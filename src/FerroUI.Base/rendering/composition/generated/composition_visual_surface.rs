@@ -170,6 +170,10 @@ impl CompositionVisualSurfaceProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "SourceOffset", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_visual_surface.get().contains(CompositionVisualSurfaceChangedFields::SOURCE_OFFSET_ANIMATED) {
+                    self.changed_fields_of_composition_visual_surface.set(self.changed_fields_of_composition_visual_surface.get() & !CompositionVisualSurfaceChangedFields::SOURCE_OFFSET);
+                }
             }
         }
         self.source_offset.set(value);
@@ -211,6 +215,10 @@ impl CompositionVisualSurfaceProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "SourceSize", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_visual_surface.get().contains(CompositionVisualSurfaceChangedFields::SOURCE_SIZE_ANIMATED) {
+                    self.changed_fields_of_composition_visual_surface.set(self.changed_fields_of_composition_visual_surface.get() & !CompositionVisualSurfaceChangedFields::SOURCE_SIZE);
+                }
             }
         }
         self.source_size.set(value);
@@ -254,15 +262,17 @@ impl CompositionVisualSurfaceProps {
         if changed.contains(CompositionVisualSurfaceChangedFields::SOURCE_VISUAL) {
             writer.write_server_object(self.source_visual.get().map(|o| o.server()));
         }
+        if changed.contains(CompositionVisualSurfaceChangedFields::SOURCE_OFFSET) {
+            writer.write(self.source_offset.get());
+        }
         if changed.contains(CompositionVisualSurfaceChangedFields::SOURCE_OFFSET_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualSurfaceProps::id_of_source_offset_property().base()));
-        } else if changed.contains(CompositionVisualSurfaceChangedFields::SOURCE_OFFSET) {
-            writer.write(self.source_offset.get());
+        }
+        if changed.contains(CompositionVisualSurfaceChangedFields::SOURCE_SIZE) {
+            writer.write(self.source_size.get());
         }
         if changed.contains(CompositionVisualSurfaceChangedFields::SOURCE_SIZE_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualSurfaceProps::id_of_source_size_property().base()));
-        } else if changed.contains(CompositionVisualSurfaceChangedFields::SOURCE_SIZE) {
-            writer.write(self.source_size.get());
         }
         self.changed_fields_of_composition_visual_surface.set(CompositionVisualSurfaceChangedFields::empty());
     }
@@ -417,6 +427,10 @@ impl ServerCompositionVisualSurfaceProps {
             let value = read_server_object(reader, compositor.as_ref());
             self.set_source_visual(host, value);
         }
+        if changed.contains(CompositionVisualSurfaceChangedFields::SOURCE_OFFSET) {
+            let value = reader.read::<Vector>();
+            self.set_source_offset(host, value);
+        }
         if changed.contains(CompositionVisualSurfaceChangedFields::SOURCE_OFFSET_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `SourceOffset` without an animation instance");
@@ -427,9 +441,10 @@ impl ServerCompositionVisualSurfaceProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionVisualSurfaceChangedFields::SOURCE_OFFSET) {
+        }
+        if changed.contains(CompositionVisualSurfaceChangedFields::SOURCE_SIZE) {
             let value = reader.read::<Vector>();
-            self.set_source_offset(host, value);
+            self.set_source_size(host, value);
         }
         if changed.contains(CompositionVisualSurfaceChangedFields::SOURCE_SIZE_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -441,9 +456,6 @@ impl ServerCompositionVisualSurfaceProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionVisualSurfaceChangedFields::SOURCE_SIZE) {
-            let value = reader.read::<Vector>();
-            self.set_source_size(host, value);
         }
         ServerCompositionVisualSurfaceHooks::on_fields_deserialized(host, changed);
     }

@@ -160,6 +160,10 @@ impl CompositionShapeProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "CenterPoint", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_shape.get().contains(CompositionShapeChangedFields::CENTER_POINT_ANIMATED) {
+                    self.changed_fields_of_composition_shape.set(self.changed_fields_of_composition_shape.get() & !CompositionShapeChangedFields::CENTER_POINT);
+                }
             }
         }
         self.center_point.set(value);
@@ -201,6 +205,10 @@ impl CompositionShapeProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Offset", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_shape.get().contains(CompositionShapeChangedFields::OFFSET_ANIMATED) {
+                    self.changed_fields_of_composition_shape.set(self.changed_fields_of_composition_shape.get() & !CompositionShapeChangedFields::OFFSET);
+                }
             }
         }
         self.offset.set(value);
@@ -242,6 +250,10 @@ impl CompositionShapeProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "RotationAngle", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_shape.get().contains(CompositionShapeChangedFields::ROTATION_ANGLE_ANIMATED) {
+                    self.changed_fields_of_composition_shape.set(self.changed_fields_of_composition_shape.get() & !CompositionShapeChangedFields::ROTATION_ANGLE);
+                }
             }
         }
         self.rotation_angle.set(value);
@@ -283,6 +295,10 @@ impl CompositionShapeProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Scale", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_shape.get().contains(CompositionShapeChangedFields::SCALE_ANIMATED) {
+                    self.changed_fields_of_composition_shape.set(self.changed_fields_of_composition_shape.get() & !CompositionShapeChangedFields::SCALE);
+                }
             }
         }
         self.scale.set(value);
@@ -324,6 +340,10 @@ impl CompositionShapeProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "TransformMatrix", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_shape.get().contains(CompositionShapeChangedFields::TRANSFORM_MATRIX_ANIMATED) {
+                    self.changed_fields_of_composition_shape.set(self.changed_fields_of_composition_shape.get() & !CompositionShapeChangedFields::TRANSFORM_MATRIX);
+                }
             }
         }
         self.transform_matrix.set(value);
@@ -385,30 +405,35 @@ impl CompositionShapeProps {
     pub fn serialize_changes_core(&self, host: &dyn CompositionShapeHooks, writer: &mut BatchStreamWriter<'_>) {
         let changed = self.changed_fields_of_composition_shape.get();
         writer.write(changed);
+        if changed.contains(CompositionShapeChangedFields::CENTER_POINT) {
+            writer.write(self.center_point.get());
+        }
         if changed.contains(CompositionShapeChangedFields::CENTER_POINT_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionShapeProps::id_of_center_point_property().base()));
-        } else if changed.contains(CompositionShapeChangedFields::CENTER_POINT) {
-            writer.write(self.center_point.get());
+        }
+        if changed.contains(CompositionShapeChangedFields::OFFSET) {
+            writer.write(self.offset.get());
         }
         if changed.contains(CompositionShapeChangedFields::OFFSET_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionShapeProps::id_of_offset_property().base()));
-        } else if changed.contains(CompositionShapeChangedFields::OFFSET) {
-            writer.write(self.offset.get());
+        }
+        if changed.contains(CompositionShapeChangedFields::ROTATION_ANGLE) {
+            writer.write(self.rotation_angle.get());
         }
         if changed.contains(CompositionShapeChangedFields::ROTATION_ANGLE_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionShapeProps::id_of_rotation_angle_property().base()));
-        } else if changed.contains(CompositionShapeChangedFields::ROTATION_ANGLE) {
-            writer.write(self.rotation_angle.get());
+        }
+        if changed.contains(CompositionShapeChangedFields::SCALE) {
+            writer.write(self.scale.get());
         }
         if changed.contains(CompositionShapeChangedFields::SCALE_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionShapeProps::id_of_scale_property().base()));
-        } else if changed.contains(CompositionShapeChangedFields::SCALE) {
-            writer.write(self.scale.get());
+        }
+        if changed.contains(CompositionShapeChangedFields::TRANSFORM_MATRIX) {
+            writer.write(self.transform_matrix.get());
         }
         if changed.contains(CompositionShapeChangedFields::TRANSFORM_MATRIX_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionShapeProps::id_of_transform_matrix_property().base()));
-        } else if changed.contains(CompositionShapeChangedFields::TRANSFORM_MATRIX) {
-            writer.write(self.transform_matrix.get());
         }
         self.changed_fields_of_composition_shape.set(CompositionShapeChangedFields::empty());
     }
@@ -593,6 +618,10 @@ impl ServerCompositionShapeProps {
     ) {
         ServerCompositionShapeHooks::deserialize_changes_extra(host, reader);
         let changed = reader.read::<CompositionShapeChangedFields>();
+        if changed.contains(CompositionShapeChangedFields::CENTER_POINT) {
+            let value = reader.read::<Vector>();
+            self.set_center_point(host, value);
+        }
         if changed.contains(CompositionShapeChangedFields::CENTER_POINT_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `CenterPoint` without an animation instance");
@@ -603,9 +632,10 @@ impl ServerCompositionShapeProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionShapeChangedFields::CENTER_POINT) {
+        }
+        if changed.contains(CompositionShapeChangedFields::OFFSET) {
             let value = reader.read::<Vector>();
-            self.set_center_point(host, value);
+            self.set_offset(host, value);
         }
         if changed.contains(CompositionShapeChangedFields::OFFSET_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -617,9 +647,10 @@ impl ServerCompositionShapeProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionShapeChangedFields::OFFSET) {
-            let value = reader.read::<Vector>();
-            self.set_offset(host, value);
+        }
+        if changed.contains(CompositionShapeChangedFields::ROTATION_ANGLE) {
+            let value = reader.read::<f32>();
+            self.set_rotation_angle(host, value);
         }
         if changed.contains(CompositionShapeChangedFields::ROTATION_ANGLE_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -631,9 +662,10 @@ impl ServerCompositionShapeProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionShapeChangedFields::ROTATION_ANGLE) {
-            let value = reader.read::<f32>();
-            self.set_rotation_angle(host, value);
+        }
+        if changed.contains(CompositionShapeChangedFields::SCALE) {
+            let value = reader.read::<Vector>();
+            self.set_scale(host, value);
         }
         if changed.contains(CompositionShapeChangedFields::SCALE_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -645,9 +677,10 @@ impl ServerCompositionShapeProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionShapeChangedFields::SCALE) {
-            let value = reader.read::<Vector>();
-            self.set_scale(host, value);
+        }
+        if changed.contains(CompositionShapeChangedFields::TRANSFORM_MATRIX) {
+            let value = reader.read::<Matrix>();
+            self.set_transform_matrix(host, value);
         }
         if changed.contains(CompositionShapeChangedFields::TRANSFORM_MATRIX_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -659,9 +692,6 @@ impl ServerCompositionShapeProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionShapeChangedFields::TRANSFORM_MATRIX) {
-            let value = reader.read::<Matrix>();
-            self.set_transform_matrix(host, value);
         }
         ServerCompositionShapeHooks::on_fields_deserialized(host, changed);
     }

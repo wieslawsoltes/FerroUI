@@ -283,6 +283,10 @@ impl CompositionSurfaceBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "HorizontalAlignmentRatio", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_surface_brush.get().contains(CompositionSurfaceBrushChangedFields::HORIZONTAL_ALIGNMENT_RATIO_ANIMATED) {
+                    self.changed_fields_of_composition_surface_brush.set(self.changed_fields_of_composition_surface_brush.get() & !CompositionSurfaceBrushChangedFields::HORIZONTAL_ALIGNMENT_RATIO);
+                }
             }
         }
         self.horizontal_alignment_ratio.set(value);
@@ -324,6 +328,10 @@ impl CompositionSurfaceBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "VerticalAlignmentRatio", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_surface_brush.get().contains(CompositionSurfaceBrushChangedFields::VERTICAL_ALIGNMENT_RATIO_ANIMATED) {
+                    self.changed_fields_of_composition_surface_brush.set(self.changed_fields_of_composition_surface_brush.get() & !CompositionSurfaceBrushChangedFields::VERTICAL_ALIGNMENT_RATIO);
+                }
             }
         }
         self.vertical_alignment_ratio.set(value);
@@ -390,6 +398,10 @@ impl CompositionSurfaceBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "AnchorPoint", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_surface_brush.get().contains(CompositionSurfaceBrushChangedFields::ANCHOR_POINT_ANIMATED) {
+                    self.changed_fields_of_composition_surface_brush.set(self.changed_fields_of_composition_surface_brush.get() & !CompositionSurfaceBrushChangedFields::ANCHOR_POINT);
+                }
             }
         }
         self.anchor_point.set(value);
@@ -431,6 +443,10 @@ impl CompositionSurfaceBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "CenterPoint", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_surface_brush.get().contains(CompositionSurfaceBrushChangedFields::CENTER_POINT_ANIMATED) {
+                    self.changed_fields_of_composition_surface_brush.set(self.changed_fields_of_composition_surface_brush.get() & !CompositionSurfaceBrushChangedFields::CENTER_POINT);
+                }
             }
         }
         self.center_point.set(value);
@@ -472,6 +488,10 @@ impl CompositionSurfaceBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Offset", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_surface_brush.get().contains(CompositionSurfaceBrushChangedFields::OFFSET_ANIMATED) {
+                    self.changed_fields_of_composition_surface_brush.set(self.changed_fields_of_composition_surface_brush.get() & !CompositionSurfaceBrushChangedFields::OFFSET);
+                }
             }
         }
         self.offset.set(value);
@@ -513,6 +533,10 @@ impl CompositionSurfaceBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "RotationAngle", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_surface_brush.get().contains(CompositionSurfaceBrushChangedFields::ROTATION_ANGLE_ANIMATED) {
+                    self.changed_fields_of_composition_surface_brush.set(self.changed_fields_of_composition_surface_brush.get() & !CompositionSurfaceBrushChangedFields::ROTATION_ANGLE);
+                }
             }
         }
         self.rotation_angle.set(value);
@@ -554,6 +578,10 @@ impl CompositionSurfaceBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Scale", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_surface_brush.get().contains(CompositionSurfaceBrushChangedFields::SCALE_ANIMATED) {
+                    self.changed_fields_of_composition_surface_brush.set(self.changed_fields_of_composition_surface_brush.get() & !CompositionSurfaceBrushChangedFields::SCALE);
+                }
             }
         }
         self.scale.set(value);
@@ -595,6 +623,10 @@ impl CompositionSurfaceBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "TransformMatrix", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_surface_brush.get().contains(CompositionSurfaceBrushChangedFields::TRANSFORM_MATRIX_ANIMATED) {
+                    self.changed_fields_of_composition_surface_brush.set(self.changed_fields_of_composition_surface_brush.get() & !CompositionSurfaceBrushChangedFields::TRANSFORM_MATRIX);
+                }
             }
         }
         self.transform_matrix.set(value);
@@ -709,48 +741,56 @@ impl CompositionSurfaceBrushProps {
         if changed.contains(CompositionSurfaceBrushChangedFields::STRETCH) {
             writer.write(self.stretch.get());
         }
+        if changed.contains(CompositionSurfaceBrushChangedFields::HORIZONTAL_ALIGNMENT_RATIO) {
+            writer.write(self.horizontal_alignment_ratio.get());
+        }
         if changed.contains(CompositionSurfaceBrushChangedFields::HORIZONTAL_ALIGNMENT_RATIO_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionSurfaceBrushProps::id_of_horizontal_alignment_ratio_property().base()));
-        } else if changed.contains(CompositionSurfaceBrushChangedFields::HORIZONTAL_ALIGNMENT_RATIO) {
-            writer.write(self.horizontal_alignment_ratio.get());
+        }
+        if changed.contains(CompositionSurfaceBrushChangedFields::VERTICAL_ALIGNMENT_RATIO) {
+            writer.write(self.vertical_alignment_ratio.get());
         }
         if changed.contains(CompositionSurfaceBrushChangedFields::VERTICAL_ALIGNMENT_RATIO_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionSurfaceBrushProps::id_of_vertical_alignment_ratio_property().base()));
-        } else if changed.contains(CompositionSurfaceBrushChangedFields::VERTICAL_ALIGNMENT_RATIO) {
-            writer.write(self.vertical_alignment_ratio.get());
         }
         if changed.contains(CompositionSurfaceBrushChangedFields::BITMAP_INTERPOLATION_MODE) {
             writer.write(self.bitmap_interpolation_mode.get());
         }
+        if changed.contains(CompositionSurfaceBrushChangedFields::ANCHOR_POINT) {
+            writer.write(self.anchor_point.get());
+        }
         if changed.contains(CompositionSurfaceBrushChangedFields::ANCHOR_POINT_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionSurfaceBrushProps::id_of_anchor_point_property().base()));
-        } else if changed.contains(CompositionSurfaceBrushChangedFields::ANCHOR_POINT) {
-            writer.write(self.anchor_point.get());
+        }
+        if changed.contains(CompositionSurfaceBrushChangedFields::CENTER_POINT) {
+            writer.write(self.center_point.get());
         }
         if changed.contains(CompositionSurfaceBrushChangedFields::CENTER_POINT_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionSurfaceBrushProps::id_of_center_point_property().base()));
-        } else if changed.contains(CompositionSurfaceBrushChangedFields::CENTER_POINT) {
-            writer.write(self.center_point.get());
+        }
+        if changed.contains(CompositionSurfaceBrushChangedFields::OFFSET) {
+            writer.write(self.offset.get());
         }
         if changed.contains(CompositionSurfaceBrushChangedFields::OFFSET_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionSurfaceBrushProps::id_of_offset_property().base()));
-        } else if changed.contains(CompositionSurfaceBrushChangedFields::OFFSET) {
-            writer.write(self.offset.get());
+        }
+        if changed.contains(CompositionSurfaceBrushChangedFields::ROTATION_ANGLE) {
+            writer.write(self.rotation_angle.get());
         }
         if changed.contains(CompositionSurfaceBrushChangedFields::ROTATION_ANGLE_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionSurfaceBrushProps::id_of_rotation_angle_property().base()));
-        } else if changed.contains(CompositionSurfaceBrushChangedFields::ROTATION_ANGLE) {
-            writer.write(self.rotation_angle.get());
+        }
+        if changed.contains(CompositionSurfaceBrushChangedFields::SCALE) {
+            writer.write(self.scale.get());
         }
         if changed.contains(CompositionSurfaceBrushChangedFields::SCALE_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionSurfaceBrushProps::id_of_scale_property().base()));
-        } else if changed.contains(CompositionSurfaceBrushChangedFields::SCALE) {
-            writer.write(self.scale.get());
+        }
+        if changed.contains(CompositionSurfaceBrushChangedFields::TRANSFORM_MATRIX) {
+            writer.write(self.transform_matrix.get());
         }
         if changed.contains(CompositionSurfaceBrushChangedFields::TRANSFORM_MATRIX_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionSurfaceBrushProps::id_of_transform_matrix_property().base()));
-        } else if changed.contains(CompositionSurfaceBrushChangedFields::TRANSFORM_MATRIX) {
-            writer.write(self.transform_matrix.get());
         }
         if changed.contains(CompositionSurfaceBrushChangedFields::SNAP_TO_PIXELS) {
             writer.write(self.snap_to_pixels.get());
@@ -1220,6 +1260,10 @@ impl ServerCompositionSurfaceBrushProps {
             let value = reader.read::<CompositionStretch>();
             self.set_stretch(host, value);
         }
+        if changed.contains(CompositionSurfaceBrushChangedFields::HORIZONTAL_ALIGNMENT_RATIO) {
+            let value = reader.read::<f32>();
+            self.set_horizontal_alignment_ratio(host, value);
+        }
         if changed.contains(CompositionSurfaceBrushChangedFields::HORIZONTAL_ALIGNMENT_RATIO_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `HorizontalAlignmentRatio` without an animation instance");
@@ -1230,9 +1274,10 @@ impl ServerCompositionSurfaceBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionSurfaceBrushChangedFields::HORIZONTAL_ALIGNMENT_RATIO) {
+        }
+        if changed.contains(CompositionSurfaceBrushChangedFields::VERTICAL_ALIGNMENT_RATIO) {
             let value = reader.read::<f32>();
-            self.set_horizontal_alignment_ratio(host, value);
+            self.set_vertical_alignment_ratio(host, value);
         }
         if changed.contains(CompositionSurfaceBrushChangedFields::VERTICAL_ALIGNMENT_RATIO_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1244,13 +1289,14 @@ impl ServerCompositionSurfaceBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionSurfaceBrushChangedFields::VERTICAL_ALIGNMENT_RATIO) {
-            let value = reader.read::<f32>();
-            self.set_vertical_alignment_ratio(host, value);
         }
         if changed.contains(CompositionSurfaceBrushChangedFields::BITMAP_INTERPOLATION_MODE) {
             let value = reader.read::<CompositionBitmapInterpolationMode>();
             self.set_bitmap_interpolation_mode(host, value);
+        }
+        if changed.contains(CompositionSurfaceBrushChangedFields::ANCHOR_POINT) {
+            let value = reader.read::<Vector>();
+            self.set_anchor_point(host, value);
         }
         if changed.contains(CompositionSurfaceBrushChangedFields::ANCHOR_POINT_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1262,9 +1308,10 @@ impl ServerCompositionSurfaceBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionSurfaceBrushChangedFields::ANCHOR_POINT) {
+        }
+        if changed.contains(CompositionSurfaceBrushChangedFields::CENTER_POINT) {
             let value = reader.read::<Vector>();
-            self.set_anchor_point(host, value);
+            self.set_center_point(host, value);
         }
         if changed.contains(CompositionSurfaceBrushChangedFields::CENTER_POINT_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1276,9 +1323,10 @@ impl ServerCompositionSurfaceBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionSurfaceBrushChangedFields::CENTER_POINT) {
+        }
+        if changed.contains(CompositionSurfaceBrushChangedFields::OFFSET) {
             let value = reader.read::<Vector>();
-            self.set_center_point(host, value);
+            self.set_offset(host, value);
         }
         if changed.contains(CompositionSurfaceBrushChangedFields::OFFSET_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1290,9 +1338,10 @@ impl ServerCompositionSurfaceBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionSurfaceBrushChangedFields::OFFSET) {
-            let value = reader.read::<Vector>();
-            self.set_offset(host, value);
+        }
+        if changed.contains(CompositionSurfaceBrushChangedFields::ROTATION_ANGLE) {
+            let value = reader.read::<f32>();
+            self.set_rotation_angle(host, value);
         }
         if changed.contains(CompositionSurfaceBrushChangedFields::ROTATION_ANGLE_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1304,9 +1353,10 @@ impl ServerCompositionSurfaceBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionSurfaceBrushChangedFields::ROTATION_ANGLE) {
-            let value = reader.read::<f32>();
-            self.set_rotation_angle(host, value);
+        }
+        if changed.contains(CompositionSurfaceBrushChangedFields::SCALE) {
+            let value = reader.read::<Vector>();
+            self.set_scale(host, value);
         }
         if changed.contains(CompositionSurfaceBrushChangedFields::SCALE_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1318,9 +1368,10 @@ impl ServerCompositionSurfaceBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionSurfaceBrushChangedFields::SCALE) {
-            let value = reader.read::<Vector>();
-            self.set_scale(host, value);
+        }
+        if changed.contains(CompositionSurfaceBrushChangedFields::TRANSFORM_MATRIX) {
+            let value = reader.read::<Matrix>();
+            self.set_transform_matrix(host, value);
         }
         if changed.contains(CompositionSurfaceBrushChangedFields::TRANSFORM_MATRIX_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1332,9 +1383,6 @@ impl ServerCompositionSurfaceBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionSurfaceBrushChangedFields::TRANSFORM_MATRIX) {
-            let value = reader.read::<Matrix>();
-            self.set_transform_matrix(host, value);
         }
         if changed.contains(CompositionSurfaceBrushChangedFields::SNAP_TO_PIXELS) {
             let value = reader.read::<bool>();

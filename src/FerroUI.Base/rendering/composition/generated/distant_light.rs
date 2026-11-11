@@ -167,6 +167,10 @@ impl DistantLightProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Color", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_distant_light.get().contains(DistantLightChangedFields::COLOR_ANIMATED) {
+                    self.changed_fields_of_distant_light.set(self.changed_fields_of_distant_light.get() & !DistantLightChangedFields::COLOR);
+                }
             }
         }
         self.color.set(value);
@@ -233,6 +237,10 @@ impl DistantLightProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Direction", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_distant_light.get().contains(DistantLightChangedFields::DIRECTION_ANIMATED) {
+                    self.changed_fields_of_distant_light.set(self.changed_fields_of_distant_light.get() & !DistantLightChangedFields::DIRECTION);
+                }
             }
         }
         self.direction.set(value);
@@ -274,6 +282,10 @@ impl DistantLightProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Intensity", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_distant_light.get().contains(DistantLightChangedFields::INTENSITY_ANIMATED) {
+                    self.changed_fields_of_distant_light.set(self.changed_fields_of_distant_light.get() & !DistantLightChangedFields::INTENSITY);
+                }
             }
         }
         self.intensity.set(value);
@@ -322,23 +334,26 @@ impl DistantLightProps {
         self.base.serialize_changes_core(host, writer);
         let changed = self.changed_fields_of_distant_light.get();
         writer.write(changed);
+        if changed.contains(DistantLightChangedFields::COLOR) {
+            writer.write(self.color.get());
+        }
         if changed.contains(DistantLightChangedFields::COLOR_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerDistantLightProps::id_of_color_property().base()));
-        } else if changed.contains(DistantLightChangedFields::COLOR) {
-            writer.write(self.color.get());
         }
         if changed.contains(DistantLightChangedFields::COORDINATE_SPACE) {
             writer.write_server_object(self.coordinate_space.get().map(|o| o.server()));
         }
+        if changed.contains(DistantLightChangedFields::DIRECTION) {
+            writer.write(self.direction.get());
+        }
         if changed.contains(DistantLightChangedFields::DIRECTION_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerDistantLightProps::id_of_direction_property().base()));
-        } else if changed.contains(DistantLightChangedFields::DIRECTION) {
-            writer.write(self.direction.get());
+        }
+        if changed.contains(DistantLightChangedFields::INTENSITY) {
+            writer.write(self.intensity.get());
         }
         if changed.contains(DistantLightChangedFields::INTENSITY_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerDistantLightProps::id_of_intensity_property().base()));
-        } else if changed.contains(DistantLightChangedFields::INTENSITY) {
-            writer.write(self.intensity.get());
         }
         self.changed_fields_of_distant_light.set(DistantLightChangedFields::empty());
     }
@@ -524,6 +539,10 @@ impl ServerDistantLightProps {
         self.base.deserialize_changes_core(host, reader, committed_at);
         ServerDistantLightHooks::deserialize_changes_extra(host, reader);
         let changed = reader.read::<DistantLightChangedFields>();
+        if changed.contains(DistantLightChangedFields::COLOR) {
+            let value = reader.read::<Color>();
+            self.set_color(host, value);
+        }
         if changed.contains(DistantLightChangedFields::COLOR_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Color` without an animation instance");
@@ -534,13 +553,14 @@ impl ServerDistantLightProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(DistantLightChangedFields::COLOR) {
-            let value = reader.read::<Color>();
-            self.set_color(host, value);
         }
         if changed.contains(DistantLightChangedFields::COORDINATE_SPACE) {
             let value = read_server_object(reader, compositor.as_ref());
             self.set_coordinate_space(host, value);
+        }
+        if changed.contains(DistantLightChangedFields::DIRECTION) {
+            let value = reader.read::<Vector3D>();
+            self.set_direction(host, value);
         }
         if changed.contains(DistantLightChangedFields::DIRECTION_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -552,9 +572,10 @@ impl ServerDistantLightProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(DistantLightChangedFields::DIRECTION) {
-            let value = reader.read::<Vector3D>();
-            self.set_direction(host, value);
+        }
+        if changed.contains(DistantLightChangedFields::INTENSITY) {
+            let value = reader.read::<f32>();
+            self.set_intensity(host, value);
         }
         if changed.contains(DistantLightChangedFields::INTENSITY_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -566,9 +587,6 @@ impl ServerDistantLightProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(DistantLightChangedFields::INTENSITY) {
-            let value = reader.read::<f32>();
-            self.set_intensity(host, value);
         }
         ServerDistantLightHooks::on_fields_deserialized(host, changed);
     }

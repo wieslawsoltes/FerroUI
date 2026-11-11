@@ -373,6 +373,10 @@ impl CompositionSpriteShapeProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "StrokeDashOffset", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_sprite_shape.get().contains(CompositionSpriteShapeChangedFields::STROKE_DASH_OFFSET_ANIMATED) {
+                    self.changed_fields_of_composition_sprite_shape.set(self.changed_fields_of_composition_sprite_shape.get() & !CompositionSpriteShapeChangedFields::STROKE_DASH_OFFSET);
+                }
             }
         }
         self.stroke_dash_offset.set(value);
@@ -464,6 +468,10 @@ impl CompositionSpriteShapeProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "StrokeMiterLimit", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_sprite_shape.get().contains(CompositionSpriteShapeChangedFields::STROKE_MITER_LIMIT_ANIMATED) {
+                    self.changed_fields_of_composition_sprite_shape.set(self.changed_fields_of_composition_sprite_shape.get() & !CompositionSpriteShapeChangedFields::STROKE_MITER_LIMIT);
+                }
             }
         }
         self.stroke_miter_limit.set(value);
@@ -530,6 +538,10 @@ impl CompositionSpriteShapeProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "StrokeThickness", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_sprite_shape.get().contains(CompositionSpriteShapeChangedFields::STROKE_THICKNESS_ANIMATED) {
+                    self.changed_fields_of_composition_sprite_shape.set(self.changed_fields_of_composition_sprite_shape.get() & !CompositionSpriteShapeChangedFields::STROKE_THICKNESS);
+                }
             }
         }
         self.stroke_thickness.set(value);
@@ -596,10 +608,11 @@ impl CompositionSpriteShapeProps {
         if changed.contains(CompositionSpriteShapeChangedFields::STROKE_DASH_CAP) {
             writer.write(self.stroke_dash_cap.get());
         }
+        if changed.contains(CompositionSpriteShapeChangedFields::STROKE_DASH_OFFSET) {
+            writer.write(self.stroke_dash_offset.get());
+        }
         if changed.contains(CompositionSpriteShapeChangedFields::STROKE_DASH_OFFSET_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionSpriteShapeProps::id_of_stroke_dash_offset_property().base()));
-        } else if changed.contains(CompositionSpriteShapeChangedFields::STROKE_DASH_OFFSET) {
-            writer.write(self.stroke_dash_offset.get());
         }
         if changed.contains(CompositionSpriteShapeChangedFields::STROKE_END_CAP) {
             writer.write(self.stroke_end_cap.get());
@@ -607,18 +620,20 @@ impl CompositionSpriteShapeProps {
         if changed.contains(CompositionSpriteShapeChangedFields::STROKE_LINE_JOIN) {
             writer.write(self.stroke_line_join.get());
         }
+        if changed.contains(CompositionSpriteShapeChangedFields::STROKE_MITER_LIMIT) {
+            writer.write(self.stroke_miter_limit.get());
+        }
         if changed.contains(CompositionSpriteShapeChangedFields::STROKE_MITER_LIMIT_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionSpriteShapeProps::id_of_stroke_miter_limit_property().base()));
-        } else if changed.contains(CompositionSpriteShapeChangedFields::STROKE_MITER_LIMIT) {
-            writer.write(self.stroke_miter_limit.get());
         }
         if changed.contains(CompositionSpriteShapeChangedFields::STROKE_START_CAP) {
             writer.write(self.stroke_start_cap.get());
         }
+        if changed.contains(CompositionSpriteShapeChangedFields::STROKE_THICKNESS) {
+            writer.write(self.stroke_thickness.get());
+        }
         if changed.contains(CompositionSpriteShapeChangedFields::STROKE_THICKNESS_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionSpriteShapeProps::id_of_stroke_thickness_property().base()));
-        } else if changed.contains(CompositionSpriteShapeChangedFields::STROKE_THICKNESS) {
-            writer.write(self.stroke_thickness.get());
         }
         self.changed_fields_of_composition_sprite_shape.set(CompositionSpriteShapeChangedFields::empty());
     }
@@ -1196,6 +1211,10 @@ impl ServerCompositionSpriteShapeProps {
             let value = reader.read::<CompositionStrokeCap>();
             self.set_stroke_dash_cap(host, value);
         }
+        if changed.contains(CompositionSpriteShapeChangedFields::STROKE_DASH_OFFSET) {
+            let value = reader.read::<f32>();
+            self.set_stroke_dash_offset(host, value);
+        }
         if changed.contains(CompositionSpriteShapeChangedFields::STROKE_DASH_OFFSET_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `StrokeDashOffset` without an animation instance");
@@ -1206,9 +1225,6 @@ impl ServerCompositionSpriteShapeProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionSpriteShapeChangedFields::STROKE_DASH_OFFSET) {
-            let value = reader.read::<f32>();
-            self.set_stroke_dash_offset(host, value);
         }
         if changed.contains(CompositionSpriteShapeChangedFields::STROKE_END_CAP) {
             let value = reader.read::<CompositionStrokeCap>();
@@ -1217,6 +1233,10 @@ impl ServerCompositionSpriteShapeProps {
         if changed.contains(CompositionSpriteShapeChangedFields::STROKE_LINE_JOIN) {
             let value = reader.read::<CompositionStrokeLineJoin>();
             self.set_stroke_line_join(host, value);
+        }
+        if changed.contains(CompositionSpriteShapeChangedFields::STROKE_MITER_LIMIT) {
+            let value = reader.read::<f32>();
+            self.set_stroke_miter_limit(host, value);
         }
         if changed.contains(CompositionSpriteShapeChangedFields::STROKE_MITER_LIMIT_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1228,13 +1248,14 @@ impl ServerCompositionSpriteShapeProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionSpriteShapeChangedFields::STROKE_MITER_LIMIT) {
-            let value = reader.read::<f32>();
-            self.set_stroke_miter_limit(host, value);
         }
         if changed.contains(CompositionSpriteShapeChangedFields::STROKE_START_CAP) {
             let value = reader.read::<CompositionStrokeCap>();
             self.set_stroke_start_cap(host, value);
+        }
+        if changed.contains(CompositionSpriteShapeChangedFields::STROKE_THICKNESS) {
+            let value = reader.read::<f32>();
+            self.set_stroke_thickness(host, value);
         }
         if changed.contains(CompositionSpriteShapeChangedFields::STROKE_THICKNESS_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1246,9 +1267,6 @@ impl ServerCompositionSpriteShapeProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionSpriteShapeChangedFields::STROKE_THICKNESS) {
-            let value = reader.read::<f32>();
-            self.set_stroke_thickness(host, value);
         }
         ServerCompositionSpriteShapeHooks::on_fields_deserialized(host, changed);
     }

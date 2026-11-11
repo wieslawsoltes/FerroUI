@@ -2809,6 +2809,16 @@ What it costs, and what it does not:
   children or more.
 - **The cache mode invalidates the composition properties** when it changes (it had no
   change handler), so an element that gets one gets its visual in the next pass.
+- **A value assigned before an animation is started, in one batch, is sent ahead of the
+  animation.** The transport carried the animation or else the value, so the value was
+  lost and the server kept its own for the components a sub-channel animation does not
+  write. Nothing showed it while the two were equal. The selection indicator of a top
+  navigation view asks for the visual of its indicator, which gives the parent panel a
+  visual and moves the position of the panel out of the offset of the indicator, resets
+  `Offset` and animates `Offset.X`: the server kept the old `Y` and drew the indicator
+  below the clip of the pane. The generated serialization now writes the value and then
+  the animation; an implicit animation still starts from the value the server has
+  (DEVIATIONS.md).
 - **Tests:** `compositor_tests` covers the elements without a visual (offsets through
   them, flattened children, an element that starts to draw, one that is asked for its
   visual in and out of a pass, an offset set on a visual asked for after a pass, hit

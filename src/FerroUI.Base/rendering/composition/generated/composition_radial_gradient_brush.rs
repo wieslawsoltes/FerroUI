@@ -206,6 +206,10 @@ impl CompositionRadialGradientBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Center", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_radial_gradient_brush.get().contains(CompositionRadialGradientBrushChangedFields::CENTER_ANIMATED) {
+                    self.changed_fields_of_composition_radial_gradient_brush.set(self.changed_fields_of_composition_radial_gradient_brush.get() & !CompositionRadialGradientBrushChangedFields::CENTER);
+                }
             }
         }
         self.center.set(value);
@@ -247,6 +251,10 @@ impl CompositionRadialGradientBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "GradientOrigin", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_radial_gradient_brush.get().contains(CompositionRadialGradientBrushChangedFields::GRADIENT_ORIGIN_ANIMATED) {
+                    self.changed_fields_of_composition_radial_gradient_brush.set(self.changed_fields_of_composition_radial_gradient_brush.get() & !CompositionRadialGradientBrushChangedFields::GRADIENT_ORIGIN);
+                }
             }
         }
         self.gradient_origin.set(value);
@@ -288,6 +296,10 @@ impl CompositionRadialGradientBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "RadiusX", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_radial_gradient_brush.get().contains(CompositionRadialGradientBrushChangedFields::RADIUS_X_ANIMATED) {
+                    self.changed_fields_of_composition_radial_gradient_brush.set(self.changed_fields_of_composition_radial_gradient_brush.get() & !CompositionRadialGradientBrushChangedFields::RADIUS_X);
+                }
             }
         }
         self.radius_x.set(value);
@@ -329,6 +341,10 @@ impl CompositionRadialGradientBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "RadiusY", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_radial_gradient_brush.get().contains(CompositionRadialGradientBrushChangedFields::RADIUS_Y_ANIMATED) {
+                    self.changed_fields_of_composition_radial_gradient_brush.set(self.changed_fields_of_composition_radial_gradient_brush.get() & !CompositionRadialGradientBrushChangedFields::RADIUS_Y);
+                }
             }
         }
         self.radius_y.set(value);
@@ -370,6 +386,10 @@ impl CompositionRadialGradientBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "AnchorPoint", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_radial_gradient_brush.get().contains(CompositionRadialGradientBrushChangedFields::ANCHOR_POINT_ANIMATED) {
+                    self.changed_fields_of_composition_radial_gradient_brush.set(self.changed_fields_of_composition_radial_gradient_brush.get() & !CompositionRadialGradientBrushChangedFields::ANCHOR_POINT);
+                }
             }
         }
         self.anchor_point.set(value);
@@ -411,6 +431,10 @@ impl CompositionRadialGradientBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "CenterPoint", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_radial_gradient_brush.get().contains(CompositionRadialGradientBrushChangedFields::CENTER_POINT_ANIMATED) {
+                    self.changed_fields_of_composition_radial_gradient_brush.set(self.changed_fields_of_composition_radial_gradient_brush.get() & !CompositionRadialGradientBrushChangedFields::CENTER_POINT);
+                }
             }
         }
         self.center_point.set(value);
@@ -452,6 +476,10 @@ impl CompositionRadialGradientBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Offset", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_radial_gradient_brush.get().contains(CompositionRadialGradientBrushChangedFields::OFFSET_ANIMATED) {
+                    self.changed_fields_of_composition_radial_gradient_brush.set(self.changed_fields_of_composition_radial_gradient_brush.get() & !CompositionRadialGradientBrushChangedFields::OFFSET);
+                }
             }
         }
         self.offset.set(value);
@@ -493,6 +521,10 @@ impl CompositionRadialGradientBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "RotationAngle", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_radial_gradient_brush.get().contains(CompositionRadialGradientBrushChangedFields::ROTATION_ANGLE_ANIMATED) {
+                    self.changed_fields_of_composition_radial_gradient_brush.set(self.changed_fields_of_composition_radial_gradient_brush.get() & !CompositionRadialGradientBrushChangedFields::ROTATION_ANGLE);
+                }
             }
         }
         self.rotation_angle.set(value);
@@ -534,6 +566,10 @@ impl CompositionRadialGradientBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Scale", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_radial_gradient_brush.get().contains(CompositionRadialGradientBrushChangedFields::SCALE_ANIMATED) {
+                    self.changed_fields_of_composition_radial_gradient_brush.set(self.changed_fields_of_composition_radial_gradient_brush.get() & !CompositionRadialGradientBrushChangedFields::SCALE);
+                }
             }
         }
         self.scale.set(value);
@@ -575,6 +611,10 @@ impl CompositionRadialGradientBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "TransformMatrix", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_radial_gradient_brush.get().contains(CompositionRadialGradientBrushChangedFields::TRANSFORM_MATRIX_ANIMATED) {
+                    self.changed_fields_of_composition_radial_gradient_brush.set(self.changed_fields_of_composition_radial_gradient_brush.get() & !CompositionRadialGradientBrushChangedFields::TRANSFORM_MATRIX);
+                }
             }
         }
         self.transform_matrix.set(value);
@@ -672,55 +712,65 @@ impl CompositionRadialGradientBrushProps {
         CompositionRadialGradientBrushHooks::base_serialize_changes_core(host, writer);
         let changed = self.changed_fields_of_composition_radial_gradient_brush.get();
         writer.write(changed);
+        if changed.contains(CompositionRadialGradientBrushChangedFields::CENTER) {
+            writer.write(self.center.get());
+        }
         if changed.contains(CompositionRadialGradientBrushChangedFields::CENTER_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionRadialGradientBrushProps::id_of_center_property().base()));
-        } else if changed.contains(CompositionRadialGradientBrushChangedFields::CENTER) {
-            writer.write(self.center.get());
+        }
+        if changed.contains(CompositionRadialGradientBrushChangedFields::GRADIENT_ORIGIN) {
+            writer.write(self.gradient_origin.get());
         }
         if changed.contains(CompositionRadialGradientBrushChangedFields::GRADIENT_ORIGIN_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionRadialGradientBrushProps::id_of_gradient_origin_property().base()));
-        } else if changed.contains(CompositionRadialGradientBrushChangedFields::GRADIENT_ORIGIN) {
-            writer.write(self.gradient_origin.get());
+        }
+        if changed.contains(CompositionRadialGradientBrushChangedFields::RADIUS_X) {
+            writer.write(self.radius_x.get());
         }
         if changed.contains(CompositionRadialGradientBrushChangedFields::RADIUS_X_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionRadialGradientBrushProps::id_of_radius_x_property().base()));
-        } else if changed.contains(CompositionRadialGradientBrushChangedFields::RADIUS_X) {
-            writer.write(self.radius_x.get());
+        }
+        if changed.contains(CompositionRadialGradientBrushChangedFields::RADIUS_Y) {
+            writer.write(self.radius_y.get());
         }
         if changed.contains(CompositionRadialGradientBrushChangedFields::RADIUS_Y_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionRadialGradientBrushProps::id_of_radius_y_property().base()));
-        } else if changed.contains(CompositionRadialGradientBrushChangedFields::RADIUS_Y) {
-            writer.write(self.radius_y.get());
+        }
+        if changed.contains(CompositionRadialGradientBrushChangedFields::ANCHOR_POINT) {
+            writer.write(self.anchor_point.get());
         }
         if changed.contains(CompositionRadialGradientBrushChangedFields::ANCHOR_POINT_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionRadialGradientBrushProps::id_of_anchor_point_property().base()));
-        } else if changed.contains(CompositionRadialGradientBrushChangedFields::ANCHOR_POINT) {
-            writer.write(self.anchor_point.get());
+        }
+        if changed.contains(CompositionRadialGradientBrushChangedFields::CENTER_POINT) {
+            writer.write(self.center_point.get());
         }
         if changed.contains(CompositionRadialGradientBrushChangedFields::CENTER_POINT_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionRadialGradientBrushProps::id_of_center_point_property().base()));
-        } else if changed.contains(CompositionRadialGradientBrushChangedFields::CENTER_POINT) {
-            writer.write(self.center_point.get());
+        }
+        if changed.contains(CompositionRadialGradientBrushChangedFields::OFFSET) {
+            writer.write(self.offset.get());
         }
         if changed.contains(CompositionRadialGradientBrushChangedFields::OFFSET_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionRadialGradientBrushProps::id_of_offset_property().base()));
-        } else if changed.contains(CompositionRadialGradientBrushChangedFields::OFFSET) {
-            writer.write(self.offset.get());
+        }
+        if changed.contains(CompositionRadialGradientBrushChangedFields::ROTATION_ANGLE) {
+            writer.write(self.rotation_angle.get());
         }
         if changed.contains(CompositionRadialGradientBrushChangedFields::ROTATION_ANGLE_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionRadialGradientBrushProps::id_of_rotation_angle_property().base()));
-        } else if changed.contains(CompositionRadialGradientBrushChangedFields::ROTATION_ANGLE) {
-            writer.write(self.rotation_angle.get());
+        }
+        if changed.contains(CompositionRadialGradientBrushChangedFields::SCALE) {
+            writer.write(self.scale.get());
         }
         if changed.contains(CompositionRadialGradientBrushChangedFields::SCALE_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionRadialGradientBrushProps::id_of_scale_property().base()));
-        } else if changed.contains(CompositionRadialGradientBrushChangedFields::SCALE) {
-            writer.write(self.scale.get());
+        }
+        if changed.contains(CompositionRadialGradientBrushChangedFields::TRANSFORM_MATRIX) {
+            writer.write(self.transform_matrix.get());
         }
         if changed.contains(CompositionRadialGradientBrushChangedFields::TRANSFORM_MATRIX_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionRadialGradientBrushProps::id_of_transform_matrix_property().base()));
-        } else if changed.contains(CompositionRadialGradientBrushChangedFields::TRANSFORM_MATRIX) {
-            writer.write(self.transform_matrix.get());
         }
         self.changed_fields_of_composition_radial_gradient_brush.set(CompositionRadialGradientBrushChangedFields::empty());
     }
@@ -1045,6 +1095,10 @@ impl ServerCompositionRadialGradientBrushProps {
         ServerCompositionRadialGradientBrushHooks::base_deserialize_changes_core(host, reader, committed_at);
         ServerCompositionRadialGradientBrushHooks::deserialize_changes_extra(host, reader);
         let changed = reader.read::<CompositionRadialGradientBrushChangedFields>();
+        if changed.contains(CompositionRadialGradientBrushChangedFields::CENTER) {
+            let value = reader.read::<RelativePoint>();
+            self.set_center(host, value);
+        }
         if changed.contains(CompositionRadialGradientBrushChangedFields::CENTER_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Center` without an animation instance");
@@ -1055,9 +1109,10 @@ impl ServerCompositionRadialGradientBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionRadialGradientBrushChangedFields::CENTER) {
+        }
+        if changed.contains(CompositionRadialGradientBrushChangedFields::GRADIENT_ORIGIN) {
             let value = reader.read::<RelativePoint>();
-            self.set_center(host, value);
+            self.set_gradient_origin(host, value);
         }
         if changed.contains(CompositionRadialGradientBrushChangedFields::GRADIENT_ORIGIN_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1069,9 +1124,10 @@ impl ServerCompositionRadialGradientBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionRadialGradientBrushChangedFields::GRADIENT_ORIGIN) {
-            let value = reader.read::<RelativePoint>();
-            self.set_gradient_origin(host, value);
+        }
+        if changed.contains(CompositionRadialGradientBrushChangedFields::RADIUS_X) {
+            let value = reader.read::<RelativeScalar>();
+            self.set_radius_x(host, value);
         }
         if changed.contains(CompositionRadialGradientBrushChangedFields::RADIUS_X_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1083,9 +1139,10 @@ impl ServerCompositionRadialGradientBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionRadialGradientBrushChangedFields::RADIUS_X) {
+        }
+        if changed.contains(CompositionRadialGradientBrushChangedFields::RADIUS_Y) {
             let value = reader.read::<RelativeScalar>();
-            self.set_radius_x(host, value);
+            self.set_radius_y(host, value);
         }
         if changed.contains(CompositionRadialGradientBrushChangedFields::RADIUS_Y_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1097,9 +1154,10 @@ impl ServerCompositionRadialGradientBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionRadialGradientBrushChangedFields::RADIUS_Y) {
-            let value = reader.read::<RelativeScalar>();
-            self.set_radius_y(host, value);
+        }
+        if changed.contains(CompositionRadialGradientBrushChangedFields::ANCHOR_POINT) {
+            let value = reader.read::<Vector>();
+            self.set_anchor_point(host, value);
         }
         if changed.contains(CompositionRadialGradientBrushChangedFields::ANCHOR_POINT_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1111,9 +1169,10 @@ impl ServerCompositionRadialGradientBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionRadialGradientBrushChangedFields::ANCHOR_POINT) {
+        }
+        if changed.contains(CompositionRadialGradientBrushChangedFields::CENTER_POINT) {
             let value = reader.read::<Vector>();
-            self.set_anchor_point(host, value);
+            self.set_center_point(host, value);
         }
         if changed.contains(CompositionRadialGradientBrushChangedFields::CENTER_POINT_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1125,9 +1184,10 @@ impl ServerCompositionRadialGradientBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionRadialGradientBrushChangedFields::CENTER_POINT) {
+        }
+        if changed.contains(CompositionRadialGradientBrushChangedFields::OFFSET) {
             let value = reader.read::<Vector>();
-            self.set_center_point(host, value);
+            self.set_offset(host, value);
         }
         if changed.contains(CompositionRadialGradientBrushChangedFields::OFFSET_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1139,9 +1199,10 @@ impl ServerCompositionRadialGradientBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionRadialGradientBrushChangedFields::OFFSET) {
-            let value = reader.read::<Vector>();
-            self.set_offset(host, value);
+        }
+        if changed.contains(CompositionRadialGradientBrushChangedFields::ROTATION_ANGLE) {
+            let value = reader.read::<f32>();
+            self.set_rotation_angle(host, value);
         }
         if changed.contains(CompositionRadialGradientBrushChangedFields::ROTATION_ANGLE_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1153,9 +1214,10 @@ impl ServerCompositionRadialGradientBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionRadialGradientBrushChangedFields::ROTATION_ANGLE) {
-            let value = reader.read::<f32>();
-            self.set_rotation_angle(host, value);
+        }
+        if changed.contains(CompositionRadialGradientBrushChangedFields::SCALE) {
+            let value = reader.read::<Vector>();
+            self.set_scale(host, value);
         }
         if changed.contains(CompositionRadialGradientBrushChangedFields::SCALE_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1167,9 +1229,10 @@ impl ServerCompositionRadialGradientBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionRadialGradientBrushChangedFields::SCALE) {
-            let value = reader.read::<Vector>();
-            self.set_scale(host, value);
+        }
+        if changed.contains(CompositionRadialGradientBrushChangedFields::TRANSFORM_MATRIX) {
+            let value = reader.read::<Matrix>();
+            self.set_transform_matrix(host, value);
         }
         if changed.contains(CompositionRadialGradientBrushChangedFields::TRANSFORM_MATRIX_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1181,9 +1244,6 @@ impl ServerCompositionRadialGradientBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionRadialGradientBrushChangedFields::TRANSFORM_MATRIX) {
-            let value = reader.read::<Matrix>();
-            self.set_transform_matrix(host, value);
         }
         ServerCompositionRadialGradientBrushHooks::on_fields_deserialized(host, changed);
     }
