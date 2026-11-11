@@ -249,6 +249,10 @@ perf_counters! {
     /// `Visual::on_attached_to_visual_tree`: a visual that entered a visual tree is shown again
     /// by the drawing item it had when it left one (desktop-performance.md, section 9.42).
     DrawingItemsKept => "drawing items kept",
+    /// `Visual::synchronize_composition_child_visuals`: the child composition visuals and the
+    /// items of the composition visual of a visual with something below it were listed from the
+    /// visual tree (desktop-performance.md, section 9.42).
+    CompositionChildrenListed => "composition children listed",
     /// `Compositor::commit`: a batch of changes was sent to the render thread.
     CompositionBatchesCommitted => "composition batches committed",
     /// `Compositor::commit`: the entries of the object stream of the batches (a server object,

@@ -108,6 +108,12 @@ impl VisualSets {
     }
 
     fn add(&mut self, set: VisualSet, visual: &Visual) {
+        // Whatever asks for the child composition visuals of a visual to be synchronized says
+        // that what is below it changed (section 9.42), also when the visual is synchronized
+        // before the pass that takes this set.
+        if matches!(set, VisualSet::RecalculateChildren | VisualSet::ChildrenFirst) {
+            visual.forget_composition_children();
+        }
         let (bits, bit) = (self.bits(visual), 1 << set as u64);
         if bits & bit == 0 {
             self.set_bits(visual, bits | bit);
@@ -827,9 +833,23 @@ impl CompositingRenderer {
             visual.synchronize_composition_child_visuals();
         }
         for visual in &dirty {
-            if !self.sets.borrow().contains(VisualSet::ChildrenFirst, visual) {
-                visual.synchronize_composition_child_visuals();
+            let (first, recalculate) = {
+                let sets = self.sets.borrow();
+                (sets.contains(VisualSet::ChildrenFirst, visual), sets.contains(VisualSet::RecalculateChildren, visual))
+            };
+            if first {
+                continue;
             }
+            // Not upstream (section 9.42): a visual that is drawn again and has below it what
+            // it had when its child composition visuals and its items were listed keeps the
+            // lists. Listing them walks the visuals below down to the nearest composition
+            // visuals, which for a holder of many items is most of its tree.
+            if !recalculate && visual.composition_children_listed() {
+                #[cfg(all(debug_assertions, not(feature = "perf-counters")))]
+                visual.assert_composition_children_listed();
+                continue;
+            }
+            visual.synchronize_composition_child_visuals();
         }
         let recalculate: Vec<Ref<Visual>> = self.sets.borrow_mut().snapshot(VisualSet::RecalculateChildren);
         for visual in &recalculate {

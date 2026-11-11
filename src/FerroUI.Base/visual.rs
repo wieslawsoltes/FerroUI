@@ -33,6 +33,10 @@ const ELIDED_OFFSET_MOVED: u8 = 2;
 /// A visual without a composition visual: an update pass of its renderer has seen it, so its
 /// bounds are those of a layout pass.
 const ELIDED_SEEN: u8 = 4;
+/// A visual with a composition visual: the child composition visuals and the items of that one
+/// are those of the visual tree below the visual, and nothing that decides them changed since
+/// they were listed (section 9.42).
+const CHILDREN_LISTED: u8 = 8;
 /// How many composition visuals, and how many visuals, the move of a visual without a
 /// composition visual re-positions below it before the visual gets a composition visual of
 /// its own instead.
@@ -89,7 +93,8 @@ pub struct Visual {
     // composition visual is released when the visual leaves its tree, as upstream.
     composition_visual_handed_out: Cell<bool>,
     // Not upstream (docs/porting/desktop-performance.md, section 9.41): what a visual without a
-    // composition visual of its own keeps for the composition visuals below it (`ELIDED_*`).
+    // composition visual of its own keeps for the composition visuals below it (`ELIDED_*`),
+    // and whether one with a composition visual listed what is below it (`CHILDREN_LISTED`).
     elided_state: Cell<u8>,
     child_composition_visual: RefCell<Option<Rc<CompositionVisual>>>,
     /// What the composition API of WinUI adds to the visual (the `Translation` facade, the
@@ -484,6 +489,9 @@ impl VisualImpl for Visual {
 
     fn synchronize_composition_child_visuals(this: &Self) {
         let Some(composition_visual) = this.own_composition_visual() else { return };
+        // Listed from here on (section 9.42): what changes the tree below while the lists are
+        // made (a composition visual one of them asks for) says so again.
+        this.elided_state.set(this.elided_state.get() | CHILDREN_LISTED);
         let composition_children = composition_visual.children();
         // Not upstream: a visual with nothing under it (no visual children, no child composition
         // visual, no layer and no unloading visuals) is expected to have no composition children;
@@ -499,6 +507,7 @@ impl VisualImpl for Visual {
             composition_visual.clear_draw_items();
             return;
         }
+        crate::perf_count!(CompositionChildrenListed);
         let mut visual_children: Rc<Vec<Ref<Visual>>> =
             this.visual_children_snapshot().unwrap_or_else(|| Rc::new(Vec::new()));
 
@@ -1587,10 +1596,11 @@ impl Visual {
     /// For a visual that has a composition visual: the composition visuals below it that were
     /// positioned through it while it had none are positioned in it (section 9.41).
     pub(crate) fn settle_composition_offsets(&self) {
-        if self.elided_state.get() == 0 {
+        let state = self.elided_state.get();
+        if state & !CHILDREN_LISTED == 0 {
             return;
         }
-        let state = self.elided_state.replace(0);
+        self.elided_state.set(state & CHILDREN_LISTED);
         if state & ELIDED_OFFSET_THROUGH != 0 {
             let (mut visuals, mut nodes) = (u32::MAX, u32::MAX);
             self.synchronize_composition_offsets_below(&mut visuals, &mut nodes);
@@ -1622,6 +1632,53 @@ impl Visual {
     #[inline]
     pub(crate) fn was_seen_without_composition_visual(&self) -> bool {
         self.elided_state.get() & ELIDED_SEEN != 0
+    }
+
+    /// Whether the child composition visuals and the items of the composition visual of the
+    /// visual are those of the visual tree below it: they were listed, and nothing that decides
+    /// them changed since. The update pass of the renderer does not list them again for a
+    /// visual that is only drawn again (section 9.42).
+    #[inline]
+    pub(crate) fn composition_children_listed(&self) -> bool {
+        self.elided_state.get() & CHILDREN_LISTED != 0
+    }
+
+    /// Something that decides what the composition visual of the visual shows below it changed
+    /// (a visual child, the order of the children, a composition visual or an item below it):
+    /// the next synchronisation lists it again.
+    #[inline]
+    pub(crate) fn forget_composition_children(&self) {
+        let state = self.elided_state.get();
+        if state & CHILDREN_LISTED != 0 {
+            self.elided_state.set(state & !CHILDREN_LISTED);
+        }
+    }
+
+    /// Debug builds: lists what is below the composition visual of a visual that says it is
+    /// listed, and fails when the lists were not the ones it had: something changed the tree
+    /// below without a notice ([`forget_composition_children`](Self::forget_composition_children)).
+    /// Not with the feature `perf-counters`, whose counts are those of a release build.
+    #[cfg(all(debug_assertions, not(feature = "perf-counters")))]
+    pub(crate) fn assert_composition_children_listed(&self) {
+        let Some(composition_visual) = self.own_composition_visual() else { return };
+        let shown = || {
+            let children = composition_visual.children();
+            let children: Vec<*const CompositionVisual> =
+                (0..children.count()).map(|index| Rc::as_ptr(&children.get(index))).collect();
+            let (items, positions) = composition_visual.draw_items().map_or((Vec::new(), Vec::new()), |list| {
+                let items: Vec<*const CompositionDrawItem> =
+                    (0..list.count()).filter_map(|index| list.item_at(index)).map(|item| Rc::as_ptr(&item)).collect();
+                let positions: Vec<usize> = (0..children.len()).map(|child| list.position(child)).collect();
+                (items, positions)
+            });
+            (children, items, positions)
+        };
+        let before = shown();
+        self.synchronize_composition_child_visuals();
+        assert!(
+            before == shown(),
+            "what is below the composition visual of a visual changed without a notice to the visual"
+        );
     }
 
     /// What is below the composition visual of this visual, in the order it is shown: for each
@@ -2405,6 +2462,9 @@ impl Visual {
     }
 
     fn visual_children_changed(&self, e: &NotifyCollectionChangedEventArgs<'_, Ref<Visual>>) {
+        // What the composition visual of the visual shows below it is listed again (section
+        // 9.42); a visual without one has the one above it told below.
+        self.forget_composition_children();
         match e.action {
             NotifyCollectionChangedAction::Add => {
                 let this = self.to_ref();

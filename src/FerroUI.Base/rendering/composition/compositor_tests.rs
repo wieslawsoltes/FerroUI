@@ -3948,6 +3948,123 @@ fn composition_work_of_a_row_of_items_taken_out_of_the_tree_and_put_back() {
     }
 }
 
+/// A holder that is drawn again keeps the lists of what is below it, and whatever changes what
+/// is below it has them made again (not from upstream; a counter check `composition_work` of
+/// `scripts/perf/gate.py`: the counts are asserted with the feature `perf-counters`, and a
+/// debug build without it lists a holder that is drawn again and fails when a list changed).
+#[test]
+fn composition_work_of_a_holder_that_is_drawn_again() {
+    use crate::diagnostics::perf_counters::{self, PerfCounter};
+
+    let s = CompositorCanvas::new();
+    let holder = TestBorder::layer(0.0, 0.0, 400.0, 400.0);
+    // Without a composition visual: what is under it is shown by the holder.
+    let group = TestBorder::new();
+    group.set_bounds(Rect::new(10.0, 10.0, 300.0, 300.0));
+    let first = TestBorder::filled(0.0, 0.0, 20.0, 10.0);
+    let layer = TestBorder::layer(0.0, 20.0, 20.0, 10.0);
+    layer.set_background(Some(Brushes::blue()));
+    let second = TestBorder::filled(0.0, 40.0, 20.0, 10.0);
+    second.set_background(Some(Brushes::green()));
+    let third = TestBorder::filled(350.0, 350.0, 20.0, 10.0);
+    third.set_background(Some(Brushes::yellow()));
+    group.add(&first);
+    group.add(&layer);
+    group.add(&second);
+    holder.add(&group);
+    holder.add(&third);
+    s.canvas.add(&holder);
+    s.run_jobs();
+    let holder_visual = own_visual(&holder);
+    let positions = || {
+        let items = holder_visual.draw_items().expect("items");
+        (0..holder_visual.children().count()).map(|child| items.position(child)).collect::<Vec<_>>()
+    };
+    assert_eq!(visuals(&[&first, &second, &third]), item_elements(&holder));
+    assert_eq!(vec![1], positions());
+
+    // The holder is drawn again after `change`: how many composition visuals listed what is
+    // below them.
+    let listed = |change: &dyn Fn()| {
+        let before = perf_counters::snapshot();
+        change();
+        holder.invalidate_visual();
+        s.run_jobs();
+        perf_counters::snapshot().since(&before).get(PerfCounter::CompositionChildrenListed)
+    };
+    let assert_listed = |expected, count| {
+        if perf_counters::ENABLED {
+            assert_eq!(expected, count);
+        }
+    };
+
+    // Drawn again, and an item of it drawn again: the lists are the ones it has.
+    for _ in 0..8 {
+        assert_listed(0, listed(&|| {}));
+    }
+    assert_listed(0, listed(&|| second.set_background(Some(Brushes::red()))));
+    assert_eq!(visuals(&[&first, &second, &third]), item_elements(&holder));
+
+    // A child that leaves it, comes back and moves, without a notice to the renderer.
+    let third_visual: Ref<Visual> = third.clone().upcast();
+    assert_listed(1, listed(&|| {
+        holder.visual_children().remove(&third_visual);
+    }));
+    assert_eq!(visuals(&[&first, &second]), item_elements(&holder));
+    assert_listed(1, listed(&|| holder.visual_children().add(third_visual.clone())));
+    assert_eq!(visuals(&[&first, &second, &third]), item_elements(&holder));
+    assert_listed(1, listed(&|| holder.visual_children().move_item(1, 0)));
+    assert_eq!(visuals(&[&third, &first, &second]), item_elements(&holder));
+    assert_eq!(vec![2], positions());
+    assert_listed(0, listed(&|| {}));
+
+    // A visual under one that has no composition visual leaves and comes back.
+    assert_listed(1, listed(&|| group.remove(&second)));
+    assert_eq!(visuals(&[&third, &first]), item_elements(&holder));
+    assert_listed(1, listed(&|| group.add(&second)));
+    assert_eq!(visuals(&[&third, &first, &second]), item_elements(&holder));
+    assert_listed(0, listed(&|| {}));
+
+    // The Z order of what is below.
+    assert_listed(1, listed(&|| layer.set_z_index(-1)));
+    assert_eq!(visuals(&[&third, &first, &second]), item_elements(&holder));
+    assert_eq!(vec![1], positions());
+    assert_listed(0, listed(&|| {}));
+
+    // An item that is no longer drawn, and is drawn again.
+    assert_listed(1, listed(&|| second.set_background(None)));
+    assert_eq!(visuals(&[&third, &first]), item_elements(&holder));
+    assert_listed(1, listed(&|| second.set_background(Some(Brushes::green()))));
+    assert_eq!(visuals(&[&third, &first, &second]), item_elements(&holder));
+    assert_listed(0, listed(&|| {}));
+
+    // A child with a composition visual that comes and leaves without a notice.
+    let extra = TestBorder::layer(100.0, 100.0, 20.0, 10.0);
+    let extra_visual: Ref<Visual> = extra.clone().upcast();
+    listed(&|| holder.visual_children().add(extra_visual.clone()));
+    assert_eq!(2, holder_visual.children().count());
+    assert!(Rc::ptr_eq(&composition_parent(&extra), &holder_visual));
+    assert_listed(0, listed(&|| {}));
+    assert_listed(1, listed(&|| {
+        holder.visual_children().remove(&extra_visual);
+    }));
+    assert_eq!(1, holder_visual.children().count());
+    assert_listed(0, listed(&|| {}));
+
+    // An item that becomes a composition visual, and the visual above it with it: that one
+    // shows what is below it from then on.
+    listed(&|| {
+        first.composition_visual().expect("in a tree");
+    });
+    assert_eq!(visuals(&[&third]), item_elements(&holder));
+    assert_eq!(visuals(&[&second]), item_elements(&group));
+    assert_eq!(1, holder_visual.children().count());
+    assert!(Rc::ptr_eq(&composition_parent(&group), &holder_visual));
+    assert!(Rc::ptr_eq(&composition_parent(&first), &own_visual(&group)));
+    assert!(Rc::ptr_eq(&composition_parent(&layer), &own_visual(&group)));
+    assert_listed(0, listed(&|| {}));
+}
+
 #[test]
 fn removed_items_invalidate_their_own_rects() {
     let s = CompositorCanvas::new();
