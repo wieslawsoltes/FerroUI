@@ -1,5 +1,10 @@
 //! Camera-only presentation through the normal composition texture presenter.
 #![forbid(unsafe_code)]
+#[cfg(feature = "qr")]
+mod qr_preview;
+#[cfg(feature = "qr")]
+pub use qr_preview::QrPreview;
+
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties,
     input::InputElementImpl,
@@ -398,6 +403,8 @@ pub fn register_types() {
     ferroui_media_controls::register_types();
     ferroui_base::TypeInfo::register_namespaces(NAMESPACES);
     ferroui_base::TypeInfo::register(CameraPreview::TYPE);
+    #[cfg(feature = "qr")]
+    ferroui_base::TypeInfo::register(QrPreview::TYPE);
 }
 
 #[cfg(test)]

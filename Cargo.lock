@@ -2435,6 +2435,7 @@ dependencies = [
  "ferroui-media",
  "ferroui-media-camera",
  "ferroui-media-controls",
+ "ferroui-media-qr",
 ]
 
 [[package]]

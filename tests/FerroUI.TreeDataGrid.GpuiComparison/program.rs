@@ -170,6 +170,8 @@ mod tests {
             nanoseconds: vec![nanoseconds],
             allocated_bytes: None,
             allocations: None,
+            instructions: None,
+            cycles: None,
         };
         let results = vec![
             (descriptor("FerroUiLayout"), Ok(measurement(1_000.0))),

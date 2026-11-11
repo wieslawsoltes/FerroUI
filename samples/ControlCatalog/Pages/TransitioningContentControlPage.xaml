@@ -1,12 +1,8 @@
 <ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:ControlCatalog.ViewModels"
-             xmlns:converter="using:ControlCatalog.Converter"
-             xmlns:system="using:System"
+             xmlns:media="using:FerroUI.Media"
              Header="TransitioningContentControl"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:DataType="vm:TransitioningContentControlPageViewModel"
              x:Class="ControlCatalog.Pages.TransitioningContentControlPage">
 
@@ -14,72 +10,55 @@
         <vm:TransitioningContentControlPageViewModel />
     </ContentPage.DataContext>
 
-    <ContentPage.Styles>
-        <Style Selector="HeaderedContentControl">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="HeaderCol" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <ContentPresenter x:Name="PART_HeaderPresenter"
-                                              Content="{TemplateBinding Header}" 
-                                              Grid.Column="0" 
-                                              VerticalAlignment="Center" />
-                            <ContentPresenter x:Name="PART_ContentPresenter"
-                                              Content="{TemplateBinding Content}" 
-                                              Grid.Column="1" 
-                                              VerticalAlignment="Center" />
-                        </Grid>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </ContentPage.Styles>
-  
-  <ContentPage.Resources>
-    <converter:MathSubtractConverter x:Key="MathSubtractConverter" />
-    <system:Double x:Key="TopMargin">8</system:Double>
-  </ContentPage.Resources>
-  
-    <DockPanel LastChildFill="True" 
-               Height="{Binding Path=Bounds.Height, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}, Converter={StaticResource MathSubtractConverter},ConverterParameter={StaticResource TopMargin}}">
+    <StackPanel MaxWidth="720" HorizontalAlignment="Stretch" Spacing="16" Margin="2,4,2,16">
+        <TextBlock Classes="h2" TextWrapping="Wrap">Choose a transition, then switch photos to see it in action.</TextBlock>
 
-        <TextBlock DockPanel.Dock="Top" Classes="h2">The TransitioningContentControl control allows you to show a page transition whenever the Content changes.</TextBlock>
+        <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1" CornerRadius="8" Padding="12" ClipToBounds="True">
+            <StackPanel Spacing="12">
+                <Border x:Name="PhotoViewport" Height="320" ClipToBounds="{Binding ClipToBounds}">
+                    <TransitioningContentControl Content="{Binding SelectedImage}"
+                                                 PageTransition="{Binding SelectedTransition.Transition}"
+                                                 IsTransitionReversed="{Binding Reversed}">
+                        <TransitioningContentControl.ContentTemplate>
+                            <DataTemplate x:DataType="media:IImage">
+                                <Image Source="{Binding}" Stretch="UniformToFill" />
+                            </DataTemplate>
+                        </TransitioningContentControl.ContentTemplate>
+                    </TransitioningContentControl>
+                </Border>
 
-        <ExperimentalAcrylicBorder DockPanel.Dock="Bottom" Margin="10" CornerRadius="5" >
-            <ExperimentalAcrylicBorder.Material>
-                <ExperimentalAcrylicMaterial BackgroundSource="Digger" TintColor="White" />
-            </ExperimentalAcrylicBorder.Material>
-            
-            <StackPanel Margin="5" Spacing="5" Grid.IsSharedSizeScope="True">
-                <HeaderedContentControl Header="Select a transition">
-                     <ComboBox ItemsSource="{Binding PageTransitions}" SelectedItem="{Binding SelectedTransition}" />
-                </HeaderedContentControl>
-                <HeaderedContentControl Header="Duration">
-                     <NumericUpDown Value="{Binding Duration}" Increment="250" Minimum="100" />
-                </HeaderedContentControl>
-                <HeaderedContentControl Header="Clip to Bounds">
-                    <ToggleSwitch IsChecked="{Binding ClipToBounds}" />
-                </HeaderedContentControl>
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                    <Button Command="{Binding PrevImage}" Content="Previous" AutomationProperties.Name="Previous photo" />
+                    <TextBlock Grid.Column="1" Text="{Binding SelectedImageCaption}" TextWrapping="Wrap"
+                               TextAlignment="Center" VerticalAlignment="Center"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    <Button Grid.Column="2" Command="{Binding NextImage}" Content="Next" AutomationProperties.Name="Next photo" />
+                </Grid>
             </StackPanel>
-        </ExperimentalAcrylicBorder>
-
-        <Button DockPanel.Dock="Left" Command="{Binding PrevImage}" Content="&lt;" />
-        <Button DockPanel.Dock="Right" Command="{Binding NextImage}" Content=">" />
-        
-        <Border ClipToBounds="{Binding ClipToBounds}" Margin="5">
-            <TransitioningContentControl Content="{Binding SelectedImage}"
-                                         PageTransition="{Binding SelectedTransition.Transition}" 
-                                         IsTransitionReversed="{Binding Reversed}">
-                <TransitioningContentControl.ContentTemplate>
-                    <DataTemplate DataType="Bitmap">
-                        <Image Source="{Binding}"  />
-                    </DataTemplate>
-                </TransitioningContentControl.ContentTemplate>
-            </TransitioningContentControl>
         </Border>
-    </DockPanel>
+
+        <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1" CornerRadius="8" Padding="12">
+            <WrapPanel ItemSpacing="20" LineSpacing="12">
+                <StackPanel Width="180" Spacing="4">
+                    <TextBlock Text="Transition" />
+                    <ComboBox x:Name="TransitionChoice" HorizontalAlignment="Stretch" AutomationProperties.Name="Transition"
+                              ItemsSource="{Binding PageTransitions}" SelectedItem="{Binding SelectedTransition, Mode=TwoWay}" />
+                </StackPanel>
+                <StackPanel Width="128" Spacing="4">
+                    <TextBlock Text="Duration (ms)" />
+                    <NumericUpDown x:Name="TransitionDuration" AutomationProperties.Name="Duration in milliseconds"
+                                   Value="{Binding Duration, Mode=TwoWay}" Increment="250" Minimum="100" FormatString="0" />
+                </StackPanel>
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Clip to bounds" />
+                    <ToggleSwitch x:Name="TransitionClipping" AutomationProperties.Name="Clip to bounds"
+                                  IsChecked="{Binding ClipToBounds, Mode=TwoWay}" />
+                </StackPanel>
+            </WrapPanel>
+        </Border>
+    </StackPanel>
 </ContentPage>

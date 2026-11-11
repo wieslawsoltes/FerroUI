@@ -557,8 +557,10 @@ python3 scripts/perf/gate.py --dry-run                         # the plan and th
 The script checks the base out, detached, in a git worktree of its own under the scratch folder
 (`--scratch`, default `ferroui-gate-scratch` beside the checkout, reused between runs and safe to
 delete), builds the base and the candidate (this checkout as it is, uncommitted changes included)
-with a target folder each, then runs them alternately, base then candidate, for `--rounds` rounds
-(default 3), and compares the medians of the rounds. A metric over its tolerance by less than the
+with a target folder each, then runs them alternately for `--rounds` rounds (default 3), and
+compares the medians of the rounds. The side that runs first changes with the round (base then
+candidate in the first, candidate then base in the second): what a run leaves behind, the caches
+of the system and the heat of the machine, is then not always the start of the same side. A metric over its tolerance by less than the
 spread of its own rounds on either side is not decided yet: one disturbed round can move a median
 of three that far (a still wall run beside a busy machine went from 1.7 to 2.2 ms on one side
 only). The gate then measures another round of that suite, alternately again, until the change is
@@ -645,7 +647,14 @@ What it measures:
   no scene's `build_ms` and `show_ms`. Without it the first scene carried the state the process
   started in: `lines`, the first by its name, was built and shown in 0.9 and 1.4 ms in a process
   started right after another and in 1.3 and 1.9 ms after 20 seconds of rest or 3.0 and 5 to
-  6.6 ms after a large process; with it, in 0.8 and 1.3 ms in each case.
+  6.6 ms after a large process; with it, in 0.8 and 1.3 ms in each case. Before that, and before
+  each start, the harness reads one byte of every page of the program's own file
+  (`page_in_the_program`): the system reads a page of a program from the disk when the process
+  first runs through it, and a build or a show, measured once a process, then timed the disk
+  whenever the system did not hold the file, which it does not after it was just written or after
+  a large process pushed it out. `list` was built and shown in 1.1 and 1.7 ms with the file in
+  memory and in 1.6 and 2.3 ms with about 1,150 pages read inside the two, and of two builds of
+  the same scene the larger program paid more of it.
 
   The render thread and wall time the gate compares are those of a frame the surface received
   (the time for a frame of the clock times `frames / rendered` of the `GATE` line, when fewer
@@ -682,6 +691,42 @@ What it measures:
   full run of both sides takes minutes rather than an hour; `--tdg-filter` selects benchmarks as
   `FERROUI_BENCH_FILTER` does.
 
+The two suites of the benchmark harness (`framework` and `tdg`) run each class of benchmarks in a
+process of its own (`FERROUI_BENCH_CLASS`, one run a class of the names `FERROUI_BENCH_LIST`
+prints). A benchmark starts from the heap, the caches and the threads the benchmarks before it in
+its process left: `trees::Propagation.font_family[Tiles=2000]` of one build took 1.82 ms in one
+process that had run the hundred and more benchmarks before it and 1.40 ms in the next, and is
+within a few percent after the benchmarks of its class alone. When the harness of the base is
+from before it could run one class, both sides run in one process, and the output says so.
+
+Beside the time, the harness counts the instructions the processor retires for an operation,
+where the system counts them for a process (macOS; `harness::processor`), and the table of the
+gate has their change in the column `Instructions`, on the line of the time. The count is of the
+work alone: it does not move with the frequency of the cores, the caches or where a build put
+the code and the data. Of 336 pairs of runs of the same build in two processes the median
+difference was 0.01 % and the largest 0.74 %, where the cycles of 49 of the pairs differed by
+more than 5 %. The verdicts of a benchmark with the count:
+
+- `REGRESSED`: the time is over its tolerance and so are the instructions. The change does more
+  work.
+- `REGRESSED (instructions)`: the instructions are over their tolerance and the time is not.
+  The change does more work that this machine hides. The instructions are over their tolerance
+  when the median of the candidate is 2 % and more than one instruction an operation over that
+  of the base, and every round of the candidate counted more than every round of the base: a
+  few benchmarks count differently from one process to the next, because the order of a hash
+  table follows a seed the process draws (`trees::Propagation.styles_changed` counted 13.70 to
+  14.51 million instructions in four runs of one build), and rounds that overlap say nothing.
+- `REGRESSED (time alone)`: the time is over its tolerance and the instructions are not. The
+  work is the same. What is left is how the processor runs it: the alignment of a loop, the
+  cache lines of the data a benchmark walks, a branch the predictor loses, all of which move
+  with any change of a build, in code the change does not touch as well
+  (`styling_subsystem::SelectorMatch.none`, measured by the gate at +10.7 % for a change that
+  touched no styling code, retired 0.95 % fewer instructions).
+
+Each of the three fails the gate. A benchmark that took less time with the instructions of the
+base is `faster (time alone)`: a quieter round, or memory and code that lie better, and not
+less work.
+
 Tolerances. A metric regresses when the candidate is slower than the base by more than
 `--tolerance` (default 5 %) times the factor of the metric, and by more than a floor below which
 the measurement resolves nothing (0.05 ms a frame, 2 ns an operation):
@@ -692,6 +737,7 @@ the measurement resolves nothing (0.05 ms a frame, 2 ns an operation):
 | Render thread time of a frame | 1.5 | it runs beside the UI thread and moves with core placement and glyph cache state |
 | Render thread and wall time of a frame benchmark | as above | compared for a frame the surface received, not for a frame of the clock |
 | TreeDataGrid and tree benchmark operation | 2 (3 under 100 ns) | short iterations in a new process per run; heap and code layout move a benchmark by several percent, and the shortest operations are near the timer |
+| Instructions of such an operation | 2 % whatever `--tolerance` is | a count, the same to a hundredth of a percent between two processes of a build (floor one instruction) |
 | Build and show of a scene (`build_ms`, `show_ms`) | 1.5 | measured once a run: one sample a round (floor 0.5 ms) |
 | Start of a scene (`startup_ms`) | 1 | the sum of the two (floor 0.5 ms) |
 | First frame of a scene of the start (`first_frame_ms`) | 1.5 | measured once a run |
@@ -700,7 +746,12 @@ the measurement resolves nothing (0.05 ms a frame, 2 ns an operation):
 | Window: first frame and time a frame | 2 | a real process: the display, the system compositor, the disk and the shader caches (floors 20 ms and 0.5 ms) |
 
 A regression the gate reports after its extra rounds is a real one; a change that is meant to
-cost time says so in the pull request, with the table.
+cost time says so in the pull request, with the table. A benchmark that regressed in time alone
+is looked at before the pull request goes up: its counts on the two sides, the sizes of the
+objects it uses (`sizes/...`), and a second run of it. When the counts and the sizes are those of
+the base and the code the benchmark runs is not what the change touches, the time is that of
+where this build put the code and the data; the pull request shows the line with its counts and
+says so. The gate is not told to pass it.
 
 ## 9. Deviations from upstream for frame cost
 
