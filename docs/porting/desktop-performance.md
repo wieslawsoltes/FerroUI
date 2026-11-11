@@ -630,7 +630,12 @@ What it measures:
   sizes of the objects an element is made of (the element class by class, its composition visual
   and the visual of the render thread); the gate compares each. With the `counters` feature
   (`--features counters`) a start also prints the allocations of each phase and the blocks it
-  left alive by size class, and the counters of the framework (section 9.40).
+  left alive by size class, and the counters of the framework (section 9.40). The gate runs every
+  test of the start (`start_of_*`) in a process of its own and the scenes of the frames in a
+  process without them: a start is the start of a process that has built nothing yet, and a scene
+  of the start leaves the heap and the caches of the process in a state that moves the build of
+  every scene measured after it (the `text` scene builds in 3.65 ms in a process of the frames
+  alone and in 4.2 to 5.0 ms after the two starts).
 - **The tree benchmarks** (`tests/FerroUI.Benchmarks`, category `trees`, suite `framework`): the
   framework's tree mechanics on walls of small tiles, in an application with a desktop's services
   (the Fluent theme, Skia's fonts, HarfBuzz): building, attaching (from the leaves up and from the

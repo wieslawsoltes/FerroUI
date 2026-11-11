@@ -90,6 +90,14 @@ WINDOW_SCENES = ["text", "list", "transforms", "wall", "lines"]
 
 TEST_ARGS = ["--ignored", "--nocapture", "--test-threads=1"]
 
+# The tests of the frame benchmarks that measure the start of a scene. Each runs in a process of
+# its own, and the scenes of the frames run in a process without them: a start is the start of a
+# process that has built nothing yet, and a scene of the start (thousands of elements) leaves the
+# heap and the caches of the process in a state that moves the build of every scene measured
+# after it (the build of the `text` scene by a seventh).
+START_TEST_PREFIX = "start_of_"
+FRAMES_TEST = ["test", "-p", FRAMES_PACKAGE, "--release", "--test", "frames", "--"]
+
 # The tests that assert counts of work (`ferroui_base::diagnostics::perf_counters`), each a
 # package, the features that compile the counters in, and the filter of its tests. Their
 # assertions are skipped without the feature, so the gate runs them with it: deterministic, on
@@ -113,7 +121,8 @@ SUITES = {
     },
     "frames": {
         "build": ["test", "-p", FRAMES_PACKAGE, "--release", "--test", "frames", "--no-run"],
-        "run": ["test", "-p", FRAMES_PACKAGE, "--release", "--test", "frames", "--", *TEST_ARGS],
+        # The scenes of the frames; the starts follow, a process each (`run_frames`).
+        "run": [*FRAMES_TEST, *TEST_ARGS, "--skip", START_TEST_PREFIX],
     },
     "framework": {
         "build": ["test", "-p", FRAMEWORK_PACKAGE, "--release", "--lib", "--no-run"],
@@ -356,6 +365,22 @@ def run_cargo(side: Side, args: list[str], env: dict[str, str], log: Path, echo:
     if status != 0:
         raise GateError(f"[{side.name}] cargo {' '.join(args)} failed with status {status}; the log is {log}")
     return "".join(lines)
+
+
+def start_tests(side: Side, env: dict[str, str], log: Path, echo: bool) -> list[str]:
+    """The tests of the start the frame benchmarks of `side` have (a base may have none)."""
+    output = run_cargo(side, [*FRAMES_TEST, "--list", "--ignored"], env, log, echo)
+    names = (line.removesuffix(": test").strip() for line in output.splitlines() if line.endswith(": test"))
+    return sorted(name for name in names if name.startswith(START_TEST_PREFIX))
+
+
+def run_frames(side: Side, starts: list[str], env: dict[str, str], log: Path, echo: bool) -> str:
+    """The scenes of the frames in one process, then each test of the start in its own."""
+    output = run_cargo(side, SUITES["frames"]["run"], env, log, echo)
+    for test in starts:
+        start_log = log.with_name(f"{log.stem}-{test}{log.suffix}")
+        output += run_cargo(side, [*FRAMES_TEST, test, "--exact", *TEST_ARGS], env, start_log, echo)
+    return output
 
 
 def prepare_base(root: Path, scratch: Path, base: str, suites: list[str], copy_gate: bool) -> tuple[Path, list[str]]:
@@ -743,6 +768,8 @@ def gate(options: argparse.Namespace) -> int:
                 print(f"run:   {FRAMES_BINARY} with FRAMES_SCENE={','.join(window_scenes)}, {options.window_seconds:g} s each")
             else:
                 print(f"run:   {variables + ' ' if variables else ''}{' '.join(cargo_command() + SUITES[suite]['run'])}")
+                if suite == "frames":
+                    print(f"run:   each test `{START_TEST_PREFIX}*` in a process of its own: {' '.join(cargo_command() + FRAMES_TEST)} <test> --exact {' '.join(TEST_ARGS)}")
         return 0
 
     base_root, copied = prepare_base(root, scratch, base_sha, suites, options.copy_gate)
@@ -756,6 +783,11 @@ def gate(options: argparse.Namespace) -> int:
     for suite in suites:
         for side in (base, candidate):
             run_cargo(side, SUITES[suite]["build"], env[suite], logs / f"build-{suite}-{side.name}.log", options.verbose)
+
+    starts: dict[str, list[str]] = {}
+    if "frames" in suites:
+        for side in (base, candidate):
+            starts[side.name] = start_tests(side, env["frames"], logs / f"list-frames-{side.name}.log", options.verbose)
 
     suite_of: dict[str, str] = {}
 
@@ -771,7 +803,10 @@ def gate(options: argparse.Namespace) -> int:
                         record(side, found)
                         suite_of.update((metric.key, suite) for metric, _ in found)
                     continue
-                output = run_cargo(side, SUITES[suite]["run"], env[suite], log, options.verbose)
+                if suite == "frames":
+                    output = run_frames(side, starts[side.name], env[suite], log, options.verbose)
+                else:
+                    output = run_cargo(side, SUITES[suite]["run"], env[suite], log, options.verbose)
                 if suite in ("gauntlet", "frames"):
                     found = parse_gate(output)
                     if not found:
