@@ -2187,6 +2187,31 @@ eight bands the threads spill onto the efficiency cores). One band already frees
 thread, and is the choice for a machine with few cores; its recording takes 13.4 ms, which
 fits a 60 Hz frame and does not fit a 120 Hz frame, where two bands do.
 
+**The bands meet where the cost of the frame divides evenly.** The bands begin as equal
+strips, and a frame is in the context when its slowest band is. What a frame costs is rarely
+spread evenly over the rows of a window: in the patchwork of the benchmark at tier 17 the
+lower band of two worked three times as long as the upper one, and the frame took the time
+of the slow one. The threads tell how long each band took, and the layer keeps from that
+what a strip of rows costs (`BandBalance`); when the slowest band works 15 % longer
+than the mean over a run of frames, the bands are moved to the rows that divide the kept
+cost evenly, each band of the least height a band may have at least. The frames after a
+move correct the strips again, so the rows close in on the cost wherever it lies; a cost
+that cannot be divided (all of it in a strip lower than a band may be) stops the moves,
+which are then tried at intervals that double. The bands stay disjoint and cover the layer,
+so a frame is drawn as before (the differences of a band from a direct frame are those
+listed below, wherever the bands meet). Measured with the harness of the benchmark (first /
+second launch, before section 9.46): the patchwork at tier 17 went from 28.9 / 33.3 to
+36.0 / 42.6 frames a second; the patchwork at tier 12 (48 / 57) and the gauntlet at tier 16
+did not change, their bands already work as long as each other. With three balanced bands
+the patchwork at tier 17 reached 36.0 / 49.7 at more processor time for a frame (68 to 76 ms
+against 64 to 66 ms), and with four it fell back; two bands stay the default. The counter
+`skia: bands of pipelined frames moved` tells how often a layer moved its bands. Tests:
+`pipelined_layer.rs` (`the_bands_move_to_where_the_cost_is`,
+`the_bands_follow_a_cost_that_moves`, `a_cost_that_cannot_be_divided_stops_moving_the_bands`,
+`bands_that_work_as_long_as_each_other_stay`, `the_bands_of_light_frames_stay`,
+`frames_after_a_move_and_of_other_bands_are_not_counted`) and, on the device,
+`the_bands_move_to_the_rows_that_cost_and_every_frame_is_drawn_as_before`.
+
 **The picture of a frame is recorded without a bounding hierarchy.** Skia can keep the
 bounds of the draws of a picture in a tree, so that a playback under a clip skips the draws
 outside it without looking at them (`begin_recording(bounds, true)`). Measured the same way:

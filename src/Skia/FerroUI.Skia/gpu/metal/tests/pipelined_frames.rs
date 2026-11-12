@@ -123,7 +123,7 @@ impl Layers {
     /// at an antialiased edge depends on the draws that share the pass: a
     /// pass with a draw that needs multisampling is multisampled as a whole).
     fn draw(&self, draw: impl Fn(&mut dyn IDrawingContextImpl)) {
-        self.draw_ordinary_in_bands(self.surface.bands(), true, &draw);
+        self.draw_ordinary_in_clips(&self.surface.band_clips(), true, &draw);
 
         let mut drawing_context = self.pipelined.create_drawing_context();
         draw(&mut *drawing_context);
@@ -133,9 +133,19 @@ impl Layers {
     /// Draws one frame of the ordinary layer band by band, in `bands` bands:
     /// each band a recording of its own, or the frame one recording.
     fn draw_ordinary_in_bands(&self, bands: usize, apart: bool, draw: &impl Fn(&mut dyn IDrawingContextImpl)) {
-        let clips = band_clips((WIDTH, HEIGHT), bands);
+        self.draw_ordinary_in_clips(&band_clips((WIDTH, HEIGHT), bands), apart, draw);
+    }
+
+    /// Draws one frame of the ordinary layer under each of `clips`: each a
+    /// recording of its own, or the frame one recording.
+    fn draw_ordinary_in_clips(
+        &self,
+        clips: &[(usize, skia_safe::IRect)],
+        apart: bool,
+        draw: &impl Fn(&mut dyn IDrawingContextImpl),
+    ) {
         let recordings: Vec<&[(usize, skia_safe::IRect)]> =
-            if apart { clips.chunks(1).collect() } else { vec![&clips[..]] };
+            if apart { clips.chunks(1).collect() } else { vec![clips] };
         for clips in recordings {
             let mut drawing_context = self.ordinary.create_drawing_context();
             let feature = drawing_context
@@ -756,6 +766,52 @@ fn the_bands_of_a_layer_are_disjoint_and_cover_it() {
             assert_eq!(height, top);
         }
     }
+}
+
+/// The scene, and over it six thousand small shapes in the rows from 150 to 250: the lower band of two equal
+/// bands draws all of them.
+fn draw_scene_with_a_heavy_lower_part(context: &mut dyn IDrawingContextImpl) {
+    draw_scene(context);
+    for index in 0..6_000u32 {
+        let (column, row) = (f64::from(index % 60), f64::from(index / 60));
+        let bounds = Rect::new(column * 5.25 + 0.25, 150.5 + row, 6.0, 5.0);
+        let color = 0xff00_0000 | (index.wrapping_mul(2_654_435_761) >> 8);
+        let shape = RoundedRect::from_radius(bounds, 1.5);
+        context.draw_rectangle(Some(&solid(color)), None, shape, &BoxShadows::default());
+    }
+}
+
+#[test]
+fn the_bands_move_to_the_rows_that_cost_and_every_frame_is_drawn_as_before() {
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    let layers = Layers::new(&device, SkiaFramePipelining::On);
+    let equal = band_clips((WIDTH, HEIGHT), BANDS);
+    assert_eq!(layers.surface.band_clips(), equal, "a layer begins with equal bands");
+
+    // Each frame is received before the next is drawn, so both layers draw a frame under the same bands.
+    for frame in 0..24 {
+        layers.draw(draw_scene_with_a_heavy_lower_part);
+        layers.pipelined.complete_pending_frame();
+        if frame % 8 == 7 {
+            layers.assert_same_pixels(&format!("frame {frame}"));
+        }
+    }
+    let moved = layers.surface.band_clips();
+    assert_eq!(moved.len(), equal.len());
+    assert!(moved[0].1.bottom() > equal[0].1.bottom(), "the upper band grew: {moved:?}");
+    assert_eq!((moved[0].1.top(), moved[0].1.bottom()), (0, moved[1].1.top()));
+    assert_eq!(moved[1].1.bottom(), HEIGHT);
+    assert!(moved[1].1.height() >= 64, "{moved:?}");
+
+    // Frames that follow each other, and that keep what the frame before drew, under the moved bands.
+    layers.draw(draw_scene);
+    layers.draw(draw_update);
+    layers.assert_same_pixels("an update over a frame, after the bands moved");
+
+    layers.dispose();
 }
 
 /// How many pixels of the scene a frame drawn under the clips of the bands

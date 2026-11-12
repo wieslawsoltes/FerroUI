@@ -353,6 +353,8 @@ perf_counters! {
     SkiaLayersBeganToPipeline => "skia: layers that began to pipeline their frames",
     /// `PipelinedLayer::finish_frame`: a frame was handed to the threads of the layer.
     SkiaFramesPipelined => "skia: frames pipelined",
+    /// `PipelinedLayer::finish_frame`: the bands of the layer were moved to rows of equal cost.
+    SkiaBandsMoved => "skia: bands of pipelined frames moved",
     /// `PipelinedLayer::finish_frame`: a recorded frame was played on the recorder of the
     /// context (it had a draw only that recorder draws, or the threads were not there).
     SkiaPipelinedFramesPlayedDirectly => "skia: recorded frames played on the recorder of the context",
