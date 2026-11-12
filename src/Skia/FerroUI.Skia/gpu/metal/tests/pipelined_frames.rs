@@ -768,15 +768,19 @@ fn the_bands_of_a_layer_are_disjoint_and_cover_it() {
     }
 }
 
-/// The scene, and over it six thousand small shapes in the rows from 150 to 250: the lower band of two equal
-/// bands draws all of them.
+/// The scene, and over it six thousand small rectangles in the rows from 150 to 255: the lower band of two equal
+/// bands draws all of them. They lie on whole pixels and have square corners, so no pixel of them is
+/// antialiased: Skia draws the antialiased edges of thousands of small shapes that overlap a few levels
+/// differently from one run to the next (with rounded corners at fractions of a pixel, the ordinary layer
+/// against its own frame before in 4 of 64 runs, and the two layers in 6 of 39), and the layers are compared
+/// byte by byte.
 fn draw_scene_with_a_heavy_lower_part(context: &mut dyn IDrawingContextImpl) {
     draw_scene(context);
     for index in 0..6_000u32 {
         let (column, row) = (f64::from(index % 60), f64::from(index / 60));
-        let bounds = Rect::new(column * 5.25 + 0.25, 150.5 + row, 6.0, 5.0);
+        let bounds = Rect::new(column * 5.0, 150.0 + row, 6.0, 5.0);
         let color = 0xff00_0000 | (index.wrapping_mul(2_654_435_761) >> 8);
-        let shape = RoundedRect::from_radius(bounds, 1.5);
+        let shape = RoundedRect::from_radius(bounds, 0.0);
         context.draw_rectangle(Some(&solid(color)), None, shape, &BoxShadows::default());
     }
 }
@@ -791,13 +795,12 @@ fn the_bands_move_to_the_rows_that_cost_and_every_frame_is_drawn_as_before() {
     let equal = band_clips((WIDTH, HEIGHT), BANDS);
     assert_eq!(layers.surface.band_clips(), equal, "a layer begins with equal bands");
 
-    // Each frame is received before the next is drawn, so both layers draw a frame under the same bands.
+    // Each frame is received before the next is drawn, so both layers draw a frame under the same bands, and
+    // each frame is compared: the frames before the bands move, the frame that moves them and those after.
     for frame in 0..24 {
         layers.draw(draw_scene_with_a_heavy_lower_part);
         layers.pipelined.complete_pending_frame();
-        if frame % 8 == 7 {
-            layers.assert_same_pixels(&format!("frame {frame}"));
-        }
+        layers.assert_same_pixels(&format!("frame {frame}, bands {:?}", layers.surface.band_clips()));
     }
     let moved = layers.surface.band_clips();
     assert_eq!(moved.len(), equal.len());
