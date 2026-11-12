@@ -16,7 +16,7 @@ const TABLE_FROM: usize = 32;
 const NOWHERE: LtrbRect = LtrbRect::new(f64::INFINITY, f64::INFINITY, f64::NEG_INFINITY, f64::NEG_INFINITY);
 
 #[cfg(test)]
-thread_local! {
+crate::ferro_thread_local! {
     /// Whether no collection keeps a table: the walks visit every child, as upstream does.
     static WITHOUT_TABLES: Cell<bool> = const { Cell::new(false) };
     /// How many children the update pass and the render walk left out by a table.
