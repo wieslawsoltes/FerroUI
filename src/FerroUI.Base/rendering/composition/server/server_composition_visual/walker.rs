@@ -8,6 +8,10 @@ pub(super) trait IServerTreeVisitor {
     /// Returns whether the children are to be visited.
     fn pre_subgraph(&mut self, visual: &Rc<ServerCompositionVisual>) -> bool;
     fn post_subgraph(&mut self, visual: &Rc<ServerCompositionVisual>);
+    /// Called before the child `index` of `container` is visited (not from upstream): the
+    /// render walk draws the drawing items that come before the child (section 9.42).
+    #[inline]
+    fn before_child(&mut self, _container: &Rc<ServerCompositionVisual>, _index: usize) {}
 }
 
 /// A position of the tree walk: a container and the index of its child to
@@ -52,6 +56,7 @@ pub(super) fn walk<V: IServerTreeVisitor>(visitor: &mut V, root: &Rc<ServerCompo
             continue;
         }
 
+        visitor.before_child(&container, current_index);
         let child = children[current_index].clone();
         let visit_children = visitor.pre_subgraph(&child);
         if visit_children {

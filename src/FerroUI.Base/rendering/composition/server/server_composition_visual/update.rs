@@ -230,6 +230,20 @@ impl IServerTreeVisitor for UpdateContext {
             self.add_to_dirty_region(Some(node.extra_dirty_rect.get()));
         }
 
+        // The drawing items that changed (not from upstream; section 9.42): where each was
+        // and is, in the space of the node as the extra dirty rect. A node that is dirty for
+        // render has its bounds in the region already; its items only forget their changes.
+        if node.take_draw_items_dirty() {
+            if let Some(items) = node.content.draw_items() {
+                let add = node.needs_to_add_extra_dirty_rect_to_dirty_region.get();
+                items.drain_dirty_rects(&mut |rect| {
+                    if add {
+                        self.add_to_dirty_region(Some(rect));
+                    }
+                });
+            }
+        }
+
         // If we pushed transforms here, we need to pop them again.  If we're handling a cache we need
         // to finish handling it here as well.
         if Self::need_to_push_bounds_affecting_properties(node) {
