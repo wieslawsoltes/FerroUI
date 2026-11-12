@@ -20,7 +20,9 @@ $settings = @{
 $previous = @{}
 try {
     $binary = (Resolve-Path -LiteralPath $Executable).Path
-    $destination = [IO.Path]::GetFullPath($OutputDirectory)
+    # A relative output directory is relative to the repository root, like the executable above
+    # (the location is the root here), not to the directory of the process.
+    $destination = [IO.Path]::GetFullPath($OutputDirectory, $repoRoot)
     New-Item -ItemType Directory -Force -Path $destination | Out-Null
     $hash = (Get-FileHash -LiteralPath $binary -Algorithm SHA256).Hash
     foreach ($key in $settings.Keys) {

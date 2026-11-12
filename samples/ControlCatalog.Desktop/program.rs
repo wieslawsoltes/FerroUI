@@ -83,6 +83,11 @@
 //! That run reads the screen under its own window: it is for a machine
 //! whose screen holds nothing but the run.
 //!
+//! With `FERROUI_SMOKE_MEDIA=1` the run is the media smoke run (`media_samples::smoke`, which lists
+//! its `FERROUI_SMOKE_MEDIA_*` variables): the video page plays its clip, then the camera page is
+//! checked. `FERROUI_SMOKE_MEDIA_VIDEO_MS=<n>` adds `n` milliseconds of playback after which the
+//! run prints the rate of delivered video frames (`CATALOG_VIDEO_DELIVERY`).
+//!
 //! With the command line switch `--vnc` the catalog runs on the headless
 //! platform, without a window on the screen, and a VNC server on port 5901
 //! of the loopback address shows its main window to a VNC viewer and passes

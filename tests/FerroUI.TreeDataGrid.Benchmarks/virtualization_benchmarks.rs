@@ -105,6 +105,7 @@ impl VirtualizationBenchmarks {
         Self { neutral_source, source_lifetime: None, window: None, grid: None, scroll: None, items: None, renderer_cell_template: None, _app: app }
     }
 
+    #[cfg(all(test, windows, feature = "renderer-benchmarks"))]
     pub(crate) fn set_renderer_cell_template(&mut self, template: Rc<dyn IControlTemplate>) {
         self.renderer_cell_template = Some(template);
     }

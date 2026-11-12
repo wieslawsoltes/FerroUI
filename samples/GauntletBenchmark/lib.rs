@@ -10,7 +10,7 @@ mod app;
 mod gauntlet;
 mod perf_data;
 mod wall;
-#[cfg(windows)]
+#[cfg(all(windows, feature = "renderer-measurement"))]
 pub mod measurement;
 
 pub use app::{App, DeviceRoboto, Launch};

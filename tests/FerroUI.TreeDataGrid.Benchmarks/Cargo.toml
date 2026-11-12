@@ -20,8 +20,9 @@ layout-benchmarks = ["dep:ferroui-benchmarks"]
 # The counting allocator of the harness (ferroui-benchmarks, harness.rs): the table of a run has
 # what an operation allocated. Off by default: counting costs time.
 count-allocations = ["layout-benchmarks", "ferroui-benchmarks/count-allocations"]
-# Real Windows GPU rendering, in addition to the original mock-layout suite.
-renderer-benchmarks = ["dep:ferroui-skia", "dep:ferroui-harfbuzz", "dep:ferroui-direct2d", "dep:ferroui-win32", "dep:ferroui-opengl", "dep:serde_json"]
+# Real Windows GPU rendering, in addition to the original mock-layout suite. On other targets the
+# feature adds no module. `cc` compiles the D3D11 completion helper (`build.rs`).
+renderer-benchmarks = ["dep:cc", "dep:ferroui-skia", "dep:ferroui-harfbuzz", "dep:ferroui-direct2d", "dep:ferroui-win32", "dep:ferroui-opengl", "dep:serde_json"]
 
 [dependencies]
 # The harness: the registry, the runner, the smoke helpers and the allocation counts.
@@ -42,4 +43,4 @@ ferroui-opengl = { workspace = true, optional = true }
 ferroui-win32 = { workspace = true, default-features = false, features = ["angle"], optional = true }
 
 [build-dependencies]
-cc.workspace = true
+cc = { workspace = true, optional = true }

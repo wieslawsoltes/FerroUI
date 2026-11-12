@@ -39,10 +39,10 @@ pub mod revision_scroll_comparison;
 
 #[cfg(feature = "layout-benchmarks")]
 mod program;
-#[cfg(all(windows, feature = "renderer-benchmarks"))]
+// The Windows Skia/ANGLE and Direct2D backends compared, one ignored test: on other targets, and in a
+// build that is not a test build, the feature adds nothing.
+#[cfg(all(test, windows, feature = "renderer-benchmarks"))]
 mod renderer_benchmarks;
-#[cfg(all(not(windows), feature = "renderer-benchmarks"))]
-compile_error!("renderer-benchmarks compares the Windows Skia/ANGLE and Direct2D backends");
 
 #[cfg(feature = "layout-benchmarks")]
 pub use program::{compare_scroll_revisions, paired_vertical_scroll, run};

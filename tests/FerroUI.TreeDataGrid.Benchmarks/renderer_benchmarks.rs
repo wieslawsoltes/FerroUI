@@ -30,6 +30,7 @@ use std::{
 extern "C" {
     fn tdg_completion_create(device: *mut c_void) -> *mut c_void;
     fn tdg_completion_wait(completion: *mut c_void) -> i32;
+    fn tdg_completion_adapter_description(completion: *mut c_void, out: *mut u8, capacity: i32) -> i32;
     fn tdg_completion_destroy(completion: *mut c_void);
 }
 struct NativeCompletion(*mut c_void);
@@ -38,6 +39,15 @@ impl NativeCompletion {
         let completion = unsafe { tdg_completion_create(ferroui_direct2d::native_device()) };
         assert!(!completion.is_null(), "D3D11 event query creation failed");
         Self(completion)
+    }
+    /// The description of the adapter the native device was created on, as DXGI reports it.
+    fn adapter_description(&self) -> String {
+        // 128 UTF-16 units at most: three bytes each cover them.
+        let mut bytes = [0u8; 384];
+        let length =
+            unsafe { tdg_completion_adapter_description(self.0, bytes.as_mut_ptr(), bytes.len() as i32) };
+        assert!(length > 0, "The D3D11 device did not report its adapter");
+        String::from_utf8_lossy(&bytes[..length as usize]).into_owned()
     }
 }
 impl Drop for NativeCompletion {
@@ -58,8 +68,8 @@ struct Backend {
     renderer: Rc<dyn IPlatformRenderInterface>,
     context: Rc<dyn IPlatformRenderInterfaceContext>,
     driver: Driver,
+    /// The adapter as the backend names it. The adapter LUID identifies a machine and is not kept.
     description: String,
-    luid: Option<Vec<u8>>,
 }
 impl Backend {
     fn new(name: &str) -> Self {
@@ -106,30 +116,27 @@ impl Backend {
                     let renderer: Rc<dyn IPlatformRenderInterface> =
                         Rc::new(ferroui_direct2d::Direct2DRenderInterface);
                     let context = renderer.create_backend_context(None);
+                    let completion = NativeCompletion::new();
+                    let adapter = completion.adapter_description();
+                    assert!(
+                        !adapter.to_ascii_lowercase().contains("microsoft basic"),
+                        "Software adapter: {adapter}"
+                    );
                     (
                         renderer,
                         context,
-                        Driver::Direct2D(NativeCompletion::new()),
-                        "hardware D3D11 / Direct2D / DirectWrite".to_owned(),
+                        Driver::Direct2D(completion),
+                        format!("{adapter} (D3D11 / Direct2D / DirectWrite)"),
                     )
                 }
                 _ => panic!("FERROUI_TDG_BACKEND must be skia or direct2d"),
             };
-        let luid = context
-            .try_get_feature(TypeId::of::<
-                dyn IExternalObjectsRenderInterfaceContextFeature,
-            >())
-            .and_then(|f| {
-                f.downcast_ref::<Rc<dyn IExternalObjectsRenderInterfaceContextFeature>>()
-                    .and_then(|f| f.device_luid())
-            });
         Self {
             name: name.into(),
             renderer,
             context,
             driver,
             description,
-            luid,
         }
     }
     fn current(&self) -> Option<Rc<dyn ferroui_base::reactive::IDisposable>> {
@@ -340,19 +347,23 @@ fn run_renderer_benchmarks() {
         "Timing runs must disable allocation counting"
     );
     let name = std::env::var("FERROUI_TDG_BACKEND").expect("FERROUI_TDG_BACKEND=skia or direct2d");
+    // Checked before anything is measured: a run must not end without a place for its results. The
+    // empty file is removed again, so a failed run leaves none.
+    let output =
+        std::env::var("FERROUI_TDG_RESULTS_JSON").expect("FERROUI_TDG_RESULTS_JSON output path");
+    if let Err(error) = std::fs::File::create(&output).map(drop).and_then(|()| std::fs::remove_file(&output)) {
+        panic!("FERROUI_TDG_RESULTS_JSON={output} cannot be written: {error}");
+    }
     let iterations = env_count("FERROUI_BENCH_ITERATIONS", 15);
     let warmup = env_count("FERROUI_BENCH_WARMUP", 3);
-    let frames = env_count("FERROUI_TDG_FRAMES_PER_BATCH", 100);
+    let frames = env_count("FERROUI_TDG_FRAMES_PER_BATCH", 20);
     let path = match std::env::var("FERROUI_TDG_DRAW_PATH").as_deref() {
         Ok("immediate") => DrawPath::Immediate,
         Ok("recorded") | Err(_) => DrawPath::Recorded,
         _ => panic!("FERROUI_TDG_DRAW_PATH must be recorded or immediate"),
     };
     let backend = Backend::new(&name);
-    println!(
-        "TDG_GPU_BACKEND {} {:?} {}",
-        name, backend.luid, backend.description
-    );
+    println!("TDG_GPU_BACKEND {} {}", name, backend.description);
     let mut rows = Vec::new();
     for neutral in [false, true] {
         for scenario in [
@@ -467,11 +478,9 @@ fn run_renderer_benchmarks() {
         }
     }
     assert!(!rows.is_empty());
-    let report = json!({"backend":name,"draw_path":path.name(),"driver":backend.description,"adapter_luid":backend.luid,
+    let report = json!({"backend":name,"draw_path":path.name(),"driver":backend.description,
         "viewport_pixels":[800,500],"scale":1,"font":"Segoe UI","font_size":12,"warmup_batches":warmup,
         "measured_batches":iterations,"frames_per_batch":frames,"gpu_completion":"wait once per batch; no presentation/vsync",
         "rows":rows});
-    let output =
-        std::env::var("FERROUI_TDG_RESULTS_JSON").expect("FERROUI_TDG_RESULTS_JSON output path");
     std::fs::write(output, serde_json::to_string_pretty(&report).unwrap()).unwrap();
 }

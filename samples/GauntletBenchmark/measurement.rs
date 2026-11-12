@@ -1,17 +1,47 @@
 //! Opt-in desktop timing with one rendered composition batch per scene step.
+//!
+//! Compiled on Windows with the feature `renderer-measurement` alone, and active only in a run that
+//! sets `PERF_MEASURE_FRAMES`: without the variable the frames are requested as in a default build.
 use crate::{Clock, Launch};
 use ferroui_base::media::imaging::{BitmapEncoderOptions, PngBitmapEncoderOptions};
 use ferroui_base::rendering::composition::ElementComposition;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{Ref, Size};
-use ferroui_controls::{Application, TopLevel, Window};
+use ferroui_controls::{AppBuilder, Application, TopLevel, Window};
+use ferroui_win32::{Win32PlatformOptions, Win32RenderingMode};
 use serde_json::json;
-use std::{cell::RefCell, sync::OnceLock, time::Instant};
+use std::{cell::RefCell, rc::Rc, sync::OnceLock, time::Instant};
 
 static START: OnceLock<Instant> = OnceLock::new();
 
 pub fn start() {
     let _ = START.set(Instant::now());
+}
+
+/// The Win32 options of a measured run. With `PERF_MEASURE_FRAMES` set the window has one rendering mode
+/// and no fallback (Direct3D 11 with the feature `direct2d`, ANGLE otherwise) and rejects the software
+/// adapter: a desktop GPU comparison must not silently select the software fallback. Without the variable
+/// the builder comes back as it is.
+pub fn use_measured_renderer(builder: AppBuilder) -> AppBuilder {
+    if std::env::var_os("PERF_MEASURE_FRAMES").is_none() {
+        return builder;
+    }
+    builder.with(Rc::new(Win32PlatformOptions {
+        rendering_mode: vec![if cfg!(feature = "direct2d") {
+            Win32RenderingMode::Direct3D11
+        } else {
+            Win32RenderingMode::AngleEgl
+        }],
+        graphics_adapter_selection_callback: Some(Rc::new(|adapters| {
+            assert!(!adapters.is_empty(), "No ANGLE adapters available");
+            // The description alone: the adapter LUID identifies a machine and stays out of the logs.
+            let description = adapters[0].description.as_deref().unwrap_or_default();
+            println!("PERF_GPU {description}");
+            assert!(!description.to_lowercase().contains("basic render"), "Software ANGLE adapter rejected");
+            0
+        })),
+        ..Default::default()
+    }))
 }
 
 struct Measurement {

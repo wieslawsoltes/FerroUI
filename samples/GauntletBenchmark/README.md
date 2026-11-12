@@ -54,7 +54,14 @@ default; `--features vello` adds the Vello backend, which `FERROUI_RENDERER=vell
 Build separate release executables for Skia/ANGLE and the native
 Direct2D/DirectWrite/D3D11 backend. Native builds use
 `--no-default-features --features direct2d-runtime-shaders`; normal Windows
-Skia builds keep the default features.
+Skia builds keep the default features. The measurement mode below is compiled
+only with the feature `renderer-measurement`, so both builds of a comparison
+add it:
+
+```powershell
+cargo build --locked --release -p gauntlet-benchmark --features renderer-measurement --target-dir target/gauntlet-skia
+cargo build --locked --release -p gauntlet-benchmark --no-default-features --features direct2d-runtime-shaders,renderer-measurement --target-dir target/gauntlet-native
+```
 
 The opt-in desktop measurement mode uses `PERF_WARMUP_FRAMES=60` and
 `PERF_MEASURE_FRAMES=240`. Each scene advances on the UI thread after the
@@ -67,19 +74,24 @@ window.
 
 `PERF_CAPTURE_PATH` optionally saves a compositor snapshot after timing stops.
 The measured scene-frame range and pointer-over counts are recorded. Keep the
-pointer outside the window, and do not compile, profile or capture the desktop
-during a timed run. Windows can clamp the requested 1280×820 logical window to
+pointer in one place, either outside the window or over it, for a whole
+comparison, and do not compile, profile or capture the desktop during a timed
+run. Windows can clamp the requested 1280×820 logical window to
 the available desktop; compare the recorded client size and render scaling.
 
 The [Windows comparison runner](../../scripts/compare-windows-gauntlet-renderers.ps1)
 runs gauntlet tier 16 and still wall tier 20 with Skia first, then native, for
 three repetitions. Pass prebuilt binaries with `-SkiaExecutable` and
-`-NativeExecutable`. Use `-Scenarios gauntlet` for animated-only runs. The runner
-checks executable hashes, scene counts, viewport, scaling and pointer conditions.
+`-NativeExecutable`; the runner refuses an executable built without
+`renderer-measurement`. Use `-Scenarios gauntlet` for animated-only runs, and
+`-GauntletTier` and `-WallTier` for other tiers. The runner checks executable
+hashes, scene counts, viewport, scaling and pointer conditions.
 It rejects viewport or DPI changes during the measured interval.
 It also checks that Direct2D submitted a present for each measured scene and
 recorded zero errors or pixel readbacks. Per-second `PERF fps` lines provide
-progress. Full-precision scene intervals determine the results.
+progress. Full-precision scene intervals determine the results. The
+[renderer benchmarks](../../docs/porting/windows-native-renderer-benchmarks.md)
+hold the method and the measured results.
 
 ## The frame gate
 

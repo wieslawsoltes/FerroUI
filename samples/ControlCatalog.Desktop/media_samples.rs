@@ -149,6 +149,22 @@ impl PlaybackCadence {
 }
 
 pub static SMOKE_FAILED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+/// The media smoke run of the catalog, on every platform: nothing without `FERROUI_SMOKE_MEDIA=1`, and
+/// none of the variables below is read without it. The run plays the clip of the video page, goes on to
+/// the camera and QR code pages, prints a `CATALOG_*` line per step and closes the main window; a
+/// failure sets [`SMOKE_FAILED`].
+///
+/// - `FERROUI_SMOKE_MEDIA_PAGE=<header>`: the page that holds the video, `Video` by default.
+/// - `FERROUI_SMOKE_MEDIA_CADENCE=1`: the cadence of the presented video frames is measured too
+///   (`CATALOG_VIDEO_CADENCE`).
+/// - `FERROUI_SMOKE_MEDIA_VIDEO_MS=<n>`: once the video plays, the run watches the delivery of video
+///   frames for `n` more milliseconds (30000 at most; 0, the default, skips the step) and prints
+///   `CATALOG_VIDEO_DELIVERY frames=<f> elapsed_ms=<t> fps=<f/t>`, where `frames` is the number of frames
+///   the renderer imported as GPU textures in that time. The line is a measurement: no value fails the run.
+/// - `FERROUI_SMOKE_MEDIA_TRANSPORT=1`: the transport commands (speed, skip, zoom) are exercised too.
+/// - `FERROUI_SMOKE_MEDIA_CAMERA=1`: a camera is started, and the capture page takes a photo and records.
+/// - `FERROUI_SMOKE_MEDIA_SYNTHETIC_CAMERA=1`: the generated camera of a build with the test fixtures
+///   stands in for a device.
 pub fn smoke() {
     if std::env::var("FERROUI_SMOKE_MEDIA").as_deref() != Ok("1") {
         return;

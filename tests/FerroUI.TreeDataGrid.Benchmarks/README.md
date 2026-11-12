@@ -189,8 +189,8 @@ The GPU mode adds a text-cell template bound to each cell's value; the original
 layout fixture does not need a drawable text template. Nonempty realized text is
 asserted, and captures verify that both backends draw the table.
 Skia uses hardware ANGLE/D3D11 with HarfBuzz; Direct2D uses hardware D3D11 with
-DirectWrite. The selected driver and adapter LUID, when exposed, are recorded.
-Software ANGLE adapters are rejected.
+DirectWrite. The selected driver and the description of its adapter are recorded.
+Software adapters are rejected.
 
 Each frame lays out and draws the full window into an offscreen GPU target.
 The default `recorded` path rebuilds a production render-data stream every frame
@@ -221,14 +221,11 @@ For a separate diagnostic run, `FERROUI_D3D_PROFILE=1` populates each row's
 timers can nest. Leave profiling disabled for the primary renderer comparison.
 The [comparison script](../../scripts/compare-windows-tdg-renderers.ps1) runs five
 Skia-first/native-second pairs against one prebuilt executable and records its
-hash. See the [parity follow-up](../../docs/porting/windows-tdg-renderer-parity.md)
-for the latest results across all twelve workloads.
+hash. See the [renderer benchmarks](../../docs/porting/windows-native-renderer-benchmarks.md)
+for the method, the results across all twelve workloads and the steps to reproduce them.
 JSON also reports recording and replay phases. Native replay enqueues batched
 commands; their execution during drawing-context disposal belongs to submission
 and total time. Compare primary GPU-drained totals across backends.
-The [Windows baseline](../../docs/porting/windows-tdg-renderer-benchmarks.md) and
-[optimization results](../../docs/porting/windows-tdg-renderer-optimization.md)
-retain measured samples and source/executable identities.
 
 ### Layout-suite results
 
