@@ -97,6 +97,11 @@ pub(crate) struct ValueStore {
     /// reevaluates the store only when this is set, and clears it: a batch that
     /// changed nothing leaves the effective values as they are.
     reevaluation_pending: Cell<bool>,
+    /// Set when a binding expression of the store that reads the templated parent of the owner
+    /// started (a template binding): `templated_parent_changed` tells the expressions only then,
+    /// and an element without one does not walk its frames when its templated parent is set. It
+    /// is not cleared. It takes a byte of the padding of the store, which is no larger.
+    reads_templated_parent: Cell<bool>,
     /// The nearest ancestor that holds inherited values. `Some(Weak)` pointing
     /// at the owner itself when the owner holds inherited values.
     inheritance_ancestor: RefCell<Option<WeakRef<FerroObject>>>,
@@ -122,6 +127,7 @@ impl ValueStore {
             frame_generation: Cell::new(0),
             styling: Cell::new(0),
             reevaluation_pending: Cell::new(false),
+            reads_templated_parent: Cell::new(false),
             inheritance_ancestor: RefCell::new(None),
             inherited_lookups: RefCell::new(Vec::new()),
             inherited_lookups_generation: Cell::new(0),
@@ -324,6 +330,48 @@ impl ValueStore {
             }
         }
         source
+    }
+
+    /// A binding expression of the store that reads the templated parent of the owner started:
+    /// a change of the templated parent is told to the expressions of the store from now on.
+    pub(crate) fn note_templated_parent_reader(&self) {
+        self.reads_templated_parent.set(true);
+    }
+
+    /// Tells the binding expressions of the store that the templated parent of
+    /// the owner changed (`StyledElement::set_templated_parent`): the local
+    /// value bindings and the entries of the frames that are not shared. A
+    /// template binding reads the templated parent of its target here instead
+    /// of observing every property change of the target. The frames and the
+    /// expressions are read by index, so an expression may change the store
+    /// while it is told.
+    pub(crate) fn templated_parent_changed(&self) {
+        if !self.reads_templated_parent.get() {
+            return;
+        }
+        let mut index = 0;
+        loop {
+            let expression = self.local_value_expressions.borrow().get(index).map(|(_, e)| e.clone());
+            let Some(expression) = expression else { break };
+            if let Some(untyped) = expression.as_untyped() {
+                untyped.templated_parent_changed();
+            }
+            index += 1;
+        }
+        let mut index = 0;
+        loop {
+            let frame = self.frames.borrow().get(index).cloned();
+            let Some(frame) = frame else { break };
+            let base = frame.base();
+            if !base.is_shared() {
+                let mut entry = 0;
+                while entry < base.entry_count() {
+                    base.get_entry(entry).templated_parent_changed();
+                    entry += 1;
+                }
+            }
+            index += 1;
+        }
     }
 
     /// The binding expression that is currently active on the property, if
