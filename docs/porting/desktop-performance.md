@@ -516,8 +516,10 @@ code.
 `samples/GauntletBenchmark` is FerroUI's port of the gauntlet and the still wall of the Cranpose
 benchmark ([cranpose-comparison.md](cranpose-comparison.md)): the same screens, per-frame work and
 `PERF_*` environment as the benchmark's desktop apps, so its harness (`desktop.py`) measures it
-beside the other frameworks. `PERF_REPORT=1` prints the frame rate the app's animation-frame
-callback sees, for A/B runs of FerroUI builds:
+beside the other frameworks. `PERF_REPORT=1` prints how often the app's animation-frame
+callback runs (`PERF fps`), for A/B runs of FerroUI builds; a build with the feature `counters`
+prints beside it the batches the compositor committed (`PERF batches`), which are the frames
+(section 9.46: the two differed by a factor of two until that section):
 
 ```sh
 PERF_SCENARIO=gauntlet PERF_TIER=16 PERF_REPORT=1 PERF_FONTS=<folder of Roboto-*.ttf> \
@@ -663,14 +665,17 @@ What it measures:
   memory and in 1.6 and 2.3 ms with about 1,150 pages read inside the two, and of two builds of
   the same scene the larger program paid more of it.
 
-  The render thread and wall time the gate compares are those of a frame the surface received
+  The UI thread, render thread and wall time the gate compares are those of a frame the surface received
   (the time for a frame of the clock times `frames / rendered` of the `GATE` line, when fewer
   frames were received than the clock had). The loop of the benchmark does not wait for a
   display: a frame of the clock that starts while the render thread still has the batch before
   it commits nothing and costs close to nothing, so a side that presents fewer of its frames
   looked faster by the frames it did not draw (section 9.42: 226 to 228 of 240 frames on one
-  side, 237 to 239 on the other, which read as 5 to 7 % of wall time). The UI thread time stays
-  that of a frame of the clock: the UI thread runs every one.
+  side, 237 to 239 on the other, which read as 5 to 7 % of wall time). The UI thread time is
+  compared the same way: the work of a frame of the clock that committed nothing is work for
+  the picture after it, and a side that ran two frames of the clock for each picture showed
+  half its UI thread time for a frame (section 9.46). The frame gate itself fails when the
+  surface receives fewer than nine in ten of the frames of a scenario.
 - **The tree benchmarks** (`tests/FerroUI.Benchmarks`, category `trees`, suite `framework`): the
   framework's tree mechanics on walls of small tiles, in an application with a desktop's services
   (the Fluent theme, Skia's fonts, HarfBuzz): building, attaching (from the leaves up and from the
@@ -742,7 +747,7 @@ the measurement resolves nothing (0.05 ms a frame, 2 ns an operation):
 |---|---:|---|
 | UI thread and wall time of a frame | 1 | hundreds of frames of a deterministic CPU workload |
 | Render thread time of a frame | 1.5 | it runs beside the UI thread and moves with core placement and glyph cache state |
-| Render thread and wall time of a frame benchmark | as above | compared for a frame the surface received, not for a frame of the clock |
+| UI thread, render thread and wall time of a frame benchmark | as above | compared for a frame the surface received, not for a frame of the clock |
 | TreeDataGrid and tree benchmark operation | 2 (3 under 100 ns) | short iterations in a new process per run; heap and code layout move a benchmark by several percent, and the shortest operations are near the timer |
 | Instructions of such an operation | 2 % whatever `--tolerance` is | a count, the same to a hundredth of a percent between two processes of a build (floor one instruction) |
 | Build and show of a scene (`build_ms`, `show_ms`) | 1.5 | measured once a run: one sample a round (floor 0.5 ms) |
@@ -2007,7 +2012,9 @@ back until the batch before it is accepted, where upstream waits until it is pro
 render thread applies and draws this one. One batch at most waits in the queue either way,
 so nothing piles up, and nothing of an accepted batch can be observed: whoever needs its
 effects still waits for `processed` or `rendered`. A batch that is completed without being
-applied raises `accepted` too.
+applied raises `accepted` too. The compositor holds the request for the next commit back by
+the same signal (section 9.46; until that section it waited for `processed`, and every
+picture took two render passes).
 
 **A batch that follows an idle tick is drawn in the display frame it was made for.** With a
 render thread, a batch that is committed a moment after the tick of its display frame waits
@@ -2167,7 +2174,11 @@ each; the frames per second are the mean of a run):
 | Section 9.32, every frame drawn directly | 39.60 / 39.52 |
 | This section, the defaults (`Adaptive`, two bands) | 59.99 / 59.95 |
 
-The display refreshes sixty times a second, so the benchmark is at its cap. What the number
+The frames per second of this table, of the table of bands below and of section 9.34 are
+callbacks of the animation frame, which is what `PERF fps` counts, and not pictures: with
+the defaults of this section the compositor committed a batch for every second callback
+(section 9.46), so the surface received about thirty frames a second where these tables say
+sixty. The times of the stages are not affected. What the number
 of bands changes is where the time goes (the stage timed by a build made for the
 measurement; the processor time is that of the whole process for a frame):
 
@@ -3090,7 +3101,8 @@ build of the `list` scene 67 % slower and the wall time of a frame of `list` and
 - The loop of the benchmark does not wait for a display. The clock of the UI thread goes on
   when the render thread has accepted a batch, and a commit waits until the batch before it
   is processed (as upstream), so a frame of the clock that starts in between commits
-  nothing. With the batch of a thousand visuals of these two scenes the base presented 226
+  nothing (section 9.46 moved the commit to the acceptance too, and no frame of the clock
+  commits nothing since). With the batch of a thousand visuals of these two scenes the base presented 226
   to 228 of its 240 frames; with the batch of one holder the candidate presents 237 to 240.
   The base was faster by the frames it did not draw: for a frame the surface received the
   two are within 2 % (`width` 3.72 and 3.73 ms, `list` 3.57 and 3.51 ms; 6,000 frames of
@@ -3325,3 +3337,63 @@ handler block of each template binding and the entries on the handler lists of i
   (a template binding follows a templated parent set, replaced and cleared, with no handler
   on its target, and a two-way one with one);
   `a_template_binding_of_a_style_setter_follows_the_templated_parent`.
+
+### 9.46 A commit is asked for when the batch before it is accepted: one render pass for a picture
+
+Section 9.33 let the media context start its next render pass when the render thread accepts
+a batch (takes it from the queue), not when it has processed it. The compositor kept
+upstream's rule for the other half: a change made while a batch is in flight asks the
+scheduler for a commit only once that batch is processed
+(`Compositor::request_composition_batch_commit_async`). The two no longer met. The pass that
+acceptance starts runs the animation frame callbacks and the layout while the render thread
+is still reading the batch; the first change of that pass finds the batch in flight and
+defers its request; the pass reaches its commit step with no commit asked for and ends. The
+request arrives when the batch is processed, and a second pass, with a second run of the
+animation frame callbacks and a second layout, commits what the first one changed.
+
+Every picture of an animated screen therefore cost two render passes. The gauntlet at tier
+16 ran its animation frame callback sixty times a second and the compositor committed
+thirty batches; at tier 12 it was 120 callbacks for 60 batches. `PERF fps` counts callbacks,
+which is why the tables of section 9.33 read sixty. The harness of the benchmark, which
+counts presented frames from outside, and the frame gate, whose `GATE` lines said
+`"frames":240` and `"rendered":120`, both had it; the gate compared the UI thread time for a
+frame of the clock, so two half-empty frames read as one cheap one.
+
+**The change.** The request for a commit is held back until the batch before it is
+accepted, the signal the media context starts its pass on, and is made at once when it
+already is. The compositor reads the completion itself (`is_completed`) instead of relying
+on a continuation having run, so the order in which the continuations of a batch run does
+not decide which pass commits. One batch at most is still in flight beside the one being
+prepared (the commit itself waits for the acceptance in `MediaContext::commit_compositor`),
+and what observes the effects of a batch still waits for `processed` or `rendered`.
+
+What it measures (M3 Pro, 60 Hz, the harness of the benchmark with FerroUI and Cranpose in
+the same run, first and second launch; the machine was not quiet, so the figures compare
+the columns and are not calibrated; the column after also has the balanced bands of the
+Skia layer):
+
+| Scene | FerroUI before | FerroUI after | Cranpose |
+|---|---|---|---|
+| gauntlet, tier 16, frames per second | 21.8 to 22.8 / 27.5 to 29.1 | 37.1 / 47.1 | 55.5 / 58.1 |
+| gauntlet, tier 16, processor time for a frame | 61 to 69 ms | 51.3 to 51.5 ms | 20.4 to 20.5 ms |
+| patchwork, tier 17, frames per second | 33.1 to 36.7 / 42.6 to 46.2 | 38.1 / 48.2 | 28.2 / 30.0 |
+| patchwork, tier 12, frames per second | 48.3 / 57.2 | 48.7 / 57.3 | 55.7 / 57.5 |
+
+Run alone, the gauntlet at tier 16 commits 44 to 48 batches a second for as many callbacks
+(30 for 60 before), and at tier 12 sixty for sixty (60 for 120): the UI thread does half the
+work for the same pictures. The frame gate's gauntlet (raster Skia, no display) receives 240
+of 240 frames where it received 120, at 14.3 ms of UI thread time for a frame received
+where it was 20.4, and 34.2 ms of wall time where it was 37.0.
+
+The gauntlet at tier 16 is not at the rate of the display yet. A frame costs the UI thread
+about 15 ms (the recording of the render data 7.4 ms, layout 6.9 ms), which leaves no room
+in a refresh interval beside the wait for the acceptance, and the render thread waits about
+9 ms of a frame for a drawable of the layer.
+
+- **Tests:** `render_thread_tests::a_commit_is_asked_for_at_once_when_the_batch_before_is_accepted`
+  (the render thread is held between the acceptance and the processing of a batch: a change
+  made then reaches the scheduler at once; it failed before the change) and
+  `a_commit_asked_for_before_the_batch_before_is_accepted_waits_for_the_acceptance`.
+- **Gate:** the frame gate fails a scenario whose surface receives fewer than nine in ten of
+  its frames, and `scripts/perf/gate.py` compares the UI thread time, as the render thread and
+  wall time, for a frame the surface received.
