@@ -213,14 +213,15 @@ impl ServerCompositionVisual {
             if self.readback_snapshot.get() {
                 // The values changed after the update walk copied them.
                 let Some(this) = self.rc() else { return };
-                compositor.set_readback_entry(self.readback_queue_index.get(), ReadbackQueueEntry::Visual(this));
+                let index = self.readback_queue_index.get() as usize;
+                compositor.set_readback_entry(index, ReadbackQueueEntry::Visual(this));
                 self.readback_snapshot.set(false);
             }
             return;
         }
 
         let Some(this) = self.rc() else { return };
-        self.readback_queue_index.set(compositor.push_readback_entry(ReadbackQueueEntry::Visual(this)));
+        self.readback_queue_index.set(compositor.push_readback_entry(ReadbackQueueEntry::Visual(this)) as u32);
         self.readback_enqueued_pass.set(pass);
         self.readback_snapshot.set(false);
     }
@@ -236,10 +237,10 @@ impl ServerCompositionVisual {
         let pass = compositor.readback_pass();
         let data = self.readback_data(0);
         if self.readback_enqueued_pass.get() == pass {
-            compositor.set_readback_snapshot(self.readback_queue_index.get(), &self.readback, data);
+            compositor.set_readback_snapshot(self.readback_queue_index.get() as usize, &self.readback, data);
         } else {
             let entry = ReadbackQueueEntry::Snapshot(self.readback.clone(), data);
-            self.readback_queue_index.set(compositor.push_readback_entry(entry));
+            self.readback_queue_index.set(compositor.push_readback_entry(entry) as u32);
             self.readback_enqueued_pass.set(pass);
         }
         self.readback_snapshot.set(true);

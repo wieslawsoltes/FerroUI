@@ -73,6 +73,11 @@ impl ServerCompositionVisual {
         }
 
         let mut parent = self.parent();
+        // The table of the parent's children says which of them the update pass comes to (not
+        // from upstream; section 9.48): this one, and every visual above that gets a flag here.
+        if let Some(p) = &parent {
+            p.child_is_dirty(self);
+        }
         let set_is_dirty_for_render_in_subgraph = additional_dirty_region || dirty_for_render;
         while let Some(p) = parent {
             if !((needs_bounding_box_update && !p.needs_bounding_box_update.get())
@@ -84,6 +89,9 @@ impl ServerCompositionVisual {
             p.is_dirty_for_render_in_subgraph
                 .set(p.is_dirty_for_render_in_subgraph.get() | set_is_dirty_for_render_in_subgraph);
             parent = p.parent();
+            if let Some(above) = &parent {
+                above.child_is_dirty(&p);
+            }
         }
 
         self.needs_bounding_box_update.set(self.needs_bounding_box_update.get() | needs_bounding_box_update);

@@ -192,6 +192,9 @@ pub struct ServerCompositionVisual {
     /// What the drawing items of the content are to the passes (`HAS_DRAW_ITEMS`,
     /// `DRAW_ITEMS_DIRTY`): one byte, so that a visual is not larger for them.
     draw_item_flags: Cell<u8>,
+    /// Where the visual is among the children of its parent, for the table the parent's
+    /// collection keeps of many children (section 9.48); what it says is checked where it is used.
+    index_in_parent: Cell<u32>,
 
     // Readback
     readback: Arc<VisualReadback>,
@@ -199,8 +202,9 @@ pub struct ServerCompositionVisual {
     /// (zero: none yet). A stamp in place of a flag, so that the pass does
     /// not have to touch the visual to clear it.
     readback_enqueued_pass: Cell<u64>,
-    /// Where in the queue of that pass the visual is.
-    readback_queue_index: Cell<usize>,
+    /// Where in the queue of that pass the visual is (32 bits, as the place among the children
+    /// is: the two share a word, and the visual stays in its block of 640 bytes).
+    readback_queue_index: Cell<u32>,
     /// Whether the entry of that pass holds a copy of the values; left as it
     /// is when the pass ends.
     readback_snapshot: Cell<bool>,
@@ -249,6 +253,7 @@ impl ServerCompositionVisual {
                 combined_transform_matrix: Cell::new(Matrix::IDENTITY),
                 enqueued_for_own_properties_recompute: Cell::new(false),
                 draw_item_flags: Cell::new(0),
+                index_in_parent: Cell::new(0),
                 readback,
                 readback_enqueued_pass: Cell::new(0),
                 readback_queue_index: Cell::new(0),
@@ -296,6 +301,35 @@ impl ServerCompositionVisual {
 
     pub fn children(&self) -> Option<&Rc<ServerCompositionVisualCollection>> {
         self.children.as_ref()
+    }
+
+    /// Where the visual says it is among the children of its parent (section 9.48).
+    #[inline]
+    pub(crate) fn index_in_parent(&self) -> usize {
+        self.index_in_parent.get() as usize
+    }
+
+    pub(crate) fn set_index_in_parent(&self, index: usize) {
+        self.index_in_parent.set(index as u32);
+    }
+
+    /// Whether the update pass has something to do in the visual or below it: what the table of
+    /// the parent's children holds of the visual when it is made.
+    pub(crate) fn update_pass_comes_here(&self) -> bool {
+        self.is_dirty_for_render.get()
+            || self.is_dirty_for_render_in_subgraph.get()
+            || self.needs_bounding_box_update.get()
+            || self.needs_to_add_extra_dirty_rect_to_dirty_region.get()
+            || self.content_changed.get()
+            || self.draw_items_dirty()
+    }
+
+    /// The update pass has something to do in `child` of the visual or below it.
+    #[inline]
+    fn child_is_dirty(&self, child: &ServerCompositionVisual) {
+        if let Some(children) = &self.children {
+            children.child_is_dirty(child);
+        }
     }
 
     pub fn cache(&self) -> Option<Rc<ServerCompositionVisualCache>> {

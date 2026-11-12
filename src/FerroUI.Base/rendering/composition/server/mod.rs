@@ -112,6 +112,8 @@ pub use server_composition_visual::{
     ServerCompositionVisualCache, TreeWalkerFrame, VisualReadback,
 };
 pub use server_composition_visual_collection::ServerCompositionVisualCollection;
+#[cfg(test)]
+pub(crate) use server_composition_visual_collection::{set_without_children_tables, take_children_left_out};
 pub use server_composition_clip::{
     composition_transform, inset_rect, CompositionClipShape, ServerGeometricClip, ServerInsetClip, ServerRectangleClip,
 };
