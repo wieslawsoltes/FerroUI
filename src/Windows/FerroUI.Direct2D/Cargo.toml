@@ -1,0 +1,35 @@
+[package]
+name = "ferroui-direct2d"
+description = "Windows system GPU rendering and text with Direct2D, Direct3D 11, DirectWrite and WIC"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[features]
+default = ["gpu"]
+gpu = []
+media-controls = ["dep:ferroui-media-controls", "dep:ferroui-media"]
+runtime-shaders = ["dep:naga"]
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+kurbo.workspace = true
+ferroui-media-controls = { workspace = true, optional = true }
+ferroui-media = { workspace = true, optional = true }
+naga = { workspace = true, optional = true, features = ["wgsl-in", "hlsl-out"] }
+
+[build-dependencies]
+cc.workspace = true
+
+[package.metadata.release]
+group = "rendering"

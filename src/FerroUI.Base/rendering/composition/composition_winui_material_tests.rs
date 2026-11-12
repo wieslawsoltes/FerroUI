@@ -375,6 +375,60 @@ fn a_backdrop_outside_a_render_is_empty() {
 }
 
 #[test]
+fn bounded_backdrop_replay_preserves_device_dependencies_through_nested_targets() {
+    use crate::media::{EffectExtensions, IEffect, ImmutableBlurEffect};
+    use crate::platform::IDrawingContextImpl;
+    use crate::rendering::composition::effects::{blur_amount_to_radius, EffectBorderMode};
+    use crate::{Matrix, Rect, Vector3D};
+    let s = CompositorCanvas::new();
+    let factory = s.compositor.create_effect_factory(GaussianBlurEffect {
+        blur_amount: 10.0, border_mode: EffectBorderMode::Hard,
+        source: parameter("backdrop"), ..Default::default()
+    });
+    let brush = factory.create_brush();
+    brush.set_source_parameter("backdrop", Some((*s.compositor.create_backdrop_brush()).clone()));
+    let other = factory.create_brush();
+    other.set_source_parameter("backdrop", Some((*s.compositor.create_backdrop_brush()).clone()));
+    let container = s.compositor.create_container_visual();
+    container.set_size(Vector::new(900.0, 700.0));
+    let background = s.compositor.create_sprite_visual();
+    background.set_size(Vector::new(900.0, 700.0));
+    background.set_brush(Some((*s.compositor.create_color_brush_with_color(Colors::RED)).clone()));
+    container.children().insert_at_top((*background).clone());
+    let first = sprite_with(&s, brush.brush());
+    first.set_offset(Vector3D::new(150.25, 70.5, 0.0));
+    let second = sprite_with(&s, other.brush());
+    second.set_offset(Vector3D::new(170.25, 90.5, 0.0));
+    container.children().insert_at_top((*first).clone());
+    container.children().insert_at_top((*second).clone());
+    show(&s, &container);
+    let log = DrawingLog::new();
+    let mut context = MockDrawingContextImpl::new(log.clone());
+    context.supports_effects = true;
+    context.supports_layer_effects = true;
+    context.bounded_effect_targets = true;
+    let transform = Matrix::create_scale(1.75, 1.75) * Matrix::create_translation(30.0, 40.0);
+    context.set_transform(transform);
+    crate::rendering::composition::server::take_backdrop_regions();
+    s.server_object(container.server()).render(&mut context, LtrbRect::INFINITE, None, true, false, false);
+    let regions = crate::rendering::composition::server::take_backdrop_regions();
+    let reach = EffectExtensions::get_effect_output_padding(Some(&ImmutableBlurEffect::new(
+        blur_amount_to_radius(10.0)) as &dyn IEffect)).left;
+    for (sprite, x, y) in [(&first, 150.25, 70.5), (&second, 170.25, 90.5)] {
+        let visual = s.server_object(sprite.server());
+        let actual = regions.iter().find(|(v, _)| v.upgrade().is_some_and(|v| Rc::ptr_eq(&v, &visual)))
+            .unwrap_or_else(|| panic!("Missing backdrop dependency at {x},{y}; regions={regions:?}; drawing={:?}", log.entries())).1;
+        let expected = Rect::new(x, y, 100.0, 50.0).inflate(reach).transform_to_aabb(transform);
+        assert_eq!(actual, LtrbRect::new(expected.x.floor(), expected.y.floor(),
+            expected.right().ceil(), expected.bottom().ceil()), "{regions:?}");
+    }
+    assert!(log.count("CreateLayer") >= 3, "nested backdrops must use bounded targets");
+    assert!(log.count("DrawRectangle Red") >= 3, "the scene must be replayed inside both backdrops");
+    assert_eq!(context.transform(), transform);
+    assert_eq!(log.count("PushClip"), log.count("PopClip"));
+}
+
+#[test]
 fn a_dirty_rectangle_under_a_backdrop_redraws_all_of_it() {
     let s = CompositorCanvas::new();
     let log = s.render_interface.log().clone();

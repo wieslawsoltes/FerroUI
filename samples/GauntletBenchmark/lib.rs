@@ -16,6 +16,8 @@ mod patchwork;
 mod patchwork_data;
 mod perf_data;
 mod wall;
+#[cfg(all(windows, feature = "renderer-measurement"))]
+pub mod measurement;
 
 pub use app::{App, DeviceRoboto, Launch};
 pub use gauntlet::{Clock, GauntletView};

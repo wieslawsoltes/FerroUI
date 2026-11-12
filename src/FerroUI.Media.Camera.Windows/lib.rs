@@ -7,7 +7,7 @@ use ferroui_media_opengl::NativeGlFrameProducer;
 #[cfg(feature = "controls")]
 pub use ferroui_media_windows::NativeGlTextureImporter;
 use ferroui_media_windows::{
-    poll_native, NativeDevice, NativeRecording, NativeSession, WindowsFrameStream,
+    poll_native, NativeRecording, NativeSession, WindowsFrameProducer, WindowsFrameStream,
 };
 use std::{
     cell::{Cell, RefCell},
@@ -19,14 +19,14 @@ use std::{
     task::Poll,
     time::Duration,
 };
-pub struct WindowsCameraProvider {
-    pub frames: NativeGlFrameProducer,
+pub struct WindowsCameraProvider<P = NativeGlFrameProducer> {
+    pub frames: P,
     permission: Rc<Cell<CameraPermission>>,
     #[cfg(feature = "synthetic-camera")]
     synthetic: bool,
 }
-impl WindowsCameraProvider {
-    pub fn new(frames: NativeGlFrameProducer) -> Self {
+impl<P: Clone + Into<WindowsFrameProducer> + 'static> WindowsCameraProvider<P> {
+    pub fn new(frames: P) -> Self {
         Self {
             frames,
             permission: Rc::new(Cell::new(CameraPermission::NotDetermined)),
@@ -37,7 +37,7 @@ impl WindowsCameraProvider {
     /// Explicit in-process MF/D3D11 test source. It is not an OS device or a
     /// fallback, and its permission state does not describe Windows privacy.
     #[cfg(feature = "synthetic-camera")]
-    pub fn synthetic(frames: NativeGlFrameProducer) -> Self {
+    pub fn synthetic(frames: P) -> Self {
         Self {
             synthetic: true,
             ..Self::new(frames)
@@ -122,7 +122,7 @@ fn discovery() -> CameraFuture<Vec<CameraDevice>> {
         .map_err(native)
     })
 }
-impl CameraProvider for WindowsCameraProvider {
+impl<P: Clone + Into<WindowsFrameProducer> + 'static> CameraProvider for WindowsCameraProvider<P> {
     fn devices(&self) -> CameraFuture<Vec<CameraDevice>> {
         self.discover()
     }
@@ -136,7 +136,8 @@ impl CameraProvider for WindowsCameraProvider {
         generation: u64,
         budget: FrameBudget,
     ) -> CameraFuture<Rc<dyn NativeCameraSession>> {
-        let frames = self.frames.with_budget(budget.clone());
+        let frames: WindowsFrameProducer = self.frames.clone().into();
+        let frames = frames.with_budget(budget.clone());
         let permission = self.permission.clone();
         let devices = self.discover();
         Box::pin(async move {
@@ -175,7 +176,7 @@ impl CameraProvider for WindowsCameraProvider {
                     Ok((f.width, f.height, n as u32, 1000))
                 })
                 .transpose()?;
-            let d3d = NativeDevice::from_renderer(&frames).await.map_err(native)?;
+            let d3d = frames.native_device().await.map_err(native)?;
             let session =
                 NativeSession::open(&d3d, &device.id, true, false, size).map_err(native)?;
             let mut prepared = Some(session);

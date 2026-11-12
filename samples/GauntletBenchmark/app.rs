@@ -42,6 +42,17 @@ impl Launch {
         LAUNCH.get_or_init(|| Launch { tier: 5, freeze: 0, wall: false, patchwork: false })
     }
 
+    /// The name of the screen asked for, as the harness names its scenarios.
+    pub fn scenario(&self) -> &'static str {
+        if self.patchwork {
+            "patchwork"
+        } else if self.wall {
+            "wall"
+        } else {
+            "gauntlet"
+        }
+    }
+
     /// The screen asked for.
     pub fn screen() -> Ref<Control> {
         let launch = Self::get();

@@ -19,6 +19,7 @@ use std::sync::Arc;
 /// give the type back, so the manager remembers it.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum Win32PlatformGraphicsKind {
+    NativeDirect3D11,
     /// ANGLE on Direct3D 11: a window is rendered through an EGL window
     /// surface.
     AngleD3D11,
@@ -199,6 +200,7 @@ impl Win32GlManager {
         try_create_vulkan: &mut dyn FnMut() -> Option<Arc<VulkanPlatformGraphics>>,
         try_register_composition: &mut dyn FnMut(Win32CompositionMode) -> bool,
     ) -> Option<Win32PlatformGraphics> {
+        KIND.with(|kind| kind.set(None));
         if opts.rendering_mode.is_empty() {
             panic!("Win32PlatformOptions.rendering_mode must not be empty or null");
         }
@@ -206,6 +208,12 @@ impl Win32GlManager {
         for rendering_mode in &opts.rendering_mode {
             match rendering_mode {
                 Win32RenderingMode::Software => return None,
+                // The renderer consumes the existing HWND surface directly and creates
+                // a hardware device. No EGL/OpenGL provider is registered for this mode.
+                Win32RenderingMode::Direct3D11 => {
+                    KIND.with(|kind| kind.set(Some(Win32PlatformGraphicsKind::NativeDirect3D11)));
+                    return None;
+                }
                 Win32RenderingMode::AngleEgl => match try_create_angle() {
                     Some(AnglePlatformGraphics::D3D11(egl)) => {
                         Self::try_register_composition(opts, try_register_composition);

@@ -1742,6 +1742,16 @@ The 3D scenes of #608 ([media3d.md](media3d.md)) are not part of the reference: 
 | A specular or emissive material over a transparent part of the viewport. | The layer adds its colour with alpha 0, and the resolve raises the alpha of a pixel to its largest colour channel (decision N). | Behaviour | The output stays a valid premultiplied image for the 2D compositor; over the viewport's own opaque geometry nothing changes. | D3 (CPU reference), D4 (GPU) |
 | Antialiasing of 3D edges by the composition engine. | 4x MSAA where the formats take it (4x ordered-grid supersampling in the CPU reference), one sample for `RenderOptions.EdgeMode` `Aliased` (decision F). | Behaviour | Edge quality equal at every scale; ProGPU's one sample at a scale of 1.5 or more stays an option. | D3, D4 |
 
+### Native Windows renderer (`src/Windows/FerroUI.Direct2D/`, `src/FerroUI.Base/media/`, `src/FerroUI.Base/rendering/`)
+
+`ferroui-direct2d` ([windows-native-renderer.md](windows-native-renderer.md)) has no counterpart in the reference, whose Direct2D backend was removed long before the ported revision; it is new work on the platform interfaces. The rows record the changes to shared code that came with it.
+
+| Reference | Port | Kind | Why |
+|---|---|---|---|
+| `DrawingImage.Draw` translates by `-sourceRect.Position + destRect.Position - bounds.Position` and then scales, so the offset of the destination is scaled with the drawing. | Translates by `-source - bounds`, scales, then translates by the position of the destination (`drawing_image.rs`). | Behaviour (fix) | A drawing image shown at a destination away from the origin and at a scale other than 1 was placed at the scaled offset; the destination rectangle is now honoured at every scale, in every backend. |
+| `ImmediateRenderer.Render` pushes the opacity of every visual. | No opacity state is pushed for an opacity of exactly 1 (`immediate_renderer.rs`). | Performance | The state does nothing, and a backend whose opacity is a layer would allocate one for every visual. |
+| No such member. | `IDrawingContextImpl::prefers_bounded_effect_targets` (default `false`, `true` in the Direct2D drawing context): the graph of a composition effect brush and the coverage of a painted brush are evaluated in scratch targets of the size of the brush. | API (addition) | A pushed layer of that backend has the size of the whole target; the other backends keep drawing in place. |
+
 ## Corrected divergences
 
 Places where the port did work that upstream does not do, or did it differently, and a later change made it match upstream again. They are kept here so a regression can be recognised. Extra allocations and copies on hot paths belong here too: `PORTING-GUIDE.md` rules out allocations on hot paths that upstream avoids.

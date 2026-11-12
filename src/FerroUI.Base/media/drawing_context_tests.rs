@@ -551,9 +551,12 @@ fn drawing_image_clips_to_the_destination_and_maps_the_source_onto_it() {
         context.draw_image(&*handle, Rect::new(100.0, 100.0, 60.0, 80.0));
         context.dispose();
     }
-    // The drawing's bounds origin is moved to the destination origin, then
-    // everything is scaled by destination size / source size.
-    let transform = Matrix::create_translation(100.0 - 10.0, 100.0 - 20.0) * Matrix::create_scale(2.0, 2.0);
+    // Scale relative to the source origin, then place it in the destination.
+    // The destination translation must not itself be scaled.
+    let transform = Matrix::create_translation(-10.0, -20.0) * Matrix::create_scale(2.0, 2.0)
+        * Matrix::create_translation(100.0, 100.0);
+    assert_eq!(transform.transform(Point::new(10.0, 20.0)), Point::new(100.0, 100.0));
+    assert_eq!(transform.transform(Point::new(40.0, 60.0)), Point::new(160.0, 180.0));
     assert_eq!(
         log.entries(),
         [
@@ -676,9 +679,7 @@ fn render_target_bitmap_renders_a_visual_and_disposes_the_platform_context() {
         [
             "Clear Transparent",
             "PushClip 0, 0, 100, 50",
-            "PushOpacity 1",
             "DrawRectangle Red none 0, 0, 100, 50 shadows=0",
-            "PopOpacity",
             "PopClip",
             "Dispose"
         ]
@@ -913,8 +914,8 @@ fn immediate_renderer_pushes_the_text_options_of_a_visual_first() {
         log.entries().into_iter().filter(|e| e.contains("Options") || e.contains("Opacity")).collect()
     };
 
-    // Default text options are not pushed.
-    assert_eq!(render(&root), ["PushOpacity 1", "PushOpacity 1", "PopOpacity", "PopOpacity"]);
+    // Default text options and fully opaque scopes need no platform state.
+    assert!(render(&root).is_empty());
 
     TextOptions::set_text_rendering_mode(&child, TextRenderingMode::Alias);
     crate::media::RenderOptions::set_edge_mode(&child, crate::media::EdgeMode::Aliased);
@@ -922,16 +923,17 @@ fn immediate_renderer_pushes_the_text_options_of_a_visual_first() {
     assert_eq!(
         render(&root),
         [
-            "PushOpacity 1",
             "PushTextOptions Alias Unspecified Unspecified",
             "PushRenderOptions",
-            "PushOpacity 1",
-            "PopOpacity",
             "PopRenderOptions",
             "PopTextOptions",
-            "PopOpacity",
         ]
     );
+    child.set_opacity(0.5);
+    assert_eq!(render(&root), [
+        "PushTextOptions Alias Unspecified Unspecified", "PushRenderOptions",
+        "PushOpacity 0.5", "PopOpacity", "PopRenderOptions", "PopTextOptions",
+    ]);
 }
 
 #[test]

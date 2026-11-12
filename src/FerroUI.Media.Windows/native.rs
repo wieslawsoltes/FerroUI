@@ -242,6 +242,12 @@ impl Drop for Device {
 #[derive(Clone)]
 pub struct NativeDevice(Arc<Device>);
 impl NativeDevice {
+    #[cfg(feature = "direct2d")]
+    pub fn from_direct2d() -> Result<Self, MediaError> {
+        NonNull::new(ferroui_direct2d::native_device())
+            .map(|p| Self(Arc::new(Device(p))))
+            .ok_or_else(|| unsupported("No native hardware D3D11 device"))
+    }
     /// Native session objects, reader callbacks, synthetic streams, frame and
     /// alias wrappers. Complements worker/texture counts after asynchronous close.
     #[cfg(feature = "synthetic-camera")]
@@ -533,6 +539,17 @@ impl Drop for Frame {
 #[derive(Clone)]
 pub struct NativeFrame(Arc<Frame>);
 impl NativeFrame {
+    #[cfg(feature = "direct2d")]
+    pub fn direct2d_texture(&self) -> Result<ferroui_direct2d::D3D11Texture, MediaError> {
+        extern "C" { fn ferro_windows_frame_texture(frame: *mut c_void,slice: *mut u32) -> *mut c_void; }
+        let mut slice=0;
+        // SAFETY: self retains the immutable MF sample and its exact array slice.
+        unsafe {
+            let texture=ferro_windows_frame_texture(self.0.0.as_ptr(),&mut slice);
+            ferroui_direct2d::D3D11Texture::from_texture(texture,slice,self.clone())
+                .ok_or_else(|| unsupported("Media texture is incompatible with native Direct2D device"))
+        }
+    }
     pub fn info(&self) -> FrameInfo {
         let mut v = FrameInfo::default();
         unsafe { ferro_windows_frame_info(self.0 .0.as_ptr(), &mut v) }

@@ -25,6 +25,8 @@ fn variable(name: &str, fallback: i32) -> i32 {
 }
 
 fn main() -> std::process::ExitCode {
+    #[cfg(all(windows, feature = "renderer-measurement"))]
+    gauntlet_benchmark::measurement::start();
     let scenario = std::env::var("PERF_SCENARIO").ok();
     Launch::set(Launch {
         tier: variable("PERF_TIER", 5),
@@ -34,6 +36,8 @@ fn main() -> std::process::ExitCode {
     });
     let args: Vec<String> = std::env::args().skip(1).collect();
     let builder = AppBuilder::configure::<App>();
+    #[cfg(all(windows, feature = "renderer-measurement"))]
+    let builder = gauntlet_benchmark::measurement::use_measured_renderer(builder);
     #[cfg(all(target_os = "macos", feature = "quartz"))]
     let builder = builder.with(std::rc::Rc::new(ferroui_native::FerroNativePlatformOptions {
         rendering_mode: vec![if cfg!(feature = "quartz-metal") {
