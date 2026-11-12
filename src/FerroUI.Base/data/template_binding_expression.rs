@@ -184,6 +184,10 @@ impl UntypedBindingExpression for TemplateBindingExpression {
 
     fn start_core(&self) {
         self.has_published_value.set(false);
+        // The store of the target tells the expression when the templated parent changes.
+        if let Some(target) = self.base.try_get_target() {
+            target.values().note_templated_parent_reader();
+        }
         self.on_templated_parent_changed();
         if !matches!(self.mode, BindingMode::TwoWay | BindingMode::OneWayToSource) {
             return;
