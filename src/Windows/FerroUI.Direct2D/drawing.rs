@@ -276,31 +276,36 @@ fn rounded(r: RoundedRect) -> BezPath {
     }
     let [tl, tr, br, bl] = radii;
     let k = 0.5522847498307936;
-    p.move_to((b.x + tl.x, b.y));
-    p.line_to((b.right() - tr.x, b.y));
-    p.curve_to(
-        (b.right() - tr.x + k * tr.x, b.y),
-        (b.right(), b.y + tr.y - k * tr.y),
-        (b.right(), b.y + tr.y),
-    );
-    p.line_to((b.right(), b.bottom() - br.y));
-    p.curve_to(
-        (b.right(), b.bottom() - br.y + k * br.y),
-        (b.right() - br.x + k * br.x, b.bottom()),
-        (b.right() - br.x, b.bottom()),
-    );
-    p.line_to((b.x + bl.x, b.bottom()));
-    p.curve_to(
-        (b.x + bl.x - k * bl.x, b.bottom()),
-        (b.x, b.bottom() - bl.y + k * bl.y),
-        (b.x, b.bottom() - bl.y),
-    );
-    p.line_to((b.x, b.y + tl.y));
-    p.curve_to(
-        (b.x, b.y + tl.y - k * tl.y),
-        (b.x + tl.x - k * tl.x, b.y),
-        (b.x + tl.x, b.y),
-    );
+    // A square corner is one point: no curve without a radius and no side without a length,
+    // so that the figure has no segment of zero length.
+    let start = (b.x + tl.x, b.y);
+    let mut last = start;
+    p.move_to(start);
+    let side = |p: &mut BezPath, to: (f64, f64), last: &mut (f64, f64)| {
+        if *last != to {
+            p.line_to(to);
+            *last = to;
+        }
+    };
+    side(&mut p, (b.right() - tr.x, b.y), &mut last);
+    if tr.x > 0. {
+        last = (b.right(), b.y + tr.y);
+        p.curve_to((b.right() - tr.x + k * tr.x, b.y), (b.right(), b.y + tr.y - k * tr.y), last);
+    }
+    side(&mut p, (b.right(), b.bottom() - br.y), &mut last);
+    if br.x > 0. {
+        last = (b.right() - br.x, b.bottom());
+        p.curve_to((b.right(), b.bottom() - br.y + k * br.y), (b.right() - br.x + k * br.x, b.bottom()), last);
+    }
+    side(&mut p, (b.x + bl.x, b.bottom()), &mut last);
+    if bl.x > 0. {
+        last = (b.x, b.bottom() - bl.y);
+        p.curve_to((b.x + bl.x - k * bl.x, b.bottom()), (b.x, b.bottom() - bl.y + k * bl.y), last);
+    }
+    if tl.x > 0. {
+        side(&mut p, (b.x, b.y + tl.y), &mut last);
+        p.curve_to((b.x, b.y + tl.y - k * tl.y), (b.x + tl.x - k * tl.x, b.y), start);
+    }
     p.close_path();
     p
 }
