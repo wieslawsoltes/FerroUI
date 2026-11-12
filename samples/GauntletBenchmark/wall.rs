@@ -207,6 +207,8 @@ impl WallView {
     }
 
     fn on_frame(&self) {
+        #[cfg(all(windows, feature = "renderer-measurement"))]
+        if crate::measurement::on_frame() { return; }
         crate::gauntlet::report_frame_rate();
         if !self.first_frame_logged.get() {
             self.first_frame_logged.set(true);
@@ -221,6 +223,9 @@ impl WallView {
         let visual: &Visual = self;
         if let Some(top_level) = TopLevel::get_top_level(Some(visual)) {
             let view = self.to_ref();
+            #[cfg(all(windows, feature = "renderer-measurement"))]
+            crate::measurement::request_next_scene(&top_level, move || view.on_frame());
+            #[cfg(not(all(windows, feature = "renderer-measurement")))]
             top_level.request_animation_frame(move |_| view.on_frame());
         }
     }

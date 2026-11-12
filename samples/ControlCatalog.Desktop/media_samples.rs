@@ -20,9 +20,31 @@ pub fn install() {
         qr: None,
     });
 }
+// The providers of the renderer in use: the shared desktop bindings, or the native Direct3D 11
+// producers when the catalog is built with the Direct2D backend.
+#[cfg_attr(all(windows, feature = "direct2d"), allow(dead_code))]
 #[path = "../media_desktop.rs"]
 mod desktop_providers;
+#[cfg(not(all(windows, feature = "direct2d")))]
 use desktop_providers::video;
+#[cfg(all(windows, feature = "direct2d"))]
+fn video(
+    interop: &dyn ICompositionGpuInterop,
+    budget: FrameBudget,
+) -> Result<
+    (
+        Rc<dyn ferroui_media_video::MediaPlayerProvider>,
+        Rc<dyn ferroui_media_controls::TextureFrameImporter>,
+    ),
+    ferroui_media::MediaError,
+> {
+    Ok((
+        Rc::new(ferroui_media_video_windows::WindowsVideoProvider {
+            frames: ferroui_media_windows::WindowsFrameProducer::from_direct2d(interop, budget)?,
+        }),
+        Rc::new(ferroui_direct2d::D3D11TextureImporter),
+    ))
+}
 fn camera(
     interop: &dyn ICompositionGpuInterop,
     budget: FrameBudget,
@@ -33,7 +55,19 @@ fn camera(
     ),
     CameraError,
 > {
-    #[cfg(all(windows, feature = "synthetic-camera"))]
+    #[cfg(all(windows, feature = "direct2d"))]
+    {
+        let frames = ferroui_media_windows::WindowsFrameProducer::from_direct2d(interop, budget).map_err(|error| {
+            CameraError::new(ferroui_media_camera::CameraErrorKind::Unsupported, error.to_string())
+        })?;
+        let importer = Rc::new(ferroui_direct2d::D3D11TextureImporter);
+        #[cfg(feature = "synthetic-camera")]
+        if std::env::var("FERROUI_SMOKE_MEDIA_SYNTHETIC_CAMERA").as_deref() == Ok("1") {
+            return Ok((Rc::new(ferroui_media_camera_windows::WindowsCameraProvider::synthetic(frames)), importer));
+        }
+        return Ok((Rc::new(ferroui_media_camera_windows::WindowsCameraProvider::new(frames)), importer));
+    }
+    #[cfg(all(windows, feature = "synthetic-camera", not(feature = "direct2d")))]
     if std::env::var("FERROUI_SMOKE_MEDIA_SYNTHETIC_CAMERA").as_deref() == Ok("1") {
         let frames = ferroui_media_opengl::NativeGlFrameProducer::from_interop(interop, budget)
             .map_err(|error| {
@@ -57,10 +91,15 @@ fn camera(
             Rc::new(ferroui_media_apple::AppleTextureImporter),
         ));
     }
+    #[cfg(not(all(windows, feature = "direct2d")))]
     desktop_providers::camera(interop, budget)
 }
 
 fn gpu_checkpoint(label: &str) {
+    #[cfg(all(windows, feature = "direct2d"))]
+    if std::env::var_os("FERROUI_D3D_STATS").is_some() {
+        println!("CATALOG_GPU_CHECKPOINT {label} {:?}", ferroui_direct2d::statistics());
+    }
     #[cfg(all(target_os = "macos", feature = "quartz-metal"))]
     if std::env::var_os("FERROUI_METAL_STATS").is_some() {
         println!(
@@ -110,6 +149,22 @@ impl PlaybackCadence {
 }
 
 pub static SMOKE_FAILED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+/// The media smoke run of the catalog, on every platform: nothing without `FERROUI_SMOKE_MEDIA=1`, and
+/// none of the variables below is read without it. The run plays the clip of the video page, goes on to
+/// the camera and QR code pages, prints a `CATALOG_*` line per step and closes the main window; a
+/// failure sets [`SMOKE_FAILED`].
+///
+/// - `FERROUI_SMOKE_MEDIA_PAGE=<header>`: the page that holds the video, `Video` by default.
+/// - `FERROUI_SMOKE_MEDIA_CADENCE=1`: the cadence of the presented video frames is measured too
+///   (`CATALOG_VIDEO_CADENCE`).
+/// - `FERROUI_SMOKE_MEDIA_VIDEO_MS=<n>`: once the video plays, the run watches the delivery of video
+///   frames for `n` more milliseconds (30000 at most; 0, the default, skips the step) and prints
+///   `CATALOG_VIDEO_DELIVERY frames=<f> elapsed_ms=<t> fps=<f/t>`, where `frames` is the number of frames
+///   the renderer imported as GPU textures in that time. The line is a measurement: no value fails the run.
+/// - `FERROUI_SMOKE_MEDIA_TRANSPORT=1`: the transport commands (speed, skip, zoom) are exercised too.
+/// - `FERROUI_SMOKE_MEDIA_CAMERA=1`: a camera is started, and the capture page takes a photo and records.
+/// - `FERROUI_SMOKE_MEDIA_SYNTHETIC_CAMERA=1`: the generated camera of a build with the test fixtures
+///   stands in for a device.
 pub fn smoke() {
     if std::env::var("FERROUI_SMOKE_MEDIA").as_deref() != Ok("1") {
         return;
@@ -120,6 +175,11 @@ pub fn smoke() {
         time::{Duration, Instant},
     };
     let capture_camera = std::env::var("FERROUI_SMOKE_MEDIA_CAMERA").as_deref() == Ok("1");
+    // Optional sustained delivery observation, after the normal warmup. Imports
+    // count newly admitted video frames, independently of UI progress redraws.
+    let video_observation_ms = std::env::var("FERROUI_SMOKE_MEDIA_VIDEO_MS")
+        .ok().and_then(|value| value.parse::<u64>().ok()).unwrap_or(0).min(30000);
+    let video_observation = Cell::new(None::<(Instant, u64)>);
     let synthetic_camera = cfg!(any(
         all(windows, feature = "synthetic-camera"),
         all(target_os = "macos", feature = "quartz-media-test-fixtures")
@@ -219,6 +279,17 @@ pub fn smoke() {
                         if counts.preview != PixelTransferCount::default() || counts.analysis != PixelTransferCount::default() || counts.photo != PixelTransferCount::default() || counts.diagnostic != PixelTransferCount::default() || counts.probe != PixelTransferCount::default() {
                             fail("Video CPU pixel transfer");
                             return false;
+                        }
+                        if video_observation_ms > 0 {
+                            let (start, imports) = video_observation.get().unwrap_or_else(|| {
+                                let observation = (Instant::now(), counts.gpu_imports);
+                                video_observation.set(Some(observation));
+                                observation
+                            });
+                            let elapsed = start.elapsed();
+                            if elapsed < Duration::from_millis(video_observation_ms) { return true; }
+                            let delivered = counts.gpu_imports - imports;
+                            println!("CATALOG_VIDEO_DELIVERY frames={delivered} elapsed_ms={} fps={:.2}", elapsed.as_millis(), delivered as f64 / elapsed.as_secs_f64());
                         }
                         gpu_checkpoint("video");
                         println!("CATALOG_VIDEO_PASS autoplay=false shared_texture=true counters={:?}",s.budget.counters().snapshot());

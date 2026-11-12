@@ -513,6 +513,14 @@ jobs:
             ./target/debug/$sample.exe || { echo "::error::$sample ended with an error"; result=1; }
           done
           exit $result
+      # The opt-in Direct2D render backend (src/Windows/FerroUI.Direct2D), which no default build
+      # compiles: the XAML HelloWorld sample without Skia. The build script of the backend compiles
+      # the effect shaders with fxc.exe of the Windows SDK of the image. Built on every run: a change
+      # of the shared crates reaches the backend too.
+      - name: Build the HelloWorld sample with the Direct2D backend
+        if: ${{ !cancelled() }}
+        timeout-minutes: 30
+        run: cargo build --locked -p hello-world --no-default-features --features direct2d
       # Upstream's integration tests of the backend (tests/FerroUI.IntegrationTests.Win32): windows
       # of the window class on the desktop of the runner, in every state, with every kind of
       # decorations, their client area and bounds compared with the screen. One binary without

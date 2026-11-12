@@ -2,6 +2,8 @@ use super::{draw_with_painted_brushes, IRenderDataVisitor, PaintedShape, RenderD
 use crate::media::{BoxShadows, IBrush, IPen, ImmediateDrawingContext, RenderOptions, TextOptions};
 use crate::media::imaging::BitmapBlendingMode;
 use crate::platform::{IDrawingContextImpl, IGeometryImpl, IGlyphRunImpl};
+use crate::media::effects::ImmutableCustomEffect;
+use crate::rendering::composition::effects::{push_custom_effect_graph, pop_custom_effect_graph};
 use crate::rendering::scene3d::Scene3DSnapshot;
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::{Matrix, Point, Rect, RoundedRect, Vector};
@@ -17,6 +19,7 @@ enum ReplayScopeKind {
     RenderOptions,
     TextOptions,
     Effect,
+    EffectGraph,
     CompositingLayer,
 }
 
@@ -37,12 +40,17 @@ impl ReplayScope {
 /// Replays recorded operations onto a platform drawing context.
 pub struct ReplayVisitor<'a> {
     context: &'a mut dyn IDrawingContextImpl,
+    effect_graphs: Vec<(ImmutableCustomEffect, Rect)>,
     geometry_corner_radius: Option<Vector>,
 }
 
 impl<'a> ReplayVisitor<'a> {
     pub fn new(context: &'a mut dyn IDrawingContextImpl) -> Self {
-        Self { context, geometry_corner_radius: None }
+        Self {
+            context,
+            effect_graphs: Vec::new(),
+            geometry_corner_radius: None,
+        }
     }
 }
 
@@ -205,6 +213,12 @@ impl IRenderDataVisitor for ReplayVisitor<'_> {
         crate::perf_count!(RenderLayersPushed);
         let mut active = false;
         if let Some(effect) = effect {
+            if let Some(custom) = effect.as_custom_effect() {
+                if push_custom_effect_graph(self.context, custom, bounds) {
+                    self.effect_graphs.push((custom.clone(), bounds));
+                    return ReplayScope::new(ReplayScopeKind::EffectGraph, true);
+                }
+            }
             if let Some(effect_impl) = self.context.as_drawing_context_impl_with_effects() {
                 effect_impl.push_effect(Some(bounds), &**effect);
                 active = true;
@@ -226,6 +240,10 @@ impl IRenderDataVisitor for ReplayVisitor<'_> {
             ReplayScopeKind::Transform => self.context.set_transform(scope.saved_transform),
             ReplayScopeKind::RenderOptions => self.context.pop_render_options(),
             ReplayScopeKind::TextOptions => self.context.pop_text_options(),
+            ReplayScopeKind::EffectGraph => {
+                let (effect, bounds) = self.effect_graphs.pop().expect("Unbalanced custom effect graph");
+                pop_custom_effect_graph(self.context, &effect, bounds);
+            }
             ReplayScopeKind::Effect => {
                 if let Some(effect_impl) = self.context.as_drawing_context_impl_with_effects() {
                     effect_impl.pop_effect();

@@ -51,9 +51,23 @@ ferroui-harfbuzz = { workspace = true }
 [target.'cfg(target_os = "macos")'.dependencies]
 ferroui-native = { workspace = true, optional = true }
 
+# Windows alone: the Direct2D render backend (the feature `direct2d`) and what the renderer
+# measurement needs (the feature `renderer-measurement`). A default build has none of them.
+[target.'cfg(windows)'.dependencies]
+ferroui-win32 = { workspace = true, default-features = false, optional = true }
+ferroui-direct2d = { workspace = true, optional = true }
+serde_json = { workspace = true, optional = true }
+
 [features]
 default = ["skia"]
 skia = ["ferroui-desktop/skia"]
+direct2d = ["ferroui-desktop/direct2d", "dep:ferroui-direct2d"]
+direct2d-runtime-shaders = ["direct2d", "ferroui-direct2d/runtime-shaders"]
+# The fixed-frame renderer measurement on Windows (`measurement.rs`), which
+# `scripts/compare-windows-gauntlet-renderers.ps1` drives with `PERF_MEASURE_FRAMES`. Off by
+# default: without it the benchmark is what the cross-framework harness runs. On other targets the
+# feature adds nothing.
+renderer-measurement = ["dep:ferroui-win32", "dep:serde_json"]
 quartz = ["ferroui-desktop/quartz", "dep:ferroui-native"]
 quartz-metal = ["quartz", "ferroui-desktop/quartz-metal"]
 # The Vello render backend beside Skia: `FERROUI_RENDERER=vello` (the default order of its modes),

@@ -17,13 +17,14 @@ ferroui-base.workspace = true
 ferroui-media.workspace = true
 ferroui-media-opengl.workspace = true
 ferroui-opengl.workspace = true
+ferroui-direct2d = { workspace = true, optional = true }
+ferroui-win32 = { workspace = true, features = ["angle"], optional = true }
 [build-dependencies]
 cc.workspace = true
-[target.'cfg(windows)'.dev-dependencies]
-ferroui-win32 = { workspace = true, features = ["angle"] }
 [features]
 controls = ["ferroui-media-opengl/controls"]
-native-frame-tests = []
+direct2d = ["dep:ferroui-direct2d"]
+native-frame-tests = ["dep:ferroui-win32"]
 synthetic-camera = []
 [package.metadata.release]
 group = "platforms"

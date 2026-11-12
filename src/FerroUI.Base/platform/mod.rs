@@ -142,7 +142,7 @@ mod standard_runtime_platform_services;
 pub use asset_loader::{AssetLoader, ASSET_SCHEME};
 pub use i_asset_loader::{AssetAssembly, AssetStream, IAssetLoader};
 pub use i_drawing_context_impl_with_effects::IDrawingContextImplWithEffects;
-pub use gpu_effects::{LightingParameters, PixelOperation, PositionedLight};
+pub use gpu_effects::{EffectRasterRegion, LightingParameters, PixelOperation, PositionedLight};
 pub use i_drawing_context_impl_with_fragments::{
     IDrawingContextImplWithFragments, IDrawingFragment,
 };
