@@ -10,7 +10,7 @@ struct Module {
     offsets: Vec<u32>,
     size: usize,
 }
-thread_local! {
+ferroui_base::ferro_thread_local! {
     static MODULES: RefCell<HashMap<(TypeId,u64), Result<Rc<Module>, String>>> = RefCell::new(HashMap::new());
 }
 fn compile(effect: &ImmutableCustomEffect) -> Result<Rc<Module>, String> {
