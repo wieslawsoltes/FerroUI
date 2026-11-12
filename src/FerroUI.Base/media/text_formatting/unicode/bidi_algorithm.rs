@@ -123,6 +123,38 @@ impl BidiAlgorithm {
         self.paragraph_embedding_level as i32
     }
 
+    /// The first code unit of a character whose class is right-to-left (R, AL), an Arabic number
+    /// (AN) or an explicit embedding, override or isolate control: U+0590, the start of the Hebrew
+    /// block. The classes below it are L, EN, ES, ET, CS, NSM, BN, B, S, WS and ON.
+    pub const FIRST_RIGHT_TO_LEFT: u16 = 0x0590;
+
+    /// Whether every code unit of `text` is below [`Self::FIRST_RIGHT_TO_LEFT`]: in a paragraph
+    /// whose embedding level is 0 every level of such a text is 0. No character opens an
+    /// embedding (X1-X8), the start of the one level run is L, so every European number has an L
+    /// or the start before it and becomes L (W7), with the separators and terminators next to it
+    /// (W4, W5); what is left is neutral and takes the embedding direction (W6, N0-N2), and L
+    /// keeps the even level (I1).
+    pub fn is_left_to_right_text(text: &[u16]) -> bool {
+        // Chunks, so that the comparison of a chunk is vectorized and a long text stops early.
+        let highest = |chunk: &[u16]| chunk.iter().fold(0, |highest, &unit| highest.max(unit));
+        text.chunks(64).all(|chunk| highest(chunk) < Self::FIRST_RIGHT_TO_LEFT)
+    }
+
+    /// The result of [`Self::process`] for a paragraph of `length` code units whose embedding
+    /// level is 0 and of whose text [`Self::is_left_to_right_text`] holds: every resolved level
+    /// is 0, and so is the resolved embedding level. The classes are not looked up and no rule is
+    /// run (step 7 of docs/porting/text-layout-performance.md).
+    pub fn process_left_to_right(&mut self, length: usize) {
+        self.reset();
+
+        if length == 0 {
+            return;
+        }
+
+        self.has_clean_state = false;
+        self.resolved_levels.resize(length, 0);
+    }
+
     /// Process data from a BiDiData instance
     ///
     /// * `data` - The BiDi Unicode data.

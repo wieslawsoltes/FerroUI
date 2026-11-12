@@ -409,3 +409,68 @@ fn text_characters_reject_a_non_positive_em_size() {
 
     TextCharacters::from_str("a", run_properties(0.0));
 }
+
+// Addition: the shapeable length takes a run of printable ASCII characters from tables, without
+// grapheme clusters and character map searches (step 7 of docs/porting/text-layout-performance.md).
+// It is the length the cluster by cluster walk gives, for every typeface, default typeface and
+// mode, in texts that mix ASCII with marks, joiners, other scripts, controls and null characters.
+#[test]
+fn the_shapeable_length_of_ascii_runs_is_that_of_the_cluster_walk() {
+    use crate::media::text_formatting::text_characters::ASCII_CLUSTERS;
+
+    const PIECES: [&str; 30] = [
+        "word", "Mixed", "a", "z", "42", "7", " ", "  ", ",", ".", "(", ")", "-", "~", "\t", "\r\n", "\n", "\0",
+        "\u{301}", "\u{323}", "\u{FE0F}", "\u{200D}", "\u{200F}", "\u{A0}", "\u{5D0}", "\u{627}", "\u{3B1}",
+        "\u{4E2D}", "\u{1F642}", "\u{1F1F5}\u{1F1F1}",
+    ];
+    let _scope = TextTestScope::with_fonts(vec![
+        primary(),
+        fallback(),
+        // Letters and digits only: a run of it ends at a space or a punctuation mark.
+        TestFont::new("Test Letters").with_ranges(&[(0x30, 0x39), (0x41, 0x5A), (0x61, 0x7A), (0x300, 0x36F)]),
+        TestFont::new(EMOJI)
+            .with_ranges(&[(0x1F1E6, 0x1F1FF), (0x1F600, 0x1F64F), (0xFE0F, 0xFE0F), (0x200D, 0x200D)]),
+    ]);
+    let names = [PRIMARY, FALLBACK, "Test Letters", EMOJI];
+    let typefaces: Vec<_> = names.iter().map(|name| Typeface::from_name(name).glyph_typeface()).collect();
+
+    let mut seed = 0x2545_F491_4F6C_DD1D_u64;
+    let mut next = |below: usize| {
+        seed ^= seed << 13;
+        seed ^= seed >> 7;
+        seed ^= seed << 17;
+        (seed % below as u64) as usize
+    };
+    let (mut lengths, mut whole) = (0, 0);
+    for case in 0..3_000 {
+        let text: String = (0..1 + next(10)).map(|_| PIECES[next(PIECES.len())]).collect();
+        let text = utf16(&text);
+        let text = text.span();
+        for (probed, glyph_typeface) in typefaces.iter().enumerate() {
+            for default in 0..=typefaces.len() {
+                let default_glyph_typeface =
+                    typefaces.get(default).filter(|_| default != probed).map(|typeface| &**typeface);
+                for mode in 0..4 {
+                    let (can_shape, full_cluster) = (mode & 1 != 0, mode & 2 != 0);
+                    let length = |ascii_clusters: bool| {
+                        ASCII_CLUSTERS.with(|switch| switch.set(ascii_clusters));
+                        TextCharacters::try_get_shapeable_length(
+                            text,
+                            glyph_typeface,
+                            default_glyph_typeface,
+                            can_shape,
+                            full_cluster,
+                        )
+                    };
+                    let (walked, taken) = (length(false), length(true));
+                    let what = format!("case {case}, typeface {probed}, default {default}, mode {mode}");
+                    assert_eq!(taken, walked, "{what}: {text:04X?}");
+                    lengths += usize::from(taken.is_some());
+                    whole += usize::from(taken == Some(text.len()));
+                }
+            }
+        }
+    }
+    // The cases are not all empty or all whole.
+    assert!(lengths > 20_000 && whole > 1_000 && whole < lengths, "{lengths} lengths, {whole} whole");
+}

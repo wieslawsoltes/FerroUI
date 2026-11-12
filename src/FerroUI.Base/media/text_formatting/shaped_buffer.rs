@@ -41,10 +41,10 @@ pub struct ShapedBuffer {
     text: ReadOnlyMemory<u16>,
     glyph_infos: ArraySlice<GlyphInfo>,
     glyph_indices: ArraySlice<u16>,
-    /// Generation counter of the shared glyph storage; bumped by every write
-    /// so siblings detect a stale cluster cache. `None` for caller-owned
+    /// What the buffers over one glyph storage share: its generation counter, bumped by every
+    /// write so siblings detect a stale cluster cache, and its number. `None` for caller-owned
     /// storage.
-    glyph_generation: Option<Rc<Cell<i32>>>,
+    shared_glyphs: Option<Rc<SharedGlyphs>>,
     glyph_typeface: Rc<GlyphTypeface>,
     font_rendering_em_size: f64,
     bidi_level: i8,
@@ -52,7 +52,53 @@ pub struct ShapedBuffer {
     /// The UAX #14 break opportunities of the text this buffer was shaped for, found once and
     /// shared with the buffers split from it (desktop-performance.md section 9.16).
     breaks: RefCell<Option<Rc<BreakTable>>>,
+    /// The concatenation flags of the glyphs, when the shaper recorded them
+    /// (`TextShaperOptions::produce_concat_flags`): one byte a glyph, [`Self::UNSAFE_TO_BREAK`]
+    /// and [`Self::UNSAFE_TO_CONCAT`]. Only the buffer the shaper made has them, not the buffers
+    /// split from it.
+    concat_flags: RefCell<Option<Rc<[u8]>>>,
     disposed: Cell<bool>,
+}
+
+/// What the buffers over one glyph storage the shaper filled share.
+struct SharedGlyphs {
+    /// Bumped by every write of the storage.
+    generation: Cell<i32>,
+    /// A number of its own for the storage (an address is used again once a storage is freed).
+    storage: u64,
+    /// For the glyphs of an edited text, the glyphs they were taken from. Boxed: only the long
+    /// texts that are edited have one.
+    edit: Option<Box<GlyphEdit>>,
+}
+
+impl SharedGlyphs {
+    fn new(edit: Option<GlyphEdit>) -> Rc<Self> {
+        static NEXT_STORAGE: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
+        let storage = NEXT_STORAGE.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        Rc::new(Self { generation: Cell::new(0), storage, edit: edit.map(Box::new) })
+    }
+}
+
+/// Where the glyphs of an edited text come from (`shaping_edit`): the glyphs before `kept` are
+/// the glyphs of `old` from `old.start` on, and the glyphs from `tail` on are the glyphs of
+/// `old` from `old_tail` on, with their clusters moved by the change of the length of the text.
+struct GlyphEdit {
+    /// The first glyph of the old buffer in its storage, as the storage was then.
+    old: GlyphRange,
+    kept: usize,
+    tail: usize,
+    old_tail: usize,
+}
+
+/// A range of the glyphs of a glyph storage at a generation of it: the glyph indices, advances
+/// and offsets a platform glyph run is made of. Two ranges that are equal have the same glyphs
+/// (the clusters aside), in the same typeface at the same size.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub(crate) struct GlyphRange {
+    pub storage: u64,
+    pub start: usize,
+    pub length: usize,
+    pub generation: i32,
 }
 
 /// The break opportunities of a text, from its start in the storage it shares.
@@ -61,6 +107,106 @@ pub(crate) struct BreakTable {
     end: usize,
     breaks: Box<[crate::media::text_formatting::unicode::LineBreak]>,
 }
+
+impl BreakTable {
+    /// How far a rule of UAX #14 looks ahead of the place it decides, in code units, with room to
+    /// spare: the old breaks kept before a change end this far ahead of it, and the old breaks
+    /// taken again start this far past it.
+    const LOOK: usize = 4;
+
+    /// Whether `text` has at `at` a break opportunity no rule looks across: a space between two
+    /// ASCII letters or digits. The rules that look back past the unit before a place look for
+    /// an opening, a quotation mark, a number or a mark that leans on its base, and stop at the
+    /// space or at the letter; the breaks from `at` on are those of the text from `at` alone.
+    fn settles(text: &[u16], at: usize) -> bool {
+        let word = |unit: u16| matches!(unit, 0x30..=0x39 | 0x41..=0x5A | 0x61..=0x7A);
+        at >= 2 && at < text.len() && word(text[at - 2]) && text[at - 1] == 0x20 && word(text[at])
+    }
+
+    /// The table of `new`, a text that starts at `start` of its storage, from this table of
+    /// `old`, the text before an edit (step 7 of docs/porting/text-layout-performance.md): the
+    /// breaks before the change are kept up to a break that settles, the text is enumerated from
+    /// there past the change to the next break that settles in both texts, and the breaks of the
+    /// old text follow, shifted. The breaks are those of an enumeration of `new` from its start,
+    /// which `text_break_table_tests` checks for random edits. `None` when the table is not that
+    /// of the whole of `old`.
+    fn edited(&self, old: &[u16], new: &[u16], start: usize) -> Option<BreakTable> {
+        self.edited_counting(old, new, start).map(|(table, _)| table)
+    }
+
+    /// [`Self::edited`], with the count of the code units that were enumerated again.
+    fn edited_counting(&self, old: &[u16], new: &[u16], start: usize) -> Option<(BreakTable, usize)> {
+        use crate::media::text_formatting::unicode::{LineBreak, LineBreakEnumerator};
+        let (old_length, new_length) = (old.len(), new.len());
+        if self.end - self.start != old_length || new_length == 0 {
+            return None;
+        }
+        let common = old_length.min(new_length);
+        let prefix = old.iter().zip(new).take_while(|(x, y)| x == y).count();
+        let suffix = old[prefix..]
+            .iter()
+            .rev()
+            .zip(new[prefix..].iter().rev())
+            .take(common - prefix)
+            .take_while(|(x, y)| x == y)
+            .count();
+        let change_end = new_length - suffix;
+        let shift = new_length as isize - old_length as isize;
+
+        let mut kept = self.breaks.partition_point(|line_break| line_break.position_wrap() + Self::LOOK <= prefix);
+        while kept > 0 && !Self::settles(new, self.breaks[kept - 1].position_wrap()) {
+            kept -= 1;
+        }
+        let from = if kept > 0 { self.breaks[kept - 1].position_wrap() } else { 0 };
+        let mut breaks = Vec::with_capacity(self.breaks.len() + 16);
+        breaks.extend_from_slice(&self.breaks[..kept]);
+        let mut enumerator = LineBreakEnumerator::new(&new[from..]);
+        let mut enumerated = new_length - from;
+        while let Some(line_break) = enumerator.move_next() {
+            let at = from + line_break.position_wrap();
+            breaks.push(LineBreak::new(from + line_break.position_measure(), at, line_break.required()));
+            if at < change_end + Self::LOOK || !Self::settles(new, at) {
+                continue;
+            }
+            let old_at = (at as isize - shift) as usize;
+            if let Ok(found) = self.breaks.binary_search_by(|old_break| old_break.position_wrap().cmp(&old_at)) {
+                breaks.extend(self.breaks[found + 1..].iter().map(|old_break| {
+                    LineBreak::new(
+                        (old_break.position_measure() as isize + shift) as usize,
+                        (old_break.position_wrap() as isize + shift) as usize,
+                        old_break.required(),
+                    )
+                }));
+                enumerated = at - from;
+                break;
+            }
+        }
+        Some((BreakTable { start, end: start + new_length, breaks: breaks.into_boxed_slice() }, enumerated))
+    }
+
+    /// The table of `text` enumerated from its start, and the table an edit of the table of
+    /// `old` gives for it (the tests compare the two).
+    #[cfg(test)]
+    pub(crate) fn of_edit(old: &[u16], text: &[u16]) -> (Vec<LineBreak>, Vec<LineBreak>) {
+        use crate::media::text_formatting::unicode::LineBreakEnumerator;
+        let whole = |text: &[u16]| LineBreakEnumerator::new(text).collect::<Vec<_>>();
+        let table = BreakTable { start: 0, end: old.len(), breaks: whole(old).into_boxed_slice() };
+        let edited = table.edited(old, text, 0).map(|table| table.breaks.into_vec()).unwrap_or_default();
+        (whole(text), edited)
+    }
+
+    /// How many code units of `text` an edit of the table of `old` enumerates again.
+    #[cfg(test)]
+    pub(crate) fn edit_enumerates(old: &[u16], text: &[u16]) -> usize {
+        use crate::media::text_formatting::unicode::LineBreakEnumerator;
+        let breaks = LineBreakEnumerator::new(old).collect::<Vec<_>>().into_boxed_slice();
+        let table = BreakTable { start: 0, end: old.len(), breaks };
+        table.edited_counting(old, text, 0).map_or(text.len(), |(_, enumerated)| enumerated)
+    }
+}
+
+#[cfg(test)]
+use crate::media::text_formatting::unicode::LineBreak;
 
 /// The break opportunities of a run's text, from the shared table of the text it was split from
 /// or found again from its start.
@@ -108,12 +254,75 @@ impl ShapedBuffer {
             text,
             glyph_infos: ArraySlice::new(vec![GlyphInfo::default(); buffer_length]),
             glyph_indices: ArraySlice::new(vec![0u16; buffer_length]),
-            glyph_generation: Some(Rc::new(Cell::new(0))),
+            shared_glyphs: Some(SharedGlyphs::new(None)),
             glyph_typeface,
             font_rendering_em_size,
             bidi_level,
             cache: RefCell::new(ClusterCache::default()),
             breaks: RefCell::new(None),
+            concat_flags: RefCell::new(None),
+            disposed: Cell::new(false),
+        })
+    }
+
+    /// The flag of a glyph whose cluster the text may not be cut at, with the two sides shaped
+    /// apart (HarfBuzz's `HB_GLYPH_FLAG_UNSAFE_TO_BREAK`).
+    pub const UNSAFE_TO_BREAK: u8 = 1;
+    /// The flag of a glyph at whose cluster the text may not be changed on one side without
+    /// changing the shaping of the other (HarfBuzz's `HB_GLYPH_FLAG_UNSAFE_TO_CONCAT`).
+    pub const UNSAFE_TO_CONCAT: u8 = 2;
+
+    /// Records the concatenation flags of the glyphs, one byte a glyph ([`Self::UNSAFE_TO_BREAK`],
+    /// [`Self::UNSAFE_TO_CONCAT`]): a shaper that was asked for them
+    /// (`TextShaperOptions::produce_concat_flags`) sets them once it filled the buffer.
+    pub fn set_concat_flags(&self, flags: Rc<[u8]>) {
+        debug_assert_eq!(flags.len(), self.glyph_infos.length());
+        *self.concat_flags.borrow_mut() = Some(flags);
+    }
+
+    /// The concatenation flags of the glyphs, when the shaper recorded them.
+    pub fn concat_flags(&self) -> Option<Rc<[u8]>> {
+        self.concat_flags.borrow().clone()
+    }
+
+    /// The buffer of `glyphs`, the glyphs of `text`, an edit of the text of `old`: the glyphs
+    /// before `kept` are the first glyphs of `old`, and the glyphs from `tail` on are the glyphs
+    /// of `old` from `old_tail` on, with their clusters moved (`shaping_edit`). The buffer knows
+    /// which glyphs of `old` its glyphs are ([`glyph_range_before_edit`](Self::glyph_range_before_edit)).
+    pub(crate) fn from_glyphs_of_edit(
+        text: ReadOnlyMemory<u16>,
+        glyphs: Vec<GlyphInfo>,
+        old: &ShapedBuffer,
+        kept: usize,
+        tail: usize,
+        old_tail: usize,
+    ) -> Rc<Self> {
+        debug_assert!(kept <= tail && tail <= glyphs.len() && glyphs.len() - tail == old.length() - old_tail);
+        let edit = old.glyph_range().map(|old| GlyphEdit { old, kept, tail, old_tail });
+        let (typeface, size) = (old.glyph_typeface.clone(), old.font_rendering_em_size);
+        Self::from_glyphs_taken(text, glyphs, typeface, size, old.bidi_level, edit)
+    }
+
+    fn from_glyphs_taken(
+        text: ReadOnlyMemory<u16>,
+        glyphs: Vec<GlyphInfo>,
+        glyph_typeface: Rc<GlyphTypeface>,
+        font_rendering_em_size: f64,
+        bidi_level: i8,
+        edit: Option<GlyphEdit>,
+    ) -> Rc<Self> {
+        let indices: Vec<u16> = glyphs.iter().map(|glyph| glyph.glyph_index).collect();
+        Rc::new(Self {
+            text,
+            glyph_infos: ArraySlice::new(glyphs),
+            glyph_indices: ArraySlice::new(indices),
+            shared_glyphs: Some(SharedGlyphs::new(edit)),
+            glyph_typeface,
+            font_rendering_em_size,
+            bidi_level,
+            cache: RefCell::new(ClusterCache::default()),
+            breaks: RefCell::new(None),
+            concat_flags: RefCell::new(None),
             disposed: Cell::new(false),
         })
     }
@@ -131,12 +340,13 @@ impl ShapedBuffer {
             text,
             glyph_infos,
             glyph_indices,
-            glyph_generation: None,
+            shared_glyphs: None,
             glyph_typeface,
             font_rendering_em_size,
             bidi_level,
             cache: RefCell::new(ClusterCache::default()),
             breaks: RefCell::new(None),
+            concat_flags: RefCell::new(None),
             disposed: Cell::new(false),
         })
     }
@@ -172,14 +382,77 @@ impl ShapedBuffer {
             text,
             glyph_infos,
             glyph_indices,
-            glyph_generation: source.glyph_generation.clone(),
+            shared_glyphs: source.shared_glyphs.clone(),
             glyph_typeface: source.glyph_typeface.clone(),
             font_rendering_em_size: source.font_rendering_em_size,
             bidi_level,
             cache: RefCell::new(cache),
             breaks: RefCell::new(source.breaks.borrow().clone()),
+            concat_flags: RefCell::new(None),
             disposed: Cell::new(false),
         })
+    }
+
+    /// The glyphs of this buffer as a range of the storage the shaper filled, as the storage is
+    /// now. `None` for caller-owned storage (a copy made to be written).
+    pub(crate) fn glyph_range(&self) -> Option<GlyphRange> {
+        let shared = self.shared_glyphs.as_ref()?;
+        Some(GlyphRange {
+            storage: shared.storage,
+            start: self.glyph_infos.start(),
+            length: self.glyph_infos.length(),
+            generation: shared.generation.get(),
+        })
+    }
+
+    /// For a buffer over the glyphs of an edited text (`shaping_edit`), the glyphs of the text
+    /// before the edit that the glyphs of this buffer were taken from: the same glyph indices,
+    /// advances and offsets. `None` when the buffer reaches into the glyphs the edit shaped, or
+    /// when the storage was written since.
+    pub(crate) fn glyph_range_before_edit(&self) -> Option<GlyphRange> {
+        let shared = self.shared_glyphs.as_ref()?;
+        let edit = shared.edit.as_ref()?;
+        if shared.generation.get() != 0 {
+            return None;
+        }
+        let (start, length) = (self.glyph_infos.start(), self.glyph_infos.length());
+        let old_start = if start + length <= edit.kept {
+            start
+        } else if start >= edit.tail {
+            start - edit.tail + edit.old_tail
+        } else {
+            return None;
+        };
+        Some(GlyphRange { start: edit.old.start + old_start, length, ..edit.old })
+    }
+
+    /// Takes the break table `source` has by now: the run cache keeps a buffer of its own over
+    /// the glyphs of a shaping (`sharing`), made before the layout found the breaks of the text.
+    pub(crate) fn share_breaks_of(&self, source: &ShapedBuffer) {
+        if self.breaks.borrow().is_none() {
+            *self.breaks.borrow_mut() = source.breaks.borrow().clone();
+        }
+    }
+
+    /// Makes the break table of this buffer's text from the table of `old`, the shaping of the
+    /// text before an edit, when `old` has the table of its whole text ([`BreakTable::edited`]).
+    /// Returns whether the buffer has a table from the edit.
+    pub(crate) fn keep_breaks_of_edit(&self, old: &ShapedBuffer) -> bool {
+        #[cfg(test)]
+        if !BREAK_TABLES.with(Cell::get) {
+            return false;
+        }
+        if self.breaks.borrow().is_some() {
+            return false;
+        }
+        let Some(table) = old.breaks.borrow().clone() else { return false };
+        if table.start != old.text.offset_in_owner() {
+            return false;
+        }
+        let edited = table.edited(old.text.span(), self.text.span(), self.text.offset_in_owner());
+        let kept = edited.is_some();
+        *self.breaks.borrow_mut() = edited.map(Rc::new);
+        kept
     }
 
     /// The buffer's length (number of glyphs).
@@ -309,8 +582,8 @@ impl ShapedBuffer {
         // Bump the shared glyph generation so any sibling that built a cluster
         // cache against the pre-mutation glyphs will detect the mismatch on
         // its next query and rebuild.
-        if let Some(generation) = &self.glyph_generation {
-            generation.set(generation.get().wrapping_add(1));
+        if let Some(shared) = &self.shared_glyphs {
+            shared.generation.set(shared.generation.get().wrapping_add(1));
         }
 
         self.invalidate_cluster_cache();
@@ -352,7 +625,7 @@ impl ShapedBuffer {
     }
 
     fn ensure_cluster_cache(&self) {
-        let current_generation = self.glyph_generation.as_ref().map_or(0, |generation| generation.get());
+        let current_generation = self.shared_glyphs.as_ref().map_or(0, |shared| shared.generation.get());
 
         {
             let cache = self.cache.borrow();
@@ -536,6 +809,26 @@ impl ShapedBuffer {
             self.font_rendering_em_size,
             self.bidi_level,
         )
+    }
+
+    /// A buffer of its own over the glyph storage of this one, with its concatenation flags: the
+    /// run cache keeps it for an edit of the text. Disposing this buffer (a run that holds the
+    /// whole of a shaping holds the shaped buffer itself, and the cache disposes its runs) leaves
+    /// the kept one its glyphs; the storage is never written in place (justification and tab
+    /// layout write to a copy).
+    pub(crate) fn sharing(&self) -> Rc<ShapedBuffer> {
+        let kept = Self::from_source(
+            self,
+            self.text.clone(),
+            self.glyph_infos.clone(),
+            self.glyph_indices.clone(),
+            self.bidi_level,
+            false,
+            0,
+            0,
+        );
+        *kept.concat_flags.borrow_mut() = self.concat_flags.borrow().clone();
+        kept
     }
 
     /// Splits the buffer at the specified text length (UTF-16 code units).
@@ -857,5 +1150,55 @@ impl ShapedBuffer {
             None => ((count - lo) as i32, consumed_width),
             Some(starts) => (starts[start_idx + count] - starts[start_idx + lo], consumed_width),
         }
+    }
+}
+
+#[cfg(test)]
+mod glyph_range_tests {
+    use super::*;
+    use crate::media::fonts::testing::TestPlatformTypeface;
+    use crate::media::FontSimulations;
+
+    const INTER: &[u8] = include_bytes!("../../test_assets/fonts/Inter-Regular.ttf");
+
+    fn glyphs(count: usize) -> Vec<GlyphInfo> {
+        (0..count).map(|glyph| GlyphInfo::new(glyph as u16, glyph as i32, 5.0)).collect()
+    }
+
+    fn text(length: usize) -> ReadOnlyMemory<u16> {
+        ReadOnlyMemory::from_vec(vec![u16::from(b'a'); length])
+    }
+
+    #[test]
+    fn the_glyphs_an_edit_kept_are_found_in_the_storage_before_it() {
+        let platform_typeface =
+            TestPlatformTypeface::from_bytes(INTER.to_vec(), FontSimulations::None).expect("the font loads");
+        let typeface = GlyphTypeface::new(platform_typeface, FontSimulations::None).expect("the font has its tables");
+        let old = ShapedBuffer::from_glyphs_taken(text(10), glyphs(10), typeface, 12.0, 0, None);
+        let old_range = old.glyph_range().expect("the shaper's storage");
+        assert_eq!((old_range.start, old_range.length, old_range.generation), (0, 10, 0));
+        assert_eq!(old.glyph_range_before_edit(), None);
+
+        // The glyphs 4 and 5 of the old text are three glyphs of the new one.
+        let edited = ShapedBuffer::from_glyphs_of_edit(text(11), glyphs(11), &old, 4, 7, 6);
+        let range = edited.glyph_range().expect("the shaper's storage");
+        assert_ne!(range.storage, old_range.storage);
+        assert_eq!(edited.glyph_range_before_edit(), None, "the whole text has the glyphs the edit shaped");
+
+        let split = edited.split(3);
+        let (first, rest) = (split.first.unwrap(), split.second.unwrap());
+        assert_eq!(first.glyph_range(), Some(GlyphRange { start: 0, length: 3, ..range }));
+        assert_eq!(first.glyph_range_before_edit(), Some(GlyphRange { start: 0, length: 3, ..old_range }));
+        assert_eq!(rest.glyph_range_before_edit(), None);
+
+        let split = rest.split(5);
+        let (middle, last) = (split.first.unwrap(), split.second.unwrap());
+        assert_eq!(middle.glyph_range_before_edit(), None, "glyphs 3 to 8 reach into the shaped piece");
+        assert_eq!(last.glyph_range_before_edit(), Some(GlyphRange { start: 7, length: 3, ..old_range }));
+
+        // Glyphs that were written since are not the glyphs of the text before.
+        edited.set(0, GlyphInfo::new(1, 0, 7.0));
+        assert_eq!(first.glyph_range_before_edit(), None);
+        assert_eq!(first.glyph_range().map(|range| range.generation), Some(1));
     }
 }

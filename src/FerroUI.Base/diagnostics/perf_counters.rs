@@ -175,6 +175,13 @@ perf_counters! {
     // --- text (design 06) ---
     /// `TextLayout::from_text_source`.
     TextLayoutsCreated => "text layouts created",
+    /// `TextFormatterImpl::shape_keeping`: a long text was shaped from the shaping of the text its
+    /// owner had before (step 7 of text-layout-performance.md).
+    TextShapingEditsTried => "text shaping edits tried",
+    /// The edit kept glyphs of the shaping before.
+    TextShapingEditsKept => "text shaping edits kept",
+    /// The break opportunities of the text were made from the table of the text before.
+    TextBreakEditsKept => "text break table edits kept",
     /// `TextLayoutCache::get_or_create`: the layout of a plain text was the one kept for it.
     TextLayoutCacheHits => "text layout cache hits",
     /// `TextLayoutCache::get_or_create`: the layout of a plain text was made and kept.
@@ -192,6 +199,9 @@ perf_counters! {
     /// `TextFormatterImpl::format_line_with_cache`: a cache was given, did
     /// not hold the line, and the shaped runs were added to it.
     TextRunCacheMisses => "text run cache misses",
+    /// `TextRunCache::adopt_line_glyph_runs`: a run of a line took the platform glyph run of
+    /// the same glyphs of the layout before.
+    TextGlyphRunsKept => "text glyph runs kept from the layout before",
     /// `TextShaper::shape_text`: a run was shaped by the platform shaper.
     TextRunsShaped => "text runs shaped",
     /// `TextBlock::invalidate_text_layout`: a layout was dropped with its shaped runs (the text

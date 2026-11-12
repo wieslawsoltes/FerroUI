@@ -119,6 +119,10 @@ impl ITextShaperImpl for HarfBuzzTextShaper {
 
             buffer.add_utf16(containing_text, start, length);
 
+            if options.produce_concat_flags() {
+                buffer.produce_unsafe_to_concat();
+            }
+
             Self::merge_break_pair(&mut buffer);
 
             buffer.guess_segment_properties();
@@ -192,6 +196,24 @@ impl ITextShaperImpl for HarfBuzzTextShaper {
                 }
 
                 shaped_buffer.set(i, GlyphInfo::with_offset(glyph_index, glyph_cluster, glyph_advance, glyph_offset));
+            }
+
+            if options.produce_concat_flags() {
+                let flags: Rc<[u8]> = glyph_infos
+                    .iter()
+                    .map(|info| {
+                        let flags = hb::glyph_flags(info);
+                        let mut byte = 0;
+                        if flags & hb::GLYPH_FLAG_UNSAFE_TO_BREAK != 0 {
+                            byte |= ShapedBuffer::UNSAFE_TO_BREAK;
+                        }
+                        if flags & hb::GLYPH_FLAG_UNSAFE_TO_CONCAT != 0 {
+                            byte |= ShapedBuffer::UNSAFE_TO_CONCAT;
+                        }
+                        byte
+                    })
+                    .collect();
+                shaped_buffer.set_concat_flags(flags);
             }
 
             shaped_buffer
