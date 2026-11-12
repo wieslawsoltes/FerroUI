@@ -157,5 +157,26 @@ changes behavior upstream defines.
    and paragraph properties; admission of a changed text on its second use; ageing by layout
    pass) as a service any control or application uses, as Cranpose's layout cache is.
 
+7. **Edits.** A text that is set again with a small change (a word of a paragraph replaced, a
+   message that grows as it streams) is laid out again whole: one frame of the `paragraph` scene
+   of the frame benchmarks (6,000 words of which one changes) costs 5.4 ms of UI time, shaping
+   the whole paragraph (35 %), finding its break opportunities (26 %) and its shapeable runs
+   (14 %) again. The layout keeps what the edit leaves as it was, each part identical to a layout
+   made from nothing, which randomized tests check for every part against a fresh layout:
+   - **Shaped runs.** The shaper records, for every glyph, whether the text may be cut and the
+     pieces shaped apart at its cluster (HarfBuzz's unsafe-to-break and unsafe-to-concat flags,
+     one bit a glyph in the shaped buffer). The new shaping of a run keeps the glyphs of the old
+     one before the first and after the last such boundary around the changed range, and shapes
+     the text between them with its context; a piece whose new edge glyphs are unsafe is widened
+     and shaped again.
+   - **Break opportunities.** The UAX #14 opportunities before the changed range and after it
+     (from the first mandatory or unambiguous break past it) are the old ones, shifted; only the
+     text between is classified again.
+   - **Lines.** The lines that end before the changed range are kept; past it, a line whose start
+     and width context are those of an old line is the old line, shifted, and the rest of the
+     paragraph follows it.
+   The run cache of a text block keeps the shaped runs of its previous text for this, and the
+   comparison of the two texts (a common prefix and suffix) is the edit.
+
 The cross-library comparison (`tests/FerroUI.Text.Comparison`: FerroUI, parley, cosmic-text and
 epaint on the same font, corpus and widths) measures each step against the others.
