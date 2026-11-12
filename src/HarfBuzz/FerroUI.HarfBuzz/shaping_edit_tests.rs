@@ -42,9 +42,9 @@ fn utf16(text: &str) -> ReadOnlyMemory<u16> {
 }
 
 /// A small deterministic generator (the tests need no randomness from the system).
-struct Random(u64);
+struct Xorshift(u64);
 
-impl Random {
+impl Xorshift {
     fn next(&mut self, below: usize) -> usize {
         self.0 ^= self.0 << 13;
         self.0 ^= self.0 >> 7;
@@ -53,13 +53,13 @@ impl Random {
     }
 }
 
-fn paragraph(random: &mut Random, words: usize) -> Vec<String> {
+fn paragraph(random: &mut Xorshift, words: usize) -> Vec<String> {
     (0..words).map(|_| WORDS[random.next(WORDS.len())].to_string()).collect()
 }
 
 /// One random edit of the words: a word replaced, inserted or removed, a word changed inside, or
 /// a word added at the end (a message that grows).
-fn edit(random: &mut Random, words: &mut Vec<String>) {
+fn edit(random: &mut Xorshift, words: &mut Vec<String>) {
     let at = random.next(words.len());
     match random.next(5) {
         0 => words[at] = WORDS[random.next(WORDS.len())].to_string(),
@@ -84,7 +84,7 @@ fn glyphs(buffer: &ShapedBuffer) -> Vec<GlyphInfo> {
 fn an_edited_text_is_shaped_as_the_whole_text_is() {
     let _app = start();
     let shaper = TextShaper::current();
-    let mut random = Random(0x9E37_79B9_7F4A_7C15);
+    let mut random = Xorshift(0x9E37_79B9_7F4A_7C15);
     let (mut kept, mut edits) = (0, 0);
     for (font, size) in [(INTER, 16.0), (INTER_VARIABLE, 13.5), (SOURCE_SANS, 15.0)] {
         let options = options(font, size);
