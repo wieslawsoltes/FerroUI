@@ -334,7 +334,10 @@ public:
             ret = nil;
             return E_FAIL;
         }
-        auto queue = [device newCommandQueue];
+        // A renderer may keep one command buffer for each render pass of a frame until it
+        // submits the frame, and a queue with the default capacity of 64 blocks the thread that
+        // asks for the 65th: the capacity is the one WebGPU implementations give their queues.
+        auto queue = [device newCommandQueueWithMaxCommandBufferCount:4096];
         *ret = new FrnMetalDevice(device, queue);
         return S_OK;
     }

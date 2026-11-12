@@ -9,7 +9,8 @@
 //! still wall, anything else for the gauntlet) choose what runs; `PERF_FONTS` names the folder of
 //! the Roboto files (default `fonts`). The `PERF` lines the harness reads are written to standard
 //! output. With the feature `vello`, `FERROUI_RENDERER=vello` (or `vello-hybrid`, `vello-gpu`,
-//! `vello-cpu`) renders with the Vello backend.
+//! `vello-cpu`) renders with the Vello backend; with the feature `progpu`,
+//! `FERROUI_RENDERER=progpu` renders with the ProGPU backend and lays text out with its shaper.
 
 use ferroui_controls::AppBuilder;
 use ferroui_desktop::AppBuilderDesktopExtensions;
@@ -43,6 +44,8 @@ fn main() -> std::process::ExitCode {
     let builder = builder.use_platform_detect();
     #[cfg(feature = "vello")]
     let builder = use_renderer_of_the_environment(builder);
+    #[cfg(feature = "progpu")]
+    let builder = use_progpu_of_the_environment(builder);
     let exit_code = builder.start_with_classic_desktop_lifetime(&args);
     #[cfg(feature = "vello")]
     ferroui_vello::perf::print_summary();
@@ -63,4 +66,16 @@ fn use_renderer_of_the_environment(builder: AppBuilder) -> AppBuilder {
         _ => return builder,
     };
     builder.with(std::rc::Rc::new(options)).use_vello()
+}
+
+/// The ProGPU backend when `FERROUI_RENDERER` is `progpu`: its render interface, its font manager
+/// and its text shaper in place of the ones of the platform. Anything else, and no value, leaves
+/// the builder as it is.
+#[cfg(feature = "progpu")]
+fn use_progpu_of_the_environment(builder: AppBuilder) -> AppBuilder {
+    use ferroui_progpu::ProGpuApplicationExtensions;
+    match std::env::var("FERROUI_RENDERER").ok().as_deref() {
+        Some("progpu") => builder.use_progpu(),
+        _ => builder,
+    }
 }

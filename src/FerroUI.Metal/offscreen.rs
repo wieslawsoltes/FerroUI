@@ -38,6 +38,10 @@ use objc2_metal::{
 use std::any::{Any, TypeId};
 use std::ffi::c_void;
 use std::ptr::NonNull;
+
+/// The command buffers the queue of the device allows at once, as the queue of a window
+/// platform does.
+const COMMAND_BUFFERS: usize = 4096;
 use std::rc::{Rc, Weak};
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::{Arc, Mutex};
@@ -82,7 +86,10 @@ impl OffscreenMetalDevice {
     /// `None` on a machine without a Metal device.
     pub fn try_new() -> Option<Rc<Self>> {
         let device = MTLCreateSystemDefaultDevice()?;
-        let queue = device.newCommandQueue()?;
+        // The capacity of the queue of a window platform: a renderer may keep one command
+        // buffer for each render pass of a frame until it submits the frame, and a queue with the
+        // default capacity of 64 blocks the thread that asks for the 65th.
+        let queue = device.newCommandQueueWithMaxCommandBufferCount(COMMAND_BUFFERS)?;
         Some(Rc::new_cyclic(|weak_self| Self {
             weak_self: weak_self.clone(),
             device,

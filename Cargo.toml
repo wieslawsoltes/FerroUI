@@ -3,8 +3,9 @@ resolver = "2"
 # Detachable native keyboard workspace, consumed through ordinary path dependencies; the
 # patched skia-bindings (external/rust-skia-bindings) is not a member either. The comparison of
 # the TreeDataGrid with GPUI tables is a workspace of its own too, so that no GPUI crate enters
-# this workspace or its lock file (tests/FerroUI.TreeDataGrid.GpuiComparison/README.md).
-exclude = ["components/FerroBoard", "external/rust-skia-bindings", "tests/FerroUI.TreeDataGrid.GpuiComparison", "tests/FerroUI.Text.Comparison"]
+# this workspace or its lock file (tests/FerroUI.TreeDataGrid.GpuiComparison/README.md). Git
+# submodules of other projects (ProGPU, third_party) are not members of the workspace.
+exclude = ["components/FerroBoard", "external/rust-skia-bindings", "tests/FerroUI.TreeDataGrid.GpuiComparison", "tests/FerroUI.Text.Comparison", "third_party"]
 members = [
     "src/Windows/FerroUI.Direct2D",
     "tests/FerroUI.ResourceBenchmarks",
@@ -163,6 +164,7 @@ members = [
     "src/Skia/FerroUI.Skia",
     "src/Quartz/FerroUI.Quartz",
     "src/Vello/FerroUI.Vello",
+    "src/ProGPU/FerroUI.ProGPU",
     "src/HarfBuzz/FerroUI.HarfBuzz",
     "src/tools/MicroCom.CodeGenerator",
     "src/tools/RichTextOracle",
@@ -420,6 +422,10 @@ ferroui-quartz = { version = "=0.5.0-preview.1", path = "src/Quartz/FerroUI.Quar
 ferroui-direct2d = { version = "=0.5.0-preview.1", path = "src/Windows/FerroUI.Direct2D" }
 ferroui-skia = { version = "=0.5.0-preview.1", path = "src/Skia/FerroUI.Skia" }
 ferroui-vello = { version = "=0.5.0-preview.1", path = "src/Vello/FerroUI.Vello" }
+ferroui-progpu = { version = "=0.5.0-preview.1", path = "src/ProGPU/FerroUI.ProGPU" }
+# The bindings of the ProGPU native engine (wieslawsoltes/ProGPU#436), at the revision the backend is built on.
+# The ProGPU submodule (third_party/ProGPU): the bindings build the engine from its sources.
+progpu-native-sys = { version = "=0.1.0-preview.70", path = "third_party/ProGPU/bindings/rust/progpu-native-sys" }
 ferroui-harfbuzz = { version = "=0.5.0-preview.1", path = "src/HarfBuzz/FerroUI.HarfBuzz" }
 bitflags = "2"
 # The legacy code pages of RTF (the optional feature `rtf-codepages` of ferroui-controls,
