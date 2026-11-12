@@ -4,22 +4,30 @@
 
 use crate::clock::Clock;
 use crate::fonts::Roboto;
-use ferroui_base::layout::{HorizontalAlignment, Orientation, VerticalAlignment};
+use ferroui_base::input::InputElementImpl;
+use ferroui_base::interactivity::InteractiveImpl;
+use ferroui_base::layout::{HorizontalAlignment, LayoutableImpl, Orientation, VerticalAlignment};
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
 use ferroui_base::media::{
     BoxShadow, BoxShadows, Color, FontFamily, FontWeight, IBrush, RotateTransform, TextWrapping, Transform,
     TransformGroup, Transforms, TranslateTransform,
 };
 use ferroui_base::media::Points;
-use ferroui_base::{BoxedValue, CornerRadius, ObjectType, Point, Ref, Thickness, Upcast, Vector};
+use ferroui_base::{
+    ferro_class, ferro_impl_classes, ferro_overrides, instantiate, BoxedValue, CornerRadius, FerroObjectImpl,
+    ObjectType, Point, Ref, StyledElementImpl, Thickness, TypeInfo, Upcast, Vector, VisualImpl,
+};
 use ferroui_controls::documents::TextElement;
-use ferroui_controls::primitives::ScrollBarVisibility;
+use ferroui_controls::generators::RecycleKey;
+use ferroui_controls::primitives::{ScrollBarVisibility, TemplatedControlImpl};
 use ferroui_controls::shapes::Polyline;
 use ferroui_controls::templates::{FuncDataTemplate, FuncTemplate};
 use ferroui_controls::{
-    Border, Button, Canvas, CheckBox, Control, Grid, ItemsControl, ItemsSource, Panel, ScrollViewer, Slider, StackPanel,
-    TextBlock, TextBox, VirtualizingStackPanel, WrapPanel,
+    Border, Button, Canvas, CheckBox, Control, ControlImpl, Grid, ItemsControl, ItemsControlImpl, ItemsSource, Panel,
+    ScrollViewer, Slider, StackPanel, TextBlock, TextBox, VirtualizingStackPanel, WrapPanel,
 };
+use std::cell::{Cell, RefCell};
+use std::collections::VecDeque;
 use std::rc::Rc;
 
 /// A scene of the frame benchmarks.
@@ -106,6 +114,56 @@ pub const SCENES: &[Scene] = &[
         guards: "boxes that draw without a composition visual, thousands in the one above them, \
                  around a visual that has one: every frame some are drawn anew, some move and \
                  some leave the tree and come back (section 9.42)",
+    },
+    Scene {
+        name: "recolor",
+        build: recolor,
+        pointer: false,
+        guards: "a wall of tiles of which a row gets another fill every frame: the recording and \
+                 the drawing of the boxes that changed and of nothing under or beside them \
+                 (sections 9.10, 9.13, 9.14)",
+    },
+    Scene {
+        name: "cards",
+        build: cards,
+        pointer: false,
+        guards: "cards of hundreds of tiles that move by their render transform every frame; when \
+                 a move begins one leaves the tree, shows another card and comes back, and every \
+                 card gets another z-index: detaching and attaching a subtree, text and fills set \
+                 on a whole card, the order of the children (sections 9.5, 9.13)",
+    },
+    Scene {
+        name: "reorder",
+        build: reorder,
+        pointer: false,
+        guards: "a wrapping panel of thousands of tiles of several widths, two neighbours of which \
+                 change places every frame: a child moved in its panel, the measure and the \
+                 arrange of a panel none of whose children changed, the moves of the tiles after \
+                 the two (section 9.13)",
+    },
+    Scene {
+        name: "deep",
+        build: deep,
+        pointer: false,
+        guards: "numbers twelve boxes deep, a row of which changes every frame: a measure and an \
+                 arrange invalidated through a chain of parents, the layout pass over deep chains \
+                 (sections 9.7, 9.9)",
+    },
+    Scene {
+        name: "rows",
+        build: rows,
+        pointer: false,
+        guards: "a list of rows of 150 tiles that scrolls by a row every frame and recycles none: \
+                 a row of 900 elements made, attached, styled, laid out and recorded and one \
+                 detached and dropped every frame (sections 9.1, 9.11, 9.40)",
+    },
+    Scene {
+        name: "pile",
+        build: pile,
+        pointer: false,
+        guards: "translucent tiles lying over one another, one of which is opaque, another one \
+                 every frame: the dirty region of a change under and over other drawings and what \
+                 is drawn again for it (sections 9.10, 9.14)",
     },
 ];
 
@@ -629,6 +687,403 @@ fn items() -> Ref<Control> {
             panel.children().remove(item);
             panel.children().add(item);
         }
+    });
+    root(&canvas)
+}
+
+// --- the patches of a patchwork -------------------------------------------------------------------
+//
+// The scenes that follow each do the per-frame work of one patch of a patchwork screen (a screen
+// of patches that each change in their own way), on a whole window: `recolor`, `cards`, `reorder`,
+// `deep`, `rows` and `pile`. A paragraph, charts and a still wall are `paragraph`, `lines` and
+// `wall`.
+
+/// The size of a tile of these scenes: 150 of them across the window.
+const PATCH_TILE: (f64, f64) = (7.5, 7.5);
+
+/// A tile made without its texts and its fill: the elements of [`tile_of`], shown by `bind` and
+/// placed by the scene.
+struct BoundTile {
+    view: Ref<Border>,
+    name: Ref<TextBlock>,
+    value: Ref<TextBlock>,
+}
+
+impl BoundTile {
+    fn new(size: (f64, f64), label_brush: &Rc<dyn IBrush>, dot_brush: &Rc<dyn IBrush>) -> Self {
+        let (width, height) = size;
+        let dot = height * 0.22;
+        let name = label(height * 0.30, label_brush, false);
+        let value = label(height * 0.26, label_brush, false);
+        let spot = Border::new();
+        spot.set_width(dot);
+        spot.set_height(dot);
+        spot.set_corner_radius(CornerRadius::uniform(dot / 2.0));
+        spot.set_background(Some(dot_brush.clone()));
+        spot.set_vertical_alignment(VerticalAlignment::Center);
+        let line = StackPanel::new();
+        line.set_orientation(Orientation::Horizontal);
+        line.set_spacing(dot * 0.5);
+        line.children().add(&spot);
+        line.children().add(&value);
+        let content = StackPanel::new();
+        content.children().add(&name);
+        content.children().add(&line);
+        let view = Border::new();
+        view.set_width(width);
+        view.set_height(height);
+        view.set_corner_radius(CornerRadius::uniform(1.0));
+        view.set_padding(Thickness::uniform(height * 0.06));
+        view.set_clip_to_bounds(true);
+        view.set_child(&content);
+        Self { view, name, value }
+    }
+
+    /// Shows tile `index`: its texts and its fill, the colour of `colors` in its turn.
+    fn bind(&self, index: usize, colors: &[Rc<dyn IBrush>]) {
+        self.name.set_text(Some(&format!("{index:05}")));
+        self.value.set_text(Some(&format!("{:03}", index % 1000)));
+        self.view.set_background(Some(colors[index % colors.len()].clone()));
+    }
+}
+
+fn palette() -> Rc<Vec<Rc<dyn IBrush>>> {
+    Rc::new(PALETTE.iter().map(|argb| brush(*argb)).collect())
+}
+
+/// The frame as an index.
+fn turn(frame: i32) -> usize {
+    frame.max(0) as usize
+}
+
+// --- recolor -------------------------------------------------------------------------------------
+
+const RECOLOR_COLUMNS: usize = 150;
+const RECOLOR_ROWS: usize = 96;
+
+fn recolor() -> Ref<Control> {
+    let white = brush(0xFFFFFFFF);
+    let ink = brush(0xFF111827);
+    let colors = palette();
+    let canvas = Canvas::new();
+    let tiles: Rc<Vec<Ref<Border>>> = Rc::new(
+        (0..RECOLOR_COLUMNS * RECOLOR_ROWS)
+            .map(|index| tile_of(index, RECOLOR_COLUMNS, PATCH_TILE, 0.0, &white, &colors[index % colors.len()], &ink))
+            .collect(),
+    );
+    for tile in tiles.iter() {
+        canvas.children().add(tile);
+    }
+    Clock::follow(move |frame| {
+        // A row a frame, down the wall; every time round each tile takes the next colour.
+        let (row, round) = (turn(frame) % RECOLOR_ROWS, turn(frame) / RECOLOR_ROWS + 1);
+        for (index, tile) in tiles.iter().enumerate().skip(row * RECOLOR_COLUMNS).take(RECOLOR_COLUMNS) {
+            tile.set_background(Some(colors[(index + round) % colors.len()].clone()));
+        }
+    });
+    root(&canvas)
+}
+
+// --- cards ---------------------------------------------------------------------------------------
+
+/// The cards: four fill the window and one is on its way in.
+const CARDS: usize = 5;
+const CARD_COLUMNS: usize = 60;
+const CARD_ROWS: usize = 12;
+const CARD_TILE: (f64, f64) = (20.3, 14.5);
+/// The frames of a move: the cards move down by a card.
+const CARD_FRAMES: i32 = 8;
+
+/// A card: a header over rows of tiles, moved by a render transform.
+struct Card {
+    panel: Ref<StackPanel>,
+    header: Ref<Border>,
+    title: Ref<TextBlock>,
+    tiles: Vec<BoundTile>,
+    shift: Ref<TranslateTransform>,
+}
+
+impl Card {
+    fn new(label_brush: &Rc<dyn IBrush>, dot_brush: &Rc<dyn IBrush>) -> Self {
+        let title = label(CARD_TILE.1 * 0.30, label_brush, true);
+        let header = Border::new();
+        header.set_width(CARD_COLUMNS as f64 * (CARD_TILE.0 + 1.0) - 1.0);
+        header.set_height(CARD_TILE.1);
+        header.set_corner_radius(CornerRadius::uniform(1.0));
+        header.set_padding(Thickness::uniform(CARD_TILE.1 * 0.06));
+        header.set_clip_to_bounds(true);
+        header.set_child(&title);
+        let shift = TranslateTransform::new();
+        let panel = StackPanel::new();
+        panel.set_spacing(1.0);
+        panel.set_render_transform(Some((&shift).into()));
+        panel.children().add(&header);
+        let mut tiles = Vec::with_capacity(CARD_COLUMNS * CARD_ROWS);
+        for _ in 0..CARD_ROWS {
+            let line = StackPanel::new();
+            line.set_orientation(Orientation::Horizontal);
+            line.set_spacing(1.0);
+            for _ in 0..CARD_COLUMNS {
+                let tile = BoundTile::new(CARD_TILE, label_brush, dot_brush);
+                line.children().add(&tile.view);
+                tiles.push(tile);
+            }
+            panel.children().add(&line);
+        }
+        Self { panel, header, title, tiles, shift }
+    }
+
+    /// Shows card `id`: its title, the fill of its header and every tile.
+    fn bind(&self, id: usize, colors: &[Rc<dyn IBrush>]) {
+        self.header.set_background(Some(colors[id % colors.len()].clone()));
+        self.title.set_text(Some(&format!("Card {id:04}")));
+        for (tile, view) in self.tiles.iter().enumerate() {
+            view.bind(id * 131 + tile, colors);
+        }
+    }
+}
+
+fn cards() -> Ref<Control> {
+    let white = brush(0xFFFFFFFF);
+    let ink = brush(0xFF111827);
+    let colors = palette();
+    // A header and the rows, a point apart, and a point to the next card.
+    let pitch = (CARD_ROWS + 1) as f64 * (CARD_TILE.1 + 1.0);
+    let canvas = Canvas::new();
+    canvas.set_clip_to_bounds(true);
+    // The cards in the order of their places, the one on its way in first: in move `m` the card
+    // at place `p` shows card `m + CARDS - 1 - p`.
+    let placed: VecDeque<Card> = (0..CARDS)
+        .map(|place| {
+            let card = Card::new(&white, &ink);
+            card.bind(CARDS - 1 - place, &colors);
+            card.panel.set_z_index(place as i32);
+            canvas.children().add(&card.panel);
+            card
+        })
+        .collect();
+    let placed = RefCell::new(placed);
+    let panel = canvas.clone();
+    let moved = Cell::new(0);
+    let show = move |frame: i32| {
+        let mut placed = placed.borrow_mut();
+        let moves = frame / CARD_FRAMES;
+        if moves != moved.get() {
+            moved.set(moves);
+            // The card that went out comes in as another one: out of the tree, bound, back in.
+            if let Some(card) = placed.pop_back() {
+                panel.children().remove(&card.panel);
+                card.bind(turn(moves) + CARDS - 1, &colors);
+                panel.children().add(&card.panel);
+                placed.push_front(card);
+            }
+            // A later place lies over an earlier one.
+            for (place, card) in placed.iter().enumerate() {
+                card.panel.set_z_index(place as i32);
+            }
+        }
+        let along = f64::from(frame % CARD_FRAMES) / f64::from(CARD_FRAMES);
+        for (place, card) in placed.iter().enumerate() {
+            card.shift.set_y((place as f64 - 1.0 + along) * pitch);
+        }
+    };
+    show(0);
+    Clock::follow(show);
+    root(&canvas)
+}
+
+// --- reorder -------------------------------------------------------------------------------------
+
+const REORDER_ITEMS: usize = 6_000;
+/// How far apart the pairs that change places in turn are.
+const REORDER_STEP: usize = 37;
+
+fn reorder() -> Ref<Control> {
+    let white = brush(0xFFFFFFFF);
+    let ink = brush(0xFF111827);
+    let colors = palette();
+    let items = WrapPanel::new();
+    items.set_item_spacing(1.0);
+    items.set_line_spacing(1.0);
+    for item in 0..REORDER_ITEMS {
+        // One to three tiles wide: two that change places move the items after them in their row.
+        let units = f64::from(((item as u32).wrapping_mul(2_654_435_761) >> 22) % 3 + 1);
+        let tile = BoundTile::new((units * PATCH_TILE.0 + units - 1.0, PATCH_TILE.1), &white, &ink);
+        tile.bind(item, &colors);
+        items.children().add(&tile.view);
+    }
+    let panel = items.clone();
+    let swapped = Cell::new(None::<usize>);
+    Clock::follow(move |frame| {
+        // Two neighbours change places, and the two of the frame before change back.
+        let children = panel.children();
+        if let Some(was) = swapped.get() {
+            children.move_item(was, was + 1);
+        }
+        let swap = turn(frame).wrapping_mul(REORDER_STEP) % (REORDER_ITEMS - 1);
+        children.move_item(swap, swap + 1);
+        swapped.set(Some(swap));
+    });
+    root(&items)
+}
+
+// --- deep ----------------------------------------------------------------------------------------
+
+const DEEP_COLUMNS: usize = 48;
+const DEEP_ROWS: usize = 40;
+/// The boxes around a number.
+const DEPTH: usize = 12;
+
+fn deep() -> Ref<Control> {
+    let white = brush(0xFFFFFFFF);
+    let colors = palette();
+    let canvas = Canvas::new();
+    let numbers: Rc<Vec<Ref<TextBlock>>> = Rc::new(
+        (0..DEEP_COLUMNS * DEEP_ROWS)
+            .map(|index| {
+                let number = label(5.5, &white, true);
+                number.set_text(Some(&format!("{:03}", index % 1000)));
+                let mut inner: Ref<Control> = number.clone().upcast();
+                for level in (0..DEPTH).rev() {
+                    let nest = Border::new();
+                    nest.set_background(Some(colors[(index + level) % colors.len()].clone()));
+                    nest.set_padding(Thickness::uniform(0.5));
+                    nest.set_child(&inner);
+                    inner = nest.upcast();
+                }
+                inner.set_width(25.6);
+                inner.set_height(19.5);
+                Canvas::set_left(&inner, (index % DEEP_COLUMNS) as f64 * 26.6);
+                Canvas::set_top(&inner, (index / DEEP_COLUMNS) as f64 * 20.5);
+                canvas.children().add(&inner);
+                number
+            })
+            .collect(),
+    );
+    Clock::follow(move |frame| {
+        // A row of numbers a frame.
+        let frame = turn(frame);
+        for (index, number) in numbers.iter().enumerate().skip(frame % DEEP_ROWS * DEEP_COLUMNS).take(DEEP_COLUMNS) {
+            number.set_text(Some(&format!("{:03}", (index + frame) % 1000)));
+        }
+    });
+    root(&canvas)
+}
+
+// --- rows ----------------------------------------------------------------------------------------
+
+const ROWS: i32 = 2_000;
+const ROW_TILES: usize = 150;
+/// The rows the window shows.
+const ROWS_SHOWN: i32 = 96;
+
+/// A list whose containers are rows of tiles and have no recycle key: a row that leaves the
+/// viewport is dropped and the one that comes in is made anew.
+#[repr(C)]
+struct UnrecycledRows {
+    base: ItemsControl,
+    label_brush: Rc<dyn IBrush>,
+    dot_brush: Rc<dyn IBrush>,
+    colors: Rc<Vec<Rc<dyn IBrush>>>,
+}
+
+ferro_class!(UnrecycledRows: ItemsControl);
+ferro_impl_classes!(
+    UnrecycledRows: FerroObjectImpl,
+    VisualImpl,
+    LayoutableImpl,
+    InteractiveImpl,
+    InputElementImpl,
+    ControlImpl,
+    TemplatedControlImpl
+);
+
+ferro_overrides! { impl StyledElementImpl for UnrecycledRows {
+    fn style_key_override(_this: &Self) -> &'static TypeInfo {
+        ItemsControl::TYPE
+    }
+} }
+
+ferro_overrides! { impl ItemsControlImpl for UnrecycledRows {
+    fn needs_container_override(_this: &Self, _item: &Option<BoxedValue>, _index: i32) -> (bool, Option<RecycleKey>) {
+        (true, None)
+    }
+
+    fn create_container_for_item_override(
+        this: &Self,
+        _item: &Option<BoxedValue>,
+        index: i32,
+        _recycle_key: Option<RecycleKey>
+    ) -> Ref<Control> {
+        let row = StackPanel::new();
+        row.set_orientation(Orientation::Horizontal);
+        row.set_spacing(1.0);
+        row.set_margin(Thickness::new(0.0, 0.0, 0.0, 1.0));
+        for column in 0..ROW_TILES {
+            let tile = BoundTile::new(PATCH_TILE, &this.label_brush, &this.dot_brush);
+            tile.bind(turn(index) * ROW_TILES + column, &this.colors);
+            row.children().add(&tile.view);
+        }
+        row.upcast()
+    }
+} }
+
+fn rows() -> Ref<Control> {
+    let rows = instantiate(UnrecycledRows {
+        base: ItemsControl::construct(),
+        label_brush: brush(0xFFFFFFFF),
+        dot_brush: brush(0xFF111827),
+        colors: palette(),
+    });
+    rows.set_items_source(Some(ItemsSource::from_values(0..ROWS)));
+    rows.set_items_panel(FuncTemplate::new(|| Some(VirtualizingStackPanel::new().upcast::<Panel>())));
+    let scroller = ScrollViewer::new();
+    scroller.set_content(Some(Control::boxed(&rows)));
+    scroller.set_vertical_scroll_bar_visibility(ScrollBarVisibility::Hidden);
+    scroller.set_horizontal_scroll_bar_visibility(ScrollBarVisibility::Disabled);
+    let follower = scroller.clone();
+    Clock::follow(move |frame| {
+        // A row a frame.
+        let first = frame.rem_euclid(ROWS - ROWS_SHOWN);
+        follower.set_offset(Vector::new(0.0, f64::from(first) * (PATCH_TILE.1 + 1.0)));
+    });
+    root(&scroller)
+}
+
+// --- pile ----------------------------------------------------------------------------------------
+
+const PILE_COLUMNS: usize = 100;
+const PILE_ROWS: usize = 64;
+/// The distance from a tile of the pile to the next; a tile is twice as wide and as high.
+const PILE_PITCH: f64 = 12.8;
+/// How far apart the tiles that are opaque in turn are.
+const PILE_STEP: usize = 37;
+
+fn pile() -> Ref<Control> {
+    let white = brush(0xFFFFFFFF);
+    let ink = brush(0xFF111827);
+    let translucent: Rc<Vec<Rc<dyn IBrush>>> =
+        Rc::new(PALETTE.iter().map(|argb| brush((argb & 0x00FF_FFFF) | 0x9900_0000)).collect());
+    let opaque = brush(0xFF000000);
+    let canvas = Canvas::new();
+    let tiles: Vec<Ref<Border>> = (0..PILE_COLUMNS * PILE_ROWS)
+        .map(|index| {
+            let tile = BoundTile::new((2.0 * PILE_PITCH - 1.0, 2.0 * PILE_PITCH - 1.0), &white, &ink);
+            tile.bind(index, &translucent);
+            Canvas::set_left(&tile.view, (index % PILE_COLUMNS) as f64 * PILE_PITCH);
+            Canvas::set_top(&tile.view, (index / PILE_COLUMNS) as f64 * PILE_PITCH);
+            canvas.children().add(&tile.view);
+            tile.view
+        })
+        .collect();
+    tiles[0].set_background(Some(opaque.clone()));
+    let was = Cell::new(0);
+    Clock::follow(move |frame| {
+        // The tile that was opaque takes its translucent fill again and another one is opaque.
+        let (before, now) = (was.get(), turn(frame).wrapping_mul(PILE_STEP) % tiles.len());
+        tiles[before].set_background(Some(translucent[before % translucent.len()].clone()));
+        tiles[now].set_background(Some(opaque.clone()));
+        was.set(now);
     });
     root(&canvas)
 }

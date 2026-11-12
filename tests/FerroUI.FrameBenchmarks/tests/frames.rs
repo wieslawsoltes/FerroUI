@@ -896,6 +896,12 @@ scenes! {
     moves => "moves",
     lines => "lines",
     items => "items",
+    recolor => "recolor",
+    cards => "cards",
+    reorder => "reorder",
+    deep => "deep",
+    rows => "rows",
+    pile => "pile",
 }
 
 macro_rules! starts {
@@ -916,8 +922,10 @@ starts! {
 
 #[test]
 fn every_scene_has_a_test() {
-    let tested =
-        ["text", "paragraph", "list", "transforms", "width", "wall", "wall+pointer", "moves", "lines", "items"];
+    let tested = [
+        "text", "paragraph", "list", "transforms", "width", "wall", "wall+pointer", "moves", "lines", "items",
+        "recolor", "cards", "reorder", "deep", "rows", "pile",
+    ];
     for scene in SCENES {
         assert!(tested.contains(&scene.name), "the scene {} has no test", scene.name);
     }

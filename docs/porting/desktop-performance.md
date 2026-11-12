@@ -613,13 +613,20 @@ What it measures:
   regression scenes, kept apart from the ports of other frameworks' benchmarks (the gauntlet
   follows the Cranpose benchmark and is synced with it). Each scene does one kind of per-frame work
   of a heavy screen, so that a change of that work shows in its own numbers, and each names the
-  sections of chapter 9 it guards: `text` (text that changes every frame), `list` (a scrolling list
-  of shadowed cards), `transforms` (panels moved by their render transform and opacity), `width` (a
-  layout under a changing width), `wall` and `wall+pointer` (a still wall), `moves` (tiles of a
+  sections of chapter 9 it guards: `text` (text that changes every frame), `paragraph` (a long
+  paragraph one word of which changes every frame), `list` (a scrolling list of shadowed cards),
+  `transforms` (panels moved by their render transform and opacity), `width` (a layout under a
+  changing width), `wall` and `wall+pointer` (a still wall), `moves` (tiles of a
   canvas that move), `lines` (charts whose lines change every frame), `items` (boxes drawn as items
   of the composition visual above them, some of which are drawn anew, move, and leave the tree and
-  come back every frame). The harness is the frame gate's; besides the times a frame, every scene
-  reports the time it takes to build (`build_ms`) and the window to show it (`show_ms`: its first
+  come back every frame), and the per-frame work of the patches of a patchwork screen, each on a
+  whole window: `recolor` (a row of the tiles of a wall filled anew), `cards` (cards of tiles that
+  move by a transform, one of which leaves the tree, shows another card and comes back when a move
+  begins), `reorder` (two children of a wrapping panel of 6,000 that change places), `deep`
+  (numbers twelve boxes deep, a row of which changes), `rows` (a list of rows of 150 tiles that
+  scrolls a row a frame and recycles none) and `pile` (translucent tiles lying over one another,
+  one of which is opaque in turn). The harness is the frame gate's; besides the times a frame,
+  every scene reports the time it takes to build (`build_ms`) and the window to show it (`show_ms`: its first
   layout, recording and commit) and their sum (`startup_ms`). Alone:
 
   ```sh
