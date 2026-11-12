@@ -147,6 +147,10 @@ impl ServerCompositionVisualCollection {
             return from;
         }
         let next = table.dirty[from..].iter().position(|dirty| *dirty).map_or(table.dirty.len(), |at| from + at);
+        debug_assert!(
+            self.typed.borrow()[from..next].iter().all(|child| !child.update_pass_comes_here()),
+            "a child the update pass has to come to is not marked in the table of the children"
+        );
         #[cfg(test)]
         LEFT_OUT.with(|left_out| left_out.set((left_out.get().0 + next - from, left_out.get().1)));
         next

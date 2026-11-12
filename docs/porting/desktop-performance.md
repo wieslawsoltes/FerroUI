@@ -3372,3 +3372,124 @@ in a refresh interval beside the wait for the acceptance, and the render thread 
 - **Gate:** the frame gate fails a scenario whose surface receives fewer than nine in ten of
   its frames, and `scripts/perf/gate.py` compares the UI thread time, as the render thread and
   wall time, for a frame the surface received.
+
+### 9.48 Children tables: the update pass and the render walk leave out children with nothing to do
+
+A composition visual with many children (the items of a wall, the rows of a long list that
+have visuals of their own) was walked child by child twice in every frame, as upstream
+walks it. The update pass called `pre_subgraph` for every child and returned at once for
+the ones without a flag; the render walk called `handle_pre_graph_transform_clip_opacity`
+for every child and left the ones whose bounds do not meet the dirty region. Neither does
+any work for such a child, but each reads the visual (the flags, the bounds, the
+transform), and a visual is 640 bytes somewhere on the heap: with twenty thousand children
+and one that changed, a frame brought twenty thousand visuals into the cache twice. On the
+still wall of the frame gate (`wall/20`: 20 000 items, a few change in a frame) this was
+most of the render thread's frame.
+
+**The change.** A collection of 32 children or more (`TABLE_FROM`) keeps a table beside
+the list of its children (`ChildrenTable` in `server_composition_visual_collection.rs`),
+with a row for each child in the order of the children:
+
+- whether the update pass has something to do in the child or below it (one byte);
+- the bounds of the child's subtree in the space of the holder, its
+  `transformed_sub_tree_bounds` (32 bytes; a child without bounds has bounds that meet
+  nothing).
+
+Each visual knows its place among the children (`index_in_parent`, 32 bits; the index of
+the visual in the readback queue became 32 bits too, and the visual keeps its block of 640
+bytes). The table is read from the children whenever the list is (`read_table`), and a
+row is written from three places:
+
+- `propagate_flags`, which every change of a visual ends in, marks the row of the visual
+  and the row of each ancestor it gives a flag to;
+- `post_subgraph` of the update pass clears the row of the visual it leaves and, when it
+  computed bounds, writes them;
+- nothing else: a write checks that the child is where it says in the list, and a child
+  that is not ends the table until the list is read again, so that a table that is wrong
+  is not used.
+
+The walker has one more question for its visitor, asked at each step over the children of
+a holder with a table: `next_child(holder, from, count)`, the next child to visit.
+
+- The update pass answers with the next marked row (`next_dirty_child`). The bounds of
+  the holder, which upstream unites child by child, are united from the rows when the
+  holder computes its bounds (`bounds_of_children`): a pass over 32-byte rows that are
+  next to each other, not over the visuals.
+- The render walk answers with the next row whose bounds meet the clip of the walk
+  (`next_child_in`). The clip of the walk is in the space of the world and the rows are in
+  the space of the holder, so the clip is mapped into the holder's space, made larger by
+  more than the arithmetic of the two directions can differ: the test leaves out only
+  children that the exact test of the visual leaves out as well. A holder whose transform
+  turns or skews, a render that stops at a visual and a visual drawn without its transform
+  ask every child, as before. The drawing items of the holder that come before a child
+  that is left out are drawn as they are before one that is visited, and the child counts
+  as visited in the debug events.
+
+One thing the exact test does had to be kept. A child with a clip of its own that lies
+outside the clip of the walk gets the empty rectangle at the origin of the world as its
+clip (`intersect_or_empty`), and bounds that lie around the origin of the world meet that
+rectangle: such a child is entered, and what it draws is clipped away. The row test
+therefore keeps the children whose bounds lie at or around the origin of the world, and
+the exact test decides for them as before. It is one child in most scenes; taking the
+visit away would change what the debug events count and is left for a change of its own.
+
+In a debug build the update pass checks, for every child it leaves out, that the visual
+has no flag: a flag set by a path that does not end in `propagate_flags` fails the tests
+instead of leaving a visual stale.
+
+**Other backends.** All of it is in `ferroui_base`, in the server side of the composition
+that every rendering backend runs (Skia, Vello, ProGPU, the browser): no backend has
+anything to implement, and the drawing contexts see the same calls in the same order for
+the children that are drawn.
+
+**Measured** with the local gate (nine rounds, the two sides alternately, the medians;
+base `cc82b74b96`):
+
+| Metric | Before | After | Change |
+|---|---:|---:|---:|
+| `wall/20` render thread, ms a frame | 4.682 | 1.670 | -64.3 % |
+| `wall/20` wall time, ms a frame | 4.685 | 1.672 | -64.3 % |
+| `wall/20` UI thread, ms a frame | 0.067 | 0.026 | -61.4 % |
+| `wall/20+pointer` render thread, ms a frame | 4.804 | 1.738 | -63.8 % |
+| `wall/20+pointer` wall time, ms a frame | 4.798 | 1.855 | -61.3 % |
+| `wall/20+pointer` UI thread, ms a frame | 0.872 | 1.163 | +33.5 % |
+| `frames/wall` render thread, ms a frame | 2.453 | 1.827 | -25.5 % |
+| `frames/recolor` render thread, ms a frame | 2.880 | 2.370 | -17.7 % |
+| `frames/pile` render thread, ms a frame | 1.701 | 1.520 | -10.7 % |
+| `gauntlet/16` render thread, ms a frame | 34.293 | 34.411 | +0.3 % |
+| `gauntlet/16` UI thread, ms a frame | 14.418 | 14.541 | +0.9 % |
+
+The gauntlet has no holder of many child visuals whose children stand still (its rows are
+drawing items of their lists), so it is unchanged, as are the other scenes of the gate.
+
+The one metric that rose, the UI thread's time in `wall/20+pointer`, is the hit test of
+the pointer, not the tables. With the pointer in the window every frame that was rendered
+is followed by two hit tests on the UI thread (pointer-over and the tooltip), and a hit
+test brings its index of the holder's children up to date whenever the render thread has
+written a newer revision of the readback: a walk over every child of the holder
+(`CompositionHitTestAabbTree::update_bucket`). Before, the render thread took 4.7 ms a
+frame and the two hit tests of a frame saw one revision, so the second one found its index
+up to date; now a frame takes 1.7 ms, the next revision is there between the two hit tests
+of nearly half of the frames, and the second hit test walks the children again (in the
+profile of the UI thread: 9 samples of 487 in the tooltip's hit test before, 501 of 1660
+after). The frame gate runs frames as fast as they render; on a display the two hit tests
+of a frame see one revision as before. The walk itself is the cost that should go (a hit
+test index that hears which children were written, as the tables hear which children
+changed), and that is the change after this one.
+
+**Tests.** `many_children_are_updated_and_rendered_as_without_their_table`: holders of 36
+to 400 children, clipped and not, scaled, mirrored and turned, through 160 frames of
+random moves, visibility, backgrounds, opacity, added, removed and nested children and
+moves of the holder, once with tables and once without (`set_without_children_tables`):
+the invalidated rectangles, the visited and rendered visuals, the bounds of the holder and
+every drawing call are the same frame by frame, and the run with tables left children out
+of both passes. `one_child_that_changes_leaves_the_other_children_out_of_both_passes`: of
+200 children, a frame without a change leaves nothing to visit, a change of one child
+leaves 199 out of both passes, and a child moved over its neighbour leaves 199 out of the
+update pass and 198 out of the render walk. `a_visual_of_the_server_fits_a_block_of_640_bytes`
+keeps the size of the visual.
+
+**Gate.** `wall/20` and `wall/20+pointer` of the frame gate (`scripts/perf/gate.py --only
+gauntlet`) hold the render thread's time of a holder of 20 000 children with a few that
+change.
+
