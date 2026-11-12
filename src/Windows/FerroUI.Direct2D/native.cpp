@@ -24,6 +24,7 @@
 #include <limits>
 #include <thread>
 #include <chrono>
+#include <condition_variable>
 #include "effects_shader.h"
 #ifdef FERRO_RUNTIME_SHADERS
 #include <d3dcompiler.h>
@@ -65,6 +66,10 @@ static void check(HRESULT hr) {
 #define API extern "C"
 #define CATCH_PTR catch(const std::exception& e) { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex); ++statistics[8]; fprintf(stderr,"Direct2D: %s\n",e.what()); return nullptr; }
 #define CATCH_VOID catch(const std::exception& e) { ++statistics[8]; fprintf(stderr,"Direct2D: %s\n",e.what()); }
+// The apartment of a thread this file starts. A thread of the application is never initialised
+// here: the apartment of the UI thread belongs to the windowing backend (OLE drag and drop, the
+// clipboard and the pickers need a single-threaded apartment there), and the MTA usage the
+// engine holds (EngineLifetime) gives every thread that has no apartment the implicit MTA.
 struct Apartment {
     HRESULT result = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
     ~Apartment() { if (SUCCEEDED(result)) CoUninitialize(); }
@@ -291,7 +296,6 @@ struct Engine {
     DXGI_ADAPTER_DESC adapter{};
     D3D_FEATURE_LEVEL level{};
     Engine() {
-        apartment();
         check(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED,__uuidof(IDWriteFactory5),
               reinterpret_cast<IUnknown**>(fonts.GetAddressOf())));
         check(fonts->CreateTextAnalyzer(&analyzer));
@@ -304,33 +308,54 @@ struct Engine {
         check(CoCreateInstance(CLSID_WICImagingFactory2,nullptr,CLSCTX_INPROC_SERVER,IID_PPV_ARGS(&wic)));
         createDevice();
     }
-    void createDevice() {
+    struct Device {
+        ComPtr<ID3D11Device> d3d;
+        ComPtr<ID3D11DeviceContext> immediate;
+        ComPtr<ID2D1Device> device;
+        ComPtr<IDXGIFactory2> dxgiFactory;
+        DXGI_ADAPTER_DESC adapter{};
+        D3D_FEATURE_LEVEL level{};
+    };
+    Device makeDevice() {
+        Device made;
         UINT flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT | D3D11_CREATE_DEVICE_VIDEO_SUPPORT;
         if (GetEnvironmentVariableW(L"FERROUI_D3D_DEBUG",nullptr,0)) flags |= D3D11_CREATE_DEVICE_DEBUG;
         // The built-in effect kernels require Shader Model 5 compute support.
         D3D_FEATURE_LEVEL levels[]={D3D_FEATURE_LEVEL_11_1,D3D_FEATURE_LEVEL_11_0};
         // Hardware is required. WARP never silently satisfies native GPU startup.
         check(D3D11CreateDevice(nullptr,D3D_DRIVER_TYPE_HARDWARE,nullptr,flags,levels,
-              ARRAYSIZE(levels),D3D11_SDK_VERSION,&d3d,&level,&immediate));
+              ARRAYSIZE(levels),D3D11_SDK_VERSION,&made.d3d,&made.level,&made.immediate));
         ComPtr<ID3D11Multithread> multithread;
-        check(immediate.As(&multithread)); multithread->SetMultithreadProtected(TRUE);
-        ComPtr<IDXGIDevice> dxgi; check(d3d.As(&dxgi));
-        ComPtr<IDXGIAdapter> gpu; check(dxgi->GetAdapter(&gpu)); check(gpu->GetDesc(&adapter));
-        check(gpu->GetParent(IID_PPV_ARGS(&dxgiFactory)));
-        check(factory->CreateDevice(dxgi.Get(), &device));
-        fprintf(stderr,"Direct2D: hardware D3D11 %s, feature level 0x%x, adapter %08lx:%08lx\n",
-                utf8(adapter.Description).c_str(),level,adapter.AdapterLuid.HighPart,adapter.AdapterLuid.LowPart);
+        check(made.immediate.As(&multithread)); multithread->SetMultithreadProtected(TRUE);
+        ComPtr<IDXGIDevice> dxgi; check(made.d3d.As(&dxgi));
+        ComPtr<IDXGIAdapter> gpu; check(dxgi->GetAdapter(&gpu)); check(gpu->GetDesc(&made.adapter));
+        check(gpu->GetParent(IID_PPV_ARGS(&made.dxgiFactory)));
+        check(factory->CreateDevice(dxgi.Get(), &made.device));
+        return made;
     }
+    void adopt(Device&& made) {
+        d3d=std::move(made.d3d);immediate=std::move(made.immediate);device=std::move(made.device);
+        dxgiFactory=std::move(made.dxgiFactory);adapter=made.adapter;level=made.level;
+        // Which adapter draws is a diagnostic: said only when diagnostics are asked for.
+        if(nativeProfiling||GetEnvironmentVariableW(L"FERROUI_D3D_STATS",nullptr,0)||
+           GetEnvironmentVariableW(L"FERROUI_D3D_DEBUG",nullptr,0))
+            fprintf(stderr,"Direct2D: hardware D3D11 %s, feature level 0x%x\n",utf8(adapter.Description).c_str(),level);
+    }
+    void createDevice() {adopt(makeDevice());}
     void recover() {
-        if(d3d&&SUCCEEDED(d3d->GetDeviceRemovedReason()))return;
+        if(SUCCEEDED(d3d->GetDeviceRemovedReason()))return;
         replaceDevice();
     }
+    // The new device is made before the removed one is let go: while the adapter is away this
+    // throws and leaves the engine as it was (its device removed, its generation the old one,
+    // every surface of it lost), and the next recover() tries again.
     void replaceDevice() {
+        auto made=makeDevice();
         glyphAtlas.reset();
         boxShadows.clear();
         framePool.clear();pooledBytes=0;
-        filterShader.Reset();neutralShaderInput.Reset();device.Reset();immediate.Reset();d3d.Reset();dxgiFactory.Reset();
-        createDevice();++generation;
+        filterShader.Reset();neutralShaderInput.Reset();
+        adopt(std::move(made));++generation;
     }
     ~Engine() {
         // Cached device children must release while their device and immediate
@@ -369,7 +394,7 @@ static std::shared_ptr<EngineLifetime> retainEngine() {
 // Native entry points hold nativeMutex; borrowing the root avoids an atomic
 // shared_ptr increment/decrement on every state operation. Objects still take
 // an owning reference through retainEngine() for their full lifetime.
-static Engine& engine() {apartment();auto& root=engineRoot().value;if(!root)throw std::runtime_error("Native renderer is shutting down");return *root->value;}
+static Engine& engine() {auto& root=engineRoot().value;if(!root)throw std::runtime_error("Native renderer is shutting down");return *root->value;}
 struct ShapeScratchLease {
     ShapeScratch local;ShapeScratch* value;bool shared;
     explicit ShapeScratchLease(bool shortInput) {
@@ -553,8 +578,8 @@ API void d2_release(Ptr p) {
     if(p && --static_cast<Object*>(p)->references==0)delete static_cast<Object*>(p);
 }
 API Ptr d2_retain(Ptr p) { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex); if(p) ++static_cast<Object*>(p)->references; return p; }
-API size_t d2_data_len(Ptr p) { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex); return static_cast<Data*>(p)->bytes.size(); }
-API const uint8_t* d2_data_bytes(Ptr p) { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex); return static_cast<Data*>(p)->bytes.data(); }
+API size_t d2_data_len(Ptr p) { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex); return p?static_cast<Data*>(p)->bytes.size():0; }
+API const uint8_t* d2_data_bytes(Ptr p) { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex); return p?static_cast<Data*>(p)->bytes.data():nullptr; }
 API Ptr d2_font(const char* family,int weight,int style,int stretch) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
     auto requested=wide(family);
     if(requested.empty()||requested==L"Default"||requested==L"$Default") requested=L"Segoe UI";
@@ -572,8 +597,10 @@ API Ptr d2_font(const char* family,int weight,int style,int stretch) try { std::
     return result.release();
 } CATCH_PTR
 API void d2_font_name(Ptr p,uint8_t* out,size_t n) { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
-    auto value=utf8(static_cast<Font*>(p)->family);
-    if(n) { size_t length=std::min(n-1,value.size()); memcpy(out,value.data(),length); out[length]=0; }
+    if(!n) return;
+    out[0]=0; if(!p) return;
+    try { auto value=utf8(static_cast<Font*>(p)->family); size_t length=std::min(n-1,value.size()); memcpy(out,value.data(),length); out[length]=0; }
+    catch(const std::exception&) {}
 }
 API Ptr d2_font_names() try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
     ComPtr<IDWriteFontCollection> collection; check(engine().fonts->GetSystemFontCollection(&collection,FALSE));
@@ -1048,9 +1075,15 @@ static void recycleFrame(std::shared_ptr<Frame> frame,uint64_t generation,bool l
     frame->dc->SetTarget(nullptr);frame->clips.clear();auto size=frame->bitmap->GetPixelSize();
     if(nativeShuttingDown)return;
     auto& e=engine();size_t bytes=(size_t)size.width*size.height*4;
-    if(!lost&&generation==e.generation&&e.framePool.size()<16&&e.pooledBytes+bytes<=64*1024*1024) {
-        e.pooledBytes+=bytes;e.framePool.push_back(std::move(frame));
+    const size_t limit=64*1024*1024;
+    if(lost||generation!=e.generation||bytes>limit)return;
+    // The pool holds the frames used last: a frame of a size no surface asks for any more (a
+    // window that was resized) leaves when a newer one needs its room.
+    while(!e.framePool.empty()&&(e.framePool.size()>=16||e.pooledBytes+bytes>limit)) {
+        auto oldest=e.framePool.front()->bitmap->GetPixelSize();
+        e.pooledBytes-=(size_t)oldest.width*oldest.height*4;e.framePool.erase(e.framePool.begin());
     }
+    e.pooledBytes+=bytes;e.framePool.push_back(std::move(frame));
 }
 struct Save { D2D1_MATRIX_3X2_F transform; size_t clips; int spread; float aspect,angle; int interpolation; };
 struct Surface : Object {
@@ -1077,6 +1110,14 @@ struct Surface : Object {
         releaseRetired();
     }
     void releaseRetired() {for(auto& f:retired)recycleFrame(std::move(f),generation,lost);retired.clear();}
+    // The retired layer targets of a frame with many layers are bounded: once they hold more
+    // than the frame pool does, the commands of the open frames that read them are submitted
+    // (a flush, not a wait for the GPU) and the targets return to the pool.
+    void boundRetired() {
+        if(retired.size()*((size_t)width*height*4)<64*1024*1024)return;
+        for(auto& f:frames)if(f->drawing&&FAILED(f->dc->Flush()))return;
+        releaseRetired();
+    }
     std::shared_ptr<Frame> makeFrame() {
         NativeTiming timing(1);
         auto& e=engine();std::shared_ptr<Frame> result;
@@ -1155,7 +1196,9 @@ struct Surface : Object {
 static void materializeClips(Frame& frame) {
     for(auto& clip:frame.clips)if(!clip.applied&&!clip.redundant){clip.applied=true;Surface::applyClip(frame,clip);}
 }
-static Surface& surface(Ptr p) { return *static_cast<Surface*>(p); }
+// A surface that could not be created reaches the bridge as a null handle (Bitmap keeps one
+// while the device is unavailable); every export fails as a unit instead of reading through it.
+static Surface& surface(Ptr p) { if(!p)throw std::runtime_error("Direct2D surface is null"); return *static_cast<Surface*>(p); }
 static D2D1_COLOR_F color(double r,double g,double b,double a) { return ColorF((float)r,(float)g,(float)b,(float)a); }
 static ComPtr<ID2D1Effect> effect(Frame& f,REFCLSID id,ID2D1Image* image) {
     ComPtr<ID2D1Effect> result; check(f.dc->CreateEffect(id,&result)); if(image) result->SetInput(0,image); return result;
@@ -1249,7 +1292,7 @@ API void d2_finish(Ptr p) try { std::lock_guard<std::recursive_mutex> nativeGuar
     auto& s=surface(p); auto& f=*s.frames.back();
     if(s.frames.size()!=1 || !s.saves.empty() || !f.clips.empty()) throw std::runtime_error("Unbalanced Direct2D drawing state");
     f.end();s.releaseRetired();
-} catch(const std::exception& e) { surface(p).lost=true; fprintf(stderr,"Direct2D finish: %s\n",e.what()); }
+} catch(const std::exception& e) { if(p)static_cast<Surface*>(p)->lost=true; fprintf(stderr,"Direct2D finish: %s\n",e.what()); }
 API Ptr d2_snapshot(Ptr p) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
     auto& s=surface(p); auto result=std::make_unique<Surface>(s.width,s.height);
     auto image=s.snapshot(); replaceImage(*result,image.Get()); return result.release();
@@ -1313,9 +1356,9 @@ API void d2_fill(Ptr p,Ptr geometry,int evenodd,double r,double g,double b,doubl
     auto& f=surface(p).frame();auto brush=f.solid(color(r,g,b,a));
     auto path=rule(static_cast<Path*>(geometry),evenodd); f.dc->FillGeometry(path.Get(),brush);
 } CATCH_VOID
-API void d2_gpu_gradient_options(Ptr p,int spread,double aspect,double angle) { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
+API void d2_gpu_gradient_options(Ptr p,int spread,double aspect,double angle) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
     auto& s=surface(p); s.spread=spread; s.aspect=(float)aspect; s.angle=(float)angle;
-}
+} CATCH_VOID
 API void d2_gradient(Ptr p,const double* colors,const double* stops,size_t n,double x1,double y1,double x2,double y2,double radius,int radial) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
     if(!n) return; auto& s=surface(p); auto& f=s.frame();
     std::vector<D2D1_GRADIENT_STOP> entries;
@@ -1345,11 +1388,18 @@ API void d2_gradient(Ptr p,const double* colors,const double* stops,size_t n,dou
     f.dc->FillRectangle(bounds,brush.Get());
 } CATCH_VOID
 API void d2_begin_layer(Ptr p,double opacity,int blend) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
-    auto& s=surface(p); auto& parent=s.frame(); auto next=s.makeFrame();
+    auto& s=surface(p); auto& parent=s.frame(); s.boundRetired(); auto next=s.makeFrame();
     D2D1_MATRIX_3X2_F m; parent.dc->GetTransform(&m); next->dc->SetTransform(m);
     next->opacity=(float)opacity; next->blend=blend;
     for(auto& clip:parent.clips) { next->clips.push_back(clip); Surface::applyClip(*next,clip); }
     s.frames.push_back(std::move(next));
+} CATCH_VOID
+// The input of a blur or a shadow reaches past the clips the parent had when the layer began:
+// the pixels outside them are part of what the kernel reads. The layer drops the clips it
+// inherited; d2_end_layer composes it into the parent under the parent's own clips.
+API void d2_gpu_reset_effect_input_clip(Ptr p) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
+    auto& s=surface(p); if(s.frames.size()<2) return;
+    auto& f=s.frame(); suspendClips(f); f.clips.clear();
 } CATCH_VOID
 static D2D1_COMPOSITE_MODE composite(int blend) {
     switch(blend) {
@@ -1719,16 +1769,16 @@ API void d2_draw_batch(Ptr p,const DrawCommand* commands,size_t count) try {std:
 } CATCH_VOID
 // Readback is confined to explicit bitmap lock/export operations. Frame drawing,
 // snapshots, filters, and presentation use only GPU resources.
-API void d2_read_pixels(Ptr p,uint8_t* out,size_t length) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
+API int d2_read_pixels(Ptr p,uint8_t* out,size_t length) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
     ++statistics[4];
-    auto& s=surface(p); if(length<(size_t)s.width*s.height*4) return;
+    auto& s=surface(p); if(!out||length<(size_t)s.width*s.height*4) return 0;
     auto image=s.snapshot(); auto& f=*s.frames.back(); ComPtr<ID2D1Bitmap1> staging;
     auto properties=BitmapProperties1((D2D1_BITMAP_OPTIONS)(D2D1_BITMAP_OPTIONS_CPU_READ|D2D1_BITMAP_OPTIONS_CANNOT_DRAW),PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM,D2D1_ALPHA_MODE_PREMULTIPLIED));
     check(f.dc->CreateBitmap(SizeU(s.width,s.height),nullptr,0,&properties,&staging)); check(staging->CopyFromBitmap(nullptr,image.Get(),nullptr));
     D2D1_MAPPED_RECT mapped{}; check(staging->Map(D2D1_MAP_OPTIONS_READ,&mapped));
     for(UINT32 y=0;y<s.height;++y) memcpy(out+(size_t)y*s.width*4,mapped.bits+(size_t)y*mapped.pitch,(size_t)s.width*4);
-    staging->Unmap();
-} CATCH_VOID
+    staging->Unmap(); return 1;
+} catch(const std::exception& e) { ++statistics[8]; fprintf(stderr,"Direct2D: %s\n",e.what()); return 0; }
 API void d2_write_pixels(Ptr p,const uint8_t* data,size_t n) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
     ++statistics[5];
     auto& s=surface(p); if(n!=(size_t)s.width*s.height*4) throw std::runtime_error("Invalid bitmap upload size");
@@ -1748,10 +1798,11 @@ API Ptr d2_decode(const uint8_t* data,size_t n) try { std::lock_guard<std::recur
     auto result=std::make_unique<Surface>(w,h); ComPtr<ID2D1Bitmap1> image;
     check(result->frame().dc->CreateBitmapFromWicBitmap(converter.Get(),nullptr,&image)); replaceImage(*result,image.Get()); return result.release();
 } CATCH_PTR
-API size_t d2_image_width(Ptr p) { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex); return surface(p).width; }
-API size_t d2_image_height(Ptr p) { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex); return surface(p).height; }
+API size_t d2_image_width(Ptr p) { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex); return p?static_cast<Surface*>(p)->width:0; }
+API size_t d2_image_height(Ptr p) { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex); return p?static_cast<Surface*>(p)->height:0; }
 API Ptr d2_encode(Ptr p,int jpeg,double quality) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
-    auto& s=surface(p); std::vector<uint8_t> bytes((size_t)s.width*s.height*4); d2_read_pixels(p,bytes.data(),bytes.size());
+    auto& s=surface(p); std::vector<uint8_t> bytes((size_t)s.width*s.height*4);
+    if(!d2_read_pixels(p,bytes.data(),bytes.size())) throw std::runtime_error("The surface could not be read for encoding");
     ComPtr<IStream> stream; check(CreateStreamOnHGlobal(nullptr,TRUE,&stream));
     ComPtr<IWICBitmapEncoder> encoder; check(engine().wic->CreateEncoder(jpeg?GUID_ContainerFormatJpeg:GUID_ContainerFormatPng,nullptr,&encoder));
     check(encoder->Initialize(stream.Get(),WICBitmapEncoderNoCache));
@@ -1816,21 +1867,24 @@ struct Window : Object {
     ~Window(){close();}
 };
 API Ptr d2_window(intptr_t hwnd) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex); engine(); if(!IsWindow((HWND)hwnd)) return nullptr; return new Window((HWND)hwnd); } CATCH_PTR
-API void d2_window_frame_begin(Ptr p) {
+API void d2_window_frame_begin(Ptr p) try {
     std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
+    if(!p)return;
     auto& w=*static_cast<Window*>(p);
     auto& e=engine();
     if(!w.lost&&w.generation==e.generation)e.glyphAtlas.begin();
     if(!w.profile)return;
     w.frameStart=std::chrono::steady_clock::now();w.frameStarted=true;w.startPixels=statistics[11];w.startCopies=statistics[7];
     for(unsigned i=0;i<20;++i)w.frameTimings[i]=nativeTimings[i];
-}
-API void d2_window_dispose(Ptr p) {std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);static_cast<Window*>(p)->close();}
-API int d2_window_state(Ptr p) { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
+} CATCH_VOID
+API void d2_window_dispose(Ptr p) {std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);if(p)static_cast<Window*>(p)->close();}
+API int d2_window_state(Ptr p) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
+    if(!p)return -1;
     auto& w=*static_cast<Window*>(p); if(w.lost||w.generation!=engine().generation||FAILED(engine().d3d->GetDeviceRemovedReason())) {w.close();return -1;}
     return IsWindow(w.hwnd)&&!IsIconic(w.hwnd)?1:0;
-}
+} catch(...) {return -1;}
 API int d2_present(Ptr window,Ptr source) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
+    if(!window)return -1;
     auto& w=*static_cast<Window*>(window); auto& s=surface(source); auto& e=engine();
     e.glyphAtlas.finish();
     if(w.lost||w.generation!=e.generation)return -1;
@@ -1885,7 +1939,8 @@ API int d2_present(Ptr window,Ptr source) try { std::lock_guard<std::recursive_m
 
 API Ptr d2_gpu_layer_snapshot(Ptr p) { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex); return d2_snapshot(p); }
 API Ptr d2_gpu_take_layer(Ptr p) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
-    Ptr result=d2_snapshot(p);auto& f=surface(p).frame();
+    Ptr result=d2_snapshot(p);if(!result)return nullptr;
+    auto& f=surface(p).frame();
     suspendClips(f);
     f.dc->Clear(ColorF(0,0,0,0));for(auto& clip:f.clips)Surface::applyClip(f,clip);return result;
 } CATCH_PTR
@@ -2066,7 +2121,7 @@ API Ptr d2_path_intercepts(Ptr p,double lower,double upper) try { std::lock_guar
 
 struct Texture : Object { ComPtr<ID3D11Texture2D> texture;UINT slice=0; };
 API Ptr d2_native_device() try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex); auto d=engine().d3d.Get();d->AddRef();return d; } CATCH_PTR
-API void d2_device_luid(uint8_t* out) { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex); memcpy(out,&engine().adapter.AdapterLuid,8); }
+API void d2_device_luid(uint8_t* out) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex); memcpy(out,&engine().adapter.AdapterLuid,8); } catch(...) {memset(out,0,8);}
 API Ptr d2_texture(Ptr pointer,UINT slice) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
     ++statistics[6];
     if(!pointer)return nullptr;auto result=std::make_unique<Texture>();
@@ -2087,11 +2142,17 @@ API Ptr d2_open_texture(intptr_t handle,int nt) try { std::lock_guard<std::recur
     return result.release();
 } CATCH_PTR
 API int d2_texture_valid(Ptr p,UINT w,UINT h,int rgba) { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
+    if(!p)return 0;
     D3D11_TEXTURE2D_DESC desc{};static_cast<Texture*>(p)->texture->GetDesc(&desc);
     return desc.Width==w&&desc.Height==h&&desc.Format==(rgba?DXGI_FORMAT_R8G8B8A8_UNORM:DXGI_FORMAT_B8G8R8A8_UNORM);
 }
 static int convertFrame(Ptr destination,Ptr source,int rec709,int flipped,int opaque,Ptr callback,void(*completed)(Ptr,int),bool& submitted) {
     auto& s=surface(destination);auto t=static_cast<Texture*>(source);auto& e=engine();
+    if(!t)return 0;
+    // A texture of another device (one imported before the device was replaced) cannot be the
+    // source of a copy on this one.
+    ComPtr<ID3D11Device> owner;t->texture->GetDevice(&owner);
+    if(owner.Get()!=e.d3d.Get())return 0;
     D3D11_TEXTURE2D_DESC desc{};t->texture->GetDesc(&desc);
     if(desc.Width!=s.width||desc.Height!=s.height)return 0;
     desc.ArraySize=1;desc.MiscFlags=0;desc.BindFlags=D3D11_BIND_SHADER_RESOURCE|D3D11_BIND_RENDER_TARGET;desc.Usage=D3D11_USAGE_DEFAULT;desc.CPUAccessFlags=0;
@@ -2122,16 +2183,46 @@ static int convertFrame(Ptr destination,Ptr source,int rec709,int flipped,int op
     };
     auto read=std::make_shared<ReadResources>();read->context=e.immediate;read->device=e.d3d;
     read->query=query;read->copy=copy;read->producer=t->texture;
-    std::thread([read,callback,completed] {
-        apartment();BOOL done=FALSE;
-        for(;;) {
-            HRESULT hr=read->context->GetData(read->query.Get(),&done,sizeof(done),D3D11_ASYNC_GETDATA_DONOTFLUSH);
-            if(hr==S_OK&&done){++statistics[9];completed(callback,1);return;}
-            if(FAILED(read->device->GetDeviceRemovedReason())){completed(callback,2);return;}
-            if(FAILED(hr)){completed(callback,0);return;}
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    // One thread watches the event queries of all conversions in flight (a video is a
+    // conversion a frame). A query that has not completed after the deadline is reported as
+    // indeterminate, which quarantines the lease of its frame instead of polling for ever.
+    struct Watcher {
+        struct Pending { std::shared_ptr<ReadResources> read;Ptr callback;void(*completed)(Ptr,int);std::chrono::steady_clock::time_point deadline; };
+        std::mutex mutex;std::condition_variable wake;std::vector<Pending> pending;bool running=false;
+        void add(Pending entry) {
+            std::lock_guard<std::mutex> lock(mutex);pending.push_back(std::move(entry));
+            if(!running){running=true;std::thread([this]{run();}).detach();}
+            wake.notify_one();
         }
-    }).detach();
+        void run() {
+            apartment();
+            for(;;) {
+                std::vector<Pending> current;
+                {std::unique_lock<std::mutex> lock(mutex);wake.wait(lock,[&]{return !pending.empty();});current.swap(pending);}
+                std::vector<Pending> waiting;
+                for(auto& entry:current) {
+                    BOOL done=FALSE;
+                    HRESULT hr=entry.read->context->GetData(entry.read->query.Get(),&done,sizeof(done),D3D11_ASYNC_GETDATA_DONOTFLUSH);
+                    int result=-1;
+                    if(hr==S_OK&&done){++statistics[9];result=1;}
+                    else if(FAILED(entry.read->device->GetDeviceRemovedReason()))result=2;
+                    else if(FAILED(hr)||std::chrono::steady_clock::now()>=entry.deadline)result=0;
+                    if(result<0){waiting.push_back(std::move(entry));continue;}
+                    auto callback=entry.callback;auto completed=entry.completed;
+                    // The resources are released before the completion is reported, as the
+                    // thread of a single conversion released them when it returned.
+                    entry.read.reset();completed(callback,result);
+                }
+                if(!waiting.empty()) {
+                    {std::lock_guard<std::mutex> lock(mutex);for(auto& entry:waiting)pending.push_back(std::move(entry));}
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                }
+            }
+        }
+    };
+    // Never destroyed: its thread may still wait on it while the process exits.
+    static Watcher& watcher=*new Watcher;
+    watcher.add({read,callback,completed,std::chrono::steady_clock::now()+std::chrono::seconds(5)});
     return 1;
 }
 API int d2_convert_frame(Ptr destination,Ptr source,int rec709,int flipped,int opaque,Ptr callback,void(*completed)(Ptr,int)) { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
@@ -2148,12 +2239,14 @@ API int d2_convert_frame(Ptr destination,Ptr source,int rec709,int flipped,int o
 API void d2_statistics(uint64_t* out,size_t count) { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);for(size_t i=0;i<std::min(count,(size_t)12);++i)out[i]=statistics[i].load();}
 API void d2_profile(uint64_t* nanoseconds,uint64_t* counts,size_t count) { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);for(size_t i=0;i<std::min(count,(size_t)20);++i){nanoseconds[i]=nativeTimings[i].load();counts[i]=nativeTimingCounts[i].load();} }
 API uint64_t d2_device_generation() try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex); engine().recover();return engine().generation; } catch(...) {return 0;}
-API int d2_surface_lost(Ptr p) { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);NativeTiming timing(11);auto& s=surface(p);return s.lost||s.generation!=engine().generation||FAILED(engine().d3d->GetDeviceRemovedReason());}
+API int d2_surface_lost(Ptr p) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);NativeTiming timing(11);auto& s=surface(p);
+    return s.lost||s.generation!=engine().generation||FAILED(engine().d3d->GetDeviceRemovedReason());
+} catch(...) {return 1;}
 struct Fence : Object { ComPtr<ID3D11Fence> fence; };
-API int d2_fences_supported() { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
+API int d2_fences_supported() try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
     ComPtr<ID3D11Device5> device;ComPtr<ID3D11DeviceContext4> context;
     return SUCCEEDED(engine().d3d.As(&device))&&SUCCEEDED(engine().immediate.As(&context));
-}
+} catch(...) {return 0;}
 API Ptr d2_open_fence(intptr_t handle) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
     auto result=std::make_unique<Fence>();ComPtr<ID3D11Device5> device;check(engine().d3d.As(&device));
     check(device->OpenSharedFence((HANDLE)handle,IID_PPV_ARGS(&result->fence)));return result.release();
@@ -2164,8 +2257,10 @@ API int d2_copy_external(Ptr target,Ptr source,int useMutex,uint64_t acquire,uin
     ComPtr<IDXGIKeyedMutex> mutex;
     if(useMutex) {
         check(texture->texture.As(&mutex));
-        HRESULT hr=mutex->AcquireSync(acquire,0);
-        // AcquireSync returns positive WAIT_TIMEOUT/WAIT_ABANDONED values too.
+        // The producer releases the key when its commands are submitted, which can be a moment
+        // after it tells the compositor: wait for it, but never without a bound on the render
+        // thread. AcquireSync returns positive WAIT_TIMEOUT/WAIT_ABANDONED values too.
+        HRESULT hr=mutex->AcquireSync(acquire,1000);
         if(hr!=S_OK)return 0;
     }
     struct MutexRelease { ComPtr<IDXGIKeyedMutex> mutex;uint64_t key;~MutexRelease(){if(mutex)mutex->ReleaseSync(key);} } unlock{mutex,release};
@@ -2213,6 +2308,7 @@ API void d2_gpu_shader_apply(Ptr destination,Ptr raw,const uint8_t* uniforms,siz
         double x,double y,double w,double h) try {
     std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
     auto& s=surface(destination);auto& e=engine();auto shader=static_cast<Shader*>(raw);
+    if(!shader)throw std::runtime_error("Runtime shader is null");
     if(shader->generation!=e.generation)throw std::runtime_error("Runtime shader belongs to a removed device");
     if(w<=0||h<=0||w>16384||h>16384||count>16)return;
     double left=std::max(0.0,floor(x)),top=std::max(0.0,floor(y));

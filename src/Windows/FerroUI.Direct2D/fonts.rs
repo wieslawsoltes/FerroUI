@@ -89,9 +89,71 @@ impl IPlatformTypeface for Typeface {
         self
     }
 }
+/// A face loaded from application data, with the attributes it is selected by.
+#[derive(Clone)]
+struct EmbeddedFont {
+    font: Arc<NativeFont>,
+    weight: FontWeight,
+    style: FontStyle,
+    stretch: FontStretch,
+}
+/// The weight, style and stretch a face declares in its OS/2 table. A face without the
+/// table, or with a value outside the defined range, is a normal face.
+fn declared_attributes(font: &NativeFont) -> (FontWeight, FontStyle, FontStretch) {
+    let table =
+        unsafe { Owned::try_new(ffi::d2_font_table(font.raw(), u32::from_be_bytes(*b"OS/2"))) };
+    let bytes = table.map(|table| table.bytes()).unwrap_or_default();
+    let field = |offset: usize| {
+        bytes
+            .get(offset..offset + 2)
+            .map_or(0, |v| i32::from(u16::from_be_bytes([v[0], v[1]])))
+    };
+    // usWeightClass, usWidthClass and fsSelection: bit 0 is italic, bit 9 is oblique.
+    let (weight, width, selection) = (field(4), field(6), field(62));
+    let weight = if (1..=1000).contains(&weight) {
+        FontWeight(weight)
+    } else {
+        FontWeight::Normal
+    };
+    let style = if selection & 1 != 0 {
+        FontStyle::Italic
+    } else if selection & 0x200 != 0 {
+        FontStyle::Oblique
+    } else {
+        FontStyle::Normal
+    };
+    (
+        weight,
+        style,
+        FontStretch::from_i32(width).unwrap_or(FontStretch::Normal),
+    )
+}
+// CSS font selection prefers weights directionally rather than by absolute distance.
+fn weight_cost(desired: i32, actual: i32) -> i32 {
+    let distance = (actual - desired).abs();
+    let tier = if desired < 400 {
+        i32::from(actual > desired)
+    } else if desired > 500 {
+        i32::from(actual < desired)
+    } else if actual >= desired && actual <= 500 {
+        0
+    } else if actual < desired {
+        1
+    } else {
+        2
+    };
+    tier * 10_000 + distance
+}
+fn style_cost(desired: FontStyle, actual: FontStyle) -> i32 {
+    match (desired, actual) {
+        (a, b) if a == b => 0,
+        (FontStyle::Normal, _) | (_, FontStyle::Normal) => 2,
+        _ => 1, // Italic and oblique stand in for each other.
+    }
+}
 #[derive(Default)]
 pub struct FontManager {
-    embedded: RefCell<Vec<Arc<NativeFont>>>,
+    embedded: RefCell<Vec<EmbeddedFont>>,
 }
 impl FontManager {
     /// Loads a variable font using public DirectWrite axis identifiers (OpenType tags).
@@ -118,13 +180,32 @@ impl FontManager {
                 return None;
             }
             let font = NativeFont::from_raw(raw);
-            self.embedded.borrow_mut().push(font.clone());
-            let mut face = Typeface::new(
-                font,
-                FontWeight::Normal,
-                FontStyle::Normal,
-                FontStretch::Normal,
-            );
+            let (mut weight, style, stretch) = declared_attributes(&font);
+            // The table describes the default instance. A weight axis value replaces it.
+            if let Some((_, value)) = variations
+                .iter()
+                .find(|(tag, _)| tag.value() == u32::from_be_bytes(*b"wght"))
+            {
+                weight = FontWeight((value.round() as i32).clamp(1, 1000));
+            }
+            {
+                // A face that is loaded again does not get a second entry.
+                let mut embedded = self.embedded.borrow_mut();
+                if !embedded.iter().any(|f| {
+                    f.font.name.eq_ignore_ascii_case(&font.name)
+                        && f.weight == weight
+                        && f.style == style
+                        && f.stretch == stretch
+                }) {
+                    embedded.push(EmbeddedFont {
+                        font: font.clone(),
+                        weight,
+                        style,
+                        stretch,
+                    });
+                }
+            }
+            let mut face = Typeface::new(font, weight, style, stretch);
             face.simulations = simulations;
             face.data = Some(data);
             Some(Rc::new(face))
@@ -145,15 +226,14 @@ impl FontManager {
 }
 impl IFontManagerImpl for FontManager {
     fn get_default_font_family_name(&self) -> String {
+        // The name of the interface font of the system stands in when the font cannot be created.
         Self::system(
             "",
             FontWeight::Normal,
             FontStyle::Normal,
             FontStretch::Normal,
         )
-        .unwrap()
-        .name
-        .clone()
+        .map_or_else(|| "Segoe UI".to_owned(), |font| font.name.clone())
     }
     fn get_installed_font_family_names(&self, _: bool) -> Vec<String> {
         unsafe {
@@ -170,13 +250,25 @@ impl IFontManagerImpl for FontManager {
         weight: FontWeight,
         stretch: FontStretch,
     ) -> Option<Rc<dyn IPlatformTypeface>> {
-        let font = self
+        // The face of an embedded family that is nearest to the request: stretch first,
+        // then style, then weight. It reports its own attributes.
+        let embedded = self
             .embedded
             .borrow()
             .iter()
-            .find(|f| f.name.eq_ignore_ascii_case(name))
-            .cloned()
-            .or_else(|| Self::system(name, weight, style, stretch))?;
+            .filter(|f| f.font.name.eq_ignore_ascii_case(name))
+            .min_by_key(|f| {
+                (
+                    (f.stretch as i32 - stretch as i32).abs(),
+                    style_cost(style, f.style),
+                    weight_cost(weight.0, f.weight.0),
+                )
+            })
+            .cloned();
+        if let Some(f) = embedded {
+            return Some(Rc::new(Typeface::new(f.font, f.weight, f.style, f.stretch)));
+        }
+        let font = Self::system(name, weight, style, stretch)?;
         // The native lookup rejects absent families. Do not compare the returned
         // English display name with a valid localized name accepted by DirectWrite.
         Some(Rc::new(Typeface::new(font, weight, style, stretch)))
@@ -193,7 +285,11 @@ impl IFontManagerImpl for FontManager {
         let ch = char::from_u32(codepoint as u32)?;
         let mut buf = [0; 2];
         let text = ch.encode_utf16(&mut buf);
-        let font = Self::system(name.unwrap_or(""), weight, style, stretch)?;
+        // The fallback lookup takes only the family name and the face attributes from its
+        // base font. A family the system does not have, such as an embedded one, starts
+        // from the default system font.
+        let font = Self::system(name.unwrap_or(""), weight, style, stretch)
+            .or_else(|| Self::system("", weight, style, stretch))?;
         let language = CString::new(culture.map(ToString::to_string).unwrap_or_default()).ok()?;
         unsafe {
             let p = ffi::d2_font_match(font.raw(), text.as_ptr(), text.len(), language.as_ptr());
@@ -290,28 +386,29 @@ impl ITextShaperImpl for TextShaper {
                 .unwrap_or_default(),
         )
         .unwrap();
-        unsafe {
-            assert_ne!(
-                ffi::d2_shape(
-                    native.font.raw(),
-                    units.as_ptr(),
-                    units.len(),
-                    text.offset_in_owner(),
-                    text.len(),
-                    language.as_ptr(),
-                    options.font_rendering_em_size(),
-                    i32::from(options.bidi_level() & 1 != 0),
-                    tags.as_ptr(),
-                    values.as_ptr(),
-                    feature_starts.as_ptr(),
-                    feature_ends.as_ptr(),
-                    tags.len(),
-                    &mut glyphs as *mut _ as ffi::Ptr,
-                    emit,
-                ),
-                0,
-                "DirectWrite shaping failed"
-            );
+        let right_to_left = options.bidi_level() & 1 != 0;
+        let result = unsafe {
+            ffi::d2_shape(
+                native.font.raw(),
+                units.as_ptr(),
+                units.len(),
+                text.offset_in_owner(),
+                text.len(),
+                language.as_ptr(),
+                options.font_rendering_em_size(),
+                i32::from(right_to_left),
+                tags.as_ptr(),
+                values.as_ptr(),
+                feature_starts.as_ptr(),
+                feature_ends.as_ptr(),
+                tags.len(),
+                &mut glyphs as *mut _ as ffi::Ptr,
+                emit,
+            )
+        };
+        // Text the system cannot shape is an empty run.
+        if result == 0 {
+            glyphs.clear();
         }
         let shaped = ShapedBuffer::new(
             text.clone(),
@@ -355,9 +452,13 @@ impl ITextShaperImpl for TextShaper {
                         / face.metrics().design_em_height as f64
                 };
             }
+            // The glyphs are in visual order and are positioned from left to right. The
+            // system measures the horizontal offset along the reading direction, so in a
+            // right-to-left run a positive offset points to the left.
+            let x = if right_to_left { -g.x } else { g.x };
             shaped.set(
                 i,
-                GlyphInfo::with_offset(id, g.cluster, advance, Vector::new(g.x, g.y)),
+                GlyphInfo::with_offset(id, g.cluster, advance, Vector::new(x, g.y)),
             );
         }
         shaped

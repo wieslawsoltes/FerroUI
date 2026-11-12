@@ -97,6 +97,10 @@ impl DrawingContext {
             return;
         }
         let tile = tile.retained_surface();
+        // A tile whose surface could not be created has nothing to draw.
+        if tile.0.is_null() {
+            return;
+        }
         self.bitmap.context(|c| unsafe {
             ffi::d2_set_transform(
                 c,

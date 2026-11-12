@@ -14,7 +14,6 @@ mod custom_shaders;
 mod drawing;
 mod ffi;
 mod fonts;
-#[cfg(feature = "gpu")]
 mod presentation;
 pub use fonts::FontManager as Direct2DFontManager;
 pub use fonts::TextShaper as DirectWriteTextShaper;
@@ -103,24 +102,38 @@ fn resized(
     width: bool,
     mode: BitmapInterpolationMode,
 ) -> io::Result<Bitmap> {
+    if dimension <= 0 {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "Decode dimension must be positive",
+        ));
+    }
     let bitmap = Bitmap::decode(stream)?;
     let s = bitmap.pixel_size();
     let size = if width {
         PixelSize::new(
             dimension,
             (s.height as f64 * dimension as f64 / s.width as f64)
-                .round()
+                .floor()
                 .max(1.) as i32,
         )
     } else {
         PixelSize::new(
             (s.width as f64 * dimension as f64 / s.height as f64)
-                .round()
+                .floor()
                 .max(1.) as i32,
             dimension,
         )
     };
-    Ok(Bitmap::resized(&bitmap, size, mode))
+    let resized = Bitmap::resized(&bitmap, size, mode);
+    // A size over the device limit, or a device that is gone, leaves the result without a
+    // surface. That is a failed load, not an image.
+    if resized.is_corrupted() {
+        return Err(io::Error::other(
+            "Direct2D could not create a surface for the resized image",
+        ));
+    }
+    Ok(resized)
 }
 impl IPlatformRenderInterface for Direct2DRenderInterface {
     fn create_ellipse_geometry(&self, r: Rect) -> Arc<dyn IGeometryImpl> {
@@ -149,11 +162,13 @@ impl IPlatformRenderInterface for Direct2DRenderInterface {
         let mut stroke = BezPath::new();
         let mut fill = BezPath::new();
         for child in children {
-            if let Some(g) = child.as_any().downcast_ref::<Geometry>() {
-                stroke.extend(g.stroke.elements().iter().copied());
-                if let Some(p) = &g.fill {
-                    fill.extend(p.elements().iter().copied())
-                }
+            let g = child
+                .as_any()
+                .downcast_ref::<Geometry>()
+                .expect("Direct2D geometry group requires Direct2D children");
+            stroke.extend(g.stroke.elements().iter().copied());
+            if let Some(p) = &g.fill {
+                fill.extend(p.elements().iter().copied())
             }
         }
         Geometry::paths(stroke, Some(fill), rule)
@@ -269,18 +284,8 @@ impl IPlatformRenderInterface for Direct2DRenderInterface {
         &self,
         graphics: Option<Rc<dyn IPlatformGraphicsContext>>,
     ) -> Rc<dyn IPlatformRenderInterfaceContext> {
-        #[cfg(feature = "gpu")]
-        {
-            {
-                let _ = graphics;
-                Rc::new(presentation::Context::new())
-            }
-        }
-        #[cfg(not(feature = "gpu"))]
-        {
-            let _ = graphics;
-            Rc::new(Direct2DContext)
-        }
+        let _ = graphics;
+        Rc::new(presentation::Context::new())
     }
     fn supports_individual_round_rects(&self) -> bool {
         true

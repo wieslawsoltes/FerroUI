@@ -1614,3 +1614,343 @@ fn positioned_glyph_batches_match_individual_draws_and_keep_color_glyphs() {
         }
     }
 }
+
+/// One premultiplied BGRA pixel of a bitmap that is `width` pixels wide.
+fn pixel_at(pixels: &[u8], width: usize, x: usize, y: usize) -> [u8; 4] {
+    pixels[(y * width + x) * 4..][..4].try_into().unwrap()
+}
+
+#[test]
+fn bitmap_blending_mode_leaves_shapes_source_over() {
+    use ferroui_base::media::{imaging::BitmapBlendingMode, RenderOptions};
+    let bitmap = Bitmap::new(PixelSize::new(20, 20), Vector::new(96., 96.));
+    let mut draw = bitmap.drawing(false, None);
+    draw.clear(Colors::WHITE);
+    draw.push_render_options(RenderOptions {
+        bitmap_blending_mode: BitmapBlendingMode::Source,
+        ..Default::default()
+    });
+    draw.draw_rectangle(
+        Some(&ImmutableSolidColorBrush::from_uint32(0x80ff0000)),
+        None,
+        RoundedRect::from_rect(Rect::new(0., 0., 10., 20.)),
+        &Default::default(),
+    );
+    draw.pop_render_options();
+    draw.dispose();
+    let pixels = bitmap.pixels();
+    // Half-transparent red over white stays opaque. A copy would have replaced the white.
+    let left = pixel_at(&pixels, 20, 5, 10);
+    assert!(
+        left[0] > 110 && left[0] < 145 && left[2] >= 254 && left[3] == 255,
+        "{left:?}"
+    );
+    assert_eq!(pixel_at(&pixels, 20, 15, 10), [255, 255, 255, 255]);
+}
+
+#[test]
+fn bitmap_blending_modes_compose_bitmaps_and_do_not_leak_into_later_shapes() {
+    use ferroui_base::media::{imaging::BitmapBlendingMode, Color, RenderOptions};
+    fn solid(color: Color) -> Bitmap {
+        let bitmap = Bitmap::new(PixelSize::new(8, 8), Vector::new(96., 96.));
+        let mut draw = bitmap.drawing(false, None);
+        draw.clear(color);
+        draw.dispose();
+        bitmap
+    }
+    // The bitmap covers the left half. A half-transparent red square follows it in the
+    // bottom right quarter while the blending mode is still set.
+    fn render(source: &Bitmap, mode: BitmapBlendingMode, background: Color) -> Vec<u8> {
+        let target = Bitmap::new(PixelSize::new(20, 20), Vector::new(96., 96.));
+        let mut draw = target.drawing(false, None);
+        draw.clear(background);
+        draw.push_render_options(RenderOptions {
+            bitmap_blending_mode: mode,
+            ..Default::default()
+        });
+        draw.draw_bitmap(source, 1., Rect::new(0., 0., 8., 8.), Rect::new(0., 0., 10., 20.));
+        draw.draw_rectangle(
+            Some(&ImmutableSolidColorBrush::from_uint32(0x80ff0000)),
+            None,
+            RoundedRect::from_rect(Rect::new(10., 10., 10., 10.)),
+            &Default::default(),
+        );
+        draw.pop_render_options();
+        draw.dispose();
+        target.pixels()
+    }
+    let red = solid(Colors::RED);
+    let clear = solid(Colors::TRANSPARENT);
+
+    // Source replaces the destination, also with transparent pixels.
+    let pixels = render(&clear, BitmapBlendingMode::Source, Colors::WHITE);
+    assert_eq!(pixel_at(&pixels, 20, 5, 5), [0, 0, 0, 0]);
+    assert_eq!(pixel_at(&pixels, 20, 15, 5), [255, 255, 255, 255]);
+    let square = pixel_at(&pixels, 20, 15, 15);
+    assert!(
+        square[0] > 110 && square[0] < 145 && square[2] >= 254 && square[3] == 255,
+        "{square:?}"
+    );
+
+    // Destination keeps what is there.
+    let pixels = render(&red, BitmapBlendingMode::Destination, Colors::WHITE);
+    assert_eq!(pixel_at(&pixels, 20, 5, 5), [255, 255, 255, 255]);
+    assert_eq!(pixel_at(&pixels, 20, 15, 5), [255, 255, 255, 255]);
+
+    // Plus adds the channels.
+    let pixels = render(&red, BitmapBlendingMode::Plus, Colors::BLUE);
+    assert_eq!(pixel_at(&pixels, 20, 5, 5), [255, 0, 255, 255]);
+    assert_eq!(pixel_at(&pixels, 20, 15, 5), [255, 0, 0, 255]);
+
+    // Multiply is composed through a layer: red times blue is black.
+    let pixels = render(&red, BitmapBlendingMode::Multiply, Colors::BLUE);
+    assert_eq!(pixel_at(&pixels, 20, 5, 5), [0, 0, 0, 255]);
+    assert_eq!(pixel_at(&pixels, 20, 15, 5), [255, 0, 0, 255]);
+    let square = pixel_at(&pixels, 20, 15, 15);
+    assert!(
+        square[0] > 110 && square[0] < 145 && square[2] > 110 && square[2] < 145,
+        "{square:?}"
+    );
+    assert_eq!(square[3], 255);
+
+    // SourceIn keeps the bitmap where the destination is opaque and ends at the bitmap edge.
+    let pixels = render(&red, BitmapBlendingMode::SourceIn, Colors::BLUE);
+    assert_eq!(pixel_at(&pixels, 20, 5, 5), [0, 0, 255, 255]);
+    assert_eq!(pixel_at(&pixels, 20, 15, 5), [255, 0, 0, 255]);
+}
+
+#[test]
+fn oversized_corner_radii_shrink_together() {
+    let bitmap = Bitmap::new(PixelSize::new(80, 40), Vector::new(96., 96.));
+    let mut draw = bitmap.drawing(false, None);
+    draw.clear(Colors::TRANSPARENT);
+    // The left side has room for a third of the top left radius, so every radius is scaled
+    // by a third: 40 at the top left and 13.33 at the top right.
+    draw.draw_rectangle(
+        Some(&ImmutableSolidColorBrush::new(Colors::RED)),
+        None,
+        RoundedRect::new(
+            Rect::new(0., 0., 80., 40.),
+            Vector::new(120., 120.),
+            Vector::new(40., 40.),
+            Vector::new(0., 0.),
+            Vector::new(0., 0.),
+        ),
+        &Default::default(),
+    );
+    draw.dispose();
+    let pixels = bitmap.pixels();
+    let red = [0, 0, 255, 255];
+    assert_eq!(pixel_at(&pixels, 80, 6, 6), [0; 4]);
+    assert_eq!(pixel_at(&pixels, 80, 20, 20), red);
+    // Inside the small top right corner. A corner limited on its own to half of each side
+    // would leave this pixel empty.
+    assert_eq!(pixel_at(&pixels, 80, 74, 5), red);
+    assert_eq!(pixel_at(&pixels, 80, 78, 1), [0; 4]);
+    assert_eq!(pixel_at(&pixels, 80, 0, 39), red);
+    assert_eq!(pixel_at(&pixels, 80, 79, 39), red);
+}
+
+#[test]
+fn clip_to_a_geometry_without_area_leaves_content_visible() {
+    let bitmap = Bitmap::new(PixelSize::new(20, 20), Vector::new(96., 96.));
+    let mut draw = bitmap.drawing(false, None);
+    draw.clear(Colors::TRANSPARENT);
+    let line =
+        Direct2DRenderInterface.create_line_geometry(Point::new(2., 2.), Point::new(18., 18.));
+    draw.push_geometry_clip(&*line);
+    draw.draw_rectangle(
+        Some(&ImmutableSolidColorBrush::new(Colors::RED)),
+        None,
+        RoundedRect::from_rect(Rect::new(0., 0., 20., 20.)),
+        &Default::default(),
+    );
+    draw.pop_geometry_clip();
+    draw.dispose();
+    // An unbalanced clip would have failed the session and left a blank target.
+    assert!(bitmap
+        .pixels()
+        .chunks_exact(4)
+        .all(|p| p == [0, 0, 255, 255]));
+}
+
+#[test]
+fn pen_without_thickness_draws_nothing() {
+    use ferroui_base::media::immutable::ImmutablePen;
+    let bitmap = Bitmap::new(PixelSize::new(20, 20), Vector::new(96., 96.));
+    let mut draw = bitmap.drawing(false, None);
+    draw.clear(Colors::TRANSPARENT);
+    let pen = ImmutablePen::from_uint32(Colors::BLACK.to_uint32(), 0.);
+    draw.draw_line(Some(&pen), Point::new(2., 2.), Point::new(18., 18.));
+    draw.draw_rectangle(
+        None,
+        Some(&pen),
+        RoundedRect::from_rect(Rect::new(4., 4., 12., 12.)),
+        &Default::default(),
+    );
+    draw.draw_geometry(
+        None,
+        Some(&pen),
+        &*geometry::Geometry::ellipse(Rect::new(2., 2., 16., 16.)),
+    );
+    draw.dispose();
+    assert!(bitmap.pixels().iter().all(|&value| value == 0));
+}
+
+#[test]
+fn relative_pen_brush_spans_the_outline() {
+    use ferroui_base::media::{
+        immutable::{ImmutableGradientStop, ImmutableLinearGradientBrush, ImmutablePen},
+        GradientSpreadMethod,
+    };
+    use ferroui_base::{RelativePoint, RelativeUnit};
+    // Red up to a quarter of the width, blue after it.
+    let brush = ImmutableLinearGradientBrush::new(
+        &[
+            ImmutableGradientStop::new(0., Colors::RED),
+            ImmutableGradientStop::new(0.24, Colors::RED),
+            ImmutableGradientStop::new(0.26, Colors::BLUE),
+            ImmutableGradientStop::new(1., Colors::BLUE),
+        ],
+        1.,
+        None,
+        None,
+        GradientSpreadMethod::Pad,
+        Some(RelativePoint::new(0., 0., RelativeUnit::Relative)),
+        Some(RelativePoint::new(1., 0., RelativeUnit::Relative)),
+        None,
+    );
+    let pen = ImmutablePen::with_brush(Some(Rc::new(brush)), 20.);
+    let bitmap = Bitmap::new(PixelSize::new(60, 60), Vector::new(96., 96.));
+    let mut draw = bitmap.drawing(false, None);
+    draw.clear(Colors::TRANSPARENT);
+    draw.draw_rectangle(
+        None,
+        Some(&pen),
+        RoundedRect::from_rect(Rect::new(20., 20., 20., 20.)),
+        &Default::default(),
+    );
+    draw.dispose();
+    let pixels = bitmap.pixels();
+    // The outline covers 10 to 50, so the colors change at 20. Measured over the
+    // rectangle alone they would change at 25.
+    assert_eq!(pixel_at(&pixels, 60, 14, 15), [0, 0, 255, 255]);
+    assert_eq!(pixel_at(&pixels, 60, 22, 15), [255, 0, 0, 255]);
+    assert_eq!(pixel_at(&pixels, 60, 45, 15), [255, 0, 0, 255]);
+}
+
+#[test]
+fn unusable_sizes_are_errors_or_empty_layers() {
+    for dimension in [0, -4] {
+        for width in [true, false] {
+            let mode = BitmapInterpolationMode::HighQuality;
+            let error = resized(&mut io::empty(), dimension, width, mode).err();
+            assert_eq!(error.map(|error| error.kind()), Some(io::ErrorKind::InvalidInput));
+        }
+    }
+    let bitmap = Bitmap::new(PixelSize::new(4, 4), Vector::new(96., 96.));
+    let mut draw = bitmap.drawing(false, None);
+    draw.clear(Colors::RED);
+    // A layer without a size is empty. One over the device limit has no surface.
+    assert!(!draw.create_layer(PixelSize::new(0, 8)).is_corrupted());
+    assert!(draw
+        .create_layer(PixelSize::new(20_000, 20_000))
+        .is_corrupted());
+    draw.dispose();
+    let mut png = Vec::new();
+    bitmap
+        .save(
+            &mut png,
+            &ferroui_base::media::imaging::PngBitmapEncoderOptions::default().into(),
+        )
+        .unwrap();
+    let half = resized(&mut &png[..], 2, true, BitmapInterpolationMode::HighQuality);
+    assert_eq!(half.ok().map(|b| b.pixel_size()), Some(PixelSize::new(2, 2)));
+    // A result over the device limit is a failed load.
+    let oversized = resized(&mut &png[..], 20_000, true, BitmapInterpolationMode::HighQuality);
+    assert!(oversized.is_err());
+}
+
+#[test]
+fn compositing_layers_reject_values_that_cannot_be_composed() {
+    use ferroui_base::media::imaging::BitmapBlendingMode;
+    let bitmap = Bitmap::new(PixelSize::new(20, 20), Vector::new(96., 96.));
+    let mut draw = bitmap.drawing(false, None);
+    draw.clear(Colors::WHITE);
+    let bounds = Rect::new(0., 0., 20., 20.);
+    let mode = BitmapBlendingMode::SourceOver;
+    assert!(!draw.try_push_compositing_layer(mode, f64::NAN, bounds));
+    assert!(!draw.try_push_compositing_layer(mode, 1.5, bounds));
+    assert!(!draw.try_push_compositing_layer(mode, -0.5, bounds));
+    assert!(!draw.try_push_compositing_layer(mode, 1., Rect::new(0., 0., f64::INFINITY, 20.)));
+    assert!(draw.try_push_compositing_layer(mode, 0.5, bounds));
+    draw.draw_rectangle(
+        Some(&ImmutableSolidColorBrush::new(Colors::RED)),
+        None,
+        RoundedRect::from_rect(bounds),
+        &Default::default(),
+    );
+    draw.pop_compositing_layer();
+    draw.dispose();
+    // A rejected layer was not pushed: the session ends balanced and keeps its pixels.
+    let pixel = pixel_at(&bitmap.pixels(), 20, 10, 10);
+    assert!(
+        pixel[0] > 110 && pixel[0] < 145 && pixel[2] >= 254 && pixel[3] == 255,
+        "{pixel:?}"
+    );
+}
+
+#[test]
+fn character_fallback_starts_from_the_system_font_for_unknown_families() {
+    let manager = fonts::FontManager::default();
+    // A Latin letter and a character that only the emoji font of the system has.
+    for codepoint in [0x41, 0x1f600] {
+        assert!(
+            manager
+                .try_match_character(
+                    codepoint,
+                    FontStyle::Normal,
+                    FontWeight::Normal,
+                    FontStretch::Normal,
+                    Some("FerroUI deliberate missing font family"),
+                    None,
+                )
+                .is_some(),
+            "no fallback for U+{codepoint:04X}"
+        );
+    }
+}
+
+#[test]
+fn embedded_families_select_the_nearest_face_and_report_its_weight() {
+    use ferroui_base::media::fonts::OpenTypeTag;
+    let manager = fonts::FontManager::default();
+    let data = include_bytes!("../../FerroUI.Base/test_assets/fonts/InterVariable.ttf");
+    let tag = OpenTypeTag::parse("wght");
+    let mut family = String::new();
+    // The heavy instance is loaded twice and is kept once.
+    for weight in [900, 100, 900] {
+        let face = manager
+            .create_variable_typeface_from_stream(
+                &mut &data[..],
+                FontSimulations::None,
+                &[(tag, f64::from(weight))],
+            )
+            .unwrap();
+        assert_eq!(face.weight(), FontWeight(weight));
+        family = face.family_name();
+    }
+    // Bold requests go to the heavier face and light requests to the lighter one. A
+    // regular request has nothing in 400 to 500 and takes the lighter face.
+    for (requested, nearest) in [(700, 900), (800, 900), (200, 100), (400, 100)] {
+        let face = manager
+            .try_create_glyph_typeface(
+                &family,
+                FontStyle::Normal,
+                FontWeight(requested),
+                FontStretch::Normal,
+            )
+            .unwrap();
+        assert_eq!(face.weight(), FontWeight(nearest), "weight {requested}");
+    }
+}

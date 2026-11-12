@@ -123,17 +123,15 @@ extern "C" {
         phase: f64,
     ) -> Ptr;
     pub fn d2_surface(w: usize, h: usize) -> Ptr;
-    pub fn d2_read_pixels(ctx: Ptr, out: *mut u8, len: usize);
+    /// 1 when `len` bytes of premultiplied BGRA were read, 0 when the read failed.
+    pub fn d2_read_pixels(ctx: Ptr, out: *mut u8, len: usize) -> i32;
     pub fn d2_write_pixels(ctx: Ptr, data: *const u8, len: usize);
-    #[cfg(feature = "gpu")]
     pub fn d2_retain(p: Ptr) -> Ptr;
     pub fn d2_snapshot(ctx: Ptr) -> Ptr;
     pub fn d2_save(ctx: Ptr);
     pub fn d2_restore(ctx: Ptr);
     pub fn d2_clear(ctx: Ptr, w: f64, h: f64, r: f64, g: f64, b: f64, a: f64);
     pub fn d2_clip(ctx: Ptr, path: Ptr, evenodd: i32);
-    #[cfg(not(feature = "gpu"))]
-    pub fn d2_fill(ctx: Ptr, path: Ptr, evenodd: i32, r: f64, g: f64, b: f64, a: f64);
     pub fn d2_gradient(
         ctx: Ptr,
         colors: *const f64,
@@ -190,6 +188,11 @@ impl Owned {
         );
         Self(p)
     }
+    /// The reference, or `None` when the native call failed: for the calls whose failure is a
+    /// state the caller handles (a size out of range, a lost device), not a broken invariant.
+    pub unsafe fn try_new(p: Ptr) -> Option<Self> {
+        (!p.is_null()).then(|| Self(p))
+    }
     pub fn bytes(&self) -> Vec<u8> {
         unsafe {
             let length = d2_data_len(self.0);
@@ -199,6 +202,13 @@ impl Owned {
                 std::slice::from_raw_parts(d2_data_bytes(self.0), length).to_vec()
             }
         }
+    }
+}
+/// A null reference: the state of a container whose native resource could not be created.
+/// Releasing it does nothing.
+impl Default for Owned {
+    fn default() -> Self {
+        Self(std::ptr::null_mut())
     }
 }
 impl Drop for Owned {
@@ -222,7 +232,6 @@ extern "C" {
     );
 }
 
-#[cfg(feature = "gpu")]
 extern "C" {
     pub fn d2_gpu_draw_surface(
         ctx: Ptr,
@@ -261,7 +270,6 @@ extern "C" {
     );
 }
 
-#[cfg(feature = "gpu")]
 extern "C" {
     pub fn d2_gpu_blur(ctx: Ptr, sigma: f64, ax: f64, ay: f64, bx: f64, by: f64);
     pub fn d2_gpu_try_draw_box_shadow(ctx: Ptr, key: &[u64; 24], x: f32, y: f32) -> i32;
@@ -277,6 +285,9 @@ extern "C" {
         data: &[f32; 8],
     );
     pub fn d2_gpu_layer_snapshot(ctx: Ptr) -> Ptr;
+    /// Drops the clips the current layer took over from its parent: the input of a blur or a
+    /// shadow reaches past them, and the parent applies them when the layer is composed.
+    pub fn d2_gpu_reset_effect_input_clip(ctx: Ptr);
     pub fn d2_gpu_filter(ctx: Ptr, kind: i32, data: *const f32, length: usize, secondary: Ptr);
     pub fn d2_gpu_defer_layer_filter(ctx: Ptr, kind: i32, data: *const f32, length: usize);
     pub fn d2_gpu_draw_lighting(
@@ -290,12 +301,10 @@ extern "C" {
     );
 }
 
-#[cfg(feature = "gpu")]
 extern "C" {
     pub fn d2_gpu_gradient_options(ctx: Ptr, spread: i32, aspect: f64, angle: f64);
 }
 
-#[cfg(feature = "gpu")]
 extern "C" {
     pub fn d2_gpu_draw_tile(
         ctx: Ptr,
@@ -309,17 +318,14 @@ extern "C" {
     );
 }
 
-#[cfg(feature = "gpu")]
 extern "C" {
     pub fn d2_gpu_render_options(ctx: Ptr, blend: i32, aliased: i32, interpolation: i32);
 }
 
-#[cfg(feature = "gpu")]
 extern "C" {
     pub fn d2_gpu_take_layer(ctx: Ptr) -> Ptr;
 }
 
-#[cfg(feature = "gpu")]
 extern "C" {
     pub fn d2_gpu_acrylic(ctx: Ptr, colors: *const f64, noise: Ptr, replace: i32);
 }

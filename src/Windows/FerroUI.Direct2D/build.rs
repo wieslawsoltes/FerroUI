@@ -5,25 +5,17 @@ fn main() {
     if std::env::var("CARGO_CFG_TARGET_OS").as_deref() != Ok("windows") {
         return;
     }
+    // The native part is C++ against the Windows SDK and links the MSVC runtime.
+    assert!(
+        std::env::var("CARGO_CFG_TARGET_ENV").as_deref() == Ok("msvc"),
+        "ferroui-direct2d builds for the windows-msvc targets only (the target is {})",
+        std::env::var("TARGET").unwrap_or_default()
+    );
     let output = std::path::PathBuf::from(std::env::var_os("OUT_DIR").unwrap());
     let fxc = std::env::var_os("FXC")
         .map(std::path::PathBuf::from)
-        .unwrap_or_else(|| {
-            let sdk = std::path::PathBuf::from(
-                std::env::var_os("ProgramFiles(x86)").expect("Windows SDK location"),
-            )
-            .join("Windows Kits/10/bin");
-            let mut versions: Vec<_> = std::fs::read_dir(sdk)
-                .expect("Windows 10 SDK with fxc.exe")
-                .filter_map(Result::ok)
-                .map(|v| v.path().join("x64/fxc.exe"))
-                .filter(|p| p.is_file())
-                .collect();
-            versions.sort();
-            versions
-                .pop()
-                .expect("Install the Windows SDK shader compiler or set FXC")
-        });
+        .or_else(sdk_shader_compiler)
+        .expect("Install the Windows SDK (it has the shader compiler fxc.exe), or set FXC to it");
     let status = std::process::Command::new(fxc)
         .args(["/nologo", "/T", "cs_5_0", "/E", "main", "/O3", "/Fh"])
         .arg(output.join("effects_shader.h"))
@@ -57,4 +49,38 @@ fn main() {
     ] {
         println!("cargo:rustc-link-lib={library}");
     }
+}
+
+/// `fxc.exe` of the newest installed Windows SDK, the one of the host architecture when the SDK
+/// has it (the x64 one runs on an ARM64 host too, emulated).
+fn sdk_shader_compiler() -> Option<std::path::PathBuf> {
+    let host = std::env::var("HOST").unwrap_or_default();
+    let architectures: &[&str] = match host.split('-').next() {
+        Some("aarch64") => &["arm64", "x64", "x86"],
+        Some("x86_64") => &["x64", "x86"],
+        _ => &["x86", "x64"],
+    };
+    let version = |path: &std::path::Path| -> Vec<u64> {
+        let name = path.file_name().and_then(|name| name.to_str());
+        name.unwrap_or_default()
+            .split('.')
+            .map(|part| part.parse().unwrap_or(0))
+            .collect()
+    };
+    ["ProgramFiles(x86)", "ProgramFiles"]
+        .iter()
+        .filter_map(std::env::var_os)
+        .filter_map(|root| {
+            std::fs::read_dir(std::path::PathBuf::from(root).join("Windows Kits/10/bin")).ok()
+        })
+        .flat_map(|versions| versions.filter_map(Result::ok).map(|entry| entry.path()))
+        .filter_map(|sdk| {
+            let compiler = architectures
+                .iter()
+                .map(|architecture| sdk.join(architecture).join("fxc.exe"))
+                .find(|compiler| compiler.is_file())?;
+            Some((version(&sdk), compiler))
+        })
+        .max_by(|a, b| a.0.cmp(&b.0))
+        .map(|(_, compiler)| compiler)
 }

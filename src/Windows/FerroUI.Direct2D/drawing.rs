@@ -17,10 +17,8 @@ use std::{
     rc::Rc,
     sync::{Arc, OnceLock},
 };
-#[cfg(feature = "gpu")]
 #[path = "effects.rs"]
 mod effects;
-#[cfg(feature = "gpu")]
 #[path = "tiles.rs"]
 mod tiles;
 
@@ -28,7 +26,7 @@ pub(crate) fn unsupported(feature: &'static str) {
     static WARNED: std::sync::Mutex<Vec<&str>> = std::sync::Mutex::new(Vec::new());
     let mut warned = WARNED.lock().unwrap();
     if !warned.contains(&feature) {
-        eprintln!("Direct2D prototype: unsupported {feature}");
+        eprintln!("ferroui-direct2d: unsupported {feature}");
         warned.push(feature)
     }
 }
@@ -243,18 +241,40 @@ fn color(c: Color, opacity: f64) -> [f64; 4] {
 fn rounded(r: RoundedRect) -> BezPath {
     let b = r.rect;
     let mut p = BezPath::new();
-    let [tl, tr, br, bl] = [
+    if b.width <= 0. || b.height <= 0. {
+        return p;
+    }
+    let mut radii = [
         r.radii_top_left,
         r.radii_top_right,
         r.radii_bottom_right,
         r.radii_bottom_left,
     ]
     .map(|v| {
-        Vector::new(
-            v.x.max(0.).min(b.width / 2.),
-            v.y.max(0.).min(b.height / 2.),
-        )
+        if !v.x.is_finite() || !v.y.is_finite() || v.x <= 0. || v.y <= 0. {
+            Vector::ZERO
+        } else {
+            v
+        }
     });
+    // Neighboring radii share the available side. Scale all corners together
+    // only when their sums overlap, preserving asymmetric elliptical corners.
+    let [tl, tr, br, bl] = radii;
+    let mut scale = 1.0_f64;
+    for (length, sum) in [
+        (b.width, tl.x + tr.x),
+        (b.width, bl.x + br.x),
+        (b.height, tl.y + bl.y),
+        (b.height, tr.y + br.y),
+    ] {
+        if sum > length {
+            scale = scale.min(length / sum);
+        }
+    }
+    for radius in &mut radii {
+        *radius *= scale;
+    }
+    let [tl, tr, br, bl] = radii;
     let k = 0.5522847498307936;
     p.move_to((b.x + tl.x, b.y));
     p.line_to((b.right() - tr.x, b.y));
@@ -285,13 +305,11 @@ fn rounded(r: RoundedRect) -> BezPath {
     p
 }
 
-#[cfg(feature = "gpu")]
 struct CachedRoundedPath {
     key: [u64; 12],
     path: Arc<NativePath>,
 }
 
-#[cfg(feature = "gpu")]
 fn rounded_native(r: RoundedRect) -> Arc<NativePath> {
     ferroui_base::ferro_thread_local! {
         static PATHS: RefCell<Box<[Option<CachedRoundedPath>]>> =
@@ -365,9 +383,7 @@ pub struct DrawingContext {
     masks: Vec<(Option<SharedBrush>, Rect, Matrix)>,
     options: Vec<RenderOptions>,
     text_options: Vec<TextOptions>,
-    #[cfg(feature = "gpu")]
     effects: Vec<effects::State>,
-    #[cfg(feature = "gpu")]
     pixels: Vec<effects::PixelState>,
 }
 impl DrawingContext {
@@ -387,9 +403,7 @@ impl DrawingContext {
             masks: Vec::new(),
             options: Vec::new(),
             text_options: Vec::new(),
-            #[cfg(feature = "gpu")]
             effects: Vec::new(),
-            #[cfg(feature = "gpu")]
             pixels: Vec::new(),
         }
     }
@@ -412,16 +426,15 @@ impl DrawingContext {
                 self.scale.x,
                 self.scale.y,
             );
-            #[cfg(feature = "gpu")]
-            {
-                let options = self.options.last().copied().unwrap_or_default();
-                ffi::d2_gpu_render_options(
-                    c,
-                    blend(options.bitmap_blending_mode).unwrap_or(28),
-                    (options.edge_mode == EdgeMode::Aliased) as i32,
-                    options.bitmap_interpolation_mode as i32,
-                );
-            }
+            // The bitmap blending mode belongs to bitmap draws only. Every other
+            // primitive is blended source-over; draw_bitmap applies the mode itself.
+            let options = self.options.last().copied().unwrap_or_default();
+            ffi::d2_gpu_render_options(
+                c,
+                0,
+                (options.edge_mode == EdgeMode::Aliased) as i32,
+                options.bitmap_interpolation_mode as i32,
+            );
         });
         true
     }
@@ -441,13 +454,12 @@ impl DrawingContext {
                 m.m31 * self.scale.x,
                 m.m32 * self.scale.y,
             ],
-            blend: blend(options.bitmap_blending_mode).unwrap_or(28),
+            blend: 0,
             aliased: (options.edge_mode == EdgeMode::Aliased) as i32,
             interpolation: options.bitmap_interpolation_mode as i32,
             ..Default::default()
         })
     }
-    #[cfg(feature = "gpu")]
     fn queue_solid(
         &self,
         geometry: impl FnOnce() -> Arc<NativePath>,
@@ -464,7 +476,6 @@ impl DrawingContext {
         }
     }
     fn fill(&mut self, path: &BezPath, rule: FillRule, brush: &dyn IBrush, bounds: impl FnOnce() -> Rect) {
-        #[cfg(feature = "gpu")]
         if let Some(paint) = solid_color(brush) {
             self.queue_solid(
                 || Arc::new(NativePath(geometry::native(path))),
@@ -479,22 +490,6 @@ impl DrawingContext {
         }
         let native = geometry::native(path);
         let opacity = brush.opacity();
-        #[cfg(not(feature = "gpu"))]
-        if let Some(solid_color) = solid_color(brush) {
-            let [r, g, b, a] = color(solid_color, opacity);
-            self.bitmap.context(|c| unsafe {
-                ffi::d2_fill(
-                    c,
-                    native.0,
-                    i32::from(rule == FillRule::EvenOdd),
-                    r,
-                    g,
-                    b,
-                    a,
-                )
-            });
-            return;
-        }
         let bounds = bounds();
         self.bitmap.context(|c| unsafe {
             ffi::d2_save(c);
@@ -538,7 +533,6 @@ impl DrawingContext {
                     self.scale.y,
                 )
             });
-            #[cfg(feature = "gpu")]
             self.bitmap.context(|c| unsafe {
                 ffi::d2_gpu_gradient_options(c, gradient.spread_method() as i32, 1., 0.)
             });
@@ -572,7 +566,6 @@ impl DrawingContext {
                     let a = g.gradient_origin().to_pixels_rect(bounds);
                     let b = g.center().to_pixels_rect(bounds);
                     let radius = g.radius_x().to_value(bounds.width).abs();
-                    #[cfg(feature = "gpu")]
                     self.bitmap.context(|c| unsafe {
                         ffi::d2_gpu_gradient_options(
                             c,
@@ -596,75 +589,35 @@ impl DrawingContext {
                         )
                     });
                 } else if let Some(g) = brush.as_conic_gradient_brush() {
-                    #[cfg(feature = "gpu")]
-                    {
-                        let center = g.center().to_pixels_rect(bounds);
-                        self.bitmap.context(|c| unsafe {
-                            ffi::d2_gpu_gradient_options(
-                                c,
-                                gradient.spread_method() as i32,
-                                1.,
-                                g.angle(),
-                            );
-                            ffi::d2_gradient(
-                                c,
-                                colors.as_ptr(),
-                                locations.as_ptr(),
-                                locations.len(),
-                                center.x,
-                                center.y,
-                                center.x,
-                                center.y,
-                                0.,
-                                2,
-                            );
-                        });
-                    }
-                    #[cfg(not(feature = "gpu"))]
-                    {
-                        let _ = g;
-                        unsupported("conic gradient");
-                    }
+                    let center = g.center().to_pixels_rect(bounds);
+                    self.bitmap.context(|c| unsafe {
+                        ffi::d2_gpu_gradient_options(
+                            c,
+                            gradient.spread_method() as i32,
+                            1.,
+                            g.angle(),
+                        );
+                        ffi::d2_gradient(
+                            c,
+                            colors.as_ptr(),
+                            locations.as_ptr(),
+                            locations.len(),
+                            center.x,
+                            center.y,
+                            center.x,
+                            center.y,
+                            0.,
+                            2,
+                        );
+                    });
                 }
             }
         } else if let Some(image) = brush.as_image_brush() {
-            #[cfg(feature = "gpu")]
             if let Some(bitmap) = image.source().and_then(|s| s.get_bitmap()) {
                 self.tile_brush(image, &*bitmap, bounds);
             }
-            #[cfg(not(feature = "gpu"))]
-            {
-                if let Some(bitmap) = image.source().and_then(|s| s.get_bitmap()) {
-                    let source_size = bitmap.pixel_size().to_size_with_dpi(bitmap.dpi().x);
-                    let calc = ferroui_base::rendering::utilities::TileBrushCalculator::from_brush(
-                        image,
-                        source_size,
-                        bounds.size(),
-                    );
-                    let d = calc.destination_rect();
-                    let src = calc.source_rect();
-                    let dpi = bitmap.dpi();
-                    self.draw_bitmap(
-                        &*bitmap,
-                        opacity,
-                        Rect::new(
-                            src.x * dpi.x / 96.,
-                            src.y * dpi.y / 96.,
-                            src.width * dpi.x / 96.,
-                            src.height * dpi.y / 96.,
-                        ),
-                        Rect::new(bounds.x + d.x, bounds.y + d.y, d.width, d.height),
-                    );
-                }
-            }
         } else if let Some(scene) = brush.as_scene_brush() {
-            #[cfg(feature = "gpu")]
             self.scene_brush(scene, bounds);
-            #[cfg(not(feature = "gpu"))]
-            if let Some(content) = scene.create_content() {
-                content.render(self, None);
-                content.dispose();
-            }
         } else {
             unsupported(
                 brush
@@ -682,16 +635,27 @@ impl DrawingContext {
         fill: Option<&BezPath>,
         rule: FillRule,
     ) {
+        // Relative brush coordinates resolve against the bounds of the geometry
+        // for the fill, and against those bounds grown by half the pen thickness
+        // for the outline.
         let bounds = || {
-            let b = stroke.bounding_box();
+            let b = match fill.filter(|p| !p.is_empty()) {
+                Some(fill) if stroke.is_empty() => fill.bounding_box(),
+                Some(fill) => stroke.bounding_box().union(fill.bounding_box()),
+                None => stroke.bounding_box(),
+            };
             Rect::new(b.x0, b.y0, b.width(), b.height())
         };
         if let (Some(brush), Some(path)) = (brush, fill) {
             self.fill(path, rule, brush, bounds)
         }
         if let Some(pen) = pen {
+            let thickness = pen.thickness();
+            // A pen without a positive thickness has no outline to draw.
+            if thickness.is_nan() || thickness <= 0. {
+                return;
+            }
             if let Some(brush) = pen.brush() {
-                #[cfg(feature = "gpu")]
                 if let Some(paint) = solid_color(&*brush) {
                     self.queue_solid(
                         || Arc::new(NativePath(Geometry::widened(stroke, pen))),
@@ -705,7 +669,7 @@ impl DrawingContext {
                     &Geometry::stroked(stroke, pen),
                     FillRule::NonZero,
                     &*brush,
-                    bounds,
+                    || bounds().inflate(thickness / 2.),
                 )
             }
         }
@@ -742,10 +706,49 @@ impl IDrawingContextImpl for DrawingContext {
             unsupported("foreign bitmap");
             return;
         };
+        let options = self.options.last().copied().unwrap_or_default();
+        // Destination keeps what is already there, so the bitmap is not drawn.
+        let Some(mode) = blend(options.bitmap_blending_mode) else {
+            return;
+        };
         if !self.prepare() {
             return;
         }
-        bitmap.draw_to(&self.bitmap, src, dst, opacity)
+        let aliased = (options.edge_mode == EdgeMode::Aliased) as i32;
+        let interpolation = options.bitmap_interpolation_mode as i32;
+        match mode {
+            0 => bitmap.draw_to(&self.bitmap, src, dst, opacity),
+            // Copy and add are blends of the bitmap primitive itself. The blend
+            // is reset afterwards so that later primitives and layers stay source-over.
+            17 | 27 => {
+                self.bitmap.context(|c| unsafe {
+                    ffi::d2_gpu_render_options(c, mode, aliased, interpolation)
+                });
+                bitmap.draw_to(&self.bitmap, src, dst, opacity);
+                self.bitmap
+                    .context(|c| unsafe { ffi::d2_gpu_render_options(c, 0, aliased, interpolation) });
+            }
+            // Every other mode is composed by a layer that holds only the bitmap.
+            _ => {
+                // These modes change the destination where the layer is transparent.
+                // The blend has to end at the edge of the drawn rectangle.
+                let bounded = matches!(mode, 18 | 19 | 22 | 24);
+                if bounded {
+                    self.push_clip(dst);
+                }
+                self.bitmap
+                    .context(|c| unsafe { ffi::d2_begin_layer(c, 1., mode) });
+                // The layer starts with default options: install the transform and
+                // the sampling options again before the bitmap is drawn into it.
+                if self.prepare() {
+                    bitmap.draw_to(&self.bitmap, src, dst, opacity);
+                }
+                self.bitmap.context(|c| unsafe { ffi::d2_end_layer(c) });
+                if bounded {
+                    self.pop_clip();
+                }
+            }
+        }
     }
     fn draw_bitmap_with_mask(
         &mut self,
@@ -778,6 +781,8 @@ impl IDrawingContextImpl for DrawingContext {
     ) {
         if let Some(g) = g.as_any().downcast_ref::<Geometry>() {
             self.shape(brush, pen, &g.stroke, g.fill.as_ref(), g.rule)
+        } else {
+            unsupported("foreign geometry")
         }
     }
     fn draw_rectangle(
@@ -787,59 +792,24 @@ impl IDrawingContextImpl for DrawingContext {
         r: RoundedRect,
         shadows: &BoxShadows,
     ) {
-        #[cfg(feature = "gpu")]
-        {
-            for shadow in shadows.iter().filter(|s| !s.is_inset) {
-                self.box_shadow_gpu(r, &shadow);
-            }
-            let mut path = None;
-            if let Some(brush) = brush {
-                if let Some(paint) = solid_color(brush) {
-                    self.queue_solid(|| rounded_native(r), paint, brush.opacity(), FillRule::NonZero);
-                } else {
-                    let path = path.insert(rounded(r));
-                    self.shape(Some(brush), None, path, Some(path), FillRule::NonZero);
-                }
-            }
-            for shadow in shadows.iter().filter(|s| s.is_inset) {
-                self.box_shadow_gpu(r, &shadow);
-            }
-            if let Some(pen) = pen {
-                let path = path.get_or_insert_with(|| rounded(r));
-                self.shape(None, Some(pen), path, None, FillRule::NonZero);
-            }
-            return;
+        for shadow in shadows.iter().filter(|s| !s.is_inset) {
+            self.box_shadow_gpu(r, &shadow);
         }
-        #[cfg(not(feature = "gpu"))]
-        {
-            let path = rounded(r);
-            for shadow in shadows.iter() {
-                if shadow.is_inset {
-                    unsupported("inset shadow");
-                    continue;
-                }
-                if !self.prepare() {
-                    return;
-                }
-                let [red, g, b, a] = color(shadow.color, 1.);
-                self.bitmap.context(|c| unsafe {
-                    ffi::d2_save(c);
-                    ffi::d2_shadow(
-                        c,
-                        shadow.offset_x,
-                        shadow.offset_y,
-                        shadow.blur,
-                        red,
-                        g,
-                        b,
-                        a,
-                    )
-                });
-                let shadow_brush = immutable::ImmutableSolidColorBrush::new(shadow.color);
-                self.fill(&path, FillRule::NonZero, &shadow_brush, || r.rect);
-                self.bitmap.context(|c| unsafe { ffi::d2_restore(c) });
+        let mut path = None;
+        if let Some(brush) = brush {
+            if let Some(paint) = solid_color(brush) {
+                self.queue_solid(|| rounded_native(r), paint, brush.opacity(), FillRule::NonZero);
+            } else {
+                let path = path.insert(rounded(r));
+                self.shape(Some(brush), None, path, Some(path), FillRule::NonZero);
             }
-            self.shape(brush, pen, &path, Some(&path), FillRule::NonZero)
+        }
+        for shadow in shadows.iter().filter(|s| s.is_inset) {
+            self.box_shadow_gpu(r, &shadow);
+        }
+        if let Some(pen) = pen {
+            let path = path.get_or_insert_with(|| rounded(r));
+            self.shape(None, Some(pen), path, None, FillRule::NonZero);
         }
     }
     fn draw_region(
@@ -878,7 +848,6 @@ impl IDrawingContextImpl for DrawingContext {
             let Some(mut command) = self.command(2) else {
                 return;
             };
-            #[cfg(feature = "gpu")]
             let (shift, aliased) = {
                 let text = self.text_options.last().copied().unwrap_or_default();
                 let options = self.options.last().copied().unwrap_or_default();
@@ -899,8 +868,6 @@ impl IDrawingContextImpl for DrawingContext {
                 };
                 (shift, (mode == TextRenderingMode::Alias) as i32)
             };
-            #[cfg(not(feature = "gpu"))]
-            let (shift, aliased) = (0., 0);
             let positioned = run.positioned();
             command.resource = positioned.0 .0;
             command.params = [r, g, b, a];
@@ -912,7 +879,15 @@ impl IDrawingContextImpl for DrawingContext {
         }
     }
     fn create_layer(&mut self, size: PixelSize) -> Rc<dyn IDrawingContextLayerImpl> {
+        // A size that is not positive or is over the device limit gives a layer
+        // without a surface: nothing is drawn into it and it draws nothing.
         Rc::new(Bitmap::new(size, Vector::new(96., 96.)))
+    }
+    fn prefers_bounded_effect_targets(&self) -> bool {
+        // A layer pushed on this context is a texture of the size of the whole
+        // target; the graph of an effect brush is evaluated in targets of the
+        // size of the brush instead.
+        true
     }
     fn push_clip(&mut self, r: Rect) {
         let Some(mut command) = self.command(0) else {
@@ -927,7 +902,6 @@ impl IDrawingContextImpl for DrawingContext {
             self.push_clip(r.rect);
             return;
         }
-        #[cfg(feature = "gpu")]
         if let Some(mut command) = self.command(4) {
             let geometry = rounded_native(r);
             command.resource = geometry.0 .0;
@@ -970,7 +944,16 @@ impl IDrawingContextImpl for DrawingContext {
     fn pop_layer(&mut self) {
         self.bitmap.context(|c| unsafe { ffi::d2_end_layer(c) })
     }
-    fn try_push_compositing_layer(&mut self, b: BitmapBlendingMode, opacity: f64, _: Rect) -> bool {
+    fn try_push_compositing_layer(&mut self, b: BitmapBlendingMode, opacity: f64, bounds: Rect) -> bool {
+        if ![bounds.x, bounds.y, bounds.width, bounds.height, opacity]
+            .iter()
+            .all(|value| value.is_finite())
+            || bounds.width < 0.
+            || bounds.height < 0.
+            || !(0.0..=1.0).contains(&opacity)
+        {
+            return false;
+        }
         if let Some(mode) = blend(b) {
             self.bitmap
                 .context(|c| unsafe { ffi::d2_begin_layer(c, opacity, mode) });
@@ -1031,11 +1014,17 @@ impl IDrawingContextImpl for DrawingContext {
             });
             return;
         }
+        // The save is always made so that the pop stays balanced. A geometry
+        // without a fill, such as a line, has no area and does not clip.
         self.bitmap.context(|c| unsafe { ffi::d2_save(c) });
-        if let Some(g) = g.as_any().downcast_ref::<Geometry>() {
-            let path = geometry::native(g.fill.as_ref().unwrap_or(&g.stroke));
+        if let Some((fill, rule)) = g
+            .as_any()
+            .downcast_ref::<Geometry>()
+            .and_then(|g| g.fill.as_ref().map(|fill| (fill, g.rule)))
+        {
+            let path = geometry::native(fill);
             self.bitmap.context(|c| unsafe {
-                ffi::d2_clip(c, path.0, i32::from(g.rule == FillRule::EvenOdd))
+                ffi::d2_clip(c, path.0, i32::from(rule == FillRule::EvenOdd))
             })
         }
     }
@@ -1056,19 +1045,16 @@ impl IDrawingContextImpl for DrawingContext {
     fn pop_text_options(&mut self) {
         self.text_options.pop();
     }
-    #[cfg(feature = "gpu")]
     fn as_drawing_context_impl_with_effects(
         &mut self,
     ) -> Option<&mut dyn IDrawingContextImplWithEffects> {
         Some(self)
     }
-    #[cfg(feature = "gpu")]
     fn as_drawing_context_impl_with_layer_effects(
         &mut self,
     ) -> Option<&mut dyn IDrawingContextImplWithLayerEffects> {
         Some(self)
     }
-    #[cfg(feature = "gpu")]
     fn as_drawing_context_with_acrylic_like_support(
         &mut self,
     ) -> Option<&mut dyn IDrawingContextWithAcrylicLikeSupport> {

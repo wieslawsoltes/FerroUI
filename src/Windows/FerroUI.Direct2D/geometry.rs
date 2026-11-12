@@ -173,8 +173,8 @@ impl Geometry {
             })
             .unwrap_or_default();
         let offset = dash.as_ref().map_or(0., |d| d.offset() * pen.thickness());
-        unsafe {
-            Owned::new(ffi::d2_stroke(
+        let widened = unsafe {
+            Owned::try_new(ffi::d2_stroke(
                 p.0,
                 pen.thickness(),
                 cap,
@@ -184,7 +184,9 @@ impl Geometry {
                 values.len(),
                 offset,
             ))
-        }
+        };
+        // A stroke the system cannot widen has no outline: it is an empty geometry.
+        widened.unwrap_or_else(|| native(&BezPath::new()))
     }
 }
 impl IGeometryImpl for Geometry {
@@ -263,7 +265,10 @@ impl IGeometryImpl for Geometry {
         IntersectionResult::Intersects
     }
     fn intersect(&self, g: &dyn IGeometryImpl) -> Option<Arc<dyn IGeometryImpl>> {
-        Some(Self::combine(self, g, GeometryCombineMode::Intersect))
+        // A geometry of another backend cannot be combined: there is no intersection to return.
+        g.as_any().is::<Self>().then(|| {
+            Self::combine(self, g, GeometryCombineMode::Intersect) as Arc<dyn IGeometryImpl>
+        })
     }
     fn with_transform(&self, m: Matrix) -> Arc<dyn ITransformedGeometryImpl> {
         Arc::new(Self {

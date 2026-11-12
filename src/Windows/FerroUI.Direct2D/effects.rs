@@ -52,6 +52,12 @@ impl DrawingContext {
             }
         }
         self.push_layer(bounds.unwrap_or_default());
+        if matches!(filter, Filter::Blur { .. } | Filter::Shadow { .. }) {
+            // The input of a blur is not clipped by the clips of the target: the pixels a clip
+            // would cut off are sampled by the kernel. The output clip is pushed before the layer.
+            self.bitmap
+                .context(|c| unsafe { ffi::d2_gpu_reset_effect_input_clip(c) });
+        }
         if !clip_output {
             if let Some(bounds) = bounds {
                 self.push_clip(bounds);
@@ -89,12 +95,14 @@ impl DrawingContext {
                     offset,
                     color,
                 } => {
-                    let original = ffi::Owned::new(ffi::d2_gpu_layer_snapshot(c));
-                    ffi::d2_gpu_blur(c, sigma, axes[0], axes[1], axes[2], axes[3]);
-                    let data = [
-                        offset[0], offset[1], 0., 0., color[0], color[1], color[2], color[3],
-                    ];
-                    ffi::d2_gpu_filter(c, 2, data.as_ptr(), data.len(), original.0);
+                    // Without a copy of the layer (a lost device) the content is drawn as it is.
+                    if let Some(original) = ffi::Owned::try_new(ffi::d2_gpu_layer_snapshot(c)) {
+                        ffi::d2_gpu_blur(c, sigma, axes[0], axes[1], axes[2], axes[3]);
+                        let data = [
+                            offset[0], offset[1], 0., 0., color[0], color[1], color[2], color[3],
+                        ];
+                        ffi::d2_gpu_filter(c, 2, data.as_ptr(), data.len(), original.0);
+                    }
                 }
                 Filter::Kernel {
                     kind,
@@ -106,6 +114,11 @@ impl DrawingContext {
                         return;
                     }
                     let secondary = secondary.map(|b| b.retained_surface());
+                    if secondary.as_ref().is_some_and(|s| s.0.is_null()) {
+                        // The second input has no surface (a lost device): the layer is drawn
+                        // without the filter.
+                        return;
+                    }
                     ffi::d2_gpu_filter(
                         c,
                         kind,
@@ -360,7 +373,7 @@ impl IDrawingContextImplWithLayerEffects for DrawingContext {
             if let Some(previous) = state.accumulated.take() {
                 ffi::d2_gpu_filter(c, 7, state.data.as_ptr(), state.data.len(), previous.0);
             }
-            state.accumulated = Some(ffi::Owned::new(ffi::d2_gpu_take_layer(c)));
+            state.accumulated = ffi::Owned::try_new(ffi::d2_gpu_take_layer(c));
         });
     }
     fn pop_pixel_operation(&mut self) {
@@ -541,6 +554,10 @@ impl DrawingContext {
         }
         let mask = mask.retained_surface();
         let cast = cast.retained_surface();
+        if mask.0.is_null() || cast.0.is_null() {
+            // No scratch surface (a size out of range or a lost device): no shadow this frame.
+            return;
+        }
         let [r, g, b, a] = color(shadow.color, 1.);
         let data = [
             offset.x as f32,
@@ -690,19 +707,28 @@ impl IDrawingContextWithAcrylicLikeSupport for DrawingContext {
         if rect.rect.width <= 0. || rect.rect.height <= 0. || !self.prepare() {
             return;
         }
-        static NOISE: std::sync::OnceLock<Bitmap> = std::sync::OnceLock::new();
-        // Shared theme asset, not a dependency on the Skia renderer. WIC decodes it once.
-        let noise = NOISE.get_or_init(|| {
-            Bitmap::decode(&mut std::io::Cursor::new(include_bytes!(
-                "../../Skia/FerroUI.Skia/assets/noise_asset_256x256_png.png"
-            )))
-            .expect("Built-in acrylic noise PNG")
+        // The noise texture the materials share. WIC decodes it once for a device; a texture that
+        // was lost with its device is decoded again.
+        ferroui_base::ferro_thread_local! {
+            static NOISE: RefCell<Option<Bitmap>> = RefCell::new(None);
+        }
+        let source = NOISE.with_borrow_mut(|noise| {
+            if noise.as_ref().is_none_or(|bitmap| bitmap.is_corrupted()) {
+                *noise = Bitmap::decode(&mut std::io::Cursor::new(
+                    ferroui_base::media::NOISE_ASSET_PNG,
+                ))
+                .ok();
+            }
+            noise.as_ref().map(Bitmap::retained_surface)
         });
+        let Some(source) = source.filter(|source| !source.0.is_null()) else {
+            // Without the texture (a lost device) the material is not drawn this frame.
+            return;
+        };
         self.push_clip_rounded(rect);
         let base = color(material.material_color(), 1.);
         let tint = color(material.tint_color(), 1.);
         let data: Vec<f64> = base.into_iter().chain(tint).collect();
-        let source = noise.retained_surface();
         self.bitmap.context(|c| unsafe {
             ffi::d2_gpu_acrylic(
                 c,

@@ -1,6 +1,6 @@
 //! Immutable D3D11 frame leases; conversion retires at an actual GPU event query.
 use crate::{
-    bitmap::Bitmap,
+    bitmap::{lock, Bitmap},
     ffi::{self, Owned},
 };
 use ferroui_base::{
@@ -11,10 +11,25 @@ use ferroui_base::{
 use std::{
     any::Any,
     rc::Rc,
-    sync::{Arc, Mutex},
+    sync::{
+        atomic::{AtomicU32, Ordering},
+        Arc, Mutex,
+    },
 };
 
 pub const SHARED_D3D11_TEXTURE: &str = "SharedFrameD3D11Texture2D";
+
+/// An external texture that cannot be copied this frame (its handle did not open on the device,
+/// its keyed mutex or fence was not signalled in time, the device was removed) is drawn as an
+/// empty image, marked as lost content, instead of ending the process: the interfaces of the
+/// compositor have no error to return. The first occurrences are reported.
+fn unavailable(output: &Bitmap, reason: &str) {
+    static REPORTED: AtomicU32 = AtomicU32::new(0);
+    if REPORTED.fetch_add(1, Ordering::Relaxed) < 8 {
+        eprintln!("Direct2D: an external texture is drawn empty: {reason}");
+    }
+    output.mark_content_lost();
+}
 
 /// Returns one AddRef-owned ID3D11Device for the native media provider.
 pub fn native_device() -> *mut std::ffi::c_void {
@@ -56,7 +71,7 @@ impl D3D11Texture {
 struct TextureHandle(D3D11Texture);
 impl IPlatformHandle for TextureHandle {
     fn handle(&self) -> isize {
-        self.0 .0.native.lock().unwrap().0 as isize
+        lock(&self.0 .0.native).0 as isize
     }
     fn handle_descriptor(&self) -> Option<&str> {
         Some(SHARED_D3D11_TEXTURE)
@@ -115,7 +130,10 @@ impl IExternalObjectsRenderInterfaceContextFeature for ExternalObjects {
                 Some(KnownPlatformGraphicsExternalImageHandleTypes::D3D11_TEXTURE_GLOBAL_SHARED_HANDLE)=>false,
                 _=>panic!("Unsupported Direct2D external texture handle"),
             };
-            let native = unsafe { Owned::new(ffi::d2_open_texture(handle.handle(), nt as i32)) };
+            // Null when the handle does not open on this device; the snapshot reports it.
+            let native =
+                unsafe { Owned::try_new(ffi::d2_open_texture(handle.handle(), nt as i32)) }
+                    .unwrap_or_default();
             (
                 D3D11Texture(Arc::new(TextureInner {
                     native: Mutex::new(native),
@@ -146,9 +164,11 @@ impl IExternalObjectsRenderInterfaceContextFeature for ExternalObjects {
             handle.handle_descriptor(),
             Some(KnownPlatformGraphicsExternalSemaphoreHandleTypes::DIRECT3D12_FENCE_NT_HANDLE)
         );
-        Rc::new(ImportedFence(unsafe {
-            Owned::new(ffi::d2_open_fence(handle.handle()))
-        }))
+        // Null when the fence does not open on this device; the snapshot that waits for it or
+        // signals it reports it.
+        Rc::new(ImportedFence(
+            unsafe { Owned::try_new(ffi::d2_open_fence(handle.handle())) }.unwrap_or_default(),
+        ))
     }
     fn get_synchronization_capabilities(
         &self,
@@ -201,7 +221,12 @@ impl ImportedImage {
         signal: Option<(&Rc<dyn IPlatformRenderInterfaceImportedSemaphore>, u64)>,
     ) -> Arc<SharedBitmapImpl> {
         let p = &self.properties;
-        let texture = self.texture.0.native.lock().unwrap();
+        let texture = lock(&self.texture.0.native);
+        let output = Bitmap::new(PixelSize::new(p.width, p.height), Vector::new(96., 96.));
+        if texture.0.is_null() {
+            unavailable(&output, "its handle did not open on the device");
+            return Arc::new(output);
+        }
         assert!(
             p.width > 0
                 && p.height > 0
@@ -215,7 +240,6 @@ impl ImportedImage {
                 } != 0,
             "External texture dimensions/format do not match"
         );
-        let output = Bitmap::new(PixelSize::new(p.width, p.height), Vector::new(96., 96.));
         let fence = |v: Option<(&Rc<dyn IPlatformRenderInterfaceImportedSemaphore>, u64)>| {
             v.map_or((std::ptr::null_mut(), 0), |(f, value)| {
                 (
@@ -228,8 +252,14 @@ impl ImportedImage {
                 )
             })
         };
+        let requested = [wait.is_some(), signal.is_some()];
         let (wait, wv) = fence(wait);
         let (signal, sv) = fence(signal);
+        if (requested[0] && wait.is_null()) || (requested[1] && signal.is_null()) {
+            // Copying without the fence would read a frame its producer has not finished.
+            unavailable(&output, "its fence did not open on the device");
+            return Arc::new(output);
+        }
         let (acquire, release) = key.unwrap_or_default();
         let result = output.context(|dest| unsafe {
             ffi::d2_copy_external(
@@ -245,10 +275,12 @@ impl ImportedImage {
                 (!p.top_left_origin) as i32,
             )
         });
-        assert_ne!(
-            result, 0,
-            "External texture is not ready, invalid, or its synchronization failed"
-        );
+        if result == 0 {
+            unavailable(
+                &output,
+                "it was not ready, or its synchronization or the copy failed",
+            );
+        }
         Arc::new(output)
     }
 }
@@ -289,7 +321,7 @@ impl IPlatformRenderInterfaceImportedImage for ImportedImage {
         if !matches!(m.format, FrameFormat::Rgba8 | FrameFormat::Bgra8)
             || unsafe {
                 ffi::d2_texture_valid(
-                    self.texture.0.native.lock().unwrap().0,
+                    lock(&self.texture.0.native).0,
                     m.width,
                     m.height,
                     rgba as i32,
@@ -346,7 +378,7 @@ struct FrameState {
 }
 impl SharedFrameBitmap {
     pub(crate) fn bitmap(&self) -> Option<Bitmap> {
-        let mut state = self.state.lock().unwrap();
+        let mut state = lock(&self.state);
         if let Some(converted) = &state.converted {
             return (!converted.is_corrupted()).then(|| converted.clone());
         }
@@ -362,7 +394,7 @@ impl SharedFrameBitmap {
         let submitted = output.context(|p| unsafe {
             ffi::d2_convert_frame(
                 p,
-                state.texture.as_ref().unwrap().0.native.lock().unwrap().0,
+                lock(&state.texture.as_ref().unwrap().0.native).0,
                 (m.color == FrameColor::Rec709Full) as i32,
                 (!m.top_left_origin) as i32,
                 (m.alpha == FrameAlpha::Opaque) as i32,
@@ -423,7 +455,7 @@ impl IBitmapImpl for SharedFrameBitmap {
         ))
     }
     fn dispose(&self) {
-        let mut state = self.state.lock().unwrap();
+        let mut state = lock(&self.state);
         state.texture = None;
         state.frame = None;
         state.converted = None;
@@ -453,7 +485,7 @@ impl ferroui_media_controls::TextureFrameImporter for D3D11TextureImporter {
             .resource::<D3D11Texture>()
             .ok_or_else(|| error("No leased D3D11 storage"))?;
         let handle = LeasedPlatformHandle::new(
-            texture.0.native.lock().unwrap().0 as isize,
+            lock(&texture.0.native).0 as isize,
             Some(SHARED_D3D11_TEXTURE),
             frame.clone(),
         );

@@ -56,7 +56,10 @@ impl IPlatformRenderInterfaceContext for Context {
             .iter()
             .find_map(|s| handle(&**s))
             .expect("Direct2D requires a Windows HWND surface");
-        let window = unsafe { Owned::new(ffi::d2_window(surface.handle())) };
+        // A window that is gone, or a device that cannot be created, gives a target without a
+        // native window: it reports itself corrupted and presents nothing.
+        let window =
+            unsafe { Owned::try_new(ffi::d2_window(surface.handle())) }.unwrap_or_default();
         Rc::new(Target {
             window: Rc::new(window),
             bitmap: RefCell::new(None),
@@ -113,11 +116,16 @@ impl IRenderTarget for Target {
         Box<dyn IDrawingContextImpl>,
         RenderTargetDrawingContextProperties,
     ) {
-        unsafe {ffi::d2_window_frame_begin(self.window.0);}
+        if !self.window.0.is_null() {
+            unsafe { ffi::d2_window_frame_begin(self.window.0) };
+        }
         let mut stored = self.bitmap.borrow_mut();
+        // A frame whose surface the device lost holds nothing of the frame before: it is not
+        // reported as retained, and the scene is drawn whole into a new surface.
         let retained = stored.as_ref().is_some_and(|b| {
             b.pixel_size() == scene.size
                 && b.dpi() == Vector::new(scene.scaling * 96., scene.scaling * 96.)
+                && !b.is_corrupted()
         });
         if !retained {
             *stored = Some(Bitmap::new(
@@ -129,6 +137,13 @@ impl IRenderTarget for Target {
         let output = bitmap.clone();
         let window = self.window.clone();
         let done = Box::new(move || {
+            // A frame that failed to draw (a device lost in the middle of it) is not shown: the
+            // window keeps the frame before, and the next frame is drawn whole. A window the
+            // device lost answers -1 here and reports itself corrupted in
+            // `platform_render_target_state`, which makes the renderer create the target again.
+            if window.0.is_null() || output.is_corrupted() {
+                return;
+            }
             output.context(|p| unsafe {
                 ffi::d2_present(window.0, p);
             })
@@ -141,6 +156,9 @@ impl IRenderTarget for Target {
         )
     }
     fn platform_render_target_state(&self) -> PlatformRenderTargetState {
+        if self.window.0.is_null() {
+            return PlatformRenderTargetState::CORRUPTED;
+        }
         match unsafe { ffi::d2_window_state(self.window.0) } {
             -1 => PlatformRenderTargetState::CORRUPTED,
             0 => PlatformRenderTargetState::NOT_READY_TRY_LATER,
@@ -149,6 +167,8 @@ impl IRenderTarget for Target {
     }
     fn dispose(&self) {
         self.bitmap.borrow_mut().take();
-        unsafe {ffi::d2_window_dispose(self.window.0);}
+        if !self.window.0.is_null() {
+            unsafe { ffi::d2_window_dispose(self.window.0) };
+        }
     }
 }
