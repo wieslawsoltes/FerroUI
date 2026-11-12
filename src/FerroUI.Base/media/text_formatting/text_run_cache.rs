@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use crate::media::text_formatting::{ShapedTextRun, TextLineMetricsMode, TextRun};
+use crate::media::text_formatting::{ShapedBuffer, ShapedTextRun, TextLineMetricsMode, TextRun, TextShaperOptions};
 use crate::media::FlowDirection;
 
 /// Caches shaped text runs and bidi processing results to avoid redundant
@@ -25,6 +25,18 @@ struct State {
     single: Option<(i32, CachedShapingResult)>,
     // Multi-entry store (only allocated when 2+ distinct keys are added).
     entries: Option<HashMap<i32, CachedShapingResult>>,
+    /// The shapings of long texts made for the current text, with their concatenation flags,
+    /// for the next text of the owner (`retire`, step 7 of text-layout-performance.md).
+    kept: Vec<KeptShaping>,
+    /// The shapings kept for the text before the current one: an edit of that text shapes the
+    /// new one from them (`shaping_edit`).
+    retired: Vec<KeptShaping>,
+}
+
+/// A shaping kept for an edit of its text.
+struct KeptShaping {
+    options: TextShaperOptions,
+    buffer: Rc<ShapedBuffer>,
 }
 
 impl TextRunCache {
@@ -35,7 +47,39 @@ impl TextRunCache {
     /// Invalidates all cached entries and disposes their shaped buffers.
     pub fn invalidate(&self) {
         let mut state = self.state.borrow_mut();
+        state.kept.clear();
+        state.retired.clear();
+        Self::invalidate_entries(&mut state);
+    }
 
+    /// Invalidates the cached entries for a new text of the owner, as
+    /// [`invalidate`](Self::invalidate) does, and keeps the shapings of long texts of the text
+    /// before for the new one: an edit of a long text shapes again only what the edit changed.
+    pub fn retire(&self) {
+        let mut state = self.state.borrow_mut();
+        state.retired = std::mem::take(&mut state.kept);
+        Self::invalidate_entries(&mut state);
+    }
+
+    /// Keeps `buffer`, the shaping of a long text with its concatenation flags, for the next text
+    /// of the owner.
+    pub(crate) fn keep_shaping(&self, options: &TextShaperOptions, buffer: &Rc<ShapedBuffer>) {
+        let mut state = self.state.borrow_mut();
+        // One shaping a set of options: a text shaped again (the cached runs dropped for another
+        // reason) replaces the one kept before.
+        state.kept.retain(|kept| !kept.options.shapes_as(options));
+        state.kept.push(KeptShaping { options: options.clone(), buffer: buffer.clone() });
+    }
+
+    /// The kept shaping of the text before the current one that was shaped as `options` shape,
+    /// taken out of the cache.
+    pub(crate) fn take_retired(&self, options: &TextShaperOptions) -> Option<Rc<ShapedBuffer>> {
+        let mut state = self.state.borrow_mut();
+        let index = state.retired.iter().position(|kept| kept.options.shapes_as(options))?;
+        Some(state.retired.swap_remove(index).buffer)
+    }
+
+    fn invalidate_entries(state: &mut State) {
         if let Some((_, value)) = state.single.take() {
             Self::dispose_cached_runs(&value);
             return;

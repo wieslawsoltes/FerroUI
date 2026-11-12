@@ -10,6 +10,22 @@ use std::os::raw::c_uint;
 
 pub use sys::{hb_feature_t as Feature, hb_glyph_info_t as GlyphInfo, hb_glyph_position_t as GlyphPosition};
 
+/// `HB_BUFFER_FLAG_PRODUCE_UNSAFE_TO_CONCAT` (HarfBuzz 4.0 and later; the generated bindings predate it).
+const BUFFER_FLAG_PRODUCE_UNSAFE_TO_CONCAT: sys::hb_buffer_flags_t = 0x0000_0040;
+/// `HB_GLYPH_FLAG_UNSAFE_TO_BREAK`: cutting the text at the start of the cluster of the glyph and
+/// shaping the two sides apart may give other glyphs.
+pub const GLYPH_FLAG_UNSAFE_TO_BREAK: u32 = 0x0000_0001;
+/// `HB_GLYPH_FLAG_UNSAFE_TO_CONCAT`: changing the text on one side of the start of the cluster of
+/// the glyph may change the shaping of the other side.
+pub const GLYPH_FLAG_UNSAFE_TO_CONCAT: u32 = 0x0000_0002;
+
+/// The flags of a shaped glyph (`hb_glyph_info_get_glyph_flags`): [`GLYPH_FLAG_UNSAFE_TO_BREAK`] and
+/// [`GLYPH_FLAG_UNSAFE_TO_CONCAT`].
+pub fn glyph_flags(info: &GlyphInfo) -> u32 {
+    // SAFETY: reads the mask of a valid glyph info.
+    unsafe { sys::hb_glyph_info_get_glyph_flags(info) as u32 }
+}
+
 /// The direction of a run of text.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Direction {
@@ -186,6 +202,18 @@ impl Buffer {
     pub fn len(&self) -> usize {
         // SAFETY: valid buffer.
         unsafe { sys::hb_buffer_get_length(self.raw) as usize }
+    }
+
+    /// Asks the shaper to mark the glyphs at which the text may not be changed on one side
+    /// without changing the shaping of the other (`HB_BUFFER_FLAG_PRODUCE_UNSAFE_TO_CONCAT`):
+    /// [`glyph_flags`] then reports [`GLYPH_FLAG_UNSAFE_TO_CONCAT`]. The other flags of the buffer
+    /// are kept; [`reset`](Self::reset) clears them.
+    pub fn produce_unsafe_to_concat(&mut self) {
+        // SAFETY: valid buffer.
+        unsafe {
+            let flags = sys::hb_buffer_get_flags(self.raw);
+            sys::hb_buffer_set_flags(self.raw, flags | BUFFER_FLAG_PRODUCE_UNSAFE_TO_CONCAT);
+        }
     }
 
     /// Sets unset segment properties from the contents of the buffer.

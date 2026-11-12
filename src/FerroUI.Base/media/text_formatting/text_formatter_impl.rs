@@ -2,6 +2,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::media::text_formatting::formatting_object_pool::{FormattingObjectPool, RentedList};
+use crate::media::text_formatting::shaping_edit;
 use crate::media::text_formatting::text_line_impl::TextLineImpl;
 use crate::media::text_formatting::text_run_cache::CachedShapingResult;
 use crate::media::text_formatting::unicode::{
@@ -239,6 +240,7 @@ impl TextFormatterImpl {
         paragraph_properties: &dyn TextParagraphProperties,
         object_pool: &FormattingObjectPool,
         font_manager: &FontManager,
+        text_run_cache: Option<&TextRunCache>,
     ) -> (RentedList<Rc<dyn TextRun>>, FlowDirection) {
         let flow_direction = paragraph_properties.flow_direction();
         let mut shaped_runs = object_pool.text_run_lists.rent();
@@ -342,7 +344,14 @@ impl TextFormatterImpl {
                         properties.font_features().map(|features| Rc::new(features.to_vec())),
                     );
 
-                    Self::shape_together(&grouped_runs, &text, &shaper_options, &text_shaper, &mut shaped_runs);
+                    Self::shape_together(
+                        &grouped_runs,
+                        &text,
+                        &shaper_options,
+                        &text_shaper,
+                        &mut shaped_runs,
+                        text_run_cache,
+                    );
                 }
                 None => {
                     shaped_runs.push(current_run.clone());
@@ -416,8 +425,9 @@ impl TextFormatterImpl {
         options: &TextShaperOptions,
         text_shaper: &TextShaper,
         results: &mut Vec<Rc<dyn TextRun>>,
+        text_run_cache: Option<&TextRunCache>,
     ) {
-        let mut shaped_buffer = text_shaper.shape_text(text, options);
+        let mut shaped_buffer = Self::shape_keeping(text, options, text_shaper, text_run_cache);
 
         let mut previous_length = 0;
 
@@ -445,6 +455,35 @@ impl TextFormatterImpl {
                 Some(second) => shaped_buffer = second,
             }
         }
+    }
+
+    /// Shapes `text`. A long text of a layout with a run cache is shaped with its concatenation
+    /// flags and kept in the cache for the next text of its owner; when the cache kept the shaping
+    /// of the text before, shaped as these options shape, the new text is shaped from it, keeping
+    /// the glyphs the edit left as they were (step 7 of docs/porting/text-layout-performance.md).
+    fn shape_keeping(
+        text: &ReadOnlyMemory<u16>,
+        options: &TextShaperOptions,
+        text_shaper: &TextShaper,
+        text_run_cache: Option<&TextRunCache>,
+    ) -> Rc<ShapedBuffer> {
+        let Some(cache) = text_run_cache.filter(|_| text.len() >= shaping_edit::MIN_KEPT_LENGTH) else {
+            return text_shaper.shape_text(text, options);
+        };
+        let edited = cache.take_retired(options).and_then(|old| {
+            let edited = shaping_edit::shape_edited(&old, text, options, text_shaper);
+            crate::perf_count!(TextShapingEditsTried);
+            if edited.is_some() {
+                crate::perf_count!(TextShapingEditsKept);
+            }
+            edited
+        });
+        let shaped =
+            edited.unwrap_or_else(|| text_shaper.shape_text(text, &options.clone().with_concat_flags(true)));
+        if shaped.concat_flags().is_some() {
+            cache.keep_shaping(options, &shaped);
+        }
+        shaped
     }
 
     /// Coalesces ranges of the same bidi level to form [`UnshapedTextRun`]s.
@@ -1164,7 +1203,7 @@ impl TextFormatter for TextFormatterImpl {
         }
 
         let (mut shaped_text_runs, resolved_flow_direction) =
-            Self::shape_text_runs(&fetched_runs, &**paragraph_properties, object_pool, &font_manager);
+            Self::shape_text_runs(&fetched_runs, &**paragraph_properties, object_pool, &font_manager, text_run_cache);
 
         let next_line_break = text_end_of_line
             .as_ref()

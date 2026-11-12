@@ -175,6 +175,11 @@ perf_counters! {
     // --- text (design 06) ---
     /// `TextLayout::from_text_source`.
     TextLayoutsCreated => "text layouts created",
+    /// `TextFormatterImpl::shape_keeping`: a long text was shaped from the shaping of the text its
+    /// owner had before (step 7 of text-layout-performance.md).
+    TextShapingEditsTried => "text shaping edits tried",
+    /// The edit kept glyphs of the shaping before.
+    TextShapingEditsKept => "text shaping edits kept",
     /// `TextLayoutCache::get_or_create`: the layout of a plain text was the one kept for it.
     TextLayoutCacheHits => "text layout cache hits",
     /// `TextLayoutCache::get_or_create`: the layout of a plain text was made and kept.

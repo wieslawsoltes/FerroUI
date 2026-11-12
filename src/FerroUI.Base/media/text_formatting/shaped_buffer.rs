@@ -52,6 +52,11 @@ pub struct ShapedBuffer {
     /// The UAX #14 break opportunities of the text this buffer was shaped for, found once and
     /// shared with the buffers split from it (desktop-performance.md section 9.16).
     breaks: RefCell<Option<Rc<BreakTable>>>,
+    /// The concatenation flags of the glyphs, when the shaper recorded them
+    /// (`TextShaperOptions::produce_concat_flags`): one byte a glyph, [`Self::UNSAFE_TO_BREAK`]
+    /// and [`Self::UNSAFE_TO_CONCAT`]. Only the buffer the shaper made has them, not the buffers
+    /// split from it.
+    concat_flags: RefCell<Option<Rc<[u8]>>>,
     disposed: Cell<bool>,
 }
 
@@ -114,6 +119,52 @@ impl ShapedBuffer {
             bidi_level,
             cache: RefCell::new(ClusterCache::default()),
             breaks: RefCell::new(None),
+            concat_flags: RefCell::new(None),
+            disposed: Cell::new(false),
+        })
+    }
+
+    /// The flag of a glyph whose cluster the text may not be cut at, with the two sides shaped
+    /// apart (HarfBuzz's `HB_GLYPH_FLAG_UNSAFE_TO_BREAK`).
+    pub const UNSAFE_TO_BREAK: u8 = 1;
+    /// The flag of a glyph at whose cluster the text may not be changed on one side without
+    /// changing the shaping of the other (HarfBuzz's `HB_GLYPH_FLAG_UNSAFE_TO_CONCAT`).
+    pub const UNSAFE_TO_CONCAT: u8 = 2;
+
+    /// Records the concatenation flags of the glyphs, one byte a glyph ([`Self::UNSAFE_TO_BREAK`],
+    /// [`Self::UNSAFE_TO_CONCAT`]): a shaper that was asked for them
+    /// (`TextShaperOptions::produce_concat_flags`) sets them once it filled the buffer.
+    pub fn set_concat_flags(&self, flags: Rc<[u8]>) {
+        debug_assert_eq!(flags.len(), self.glyph_infos.length());
+        *self.concat_flags.borrow_mut() = Some(flags);
+    }
+
+    /// The concatenation flags of the glyphs, when the shaper recorded them.
+    pub fn concat_flags(&self) -> Option<Rc<[u8]>> {
+        self.concat_flags.borrow().clone()
+    }
+
+    /// Creates a buffer of the glyphs `glyphs`, already shaped (an edit of a shaping,
+    /// `shaping_edit`).
+    pub(crate) fn from_glyphs(
+        text: ReadOnlyMemory<u16>,
+        glyphs: Vec<GlyphInfo>,
+        glyph_typeface: Rc<GlyphTypeface>,
+        font_rendering_em_size: f64,
+        bidi_level: i8,
+    ) -> Rc<Self> {
+        let indices: Vec<u16> = glyphs.iter().map(|glyph| glyph.glyph_index).collect();
+        Rc::new(Self {
+            text,
+            glyph_infos: ArraySlice::new(glyphs),
+            glyph_indices: ArraySlice::new(indices),
+            glyph_generation: Some(Rc::new(Cell::new(0))),
+            glyph_typeface,
+            font_rendering_em_size,
+            bidi_level,
+            cache: RefCell::new(ClusterCache::default()),
+            breaks: RefCell::new(None),
+            concat_flags: RefCell::new(None),
             disposed: Cell::new(false),
         })
     }
@@ -137,6 +188,7 @@ impl ShapedBuffer {
             bidi_level,
             cache: RefCell::new(ClusterCache::default()),
             breaks: RefCell::new(None),
+            concat_flags: RefCell::new(None),
             disposed: Cell::new(false),
         })
     }
@@ -178,6 +230,7 @@ impl ShapedBuffer {
             bidi_level,
             cache: RefCell::new(cache),
             breaks: RefCell::new(source.breaks.borrow().clone()),
+            concat_flags: RefCell::new(None),
             disposed: Cell::new(false),
         })
     }

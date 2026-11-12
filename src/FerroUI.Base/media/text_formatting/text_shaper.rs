@@ -42,4 +42,20 @@ impl TextShaper {
     pub fn shape_str(&self, text: &str, options: &TextShaperOptions) -> Rc<ShapedBuffer> {
         self.shape_text(&ReadOnlyMemory::<u16>::from_str(text), options)
     }
+
+    /// Shapes `text`, an edit of the text `previous` is the shaping of (with the same options and
+    /// its concatenation flags, `TextShaperOptions::with_concat_flags`): the glyphs of `previous`
+    /// the edit leaves as they were are kept and only the text around the change is shaped again.
+    /// The result is the shaping of the whole of `text` with these options, with its own
+    /// concatenation flags for the next edit. `None` when nothing of `previous` can be kept (a
+    /// right-to-left text, a text that is a range of a longer one, a shaping without flags, a
+    /// change at the start of the text): the caller shapes `text` whole.
+    pub fn shape_edited_text(
+        &self,
+        previous: &ShapedBuffer,
+        text: &ReadOnlyMemory<u16>,
+        options: &TextShaperOptions,
+    ) -> Option<Rc<ShapedBuffer>> {
+        crate::media::text_formatting::shaping_edit::shape_edited(previous, text, options, self)
+    }
 }

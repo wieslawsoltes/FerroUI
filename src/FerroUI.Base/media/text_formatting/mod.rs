@@ -40,6 +40,7 @@ mod justification_properties;
 mod logical_direction;
 mod logical_text_run_enumerator;
 mod shaped_buffer;
+mod shaping_edit;
 mod shaped_text_run;
 mod split_result;
 mod text_bounds;
