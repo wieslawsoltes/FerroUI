@@ -190,6 +190,13 @@ changes behavior upstream defines.
      of them in a typeface, set when its character map has a glyph (filled at the first use).
      Other text is taken cluster by cluster as before. Every layout of Latin text has this,
      edited or not.
+   - **Directions.** The bidirectional algorithm ran over every paragraph: a class looked up
+     for every character, then the rules. A left-to-right paragraph whose code units are all
+     below U+0590 (the start of the Hebrew block) has no character of a right-to-left class
+     and no embedding, override or isolate control, so every level is 0; such a paragraph is
+     found by a scan of its code units and the algorithm is not run. A test compares the
+     levels with those of the algorithm for random texts and checks the class of every
+     character below U+0590.
    - **Lines.** The lines that end before the changed range are kept; past it, a line whose start
      and width context are those of an old line is the old line, shifted, and the rest of the
      paragraph follows it.
@@ -198,8 +205,8 @@ changes behavior upstream defines.
 
    Measured on the `paragraph` scene (UI thread, a frame): 5.37 ms before, 3.80 ms with the
    shaped runs kept, 2.71 ms with the break opportunities kept as well, 1.84 ms with the scan
-   for the first required break, 1.26 ms with the ASCII tables of the shapeable runs. The lines
-   are not kept yet.
+   for the first required break, 1.26 ms with the ASCII tables of the shapeable runs, 0.95 ms
+   with the scan for a left-to-right paragraph. The lines are not kept yet.
 
 The cross-library comparison (`tests/FerroUI.Text.Comparison`: FerroUI, parley, cosmic-text and
 epaint on the same font, corpus and widths) measures each step against the others.

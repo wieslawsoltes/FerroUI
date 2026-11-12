@@ -324,3 +324,76 @@ fn resolves_a_long_paragraph_of_isolates_and_embeddings() {
     assert_eq!(levels.len(), embeddings.len());
     assert!(levels.chunks(4).all(|levels| levels[0] == 0 && levels[2] == 1));
 }
+
+/// The classes that make a level other than 0 in a left-to-right paragraph.
+fn is_right_to_left_class(class: BidiClass) -> bool {
+    matches!(
+        class,
+        BidiClass::RightToLeft
+            | BidiClass::ArabicLetter
+            | BidiClass::ArabicNumber
+            | BidiClass::LeftToRightEmbedding
+            | BidiClass::RightToLeftEmbedding
+            | BidiClass::LeftToRightOverride
+            | BidiClass::RightToLeftOverride
+            | BidiClass::PopDirectionalFormat
+            | BidiClass::LeftToRightIsolate
+            | BidiClass::RightToLeftIsolate
+            | BidiClass::FirstStrongIsolate
+            | BidiClass::PopDirectionalIsolate
+    )
+}
+
+#[test]
+fn no_character_before_the_hebrew_block_has_a_right_to_left_class() {
+    let mut data = BidiData::new();
+    for unit in 0..BidiAlgorithm::FIRST_RIGHT_TO_LEFT {
+        data.reset();
+        data.append(&[unit]);
+        assert!(!is_right_to_left_class(data.classes()[0]), "U+{unit:04X} is {:?}", data.classes()[0]);
+    }
+    assert!(BidiAlgorithm::is_left_to_right_text(&[]));
+    assert!(BidiAlgorithm::is_left_to_right_text(&[BidiAlgorithm::FIRST_RIGHT_TO_LEFT - 1; 200]));
+    for at in [0, 63, 64, 199] {
+        let mut text = [0x0041; 200];
+        text[at] = BidiAlgorithm::FIRST_RIGHT_TO_LEFT;
+        assert!(!BidiAlgorithm::is_left_to_right_text(&text), "a Hebrew code unit at {at}");
+    }
+}
+
+#[test]
+fn a_left_to_right_text_has_the_levels_the_rules_give() {
+    // Texts of code units below the Hebrew block: letters, numbers with their separators and
+    // terminators, brackets, marks, spaces, separators of paragraphs and segments, controls.
+    const PIECES: &[&str] = &[
+        "word", "A", "12", "3.5", "1,000", "+", "-", "$", "%", "#", "(", ")", "[", "]", "{", "}", "<", ">", " ", "  ",
+        "\t", "\n", "\r\n", "\u{1c}", "\u{1f}", "\u{85}", "\u{a0}", "\u{ad}", "\u{301}", "\u{483}", "\u{b2}",
+        "\u{b0}", "\u{e9}", "\u{3b1}", "\u{416}", "\u{2b9}", "/", ":", ";", ".", ",", "!", "\u{0}", "\u{7f}",
+        "\u{58f}", "\u{58a}",
+    ];
+    let mut state = 0x2545_F491_4F6C_DD1Du64;
+    let mut next = move |below: usize| {
+        state ^= state << 13;
+        state ^= state >> 7;
+        state ^= state << 17;
+        (state % below as u64) as usize
+    };
+    let mut data = BidiData::new();
+    let mut bidi = BidiAlgorithm::new();
+    let mut fast = BidiAlgorithm::new();
+    for case in 0..20_000 {
+        let count = 1 + next(40);
+        let text: String = (0..count).map(|_| PIECES[next(PIECES.len())]).collect();
+        let units: Vec<u16> = text.encode_utf16().collect();
+        assert!(BidiAlgorithm::is_left_to_right_text(&units), "case {case}: {text:?}");
+
+        data.reset();
+        data.set_paragraph_embedding_level(0);
+        data.append(&units);
+        bidi.process(&mut data);
+        fast.process_left_to_right(units.len());
+
+        assert_eq!(fast.resolved_levels(), bidi.resolved_levels(), "case {case}: {text:?}");
+        assert_eq!(bidi.resolve_embedding_level(data.classes()), 0, "case {case}: {text:?}");
+    }
+}

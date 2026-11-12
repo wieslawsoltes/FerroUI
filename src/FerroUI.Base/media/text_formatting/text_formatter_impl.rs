@@ -257,24 +257,41 @@ impl TextFormatterImpl {
 
         let (bidi_data, bidi_algorithm) = &mut *bidi;
 
-        bidi_data.reset();
-        bidi_data.set_paragraph_embedding_level(flow_direction as i8);
+        // The length of a run in the paragraph: a run without text counts as letters.
+        let run_length = |text_run: &Rc<dyn TextRun>| match text_run.text_span().len() {
+            0 => text_run.length().max(0) as usize,
+            length => length,
+        };
 
-        for text_run in text_runs {
-            let text = text_run.text_span();
+        // A left-to-right paragraph without a character that can be of a right-to-left class
+        // has level 0 throughout: the classes are not looked up and the rules are not run.
+        let left_to_right = flow_direction == FlowDirection::LeftToRight
+            && text_runs.iter().all(|text_run| BidiAlgorithm::is_left_to_right_text(text_run.text_span()));
 
-            if !text.is_empty() {
-                bidi_data.append(text);
-            } else if text_run.length() == DEFAULT_TEXT_SOURCE_LENGTH {
-                bidi_data.append(&DEFAULT_TEXT);
-            } else {
-                bidi_data.append(&vec![b'a' as u16; text_run.length().max(0) as usize]);
+        let resolved_embedding_level = if left_to_right {
+            bidi_algorithm.process_left_to_right(text_runs.iter().map(run_length).sum());
+
+            0
+        } else {
+            bidi_data.reset();
+            bidi_data.set_paragraph_embedding_level(flow_direction as i8);
+
+            for text_run in text_runs {
+                let text = text_run.text_span();
+
+                if !text.is_empty() {
+                    bidi_data.append(text);
+                } else if text_run.length() == DEFAULT_TEXT_SOURCE_LENGTH {
+                    bidi_data.append(&DEFAULT_TEXT);
+                } else {
+                    bidi_data.append(&vec![b'a' as u16; run_length(text_run)]);
+                }
             }
-        }
 
-        bidi_algorithm.process(bidi_data);
+            bidi_algorithm.process(bidi_data);
 
-        let resolved_embedding_level = bidi_algorithm.resolve_embedding_level(bidi_data.classes());
+            bidi_algorithm.resolve_embedding_level(bidi_data.classes())
+        };
 
         let resolved_flow_direction =
             if (resolved_embedding_level & 1) == 0 { FlowDirection::LeftToRight } else { FlowDirection::RightToLeft };
