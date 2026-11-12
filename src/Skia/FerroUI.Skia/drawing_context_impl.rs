@@ -117,7 +117,7 @@ struct ContextCanvas {
 }
 
 /// The matrix the canvas of a drawing context takes with its next use.
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 enum PendingMatrix {
     /// None: the canvas has the transform of the context.
     None,

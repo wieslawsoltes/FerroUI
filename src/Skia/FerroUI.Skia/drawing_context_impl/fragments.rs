@@ -170,10 +170,10 @@ impl ContextCanvas {
     /// The matrix the canvas of the source has for the context: the one it takes with its next
     /// use, else the one it has.
     fn source_matrix(&mut self) -> sk::M44 {
-        match self.pending {
+        match &self.pending {
             PendingMatrix::None => self.source.get().local_to_device(),
-            PendingMatrix::Transform(transform) => self.device_matrix(transform),
-            PendingMatrix::Device(matrix) => matrix,
+            PendingMatrix::Transform(transform) => self.device_matrix(*transform),
+            PendingMatrix::Device(matrix) => matrix.clone(),
         }
     }
 
@@ -231,7 +231,7 @@ impl ContextCanvas {
         // The canvas of the source takes the matrix the context had for the recorder, with its
         // next use: the picture is drawn in the coordinates of the device.
         if matches!(self.pending, PendingMatrix::None) {
-            self.pending = PendingMatrix::Device(matrix);
+            self.pending = PendingMatrix::Device(matrix.clone());
         }
         let canvas = self.source.canvas_only();
         if let Some(picture) = &picture {
