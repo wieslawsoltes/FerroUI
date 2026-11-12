@@ -8,9 +8,17 @@ fn library_directories() -> Vec<std::path::PathBuf> {
     let executable = std::env::current_exe().unwrap();
     let own = executable.parent().unwrap().to_path_buf();
     let mut directories = vec![own.clone()];
-    let packages = own.ancestors().nth(3).filter(|build| build.file_name().is_some_and(|name| name == "build"));
+    let packages = own
+        .ancestors()
+        .nth(3)
+        .filter(|build| build.file_name().is_some_and(|name| name == "build"));
     let entries = |directory: &std::path::Path| -> Vec<std::path::PathBuf> {
-        std::fs::read_dir(directory).into_iter().flatten().filter_map(Result::ok).map(|entry| entry.path()).collect()
+        std::fs::read_dir(directory)
+            .into_iter()
+            .flatten()
+            .filter_map(Result::ok)
+            .map(|entry| entry.path())
+            .collect()
     };
     for package in packages.map(entries).unwrap_or_default() {
         for unit in entries(&package) {
@@ -25,9 +33,14 @@ fn library_directories() -> Vec<std::path::PathBuf> {
 
 /// The file of compiler arguments that names `directories` as the places of dependencies, written into
 /// `directory`: there may be more of them than a command line holds.
-fn library_search_arguments(directories: &[std::path::PathBuf], directory: &std::path::Path) -> String {
-    let arguments: String =
-        directories.iter().map(|directory| format!("-L\ndependency={}\n", directory.display())).collect();
+fn library_search_arguments(
+    directories: &[std::path::PathBuf],
+    directory: &std::path::Path,
+) -> String {
+    let arguments: String = directories
+        .iter()
+        .map(|directory| format!("-L\ndependency={}\n", directory.display()))
+        .collect();
     let file = directory.join("libraries.args");
     std::fs::write(&file, arguments).unwrap();
     format!("@{}", file.display())
