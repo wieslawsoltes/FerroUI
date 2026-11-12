@@ -358,6 +358,12 @@ it. Abbreviations: CS = `controls/dev/CommonStyles/`, GX = `dxaml/xcp/dxaml/them
 | LBI-10 | `ListPickerFlyoutPresenterItemStyle` | Items of the list of a `ListPickerFlyout`. | Waived. | FerroUI has no list picker flyout. |
 | LBI-11 | `TabNavigation="Local"`, `UseSystemFocusVisuals`, `IsHoldingEnabled`, `AllowDrop`, `ContentTransitions` | Navigation, focus and input settings. | `KeyboardNavigation.TabNavigation="Local"`, the default focus adorner; the others are left out. | G-14, G-19. |
 
+## MediaTransportControls
+
+| ID | WinUI source | WinUI | FerroUI | Reason |
+|---|---|---|---|---|
+| MTC-1 | `MediaTransportControls_themeresources.xaml`, control panel | A command bar places and drops its buttons by priority. | Standard buttons and sliders retain the primary actions. A menu gives keyboard access to skip, zoom and the other actions the media provider supports. | A single compact row works with the portable playback capabilities and standard automation peers. |
+
 ## Menu
 
 | ID | WinUI source | What WinUI does | What the port does | Why |
@@ -1201,6 +1207,7 @@ their sections above).
 | PathIcon | B1 | ported | No WinUI style (IconElement has no template): the Path that WinUI's PathIcon builds in code (CPathIcon::ApplyTemplate, icon.cpp), unscaled and filled with the Foreground. |
 | FontIcon | B1 | ported | No WinUI style (IconElement has no template): the TextBlock that WinUI's FontIcon builds in code (CFontIcon::ApplyTemplate, icon.cpp), in the font SymbolThemeFontFamily. A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it. |
 | SymbolIcon | B1 | ported | No WinUI style (IconElement has no template): the TextBlock that WinUI's SymbolIcon builds in code (CSymbolIcon::ApplyTemplate, icon.cpp), 20 px, in the font SymbolThemeFontFamily. A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it. |
+| CameraCaptureUI | B6 | ported | No WinUI style (the CameraCaptureUI of Windows is a system dialog): a CameraPreview above the capture actions, drawn with the Button theme. A control of ferroui-media-camera-controls (docs/media/ISSUE-561.md); the Fluent theme has no document for it. |
 | PopupRoot | F | ported | No WinUI style: the text of the window (TextFillColorPrimaryBrush, ContentControlThemeFontFamily, ControlContentThemeFontSize). |
 | SelectableTextBlock | B1 | ported | No WinUI control (TextBlock.IsTextSelectionEnabled): the selection colours of the text selection manager of WinUI (SystemControlHighlightAccentBrush, SystemColorHighlightTextColor). |
 | TabbedPage | B5 | ported | No WinUI control: the top pane of NavigationView (TopNavArea of NavigationView.xaml, MUX_NavigationViewItemPresenterStyleWhenOnTopPane of NavigationView_themeresources.xaml; NavigationView itself is NavigationView.xaml) and the page background. |

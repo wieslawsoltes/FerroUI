@@ -529,6 +529,7 @@ const PROCESS_WARM_UP_FRAMES: i32 = 30;
 fn warm_up_the_process() {
     static WARMED: Once = Once::new();
     WARMED.call_once(|| {
+        ferroui_frame_benchmarks::page_in_the_program();
         let gate = Gate::start(&WARM_UP);
         gate.run(PROCESS_WARM_UP_FRAMES);
     });
@@ -584,6 +585,9 @@ fn measure_start(scene: &Scene) {
     if let Some(wait) = std::env::var("FERROUI_GATE_START_DELAY_MS").ok().and_then(|wait| wait.parse().ok()) {
         std::thread::sleep(Duration::from_millis(wait));
     }
+    // A start is of a process that has built nothing yet, with its program in memory: the pages
+    // of the program the start runs through are not read from the disk inside it.
+    ferroui_frame_benchmarks::page_in_the_program();
     let counters = ferroui_base::diagnostics::perf_counters::snapshot();
     let gate = Gate::start(scene);
     let first = gate.first_frame();
@@ -663,6 +667,9 @@ struct Census {
     bare_chain: usize,
     /// Have no composition visual (section 9.41).
     without_visual: usize,
+    /// Draw, and have no composition visual: what they draw is an item of the composition
+    /// visual of the nearest element above that has one (section 9.42).
+    items: usize,
     /// Of those that draw nothing and set an input: how many set each one. An element that sets
     /// two is counted for both.
     inputs_set: [usize; INPUT_NAMES.len()],
@@ -708,8 +715,12 @@ impl Census {
         if !has_visual {
             self.without_visual += 1;
         }
-        let draws =
-            has_visual && visual.composition_visual().is_some_and(|composition| composition.draw_list().is_some());
+        let is_item = visual.has_composition_item();
+        if is_item {
+            self.items += 1;
+        }
+        let draws = is_item
+            || has_visual && visual.composition_visual().is_some_and(|composition| composition.draw_list().is_some());
         let other_inputs = visual.opacity() != 1.0
             || visual.clip().is_some()
             || visual.cache_mode().is_some()
@@ -792,6 +803,7 @@ impl Census {
             line("draw nothing, set nothing, under one that does neither", self.bare_under_bare),
             format!("  longest chain that draws nothing and sets nothing: {}", self.bare_chain),
             line("have no composition visual", self.without_visual),
+            line("draw as an item of a composition visual above them", self.items),
             line("have a composition visual, draw nothing, set nothing", self.visual_for_another_reason),
             line("are below one that is not visible", self.below_hidden),
             line("have a composition visual below one that is not visible", self.visuals_below_hidden),
@@ -882,6 +894,7 @@ scenes! {
     wall_with_the_pointer => "wall+pointer",
     moves => "moves",
     lines => "lines",
+    items => "items",
 }
 
 macro_rules! starts {
@@ -902,7 +915,7 @@ starts! {
 
 #[test]
 fn every_scene_has_a_test() {
-    let tested = ["text", "list", "transforms", "width", "wall", "wall+pointer", "moves", "lines"];
+    let tested = ["text", "list", "transforms", "width", "wall", "wall+pointer", "moves", "lines", "items"];
     for scene in SCENES {
         assert!(tested.contains(&scene.name), "the scene {} has no test", scene.name);
     }

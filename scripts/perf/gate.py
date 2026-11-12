@@ -12,8 +12,10 @@ The base (default: the merge-base of HEAD with origin/main) is checked out, deta
 worktree of its own under the scratch folder (default: `ferroui-gate-scratch` beside the
 checkout; reused between runs), and built there with a target folder of its own; the candidate is
 this checkout as it is, uncommitted changes included, built with another target folder. Both are
-built first, then measured alternately (base, candidate, base, candidate, ...) for `--rounds`
-rounds, so that both sides see the same machine. A metric is the median of its rounds. When a
+built first, then measured alternately for `--rounds` rounds, so that both sides see the same
+machine; the side that goes first changes from round to round (base, candidate; candidate, base;
+...), so that neither is always the one measured after the other. A metric is the median of its
+rounds. When a
 metric is over its tolerance by less than the spread of its own rounds on either side (one
 disturbed round can move a median of three that far), the gate measures more rounds, alternately
 again, up to `--max-rounds`, before it decides.
@@ -23,9 +25,13 @@ What is measured (see docs/porting/desktop-performance.md, section 8.1):
 - the frame gate, `samples/GauntletBenchmark/tests/frame_gate.rs`: per scenario (`gauntlet/16`,
   `wall/20`) the milliseconds a frame of the UI thread, of the render thread and of wall time,
   from its `GATE {...}` lines;
-- the TreeDataGrid benchmarks, `tests/FerroUI.TreeDataGrid.Benchmarks`: the median time of one
-  operation of every benchmark, from the tables of the harness (`ferroui-benchmarks`,
-  `harness.rs`).
+- the TreeDataGrid benchmarks, `tests/FerroUI.TreeDataGrid.Benchmarks`, and the framework
+  benchmarks, `tests/FerroUI.Benchmarks`: the median time of one operation of every benchmark,
+  from the tables of the harness (`ferroui-benchmarks`, `harness.rs`), and, where the harness
+  counts them, the instructions the processor retires for it. Each class of benchmarks runs in a
+  process of its own. A time over its tolerance whose instructions are not is reported as
+  `REGRESSED (time alone)`: the work is the same, and the time is that of where this build put
+  the code and the data, or of the machine.
 
 What is checked without a measurement, on the candidate alone and once (`counters`): the tests
 that assert how much work an operation does, read from the framework's performance counters
@@ -90,12 +96,24 @@ WINDOW_SCENES = ["text", "list", "transforms", "wall", "lines"]
 
 TEST_ARGS = ["--ignored", "--nocapture", "--test-threads=1"]
 
-# The tests of the frame benchmarks that measure the start of a scene. Each runs in a process of
-# its own, and the scenes of the frames run in a process without them: a start is the start of a
-# process that has built nothing yet, and a scene of the start (thousands of elements) leaves the
-# heap and the caches of the process in a state that moves the build of every scene measured
-# after it (the build of the `text` scene by a seventh).
-START_TEST_PREFIX = "start_of_"
+# The variables of the benchmark harness that list the selected benchmarks and that run one class
+# of them (`tests/FerroUI.Benchmarks/harness.rs`).
+BENCH_LIST = "FERROUI_BENCH_LIST"
+BENCH_CLASS = "FERROUI_BENCH_CLASS"
+# The suites of the harness. Each class of their benchmarks runs in a process of its own: a
+# benchmark starts from the heap, the caches and the threads the benchmarks before it in the
+# process left, and the same benchmark of the same build differed by a third between two processes
+# that had run the hundred and more before it (`trees::Propagation.font_family`: 1.82 and 1.40 ms)
+# where it is within a few percent after the benchmarks of its class alone.
+HARNESS_SUITES = ("framework", "tdg")
+
+# The tests of the frame benchmarks (`cargo test ... -- --list --ignored`). Each runs in a process
+# of its own: a start is the start of a process that has built nothing yet, and a scene leaves
+# the heap and the caches of the process in a state that moves what is measured after it. A
+# scene of the start (thousands of elements) moved the build of the `text` scene by a seventh,
+# and a scene of the frames the build of the one after it by as much as two thirds when the two
+# sides left the allocator in different states (a side that has fewer composition objects frees
+# other blocks). What a scene is measured after is then the same on both sides: nothing.
 FRAMES_TEST = ["test", "-p", FRAMES_PACKAGE, "--release", "--test", "frames", "--"]
 
 # The tests that assert counts of work (`ferroui_base::diagnostics::perf_counters`), each a
@@ -121,8 +139,8 @@ SUITES = {
     },
     "frames": {
         "build": ["test", "-p", FRAMES_PACKAGE, "--release", "--test", "frames", "--no-run"],
-        # The scenes of the frames; the starts follow, a process each (`run_frames`).
-        "run": [*FRAMES_TEST, *TEST_ARGS, "--skip", START_TEST_PREFIX],
+        # Not one run: each test in a process of its own (`run_frames`).
+        "run": [],
     },
     "framework": {
         "build": ["test", "-p", FRAMEWORK_PACKAGE, "--release", "--lib", "--no-run"],
@@ -144,6 +162,11 @@ ALL_SUITES = ["counters", "gauntlet", "frames", "framework", "tdg", "window"]
 #
 # - UI thread and wall time of a frame: the factor 1. The frame gate averages hundreds of frames
 #   of a deterministic workload on the CPU (raster Skia), so a few percent is a real change.
+# - Render thread and wall time are those of a frame the surface received (`presented_frames`):
+#   the loop of the benchmark does not wait for the display, and a frame of the clock that
+#   starts while the render thread still has the batch before it commits nothing and costs
+#   close to nothing. A side that presents fewer of its frames would look faster by the frames
+#   it did not draw.
 # - Render thread: 1.5. The render thread runs beside the UI thread and its time moves with
 #   where the scheduler puts the two threads (performance or efficiency cores) and with the state
 #   of Skia's glyph caches when the measured window starts.
@@ -177,6 +200,18 @@ TDG_FACTOR = 2.0
 TDG_SHORT_FACTOR = 3.0
 TDG_SHORT_NS = 100.0
 TDG_FLOOR_NS = 2.0
+# - The instructions of a benchmark operation (the harness reads them where the system counts
+#   them): 2 %, whatever `--tolerance` is, and more than one instruction. They do not move with
+#   the machine or with where a build puts the code: of 336 pairs of runs of the same build the
+#   median difference was 0.01 % and the largest 0.74 %. A benchmark over this tolerance does more
+#   work, whatever its time says; a benchmark whose time is over its tolerance and whose
+#   instructions are not does the same work in more time. A few benchmarks count differently
+#   from one process to the next (the order of a hash table follows a seed the process draws:
+#   `Propagation.styles_changed` counted 13.70 to 14.51 million in four runs of one build), so
+#   the instructions are over their tolerance only when every round of the candidate also
+#   counted more than every round of the base.
+INSTRUCTIONS_TOLERANCE = 0.02
+INSTRUCTIONS_FLOOR = 1.0
 
 
 @dataclass
@@ -198,6 +233,8 @@ class Side:
     values: dict[str, list[float]] = field(default_factory=dict)
     metrics: dict[str, Metric] = field(default_factory=dict)
     failed: set[str] = field(default_factory=set)
+    # The instructions of an operation of a benchmark, a value a round, by the key of its time.
+    instructions: dict[str, list[float]] = field(default_factory=dict)
 
 
 class GateError(Exception):
@@ -208,6 +245,24 @@ class GateError(Exception):
 
 GATE_LINE = re.compile(r"^GATE (\{.*\})\s*$")
 SIZES_LINE = re.compile(r"^SIZES (\{.*\})\s*$")
+
+
+# The times of a record that are compared for a frame the surface received.
+PRESENTED_FRAME_TIMES = ("render_ms_per_frame", "wall_ms_per_frame")
+
+
+def presented_frames(record: dict) -> float:
+    """What a time for a frame of the clock of `record` is multiplied by to be the time for a
+    frame the surface received: the frames of the clock over the frames received, when the
+    record counts both and fewer were received than the clock had (a record without the count,
+    or with as many frames received as measured, is left as it is)."""
+    frames = record.get("frames")
+    rendered = record.get("rendered")
+    if not isinstance(frames, (int, float)) or not isinstance(rendered, (int, float)):
+        return 1.0
+    if rendered <= 0 or rendered >= frames:
+        return 1.0
+    return float(frames) / float(rendered)
 
 
 def parse_gate(output: str) -> list[tuple[Metric, float]]:
@@ -224,10 +279,12 @@ def parse_gate(output: str) -> list[tuple[Metric, float]]:
             continue
         record = json.loads(match.group(1))
         bench = record["bench"]
+        presented = presented_frames(record)
         for name, factor in FRAME_FACTORS.items():
             if name in record:
                 metric = Metric(f"{bench} {name}", "ms", factor, FRAME_FLOOR_MS)
-                found.append((metric, float(record[name])))
+                scale = presented if name in PRESENTED_FRAME_TIMES else 1.0
+                found.append((metric, float(record[name]) * scale))
         for name, factor in STARTUP_FACTORS.items():
             if name in record:
                 metric = Metric(f"{bench} {name}", "ms", factor, STARTUP_FLOOR_MS)
@@ -259,9 +316,10 @@ def tdg_metric(full_name: str, nanoseconds: float) -> Metric:
     return Metric(full_name, "ns", factor, TDG_FLOOR_NS)
 
 
-def parse_tdg(output: str) -> tuple[list[tuple[Metric, float]], set[str]]:
-    """The median time of one operation of every benchmark of a run of the harness, and the
-    benchmarks that failed.
+def parse_tdg(output: str) -> tuple[list[tuple[Metric, float]], set[str], dict[str, float]]:
+    """The median time of one operation of every benchmark of a run of the harness (or of
+    several, one after the other), the benchmarks that failed, and the instructions of an
+    operation of the benchmarks whose table has them.
 
     The harness prints a line per benchmark as it ends,
 
@@ -271,15 +329,17 @@ def parse_tdg(output: str) -> tuple[list[tuple[Metric, float]], set[str]]:
     (the mean of the iterations), and then a table per class:
 
         treedatagrid::Class
-        | Benchmark | Parameters | Mean | Median | Min | StdDev | ...
+        | Benchmark | Parameters | Mean | Median | Min | StdDev | ... | Instructions | Cycles |
         |-----------|------------|------|--------|-----|--------|
-        | name      | Param=value | 1.234 us | 1.230 us | ...
+        | name      | Param=value | 1.234 us | 1.230 us | ...          |       152210 |  48211 |
 
     The full name is `category::Class.name`, with `[parameters]` when there are any. The median
     is taken from the table; a benchmark the table does not have (output cut short) falls back
-    to the mean of its line.
+    to the mean of its line. The columns of the processor are there where the system counts
+    (`harness::processor`).
     """
     medians: dict[str, float] = {}
+    instructions: dict[str, float] = {}
     means: dict[str, float] = {}
     failed: set[str] = set()
 
@@ -324,11 +384,15 @@ def parse_tdg(output: str) -> tuple[list[tuple[Metric, float]], set[str]]:
         value = parse_time(row.get("Median", "")) or parse_time(row.get("Mean", ""))
         if value is not None:
             medians[full_name] = value
+        try:
+            instructions[full_name] = float(row.get("Instructions", ""))
+        except ValueError:
+            pass
 
     for name, value in means.items():
         medians.setdefault(name, value)
     found = [(tdg_metric(name, value), value) for name, value in medians.items() if name not in failed]
-    return found, failed
+    return found, failed, {name: value for name, value in instructions.items() if name not in failed}
 
 
 # --- running --------------------------------------------------------------------------------------
@@ -367,19 +431,51 @@ def run_cargo(side: Side, args: list[str], env: dict[str, str], log: Path, echo:
     return "".join(lines)
 
 
-def start_tests(side: Side, env: dict[str, str], log: Path, echo: bool) -> list[str]:
-    """The tests of the start the frame benchmarks of `side` have (a base may have none)."""
+def frame_tests(side: Side, env: dict[str, str], log: Path, echo: bool) -> list[str]:
+    """The tests the frame benchmarks of `side` measure with (a base may have fewer)."""
     output = run_cargo(side, [*FRAMES_TEST, "--list", "--ignored"], env, log, echo)
     names = (line.removesuffix(": test").strip() for line in output.splitlines() if line.endswith(": test"))
-    return sorted(name for name in names if name.startswith(START_TEST_PREFIX))
+    return sorted(names)
 
 
-def run_frames(side: Side, starts: list[str], env: dict[str, str], log: Path, echo: bool) -> str:
-    """The scenes of the frames in one process, then each test of the start in its own."""
-    output = run_cargo(side, SUITES["frames"]["run"], env, log, echo)
-    for test in starts:
-        start_log = log.with_name(f"{log.stem}-{test}{log.suffix}")
-        output += run_cargo(side, [*FRAMES_TEST, test, "--exact", *TEST_ARGS], env, start_log, echo)
+def run_frames(side: Side, tests: list[str], env: dict[str, str], log: Path, echo: bool) -> str:
+    """Each test of the frame benchmarks in a process of its own."""
+    output = ""
+    for test in tests:
+        test_log = log.with_name(f"{log.stem}-{test}{log.suffix}")
+        output += run_cargo(side, [*FRAMES_TEST, test, "--exact", *TEST_ARGS], env, test_log, echo)
+    return output
+
+
+LISTED_NAME = re.compile(r"(?:^|\.\.\. )([A-Za-z0-9_]+::[A-Za-z0-9_]+)\.\S")
+
+
+def runs_one_class(side: Side) -> bool:
+    """Whether the benchmark harness of `side` can run one class of the selected benchmarks (a
+    base from before it could cannot)."""
+    harness = side.root / FRAMEWORK_CRATE / "harness.rs"
+    return harness.is_file() and BENCH_CLASS in harness.read_text(encoding="utf-8")
+
+
+def benchmark_classes(side: Side, suite: str, env: dict[str, str], log: Path, echo: bool) -> list[str]:
+    """The classes (`category::Class`) of the benchmarks the run of `suite` selects on `side`, in
+    the order of the harness."""
+    output = run_cargo(side, SUITES[suite]["run"], {**env, BENCH_LIST: "1"}, log, echo)
+    # The first name follows the line of the test (`test ... run_benchmarks ... `) when the
+    # output is not captured.
+    classes = [match.group(1) for match in map(LISTED_NAME.search, output.splitlines()) if match]
+    return list(dict.fromkeys(classes))
+
+
+def run_benchmarks(side: Side, suite: str, classes: list[str] | None, env: dict[str, str], log: Path, echo: bool) -> str:
+    """The benchmarks of `suite`: each of `classes` in a process of its own, or all of them in
+    one when there is no list of classes."""
+    if classes is None:
+        return run_cargo(side, SUITES[suite]["run"], env, log, echo)
+    output = ""
+    for name in classes:
+        class_log = log.with_name(f"{log.stem}-{name.replace('::', '-')}{log.suffix}")
+        output += run_cargo(side, SUITES[suite]["run"], {**env, BENCH_CLASS: name}, class_log, echo)
     return output
 
 
@@ -533,10 +629,12 @@ def run_counter_checks(candidate: Side, logs: Path, echo: bool) -> list[Row]:
     return rows
 
 
-def record(side: Side, found: list[tuple[Metric, float]]) -> None:
+def record(side: Side, found: list[tuple[Metric, float]], instructions: dict[str, float] | None = None) -> None:
     for metric, value in found:
         side.metrics[metric.key] = metric
         side.values.setdefault(metric.key, []).append(value)
+    for key, value in (instructions or {}).items():
+        side.instructions.setdefault(key, []).append(value)
 
 
 # --- the comparison -------------------------------------------------------------------------------
@@ -567,6 +665,11 @@ class Row:
     tolerance: str
     verdict: str
     regressed: bool
+    # The change of the instructions of an operation, for a benchmark both sides counted them for.
+    instructions: str = ""
+    # Whether what regressed is the measured value (a time): more rounds can then tell a
+    # disturbed round from a change, which they cannot for a count.
+    measured: bool = False
 
 
 def compare(base: Side, candidate: Side, tolerance: float) -> list[Row]:
@@ -588,17 +691,48 @@ def compare(base: Side, candidate: Side, tolerance: float) -> list[Row]:
             rows.append(Row(key, cell_b, cell_c, "", f"{limit * 100:g} %", verdict, c is None))
             continue
         change = (c - b) / b if b > 0 else 0.0
-        if change > limit and c - b > metric.floor:
-            verdict, regressed = "REGRESSED", True
+        counted = key in base.instructions and key in candidate.instructions
+        counts_b = statistics.median(base.instructions[key]) if counted else 0.0
+        counts_c = statistics.median(candidate.instructions[key]) if counted else 0.0
+        counts = (counts_c - counts_b) / counts_b if counts_b > 0 else 0.0
+        more_work = (
+            counts > INSTRUCTIONS_TOLERANCE
+            and counts_c - counts_b > INSTRUCTIONS_FLOOR
+            and min(candidate.instructions[key]) > max(base.instructions[key])
+        )
+        less_work = counted and counts < -INSTRUCTIONS_TOLERANCE and (
+            max(candidate.instructions[key]) < min(base.instructions[key])
+        )
+        measured = change > limit and c - b > metric.floor
+        if measured:
+            # The same work in more time is a regression too, and says what it is.
+            verdict, regressed = ("REGRESSED (time alone)" if counted and not more_work else "REGRESSED"), True
+        elif more_work:
+            verdict, regressed = "REGRESSED (instructions)", True
         elif change < -limit and b - c > metric.floor:
-            verdict, regressed = "faster", False
+            # Less time for the same work is what a quieter round looks like, and what a change of
+            # the memory or of the layout of the code looks like: the line says which it cannot be.
+            verdict, regressed = ("faster (time alone)" if counted and not less_work else "faster"), False
         else:
             verdict, regressed = "ok", False
-        rows.append(Row(key, cell_b, cell_c, f"{change * 100:+.1f} %", f"{limit * 100:g} %", verdict, regressed))
+        rows.append(
+            Row(
+                key,
+                cell_b,
+                cell_c,
+                f"{change * 100:+.1f} %",
+                f"{limit * 100:g} %",
+                verdict,
+                regressed,
+                f"{counts * 100:+.2f} %" if counted else "",
+                measured,
+            )
+        )
     return rows
 
 
-HEADER = ("Metric", "Base", "Candidate", "Change", "Tolerance", "Verdict")
+HEADER = ("Metric", "Base", "Candidate", "Change", "Instructions", "Tolerance", "Verdict")
+INSTRUCTIONS_COLUMN = HEADER.index("Instructions")
 
 
 def is_within_spread(base: Side, candidate: Side, key: str) -> bool:
@@ -612,12 +746,21 @@ def is_within_spread(base: Side, candidate: Side, key: str) -> bool:
 
 
 def cells(row: Row) -> tuple[str, ...]:
-    return (row.key, row.base, row.candidate, row.change, row.tolerance, row.verdict)
+    return (row.key, row.base, row.candidate, row.change, row.instructions, row.tolerance, row.verdict)
+
+
+def table_of(rows: list[Row]) -> list[tuple[str, ...]]:
+    """The header and the lines of `rows`, without the column of the instructions when no row
+    has them."""
+    table = [HEADER, *(cells(row) for row in rows)]
+    if any(row.instructions for row in rows):
+        return table
+    return [line[:INSTRUCTIONS_COLUMN] + line[INSTRUCTIONS_COLUMN + 1 :] for line in table]
 
 
 def text_table(rows: list[Row]) -> str:
-    table = [HEADER, *(cells(row) for row in rows)]
-    widths = [max(len(line[column]) for line in table) for column in range(len(HEADER))]
+    table = table_of(rows)
+    widths = [max(len(line[column]) for line in table) for column in range(len(table[0]))]
     out = []
     for index, line in enumerate(table):
         out.append(
@@ -632,9 +775,9 @@ def text_table(rows: list[Row]) -> str:
 
 
 def markdown_table(rows: list[Row]) -> str:
-    out = ["| " + " | ".join(HEADER) + " |", "|---|---:|---:|---:|---:|---|"]
-    for row in rows:
-        key, *rest = cells(row)
+    header, *lines = table_of(rows)
+    out = ["| " + " | ".join(header) + " |", "|---|" + "---:|" * (len(header) - 2) + "---|"]
+    for key, *rest in lines:
         out.append("| `" + key + "` | " + " | ".join(rest) + " |")
     return "\n".join(out)
 
@@ -766,10 +909,12 @@ def gate(options: argparse.Namespace) -> int:
             print(f"build: {' '.join(cargo_command() + SUITES[suite]['build'])}")
             if suite == "window":
                 print(f"run:   {FRAMES_BINARY} with FRAMES_SCENE={','.join(window_scenes)}, {options.window_seconds:g} s each")
+            elif suite == "frames":
+                print(f"run:   each test in a process of its own: {variables + ' ' if variables else ''}{' '.join(cargo_command() + FRAMES_TEST)} <test> --exact {' '.join(TEST_ARGS)}")
             else:
                 print(f"run:   {variables + ' ' if variables else ''}{' '.join(cargo_command() + SUITES[suite]['run'])}")
-                if suite == "frames":
-                    print(f"run:   each test `{START_TEST_PREFIX}*` in a process of its own: {' '.join(cargo_command() + FRAMES_TEST)} <test> --exact {' '.join(TEST_ARGS)}")
+                if suite in HARNESS_SUITES:
+                    print(f"run:   each class of the benchmarks in a process of its own, with {BENCH_CLASS}=<category::Class>")
         return 0
 
     base_root, copied = prepare_base(root, scratch, base_sha, suites, options.copy_gate)
@@ -784,16 +929,36 @@ def gate(options: argparse.Namespace) -> int:
         for side in (base, candidate):
             run_cargo(side, SUITES[suite]["build"], env[suite], logs / f"build-{suite}-{side.name}.log", options.verbose)
 
-    starts: dict[str, list[str]] = {}
+    frames: dict[str, list[str]] = {}
     if "frames" in suites:
         for side in (base, candidate):
-            starts[side.name] = start_tests(side, env["frames"], logs / f"list-frames-{side.name}.log", options.verbose)
+            frames[side.name] = frame_tests(side, env["frames"], logs / f"list-frames-{side.name}.log", options.verbose)
+
+    # The classes of the benchmarks of each harness suite, a side: each runs in a process of its
+    # own, when the harness of both sides can run one class (else both run all in one process,
+    # so that the two are measured the same way).
+    classes: dict[tuple[str, str], list[str] | None] = {}
+    for suite in suites:
+        if suite not in HARNESS_SUITES:
+            continue
+        one_class = runs_one_class(base) and runs_one_class(candidate)
+        if not one_class:
+            print(f"note: the harness of a side cannot run one class ({BENCH_CLASS}): the {suite} benchmarks of both run in one process")
+        for side in (base, candidate):
+            classes[suite, side.name] = (
+                benchmark_classes(side, suite, env[suite], logs / f"list-{suite}-{side.name}.log", options.verbose)
+                if one_class
+                else None
+            )
 
     suite_of: dict[str, str] = {}
 
     def measure(round_index: int, measured: list[str], of: int) -> None:
+        # The side that goes first changes with the round: what a run leaves behind (the caches
+        # of the system, the heat of the machine) is then not always the other side's start.
+        sides = (base, candidate) if round_index % 2 == 0 else (candidate, base)
         for suite in measured:
-            for side in (base, candidate):
+            for side in sides:
                 print(f"round {round_index + 1} of {of}: {suite}, {side.name}", flush=True)
                 log = logs / f"{suite}-{side.name}-{round_index + 1}.log"
                 if suite == "window":
@@ -804,7 +969,9 @@ def gate(options: argparse.Namespace) -> int:
                         suite_of.update((metric.key, suite) for metric, _ in found)
                     continue
                 if suite == "frames":
-                    output = run_frames(side, starts[side.name], env[suite], log, options.verbose)
+                    output = run_frames(side, frames[side.name], env[suite], log, options.verbose)
+                elif suite in HARNESS_SUITES:
+                    output = run_benchmarks(side, suite, classes[suite, side.name], env[suite], log, options.verbose)
                 else:
                     output = run_cargo(side, SUITES[suite]["run"], env[suite], log, options.verbose)
                 if suite in ("gauntlet", "frames"):
@@ -814,10 +981,10 @@ def gate(options: argparse.Namespace) -> int:
                     record(side, found)
                     suite_of.update((metric.key, suite) for metric, _ in found)
                 else:
-                    found, failed = parse_tdg(output)
+                    found, failed, instructions = parse_tdg(output)
                     if not found and not failed:
                         raise GateError(f"[{side.name}] the {suite} run printed no result; the log is {log}")
-                    record(side, found)
+                    record(side, found, instructions)
                     suite_of.update((metric.key, suite) for metric, _ in found)
                     side.failed |= failed
 
@@ -826,7 +993,7 @@ def gate(options: argparse.Namespace) -> int:
 
     rounds = options.rounds
     while rounds < options.max_rounds:
-        doubtful = [row.key for row in compare(base, candidate, options.tolerance) if row.regressed and is_within_spread(base, candidate, row.key)]
+        doubtful = [row.key for row in compare(base, candidate, options.tolerance) if row.measured and is_within_spread(base, candidate, row.key)]
         if not doubtful:
             break
         measured = [suite for suite in suites if any(suite_of.get(key) == suite for key in doubtful)]
@@ -836,8 +1003,10 @@ def gate(options: argparse.Namespace) -> int:
 
     rows = [*check_rows, *compare(base, candidate, options.tolerance)]
     regressions = [row for row in rows if row.regressed]
+    time_alone = sum(row.verdict == "REGRESSED (time alone)" for row in regressions)
     summary = (
         f"{len(rows)} metrics, {len(regressions)} regressed beyond their tolerance"
+        + (f" ({time_alone} of them in time alone, with the instructions of the base)" if time_alone else "")
         if regressions
         else f"{len(rows)} metrics, none regressed beyond its tolerance"
     )
@@ -857,12 +1026,19 @@ def gate(options: argparse.Namespace) -> int:
             "",
             f"Base `{base_sha[:10]}` ({base_ref}), candidate `{candidate_label}`; {options.rounds} rounds"
             + (f" (up to {rounds} where a metric was over its tolerance within the spread of its rounds)" if rounds > options.rounds else "")
-            + ", ABAB, "
+            + ", the two sides alternately and each first in turn, "
             f"median of the rounds; tolerance {options.tolerance * 100:.0f} % times the factor of the metric "
             "(`scripts/perf/gate.py`). Frame gate: 1280 x 820 at a scaling of 2, raster Skia, render-thread mode. "
             f"TreeDataGrid: median time of an operation, {options.tdg_iterations} iterations of at least "
             f"{options.tdg_min_iteration_ms} ms after {options.tdg_warmup} of warm-up"
             + (f", filter `{options.tdg_filter}`" if options.tdg_filter else "")
+            + (
+                ". Benchmarks: a process per class; Instructions is the change of the instructions an "
+                f"operation retires (tolerance {INSTRUCTIONS_TOLERANCE * 100:g} %), and a time over its "
+                "tolerance with instructions within theirs is `REGRESSED (time alone)`"
+                if any(row.instructions for row in rows)
+                else ""
+            )
             + f". Machine: {machine}.",
             "",
             *([*notes, ""] if notes else []),

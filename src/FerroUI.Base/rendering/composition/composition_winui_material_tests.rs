@@ -533,7 +533,8 @@ fn acrylic_draws_its_recipe_and_falls_back_with_the_policy() {
     context.supports_effects = true;
     context.log_effects = true;
     context.supports_layer_effects = true;
-    s.server_object(element.composition_visual().unwrap().server()).render(
+    assert!(!element.has_composition_visual(), "what the element draws is shown by the visual above it");
+    s.server_visual(&s.root).render(
         &mut context,
         LtrbRect::INFINITE,
         None,
@@ -766,7 +767,8 @@ fn host_backdrop_acrylic_shows_what_is_behind_the_window_and_falls_back_while_in
     let log = DrawingLog::new();
     let mut context = MockDrawingContextImpl::new(log.clone());
     context.supports_layer_effects = true;
-    s.server_object(element.composition_visual().unwrap().server()).render(
+    assert!(!element.has_composition_visual(), "what the element draws is shown by the visual above it");
+    s.server_visual(&s.root).render(
         &mut context,
         LtrbRect::INFINITE,
         None,

@@ -65,6 +65,10 @@ pub(crate) struct DynamicResourceExpression {
     override_theme_variant: Cell<bool>,
     target_type_is_brush: Cell<bool>,
     theme_variant: RefCell<Option<ThemeVariant>>,
+    /// The last sequence number of the notifications of changed resources
+    /// when the resource was last looked up: a notification that is not newer
+    /// describes a change that lookup already saw.
+    looked_up_at: Cell<i32>,
     owner_changed_subscription: RefCell<Option<Subscription>>,
     host_subscriptions: RefCell<Vec<Subscription>>,
 }
@@ -99,6 +103,7 @@ impl DynamicResourceExpression {
             override_theme_variant: Cell::new(false),
             target_type_is_brush: Cell::new(false),
             theme_variant: RefCell::new(theme_variant),
+            looked_up_at: Cell::new(0),
             owner_changed_subscription: RefCell::new(None),
             host_subscriptions: RefCell::new(Vec::new()),
         });
@@ -122,6 +127,7 @@ impl DynamicResourceExpression {
     }
 
     fn on_start(&self) {
+        ferroui_base::perf_count!(DynamicResourceExpressionsStarted);
         let host = self.try_get_resource_host();
         if host.is_none() {
             // The target is not an IResourceHost, so we need to find one from the anchor.
@@ -196,7 +202,23 @@ impl DynamicResourceExpression {
         self.publish_value();
     }
 
+    /// The resources of the host changed: the resource is looked up again
+    /// unless it was looked up after the change was made (the attachment of
+    /// an element to a tree is notified to it after the styles it applies on
+    /// the way, and after the theme variant it inherits there, have started
+    /// or updated its dynamic resources).
+    fn resources_changed(&self, e: &ResourcesChangedEventArgs) {
+        if e.is_newer_than(self.looked_up_at.get()) {
+            self.publish_value();
+        } else {
+            ferroui_base::perf_count!(DynamicResourceNotificationsSeen);
+        }
+    }
+
     fn publish_value(&self) {
+        ferroui_base::perf_count!(DynamicResourceLookups);
+        // Taken before the lookup: a change notified while it runs is newer.
+        self.looked_up_at.set(ResourcesChangedEventArgs::last_sequence_number());
         let value = match self.host() {
             Some(host) => {
                 let theme = self.theme_variant.borrow().clone();
@@ -275,9 +297,9 @@ impl DynamicResourceExpression {
         let mut subscriptions = Vec::with_capacity(2);
 
         let weak = self.this.clone();
-        subscriptions.push(Subscription::new(host.resources_changed(Rc::new(move |_: &ResourcesChangedEventArgs| {
+        subscriptions.push(Subscription::new(host.resources_changed(Rc::new(move |e: &ResourcesChangedEventArgs| {
             if let Some(this) = weak.upgrade() {
-                this.publish_value();
+                this.resources_changed(e);
             }
         }))));
 

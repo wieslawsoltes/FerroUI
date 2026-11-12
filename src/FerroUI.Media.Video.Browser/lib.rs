@@ -37,6 +37,12 @@ extern "C" {
     #[wasm_bindgen(method, catch)]
     fn audio(this: &BrowserVideo, volume: f64, muted: bool) -> Result<(), JsValue>;
     #[wasm_bindgen(method, catch)]
+    fn rate(this: &BrowserVideo, value: f64) -> Result<(), JsValue>;
+    #[wasm_bindgen(method, getter, js_name = canCast)]
+    fn can_cast(this: &BrowserVideo) -> bool;
+    #[wasm_bindgen(method, catch)]
+    fn cast(this: &BrowserVideo) -> Result<JsValue, JsValue>;
+    #[wasm_bindgen(method, catch)]
     fn seek(this: &BrowserVideo, position: f64) -> Result<BrowserSeek, JsValue>;
     #[wasm_bindgen(method)]
     fn close(this: &BrowserVideo);
@@ -183,6 +189,27 @@ impl NativeMediaSession for Session {
     }
     fn set_audio(&self, volume: f64, muted: bool) -> Result<(), MediaError> {
         self.video.0.audio(volume, muted).map_err(js_error)
+    }
+    fn supports_playback_rate(&self) -> bool {
+        true
+    }
+    fn set_playback_rate(&self, rate: f64) -> Result<(), MediaError> {
+        self.video.0.rate(rate).map_err(js_error)
+    }
+    fn supports_casting(&self) -> bool {
+        self.video.0.can_cast()
+    }
+    fn cast(&self) -> MediaFuture<()> {
+        let requested = self
+            .video
+            .0
+            .cast()
+            .map(|promise| await_promise(&promise))
+            .map_err(js_error);
+        Box::pin(async move {
+            requested?.await.map_err(promise_error)?;
+            Ok(())
+        })
     }
     fn stop(&self) -> Result<(), MediaError> {
         self.stream.clear();

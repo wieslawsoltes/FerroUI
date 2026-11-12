@@ -36,3 +36,22 @@ fn a_visual_of_the_server_fits_a_block_of_640_bytes() {
         size_of::<ServerCompositionVisual>()
     );
 }
+
+/// What a visual that only draws has instead of the two visuals: an item on each thread
+/// (desktop-performance.md, section 9.42).
+#[test]
+#[cfg(target_pointer_width = "64")]
+fn a_drawing_item_fits_a_block_of_96_bytes_and_its_server_item_one_of_144() {
+    use super::server::ServerDrawItem;
+    use super::CompositionDrawItem;
+    assert!(
+        size_of::<CompositionDrawItem>() + RC_HEADER <= 96,
+        "CompositionDrawItem is {} bytes",
+        size_of::<CompositionDrawItem>()
+    );
+    assert!(
+        size_of::<ServerDrawItem>() + RC_HEADER <= 144,
+        "ServerDrawItem is {} bytes",
+        size_of::<ServerDrawItem>()
+    );
+}

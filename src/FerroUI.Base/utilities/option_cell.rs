@@ -32,6 +32,36 @@ impl<T> OptionCell<T> {
     pub(crate) fn set(&self, value: Option<T>) {
         drop(self.value.replace(value));
     }
+
+    /// Replaces the value and returns the one the cell held.
+    #[inline]
+    pub(crate) fn replace(&self, value: Option<T>) -> Option<T> {
+        self.value.replace(value)
+    }
+
+    /// Takes the value out: the cell holds nothing afterwards.
+    #[inline]
+    pub(crate) fn take(&self) -> Option<T> {
+        self.value.take()
+    }
+
+    /// Calls `read` with the value, without cloning it. `read` must not read the cell.
+    #[inline]
+    pub(crate) fn with<R>(&self, read: impl FnOnce(Option<&T>) -> R) -> R {
+        let value = self.value.take();
+        let result = read(value.as_ref());
+        self.value.set(value);
+        result
+    }
+
+    /// Whether the cell holds a value, without cloning it.
+    #[inline]
+    pub(crate) fn is_some(&self) -> bool {
+        let value = self.value.take();
+        let result = value.is_some();
+        self.value.set(value);
+        result
+    }
 }
 
 impl<T: Clone> OptionCell<T> {
@@ -146,6 +176,27 @@ mod tests {
         assert_eq!(*seen.borrow(), ["new"]);
 
         cell.set(None);
+    }
+
+    #[test]
+    fn a_value_is_taken_or_replaced_without_a_clone() {
+        let first: Rc<dyn Named> = Rc::new(Item("first"));
+        let second: Rc<dyn Named> = Rc::new(Item("second"));
+        let cell = OptionCell::new();
+        assert!(!cell.is_some());
+
+        cell.set(Some(first.clone()));
+        assert!(cell.is_some());
+        assert_eq!(Rc::strong_count(&first), 2);
+
+        let old = cell.replace(Some(second.clone())).expect("the value that was set");
+        assert!(Rc::ptr_eq(&old, &first));
+        assert_eq!(Rc::strong_count(&first), 2);
+
+        let taken = cell.take().expect("the value that replaced it");
+        assert!(Rc::ptr_eq(&taken, &second));
+        assert!(!cell.is_some());
+        assert!(cell.get().is_none());
     }
 
     #[test]

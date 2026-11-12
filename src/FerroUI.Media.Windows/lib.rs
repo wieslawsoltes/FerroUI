@@ -13,7 +13,9 @@ use ferroui_base::{
 use ferroui_media::{frames::*, *};
 #[cfg(feature = "controls")]
 pub use ferroui_media_opengl::NativeGlTextureImporter;
-pub use native::{NativeDevice, NativeFrame, NativeSession, NativeState};
+pub use native::{
+    EncodedRecording, NativeDevice, NativeFrame, NativeRecording, NativeSession, NativeState,
+};
 
 use std::{cell::RefCell, rc::Rc, task::Poll, time::Duration};
 
@@ -131,9 +133,23 @@ impl WindowsFrameStream {
                 "GPU completion is indeterminate; retained storage is quarantined",
             ));
         }
-        if self.ready.borrow().is_some() || self.pending.borrow().is_some() {
+        // Deliver a completed import on this tick and start its successor without waiting for
+        // another tick. A pending import or producer fence still owns the sole import slot until
+        // it completes.
+        let frame = self.poll_import()?;
+        if self.pending.borrow().is_some() || self.ready.borrow().is_some() {
+            return Ok(frame);
+        }
+        let job = self.queue_import()?;
+        *self.pending.borrow_mut() = job;
+        if frame.is_none() {
+            // An import that completes synchronously is delivered on the tick that queued it.
             return self.poll_import();
         }
+        Ok(frame)
+    }
+
+    fn queue_import(&self) -> Result<Option<MediaFuture<Option<ReadyWindowsFrame>>>, MediaError> {
         if let Some(frame) = self.native.take_frame()? {
             if frame.info().epoch == self.epoch.get() {
                 self.retry.replace(Some(frame));
@@ -189,9 +205,7 @@ impl WindowsFrameStream {
         };
         // The requested native MF video processor supplies RGB DXGI storage.
         // No framework video copy/readback is used by this import.
-        let job = self.producer.import(metadata, frame);
-        self.pending.replace(Some(job));
-        self.poll_import()
+        Ok(Some(self.producer.import(metadata, frame)))
     }
 }
 

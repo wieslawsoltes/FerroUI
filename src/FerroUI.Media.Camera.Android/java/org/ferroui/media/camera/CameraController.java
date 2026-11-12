@@ -31,12 +31,18 @@ import androidx.camera.core.Preview;
 import androidx.camera.core.resolutionselector.ResolutionSelector;
 import androidx.camera.core.resolutionselector.ResolutionStrategy;
 import androidx.camera.lifecycle.ProcessCameraProvider;
+import androidx.camera.video.Quality;
+import androidx.camera.video.QualitySelector;
+import androidx.camera.video.Recorder;
+import androidx.camera.video.VideoCapture;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
 import com.google.common.util.concurrent.ListenableFuture;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.json.JSONArray;
@@ -82,6 +88,9 @@ public final class CameraController implements LifecycleOwner,Application.Activi
     private java.lang.ref.WeakReference<CapturedPhoto> activePhoto=new java.lang.ref.WeakReference<>(null);
     private final java.util.concurrent.ExecutorService photoExecutor=java.util.concurrent.Executors.newSingleThreadExecutor();
     private static final AtomicBoolean PHOTO_BUSY=new AtomicBoolean();
+    private VideoCapture<Recorder> video;
+    private CameraRecordingRequest activeRecording;
+    private boolean recordingSuspendedStill;
     private final String selectedId;
     private final int facing,preferredWidth,preferredHeight;
     private final boolean exact;
@@ -217,6 +226,7 @@ public final class CameraController implements LifecycleOwner,Application.Activi
         }
     }
     private void bindUseCases() {
+        cancelRecording();
         ready=false;
         synchronized(geometryLock){previewSensorToBuffer=null;geometryEpoch++;}
         if(analysis!=null) {analysis.clearAnalyzer();provider.unbind(preview,still,analysis);analysis=null;}
@@ -237,6 +247,7 @@ public final class CameraController implements LifecycleOwner,Application.Activi
     /** UI-thread opt-in; Camera remains independent of any recognition engine. */
     public String setAnalyzer(FrameAnalyzer value) {
         if(closed) return "Camera is closed";
+        if(video!=null) return "Camera is recording";
         FrameAnalyzer previous=analyzer;analyzer=value;
         if(previous!=null && previous!=value) previous.close();
         try {if(provider!=null && preview!=null) bindUseCases();return "";}
@@ -296,7 +307,7 @@ public final class CameraController implements LifecycleOwner,Application.Activi
     }
     public CapturedPhoto capture() {
         CapturedPhoto photo=new CapturedPhoto();
-        if(!ready() || still==null) {photo.fail("Camera is not ready");return photo;}
+        if(!ready() || still==null || video!=null) {photo.fail("Camera is not ready for still capture");return photo;}
         if(!PHOTO_BUSY.compareAndSet(false,true)) {photo.fail("Still capture busy");return photo;}
         capturing=true;activePhoto=new java.lang.ref.WeakReference<>(photo);
         try {
@@ -319,9 +330,77 @@ public final class CameraController implements LifecycleOwner,Application.Activi
         return photo;
     }
     private void captureFinished() {capturing=false;PHOTO_BUSY.set(false);if(closed) photoExecutor.shutdown();}
+
+    private static final java.util.List<Quality> RECORDING_QUALITIES =
+        Arrays.asList(Quality.HD, Quality.SD, Quality.FHD);
+
+    public boolean supportsRecording() {
+        if (!ready() || camera == null || analysis != null) return false;
+        try {
+            return Recorder.getVideoCapabilities(camera.getCameraInfo()).getSupportedQualities(DynamicRange.SDR)
+                .stream().anyMatch(RECORDING_QUALITIES::contains);
+        } catch (RuntimeException unavailable) {
+            return false;
+        }
+    }
+
+    public CameraRecordingRequest startRecording() {
+        CameraRecordingRequest request = new CameraRecordingRequest(main);
+        if (!supportsRecording() || capturing || video != null) {
+            request.fail("Camera recording is unavailable or busy");
+            return request;
+        }
+        if (activeRecording != null) activeRecording.cancel();
+        activeRecording = request;
+        try {
+            Recorder recorder = new Recorder.Builder()
+                .setQualitySelector(QualitySelector.fromOrderedList(RECORDING_QUALITIES)).build();
+            VideoCapture<Recorder> output = new VideoCapture.Builder<>(recorder)
+                .setDynamicRange(DynamicRange.SDR).setTargetRotation(displayRotation()).build();
+            video = output;
+            try {
+                provider.bindToLifecycle(this, selectedCamera, output);
+            } catch (IllegalArgumentException incompatibleStreams) {
+                // Some cameras support preview + video but cannot keep a third
+                // still stream. CameraCaptureUI already serializes the two captures.
+                provider.unbind(output, still);
+                recordingSuspendedStill = true;
+                provider.bindToLifecycle(this, selectedCamera, output);
+            }
+            request.start(activity, recorder, () -> releaseRecordingUseCase(output));
+        } catch (IOException | RuntimeException failure) {
+            request.fail(failure.toString());
+            if (video != null) releaseRecordingUseCase(video);
+        }
+        return request;
+    }
+
+    private void releaseRecordingUseCase(VideoCapture<Recorder> output) {
+        if (video == output) {
+            video = null;
+            provider.unbind(output);
+            if (recordingSuspendedStill) {
+                recordingSuspendedStill = false;
+                if (!closed) {
+                    try { provider.bindToLifecycle(this, selectedCamera, still); }
+                    catch (RuntimeException restore) { fail(8, restore.toString()); }
+                }
+            }
+        }
+    }
+
+    private void cancelRecording() {
+        if (activeRecording != null) {
+            activeRecording.cancel();
+            activeRecording = null;
+        }
+    }
+
     public void close() {
         if(closed) return;
         closed=true;ready=false;synchronized(clockLock){frameClock.clear();clockSession=null;}CapturedPhoto photo=activePhoto.get();if(photo!=null) photo.abandon();
+        cancelRecording();
+        if(video!=null) releaseRecordingUseCase(video);
         if(!capturing) photoExecutor.shutdown();
         FrameAnalyzer old=analyzer;analyzer=null;if(old!=null) old.close();
         if(analysis!=null) analysis.clearAnalyzer();analysisExecutor.shutdown();
@@ -332,7 +411,7 @@ public final class CameraController implements LifecycleOwner,Application.Activi
     }
     private int displayRotation() {return activity.getWindowManager().getDefaultDisplay().getRotation();}
     @Override public void onConfigurationChanged(android.content.res.Configuration configuration) {
-        if(closed) return;int target=displayRotation();if(preview!=null) preview.setTargetRotation(target);if(still!=null) still.setTargetRotation(target);
+        if(closed) return;cancelRecording();int target=displayRotation();if(preview!=null) preview.setTargetRotation(target);if(still!=null) still.setTargetRotation(target);
     }
     @Override public void onLowMemory() {}
     @Override public void onTrimMemory(int level) {}
@@ -360,7 +439,7 @@ public final class CameraController implements LifecycleOwner,Application.Activi
         return context.getSharedPreferences("ferroui.media.camera",Context.MODE_PRIVATE).getBoolean("requested",false) ? 2 : 0;
     }
     @Override public void onActivityResumed(Activity a){if(a==activity && !closed) {lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_START);lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_RESUME);}}
-    @Override public void onActivityPaused(Activity a){if(a==activity && !closed) {lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE);lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_STOP);}}
+    @Override public void onActivityPaused(Activity a){if(a==activity && !closed) {cancelRecording();lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE);lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_STOP);}}
     @Override public void onActivityDestroyed(Activity a){if(a==activity) close();}
     @Override public void onActivityCreated(Activity a,Bundle b){}
     @Override public void onActivityStarted(Activity a){}

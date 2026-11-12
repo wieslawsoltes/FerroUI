@@ -557,8 +557,10 @@ python3 scripts/perf/gate.py --dry-run                         # the plan and th
 The script checks the base out, detached, in a git worktree of its own under the scratch folder
 (`--scratch`, default `ferroui-gate-scratch` beside the checkout, reused between runs and safe to
 delete), builds the base and the candidate (this checkout as it is, uncommitted changes included)
-with a target folder each, then runs them alternately, base then candidate, for `--rounds` rounds
-(default 3), and compares the medians of the rounds. A metric over its tolerance by less than the
+with a target folder each, then runs them alternately for `--rounds` rounds (default 3), and
+compares the medians of the rounds. The side that runs first changes with the round (base then
+candidate in the first, candidate then base in the second): what a run leaves behind, the caches
+of the system and the heat of the machine, is then not always the start of the same side. A metric over its tolerance by less than the
 spread of its own rounds on either side is not decided yet: one disturbed round can move a median
 of three that far (a still wall run beside a busy machine went from 1.7 to 2.2 ms on one side
 only). The gate then measures another round of that suite, alternately again, until the change is
@@ -614,7 +616,9 @@ What it measures:
   sections of chapter 9 it guards: `text` (text that changes every frame), `list` (a scrolling list
   of shadowed cards), `transforms` (panels moved by their render transform and opacity), `width` (a
   layout under a changing width), `wall` and `wall+pointer` (a still wall), `moves` (tiles of a
-  canvas that move), `lines` (charts whose lines change every frame). The harness is the frame gate's; besides the times a frame, every scene
+  canvas that move), `lines` (charts whose lines change every frame), `items` (boxes drawn as items
+  of the composition visual above them, some of which are drawn anew, move, and leave the tree and
+  come back every frame). The harness is the frame gate's; besides the times a frame, every scene
   reports the time it takes to build (`build_ms`) and the window to show it (`show_ms`: its first
   layout, recording and commit) and their sum (`startup_ms`). Alone:
 
@@ -631,17 +635,35 @@ What it measures:
   and the visual of the render thread); the gate compares each. With the `counters` feature
   (`--features counters`) a start also prints the allocations of each phase and the blocks it
   left alive by size class, and the counters of the framework (section 9.40). The gate runs every
-  test of the start (`start_of_*`) in a process of its own and the scenes of the frames in a
-  process without them: a start is the start of a process that has built nothing yet, and a scene
-  of the start leaves the heap and the caches of the process in a state that moves the build of
-  every scene measured after it (the `text` scene builds in 3.65 ms in a process of the frames
-  alone and in 4.2 to 5.0 ms after the two starts). Before the first scene of the frames a
+  test of the frame benchmarks in a process of its own: a start is the start of a process that
+  has built nothing yet, and a scene leaves the heap and the caches of the process in a state
+  that moves what is measured after it. The `text` scene builds in 3.65 ms in a process of the
+  frames alone and in 4.2 to 5.0 ms after the two starts; the `list` scene, measured after six
+  others in one process, was built in 1.6 ms by one side of a comparison and in 2.7 ms by the
+  other, whose scenes before it had left other blocks free, and in 1.2 and 1.1 ms by the two in
+  processes of their own (section 9.42). Before the first scene of the frames a
   process measures, the harness shows a small scene made of what the scenes use (text, rounded
   borders, polylines, panels) and runs 30 frames of it, once: what a process does once is then in
   no scene's `build_ms` and `show_ms`. Without it the first scene carried the state the process
   started in: `lines`, the first by its name, was built and shown in 0.9 and 1.4 ms in a process
   started right after another and in 1.3 and 1.9 ms after 20 seconds of rest or 3.0 and 5 to
-  6.6 ms after a large process; with it, in 0.8 and 1.3 ms in each case.
+  6.6 ms after a large process; with it, in 0.8 and 1.3 ms in each case. Before that, and before
+  each start, the harness reads one byte of every page of the program's own file
+  (`page_in_the_program`): the system reads a page of a program from the disk when the process
+  first runs through it, and a build or a show, measured once a process, then timed the disk
+  whenever the system did not hold the file, which it does not after it was just written or after
+  a large process pushed it out. `list` was built and shown in 1.1 and 1.7 ms with the file in
+  memory and in 1.6 and 2.3 ms with about 1,150 pages read inside the two, and of two builds of
+  the same scene the larger program paid more of it.
+
+  The render thread and wall time the gate compares are those of a frame the surface received
+  (the time for a frame of the clock times `frames / rendered` of the `GATE` line, when fewer
+  frames were received than the clock had). The loop of the benchmark does not wait for a
+  display: a frame of the clock that starts while the render thread still has the batch before
+  it commits nothing and costs close to nothing, so a side that presents fewer of its frames
+  looked faster by the frames it did not draw (section 9.42: 226 to 228 of 240 frames on one
+  side, 237 to 239 on the other, which read as 5 to 7 % of wall time). The UI thread time stays
+  that of a frame of the clock: the UI thread runs every one.
 - **The tree benchmarks** (`tests/FerroUI.Benchmarks`, category `trees`, suite `framework`): the
   framework's tree mechanics on walls of small tiles, in an application with a desktop's services
   (the Fluent theme, Skia's fonts, HarfBuzz): building, attaching (from the leaves up and from the
@@ -669,6 +691,42 @@ What it measures:
   full run of both sides takes minutes rather than an hour; `--tdg-filter` selects benchmarks as
   `FERROUI_BENCH_FILTER` does.
 
+The two suites of the benchmark harness (`framework` and `tdg`) run each class of benchmarks in a
+process of its own (`FERROUI_BENCH_CLASS`, one run a class of the names `FERROUI_BENCH_LIST`
+prints). A benchmark starts from the heap, the caches and the threads the benchmarks before it in
+its process left: `trees::Propagation.font_family[Tiles=2000]` of one build took 1.82 ms in one
+process that had run the hundred and more benchmarks before it and 1.40 ms in the next, and is
+within a few percent after the benchmarks of its class alone. When the harness of the base is
+from before it could run one class, both sides run in one process, and the output says so.
+
+Beside the time, the harness counts the instructions the processor retires for an operation,
+where the system counts them for a process (macOS; `harness::processor`), and the table of the
+gate has their change in the column `Instructions`, on the line of the time. The count is of the
+work alone: it does not move with the frequency of the cores, the caches or where a build put
+the code and the data. Of 336 pairs of runs of the same build in two processes the median
+difference was 0.01 % and the largest 0.74 %, where the cycles of 49 of the pairs differed by
+more than 5 %. The verdicts of a benchmark with the count:
+
+- `REGRESSED`: the time is over its tolerance and so are the instructions. The change does more
+  work.
+- `REGRESSED (instructions)`: the instructions are over their tolerance and the time is not.
+  The change does more work that this machine hides. The instructions are over their tolerance
+  when the median of the candidate is 2 % and more than one instruction an operation over that
+  of the base, and every round of the candidate counted more than every round of the base: a
+  few benchmarks count differently from one process to the next, because the order of a hash
+  table follows a seed the process draws (`trees::Propagation.styles_changed` counted 13.70 to
+  14.51 million instructions in four runs of one build), and rounds that overlap say nothing.
+- `REGRESSED (time alone)`: the time is over its tolerance and the instructions are not. The
+  work is the same. What is left is how the processor runs it: the alignment of a loop, the
+  cache lines of the data a benchmark walks, a branch the predictor loses, all of which move
+  with any change of a build, in code the change does not touch as well
+  (`styling_subsystem::SelectorMatch.none`, measured by the gate at +10.7 % for a change that
+  touched no styling code, retired 0.95 % fewer instructions).
+
+Each of the three fails the gate. A benchmark that took less time with the instructions of the
+base is `faster (time alone)`: a quieter round, or memory and code that lie better, and not
+less work.
+
 Tolerances. A metric regresses when the candidate is slower than the base by more than
 `--tolerance` (default 5 %) times the factor of the metric, and by more than a floor below which
 the measurement resolves nothing (0.05 ms a frame, 2 ns an operation):
@@ -677,7 +735,9 @@ the measurement resolves nothing (0.05 ms a frame, 2 ns an operation):
 |---|---:|---|
 | UI thread and wall time of a frame | 1 | hundreds of frames of a deterministic CPU workload |
 | Render thread time of a frame | 1.5 | it runs beside the UI thread and moves with core placement and glyph cache state |
+| Render thread and wall time of a frame benchmark | as above | compared for a frame the surface received, not for a frame of the clock |
 | TreeDataGrid and tree benchmark operation | 2 (3 under 100 ns) | short iterations in a new process per run; heap and code layout move a benchmark by several percent, and the shortest operations are near the timer |
+| Instructions of such an operation | 2 % whatever `--tolerance` is | a count, the same to a hundredth of a percent between two processes of a build (floor one instruction) |
 | Build and show of a scene (`build_ms`, `show_ms`) | 1.5 | measured once a run: one sample a round (floor 0.5 ms) |
 | Start of a scene (`startup_ms`) | 1 | the sum of the two (floor 0.5 ms) |
 | First frame of a scene of the start (`first_frame_ms`) | 1.5 | measured once a run |
@@ -686,7 +746,12 @@ the measurement resolves nothing (0.05 ms a frame, 2 ns an operation):
 | Window: first frame and time a frame | 2 | a real process: the display, the system compositor, the disk and the shader caches (floors 20 ms and 0.5 ms) |
 
 A regression the gate reports after its extra rounds is a real one; a change that is meant to
-cost time says so in the pull request, with the table.
+cost time says so in the pull request, with the table. A benchmark that regressed in time alone
+is looked at before the pull request goes up: its counts on the two sides, the sizes of the
+objects it uses (`sizes/...`), and a second run of it. When the counts and the sizes are those of
+the base and the code the benchmark runs is not what the change touches, the time is that of
+where this build put the code and the data; the pull request shows the line with its counts and
+says so. The gate is not told to pass it.
 
 ## 9. Deviations from upstream for frame cost
 
@@ -2824,3 +2889,407 @@ What it costs, and what it does not:
   visual in and out of a pass, an offset set on a visual asked for after a pass, hit
   tests from a root without a visual and through a new visual before its first frame);
   the counter check `composition_work` counts the visuals made.
+
+### 9.42 Drawing items: an element that only draws has no composition visual
+
+After section 9.41 the composition visuals that are left are those of the elements that
+draw, and most of those need nothing else of one: a text block, a border, a shape records
+a drawing and its layout says where it is. Each still had a `CompositionVisual` and a
+draw list on the UI thread and a `ServerCompositionVisual` on the render thread, with a
+transform, bounds, a dirty state, a readback and a place in two lists of children of its
+own: in the tiles start 1.7 KB of live memory on the two threads beside the drawing
+itself, for an offset.
+
+An element that draws, and needs a composition visual for nothing else, now has none
+(`Visual::needs_own_composition_visual` no longer asks whether the recording is empty).
+What it drew is a *drawing item* of the composition visual of the nearest element above
+it that has one, the holder: the render data, where the drawing is in the holder (the
+position of the element plus the positions of the elements without a visual between), and
+the size of the element when it clips to its bounds. `Visual::has_composition_item` says
+that an element is shown this way.
+
+- **Which elements.** The rule of section 9.41 without its second line. An element that
+  clips to its bounds is an item while nothing is under it: the clip of an item is the
+  rectangle of its size, and an element that clips its children keeps its composition
+  visual, which clips them. A class whose drawing needs its composition visual says so
+  with `requires_composition_visual`: a `Border` that clips to its bounds (the clip follows
+  its corner radius) and the selection indicator (its content draws it) do.
+- **Which holders.** A draw-list visual, with or without an extension that says it shows
+  items (`ICompositionDrawListVisualExtension::holds_drawing_items`, `false` by default;
+  the border's says `true`). A visual that draws acrylic, or one with another extension,
+  shows its own drawing only: the elements below it that draw get composition visuals as
+  before.
+- **The order.** The items and the child visuals of a holder are painted in one order,
+  that of the visual tree below the holder (the Z order of each level). The holder keeps
+  the items in that order and, for each child visual, the number of items painted before
+  it.
+- **From an item to a visual, and not back.** An element that comes to need a composition
+  visual (an opacity, a transform, something under an element that clips, a caller that
+  asks for `composition_visual()`) gets one, as in section 9.41: its item leaves the
+  holder and the drawing it has becomes the draw list of the visual, without a new
+  recording. It keeps the visual until it leaves the tree. An element without a visual
+  that gets one above its items becomes their holder, and they move to it.
+- **Moves.** An item moves with its element and with the elements without a visual above
+  it; it counts as a visual in the bound of section 9.41 (eight visuals and thirty-two
+  elements below an element that moves, beyond which that element gets a visual).
+- **Out of the tree.** The item of an element that leaves its tree is kept where the
+  composition visual of an element is kept (section 9.32: until the next pass of the
+  renderer, or beside a row in a recycle pool) and is listed again with the drawing it
+  has when the element is back (`IRenderer::keep_departed_composition_item`; the counter
+  `drawing items kept` counts the items that come back this way).
+
+**The transport.** The serialization of a holder carries the changes of its items: the
+one range of the list that was replaced (where it starts, how many items it removes, and
+the items that take their place: the render data, the offset, the clip), the positions of
+the child visuals when they changed, and for each item that stays and changed its index
+and what changed (another drawing, the same drawing recorded again, the offset, the
+clip). An item is not an object of the compositor: it has no identifier, is not
+registered for serialization and has no readback.
+
+**The render thread.** A `ServerCompositionDrawListVisual` has the items of its holder
+(`ServerDrawItems`): for each the render data, the fragment the backend kept of it (as
+for a draw list), the offset, the clip and the bounds it last reported.
+
+- The bounds of the own content of the holder are those of its drawing and of its items.
+- A change of an item makes dirty where the item was and where it is, not the holder: a
+  holder of thousands of items whose one item changes redraws that item and what
+  overlaps it. The rectangles of removed items are kept until the next frame (sixteen
+  apart, the rest united with the last).
+- The holder draws its own drawing, the items before its first child visual, the child,
+  the items before the next, and the rest after the last child. An item outside the clip
+  or the dirty region of the frame is passed over. An item is drawn with the transform of
+  the holder moved by its offset, inside its clip when it has one.
+- An item observes its render data: a resource of the drawing that changes (a brush that
+  is animated) drops the fragment of that item and makes its bounds dirty.
+- The bitmap cache of a visual above is rendered again when an item
+  below it changes, as for a visual.
+
+**Hit testing.** The signatures of the hit tests are the same, and an item is found as
+its element. The items and the child visuals of a holder are tested in one order, from
+the last painted: the items after a child, the child, the items before it. An item is
+tested with the input in the coordinates of the holder moved by its offset, against its
+clip and then its drawing; the filter is asked for the element of the item and for the
+elements without a visual between it and the holder. A geometry is tested against a
+drawing only when it meets the bounds of that drawing
+(`ICompositionHitTester::drawing_bounds_match`), which is what the bounds of the subtree
+of a composition visual did for the drawing of that visual. The hit test of the
+composition API (`CompositionTarget::try_hit_test`) answers with the holder, once, for
+any number of its items that are hit. An item is where the last layout put it; a
+composition visual is where the last frame drew it (DEVIATIONS.md).
+
+A holder with 32 child visuals and more looks them up in the index of its children
+(`CompositionHitTestAabbTree`) as a visual without items does: the index answers with each child and where it is
+among the children, and the items painted after that child, down to the child the index
+answered with before, are tested ahead of it. A holder of 32 items and more keeps the
+bounds of every 32 items that follow each other (`DrawItemList::chunk_bounds`), calculated
+when a hit test first asks for them and again for a chunk after one of its items changed
+(a drawing, an offset, a clip) or the list changed from that chunk on; a test passes over
+the chunks whose bounds the input misses. A list of fewer items has no such bounds, and
+none is kept for a holder that was never hit tested.
+
+**A holder that is drawn again.** Upstream lists the child composition visuals of every
+visual that was drawn again in a pass, which is a walk over the children of that visual. The
+walk of a holder goes down through every element without a composition visual to the nearest
+ones that have one: the root of the `width` scene, drawn again every frame, walked the 1,200
+elements below it every frame to make the lists it had (0.127 ms of UI time a frame
+where the base has 0.074 ms). A visual with a composition visual now remembers that
+its lists are those of the tree below it (a bit of the state a visual has for section 9.41;
+a visual is no larger), and a pass does not list it again when it was only drawn again
+(0.064 ms). What makes it forget:
+
+- the renderer is told that its children changed (`IRenderer::recalculate_children`: a
+  child attached, the Z order of a child, a visual below without a composition visual that
+  gained, lost or moved a child);
+- an item of it came, left, was released or stopped being drawn, or a visual below it got a
+  composition visual;
+- its own visual children changed (a child removed or moved, which upstream leaves to the
+  listing of a visual that is drawn again);
+- it left its tree.
+
+A debug build lists it all the same and fails when a list changed (the child visuals, the
+items, the positions of the child visuals among the items), so every test that runs a pass
+of the renderer checks the rule; the counter `composition children listed` counts the
+listings, and `composition_work_of_a_holder_that_is_drawn_again` asserts them for a holder
+drawn again, for each of the changes above and for the passes after each.
+
+The two start scenes, before (section 9.41, the base of the gate) and after, the medians
+of the gate (5 rounds that alternate the two builds; Apple M3 Pro, release
+build; the counts and the live heap are from the build with counters):
+
+| The tiles start (352,187 elements) | Section 9.41 | Drawing items | Change |
+|---|---:|---:|---:|
+| Composition visuals made | 234,791 | 58,699 | -75.0 % |
+| Drawing items | 0 | 176,092 |  |
+| Objects in the first batch | 3,228,373 | 1,760,940 | -45.5 % |
+| Build (ms) | 423.2 | 425.0 | +0.4 % |
+| Show: attach, styles, layout (ms) | 644.2 | 646.4 | +0.3 % |
+| First frame, UI thread (ms) | 421.5 | 370.6 | -12.1 % |
+| First frame, render thread (ms) | 581.8 | 470.4 | -19.2 % |
+| Show to first frame (ms) | 932.6 | 767.7 | -17.7 % |
+| Start (ms) | 2158.1 | 1981.6 | -8.2 % |
+| Memory of the first frame (MB) | 1017.5 | 594.4 | -41.6 % |
+| Memory of the start (MB) | 2434.9 | 1974.3 | -18.9 % |
+| Live heap after the first frame (MB) | 2098.4 | 1803.0 | -14.1 % |
+
+| The controls start (24,017 visuals) | Section 9.41 | Drawing items | Change |
+|---|---:|---:|---:|
+| Composition visuals made | 14,811 | 9,073 | -38.7 % |
+| Drawing items | 0 | 5,738 |  |
+| Objects in the first batch | 171,926 | 123,487 | -28.2 % |
+| Build (ms) | 3.5 | 3.4 | -1.4 % |
+| Show: attach, styles, layout (ms) | 225.1 | 227.0 | +0.9 % |
+| First frame, UI thread (ms) | 32.1 | 30.7 | -4.1 % |
+| First frame, render thread (ms) | 20.0 | 17.4 | -13.3 % |
+| Show to first frame (ms) | 48.0 | 44.3 | -7.8 % |
+| Start (ms) | 292.6 | 290.4 | -0.8 % |
+| Memory of the first frame (MB) | 90.5 | 77.6 | -14.3 % |
+| Memory of the start (MB) | 322.5 | 309.6 | -4.0 % |
+| Live heap after the first frame (MB) | 283.3 | 272.5 | -3.8 % |
+
+**What the first gate run measured.** The first run of the gate for this change reported the
+build of the `list` scene 67 % slower and the wall time of a frame of `list` and `width` 5 to
+6 % slower. Neither is a cost of the change, and the gate measures both differently now
+(section 8.1):
+
+- The scenes of the frames ran in one process, and `list` was built after six others. With
+  fewer composition objects the scenes before it left other blocks free, and its build moved
+  from 1.6 to 2.7 ms; in processes of their own the two sides build it in 1.19 and 1.10 ms.
+  Every test of the frame benchmarks now runs in a process of its own.
+- The loop of the benchmark does not wait for a display. The clock of the UI thread goes on
+  when the render thread has accepted a batch, and a commit waits until the batch before it
+  is processed (as upstream), so a frame of the clock that starts in between commits
+  nothing. With the batch of a thousand visuals of these two scenes the base presented 226
+  to 228 of its 240 frames; with the batch of one holder the candidate presents 237 to 240.
+  The base was faster by the frames it did not draw: for a frame the surface received the
+  two are within 2 % (`width` 3.72 and 3.73 ms, `list` 3.57 and 3.51 ms; 6,000 frames of
+  `width`: 3.906 and 3.859 ms). The gate now compares the render thread and wall time for a
+  frame the surface received. The scenes whose render thread is slower than their UI thread
+  present every second or third frame of the clock on both sides (`lines`, `moves` and
+  `items` 120 of 240, `text` 160), so their render and wall times in the tables of the gate
+  are from here on two and one and a half times those of the sections before.
+
+What it costs, and what it does not:
+
+- **A holder lists its items again when the tree below it changes** (an element added,
+  removed or moved, an element that starts or stops drawing, an item that becomes a
+  visual), and not when it is only drawn again: the walk is over the elements below it
+  down to the nearest composition visuals, and the difference to the list the server has
+  is sent as one range. A holder of thousands of items of which a few come and leave every
+  frame pays the walk every frame (the `items` scene measures it); the positions of the
+  child visuals are sent whole when they change.
+- **The items of a chunk that the input meets are tested one by one**, from the last: a
+  holder of thousands of items that lie over each other tests them all, as a visual does
+  the children whose bounds overlap. The bounds of a drawing are calculated from its
+  recording for a geometry test and for the bounds of its chunk.
+- **`composition_visual()` of an element that is an item makes its visual**, as for an
+  element that had none (section 9.41). Code that walks the composition tree finds the
+  holder where it found a visual of each element; the element says which with
+  `has_composition_visual` and `has_composition_item`.
+- **A custom extension of a draw-list visual** whose server content draws the render data
+  of the visual itself shows no items unless both sides say so
+  (`holds_drawing_items`, and `IServerVisualContent::draw_items` on the render thread).
+- **Sizes.** An item is 72 bytes on the UI thread (a block of 96) and 120 on the render
+  thread (a block of 144), where the two visuals were in blocks of 512 and 640 bytes
+  with their handles and lists around them (`object_size_tests`). The list of a holder
+  is made with its first item.
+- **Tests:** `compositor_tests` covers an element that draws as an item, the clip of an
+  item, the paint and hit order of items and child visuals, a geometry that meets and
+  misses the bounds of items, items among indexed child visuals, the bounds of the chunks
+  of a long list of items and what makes them stale, items that follow their elements and the elements above
+  them, an item that moves to the visual an element above it gets, an item that becomes
+  a visual with its drawing, an item kept while its element is out of the tree, the
+  dirty rectangles of changed and removed items, the items drawn in a dirty area and a
+  bitmap cache above an item that changes; the counter checks `composition_work` count
+  the items recorded and drawn and the listings of a holder; the frame scene `items` (section 8.1) measures a holder
+  of 6,000 items of which some are drawn anew, some move and some leave the tree and
+  come back every frame.
+### 9.43 The binding of a setter is instanced when its value is first asked for
+
+A setter whose value is a binding (a `{DynamicResource}`, a `{Binding}`, a
+`{TemplateBinding}` in a style) gave the frame of its style instance a binding
+expression as the entry of its property, as upstream does: the expression was created
+and attached when the style was attached, and started when the store first asked the
+entry for a value. Most of them are never asked. A style that is not active (a
+`:pointerover` or `:pressed` style of a control nobody points at) is not evaluated,
+and neither is a setter below the effective value (a local value, a style later in the
+order, a control theme under a style). In the start of the controls scene
+45,198 of the 120,487 binding expressions that were created were never
+started, every one of them the dynamic resource of a setter, and the expression is the
+largest object a style attach creates: a block of 512 bytes, about 23 MB (45,198 blocks of 512 bytes) of live
+heap at the first frame for expressions that did nothing.
+
+The entry of such a setter is now a `SetterBindingEntry`: the binding, the property,
+the owner and the priority of the frame, 64 bytes (a block of 80). It makes the
+expression from the binding and attaches it the first time the store asks it for a
+value (`has_value`, `try_get_value`, `get_value_boxed`) or for the expression itself
+(`BindingOperations::get_binding_expression_base` of a property whose value comes from
+the setter), and from then on answers with the expression.
+
+- **The entry stays the entry.** The store compares entries by identity (the entry of
+  an effective value, the order of two entries of one priority), so the record is the
+  entry of the frame before and after the expression exists, and it is the sink of its
+  expression: a change of the expression reaches the store as a change of the record
+  (`ValueStore::on_entry_changed`, which `on_expression_changed` now calls for an
+  expression that is its own entry).
+- **What is asked of an expression that was never started** is its property and to stop
+  (`unsubscribe`, when the style is deactivated or detached). The record answers both
+  without an expression.
+- **An inactive frame instances nothing.** `get_expression` asks the entries of the
+  active frames only, as the evaluation of the effective value does.
+- **A direct property** has no value entries; its setter binds as before.
+
+What does not change: when a binding of a setter is started (when its value is first
+evaluated), stopped (when the style is deactivated or detached, or the value is no
+longer the effective one) and started again, the priority its value has, the expression
+`get_binding_expression_base` answers with, and data validation.
+
+The start of the controls scene, before (main, the base of the gate) and after; the
+medians of the gate (5 rounds that alternate the two builds; Apple M3 Pro, release
+build), and the counts and the live heap from one run of each with counters:
+
+| `startup/controls` | Before | After | Change |
+|---|---:|---:|---:|
+| Show | 225.7 ms | 223.3 ms | -1.0 % |
+| Start (to the first frame) | 292.4 ms | 289.9 ms | -0.8 % |
+| Memory of the show | 228.3 MB | 210.7 MB | -7.7 % |
+| Memory of the start | 329.6 MB | 312.5 MB | -5.2 % |
+| Live heap the show leaves (counters) | 189.1 MB | 174.4 MB | -7.8 % |
+
+| Counted in the start of the controls scene | Before | After |
+|---|---:|---:|
+| Binding expressions created | 120,487 | 75,289 |
+| Binding expressions started | 75,289 | 75,289 |
+| Dynamic resource expressions created | 69,239 | 24,041 |
+| Dynamic resource expressions started | 24,041 | 24,041 |
+| Setter binding entries created | | 60,816 |
+
+The time hardly moves: an expression that is never started costs its allocation and its
+attach, and the time of the show is in the expressions that start (the resource lookup
+of each, its subscriptions) and in the rest of the styling. The other scenes of the gate
+do not change beyond their tolerances (`startup/tiles` has no styles with bindings).
+
+- **Tests:** `binding_setter_tests`: a setter below the effective value is not
+  instanced, also after the style is detached; a setter of an inactive style is
+  instanced once when the style becomes active and keeps its expression while the
+  style goes inactive and active again; a setter below a local value is instanced when
+  the local value is cleared; the value follows its source and replaces a current
+  value; the expression of the property is the expression of the entry; the size of
+  the record. The counter check `setter_binding_work_of_styles_that_are_not_evaluated` asserts the expressions created and
+  started in the start of the controls scene.
+
+### 9.44 A dynamic resource does not look up again for a change it has seen
+
+A dynamic resource follows the resources and the theme variant of its host: it subscribes
+to both and looks its resource up again for every notification. When an element is
+attached to a tree its dynamic resources were updated twice there. Setting the parent sets
+the inheritance parent first, and the theme variant the element inherits from it makes
+each of its dynamic resources look up (with the new styling parent, since the walk of a
+lookup goes up the inheritance parents); then the attachment applies the styles of the
+element, whose setters start their dynamic resources, and makes a notification of changed
+resources, which makes every dynamic resource of the element look up again. The second
+lookup sees the tree the first saw and publishes the value the first published.
+
+- **The notification of an attachment is numbered when the element gets its parent.**
+  `set_parent` makes it (`ResourcesChangedEventArgs::create`) before it sets the
+  inheritance parent, and every element of the attached subtree receives that one
+  notification (`LogicalTreeAttachmentEventArgs` carries it to the elements below and to
+  the template children). Each element made its own, after its styles were applied.
+- **A dynamic resource remembers when it looked up.** `DynamicResourceExpression` takes
+  the last sequence number of the notifications
+  (`ResourcesChangedEventArgs::last_sequence_number`) before each lookup and does not
+  look up again for a notification that is not newer
+  (`ResourcesChangedEventArgs::is_newer_than`).
+
+Why it is correct: every notification of the framework is made after the change it
+describes, as upstream's is (a dictionary that is changed, a dictionary or a style that
+gets or loses its owner, the accent or the density of a theme, an element that gets or
+loses its parent, the application forwarding its own). A lookup made after the
+notification was numbered was made after the change, and saw it. The number is taken
+before the lookup, so a change notified while the lookup runs is newer. Arguments that
+`create` did not number (the default) are newer than any moment.
+
+The start of the controls scene and the `list` scene, before (section 9.43, the base of the
+gate) and after; the medians of the gate (5 rounds that alternate the two builds; Apple M3
+Pro, release build), and the counts from one run of each build with counters:
+
+| Scene | Before | After | Change |
+|---|---:|---:|---:|
+| `startup/controls` show | 223.7 ms | 216.8 ms | -3.1 % |
+| `startup/controls` start (to the first frame) | 292.1 ms | 281.9 ms | -3.5 % |
+| `frames/list` show | 2.79 ms | 2.00 ms | -28.2 % |
+| `frames/list` start | 4.02 ms | 3.11 ms | -22.7 % |
+
+| Counted in the start of the controls scene | Before | After |
+|---|---:|---:|
+| Resource lookups | 79,670 | 56,059 |
+| Resource hosts probed | 1,127,451 | 778,141 |
+| Lookups of dynamic resources | 56,853 | 33,242 |
+| Notifications already seen | | 23,611 |
+| Binding values published | 112,904 | 89,293 |
+| Property changes raised | 426,905 | 426,905 |
+
+The property changes are the same: the lookups that are left out published the value the
+property had. The memory of the starts does not change.
+
+The framework benchmark `styling_subsystem::DynamicResources` guards it: a section of 1,000
+texts whose tags are a dynamic resource of the root, in a theme variant scope, detached and
+attached again (the gate, base section 9.43, 5 rounds):
+
+| `styling_subsystem::DynamicResources` | Before | After | Change |
+|---|---:|---:|---:|
+| `reattach` | 1.862 ms | 1.693 ms | -9.1 % |
+| `detach` | 1.470 ms | 1.377 ms | -6.3 % |
+| `reattach_with_inactive_setters` (four dynamic-resource setters of a style that does not match yet) | 2.331 ms | 2.127 ms | -8.8 % |
+
+- **Tests:** `resource_tests::a_notification_is_newer_than_the_moments_before_it_was_made`;
+  `dynamic_resource_expression_tests::attachment` attaches a group of elements with
+  dynamic resources to a root, with and without a theme variant to inherit, and checks
+  the values after the attachment, a later change and the detachment; with the counters
+  it asserts one lookup for each resource in the attachment.
+
+### 9.45 A template binding is told of its templated parent by the store of its target
+
+A template binding reads a property of the templated parent of its target. To see the
+templated parent change, upstream's expression subscribes to every property change of its
+target, and so did this one: a handler (a closure in a block of its own) on the handler list
+of the target for each template binding, called for every property change of the target to
+compare the property with `TemplatedParent`. An element of a control template has several
+template bindings (a border of a button binds its background, its border brush and
+thickness, its corner radius and its padding), and its properties change many times while the
+template is applied and laid out. The start of the controls scene has 45,214 template
+bindings.
+
+- **The store tells them.** `StyledElement::set_templated_parent` asks the value store of the
+  element to tell its binding expressions (`ValueStore::templated_parent_changed`): the local
+  value bindings, and the entries of the frames the element does not share. A template
+  binding that runs reads the new templated parent, subscribes to it and publishes, as it did
+  in its handler. A setter entry of a style (section 9.43) tells the expression it made, and a
+  multi-binding the expressions of its bindings, which have its target and are no entries of
+  the store.
+- **A template binding that writes to the source** (`TwoWay`, `OneWayToSource`) still
+  subscribes to the property changes of its target, for its target property.
+
+The store is told before the property change of `TemplatedParent` is raised, where the
+handler ran with the other handlers of the target: the values the template bindings publish
+are in place when the handlers of `TemplatedParent` run.
+
+The start of the controls scene, before (section 9.44, the base of the gate) and after; the
+medians of the gate (5 rounds that alternate the two builds; Apple M3 Pro, release build):
+
+| `startup/controls` | Before | After | Change |
+|---|---:|---:|---:|
+| Show | 219.8 ms | 221.3 ms | +0.7 % |
+| Start (to the first frame) | 286.3 ms | 288.5 ms | +0.8 % |
+| Memory of the show | 210.8 MB | 207.1 MB | -1.8 % |
+| Memory of the start | 312.3 MB | 308.9 MB | -1.1 % |
+
+The time does not change beyond the noise (an earlier run of the gate measured -0.8 %): the
+handlers it removes were short calls, and the work of a template binding is the one value it
+publishes when its templated parent is set (section 9.43, the profile). What it removes is the
+handler block of each template binding and the entries on the handler lists of its target,
+3.4 MB in the start of the controls scene.
+
+- **Tests:** `binding_model_tests::template_binding_follows_the_templated_parent_without_observing_its_target`
+  (a template binding follows a templated parent set, replaced and cleared, with no handler
+  on its target, and a two-way one with one);
+  `a_template_binding_of_a_style_setter_follows_the_templated_parent`.

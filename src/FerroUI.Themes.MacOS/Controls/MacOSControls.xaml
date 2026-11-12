@@ -83,6 +83,8 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/SplitButton.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/ToggleSwitch.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/Slider.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/MediaTransportControls.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/CameraCaptureUI.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/NumericUpDown.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/ButtonSpinner.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/Expander.xaml" />

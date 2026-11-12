@@ -143,6 +143,12 @@ impl NativeMediaSession for Session {
         self.stream.native.audio(volume, muted);
         Ok(())
     }
+    fn supports_playback_rate(&self) -> bool {
+        self.stream.native.supports_playback_rate()
+    }
+    fn set_playback_rate(&self, rate: f64) -> Result<(), MediaError> {
+        self.stream.native.set_playback_rate(rate)
+    }
     fn take_frame(&self) -> Result<Option<FrameLease>, MediaError> {
         self.stream.take_frame()
     }

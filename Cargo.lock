@@ -627,6 +627,12 @@ dependencies = [
  "ferroui-android",
  "ferroui-base",
  "ferroui-controls",
+ "ferroui-media",
+ "ferroui-media-android",
+ "ferroui-media-camera",
+ "ferroui-media-camera-android",
+ "ferroui-media-video",
+ "ferroui-media-video-android",
 ]
 
 [[package]]
@@ -1696,6 +1702,7 @@ dependencies = [
  "ferroui-harfbuzz",
  "ferroui-headless",
  "ferroui-markup",
+ "ferroui-markup-xaml",
  "ferroui-skia",
  "ferroui-themes-fluent",
  "ferroui-themes-simple",
@@ -2569,6 +2576,7 @@ dependencies = [
  "ferroui-media",
  "ferroui-media-android",
  "ferroui-media-video",
+ "serde_json",
 ]
 
 [[package]]
@@ -3054,6 +3062,8 @@ dependencies = [
  "ferroui-dialogs",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
+ "ferroui-media-camera-controls",
+ "ferroui-media-video-controls",
 ]
 
 [[package]]
@@ -3066,6 +3076,8 @@ dependencies = [
  "ferroui-dialogs",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
+ "ferroui-media-camera-controls",
+ "ferroui-media-video-controls",
 ]
 
 [[package]]
@@ -3079,6 +3091,8 @@ dependencies = [
  "ferroui-dialogs",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
+ "ferroui-media-camera-controls",
+ "ferroui-media-video-controls",
  "material-colors",
 ]
 
@@ -3093,6 +3107,8 @@ dependencies = [
  "ferroui-dialogs",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
+ "ferroui-media-camera-controls",
+ "ferroui-media-video-controls",
  "ferroui-themes-fluent",
 ]
 
@@ -3106,6 +3122,8 @@ dependencies = [
  "ferroui-dialogs",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
+ "ferroui-media-camera-controls",
+ "ferroui-media-video-controls",
 ]
 
 [[package]]
@@ -5336,7 +5354,7 @@ dependencies = [
  "ferroui-native",
  "ferroui-opengl",
  "ferroui-skia",
- "ferroui-themes-fluent",
+ "ferroui-themes-winui",
  "ferroui-x11",
  "image",
  "skia-safe",
@@ -5390,7 +5408,7 @@ dependencies = [
  "ferroui-media-video-apple",
  "ferroui-media-video-controls",
  "ferroui-opengl",
- "ferroui-themes-simple",
+ "ferroui-themes-winui",
  "image",
 ]
 
@@ -7951,8 +7969,26 @@ dependencies = [
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
  "ferroui-markup-xaml-winui",
+ "ferroui-media",
+ "ferroui-media-apple",
+ "ferroui-media-camera",
+ "ferroui-media-camera-apple",
+ "ferroui-media-camera-controls",
+ "ferroui-media-camera-linux",
+ "ferroui-media-camera-windows",
+ "ferroui-media-controls",
+ "ferroui-media-linux",
+ "ferroui-media-opengl",
+ "ferroui-media-video",
+ "ferroui-media-video-apple",
+ "ferroui-media-video-controls",
+ "ferroui-media-video-linux",
+ "ferroui-media-video-windows",
+ "ferroui-media-windows",
+ "ferroui-native",
  "ferroui-skia",
  "ferroui-themes-winui",
+ "ferroui-x11",
 ]
 
 [[package]]

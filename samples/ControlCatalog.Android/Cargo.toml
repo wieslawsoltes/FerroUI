@@ -24,3 +24,21 @@ ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
 ferroui-android = { workspace = true }
 control-catalog = { path = "../ControlCatalog" }
+
+[features]
+native-media = [
+    "dep:ferroui-media",
+    "dep:ferroui-media-android",
+    "dep:ferroui-media-camera",
+    "dep:ferroui-media-camera-android",
+    "dep:ferroui-media-video",
+    "dep:ferroui-media-video-android",
+]
+
+[target.'cfg(target_os = "android")'.dependencies]
+ferroui-media = { workspace = true, optional = true }
+ferroui-media-android = { workspace = true, features = ["controls"], optional = true }
+ferroui-media-camera = { workspace = true, optional = true }
+ferroui-media-camera-android = { workspace = true, optional = true }
+ferroui-media-video = { workspace = true, optional = true }
+ferroui-media-video-android = { workspace = true, optional = true }

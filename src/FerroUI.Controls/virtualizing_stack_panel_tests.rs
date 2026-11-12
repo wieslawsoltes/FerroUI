@@ -3400,8 +3400,8 @@ impl ItemsControlImpl for ItemsControlWithRows {
         _index: i32,
         _recycle_key: Option<RecycleKey>,
     ) -> Ref<Control> {
-        // Both draw, so both have a composition visual: one that draws nothing and sets
-        // nothing has none to keep.
+        // Both draw and need a composition visual for nothing else, so each is a drawing item
+        // of the composition visual above the rows: the item is what is kept.
         let canvas = Canvas::new();
         canvas.set_width(100.0);
         canvas.set_height(10.0);
@@ -3423,11 +3423,11 @@ impl ItemsControlWithRows {
     }
 }
 
-/// How many composition visuals the rows of a list cost while they wait in the recycle
-/// pool of the panel (not from upstream; a counter check `composition_work` of
-/// `scripts/perf/gate.py`, the counts are asserted with the feature `perf-counters`): a
-/// row that goes to the pool in one update pass and comes back in a later one has none
-/// made, however many passes it waited.
+/// What the rows of a list cost the compositor while they wait in the recycle pool of the
+/// panel (not from upstream; a counter check `composition_work` of `scripts/perf/gate.py`,
+/// the counts are asserted with the feature `perf-counters`): a row that goes to the pool
+/// in one update pass and comes back in a later one is shown by the drawing items it had,
+/// however many passes it waited, and no composition visual is made for it.
 #[test]
 fn composition_work_of_rows_that_wait_in_the_recycle_pool() {
     use crate::compositor_hit_testing_tests::CompositorTestServices;
@@ -3470,8 +3470,9 @@ fn composition_work_of_rows_that_wait_in_the_recycle_pool() {
     let work = perf_counters::snapshot().since(&before);
     if perf_counters::ENABLED {
         assert_eq!(0, work.get(PerfCounter::CompositionVisualsCreated));
+        assert_eq!(0, work.get(PerfCounter::CompositionVisualsKept));
         // Five rows of a border and its canvas, four times.
-        assert_eq!(40, work.get(PerfCounter::CompositionVisualsKept));
+        assert_eq!(40, work.get(PerfCounter::DrawingItemsKept));
     }
 
     // The pool lets go of what it kept when the panel leaves the tree.

@@ -21,9 +21,11 @@
 mod clock;
 mod fonts;
 mod host;
+mod residency;
 pub mod scenes;
 
 pub use clock::Clock;
 pub use fonts::Roboto;
 pub use host::FrameHost;
+pub use residency::page_in_the_program;
 pub use scenes::{Scene, SCENES, STARTUP_SCENES, WARM_UP};

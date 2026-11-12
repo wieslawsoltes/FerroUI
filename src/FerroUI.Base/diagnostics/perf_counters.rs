@@ -151,6 +151,23 @@ perf_counters! {
     TemplateBindingExpressionsCreated => "template binding expressions created",
     /// `DynamicResourceExpression::new` (the XAML runtime library).
     DynamicResourceExpressionsCreated => "dynamic resource expressions created",
+    /// `SetterBindingEntry::new`: a style attach made the entry of a setter
+    /// whose value is a binding. The entry creates its binding expression
+    /// when its value is first asked for.
+    SetterBindingEntriesCreated => "setter binding entries created",
+    /// `UntypedBindingExpression::start` of an expression that was not
+    /// running: the expression subscribed to its source.
+    BindingExpressionsStarted => "binding expressions started",
+    /// `DynamicResourceExpression::on_start` (the XAML runtime library): the
+    /// expression found its host, subscribed to it and looked its resource up.
+    DynamicResourceExpressionsStarted => "dynamic resource expressions started",
+    /// `DynamicResourceExpression::publish_value` (the XAML runtime library):
+    /// a dynamic resource looked its resource up and published it.
+    DynamicResourceLookups => "dynamic resource lookups",
+    /// `DynamicResourceExpression` (the XAML runtime library): a notification
+    /// of changed resources that was not newer than the last lookup of the
+    /// expression, which did not look up again.
+    DynamicResourceNotificationsSeen => "dynamic resource notifications already seen",
     /// `UntypedBindingExpressionBase::publish_value` of a running
     /// expression and `TypedBindingExpression::publish_value`.
     BindingValuesPublished => "binding values published",
@@ -236,12 +253,23 @@ perf_counters! {
     /// `CompositingRenderer::update_core`: a recorded drawing was given to the render data the
     /// visual had, whose server-side object was kept.
     VisualsRecordedInPlace => "visuals recorded into their render data",
+    /// `CompositingRenderer::update_core`: the drawing of a visual without a composition visual
+    /// was recorded as an item of the composition visual above (desktop-performance.md,
+    /// section 9.42).
+    VisualsRecordedAsItems => "visuals recorded as drawing items",
     /// `Visual::attach_to_compositor_core`: a composition visual was created for a visual that
     /// entered a visual tree.
     CompositionVisualsCreated => "composition visuals created",
     /// `Visual::attach_to_compositor_core`: a visual that entered a visual tree rejoined with
     /// the composition visual it had when it left one (desktop-performance.md, section 9.32).
     CompositionVisualsKept => "composition visuals kept",
+    /// `Visual::on_attached_to_visual_tree`: a visual that entered a visual tree is shown again
+    /// by the drawing item it had when it left one (desktop-performance.md, section 9.42).
+    DrawingItemsKept => "drawing items kept",
+    /// `Visual::synchronize_composition_child_visuals`: the child composition visuals and the
+    /// items of the composition visual of a visual with something below it were listed from the
+    /// visual tree (desktop-performance.md, section 9.42).
+    CompositionChildrenListed => "composition children listed",
     /// `Compositor::commit`: a batch of changes was sent to the render thread.
     CompositionBatchesCommitted => "composition batches committed",
     /// `Compositor::commit`: the entries of the object stream of the batches (a server object,
@@ -277,6 +305,8 @@ perf_counters! {
     RenderCanvasTransformsApplied => "render: transforms applied to the canvas",
     /// The render walk: a visual pushed its clip to bounds.
     RenderVisualClipsPushed => "render: visual clips to bounds pushed",
+    /// The render walk: a drawing item of a visual was drawn (section 9.42).
+    RenderItemsDrawn => "render: drawing items drawn",
     /// The render walk: a visual pushed its opacity.
     RenderVisualOpacitiesPushed => "render: visual opacities pushed",
     /// The render walk: a visual was drawn from its bitmap cache.

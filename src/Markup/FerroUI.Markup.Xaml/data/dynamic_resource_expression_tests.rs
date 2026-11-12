@@ -355,3 +355,110 @@ mod brush_property {
         assert_eq!(background_color(&border), Some(Colors::RED));
     }
 }
+
+// --- an element attached to a tree: its dynamic resources look up once ----
+
+mod attachment {
+    use super::*;
+    use ferroui_base::diagnostics::perf_counters::{self, PerfCounter as C};
+    use ferroui_base::{StyledElement, StyledElementImpl};
+
+    /// A styled element that is the root of a logical tree.
+    #[repr(C)]
+    struct Root {
+        base: StyledElement,
+    }
+
+    ferroui_base::ferro_class!(Root: StyledElement);
+    ferroui_base::ferro_impl_classes!(Root: ferroui_base::FerroObjectImpl);
+
+    impl StyledElementImpl for Root {
+        fn is_logical_root(_this: &Self) -> bool {
+            true
+        }
+    }
+
+    impl Root {
+        fn new() -> Ref<Self> {
+            ferroui_base::instantiate(Self { base: StyledElement::construct() })
+        }
+    }
+
+    /// A group of four borders whose tags are the dynamic resource `text`,
+    /// started while the group is in no tree.
+    fn group() -> (Ref<Border>, Vec<Ref<Border>>) {
+        let group = Border::new();
+        let borders: Vec<_> = (0..4)
+            .map(|_| {
+                let border = Border::new();
+                group.logical_children().add(border.clone().upcast());
+                let expression = DynamicResourceExpression::new(key("text"), None, None, BindingPriority::LocalValue);
+                let _ = border.bind_binding(Control::tag_property(), &ExpressionBinding(expression));
+                assert_eq!(tag_text(&border), None);
+                border
+            })
+            .collect();
+        (group, borders)
+    }
+
+    fn tags(borders: &[Ref<Border>]) -> Vec<Option<String>> {
+        borders.iter().map(|border| tag_text(border)).collect()
+    }
+
+    fn all(text: Option<&str>) -> Vec<Option<String>> {
+        vec![text.map(str::to_string); 4]
+    }
+
+    #[test]
+    fn the_attachment_of_a_subtree_looks_each_resource_up_once() {
+        let root = Root::new();
+        root.resources().add("text", Some(boxed("root".to_string())));
+        let (group, borders) = group();
+
+        let before = perf_counters::snapshot();
+        root.logical_children().add(group.clone().upcast());
+        let counted = perf_counters::snapshot().since(&before);
+        assert_eq!(tags(&borders), all(Some("root")));
+        if perf_counters::ENABLED {
+            assert_eq!(counted.get(C::DynamicResourceLookups), 4);
+            assert_eq!(counted.get(C::DynamicResourceNotificationsSeen), 0);
+        }
+
+        // A change of the resources after the attachment is newer.
+        root.resources().set("text", Some(boxed("changed".to_string())));
+        assert_eq!(tags(&borders), all(Some("changed")));
+
+        // Out of the tree the resource of the root is not visible.
+        root.logical_children().remove(&group.clone().upcast());
+        assert_eq!(tags(&borders), all(None));
+    }
+
+    #[test]
+    fn a_resource_looked_up_for_the_inherited_theme_variant_is_not_looked_up_again() {
+        let root = Root::new();
+        let themed = ResourceDictionary::new();
+        themed.add_theme_dictionary(ThemeVariant::dark(), dictionary_with("text", "dark"));
+        themed.add_theme_dictionary(ThemeVariant::light(), dictionary_with("text", "light"));
+        root.resources().add_merged_dictionary(themed);
+        root.set_value(ThemeVariant::requested_theme_variant_property(), Some(ThemeVariant::dark()));
+        let (group, borders) = group();
+
+        // The theme variant the borders inherit when the group is attached
+        // looks the resources up; the notification of the attachment, made
+        // before, does not look them up again.
+        let before = perf_counters::snapshot();
+        root.logical_children().add(group.clone().upcast());
+        let counted = perf_counters::snapshot().since(&before);
+        assert_eq!(tags(&borders), all(Some("dark")));
+        if perf_counters::ENABLED {
+            assert_eq!(counted.get(C::DynamicResourceLookups), 4);
+            assert_eq!(counted.get(C::DynamicResourceNotificationsSeen), 4);
+        }
+
+        root.set_value(ThemeVariant::requested_theme_variant_property(), Some(ThemeVariant::light()));
+        assert_eq!(tags(&borders), all(Some("light")));
+
+        root.logical_children().remove(&group.clone().upcast());
+        assert_eq!(tags(&borders), all(None));
+    }
+}

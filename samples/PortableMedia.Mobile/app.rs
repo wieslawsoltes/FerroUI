@@ -38,7 +38,7 @@ impl ApplicationImpl for App {
         ferroui_media_video_controls::register_types();
         ferroui_media_camera_controls::register_types();
         this.styles()
-            .add(ferroui_themes_simple::SimpleTheme::new().as_style());
+            .add(ferroui_themes_winui::WinUITheme::new().as_style());
     }
     fn on_framework_initialization_completed(this: &Self) {
         let lifetime = this.application_lifetime();
@@ -365,7 +365,7 @@ fn create() -> Ref<Control> {
         },
         Duration::from_millis(50),
         DispatcherPriority::NORMAL,
-    );
+    ).detach();
     let host = ferroui_controls::UserControl::new();
     host.set_content(Some(Control::boxed(root)));
     ferroui_controls::TopLevel::set_auto_safe_area_padding(&host, true);
@@ -707,7 +707,7 @@ fn watch_camera_retirement(
         },
         Duration::from_millis(16),
         DispatcherPriority::NORMAL,
-    );
+    ).detach();
 }
 
 fn start_smoke(view: &Ref<MediaPlayerElement>, budget: FrameBudget) {
@@ -958,7 +958,7 @@ fn start_smoke(view: &Ref<MediaPlayerElement>, budget: FrameBudget) {
         },
         Duration::from_millis(33),
         DispatcherPriority::NORMAL,
-    );
+    ).detach();
 }
 
 async fn native_qr_smoke() {
@@ -1106,7 +1106,7 @@ fn qr_action(
             },
             Duration::from_millis(100),
             DispatcherPriority::NORMAL,
-        );
+        ).detach();
     }
     #[cfg(target_os = "ios")]
     {
@@ -1152,7 +1152,7 @@ fn qr_action(
             },
             Duration::from_millis(100),
             DispatcherPriority::NORMAL,
-        );
+        ).detach();
     }
 }
 
@@ -1361,7 +1361,7 @@ fn renderer_action(
         },
         Duration::from_millis(33),
         DispatcherPriority::NORMAL,
-    );
+    ).detach();
     let button = Button::new();
     button.set_content(Some(Rc::new("3D".to_string()) as BoxedValue));
     AutomationProperties::set_name(&button, Some("Toggle shared texture renderer"));

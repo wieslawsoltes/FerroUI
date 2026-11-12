@@ -37,6 +37,11 @@ pub trait IValueEntry {
     fn as_binding_expression(self: Rc<Self>) -> Option<Rc<dyn crate::data::BindingExpressionBase>> {
         None
     }
+
+    /// The templated parent of the owner of the entry changed
+    /// (`ValueStore::templated_parent_changed`). An entry that does not read
+    /// the templated parent does nothing.
+    fn templated_parent_changed(&self) {}
 }
 
 /// Identity comparison of two value entries.

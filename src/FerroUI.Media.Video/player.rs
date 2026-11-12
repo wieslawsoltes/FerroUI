@@ -63,11 +63,26 @@ impl Default for MediaPlaybackSession {
 #[derive(Clone, Debug)]
 pub enum MediaPlayerEvent {
     OptionsChanged(MediaPlayerOptions),
+    PlaybackRateChanged(f64),
+    TrackSelectionChanged(MediaTrackKind),
     IntentChanged(PlaybackIntent),
     Opened,
     StateChanged(MediaPlaybackSession),
     SeekCompleted(Duration),
     Ended,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum MediaTrackKind {
+    Audio,
+    Captions,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct MediaTrack {
+    /// A provider-owned identifier, valid only for the current native session.
+    pub id: u32,
+    pub label: String,
+    pub selected: bool,
 }
 #[derive(Clone, Debug)]
 pub struct MediaPlayerOptions {
@@ -108,6 +123,38 @@ pub trait NativeMediaSession {
     }
     fn seek(&self, position: Duration) -> MediaFuture<Duration>;
     fn set_audio(&self, volume: f64, muted: bool) -> Result<(), MediaError>;
+    fn supports_playback_rate(&self) -> bool {
+        false
+    }
+    fn set_playback_rate(&self, _rate: f64) -> Result<(), MediaError> {
+        Err(MediaError::new(
+            MediaErrorKind::Unsupported,
+            "Playback rate is unavailable",
+        ))
+    }
+    fn supports_casting(&self) -> bool {
+        false
+    }
+    fn cast(&self) -> MediaFuture<()> {
+        Box::pin(async {
+            Err(MediaError::new(
+                MediaErrorKind::Unsupported,
+                "Casting is unavailable",
+            ))
+        })
+    }
+    fn tracks(&self, _kind: MediaTrackKind) -> Vec<MediaTrack> {
+        Vec::new()
+    }
+    fn select_track(&self, _kind: MediaTrackKind, _id: Option<u32>) -> Result<(), MediaError> {
+        Err(MediaError::new(
+            MediaErrorKind::Unsupported,
+            "Track selection is unavailable",
+        ))
+    }
+    fn caption_text(&self) -> Option<String> {
+        None
+    }
     fn take_frame(&self) -> Result<Option<FrameLease>, MediaError>;
 }
 pub trait MediaPlayerProvider {
@@ -130,6 +177,8 @@ struct PlayerInner {
     operations: OperationSet,
     intent: Cell<PlaybackIntent>,
     options: RefCell<MediaPlayerOptions>,
+    rate: Cell<f64>,
+    captions_enabled: Cell<bool>,
     source: RefCell<Option<MediaSource>>,
     native: RefCell<Option<Rc<dyn NativeMediaSession>>>,
     state: RefCell<MediaPlaybackSession>,
@@ -174,7 +223,10 @@ impl Drop for CancelSeekOnDrop {
                 return;
             }
             let mut pending = inner.pending_seek.borrow_mut();
-            if pending.as_ref().is_some_and(|pending| Rc::ptr_eq(pending, &self.request)) {
+            if pending
+                .as_ref()
+                .is_some_and(|pending| Rc::ptr_eq(pending, &self.request))
+            {
                 pending.take();
             }
         }
@@ -241,6 +293,8 @@ impl MediaPlayer {
             operations: OperationSet::default(),
             intent: Cell::new(PlaybackIntent::Pause),
             options: RefCell::new(MediaPlayerOptions::default()),
+            rate: Cell::new(1.0),
+            captions_enabled: Cell::new(false),
             source: RefCell::new(None),
             native: RefCell::new(None),
             state: RefCell::new(MediaPlaybackSession::default()),
@@ -276,6 +330,106 @@ impl MediaPlayer {
     }
     pub fn requested_state(&self) -> PlaybackIntent {
         self.0.intent.get()
+    }
+    pub fn supports_playback_rate(&self) -> bool {
+        self.0
+            .native
+            .borrow()
+            .as_ref()
+            .is_some_and(|native| native.supports_playback_rate())
+    }
+    pub fn playback_rate(&self) -> f64 {
+        self.0.rate.get()
+    }
+    pub fn supports_casting(&self) -> bool {
+        self.0
+            .native
+            .borrow()
+            .as_ref()
+            .is_some_and(|native| native.supports_casting())
+    }
+    pub fn cast(&self) -> MediaFuture<()> {
+        let native = self
+            .0
+            .native
+            .borrow()
+            .clone()
+            .filter(|native| native.supports_casting());
+        if let Some(native) = native {
+            // Invoke the provider before deferring to the dispatcher, while the
+            // browser still grants transient activation for the click.
+            self.guard(
+                native.cast(),
+                OperationScope::Source,
+                self.0.generation.get(),
+                0,
+            )
+        } else {
+            Box::pin(async {
+                Err(MediaError::new(
+                    MediaErrorKind::Unsupported,
+                    "Casting is unavailable",
+                ))
+            })
+        }
+    }
+    pub fn tracks(&self, kind: MediaTrackKind) -> Vec<MediaTrack> {
+        self.0
+            .native
+            .borrow()
+            .as_ref()
+            .map_or_else(Vec::new, |native| native.tracks(kind))
+    }
+    pub fn select_track(&self, kind: MediaTrackKind, id: Option<u32>) -> Result<(), MediaError> {
+        let native = self.0.native.borrow().clone().ok_or_else(|| {
+            MediaError::new(
+                MediaErrorKind::Unsupported,
+                "Track selection is unavailable",
+            )
+        })?;
+        native.select_track(kind, id)?;
+        if kind == MediaTrackKind::Captions {
+            self.0.captions_enabled.set(id.is_some());
+        }
+        self.0
+            .events
+            .emit(&MediaPlayerEvent::TrackSelectionChanged(kind));
+        Ok(())
+    }
+    pub fn caption_text(&self) -> Option<String> {
+        if !self.0.captions_enabled.get() {
+            return None;
+        }
+        self.0
+            .native
+            .borrow()
+            .as_ref()
+            .and_then(|native| native.caption_text())
+    }
+    pub fn set_playback_rate(&self, rate: f64) -> Result<(), MediaError> {
+        if !(0.5..=2.0).contains(&rate) {
+            return Err(MediaError::new(
+                MediaErrorKind::InvalidSource,
+                "Playback rate must be between 0.5 and 2",
+            ));
+        }
+        let native = self
+            .0
+            .native
+            .borrow()
+            .clone()
+            .filter(|native| native.supports_playback_rate())
+            .ok_or_else(|| {
+                MediaError::new(MediaErrorKind::Unsupported, "Playback rate is unavailable")
+            })?;
+        if self.playback_rate() != rate {
+            native.set_playback_rate(rate)?;
+            self.0.rate.set(rate);
+            self.0
+                .events
+                .emit(&MediaPlayerEvent::PlaybackRateChanged(rate));
+        }
+        Ok(())
     }
     pub fn set_options(&self, options: MediaPlayerOptions) -> Result<(), MediaError> {
         if !options.volume.is_finite() || !(0.0..=1.0).contains(&options.volume) {
@@ -342,6 +496,7 @@ impl MediaPlayer {
         next
     }
     fn replace(&self) -> u64 {
+        self.0.captions_enabled.set(false);
         let generation = self
             .0
             .generation
@@ -479,6 +634,15 @@ impl MediaPlayer {
             let options = player.options();
             let prepared = native
                 .set_audio(options.volume, options.muted)
+                .and_then(|()| {
+                    let rate = player.playback_rate();
+                    if !native.supports_playback_rate() {
+                        player.0.rate.set(1.0);
+                    } else if rate != 1.0 {
+                        native.set_playback_rate(rate)?;
+                    }
+                    Ok(())
+                })
                 .and_then(|()| native.state());
             let state = match prepared {
                 Ok(state) => state,

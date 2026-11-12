@@ -73,6 +73,7 @@ FERROUI_BENCH_FILTER=VirtualizationBenchmarks.vertical_row_scrolls,Virtualizatio
 |---|---|---|
 | `FERROUI_BENCH_FILTER` | none | Parts of names separated by commas; a benchmark runs when its full name contains one |
 | `FERROUI_BENCH_LIST` | not set | When set, the selected names are printed and nothing runs |
+| `FERROUI_BENCH_CLASS` | none | A class (`category::Class`); of the selected benchmarks those of that class run. The local performance gate starts one run a class with it |
 | `FERROUI_BENCH_ITERATIONS` | 15 | The measured iterations of a benchmark |
 | `FERROUI_BENCH_WARMUP` | 3 | The iterations before them |
 | `FERROUI_BENCH_MIN_ITERATION_MS` | 500 | The least time of an iteration |
