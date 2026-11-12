@@ -179,6 +179,10 @@ changes behavior upstream defines.
      whole. The count of regional indicators (LB30a) is now that of one sequence, as the rule
      says, where an indicator alone earlier in the text paired the indicators of every later
      sequence the other way.
+   - **Required breaks.** The text of a run was classified whole a second time to find its
+     first required break. A break is required after a hard line break only (U+000A to U+000D,
+     U+0085, U+2028 and U+2029), so the text is scanned for those characters
+     (`LineBreakEnumerator::first_required`), in every layout, edited or not.
    - **Lines.** The lines that end before the changed range are kept; past it, a line whose start
      and width context are those of an old line is the old line, shifted, and the rest of the
      paragraph follows it.
@@ -186,8 +190,8 @@ changes behavior upstream defines.
    comparison of the two texts (a common prefix and suffix) is the edit.
 
    Measured on the `paragraph` scene (UI thread, a frame): 5.37 ms before, 3.80 ms with the
-   shaped runs kept, 2.71 ms with the break opportunities kept as well. The lines are not kept
-   yet.
+   shaped runs kept, 2.71 ms with the break opportunities kept as well, 1.84 ms with the scan
+   for the first required break. The lines are not kept yet.
 
 The cross-library comparison (`tests/FerroUI.Text.Comparison`: FerroUI, parley, cosmic-text and
 epaint on the same font, corpus and widths) measures each step against the others.

@@ -654,17 +654,9 @@ impl TextFormatterImpl {
             return None;
         }
 
-        let mut line_break_enumerator = LineBreakEnumerator::new(text);
-
-        while let Some(line_break) = line_break_enumerator.move_next() {
-            if !line_break.required() {
-                continue;
-            }
-
-            return Some(line_break);
-        }
-
-        None
+        // The first required break, which the enumerator gives after a hard line break only: the
+        // text is not classified for it (step 7 of docs/porting/text-layout-performance.md).
+        LineBreakEnumerator::first_required(text)
     }
 
     fn measure_length(text_runs: &[Rc<dyn TextRun>], paragraph_width: f64) -> i32 {

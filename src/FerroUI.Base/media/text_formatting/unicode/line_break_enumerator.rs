@@ -46,6 +46,34 @@ impl<'a> LineBreakEnumerator<'a> {
     }
 }
 
+impl LineBreakEnumerator<'_> {
+    /// The first required break of `text`: the first break the enumerator gives whose
+    /// [`LineBreak::required`] is set, found without the rules. A break is required after a hard
+    /// line break only (classes BK, CR, LF and NL: U+000A to U+000D, U+0085, U+2028 and U+2029;
+    /// CR LF breaks once, after the LF), so the text is scanned for those characters; a text
+    /// without one has no required break (the break at the end of such a text is not required).
+    pub fn first_required(text: &[u16]) -> Option<LineBreak> {
+        let at = text.iter().position(|&unit| is_hard_break(unit))?;
+        let pair = text[at] == 0x000D && text.get(at + 1) == Some(&0x000A);
+        let position_wrap = (at + 1 + usize::from(pair)) as i32;
+        // As `get_line_break` measures: up to the character before the break and the spaces before
+        // it, for a CR or LF; a break of another class is measured with its character.
+        let position_measure = match text[at] {
+            0x000D if pair => find_prior_non_whitespace(text, at as i32),
+            0x000A | 0x000D => find_prior_non_whitespace(text, position_wrap),
+            _ => position_wrap,
+        };
+        Some(LineBreak::new(position_measure.max(0) as usize, position_wrap as usize, true))
+    }
+}
+
+/// Whether `unit` is a character of a hard line break class (BK, CR, LF, NL); all are in the
+/// basic plane, and no surrogate is one.
+#[inline(always)]
+fn is_hard_break(unit: u16) -> bool {
+    matches!(unit, 0x000A..=0x000D | 0x0085 | 0x2028 | 0x2029)
+}
+
 impl Iterator for LineBreakEnumerator<'_> {
     type Item = LineBreak;
 
