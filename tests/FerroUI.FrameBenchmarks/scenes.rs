@@ -92,6 +92,14 @@ pub const SCENES: &[Scene] = &[
         guards: "charts whose lines change every frame: new geometries, their stroke bounds and \
                  their drawing, the render walk over plain visuals (section 9.24)",
     },
+    Scene {
+        name: "items",
+        build: items,
+        pointer: false,
+        guards: "boxes that draw without a composition visual, thousands in the one above them, \
+                 around a visual that has one: every frame some are drawn anew, some move and \
+                 some leave the tree and come back (section 9.42)",
+    },
 ];
 
 /// The scenes whose start is measured phase by phase (`tests/frames.rs`, `startup/<name>`): the
@@ -519,6 +527,65 @@ fn lines() -> Ref<Control> {
     draw(0);
     Clock::follow(draw);
     root(&panel)
+}
+
+// --- items ---------------------------------------------------------------------------------------
+
+const ITEM_BOXES: usize = 6_000;
+const ITEM_COLUMNS: usize = 120;
+/// One box in this many is drawn anew in a frame, one moves and one leaves and comes back.
+const ITEM_STRIDE: usize = 64;
+
+fn items() -> Ref<Control> {
+    let colors: Rc<Vec<Rc<dyn IBrush>>> = Rc::new(PALETTE.iter().map(|argb| brush(*argb)).collect());
+    let left = |index: usize| (index % ITEM_COLUMNS) as f64 * 8.0;
+    let canvas = Canvas::new();
+    let boxes: Rc<Vec<Ref<Border>>> = Rc::new(
+        (0..ITEM_BOXES)
+            .map(|index| {
+                // Nothing under it, no clip and nothing the compositor applies: what it draws is
+                // an item of the composition visual above the canvas.
+                let item = Border::new();
+                item.set_width(7.0);
+                item.set_height(7.0);
+                item.set_corner_radius(CornerRadius::uniform(1.5));
+                item.set_background(Some(colors[index % colors.len()].clone()));
+                Canvas::set_left(&item, left(index));
+                Canvas::set_top(&item, (index / ITEM_COLUMNS) as f64 * 8.0);
+                item
+            })
+            .collect(),
+    );
+    for (index, item) in boxes.iter().enumerate() {
+        if index == ITEM_BOXES / 2 {
+            // A composition visual among the items: half of them are painted under it, half over.
+            let band = Border::new();
+            band.set_width(ITEM_COLUMNS as f64 * 8.0);
+            band.set_height(120.0);
+            band.set_background(Some(brush(0xFF111827)));
+            band.set_opacity(0.5);
+            Canvas::set_top(&band, 140.0);
+            canvas.children().add(&band);
+        }
+        canvas.children().add(item);
+    }
+    let panel = canvas.clone();
+    Clock::follow(move |frame| {
+        let phase = frame.rem_euclid(ITEM_STRIDE as i32) as usize;
+        let turn = frame.rem_euclid(i32::MAX) as usize;
+        for (index, item) in boxes.iter().enumerate().skip(phase).step_by(ITEM_STRIDE) {
+            item.set_background(Some(colors[(index + turn) % colors.len()].clone()));
+        }
+        for (index, item) in boxes.iter().enumerate().skip((phase + 21) % ITEM_STRIDE).step_by(ITEM_STRIDE) {
+            Canvas::set_left(item, left(index) + 3.0 * wave(frame + index as i32, 60));
+        }
+        // Out of the tree and back in, over the others.
+        for item in boxes.iter().skip((phase + 42) % ITEM_STRIDE).step_by(ITEM_STRIDE) {
+            panel.children().remove(item);
+            panel.children().add(item);
+        }
+    });
+    root(&canvas)
 }
 
 // --- the warm-up ----------------------------------------------------------------------------------

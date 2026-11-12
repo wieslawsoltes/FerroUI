@@ -107,6 +107,12 @@ impl FerroObjectImpl for SelectionIndicator {
 }
 
 impl VisualImpl for SelectionIndicator {
+    // The indicator is drawn by the content of its composition visual
+    // (docs/porting/desktop-performance.md, section 9.42).
+    fn requires_composition_visual(_this: &Self) -> bool {
+        true
+    }
+
     fn create_composition_visual(this: &Self, compositor: &Rc<Compositor>) -> CompositionDrawListVisual {
         let state = Rc::new(IndicatorState {
             radius: Cell::new(this.radius()),

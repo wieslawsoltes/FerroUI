@@ -31,6 +31,10 @@ pub(crate) struct TestBorder {
     base: Visual,
     background: RefCell<Option<Rc<dyn IBrush>>>,
     custom_hit_test: Cell<Option<bool>>,
+    /// Whether it has a composition visual of its own whatever it draws.
+    layer: Cell<bool>,
+    /// How far past its bounds it draws, on every side.
+    overdraw: Cell<f64>,
 }
 
 ferro_class!(TestBorder: Visual);
@@ -40,12 +44,19 @@ impl VisualImpl for TestBorder {
     fn render(this: &Self, context: &mut DrawingContext) {
         let background = this.background.borrow().clone();
         if let Some(background) = background {
-            context.fill_rectangle(&background, Rect::from_size(this.bounds().size()), 0.0);
+            let size = this.bounds().size();
+            let over = this.overdraw.get();
+            let rect = Rect::new(0.0 - over, 0.0 - over, size.width + 2.0 * over, size.height + 2.0 * over);
+            context.fill_rectangle(&background, rect, 0.0);
         }
     }
 
     fn custom_hit_test(this: &Self, _point: Point) -> Option<bool> {
         this.custom_hit_test.get()
+    }
+
+    fn requires_composition_visual(this: &Self) -> bool {
+        this.layer.get()
     }
 }
 
@@ -55,14 +66,25 @@ impl TestBorder {
             base: Visual::construct(),
             background: RefCell::new(None),
             custom_hit_test: Cell::new(None),
+            layer: Cell::new(false),
+            overdraw: Cell::new(0.0),
         })
     }
 
-    /// A border with a background at the given bounds.
+    /// A border with a background at the given bounds. What it draws is shown by the
+    /// composition visual of the nearest visual above it that has one (section 9.42).
     pub(crate) fn filled(x: f64, y: f64, width: f64, height: f64) -> Ref<Self> {
         let border = Self::new();
         border.set_background(Some(Brushes::red()));
         border.set_bounds(Rect::new(x, y, width, height));
+        border
+    }
+
+    /// A border with a background at the given bounds that has a composition visual of its
+    /// own, as a visual that sets something the compositor applies.
+    pub(crate) fn layer(x: f64, y: f64, width: f64, height: f64) -> Ref<Self> {
+        let border = Self::filled(x, y, width, height);
+        border.layer.set(true);
         border
     }
 
@@ -284,8 +306,13 @@ impl CompositorCanvas {
         assert_eq!(expected.map(|v| v.clone().upcast::<Visual>()), tested);
     }
 
+    /// The server side of the composition visual of `visual`. A visual that had none gets it
+    /// by the question (section 9.41), and the batch that carries it is sent first.
     fn server_visual(&self, visual: &Visual) -> Rc<ServerCompositionVisual> {
         let id = visual.composition_visual().expect("the visual is attached").server();
+        if self.compositor.server().get::<ServerCompositionVisual>(id).is_none() {
+            self.run_jobs();
+        }
         self.compositor.server().get::<ServerCompositionVisual>(id).expect("the server visual exists")
     }
 }
@@ -352,8 +379,8 @@ fn control_should_invalidate_own_rect_when_removed() {
 #[test]
 fn sibling_controls_should_invalidate_union_rect_when_removed() {
     let s = CompositorCanvas::new();
-    let control = TestBorder::filled(30.0, 10.0, 20.0, 10.0);
-    let control2 = TestBorder::filled(30.0, 50.0, 20.0, 10.0);
+    let control = TestBorder::layer(30.0, 10.0, 20.0, 10.0);
+    let control2 = TestBorder::layer(30.0, 50.0, 20.0, 10.0);
     control2.set_background(Some(Brushes::blue()));
     s.canvas.add(&control);
     s.canvas.add(&control2);
@@ -384,13 +411,23 @@ fn decorator_with_child() -> (Ref<TestBorder>, Ref<TestBorder>) {
     (control, child)
 }
 
+/// The decorator of [`decorator_with_child`] around a border that has a composition visual
+/// of its own.
+fn decorator_with_layer() -> (Ref<TestBorder>, Ref<TestBorder>) {
+    let control = TestBorder::new();
+    control.set_bounds(Rect::new(30.0, 50.0, 40.0, 30.0));
+    let child = TestBorder::layer(10.0, 10.0, 20.0, 10.0);
+    control.add(&child);
+    (control, child)
+}
+
 /// What is set on a composition visual asked for after a pass stays: the visual was
 /// synchronized when it was created, and the next pass has nothing of it to forward
 /// (section 9.41).
 #[test]
 fn an_offset_set_on_a_composition_visual_asked_for_after_a_pass_survives_the_next_pass() {
     let s = CompositorCanvas::new();
-    let (control, child) = decorator_with_child();
+    let (control, child) = decorator_with_layer();
     s.canvas.add(&control);
     s.run_jobs();
     assert!(!control.has_composition_visual());
@@ -412,6 +449,14 @@ fn an_offset_set_on_a_composition_visual_asked_for_after_a_pass_survives_the_nex
 /// other does, and has a composition visual of its own, which the other has not (section 9.41).
 fn clipping_decorator_with_child() -> (Ref<TestBorder>, Ref<TestBorder>) {
     let (control, child) = decorator_with_child();
+    control.set_clip_to_bounds(true);
+    (control, child)
+}
+
+/// The decorator of [`clipping_decorator_with_child`] around a border that has a composition
+/// visual of its own.
+fn clipping_decorator_with_layer() -> (Ref<TestBorder>, Ref<TestBorder>) {
+    let (control, child) = decorator_with_layer();
     control.set_clip_to_bounds(true);
     (control, child)
 }
@@ -461,8 +506,11 @@ fn do_not_re_render_unaffected_visual_trees(
     expected_rendered_visuals_count: i32,
 ) {
     let s = CompositorCanvas::new();
+    // Every visual of the test has a composition visual, as upstream; the drawings shown by
+    // the composition visual above are in the tests of section 9.42.
+    s.canvas.layer.set(true);
     for (x, y) in [(0.0, 0.0), (30.0, 50.0)] {
-        let border = TestBorder::filled(x, y, 20.0, 10.0);
+        let border = TestBorder::layer(x, y, 20.0, 10.0);
         border.set_clip_to_bounds(clip_to_bounds);
         if clip_geometry {
             border.set_clip(RectangleGeometry::with_rect(Rect::from_size(Size::new(20.0, 10.0))).upcast::<crate::media::Geometry>());
@@ -756,12 +804,12 @@ fn hit_test_uses_the_child_index_for_many_children() {
     let s = CompositorCanvas::new();
     let mut borders = Vec::new();
     for i in 0..100 {
-        let border = TestBorder::filled((i % 10) as f64 * 50.0, (i / 10) as f64 * 50.0, 40.0, 40.0);
+        let border = TestBorder::layer((i % 10) as f64 * 50.0, (i / 10) as f64 * 50.0, 40.0, 40.0);
         s.canvas.add(&border);
         borders.push(border);
     }
     // Two overlapping visuals in different buckets.
-    let overlapping = TestBorder::filled(0.0, 0.0, 40.0, 40.0);
+    let overlapping = TestBorder::layer(0.0, 0.0, 40.0, 40.0);
     s.canvas.add(&overlapping);
 
     s.assert_hit_test(10.0, 10.0, None, &[&overlapping, &borders[0]]);
@@ -793,7 +841,7 @@ fn aabb_tree_orders_candidates_and_follows_changes() {
     let s = CompositorCanvas::new();
     let mut borders = Vec::new();
     for i in 0..70 {
-        let border = TestBorder::filled(i as f64 * 10.0, 0.0, 30.0, 30.0);
+        let border = TestBorder::layer(i as f64 * 10.0, 0.0, 30.0, 30.0);
         s.canvas.add(&border);
         borders.push(border);
     }
@@ -834,9 +882,9 @@ fn aabb_tree_orders_candidates_and_follows_changes() {
 #[test]
 fn composition_children_follow_visual_children_and_z_index() {
     let s = CompositorCanvas::new();
-    let a = TestBorder::filled(0.0, 0.0, 10.0, 10.0);
-    let b = TestBorder::filled(0.0, 0.0, 10.0, 10.0);
-    let c = TestBorder::filled(0.0, 0.0, 10.0, 10.0);
+    let a = TestBorder::layer(0.0, 0.0, 10.0, 10.0);
+    let b = TestBorder::layer(0.0, 0.0, 10.0, 10.0);
+    let c = TestBorder::layer(0.0, 0.0, 10.0, 10.0);
     s.canvas.add(&a);
     s.canvas.add(&b);
     s.canvas.add(&c);
@@ -2032,7 +2080,7 @@ fn own_server_visual(s: &CompositorCanvas, visual: &Visual) -> Rc<ServerComposit
 #[test]
 fn visual_back_before_the_update_pass_keeps_its_composition_visuals() {
     let s = CompositorCanvas::new();
-    let (control, child) = clipping_decorator_with_child();
+    let (control, child) = clipping_decorator_with_layer();
     s.canvas.add(&control);
     s.run_jobs();
     let objects = s.compositor.server().object_count();
@@ -2098,7 +2146,7 @@ fn visual_not_back_by_the_update_pass_releases_its_composition_visuals() {
     let s = CompositorCanvas::new();
     s.run_jobs();
     let baseline = s.compositor.server().object_count();
-    let (control, child) = clipping_decorator_with_child();
+    let (control, child) = clipping_decorator_with_layer();
     s.canvas.add(&control);
     s.run_jobs();
     let control_visual = own_visual(&control);
@@ -2136,7 +2184,7 @@ fn composition_visuals_kept_for_a_dropped_visual_are_released() {
     let s = CompositorCanvas::new();
     s.run_jobs();
     let baseline = s.compositor.server().object_count();
-    let (control, child) = clipping_decorator_with_child();
+    let (control, child) = clipping_decorator_with_layer();
     s.canvas.add(&control);
     s.run_jobs();
     let control_visual = own_visual(&control);
@@ -2168,7 +2216,7 @@ fn composition_visuals_kept_for_a_dropped_visual_are_released() {
 #[test]
 fn composition_visual_handed_out_is_released_when_its_visual_leaves() {
     let s = CompositorCanvas::new();
-    let (control, child) = clipping_decorator_with_child();
+    let (control, child) = clipping_decorator_with_layer();
     s.canvas.add(&control);
     s.run_jobs();
     // Something asked for the composition visual of the child: it may hold it or have changed it.
@@ -2194,8 +2242,8 @@ fn composition_visual_handed_out_is_released_when_its_visual_leaves() {
 #[test]
 fn composition_visual_is_not_kept_with_a_child_visual_or_while_rendering_is_stopped() {
     let s = CompositorCanvas::new();
-    let host = TestBorder::filled(0.0, 0.0, 20.0, 20.0);
-    let plain = TestBorder::filled(30.0, 0.0, 20.0, 20.0);
+    let host = TestBorder::layer(0.0, 0.0, 20.0, 20.0);
+    let plain = TestBorder::layer(30.0, 0.0, 20.0, 20.0);
     s.canvas.add(&host);
     s.canvas.add(&plain);
     s.run_jobs();
@@ -2232,8 +2280,8 @@ fn composition_visual_is_not_kept_with_a_child_visual_or_while_rendering_is_stop
 #[test]
 fn visual_out_of_the_tree_is_not_hit_through_what_is_kept_for_it() {
     let s = CompositorCanvas::new();
-    let (control, child) = clipping_decorator_with_child();
-    let under = TestBorder::filled(30.0, 50.0, 40.0, 30.0);
+    let (control, child) = clipping_decorator_with_layer();
+    let under = TestBorder::layer(30.0, 50.0, 40.0, 30.0);
     s.canvas.add(&under);
     s.canvas.add(&control);
     s.assert_hit_test(45.0, 65.0, None, &[&child, &under]);
@@ -2262,8 +2310,8 @@ fn move_between_parents(hand_out: bool) -> Vec<String> {
     let to = TestBorder::new();
     to.set_bounds(Rect::new(100.0, 0.0, 50.0, 50.0));
     to.set_clip_to_bounds(true);
-    let child = TestBorder::filled(10.0, 10.0, 20.0, 20.0);
-    let grandchild = TestBorder::filled(5.0, 5.0, 5.0, 5.0);
+    let child = TestBorder::layer(10.0, 10.0, 20.0, 20.0);
+    let grandchild = TestBorder::layer(5.0, 5.0, 5.0, 5.0);
     grandchild.set_background(Some(Brushes::blue()));
     child.add(&grandchild);
     from.add(&child);
@@ -2321,7 +2369,7 @@ fn visual_moved_to_another_parent_and_place_redraws_where_it_was_and_where_it_is
     from.set_bounds(Rect::new(0.0, 0.0, 50.0, 50.0));
     let to = TestBorder::new();
     to.set_bounds(Rect::new(100.0, 200.0, 50.0, 50.0));
-    let child = TestBorder::filled(10.0, 10.0, 20.0, 20.0);
+    let child = TestBorder::layer(10.0, 10.0, 20.0, 20.0);
     from.add(&child);
     s.canvas.add(&from);
     s.canvas.add(&to);
@@ -2339,7 +2387,7 @@ fn visual_moved_to_another_parent_and_place_redraws_where_it_was_and_where_it_is
 #[test]
 fn child_removed_while_its_parent_is_out_of_the_tree_releases_its_composition_visual() {
     let s = CompositorCanvas::new();
-    let (control, child) = clipping_decorator_with_child();
+    let (control, child) = clipping_decorator_with_layer();
     s.canvas.add(&control);
     s.run_jobs();
     let control_visual = own_visual(&control);
@@ -2363,7 +2411,7 @@ fn child_removed_while_its_parent_is_out_of_the_tree_releases_its_composition_vi
 #[test]
 fn composition_visual_kept_for_one_compositor_is_not_used_with_another() {
     let s = CompositorCanvas::new();
-    let control = TestBorder::filled(0.0, 0.0, 20.0, 20.0);
+    let control = TestBorder::layer(0.0, 0.0, 20.0, 20.0);
     s.canvas.add(&control);
     s.run_jobs();
     let kept = own_visual(&control);
@@ -2418,7 +2466,7 @@ fn composition_work_of_a_row_taken_out_of_the_tree_and_put_back() {
     use crate::diagnostics::perf_counters::{self, PerfCounter};
 
     let s = CompositorCanvas::new();
-    let (row, cell) = clipping_decorator_with_child();
+    let (row, cell) = clipping_decorator_with_layer();
     s.canvas.add(&row);
     s.run_jobs();
     let objects = s.compositor.server().object_count();
@@ -2478,7 +2526,7 @@ fn take_out_for_a_pool(s: &CompositorCanvas, control: &Ref<TestBorder>) -> Optio
 #[test]
 fn visual_taken_out_for_a_pool_keeps_its_composition_visuals_across_update_passes() {
     let s = CompositorCanvas::new();
-    let (control, child) = clipping_decorator_with_child();
+    let (control, child) = clipping_decorator_with_layer();
     s.canvas.add(&control);
     s.run_jobs();
     let objects = s.compositor.server().object_count();
@@ -2533,7 +2581,7 @@ fn composition_visuals_kept_for_a_pool_are_released_by_what_holds_them() {
     let s = CompositorCanvas::new();
     s.run_jobs();
     let baseline = s.compositor.server().object_count();
-    let (control, child) = clipping_decorator_with_child();
+    let (control, child) = clipping_decorator_with_layer();
     s.canvas.add(&control);
     s.run_jobs();
     let control_visual = own_visual(&control);
@@ -2569,7 +2617,7 @@ fn composition_visuals_kept_for_a_pool_outlive_no_visual() {
     let s = CompositorCanvas::new();
     s.run_jobs();
     let baseline = s.compositor.server().object_count();
-    let (control, child) = clipping_decorator_with_child();
+    let (control, child) = clipping_decorator_with_layer();
     s.canvas.add(&control);
     s.run_jobs();
     let child_visual = own_visual(&child);
@@ -2599,7 +2647,7 @@ fn composition_visuals_kept_for_a_pool_outlive_no_visual() {
 #[test]
 fn child_that_left_a_pooled_visual_releases_its_composition_visual_with_the_pool() {
     let s = CompositorCanvas::new();
-    let (control, child) = clipping_decorator_with_child();
+    let (control, child) = clipping_decorator_with_layer();
     s.canvas.add(&control);
     s.run_jobs();
     let control_visual = own_visual(&control);
@@ -2624,9 +2672,9 @@ fn child_that_left_a_pooled_visual_releases_its_composition_visual_with_the_pool
 #[test]
 fn visuals_taken_out_inside_one_another_are_kept_by_the_innermost() {
     let s = CompositorCanvas::new();
-    let first = TestBorder::filled(0.0, 0.0, 20.0, 20.0);
-    let second = TestBorder::filled(30.0, 0.0, 20.0, 20.0);
-    let third = TestBorder::filled(60.0, 0.0, 20.0, 20.0);
+    let first = TestBorder::layer(0.0, 0.0, 20.0, 20.0);
+    let second = TestBorder::layer(30.0, 0.0, 20.0, 20.0);
+    let third = TestBorder::layer(60.0, 0.0, 20.0, 20.0);
     for control in [&first, &second, &third] {
         s.canvas.add(control);
     }
@@ -2699,7 +2747,7 @@ fn nothing_is_kept_for_a_pool_outside_of_a_tree_or_while_rendering_is_stopped() 
 #[test]
 fn composition_visuals_kept_for_a_pool_are_not_used_by_a_disposed_renderer() {
     let s = CompositorCanvas::new();
-    let (control, child) = clipping_decorator_with_child();
+    let (control, child) = clipping_decorator_with_layer();
     s.canvas.add(&control);
     s.run_jobs();
     let child_visual = own_visual(&child);
@@ -2913,7 +2961,7 @@ fn composition_parent(visual: &Visual) -> Rc<super::CompositionVisual> {
 #[test]
 fn a_visual_that_draws_nothing_and_sets_nothing_has_no_composition_visual() {
     let s = CompositorCanvas::new();
-    let (control, child) = decorator_with_child();
+    let (control, child) = decorator_with_layer();
     s.canvas.add(&control);
     s.run_jobs();
 
@@ -2930,46 +2978,9 @@ fn a_visual_that_draws_nothing_and_sets_nothing_has_no_composition_visual() {
 }
 
 #[test]
-fn a_visual_gets_its_composition_visual_when_it_draws_and_keeps_it() {
-    let s = CompositorCanvas::new();
-    let (control, child) = decorator_with_child();
-    s.canvas.add(&control);
-    s.run_jobs();
-    let child_visual = own_visual(&child);
-    s.events.rects.borrow_mut().clear();
-
-    control.set_background(Some(Brushes::blue()));
-    s.assert_rects(&[Rect::new(30.0, 50.0, 40.0, 30.0), Rect::new(40.0, 60.0, 20.0, 10.0)]);
-    let control_visual = own_visual(&control);
-    assert!(Rc::ptr_eq(&child_visual, &own_visual(&child)), "the child keeps its composition visual");
-    assert!(Rc::ptr_eq(&composition_parent(&child), &control_visual));
-    assert!(Rc::ptr_eq(&composition_parent(&control), &own_visual(&s.root)));
-    assert_eq!(Vector3D::new(10.0, 10.0, 0.0), child_visual.offset());
-    assert_eq!(Vector3D::new(30.0, 50.0, 0.0), control_visual.offset());
-    assert_eq!(1, own_visual(&s.root).children().count());
-    assert_eq!(1, control_visual.children().count());
-    s.assert_hit_test(45.0, 65.0, None, &[&child, &control]);
-
-    // It has it for as long as it is in the tree.
-    control.set_background(None);
-    s.assert_rects(&[Rect::new(30.0, 50.0, 40.0, 30.0), Rect::new(40.0, 60.0, 20.0, 10.0)]);
-    assert!(Rc::ptr_eq(&control_visual, &own_visual(&control)));
-    s.assert_hit_test(45.0, 65.0, None, &[&child]);
-
-    // A new one is decided when it enters a tree again.
-    s.canvas.remove(&control);
-    s.run_jobs();
-    s.run_jobs();
-    s.canvas.add(&control);
-    s.run_jobs();
-    assert!(!control.has_composition_visual());
-    assert_eq!(Vector3D::new(40.0, 60.0, 0.0), own_visual(&child).offset());
-}
-
-#[test]
 fn a_visual_gets_its_composition_visual_when_it_sets_what_the_compositor_applies() {
     let s = CompositorCanvas::new();
-    let (control, child) = decorator_with_child();
+    let (control, child) = decorator_with_layer();
     s.canvas.add(&control);
     s.run_jobs();
 
@@ -2981,14 +2992,14 @@ fn a_visual_gets_its_composition_visual_when_it_sets_what_the_compositor_applies
     assert_eq!(Vector3D::new(10.0, 10.0, 0.0), own_visual(&child).offset());
 
     // One that sets it before it is shown has it from its first pass.
-    let (clipping, inner) = clipping_decorator_with_child();
+    let (clipping, inner) = clipping_decorator_with_layer();
     s.canvas.add(&clipping);
     s.run_jobs();
     assert!(clipping.has_composition_visual());
     assert!(Rc::ptr_eq(&composition_parent(&inner), &own_visual(&clipping)));
 
     // Hidden, it hides what is under it.
-    let (hidden, covered) = decorator_with_child();
+    let (hidden, covered) = decorator_with_layer();
     hidden.set_bounds(Rect::new(200.0, 200.0, 40.0, 30.0));
     s.canvas.add(&hidden);
     s.assert_hit_test(215.0, 215.0, None, &[&covered]);
@@ -3000,7 +3011,7 @@ fn a_visual_gets_its_composition_visual_when_it_sets_what_the_compositor_applies
 #[test]
 fn asking_for_the_composition_visual_creates_it_in_its_place() {
     let s = CompositorCanvas::new();
-    let (control, child) = decorator_with_child();
+    let (control, child) = decorator_with_layer();
     s.canvas.add(&control);
     s.run_jobs();
     assert!(!control.has_composition_visual());
@@ -3028,7 +3039,7 @@ fn asking_for_the_composition_visual_creates_it_in_its_place() {
     s.assert_hit_test(45.0, 65.0, None, &[&child]);
 
     // One asked for before the first pass of its visual is placed by that pass.
-    let (early, inner) = decorator_with_child();
+    let (early, inner) = decorator_with_layer();
     early.set_bounds(Rect::new(200.0, 200.0, 40.0, 30.0));
     s.canvas.add(&early);
     let early_visual: Rc<super::CompositionVisual> = (*early.composition_visual().expect("in a tree")).clone();
@@ -3087,7 +3098,7 @@ fn what_is_under_a_new_composition_visual_is_hit_before_the_first_frame_with_it(
 #[test]
 fn what_is_under_a_visual_without_a_composition_visual_follows_it() {
     let s = CompositorCanvas::new();
-    let (control, child) = decorator_with_child();
+    let (control, child) = decorator_with_layer();
     s.canvas.add(&control);
     s.run_jobs();
     s.events.rects.borrow_mut().clear();
@@ -3103,7 +3114,7 @@ fn what_is_under_a_visual_without_a_composition_visual_follows_it() {
     many.set_bounds(Rect::new(300.0, 300.0, 400.0, 20.0));
     let mut cells = Vec::new();
     for i in 0..12 {
-        let cell = TestBorder::filled(i as f64 * 30.0, 0.0, 20.0, 20.0);
+        let cell = TestBorder::layer(i as f64 * 30.0, 0.0, 20.0, 20.0);
         many.add(&cell);
         cells.push(cell);
     }
@@ -3127,8 +3138,8 @@ fn what_is_under_a_visual_without_a_composition_visual_follows_it() {
 #[test]
 fn children_of_a_visual_without_a_composition_visual_are_shown_in_their_order() {
     let s = CompositorCanvas::new();
-    let (first, first_child) = decorator_with_child();
-    let (second, second_child) = decorator_with_child();
+    let (first, first_child) = decorator_with_layer();
+    let (second, second_child) = decorator_with_layer();
     s.canvas.add(&first);
     s.canvas.add(&second);
     s.assert_hit_test(45.0, 65.0, None, &[&second_child, &first_child]);
@@ -3140,7 +3151,7 @@ fn children_of_a_visual_without_a_composition_visual_are_shown_in_their_order() 
     assert!(!first.has_composition_visual());
 
     // A child added to one of them is shown after its siblings, before what follows it.
-    let added = TestBorder::filled(10.0, 10.0, 20.0, 10.0);
+    let added = TestBorder::layer(10.0, 10.0, 20.0, 10.0);
     second.add(&added);
     s.assert_hit_test(45.0, 65.0, None, &[&first_child, &added, &second_child]);
 
@@ -3186,7 +3197,7 @@ fn hit_tests_ask_the_filter_for_the_visuals_without_a_composition_visual() {
 #[test]
 fn a_visual_without_a_composition_visual_that_leaves_and_returns_keeps_what_is_under_it() {
     let s = CompositorCanvas::new();
-    let (control, child) = decorator_with_child();
+    let (control, child) = decorator_with_layer();
     s.canvas.add(&control);
     s.run_jobs();
     let child_visual = own_visual(&child);
@@ -3218,4 +3229,961 @@ fn a_visual_without_a_composition_visual_that_leaves_and_returns_keeps_what_is_u
     s.run_jobs();
     assert_eq!(objects, s.compositor.server().object_count());
     s.assert_hit_test(45.0, 65.0, None, &[&child]);
+}
+
+// --- drawing items (desktop-performance.md, 9.42) -------------------------------------------
+
+fn visuals(borders: &[&Ref<TestBorder>]) -> Vec<Ref<Visual>> {
+    borders.iter().map(|border| (*border).clone().upcast()).collect()
+}
+
+/// What `visual` drew, as the composition visual above it shows it.
+fn item_of(visual: &Visual) -> Rc<super::CompositionDrawItem> {
+    visual.composition_item().expect("what the visual drew is an item")
+}
+
+/// The visuals whose drawings the composition visual of `visual` shows as items, in the order
+/// of the items.
+fn item_elements(visual: &Visual) -> Vec<Ref<Visual>> {
+    let holder = own_visual(visual);
+    let Some(items) = holder.draw_items() else { return Vec::new() };
+    (0..items.count()).filter_map(|index| items.item_at(index)).filter_map(|item| item.element()).collect()
+}
+
+/// The items the server side of the composition visual of `visual` shows.
+fn server_items(s: &CompositorCanvas, visual: &Visual) -> Vec<Rc<super::server::ServerDrawItem>> {
+    own_server_visual(s, visual).content().draw_items().map(|items| items.items()).unwrap_or_default()
+}
+
+/// Where the child visuals of the server side of the composition visual of `visual` are among
+/// its items.
+fn server_child_positions(s: &CompositorCanvas, visual: &Visual) -> Vec<u32> {
+    own_server_visual(s, visual).content().draw_items().map(|items| items.child_positions()).unwrap_or_default()
+}
+
+/// What `log` has of rectangles and rectangular clips, in its order: the brush of a rectangle,
+/// `PushClip` with its rectangle, and the `PopClip` of such a clip.
+fn drawn(log: &crate::rendering::testing::DrawingLog) -> Vec<String> {
+    let mut clips = Vec::new();
+    let mut drawn = Vec::new();
+    for entry in log.entries().iter() {
+        if let Some(rest) = entry.strip_prefix("DrawRectangle ") {
+            drawn.extend(rest.split(' ').next().map(str::to_string));
+        } else if entry.starts_with("PushClip ") {
+            clips.push(true);
+            drawn.push(entry.clone());
+        } else if entry == "PushClipRegion" || entry.starts_with("PushRoundedClip ") || entry.starts_with("PushGeometryClip") {
+            clips.push(false);
+        } else if entry == "PopClip" && clips.pop().unwrap_or(false) {
+            drawn.push(entry.clone());
+        }
+    }
+    drawn
+}
+
+/// The brushes of the rectangles `log` has, in its order.
+fn rectangles(log: &crate::rendering::testing::DrawingLog) -> Vec<String> {
+    drawn(log).into_iter().filter(|entry| !entry.starts_with("PushClip ") && entry != "PopClip").collect()
+}
+
+#[test]
+fn a_visual_that_draws_is_an_item_of_the_composition_visual_above_it() {
+    let s = CompositorCanvas::new();
+    let (control, child) = decorator_with_child();
+    s.canvas.add(&control);
+    s.run_jobs();
+
+    assert!(!s.canvas.has_composition_visual());
+    assert!(!control.has_composition_visual());
+    assert!(!child.has_composition_visual());
+    assert!(control.composition_item().is_none(), "it draws nothing");
+    let root_visual = own_visual(&s.root);
+    let item = item_of(&child);
+    assert!(item.is_held_by(&root_visual));
+    assert!(Rc::ptr_eq(&root_visual, &item.holder().expect("the item is shown")));
+    assert_eq!((40.0, 60.0), item.offset());
+    assert_eq!(None, item.clip());
+    assert_eq!(visuals(&[&child]), item_elements(&s.root));
+    assert_eq!(0, root_visual.children().count());
+    let on_server = server_items(&s, &s.root);
+    assert_eq!(1, on_server.len());
+    assert_eq!((40.0, 60.0), on_server[0].offset());
+    assert_eq!(None, on_server[0].clip());
+    assert!(on_server[0].data().is_some());
+    s.assert_hit_test(45.0, 65.0, None, &[&child]);
+    s.assert_hit_test_first(45.0, 65.0, None, Some(&child));
+    s.assert_hit_test(35.0, 55.0, None, &[]);
+    s.events.rects.borrow_mut().clear();
+
+    // A visual above it that draws is an item before it: the one it has stays.
+    control.set_background(Some(Brushes::blue()));
+    s.assert_rects(&[Rect::new(30.0, 50.0, 40.0, 30.0)]);
+    assert!(!control.has_composition_visual());
+    assert_eq!((30.0, 50.0), item_of(&control).offset());
+    assert!(Rc::ptr_eq(&item, &item_of(&child)));
+    assert_eq!(visuals(&[&control, &child]), item_elements(&s.root));
+    assert_eq!(2, server_items(&s, &s.root).len());
+    assert!(Rc::ptr_eq(&on_server[0], &server_items(&s, &s.root)[1]));
+    s.assert_hit_test(45.0, 65.0, None, &[&child, &control]);
+    s.assert_hit_test(35.0, 55.0, None, &[&control]);
+
+    // One that draws nothing any more has no item.
+    control.set_background(None);
+    s.assert_rects(&[Rect::new(30.0, 50.0, 40.0, 30.0)]);
+    assert!(control.composition_item().is_none());
+    assert!(!control.has_composition_visual());
+    assert_eq!(visuals(&[&child]), item_elements(&s.root));
+    assert_eq!(1, server_items(&s, &s.root).len());
+    s.assert_hit_test(45.0, 65.0, None, &[&child]);
+    assert_eq!(0, root_visual.children().count());
+}
+
+#[test]
+fn an_item_is_clipped_to_the_size_of_a_visual_that_clips_to_its_bounds() {
+    let s = CompositorCanvas::new();
+    let log = s.render_interface.log().clone();
+    let border = TestBorder::filled(30.0, 50.0, 20.0, 10.0);
+    border.overdraw.set(5.0);
+    border.set_clip_to_bounds(true);
+    s.canvas.add(&border);
+    log.clear();
+    s.assert_rects(&[Rect::new(30.0, 50.0, 20.0, 10.0)]);
+
+    // It has no visual children: the clip is one of its drawing alone.
+    assert!(!border.has_composition_visual());
+    let item = item_of(&border);
+    assert_eq!(Some((20.0, 10.0)), item.clip());
+    assert_eq!(Some((20.0, 10.0)), server_items(&s, &s.root)[0].clip());
+    assert_eq!(vec!["PushClip 0, 0, 20, 10", "Red", "PopClip"], drawn(&log));
+    s.assert_hit_test(35.0, 55.0, None, &[&border]);
+    s.assert_hit_test(27.0, 47.0, None, &[]);
+    s.events.rects.borrow_mut().clear();
+
+    // Without the clip all of the drawing is shown, and hit.
+    border.set_clip_to_bounds(false);
+    log.clear();
+    s.assert_rects(&[Rect::new(30.0, 50.0, 20.0, 10.0), Rect::new(25.0, 45.0, 30.0, 20.0)]);
+    assert!(Rc::ptr_eq(&item, &item_of(&border)));
+    assert_eq!(None, item.clip());
+    assert_eq!(None, server_items(&s, &s.root)[0].clip());
+    assert_eq!(vec!["Red"], drawn(&log));
+    s.assert_hit_test(27.0, 47.0, None, &[&border]);
+
+    // With a visual child the clip is one of what is under the visual too: it is the clip of
+    // a composition visual, which shows the drawing from here on.
+    border.set_clip_to_bounds(true);
+    s.run_jobs();
+    assert!(!border.has_composition_visual());
+    let inner = TestBorder::filled(5.0, 2.0, 5.0, 5.0);
+    inner.set_background(Some(Brushes::blue()));
+    border.add(&inner);
+    s.run_jobs();
+    assert!(border.has_composition_visual());
+    assert!(border.composition_item().is_none());
+    assert!(item_elements(&s.root).is_empty());
+    assert!(server_items(&s, &s.root).is_empty());
+    assert!(draw_list_of(&own_visual(&border)).is_some());
+    let inner_item = item_of(&inner);
+    assert!(inner_item.is_held_by(&own_visual(&border)));
+    assert_eq!((5.0, 2.0), inner_item.offset());
+    assert_eq!(1, server_items(&s, &border).len());
+    s.assert_hit_test(27.0, 47.0, None, &[]);
+    s.assert_hit_test(36.0, 53.0, None, &[&inner, &border]);
+}
+
+#[test]
+fn items_and_child_visuals_are_painted_and_hit_in_the_order_of_the_visuals() {
+    let s = CompositorCanvas::new();
+    let log = s.render_interface.log().clone();
+    let below = TestBorder::filled(40.0, 60.0, 20.0, 10.0);
+    let layer = TestBorder::layer(40.0, 60.0, 20.0, 10.0);
+    layer.set_background(Some(Brushes::blue()));
+    let above = TestBorder::filled(40.0, 60.0, 20.0, 10.0);
+    above.set_background(Some(Brushes::green()));
+    s.canvas.add(&below);
+    s.canvas.add(&layer);
+    s.canvas.add(&above);
+    log.clear();
+    s.run_jobs();
+
+    let root_visual = own_visual(&s.root);
+    assert_eq!(vec!["Red", "Blue", "Green"], drawn(&log));
+    assert_eq!(visuals(&[&below, &above]), item_elements(&s.root));
+    assert_eq!(1, root_visual.children().count());
+    assert_eq!(1, root_visual.draw_items().expect("items").position(0));
+    assert_eq!(vec![1], server_child_positions(&s, &s.root));
+    s.assert_hit_test(45.0, 65.0, None, &[&above, &layer, &below]);
+    s.assert_hit_test_first(45.0, 65.0, None, Some(&above));
+
+    // What the filter rejects is passed over, an item as a composition visual.
+    let above_visual: Ref<Visual> = above.clone().upcast();
+    let not_above = move |visual: &Visual| !std::ptr::eq(visual, &*above_visual);
+    s.assert_hit_test(45.0, 65.0, Some(&not_above), &[&layer, &below]);
+    s.assert_hit_test_first(45.0, 65.0, Some(&not_above), Some(&layer));
+    let layer_visual: Ref<Visual> = layer.clone().upcast();
+    let not_layer = move |visual: &Visual| !std::ptr::eq(visual, &*layer_visual);
+    s.assert_hit_test(45.0, 65.0, Some(&not_layer), &[&above, &below]);
+
+    // The Z order of the visuals orders the items and the child visuals alike.
+    below.set_z_index(1);
+    log.clear();
+    s.assert_hit_test(45.0, 65.0, None, &[&below, &above, &layer]);
+    assert_eq!(vec!["Blue", "Green", "Red"], drawn(&log));
+    assert_eq!(visuals(&[&above, &below]), item_elements(&s.root));
+    assert_eq!(0, root_visual.draw_items().expect("items").position(0));
+    assert_eq!(vec![0], server_child_positions(&s, &s.root));
+
+    // An item added below one that has a composition visual is painted before it.
+    let first = TestBorder::filled(40.0, 60.0, 20.0, 10.0);
+    first.set_background(Some(Brushes::yellow()));
+    first.set_z_index(-1);
+    s.canvas.add(&first);
+    log.clear();
+    s.assert_hit_test(45.0, 65.0, None, &[&below, &above, &layer, &first]);
+    assert_eq!(vec!["Yellow", "Blue", "Green", "Red"], drawn(&log));
+    assert_eq!(vec![1], server_child_positions(&s, &s.root));
+
+    // Without the child visual the items are all there is.
+    s.canvas.remove(&layer);
+    log.clear();
+    s.assert_hit_test(45.0, 65.0, None, &[&below, &above, &first]);
+    assert_eq!(vec!["Yellow", "Green", "Red"], drawn(&log));
+    assert_eq!(0, root_visual.children().count());
+    assert!(server_child_positions(&s, &s.root).is_empty());
+}
+
+#[test]
+fn a_geometry_hits_the_items_whose_bounds_it_meets() {
+    let s = CompositorCanvas::new();
+    let first = TestBorder::filled(0.0, 0.0, 10.0, 10.0);
+    let second = TestBorder::filled(0.0, 10.0, 10.0, 10.0);
+    let layer = TestBorder::layer(0.0, 20.0, 10.0, 10.0);
+    layer.set_background(Some(Brushes::blue()));
+    s.canvas.add(&first);
+    s.canvas.add(&second);
+    s.canvas.add(&layer);
+    s.run_jobs();
+    assert_eq!(visuals(&[&first, &second]), item_elements(&s.root));
+    let hit = |x: f64, y: f64, width: f64, height: f64| -> Vec<Ref<Visual>> {
+        let geometry =
+            RectangleGeometry::with_rect(Rect::new(x, y, width, height)).upcast::<crate::media::Geometry>();
+        s.renderer.hit_test_geometry(&geometry, &s.root, None).into_iter().map(|hit| hit.visual_hit).collect()
+    };
+
+    // A geometry that only touches what an item drew does not hit it, as it does not hit a
+    // composition visual it only touches.
+    assert_eq!(visuals(&[&second]), hit(5.0, 10.0, 10.0, 10.0));
+    assert_eq!(visuals(&[&first]), hit(5.0, 0.0, 10.0, 10.0));
+    assert_eq!(visuals(&[&layer, &second, &first]), hit(5.0, 5.0, 10.0, 20.0));
+    assert!(hit(10.0, 0.0, 10.0, 30.0).is_empty());
+
+    // The item is where the layout put it.
+    second.set_bounds(Rect::new(0.0, 40.0, 10.0, 10.0));
+    s.run_jobs();
+    assert!(hit(5.0, 10.0, 10.0, 10.0).is_empty());
+    assert_eq!(visuals(&[&second]), hit(5.0, 45.0, 10.0, 10.0));
+}
+
+#[test]
+fn items_among_many_child_visuals_are_hit_in_the_order_of_the_visuals() {
+    let s = CompositorCanvas::new();
+    let place = |i: usize| TestBorder::layer((i % 10) as f64 * 50.0, (i / 10) as f64 * 50.0, 40.0, 40.0);
+    let mut layers = Vec::new();
+    for i in 0..20 {
+        layers.push(place(i));
+        s.canvas.add(&layers[i]);
+    }
+    let between = TestBorder::filled(0.0, 0.0, 40.0, 40.0);
+    s.canvas.add(&between);
+    for i in 20..40 {
+        layers.push(place(i));
+        s.canvas.add(&layers[i]);
+    }
+    let over = TestBorder::layer(0.0, 0.0, 40.0, 40.0);
+    s.canvas.add(&over);
+    let top = TestBorder::filled(0.0, 0.0, 40.0, 40.0);
+    s.canvas.add(&top);
+    let first = TestBorder::filled(0.0, 0.0, 40.0, 40.0);
+    first.set_z_index(-1);
+    s.canvas.add(&first);
+    s.run_jobs();
+
+    // The child visuals are looked up in their index, and the items between them are tested
+    // where they are painted (section 9.42).
+    let root_visual = own_visual(&s.root);
+    assert_eq!(visuals(&[&first, &between, &top]), item_elements(&s.root));
+    assert_eq!(41, root_visual.children().count());
+    s.assert_hit_test(10.0, 10.0, None, &[&top, &over, &between, &layers[0], &first]);
+    assert!(root_visual.hit_test_children.borrow().is_some(), "the children are indexed");
+    s.assert_hit_test_first(10.0, 10.0, None, Some(&top));
+    s.assert_hit_test(10.0, 110.0, None, &[&layers[20]]);
+    s.assert_hit_test_first(10.0, 110.0, None, Some(&layers[20]));
+    s.assert_hit_test(45.0, 45.0, None, &[]);
+    s.assert_hit_test_first(45.0, 45.0, None, None);
+
+    // The first that the filter accepts, an item or a child visual.
+    let without = |rejected: &[&Ref<TestBorder>]| {
+        let rejected = visuals(rejected);
+        move |visual: &Visual| !rejected.iter().any(|rejected| std::ptr::eq(visual, &**rejected))
+    };
+    s.assert_hit_test_first(10.0, 10.0, Some(&without(&[&top])), Some(&over));
+    s.assert_hit_test_first(10.0, 10.0, Some(&without(&[&top, &over])), Some(&between));
+    s.assert_hit_test_first(10.0, 10.0, Some(&without(&[&top, &over, &between])), Some(&layers[0]));
+    s.assert_hit_test_first(10.0, 10.0, Some(&without(&[&top, &over, &between, &layers[0]])), Some(&first));
+    s.assert_hit_test(10.0, 10.0, Some(&without(&[&over, &layers[0]])), &[&top, &between, &first]);
+
+    // An item where no child visual is, between child visuals that the index leaves out.
+    between.set_bounds(Rect::new(700.0, 700.0, 40.0, 40.0));
+    s.assert_hit_test(710.0, 710.0, None, &[&between]);
+    s.assert_hit_test_first(710.0, 710.0, None, Some(&between));
+    s.assert_hit_test(10.0, 10.0, None, &[&top, &over, &layers[0], &first]);
+
+    // A geometry, as a point.
+    let hit = |x: f64, y: f64, width: f64, height: f64| -> Vec<Ref<Visual>> {
+        let geometry =
+            RectangleGeometry::with_rect(Rect::new(x, y, width, height)).upcast::<crate::media::Geometry>();
+        s.renderer.hit_test_geometry(&geometry, &s.root, None).into_iter().map(|hit| hit.visual_hit).collect()
+    };
+    assert_eq!(visuals(&[&top, &over, &layers[1], &layers[0], &first]), hit(30.0, 10.0, 30.0, 10.0));
+    assert_eq!(visuals(&[&between]), hit(690.0, 690.0, 20.0, 20.0));
+}
+
+#[test]
+fn the_items_of_a_holder_with_many_are_hit_through_the_bounds_of_their_chunks() {
+    use crate::platform::LtrbRect;
+
+    let s = CompositorCanvas::new();
+    let mut items = Vec::new();
+    for i in 0..100 {
+        let item = TestBorder::filled((i % 10) as f64 * 50.0, (i / 10) as f64 * 50.0, 40.0, 40.0);
+        s.canvas.add(&item);
+        items.push(item);
+    }
+    let overlapping = TestBorder::filled(0.0, 0.0, 40.0, 40.0);
+    s.canvas.add(&overlapping);
+    s.run_jobs();
+    let holder = own_visual(&s.root);
+    let list = || holder.draw_items().expect("the root shows items");
+    assert_eq!(101, item_elements(&s.root).len());
+
+    s.assert_hit_test(10.0, 10.0, None, &[&overlapping, &items[0]]);
+    s.assert_hit_test_first(10.0, 10.0, None, Some(&overlapping));
+    s.assert_hit_test(460.0, 460.0, None, &[&items[99]]);
+    s.assert_hit_test_first(460.0, 460.0, None, Some(&items[99]));
+    s.assert_hit_test(45.0, 45.0, None, &[]);
+    s.assert_hit_test_first(45.0, 45.0, None, None);
+    // Thirty-two items that follow each other have bounds: the first three rows and two of
+    // the fourth, and the last five items.
+    assert_eq!(Some(LtrbRect::new(0.0, 0.0, 490.0, 190.0)), list().chunk_bounds(0));
+    assert_eq!(Some(LtrbRect::new(0.0, 0.0, 490.0, 490.0)), list().chunk_bounds(3));
+    assert_eq!(None, list().chunk_bounds(4));
+
+    // An item that moves is where it is, and the bounds of its chunk with it.
+    s.canvas.remove(&overlapping);
+    s.run_jobs();
+    assert_eq!(Some(LtrbRect::new(300.0, 450.0, 490.0, 490.0)), list().chunk_bounds(3));
+    items[99].set_bounds(Rect::new(700.0, 700.0, 40.0, 40.0));
+    s.assert_hit_test(460.0, 460.0, None, &[]);
+    s.assert_hit_test(710.0, 710.0, None, &[&items[99]]);
+    s.assert_hit_test_first(710.0, 710.0, None, Some(&items[99]));
+    assert_eq!(Some(LtrbRect::new(300.0, 450.0, 740.0, 740.0)), list().chunk_bounds(3));
+    assert_eq!(Some(LtrbRect::new(0.0, 0.0, 490.0, 190.0)), list().chunk_bounds(0));
+
+    // One that draws something else.
+    items[40].set_bounds(Rect::new(0.0, 200.0, 48.0, 48.0));
+    s.assert_hit_test(45.0, 245.0, None, &[&items[40]]);
+    // One that clips to its bounds is hit inside them.
+    items[41].set_clip_to_bounds(true);
+    s.assert_hit_test(60.0, 210.0, None, &[&items[41]]);
+    s.assert_hit_test(95.0, 210.0, None, &[]);
+
+    // The items after one that left are others of their chunks.
+    s.canvas.remove(&items[5]);
+    s.assert_hit_test(260.0, 10.0, None, &[]);
+    s.assert_hit_test(310.0, 10.0, None, &[&items[6]]);
+    s.assert_hit_test(710.0, 710.0, None, &[&items[99]]);
+    assert_eq!(Some(LtrbRect::new(0.0, 0.0, 490.0, 190.0)), list().chunk_bounds(0));
+    assert_eq!(Some(LtrbRect::new(350.0, 450.0, 740.0, 740.0)), list().chunk_bounds(3));
+    let added = TestBorder::filled(900.0, 900.0, 40.0, 40.0);
+    s.canvas.add(&added);
+    s.assert_hit_test(910.0, 910.0, None, &[&added]);
+    s.assert_hit_test_first(910.0, 910.0, None, Some(&added));
+
+    // A geometry that meets the bounds of one chunk.
+    let hit = |x: f64, y: f64, width: f64, height: f64| -> Vec<Ref<Visual>> {
+        let geometry =
+            RectangleGeometry::with_rect(Rect::new(x, y, width, height)).upcast::<crate::media::Geometry>();
+        s.renderer.hit_test_geometry(&geometry, &s.root, None).into_iter().map(|hit| hit.visual_hit).collect()
+    };
+    assert_eq!(visuals(&[&added, &items[99]]), hit(730.0, 730.0, 180.0, 180.0));
+    assert_eq!(visuals(&[&items[11], &items[10], &items[1], &items[0]]), hit(30.0, 30.0, 30.0, 30.0));
+
+    // Few items are tested one by one, without bounds of chunks.
+    for item in &items[20..] {
+        s.canvas.remove(item);
+    }
+    s.assert_hit_test(10.0, 10.0, None, &[&items[0]]);
+    s.assert_hit_test(910.0, 910.0, None, &[&added]);
+    assert_eq!(20, item_elements(&s.root).len());
+    assert!(!list().has_hit_bounds());
+}
+
+#[test]
+fn an_item_follows_its_visual_and_the_visuals_above_it_with_the_drawing_it_has() {
+    use crate::diagnostics::perf_counters::{self, PerfCounter};
+
+    let s = CompositorCanvas::new();
+    let (control, child) = decorator_with_child();
+    s.canvas.add(&control);
+    s.run_jobs();
+    let item = item_of(&child);
+    let data = item.data().expect("a drawing");
+    let on_server = server_items(&s, &s.root)[0].clone();
+    let data_on_server = on_server.data().expect("a drawing");
+    let objects = s.compositor.server().object_count();
+    s.events.rects.borrow_mut().clear();
+
+    // The visual moves: its item has another offset, and nothing is drawn or sent again.
+    let before = perf_counters::snapshot();
+    child.set_bounds(Rect::new(15.0, 10.0, 20.0, 10.0));
+    s.assert_rects(&[Rect::new(40.0, 60.0, 20.0, 10.0), Rect::new(45.0, 60.0, 20.0, 10.0)]);
+    let work = perf_counters::snapshot().since(&before);
+    if perf_counters::ENABLED {
+        assert_eq!(0, work.get(PerfCounter::VisualsRecorded));
+        assert_eq!(0, work.get(PerfCounter::CompositionVisualsCreated));
+    }
+    assert!(Rc::ptr_eq(&item, &item_of(&child)));
+    assert!(Rc::ptr_eq(&data, &item.data().expect("a drawing")));
+    assert_eq!((45.0, 60.0), item.offset());
+    assert!(Rc::ptr_eq(&on_server, &server_items(&s, &s.root)[0]));
+    assert_eq!((45.0, 60.0), on_server.offset());
+    assert!(Rc::ptr_eq(&data_on_server, &on_server.data().expect("a drawing")));
+    assert_eq!(objects, s.compositor.server().object_count());
+    s.assert_hit_test(50.0, 65.0, None, &[&child]);
+    s.assert_hit_test(42.0, 65.0, None, &[]);
+
+    // A visual above it that has no composition visual moves: the same.
+    control.set_bounds(Rect::new(55.0, 50.0, 40.0, 30.0));
+    s.assert_rects(&[Rect::new(45.0, 60.0, 20.0, 10.0), Rect::new(70.0, 60.0, 20.0, 10.0)]);
+    assert!(!control.has_composition_visual());
+    assert_eq!((70.0, 60.0), item.offset());
+    assert_eq!((70.0, 60.0), on_server.offset());
+    assert!(Rc::ptr_eq(&data, &item.data().expect("a drawing")));
+    s.assert_hit_test(75.0, 65.0, None, &[&child]);
+    s.assert_hit_test(50.0, 65.0, None, &[]);
+
+    // Under a visual that has a composition visual the item is where it is in that one, which
+    // is what moves.
+    let (clipping, inner) = clipping_decorator_with_child();
+    clipping.set_bounds(Rect::new(200.0, 200.0, 40.0, 30.0));
+    s.canvas.add(&clipping);
+    s.run_jobs();
+    let inner_item = item_of(&inner);
+    assert!(inner_item.is_held_by(&own_visual(&clipping)));
+    assert_eq!((10.0, 10.0), inner_item.offset());
+    assert_eq!(visuals(&[&child]), item_elements(&s.root));
+    assert_eq!(visuals(&[&inner]), item_elements(&clipping));
+    s.events.rects.borrow_mut().clear();
+    clipping.set_bounds(Rect::new(300.0, 200.0, 40.0, 30.0));
+    s.assert_rects(&[Rect::new(210.0, 210.0, 20.0, 10.0), Rect::new(310.0, 210.0, 20.0, 10.0)]);
+    assert_eq!((10.0, 10.0), inner_item.offset());
+    s.assert_hit_test(315.0, 215.0, None, &[&inner]);
+    s.assert_hit_test(215.0, 215.0, None, &[]);
+}
+
+#[test]
+fn an_item_moves_to_the_composition_visual_a_visual_above_it_gets() {
+    let s = CompositorCanvas::new();
+    let (control, child) = decorator_with_child();
+    s.canvas.add(&control);
+    s.run_jobs();
+    let item = item_of(&child);
+    let data = item.data().expect("a drawing");
+    s.events.rects.borrow_mut().clear();
+
+    control.set_opacity(0.5);
+    s.run_jobs();
+    assert!(control.has_composition_visual());
+    assert!(Rc::ptr_eq(&item, &item_of(&child)));
+    assert!(Rc::ptr_eq(&data, &item.data().expect("a drawing")));
+    assert!(item.is_held_by(&own_visual(&control)));
+    assert_eq!((10.0, 10.0), item.offset());
+    assert!(item_elements(&s.root).is_empty());
+    assert!(server_items(&s, &s.root).is_empty());
+    assert_eq!(visuals(&[&child]), item_elements(&control));
+    let on_server = server_items(&s, &control);
+    assert_eq!(1, on_server.len());
+    assert_eq!((10.0, 10.0), on_server[0].offset());
+    s.assert_rects(&[Rect::new(40.0, 60.0, 20.0, 10.0)]);
+    s.assert_hit_test(45.0, 65.0, None, &[&child]);
+    s.assert_hit_test(35.0, 55.0, None, &[]);
+
+    // The new one moves, and the item with it.
+    control.set_bounds(Rect::new(55.0, 50.0, 40.0, 30.0));
+    s.assert_rects(&[Rect::new(40.0, 60.0, 20.0, 10.0), Rect::new(65.0, 60.0, 20.0, 10.0)]);
+    assert_eq!((10.0, 10.0), item.offset());
+    s.assert_hit_test(70.0, 65.0, None, &[&child]);
+}
+
+#[test]
+fn a_visual_that_is_an_item_gets_a_composition_visual_with_its_drawing() {
+    let s = CompositorCanvas::new();
+    let (control, child) = decorator_with_child();
+    s.canvas.add(&control);
+    s.run_jobs();
+    let item = item_of(&child);
+    let data = item.data().expect("a drawing");
+
+    // Asked for: the drawing of the item is the one of the composition visual.
+    let child_visual: Rc<super::CompositionVisual> = (*child.composition_visual().expect("in a tree")).clone();
+    assert!(child.composition_item().is_none());
+    assert!(item.data().is_none());
+    assert!(Rc::ptr_eq(&data, &draw_list_of(&child_visual).expect("the drawing of the item")));
+    // It is hit where it is before a frame is rendered with the composition visual.
+    let hit = vec![child.clone().upcast::<Visual>()];
+    let first = Some(child.clone().upcast::<Visual>());
+    assert_eq!(hit, s.renderer.hit_test(Point::new(45.0, 65.0), &s.root, None));
+    assert_eq!(first, s.renderer.hit_test_first(Point::new(45.0, 65.0), &s.root, None));
+    assert_eq!(hit, s.renderer.hit_test(Point::new(15.0, 15.0), &control, None));
+    assert_eq!(first, s.renderer.hit_test_first(Point::new(15.0, 15.0), &control, None));
+    assert_eq!(hit, s.renderer.hit_test(Point::new(5.0, 5.0), &child, None));
+    assert!(s.renderer.hit_test(Point::new(35.0, 55.0), &s.root, None).is_empty());
+
+    s.events.rects.borrow_mut().clear();
+    s.assert_rects(&[Rect::new(40.0, 60.0, 20.0, 10.0)]);
+    assert!(item_elements(&s.root).is_empty());
+    assert!(server_items(&s, &s.root).is_empty());
+    assert!(Rc::ptr_eq(&composition_parent(&child), &own_visual(&control)));
+    assert_eq!(Vector3D::new(10.0, 10.0, 0.0), child_visual.offset());
+    assert!(Rc::ptr_eq(&data, &draw_list_of(&child_visual).expect("the drawing of the item")));
+    s.assert_hit_test(45.0, 65.0, None, &[&child]);
+    s.assert_hit_test_first(45.0, 65.0, None, Some(&child));
+
+    // It is not an item again for as long as it is in the tree.
+    child.set_background(Some(Brushes::blue()));
+    s.run_jobs();
+    assert!(child.composition_item().is_none());
+    assert!(Rc::ptr_eq(&child_visual, &own_visual(&child)));
+    assert!(item_elements(&control).is_empty());
+
+    // One that sets what the compositor applies gets its composition visual in the update
+    // pass, with the drawing it has.
+    let other = TestBorder::filled(200.0, 200.0, 20.0, 10.0);
+    s.canvas.add(&other);
+    s.run_jobs();
+    let other_data = item_of(&other).data().expect("a drawing");
+    s.events.rects.borrow_mut().clear();
+    other.set_opacity(0.5);
+    s.assert_rects(&[Rect::new(200.0, 200.0, 20.0, 10.0)]);
+    assert!(other.has_composition_visual());
+    assert!(other.composition_item().is_none());
+    assert!(Rc::ptr_eq(&other_data, &draw_list_of(&own_visual(&other)).expect("the drawing of the item")));
+    assert_eq!(0.5, own_visual(&other).opacity());
+    s.assert_hit_test(205.0, 205.0, None, &[&other]);
+
+    // Hidden, it is neither shown nor hit.
+    let hidden = TestBorder::filled(300.0, 300.0, 20.0, 10.0);
+    s.canvas.add(&hidden);
+    s.assert_hit_test(305.0, 305.0, None, &[&hidden]);
+    s.events.rects.borrow_mut().clear();
+    hidden.set_is_visible(false);
+    s.assert_rects(&[Rect::new(300.0, 300.0, 20.0, 10.0)]);
+    s.assert_hit_test(305.0, 305.0, None, &[]);
+    assert!(hidden.composition_item().is_none());
+}
+
+#[test]
+fn an_item_of_a_visual_that_leaves_and_returns_is_kept_as_a_composition_visual_is() {
+    let s = CompositorCanvas::new();
+    let (control, child) = decorator_with_child();
+    s.canvas.add(&control);
+    s.run_jobs();
+    let item = item_of(&child);
+    let data = item.data().expect("a drawing");
+    let on_server = server_items(&s, &s.root)[0].clone();
+    let objects = s.compositor.server().object_count();
+
+    // Back in the same pass: the item is the one it was, and nothing of it is sent.
+    s.canvas.remove(&control);
+    assert!(item.is_departed());
+    // A visual that is out of the tree is not hit through what is kept for it.
+    assert!(s.renderer.hit_test(Point::new(45.0, 65.0), &s.root, None).is_empty());
+    assert!(s.renderer.hit_test_first(Point::new(45.0, 65.0), &s.root, None).is_none());
+    s.canvas.add(&control);
+    assert!(!item.is_departed());
+    s.run_jobs();
+    assert!(Rc::ptr_eq(&item, &item_of(&child)));
+    assert!(Rc::ptr_eq(&data, &item.data().expect("a drawing")));
+    assert!(item.is_held_by(&own_visual(&s.root)));
+    assert!(Rc::ptr_eq(&on_server, &server_items(&s, &s.root)[0]));
+    assert_eq!(objects, s.compositor.server().object_count());
+    s.assert_hit_test(45.0, 65.0, None, &[&child]);
+
+    // Out for a pass: it is released, and what is shown when the visual is back is new.
+    s.canvas.remove(&control);
+    s.run_jobs();
+    assert!(child.composition_item().is_none());
+    assert!(item.data().is_none());
+    assert!(item_elements(&s.root).is_empty());
+    assert!(server_items(&s, &s.root).is_empty());
+    s.assert_hit_test(45.0, 65.0, None, &[]);
+    s.canvas.add(&control);
+    s.run_jobs();
+    let item = item_of(&child);
+    assert_eq!((40.0, 60.0), item.offset());
+    // The disposal of dropped objects rides on a later batch.
+    s.canvas.invalidate_visual();
+    s.run_jobs();
+    assert_eq!(objects, s.compositor.server().object_count());
+    s.assert_hit_test(45.0, 65.0, None, &[&child]);
+
+    // Taken out for a pool: it is kept for as many passes as the pool has it, and is not shown.
+    let data = item.data().expect("a drawing");
+    let kept = take_out_for_a_pool(&s, &control);
+    assert!(kept.is_some());
+    for _ in 0..3 {
+        s.canvas.invalidate_visual();
+        s.run_jobs();
+    }
+    assert!(item.is_departed());
+    assert!(Rc::ptr_eq(&item, &child.composition_item().expect("kept")));
+    assert!(item_elements(&s.root).is_empty());
+    assert!(server_items(&s, &s.root).is_empty());
+    s.assert_hit_test(45.0, 65.0, None, &[]);
+    s.canvas.add(&control);
+    drop(kept);
+    s.run_jobs();
+    assert!(!item.is_departed());
+    assert!(Rc::ptr_eq(&item, &item_of(&child)));
+    assert!(Rc::ptr_eq(&data, &item.data().expect("a drawing")));
+    assert_eq!(visuals(&[&child]), item_elements(&s.root));
+    assert_eq!(1, server_items(&s, &s.root).len());
+    s.canvas.invalidate_visual();
+    s.run_jobs();
+    assert_eq!(objects, s.compositor.server().object_count());
+    s.assert_hit_test(45.0, 65.0, None, &[&child]);
+
+    // What the pool lets go of while the visual is out is released.
+    let kept = take_out_for_a_pool(&s, &control);
+    s.run_jobs();
+    assert!(child.composition_item().is_some());
+    drop(kept);
+    s.run_jobs();
+    assert!(child.composition_item().is_none());
+    assert!(item.data().is_none());
+    s.canvas.add(&control);
+    s.run_jobs();
+    s.canvas.invalidate_visual();
+    s.run_jobs();
+    assert_eq!(objects, s.compositor.server().object_count());
+    s.assert_hit_test(45.0, 65.0, None, &[&child]);
+}
+
+/// The row of `composition_work_of_a_row_taken_out_of_the_tree_and_put_back` with a cell that
+/// is an item: the one composition visual of the row is what is kept, and made again.
+#[test]
+fn composition_work_of_a_row_of_items_taken_out_of_the_tree_and_put_back() {
+    use crate::diagnostics::perf_counters::{self, PerfCounter};
+
+    let s = CompositorCanvas::new();
+    let (row, cell) = clipping_decorator_with_child();
+    s.canvas.add(&row);
+    s.run_jobs();
+    s.canvas.invalidate_visual();
+    s.run_jobs();
+    let objects = s.compositor.server().object_count();
+    let item = item_of(&cell);
+
+    let before = perf_counters::snapshot();
+    for _ in 0..8 {
+        s.canvas.remove(&row);
+        s.canvas.add(&row);
+        s.run_jobs();
+    }
+    let work = perf_counters::snapshot().since(&before);
+    assert_eq!(objects, s.compositor.server().object_count());
+    assert!(Rc::ptr_eq(&item, &item_of(&cell)));
+    assert!(!cell.has_composition_visual());
+    if perf_counters::ENABLED {
+        assert_eq!(0, work.get(PerfCounter::CompositionVisualsCreated));
+        assert_eq!(8, work.get(PerfCounter::CompositionVisualsKept));
+        assert_eq!(8, work.get(PerfCounter::DrawingItemsKept));
+    }
+
+    let before = perf_counters::snapshot();
+    s.canvas.remove(&row);
+    s.run_jobs();
+    s.canvas.add(&row);
+    s.run_jobs();
+    s.canvas.invalidate_visual();
+    s.run_jobs();
+    let work = perf_counters::snapshot().since(&before);
+    assert_eq!(objects, s.compositor.server().object_count());
+    assert!(!cell.has_composition_visual());
+    if perf_counters::ENABLED {
+        assert_eq!(1, work.get(PerfCounter::CompositionVisualsCreated));
+        assert_eq!(0, work.get(PerfCounter::CompositionVisualsKept));
+        assert_eq!(0, work.get(PerfCounter::DrawingItemsKept));
+    }
+
+    let item = item_of(&cell);
+    let before = perf_counters::snapshot();
+    for _ in 0..8 {
+        let kept = row.leave_tree_keeping_composition_visuals(|| s.canvas.remove(&row));
+        for _ in 0..3 {
+            s.canvas.invalidate_visual();
+            s.run_jobs();
+        }
+        s.canvas.add(&row);
+        drop(kept);
+        s.run_jobs();
+    }
+    let work = perf_counters::snapshot().since(&before);
+    assert_eq!(objects, s.compositor.server().object_count());
+    assert!(Rc::ptr_eq(&item, &item_of(&cell)));
+    if perf_counters::ENABLED {
+        assert_eq!(0, work.get(PerfCounter::CompositionVisualsCreated));
+        assert_eq!(8, work.get(PerfCounter::CompositionVisualsKept));
+        assert_eq!(8, work.get(PerfCounter::DrawingItemsKept));
+    }
+}
+
+/// A holder that is drawn again keeps the lists of what is below it, and whatever changes what
+/// is below it has them made again (not from upstream; a counter check `composition_work` of
+/// `scripts/perf/gate.py`: the counts are asserted with the feature `perf-counters`, and a
+/// debug build without it lists a holder that is drawn again and fails when a list changed).
+#[test]
+fn composition_work_of_a_holder_that_is_drawn_again() {
+    use crate::diagnostics::perf_counters::{self, PerfCounter};
+
+    let s = CompositorCanvas::new();
+    let holder = TestBorder::layer(0.0, 0.0, 400.0, 400.0);
+    // Without a composition visual: what is under it is shown by the holder.
+    let group = TestBorder::new();
+    group.set_bounds(Rect::new(10.0, 10.0, 300.0, 300.0));
+    let first = TestBorder::filled(0.0, 0.0, 20.0, 10.0);
+    let layer = TestBorder::layer(0.0, 20.0, 20.0, 10.0);
+    layer.set_background(Some(Brushes::blue()));
+    let second = TestBorder::filled(0.0, 40.0, 20.0, 10.0);
+    second.set_background(Some(Brushes::green()));
+    let third = TestBorder::filled(350.0, 350.0, 20.0, 10.0);
+    third.set_background(Some(Brushes::yellow()));
+    group.add(&first);
+    group.add(&layer);
+    group.add(&second);
+    holder.add(&group);
+    holder.add(&third);
+    s.canvas.add(&holder);
+    s.run_jobs();
+    let holder_visual = own_visual(&holder);
+    let positions = || {
+        let items = holder_visual.draw_items().expect("items");
+        (0..holder_visual.children().count()).map(|child| items.position(child)).collect::<Vec<_>>()
+    };
+    assert_eq!(visuals(&[&first, &second, &third]), item_elements(&holder));
+    assert_eq!(vec![1], positions());
+
+    // The holder is drawn again after `change`: how many composition visuals listed what is
+    // below them.
+    let listed = |change: &dyn Fn()| {
+        let before = perf_counters::snapshot();
+        change();
+        holder.invalidate_visual();
+        s.run_jobs();
+        perf_counters::snapshot().since(&before).get(PerfCounter::CompositionChildrenListed)
+    };
+    let assert_listed = |expected, count| {
+        if perf_counters::ENABLED {
+            assert_eq!(expected, count);
+        }
+    };
+
+    // Drawn again, and an item of it drawn again: the lists are the ones it has.
+    for _ in 0..8 {
+        assert_listed(0, listed(&|| {}));
+    }
+    assert_listed(0, listed(&|| second.set_background(Some(Brushes::red()))));
+    assert_eq!(visuals(&[&first, &second, &third]), item_elements(&holder));
+
+    // A child that leaves it, comes back and moves, without a notice to the renderer.
+    let third_visual: Ref<Visual> = third.clone().upcast();
+    assert_listed(1, listed(&|| {
+        holder.visual_children().remove(&third_visual);
+    }));
+    assert_eq!(visuals(&[&first, &second]), item_elements(&holder));
+    assert_listed(1, listed(&|| holder.visual_children().add(third_visual.clone())));
+    assert_eq!(visuals(&[&first, &second, &third]), item_elements(&holder));
+    assert_listed(1, listed(&|| holder.visual_children().move_item(1, 0)));
+    assert_eq!(visuals(&[&third, &first, &second]), item_elements(&holder));
+    assert_eq!(vec![2], positions());
+    assert_listed(0, listed(&|| {}));
+
+    // A visual under one that has no composition visual leaves and comes back.
+    assert_listed(1, listed(&|| group.remove(&second)));
+    assert_eq!(visuals(&[&third, &first]), item_elements(&holder));
+    assert_listed(1, listed(&|| group.add(&second)));
+    assert_eq!(visuals(&[&third, &first, &second]), item_elements(&holder));
+    assert_listed(0, listed(&|| {}));
+
+    // The Z order of what is below.
+    assert_listed(1, listed(&|| layer.set_z_index(-1)));
+    assert_eq!(visuals(&[&third, &first, &second]), item_elements(&holder));
+    assert_eq!(vec![1], positions());
+    assert_listed(0, listed(&|| {}));
+
+    // An item that is no longer drawn, and is drawn again.
+    assert_listed(1, listed(&|| second.set_background(None)));
+    assert_eq!(visuals(&[&third, &first]), item_elements(&holder));
+    assert_listed(1, listed(&|| second.set_background(Some(Brushes::green()))));
+    assert_eq!(visuals(&[&third, &first, &second]), item_elements(&holder));
+    assert_listed(0, listed(&|| {}));
+
+    // A child with a composition visual that comes and leaves without a notice.
+    let extra = TestBorder::layer(100.0, 100.0, 20.0, 10.0);
+    let extra_visual: Ref<Visual> = extra.clone().upcast();
+    listed(&|| holder.visual_children().add(extra_visual.clone()));
+    assert_eq!(2, holder_visual.children().count());
+    assert!(Rc::ptr_eq(&composition_parent(&extra), &holder_visual));
+    assert_listed(0, listed(&|| {}));
+    assert_listed(1, listed(&|| {
+        holder.visual_children().remove(&extra_visual);
+    }));
+    assert_eq!(1, holder_visual.children().count());
+    assert_listed(0, listed(&|| {}));
+
+    // An item that becomes a composition visual, and the visual above it with it: that one
+    // shows what is below it from then on.
+    listed(&|| {
+        first.composition_visual().expect("in a tree");
+    });
+    assert_eq!(visuals(&[&third]), item_elements(&holder));
+    assert_eq!(visuals(&[&second]), item_elements(&group));
+    assert_eq!(1, holder_visual.children().count());
+    assert!(Rc::ptr_eq(&composition_parent(&group), &holder_visual));
+    assert!(Rc::ptr_eq(&composition_parent(&first), &own_visual(&group)));
+    assert!(Rc::ptr_eq(&composition_parent(&layer), &own_visual(&group)));
+    assert_listed(0, listed(&|| {}));
+}
+
+#[test]
+fn removed_items_invalidate_their_own_rects() {
+    let s = CompositorCanvas::new();
+    let control = TestBorder::filled(30.0, 10.0, 20.0, 10.0);
+    let control2 = TestBorder::filled(30.0, 50.0, 20.0, 10.0);
+    control2.set_background(Some(Brushes::blue()));
+    s.canvas.add(&control);
+    s.canvas.add(&control2);
+    s.run_jobs();
+    s.events.rects.borrow_mut().clear();
+    s.canvas.remove(&control);
+    s.canvas.remove(&control2);
+    // Not the union of the two, which is what the bounds of one composition visual would give.
+    s.assert_rects(&[Rect::new(30.0, 10.0, 20.0, 10.0), Rect::new(30.0, 50.0, 20.0, 10.0)]);
+    assert!(server_items(&s, &s.root).is_empty());
+}
+
+#[test]
+fn only_the_items_in_the_dirty_area_are_drawn_again() {
+    use crate::diagnostics::perf_counters::{self, PerfCounter};
+
+    let s = CompositorCanvas::new();
+    let log = s.render_interface.log().clone();
+    let near = TestBorder::filled(10.0, 10.0, 20.0, 20.0);
+    let far = TestBorder::filled(500.0, 500.0, 20.0, 20.0);
+    far.set_background(Some(Brushes::blue()));
+    s.canvas.add(&near);
+    s.canvas.add(&far);
+    log.clear();
+    s.run_jobs();
+    assert_eq!(vec!["Red", "Blue"], drawn(&log));
+    s.events.rects.borrow_mut().clear();
+
+    // A drawing that changed: the item alone is drawn, with the one composition visual.
+    let before = perf_counters::snapshot();
+    log.clear();
+    near.set_background(Some(Brushes::green()));
+    s.assert_rects(&[Rect::new(10.0, 10.0, 20.0, 20.0)]);
+    assert_eq!(vec!["Green"], drawn(&log));
+    let work = perf_counters::snapshot().since(&before);
+    if perf_counters::ENABLED {
+        assert_eq!(1, work.get(PerfCounter::RenderItemsDrawn));
+        assert_eq!(1, work.get(PerfCounter::VisualsRecordedAsItems));
+    }
+
+    // The same drawing drawn again (section 9.14): its area alone.
+    log.clear();
+    far.invalidate_visual();
+    s.assert_rects(&[Rect::new(500.0, 500.0, 20.0, 20.0)]);
+    assert_eq!(vec!["Blue"], drawn(&log));
+
+    // One over the other: both are drawn, in their order.
+    log.clear();
+    far.set_bounds(Rect::new(20.0, 20.0, 20.0, 20.0));
+    s.assert_rects(&[Rect::new(500.0, 500.0, 20.0, 20.0), Rect::new(20.0, 20.0, 20.0, 20.0)]);
+    assert_eq!(vec!["Green", "Blue"], drawn(&log));
+}
+
+#[test]
+fn a_bitmap_cache_is_rendered_again_when_an_item_below_it_changes() {
+    use crate::media::{BitmapCache, CacheMode};
+
+    let s = CompositorCanvas::new();
+    let log = s.render_interface.log().clone();
+    let (control, child) = decorator_with_child();
+    let other = TestBorder::filled(0.0, 0.0, 5.0, 5.0);
+    other.set_background(Some(Brushes::blue()));
+    control.add(&other);
+    // A visual below the cached one that has no composition visual and shows an item.
+    let nested = TestBorder::new();
+    nested.set_bounds(Rect::new(30.0, 20.0, 10.0, 10.0));
+    let deep = TestBorder::filled(2.0, 2.0, 5.0, 5.0);
+    deep.set_background(Some(Brushes::green()));
+    nested.add(&deep);
+    control.add(&nested);
+    control.set_cache_mode(BitmapCache::new().upcast::<CacheMode>());
+    s.canvas.add(&control);
+    s.run_jobs();
+    assert!(control.has_composition_visual());
+    assert_eq!(visuals(&[&child, &other, &deep]), item_elements(&control));
+    assert_eq!(vec!["Red", "Blue", "Green"], drawn(&log));
+    log.clear();
+
+    // Nothing changed: the cache is drawn, not what is under it.
+    s.canvas.invalidate_visual();
+    s.run_jobs();
+    assert!(drawn(&log).is_empty(), "{:?}", log.entries());
+    log.clear();
+
+    // An item that moves: the cache is rendered again where the item was and is, with the
+    // items that are there.
+    child.set_bounds(Rect::new(15.0, 10.0, 20.0, 10.0));
+    s.run_jobs();
+    assert_eq!(vec!["Red"], rectangles(&log));
+    log.clear();
+
+    // One that moves with a visual above it: what is cached is of another size, and all of it
+    // is rendered again.
+    nested.set_bounds(Rect::new(30.0, 15.0, 10.0, 10.0));
+    s.run_jobs();
+    assert_eq!(vec!["Red", "Blue", "Green"], rectangles(&log));
+    assert_eq!(1, log.count("DrawBitmap 1 0, 0, 37, 22 0, 0, 37, 22"));
+    log.clear();
+
+    // One that is removed.
+    control.remove(&child);
+    s.run_jobs();
+    assert_eq!(vec!["Green"], rectangles(&log));
+    log.clear();
+
+    // One that is added: it is the last of the items.
+    control.add(&child);
+    s.run_jobs();
+    assert_eq!(visuals(&[&other, &deep, &child]), item_elements(&control));
+    assert_eq!(vec!["Green", "Red"], rectangles(&log));
+    log.clear();
+
+    // One whose drawing is another one.
+    other.set_background(Some(Brushes::yellow()));
+    s.run_jobs();
+    assert_eq!(vec!["Yellow"], rectangles(&log));
 }

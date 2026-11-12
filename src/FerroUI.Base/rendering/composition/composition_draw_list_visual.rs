@@ -1,15 +1,20 @@
+use super::composition_draw_item::{CompositionDrawItem, DrawItemList};
 use super::drawing::CompositionRenderData;
 use super::generated::{
     CompositionContainerVisualProps, CompositionExperimentalAcrylicVisualHooks,
     CompositionExperimentalAcrylicVisualProps,
 };
-use super::server::{IServerVisualContent, ServerCompositionDrawListVisual, ServerCompositionExperimentalAcrylicVisual};
+use super::server::{
+    IServerVisualContent, ServerCompositionDrawListVisual, ServerCompositionExperimentalAcrylicVisual, DRAW_LIST_ITEMS,
+    DRAW_LIST_NEW, DRAW_LIST_REDRAWN,
+};
 use super::transport::{BatchStreamWriter, IRegisterForSerialization};
 use super::visual::CompositionVisualKind;
 use super::{CompositionVisual, Compositor};
 use crate::media::{Geometry, IntersectionResult};
+use crate::utilities::OptionCell;
 use crate::{Point, Ref, Visual, WeakRef};
-use std::cell::{Cell, RefCell};
+use std::cell::{Cell, OnceCell};
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -31,6 +36,15 @@ pub trait ICompositionDrawListVisualExtension: 'static {
     fn follows_control_out_of_tree(&self) -> bool {
         false
     }
+
+    /// Whether the visual shows the drawings of the visuals below its own that have no
+    /// composition visual (the drawing items, docs/porting/desktop-performance.md, section
+    /// 9.42): its server content hands out the items of the draw list visual it wraps
+    /// (`IServerVisualContent::draw_items`). `false` by default: each of those visuals gets a
+    /// composition visual of its own.
+    fn holds_drawing_items(&self) -> bool {
+        false
+    }
 }
 
 /// What a draw list visual adds to a visual: the visual of the tree it
@@ -44,7 +58,10 @@ pub(crate) struct DrawListData {
     draw_list_changed: Cell<bool>,
     /// The drawing is the same but what it shows changed (section 9.14): the server redraws it.
     content_invalidated: Cell<bool>,
-    draw_list: RefCell<Option<Rc<CompositionRenderData>>>,
+    draw_list: OptionCell<Rc<CompositionRenderData>>,
+    /// The drawings of the visuals below that have no composition visual (section 9.42): made
+    /// when the first one is listed.
+    items: OnceCell<Box<DrawItemList>>,
     /// The visual left its visual tree and this composition visual is kept for its return
     /// (section 9.32). Until then it is hit tested as a released one is: it
     /// has no drawing and no children.
@@ -72,17 +89,23 @@ impl DrawListData {
     }
 
     fn serialize_draw_list(&self, host: &CompositionVisual, writer: &mut BatchStreamWriter<'_>) {
-        // 0: unchanged; 1: a new drawing; 2: the same drawing, drawn again (section 9.14).
+        // The drawing: unchanged, a new one, or the same one drawn again (section 9.14). And
+        // whether the changes of the items follow (section 9.42).
+        let items = self.items.get().filter(|items| items.has_changes());
+        let items_bit = if items.is_some() { DRAW_LIST_ITEMS } else { 0 };
         if self.draw_list_changed.get() {
-            writer.write(1u8);
-            writer.write_server_object(self.draw_list.borrow().as_ref().map(|draw_list| draw_list.server()));
+            writer.write(DRAW_LIST_NEW | items_bit);
+            writer.write_server_object(self.draw_list.get().map(|draw_list| draw_list.server()));
             self.draw_list_changed.set(false);
         } else if self.content_invalidated.get() {
-            writer.write(2u8);
+            writer.write(DRAW_LIST_REDRAWN | items_bit);
         } else {
-            writer.write(0u8);
+            writer.write(items_bit);
         }
         self.content_invalidated.set(false);
+        if let Some(items) = items {
+            items.serialize(host, writer);
+        }
         self.props.serialize_changes_core(host, writer);
     }
 
@@ -105,7 +128,7 @@ impl DrawListData {
         if self.departed.get() {
             return None;
         }
-        self.draw_list.borrow().clone()
+        self.draw_list.get()
     }
 
     pub(super) fn is_departed(&self) -> bool {
@@ -139,6 +162,16 @@ impl DrawListData {
             return custom;
         }
         draw_list.map_or(IntersectionResult::Empty, |draw_list| draw_list.hit_test_geometry(geometry))
+    }
+}
+
+impl CompositionVisual {
+    /// The items the visual shows (section 9.42), if it ever had one.
+    pub(crate) fn draw_items(&self) -> Option<&DrawItemList> {
+        match &self.kind {
+            CompositionVisualKind::DrawList(data) => data.items.get().map(|items| &**items),
+            _ => None,
+        }
     }
 }
 
@@ -214,7 +247,8 @@ impl CompositionDrawListVisual {
             visual: visual.map(|visual| visual.to_ref().downgrade()),
             draw_list_changed: Cell::new(false),
             content_invalidated: Cell::new(false),
-            draw_list: RefCell::new(None),
+            draw_list: OptionCell::new(),
+            items: OnceCell::new(),
             departed: Cell::new(false),
             shown_through: Cell::new(false),
             acrylic: acrylic.then(CompositionExperimentalAcrylicVisualProps::new),
@@ -255,6 +289,36 @@ impl CompositionDrawListVisual {
             && data.extension.as_ref().is_none_or(|extension| extension.follows_control_out_of_tree())
     }
 
+    /// Whether the visual shows the drawings of the visuals below its own that have no
+    /// composition visual (section 9.42): a plain draw list visual does, and a derived one says
+    /// so itself.
+    pub(crate) fn holds_drawing_items(&self) -> bool {
+        let data = self.data();
+        data.acrylic.is_none() && data.extension.as_ref().is_none_or(|extension| extension.holds_drawing_items())
+    }
+
+    /// Makes `items` the drawings the visual shows for the visuals below its own that have no
+    /// composition visual, in paint order, and `positions` the number of them that are painted
+    /// before each of its child visuals.
+    pub(crate) fn set_draw_items(&self, items: Vec<Rc<CompositionDrawItem>>, mut positions: Vec<u32>) {
+        let data = self.data();
+        if items.is_empty() {
+            if data.items.get().is_none() {
+                return;
+            }
+            positions.clear();
+        }
+        let list = data.items.get_or_init(Default::default);
+        if list.set(&self.0, items, positions) {
+            self.0.register_for_serialization();
+        }
+    }
+
+    /// The visual shows no drawing but its own.
+    pub(crate) fn clear_draw_items(&self) {
+        self.set_draw_items(Vec::new(), Vec::new());
+    }
+
     /// Marks the visual as kept for a visual that left its tree, or as in use again.
     pub(crate) fn set_departed(&self, departed: bool) {
         self.data().departed.set(departed);
@@ -267,7 +331,7 @@ impl CompositionDrawListVisual {
     }
 
     pub fn draw_list(&self) -> Option<Rc<CompositionRenderData>> {
-        self.data().draw_list.borrow().clone()
+        self.data().draw_list.get()
     }
 
     /// Keeps the drawing but has the server draw it again: the visual was invalidated and
@@ -275,7 +339,7 @@ impl CompositionDrawListVisual {
     /// brush) may have changed (an addition, desktop-performance.md section 9.14).
     pub fn invalidate_draw_list_content(&self) {
         let data = self.data();
-        if data.draw_list.borrow().is_none() {
+        if !data.draw_list.is_some() {
             return;
         }
         data.content_invalidated.set(true);
@@ -285,7 +349,7 @@ impl CompositionDrawListVisual {
     pub fn set_draw_list(&self, value: Option<Rc<CompositionRenderData>>) {
         let data = self.data();
         // Nothing to do
-        if value.is_none() && data.draw_list.borrow().is_none() {
+        if value.is_none() && !data.draw_list.is_some() {
             return;
         }
 
