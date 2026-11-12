@@ -75,6 +75,73 @@ impl WallData {
     }
 }
 
+/// A tile: its label over a dot and its value, on a fill the owner sets. Its texts follow
+/// `text_height`, the height of a tile of the wall. [`TileView::bind`] shows tile `index`, so a list
+/// that recycles its rows reuses the controls.
+#[repr(C)]
+pub struct TileView {
+    base: Border,
+    label: Ref<TextBlock>,
+    value: Ref<TextBlock>,
+    spot: Ref<Border>,
+}
+
+ferro_class!(TileView: Border);
+ferro_impl_classes!(
+    TileView: FerroObjectImpl,
+    StyledElementImpl,
+    VisualImpl,
+    LayoutableImpl,
+    InteractiveImpl,
+    InputElementImpl,
+    ControlImpl
+);
+
+impl TileView {
+    pub fn new(look: Look, width: f64, height: f64, text_height: f64, padding: f64) -> Ref<Self> {
+        let swatches = Swatches::get();
+        let label = look.text(text_height * 0.30, &swatches.white, true);
+        let value = look.text(text_height * 0.26, &swatches.white, false);
+        let dot = text_height * 0.22;
+        let spot = Border::new();
+        spot.set_width(dot);
+        spot.set_height(dot);
+        spot.set_corner_radius(CornerRadius::uniform(dot / 2.0));
+        spot.set_vertical_alignment(VerticalAlignment::Center);
+        let line = StackPanel::new();
+        line.set_orientation(Orientation::Horizontal);
+        line.set_spacing(dot * 0.5);
+        line.children().add(&spot);
+        line.children().add(&value);
+        let content = StackPanel::new();
+        content.children().add(&label);
+        content.children().add(&line);
+        let this = instantiate(Self { base: Border::construct(), label, value, spot });
+        this.set_width(width);
+        this.set_height(height);
+        this.set_corner_radius(CornerRadius::uniform(WallData::CORNER));
+        this.set_padding(Thickness::uniform(padding));
+        this.set_clip_to_bounds(true);
+        this.set_child(&content);
+        this
+    }
+
+    /// Shows tile `index`'s label, value and dot; a text that did not change is not set again.
+    pub fn bind(&self, index: i32) {
+        let swatches = Swatches::get();
+        let text = WallData::label(index);
+        if self.label.text().as_deref() != Some(text.as_str()) {
+            self.label.set_text(Some(&text));
+        }
+        let text = WallData::value(index);
+        if self.value.text().as_deref() != Some(text.as_str()) {
+            self.value.set_text(Some(&text));
+        }
+        let dot = (index as usize / swatches.palette.len()) % swatches.chip_background.len();
+        self.spot.set_background(Some(swatches.chip_background[dot].clone()));
+    }
+}
+
 /// The wall's area in the window every desktop app opens, under the top bar and the clock line.
 const WALL_WIDTH: f64 = 1280.0;
 const WALL_HEIGHT: f64 = 820.0 - 56.0 - WallData::CLOCK_HEIGHT;
@@ -129,38 +196,10 @@ impl WallView {
         let wall = Canvas::new();
         wall.set_clip_to_bounds(true);
         let height = tier.1;
-        let dot = height * 0.22;
         for index in 0..tiles {
-            let label = look.text(height * 0.30, &swatches.white, true);
-            label.set_text(Some(&WallData::label(index)));
-            let value = look.text(height * 0.26, &swatches.white, false);
-            value.set_text(Some(&WallData::value(index)));
-            let spot = Border::new();
-            spot.set_width(dot);
-            spot.set_height(dot);
-            spot.set_corner_radius(CornerRadius::uniform(dot / 2.0));
-            spot.set_background(Some(
-                swatches.chip_background
-                    [(index as usize / swatches.palette.len()) % swatches.chip_background.len()]
-                .clone(),
-            ));
-            spot.set_vertical_alignment(VerticalAlignment::Center);
-            let line = StackPanel::new();
-            line.set_orientation(Orientation::Horizontal);
-            line.set_spacing(dot * 0.5);
-            line.children().add(&spot);
-            line.children().add(&value);
-            let content = StackPanel::new();
-            content.children().add(&label);
-            content.children().add(&line);
-            let tile = Border::new();
-            tile.set_width(tier.0);
-            tile.set_height(height);
-            tile.set_corner_radius(CornerRadius::uniform(WallData::CORNER));
-            tile.set_padding(Thickness::uniform(height * 0.06));
+            let tile = TileView::new(look, tier.0, height, height, height * 0.06);
+            tile.bind(index);
             tile.set_background(Some(swatches.palette[index as usize % swatches.palette.len()].clone()));
-            tile.set_clip_to_bounds(true);
-            tile.set_child(&content);
             let at = WallData::origin(index, columns, tier);
             Canvas::set_left(&tile, at.x);
             Canvas::set_top(&tile, at.y);

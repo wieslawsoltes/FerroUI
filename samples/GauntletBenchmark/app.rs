@@ -2,6 +2,7 @@
 //! the files every app of the comparison loads, and the 1280 x 820 window of the desktop apps.
 
 use crate::gauntlet::GauntletView;
+use crate::patchwork::PatchworkView;
 use crate::wall::WallView;
 use ferroui_base::media::fonts::{FontCollectionBase, FontCollectionBaseImpl};
 use ferroui_base::media::FontManager;
@@ -16,12 +17,14 @@ use std::sync::OnceLock;
 
 /// What the launch asked of the gauntlet.
 pub struct Launch {
-    /// Load tier, 1 to 16 (the still wall: 1 to 20).
+    /// Load tier, 1 to 16 (the still wall and the patchwork: 1 to 20).
     pub tier: i32,
     /// Stop on this frame and hold still, for picture comparisons; 0 runs on.
     pub freeze: i32,
     /// Whether the screen is the still wall in place of the gauntlet.
     pub wall: bool,
+    /// Whether the screen is the patchwork in place of the gauntlet and the still wall.
+    pub patchwork: bool,
 }
 
 static LAUNCH: OnceLock<Launch> = OnceLock::new();
@@ -36,13 +39,26 @@ impl Launch {
 
     /// The options of this launch: the defaults when none were set.
     pub fn get() -> &'static Launch {
-        LAUNCH.get_or_init(|| Launch { tier: 5, freeze: 0, wall: false })
+        LAUNCH.get_or_init(|| Launch { tier: 5, freeze: 0, wall: false, patchwork: false })
+    }
+
+    /// The name of the screen asked for, as the harness names its scenarios.
+    pub fn scenario(&self) -> &'static str {
+        if self.patchwork {
+            "patchwork"
+        } else if self.wall {
+            "wall"
+        } else {
+            "gauntlet"
+        }
     }
 
     /// The screen asked for.
     pub fn screen() -> Ref<Control> {
         let launch = Self::get();
-        if launch.wall {
+        if launch.patchwork {
+            PatchworkView::new(launch.tier, launch.freeze).upcast()
+        } else if launch.wall {
             WallView::new(launch.tier, launch.freeze).upcast()
         } else {
             GauntletView::new(launch.tier, launch.freeze).upcast()
@@ -54,7 +70,8 @@ impl Launch {
         println!("{line}");
     }
 
-    /// The bytes of a Roboto file in the folder `PERF_FONTS` names (default `fonts`).
+    /// The bytes of a font file (Roboto, or the monospaced face of the patchwork's chat) in the
+    /// folder `PERF_FONTS` names (default `fonts`).
     pub fn read_font(file: &str) -> Vec<u8> {
         let folder = std::env::var_os("PERF_FONTS").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("fonts"));
         let path = folder.join(file);
@@ -92,7 +109,15 @@ impl ApplicationImpl for App {
         let lifetime = this.application_lifetime();
         if let Some(desktop) = lifetime.as_ref().and_then(|l| l.as_classic_desktop_style_application_lifetime()) {
             let window = Window::new();
-            window.set_title(Some(if Launch::get().wall { "Still wall" } else { "Gauntlet" }.to_string()));
+            let launch = Launch::get();
+            let title = if launch.patchwork {
+                "Patchwork"
+            } else if launch.wall {
+                "Still wall"
+            } else {
+                "Gauntlet"
+            };
+            window.set_title(Some(title.to_string()));
             window.set_width(DESKTOP_WIDTH);
             window.set_height(DESKTOP_HEIGHT);
             window.set_can_resize(false);

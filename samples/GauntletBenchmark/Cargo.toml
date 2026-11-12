@@ -1,6 +1,6 @@
 [package]
 name = "gauntlet-benchmark"
-description = "The gauntlet and the still wall of the Cranpose UI benchmark in FerroUI: a heavy animated screen and a still one, driven frame by frame for a cross-framework comparison"
+description = "The gauntlet, the still wall and the patchwork of the Cranpose UI benchmark in FerroUI: a heavy animated screen, a still one and one that changes in small parts, driven frame by frame for a cross-framework comparison"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

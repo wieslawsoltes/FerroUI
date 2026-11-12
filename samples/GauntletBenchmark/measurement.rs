@@ -167,7 +167,7 @@ pub(crate) fn on_frame() -> bool {
         let measured_presents: Option<u64> = None;
         let result = json!({
             "backend": if cfg!(feature="direct2d") {"direct2d"} else {"skia-angle"},
-            "scenario": if Launch::get().wall {"wall"} else {"gauntlet"}, "tier": Launch::get().tier,
+            "scenario": Launch::get().scenario(), "tier": Launch::get().tier,
             "metric": "desktop scene intervals gated by rendered composition batches",
             "warmup_frames":run.warmup,"measured_frames":run.frames,"last_scene_frame":Clock::frame(),
             "elapsed_ms":elapsed_ms,"mean_ms":mean,"callback_fps":1000./mean,
