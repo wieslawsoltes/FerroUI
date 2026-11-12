@@ -470,8 +470,9 @@ impl TextFormatterImpl {
         let Some(cache) = text_run_cache.filter(|_| text.len() >= shaping_edit::MIN_KEPT_LENGTH) else {
             return text_shaper.shape_text(text, options);
         };
-        let edited = cache.take_retired(options).and_then(|old| {
-            let edited = shaping_edit::shape_edited(&old, text, options, text_shaper);
+        let old = cache.take_retired(options);
+        let edited = old.as_ref().and_then(|old| {
+            let edited = shaping_edit::shape_edited(old, text, options, text_shaper);
             crate::perf_count!(TextShapingEditsTried);
             if edited.is_some() {
                 crate::perf_count!(TextShapingEditsKept);
@@ -480,6 +481,11 @@ impl TextFormatterImpl {
         });
         let shaped =
             edited.unwrap_or_else(|| text_shaper.shape_text(text, &options.clone().with_concat_flags(true)));
+        // The break opportunities do not depend on the shaping: they are kept also when the
+        // glyphs are not.
+        if old.is_some_and(|old| shaped.keep_breaks_of_edit(&old)) {
+            crate::perf_count!(TextBreakEditsKept);
+        }
         if shaped.concat_flags().is_some() {
             cache.keep_shaping(options, &shaped);
         }

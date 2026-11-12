@@ -169,14 +169,25 @@ changes behavior upstream defines.
      one before the first and after the last such boundary around the changed range, and shapes
      the text between them with its context; a piece whose new edge glyphs are unsafe is widened
      and shaped again.
-   - **Break opportunities.** The UAX #14 opportunities before the changed range and after it
-     (from the first mandatory or unambiguous break past it) are the old ones, shifted; only the
-     text between is classified again.
+   - **Break opportunities.** The UAX #14 opportunities of a shaped text are a table of the
+     shaped buffer. The table of the new text keeps the old opportunities before the changed
+     range, up to the last one at a space between two ASCII letters or digits (a place no rule
+     of the algorithm looks across: the rules that look back past one unit look for an opening,
+     a quotation mark, a number or a mark that leans on its base), classifies the text from
+     there, and takes the old opportunities again, shifted, from the first such place past the
+     change that is an opportunity in both texts. A text without such a place is classified
+     whole. The count of regional indicators (LB30a) is now that of one sequence, as the rule
+     says, where an indicator alone earlier in the text paired the indicators of every later
+     sequence the other way.
    - **Lines.** The lines that end before the changed range are kept; past it, a line whose start
      and width context are those of an old line is the old line, shifted, and the rest of the
      paragraph follows it.
    The run cache of a text block keeps the shaped runs of its previous text for this, and the
    comparison of the two texts (a common prefix and suffix) is the edit.
+
+   Measured on the `paragraph` scene (UI thread, a frame): 5.37 ms before, 3.80 ms with the
+   shaped runs kept, 2.71 ms with the break opportunities kept as well. The lines are not kept
+   yet.
 
 The cross-library comparison (`tests/FerroUI.Text.Comparison`: FerroUI, parley, cosmic-text and
 epaint on the same font, corpus and widths) measures each step against the others.

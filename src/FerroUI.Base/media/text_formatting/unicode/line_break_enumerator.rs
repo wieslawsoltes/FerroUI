@@ -201,6 +201,11 @@ fn regional_indicator(_text: &[u16], state: &mut LineBreakState) -> RuleResult {
         if state.regional_indicator % 2 == 0 {
             state.regional_indicator = 0;
         }
+    } else {
+        // LB30a counts the regional indicators of one sequence: `sot (RI RI)* RI x RI` and
+        // `[^RI] (RI RI)* RI x RI`. An indicator alone earlier in the text does not pair the
+        // ones of a later sequence the other way.
+        state.regional_indicator = 0;
     }
 
     RuleResult::Pass

@@ -37,6 +37,9 @@ struct State {
 struct KeptShaping {
     options: TextShaperOptions,
     buffer: Rc<ShapedBuffer>,
+    /// The buffer of the runs, for the break table the layout makes on it after the shaping is
+    /// kept (a disposed buffer keeps its table).
+    source: Rc<ShapedBuffer>,
 }
 
 impl TextRunCache {
@@ -69,15 +72,17 @@ impl TextRunCache {
         // reason) replaces the one kept before.
         state.kept.retain(|kept| !kept.options.shapes_as(options));
         // A buffer of its own over the glyphs: the runs of the cache hold `buffer` and dispose it.
-        state.kept.push(KeptShaping { options: options.clone(), buffer: buffer.sharing() });
+        state.kept.push(KeptShaping { options: options.clone(), buffer: buffer.sharing(), source: buffer.clone() });
     }
 
     /// The kept shaping of the text before the current one that was shaped as `options` shape,
-    /// taken out of the cache.
+    /// taken out of the cache, with the break table the layout of that text made.
     pub(crate) fn take_retired(&self, options: &TextShaperOptions) -> Option<Rc<ShapedBuffer>> {
         let mut state = self.state.borrow_mut();
         let index = state.retired.iter().position(|kept| kept.options.shapes_as(options))?;
-        Some(state.retired.swap_remove(index).buffer)
+        let kept = state.retired.swap_remove(index);
+        kept.buffer.share_breaks_of(&kept.source);
+        Some(kept.buffer)
     }
 
     fn invalidate_entries(state: &mut State) {

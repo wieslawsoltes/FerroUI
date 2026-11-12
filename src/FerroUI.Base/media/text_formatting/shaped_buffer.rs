@@ -67,6 +67,106 @@ pub(crate) struct BreakTable {
     breaks: Box<[crate::media::text_formatting::unicode::LineBreak]>,
 }
 
+impl BreakTable {
+    /// How far a rule of UAX #14 looks ahead of the place it decides, in code units, with room to
+    /// spare: the old breaks kept before a change end this far ahead of it, and the old breaks
+    /// taken again start this far past it.
+    const LOOK: usize = 4;
+
+    /// Whether `text` has at `at` a break opportunity no rule looks across: a space between two
+    /// ASCII letters or digits. The rules that look back past the unit before a place look for
+    /// an opening, a quotation mark, a number or a mark that leans on its base, and stop at the
+    /// space or at the letter; the breaks from `at` on are those of the text from `at` alone.
+    fn settles(text: &[u16], at: usize) -> bool {
+        let word = |unit: u16| matches!(unit, 0x30..=0x39 | 0x41..=0x5A | 0x61..=0x7A);
+        at >= 2 && at < text.len() && word(text[at - 2]) && text[at - 1] == 0x20 && word(text[at])
+    }
+
+    /// The table of `new`, a text that starts at `start` of its storage, from this table of
+    /// `old`, the text before an edit (step 7 of docs/porting/text-layout-performance.md): the
+    /// breaks before the change are kept up to a break that settles, the text is enumerated from
+    /// there past the change to the next break that settles in both texts, and the breaks of the
+    /// old text follow, shifted. The breaks are those of an enumeration of `new` from its start,
+    /// which `text_break_table_tests` checks for random edits. `None` when the table is not that
+    /// of the whole of `old`.
+    fn edited(&self, old: &[u16], new: &[u16], start: usize) -> Option<BreakTable> {
+        self.edited_counting(old, new, start).map(|(table, _)| table)
+    }
+
+    /// [`Self::edited`], with the count of the code units that were enumerated again.
+    fn edited_counting(&self, old: &[u16], new: &[u16], start: usize) -> Option<(BreakTable, usize)> {
+        use crate::media::text_formatting::unicode::{LineBreak, LineBreakEnumerator};
+        let (old_length, new_length) = (old.len(), new.len());
+        if self.end - self.start != old_length || new_length == 0 {
+            return None;
+        }
+        let common = old_length.min(new_length);
+        let prefix = old.iter().zip(new).take_while(|(x, y)| x == y).count();
+        let suffix = old[prefix..]
+            .iter()
+            .rev()
+            .zip(new[prefix..].iter().rev())
+            .take(common - prefix)
+            .take_while(|(x, y)| x == y)
+            .count();
+        let change_end = new_length - suffix;
+        let shift = new_length as isize - old_length as isize;
+
+        let mut kept = self.breaks.partition_point(|line_break| line_break.position_wrap() + Self::LOOK <= prefix);
+        while kept > 0 && !Self::settles(new, self.breaks[kept - 1].position_wrap()) {
+            kept -= 1;
+        }
+        let from = if kept > 0 { self.breaks[kept - 1].position_wrap() } else { 0 };
+        let mut breaks = Vec::with_capacity(self.breaks.len() + 16);
+        breaks.extend_from_slice(&self.breaks[..kept]);
+        let mut enumerator = LineBreakEnumerator::new(&new[from..]);
+        let mut enumerated = new_length - from;
+        while let Some(line_break) = enumerator.move_next() {
+            let at = from + line_break.position_wrap();
+            breaks.push(LineBreak::new(from + line_break.position_measure(), at, line_break.required()));
+            if at < change_end + Self::LOOK || !Self::settles(new, at) {
+                continue;
+            }
+            let old_at = (at as isize - shift) as usize;
+            if let Ok(found) = self.breaks.binary_search_by(|old_break| old_break.position_wrap().cmp(&old_at)) {
+                breaks.extend(self.breaks[found + 1..].iter().map(|old_break| {
+                    LineBreak::new(
+                        (old_break.position_measure() as isize + shift) as usize,
+                        (old_break.position_wrap() as isize + shift) as usize,
+                        old_break.required(),
+                    )
+                }));
+                enumerated = at - from;
+                break;
+            }
+        }
+        Some((BreakTable { start, end: start + new_length, breaks: breaks.into_boxed_slice() }, enumerated))
+    }
+
+    /// The table of `text` enumerated from its start, and the table an edit of the table of
+    /// `old` gives for it (the tests compare the two).
+    #[cfg(test)]
+    pub(crate) fn of_edit(old: &[u16], text: &[u16]) -> (Vec<LineBreak>, Vec<LineBreak>) {
+        use crate::media::text_formatting::unicode::LineBreakEnumerator;
+        let whole = |text: &[u16]| LineBreakEnumerator::new(text).collect::<Vec<_>>();
+        let table = BreakTable { start: 0, end: old.len(), breaks: whole(old).into_boxed_slice() };
+        let edited = table.edited(old, text, 0).map(|table| table.breaks.into_vec()).unwrap_or_default();
+        (whole(text), edited)
+    }
+
+    /// How many code units of `text` an edit of the table of `old` enumerates again.
+    #[cfg(test)]
+    pub(crate) fn edit_enumerates(old: &[u16], text: &[u16]) -> usize {
+        use crate::media::text_formatting::unicode::LineBreakEnumerator;
+        let breaks = LineBreakEnumerator::new(old).collect::<Vec<_>>().into_boxed_slice();
+        let table = BreakTable { start: 0, end: old.len(), breaks };
+        table.edited_counting(old, text, 0).map_or(text.len(), |(_, enumerated)| enumerated)
+    }
+}
+
+#[cfg(test)]
+use crate::media::text_formatting::unicode::LineBreak;
+
 /// The break opportunities of a run's text, from the shared table of the text it was split from
 /// or found again from its start.
 pub(crate) enum RunLineBreaks<'a> {
@@ -233,6 +333,35 @@ impl ShapedBuffer {
             concat_flags: RefCell::new(None),
             disposed: Cell::new(false),
         })
+    }
+
+    /// Takes the break table `source` has by now: the run cache keeps a buffer of its own over
+    /// the glyphs of a shaping (`sharing`), made before the layout found the breaks of the text.
+    pub(crate) fn share_breaks_of(&self, source: &ShapedBuffer) {
+        if self.breaks.borrow().is_none() {
+            *self.breaks.borrow_mut() = source.breaks.borrow().clone();
+        }
+    }
+
+    /// Makes the break table of this buffer's text from the table of `old`, the shaping of the
+    /// text before an edit, when `old` has the table of its whole text ([`BreakTable::edited`]).
+    /// Returns whether the buffer has a table from the edit.
+    pub(crate) fn keep_breaks_of_edit(&self, old: &ShapedBuffer) -> bool {
+        #[cfg(test)]
+        if !BREAK_TABLES.with(Cell::get) {
+            return false;
+        }
+        if self.breaks.borrow().is_some() {
+            return false;
+        }
+        let Some(table) = old.breaks.borrow().clone() else { return false };
+        if table.start != old.text.offset_in_owner() {
+            return false;
+        }
+        let edited = table.edited(old.text.span(), self.text.span(), self.text.offset_in_owner());
+        let kept = edited.is_some();
+        *self.breaks.borrow_mut() = edited.map(Rc::new);
+        kept
     }
 
     /// The buffer's length (number of glyphs).

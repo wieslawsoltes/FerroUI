@@ -666,3 +666,53 @@ fn start() -> UnitTestApplicationScope {
             .with_font_manager_impl(Rc::new(CustomFontManagerImpl::new())),
     )
 }
+
+/// The lines of a wrapped layout: first text source index, length and width.
+fn wrapped_lines(text: &str, cache: Option<Rc<TextRunCache>>) -> Vec<(i32, i32, f64)> {
+    let layout = TextLayout::new(
+        text,
+        Typeface::default_typeface(),
+        TextLayoutOptions {
+            font_size: 12.0,
+            text_wrapping: TextWrapping::Wrap,
+            max_width: 420.0,
+            text_run_cache: cache,
+            ..Default::default()
+        },
+    );
+    let lines = layout
+        .text_lines()
+        .iter()
+        .map(|line| (line.first_text_source_index(), line.length(), line.width_including_trailing_whitespace()))
+        .collect();
+    layout.dispose();
+    lines
+}
+
+#[test]
+fn an_edited_long_text_with_a_retired_cache_has_the_lines_of_a_new_layout() {
+    // A FerroUI addition (step 7 of docs/porting/text-layout-performance.md): the owner of a long
+    // text retires its cache for a new text, and the layout of the new text keeps the glyphs and
+    // the break opportunities the edit left as they were.
+    let _scope = start();
+    let words =
+        ["office", "(quoted)", "Wave", "1,234.56", "x-y", "today;", "caf\u{e9}", "\u{4E2D}\u{6587}", "a", "end."];
+    let mut text: Vec<String> = (0..160).map(|word| words[(word * 7 + word / 3) % words.len()].to_string()).collect();
+    let cache = Rc::new(TextRunCache::new());
+    assert_eq!(wrapped_lines(&text.join(" "), Some(cache.clone())), wrapped_lines(&text.join(" "), None));
+    for step in 0..48 {
+        let at = (step * 37 + 11) % text.len();
+        match step % 4 {
+            0 => text[at] = words[step % words.len()].to_string(),
+            1 => text.insert(at, format!("{step:05}")),
+            2 => {
+                text.remove(at);
+            }
+            _ => text.push(words[(step / 4) % words.len()].to_string()),
+        }
+        let edited = text.join(" ");
+        cache.retire();
+        assert_eq!(wrapped_lines(&edited, Some(cache.clone())), wrapped_lines(&edited, None), "step {step}: {edited}");
+    }
+    cache.dispose();
+}

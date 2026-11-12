@@ -180,6 +180,8 @@ perf_counters! {
     TextShapingEditsTried => "text shaping edits tried",
     /// The edit kept glyphs of the shaping before.
     TextShapingEditsKept => "text shaping edits kept",
+    /// The break opportunities of the text were made from the table of the text before.
+    TextBreakEditsKept => "text break table edits kept",
     /// `TextLayoutCache::get_or_create`: the layout of a plain text was the one kept for it.
     TextLayoutCacheHits => "text layout cache hits",
     /// `TextLayoutCache::get_or_create`: the layout of a plain text was made and kept.
