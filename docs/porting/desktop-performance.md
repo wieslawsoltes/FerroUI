@@ -3475,7 +3475,7 @@ profile of the UI thread: 9 samples of 487 in the tooltip's hit test before, 501
 after). The frame gate runs frames as fast as they render; on a display the two hit tests
 of a frame see one revision as before. The walk itself is the cost that should go (a hit
 test index that hears which children were written, as the tables hear which children
-changed), and that is the change after this one.
+changed), and that is the change after this one (section 9.49).
 
 **Tests.** `many_children_are_updated_and_rendered_as_without_their_table`: holders of 36
 to 400 children, clipped and not, scaled, mirrored and turned, through 160 frames of
@@ -3493,3 +3493,113 @@ keeps the size of the visual.
 gauntlet`) hold the render thread's time of a holder of 20 000 children with a few that
 change.
 
+### 9.49 The hit-test index hears which children the render thread wrote
+
+A holder of 32 children or more answers a hit test from an index of its children
+(`CompositionHitTestAabbTree`, as upstream has it: buckets of 32 children in the order of
+the children, a tree of bounds in each). The bounds come from the readback of each child,
+which the render thread writes and the UI thread reads at a revision (`ReadbackIndices`).
+A bucket remembers the revision it was read at, and a hit test at a newer revision read
+every child of every bucket it came to before it asked the tree: for a point over the
+holder that is every child of the holder. A child whose readback was not written since
+returns after comparing two revisions (section 9.6), but the comparison reads the visual,
+and the walk is as long as the list of children whatever changed. On the still wall with
+the pointer in the window (`wall/20+pointer`: 20 000 items, two hit tests after each
+frame) this walk was the UI thread's frame, and it grew when the render thread became
+faster (section 9.48).
+
+**The change.** The readback pass says which readbacks it wrote, and the index reads
+those.
+
+- `ReadbackIndices` keeps a list of the readbacks written in the latest revisions
+  (`Written`: pairs of the revision and the key of the readback, the oldest first). The
+  key of a readback is its address: the UI visual and the server visual share one
+  readback, and it stays where it is while either of them lives. The pass
+  (`ServerCompositor::visual_readback_update_pass`) asks its write scope for the list
+  (`ReadbackWriteScope::written`) and adds the key of each readback it writes, visual or
+  snapshot, before the revision is published.
+- The list is bounded. A pass that writes more than 1 024 readbacks
+  (`WRITTEN_IN_A_REVISION`) lists none of them, and the list keeps at most 4 096 keys
+  (`WRITTEN_KEPT`), dropping whole revisions from the old end. Both move the floor of the
+  list, the revision from which it is complete, and a question about revisions before the
+  floor (`written_between`) is answered with "not known".
+- The index keeps its entries by the key of the child's readback, the revision it last
+  heard at (`heard`) and the set of the children it has not settled: the ones whose
+  entry was made without a readback (a child the render thread has not written yet, and
+  one that a hit test passes through until it has a readback, section 9.41).
+- At the start of a hit test of the holder the index hears (`hear_written`): it asks for
+  the readbacks written after `heard` up to the revision of the hit test and reads those
+  of them that are its children, and the children that are not settled. When the answer
+  was complete and every child was where its entry says, each bucket that was current at
+  `heard` is current at the revision of the hit test, without a walk.
+- Anything else falls back to the walk, bucket by bucket as before: a list that does not
+  reach back to `heard` (a pass that wrote more than the list takes, or a holder that was
+  not hit-tested for many frames), a key whose child is no longer at its place, and a
+  bucket that was not current at `heard`. A bucket that is made while the index is in use
+  starts at `heard`, because each entry that comes to it is read as it comes or is not
+  settled.
+
+What a hit test finds is what the walk finds: the walk changes an entry only for a child
+whose readback has a newer revision than the entry, a readback gets a newer revision only
+in a pass, and every pass since `heard` is in the list or moved its floor. The statement
+kept between hit tests is that a bucket whose revision is `heard` has every entry either
+read at `heard` or later, or in the set of the children that are not settled.
+
+**Other backends.** The list is in the readback bookkeeping of `ferroui_base` and the
+index is on the UI side of the composition: every rendering backend (Skia, Vello, ProGPU,
+the browser) runs the same readback pass, and none has anything to implement.
+
+**Measured.** In the tests, the buckets walked by four hit tests a frame through random
+frames (a frame in sixteen moves every child, the others add, remove, hide and move a
+few), with the list and without:
+
+| Children | Frames | Bucket walks without the list | With the list |
+|---:|---:|---:|---:|
+| 40 | 80 | 92 | 0 |
+| 200 | 120 | 518 | 0 |
+| 1 200 | 40 | 950 | 418 |
+
+With 1 200 children the frames that move every child write more than the list takes, and
+those are the walks that remain.
+
+With the local gate (the two sides alternately, the medians; base `2cc3671f21`, the
+children tables of section 9.48):
+
+| Metric | Before | After | Change |
+|---|---:|---:|---:|
+| `wall/20+pointer` UI thread, ms a frame | 1.220 | 0.039 | -96.8 % |
+| `wall/20+pointer` wall time, ms a frame | 1.902 | 1.633 | -14.1 % |
+| `wall/20+pointer` render thread, ms a frame | 1.752 | 1.632 | -6.9 % |
+| `wall/20` UI thread, ms a frame | 0.027 | 0.024 | -9.4 % |
+| `wall/20` render thread, ms a frame | 1.659 | 1.626 | -2.0 % |
+| `gauntlet/16` UI thread, ms a frame | 14.614 | 14.469 | -1.0 % |
+| `gauntlet/16` render thread, ms a frame | 34.331 | 34.166 | -0.5 % |
+
+The UI thread's frame with the pointer in the window is now what it is without the
+pointer, to a hundredth of a millisecond: the two hit tests of a frame read the few
+children that were written. Against the commit before the children tables the same
+metric went from 0.872 ms to 0.039 ms. None of the 121 metrics of the gate is over its
+tolerance.
+
+**Found on the way.** A child added to or removed from a holder has the UI side clear the
+holder's composition children and add them all again
+(`Visual::synchronize_composition_child_visuals`, as upstream does on any difference).
+The index is emptied with the list, and the next readback pass writes every sibling: one
+child added among 200 lists about 205 readbacks. The index handles it (the children come
+back unsettled and are read once), but the cost is that of the whole list for one child,
+on both threads. Making the synchronization insert and remove the children that differ
+is a change of its own, to be measured on a list that grows and shrinks.
+
+**Tests.** `the_readbacks_of_the_latest_revisions_are_listed`: what the list answers for
+ranges of revisions, a pass over the limit, and the oldest revisions leaving at the bound.
+`a_hit_test_index_that_hears_the_written_children_finds_what_one_that_reads_every_child_finds`:
+40, 200 and 1 200 children through random frames (moves of every child, children added,
+removed, hidden and resized, frames without a render), four hit tests a frame, once with
+the list and once without (`HEARS_WRITTEN`): the same visuals in the same order every
+time, and fewer walks with the list.
+`a_child_that_changes_among_many_does_not_have_the_index_read_the_other_children`: of
+2 000 children one moves in each of 20 frames; the hit tests find it at its new place and
+the last child at its own, and no bucket is walked after the first hit test.
+
+**Gate.** `wall/20+pointer` of the frame gate holds the UI thread's time of the hit tests
+over a holder of 20 000 children.

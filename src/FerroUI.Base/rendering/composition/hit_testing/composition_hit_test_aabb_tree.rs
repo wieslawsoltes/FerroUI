@@ -121,7 +121,7 @@ pub struct CompositionHitTestAabbTree {
 }
 
 #[cfg(test)]
-thread_local! {
+crate::ferro_thread_local! {
     /// Off in the tests that compare the index with one that reads every child.
     pub(crate) static HEARS_WRITTEN: std::cell::Cell<bool> = const { std::cell::Cell::new(true) };
 }
