@@ -68,6 +68,15 @@ pub trait IRenderer {
         false
     }
 
+    /// A visual that has no composition visual is leaving the visual tree of the renderer and
+    /// asks whether the renderer keeps what it drew until its next update pass, as it keeps a
+    /// composition visual: `true` when the renderer took it. `false`, the default, has the
+    /// visual let go of it at once (FerroUI deviation, docs/porting/desktop-performance.md,
+    /// section 9.42).
+    fn keep_departed_composition_item(&self, _visual: &Visual) -> bool {
+        false
+    }
+
     /// A visual whose composition visual was kept is attached to the visual tree of this
     /// renderer: whether the composition visual may be used there (section 9.32).
     fn rejoins_departed_composition_visual(&self, _composition_visual: &CompositionDrawListVisual) -> bool {

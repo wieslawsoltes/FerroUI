@@ -1,7 +1,10 @@
 use super::ICompositionHitTester;
 use crate::media::IntersectionResult;
 use crate::platform::LtrbRect;
-use crate::rendering::composition::{CompositionTarget, CompositionVisual, CompositionVisualCollection};
+use crate::rendering::composition::{
+    holder_passes, CompositionDrawItem, CompositionHitTarget, CompositionTarget, CompositionVisual,
+    CompositionVisualCollection, HitFilters,
+};
 use std::collections::HashMap;
 use std::rc::Rc;
 
@@ -189,6 +192,20 @@ impl CompositionHitTestAabbTree {
         results: &mut Vec<Rc<CompositionVisual>>,
         readback_revision: u64,
     ) {
+        self.query_until::<H, ()>(input, readback_revision, &mut |visual, _| {
+            results.push(visual.clone());
+            None
+        });
+    }
+
+    /// Calls `each` with the children that may be hit by `input`, topmost first, and with
+    /// where each is among the children, until it answers.
+    pub(crate) fn query_until<H: ICompositionHitTester, R>(
+        &mut self,
+        input: &H::Input,
+        readback_revision: u64,
+        each: &mut dyn FnMut(&Rc<CompositionVisual>, usize) -> Option<R>,
+    ) -> Option<R> {
         let mut candidates: Vec<Candidate> = Vec::with_capacity(ORDER_BUCKET_SIZE as usize);
         let mut stack: Vec<i32> = Vec::with_capacity(16);
 
@@ -207,9 +224,13 @@ impl CompositionHitTestAabbTree {
             candidates.sort_by(|left, right| right.order.cmp(&left.order));
 
             for candidate in candidates.drain(..) {
-                results.push(candidate.visual);
+                if let Some(answer) = each(&candidate.visual, candidate.order as usize) {
+                    return Some(answer);
+                }
             }
         }
+
+        None
     }
 
     /// Finds the topmost hit among the children that may be hit by
@@ -222,32 +243,33 @@ impl CompositionHitTestAabbTree {
         result_filter: VisualFilter<'_>,
         readback_revision: u64,
     ) -> (Option<Rc<CompositionVisual>>, IntersectionResult) {
+        // What a visual without a composition visual drew is hit as the composition visual
+        // that shows it (docs/porting/desktop-performance.md, section 9.42).
+        let item_filter = |item: &Rc<CompositionDrawItem>| holder_passes(item, result_filter);
+        let filters = HitFilters { visual: filter, result: result_filter, item: Some(&item_filter) };
+        let (hit, intersection_result) = self.query_first_target::<H>(target, input, input, filters, readback_revision);
+        (hit.and_then(CompositionHitTarget::into_holder), intersection_result)
+    }
+
+    /// [`query_first`](Self::query_first) that says what is hit of a composition visual: the
+    /// visual, or what a visual without a composition visual drew in it. `layout_input` is the
+    /// input in the coordinates the parent of the children has in the last layout
+    /// (`CompositionTarget::hit_test_core`).
+    pub(crate) fn query_first_target<H: ICompositionHitTester>(
+        &mut self,
+        target: &CompositionTarget,
+        input: &H::Input,
+        layout_input: &H::Input,
+        filters: HitFilters<'_>,
+        readback_revision: u64,
+    ) -> (Option<CompositionHitTarget>, IntersectionResult) {
         let mut intersection_result = IntersectionResult::NotCalculated;
-        let mut candidates: Vec<Candidate> = Vec::with_capacity(ORDER_BUCKET_SIZE as usize);
-        let mut stack: Vec<i32> = Vec::with_capacity(16);
-
-        for i in (0..self.buckets.len()).rev() {
-            self.update_bucket(i, readback_revision);
-            let Some(bucket) = self.buckets.get(i) else { continue };
-            if bucket.is_empty() {
-                continue;
-            }
-
-            candidates.clear();
-            stack.clear();
-            self.query_bucket::<H>(i, input, &mut candidates, &mut stack);
-            candidates.sort_by(|left, right| right.order.cmp(&left.order));
-
-            for candidate in candidates.drain(..) {
-                let (hit, result) = target.hit_test_first_core::<H>(&candidate.visual, input, filter, result_filter);
-                intersection_result = result;
-                if hit.is_some() {
-                    return (hit, intersection_result);
-                }
-            }
-        }
-
-        (None, intersection_result)
+        let hit = self.query_until::<H, CompositionHitTarget>(input, readback_revision, &mut |visual, _| {
+            let (hit, result) = target.hit_test_first_core::<H>(visual, input, layout_input, filters);
+            intersection_result = result;
+            hit
+        });
+        (hit, intersection_result)
     }
 
     fn update_bucket(&mut self, bucket_index: usize, readback_revision: u64) {

@@ -1,4 +1,5 @@
 use super::animations::{ICompositionAnimation, ICompositionAnimationBase};
+use super::composition_draw_item::HIT_TEST_ITEM_CHUNK;
 use super::container_visual::HIT_TEST_AABB_TREE_THRESHOLD;
 use super::expressions::ExpressionVariant;
 use super::generated::{CompositionTargetHooks, CompositionTargetProps, ServerCompositionTargetProps};
@@ -6,12 +7,14 @@ use super::hit_testing::{is_hit, ICompositionHitTester};
 use super::server::{CompositionProperty, RenderSurfaces, ServerCompositionTarget, ServerObjectId};
 use super::transport::{BatchStreamWriter, IRegisterForSerialization};
 use super::{
-    AsCompositionObject, CompositionObject, CompositionTransparencyLevel, ICompositionObjectAnimations, CompositionVisual, Compositor, ICompositionObject,
-    ICompositionObjectHost, ICompositionTargetDebugEvents, ICompositorSerializable, PendingAnimations,
+    AsCompositionObject, CompositionDrawItem, CompositionDrawListVisual, CompositionObject, CompositionTransparencyLevel,
+    CompositionVisual, Compositor, DrawItemList, ICompositionObject, ICompositionObjectAnimations, ICompositionObjectHost,
+    ICompositionTargetDebugEvents, ICompositorSerializable, PendingAnimations,
 };
 use crate::media::IntersectionResult;
+use crate::platform::LtrbRect;
 use crate::rendering::{LayoutPassTiming, RendererDebugOverlays};
-use crate::Size;
+use crate::{Matrix, Ref, Size, Visual};
 use std::any::Any;
 use std::cell::RefCell;
 use std::sync::Arc;
@@ -22,6 +25,87 @@ static NEXT_ID: AtomicI64 = AtomicI64::new(1);
 
 type VisualFilter<'a> = Option<&'a dyn Fn(&Rc<CompositionVisual>) -> bool>;
 
+/// The items of a holder that a walk over its child visuals, from the last, has not passed
+/// yet (section 9.42).
+struct ItemsBetween<'a> {
+    items: Option<&'a DrawItemList>,
+    /// The number of items painted before the child visual the walk is at.
+    end: usize,
+}
+
+impl<'a> ItemsBetween<'a> {
+    fn of(visual: &'a CompositionVisual) -> Self {
+        let items = CompositionTarget::items_of(visual);
+        Self { items, end: items.map_or(0, DrawItemList::count) }
+    }
+
+    /// The items painted after the child visual at `child` that the walk has not passed, as
+    /// the list and a range of it; the walk passes them. The children of a walk that leaves
+    /// some out are in the order of the list, so the items around one that is left out are
+    /// passed with those after the next child above it.
+    fn after(&mut self, child: usize) -> Option<(&'a DrawItemList, usize, usize)> {
+        let items = self.items?;
+        let end = self.end;
+        self.end = items.position(child).min(end);
+        (self.end < end).then_some((items, self.end, end))
+    }
+
+    /// The items painted before the first child visual of the walk.
+    fn rest(&mut self) -> Option<(&'a DrawItemList, usize, usize)> {
+        let items = self.items?;
+        let end = std::mem::take(&mut self.end);
+        (end > 0).then_some((items, 0, end))
+    }
+}
+
+/// What a hit test of the composition tree finds: a composition visual, or what a visual
+/// without one drew, which the composition visual of a visual above it shows
+/// (docs/porting/desktop-performance.md, section 9.42).
+pub(crate) enum CompositionHitTarget {
+    Visual(Rc<CompositionVisual>),
+    Item(Rc<CompositionDrawItem>),
+}
+
+impl CompositionHitTarget {
+    /// The visual of the visual tree that is hit.
+    pub(crate) fn element(&self) -> Option<Ref<Visual>> {
+        match self {
+            CompositionHitTarget::Visual(visual) => {
+                CompositionDrawListVisual::from_visual(visual).and_then(|visual| visual.visual())
+            }
+            CompositionHitTarget::Item(item) => item.element(),
+        }
+    }
+
+    /// The composition visual that shows what is hit.
+    pub(crate) fn into_holder(self) -> Option<Rc<CompositionVisual>> {
+        match self {
+            CompositionHitTarget::Visual(visual) => Some(visual),
+            CompositionHitTarget::Item(item) => item.holder(),
+        }
+    }
+}
+
+/// What a hit test asks before it tests something.
+#[derive(Clone, Copy)]
+pub(crate) struct HitFilters<'a> {
+    /// A composition visual it rejects is skipped with everything under it.
+    pub(crate) visual: VisualFilter<'a>,
+    /// A composition visual it rejects is not the first hit; what is under it is still tested.
+    pub(crate) result: VisualFilter<'a>,
+    /// A drawing item it rejects is not hit. `None` accepts every item.
+    pub(crate) item: Option<&'a dyn Fn(&Rc<CompositionDrawItem>) -> bool>,
+}
+
+/// Whether the composition visual that shows `item` passes `result_filter`: how the hit
+/// tests that name composition visuals only treat an item.
+pub(crate) fn holder_passes(item: &Rc<CompositionDrawItem>, result_filter: VisualFilter<'_>) -> bool {
+    match result_filter {
+        Some(result_filter) => item.holder().is_some_and(|holder| result_filter(&holder)),
+        None => true,
+    }
+}
+
 /// The root of a composition visual tree: what a renderer draws to a
 /// render target.
 pub struct CompositionTarget {
@@ -29,7 +113,7 @@ pub struct CompositionTarget {
     object: CompositionObject,
     props: CompositionTargetProps,
     id: i64,
-    hit_test_child_candidates: RefCell<Vec<Rc<CompositionVisual>>>,
+    hit_test_child_candidates: RefCell<Vec<(Rc<CompositionVisual>, usize)>>,
 }
 
 /// How a hit test enters a composition visual.
@@ -190,38 +274,161 @@ impl CompositionTarget {
         root: Option<&Rc<CompositionVisual>>,
         filter: VisualFilter<'_>,
     ) -> Option<Vec<(IntersectionResult, Rc<CompositionVisual>)>> {
-        self.compositor().readback().next_read();
         let root = match root {
             Some(root) => root.clone(),
             None => self.root()?,
         };
+        let filters = HitFilters { visual: filter, result: None, item: None };
+        let targets = self.hit_test_targets::<H>(input, &root, filters)?;
+
+        // What a visual without a composition visual drew is hit as the composition visual
+        // that shows it, which is in the result once (section 9.42).
+        let mut res: Vec<(IntersectionResult, Rc<CompositionVisual>)> = Vec::with_capacity(targets.len());
+        let mut items = false;
+        for (intersection, target) in targets {
+            items |= matches!(target, CompositionHitTarget::Item(_));
+            let Some(visual) = target.into_holder() else { continue };
+            if items && res.iter().any(|(_, known)| Rc::ptr_eq(known, &visual)) {
+                continue;
+            }
+            res.push((intersection, visual));
+        }
+        Some(res)
+    }
+
+    /// [`try_hit_test`](Self::try_hit_test) that says what is hit of a composition visual: the
+    /// visual, or what a visual without a composition visual drew in it (section 9.42).
+    pub(crate) fn hit_test_targets<H: ICompositionHitTester>(
+        &self,
+        input: &H::Input,
+        root: &Rc<CompositionVisual>,
+        filters: HitFilters<'_>,
+    ) -> Option<Vec<(IntersectionResult, CompositionHitTarget)>> {
+        self.compositor().readback().next_read();
 
         // Need to convert transform the point using visual's readback since HitTestCore will use its inverse matrix
         // NOTE: it can technically break hit-testing of the root visual itself if it has a non-identity transform,
         // need to investigate that possibility later. We might want a separate mode for root hit-testing.
-        let parent_input = Self::root_parent_input::<H>(&root, input)?;
+        let parent_input = Self::root_parent_input::<H>(root, input)?;
+        let layout_input = Self::root_layout_input::<H>(root, input);
+        let layout_input = layout_input.as_ref().unwrap_or(&parent_input);
 
         let mut res = Vec::new();
-        self.hit_test_core::<H>(&root, &parent_input, &mut res, filter);
+        self.hit_test_core::<H>(root, &parent_input, layout_input, &mut res, filters);
         Some(res)
     }
 
-    /// [`try_hit_test`](Self::try_hit_test) for a root that has no composition visual
-    /// (docs/porting/desktop-performance.md, section 9.41): `visuals` are the composition
-    /// visuals that show what is under it, in the order they are shown, all children of one
-    /// composition visual, and `parent_input` is the input in the coordinates of that one.
+    /// [`hit_test_targets`](Self::hit_test_targets) for a root that has no composition visual
+    /// (docs/porting/desktop-performance.md, sections 9.41 and 9.42): `targets` are what shows
+    /// the root and what is under it, in the order it is shown, all of one composition visual
+    /// (children of it and items in it). `layout_input` is the input in the coordinates that
+    /// one has in the last layout, and `parent_input` in those of the composition visual that
+    /// showed the children in the last frame ([`last_frame_input`](Self::last_frame_input)).
     pub(crate) fn hit_test_siblings<H: ICompositionHitTester>(
         &self,
-        visuals: &[Rc<CompositionVisual>],
+        targets: &[CompositionHitTarget],
         parent_input: &H::Input,
-        filter: VisualFilter<'_>,
-    ) -> Vec<(IntersectionResult, Rc<CompositionVisual>)> {
+        layout_input: &H::Input,
+        filters: HitFilters<'_>,
+    ) -> Vec<(IntersectionResult, CompositionHitTarget)> {
         self.compositor().readback().next_read();
         let mut res = Vec::new();
-        for visual in visuals.iter().rev() {
-            self.hit_test_core::<H>(visual, parent_input, &mut res, filter);
+        for target in targets.iter().rev() {
+            match target {
+                CompositionHitTarget::Visual(visual) => {
+                    self.hit_test_core::<H>(visual, parent_input, layout_input, &mut res, filters)
+                }
+                CompositionHitTarget::Item(item) => {
+                    if let Some(intersection) = Self::hit_test_item::<H>(item, layout_input, filters) {
+                        res.push((intersection, CompositionHitTarget::Item(item.clone())));
+                    }
+                }
+            }
         }
         res
+    }
+
+    /// How `input`, in the coordinates of the composition visual that shows `item`, hits it;
+    /// `None` when it does not.
+    ///
+    /// Deviation (DEVIATIONS.md, Composition visuals): the item is where the last layout put
+    /// it, while a composition visual is tested where the last frame showed it.
+    fn hit_test_item<H: ICompositionHitTester>(
+        item: &Rc<CompositionDrawItem>,
+        input: &H::Input,
+        filters: HitFilters<'_>,
+    ) -> Option<IntersectionResult> {
+        if item.is_departed() {
+            return None;
+        }
+        let data = item.data()?;
+        let (x, y) = item.offset();
+        if let Some((width, height)) = item.clip() {
+            if !H::transformed_sub_tree_bounds_match(LtrbRect::new(x, y, x + width, y + height), input) {
+                return None;
+            }
+        }
+        let bounds = || {
+            let bounds = data.bounds()?;
+            Some(LtrbRect::new(bounds.left + x, bounds.top + y, bounds.right + x, bounds.bottom + y))
+        };
+        if !H::drawing_bounds_match(&bounds, input) {
+            return None;
+        }
+        let local = H::transform(input, Matrix::create_translation(-x, -y));
+        let intersection = H::hit_test_drawing(&data, &local);
+        // The filter last: it is asked for the items that are hit only.
+        if !is_hit(intersection) || filters.item.is_some_and(|filter| !filter(item)) {
+            return None;
+        }
+        Some(intersection)
+    }
+
+    /// The items of `visual`, when it shows any.
+    fn items_of(visual: &CompositionVisual) -> Option<&DrawItemList> {
+        visual.draw_items().filter(|items| items.count() != 0)
+    }
+
+    /// The input in the coordinates of a visual that is entered through
+    /// ([`Entered::Through`]), from the one in the coordinates its parent has in the last
+    /// layout: the visual is where its offset says in its parent. What it draws, and what the
+    /// visuals without a composition visual drew in it, are tested with it (section 9.42).
+    fn through_layout_input<H: ICompositionHitTester>(visual: &CompositionVisual, layout_input: &H::Input) -> H::Input {
+        let offset = visual.offset();
+        H::transform(layout_input, Matrix::create_translation(-offset.x, -offset.y))
+    }
+
+    /// The input of a hit test under `root`, given in its coordinates, in those its parent has
+    /// in the last layout, when they are not those of the last frame: the root is entered
+    /// through.
+    fn root_layout_input<H: ICompositionHitTester>(root: &Rc<CompositionVisual>, input: &H::Input) -> Option<H::Input> {
+        if root.try_get_valid_readback().is_some() || !root.hit_tests_through() {
+            return None;
+        }
+        let offset = root.offset();
+        Some(H::transform(input, Matrix::create_translation(offset.x, offset.y)))
+    }
+
+    /// `input`, given in the coordinates `visual` has in the last layout, in those of the
+    /// composition visual that showed what is under `visual` in the last frame, when that is
+    /// another one: no frame was rendered with `visual`, nor with the ones above it that were
+    /// created with it (section 9.41).
+    pub(crate) fn last_frame_input<H: ICompositionHitTester>(
+        visual: &Rc<CompositionVisual>,
+        input: &H::Input,
+    ) -> Option<H::Input> {
+        if !visual.hit_tests_through() {
+            return None;
+        }
+        let (mut x, mut y) = (0.0, 0.0);
+        let mut above = Some(visual.clone());
+        while let Some(visual) = above.filter(|visual| visual.hit_tests_through()) {
+            let offset = visual.offset();
+            x += offset.x;
+            y += offset.y;
+            above = visual.parent();
+        }
+        Some(H::transform(input, Matrix::create_translation(x, y)))
     }
 
     /// The input of a hit test under `root`, given in its coordinates, in those of its parent.
@@ -248,44 +455,73 @@ impl CompositionTarget {
         }
     }
 
+    /// Tests `visual` and what is under it. `parent_input` is the input in the coordinates of
+    /// the composition visual that showed `visual` in the last frame, and `layout_input` in
+    /// those its parent has in the last layout: the same, unless a visual above it is entered
+    /// through.
     fn hit_test_core<H: ICompositionHitTester>(
         &self,
         visual: &Rc<CompositionVisual>,
         parent_input: &H::Input,
-        result: &mut Vec<(IntersectionResult, Rc<CompositionVisual>)>,
-        filter: VisualFilter<'_>,
+        layout_input: &H::Input,
+        result: &mut Vec<(IntersectionResult, CompositionHitTarget)>,
+        filters: HitFilters<'_>,
     ) {
-        let input = match Self::hit_test_visual::<H>(visual, parent_input, filter) {
+        let input = match Self::hit_test_visual::<H>(visual, parent_input, filters.visual) {
             Some(Entered::Local(input)) => input,
             Some(Entered::Through) => {
-                self.hit_test_children::<H>(visual, parent_input, result, filter);
+                // The child visuals are where they were in the last frame, in the coordinates
+                // of the parent (section 9.41); what the visual shows itself was an item of
+                // the composition visual above, where the last layout put it (section 9.42).
+                let local = Self::through_layout_input::<H>(visual, layout_input);
+                self.hit_test_children::<H>(visual, parent_input, &local, result, filters);
+                if let Some(intersection) = Self::hit_test_through::<H>(visual, &local) {
+                    result.push((intersection, CompositionHitTarget::Visual(visual.clone())));
+                }
                 return;
             }
             None => return,
         };
 
         // Inspect children
-        self.hit_test_children::<H>(visual, &input, result, filter);
+        self.hit_test_children::<H>(visual, &input, &input, result, filters);
 
         // Hit-test the current node
         let intersection_result = H::hit_test(visual, &input);
         if is_hit(intersection_result) {
-            result.push((intersection_result, visual.clone()));
+            result.push((intersection_result, CompositionHitTarget::Visual(visual.clone())));
         }
     }
 
+    /// How `input`, in the coordinates of a visual that is entered through, hits what the
+    /// visual shows itself; `None` when it does not.
+    fn hit_test_through<H: ICompositionHitTester>(visual: &Rc<CompositionVisual>, input: &H::Input) -> Option<IntersectionResult> {
+        if visual.is_departed() || (visual.clip_to_bounds() && !H::clipped_bounds_match(visual, input)) {
+            return None;
+        }
+        let intersection = H::hit_test(visual, input);
+        is_hit(intersection).then_some(intersection)
+    }
+
+    /// Tests what is under `visual`: its child visuals with `input`, and what the visuals
+    /// without a composition visual drew in it with `item_input`, the input in the coordinates
+    /// `visual` has in the last layout.
     fn hit_test_children<H: ICompositionHitTester>(
         &self,
         visual: &Rc<CompositionVisual>,
         input: &H::Input,
-        result: &mut Vec<(IntersectionResult, Rc<CompositionVisual>)>,
-        filter: VisualFilter<'_>,
+        item_input: &H::Input,
+        result: &mut Vec<(IntersectionResult, CompositionHitTarget)>,
+        filters: HitFilters<'_>,
     ) {
         // The children of a visual kept for a visual that left its tree are those of a released
         // one: none (section 9.32).
         if visual.is_departed() {
             return;
         }
+        // The items and the child visuals are shown in one order: from the last, the items
+        // after a child, then the child (section 9.42).
+        let mut items = ItemsBetween::of(visual);
         if visual.children().count() >= HIT_TEST_AABB_TREE_THRESHOLD {
             // The candidate list of the target is reused unless a query is
             // already running (a nested container).
@@ -296,8 +532,11 @@ impl CompositionTarget {
             candidates.clear();
             let queried = visual.try_query_hit_test_children::<H>(input, &mut candidates);
             if queried {
-                for child in &candidates {
-                    self.hit_test_core::<H>(child, input, result, filter);
+                for (child, index) in &candidates {
+                    if let Some((list, start, end)) = items.after(*index) {
+                        Self::hit_test_items::<H>(list, start, end, item_input, result, filters);
+                    }
+                    self.hit_test_core::<H>(child, input, item_input, result, filters);
                 }
             }
             candidates.clear();
@@ -307,6 +546,9 @@ impl CompositionTarget {
                 }
             }
             if queried {
+                if let Some((list, start, end)) = items.rest() {
+                    Self::hit_test_items::<H>(list, start, end, item_input, result, filters);
+                }
                 return;
             }
         }
@@ -317,8 +559,77 @@ impl CompositionTarget {
         let mut index = children.count();
         while index > 0 {
             index -= 1;
-            self.hit_test_core::<H>(&children.get(index), input, result, filter);
+            if let Some((list, start, end)) = items.after(index) {
+                Self::hit_test_items::<H>(list, start, end, item_input, result, filters);
+            }
+            self.hit_test_core::<H>(&children.get(index), input, item_input, result, filters);
         }
+        if let Some((list, start, end)) = items.rest() {
+            Self::hit_test_items::<H>(list, start, end, item_input, result, filters);
+        }
+    }
+
+    /// Tests the items `start..end` of a holder, from the last.
+    fn hit_test_items<H: ICompositionHitTester>(
+        items: &DrawItemList,
+        start: usize,
+        end: usize,
+        input: &H::Input,
+        result: &mut Vec<(IntersectionResult, CompositionHitTarget)>,
+        filters: HitFilters<'_>,
+    ) {
+        Self::items_that_may_be_hit::<H, ()>(items, start, end, input, &mut |item| {
+            if let Some(intersection) = Self::hit_test_item::<H>(&item, input, filters) {
+                result.push((intersection, CompositionHitTarget::Item(item)));
+            }
+            None
+        });
+    }
+
+    /// The last of the items `start..end` of a holder that is hit.
+    fn hit_test_first_item<H: ICompositionHitTester>(
+        items: &DrawItemList,
+        start: usize,
+        end: usize,
+        input: &H::Input,
+        filters: HitFilters<'_>,
+    ) -> Option<(CompositionHitTarget, IntersectionResult)> {
+        Self::items_that_may_be_hit::<H, _>(items, start, end, input, &mut |item| {
+            let intersection = Self::hit_test_item::<H>(&item, input, filters)?;
+            Some((CompositionHitTarget::Item(item), intersection))
+        })
+    }
+
+    /// Calls `each` with the items `start..end` of a holder that `input` may hit, from the
+    /// last, until it answers. A holder of `HIT_TEST_ITEM_CHUNK` items and more keeps the
+    /// bounds of every `HIT_TEST_ITEM_CHUNK` of them that follow each other
+    /// (`DrawItemList::chunk_bounds`): the items of a chunk whose bounds the input misses are
+    /// passed over together, as the children of a visual are in the buckets of its index.
+    fn items_that_may_be_hit<H: ICompositionHitTester, R>(
+        items: &DrawItemList,
+        start: usize,
+        end: usize,
+        input: &H::Input,
+        each: &mut dyn FnMut(Rc<CompositionDrawItem>) -> Option<R>,
+    ) -> Option<R> {
+        let indexed = items.count() >= HIT_TEST_ITEM_CHUNK;
+        let mut end = end;
+        while end > start {
+            let chunk = (end - 1) / HIT_TEST_ITEM_CHUNK;
+            let chunk_start = if indexed { (chunk * HIT_TEST_ITEM_CHUNK).max(start) } else { start };
+            let may_be_hit = !indexed
+                || items.chunk_bounds(chunk).is_some_and(|bounds| H::transformed_sub_tree_bounds_match(bounds, input));
+            if may_be_hit {
+                for index in (chunk_start..end).rev() {
+                    let Some(item) = items.item_at(index) else { continue };
+                    if let Some(answer) = each(item) {
+                        return Some(answer);
+                    }
+                }
+            }
+            end = chunk_start;
+        }
+        None
     }
 
     fn hit_test_visual<H: ICompositionHitTester>(
@@ -375,7 +686,6 @@ impl CompositionTarget {
         filter: VisualFilter<'_>,
         result_filter: VisualFilter<'_>,
     ) -> (Option<Rc<CompositionVisual>>, IntersectionResult) {
-        self.compositor().readback().next_read();
         let none = (None, IntersectionResult::NotCalculated);
         let root = match root {
             Some(root) => root.clone(),
@@ -384,83 +694,143 @@ impl CompositionTarget {
                 None => return none,
             },
         };
+        // What a visual without a composition visual drew is hit as the composition visual
+        // that shows it (section 9.42).
+        let item_filter = |item: &Rc<CompositionDrawItem>| holder_passes(item, result_filter);
+        let filters = HitFilters { visual: filter, result: result_filter, item: Some(&item_filter) };
+        let (hit, intersection) = self.hit_test_first_target::<H>(input, &root, filters);
+        (hit.and_then(CompositionHitTarget::into_holder), intersection)
+    }
+
+    /// [`try_hit_test_first`](Self::try_hit_test_first) that says what is hit of a composition
+    /// visual: the visual, or what a visual without a composition visual drew in it
+    /// (section 9.42).
+    pub(crate) fn hit_test_first_target<H: ICompositionHitTester>(
+        &self,
+        input: &H::Input,
+        root: &Rc<CompositionVisual>,
+        filters: HitFilters<'_>,
+    ) -> (Option<CompositionHitTarget>, IntersectionResult) {
+        self.compositor().readback().next_read();
 
         // Need to convert transform the point using visual's readback since HitTestCore will use its inverse matrix
         // NOTE: it can technically break hit-testing of the root visual itself if it has a non-identity transform,
         // need to investigate that possibility later. We might want a separate mode for root hit-testing.
-        let Some(parent_input) = Self::root_parent_input::<H>(&root, input) else { return none };
+        let Some(parent_input) = Self::root_parent_input::<H>(root, input) else {
+            return (None, IntersectionResult::NotCalculated);
+        };
+        let layout_input = Self::root_layout_input::<H>(root, input);
+        let layout_input = layout_input.as_ref().unwrap_or(&parent_input);
 
-        self.hit_test_first_core::<H>(&root, &parent_input, filter, result_filter)
+        self.hit_test_first_core::<H>(root, &parent_input, layout_input, filters)
     }
 
-    /// [`try_hit_test_first`](Self::try_hit_test_first) for a root that has no composition
-    /// visual: see [`hit_test_siblings`](Self::hit_test_siblings).
+    /// [`hit_test_first_target`](Self::hit_test_first_target) for a root that has no
+    /// composition visual: see [`hit_test_siblings`](Self::hit_test_siblings).
     pub(crate) fn hit_test_first_sibling<H: ICompositionHitTester>(
         &self,
-        visuals: &[Rc<CompositionVisual>],
+        targets: &[CompositionHitTarget],
         parent_input: &H::Input,
-        filter: VisualFilter<'_>,
-        result_filter: VisualFilter<'_>,
-    ) -> (Option<Rc<CompositionVisual>>, IntersectionResult) {
+        layout_input: &H::Input,
+        filters: HitFilters<'_>,
+    ) -> (Option<CompositionHitTarget>, IntersectionResult) {
         self.compositor().readback().next_read();
-        for visual in visuals.iter().rev() {
-            let (hit, intersection) = self.hit_test_first_core::<H>(visual, parent_input, filter, result_filter);
-            if hit.is_some() {
-                return (hit, intersection);
+        for target in targets.iter().rev() {
+            match target {
+                CompositionHitTarget::Visual(visual) => {
+                    let (hit, intersection) =
+                        self.hit_test_first_core::<H>(visual, parent_input, layout_input, filters);
+                    if hit.is_some() {
+                        return (hit, intersection);
+                    }
+                }
+                CompositionHitTarget::Item(item) => {
+                    if let Some(intersection) = Self::hit_test_item::<H>(item, layout_input, filters) {
+                        return (Some(CompositionHitTarget::Item(item.clone())), intersection);
+                    }
+                }
             }
         }
         (None, IntersectionResult::NotCalculated)
     }
 
+    /// The first hit of `visual` and what is under it: the inputs are those of
+    /// [`hit_test_core`](Self::hit_test_core).
     pub(crate) fn hit_test_first_core<H: ICompositionHitTester>(
         &self,
         visual: &Rc<CompositionVisual>,
         parent_input: &H::Input,
-        filter: VisualFilter<'_>,
-        result_filter: VisualFilter<'_>,
-    ) -> (Option<Rc<CompositionVisual>>, IntersectionResult) {
-        let (input, through) = match Self::hit_test_visual::<H>(visual, parent_input, filter) {
-            Some(Entered::Local(input)) => (input, false),
-            // What is under it is where it was in the last frame: in the coordinates of the
-            // parent, with the content of the visual not drawn yet (section 9.41).
-            Some(Entered::Through) => (parent_input.clone(), true),
+        layout_input: &H::Input,
+        filters: HitFilters<'_>,
+    ) -> (Option<CompositionHitTarget>, IntersectionResult) {
+        let (input, through) = match Self::hit_test_visual::<H>(visual, parent_input, filters.visual) {
+            Some(Entered::Local(input)) => (input, None),
+            // The child visuals are where they were in the last frame, in the coordinates of
+            // the parent (section 9.41); what the visual shows itself was an item of the
+            // composition visual above, where the last layout put it (section 9.42).
+            Some(Entered::Through) => {
+                (parent_input.clone(), Some(Self::through_layout_input::<H>(visual, layout_input)))
+            }
             None => return (None, IntersectionResult::NotCalculated),
         };
+        // The input in the coordinates the visual has in the last layout.
+        let layout_input = through.as_ref().unwrap_or(&input);
 
         // A visual kept for a visual that left its tree has no children here (section 9.32).
-        let mut queried_indexed_children = visual.is_departed();
-        if !queried_indexed_children && visual.children().count() >= HIT_TEST_AABB_TREE_THRESHOLD {
-            if let Some((hit, intersection_result)) =
-                visual.try_query_first_hit_test_child::<H>(self, &input, filter, result_filter)
-            {
-                queried_indexed_children = true;
-                if hit.is_some() {
-                    return (hit, intersection_result);
+        if !visual.is_departed() {
+            // The items and the child visuals are shown in one order: from the last, the items
+            // after a child, then the child (section 9.42).
+            let mut items = ItemsBetween::of(visual);
+            let mut test_child = |child: &Rc<CompositionVisual>, index: usize| {
+                if let Some((list, start, end)) = items.after(index) {
+                    let hit = Self::hit_test_first_item::<H>(list, start, end, layout_input, filters);
+                    if hit.is_some() {
+                        return hit;
+                    }
                 }
+                let (hit, intersection_result) = self.hit_test_first_core::<H>(child, &input, layout_input, filters);
+                hit.map(|hit| (hit, intersection_result))
+            };
+            let indexed = if visual.children().count() >= HIT_TEST_AABB_TREE_THRESHOLD {
+                visual.try_query_hit_test_children_until::<H, _>(&input, &mut test_child)
+            } else {
+                None
+            };
+            let hit = match indexed {
+                Some(hit) => hit,
+                None => {
+                    // By index, from the last child, as the original: no copy of the
+                    // children of every visual the hit test enters.
+                    let children = visual.children();
+                    let mut index = children.count();
+                    let mut hit = None;
+                    while index > 0 && hit.is_none() {
+                        index -= 1;
+                        hit = test_child(&children.get(index), index);
+                    }
+                    hit
+                }
+            };
+            let hit = hit.or_else(|| {
+                let (list, start, end) = items.rest()?;
+                Self::hit_test_first_item::<H>(list, start, end, layout_input, filters)
+            });
+            if let Some((hit, intersection_result)) = hit {
+                return (Some(hit), intersection_result);
             }
         }
 
-        if !queried_indexed_children {
-            // By index, from the last child, as the original: no copy of the
-            // children of every visual the hit test enters.
-            let children = visual.children();
-            let mut index = children.count();
-            while index > 0 {
-                index -= 1;
-                let child = children.get(index);
-                let (hit, intersection_result) = self.hit_test_first_core::<H>(&child, &input, filter, result_filter);
-                if hit.is_some() {
-                    return (hit, intersection_result);
+        if through.is_some() {
+            return match Self::hit_test_through::<H>(visual, layout_input) {
+                Some(intersection) if filters.result.is_none_or(|result_filter| result_filter(visual)) => {
+                    (Some(CompositionHitTarget::Visual(visual.clone())), intersection)
                 }
-            }
-        }
-
-        if through {
-            return (None, IntersectionResult::NotCalculated);
+                _ => (None, IntersectionResult::NotCalculated),
+            };
         }
         let intersection_result = H::hit_test(visual, &input);
-        let hit = is_hit(intersection_result) && result_filter.is_none_or(|result_filter| result_filter(visual));
-        (hit.then(|| visual.clone()), intersection_result)
+        let hit = is_hit(intersection_result) && filters.result.is_none_or(|result_filter| result_filter(visual));
+        (hit.then(|| CompositionHitTarget::Visual(visual.clone())), intersection_result)
     }
 
     pub fn request_redraw(&self) {

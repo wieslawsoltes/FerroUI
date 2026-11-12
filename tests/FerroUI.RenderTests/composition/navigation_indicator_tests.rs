@@ -39,7 +39,6 @@ impl IFramebufferPlatformSurface for Surface {
 }
 
 struct Sidebar {
-    _test: TestBase,
     root: Ref<TestRenderRoot>,
     renderer: Rc<CompositingRenderer>,
     bitmap: Arc<dyn IWriteableBitmapImpl>,
@@ -49,6 +48,9 @@ struct Sidebar {
     slider: Ref<NavigationViewItem>,
     table: Ref<NavigationViewItem>,
     scaling: f64,
+    // The last field: the scope of the test ends after everything made in it is dropped. The
+    // compositor goes with the last of the items, and is released on the thread it was made on.
+    _test: TestBase,
 }
 
 fn item(text: &str) -> Ref<NavigationViewItem> {
@@ -121,7 +123,6 @@ impl Sidebar {
         root.initialize(&renderer, &host.upcast());
         renderer.start();
         let scene = Self {
-            _test: test,
             root,
             renderer,
             bitmap,
@@ -131,6 +132,7 @@ impl Sidebar {
             slider,
             table,
             scaling,
+            _test: test,
         };
         scene.flush();
         for visual in scene.nav.clone().upcast::<Visual>().get_visual_descendants() {

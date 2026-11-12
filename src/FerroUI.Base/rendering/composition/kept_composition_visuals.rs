@@ -1,12 +1,20 @@
 //! The composition visuals kept for visuals that are out of their visual tree (FerroUI
 //! addition, docs/porting/desktop-performance.md, section 9.32).
 
-use super::CompositionDrawListVisual;
+use super::{CompositionDrawItem, CompositionDrawListVisual};
 use crate::{Visual, WeakRef};
+use std::rc::Rc;
 
-/// A composition visual kept for its visual. The visual is referred to weakly: what keeps a
-/// composition visual keeps no visual alive.
-pub(crate) type KeptCompositionVisual = (WeakRef<Visual>, CompositionDrawListVisual);
+/// What is kept of a visual that left its tree: its composition visual, or, for a visual
+/// without one, what it drew (section 9.42).
+pub(crate) enum KeptComposition {
+    Visual(CompositionDrawListVisual),
+    Item(Rc<CompositionDrawItem>),
+}
+
+/// A composition visual, or a drawing, kept for its visual. The visual is referred to weakly:
+/// what keeps a composition visual keeps no visual alive.
+pub(crate) type KeptCompositionVisual = (WeakRef<Visual>, KeptComposition);
 
 /// The composition visuals of the visuals that left a visual tree inside
 /// [`Visual::leave_tree_keeping_composition_visuals`], kept until this is released or dropped.
@@ -50,16 +58,24 @@ impl Drop for KeptCompositionVisuals {
 
 /// Empties `entries`: a visual that is still out of its tree releases the composition visual
 /// kept for it, and the composition visual of a visual that is gone is released as it was left.
-/// A visual that is back in a tree, or holds another composition visual, is left alone.
+/// A visual that is back in a tree, or holds another composition visual, is left alone. The
+/// drawing kept for a visual without a composition visual goes the same way.
 pub(crate) fn release_kept_composition_visuals(entries: &mut Vec<KeptCompositionVisual>) {
-    for (visual, composition_visual) in entries.drain(..) {
-        match visual.upgrade() {
-            Some(visual) => visual.release_departed_composition_visual(&composition_visual),
-            // The visual is gone and its composition visual is still as it left it.
-            None if composition_visual.is_departed() => {
-                Visual::release_orphaned_composition_visual(&composition_visual);
-            }
-            None => {}
+    for (visual, kept) in entries.drain(..) {
+        match kept {
+            KeptComposition::Visual(composition_visual) => match visual.upgrade() {
+                Some(visual) => visual.release_departed_composition_visual(&composition_visual),
+                // The visual is gone and its composition visual is still as it left it.
+                None if composition_visual.is_departed() => {
+                    Visual::release_orphaned_composition_visual(&composition_visual);
+                }
+                None => {}
+            },
+            KeptComposition::Item(item) => match visual.upgrade() {
+                Some(visual) => visual.release_departed_composition_item(&item),
+                None if item.is_departed() => item.release(),
+                None => {}
+            },
         }
     }
 }
