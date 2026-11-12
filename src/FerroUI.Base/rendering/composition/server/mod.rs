@@ -31,6 +31,7 @@ mod server_composition_visual_collection;
 mod server_composition_visual_surface;
 mod server_compositor_animations;
 mod server_custom_composition_visual;
+mod server_draw_items;
 mod server_drop_shadow;
 mod server_layer_visual;
 mod server_redirect_visual;
@@ -153,6 +154,9 @@ pub use super::brushes::{
 };
 pub use server_compositor_animations::ServerCompositorAnimations;
 pub use server_custom_composition_visual::ServerCompositionCustomVisual;
+pub use server_draw_items::{ServerDrawItem, ServerDrawItems};
+pub(crate) use server_composition_draw_list_visual::{DRAW_LIST_ITEMS, DRAW_LIST_NEW, DRAW_LIST_REDRAWN};
+pub(crate) use server_draw_items::{DRAW_ITEM_CLIP, DRAW_ITEM_CONTENT, DRAW_ITEM_OFFSET, DRAW_ITEM_REDRAWN};
 pub use server_object::{
     impl_animated_server_object, IAnimatedServerObject, IServerObject, ServerExpressionObject, ServerObject, ServerObjectId,
 };

@@ -1,6 +1,7 @@
 use ferroui_base::platform::{IDrawingContextImpl, LtrbRect};
 use ferroui_base::rendering::composition::server::{
-    IServerVisualContent, ServerCompositionDrawListVisual, ServerCompositionVisual, ServerVisualRenderContext,
+    IServerVisualContent, ServerCompositionDrawListVisual, ServerCompositionVisual, ServerDrawItems,
+    ServerVisualRenderContext,
 };
 use ferroui_base::rendering::composition::transport::{BatchStreamReader, BatchStreamWriter, IRegisterForSerialization};
 use ferroui_base::rendering::composition::{CompositionDrawListVisual, Compositor, ICompositionDrawListVisualExtension};
@@ -28,6 +29,12 @@ impl ICompositionDrawListVisualExtension for BorderVisualState {
     // The border writes its corner radius whenever the property changes, in a tree or not
     // (`Border::on_property_changed`).
     fn follows_control_out_of_tree(&self) -> bool {
+        true
+    }
+
+    // The server content hands out the items of the draw list visual it wraps: they are drawn
+    // inside the rounded clip, as the child visuals are.
+    fn holds_drawing_items(&self) -> bool {
         true
     }
 }
@@ -100,6 +107,10 @@ impl IServerVisualContent for ServerBorderVisual {
 
     fn compute_own_content_bounds(&self, visual: &ServerCompositionVisual) -> Option<LtrbRect> {
         self.draw_list.compute_own_content_bounds(visual)
+    }
+
+    fn draw_items(&self) -> Option<&ServerDrawItems> {
+        self.draw_list.draw_items()
     }
 
     fn render_core(

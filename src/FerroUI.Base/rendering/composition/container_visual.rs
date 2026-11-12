@@ -2,8 +2,7 @@
 //! of the container class are members of [`CompositionVisual`].
 
 use super::hit_testing::{CompositionHitTestAabbTree, ICompositionHitTester};
-use super::{CompositionTarget, CompositionVisual};
-use crate::media::IntersectionResult;
+use super::CompositionVisual;
 use std::rc::Rc;
 
 /// A visual that can have children: every visual.
@@ -38,36 +37,29 @@ impl CompositionVisual {
         }
     }
 
-    /// Collects the children that may be hit by `input`, topmost first,
-    /// using the hit test index. Returns `false` when the children are not
-    /// indexed (there are too few of them).
+    /// Collects the children that may be hit by `input`, topmost first, each with where it is
+    /// among the children, using the hit test index. Returns `false` when the children are
+    /// not indexed (there are too few of them).
     pub(crate) fn try_query_hit_test_children<H: ICompositionHitTester>(
         &self,
         input: &H::Input,
-        results: &mut Vec<Rc<CompositionVisual>>,
+        results: &mut Vec<(Rc<CompositionVisual>, usize)>,
     ) -> bool {
-        if self.children().count() < HIT_TEST_AABB_TREE_THRESHOLD {
-            *self.hit_test_children.borrow_mut() = None;
-            return false;
-        }
-
-        let read_revision = self.compositor().readback().read_revision();
-        let mut tree = self.hit_test_children.borrow_mut();
-        let tree = tree.get_or_insert_with(|| Box::new(CompositionHitTestAabbTree::new(self.children().clone())));
-        tree.query::<H>(input, results, read_revision);
-        true
+        self.try_query_hit_test_children_until::<H, ()>(input, &mut |child, index| {
+            results.push((child.clone(), index));
+            None
+        })
+        .is_some()
     }
 
-    /// Finds the topmost hit among the children using the hit test index.
-    /// Returns `None` when the children are not indexed, otherwise the hit
-    /// (if any) and its intersection result.
-    pub(crate) fn try_query_first_hit_test_child<H: ICompositionHitTester>(
+    /// Calls `each` with the children that may be hit by `input`, topmost first, and with
+    /// where each is among the children, until it answers, using the hit test index. Returns
+    /// `None` when the children are not indexed, otherwise the answer (if any).
+    pub(crate) fn try_query_hit_test_children_until<H: ICompositionHitTester, R>(
         &self,
-        target: &CompositionTarget,
         input: &H::Input,
-        filter: Option<&dyn Fn(&Rc<CompositionVisual>) -> bool>,
-        result_filter: Option<&dyn Fn(&Rc<CompositionVisual>) -> bool>,
-    ) -> Option<(Option<Rc<CompositionVisual>>, IntersectionResult)> {
+        each: &mut dyn FnMut(&Rc<CompositionVisual>, usize) -> Option<R>,
+    ) -> Option<Option<R>> {
         if self.children().count() < HIT_TEST_AABB_TREE_THRESHOLD {
             *self.hit_test_children.borrow_mut() = None;
             return None;
@@ -76,7 +68,7 @@ impl CompositionVisual {
         let read_revision = self.compositor().readback().read_revision();
         let mut tree = self.hit_test_children.borrow_mut();
         let tree = tree.get_or_insert_with(|| Box::new(CompositionHitTestAabbTree::new(self.children().clone())));
-        Some(tree.query_first::<H>(target, input, filter, result_filter, read_revision))
+        Some(tree.query_until::<H, R>(input, read_revision, each))
     }
 
     fn update_hit_test_child_order(&self, tree: &mut CompositionHitTestAabbTree) {

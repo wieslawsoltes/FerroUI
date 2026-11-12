@@ -67,6 +67,11 @@ const CLIP_SIZE_DIRTY_MASK: F = F::SIZE
     .union(F::COMPOSITION_CLIP)
     .union(WINUI_SIZE_FIELDS_MASK);
 
+/// The content has drawing items: the render walk looks for them between the children.
+const HAS_DRAW_ITEMS: u8 = 1;
+/// Something of the drawing items changed since the update pass last took their changes.
+const DRAW_ITEMS_DIRTY: u8 = 2;
+
 const READBACK_DIRTY_MASK: F =
     COMBINED_TRANSFORM_FIELDS_MASK.union(F::ROOT).union(F::VISIBLE).union(F::VISIBLE_ANIMATED);
 
@@ -191,12 +196,53 @@ impl ServerCompositionVisual {
     }
 
     pub(crate) fn add_extra_dirty_rect(&self, rect: LtrbRect) {
-        self.extra_dirty_rect.set(if self.delay_propagate_has_extra_dirty_rects.get() {
-            self.extra_dirty_rect.get().union(rect)
+        // A rect of zero size is what a change of the drawing items left there: it has
+        // nothing to unite with.
+        let current = self.extra_dirty_rect.get();
+        self.extra_dirty_rect.set(if self.delay_propagate_has_extra_dirty_rects.get() && !current.is_zero_size() {
+            current.union(rect)
         } else {
             rect
         });
         self.delay_propagate_has_extra_dirty_rects.set(true);
+        self.enqueue_own_properties_recompute();
+    }
+
+    /// Whether the content has drawing items.
+    #[inline]
+    pub(crate) fn has_draw_items(&self) -> bool {
+        self.draw_item_flags.get() & HAS_DRAW_ITEMS != 0
+    }
+
+    pub(crate) fn set_has_draw_items(&self, value: bool) {
+        let flags = self.draw_item_flags.get();
+        self.draw_item_flags.set(if value { flags | HAS_DRAW_ITEMS } else { flags & !HAS_DRAW_ITEMS });
+    }
+
+    /// Whether the drawing items changed since the last call; the update pass asks.
+    pub(super) fn take_draw_items_dirty(&self) -> bool {
+        let flags = self.draw_item_flags.get();
+        self.draw_item_flags.set(flags & !DRAW_ITEMS_DIRTY);
+        flags & DRAW_ITEMS_DIRTY != 0
+    }
+
+    pub(super) fn draw_items_dirty(&self) -> bool {
+        self.draw_item_flags.get() & DRAW_ITEMS_DIRTY != 0
+    }
+
+    /// Something of the drawing items of the content changed: the update pass adds where
+    /// the changed items were and are to the dirty region, as the extra dirty rects of the
+    /// visual, and the bounds of the content are computed again. The visual is not dirty for
+    /// render: what else it shows is not drawn again for an item (section 9.42).
+    pub(crate) fn content_items_changed(&self) {
+        self.draw_item_flags.set(self.draw_item_flags.get() | DRAW_ITEMS_DIRTY);
+        if !self.delay_propagate_has_extra_dirty_rects.get() {
+            // A rect the update pass has not taken yet stays; one it took is not added again.
+            if !self.needs_to_add_extra_dirty_rect_to_dirty_region.get() {
+                self.extra_dirty_rect.set(LtrbRect::default());
+            }
+            self.delay_propagate_has_extra_dirty_rects.set(true);
+        }
         self.enqueue_own_properties_recompute();
     }
 

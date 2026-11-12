@@ -28,7 +28,8 @@ pub use walker::TreeWalkerFrame;
 use super::{
     CompositionProperty, IAnimatedServerObject, IServerAnimatedPropertyHost, IServerObject, IServerPropertyHost,
     IServerRenderResource, IServerRenderResourceObserver, ServerCompositionBitmapCache, ServerCompositionTarget,
-    ServerCompositionVisualCollection, ServerCompositor, ServerObject, ServerValueChange, ServerVisualRenderContext,
+    ServerCompositionVisualCollection, ServerCompositor, ServerDrawItems, ServerObject, ServerValueChange,
+    ServerVisualRenderContext,
 };
 use crate::media::{IBrush, IImmutableEffect, RenderOptions, TextOptions};
 use crate::numerics::Quaternion;
@@ -122,6 +123,12 @@ pub trait IServerVisualContent: 'static {
         ServerCompositionContainerVisualProps::get_composition_property(name)
     }
 
+    /// The drawing items the content shows between the child visuals (not from upstream;
+    /// docs/porting/desktop-performance.md, section 9.42). `None` for a content without any.
+    fn draw_items(&self) -> Option<&ServerDrawItems> {
+        None
+    }
+
     /// The visual has been disposed on the UI thread.
     fn dispose(&self, _visual: &ServerCompositionVisual) {}
 
@@ -182,6 +189,9 @@ pub struct ServerCompositionVisual {
 
     // Dirty inputs
     enqueued_for_own_properties_recompute: Cell<bool>,
+    /// What the drawing items of the content are to the passes (`HAS_DRAW_ITEMS`,
+    /// `DRAW_ITEMS_DIRTY`): one byte, so that a visual is not larger for them.
+    draw_item_flags: Cell<u8>,
 
     // Readback
     readback: Arc<VisualReadback>,
@@ -238,6 +248,7 @@ impl ServerCompositionVisual {
                 extra_dirty_rect: Cell::new(LtrbRect::default()),
                 combined_transform_matrix: Cell::new(Matrix::IDENTITY),
                 enqueued_for_own_properties_recompute: Cell::new(false),
+                draw_item_flags: Cell::new(0),
                 readback,
                 readback_enqueued_pass: Cell::new(0),
                 readback_queue_index: Cell::new(0),

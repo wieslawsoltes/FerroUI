@@ -3,7 +3,9 @@ use super::ServerCompositionVisual;
 use crate::media::{RenderOptions, TextOptions};
 use crate::platform::{IDrawingContextImpl, LtrbRect};
 use crate::rendering::composition::effects::{pop_custom_effect_graph_with, push_custom_effect_graph_with};
-use crate::rendering::composition::server::{render_scope, CompositorPools, IDirtyRectTracker, LitContent, ServerVisualRenderContext};
+use crate::rendering::composition::server::{
+    render_scope, CompositorPools, IDirtyRectTracker, LitContent, ServerDrawItems, ServerVisualRenderContext,
+};
 use crate::Matrix;
 use std::rc::Rc;
 
@@ -153,6 +155,34 @@ impl<'a> RenderContext<'a> {
         true
     }
 
+    /// Draws the drawing items `range` of `holder`, in its space (section 9.42).
+    fn render_draw_items(
+        &mut self,
+        holder: &Rc<ServerCompositionVisual>,
+        items: &ServerDrawItems,
+        range: std::ops::Range<usize>,
+    ) {
+        if range.is_empty() {
+            return;
+        }
+        let transform = self.walk_context.transform;
+        let clip = self.walk_context.clip;
+        // The lights that reach the content reach its items.
+        let lit = if self.lights_registered { LitContent::begin(holder, self.canvas) } else { None };
+        let canvas = &mut *self.canvas;
+        let dirty_rects = self.dirty_rects.as_deref();
+        let moved = render_scope::with_painting_visual(holder, || {
+            items.render(range, canvas, transform, clip, dirty_rects)
+        });
+        if moved {
+            crate::perf_count!(RenderVisualTransformsSet);
+            self.canvas.set_transform(transform);
+        }
+        if let Some(lit) = lit {
+            lit.end(self.canvas);
+        }
+    }
+
     fn dispose(mut self) {
         let pools = self.pools;
         self.adorner_helper_dispose();
@@ -162,6 +192,15 @@ impl<'a> RenderContext<'a> {
 }
 
 impl IServerTreeVisitor for RenderContext<'_> {
+    fn before_child(&mut self, container: &Rc<ServerCompositionVisual>, index: usize) {
+        if !container.has_draw_items() || self.stopped {
+            return;
+        }
+        if let Some(items) = container.content.draw_items() {
+            self.render_draw_items(container, items, items.range_before_child(index));
+        }
+    }
+
     fn pre_subgraph(&mut self, visual: &Rc<ServerCompositionVisual>) -> bool {
         // A backdrop render stops at the visual that paints the backdrop
         // (winui-materials.md).
@@ -253,6 +292,16 @@ impl IServerTreeVisitor for RenderContext<'_> {
 
         // If we've used cache, those never got pushed in PreSubgraph
         if !self.used_cache {
+            // The drawing items after the last child (not from upstream; section 9.42): all
+            // of them for a visual without children. A render without the children leaves
+            // them out, as what is below the visual; one that stopped has drawn what it shows.
+            if visual.has_draw_items() && self.render_children && !self.stopped {
+                if let Some(items) = visual.content.draw_items() {
+                    let children = visual.children().map_or(0, |children| children.count());
+                    self.render_draw_items(visual, items, items.range_after_children(children));
+                }
+            }
+
             // What the content pushed for its children (not from upstream).
             let canvas = &mut *self.canvas;
             render_scope::with_painting_visual(visual, || {
