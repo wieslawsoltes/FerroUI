@@ -2,6 +2,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::media::text_formatting::formatting_object_pool::{FormattingObjectPool, RentedList};
+use crate::media::text_formatting::shaping_edit;
 use crate::media::text_formatting::text_line_impl::TextLineImpl;
 use crate::media::text_formatting::text_run_cache::CachedShapingResult;
 use crate::media::text_formatting::unicode::{
@@ -42,6 +43,7 @@ impl TextFormatterImpl {
         paragraph_width: f64,
         paragraph_properties: &Rc<dyn TextParagraphProperties>,
         object_pool: &FormattingObjectPool,
+        text_run_cache: &TextRunCache,
     ) -> Rc<TextLineImpl> {
         let resolved_flow_direction = cached.resolved_flow_direction;
 
@@ -66,7 +68,7 @@ impl TextFormatterImpl {
                     false,
                 );
 
-                text_line.finalize_line();
+                Self::finalize_line(&text_line, Some(text_run_cache));
 
                 text_line
             }
@@ -82,9 +84,23 @@ impl TextFormatterImpl {
                     resolved_flow_direction,
                     next_line_break.as_ref(),
                     object_pool,
+                    Some(text_run_cache),
                 )
             }
         }
+    }
+
+    /// Finishes `text_line` ([`TextLineImpl::finalize_line`]). With the run cache of a layout
+    /// that is being made, the shaped runs of the line first take the platform glyph runs the
+    /// layout before kept for their glyphs, and then give theirs to the next layout
+    /// ([`TextRunCache::begin_layout`]).
+    fn finalize_line(text_line: &TextLineImpl, text_run_cache: Option<&TextRunCache>) {
+        let Some(text_run_cache) = text_run_cache else {
+            return text_line.finalize_line();
+        };
+        text_run_cache.adopt_line_glyph_runs(&TextLine::text_runs(text_line));
+        text_line.finalize_line();
+        text_run_cache.keep_line_glyph_runs(&TextLine::text_runs(text_line));
     }
 
     /// Produces a list of text runs for a line, adding an extra reference to each
@@ -239,6 +255,7 @@ impl TextFormatterImpl {
         paragraph_properties: &dyn TextParagraphProperties,
         object_pool: &FormattingObjectPool,
         font_manager: &FontManager,
+        text_run_cache: Option<&TextRunCache>,
     ) -> (RentedList<Rc<dyn TextRun>>, FlowDirection) {
         let flow_direction = paragraph_properties.flow_direction();
         let mut shaped_runs = object_pool.text_run_lists.rent();
@@ -255,24 +272,41 @@ impl TextFormatterImpl {
 
         let (bidi_data, bidi_algorithm) = &mut *bidi;
 
-        bidi_data.reset();
-        bidi_data.set_paragraph_embedding_level(flow_direction as i8);
+        // The length of a run in the paragraph: a run without text counts as letters.
+        let run_length = |text_run: &Rc<dyn TextRun>| match text_run.text_span().len() {
+            0 => text_run.length().max(0) as usize,
+            length => length,
+        };
 
-        for text_run in text_runs {
-            let text = text_run.text_span();
+        // A left-to-right paragraph without a character that can be of a right-to-left class
+        // has level 0 throughout: the classes are not looked up and the rules are not run.
+        let left_to_right = flow_direction == FlowDirection::LeftToRight
+            && text_runs.iter().all(|text_run| BidiAlgorithm::is_left_to_right_text(text_run.text_span()));
 
-            if !text.is_empty() {
-                bidi_data.append(text);
-            } else if text_run.length() == DEFAULT_TEXT_SOURCE_LENGTH {
-                bidi_data.append(&DEFAULT_TEXT);
-            } else {
-                bidi_data.append(&vec![b'a' as u16; text_run.length().max(0) as usize]);
+        let resolved_embedding_level = if left_to_right {
+            bidi_algorithm.process_left_to_right(text_runs.iter().map(run_length).sum());
+
+            0
+        } else {
+            bidi_data.reset();
+            bidi_data.set_paragraph_embedding_level(flow_direction as i8);
+
+            for text_run in text_runs {
+                let text = text_run.text_span();
+
+                if !text.is_empty() {
+                    bidi_data.append(text);
+                } else if text_run.length() == DEFAULT_TEXT_SOURCE_LENGTH {
+                    bidi_data.append(&DEFAULT_TEXT);
+                } else {
+                    bidi_data.append(&vec![b'a' as u16; run_length(text_run)]);
+                }
             }
-        }
 
-        bidi_algorithm.process(bidi_data);
+            bidi_algorithm.process(bidi_data);
 
-        let resolved_embedding_level = bidi_algorithm.resolve_embedding_level(bidi_data.classes());
+            bidi_algorithm.resolve_embedding_level(bidi_data.classes())
+        };
 
         let resolved_flow_direction =
             if (resolved_embedding_level & 1) == 0 { FlowDirection::LeftToRight } else { FlowDirection::RightToLeft };
@@ -342,7 +376,14 @@ impl TextFormatterImpl {
                         properties.font_features().map(|features| Rc::new(features.to_vec())),
                     );
 
-                    Self::shape_together(&grouped_runs, &text, &shaper_options, &text_shaper, &mut shaped_runs);
+                    Self::shape_together(
+                        &grouped_runs,
+                        &text,
+                        &shaper_options,
+                        &text_shaper,
+                        &mut shaped_runs,
+                        text_run_cache,
+                    );
                 }
                 None => {
                     shaped_runs.push(current_run.clone());
@@ -416,8 +457,9 @@ impl TextFormatterImpl {
         options: &TextShaperOptions,
         text_shaper: &TextShaper,
         results: &mut Vec<Rc<dyn TextRun>>,
+        text_run_cache: Option<&TextRunCache>,
     ) {
-        let mut shaped_buffer = text_shaper.shape_text(text, options);
+        let mut shaped_buffer = Self::shape_keeping(text, options, text_shaper, text_run_cache);
 
         let mut previous_length = 0;
 
@@ -445,6 +487,41 @@ impl TextFormatterImpl {
                 Some(second) => shaped_buffer = second,
             }
         }
+    }
+
+    /// Shapes `text`. A long text of a layout with a run cache is shaped with its concatenation
+    /// flags and kept in the cache for the next text of its owner; when the cache kept the shaping
+    /// of the text before, shaped as these options shape, the new text is shaped from it, keeping
+    /// the glyphs the edit left as they were (step 7 of docs/porting/text-layout-performance.md).
+    fn shape_keeping(
+        text: &ReadOnlyMemory<u16>,
+        options: &TextShaperOptions,
+        text_shaper: &TextShaper,
+        text_run_cache: Option<&TextRunCache>,
+    ) -> Rc<ShapedBuffer> {
+        let Some(cache) = text_run_cache.filter(|_| text.len() >= shaping_edit::MIN_KEPT_LENGTH) else {
+            return text_shaper.shape_text(text, options);
+        };
+        let old = cache.take_retired(options);
+        let edited = old.as_ref().and_then(|old| {
+            let edited = shaping_edit::shape_edited(old, text, options, text_shaper);
+            crate::perf_count!(TextShapingEditsTried);
+            if edited.is_some() {
+                crate::perf_count!(TextShapingEditsKept);
+            }
+            edited
+        });
+        let shaped =
+            edited.unwrap_or_else(|| text_shaper.shape_text(text, &options.clone().with_concat_flags(true)));
+        // The break opportunities do not depend on the shaping: they are kept also when the
+        // glyphs are not.
+        if old.is_some_and(|old| shaped.keep_breaks_of_edit(&old)) {
+            crate::perf_count!(TextBreakEditsKept);
+        }
+        if shaped.concat_flags().is_some() {
+            cache.keep_shaping(options, &shaped);
+        }
+        shaped
     }
 
     /// Coalesces ranges of the same bidi level to form [`UnshapedTextRun`]s.
@@ -609,17 +686,9 @@ impl TextFormatterImpl {
             return None;
         }
 
-        let mut line_break_enumerator = LineBreakEnumerator::new(text);
-
-        while let Some(line_break) = line_break_enumerator.move_next() {
-            if !line_break.required() {
-                continue;
-            }
-
-            return Some(line_break);
-        }
-
-        None
+        // The first required break, which the enumerator gives after a hard line break only: the
+        // text is not classified for it (step 7 of docs/porting/text-layout-performance.md).
+        LineBreakEnumerator::first_required(text)
     }
 
     fn measure_length(text_runs: &[Rc<dyn TextRun>], paragraph_width: f64) -> i32 {
@@ -731,6 +800,7 @@ impl TextFormatterImpl {
     /// * `paragraph_properties` — the text paragraph properties.
     /// * `current_line_break` — the current line break if the line was explicitly broken.
     /// * `object_pool` — a pool used to get reusable formatting objects.
+    /// * `text_run_cache` — the run cache of the layout, for the platform glyph runs of the line.
     #[allow(clippy::too_many_arguments)]
     fn perform_text_wrapping(
         text_runs: &mut Vec<Rc<dyn TextRun>>,
@@ -741,6 +811,7 @@ impl TextFormatterImpl {
         resolved_flow_direction: FlowDirection,
         current_line_break: Option<&Rc<TextLineBreak>>,
         object_pool: &FormattingObjectPool,
+        text_run_cache: Option<&TextRunCache>,
     ) -> Rc<TextLineImpl> {
         if text_runs.is_empty() {
             return Self::create_empty_text_line(first_text_source_index, paragraph_width, paragraph_properties);
@@ -843,7 +914,7 @@ impl TextFormatterImpl {
                     false,
                 );
 
-                text_line.finalize_line();
+                Self::finalize_line(&text_line, text_run_cache);
 
                 text_line
             }
@@ -1131,6 +1202,7 @@ impl TextFormatter for TextFormatterImpl {
                             previous_line_break.flow_direction(),
                             Some(previous_line_break),
                             object_pool,
+                            text_run_cache,
                         ));
                     }
                 }
@@ -1150,6 +1222,7 @@ impl TextFormatter for TextFormatterImpl {
                     paragraph_width,
                     paragraph_properties,
                     object_pool,
+                    text_run_cache,
                 ));
             }
         }
@@ -1164,7 +1237,7 @@ impl TextFormatter for TextFormatterImpl {
         }
 
         let (mut shaped_text_runs, resolved_flow_direction) =
-            Self::shape_text_runs(&fetched_runs, &**paragraph_properties, object_pool, &font_manager);
+            Self::shape_text_runs(&fetched_runs, &**paragraph_properties, object_pool, &font_manager, text_run_cache);
 
         let next_line_break = text_end_of_line
             .as_ref()
@@ -1203,7 +1276,7 @@ impl TextFormatter for TextFormatterImpl {
                     false,
                 );
 
-                text_line.finalize_line();
+                Self::finalize_line(&text_line, text_run_cache);
 
                 text_line
             }
@@ -1216,6 +1289,7 @@ impl TextFormatter for TextFormatterImpl {
                 resolved_flow_direction,
                 next_line_break.as_ref(),
                 object_pool,
+                text_run_cache,
             ),
         };
 

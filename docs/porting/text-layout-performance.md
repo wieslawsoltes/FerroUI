@@ -157,5 +157,74 @@ changes behavior upstream defines.
    and paragraph properties; admission of a changed text on its second use; ageing by layout
    pass) as a service any control or application uses, as Cranpose's layout cache is.
 
+7. **Edits.** A text that is set again with a small change (a word of a paragraph replaced, a
+   message that grows as it streams) is laid out again whole: one frame of the `paragraph` scene
+   of the frame benchmarks (6,000 words of which one changes) costs 5.4 ms of UI time, shaping
+   the whole paragraph (35 %), finding its break opportunities (26 %) and its shapeable runs
+   (14 %) again. The layout keeps what the edit leaves as it was, each part identical to a layout
+   made from nothing, which randomized tests check for every part against a fresh layout:
+   - **Shaped runs.** The shaper records, for every glyph, whether the text may be cut and the
+     pieces shaped apart at its cluster (HarfBuzz's unsafe-to-break and unsafe-to-concat flags,
+     one bit a glyph in the shaped buffer). The new shaping of a run keeps the glyphs of the old
+     one before the first and after the last such boundary around the changed range, and shapes
+     the text between them with its context; a piece whose new edge glyphs are unsafe is widened
+     and shaped again.
+   - **Break opportunities.** The UAX #14 opportunities of a shaped text are a table of the
+     shaped buffer. The table of the new text keeps the old opportunities before the changed
+     range, up to the last one at a space between two ASCII letters or digits (a place no rule
+     of the algorithm looks across: the rules that look back past one unit look for an opening,
+     a quotation mark, a number or a mark that leans on its base), classifies the text from
+     there, and takes the old opportunities again, shifted, from the first such place past the
+     change that is an opportunity in both texts. A text without such a place is classified
+     whole. The count of regional indicators (LB30a) is now that of one sequence, as the rule
+     says, where an indicator alone earlier in the text paired the indicators of every later
+     sequence the other way.
+   - **Required breaks.** The text of a run was classified whole a second time to find its
+     first required break. A break is required after a hard line break only (U+000A to U+000D,
+     U+0085, U+2028 and U+2029), so the text is scanned for those characters
+     (`LineBreakEnumerator::first_required`), in every layout, edited or not.
+   - **Shapeable runs.** The length of text a typeface can shape was found a grapheme cluster
+     at a time, with a search of the character map for every cluster. A printable ASCII
+     character that an ASCII character follows is a cluster of its own, so a run of them is
+     taken from two tables: the script and category of the 128 characters, and one bit for each
+     of them in a typeface, set when its character map has a glyph (filled at the first use).
+     Other text is taken cluster by cluster as before. Every layout of Latin text has this,
+     edited or not.
+   - **Directions.** The bidirectional algorithm ran over every paragraph: a class looked up
+     for every character, then the rules. A left-to-right paragraph whose code units are all
+     below U+0590 (the start of the Hebrew block) has no character of a right-to-left class
+     and no embedding, override or isolate control, so every level is 0; such a paragraph is
+     found by a scan of its code units and the algorithm is not run. A test compares the
+     levels with those of the algorithm for random texts and checks the class of every
+     character below U+0590.
+   - **Platform glyph runs of the lines.** The lines are made again (wrapping a shaped run is a
+     search of its advance sums), and what a line costs is the glyph run of the renderer made
+     for each of its runs: positions, bounds, and on the render thread a text blob the GPU text
+     cache has not seen. The glyph storage a shaping fills has a number, and a shaped buffer
+     made by an edit knows which glyphs of the storage before it its kept glyphs are. The run
+     cache keeps the platform glyph runs of the lines of the last layout of its owner under the
+     storage number and glyph range of each run; a line of the next layout whose run has the
+     same range of the same storage, or a range the edit kept of the storage before, takes that
+     glyph run in place of making one (same glyph indices, advances and offsets, same size and
+     origin; a storage written since is told by its generation). The runs of the layout before
+     are held for the time of one layout only, so between layouts the cache holds nothing the
+     lines do not hold. The lines that an edit leaves take their glyph runs; the line of the
+     edit, and lines whose wrapping moved, make theirs. Only a text the cache keeps a shaping
+     of has its glyph runs kept: the kept shapings and the two tables of glyph runs are one
+     allocation the cache makes with the first kept shaping and frees when it holds nothing,
+     so the layout of a short text allocates and looks up nothing for this (the local gate
+     measured 5 % more instructions on `trees::Propagation.font_family`, 2,000 short texts
+     laid out again, while every text had a table; 0.5 % now).
+   The run cache of a text block keeps the shaped runs of its previous text for this, and the
+   comparison of the two texts (a common prefix and suffix, compared as memory) is the edit.
+
+   Measured on the `paragraph` scene (UI thread, a frame): 5.37 ms before, 3.80 ms with the
+   shaped runs kept, 2.71 ms with the break opportunities kept as well, 1.84 ms with the scan
+   for the first required break, 1.26 ms with the ASCII tables of the shapeable runs, 0.95 ms
+   with the scan for a left-to-right paragraph, 0.69 ms with the platform glyph runs of the
+   lines kept: an eighth of the time before. What is left is the shaping of the changed piece
+   and the copy of the kept glyphs (40 %), the wrapping of the paragraph (31 %, of which the
+   advance sums of the new glyphs are 14 %) and the making of the lines.
+
 The cross-library comparison (`tests/FerroUI.Text.Comparison`: FerroUI, parley, cosmic-text and
 epaint on the same font, corpus and widths) measures each step against the others.

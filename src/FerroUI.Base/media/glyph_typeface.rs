@@ -64,6 +64,9 @@ pub struct GlyphTypeface {
     supported_features: OnceCell<Vec<OpenTypeTag>>,
     text_shaper_typeface: RefCell<Option<Rc<dyn ITextShaperTypeface>>>,
     supported_unicode_range: OnceCell<UnicodeRange>,
+    /// Which of the code points U+0000 to U+007F the character map has a glyph for, one bit
+    /// each (`covers_ascii`).
+    ascii_coverage: OnceCell<u128>,
 
     /// Lazily-built set of OpenType script tags the font declares in
     /// GSUB/GPOS, used by `can_shape_script`, and whether a present table
@@ -262,6 +265,7 @@ impl GlyphTypeface {
             supported_features: OnceCell::new(),
             text_shaper_typeface: RefCell::new(None),
             supported_unicode_range: OnceCell::new(),
+            ascii_coverage: OnceCell::new(),
             shaping_script_tags: OnceCell::new(),
         }))
     }
@@ -342,6 +346,19 @@ impl GlyphTypeface {
     /// Gets a mapping of Unicode code points to glyph indices.
     pub fn character_to_glyph_map(&self) -> &CharacterToGlyphMap {
         &self.cmap_table
+    }
+
+    /// Whether the character map has a glyph for `unit`, a code point below U+0080: what
+    /// `character_to_glyph_map().try_get_glyph(unit).is_some()` gives, from a table of the 128
+    /// answers that the first call fills (the itemization of a text asks for every character).
+    #[inline]
+    pub(crate) fn covers_ascii(&self, unit: u16) -> bool {
+        debug_assert!(unit < 0x80);
+        let coverage = self.ascii_coverage.get_or_init(|| {
+            let covered = (0..128).filter(|&code| self.cmap_table.try_get_glyph(code).is_some());
+            covered.fold(0u128, |set, code| set | 1 << code)
+        });
+        coverage >> unit & 1 != 0
     }
 
     /// Gets the font metrics associated with this font.

@@ -1249,8 +1249,10 @@ impl TextBlock {
     /// run properties and the paragraph properties, which are not made of the text, are kept
     /// (a FerroUI addition, docs/porting/desktop-performance.md, section 9.29).
     fn invalidate_text_layout_for_text(&self) {
+        // The shapings of a long text are kept for the new one: an edit shapes again only what it
+        // changed (step 7 of docs/porting/text-layout-performance.md).
         if let Some(text_run_cache) = self.text_run_cache.borrow().as_ref() {
-            text_run_cache.invalidate();
+            text_run_cache.retire();
         }
         *self.text_runs.borrow_mut() = None;
         self.text_runs_embed_controls.set(true);

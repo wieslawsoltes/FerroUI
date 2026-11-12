@@ -314,6 +314,26 @@ impl GlyphRun {
         self.create_glyph_run_impl()
     }
 
+    /// The platform implementation of the glyph run, when it has been made.
+    pub(crate) fn created_platform_impl(&self) -> Option<std::sync::Arc<dyn IGlyphRunImpl>> {
+        self.platform_impl.borrow().clone()
+    }
+
+    /// Takes `platform_impl`, the platform implementation of a glyph run of the same glyphs of
+    /// the same typeface (the caller's word), as the one of this run, in place of making one.
+    /// Not taken, and `false`, when this run has one already or when the size or the baseline
+    /// origin of `platform_impl` is not the one of this run.
+    pub(crate) fn adopt_platform_impl(&self, platform_impl: &std::sync::Arc<dyn IGlyphRunImpl>) -> bool {
+        let as_this_run = platform_impl.font_rendering_em_size() == self.font_rendering_em_size()
+            && platform_impl.baseline_origin() == self.baseline_origin();
+        let mut own = self.platform_impl.borrow_mut();
+        if own.is_some() || !as_this_run {
+            return false;
+        }
+        *own = Some(platform_impl.clone());
+        true
+    }
+
     /// Obtains geometry for the glyph run.
     pub fn build_geometry(&self) -> crate::Ref<crate::media::Geometry> {
         let geometry_impl = render_interface().build_glyph_run_geometry(self);
