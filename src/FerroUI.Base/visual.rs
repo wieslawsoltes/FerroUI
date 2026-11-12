@@ -17,6 +17,7 @@ use crate::{
     StyledElementImpl, StyledElementImplExt, StyledProperty, StyledPropertyOptions, Upcast,
     VisualTreeAttachmentEventArgs, WeakRef,
 };
+use rustc_hash::FxHashMap;
 use std::cell::{Cell, OnceCell, RefCell};
 use std::rc::Rc;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -254,6 +255,10 @@ crate::ferro_thread_local! {
     // the visuals of the thread), which the layout manager reads to reuse the viewports of shared
     // ancestors within one pass (DEVIATIONS.md, Layout).
     static GEOMETRY_VERSION: Cell<u64> = const { Cell::new(0) };
+    // Not upstream: a version of which visuals of the thread have a composition visual and which
+    // are in a tree. With the version of the geometry it says whether where the visuals without a
+    // composition visual are shown changed (`CompositionItemPlacements`).
+    static COMPOSITION_HOLDER_VERSION: Cell<u64> = const { Cell::new(0) };
 }
 
 /// The version of the geometry of the visuals of the thread (see `GEOMETRY_VERSION`).
@@ -265,6 +270,46 @@ pub(crate) fn geometry_version() -> u64 {
 #[inline]
 fn bump_geometry_version() {
     GEOMETRY_VERSION.with(|version| version.set(version.get().wrapping_add(1)));
+}
+
+#[inline]
+fn bump_composition_holder_version() {
+    COMPOSITION_HOLDER_VERSION.with(|version| version.set(version.get().wrapping_add(1)));
+}
+
+/// Where the visuals without a composition visual are shown, for the visuals an update pass of a
+/// renderer records one after another (docs/porting/desktop-performance.md, section 9.47): the
+/// visual that shows what is below a visual without a composition visual, and where that visual
+/// is in it, by the address of the visual. The visuals of a subtree share the visuals above them,
+/// so the walk up to the composition visual is made once for them. The entries are valid while
+/// the geometry of the visuals, their composition visuals and their trees do not change, which
+/// the two versions say; the renderer empties the map at the end of its pass.
+#[derive(Default)]
+pub(crate) struct CompositionItemPlacements {
+    versions: (u64, u64),
+    below: FxHashMap<usize, (Ref<Visual>, f64, f64)>,
+}
+
+impl CompositionItemPlacements {
+    /// Drops the entries the changes since they were computed made stale.
+    fn validate(&mut self) {
+        let versions = (geometry_version(), COMPOSITION_HOLDER_VERSION.with(Cell::get));
+        if self.versions != versions {
+            self.below.clear();
+            self.versions = versions;
+        }
+    }
+
+    /// Releases the visuals the entries hold.
+    pub(crate) fn clear(&mut self) {
+        self.below.clear();
+    }
+
+    /// The number of visuals a placement is kept for.
+    #[cfg(test)]
+    pub(crate) fn count(&self) -> usize {
+        self.below.len()
+    }
 }
 
 crate::ferro_overrides! { impl FerroObjectImpl for Visual {
@@ -327,6 +372,7 @@ impl VisualImpl for Visual {
 
     fn on_attached_to_visual_tree_core(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         *this.presentation_source.borrow_mut() = Some(e.presentation_source().clone());
+        bump_composition_holder_version();
         ROOTED_VISUAL_CHILDREN_COUNT.with(|count| count.set(count.get() + 1));
 
         if let Some(render_transform) = this.render_transform() {
@@ -414,6 +460,7 @@ impl VisualImpl for Visual {
         // The renderer is told once the visual is out of the tree: that is how it knows a visual
         // that left from one that has no composition visual (section 9.41).
         let source = this.presentation_source.borrow_mut().take();
+        bump_composition_holder_version();
         if let Some(source) = source {
             source.renderer().add_dirty(this);
         }
@@ -480,6 +527,7 @@ impl VisualImpl for Visual {
         }
         let composition_visual = this.composition_visual.take();
         if let Some(composition_visual) = composition_visual {
+            bump_composition_holder_version();
             this.release_composition_visual(&composition_visual);
         }
         // Nothing holds a composition visual of this visual any more: in its next tree the
@@ -1530,43 +1578,115 @@ impl Visual {
     /// The offset of the composition visual of the visual: its position in the nearest visual
     /// above it that has a composition visual (section 9.41). With `mark`, the visuals between
     /// the two remember that an offset was computed through them.
+    ///
+    /// The positions are added from the visual that has the composition visual down to this one,
+    /// so that the position of a visual in between is a term of the sum, which
+    /// [`composition_item_placement`](Self::composition_item_placement) keeps for the visuals
+    /// below it: both give the same number, to the last bit.
     pub(crate) fn composition_offset(&self, mark: bool) -> crate::Vector3D {
         let bounds = self.bounds.get();
-        let (mut x, mut y) = (bounds.x, bounds.y);
-        let mut parent = self.visual_parent();
-        while let Some(ancestor) = parent {
-            if ancestor.has_composition_visual() || !ancestor.is_attached_to_visual_tree() {
-                break;
-            }
-            let position = ancestor.bounds.get();
-            x += position.x;
-            y += position.y;
-            if mark {
-                ancestor.elided_state.set(ancestor.elided_state.get() | ELIDED_OFFSET_THROUGH);
-            }
-            parent = ancestor.visual_parent();
+        let (x, y) = self.visual_parent().map_or((0.0, 0.0), |parent| parent.elided_origin(mark));
+        crate::Vector3D::new(x + bounds.x, y + bounds.y, 0.0)
+    }
+
+    /// Where the visual is in the nearest visual above it that has a composition visual; nothing
+    /// is added for a visual that has a composition visual, or that is out of the tree.
+    fn elided_origin(&self, mark: bool) -> (f64, f64) {
+        if self.has_composition_visual() || !self.is_attached_to_visual_tree() {
+            return (0.0, 0.0);
         }
-        crate::Vector3D::new(x, y, 0.0)
+        let (x, y) = self.visual_parent().map_or((0.0, 0.0), |parent| parent.elided_origin(mark));
+        if mark {
+            self.elided_state.set(self.elided_state.get() | ELIDED_OFFSET_THROUGH);
+        }
+        let position = self.bounds.get();
+        (x + position.x, y + position.y)
+    }
+
+    /// For a visual without a composition visual: the nearest visual above it that has one, whose
+    /// composition visual shows what this one draws as an item, and where the item is in it:
+    /// [`nearest_composition_ancestor`](Self::nearest_composition_ancestor) and
+    /// [`composition_offset`](Self::composition_offset) with `mark`, in one walk that ends at the
+    /// first visual `placements` knows (section 9.47).
+    pub(crate) fn composition_item_placement(
+        &self,
+        placements: &mut CompositionItemPlacements,
+    ) -> Option<(Ref<Visual>, (f64, f64))> {
+        placements.validate();
+        let (holder, x, y) = Self::placement_below(&self.visual_parent()?, placements)?;
+        let bounds = self.bounds.get();
+        let offset = (x + bounds.x, y + bounds.y);
+        debug_assert!(
+            self.nearest_composition_ancestor().is_some_and(|ancestor| ancestor.ptr_eq(&holder))
+                && self.composition_offset(false) == crate::Vector3D::new(offset.0, offset.1, 0.0),
+            "the placement kept for the visuals below a visual is not the one a walk gives"
+        );
+        Some((holder, offset))
+    }
+
+    /// The visual that shows what is below `visual`, and where `visual` is in it: `visual` itself
+    /// when it has a composition visual.
+    fn placement_below(
+        visual: &Ref<Visual>,
+        placements: &mut CompositionItemPlacements,
+    ) -> Option<(Ref<Visual>, f64, f64)> {
+        if visual.has_composition_visual() {
+            return Some((visual.clone(), 0.0, 0.0));
+        }
+        if !visual.is_attached_to_visual_tree() {
+            // Nothing is positioned through a visual out of the tree, and nothing is kept for it.
+            return visual.nearest_composition_ancestor().map(|holder| (holder, 0.0, 0.0));
+        }
+        let key = &**visual as *const Visual as usize;
+        if let Some((holder, x, y)) = placements.below.get(&key) {
+            return Some((holder.clone(), *x, *y));
+        }
+        let (holder, x, y) = Self::placement_below(&visual.visual_parent()?, placements)?;
+        // An entry says that offsets of the visuals below were computed through the visual, as
+        // the mark does: the mark is taken away where the entries are dropped (the visual gets a
+        // composition visual, or leaves its tree).
+        visual.elided_state.set(visual.elided_state.get() | ELIDED_OFFSET_THROUGH);
+        let position = visual.bounds.get();
+        let (x, y) = (x + position.x, y + position.y);
+        placements.below.insert(key, (holder.clone(), x, y));
+        Some((holder, x, y))
     }
 
     /// Writes the offset of the composition visual again: a visual above it that has no
     /// composition visual moved, or got one.
-    fn synchronize_composition_offset(&self) {
+    ///
+    /// `origin` is where the parent of the visual is in the nearest visual above that has a
+    /// composition visual ([`elided_origin`](Self::elided_origin)): the walk down the visuals
+    /// that moved carries it, so no visual walks up for it (section 9.47).
+    fn synchronize_composition_offset(&self, origin: (f64, f64)) {
+        let bounds = self.bounds.get();
+        let offset = (origin.0 + bounds.x, origin.1 + bounds.y);
+        debug_assert!(
+            self.composition_offset(false) == crate::Vector3D::new(offset.0, offset.1, 0.0),
+            "the offset carried down the visuals is not the one a walk up gives"
+        );
         if let Some(comp) = self.own_composition_visual() {
-            let offset = self.composition_offset(true);
+            let offset = crate::Vector3D::new(offset.0, offset.1, 0.0);
             if comp.offset() != offset {
                 comp.set_offset(offset);
             }
         } else if let Some(item) = self.composition_item.get() {
-            let offset = self.composition_offset(true);
-            item.set_offset((offset.x, offset.y));
+            item.set_offset(offset);
         }
     }
 
     /// Writes the offsets of the composition visuals nearest below this visual again. `false`
     /// when it stopped because there are more of them than `visuals_left`, or more visuals on
     /// the way than `nodes_left`.
-    fn synchronize_composition_offsets_below(&self, visuals_left: &mut u32, nodes_left: &mut u32) -> bool {
+    ///
+    /// `origin` is where this visual is in the nearest visual above that has a composition
+    /// visual, or this visual itself when it has one.
+    fn synchronize_composition_offsets_below(
+        &self,
+        origin: (f64, f64),
+        visuals_left: &mut u32,
+        nodes_left: &mut u32,
+    ) -> bool {
         let Some(children) = self.visual_children_snapshot() else { return true };
         for child in children.iter() {
             if *nodes_left == 0 {
@@ -1581,13 +1701,19 @@ impl Visual {
                     return false;
                 }
                 *visuals_left -= 1;
-                child.synchronize_composition_offset();
+                child.synchronize_composition_offset(origin);
             }
-            if !has_composition_visual
-                && child.elided_state.get() & ELIDED_OFFSET_THROUGH != 0
-                && !child.synchronize_composition_offsets_below(visuals_left, nodes_left)
-            {
-                return false;
+            if !has_composition_visual && child.elided_state.get() & ELIDED_OFFSET_THROUGH != 0 {
+                // As `elided_origin` adds them: nothing for a visual out of the tree.
+                let below = if child.is_attached_to_visual_tree() {
+                    let position = child.bounds.get();
+                    (origin.0 + position.x, origin.1 + position.y)
+                } else {
+                    (0.0, 0.0)
+                };
+                if !child.synchronize_composition_offsets_below(below, visuals_left, nodes_left) {
+                    return false;
+                }
             }
         }
         true
@@ -1603,7 +1729,7 @@ impl Visual {
         self.elided_state.set(state & CHILDREN_LISTED);
         if state & ELIDED_OFFSET_THROUGH != 0 {
             let (mut visuals, mut nodes) = (u32::MAX, u32::MAX);
-            self.synchronize_composition_offsets_below(&mut visuals, &mut nodes);
+            self.synchronize_composition_offsets_below(self.elided_origin(true), &mut visuals, &mut nodes);
         }
     }
 
@@ -1611,14 +1737,37 @@ impl Visual {
     /// composition visuals below it follow a change of its position. `false` when there are
     /// too many of them: the renderer then gives the visual a composition visual, whose offset
     /// is the one thing a later move changes.
-    pub(crate) fn move_composition_offsets_below(&self) -> bool {
+    ///
+    /// Where the visual is comes from `placements`, which the pass keeps for the visuals above
+    /// the ones it records and moves (section 9.47).
+    pub(crate) fn move_composition_offsets_below(&self, placements: &mut CompositionItemPlacements) -> bool {
         let state = self.elided_state.get();
         if state & ELIDED_OFFSET_MOVED == 0 {
             return true;
         }
         self.elided_state.set(state & !ELIDED_OFFSET_MOVED);
+        // As `elided_origin(true)` of the visual gives it.
+        let origin = if self.has_composition_visual() || !self.is_attached_to_visual_tree() {
+            (0.0, 0.0)
+        } else {
+            self.elided_state.set(self.elided_state.get() | ELIDED_OFFSET_THROUGH);
+            self.composition_item_origin(placements)
+        };
+        debug_assert!(origin == self.elided_origin(false), "the origin kept for a visual is not the one a walk gives");
         let (mut visuals, mut nodes) = (ELIDED_MOVE_VISUALS, ELIDED_MOVE_NODES);
-        self.synchronize_composition_offsets_below(&mut visuals, &mut nodes)
+        self.synchronize_composition_offsets_below(origin, &mut visuals, &mut nodes)
+    }
+
+    /// Where the visual is in the nearest visual above it that has a composition visual:
+    /// [`composition_offset`](Self::composition_offset) with the mark, from `placements`.
+    fn composition_item_origin(&self, placements: &mut CompositionItemPlacements) -> (f64, f64) {
+        match self.composition_item_placement(placements) {
+            Some((_, origin)) => origin,
+            None => {
+                let offset = self.composition_offset(true);
+                (offset.x, offset.y)
+            }
+        }
     }
 
     /// The update pass of the renderer saw the visual without a composition visual: its bounds
@@ -1742,10 +1891,9 @@ impl Visual {
     }
 
     /// Writes where the item of the visual is, and its clip, again.
-    pub(crate) fn synchronize_composition_item(&self) {
+    pub(crate) fn synchronize_composition_item(&self, placements: &mut CompositionItemPlacements) {
         if let Some(item) = self.composition_item.get() {
-            let offset = self.composition_offset(true);
-            item.set_offset((offset.x, offset.y));
+            item.set_offset(self.composition_item_origin(placements));
             item.set_clip(self.composition_item_clip());
         }
     }
@@ -1830,6 +1978,7 @@ impl Visual {
                 .is_some_and(|source| source.renderer().keep_departed_composition_visual(self, &composition_visual));
         if kept {
             self.composition_visual_departed.set(true);
+            bump_composition_holder_version();
             composition_visual.set_departed(true);
         }
         kept
@@ -1875,6 +2024,7 @@ impl Visual {
         }
         self.composition_visual_departed.set(false);
         let composition_visual = self.composition_visual.take();
+        bump_composition_holder_version();
         if let Some(composition_visual) = composition_visual {
             self.release_composition_visual(&composition_visual);
         }
@@ -2189,6 +2339,8 @@ impl Visual {
     ) -> CompositionDrawListVisual {
         let current = self.composition_visual.get();
         if self.composition_visual_departed.replace(false) {
+            // It has the composition visual it left with again, or a new one.
+            bump_composition_holder_version();
             // The visual left a tree and is in one again before the renderer released its
             // composition visual (section 9.32).
             if let Some(kept) = current {
@@ -2229,6 +2381,7 @@ impl Visual {
             }
         }
         self.composition_visual.set(Some(created.clone()));
+        bump_composition_holder_version();
         self.composition_visual_handed_out.set(false);
         self.composition_visual_created(&created);
         created
@@ -2407,6 +2560,7 @@ impl Visual {
         }
 
         *self.presentation_source.borrow_mut() = presentation_source.clone();
+        bump_composition_holder_version();
 
         if let Some(source) = presentation_source {
             let e = VisualTreeAttachmentEventArgs::new(None, source);
