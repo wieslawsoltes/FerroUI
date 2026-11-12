@@ -23,16 +23,46 @@ fn error<T>(result: ServiceResult<T>) -> ServiceError {
         Ok(_) => panic!("expected resolution failure"),
     }
 }
+/// The directories that hold the libraries Cargo built for this test, to find them in and for the compiler to look
+/// for what they depend on: the directory of the test executable where one directory holds every library
+/// (`<profile>/deps`), and the output directory of every package where each package has its own
+/// (`<profile>/build/<package>/<hash>/out`).
+fn library_directories() -> Vec<std::path::PathBuf> {
+    let executable = std::env::current_exe().unwrap();
+    let own = executable.parent().unwrap().to_path_buf();
+    let mut directories = vec![own.clone()];
+    let packages = own.ancestors().nth(3).filter(|build| build.file_name().is_some_and(|name| name == "build"));
+    let entries = |directory: &std::path::Path| -> Vec<std::path::PathBuf> {
+        std::fs::read_dir(directory).into_iter().flatten().filter_map(Result::ok).map(|entry| entry.path()).collect()
+    };
+    for package in packages.map(entries).unwrap_or_default() {
+        for unit in entries(&package) {
+            let output = unit.join("out");
+            if output != own && output.is_dir() {
+                directories.push(output);
+            }
+        }
+    }
+    directories
+}
+
+/// The file of compiler arguments that names `directories` as the places of dependencies, written into
+/// `directory`: there may be more of them than a command line holds.
+fn library_search_arguments(directories: &[std::path::PathBuf], directory: &std::path::Path) -> String {
+    let arguments: String =
+        directories.iter().map(|directory| format!("-L\ndependency={}\n", directory.display())).collect();
+    let file = directory.join("libraries.args");
+    std::fs::write(&file, arguments).unwrap();
+    format!("@{}", file.display())
+}
+
 /// Compile-time counterparts of CLR null-argument and abstract-type rejection tests.
 fn assert_compile_error(source: &str, code: &str) {
     static NEXT: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
-    let deps = std::env::current_exe()
-        .unwrap()
-        .parent()
-        .unwrap()
-        .to_path_buf();
-    let library = std::fs::read_dir(&deps)
-        .unwrap()
+    let directories = library_directories();
+    let library = directories
+        .iter()
+        .flat_map(|directory| std::fs::read_dir(directory).unwrap())
         .filter_map(Result::ok)
         .filter(|e| {
             e.file_name()
@@ -61,8 +91,7 @@ fn assert_compile_error(source: &str, code: &str) {
                 "ferroui_dependency_injection={}",
                 library.display()
             ))
-            .arg("-L")
-            .arg(format!("dependency={}", deps.display()))
+            .arg(library_search_arguments(&directories, &dir))
             .output()
             .unwrap()
     };
