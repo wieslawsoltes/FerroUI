@@ -1,15 +1,20 @@
-//! The gauntlet in a desktop window, as the desktop harness of the Cranpose benchmark runs it.
+//! The gauntlet, the still wall or the patchwork in a desktop window, as the desktop harness of the
+//! Cranpose benchmark runs it.
 //!
 //! ```text
 //! PERF_TIER=16 PERF_FONTS=path/to/fonts cargo run --release -p gauntlet-benchmark
 //! PERF_SCENARIO=wall PERF_TIER=20 PERF_FONTS=path/to/fonts cargo run --release -p gauntlet-benchmark
+//! PERF_SCENARIO=patchwork PERF_TIER=17 PERF_FONTS=path/to/fonts PERF_CHAT=path/to/chat-assets \
+//!     cargo run --release -p gauntlet-benchmark
 //! ```
 //!
 //! `PERF_TIER` (default 5), `PERF_FREEZE` (default 0: never) and `PERF_SCENARIO` (`wall` for the
-//! still wall, anything else for the gauntlet) choose what runs; `PERF_FONTS` names the folder of
-//! the Roboto files (default `fonts`). The `PERF` lines the harness reads are written to standard
-//! output. With the feature `vello`, `FERROUI_RENDERER=vello` (or `vello-hybrid`, `vello-gpu`,
-//! `vello-cpu`) renders with the Vello backend.
+//! still wall, `patchwork` for the patchwork, anything else for the gauntlet) choose what runs;
+//! `PERF_FONTS` names the folder of the Roboto files and of the monospaced face of the patchwork's
+//! chat (default `fonts`), `PERF_CHAT` the folder of the chat's pictures (default `chat-assets`).
+//! The `PERF` lines the harness reads are written to standard output. With the feature `vello`,
+//! `FERROUI_RENDERER=vello` (or `vello-hybrid`, `vello-gpu`, `vello-cpu`) renders with the Vello
+//! backend.
 
 use ferroui_controls::AppBuilder;
 use ferroui_desktop::AppBuilderDesktopExtensions;
@@ -20,10 +25,12 @@ fn variable(name: &str, fallback: i32) -> i32 {
 }
 
 fn main() -> std::process::ExitCode {
+    let scenario = std::env::var("PERF_SCENARIO").ok();
     Launch::set(Launch {
         tier: variable("PERF_TIER", 5),
         freeze: variable("PERF_FREEZE", 0),
-        wall: std::env::var("PERF_SCENARIO").is_ok_and(|scenario| scenario == "wall"),
+        wall: scenario.as_deref() == Some("wall"),
+        patchwork: scenario.as_deref() == Some("patchwork"),
     });
     let args: Vec<String> = std::env::args().skip(1).collect();
     let builder = AppBuilder::configure::<App>();
