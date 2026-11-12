@@ -144,7 +144,7 @@ pub use i_asset_loader::{AssetAssembly, AssetStream, IAssetLoader};
 pub use i_drawing_context_impl_with_effects::IDrawingContextImplWithEffects;
 pub use gpu_effects::{EffectRasterRegion, LightingParameters, PixelOperation, PositionedLight};
 pub use i_drawing_context_impl_with_fragments::{
-    IDrawingContextImplWithFragments, IDrawingFragment,
+    FragmentKeeping, IDrawingContextImplWithFragments, IDrawingFragment,
 };
 pub use i_drawing_context_impl_with_layer_effects::{
     IDrawingContextImplWithLayerEffects, MultiplyLayerFactors,

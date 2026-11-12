@@ -1,8 +1,9 @@
 use crate::media::{BoxShadows, Color, IBrush, IEffect, IExperimentalAcrylicMaterial, IPen, RenderOptions};
 use crate::media::imaging::BitmapBlendingMode;
 use crate::platform::{
-    AlphaFormat, IBitmapImpl, IDrawingContextImpl, IDrawingContextImplWithEffects, IDrawingContextLayerImpl,
-    IDrawingContextWithAcrylicLikeSupport, IGeometryImpl, IGlyphRunImpl, ILockedFramebuffer,
+    AlphaFormat, FragmentKeeping, IBitmapImpl, IDrawingContextImpl, IDrawingContextImplWithEffects,
+    IDrawingContextImplWithFragments, IDrawingContextLayerImpl, IDrawingContextWithAcrylicLikeSupport,
+    IDrawingFragment, IGeometryImpl, IGlyphRunImpl, ILockedFramebuffer,
     IPlatformRenderInterfaceRegion, IReadableBitmapImpl, IRenderTargetBitmapImpl, PixelFormat, PixelFormats,
 };
 use crate::{Matrix, PixelSize, Rect, RoundedRect, Vector};
@@ -139,6 +140,43 @@ pub struct MockDrawingContextImpl {
     /// models <lights> lights`, #608), as a backend with a 3D executor does.
     /// Off by default: a scene then draws nothing and is counted.
     pub supports_scene_3d: bool,
+    /// Whether the context keeps drawings as fragments, and when it has them made
+    /// (`BeginFragment` / `EndFragment`, and `DrawFragment`, or `RefuseFragment` for one it
+    /// does not draw). Off by default.
+    pub fragment_keeping: Option<FragmentKeeping>,
+    /// Whether the context refuses the fragments it is asked to draw.
+    pub refuses_fragments: bool,
+    /// Whether the context makes no fragment of what is drawn (`end_fragment` gives none).
+    pub makes_no_fragments: bool,
+}
+
+/// What a mock drawing context keeps of a drawing.
+struct MockFragment;
+
+impl IDrawingFragment for MockFragment {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+}
+
+impl IDrawingContextImplWithFragments for MockDrawingContextImpl {
+    fn begin_fragment(&mut self) {
+        self.log.push("BeginFragment");
+    }
+
+    fn end_fragment(&mut self) -> Option<Rc<dyn IDrawingFragment>> {
+        self.log.push("EndFragment");
+        (!self.makes_no_fragments).then(|| Rc::new(MockFragment) as Rc<dyn IDrawingFragment>)
+    }
+
+    fn draw_fragment(&mut self, _fragment: &Rc<dyn IDrawingFragment>) -> bool {
+        self.log.push(if self.refuses_fragments { "RefuseFragment" } else { "DrawFragment" });
+        !self.refuses_fragments
+    }
+
+    fn fragment_keeping(&mut self) -> FragmentKeeping {
+        self.fragment_keeping.unwrap_or_default()
+    }
 }
 
 impl MockDrawingContextImpl {
@@ -157,6 +195,9 @@ impl MockDrawingContextImpl {
             log_render_options: false,
             log_matrices: false,
             supports_scene_3d: false,
+            fragment_keeping: None,
+            refuses_fragments: false,
+            makes_no_fragments: false,
         }
     }
 
@@ -347,6 +388,14 @@ impl IDrawingContextImpl for MockDrawingContextImpl {
 
     fn get_feature(&mut self, _feature_type: TypeId) -> Option<Rc<dyn Any>> {
         None
+    }
+
+    fn as_drawing_context_impl_with_fragments(&mut self) -> Option<&mut dyn IDrawingContextImplWithFragments> {
+        if self.fragment_keeping.is_some() {
+            Some(self)
+        } else {
+            None
+        }
     }
 
     fn as_drawing_context_impl_with_effects(&mut self) -> Option<&mut dyn IDrawingContextImplWithEffects> {

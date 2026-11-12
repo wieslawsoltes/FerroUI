@@ -11,6 +11,31 @@ pub trait IDrawingFragment: Any {
     fn as_any(&self) -> &dyn Any;
 }
 
+/// When a drawing context wants a fragment made of a drawing of the
+/// compositor that it has no fragment of, or whose fragment it refused to
+/// draw ([`IDrawingContextImplWithFragments::fragment_keeping`]).
+///
+/// The compositor keeps the answer apart from the backend: when fragments are
+/// made is one policy for every backend, and a backend only says which case
+/// is its own.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum FragmentKeeping {
+    /// Not in this frame: the context draws the fragments it made before and
+    /// makes none. What it refuses now it may draw again in a later frame,
+    /// so nothing the compositor keeps changes.
+    None,
+    /// With every such drawing: a fragment costs the backend little more
+    /// than the drawing does.
+    #[default]
+    Each,
+    /// Once the drawing was drawn before as it is now: making a fragment
+    /// costs the backend more than the drawing does, so a drawing that
+    /// changes with every frame gets none. A drawing whose fragment the
+    /// context refuses is drawn from its commands for a number of frames
+    /// that doubles with every refusal, before the next fragment is made.
+    Settled,
+}
+
 /// A drawing context that can keep what is drawn between two calls as a
 /// fragment and draw it again in a later frame.
 ///
@@ -36,4 +61,10 @@ pub trait IDrawingContextImplWithFragments: IDrawingContextImpl {
     /// commands it was made of would give. Returns `false` without drawing
     /// anything otherwise.
     fn draw_fragment(&mut self, fragment: &Rc<dyn IDrawingFragment>) -> bool;
+
+    /// When the compositor has fragments made by this context, as the
+    /// context is now.
+    fn fragment_keeping(&mut self) -> FragmentKeeping {
+        FragmentKeeping::Each
+    }
 }

@@ -38,6 +38,8 @@ use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
+mod fragments;
+
 /// What a drawing context draws to.
 pub enum CanvasSource {
     /// The canvas of a surface.
@@ -63,15 +65,24 @@ impl CanvasSource {
     /// Panics when the drawing context has been disposed.
     #[inline]
     fn get(&mut self) -> &sk::Canvas {
+        if let CanvasSource::Recorder { recorder, leases: Some(leases), .. } = self {
+            if let Some(canvas) = recorder.recording_canvas() {
+                leases.draw_pending(canvas);
+            }
+        }
+        self.canvas_only()
+    }
+
+    /// The canvas as it is: what the leases that ended drew is not drawn into it.
+    ///
+    /// # Panics
+    /// Panics when the drawing context has been disposed.
+    #[inline]
+    fn canvas_only(&mut self) -> &sk::Canvas {
         match self {
             CanvasSource::Surface(surface) => surface.canvas(),
-            CanvasSource::Recorder { recorder, leases, .. } => {
-                let canvas =
-                    recorder.recording_canvas().unwrap_or_else(|| panic!("The picture recording has ended"));
-                if let Some(leases) = leases {
-                    leases.draw_pending(canvas);
-                }
-                canvas
+            CanvasSource::Recorder { recorder, .. } => {
+                recorder.recording_canvas().unwrap_or_else(|| panic!("The picture recording has ended"))
             }
             CanvasSource::Finished => panic!("The drawing context has been disposed"),
         }
@@ -91,8 +102,8 @@ impl CanvasSource {
 /// one upstream would have set.
 struct ContextCanvas {
     source: CanvasSource,
-    /// The transform of the context the canvas does not have yet.
-    pending_transform: Option<Matrix>,
+    /// The matrix of the context the canvas does not have yet.
+    pending: PendingMatrix,
     /// What a transform is multiplied with before it is set on the canvas
     /// (the scale of a context that draws at another DPI).
     post_transform: Option<Matrix>,
@@ -100,11 +111,27 @@ struct ContextCanvas {
     /// the context has the surface and can draw to its canvas (the API
     /// lease), at a time the context does not learn about.
     eager: bool,
+    /// The fragment that is being made (`fragments.rs`): what the context draws goes to the
+    /// recorder of the fragment, whose canvas is the canvas of the context until the fragment ends.
+    capture: Option<Box<fragments::FragmentCapture>>,
+}
+
+/// The matrix the canvas of a drawing context takes with its next use.
+#[derive(Clone, Copy)]
+enum PendingMatrix {
+    /// None: the canvas has the transform of the context.
+    None,
+    /// The transform of the context.
+    Transform(Matrix),
+    /// The matrix the canvas had when a fragment was drawn on it (`fragments.rs`). A fragment is
+    /// drawn with a matrix of its own, and the canvas takes the one of the context again with its
+    /// next use, unless a transform or a restore replaces it first, as most do.
+    Device(sk::M44),
 }
 
 impl ContextCanvas {
     fn new(source: CanvasSource, post_transform: Option<Matrix>) -> Self {
-        Self { source, pending_transform: None, post_transform, eager: false }
+        Self { source, pending: PendingMatrix::None, post_transform, eager: false, capture: None }
     }
 
     /// The canvas, with the transform of the context on it.
@@ -113,46 +140,76 @@ impl ContextCanvas {
     /// Panics when the drawing context has been disposed.
     #[inline]
     fn get(&mut self) -> &sk::Canvas {
-        if self.pending_transform.is_some() {
-            self.apply_pending_transform();
+        if !matches!(self.pending, PendingMatrix::None) {
+            self.apply_pending();
         }
-        self.source.get()
+        self.target()
+    }
+
+    /// The canvas that is drawn to, with the matrix it has: the one of the fragment that is being
+    /// made, else the one of the source.
+    #[inline]
+    fn target(&mut self) -> &sk::Canvas {
+        match &mut self.capture {
+            Some(capture) => capture.canvas(&self.source),
+            None => self.source.get(),
+        }
     }
 
     /// Records the transform the canvas takes with its next use.
     #[inline]
     fn set_transform(&mut self, value: Matrix) {
-        self.pending_transform = Some(value);
+        self.pending = PendingMatrix::Transform(value);
         if self.eager {
-            self.apply_pending_transform();
+            self.apply_pending();
         }
     }
 
-    fn apply_pending_transform(&mut self) {
-        let Some(mut transform) = self.pending_transform.take() else { return };
-        if let Some(post_transform) = self.post_transform {
-            transform *= post_transform;
-        }
-        ferroui_base::perf_count!(RenderCanvasTransformsApplied);
+    /// The matrix of the canvas for a transform of the context.
+    #[inline]
+    fn device_matrix(&self, transform: Matrix) -> sk::M44 {
         // The canvas internally uses a 4x4 matrix; convert directly.
-        self.source.get().set_matrix(&to_sk_matrix44(transform));
+        to_sk_matrix44(match self.post_transform {
+            Some(post_transform) => transform * post_transform,
+            None => transform,
+        })
+    }
+
+    fn apply_pending(&mut self) {
+        let matrix = match std::mem::replace(&mut self.pending, PendingMatrix::None) {
+            PendingMatrix::None => return,
+            PendingMatrix::Transform(transform) => {
+                ferroui_base::perf_count!(RenderCanvasTransformsApplied);
+                self.device_matrix(transform)
+            }
+            PendingMatrix::Device(matrix) => matrix,
+        };
+        self.target().set_matrix(&matrix);
     }
 
     /// Restores the canvas to its last save. The restore replaces the matrix
-    /// of the canvas, so a transform that was not applied yet is dropped
+    /// of the canvas, so a matrix that was not applied yet is dropped
     /// without being set. (A restore without a save changes nothing: the
-    /// canvas takes the transform then.)
-    fn restore(&mut self) -> &sk::Canvas {
-        if self.pending_transform.is_some() {
-            if self.source.get().save_count() > 1 {
-                self.pending_transform = None;
+    /// canvas takes the matrix then.)
+    ///
+    /// Returns the save count the canvas has afterwards and its matrix.
+    fn restore(&mut self) -> (usize, sk::M44) {
+        // A restore to a save from before the fragment that is being made is not a part of it:
+        // the fragment ends here, and nothing is kept of it.
+        if self.capture.is_some() && self.target().save_count() == 1 {
+            self.abandon_capture();
+        }
+        if !matches!(self.pending, PendingMatrix::None) {
+            if self.target().save_count() > 1 {
+                self.pending = PendingMatrix::None;
             } else {
-                self.apply_pending_transform();
+                self.apply_pending();
             }
         }
-        let canvas = self.source.get();
+        let offset = self.save_offset();
+        let canvas = self.target();
         canvas.restore();
-        canvas
+        (canvas.save_count() + offset, canvas.local_to_device())
     }
 
     /// The end of the drawing: a surface is left with the transform of the
@@ -160,15 +217,15 @@ impl ContextCanvas {
     /// without a transform nothing was drawn with.
     fn finish_transform(&mut self) {
         if matches!(self.source, CanvasSource::Surface(_)) {
-            self.apply_pending_transform();
+            self.apply_pending();
         }
-        self.pending_transform = None;
+        self.pending = PendingMatrix::None;
     }
 
     /// Sets transforms on the canvas at once from now on (see `eager`).
     fn set_eager(&mut self) {
         self.eager = true;
-        self.apply_pending_transform();
+        self.apply_pending();
     }
 }
 
@@ -683,7 +740,8 @@ impl DrawingContextImpl {
     /// A layer with an image filter is about to be drawn: a filter reads around the pixels it
     /// writes, so the frame is one the recorder of the context draws
     /// ([`ISkiaGrContext::note_direct_only_draw`]).
-    fn note_image_filter(&self) {
+    fn note_image_filter(&mut self) {
+        self.canvas.note_direct_only();
         if let Some(gr_context) = &self.gr_context {
             gr_context.note_direct_only_draw();
         }
@@ -696,6 +754,8 @@ impl DrawingContextImpl {
 
     /// The Skia canvas.
     pub fn canvas(&mut self) -> &sk::Canvas {
+        // What is drawn with the canvas itself is not known to be drawn the same again.
+        self.canvas.note_not_kept();
         self.canvas.get()
     }
 
@@ -786,15 +846,14 @@ impl DrawingContextImpl {
     /// Restores the canvas state. The transform of the context is what the
     /// canvas has afterwards, less the post transform of a scaled context.
     fn restore_canvas(&mut self) {
-        let canvas = self.canvas.restore();
-        let level = canvas.save_count();
+        let (level, matrix) = self.canvas.restore();
         self.rounded_clip_elements.retain(|saved| *saved <= level);
         // Deviation (DEVIATIONS.md, Skia backend): upstream reads the
         // transform back from the canvas (`Canvas.TotalMatrix44`), post
         // transform included, so a scaled context (a render target bitmap of
         // more than 96 DPI) scaled the transforms pushed after a restore
         // twice. The transform of the context is the logical one.
-        let total = matrix44_to_matrix(&canvas.local_to_device());
+        let total = matrix44_to_matrix(&matrix);
         self.current_transform = Some(match self.post_transform {
             Some(post_transform) => total * post_transform.invert(),
             None => total,
@@ -1041,6 +1100,9 @@ impl DrawingContextImpl {
         tile_brush: &dyn ITileBrush,
         tile_brush_image: &dyn IBitmapImpl,
     ) {
+        // The image of the brush can be one that changes (a bitmap that is written to, a render
+        // target): a fragment would keep the tile of this frame.
+        self.canvas.note_not_kept();
         let dpi = self.intermediate_surface_dpi;
         let image_pixel_size = tile_brush_image.pixel_size();
 
@@ -1410,11 +1472,20 @@ impl DrawingContextImpl {
 
         let program = program(effect)?;
         let inherited_opacity = self.current_opacity;
-        let canvas = self.canvas.get();
         let bounds = match clip_rect {
             Some(clip_rect) => to_sk_rect(clip_rect),
-            None => canvas.local_clip_bounds()?,
+            // The clip of the frame, which a fragment is not made for.
+            None => {
+                self.canvas.note_not_kept();
+                self.canvas.local_clip_bounds()?
+            }
         };
+        // The layer is laid out in the pixels of the device: a fragment with it stays where it is.
+        self.canvas.note_not_movable();
+        if program.samples_content {
+            self.canvas.note_direct_only();
+        }
+        let canvas = self.canvas.get();
         let matrix = canvas.local_to_device();
         let layer = ShaderLayer::new(&matrix, bounds)?;
         let mut paint = SkPaintCache::get();
@@ -1648,6 +1719,10 @@ impl IDrawingContextImpl for DrawingContextImpl {
         self.check_lease();
         let drawable_image = try_get_drawable_bitmap(source)
             .unwrap_or_else(|| panic!("The bitmap was not created by the Skia backend"));
+        // Only a bitmap that cannot change is drawn the same again.
+        if !source.as_any().is::<crate::immutable_bitmap::ImmutableBitmap>() {
+            self.canvas.note_not_kept();
+        }
         let s = to_sk_rect(source_rect);
         let d = to_sk_rect(dest_rect);
         let is_upscaling = d.width() > s.width() || d.height() > s.height();
@@ -2144,6 +2219,12 @@ impl IDrawingContextImpl for DrawingContextImpl {
         Some(self)
     }
 
+    fn as_drawing_context_impl_with_fragments(
+        &mut self,
+    ) -> Option<&mut dyn ferroui_base::platform::IDrawingContextImplWithFragments> {
+        Some(self)
+    }
+
     fn as_drawing_context_with_acrylic_like_support(
         &mut self,
     ) -> Option<&mut dyn IDrawingContextWithAcrylicLikeSupport> {
@@ -2165,6 +2246,8 @@ impl IDrawingContextImpl for DrawingContextImpl {
 
     fn get_feature(&mut self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
         if feature_type == TypeId::of::<dyn ISkiaApiLeaseFeature>() {
+            // What a client draws with the Skia API is its own to draw in every frame.
+            self.canvas.note_not_kept();
             if let CanvasSource::Recorder { leases: Some(leases), .. } = &self.canvas.source {
                 let leases = leases.clone();
                 let transform = self.canvas.get().local_to_device();
@@ -2208,6 +2291,9 @@ impl IDrawingContextImpl for DrawingContextImpl {
         self.check_lease();
         self.disposed = true;
 
+        // A fragment that was not ended is drawn as what it is: a part of the frame.
+        self.canvas.abandon_capture();
+
         // Before the disposables, which may read the surface.
         self.canvas.finish_transform();
 
@@ -2242,6 +2328,8 @@ impl IDrawingContextImpl for DrawingContextImpl {
 impl ferroui_base::platform::IDrawingContextImplWithScene3D for DrawingContextImpl {
     fn draw_scene_3d(&mut self, frame: &ferroui_base::rendering::scene3d::Scene3DFrame) -> bool {
         self.check_lease();
+        // The scene is drawn for the pixels of the device, and its frame is one of many.
+        self.canvas.note_not_kept();
         let mut device = self.current_transform.unwrap_or(Matrix::IDENTITY);
         if let Some(post_transform) = self.post_transform {
             device *= post_transform;
@@ -2646,8 +2734,9 @@ impl DrawingContextImpl {
     /// case, stay elements. The raster backend keeps Skia's clip, the
     /// reference.
     fn clip_rounded_rect(&mut self, rrect: &sk::RRect, op: sk::ClipOp) {
+        let offset = self.canvas.save_offset();
         let canvas = self.canvas.get();
-        let level = canvas.save_count();
+        let level = canvas.save_count() + offset;
         self.rounded_clip_elements.retain(|saved| *saved <= level);
         let matrix = canvas.local_to_device_as_3x3();
         let rounded = !matches!(rrect.get_type(), sk::rrect::Type::Empty | sk::rrect::Type::Rect);
@@ -2658,6 +2747,8 @@ impl DrawingContextImpl {
         if rounded && !element && (gpu || COVERAGE_CLIPS_ON_RASTER.with(Cell::get)) {
             if let Some(shader) = crate::composition_effects::rounded_rect_coverage(rrect, &matrix) {
                 canvas.clip_shader(shader, op);
+                // The coverage is laid out in the pixels of the device: a fragment stays where it is.
+                self.canvas.note_not_movable();
                 ROUNDED_CLIPS.with(|counts| counts.set((counts.get().0 + 1, counts.get().1)));
                 return;
             }

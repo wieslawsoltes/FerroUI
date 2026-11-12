@@ -7,7 +7,7 @@
 //! in one order: `child_positions` says how many items come before each child.
 
 use super::{IDirtyRectTracker, IServerRenderResource, IServerRenderResourceObserver, ServerCompositionVisual, ServerCompositor};
-use crate::platform::{IDrawingContextImpl, IDrawingFragment, LtrbRect};
+use crate::platform::{FragmentKeeping, IDrawingContextImpl, IDrawingFragment, LtrbRect};
 use crate::rendering::composition::drawing::ServerCompositionRenderData;
 use crate::rendering::composition::transport::BatchStreamReader;
 use crate::utilities::OptionCell;
@@ -29,26 +29,117 @@ pub(crate) const DRAW_ITEM_CLIP: u8 = 8;
 /// the last.
 const REMOVED_RECTS: usize = 16;
 
-/// Draws `commands` from the fragment the backend kept of them when it can, and keeps a new
-/// one when it cannot.
+/// How many times a drawing is drawn from its commands before a backend that keeps settled
+/// drawings ([`FragmentKeeping::Settled`]) makes a fragment of it.
+const SETTLED_AFTER: u8 = 1;
+/// The most drawings from the commands between two fragments of a drawing whose fragments the
+/// backend refuses to draw.
+const LONGEST_WAIT: u8 = 64;
+/// The backend made no fragment of the drawing: none is asked for until the drawing changes.
+const NO_FRAGMENT: u8 = u8::MAX;
+
+/// What the backend kept of a drawing, and when the next fragment of it is made: the part of
+/// [`draw_with_fragment`] that lives as long as the drawing does.
+pub(super) struct KeptFragment {
+    fragment: OptionCell<Rc<dyn IDrawingFragment>>,
+    /// How many times the drawing is still drawn from its commands before a fragment is made
+    /// ([`FragmentKeeping::Settled`]), or [`NO_FRAGMENT`].
+    wait: Cell<u8>,
+    /// What `wait` was set to when the backend last refused to draw the fragment.
+    refused_wait: Cell<u8>,
+}
+
+impl Default for KeptFragment {
+    fn default() -> Self {
+        Self { fragment: OptionCell::new(), wait: Cell::new(SETTLED_AFTER), refused_wait: Cell::new(SETTLED_AFTER) }
+    }
+}
+
+impl KeptFragment {
+
+    /// The drawing is another one, or was drawn again: what was kept of it is dropped.
+    pub(super) fn clear(&self) {
+        self.fragment.set(None);
+        self.wait.set(SETTLED_AFTER);
+        self.refused_wait.set(SETTLED_AFTER);
+    }
+
+    #[cfg(test)]
+    pub(super) fn is_kept(&self) -> bool {
+        self.fragment.get().is_some()
+    }
+}
+
+/// Draws `commands` from the fragment the backend kept of them when it can, and has a new one
+/// made when the backend wants one ([`FragmentKeeping`]).
+///
+/// The policy is the compositor's, one for every backend: a backend says when a fragment is
+/// worth making, draws one, and refuses the ones it cannot draw as the commands would.
 ///
 /// Deviation (DEVIATIONS.md, Server composition visuals): upstream replays the commands every
 /// time (`RenderCore`).
 pub(super) fn draw_with_fragment(
     commands: &ServerCompositionRenderData,
-    fragment: &OptionCell<Rc<dyn IDrawingFragment>>,
+    kept: &KeptFragment,
     canvas: &mut dyn IDrawingContextImpl,
 ) {
-    if let Some(fragments) = canvas.as_drawing_context_impl_with_fragments() {
-        if fragment.get().is_some_and(|fragment| fragments.draw_fragment(&fragment)) {
-            return;
+    draw_kept_or(kept, canvas, |canvas| commands.render(canvas));
+}
+
+/// [`draw_with_fragment`] for a drawing that `render` draws.
+fn draw_kept_or(
+    kept: &KeptFragment,
+    canvas: &mut dyn IDrawingContextImpl,
+    render: impl Fn(&mut dyn IDrawingContextImpl),
+) {
+    let Some(fragments) = canvas.as_drawing_context_impl_with_fragments() else {
+        render(canvas);
+        return;
+    };
+    let keeping = fragments.fragment_keeping();
+    let refused = match kept.fragment.get() {
+        Some(fragment) => {
+            if fragments.draw_fragment(&fragment) {
+                crate::perf_count!(RenderFragmentsDrawn);
+                return;
+            }
+            true
         }
-        fragments.begin_fragment();
-        commands.render(fragments);
-        fragment.set(fragments.end_fragment());
+        None => false,
+    };
+    let make = match keeping {
+        FragmentKeeping::None => false,
+        FragmentKeeping::Each => true,
+        FragmentKeeping::Settled if refused => {
+            // The drawing is at a state the fragment was not made at (it is scaled, it
+            // fades): while that lasts a fragment a frame would be made and refused.
+            let wait = kept.refused_wait.get().saturating_mul(2).min(LONGEST_WAIT);
+            kept.fragment.set(None);
+            kept.refused_wait.set(wait);
+            kept.wait.set(wait);
+            false
+        }
+        FragmentKeeping::Settled => match kept.wait.get() {
+            0 => true,
+            NO_FRAGMENT => false,
+            wait => {
+                kept.wait.set(wait - 1);
+                false
+            }
+        },
+    };
+    if !make {
+        render(fragments);
         return;
     }
-    commands.render(canvas);
+    fragments.begin_fragment();
+    render(fragments);
+    let fragment = fragments.end_fragment();
+    crate::perf_count!(RenderFragmentsMade);
+    if fragment.is_none() && keeping == FragmentKeeping::Settled {
+        kept.wait.set(NO_FRAGMENT);
+    }
+    kept.fragment.set(fragment);
 }
 
 /// The drawing of a visual without a composition visual, in the composition visual that
@@ -58,7 +149,7 @@ pub struct ServerDrawItem {
     data: OptionCell<Rc<ServerCompositionRenderData>>,
     /// What the backend kept of the drawing: dropped when the drawing or a resource of it
     /// changes.
-    fragment: OptionCell<Rc<dyn IDrawingFragment>>,
+    fragment: KeptFragment,
     /// Where the drawing is in the holder.
     offset: Cell<(f64, f64)>,
     /// The size the drawing is clipped to.
@@ -78,7 +169,7 @@ impl ServerDrawItem {
         let item = Rc::new(ServerDrawItem {
             holder: holder.clone(),
             data: OptionCell::new(),
-            fragment: OptionCell::new(),
+            fragment: KeptFragment::default(),
             offset: Cell::new((0.0, 0.0)),
             clip: Cell::new(None),
             announced: Cell::new(None),
@@ -105,7 +196,7 @@ impl ServerDrawItem {
             data.add_observer(&observer);
         }
         self.data.set(data);
-        self.fragment.set(None);
+        self.fragment.clear();
     }
 
     fn read_offset(&self, reader: &mut BatchStreamReader<'_>) {
@@ -150,7 +241,7 @@ impl ServerDrawItem {
 
 impl IServerRenderResourceObserver for ServerDrawItem {
     fn dependency_queued_invalidate(&self, _sender: &dyn IServerRenderResource) {
-        self.fragment.set(None);
+        self.fragment.clear();
         self.dirty.set(true);
         if let Some(holder) = self.holder.upgrade() {
             holder.content_items_changed();
@@ -233,7 +324,7 @@ impl ServerDrawItems {
                 item.read_data(compositor.as_ref(), reader);
             }
             if bits & DRAW_ITEM_REDRAWN != 0 {
-                item.fragment.set(None);
+                item.fragment.clear();
             }
             if bits & DRAW_ITEM_OFFSET != 0 {
                 item.read_offset(reader);
@@ -338,3 +429,7 @@ impl ServerDrawItems {
         self.removed.borrow_mut().clear();
     }
 }
+
+#[cfg(test)]
+#[path = "server_draw_items_tests.rs"]
+mod tests;

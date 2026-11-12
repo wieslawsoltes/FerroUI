@@ -1,12 +1,11 @@
-use super::server_draw_items::draw_with_fragment;
+use super::server_draw_items::{draw_with_fragment, KeptFragment};
 use super::{
     IServerRenderResource, IServerRenderResourceObserver, IServerVisualContent, ServerCompositionVisual, ServerDrawItems,
     ServerVisualRenderContext,
 };
-use crate::platform::{IDrawingFragment, LtrbRect};
+use crate::platform::LtrbRect;
 use crate::rendering::composition::drawing::ServerCompositionRenderData;
 use crate::rendering::composition::transport::BatchStreamReader;
-use crate::utilities::OptionCell;
 use std::any::Any;
 use std::cell::{OnceCell, RefCell};
 use std::rc::Rc;
@@ -19,7 +18,7 @@ pub struct ServerCompositionDrawListVisual {
     /// What the backend kept of the commands when they were drawn, to draw
     /// them again from while they do not change: dropped when the commands
     /// or a resource of them change.
-    fragment: OptionCell<Rc<dyn IDrawingFragment>>,
+    fragment: KeptFragment,
     /// The drawings of the visuals below that have no composition visual (section 9.42):
     /// made when the first one arrives.
     items: OnceCell<Box<ServerDrawItems>>,
@@ -71,7 +70,7 @@ impl IServerVisualContent for ServerCompositionDrawListVisual {
         let change = changes & DRAW_LIST_CHANGE_MASK;
         if change == DRAW_LIST_REDRAWN {
             // The same drawing, drawn again (section 9.14).
-            self.fragment.set(None);
+            self.fragment.clear();
             visual.invalidate_content();
         }
         if change == DRAW_LIST_NEW {
@@ -89,7 +88,7 @@ impl IServerVisualContent for ServerCompositionDrawListVisual {
                 commands.add_observer(&observer);
             }
             *self.render_commands.borrow_mut() = commands;
-            self.fragment.set(None);
+            self.fragment.clear();
             visual.invalidate_content();
         }
         if changes & DRAW_LIST_ITEMS != 0 {
@@ -114,13 +113,13 @@ impl IServerVisualContent for ServerCompositionDrawListVisual {
     }
 
     fn dependency_queued_invalidate(&self, visual: &ServerCompositionVisual) {
-        self.fragment.set(None);
+        self.fragment.clear();
         visual.invalidate_content();
     }
 
     fn dispose(&self, visual: &ServerCompositionVisual) {
         *self.render_commands.borrow_mut() = None;
-        self.fragment.set(None);
+        self.fragment.clear();
         if let Some(items) = self.items.get() {
             items.clear();
             visual.set_has_draw_items(false);

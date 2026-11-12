@@ -317,6 +317,10 @@ perf_counters! {
     RenderVisualClipsPushed => "render: visual clips to bounds pushed",
     /// The render walk: a drawing item of a visual was drawn (section 9.42).
     RenderItemsDrawn => "render: drawing items drawn",
+    /// The render walk: a drawing was drawn from the fragment the backend kept of it.
+    RenderFragmentsDrawn => "render: drawings drawn from a kept fragment",
+    /// The render walk: the backend was asked to keep a fragment of a drawing.
+    RenderFragmentsMade => "render: fragments made of drawings",
     /// The render walk: a visual pushed its opacity.
     RenderVisualOpacitiesPushed => "render: visual opacities pushed",
     /// The render walk: a visual was drawn from its bitmap cache.

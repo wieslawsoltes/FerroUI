@@ -6,7 +6,8 @@ use crate::media::imaging::BitmapBlendingMode;
 use crate::media::immutable::ImmutableSolidColorBrush;
 use crate::media::{BoxShadows, Color, IBrush, IExperimentalAcrylicMaterial, IPen, RenderOptions, TextOptions};
 use crate::platform::{
-    IBitmapImpl, IDrawingContextImpl, IDrawingContextImplWithEffects, IDrawingContextImplWithFragments,
+    FragmentKeeping, IBitmapImpl, IDrawingContextImpl, IDrawingContextImplWithEffects,
+    IDrawingContextImplWithFragments,
     IDrawingContextImplWithScene3D, IDrawingContextLayerImpl, IDrawingFragment,
     IDrawingContextWithAcrylicLikeSupport, IGeometryImpl, IGlyphRunImpl, IPlatformRenderInterfaceRegion,
 };
@@ -657,5 +658,13 @@ impl IDrawingContextImplWithFragments for CompositorDrawingContextProxy {
     fn draw_fragment(&mut self, fragment: &Rc<dyn IDrawingFragment>) -> bool {
         self.flush();
         self.inner.as_drawing_context_impl_with_fragments().is_some_and(|inner| inner.draw_fragment(fragment))
+    }
+
+    fn fragment_keeping(&mut self) -> FragmentKeeping {
+        // Nothing is flushed: what is pending is state the answer does not depend on.
+        match self.inner.as_drawing_context_impl_with_fragments() {
+            Some(inner) => inner.fragment_keeping(),
+            None => FragmentKeeping::None,
+        }
     }
 }
