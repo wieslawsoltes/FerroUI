@@ -66,15 +66,16 @@ struct SharedGlyphs {
     generation: Cell<i32>,
     /// A number of its own for the storage (an address is used again once a storage is freed).
     storage: u64,
-    /// For the glyphs of an edited text, the glyphs they were taken from.
-    edit: Option<GlyphEdit>,
+    /// For the glyphs of an edited text, the glyphs they were taken from. Boxed: only the long
+    /// texts that are edited have one.
+    edit: Option<Box<GlyphEdit>>,
 }
 
 impl SharedGlyphs {
     fn new(edit: Option<GlyphEdit>) -> Rc<Self> {
         static NEXT_STORAGE: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
         let storage = NEXT_STORAGE.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-        Rc::new(Self { generation: Cell::new(0), storage, edit })
+        Rc::new(Self { generation: Cell::new(0), storage, edit: edit.map(Box::new) })
     }
 }
 

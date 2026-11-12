@@ -30,8 +30,19 @@ struct State {
     single: Option<(i32, CachedShapingResult)>,
     // Multi-entry store (only allocated when 2+ distinct keys are added).
     entries: Option<HashMap<i32, CachedShapingResult>>,
+    /// What is kept of a long text for an edit of it and for its next layout (step 7 of
+    /// text-layout-performance.md). Made with the first shaping that is kept and dropped when
+    /// nothing is kept any more: the cache of a short text has none.
+    long: Option<Box<LongText>>,
+    /// Whether a layout is being made.
+    in_layout: bool,
+}
+
+/// What a run cache keeps of a long text.
+#[derive(Default)]
+struct LongText {
     /// The shapings of long texts made for the current text, with their concatenation flags,
-    /// for the next text of the owner (`retire`, step 7 of text-layout-performance.md).
+    /// for the next text of the owner (`retire`).
     kept: Vec<KeptShaping>,
     /// The shapings kept for the text before the current one: an edit of that text shapes the
     /// new one from them (`shaping_edit`).
@@ -42,8 +53,12 @@ struct State {
     /// While a layout is made (`begin_layout`): the platform glyph runs of the lines of the
     /// layout before, which a line of the same glyphs takes. Empty between layouts.
     previous_line_runs: GlyphRunTable,
-    /// Whether a layout is being made.
-    in_layout: bool,
+}
+
+impl LongText {
+    fn is_empty(&self) -> bool {
+        self.kept.is_empty() && self.retired.is_empty() && self.line_runs.is_empty()
+    }
 }
 
 /// The platform glyph runs of the lines of a layout, by the storage and the first glyph of the
@@ -121,10 +136,10 @@ impl TextRunCache {
     /// Invalidates all cached entries and disposes their shaped buffers.
     pub fn invalidate(&self) {
         let mut state = self.state.borrow_mut();
-        state.kept.clear();
-        state.retired.clear();
-        release_glyph_runs(&mut state.line_runs);
-        release_glyph_runs(&mut state.previous_line_runs);
+        if let Some(mut long) = state.long.take() {
+            release_glyph_runs(&mut long.line_runs);
+            release_glyph_runs(&mut long.previous_line_runs);
+        }
         Self::invalidate_entries(&mut state);
     }
 
@@ -134,37 +149,45 @@ impl TextRunCache {
     /// layout before whose glyphs are the glyphs of a line of this one (the text was not edited
     /// there and the line breaks where it did) gives its platform glyph run to the new line:
     /// the bounds of the glyphs are not measured again, and the renderer draws the run it has
-    /// drawn before.
+    /// drawn before. Only the lines of a text a shaping is kept of are kept (a long text): a
+    /// short text is laid out again at no cost worth a table of its lines.
     pub(crate) fn begin_layout(&self) {
         let mut state = self.state.borrow_mut();
-        let state = &mut *state;
-        release_glyph_runs(&mut state.previous_line_runs);
-        std::mem::swap(&mut state.line_runs, &mut state.previous_line_runs);
         state.in_layout = true;
+        if let Some(long) = &mut state.long {
+            release_glyph_runs(&mut long.previous_line_runs);
+            std::mem::swap(&mut long.line_runs, &mut long.previous_line_runs);
+        }
     }
 
     /// The layout that started is made: the platform glyph runs of the layout before that no
     /// line took are released.
     pub(crate) fn end_layout(&self) {
         let mut state = self.state.borrow_mut();
-        release_glyph_runs(&mut state.previous_line_runs);
         state.in_layout = false;
+        if let Some(long) = &mut state.long {
+            release_glyph_runs(&mut long.previous_line_runs);
+            if long.is_empty() {
+                state.long = None;
+            }
+        }
     }
 
     /// Gives the shaped runs of a line that is about to be finished the platform glyph runs kept
     /// for their glyphs from the layout before. Nothing outside a layout.
     pub(crate) fn adopt_line_glyph_runs(&self, text_runs: &[Rc<dyn TextRun>]) {
         let state = self.state.borrow();
-        if !state.in_layout || state.previous_line_runs.is_empty() {
+        let Some(long) = state.long.as_deref().filter(|long| state.in_layout && !long.previous_line_runs.is_empty())
+        else {
             return;
-        }
+        };
         for run in text_runs {
             let Some((run, range)) = Self::glyph_range_of(run) else {
                 continue;
             };
             let buffer = run.shaped_buffer();
             let kept = [Some(range), buffer.glyph_range_before_edit()].into_iter().flatten().find_map(|range| {
-                let kept = state.previous_line_runs.get(&(range.storage, range.start))?;
+                let kept = long.previous_line_runs.get(&(range.storage, range.start))?;
                 (kept.length == range.length && kept.generation == range.generation).then_some(kept)
             });
             if let Some(kept) = kept {
@@ -176,12 +199,13 @@ impl TextRunCache {
     }
 
     /// Keeps the platform glyph runs of the shaped runs of a finished line for the next layout.
-    /// Nothing outside a layout.
+    /// Nothing outside a layout, and nothing for a text no shaping is kept of.
     pub(crate) fn keep_line_glyph_runs(&self, text_runs: &[Rc<dyn TextRun>]) {
         let mut state = self.state.borrow_mut();
-        if !state.in_layout {
+        let in_layout = state.in_layout;
+        let Some(long) = state.long.as_deref_mut().filter(|long| in_layout && !long.kept.is_empty()) else {
             return;
-        }
+        };
         for run in text_runs {
             let Some((run, range)) = Self::glyph_range_of(run) else {
                 continue;
@@ -190,7 +214,7 @@ impl TextRunCache {
                 continue;
             };
             let kept = KeptGlyphRun { length: range.length, generation: range.generation, platform_impl };
-            if let Some(replaced) = state.line_runs.insert((range.storage, range.start), kept) {
+            if let Some(replaced) = long.line_runs.insert((range.storage, range.start), kept) {
                 release_platform_impl(Some(replaced.platform_impl));
             }
         }
@@ -218,7 +242,9 @@ impl TextRunCache {
     /// before for the new one: an edit of a long text shapes again only what the edit changed.
     pub fn retire(&self) {
         let mut state = self.state.borrow_mut();
-        state.retired = std::mem::take(&mut state.kept);
+        if let Some(long) = &mut state.long {
+            long.retired = std::mem::take(&mut long.kept);
+        }
         Self::invalidate_entries(&mut state);
     }
 
@@ -226,19 +252,21 @@ impl TextRunCache {
     /// of the owner.
     pub(crate) fn keep_shaping(&self, options: &TextShaperOptions, buffer: &Rc<ShapedBuffer>) {
         let mut state = self.state.borrow_mut();
+        let long = state.long.get_or_insert_with(Default::default);
         // One shaping a set of options: a text shaped again (the cached runs dropped for another
         // reason) replaces the one kept before.
-        state.kept.retain(|kept| !kept.options.shapes_as(options));
+        long.kept.retain(|kept| !kept.options.shapes_as(options));
         // A buffer of its own over the glyphs: the runs of the cache hold `buffer` and dispose it.
-        state.kept.push(KeptShaping { options: options.clone(), buffer: buffer.sharing(), source: buffer.clone() });
+        long.kept.push(KeptShaping { options: options.clone(), buffer: buffer.sharing(), source: buffer.clone() });
     }
 
     /// The kept shaping of the text before the current one that was shaped as `options` shape,
     /// taken out of the cache, with the break table the layout of that text made.
     pub(crate) fn take_retired(&self, options: &TextShaperOptions) -> Option<Rc<ShapedBuffer>> {
         let mut state = self.state.borrow_mut();
-        let index = state.retired.iter().position(|kept| kept.options.shapes_as(options))?;
-        let kept = state.retired.swap_remove(index);
+        let long = state.long.as_deref_mut()?;
+        let index = long.retired.iter().position(|kept| kept.options.shapes_as(options))?;
+        let kept = long.retired.swap_remove(index);
         kept.buffer.share_breaks_of(&kept.source);
         Some(kept.buffer)
     }

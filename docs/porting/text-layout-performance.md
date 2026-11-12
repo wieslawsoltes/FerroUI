@@ -209,7 +209,12 @@ changes behavior upstream defines.
      origin; a storage written since is told by its generation). The runs of the layout before
      are held for the time of one layout only, so between layouts the cache holds nothing the
      lines do not hold. The lines that an edit leaves take their glyph runs; the line of the
-     edit, and lines whose wrapping moved, make theirs.
+     edit, and lines whose wrapping moved, make theirs. Only a text the cache keeps a shaping
+     of has its glyph runs kept: the kept shapings and the two tables of glyph runs are one
+     allocation the cache makes with the first kept shaping and frees when it holds nothing,
+     so the layout of a short text allocates and looks up nothing for this (the local gate
+     measured 5 % more instructions on `trees::Propagation.font_family`, 2,000 short texts
+     laid out again, while every text had a table; 0.5 % now).
    The run cache of a text block keeps the shaped runs of its previous text for this, and the
    comparison of the two texts (a common prefix and suffix, compared as memory) is the edit.
 
