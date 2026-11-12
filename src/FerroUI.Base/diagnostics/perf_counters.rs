@@ -161,6 +161,13 @@ perf_counters! {
     /// `DynamicResourceExpression::on_start` (the XAML runtime library): the
     /// expression found its host, subscribed to it and looked its resource up.
     DynamicResourceExpressionsStarted => "dynamic resource expressions started",
+    /// `DynamicResourceExpression::publish_value` (the XAML runtime library):
+    /// a dynamic resource looked its resource up and published it.
+    DynamicResourceLookups => "dynamic resource lookups",
+    /// `DynamicResourceExpression` (the XAML runtime library): a notification
+    /// of changed resources that was not newer than the last lookup of the
+    /// expression, which did not look up again.
+    DynamicResourceNotificationsSeen => "dynamic resource notifications already seen",
     /// `UntypedBindingExpressionBase::publish_value` of a running
     /// expression and `TypedBindingExpression::publish_value`.
     BindingValuesPublished => "binding values published",

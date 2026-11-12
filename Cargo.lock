@@ -1701,6 +1701,7 @@ dependencies = [
  "ferroui-harfbuzz",
  "ferroui-headless",
  "ferroui-markup",
+ "ferroui-markup-xaml",
  "ferroui-skia",
  "ferroui-themes-fluent",
  "ferroui-themes-simple",

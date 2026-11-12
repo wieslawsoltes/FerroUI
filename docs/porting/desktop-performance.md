@@ -3176,3 +3176,73 @@ do not change beyond their tolerances (`startup/tiles` has no styles with bindin
   value; the expression of the property is the expression of the entry; the size of
   the record. The counter check `setter_binding_work_of_styles_that_are_not_evaluated` asserts the expressions created and
   started in the start of the controls scene.
+
+### 9.44 A dynamic resource does not look up again for a change it has seen
+
+A dynamic resource follows the resources and the theme variant of its host: it subscribes
+to both and looks its resource up again for every notification. When an element is
+attached to a tree its dynamic resources were updated twice there. Setting the parent sets
+the inheritance parent first, and the theme variant the element inherits from it makes
+each of its dynamic resources look up (with the new styling parent, since the walk of a
+lookup goes up the inheritance parents); then the attachment applies the styles of the
+element, whose setters start their dynamic resources, and makes a notification of changed
+resources, which makes every dynamic resource of the element look up again. The second
+lookup sees the tree the first saw and publishes the value the first published.
+
+- **The notification of an attachment is numbered when the element gets its parent.**
+  `set_parent` makes it (`ResourcesChangedEventArgs::create`) before it sets the
+  inheritance parent, and every element of the attached subtree receives that one
+  notification (`LogicalTreeAttachmentEventArgs` carries it to the elements below and to
+  the template children). Each element made its own, after its styles were applied.
+- **A dynamic resource remembers when it looked up.** `DynamicResourceExpression` takes
+  the last sequence number of the notifications
+  (`ResourcesChangedEventArgs::last_sequence_number`) before each lookup and does not
+  look up again for a notification that is not newer
+  (`ResourcesChangedEventArgs::is_newer_than`).
+
+Why it is correct: every notification of the framework is made after the change it
+describes, as upstream's is (a dictionary that is changed, a dictionary or a style that
+gets or loses its owner, the accent or the density of a theme, an element that gets or
+loses its parent, the application forwarding its own). A lookup made after the
+notification was numbered was made after the change, and saw it. The number is taken
+before the lookup, so a change notified while the lookup runs is newer. Arguments that
+`create` did not number (the default) are newer than any moment.
+
+The start of the controls scene and the `list` scene, before (section 9.43, the base of the
+gate) and after; the medians of the gate (5 rounds that alternate the two builds; Apple M3
+Pro, release build), and the counts from one run of each build with counters:
+
+| Scene | Before | After | Change |
+|---|---:|---:|---:|
+| `startup/controls` show | 223.7 ms | 216.8 ms | -3.1 % |
+| `startup/controls` start (to the first frame) | 292.1 ms | 281.9 ms | -3.5 % |
+| `frames/list` show | 2.79 ms | 2.00 ms | -28.2 % |
+| `frames/list` start | 4.02 ms | 3.11 ms | -22.7 % |
+
+| Counted in the start of the controls scene | Before | After |
+|---|---:|---:|
+| Resource lookups | 79,670 | 56,059 |
+| Resource hosts probed | 1,127,451 | 778,141 |
+| Lookups of dynamic resources | 56,853 | 33,242 |
+| Notifications already seen | | 23,611 |
+| Binding values published | 112,904 | 89,293 |
+| Property changes raised | 426,905 | 426,905 |
+
+The property changes are the same: the lookups that are left out published the value the
+property had. The memory of the starts does not change.
+
+The framework benchmark `styling_subsystem::DynamicResources` guards it: a section of 1,000
+texts whose tags are a dynamic resource of the root, in a theme variant scope, detached and
+attached again (the gate, base section 9.43, 5 rounds):
+
+| `styling_subsystem::DynamicResources` | Before | After | Change |
+|---|---:|---:|---:|
+| `reattach` | 1.862 ms | 1.693 ms | -9.1 % |
+| `detach` | 1.470 ms | 1.377 ms | -6.3 % |
+| `reattach_with_inactive_setters` (four dynamic-resource setters of a style that does not match yet) | 2.331 ms | 2.127 ms | -8.8 % |
+
+- **Tests:** `resource_tests::a_notification_is_newer_than_the_moments_before_it_was_made`;
+  `dynamic_resource_expression_tests::attachment` attaches a group of elements with
+  dynamic resources to a root, with and without a theme variant to inherit, and checks
+  the values after the attachment, a later change and the detachment; with the counters
+  it asserts one lookup for each resource in the attachment.
