@@ -1,436 +1,371 @@
-# Native Windows renderer
+# Windows native renderer
 
-`ferroui-direct2d` is an opt-in Windows backend. It uses a hardware D3D11
-device (feature level 11.0 or later), DXGI flip-model presentation, Direct2D drawing, DirectWrite font
-discovery/shaping, and WIC image codecs. The default desktop backend remains
-Skia. The native feature graph excludes Skia, HarfBuzz, ANGLE, Vello and wgpu.
+`ferroui-direct2d` (`src/Windows/FerroUI.Direct2D`) is an opt-in render backend for Windows that
+draws with the graphics stack of the system: Direct2D on a hardware Direct3D 11 device, DirectWrite
+for fonts and shaping, the Windows Imaging Component (WIC) for image files, and a DXGI swap chain
+shown through DirectComposition. A build that selects it contains no Skia, no HarfBuzz and no ANGLE.
+Skia remains the default renderer of every desktop build; nothing changes for an application that
+does not ask for this backend.
+
+Choose it when:
+
+- the size of the executable matters: the renderer, the shaper and the image codecs come from
+  Windows and are not linked into the program (see
+  [Measure binary size](#measure-binary-size));
+- text should be shaped and rasterized by DirectWrite, with the font fallback of the system;
+- video or camera frames should stay on the Direct3D 11 device that draws the window.
+
+Keep Skia when:
+
+- the application has to start without a hardware GPU (the native renderer refuses the software
+  rasterizer and has no CPU fallback);
+- it needs subpixel (ClearType) text, the blur, acrylic or Mica window backdrops, or rendering that
+  matches the other platforms pixel for pixel;
+- it uses custom shader effects and cannot take the optional runtime shader compiler
+  (see [Effects and custom shaders](#effects-and-custom-shaders)).
+
+Measurements against Skia on ANGLE are in
+[windows-native-renderer-benchmarks.md](windows-native-renderer-benchmarks.md).
+
+## Requirements
+
+To build:
+
+- A Windows target with the MSVC C++ toolchain. The backend has a C++17 translation unit that the
+  `cc` crate compiles.
+- The Windows SDK with the shader compiler `fxc.exe`. The build script takes the newest
+  `Windows Kits\10\bin\<version>\x64\fxc.exe` under the 32-bit program files directory. Set the
+  environment variable `FXC` to the full path of the compiler when the SDK is somewhere else.
+  Without a compiler the build stops with a message that names `FXC`.
+
+To run:
+
+- Windows 10 version 1709 or later.
+- A hardware Direct3D 11 device of feature level 11_0 or 11_1. The built-in effect kernels are
+  Shader Model 5 compute shaders. The device is created with the hardware driver type only: WARP
+  never satisfies the request, so a machine or a session without a hardware adapter cannot start
+  the backend.
+
+`use_direct2d()` checks both at startup and stops the program with a message that states the
+requirement when the device cannot be created.
 
 ## Build and run
 
-Use a Windows MSVC Rust toolchain and the Visual Studio C++ and Windows SDK
-components. The SDK's `fxc.exe` compiles the built-in effect kernels at build
-time; `FXC` can specify its location. No shader compiler is deployed for those
-kernels.
-
-The required DirectWrite factory and in-memory font loader set the native API
-baseline at Windows 10 Creators Update or later. The current hardware runs
-were on Windows 11 with SDK 10.0.26100.0; earlier supported Windows versions
-have not been exercised. See Microsoft's
-[in-memory font API documentation](https://github.com/MicrosoftDocs/win32/blob/docs/desktop-src/DirectWrite/custom-font-sets-win10.md).
+The samples take the backend with their feature `direct2d`. The default features select Skia, so
+they have to be turned off: enabling `skia` and `direct2d` together on Windows is a compile error.
 
 ```powershell
 cargo run -p hello-world --no-default-features --features direct2d
 cargo run -p control-catalog-desktop --no-default-features --features direct2d
 ```
 
-An application can select `.use_direct2d()` explicitly, or enable
-`ferroui-desktop/direct2d` and use platform detection. Select one renderer:
-enabling both the Windows native and Skia desktop features is rejected at build
-time. Win32 window management, input and accessibility continue to use the
-existing platform implementation.
+| Package | Feature | Adds |
+| --- | --- | --- |
+| `ferroui-desktop` | `direct2d` | The backend, and the Win32 windowing backend in its Direct3D 11 mode (`ferroui-win32/native-d3d11`) without ANGLE |
+| `ferroui-desktop` | `direct2d-runtime-shaders` | `direct2d` and the runtime shader compiler (`ferroui-direct2d/runtime-shaders`) |
+| `hello-world` | `direct2d` | The backend through `ferroui-desktop` |
+| `hello-world` | `direct2d-runtime-shaders` | `direct2d` and the runtime shader compiler |
+| `control-catalog-desktop` | `direct2d` | The backend, and video and camera frames on its Direct3D 11 device |
+| `control-catalog-desktop` | `direct2d-runtime-shaders` | `direct2d` and the runtime shader compiler, for the pages with custom shader effects |
+| `control-catalog-desktop` | `direct2d-media-test-fixtures` | `direct2d` and the synthetic camera of the media smoke run |
+| `ferroui-direct2d` | `runtime-shaders` | The WGSL to HLSL translation of custom shader effects |
+| `ferroui-direct2d` | `media-controls` | `D3D11TextureImporter`, which the media controls use to draw Direct3D 11 frames |
 
-Runtime WGSL effects are optional and add Naga and a runtime dependency on the
-Windows `d3dcompiler_47.dll`:
+In an application, turn off the default features of `ferroui-desktop` and enable `direct2d`:
 
 ```powershell
+cargo add ferroui-desktop --no-default-features --features direct2d
+```
+
+`use_platform_detect()` then loads the Win32 windowing backend and registers the renderer and the
+text shaper; no other code changes. An application that uses custom shader effects enables
+`direct2d-runtime-shaders` instead of `direct2d`.
+
+An application that builds its `AppBuilder` by hand calls
+`Direct2DApplicationExtensions::use_direct2d()`, which registers the rendering subsystem `Direct2D`
+and the text shaping subsystem `DirectWrite`. The windows must then come from `ferroui-win32` with
+its feature `native-d3d11`, whose default platform options select the rendering mode
+`Win32RenderingMode::Direct3D11`: in that mode the windowing backend creates no EGL or OpenGL
+context and leaves the device and the swap chain to the renderer.
+
+## Architecture
+
+The backend has two layers.
+
+`native.cpp` holds everything that talks to COM: the factories, the Direct3D device, drawing,
+text, images, effects, the swap chain and the imported textures. It exports a C ABI (functions
+named `d2_*`) and is compiled by `build.rs` together with the header that `fxc.exe` generates from
+`effects.hlsl`. One recursive mutex serializes every entry point, so the Rust side may call from
+the UI thread and from the render thread.
+
+The Rust modules implement the rendering interfaces of the framework on top of that ABI:
+
+| Module | Role |
+| --- | --- |
+| `lib.rs` | `Direct2DRenderInterface` (the platform render interface), `use_direct2d()`, the device accessors and the statistics |
+| `presentation.rs` | The render interface context, window render targets and offscreen targets |
+| `drawing.rs` | The drawing context: brushes, pens, clips, opacity, layers, blend modes, glyph runs |
+| `effects.rs`, `tiles.rs` | Effects, layer effects, box shadows, the acrylic material and tiled brushes on the GPU |
+| `custom_shaders.rs` | Custom shader effects (feature `runtime-shaders`) |
+| `bitmap.rs`, `writeable_bitmap.rs` | GPU bitmaps, decoding and encoding, writable bitmaps |
+| `geometry.rs`, `path_measure.rs`, `region.rs` | Geometries, path measurement and regions |
+| `fonts.rs` | `Direct2DFontManager` and `DirectWriteTextShaper` |
+| `external_objects.rs` | Import of shared Direct3D 11 textures for video, camera and other producers |
+| `ffi.rs` | The declarations of the C ABI |
+
+The drawing context does not cross the boundary once per primitive. It records draw commands and
+passes them to the C++ layer in batches, at the end of a drawing session or when 4,096 commands
+have collected.
+
+### Device
+
+The engine owns one Direct3D 11 device for the process, created with BGRA and video support and
+with multithread protection on, and one Direct2D device on top of it. Every surface is a
+premultiplied BGRA texture drawn through a Direct2D device context in pixel units. The render
+interface reports premultiplied alpha and `BGRA8888` as its default formats.
+
+The caches of the device are bounded:
+
+| Cache | Bound |
+| --- | --- |
+| Pooled frame textures | 16 textures and 64 MiB |
+| Glyph atlas | 256 x 256 pages, 64 pages (16 MiB), least recently used first out |
+| Box shadows | 512 entries and 32 MiB |
+| Shaping results, per font | 2,048 entries and 1 MiB; runs of up to 256 UTF-16 units with up to 16 features |
+| Glyph metrics, per font | 4,096 entries |
+
+### Presentation
+
+A window render target needs the `HWND` of the window. In the Direct3D 11 mode the windowing
+backend creates the window without a redirection bitmap, and the renderer attaches a
+DirectComposition target to it. The swap chain is a composition swap chain with two BGRA buffers,
+the flip-sequential model and premultiplied alpha, so a transparent window is composed by the
+system without a copy through GDI. It is created on the first present and resized when the client
+size changes.
+
+Each window keeps one retained root texture. A frame is drawn into it, copied to the back buffer
+on the GPU and presented with a sync interval of zero; the compositor of the framework paces the
+frames. The retained texture lets a frame redraw the dirty regions only. A present is skipped
+while the system reports the window as occluded.
+
+Offscreen render targets are textures of up to 16,384 pixels on a side.
+
+### Device loss and recovery
+
+The engine counts device generations. When Direct3D reports the device as removed, the engine
+creates a new device before it releases the old one, clears the glyph atlas, the box shadow cache,
+the frame pool and the compiled shader objects, and increments the generation. While no hardware
+adapter is available the old state stays in place and the next check tries again.
+
+- A window target whose generation is stale reports itself as corrupted, and the compositor
+  recreates it.
+- Bitmaps check their generation at the start of a drawing session. A bitmap that was decoded from
+  a file or created from pixels is recreated from those bytes.
+- Compiled custom shader pipelines are cached per generation and rebuilt on demand.
+- A leased video or camera texture of an earlier generation is refused; the producer supplies a
+  new frame on the new device.
+
+`ferroui_direct2d::device_generation()` returns the current generation to code that shares the
+device.
+
+### Text
+
+`Direct2DFontManager` enumerates the system font collection, matches typefaces by family, weight,
+style and stretch, loads fonts from streams through an in-memory font loader, applies variable
+font axes, and asks DirectWrite for the fallback font of a code point. The default family is
+Segoe UI.
+
+`DirectWriteTextShaper` shapes with the DirectWrite text analyzer: script analysis, glyph mapping
+with the OpenType features and their ranges, then glyph placement. The shaper passes the text of
+the whole paragraph together with the range of the run, so that context at the edges of a run is
+available. A run is shaped in windows of at most 65,535 UTF-16 units. A window that the analyzer
+rejects is halved, and a window that does not end the run is cut back to a position where the
+analyzer allows shaping to break, so that the remainder is shaped with the next window.
+
+Glyph runs are drawn by Direct2D with grayscale antialiasing, or aliased when the text rendering
+mode asks for it. Small opaque runs without colour glyphs that repeat from frame to frame are
+served from the glyph atlas.
+
+### Images
+
+WIC decodes image files and streams into premultiplied BGRA textures and encodes bitmaps as PNG
+or JPEG. Bitmaps created from pixels and writable bitmaps accept `BGRA8888`, `RGBA8888` and
+`RGB565`; other formats are refused. A bitmap created from pixels is converted to premultiplied
+BGRA once. A writable bitmap keeps its pixels in CPU memory in the declared format and uploads
+them to its texture only when a lock has changed them. Snapshots of a surface are copies on the
+GPU.
+
+### Effects and custom shaders
+
+No effect reads pixels back to the CPU. The backend implements the effect interfaces of the
+drawing context with the built-in effects of Direct2D (blur, colour matrix, composite, blend,
+convolution, arithmetic composite, table transfer, affine transform) and with one compute shader,
+`effects.hlsl`, whose kernels cover what Direct2D has no effect for: multiply, convolution, lighting
+and pixel operation layers, box shadows and conic gradients. `build.rs` compiles that shader, so a
+normal build needs no shader compiler at run time.
+
+Covered are blur and drop shadow effects, luminance to alpha, blend, colour matrix, multiply,
+lighting, pixel operation and convolution layers, outer and inset box shadows (cached per shape and
+parameters) and the acrylic material.
+
+Custom shader effects carry WGSL source. They need the feature `runtime-shaders`, which adds the
+`naga` crate to translate WGSL to HLSL (Shader Model 5) and compiles the result with
+`d3dcompiler_47.dll` from the system directory; the program ships no copy of that library. The
+uniform block has to be a global named `uniforms` whose members match the uniform layout of the
+effect, and the entry points are `vs_main` and `fs_main`. Pipelines are cached per effect type. A
+shader that fails to translate or compile is reported once on standard error and its content is
+drawn unchanged.
+
+Without `runtime-shaders` a custom shader effect is reported once as unhandled and its content is
+drawn without the effect.
+
+A layer pushed on a Direct2D drawing context is a texture of the size of the whole target, so the
+graph of a composition effect brush (a backdrop material, a mask, a blur under a small element)
+would cost window-sized textures for every node. The drawing context therefore answers `true` to
+`IDrawingContextImpl::prefers_bounded_effect_targets()`: the compositor evaluates such a graph in
+scratch targets of the size of the brush and draws the result from there. The other backends
+answer `false`, the default, and draw the graph in place as before.
+
+### Media and external textures
+
+The render interface context exposes the external objects feature of the compositor for Direct3D 11
+textures: shared NT handles, legacy global shared handles, and textures of the renderer's own
+device handed over as a lease. Access is synchronized with a keyed mutex or, where the device
+supports it, with a fence. An imported frame must come from the adapter of the renderer and belong
+to the current device generation, may be `RGBA8` or `BGRA8` up to 8,192 pixels on a side, and must
+not have straight alpha. Colour conversion and flipping happen on the GPU, and the lease of a frame
+ends when a GPU event query confirms that the conversion has completed.
+
+`ferroui-media-windows` has a matching feature `direct2d`:
+`WindowsFrameProducer::from_direct2d` makes Media Foundation decode onto the device of the
+renderer (`ferroui_direct2d::native_device()`), so video and camera frames reach the screen
+without a copy through system memory. The control catalog uses it for its video and camera pages
+when built with `direct2d`.
+
+## Environment variables
+
+The diagnostic variables are read by presence; any value turns them on.
+
+| Variable | Read by | Effect |
+| --- | --- | --- |
+| `FXC` | `build.rs` | Full path of `fxc.exe`, when the Windows SDK is not in its default location |
+| `FERROUI_D3D_STATS` | the engine, HelloWorld, the control catalog | The engine names the adapter and the feature level on standard error. The samples print the renderer statistics when they exit, and the catalog media smoke run prints `CATALOG_GPU_CHECKPOINT` lines |
+| `FERROUI_D3D_PROFILE` | the engine | Names the adapter, collects CPU timings, and prints a frame profile per window every 60 frames and a line for every submission above 16 ms. Read once when the process starts |
+| `FERROUI_D3D_DEBUG` | the engine | Names the adapter and creates the Direct3D device with the debug layer and the Direct2D factory with debug information. The debug layer of the Windows SDK has to be installed |
+| `FERROUI_D3D_SHADER_DUMP` | `custom_shaders.rs` | A directory that receives the translated HLSL of each custom shader effect as `<effect name>.hlsl` (feature `runtime-shaders`) |
+
+The statistics are twelve counters, in this order: surface allocations, path draws, image draws,
+presents, explicit pixel readbacks, image uploads, texture imports, GPU copies, errors, completed
+media reads, compute dispatches, compute pixels. `ferroui_direct2d::statistics()` returns them.
+Every error of the C++ layer is also printed on standard error with the prefix `Direct2D:`.
+
+```powershell
+$env:FERROUI_D3D_STATS = '1'
+$env:FERROUI_SMOKE_EXIT_MS = '3000'
+cargo run -p hello-world --no-default-features --features direct2d
+```
+
+The timings of `FERROUI_D3D_PROFILE` are CPU times of calls into the system. They can nest and are
+not GPU timestamps, and collecting them costs time: leave the variable unset when measuring.
+
+The media smoke run of the control catalog (`FERROUI_SMOKE_MEDIA=1` and its companions, listed in
+`samples/ControlCatalog.Desktop/media_samples.rs`) has two additions for this backend:
+
+| Variable | Effect |
+| --- | --- |
+| `FERROUI_SMOKE_MEDIA_VIDEO_MS` | Observes video delivery for that many milliseconds (at most 30,000) after the warm-up and prints `CATALOG_VIDEO_DELIVERY` with the frames, the time and the rate |
+| `FERROUI_SMOKE_MEDIA_SYNTHETIC_CAMERA` | With the value `1` and the feature `direct2d-media-test-fixtures`, the camera page uses a synthetic camera on the device of the renderer |
+
+`FERROUI_SMOKE_RENDERING` and `FERROUI_SMOKE_COMPOSITION` select rendering and composition modes
+of the Skia build; leave them unset in a native build.
+
+## Feature coverage and differences from Skia
+
+The backend implements the drawing context of the framework on the GPU: solid, gradient
+(linear, radial and conic), image and scene brushes, pens with dashes, caps and joins, geometry and
+rectangular clips, opacity and opacity masks, layers, the blend modes of the framework, regions,
+individual rounded rectangles, compositing layers, bitmaps, render target bitmaps, writable
+bitmaps, glyph runs, effects and the external textures above.
+
+It differs from the Skia backend in these points:
+
+- **No software rendering.** There is neither a WARP nor a CPU path. The default Win32 platform
+  options of a native build contain the Direct3D 11 mode alone.
+- **Text.** Shaping and rasterization are DirectWrite's, not HarfBuzz's and Skia's, so glyph
+  positions and coverage can differ by fractions of a pixel. Text is antialiased in grayscale or
+  aliased; there is no subpixel antialiasing.
+- **Windows are always composed with alpha.** The window has no redirection bitmap and the swap
+  chain is premultiplied. The windowing backend reports the transparency level `Transparent` as
+  supported and `None`, `Blur`, `AcrylicBlur` and `Mica` as unsupported in this mode.
+- **Custom shader effects** need the feature `runtime-shaders`; otherwise their content is drawn
+  unchanged.
+- **Pixel formats.** Bitmaps accept `BGRA8888`, `RGBA8888` and `RGB565` only. Creating a bitmap
+  from pixels of another format, or from a buffer that is too small for its stride and size, is a
+  programming error and stops the program with a message.
+- **Bitmap blending modes.** `Source` and `Plus` are blends of the bitmap draw itself; the other
+  modes are composed through a layer that holds the bitmap. The modes that change the destination
+  outside the bitmap (`SourceIn`, `SourceOut`, `DestinationIn`, `DestinationAtop`) end at the
+  axis-aligned bounds of the destination rectangle, which is exact without rotation or skew only.
+- **Text with a gradient or an image brush** is filled through the outlines of the glyphs, not
+  through the glyph atlas.
+- **Typeface attributes.** A typeface of an embedded font reports the weight, style and stretch
+  its font declares; a typeface of a system font reports the values it was asked for. The bold
+  and oblique simulations of a nearest match are not applied.
+- **Encoding.** The JPEG quality is honoured; the compression level of a PNG is not.
+- **Not implemented.** 3D scenes (`Viewport3D`), which are drawn by the Skia and Vello backends
+  only, and the optional drawing context features that have a default in the platform interface.
+  The effect graph form of a custom layer effect is drawn without the effect.
+- **Objects of another backend.** A bitmap or a geometry that another backend created cannot be
+  drawn, and a brush of an unknown kind is skipped, as is an opacity mask without a brush the
+  backend can resolve. Each such case is reported once on standard error.
+
+## Tests
+
+The tests need a Windows machine with a hardware GPU. They create the real device and compare
+pixels read back from GPU surfaces.
+
+```powershell
+cargo test -p ferroui-direct2d
+cargo test -p ferroui-direct2d --features runtime-shaders
+cargo test -p ferroui-direct2d -- --ignored reveal_lighting_dispatch_work_is_bounded_by_the_control
+cargo test -p ferroui-desktop --no-default-features --features direct2d
+cargo test -p ferroui-media-windows --features direct2d
+```
+
+The first command runs the drawing, text, bitmap and effect tests. The second adds the test that
+translates and compiles every shader program of the effects library. The third runs the one test
+that is ignored by default because it measures the amount of compute work. The fourth checks that
+platform detection selects Direct2D and DirectWrite without HarfBuzz, and the fifth checks the
+Direct3D 11 frame producer of the media backend.
+
+`native_tests.cpp` in the crate directory is a separate harness for the C++ layer. It includes
+`native.cpp`, has its own `main` and runs the engine under the Direct3D debug layer. Cargo does
+not build it: compile it with the MSVC compiler, with the generated `effects_shader.h` on the
+include path and the libraries that `build.rs` links.
+
+For a check in a real window, run a sample with `FERROUI_D3D_STATS` set and read the statistics
+line it prints on exit: the error counter is the ninth value and the readback counter the fifth,
+and both stay at zero in a normal run.
+
+```powershell
+$env:FERROUI_D3D_STATS = '1'
+$env:FERROUI_SMOKE_EXIT_MS = '20000'
+$env:FERROUI_SMOKE_PAGES = '150'
 cargo run -p control-catalog-desktop --no-default-features --features direct2d-runtime-shaders
 ```
 
-The size-oriented native build omits that feature. Built-in gradients, shadows,
-blur, acrylic, lighting, convolution and composition pixel operations do not
-require it. Custom shader effects without the feature report their unsupported
-status rather than silently invoking a CPU shader implementation.
+## Measure binary size
 
-## Ownership and rendering
-
-The renderer owns one hardware D3D11 device with BGRA and video support and
-multithread protection. There is no WARP fallback. Direct2D contexts target
-textures on that device; the window target copies into a premultiplied-alpha
-composition swap chain attached to its HWND through DirectComposition and
-presents through DXGI. Offscreen layers and snapshots remain GPU resources.
-Snapshots copy their content so later drawing and texture reuse cannot alter
-them. Temporary Direct2D frames are pooled within a bounded 64 MiB/16-frame
-budget. Device replacement clears the pool and changes the device generation;
-stale contexts and imports are rejected, while decoded/uploaded application
-images can reconstruct their GPU resources.
-
-Every native object and pending media read retains the graphics factories and
-their MTA usage. Windows releases Rust thread-local caches after C++ static
-destructors; dropping the singleton owner therefore stops pool reuse but keeps
-the factories alive until the last native resource is released. The SDK harness
-explicitly tests that order, including final factory destruction.
-During process detach, remaining Rust TLS resources skip COM calls because
-system graphics DLL teardown may already have run. The OS reclaims those final
-process resources; ordinary window closure and media retirement release them
-normally while the process is running.
-
-The compositor already applies render scaling. Its drawing context therefore
-does not apply bitmap DPI a second time. Immediate render-target drawing still
-uses bitmap DPI. Tests compare both paths at 100%, 125%, 150% and 200%.
-
-Lighting uses the shared `EffectRasterRegion` calculation to round outwards,
-clip the scratch texture to the viewport, and map cropped pixel coordinates
-back into logical effect space. Direct2D and Quartz use the cropped texture;
-Vello uses the same calculation for its already bounded lighting pass. Skia
-already evaluates lighting over the drawn rectangle. Shared composition logic
-also folds ambient/distant lighting into a constant color for every backend.
-Native procedural lighting dispatches directly into a cropped GPU image and
-draws that image into the parent. It does not snapshot the parent or allocate
-an intermediate render target. Lighting that multiplies existing pixels keeps
-its input-dependent filter path.
-
-Pointwise composition effect graphs now render in a brush-sized target in the
-shared painter. Their blend, noise, mask and color-matrix intermediates inherit
-that size on every backend with layer-effect support. Backdrops, blur, shadow
-and convolution keep the original canvas. Stroke/glyph coverage for these
-graphs uses a bounded target too, and publishes its bounds before allocating
-its paint and mask layers. Direct2D passes completed internal layer images to
-their parents without copying them; their targets cannot be reused until the
-root EndDraw has submitted every read. Public snapshots remain independent.
-Color-matrix and luminance layers attach their native effect to the completed
-child image in the parent graph. They submit the child once, without taking a
-snapshot and redrawing the filtered pixels into the child. This preserves the
-parent's output clip and group opacity; the SDK regression compares straight
-and premultiplied alpha with the previous intermediate-image path.
-Finished image/noise surfaces cache their immutable snapshot until the next
-write or drawing operation. These changes address the remaining window-sized
-work and repeated flush/copy operations in Reveal beyond its lighting pass.
-The shared coverage painter marks its bounded context so nested effect brushes
-can reuse that target. Translucent wrappers retain their isolated opacity path.
-Temporary surfaces must retain their image storage after disposal while queued
-draws reference it; Skia uses an owned GPU surface rather than a borrowed
-session framebuffer for these targets.
-
-The shared graph painter also reuses a fresh transparent parent layer for a
-mask, blend or composite's initial isolation. It tracks the first source
-separately: later source-over siblings still isolate their output so their
-masks cannot erase earlier content. This removes redundant submissions in
-Reveal while keeping the optimization available to every backend.
-
-`FERROUI_D3D_PROFILE=1` reports native submission/presentation timing and a
-breakdown for submissions above 16 ms. The breakdown timings overlap (for
-example, snapshots contain EndDraw), so they must not be added together.
-Use `FERROUI_FRAME_TIMES=1` for the compositor's frame summary. Debug catalog
-measurements are useful for finding work, but are not release FPS claims;
-`--profile fast-release` is available for an optimized interactive trial.
-
-An earlier optimized interactive Reveal trial on the GTX 1660 Ti at 175% DPI used
-identical pointer sweeps in a 1100 by 800 logical-pixel window, without
-screenshot capture during the measurement. The 32-frame samples changed from
-20.591 ms median / 22.730 ms p95 before these optimizations to 15.253 ms median /
-23.442 ms p95 after them. Typical frame time improved by about 26%, but the
-remaining spikes exceed the 16.7 ms budget; this is not a stable-60-fps claim.
-
-The final shared isolation change was measured separately against its immediate
-predecessor, with compilation idle, one active catalog window, the same window
-size and pointer sweeps, and no screenshots during measurement. The two-sweep
-samples were 31 frames before and 29 after: median 15.403 to 14.243 ms, p95
-18.351 to 16.407 ms. That is another 7.5% reduction in typical frame time.
-The final maximum was 19.433 ms, so occasional missed 60 Hz frame budgets
-remain. These small diagnostic samples do not establish sustained frame rate.
-
-DirectWrite script analysis sees the surrounding UTF-16 paragraph, including
-formatter slice context, while excluding unrelated lines of large text buffers.
-The resulting clusters are relative to the requested slice.
-Embedded font bytes have a COM owner retained by the font file. Variable axes,
-font fallback, OpenType features, glyph advances and positioned glyph drawing
-use DirectWrite. Long script runs use bounded calls and commit only prefixes
-marked `canBreakShapingAfter` by DirectWrite, preserving ligatures, combining
-clusters and RTL order. Native input limits can be smaller than the 16-bit
-cluster-map range, so a rejected large call is retried with less text.
-An indivisible shaping span that exceeds the native limit without any safe
-split still reports an error. Tests cover long Latin/combining paragraphs,
-Arabic paragraphs and surrogate pairs.
-
-OpenType feature ranges use owner-text UTF-16 coordinates, with exclusive ends,
-matching the HarfBuzz adapter. Overriding one feature preserves the standard
-ligature, contextual-ligature, contextual-alternate and kerning defaults from
-[WinUI typography](https://github.com/microsoft/microsoft-ui-xaml/blob/74c2cab127943565ca2a278cc8f64f472209dd14/dxaml/xcp/core/text/common/Typography.cpp).
-Context outside a formatter item participates in joining analysis but cannot
-consume that item's characters into an external ligature. Direct immediate
-custom drawing uses the fallback color of a XAML composition brush for fills
-and opacity masks, including its opacity.
-
-## Video, camera and shared textures
-
-The Windows media providers accept either their existing OpenGL producer or a
-native D3D11 producer. The native path gives Media Foundation the renderer's
-device. Decoded frames retain their native texture and array slice; the renderer
-imports them directly and performs GPU copies/conversion. Imported composition
-handles retain the original `FrameLease`, including its budget accounting.
-
-A producer lease is retired only after the GPU event query completes. A failure
-after submission quarantines the read until completion or confirmed device
-removal. NT and legacy DXGI shared handles, keyed mutexes, and D3D11 fence waits
-and signals are supported when the corresponding device interfaces are
-available. Preview does not map frame pixels or upload a CPU copy. Explicit
-image export/readback APIs remain available separately.
-
-The catalog's normal `direct2d` feature uses physical camera discovery. The
-optional test feature below enables an explicitly selected GPU-generated
-synthetic camera, not a substitute claim of physical camera validation:
+`scripts/measure-windows-native.ps1` builds HelloWorld with the Skia backend and with the native
+backend in the `dist` profile from one clean, committed revision, and writes the sizes to
+`target/windows-native-size/results.json`. It needs PowerShell 7.2 or later and `dumpbin.exe` of
+the MSVC tools.
 
 ```powershell
-$env:FERROUI_SMOKE_MEDIA='1'
-$env:FERROUI_SMOKE_MEDIA_CAMERA='1'
-$env:FERROUI_SMOKE_MEDIA_SYNTHETIC_CAMERA='1'
-cargo run -p control-catalog-desktop --no-default-features --features direct2d-media-test-fixtures
-```
-
-## Validation and measurements
-
-```powershell
-cargo test -p ferroui-direct2d --lib --features runtime-shaders
-cargo test -p ferroui-direct2d --lib reveal_lighting_dispatch_work -- --ignored --nocapture --test-threads=1
-cargo check -p ferroui-vello --features gpu
-./scripts/measure-windows-native.ps1
-# Also measure the optional native runtime shader compiler:
 ./scripts/measure-windows-native.ps1 -IncludeRuntimeShaders
 ```
 
-The renderer tests compare pixels with shared CPU references, including
-transformed effect bounds, gradients/tiling, convolution, composition blend
-operations, lighting, masks, acrylic, sampling, glyph rendering and image-codec
-round trips. They also check Arabic formatter-slice context, embedded-font
-lifetime, variable fonts, surrogate clusters, snapshot independence and DPI.
-
-`native_tests.cpp` is an additional Windows SDK harness which includes the
-adapter directly. Compile with the build-generated `effects_shader.h`, the SDK
-libraries used by `build.rs`, and optionally `FERRO_RUNTIME_SHADERS`. With
-`FERROUI_D3D_DEBUG=1`, it checks D3D11 debug messages, array-slice pixels,
-producer completion, NT/legacy handles, keyed mutexes, timeline fences,
-runtime shader coordinates and hardware-device replacement.
-
-`FERROUI_D3D_STATS=1` prints catalog counters in this order: surfaces, path
-draws, image draws, presents, explicit readbacks, ordinary image uploads,
-texture imports, GPU copies, errors, completed media reads, compute dispatches,
-compute pixels. Media smoke counters distinguish asset uploads from video or
-camera transfers. `FERROUI_SMOKE_SCREENSHOTS` requests explicit diagnostic
-readbacks and should not be used for a zero-readback preview measurement.
-
-The size script builds HelloWorld with identical `dist` profiles and preserves
-both deployments, hashes, dependency graphs and DLL imports. It records the
-source revision, OS, GPU and Rust version. All shipped application files count;
-Windows/VC runtime prerequisites are listed as system imports. Historical
-prototype sizes are not final measurements of this implementation.
-The audit script requires PowerShell 7.2 or later. It requires one clean source
-revision for the complete comparison, records compiler build retries, and
-audits the runtime-shader configuration separately when requested.
-
-The final clean-source comparison is recorded in
-[windows-native-renderer-results.json](windows-native-renderer-results.json),
-at source revision `2ae89e43d432901090af2446924a4e3e7de7c08e`, using Rust
-1.93.0, x86_64 MSVC and the `dist` profile:
-
-| HelloWorld configuration | EXE / total deployed bytes | Gzip bytes | Smaller than Skia |
-|---|---:|---:|---:|
-| Skia / HarfBuzz | 42,464,768 | 15,558,431 | — |
-| Native, built-in shaders | 28,883,968 | 10,124,067 | 31.98% |
-| Native, optional runtime shaders | 30,820,864 | 10,887,986 | 27.42% |
-
-Each deployment contains one EXE and no additional application DLLs/assets.
-Windows and installed VC runtime DLLs are prerequisites, listed with versions
-in the report; they are excluded from both deployment totals. The optional
-runtime compiler also dynamically loads the system `d3dcompiler_47.dll`.
-All three preserved deployments were launched from their own directories and
-exited successfully. Native startup used hardware D3D11 with zero backend
-errors/readbacks. All three builds succeeded on their first attempt.
-
-Final validation and artifact hashes are recorded in
-[windows-native-renderer-validation.json](windows-native-renderer-validation.json).
-The native Rust suite passes 38 tests (one separate lighting benchmark is
-ignored by the normal run); all 586 shared composition tests pass. The SDK
-harness reports zero D3D debug warnings/errors. Default Skia desktop builds
-and runtime capture runs pass on Windows, and the latest default Linux desktop
-passes `cargo check` in Ubuntu/WSL with Skia, HarfBuzz and X11 enabled.
-
-Paired native/Skia catalog captures at 175% DPI cover 18 dark-theme pages:
-Home, TextBlock, TextBox, Image, TabbedPage, Visuals, Composition brushes,
-Shadows and lights, Effect brushes, Acrylic brush, Blend and colour effects,
-Lighting, Reveal, Colour effects, Image effects, Shader effects, Interactive
-effects and Page transitions. Seven light-theme captures cover Home,
-TextBlock, Image, Composition brushes, Acrylic brush, Reveal and Shader
-effects. The native runs report zero backend errors. The comparison shows
-consistent layout/effect behavior, with font antialiasing and blur rounding
-differences; animated samples can differ with capture time. TextBox and
-TabbedPage here are overview galleries, not interactive coverage of every
-subpage. A separate native TextBox trial exercised embedded font styles,
-Arabic/mixed-direction editing, selection, emoji deletion and undo.
-
-The latest normal catalog video run passes playback, shared-texture import,
-navigation retirement and QR decoding with zero CPU frame transfers. Physical
-discovery reports zero cameras; an explicit capture request therefore times
-out as unavailable. Physical capture remains unverified. The separate,
-explicitly synthetic GPU-camera fixture passes preview and navigation
-retirement with zero CPU frame transfers, and is not enabled in the user trial.
-
-Current hardware validation uses Windows, an NVIDIA GeForce GTX 1660 Ti, and
-hardware D3D11 feature level 11.1. The native SDK harness passes with zero
-debug-layer errors/warnings. Catalog video and synthetic-camera playback pass
-with zero CPU frame transfers and full lease retirement after navigation.
-Physical camera capture, macOS execution of the shared Quartz change, and full
-catalog parity remain validation items; this backend is experimental.
-
-The effect architecture was checked against the MIT-licensed
-[WinUI Reveal implementation](https://github.com/microsoft/microsoft-ui-xaml/blob/78c72df1a5e6df181ce2d86a8a8cdff53be5ef22/controls/dev/Materials/Reveal/RevealBrush.cpp).
-The native adapter uses the existing Ferro rendering contracts and shared
-composition effect semantics.
-
-### Video delivery pacing follow-up
-
-The Windows importer previously spent separate presentation ticks creating an
-import, polling it and delivering its ready frame. Immediately completed
-imports now finish in one tick; genuinely asynchronous work and producer fences
-still defer delivery without blocking the UI. This applies to both Windows
-providers (Direct2D and ANGLE/Skia).
-
-The shared video control polls at 16 ms while active, retaining its roughly
-one-second command-settling allowance. The shared texture presenter permits two
-immutable updates in flight, skips duplicate identities and retires temporary
-imports in the same render batch as their surface update. The acquired bitmap
-and GPU reader retain their own leases. The existing three-frame storage budget
-still applies. Geometry changes are queued with their frame; unchanged frames
-reuse the existing geometry. These presenter/control changes apply to every
-rendering backend, including camera previews.
-
-The native composition swap chain presents with sync interval zero, allowing
-DWM to compose the latest complete image without an additional blocking vblank.
-Tearing flags remain disabled. Media Foundation read-ahead now applies video
-and audio backpressure independently, so a full video queue cannot prevent the
-audio clock from receiving data.
-
-Validation on the GTX 1660 Ti includes three import-state tests, six shared
-media-control tests, twelve video-control tests and a composition test proving
-same-batch import disposal preserves the surface bitmap. An explicit hardware
-test consumes and draws the bundled 24 fps video through Direct2D at 24.20 fps
-over five seconds, disposes temporary imports before drawing and verifies full
-lease retirement. The native SDK harness reports zero D3D debug warnings/errors,
-including its resize/minimize/device-replacement checks.
-
-The final foreground native fast-release catalog sustained 24.05 newly imported
-frames/s over 8.109 seconds from that 24 fps sample, with zero CPU frame
-transfers, zero backend errors and successful navigation retirement/QR decoding.
-This measures admitted frame delivery, not physical display scanout. The default
-Skia debug catalog also passes playback, retirement and zero-CPU-transfer smoke
-checks; its unoptimized build is not a matched renderer throughput comparison.
-The final normal native catalog also passes interactive Play, Pause, paused
-seek, resume and Stop checks; Stop restores the first frame at 0:00.
-Set `FERROUI_SMOKE_MEDIA=1` and `FERROUI_SMOKE_MEDIA_VIDEO_MS=5000` to repeat the
-sustained-delivery observation. Local logs are under `target/native-evidence/`
-with the `video-pacing-` prefix. Physical camera capture remains unverified.
-
-### Acrylic intermediate target bounds
-
-Effect brushes with an in-app backdrop and hard-border Gaussian blur now use
-bounded temporary targets in the shared compositor. The target encloses the
-brush plus the blur's sampling reach, transformed into device pixels and rounded
-outward. Nested hard blurs accumulate their padding. This keeps the acrylic
-luminosity/colour blend layers and snapshots at card size instead of window size,
-including on backends whose internal save layers use their entire target.
-
-Backdrop replay shifts its render-root transform and clip into that temporary
-target. Dependency regions are translated back to the original device
-coordinates, so later changes behind an acrylic card still invalidate the right
-area. Nested backdrop renders carry the same origin through their replay.
-Pointwise effects retain their existing fresh-layer reuse. Soft-border blurs,
-shadows, convolutions and host-backdrop destination clearing keep their existing
-path. A temporary context without the required effect support also falls back.
-
-All 589 shared composition tests pass, including fractional-DPI blur padding,
-nested backdrop replay and original-device dependency coordinates. The default
-Skia catalog builds and captures the acrylic page successfully. Local evidence
-for this follow-up uses the `target/native-evidence/acrylic-` prefix.
-
-Native fast-release slider trials on the GTX 1660 Ti at 125% DPI, with the
-catalog maximized on the same 1024-by-768 display, reduce average render work
-from 44.730 ms to 22.682 ms in representative 60-frame acrylic samples (about
-49%). These are submission-work measurements, not display-frame-rate claims;
-work remains above a 16.7 ms budget. The display resolution changed after this
-comparison, so subsequent profile records are not part of that pair. Native
-before/after captures at 1005-by-699 pixels preserve the card layout and backdrop
-appearance, and the native runs report zero backend errors. Both ends of the
-tint slider were exercised. The first optimized rebuild encountered a compiler
-access violation; the retry completed successfully. The default Skia build and
-capture also pass with the final source.
-
-### Upstream and investigation integration
-
-The Windows branch incorporates upstream main `6836f7a1e` and the investigation
-branch `dff710746`, including its updated Windows handover and Quartz contract
-audit. The two shared drawing conflicts retained both custom-effect graph
-handling and the new scene-3D operation. Windows-specific rendering, text, media
-and bounded-acrylic changes remain in place. This integration does not add a
-Direct2D implementation of the optional scene-3D drawing interface.
-
-The new Renderer parity catalog page exposes geometry acceptance cases that
-needed Windows corrections: fill-only curves contribute to bounds, containment
-distinguishes fully-inside/fully-contains from partial overlap, and a stroke
-broken by an unstroked segment closes to the original figure start. These use
-the same shared geometry contract as the newly audited Quartz implementation.
-Writable inputs now retain BGRA8888, RGBA8888 or RGB565 CPU memory with the
-requested alpha convention, using separate premultiplied BGRA GPU storage.
-Unchanged locks preserve bytes/version and do not read back or upload pixels.
-Drawing, resizing and shader inputs consume that GPU storage directly. The
-geometry export also discards hollow boolean-boundary figures instead of
-mistaking them for filled intersections. The native suite passes 42 tests (one
-lighting benchmark remains separately ignored), and all 590 shared composition
-tests pass. The broader encoding cases in the macOS audit still require a
-Windows audit; macOS results are not Windows certification. Earlier
-size reports identify their historical source revisions and are not measurements
-of this integration.
-
-The merged native catalog passes the Renderer parity text smoke check (RTL
-selection, hit testing, replacement and undo) and its geometry/writable-input
-construction checks, with zero backend errors. Both native and default Skia
-catalog compilation checks pass. Evidence uses the `merge-` prefix under
-`target/native-evidence/`.
-
-The investigation branch's subsequent iOS/Quartz commit `58460442c` is also
-merged. It does not change the Windows renderer, shared Base/Controls code or
-the TreeDataGrid benchmark source measured below.
-
-### TreeDataGrid GPU measurements
-
-The [2026-11-10 desktop gauntlet comparison](windows-gauntlet-renderer-benchmarks.md)
-after merging main at `adaa37363` shows a different workload profile: native
-takes 42% longer per animated gauntlet callback, while delivering 2.94× Skia's
-callback throughput on the still wall. Those desktop timings include scheduling
-and are distinct from the offscreen TDG measurements below. The report reviews
-the open performance stack (#676–#679), retains raw samples and records the
-actual clamped Windows viewport.
-
-The [2026-11-09 follow-up](windows-native-renderer-main-followup.md) merges
-`main` at `f91b679fe` and adds bounded positioned-run reuse, repeated-use
-admission, deferred native transform updates and safe overlap-scan shortcuts.
-Five fresh paired runs give 10.7–26.9% lower native mean times than Skia across
-all twelve workloads; ten improve over the merged native baseline. All 55
-native tests, identical TDG captures, catalog text/DPI checks and video/shared
-textures pass. The report retains variability, individual-pair limits and raw evidence.
-
-The latest [performance parity report](windows-tdg-renderer-parity.md) beats Skia
-in all twelve matched recorded-path workloads: five complete Skia-first/native-second
-pairs give 7.9–19.9% lower native GPU-drained frame times. Batched native commands
-and glyph draws, deferred safe text clips and guarded DirectWrite simple shaping
-close the remaining gap. All 54 native tests, catalog text/DPI/effects captures,
-24 fps video/shared textures and synthetic GPU camera checks pass. Physical
-camera capture remains untested because this machine has no camera. Raw samples,
-source/binary identities and a repeatable comparison runner accompany the report.
-
-Earlier stages remain documented for comparison:
-
-The [2026-11-08 comparison](windows-tdg-renderer-benchmarks.md) runs Skia first,
-then native, on the same hardware and optimized executable. Native is slower
-in all twelve recorded full-redraw workloads: 3.650–8.693 ms/frame versus
-0.399–1.790 ms/frame, or 4.2–9.4× the Skia time. The separate immediate drawing
-path is substantially slower again and exposes unnecessary opacity-1 layers.
-These are offscreen GPU-drained redraw measurements, not displayed catalog FPS.
-Raw samples, variability, commands and source/binary identities accompany the
-report. Functional acceptance does not establish performance parity.
-
-The [optimization follow-up](windows-tdg-renderer-optimization.md) fixes repeated
-geometry clipping of rectangles, per-command device queries and eager glyph
-outlines, and reuses font metrics, brushes and the analyzer. Native recorded
-redraws are 3.0–4.4× faster than that baseline, with 45 native tests and 33 shared
-drawing-context tests passing. Native still takes 1.4–2.2× the Skia time in the
-same workloads. The shared immediate renderer also skips opacity-1 groups for
-all backends. Final catalog parity and video/shared-texture checks pass.
+For each build the script records the size of the executable and of its gzip compression, checks
+with `cargo tree` that a native build depends on none of the bundled renderers, and checks with
+`dumpbin` that the executable imports system libraries only. The results are in
+[windows-native-renderer-benchmarks.md](windows-native-renderer-benchmarks.md#binary-size).
