@@ -618,13 +618,24 @@ impl Compositor {
         let next_commit = CompositionBatch::new();
         *self.next_commit.borrow_mut() = Some(next_commit.clone());
         let pending = self.pending_batch.lock().unwrap_or_else(|e| e.into_inner()).clone();
-        match pending {
+        // Upstream holds the request back until the batch before is
+        // processed. Here it is held back until the render thread accepts
+        // that batch, which is the signal the media context starts its next
+        // render pass on: the changes of that pass ask for their commit in
+        // the pass, and the pass commits them. Held back until the batch
+        // was processed, the request reached the scheduler after the pass,
+        // and a second pass, with a second animation frame, was needed to
+        // commit what the first one changed (desktop-performance.md,
+        // section 9.46). The signal is read here, not only followed by a
+        // continuation: the order in which the continuations of a batch run
+        // does not decide which pass commits.
+        match pending.filter(|pending| !pending.accepted().is_completed()) {
             Some(pending) => {
-                // The previous batch has not been processed yet: ask for
-                // the commit once it has been.
+                // The render thread has not taken the previous batch yet:
+                // ask for the commit once it has.
                 let key = self.key;
                 let dispatcher = self.dispatcher.clone();
-                pending.processed().on_completed(move || {
+                pending.accepted().on_completed(move || {
                     dispatcher.post(
                         move || {
                             if let Some(compositor) = find_compositor(key) {
@@ -782,7 +793,7 @@ impl Compositor {
         *self.pending_batch.lock().unwrap_or_else(|e| e.into_inner()) = Some(commit.clone());
         let pending_batch = self.pending_batch.clone();
         let sequence_id = commit.sequence_id();
-        commit.processed().on_completed(move || {
+        commit.accepted().on_completed(move || {
             let mut pending = pending_batch.lock().unwrap_or_else(|e| e.into_inner());
             if pending.as_ref().is_some_and(|p| p.sequence_id() == sequence_id) {
                 *pending = None;
