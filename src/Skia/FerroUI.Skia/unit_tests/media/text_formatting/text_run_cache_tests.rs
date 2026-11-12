@@ -716,3 +716,78 @@ fn an_edited_long_text_with_a_retired_cache_has_the_lines_of_a_new_layout() {
     }
     cache.dispose();
 }
+
+/// The platform glyph runs of the shaped runs of the lines of `layout`, as addresses.
+fn platform_glyph_runs(layout: &TextLayout) -> Vec<Vec<usize>> {
+    let of_line = |line: &Rc<dyn TextLine>| -> Vec<usize> {
+        let runs = line.text_runs();
+        let shaped = runs.iter().filter_map(|run| run.clone().downcast_rc::<ShapedTextRun>());
+        shaped.map(|run| std::sync::Arc::as_ptr(&run.glyph_run().platform_impl()) as *const () as usize).collect()
+    };
+    layout.text_lines().iter().map(of_line).collect()
+}
+
+#[test]
+fn the_lines_an_edit_leaves_keep_their_platform_glyph_runs() {
+    // A FerroUI addition (step 7 of docs/porting/text-layout-performance.md): the run cache keeps
+    // the platform glyph runs of the lines of a layout for the next layout of its owner, which
+    // takes them for the lines whose glyphs are the same glyphs: the lines of the same text, and
+    // the lines an edit of a long text left as they were.
+    let _scope = start();
+    let layout = |text: &str, cache: &Rc<TextRunCache>| {
+        TextLayout::new(
+            text,
+            Typeface::default_typeface(),
+            TextLayoutOptions {
+                font_size: 12.0,
+                text_wrapping: TextWrapping::Wrap,
+                max_width: 420.0,
+                text_run_cache: Some(cache.clone()),
+                ..Default::default()
+            },
+        )
+    };
+    let words = |changed: &str| -> String {
+        let word = |word: usize| if word == 200 { changed.to_string() } else { format!("{word:05}") };
+        (0..400).map(word).collect::<Vec<_>>().join(" ")
+    };
+    let cache = Rc::new(TextRunCache::new());
+    let first = layout(&words("00200"), &cache);
+    let first_runs = platform_glyph_runs(&first);
+    assert!(first_runs.len() > 8, "the text has many lines: {}", first_runs.len());
+
+    // The same text again: every line has the platform glyph run of the layout before.
+    let again = layout(&words("00200"), &cache);
+    assert_eq!(platform_glyph_runs(&again), first_runs);
+    first.dispose();
+
+    // An edit in the middle of the text: the lines before it and the lines after it keep theirs,
+    // and the bounds of every line are those of a layout made from nothing.
+    cache.retire();
+    let edited = layout(&words("00777"), &cache);
+    let edited_runs = platform_glyph_runs(&edited);
+    assert_eq!(edited_runs.len(), first_runs.len());
+    let kept = edited_runs.iter().zip(&first_runs).filter(|(edited, first)| edited == first).count();
+    assert_eq!(kept, first_runs.len() - 1, "every line but the edited one keeps its glyph run");
+    assert_eq!(edited_runs.first(), first_runs.first());
+    assert_eq!(edited_runs.last(), first_runs.last());
+    let fresh = TextLayout::new(
+        &words("00777"),
+        Typeface::default_typeface(),
+        TextLayoutOptions {
+            font_size: 12.0,
+            text_wrapping: TextWrapping::Wrap,
+            max_width: 420.0,
+            ..Default::default()
+        },
+    );
+    let bounds = |layout: &TextLayout| -> Vec<(f64, f64, f64)> {
+        let line = |line: &Rc<dyn TextLine>| (line.width(), line.extent(), line.overhang_leading());
+        layout.text_lines().iter().map(line).collect()
+    };
+    assert_eq!(bounds(&edited), bounds(&fresh));
+    again.dispose();
+    edited.dispose();
+    fresh.dispose();
+    cache.dispose();
+}

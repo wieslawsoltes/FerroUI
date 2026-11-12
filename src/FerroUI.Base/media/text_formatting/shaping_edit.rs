@@ -42,6 +42,30 @@ fn is_whole(text: &ReadOnlyMemory<u16>) -> bool {
     }
 }
 
+/// How many code units are compared at once: a long text that an edit leaves mostly as it was is
+/// compared as memory, and only the piece with the first difference unit by unit.
+const COMPARED_AT_ONCE: usize = 64;
+
+/// The length of the common start of `a` and `b`.
+fn common_prefix(a: &[u16], b: &[u16]) -> usize {
+    let limit = a.len().min(b.len());
+    let mut at = 0;
+    while at + COMPARED_AT_ONCE <= limit && a[at..at + COMPARED_AT_ONCE] == b[at..at + COMPARED_AT_ONCE] {
+        at += COMPARED_AT_ONCE;
+    }
+    at + a[at..limit].iter().zip(&b[at..limit]).take_while(|(x, y)| x == y).count()
+}
+
+/// The length of the common end of `a` and `b`, at most `limit`.
+fn common_suffix(a: &[u16], b: &[u16], limit: usize) -> usize {
+    let (a, b) = (&a[a.len() - limit..], &b[b.len() - limit..]);
+    let mut left = limit;
+    while left >= COMPARED_AT_ONCE && a[left - COMPARED_AT_ONCE..left] == b[left - COMPARED_AT_ONCE..left] {
+        left -= COMPARED_AT_ONCE;
+    }
+    limit - left + a[..left].iter().rev().zip(b[..left].iter().rev()).take_while(|(x, y)| x == y).count()
+}
+
 /// `new_text` shaped with `options`, from `old`, the shaping of the text before an edit with the
 /// same options: the glyphs a shaping of the whole of `new_text` gives, with their concatenation
 /// flags. `None` when the edit cannot keep glyphs of `old`: a right-to-left shaping, a text that is
@@ -68,14 +92,8 @@ pub(crate) fn shape_edited(
 
     // The changed range: old [prefix, old_length - suffix), new [prefix, new_length - suffix).
     let common = old_length.min(new_length);
-    let prefix = a.iter().zip(b).take_while(|(x, y)| x == y).count();
-    let suffix = a[prefix..]
-        .iter()
-        .rev()
-        .zip(b[prefix..].iter().rev())
-        .take(common - prefix)
-        .take_while(|(x, y)| x == y)
-        .count();
+    let prefix = common_prefix(a, b);
+    let suffix = common_suffix(&a[prefix..], &b[prefix..], common - prefix);
     let shift = new_length as isize - old_length as isize;
     let cluster = |glyph: usize| old_glyphs[glyph].glyph_cluster as usize;
 
@@ -132,27 +150,54 @@ pub(crate) fn shape_edited(
             let mut flags = Vec::with_capacity(glyphs.capacity());
             glyphs.extend_from_slice(&old_glyphs[..start]);
             flags.extend_from_slice(&old_flags[..start]);
-            for glyph in 0..piece_end {
-                let mut info = piece_glyphs[glyph];
+            glyphs.extend_from_slice(&piece_glyphs[..piece_end]);
+            for info in &mut glyphs[start..] {
                 info.glyph_cluster += from as i32;
-                glyphs.push(info);
-                flags.push(piece_flags[glyph]);
             }
-            for glyph in old_from..count {
-                let mut info = old_glyphs[glyph];
-                info.glyph_cluster = (info.glyph_cluster as isize + shift) as i32;
-                glyphs.push(info);
-                flags.push(old_flags[glyph]);
+            flags.extend_from_slice(&piece_flags[..piece_end]);
+            let tail = glyphs.len();
+            glyphs.extend_from_slice(&old_glyphs[old_from..]);
+            if shift != 0 {
+                for info in &mut glyphs[tail..] {
+                    info.glyph_cluster = (info.glyph_cluster as isize + shift) as i32;
+                }
             }
-            let shaped = ShapedBuffer::from_glyphs(
-                new_text.clone(),
-                glyphs,
-                old.glyph_typeface().clone(),
-                old.font_rendering_em_size(),
-                old.bidi_level(),
-            );
+            flags.extend_from_slice(&old_flags[old_from..]);
+            let shaped =
+                ShapedBuffer::from_glyphs_of_edit(new_text.clone(), glyphs, old, start, start + piece_end, old_from);
             shaped.set_concat_flags(flags.into());
             return Some(shaped);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{common_prefix, common_suffix};
+
+    #[test]
+    fn the_common_start_and_end_of_two_texts() {
+        let text = |length: usize, changed: &[usize]| -> Vec<u16> {
+            (0..length).map(|at| if changed.contains(&at) { 1 } else { 7 + (at % 5) as u16 }).collect()
+        };
+        for length in [0, 1, 63, 64, 65, 200, 1_000] {
+            let a = text(length, &[]);
+            assert_eq!(common_prefix(&a, &a), length);
+            assert_eq!(common_suffix(&a, &a, length), length);
+            for at in [0, 1, 62, 63, 64, 65, 127, 128, 199, 999] {
+                if at >= length {
+                    continue;
+                }
+                let b = text(length, &[at]);
+                assert_eq!(common_prefix(&a, &b), at, "length {length}, changed at {at}");
+                assert_eq!(common_suffix(&a, &b, length), length - at - 1, "length {length}, changed at {at}");
+                // The end is looked for in what the start leaves, as `shape_edited` does.
+                assert_eq!(common_suffix(&a[at..], &b[at..], length - at), length - at - 1);
+            }
+        }
+        // Texts of different lengths: the shorter one bounds both.
+        let (a, b) = (text(300, &[]), text(130, &[]));
+        assert_eq!(common_prefix(&a, &b), 130);
+        assert_eq!(common_suffix(&a[130..], &b[130..], 0), 0);
     }
 }

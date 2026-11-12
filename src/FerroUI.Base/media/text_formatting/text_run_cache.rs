@@ -1,9 +1,14 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::hash::{BuildHasherDefault, Hasher};
 use std::rc::Rc;
+use std::sync::Arc;
 
+use crate::media::i_immutable_glyph_run_reference::release_platform_impl;
+use crate::media::text_formatting::shaped_buffer::GlyphRange;
 use crate::media::text_formatting::{ShapedBuffer, ShapedTextRun, TextLineMetricsMode, TextRun, TextShaperOptions};
-use crate::media::FlowDirection;
+use crate::media::{FlowDirection, GlyphInfoList};
+use crate::platform::IGlyphRunImpl;
 
 /// Caches shaped text runs and bidi processing results to avoid redundant
 /// shaping when only the paragraph width constraint changes (e.g., between
@@ -31,6 +36,72 @@ struct State {
     /// The shapings kept for the text before the current one: an edit of that text shapes the
     /// new one from them (`shaping_edit`).
     retired: Vec<KeptShaping>,
+    /// The platform glyph runs of the lines of the layout that is being made, by the glyphs they
+    /// are made of (`keep_line_glyph_runs`).
+    line_runs: GlyphRunTable,
+    /// While a layout is made (`begin_layout`): the platform glyph runs of the lines of the
+    /// layout before, which a line of the same glyphs takes. Empty between layouts.
+    previous_line_runs: GlyphRunTable,
+    /// Whether a layout is being made.
+    in_layout: bool,
+}
+
+/// The platform glyph runs of the lines of a layout, by the storage and the first glyph of the
+/// glyphs they are made of.
+type GlyphRunTable = HashMap<(u64, usize), KeptGlyphRun, BuildHasherDefault<GlyphRangeHasher>>;
+
+struct KeptGlyphRun {
+    length: usize,
+    generation: i32,
+    platform_impl: Arc<dyn IGlyphRunImpl>,
+}
+
+/// The hash of a storage number and a glyph index: two multiplications, no more is needed for
+/// numbers that count up.
+#[derive(Default)]
+struct GlyphRangeHasher(u64);
+
+impl Hasher for GlyphRangeHasher {
+    fn finish(&self) -> u64 {
+        self.0
+    }
+
+    fn write(&mut self, bytes: &[u8]) {
+        for &byte in bytes {
+            self.write_u64(byte as u64);
+        }
+    }
+
+    fn write_u64(&mut self, value: u64) {
+        self.0 = (self.0.rotate_left(5) ^ value).wrapping_mul(0x517C_C1B7_2722_0A95);
+    }
+
+    fn write_usize(&mut self, value: usize) {
+        self.write_u64(value as u64);
+    }
+}
+
+fn release_glyph_runs(table: &mut GlyphRunTable) {
+    for (_, kept) in table.drain() {
+        release_platform_impl(Some(kept.platform_impl));
+    }
+}
+
+/// A layout that is being made with a run cache: [`TextRunCache::begin_layout`] when it starts,
+/// [`TextRunCache::end_layout`] when it is dropped.
+pub(crate) struct TextRunCacheLayout(Rc<TextRunCache>);
+
+impl TextRunCacheLayout {
+    pub(crate) fn begin(cache: &Rc<TextRunCache>) -> Self {
+        cache.begin_layout();
+        Self(cache.clone())
+    }
+}
+
+impl Drop for TextRunCacheLayout {
+    fn drop(&mut self) {
+        self.0.end_layout();
+    }
 }
 
 /// A shaping kept for an edit of its text.
@@ -52,7 +123,94 @@ impl TextRunCache {
         let mut state = self.state.borrow_mut();
         state.kept.clear();
         state.retired.clear();
+        release_glyph_runs(&mut state.line_runs);
+        release_glyph_runs(&mut state.previous_line_runs);
         Self::invalidate_entries(&mut state);
+    }
+
+    /// A layout starts: the platform glyph runs of the lines of the layout before are kept until
+    /// [`end_layout`](Self::end_layout) for the lines of this one, and the lines of this one are
+    /// kept for the next layout (docs/porting/text-layout-performance.md, step 7). A line of the
+    /// layout before whose glyphs are the glyphs of a line of this one (the text was not edited
+    /// there and the line breaks where it did) gives its platform glyph run to the new line:
+    /// the bounds of the glyphs are not measured again, and the renderer draws the run it has
+    /// drawn before.
+    pub(crate) fn begin_layout(&self) {
+        let mut state = self.state.borrow_mut();
+        let state = &mut *state;
+        release_glyph_runs(&mut state.previous_line_runs);
+        std::mem::swap(&mut state.line_runs, &mut state.previous_line_runs);
+        state.in_layout = true;
+    }
+
+    /// The layout that started is made: the platform glyph runs of the layout before that no
+    /// line took are released.
+    pub(crate) fn end_layout(&self) {
+        let mut state = self.state.borrow_mut();
+        release_glyph_runs(&mut state.previous_line_runs);
+        state.in_layout = false;
+    }
+
+    /// Gives the shaped runs of a line that is about to be finished the platform glyph runs kept
+    /// for their glyphs from the layout before. Nothing outside a layout.
+    pub(crate) fn adopt_line_glyph_runs(&self, text_runs: &[Rc<dyn TextRun>]) {
+        let state = self.state.borrow();
+        if !state.in_layout || state.previous_line_runs.is_empty() {
+            return;
+        }
+        for run in text_runs {
+            let Some((run, range)) = Self::glyph_range_of(run) else {
+                continue;
+            };
+            let buffer = run.shaped_buffer();
+            let kept = [Some(range), buffer.glyph_range_before_edit()].into_iter().flatten().find_map(|range| {
+                let kept = state.previous_line_runs.get(&(range.storage, range.start))?;
+                (kept.length == range.length && kept.generation == range.generation).then_some(kept)
+            });
+            if let Some(kept) = kept {
+                if run.glyph_run().adopt_platform_impl(&kept.platform_impl) {
+                    crate::perf_count!(TextGlyphRunsKept);
+                }
+            }
+        }
+    }
+
+    /// Keeps the platform glyph runs of the shaped runs of a finished line for the next layout.
+    /// Nothing outside a layout.
+    pub(crate) fn keep_line_glyph_runs(&self, text_runs: &[Rc<dyn TextRun>]) {
+        let mut state = self.state.borrow_mut();
+        if !state.in_layout {
+            return;
+        }
+        for run in text_runs {
+            let Some((run, range)) = Self::glyph_range_of(run) else {
+                continue;
+            };
+            let Some(platform_impl) = run.glyph_run().created_platform_impl() else {
+                continue;
+            };
+            let kept = KeptGlyphRun { length: range.length, generation: range.generation, platform_impl };
+            if let Some(replaced) = state.line_runs.insert((range.storage, range.start), kept) {
+                release_platform_impl(Some(replaced.platform_impl));
+            }
+        }
+    }
+
+    /// The shaped run `run` is and the glyphs its platform glyph run is made of, when those are
+    /// glyphs of a storage the shaper filled: a left-to-right run whose glyph run has the glyphs
+    /// of the shaped buffer of the run.
+    fn glyph_range_of(run: &Rc<dyn TextRun>) -> Option<(&ShapedTextRun, GlyphRange)> {
+        let run = run.downcast_ref::<ShapedTextRun>()?;
+        let buffer = run.shaped_buffer();
+        if run.bidi_level() & 1 != 0 || buffer.length() == 0 {
+            return None;
+        }
+        match run.glyph_run().glyph_infos() {
+            GlyphInfoList::ShapedBuffer(glyphs) if Rc::ptr_eq(&glyphs, buffer) => {
+                buffer.glyph_range().map(|range| (run, range))
+            }
+            _ => None,
+        }
     }
 
     /// Invalidates the cached entries for a new text of the owner, as

@@ -43,6 +43,7 @@ impl TextFormatterImpl {
         paragraph_width: f64,
         paragraph_properties: &Rc<dyn TextParagraphProperties>,
         object_pool: &FormattingObjectPool,
+        text_run_cache: &TextRunCache,
     ) -> Rc<TextLineImpl> {
         let resolved_flow_direction = cached.resolved_flow_direction;
 
@@ -67,7 +68,7 @@ impl TextFormatterImpl {
                     false,
                 );
 
-                text_line.finalize_line();
+                Self::finalize_line(&text_line, Some(text_run_cache));
 
                 text_line
             }
@@ -83,9 +84,23 @@ impl TextFormatterImpl {
                     resolved_flow_direction,
                     next_line_break.as_ref(),
                     object_pool,
+                    Some(text_run_cache),
                 )
             }
         }
+    }
+
+    /// Finishes `text_line` ([`TextLineImpl::finalize_line`]). With the run cache of a layout
+    /// that is being made, the shaped runs of the line first take the platform glyph runs the
+    /// layout before kept for their glyphs, and then give theirs to the next layout
+    /// ([`TextRunCache::begin_layout`]).
+    fn finalize_line(text_line: &TextLineImpl, text_run_cache: Option<&TextRunCache>) {
+        let Some(text_run_cache) = text_run_cache else {
+            return text_line.finalize_line();
+        };
+        text_run_cache.adopt_line_glyph_runs(&TextLine::text_runs(text_line));
+        text_line.finalize_line();
+        text_run_cache.keep_line_glyph_runs(&TextLine::text_runs(text_line));
     }
 
     /// Produces a list of text runs for a line, adding an extra reference to each
@@ -785,6 +800,7 @@ impl TextFormatterImpl {
     /// * `paragraph_properties` — the text paragraph properties.
     /// * `current_line_break` — the current line break if the line was explicitly broken.
     /// * `object_pool` — a pool used to get reusable formatting objects.
+    /// * `text_run_cache` — the run cache of the layout, for the platform glyph runs of the line.
     #[allow(clippy::too_many_arguments)]
     fn perform_text_wrapping(
         text_runs: &mut Vec<Rc<dyn TextRun>>,
@@ -795,6 +811,7 @@ impl TextFormatterImpl {
         resolved_flow_direction: FlowDirection,
         current_line_break: Option<&Rc<TextLineBreak>>,
         object_pool: &FormattingObjectPool,
+        text_run_cache: Option<&TextRunCache>,
     ) -> Rc<TextLineImpl> {
         if text_runs.is_empty() {
             return Self::create_empty_text_line(first_text_source_index, paragraph_width, paragraph_properties);
@@ -897,7 +914,7 @@ impl TextFormatterImpl {
                     false,
                 );
 
-                text_line.finalize_line();
+                Self::finalize_line(&text_line, text_run_cache);
 
                 text_line
             }
@@ -1185,6 +1202,7 @@ impl TextFormatter for TextFormatterImpl {
                             previous_line_break.flow_direction(),
                             Some(previous_line_break),
                             object_pool,
+                            text_run_cache,
                         ));
                     }
                 }
@@ -1204,6 +1222,7 @@ impl TextFormatter for TextFormatterImpl {
                     paragraph_width,
                     paragraph_properties,
                     object_pool,
+                    text_run_cache,
                 ));
             }
         }
@@ -1257,7 +1276,7 @@ impl TextFormatter for TextFormatterImpl {
                     false,
                 );
 
-                text_line.finalize_line();
+                Self::finalize_line(&text_line, text_run_cache);
 
                 text_line
             }
@@ -1270,6 +1289,7 @@ impl TextFormatter for TextFormatterImpl {
                 resolved_flow_direction,
                 next_line_break.as_ref(),
                 object_pool,
+                text_run_cache,
             ),
         };
 

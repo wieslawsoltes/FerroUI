@@ -4,7 +4,7 @@ use crate::media::text_formatting::{
     FormattedTextSource, FormattingObjectPool, GenericTextParagraphProperties, GenericTextRunProperties,
     ITextDrawingSink, ITextSource, InterWordJustification, PlainTextLayoutRequest, TextCollapsingProperties,
     TextEndOfParagraph, TextFormatter, TextFormatterImpl, TextLine, TextLineImpl, TextParagraphProperties, TextRun,
-    TextRunCache, TextRunProperties, TextParagraphStyle, TextParagraphStyles,
+    TextRunCache, TextRunCacheLayout, TextRunProperties, TextParagraphStyle, TextParagraphStyles,
 };
 use crate::media::{
     BaselineAlignment, CharacterHit, FlowDirection, FontFeatureCollection, FontManager, IBrush, TextAlignment,
@@ -845,6 +845,8 @@ impl TextLayout {
     }
 
     fn create_text_lines(&mut self) -> Vec<Rc<dyn TextLine>> {
+        // The lines take the platform glyph runs the run cache kept of the layout before.
+        let _layout = self.text_run_cache.as_ref().map(TextRunCacheLayout::begin);
         let object_pool = FormattingObjectPool::instance();
         let mut first = true;
         let mut text_lines = object_pool.text_lines.rent();

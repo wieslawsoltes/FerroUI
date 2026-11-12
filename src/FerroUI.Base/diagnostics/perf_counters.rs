@@ -199,6 +199,9 @@ perf_counters! {
     /// `TextFormatterImpl::format_line_with_cache`: a cache was given, did
     /// not hold the line, and the shaped runs were added to it.
     TextRunCacheMisses => "text run cache misses",
+    /// `TextRunCache::adopt_line_glyph_runs`: a run of a line took the platform glyph run of
+    /// the same glyphs of the layout before.
+    TextGlyphRunsKept => "text glyph runs kept from the layout before",
     /// `TextShaper::shape_text`: a run was shaped by the platform shaper.
     TextRunsShaped => "text runs shaped",
     /// `TextBlock::invalidate_text_layout`: a layout was dropped with its shaped runs (the text

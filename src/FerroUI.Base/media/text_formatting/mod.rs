@@ -157,7 +157,7 @@ pub use text_run::{TextRun, DEFAULT_TEXT_SOURCE_LENGTH};
 pub use text_run_bounds::TextRunBounds;
 pub use text_run_cache::TextRunCache;
 #[allow(unused_imports)] // used by tests
-pub(crate) use text_run_cache::CachedShapingResult;
+pub(crate) use text_run_cache::{CachedShapingResult, TextRunCacheLayout};
 pub use text_run_properties::TextRunProperties;
 pub use text_shaper::TextShaper;
 pub use text_shaper_options::TextShaperOptions;
