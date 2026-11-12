@@ -3725,6 +3725,70 @@ fn an_item_moves_to_the_composition_visual_a_visual_above_it_gets() {
     s.assert_hit_test(70.0, 65.0, None, &[&child]);
 }
 
+/// Where `visual` draws: the visual whose composition visual shows its drawing, and the offset of
+/// the drawing in it.
+fn place_of(
+    visual: &Ref<TestBorder>,
+    kept: &mut crate::visual::CompositionItemPlacements,
+) -> Option<(Ref<Visual>, (f64, f64))> {
+    visual.composition_item_placement(kept)
+}
+
+/// The composition visual that shows what a visual drew, and the place of the drawing in it, are
+/// looked for once for the visuals above it that have no composition visual, and again after one
+/// of them moves, gets a composition visual or leaves the tree (section 9.47). A debug build also
+/// compares every answer with a walk up the parents, in every test that records a drawing.
+#[test]
+fn the_place_of_an_item_is_kept_for_the_visuals_above_it_until_one_of_them_changes() {
+    let s = CompositorCanvas::new();
+    let outer = TestBorder::new();
+    outer.set_bounds(Rect::new(100.0, 200.0, 300.0, 300.0));
+    let (control, child) = decorator_with_child();
+    let sibling = TestBorder::filled(5.0, 15.0, 10.0, 10.0);
+    control.add(&sibling);
+    outer.add(&control);
+    s.canvas.add(&outer);
+    s.run_jobs();
+    let root: Ref<Visual> = s.root.clone().upcast();
+    let mut kept = crate::visual::CompositionItemPlacements::default();
+
+    // The first visual walks up to the root: the three visuals in between are known from then on.
+    assert_eq!(Some((root.clone(), (140.0, 260.0))), place_of(&child, &mut kept));
+    assert_eq!(3, kept.count());
+    assert_eq!(Some((root.clone(), (135.0, 265.0))), place_of(&sibling, &mut kept));
+    assert_eq!(Some((root.clone(), (130.0, 250.0))), place_of(&control, &mut kept));
+    assert_eq!(3, kept.count());
+
+    // A visual in between moves: what was known is dropped.
+    outer.set_bounds(Rect::new(110.0, 200.0, 300.0, 300.0));
+    assert_eq!(Some((root.clone(), (145.0, 265.0))), place_of(&sibling, &mut kept));
+    assert_eq!(Some((root.clone(), (150.0, 260.0))), place_of(&child, &mut kept));
+    assert_eq!(3, kept.count());
+
+    // One gets a composition visual: the visuals below it draw in that one.
+    control.set_opacity(0.5);
+    s.run_jobs();
+    assert!(control.has_composition_visual());
+    let holder: Ref<Visual> = control.clone().upcast();
+    assert_eq!(Some((holder.clone(), (10.0, 10.0))), place_of(&child, &mut kept));
+    assert_eq!(0, kept.count());
+    assert_eq!(Some((root.clone(), (140.0, 250.0))), place_of(&control, &mut kept));
+    assert_eq!(2, kept.count());
+
+    // The visuals leave the tree: nothing is kept for a visual out of it, or through one.
+    s.canvas.remove(&outer);
+    let _ = place_of(&control, &mut kept);
+    assert_eq!(0, kept.count());
+    s.canvas.add(&outer);
+    s.run_jobs();
+    assert_eq!(Some((root, (140.0, 250.0))), place_of(&control, &mut kept));
+    assert_eq!(2, kept.count());
+    assert_eq!(Some((holder, (5.0, 15.0))), place_of(&sibling, &mut kept));
+
+    // The renderer keeps nothing between its passes: the visuals it kept would stay alive.
+    assert_eq!(0, s.renderer.kept_item_placements());
+}
+
 #[test]
 fn a_visual_that_is_an_item_gets_a_composition_visual_with_its_drawing() {
     let s = CompositorCanvas::new();
