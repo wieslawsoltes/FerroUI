@@ -276,22 +276,224 @@ fn wrap_texture(
     graphite::surfaces::wrap_backend_texture(recorder, &backend_texture, color_type, None, Some(props))
 }
 
-/// The `bands` bands of a layer of the given size: the index of each band
-/// and the rows it draws, from the top. The bands are disjoint and cover
-/// the layer.
+/// The `bands` bands of a layer of the given size as equal strips, which is what a layer begins with
+/// ([`BandBalance`]): the index of each band and the rows it draws, from the top. The bands are disjoint and
+/// cover the layer.
 pub(crate) fn band_clips(size: (i32, i32), bands: usize) -> Vec<(usize, IRect)> {
     let (width, height) = size;
-    let bands = bands.max(1);
-    let mut clips = Vec::with_capacity(bands);
-    for index in 0..bands {
-        let top = (i64::from(height) * index as i64 / bands as i64) as i32;
-        let bottom = (i64::from(height) * (index as i64 + 1) / bands as i64) as i32;
-        let clip = IRect::new(0, top, width, bottom);
-        if !clip.is_empty() {
-            clips.push((index, clip));
+    BandBalance::new(height, bands).clips(width)
+}
+
+/// The rows the cost of the frames of a layer is kept for at a time ([`BandBalance`]); the row two bands meet
+/// at is a multiple of it once the bands were moved.
+const BALANCE_ROWS: i32 = 16;
+
+/// How many frames the time of the bands is averaged over before the bands are looked at.
+const BALANCE_FRAMES: u32 = 8;
+
+/// The frames after a move that are not counted: a band draws the glyphs that came into it for the first
+/// time, which its recorder rasterizes and uploads.
+const BALANCE_SETTLE_FRAMES: u32 = 2;
+
+/// The time of the threads on a frame below which the bands stay where they are: nothing waits for the
+/// slowest band of such a frame.
+const MIN_BALANCED_COST: Duration = Duration::from_millis(2);
+
+/// How much longer than the mean of the bands the slowest band works before the bands are moved.
+const BALANCE_SLACK: f64 = 0.15;
+
+/// How much of what is kept about the rows inside a band goes back to an even spread at each look: a frame
+/// tells the time of a band, not where in the band it went, and what was learned from other bands grows old.
+const BALANCE_FORGET: f64 = 0.05;
+
+/// By how much a move has to lower the time of the slowest band against the mean for the next look to follow
+/// at once.
+const BALANCE_GAIN: f64 = 0.03;
+
+/// The most looks that are skipped after moves that did not help.
+const MAX_BALANCE_HOLD: u32 = 64;
+
+/// The rows the bands of a layer meet at, moved until the threads work as long as each other.
+///
+/// The bands begin as equal strips. What a frame costs is rarely spread evenly over the rows of a window, and
+/// a frame is in the context when its slowest band is, so equal strips leave one thread waiting for another
+/// (measured on a screen whose lower half holds most of the text: one band of two took three times the time
+/// of the other, and the frame took the time of the slow one).
+///
+/// The threads tell how long each band took. From that the layer keeps what a strip of [`BALANCE_ROWS`] rows
+/// costs: the strips of a band are scaled so that they add up to the time of the band, which is all a frame
+/// tells. When the slowest band works [`BALANCE_SLACK`] longer than the mean, the bands are moved to the rows
+/// that divide the kept cost evenly. The next frames are measured with other bands and correct the strips
+/// again, so the rows close in on the cost wherever it lies, and the bands rest when what is kept agrees with
+/// what is measured. A cost that cannot be divided (a strip of the layer lower than a band may be) would move
+/// the bands for nothing: after a move that did not help, the looks that follow are skipped, twice as many
+/// each time.
+struct BandBalance {
+    height: i32,
+    /// The rows the bands meet at, from the top: one fewer than there are bands.
+    edges: Vec<i32>,
+    /// What each strip of [`BALANCE_ROWS`] rows costs a frame, in seconds, as far as the frames told.
+    model: Vec<f64>,
+    /// The time of each band over the frames since the last look, in seconds.
+    busy: Vec<f64>,
+    /// The frames `busy` adds up.
+    frames: u32,
+    /// The frames still left out after a move.
+    settle: u32,
+    /// The time of the slowest band against the mean when the bands were last moved, until the look after.
+    before_move: Option<f64>,
+    /// The looks that were skipped after the last move that did not help.
+    hold: u32,
+    /// The looks still to skip.
+    skip: u32,
+}
+
+impl BandBalance {
+    /// `bands` equal strips of a layer of `height` rows.
+    fn new(height: i32, bands: usize) -> Self {
+        let bands = bands.max(1);
+        let edges = (1..bands).map(|index| (i64::from(height) * index as i64 / bands as i64) as i32).collect();
+        let strips = usize::try_from((height + BALANCE_ROWS - 1) / BALANCE_ROWS).unwrap_or(0).max(1);
+        Self {
+            height,
+            edges,
+            model: vec![1.0; strips],
+            busy: vec![0.0; bands],
+            frames: 0,
+            settle: 0,
+            before_move: None,
+            hold: 0,
+            skip: 0,
         }
     }
-    clips
+
+    fn bands(&self) -> usize {
+        self.busy.len()
+    }
+
+    /// The index of each band and the rows it draws in a layer `width` pixels wide, from the top.
+    fn clips(&self, width: i32) -> Vec<(usize, IRect)> {
+        let mut clips = Vec::with_capacity(self.bands());
+        let mut top = 0;
+        for index in 0..self.bands() {
+            let bottom = self.edges.get(index).copied().unwrap_or(self.height);
+            let clip = IRect::new(0, top, width, bottom);
+            if !clip.is_empty() {
+                clips.push((index, clip));
+            }
+            top = bottom;
+        }
+        clips
+    }
+
+    /// How long the threads worked on the bands of a frame, by band. Returns whether the bands were moved.
+    fn frame(&mut self, busy: &[Duration]) -> bool {
+        if busy.len() != self.bands() || busy.len() < 2 {
+            return false;
+        }
+        if self.settle > 0 {
+            self.settle -= 1;
+            return false;
+        }
+        for (sum, band) in self.busy.iter_mut().zip(busy) {
+            *sum += band.as_secs_f64();
+        }
+        self.frames += 1;
+        if self.frames < BALANCE_FRAMES {
+            return false;
+        }
+        let frames = f64::from(self.frames);
+        let busy: Vec<f64> = self.busy.iter().map(|sum| sum / frames).collect();
+        self.busy.fill(0.0);
+        self.frames = 0;
+        self.look(&busy)
+    }
+
+    /// Looks at the time a frame took in each band, and moves the bands when one of them is slow.
+    fn look(&mut self, busy: &[f64]) -> bool {
+        let mean = busy.iter().sum::<f64>() / busy.len() as f64;
+        let slowest = busy.iter().copied().fold(0.0, f64::max);
+        if mean <= 0.0 {
+            return false;
+        }
+        self.learn(busy);
+        if let Some(before) = self.before_move.take() {
+            if slowest / mean > before * (1.0 - BALANCE_GAIN) {
+                self.hold = (self.hold * 2).clamp(1, MAX_BALANCE_HOLD);
+                self.skip = self.hold;
+            } else {
+                self.hold = 0;
+            }
+        }
+        if self.skip > 0 {
+            self.skip -= 1;
+            return false;
+        }
+        let light = mean * (busy.len() as f64) < MIN_BALANCED_COST.as_secs_f64();
+        if light || slowest <= mean * (1.0 + BALANCE_SLACK) {
+            return false;
+        }
+        let edges = self.balanced_edges();
+        if edges == self.edges {
+            return false;
+        }
+        self.edges = edges;
+        self.before_move = Some(slowest / mean);
+        self.settle = BALANCE_SETTLE_FRAMES;
+        true
+    }
+
+    /// The band each strip of the model is in: the band its middle row is in.
+    fn bands_of_strips(&self) -> Vec<usize> {
+        (0..self.model.len())
+            .map(|strip| {
+                let middle = strip as i32 * BALANCE_ROWS + BALANCE_ROWS / 2;
+                self.edges.partition_point(|edge| *edge <= middle)
+            })
+            .collect()
+    }
+
+    /// Scales the strips of each band to the time the band took.
+    fn learn(&mut self, busy: &[f64]) {
+        let bands = self.bands_of_strips();
+        let mut kept = vec![0.0; busy.len()];
+        let mut strips = vec![0usize; busy.len()];
+        for (strip, band) in bands.iter().enumerate() {
+            kept[*band] += self.model[strip];
+            strips[*band] += 1;
+        }
+        for (strip, band) in bands.iter().enumerate() {
+            let even = busy[*band] / strips[*band].max(1) as f64;
+            let scaled = if kept[*band] > 0.0 { self.model[strip] * busy[*band] / kept[*band] } else { even };
+            self.model[strip] = scaled + (even - scaled) * BALANCE_FORGET;
+        }
+    }
+
+    /// The rows that divide the kept cost evenly, each at the end of a strip and every band of
+    /// [`MIN_BAND_HEIGHT`] rows at least.
+    fn balanced_edges(&self) -> Vec<i32> {
+        let bands = self.bands();
+        let total: f64 = self.model.iter().sum();
+        let mut edges: Vec<i32> = Vec::with_capacity(bands - 1);
+        let (mut strip, mut above) = (0usize, 0.0);
+        for index in 1..bands {
+            let wanted = total * index as f64 / bands as f64;
+            while strip < self.model.len() && above + self.model[strip] <= wanted {
+                above += self.model[strip];
+                strip += 1;
+            }
+            // The row of equal cost is inside this strip: the nearer end of the strip.
+            let inside = match self.model.get(strip) {
+                Some(cost) if *cost > 0.0 => (wanted - above) / cost,
+                _ => 0.0,
+            };
+            let row = (strip as i32 + i32::from(inside > 0.5)) * BALANCE_ROWS;
+            let least = edges.last().copied().unwrap_or(0) + MIN_BAND_HEIGHT;
+            let most = self.height - (bands - index) as i32 * MIN_BAND_HEIGHT;
+            edges.push(row.clamp(least, most.max(least)));
+        }
+        edges
+    }
 }
 
 /// Draws the part of a picture that lies in a band: the picture under the
@@ -725,25 +927,27 @@ struct PendingFrame {
 
 /// Receives the answers for the bands of a frame, which waits until the
 /// threads have inserted them. Returns the bands that are not in the
-/// context, and how long the threads worked on the frame.
+/// context, and how long the threads worked on each band of the frame.
 fn collect_bands(
     pool: &mut BandPool,
     recording_failed: &mut bool,
     layer: u64,
     pending: &PendingFrame,
-) -> (Vec<IRect>, Duration) {
+) -> (Vec<IRect>, Vec<Duration>) {
     // The bands of a frame that no flush has told to insert yet: a frame
     // that was drawn and not shown.
     pool.release();
     // By the index of the band; the indices of the bands of a frame are
     // below their number.
     let mut inserted = vec![false; pending.clips.len()];
-    let mut busy = Duration::ZERO;
+    let mut busy = vec![Duration::ZERO; pending.clips.len()];
     for _ in 0..pending.sent {
         let Some(output) = pool.receive(layer) else {
             break;
         };
-        busy += output.busy;
+        if let Some(band) = busy.get_mut(output.index) {
+            *band = output.busy;
+        }
         if output.inserted {
             if let Some(done) = inserted.get_mut(output.index) {
                 *done = true;
@@ -816,6 +1020,8 @@ struct PipelinedLayer {
     direct_only_draws: Cell<u64>,
     /// How long the threads worked on the frame collected last.
     busy: Cell<Duration>,
+    /// Where the bands of the next pipelined frame meet.
+    balance: RefCell<BandBalance>,
     /// The frame the threads are playing.
     pending: RefCell<Option<PendingFrame>>,
 }
@@ -910,10 +1116,12 @@ impl PipelinedLayer {
         let Some((missing, busy)) = collected else {
             return;
         };
-        self.busy.set(busy);
+        self.busy.set(busy.iter().sum());
         if !missing.is_empty() {
             self.play_on_main(&previous.picture, Some(missing.as_slice()));
             self.policy.borrow_mut().frame_needed_direct();
+        } else if previous.sent == busy.len() && self.balance.borrow_mut().frame(&busy) {
+            ferroui_base::perf_count!(SkiaBandsMoved);
         }
     }
 
@@ -936,7 +1144,14 @@ impl PipelinedLayer {
             // A band has a thread of its own: a layer that asks for more
             // bands than the first pipelined layer of the context did has
             // as many as there are threads.
-            let clips = band_clips(self.size, self.bands.min(threads));
+            let clips = {
+                let mut balance = self.balance.borrow_mut();
+                let bands = self.bands.min(threads);
+                if balance.bands() != bands {
+                    *balance = BandBalance::new(self.size.1, bands);
+                }
+                balance.clips(self.size.0)
+            };
 
             // What the recorder of the context has pending comes before the
             // bands: an earlier frame it drew on the texture, and the images
@@ -1074,6 +1289,7 @@ impl PipelinedLayerSurface {
             last_frame: Cell::new(None),
             direct_only_draws: Cell::new(context.direct_only_draws()),
             busy: Cell::new(Duration::ZERO),
+            balance: RefCell::new(BandBalance::new(height, bands)),
             pending: RefCell::new(None),
         })))
     }
@@ -1084,6 +1300,12 @@ impl PipelinedLayerSurface {
     #[cfg(test)]
     pub(crate) fn bands(&self) -> usize {
         self.0.bands
+    }
+
+    /// The bands the next pipelined frame of the layer is divided into.
+    #[cfg(test)]
+    pub(crate) fn band_clips(&self) -> Vec<(usize, IRect)> {
+        self.0.balance.borrow().clips(self.0.size.0)
     }
 }
 
@@ -1180,6 +1402,132 @@ mod tests {
     use super::*;
 
     const FRAME: Duration = Duration::from_micros(16_667);
+
+    /// How long each band of `balance` works on a frame whose row `row` costs `cost(row)` seconds.
+    fn band_times(balance: &BandBalance, cost: &dyn Fn(i32) -> f64) -> Vec<Duration> {
+        let time = |clip: &IRect| Duration::from_secs_f64((clip.top..clip.bottom).map(cost).sum());
+        balance.clips(100).iter().map(|(_, clip)| time(clip)).collect()
+    }
+
+    /// The time of the slowest band of such a frame against the mean of the bands.
+    fn slowest_to_mean(balance: &BandBalance, cost: &dyn Fn(i32) -> f64) -> f64 {
+        let times: Vec<f64> = band_times(balance, cost).iter().map(Duration::as_secs_f64).collect();
+        times.iter().copied().fold(0.0, f64::max) / (times.iter().sum::<f64>() / times.len() as f64)
+    }
+
+    /// Draws `frames` such frames, and returns how many times the bands were moved. The bands are checked
+    /// after every frame: disjoint, the whole layer, none lower than a band may be.
+    fn draw(balance: &mut BandBalance, frames: u32, cost: &dyn Fn(i32) -> f64) -> u32 {
+        let mut moves = 0;
+        for _ in 0..frames {
+            let times = band_times(balance, cost);
+            moves += u32::from(balance.frame(&times));
+            let clips = balance.clips(100);
+            assert_eq!(clips.len(), balance.bands());
+            assert_eq!(clips[0].1.top, 0);
+            assert_eq!(clips[clips.len() - 1].1.bottom, balance.height);
+            for (index, (band, clip)) in clips.iter().enumerate() {
+                assert_eq!(*band, index);
+                assert!(clip.height() >= MIN_BAND_HEIGHT, "band {index} is {} rows", clip.height());
+                assert!(index == 0 || clip.top == clips[index - 1].1.bottom);
+            }
+        }
+        moves
+    }
+
+    /// A frame of 34 ms whose rows from `from` on cost `times` the rows above.
+    fn heavy_from(height: i32, from: i32, times: f64) -> impl Fn(i32) -> f64 {
+        let unit = 0.034 / (f64::from(from) + f64::from(height - from) * times);
+        move |row| if row >= from { unit * times } else { unit }
+    }
+
+    #[test]
+    fn the_bands_begin_as_equal_strips() {
+        assert_eq!(band_clips((300, 1000), 1), vec![(0, IRect::new(0, 0, 300, 1000))]);
+        assert_eq!(
+            band_clips((300, 1001), 3),
+            vec![
+                (0, IRect::new(0, 0, 300, 333)),
+                (1, IRect::new(0, 333, 300, 667)),
+                (2, IRect::new(0, 667, 300, 1001)),
+            ]
+        );
+    }
+
+    #[test]
+    fn bands_that_work_as_long_as_each_other_stay() {
+        for bands in [2, 3, 4] {
+            let mut balance = BandBalance::new(1600, bands);
+            // Within the slack: one half costs a tenth more than the other.
+            assert_eq!(draw(&mut balance, 400, &heavy_from(1600, 800, 1.1)), 0);
+            assert_eq!(balance.clips(100), band_clips((100, 1600), bands));
+        }
+    }
+
+    #[test]
+    fn the_bands_of_light_frames_stay() {
+        // Three times the cost in the lower half, of a frame the threads draw in a millisecond.
+        let heavy = heavy_from(1600, 800, 3.0);
+        let light = |row: i32| heavy(row) / 34.0;
+        let mut balance = BandBalance::new(1600, 2);
+        assert_eq!(draw(&mut balance, 400, &light), 0);
+    }
+
+    #[test]
+    fn the_bands_move_to_where_the_cost_is() {
+        for (bands, from, times) in [(2, 800, 3.0), (2, 1200, 8.0), (3, 800, 3.0), (4, 400, 0.2), (2, 300, 0.1)] {
+            let cost = heavy_from(1600, from, times);
+            let mut balance = BandBalance::new(1600, bands);
+            let before = slowest_to_mean(&balance, &cost);
+            let moves = draw(&mut balance, 800, &cost);
+            let after = slowest_to_mean(&balance, &cost);
+            assert!(before > 1.0 + BALANCE_SLACK, "{bands} bands, {times} from {from}: {before}");
+            assert!(after <= 1.0 + BALANCE_SLACK, "{bands} bands, {times} from {from}: {before} to {after}");
+            assert!((1..=12).contains(&moves), "{bands} bands, {times} from {from}: {moves} moves");
+            // And they rest there.
+            assert_eq!(draw(&mut balance, 400, &cost), 0);
+        }
+    }
+
+    #[test]
+    fn the_bands_follow_a_cost_that_moves() {
+        let mut balance = BandBalance::new(1600, 2);
+        for (from, times) in [(800, 3.0), (800, 0.25), (1100, 6.0), (800, 1.0), (500, 0.3)] {
+            let cost = heavy_from(1600, from, times);
+            let moves = draw(&mut balance, 800, &cost);
+            let after = slowest_to_mean(&balance, &cost);
+            assert!(after <= 1.0 + BALANCE_SLACK, "{times} from {from}: {after} after {moves} moves");
+            assert!(moves <= 12, "{times} from {from}: {moves} moves");
+        }
+    }
+
+    #[test]
+    fn a_cost_that_cannot_be_divided_stops_moving_the_bands() {
+        // All of a frame in sixteen rows: whichever band has them works alone.
+        let cost = |row: i32| if (784..800).contains(&row) { 0.034 / 16.0 } else { 0.0 };
+        for bands in [2, 3] {
+            let mut balance = BandBalance::new(1600, bands);
+            let moves = draw(&mut balance, 8 * 400, &cost);
+            assert!(moves <= 16, "{bands} bands: {moves} moves in 400 looks");
+        }
+    }
+
+    #[test]
+    fn frames_after_a_move_and_of_other_bands_are_not_counted() {
+        let cost = heavy_from(1600, 800, 3.0);
+        let mut balance = BandBalance::new(1600, 2);
+        // The times of three bands tell nothing about two.
+        assert_eq!(draw(&mut BandBalance::new(1600, 3), 1, &cost), 0);
+        for _ in 0..40 {
+            assert!(!balance.frame(&[Duration::from_millis(9); 3]));
+        }
+        assert_eq!(balance.frames, 0);
+        assert_eq!(draw(&mut balance, BALANCE_FRAMES - 1, &cost), 0);
+        assert_eq!(draw(&mut balance, 1, &cost), 1);
+        assert_eq!(balance.settle, BALANCE_SETTLE_FRAMES);
+        assert_eq!(draw(&mut balance, BALANCE_SETTLE_FRAMES, &cost), 0);
+        assert_eq!(balance.frames, 0);
+    }
 
     /// Runs `frames` frames `period` apart, each costing `cost`, and returns
     /// what the policy answered for each.
