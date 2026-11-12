@@ -9,7 +9,8 @@
 
 use super::{
     CompositionGpuImportedImageSynchronizationCapabilities, CompositionTarget, CompositionVisual, Compositor,
-    ICompositionImportableSharedGpuContextImage, LocalFuture, RenderInterfaceFeature, RenderSurfaces,
+    ICompositionImportableSharedGpuContextImage, ICompositorScheduler, LocalFuture, RenderInterfaceFeature,
+    RenderSurfaces,
 };
 use crate::media::MediaContext;
 use crate::platform::surfaces::IPlatformRenderSurface;
@@ -1419,9 +1420,14 @@ impl TickedRenderThread {
 
     /// Ticks the loop once and returns when the tick is over.
     fn tick(&self) {
+        self.start_tick().recv().expect("the render thread ticked");
+    }
+
+    /// Starts a tick of the loop and returns what receives its end.
+    fn start_tick(&self) -> std::sync::mpsc::Receiver<()> {
         let (done, ticked) = std::sync::mpsc::channel();
         self.ticks.as_ref().expect("the render thread runs").send(done).expect("the render thread runs");
-        ticked.recv().expect("the render thread ticked");
+        ticked
     }
 }
 
@@ -1448,6 +1454,99 @@ fn a_batch_is_accepted_when_the_render_thread_takes_it() {
     render_thread.tick();
     assert!(batch.accepted().is_completed());
     assert!(batch.processed().is_completed());
+}
+
+/// A scheduler that counts the commits it is asked for.
+struct CountingScheduler(Cell<usize>);
+
+impl ICompositorScheduler for CountingScheduler {
+    fn commit_requested(&self, _compositor: &Rc<Compositor>) {
+        self.0.set(self.0.get() + 1);
+    }
+}
+
+#[test]
+fn a_commit_is_asked_for_at_once_when_the_batch_before_is_accepted() {
+    // The media context starts its next render pass when the render thread
+    // accepts a batch, while the batch is still being read. What the pass
+    // changes asks the scheduler for a commit in the pass, so that the pass
+    // commits it: a request that waited for the batch to be processed came
+    // after the pass, and every frame took two passes and two animation
+    // frames (desktop-performance.md, section 9.46).
+    let _dispatcher_scope = Dispatcher::unit_test_scope();
+    let (_locator_scope, _render_interface) = MockPlatformRenderInterface::install();
+    let render_loop = ManualRenderLoop::background();
+    let counting = Rc::new(CountingScheduler(Cell::new(0)));
+    let scheduler: Rc<dyn ICompositorScheduler> = counting.clone();
+    let compositor = Compositor::with_render_thread(
+        render_loop.clone(),
+        None,
+        false,
+        &scheduler,
+        Dispatcher::ui_thread(),
+        None,
+        None,
+    );
+    let render_thread = TickedRenderThread::start(&render_loop);
+
+    compositor.request_commit_async();
+    assert_eq!(1, counting.0.get());
+    let batch = compositor.commit();
+
+    // The render thread stops between the acceptance of the batch and its
+    // first change, as it is while a pass of the other thread starts.
+    let (accepted, is_accepted) = std::sync::mpsc::channel();
+    let (read_on, may_read_on) = std::sync::mpsc::channel::<()>();
+    batch.accepted().on_completed(move || {
+        let _ = accepted.send(());
+        let _ = may_read_on.recv();
+    });
+    let ticked = render_thread.start_tick();
+    is_accepted.recv().expect("the render thread accepts the batch");
+    assert!(batch.accepted().is_completed());
+    assert!(!batch.processed().is_completed());
+
+    compositor.request_commit_async();
+    assert_eq!(2, counting.0.get(), "the request reaches the scheduler without a job of the dispatcher");
+
+    read_on.send(()).expect("the render thread waits");
+    ticked.recv().expect("the render thread ticked");
+    assert!(batch.processed().is_completed());
+    Dispatcher::ui_thread().run_jobs(None);
+    assert_eq!(2, counting.0.get(), "one request for one commit");
+}
+
+#[test]
+fn a_commit_asked_for_before_the_batch_before_is_accepted_waits_for_the_acceptance() {
+    let _dispatcher_scope = Dispatcher::unit_test_scope();
+    let (_locator_scope, _render_interface) = MockPlatformRenderInterface::install();
+    let render_loop = ManualRenderLoop::background();
+    let counting = Rc::new(CountingScheduler(Cell::new(0)));
+    let scheduler: Rc<dyn ICompositorScheduler> = counting.clone();
+    let compositor = Compositor::with_render_thread(
+        render_loop.clone(),
+        None,
+        false,
+        &scheduler,
+        Dispatcher::ui_thread(),
+        None,
+        None,
+    );
+    let render_thread = TickedRenderThread::start(&render_loop);
+
+    compositor.request_commit_async();
+    let batch = compositor.commit();
+    assert_eq!(1, counting.0.get());
+
+    // The batch waits in the queue: a second one is not asked for yet.
+    compositor.request_commit_async();
+    Dispatcher::ui_thread().run_jobs(None);
+    assert_eq!(1, counting.0.get());
+
+    render_thread.tick();
+    assert!(batch.accepted().is_completed());
+    Dispatcher::ui_thread().run_jobs(None);
+    assert_eq!(2, counting.0.get());
 }
 
 #[test]

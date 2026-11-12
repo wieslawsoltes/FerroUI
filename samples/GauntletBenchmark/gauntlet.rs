@@ -348,8 +348,12 @@ impl GauntletView {
     }
 }
 
-/// With `PERF_REPORT=1`, prints `PERF fps N` once a second: the frames the animation frame callback
-/// ran, for comparing builds of FerroUI (the harness counts presented frames from outside instead).
+/// With `PERF_REPORT=1`, prints `PERF fps N` once a second: the times the animation frame callback
+/// ran, for comparing builds of FerroUI. A callback is not a picture: the frames are the batches
+/// the compositor committed, which a build with the feature `counters` prints beside it as
+/// `PERF batches N` (the harness counts presented frames from outside instead). The two are equal
+/// when every render pass commits what its animation frame changed (desktop-performance.md,
+/// section 9.46).
 pub(crate) fn report_frame_rate() {
     ferroui_base::ferro_thread_local! {
         static REPORT: Option<(Cell<std::time::Instant>, Cell<u32>)> =
@@ -361,6 +365,14 @@ pub(crate) fn report_frame_rate() {
         let elapsed = since.get().elapsed();
         if elapsed.as_secs_f64() >= 1.0 {
             println!("PERF fps {:.1}", f64::from(frames.get()) / elapsed.as_secs_f64());
+            #[cfg(feature = "counters")]
+            {
+                use ferroui_base::diagnostics::perf_counters::{snapshot, PerfCounter};
+                ferroui_base::ferro_thread_local! { static BATCHES: Cell<u64> = Cell::new(0); }
+                let batches = snapshot().get(PerfCounter::CompositionBatchesCommitted);
+                let since_last = BATCHES.with(|last| batches - last.replace(batches));
+                println!("PERF batches {:.1}", since_last as f64 / elapsed.as_secs_f64());
+            }
             since.set(std::time::Instant::now());
             frames.set(0);
         }

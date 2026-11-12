@@ -162,11 +162,12 @@ ALL_SUITES = ["counters", "gauntlet", "frames", "framework", "tdg", "window"]
 #
 # - UI thread and wall time of a frame: the factor 1. The frame gate averages hundreds of frames
 #   of a deterministic workload on the CPU (raster Skia), so a few percent is a real change.
-# - Render thread and wall time are those of a frame the surface received (`presented_frames`):
-#   the loop of the benchmark does not wait for the display, and a frame of the clock that
-#   starts while the render thread still has the batch before it commits nothing and costs
-#   close to nothing. A side that presents fewer of its frames would look faster by the frames
-#   it did not draw.
+# - The three times are those of a frame the surface received (`presented_frames`): the loop of
+#   the benchmark does not wait for the display, and a frame of the clock that commits nothing
+#   costs the render thread close to nothing. A side that presents fewer of its frames would
+#   look faster by the frames it did not draw, and a side that needs two frames of the clock,
+#   with two layouts, for one picture would not show it in its UI thread time
+#   (desktop-performance.md, section 9.46).
 # - Render thread: 1.5. The render thread runs beside the UI thread and its time moves with
 #   where the scheduler puts the two threads (performance or efficiency cores) and with the state
 #   of Skia's glyph caches when the measured window starts.
@@ -247,8 +248,10 @@ GATE_LINE = re.compile(r"^GATE (\{.*\})\s*$")
 SIZES_LINE = re.compile(r"^SIZES (\{.*\})\s*$")
 
 
-# The times of a record that are compared for a frame the surface received.
-PRESENTED_FRAME_TIMES = ("render_ms_per_frame", "wall_ms_per_frame")
+# The times of a record that are compared for a frame the surface received: all of them. The
+# work of the UI thread in a frame of the clock that committed nothing is work for the picture
+# that followed it.
+PRESENTED_FRAME_TIMES = ("ui_ms_per_frame", "render_ms_per_frame", "wall_ms_per_frame")
 
 
 def presented_frames(record: dict) -> float:
