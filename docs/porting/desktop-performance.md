@@ -3397,3 +3397,53 @@ in a refresh interval beside the wait for the acceptance, and the render thread 
 - **Gate:** the frame gate fails a scenario whose surface receives fewer than nine in ten of
   its frames, and `scripts/perf/gate.py` compares the UI thread time, as the render thread and
   wall time, for a frame the surface received.
+
+### 9.47 Where an item is, is found once for the visuals of a pass
+
+A visual without a composition visual has what it draws shown as an item of the nearest
+visual above it that has one (section 9.42), at the sum of the positions of the visuals in
+between (section 9.41). Both were found by a walk up the visual parents: one for the visual
+that shows the item, one for the offset, for every visual a pass recorded; and one more for
+every composition visual and item below a visual that moved, each child walking up through
+the parent that had just been walked. The visuals of a screen are mostly below the same few
+visuals and deep (about 25 visuals between a row of the gauntlet and the composition visual
+that shows it), so the walks were a quarter of the commit: at tier 16, of 1,293 samples
+under `Compositor::commit`, 308 were in `composition_offset` itself and 185 in
+`nearest_composition_ancestor` itself.
+
+**The change.**
+
+- *Recording.* The renderer keeps, for the length of an update pass, where each visual
+  without a composition visual is in the visual that shows it (`CompositionItemPlacements`:
+  the address of the visual, the showing visual, the origin). A recorded visual asks for its
+  parent's entry; a parent without one asks its own parent and adds its position, so the
+  walk is made once for each visual on the way and ends at the first one already known. The
+  entries are kept only while nothing that decides them changes: a counter of the bounds of
+  visuals and a counter of the composition visuals that come, go, attach or detach are
+  compared at every use, and the entries are dropped at the end of the pass, so none
+  outlives a visual.
+- *Moving.* The walk down the visuals below a visual that moved carries the origin with it
+  (`synchronize_composition_offsets_below`), so a child adds its position to what it is
+  given. A visual whose position alone changed takes its own origin from the entries of the
+  pass (`move_composition_offsets_below`, `synchronize_composition_item`).
+
+The offsets written are the same ones: in a debug build every placement taken from the
+entries and every origin carried down is compared with the walk up it replaces
+(`debug_assert!` in `composition_item_placement`, `synchronize_composition_offset` and
+`move_composition_offsets_below`), under every test of the crate.
+
+What it measures (M3 Pro, 60 Hz, the harness of the benchmark, the two binaries run in
+turn, first and second launch; Cranpose from the run of section 9.46):
+
+| Gauntlet, tier 16 | Before | After | Cranpose |
+|---|---|---|---|
+| frames per second | 39.2 to 40.0 / 48.1 to 48.7 | 42.6 to 42.8 / 53.8 to 54.3 | 55.5 / 58.1 |
+| processor time for a frame | 49.2 to 51.5 / 47.7 to 50.6 ms | 46.9 to 48.4 / 47.0 to 47.3 ms | 20.4 to 20.5 ms |
+
+- **Tests:** `compositor_tests::the_place_of_an_item_is_kept_for_the_visuals_above_it_until_one_of_them_changes`
+  (the entries give the place a walk gives, follow a visual that moves, are dropped when a
+  visual between gets a composition visual or leaves the tree, and none is left after the
+  pass), and the assertions above under the tests of sections 9.41 and 9.42.
+- **Not upstream:** upstream gives every visual a composition visual, whose offset is its
+  position in its parent, and has no walk to shorten.
+

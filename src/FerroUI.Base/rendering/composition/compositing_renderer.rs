@@ -13,6 +13,7 @@ use crate::rendering::{
 };
 use crate::threading::DispatcherPriority;
 use crate::utilities::HandlerList;
+use crate::visual::CompositionItemPlacements;
 use crate::{Matrix, Point, Rect, Ref, Size, Visual};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
@@ -221,6 +222,9 @@ pub struct CompositingRenderer {
     /// The visuals that were given a composition visual while the renderer could not place it:
     /// during an update pass, or while it placed another one (section 9.41).
     late: RefCell<Vec<Ref<Visual>>>,
+    /// Where the visuals without a composition visual are shown, for the visuals of one update
+    /// pass (section 9.47).
+    item_placements: RefCell<CompositionItemPlacements>,
     /// Whether the renderer is placing a composition visual created outside an update pass.
     placing: Cell<bool>,
     queued_update: Cell<bool>,
@@ -265,6 +269,7 @@ impl CompositingRenderer {
             departed: RefCell::new(Vec::new()),
             keeping: RefCell::new(None),
             late: RefCell::new(Vec::new()),
+            item_placements: RefCell::default(),
             placing: Cell::new(false),
             queued_update: Cell::new(false),
             queued_scene_invalidation: Cell::new(false),
@@ -565,6 +570,13 @@ impl CompositingRenderer {
         comp
     }
 
+    /// How many visuals the renderer knows the place of the drawings below: none between two
+    /// passes.
+    #[cfg(test)]
+    pub(crate) fn kept_item_placements(&self) -> usize {
+        self.item_placements.borrow().count()
+    }
+
     /// What `visual`, which has no composition visual, drew in the update pass is an item of
     /// the composition visual of the nearest visual above it that has one (section 9.42):
     /// `item` is the one it has. Gives the drawing back when that composition visual shows no
@@ -575,12 +587,13 @@ impl CompositingRenderer {
         item: Option<Rc<CompositionDrawItem>>,
         drawing: RecordedDrawing,
     ) -> Option<RecordedDrawing> {
-        let Some(holder) = visual.nearest_composition_ancestor() else { return Some(drawing) };
+        // The visuals a pass records are mostly below the same few visuals: the walk up to the
+        // composition visual is made once for them (section 9.47).
+        let placement = visual.composition_item_placement(&mut self.item_placements.borrow_mut());
+        let Some((holder, offset)) = placement else { return Some(drawing) };
         let Some(holder_visual) = holder.own_composition_visual().filter(|comp| comp.holds_drawing_items()) else {
             return Some(drawing);
         };
-        let offset = visual.composition_offset(true);
-        let offset = (offset.x, offset.y);
         let clip = visual.composition_item_clip();
         let item = match (drawing, item) {
             (RecordedDrawing::New(Some(data)), Some(item)) => {
@@ -623,7 +636,8 @@ impl CompositingRenderer {
         visual.mark_seen_without_composition_visual();
         // The composition visuals below follow it when it moved; when there are too many of
         // them it gets a composition visual, which moves them all.
-        if !visual.move_composition_offsets_below() {
+        let moved = visual.move_composition_offsets_below(&mut self.item_placements.borrow_mut());
+        if !moved {
             self.materialize_in_pass(visual);
         }
         None
@@ -762,7 +776,8 @@ impl CompositingRenderer {
                 visual.mark_seen_without_composition_visual();
                 // The composition visuals below follow it when it moved; when there are too
                 // many of them it gets a composition visual, which moves them all.
-                if !visual.move_composition_offsets_below() {
+                let moved = visual.move_composition_offsets_below(&mut self.item_placements.borrow_mut());
+                if !moved {
                     self.materialize_in_pass(visual);
                 }
                 continue;
@@ -803,8 +818,12 @@ impl CompositingRenderer {
             } else {
                 // What it drew follows it (section 9.42), and so do the composition visuals
                 // below.
-                visual.synchronize_composition_item();
-                if !visual.move_composition_offsets_below() {
+                let moved = {
+                    let mut placements = self.item_placements.borrow_mut();
+                    visual.synchronize_composition_item(&mut placements);
+                    visual.move_composition_offsets_below(&mut placements)
+                };
+                if !moved {
                     self.materialize_in_pass(visual);
                 }
             }
@@ -877,6 +896,7 @@ impl CompositingRenderer {
         }
         // Nothing else is added during the pass (`updating`), so the sets are emptied together.
         self.sets.borrow_mut().clear();
+        self.item_placements.borrow_mut().clear();
         if let Some(root) = self.root.upgrade() {
             self.composition_target.set_size(root.client_size());
             self.composition_target.set_scaling(root.render_scaling());
@@ -1158,6 +1178,7 @@ impl IRenderer for CompositingRenderer {
         }
         self.sets.borrow_mut().clear();
         self.late.borrow_mut().clear();
+        self.item_placements.borrow_mut().clear();
         self.release_departed();
         for (token, _) in self.scene_invalidated.snapshot().iter() {
             self.scene_invalidated.remove(*token);
