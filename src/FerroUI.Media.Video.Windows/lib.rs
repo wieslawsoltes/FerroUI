@@ -5,11 +5,11 @@ use ferroui_media_opengl::NativeGlFrameProducer;
 use ferroui_media_video::{frames::*, *};
 #[cfg(feature = "controls")]
 pub use ferroui_media_windows::NativeGlTextureImporter;
-use ferroui_media_windows::{poll_native, NativeDevice, NativeSession, WindowsFrameStream};
+use ferroui_media_windows::{poll_native, NativeSession, WindowsFrameStream, WindowsFrameProducer};
 use std::{path::PathBuf, rc::Rc, task::Poll, time::Duration};
 
-pub struct WindowsVideoProvider {
-    pub frames: NativeGlFrameProducer,
+pub struct WindowsVideoProvider<P = NativeGlFrameProducer> {
+    pub frames: P,
 }
 fn error(message: impl Into<String>) -> MediaError {
     MediaError::new(MediaErrorKind::InvalidSource, message)
@@ -30,7 +30,7 @@ fn file_path(path: PathBuf) -> Result<String, MediaError> {
 struct Session {
     stream: WindowsFrameStream,
 }
-impl MediaPlayerProvider for WindowsVideoProvider {
+impl<P: Clone + Into<WindowsFrameProducer> + 'static> MediaPlayerProvider for WindowsVideoProvider<P> {
     fn open(
         &self,
         source: MediaSource,
@@ -38,9 +38,9 @@ impl MediaPlayerProvider for WindowsVideoProvider {
         generation: u64,
         _: PresentationPolicy,
     ) -> MediaFuture<Rc<dyn NativeMediaSession>> {
-        let frames = self.frames.clone();
+        let frames: WindowsFrameProducer = self.frames.clone().into();
         Box::pin(async move {
-            let device = NativeDevice::from_renderer(&frames).await?;
+            let device = frames.native_device().await?;
             let PreparedMediaSource {
                 location,
                 temporary: resource,

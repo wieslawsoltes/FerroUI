@@ -81,6 +81,15 @@ window. A failure exits nonzero; success prints `CATALOG_MEDIA_SMOKE_PASS`.
 It does not start a camera or prompt for permission. Do not combine it with the
 catalog's other automatic navigation modes.
 
+`FERROUI_SMOKE_MEDIA_VIDEO_MS=<milliseconds>` (at most 30,000) adds a delivery
+measurement to the smoke on every platform: after the warm-up it counts the video
+frames that reach the presenter for that time and prints
+`CATALOG_VIDEO_DELIVERY frames=<f> elapsed_ms=<t> fps=<rate>` before the pass line.
+The native Windows build has a synthetic camera for the camera page
+(`FERROUI_SMOKE_MEDIA_SYNTHETIC_CAMERA=1` with the feature
+`direct2d-media-test-fixtures`, see
+[the renderer guide](../porting/windows-native-renderer.md#environment-variables)).
+
 ```sh
 cargo test -p control-catalog --lib bundled_qr_image_decodes_two_independent_symbols
 FERROUI_SMOKE_RENDERING=metal \

@@ -1933,6 +1933,13 @@ impl IDrawingContextImpl for DrawingContextImpl {
         Rc::new(self.create_render_target(size, true, false, None))
     }
 
+    fn create_temporary_layer(&mut self, size: PixelSize) -> Rc<dyn IDrawingContextLayerImpl> {
+        self.check_lease();
+        // Queued image draws must own their backing texture after this scratch
+        // target is disposed. Manual framebuffer layers belong to the session.
+        Rc::new(self.create_render_target(size, false, false, None))
+    }
+
     fn push_clip(&mut self, clip: Rect) {
         self.check_lease();
         let canvas = self.canvas.get();

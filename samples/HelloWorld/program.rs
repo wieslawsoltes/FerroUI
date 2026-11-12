@@ -31,6 +31,10 @@ fn main() -> std::process::ExitCode {
         .use_platform_detect()
         .after_setup(|_| sample_support::smoke_run())
         .start_with_classic_desktop_lifetime(&args);
+    #[cfg(all(windows, feature = "direct2d"))]
+    if std::env::var_os("FERROUI_D3D_STATS").is_some() {
+        eprintln!("Direct2D [surfaces, paths, images, presents, readbacks, uploads, imports, copies, errors, completed media reads, compute dispatches, compute pixels]: {:?}", ferroui_direct2d::statistics());
+    }
     #[cfg(all(target_os = "macos", feature = "quartz-metal"))]
     if std::env::var_os("FERROUI_METAL_STATS").is_some() {
         eprintln!(

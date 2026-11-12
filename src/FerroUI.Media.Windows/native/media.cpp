@@ -504,7 +504,7 @@ static void run(const std::shared_ptr<Session> &owner){
             if(s.playing&&s.has_audio)write_audio(s);
             LONGLONG clock=s.clock_position();
             present_video(s,clock);
-            bool request=false;
+            bool request=false;DWORD request_stream=MF_SOURCE_READER_ANY_STREAM;
             {std::lock_guard<std::mutex> guard(s.lock);
                 if(s.playing&&s.state.state!=5)s.state.state=2;
                 if(s.has_audio&&s.playing){UINT padding=0;check(s.audio->GetCurrentPadding(&padding));s.state.buffering=(s.audio_started&&padding==0&&!s.audio_eos)?1:0;}else s.state.buffering=0;
@@ -515,9 +515,19 @@ static void run(const std::shared_ptr<Session> &owner){
                 }
                 check(s.event_error);
                 bool need=s.camera||s.playing||!s.prepared_frame;
-                if(need&&!s.pending_seek&&!s.in_flight&&!s.packet_ready&&s.video.size()<3&&s.pcm_bytes<96000&&!(s.video_eos&&(!s.has_audio||s.audio_eos))){s.in_flight=true;s.request_epoch=s.epoch;request=true;}
+                bool video_room=!s.video_eos&&s.video.size()<3;
+                // Audio that is read while the stream is paused is dropped, so
+                // a paused stream reads audio only with the video it prepares.
+                bool audio_room=s.has_audio&&!s.audio_eos&&s.pcm_bytes<96000&&(s.playing||video_room);
+                // Backpressure is per stream. A full video queue must not stop
+                // audio reads while playing: video is timed by that audio clock, so
+                // doing so can starve the clock needed to drain the video queue itself.
+                if(need&&!s.pending_seek&&!s.in_flight&&!s.packet_ready&&(video_room||audio_room)){
+                    request_stream=video_room?(audio_room?MF_SOURCE_READER_ANY_STREAM:MF_SOURCE_READER_FIRST_VIDEO_STREAM):MF_SOURCE_READER_FIRST_AUDIO_STREAM;
+                    s.in_flight=true;s.request_epoch=s.epoch;request=true;
+                }
             }
-            if(request)check(s.reader->ReadSample(MF_SOURCE_READER_ANY_STREAM,0,nullptr,nullptr,nullptr,nullptr));
+            if(request)check(s.reader->ReadSample(request_stream,0,nullptr,nullptr,nullptr,nullptr));
             // ReadSample can complete before the worker enters this wait.
             // Handle an already delivered callback without waiting on its
             // spent notification. Keep the timeout for the clock/GPU checks.
@@ -632,6 +642,9 @@ int ferro_windows_set_rate(FerroWindowsSession *s,double rate){
 }
 FerroWindowsFrame *ferro_windows_take(FerroWindowsSession *s){std::lock_guard<std::mutex> guard(s->value->lock);if(s->value->latest&&s->value->latest->info.epoch==s->value->epoch)return s->value->latest.release();return nullptr;}
 void ferro_windows_frame_info(FerroWindowsFrame *f,FerroWindowsFrameInfo *out){*out=f->info;}
+// Borrowed immutable texture; the caller synchronously AddRefs it and retains f
+// through the consumer's event query. No Map/readback/CPU pixel access.
+void *ferro_windows_frame_texture(FerroWindowsFrame *f,uint32_t *slice){*slice=f->slice;return f->texture.Get();}
 void ferro_windows_frame_release(FerroWindowsFrame *f){
     auto owner=f->owner.lock();auto context=f->context;
     delete f;

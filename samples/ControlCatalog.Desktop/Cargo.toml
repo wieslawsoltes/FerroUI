@@ -39,7 +39,8 @@ ferroui-media-windows = {workspace=true,features=["controls"]}
 ferroui-media-video-windows.workspace=true
 ferroui-media-camera-windows.workspace=true
 ferroui-media-opengl.workspace=true
-ferroui-win32 = { workspace = true, features = ["angle"] }
+ferroui-win32 = { workspace = true, default-features = false }
+ferroui-direct2d = { workspace = true, optional = true, features = ["media-controls"] }
 
 # The options of a smoke run on macOS (`FERROUI_SMOKE_RENDERING`).
 [target.'cfg(target_os = "macos")'.dependencies]
@@ -68,6 +69,9 @@ animation-probe = []
 startup-probe-allocations = ["animation-probe"]
 default = ["skia"]
 skia = ["ferroui-desktop/skia", "ferroui-headless-vnc/harfbuzz"]
+direct2d = ["ferroui-desktop/direct2d", "dep:ferroui-direct2d", "ferroui-media-windows/direct2d"]
+direct2d-media-test-fixtures = ["direct2d", "synthetic-camera"]
+direct2d-runtime-shaders = ["direct2d", "ferroui-direct2d/runtime-shaders"]
 quartz = ["ferroui-desktop/quartz"]
 quartz-metal = ["quartz", "ferroui-desktop/quartz-metal", "dep:ferroui-quartz", "ferroui-quartz/metal", "ferroui-quartz/runtime-shaders"]
 quartz-media-test-fixtures = ["quartz-metal", "dep:ferroui-quartz", "ferroui-quartz/media-test-fixtures"]

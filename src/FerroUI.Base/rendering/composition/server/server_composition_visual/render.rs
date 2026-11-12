@@ -6,7 +6,7 @@ use crate::rendering::composition::effects::{pop_custom_effect_graph_with, push_
 use crate::rendering::composition::server::{
     render_scope, CompositorPools, IDirtyRectTracker, LitContent, ServerDrawItems, ServerVisualRenderContext,
 };
-use crate::Matrix;
+use crate::{Matrix, Vector};
 use std::rc::Rc;
 
 pub(super) struct RenderContext<'a> {
@@ -393,6 +393,7 @@ impl ServerCompositionVisual {
             skip_root_visual_transform,
             rendering_to_bitmap_cache,
             None,
+            Vector::ZERO,
         )
     }
 
@@ -407,6 +408,7 @@ impl ServerCompositionVisual {
         stop_at: &Rc<ServerCompositionVisual>,
         skip_root_visual_transform: bool,
         rendering_to_bitmap_cache: bool,
+        device_origin: Vector,
     ) {
         self.render_with_stop(
             canvas,
@@ -416,6 +418,7 @@ impl ServerCompositionVisual {
             skip_root_visual_transform,
             rendering_to_bitmap_cache,
             Some(Rc::as_ptr(stop_at)),
+            device_origin,
         );
     }
 
@@ -429,6 +432,7 @@ impl ServerCompositionVisual {
         skip_root_visual_transform: bool,
         rendering_to_bitmap_cache: bool,
         stop_at: Option<*const ServerCompositionVisual>,
+        device_origin: Vector,
     ) -> (i32, i32) {
         let Some(compositor) = self.compositor() else { return (0, 0) };
         let pools = compositor.pools();
@@ -437,6 +441,7 @@ impl ServerCompositionVisual {
             visual: self.clone(),
             transform,
             clip,
+            device_origin,
             skip_root_visual_transform,
             rendering_to_bitmap_cache,
         };
