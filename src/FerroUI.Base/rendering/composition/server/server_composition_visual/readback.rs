@@ -154,6 +154,15 @@ impl VisualReadback {
         Self { revisions: [AtomicU64::new(u64::MAX), AtomicU64::new(u64::MAX)], slots: [Slot::new(), Slot::new()] }
     }
 
+    /// What the readback is listed by among the readbacks a revision wrote
+    /// ([`ReadbackIndices::written_between`]; not from upstream): where it is, which is one place
+    /// for as long as a visual has it.
+    ///
+    /// [`ReadbackIndices::written_between`]: crate::rendering::composition::server::ReadbackIndices::written_between
+    pub fn key(&self) -> usize {
+        self as *const Self as usize
+    }
+
     /// The slot a reader at `reader_revision` reads, with its revision.
     fn slot_for_read(&self, reader_revision: u64) -> Option<(usize, u64)> {
         let slot0_revision = self.revisions[0].load(Ordering::SeqCst);
@@ -259,6 +268,11 @@ impl ServerCompositionVisual {
 
     pub fn get_readback(&self, reader_revision: u64) -> Option<ReadbackData> {
         self.readback.get_readback(reader_revision)
+    }
+
+    /// The [`VisualReadback::key`] of the readback of the visual.
+    pub(crate) fn readback_key(&self) -> usize {
+        self.readback.key()
     }
 
     fn readback_data(&self, revision: u64) -> ReadbackData {

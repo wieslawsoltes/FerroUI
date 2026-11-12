@@ -4347,3 +4347,113 @@ fn one_child_that_changes_leaves_the_other_children_out_of_both_passes() {
     s.run_jobs();
     assert_eq!((199, 198), super::server::take_children_left_out());
 }
+
+// --- the hit test index hears which children were written (section 9.49) ----------------
+
+/// Frames of a holder with `count` children that have composition visuals of their own, with
+/// random moves, additions, removals and changes of visibility, and now and then a move of every
+/// child, each followed by hit tests: what every hit test found (the children by the order they
+/// were made in), and how many times the index read all the children of a bucket.
+fn hit_test_frames(count: usize, frames: usize, changes: usize, hears: bool) -> (Vec<Vec<usize>>, usize) {
+    super::hit_testing::HEARS_WRITTEN.set(hears);
+    let s = CompositorCanvas::new();
+    let mut random = Xorshift(0x2545_F491_4F6C_DD1D);
+    let mut made: Vec<Ref<Visual>> = Vec::new();
+    let mut children = Vec::new();
+    let add = |random: &mut Xorshift, children: &mut Vec<Ref<TestBorder>>, made: &mut Vec<Ref<Visual>>| {
+        let rect = random.rect();
+        let child = TestBorder::layer(rect.x, rect.y, rect.width, rect.height);
+        s.canvas.add(&child);
+        made.push(child.clone().upcast());
+        children.push(child);
+    };
+    for _ in 0..count {
+        add(&mut random, &mut children, &mut made);
+    }
+    s.run_jobs();
+
+    let mut found = Vec::new();
+    for frame in 0..frames {
+        if frame % 16 == 7 {
+            children.iter().for_each(|child| child.set_bounds(random.rect()));
+        }
+        for _ in 0..random.next(changes + 1) {
+            let at = random.next(children.len());
+            match random.next(8) {
+                0 if children.len() > 40 => s.canvas.remove(&children.remove(at)),
+                1 => add(&mut random, &mut children, &mut made),
+                2 => children[at].set_is_visible(!children[at].is_visible()),
+                _ => children[at].set_bounds(random.rect()),
+            }
+        }
+        // A frame in three in which nothing changed, and one in which the hit tests are asked
+        // twice before the next frame.
+        if frame % 3 != 2 {
+            s.run_jobs();
+        }
+        for test in 0..4 {
+            let point = Point::new(random.next(1000) as f64, random.next(1000) as f64);
+            let hit = match test % 2 {
+                0 => s.renderer.hit_test(point, &s.root, None),
+                _ => s.renderer.hit_test_first(point, &s.root, None).into_iter().collect(),
+            };
+            let order = |visual: &Ref<Visual>| made.iter().position(|made| made == visual).unwrap_or(usize::MAX);
+            found.push(hit.iter().map(order).collect());
+        }
+    }
+    // The holder draws nothing and has no composition visual: the children are children of the
+    // composition visual of the root (section 9.41).
+    let holder = own_visual(&children[0]).parent().expect("the composition visual of the root");
+    let walks = holder.hit_test_children.borrow().as_ref().expect("the children are indexed").bucket_walks;
+    super::hit_testing::HEARS_WRITTEN.set(true);
+    (found, walks)
+}
+
+#[test]
+fn a_hit_test_index_that_hears_the_written_children_finds_what_one_that_reads_every_child_finds() {
+    // 200 children: every pass is listed. 1 200: a pass that writes every child (a child added or
+    // removed has the children listed again, and all of them written) is not, and the index reads
+    // the buckets after it.
+    for (count, frames, changes) in [(200, 120, 6), (1_200, 40, 4), (40, 80, 3)] {
+        let (reads_all, walks_of_all) = hit_test_frames(count, frames, changes, false);
+        let (hears, walks) = hit_test_frames(count, frames, changes, true);
+        assert_eq!(reads_all.len(), hears.len());
+        for (index, (reads_all, hears)) in reads_all.iter().zip(&hears).enumerate() {
+            assert_eq!(reads_all, hears, "{count} children, hit test {index}");
+        }
+        assert!(reads_all.iter().any(|found| !found.is_empty()), "{count} children: the hit tests find children");
+        let fewer = if count == 1_200 { walks < walks_of_all } else { walks == 0 };
+        assert!(fewer && walks_of_all > 0, "{count} children: {walks} bucket walks, {walks_of_all} without");
+    }
+}
+
+#[test]
+fn a_child_that_changes_among_many_does_not_have_the_index_read_the_other_children() {
+    let s = CompositorCanvas::new();
+    let mut children = Vec::new();
+    for i in 0..2_000 {
+        let child = TestBorder::layer((i % 50) as f64 * 20.0, (i / 50) as f64 * 25.0, 18.0, 23.0);
+        s.canvas.add(&child);
+        children.push(child);
+    }
+    s.run_jobs();
+    let holder = own_visual(&children[0]).parent().expect("the composition visual of the root");
+    let walks = || holder.hit_test_children.borrow().as_ref().map_or(0, |tree| tree.bucket_walks);
+
+    // The first frame wrote every child, more than a pass is listed with: every bucket is read
+    // once, by the hit tests that come to it.
+    s.assert_hit_test(5.0, 5.0, None, &[&children[0]]);
+    let read_once = walks();
+    assert_eq!(2_000_usize.div_ceil(32), read_once);
+
+    for frame in 0..20 {
+        let moved = &children[(frame * 97) % 2_000];
+        moved.set_bounds(Rect::new(1.0, 1.0, 8.0, 8.0));
+        s.run_jobs();
+        let hit = s.renderer.hit_test(Point::new(5.0, 5.0), &s.root, None);
+        assert!(hit.contains(&moved.clone().upcast()), "frame {frame}: the child is found where it moved to");
+        let last = s.renderer.hit_test_first(Point::new(985.0, 985.0), &s.root, None);
+        assert_eq!(Some(children[1_999].clone().upcast()), last);
+        assert_eq!(read_once, walks(), "frame {frame}");
+    }
+}
