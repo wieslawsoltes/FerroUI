@@ -68,7 +68,8 @@ impl TextRunCache {
         // One shaping a set of options: a text shaped again (the cached runs dropped for another
         // reason) replaces the one kept before.
         state.kept.retain(|kept| !kept.options.shapes_as(options));
-        state.kept.push(KeptShaping { options: options.clone(), buffer: buffer.clone() });
+        // A buffer of its own over the glyphs: the runs of the cache hold `buffer` and dispose it.
+        state.kept.push(KeptShaping { options: options.clone(), buffer: buffer.sharing() });
     }
 
     /// The kept shaping of the text before the current one that was shaped as `options` shape,

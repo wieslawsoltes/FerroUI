@@ -591,6 +591,26 @@ impl ShapedBuffer {
         )
     }
 
+    /// A buffer of its own over the glyph storage of this one, with its concatenation flags: the
+    /// run cache keeps it for an edit of the text. Disposing this buffer (a run that holds the
+    /// whole of a shaping holds the shaped buffer itself, and the cache disposes its runs) leaves
+    /// the kept one its glyphs; the storage is never written in place (justification and tab
+    /// layout write to a copy).
+    pub(crate) fn sharing(&self) -> Rc<ShapedBuffer> {
+        let kept = Self::from_source(
+            self,
+            self.text.clone(),
+            self.glyph_infos.clone(),
+            self.glyph_indices.clone(),
+            self.bidi_level,
+            false,
+            0,
+            0,
+        );
+        *kept.concat_flags.borrow_mut() = self.concat_flags.borrow().clone();
+        kept
+    }
+
     /// Splits the buffer at the specified text length (UTF-16 code units).
     ///
     /// Both halves share this buffer's glyph storage and cluster cache.
