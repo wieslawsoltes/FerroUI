@@ -3570,6 +3570,7 @@ children tables of section 9.48):
 | `wall/20+pointer` UI thread, ms a frame | 1.220 | 0.039 | -96.8 % |
 | `wall/20+pointer` wall time, ms a frame | 1.902 | 1.633 | -14.1 % |
 | `wall/20+pointer` render thread, ms a frame | 1.752 | 1.632 | -6.9 % |
+| `frames/wall+pointer` UI thread, ms a frame | 0.092 | 0.028 | -69.1 % |
 | `wall/20` UI thread, ms a frame | 0.027 | 0.024 | -9.4 % |
 | `wall/20` render thread, ms a frame | 1.659 | 1.626 | -2.0 % |
 | `gauntlet/16` UI thread, ms a frame | 14.614 | 14.469 | -1.0 % |
