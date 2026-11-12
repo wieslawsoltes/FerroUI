@@ -179,7 +179,7 @@ impl CompositionPaintedBrush {
         let pixels = bounds.transform_to_aabb(transform);
         let (x, y) = (pixels.x.floor(), pixels.y.floor());
         let (width, height) = (pixels.right().ceil() - x, pixels.bottom().ceil() - y);
-        if can_isolate(&self.object, 0) && transform.try_invert().is_some()
+        if canvas.prefers_bounded_effect_targets() && can_isolate(&self.object, 0) && transform.try_invert().is_some()
             && [x, y, width, height].iter().all(|v| v.is_finite())
             && width > 0.0 && height > 0.0 && width <= 16384.0 && height <= 16384.0 {
             let layer = canvas.create_temporary_layer(crate::PixelSize::new(width as i32, height as i32));
@@ -189,9 +189,11 @@ impl CompositionPaintedBrush {
                 context.set_transform(transform * crate::Matrix::create_translation(-x, -y));
                 with_bounded_effect_context(&mut *context, |context| self.paint_coverage(context, shape, bounds, pen));
                 context.dispose();
+                canvas.push_render_options(crate::media::RenderOptions::default());
                 canvas.set_transform(crate::Matrix::IDENTITY);
                 canvas.draw_bitmap(&*layer, 1.0, Rect::new(0.0, 0.0, width, height), Rect::new(x, y, width, height));
                 canvas.set_transform(transform);
+                canvas.pop_render_options();
                 layer.dispose();
                 return;
             }
@@ -202,9 +204,13 @@ impl CompositionPaintedBrush {
     }
 
     fn paint_coverage(&self, canvas: &mut dyn IDrawingContextImpl, shape: PaintedShape<'_>, bounds: Rect, pen: Option<&ImmutablePen>) {
-        // The coverage can never contribute outside these bounds. Give every
-        // backend that limit before it allocates the paint and mask layers.
-        canvas.push_clip(bounds);
+        // The coverage can never contribute outside these bounds. A backend whose layers have
+        // the size of its target gets that limit as a clip before it allocates the paint and
+        // mask layers; the layers of every other backend are limited by their bounds.
+        let clipped = canvas.prefers_bounded_effect_targets();
+        if clipped {
+            canvas.push_clip(bounds);
+        }
         canvas.push_layer(bounds);
         self.paint(canvas, bounds);
         if let Some(layers) = canvas.as_drawing_context_impl_with_layer_effects() {
@@ -219,7 +225,9 @@ impl CompositionPaintedBrush {
             layers.pop_blend_layer();
         }
         canvas.pop_layer();
-        canvas.pop_clip();
+        if clipped {
+            canvas.pop_clip();
+        }
     }
 }
 

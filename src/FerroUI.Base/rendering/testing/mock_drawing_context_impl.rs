@@ -121,6 +121,11 @@ pub struct MockDrawingContextImpl {
     /// `PushPixelOperation <bounds> <operation>` / `NextPixelOperationSource`
     /// / `PopPixelOperation`), as a GPU backend does. Off by default.
     pub supports_gpu_effects: bool,
+    /// Whether the context asks for the graph of an effect brush in a scratch
+    /// target of the size of the brush (`prefers_bounded_effect_targets`), as
+    /// a backend whose layers have the size of its target does. Off by
+    /// default: the graph is drawn in place.
+    pub bounded_effect_targets: bool,
     /// Whether pushed render options are recorded with their values
     /// (`PushRenderOptions <text> <interpolation> <edge> <blending>
     /// <full opacity>`) rather than as `PushRenderOptions`. Off by default.
@@ -148,6 +153,7 @@ impl MockDrawingContextImpl {
             supports_acrylic: false,
             supports_layer_effects: false,
             supports_gpu_effects: false,
+            bounded_effect_targets: false,
             log_render_options: false,
             log_matrices: false,
             supports_scene_3d: false,
@@ -239,9 +245,14 @@ impl IDrawingContextImpl for MockDrawingContextImpl {
         let mut layer = MockDrawingContextLayerImpl::new(self.log.clone(), size);
         layer.supports_layer_effects = self.supports_layer_effects;
         layer.supports_gpu_effects = self.supports_gpu_effects;
+        layer.bounded_effect_targets = self.bounded_effect_targets;
         layer.supports_effects = self.supports_effects;
         layer.log_effects = self.log_effects;
         Rc::new(layer)
+    }
+
+    fn prefers_bounded_effect_targets(&self) -> bool {
+        self.bounded_effect_targets
     }
 
     fn push_clip(&mut self, clip: Rect) {
@@ -525,6 +536,7 @@ pub struct MockDrawingContextLayerImpl {
     size: PixelSize,
     supports_layer_effects: bool,
     supports_gpu_effects: bool,
+    bounded_effect_targets: bool,
     supports_effects: bool,
     log_effects: bool,
     /// For a layer that holds frames back
@@ -543,6 +555,7 @@ impl MockDrawingContextLayerImpl {
             size,
             supports_layer_effects: false,
             supports_gpu_effects: false,
+            bounded_effect_targets: false,
             supports_effects: false,
             log_effects: false,
             drawn: AtomicU32::new(0),
@@ -613,6 +626,7 @@ impl IDrawingContextLayerImpl for MockDrawingContextLayerImpl {
         let mut context = MockDrawingContextImpl::new(self.log.clone());
         context.supports_layer_effects = self.supports_layer_effects;
         context.supports_gpu_effects = self.supports_gpu_effects;
+        context.bounded_effect_targets = self.bounded_effect_targets;
         context.supports_effects = self.supports_effects;
         context.log_effects = self.log_effects;
         Box::new(context)

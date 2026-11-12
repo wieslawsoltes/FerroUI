@@ -406,6 +406,7 @@ fn bounded_backdrop_replay_preserves_device_dependencies_through_nested_targets(
     let mut context = MockDrawingContextImpl::new(log.clone());
     context.supports_effects = true;
     context.supports_layer_effects = true;
+    context.bounded_effect_targets = true;
     let transform = Matrix::create_scale(1.75, 1.75) * Matrix::create_translation(30.0, 40.0);
     context.set_transform(transform);
     crate::rendering::composition::server::take_backdrop_regions();

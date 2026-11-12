@@ -416,6 +416,7 @@ fn pointwise_effect_brushes_bound_all_intermediates_and_restore_fractional_dpi_t
     let log = DrawingLog::new();
     let mut context = MockDrawingContextImpl::new(log.clone());
     context.supports_layer_effects = true;
+    context.bounded_effect_targets = true;
     let transform = Matrix::create_scale(1.75, 1.75);
     context.set_transform(transform);
     server.paint(&mut context, Rect::new(20.2, 30.3, 100.0, 50.0));
@@ -443,6 +444,7 @@ fn backdrop_matrices_are_bounded_but_soft_blurs_keep_the_original_canvas() {
         let log = DrawingLog::new();
         let mut context = MockDrawingContextImpl::new(log.clone());
         context.supports_layer_effects = true;
+        context.bounded_effect_targets = true;
         context.supports_effects = true;
         server.paint(&mut context, Rect::new(0.0, 0.0, 100.0, 50.0));
         assert_eq!(log.entries().iter().any(|entry| entry.starts_with("CreateLayer")), bounded, "{:?}", log.entries());
@@ -466,6 +468,7 @@ fn hard_blur_targets_include_the_sampling_halo_at_fractional_dpi() {
     let log = DrawingLog::new();
     let mut context = MockDrawingContextImpl::new(log.clone());
     context.supports_layer_effects = true;
+    context.bounded_effect_targets = true;
     context.supports_effects = true;
     let transform = Matrix::create_scale(1.75, 1.75);
     context.set_transform(transform);
@@ -508,6 +511,7 @@ fn effect_masks_reuse_fresh_layers_but_isolate_later_source_over_siblings() {
         let log = DrawingLog::new();
         let mut context = MockDrawingContextImpl::new(log.clone());
         context.supports_layer_effects = true;
+        context.bounded_effect_targets = true;
         server.paint(&mut context, Rect::new(0.0, 0.0, 40.0, 30.0));
         let entries = log.entries();
         assert_eq!(entries.iter().filter(|entry| entry.starts_with("PushLayer ")).count(), expected_isolation, "{entries:?}");
@@ -535,6 +539,7 @@ fn pointwise_effect_stroke_coverage_uses_a_brush_sized_target() {
     let log = DrawingLog::new();
     let mut context = MockDrawingContextImpl::new(log.clone());
     context.supports_layer_effects = true;
+    context.bounded_effect_targets = true;
     let transform = Matrix::create_translation(1000.0, 2000.0);
     context.set_transform(transform);
     assert!(draw_with_painted_brushes(&mut context, None, Some(&*pen),

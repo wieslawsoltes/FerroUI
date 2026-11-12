@@ -185,14 +185,18 @@ impl ServerCompositionEffectBrush {
         if opacity <= 0.0 || is_empty(&rect) || self.painting.replace(true) {
             return;
         }
-        // Pointwise graphs never need pixels outside the brush. Evaluate the
-        // complete graph in one bounded target, so every nested blend/matrix
-        // layer stays small even on backends whose save layers use the canvas
-        // size. Hard-border blurs additionally need a halo around the output;
-        // backdrop replay is rebased into the same temporary target.
+        // Pointwise graphs never need pixels outside the brush. On a backend whose pushed
+        // layers have the size of its target (`prefers_bounded_effect_targets`) the complete
+        // graph is evaluated in one bounded target, so every nested blend/matrix layer stays
+        // small. Hard-border blurs additionally need a halo around the output; backdrop replay
+        // is rebased into the same temporary target. Every other backend draws the graph in
+        // place: its layers are limited to their bounds already.
         let already_bounded = opacity == 1.0 && self.can_paint_bounded(root)
             && crate::rendering::composition::drawing::is_bounded_effect_context(canvas);
-        if !already_bounded && self.bounded_padding(root).is_some_and(|padding| self.paint_bounded(root, canvas, rect, opacity, padding)) {
+        if !already_bounded
+            && canvas.prefers_bounded_effect_targets()
+            && self.bounded_padding(root).is_some_and(|padding| self.paint_bounded(root, canvas, rect, opacity, padding))
+        {
             self.painting.set(false);
             return;
         }
@@ -287,9 +291,13 @@ impl ServerCompositionEffectBrush {
             });
             context.dispose();
         }
+        // The target is drawn pixel for pixel and source over, whatever interpolation and blend
+        // mode the caller has pushed for its own drawing.
+        canvas.push_render_options(crate::media::RenderOptions::default());
         canvas.set_transform(Matrix::IDENTITY);
         canvas.draw_bitmap(&*layer, opacity, Rect::new(0.0, 0.0, width, height), Rect::new(x, y, width, height));
         canvas.set_transform(transform);
+        canvas.pop_render_options();
         layer.dispose();
         true
     }

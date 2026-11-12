@@ -76,6 +76,16 @@ pub trait IDrawingContextImpl {
         self.create_layer(size)
     }
 
+    /// Whether the graph of an effect brush is evaluated in a scratch target of the size of the
+    /// brush ([`create_temporary_layer`](Self::create_temporary_layer)) and drawn from it, rather
+    /// than in layers pushed on this context. A backend whose pushed layers have the size of its
+    /// whole target answers `true`: a small effect then costs targets of its own size, not of the
+    /// size of the window. `false` by default: a backend whose layers are limited to their bounds
+    /// and to the clip draws the graph in place, with no target of its own and no copy.
+    fn prefers_bounded_effect_targets(&self) -> bool {
+        false
+    }
+
     /// Pushes a clip rectangle.
     fn push_clip(&mut self, clip: Rect);
 
