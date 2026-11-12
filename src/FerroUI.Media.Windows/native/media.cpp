@@ -516,10 +516,12 @@ static void run(const std::shared_ptr<Session> &owner){
                 check(s.event_error);
                 bool need=s.camera||s.playing||!s.prepared_frame;
                 bool video_room=!s.video_eos&&s.video.size()<3;
-                bool audio_room=s.has_audio&&!s.audio_eos&&s.pcm_bytes<96000;
+                // Audio that is read while the stream is paused is dropped, so
+                // a paused stream reads audio only with the video it prepares.
+                bool audio_room=s.has_audio&&!s.audio_eos&&s.pcm_bytes<96000&&(s.playing||video_room);
                 // Backpressure is per stream. A full video queue must not stop
-                // audio reads: video is timed by that audio clock, so doing so
-                // can starve the clock needed to drain the video queue itself.
+                // audio reads while playing: video is timed by that audio clock, so
+                // doing so can starve the clock needed to drain the video queue itself.
                 if(need&&!s.pending_seek&&!s.in_flight&&!s.packet_ready&&(video_room||audio_room)){
                     request_stream=video_room?(audio_room?MF_SOURCE_READER_ANY_STREAM:MF_SOURCE_READER_FIRST_VIDEO_STREAM):MF_SOURCE_READER_FIRST_AUDIO_STREAM;
                     s.in_flight=true;s.request_epoch=s.epoch;request=true;

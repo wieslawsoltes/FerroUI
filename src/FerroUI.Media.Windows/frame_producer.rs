@@ -121,6 +121,7 @@ impl WindowsFrameProducer {
                 let result = (|| {
                     if metadata.device.as_ref() != Some(device)
                         || metadata.device_generation != *generation
+                        || *generation != ferroui_direct2d::device_generation()
                     {
                         return Err(MediaError::new(
                             MediaErrorKind::DeviceLost,

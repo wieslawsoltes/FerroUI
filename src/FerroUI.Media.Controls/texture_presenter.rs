@@ -41,6 +41,9 @@ pub struct TexturePresenter {
     generation: Cell<u64>,
     in_flight: Cell<u8>,
     current: RefCell<Option<FrameMetadata>>,
+    /// Whether a frame was presented (`frame_presented`) since the last clear:
+    /// `current` is the frame that was submitted, which may not be shown yet.
+    shown: Cell<bool>,
     last_error: RefCell<Option<MediaError>>,
     errors: MediaEvent<MediaError>,
     presented: MediaEvent<FrameMetadata>,
@@ -90,6 +93,7 @@ impl TexturePresenter {
             generation: Cell::new(0),
             in_flight: Cell::new(0),
             current: RefCell::new(None),
+            shown: Cell::new(false),
             last_error: RefCell::new(None),
             errors: MediaEvent::default(),
             presented: MediaEvent::default(),
@@ -189,6 +193,7 @@ impl TexturePresenter {
                 .expect("presenter generation exhausted"),
         );
         self.current.borrow_mut().take();
+        self.shown.set(false);
         self.interop.borrow_mut().take();
         self.in_flight.set(0);
         ElementComposition::set_element_child_visual(&self.to_ref(), None);
@@ -217,7 +222,10 @@ impl TexturePresenter {
                 if let Some(surface) = self.surface.borrow().clone() {
                     surface.clear_async();
                 }
-                self.cleared.emit(&());
+                // A frame that was submitted and never presented is not cleared.
+                if self.shown.replace(false) {
+                    self.cleared.emit(&());
+                }
             }
             return;
         };
@@ -286,6 +294,7 @@ impl TexturePresenter {
                 ));
             } else {
                 view.last_error.borrow_mut().take();
+                view.shown.set(true);
                 view.presented.emit(&metadata);
                 // Pick up a newer mailbox frame when a bounded update slot opens.
                 view.present_latest();
