@@ -44,6 +44,13 @@ pub const SCENES: &[Scene] = &[
                  properties, glyph runs and their drawing (sections 9.7, 9.8, 9.12, 9.16, 9.22)",
     },
     Scene {
+        name: "paragraph",
+        build: paragraph,
+        pointer: false,
+        guards: "one long wrapped paragraph of which one word changes every frame, as in the paragraph patch \
+                 of the benchmark's patchwork: the text layout of a long text that is set again whole",
+    },
+    Scene {
         name: "list",
         build: list,
         pointer: false,
@@ -229,6 +236,44 @@ fn text() -> Ref<Control> {
     let panel = Border::new();
     panel.set_padding(Thickness::uniform(6.0));
     panel.set_child(&tiles);
+    root(&panel)
+}
+
+// --- paragraph -----------------------------------------------------------------------------------
+
+/// The words of the paragraph: the paragraph patch of the benchmark's patchwork holds three words a
+/// tile, about ten thousand at its tier 17.
+const PARAGRAPH_WORDS: usize = 6_000;
+/// How far apart the words that change in turn are (the step of the benchmark's patchwork).
+const PARAGRAPH_STEP: usize = 37;
+
+/// The paragraph in frame `frame`: `words` words a space apart, each its index in five digits, but
+/// for one that shows the frame instead, another one every frame. Digits are as wide as one another,
+/// so no line of the paragraph breaks at another word for it.
+fn paragraph_text(frame: i32, words: usize) -> String {
+    let frame = frame.max(0) as usize;
+    let changed = frame.wrapping_mul(PARAGRAPH_STEP) % words.max(1);
+    let mut text = String::with_capacity(words * 6);
+    for word in 0..words {
+        if word > 0 {
+            text.push(' ');
+        }
+        let value = if word == changed { frame % 100_000 } else { word };
+        text.push_str(&format!("{value:05}"));
+    }
+    text
+}
+
+fn paragraph() -> Ref<Control> {
+    let ink = brush(0xFF111827);
+    let text = label(10.0, &ink, false);
+    text.set_text_wrapping(TextWrapping::Wrap);
+    text.set_text(Some(&paragraph_text(0, PARAGRAPH_WORDS)));
+    let followed = text.clone();
+    Clock::follow(move |frame| followed.set_text(Some(&paragraph_text(frame, PARAGRAPH_WORDS))));
+    let panel = Border::new();
+    panel.set_padding(Thickness::uniform(6.0));
+    panel.set_child(&text);
     root(&panel)
 }
 
