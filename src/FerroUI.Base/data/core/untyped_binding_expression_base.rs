@@ -419,6 +419,7 @@ pub trait UntypedBindingExpression: 'static {
             return;
         }
         base.is_running.set(true);
+        crate::perf_count!(BindingExpressionsStarted);
         base.produce_value.set(produce_value);
         self.start_core();
         base.produce_value.set(true);

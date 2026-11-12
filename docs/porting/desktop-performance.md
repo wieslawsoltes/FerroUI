@@ -3103,3 +3103,76 @@ What it costs, and what it does not:
   the items recorded and drawn and the listings of a holder; the frame scene `items` (section 8.1) measures a holder
   of 6,000 items of which some are drawn anew, some move and some leave the tree and
   come back every frame.
+### 9.43 The binding of a setter is instanced when its value is first asked for
+
+A setter whose value is a binding (a `{DynamicResource}`, a `{Binding}`, a
+`{TemplateBinding}` in a style) gave the frame of its style instance a binding
+expression as the entry of its property, as upstream does: the expression was created
+and attached when the style was attached, and started when the store first asked the
+entry for a value. Most of them are never asked. A style that is not active (a
+`:pointerover` or `:pressed` style of a control nobody points at) is not evaluated,
+and neither is a setter below the effective value (a local value, a style later in the
+order, a control theme under a style). In the start of the controls scene
+45,198 of the 120,487 binding expressions that were created were never
+started, every one of them the dynamic resource of a setter, and the expression is the
+largest object a style attach creates: a block of 512 bytes, about 23 MB (45,198 blocks of 512 bytes) of live
+heap at the first frame for expressions that did nothing.
+
+The entry of such a setter is now a `SetterBindingEntry`: the binding, the property,
+the owner and the priority of the frame, 64 bytes (a block of 80). It makes the
+expression from the binding and attaches it the first time the store asks it for a
+value (`has_value`, `try_get_value`, `get_value_boxed`) or for the expression itself
+(`BindingOperations::get_binding_expression_base` of a property whose value comes from
+the setter), and from then on answers with the expression.
+
+- **The entry stays the entry.** The store compares entries by identity (the entry of
+  an effective value, the order of two entries of one priority), so the record is the
+  entry of the frame before and after the expression exists, and it is the sink of its
+  expression: a change of the expression reaches the store as a change of the record
+  (`ValueStore::on_entry_changed`, which `on_expression_changed` now calls for an
+  expression that is its own entry).
+- **What is asked of an expression that was never started** is its property and to stop
+  (`unsubscribe`, when the style is deactivated or detached). The record answers both
+  without an expression.
+- **An inactive frame instances nothing.** `get_expression` asks the entries of the
+  active frames only, as the evaluation of the effective value does.
+- **A direct property** has no value entries; its setter binds as before.
+
+What does not change: when a binding of a setter is started (when its value is first
+evaluated), stopped (when the style is deactivated or detached, or the value is no
+longer the effective one) and started again, the priority its value has, the expression
+`get_binding_expression_base` answers with, and data validation.
+
+The start of the controls scene, before (main, the base of the gate) and after; the
+medians of the gate (5 rounds that alternate the two builds; Apple M3 Pro, release
+build), and the counts and the live heap from one run of each with counters:
+
+| `startup/controls` | Before | After | Change |
+|---|---:|---:|---:|
+| Show | 225.7 ms | 223.3 ms | -1.0 % |
+| Start (to the first frame) | 292.4 ms | 289.9 ms | -0.8 % |
+| Memory of the show | 228.3 MB | 210.7 MB | -7.7 % |
+| Memory of the start | 329.6 MB | 312.5 MB | -5.2 % |
+| Live heap the show leaves (counters) | 189.1 MB | 174.4 MB | -7.8 % |
+
+| Counted in the start of the controls scene | Before | After |
+|---|---:|---:|
+| Binding expressions created | 120,487 | 75,289 |
+| Binding expressions started | 75,289 | 75,289 |
+| Dynamic resource expressions created | 69,239 | 24,041 |
+| Dynamic resource expressions started | 24,041 | 24,041 |
+| Setter binding entries created | | 60,816 |
+
+The time hardly moves: an expression that is never started costs its allocation and its
+attach, and the time of the show is in the expressions that start (the resource lookup
+of each, its subscriptions) and in the rest of the styling. The other scenes of the gate
+do not change beyond their tolerances (`startup/tiles` has no styles with bindings).
+
+- **Tests:** `binding_setter_tests`: a setter below the effective value is not
+  instanced, also after the style is detached; a setter of an inactive style is
+  instanced once when the style becomes active and keeps its expression while the
+  style goes inactive and active again; a setter below a local value is instanced when
+  the local value is cleared; the value follows its source and replaces a current
+  value; the expression of the property is the expression of the entry; the size of
+  the record. The counter check `setter_binding_work_of_styles_that_are_not_evaluated` asserts the expressions created and
+  started in the start of the controls scene.

@@ -409,24 +409,38 @@ impl ValueStore {
             return;
         }
         let entry: Rc<dyn IValueEntry> = instance.clone();
+        self.on_entry_changed(owner, property, &entry, instance.priority(), has_value_changed, has_error_changed);
+    }
 
+    /// The value or the error state of `entry`, an entry of this store for
+    /// `property` with `priority`, changed: of a binding expression that is
+    /// its own entry ([`on_expression_changed`](Self::on_expression_changed)),
+    /// or of the entry of a setter that holds its expression.
+    pub(crate) fn on_entry_changed(
+        &self,
+        owner: &FerroObject,
+        property: &'static FerroProperty,
+        entry: &Rc<dyn IValueEntry>,
+        priority: BindingPriority,
+        has_value_changed: bool,
+        has_error_changed: bool,
+    ) {
         if property.is_direct() {
             if has_value_changed {
-                property.routes().route_set_direct_value_unchecked(owner, &*entry);
+                property.routes().route_set_direct_value_unchecked(owner, &**entry);
             }
         } else if has_value_changed {
-            let priority = instance.priority();
             if priority == BindingPriority::LocalValue {
                 let effective = self.get_or_add_effective_value(owner, property);
-                effective.set_local_value_and_raise_entry(owner, &*entry);
+                effective.set_local_value_and_raise_entry(owner, &**entry);
             } else {
                 match self.get_effective_value(property) {
                     Some(existing) => {
                         if priority <= existing.base_priority() {
-                            self.reevaluate_effective_value(owner, property, Some(existing), Some(&entry), false);
+                            self.reevaluate_effective_value(owner, property, Some(existing), Some(entry), false);
                         }
                     }
-                    None => self.add_effective_value_and_raise(owner, property, &entry, priority),
+                    None => self.add_effective_value_and_raise(owner, property, entry, priority),
                 }
             }
         }

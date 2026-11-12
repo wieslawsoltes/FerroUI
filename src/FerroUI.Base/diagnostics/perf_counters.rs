@@ -151,6 +151,16 @@ perf_counters! {
     TemplateBindingExpressionsCreated => "template binding expressions created",
     /// `DynamicResourceExpression::new` (the XAML runtime library).
     DynamicResourceExpressionsCreated => "dynamic resource expressions created",
+    /// `SetterBindingEntry::new`: a style attach made the entry of a setter
+    /// whose value is a binding. The entry creates its binding expression
+    /// when its value is first asked for.
+    SetterBindingEntriesCreated => "setter binding entries created",
+    /// `UntypedBindingExpression::start` of an expression that was not
+    /// running: the expression subscribed to its source.
+    BindingExpressionsStarted => "binding expressions started",
+    /// `DynamicResourceExpression::on_start` (the XAML runtime library): the
+    /// expression found its host, subscribed to it and looked its resource up.
+    DynamicResourceExpressionsStarted => "dynamic resource expressions started",
     /// `UntypedBindingExpressionBase::publish_value` of a running
     /// expression and `TypedBindingExpression::publish_value`.
     BindingValuesPublished => "binding values published",
