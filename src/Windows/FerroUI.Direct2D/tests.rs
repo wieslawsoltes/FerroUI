@@ -1747,7 +1747,9 @@ fn oversized_corner_radii_shrink_together() {
     // would leave this pixel empty.
     assert_eq!(pixel_at(&pixels, 80, 74, 5), red);
     assert_eq!(pixel_at(&pixels, 80, 78, 1), [0; 4]);
-    assert_eq!(pixel_at(&pixels, 80, 0, 39), red);
+    // The bottom corners are square. The top left arc ends at the bottom of the left side, so
+    // the pixels of the first column are on its edge.
+    assert_eq!(pixel_at(&pixels, 80, 4, 39), red);
     assert_eq!(pixel_at(&pixels, 80, 79, 39), red);
 }
 
