@@ -183,6 +183,13 @@ changes behavior upstream defines.
      first required break. A break is required after a hard line break only (U+000A to U+000D,
      U+0085, U+2028 and U+2029), so the text is scanned for those characters
      (`LineBreakEnumerator::first_required`), in every layout, edited or not.
+   - **Shapeable runs.** The length of text a typeface can shape was found a grapheme cluster
+     at a time, with a search of the character map for every cluster. A printable ASCII
+     character that an ASCII character follows is a cluster of its own, so a run of them is
+     taken from two tables: the script and category of the 128 characters, and one bit for each
+     of them in a typeface, set when its character map has a glyph (filled at the first use).
+     Other text is taken cluster by cluster as before. Every layout of Latin text has this,
+     edited or not.
    - **Lines.** The lines that end before the changed range are kept; past it, a line whose start
      and width context are those of an old line is the old line, shifted, and the rest of the
      paragraph follows it.
@@ -191,7 +198,8 @@ changes behavior upstream defines.
 
    Measured on the `paragraph` scene (UI thread, a frame): 5.37 ms before, 3.80 ms with the
    shaped runs kept, 2.71 ms with the break opportunities kept as well, 1.84 ms with the scan
-   for the first required break. The lines are not kept yet.
+   for the first required break, 1.26 ms with the ASCII tables of the shapeable runs. The lines
+   are not kept yet.
 
 The cross-library comparison (`tests/FerroUI.Text.Comparison`: FerroUI, parley, cosmic-text and
 epaint on the same font, corpus and widths) measures each step against the others.
