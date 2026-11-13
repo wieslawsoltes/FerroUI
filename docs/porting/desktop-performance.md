@@ -3764,7 +3764,10 @@ makes fragments).
 At tier 16 of the gauntlet in a window the benchmark showed 55 frames a second on a display
 of 60 (section 9.47), with no thread saturated: the UI thread's pass took 13.5 ms in the
 median, the render thread's tick 12.4 ms. A trace of the render thread's ticks said where
-the five frames went.
+the five frames went. (The trace, like the 55 frames a second, is of the benchmark built
+with its counters, the feature `counters`, which the batch statistics need; the counting
+costs the UI thread about a tenth of its time. Without it the same build shows 58 frames a
+second; both builds are in the results below.)
 
 | Of a second at tier 16 (before) | |
 | --- | ---: |
@@ -3826,9 +3829,9 @@ the display would have. With rules 2 and 3 the tick out of turn records the late
 once, the tick of the display that follows presents it, and the stream is back in step.
 
 **Only a stream that misses frames is drawn ahead.** Drawn ahead in every tick, tier 12
-(which holds 60 frames a second either way) cost 10 to 19 per cent more processor time:
-13.0 and 11.9 s of thread time in twelve seconds before, 14.0 and 14.2 s after, on every
-thread, the UI thread most (4.2 s to 5.0 s). The work is the same, and so is the number of
+(which holds 60 frames a second either way) cost 10 to 19 per cent more processor time
+(in the build with counters): 13.0 and 11.9 s of thread time in twelve seconds before, 14.0
+and 14.2 s after, on every thread, the UI thread most (4.2 s to 5.0 s). The work is the same, and so is the number of
 ticks (120 ticks in two seconds, each with a batch, none out of turn); what changed is
 when the render thread records. Asking for the surface first, it waits while the UI thread
 is in the first half of its pass and records in the second; drawing first, it records
@@ -3848,17 +3851,28 @@ and the processor time of all threads over the run):
 
 | Scene | Before | After |
 | --- | ---: | ---: |
+| Gauntlet tier 16, frames a second | 58.4, 57.8, 57.6, 57.8 | 59.5, 59.5, 58.8, 59.4 |
+| Gauntlet tier 16, thread time in 14 s | 27.6 s, 30.3 s | 28.4 s, 30.5 s |
+| Gauntlet tier 14, frames a second | 60.0, 60.1 | 60.0, 60.0 |
+| Gauntlet tier 14, thread time in 12 s | 18.1 s, 20.4 s | 18.2 s, 18.4 s |
+| Gauntlet tier 12, frames a second | 60.0, 60.0 | 60.0, 60.0 |
+| Gauntlet tier 12, thread time in 12 s | 11.4 s, 11.5 s | 11.5 s, 11.4 s |
+| Still wall tier 20, frames a second | 60.0 | 60.1 |
+| Still wall tier 20, thread time in 12 s | 4.5 s | 4.7 s |
+
+Of the two display frames in sixty that tier 16 missed, the change gets back more than
+one; the processor time for a frame stays what it was (0.034 s and 0.037 s before, 0.034 s
+and 0.037 s after).
+
+The same pair built with the counters of the benchmark, where the UI thread's pass is a
+tenth longer and misses the tick more often, shows what the rules are worth to a stream
+that is later still:
+
+| Scene, built with counters | Before | After |
+| --- | ---: | ---: |
 | Gauntlet tier 16, frames a second | 55.9, 54.5 | 58.5, 58.4 |
 | Gauntlet tier 16, thread time in 14 s | 27.2 s, 29.3 s | 28.7 s, 30.8 s |
 | Gauntlet tier 14, frames a second | 59.8, 59.9 | 59.9, 60.0 |
-| Gauntlet tier 14, thread time in 12 s | 19.9 s, 18.7 s | 19.6 s, 19.0 s |
-| Gauntlet tier 12, frames a second | 60.0, 60.0 | 60.0, 60.0 |
-| Gauntlet tier 12, thread time in 12 s | 13.9 s, 11.5 s | 12.2 s, 11.8 s |
-| Still wall tier 20, frames a second | 60.0 | 60.0 |
-| Still wall tier 20, thread time in 12 s | 5.2 s | 5.1 s |
-
-At tier 16 the processor time for a frame is what it was (0.035 s and 0.038 s before,
-0.035 s and 0.038 s after): the frames gained cost what a frame costs, and no more.
 
 **The local gate** (counters, the gauntlet and the frame scenes without a window, the
 scenes in a window): 139 metrics, one over its tolerance, the still wall at tier 20 without
