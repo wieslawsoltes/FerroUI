@@ -1,4 +1,5 @@
 use crate::platform::{IDrawingContextImpl, LtrbPixelRect, LtrbRect};
+use smallvec::SmallVec;
 use std::cell::Cell;
 use std::hash::{BuildHasher, Hasher};
 
@@ -9,6 +10,13 @@ use std::hash::{BuildHasher, Hasher};
 pub trait IDirtyRectTracker: IDirtyRectCollector {
     /// Post-processes the dirty rect area (e. g. to account for anti-aliasing)
     fn finalize_frame(&self, bounds: LtrbRect);
+
+    /// Adds a rectangle to the dirty area `finalize_frame` made final: an
+    /// area that is drawn whole once a part of it is. `intersects` answers
+    /// for the final area, so such an area is tested after `finalize_frame`
+    /// and added with this. Not in the C# source (desktop-performance.md,
+    /// section 9.54).
+    fn include(&self, rect: LtrbRect, bounds: LtrbRect);
 
     /// Pushes the dirty area as a clip onto `ctx`.
     ///
@@ -74,6 +82,78 @@ pub(super) fn pixel_rect_from_rect_unscaled(rect: LtrbRect) -> LtrbPixelRect {
 /// C# `LtrbPixelRect.ToLtrbRectUnscaled`.
 pub(super) fn pixel_rect_to_ltrb_rect_unscaled(rect: LtrbPixelRect) -> LtrbRect {
     LtrbRect::new(rect.left as f64, rect.top as f64, rect.right as f64, rect.bottom as f64)
+}
+
+// --- what a frame draws for its dirty rectangles ----------------------------
+//
+// Not in the C# source (desktop-performance.md, section 9.54). The dirty
+// rectangles are there to draw less. A set of them that leaves out little
+// costs a backend more than it saves, and so does one rectangle that is all
+// but the surface.
+
+/// The share of their union the dirty rectangles have to fill for the union
+/// to be drawn in their place. A clip of several rectangles is not a
+/// rectangle to a backend, and every draw inside it pays for that.
+pub(super) const UNION_SHARE: f64 = 0.875;
+
+/// The share of the surface one dirty rectangle has to cover for the whole
+/// surface to be drawn: a frame that draws all of its surface clears it,
+/// and keeps nothing of the frame before it.
+pub(super) const SURFACE_SHARE: f64 = 0.96;
+
+fn area(rect: LtrbRect) -> f64 {
+    rect.width().max(0.0) * rect.height().max(0.0)
+}
+
+/// The area the rectangles cover together, each point counted once.
+fn covered_area(rects: &[LtrbRect]) -> f64 {
+    let mut xs: SmallVec<[f64; 32]> = rects.iter().flat_map(|rect| [rect.left, rect.right]).collect();
+    let mut ys: SmallVec<[f64; 32]> = rects.iter().flat_map(|rect| [rect.top, rect.bottom]).collect();
+    xs.sort_by(f64::total_cmp);
+    ys.sort_by(f64::total_cmp);
+    let mut covered = 0.0;
+    for x in xs.windows(2).filter(|x| x[0] < x[1]) {
+        for y in ys.windows(2).filter(|y| y[0] < y[1]) {
+            let inside = |rect: &LtrbRect| rect.left <= x[0] && x[1] <= rect.right && rect.top <= y[0] && y[1] <= rect.bottom;
+            if rects.iter().any(inside) {
+                covered += (x[1] - x[0]) * (y[1] - y[0]);
+            }
+        }
+    }
+    covered
+}
+
+/// What a frame draws for one dirty rectangle: the surface, when the
+/// rectangle covers [`SURFACE_SHARE`] of it, and the rectangle otherwise.
+pub(super) fn surface_or_rect(rect: LtrbRect, bounds: LtrbRect) -> LtrbRect {
+    let surface = area(bounds);
+    if surface > 0.0 && area(rect.intersect_or_empty(bounds)) >= SURFACE_SHARE * surface {
+        bounds
+    } else {
+        rect
+    }
+}
+
+/// Replaces the dirty rectangles of a frame, which are inside `bounds`,
+/// with their union when they fill [`UNION_SHARE`] of it, and one rectangle
+/// with the surface when it covers [`SURFACE_SHARE`] of that. The area drawn
+/// only grows.
+pub(super) fn simplify_dirty_rects(rects: &mut Vec<LtrbRect>, bounds: LtrbRect) {
+    if rects.len() > 1 {
+        let union = rects.iter().filter(|rect| !rect.is_zero_size()).copied().reduce(|all, rect| all.union(rect));
+        if let Some(union) = union {
+            let needed = UNION_SHARE * area(union);
+            // The sum is the least to compute, and the rectangles cover no
+            // more than it.
+            if rects.iter().map(|rect| area(*rect)).sum::<f64>() >= needed && covered_area(rects) >= needed {
+                rects.clear();
+                rects.push(union);
+            }
+        }
+    }
+    if let [rect] = rects.as_mut_slice() {
+        *rect = surface_or_rect(*rect, bounds);
+    }
 }
 
 /// The pseudo random number source of the `visualize` overlays (C#
@@ -535,6 +615,74 @@ pub(crate) mod tests {
             self.regions.borrow_mut().push(region.clone());
             region
         }
+    }
+
+    const SURFACE: LtrbRect = LtrbRect::new(0.0, 0.0, 1000.0, 1000.0);
+
+    #[test]
+    fn the_covered_area_counts_every_point_once() {
+        assert_eq!(0.0, covered_area(&[]));
+        assert_eq!(200.0, covered_area(&[LtrbRect::new(0.0, 0.0, 10.0, 10.0), LtrbRect::new(20.0, 0.0, 30.0, 10.0)]));
+        // Two rectangles that share a quarter of each, and one inside them.
+        let rects = [
+            LtrbRect::new(0.0, 0.0, 10.0, 10.0),
+            LtrbRect::new(5.0, 5.0, 15.0, 15.0),
+            LtrbRect::new(6.0, 6.0, 9.0, 9.0),
+        ];
+        assert_eq!(175.0, covered_area(&rects));
+        // A rectangle of no size covers nothing.
+        assert_eq!(100.0, covered_area(&[LtrbRect::new(0.0, 0.0, 10.0, 10.0), LtrbRect::default()]));
+    }
+
+    #[test]
+    fn rectangles_that_fill_their_union_are_replaced_with_it() {
+        // Two bands with a gap of a tenth of their union between them.
+        let mut rects = vec![LtrbRect::new(100.0, 100.0, 500.0, 280.0), LtrbRect::new(100.0, 320.0, 500.0, 500.0)];
+        simplify_dirty_rects(&mut rects, SURFACE);
+        assert_eq!(vec![LtrbRect::new(100.0, 100.0, 500.0, 500.0)], rects);
+
+        // The same bands with a gap of a fifth: the union would draw too much.
+        let bands = vec![LtrbRect::new(100.0, 100.0, 500.0, 260.0), LtrbRect::new(100.0, 340.0, 500.0, 500.0)];
+        let mut rects = bands.clone();
+        simplify_dirty_rects(&mut rects, SURFACE);
+        assert_eq!(bands, rects);
+
+        // Rectangles that lie over each other fill what they cover, not the
+        // sum of their areas: two corners of a square, and the square is not
+        // filled.
+        let corners = vec![LtrbRect::new(0.0, 0.0, 300.0, 300.0), LtrbRect::new(150.0, 150.0, 450.0, 450.0)];
+        let mut rects = corners.clone();
+        simplify_dirty_rects(&mut rects, SURFACE);
+        assert_eq!(corners, rects);
+
+        // A rectangle of no size does not stretch the union.
+        let mut rects = vec![
+            LtrbRect::default(),
+            LtrbRect::new(600.0, 600.0, 700.0, 700.0),
+            LtrbRect::new(600.0, 700.0, 700.0, 800.0),
+        ];
+        simplify_dirty_rects(&mut rects, SURFACE);
+        assert_eq!(vec![LtrbRect::new(600.0, 600.0, 700.0, 800.0)], rects);
+    }
+
+    #[test]
+    fn a_rectangle_that_is_all_but_the_surface_is_replaced_with_the_surface() {
+        assert_eq!(SURFACE, surface_or_rect(LtrbRect::new(10.0, 0.0, 990.0, 1000.0), SURFACE));
+        let smaller = LtrbRect::new(30.0, 0.0, 970.0, 1000.0);
+        assert_eq!(smaller, surface_or_rect(smaller, SURFACE));
+        // A surface of no size is no surface to draw.
+        assert_eq!(smaller, surface_or_rect(smaller, LtrbRect::default()));
+
+        // The union of the rectangles first, and the surface for the union.
+        let mut rects = vec![LtrbRect::new(0.0, 0.0, 1000.0, 480.0), LtrbRect::new(0.0, 500.0, 1000.0, 990.0)];
+        simplify_dirty_rects(&mut rects, SURFACE);
+        assert_eq!(vec![SURFACE], rects);
+
+        // Two rectangles in the corners of the surface cover little of it.
+        let corners = vec![LtrbRect::new(0.0, 0.0, 50.0, 50.0), LtrbRect::new(950.0, 950.0, 1000.0, 1000.0)];
+        let mut rects = corners.clone();
+        simplify_dirty_rects(&mut rects, SURFACE);
+        assert_eq!(corners, rects);
     }
 
     #[test]

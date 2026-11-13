@@ -1,4 +1,4 @@
-use super::i_dirty_rect_tracker::{full_union, pixel_rect_from_rect_unscaled, VisualizeRandom};
+use super::i_dirty_rect_tracker::{full_union, pixel_rect_from_rect_unscaled, simplify_dirty_rects, VisualizeRandom};
 use super::multi_dirty_rect_tracker_c_dirty_region::CDirtyRegion2;
 use super::{IDirtyRectCollector, IDirtyRectTracker};
 use crate::media::immutable::ImmutableSolidColorBrush;
@@ -31,6 +31,20 @@ impl MultiDirtyRectTracker {
         }
     }
 
+    /// Makes the clip and the combined rectangle of the final rectangles,
+    /// which are first made as simple as the area they cover allows.
+    fn publish(&self, bounds: LtrbRect) {
+        let mut inflated_rects = self.inflated_rects.borrow_mut();
+        simplify_dirty_rects(&mut inflated_rects, bounds);
+        self.clip_region.reset();
+        let mut combined: Option<LtrbRect> = None;
+        for rect in inflated_rects.iter() {
+            self.clip_region.add_rect(pixel_rect_from_rect_unscaled(*rect));
+            combined = full_union(combined, Some(*rect));
+        }
+        self.combined_rect.set(combined.unwrap_or_default());
+    }
+
     /// The dirty rectangles of the last finalized frame, inflated and
     /// clipped to the frame bounds.
     pub fn inflated_rects(&self) -> Ref<'_, [LtrbRect]> {
@@ -46,22 +60,20 @@ impl IDirtyRectCollector for MultiDirtyRectTracker {
 
 impl IDirtyRectTracker for MultiDirtyRectTracker {
     fn finalize_frame(&self, bounds: LtrbRect) {
-        let mut inflated_rects = self.inflated_rects.borrow_mut();
-        inflated_rects.clear();
-        self.clip_region.reset();
-
-        let mut regions = self.regions.borrow_mut();
-        let dirty_regions = regions.get_uninflated_dirty_regions();
-
-        let mut combined: Option<LtrbRect> = None;
-        for rect in dirty_regions {
-            let inflated = rect.inflate(Thickness::uniform(1.0)).intersect_or_empty(bounds);
-            inflated_rects.push(inflated);
-            self.clip_region.add_rect(pixel_rect_from_rect_unscaled(inflated));
-            combined = full_union(combined, Some(inflated));
+        {
+            let mut inflated_rects = self.inflated_rects.borrow_mut();
+            inflated_rects.clear();
+            let mut regions = self.regions.borrow_mut();
+            for rect in regions.get_uninflated_dirty_regions() {
+                inflated_rects.push(rect.inflate(Thickness::uniform(1.0)).intersect_or_empty(bounds));
+            }
         }
+        self.publish(bounds);
+    }
 
-        self.combined_rect.set(combined.unwrap_or_default());
+    fn include(&self, rect: LtrbRect, bounds: LtrbRect) {
+        self.inflated_rects.borrow_mut().push(rect.inflate(Thickness::uniform(1.0)).intersect_or_empty(bounds));
+        self.publish(bounds);
     }
 
     fn begin_draw(&self, ctx: &mut dyn IDrawingContextImpl) {
@@ -179,6 +191,68 @@ mod tests {
         // The surface bounds, inflated and clipped back to the bounds.
         assert_eq!(vec![BOUNDS], tracker.inflated_rects().to_vec());
         assert_eq!(BOUNDS, tracker.combined_rect());
+    }
+
+    #[test]
+    fn rectangles_that_fill_their_union_are_drawn_as_one_rectangle() {
+        let platform = MockRenderInterface::default();
+        let tracker = MultiDirtyRectTracker::new(&platform, 4, 0.0);
+        let region = platform.regions.borrow()[0].clone();
+        tracker.initialize(BOUNDS);
+        tracker.add_rect(LtrbRect::new(100.0, 100.0, 500.0, 280.0));
+        tracker.add_rect(LtrbRect::new(100.0, 320.0, 500.0, 500.0));
+        tracker.finalize_frame(BOUNDS);
+        assert_eq!(vec![LtrbRect::new(99.0, 99.0, 501.0, 501.0)], tracker.inflated_rects().to_vec());
+        assert_eq!(vec![LtrbPixelRect::new(99, 99, 501, 501)], *region.rects.borrow());
+        assert_eq!(LtrbRect::new(99.0, 99.0, 501.0, 501.0), tracker.combined_rect());
+        // What lies between the two is drawn as well.
+        assert!(tracker.intersects(LtrbRect::new(200.0, 290.0, 300.0, 310.0)));
+    }
+
+    #[test]
+    fn rectangles_that_are_all_but_the_surface_are_drawn_as_the_surface() {
+        let platform = MockRenderInterface::default();
+        let tracker = MultiDirtyRectTracker::new(&platform, 4, 0.0);
+        let region = platform.regions.borrow()[0].clone();
+        tracker.initialize(BOUNDS);
+        tracker.add_rect(LtrbRect::new(5.0, 0.0, 995.0, 480.0));
+        tracker.add_rect(LtrbRect::new(5.0, 500.0, 995.0, 1000.0));
+        tracker.finalize_frame(BOUNDS);
+        assert_eq!(vec![BOUNDS], tracker.inflated_rects().to_vec());
+        assert_eq!(vec![LtrbPixelRect::new(0, 0, 1000, 1000)], *region.rects.borrow());
+        assert_eq!(BOUNDS, tracker.combined_rect());
+    }
+
+    #[test]
+    fn an_included_rectangle_joins_the_final_rectangles() {
+        let platform = MockRenderInterface::default();
+        let tracker = MultiDirtyRectTracker::new(&platform, 4, 0.0);
+        let region = platform.regions.borrow()[0].clone();
+        tracker.initialize(BOUNDS);
+        tracker.add_rect(LtrbRect::new(0.0, 0.0, 10.0, 10.0));
+        // Nothing is final before the frame is: the tracker answers for the
+        // rectangles it draws.
+        assert!(!tracker.intersects(LtrbRect::new(0.0, 0.0, 10.0, 10.0)));
+        tracker.finalize_frame(BOUNDS);
+        assert!(tracker.intersects(LtrbRect::new(5.0, 5.0, 600.0, 20.0)));
+
+        tracker.include(LtrbRect::new(5.0, 5.0, 600.0, 20.0), BOUNDS);
+        assert_eq!(
+            vec![LtrbRect::new(0.0, 0.0, 11.0, 11.0), LtrbRect::new(4.0, 4.0, 601.0, 21.0)],
+            tracker.inflated_rects().to_vec()
+        );
+        assert_eq!(
+            vec![LtrbPixelRect::new(0, 0, 11, 11), LtrbPixelRect::new(4, 4, 601, 21)],
+            *region.rects.borrow()
+        );
+        assert_eq!(LtrbRect::new(0.0, 0.0, 601.0, 21.0), tracker.combined_rect());
+        assert!(tracker.intersects(LtrbRect::new(550.0, 15.0, 700.0, 400.0)));
+
+        // An included rectangle that fills the union with the others is
+        // drawn with them as one.
+        tracker.include(LtrbRect::new(0.0, 0.0, 600.0, 20.0), BOUNDS);
+        assert_eq!(vec![LtrbRect::new(0.0, 0.0, 601.0, 21.0)], tracker.inflated_rects().to_vec());
+        assert_eq!(vec![LtrbPixelRect::new(0, 0, 601, 21)], *region.rects.borrow());
     }
 
     #[test]
