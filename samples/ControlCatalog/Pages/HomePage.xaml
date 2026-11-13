@@ -49,11 +49,13 @@
       </Grid>
     </Border>
 
-    <!-- Realize the card sections near the scroll viewport. -->
+    <!-- The card sections are realized near the viewport of the page only: the page is created
+         again on every switch to it. The cache keeps the sections next to the viewport realized,
+         so that Tab and Shift+Tab move from the last card of a section to the next section. -->
     <ItemsControl ItemsSource="{Binding HomeSections}">
       <ItemsControl.ItemsPanel>
         <ItemsPanelTemplate>
-          <VirtualizingStackPanel />
+          <VirtualizingStackPanel CacheLength="0.25" />
         </ItemsPanelTemplate>
       </ItemsControl.ItemsPanel>
       <ItemsControl.ItemTemplate>
