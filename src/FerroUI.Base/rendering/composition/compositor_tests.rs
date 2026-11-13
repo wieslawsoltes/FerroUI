@@ -4251,3 +4251,273 @@ fn a_bitmap_cache_is_rendered_again_when_an_item_below_it_changes() {
     s.run_jobs();
     assert_eq!(vec!["Yellow"], rectangles(&log));
 }
+
+/// A small deterministic generator (the tests need no randomness from the system).
+struct Xorshift(u64);
+
+impl Xorshift {
+    fn next(&mut self, below: usize) -> usize {
+        self.0 ^= self.0 << 13;
+        self.0 ^= self.0 >> 7;
+        self.0 ^= self.0 << 17;
+        (self.0 % below.max(1) as u64) as usize
+    }
+
+    fn rect(&mut self) -> Rect {
+        let (x, y) = (self.next(1400) as f64 - 200.0, self.next(1400) as f64 - 200.0);
+        Rect::new(x, y, 5.0 + self.next(60) as f64, 5.0 + self.next(60) as f64)
+    }
+}
+
+/// Frames of a holder with `count` children that have composition visuals of their own, with
+/// random moves, additions, removals and changes of visibility, drawing and opacity, of
+/// children nested in them, and moves of the holder itself: what every frame invalidated,
+/// visited, rendered and drew and the bounds the server keeps for the holder, and how many
+/// children the update pass and the render walk left out over the run.
+fn many_children_frames(
+    count: usize,
+    clip: bool,
+    transform: Option<Matrix>,
+    without_tables: bool,
+) -> (Vec<String>, (usize, usize)) {
+    super::server::set_without_children_tables(without_tables);
+    let s = CompositorCanvas::new();
+    let log = s.render_interface.log().clone();
+    let holder = TestBorder::layer(20.0, 10.0, 900.0, 800.0);
+    holder.set_clip_to_bounds(clip);
+    if let Some(transform) = transform {
+        holder.set_render_transform(Some(Rc::new(crate::media::immutable::ImmutableTransform::new(transform))));
+    }
+    s.canvas.add(&holder);
+    let mut random = Xorshift(0x9E37_79B9_7F4A_7C15 ^ count as u64);
+    let brushes = [Brushes::red(), Brushes::blue(), Brushes::green(), Brushes::yellow()];
+    let mut children = Vec::new();
+    for _ in 0..count {
+        let bounds = random.rect();
+        let child = TestBorder::layer(bounds.x, bounds.y, bounds.width, bounds.height);
+        holder.add(&child);
+        children.push(child);
+    }
+    s.run_jobs();
+    s.events.reset();
+    log.clear();
+    super::server::take_children_left_out();
+
+    let mut frames = Vec::new();
+    for frame in 0..160 {
+        for _ in 0..random.next(3) + usize::from(frame % 7 != 0) {
+            let at = random.next(children.len());
+            match random.next(10) {
+                0..=2 => children[at].set_bounds(random.rect()),
+                3 => children[at].set_is_visible(!children[at].is_visible()),
+                4 => children[at].set_background(Some(brushes[random.next(brushes.len())].clone())),
+                5 => {
+                    let bounds = random.rect();
+                    let child = TestBorder::layer(bounds.x, bounds.y, bounds.width, bounds.height);
+                    holder.add(&child);
+                    children.push(child);
+                }
+                6 if children.len() + 6 > count => {
+                    holder.remove(&children.remove(at));
+                }
+                7 => children[at].set_opacity(0.25 + random.next(4) as f64 * 0.25),
+                8 => {
+                    // One nested in a child: the bounds of the child's subtree are other ones.
+                    let bounds = random.rect();
+                    let (x, y) = (bounds.x / 10.0, bounds.y / 10.0);
+                    children[at].add(&TestBorder::layer(x, y, bounds.width, bounds.height));
+                }
+                _ if frame % 5 == 0 => {
+                    holder.set_bounds(Rect::new(random.next(60) as f64, random.next(60) as f64, 900.0, 800.0));
+                }
+                _ => {}
+            }
+        }
+        s.run_jobs();
+        let mut rects: Vec<String> = s.events.rects.borrow().iter().map(|rect| rect.to_string()).collect();
+        rects.sort();
+        let server = s.server_visual(&holder);
+        frames.push(format!(
+            "frame {frame}: rects {rects:?}, visited {}, rendered {}, bounds {:?} / {:?}, drawn {:?}",
+            s.events.visited_visuals.get(),
+            s.events.rendered_visuals.get(),
+            server.sub_tree_bounds(),
+            server.transformed_sub_tree_bounds(),
+            log.take(),
+        ));
+        s.events.reset();
+    }
+    let left_out = super::server::take_children_left_out();
+    super::server::set_without_children_tables(false);
+    (frames, left_out)
+}
+
+#[test]
+fn many_children_are_updated_and_rendered_as_without_their_table() {
+    // Children tables (docs/porting/desktop-performance.md, section 9.48) leave out children
+    // that have nothing to update and children outside what is rendered: every frame is the
+    // frame a walk of all the children gives. 36 children go below the count a table is kept
+    // from and above it again. A holder that is scaled or mirrored has what is rendered mapped
+    // into its space; one that is turned has all its children walked.
+    let scaled = Matrix::new(1.5, 0.0, 0.0, 0.6, 30.0, -20.0);
+    let mirrored = Matrix::new(-1.0, 0.0, 0.0, 1.25, 900.0, 0.0);
+    let turned = Matrix::create_rotation(0.3);
+    let cases = [
+        (36, false, None),
+        (36, true, None),
+        (120, false, None),
+        (120, true, None),
+        (400, true, None),
+        (120, true, Some(scaled)),
+        (120, false, Some(mirrored)),
+        (120, true, Some(turned)),
+    ];
+    for (count, clip, transform) in cases {
+        let (with_tables, left_out) = many_children_frames(count, clip, transform, false);
+        let (without_tables, none_left_out) = many_children_frames(count, clip, transform, true);
+        assert_eq!((0, 0), none_left_out);
+        let culled = transform != Some(turned);
+        assert!(left_out.0 > 0 && (left_out.1 > 0) == culled, "{count} children, {transform:?}: {left_out:?} left out");
+        for (with, without) in with_tables.iter().zip(&without_tables) {
+            assert_eq!(without, with, "{count} children, clip {clip}, transform {transform:?}");
+        }
+        assert_eq!(without_tables.len(), with_tables.len());
+    }
+}
+
+#[test]
+fn one_child_that_changes_leaves_the_other_children_out_of_both_passes() {
+    let s = CompositorCanvas::new();
+    let mut children = Vec::new();
+    for i in 0..200 {
+        let child = TestBorder::layer(100.0 + (i % 20) as f64 * 40.0, 100.0 + (i / 20) as f64 * 50.0, 30.0, 40.0);
+        s.canvas.add(&child);
+        children.push(child);
+    }
+    s.run_jobs();
+    super::server::take_children_left_out();
+
+    // A frame in which nothing changed walks no child.
+    s.run_jobs();
+    assert_eq!((0, 0), super::server::take_children_left_out());
+
+    children[117].set_background(Some(Brushes::blue()));
+    s.run_jobs();
+    let (update, render) = super::server::take_children_left_out();
+    assert_eq!((199, 199), (update, render));
+
+    // One that moves over the child below it: the two are walked, no other.
+    children[5].set_bounds(Rect::new(300.0, 120.0, 30.0, 40.0));
+    s.run_jobs();
+    assert_eq!((199, 198), super::server::take_children_left_out());
+}
+
+// --- the hit test index hears which children were written (section 9.49) ----------------
+
+/// Frames of a holder with `count` children that have composition visuals of their own, with
+/// random moves, additions, removals and changes of visibility, and now and then a move of every
+/// child, each followed by hit tests: what every hit test found (the children by the order they
+/// were made in), and how many times the index read all the children of a bucket.
+fn hit_test_frames(count: usize, frames: usize, changes: usize, hears: bool) -> (Vec<Vec<usize>>, usize) {
+    super::hit_testing::HEARS_WRITTEN.set(hears);
+    let s = CompositorCanvas::new();
+    let mut random = Xorshift(0x2545_F491_4F6C_DD1D);
+    let mut made: Vec<Ref<Visual>> = Vec::new();
+    let mut children = Vec::new();
+    let add = |random: &mut Xorshift, children: &mut Vec<Ref<TestBorder>>, made: &mut Vec<Ref<Visual>>| {
+        let rect = random.rect();
+        let child = TestBorder::layer(rect.x, rect.y, rect.width, rect.height);
+        s.canvas.add(&child);
+        made.push(child.clone().upcast());
+        children.push(child);
+    };
+    for _ in 0..count {
+        add(&mut random, &mut children, &mut made);
+    }
+    s.run_jobs();
+
+    let mut found = Vec::new();
+    for frame in 0..frames {
+        if frame % 16 == 7 {
+            children.iter().for_each(|child| child.set_bounds(random.rect()));
+        }
+        for _ in 0..random.next(changes + 1) {
+            let at = random.next(children.len());
+            match random.next(8) {
+                0 if children.len() > 40 => s.canvas.remove(&children.remove(at)),
+                1 => add(&mut random, &mut children, &mut made),
+                2 => children[at].set_is_visible(!children[at].is_visible()),
+                _ => children[at].set_bounds(random.rect()),
+            }
+        }
+        // A frame in three in which nothing changed, and one in which the hit tests are asked
+        // twice before the next frame.
+        if frame % 3 != 2 {
+            s.run_jobs();
+        }
+        for test in 0..4 {
+            let point = Point::new(random.next(1000) as f64, random.next(1000) as f64);
+            let hit = match test % 2 {
+                0 => s.renderer.hit_test(point, &s.root, None),
+                _ => s.renderer.hit_test_first(point, &s.root, None).into_iter().collect(),
+            };
+            let order = |visual: &Ref<Visual>| made.iter().position(|made| made == visual).unwrap_or(usize::MAX);
+            found.push(hit.iter().map(order).collect());
+        }
+    }
+    // The holder draws nothing and has no composition visual: the children are children of the
+    // composition visual of the root (section 9.41).
+    let holder = own_visual(&children[0]).parent().expect("the composition visual of the root");
+    let walks = holder.hit_test_children.borrow().as_ref().expect("the children are indexed").bucket_walks;
+    super::hit_testing::HEARS_WRITTEN.set(true);
+    (found, walks)
+}
+
+#[test]
+fn a_hit_test_index_that_hears_the_written_children_finds_what_one_that_reads_every_child_finds() {
+    // 200 children: every pass is listed. 1 200: a pass that writes every child (a child added or
+    // removed has the children listed again, and all of them written) is not, and the index reads
+    // the buckets after it.
+    for (count, frames, changes) in [(200, 120, 6), (1_200, 40, 4), (40, 80, 3)] {
+        let (reads_all, walks_of_all) = hit_test_frames(count, frames, changes, false);
+        let (hears, walks) = hit_test_frames(count, frames, changes, true);
+        assert_eq!(reads_all.len(), hears.len());
+        for (index, (reads_all, hears)) in reads_all.iter().zip(&hears).enumerate() {
+            assert_eq!(reads_all, hears, "{count} children, hit test {index}");
+        }
+        assert!(reads_all.iter().any(|found| !found.is_empty()), "{count} children: the hit tests find children");
+        let fewer = if count == 1_200 { walks < walks_of_all } else { walks == 0 };
+        assert!(fewer && walks_of_all > 0, "{count} children: {walks} bucket walks, {walks_of_all} without");
+    }
+}
+
+#[test]
+fn a_child_that_changes_among_many_does_not_have_the_index_read_the_other_children() {
+    let s = CompositorCanvas::new();
+    let mut children = Vec::new();
+    for i in 0..2_000 {
+        let child = TestBorder::layer((i % 50) as f64 * 20.0, (i / 50) as f64 * 25.0, 18.0, 23.0);
+        s.canvas.add(&child);
+        children.push(child);
+    }
+    s.run_jobs();
+    let holder = own_visual(&children[0]).parent().expect("the composition visual of the root");
+    let walks = || holder.hit_test_children.borrow().as_ref().map_or(0, |tree| tree.bucket_walks);
+
+    // The first frame wrote every child, more than a pass is listed with: every bucket is read
+    // once, by the hit tests that come to it.
+    s.assert_hit_test(5.0, 5.0, None, &[&children[0]]);
+    let read_once = walks();
+    assert_eq!(2_000_usize.div_ceil(32), read_once);
+
+    for frame in 0..20 {
+        let moved = &children[(frame * 97) % 2_000];
+        moved.set_bounds(Rect::new(1.0, 1.0, 8.0, 8.0));
+        s.run_jobs();
+        let hit = s.renderer.hit_test(Point::new(5.0, 5.0), &s.root, None);
+        assert!(hit.contains(&moved.clone().upcast()), "frame {frame}: the child is found where it moved to");
+        let last = s.renderer.hit_test_first(Point::new(985.0, 985.0), &s.root, None);
+        assert_eq!(Some(children[1_999].clone().upcast()), last);
+        assert_eq!(read_once, walks(), "frame {frame}");
+    }
+}

@@ -68,7 +68,7 @@ pub use dirty_rects::{
 pub use fps_counter::FpsCounter;
 pub use frame_time_graph::FrameTimeGraph;
 pub use i_server_clock_item::IServerClockItem;
-pub use readback_indices::{ReadbackIndices, ReadbackWriteScope};
+pub use readback_indices::{ReadbackIndices, ReadbackWriteScope, WrittenList};
 pub use render_scope::{brush_light_ids, draw_backdrop, painting_visual, MAX_BACKDROP_DEPTH};
 pub(crate) use render_scope::{is_self_or_ancestor, take_backdrop_regions, with_brush_light_ids, with_canvas_origin};
 pub(crate) use server_composition_simple_brush::server_simple_brush;
@@ -112,6 +112,8 @@ pub use server_composition_visual::{
     ServerCompositionVisualCache, TreeWalkerFrame, VisualReadback,
 };
 pub use server_composition_visual_collection::ServerCompositionVisualCollection;
+#[cfg(test)]
+pub(crate) use server_composition_visual_collection::{set_without_children_tables, take_children_left_out};
 pub use server_composition_clip::{
     composition_transform, inset_rect, CompositionClipShape, ServerGeometricClip, ServerInsetClip, ServerRectangleClip,
 };

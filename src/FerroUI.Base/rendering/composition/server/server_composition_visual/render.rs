@@ -191,7 +191,74 @@ impl<'a> RenderContext<'a> {
     }
 }
 
+/// The part `from..to` of the world on one axis in the space of a walk whose transform has `scale`
+/// and `offset` on that axis, wider by more than the arithmetic of the two directions can differ.
+/// `None` for one that is no part of the axis.
+fn span_in_walk_space(from: f64, to: f64, scale: f64, offset: f64) -> Option<(f64, f64)> {
+    let end = |value: f64| -> Option<(f64, f64)> {
+        let at = (value - offset) / scale;
+        if at.is_nan() {
+            return None;
+        }
+        if at.is_infinite() {
+            return Some((at, at));
+        }
+        let off = ((value.abs() + offset.abs() + 1.0) / scale.abs() * 1e-9).max(at.abs() * 1e-12);
+        Some((at - off, at + off))
+    };
+    let (from, to) = (end(from)?, end(to)?);
+    Some((from.0.min(to.0), from.1.max(to.1)))
+}
+
+impl RenderContext<'_> {
+    /// The clip of the walk and the origin of the world, in the space the walk is in and each a
+    /// little larger than it is (section 9.48). `None` with a transform that turns or skews: the
+    /// bounds of a child in the world are then not those of its bounds here.
+    fn clip_and_origin_in_walk_space(&self) -> Option<(LtrbRect, LtrbRect)> {
+        let m = self.walk_context.transform;
+        let straight = m.m12 == 0.0 && m.m21 == 0.0 && !m.contains_perspective();
+        if !straight || m.m11 == 0.0 || m.m22 == 0.0 || !(m.m11 + m.m22 + m.m31 + m.m32).is_finite() {
+            return None;
+        }
+        let clip = self.walk_context.clip;
+        let (left, right) = span_in_walk_space(clip.left, clip.right, m.m11, m.m31)?;
+        let (top, bottom) = span_in_walk_space(clip.top, clip.bottom, m.m22, m.m32)?;
+        let (origin_left, origin_right) = span_in_walk_space(0.0, 0.0, m.m11, m.m31)?;
+        let (origin_top, origin_bottom) = span_in_walk_space(0.0, 0.0, m.m22, m.m32)?;
+        Some((
+            LtrbRect::new(left, top, right, bottom),
+            LtrbRect::new(origin_left, origin_top, origin_right, origin_bottom),
+        ))
+    }
+}
+
 impl IServerTreeVisitor for RenderContext<'_> {
+    fn next_child(&mut self, container: &Rc<ServerCompositionVisual>, from: usize, _count: usize) -> usize {
+        // A child whose bounds in the world do not meet the clip of the walk is counted and left
+        // (`handle_pre_graph_transform_clip_opacity`): the clip of the child is within the clip
+        // of the walk, or it is the empty rectangle at the origin of the world, which only bounds
+        // around that origin meet. The table has the bounds of every child, and tells the
+        // children that are left without a look at them. A render that stops at a visual, or
+        // whose next visual is drawn without its transform, looks at every visual.
+        if self.stop_at.is_some() || self.skip_next_visual_transform {
+            return from;
+        }
+        let Some(children) = container.children() else { return from };
+        let Some((clip, origin)) = self.clip_and_origin_in_walk_space() else { return from };
+        let next = children.next_child_in(from, clip, origin);
+        if next > from {
+            self.visited_visuals += (next - from) as i32;
+            if container.has_draw_items() {
+                // The drawing items before a child that is left are drawn as before a child
+                // that is visited.
+                for index in from..next {
+                    self.before_child(container, index);
+                }
+            }
+        }
+        next
+    }
+
     fn before_child(&mut self, container: &Rc<ServerCompositionVisual>, index: usize) {
         if !container.has_draw_items() || self.stopped {
             return;

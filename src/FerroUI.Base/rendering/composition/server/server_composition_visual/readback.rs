@@ -154,6 +154,15 @@ impl VisualReadback {
         Self { revisions: [AtomicU64::new(u64::MAX), AtomicU64::new(u64::MAX)], slots: [Slot::new(), Slot::new()] }
     }
 
+    /// What the readback is listed by among the readbacks a revision wrote
+    /// ([`ReadbackIndices::written_between`]; not from upstream): where it is, which is one place
+    /// for as long as a visual has it.
+    ///
+    /// [`ReadbackIndices::written_between`]: crate::rendering::composition::server::ReadbackIndices::written_between
+    pub fn key(&self) -> usize {
+        self as *const Self as usize
+    }
+
     /// The slot a reader at `reader_revision` reads, with its revision.
     fn slot_for_read(&self, reader_revision: u64) -> Option<(usize, u64)> {
         let slot0_revision = self.revisions[0].load(Ordering::SeqCst);
@@ -213,14 +222,15 @@ impl ServerCompositionVisual {
             if self.readback_snapshot.get() {
                 // The values changed after the update walk copied them.
                 let Some(this) = self.rc() else { return };
-                compositor.set_readback_entry(self.readback_queue_index.get(), ReadbackQueueEntry::Visual(this));
+                let index = self.readback_queue_index.get() as usize;
+                compositor.set_readback_entry(index, ReadbackQueueEntry::Visual(this));
                 self.readback_snapshot.set(false);
             }
             return;
         }
 
         let Some(this) = self.rc() else { return };
-        self.readback_queue_index.set(compositor.push_readback_entry(ReadbackQueueEntry::Visual(this)));
+        self.readback_queue_index.set(compositor.push_readback_entry(ReadbackQueueEntry::Visual(this)) as u32);
         self.readback_enqueued_pass.set(pass);
         self.readback_snapshot.set(false);
     }
@@ -236,10 +246,10 @@ impl ServerCompositionVisual {
         let pass = compositor.readback_pass();
         let data = self.readback_data(0);
         if self.readback_enqueued_pass.get() == pass {
-            compositor.set_readback_snapshot(self.readback_queue_index.get(), &self.readback, data);
+            compositor.set_readback_snapshot(self.readback_queue_index.get() as usize, &self.readback, data);
         } else {
             let entry = ReadbackQueueEntry::Snapshot(self.readback.clone(), data);
-            self.readback_queue_index.set(compositor.push_readback_entry(entry));
+            self.readback_queue_index.set(compositor.push_readback_entry(entry) as u32);
             self.readback_enqueued_pass.set(pass);
         }
         self.readback_snapshot.set(true);
@@ -258,6 +268,11 @@ impl ServerCompositionVisual {
 
     pub fn get_readback(&self, reader_revision: u64) -> Option<ReadbackData> {
         self.readback.get_readback(reader_revision)
+    }
+
+    /// The [`VisualReadback::key`] of the readback of the visual.
+    pub(crate) fn readback_key(&self) -> usize {
+        self.readback.key()
     }
 
     fn readback_data(&self, revision: u64) -> ReadbackData {

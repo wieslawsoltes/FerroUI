@@ -1,11 +1,12 @@
 use super::ICompositionHitTester;
 use crate::media::IntersectionResult;
 use crate::platform::LtrbRect;
+use crate::rendering::composition::server::ReadbackIndices;
 use crate::rendering::composition::{
     holder_passes, CompositionDrawItem, CompositionHitTarget, CompositionTarget, CompositionVisual,
     CompositionVisualCollection, HitFilters,
 };
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 
 const NULL: i32 = -1;
@@ -71,6 +72,12 @@ impl Entry {
     fn new(order: i32) -> Self {
         Self { order, leaf: NULL, revision: 0, is_unbounded: false }
     }
+
+    /// Whether the entry was made from a readback: what it says then changes only when the
+    /// readback pass writes the child. An entry made without one is read again at every revision.
+    fn is_settled(&self) -> bool {
+        self.revision != 0 && self.revision != SHOWN_THROUGH_REVISION
+    }
 }
 
 struct Candidate {
@@ -78,8 +85,10 @@ struct Candidate {
     order: i32,
 }
 
-fn key(visual: &Rc<CompositionVisual>) -> *const CompositionVisual {
-    Rc::as_ptr(visual)
+/// The readback of the child, which it has for as long as it lives: what the readback pass lists
+/// the child by when it writes it.
+fn key(visual: &Rc<CompositionVisual>) -> usize {
+    visual.readback_key()
 }
 
 fn contains_rect(outer: &LtrbRect, rect: LtrbRect) -> bool {
@@ -89,12 +98,32 @@ fn contains_rect(outer: &LtrbRect, rect: LtrbRect) -> bool {
 /// An index of the children of a visual for hit testing: the children are
 /// grouped into buckets by their order, and each bucket is a dynamic tree
 /// of axis-aligned bounding boxes.
+///
+/// Not from upstream: the index hears from the readback pass which children it wrote
+/// ([`hear_written`](Self::hear_written)) and reads those, where upstream reads every child of a
+/// bucket again at each revision. A bucket whose revision is the one last heard has every entry
+/// either made without a readback or read at that revision or after it.
 pub struct CompositionHitTestAabbTree {
     children: Rc<CompositionVisualCollection>,
-    entries: HashMap<*const CompositionVisual, Entry>,
+    entries: HashMap<usize, Entry>,
+    /// The entries made without a readback ([`Entry::is_settled`]).
+    unsettled: HashSet<usize>,
+    /// The read revision the index last heard the written children of.
+    heard: u64,
+    /// The children to read, kept between calls for its storage.
+    to_read: Vec<usize>,
     buckets: Vec<Bucket>,
     nodes: Vec<Node>,
     free_list: i32,
+    /// How many times the children of a bucket were all read.
+    #[cfg(test)]
+    pub(crate) bucket_walks: usize,
+}
+
+#[cfg(test)]
+crate::ferro_thread_local! {
+    /// Off in the tests that compare the index with one that reads every child.
+    pub(crate) static HEARS_WRITTEN: std::cell::Cell<bool> = const { std::cell::Cell::new(true) };
 }
 
 impl CompositionHitTestAabbTree {
@@ -102,9 +131,14 @@ impl CompositionHitTestAabbTree {
         let mut tree = Self {
             children: children.clone(),
             entries: HashMap::new(),
+            unsettled: HashSet::new(),
+            heard: 0,
+            to_read: Vec::new(),
             buckets: Vec::new(),
             nodes: Vec::new(),
             free_list: NULL,
+            #[cfg(test)]
+            bucket_walks: 0,
         };
         for (i, child) in children.items().iter().enumerate() {
             tree.update(child, i as i32);
@@ -114,6 +148,7 @@ impl CompositionHitTestAabbTree {
 
     pub fn clear(&mut self) {
         self.entries.clear();
+        self.unsettled.clear();
         self.buckets.clear();
         self.nodes.clear();
         self.free_list = NULL;
@@ -136,11 +171,22 @@ impl CompositionHitTestAabbTree {
 
         let (state, bounds, revision) = Self::get_bounds_state(visual);
         self.update_bounds(visual, &mut entry, state, bounds, revision);
-        self.entries.insert(key(visual), entry);
+        self.put(key(visual), entry);
+    }
+
+    /// Keeps the entry of a child, and whether it is one to read again at every revision.
+    fn put(&mut self, key: usize, entry: Entry) {
+        if !entry.is_settled() {
+            self.unsettled.insert(key);
+        } else if !self.unsettled.is_empty() {
+            self.unsettled.remove(&key);
+        }
+        self.entries.insert(key, entry);
     }
 
     pub fn remove(&mut self, visual: &Rc<CompositionVisual>) {
         let Some(entry) = self.entries.remove(&key(visual)) else { return };
+        self.unsettled.remove(&key(visual));
 
         if entry.leaf != NULL {
             self.destroy_leaf(entry.leaf);
@@ -153,13 +199,78 @@ impl CompositionHitTestAabbTree {
 
     pub fn update_order(&mut self, visual: &Rc<CompositionVisual>, order: i32) {
         let Some(mut entry) = self.entries.get(&key(visual)).copied() else {
-            self.entries.insert(key(visual), Entry::new(order));
+            self.put(key(visual), Entry::new(order));
             return;
         };
 
         if entry.order != order {
             self.update_order_core(visual, &mut entry, order);
-            self.entries.insert(key(visual), entry);
+            self.put(key(visual), entry);
+        }
+    }
+
+    /// Brings the index to the read revision `read_revision` by reading the children the readback
+    /// pass wrote since the revision the index heard last, and the children that have no readback
+    /// yet: what a hit test calls before it asks the index, so that the buckets it comes to are
+    /// not read child by child ([`update_bucket`](Self::update_bucket)). When the revisions since
+    /// are not all listed (a pass that wrote more than a list is kept for, or many passes since)
+    /// the buckets are left to that reading.
+    pub(crate) fn hear_written(&mut self, read_revision: u64, indices: &ReadbackIndices) {
+        if self.heard == read_revision {
+            return;
+        }
+        #[cfg(test)]
+        if !HEARS_WRITTEN.get() {
+            return;
+        }
+        let heard = std::mem::replace(&mut self.heard, read_revision);
+        let mut to_read = std::mem::take(&mut self.to_read);
+        to_read.clear();
+        let mut current = indices.written_between(heard, read_revision, &mut to_read);
+        if current {
+            to_read.extend(self.unsettled.iter().copied());
+            for key in &to_read {
+                current &= self.read_child(*key, read_revision);
+            }
+        }
+        self.to_read = to_read;
+        if current {
+            // The buckets that were at the revision heard last are at this one now. A bucket that
+            // was not is read child by child when a hit test comes to it.
+            for bucket in self.buckets.iter_mut().filter(|bucket| bucket.readback_revision == heard) {
+                bucket.readback_revision = read_revision;
+            }
+        }
+    }
+
+    /// Reads the child with the key `key` again. `false` when the child is not where its entry
+    /// says it is among the children, so that it was not read.
+    fn read_child(&mut self, key: usize, readback_revision: u64) -> bool {
+        // A readback that is listed and is not of a child of this index: nothing to read.
+        let Some(entry) = self.entries.get(&key).copied() else { return true };
+        let order = entry.order as usize;
+        if entry.order < 0 || order >= self.children.count() {
+            return false;
+        }
+        let visual = self.children.get(order);
+        if visual.readback_key() != key {
+            return false;
+        }
+        self.read_entry(&visual, entry, readback_revision);
+        true
+    }
+
+    /// Makes the entry of a child say what the readback of the child says at `readback_revision`.
+    fn read_entry(&mut self, visual: &Rc<CompositionVisual>, mut entry: Entry, readback_revision: u64) {
+        // A child whose readback is the one the entry was made from is unchanged: compare the
+        // revisions before reading the readback itself (desktop-performance.md, section 9.6).
+        if entry.revision != 0 && visual.readback_revision(readback_revision) == Some(entry.revision) {
+            return;
+        }
+        let (state, bounds, revision) = Self::get_bounds_state(visual);
+        if entry.revision != revision {
+            self.update_bounds(visual, &mut entry, state, bounds, revision);
+            self.put(key(visual), entry);
         }
     }
 
@@ -277,22 +388,17 @@ impl CompositionHitTestAabbTree {
             return;
         }
 
+        #[cfg(test)]
+        {
+            self.bucket_walks += 1;
+        }
         // Only the bucket's children: a snapshot of the whole collection for each bucket made a hit
         // test over a collection of thousands of children quadratic.
         let end = self.children.count().min((bucket_index + 1) * ORDER_BUCKET_SIZE as usize);
         for index in (bucket_index * ORDER_BUCKET_SIZE as usize)..end {
             let visual = self.children.get(index);
-            let Some(mut entry) = self.entries.get(&key(&visual)).copied() else { continue };
-            // A child whose readback is the one the entry was made from is unchanged: compare the
-            // revisions before reading the readback itself (desktop-performance.md, section 9.6).
-            if entry.revision != 0 && visual.readback_revision(readback_revision) == Some(entry.revision) {
-                continue;
-            }
-            let (state, bounds, revision) = Self::get_bounds_state(&visual);
-            if entry.revision != revision {
-                self.update_bounds(&visual, &mut entry, state, bounds, revision);
-                self.entries.insert(key(&visual), entry);
-            }
+            let Some(entry) = self.entries.get(&key(&visual)).copied() else { continue };
+            self.read_entry(&visual, entry, readback_revision);
         }
 
         if let Some(bucket) = self.buckets.get_mut(bucket_index) {
@@ -392,7 +498,9 @@ impl CompositionHitTestAabbTree {
 
     fn get_or_create_bucket(&mut self, bucket_index: i32) -> &mut Bucket {
         while self.buckets.len() as i32 <= bucket_index {
-            self.buckets.push(Bucket::new(NULL));
+            // A bucket starts at the revision heard last: an entry that comes to it is read as
+            // it comes, or is one made without a readback.
+            self.buckets.push(Bucket { readback_revision: self.heard, ..Bucket::new(NULL) });
         }
         &mut self.buckets[bucket_index as usize]
     }
