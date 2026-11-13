@@ -4291,7 +4291,7 @@ out again in a frame. Sections on the layout and on the frame's data take it fro
 **Other backends.** The count is of the compositor's tree in `ferroui_base`, and is the
 same whichever backend draws it.
 
-### 9.56 Where a backend clips a region for every draw, the dirty area of a frame is one rectangle
+### 9.56 Where a backend clips a region for every draw, a frame is drawn one dirty rectangle at a time
 
 The site of the control catalog, built from the main branch with sections 9.53 and 9.54 in
 it, took visibly longer to show a page than the site before them: the Buttons page most,
@@ -4335,40 +4335,89 @@ the masks of the larger draws are as large as the content area. The saving of th
 area is lost many times over.
 
 **The change.** A render target says whether its backend pays for a clip of a region with
-every draw, and the trackers draw the dirty area of such a target as one rectangle.
+every draw, and a frame of such a target is drawn one dirty rectangle at a time, each under
+a clip that is that rectangle: the scissor, on Ganesh.
 
-- `IRenderTarget::clips_regions_per_draw` (`false` by default) is the question.
-- `IDirtyRectTracker::draw_as_one_rectangle` is the answer a tracker is given before a
-  frame (`ServerCompositionTarget::render_frame`). `MultiDirtyRectTracker` and
-  `RegionDirtyRectTracker` then make the area of the frame the rectangle that holds their
-  rectangles, on whole pixels, and clip the frame with it (`push_clip`); what they report
-  as the area drawn is that rectangle. `SingleDirtyRectTracker` has one rectangle in any
-  case, and the default of the method does nothing.
+- `IRenderTarget::clips_regions_per_draw` (`false` by default) is the question, asked with
+  every frame (`ServerCompositionTarget::render_frame`).
+- `IDirtyRectTracker::separate_rects` gives the rectangles of the finalized frame as such a
+  target draws them: on whole pixels, without overlap, and covering what the dirty
+  rectangles cover (`separate_dirty_rects`). Rectangles close to each other are first
+  joined into the rectangle that holds them (below). Of what is left the largest stay
+  whole, and a smaller one keeps what is outside them, in at most four pieces for each of
+  them; the rectangles of a tracker are inflated by a pixel, so two that touch overlap,
+  and those of `MultiDirtyRectTracker` may overlap as they are. More than eight pieces
+  (`SEPARATE_RECTS`), or more than thirty-two rectangles to begin with, become the one
+  rectangle that holds them all.
+- `ServerCompositionTarget::render_root_to_context_with_clip` draws a pass for each
+  rectangle: the clip, the clear, and the walk of the tree with the rectangle as its clip,
+  which draws the visuals that reach into it. The walk changes nothing in the tree, so a
+  frame may walk it more than once. The trackers collect, test and report what they did,
+  and clip with their region wherever they are asked to clip.
+- A frame with a backdrop in its dirty area is one pass under the rectangle that holds its
+  rectangles. A backdrop is drawn whole (section 9.54) and reads what the frame drew under
+  it and around it; cut into passes it would read what a pass has yet to draw.
 - In the Skia backend `SkiaGpuRenderTarget` answers `true` for a context of Ganesh (WebGL
   in a browser, OpenGL and Vulkan where Graphite is not used) and `false` for Graphite
   and for the raster surface.
 
 The rules of section 9.54 are untouched and run first: where the rectangles fill their
-union the area is one rectangle on every backend, and this section adds the frames where
-they do not, on the backends that pay for it.
+union the area is one rectangle on every backend, and this section is about the frames
+where they do not, on the backends that pay for a region.
 
-**Measured** with the site of this branch, built and walked by the browser job of its pull
-request (a runner of the CI, Linux, headless Chrome with its software rasteriser; the
-median of three rounds), beside the two sites of the table above:
+**One rectangle for the frame was the first form of this section, and the wrong one.** It
+drew such a frame under the one rectangle that holds its dirty rectangles. That is right
+where the rectangles nearly fill it, as in a page switch, and wrong where they are small
+and far apart: the rectangle between them is drawn again in every frame. The gate of the
+platforms (section 8.2) found it with its first run, on Android, where the window is drawn
+with Ganesh on OpenGL. The still wall of the frame benchmarks changes a clock in one
+corner and moves a cursor in every frame (`window/wall`, the emulator of section 8.2, the
+median of nine rounds, each side against the commit the frame benchmarks came with):
 
-| Switch | | Before 9.53 | Main | This section |
-| --- | --- | ---: | ---: | ---: |
-| Buttons, first visit | draw calls | 71 | 215 to 227 | 170 |
-| | masks | 34 | 190 | 35 |
-| | pixels of masks | 169,284 | 3,333,194 | 482,382 |
-| CheckBox, first visit | masks | 2 | 29 to 38 | 2 |
-| | pixels of masks | 21,328 | 1,304,000 | 16,216 |
-| Buttons, shown again | masks | 18 | 120 to 127 | 17 |
-| | pixels of masks | 111,522 | 2.5 to 3.0 million | 73,848 |
-| CheckBox, shown again | masks | 2 | 27 to 36 | 1 |
-| | pixels of masks | 21,328 | 1,270,000 | 9,362 |
-| Home, shown again | masks | 93 to 98 | 422 to 443 | 46 |
-| | pixels of masks | 22 to 23 million | 76 to 79 million | 11.8 million |
+| Android, the still wall in a window | ms a frame |
+| --- | ---: |
+| The region clip (before this section) | 16.667 |
+| One rectangle for the frame | 29.240 |
+| A pass for every rectangle | 16.667 |
+| One rectangle at a time, those close to each other joined | 16.7 |
+
+The first three rows are medians of the gate. The fourth is the frame rate of
+the same scene in two rounds of four launches a side (59.9 to 60.1 frames a second with
+the rectangles joined, 59.1 to 60.3 before this section): the run of the gate that would
+have given its median did not finish, and the gate of the platforms runs it again before
+a release (section 8.2).
+
+**Rectangles close to each other are one rectangle.** A pass for every dirty rectangle was
+the second form, and the site said what was wrong with it. The banner of the Home page
+clips its content with rounded corners, and four pictures float in it: four dirty
+rectangles in every frame, all inside the banner. The masks of such a frame are made for
+each of its passes: a frame of four passes uploaded about five masks where a frame of one
+rectangle uploads one, 286 masks in a switch to that page against 46 under one rectangle
+and a budget of 220. A pass of its own is a walk of the tree, a clear, and
+once more every draw that reaches into it and into its neighbour, a background or the mask
+of a clip both are under. That is worth it for what is far apart, and not for what is
+close.
+
+So two rectangles that fill a quarter of the rectangle that holds them both
+(`JOINED_SHARE`) are drawn as that rectangle, the pair that fills the most of it first,
+until no pair does (`join_dirty_rects`). A rectangle made of others counts with the area
+of those, not with its own, so a chain of small rectangles does not grow over what is
+empty. The four pictures become the banner. A page switch, the content area and the two
+rows of the drawer, becomes the window, which is what the first form drew and what the
+counts below were good for. The clock and the cursor of the still wall fill next to
+nothing of the rectangle between them and stay two passes.
+
+**Measured** with the sites of the three forms, each built and walked by the browser job of
+its pull request (a runner of the CI, Linux, headless Chrome with its software rasteriser;
+the median of three rounds), beside the two sites of the table above:
+
+| Switch | | Before 9.53 | Main | One rectangle | A pass for each | Joined |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| Buttons, first visit | masks (pixels) | 34 (169,284) | 190 (3,333,194) | 35 (482,382) | 39 (250,877) | 34 (167,172) |
+| CheckBox, first visit | masks (pixels) | 2 (21,328) | 29 to 38 (1,304,000) | 2 (16,216) | 2 (16,216) | 2 (16,216) |
+| Buttons, shown again | masks (pixels) | 18 (111,522) | 120 to 127 (2.5 to 3.0 million) | 17 (73,848) | 19.5 (115,624) | 18 (624,669) |
+| CheckBox, shown again | masks (pixels) | 2 (21,328) | 27 to 36 (1,270,000) | 1 (9,362) | 1 (9,362) | 1 (9,362) |
+| Home, shown again | masks (pixels) | 93 to 98 (22 to 23 million) | 422 to 443 (76 to 79 million) | 46 (11.8 million) | 286 (4,760,866) | 48 (11,374,694) |
 
 The masks of a switch are again those of its glyphs and paths. The draw calls are more
 than before section 9.53 because a switch has more frames than it had then (20 to 29 on
@@ -4405,33 +4454,42 @@ which is why the gate counts them.
   well as a folder.
 
 Both fail on the site of the main branch before this section (190 masks against 80 on the
-first visit of Buttons) and pass on a site whose frames are drawn under one rectangle.
+first visit of Buttons) and on the site of the second form (286 masks against 220 on the
+Home page), and pass on the sites of the first form and of this one.
 
-**What stays as it was.** What is on the screen: a frame draws more than its dirty
-rectangles, never less, and what it draws besides is drawn as it was. The rectangles a
-tracker collects, the rules of section 9.54 and the widening over backdrops are
-untouched. A target that does not answer the question draws regions as before, which is
-every target of the desktop with Graphite, the raster surface and the targets of the
-other backends.
+**What stays as it was.** What is on the screen: a frame draws its dirty rectangles, on
+whole pixels, and what lies between those that are close to each other, never less, and
+what it draws there is drawn as it was. The rectangles a tracker collects, the rules of
+section 9.54 and the widening over backdrops are untouched. A target that does not answer
+the question draws regions as before, which is every target of the desktop with Graphite,
+the raster surface and the targets of the other backends.
 
 **Other backends.** The question and the rule are in `ferroui_base`
 (`IRenderTarget`, `IDirtyRectTracker`, the composition target); a backend answers with one
 method. Vello and ProGPU clip in the shader or by the scissor and keep the default.
 A backend whose clip of a region is a mask, a stencil pass or a layer for each draw
 (Ganesh; Direct2D with a geometry clip, should its target be given regions) answers
-`true` and gets frames of one rectangle with no code of its own. Should such a backend be
-given the rectangles one at a time later, each under its own scissor, the answer moves to
-the target that can do so, and the trackers stay as they are.
+`true` and gets its frames one rectangle at a time, each under a clip it has a scissor
+for, with no code of its own.
 
 **Not upstream.** Upstream's trackers clip with the region they collected on every
 backend; `DEVIATIONS.md` has the row.
 
-**Tests.** `multi_dirty_rect_tracker.rs`:
-`a_frame_asked_for_one_rectangle_draws_the_rectangle_that_holds_its_dirty_rectangles`.
+**Tests.** `i_dirty_rect_tracker.rs`: `rectangles_apart_stay_as_they_are_the_largest_first`,
+`rectangles_close_to_each_other_are_drawn_as_the_rectangle_that_holds_them` (the four
+pictures of a banner, a page switch, a quarter of the rectangle and less than a quarter, a
+joined rectangle that counts with the area of its members),
+`rectangles_that_overlap_are_cut_into_pieces_that_do_not` (the pieces never overlap and
+cover what the rectangles covered, and no more where nothing is joined) and
+`more_pieces_than_a_frame_is_drawn_in_are_their_union`. `multi_dirty_rect_tracker.rs`:
+`the_rectangles_of_a_frame_drawn_one_at_a_time_are_its_dirty_rectangles_apart`.
 `region_dirty_rect_tracker.rs`:
-`a_frame_asked_for_one_rectangle_draws_the_bounds_of_its_region`. `compositor_tests.rs`:
-`target_that_clips_regions_per_draw_renders_one_rectangle_of_the_dirty_area` (two dirty
-rectangles apart from each other: a target that answers `true` gets one clip of a
-rectangle that holds both and no clip of a region, one that does not gets the region).
+`the_rectangles_of_a_frame_drawn_one_at_a_time_are_those_of_its_region_apart`.
+`compositor_tests.rs`:
+`target_that_clips_regions_per_draw_renders_each_dirty_rectangle_under_its_own_clip` (two
+dirty rectangles apart from each other: a target that answers `true` gets a pass for each
+under a clip of its rectangle, no clip of a region, and nothing of the visual between
+them; one that does not gets the region). `composition_winui_material_tests.rs`:
+`a_frame_drawn_one_rectangle_at_a_time_draws_a_backdrop_in_its_dirty_area_in_one_rectangle`.
 `skia_gpu_render_target.rs`: `only_a_ganesh_context_clips_regions_per_draw`. In a
 browser: `navigation_cost.test.mjs`, above.

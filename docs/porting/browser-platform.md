@@ -1298,7 +1298,7 @@ The fixed 512 MB is 1.77 times the peak of one pass, and a page that is visited 
 
 The WebGL surface is drawn with Skia's Ganesh, and Ganesh pays for a clip that is not a rectangle with every draw under it: the clip becomes a path, its coverage is rasterised on the processor into a mask of one channel, and the mask is uploaded as a texture. When the dirty area of a frame became the rectangles that changed instead of the window (`desktop-performance.md`, sections 9.53 and 9.54), a switch between pages of the catalog was drawn under a clip of a region and uploaded a mask for nearly every draw: 190 on the first visit of the Buttons page where the site before uploaded 34, with twenty times the pixels. The desktop, drawn with Graphite, showed nothing of it, and the published site was slower to show every page.
 
-A render target now says whether its backend clips a region for every draw (`IRenderTarget::clips_regions_per_draw`; a Ganesh context does), and the frames of such a target are drawn under the one rectangle that holds their dirty rectangles (section 9.56 of `desktop-performance.md`, with the numbers).
+A render target now says whether its backend clips a region for every draw (`IRenderTarget::clips_regions_per_draw`; a Ganesh context does), and the frames of such a target are drawn one dirty rectangle at a time, each under a clip that is its rectangle (section 9.56 of `desktop-performance.md`, with the numbers).
 
 The gate counts instead of timing, because the time of a switch in headless Chrome does not tell the two apart on a fast processor:
 
