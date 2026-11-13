@@ -3758,3 +3758,153 @@ what its commands draw, also where the drawing moved to by whole pixels; it is r
 where the pixels would differ; one laid out in the pixels of the device stays where it is;
 pushes left open or popped across the fragment are not kept; only a context that records
 makes fragments).
+
+### 9.51 A tick that only presents leaves its display frame open, and a stream that misses frames draws its layer before it waits for the target
+
+At tier 16 of the gauntlet in a window the benchmark showed 55 frames a second on a display
+of 60 (section 9.47), with no thread saturated: the UI thread's pass took 13.5 ms in the
+median, the render thread's tick 12.4 ms. A trace of the render thread's ticks said where
+the five frames went.
+
+| Of a second at tier 16 (before) | |
+| --- | ---: |
+| Ticks of the render timer | 59.9 |
+| Ticks that applied a batch and drew it | 54.3 |
+| Ticks that had no batch and presented the frame the layer held back | 5.6 |
+
+| Of a tick that drew (median) | ms |
+| --- | ---: |
+| The batch is applied | 1.47 |
+| The target is asked for its drawing context (`nextDrawable` of the Metal layer) | 6.89 |
+| The frame is recorded into the layer | 3.84 |
+| The frame before it is blitted and presented | 0.10 |
+
+Two things follow from it.
+
+- **A pass that ends just after the tick waits a display frame.** The UI thread's pass is
+  as long as the display frame in one pass of ten (16.6 ms at the ninetieth percentile). Its
+  batch then comes a moment after the tick. Section 9.33 gave such a batch a tick out of
+  turn, but only after a tick that drew nothing at all; in a stream of a pipelined layer the
+  tick the batch missed presented the frame the layer held back, counted as a tick that
+  drew, and the batch waited for the next tick of the display: 16.7 ms in which the render
+  thread had nothing to do.
+- **More than half of a tick is a wait that comes first.** The window's layer hands out
+  its next surface when the display has taken the one before it, and the render thread
+  asked for it before it drew: the recording of the frame, which needs the surface for
+  nothing (it goes into the layer of the target, and from there to the band threads),
+  started seven milliseconds into the tick.
+
+**The change.** Three rules, all of them in the compositor (`ferroui_base`); a backend
+opts in with two methods.
+
+1. *A tick that only presented leaves its display frame open.* A tick that applied no
+   batch and drew no scene (it drew nothing, or it only presented the frame a layer held
+   back: `ServerCompositionTarget::only_presented_held_frame`) notes itself in the queue
+   (`BatchQueue::note_idle_tick`), and the first batch after it asks for a tick out of turn,
+   as in section 9.33. A batch that came while such a tick presented is found by the note
+   itself, which then returns `true`: the render thread asks its loop for the tick when
+   the one it is in ends (`ServerCompositor::take_late_batch_tick_request`,
+   `RenderThreadLoopTask::render`). One tick out of turn at most answers one such tick, as
+   before.
+2. *The layer is drawn before the target is asked for its context.* Where the render
+   target says a frame may be prepared before its context exists
+   (`IRenderTarget::prepare_frame_ahead`) and the layer of the target says it is drawn
+   apart from the target (`IDrawingContextLayerImpl::draws_ahead_of_target`),
+   `ServerCompositionTarget::render_frame` draws the tree into the layer first and asks the
+   target for its context afterwards, to blit and present. The wait for the surface comes
+   after the work, and the threads that play the frame work during it.
+3. *A frame drawn into a layer that held nothing is not presented by its tick.* Such a
+   layer holds the new frame back (section 9.33), so a blit would show the frame the
+   window already shows. The tick ends without asking the target for anything: no wait for
+   a surface, no present. The target remembers that its layer holds a frame the window has
+   not seen (`layer_unpresented`), and the next tick presents it, with the next frame
+   drawn before it when there is one.
+
+Rule 1 alone gained nothing (54.5 and 54.6 frames a second before, 53.0 and 54.0 with it):
+the tick out of turn still began with the wait for a surface, and ended where the tick of
+the display would have. With rules 2 and 3 the tick out of turn records the late frame at
+once, the tick of the display that follows presents it, and the stream is back in step.
+
+**Only a stream that misses frames is drawn ahead.** Drawn ahead in every tick, tier 12
+(which holds 60 frames a second either way) cost 10 to 19 per cent more processor time:
+13.0 and 11.9 s of thread time in twelve seconds before, 14.0 and 14.2 s after, on every
+thread, the UI thread most (4.2 s to 5.0 s). The work is the same, and so is the number of
+ticks (120 ticks in two seconds, each with a batch, none out of turn); what changed is
+when the render thread records. Asking for the surface first, it waits while the UI thread
+is in the first half of its pass and records in the second; drawing first, it records
+while the UI thread builds the next frame. The likely cause, not proven, is that the two
+threads then slow each other down: they allocate and release the same kind of small blocks
+and read and write the reference counts of the same shared values, and the profile shows
+the added time spread over all of that, with no single place. So the compositor draws
+layers ahead only while the stream
+of batches misses display frames (`ServerCompositor::draws_layers_ahead`): for 120 ticks
+(`DRAW_AHEAD_TICKS`) after a tick that had no batch and presented the frame a layer held
+back, which is the mark of a missed frame in such a stream. A stream that keeps the rhythm
+of the display is drawn as before, and costs what it did.
+
+**Measured** in the window of the benchmark on a display of 60 Hz, base and candidate in
+turn; the base is the main branch with sections 9.48 and 9.49 in it (frames a second,
+and the processor time of all threads over the run):
+
+| Scene | Before | After |
+| --- | ---: | ---: |
+| Gauntlet tier 16, frames a second | 55.9, 54.5 | 58.5, 58.4 |
+| Gauntlet tier 16, thread time in 14 s | 27.2 s, 29.3 s | 28.7 s, 30.8 s |
+| Gauntlet tier 14, frames a second | 59.8, 59.9 | 59.9, 60.0 |
+| Gauntlet tier 14, thread time in 12 s | 19.9 s, 18.7 s | 19.6 s, 19.0 s |
+| Gauntlet tier 12, frames a second | 60.0, 60.0 | 60.0, 60.0 |
+| Gauntlet tier 12, thread time in 12 s | 13.9 s, 11.5 s | 12.2 s, 11.8 s |
+| Still wall tier 20, frames a second | 60.0 | 60.0 |
+| Still wall tier 20, thread time in 12 s | 5.2 s | 5.1 s |
+
+At tier 16 the processor time for a frame is what it was (0.035 s and 0.038 s before,
+0.035 s and 0.038 s after): the frames gained cost what a frame costs, and no more.
+
+**The local gate** (counters, the gauntlet and the frame scenes without a window, the
+scenes in a window): 139 metrics, one over its tolerance, the still wall at tier 20 without
+a window (4.46 ms a frame before, 4.72 ms after, +5.9 % against 5 %). That scene draws into
+a framebuffer, with no layer that holds frames back, and none of the three rules applies
+to it; its rounds spread from 4.26 ms to 5.25 ms. Run again alone, four rounds in turn, it
+gave 5.15 to 5.77 ms before and 4.48 to 5.41 ms after: the noise of the machine. The
+gauntlet at tier 16 without a window is where it was (33.45 ms and 33.25 ms a frame).
+
+**What stays as it was.** The frames are presented in the order they were drawn, each one
+once. A frame of a layer that holds frames back is presented one tick after it was drawn,
+as before; a batch is reported as rendered at the end of the tick that presents its frame
+(section 9.33). A target that is not ready when a frame was drawn ahead keeps the frame in
+its layer and presents it with the first tick that has the target. A layer that does not
+answer `draws_ahead_of_target`, a target with overlays (the frame-rate and dirty-rectangle
+overlays are drawn over the layer on the target), a compositor without a render thread and
+a synchronous render are untouched: the frame is drawn inside the context of the target.
+
+**In the Skia backend** `SkiaGpuRenderTarget::prepare_frame_ahead` sets the text rendering
+of the frame, which is all its context did for the layer, and only a pipelined layer
+(`PipelinedLayerSurface` while its policy pipelines) answers `draws_ahead_of_target`: its
+frame is a picture for the band threads, and nothing of it touches the surface of the
+window. A layer drawn directly keeps the order it had; its drawing and the blit share the
+recorder of the context and one flush.
+
+**Other backends.** Nothing in the three rules or in the condition knows Skia. Every
+backend that presents through a queue of surfaces has the same wait in the same place:
+`get_current_texture` of a wgpu surface (Vello, ProGPU), `vkAcquireNextImageKHR` of a
+Vulkan swapchain, `eglSwapBuffers` behind a throttled buffer queue. A backend opts in with
+the two methods when its layer is a target of its own that can be drawn, or recorded,
+without the surface of the window: a retained scene that is encoded before the surface
+texture is acquired (Vello encodes its scene on the processor, ProGPU builds its frame
+graph), or an offscreen texture. `prepare_frame_ahead` is where it does what its drawing
+context would have done for the layer before the first draw; a layer that also holds
+frames back (`has_pending_frame`) gets rule 3 with it. The policy, the bookkeeping of
+what is presented and the notifications stay in `ferroui_base`.
+
+**Not upstream.** Upstream's target asks for its drawing context and draws inside it, in
+every frame; `DEVIATIONS.md` has the rows.
+
+**Tests.** `compositor_tests.rs`: a frame drawn into a layer that holds nothing asks
+nothing of the target, and the next tick presents it; a layer drawn ahead is drawn before
+the target is asked for a context; a layer is drawn ahead only while the batches miss
+display frames, and for `DRAW_AHEAD_TICKS` ticks; a layer that does not ask is drawn inside
+the context of the target; a frame drawn ahead is presented once a target that was not
+ready is. `render_thread_tests.rs`: a batch that follows a tick that only presented asks
+for a frame out of turn, and so does one that comes while such a tick presents.
+`pipelined_frames.rs` (Metal): only a layer that hands its frames to threads is drawn
+ahead of its target.
