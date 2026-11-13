@@ -12,7 +12,7 @@ Generated from upstream commit `66b7273b9a2b5ba8416feb4376b9cdc3078b8573`. Back 
 | Phase / priority | 2 - rendering backends / P2 |
 | Files | 30/30 (100.0%) |
 | Types | 151/151 (100.0%) |
-| Members | 283/2034 (1751 waived) (100.0%) |
+| Members | 279/2034 (1751 waived) (98.6%) |
 | Contracts (interfaces) | 12/12 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
@@ -38,7 +38,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 12/12, types 26/26, members 130/130
+### `(project root)` - files 12/12, types 26/26, members 126/130
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -48,12 +48,22 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `IVulkanRenderTarget.cs` | `i_vulkan_render_target.rs` | present | 2/2 | 6/6 |  |
 | `VulkanBindings.cs` | `vulkan_bindings.rs` | present | 1/1 | 3/3 |  |
 | `VulkanContext.cs` | `vulkan_context.rs` | present | 1/1 | 15/15 |  |
-| `VulkanException.cs` | `vulkan_exception.rs` | present | 2/2 | 5/5 |  |
+| `VulkanException.cs` | `vulkan_exception.rs` | partial | 2/2 | 1/5 |  |
 | `VulkanExternalObjectsFeature.cs` | `vulkan_external_objects_feature.rs` | present | 1/1 | 10/10 |  |
 | `VulkanImageInfo.cs` | `vulkan_image_info.rs` | present | 1/1 | 12/12 |  |
 | `VulkanKhrSurfaceRenderTarget.cs` | `vulkan_khr_surface_render_target.rs` | present | 2/2 | 14/14 |  |
 | `VulkanOptions.cs` | `vulkan_options.rs` | present | 5/5 | 18/18 |  |
 | `VulkanPlatformGraphics.cs` | `vulkan_platform_graphics.rs` | present | 2/2 | 8/8 |  |
+
+<details><summary><code>VulkanException.cs</code> - 4 missing</summary>
+
+- `VulkanException` (class): 4 missing
+  - `VulkanException(string message)`
+  - `VulkanException(string funcName, int res)`
+  - `VulkanException(string funcName, VkResult res)` *(internal)*
+  - `static void ThrowOnError(string funcName, int res)`
+
+</details>
 
 ### `Interop` - files 12/12, types 15/15, members 85/85
 

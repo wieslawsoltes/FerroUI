@@ -146,4 +146,4 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `interop/signature.rs` | **unmapped** | `JavaType` |
 | `log.rs` | **unmapped** | `LogPriority` |
 
-Tests, examples and build scripts (not scanned): `examples/android_smoke.rs`.
+Tests, examples and build scripts (not scanned): `examples/android_smoke.rs`, `platform/input/android_input_method_connection_tests.rs`.

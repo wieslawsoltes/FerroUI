@@ -801,6 +801,7 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | Rust file | Reason | Types defined |
 |---|---|---|
 | `internal/operator.rs` | the shared shape of the operators with one source (`OperatorSink`, `unary`), which upstream writes out in each Producer | `OperatorSink`, `UnaryOperator` |
+| `internal/task_completion.rs` | **unmapped** | `Inner`, `TaskCompletion` |
 | `internal/token_registration.rs` | **unmapped** | `TokenRegistration` |
 | `linq/numeric.rs` | the numeric traits that make Sum, Average, Min and Max one generic method each (reactive.md, section 5.3) | `Averageable`, `Extremum`, `Summable` |
 

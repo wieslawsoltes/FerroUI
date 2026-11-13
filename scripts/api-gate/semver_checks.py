@@ -2,10 +2,10 @@
 """The API gate of the signatures: cargo-semver-checks against the last release (docs/release.md,
 "API stability").
 
-Within a minor version (0.4) the public API of the published crates only grows. This script runs
+Within a minor version (0.5) the public API of the published crates only grows. This script runs
 `cargo semver-checks` for every published crate that the baseline release has, with the release
 type `minor` (additions allowed, nothing removed or changed). While the workspace is at a preview of
-the next minor version (0.5.0-preview.1 after the baseline 0.4.0) it compares nothing: the previews
+the next minor version (0.6.0-preview.1 after the baseline 0.5.0) it compares nothing: the previews
 may change any part of the API (docs/release.md, "Version scheme"), and the release that starts the
 minor version moves the baseline to it.
 
@@ -27,7 +27,7 @@ Both sides are documented the same way, with the features cargo unifies for the 
 together. The documentation of the baseline is kept in `BASELINE_DOCS` (target/api-gate/baseline),
 which CI caches under the key `--baseline-key` prints (the baseline commit and the rustc version).
 
-The baseline is the tag of the release (`v0.4.0`) when the clone has it, and otherwise
+The baseline is the tag of the release (`v0.5.0`) when the clone has it, and otherwise
 `BASELINE_COMMIT`, the commit of that tag. A crate the baseline does not have (one that joined after
 it) is not checked.
 
@@ -55,11 +55,13 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# The release the gate compares with, and the commit of its sources: the tag v0.4.0 (published
-# 2026-11-01). Updated by the release that starts the next minor version (docs/release.md,
-# "API stability").
-BASELINE_VERSION = "0.4.0"
-BASELINE_COMMIT = "311b5d6ae60285dbbd970e55756fff25e9f64dd8"
+# The release the gate compares with, and the commit of its sources: the tag v0.5.0 (2026-11-13).
+# Until the tag exists, the commit of main the release pull request was made from, whose sources
+# have the API of 0.5.0 (the release changes versions and documents only); the pull request after
+# the release sets the commit of the tag. Updated by the release that starts the next minor version
+# (docs/release.md, "API stability").
+BASELINE_VERSION = "0.5.0"
+BASELINE_COMMIT = "00ce4476c21bc279c167ba972390d0175b3afd79"
 
 # Lints that are not counted for the virtual tables of the classes (`*VTable` structs written by
 # `ferro_class!`): a new virtual member adds a field to the table and may move the others.
@@ -247,8 +249,8 @@ def workspace_version():
 
 
 def is_next_minor_preview(version):
-    """Whether `version` is a preview of a minor version after the baseline's (0.5.0-preview.1 after
-    0.4.0), which may change any part of the API."""
+    """Whether `version` is a preview of a minor version after the baseline's (0.6.0-preview.1 after
+    0.5.0), which may change any part of the API."""
     core, _, pre = version.partition("-")
     return bool(pre) and tuple(map(int, core.split(".")[:2])) > tuple(map(int, BASELINE_VERSION.split(".")[:2]))
 

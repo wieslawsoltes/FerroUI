@@ -113,6 +113,10 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 
 | Rust file | Reason | Types defined |
 |---|---|---|
+| `automation_event_sink.rs` | **unmapped** | `Win32AutomationEventSink` |
+| `automation_node_text.rs` | **unmapped** |  |
 | `marshalling/ole_aut.rs` | the functions of oleaut32 the marshalling calls (upstream imports them in SafeArrayRef.cs and reaches the strings through its runtime), with a stand-in of the same memory layout on hosts that are not Windows | `Block` |
+| `text_pattern_marshalling.rs` | **unmapped** |  |
+| `text_range_node.rs` | **unmapped** | `RangeEntry`, `RangeTable`, `SendTextRange`, `TextRangeNode` |
 
-Tests, examples and build scripts (not scanned): `automation_node_tests.rs`, `marshalling/com_variant_tests.rs`, `marshalling/safe_array_ref_tests.rs`.
+Tests, examples and build scripts (not scanned): `automation_node_tests.rs`, `marshalling/com_variant_tests.rs`, `marshalling/safe_array_ref_tests.rs`, `text_pattern_tests.rs`.

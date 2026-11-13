@@ -4,8 +4,21 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-13
+
+The fifth release. It adds, among the entries below:
+- compiled `{x:Bind}`, one core for FerroUI XAML and WinUI XAML, and compiled bindings by default ([docs/porting/x-bind.md](docs/porting/x-bind.md), [docs/xaml-themes.md](docs/xaml-themes.md));
+- custom effects on `Visual.Effect`, as effect graphs and as runtime shaders on Skia and Vello, with a library of effects and page transitions ([docs/porting/custom-effects.md](docs/porting/custom-effects.md));
+- the portable media crates (video playback, camera capture and QR analysis, with the WinUI media controls; [docs/media/README.md](docs/media/README.md)), WPF-style 3D (`Viewport3D` and the Media3D scene model, drawn in Skia and Vello; [docs/porting/media3d.md](docs/porting/media3d.md)) and two experimental native renderers, `ferroui-quartz` on macOS and `ferroui-direct2d` on Windows;
+- smaller executables: theme trimming and the trimming of the tables of types on by default, `dist` and `release` without unwinding, fewer closures and constant class tables ([docs/binary-size.md](docs/binary-size.md));
+- idiomatic Rust under the .NET-named API: `...Error` types, `Subscription` guards, futures on the dispatcher with `JoinHandle`, `CancellationToken`, `Duration`, `UriRef` and `CultureInfo` on ICU4X ([docs/idiomatic-rust.md](docs/idiomatic-rust.md));
+- a faster start and faster frames for large trees (drawing items and composition visuals on demand; [docs/porting/desktop-performance.md](docs/porting/desktop-performance.md)), cooperative resizing in every backend, the polar, Sankey, treemap, map, financial and gauge charts of the LiveCharts2 port, and WinUI's `PagerControl` and `PersonPicture` with their WinUI Gallery pages.
+
+38 crates join, so 125 are published: the Designer Studio crates (`ferroui-designer`, `ferroui-designer-animation`, `ferroui-designer-collaboration`, `ferroui-designer-collaboration-host`, `ferroui-designer-core`, `ferroui-designer-language`, `ferroui-designer-project`, `ferroui-designer-tools`), the portable media crates (`ferroui-media`, `ferroui-media-android`, `ferroui-media-apple`, `ferroui-media-browser`, `ferroui-media-camera`, `ferroui-media-camera-android`, `ferroui-media-camera-apple`, `ferroui-media-camera-browser`, `ferroui-media-camera-controls`, `ferroui-media-camera-linux`, `ferroui-media-camera-windows`, `ferroui-media-controls`, `ferroui-media-linux`, `ferroui-media-metal`, `ferroui-media-opengl`, `ferroui-media-qr`, `ferroui-media-qr-android`, `ferroui-media-qr-apple`, `ferroui-media-video`, `ferroui-media-video-android`, `ferroui-media-video-apple`, `ferroui-media-video-browser`, `ferroui-media-video-controls`, `ferroui-media-video-linux`, `ferroui-media-video-windows`, `ferroui-media-windows`), `ferroui-media3d`, `ferroui-render3d`, `ferroui-quartz` and `ferroui-direct2d`. Within 0.5 the public API is kept; 0.6.0 may change it. The known limitations are listed at the end of this entry.
+
 ### Added
 
+- **Portable media: video, camera and QR crates** ([docs/media/README.md](docs/media/README.md), [docs/media/PORTABLE-MEDIA-FRAMEWORK-SPECIFICATION.md](docs/media/PORTABLE-MEDIA-FRAMEWORK-SPECIFICATION.md)): the `ferroui-media` family of independently installable crates. `ferroui-media` holds the shared frames, events, errors and the renderer host; `ferroui-media-video` has `MediaSource`, `MediaPlayer` and `MediaPlaybackSession`; `ferroui-media-camera` the discovery of cameras, explicit capture, negotiated settings and owned photos; `ferroui-media-qr` the optional QR analysis; the `-controls` crates `TexturePresenter`, `MediaPlayerElement` with `MediaTransportControls`, and `CameraPreview`; and the platform crates the providers of macOS and iOS, Windows, Linux, Android and the browser. Frames reach the renderer as shared textures (`CompositionDrawingSurface::update_shared_frame_async`) without a snapshot. The ControlCatalog has Video, Camera and QR pages ([docs/media/CONTROL-CATALOG.md](docs/media/CONTROL-CATALOG.md)).
 - **Drawing items** (#644, [docs/porting/desktop-performance.md](docs/porting/desktop-performance.md), section 9.42): `Visual::has_composition_item` says whether an attached visual is shown as a drawing item of the composition visual of a visual above it; `ICompositionDrawListVisualExtension::holds_drawing_items` (`false` by default) says that a draw-list visual with that extension shows items, and `IServerVisualContent::draw_items` gives its server content the items to draw (`ServerDrawItems`, `ServerDrawItem`); `IRenderer::keep_departed_composition_item` asks a renderer to keep the item of a visual that left its tree; `ICompositionHitTester::drawing_bounds_match` says whether an input can hit a drawing with the given bounds (a geometry that does not meet them cannot).
 - **WinUI media controls and Gallery examples** ([#561](https://github.com/wieslawsoltes/FerroUI/issues/561)): poster and full-window video presentation, a WinUI transport template with standard and compact layouts, and explicit photo capture and Apple silent video recording through `CameraCaptureUI`. The ControlCatalog and WinUI Gallery examples reuse the portable providers. [Media control coverage and checks](docs/media/ISSUE-561.md).
 
@@ -430,6 +443,14 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 | `ferroui-vulkan` | `VulkanException` | `VulkanError` |
 | `ferroui-wayland` | `FerroWaylandException`, `ferro_wayland_exception::FerroWaylandExceptionKind` | `FerroWaylandError`, `ferro_wayland_exception::FerroWaylandErrorKind` |
 | `ferroui-x11` | `x11_exception::X11Exception` | `x11_exception::X11Error` |
+
+### Known limitations
+
+- **Vello stays optional.** Skia is the default backend; Vello is experimental ([docs/porting/vello-backend.md](docs/porting/vello-backend.md)).
+- **The native renderers are experimental.** `ferroui-quartz` and `ferroui-direct2d` are opt-in backends ([docs/porting/quartz-prototype.md](docs/porting/quartz-prototype.md), [docs/porting/windows-native-renderer.md](docs/porting/windows-native-renderer.md)).
+- **Portable media is an initial implementation**, not a declaration of support on all six platforms; the verification of each platform and the outstanding native work are recorded in [docs/media/README.md](docs/media/README.md).
+- **3D is at step D4 of #608**: the Media3D values, the scene model, the CPU reference rasterizer, and the scenes drawn in Skia and on the GPU in Vello's hybrid and GPU modes ([docs/porting/media3d.md](docs/porting/media3d.md)); the later steps are not in this release.
+- The work of the 0.5.0 milestone that is still open (binary size, text layout, performance, the idiomatic Rust cleanup and 3D) continues in the 0.5.1 milestone.
 
 ## [0.4.0] - 2026-10-31
 
@@ -916,7 +937,8 @@ The preview makes the framework available as crates so that it can be tried outs
 - **Documentation.** The API documentation is the documentation comments carried over by the port; there are no guides beyond the README and the documents under `docs/`. Not every crate is expected to build on docs.rs (see `docs/release.md`).
 - **Tests of the published crates.** The packages hold the sources of the tests but not the test fonts and images of the Skia backend; the test suites are run from the repository.
 
-[Unreleased]: https://github.com/wieslawsoltes/FerroUI/compare/v0.4.0...main
+[Unreleased]: https://github.com/wieslawsoltes/FerroUI/compare/v0.5.0...main
+[0.5.0]: https://github.com/wieslawsoltes/FerroUI/releases/tag/v0.5.0
 [0.4.0]: https://github.com/wieslawsoltes/FerroUI/releases/tag/v0.4.0
 [0.4.0-preview.1]: https://github.com/wieslawsoltes/FerroUI/releases/tag/v0.4.0-preview.1
 [0.3.0]: https://github.com/wieslawsoltes/FerroUI/releases/tag/v0.3.0

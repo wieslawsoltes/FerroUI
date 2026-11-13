@@ -6,7 +6,7 @@
 
 FerroUI is a cross-platform UI framework for Rust: a retained-mode control library with a styled property system, data binding, XAML markup, control themes and a composition-based renderer. It is a port of the Avalonia UI framework to Rust that keeps the original architecture, contracts and behaviour, so that applications, themes and markup written against that model carry over with their structure intact.
 
-> **Status: 0.4.0.** `0.4.0` is the current release on crates.io. It adds a declarative Rust API for user interfaces without XAML: builders, the `rsx!` macro, signals, components with hooks and a reconciler, asynchronous data, error boundaries and a router ([docs/declarative-ui.md](docs/declarative-ui.md)). It also adds the [developer tools](#developer-tools), the native WinUI controls with the WinUI composition API and the VisualStateManager, rich text (RichTextBlock and RichEditBox with input methods on every platform), Cartesian and pie charts, the behaviors libraries, the macOS 26 and Material themes and hot reload, and makes the Vello backend faster ([CHANGELOG.md](CHANGELOG.md)). Every upstream file and member in scope is ported or waived with a recorded reason. The framework runs on macOS, Windows, Linux (X11, Wayland and the framebuffer), iOS, Android and in the browser. It was verified in continuous integration, in virtual machines, in the iOS simulator and on the Android emulator, not on a range of real devices. Within 0.4 the public API is kept; 0.5.0 may change it. See [Project status](#project-status).
+> **Status: 0.5.0.** `0.5.0` is the current release on crates.io. It adds compiled `{x:Bind}` with compiled bindings by default, custom effects as runtime shaders on Skia and Vello, the portable media crates (video, camera and QR), WPF-style 3D (`Viewport3D` and the Media3D scene model), experimental native renderers for macOS and Windows, smaller executables (theme trimming on by default, builds without unwinding), idiomatic Rust types under the .NET-named API, and faster starts and frames for large trees; the Designer Studio crates are published with it ([CHANGELOG.md](CHANGELOG.md)). Every upstream file and member in scope is ported or waived with a recorded reason, except 67 members, three types and one file that the idiomatic Rust cleanup (#423) renamed or made concrete and that the tracking data does not map yet ([REMAINING.md](docs/porting/REMAINING.md)). The framework runs on macOS, Windows, Linux (X11, Wayland and the framebuffer), iOS, Android and in the browser. It was verified in continuous integration, in virtual machines, in the iOS simulator and on the Android emulator, not on a range of real devices. Within 0.5 the public API is kept; 0.6.0 may change it. See [Project status](#project-status).
 
 ![The ControlCatalog with the WinUI 3 theme on Windows 11, in a window with the Mica backdrop](docs/porting/images/control_catalog_winui_windows.png)
 
@@ -89,10 +89,10 @@ FerroUI is a set of crates that are released together at one version. A desktop 
 
 ```toml
 [dependencies]
-ferroui-base = "=0.4.0"
-ferroui-controls = "=0.4.0"
-ferroui-desktop = "=0.4.0"
-ferroui-themes-fluent = "=0.4.0"
+ferroui-base = "=0.5.0"
+ferroui-controls = "=0.5.0"
+ferroui-desktop = "=0.5.0"
+ferroui-themes-fluent = "=0.5.0"
 ```
 
 The WinUI 3 theme is the crate `ferroui-themes-winui` (`WinUITheme`), used in place of `ferroui-themes-fluent` or beside it; the facade crate has it as the feature `winui-theme`.
@@ -107,11 +107,11 @@ Run the gallery with `cargo run -p material-theme-gallery --bin material-theme-g
 
 An application can also name one dependency instead: the facade crate `ferroui`. It re-exports the common crates under short names (`ferroui::base`, `ferroui::controls`, ...) with a prelude of the types of a minimal application; its default features are the desktop platforms and the Fluent theme, and further features add the Simple theme, XAML loading at run time, the colour picker, Charts, the TreeDataGrid, the dialogs, the browser platform, the WinUI 3 theme, the Vello backend, the headless platform and the graphics contracts ([docs/release.md](docs/release.md), section 2.1). In the repository it is used already: `cargo run -p ferroui --example hello`.
 
-The libraries for MVVM applications (Rx, DynamicData, ReactiveUI and their integration with the controls) are crates of the release as well: `ferroui-reactiveui-controls = "=0.4.0"` beside the crates above, or the facade crate with its feature `reactiveui` ([docs/mvvm.md](docs/mvvm.md)).
+The libraries for MVVM applications (Rx, DynamicData, ReactiveUI and their integration with the controls) are crates of the release as well: `ferroui-reactiveui-controls = "=0.5.0"` beside the crates above, or the facade crate with its feature `reactiveui` ([docs/mvvm.md](docs/mvvm.md)).
 
-The declarative API (`ferroui-view` with `ferroui-view-macros`, [docs/declarative-ui.md](docs/declarative-ui.md)) and the developer tools (`ferroui-diagnostics`) are crates of the release too: `ferroui-view = "=0.4.0"` and `ferroui-diagnostics = "=0.4.0"` beside the crates above (the facade has the developer tools as its feature `diagnostics`).
+The declarative API (`ferroui-view` with `ferroui-view-macros`, [docs/declarative-ui.md](docs/declarative-ui.md)) and the developer tools (`ferroui-diagnostics`) are crates of the release too: `ferroui-view = "=0.5.0"` and `ferroui-diagnostics = "=0.5.0"` beside the crates above (the facade has the developer tools as its feature `diagnostics`).
 
-The crates of a release depend on one another at exactly its version, so name the same version for every FerroUI crate, as above. `0.1.0` followed four previews (`0.1.0-preview.1` to `0.1.0-preview.4`), pre-releases in the sense of semantic versioning, which Cargo selects only when they are named, `0.2.0`, `0.3.0` and `0.4.0` are the next minor versions, and `0.3.0` and `0.4.0` each followed one preview (`0.3.0-preview.1`, `0.4.0-preview.1`). The work towards the next one is published as previews of it (`0.5.0-preview.1` will be the first), which may change any part of the public API. The release process is described in [docs/release.md](docs/release.md) and the changes of each release in [CHANGELOG.md](CHANGELOG.md).
+The crates of a release depend on one another at exactly its version, so name the same version for every FerroUI crate, as above. `0.1.0` followed four previews (`0.1.0-preview.1` to `0.1.0-preview.4`), pre-releases in the sense of semantic versioning, which Cargo selects only when they are named, `0.2.0`, `0.3.0`, `0.4.0` and `0.5.0` are the next minor versions, and `0.3.0` and `0.4.0` each followed one preview (`0.3.0-preview.1`, `0.4.0-preview.1`). The work towards the next one is published as previews of it, which may change any part of the public API. The release process is described in [docs/release.md](docs/release.md) and the changes of each release in [CHANGELOG.md](CHANGELOG.md).
 
 The platforms that are not part of platform detection are named by their own crates beside the others: `ferroui-wayland`, `ferroui-linuxframebuffer`, `ferroui-ios`, `ferroui-android`, `ferroui-browser`, `ferroui-winui` and `ferroui-headless-vnc`.
 
