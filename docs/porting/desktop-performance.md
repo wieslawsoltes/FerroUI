@@ -3678,3 +3678,80 @@ the last child at its own, and no bucket is walked after the first hit test.
 
 **Gate.** `wall/20+pointer` of the frame gate holds the UI thread's time of the hit tests
 over a holder of 20 000 children.
+
+### 9.50 Tried and left out: the drawings of items kept as pictures of the backend
+
+The first of the changes of architecture that were proposed for the frame: what an item
+draws is kept by the render thread in the form the backend draws it in, and drawn again
+from that form while the item does not change, instead of its commands being walked in
+every frame. The interface was there (`IDrawingContextImplWithFragments`, the fragments of
+draw list visuals); the trial gave it to the items of a holder (section 9.42) and to Skia.
+It is recorded here with what it measured. It is not merged: in the window it draws no
+frame sooner and costs processor time. The code is on the branch `perf/skia-item-pictures`.
+
+**What was tried.** The policy is in `ferroui_base` and the same for every backend:
+
+- `FragmentKeeping` (`None`, `Each`, `Settled`), asked of the context by
+  `IDrawingContextImplWithFragments::fragment_keeping`: whether the backend gains from a
+  fragment at all, from one of every drawing, or only from one of a drawing that was drawn
+  twice as it was. `DrawingContextProxy` forwards it.
+- `KeptFragment` (`server_draw_items.rs`): the fragment of one item beside its commands,
+  the frames it waited (`SETTLED_AFTER = 1`), and, for a backend that refused to draw the
+  fragment again, how long before it is asked once more (doubling up to `LONGEST_WAIT = 64`
+  frames), so that an item whose place changes by a fraction of a pixel in every frame is
+  not recorded in every frame.
+- Skia (`drawing_context_impl/fragments.rs`): a fragment is an `SkPicture` of the commands,
+  recorded by a recorder of its own that starts with the matrix of the frame's canvas. It
+  is drawn again in the state it was made in and with the matrix it was made with, or with
+  that matrix moved by whole pixels when nothing in it was laid out in the pixels of the
+  device (text placed on the pixel grid, hairlines). Skia answers `Settled` only for a
+  context that records (the pipelined layer of a window, a picture render target) and
+  `None` for a surface, where a picture is played back call by call.
+
+**Measured** (M3 Pro, 60 Hz, `release`, the gauntlet benchmark in its window, 14 seconds a
+run, two alternating rounds; main is 01e1c3f24, with sections 9.46 and 9.47 and the
+balanced bands):
+
+| | main | with kept pictures |
+|---|---:|---:|
+| gauntlet, tier 16, frames a second | 55.1, 55.2 | 53.1, 52.7 |
+| gauntlet, tier 16, processor time of the run | 26.5 s, 30.0 s | 28.9 s, 31.6 s |
+| still wall, tier 20, frames a second | 60.0, 60.0 | 60.0, 60.0 |
+| still wall, tier 20, processor time of the run | 8.6 s, 9.2 s | 9.1 s, 9.4 s |
+| gauntlet, tier 16, render thread drawing items (5 s sampled) | 621 ms | 722 ms |
+
+Of the 722 ms, 42 are spent ending recordings. The window suite of the gate shows every one
+of its five scenes at the display's 16.667 ms a frame on both sides. The headless gate
+(raster surface, where no fragment is made) is unchanged: 121 metrics, none regressed.
+
+**Why it gains nothing.** A picture of Skia is a list of operations, not pixels and not
+commands of the graphics processor. Drawing a kept picture into the picture of the frame
+saves recording the item's few operations (a rectangle, a run of glyphs) and costs a
+reference to the picture with a save, a matrix and a restore around it, which is about the
+same; when the frame's picture is played into the Graphite recorder, every operation of
+the kept picture is drawn as if it had been recorded directly. What the render thread
+spends on an item is spent after the recording, and a picture keeps none of it. On the
+gauntlet most items change or move by fractions of a pixel in every frame, so pictures are
+also made that are never drawn again. And at tier 16 the UI thread's pass, not the render
+thread, bounds the frame rate (section 9.46), so even a saving there would not show as
+frames.
+
+**Other backends.** The policy is where a backend whose fragments hold more than a list of
+operations finds it: an engine with a retained scene (ProGPU: the scene nodes and their
+buffers of an item, drawn again by reference) or one whose scene is appended by copying an
+encoding (Vello) would answer `Each` or `Settled` and implement `begin_fragment`,
+`end_fragment` and `draw_fragment`; nothing in `KeptFragment` knows Skia. It is to be taken
+from the branch with the first backend that measures a gain from it.
+
+**What would keep work in Skia** is the pixels of a settled subtree in a texture. That is a
+different trade: memory for every kept subtree, text that is no longer placed on the pixel
+grid of the window when the subtree moves by a fraction of a pixel or is scaled, and a
+texture to draw again whenever anything in the subtree changes. The scenes measured here do
+not ask for it (the still wall is at the display's rate, the gauntlet changes everywhere),
+so it is not proposed.
+
+**Tests on the branch.** Six in `server_draw_items_tests.rs` (a fragment is made after the
+item settled, drawn again, dropped when the item changes, the waits after a refusal) and
+nine in `fragment_tests.rs` (the pixels of a kept picture are those of the commands under
+moves by whole pixels, clips, opacity and options; a refusal for a fraction of a pixel or
+another state).
