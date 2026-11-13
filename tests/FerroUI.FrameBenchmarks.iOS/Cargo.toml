@@ -19,5 +19,7 @@ test = false
 [dependencies]
 ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
-ferroui-ios = { workspace = true, features = ["skia"] }
+# By its path and with its default features, of which Skia is one: the feature is not named, so
+# the host also builds in a base of the gate from before the crate had the choice.
+ferroui-ios = { path = "../../src/iOS/FerroUI.iOS" }
 ferroui-frame-benchmarks = { path = "../FerroUI.FrameBenchmarks", default-features = false }
