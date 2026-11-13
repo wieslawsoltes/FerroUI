@@ -166,10 +166,11 @@ pub trait IRenderTarget {
     /// nothing to speak of. Skia's Ganesh is such a target: it has a scissor
     /// for a rectangle, and for a region a mask of the size of each draw,
     /// which it rasterises and uploads for that draw. The composition
-    /// target has a frame of such a target draw the one rectangle that
-    /// holds its dirty rectangles, under a clip that is that rectangle
-    /// (`IDirtyRectTracker::draw_as_one_rectangle`), and the dirty area as
-    /// it is everywhere else (desktop-performance.md, section 9.56).
+    /// target draws a frame of such a target one dirty rectangle at a
+    /// time, each under a clip that is that rectangle
+    /// (`IDirtyRectTracker::separate_rects`), and under the region of its
+    /// dirty rectangles everywhere else (desktop-performance.md, section
+    /// 9.56).
     ///
     /// Not from upstream, which clips every frame to the region.
     fn clips_regions_per_draw(&self) -> bool {

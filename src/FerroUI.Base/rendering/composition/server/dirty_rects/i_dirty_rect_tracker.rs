@@ -41,17 +41,20 @@ pub trait IDirtyRectTracker: IDirtyRectCollector {
 
     fn combined_rect(&self) -> LtrbRect;
 
-    /// Has the frames finalized from here on draw one rectangle, the one
-    /// that holds every dirty rectangle of the frame on whole pixels, under
-    /// a clip that is that rectangle (`one`), or the dirty area as the
-    /// tracker makes it (the default). The composition target asks for one
-    /// rectangle where the render target applies a clip of several
-    /// rectangles to every draw on its own
-    /// (`IRenderTarget::clips_regions_per_draw`). A tracker of one rectangle
-    /// has nothing to change. Not in the C# source (desktop-performance.md,
-    /// section 9.56).
-    fn draw_as_one_rectangle(&self, one: bool) {
-        let _ = one;
+    /// The dirty area of the finalized frame as rectangles of whole pixels
+    /// that do not overlap, put into `rects` in place of what it holds: the
+    /// passes of a frame that is drawn one rectangle at a time, each under
+    /// a clip that is its rectangle. The composition target draws so where
+    /// the render target applies a clip of several rectangles to every draw
+    /// on its own (`IRenderTarget::clips_regions_per_draw`). The default is
+    /// the rectangle that holds the area. Not in the C# source
+    /// (desktop-performance.md, section 9.56).
+    fn separate_rects(&self, rects: &mut Vec<LtrbRect>) {
+        rects.clear();
+        let all = self.combined_rect();
+        if !all.is_zero_size() {
+            rects.push(all);
+        }
     }
 
     /// Whether the tracker is a `SingleDirtyRectTracker` (the `is` test of
@@ -169,17 +172,79 @@ pub(super) fn simplify_dirty_rects(rects: &mut Vec<LtrbRect>, bounds: LtrbRect) 
     }
 }
 
-/// Replaces the dirty rectangles of a frame with the one rectangle that
-/// holds them all, on whole pixels, or with the surface when that covers
-/// [`SURFACE_SHARE`] of it: what a frame draws on a target that is to get
-/// one rectangle ([`IDirtyRectTracker::draw_as_one_rectangle`]). The area
-/// drawn only grows.
-pub(super) fn unite_dirty_rects(rects: &mut Vec<LtrbRect>, bounds: LtrbRect) {
-    let union = rects.iter().filter(|rect| !rect.is_zero_size()).copied().reduce(|all, rect| all.union(rect));
+/// The most rectangles a frame is drawn in, one after the other
+/// ([`IDirtyRectTracker::separate_rects`]). Every rectangle is a walk of
+/// the tree, and an area in more pieces than this is drawn as the one
+/// rectangle that holds it.
+pub(super) const SEPARATE_RECTS: usize = 8;
+
+/// Makes the dirty rectangles of a frame rectangles of whole pixels that
+/// do not overlap and cover the same area: what a frame draws, one
+/// rectangle after the other, on a target that is not given a clip of
+/// several rectangles ([`IDirtyRectTracker::separate_rects`]). The largest
+/// rectangles stay whole, and a smaller one keeps what is outside them, in
+/// at most four pieces for each. More than [`SEPARATE_RECTS`] pieces become
+/// the one rectangle that holds them all. The area drawn only grows.
+pub(super) fn separate_dirty_rects(rects: &mut Vec<LtrbRect>) {
+    rects.retain(|rect| !rect.is_zero_size());
+    for rect in rects.iter_mut() {
+        *rect = pixel_rect_to_ltrb_rect_unscaled(pixel_rect_from_rect_unscaled(*rect));
+    }
+    let Some(all) = rects.iter().copied().reduce(|all, rect| all.union(rect)) else { return };
+    if rects.len() == 1 {
+        return;
+    }
+    rects.sort_by(|left, right| area(*right).total_cmp(&area(*left)));
+    let mut apart: SmallVec<[LtrbRect; 16]> = SmallVec::new();
+    let mut pieces: SmallVec<[LtrbRect; 8]> = SmallVec::new();
+    let mut outside: SmallVec<[LtrbRect; 8]> = SmallVec::new();
+    for rect in rects.iter() {
+        pieces.clear();
+        pieces.push(*rect);
+        for taken in apart.iter() {
+            outside.clear();
+            for piece in pieces.iter() {
+                push_outside(*piece, *taken, &mut outside);
+            }
+            std::mem::swap(&mut pieces, &mut outside);
+            if pieces.is_empty() {
+                break;
+            }
+        }
+        apart.extend(pieces.drain(..));
+        if apart.len() > SEPARATE_RECTS {
+            break;
+        }
+    }
     rects.clear();
-    if let Some(union) = union {
-        let pixels = pixel_rect_to_ltrb_rect_unscaled(pixel_rect_from_rect_unscaled(union));
-        rects.push(surface_or_rect(pixels, bounds));
+    if apart.len() > SEPARATE_RECTS {
+        rects.push(all);
+    } else {
+        rects.extend(apart);
+    }
+}
+
+/// Pushes what of `rect` is outside `other`: the band above it and the
+/// band below it, at the width of `rect`, and what is left and right of it
+/// between them.
+fn push_outside(rect: LtrbRect, other: LtrbRect, pieces: &mut SmallVec<[LtrbRect; 8]>) {
+    if !rect.intersects(other) {
+        pieces.push(rect);
+        return;
+    }
+    let top = rect.top.max(other.top);
+    let bottom = rect.bottom.min(other.bottom);
+    if rect.top < top {
+        pieces.push(LtrbRect::new(rect.left, rect.top, rect.right, top));
+    }
+    if rect.left < other.left {
+        pieces.push(LtrbRect::new(rect.left, top, other.left, bottom));
+    }
+    if other.right < rect.right {
+        pieces.push(LtrbRect::new(other.right, top, rect.right, bottom));
+    }
+    if bottom < rect.bottom {
+        pieces.push(LtrbRect::new(rect.left, bottom, rect.right, rect.bottom));
     }
 }
 
@@ -710,6 +775,116 @@ pub(crate) mod tests {
         let mut rects = corners.clone();
         simplify_dirty_rects(&mut rects, SURFACE);
         assert_eq!(corners, rects);
+    }
+
+    #[test]
+    fn rectangles_apart_stay_as_they_are_the_largest_first() {
+        let mut rects = vec![
+            LtrbRect::new(10.0, 10.0, 20.0, 20.0),
+            LtrbRect::default(),
+            LtrbRect::new(500.0, 500.0, 540.0, 540.0),
+            LtrbRect::new(30.0, 10.0, 30.0, 40.0),
+            LtrbRect::new(100.25, 100.5, 119.5, 120.0),
+        ];
+        separate_dirty_rects(&mut rects);
+        assert_eq!(
+            vec![
+                LtrbRect::new(500.0, 500.0, 540.0, 540.0),
+                LtrbRect::new(100.0, 100.0, 120.0, 120.0),
+                LtrbRect::new(10.0, 10.0, 20.0, 20.0),
+            ],
+            rects
+        );
+
+        let mut one = vec![LtrbRect::new(1.5, 2.5, 3.5, 4.5)];
+        separate_dirty_rects(&mut one);
+        assert_eq!(vec![LtrbRect::new(1.0, 2.0, 4.0, 5.0)], one);
+
+        let mut none = vec![LtrbRect::default(), LtrbRect::new(5.0, 5.0, 5.0, 9.0)];
+        separate_dirty_rects(&mut none);
+        assert!(none.is_empty());
+    }
+
+    #[test]
+    fn rectangles_that_overlap_are_cut_into_pieces_that_do_not() {
+        // The larger one stays whole; the other keeps what is outside it,
+        // in up to four pieces.
+        let mut rects = vec![LtrbRect::new(40.0, 40.0, 60.0, 60.0), LtrbRect::new(0.0, 0.0, 100.0, 50.0)];
+        separate_dirty_rects(&mut rects);
+        assert_eq!(vec![LtrbRect::new(0.0, 0.0, 100.0, 50.0), LtrbRect::new(40.0, 50.0, 60.0, 60.0)], rects);
+
+        let mut rects = vec![LtrbRect::new(0.0, 0.0, 100.0, 100.0), LtrbRect::new(40.0, 40.0, 60.0, 60.0)];
+        separate_dirty_rects(&mut rects);
+        assert_eq!(vec![LtrbRect::new(0.0, 0.0, 100.0, 100.0)], rects);
+
+        let mut rects = vec![LtrbRect::new(0.0, 0.0, 100.0, 100.0), LtrbRect::new(40.0, 40.0, 59.0, 59.0)];
+        rects.swap(0, 1);
+        rects.push(LtrbRect::new(-10.0, 30.0, 110.0, 70.0));
+        separate_dirty_rects(&mut rects);
+        assert_eq!(
+            vec![
+                LtrbRect::new(0.0, 0.0, 100.0, 100.0),
+                LtrbRect::new(-10.0, 30.0, 0.0, 70.0),
+                LtrbRect::new(100.0, 30.0, 110.0, 70.0),
+            ],
+            rects
+        );
+
+        // Whatever the rectangles, the pieces cover what they covered, and
+        // each point once.
+        let cases = [
+            vec![LtrbRect::new(0.0, 0.0, 50.0, 50.0), LtrbRect::new(25.0, 25.0, 80.0, 60.0)],
+            vec![
+                LtrbRect::new(200.0, 0.0, 1400.0, 900.0),
+                LtrbRect::new(0.0, 99.0, 202.0, 141.0),
+                LtrbRect::new(0.0, 139.0, 202.0, 181.0),
+            ],
+            vec![
+                LtrbRect::new(10.0, 10.0, 30.0, 30.0),
+                LtrbRect::new(20.0, 20.0, 40.0, 40.0),
+                LtrbRect::new(30.0, 0.0, 50.0, 25.0),
+                LtrbRect::new(0.0, 28.0, 60.0, 32.0),
+            ],
+        ];
+        for case in cases {
+            let mut rects = case.clone();
+            separate_dirty_rects(&mut rects);
+            assert!(rects.len() <= SEPARATE_RECTS, "{rects:?}");
+            for (index, rect) in rects.iter().enumerate() {
+                assert!(rects[index + 1..].iter().all(|other| !rect.intersects(*other)), "{rects:?}");
+            }
+            assert_eq!(covered_area(&case), rects.iter().map(|rect| area(*rect)).sum::<f64>(), "{rects:?}");
+        }
+    }
+
+    #[test]
+    fn more_pieces_than_a_frame_is_drawn_in_are_their_union() {
+        let row = |count: usize| -> Vec<LtrbRect> {
+            (0..count).map(|n| LtrbRect::new(n as f64 * 20.0, 0.0, n as f64 * 20.0 + 10.0, 10.0)).collect()
+        };
+
+        // Nine rectangles apart.
+        let mut rects = row(9);
+        separate_dirty_rects(&mut rects);
+        assert_eq!(vec![LtrbRect::new(0.0, 0.0, 170.0, 10.0)], rects);
+
+        // Eight are drawn each for itself.
+        let mut rects = row(8);
+        separate_dirty_rects(&mut rects);
+        assert_eq!(SEPARATE_RECTS, rects.len());
+
+        // Six rectangles whose pieces are more than eight: four squares
+        // under a cross.
+        let mut rects = vec![
+            LtrbRect::new(0.0, 45.0, 200.0, 55.0),
+            LtrbRect::new(95.0, 0.0, 105.0, 100.0),
+            LtrbRect::new(10.0, 40.0, 30.0, 60.0),
+            LtrbRect::new(40.0, 40.0, 60.0, 60.0),
+            LtrbRect::new(140.0, 40.0, 160.0, 60.0),
+            LtrbRect::new(170.0, 40.0, 190.0, 60.0),
+        ];
+        separate_dirty_rects(&mut rects);
+        assert_eq!(vec![LtrbRect::new(0.0, 0.0, 200.0, 100.0)], rects);
     }
 
     #[test]
