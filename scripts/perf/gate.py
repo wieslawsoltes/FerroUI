@@ -60,7 +60,8 @@ builds the host of the frame benchmarks of each side for the device
 (`tests/FerroUI.FrameBenchmarks.Android`, `tests/FerroUI.FrameBenchmarks.iOS`), packages it with
 the script of the platform, installs both under application ids of their own and starts each
 scene with the command of the platform (`am start`, `simctl launch`); the `PERF` lines come from
-the log of the device or the console of the process. Android needs ANDROID_HOME (the SDK), as
+the log of the device or the console of the process. The first frames of Android are timed by
+the clock of the device, from the start of the process. Android needs ANDROID_HOME (the SDK), as
 `scripts/android/env.sh` does.
 
 Where this script is not in a git checkout (a machine that gets a copy of the sources, made for
@@ -197,6 +198,8 @@ ANDROID_TARGETS = {"arm64-v8a": "aarch64-linux-android", "x86_64": "x86_64-linux
 ANDROID_ACTIVITY = "org.ferroui.android.FerroMainActivity"
 # The tag of the log the Android host writes the `PERF` lines with.
 ANDROID_TAG = "ferroui-frames"
+# The tag the activity manager of Android says with that it started a process (`Start proc`).
+ANDROID_SYSTEM_TAG = "ActivityManager"
 IOS_PACKAGE = "ferroui-frame-benchmarks-ios"
 IOS_CRATE = Path("tests/FerroUI.FrameBenchmarks.iOS")
 IOS_BINARY = "frame-benchmarks-ios"
@@ -700,12 +703,48 @@ class PerfReport:
     scene: str | None = None
 
 
-def read_perf(command: list[str], env: dict[str, str] | None, cwd: Path | None, seconds: float, log: Path, echo: bool, launch=None) -> PerfReport:
+class AndroidClock:
+    """The times of the lines of `logcat -v threadtime`, by the clock of the device and from the
+    start of the process of `application` (the `Start proc` line of the activity manager):
+    neither the time the command that starts it takes nor the time a line takes to reach this
+    machine is in them."""
+
+    LINE = re.compile(r"^\d\d-\d\d (\d\d):(\d\d):(\d\d)\.(\d\d\d)\s+(\d+)\s+\d+\s+\w\s+(.*?)\s*: (.*)$")
+
+    def __init__(self, application: str):
+        self.started = re.compile(rf"^Start proc (\d+):{re.escape(application)}/")
+        self.process: str | None = None
+        self.start = 0.0
+
+    def __call__(self, line: str) -> tuple[float, str] | None:
+        """The time of `line` in milliseconds from the start of the process and what it says, or
+        nothing for a line that is not of the process (one of a run before it among them)."""
+        found = self.LINE.match(line)
+        if found is None:
+            return None
+        hours, minutes, seconds, thousandths, process, tag, text = found.groups()
+        at = ((int(hours) * 60 + int(minutes)) * 60 + int(seconds)) * 1000.0 + int(thousandths)
+        if tag == ANDROID_SYSTEM_TAG:
+            started = self.started.match(text)
+            if started is not None:
+                self.process, self.start = started.group(1), at
+            return None
+        if self.process is None or process != self.process or tag != ANDROID_TAG:
+            return None
+        # The line has the time of the day: a run over midnight goes on in the next one.
+        return (at - self.start) % 86_400_000.0, text
+
+
+def read_perf(
+    command: list[str], env: dict[str, str] | None, cwd: Path | None, seconds: float, log: Path, echo: bool, launch=None, clock=None
+) -> PerfReport:
     """Runs `command` for `seconds` and returns what its `PERF` lines said. `launch`, when given,
     is called once the command runs and starts what the command reports (on a device the command
-    is the stream of its log); the times then count from that call, else from the start of the
-    command. A line gets its time when it is read, by a thread of its own: neither a pipe that
-    blocks nor one that does not is the same on every system."""
+    is the stream of its log); the run then lasts `seconds` from that call. The times count from
+    the start of the command, with the time each line was read at, by a thread of its own
+    (neither a pipe that blocks nor one that does not is the same on every system); or, with
+    `clock`, they are what it says of each line (`AndroidClock`), and the log has the time each
+    line was read at in front of it."""
     report = PerfReport()
     log.parent.mkdir(parents=True, exist_ok=True)
     lines: queue.Queue[tuple[float, str]] = queue.Queue()
@@ -737,17 +776,23 @@ def read_perf(command: list[str], env: dict[str, str] | None, cwd: Path | None, 
                     if process.poll() is not None:
                         break
                     continue
-                out.write(line + "\n")
+                at = (stamp - start) * 1000.0
+                out.write(line + "\n" if clock is None else f"{at:9.1f} {line}\n")
                 if echo:
                     sys.stdout.write(f"  {line}\n")
-                if stamp < start:
+                if clock is not None:
+                    told = clock(line)
+                    if told is None:
+                        continue
+                    at, line = told
+                elif stamp < start:
                     continue
                 if line.startswith("PERF scene "):
                     report.scene = line.split()[2]
                 elif line.startswith("PERF first_frame") and report.first_frame is None:
-                    report.first_frame = (stamp - start) * 1000.0
+                    report.first_frame = at
                 elif line.startswith("PERF second_frame") and report.second_frame is None:
-                    report.second_frame = (stamp - start) * 1000.0
+                    report.second_frame = at
                 elif line.startswith("PERF fps "):
                     report.rates.append(float(line.split()[2]))
         finally:
@@ -863,21 +908,28 @@ def build_device(side: Side, device: Device, scratch: Path, logs: Path, echo: bo
 
 def run_device_window(side: Side, device: Device, scene: str, seconds: float, log: Path, echo: bool) -> list[tuple[Metric, float]]:
     """Starts the application of `side` on the device with `scene` for `seconds` and returns its
-    metrics (`window_metrics`), with the times from the command that starts it. Android: the
-    scene is an extra of the intent, and the lines are read from the log of the device, which is
-    emptied first. iOS: the scene is in the environment of the process, and the lines are its
-    standard output on the console of `simctl launch`."""
+    metrics (`window_metrics`). Android: the scene is an extra of the intent, and the lines are
+    read from the log of the device, which is emptied first; the times are those of the device,
+    from the start of the process (`AndroidClock`). iOS: the scene is in the environment of the
+    process, and the lines are its standard output on the console of `simctl launch`; the times
+    are from that command."""
     application = device_application(side)
     print(f"[{side.name}] {application} {scene} for {seconds:g} s", flush=True)
     if device.kind == "android":
         run_tool(device.adb("shell", "am", "force-stop", application))
         run_tool(device.adb("logcat", "-c"))
         start = device.adb("shell", "am", "start", "-n", f"{application}/{ANDROID_ACTIVITY}", "--es", "FRAMES_SCENE", scene)
-        stream = device.adb("logcat", "-v", "raw", "-s", f"{ANDROID_TAG}:I")
+        stream = device.adb("logcat", "-v", "threadtime", "-s", f"{ANDROID_TAG}:I", f"{ANDROID_SYSTEM_TAG}:I")
+        clock = AndroidClock(application)
         try:
-            report = read_perf(stream, None, None, seconds, log, echo, lambda: run_tool(start))
+            report = read_perf(stream, None, None, seconds, log, echo, lambda: run_tool(start), clock)
         finally:
             run_tool(device.adb("shell", "am", "force-stop", application))
+        if clock.process is None:
+            raise GateError(
+                f"[{side.name}] the log of the device does not say when the process of {application} started "
+                f"(no `Start proc` line of {ANDROID_SYSTEM_TAG}); the log is {log}"
+            )
     else:
         env = {**os.environ, "SIMCTL_CHILD_FRAMES_SCENE": scene, "SIMCTL_CHILD_PERF_REPORT": "1"}
         launch = ["xcrun", "simctl", "launch", "--console-pty", "--terminate-running-process", device.simulator, application]
