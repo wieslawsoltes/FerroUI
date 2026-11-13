@@ -4379,13 +4379,11 @@ median of nine rounds, each side against the commit the frame benchmarks came wi
 | The region clip (before this section) | 16.667 |
 | One rectangle for the frame | 29.240 |
 | A pass for every rectangle | 16.667 |
-| One rectangle at a time, those close to each other joined | 16.7 |
+| One rectangle at a time, those close to each other joined | 16.667 |
 
-The first three rows are medians of the gate. The fourth is the frame rate of
-the same scene in two rounds of four launches a side (59.9 to 60.1 frames a second with
-the rectangles joined, 59.1 to 60.3 before this section): the run of the gate that would
-have given its median did not finish, and the gate of the platforms runs it again before
-a release (section 8.2).
+In the gate of the last row the other scenes in a window (text, list, transforms, lines)
+are where they were as well, 16.667 ms a frame on both sides, and the first frame of the
+wall comes after 685 ms where it came after 972 ms.
 
 **Rectangles close to each other are one rectangle.** A pass for every dirty rectangle was
 the second form, and the site said what was wrong with it. The banner of the Home page
