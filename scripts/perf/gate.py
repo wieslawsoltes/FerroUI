@@ -7,6 +7,7 @@ TreeDataGrid benchmarks, of a base commit against the working tree, measured on 
     python3 scripts/perf/gate.py --only gauntlet
     python3 scripts/perf/gate.py --only tdg --tdg-filter VirtualizationBenchmarks
     python3 scripts/perf/gate.py --only counters
+    python3 scripts/perf/gate.py --only browser --browser-site target/browser/control-catalog-browser
 
 The base (default: the merge-base of HEAD with origin/main) is checked out, detached, in a git
 worktree of its own under the scratch folder (default: `ferroui-gate-scratch` beside the
@@ -38,6 +39,17 @@ that assert how much work an operation does, read from the framework's performan
 (`COUNTER_CHECKS`). The counters exist only with the feature `perf-counters`, which no other
 automated check turns on, so the assertions of these tests run here. A test that fails fails the
 gate.
+
+What is checked and measured in a browser, only when asked for (`--only browser`, or `browser`
+in a list; never part of `all`): what a page switch of the ControlCatalog site costs in headless
+Chromium, by `scripts/browser/navigation-cost.mjs` (desktop-performance.md, section 9.56). The
+gate does not build browser sites: `--browser-site` names the candidate's, a folder made by
+`scripts/build-browser.sh control-catalog-browser` or the address of a deployed site (with the
+query that keeps its frames on the thread of the page, `?Threads=false`). The masks every switch
+uploads are checked against the budget of the script, on the candidate alone and once: they do
+not depend on the machine, and a switch over its budget fails the gate. With `--browser-base-site`
+(a folder or an address as well) the two sites are also measured alternately like every other
+suite: the masks, their pixels and the time to the first painted frame of each switch.
 
 When the base has no frame gate (commits before it), the candidate's `samples/GauntletBenchmark`
 is copied into the base worktree (and made a member of its workspace when it is not one), so that
@@ -151,8 +163,13 @@ SUITES = {
         "build": ["build", "-p", FRAMES_PACKAGE, "--release", "--bin", FRAMES_BINARY],
         "run": [],
     },
+    # Not run through cargo and not built here: `run_browser` on a site that exists.
+    "browser": {"build": [], "run": []},
 }
 ALL_SUITES = ["counters", "gauntlet", "frames", "framework", "tdg", "window"]
+# Suites that are run only when `--only` names them: they need something the gate does not make.
+OPT_IN_SUITES = ["browser"]
+BROWSER_SCRIPT = Path("scripts/browser/navigation-cost.mjs")
 
 # --- tolerances -----------------------------------------------------------------------------------
 #
@@ -197,6 +214,15 @@ SIZE_FLOOR_BYTES = 0.0
 WINDOW_FACTOR = 2.0
 WINDOW_FRAME_FLOOR_MS = 0.5
 WINDOW_FIRST_FRAME_FLOOR_MS = 20.0
+# - The browser suite: the masks a page switch uploads and their pixels are counts of a
+#   deterministic route, the same from run to run but for a frame more or less of an animation:
+#   5 (a quarter with the default tolerance), and more than a few masks. The time to the first
+#   painted frame is that of a software rasteriser in a headless browser: 10, and 50 ms.
+BROWSER_COUNT_FACTOR = 5.0
+BROWSER_MASKS_FLOOR = 8.0
+BROWSER_MASK_PIXELS_FLOOR = 250_000.0
+BROWSER_TIME_FACTOR = 10.0
+BROWSER_TIME_FLOOR_MS = 50.0
 TDG_FACTOR = 2.0
 TDG_SHORT_FACTOR = 3.0
 TDG_SHORT_NS = 100.0
@@ -220,7 +246,7 @@ class Metric:
     """One number of a run, lower is better."""
 
     key: str
-    unit: str  # "ms", "ns", "MB" or "bytes"
+    unit: str  # "ms", "ns", "MB", "bytes" or "count"
     factor: float
     floor: float
 
@@ -632,6 +658,64 @@ def run_counter_checks(candidate: Side, logs: Path, echo: bool) -> list[Row]:
     return rows
 
 
+def run_browser(root: Path, name: str, site: str, log: Path, echo: bool) -> tuple[list[tuple[Metric, float]], dict]:
+    """Runs the page switches of `BROWSER_SCRIPT` on `site` (a folder or an address) in headless
+    Chromium and returns, for every page and visit of its route, the masks the switch uploads,
+    their pixels and the time to its first painted frame, and the whole result of the script
+    (with `budget` and `over`, the switches over their budget)."""
+    node = shutil.which("node")
+    if node is None:
+        raise GateError("the browser suite needs node on the PATH")
+    if not re.match(r"^https?:", site) and not (Path(site) / "index.html").is_file():
+        raise GateError(f"no site at {site}: build it with scripts/build-browser.sh control-catalog-browser")
+    command = [node, str(root / BROWSER_SCRIPT), site, "--json"]
+    print(f"[{name}] {' '.join(shlex.quote(part) for part in command)}", flush=True)
+    log.parent.mkdir(parents=True, exist_ok=True)
+    done = subprocess.run(command, cwd=root, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, check=False)
+    log.write_text(done.stdout, encoding="utf-8")
+    if echo:
+        print(done.stdout, flush=True)
+    lines = [line for line in done.stdout.splitlines() if line.startswith("{")]
+    if done.returncode != 0 or not lines:
+        raise GateError(f"[{name}] the page switches of {site} were not measured; the log is {log}")
+    result = json.loads(lines[-1])
+    found = []
+    for visit in ("first", "again"):
+        for page, numbers in result[visit].items():
+            key = f"browser/{page} {'first visit' if visit == 'first' else 'shown again'}"
+            found.append((Metric(f"{key} masks", "count", BROWSER_COUNT_FACTOR, BROWSER_MASKS_FLOOR), float(numbers["masks"])))
+            found.append(
+                (Metric(f"{key} mask pixels", "count", BROWSER_COUNT_FACTOR, BROWSER_MASK_PIXELS_FLOOR), float(numbers["maskPixels"]))
+            )
+            if numbers.get("paintedMs") is not None:
+                found.append((Metric(f"{key} painted", "ms", BROWSER_TIME_FACTOR, BROWSER_TIME_FLOOR_MS), float(numbers["paintedMs"])))
+    return found, result
+
+
+def run_browser_budget(candidate: Side, site: str, logs: Path, echo: bool) -> list[Row]:
+    """Checks the page switches of the candidate's site against the budget of `BROWSER_SCRIPT` and
+    returns a row of the table for each budget: what the switch uploaded, what it may upload."""
+    _, result = run_browser(candidate.root, candidate.name, site, logs / "browser-budget.log", echo)
+    over = result.get("over", [])
+    rows = []
+    for visit, pages in result["budget"].items():
+        for page, limits in pages.items():
+            numbers = result[visit].get(page)
+            label = f"{page} {'first visit' if visit == 'first' else 'shown again'}"
+            for name, limit in limits.items():
+                key = f"browser/{label} budget of {'masks' if name == 'masks' else 'mask pixels'}"
+                if numbers is None:
+                    rows.append(Row(key, "-", "FAILED", "", f"{limit:,.0f}", "FAILED", True))
+                    continue
+                kept = numbers[name] <= limit
+                rows.append(
+                    Row(key, "-", format_value(float(numbers[name]), "count"), "", f"{limit:,.0f}", "ok" if kept else "OVER BUDGET", not kept)
+                )
+    for line in over:
+        print(f"[{candidate.name}] browser: over the budget: {line}", flush=True)
+    return rows
+
+
 def record(side: Side, found: list[tuple[Metric, float]], instructions: dict[str, float] | None = None) -> None:
     for metric, value in found:
         side.metrics[metric.key] = metric
@@ -650,6 +734,8 @@ def format_value(value: float, unit: str) -> str:
         return f"{value:.1f} MB"
     if unit == "bytes":
         return f"{value:.0f} bytes"
+    if unit == "count":
+        return f"{value:,.0f}" if value == int(value) else f"{value:,.1f}"
     if value < 1e3:
         return f"{value:.2f} ns"
     if value < 1e6:
@@ -801,8 +887,14 @@ def main() -> int:
     parser.add_argument(
         "--only",
         default="all",
-        help="what to measure, comma separated: counters, gauntlet, frames, framework, tdg, window, or all (default all)",
+        help="what to measure, comma separated: counters, gauntlet, frames, framework, tdg, window, or all (default all); "
+        "browser only when it is named",
     )
+    parser.add_argument(
+        "--browser-site",
+        help="the ControlCatalog site of the candidate for the browser suite: a folder built by scripts/build-browser.sh or an address",
+    )
+    parser.add_argument("--browser-base-site", help="the site of the base, to measure the two against each other as well")
     parser.add_argument("--framework-filter", default=FRAMEWORK_FILTER, help=f"FERROUI_BENCH_FILTER of the framework run (default {FRAMEWORK_FILTER})")
     parser.add_argument("--window-seconds", type=float, default=12.0, help="how long the window suite runs each scene (default 12)")
     parser.add_argument("--window-scenes", default=",".join(WINDOW_SCENES), help=f"the scenes of the window suite (default {','.join(WINDOW_SCENES)})")
@@ -848,7 +940,9 @@ def gate(options: argparse.Namespace) -> int:
     suites = ALL_SUITES if options.only == "all" else [suite.strip() for suite in options.only.split(",") if suite.strip()]
     unknown = [suite for suite in suites if suite not in SUITES]
     if unknown:
-        raise GateError(f"unknown suites: {', '.join(unknown)} (known: {', '.join(ALL_SUITES)})")
+        raise GateError(f"unknown suites: {', '.join(unknown)} (known: {', '.join([*ALL_SUITES, *OPT_IN_SUITES])})")
+    if "browser" in suites and not options.browser_site:
+        raise GateError("the browser suite needs --browser-site: the gate does not build browser sites")
     window_scenes = [scene.strip() for scene in options.window_scenes.split(",") if scene.strip()]
 
     bench_env = {
@@ -861,6 +955,7 @@ def gate(options: argparse.Namespace) -> int:
         "frames": {},
         "framework": {**bench_env, "FERROUI_BENCH_FILTER": options.framework_filter},
         "window": {},
+        "browser": {},
         "tdg": {
             "FERROUI_BENCH_ITERATIONS": str(options.tdg_iterations),
             "FERROUI_BENCH_WARMUP": str(options.tdg_warmup),
@@ -875,8 +970,14 @@ def gate(options: argparse.Namespace) -> int:
         if options.warmup is not None:
             env[suite]["GATE_WARMUP"] = str(options.warmup)
 
+    # The browser suite is measured only against a site of the base; its budget needs none.
+    browser = "browser" in suites
+    if browser and not options.browser_base_site:
+        suites = [suite for suite in suites if suite != "browser"]
     timed = [suite for suite in suites if suite != "counters"]
     what = [f"{options.rounds} rounds of {', '.join(timed)}"] if timed else []
+    if browser:
+        what.insert(0, "the budget of the page switches in a browser")
     if "counters" in suites:
         what.insert(0, "the counter checks")
     print(f"base: {base_ref} ({base_sha[:10]}), candidate: {candidate_label}, {' and '.join(what)}")
@@ -897,18 +998,25 @@ def gate(options: argparse.Namespace) -> int:
             print(f"run:   {' '.join(cargo_command() + counter_check_args(*check, False))}")
     elif counters:
         check_rows = run_counter_checks(candidate, logs, options.verbose)
-        if not suites:
-            failures = [row for row in check_rows if row.regressed]
-            print()
-            print(text_table(check_rows))
-            print()
-            print(f"{len(check_rows)} counter checks, {len(failures)} failed" if failures else f"{len(check_rows)} counter checks, none failed")
-            print(f"logs: {logs}")
-            return 1 if failures else 0
+    if browser and options.dry_run:
+        print(f"run:   node {BROWSER_SCRIPT} {options.browser_site} --json (the budget of the page switches)")
+    elif browser:
+        check_rows += run_browser_budget(candidate, options.browser_site, logs, options.verbose)
+    if check_rows and not suites:
+        failures = [row for row in check_rows if row.regressed]
+        print()
+        print(text_table(check_rows))
+        print()
+        print(f"{len(check_rows)} checks, {len(failures)} failed" if failures else f"{len(check_rows)} checks, none failed")
+        print(f"logs: {logs}")
+        return 1 if failures else 0
 
     if options.dry_run:
         for suite in suites:
             variables = " ".join(f"{name}={value}" for name, value in env[suite].items())
+            if suite == "browser":
+                print(f"run:   node {BROWSER_SCRIPT} <site> --json, on {options.browser_base_site} and {options.browser_site} in turn")
+                continue
             print(f"build: {' '.join(cargo_command() + SUITES[suite]['build'])}")
             if suite == "window":
                 print(f"run:   {FRAMES_BINARY} with FRAMES_SCENE={','.join(window_scenes)}, {options.window_seconds:g} s each")
@@ -920,7 +1028,9 @@ def gate(options: argparse.Namespace) -> int:
                     print(f"run:   each class of the benchmarks in a process of its own, with {BENCH_CLASS}=<category::Class>")
         return 0
 
-    base_root, copied = prepare_base(root, scratch, base_sha, suites, options.copy_gate)
+    # The browser suite runs the candidate's script on two sites that exist: no worktree of the base.
+    built = [suite for suite in suites if SUITES[suite]["build"]]
+    base_root, copied = prepare_base(root, scratch, base_sha, suites, options.copy_gate) if built else (root, [])
     if copied:
         reason = "--copy-gate" if options.copy_gate else "the base has no benchmark code of its own for them"
         print(f"note: {reason}: the candidate's {', '.join(copied)} were copied into the base worktree, so both sides run the same benchmark code")
@@ -928,7 +1038,7 @@ def gate(options: argparse.Namespace) -> int:
     base = Side("base", base_root, scratch / "target-base", f"{base_ref} ({base_sha[:10]})")
 
     # Both sides are built before anything is measured: a build does not run beside a measurement.
-    for suite in suites:
+    for suite in built:
         for side in (base, candidate):
             run_cargo(side, SUITES[suite]["build"], env[suite], logs / f"build-{suite}-{side.name}.log", options.verbose)
 
@@ -964,6 +1074,12 @@ def gate(options: argparse.Namespace) -> int:
             for side in sides:
                 print(f"round {round_index + 1} of {of}: {suite}, {side.name}", flush=True)
                 log = logs / f"{suite}-{side.name}-{round_index + 1}.log"
+                if suite == "browser":
+                    site = options.browser_base_site if side is base else options.browser_site
+                    found, _ = run_browser(root, side.name, site, log, options.verbose)
+                    record(side, found)
+                    suite_of.update((metric.key, suite) for metric, _ in found)
+                    continue
                 if suite == "window":
                     for scene in window_scenes:
                         scene_log = logs / f"window-{scene.replace('+', '-')}-{side.name}-{round_index + 1}.log"

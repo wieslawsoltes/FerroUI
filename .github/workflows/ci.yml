@@ -780,6 +780,8 @@ jobs:
         run: scripts/build-browser.sh control-catalog-browser --webapp-prebuilt
       - name: ControlCatalog tests in headless Chrome (rendering, resize, console, drawer, navigation, click, typing)
         run: node scripts/browser/tests/control_catalog.test.mjs --screenshot target/browser/screenshots/control-catalog.png
+      - name: What a page switch costs in headless Chrome (the masks its frames upload, against their budget)
+        run: node scripts/browser/tests/navigation_cost.test.mjs
       - name: Keep the screenshot
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

@@ -1,4 +1,4 @@
-use super::{ISkiaGpu, ISkiaGpuRenderTarget, ISkiaGrContext};
+use super::{ISkiaGpu, ISkiaGpuRenderTarget, ISkiaGrContext, SkiaGpuBackend};
 use crate::drawing_context_impl::{CreateInfo, DrawingContextImpl};
 use crate::skia_options::SkiaOptions;
 use crate::skia_platform::SkiaPlatform;
@@ -20,6 +20,9 @@ pub struct SkiaGpuRenderTarget {
     /// composition target keeps a layer between frames, whose surface properties are those of
     /// the frame it was created in, and creates it again once they differ.
     frame_text_rendering: Rc<Cell<TextRenderingSettings>>,
+    /// The Skia backend of the context the frames of the target are drawn with, known from the
+    /// first of them on (`clips_regions_per_draw`).
+    backend: Cell<Option<SkiaGpuBackend>>,
 }
 
 impl SkiaGpuRenderTarget {
@@ -90,8 +93,25 @@ impl SkiaGpuRenderTarget {
         render_target: Rc<dyn ISkiaGpuRenderTarget>,
         text_rendering: TextRenderingSource,
     ) -> Self {
-        Self { skia_gpu, render_target, text_rendering, frame_text_rendering: Rc::default() }
+        Self {
+            skia_gpu,
+            render_target,
+            text_rendering,
+            frame_text_rendering: Rc::default(),
+            backend: Cell::new(None),
+        }
     }
+}
+
+/// Whether a context of `backend` applies a clip of several rectangles to every draw under it on
+/// its own. Ganesh does: a region is the path of its boundary to it, which is no rectangle and
+/// not convex, so each draw under it gets a mask of its own size, rasterised on the processor and
+/// uploaded as a texture, or drawn into the stencil buffer (`ClipStack::apply`). A rectangle is
+/// its scissor. Graphite draws the clip with the shader of the draw, and the raster backend has
+/// regions of its own. A backend that is not known yet (before the first frame, which draws the
+/// whole surface) is asked again with the next frame.
+pub(crate) fn clips_regions_per_draw(backend: Option<SkiaGpuBackend>) -> bool {
+    backend == Some(SkiaGpuBackend::Ganesh)
 }
 
 impl IRenderTarget for SkiaGpuRenderTarget {
@@ -130,6 +150,7 @@ impl IRenderTarget for SkiaGpuRenderTarget {
         };
 
         let gr_context = session.gr_context();
+        self.backend.set(Some(gr_context.backend()));
         let mut context = DrawingContextImpl::new(nfo, vec![Box::new(move || session.dispose())]);
         // The programs of the runtime effects are made with the second frame
         // of a GPU context (the first paint is not delayed), not with the
@@ -139,7 +160,7 @@ impl IRenderTarget for SkiaGpuRenderTarget {
             // Box shadows use Skia's mask-filter path, not the registered
             // effect graphs. Compile its pipelines on a separate recorder,
             // before the first hover or connected animation needs them.
-            if gr_context.backend() == super::SkiaGpuBackend::Graphite && prewarm_effect_pipelines() {
+            if gr_context.backend() == SkiaGpuBackend::Graphite && prewarm_effect_pipelines() {
                 let prewarm_scene = RenderTargetSceneInfo {
                     size: ferroui_base::PixelSize::new(512, 512),
                     ..scene_info.clone()
@@ -153,6 +174,11 @@ impl IRenderTarget for SkiaGpuRenderTarget {
 
     fn platform_render_target_state(&self) -> PlatformRenderTargetState {
         self.render_target.state()
+    }
+
+    /// The frames of a Ganesh context draw one rectangle (desktop-performance.md, section 9.56).
+    fn clips_regions_per_draw(&self) -> bool {
+        clips_regions_per_draw(self.backend.get())
     }
 
     /// The layers compare their text rendering with the one of the frame
@@ -380,5 +406,15 @@ mod tests {
         // Each context prewarms its own programs.
         assert!(!prewarm_frame(&other));
         assert!(prewarm_frame(&other));
+    }
+
+    /// Section 9.56: only a Ganesh context applies a clip of several rectangles to every draw on
+    /// its own, so only its frames are drawn as one rectangle. Graphite keeps the rectangles of
+    /// the frame, and so does a target whose context is not known yet.
+    #[test]
+    fn only_a_ganesh_context_clips_regions_per_draw() {
+        assert!(clips_regions_per_draw(Some(SkiaGpuBackend::Ganesh)));
+        assert!(!clips_regions_per_draw(Some(SkiaGpuBackend::Graphite)));
+        assert!(!clips_regions_per_draw(None));
     }
 }

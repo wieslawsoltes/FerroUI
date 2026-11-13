@@ -519,6 +519,10 @@ impl ServerCompositionTarget {
         }
 
         let properties = render_target.properties();
+        // A target that applies a clip of several rectangles to each draw
+        // is given one rectangle to draw (section 9.56 of
+        // desktop-performance.md).
+        self.dirty_rects.draw_as_one_rectangle(render_target.clips_regions_per_draw());
         let need_layer = self.overlays.require_layer() // Check if we don't need overlays
             // Check if render target can be rendered to directly and preserves the previous frame
             || !(properties.retains_previous_frame_contents && properties.is_suitable_for_direct_rendering);

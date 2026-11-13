@@ -41,6 +41,19 @@ pub trait IDirtyRectTracker: IDirtyRectCollector {
 
     fn combined_rect(&self) -> LtrbRect;
 
+    /// Has the frames finalized from here on draw one rectangle, the one
+    /// that holds every dirty rectangle of the frame on whole pixels, under
+    /// a clip that is that rectangle (`one`), or the dirty area as the
+    /// tracker makes it (the default). The composition target asks for one
+    /// rectangle where the render target applies a clip of several
+    /// rectangles to every draw on its own
+    /// (`IRenderTarget::clips_regions_per_draw`). A tracker of one rectangle
+    /// has nothing to change. Not in the C# source (desktop-performance.md,
+    /// section 9.56).
+    fn draw_as_one_rectangle(&self, one: bool) {
+        let _ = one;
+    }
+
     /// Whether the tracker is a `SingleDirtyRectTracker` (the `is` test of
     /// the render pass, which needs no per-visual test with one).
     fn is_single_dirty_rect_tracker(&self) -> bool {
@@ -153,6 +166,20 @@ pub(super) fn simplify_dirty_rects(rects: &mut Vec<LtrbRect>, bounds: LtrbRect) 
     }
     if let [rect] = rects.as_mut_slice() {
         *rect = surface_or_rect(*rect, bounds);
+    }
+}
+
+/// Replaces the dirty rectangles of a frame with the one rectangle that
+/// holds them all, on whole pixels, or with the surface when that covers
+/// [`SURFACE_SHARE`] of it: what a frame draws on a target that is to get
+/// one rectangle ([`IDirtyRectTracker::draw_as_one_rectangle`]). The area
+/// drawn only grows.
+pub(super) fn unite_dirty_rects(rects: &mut Vec<LtrbRect>, bounds: LtrbRect) {
+    let union = rects.iter().filter(|rect| !rect.is_zero_size()).copied().reduce(|all, rect| all.union(rect));
+    rects.clear();
+    if let Some(union) = union {
+        let pixels = pixel_rect_to_ltrb_rect_unscaled(pixel_rect_from_rect_unscaled(union));
+        rects.push(surface_or_rect(pixels, bounds));
     }
 }
 
