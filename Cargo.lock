@@ -2115,6 +2115,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-frame-benchmarks-android"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-android",
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-frame-benchmarks",
+]
+
+[[package]]
+name = "ferroui-frame-benchmarks-ios"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-frame-benchmarks",
+ "ferroui-ios",
+]
+
+[[package]]
 name = "ferroui-freedesktop"
 version = "0.5.0-preview.1"
 dependencies = [

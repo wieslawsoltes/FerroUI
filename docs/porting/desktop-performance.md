@@ -779,6 +779,55 @@ the base and the code the benchmark runs is not what the change touches, the tim
 where this build put the code and the data; the pull request shows the line with its counts and
 says so. The gate is not told to pass it.
 
+### 8.2 The gate on every platform
+
+The gate of section 8.1 runs on the machine of whoever changes the code, which is a Mac. A
+regression that only one platform has is not seen there: section 9.56 is one that only the browser
+had. So the gate runs on every platform the framework supports before a release (`docs/release.md`,
+section 8.4), and whenever a change is about one platform. It is the same script everywhere; what
+differs is where the window suite runs and where the sources come from.
+
+| Platform | The suites | How it is run |
+|---|---|---|
+| macOS | all | `python3 scripts/perf/gate.py --base <base>` |
+| Linux | all | the same, in a display: `xvfb-run -a python3 scripts/perf/gate.py ...` |
+| Windows | all | the same, in the session of a signed-in user (a window needs a desktop) |
+| Android | `window` | `--only window --window-device android`, an emulator or a device that runs |
+| iOS | `window` | `--only window --window-device ios`, a simulator that is booted |
+| Browser | `browser` | `--only browser --browser-site <folder or address>`, headless Chrome |
+
+The window suite draws with the GPU backend the platform's applications get, whatever that is on
+the machine, the emulator or the simulator; the browser suite counts what WebGL is asked for.
+
+- **The suites without a window** (`counters`, `gauntlet`, `frames`, `framework`, `tdg`) draw into
+  a raster framebuffer and need no display: they are the same on macOS, Linux and Windows, and say
+  what the compiler and the allocator of each platform make of the same code. On a device and in a
+  browser they do not run: a test binary is not an application there.
+- **The window suite on a device** (`--window-device android` or `ios`, with `--device-id` when
+  more than one is running): the scenes are those of the desktop program, in an application of
+  their own, `tests/FerroUI.FrameBenchmarks.Android` (a native library of an activity) and
+  `tests/FerroUI.FrameBenchmarks.iOS`. Both are a few lines: the application, the scenes and the
+  report are in `tests/FerroUI.FrameBenchmarks` (`App`, `report_to`, `scene_from`), and the fonts
+  are part of the program, since an application on a device has no folder of the repository. The
+  gate builds the host of each side with cargo (the environment of `scripts/android/env.sh`, the
+  SDK of the simulator), packages it with `scripts/android/apk.sh package --no-cargo` or
+  `scripts/ios/bundle.sh --no-build`, and installs both sides under ids of their own
+  (`org.ferroui.framebenchmarks.base`, `.candidate`). A scene is started with the command of the
+  platform: on Android `am start` with the scene as an extra of the intent (`FRAMES_SCENE`), the
+  `PERF` lines read from the log of the device (tag `ferroui-frames`); on iOS `simctl launch` with
+  the scene in the environment of the process, the lines read from its console. The times are
+  from that command. The program says which scene it shows (`PERF scene`), and the gate fails
+  when it is not the one asked for.
+- **Where the candidate is not a git checkout** (a machine that gets its sources as a copy:
+  `scripts/windows/vm-sync.sh <commit> <folder>` makes one, on any system), the base is a second
+  copy, passed with `--base-dir`; the gate checks nothing out and names each side by the commit
+  its copy was made from. `--copy-gate` copies the candidate's benchmark code into that tree as it
+  does into a worktree.
+- **The numbers of an emulator, a simulator and a virtual machine** are those of the machine
+  below them and of its drivers: they are compared with the other side on the same one, in the
+  same run, and never with the numbers of another platform. A virtual machine or an emulator runs
+  alone while it is measured.
+
 ## 9. Deviations from upstream for frame cost
 
 Each deviation keeps the observable behaviour of upstream (the same events, the same order, the

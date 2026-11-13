@@ -8,6 +8,9 @@ TreeDataGrid benchmarks, of a base commit against the working tree, measured on 
     python3 scripts/perf/gate.py --only tdg --tdg-filter VirtualizationBenchmarks
     python3 scripts/perf/gate.py --only counters
     python3 scripts/perf/gate.py --only browser --browser-site target/browser/control-catalog-browser
+    python3 scripts/perf/gate.py --only window --window-device android
+    python3 scripts/perf/gate.py --only window --window-device ios --device-id <simulator>
+    python3 scripts/perf/gate.py --base-dir ../ferroui-base
 
 The base (default: the merge-base of HEAD with origin/main) is checked out, detached, in a git
 worktree of its own under the scratch folder (default: `ferroui-gate-scratch` beside the
@@ -51,6 +54,22 @@ not depend on the machine, and a switch over its budget fails the gate. With `--
 (a folder or an address as well) the two sites are also measured alternately like every other
 suite: the masks, their pixels and the time to the first painted frame of each switch.
 
+The window suite on a device (`--window-device android` or `ios`; an Android emulator or device
+that runs, an iOS simulator that is booted; `--device-id` when there is more than one): the gate
+builds the host of the frame benchmarks of each side for the device
+(`tests/FerroUI.FrameBenchmarks.Android`, `tests/FerroUI.FrameBenchmarks.iOS`), packages it with
+the script of the platform, installs both under application ids of their own and starts each
+scene with the command of the platform (`am start`, `simctl launch`); the `PERF` lines come from
+the log of the device or the console of the process. Android needs ANDROID_HOME (the SDK), as
+`scripts/android/env.sh` does.
+
+Where this script is not in a git checkout (a machine that gets a copy of the sources, made for
+example by `scripts/windows/vm-sync.sh`), or with `--base-dir` in any case, the base is a source
+tree as it is: nothing is checked out, and each side is named by the commit its copy says it was
+made from. The gate runs on macOS, Linux and Windows; the window suite needs a display (on Linux
+`xvfb-run -a` gives one). See docs/porting/desktop-performance.md, section 8.2, and
+docs/release.md, section 8.4: the gate on every platform, before a release.
+
 When the base has no frame gate (commits before it), the candidate's `samples/GauntletBenchmark`
 is copied into the base worktree (and made a member of its workspace when it is not one), so that
 both sides run the same benchmark code; the output says so.
@@ -68,12 +87,15 @@ import datetime
 import json
 import os
 import platform
+import queue
 import re
 import shlex
 import shutil
 import statistics
 import subprocess
 import sys
+import threading
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -167,6 +189,23 @@ SUITES = {
     "browser": {"build": [], "run": []},
 }
 ALL_SUITES = ["counters", "gauntlet", "frames", "framework", "tdg", "window"]
+# The hosts of the frame benchmarks on a device, which the window suite runs with `--window-device`:
+# the package and its folder, and what the gate needs to start the application and to read it.
+ANDROID_PACKAGE = "ferroui-frame-benchmarks-android"
+ANDROID_CRATE = Path("tests/FerroUI.FrameBenchmarks.Android")
+ANDROID_TARGETS = {"arm64-v8a": "aarch64-linux-android", "x86_64": "x86_64-linux-android"}
+ANDROID_ACTIVITY = "org.ferroui.android.FerroMainActivity"
+# The tag of the log the Android host writes the `PERF` lines with.
+ANDROID_TAG = "ferroui-frames"
+IOS_PACKAGE = "ferroui-frame-benchmarks-ios"
+IOS_CRATE = Path("tests/FerroUI.FrameBenchmarks.iOS")
+IOS_BINARY = "frame-benchmarks-ios"
+IOS_TARGET = "aarch64-apple-ios-sim" if platform.machine() == "arm64" else "x86_64-apple-ios"
+DEVICE_CRATES = {"android": ANDROID_CRATE, "ios": IOS_CRATE}
+# The application id of a side on a device is this with the name of the side: both stay installed.
+DEVICE_APPLICATION = "org.ferroui.framebenchmarks"
+# The file a copy of the sources made by `scripts/windows/vm-sync.sh` names its commit in.
+TREE_COMMIT_MARK = ".vm-sync-commit"
 # Suites that are run only when `--only` names them: they need something the gate does not make.
 OPT_IN_SUITES = ["browser"]
 BROWSER_SCRIPT = Path("scripts/browser/navigation-cost.mjs")
@@ -262,6 +301,46 @@ class Side:
     failed: set[str] = field(default_factory=set)
     # The instructions of an operation of a benchmark, a value a round, by the key of its time.
     instructions: dict[str, list[float]] = field(default_factory=dict)
+
+
+def adb_tool() -> str:
+    """`adb` of the search path, or the one of the SDK that `ANDROID_HOME` names."""
+    found = shutil.which("adb")
+    if found:
+        return found
+    sdk = os.environ.get("ANDROID_HOME") or os.environ.get("ANDROID_SDK_ROOT")
+    if sdk:
+        tool = Path(sdk) / "platform-tools" / ("adb.exe" if os.name == "nt" else "adb")
+        if tool.exists():
+            return str(tool)
+    return "adb"
+
+
+@dataclass
+class Device:
+    """Where the window suite runs when it is not this machine: an Android device or emulator
+    (`adb`), or an iOS simulator (`xcrun simctl`)."""
+
+    kind: str  # "android" or "ios"
+    id: str | None
+    # Android: the ABI of the device, which names the target of the build.
+    abi: str = ""
+
+    def adb(self, *args: str) -> list[str]:
+        return [adb_tool(), *(["-s", self.id] if self.id else []), *args]
+
+    @property
+    def simulator(self) -> str:
+        return self.id or "booted"
+
+    @property
+    def target(self) -> str:
+        return ANDROID_TARGETS[self.abi] if self.kind == "android" else IOS_TARGET
+
+    def __str__(self) -> str:
+        if self.kind == "android":
+            return f"an Android device ({self.id or 'the one adb sees'}, {self.abi})"
+        return f"an iOS simulator ({self.simulator}, {IOS_TARGET})"
 
 
 class GateError(Exception):
@@ -432,10 +511,51 @@ def cargo_command() -> list[str]:
 
 
 def git(root: Path, *args: str, check: bool = True) -> str:
-    result = subprocess.run(["git", "-C", str(root), *args], capture_output=True, text=True)
+    try:
+        result = subprocess.run(["git", "-C", str(root), *args], capture_output=True, text=True)
+    except FileNotFoundError:
+        # A machine without git measures two source trees (`--base-dir`).
+        if check:
+            raise GateError(f"git {' '.join(args)}: git is not installed") from None
+        return ""
     if check and result.returncode != 0:
         raise GateError(f"git {' '.join(args)}: {result.stderr.strip()}")
     return result.stdout.strip()
+
+
+def checkout_root(folder: Path) -> Path | None:
+    """`folder` when it is the top of a git checkout, else nothing (a copy of the sources, also one
+    that lies inside the checkout of something else)."""
+    top = git(folder, "rev-parse", "--show-toplevel", check=False)
+    return folder if top and Path(top).resolve() == folder.resolve() else None
+
+
+def tree_commit(folder: Path) -> str | None:
+    """The commit a source tree was made from: what its mark says (a copy), else its HEAD (a
+    checkout), else nothing."""
+    mark = folder / TREE_COMMIT_MARK
+    if mark.is_file():
+        return mark.read_text(encoding="utf-8").strip() or None
+    if checkout_root(folder) is not None:
+        return git(folder, "rev-parse", "HEAD", check=False) or None
+    return None
+
+
+def run_tool(command: list[str], env: dict[str, str] | None = None, cwd: Path | None = None, log: Path | None = None) -> str:
+    """Runs a tool of a device (adb, simctl, a packaging script) and returns its output."""
+    try:
+        result = subprocess.run(
+            command, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, errors="replace"
+        )
+    except FileNotFoundError:
+        raise GateError(f"{command[0]} is not installed, or not in PATH") from None
+    if log is not None:
+        log.parent.mkdir(parents=True, exist_ok=True)
+        log.write_text(result.stdout, encoding="utf-8")
+    if result.returncode != 0:
+        tail = "\n".join(result.stdout.strip().splitlines()[-8:])
+        raise GateError(f"{' '.join(shlex.quote(part) for part in command)} failed with status {result.returncode}:\n{tail}")
+    return result.stdout
 
 
 def run_cargo(side: Side, args: list[str], env: dict[str, str], log: Path, echo: bool) -> str:
@@ -508,12 +628,9 @@ def run_benchmarks(side: Side, suite: str, classes: list[str] | None, env: dict[
     return output
 
 
-def prepare_base(root: Path, scratch: Path, base: str, suites: list[str], copy_gate: bool) -> tuple[Path, list[str]]:
+def checkout_base(root: Path, scratch: Path, base: str) -> Path:
     """Checks out `base`, detached, in the worktree of the scratch folder (created on first use),
-    and copies into it the candidate's benchmark code the measured suites need when the base has
-    none of it or `copy_gate` asks for it: the frame gate of the gauntlet, the frame benchmarks,
-    the framework benchmarks (when the base lacks one of their categories). Returns the worktree and the
-    folders copied."""
+    and returns the worktree."""
     worktree = scratch / "base"
     common = Path(git(root, "rev-parse", "--path-format=absolute", "--git-common-dir")).resolve()
     if worktree.exists():
@@ -528,12 +645,25 @@ def prepare_base(root: Path, scratch: Path, base: str, suites: list[str], copy_g
         scratch.mkdir(parents=True, exist_ok=True)
         # --force: the path may be registered from an earlier scratch folder that was deleted.
         git(root, "worktree", "add", "--force", "--detach", str(worktree), base)
+    return worktree
 
+
+def copy_benchmarks(root: Path, worktree: Path, suites: list[str], copy_gate: bool, device: Device | None) -> list[str]:
+    """Copies into the source tree of the base the candidate's benchmark code the measured suites
+    need when the base has none of it or `copy_gate` asks for it: the frame gate of the gauntlet,
+    the frame benchmarks, their host on a device (the window suite with `--window-device`; with a
+    host that is copied the frame benchmarks are copied as well, since the host is written for
+    them), the framework benchmarks (when the base lacks one of their categories). Returns the
+    folders copied."""
     wanted: list[tuple[Path, bool]] = []
     if "gauntlet" in suites:
         wanted.append((GATE_SAMPLE, (worktree / GATE_TEST).is_file()))
     if "frames" in suites or "window" in suites:
-        wanted.append((FRAMES_CRATE, (worktree / FRAMES_CRATE / "Cargo.toml").is_file()))
+        host = DEVICE_CRATES[device.kind] if device is not None and "window" in suites else None
+        host_present = host is None or (worktree / host / "Cargo.toml").is_file()
+        wanted.append((FRAMES_CRATE, host_present and (worktree / FRAMES_CRATE / "Cargo.toml").is_file()))
+        if host is not None:
+            wanted.append((host, host_present))
     if "framework" in suites:
         present = all((worktree / FRAMEWORK_CRATE / category).is_dir() for category in FRAMEWORK_CATEGORIES)
         wanted.append((FRAMEWORK_CRATE, present))
@@ -555,69 +685,207 @@ def prepare_base(root: Path, scratch: Path, base: str, suites: list[str], copy_g
                 raise GateError(f"cannot add {folder} to the members of {manifest}")
             manifest.write_text(text, encoding="utf-8")
         copied.append(folder.as_posix())
-    return worktree, copied
+    return copied
+
+
+@dataclass
+class PerfReport:
+    """What the `PERF` lines of a run of the frame benchmarks said, with the times in
+    milliseconds from its start."""
+
+    first_frame: float | None = None
+    second_frame: float | None = None
+    rates: list[float] = field(default_factory=list)
+    # The scene the program says it shows (`PERF scene`; a program before that line says none).
+    scene: str | None = None
+
+
+def read_perf(command: list[str], env: dict[str, str] | None, cwd: Path | None, seconds: float, log: Path, echo: bool, launch=None) -> PerfReport:
+    """Runs `command` for `seconds` and returns what its `PERF` lines said. `launch`, when given,
+    is called once the command runs and starts what the command reports (on a device the command
+    is the stream of its log); the times then count from that call, else from the start of the
+    command. A line gets its time when it is read, by a thread of its own: neither a pipe that
+    blocks nor one that does not is the same on every system."""
+    report = PerfReport()
+    log.parent.mkdir(parents=True, exist_ok=True)
+    lines: queue.Queue[tuple[float, str]] = queue.Queue()
+    with open(log, "w", encoding="utf-8") as out:
+        try:
+            process = subprocess.Popen(
+                command, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, errors="replace"
+            )
+        except FileNotFoundError:
+            raise GateError(f"{command[0]} cannot be started: it is not built, not installed or not in PATH") from None
+        assert process.stdout is not None
+
+        def pump(stream=process.stdout) -> None:
+            for line in stream:
+                lines.put((time.monotonic(), line.rstrip("\r\n")))
+
+        threading.Thread(target=pump, daemon=True).start()
+        try:
+            start = time.monotonic()
+            if launch is not None:
+                launch()
+            while True:
+                left = start + seconds - time.monotonic()
+                if left <= 0:
+                    break
+                try:
+                    stamp, line = lines.get(timeout=min(left, 0.1))
+                except queue.Empty:
+                    if process.poll() is not None:
+                        break
+                    continue
+                out.write(line + "\n")
+                if echo:
+                    sys.stdout.write(f"  {line}\n")
+                if stamp < start:
+                    continue
+                if line.startswith("PERF scene "):
+                    report.scene = line.split()[2]
+                elif line.startswith("PERF first_frame") and report.first_frame is None:
+                    report.first_frame = (stamp - start) * 1000.0
+                elif line.startswith("PERF second_frame") and report.second_frame is None:
+                    report.second_frame = (stamp - start) * 1000.0
+                elif line.startswith("PERF fps "):
+                    report.rates.append(float(line.split()[2]))
+        finally:
+            process.kill()
+            process.wait()
+    return report
+
+
+def window_metrics(side: Side, scene: str, report: PerfReport, seconds: float, log: Path) -> list[tuple[Metric, float]]:
+    """The metrics of a scene in a window: its first frame (the time from the start to its first
+    animation frame), its second frame where the program reports one (the first frame is not
+    drawn yet when it is reported: the second is the time by which the scene is on the screen)
+    and its time a frame (from the median of its `PERF fps` lines after the first three)."""
+    if report.scene is not None and report.scene != scene:
+        raise GateError(f"[{side.name}] the program showed {report.scene} where {scene} was asked for; the log is {log}")
+    if report.first_frame is None or len(report.rates) < 5:
+        raise GateError(f"[{side.name}] {scene} drew no frames in {seconds:g} s; the log is {log}")
+    rate = statistics.median(report.rates[3:])
+    found = [
+        (Metric(f"window/{scene} ms_per_frame", "ms", WINDOW_FACTOR, WINDOW_FRAME_FLOOR_MS), 1000.0 / rate),
+        (Metric(f"window/{scene} first_frame_ms", "ms", WINDOW_FACTOR, WINDOW_FIRST_FRAME_FLOOR_MS), report.first_frame),
+    ]
+    if report.second_frame is not None:
+        found.append(
+            (Metric(f"window/{scene} second_frame_ms", "ms", WINDOW_FACTOR, WINDOW_FIRST_FRAME_FLOOR_MS), report.second_frame)
+        )
+    return found
 
 
 def run_window(side: Side, scene: str, seconds: float, log: Path, echo: bool) -> list[tuple[Metric, float]]:
     """Opens `scene` in the desktop program of the frame benchmarks for `seconds` and returns its
-    first frame (the time from the start of the process to its first animation frame), its second
-    frame where the program reports one (the first frame is not drawn yet when it is reported: the
-    second is the time by which the scene is on the screen) and its time a frame (from the median
-    of its `PERF fps` lines after the first three)."""
-    import time
-
-    binary = side.target / "release" / FRAMES_BINARY
+    metrics (`window_metrics`)."""
+    binary = side.target / "release" / (FRAMES_BINARY + (".exe" if os.name == "nt" else ""))
     env = {**os.environ, "FRAMES_SCENE": scene, "PERF_REPORT": "1"}
+    # A program before the fonts were part of it reads them from this folder.
     env.setdefault("PERF_FONTS", str(side.root / "src/FerroUI.Themes.Material/Assets"))
     print(f"[{side.name}] {binary.name} {scene} for {seconds:g} s", flush=True)
-    log.parent.mkdir(parents=True, exist_ok=True)
-    start = time.monotonic()
-    first_frame = None
-    second_frame = None
-    rates = []
-    with open(log, "w", encoding="utf-8") as out:
-        process = subprocess.Popen([str(binary)], cwd=side.root, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-        assert process.stdout is not None
+    report = read_perf([str(binary)], env, side.root, seconds, log, echo)
+    return window_metrics(side, scene, report, seconds, log)
+
+
+def find_device(kind: str, identifier: str | None) -> Device:
+    """The device of the window suite: an Android device or emulator that is running (its ABI is
+    asked of it), or an iOS simulator that is booted."""
+    device = Device(kind, identifier)
+    if kind == "android":
+        device.abi = run_tool(device.adb("shell", "getprop", "ro.product.cpu.abi")).strip()
+        if device.abi not in ANDROID_TARGETS:
+            raise GateError(f"the ABI of the Android device is {device.abi or 'unknown'}: one of {', '.join(ANDROID_TARGETS)} is needed")
+        # A screen that is off draws no frames.
+        run_tool(device.adb("shell", "input", "keyevent", "KEYCODE_WAKEUP"))
+    else:
+        run_tool(["xcrun", "simctl", "bootstatus", device.simulator])
+    return device
+
+
+def android_environment(root: Path) -> dict[str, str]:
+    """The environment `scripts/android/env.sh` of a source tree sets for a build: the linker and
+    the compilers of the NDK. The SDK is the one of ANDROID_HOME."""
+    script = root / "scripts/android/env.sh"
+    dump = "import json, os; print(json.dumps(dict(os.environ)))"
+    output = run_tool(["bash", "-c", 'source "$1" >/dev/null && exec "$2" -c "$3"', "_", str(script), sys.executable, dump])
+    return json.loads(output.strip().splitlines()[-1])
+
+
+def device_application(side: Side) -> str:
+    return f"{DEVICE_APPLICATION}.{side.name}"
+
+
+def device_build_args(device: Device) -> list[str]:
+    if device.kind == "android":
+        return ["build", "-p", ANDROID_PACKAGE, "--lib", "--target", device.target, "--release"]
+    return ["build", "-p", IOS_PACKAGE, "--target", device.target, "--release", "--bin", IOS_BINARY]
+
+
+def build_device(side: Side, device: Device, scratch: Path, logs: Path, echo: bool) -> None:
+    """Builds the host of the frame benchmarks of `side` for the device, packages it with the
+    script of the platform (which is told that the build is done: the build goes through
+    `run_cargo` like every other) and installs it, with an application id of the side."""
+    out = scratch / f"device-{side.name}"
+    application = device_application(side)
+    name = f"Frames {side.name}"
+    if device.kind == "android":
+        env = android_environment(side.root)
+        run_cargo(side, device_build_args(device), env, logs / f"build-window-{side.name}.log", echo)
+        command = [
+            "bash", str(side.root / "scripts/android/apk.sh"), "package", "--package", ANDROID_PACKAGE, "--release",
+            "--abi", device.abi, "--application-id", application, "--label", name, "--out", str(out), "--no-cargo",
+        ]  # fmt: skip
+        output = run_tool(command, {**env, "CARGO_TARGET_DIR": str(side.target)}, side.root, logs / f"package-window-{side.name}.log")
+        last = output.strip().splitlines()[-1] if output.strip() else ""
+        if not last.startswith("APK: "):
+            raise GateError(f"[{side.name}] apk.sh did not name its package; the log is {logs / f'package-window-{side.name}.log'}")
+        package = last.removeprefix("APK: ").strip()
+        print(f"[{side.name}] adb install {package}", flush=True)
+        run_tool(device.adb("install", "-r", package), log=logs / f"install-window-{side.name}.log")
+    else:
+        sdk = run_tool(["xcrun", "--sdk", "iphonesimulator", "--show-sdk-path"]).strip()
+        run_cargo(side, device_build_args(device), {"SDKROOT": sdk}, logs / f"build-window-{side.name}.log", echo)
+        command = [
+            "bash", str(side.root / "scripts/ios/bundle.sh"), "--package", IOS_PACKAGE, "--bin", IOS_BINARY,
+            "--target", device.target, "--profile", "release", "--bundle-id", application, "--name", name,
+            "--out", str(out), "--no-build",
+        ]  # fmt: skip
+        env = {**os.environ, "CARGO_TARGET_DIR": str(side.target)}
+        output = run_tool(command, env, side.root, logs / f"package-window-{side.name}.log")
+        bundle = output.strip().splitlines()[-1] if output.strip() else ""
+        if not Path(bundle).is_dir():
+            raise GateError(f"[{side.name}] bundle.sh did not name its bundle; the log is {logs / f'package-window-{side.name}.log'}")
+        print(f"[{side.name}] simctl install {bundle}", flush=True)
+        run_tool(["xcrun", "simctl", "install", device.simulator, bundle], log=logs / f"install-window-{side.name}.log")
+
+
+def run_device_window(side: Side, device: Device, scene: str, seconds: float, log: Path, echo: bool) -> list[tuple[Metric, float]]:
+    """Starts the application of `side` on the device with `scene` for `seconds` and returns its
+    metrics (`window_metrics`), with the times from the command that starts it. Android: the
+    scene is an extra of the intent, and the lines are read from the log of the device, which is
+    emptied first. iOS: the scene is in the environment of the process, and the lines are its
+    standard output on the console of `simctl launch`."""
+    application = device_application(side)
+    print(f"[{side.name}] {application} {scene} for {seconds:g} s", flush=True)
+    if device.kind == "android":
+        run_tool(device.adb("shell", "am", "force-stop", application))
+        run_tool(device.adb("logcat", "-c"))
+        start = device.adb("shell", "am", "start", "-n", f"{application}/{ANDROID_ACTIVITY}", "--es", "FRAMES_SCENE", scene)
+        stream = device.adb("logcat", "-v", "raw", "-s", f"{ANDROID_TAG}:I")
         try:
-            os.set_blocking(process.stdout.fileno(), False)
-            buffer = ""
-            while time.monotonic() - start < seconds and process.poll() is None:
-                try:
-                    chunk = process.stdout.read()
-                except BlockingIOError:
-                    # A text stream over a pipe that does not block raises where there is nothing
-                    # to read yet (it does not always return an empty string).
-                    chunk = ""
-                if chunk:
-                    buffer += chunk
-                    *lines, buffer = buffer.split("\n")
-                    for line in lines:
-                        out.write(line + "\n")
-                        if echo:
-                            sys.stdout.write(f"  {line}\n")
-                        if line.startswith("PERF first_frame") and first_frame is None:
-                            first_frame = (time.monotonic() - start) * 1000.0
-                        elif line.startswith("PERF second_frame") and second_frame is None:
-                            second_frame = (time.monotonic() - start) * 1000.0
-                        elif line.startswith("PERF fps "):
-                            rates.append(float(line.split()[2]))
-                else:
-                    time.sleep(0.01)
+            report = read_perf(stream, None, None, seconds, log, echo, lambda: run_tool(start))
         finally:
-            process.kill()
-            process.wait()
-    if first_frame is None or len(rates) < 5:
-        raise GateError(f"[{side.name}] {scene} drew no frames in {seconds:g} s; the log is {log}")
-    rate = statistics.median(rates[3:])
-    found = [
-        (Metric(f"window/{scene} ms_per_frame", "ms", WINDOW_FACTOR, WINDOW_FRAME_FLOOR_MS), 1000.0 / rate),
-        (Metric(f"window/{scene} first_frame_ms", "ms", WINDOW_FACTOR, WINDOW_FIRST_FRAME_FLOOR_MS), first_frame),
-    ]
-    if second_frame is not None:
-        found.append(
-            (Metric(f"window/{scene} second_frame_ms", "ms", WINDOW_FACTOR, WINDOW_FIRST_FRAME_FLOOR_MS), second_frame)
-        )
-    return found
+            run_tool(device.adb("shell", "am", "force-stop", application))
+    else:
+        env = {**os.environ, "SIMCTL_CHILD_FRAMES_SCENE": scene, "SIMCTL_CHILD_PERF_REPORT": "1"}
+        launch = ["xcrun", "simctl", "launch", "--console-pty", "--terminate-running-process", device.simulator, application]
+        try:
+            report = read_perf(launch, env, None, seconds, log, echo)
+        finally:
+            subprocess.run(["xcrun", "simctl", "terminate", device.simulator, application], capture_output=True)
+    return window_metrics(side, scene, report, seconds, log)
 
 
 def counter_check_args(package: str, features: str, test_filter: str, build: bool) -> list[str]:
@@ -898,6 +1166,16 @@ def main() -> int:
     parser.add_argument("--framework-filter", default=FRAMEWORK_FILTER, help=f"FERROUI_BENCH_FILTER of the framework run (default {FRAMEWORK_FILTER})")
     parser.add_argument("--window-seconds", type=float, default=12.0, help="how long the window suite runs each scene (default 12)")
     parser.add_argument("--window-scenes", default=",".join(WINDOW_SCENES), help=f"the scenes of the window suite (default {','.join(WINDOW_SCENES)})")
+    parser.add_argument(
+        "--window-device",
+        choices=sorted(DEVICE_CRATES),
+        help="run the window suite on a device instead of this machine: an Android device or emulator that is running, or an iOS simulator that is booted",
+    )
+    parser.add_argument("--device-id", help="the device of --window-device: the serial of adb, or the identifier of the simulator (default: the one that runs)")
+    parser.add_argument(
+        "--base-dir",
+        help="the source tree of the base, as it is, instead of a worktree the gate checks out; needed where the candidate is not a git checkout",
+    )
     parser.add_argument("--tolerance", type=float, default=0.05, help="the allowed slowdown, as a fraction (default 0.05)")
     parser.add_argument("--tdg-filter", help="FERROUI_BENCH_FILTER of the TreeDataGrid run: parts of names, comma separated")
     parser.add_argument("--tdg-iterations", type=int, default=7, help="FERROUI_BENCH_ITERATIONS of the TreeDataGrid run (default 7)")
@@ -926,16 +1204,32 @@ def main() -> int:
 
 
 def gate(options: argparse.Namespace) -> int:
-    root = Path(git(Path(__file__).resolve().parent, "rev-parse", "--show-toplevel"))
+    # The candidate is the source tree this script is in: a git checkout, or a copy of one (on a
+    # machine that gets its sources copied; the base is then a copy as well, `--base-dir`).
+    root = Path(__file__).resolve().parents[2]
+    checkout = checkout_root(root) is not None
     scratch = Path(options.scratch).resolve() if options.scratch else (root.parent / "ferroui-gate-scratch")
-    base_ref = options.base
-    if base_ref is None:
-        if not git(root, "rev-parse", "--verify", "-q", "origin/main", check=False):
-            raise GateError("origin/main is unknown here: pass --base")
-        base_ref = git(root, "merge-base", "HEAD", "origin/main")
-    base_sha = git(root, "rev-parse", "--verify", f"{base_ref}^{{commit}}")
-    head_sha = git(root, "rev-parse", "HEAD")
-    dirty = bool(git(root, "status", "--porcelain", "--untracked-files=no"))
+    base_dir = Path(options.base_dir).resolve() if options.base_dir else None
+    if base_dir is not None:
+        if not (base_dir / "Cargo.toml").is_file():
+            raise GateError(f"--base-dir: {base_dir} is not a source tree of the workspace")
+        base_sha = tree_commit(base_dir) or base_dir.name
+        base_ref = options.base or f"the tree {base_dir.name}"
+    elif not checkout:
+        raise GateError(f"{root} is not a git checkout: pass the source tree of the base with --base-dir")
+    else:
+        base_ref = options.base
+        if base_ref is None:
+            if not git(root, "rev-parse", "--verify", "-q", "origin/main", check=False):
+                raise GateError("origin/main is unknown here: pass --base")
+            base_ref = git(root, "merge-base", "HEAD", "origin/main")
+        base_sha = git(root, "rev-parse", "--verify", f"{base_ref}^{{commit}}")
+    if checkout:
+        head_sha = git(root, "rev-parse", "HEAD")
+        dirty = bool(git(root, "status", "--porcelain", "--untracked-files=no"))
+    else:
+        head_sha = tree_commit(root) or root.name
+        dirty = False
     candidate_label = head_sha[:10] + (" with uncommitted changes" if dirty else "")
     suites = ALL_SUITES if options.only == "all" else [suite.strip() for suite in options.only.split(",") if suite.strip()]
     unknown = [suite for suite in suites if suite not in SUITES]
@@ -944,6 +1238,10 @@ def gate(options: argparse.Namespace) -> int:
     if "browser" in suites and not options.browser_site:
         raise GateError("the browser suite needs --browser-site: the gate does not build browser sites")
     window_scenes = [scene.strip() for scene in options.window_scenes.split(",") if scene.strip()]
+    if options.window_device and "window" not in suites:
+        raise GateError("--window-device is the device of the window suite, which is not among the suites")
+    if options.device_id and not options.window_device:
+        raise GateError("--device-id names the device of --window-device")
 
     bench_env = {
         "FERROUI_BENCH_ITERATIONS": str(options.tdg_iterations),
@@ -982,6 +1280,13 @@ def gate(options: argparse.Namespace) -> int:
         what.insert(0, "the counter checks")
     print(f"base: {base_ref} ({base_sha[:10]}), candidate: {candidate_label}, {' and '.join(what)}")
     print(f"scratch: {scratch}; cargo: {' '.join(cargo_command())}")
+    device = None
+    if options.window_device and options.dry_run:
+        device = Device(options.window_device, options.device_id, "arm64-v8a")
+    elif options.window_device:
+        device = find_device(options.window_device, options.device_id)
+    if device is not None:
+        print(f"the window suite runs on {device}")
     if base_sha == head_sha:
         print("note: the base is HEAD; the comparison shows the uncommitted changes, or the noise of the machine")
 
@@ -1017,6 +1322,11 @@ def gate(options: argparse.Namespace) -> int:
             if suite == "browser":
                 print(f"run:   node {BROWSER_SCRIPT} <site> --json, on {options.browser_base_site} and {options.browser_site} in turn")
                 continue
+            if suite == "window" and device is not None:
+                script = "scripts/android/apk.sh package --no-cargo" if device.kind == "android" else "scripts/ios/bundle.sh --no-build"
+                print(f"build: {' '.join(cargo_command() + device_build_args(device))}, then {script} and the install on the device")
+                print(f"run:   {DEVICE_APPLICATION}.<side> on the device with FRAMES_SCENE={','.join(window_scenes)}, {options.window_seconds:g} s each")
+                continue
             print(f"build: {' '.join(cargo_command() + SUITES[suite]['build'])}")
             if suite == "window":
                 print(f"run:   {FRAMES_BINARY} with FRAMES_SCENE={','.join(window_scenes)}, {options.window_seconds:g} s each")
@@ -1030,17 +1340,23 @@ def gate(options: argparse.Namespace) -> int:
 
     # The browser suite runs the candidate's script on two sites that exist: no worktree of the base.
     built = [suite for suite in suites if SUITES[suite]["build"]]
-    base_root, copied = prepare_base(root, scratch, base_sha, suites, options.copy_gate) if built else (root, [])
+    base_root, copied = root, []
+    if built:
+        base_root = base_dir if base_dir is not None else checkout_base(root, scratch, base_sha)
+        copied = copy_benchmarks(root, base_root, suites, options.copy_gate, device)
     if copied:
         reason = "--copy-gate" if options.copy_gate else "the base has no benchmark code of its own for them"
-        print(f"note: {reason}: the candidate's {', '.join(copied)} were copied into the base worktree, so both sides run the same benchmark code")
+        print(f"note: {reason}: the candidate's {', '.join(copied)} were copied into the base, so both sides run the same benchmark code")
 
     base = Side("base", base_root, scratch / "target-base", f"{base_ref} ({base_sha[:10]})")
 
     # Both sides are built before anything is measured: a build does not run beside a measurement.
     for suite in built:
         for side in (base, candidate):
-            run_cargo(side, SUITES[suite]["build"], env[suite], logs / f"build-{suite}-{side.name}.log", options.verbose)
+            if suite == "window" and device is not None:
+                build_device(side, device, scratch, logs, options.verbose)
+            else:
+                run_cargo(side, SUITES[suite]["build"], env[suite], logs / f"build-{suite}-{side.name}.log", options.verbose)
 
     frames: dict[str, list[str]] = {}
     if "frames" in suites:
@@ -1083,7 +1399,10 @@ def gate(options: argparse.Namespace) -> int:
                 if suite == "window":
                     for scene in window_scenes:
                         scene_log = logs / f"window-{scene.replace('+', '-')}-{side.name}-{round_index + 1}.log"
-                        found = run_window(side, scene, options.window_seconds, scene_log, options.verbose)
+                        if device is not None:
+                            found = run_device_window(side, device, scene, options.window_seconds, scene_log, options.verbose)
+                        else:
+                            found = run_window(side, scene, options.window_seconds, scene_log, options.verbose)
                         record(side, found)
                         suite_of.update((metric.key, suite) for metric, _ in found)
                     continue
@@ -1138,6 +1457,8 @@ def gate(options: argparse.Namespace) -> int:
     if options.markdown:
         machine = f"{platform.system()} {platform.machine()}, Python {platform.python_version()}"
         notes = []
+        if device is not None:
+            notes.append(f"The window suite ran on {device}.")
         if copied:
             notes.append(f"The candidate's {', '.join(f'`{folder}`' for folder in copied)} were copied into the base, so both sides run the same benchmark code.")
         lines = [
