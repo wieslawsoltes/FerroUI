@@ -1326,7 +1326,7 @@ fn the_elements_beside_the_one_with_the_focus_stay_realized(buffer_factor: f64) 
                 assert!(realized.contains(&beside), "{index}: the element {beside} is realized, {realized:?}");
             }
         }
-        // The trail is two elements at most, and a viewport between two elements asks for one more.
+        // The trail is an element on a side, and a viewport between two elements asks for one more.
         assert!(realized.len() <= at_rest.len() + 3, "{index}: {realized:?} against {at_rest:?} at rest");
     };
 
@@ -2813,8 +2813,9 @@ fn focused_container_is_positioned_correctly_when_container_size_change_causes_i
 
 theory!(
     focused_container_is_positioned_correctly_when_container_size_change_causes_it_to_be_moved_into_visible_viewport:
+    // The last element of the viewport, 7, has the focus: the focus trail realizes 8.
     focused_container_is_positioned_correctly_when_container_size_change_causes_it_to_be_moved_into_visible_viewport_1(
-        0.0, 4, 7, 3, 6, 3, 7,
+        0.0, 4, 7, 3, 6, 3, 8,
     );
     focused_container_is_positioned_correctly_when_container_size_change_causes_it_to_be_moved_into_visible_viewport_2(
         0.5, 0, 7, 0, 7, 0, 9,

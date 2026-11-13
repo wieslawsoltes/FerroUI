@@ -57,6 +57,9 @@ pub struct VirtualizingStackPanel {
 
     has_reached_start: Cell<bool>,
     has_reached_end: Cell<bool>,
+    /// Whether the first and the last realized element are there for the focus trail of
+    /// `realize_elements` and not for the viewport.
+    focus_trail: Cell<(bool, bool)>,
     last_measured_extended_viewport: Cell<Rect>,
     last_known_extended_viewport: Cell<Rect>,
 
@@ -69,8 +72,8 @@ ferroui_base::ferro_class_info!(VirtualizingStackPanel { new: VirtualizingStackP
 ferro_impl_classes!(VirtualizingStackPanel: StyledElementImpl, InteractiveImpl, ControlImpl, PanelImpl);
 
 impl InputElementImpl for VirtualizingStackPanel {
-    /// Measures the panel again when the focus came to its first or its last realized element and the
-    /// element beside it is not realized: the focus trail of `realize_elements` realizes it.
+    /// Measures the panel again when the focus came to the first or the last element of its viewport and
+    /// the element beside it is not realized: the focus trail of `realize_elements` realizes it.
     fn on_got_focus(this: &Self, e: &FocusChangedEventArgs) {
         Self::parent_on_got_focus(this, e);
 
@@ -757,6 +760,7 @@ impl VirtualizingStackPanel {
             buffer_factor: Cell::new(0.0),
             has_reached_start: Cell::new(false),
             has_reached_end: Cell::new(false),
+            focus_trail: Cell::new((false, false)),
             last_measured_extended_viewport: Cell::new(Rect::default()),
             last_known_extended_viewport: Cell::new(Rect::default()),
             items_control_property_changed: RefCell::new(None),
@@ -1257,19 +1261,19 @@ impl VirtualizingStackPanel {
         self.has_reached_end.set(false);
 
         // The focus trail. Tab moves through the visual tree, so it cannot reach an element that is not
-        // realized, and what the viewport realizes around the element with the focus depends on where
-        // the viewport happens to end. So the elements beside the one with the focus stay realized
-        // while that one is in the realized range or right beside it: at most two elements more than
-        // the viewport asks for, and none once the focus is elsewhere.
+        // realized, and whether the element beside the one with the focus is realized depends on where
+        // the viewport happens to end. So while the focus is in the first or in the last element of the
+        // viewport, the element beside it is realized as well: one element more than the viewport asks
+        // for on that side, and none once the focus is elsewhere. An element with the focus that the
+        // viewport left is not part of it, and is kept or recycled as before.
         let focused = self.index_of_keyboard_focus(realized_elements);
-        // Before the anchor only the element right before it can be kept: the range has no gaps.
-        let focused_at_start = focused.filter(|focused| *focused >= viewport.anchor_index - 1);
+        let mut focus_trail = (false, false);
 
         // If the anchor element is at the beginning of, or before, the start
         // of the viewport then we can recycle all elements before it.
         if u <= viewport.anchor_u {
-            let keep_from =
-                focused_at_start.map_or(viewport.anchor_index, |focused| viewport.anchor_index.min(focused - 1));
+            // The element before an anchor with the focus is the focus trail.
+            let keep_from = viewport.anchor_index - i32::from(focused == Some(viewport.anchor_index));
             realized_elements.recycle_elements_before(keep_from, |element, index| self.recycle_element(element, index));
         }
 
@@ -1303,22 +1307,20 @@ impl VirtualizingStackPanel {
             }
         }
 
-        // The focus trail after the viewport: the element with the focus when it is the one right after
-        // the last, and the element after the one with the focus.
-        if let Some(focused) = focused.filter(|focused| *focused <= index) {
-            while index < item_count && index <= focused + 1 {
-                let e = self.get_or_create_element(items, &generator, index);
+        // The focus trail after the viewport: the element after the last one, when that has the focus.
+        if focused == Some(index - 1) && index < item_count {
+            let e = self.get_or_create_element(items, &generator, index);
 
-                e.measure(available_size);
-                let desired_size = e.desired_size();
-                let size_u = if horizontal { desired_size.width } else { desired_size.height };
-                let size_v = if horizontal { desired_size.height } else { desired_size.width };
+            e.measure(available_size);
+            let desired_size = e.desired_size();
+            let size_u = if horizontal { desired_size.width } else { desired_size.height };
+            let size_v = if horizontal { desired_size.height } else { desired_size.width };
 
-                measure_elements.add(index, e, u, size_u);
-                viewport.measured_v = viewport.measured_v.max(size_v);
-                u += size_u;
-                index += 1;
-            }
+            measure_elements.add(index, e, u, size_u);
+            viewport.measured_v = viewport.measured_v.max(size_v);
+            u += size_u;
+            index += 1;
+            focus_trail.1 = true;
         }
 
         // Check if we reached the end of the collection.
@@ -1351,23 +1353,23 @@ impl VirtualizingStackPanel {
             index -= 1;
         }
 
-        // The focus trail before the viewport: the element with the focus when it is the one right
-        // before the first, and the element before the one with the focus.
-        if let Some(focused) = focused_at_start.filter(|focused| *focused >= index) {
-            while index >= 0 && index >= focused - 1 {
-                let e = self.get_or_create_element(items, &generator, index);
+        // The focus trail before the viewport: the element before the first one, when that has the
+        // focus.
+        if focused == Some(index + 1) && index >= 0 {
+            let e = self.get_or_create_element(items, &generator, index);
 
-                e.measure(available_size);
-                let desired_size = e.desired_size();
-                let size_u = if horizontal { desired_size.width } else { desired_size.height };
-                let size_v = if horizontal { desired_size.height } else { desired_size.width };
-                u -= size_u;
+            e.measure(available_size);
+            let desired_size = e.desired_size();
+            let size_u = if horizontal { desired_size.width } else { desired_size.height };
+            let size_v = if horizontal { desired_size.height } else { desired_size.width };
+            u -= size_u;
 
-                measure_elements.add(index, e, u, size_u);
-                viewport.measured_v = viewport.measured_v.max(size_v);
-                index -= 1;
-            }
+            measure_elements.add(index, e, u, size_u);
+            viewport.measured_v = viewport.measured_v.max(size_v);
+            index -= 1;
+            focus_trail.0 = true;
         }
+        self.focus_trail.set(focus_trail);
 
         // Check if we reached the start of the collection.
         self.has_reached_start.set(index < 0);
@@ -1389,8 +1391,9 @@ impl VirtualizingStackPanel {
         })
     }
 
-    /// Whether the focus of `e` came to the first or the last realized element while the element
-    /// beside it, which the focus trail of `realize_elements` keeps realized, is not.
+    /// Whether the focus of `e` came to the first or the last element of the viewport while the element
+    /// beside it, which the focus trail of `realize_elements` keeps realized, is not. An element of the
+    /// trail that gets the focus asks for nothing: it is in the viewport once that follows the focus.
     fn focus_trail_is_short(&self, e: &FocusChangedEventArgs) -> bool {
         let Some(realized_elements) = self.realized_elements.borrow().clone() else {
             return false;
@@ -1418,9 +1421,10 @@ impl VirtualizingStackPanel {
 
         let index = realized_elements.get_index(&element);
         let item_count = self.items().count() as i32;
+        let (before, after) = self.focus_trail.get();
         index >= 0
-            && ((index == realized_elements.first_index() && index > 0)
-                || (index == realized_elements.last_index() && index < item_count - 1))
+            && ((!before && index == realized_elements.first_index() && index > 0)
+                || (!after && index == realized_elements.last_index() && index < item_count - 1))
     }
 
     fn get_or_create_element(
