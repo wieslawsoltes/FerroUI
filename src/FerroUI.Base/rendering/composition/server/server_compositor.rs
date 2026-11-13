@@ -649,12 +649,26 @@ impl ServerCompositor {
         let scope = self.readback.begin_write();
         let read = self.readback.read_revision();
         let write = self.readback.write_revision();
+        // The readbacks are listed as they are written (not from upstream), so that an index of
+        // the children of a visual reads the children this pass wrote and no others
+        // (desktop-performance.md, section 9.49).
+        let mut written = scope.written(entries.len());
         for entry in entries.drain(..) {
-            match entry {
-                ReadbackQueueEntry::Visual(visual) => visual.update_readback(write, read),
-                ReadbackQueueEntry::Snapshot(readback, data) => readback.update_readback(write, read, data),
+            let key = match entry {
+                ReadbackQueueEntry::Visual(visual) => {
+                    visual.update_readback(write, read);
+                    visual.readback_key()
+                }
+                ReadbackQueueEntry::Snapshot(readback, data) => {
+                    readback.update_readback(write, read, data);
+                    readback.key()
+                }
+            };
+            if let Some(written) = written.as_mut() {
+                written.push(key);
             }
         }
+        drop(written);
         drop(scope);
 
         // The storage of the queue is kept for the next pass, up to what an

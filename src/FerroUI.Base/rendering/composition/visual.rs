@@ -363,6 +363,12 @@ impl CompositionVisual {
         self.readback.readback_revision(read_revision)
     }
 
+    /// The [`VisualReadback::key`] of the readback of this visual: what the readback pass lists
+    /// the visual by when it writes it.
+    pub(crate) fn readback_key(&self) -> usize {
+        self.readback.key()
+    }
+
     /// The data the server wrote back for this visual, if it is valid for
     /// the current read revision.
     pub fn try_get_valid_readback(&self) -> Option<ReadbackData> {

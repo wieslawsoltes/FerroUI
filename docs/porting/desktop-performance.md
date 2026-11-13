@@ -3447,3 +3447,314 @@ turn, first and second launch; Cranpose from the run of section 9.46):
 - **Not upstream:** upstream gives every visual a composition visual, whose offset is its
   position in its parent, and has no walk to shorten.
 
+### 9.48 Children tables: the update pass and the render walk leave out children with nothing to do
+
+A composition visual with many children (the items of a wall, the rows of a long list that
+have visuals of their own) was walked child by child twice in every frame, as upstream
+walks it. The update pass called `pre_subgraph` for every child and returned at once for
+the ones without a flag; the render walk called `handle_pre_graph_transform_clip_opacity`
+for every child and left the ones whose bounds do not meet the dirty region. Neither does
+any work for such a child, but each reads the visual (the flags, the bounds, the
+transform), and a visual is 640 bytes somewhere on the heap: with twenty thousand children
+and one that changed, a frame brought twenty thousand visuals into the cache twice. On the
+still wall of the frame gate (`wall/20`: 20 000 items, a few change in a frame) this was
+most of the render thread's frame.
+
+**The change.** A collection of 32 children or more (`TABLE_FROM`) keeps a table beside
+the list of its children (`ChildrenTable` in `server_composition_visual_collection.rs`),
+with a row for each child in the order of the children:
+
+- whether the update pass has something to do in the child or below it (one byte);
+- the bounds of the child's subtree in the space of the holder, its
+  `transformed_sub_tree_bounds` (32 bytes; a child without bounds has bounds that meet
+  nothing).
+
+Each visual knows its place among the children (`index_in_parent`, 32 bits; the index of
+the visual in the readback queue became 32 bits too, and the visual keeps its block of 640
+bytes). The table is read from the children whenever the list is (`read_table`), and a
+row is written from three places:
+
+- `propagate_flags`, which every change of a visual ends in, marks the row of the visual
+  and the row of each ancestor it gives a flag to;
+- `post_subgraph` of the update pass clears the row of the visual it leaves and, when it
+  computed bounds, writes them;
+- nothing else: a write checks that the child is where it says in the list, and a child
+  that is not ends the table until the list is read again, so that a table that is wrong
+  is not used.
+
+The walker has one more question for its visitor, asked at each step over the children of
+a holder with a table: `next_child(holder, from, count)`, the next child to visit.
+
+- The update pass answers with the next marked row (`next_dirty_child`). The bounds of
+  the holder, which upstream unites child by child, are united from the rows when the
+  holder computes its bounds (`bounds_of_children`): a pass over 32-byte rows that are
+  next to each other, not over the visuals.
+- The render walk answers with the next row whose bounds meet the clip of the walk
+  (`next_child_in`). The clip of the walk is in the space of the world and the rows are in
+  the space of the holder, so the clip is mapped into the holder's space, made larger by
+  more than the arithmetic of the two directions can differ: the test leaves out only
+  children that the exact test of the visual leaves out as well. A holder whose transform
+  turns or skews, a render that stops at a visual and a visual drawn without its transform
+  ask every child, as before. The drawing items of the holder that come before a child
+  that is left out are drawn as they are before one that is visited, and the child counts
+  as visited in the debug events.
+
+One thing the exact test does had to be kept. A child with a clip of its own that lies
+outside the clip of the walk gets the empty rectangle at the origin of the world as its
+clip (`intersect_or_empty`), and bounds that lie around the origin of the world meet that
+rectangle: such a child is entered, and what it draws is clipped away. The row test
+therefore keeps the children whose bounds lie at or around the origin of the world, and
+the exact test decides for them as before. It is one child in most scenes; taking the
+visit away would change what the debug events count and is left for a change of its own.
+
+In a debug build the update pass checks, for every child it leaves out, that the visual
+has no flag: a flag set by a path that does not end in `propagate_flags` fails the tests
+instead of leaving a visual stale.
+
+**Other backends.** All of it is in `ferroui_base`, in the server side of the composition
+that every rendering backend runs (Skia, Vello, ProGPU, the browser): no backend has
+anything to implement, and the drawing contexts see the same calls in the same order for
+the children that are drawn.
+
+**Measured** with the local gate (nine rounds, the two sides alternately, the medians;
+base `cc82b74b96`):
+
+| Metric | Before | After | Change |
+|---|---:|---:|---:|
+| `wall/20` render thread, ms a frame | 4.682 | 1.670 | -64.3 % |
+| `wall/20` wall time, ms a frame | 4.685 | 1.672 | -64.3 % |
+| `wall/20` UI thread, ms a frame | 0.067 | 0.026 | -61.4 % |
+| `wall/20+pointer` render thread, ms a frame | 4.804 | 1.738 | -63.8 % |
+| `wall/20+pointer` wall time, ms a frame | 4.798 | 1.855 | -61.3 % |
+| `wall/20+pointer` UI thread, ms a frame | 0.872 | 1.163 | +33.5 % |
+| `frames/wall` render thread, ms a frame | 2.453 | 1.827 | -25.5 % |
+| `frames/recolor` render thread, ms a frame | 2.880 | 2.370 | -17.7 % |
+| `frames/pile` render thread, ms a frame | 1.701 | 1.520 | -10.7 % |
+| `gauntlet/16` render thread, ms a frame | 34.293 | 34.411 | +0.3 % |
+| `gauntlet/16` UI thread, ms a frame | 14.418 | 14.541 | +0.9 % |
+
+The gauntlet has no holder of many child visuals whose children stand still (its rows are
+drawing items of their lists), so it is unchanged, as are the other scenes of the gate.
+
+The one metric that rose, the UI thread's time in `wall/20+pointer`, is the hit test of
+the pointer, not the tables. With the pointer in the window every frame that was rendered
+is followed by two hit tests on the UI thread (pointer-over and the tooltip), and a hit
+test brings its index of the holder's children up to date whenever the render thread has
+written a newer revision of the readback: a walk over every child of the holder
+(`CompositionHitTestAabbTree::update_bucket`). Before, the render thread took 4.7 ms a
+frame and the two hit tests of a frame saw one revision, so the second one found its index
+up to date; now a frame takes 1.7 ms, the next revision is there between the two hit tests
+of nearly half of the frames, and the second hit test walks the children again (in the
+profile of the UI thread: 9 samples of 487 in the tooltip's hit test before, 501 of 1660
+after). The frame gate runs frames as fast as they render; on a display the two hit tests
+of a frame see one revision as before. The walk itself is the cost that should go (a hit
+test index that hears which children were written, as the tables hear which children
+changed), and that is the change after this one (section 9.49).
+
+**Tests.** `many_children_are_updated_and_rendered_as_without_their_table`: holders of 36
+to 400 children, clipped and not, scaled, mirrored and turned, through 160 frames of
+random moves, visibility, backgrounds, opacity, added, removed and nested children and
+moves of the holder, once with tables and once without (`set_without_children_tables`):
+the invalidated rectangles, the visited and rendered visuals, the bounds of the holder and
+every drawing call are the same frame by frame, and the run with tables left children out
+of both passes. `one_child_that_changes_leaves_the_other_children_out_of_both_passes`: of
+200 children, a frame without a change leaves nothing to visit, a change of one child
+leaves 199 out of both passes, and a child moved over its neighbour leaves 199 out of the
+update pass and 198 out of the render walk. `a_visual_of_the_server_fits_a_block_of_640_bytes`
+keeps the size of the visual.
+
+**Gate.** `wall/20` and `wall/20+pointer` of the frame gate (`scripts/perf/gate.py --only
+gauntlet`) hold the render thread's time of a holder of 20 000 children with a few that
+change.
+
+### 9.49 The hit-test index hears which children the render thread wrote
+
+A holder of 32 children or more answers a hit test from an index of its children
+(`CompositionHitTestAabbTree`, as upstream has it: buckets of 32 children in the order of
+the children, a tree of bounds in each). The bounds come from the readback of each child,
+which the render thread writes and the UI thread reads at a revision (`ReadbackIndices`).
+A bucket remembers the revision it was read at, and a hit test at a newer revision read
+every child of every bucket it came to before it asked the tree: for a point over the
+holder that is every child of the holder. A child whose readback was not written since
+returns after comparing two revisions (section 9.6), but the comparison reads the visual,
+and the walk is as long as the list of children whatever changed. On the still wall with
+the pointer in the window (`wall/20+pointer`: 20 000 items, two hit tests after each
+frame) this walk was the UI thread's frame, and it grew when the render thread became
+faster (section 9.48).
+
+**The change.** The readback pass says which readbacks it wrote, and the index reads
+those.
+
+- `ReadbackIndices` keeps a list of the readbacks written in the latest revisions
+  (`Written`: pairs of the revision and the key of the readback, the oldest first). The
+  key of a readback is its address: the UI visual and the server visual share one
+  readback, and it stays where it is while either of them lives. The pass
+  (`ServerCompositor::visual_readback_update_pass`) asks its write scope for the list
+  (`ReadbackWriteScope::written`) and adds the key of each readback it writes, visual or
+  snapshot, before the revision is published.
+- The list is bounded. A pass that writes more than 1 024 readbacks
+  (`WRITTEN_IN_A_REVISION`) lists none of them, and the list keeps at most 4 096 keys
+  (`WRITTEN_KEPT`), dropping whole revisions from the old end. Both move the floor of the
+  list, the revision from which it is complete, and a question about revisions before the
+  floor (`written_between`) is answered with "not known".
+- The index keeps its entries by the key of the child's readback, the revision it last
+  heard at (`heard`) and the set of the children it has not settled: the ones whose
+  entry was made without a readback (a child the render thread has not written yet, and
+  one that a hit test passes through until it has a readback, section 9.41).
+- At the start of a hit test of the holder the index hears (`hear_written`): it asks for
+  the readbacks written after `heard` up to the revision of the hit test and reads those
+  of them that are its children, and the children that are not settled. When the answer
+  was complete and every child was where its entry says, each bucket that was current at
+  `heard` is current at the revision of the hit test, without a walk.
+- Anything else falls back to the walk, bucket by bucket as before: a list that does not
+  reach back to `heard` (a pass that wrote more than the list takes, or a holder that was
+  not hit-tested for many frames), a key whose child is no longer at its place, and a
+  bucket that was not current at `heard`. A bucket that is made while the index is in use
+  starts at `heard`, because each entry that comes to it is read as it comes or is not
+  settled.
+
+What a hit test finds is what the walk finds: the walk changes an entry only for a child
+whose readback has a newer revision than the entry, a readback gets a newer revision only
+in a pass, and every pass since `heard` is in the list or moved its floor. The statement
+kept between hit tests is that a bucket whose revision is `heard` has every entry either
+read at `heard` or later, or in the set of the children that are not settled.
+
+**Other backends.** The list is in the readback bookkeeping of `ferroui_base` and the
+index is on the UI side of the composition: every rendering backend (Skia, Vello, ProGPU,
+the browser) runs the same readback pass, and none has anything to implement.
+
+**Measured.** In the tests, the buckets walked by four hit tests a frame through random
+frames (a frame in sixteen moves every child, the others add, remove, hide and move a
+few), with the list and without:
+
+| Children | Frames | Bucket walks without the list | With the list |
+|---:|---:|---:|---:|
+| 40 | 80 | 92 | 0 |
+| 200 | 120 | 518 | 0 |
+| 1 200 | 40 | 950 | 418 |
+
+With 1 200 children the frames that move every child write more than the list takes, and
+those are the walks that remain.
+
+With the local gate (the two sides alternately, the medians; base `2cc3671f21`, the
+children tables of section 9.48):
+
+| Metric | Before | After | Change |
+|---|---:|---:|---:|
+| `wall/20+pointer` UI thread, ms a frame | 1.220 | 0.039 | -96.8 % |
+| `wall/20+pointer` wall time, ms a frame | 1.902 | 1.633 | -14.1 % |
+| `wall/20+pointer` render thread, ms a frame | 1.752 | 1.632 | -6.9 % |
+| `frames/wall+pointer` UI thread, ms a frame | 0.092 | 0.028 | -69.1 % |
+| `wall/20` UI thread, ms a frame | 0.027 | 0.024 | -9.4 % |
+| `wall/20` render thread, ms a frame | 1.659 | 1.626 | -2.0 % |
+| `gauntlet/16` UI thread, ms a frame | 14.614 | 14.469 | -1.0 % |
+| `gauntlet/16` render thread, ms a frame | 34.331 | 34.166 | -0.5 % |
+
+The UI thread's frame with the pointer in the window is now what it is without the
+pointer, to a hundredth of a millisecond: the two hit tests of a frame read the few
+children that were written. Against the commit before the children tables the same
+metric went from 0.872 ms to 0.039 ms. None of the 121 metrics of the gate is over its
+tolerance.
+
+**Found on the way.** A child added to or removed from a holder has the UI side clear the
+holder's composition children and add them all again
+(`Visual::synchronize_composition_child_visuals`, as upstream does on any difference).
+The index is emptied with the list, and the next readback pass writes every sibling: one
+child added among 200 lists about 205 readbacks. The index handles it (the children come
+back unsettled and are read once), but the cost is that of the whole list for one child,
+on both threads. Making the synchronization insert and remove the children that differ
+is a change of its own, to be measured on a list that grows and shrinks.
+
+**Tests.** `the_readbacks_of_the_latest_revisions_are_listed`: what the list answers for
+ranges of revisions, a pass over the limit, and the oldest revisions leaving at the bound.
+`a_hit_test_index_that_hears_the_written_children_finds_what_one_that_reads_every_child_finds`:
+40, 200 and 1 200 children through random frames (moves of every child, children added,
+removed, hidden and resized, frames without a render), four hit tests a frame, once with
+the list and once without (`HEARS_WRITTEN`): the same visuals in the same order every
+time, and fewer walks with the list.
+`a_child_that_changes_among_many_does_not_have_the_index_read_the_other_children`: of
+2 000 children one moves in each of 20 frames; the hit tests find it at its new place and
+the last child at its own, and no bucket is walked after the first hit test.
+
+**Gate.** `wall/20+pointer` of the frame gate holds the UI thread's time of the hit tests
+over a holder of 20 000 children.
+
+### 9.50 Tried and left out: the drawings of items kept as pictures of the backend
+
+The first of the changes of architecture that were proposed for the frame: what an item
+draws is kept by the render thread in the form the backend draws it in, and drawn again
+from that form while the item does not change, instead of its commands being walked in
+every frame. The interface was there (`IDrawingContextImplWithFragments`, the fragments of
+draw list visuals); the trial gave it to the items of a holder (section 9.42) and to Skia.
+It is recorded here with what it measured. It is not merged: in the window it draws no
+frame sooner and costs processor time. The code is on the branch `perf/skia-item-pictures`.
+
+**What was tried.** The policy is in `ferroui_base` and the same for every backend:
+
+- `FragmentKeeping` (`None`, `Each`, `Settled`), asked of the context by
+  `IDrawingContextImplWithFragments::fragment_keeping`: whether the backend gains from a
+  fragment at all, from one of every drawing, or only from one of a drawing that was drawn
+  twice as it was. `DrawingContextProxy` forwards it.
+- `KeptFragment` (`server_draw_items.rs`): the fragment of one item beside its commands,
+  the frames it waited (`SETTLED_AFTER = 1`), and, for a backend that refused to draw the
+  fragment again, how long before it is asked once more (doubling up to `LONGEST_WAIT = 64`
+  frames), so that an item whose place changes by a fraction of a pixel in every frame is
+  not recorded in every frame.
+- Skia (`drawing_context_impl/fragments.rs`): a fragment is an `SkPicture` of the commands,
+  recorded by a recorder of its own that starts with the matrix of the frame's canvas. It
+  is drawn again in the state it was made in and with the matrix it was made with, or with
+  that matrix moved by whole pixels when nothing in it was laid out in the pixels of the
+  device (text placed on the pixel grid, hairlines). Skia answers `Settled` only for a
+  context that records (the pipelined layer of a window, a picture render target) and
+  `None` for a surface, where a picture is played back call by call.
+
+**Measured** (M3 Pro, 60 Hz, `release`, the gauntlet benchmark in its window, 14 seconds a
+run, two alternating rounds; main is 01e1c3f24, with sections 9.46 and 9.47 and the
+balanced bands):
+
+| | main | with kept pictures |
+|---|---:|---:|
+| gauntlet, tier 16, frames a second | 55.1, 55.2 | 53.1, 52.7 |
+| gauntlet, tier 16, processor time of the run | 26.5 s, 30.0 s | 28.9 s, 31.6 s |
+| still wall, tier 20, frames a second | 60.0, 60.0 | 60.0, 60.0 |
+| still wall, tier 20, processor time of the run | 8.6 s, 9.2 s | 9.1 s, 9.4 s |
+| gauntlet, tier 16, render thread drawing items (5 s sampled) | 621 ms | 722 ms |
+
+Of the 722 ms, 42 are spent ending recordings. The window suite of the gate shows every one
+of its five scenes at the display's 16.667 ms a frame on both sides. The headless gate
+(raster surface, where no fragment is made) is unchanged: 121 metrics, none regressed.
+
+**Why it gains nothing.** A picture of Skia is a list of operations, not pixels and not
+commands of the graphics processor. Drawing a kept picture into the picture of the frame
+saves recording the item's few operations (a rectangle, a run of glyphs) and costs a
+reference to the picture with a save, a matrix and a restore around it, which is about the
+same; when the frame's picture is played into the Graphite recorder, every operation of
+the kept picture is drawn as if it had been recorded directly. What the render thread
+spends on an item is spent after the recording, and a picture keeps none of it. On the
+gauntlet most items change or move by fractions of a pixel in every frame, so pictures are
+also made that are never drawn again. And at tier 16 the UI thread's pass, not the render
+thread, bounds the frame rate (section 9.46), so even a saving there would not show as
+frames.
+
+**Other backends.** The policy is where a backend whose fragments hold more than a list of
+operations finds it: an engine with a retained scene (ProGPU: the scene nodes and their
+buffers of an item, drawn again by reference) or one whose scene is appended by copying an
+encoding (Vello) would answer `Each` or `Settled` and implement `begin_fragment`,
+`end_fragment` and `draw_fragment`; nothing in `KeptFragment` knows Skia. It is to be taken
+from the branch with the first backend that measures a gain from it.
+
+**What would keep work in Skia** is the pixels of a settled subtree in a texture. That is a
+different trade: memory for every kept subtree, text that is no longer placed on the pixel
+grid of the window when the subtree moves by a fraction of a pixel or is scaled, and a
+texture to draw again whenever anything in the subtree changes. The scenes measured here do
+not ask for it (the still wall is at the display's rate, the gauntlet changes everywhere),
+so it is not proposed.
+
+**Tests on the branch.** Six in `server_draw_items_tests.rs` (a context without fragments
+draws the commands; a fragment with every drawing for `Each`; for `Settled` a fragment when
+the drawing is drawn again; after a refusal a wait that doubles; a drawing the context
+makes no fragment of is not asked for again) and nine in `fragment_tests.rs` (a fragment is
+what its commands draw, also where the drawing moved to by whole pixels; it is refused
+where the pixels would differ; one laid out in the pixels of the device stays where it is;
+pushes left open or popped across the fragment are not kept; only a context that records
+makes fragments).

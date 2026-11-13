@@ -65,9 +65,12 @@ impl CompositionVisual {
             return None;
         }
 
-        let read_revision = self.compositor().readback().read_revision();
+        let compositor = self.compositor();
+        let readback = compositor.readback();
+        let read_revision = readback.read_revision();
         let mut tree = self.hit_test_children.borrow_mut();
         let tree = tree.get_or_insert_with(|| Box::new(CompositionHitTestAabbTree::new(self.children().clone())));
+        tree.hear_written(read_revision, readback);
         Some(tree.query_until::<H, R>(input, read_revision, each))
     }
 

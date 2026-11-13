@@ -12,6 +12,14 @@ pub(super) trait IServerTreeVisitor {
     /// render walk draws the drawing items that come before the child (section 9.42).
     #[inline]
     fn before_child(&mut self, _container: &Rc<ServerCompositionVisual>, _index: usize) {}
+    /// The child of `container` to visit next, of those from `from` on, or `count`, their number,
+    /// for none (not from upstream; section 9.48). Asked before `before_child`, and only of a
+    /// container whose collection keeps a table of its children: what the visitor would do at the
+    /// children it leaves out is its to do here.
+    #[inline]
+    fn next_child(&mut self, _container: &Rc<ServerCompositionVisual>, from: usize, _count: usize) -> usize {
+        from
+    }
 }
 
 /// A position of the tree walk: a container and the index of its child to
@@ -20,6 +28,8 @@ pub struct TreeWalkerFrame {
     visual: Rc<ServerCompositionVisual>,
     children: Rc<Vec<Rc<ServerCompositionVisual>>>,
     current_index: usize,
+    /// Whether the collection of the container keeps a table of its children.
+    tabled: bool,
 }
 
 /// The children of a visual, `None` for a visual without a children
@@ -27,6 +37,10 @@ pub struct TreeWalkerFrame {
 /// nothing is allocated for such a visual).
 fn children_of(visual: &ServerCompositionVisual) -> Option<Rc<Vec<Rc<ServerCompositionVisual>>>> {
     visual.children().map(|children| children.list())
+}
+
+fn has_children_table(visual: &ServerCompositionVisual) -> bool {
+    visual.children().is_some_and(|children| children.has_table())
 }
 
 pub(super) fn walk<V: IServerTreeVisitor>(visitor: &mut V, root: &Rc<ServerCompositionVisual>, pools: &CompositorPools) {
@@ -44,8 +58,12 @@ pub(super) fn walk<V: IServerTreeVisitor>(visitor: &mut V, root: &Rc<ServerCompo
     };
 
     let mut current_index = 0usize;
+    let mut tabled = has_children_table(&container);
 
     loop {
+        if tabled && current_index < children.len() {
+            current_index = visitor.next_child(&container, current_index, children.len());
+        }
         if current_index >= children.len() {
             // Exiting "recursion"
             visitor.post_subgraph(&container);
@@ -53,6 +71,7 @@ pub(super) fn walk<V: IServerTreeVisitor>(visitor: &mut V, root: &Rc<ServerCompo
             container = frame.visual;
             children = frame.children;
             current_index = frame.current_index;
+            tabled = frame.tabled;
             continue;
         }
 
@@ -62,10 +81,11 @@ pub(super) fn walk<V: IServerTreeVisitor>(visitor: &mut V, root: &Rc<ServerCompo
         if visit_children {
             if let Some(child_children) = children_of(&child).filter(|children| !children.is_empty()) {
                 // Go deeper
-                frames.push(TreeWalkerFrame { visual: container, children, current_index: current_index + 1 });
+                frames.push(TreeWalkerFrame { visual: container, children, current_index: current_index + 1, tabled });
                 container = child;
                 children = child_children;
                 current_index = 0;
+                tabled = has_children_table(&container);
                 continue; // Enter "recursion"
             }
         }
