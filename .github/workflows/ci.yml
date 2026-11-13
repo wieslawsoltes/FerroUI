@@ -948,12 +948,14 @@ jobs:
           xvfb-run -a --server-args="-screen 0 1280x1024x24" \
             timeout 300 target/debug/examples/x11_window --smoke --mode=glx --expect-fallback --skip=input,popup,screens,clipboard
       # A window manager clamps the window to a screen narrower than it: the server and the
-      # framework have to agree on the size the window got.
+      # framework have to agree on the size the window got. Every run under a window manager
+      # starts it with `scripts/x11/with-window-manager.sh`, which waits until it manages the
+      # screen: one that takes the window in the middle of a run moves it under the pointer.
       - name: The same under a window manager (openbox)
         if: ${{ !cancelled() }}
         run: |
           xvfb-run -a --server-args="-screen 0 600x500x24" \
-            sh -c 'openbox & sleep 2; timeout 300 target/debug/examples/x11_window --smoke'
+            scripts/x11/with-window-manager.sh timeout 300 target/debug/examples/x11_window --smoke
       # Two monitors of the RandR extension, side by side: the first takes the output of the
       # server (which removes the monitor the server derives from it), the second has none. The
       # server must not reset when xrandr, its only client, disconnects: the monitors would be gone.
@@ -966,8 +968,7 @@ jobs:
         if: ${{ !cancelled() }}
         run: |
           dbus-run-session -- xvfb-run -a --server-args="-screen 0 1280x1024x24" sh -c '
-            openbox & sleep 2
-            timeout 300 target/debug/examples/x11_window --smoke --ime=ibus --skip=popup,resize,screens,clipboard'
+            scripts/x11/with-window-manager.sh timeout 300 target/debug/examples/x11_window --smoke --ime=ibus --skip=popup,resize,screens,clipboard'
       # Text through the input method of the server: the one Xlib has built in (@im=local), with a
       # compose sequence, which only an input method produces. A key gets the compose symbol (the
       # scroll lock key: the framework has no action for it, where the menu key would open the
@@ -980,8 +981,7 @@ jobs:
           LANG=en_US.UTF-8 xvfb-run -a --server-args="-screen 0 1280x1024x24 -noreset" sh -c '
             set -e
             xmodmap -e "keycode 78 = Multi_key"
-            openbox & sleep 2
-            timeout 300 target/debug/examples/x11_window --smoke --ime=xim --skip=popup,resize,screens,clipboard'
+            scripts/x11/with-window-manager.sh timeout 300 target/debug/examples/x11_window --smoke --ime=xim --skip=popup,resize,screens,clipboard'
       # Drag and drop: the server synthesizes a press on a square that starts a drag, the movement
       # and the release; first over the window itself, then over the window of a second process
       # (the same example, as a drop target), so that the source side of one process and the target
@@ -1017,14 +1017,12 @@ jobs:
         if: ${{ !cancelled() }}
         run: |
           xvfb-run -a --server-args="-screen 0 1280x1024x24" sh -c '
-            openbox & sleep 2
-            timeout 300 target/debug/examples/x11_window --smoke --gtk-dialog --skip=input,popup,resize,screens,clipboard'
+            scripts/x11/with-window-manager.sh timeout 300 target/debug/examples/x11_window --smoke --gtk-dialog --skip=input,popup,resize,screens,clipboard'
       - name: The file dialogs of GTK (on the UI thread, with the main loop of GLib)
         if: ${{ !cancelled() }}
         run: |
           xvfb-run -a --server-args="-screen 0 1280x1024x24" sh -c '
-            openbox & sleep 2
-            timeout 300 target/debug/examples/x11_window --smoke --glib --gtk-dialog --skip=input,popup,resize,screens,clipboard'
+            scripts/x11/with-window-manager.sh timeout 300 target/debug/examples/x11_window --smoke --glib --gtk-dialog --skip=input,popup,resize,screens,clipboard'
       # Stage 2f: a window of another client held by the native control host of the window (its
       # holder window, bounds, hiding, release), an XEmbed plug in a socket window of the example
       # (announced, embedded, drawn, resized by the embedder, destroyed), and the lifetime events.

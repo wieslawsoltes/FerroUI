@@ -356,6 +356,41 @@ check("three pages are reached through the drawer and show their content", async
     assert(page.errors.length === 0, `errors were logged:\n${page.errors.join("\n")}`);
 });
 
+check("Visual States opens and applies setters from both state groups", async (page) => {
+    await navigate(page, "Layout");
+    await navigate(page, "Visual States");
+    const caption = (e) => e.name === "Caption" && inContent(e);
+    await page.find("Normal", caption);
+
+    for (const [button, common, size] of [
+        ["Highlighted", "Highlighted", "(none)"],
+        ["Expanded", "Highlighted", "Expanded"],
+        ["Dimmed", "Dimmed", "Expanded"],
+        ["Compact", "Dimmed", "Compact"],
+        ["Normal", "Normal", "Compact"],
+    ]) {
+        await page.clickElement(await page.find(button, (e) => e.name !== "Caption" && inContent(e)));
+        await page.find(`CommonStates: ${common}, SizeStates: ${size}`, (e) => e.name === "CurrentStates" && inContent(e));
+        await page.find(common, caption);
+    }
+    assert(page.errors.length === 0, `errors were logged:\n${page.errors.join("\n")}`);
+}, { size: TOUR_SIZE });
+
+check("Screens renders when the browser only exposes the current display", async (page) => {
+    await page.evaluate(`(() => {
+        Object.defineProperties(window.screen, {
+            addEventListener: { value: undefined },
+            removeEventListener: { value: undefined },
+            orientation: { value: undefined },
+        });
+        Object.defineProperty(window, "getScreenDetails", { value: undefined });
+    })()`);
+    await visit(page, { section: "Window & Platform", name: "Screens" });
+    await page.clickElement(await page.find("Request ScreenDetails", inContent));
+    await page.find("Request ScreenDetails: Denied", inContent);
+    assert(page.errors.length === 0, `errors were logged:\n${page.errors.join("\n")}`);
+}, { size: TOUR_SIZE });
+
 check("the home page and the page of a section show the cards of their pages, and a card opens its page", async (page) => {
     // The home page lists, under the title of each section, a card for each page of the section: its
     // header and its description. The first cards of the first section are in the view at this size.

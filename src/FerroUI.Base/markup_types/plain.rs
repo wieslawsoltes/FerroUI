@@ -1073,6 +1073,9 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<Selector>();
     ValueTypes::register_nullable::<StyleQuery>();
     ValueTypes::register_nullable::<Rc<RelativeSource>>();
+    // `Setter.Target` holds an `Option<Rc<TargetPropertyPath>>`: its nullable form is needed before any
+    // first use of the type registers it (the setters of a visual state, without `type-tables`).
+    ValueTypes::register_used::<TargetPropertyPath>();
     ValueTypes::register_cast::<Rc<TransformOperations>, Rc<dyn crate::media::ITransform>>(|operations| operations.clone());
     ValueTypes::register_cast::<Rc<DefaultValueConverter>, Rc<dyn IValueConverter>>(|c| c.clone());
     ValueTypes::register_cast::<Rc<StringFormatValueConverter>, Rc<dyn IValueConverter>>(|c| c.clone());
@@ -1123,7 +1126,6 @@ pub(super) fn register_value_type_table() {
     ValueTypes::register_used::<KeyFrames>();
     ValueTypes::register_used::<GestureRecognizerCollection>();
     ValueTypes::register_used::<Setter>();
-    ValueTypes::register_used::<TargetPropertyPath>();
     ValueTypes::register_used::<CompiledBinding>();
     ValueTypes::register_used::<ReflectionBinding>();
     ValueTypes::register_used::<MultiBinding>();
