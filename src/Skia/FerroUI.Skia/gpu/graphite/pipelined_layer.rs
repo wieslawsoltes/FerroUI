@@ -110,8 +110,11 @@ pub(crate) fn band_count(height: i32, asked: usize) -> Option<usize> {
     (bands >= asked.min(2)).then_some(bands)
 }
 
-/// Frames that begin further apart than this do not belong to one stream:
-/// the layer forgets what it measured and draws the next one directly.
+/// Frames with a pause longer than this between them do not belong to one
+/// stream: the layer forgets what it measured and draws the next one
+/// directly. The pause is the time between the beginnings of two frames
+/// that the first of them did not cost: a frame that takes longer than
+/// this to draw is not a pause, it is the frame the policy is there for.
 const STREAM_GAP: Duration = Duration::from_millis(100);
 
 /// A frame that cost less than this is never late, whatever the period.
@@ -183,7 +186,10 @@ impl PipelinePolicy {
 
         let period = self.last_begin.map(|last| now.saturating_duration_since(last));
         self.last_begin = Some(now);
-        let Some(period) = period.filter(|period| *period <= STREAM_GAP) else {
+        // What the frame before cost is not part of the pause: frames that
+        // each take longer than the gap, one after the other, are a stream.
+        let paused = |period: &Duration| period.saturating_sub(previous_cost.unwrap_or_default()) > STREAM_GAP;
+        let Some(period) = period.filter(|period| !paused(period)) else {
             // The first frame, or the first after a pause: nothing is known
             // about the stream it begins.
             self.pipelined = false;
@@ -1604,9 +1610,28 @@ mod tests {
         let (mut policy, mut now) = adaptive();
         assert!(run(&mut policy, &mut now, 4, FRAME, Duration::from_millis(12))[3]);
 
-        now += STREAM_GAP + Duration::from_millis(1);
+        // The pause is what the frame before it did not cost.
+        now += STREAM_GAP + Duration::from_millis(12 + 1);
         assert!(!policy.frame_begins(now, Some(Duration::from_millis(12))));
         assert_eq!(vec![false, false, false, true], run(&mut policy, &mut now, 4, FRAME, Duration::from_millis(12)));
+
+        // A frame of which nothing was measured cost nothing.
+        now += STREAM_GAP + Duration::from_millis(1);
+        assert!(!policy.frame_begins(now, None));
+    }
+
+    #[test]
+    fn frames_that_each_take_longer_than_a_pause_are_a_stream() {
+        let (mut policy, mut now) = adaptive();
+        // 118 ms of drawing in 120 ms: the frames follow each other without a pause.
+        let (period, cost) = (Duration::from_millis(120), Duration::from_millis(118));
+        assert!(period > STREAM_GAP);
+        assert_eq!(vec![false, false, false, true, true], run(&mut policy, &mut now, 5, period, cost));
+
+        // The same frames with a pause after each never make a stream.
+        let (mut policy, mut now) = adaptive();
+        let period = cost + STREAM_GAP + Duration::from_millis(1);
+        assert!(run(&mut policy, &mut now, 8, period, cost).iter().all(|pipelined| !pipelined));
     }
 
     #[test]

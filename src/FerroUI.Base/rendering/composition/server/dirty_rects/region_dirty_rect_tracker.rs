@@ -53,6 +53,12 @@ impl IDirtyRectTracker for RegionDirtyRectTracker {
         self.combined_rect.set(pixel_rect_to_ltrb_rect_unscaled(self.region.bounds()));
     }
 
+    fn include(&self, rect: LtrbRect, _bounds: LtrbRect) {
+        self.rects.borrow_mut().push(rect);
+        self.region.add_rect(Self::get_inflated_pixel_rect(rect));
+        self.combined_rect.set(pixel_rect_to_ltrb_rect_unscaled(self.region.bounds()));
+    }
+
     fn begin_draw(&self, ctx: &mut dyn IDrawingContextImpl) {
         ctx.push_clip_region(&*self.region);
     }
@@ -117,6 +123,26 @@ mod tests {
         assert_eq!(LtrbRect::new(10.0, 10.0, 70.0, 80.0), tracker.combined_rect());
         assert!(tracker.intersects(LtrbRect::new(15.0, 15.0, 16.0, 16.0)));
         assert!(!tracker.intersects(LtrbRect::new(30.0, 30.0, 40.0, 40.0)));
+    }
+
+    #[test]
+    fn an_included_rectangle_joins_the_final_region() {
+        let platform = MockRenderInterface::default();
+        let tracker = RegionDirtyRectTracker::new(&platform);
+        let region = platform.regions.borrow()[0].clone();
+        tracker.add_rect(LtrbRect::new(10.0, 10.0, 20.0, 20.0));
+        tracker.finalize_frame(BOUNDS);
+        assert!(!tracker.intersects(LtrbRect::new(30.0, 30.0, 40.0, 40.0)));
+        tracker.include(LtrbRect::new(15.0, 15.0, 40.0, 50.0), BOUNDS);
+        assert_eq!(
+            vec![LtrbPixelRect::new(10, 10, 20, 20), LtrbPixelRect::new(15, 15, 40, 50)],
+            *region.rects.borrow()
+        );
+        assert_eq!(LtrbRect::new(10.0, 10.0, 40.0, 50.0), tracker.combined_rect());
+        assert!(tracker.intersects(LtrbRect::new(30.0, 30.0, 40.0, 40.0)));
+        // The frame after it starts from the rectangles that were added.
+        tracker.finalize_frame(BOUNDS);
+        assert_eq!(2, region.rects.borrow().len());
     }
 
     #[test]

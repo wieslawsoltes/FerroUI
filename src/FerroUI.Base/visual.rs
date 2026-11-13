@@ -2435,6 +2435,16 @@ impl Visual {
         }
     }
 
+    /// Invalidates the visual because its layout was invalidated: its drawing is recorded
+    /// again, and its area is drawn again only when it draws something else than it drew. A
+    /// FerroUI addition (docs/porting/desktop-performance.md, section 9.53): upstream
+    /// invalidates the visual, whose area is then drawn again whatever it draws.
+    pub(crate) fn invalidate_visual_for_layout(&self) {
+        if let Some(source) = self.presentation_source() {
+            source.renderer().add_dirty_for_layout(self);
+        }
+    }
+
     /// Invalidates the composition properties of this visual (its render transform and opacity)
     /// but not its drawing: the renderer synchronizes the properties without calling `render`
     /// again. A FerroUI addition (docs/porting/desktop-performance.md, section 9.5): upstream

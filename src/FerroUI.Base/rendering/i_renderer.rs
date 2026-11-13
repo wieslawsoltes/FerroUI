@@ -23,6 +23,14 @@ pub trait IRenderer {
     /// Mark a visual as dirty and needing re-rendering.
     fn add_dirty(&self, visual: &Visual);
 
+    /// Mark a visual whose layout was invalidated: what it draws may have changed with it. A
+    /// renderer that knows what a visual drew records the drawing again and draws the area of
+    /// the visual again only when the drawing is another one. The default marks the visual
+    /// dirty (FerroUI deviation, docs/porting/desktop-performance.md, section 9.53).
+    fn add_dirty_for_layout(&self, visual: &Visual) {
+        self.add_dirty(visual);
+    }
+
     /// Mark a visual whose composition properties changed (its render transform or opacity)
     /// but whose own drawing did not: a renderer that keeps the drawing of a visual apart from
     /// its properties synchronizes the properties without recording the drawing again. The

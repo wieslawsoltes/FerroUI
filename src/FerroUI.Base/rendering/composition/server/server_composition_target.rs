@@ -200,13 +200,16 @@ impl ServerCompositionTarget {
         })
     }
 
-    /// Makes dirty the whole of every backdrop a dirty rectangle touches,
+    /// Makes dirty the whole of every backdrop the dirty area touches,
     /// until no more is added: a blurred backdrop drawn in part would mix the
-    /// new pixels with the old ones (winui-materials.md, the backdrop).
-    fn expand_dirty_rects_over_backdrops(&self) {
+    /// new pixels with the old ones (winui-materials.md, the backdrop). The
+    /// dirty area is the final one, which is what the frame draws: a tracker
+    /// answers `intersects` for nothing else, and the final area is larger
+    /// than the rectangles that were added.
+    fn expand_dirty_rects_over_backdrops(&self, render_bounds: LtrbRect) {
         let mut regions = self.backdrop_regions.borrow_mut();
         regions.retain(|(visual, _)| visual.upgrade().is_some_and(|visual| visual.root().is_some()));
-        if regions.is_empty() || self.dirty_rects.is_empty() {
+        if regions.is_empty() {
             return;
         }
         let mut added = vec![false; regions.len()];
@@ -214,7 +217,7 @@ impl ServerCompositionTarget {
             let mut changed = false;
             for (index, (_, region)) in regions.iter().enumerate() {
                 if !added[index] && self.dirty_rects.intersects(*region) {
-                    self.dirty_rects.add_rect(*region);
+                    self.dirty_rects.include(*region, render_bounds);
                     added[index] = true;
                     changed = true;
                 }
@@ -414,11 +417,12 @@ impl ServerCompositionTarget {
     }
 
     /// The beginning of a frame that draws the tree: the dirty rectangles
-    /// are final and the frame is counted.
+    /// are final, with the backdrops they touch, and the frame is counted.
     fn begin_scene(&self, render_bounds: LtrbRect, pixel_size: PixelSize) {
         use crate::diagnostics::perf_counters::{add, PerfCounter};
         super::take_backdrop_regions();
         self.dirty_rects.finalize_frame(render_bounds);
+        self.expand_dirty_rects_over_backdrops(render_bounds);
         let dirty = self.dirty_rects.combined_rect().intersect_or_empty(render_bounds);
         add(PerfCounter::RenderFramesDrawn, 1);
         add(PerfCounter::RenderDirtyBoundsPixels, (dirty.width().max(0.0) * dirty.height().max(0.0)) as u64);
@@ -542,7 +546,6 @@ impl ServerCompositionTarget {
                 self.dirty_rects.initialize(render_bounds);
                 self.dirty_rects.add_rect(render_bounds);
             }
-            self.expand_dirty_rects_over_backdrops();
             if !self.dirty_rects.is_empty() {
                 self.begin_scene(render_bounds, pixel_size);
                 let mut context = layer.create_drawing_context();
@@ -610,9 +613,6 @@ impl ServerCompositionTarget {
                 self.dirty_rects.add_rect(render_bounds);
             }
 
-            if !drawn_ahead {
-                self.expand_dirty_rects_over_backdrops();
-            }
             let layer = self.layer.borrow().clone();
             // Whether the tick draws the tree now. A tick that does not
             // still presents the frame it drew ahead, or the frame its layer

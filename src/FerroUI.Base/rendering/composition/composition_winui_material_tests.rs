@@ -434,6 +434,10 @@ fn a_dirty_rectangle_under_a_backdrop_redraws_all_of_it() {
     let log = s.render_interface.log().clone();
     let under = TestBorder::filled(0.0, 0.0, 10.0, 10.0);
     s.canvas.add(&under);
+    // Under the backdrop as well, and away from the change.
+    let beside = TestBorder::filled(150.0, 50.0, 10.0, 10.0);
+    beside.set_background(Some(crate::media::Brushes::green()));
+    s.canvas.add(&beside);
     let sprite = s.compositor.create_sprite_visual();
     sprite.set_size(Vector::new(200.0, 100.0));
     sprite.set_brush(Some((*s.compositor.create_backdrop_brush()).clone()));
@@ -443,12 +447,38 @@ fn a_dirty_rectangle_under_a_backdrop_redraws_all_of_it() {
     under.set_background(Some(crate::media::Brushes::blue()));
     s.run_jobs();
     let entries = log.entries();
+    // The area of the frame is the backdrop, not the rectangle that changed: what lies
+    // under the backdrop away from the change is drawn for itself and for the backdrop.
+    assert_eq!(log.count("DrawRectangle Green"), 2, "{entries:?}");
     // The clip of the dirty area covers the whole backdrop.
     let covers = entries.iter().filter_map(|entry| entry.strip_prefix("PushClip ")).any(|rect| {
         let values: Vec<f64> = rect.split(", ").filter_map(|value| value.parse().ok()).collect();
         values.len() == 4 && values[0] <= 0.0 && values[1] <= 0.0 && values[0] + values[2] >= 200.0 && values[1] + values[3] >= 100.0
     });
     assert!(covers, "the whole backdrop is drawn again: {entries:?}");
+}
+
+#[test]
+fn a_dirty_rectangle_away_from_a_backdrop_leaves_the_backdrop_as_it_is() {
+    let s = CompositorCanvas::new();
+    let log = s.render_interface.log().clone();
+    let away = TestBorder::filled(600.0, 600.0, 10.0, 10.0);
+    s.canvas.add(&away);
+    let sprite = s.compositor.create_sprite_visual();
+    sprite.set_size(Vector::new(200.0, 100.0));
+    sprite.set_brush(Some((*s.compositor.create_backdrop_brush()).clone()));
+    show(&s, &sprite);
+    log.clear();
+    // The frame before this one drew the whole surface. What it drew says
+    // nothing of this frame, which draws the rectangle that changed.
+    away.set_background(Some(crate::media::Brushes::blue()));
+    s.run_jobs();
+    let entries = log.entries();
+    assert_eq!(log.count("DrawRectangle"), 1, "{entries:?}");
+    assert_eq!(log.count("DrawRectangle Blue none 0, 0, 10, 10"), 1, "{entries:?}");
+    // Nothing of the backdrop: no clip of its own, and no layer.
+    assert_eq!(log.count("PushClip "), 0, "{entries:?}");
+    assert_eq!(log.count("CreateLayer"), 0, "{entries:?}");
 }
 
 #[test]

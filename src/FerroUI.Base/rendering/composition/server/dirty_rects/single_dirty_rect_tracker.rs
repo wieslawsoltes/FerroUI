@@ -1,5 +1,5 @@
 use super::i_dirty_rect_tracker::{
-    full_union, pixel_rect_from_rect_unscaled, pixel_rect_to_ltrb_rect_unscaled, VisualizeRandom,
+    full_union, pixel_rect_from_rect_unscaled, pixel_rect_to_ltrb_rect_unscaled, surface_or_rect, VisualizeRandom,
 };
 use super::{IDirtyRectCollector, IDirtyRectTracker};
 use crate::media::immutable::ImmutableSolidColorBrush;
@@ -36,11 +36,19 @@ impl IDirtyRectCollector for SingleDirtyRectTracker {
 impl IDirtyRectTracker for SingleDirtyRectTracker {
     fn finalize_frame(&self, bounds: LtrbRect) {
         self.extended_rect.set(match self.rect.get() {
-            Some(rect) => pixel_rect_to_ltrb_rect_unscaled(pixel_rect_from_rect_unscaled(
-                rect.inflate(Thickness::uniform(1.0)).intersect_or_empty(bounds),
-            )),
+            Some(rect) => surface_or_rect(
+                pixel_rect_to_ltrb_rect_unscaled(pixel_rect_from_rect_unscaled(
+                    rect.inflate(Thickness::uniform(1.0)).intersect_or_empty(bounds),
+                )),
+                bounds,
+            ),
             None => LtrbRect::default(),
         });
+    }
+
+    fn include(&self, rect: LtrbRect, bounds: LtrbRect) {
+        self.add_rect(rect);
+        self.finalize_frame(bounds);
     }
 
     fn begin_draw(&self, ctx: &mut dyn IDrawingContextImpl) {
@@ -128,6 +136,31 @@ mod tests {
         tracker.finalize_frame(BOUNDS);
         assert_eq!(LtrbRect::default(), tracker.combined_rect());
         assert!(!tracker.is_empty());
+    }
+
+    #[test]
+    fn a_rectangle_that_is_all_but_the_surface_is_drawn_as_the_surface() {
+        let tracker = SingleDirtyRectTracker::new();
+        tracker.add_rect(LtrbRect::new(2.0, 0.0, 99.0, 100.0));
+        tracker.finalize_frame(BOUNDS);
+        assert_eq!(BOUNDS, tracker.combined_rect());
+
+        let tracker = SingleDirtyRectTracker::new();
+        tracker.add_rect(LtrbRect::new(6.0, 0.0, 96.0, 100.0));
+        tracker.finalize_frame(BOUNDS);
+        assert_eq!(LtrbRect::new(5.0, 0.0, 97.0, 100.0), tracker.combined_rect());
+    }
+
+    #[test]
+    fn an_included_rectangle_joins_the_final_rectangle() {
+        let tracker = SingleDirtyRectTracker::new();
+        tracker.initialize(BOUNDS);
+        tracker.add_rect(LtrbRect::new(10.0, 10.0, 20.0, 20.0));
+        tracker.finalize_frame(BOUNDS);
+        assert!(!tracker.intersects(LtrbRect::new(30.0, 30.0, 60.0, 60.0)));
+        tracker.include(LtrbRect::new(15.0, 15.0, 40.0, 50.0), BOUNDS);
+        assert_eq!(LtrbRect::new(9.0, 9.0, 41.0, 51.0), tracker.combined_rect());
+        assert!(tracker.intersects(LtrbRect::new(30.0, 30.0, 60.0, 60.0)));
     }
 
     #[test]

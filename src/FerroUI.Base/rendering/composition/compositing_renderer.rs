@@ -73,9 +73,13 @@ struct VisualSets {
 }
 
 impl VisualSets {
-    /// The bits of a word below its epoch: one for each set, and one more for each that marks a
-    /// visual already kept while a list is compacted.
-    const BITS: u32 = 2 * Self::SETS as u32;
+    /// The bits of a word below its epoch: one for each set, one more for each that marks a
+    /// visual already kept while a list is compacted, and `REDRAW`.
+    const BITS: u32 = 2 * Self::SETS as u32 + 1;
+
+    /// The bit of a visual of the dirty set whose area is drawn again whatever it draws: it
+    /// was invalidated itself, not only with its layout (section 9.53).
+    const REDRAW: u64 = 1 << (2 * Self::SETS as u64);
 
     /// The number of sets.
     const SETS: usize = 4;
@@ -127,10 +131,26 @@ impl VisualSets {
         self.bits(visual) & (1 << set as u64) != 0
     }
 
+    /// Adds `visual` to the dirty set. With `redraw` its area is drawn again also when it
+    /// draws what it drew; a visual added once with it keeps it until it leaves the set.
+    fn add_dirty(&mut self, visual: &Visual, redraw: bool) {
+        self.add(VisualSet::Dirty, visual);
+        if redraw {
+            self.set_bits(visual, self.bits(visual) | Self::REDRAW);
+        }
+    }
+
+    /// Whether the area of `visual`, which is in the dirty set, is drawn again whatever the
+    /// visual draws.
+    fn redraws(&self, visual: &Visual) -> bool {
+        self.bits(visual) & Self::REDRAW != 0
+    }
+
     fn remove(&mut self, set: VisualSet, visual: &Visual) {
         let (bits, bit) = (self.bits(visual), 1 << set as u64);
         if bits & bit != 0 {
-            self.set_bits(visual, bits & !bit);
+            let redraw = if matches!(set, VisualSet::Dirty) { Self::REDRAW } else { 0 };
+            self.set_bits(visual, bits & !(bit | redraw));
             let index = set as usize;
             self.live[index] -= 1;
             self.stale[index] += 1;
@@ -541,6 +561,30 @@ impl CompositingRenderer {
         }
     }
 
+    /// Queues `visual` for the next update pass, which records its drawing again. With `redraw`
+    /// its area is drawn again whatever it draws; without, only when it draws something else
+    /// than it drew (section 9.53).
+    fn add_dirty_visual(&self, visual: &Visual, redraw: bool) {
+        if self.is_disposed.get() {
+            return;
+        }
+        if self.updating.get() {
+            panic!("Visual was invalidated during the render pass");
+        }
+
+        // A visual says so when it leaves the tree. One that is in the tree without a
+        // composition visual is queued like any other: the pass finds out whether it needs one
+        // (section 9.41).
+        if !visual.is_attached_to_visual_tree() {
+            // Queuing a detached visual would keep it alive for as long as rendering is stopped.
+            self.sets.borrow_mut().remove_all(visual);
+        } else {
+            self.sets.borrow_mut().add_dirty(visual, redraw);
+        }
+
+        self.queue_update();
+    }
+
     /// Creates the composition visual of a visual of the tree in the update pass (section 9.41).
     fn create_in_pass(&self, visual: &Visual) -> CompositionDrawListVisual {
         visual.attach_to_compositor_core(&self.compositor, Some(self as &dyn IRenderer))
@@ -586,6 +630,7 @@ impl CompositingRenderer {
         visual: &Visual,
         item: Option<Rc<CompositionDrawItem>>,
         drawing: RecordedDrawing,
+        redraw: bool,
     ) -> Option<RecordedDrawing> {
         // The visuals a pass records are mostly below the same few visuals: the walk up to the
         // composition visual is made once for them (section 9.47).
@@ -612,7 +657,10 @@ impl CompositingRenderer {
             }
             (RecordedDrawing::Same, Some(item)) => {
                 crate::perf_count!(VisualsRecordedUnchanged);
-                item.mark_redrawn();
+                // Invalidated with its layout alone, it shows what it showed (section 9.53).
+                if redraw {
+                    item.mark_redrawn();
+                }
                 Some(item)
             }
             // Nothing to show.
@@ -703,6 +751,9 @@ impl CompositingRenderer {
             if !visual.is_attached_to_visual_tree() {
                 continue;
             }
+            // Whether its area is drawn again when it draws what it drew: not when its layout
+            // alone invalidated it (section 9.53).
+            let redraw = self.sets.borrow().redraws(visual);
             let mut comp = visual.own_composition_visual();
             // What it drew as an item of the composition visual above (section 9.42).
             let mut item = if comp.is_none() { visual.composition_item() } else { None };
@@ -786,7 +837,7 @@ impl CompositingRenderer {
                 Some(comp) => (comp, draw_list),
                 // It draws and needs no composition visual: its drawing is an item of the
                 // composition visual above, unless that one shows no drawing but its own.
-                None => match self.record_item_in_pass(visual, item, draw_list) {
+                None => match self.record_item_in_pass(visual, item, draw_list, redraw) {
                     None => continue,
                     Some(draw_list) => (self.materialize_in_pass(visual), draw_list),
                 },
@@ -799,7 +850,9 @@ impl CompositingRenderer {
                 }
                 RecordedDrawing::Same => {
                     crate::perf_count!(VisualsRecordedUnchanged);
-                    comp.invalidate_draw_list_content();
+                    if redraw {
+                        comp.invalidate_draw_list_content();
+                    }
                 }
             }
         }
@@ -986,24 +1039,11 @@ impl IRenderer for CompositingRenderer {
     }
 
     fn add_dirty(&self, visual: &Visual) {
-        if self.is_disposed.get() {
-            return;
-        }
-        if self.updating.get() {
-            panic!("Visual was invalidated during the render pass");
-        }
+        self.add_dirty_visual(visual, true);
+    }
 
-        // A visual says so when it leaves the tree. One that is in the tree without a
-        // composition visual is queued like any other: the pass finds out whether it needs one
-        // (section 9.41).
-        if !visual.is_attached_to_visual_tree() {
-            // Queuing a detached visual would keep it alive for as long as rendering is stopped.
-            self.sets.borrow_mut().remove_all(visual);
-        } else {
-            self.sets.borrow_mut().add(VisualSet::Dirty, visual);
-        }
-
-        self.queue_update();
+    fn add_dirty_for_layout(&self, visual: &Visual) {
+        self.add_dirty_visual(visual, false);
     }
 
     fn add_dirty_properties(&self, visual: &Visual) {

@@ -907,7 +907,7 @@ impl Layoutable {
                 if let Some(manager) = self.get_layout_manager() {
                     manager.invalidate_measure(self);
                 }
-                self.invalidate_visual();
+                self.invalidate_visual_for_layout();
             }
             self.on_measure_invalidated();
         }
@@ -921,7 +921,7 @@ impl Layoutable {
             if let Some(manager) = self.get_layout_manager() {
                 manager.invalidate_arrange(self);
             }
-            self.invalidate_visual();
+            self.invalidate_visual_for_layout();
         }
     }
 
