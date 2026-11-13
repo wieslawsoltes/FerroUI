@@ -1,5 +1,5 @@
 //! The drawings of the compositor kept as pictures (`IDrawingContextImplWithFragments`,
-//! docs/porting/desktop-performance.md, 9.48).
+//! docs/porting/desktop-performance.md, 9.50).
 //!
 //! A drawing that is drawn again as it was is a list of commands the compositor walks in every
 //! frame: brushes are turned into paints, geometries looked up, and each call recorded into the
