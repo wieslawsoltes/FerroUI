@@ -363,6 +363,10 @@ impl IDrawingContextLayerImpl for SurfaceRenderTarget {
     fn complete_pending_frame(&self) {
         self.surface.complete_pending_frame();
     }
+
+    fn draws_ahead_of_target(&self) -> bool {
+        self.surface.draws_ahead_of_target()
+    }
 }
 
 impl IDrawableBitmapImpl for SurfaceRenderTarget {

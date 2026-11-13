@@ -139,6 +139,28 @@ pub trait IRenderTarget {
         PlatformRenderTargetState::READY
     }
 
+    /// Prepares a frame whose layer is drawn before the drawing context of
+    /// the target is created, and returns whether the target allows that:
+    /// a layer its drawing contexts created can be drawn while no drawing
+    /// context of the target exists, and whatever the target sets up for
+    /// the layers of a frame when it creates its drawing context is set up
+    /// by this call. `false` by default.
+    ///
+    /// The compositor asks before every frame it would draw that way, and
+    /// then creates the drawing context of the target only to present the
+    /// layer: a target whose surface is waited for (a swapchain image, the
+    /// drawable of a view) gives the time of the wait to the drawing, and
+    /// is not asked at all by a tick that has nothing new to present
+    /// (desktop-performance.md, section 9.51). The layer decides as well
+    /// (`IDrawingContextLayerImpl::draws_ahead_of_target`).
+    ///
+    /// Not from upstream, where the drawing context of the target is
+    /// created first.
+    fn prepare_frame_ahead(&self, scene_info: &RenderTargetSceneInfo) -> bool {
+        let _ = scene_info;
+        false
+    }
+
     /// Makes the GPU programs of what `paint` draws before a frame needs
     /// them (#437; `effects::register_effect_prewarm`): `paint` draws, once,
     /// with a drawing context of the kind the frames of the target draw

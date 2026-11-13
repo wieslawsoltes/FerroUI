@@ -2870,6 +2870,196 @@ fn no_batch_waits_for_a_held_frame_once_rendering_is_stopped() {
     assert!(batch.rendered().is_completed());
 }
 
+// --- a layer drawn ahead of its target (desktop-performance.md, section 9.51) ---------
+
+/// [`canvas_with_held_frames`] over a target that lets its layer be drawn
+/// before a drawing context of the target exists, after one frame that was
+/// drawn and presented: the layer exists and holds nothing back.
+fn canvas_with_a_layer_drawn_ahead() -> (CompositorCanvas, crate::rendering::testing::DrawingLog, Rc<ServerCompositionTarget>)
+{
+    let (s, log, target) = canvas_with_held_frames();
+    log.draw_layers_ahead(true);
+    s.canvas.add(&TestBorder::filled(30.0, 50.0, 20.0, 10.0));
+    Dispatcher::ui_thread().run_jobs(None);
+    s.compositor.commit();
+    s.render_loop.tick();
+    s.render_loop.tick();
+    assert!(!target.has_pending_frame());
+    log.clear();
+    (s, log, target)
+}
+
+/// The places in the log of the first entry that starts with each prefix.
+fn first_entries(log: &crate::rendering::testing::DrawingLog, prefixes: [&str; 2]) -> [usize; 2] {
+    let entries = log.entries();
+    prefixes.map(|prefix| {
+        entries.iter().position(|e| e.starts_with(prefix)).unwrap_or_else(|| panic!("no {prefix} in {entries:?}"))
+    })
+}
+
+#[test]
+fn a_frame_drawn_into_a_layer_that_holds_nothing_asks_nothing_of_the_target() {
+    let (s, log, target) = canvas_with_a_layer_drawn_ahead();
+
+    s.canvas.add(&TestBorder::filled(130.0, 50.0, 20.0, 10.0));
+    Dispatcher::ui_thread().run_jobs(None);
+    let batch = s.compositor.commit();
+    s.render_loop.tick();
+    // The tick drew its frame into the layer, which holds it back: there is
+    // nothing to present, and the target is not asked for a context (the
+    // wait for the next drawable of a window).
+    assert!(log.count("DrawRectangle") >= 1, "{:?}", log.entries());
+    assert_eq!(0, log.count("TargetContext"), "{:?}", log.entries());
+    assert_eq!(0, log.count("Blit"), "{:?}", log.entries());
+    assert!(target.has_pending_frame());
+    assert!(batch.processed().is_completed());
+    assert!(!batch.rendered().is_completed());
+
+    // The next tick presents the frame, as it does for a layer drawn inside
+    // the context of the target.
+    log.clear();
+    s.render_loop.tick();
+    let presented: Vec<String> = log
+        .entries()
+        .into_iter()
+        .filter(|e| ["TargetContext", "CompletePendingFrame", "Blit"].iter().any(|prefix| e.starts_with(prefix)))
+        .collect();
+    assert_eq!(vec!["TargetContext", "CompletePendingFrame", "Blit frame 2 of 2"], presented, "{:?}", log.entries());
+    assert_eq!(0, log.count("DrawRectangle"), "the tick presents, it draws nothing: {:?}", log.entries());
+    assert!(!target.has_pending_frame());
+    assert!(batch.rendered().is_completed());
+
+    log.clear();
+    s.render_loop.tick();
+    assert_eq!(0, log.count("TargetContext") + log.count("Blit"), "{:?}", log.entries());
+}
+
+#[test]
+fn a_layer_drawn_ahead_is_drawn_before_the_target_is_asked_for_a_context() {
+    let (s, log, target) = canvas_with_a_layer_drawn_ahead();
+
+    s.canvas.add(&TestBorder::filled(130.0, 50.0, 20.0, 10.0));
+    Dispatcher::ui_thread().run_jobs(None);
+    let first = s.compositor.commit();
+    s.render_loop.tick();
+    assert!(!first.rendered().is_completed());
+
+    // The layer holds a frame: the next frame of the stream is drawn into
+    // the layer, and only then is the target asked for the context that
+    // presents the frame before.
+    s.canvas.add(&TestBorder::filled(230.0, 50.0, 20.0, 10.0));
+    Dispatcher::ui_thread().run_jobs(None);
+    let second = s.compositor.commit();
+    log.clear();
+    s.render_loop.tick();
+    let [drawn, asked] = first_entries(&log, ["DrawRectangle", "TargetContext"]);
+    assert!(drawn < asked, "{:?}", log.entries());
+    assert_eq!(1, log.count("TargetContext"));
+    assert_eq!(1, log.count("Blit frame 2 of 3"), "{:?}", log.entries());
+    assert_eq!(0, log.count("CompletePendingFrame"));
+    assert!(first.rendered().is_completed());
+    assert!(!second.rendered().is_completed());
+    assert!(target.has_pending_frame());
+
+    log.clear();
+    s.render_loop.tick();
+    assert_eq!(1, log.count("Blit frame 3 of 3"), "{:?}", log.entries());
+    assert!(second.rendered().is_completed());
+    assert!(!target.has_pending_frame());
+}
+
+#[test]
+fn a_layer_is_drawn_ahead_only_while_the_batches_miss_display_frames() {
+    let (s, log, _target) = canvas_with_held_frames();
+    log.draw_layers_ahead(true);
+    let frame = |index: u32| {
+        s.canvas.add(&TestBorder::filled(10.0 + f64::from(index % 20) * 10.0, 50.0, 20.0, 10.0));
+        Dispatcher::ui_thread().run_jobs(None);
+        s.compositor.commit();
+        log.clear();
+        s.render_loop.tick();
+    };
+
+    // A stream of batches that misses no tick: each frame is drawn inside
+    // the context of the target, which presents the frame before it.
+    for index in 0..4 {
+        frame(index);
+        let [asked, drawn] = first_entries(&log, ["TargetContext", "DrawRectangle"]);
+        assert!(asked < drawn, "frame {index}: {:?}", log.entries());
+    }
+
+    // A tick without a batch presents the frame the layer held back: the
+    // stream missed a display frame, and its next frames are drawn ahead.
+    log.clear();
+    s.render_loop.tick();
+    assert_eq!(1, log.count("CompletePendingFrame"), "{:?}", log.entries());
+    frame(4);
+    assert_eq!(0, log.count("TargetContext"), "the layer held nothing: {:?}", log.entries());
+    for index in 1..super::server::DRAW_AHEAD_TICKS {
+        frame(4 + index);
+        let [drawn, asked] = first_entries(&log, ["DrawRectangle", "TargetContext"]);
+        assert!(drawn < asked, "frame {index} after the missed one: {:?}", log.entries());
+    }
+
+    // That many ticks later the stream has kept the rhythm of the display,
+    // and its frames are drawn inside the context of the target again.
+    frame(4 + super::server::DRAW_AHEAD_TICKS);
+    let [asked, drawn] = first_entries(&log, ["TargetContext", "DrawRectangle"]);
+    assert!(asked < drawn, "{:?}", log.entries());
+}
+
+#[test]
+fn a_layer_that_does_not_ask_for_it_is_drawn_inside_the_context_of_the_target() {
+    // The target allows it, the layer holds no frame back and does not ask.
+    let s = CompositorCanvas::new();
+    let log = s.render_interface.log().clone();
+    log.draw_layers_ahead(true);
+    s.canvas.add(&TestBorder::filled(30.0, 50.0, 20.0, 10.0));
+    Dispatcher::ui_thread().run_jobs(None);
+    s.render_loop.tick();
+
+    s.canvas.add(&TestBorder::filled(130.0, 50.0, 20.0, 10.0));
+    Dispatcher::ui_thread().run_jobs(None);
+    log.clear();
+    s.render_loop.tick();
+    let [asked, drawn] = first_entries(&log, ["TargetContext", "DrawRectangle"]);
+    assert!(asked < drawn, "{:?}", log.entries());
+    assert_eq!(1, log.count("Blit"), "{:?}", log.entries());
+}
+
+#[test]
+fn a_frame_drawn_ahead_is_presented_once_a_target_that_was_not_ready_is() {
+    let (s, log, target) = canvas_with_a_layer_drawn_ahead();
+
+    s.canvas.add(&TestBorder::filled(130.0, 50.0, 20.0, 10.0));
+    Dispatcher::ui_thread().run_jobs(None);
+    let first = s.compositor.commit();
+    s.render_loop.tick();
+
+    // The frame is in the layer when the target answers that it is not
+    // ready: nothing is presented, and the frame is not drawn again.
+    s.canvas.add(&TestBorder::filled(230.0, 50.0, 20.0, 10.0));
+    Dispatcher::ui_thread().run_jobs(None);
+    let second = s.compositor.commit();
+    log.leave_targets_not_ready(true);
+    log.clear();
+    s.render_loop.tick();
+    assert!(log.count("DrawRectangle") >= 1, "{:?}", log.entries());
+    assert_eq!(1, log.count("TargetNotReady"), "{:?}", log.entries());
+    assert_eq!(0, log.count("Blit"), "{:?}", log.entries());
+    assert!(target.is_waiting_for_ready_render_target());
+    assert!(target.has_pending_frame());
+
+    log.leave_targets_not_ready(false);
+    log.clear();
+    s.render_loop.tick();
+    assert_eq!(0, log.count("DrawRectangle"), "{:?}", log.entries());
+    assert_eq!(1, log.count("Blit frame 3 of 3"), "{:?}", log.entries());
+    assert!(!target.has_pending_frame());
+    assert!(first.rendered().is_completed());
+    assert!(second.rendered().is_completed());
+}
+
 // --- the rarely set properties of a visual (not from upstream) ------------------------
 
 /// The properties of a visual that few visuals set are in a second block,

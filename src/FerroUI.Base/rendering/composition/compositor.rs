@@ -195,11 +195,23 @@ impl IRenderLoopTask for RenderThreadLoopTask {
         // The request is read inside the lock: the compositor sets it before
         // it enters the lock to take its handles back, so a frame either
         // ends before that or does not start.
-        let rendered = self
-            .server
-            .try_with(|server| (!self.release_requested.load(Ordering::SeqCst)).then(|| server.render()));
+        let rendered = self.server.try_with(|server| {
+            (!self.release_requested.load(Ordering::SeqCst))
+                .then(|| (server.render(), server.take_late_batch_tick_request()))
+        });
         match rendered {
-            Some(Some(wants_next_tick)) => wants_next_tick,
+            Some(Some((wants_next_tick, late_batch))) => {
+                // A batch came while the tick presented the frame before it:
+                // the batch is drawn now, not a display frame later
+                // (desktop-performance.md, section 9.51). The request made
+                // inside the tick is served right after it.
+                if late_batch {
+                    if let Some(render_loop) = self.render_loop.upgrade().filter(|l| l.runs_in_background()) {
+                        render_loop.request_frame_out_of_turn();
+                    }
+                }
+                wants_next_tick
+            }
             Some(None) => {
                 // The last job of the render thread: the graph, and with it
                 // every render target and the graphics context, is dropped

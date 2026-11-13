@@ -83,6 +83,8 @@ pub use server_composition_simple_geometry::ServerCompositionSimpleGeometry;
 pub use super::brushes::{ServerCompositionSimpleContentBrush, ServerCompositionSimpleImageBrush};
 pub use server_composition_simple_transform::ServerCompositionSimpleTransform;
 pub(crate) use server_compositor::{ReadbackQueueEntry, OBJECT_END_MAGIC};
+#[cfg(test)]
+pub(crate) use server_compositor::DRAW_AHEAD_TICKS;
 pub use server_compositor::{BatchQueue, CompositorClock, ServerCompositor};
 pub use server_list::ServerList;
 pub use composition_target_overlays::CompositionTargetOverlays;

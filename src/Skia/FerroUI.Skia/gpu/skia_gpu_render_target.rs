@@ -155,6 +155,17 @@ impl IRenderTarget for SkiaGpuRenderTarget {
         self.render_target.state()
     }
 
+    /// The layers compare their text rendering with the one of the frame
+    /// (`SurfaceRenderTarget::is_corrupted`), which the drawing context of
+    /// the target sets otherwise; nothing else of a rendering session is
+    /// what a layer draws with. Which layers are drawn ahead is theirs to
+    /// say: those that pipeline their frames.
+    fn prepare_frame_ahead(&self, scene_info: &RenderTargetSceneInfo) -> bool {
+        let text_rendering = self.text_rendering.settings(scene_info.scaling, scene_info.transparency_level);
+        self.frame_text_rendering.set(text_rendering);
+        true
+    }
+
     /// Draws `paint` offscreen with the drawing context of the frames, so
     /// that the GPU makes its pipelines before a frame needs them (#437):
     /// on Graphite onto a recorder of its own, whose pipelines compile on a

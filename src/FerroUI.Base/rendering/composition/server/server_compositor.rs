@@ -41,7 +41,7 @@ pub struct BatchQueue {
 #[derive(Default)]
 struct QueuedBatches {
     batches: VecDeque<CommittedBatch>,
-    /// The last tick of the render thread found no batch and drew nothing,
+    /// The last tick of the render thread found no batch and drew no scene,
     /// and no batch has been enqueued since: see
     /// [`BatchQueue::note_idle_tick`].
     idle_tick: bool,
@@ -50,7 +50,7 @@ struct QueuedBatches {
 impl BatchQueue {
     /// Adds a batch. Returns whether the batch is late for the display
     /// frame: the last tick of the render thread came before it, found
-    /// nothing to apply and drew nothing. One batch at most is answered
+    /// nothing to apply and drew no scene. One batch at most is answered
     /// `true` for one such tick.
     pub(crate) fn enqueue(&self, batch: CommittedBatch) -> bool {
         let mut queue = self.queue.lock().unwrap();
@@ -68,19 +68,20 @@ impl BatchQueue {
     }
 
     /// The render thread ends a tick in which it applied no batch and drew
-    /// no frame. A batch that is enqueued before the next tick has missed
+    /// no scene: it drew nothing, or it only presented the frame a layer
+    /// held back. A batch that is enqueued before the next tick has missed
     /// the tick of its display frame for no reason but its timing; the
     /// compositor asks the render loop for a tick out of turn for it
-    /// (desktop-performance.md, section 9.33), which draws the one frame
-    /// this display frame is still without.
+    /// (desktop-performance.md, sections 9.33 and 9.51), which draws the one
+    /// scene this display frame is still without.
     ///
-    /// Nothing is noted while a batch waits in the queue: it came during the
-    /// tick, and is applied by the next one.
-    fn note_idle_tick(&self) {
+    /// Returns whether a batch waits in the queue already: it came during
+    /// the tick and missed it the same way, so the render thread asks for
+    /// the tick out of turn itself. Nothing is noted then.
+    fn note_idle_tick(&self) -> bool {
         let mut queue = self.queue.lock().unwrap();
-        if queue.batches.is_empty() {
-            queue.idle_tick = true;
-        }
+        queue.idle_tick = queue.batches.is_empty();
+        !queue.idle_tick
     }
 
     /// Takes a stream buffer for a new batch.
@@ -124,6 +125,11 @@ const _: fn() = || {
 
 const COMMIT_GRACE_TICKS: i32 = 10;
 
+/// For how many ticks after one whose display frame the batches missed the
+/// targets draw their layers ahead ([`ServerCompositor::draws_layers_ahead`]):
+/// two seconds of a display at sixty frames a second.
+pub(crate) const DRAW_AHEAD_TICKS: u32 = 120;
+
 /// A job in the queues of the server compositor: a job of a batch, or one
 /// bound to the server object it was sent for. It never leaves the render
 /// thread, unlike the [`ServerJob`] of a batch.
@@ -162,6 +168,13 @@ pub struct ServerCompositor {
     ticks_since_last_commit: Cell<i32>,
     /// Whether the batch pass of the current tick applied a batch.
     applied_batches_in_tick: Cell<bool>,
+    /// A batch came during a tick that applied nothing and drew no scene:
+    /// the render thread asks its loop for a tick out of turn
+    /// ([`Self::take_late_batch_tick_request`]).
+    late_batch_tick_wanted: Cell<bool>,
+    /// For how many more ticks the targets draw their layers ahead
+    /// ([`Self::draws_layers_ahead`]).
+    draw_ahead_ticks: Cell<u32>,
     to_notify_processed: RefCell<Vec<Arc<CompositionBatch>>>,
     to_notify_rendered: RefCell<Vec<Arc<CompositionBatch>>>,
     /// The batches of the tick before, whose frame a layer held back at the
@@ -241,6 +254,8 @@ impl ServerCompositor {
             readback,
             ticks_since_last_commit: Cell::new(0),
             applied_batches_in_tick: Cell::new(false),
+            late_batch_tick_wanted: Cell::new(false),
+            draw_ahead_ticks: Cell::new(0),
             to_notify_processed: RefCell::new(Vec::new()),
             to_notify_rendered: RefCell::new(Vec::new()),
             held_rendered: RefCell::new(Vec::new()),
@@ -549,6 +564,28 @@ impl ServerCompositor {
         for batch in &rendered {
             batch.notify_rendered();
         }
+    }
+
+    /// Whether a target draws its layer before it asks for the drawing
+    /// context of its render target, where the two allow it (section 9.51 of
+    /// desktop-performance.md): while the batches miss display frames, that
+    /// is for [`DRAW_AHEAD_TICKS`] ticks after one that had no batch and
+    /// presented the frame a layer held back.
+    ///
+    /// A stream of batches that keeps the rhythm of the display gains
+    /// nothing from it: the wait for the surface of the target falls into
+    /// the part of the display frame the render thread has left over, and
+    /// drawn ahead, the layer is drawn while the UI thread is in its pass,
+    /// which costs both threads time.
+    pub(crate) fn draws_layers_ahead(&self) -> bool {
+        self.draw_ahead_ticks.get() > 0
+    }
+
+    /// Whether the last tick ended with a batch in the queue that missed it
+    /// only by its timing ([`BatchQueue::note_idle_tick`]): the caller, a
+    /// render thread, asks its loop for a tick out of turn. Answered once.
+    pub(crate) fn take_late_batch_tick_request(&self) -> bool {
+        self.late_batch_tick_wanted.replace(false)
     }
 
     /// Whether a layer of an active target holds a frame back. Never while
@@ -984,14 +1021,28 @@ impl ServerCompositor {
         self.execute_server_jobs(&self.received_job_queue);
 
         let targets = self.active_targets.borrow().clone();
-        let mut drew_frame = false;
+        let mut drew_scene = false;
+        let mut presented_held_frame = false;
         for target in &targets {
             target.update(compositor_global_passes_elapsed);
             target.render();
-            drew_frame |= target.drew_frame();
+            drew_scene |= target.drew_frame() && !target.only_presented_held_frame();
+            presented_held_frame |= target.only_presented_held_frame();
         }
-        if !drew_frame && !self.applied_batches_in_tick.get() {
-            self.batches.note_idle_tick();
+        // A tick that had no batch and presented the frame a layer held back
+        // is a frame the stream of batches missed: for the frames that
+        // follow, the layers are drawn ahead of their targets.
+        if presented_held_frame && !self.applied_batches_in_tick.get() {
+            self.draw_ahead_ticks.set(DRAW_AHEAD_TICKS);
+        } else {
+            self.draw_ahead_ticks.set(self.draw_ahead_ticks.get().saturating_sub(1));
+        }
+        // A tick that applied nothing and drew no scene leaves its display
+        // frame open for a batch that comes late (section 9.51 of
+        // desktop-performance.md); presenting the frame a layer held back
+        // does not close it.
+        if !drew_scene && !self.applied_batches_in_tick.get() && self.batches.note_idle_tick() {
+            self.late_batch_tick_wanted.set(true);
         }
 
         self.visual_readback_update_pass();

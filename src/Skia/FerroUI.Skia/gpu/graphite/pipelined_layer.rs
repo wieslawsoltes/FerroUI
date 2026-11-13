@@ -1395,6 +1395,14 @@ impl ISkiaSurface for PipelinedLayerSurface {
     fn complete_pending_frame(&self) {
         self.0.flush_pending();
     }
+
+    /// While the layer pipelines its frames: a recorded frame needs nothing
+    /// of the rendering session, and is on screen a tick after it is drawn
+    /// either way. A layer that draws directly keeps the order of a frame,
+    /// which is what its cost is measured in.
+    fn draws_ahead_of_target(&self) -> bool {
+        self.0.surface.borrow().is_some() && self.0.policy.borrow().is_pipelined()
+    }
 }
 
 #[cfg(test)]
