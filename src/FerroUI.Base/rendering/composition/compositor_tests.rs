@@ -4377,6 +4377,52 @@ fn only_the_items_in_the_dirty_area_are_drawn_again() {
     assert_eq!(vec!["Green", "Blue"], drawn(&log));
 }
 
+/// Section 9.53.
+#[test]
+fn a_visual_invalidated_with_its_layout_alone_is_drawn_again_only_when_it_draws_something_else() {
+    let s = CompositorCanvas::new();
+    let log = s.render_interface.log().clone();
+    // One whose drawing is an item, and one with a composition visual of its own.
+    let item = TestBorder::filled(10.0, 10.0, 20.0, 20.0);
+    let layer = TestBorder::layer(100.0, 100.0, 20.0, 20.0);
+    layer.set_background(Some(Brushes::blue()));
+    s.canvas.add(&item);
+    s.canvas.add(&layer);
+    s.run_jobs();
+    assert!(item.composition_item().is_some());
+    assert!(layer.composition_item().is_none());
+    s.events.rects.borrow_mut().clear();
+
+    for border in [&item, &layer] {
+        let bounds = border.bounds();
+
+        // The same drawing: it is recorded, and nothing is drawn.
+        log.clear();
+        border.invalidate_visual_for_layout();
+        s.assert_rects(&[]);
+        assert!(drawn(&log).is_empty());
+
+        // Invalidated itself as well, before or after: its area is drawn again (section 9.14).
+        border.invalidate_visual_for_layout();
+        border.invalidate_visual();
+        s.assert_rects(&[bounds]);
+        border.invalidate_visual();
+        border.invalidate_visual_for_layout();
+        s.assert_rects(&[bounds]);
+
+        // Which holds for the pass it was asked for, not for the next one.
+        border.invalidate_visual_for_layout();
+        s.assert_rects(&[]);
+
+        // Another drawing is drawn.
+        log.clear();
+        *border.background.borrow_mut() = Some(Brushes::green());
+        border.invalidate_visual_for_layout();
+        s.assert_rects(&[bounds]);
+        assert_eq!(vec!["Green"], drawn(&log));
+    }
+}
+
 #[test]
 fn a_bitmap_cache_is_rendered_again_when_an_item_below_it_changes() {
     use crate::media::{BitmapCache, CacheMode};
