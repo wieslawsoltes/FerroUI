@@ -49,8 +49,13 @@
       </Grid>
     </Border>
 
-    <!-- Card sections -->
+    <!-- Realize the card sections near the scroll viewport. -->
     <ItemsControl ItemsSource="{Binding HomeSections}">
+      <ItemsControl.ItemsPanel>
+        <ItemsPanelTemplate>
+          <VirtualizingStackPanel />
+        </ItemsPanelTemplate>
+      </ItemsControl.ItemsPanel>
       <ItemsControl.ItemTemplate>
         <DataTemplate DataType="models:HomeSection">
           <StackPanel Spacing="14">

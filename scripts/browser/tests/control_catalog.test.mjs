@@ -388,6 +388,10 @@ check("a click on a button raises its Click", async (page) => {
     await page.find("Click raised 1 time.", inContent);
     await page.clickElement(button);
     await page.find("Click raised 2 times.", inContent);
+
+    await navigate(page, "Home");
+    await page.clickElement(await page.find("Buttons", inContent));
+    await page.find("Click the first button to raise Click.", inContent);
     assert(page.errors.length === 0, `errors were logged:\n${page.errors.join("\n")}`);
 });
 
