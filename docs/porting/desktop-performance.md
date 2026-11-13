@@ -4222,3 +4222,58 @@ from the change is drawn for itself and for the backdrop; it failed with the wid
 before the final area) and
 `a_dirty_rectangle_away_from_a_backdrop_leaves_the_backdrop_as_it_is`. The frame gate has
 `text`, `list` and `grow`.
+
+### 9.55 A census of the elements of tier 16: what is left to draw as an item
+
+Sections 9.41 and 9.42 gave a visual a composition visual only when it sets something the
+compositor applies, and drew every other visual as an item of the composition visual above
+it; stage B of the startup work extended that to the visuals that clip and have nothing
+under them. The third of the architecture proposals was to move more elements there. Before
+any code, the elements of the gauntlet at tier 16 were counted by what they are in the
+composition (a count over the visual tree of the window after two seconds of the run; the
+count is not part of the benchmark).
+
+| Elements of tier 16 | | Share |
+| --- | ---: | ---: |
+| All | 13,393 | |
+| Drawn as an item of a composition visual above | 9,746 | 72.8 % |
+| Draw nothing and have no composition visual (panels) | 2,964 | 22.1 % |
+| Have a composition visual | 683 | 5.1 % |
+
+| The items | |
+| --- | ---: |
+| `TextBlock` | 5,508 |
+| `Border` | 2,776 |
+| Bars of the charts | 620 |
+| Ticker tiles | 400 |
+| `Image` | 220 |
+| Sparklines | 220 |
+| Others | 2 |
+
+| The composition visuals, by what asks for one | |
+| --- | ---: |
+| A clip with visuals under it (the avatar of a card, the scroll viewer, the window) | 225 |
+| An opacity (the badge of a card) | 221 |
+| The cards and the rows that hold those (209 cards, 14 rows) | 223 |
+| A render transform (the tilted and the stacked layers) | 12 |
+| Others | 2 |
+
+**The result: nothing is left to move.** 95 of 100 elements have no composition visual. Of
+the 683 that have one, 458 set what only the compositor applies: a clip over children, an
+opacity, a transform. An item cannot carry those without becoming a visual again under
+another name (a clip or an opacity over children is a layer of the frame, and a transform
+that changes every frame is what a composition visual exists to change without a new
+recording). The 223 cards and rows are the parents of those: 16 visuals a row, against the
+9,746 items they hold. Taking the visual from a card would save one object in the batch of
+a frame in forty-eight (10,619 objects a frame at this tier), and would make the card's
+content part of the recording of the row, which then is recorded again whenever one card
+changes.
+
+So this proposal is closed without a change: stage B was the change. What the count shows
+is where the frame's work is now, which is not in the number of composition visuals: 9,746
+items, of which 3,648 are recorded again in a frame (4,927 visuals are visited by the
+recording, 997 of them unchanged), and 5,508 text blocks, of which about 430 lay their text
+out again in a frame. Sections on the layout and on the frame's data take it from there.
+
+**Other backends.** The count is of the compositor's tree in `ferroui_base`, and is the
+same whichever backend draws it.
