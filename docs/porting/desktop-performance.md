@@ -3750,8 +3750,11 @@ texture to draw again whenever anything in the subtree changes. The scenes measu
 not ask for it (the still wall is at the display's rate, the gauntlet changes everywhere),
 so it is not proposed.
 
-**Tests on the branch.** Six in `server_draw_items_tests.rs` (a fragment is made after the
-item settled, drawn again, dropped when the item changes, the waits after a refusal) and
-nine in `fragment_tests.rs` (the pixels of a kept picture are those of the commands under
-moves by whole pixels, clips, opacity and options; a refusal for a fraction of a pixel or
-another state).
+**Tests on the branch.** Six in `server_draw_items_tests.rs` (a context without fragments
+draws the commands; a fragment with every drawing for `Each`; for `Settled` a fragment when
+the drawing is drawn again; after a refusal a wait that doubles; a drawing the context
+makes no fragment of is not asked for again) and nine in `fragment_tests.rs` (a fragment is
+what its commands draw, also where the drawing moved to by whole pixels; it is refused
+where the pixels would differ; one laid out in the pixels of the device stays where it is;
+pushes left open or popped across the fragment are not kept; only a context that records
+makes fragments).
