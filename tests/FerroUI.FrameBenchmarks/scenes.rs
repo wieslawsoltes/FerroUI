@@ -49,7 +49,8 @@ pub const SCENES: &[Scene] = &[
         build: text,
         pointer: false,
         guards: "text that changes every frame: text layout, shaping and line breaking, run \
-                 properties, glyph runs and their drawing (sections 9.7, 9.8, 9.12, 9.16, 9.22)",
+                 properties, glyph runs and their drawing; dirty rectangles that fill their union \
+                 are drawn as one (sections 9.7, 9.8, 9.12, 9.16, 9.22, 9.54)",
     },
     Scene {
         name: "paragraph",
@@ -63,7 +64,8 @@ pub const SCENES: &[Scene] = &[
         build: list,
         pointer: false,
         guards: "a list of shadowed cards scrolling every frame: virtualization, recycling, creating \
-                 and disposing content and composition visuals, box shadows (sections 9.1, 9.11)",
+                 and disposing content and composition visuals, box shadows; a dirty rectangle that \
+                 is all but the surface is drawn as the surface (sections 9.1, 9.11, 9.54)",
     },
     Scene {
         name: "transforms",
@@ -77,7 +79,8 @@ pub const SCENES: &[Scene] = &[
         build: width,
         pointer: false,
         guards: "a layout whose width changes every frame: measure holds, text block layouts kept \
-                 over their width hold, copies of sizes and margins (sections 9.7, 9.9, 9.12, 9.15)",
+                 over their width hold, copies of sizes and margins; a frame in which no card moves \
+                 draws nothing (sections 9.7, 9.9, 9.12, 9.15, 9.53)",
     },
     Scene {
         name: "wall",
@@ -164,6 +167,14 @@ pub const SCENES: &[Scene] = &[
         guards: "translucent tiles lying over one another, one of which is opaque, another one \
                  every frame: the dirty region of a change under and over other drawings and what \
                  is drawn again for it (sections 9.10, 9.14)",
+    },
+    Scene {
+        name: "grow",
+        build: grow,
+        pointer: false,
+        guards: "a still wall of tiles beside a label whose size changes every frame, which invalidates \
+                 the layout up to the root: what is laid out again and draws what it drew is not drawn \
+                 again, and the frame draws the label (sections 9.53, 9.54)",
     },
 ];
 
@@ -782,6 +793,40 @@ fn recolor() -> Ref<Control> {
         }
     });
     root(&canvas)
+}
+
+// --- grow ----------------------------------------------------------------------------------------
+
+/// The longest text of the label of the `grow` scene, in digits.
+const GROW_DIGITS: usize = 24;
+
+fn grow() -> Ref<Control> {
+    let white = brush(0xFFFFFFFF);
+    let ink = brush(0xFF111827);
+    let colors = palette();
+    let canvas = Canvas::new();
+    for index in 0..RECOLOR_COLUMNS * RECOLOR_ROWS {
+        let fill = &colors[index % colors.len()];
+        canvas.children().add(&tile_of(index, RECOLOR_COLUMNS, PATCH_TILE, 0.0, &white, fill, &ink));
+    }
+    // The label takes the size of its text, so every frame changes the desired size of each
+    // element from it to the root.
+    let text = label(14.0, &white, true);
+    let badge = rounded(ink.clone(), 6.0, Thickness::uniform(8.0), &text);
+    badge.set_horizontal_alignment(HorizontalAlignment::Left);
+    badge.set_vertical_alignment(VerticalAlignment::Top);
+    let content = Grid::new();
+    content.children().add(&canvas);
+    content.children().add(&badge);
+    let grow = move |frame: i32| {
+        // A digit more or a digit less in every frame, from one digit to the longest text and back.
+        let step = turn(frame) % (2 * (GROW_DIGITS - 1));
+        let digits = 1 + step.min(2 * (GROW_DIGITS - 1) - step);
+        text.set_text(Some(&"0123456789".repeat(3)[..digits]));
+    };
+    grow(0);
+    Clock::follow(grow);
+    root(&content)
 }
 
 // --- cards ---------------------------------------------------------------------------------------
