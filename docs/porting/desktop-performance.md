@@ -626,8 +626,9 @@ What it measures:
   move by a transform, one of which leaves the tree, shows another card and comes back when a move
   begins), `reorder` (two children of a wrapping panel of 6,000 that change places), `deep`
   (numbers twelve boxes deep, a row of which changes), `rows` (a list of rows of 150 tiles that
-  scrolls a row a frame and recycles none) and `pile` (translucent tiles lying over one another,
-  one of which is opaque in turn). The harness is the frame gate's; besides the times a frame,
+  scrolls a row a frame and recycles none), `pile` (translucent tiles lying over one another,
+  one of which is opaque in turn) and `grow` (a still wall beside a label whose size changes
+  every frame, which invalidates the layout up to the root). The harness is the frame gate's; besides the times a frame,
   every scene reports the time it takes to build (`build_ms`) and the window to show it (`show_ms`: its first
   layout, recording and commit) and their sum (`startup_ms`). Alone:
 
@@ -2068,8 +2069,9 @@ asks.
 or `On` (every frame, for tests and measurements). An adaptive layer pipelines after four
 frames in a row that were late (a frame is late when it cost more than half of the time to
 the frame after it, and 4 ms at least), draws directly again after ninety light frames in a
-row, starts over after a pause of 100 ms, and stays direct for 120 frames after a frame that
-only the recorder of the context draws. An application whose frames are light never
+row, starts over after a pause of 100 ms (the time between the beginnings of two frames
+that the first of them did not cost, section 9.52), and stays direct for 120 frames after a
+frame that only the recorder of the context draws. An application whose frames are light never
 pipelines one, has no threads for it, and shows every frame in the tick that drew it, as
 upstream does.
 
@@ -2244,6 +2246,7 @@ Tests: `render_thread_tests.rs` (`a_batch_is_accepted_when_the_render_thread_tak
 `a_late_frame_costs_half_its_period_and_four_milliseconds_at_least`,
 `a_pipelined_layer_draws_directly_again_after_ninety_light_frames`,
 `a_pause_begins_a_new_stream_that_is_drawn_directly`,
+`frames_that_each_take_longer_than_a_pause_are_a_stream`,
 `a_frame_that_needs_the_recorder_of_the_context_holds_the_layer_off`,
 `the_options_can_ask_for_pipelined_frames_always_or_never`,
 `the_threads_insert_in_the_order_the_bands_were_sent_in`,
@@ -3922,3 +3925,300 @@ ready is. `render_thread_tests.rs`: a batch that follows a tick that only presen
 for a frame out of turn, and so does one that comes while such a tick presents.
 `pipelined_frames.rs` (Metal): only a layer that hands its frames to threads is drawn
 ahead of its target.
+
+### 9.52 A frame that takes longer than a pause is not a pause
+
+The benchmark measures ten seconds from the launch, so the first seconds of a scene count
+as much as the rest. Frames a second in each second of the patchwork scene in a window, on
+a display of 60 Hz, before this section and the next:
+
+| Scene | 1st | 2nd | 3rd | 4th | 5th | 6th | 7th |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Patchwork tier 17 | 26.0 | 32.8 | 48.6 | 60.0 | 60.0 | 60.0 | 60.0 |
+| Patchwork tier 20 | 11.8 | 11.6 | 11.7 | 12.6 | 10.5 | 15.7 | 37.7 |
+
+Tier 20 is a scene the adaptive layer of section 9.33 is made for: its frames cost the
+render thread several display frames each. The layer drew them directly for six seconds
+all the same. The policy starts over after a pause (`STREAM_GAP`, 100 ms), and it took the
+time between the beginnings of two frames for the pause. The frames of those seconds took
+around a tenth of a second each; every one that took longer was a pause, the count of late
+frames began again, and four late frames in a row came together only by chance.
+
+**The change.** A pause is the time between the beginnings of two frames that the first
+of them did not cost (`PipelinePolicy::frame_begins`: the period less the cost of the
+frame before it, compared with `STREAM_GAP`). Frames that each take longer than the gap,
+one after the other, are a stream, and the layer pipelines after four of them. A frame
+whose cost is not known counts with its whole period, as before, and so does every frame
+of a stream of light frames: the rule is the old one wherever a frame costs less than the
+gap.
+
+**Measured**, with this rule alone (two runs; the rule of the next section is not in):
+
+| Scene | 1st | 2nd | 3rd | 4th | 5th | 6th | 7th |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Patchwork tier 17 | 26.2 | 32.5 | 48.9 | 60.0 | 60.0 | 59.9 | 60.0 |
+| Patchwork tier 20 | 14.4 | 19.4 | 20.0 | 22.7 | 37.9 | 35.0 | 37.7 |
+| Patchwork tier 20, second run | 14.0 | 19.9 | 19.8 | 21.0 | 38.4 | 36.7 | 38.0 |
+
+Tier 20 pipelines from its fifth frame on and reaches its rate two seconds earlier; what
+holds the first seconds at 20 is the subject of the next section. Tier 17, whose frames
+are shorter than the gap, is where it was.
+
+**Other backends.** The policy takes times and costs, and nothing of Skia but the option
+that turns it off or on (`SkiaFramePipelining`). It lives with the one layer that
+pipelines; a second backend whose layer hands its frames to threads takes it as it is,
+and it moves to `ferroui_base` with that backend.
+
+**Not upstream.** Upstream has no pipelined layer; the row of section 9.33 in
+`DEVIATIONS.md` covers the policy.
+
+**Tests.** `pipelined_layer.rs`: `frames_that_each_take_longer_than_a_pause_are_a_stream`
+(frames of 118 ms every 120 ms pipeline with the fourth; the same frames with more than
+the gap between the end of one and the beginning of the next never do), and
+`a_pause_begins_a_new_stream_that_is_drawn_directly`, which now leaves the cost of the
+frame out of its pause and checks a frame of unknown cost as well.
+
+### 9.53 A visual invalidated with its layout alone is drawn again only when it draws something else
+
+With the layer pipelined, the first seconds of the patchwork scene were still at half the
+rate of the rest. A trace of the dirty rectangles said why: in the first eighty frames or
+so, every frame drew the whole window again, 1280 by 820, where the frames after them draw
+the cells that changed. A frame of the whole window costs about 2.4 times as much.
+
+The rectangle was that of the root. While the data of the scene arrives, the desired size
+of some element changes in almost every frame. `Layoutable::measure` invalidates the
+measure of the parent of such an element, and so on up to the root, and an invalidated
+measure invalidates the visual, as upstream does. The root is recorded again and draws what
+it drew: its background. Section 9.14 does not send such a drawing again, but it has the
+server draw the area of the visual again, because an invalidation can come from something
+the drawing does not contain. For the root, that area is the window.
+
+**The change.** An invalidation says why it was made, and the renderer draws the area of
+an unchanged drawing again only when the visual itself was invalidated.
+
+- `Layoutable::invalidate_measure` and `invalidate_arrange` call
+  `Visual::invalidate_visual_for_layout`, which marks the visual with
+  `IRenderer::add_dirty_for_layout`. The default of that method is `add_dirty`: a renderer
+  that does not know what a visual drew behaves as before.
+- `CompositingRenderer` keeps one bit for a dirty visual, beside the bits of its sets in
+  the word the visual already has (`VisualSets::REDRAW`; no list, and no memory for it).
+  `add_dirty` sets it, `add_dirty_for_layout` does not, and a visual marked in both ways,
+  in either order, has it. The bit goes with the dirty mark when the pass takes the visual.
+- The update pass records every dirty visual again, as before. A drawing that is another
+  one is sent, and its area drawn again, as before. A drawing that is the same
+  (`RecordedDrawing::Same`) has its area drawn again when the bit is set, and nothing at
+  all when it is not.
+
+Nothing that changes what is on the screen relies on the layout invalidation. A visual
+whose size changes in the arrange that follows is invalidated by the change of its bounds,
+and one that only moves has the offset of its composition visual or item changed, with a
+dirty mark of its own (section 9.13); a property that affects the rendering, an opacity
+mask, an effect or a clip invalidates the visual itself; and a child that draws something
+else is recorded and compared for itself. What is left for the layout invalidation is to
+have the drawing recorded again, because the layout may have changed what the visual
+draws, and that it still does.
+
+**Measured** in the window of the benchmark on a display of 60 Hz, with this section, the
+one before it and the one after it, frames a second in each second from the launch (two
+runs a side):
+
+| Scene | 1st | 2nd | 3rd | 4th | 5th | 6th | 7th |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Patchwork tier 17, before | 26.0 | 32.8 | 48.6 | 60.0 | 60.0 | 60.0 | 60.0 |
+| Patchwork tier 17, before | 26.1 | 32.6 | 48.7 | 60.0 | 60.0 | 60.0 | 60.0 |
+| Patchwork tier 17, after | 33.6 | 59.9 | 59.9 | 60.1 | 60.0 | 60.0 | 60.0 |
+| Patchwork tier 17, after | 42.3 | 60.0 | 60.0 | 60.0 | 59.8 | 60.1 | 60.0 |
+| Patchwork tier 20, before | 11.8 | 11.6 | 11.7 | 12.6 | 10.5 | 15.7 | 37.7 |
+| Patchwork tier 20, after | 17.5 | 38.4 | 37.8 | 38.4 | 36.0 | 40.3 | 38.1 |
+| Patchwork tier 20, after | 20.6 | 38.2 | 37.6 | 38.9 | 35.5 | 40.0 | 38.3 |
+
+The gauntlet at tier 16 has no such seconds, and is where it was (measured with this
+section and the one before it): 52.9, 48.4, 52.9, 52.9, 53.5 and 54.0 frames in the first
+second of six runs before, 53.2, 51.4, 54.0, 53.6 and 53.6 in five runs after (and 33.0 in
+one), 59 to 60 in every second after it on both sides.
+
+The harness of the benchmark, ten seconds from the launch, first launch and second (frames
+a second; the processor time of all threads for a frame; the 99th percentile of the frame
+time), with the other framework of the benchmark from its run on the same machine:
+
+| Scene | Before | After | Cranpose |
+| --- | ---: | ---: | ---: |
+| Gauntlet tier 16, frames a second | 44.3, 55.4 | 43.3, 54.8 | 55.3, 58.2 |
+| Gauntlet tier 16, processor ms a frame | 47.2, 46.0 | 47.2, 46.7 | |
+| Gauntlet tier 16, 99th percentile, ms | 34.4, 33.5 | 34.1, 33.6 | |
+| Patchwork tier 12, frames a second | 48.8, 57.4 | 48.2, 57.4 | 56.1, 57.3 |
+| Patchwork tier 12, processor ms a frame | 23.6, 21.4 | 20.4, 21.0 | |
+| Patchwork tier 12, 99th percentile, ms | 32.5, 20.0 | 33.4, 20.2 | |
+| Patchwork tier 17, frames a second | 38.9, 48.3 | 44.6, 54.2 | 27.8, 29.2 |
+| Patchwork tier 17, processor ms a frame | 57.9, 54.9 | 52.0, 50.9 | |
+| Patchwork tier 17, 99th percentile, ms | 67.8, 51.2 | 34.2, 33.3 | |
+| Patchwork tier 20, frames a second | 11.4, 17.5 | 25.8, 32.0 | 9.4, 10.2 |
+| Patchwork tier 20, processor ms a frame | 123.3, 104.3 | 91.8, 87.4 | |
+| Patchwork tier 20, 99th percentile, ms | 167.0, 166.9 | 66.5, 50.5 | |
+
+The time to the first frame is what it was (2.0 s in a first launch, 0.5 to 0.8 s in a
+second; 2.5 s and 1.3 s at tier 20 of the patchwork): what is left between the first
+launch and the second is the first frame, not the frames after it.
+
+**The frame scenes without a window** (the render thread, ms for a frame it drew; three
+runs a side, in turn):
+
+| Scene | Before | After |
+| --- | ---: | ---: |
+| `grow`: a still wall of 14,400 tiles beside a label whose size changes every frame | 80.2, 81.0, 80.0 | 1.76, 1.76, 1.76 |
+| `width`: 300 cards in a panel whose width changes every frame | 3.77, 3.71, 3.94 | 3.40, 3.36, 3.31 |
+| `width`: frames drawn of 240 | 240 | 12 |
+
+`grow` is new with this section, and is what the first seconds of the patchwork were: a
+change of a desired size that reaches the root. `width` lays its cards out again in every
+frame, and they move only when a line of them wraps another way; the 228 frames in which
+none moves are no longer drawn at all. Two other scenes, `text` and `list`, were slower
+with this section alone, for what their dirty area had become; section 9.54 is about them.
+
+**What stays as it was.** A visual invalidated itself has its area drawn again whatever
+it draws, as section 9.14 says, also when its layout was invalidated in the same pass. A
+drawing that is another one is sent and drawn. The layout pass, the order of its
+invalidations and what `invalidate_measure` and `invalidate_arrange` do to the layout are
+untouched; `invalidate_visual` is public and does what it did. A renderer other than the
+compositing renderer gets `add_dirty` through the default.
+
+**Other backends.** All of it is in `ferroui_base`: the invalidation, the bit and the
+update pass. The dirty rectangles of a frame are made there for every backend, so Skia,
+Vello and ProGPU draw the same smaller area, with no code of their own.
+
+**Not upstream.** Upstream invalidates the visual from `InvalidateMeasure` and
+`InvalidateArrange`, and its area is drawn again whatever it draws; `DEVIATIONS.md` has
+the row.
+
+**Tests.** `compositor_tests.rs`:
+`a_visual_invalidated_with_its_layout_alone_is_drawn_again_only_when_it_draws_something_else`
+(an item and a visual with a layer: the layout alone and the same drawing draw nothing; the
+layout and the visual, in either order, draw its bounds; the request does not outlive the
+pass; another drawing after a layout invalidation is drawn). `visual_tests.rs` of the
+controls: `invalidating_the_layout_invalidates_the_visual_for_its_layout`. The frame gate
+has the scene `grow`.
+
+### 9.54 The dirty area of a frame is one rectangle where its rectangles fill their union, and the surface where it is all but the surface
+
+Before section 9.53 a scene whose layout changed in every frame had the window for its
+dirty area, by the root. With it, the area of such a frame is what the tracker makes of
+the visuals that changed, and two frame scenes without a window were slower for it on the
+render thread (ms a frame, three runs):
+
+| Scene | Main | With section 9.53 alone |
+| --- | ---: | ---: |
+| `text` | 6.09 | 7.08, 7.04, 7.08 |
+| `list` | 3.52 | 3.76, 3.77, 3.76 |
+
+A trace of the rectangles of their frames said what the area had become.
+
+- **`text`: eight rectangles that are nearly one.** The scene changes the text of 480
+  tiles all over the window. The tracker of the default (`MultiDirtyRectTracker`, eight
+  rectangles at most) ends with eight that cover 92 to 95 per cent of their union, and
+  the union is 98 per cent of the surface. The frame draws almost all it drew before, but
+  under a clip of a region where it had a clip of a rectangle, and every drawing of the
+  frame is clipped against the region.
+- **`list`: one rectangle that is all but the surface.** The list scrolls, and its
+  rectangle is 99.3 per cent of the surface. A frame of the whole surface is cleared; a
+  frame of less keeps what the frame before drew, and its clear is a drawing under the
+  clip. The seven thousandths of the surface it did not draw cost more than they saved.
+
+**The change.** The dirty area is made simple where it is made final for the frame
+(`IDirtyRectTracker::finalize_frame`), in `ferroui_base`, with two rules
+(`simplify_dirty_rects`, `surface_or_rect`):
+
+1. *Rectangles that fill their union are replaced with it.* When the rectangles of the
+   frame cover seven eighths of their union or more (`UNION_SHARE`; the area they cover,
+   each point counted once), the frame draws the union. What it draws besides is a
+   seventh of what it drew anyway at most, and its clip is a rectangle. The rectangles of
+   `text` fill 0.92 to 0.95 of their union. Those of the `width` scene in the frames it
+   draws, cards that moved in some lines of a panel, fill 0.81 of it and stay eight
+   rectangles: there the region saves more than it costs.
+2. *A rectangle that is all but the surface is replaced with the surface.* One rectangle
+   that covers 96 per cent of the surface or more (`SURFACE_SHARE`) becomes the surface,
+   and the frame is one of the whole surface for the tracker, the target and the backend:
+   cleared whole, with no clip to draw under.
+
+`MultiDirtyRectTracker` applies both, in that order, so that rectangles that fill a union
+that is all but the surface become the surface; `SingleDirtyRectTracker`, the tracker of a
+platform without regions, applies the second. `RegionDirtyRectTracker`, the exact region
+an application asks for with `max_dirty_rects` of zero or less, is left as it is. The
+area of a frame only grows by the rules, and never past the surface: what is drawn besides
+shows what it showed.
+
+**The backdrops.** A dirty rectangle that touches the area a backdrop reads is widened to
+the whole of that area (`winui-materials.md`: a blurred backdrop drawn in part would mix
+the new pixels with the old ones). The target
+did that before the tracker made its area final, and asked the tracker which areas the
+rectangles touched; but `MultiDirtyRectTracker` answers `intersects` from its final
+rectangles, which do not exist before `finalize_frame`, and `SingleDirtyRectTracker` from
+the final rectangle of the frame before. With the default tracker a change under a
+backdrop drew the backdrop inside the rectangle of the change only. The target now makes
+the area final first and widens it afterwards (`ServerCompositionTarget::begin_scene`),
+with a method the trackers got for it: `IDirtyRectTracker::include` adds a rectangle to
+the final area, and applies the rules above again.
+
+**Measured**, the frame scenes without a window, base and candidate in turn (the render
+thread, ms for a frame it drew; three runs a side):
+
+| Scene | Main | Sections 9.53 and 9.54 |
+| --- | ---: | ---: |
+| `text` | 6.35, 6.09, 6.10 | 6.13, 6.16, 6.19 |
+| `list` | 3.54, 3.53, 3.50 | 3.48, 3.53, 3.53 |
+| `recolor` | 2.34, 2.34, 2.35 | 2.34, 2.34, 2.34 |
+| `width` | 3.77, 3.71, 3.94 | 3.40, 3.36, 3.31 |
+| `grow` | 80.2, 81.0, 80.0 | 1.76, 1.76, 1.76 |
+
+The window of the benchmark is in section 9.53; its numbers are those of the three
+sections together.
+
+**The local gate** (counters, the gauntlet and the frame scenes without a window, the
+three sections together): 130 metrics, six over their tolerance, none of them work the
+change adds.
+
+- *`width`, the UI time and the wall time for a presented frame* (0.056 ms to 0.484 ms and
+  3.74 ms to 3.96 ms). The gate divides the time of a run by the frames that were drawn,
+  and the scene now draws 12 of its 240 frames where it drew every one. For a frame of the
+  clock the UI thread takes 0.024 ms where it took 0.056 ms, and the render thread 0.17 ms
+  where it took 3.74 ms. With this section on both sides the two counts are the same again.
+- *The start of `cards` and of `grow`* (+5.8 % and +5.9 % against 5 %) *and the UI time of
+  `reorder`* (1.78 ms to 1.91 ms, +7.1 %, and with it its wall time). The scenes with many
+  elements take 3 to 5 per cent longer to build and to show on this side, every one of them
+  (`wall`: 140.5 ms to 145.0 ms to build), though no element has a renderer while it is
+  built and the code that builds it is the same. Counted for the whole process, four runs a
+  side: `wall` retires 18.61 to 18.64 thousand million instructions before and 18.61 to
+  18.62 after, `reorder` 19.58 before and 19.37 after (1 % fewer); the peak of memory is
+  the same (792.2 MB, 54 226 pages); the cycles of `wall` are 0.9 % more. The same work in
+  a little more time is where the code lies in this binary, and the next change moves it
+  again: the gate of section 9.51 built the same scenes within 2.5 % either way.
+
+What the rules of this section and the one before it gain shows in the scenes that were
+not made for them: the render thread takes 13.1 % less for a frame of `lines` (17.67 ms to
+15.34 ms) and 13.7 % less for one of `moves` (25.37 ms to 21.88 ms), whose rectangles fill
+their union, and `grow` goes from 81.2 ms to 1.74 ms. The gauntlet at tier 16 is where it
+was (11.91 ms and 11.73 ms on the UI thread, 33.47 ms and 33.53 ms on the render thread),
+and so is the still wall at tier 20 (1.63 ms and 1.60 ms).
+
+**Other backends.** The rules and the widening over backdrops are in the trackers and the
+target of `ferroui_base`, and the area they make is the one every backend draws: Skia,
+Vello and ProGPU get a clip of a rectangle where they had a region, and a frame of the
+whole surface where they had nearly one, with no code of their own. A backend that tells
+a frame of the whole surface from a part of one (a target it clears where it would load
+it) gains from the second rule by itself.
+
+**Not upstream.** Upstream's trackers draw the rectangles they collected as they are;
+`DEVIATIONS.md` has the row. The backdrops and the widening over them are FerroUI's own
+(`winui-materials.md`), and so is `IDirtyRectTracker::include`.
+
+**Tests.** `i_dirty_rect_tracker.rs`: `the_covered_area_counts_every_point_once`,
+`rectangles_that_fill_their_union_are_replaced_with_it`,
+`a_rectangle_that_is_all_but_the_surface_is_replaced_with_the_surface`. The trackers:
+`rectangles_that_fill_their_union_are_drawn_as_one_rectangle`,
+`rectangles_that_are_all_but_the_surface_are_drawn_as_the_surface`,
+`a_rectangle_that_is_all_but_the_surface_is_drawn_as_the_surface` and, of each tracker,
+that an included rectangle joins the final area. `composition_winui_material_tests.rs`:
+`a_dirty_rectangle_under_a_backdrop_redraws_all_of_it` (what lies under the backdrop away
+from the change is drawn for itself and for the backdrop; it failed with the widening
+before the final area) and
+`a_dirty_rectangle_away_from_a_backdrop_leaves_the_backdrop_as_it_is`. The frame gate has
+`text`, `list` and `grow`.
