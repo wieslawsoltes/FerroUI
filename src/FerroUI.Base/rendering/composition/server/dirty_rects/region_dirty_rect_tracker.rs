@@ -177,18 +177,11 @@ mod tests {
         assert_eq!(vec![LtrbRect::new(50.0, 60.0, 70.0, 80.0), LtrbRect::new(10.0, 10.0, 21.0, 20.0)], rects);
 
         // One included after the frame was made final is among them, and
-        // one it overlaps keeps what is outside it.
+        // one it is close to is drawn with it, as the rectangle that
+        // holds both.
         tracker.include(LtrbRect::new(60.0, 70.0, 90.0, 90.0), BOUNDS);
         tracker.separate_rects(&mut rects);
-        assert_eq!(
-            vec![
-                LtrbRect::new(60.0, 70.0, 90.0, 90.0),
-                LtrbRect::new(50.0, 60.0, 70.0, 70.0),
-                LtrbRect::new(50.0, 70.0, 60.0, 80.0),
-                LtrbRect::new(10.0, 10.0, 21.0, 20.0),
-            ],
-            rects
-        );
+        assert_eq!(vec![LtrbRect::new(50.0, 60.0, 90.0, 90.0), LtrbRect::new(10.0, 10.0, 21.0, 20.0)], rects);
 
         // The frame is what it was: a region, and nothing between its
         // rectangles.

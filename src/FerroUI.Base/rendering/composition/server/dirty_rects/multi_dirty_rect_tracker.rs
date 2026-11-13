@@ -286,19 +286,11 @@ mod tests {
         assert_eq!(vec![LtrbRect::new(499.0, 499.0, 512.0, 521.0), LtrbRect::new(9.0, 9.0, 21.0, 21.0)], rects);
 
         // A rectangle included after the frame was made final is one of
-        // them, on whole pixels, and one it overlaps keeps what is outside
-        // it.
+        // them, on whole pixels, and one it is close to is drawn with it,
+        // as the rectangle that holds both.
         tracker.include(LtrbRect::new(15.0, 15.0, 40.5, 30.0), BOUNDS);
         tracker.separate_rects(&mut rects);
-        assert_eq!(
-            vec![
-                LtrbRect::new(14.0, 14.0, 42.0, 31.0),
-                LtrbRect::new(499.0, 499.0, 512.0, 521.0),
-                LtrbRect::new(9.0, 9.0, 21.0, 14.0),
-                LtrbRect::new(9.0, 14.0, 14.0, 21.0),
-            ],
-            rects
-        );
+        assert_eq!(vec![LtrbRect::new(9.0, 9.0, 42.0, 31.0), LtrbRect::new(499.0, 499.0, 512.0, 521.0)], rects);
 
         // Asking changes nothing of the frame: its rectangles, its region
         // and what it tests the visuals against are what they were.
