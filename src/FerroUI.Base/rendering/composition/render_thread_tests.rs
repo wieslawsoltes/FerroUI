@@ -1583,6 +1583,111 @@ fn a_batch_that_follows_an_idle_tick_asks_for_a_frame_out_of_turn() {
     assert_eq!(1, render_loop.frames_requested_out_of_turn());
 }
 
+/// A target of `compositor` over the mock render interface, with a root
+/// visual, enabled: the next tick draws its first frame.
+fn shown_target(compositor: &Rc<Compositor>) -> (Rc<CompositionTarget>, Rc<CompositionVisual>) {
+    let surfaces: RenderSurfaces = Arc::new(Vec::new);
+    let target = compositor.create_composition_target(surfaces);
+    let root = compositor.create_container_visual();
+    root.set_size(Vector::new(100.0, 80.0));
+    target.set_root(Some(root.clone()));
+    target.set_scaling(1.0);
+    target.set_size(Size::new(100.0, 80.0));
+    target.set_is_enabled(true);
+    (target, root)
+}
+
+/// A frame of the target of [`shown_target`] that differs from the one
+/// before.
+fn resize_shown_target(target: &CompositionTarget, root: &CompositionVisual, width: f64) {
+    root.set_size(Vector::new(width, 80.0));
+    target.set_size(Size::new(width, 80.0));
+}
+
+#[test]
+fn a_batch_that_follows_a_tick_that_only_presented_asks_for_a_frame_out_of_turn() {
+    let _dispatcher_scope = Dispatcher::unit_test_scope();
+    let (_locator_scope, render_interface) = MockPlatformRenderInterface::install();
+    let log = render_interface.log().clone();
+    log.hold_layer_frames_back(true);
+    let render_loop = ManualRenderLoop::background();
+    let compositor = render_thread_compositor(&render_loop, false);
+    let render_thread = TickedRenderThread::start(&render_loop);
+
+    // The first tick draws a frame, which the layer holds back.
+    let (target, root) = shown_target(&compositor);
+    compositor.commit();
+    render_thread.tick();
+    assert_eq!(1, log.count("Blit frame 0 of 1"), "{:?}", log.entries());
+
+    // A batch that follows a tick which drew a scene waits for its tick.
+    resize_shown_target(&target, &root, 110.0);
+    compositor.commit();
+    assert_eq!(0, render_loop.frames_requested_out_of_turn());
+    render_thread.tick();
+
+    // The tick after presents the frame the layer held back and draws no
+    // scene: its display frame is still open, and the batch that follows
+    // it is drawn out of turn (desktop-performance.md, section 9.51).
+    log.clear();
+    render_thread.tick();
+    assert_eq!(1, log.count("CompletePendingFrame"), "{:?}", log.entries());
+    resize_shown_target(&target, &root, 120.0);
+    compositor.commit();
+    assert_eq!(1, render_loop.frames_requested_out_of_turn());
+
+    // The tick out of turn applies the batch: one at most for one display
+    // tick.
+    render_thread.tick();
+    resize_shown_target(&target, &root, 130.0);
+    compositor.commit();
+    assert_eq!(1, render_loop.frames_requested_out_of_turn());
+    drop(render_thread);
+}
+
+#[test]
+fn a_batch_that_comes_while_a_tick_only_presents_asks_for_a_frame_out_of_turn() {
+    let _dispatcher_scope = Dispatcher::unit_test_scope();
+    let (_locator_scope, render_interface) = MockPlatformRenderInterface::install();
+    let log = render_interface.log().clone();
+    log.hold_layer_frames_back(true);
+    let render_loop = ManualRenderLoop::background();
+    let compositor = render_thread_compositor(&render_loop, false);
+    let render_thread = TickedRenderThread::start(&render_loop);
+
+    let (target, root) = shown_target(&compositor);
+    compositor.commit();
+    render_thread.tick();
+
+    // The render thread stops while it presents the frame the layer held
+    // back, in a tick that found no batch.
+    let (presenting, is_presenting) = std::sync::mpsc::channel();
+    let (present_on, may_present_on) = std::sync::mpsc::channel::<()>();
+    let may_present_on = std::sync::Mutex::new(may_present_on);
+    log.on_entry("CompletePendingFrame", move || {
+        let _ = presenting.send(());
+        let _ = may_present_on.lock().unwrap().recv();
+    });
+    let ticked = render_thread.start_tick();
+    is_presenting.recv().expect("the render thread presents the frame");
+
+    // The batch missed the tick by its timing alone. The tick before it
+    // drew a scene, so the batch is not late for this thread; the render
+    // thread finds it when its tick ends and asks for the tick itself.
+    resize_shown_target(&target, &root, 110.0);
+    compositor.commit();
+    assert_eq!(0, render_loop.frames_requested_out_of_turn());
+    present_on.send(()).expect("the render thread waits");
+    ticked.recv().expect("the render thread ticked");
+    drop(present_on);
+    assert_eq!(1, render_loop.frames_requested_out_of_turn());
+
+    // The tick out of turn draws the batch and asks for nothing.
+    render_thread.tick();
+    assert_eq!(1, render_loop.frames_requested_out_of_turn());
+    drop(render_thread);
+}
+
 #[test]
 fn a_compositor_that_renders_on_its_own_thread_asks_for_no_frame_out_of_turn() {
     let _dispatcher_scope = Dispatcher::unit_test_scope();

@@ -7,7 +7,8 @@ use crate::platform::{
     IOptionalFeatureProvider, IPlatformGraphicsContext, IPlatformRenderInterface, IPlatformRenderInterfaceContext,
     IPlatformRenderInterfaceRegion, IRenderTarget, IRenderTargetBitmapImpl, IStreamGeometryBuilder,
     ITransformedGeometryImpl, IWriteableBitmapImpl, LtrbPixelRect, LtrbRect, PixelFormat,
-    PixelFormats, RenderTargetDrawingContextProperties, RenderTargetProperties, RenderTargetSceneInfo,
+    PixelFormats, RenderTargetDrawingContextProperties, RenderTargetError, RenderTargetProperties,
+    RenderTargetSceneInfo,
 };
 use crate::reactive::IDisposable;
 use crate::{FerroLocator, Matrix, PixelSize, Point, Rect, Size, Vector};
@@ -489,7 +490,23 @@ impl IRenderTarget for MockRenderTarget {
         &self,
         _scene_info: &RenderTargetSceneInfo,
     ) -> (Box<dyn IDrawingContextImpl>, RenderTargetDrawingContextProperties) {
+        if self.log.layers_draw_ahead() {
+            self.log.push("TargetContext");
+        }
         (Box::new(MockDrawingContextImpl::new(self.log.clone())), RenderTargetDrawingContextProperties::default())
+    }
+    fn try_create_drawing_context(
+        &self,
+        scene_info: &RenderTargetSceneInfo,
+    ) -> Result<(Box<dyn IDrawingContextImpl>, RenderTargetDrawingContextProperties), RenderTargetError> {
+        if self.log.targets_are_not_ready() {
+            self.log.push("TargetNotReady");
+            return Err(RenderTargetError::NotReady(crate::RenderTargetNotReadyError::new()));
+        }
+        Ok(self.create_drawing_context(scene_info))
+    }
+    fn prepare_frame_ahead(&self, _scene_info: &RenderTargetSceneInfo) -> bool {
+        self.log.layers_draw_ahead()
     }
     fn dispose(&self) {
         self.disposed.set(true);

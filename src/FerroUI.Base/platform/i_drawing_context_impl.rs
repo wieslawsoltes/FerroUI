@@ -230,6 +230,18 @@ pub trait IDrawingContextLayerImpl: IBitmapImpl {
         false
     }
 
+    /// Whether the next frame of the layer is better drawn before the
+    /// drawing context of the render target it is blitted onto is created
+    /// (`IRenderTarget::prepare_frame_ahead`; desktop-performance.md,
+    /// section 9.51): the layer needs no drawing context of the target to
+    /// be drawn, and it holds its frames back, so that drawing it first
+    /// delays no frame. `false` by default.
+    ///
+    /// Not from upstream.
+    fn draws_ahead_of_target(&self) -> bool {
+        false
+    }
+
     /// Completes the frame the layer holds back, so that the next
     /// [`blit`](Self::blit) shows it. For a tick that draws nothing into
     /// the layer: a tick that draws completes the frame before it by

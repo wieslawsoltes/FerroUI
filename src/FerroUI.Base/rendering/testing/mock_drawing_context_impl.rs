@@ -13,7 +13,17 @@ use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 /// The shared record of what was drawn on mock drawing contexts, one line
 /// per call, in call order.
 #[derive(Clone, Default)]
-pub struct DrawingLog(std::sync::Arc<std::sync::Mutex<Vec<String>>>, std::sync::Arc<std::sync::atomic::AtomicBool>);
+pub struct DrawingLog(
+    std::sync::Arc<std::sync::Mutex<Vec<String>>>,
+    std::sync::Arc<std::sync::atomic::AtomicBool>,
+    std::sync::Arc<std::sync::atomic::AtomicBool>,
+    std::sync::Arc<std::sync::atomic::AtomicBool>,
+    std::sync::Arc<std::sync::Mutex<Option<EntryHook>>>,
+);
+
+/// What [`DrawingLog::on_entry`] runs, and the start of the entries it runs
+/// for.
+type EntryHook = (String, std::sync::Arc<dyn Fn() + Send + Sync>);
 
 impl DrawingLog {
     pub fn new() -> Self {
@@ -33,9 +43,47 @@ impl DrawingLog {
         self.1.load(std::sync::atomic::Ordering::SeqCst)
     }
 
+    /// Makes the mock render targets that record to this log allow a frame
+    /// whose layer is drawn before their drawing context is created
+    /// ([`IRenderTarget::prepare_frame_ahead`](crate::platform::IRenderTarget::prepare_frame_ahead)),
+    /// and the mock layers that hold frames back ask for it
+    /// ([`IDrawingContextLayerImpl::draws_ahead_of_target`]). Such a target
+    /// logs `TargetContext` for every drawing context it creates.
+    pub fn draw_layers_ahead(&self, ahead: bool) {
+        self.2.store(ahead, std::sync::atomic::Ordering::SeqCst);
+    }
+
+    pub(crate) fn layers_draw_ahead(&self) -> bool {
+        self.2.load(std::sync::atomic::Ordering::SeqCst)
+    }
+
+    /// Makes the mock render targets that record to this log answer that
+    /// they are not ready when a drawing context is asked of them
+    /// ([`IRenderTarget::try_create_drawing_context`](crate::platform::IRenderTarget::try_create_drawing_context)).
+    /// Such a target logs `TargetNotReady`.
+    pub fn leave_targets_not_ready(&self, not_ready: bool) {
+        self.3.store(not_ready, std::sync::atomic::Ordering::SeqCst);
+    }
+
+    pub(crate) fn targets_are_not_ready(&self) -> bool {
+        self.3.load(std::sync::atomic::Ordering::SeqCst)
+    }
+
+    /// Runs `hook` after every entry that starts with `prefix`, on the
+    /// thread that records the entry: a test stops the thread that renders
+    /// at a known point of a frame with it.
+    pub fn on_entry(&self, prefix: &str, hook: impl Fn() + Send + Sync + 'static) {
+        *self.4.lock().unwrap() = Some((prefix.to_owned(), std::sync::Arc::new(hook)));
+    }
+
     /// Appends an entry.
     pub fn push(&self, entry: impl Into<String>) {
-        self.0.lock().unwrap().push(entry.into());
+        let entry = entry.into();
+        let hook = self.4.lock().unwrap().as_ref().filter(|(prefix, _)| entry.starts_with(prefix)).map(|(_, hook)| hook.clone());
+        self.0.lock().unwrap().push(entry);
+        if let Some(hook) = hook {
+            hook();
+        }
     }
 
     /// A copy of the entries recorded so far.
@@ -640,7 +688,12 @@ impl IDrawingContextLayerImpl for MockDrawingContextLayerImpl {
         if self.log.layers_hold_frames_back() {
             self.log.push("CompletePendingFrame");
             self.shown.store(self.drawn.load(Ordering::SeqCst), Ordering::SeqCst);
+            self.drew_since_blit.store(false, Ordering::SeqCst);
         }
+    }
+
+    fn draws_ahead_of_target(&self) -> bool {
+        self.log.layers_hold_frames_back() && self.log.layers_draw_ahead()
     }
 
     fn create_shared_snapshot(&self) -> std::sync::Arc<crate::platform::SharedBitmapImpl> {

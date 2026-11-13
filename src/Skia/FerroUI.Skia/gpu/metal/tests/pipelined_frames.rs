@@ -499,6 +499,27 @@ fn a_frame_that_leases_the_skia_api_is_drawn_by_the_recorder_of_the_context() {
 }
 
 #[test]
+fn only_a_layer_that_hands_its_frames_to_threads_is_drawn_ahead_of_its_target() {
+    // desktop-performance.md, section 9.51: the frame of such a layer is
+    // recorded before the target is asked for its next drawable.
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    let layers = Layers::new(&device, SkiaFramePipelining::On);
+    assert!(layers.pipelined.draws_ahead_of_target());
+    assert!(!layers.ordinary.draws_ahead_of_target());
+    layers.dispose();
+
+    // The cost of a direct frame is measured to the end of its last flush:
+    // it stays inside the drawing context of the target.
+    let layers = Layers::new(&device, SkiaFramePipelining::Adaptive);
+    layers.draw_unclipped(draw_scene);
+    assert!(!layers.pipelined.draws_ahead_of_target());
+    layers.dispose();
+}
+
+#[test]
 fn an_adaptive_layer_draws_its_first_frames_directly() {
     let Some(device) = TestMetalDevice::try_new() else {
         eprintln!("skipped: no Metal device available");

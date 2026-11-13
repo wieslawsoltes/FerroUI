@@ -77,6 +77,13 @@ pub trait ISkiaSurface {
     /// (`IDrawingContextLayerImpl::complete_pending_frame`). Nothing by default.
     fn complete_pending_frame(&self) {}
 
+    /// Whether the next frame of the surface is better drawn before the rendering session of
+    /// the frame begins (`IDrawingContextLayerImpl::draws_ahead_of_target`). `false` by
+    /// default.
+    fn draws_ahead_of_target(&self) -> bool {
+        false
+    }
+
     /// Releases the surface.
     fn dispose(&self);
 }
