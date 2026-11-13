@@ -815,9 +815,18 @@ the machine, the emulator or the simulator; the browser suite counts what WebGL 
   (`org.ferroui.framebenchmarks.base`, `.candidate`). A scene is started with the command of the
   platform: on Android `am start` with the scene as an extra of the intent (`FRAMES_SCENE`), the
   `PERF` lines read from the log of the device (tag `ferroui-frames`); on iOS `simctl launch` with
-  the scene in the environment of the process, the lines read from its console. The times are
-  from that command. The program says which scene it shows (`PERF scene`), and the gate fails
-  when it is not the one asked for.
+  the scene in the environment of the process, the lines read from its console. The program says
+  which scene it shows (`PERF scene`), and the gate fails when it is not the one asked for.
+- **The first frames of a device are timed where they happen.** On iOS the times are from the
+  command that starts the scene, as on the desktop: the simulator runs on the machine of the
+  gate, and its console is a pipe. On Android they are those of the log of the device
+  (`logcat -v threadtime`), from the line with which the activity manager says it started the
+  process (`Start proc`) to the `PERF` lines of that process, and of no other. A time taken on
+  the machine of the gate has in it what `adb` takes to start the scene and what a line takes
+  to arrive, and the second is not the same for every line: in the first run on the emulator
+  the first frame of the text scene arrived after 173 ms on one side and after 340 ms on the
+  other, and the log of the device had the second side ahead. The log of a run keeps the time
+  each line arrived at in front of it.
 - **Where the candidate is not a git checkout** (a machine that gets its sources as a copy:
   `scripts/windows/vm-sync.sh <commit> <folder>` makes one, on any system), the base is a second
   copy, passed with `--base-dir`; the gate checks nothing out and names each side by the commit
