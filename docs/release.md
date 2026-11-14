@@ -296,6 +296,7 @@ A failed documentation build does not affect the crate on crates.io: it shows as
 | `scripts/release/publish.sh --dry-run` or `--publish` | The one list of what a release does, for the workflow and for a maintainer. |
 | `.github/workflows/release.yml` | The release workflow. |
 | `.github/workflows/ci.yml`, job `packaging` | Keeps the crates publishable. |
+| `scripts/perf/gate.py` | The performance gate, run on every platform before a release (section 8.4). |
 
 ### 8.1 The dry run
 
@@ -336,6 +337,25 @@ The job `packaging` of `ci.yml` runs `publish.sh --dry-run --no-verify` on Linux
 
 **If a crate cannot be published.** The crates before it in the order are on crates.io at that version and stay there. Fix the cause and run again if the fix does not change a crate that was already uploaded; otherwise yank the uploaded crates of that version (`cargo yank`, by the owner) and release the next preview number.
 
+### 8.4 The platform benchmark gates
+
+A release is made only after the performance gate (`scripts/perf/gate.py`; `docs/porting/desktop-performance.md`, sections 8.1 and 8.2) has passed on every supported platform, against the release before it. The continuous integration does not run it: it measures, and a measurement needs a machine that does nothing else. Whoever makes the release runs it, one platform after the other, and puts the table of each (`--markdown`) into the pull request of the release.
+
+| Platform | Where | What runs |
+|---|---|---|
+| macOS | the machine of the release | every suite: `python3 scripts/perf/gate.py --base <base> --copy-gate --markdown <file>` |
+| Linux | a machine or a virtual machine with a display (`xvfb-run -a`) | every suite, the same command; with a copy of the sources, `--base-dir <copy of the base>` |
+| Windows | a machine or a virtual machine, in the session of a signed-in user | every suite, the same command; with a copy of the sources, `--base-dir <copy of the base>` |
+| Android | an emulator, or a device | the window suite: `--only window --window-device android` |
+| iOS | a simulator | the window suite: `--only window --window-device ios` |
+| Browser | headless Chrome | the browser suite on the site of the commit: `--only browser --browser-site <folder or address>`, with `--browser-base-site` when a site of the base exists; a folder is opened without the render thread, an address as it is given, so the published site of a module with threads is `<address>/?Threads=false` |
+
+- **The base** is the tag of the release before, where the benchmark packages of the candidate build in it (`--copy-gate` copies them into the base, so that both sides run the same benchmark code). Where they do not, it is the first commit of `main` after that tag in which they build; the table then names it, and the release notes say what the comparison leaves out.
+- **Passed** means the exit status 0 on each platform. A metric over its tolerance that is meant (a feature that costs what it gives) is named in the release notes with its numbers; one that is not meant is fixed first, and the fix comes with a test and, where a number can show it, with a line of the gate (as section 9.56 of the performance document did for the page switches of the browser).
+- **One at a time.** A virtual machine, an emulator and a simulator are measured alone, with nothing else running on the machine below them, and a build never runs beside a measurement. The numbers of one platform are compared with its own base only.
+- **A fix is measured wherever its code runs.** A change made for one platform of a rendering backend (WebGL in a browser, for instance) runs on the others of that backend as well (OpenGL on Android and Linux), and is measured there before it is merged: the first run of these gates found, on Android, what the fix for the page switches of the browser cost a still scene (section 9.56 of the performance document).
+- **A platform that cannot be measured** (no machine for it at the time of the release) is named in the release notes as not measured. It is not left out silently.
+
 ## 9. What "ready" means: the checklist of a release
 
 Before the release:
@@ -347,6 +367,7 @@ Before the release:
 - [ ] `scripts/release/set-version.sh <version>` was run if the version changed, and the installation section of the README names the version.
 - [ ] `scripts/release/readme-crates-table.sh --check` passes.
 - [ ] The release workflow was run with `dry_run` on for the commit, and passed.
+- [ ] The platform benchmark gates of section 8.4 passed for the commit on macOS, Linux, Windows, Android, iOS and in the browser, and their tables are in the pull request of the release. Required: a release does not go out without them.
 - [ ] For the first release only: the decisions of section 12 are made.
 
 The release:

@@ -5,8 +5,12 @@ use ferroui_base::media::fonts::{FontCollectionBase, FontCollectionBaseImpl};
 use ferroui_base::utilities::UriRef;
 use std::path::PathBuf;
 
-/// Roboto Regular and Bold from the folder `PERF_FONTS` names (default: the Material theme's assets
-/// of this checkout).
+const REGULAR: &[u8] = include_bytes!("../../src/FerroUI.Themes.Material/Assets/Roboto-Regular.ttf");
+const BOLD: &[u8] = include_bytes!("../../src/FerroUI.Themes.Material/Assets/Roboto-Bold.ttf");
+
+/// Roboto Regular and Bold: the files of the Material theme's assets, which are part of the
+/// program (an application of a device has no checkout beside it), or those of the folder
+/// `PERF_FONTS` names.
 pub struct Roboto {
     base: FontCollectionBase,
     key: url::Url,
@@ -21,12 +25,15 @@ impl Roboto {
             base: FontCollectionBase::new(),
             key: UriRef::parse_absolute("fonts:Frames").expect("the key of the collection"),
         };
-        let folder = std::env::var_os("PERF_FONTS").map(PathBuf::from).unwrap_or_else(|| {
-            PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/../../src/FerroUI.Themes.Material/Assets"))
-        });
-        for file in ["Roboto-Regular.ttf", "Roboto-Bold.ttf"] {
-            let path = folder.join(file);
-            let bytes = std::fs::read(&path).unwrap_or_else(|error| panic!("cannot read {}: {error}", path.display()));
+        let folder = std::env::var_os("PERF_FONTS").map(PathBuf::from);
+        for (file, built_in) in [("Roboto-Regular.ttf", REGULAR), ("Roboto-Bold.ttf", BOLD)] {
+            let bytes = match &folder {
+                Some(folder) => {
+                    let path = folder.join(file);
+                    std::fs::read(&path).unwrap_or_else(|error| panic!("cannot read {}: {error}", path.display()))
+                }
+                None => built_in.to_vec(),
+            };
             FontCollectionBase::try_add_glyph_typeface_from_stream(&collection, &mut std::io::Cursor::new(bytes));
         }
         collection

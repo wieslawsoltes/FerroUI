@@ -15,17 +15,24 @@
 //! - `program.rs` (`frame-benchmarks`): a scene in a desktop window (`FRAMES_SCENE`), printing
 //!   `PERF first_frame` and, with `PERF_REPORT=1`, `PERF fps N` once a second, for the gate's
 //!   window suite (the GPU backends).
+//! - `tests/FerroUI.FrameBenchmarks.Android` and `tests/FerroUI.FrameBenchmarks.iOS`: the same
+//!   application ([`App`]) as the main view of an Android activity and of an iOS application, for
+//!   the window suite in an emulator and in a simulator (`gate.py --window-device`).
 //!
 //! Every frame advances a frame index ([`Clock`]); the scenes follow it, never wall time.
 
+mod application;
 mod clock;
 mod fonts;
 mod host;
+mod report;
 mod residency;
 pub mod scenes;
 
+pub use application::App;
 pub use clock::Clock;
 pub use fonts::Roboto;
 pub use host::FrameHost;
+pub use report::{report_to, scene_from};
 pub use residency::page_in_the_program;
 pub use scenes::{Scene, SCENES, STARTUP_SCENES, WARM_UP};

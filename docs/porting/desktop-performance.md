@@ -709,7 +709,9 @@ What it measures:
   tolerance (a quarter with the default) and a floor (8 masks, 250,000 pixels), since an animation
   runs a frame more or less from run to run, and a time ten times the tolerance and 50 ms, since
   the time of a switch in headless Chrome says little (section 9.56). The counts are those of the
-  module without threads, drawn on the thread of the page.
+  module without threads, drawn on the thread of the page. A folder is opened that way by the
+  script; an address is opened as it is given, so the published site of a module with threads is
+  given as `<address>/?Threads=false`.
 - **The TreeDataGrid benchmarks** (`tests/FerroUI.TreeDataGrid.Benchmarks`, `run_benchmarks`): the
   median time of one operation of each benchmark, read from the tables of the harness. The gate
   runs the harness with shorter iterations than its defaults (7 iterations of at least 250 ms
@@ -778,6 +780,81 @@ objects it uses (`sizes/...`), and a second run of it. When the counts and the s
 the base and the code the benchmark runs is not what the change touches, the time is that of
 where this build put the code and the data; the pull request shows the line with its counts and
 says so. The gate is not told to pass it.
+
+### 8.2 The gate on every platform
+
+The gate of section 8.1 runs on the machine of whoever changes the code, which is a Mac. A
+regression that only one platform has is not seen there: section 9.56 is one that only the browser
+had. So the gate runs on every platform the framework supports before a release (`docs/release.md`,
+section 8.4), and whenever a change is about one platform. It is the same script everywhere; what
+differs is where the window suite runs and where the sources come from.
+
+| Platform | The suites | How it is run |
+|---|---|---|
+| macOS | all | `python3 scripts/perf/gate.py --base <base>` |
+| Linux | all | the same, in a display: `xvfb-run -a python3 scripts/perf/gate.py ...` |
+| Windows | all | the same, in the session of a signed-in user (a window needs a desktop) |
+| Android | `window` | `--only window --window-device android`, an emulator or a device that runs |
+| iOS | `window` | `--only window --window-device ios`, a simulator that is booted |
+| Browser | `browser` | `--only browser --browser-site <folder or address>`, headless Chrome |
+
+The window suite draws with the GPU backend the platform's applications get, whatever that is on
+the machine, the emulator or the simulator; the browser suite counts what WebGL is asked for.
+
+- **The suites without a window** (`counters`, `gauntlet`, `frames`, `framework`, `tdg`) draw into
+  a raster framebuffer and need no display: they are the same on macOS, Linux and Windows, and say
+  what the compiler and the allocator of each platform make of the same code. On a device and in a
+  browser they do not run: a test binary is not an application there.
+- **The window suite on a device** (`--window-device android` or `ios`, with `--device-id` when
+  more than one is running): the scenes are those of the desktop program, in an application of
+  their own, `tests/FerroUI.FrameBenchmarks.Android` (a native library of an activity) and
+  `tests/FerroUI.FrameBenchmarks.iOS`. Both are a few lines: the application, the scenes and the
+  report are in `tests/FerroUI.FrameBenchmarks` (`App`, `report_to`, `scene_from`), and the fonts
+  are part of the program, since an application on a device has no folder of the repository. The
+  gate builds the host of each side with cargo (the environment of `scripts/android/env.sh`, the
+  SDK of the simulator), packages it with `scripts/android/apk.sh package --no-cargo` or
+  `scripts/ios/bundle.sh --no-build`, and installs both sides under ids of their own
+  (`org.ferroui.framebenchmarks.base`, `.candidate`). A scene is started with the command of the
+  platform: on Android `am start` with the scene as an extra of the intent (`FRAMES_SCENE`), the
+  `PERF` lines read from the log of the device (tag `ferroui-frames`); on iOS `simctl launch` with
+  the scene in the environment of the process, the lines read from its console. The program says
+  which scene it shows (`PERF scene`), and the gate fails when it is not the one asked for.
+- **The first frames of a device are timed where they happen.** On iOS the times are from the
+  command that starts the scene, as on the desktop: the simulator runs on the machine of the
+  gate, and its console is a pipe. On Android they are those of the log of the device
+  (`logcat -v threadtime`), from the line with which the activity manager says it started the
+  process (`Start proc`) to the `PERF` lines of that process, and of no other. A time taken on
+  the machine of the gate has in it what `adb` takes to start the scene and what a line takes
+  to arrive, and the second is not the same for every line. The log of a run keeps the time
+  each line arrived at in front of it.
+- **A side begins its scenes on a device with a launch that is not measured** (`warm_device`,
+  three seconds of its first scene). An application started after another one ran starts later,
+  before a line of its code runs, and its second launch does not. The sides take turns, so the
+  first scene of a side was timed by which side went before it. Nine rounds on the emulator, the
+  text scene, from the start of the process to the line with which the program names its scene
+  and to its first frame:
+
+  | The text scene of the candidate | To its scene, ms | To its first frame, ms |
+  | --- | ---: | ---: |
+  | After the scenes of the base (five rounds) | 277 to 298 | 292 to 311 |
+  | After its own scenes of the round before (four rounds) | 87 to 109 | 97 to 121 |
+  | The base, in either place | 84 to 109 | 103 to 134 |
+
+  The median of the nine was 292 ms against 131 ms, a first frame twice as late that no frame
+  was part of: from the scene to the first frame the candidate took 14 ms and the base 22 ms.
+  The base did not show it. The likely cause, not proven, is the memory of the emulator: the
+  last scene of a side, the lines, is much the heavier one on the base of that run, and what it
+  takes is taken from the pages of the other application. With the launch that does not count
+  both sides start their first scene as they start every other one.
+- **Where the candidate is not a git checkout** (a machine that gets its sources as a copy:
+  `scripts/windows/vm-sync.sh <commit> <folder>` makes one, on any system), the base is a second
+  copy, passed with `--base-dir`; the gate checks nothing out and names each side by the commit
+  its copy was made from. `--copy-gate` copies the candidate's benchmark code into that tree as it
+  does into a worktree.
+- **The numbers of an emulator, a simulator and a virtual machine** are those of the machine
+  below them and of its drivers: they are compared with the other side on the same one, in the
+  same run, and never with the numbers of another platform. A virtual machine or an emulator runs
+  alone while it is measured.
 
 ## 9. Deviations from upstream for frame cost
 
