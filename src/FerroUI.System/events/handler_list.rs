@@ -99,7 +99,8 @@ impl<F: ?Sized> HandlerList<F> {
     pub fn remove(&self, token: u64) -> bool {
         let removed = self.with(|handlers| {
             let handlers = handlers.as_mut()?;
-            let index = handlers.iter().position(|(id, _)| *id == token)?;
+            // Tokens only grow and a handler is added at the end: the list is in their order.
+            let index = handlers.binary_search_by_key(&token, |(id, _)| *id).ok()?;
             Some(Rc::make_mut_or_clone(handlers).remove(index))
         });
         // The handler is released with the list whole again: what it owns
@@ -125,5 +126,59 @@ impl<F: ?Sized> MakeMutOrClone<Handlers<F>> for Rc<Handlers<F>> {
             *this = Rc::new(copy);
         }
         Rc::get_mut(this).expect("uniquely owned after copy")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn tokens(list: &HandlerList<dyn Fn()>) -> Vec<u64> {
+        list.snapshot().iter().map(|(token, _)| *token).collect()
+    }
+
+    /// A handler is found by its token wherever it is in the list, and the handlers left keep their order: the
+    /// list is searched as one in the order of its tokens.
+    #[test]
+    fn a_handler_is_removed_by_its_token_wherever_it_is_in_the_list() {
+        let list: HandlerList<dyn Fn()> = HandlerList::new();
+        let other: HandlerList<dyn Fn()> = HandlerList::new();
+        let mut added = Vec::new();
+        for index in 0..9 {
+            added.push(list.add(Rc::new(|| {})));
+            // The tokens of a list need not follow each other: other lists take from the same counter.
+            if index % 2 == 0 {
+                other.add(Rc::new(|| {}));
+            }
+        }
+        assert_eq!(tokens(&list), added);
+        assert!(added.windows(2).all(|pair| pair[0] < pair[1]));
+
+        // The first, the last, one between them, and one of a list that shares its storage with a snapshot.
+        for index in [0, 8, 4] {
+            assert!(list.remove(added[index]));
+        }
+        let snapshot = list.snapshot();
+        assert!(list.remove(added[5]));
+        assert_eq!(snapshot.len(), 6);
+        let left: Vec<u64> = [1, 2, 3, 6, 7].iter().map(|index| added[*index]).collect();
+        assert_eq!(tokens(&list), left);
+
+        // A token that was removed, one of another list and one never given out remove nothing.
+        assert!(!list.remove(added[4]));
+        assert!(!list.remove(tokens(&other)[0]));
+        assert!(!list.remove(0));
+        assert!(!list.remove(u64::MAX));
+        assert_eq!(tokens(&list), left);
+
+        // A handler added after removals is the last one.
+        let last = list.add(Rc::new(|| {}));
+        assert_eq!(tokens(&list).last(), Some(&last));
+        for token in left {
+            assert!(list.remove(token));
+        }
+        assert!(list.remove(last));
+        assert!(list.is_empty());
+        assert!(!list.remove(last));
     }
 }
