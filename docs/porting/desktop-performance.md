@@ -4568,3 +4568,88 @@ them; one that does not gets the region). `composition_winui_material_tests.rs`:
 `a_frame_drawn_one_rectangle_at_a_time_draws_a_backdrop_in_its_dirty_area_in_one_rectangle`.
 `skia_gpu_render_target.rs`: `only_a_ganesh_context_clips_regions_per_draw`. In a
 browser: `navigation_cost.test.mjs`, above.
+
+### 9.58 Tried and left out: a shared resource of a recording as the slot of its batch
+
+The frame data that crosses from the UI thread to the render thread was the subject of a
+proposal of its own: publish it as shared blocks that are not written and read again, with
+a difference in place of the whole. The profile was asked first what there is to gain (tier
+16 of the gauntlet, the share of the samples of each thread):
+
+| Tier 16 | |
+| --- | ---: |
+| UI thread: writing render data and visuals into the batch | 2.7 % |
+| Render thread: reading them, and releasing the content they replace | 4.0 % |
+| UI thread: the commit as a whole | 29.8 % |
+| UI thread: recording the drawings that changed (inside the commit) | 15 % |
+
+The transport is a small part of a frame, and most of what the proposal describes is how
+it already works. A batch carries only what changed since the batch before it (the visuals
+and the drawings that are dirty), which is the difference. The resources of a recording
+(brushes, pens, glyph runs, bitmaps, geometries) cross by reference and are never copied.
+The opcodes of a recording are a short copy into a buffer that is kept between frames. A
+form in which a recording itself is one shared block was looked at and left: the render
+thread reads a recording once into the server render data, which is what it draws from in
+every frame after, so a block would save one short copy into a buffer that is kept and
+cost an allocation for every recording that is sent.
+
+What the transport does pay for is a box for every resource: one allocation on the UI
+thread and one release on the render thread for each brush, pen, glyph run and bitmap of
+each recording that is sent. That was the part worth a trial. It is recorded here with what
+it measured. It is not merged: no line of the gate says a frame is shorter for it. The code
+is on the branch `perf/frame-blocks-slots`.
+
+**What was tried.** A resource that is one counted reference to a value both threads read
+is the slot of the batch itself (`BatchObject::Shared`, an `Arc<dyn Any + Send + Sync>`):
+the shared form of a brush or a pen, a glyph run, a bitmap, the snapshot of a 3D scene.
+Nothing is allocated for the slot, and nothing is released for it on the render thread but
+the reference. A resource that is a reference to a trait object (a geometry, an effect, a
+custom draw operation) crosses in a box as before. What a batch carries and the order it
+is read in are untouched, the server render data holds what it held, and a backend sees
+nothing of it.
+
+**Measured** with the local gate (section 8.1; every suite, nine rounds, against the main
+branch the trial was made from):
+
+| | Main | The slots | |
+| --- | ---: | ---: | ---: |
+| Gauntlet, tier 16: UI thread, ms a frame | 11.680 | 11.595 | −0.7 % |
+| Gauntlet, tier 16: render thread, ms a frame | 33.236 | 33.299 | +0.2 % |
+| Gauntlet, tier 16: ms a frame | 33.243 | 33.306 | +0.2 % |
+| Start of the items scene (`frames/items startup_ms`), ms | 11.709 | 10.901 | −6.9 % |
+| Start of the tiles scene (`startup/tiles startup_ms`), ms | 2062.7 | 2014.4 | −2.3 % |
+| Its first frame, resident memory (`first_frame_mb`), MB | 470.6 | 616.9 | +31.1 % |
+| `forced_stationary_vertical_layouts` of the TreeDataGrid, instructions | | | +2.6 % |
+
+- **The frame is what it was.** The UI thread's 0.7 per cent is inside what two runs of
+  one build differ by, and the render thread, which sets the rate of the window at this
+  tier, did not move. What the boxes cost is below what the gate can tell of a frame.
+- **The start of the items scene** is the one line the gate called faster, and more than
+  half of it is the base of this run: a gate of the same base commit a few hours before
+  measured 11.235 ms for it, and 11.056 ms for a change that does not touch the transport.
+  What is left is about three per cent of eleven milliseconds.
+- **The memory of the first frame** is the allocator, not the slots: the same base commit
+  held 572.2 MB there in the gate a few hours before and 470.6 MB in this one, and the
+  whole start differs by 3.9 per cent (1895.4 and 1969.9 MB), inside its tolerance. A slot
+  holds a reference in place of a box, so there is nothing in the change that could keep
+  146 MB.
+- **The instructions of the TreeDataGrid line** rose by 2.56 and 2.63 per cent in a
+  benchmark that invalidates a measure and runs the layout pass: it sends no batch, and
+  the code of the trial is not on its path. That leaves the build (what the compiler puts
+  where once a crate has another variant and four more functions) as the cause. It was
+  not followed further for a change that is not merged.
+
+**Why it is left out.** A change of the transport is merged for a shorter frame, and this
+one does not make one. It adds a variant to a public enum of `ferroui_base` and a second
+way for a resource to cross, for an allocation whose cost the gate does not find.
+
+**Other backends.** The batch and its slots are in `ferroui_base`; Skia, Vello and ProGPU
+read the same server render data, and none of them would see the change. Should a backend
+or a scene measure the boxes (a start that sends hundreds of thousands of recordings in
+one batch is where they are most), the branch is where to take it from.
+
+**Not upstream.** Upstream's batch stream carries its objects as references of the managed
+heap, where a slot costs nothing; the box is a cost of this port.
+
+**Tests on the branch.** `batch_stream.rs`: `a_shared_payload_is_its_own_slot`.
+`render_data_tests.rs`: `shared_resources_cross_a_batch_as_its_slots`.
