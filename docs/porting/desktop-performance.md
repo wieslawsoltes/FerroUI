@@ -783,7 +783,13 @@ is looked at before the pull request goes up: its counts on the two sides, the s
 objects it uses (`sizes/...`), and a second run of it. When the counts and the sizes are those of
 the base and the code the benchmark runs is not what the change touches, the time is that of
 where this build put the code and the data; the pull request shows the line with its counts and
-says so. The gate is not told to pass it.
+says so. The gate is not told to pass it. Where the line stays over its tolerance in the second
+run, a third check settles it: the candidate built once more with a few bytes in front of the
+code of the libraries (`core::arch::global_asm!(".section __TEXT,__text,regular,pure_instructions",
+".space 36", ".p2align 2");` at the end of the `lib.rs` of the benchmark crate, not committed),
+and the line run with that program and the two of the gate (`FERROUI_BENCH_FILTER`,
+`FERROUI_BENCH_ITERATIONS`, the cycles beside the instructions). Code that is slower for what it
+does is slower wherever it is put; section 9.57 has a case that was not.
 
 ### 8.2 The gate on every platform
 
@@ -4572,3 +4578,379 @@ them; one that does not gets the region). `composition_winui_material_tests.rs`:
 `a_frame_drawn_one_rectangle_at_a_time_draws_a_backdrop_in_its_dirty_area_in_one_rectangle`.
 `skia_gpu_render_target.rs`: `only_a_ganesh_context_clips_regions_per_draw`. In a
 browser: `navigation_cost.test.mjs`, above.
+
+### 9.57 A hold is inherited with the measure it describes, and a grid of several star columns holds what its cells hold at their share
+
+The layout pass is the largest part of the UI thread's frame at tier 16 of the gauntlet
+(40.7 per cent of its samples; the commit of the compositor 29.8, the creation of text
+layouts 14.5). The content width of that scene changes in every frame, so what a pass costs
+is what its measure holds (section 9.15) do not stop. A count of the measures of one pass
+that ran and returned the desired size they had returned before, at another constraint,
+by the type of the element:
+
+| Measured again for the same desired size, a pass | |
+| --- | ---: |
+| `Grid` | 352 |
+| `Border` | 296 |
+| `StackPanel` | 202 |
+| The sparkline of a card | 118 |
+| The bar of a card | 118 |
+| The card | 84 |
+| All | about 1,170 |
+
+Two rules of section 9.15 were behind all of them.
+
+- **An element whose class does not override the measure held nothing.** The measure of
+  `Layoutable` gives every visual child the constraint it got and returns the largest of
+  their desired sizes: a control without children returns nothing at every constraint, and
+  one with children returns the same as long as each child does. It could not say so. A
+  hold is a statement about one `measure_override`, and a virtual member is inherited by
+  every class below: had the root class reported the hold of its measure, a class that
+  overrides `measure_override` alone would have inherited a hold that describes a measure
+  it no longer runs. So the root reported none, and every class without a measure of its
+  own (the sparkline, the bar, a user control, a panel that only arranges) was measured
+  again at every constraint, and so was every border and stack that holds one, since they
+  hold what their children hold.
+- **A grid with more than one star column held its own size only.** The header of a card
+  and its rows of values are such grids.
+
+**The change**, in two parts.
+
+1. *A member of a class may follow another one* (`ferro_class!`, in `ferroui_base`): a
+   virtual member declared `follows <member> else <fallback>` is inherited only together
+   with the member it follows. An implementation that states what it overrides
+   (`ferro_impl_classes!`, `ferro_overrides!`) and overrides neither of the two takes both
+   from its base class; one that overrides the followed member alone gets the fallback in
+   its slot; one that overrides the following member has its own, as before. An
+   implementation that does not state what it overrides (a plain `impl`) cannot be asked
+   which of the two it has, and gets the fallback unless it overrides the following member:
+   the safe answer. `parent_<member>` is unchanged.
+
+   `LayoutableImpl::measure_hold_override` follows `measure_override`, with "holds
+   nothing" as its fallback, and the root class reports the hold of its measure: the
+   intersection of the holds of its visible visual children, and every size without one. The
+   classes that report a hold of their own (section 9.15) are as they were. The same rule
+   closes a hazard those classes had: a class derived from `Border`, `Decorator`,
+   `StackPanel` or `Grid` that overrides `measure_override` alone used to inherit the hold
+   of the measure it replaced, and now holds nothing until it says what it holds.
+
+2. *A grid of several star columns holds what its cells hold at their share.* A cell of
+   weight `w` among star columns of weight `Σw` gets `(W − fixed) · w / Σw` of the width
+   `W` of the grid, where `fixed` is the width of the other columns and the spacing. Its
+   hold in its own space is a range of that share; in the space of the grid it is the range
+   divided by the share (`hold · Σw / w`), moved by `fixed`, and narrowed on each side by a
+   rounding step (when the layout is rounded) and by a slack of 1/65536 for the division
+   (`STAR_SHARE_SLACK`), both divided by the share as well. The grid holds the intersection
+   over its cells. With one star column the share is one and the slack nothing: the hold of
+   section 9.15, bit for bit. The conditions are those of section 9.15 (no limits or shared
+   sizes on the star columns, auto or pixel rows, no spans, a finite width).
+
+**Measured** with the local gate (section 8.1) against the main branch it was made from:
+the median of three to nine rounds, the two sides in turn, time and where they are counted
+the instructions.
+
+| Line | Before | After | Time | Instructions |
+| --- | ---: | ---: | ---: | ---: |
+| Gauntlet tier 16, the UI thread, ms a frame | 11.584 | 10.540 | -9.0 % | |
+| Gauntlet tier 16, the render thread, ms a frame | 33.330 | 32.865 | -1.4 % | |
+| `SizeChange.star_grid[Leaves=1000]` | 125.2 us | 108.3 us | -13.5 % | -12.86 % |
+| `AttachedLayoutProperties.grid_cell[Children=1000]` | 84.2 us | 79.7 us | -5.3 % | -5.19 % |
+| `ScrollContent.viewport[Rows=1000]` | 3.549 us | 3.460 us | -2.5 % | -1.00 % |
+| `PanelMeasureArrange`, its eight panels | | | -1.7 to +0.2 % | -0.64 to -0.89 % |
+
+The UI thread has a millisecond more of every frame of the gauntlet. The rate of its
+window is set by the render thread at this tier, which is where it was, so the frames a
+second are too. The frame benchmarks and the windows of the gate are inside their
+tolerances.
+
+The first form of the grid's hold cost a line of its own. It read the length of the
+column of every cell, a property of the column definition, to see whether the cell is in
+a star column: `grid_cell`, a grid of a thousand cells in columns of a length in pixels,
+went up by 2.27 per cent of its instructions, the one line of the 387 of the gate over
+its tolerance there. The hold now reads the column of a cell only in a grid that has a
+star column, and the length of that column only where there are several of them; a grid
+without one reads neither, which it did before this section, and the line is 5.19 per
+cent under the main branch.
+
+Nine lines of the `trees` suite were over their tolerance in time alone in that run, by 10
+to 39 per cent, with the instructions of the main branch (between -0.06 and +0.16 per
+cent). A second run of the suite, against the main branch of that day, had six of them
+inside their tolerance and three over it again: a font family and a font weight set on
+the root of 2,000 tiles, and a class toggled on them. They were looked at by the rule of
+section 8.1. No object the benchmarks use has changed its size, the instructions are those
+of the main branch, and a profile of the two programs has the same share of the time in
+every function, in the change that is timed and in the layout pass after it: the whole of
+it was slower by a sixth, and nothing in particular. The program of the branch was then
+built once more with 36 bytes in front of the code of the libraries (a `global_asm!` of
+`.space 36` in the benchmark crate), which moves every function and changes none. The
+medians of 600 iterations, the two programs of the gate and that one, run directly:
+
+| Line | | Main | Branch | Branch, moved by 36 bytes |
+| --- | --- | ---: | ---: | ---: |
+| `Propagation.font_family[Tiles=2000]` | time | 1.15 to 1.19 ms | 1.52 ms | 1.13 to 1.17 ms |
+| | cycles | 4.30 to 4.47 million | 5.73 million | 4.25 to 4.42 million |
+| | instructions | 12,585,453 | 12,579,623 | 12,581,527 |
+| `Propagation.font_weight[Tiles=2000]` | time | 1.15 to 1.16 ms | 1.50 ms | 1.14 to 1.22 ms |
+| | cycles | 4.34 to 4.36 million | 5.63 million | 4.32 to 4.59 million |
+| | instructions | 12,540,727 | 12,536,814 | 12,539,026 |
+| `Styling.toggle_class[Tiles=2000]` | time | 339 to 340 us | 388 us | 330 to 333 us |
+| | cycles | 1.28 million | 1.46 million | 1.25 to 1.26 million |
+
+The same code 36 bytes further on runs at the speed of the main branch. The time of these
+three lines is that of where a build puts the code, not of what the code does; an earlier
+build of the main branch took 4.94 million cycles for the first of them at the same
+instructions. The gate is not told to pass them, and the pull
+request shows them with their counts.
+
+**What stays as it was.** The desired sizes and the arranged bounds: a hold only says that
+a measure would return what it returned. The layout pass, its order and its invalidations
+are untouched, and so is every `measure_override`. A class that reported a hold reports the
+same one. A class with a plain `impl` that overrides `measure_override` holds nothing, as
+before, and one that overrides only `arrange_override` in a plain `impl` holds nothing
+either, as before; `ReversibleStackPanel` and the preview adorner of `GridSplitter`, which
+keep the measure of their base class, now state their overrides and keep its hold.
+
+**Other backends.** All of it is in `ferroui_base` and the controls; the layout does not
+know what draws it, and Skia, Vello and ProGPU get the same smaller pass.
+
+**Not upstream.** Upstream has no holds (section 9.15) and its virtual members are
+inherited one by one; `DEVIATIONS.md` has the row.
+
+**Tests.** `virtual_dispatch_tests.rs`:
+`member_that_follows_another_is_inherited_only_with_the_member_it_follows` (nine classes:
+which of the two members each overrides, stated or in a plain `impl`, directly and below a
+class that overrides the followed one; the results and the slots). `measure_hold_tests.rs`
+of the controls: `a_hold_is_inherited_only_with_the_measure_it_describes` (a decorator
+holds; a decorator class that overrides the measure holds nothing and is measured again;
+one that states an arrange alone holds; a control without children holds every width; a
+panel holds what its visible children hold);
+`a_grid_of_several_star_columns_holds_what_its_cells_hold_at_their_share` (the hold of the
+grid against the hold of its cell at shares of a half, two thirds and a quarter, at 58
+widths); `a_grid_of_several_star_columns_measured_inside_its_holds_lays_out_as_a_new_one`
+(seven grids, among them weights of 1.5 and 3, a fixed and an auto column between the star
+columns, spacings and cells that are panels without a measure of their own; with and
+without layout rounding: measured at a width and then at every width a quarter pixel apart
+around it, each has the desired sizes and the arranged bounds of a tree laid out at that
+width from nothing, and holds at more than fifty of those widths).
+
+### 9.58 Tried and left out: a shared resource of a recording as the slot of its batch
+
+The frame data that crosses from the UI thread to the render thread was the subject of a
+proposal of its own: publish it as shared blocks that are not written and read again, with
+a difference in place of the whole. The profile was asked first what there is to gain (tier
+16 of the gauntlet, the share of the samples of each thread):
+
+| Tier 16 | |
+| --- | ---: |
+| UI thread: writing render data and visuals into the batch | 2.7 % |
+| Render thread: reading them, and releasing the content they replace | 4.0 % |
+| UI thread: the commit as a whole | 29.8 % |
+| UI thread: recording the drawings that changed (inside the commit) | 15 % |
+
+The transport is a small part of a frame, and most of what the proposal describes is how
+it already works. A batch carries only what changed since the batch before it (the visuals
+and the drawings that are dirty), which is the difference. The resources of a recording
+(brushes, pens, glyph runs, bitmaps, geometries) cross by reference and are never copied.
+The opcodes of a recording are a short copy into a buffer that is kept between frames. A
+form in which a recording itself is one shared block was looked at and left: the render
+thread reads a recording once into the server render data, which is what it draws from in
+every frame after, so a block would save one short copy into a buffer that is kept and
+cost an allocation for every recording that is sent.
+
+What the transport does pay for is a box for every resource: one allocation on the UI
+thread and one release on the render thread for each brush, pen, glyph run and bitmap of
+each recording that is sent. That was the part worth a trial. It is recorded here with what
+it measured. It is not merged: no line of the gate says a frame is shorter for it. The code
+is on the branch `perf/frame-blocks-slots`.
+
+**What was tried.** A resource that is one counted reference to a value both threads read
+is the slot of the batch itself (`BatchObject::Shared`, an `Arc<dyn Any + Send + Sync>`):
+the shared form of a brush or a pen, a glyph run, a bitmap, the snapshot of a 3D scene.
+Nothing is allocated for the slot, and nothing is released for it on the render thread but
+the reference. A resource that is a reference to a trait object (a geometry, an effect, a
+custom draw operation) crosses in a box as before. What a batch carries and the order it
+is read in are untouched, the server render data holds what it held, and a backend sees
+nothing of it.
+
+**Measured** with the local gate (section 8.1; every suite, nine rounds, against the main
+branch the trial was made from):
+
+| | Main | The slots | |
+| --- | ---: | ---: | ---: |
+| Gauntlet, tier 16: UI thread, ms a frame | 11.680 | 11.595 | −0.7 % |
+| Gauntlet, tier 16: render thread, ms a frame | 33.236 | 33.299 | +0.2 % |
+| Gauntlet, tier 16: ms a frame | 33.243 | 33.306 | +0.2 % |
+| Start of the items scene (`frames/items startup_ms`), ms | 11.709 | 10.901 | −6.9 % |
+| Start of the tiles scene (`startup/tiles startup_ms`), ms | 2062.7 | 2014.4 | −2.3 % |
+| Its first frame, resident memory (`first_frame_mb`), MB | 470.6 | 616.9 | +31.1 % |
+| `forced_stationary_vertical_layouts` of the TreeDataGrid, instructions | | | +2.6 % |
+
+- **The frame is what it was.** The UI thread's 0.7 per cent is inside what two runs of
+  one build differ by, and the render thread, which sets the rate of the window at this
+  tier, did not move. What the boxes cost is below what the gate can tell of a frame.
+- **The start of the items scene** is the one line the gate called faster, and more than
+  half of it is the base of this run: a gate of the same base commit a few hours before
+  measured 11.235 ms for it, and 11.056 ms for a change that does not touch the transport.
+  What is left is about three per cent of eleven milliseconds.
+- **The memory of the first frame** is the allocator, not the slots: the same base commit
+  held 572.2 MB there in the gate a few hours before and 470.6 MB in this one, and the
+  whole start differs by 3.9 per cent (1895.4 and 1969.9 MB), inside its tolerance. A slot
+  holds a reference in place of a box, so there is nothing in the change that could keep
+  146 MB.
+- **The instructions of the TreeDataGrid line** rose by 2.56 and 2.63 per cent in a
+  benchmark that invalidates a measure and runs the layout pass: it sends no batch, and
+  the code of the trial is not on its path. That leaves the build (what the compiler puts
+  where once a crate has another variant and four more functions) as the cause. It was
+  not followed further for a change that is not merged.
+
+**Why it is left out.** A change of the transport is merged for a shorter frame, and this
+one does not make one. It adds a variant to a public enum of `ferroui_base` and a second
+way for a resource to cross, for an allocation whose cost the gate does not find.
+
+**Other backends.** The batch and its slots are in `ferroui_base`; Skia, Vello and ProGPU
+read the same server render data, and none of them would see the change. Should a backend
+or a scene measure the boxes (a start that sends hundreds of thousands of recordings in
+one batch is where they are most), the branch is where to take it from.
+
+**Not upstream.** Upstream's batch stream carries its objects as references of the managed
+heap, where a slot costs nothing; the box is a cost of this port.
+
+**Tests on the branch.** `batch_stream.rs`: `a_shared_payload_is_its_own_slot`.
+`render_data_tests.rs`: `shared_resources_cross_a_batch_as_its_slots`.
+
+### 9.60 A dynamic resource follows its element by a token, and a style instance is made with room for its setters
+
+Styling is the seventh of the architecture proposals. It is 0.4 to 0.5 per cent of the UI
+thread at tier 16 of the gauntlet, whose controls are styled once and then only laid out
+and drawn, so the window benchmarks cannot measure it; the benchmarks of the styling
+subsystem can (`styling_subsystem::`, section 8). What they time is the cost of a page
+shown for the first time, a list that realizes its rows and a theme that is changed: the
+theme of a control attached, its template applied, the control taken out of a tree and put
+back.
+
+A profile of the timed part of `ControlThemeApply.attach[TextBox, 200]`, the theme of a
+text box attached to 200 of them (1.93 ms, 9.7 µs a control), by what the time is spent in
+(a function counts with what it calls, so the lines overlap):
+
+| Of the attach of a control theme | per cent |
+| --- | ---: |
+| The effective values are evaluated again (`reevaluate_effective_values`) | 75.8 |
+| A dynamic resource is started (`DynamicResourceExpression::start_core`) | 37.5 |
+| of that, the resource is looked up, converted and published | 20.6 |
+| of that, the expression subscribes to its element | 14.3 |
+| The new values are stored and their changes raised | 28.4 |
+| of that, the handlers of the classes for a changed property | 13.0 |
+| The style is instanced (`StyleBase::try_attach_instance`) | 9.3 |
+| The expressions of the setters are made | 6.2 |
+
+Nearly half of an attach is the dynamic resources of the theme's setters: a brush, a
+thickness or a font size the theme takes from the resources of the application, each one
+an expression that looks its resource up from the control, converts it for the property
+and follows the resources and the theme variant of the control from then on.
+
+**What a started expression allocated.** To follow its element it made two closures, a
+subscription for each of them (the closure that removes the handler again, shared and
+counted), and a list for the two subscriptions: five allocations, released again when the
+expression stops. The subscriptions are what the public events of an element return, and
+are right for a subscriber that may outlive the element or forget it. An expression does
+neither: it is owned by the value store of the object it is the value of, it knows the
+element it follows, and it stops before it lets go of it.
+
+**The change**, in four parts, none of which changes what a property reads.
+
+1. *A dynamic resource follows a styled element by a token.* `StyledElement` gives out the
+   token of a handler (`add_resources_changed_handler`,
+   `add_actual_theme_variant_changed_handler`, and the two that remove; hidden from the
+   documentation, for the markup crate) and the expression keeps the two tokens where it
+   kept the list. A started expression allocates its two closures and nothing else. An
+   expression released while it runs takes its handlers out as the subscriptions did
+   (`Drop`), and a host that is no styled element, the application, is subscribed to as
+   before.
+2. *A style instance is made with room for its setters.* The entries of an instance were
+   pushed one by one into a list that grew as it went, four or five times for the theme of
+   a control; it is now made once, with the number of the style's setters, and no larger.
+3. *The entries of a frame unsubscribe without a copy of the list on the heap.* A frame
+   that is removed copied its entries to unsubscribe them; the copy is now on the stack
+   for frames of up to sixteen entries.
+4. *A handler is found by its token with a binary search.* The tokens of every list come
+   from one counter and a handler is added at the end, so a list is in the order of its
+   tokens. A control with thirty dynamic resources has thirty handlers in each of two
+   lists, and each expression that stops removes one from each.
+
+**Measured** with the benchmarks of the styling subsystem in the local gate, the commit
+before this section against it, three rounds a side (the median; instructions are those
+the processor counted for the timed part, which a busy machine does not move):
+
+| Benchmark | Before | After | Time | Instructions |
+| --- | ---: | ---: | ---: | ---: |
+| `ControlThemeApply.attach[Button, 200]` | 924 µs | 878 µs | -5.0 % | -8.0 % |
+| `ControlThemeApply.attach[CheckBox, 200]` | 987 µs | 939 µs | -4.9 % | -7.3 % |
+| `ControlThemeApply.attach[TextBox, 200]` | 1.888 ms | 1.833 ms | -2.9 % | -6.1 % |
+| `StylesChanged.remove_from_root[1000]` | 212 µs | 192 µs | -9.3 % | -11.3 % |
+| `Activation.pseudo_class_set_unobserved[1000]` | 40.1 µs | 35.6 µs | -11.3 % | -5.2 % |
+| `Activation.pseudo_class_set[1000]` | 154 µs | 152 µs | -1.8 % | -1.8 % |
+| `SetterApply.template[1000, 8]` | 1.051 ms | 1.018 ms | -3.1 % | -3.8 % |
+| `SetterApply.binding[1000, 8]` | 1.422 ms | 1.377 ms | -3.2 % | -2.7 % |
+| `DetachReattach.detach[1000]` | 746 µs | 745 µs | -0.2 % | -2.9 % |
+| `DetachReattach.move_same_styles[1000]` | 2.129 ms | 2.085 ms | -2.1 % | -0.8 % |
+| `ControlThemeApply.switch_theme_variant[Button, 200]` | 721 µs | 741 µs | +2.7 % | -1.4 % |
+| `StylesInScope.inactive_by_class[100]` | 16.03 ms | 16.02 ms | -0.0 % | +0.9 % |
+| `SelectorMatch.pseudo_class[1000]` | 358 µs | 359 µs | +0.3 % | +0.6 % |
+| `ResourceLookup.switch_theme_variant[1000]` | 778 µs | 816 µs | +4.9 % | +0.5 % |
+| `DynamicResources.detach[1000]` | 1.397 ms | 1.389 ms | -0.6 % | +0.5 % |
+
+The gate measured 62 lines and none is over its tolerance. The attach of a theme executes
+6 to 8 per cent less, which is what the profile promised for the subscriptions and the
+list of the instance, and a style collection taken from the root 11 per cent less: every
+frame it removes unsubscribes its entries without a list of its own. The last four lines
+stand for the ones that execute more, none of them by one per cent: the selectors with a
+class and the styles that are not active, and the resources of a control that is detached
+or changes its theme variant. The likely causes, not profiled: a style of one setter asks
+for its room before its first entry where the list used to ask with it, and an expression
+looks its element up to take its handlers out. Of the 47 lines that are not in the table
+none executes one per cent more, most are within a tenth of a per cent, and the times are
+within the noise of the machine (`SelectorMatch.none`, which executes the same
+instructions to the last, is 4.5 per cent apart).
+
+**What was looked at and left.** Three larger changes were sized and are not in this
+section; they belong to the shared styled values of the work that follows, and each has a
+hazard that a bounded change does not.
+
+- *A memo of the resolved resources of the application.* The lookup, the conversion of a
+  colour to a brush and the cast to the type of the property are 13 per cent of an attach,
+  and the same few hundred resources are resolved for every control. A memo by key, theme
+  variant and target type would answer them. It needs to know that the value came from
+  the application and not from a dictionary between the control and it, an epoch that
+  every change of a resource moves, and an answer for resources that give a new object for
+  each lookup; and the brushes made from colours would become shared objects.
+- *The instance of a style that is not active, made when it becomes active.* A control
+  holds the entries and expressions of every pointer-over, pressed and disabled style of
+  its theme from its first attach on. The errors of a setter are reported while it is
+  instanced, the value store and the developer tools read the entries of a frame that is
+  not active, and a binding may have effects when it is instanced.
+- *The notification of a control taken out of its tree.* Every dynamic resource of the
+  control looks its resource up again and publishes that there is none, which costs about
+  what the attach of the theme cost. Leaving it out would change what the properties of a
+  detached control read, which upstream does not do either.
+
+The other half of the seventh proposal, compiled bindings by default, was merged before
+the proposals were written (#603, PR 637); what is left of that ticket is about the size
+of the binary.
+
+**What stays as it was.** The value of every property, the order of the notifications and
+the handlers, and what the public events of an element return. An object of the class
+model is as large as it was: the tokens are kept by the expression, and the element has
+the two handler lists it had.
+
+**Other backends.** All of it is in `ferroui_system`, `ferroui_base` and the markup crate;
+styling does not know what draws it.
+
+**Not upstream.** Upstream's expression subscribes to the events of its host;
+`DEVIATIONS.md` has the row.
+
+**Tests.** `handler_list.rs`:
+`a_handler_is_removed_by_its_token_wherever_it_is_in_the_list`.
+`dynamic_resource_expression_tests.rs`:
+`an_expression_takes_its_handlers_out_of_the_element_it_follows` (two expressions of an
+element stopped in turn, one stopped twice, one released while it runs with the object it
+is the value of, and one whose element is gone before it stops).

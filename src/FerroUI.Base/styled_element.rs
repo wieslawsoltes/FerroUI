@@ -446,6 +446,42 @@ impl StyledElement {
         })
     }
 
+    /// [`resources_changed`](Self::resources_changed) for a subscriber that keeps the element and removes its
+    /// handler itself: the handler is added for a token, and no subscription is made for it. A dynamic resource
+    /// follows its element this way; every started one would otherwise make a subscription, and a control has
+    /// tens of them.
+    #[doc(hidden)]
+    pub fn add_resources_changed_handler(&self, handler: Rc<dyn Fn(&ResourcesChangedEventArgs)>) -> u64 {
+        self.resources_changed.add(handler)
+    }
+
+    /// Removes a handler added with [`add_resources_changed_handler`](Self::add_resources_changed_handler).
+    #[doc(hidden)]
+    pub fn remove_resources_changed_handler(&self, token: u64) -> bool {
+        self.resources_changed.remove(token)
+    }
+
+    /// [`actual_theme_variant_changed`](Self::actual_theme_variant_changed) by token, as
+    /// [`add_resources_changed_handler`](Self::add_resources_changed_handler).
+    #[doc(hidden)]
+    pub fn add_actual_theme_variant_changed_handler(&self, handler: Rc<dyn Fn()>) -> u64 {
+        self.actual_theme_variant_changed.add(handler)
+    }
+
+    /// Removes a handler added with
+    /// [`add_actual_theme_variant_changed_handler`](Self::add_actual_theme_variant_changed_handler).
+    #[doc(hidden)]
+    pub fn remove_actual_theme_variant_changed_handler(&self, token: u64) -> bool {
+        self.actual_theme_variant_changed.remove(token)
+    }
+
+    /// How many handlers follow the resources and the theme variant of the element, for the tests of what
+    /// subscribes to them.
+    #[doc(hidden)]
+    pub fn resource_handler_counts(&self) -> (usize, usize) {
+        (self.resources_changed.len(), self.actual_theme_variant_changed.len())
+    }
+
     // --- properties -------------------------------------------------------
 
     /// The name of the styled element.
