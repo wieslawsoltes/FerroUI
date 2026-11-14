@@ -1374,6 +1374,54 @@ fn the_focus_trail_is_the_element_beside_the_focus_and_ends_with_it() {
     assert_eq!(at_rest, get_realized_indexes(&t.target, &t.items_control));
 }
 
+/// The items of `elements` in their order; -1 for one that is not a container of the items control.
+fn indexes_of(elements: impl IntoIterator<Item = Ref<Control>>, items_control: &ItemsControl) -> Vec<i32> {
+    elements.into_iter().map(|element| items_control.index_from_container(&element)).collect()
+}
+
+#[test]
+fn tab_follows_the_items_of_the_realized_elements_and_not_the_order_they_were_made_in() {
+    let _app = app();
+    let t = create_target(|o| o.buffer_factor = 0.0);
+    let tab_order = || {
+        let children = t.target.children_in_tab_focus_order().expect("the panel names its children in tab order");
+        indexes_of(children.into_iter().filter_map(|child| child.cast::<Control>()), &t.items_control)
+    };
+    assert_eq!(get_realized_indexes(&t.target, &t.items_control), tab_order());
+
+    // Down and half the way back: the elements before those that stayed are made after them.
+    t.scroll.set_offset(Vector::new(0.0, 200.0));
+    layout(&t.target);
+    t.scroll.set_offset(Vector::new(0.0, 150.0));
+    layout(&t.target);
+
+    let realized = get_realized_indexes(&t.target, &t.items_control);
+    let visual_order = indexes_of(
+        t.target
+            .get_visual_children()
+            .iter()
+            .filter_map(|child| child.cast::<Control>())
+            .filter(|child| child.is_visible()),
+        &t.items_control,
+    );
+    assert_ne!(realized, visual_order, "the visual children are not in the order of their items");
+    assert_eq!(realized, tab_order());
+
+    // An element kept for the focus outside of the realized range is at the place of its item.
+    let focused = first_realized(&t.target);
+    focused.set_focusable(true);
+    assert!(focused.focus());
+    KeyboardNavigation::set_tab_once_active_element(&t.items_control, Some(focused.clone().upcast()));
+    t.scroll.set_offset(Vector::new(0.0, 400.0));
+    layout(&t.target);
+    let focused_index = realized[0];
+    let realized = get_realized_indexes(&t.target, &t.items_control);
+    assert!(realized[0] > focused_index, "the element with the focus left the realized range");
+    let mut with_focused = vec![focused_index];
+    with_focused.extend(realized);
+    assert_eq!(with_focused, tab_order());
+}
+
 fn scrolling_back_to_focused_element_uses_correct_element(buffer_factor: f64) {
     let _app = app();
     let t = create_target(|o| o.buffer_factor = buffer_factor);

@@ -72,6 +72,36 @@ ferroui_base::ferro_class_info!(VirtualizingStackPanel { new: VirtualizingStackP
 ferro_impl_classes!(VirtualizingStackPanel: StyledElementImpl, InteractiveImpl, ControlImpl, PanelImpl);
 
 impl InputElementImpl for VirtualizingStackPanel {
+    /// The realized elements in the order of their items: the visual children of a panel that recycles
+    /// its elements are in the order they were made or taken from the pool, which is not the order Tab
+    /// has to follow.
+    fn children_in_tab_focus_order(this: &Self) -> Option<Vec<Ref<InputElement>>> {
+        let realized_elements = this.realized_elements.borrow().clone()?;
+        let mut children: Vec<(i32, Ref<InputElement>)> = Vec::with_capacity(realized_elements.count() + 2);
+        let first_index = realized_elements.first_index();
+        for i in 0..realized_elements.count() {
+            if let Some(element) = realized_elements.element_at(i) {
+                children.push((first_index + i as i32, element.upcast()));
+            }
+        }
+
+        // The elements kept outside of the realized range, at the place of their items.
+        let outside = [
+            (this.focused_index.get(), this.focused_element.borrow().clone()),
+            (this.scroll_to_index.get(), this.scroll_to_element.borrow().clone()),
+        ];
+        for (index, element) in outside {
+            let Some(element) = element.filter(|_| index >= 0) else { continue };
+            let element: Ref<InputElement> = element.upcast();
+            if children.iter().all(|(_, child)| *child != element) {
+                let at = children.partition_point(|(child_index, _)| *child_index < index);
+                children.insert(at, (index, element));
+            }
+        }
+
+        Some(children.into_iter().map(|(_, child)| child).collect())
+    }
+
     /// Measures the panel again when the focus came to the first or the last element of its viewport and
     /// the element beside it is not realized: the focus trail of `realize_elements` realizes it.
     fn on_got_focus(this: &Self, e: &FocusChangedEventArgs) {
