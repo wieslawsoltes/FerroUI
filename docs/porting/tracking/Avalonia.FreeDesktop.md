@@ -75,11 +75,12 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 |---|---|---|
 | `dbus_ime/fcitx/dbus.rs` | **unmapped** | `InputContext`, `InputContext1`, `InputMethod`, `InputMethod1` |
 | `dbus_ime/ibus/dbus.rs` | **unmapped** | `InputContext`, `Portal`, `Service` |
-| `dbus_ime/tests.rs` | the unit tests of the module | `Fcitx4Context`, `Fcitx4Method`, `Fcitx5Context`, `Fcitx5Method`, `IBusContext`, `IBusPortal`, `IBusService`, `Recorded`, `TestBus`, `TestClient`, `TestDevice`, `TestRoot` |
+| `dbus_ime/ibus/ibus_input_options.rs` | **unmapped** | `IBusInputOptions` |
+| `dbus_ime/tests.rs` | the unit tests of the module | `DeferredCall`, `Fcitx4Context`, `Fcitx4Method`, `Fcitx5Context`, `Fcitx5Method`, `IBusCalls`, `IBusContext`, `IBusPortal`, `IBusService`, `InputMethodSlot`, `Recorded`, `RichWindow`, ... (16 total) |
 | `dbus_menu_exporter/tests.rs` | the unit tests of the module | `Fixture`, `RegistrarDouble` |
 | `dbus_system_dialog/tests.rs` | the unit tests of the module | `Answer`, `Fixture`, `Portal` |
 | `dbus_tray_icon_impl/tests.rs` | the unit tests of the module | `Fixture`, `TestIcon`, `WatcherDouble` |
 | `event.rs` | **unmapped** | `Event` |
-| `signal_watch.rs` | A subscription to a D-Bus signal as a disposable handle, and a cancellation flag: facilities of the D-Bus library and of the runtime of the original (`Watch...Async`, `CancellationTokenSource`) | `CancellationFlag`, `CancellationState`, `Cancelled`, `Subscription` |
+| `signal_watch.rs` | A subscription to a D-Bus signal as a disposable handle, and a cancellation flag: facilities of the D-Bus library and of the runtime of the original (`Watch...Async`, `CancellationTokenSource`) | `CancellationFlag`, `Cancelled`, `Subscription` |
 | `test_support.rs` | **unmapped** | `FakeBus`, `Log`, `ServiceBuilder`, `TestConnections` |
 | `ui_thread_object.rs` | How an object exported on a connection answers from the object of the UI thread it stands for: the D-Bus library of the original calls a handler on the synchronization context of the thread that made the connection | `Sender`, `Slot`, `UiThreadCall`, `UiThreadHandle` |

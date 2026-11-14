@@ -12,7 +12,7 @@ Generated from upstream commit `66b7273b9a2b5ba8416feb4376b9cdc3078b8573`. Back 
 | Phase / priority | 5 - desktop (Linux) / P1 |
 | Files | 79/79 (100.0%), 2 not applicable |
 | Types | 108/121 (13 waived) (100.0%) |
-| Members | 624/790 (166 waived) (100.0%) |
+| Members | 623/790 (166 waived) (99.8%) |
 | Contracts (interfaces) | 14/14 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
@@ -40,11 +40,11 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 26/26, types 32/33 (1 waived), members 161/206 (45 waived)
+### `(project root)` - files 26/26, types 32/33 (1 waived), members 160/206 (45 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AvaloniaWaylandException.cs` | `ferro_wayland_exception.rs` | present | 6/6 | 8/23 (15 waived) |  |
+| `AvaloniaWaylandException.cs` | `ferro_wayland_exception.rs` | partial | 6/6 | 7/23 (15 waived) |  |
 | `AvaloniaWaylandPlatformExtensions.cs` | `ferro_wayland_platform_extensions.rs` | present | 1/1 | 2/2 |  |
 | `IWaylandXdgTopLevelExport.cs` | `i_wayland_xdg_top_level_export.rs` | present | 1/1 | 1/1 |  |
 | `PopupImpl.Sink.cs` | `popup_impl_sink.rs` | present | 1/1 | 0/0 |  |
@@ -70,6 +70,32 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `XkbComposeTable.cs` | `xkb_compose_table.rs` | present | 1/1 | 3/3 |  |
 | `XkbContext.cs` | `xkb_context.rs` | present | 1/1 | 3/3 |  |
 | `XkbKeyTransform.cs` | `xkb_key_transform.rs` | present | 1/1 | 5/5 |  |
+
+<details><summary><code>AvaloniaWaylandException.cs</code> - 1 missing</summary>
+
+- `AvaloniaWaylandException` (class): 1 missing
+  - `AvaloniaWaylandException()`
+  - waived (one error type with a kind (`FerroWaylandErrorKind`) stands for the exception classes; a kind is made with the arguments the backend makes it with (`new` of the kind)): `.ctor`
+  - waived (one error type with a kind (`FerroWaylandErrorKind`) stands for the exception classes; an inner exception is `FerroWaylandError::with_inner`): `.ctor`
+- `AvaloniaWaylandPollException` (class): complete
+  - waived (one error type with a kind (`FerroWaylandErrorKind`) stands for the exception classes; a kind is made with the arguments the backend makes it with (`new` of the kind)): `.ctor`
+  - waived (one error type with a kind (`FerroWaylandErrorKind`) stands for the exception classes; an inner exception is `FerroWaylandError::with_inner`): `.ctor`
+- `AvaloniaWaylandNetworkException` (class): complete
+  - waived (one error type with a kind (`FerroWaylandErrorKind`) stands for the exception classes; a kind is made with the arguments the backend makes it with (`new` of the kind)): `.ctor`
+  - waived (one error type with a kind (`FerroWaylandErrorKind`) stands for the exception classes; an inner exception is `FerroWaylandError::with_inner`): `.ctor`
+- `AvaloniaWaylandFlushException` (class): complete
+  - waived (one error type with a kind (`FerroWaylandErrorKind`) stands for the exception classes; `from_errno` of the flush and of the read error): `.ctor`
+  - waived (one error type with a kind (`FerroWaylandErrorKind`) stands for the exception classes; an inner exception is `FerroWaylandError::with_inner`): `.ctor`
+- `AvaloniaWaylandReadException` (class): complete
+  - waived (one error type with a kind (`FerroWaylandErrorKind`) stands for the exception classes; `from_errno` of the flush and of the read error): `.ctor`
+  - waived (one error type with a kind (`FerroWaylandErrorKind`) stands for the exception classes; an inner exception is `FerroWaylandError::with_inner`): `.ctor`
+- `AvaloniaWaylandProtocolErrorException` (class): complete
+  - waived (one error type with a kind (`FerroWaylandErrorKind`) stands for the exception classes; `FerroWaylandProtocolErrorException::with_code`): `.ctor`
+  - waived (one error type with a kind (`FerroWaylandErrorKind`) stands for the exception classes; a kind is made with the arguments the backend makes it with (`new` of the kind)): `.ctor`
+  - waived (one error type with a kind (`FerroWaylandErrorKind`) stands for the exception classes; an inner exception is `FerroWaylandError::with_inner`): `.ctor`
+  - waived (one error type with a kind (`FerroWaylandErrorKind`) stands for the exception classes; the code and the message of a protocol error are the fields of `FerroWaylandErrorKind::ProtocolError`): `ErrorCode`, `ErrorMessage`
+
+</details>
 
 ### `Clipboard` - files 5/5, types 6/6, members 34/34
 

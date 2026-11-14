@@ -2,23 +2,23 @@
  "upstreamCommit": "66b7273b9a2b5ba8416feb4376b9cdc3078b8573",
  "inScope": {
   "files": [
-   2794,
+   2793,
    2794,
    0
   ],
   "types": [
-   3937,
+   3933,
    4346,
-   409
+   410
   ],
   "members": [
-   30351,
+   30292,
    36188,
-   5837
+   5829
   ]
  },
  "allProjects": {
-  "membersPresent": 30351,
+  "membersPresent": 30292,
   "members": 37382,
   "membersNotApplicable": 1194,
   "membersOutOfScope": 0
@@ -259,6 +259,7 @@
     ]
    },
    "rustOnly": [
+    "ast/namespace_scope.rs",
     "extensions/query_interface.rs"
    ]
   },
@@ -731,17 +732,17 @@
     0
    ],
    "types": [
-    1523,
+    1522,
     1657,
-    134
+    135
    ],
    "members": [
-    10358,
+    10328,
     11380,
-    1022
+    1015
    ],
    "interfaces": [
-    248,
+    247,
     261
    ],
    "propertyRegistrations": [
@@ -755,17 +756,17 @@
    "notApplicableFiles": 52,
    "matchKinds": {
     "alias field": 3,
-    "alias fn": 162,
+    "alias fn": 158,
     "alias free fn": 5,
     "const": 381,
     "derive": 62,
-    "field": 619,
-    "fn": 6556,
+    "field": 615,
+    "fn": 6531,
     "free fn": 15,
     "free item": 16,
     "getter fn": 4,
-    "overload fn": 307,
-    "trait": 360,
+    "overload fn": 314,
+    "trait": 356,
     "trait fn": 75,
     "variant": 1793
    },
@@ -4527,24 +4528,37 @@
    },
    "rustOnly": [
     "animation/animation_task.rs",
-    "animation/cancellation.rs",
     "animation/time_span.rs",
+    "animation/transitions/solid_color_brush_transition.rs",
+    "controls/resource_dictionary_reload.rs",
     "controls/resource_key.rs",
+    "controls/resource_preview.rs",
+    "controls/resource_provenance.rs",
     "data/converters/composite_format.rs",
+    "data/core/expression_nodes/function_node.rs",
     "data/core/plugins/markup_members.rs",
     "data/core/plugins/property_info_accessor_factory.rs",
     "data/core/plugins/untyped_accessor_plugin.rs",
     "data/core/weak_value.rs",
+    "data/local_binding_reload.rs",
     "data/model/i_bindable_indexer.rs",
     "data/model/i_notify_collection_changed.rs",
     "data/model/i_notify_data_error_info.rs",
     "data/model/model_type.rs",
     "diagnostics/perf_counters.rs",
     "element_ref.rs",
+    "ferro_property_metadata_construction_oracles.rs",
     "i_support_initialize.rs",
     "input/i_command.rs",
+    "input/input_element_effects.rs",
+    "input/input_scope.rs",
+    "input/input_scope_name_value.rs",
     "input/platform/clipboard_error.rs",
+    "input/text_input/text_input_method_connection.rs",
+    "input/text_input/text_input_method_edit.rs",
+    "input/text_input/text_input_method_range_geometry.rs",
     "layout/layout_manager_tests_bring_into_view.rs",
+    "layout/measure_hold.rs",
     "layout/testing.rs",
     "markup_types/animation.rs",
     "markup_types/classes.rs",
@@ -4552,7 +4566,24 @@
     "markup_types/enums.rs",
     "markup_types/named_values.rs",
     "markup_types/plain.rs",
+    "markup_types/rich_text.rs",
     "markup_types/values.rs",
+    "media/acrylic_brush.rs",
+    "media/color_matrix.rs",
+    "media/convolve_matrix.rs",
+    "media/effects/custom_effect.rs",
+    "media/effects/custom_effect_graph.rs",
+    "media/effects/custom_effect_registry.rs",
+    "media/effects/custom_effect_shader.rs",
+    "media/effects/effect_image.rs",
+    "media/effects/effect_input.rs",
+    "media/effects/immutable_luminance_to_alpha_effect.rs",
+    "media/effects/library.rs",
+    "media/effects/library/interactive.rs",
+    "media/effects/library/shaders.rs",
+    "media/effects/library/transitions.rs",
+    "media/font_fallback_mapping.rs",
+    "media/font_typography.rs",
     "media/fonts/tables/testing/big_endian_buffer.rs",
     "media/fonts/tables/testing/synthetic_font.rs",
     "media/fonts/testing/test_asset_loader.rs",
@@ -4561,17 +4592,28 @@
     "media/fonts/testing/test_font_scope.rs",
     "media/fonts/testing/test_fonts.rs",
     "media/fonts/testing/test_platform_typeface.rs",
+    "media/geometry_path_data.rs",
     "media/known_color_brushes.rs",
+    "media/material_policy.rs",
     "media/media_collection.rs",
+    "media/path_commands.rs",
     "media/ref_adapter.rs",
     "media/shared_brush.rs",
     "media/testing.rs",
+    "media/text_formatting/font_family_line_metrics.rs",
     "media/text_formatting/i_text_drawing_sink.rs",
+    "media/text_formatting/shaping_edit.rs",
     "media/text_formatting/testing/drawing.rs",
     "media/text_formatting/testing/fonts.rs",
     "media/text_formatting/testing/shaper.rs",
     "media/text_formatting/testing/sources.rs",
+    "media/text_formatting/text_geometry_sink.rs",
     "media/text_formatting/text_index.rs",
+    "media/text_formatting/text_layout_cache.rs",
+    "media/text_formatting/text_line_metrics_mode.rs",
+    "media/text_formatting/text_paragraph_style.rs",
+    "media/text_formatting/text_tab_layout.rs",
+    "media/text_formatting/text_tab_stop.rs",
     "media/text_formatting/unicode/bidi_trie.rs",
     "media/text_formatting/unicode/east_asian_width_trie.rs",
     "media/text_formatting/unicode/script_extensions_data.rs",
@@ -4580,10 +4622,15 @@
     "media/text_formatting/unicode/ucd_test_data.rs",
     "media/text_formatting/unicode/unicode_data_trie.rs",
     "media/text_line_bounds.rs",
+    "media/theme_shadow.rs",
     "media/tile_mode.rs",
+    "media/xaml_composition_brush_base.rs",
+    "media/xaml_light.rs",
+    "metadata/accessor.rs",
     "metadata/markup_macros.rs",
     "metadata/members.rs",
     "metadata/property_accessors.rs",
+    "metadata/receiver.rs",
     "metadata/service_provider.rs",
     "metadata/typed_path.rs",
     "numerics/matrix3x2.rs",
@@ -4594,14 +4641,24 @@
     "numerics/vector2.rs",
     "numerics/vector3.rs",
     "numerics/vector4.rs",
+    "platform/gpu_effects.rs",
     "platform/i_drawing_context_impl_with_effects.rs",
     "platform/i_drawing_context_impl_with_fragments.rs",
+    "platform/i_drawing_context_impl_with_layer_effects.rs",
+    "platform/i_drawing_context_impl_with_scene_3d.rs",
+    "platform/i_font_fallback_mapper.rs",
+    "platform/leased_platform_handle.rs",
     "platform/native_library.rs",
     "platform/render_interface_access.rs",
     "platform/storage/file_io/path.rs",
     "platform/surfaces/platform_text_rendering_parameters.rs",
+    "property_store/boxed_binding_entry.rs",
+    "property_store/boxed_local_value_binding_observer.rs",
+    "property_store/hot_value.rs",
+    "property_store/setter_binding_entry.rs",
     "register_types.rs",
     "rendering/auto_reset_event.rs",
+    "rendering/composition/alpha_mask.rs",
     "rendering/composition/animations/animation_controller.rs",
     "rendering/composition/animations/composition_easing_function.rs",
     "rendering/composition/animations/natural_motion_animation.rs",
@@ -4613,9 +4670,11 @@
     "rendering/composition/brushes/server_composition_effect_brush.rs",
     "rendering/composition/brushes/server_composition_nine_grid_brush.rs",
     "rendering/composition/brushes/server_composition_surface_brush.rs",
+    "rendering/composition/brushes/server_xaml_composition_brush.rs",
     "rendering/composition/composition_batch.rs",
     "rendering/composition/composition_cache_mode.rs",
     "rendering/composition/composition_clip.rs",
+    "rendering/composition/composition_draw_item.rs",
     "rendering/composition/composition_geometry.rs",
     "rendering/composition/composition_light.rs",
     "rendering/composition/composition_object_impls.rs",
@@ -4629,10 +4688,17 @@
     "rendering/composition/composition_winui_enums.rs",
     "rendering/composition/composition_winui_factories.rs",
     "rendering/composition/composition_winui_layer_factories.rs",
+    "rendering/composition/drawing/composition_painted_brush.rs",
     "rendering/composition/drop_shadow.rs",
     "rendering/composition/effects/composition_effect_factory.rs",
+    "rendering/composition/effects/custom_effect_painting.rs",
     "rendering/composition/effects/effect_graph.rs",
+    "rendering/composition/effects/effect_prewarm.rs",
     "rendering/composition/effects/graphics_effects.rs",
+    "rendering/composition/frames/lifetime.rs",
+    "rendering/composition/frames/metadata.rs",
+    "rendering/composition/frames/policy.rs",
+    "rendering/composition/frames/tests.rs",
     "rendering/composition/generated/ambient_light.rs",
     "rendering/composition/generated/composition_animations.rs",
     "rendering/composition/generated/composition_bitmap_cache.rs",
@@ -4695,11 +4761,13 @@
     "rendering/composition/interactions/interaction_tracker.rs",
     "rendering/composition/interactions/interaction_tracker_inertia_modifier.rs",
     "rendering/composition/interactions/visual_interaction_source.rs",
+    "rendering/composition/kept_composition_visuals.rs",
     "rendering/composition/layer_visual.rs",
     "rendering/composition/loaded_image_surface.rs",
     "rendering/composition/redirect_visual.rs",
     "rendering/composition/render_interface_feature.rs",
     "rendering/composition/server/compositor_lock.rs",
+    "rendering/composition/server/render_scope.rs",
     "rendering/composition/server/server_composition_cache_mode.rs",
     "rendering/composition/server/server_composition_clip.rs",
     "rendering/composition/server/server_composition_geometry.rs",
@@ -4711,6 +4779,7 @@
     "rendering/composition/server/server_composition_visual/winui_members.rs",
     "rendering/composition/server/server_composition_visual_collection.rs",
     "rendering/composition/server/server_composition_visual_surface.rs",
+    "rendering/composition/server/server_draw_items.rs",
     "rendering/composition/server/server_drop_shadow.rs",
     "rendering/composition/server/server_layer_visual.rs",
     "rendering/composition/server/server_loaded_image_surface.rs",
@@ -4720,22 +4789,31 @@
     "rendering/composition/server/server_sprite_visual.rs",
     "rendering/composition/shape_visual.rs",
     "rendering/composition/sprite_visual.rs",
+    "rendering/composition/system_backdrops.rs",
     "rendering/composition/test_compositor.rs",
     "rendering/composition/testing.rs",
+    "rendering/composition/theme_shadow_visual.rs",
     "rendering/i_hit_tester.rs",
     "rendering/managed_hit_tester.rs",
+    "rendering/native_render_scope.rs",
+    "rendering/scene3d/tests.rs",
     "rendering/scene_graph/scene_graph_test_support.rs",
     "rendering/testing/mock_drawing_context_impl.rs",
     "rendering/testing/mock_platform_render_interface.rs",
     "rust_paths.rs",
+    "styling/selector_candidates.rs",
+    "styling/target_property_path.rs",
     "styling/test_support.rs",
     "styling/testing.rs",
+    "styling/theme_candidates.rs",
+    "threading/dispatcher_spawn.rs",
     "threading/dispatcher_task.rs",
     "threading/dispatcher_tests_exception.rs",
     "type_system.rs",
     "utilities/cancel_event_args.rs",
     "utilities/compare_info.rs",
     "utilities/culture_info.rs",
+    "utilities/current_locale.rs",
     "utilities/date_time.rs",
     "utilities/date_time_format.rs",
     "utilities/date_time_format_info.rs",
@@ -4752,13 +4830,17 @@
     "utilities/number_format.rs",
     "utilities/number_format_info.rs",
     "utilities/number_styles.rs",
+    "utilities/option_cell.rs",
     "utilities/read_only_memory.rs",
+    "utilities/release_excess.rs",
     "utilities/test_culture_data_provider.rs",
     "utilities/text_info.rs",
     "utilities/thread_bound.rs",
     "utilities/time_zone_info.rs",
     "utilities/uri.rs",
-    "visual/composition_facades.rs"
+    "utilities/uri_ref.rs",
+    "visual/composition_facades.rs",
+    "visual/theme_shadow.rs"
    ]
   },
   {
@@ -4821,6 +4903,11 @@
    },
    "rustOnly": [
     "diagnostics.rs",
+    "hot_reload_manifest.rs",
+    "hot_reload_manifest_types.rs",
+    "hot_reload_profile.rs",
+    "shader_effects.rs",
+    "theme_roots.rs",
     "type_system/emit_types.rs",
     "type_system/model_type_system.rs",
     "type_system/tests.rs",
@@ -4846,7 +4933,7 @@
    "members": [
     6262,
     6412,
-    150
+    148
    ],
    "interfaces": [
     84,
@@ -4866,10 +4953,10 @@
     "const": 33,
     "derive": 2,
     "field": 29,
-    "fn": 5605,
+    "fn": 5604,
     "free item": 4,
     "overload fn": 82,
-    "trait": 34,
+    "trait": 35,
     "variant": 425
    },
    "presentFiles": {
@@ -6497,12 +6584,66 @@
    "rustOnly": [
     "animation/connected_animation_flight.rs",
     "assigned_binding.rs",
+    "auto_complete_box/query_submitted_event_args.rs",
+    "auto_suggest_box.rs",
+    "automation/automation_error.rs",
+    "automation/i_automation_event_sink.rs",
+    "automation/peers/auto_suggest_box_automation_peer.rs",
+    "automation/peers/hyperlink_automation_peer.rs",
+    "automation/peers/info_bar_automation_peer.rs",
+    "automation/peers/navigation_view_automation_peer.rs",
+    "automation/peers/navigation_view_item_automation_peer.rs",
+    "automation/peers/number_box_automation_peer.rs",
+    "automation/peers/pager_control_automation_peer.rs",
+    "automation/peers/person_picture_automation_peer.rs",
+    "automation/peers/progress_ring_automation_peer.rs",
+    "automation/peers/radio_buttons_automation_peer.rs",
+    "automation/peers/rating_control_automation_peer.rs",
+    "automation/peers/rich_edit_box_automation_peer.rs",
+    "automation/peers/rich_edit_box_text_presenter_automation_peer.rs",
+    "automation/peers/rich_text_block_automation_peer.rs",
+    "automation/peers/title_bar_automation_peer.rs",
+    "automation/provider/i_text_child_provider.rs",
+    "automation/provider/i_text_edit_provider.rs",
+    "automation/provider/i_text_provider.rs",
+    "automation/provider/i_text_provider2.rs",
+    "automation/provider/i_text_range_provider.rs",
+    "automation/provider/rich_text_automation.rs",
     "command_bar/command_bar_tests_keyboard.rs",
     "command_bar/command_bar_tests_overflow.rs",
+    "contact.rs",
+    "context_menu_event_args.rs",
+    "documents/block.rs",
+    "documents/block_collection.rs",
+    "documents/character_format.rs",
+    "documents/document_delta.rs",
+    "documents/document_link_field.rs",
+    "documents/document_snapshot.rs",
+    "documents/hyperlink.rs",
+    "documents/line_spacing_rule.rs",
+    "documents/paragraph.rs",
+    "documents/rich_text_document.rs",
+    "documents/text_highlight_merge.rs",
+    "documents/text_highlight_range.rs",
+    "documents/text_highlighter.rs",
+    "documents/text_highlighter_collection.rs",
+    "documents/text_language.rs",
+    "documents/text_position.rs",
+    "documents/typography.rs",
+    "documents/typography_format.rs",
+    "font_icon.rs",
+    "frame.rs",
+    "frame_page.rs",
     "grid_mocks.rs",
     "hosting/element_composition_preview.rs",
     "i_clickable_control.rs",
     "i_command_source.rs",
+    "i_key_index_mapping.rs",
+    "icon_source.rs",
+    "icon_test_support.rs",
+    "info_badge.rs",
+    "info_bar.rs",
+    "input_test_support.rs",
     "keyboard_navigation_tests_tab.rs",
     "keyboard_navigation_tests_xy.rs",
     "layout_test_control.rs",
@@ -6516,10 +6657,21 @@
     "markup_types/lists.rs",
     "markup_types/plain.rs",
     "markup_types/values.rs",
+    "media/reveal_brush.rs",
+    "media/reveal_focus.rs",
+    "media/reveal_lights.rs",
+    "media/system_backdrop.rs",
     "metadata/pseudo_classes_attribute.rs",
     "metadata/template_part_attribute.rs",
     "mouse_test_helper.rs",
     "navigable_containers.rs",
+    "navigation.rs",
+    "navigation/page_stack_entry.rs",
+    "navigation_test_support.rs",
+    "navigation_view.rs",
+    "navigation_view_events.rs",
+    "navigation_view_item.rs",
+    "number_box.rs",
     "page/carousel_page_tests_interaction.rs",
     "page/drawer_page_tests_lifecycle.rs",
     "page/drawer_page_tests_templates.rs",
@@ -6527,6 +6679,9 @@
     "page/navigation_page_tests_navigating.rs",
     "page/navigation_page_tests_stack.rs",
     "page/tabbed_page_tests_data_template.rs",
+    "page_type.rs",
+    "pager_control.rs",
+    "person_picture.rs",
     "platform/i_platform_handle.rs",
     "platform/platform_handle.rs",
     "pointer_tests_base.rs",
@@ -6536,20 +6691,82 @@
     "presenters/content_presenter_tests_standalone.rs",
     "presenters/content_presenter_tests_unrooted.rs",
     "presenters/scroll_content_presenter_tests_i_logical_scrollable.rs",
+    "presenters/text_presenter_paragraphs.rs",
+    "presenters/text_presenter_styles.rs",
+    "primitives/info_badge_template_settings.rs",
+    "primitives/info_bar_panel.rs",
+    "primitives/info_bar_template_settings.rs",
+    "primitives/navigation_view_template_settings.rs",
+    "primitives/pager_control_template_settings.rs",
+    "primitives/person_picture_template_settings.rs",
     "primitives/popup_tests_items_control.rs",
+    "primitives/progress_ring_template_settings.rs",
+    "primitives/radio_buttons_panel.rs",
     "primitives/selecting_items_control_tests_auto_select.rs",
     "primitives/selecting_items_control_tests_multiple.rs",
     "primitives/selecting_items_control_tests_selected_value.rs",
+    "primitives/title_bar_template_settings.rs",
+    "progress_ring.rs",
+    "radio_buttons.rs",
+    "rating_control.rs",
+    "rating_item_info.rs",
     "register_types.rs",
     "remote/ui_thread_handle.rs",
     "render_tests_culling.rs",
+    "rich_edit_box.rs",
+    "rich_edit_box_format_commands.rs",
+    "rich_edit_box_text_input_method_client.rs",
+    "rich_edit_box_text_presenter.rs",
+    "rich_edit_context_menu.rs",
+    "rich_edit_fragment_filter.rs",
+    "rich_edit_input_range_geometry.rs",
+    "rich_text/rich_edit_text_case.rs",
+    "rich_text/rich_edit_text_clipboard.rs",
+    "rich_text/rich_edit_text_document.rs",
+    "rich_text/rich_edit_text_field_story.rs",
+    "rich_text/rich_edit_text_paragraph_typing_native_cases.rs",
+    "rich_text/rich_edit_text_range_gravity.rs",
+    "rich_text/rich_edit_text_range_gravity_native_cases.rs",
+    "rich_text/rich_edit_text_range_operations.rs",
+    "rich_text/rich_edit_text_range_tracking.rs",
+    "rich_text/rich_edit_text_range_tracking_native_cases.rs",
+    "rich_text/rich_edit_text_selection_gravity.rs",
+    "rich_text/rich_edit_text_selection_gravity_native_cases.rs",
+    "rich_text/rich_edit_text_selection_movement.rs",
+    "rich_text/rich_edit_text_selection_navigation.rs",
+    "rich_text/rich_edit_text_selection_options.rs",
+    "rich_text/rich_edit_text_selection_options_native_cases.rs",
+    "rich_text/rich_edit_text_stream.rs",
+    "rich_text/rich_edit_text_units.rs",
+    "rich_text/rich_text_editor.rs",
+    "rich_text/rich_text_editor_gravity.rs",
+    "rich_text/rich_text_editor_selection.rs",
+    "rich_text/rich_text_exact_edit.rs",
+    "rich_text/rich_text_field_story.rs",
+    "rich_text/rich_text_link.rs",
+    "rich_text/rich_text_link_native_cases.rs",
+    "rich_text/rich_text_transfer.rs",
+    "rich_text/rtf.rs",
+    "rich_text/rtf_encoding.rs",
+    "rich_text/rtf_link_fields.rs",
+    "rich_text/rtf_styles.rs",
+    "rich_text_block.rs",
+    "rich_text_block_overflow.rs",
+    "rich_text_context_menu.rs",
+    "rich_text_layout.rs",
+    "rich_text_overflow_links.rs",
     "rust_paths.rs",
     "scroll_viewer_tests_i_logical_scrollable.rs",
     "selection/selection_model_tests_multiple.rs",
     "selection/selection_model_tests_single.rs",
+    "selection_indicator.rs",
+    "selection_indicator_animation.rs",
+    "selection_indicator_animation/tests.rs",
     "size_to_content.rs",
     "styled_element_tests_resources.rs",
     "styled_element_tests_theming.rs",
+    "symbol_icon.rs",
+    "templates/i_data_template_component.rs",
     "templates/template_result.rs",
     "test_command.rs",
     "test_support.rs",
@@ -6575,13 +6792,26 @@
     "testing/test_theme_pull_to_refresh.rs",
     "testing/test_theme_split_view.rs",
     "testing/unit_test_application.rs",
+    "testing/winui_only.rs",
+    "text_box_history.rs",
     "text_box_tests_data_validation.rs",
     "text_box_tests_input.rs",
     "text_layout_rounding_placement.rs",
+    "title_bar.rs",
     "top_level_tests_platform_features.rs",
     "utils/debug_display.rs",
+    "utils/initials_generator.rs",
     "utils/masked_text_provider.rs",
-    "window_decorations.rs"
+    "utils/number_expression.rs",
+    "visual_state/applied_setters.rs",
+    "visual_state/state_trigger_base.rs",
+    "visual_state/state_triggers.rs",
+    "visual_state/visual_state.rs",
+    "visual_state/visual_state_changed_event_args.rs",
+    "visual_state/visual_state_group.rs",
+    "visual_state/visual_state_manager.rs",
+    "window_decorations.rs",
+    "zoom_mode.rs"
    ]
   },
   {
@@ -6765,17 +6995,17 @@
     0
    ],
    "types": [
-    18,
+    17,
     18,
     0
    ],
    "members": [
-    174,
+    173,
     176,
     2
    ],
    "interfaces": [
-    1,
+    0,
     1
    ],
    "propertyRegistrations": [
@@ -6791,7 +7021,7 @@
     "alias fn": 2,
     "alias free item": 1,
     "field": 2,
-    "fn": 162,
+    "fn": 161,
     "free item": 2,
     "overload fn": 5
    },
@@ -7125,6 +7355,7 @@
    "rustOnly": [
     "dbus_ime/fcitx/dbus.rs",
     "dbus_ime/ibus/dbus.rs",
+    "dbus_ime/ibus/ibus_input_options.rs",
     "dbus_ime/tests.rs",
     "dbus_menu_exporter/tests.rs",
     "dbus_system_dialog/tests.rs",
@@ -7316,7 +7547,9 @@
      "i_metal_external_objects_feature.rs"
     ]
    },
-   "rustOnly": []
+   "rustOnly": [
+    "offscreen.rs"
+   ]
   },
   {
    "name": "Avalonia.MicroCom",
@@ -7406,10 +7639,10 @@
     "alias fn": 11,
     "alias free fn": 10,
     "field": 18,
-    "fn": 476,
+    "fn": 474,
     "free fn": 6,
     "overload fn": 10,
-    "trait": 1,
+    "trait": 3,
     "trait fn": 1,
     "variant": 7
    },
@@ -7562,7 +7795,9 @@
      "window_impl_base.rs"
     ]
    },
-   "rustOnly": []
+   "rustOnly": [
+    "native_text_input_options.rs"
+   ]
   },
   {
    "name": "Avalonia.OpenGL",
@@ -7581,7 +7816,7 @@
     2
    ],
    "members": [
-    608,
+    602,
     640,
     32
    ],
@@ -7601,10 +7836,10 @@
    "matchKinds": {
     "alias fn": 2,
     "field": 24,
-    "fn": 274,
+    "fn": 270,
     "free fn": 92,
     "free item": 182,
-    "overload fn": 5,
+    "overload fn": 3,
     "trait fn": 3,
     "variant": 26
    },
@@ -7732,6 +7967,7 @@
     "entry_points.rs",
     "register_types.rs",
     "rust_paths.rs",
+    "shared_frame_texture.rs",
     "testing.rs"
    ]
   },
@@ -7752,7 +7988,7 @@
     1
    ],
    "members": [
-    198,
+    195,
     202,
     4
    ],
@@ -7770,10 +8006,10 @@
    ],
    "notApplicableFiles": 0,
    "matchKinds": {
-    "alias fn": 8,
+    "alias fn": 6,
     "const": 1,
     "field": 52,
-    "fn": 95,
+    "fn": 94,
     "trait": 9,
     "variant": 33
    },
@@ -7959,7 +8195,7 @@
     0
    ],
    "members": [
-    283,
+    279,
     2034,
     1751
    ],
@@ -7980,7 +8216,7 @@
     "alias fn": 1,
     "const": 2,
     "field": 35,
-    "fn": 242,
+    "fn": 238,
     "overload fn": 3
    },
    "presentFiles": {
@@ -8094,7 +8330,7 @@
     13
    ],
    "members": [
-    624,
+    623,
     790,
     166
    ],
@@ -8114,7 +8350,7 @@
    "matchKinds": {
     "const": 5,
     "field": 94,
-    "fn": 477,
+    "fn": 476,
     "free fn": 12,
     "free item": 6,
     "overload fn": 1,
@@ -8382,7 +8618,7 @@
     108
    ],
    "members": [
-    3691,
+    3690,
     4897,
     1206
    ],
@@ -8405,7 +8641,7 @@
     "alias free fn": 6,
     "const": 98,
     "field": 266,
-    "fn": 507,
+    "fn": 506,
     "free fn": 136,
     "free item": 17,
     "overload fn": 7,
@@ -8886,11 +9122,18 @@
     ]
    },
    "rustOnly": [
+    "browser_accessibility.rs",
+    "browser_text_input_dom.rs",
+    "browser_text_input_edit.rs",
+    "browser_text_input_options.rs",
+    "browser_text_input_projection.rs",
+    "interop/accessibility_helper.rs",
     "interop/completion_helper.rs",
     "interop/thread_proxy.rs",
     "rendering/browser_render_surface.rs",
     "rendering/browser_surface_shared.rs",
-    "rendering/render_statistics.rs"
+    "rendering/render_statistics.rs",
+    "rendering/web_gl_frame_completion.rs"
    ]
   },
   {
@@ -8952,22 +9195,22 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    11,
+    10,
     11,
     0
    ],
    "types": [
-    22,
+    21,
     24,
     2
    ],
    "members": [
-    241,
+    230,
     253,
     12
    ],
    "interfaces": [
-    2,
+    1,
     3
    ],
    "propertyRegistrations": [
@@ -8981,7 +9224,7 @@
    "notApplicableFiles": 0,
    "matchKinds": {
     "field": 8,
-    "fn": 217,
+    "fn": 206,
     "overload fn": 14,
     "variant": 2
    },
@@ -9015,9 +9258,6 @@
     ],
     "IHeadlessTouchPointer.cs": [
      "i_headless_touch_pointer.rs"
-    ],
-    "IHeadlessWindow.cs": [
-     "i_headless_window.rs"
     ]
    },
    "rustOnly": [
@@ -9428,9 +9668,9 @@
     2
    ],
    "members": [
-    208,
+    206,
     239,
-    31
+    33
    ],
    "interfaces": [
     9,
@@ -9448,10 +9688,10 @@
    "matchKinds": {
     "alias fn": 9,
     "field": 26,
-    "fn": 157,
+    "fn": 156,
     "free fn": 1,
     "overload fn": 9,
-    "trait": 2,
+    "trait": 1,
     "variant": 4
    },
    "presentFiles": {
@@ -9596,12 +9836,31 @@
    },
    "rustOnly": [
     "converters/type_converter.rs",
+    "markup_extensions/x_bind/binding.rs",
+    "markup_extensions/x_bind/bindings.rs",
+    "markup_extensions/x_bind/deferred_element.rs",
+    "markup_extensions/x_bind/event.rs",
+    "markup_extensions/x_bind/extension.rs",
+    "markup_extensions/x_bind/root_node.rs",
     "object_casts.rs",
+    "populate_overrides.rs",
     "register_types.rs",
+    "reload_events.rs",
+    "reload_identity.rs",
+    "reload_resources.rs",
+    "reload_templates.rs",
+    "reload_validation.rs",
     "rust_paths.rs",
+    "source_overlay.rs",
     "test_support.rs",
+    "xaml_error_scope.rs",
+    "xaml_il/runtime/compact_resource_rows.rs",
     "xaml_il/runtime/compiled.rs",
+    "xaml_il/runtime/deferred_reload.rs",
     "xaml_il/runtime/runtime_list.rs",
+    "xaml_il/runtime/theme_resources.rs",
+    "xaml_il/runtime/theme_styles.rs",
+    "xaml_il/runtime/theme_units.rs",
     "xaml_il/runtime/xaml_il_context.rs",
     "xamlx_runtime.rs"
    ]
@@ -9856,6 +10115,12 @@
     "back_end/includes.rs",
     "back_end/methods.rs",
     "back_end/namespaces.rs",
+    "binding_capture.rs",
+    "compiler_extensions/transformers/development_key_transformer.rs",
+    "compiler_extensions/transformers/ferro_xaml_il_visual_state_setter_transformer.rs",
+    "compiler_extensions/transformers/x_bind.rs",
+    "compiler_extensions/transformers/x_bind_directives.rs",
+    "compiler_extensions/transformers/x_bind_path.rs",
     "core_table.rs",
     "runtime/framework/binding_path.rs",
     "runtime/framework/helpers.rs",
@@ -9883,6 +10148,10 @@
     "rust_emitter/runtime_host.rs",
     "rust_emitter/runtime_types.rs",
     "rust_emitter/source.rs",
+    "rust_emitter/theme_rows.rs",
+    "rust_emitter/theme_styles.rs",
+    "rust_emitter/theme_unit_graph.rs",
+    "rust_emitter/theme_units.rs",
     "rust_emitter/transform.rs",
     "testing/bindings.rs",
     "testing/objects.rs",
@@ -9901,17 +10170,17 @@
     0
    ],
    "types": [
-    67,
+    66,
     67,
     0
    ],
    "members": [
-    438,
+    437,
     457,
     19
    ],
    "interfaces": [
-    10,
+    9,
     10
    ],
    "propertyRegistrations": [
@@ -9926,7 +10195,7 @@
    "matchKinds": {
     "alias fn": 6,
     "alias free fn": 12,
-    "field": 30,
+    "field": 29,
     "fn": 343,
     "free fn": 34,
     "free item": 1,
@@ -10101,13 +10370,21 @@
     ]
    },
    "rustOnly": [
+    "composition_effects.rs",
+    "custom_shader_effects.rs",
     "gpu/ganesh/ganesh_gr_context.rs",
     "gpu/graphite/graphite_gr_context.rs",
+    "gpu/graphite/graphite_prewarm.rs",
+    "gpu/graphite/pipelined_layer.rs",
     "gpu/i_skia_gr_context.rs",
+    "gpu/metal/frame_completion.rs",
     "gpu/metal/tests.rs",
     "gpu/vulkan/frames_test.rs",
     "gpu/vulkan/tests.rs",
+    "leased_gpu_bitmap.rs",
     "locked_framebuffer.rs",
+    "runtime_effects.rs",
+    "scene3d.rs",
     "tests.rs",
     "text_rendering_override.rs",
     "text_rendering_settings.rs",
@@ -10135,9 +10412,9 @@
     24
    ],
    "members": [
-    2349,
+    2350,
     2603,
-    254
+    253
    ],
    "interfaces": [
     7,
@@ -10161,7 +10438,7 @@
     "fn": 581,
     "free fn": 158,
     "free item": 54,
-    "overload fn": 10,
+    "overload fn": 11,
     "trait": 14,
     "variant": 1095
    },
@@ -10450,6 +10727,9 @@
     ]
    },
    "rustOnly": [
+    "input/imm32_context.rs",
+    "input/imm32_input_options.rs",
+    "open_gl/angle/angle_display_lifetime.rs",
     "sync_root.rs",
     "win32_text_rendering.rs",
     "win_rt/numerics.rs",
@@ -10620,7 +10900,11 @@
     ]
    },
    "rustOnly": [
-    "marshalling/ole_aut.rs"
+    "automation_event_sink.rs",
+    "automation_node_text.rs",
+    "marshalling/ole_aut.rs",
+    "text_pattern_marshalling.rs",
+    "text_range_node.rs"
    ]
   },
   {
@@ -10747,12 +11031,17 @@
     ]
    },
    "rustOnly": [
+    "core_text_input_options.rs",
+    "core_text_layout.rs",
+    "core_text_synchronization.rs",
     "interop/async_operation.rs",
     "interop/collections.rs",
     "interop/composable.rs",
     "interop/event_handlers.rs",
     "interop/win_rt.rs",
     "process_end.rs",
+    "win_ui_text_input_method_exact.rs",
+    "win_ui_text_input_method_layout.rs",
     "windows_app_sdk.rs",
     "xaml_application.rs"
    ]
@@ -10927,7 +11216,8 @@
     ]
    },
    "rustOnly": [
-    "completion.rs"
+    "completion.rs",
+    "metal/external_frames.rs"
    ]
   },
   {
@@ -10972,6 +11262,42 @@
  "unusedPathOverrides": [],
  "unusedWaivers": [
   {
+   "project": "Avalonia.Base",
+   "type": "Avalonia.AvaloniaObject",
+   "member": "RaisePropertyChanged",
+   "reason": "the overload taking ready-made event arguments is folded into `raise_property_changed`, which builds the borrowed arguments itself (they cannot outlive the call)"
+  },
+  {
+   "project": "Avalonia.Base",
+   "type": "Avalonia.AvaloniaPropertyChangedEventArgs*",
+   "member": "AvaloniaPropertyChangedEventArgs(*",
+   "reason": "one constructor: `FerroPropertyChangedEventArgs::new` takes the property, the borrowed values, the priority and whether the effective value changed (one non-generic type stands for the base class and the typed class)"
+  },
+  {
+   "project": "Avalonia.Base",
+   "type": "Avalonia.PropertyStore.DirectBindingObserver*",
+   "member": "Start",
+   "reason": "one `start` taking the `BindingSource` enum that holds either kind of observable"
+  },
+  {
+   "project": "Avalonia.Base",
+   "type": "Avalonia.PropertyStore.LocalValueBindingObserver*",
+   "member": "Start",
+   "reason": "one `start` taking the `BindingSource` enum that holds either kind of observable"
+  },
+  {
+   "project": "Avalonia.Controls",
+   "type": "*.ItemsSourceView*",
+   "member": "HasKeyIndexMapping",
+   "reason": "an internal constant (`false`) nothing reads"
+  },
+  {
+   "project": "Avalonia.Controls",
+   "type": "*.ItemsSourceView*",
+   "member": "KeyFromIndex",
+   "reason": "an internal member nothing calls; upstream throws `NotImplementedException`"
+  },
+  {
    "project": "Avalonia.Headless",
    "type": "*HeadlessWindowImpl",
    "member": "Position",
@@ -10984,6 +11310,12 @@
    "reason": "five constructors, four functions (`new`, `from_center_and_angles`, `from_angles`, `from_center`): the constructor that takes the centre as two numbers and no angles only serves the one that takes it as a point, which is `from_center`"
   },
   {
+   "project": "Avalonia.Base",
+   "type": "Avalonia.Media.TextFormatting.TextLayout",
+   "member": "TextLayout(*",
+   "reason": "four constructors, three functions: `new` and `from_utf16` take the options of the text constructors as `TextLayoutOptions` (the overload without the optional arguments is the same call), and `from_text_source` takes the text run cache as an option, which covers the overload without it"
+  },
+  {
    "project": "Avalonia.Skia",
    "type": "Avalonia.Skia.GeometryImpl",
    "member": "InvalidateCaches",
@@ -10994,6 +11326,12 @@
    "type": "Avalonia.Wayland.Server.Interop.WaylandConnection",
    "member": "WaylandConnection(int fd)",
    "reason": "`WaylandConnection::connect_to_fd`"
+  },
+  {
+   "project": "Avalonia.Win32",
+   "type": "Avalonia.Win32.WinRT.NativeWinRTMethods",
+   "member": "WindowsCreateString",
+   "reason": "the declaration of the system is the `extern` function `WindowsCreateString` of the file (a text and its length); `windows_create_string` is the overload that takes the text alone"
   }
  ]
 }
