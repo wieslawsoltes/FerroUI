@@ -124,11 +124,11 @@ jobs:
       - name: Package the published crates without building
         run: scripts/release/publish.sh --dry-run --no-verify
 
-  # The API gate (docs/release.md, "API stability"): within 0.4 the public API of the published
+  # The API gate (docs/release.md, "API stability"): within 0.5 the public API of the published
   # crates only grows. cargo-semver-checks compares the rustdoc JSON of each published crate with
-  # that of the sources of 0.4.0 (scripts/api-gate/semver_checks.py: the tag v0.4.0), with the
-  # release type `minor`. While the workspace is at a preview of 0.5.0 it passes without building:
-  # the previews may change the API, and the release of 0.5.0 moves the baseline to it. The script documents all the
+  # that of the sources of 0.5.0 (scripts/api-gate/semver_checks.py: the tag v0.5.0), with the
+  # release type `minor`. While the workspace is at a preview of 0.6.0 it passes without building:
+  # the previews may change the API, and the release of 0.6.0 moves the baseline to it. The script documents all the
   # crates in one `cargo doc` for each side, so the dependencies are checked once and not once per
   # crate, and the documentation of the baseline is cached under the baseline commit and the rustc
   # version: a run documents the pull request only. It runs when a pull request changes the sources
@@ -188,7 +188,7 @@ jobs:
           workspaces: ". -> target/api-gate/target-current"
           save-if: ${{ github.ref == 'refs/heads/main' }}
           cache-on-failure: true
-      - name: Documentation of 0.4.0
+      - name: Documentation of 0.5.0
         if: steps.changes.outputs.run == 'true' && steps.baseline-cache.outputs.cache-hit != 'true'
         run: python3 scripts/api-gate/semver_checks.py --fetch --baseline-only
       - uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
@@ -196,7 +196,7 @@ jobs:
         with:
           path: target/api-gate/baseline
           key: ${{ steps.baseline.outputs.key }}
-      - name: Signatures against 0.4.0
+      - name: Signatures against 0.5.0
         if: steps.changes.outputs.run == 'true'
         run: python3 scripts/api-gate/semver_checks.py --fetch
 

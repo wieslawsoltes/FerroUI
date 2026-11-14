@@ -11,9 +11,9 @@ Generated from upstream commit `66b7273b9a2b5ba8416feb4376b9cdc3078b8573`. Back 
 | Crate | `ferroui-skia` |
 | Phase / priority | 1 - rendering / P0 |
 | Files | 55/55 (100.0%) |
-| Types | 67/67 (100.0%) |
-| Members | 438/457 (19 waived) (100.0%) |
-| Contracts (interfaces) | 10/10 |
+| Types | 66/67 (98.5%) |
+| Members | 437/457 (19 waived) (99.8%) |
+| Contracts (interfaces) | 9/10 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
 
@@ -24,7 +24,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | Interface | Access | Upstream file | Members | Status |
 |---|---|---|---|---|
 | `Avalonia.Skia.IDrawableBitmapImpl` | internal | `IDrawableBitmapImpl.cs` | 1/1 | present |
-| `Avalonia.Skia.IGlSkiaFboProvider` | internal | `Gpu/OpenGl/GlSkiaExternalObjectsFeature.cs` | 1/1 | present |
+| `Avalonia.Skia.IGlSkiaFboProvider` | internal | `Gpu/OpenGl/GlSkiaExternalObjectsFeature.cs` | 0/1 | missing |
 | `Avalonia.Skia.IGlSkiaSpecificOptionsFeature` | public | `Gpu/OpenGl/IGlSkiaSpecificOptionsFeature.cs` | 1/1 | present |
 | `Avalonia.Skia.ISkiaGpu` | internal | `Gpu/ISkiaGpu.cs` | 5/5 | present |
 | `Avalonia.Skia.ISkiaGpuRenderSession` | public | `Gpu/ISkiaGpuRenderSession.cs` | 4/4 | present |
@@ -92,16 +92,24 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `SkiaMetalExternalObjectsFeature.cs` | `gpu/metal/skia_metal_external_objects_feature.rs` | present | 1/1 | 9/9 |  |
 | `SkiaMetalGpu.cs` | `gpu/metal/skia_metal_gpu.rs` | present | 3/3 | 21/21 |  |
 
-### `Gpu/OpenGl` - files 6/6, types 9/9, members 54/55 (1 waived)
+### `Gpu/OpenGl` - files 6/6, types 8/9, members 53/55 (1 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `FboSkiaSurface.cs` | `gpu/open_gl/fbo_skia_surface.rs` | present | 1/1 | 5/5 |  |
 | `GlRenderTarget.cs` | `gpu/open_gl/gl_render_target.rs` | present | 1/1 | 4/4 |  |
-| `GlSkiaExternalObjectsFeature.cs` | `gpu/open_gl/gl_skia_external_objects_feature.rs` | present | 4/4 | 21/22 (1 waived) |  |
+| `GlSkiaExternalObjectsFeature.cs` | `gpu/open_gl/gl_skia_external_objects_feature.rs` | partial | 3/4 | 20/22 (1 waived) |  |
 | `GlSkiaGpu.cs` | `gpu/open_gl/gl_skia_gpu.rs` | present | 1/1 | 16/16 |  |
 | `GlSkiaSharedTextureForComposition.cs` | `gpu/open_gl/gl_skia_shared_texture_for_composition.rs` | present | 1/1 | 7/7 |  |
 | `IGlSkiaSpecificOptionsFeature.cs` | `gpu/open_gl/i_gl_skia_specific_options_feature.rs` | present | 1/1 | 1/1 |  |
+
+<details><summary><code>GlSkiaExternalObjectsFeature.cs</code> - 2 missing</summary>
+
+- `IGlSkiaFboProvider` (interface, internal): **type missing** (1 members)
+- `GlSkiaImportedImage` (class): complete
+  - waived (the two constructors are one `new` with the source of the image as an enum (`ImportedImageSource::External`, `Shared`)): `.ctor`
+
+</details>
 
 ### `Gpu/Vulkan` - files 3/3, types 4/4, members 31/31
 
@@ -127,14 +135,22 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 
 | Rust file | Reason | Types defined |
 |---|---|---|
+| `composition_effects.rs` | **unmapped** | `LightingOutput`, `PixelOperationPrograms` |
+| `custom_shader_effects.rs` | **unmapped** | `ShaderEffectProgram`, `ShaderLayer`, `SkiaEffectImage` |
 | `gpu/ganesh/ganesh_gr_context.rs` | the Ganesh implementation of the backend-neutral GPU context (the binding has separate Ganesh and Graphite context types) | `GaneshGrContext` |
-| `gpu/graphite/graphite_gr_context.rs` | the Graphite implementation of the backend-neutral GPU context (the binding has separate Ganesh and Graphite context types) | `GraphiteGrContext`, `GraphiteState`, `UploadedImage` |
-| `gpu/i_skia_gr_context.rs` | the backend-neutral GPU context of the Skia backend (the binding has separate Ganesh and Graphite context types, SkiaSharp has one `GRContext`) | `ISkiaGrContext`, `SkiaGpuBackend` |
-| `gpu/metal/tests.rs` | the unit tests of the module | `ExternalObjectsDevice`, `FakeEvent`, `FakeExternalObjects`, `FakeTexture`, `GraphiteTarget`, `Id`, `Log`, `LogSink`, `Sel`, `TestMetalDevice`, `TextureRenderTarget`, `TextureSession`, ... (13 total) |
+| `gpu/graphite/graphite_gr_context.rs` | the Graphite implementation of the backend-neutral GPU context (the binding has separate Ganesh and Graphite context types) | `GraphiteGrContext`, `GraphiteState`, `SharedContext`, `UploadedImage` |
+| `gpu/graphite/graphite_prewarm.rs` | **unmapped** | `GraphitePrewarmContext`, `PrewarmCompile`, `PrewarmState` |
+| `gpu/graphite/pipelined_layer.rs` | **unmapped** | `Band`, `BandBalance`, `BandJob`, `BandOutput`, `BandParts`, `BandPool`, `BandRecorder`, `BandWorker`, `Fallback`, `Frame`, `Held`, `InsertOrder`, ... (20 total) |
+| `gpu/i_skia_gr_context.rs` | the backend-neutral GPU context of the Skia backend (the binding has separate Ganesh and Graphite context types, SkiaSharp has one `GRContext`) | `ISkiaGrContext`, `SkiaGpuBackend`, `SkiaPrewarm` |
+| `gpu/metal/frame_completion.rs` | **unmapped** |  |
+| `gpu/metal/tests.rs` | the unit tests of the module | `ExternalObjectsDevice`, `FakeEvent`, `FakeExternalObjects`, `FakeTexture`, `GraphiteTarget`, `Id`, `Log`, `LogSink`, `Sel`, `TestMetalDevice`, `TextureRenderTarget`, `TextureSession`, ... (14 total) |
 | `gpu/vulkan/frames_test.rs` | **unmapped** | `HeadlessSurface`, `HeadlessSurfaceFactory`, `TestSurface` |
 | `gpu/vulkan/tests.rs` | the unit tests of the module |  |
+| `leased_gpu_bitmap.rs` | **unmapped** | `LeasedGpuBitmap` |
 | `locked_framebuffer.rs` | a locked framebuffer described by plain values: the `Platform/LockedFramebuffer.cs` of Avalonia.Base, which the base crate cannot hold without unsafe code, for the surfaces of the backend | `LockedFramebuffer` |
-| `tests.rs` | the unit tests of the module | `BrushSpec`, `Material`, `MockFramebuffer`, `MockSurface`, `Target`, `TwoSquares`, `TwoSquaresBrush` |
+| `runtime_effects.rs` | **unmapped** | `ProgramKind`, `RuntimeProgram`, `UniformError`, `Uniforms` |
+| `scene3d.rs` | **unmapped** |  |
+| `tests.rs` | the unit tests of the module | `BrushSpec`, `ColumnDraw`, `Material`, `MockFramebuffer`, `MockSurface`, `Pages`, `Target`, `TwoSquares`, `TwoSquaresBrush` |
 | `text_rendering_override.rs` | **unmapped** | `TextRenderingOverride` |
 | `text_rendering_settings.rs` | **unmapped** | `TextRenderingSettings`, `TextRenderingSource` |
 | `unit_tests/hit_testing.rs` | the port of upstream's Skia unit test project (tests/Avalonia.Skia.UnitTests) and its test doubles, not of the library | `CompositorTestServices`, `LocatorScope` |
@@ -143,4 +159,4 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `unit_tests/media/text_formatting/single_buffer_text_source.rs` | the port of upstream's Skia unit test project (tests/Avalonia.Skia.UnitTests) and its test doubles, not of the library | `SingleBufferTextSource` |
 | `unit_tests/test_font_manager.rs` | the port of upstream's Skia unit test project (tests/Avalonia.Skia.UnitTests) and its test doubles, not of the library | `TestFontManager` |
 
-Tests, examples and build scripts (not scanned): `build.rs`, `text_rendering_tests.rs`, `text_tests.rs`, `unit_tests/combined_geometry_impl_tests.rs`, `unit_tests/drawing_context_helper_tests.rs`, `unit_tests/drawing_context_impl_tests.rs`, `unit_tests/media/bitmap_save_tests.rs`, `unit_tests/media/custom_font_collection_tests.rs`, `unit_tests/media/embedded_font_collection_tests.rs`, `unit_tests/media/font_collection_determinism_tests.rs`, `unit_tests/media/font_collection_tests.rs`, `unit_tests/media/font_collection_try_match_character_tests.rs`, `unit_tests/media/font_manager_tests.rs`, `unit_tests/media/glyph_run_tests.rs`, `unit_tests/media/glyph_typeface_shaping_tests.rs`, `unit_tests/media/immutable_bitmap_tests.rs`, `unit_tests/media/stream_geometry_tests.rs`, `unit_tests/media/text_formatting/bidi_reorderer_tests.rs`, `unit_tests/media/text_formatting/empty_shaped_buffer_tests.rs`, `unit_tests/media/text_formatting/shaped_buffer_shared_storage_tests.rs`, `unit_tests/media/text_formatting/shaping_capability_fallback_tests.rs`, `unit_tests/media/text_formatting/split_text_runs_tests.rs`, `unit_tests/media/text_formatting/tables/cmap_table_tests.rs`, `unit_tests/media/text_formatting/text_characters_tests.rs`, `unit_tests/media/text_formatting/text_collapsing_bidi_tests.rs`, `unit_tests/media/text_formatting/text_formatter_tests.rs`, `unit_tests/media/text_formatting/text_formatter_wrap_characterization_tests.rs`, `unit_tests/media/text_formatting/text_layout_range_contract_tests.rs`, `unit_tests/media/text_formatting/text_layout_tests.rs`, `unit_tests/media/text_formatting/text_line_tests.rs`, `unit_tests/media/text_formatting/text_run_cache_tests.rs`, `unit_tests/media/text_formatting/text_shaper_tests.rs`, `unit_tests/path_geometry_tests.rs`, `unit_tests/render_bounds_tests.rs`, `unit_tests/skia_options_tests.rs`, `unit_tests/two_level_cache_tests.rs`.
+Tests, examples and build scripts (not scanned): `build.rs`, `compositing_tests.rs`, `composition_effect_tests.rs`, `coverage_clip_tests.rs`, `gpu/metal/shared_frame_tests.rs`, `gpu/metal/tests/pipelined_frames.rs`, `layer_effect_tests.rs`, `text_rendering_tests.rs`, `text_tests.rs`, `unit_tests/combined_geometry_impl_tests.rs`, `unit_tests/drawing_context_helper_tests.rs`, `unit_tests/drawing_context_impl_tests.rs`, `unit_tests/drawing_context_transform_tests.rs`, `unit_tests/media/bitmap_save_tests.rs`, `unit_tests/media/custom_font_collection_tests.rs`, `unit_tests/media/embedded_font_collection_tests.rs`, `unit_tests/media/font_collection_determinism_tests.rs`, `unit_tests/media/font_collection_tests.rs`, `unit_tests/media/font_collection_try_match_character_tests.rs`, `unit_tests/media/font_manager_tests.rs`, `unit_tests/media/glyph_run_tests.rs`, `unit_tests/media/glyph_typeface_shaping_tests.rs`, `unit_tests/media/immutable_bitmap_tests.rs`, `unit_tests/media/stream_geometry_tests.rs`, `unit_tests/media/text_formatting/bidi_reorderer_tests.rs`, `unit_tests/media/text_formatting/empty_shaped_buffer_tests.rs`, `unit_tests/media/text_formatting/shaped_buffer_shared_storage_tests.rs`, `unit_tests/media/text_formatting/shaping_capability_fallback_tests.rs`, `unit_tests/media/text_formatting/split_text_runs_tests.rs`, `unit_tests/media/text_formatting/tables/cmap_table_tests.rs`, `unit_tests/media/text_formatting/text_characters_tests.rs`, `unit_tests/media/text_formatting/text_collapsing_bidi_tests.rs`, `unit_tests/media/text_formatting/text_formatter_tests.rs`, `unit_tests/media/text_formatting/text_formatter_wrap_characterization_tests.rs`, `unit_tests/media/text_formatting/text_layout_range_contract_tests.rs`, `unit_tests/media/text_formatting/text_layout_tests.rs`, `unit_tests/media/text_formatting/text_line_tests.rs`, `unit_tests/media/text_formatting/text_run_cache_tests.rs`, `unit_tests/media/text_formatting/text_shaper_tests.rs`, `unit_tests/path_geometry_tests.rs`, `unit_tests/render_bounds_tests.rs`, `unit_tests/skia_options_tests.rs`, `unit_tests/two_level_cache_tests.rs`.

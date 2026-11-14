@@ -4,7 +4,7 @@ Subsystems the framework cannot work correctly without. Each is ported in full â
 
 Status: **done** (ported, tested, integrated), **partial** (integrated with listed gaps), **in progress**, **queued** (blocked on the items named). A row that is done can still list what was not verified (a real device, a screen reader, a person at the keyboard).
 
-State on 2026-10-15: every upstream file and member in scope is ported or waived with a reason (`TRACKING.md`: 30354 of 36210 members, 5856 waived, none missing). The notes of each row keep the history of its stages; where a later sentence of a row contradicts an earlier one, the later one is current.
+State on 2026-11-13 (0.5.0): every upstream file and member in scope is ported or waived with a reason, except 67 members, three types and one file (`TRACKING.md`: 30292 of 36188 members, 5829 waived; `REMAINING.md` lists them): the `...Exception` types that the idiomatic Rust cleanup (#423) made `...Error` types and the single-implementation interfaces it made concrete types, which the tracking data does not map yet. On 2026-10-15 none was missing (30354 of 36210 members, 5856 waived). The notes of each row keep the history of its stages; where a later sentence of a row contradicts an earlier one, the later one is current.
 
 | # | Subsystem | Upstream location | Status | Known gaps / notes |
 |---|---|---|---|---|

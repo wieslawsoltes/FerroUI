@@ -1,6 +1,7 @@
 //! The host of a scene: drives the frames from the animation frames of its top level.
 
 use crate::clock::Clock;
+use crate::report;
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
@@ -13,7 +14,8 @@ use std::cell::Cell;
 
 /// Shows a scene and, from its attachment to a top level on, advances the [`Clock`] once per
 /// animation frame and requests the next one. Prints `PERF first_frame` on the first frame,
-/// `PERF second_frame` on the one after it and, with `PERF_REPORT=1`, `PERF fps N` once a second.
+/// `PERF second_frame` on the one after it and, with `PERF_REPORT=1`, `PERF fps N` once a second
+/// (to the standard output, or to the host: [`crate::report_to`]).
 ///
 /// The first animation frame comes before the scene has been drawn: what it leaves to do (the first
 /// commit of the composition tree, the first drawing, whatever the platform asks to be painted when
@@ -68,8 +70,8 @@ impl FrameHost {
             return;
         }
         match self.frames_logged.get() {
-            0 => println!("PERF first_frame"),
-            1 => println!("PERF second_frame"),
+            0 => report::line("PERF first_frame"),
+            1 => report::line("PERF second_frame"),
             _ => {}
         }
         self.frames_logged.set(self.frames_logged.get().saturating_add(1).min(2));
@@ -79,18 +81,19 @@ impl FrameHost {
     }
 }
 
-/// With `PERF_REPORT=1`, prints `PERF fps N` once a second.
+/// With `PERF_REPORT=1`, or where the host takes the lines ([`crate::report_to`]), reports
+/// `PERF fps N` once a second.
 fn report_frame_rate() {
     ferroui_base::ferro_thread_local! {
         static REPORT: Option<(Cell<std::time::Instant>, Cell<u32>)> =
-            std::env::var_os("PERF_REPORT").map(|_| (Cell::new(std::time::Instant::now()), Cell::new(0)));
+            report::reports_frame_rate().then(|| (Cell::new(std::time::Instant::now()), Cell::new(0)));
     }
     REPORT.with(|report| {
         let Some((since, frames)) = report else { return };
         frames.set(frames.get() + 1);
         let elapsed = since.get().elapsed();
         if elapsed.as_secs_f64() >= 1.0 {
-            println!("PERF fps {:.1}", f64::from(frames.get()) / elapsed.as_secs_f64());
+            report::line(&format!("PERF fps {:.1}", f64::from(frames.get()) / elapsed.as_secs_f64()));
             since.set(std::time::Instant::now());
             frames.set(0);
         }

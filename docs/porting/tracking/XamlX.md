@@ -244,6 +244,7 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 
 | Rust file | Reason | Types defined |
 |---|---|---|
+| `ast/namespace_scope.rs` | **unmapped** | `XamlNamespaceScope` |
 | `extensions/query_interface.rs` | dynamic interface queries on AST nodes: replaces C# `is`/`as` casts to backend-generic interfaces |  |
 
 Tests, examples and build scripts (not scanned): `tests/ast_tests.rs`, `tests/emit_tests.rs`, `tests/helpers.rs`, `tests/mod.rs`, `tests/parser_tests.rs`, `tests/test_xaml_language.rs`, `tests/transformer_tests.rs`, `tests/type_system_tests.rs`, `tests/whitespace_tests.rs`.

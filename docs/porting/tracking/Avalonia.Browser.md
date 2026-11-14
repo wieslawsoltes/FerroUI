@@ -136,10 +136,17 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 
 | Rust file | Reason | Types defined |
 |---|---|---|
+| `browser_accessibility.rs` | **unmapped** | `BrowserAccessibility`, `Node`, `NodeState` |
+| `browser_text_input_dom.rs` | **unmapped** | `Composition`, `DomState`, `FlagGuard`, `PendingEdit`, `Snapshot` |
+| `browser_text_input_edit.rs` | **unmapped** |  |
+| `browser_text_input_options.rs` | **unmapped** | `BrowserTextInputOptions` |
+| `browser_text_input_projection.rs` | **unmapped** | `CollapsedLineEnding`, `DomTextProjection` |
+| `interop/accessibility_helper.rs` | **unmapped** |  |
 | `interop/completion_helper.rs` | completion of the asynchronous calls into the page: upstream's runtime turns a promise of the page into a task | `Completions`, `IPromiseTracker`, `PagePromiseTracker`, `PendingRequest`, `PromiseError`, `PromiseFuture`, `PromiseOutcome` |
 | `interop/thread_proxy.rs` | the threads of the module: the id of the calling thread and a call made on another one; upstream's runtime carries a call from one thread to another (browser stage B2.3) | `ProxyingQueue`, `RunOnThread`, `ThreadWork` |
 | `rendering/browser_render_surface.rs` | the render surface of a canvas as it is handed to the compositor: upstream hands out the render target itself, which with a render worker exists on the render thread only (browser stage B2.5) | `BrowserRenderSurface` |
 | `rendering/browser_surface_shared.rs` | what the thread of the user interface and the thread that renders both know about one canvas: one object read by both threads by convention upstream (browser stage B2.3) | `BrowserSurfaceShared`, `FirstFrameHandler`, `SurfaceRegistry` |
 | `rendering/render_statistics.rs` | where the frames of the page are drawn and what the ticks of a render thread asked of the main thread, for tests and diagnostics (browser stage B2.6): not from upstream | `Counters`, `RenderStatistics` |
+| `rendering/web_gl_frame_completion.rs` | **unmapped** |  |
 
-Tests, examples and build scripts (not scanned): `examples/render_worker_clear/main.rs`, `examples/storage_view/main.rs`, `examples/themed_view/main.rs`, `examples/thread_spawn/main.rs`.
+Tests, examples and build scripts (not scanned): `browser_accessibility_tests.rs`, `browser_text_input_dom_tests.rs`, `examples/render_worker_clear/main.rs`, `examples/storage_view/main.rs`, `examples/themed_view/main.rs`, `examples/thread_spawn/main.rs`.

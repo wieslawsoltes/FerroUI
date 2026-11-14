@@ -10,10 +10,10 @@ Generated from upstream commit `66b7273b9a2b5ba8416feb4376b9cdc3078b8573`. Back 
 | FerroUI | `src/Headless/FerroUI.Headless` (exists) |
 | Crate | `ferroui-headless` |
 | Phase / priority | 1 - test infrastructure / P1 |
-| Files | 11/11 (100.0%) |
-| Types | 22/24 (2 waived) (100.0%) |
-| Members | 241/253 (12 waived) (100.0%) |
-| Contracts (interfaces) | 2/3 |
+| Files | 10/11 (90.9%) |
+| Types | 21/24 (2 waived) (95.5%) |
+| Members | 230/253 (12 waived) (95.4%) |
+| Contracts (interfaces) | 1/3 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
 
@@ -25,11 +25,11 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 |---|---|---|---|---|
 | `Avalonia.Headless.HeadlessPlatformRenderInterface.IHeadlessGeometryWithEdges` | internal | `HeadlessPlatformRenderInterface.cs` | 0/3 (3 waived) | waived |
 | `Avalonia.Headless.IHeadlessTouchPointer` | public | `IHeadlessTouchPointer.cs` | 0/0 | present |
-| `Avalonia.Headless.IHeadlessWindow` | internal | `IHeadlessWindow.cs` | 11/11 | present |
+| `Avalonia.Headless.IHeadlessWindow` | internal | `IHeadlessWindow.cs` | 0/11 | missing |
 
 ## Files
 
-### `(project root)` - files 11/11, types 22/24 (2 waived), members 241/253 (12 waived)
+### `(project root)` - files 10/11, types 21/24 (2 waived), members 230/253 (12 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -43,7 +43,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `HeadlessWindowExtensions.cs` | `headless_window_extensions.rs` | present | 1/1 | 16/16 |  |
 | `HeadlessWindowImpl.cs` | `headless_window_impl.rs` | present | 1/1 | 79/84 (5 waived) |  |
 | `IHeadlessTouchPointer.cs` | `i_headless_touch_pointer.rs` | present | 1/1 | 0/0 |  |
-| `IHeadlessWindow.cs` | `i_headless_window.rs` | present | 1/1 | 11/11 |  |
+| `IHeadlessWindow.cs` | `i_headless_window.rs` | missing | 0/1 | 0/11 |  |
 
 ## Rust-only files
 
