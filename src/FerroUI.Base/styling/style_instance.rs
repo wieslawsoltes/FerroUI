@@ -83,6 +83,11 @@ impl StyleInstance {
         }
     }
 
+    /// Makes room for the instances of `setters` setters.
+    pub(crate) fn reserve(&self, setters: usize) {
+        self.base.reserve(setters);
+    }
+
     /// Adds the instance of a setter. A second setter for a property the
     /// style instance already has a value for is an error (the invalid
     /// operation of the managed original); nothing is added then.

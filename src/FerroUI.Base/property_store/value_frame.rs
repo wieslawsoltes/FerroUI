@@ -1,6 +1,7 @@
 use super::{FramePriority, FrameType, IValueEntry};
 use crate::data::BindingPriority;
 use crate::{FerroObject, FerroProperty, Ref, WeakRef};
+use smallvec::SmallVec;
 use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -101,8 +102,16 @@ impl ValueFrameBase {
         }
     }
 
+    /// Makes room for `additional` entries, and no more: the frame of a style
+    /// gets one for each of its setters, once.
+    pub fn reserve(&self, additional: usize) {
+        self.entries.borrow_mut().reserve_exact(additional);
+    }
+
     pub fn unsubscribe_all(&self) {
-        let entries: Vec<_> = self.entries.borrow().clone();
+        // The entries as they are now, out of the list while they unsubscribe; the frames of a control hold a
+        // few entries each, which need no allocation.
+        let entries: SmallVec<[Rc<dyn IValueEntry>; 16]> = self.entries.borrow().iter().cloned().collect();
         for entry in entries {
             entry.unsubscribe();
         }
