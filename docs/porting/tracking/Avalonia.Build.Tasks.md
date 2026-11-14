@@ -41,7 +41,14 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | Rust file | Reason | Types defined |
 |---|---|---|
 | `diagnostics.rs` | **unmapped** | `Diagnostics` |
+| `hot_reload_manifest.rs` | **unmapped** |  |
+| `hot_reload_manifest_types.rs` | **unmapped** | `Catalog` |
+| `hot_reload_profile.rs` | **unmapped** | `ProfileInputs` |
+| `shader_effects.rs` | **unmapped** | `ShaderEffectGlsl`, `ShaderEffectGlslError`, `ShaderEffectGlslFiles` |
+| `theme_roots.rs` | **unmapped** | `Roots`, `ThemeTrimming`, `TomlValue`, `TypeGraph` |
 | `type_system/emit_types.rs` | the build-time type system of the compiler over the type models (docs/porting/xaml.md, 9.5.2, 9.5.5): the counterpart of the Cecil type system of upstream's build task (XamlX.IL.Cecil, which the tracking does not list) | `Conversions`, `ModelClass`, `ModelEmitProperty`, `ModelEmitTypes`, `ModelMarkup` |
 | `type_system/model_type_system.rs` | the build-time type system of the compiler over the type models (docs/porting/xaml.md, 9.5.2, 9.5.5): the counterpart of the Cecil type system of upstream's build task (XamlX.IL.Cecil, which the tracking does not list) | `Index`, `MemberBuilder`, `Merged`, `ModelTypeSystem`, `Position` |
 | `type_system/tests.rs` | the unit tests of the module |  |
 | `type_system/types.rs` | the build-time type system of the compiler over the type models (docs/porting/xaml.md, 9.5.2, 9.5.5): the counterpart of the Cecil type system of upstream's build task (XamlX.IL.Cecil, which the tracking does not list) | `DeclaredRust`, `MemberRust`, `MemberSource`, `MembersInit`, `ModelAssembly`, `ModelConstructor`, `ModelCustomAttribute`, `ModelEvent`, `ModelField`, `ModelMembers`, `ModelMethod`, `ModelParameterInfo`, ... (17 total) |
+
+Tests, examples and build scripts (not scanned): `theme_roots_tests.rs`.

@@ -890,6 +890,7 @@
    },
    "rustOnly": [
     "internal/operator.rs",
+    "internal/task_completion.rs",
     "internal/token_registration.rs",
     "linq/numeric.rs"
    ]

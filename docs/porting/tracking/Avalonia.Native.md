@@ -190,4 +190,8 @@ Interfaces 58/58, methods 328/328, enums 23/23, structs 8/8. Names are compared 
 
 Rust sources of this crate that no upstream file maps to. Give each a reason in `docs/porting/data/path-overrides.toml` (`[[rust_only]]`), or map upstream files to it (`[[map]]`).
 
-Tests, examples and build scripts (not scanned): `build.rs`, `examples/platform_window.rs`, `examples/raw_window.rs`, `menu_tests.rs`, `tests/accessibility_tree.rs`.
+| Rust file | Reason | Types defined |
+|---|---|---|
+| `native_text_input_options.rs` | **unmapped** | `NativeTextContentType`, `NativeTextInputOptions` |
+
+Tests, examples and build scripts (not scanned): `build.rs`, `examples/platform_window.rs`, `examples/raw_window.rs`, `menu_tests.rs`, `tests/accessibility_tree.rs`, `tests/first_paint.rs`, `tests/text_input_options.rs`.
