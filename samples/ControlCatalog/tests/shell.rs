@@ -424,8 +424,9 @@ fn the_home_page_realizes_each_section_as_it_scrolls() {
 }
 
 /// Tab moves the focus from card to card through every section of the home page, and Shift+Tab
-/// back: the panel of the sections keeps the sections beside the one with the focus realized (its
-/// focus trail), so the focus does not leave the page at the last card of a realized section.
+/// back: the panel of the sections realizes the section beside the first or the last one of its
+/// viewport while that one has the focus (its focus trail), so the focus does not leave the page at
+/// the last card of a realized section.
 #[test]
 fn tab_moves_through_the_cards_of_every_section_of_the_home_page() {
     use ferroui_base::input::raw::{RawKeyEventArgs, RawKeyEventType};

@@ -52,7 +52,8 @@
     <!-- The card sections are realized near the viewport of the page only: the page is created
          again on every switch to it. The cache realizes the sections next to the viewport before
          they scroll in. Tab and Shift+Tab move from the last card of a section to the next section
-         whatever the cache is: the panel keeps the sections beside the one with the focus realized. -->
+         whatever the cache is: the panel realizes the section beside the first or the last one of
+         the viewport while that one has the focus. -->
     <ItemsControl ItemsSource="{Binding HomeSections}">
       <ItemsControl.ItemsPanel>
         <ItemsPanelTemplate>
