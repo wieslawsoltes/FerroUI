@@ -15,8 +15,9 @@ use crate::layout::LayoutableImpl;
 use crate::visual_tree::IHostedVisualTreeRoot;
 use crate::{
     ferro_class, ferro_impl_classes, ferro_property, ferro_routed_event, instantiate, DirectProperty,
-    FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, StyledElementImpl,
-    StyledProperty, StyledPropertyOptions, Visual, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs,
+    FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, PropertyChangeHandler, Ref,
+    StyledElementImpl, StyledProperty, StyledPropertyOptions, Visual, VisualImpl, VisualImplExt,
+    VisualTreeAttachmentEventArgs,
 };
 use crate::collections::FerroList;
 use std::cell::{Cell, OnceCell, RefCell};
@@ -163,15 +164,18 @@ crate::ferro_overrides! { impl FerroObjectImpl for InputElement {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
-        let property = change.property();
+        const HANDLER: PropertyChangeHandler = PropertyChangeHandler::InputElement;
+        if !change.reaches(HANDLER) {
+            return;
+        }
 
-        if property == Self::is_focused_property().as_property() {
+        if change.is_for(HANDLER, Self::is_focused_property().as_property()) {
             this.update_pseudo_classes(Some(change.get_new_value::<bool>()), None);
-        } else if property == Self::is_pointer_over_property().as_property() {
+        } else if change.is_for(HANDLER, Self::is_pointer_over_property().as_property()) {
             this.update_pseudo_classes(None, Some(change.get_new_value::<bool>()));
-        } else if property == Self::is_keyboard_focus_within_property().as_property() {
+        } else if change.is_for(HANDLER, Self::is_keyboard_focus_within_property().as_property()) {
             this.set_pseudo_class(":focus-within", change.get_new_value::<bool>());
-        } else if property == Visual::is_visible_property().as_property()
+        } else if change.is_for(HANDLER, Visual::is_visible_property().as_property())
             && !change.get_new_value::<bool>()
             && this.is_keyboard_focus_within()
         {
@@ -583,6 +587,13 @@ impl InputElement {
     /// that route the input events to the `on_*` virtual members and the
     /// gesture synthesis.
     fn static_constructor() {
+        PropertyChangeHandler::InputElement.reacts_to(&[
+            Self::is_focused_property().as_property(),
+            Self::is_pointer_over_property().as_property(),
+            Self::is_keyboard_focus_within_property().as_property(),
+            Visual::is_visible_property().as_property(),
+        ]);
+
         // Register the routed events that no class handler below refers
         // to, so that the registry lists every event of the class once the
         // class is initialised.

@@ -55,6 +55,7 @@ mod pixel_rect;
 mod pixel_size;
 mod pixel_vector;
 mod point;
+mod property_change_handler;
 mod rect;
 mod register_types;
 mod rust_paths;
@@ -93,6 +94,7 @@ pub use ferro_property::{
 #[doc(hidden)]
 pub use ferro_property::{__NoPropertyValueType, __NoValueMarkup, __RegisterPropertyValueType, __RegisterValueMarkup, __ValueMarkupProbe};
 pub use ferro_property_changed_event_args::{FerroPropertyChangedEventArgs, OwnedFerroPropertyChangedEventArgs};
+pub use property_change_handler::PropertyChangeHandler;
 pub use ferro_property_metadata::{
     CoerceValueCallback, DirectPropertyMetadata, FerroPropertyMetadata, StyledPropertyMetadata,
 };
