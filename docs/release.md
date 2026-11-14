@@ -348,7 +348,7 @@ A release is made only after the performance gate (`scripts/perf/gate.py`; `docs
 | Windows | a machine or a virtual machine, in the session of a signed-in user | every suite, the same command; with a copy of the sources, `--base-dir <copy of the base>` |
 | Android | an emulator, or a device | the window suite: `--only window --window-device android` |
 | iOS | a simulator | the window suite: `--only window --window-device ios` |
-| Browser | headless Chrome | the browser suite on the site of the commit: `--only browser --browser-site <folder or address>`, with `--browser-base-site` when a site of the base exists |
+| Browser | headless Chrome | the browser suite on the site of the commit: `--only browser --browser-site <folder or address>`, with `--browser-base-site` when a site of the base exists; a folder is opened without the render thread, an address as it is given, so the published site of a module with threads is `<address>/?Threads=false` |
 
 - **The base** is the tag of the release before, where the benchmark packages of the candidate build in it (`--copy-gate` copies them into the base, so that both sides run the same benchmark code). Where they do not, it is the first commit of `main` after that tag in which they build; the table then names it, and the release notes say what the comparison leaves out.
 - **Passed** means the exit status 0 on each platform. A metric over its tolerance that is meant (a feature that costs what it gives) is named in the release notes with its numbers; one that is not meant is fixed first, and the fix comes with a test and, where a number can show it, with a line of the gate (as section 9.56 of the performance document did for the page switches of the browser).

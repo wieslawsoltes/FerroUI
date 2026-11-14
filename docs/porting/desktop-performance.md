@@ -709,7 +709,9 @@ What it measures:
   tolerance (a quarter with the default) and a floor (8 masks, 250,000 pixels), since an animation
   runs a frame more or less from run to run, and a time ten times the tolerance and 50 ms, since
   the time of a switch in headless Chrome says little (section 9.56). The counts are those of the
-  module without threads, drawn on the thread of the page.
+  module without threads, drawn on the thread of the page. A folder is opened that way by the
+  script; an address is opened as it is given, so the published site of a module with threads is
+  given as `<address>/?Threads=false`.
 - **The TreeDataGrid benchmarks** (`tests/FerroUI.TreeDataGrid.Benchmarks`, `run_benchmarks`): the
   median time of one operation of each benchmark, read from the tables of the harness. The gate
   runs the harness with shorter iterations than its defaults (7 iterations of at least 250 ms
