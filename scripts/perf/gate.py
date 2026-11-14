@@ -61,8 +61,9 @@ builds the host of the frame benchmarks of each side for the device
 the script of the platform, installs both under application ids of their own and starts each
 scene with the command of the platform (`am start`, `simctl launch`); the `PERF` lines come from
 the log of the device or the console of the process. The first frames of Android are timed by
-the clock of the device, from the start of the process. Android needs ANDROID_HOME (the SDK), as
-`scripts/android/env.sh` does.
+the clock of the device, from the start of the process, and each side begins its scenes with a
+launch that is not measured (an application started after another one starts later). Android
+needs ANDROID_HOME (the SDK), as `scripts/android/env.sh` does.
 
 Where this script is not in a git checkout (a machine that gets a copy of the sources, made for
 example by `scripts/windows/vm-sync.sh`), or with `--base-dir` in any case, the base is a source
@@ -198,6 +199,8 @@ ANDROID_TARGETS = {"arm64-v8a": "aarch64-linux-android", "x86_64": "x86_64-linux
 ANDROID_ACTIVITY = "org.ferroui.android.FerroMainActivity"
 # The tag of the log the Android host writes the `PERF` lines with.
 ANDROID_TAG = "ferroui-frames"
+# How long the launch lasts with which a side begins its scenes on a device (`warm_device`).
+DEVICE_WARM_SECONDS = 3.0
 # The tag the activity manager of Android says with that it started a process (`Start proc`).
 ANDROID_SYSTEM_TAG = "ActivityManager"
 IOS_PACKAGE = "ferroui-frame-benchmarks-ios"
@@ -906,6 +909,27 @@ def build_device(side: Side, device: Device, scratch: Path, logs: Path, echo: bo
         run_tool(["xcrun", "simctl", "install", device.simulator, bundle], log=logs / f"install-window-{side.name}.log")
 
 
+def warm_device(side: Side, device: Device, scene: str) -> None:
+    """Starts the application of `side` on the device with `scene` and stops it again, with
+    nothing measured. An application started after another one ran starts later, before a line of
+    its code runs (the system reads its pages again), and the second launch does not: the first
+    scene of a side would be timed by which side went before it, so each side begins its scenes
+    with a launch that does not count."""
+    application = device_application(side)
+    print(f"[{side.name}] {application} {scene} for {DEVICE_WARM_SECONDS:g} s, not measured", flush=True)
+    if device.kind == "android":
+        run_tool(device.adb("shell", "am", "force-stop", application))
+        activity = f"{application}/{ANDROID_ACTIVITY}"
+        run_tool(device.adb("shell", "am", "start", "-n", activity, "--es", "FRAMES_SCENE", scene))
+        time.sleep(DEVICE_WARM_SECONDS)
+        run_tool(device.adb("shell", "am", "force-stop", application))
+    else:
+        env = {**os.environ, "SIMCTL_CHILD_FRAMES_SCENE": scene}
+        run_tool(["xcrun", "simctl", "launch", "--terminate-running-process", device.simulator, application], env)
+        time.sleep(DEVICE_WARM_SECONDS)
+        subprocess.run(["xcrun", "simctl", "terminate", device.simulator, application], capture_output=True)
+
+
 def run_device_window(side: Side, device: Device, scene: str, seconds: float, log: Path, echo: bool) -> list[tuple[Metric, float]]:
     """Starts the application of `side` on the device with `scene` for `seconds` and returns its
     metrics (`window_metrics`). Android: the scene is an extra of the intent, and the lines are
@@ -1449,6 +1473,8 @@ def gate(options: argparse.Namespace) -> int:
                     suite_of.update((metric.key, suite) for metric, _ in found)
                     continue
                 if suite == "window":
+                    if device is not None:
+                        warm_device(side, device, window_scenes[0])
                     for scene in window_scenes:
                         scene_log = logs / f"window-{scene.replace('+', '-')}-{side.name}-{round_index + 1}.log"
                         if device is not None:

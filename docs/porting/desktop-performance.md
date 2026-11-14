@@ -823,10 +823,27 @@ the machine, the emulator or the simulator; the browser suite counts what WebGL 
   (`logcat -v threadtime`), from the line with which the activity manager says it started the
   process (`Start proc`) to the `PERF` lines of that process, and of no other. A time taken on
   the machine of the gate has in it what `adb` takes to start the scene and what a line takes
-  to arrive, and the second is not the same for every line: in the first run on the emulator
-  the first frame of the text scene arrived after 173 ms on one side and after 340 ms on the
-  other, and the log of the device had the second side ahead. The log of a run keeps the time
+  to arrive, and the second is not the same for every line. The log of a run keeps the time
   each line arrived at in front of it.
+- **A side begins its scenes on a device with a launch that is not measured** (`warm_device`,
+  three seconds of its first scene). An application started after another one ran starts later,
+  before a line of its code runs, and its second launch does not. The sides take turns, so the
+  first scene of a side was timed by which side went before it. Nine rounds on the emulator, the
+  text scene, from the start of the process to the line with which the program names its scene
+  and to its first frame:
+
+  | The text scene of the candidate | To its scene, ms | To its first frame, ms |
+  | --- | ---: | ---: |
+  | After the scenes of the base (five rounds) | 277 to 298 | 292 to 311 |
+  | After its own scenes of the round before (four rounds) | 87 to 109 | 97 to 121 |
+  | The base, in either place | 84 to 109 | 103 to 134 |
+
+  The median of the nine was 292 ms against 131 ms, a first frame twice as late that no frame
+  was part of: from the scene to the first frame the candidate took 14 ms and the base 22 ms.
+  The base did not show it. The likely cause, not proven, is the memory of the emulator: the
+  last scene of a side, the lines, is much the heavier one on the base of that run, and what it
+  takes is taken from the pages of the other application. With the launch that does not count
+  both sides start their first scene as they start every other one.
 - **Where the candidate is not a git checkout** (a machine that gets its sources as a copy:
   `scripts/windows/vm-sync.sh <commit> <folder>` makes one, on any system), the base is a second
   copy, passed with `--base-dir`; the gate checks nothing out and names each side by the commit
