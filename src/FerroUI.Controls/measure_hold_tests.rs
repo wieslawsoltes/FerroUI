@@ -1,4 +1,4 @@
-//! Measure holds (desktop-performance.md sections 9.15 and 9.56): a tree measured at one width
+//! Measure holds (desktop-performance.md sections 9.15 and 9.57): a tree measured at one width
 //! and then at another inside the holds of its elements has the desired sizes and, once
 //! arranged, the bounds of a tree measured and arranged at the second width from nothing.
 
@@ -122,7 +122,7 @@ fn tree(centered: bool, columns: Option<Columns>) -> Ref<Border> {
     Grid::set_column(&percent, 1);
     progress.children().add(&percent);
     stack.children().add(&progress);
-    // Several star columns: each has its share of the width (section 9.56).
+    // Several star columns: each has its share of the width (section 9.57).
     if let Some(columns) = columns {
         let columns_box = Border::new();
         columns_box.set_child(&grid(columns));
@@ -225,7 +225,7 @@ fn a_tree_measured_inside_its_holds_lays_out_as_a_new_one() {
     assert!(held > 100, "only {held} widths were held");
 }
 
-/// Section 9.56: a grid of several star columns holds what the cells of its columns hold, each
+/// Section 9.57: a grid of several star columns holds what the cells of its columns hold, each
 /// at its share of the width, with and without layout rounding, and so does an element with the
 /// measure of `Layoutable`.
 #[test]
@@ -328,7 +328,7 @@ ferro_overrides! {
     }
 }
 
-/// Section 9.56: a hold is inherited only with the measure it describes.
+/// Section 9.57: a hold is inherited only with the measure it describes.
 #[test]
 fn a_hold_is_inherited_only_with_the_measure_it_describes() {
     let _scope = test_scope();

@@ -31,7 +31,7 @@ ferro_impl_classes!(
 ferroui_base::ferro_impl_classes!(ReversibleStackPanel: FerroObjectImpl);
 
 // States what it overrides: the class keeps the measure of its base class, and with it
-// the hold of that measure (section 9.56 of `docs/porting/desktop-performance.md`).
+// the hold of that measure (section 9.57 of `docs/porting/desktop-performance.md`).
 ferroui_base::ferro_overrides! {
     impl LayoutableImpl for ReversibleStackPanel {
         fn arrange_override(this: &Self, final_size: Size) -> Size {

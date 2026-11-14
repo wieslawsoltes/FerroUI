@@ -85,7 +85,7 @@ ferro_class! {
         /// element is not measured again at an available size inside the hold.
         ///
         /// A hold describes one `measure_override`, and is inherited only with it (section
-        /// 9.56): a class that overrides `measure_override` and not this member holds nothing,
+        /// 9.57): a class that overrides `measure_override` and not this member holds nothing,
         /// whatever its base class holds, and so does a class whose implementation is a plain
         /// `impl` without this member. A class that states it overrides neither
         /// (`ferro_impl_classes!`, `ferro_overrides!`) has the hold of its base class; where
