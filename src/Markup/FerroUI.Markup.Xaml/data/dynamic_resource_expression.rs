@@ -70,7 +70,20 @@ pub(crate) struct DynamicResourceExpression {
     /// describes a change that lookup already saw.
     looked_up_at: Cell<i32>,
     owner_changed_subscription: RefCell<Option<Subscription>>,
-    host_subscriptions: RefCell<Vec<Subscription>>,
+    host_subscriptions: RefCell<HostSubscriptions>,
+}
+
+/// What an expression follows of its host, and how it stops following it.
+enum HostSubscriptions {
+    None,
+    /// The handlers the expression added to a styled element, by their tokens
+    /// (`0` for none). The element is the host of the expression until the
+    /// handlers are removed. An expression is started for every dynamic
+    /// resource of a control theme, tens for a control, and a subscription
+    /// object for each handler was three allocations of a started expression.
+    Element { resources_changed: u64, theme_variant_changed: u64 },
+    /// The subscriptions of a host that is no styled element (the application).
+    Other(Vec<Subscription>),
 }
 
 impl DynamicResourceExpression {
@@ -105,7 +118,7 @@ impl DynamicResourceExpression {
             theme_variant: RefCell::new(theme_variant),
             looked_up_at: Cell::new(0),
             owner_changed_subscription: RefCell::new(None),
-            host_subscriptions: RefCell::new(Vec::new()),
+            host_subscriptions: RefCell::new(HostSubscriptions::None),
         });
         #[cfg(all(feature = "hot-reload", debug_assertions))]
         crate::reload_resources::record(expression.clone());
@@ -294,32 +307,76 @@ impl DynamicResourceExpression {
 
     fn subscribe(&self, host: Option<&ResourceHostRef>) {
         let Some(host) = host else { return };
-        let mut subscriptions = Vec::with_capacity(2);
 
         let weak = self.this.clone();
-        subscriptions.push(Subscription::new(host.resources_changed(Rc::new(move |e: &ResourcesChangedEventArgs| {
+        let resources_changed: Rc<dyn Fn(&ResourcesChangedEventArgs)> = Rc::new(move |e: &ResourcesChangedEventArgs| {
             if let Some(this) = weak.upgrade() {
                 this.resources_changed(e);
             }
-        }))));
+        });
+        let weak = self.this.clone();
+        let follows_theme_variant = !self.override_theme_variant.get();
+        let theme_variant_changed = move || -> Rc<dyn Fn()> {
+            Rc::new(move || {
+                if let Some(this) = weak.upgrade() {
+                    this.actual_theme_variant_changed();
+                }
+            })
+        };
 
-        if !self.override_theme_variant.get() {
-            if let Some(theme_variant_host) = host.as_theme_variant_host() {
-                *self.theme_variant.borrow_mut() = theme_variant_host.actual_theme_variant();
-                let weak = self.this.clone();
-                subscriptions.push(Subscription::new(theme_variant_host.actual_theme_variant_changed(Rc::new(move || {
-                    if let Some(this) = weak.upgrade() {
-                        this.actual_theme_variant_changed();
-                    }
-                }))));
+        let subscriptions = match host {
+            ResourceHostRef::Element(element) => {
+                let resources_changed = element.add_resources_changed_handler(resources_changed);
+                let theme_variant_changed = if follows_theme_variant {
+                    *self.theme_variant.borrow_mut() = element.actual_theme_variant();
+                    element.add_actual_theme_variant_changed_handler(theme_variant_changed())
+                } else {
+                    0
+                };
+                HostSubscriptions::Element { resources_changed, theme_variant_changed }
             }
-        }
-
+            ResourceHostRef::Other(_) => {
+                let mut subscriptions = Vec::with_capacity(2);
+                subscriptions.push(Subscription::new(host.resources_changed(resources_changed)));
+                if follows_theme_variant {
+                    if let Some(theme_variant_host) = host.as_theme_variant_host() {
+                        *self.theme_variant.borrow_mut() = theme_variant_host.actual_theme_variant();
+                        subscriptions.push(Subscription::new(
+                            theme_variant_host.actual_theme_variant_changed(theme_variant_changed()),
+                        ));
+                    }
+                }
+                HostSubscriptions::Other(subscriptions)
+            }
+        };
         *self.host_subscriptions.borrow_mut() = subscriptions;
     }
 
+    /// Stops following the host. Called while the host of the expression is
+    /// still the one [`subscribe`](Self::subscribe) was called with.
     fn unsubscribe(&self) {
-        drop(self.host_subscriptions.take());
+        let subscriptions = self.host_subscriptions.replace(HostSubscriptions::None);
+        match subscriptions {
+            HostSubscriptions::None => {}
+            HostSubscriptions::Element { resources_changed, theme_variant_changed } => {
+                // An element that is gone has released its handlers.
+                if let Some(ResourceHostRef::Element(element)) = self.host() {
+                    element.remove_resources_changed_handler(resources_changed);
+                    if theme_variant_changed != 0 {
+                        element.remove_actual_theme_variant_changed_handler(theme_variant_changed);
+                    }
+                }
+            }
+            HostSubscriptions::Other(subscriptions) => drop(subscriptions),
+        }
+    }
+}
+
+/// An expression released while it runs takes its handlers out of its host,
+/// as the subscriptions it used to hold did when they were released with it.
+impl Drop for DynamicResourceExpression {
+    fn drop(&mut self) {
+        self.unsubscribe();
     }
 }
 

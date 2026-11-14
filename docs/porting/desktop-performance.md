@@ -4568,3 +4568,140 @@ them; one that does not gets the region). `composition_winui_material_tests.rs`:
 `a_frame_drawn_one_rectangle_at_a_time_draws_a_backdrop_in_its_dirty_area_in_one_rectangle`.
 `skia_gpu_render_target.rs`: `only_a_ganesh_context_clips_regions_per_draw`. In a
 browser: `navigation_cost.test.mjs`, above.
+
+### 9.60 A dynamic resource follows its element by a token, and a style instance is made with room for its setters
+
+Styling is the seventh of the architecture proposals. It is 0.4 to 0.5 per cent of the UI
+thread at tier 16 of the gauntlet, whose controls are styled once and then only laid out
+and drawn, so the window benchmarks cannot measure it; the benchmarks of the styling
+subsystem can (`styling_subsystem::`, section 8). What they time is the cost of a page
+shown for the first time, a list that realizes its rows and a theme that is changed: the
+theme of a control attached, its template applied, the control taken out of a tree and put
+back.
+
+A profile of the timed part of `ControlThemeApply.attach[TextBox, 200]`, the theme of a
+text box attached to 200 of them (1.93 ms, 9.7 µs a control), by what the time is spent in
+(a function counts with what it calls, so the lines overlap):
+
+| Of the attach of a control theme | per cent |
+| --- | ---: |
+| The effective values are evaluated again (`reevaluate_effective_values`) | 75.8 |
+| A dynamic resource is started (`DynamicResourceExpression::start_core`) | 37.5 |
+| of that, the resource is looked up, converted and published | 20.6 |
+| of that, the expression subscribes to its element | 14.3 |
+| The new values are stored and their changes raised | 28.4 |
+| of that, the handlers of the classes for a changed property | 13.0 |
+| The style is instanced (`StyleBase::try_attach_instance`) | 9.3 |
+| The expressions of the setters are made | 6.2 |
+
+Nearly half of an attach is the dynamic resources of the theme's setters: a brush, a
+thickness or a font size the theme takes from the resources of the application, each one
+an expression that looks its resource up from the control, converts it for the property
+and follows the resources and the theme variant of the control from then on.
+
+**What a started expression allocated.** To follow its element it made two closures, a
+subscription for each of them (the closure that removes the handler again, shared and
+counted), and a list for the two subscriptions: five allocations, released again when the
+expression stops. The subscriptions are what the public events of an element return, and
+are right for a subscriber that may outlive the element or forget it. An expression does
+neither: it is owned by the value store of the object it is the value of, it knows the
+element it follows, and it stops before it lets go of it.
+
+**The change**, in four parts, none of which changes what a property reads.
+
+1. *A dynamic resource follows a styled element by a token.* `StyledElement` gives out the
+   token of a handler (`add_resources_changed_handler`,
+   `add_actual_theme_variant_changed_handler`, and the two that remove; hidden from the
+   documentation, for the markup crate) and the expression keeps the two tokens where it
+   kept the list. A started expression allocates its two closures and nothing else. An
+   expression released while it runs takes its handlers out as the subscriptions did
+   (`Drop`), and a host that is no styled element, the application, is subscribed to as
+   before.
+2. *A style instance is made with room for its setters.* The entries of an instance were
+   pushed one by one into a list that grew as it went, four or five times for the theme of
+   a control; it is now made once, with the number of the style's setters, and no larger.
+3. *The entries of a frame unsubscribe without a copy of the list on the heap.* A frame
+   that is removed copied its entries to unsubscribe them; the copy is now on the stack
+   for frames of up to sixteen entries.
+4. *A handler is found by its token with a binary search.* The tokens of every list come
+   from one counter and a handler is added at the end, so a list is in the order of its
+   tokens. A control with thirty dynamic resources has thirty handlers in each of two
+   lists, and each expression that stops removes one from each.
+
+**Measured** with the benchmarks of the styling subsystem in the local gate, the commit
+before this section against it, three rounds a side (the median; instructions are those
+the processor counted for the timed part, which a busy machine does not move):
+
+| Benchmark | Before | After | Time | Instructions |
+| --- | ---: | ---: | ---: | ---: |
+| `ControlThemeApply.attach[Button, 200]` | 924 µs | 878 µs | -5.0 % | -8.0 % |
+| `ControlThemeApply.attach[CheckBox, 200]` | 987 µs | 939 µs | -4.9 % | -7.3 % |
+| `ControlThemeApply.attach[TextBox, 200]` | 1.888 ms | 1.833 ms | -2.9 % | -6.1 % |
+| `StylesChanged.remove_from_root[1000]` | 212 µs | 192 µs | -9.3 % | -11.3 % |
+| `Activation.pseudo_class_set_unobserved[1000]` | 40.1 µs | 35.6 µs | -11.3 % | -5.2 % |
+| `Activation.pseudo_class_set[1000]` | 154 µs | 152 µs | -1.8 % | -1.8 % |
+| `SetterApply.template[1000, 8]` | 1.051 ms | 1.018 ms | -3.1 % | -3.8 % |
+| `SetterApply.binding[1000, 8]` | 1.422 ms | 1.377 ms | -3.2 % | -2.7 % |
+| `DetachReattach.detach[1000]` | 746 µs | 745 µs | -0.2 % | -2.9 % |
+| `DetachReattach.move_same_styles[1000]` | 2.129 ms | 2.085 ms | -2.1 % | -0.8 % |
+| `ControlThemeApply.switch_theme_variant[Button, 200]` | 721 µs | 741 µs | +2.7 % | -1.4 % |
+| `StylesInScope.inactive_by_class[100]` | 16.03 ms | 16.02 ms | -0.0 % | +0.9 % |
+| `SelectorMatch.pseudo_class[1000]` | 358 µs | 359 µs | +0.3 % | +0.6 % |
+| `ResourceLookup.switch_theme_variant[1000]` | 778 µs | 816 µs | +4.9 % | +0.5 % |
+| `DynamicResources.detach[1000]` | 1.397 ms | 1.389 ms | -0.6 % | +0.5 % |
+
+The gate measured 62 lines and none is over its tolerance. The attach of a theme executes
+6 to 8 per cent less, which is what the profile promised for the subscriptions and the
+list of the instance, and a style collection taken from the root 11 per cent less: every
+frame it removes unsubscribes its entries without a list of its own. The last four lines
+stand for the ones that execute more, none of them by one per cent: the selectors with a
+class and the styles that are not active, and the resources of a control that is detached
+or changes its theme variant. The likely causes, not profiled: a style of one setter asks
+for its room before its first entry where the list used to ask with it, and an expression
+looks its element up to take its handlers out. Of the 47 lines that are not in the table
+none executes one per cent more, most are within a tenth of a per cent, and the times are
+within the noise of the machine (`SelectorMatch.none`, which executes the same
+instructions to the last, is 4.5 per cent apart).
+
+**What was looked at and left.** Three larger changes were sized and are not in this
+section; they belong to the shared styled values of the work that follows, and each has a
+hazard that a bounded change does not.
+
+- *A memo of the resolved resources of the application.* The lookup, the conversion of a
+  colour to a brush and the cast to the type of the property are 13 per cent of an attach,
+  and the same few hundred resources are resolved for every control. A memo by key, theme
+  variant and target type would answer them. It needs to know that the value came from
+  the application and not from a dictionary between the control and it, an epoch that
+  every change of a resource moves, and an answer for resources that give a new object for
+  each lookup; and the brushes made from colours would become shared objects.
+- *The instance of a style that is not active, made when it becomes active.* A control
+  holds the entries and expressions of every pointer-over, pressed and disabled style of
+  its theme from its first attach on. The errors of a setter are reported while it is
+  instanced, the value store and the developer tools read the entries of a frame that is
+  not active, and a binding may have effects when it is instanced.
+- *The notification of a control taken out of its tree.* Every dynamic resource of the
+  control looks its resource up again and publishes that there is none, which costs about
+  what the attach of the theme cost. Leaving it out would change what the properties of a
+  detached control read, which upstream does not do either.
+
+The other half of the seventh proposal, compiled bindings by default, was merged before
+the proposals were written (#603, PR 637); what is left of that ticket is about the size
+of the binary.
+
+**What stays as it was.** The value of every property, the order of the notifications and
+the handlers, and what the public events of an element return. An object of the class
+model is as large as it was: the tokens are kept by the expression, and the element has
+the two handler lists it had.
+
+**Other backends.** All of it is in `ferroui_system`, `ferroui_base` and the markup crate;
+styling does not know what draws it.
+
+**Not upstream.** Upstream's expression subscribes to the events of its host;
+`DEVIATIONS.md` has the row.
+
+**Tests.** `handler_list.rs`:
+`a_handler_is_removed_by_its_token_wherever_it_is_in_the_list`.
+`dynamic_resource_expression_tests.rs`:
+`an_expression_takes_its_handlers_out_of_the_element_it_follows` (two expressions of an
+element stopped in turn, one stopped twice, one released while it runs with the object it
+is the value of, and one whose element is gone before it stops).
