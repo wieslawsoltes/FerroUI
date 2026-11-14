@@ -295,18 +295,28 @@ ferro_impl_classes!(Grid: StyledElementImpl, VisualImpl, InteractiveImpl, InputE
 
 ferroui_base::ferro_impl_classes!(Grid: FerroObjectImpl);
 
+/// What the hold of a cell in one of several star columns gives up on each side, in the units of
+/// the cell: the share of a star column is a product and a quotient of rounded numbers, and may
+/// differ from the exact one in its last digits. Far more than that, and far less than anything a
+/// layout can see.
+const STAR_SHARE_SLACK: f64 = 1.0 / 65536.0;
+
 impl LayoutableImpl for Grid {
     /// Content measurement.
     /// The measure hold of a grid (desktop-performance.md section 9.15), in two shapes:
     ///
     /// - without definitions every child gets the grid's constraint: the intersection of the
     ///   visible children's holds;
-    /// - with one star column (without minimum, maximum or shared size), rows that are auto or
+    /// - with star columns (without minimum, maximum or shared size), rows that are auto or
     ///   pixel sized (or any rows at an infinite height, where star rows size to their content),
     ///   no shared sizes and no spans, at a finite width: a cell of an auto or pixel
-    ///   column, or of any row, gets a constraint the grid's does not change, and a cell of the star
-    ///   column gets the grid's width less a fixed amount `F` (the other columns and the spacing),
-    ///   so its hold moves by `F` (less a rounding step on each side when the layout is rounded).
+    ///   column, or of any row, gets a constraint the grid's does not change, and a cell of a star
+    ///   column of weight `w` gets its share `w / W` of the grid's width less a fixed amount `F`
+    ///   (the other columns and the spacing; `W` is the weight of all star columns). The star
+    ///   columns are resolved before any of their cells is measured, with no minimum to give way
+    ///   to, so the share is exact, and the hold of the cell maps back as `hold * W / w + F`
+    ///   (less a rounding step of the cell on each side when the layout is rounded, and with
+    ///   several star columns less what the division may round away).
     ///
     /// Any other grid holds nothing.
     fn measure_hold_override(this: &Self, constraint: Size) -> Option<ferroui_base::layout::MeasureHold> {
@@ -323,18 +333,27 @@ impl LayoutableImpl for Grid {
             return None;
         }
         let (definitions_u, definitions_v) = (this.definitions_u(), this.definitions_v());
-        let mut star = None;
+        let (mut star_columns, mut star_weight) = (0, 0.0);
         for index in 0..definitions_u.count() {
             let definition = &definitions_u[index];
             if definition.is_shared() {
                 return None;
             }
-            if definition.user_size().is_star() {
-                if star.is_some() || definition.user_min_size() != 0.0 || definition.user_max_size() != f64::INFINITY {
+            let size = definition.user_size();
+            if size.is_star() {
+                let weight = size.value();
+                if definition.user_min_size() != 0.0
+                    || definition.user_max_size() != f64::INFINITY
+                    || !(weight > 0.0 && weight.is_finite())
+                {
                     return None;
                 }
-                star = Some(index);
+                star_columns += 1;
+                star_weight += weight;
             }
+        }
+        if !star_weight.is_finite() {
+            return None;
         }
         // Star rows share a finite height; at an infinite height they size to their content as
         // auto rows do.
@@ -355,15 +374,21 @@ impl LayoutableImpl for Grid {
                 return None;
             }
             let child_hold = child.measure_hold()?.any_height();
-            if star != Some(Grid::get_column(child).clamp(0, last_column.max(0)) as usize) {
+            let size = definitions_u[Grid::get_column(child).clamp(0, last_column.max(0)) as usize].user_size();
+            if !size.is_star() {
                 continue;
             }
             let measured = child.previous_measure()?.width;
             if !(measured > 0.0 && measured.is_finite()) {
                 return None;
             }
-            let fixed = constraint.width - measured;
-            let width = (child_hold.width.0 + fixed + step, child_hold.width.1 + fixed - step);
+            // The width of the grid for a width of the cell: `cell * ratio + fixed`. One star
+            // column has the whole of what is left, with no division.
+            let (ratio, slack) =
+                if star_columns == 1 { (1.0, 0.0) } else { (star_weight / size.value(), STAR_SHARE_SLACK) };
+            let fixed = constraint.width - measured * ratio;
+            let margin = (step + slack) * ratio;
+            let width = (child_hold.width.0 * ratio + fixed + margin, child_hold.width.1 * ratio + fixed - margin);
             hold = hold.intersect(MeasureHold::new(width, MeasureHold::ANY.height))?;
         }
         hold.contains(constraint).then_some(hold)

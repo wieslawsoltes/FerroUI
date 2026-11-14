@@ -80,10 +80,20 @@ ferro_class! {
         /// pass. Returns the size the control would like to be.
         fn measure_override(this, available_size: Size) -> Size;
         /// The range of constraints, around the one `measure_override` was just given, over which
-        /// it returns the same size and leaves the descendants as they are, or `None` (the
-        /// default) when only that constraint is known to. An addition (desktop-performance.md
-        /// section 9.15): an element is not measured again at an available size inside the hold.
-        fn measure_hold_override(this, constraint: Size) -> Option<crate::layout::MeasureHold>;
+        /// it returns the same size and leaves the descendants as they are, or `None` when only
+        /// that constraint is known to. An addition (desktop-performance.md section 9.15): an
+        /// element is not measured again at an available size inside the hold.
+        ///
+        /// A hold describes one `measure_override`, and is inherited only with it (section
+        /// 9.56): a class that overrides `measure_override` and not this member holds nothing,
+        /// whatever its base class holds, and so does a class whose implementation is a plain
+        /// `impl` without this member. A class that states it overrides neither
+        /// (`ferro_impl_classes!`, `ferro_overrides!`) has the hold of its base class; where
+        /// that is the measure of `Layoutable` itself, which gives every visual child the
+        /// constraint and returns the largest desired size, it is what all the visible
+        /// children hold.
+        fn measure_hold_override(this, constraint: Size) -> Option<crate::layout::MeasureHold>,
+            follows measure_override else Layoutable::holds_nothing;
         /// The default implementation of the control's arrange pass.
         ///
         /// This calculates the final bounds taking into account the control's
@@ -286,8 +296,22 @@ impl LayoutableImpl for Layoutable {
         Size::new(width, height)
     }
 
-    fn measure_hold_override(_this: &Self, _constraint: Size) -> Option<crate::layout::MeasureHold> {
-        None
+    /// The hold of the measure below: every visual child gets the constraint, and the result is
+    /// the largest desired size, so the measure holds wherever all the visible children do (and
+    /// everywhere without one). A child that is not visible has no desired size at any
+    /// constraint.
+    fn measure_hold_override(this: &Self, _constraint: Size) -> Option<crate::layout::MeasureHold> {
+        let mut hold = crate::layout::MeasureHold::ANY;
+        if let Some(children) = this.visual_children_snapshot() {
+            for visual in children.iter() {
+                if let Some(layoutable) = visual.downcast_ref::<Layoutable>() {
+                    if layoutable.is_visible() {
+                        hold = hold.intersect(layoutable.measure_hold()?)?;
+                    }
+                }
+            }
+        }
+        Some(hold)
     }
 
     fn measure_override(this: &Self, available_size: Size) -> Size {
@@ -499,6 +523,12 @@ crate::ferro_properties! { impl Layoutable {
 } }
 
 impl Layoutable {
+    /// The hold of a class that overrides `measure_override` and not `measure_hold_override`:
+    /// none, whatever its base class holds (the fallback of the member in the class declaration).
+    pub(crate) fn holds_nothing(&self, _constraint: Size) -> Option<crate::layout::MeasureHold> {
+        None
+    }
+
     fn static_constructor() {
         Self::affects_measure::<Layoutable>(&[
             Self::width_property().as_property(),
