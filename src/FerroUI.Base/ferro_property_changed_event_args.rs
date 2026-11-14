@@ -1,6 +1,6 @@
 use crate::data::core::{ValueType, ValueTypes};
 use crate::data::BindingPriority;
-use crate::{BoxedValue, FerroObject, FerroProperty, Ref};
+use crate::{BoxedValue, FerroObject, FerroProperty, PropertyChangeHandler, Ref};
 use std::any::Any;
 
 /// Provides information for a property change.
@@ -39,6 +39,35 @@ impl<'a> FerroPropertyChangedEventArgs<'a> {
     #[inline]
     pub fn property(&self) -> &'static FerroProperty {
         self.property
+    }
+
+    /// Whether the change is of a property the handler of a class reacts to
+    /// ([`PropertyChangeHandler::reacts_to`]): `false` lets the handler return before it
+    /// compares the property with any of its own.
+    ///
+    /// Always `true` in a debug build, so that the comparisons of the handler run and
+    /// [`is_for`](Self::is_for) can check each of them against what the class named.
+    #[inline]
+    pub fn reaches(&self, handler: PropertyChangeHandler) -> bool {
+        cfg!(debug_assertions) || self.property.has_change_handler(handler)
+    }
+
+    /// Whether the change is of `property`: the comparison of a handler that asked
+    /// [`reaches`](Self::reaches) first.
+    ///
+    /// In a debug build a match with a property the class did not name is a failed
+    /// assertion: a release build would not have come as far as the comparison.
+    #[inline]
+    pub fn is_for(&self, handler: PropertyChangeHandler, property: &'static FerroProperty) -> bool {
+        let matches = self.property == property;
+        debug_assert!(
+            !matches || self.property.has_change_handler(handler),
+            "the handler {handler:?} reacts to {}.{}, which its class did not name with \
+             PropertyChangeHandler::reacts_to",
+            self.property.owner_type().name(),
+            self.property.name(),
+        );
+        matches
     }
 
     /// The old value of the property, untyped. `None` when only the base

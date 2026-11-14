@@ -4,8 +4,8 @@ use crate::styling::{Container, ContainerSizing};
 use crate::utilities::{HandlerList, MathUtilities};
 use crate::{
     ferro_class, ferro_property, instantiate, DirectProperty, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
-    FerroPropertyChangedEventArgs, ObjectType, Point, Rect, Ref, Size, StyledElementImpl, StyledElementImplExt,
-    StyledProperty, StyledPropertyOptions, Thickness, Upcast, Visual, VisualImpl, VisualImplExt,
+    FerroPropertyChangedEventArgs, ObjectType, Point, PropertyChangeHandler, Rect, Ref, Size, StyledElementImpl,
+    StyledElementImplExt, StyledProperty, StyledPropertyOptions, Thickness, Upcast, Visual, VisualImpl, VisualImplExt,
     VisualTreeAttachmentEventArgs,
 };
 use std::cell::{Cell, RefCell};
@@ -104,7 +104,12 @@ crate::ferro_overrides! { impl FerroObjectImpl for Layoutable {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
-        if change.property() == Visual::is_visible_property().as_property() {
+        const HANDLER: PropertyChangeHandler = PropertyChangeHandler::Layoutable;
+        if !change.reaches(HANDLER) {
+            return;
+        }
+
+        if change.is_for(HANDLER, Visual::is_visible_property().as_property()) {
             this.set_desired_size(Size::default());
 
             // All changes to visibility cause the parent element to be notified.
@@ -500,6 +505,7 @@ crate::ferro_properties! { impl Layoutable {
 
 impl Layoutable {
     fn static_constructor() {
+        PropertyChangeHandler::Layoutable.reacts_to(&[Visual::is_visible_property().as_property()]);
         Self::affects_measure::<Layoutable>(&[
             Self::width_property().as_property(),
             Self::height_property().as_property(),

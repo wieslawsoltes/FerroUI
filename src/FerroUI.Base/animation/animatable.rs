@@ -4,8 +4,8 @@ use crate::data::BindingPriority;
 use crate::reactive::Subscription;
 use crate::{
     ferro_class, ferro_property, instantiate, BoxedValue, FerroObject, FerroObjectExtensions, FerroObjectImpl,
-    FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, StyledProperty, StyledPropertyOptions,
-    UnsetValueType,
+    FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, PropertyChangeHandler, Ref, StyledProperty,
+    StyledPropertyOptions, UnsetValueType,
 };
 use std::any::Any;
 use std::cell::{Cell, RefCell};
@@ -78,7 +78,12 @@ crate::ferro_overrides! { impl FerroObjectImpl for Animatable {
     /// Classes deriving from `Animatable` must not override this member;
     /// override `on_property_changed` instead.
     fn on_property_changed_core(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
-        if change.property() == Self::transitions_property().as_property() && change.is_effective_value_change() {
+        // The transitions collection is the one property this handler compares with; every
+        // other change goes on to the transitions of the property that changed.
+        if change.reaches(PropertyChangeHandler::Animatable)
+            && change.is_for(PropertyChangeHandler::Animatable, Self::transitions_property().as_property())
+            && change.is_effective_value_change()
+        {
             let (old_transitions, new_transitions) = change.get_old_and_new_value::<Option<Transitions>>();
 
             // When transitions are replaced, we add the new transitions before removing the old
@@ -185,6 +190,10 @@ crate::ferro_properties! { impl Animatable {
 } }
 
 impl Animatable {
+    fn static_constructor() {
+        PropertyChangeHandler::Animatable.reacts_to(&[Self::transitions_property().as_property()]);
+    }
+
     /// Creates the class data; see [`FerroObject::construct`].
     pub fn construct() -> Self {
         Self {

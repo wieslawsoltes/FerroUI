@@ -12,8 +12,8 @@ use crate::rendering::{IPresentationSource, IRenderer};
 use crate::utilities::{HandlerList, OptionCell};
 use crate::{
     ferro_class, ferro_property, instantiate, AttachedProperty, DirectProperty, FerroObjectImpl,
-    FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Nullable, ObjectType, Rect, Ref,
-    RelativePoint, StyledElement,
+    FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Nullable, ObjectType, PropertyChangeHandler,
+    Rect, Ref, RelativePoint, StyledElement,
     StyledElementImpl, StyledElementImplExt, StyledProperty, StyledPropertyOptions, Upcast,
     VisualTreeAttachmentEventArgs, WeakRef,
 };
@@ -323,19 +323,24 @@ crate::ferro_overrides! { impl FerroObjectImpl for Visual {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
-        if change.property() == Self::is_visible_property().as_property() {
+        const HANDLER: PropertyChangeHandler = PropertyChangeHandler::Visual;
+        if !change.reaches(HANDLER) {
+            return;
+        }
+
+        if change.is_for(HANDLER, Self::is_visible_property().as_property()) {
             let parent_state = this.visual_parent().is_none_or(|p| p.is_effectively_visible());
             this.update_is_effectively_visible(parent_state);
-        } else if change.property() == Self::shadow_property().as_property() {
+        } else if change.is_for(HANDLER, Self::shadow_property().as_property()) {
             let old = change.get_old_value::<Option<Ref<crate::media::Shadow>>>().flatten();
             let new = change.get_new_value::<Option<Ref<crate::media::Shadow>>>();
             this.on_shadow_changed(old.as_ref(), new.as_ref());
-        } else if change.property() == crate::styling::ThemeVariant::actual_theme_variant_property().as_property() {
+        } else if change.is_for(HANDLER, crate::styling::ThemeVariant::actual_theme_variant_property().as_property()) {
             // The shadow of the theme is drawn in the theme of the element.
             if this.may_cast_theme_shadow() {
                 this.invalidate_visual();
             }
-        } else if change.property() == Self::flow_direction_property().as_property() {
+        } else if change.is_for(HANDLER, Self::flow_direction_property().as_property()) {
             this.invalidate_mirror_transform();
             if let Some(children) = this.visual_children.get() {
                 for child in children.snapshot().iter() {
@@ -1031,6 +1036,12 @@ impl Visual {
     }
 
     fn static_constructor() {
+        PropertyChangeHandler::Visual.reacts_to(&[
+            Self::is_visible_property().as_property(),
+            Self::shadow_property().as_property(),
+            crate::styling::ThemeVariant::actual_theme_variant_property().as_property(),
+            Self::flow_direction_property().as_property(),
+        ]);
         Self::affects_render::<Visual>(&[
             Self::clip_property().as_property(),
             Self::clip_to_bounds_property().as_property(),
