@@ -119,11 +119,18 @@ jobs:
           exit 1
       # The test builds fill the disk of the runner, and building every crate from its package
       # needs as much again: the test executables are not used again, nor is the Android SDK of the
-      # image (the package builds of 0.4.0 ran out of space otherwise).
+      # image (the package builds of 0.4.0 ran out of space otherwise). Cargo writes them to
+      # target/debug/deps, or, with the newer layout of its build directory (Rust 1.100 on the
+      # runner), to target/debug/build/<package>/<hash>/out: both are searched, build scripts kept.
       - name: Free the disk for the package builds
         run: |
           df -h /
-          find target/debug/deps -type f -perm -u+x ! -name '*.*' -delete
+          for dir in target/debug/deps target/debug/build; do
+            if [ -d "$dir" ]; then
+              find "$dir" -type f -perm -u+x ! -name '*.*' ! -name 'build-script-*' ! -name 'build_script_*' \
+                -name '*-[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]' -delete
+            fi
+          done
           rm -rf target/debug/incremental "$HOME/Library/Android"
           df -h /
       - name: Package every crate and build each from its package

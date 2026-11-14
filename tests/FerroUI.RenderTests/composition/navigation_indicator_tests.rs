@@ -21,6 +21,7 @@ use ferroui_themes_winui::WinUITheme;
 use std::any::Any;
 use std::rc::Rc;
 use std::sync::Arc;
+use std::time::Duration;
 
 struct Surface(Arc<dyn IWriteableBitmapImpl>);
 impl IPlatformRenderSurface for Surface {
@@ -116,7 +117,11 @@ impl Sidebar {
             &MediaContext::instance().scheduler(),
             Dispatcher::ui_thread(),
             None,
-            None,
+            // The clock of the compositor stands still: an animation of the indicator is where
+            // `seek` puts it, however long the machine takes to lay out and paint the frames
+            // before it. With the clock of the machine a transition of 600 ms was over before
+            // it was paused wherever those frames took longer, and the test saw its last frame.
+            Some(Rc::new(|| Duration::from_secs(1))),
         );
         let root = TestRenderRoot::new(scaling);
         let renderer = CompositingRenderer::new(&root.source(), &compositor, surfaces);
