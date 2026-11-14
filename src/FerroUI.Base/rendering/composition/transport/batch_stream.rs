@@ -27,7 +27,6 @@ use crate::{
 use std::any::Any;
 use std::collections::VecDeque;
 use std::rc::Rc;
-use std::sync::Arc;
 use std::time::Duration;
 
 /// A job executed by the server compositor on the render thread.
@@ -82,22 +81,12 @@ pub enum BatchObject {
     /// Any other reference-typed payload (render data resources, platform
     /// handles, lists).
     Value(Box<dyn Any + Send>),
-    /// A payload both threads read as it is: the counted reference itself is the slot, so it
-    /// crosses without a box of its own (an addition, docs/porting/desktop-performance.md,
-    /// section 9.58).
-    Shared(Arc<dyn Any + Send + Sync>),
 }
 
 impl BatchObject {
     /// Wraps a payload value.
     pub fn value<T: Any + Send>(value: T) -> BatchObject {
         BatchObject::Value(Box::new(value))
-    }
-
-    /// The slot of a shared payload: the reference, with nothing allocated for the slot.
-    #[inline]
-    pub fn shared<T: Any + Send + Sync>(value: Arc<T>) -> BatchObject {
-        BatchObject::Shared(value)
     }
 }
 
@@ -564,25 +553,6 @@ impl<'a> BatchStreamReader<'a> {
         }
     }
 
-    /// Reads a shared payload as it was written ([`BatchObject::shared`]), or null.
-    #[inline]
-    pub fn read_shared_object(&mut self) -> Option<Arc<dyn Any + Send + Sync>> {
-        match self.read_object() {
-            BatchObject::Null => None,
-            BatchObject::Shared(value) => Some(value),
-            _ => panic!("the batch object stream does not hold a shared value here"),
-        }
-    }
-
-    /// Reads a shared payload of type `T` (or null).
-    #[inline]
-    pub fn read_shared<T: Any + Send + Sync>(&mut self) -> Option<Arc<T>> {
-        self.read_shared_object().map(|value| match value.downcast::<T>() {
-            Ok(value) => value,
-            Err(_) => panic!("the batch object stream holds a shared value of another type here"),
-        })
-    }
-
     /// Reads a resource reference (or null): a payload value in its wire
     /// form or the id of a server object.
     pub fn read_resource<T: ?Sized + BatchResourceValue>(&mut self) -> Option<BatchResource<T>> {
@@ -637,29 +607,6 @@ mod tests {
         }
         assert!(reader.is_object_eof());
         assert!(reader.is_struct_eof());
-    }
-
-    #[test]
-    fn a_shared_payload_is_its_own_slot() {
-        // Not from upstream.
-        let first = Arc::new(7u32);
-        let second: Arc<Arc<str>> = Arc::new(Arc::from("glyphs"));
-        let mut data = BatchStreamData::new();
-        {
-            let mut writer = BatchStreamWriter::new(&mut data);
-            writer.write_object(BatchObject::shared(first.clone()));
-            writer.write_object(BatchObject::shared(second.clone()));
-            writer.write_object(BatchObject::Null);
-        }
-
-        // The slot holds the reference that was written: nothing was made for it.
-        assert_eq!(Arc::strong_count(&first), 2);
-        let mut reader = BatchStreamReader::new(&mut data);
-        assert!(Arc::ptr_eq(&first, &reader.read_shared::<u32>().unwrap()));
-        assert!(Arc::ptr_eq(&second, &reader.read_shared::<Arc<str>>().unwrap()));
-        assert!(reader.read_shared::<u32>().is_none());
-        assert!(reader.is_object_eof());
-        assert_eq!(Arc::strong_count(&first), 1);
     }
 
     #[test]

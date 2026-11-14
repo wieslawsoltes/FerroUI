@@ -225,57 +225,6 @@ fn round_trip(stream: &RenderDataStream) -> RenderDataStream {
 }
 
 #[test]
-fn shared_resources_cross_a_batch_as_its_slots() {
-    use crate::rendering::composition::transport::BatchObject;
-
-    let glyph_run: std::sync::Arc<dyn IGlyphRunImpl> = MockGlyphRunImpl::new(Rect::new(1.0, 2.0, 30.0, 12.0));
-    let brush = brush();
-    let pen: Rc<dyn crate::media::IPen> =
-        Rc::new(crate::media::immutable::ImmutablePen::with_brush(Some(crate::media::Brushes::black()), 2.0));
-    let mut stream = RenderDataStream::new();
-    stream.draw_rectangle(
-        b(&brush), Some(RenderDataResource::Pen(pen.clone())), None, rect(0.0, 0.0, 10.0, 10.0), &BoxShadows::default(),
-    );
-    stream.draw_glyph_run(b(&brush), Some(glyph_run.clone()));
-
-    // Each of the three is the slot itself: a counted reference, with no box around it.
-    let mut data = BatchStreamData::new();
-    stream.serialize_to(&mut BatchStreamWriter::new(&mut data));
-    assert_eq!(data.objects.len(), 3);
-    assert!(data.objects.iter().all(|object| matches!(object, BatchObject::Shared(_))));
-
-    // What arrives is what was recorded: the shared form the brush and the pen keep, and the
-    // glyph run.
-    let mut result = RenderDataStream::new();
-    let mut reader = BatchStreamReader::new(&mut data);
-    result.deserialize_from(&mut reader, &|_| None);
-    assert!(reader.is_object_eof() && reader.is_struct_eof());
-    assert_eq!(result.resources.count(), 3);
-    let shared_brush = crate::media::shared_brush_of(&*brush).unwrap();
-    let shared_pen = crate::media::shared_pen_of(&*pen).unwrap();
-    let mut seen = 0;
-    for (handle, resource) in result.resources.iter().enumerate() {
-        match resource {
-            RenderDataResource::Brush(received) => {
-                assert_eq!(received.reference_id(), IBrush::reference_id(&shared_brush));
-                seen += 1;
-            }
-            RenderDataResource::Pen(received) => {
-                assert_eq!(received.reference_id(), crate::media::IPen::reference_id(&shared_pen));
-                seen += 10;
-            }
-            RenderDataResource::GlyphRun(_) => {
-                assert!(std::sync::Arc::ptr_eq(result.resources.glyph_run(handle as i32).unwrap(), &glyph_run));
-                seen += 100;
-            }
-            _ => panic!("a resource that was not recorded"),
-        }
-    }
-    assert_eq!(seen, 111);
-    assert_eq!(recorded_opcodes(&result), recorded_opcodes(&stream));
-}
-
-#[test]
 fn compositing_layer_public_recording_round_trip_preserves_blend_opacity_bounds_and_order() {
     let (scope, render_interface) = MockPlatformRenderInterface::install();
     render_interface.set_supports_compositing_layers(true);
