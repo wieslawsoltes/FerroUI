@@ -126,7 +126,10 @@ export class InputHelper {
     }
 
     public static isClipboardFormatSupported(format: string): boolean {
-        const supports = (ClipboardItem as any).supports as ((type: string) => boolean) | undefined;
+        // Some browsers have no ClipboardItem (Firefox before 127): the formats below are assumed.
+        const supports = typeof ClipboardItem === "undefined"
+            ? undefined
+            : (ClipboardItem as any).supports as ((type: string) => boolean) | undefined;
         if (supports) {
             return supports.call(ClipboardItem, format);
         }
