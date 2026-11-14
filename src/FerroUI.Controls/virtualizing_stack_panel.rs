@@ -10,7 +10,10 @@ use crate::{
     VirtualizingPanelImpl, VirtualizingPanelImplExt,
 };
 use ferroui_base::collections::NotifyCollectionChangedAction;
-use ferroui_base::input::{InputElement, InputElementImpl, KeyboardNavigation, NavigationDirection};
+use ferroui_base::input::{
+    FocusChangedEventArgs, InputElement, InputElementImpl, InputElementImplExt, KeyboardNavigation,
+    NavigationDirection,
+};
 use ferroui_base::interactivity::{
     Interactive, InteractiveImpl, RoutedEvent, RoutedEventArgs, RoutedEventHandlerToken, RoutingStrategies,
 };
@@ -54,6 +57,9 @@ pub struct VirtualizingStackPanel {
 
     has_reached_start: Cell<bool>,
     has_reached_end: Cell<bool>,
+    /// Whether the first and the last realized element are there for the focus trail of
+    /// `realize_elements` and not for the viewport.
+    focus_trail: Cell<(bool, bool)>,
     last_measured_extended_viewport: Cell<Rect>,
     last_known_extended_viewport: Cell<Rect>,
 
@@ -63,13 +69,49 @@ pub struct VirtualizingStackPanel {
 
 ferro_class!(VirtualizingStackPanel: VirtualizingPanel);
 ferroui_base::ferro_class_info!(VirtualizingStackPanel { new: VirtualizingStackPanel::new });
-ferro_impl_classes!(
-    VirtualizingStackPanel: StyledElementImpl,
-    InteractiveImpl,
-    InputElementImpl,
-    ControlImpl,
-    PanelImpl
-);
+ferro_impl_classes!(VirtualizingStackPanel: StyledElementImpl, InteractiveImpl, ControlImpl, PanelImpl);
+
+impl InputElementImpl for VirtualizingStackPanel {
+    /// The realized elements in the order of their items: the visual children of a panel that recycles
+    /// its elements are in the order they were made or taken from the pool, which is not the order Tab
+    /// has to follow.
+    fn children_in_tab_focus_order(this: &Self) -> Option<Vec<Ref<InputElement>>> {
+        let realized_elements = this.realized_elements.borrow().clone()?;
+        let mut children: Vec<(i32, Ref<InputElement>)> = Vec::with_capacity(realized_elements.count() + 2);
+        let first_index = realized_elements.first_index();
+        for i in 0..realized_elements.count() {
+            if let Some(element) = realized_elements.element_at(i) {
+                children.push((first_index + i as i32, element.upcast()));
+            }
+        }
+
+        // The elements kept outside of the realized range, at the place of their items.
+        let outside = [
+            (this.focused_index.get(), this.focused_element.borrow().clone()),
+            (this.scroll_to_index.get(), this.scroll_to_element.borrow().clone()),
+        ];
+        for (index, element) in outside {
+            let Some(element) = element.filter(|_| index >= 0) else { continue };
+            let element: Ref<InputElement> = element.upcast();
+            if children.iter().all(|(_, child)| *child != element) {
+                let at = children.partition_point(|(child_index, _)| *child_index < index);
+                children.insert(at, (index, element));
+            }
+        }
+
+        Some(children.into_iter().map(|(_, child)| child).collect())
+    }
+
+    /// Measures the panel again when the focus came to the first or the last element of its viewport and
+    /// the element beside it is not realized: the focus trail of `realize_elements` realizes it.
+    fn on_got_focus(this: &Self, e: &FocusChangedEventArgs) {
+        Self::parent_on_got_focus(this, e);
+
+        if this.focus_trail_is_short(e) {
+            this.invalidate_measure();
+        }
+    }
+}
 
 #[derive(Clone, Copy, Default)]
 struct MeasureViewport {
@@ -748,6 +790,7 @@ impl VirtualizingStackPanel {
             buffer_factor: Cell::new(0.0),
             has_reached_start: Cell::new(false),
             has_reached_end: Cell::new(false),
+            focus_trail: Cell::new((false, false)),
             last_measured_extended_viewport: Cell::new(Rect::default()),
             last_known_extended_viewport: Cell::new(Rect::default()),
             items_control_property_changed: RefCell::new(None),
@@ -1247,11 +1290,21 @@ impl VirtualizingStackPanel {
         self.has_reached_start.set(false);
         self.has_reached_end.set(false);
 
+        // The focus trail. Tab moves through the visual tree, so it cannot reach an element that is not
+        // realized, and whether the element beside the one with the focus is realized depends on where
+        // the viewport happens to end. So while the focus is in the first or in the last element of the
+        // viewport, the element beside it is realized as well: one element more than the viewport asks
+        // for on that side, and none once the focus is elsewhere. An element with the focus that the
+        // viewport left is not part of it, and is kept or recycled as before.
+        let focused = self.index_of_keyboard_focus(realized_elements);
+        let mut focus_trail = (false, false);
+
         // If the anchor element is at the beginning of, or before, the start
         // of the viewport then we can recycle all elements before it.
         if u <= viewport.anchor_u {
-            realized_elements
-                .recycle_elements_before(viewport.anchor_index, |element, index| self.recycle_element(element, index));
+            // The element before an anchor with the focus is the focus trail.
+            let keep_from = viewport.anchor_index - i32::from(focused == Some(viewport.anchor_index));
+            realized_elements.recycle_elements_before(keep_from, |element, index| self.recycle_element(element, index));
         }
 
         // Start at the anchor element and move forwards, realizing elements.
@@ -1284,6 +1337,22 @@ impl VirtualizingStackPanel {
             }
         }
 
+        // The focus trail after the viewport: the element after the last one, when that has the focus.
+        if focused == Some(index - 1) && index < item_count {
+            let e = self.get_or_create_element(items, &generator, index);
+
+            e.measure(available_size);
+            let desired_size = e.desired_size();
+            let size_u = if horizontal { desired_size.width } else { desired_size.height };
+            let size_v = if horizontal { desired_size.height } else { desired_size.width };
+
+            measure_elements.add(index, e, u, size_u);
+            viewport.measured_v = viewport.measured_v.max(size_v);
+            u += size_u;
+            index += 1;
+            focus_trail.1 = true;
+        }
+
         // Check if we reached the end of the collection.
         self.has_reached_end.set(index >= item_count);
 
@@ -1314,11 +1383,78 @@ impl VirtualizingStackPanel {
             index -= 1;
         }
 
+        // The focus trail before the viewport: the element before the first one, when that has the
+        // focus.
+        if focused == Some(index + 1) && index >= 0 {
+            let e = self.get_or_create_element(items, &generator, index);
+
+            e.measure(available_size);
+            let desired_size = e.desired_size();
+            let size_u = if horizontal { desired_size.width } else { desired_size.height };
+            let size_v = if horizontal { desired_size.height } else { desired_size.width };
+            u -= size_u;
+
+            measure_elements.add(index, e, u, size_u);
+            viewport.measured_v = viewport.measured_v.max(size_v);
+            index -= 1;
+            focus_trail.0 = true;
+        }
+        self.focus_trail.set(focus_trail);
+
         // Check if we reached the start of the collection.
         self.has_reached_start.set(index < 0);
 
         // We can now recycle elements before the first element.
         realized_elements.recycle_elements_before(index + 1, |element, index| self.recycle_element(element, index));
+    }
+
+    /// The index of the realized element the keyboard focus is in, when it is in one.
+    fn index_of_keyboard_focus(&self, realized_elements: &RealizedStackElements) -> Option<i32> {
+        if !self.is_keyboard_focus_within() {
+            return None;
+        }
+
+        let first_index = realized_elements.first_index();
+        (0..realized_elements.count()).find_map(|i| {
+            let element = realized_elements.element_at(i)?;
+            element.is_keyboard_focus_within().then_some(first_index + i as i32)
+        })
+    }
+
+    /// Whether the focus of `e` came to the first or the last element of the viewport while the element
+    /// beside it, which the focus trail of `realize_elements` keeps realized, is not. An element of the
+    /// trail that gets the focus asks for nothing: it is in the viewport once that follows the focus.
+    fn focus_trail_is_short(&self, e: &FocusChangedEventArgs) -> bool {
+        let Some(realized_elements) = self.realized_elements.borrow().clone() else {
+            return false;
+        };
+        if realized_elements.count() == 0 {
+            return false;
+        }
+
+        // The element of this panel the focus is in.
+        let this_visual: Ref<Visual> = self.to_ref().upcast();
+        let mut current = e.source().and_then(|source| source.cast::<Visual>());
+        let element = loop {
+            let Some(visual) = current else {
+                return false;
+            };
+            let parent = visual.visual_parent();
+            if parent.as_ref() == Some(&this_visual) {
+                break visual;
+            }
+            current = parent;
+        };
+        let Some(element) = element.cast::<Control>() else {
+            return false;
+        };
+
+        let index = realized_elements.get_index(&element);
+        let item_count = self.items().count() as i32;
+        let (before, after) = self.focus_trail.get();
+        index >= 0
+            && ((!before && index == realized_elements.first_index() && index > 0)
+                || (!after && index == realized_elements.last_index() && index < item_count - 1))
     }
 
     fn get_or_create_element(
