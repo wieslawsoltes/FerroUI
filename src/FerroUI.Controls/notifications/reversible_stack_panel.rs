@@ -30,48 +30,52 @@ ferro_impl_classes!(
 
 ferroui_base::ferro_impl_classes!(ReversibleStackPanel: FerroObjectImpl);
 
-impl LayoutableImpl for ReversibleStackPanel {
-    fn arrange_override(this: &Self, final_size: Size) -> Size {
-        let orientation = this.orientation();
-        let spacing = this.spacing();
-        let final_rect = Rect::from_size(final_size);
-        let mut pos = 0.0;
+// States what it overrides: the class keeps the measure of its base class, and with it
+// the hold of that measure (section 9.57 of `docs/porting/desktop-performance.md`).
+ferroui_base::ferro_overrides! {
+    impl LayoutableImpl for ReversibleStackPanel {
+        fn arrange_override(this: &Self, final_size: Size) -> Size {
+            let orientation = this.orientation();
+            let spacing = this.spacing();
+            let final_rect = Rect::from_size(final_size);
+            let mut pos = 0.0;
 
-        let children = this.children().snapshot();
-        let reverse_order = this.reverse_order();
+            let children = this.children().snapshot();
+            let reverse_order = this.reverse_order();
 
-        for index in 0..children.len() {
-            let child = &children[if reverse_order { children.len() - 1 - index } else { index }];
+            for index in 0..children.len() {
+                let child = &children[if reverse_order { children.len() - 1 - index } else { index }];
 
-            if !child.is_visible() {
-                continue;
+                if !child.is_visible() {
+                    continue;
+                }
+
+                let child_width = child.desired_size().width;
+                let child_height = child.desired_size().height;
+
+                if orientation == Orientation::Vertical {
+                    let rect = LayoutExtensions::align(
+                        Rect::new(0.0, pos, child_width, child_height),
+                        final_rect,
+                        child.horizontal_alignment(),
+                        VerticalAlignment::Top,
+                    );
+                    this.arrange_child(child, rect, final_size, orientation);
+                    pos += child_height + spacing;
+                } else {
+                    let rect = LayoutExtensions::align(
+                        Rect::new(pos, 0.0, child_width, child_height),
+                        final_rect,
+                        HorizontalAlignment::Left,
+                        child.vertical_alignment(),
+                    );
+                    this.arrange_child(child, rect, final_size, orientation);
+                    pos += child_width + spacing;
+                }
             }
 
-            let child_width = child.desired_size().width;
-            let child_height = child.desired_size().height;
-
-            if orientation == Orientation::Vertical {
-                let rect = LayoutExtensions::align(
-                    Rect::new(0.0, pos, child_width, child_height),
-                    final_rect,
-                    child.horizontal_alignment(),
-                    VerticalAlignment::Top,
-                );
-                this.arrange_child(child, rect, final_size, orientation);
-                pos += child_height + spacing;
-            } else {
-                let rect = LayoutExtensions::align(
-                    Rect::new(pos, 0.0, child_width, child_height),
-                    final_rect,
-                    HorizontalAlignment::Left,
-                    child.vertical_alignment(),
-                );
-                this.arrange_child(child, rect, final_size, orientation);
-                pos += child_width + spacing;
-            }
+            final_size
         }
-
-        final_size
     }
 }
 

@@ -882,14 +882,18 @@ ferro_impl_classes!(
     ControlImpl
 );
 
-impl LayoutableImpl for PreviewAdorner {
-    fn arrange_override(this: &Self, final_size: Size) -> Size {
-        // Adorners always get clipped to the owner control. In this case we
-        // want to constrain the size to the splitter size but draw on top
-        // of the parent grid.
-        this.set_clip(None::<Ref<Geometry>>);
+// States what it overrides: the class keeps the measure of its base class, and with it
+// the hold of that measure (section 9.57 of `docs/porting/desktop-performance.md`).
+ferroui_base::ferro_overrides! {
+    impl LayoutableImpl for PreviewAdorner {
+        fn arrange_override(this: &Self, final_size: Size) -> Size {
+            // Adorners always get clipped to the owner control. In this case we
+            // want to constrain the size to the splitter size but draw on top
+            // of the parent grid.
+            this.set_clip(None::<Ref<Geometry>>);
 
-        Self::parent_arrange_override(this, final_size)
+            Self::parent_arrange_override(this, final_size)
+        }
     }
 }
 
