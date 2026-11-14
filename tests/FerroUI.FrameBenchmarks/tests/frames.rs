@@ -41,6 +41,8 @@
 //!
 //! With the `counters` feature a start also prints, for each of its phases, the allocations it
 //! made and the blocks it left alive by size class (`heap`), and the counters of the framework.
+//! `FERROUI_HEAP_SITES=build|show|first|all` adds the blocks that phase left alive by the calls
+//! that allocated them, which `scripts/perf/heap-sites.py` reads.
 //!
 //! `sizes_of_an_element` prints the sizes of the objects an element in the tree is made of,
 //!
@@ -399,17 +401,22 @@ impl Gate {
         window.set_height(HEIGHT);
         window.set_can_resize(false);
         let (memory_before, heap_before) = (resident_megabytes(), heap::snapshot());
+        heap::sites("build", true);
         let built = Instant::now();
         let screen = FrameHost::new((scene.build)());
         let build = built.elapsed();
+        heap::sites("build", false);
         let (memory_built, heap_built) = (resident_megabytes(), heap::snapshot());
+        heap::sites("show", true);
         let shown = Instant::now();
         window.set_content(Some(Control::boxed(&screen)));
         let content = shown.elapsed();
         let heap_content = heap::snapshot();
         window.show();
         let show = shown.elapsed();
+        heap::sites("show", false);
         let (memory_shown, heap_shown) = (resident_megabytes(), heap::snapshot());
+        heap::sites("first", true);
 
         let thread_loop = render_loop.clone();
         let render_thread = thread::spawn(move || thread_loop.run());
@@ -593,6 +600,7 @@ fn measure_start(scene: &Scene) {
     let first = gate.first_frame();
     let counters = ferroui_base::diagnostics::perf_counters::snapshot().since(&counters);
     assert!(first.rendered > 0, "{bench}: the surface received no frame");
+    heap::sites("first", false);
     let (memory_first, heap_first) = (resident_megabytes(), heap::snapshot());
     // A tool that reads the memory of the process needs it to stay as the first frame left it.
     if let Some(wait) = std::env::var("FERROUI_GATE_END_DELAY_MS").ok().and_then(|wait| wait.parse().ok()) {
@@ -639,6 +647,9 @@ fn measure_start(scene: &Scene) {
         let mut census = Census::default();
         census.count(&gate.window, true);
         println!("{bench} census:\n{}", census.report());
+        if let Some(sites) = heap::sites_report() {
+            println!("{bench} heap sites:\n{sites}{bench} heap sites end");
+        }
     }
 }
 
