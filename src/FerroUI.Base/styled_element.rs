@@ -16,8 +16,8 @@ use crate::utilities::HandlerList;
 use crate::InitializationError;
 use crate::{
     ferro_class, ferro_property, instantiate, AnyValue, BoxedValue, DirectProperty, FerroObject, FerroObjectImpl,
-    FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Nullable, Ref, StyledProperty,
-    StyledPropertyOptions, TypeInfo, WeakRef,
+    FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Nullable, PropertyChangeHandler, Ref,
+    StyledProperty, StyledPropertyOptions, TypeInfo, WeakRef,
 };
 use std::cell::{Cell, OnceCell, RefCell};
 use std::rc::Rc;
@@ -145,9 +145,14 @@ crate::ferro_overrides! { impl FerroObjectImpl for StyledElement {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
-        if change.property() == Self::theme_property().as_property() {
+        const HANDLER: PropertyChangeHandler = PropertyChangeHandler::StyledElement;
+        if !change.reaches(HANDLER) {
+            return;
+        }
+
+        if change.is_for(HANDLER, Self::theme_property().as_property()) {
             this.on_control_theme_changed();
-        } else if change.property() == ThemeVariant::actual_theme_variant_property().as_property()
+        } else if change.is_for(HANDLER, ThemeVariant::actual_theme_variant_property().as_property())
             && !this.actual_theme_variant_changed.is_empty()
         {
             for (_, handler) in this.actual_theme_variant_changed.snapshot().iter() {
@@ -326,6 +331,13 @@ crate::ferro_properties! { impl StyledElement, also [
 } }
 
 impl StyledElement {
+    fn static_constructor() {
+        PropertyChangeHandler::StyledElement.reacts_to(&[
+            Self::theme_property().as_property(),
+            ThemeVariant::actual_theme_variant_property().as_property(),
+        ]);
+    }
+
     /// Creates the class data; see [`FerroObject::construct`].
     pub fn construct() -> Self {
         Self {
