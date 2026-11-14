@@ -21,7 +21,7 @@ harfbuzz = ["ferroui-headless/harfbuzz"]
 [dependencies]
 ferroui-base.workspace = true
 ferroui-controls.workspace = true
-ferroui-headless = { path = "../FerroUI.Headless", version = "=0.5.0", default-features = false }
+ferroui-headless = { path = "../FerroUI.Headless", version = "=0.5.1-preview.1", default-features = false }
 bitflags.workspace = true
 # The RFB server (`remote_viewing/`, a port of the parts of RemoteViewing the original uses;
 # docs/porting/headless-vnc.md): zlib for the basic compression of the Tight encoding, JPEG for its
