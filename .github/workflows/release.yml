@@ -127,7 +127,7 @@ jobs:
           df -h /
           for dir in target/debug/deps target/debug/build; do
             if [ -d "$dir" ]; then
-              find "$dir" -type f -perm -u+x ! -name '*.*' ! -name 'build-script-*' \
+              find "$dir" -type f -perm -u+x ! -name '*.*' ! -name 'build-script-*' ! -name 'build_script_*' \
                 -name '*-[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]' -delete
             fi
           done
