@@ -61,7 +61,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 # the release sets the commit of the tag. Updated by the release that starts the next minor version
 # (docs/release.md, "API stability").
 BASELINE_VERSION = "0.5.0"
-BASELINE_COMMIT = "d4ceaf6ffcc29d715b8f8a747ba80fb7991e9738"
+BASELINE_COMMIT = "696e2e1111bdaa83070d2c4b6a9b78944da3b443"
 
 # Lints that are not counted for the virtual tables of the classes (`*VTable` structs written by
 # `ferro_class!`): a new virtual member adds a field to the table and may move the others.

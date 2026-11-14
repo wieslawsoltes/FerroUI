@@ -32,8 +32,12 @@ path = "tests/frames.rs"
 ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
 ferroui-themes-fluent = { workspace = true }
-ferroui-desktop = { path = "../../src/FerroUI.Desktop", default-features = false }
 url = { workspace = true }
+
+# The desktop program (`program.rs`) alone uses it; on a device the library is hosted by
+# `tests/FerroUI.FrameBenchmarks.Android` and `tests/FerroUI.FrameBenchmarks.iOS`.
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+ferroui-desktop = { path = "../../src/FerroUI.Desktop", default-features = false }
 
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }

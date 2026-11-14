@@ -181,6 +181,8 @@ members = [
     "tests/FerroUI.RenderTests",
     "tests/FerroUI.Benchmarks",
     "tests/FerroUI.FrameBenchmarks",
+    "tests/FerroUI.FrameBenchmarks.Android",
+    "tests/FerroUI.FrameBenchmarks.iOS",
     "tests/FerroUI.TreeDataGrid.Benchmarks",
     "tests/FerroUI.LeakTests",
     "tests/FerroUI.IntegrationTests.Appium",
