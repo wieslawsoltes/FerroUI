@@ -332,6 +332,7 @@ impl StyleBase {
                 let instance = StyleInstance::new(self.to_ref().downgrade(), activator, type_);
 
                 let setters = self.setters.get().map(FerroList::snapshot).unwrap_or_default();
+                instance.reserve(setters.len());
                 for setter in setters.iter() {
                     let setter_instance = setter.clone().instance(&instance, target);
                     can_share_instance &= setter_instance.is_setter;
