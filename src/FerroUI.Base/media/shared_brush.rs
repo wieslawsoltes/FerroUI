@@ -68,6 +68,18 @@ struct BrushValues {
 pub struct SharedBrush(Arc<BrushValues>);
 
 impl SharedBrush {
+    /// The brush as the slot of a batch: its counted values, with nothing allocated for the
+    /// slot (docs/porting/desktop-performance.md, section 9.58).
+    pub(crate) fn into_batch_slot(self) -> Arc<dyn std::any::Any + Send + Sync> {
+        self.0
+    }
+
+    /// The brush [`into_batch_slot`](Self::into_batch_slot) made the slot of; `None` for the
+    /// slot of something else.
+    pub(crate) fn from_batch_slot(slot: Arc<dyn std::any::Any + Send + Sync>) -> Option<SharedBrush> {
+        slot.downcast::<BrushValues>().ok().map(SharedBrush)
+    }
+
     /// Copies the values of `brush`. `None` for a brush that is none of the
     /// kinds a render backend draws from values (a solid colour, a gradient,
     /// an image).
@@ -374,6 +386,16 @@ struct PenValues {
 pub struct SharedPen(Arc<PenValues>);
 
 impl SharedPen {
+    /// The pen as the slot of a batch; see [`SharedBrush::into_batch_slot`].
+    pub(crate) fn into_batch_slot(self) -> Arc<dyn std::any::Any + Send + Sync> {
+        self.0
+    }
+
+    /// The pen [`into_batch_slot`](Self::into_batch_slot) made the slot of.
+    pub(crate) fn from_batch_slot(slot: Arc<dyn std::any::Any + Send + Sync>) -> Option<SharedPen> {
+        slot.downcast::<PenValues>().ok().map(SharedPen)
+    }
+
     /// Copies the values of `pen`. `None` when its brush has no shared form.
     pub fn from_pen(pen: &dyn IPen) -> Option<SharedPen> {
         let brush = match pen.brush() {

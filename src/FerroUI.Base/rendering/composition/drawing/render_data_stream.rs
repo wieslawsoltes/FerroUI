@@ -282,6 +282,11 @@ impl RenderDataStream {
     /// Writes the stream to a batch. Resources with a server-side
     /// counterpart are sent as the counterpart's id; client-only resources
     /// keep their slot but are not sent.
+    ///
+    /// A resource that is one counted reference to a value both threads read (the shared form
+    /// of a brush or a pen, a glyph run, a bitmap, the snapshot of a 3D scene) is the slot of
+    /// the batch itself; the others are a reference to a trait object and cross in a box
+    /// (docs/porting/desktop-performance.md, section 9.58).
     pub fn serialize_to(&self, writer: &mut BatchStreamWriter<'_>) {
         writer.write(self.max_depth);
         writer.write(self.resources.count() as i32);
@@ -294,13 +299,13 @@ impl RenderDataStream {
                     writer.write(TAG_BRUSH);
                     let shared = crate::media::shared_brush_of(&**v)
                         .unwrap_or_else(|| panic!("The brush is not compatible with composition"));
-                    writer.write_object(BatchObject::value(shared));
+                    writer.write_object(BatchObject::Shared(shared.into_batch_slot()));
                 }
                 RenderDataResource::Pen(v) => {
                     writer.write(TAG_PEN);
                     let shared = crate::media::shared_pen_of(&**v)
                         .unwrap_or_else(|| panic!("The pen is not compatible with composition"));
-                    writer.write_object(BatchObject::value(shared));
+                    writer.write_object(BatchObject::Shared(shared.into_batch_slot()));
                 }
                 RenderDataResource::GeometryImpl(v) => {
                     writer.write(TAG_GEOMETRY_IMPL);
@@ -312,11 +317,11 @@ impl RenderDataStream {
                 RenderDataResource::Geometry(_) => panic!("a geometry of render data is not sent by value"),
                 RenderDataResource::GlyphRun(v) => {
                     writer.write(TAG_GLYPH_RUN);
-                    writer.write_object(BatchObject::value(v.clone()));
+                    writer.write_object(BatchObject::shared(v.clone()));
                 }
                 RenderDataResource::Bitmap(v) => {
                     writer.write(TAG_BITMAP);
-                    writer.write_object(BatchObject::value(v.clone()));
+                    writer.write_object(BatchObject::shared(v.clone()));
                 }
                 RenderDataResource::CustomDrawOperation(v) => {
                     writer.write(TAG_CUSTOM);
@@ -328,7 +333,7 @@ impl RenderDataStream {
                 }
                 RenderDataResource::Scene3D(v) => {
                     writer.write(TAG_SCENE_3D);
-                    writer.write_object(BatchObject::value(v.clone()));
+                    writer.write_object(BatchObject::shared(v.clone()));
                 }
                 RenderDataResource::ServerBrush { server, .. } => {
                     writer.write(TAG_SERVER_BRUSH);
@@ -362,6 +367,18 @@ impl RenderDataStream {
                 None => panic!("a render data resource is missing from the batch"),
             }
         }
+        fn shared<T: std::any::Any + Send + Sync>(reader: &mut BatchStreamReader<'_>) -> Arc<T> {
+            match reader.read_shared::<T>() {
+                Some(value) => value,
+                None => panic!("a render data resource is missing from the batch"),
+            }
+        }
+        fn slot(reader: &mut BatchStreamReader<'_>) -> Arc<dyn std::any::Any + Send + Sync> {
+            match reader.read_shared_object() {
+                Some(value) => value,
+                None => panic!("a render data resource is missing from the batch"),
+            }
+        }
         fn server_object(
             reader: &mut BatchStreamReader<'_>,
             resolve: &dyn Fn(ServerObjectId) -> Option<Rc<dyn IServerObject>>,
@@ -377,14 +394,20 @@ impl RenderDataStream {
         for _ in 0..resource_count {
             let resource = match reader.read::<u8>() {
                 TAG_NOT_SENT => RenderDataResource::NotSent,
-                TAG_BRUSH => RenderDataResource::Brush(Rc::new(value::<crate::media::SharedBrush>(reader))),
-                TAG_PEN => RenderDataResource::Pen(Rc::new(value::<crate::media::SharedPen>(reader))),
+                TAG_BRUSH => match crate::media::SharedBrush::from_batch_slot(slot(reader)) {
+                    Some(brush) => RenderDataResource::Brush(Rc::new(brush)),
+                    None => panic!("the batch holds something else where render data has a brush"),
+                },
+                TAG_PEN => match crate::media::SharedPen::from_batch_slot(slot(reader)) {
+                    Some(pen) => RenderDataResource::Pen(Rc::new(pen)),
+                    None => panic!("the batch holds something else where render data has a pen"),
+                },
                 TAG_GEOMETRY_IMPL => RenderDataResource::GeometryImpl(value(reader)),
-                TAG_GLYPH_RUN => RenderDataResource::GlyphRun(value(reader)),
-                TAG_BITMAP => RenderDataResource::Bitmap(value(reader)),
+                TAG_GLYPH_RUN => RenderDataResource::GlyphRun(shared(reader)),
+                TAG_BITMAP => RenderDataResource::Bitmap(shared(reader)),
                 TAG_CUSTOM => RenderDataResource::CustomDrawOperation(value(reader)),
                 TAG_EFFECT => RenderDataResource::Effect(value(reader)),
-                TAG_SCENE_3D => RenderDataResource::Scene3D(value(reader)),
+                TAG_SCENE_3D => RenderDataResource::Scene3D(shared(reader)),
                 TAG_SERVER_BRUSH => {
                     let object = server_object(reader, resolve);
                     match object.clone().as_brush() {
