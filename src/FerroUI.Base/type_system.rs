@@ -1274,8 +1274,46 @@ pub fn instantiate<T: ObjectType>(value: T) -> Ref<T> {
 ///
 /// The declaring class must implement every member itself; these are the
 /// base implementations.
+///
+/// A member that describes the implementation of another member is
+/// declared as following it:
+///
+/// ```ignore
+/// fn measure_hold_override(this, constraint: Size) -> Option<MeasureHold>,
+///     follows measure_override else Layoutable::holds_nothing;
+/// ```
+///
+/// Such a member is inherited only together with the member it follows. An
+/// implementation that states what it overrides, and overrides neither of
+/// the two, takes the slot of its base class; one that overrides the
+/// followed member alone gets the function named after `else`, which is
+/// also the default of the member in the `Impl` trait, so an implementation
+/// written as a plain `impl` (which states nothing) never inherits it
+/// either. The function takes what the member takes, with a reference to
+/// the declaring class first.
 #[macro_export]
 macro_rules! ferro_class {
+    // The default of a member in the `Impl` trait: the call of the base
+    // class, or of the fallback of a member that follows another.
+    (@member_default [] [$($parent:tt)*] [$($arguments:tt)*]) => { $($parent)* };
+    (@member_default [$fallback:path] [$($parent:tt)*] [$($arguments:tt)*]) => { $fallback($($arguments)*) };
+
+    // The slot of a member in the table of an implementation: the slot of
+    // the base class where the implementation states it does not override
+    // the member (`$forwards`), else its own function. A member that follows
+    // another takes the slot of the base class only where the followed
+    // member is not overridden either (`$with`), and the fallback otherwise.
+    (@member_slot [] $forwards:expr, $parent:expr, $own:expr) => {
+        if $forwards { $parent } else { $own }
+    };
+    (@member_slot [$with:expr, $fallback:path] $forwards:expr, $parent:expr, $own:expr) => {
+        if $forwards {
+            if $with { $parent } else { $fallback }
+        } else {
+            $own
+        }
+    };
+
     // What the type declares, in the order of a static initialisation:
     // interface casts, properties (field initialisers), static constructor.
     // Inherent items of the type win over the `ClassDefaults` fallbacks.
@@ -1427,7 +1465,8 @@ macro_rules! ferro_class {
         $name:ident : $base:ident, virtuals $impl_trait:ident : $parent_impl:path {
             $(
                 $(#[$meta:meta])*
-                fn $method:ident(this $(, $arg:ident : $arg_ty:ty)* $(,)?) $(-> $ret:ty)?;
+                fn $method:ident(this $(, $arg:ident : $arg_ty:ty)* $(,)?) $(-> $ret:ty)?
+                    $(, follows $followed:ident else $fallback:path)?;
             )*
         }
     ) => {
@@ -1475,7 +1514,11 @@ macro_rules! ferro_class {
                     $(#[$meta])*
                     #[allow(unused_variables)]
                     fn $method(this: &Self $(, $arg: $arg_ty)*) $(-> $ret)? {
-                        <Self as [<$impl_trait Ext>]>::[<parent_ $method>](this $(, $arg)*)
+                        $crate::ferro_class!(@member_default
+                            [$($fallback)?]
+                            [<Self as [<$impl_trait Ext>]>::[<parent_ $method>](this $(, $arg)*)]
+                            [$crate::Upcast::<$name>::upcast(this) $(, $arg)*]
+                        )
                     }
                 )*
             }
@@ -1504,19 +1547,26 @@ macro_rules! ferro_class {
                         // A member `T` states it does not override is the
                         // default, which calls this slot of the parent
                         // table: the slot itself is taken.
-                        $method: if $crate::__forwards_to_parent::<T, [<$name VTable>]>(
-                            <T as $impl_trait>::__OVERRIDES,
-                            ::std::stringify!($method),
-                        ) {
+                        $method: $crate::ferro_class!(@member_slot
+                            [$(
+                                $crate::__forwards_to_parent::<T, [<$name VTable>]>(
+                                    <T as $impl_trait>::__OVERRIDES,
+                                    ::std::stringify!($followed),
+                                ),
+                                $fallback
+                            )?]
+                            $crate::__forwards_to_parent::<T, [<$name VTable>]>(
+                                <T as $impl_trait>::__OVERRIDES,
+                                ::std::stringify!($method),
+                            ),
                             // SAFETY: the parent of `T` is `$name` or derives
                             // from it (`__forwards_to_parent` checked it), so
                             // its table starts with this one.
-                            unsafe { $crate::__parent_vtable_part::<T, [<$name VTable>]>() }.$method
-                        } else {
+                            unsafe { $crate::__parent_vtable_part::<T, [<$name VTable>]>() }.$method,
                             // SAFETY: this table is only attached to objects
                             // whose most-derived class is `T`.
                             |this $(, $arg)*| T::$method(unsafe { $crate::cast_this::<$name, T>(this) } $(, $arg)*)
-                        },
+                        ),
                     )*
                 };
             }
