@@ -993,10 +993,12 @@ fn target_renders_only_the_dirty_area_clipped_with(s: CompositorCanvas, clip: &s
 
 /// Section 9.56 of desktop-performance.md: a render target that applies a
 /// clip of several rectangles to every draw on its own (Skia's Ganesh makes
-/// a mask for each draw) is given the one rectangle that holds the dirty
-/// rectangles of the frame, under a clip of a rectangle.
+/// a mask for each draw) is given the dirty rectangles of the frame one at
+/// a time, each under a clip that is its rectangle. What lies between them
+/// is not drawn again: a clock and a cursor far apart on a still wall draw
+/// the clock and the cursor.
 #[test]
-fn target_that_clips_regions_per_draw_renders_one_rectangle_of_the_dirty_area() {
+fn target_that_clips_regions_per_draw_renders_each_dirty_rectangle_under_its_own_clip() {
     let s = CompositorCanvas::new();
     let log = s.render_interface.log().clone();
     let first = TestBorder::filled(10.0, 10.0, 20.0, 20.0);
@@ -1024,20 +1026,30 @@ fn target_that_clips_regions_per_draw_renders_one_rectangle_of_the_dirty_area() 
     assert_eq!(0, log.count("DrawRectangle BlueViolet"), "{:?}", log.entries());
     log.clear();
 
-    // The same change on a target that clips a region for every draw: one
-    // clip of the rectangle that holds both, no region, and what lies
-    // inside that rectangle is drawn again with them. What lies outside it
-    // is not.
+    // The same change on a target that clips a region for every draw: no
+    // region, and each of the two rectangles under a clip of its own, in a
+    // pass that clears it and draws what it holds. The visual between the
+    // two and the one beside them are in neither, and are not drawn.
     log.clip_regions_per_draw(true);
     first.set_background(Some(Brushes::red()));
     second.set_background(Some(Brushes::blue()));
     s.run_jobs();
-    assert_eq!(0, log.count("PushClipRegion"), "{:?}", log.entries());
-    assert!(log.entries().iter().any(|e| e.starts_with("PushClip 9, 9, 512, 512")), "{:?}", log.entries());
-    assert_eq!(1, log.count("DrawRectangle Red"), "{:?}", log.entries());
-    assert_eq!(1, log.count("DrawRectangle Blue "), "{:?}", log.entries());
-    assert_eq!(1, log.count("DrawRectangle Yellow"), "{:?}", log.entries());
-    assert_eq!(0, log.count("DrawRectangle BlueViolet"), "{:?}", log.entries());
+    let entries = log.entries();
+    assert_eq!(0, log.count("PushClipRegion"), "{entries:?}");
+    let position = |prefix: &str| {
+        entries.iter().position(|e| e.starts_with(prefix)).unwrap_or_else(|| panic!("{prefix}: {entries:?}"))
+    };
+    let clips = [position("PushClip 9, 9, 22, 22"), position("PushClip 499, 499, 22, 22")];
+    let draws = [position("DrawRectangle Red"), position("DrawRectangle Blue ")];
+    for (clip, draw) in clips.into_iter().zip(draws) {
+        let pop = clip + entries[clip..].iter().position(|e| e.starts_with("PopClip")).expect("the pass ends");
+        assert!(clip < draw && draw < pop, "{entries:?}");
+        assert!(entries[clip..pop].iter().any(|e| e.starts_with("Clear")), "{entries:?}");
+    }
+    assert_eq!(1, log.count("DrawRectangle Red"), "{entries:?}");
+    assert_eq!(1, log.count("DrawRectangle Blue "), "{entries:?}");
+    assert_eq!(0, log.count("DrawRectangle Yellow"), "{entries:?}");
+    assert_eq!(0, log.count("DrawRectangle BlueViolet"), "{entries:?}");
     log.clear();
 
     // One dirty rectangle is a clip of a rectangle there as well.

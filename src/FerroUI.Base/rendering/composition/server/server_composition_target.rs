@@ -47,6 +47,19 @@ pub struct ServerCompositionTarget {
     disposed: Cell<bool>,
     attached_visuals: RefCell<HashMap<*const ServerCompositionVisual, Rc<ServerCompositionVisual>>>,
     dirty_rects: Rc<dyn IDirtyRectTracker>,
+    /// Whether a frame is drawn one dirty rectangle at a time, each under a
+    /// clip that is its rectangle, and not under one clip of them all: what
+    /// the render target of the frame asks for
+    /// (`IRenderTarget::clips_regions_per_draw`; section 9.56 of
+    /// desktop-performance.md).
+    draws_rects_apart: Cell<bool>,
+    /// The rectangles of such a frame (`IDirtyRectTracker::separate_rects`),
+    /// kept for their memory.
+    separate_rects: RefCell<Vec<LtrbRect>>,
+    /// Whether the dirty area of the frame holds a backdrop: such a frame
+    /// is drawn as one rectangle, since a backdrop reads what the frame
+    /// drew behind it, also beside its own area.
+    backdrop_in_dirty_area: Cell<bool>,
     id: i64,
     debug_events: RefCell<Option<Arc<dyn ICompositionTargetDebugEvents>>>,
     rendered_visuals: Cell<i32>,
@@ -175,6 +188,9 @@ impl ServerCompositionTarget {
                 disposed: Cell::new(false),
                 attached_visuals: RefCell::new(HashMap::new()),
                 dirty_rects,
+                draws_rects_apart: Cell::new(false),
+                separate_rects: RefCell::new(Vec::new()),
+                backdrop_in_dirty_area: Cell::new(false),
                 id,
                 debug_events: RefCell::new(None),
                 rendered_visuals: Cell::new(0),
@@ -207,6 +223,7 @@ impl ServerCompositionTarget {
     /// answers `intersects` for nothing else, and the final area is larger
     /// than the rectangles that were added.
     fn expand_dirty_rects_over_backdrops(&self, render_bounds: LtrbRect) {
+        self.backdrop_in_dirty_area.set(false);
         let mut regions = self.backdrop_regions.borrow_mut();
         regions.retain(|(visual, _)| visual.upgrade().is_some_and(|visual| visual.root().is_some()));
         if regions.is_empty() {
@@ -218,6 +235,7 @@ impl ServerCompositionTarget {
             for (index, (_, region)) in regions.iter().enumerate() {
                 if !added[index] && self.dirty_rects.intersects(*region) {
                     self.dirty_rects.include(*region, render_bounds);
+                    self.backdrop_in_dirty_area.set(true);
                     added[index] = true;
                     changed = true;
                 }
@@ -520,9 +538,9 @@ impl ServerCompositionTarget {
 
         let properties = render_target.properties();
         // A target that applies a clip of several rectangles to each draw
-        // is given one rectangle to draw (section 9.56 of
+        // is given the dirty rectangles one at a time (section 9.56 of
         // desktop-performance.md).
-        self.dirty_rects.draw_as_one_rectangle(render_target.clips_regions_per_draw());
+        self.draws_rects_apart.set(render_target.clips_regions_per_draw());
         let need_layer = self.overlays.require_layer() // Check if we don't need overlays
             // Check if render target can be rendered to directly and preserves the previous frame
             || !(properties.retains_previous_frame_contents && properties.is_suitable_for_direct_rendering);
@@ -787,35 +805,62 @@ impl ServerCompositionTarget {
         root: &Rc<ServerCompositionVisual>,
     ) {
         let use_layer_clip = compositor.options().use_save_layer_root_clip.unwrap_or(false);
-        self.dirty_rects.begin_draw(context);
-        {
+        let scaling = self.scaling();
+        let pixel_size = self.pixel_size();
+        let bounds = LtrbRect::new(0.0, 0.0, pixel_size.width as f64, pixel_size.height as f64);
+        let (visited, rendered) = if self.draws_rects_apart.get() && !self.dirty_rects.is_single_dirty_rect_tracker() {
+            // One pass for each dirty rectangle, under a clip that is the
+            // rectangle: the backend of the target makes a mask for every
+            // draw under a clip of several rectangles, and one rectangle
+            // that holds them all draws what lies between them again.
+            let mut rects = self.separate_rects.borrow_mut();
+            self.dirty_rects.separate_rects(&mut rects);
+            if rects.len() > 1 && self.backdrop_in_dirty_area.get() {
+                let all = rects.iter().copied().reduce(|all, rect| all.union(rect)).unwrap_or_default();
+                rects.clear();
+                rects.push(all);
+            }
+            let transform = context.transform();
+            let mut counts = (0, 0);
+            for rect in rects.iter() {
+                context.set_transform(transform);
+                context.push_clip(rect.to_rect());
+                context.clear(Colors::TRANSPARENT);
+                if use_layer_clip {
+                    context.push_layer(rect.to_rect());
+                }
+                context.set_transform(Matrix::create_scale(scaling, scaling));
+                // A walk with no tracker draws what its clip holds, as one
+                // with a tracker of one rectangle does.
+                let (visited, rendered) =
+                    root.render(context, bounds.intersect_or_empty(*rect), None, true, false, false);
+                counts = (counts.0 + visited, counts.1 + rendered);
+                if use_layer_clip {
+                    context.pop_layer();
+                }
+                context.pop_clip();
+            }
+            counts
+        } else {
+            self.dirty_rects.begin_draw(context);
             context.clear(Colors::TRANSPARENT);
             if use_layer_clip {
                 context.push_layer(self.dirty_rects.combined_rect().to_rect());
             }
-            let scaling = self.scaling();
             context.set_transform(Matrix::create_scale(scaling, scaling));
-            let pixel_size = self.pixel_size();
-            let (visited, rendered) = root.render(
-                context,
-                LtrbRect::new(0.0, 0.0, pixel_size.width as f64, pixel_size.height as f64),
-                Some(self.dirty_rects.clone()),
-                true,
-                false,
-                false,
-            );
-            self.visited_visuals.set(visited);
-            self.rendered_visuals.set(rendered);
-            if let Some(events) = self.debug_events() {
-                events.set_rendered_visuals(rendered);
-                events.set_visited_visuals(visited);
-            }
-
+            let counts = root.render(context, bounds, Some(self.dirty_rects.clone()), true, false, false);
             if use_layer_clip {
                 context.pop_layer();
             }
+            self.dirty_rects.end_draw(context);
+            counts
+        };
+        self.visited_visuals.set(visited);
+        self.rendered_visuals.set(rendered);
+        if let Some(events) = self.debug_events() {
+            events.set_rendered_visuals(rendered);
+            events.set_visited_visuals(visited);
         }
-        self.dirty_rects.end_draw(context);
     }
 
     pub fn request_update(&self) {

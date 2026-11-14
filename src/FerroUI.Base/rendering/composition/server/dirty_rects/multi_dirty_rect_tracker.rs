@@ -1,5 +1,5 @@
 use super::i_dirty_rect_tracker::{
-    full_union, pixel_rect_from_rect_unscaled, simplify_dirty_rects, unite_dirty_rects, VisualizeRandom,
+    full_union, pixel_rect_from_rect_unscaled, separate_dirty_rects, simplify_dirty_rects, VisualizeRandom,
 };
 use super::multi_dirty_rect_tracker_c_dirty_region::CDirtyRegion2;
 use super::{IDirtyRectCollector, IDirtyRectTracker};
@@ -19,9 +19,6 @@ pub struct MultiDirtyRectTracker {
     inflated_rects: RefCell<Vec<LtrbRect>>,
     random: VisualizeRandom,
     combined_rect: Cell<LtrbRect>,
-    /// Whether a frame draws the one rectangle that holds its dirty
-    /// rectangles (`draw_as_one_rectangle`).
-    one_rectangle: Cell<bool>,
 }
 
 impl MultiDirtyRectTracker {
@@ -33,19 +30,14 @@ impl MultiDirtyRectTracker {
             inflated_rects: RefCell::new(Vec::new()),
             random: VisualizeRandom::new(),
             combined_rect: Cell::new(LtrbRect::default()),
-            one_rectangle: Cell::new(false),
         }
     }
 
     /// Makes the clip and the combined rectangle of the final rectangles,
-    /// which are first made as simple as the area they cover allows, and
-    /// one rectangle where the frame is to draw one.
+    /// which are first made as simple as the area they cover allows.
     fn publish(&self, bounds: LtrbRect) {
         let mut inflated_rects = self.inflated_rects.borrow_mut();
         simplify_dirty_rects(&mut inflated_rects, bounds);
-        if self.one_rectangle.get() {
-            unite_dirty_rects(&mut inflated_rects, bounds);
-        }
         self.clip_region.reset();
         let mut combined: Option<LtrbRect> = None;
         for rect in inflated_rects.iter() {
@@ -87,15 +79,13 @@ impl IDirtyRectTracker for MultiDirtyRectTracker {
     }
 
     fn begin_draw(&self, ctx: &mut dyn IDrawingContextImpl) {
-        if self.one_rectangle.get() {
-            ctx.push_clip(self.combined_rect.get().to_rect());
-        } else {
-            ctx.push_clip_region(&*self.clip_region);
-        }
+        ctx.push_clip_region(&*self.clip_region);
     }
 
-    fn draw_as_one_rectangle(&self, one: bool) {
-        self.one_rectangle.set(one);
+    fn separate_rects(&self, rects: &mut Vec<LtrbRect>) {
+        rects.clear();
+        rects.extend_from_slice(&self.inflated_rects.borrow());
+        separate_dirty_rects(rects);
     }
 
     fn end_draw(&self, ctx: &mut dyn IDrawingContextImpl) {
@@ -274,78 +264,51 @@ mod tests {
     }
 
     #[test]
-    fn a_frame_asked_for_one_rectangle_draws_the_rectangle_that_holds_its_dirty_rectangles() {
+    fn the_rectangles_of_a_frame_drawn_one_at_a_time_are_its_dirty_rectangles_apart() {
         let platform = MockRenderInterface::default();
         let tracker = MultiDirtyRectTracker::new(&platform, 4, 0.0);
         let region = platform.regions.borrow()[0].clone();
-        let between = LtrbRect::new(200.0, 200.0, 210.0, 210.0);
-        let frame = |tracker: &MultiDirtyRectTracker| {
-            tracker.initialize(BOUNDS);
-            tracker.add_rect(LtrbRect::new(10.0, 10.0, 20.0, 20.0));
-            tracker.add_rect(LtrbRect::new(500.5, 500.5, 510.2, 520.0));
-            tracker.finalize_frame(BOUNDS);
-        };
-        let clip_of = |tracker: &MultiDirtyRectTracker| {
-            let mut ctx = MockDrawingContext::default();
-            tracker.begin_draw(&mut ctx);
-            tracker.end_draw(&mut ctx);
-            ctx.log
-        };
+        let mut rects = vec![LtrbRect::new(1.0, 2.0, 3.0, 4.0)];
 
-        // As the tracker makes it: two rectangles far apart, a region, and
-        // nothing of what lies between them.
-        frame(&tracker);
-        assert_eq!(2, tracker.inflated_rects().len());
-        assert!(!tracker.intersects(between));
-        assert!(clip_of(&tracker)[0].starts_with("push_clip_region ["), "{:?}", clip_of(&tracker));
-
-        // Asked for one rectangle: the one that holds both, on whole pixels,
-        // is what the frame draws, what it tests the visuals against and
-        // what it clips to, with a clip of a rectangle.
-        tracker.draw_as_one_rectangle(true);
-        frame(&tracker);
-        let one = LtrbRect::new(9.0, 9.0, 512.0, 521.0);
-        assert_eq!(vec![one], tracker.inflated_rects().to_vec());
-        assert_eq!(one, tracker.combined_rect());
-        assert_eq!(vec![LtrbPixelRect::new(9, 9, 512, 521)], *region.rects.borrow());
-        assert!(tracker.intersects(between));
-        assert!(!tracker.intersects(LtrbRect::new(600.0, 30.0, 700.0, 40.0)));
-        assert_eq!(vec!["push_clip 9, 9, 503, 512".to_string(), "pop_clip".to_string()], clip_of(&tracker));
-
-        // A rectangle included after the frame was made final joins it.
-        tracker.include(LtrbRect::new(600.0, 30.0, 700.0, 40.0), BOUNDS);
-        let wider = LtrbRect::new(9.0, 9.0, 701.0, 521.0);
-        assert_eq!(vec![wider], tracker.inflated_rects().to_vec());
-        assert_eq!(wider, tracker.combined_rect());
-        assert_eq!(vec![LtrbPixelRect::new(9, 9, 701, 521)], *region.rects.borrow());
-        assert_eq!("push_clip 9, 9, 692, 512", clip_of(&tracker)[0]);
-
-        // One dirty rectangle is drawn on whole pixels as well, and two that
-        // span the surface are the surface.
+        // A frame with nothing to draw has no rectangle.
         tracker.initialize(BOUNDS);
+        tracker.finalize_frame(BOUNDS);
+        tracker.separate_rects(&mut rects);
+        assert!(rects.is_empty());
+
+        // Two rectangles far apart are two rectangles, the larger first,
+        // and nothing of what lies between them.
+        tracker.initialize(BOUNDS);
+        tracker.add_rect(LtrbRect::new(10.0, 10.0, 20.0, 20.0));
         tracker.add_rect(LtrbRect::new(500.5, 500.5, 510.2, 520.0));
         tracker.finalize_frame(BOUNDS);
-        assert_eq!(vec![LtrbRect::new(499.0, 499.0, 512.0, 521.0)], tracker.inflated_rects().to_vec());
-        tracker.initialize(BOUNDS);
-        tracker.add_rect(LtrbRect::new(0.0, 0.0, 10.0, 10.0));
-        tracker.add_rect(LtrbRect::new(990.0, 990.0, 1000.0, 1000.0));
-        tracker.finalize_frame(BOUNDS);
-        assert_eq!(vec![BOUNDS], tracker.inflated_rects().to_vec());
-        assert_eq!("push_clip 0, 0, 1000, 1000", clip_of(&tracker)[0]);
+        tracker.separate_rects(&mut rects);
+        assert_eq!(vec![LtrbRect::new(499.0, 499.0, 512.0, 521.0), LtrbRect::new(9.0, 9.0, 21.0, 21.0)], rects);
 
-        // A frame with nothing to draw has an empty clip.
-        tracker.initialize(BOUNDS);
-        tracker.finalize_frame(BOUNDS);
-        assert!(tracker.inflated_rects().is_empty());
-        assert_eq!(LtrbRect::default(), tracker.combined_rect());
+        // A rectangle included after the frame was made final is one of
+        // them, on whole pixels, and one it is close to is drawn with it,
+        // as the rectangle that holds both.
+        tracker.include(LtrbRect::new(15.0, 15.0, 40.5, 30.0), BOUNDS);
+        tracker.separate_rects(&mut rects);
+        assert_eq!(vec![LtrbRect::new(9.0, 9.0, 42.0, 31.0), LtrbRect::new(499.0, 499.0, 512.0, 521.0)], rects);
 
-        // Not asked any more: the dirty area as the tracker makes it.
-        tracker.draw_as_one_rectangle(false);
-        frame(&tracker);
-        assert_eq!(2, tracker.inflated_rects().len());
-        assert_eq!(2, region.rects.borrow().len());
-        assert!(!tracker.intersects(between));
-        assert!(clip_of(&tracker)[0].starts_with("push_clip_region ["));
+        // Asking changes nothing of the frame: its rectangles, its region
+        // and what it tests the visuals against are what they were.
+        assert_eq!(3, tracker.inflated_rects().len());
+        assert_eq!(3, region.rects.borrow().len());
+        assert_eq!(LtrbRect::new(9.0, 9.0, 512.0, 521.0), tracker.combined_rect());
+        assert!(!tracker.intersects(LtrbRect::new(200.0, 200.0, 210.0, 210.0)));
+        let mut ctx = MockDrawingContext::default();
+        tracker.begin_draw(&mut ctx);
+        assert!(ctx.log[0].starts_with("push_clip_region ["), "{:?}", ctx.log);
+
+        // Two rectangles that fill the surface are the surface.
+        tracker.initialize(BOUNDS);
+        tracker.add_rect(LtrbRect::new(0.0, 0.0, 1000.0, 500.0));
+        tracker.add_rect(LtrbRect::new(0.0, 500.0, 1000.0, 1000.0));
+        tracker.finalize_frame(BOUNDS);
+        tracker.separate_rects(&mut rects);
+        assert_eq!(vec![BOUNDS], rects);
     }
 
     #[test]

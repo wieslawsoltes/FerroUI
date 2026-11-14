@@ -1,5 +1,5 @@
 use super::i_dirty_rect_tracker::{
-    pixel_rect_from_rect_unscaled, pixel_rect_to_ltrb_rect_unscaled, VisualizeRandom,
+    pixel_rect_from_rect_unscaled, pixel_rect_to_ltrb_rect_unscaled, separate_dirty_rects, VisualizeRandom,
 };
 use super::{IDirtyRectCollector, IDirtyRectTracker};
 use crate::media::immutable::ImmutableSolidColorBrush;
@@ -18,9 +18,6 @@ pub struct RegionDirtyRectTracker {
     rects: RefCell<Vec<LtrbRect>>,
     random: VisualizeRandom,
     combined_rect: Cell<LtrbRect>,
-    /// Whether a frame draws the bounds of its region
-    /// (`draw_as_one_rectangle`).
-    one_rectangle: Cell<bool>,
 }
 
 impl RegionDirtyRectTracker {
@@ -30,19 +27,12 @@ impl RegionDirtyRectTracker {
             rects: RefCell::new(Vec::new()),
             random: VisualizeRandom::new(),
             combined_rect: Cell::new(LtrbRect::default()),
-            one_rectangle: Cell::new(false),
         }
     }
 
-    /// Makes the combined rectangle of the region, which becomes its bounds
-    /// where the frame is to draw one rectangle.
+    /// Makes the combined rectangle of the region.
     fn publish(&self) {
-        let bounds = self.region.bounds();
-        if self.one_rectangle.get() {
-            self.region.reset();
-            self.region.add_rect(bounds);
-        }
-        self.combined_rect.set(pixel_rect_to_ltrb_rect_unscaled(bounds));
+        self.combined_rect.set(pixel_rect_to_ltrb_rect_unscaled(self.region.bounds()));
     }
 
     fn get_inflated_pixel_rect(rc: LtrbRect) -> LtrbPixelRect {
@@ -75,15 +65,14 @@ impl IDirtyRectTracker for RegionDirtyRectTracker {
     }
 
     fn begin_draw(&self, ctx: &mut dyn IDrawingContextImpl) {
-        if self.one_rectangle.get() {
-            ctx.push_clip(self.combined_rect.get().to_rect());
-        } else {
-            ctx.push_clip_region(&*self.region);
-        }
+        ctx.push_clip_region(&*self.region);
     }
 
-    fn draw_as_one_rectangle(&self, one: bool) {
-        self.one_rectangle.set(one);
+    fn separate_rects(&self, rects: &mut Vec<LtrbRect>) {
+        rects.clear();
+        let added = self.rects.borrow();
+        rects.extend(added.iter().map(|rect| pixel_rect_to_ltrb_rect_unscaled(Self::get_inflated_pixel_rect(*rect))));
+        separate_dirty_rects(rects);
     }
 
     fn end_draw(&self, ctx: &mut dyn IDrawingContextImpl) {
@@ -169,47 +158,38 @@ mod tests {
     }
 
     #[test]
-    fn a_frame_asked_for_one_rectangle_draws_the_bounds_of_its_region() {
+    fn the_rectangles_of_a_frame_drawn_one_at_a_time_are_those_of_its_region_apart() {
         let platform = MockRenderInterface::default();
         let tracker = RegionDirtyRectTracker::new(&platform);
         let region = platform.regions.borrow()[0].clone();
-        let between = LtrbRect::new(30.0, 30.0, 40.0, 40.0);
-        let frame = |tracker: &RegionDirtyRectTracker| {
-            tracker.initialize(BOUNDS);
-            tracker.add_rect(LtrbRect::new(10.2, 10.7, 20.1, 20.0));
-            tracker.add_rect(LtrbRect::new(50.0, 60.0, 70.0, 80.0));
-            tracker.finalize_frame(BOUNDS);
-        };
-        let clip_of = |tracker: &RegionDirtyRectTracker| {
-            let mut ctx = MockDrawingContext::default();
-            tracker.begin_draw(&mut ctx);
-            tracker.end_draw(&mut ctx);
-            ctx.log
-        };
+        let mut rects = vec![LtrbRect::new(1.0, 2.0, 3.0, 4.0)];
 
-        frame(&tracker);
-        assert_eq!(2, region.rects.borrow().len());
-        assert!(!tracker.intersects(between));
-        assert!(clip_of(&tracker)[0].starts_with("push_clip_region ["), "{:?}", clip_of(&tracker));
+        tracker.finalize_frame(BOUNDS);
+        tracker.separate_rects(&mut rects);
+        assert!(rects.is_empty());
 
-        tracker.draw_as_one_rectangle(true);
-        frame(&tracker);
-        assert_eq!(vec![LtrbPixelRect::new(10, 10, 70, 80)], *region.rects.borrow());
-        assert_eq!(LtrbRect::new(10.0, 10.0, 70.0, 80.0), tracker.combined_rect());
-        assert!(tracker.intersects(between));
-        assert_eq!(vec!["push_clip 10, 10, 60, 70".to_string(), "pop_clip".to_string()], clip_of(&tracker));
+        // The rectangles that were added, on the pixels of the region, the
+        // larger first.
+        tracker.add_rect(LtrbRect::new(10.2, 10.7, 20.1, 20.0));
+        tracker.add_rect(LtrbRect::new(50.0, 60.0, 70.0, 80.0));
+        tracker.finalize_frame(BOUNDS);
+        tracker.separate_rects(&mut rects);
+        assert_eq!(vec![LtrbRect::new(50.0, 60.0, 70.0, 80.0), LtrbRect::new(10.0, 10.0, 21.0, 20.0)], rects);
 
-        // A rectangle included after the frame was made final joins it.
-        tracker.include(LtrbRect::new(80.0, 5.0, 90.0, 15.0), BOUNDS);
-        assert_eq!(vec![LtrbPixelRect::new(10, 5, 90, 80)], *region.rects.borrow());
-        assert_eq!(LtrbRect::new(10.0, 5.0, 90.0, 80.0), tracker.combined_rect());
-        assert_eq!("push_clip 10, 5, 80, 75", clip_of(&tracker)[0]);
+        // One included after the frame was made final is among them, and
+        // one it is close to is drawn with it, as the rectangle that
+        // holds both.
+        tracker.include(LtrbRect::new(60.0, 70.0, 90.0, 90.0), BOUNDS);
+        tracker.separate_rects(&mut rects);
+        assert_eq!(vec![LtrbRect::new(50.0, 60.0, 90.0, 90.0), LtrbRect::new(10.0, 10.0, 21.0, 20.0)], rects);
 
-        tracker.draw_as_one_rectangle(false);
-        frame(&tracker);
-        assert_eq!(2, region.rects.borrow().len());
-        assert!(!tracker.intersects(between));
-        assert!(clip_of(&tracker)[0].starts_with("push_clip_region ["));
+        // The frame is what it was: a region, and nothing between its
+        // rectangles.
+        assert_eq!(3, region.rects.borrow().len());
+        assert!(!tracker.intersects(LtrbRect::new(30.0, 30.0, 40.0, 40.0)));
+        let mut ctx = MockDrawingContext::default();
+        tracker.begin_draw(&mut ctx);
+        assert!(ctx.log[0].starts_with("push_clip_region ["), "{:?}", ctx.log);
     }
 
     #[test]
