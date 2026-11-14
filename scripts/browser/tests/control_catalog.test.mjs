@@ -16,7 +16,8 @@
 //   through the preloads of the host page, and the page preloads no other asset file;
 // - input, driven with real pointer and key events: the navigation drawer opens from its toggle
 //   button, three pages are reached through the drawer and show their content, the home page and the
-//   page of a section show the cards of their pages and a card opens its page, a click on a button
+//   page of a section show the cards of their pages and a card opens its page, the wheel reaches the
+//   last section of the home page (its sections are realized as they scroll in), a click on a button
 //   has its effect, and text typed into a text box becomes its text;
 // - at the viewport of a phone with touch input (`start({ phone: true })`): a drag scrolls the home
 //   page with the finger, a flick scrolls it on after the finger is lifted (the inertia of the
@@ -355,6 +356,41 @@ check("three pages are reached through the drawer and show their content", async
     assert(page.errors.length === 0, `errors were logged:\n${page.errors.join("\n")}`);
 });
 
+check("Visual States opens and applies setters from both state groups", async (page) => {
+    await navigate(page, "Layout");
+    await navigate(page, "Visual States");
+    const caption = (e) => e.name === "Caption" && inContent(e);
+    await page.find("Normal", caption);
+
+    for (const [button, common, size] of [
+        ["Highlighted", "Highlighted", "(none)"],
+        ["Expanded", "Highlighted", "Expanded"],
+        ["Dimmed", "Dimmed", "Expanded"],
+        ["Compact", "Dimmed", "Compact"],
+        ["Normal", "Normal", "Compact"],
+    ]) {
+        await page.clickElement(await page.find(button, (e) => e.name !== "Caption" && inContent(e)));
+        await page.find(`CommonStates: ${common}, SizeStates: ${size}`, (e) => e.name === "CurrentStates" && inContent(e));
+        await page.find(common, caption);
+    }
+    assert(page.errors.length === 0, `errors were logged:\n${page.errors.join("\n")}`);
+}, { size: TOUR_SIZE });
+
+check("Screens renders when the browser only exposes the current display", async (page) => {
+    await page.evaluate(`(() => {
+        Object.defineProperties(window.screen, {
+            addEventListener: { value: undefined },
+            removeEventListener: { value: undefined },
+            orientation: { value: undefined },
+        });
+        Object.defineProperty(window, "getScreenDetails", { value: undefined });
+    })()`);
+    await visit(page, { section: "Window & Platform", name: "Screens" });
+    await page.clickElement(await page.find("Request ScreenDetails", inContent));
+    await page.find("Request ScreenDetails: Denied", inContent);
+    assert(page.errors.length === 0, `errors were logged:\n${page.errors.join("\n")}`);
+}, { size: TOUR_SIZE });
+
 check("the home page and the page of a section show the cards of their pages, and a card opens its page", async (page) => {
     // The home page lists, under the title of each section, a card for each page of the section: its
     // header and its description. The first cards of the first section are in the view at this size.
@@ -377,6 +413,16 @@ check("the home page and the page of a section show the cards of their pages, an
     await page.until("the card opened the CheckBox page", (s) => s.page === "CheckBox" && !s.navigating
         && s.elements.filter((e) => e.type === "CheckBox" && inContent(e)).length >= 3);
     assert(!(await page.state()).elements.some((e) => e.text === "Two- and three-state check boxes" && e.hit), "the home page is still shown");
+
+    // The sections of the home page are realized as they scroll into the view: the wheel reaches the
+    // last section, and its card opens its page.
+    await navigate(page, "Home");
+    const last = "Enumerate displays and their bounds";
+    for (let notch = 0; notch < 60 && !(await page.state()).elements.some((e) => e.text === last && inContent(e)); notch++) {
+        await page.wheel(Math.round((DRAWER_EDGE + FIRST_SIZE.width) / 2), Math.round(FIRST_SIZE.height / 2), 0, 300);
+    }
+    await page.clickElement(await page.find(last, inContent));
+    await page.until("the card opened the Screens page", (s) => s.page === "Screens" && !s.navigating);
     assert(page.errors.length === 0, `errors were logged:\n${page.errors.join("\n")}`);
 });
 

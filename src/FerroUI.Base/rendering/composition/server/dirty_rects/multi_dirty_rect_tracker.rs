@@ -1,4 +1,6 @@
-use super::i_dirty_rect_tracker::{full_union, pixel_rect_from_rect_unscaled, simplify_dirty_rects, VisualizeRandom};
+use super::i_dirty_rect_tracker::{
+    full_union, pixel_rect_from_rect_unscaled, separate_dirty_rects, simplify_dirty_rects, VisualizeRandom,
+};
 use super::multi_dirty_rect_tracker_c_dirty_region::CDirtyRegion2;
 use super::{IDirtyRectCollector, IDirtyRectTracker};
 use crate::media::immutable::ImmutableSolidColorBrush;
@@ -78,6 +80,12 @@ impl IDirtyRectTracker for MultiDirtyRectTracker {
 
     fn begin_draw(&self, ctx: &mut dyn IDrawingContextImpl) {
         ctx.push_clip_region(&*self.clip_region);
+    }
+
+    fn separate_rects(&self, rects: &mut Vec<LtrbRect>) {
+        rects.clear();
+        rects.extend_from_slice(&self.inflated_rects.borrow());
+        separate_dirty_rects(rects);
     }
 
     fn end_draw(&self, ctx: &mut dyn IDrawingContextImpl) {
@@ -253,6 +261,54 @@ mod tests {
         tracker.include(LtrbRect::new(0.0, 0.0, 600.0, 20.0), BOUNDS);
         assert_eq!(vec![LtrbRect::new(0.0, 0.0, 601.0, 21.0)], tracker.inflated_rects().to_vec());
         assert_eq!(vec![LtrbPixelRect::new(0, 0, 601, 21)], *region.rects.borrow());
+    }
+
+    #[test]
+    fn the_rectangles_of_a_frame_drawn_one_at_a_time_are_its_dirty_rectangles_apart() {
+        let platform = MockRenderInterface::default();
+        let tracker = MultiDirtyRectTracker::new(&platform, 4, 0.0);
+        let region = platform.regions.borrow()[0].clone();
+        let mut rects = vec![LtrbRect::new(1.0, 2.0, 3.0, 4.0)];
+
+        // A frame with nothing to draw has no rectangle.
+        tracker.initialize(BOUNDS);
+        tracker.finalize_frame(BOUNDS);
+        tracker.separate_rects(&mut rects);
+        assert!(rects.is_empty());
+
+        // Two rectangles far apart are two rectangles, the larger first,
+        // and nothing of what lies between them.
+        tracker.initialize(BOUNDS);
+        tracker.add_rect(LtrbRect::new(10.0, 10.0, 20.0, 20.0));
+        tracker.add_rect(LtrbRect::new(500.5, 500.5, 510.2, 520.0));
+        tracker.finalize_frame(BOUNDS);
+        tracker.separate_rects(&mut rects);
+        assert_eq!(vec![LtrbRect::new(499.0, 499.0, 512.0, 521.0), LtrbRect::new(9.0, 9.0, 21.0, 21.0)], rects);
+
+        // A rectangle included after the frame was made final is one of
+        // them, on whole pixels, and one it is close to is drawn with it,
+        // as the rectangle that holds both.
+        tracker.include(LtrbRect::new(15.0, 15.0, 40.5, 30.0), BOUNDS);
+        tracker.separate_rects(&mut rects);
+        assert_eq!(vec![LtrbRect::new(9.0, 9.0, 42.0, 31.0), LtrbRect::new(499.0, 499.0, 512.0, 521.0)], rects);
+
+        // Asking changes nothing of the frame: its rectangles, its region
+        // and what it tests the visuals against are what they were.
+        assert_eq!(3, tracker.inflated_rects().len());
+        assert_eq!(3, region.rects.borrow().len());
+        assert_eq!(LtrbRect::new(9.0, 9.0, 512.0, 521.0), tracker.combined_rect());
+        assert!(!tracker.intersects(LtrbRect::new(200.0, 200.0, 210.0, 210.0)));
+        let mut ctx = MockDrawingContext::default();
+        tracker.begin_draw(&mut ctx);
+        assert!(ctx.log[0].starts_with("push_clip_region ["), "{:?}", ctx.log);
+
+        // Two rectangles that fill the surface are the surface.
+        tracker.initialize(BOUNDS);
+        tracker.add_rect(LtrbRect::new(0.0, 0.0, 1000.0, 500.0));
+        tracker.add_rect(LtrbRect::new(0.0, 500.0, 1000.0, 1000.0));
+        tracker.finalize_frame(BOUNDS);
+        tracker.separate_rects(&mut rects);
+        assert_eq!(vec![BOUNDS], rects);
     }
 
     #[test]

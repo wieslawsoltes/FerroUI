@@ -991,6 +991,86 @@ fn target_renders_only_the_dirty_area_clipped_with(s: CompositorCanvas, clip: &s
     s.assert_rects(&[Rect::new(500.0, 500.0, 20.0, 20.0)]);
 }
 
+/// Section 9.56 of desktop-performance.md: a render target that applies a
+/// clip of several rectangles to every draw on its own (Skia's Ganesh makes
+/// a mask for each draw) is given the dirty rectangles of the frame one at
+/// a time, each under a clip that is its rectangle. What lies between them
+/// is not drawn again: a clock and a cursor far apart on a still wall draw
+/// the clock and the cursor.
+#[test]
+fn target_that_clips_regions_per_draw_renders_each_dirty_rectangle_under_its_own_clip() {
+    let s = CompositorCanvas::new();
+    let log = s.render_interface.log().clone();
+    let first = TestBorder::filled(10.0, 10.0, 20.0, 20.0);
+    let between = TestBorder::filled(250.0, 250.0, 20.0, 20.0);
+    between.set_background(Some(Brushes::yellow()));
+    let outside = TestBorder::filled(700.0, 40.0, 20.0, 20.0);
+    outside.set_background(Some(Brushes::blue_violet()));
+    let second = TestBorder::filled(500.0, 500.0, 20.0, 20.0);
+    second.set_background(Some(Brushes::blue()));
+    for border in [&first, &between, &outside, &second] {
+        s.canvas.add(border);
+    }
+    s.run_jobs();
+    log.clear();
+
+    // Two visuals far apart change in one frame. Region clipping is on, and
+    // the target takes regions: the frame is clipped to a region of the two
+    // and draws them alone.
+    first.set_background(Some(Brushes::green()));
+    second.set_background(Some(Brushes::green()));
+    s.run_jobs();
+    assert_eq!(1, log.count("PushClipRegion"), "{:?}", log.entries());
+    assert_eq!(2, log.count("DrawRectangle Green"), "{:?}", log.entries());
+    assert_eq!(0, log.count("DrawRectangle Yellow"), "{:?}", log.entries());
+    assert_eq!(0, log.count("DrawRectangle BlueViolet"), "{:?}", log.entries());
+    log.clear();
+
+    // The same change on a target that clips a region for every draw: no
+    // region, and each of the two rectangles under a clip of its own, in a
+    // pass that clears it and draws what it holds. The visual between the
+    // two and the one beside them are in neither, and are not drawn.
+    log.clip_regions_per_draw(true);
+    first.set_background(Some(Brushes::red()));
+    second.set_background(Some(Brushes::blue()));
+    s.run_jobs();
+    let entries = log.entries();
+    assert_eq!(0, log.count("PushClipRegion"), "{entries:?}");
+    let position = |prefix: &str| {
+        entries.iter().position(|e| e.starts_with(prefix)).unwrap_or_else(|| panic!("{prefix}: {entries:?}"))
+    };
+    let clips = [position("PushClip 9, 9, 22, 22"), position("PushClip 499, 499, 22, 22")];
+    let draws = [position("DrawRectangle Red"), position("DrawRectangle Blue ")];
+    for (clip, draw) in clips.into_iter().zip(draws) {
+        let pop = clip + entries[clip..].iter().position(|e| e.starts_with("PopClip")).expect("the pass ends");
+        assert!(clip < draw && draw < pop, "{entries:?}");
+        assert!(entries[clip..pop].iter().any(|e| e.starts_with("Clear")), "{entries:?}");
+    }
+    assert_eq!(1, log.count("DrawRectangle Red"), "{entries:?}");
+    assert_eq!(1, log.count("DrawRectangle Blue "), "{entries:?}");
+    assert_eq!(0, log.count("DrawRectangle Yellow"), "{entries:?}");
+    assert_eq!(0, log.count("DrawRectangle BlueViolet"), "{entries:?}");
+    log.clear();
+
+    // One dirty rectangle is a clip of a rectangle there as well.
+    second.set_background(Some(Brushes::green()));
+    s.run_jobs();
+    assert_eq!(0, log.count("PushClipRegion"), "{:?}", log.entries());
+    assert!(log.entries().iter().any(|e| e.starts_with("PushClip 499, 499, 22, 22")), "{:?}", log.entries());
+    assert_eq!(1, log.count("DrawRectangle Green"), "{:?}", log.entries());
+    assert_eq!(0, log.count("DrawRectangle Yellow"), "{:?}", log.entries());
+    log.clear();
+
+    // The target is asked with every frame: one that takes regions again
+    // gets them again.
+    log.clip_regions_per_draw(false);
+    first.set_background(Some(Brushes::green()));
+    second.set_background(Some(Brushes::blue()));
+    s.run_jobs();
+    assert_eq!(1, log.count("PushClipRegion"), "{:?}", log.entries());
+    assert_eq!(0, log.count("DrawRectangle Yellow"), "{:?}", log.entries());
+}
+
 #[test]
 fn opacity_and_clip_are_pushed_around_the_content() {
     let s = CompositorCanvas::new();

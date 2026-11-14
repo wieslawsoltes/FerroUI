@@ -482,6 +482,57 @@ fn a_dirty_rectangle_away_from_a_backdrop_leaves_the_backdrop_as_it_is() {
 }
 
 #[test]
+fn a_frame_drawn_one_rectangle_at_a_time_draws_a_backdrop_in_its_dirty_area_in_one_rectangle() {
+    let s = CompositorCanvas::new();
+    let log = s.render_interface.log().clone();
+    let under = TestBorder::filled(0.0, 0.0, 10.0, 10.0);
+    s.canvas.add(&under);
+    let away = TestBorder::filled(600.0, 600.0, 10.0, 10.0);
+    s.canvas.add(&away);
+    let apart = TestBorder::filled(800.0, 100.0, 10.0, 10.0);
+    s.canvas.add(&apart);
+    let sprite = s.compositor.create_sprite_visual();
+    sprite.set_size(Vector::new(200.0, 100.0));
+    sprite.set_brush(Some((*s.compositor.create_backdrop_brush()).clone()));
+    show(&s, &sprite);
+    // A target that is given the dirty rectangles one at a time
+    // (desktop-performance.md, section 9.56).
+    log.clip_regions_per_draw(true);
+    let clips = |entries: &[String]| -> Vec<Vec<f64>> {
+        entries
+            .iter()
+            .filter_map(|entry| entry.strip_prefix("PushClip "))
+            .map(|rect| rect.split(", ").filter_map(|value| value.parse().ok()).collect())
+            .collect()
+    };
+
+    // Two changes away from the backdrop: a pass for each, and nothing of
+    // the backdrop.
+    log.clear();
+    away.set_background(Some(crate::media::Brushes::blue()));
+    apart.set_background(Some(crate::media::Brushes::blue()));
+    s.run_jobs();
+    let entries = log.entries();
+    assert_eq!(clips(&entries), vec![vec![599.0, 599.0, 12.0, 12.0], vec![799.0, 99.0, 12.0, 12.0]], "{entries:?}");
+    assert_eq!(log.count("CreateLayer"), 0, "{entries:?}");
+
+    // A change under the backdrop and one away from it. The backdrop reads
+    // what the frame drew under it, so it is not drawn in a pass of its
+    // own: the frame is one rectangle that holds the backdrop and the
+    // change away from it.
+    log.clear();
+    under.set_background(Some(crate::media::Brushes::green()));
+    away.set_background(Some(crate::media::Brushes::green()));
+    s.run_jobs();
+    let entries = log.entries();
+    let clips = clips(&entries);
+    let holds_both =
+        |c: &Vec<f64>| c.len() == 4 && c[0] <= 0.0 && c[1] <= 0.0 && c[0] + c[2] >= 610.0 && c[1] + c[3] >= 610.0;
+    assert!(clips.iter().any(holds_both), "{entries:?}");
+    assert!(!clips.iter().any(|c| c.len() == 4 && c[0] >= 590.0), "{entries:?}");
+}
+
+#[test]
 fn the_host_backdrop_brush_clears_its_area_in_a_transparent_window() {
     let s = CompositorCanvas::new();
     let brush = (*s.compositor.create_host_backdrop_brush()).clone();

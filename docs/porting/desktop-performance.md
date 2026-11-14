@@ -553,6 +553,7 @@ python3 scripts/perf/gate.py --only frames,framework           # FerroUI's own r
 python3 scripts/perf/gate.py --only window --window-scenes text,wall
 python3 scripts/perf/gate.py --only tdg --tdg-filter VirtualizationBenchmarks
 python3 scripts/perf/gate.py --only counters                   # the counter checks alone
+python3 scripts/perf/gate.py --only browser --browser-site target/browser/control-catalog-browser
 python3 scripts/perf/gate.py --dry-run                         # the plan and the commands
 ```
 
@@ -697,6 +698,18 @@ What it measures:
   painted when a window is shown keep the thread until the second, which is the time by which the
   scene is on the screen and the application answers. A scene that holds the display's rate shows
   no change of its time a frame; its first frames still do.
+- **The browser suite** (`browser`, only when it is named, with `--browser-site`): what a switch
+  between pages of the control catalog asks of WebGL in headless Chrome
+  (`scripts/browser/navigation-cost.mjs`; section 9.56). The site is a folder
+  (`scripts/build-browser.sh control-catalog-browser` makes it) or an address, the published site
+  among them; nothing is built for it. The masks a switch uploads and their pixels are held against
+  the budget of the page (`browser/<page> <visit> budget of masks`, `OVER BUDGET`), on the
+  candidate alone. With `--browser-base-site` the masks, their pixels and the time to the paint of
+  each switch are compared with those of another site as well: a count has five times the
+  tolerance (a quarter with the default) and a floor (8 masks, 250,000 pixels), since an animation
+  runs a frame more or less from run to run, and a time ten times the tolerance and 50 ms, since
+  the time of a switch in headless Chrome says little (section 9.56). The counts are those of the
+  module without threads, drawn on the thread of the page.
 - **The TreeDataGrid benchmarks** (`tests/FerroUI.TreeDataGrid.Benchmarks`, `run_benchmarks`): the
   median time of one operation of each benchmark, read from the tables of the harness. The gate
   runs the harness with shorter iterations than its defaults (7 iterations of at least 250 ms
@@ -4277,3 +4290,204 @@ out again in a frame. Sections on the layout and on the frame's data take it fro
 
 **Other backends.** The count is of the compositor's tree in `ferroui_base`, and is the
 same whichever backend draws it.
+
+### 9.56 Where a backend clips a region for every draw, a frame is drawn one dirty rectangle at a time
+
+The site of the control catalog, built from the main branch with sections 9.53 and 9.54 in
+it, took visibly longer to show a page than the site before them: the Buttons page most,
+and nearly every page, on every switch, also back to a page that had been shown. Nothing
+of it showed on the desktop, in the gate or in a window.
+
+The site draws with WebGL, so what a switch asks of the driver can be counted in the page
+(`scripts/browser/gl-work.mjs`). A switch in headless Chrome, 1400 by 900, the module
+without threads, from the click to the last frame of the switch (the median of three
+rounds; a mask is a texture of one channel, which is how Skia uploads coverage it
+rasterised on the processor):
+
+| Switch | | Before 9.53 | Main |
+| --- | --- | ---: | ---: |
+| Buttons, first visit | draw calls | 71 | 215 to 227 |
+| | masks | 34 | 190 |
+| | pixels of masks | 169,284 | 3,333,194 |
+| CheckBox, first visit | masks | 2 | 29 to 38 |
+| | pixels of masks | 21,328 | 1,304,000 |
+| Buttons, shown again | masks | 18 | 120 to 127 |
+| | pixels of masks | 111,522 | 2.5 to 3.0 million |
+| CheckBox, shown again | masks | 2 | 27 to 36 |
+| | pixels of masks | 21,328 | 1,270,000 |
+| Home, shown again | masks | 93 to 98 | 422 to 443 |
+| | pixels of masks | 22 to 23 million | 76 to 79 million |
+
+Before section 9.53 a switch invalidated the layout up to the root, and the dirty area of
+its frames was the window: one rectangle. Since then it is what changed, the content area
+and the rows of the drawer that lose and get the selection, and since they do not fill
+their union (section 9.54) the frame is drawn under a clip of a region
+(`MultiDirtyRectTracker`, `push_clip_region`).
+
+What a clip of a region costs depends on the backend. Graphite, which the desktop draws
+with, applies a clip in the shader of the draw, and the scissor where the clip is a
+rectangle; a region of a few rectangles costs it next to nothing, and the frame gains what
+it does not draw. Ganesh, which a WebGL context is drawn with, has no such clip: a region
+that is not a rectangle becomes the path of its outline, and the coverage of that path is
+rasterised on the processor into a mask, uploaded as a texture and sampled, for each draw
+under the clip. A frame of a page then uploads a mask for nearly every draw it makes, and
+the masks of the larger draws are as large as the content area. The saving of the smaller
+area is lost many times over.
+
+**The change.** A render target says whether its backend pays for a clip of a region with
+every draw, and a frame of such a target is drawn one dirty rectangle at a time, each under
+a clip that is that rectangle: the scissor, on Ganesh.
+
+- `IRenderTarget::clips_regions_per_draw` (`false` by default) is the question, asked with
+  every frame (`ServerCompositionTarget::render_frame`).
+- `IDirtyRectTracker::separate_rects` gives the rectangles of the finalized frame as such a
+  target draws them: on whole pixels, without overlap, and covering what the dirty
+  rectangles cover (`separate_dirty_rects`). Rectangles close to each other are first
+  joined into the rectangle that holds them (below). Of what is left the largest stay
+  whole, and a smaller one keeps what is outside them, in at most four pieces for each of
+  them; the rectangles of a tracker are inflated by a pixel, so two that touch overlap,
+  and those of `MultiDirtyRectTracker` may overlap as they are. More than eight pieces
+  (`SEPARATE_RECTS`), or more than thirty-two rectangles to begin with, become the one
+  rectangle that holds them all.
+- `ServerCompositionTarget::render_root_to_context_with_clip` draws a pass for each
+  rectangle: the clip, the clear, and the walk of the tree with the rectangle as its clip,
+  which draws the visuals that reach into it. The walk changes nothing in the tree, so a
+  frame may walk it more than once. The trackers collect, test and report what they did,
+  and clip with their region wherever they are asked to clip.
+- A frame with a backdrop in its dirty area is one pass under the rectangle that holds its
+  rectangles. A backdrop is drawn whole (section 9.54) and reads what the frame drew under
+  it and around it; cut into passes it would read what a pass has yet to draw.
+- In the Skia backend `SkiaGpuRenderTarget` answers `true` for a context of Ganesh (WebGL
+  in a browser, OpenGL and Vulkan where Graphite is not used) and `false` for Graphite
+  and for the raster surface.
+
+The rules of section 9.54 are untouched and run first: where the rectangles fill their
+union the area is one rectangle on every backend, and this section is about the frames
+where they do not, on the backends that pay for a region.
+
+**One rectangle for the frame was the first form of this section, and the wrong one.** It
+drew such a frame under the one rectangle that holds its dirty rectangles. That is right
+where the rectangles nearly fill it, as in a page switch, and wrong where they are small
+and far apart: the rectangle between them is drawn again in every frame. The gate of the
+platforms (section 8.2) found it with its first run, on Android, where the window is drawn
+with Ganesh on OpenGL. The still wall of the frame benchmarks changes a clock in one
+corner and moves a cursor in every frame (`window/wall`, the emulator of section 8.2, the
+median of nine rounds, each side against the commit the frame benchmarks came with):
+
+| Android, the still wall in a window | ms a frame |
+| --- | ---: |
+| The region clip (before this section) | 16.667 |
+| One rectangle for the frame | 29.240 |
+| A pass for every rectangle | 16.667 |
+| One rectangle at a time, those close to each other joined | 16.667 |
+
+In the gate of the last row the other scenes in a window (text, list, transforms, lines)
+are where they were as well, 16.667 ms a frame on both sides, and the first frame of the
+wall comes after 685 ms where it came after 972 ms.
+
+**Rectangles close to each other are one rectangle.** A pass for every dirty rectangle was
+the second form, and the site said what was wrong with it. The banner of the Home page
+clips its content with rounded corners, and four pictures float in it: four dirty
+rectangles in every frame, all inside the banner. The masks of such a frame are made for
+each of its passes: a frame of four passes uploaded about five masks where a frame of one
+rectangle uploads one, 286 masks in a switch to that page against 46 under one rectangle
+and a budget of 220. A pass of its own is a walk of the tree, a clear, and
+once more every draw that reaches into it and into its neighbour, a background or the mask
+of a clip both are under. That is worth it for what is far apart, and not for what is
+close.
+
+So two rectangles that fill a quarter of the rectangle that holds them both
+(`JOINED_SHARE`) are drawn as that rectangle, the pair that fills the most of it first,
+until no pair does (`join_dirty_rects`). A rectangle made of others counts with the area
+of those, not with its own, so a chain of small rectangles does not grow over what is
+empty. The four pictures become the banner. A page switch, the content area and the two
+rows of the drawer, becomes the window, which is what the first form drew and what the
+counts below were good for. The clock and the cursor of the still wall fill next to
+nothing of the rectangle between them and stay two passes.
+
+**Measured** with the sites of the three forms, each built and walked by the browser job of
+its pull request (a runner of the CI, Linux, headless Chrome with its software rasteriser;
+the median of three rounds), beside the two sites of the table above:
+
+| Switch | | Before 9.53 | Main | One rectangle | A pass for each | Joined |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| Buttons, first visit | masks (pixels) | 34 (169,284) | 190 (3,333,194) | 35 (482,382) | 39 (250,877) | 34 (167,172) |
+| CheckBox, first visit | masks (pixels) | 2 (21,328) | 29 to 38 (1,304,000) | 2 (16,216) | 2 (16,216) | 2 (16,216) |
+| Buttons, shown again | masks (pixels) | 18 (111,522) | 120 to 127 (2.5 to 3.0 million) | 17 (73,848) | 19.5 (115,624) | 18 (624,669) |
+| CheckBox, shown again | masks (pixels) | 2 (21,328) | 27 to 36 (1,270,000) | 1 (9,362) | 1 (9,362) | 1 (9,362) |
+| Home, shown again | masks (pixels) | 93 to 98 (22 to 23 million) | 422 to 443 (76 to 79 million) | 46 (11.8 million) | 286 (4,760,866) | 48 (11,374,694) |
+
+The masks of a switch are again those of its glyphs and paths. The draw calls are more
+than before section 9.53 because a switch has more frames than it had then (20 to 29 on
+the runner, two or three in the build before 9.53: the animations of the pages that came
+since), each of a few draws; the masks do not grow with them. The Home page uploads a
+mask in every frame of its animation, a path Ganesh rasterises on the processor, on every
+side; the runner draws fewer frames of it in the time of a switch (47 against 94 to 100),
+so its count is not to be compared with the two columns beside it.
+
+Times are left out on purpose. On the machine of these numbers a switch ends after 500 to
+630 ms and is painted after 860 to 900 ms on both sides, with the software rasteriser of
+headless Chrome, with the GPU of the machine and with the processor slowed down six
+times: the wait for the page's assets and the animation of the switch are most of it, and
+a desktop processor rasterises and uploads the masks inside the frames it has. The delay
+that was reported is what a slower processor and a slower upload make of the same masks,
+which is why the gate counts them.
+
+**The gate.** The count is the regression test and the benchmark gate of this section.
+
+- `scripts/browser/tests/navigation_cost.test.mjs` opens the site in headless Chrome,
+  walks Buttons, CheckBox and Home three times and holds the masks and the pixels of masks
+  of every switch against the budget of its page (`BUDGET` of
+  `scripts/browser/navigation-cost.mjs`: about twice what a frame of one rectangle
+  uploads, a third of what the frames of regions did). It also checks that the frames are
+  drawn with WebGL on the thread of the page, where they are counted, and that a page
+  shown again links no program and uploads no more than its first visit. It runs in the
+  browser job of every pull request, in the browser workflow for the modules without and
+  with threads, and in the Pages workflow before the site is published.
+- `scripts/perf/gate.py --only browser --browser-site <folder or address>` puts the same
+  budget into the table of the local gate, and with `--browser-base-site` compares the
+  counts of two sites (section 8.1).
+- `node scripts/browser/navigation-cost.mjs <folder or address>` prints the table of a
+  site; `--gate` fails over the budget, and it takes the address of the published site as
+  well as a folder.
+
+Both fail on the site of the main branch before this section (190 masks against 80 on the
+first visit of Buttons) and on the site of the second form (286 masks against 220 on the
+Home page), and pass on the sites of the first form and of this one.
+
+**What stays as it was.** What is on the screen: a frame draws its dirty rectangles, on
+whole pixels, and what lies between those that are close to each other, never less, and
+what it draws there is drawn as it was. The rectangles a tracker collects, the rules of
+section 9.54 and the widening over backdrops are untouched. A target that does not answer
+the question draws regions as before, which is every target of the desktop with Graphite,
+the raster surface and the targets of the other backends.
+
+**Other backends.** The question and the rule are in `ferroui_base`
+(`IRenderTarget`, `IDirtyRectTracker`, the composition target); a backend answers with one
+method. Vello and ProGPU clip in the shader or by the scissor and keep the default.
+A backend whose clip of a region is a mask, a stencil pass or a layer for each draw
+(Ganesh; Direct2D with a geometry clip, should its target be given regions) answers
+`true` and gets its frames one rectangle at a time, each under a clip it has a scissor
+for, with no code of its own.
+
+**Not upstream.** Upstream's trackers clip with the region they collected on every
+backend; `DEVIATIONS.md` has the row.
+
+**Tests.** `i_dirty_rect_tracker.rs`: `rectangles_apart_stay_as_they_are_the_largest_first`,
+`rectangles_close_to_each_other_are_drawn_as_the_rectangle_that_holds_them` (the four
+pictures of a banner, a page switch, a quarter of the rectangle and less than a quarter, a
+joined rectangle that counts with the area of its members),
+`rectangles_that_overlap_are_cut_into_pieces_that_do_not` (the pieces never overlap and
+cover what the rectangles covered, and no more where nothing is joined) and
+`more_pieces_than_a_frame_is_drawn_in_are_their_union`. `multi_dirty_rect_tracker.rs`:
+`the_rectangles_of_a_frame_drawn_one_at_a_time_are_its_dirty_rectangles_apart`.
+`region_dirty_rect_tracker.rs`:
+`the_rectangles_of_a_frame_drawn_one_at_a_time_are_those_of_its_region_apart`.
+`compositor_tests.rs`:
+`target_that_clips_regions_per_draw_renders_each_dirty_rectangle_under_its_own_clip` (two
+dirty rectangles apart from each other: a target that answers `true` gets a pass for each
+under a clip of its rectangle, no clip of a region, and nothing of the visual between
+them; one that does not gets the region). `composition_winui_material_tests.rs`:
+`a_frame_drawn_one_rectangle_at_a_time_draws_a_backdrop_in_its_dirty_area_in_one_rectangle`.
+`skia_gpu_render_target.rs`: `only_a_ganesh_context_clips_regions_per_draw`. In a
+browser: `navigation_cost.test.mjs`, above.

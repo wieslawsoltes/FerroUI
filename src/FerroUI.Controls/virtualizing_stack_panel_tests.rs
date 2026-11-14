@@ -1300,6 +1300,128 @@ theory!(removing_item_of_focused_element_clears_focus:
     removing_item_of_focused_element_clears_focus_1(0.0);
     removing_item_of_focused_element_clears_focus_2(0.5));
 
+/// The focus trail: Tab moves through the visual tree and cannot reach an element that is not
+/// realized, so the elements beside the one with the focus are, wherever the viewport ends.
+fn the_elements_beside_the_one_with_the_focus_stay_realized(buffer_factor: f64) {
+    let _app = app();
+    let t = create_target(|o| o.buffer_factor = buffer_factor);
+    let item_count = t.items_control.item_count();
+    let at_rest = get_realized_indexes(&t.target, &t.items_control);
+
+    // Moves the focus as Tab does, to an element that has to be realized for it, and lays out.
+    let focus = |index: i32| {
+        let element = t
+            .items_control
+            .container_from_index(index)
+            .unwrap_or_else(|| panic!("the element {index} beside the one with the focus is not realized"));
+        element.set_focusable(true);
+        assert!(element.focus(), "the element {index} takes the focus");
+        layout(&t.target);
+
+        assert!(element.is_keyboard_focus_within(), "the element {index} keeps the focus over the layout");
+        let realized = get_realized_indexes(&t.target, &t.items_control);
+        assert!(realized.windows(2).all(|pair| pair[1] == pair[0] + 1), "{index}: a range without gaps, {realized:?}");
+        for beside in [index - 1, index + 1] {
+            if (0..item_count).contains(&beside) {
+                assert!(realized.contains(&beside), "{index}: the element {beside} is realized, {realized:?}");
+            }
+        }
+        // The trail is an element on a side, and a viewport between two elements asks for one more.
+        assert!(realized.len() <= at_rest.len() + 3, "{index}: {realized:?} against {at_rest:?} at rest");
+    };
+
+    // From the last element the viewport realized to the end of the items, and back to the first.
+    let start = *at_rest.last().expect("realized elements");
+    for index in start..item_count {
+        focus(index);
+    }
+    for index in (0..item_count - 1).rev() {
+        focus(index);
+    }
+}
+
+theory!(the_elements_beside_the_one_with_the_focus_stay_realized:
+    the_elements_beside_the_one_with_the_focus_stay_realized_1(0.0);
+    the_elements_beside_the_one_with_the_focus_stay_realized_2(0.5));
+
+#[test]
+fn the_focus_trail_is_the_element_beside_the_focus_and_ends_with_it() {
+    let _app = app();
+    let t = create_target(|o| o.buffer_factor = 0.0);
+    let at_rest = get_realized_indexes(&t.target, &t.items_control);
+    let last = *at_rest.last().expect("realized elements");
+
+    // The focus inside the range realizes nothing.
+    let inside = t.items_control.container_from_index(last - 1).expect("an element of the range");
+    inside.set_focusable(true);
+    assert!(inside.focus());
+    layout(&t.target);
+    assert_eq!(at_rest, get_realized_indexes(&t.target, &t.items_control));
+
+    // The focus in the last element realizes the one after it, and only that one.
+    let focused = last_realized(&t.target);
+    focused.set_focusable(true);
+    assert!(focused.focus());
+    layout(&t.target);
+    let mut with_trail = at_rest.clone();
+    with_trail.push(last + 1);
+    assert_eq!(with_trail, get_realized_indexes(&t.target, &t.items_control));
+
+    // With the focus elsewhere the next measure has the range of the viewport again.
+    assert!(inside.focus());
+    t.target.invalidate_measure();
+    layout(&t.target);
+    assert_eq!(at_rest, get_realized_indexes(&t.target, &t.items_control));
+}
+
+/// The items of `elements` in their order; -1 for one that is not a container of the items control.
+fn indexes_of(elements: impl IntoIterator<Item = Ref<Control>>, items_control: &ItemsControl) -> Vec<i32> {
+    elements.into_iter().map(|element| items_control.index_from_container(&element)).collect()
+}
+
+#[test]
+fn tab_follows_the_items_of_the_realized_elements_and_not_the_order_they_were_made_in() {
+    let _app = app();
+    let t = create_target(|o| o.buffer_factor = 0.0);
+    let tab_order = || {
+        let children = t.target.children_in_tab_focus_order().expect("the panel names its children in tab order");
+        indexes_of(children.into_iter().filter_map(|child| child.cast::<Control>()), &t.items_control)
+    };
+    assert_eq!(get_realized_indexes(&t.target, &t.items_control), tab_order());
+
+    // Down and half the way back: the elements before those that stayed are made after them.
+    t.scroll.set_offset(Vector::new(0.0, 200.0));
+    layout(&t.target);
+    t.scroll.set_offset(Vector::new(0.0, 150.0));
+    layout(&t.target);
+
+    let realized = get_realized_indexes(&t.target, &t.items_control);
+    let visual_order = indexes_of(
+        t.target
+            .get_visual_children()
+            .iter()
+            .filter_map(|child| child.cast::<Control>())
+            .filter(|child| child.is_visible()),
+        &t.items_control,
+    );
+    assert_ne!(realized, visual_order, "the visual children are not in the order of their items");
+    assert_eq!(realized, tab_order());
+
+    // An element kept for the focus outside of the realized range is at the place of its item.
+    let focused = first_realized(&t.target);
+    focused.set_focusable(true);
+    assert!(focused.focus());
+    KeyboardNavigation::set_tab_once_active_element(&t.items_control, Some(focused.clone().upcast()));
+    t.scroll.set_offset(Vector::new(0.0, 400.0));
+    layout(&t.target);
+    let focused_index = realized[0];
+    let realized = get_realized_indexes(&t.target, &t.items_control);
+    assert!(realized[0] > focused_index, "the element with the focus left the realized range");
+    let mut with_focused = vec![focused_index];
+    with_focused.extend(realized);
+    assert_eq!(with_focused, tab_order());
+}
+
 fn scrolling_back_to_focused_element_uses_correct_element(buffer_factor: f64) {
     let _app = app();
     let t = create_target(|o| o.buffer_factor = buffer_factor);
@@ -2739,8 +2861,9 @@ fn focused_container_is_positioned_correctly_when_container_size_change_causes_i
 
 theory!(
     focused_container_is_positioned_correctly_when_container_size_change_causes_it_to_be_moved_into_visible_viewport:
+    // The last element of the viewport, 7, has the focus: the focus trail realizes 8.
     focused_container_is_positioned_correctly_when_container_size_change_causes_it_to_be_moved_into_visible_viewport_1(
-        0.0, 4, 7, 3, 6, 3, 7,
+        0.0, 4, 7, 3, 6, 3, 8,
     );
     focused_container_is_positioned_correctly_when_container_size_change_causes_it_to_be_moved_into_visible_viewport_2(
         0.5, 0, 7, 0, 7, 0, 9,

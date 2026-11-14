@@ -4,7 +4,7 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ## [Unreleased]
 
-## [0.5.0] - 2026-11-13
+## [0.5.0] - 2026-11-14
 
 The fifth release. It adds, among the entries below:
 - compiled `{x:Bind}`, one core for FerroUI XAML and WinUI XAML, and compiled bindings by default ([docs/porting/x-bind.md](docs/porting/x-bind.md), [docs/xaml-themes.md](docs/xaml-themes.md));
@@ -166,6 +166,9 @@ The fifth release. It adds, among the entries below:
 
 ### Fixed
 
+- **A page switch in the browser no longer draws the frame under a mask** (#721, #723, [docs/porting/desktop-performance.md](docs/porting/desktop-performance.md), section 9.56): on a backend that clips a region for every draw (Skia's Ganesh, which the browser and Android use), a frame whose dirty area has several rectangles is drawn one dirty rectangle at a time, each under a scissor clip, instead of under a clip of the region, which Ganesh rasterised as a mask for every draw. A render target says whether its backend does so (`IRenderTarget::clips_regions_per_draw`, `false` by default), and `IDirtyRectTracker::separate_rects` gives the rectangles of a frame on whole pixels and without overlap, with rectangles close to each other joined first. Graphite on the desktop keeps the one clip of the region.
+- **The Visual States and Screens pages of the control catalog in the browser** (#724): `TargetPropertyPath` registers its nullable form with the start-up conversions, so a trimmed build (without `type-tables`) converts `Setter.Target` in compiled markup; the Screens page no longer throws in browsers without the screen events.
+- **A switch to the Home page of the control catalog realizes the sections near the viewport only** (#725): the panel of its sections is a `VirtualizingStackPanel` with `CacheLength="0.25"`. In a `VirtualizingStackPanel`, Tab and Shift+Tab follow the order of the items, not the order in which recycled elements were made, and the element beside a focused first or last element of the viewport is realized too, so focus can move on ([docs/porting/DEVIATIONS.md](docs/porting/DEVIATIONS.md)).
 - **Line breaking: regional indicators are paired within their own sequence** (UAX #14, LB30a). The count of regional indicators before a position ran over the whole text, so a single indicator earlier in a text shifted the pairs of every later flag sequence and allowed a break inside a flag. The count is now that of the run of indicators the position is in.
 - **A `DrawingImage` drawn away from the origin at a scale** was placed at the scaled offset of its destination rectangle; the destination is now honoured at every scale (`DrawingImage::draw`, [docs/porting/DEVIATIONS.md](docs/porting/DEVIATIONS.md)). The texture presenter of the media controls raises `cleared` when a source that had shown a frame has none any more.
 - **Compiled markup: a class behind a later glob import of its crate is found** ([docs/porting/xaml.md](docs/porting/xaml.md), 9.5). The source scan resolved a name through the first glob import that had it, also when that module only imported the name back from the asking module (`use crate::Name;` below `pub use module::*;`): the path was taken as written, the class was then missing from the list of registered classes of the crate (`const TYPES`), and a document that named it failed with `FRN2000`. The glob import of the module that declares the name now wins.
