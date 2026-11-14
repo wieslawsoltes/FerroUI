@@ -19,6 +19,7 @@ pub struct DrawingLog(
     std::sync::Arc<std::sync::atomic::AtomicBool>,
     std::sync::Arc<std::sync::atomic::AtomicBool>,
     std::sync::Arc<std::sync::Mutex<Option<EntryHook>>>,
+    std::sync::Arc<std::sync::atomic::AtomicBool>,
 );
 
 /// What [`DrawingLog::on_entry`] runs, and the start of the entries it runs
@@ -55,6 +56,17 @@ impl DrawingLog {
 
     pub(crate) fn layers_draw_ahead(&self) -> bool {
         self.2.load(std::sync::atomic::Ordering::SeqCst)
+    }
+
+    /// Makes the mock render targets that record to this log answer that
+    /// they apply a clip of several rectangles to every draw on its own
+    /// ([`IRenderTarget::clips_regions_per_draw`](crate::platform::IRenderTarget::clips_regions_per_draw)).
+    pub fn clip_regions_per_draw(&self, per_draw: bool) {
+        self.5.store(per_draw, std::sync::atomic::Ordering::SeqCst);
+    }
+
+    pub(crate) fn targets_clip_regions_per_draw(&self) -> bool {
+        self.5.load(std::sync::atomic::Ordering::SeqCst)
     }
 
     /// Makes the mock render targets that record to this log answer that

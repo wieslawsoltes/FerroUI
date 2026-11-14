@@ -161,6 +161,22 @@ pub trait IRenderTarget {
         false
     }
 
+    /// Whether the target applies a clip of several rectangles to every
+    /// draw under it on its own, where a clip of one rectangle costs
+    /// nothing to speak of. Skia's Ganesh is such a target: it has a scissor
+    /// for a rectangle, and for a region a mask of the size of each draw,
+    /// which it rasterises and uploads for that draw. The composition
+    /// target draws a frame of such a target one dirty rectangle at a
+    /// time, each under a clip that is that rectangle
+    /// (`IDirtyRectTracker::separate_rects`), and under the region of its
+    /// dirty rectangles everywhere else (desktop-performance.md, section
+    /// 9.56).
+    ///
+    /// Not from upstream, which clips every frame to the region.
+    fn clips_regions_per_draw(&self) -> bool {
+        false
+    }
+
     /// Makes the GPU programs of what `paint` draws before a frame needs
     /// them (#437; `effects::register_effect_prewarm`): `paint` draws, once,
     /// with a drawing context of the kind the frames of the target draw

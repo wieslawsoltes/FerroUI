@@ -94,6 +94,11 @@ jobs:
       - name: Test the module with threads before publishing it
         if: steps.pages.outputs.enabled == 'true'
         run: node scripts/browser/tests/control_catalog.test.mjs target/browser-threads/control-catalog-browser
+      - name: What a page switch of the site costs, against its budget, before publishing it
+        if: steps.pages.outputs.enabled == 'true'
+        run: |
+          node scripts/browser/tests/navigation_cost.test.mjs target/browser/control-catalog-browser
+          node scripts/browser/tests/navigation_cost.test.mjs target/browser-threads/control-catalog-browser
       - name: Test the site before publishing it (which module its page loads)
         if: steps.pages.outputs.enabled == 'true'
         run: node scripts/browser/tests/site_loader.test.mjs target/browser-both/control-catalog-browser

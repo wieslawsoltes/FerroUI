@@ -1294,6 +1294,22 @@ The fixed 512 MB is 1.77 times the peak of one pass, and a page that is visited 
 - **The Home page in WebGL2 under the software rasteriser on a quiet machine**: the load rose during that series.
 - **Why** the software rasteriser withholds animation frames, and what the GPU process does during the 2 s of the first frame: only that the threads of the page wait.
 
+## 23. What a page switch uploads, and its gate (2026-11-13)
+
+The WebGL surface is drawn with Skia's Ganesh, and Ganesh pays for a clip that is not a rectangle with every draw under it: the clip becomes a path, its coverage is rasterised on the processor into a mask of one channel, and the mask is uploaded as a texture. When the dirty area of a frame became the rectangles that changed instead of the window (`desktop-performance.md`, sections 9.53 and 9.54), a switch between pages of the catalog was drawn under a clip of a region and uploaded a mask for nearly every draw: 190 on the first visit of the Buttons page where the site before uploaded 34, with twenty times the pixels. The desktop, drawn with Graphite, showed nothing of it, and the published site was slower to show every page.
+
+A render target now says whether its backend clips a region for every draw (`IRenderTarget::clips_regions_per_draw`; a Ganesh context does), and the frames of such a target are drawn one dirty rectangle at a time, each under a clip that is its rectangle (section 9.56 of `desktop-performance.md`, with the numbers).
+
+The gate counts instead of timing, because the time of a switch in headless Chrome does not tell the two apart on a fast processor:
+
+| File | What it does |
+|---|---|
+| `scripts/browser/gl-work.mjs` | An init script that counts the WebGL calls of the thread of the page: programs linked, draw calls, textures and their pixels, those of one channel (the masks), framebuffer binds and clears. |
+| `scripts/browser/navigation-cost.mjs <folder or address>` | Walks Buttons, CheckBox and Home of the catalog three times and prints what each switch cost, first visit and shown again; `--gate` fails over the budget of a page (`BUDGET`), `--json` is what `scripts/perf/gate.py --only browser` reads. |
+| `scripts/browser/tests/navigation_cost.test.mjs [folder or address]` | The regression test: every switch within the budget of its page, the frames drawn with WebGL on the thread of the page, a page shown again links no program. |
+
+The test runs in the browser job of every pull request (`ci.yml`), for both modules in `browser.yml`, and in `pages.yml` before the site is published: a site over its budget is not deployed. A module built with threads is measured with its frames drawn on the thread of the page (`RenderThread=false`), since the probe does not see the context of a worker. After a deployment the published site is checked with the same test and its address (`...?Threads=false`).
+
 ## Owner decision (2026-10-04)
 
 Proceed as recommended: `wasm32-unknown-emscripten` with the Skia backend first (Ganesh/WebGL2 and raster paths kept in `FerroUI.Skia` next to Graphite/Metal), Vello on `wasm32-unknown-unknown` second.

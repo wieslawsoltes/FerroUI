@@ -508,6 +508,9 @@ impl IRenderTarget for MockRenderTarget {
     fn prepare_frame_ahead(&self, _scene_info: &RenderTargetSceneInfo) -> bool {
         self.log.layers_draw_ahead()
     }
+    fn clips_regions_per_draw(&self) -> bool {
+        self.log.targets_clip_regions_per_draw()
+    }
     fn dispose(&self) {
         self.disposed.set(true);
     }
