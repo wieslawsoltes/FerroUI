@@ -333,7 +333,8 @@ impl LayoutableImpl for Grid {
             return None;
         }
         let (definitions_u, definitions_v) = (this.definitions_u(), this.definitions_v());
-        let (mut star_columns, mut star_weight) = (0, 0.0);
+        // The star columns: how many, their weight, and the last of them (the only one, with one).
+        let (mut star_columns, mut star_weight, mut star) = (0, 0.0, 0);
         for index in 0..definitions_u.count() {
             let definition = &definitions_u[index];
             if definition.is_shared() {
@@ -350,6 +351,7 @@ impl LayoutableImpl for Grid {
                 }
                 star_columns += 1;
                 star_weight += weight;
+                star = index;
             }
         }
         if !star_weight.is_finite() {
@@ -374,10 +376,24 @@ impl LayoutableImpl for Grid {
                 return None;
             }
             let child_hold = child.measure_hold()?.any_height();
-            let size = definitions_u[Grid::get_column(child).clamp(0, last_column.max(0)) as usize].user_size();
-            if !size.is_star() {
+            // Which column a cell is in matters only for a star column, and the length of a
+            // column is read only where it may be one of several.
+            if star_columns == 0 {
                 continue;
             }
+            let column = Grid::get_column(child).clamp(0, last_column.max(0)) as usize;
+            let weight = if star_columns == 1 {
+                if column != star {
+                    continue;
+                }
+                star_weight
+            } else {
+                let size = definitions_u[column].user_size();
+                if !size.is_star() {
+                    continue;
+                }
+                size.value()
+            };
             let measured = child.previous_measure()?.width;
             if !(measured > 0.0 && measured.is_finite()) {
                 return None;
@@ -385,7 +401,7 @@ impl LayoutableImpl for Grid {
             // The width of the grid for a width of the cell: `cell * ratio + fixed`. One star
             // column has the whole of what is left, with no division.
             let (ratio, slack) =
-                if star_columns == 1 { (1.0, 0.0) } else { (star_weight / size.value(), STAR_SHARE_SLACK) };
+                if star_columns == 1 { (1.0, 0.0) } else { (star_weight / weight, STAR_SHARE_SLACK) };
             let fixed = constraint.width - measured * ratio;
             let margin = (step + slack) * ratio;
             let width = (child_hold.width.0 * ratio + fixed + margin, child_hold.width.1 * ratio + fixed - margin);
