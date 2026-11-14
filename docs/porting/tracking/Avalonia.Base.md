@@ -11,9 +11,9 @@ Generated from upstream commit `66b7273b9a2b5ba8416feb4376b9cdc3078b8573`. Back 
 | Crate | `ferroui-base` |
 | Phase / priority | 0 - core / P0 |
 | Files | 1247/1247 (100.0%), 52 not applicable |
-| Types | 1523/1657 (134 waived) (100.0%) |
-| Members | 10358/11380 (1022 waived) (100.0%) |
-| Contracts (interfaces) | 248/261 |
+| Types | 1522/1657 (135 waived) (100.0%) |
+| Members | 10328/11380 (1015 waived) (99.6%) |
+| Contracts (interfaces) | 247/261 |
 | Property registrations | 224/239 |
 | Routed events | 41/41 |
 
@@ -43,7 +43,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Controls.IDeferredContent` | public | `Controls/IDeferredContent.cs` | 1/1 | present |
 | `Avalonia.Controls.INameScope` | public | `Controls/INameScope.cs` | 5/5 | present |
 | `Avalonia.Controls.IPseudoClasses` | public | `Controls/IPseudoClasses.cs` | 3/3 | present |
-| `Avalonia.Controls.IResourceDictionary` | public | `Controls/IResourceDictionary.cs` | 0/2 (2 waived) | present |
+| `Avalonia.Controls.IResourceDictionary` | public | `Controls/IResourceDictionary.cs` | 1/2 (1 waived) | present |
 | `Avalonia.Controls.IResourceHost` | public | `Controls/IResourceHost.cs` | 2/2 | present |
 | `Avalonia.Controls.IResourceNode` | public | `Controls/IResourceNode.cs` | 2/2 | present |
 | `Avalonia.Controls.IResourceProvider` | public | `Controls/IResourceProvider.cs` | 4/4 | present |
@@ -209,7 +209,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Platform.IWriteableBitmapImpl` | public | `Platform/IWriteableBitmapImpl.cs` | 0/0 | present |
 | `Avalonia.Platform.Internal.IAssemblyDescriptor` | internal | `Platform/Internal/AssemblyDescriptor.cs` | 4/4 | present |
 | `Avalonia.Platform.Internal.IAssemblyDescriptorResolver` | internal | `Platform/Internal/AssemblyDescriptorResolver.cs` | 3/3 | present |
-| `Avalonia.Platform.Internal.IAssetDescriptor` | internal | `Platform/Internal/AssetDescriptor.cs` | 2/2 | present |
+| `Avalonia.Platform.Internal.IAssetDescriptor` | internal | `Platform/Internal/AssetDescriptor.cs` | 0/2 (2 waived) | waived |
 | `Avalonia.Platform.Storage.ILauncher` | public | `Platform/Storage/ILauncher.cs` | 2/2 | present |
 | `Avalonia.Platform.Storage.IStorageBookmarkFile` | public | `Platform/Storage/IStorageBookmarkItem.cs` | 0/0 | present |
 | `Avalonia.Platform.Storage.IStorageBookmarkFolder` | public | `Platform/Storage/IStorageBookmarkItem.cs` | 0/0 | present |
@@ -291,18 +291,18 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 55/55, types 61/63 (2 waived), members 851/923 (72 waived)
+### `(project root)` - files 55/55, types 61/63 (2 waived), members 846/923 (68 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AttachedProperty.cs` | `styled_property.rs` | present | 1/1 | 2/2 | merged: AttachedProperty&lt;T&gt; is a thin wrapper over StyledProperty&lt;T&gt; |
-| `AvaloniaInternalException.cs` | `ferro_internal_exception.rs` | present | 1/1 | 1/1 |  |
+| `AvaloniaInternalException.cs` | `ferro_internal_exception.rs` | partial | 1/1 | 0/1 |  |
 | `AvaloniaLocator.cs` | `ferro_locator.rs` | present | 4/4 | 18/20 (2 waived) |  |
-| `AvaloniaObject.cs` | `ferro_object.rs` | present | 1/1 | 44/55 (11 waived) |  |
+| `AvaloniaObject.cs` | `ferro_object.rs` | present | 1/1 | 45/55 (10 waived) |  |
 | `AvaloniaObjectExtensions.cs` | `ferro_object_extensions.rs` | present | 1/1 | 15/17 (2 waived) |  |
 | `AvaloniaProperty.cs` | `ferro_property.rs` | present | 2/2 | 43/49 (6 waived) |  |
-| `AvaloniaPropertyChangedEventArgs.cs` | `ferro_property_changed_event_args.rs` | present | 1/1 | 10/12 (2 waived) |  |
-| `AvaloniaPropertyChangedEventArgs`1.cs` | `ferro_property_changed_event_args.rs` | present | 1/1 | 6/8 (2 waived) | generic arity merged |
+| `AvaloniaPropertyChangedEventArgs.cs` | `ferro_property_changed_event_args.rs` | present | 1/1 | 11/12 (1 waived) |  |
+| `AvaloniaPropertyChangedEventArgs`1.cs` | `ferro_property_changed_event_args.rs` | present | 1/1 | 7/8 (1 waived) | generic arity merged |
 | `AvaloniaPropertyChangedExtensions.cs` | `ferro_property_changed_event_args.rs` | present | 1/1 | 3/3 | merged: the typed accessors (`get_old_value`, `get_new_value`, `get_old_and_new_value`) are inherent methods of the one event arguments type |
 | `AvaloniaPropertyExtensions.cs` | `media/i_affects_render.rs` | present | 1/1 | 1/1 | merged: `can_value_affect_render` is a function of the module of the contract it tests for; `Visual::affects_render` calls it with the value type of the property |
 | `AvaloniaPropertyMetadata.cs` | `ferro_property_metadata.rs` | present | 1/1 | 7/7 | merged: the three metadata classes share one file |
@@ -312,7 +312,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `CombinedGeometry.cs` | `combined_geometry.rs` | present | 2/2 | 18/18 |  |
 | `CornerRadius.cs` | `corner_radius.rs` | present | 1/1 | 14/15 (1 waived) |  |
 | `DirectProperty.cs` | `direct_property.rs` | present | 1/1 | 6/10 (4 waived) |  |
-| `DirectPropertyBase.cs` | `direct_property.rs` | present | 1/1 | 18/20 (2 waived) | merged: DirectPropertyBase&lt;T&gt; lives next to DirectProperty&lt;TOwner, T&gt; |
+| `DirectPropertyBase.cs` | `direct_property.rs` | present | 1/1 | 19/20 (1 waived) | merged: DirectPropertyBase&lt;T&gt; lives next to DirectProperty&lt;TOwner, T&gt; |
 | `DirectPropertyMetadata`1.cs` | `ferro_property_metadata.rs` | present | 1/1 | 5/5 | merged: the three metadata classes share one file |
 | `EnumExtensions.cs` | - | n/a | - | - | not-applicable: flag tests over enums of any size through unsafe reinterpretation: flag enums are `bitflags!` types, whose `contains` and `intersects` are `HasAllFlags` and `HasAnyFlag` |
 | `GeneratedAttachedPropertyAttribute.cs` | - | n/a | - | - | not-applicable: markers read by the upstream source generator of property definitions (tools/Avalonia.Generators): properties are declared with `ferro_property!` / `ferro_properties!`, which take the same options as arguments |
@@ -337,8 +337,8 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `RelativePoint.cs` | `relative_point.rs` | present | 2/2 | 17/18 (1 waived) |  |
 | `RelativeRect.cs` | `relative_rect.rs` | present | 1/1 | 15/16 (1 waived) |  |
 | `RelativeScalar.cs` | `relative_scalar.rs` | present | 1/1 | 13/14 (1 waived) |  |
-| `RenderTargetCorruptedException.cs` | `render_target_corrupted_exception.rs` | present | 1/1 | 4/4 |  |
-| `RenderTargetNotReadyException.cs` | `render_target_not_ready_exception.rs` | present | 1/1 | 4/4 |  |
+| `RenderTargetCorruptedException.cs` | `render_target_corrupted_exception.rs` | partial | 1/1 | 0/4 |  |
+| `RenderTargetNotReadyException.cs` | `render_target_not_ready_exception.rs` | partial | 1/1 | 0/4 |  |
 | `Rotate3DTransform.cs` | `rotate_3d_transform.rs` | present | 1/1 | 18/18 |  |
 | `RoundedRect.cs` | `rounded_rect.rs` | present | 1/1 | 23/24 (1 waived) |  |
 | `Size.cs` | `size.rs` | present | 1/1 | 26/27 (1 waived) |  |
@@ -354,6 +354,33 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Visual.cs` | `visual.rs` | present | 1/1 | 60/61 (1 waived) |  |
 | `VisualExtensions.cs` | `visual_tree/visual_extensions.rs` | present | 1/1 | 4/4 | merged: the extension methods of both static classes are inherent methods of Visual |
 | `VisualTreeAttachmentEventArgs.cs` | `visual_tree_attachment_event_args.rs` | present | 1/1 | 6/6 |  |
+
+<details><summary><code>AvaloniaInternalException.cs</code> - 1 missing</summary>
+
+- `AvaloniaInternalException` (class): 1 missing
+  - `AvaloniaInternalException(string message)`
+
+</details>
+
+<details><summary><code>RenderTargetCorruptedException.cs</code> - 4 missing</summary>
+
+- `RenderTargetCorruptedException` (class): 4 missing
+  - `RenderTargetCorruptedException()`
+  - `RenderTargetCorruptedException(string message)`
+  - `RenderTargetCorruptedException(Exception innerException)`
+  - `RenderTargetCorruptedException(string message, Exception innerException)`
+
+</details>
+
+<details><summary><code>RenderTargetNotReadyException.cs</code> - 4 missing</summary>
+
+- `RenderTargetNotReadyException` (class): 4 missing
+  - `RenderTargetNotReadyException()`
+  - `RenderTargetNotReadyException(string message)`
+  - `RenderTargetNotReadyException(Exception innerException)`
+  - `RenderTargetNotReadyException(string message, Exception innerException)`
+
+</details>
 
 ### `Animation` - files 39/39, types 44/45 (1 waived), members 193/219 (26 waived)
 
@@ -539,7 +566,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ReferenceEqualityComparer.cs` | - | n/a | - | - | no non-private types (assembly attributes, global usings or file-local helpers) |
 | `TrimmingAttributes.cs` | - | n/a | - | - | no non-private types (assembly attributes, global usings or file-local helpers) |
 
-### `Controls` - files 21/21, types 16/21 (5 waived), members 94/118 (24 waived)
+### `Controls` - files 21/21, types 16/21 (5 waived), members 95/118 (23 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -549,7 +576,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `IDeferredContent.cs` | `controls/i_deferred_content.rs` | present | 1/1 | 1/1 |  |
 | `INameScope.cs` | `controls/i_name_scope.rs` | present | 1/1 | 5/5 |  |
 | `IPseudoClasses.cs` | `controls/classes.rs` | present | 1/1 | 3/3 | merged: the trait lives next to its only implementation |
-| `IResourceDictionary.cs` | `controls/i_resource_dictionary.rs` | present | 1/1 | 0/2 (2 waived) |  |
+| `IResourceDictionary.cs` | `controls/i_resource_dictionary.rs` | present | 1/1 | 1/2 (1 waived) |  |
 | `IResourceHost.cs` | `controls/i_resource_host.rs` | present | 1/1 | 2/2 |  |
 | `IResourceNode.cs` | `controls/i_resource_node.rs` | present | 1/1 | 2/2 |  |
 | `IResourceProvider.cs` | `controls/i_resource_provider.rs` | present | 1/1 | 4/4 |  |
@@ -585,13 +612,13 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ITemplateResult.cs` | `controls/mod.rs` | present | 0/1 (1 waived) | 0/2 (2 waived) | replaced: ported in the crate of the controls, their only user, where the tracking of `Avalonia.Controls` does not look for them: `src/FerroUI.Controls/templates/template_result.rs` (`TemplateResult&lt;T&gt;`, which also stands for `ITemplateResult`) |
 | `TemplateResult.cs` | `controls/mod.rs` | present | 0/1 (1 waived) | 0/5 (5 waived) | replaced: ported in the crate of the controls, their only user, where the tracking of `Avalonia.Controls` does not look for them: `src/FerroUI.Controls/templates/template_result.rs` (`TemplateResult&lt;T&gt;`, which also stands for `ITemplateResult`) |
 
-### `Data` - files 21/21, types 28/50 (22 waived), members 161/282 (121 waived)
+### `Data` - files 21/21, types 28/50 (22 waived), members 154/282 (121 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AssignBindingAttribute.cs` | `ferro_property.rs` | present | 0/1 (1 waived) | 0/0 | replaced: an attribute read by the markup compiler: a registered property states it with `StyledPropertyOptions::assign_binding` (`FerroProperty::assign_binding`), a plain property with the `AssignBinding` attribute of its markup metadata (`metadata::attributes::ASSIGN_BINDING`) |
 | `BindingBase.cs` | `data/binding_base.rs` | present | 1/1 | 1/1 |  |
-| `BindingChainException.cs` | `data/binding_chain_exception.rs` | present | 1/1 | 5/6 (1 waived) |  |
+| `BindingChainException.cs` | `data/binding_chain_exception.rs` | partial | 1/1 | 0/6 (1 waived) |  |
 | `BindingExpressionBase.cs` | `data/binding_expression_base.rs` | present | 1/1 | 8/19 (11 waived) |  |
 | `BindingMode.cs` | `data/binding_mode.rs` | present | 1/1 | 5/5 |  |
 | `BindingNotification.cs` | `data/binding_notification.rs` | present | 2/3 (1 waived) | 23/25 (2 waived) |  |
@@ -601,7 +628,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `CompiledBinding.cs` | `data/compiled_binding.rs` | present | 1/1 | 3/18 (15 waived) |  |
 | `CompiledBindingPath.cs` | `data/compiled_binding_path.rs` | present | 4/24 (20 waived) | 25/81 (56 waived) |  |
 | `CultureInfoIetfLanguageTagConverter.cs` | `data/culture_info_ietf_language_tag_converter.rs` | present | 1/1 | 2/2 |  |
-| `DataValidationException.cs` | `data/data_validation_exception.rs` | present | 1/1 | 2/2 |  |
+| `DataValidationException.cs` | `data/data_validation_exception.rs` | partial | 1/1 | 0/2 |  |
 | `IndexerBinding.cs` | `data/indexer_binding.rs` | present | 1/1 | 3/3 |  |
 | `IndexerDescriptor.cs` | `data/indexer_descriptor.rs` | present | 1/1 | 11/11 |  |
 | `MultiBinding.cs` | `data/multi_binding.rs` | present | 1/1 | 2/12 (10 waived) |  |
@@ -611,6 +638,26 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `TemplateBinding.cs` | `data/template_binding.rs` | present | 1/1 | 4/9 (5 waived) |  |
 | `TemplateBindingExpression.cs` | `data/template_binding_expression.rs` | present | 1/1 | 5/5 |  |
 | `UpdateSourceTrigger.cs` | `data/update_source_trigger.rs` | present | 1/1 | 4/4 |  |
+
+<details><summary><code>BindingChainException.cs</code> - 5 missing</summary>
+
+- `BindingChainException` (class): 5 missing
+  - `BindingChainException()`
+  - `BindingChainException(string message)`
+  - `string? Expression { get; protected set; }`
+  - `string? ExpressionErrorPoint { get; protected set; }`
+  - `override string Message { get; }`
+  - waived (ported as `BindingChainError::with_expression`): `.ctor`
+
+</details>
+
+<details><summary><code>DataValidationException.cs</code> - 2 missing</summary>
+
+- `DataValidationException` (class): 2 missing
+  - `DataValidationException(object? errorData)`
+  - `object? ErrorData { get; }`
+
+</details>
 
 ### `Data/Converters` - files 11/11, types 12/13 (1 waived), members 41/47 (6 waived)
 
@@ -628,7 +675,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `StringFormatMultiValueConverter.cs` | `data/converters/string_format_multi_value_converter.rs` | present | 1/1 | 4/4 |  |
 | `StringFormatValueConverter.cs` | `data/converters/string_format_value_converter.rs` | present | 1/1 | 5/5 |  |
 
-### `Data/Core` - files 15/15, types 15/16 (1 waived), members 105/120 (15 waived)
+### `Data/Core` - files 15/15, types 15/16 (1 waived), members 103/120 (15 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -637,7 +684,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ClrPropertyInfo.cs` | `data/core/clr_property_info.rs` | present | 1/2 (1 waived) | 7/8 (1 waived) |  |
 | `ClrPropertyInfo`2.cs` | `data/core/clr_property_info.rs` | present | 1/1 | 9/9 | generic arity merged |
 | `CommonPropertyNames.cs` | `data/core/common_property_names.rs` | present | 1/1 | 1/1 |  |
-| `ExpressionParseException.cs` | `data/core/expression_parse_exception.rs` | present | 1/1 | 2/2 |  |
+| `ExpressionParseException.cs` | `data/core/expression_parse_exception.rs` | partial | 1/1 | 0/2 |  |
 | `IBindingExpressionSink.cs` | `data/core/i_binding_expression_sink.rs` | present | 1/1 | 2/2 |  |
 | `IPropertyInfo.cs` | `data/core/i_property_info.rs` | present | 1/1 | 6/6 |  |
 | `IPropertyInfo`2.cs` | `data/core/i_property_info.rs` | present | 1/1 | 2/2 | generic arity merged |
@@ -648,6 +695,14 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `TypedBindingExpression.cs` | `data/core/typed_binding_expression.rs` | present | 1/1 | 9/11 (2 waived) |  |
 | `UntypedBindingExpressionBase.cs` | `data/core/untyped_binding_expression_base.rs` | present | 1/1 | 18/27 (9 waived) |  |
 | `UntypedObservableBindingExpression.cs` | `data/core/untyped_observable_binding_expression.rs` | present | 1/1 | 4/7 (3 waived) |  |
+
+<details><summary><code>ExpressionParseException.cs</code> - 2 missing</summary>
+
+- `ExpressionParseException` (class): 2 missing
+  - `ExpressionParseException(int column, string message, Exception? innerException = null)`
+  - `int Column { get; }`
+
+</details>
 
 ### `Data/Core/ExpressionNodes` - files 19/19, types 19/19, members 82/101 (19 waived)
 
@@ -1169,7 +1224,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `SystemFontCollection.cs` | `media/fonts/system_font_collection.rs` | present | 1/1 | 6/6 |  |
 | `UnmanagedFontMemory.cs` | `media/fonts/unmanaged_font_memory.rs` | present | 1/1 | 4/7 (3 waived) |  |
 
-### `Media/Fonts/Tables` - files 20/20, types 39/39, members 394/394
+### `Media/Fonts/Tables` - files 20/20, types 39/39, members 390/394
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -1181,18 +1236,34 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `FontVersion.cs` | `media/fonts/tables/font_version.rs` | present | 1/1 | 12/12 |  |
 | `HeadTable.cs` | `media/fonts/tables/head_table.rs` | present | 6/6 | 45/45 |  |
 | `HorizontalHeaderTable.cs` | `media/fonts/tables/horizontal_header_table.rs` | present | 1/1 | 16/16 |  |
-| `InvalidFontTableException.cs` | `media/fonts/tables/invalid_font_table_exception.rs` | present | 1/1 | 2/2 |  |
+| `InvalidFontTableException.cs` | `media/fonts/tables/invalid_font_table_exception.rs` | partial | 1/1 | 0/2 |  |
 | `KnownNameIds.cs` | `media/fonts/tables/known_name_ids.rs` | present | 1/1 | 18/18 |  |
 | `LocaTable.cs` | `media/fonts/tables/loca_table.rs` | present | 1/1 | 7/7 |  |
 | `MaxpTable.cs` | `media/fonts/tables/maxp_table.rs` | present | 1/1 | 18/18 |  |
 | `MetaTable.cs` | `media/fonts/tables/meta_table.rs` | present | 1/1 | 6/6 |  |
-| `MissingFontTableException.cs` | `media/fonts/tables/missing_font_table_exception.rs` | present | 1/1 | 2/2 |  |
+| `MissingFontTableException.cs` | `media/fonts/tables/missing_font_table_exception.rs` | partial | 1/1 | 0/2 |  |
 | `OS2Table.cs` | `media/fonts/tables/os2_table.rs` | present | 2/2 | 52/52 |  |
 | `Panose.cs` | `media/fonts/tables/panose.rs` | present | 11/11 | 131/131 |  |
 | `PlatformID.cs` | `media/fonts/tables/platform_id.rs` | present | 1/1 | 5/5 |  |
 | `PostTable.cs` | `media/fonts/tables/post_table.rs` | present | 1/1 | 8/8 |  |
 | `ScriptListTable.cs` | `media/fonts/tables/script_list_table.rs` | present | 1/1 | 1/1 |  |
 | `VerticalHeaderTable.cs` | `media/fonts/tables/vertical_header_table.rs` | present | 1/1 | 16/16 |  |
+
+<details><summary><code>InvalidFontTableException.cs</code> - 2 missing</summary>
+
+- `InvalidFontTableException` (class): 2 missing
+  - `InvalidFontTableException(string message, string table)`
+  - `string Table { get; }`
+
+</details>
+
+<details><summary><code>MissingFontTableException.cs</code> - 2 missing</summary>
+
+- `MissingFontTableException` (class): 2 missing
+  - `MissingFontTableException(string message, string table)`
+  - `string Table { get; }`
+
+</details>
 
 ### `Media/Fonts/Tables/Cmap` - files 10/10, types 10/10, members 83/86 (3 waived)
 
@@ -1274,7 +1345,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ImmutableTileBrush.cs` | `media/immutable/immutable_tile_brush.rs` | present | 1/1 | 12/12 |  |
 | `ImmutableTransform.cs` | `media/immutable/immutable_transform.rs` | present | 1/1 | 2/2 |  |
 
-### `Media/TextFormatting` - files 43/43, types 47/48 (1 waived), members 341/353 (12 waived)
+### `Media/TextFormatting` - files 43/43, types 47/48 (1 waived), members 342/353 (11 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -1303,7 +1374,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `TextEndOfParagraph.cs` | `media/text_formatting/text_end_of_paragraph.rs` | present | 1/1 | 2/2 |  |
 | `TextFormatter.cs` | `media/text_formatting/text_formatter.rs` | present | 1/1 | 4/4 |  |
 | `TextFormatterImpl.cs` | `media/text_formatting/text_formatter_impl.rs` | present | 1/1 | 5/5 |  |
-| `TextLayout.cs` | `media/text_formatting/text_layout.rs` | present | 1/1 | 24/25 (1 waived) |  |
+| `TextLayout.cs` | `media/text_formatting/text_layout.rs` | present | 1/1 | 25/25 |  |
 | `TextLeadingPrefixCharacterEllipsis.cs` | `media/text_formatting/text_leading_prefix_character_ellipsis.rs` | present | 1/1 | 5/5 |  |
 | `TextLine.cs` | `media/text_formatting/text_line.rs` | present | 1/1 | 27/27 |  |
 | `TextLineBreak.cs` | `media/text_formatting/text_line_break.rs` | present | 1/1 | 4/4 |  |
@@ -1450,13 +1521,13 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `SystemNavigationManagerImpl.cs` | `platform/system_navigation_manager_impl.rs` | present | 1/1 | 1/1 |  |
 | `VisualQueryProvider.cs` | `styling/visual_query_provider.rs` | present | 1/1 | 6/6 | renamed: ported next to the container queries of Styling, its only users |
 
-### `Platform/Internal` - files 4/4, types 8/8, members 28/30 (2 waived)
+### `Platform/Internal` - files 4/4, types 7/8 (1 waived), members 26/30 (4 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AssemblyDescriptor.cs` | `platform/internal/assembly_descriptor.rs` | present | 2/2 | 9/9 |  |
 | `AssemblyDescriptorResolver.cs` | `platform/internal/assembly_descriptor_resolver.rs` | present | 2/2 | 6/6 |  |
-| `AssetDescriptor.cs` | `platform/internal/asset_descriptor.rs` | present | 3/3 | 8/8 | merged: the two descriptors differ in where the bytes come from (a manifest resource by name, a slice of the packed resource); both kinds of asset are registered as embedded byte slices, described by EmbeddedAssetDescriptor |
+| `AssetDescriptor.cs` | `platform/internal/asset_descriptor.rs` | present | 2/3 (1 waived) | 6/8 (2 waived) | merged: the two descriptors differ in where the bytes come from (a manifest resource by name, a slice of the packed resource); both kinds of asset are registered as embedded byte slices, described by EmbeddedAssetDescriptor |
 | `Constants.cs` | - | n/a | - | - | not-applicable: the name of the manifest resource into which the build task packs the assets of an assembly: a crate registers each asset with the asset registry (platform/internal/asset_registry.rs), there is no packed resource to name |
 | `SlicedStream.cs` | - | n/a | - | - | not-applicable: a Stream over one asset inside the packed manifest resource of an assembly: an embedded asset is a `&'static [u8]` of its own, read through `AssetStream` |
 | `UnmanagedBlob.cs` | `platform/internal/unmanaged_blob.rs` | present | 1/1 | 5/7 (2 waived) |  |
@@ -1517,30 +1588,96 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 |---|---|---|---|---|---|
 | `AssemblyInfo.cs` | - | n/a | - | - | no non-private types (assembly attributes, global usings or file-local helpers) |
 
-### `PropertyStore` - files 19/19, types 21/21, members 144/211 (67 waived)
+### `PropertyStore` - files 19/19, types 21/21, members 136/211 (64 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AvaloniaPropertyDictionaryPool.cs` | - | n/a | - | - | not-applicable: pool of the dictionaries that hold the old and new inherited values while the inheritance parent changes: `ValueStore::set_inheritance_parent` collects them in a local `Vec` |
-| `BindingEntryBase.cs` | `property_store/binding_entry.rs` | present | 1/1 | 17/22 (5 waived) | merged: one generic BindingEntry&lt;T&gt; with a BindingSource enum replaces the base class and its typed/untyped subclasses |
+| `BindingEntryBase.cs` | `property_store/binding_entry.rs` | partial | 1/1 | 14/22 (5 waived) | merged: one generic BindingEntry&lt;T&gt; with a BindingSource enum replaces the base class and its typed/untyped subclasses |
 | `BindingEntryBaseNonGenericHelper.cs` | `property_store/binding_entry.rs` | present | 1/1 | 0/2 (2 waived) | replaced: the `Creating` and `CreatingQuiet` sentinel disposables are variants of the private `Subscription` enum of the binding entry |
-| `DirectBindingObserver.cs` | `property_store/local_value_binding_observer.rs` | present | 1/1 | 4/9 (5 waived) | merged: local-value and direct-property binding observers (typed and untyped) share one file |
+| `DirectBindingObserver.cs` | `property_store/local_value_binding_observer.rs` | present | 1/1 | 5/9 (4 waived) | merged: local-value and direct-property binding observers (typed and untyped) share one file |
 | `DirectUntypedBindingObserver.cs` | `property_store/local_value_binding_observer.rs` | present | 1/1 | 4/7 (3 waived) | merged: local-value and direct-property binding observers (typed and untyped) share one file |
-| `EffectiveValue.cs` | `property_store/effective_value.rs` | present | 1/1 | 21/24 (3 waived) |  |
-| `EffectiveValue`1.cs` | `property_store/effective_value.rs` | present | 1/1 | 15/15 | generic arity merged |
+| `EffectiveValue.cs` | `property_store/effective_value.rs` | partial | 1/1 | 18/24 (3 waived) |  |
+| `EffectiveValue`1.cs` | `property_store/effective_value.rs` | partial | 1/1 | 14/15 | generic arity merged |
 | `FramePriority.cs` | `property_store/frame_priority.rs` | present | 2/2 | 3/15 (12 waived) | renamed: the extension methods are inherent methods of FramePriority |
 | `IValueEntry.cs` | `property_store/value_entry.rs` | present | 1/1 | 6/6 | interface merged into implementation file |
 | `IValueEntry`1.cs` | `property_store/value_entry.rs` | present | 1/1 | 1/1 | generic arity merged; interface merged into implementation file |
 | `ImmediateValueEntry.cs` | `property_store/immediate_value_frame.rs` | present | 1/1 | 5/9 (4 waived) | merged: the entry lives next to the frame that owns it |
 | `ImmediateValueFrame.cs` | `property_store/immediate_value_frame.rs` | present | 1/1 | 6/8 (2 waived) |  |
 | `LocalValueBindingObserver.cs` | `property_store/local_value_binding_observer.rs` | present | 1/1 | 2/3 (1 waived) | merged: local-value and direct-property binding observers (typed and untyped) share one file |
-| `LocalValueBindingObserverBase.cs` | `property_store/local_value_binding_observer.rs` | present | 1/1 | 5/10 (5 waived) | merged: local-value and direct-property binding observers (typed and untyped) share one file |
+| `LocalValueBindingObserverBase.cs` | `property_store/local_value_binding_observer.rs` | partial | 1/1 | 5/10 (4 waived) | merged: local-value and direct-property binding observers (typed and untyped) share one file |
 | `PropertyNotifying.cs` | `property_store/effective_value.rs` | present | 1/1 | 1/2 (1 waived) | replaced: the disposable scope that calls the `Notifying` callback of the property before and after a change notification is written out at its call sites (`EffectiveValue::notify_value_changed` and the two inherited-value notifications of `ValueStore`) |
-| `SourceUntypedBindingEntry.cs` | `property_store/binding_entry.rs` | present | 1/1 | 4/5 (1 waived) | merged: one generic BindingEntry&lt;T&gt; with a BindingSource enum replaces the base class and its typed/untyped subclasses |
-| `TypedBindingEntry.cs` | `property_store/binding_entry.rs` | present | 1/1 | 4/6 (2 waived) | merged: one generic BindingEntry&lt;T&gt; with a BindingSource enum replaces the base class and its typed/untyped subclasses |
+| `SourceUntypedBindingEntry.cs` | `property_store/binding_entry.rs` | partial | 1/1 | 3/5 (1 waived) | merged: one generic BindingEntry&lt;T&gt; with a BindingSource enum replaces the base class and its typed/untyped subclasses |
+| `TypedBindingEntry.cs` | `property_store/binding_entry.rs` | partial | 1/1 | 3/6 (2 waived) | merged: one generic BindingEntry&lt;T&gt; with a BindingSource enum replaces the base class and its typed/untyped subclasses |
 | `UntypedValueUtils.cs` | `styled_property.rs` | present | 1/1 | 0/1 (1 waived) | replaced: `StyledProperty::from_untyped` converts the untyped value and `BindingEntry::convert_and_validate` validates it |
 | `ValueFrame.cs` | `property_store/value_frame.rs` | present | 2/2 | 8/19 (11 waived) |  |
-| `ValueStore.cs` | `property_store/value_store.rs` | present | 1/1 | 38/47 (9 waived) |  |
+| `ValueStore.cs` | `property_store/value_store.rs` | partial | 1/1 | 38/47 (8 waived) |  |
+
+<details><summary><code>BindingEntryBase.cs</code> - 3 missing</summary>
+
+- `BindingEntryBase<TValue, TSource>` (class): 3 missing
+  - `bool IsSubscribed { get; }`
+  - `ValueFrame Frame { get; }` *(protected)*
+  - `abstract TValue GetDefaultValue(AvaloniaObject owner)` *(protected)*
+  - waived (one constructor: `BindingEntry::new` takes the `BindingSource` enum that holds either kind of observable): `.ctor`
+  - waived (the observer callbacks are implemented by the private observers of the entry (`TypedObserver` and `ValueObserver` of the typed `BindingEntry`, `BoxedBindingObserver` of the untyped `BoxedBindingEntry`), one per kind of source, which call `validate` / `convert_and_validate` / `receive`, `set_value` and `binding_completed`): `OnCompleted`, `OnError`, `OnNext`, `OnNext`
+
+</details>
+
+<details><summary><code>EffectiveValue.cs</code> - 3 missing</summary>
+
+- `EffectiveValue` (class): 3 missing
+  - `IValueEntry? BaseValueEntry { get; private set; }`
+  - `bool IsCoercedDefaultValue { get; set; }`
+  - `void UpdateValueEntry(IValueEntry? entry, BindingPriority priority)` *(protected)*
+  - waived (ported as the presence of the uncommon fields of `EffectiveValue&lt;T&gt;`, which hold the coercion callback (`uncommon.is_some()`)): `HasCoercion`
+  - waived (the protected setters are writes to the private `priority` and `base_priority` cells of `EffectiveValue&lt;T&gt;`; there is no subclass to call a setter): `Priority`, `BasePriority`
+
+</details>
+
+<details><summary><code>EffectiveValue`1.cs</code> - 1 missing</summary>
+
+- `EffectiveValue<T>` (class): 1 missing
+  - `override void SetLocalValueAndRaise(ValueStore owner, AvaloniaProperty property, IValueEntry entry)` *(2 of 3 overloads found)*
+
+</details>
+
+<details><summary><code>LocalValueBindingObserverBase.cs</code> - 1 missing</summary>
+
+- `LocalValueBindingObserverBase<T>` (class): 1 missing
+  - `IDisposable? _subscription` *(protected)*
+  - waived (the observer callbacks are implemented by the private observers of the file (`Typed`, `Value`, `DirectTyped`, `DirectValue`, `DirectBoxed`), one per kind of source, which call `next`, `next_value` and `completed`): `OnCompleted`, `OnError`, `OnNext`, `OnNext`
+
+</details>
+
+<details><summary><code>SourceUntypedBindingEntry.cs</code> - 1 missing</summary>
+
+- `SourceUntypedBindingEntry<TTarget>` (class): 1 missing
+  - `override TTarget GetDefaultValue(AvaloniaObject owner)` *(protected)*
+  - waived (the `BindingValue&lt;object?&gt;` overload throws `NotSupportedException` upstream; an untyped value is converted by `resolve_boxed_binding_value` and validated by `BoxedBindingEntry::receive`): `ConvertAndValidate`
+
+</details>
+
+<details><summary><code>TypedBindingEntry.cs</code> - 1 missing</summary>
+
+- `TypedBindingEntry<T>` (class): 1 missing
+  - `override T GetDefaultValue(AvaloniaObject owner)` *(protected)*
+  - waived (one constructor: `BindingEntry::new` takes the `BindingSource` enum that holds either kind of observable): `.ctor`
+  - waived (ported as `BindingEntry::validate` (a plain value) and `BindingEntry::convert_and_validate` (a binding value)): `ConvertAndValidate`
+
+</details>
+
+<details><summary><code>ValueStore.cs</code> - 1 missing</summary>
+
+- `ValueStore` (class): 1 missing
+  - `void OnInheritedEffectiveValueDisposed<T>(StyledProperty<T> property, T oldValue, T newValue)`
+  - waived (ported as `set_local_value` (a typed value); an untyped value goes through `PropertyRoutes::route_set_value` of the property, and the value entry of a binding expression through `EffectiveValueDyn::set_local_value_and_raise_entry` in `on_expression_changed`): `SetLocalValue`, `SetLocalValue`
+  - waived (ported in `diagnostics::FerroObjectDiagnosticExtensions::get_diagnostic`, its one caller): `GetDiagnostic`
+  - waived (the overloads per kind of observable are one `add_binding` (styled) and one `add_direct_binding` (direct) taking the `BindingSource` enum, and `add_binding_expression` for a binding expression): `AddBinding`, `AddBinding`, `AddBinding`
+  - waived (the store does not hold its owner (it is a field of the object): every member that needs the owner takes it as its `owner` argument): `Owner`
+  - waived (the untyped overload is `PropertyRoutes::route_get_value` of the property, which boxes the typed `get_value`): `GetValue`
+
+</details>
 
 ### `Reactive` - files 15/15, types 17/18 (1 waived), members 73/95 (22 waived)
 
@@ -1596,7 +1733,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `UiThreadRenderTimer.cs` | `rendering/ui_thread_render_timer.rs` | present | 1/1 | 3/3 |  |
 | `ZIndexComparer.cs` | `rendering/z_index_comparer.rs` | present | 1/1 | 1/3 (2 waived) |  |
 
-### `Rendering/Composition` - files 26/26, types 41/41, members 255/275 (20 waived)
+### `Rendering/Composition` - files 26/26, types 41/41, members 254/275 (20 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -1618,7 +1755,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `CompositionTransparencyLevel.cs` | `rendering/composition/composition_transparency_level.rs` | present | 1/1 | 5/5 |  |
 | `Compositor.Factories.cs` | `rendering/composition/compositor_factories.rs` | present | 1/1 | 17/17 |  |
 | `Compositor.cs` | `rendering/composition/compositor.rs` | present | 2/2 | 25/26 (1 waived) |  |
-| `ContainerVisual.cs` | `rendering/composition/container_visual.rs`, `rendering/composition/visual.rs` | present | 1/1 | 7/8 (1 waived) | merged: every visual has children, so `CompositionContainerVisual` is an alias of `CompositionVisual` and its members are members of that class |
+| `ContainerVisual.cs` | `rendering/composition/container_visual.rs`, `rendering/composition/visual.rs` | partial | 1/1 | 6/8 (1 waived) | merged: every visual has children, so `CompositionContainerVisual` is an alias of `CompositionVisual` and its members are members of that class |
 | `ElementCompositionPreview.cs` | `rendering/composition/element_composition_preview.rs` | present | 1/1 | 3/3 |  |
 | `Enums.cs` | `rendering/composition/enums.rs` | present | 4/4 | 41/41 |  |
 | `ICompositionTargetDebugEvents.cs` | `rendering/composition/i_composition_target_debug_events.rs` | present | 1/1 | 3/3 |  |
@@ -1626,6 +1763,14 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `MatrixUtils.cs` | `rendering/composition/matrix_utils.rs` | present | 1/1 | 3/3 |  |
 | `Visual.cs` | `rendering/composition/visual.rs` | present | 1/1 | 7/8 (1 waived) |  |
 | `VisualCollection.cs` | `rendering/composition/visual_collection.rs` | present | 1/1 | 6/6 |  |
+
+<details><summary><code>ContainerVisual.cs</code> - 1 missing</summary>
+
+- `CompositionContainerVisual` (class): 1 missing
+  - `bool TryQueryFirstHitTestChild<THitTester, T>(CompositionTarget target, T input, Func<CompositionVisual, bo...` *(internal)*
+  - waived (ported as `CompositionVisualHooks::on_root_changed` of `CompositionVisual`, which does the work of the override of the container visual (the root of the children) and of the base class): `OnRootChangedCore`
+
+</details>
 
 ### `Rendering/Composition/Animations` - files 13/13, types 32/32, members 116/137 (21 waived)
 
@@ -1681,7 +1826,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ServerCompositionSimplePen.cs` | `rendering/composition/drawing/server_composition_simple_pen.rs` | present | 1/1 | 2/2 |  |
 | `ServerResourceHelperExtensions.cs` | `rendering/composition/drawing/server_resource_helper_extensions.rs` | present | 1/1 | 4/4 |  |
 
-### `Rendering/Composition/Expressions` - files 9/9, types 25/26 (1 waived), members 166/210 (44 waived)
+### `Rendering/Composition/Expressions` - files 9/9, types 25/26 (1 waived), members 164/210 (44 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -1689,11 +1834,19 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `DelegateExpressionFfi.cs` | `rendering/composition/expressions/delegate_expression_ffi.rs` | present | 1/1 | 2/10 (8 waived) |  |
 | `Expression.cs` | `rendering/composition/expressions/expression.rs` | present | 12/13 (1 waived) | 77/94 (17 waived) |  |
 | `ExpressionEvaluationContext.cs` | `rendering/composition/expressions/expression_evaluation_context.rs` | present | 4/4 | 10/10 |  |
-| `ExpressionParseException.cs` | `rendering/composition/expressions/expression_parse_exception.rs` | present | 1/1 | 2/2 |  |
+| `ExpressionParseException.cs` | `rendering/composition/expressions/expression_parse_exception.rs` | partial | 1/1 | 0/2 |  |
 | `ExpressionParser.cs` | `rendering/composition/expressions/expression_parser.rs` | present | 1/1 | 1/1 |  |
 | `ExpressionTrackedValues.cs` | `rendering/composition/expressions/expression_tracked_values.rs` | present | 2/2 | 8/8 |  |
 | `ExpressionVariant.cs` | `rendering/composition/expressions/expression_variant.rs` | present | 2/2 | 46/65 (19 waived) |  |
 | `TokenParser.cs` | `rendering/composition/expressions/token_parser.rs` | present | 1/1 | 18/18 |  |
+
+<details><summary><code>ExpressionParseException.cs</code> - 2 missing</summary>
+
+- `ExpressionParseException` (class): 2 missing
+  - `int Position { get; }`
+  - `ExpressionParseException(string message, int position)`
+
+</details>
 
 ### `Rendering/Composition/HitTesting` - files 4/4, types 4/4, members 22/22
 
@@ -1704,7 +1857,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ICompositionHitTester.cs` | `rendering/composition/hit_testing/i_composition_hit_tester.rs` | present | 1/1 | 5/5 |  |
 | `PointCompositionHitTester.cs` | `rendering/composition/hit_testing/point_composition_hit_tester.rs` | present | 1/1 | 5/5 |  |
 
-### `Rendering/Composition/Server` - files 34/34, types 42/42, members 220/269 (49 waived)
+### `Rendering/Composition/Server` - files 34/34, types 42/42, members 219/269 (49 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -1730,7 +1883,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ServerCompositionSurface.cs` | `rendering/composition/server/server_composition_surface.rs` | present | 1/1 | 1/3 (2 waived) | merged: the abstract class is the trait `IServerCompositionSurface` (`bitmap`, `changed`), implemented by `ServerCompositionDrawingSurface` |
 | `ServerCompositionSurfaceVisual.cs` | `rendering/composition/server/server_composition_surface_visual.rs` | present | 1/1 | 3/3 |  |
 | `ServerCompositionTarget.cs` | `rendering/composition/server/server_composition_target.rs` | present | 1/1 | 15/18 (3 waived) |  |
-| `ServerCompositor.Passes.cs` | `rendering/composition/server/server_compositor.rs` | present | 1/1 | 4/4 | partial merged into main file |
+| `ServerCompositor.Passes.cs` | `rendering/composition/server/server_compositor.rs` | partial | 1/1 | 3/4 | partial merged into main file |
 | `ServerCompositor.UserApis.cs` | `rendering/composition/server/server_compositor.rs` | present | 1/1 | 5/5 | partial merged into main file |
 | `ServerCompositor.cs` | `rendering/composition/server/server_compositor.rs` | present | 1/1 | 18/26 (8 waived) |  |
 | `ServerCompositorAnimations.cs` | `rendering/composition/server/server_compositor_animations.rs` | present | 1/1 | 5/5 |  |
@@ -1742,6 +1895,13 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ServerSizeDependantVisual.cs` | `rendering/composition/server/server_size_dependant_visual.rs` | present | 1/1 | 2/3 (1 waived) |  |
 | `ServerVisualRenderContext.cs` | `rendering/composition/server/server_visual_render_context.rs` | present | 1/1 | 2/2 |  |
 | `SimpleServerObject.cs` | `rendering/composition/server/server_object.rs` | present | 1/1 | 3/7 (4 waived) | merged: the base class of the server objects is the trait `IServerObject` (`deserialize_changes`, `deserialize_changes_core`, `values_invalidated`), declared next to `ServerObject` |
+
+<details><summary><code>ServerCompositor.Passes.cs</code> - 1 missing</summary>
+
+- `ServerCompositor` (class): 1 missing
+  - `void EnqueueVisualForReadbackUpdatePass(ServerCompositionVisual visual)`
+
+</details>
 
 ### `Rendering/Composition/Server/DirtyRects` - files 6/6, types 7/7, members 37/37
 
@@ -1962,24 +2122,37 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | Rust file | Reason | Types defined |
 |---|---|---|
 | `animation/animation_task.rs` | the completion of an animation run, the `Task` upstream returns: completed from within a clock tick or a cancellation, so it needs no executor | `AnimationTask`, `State` |
-| `animation/cancellation.rs` | cancellation callbacks for state of the UI thread: a cancellation token runs its callbacks on the cancelling thread, so they must be `Send`, and what an animation does on cancellation is not | `LocalCancellationRegistration` |
-| `animation/time_span.rs` | counterpart of .NET `System.TimeSpan` (signed 100-nanosecond ticks), the time type of the animation system | `TimeSpan` |
+| `animation/time_span.rs` | counterpart of .NET `System.TimeSpan` (signed 100-nanosecond ticks), the time type of the animation system | `NegativeDurationError`, `NegativeTimeSpanError`, `SignedDuration`, `TimeSpan` |
+| `animation/transitions/solid_color_brush_transition.rs` | **unmapped** | `Brush` |
+| `controls/resource_dictionary_reload.rs` | **unmapped** | `Items`, `Owned`, `ResourceDictionaryChange`, `ResourceDictionaryOwnership`, `Themes`, `Versions` |
 | `controls/resource_key.rs` | a value usable as a resource key (value equality and a hash) and the hasher of the resource tables: upstream keys are `object` | `ResourceKey`, `ResourceKeyBuildHasher`, `ResourceKeyHasher`, `ResourceKeyObject` |
+| `controls/resource_preview.rs` | **unmapped** | `Factory`, `Previews`, `Resolver`, `ResourcePreviewGuard`, `ResourcePreviewResolver`, `ResourcePreviewScope` |
+| `controls/resource_provenance.rs` | **unmapped** |  |
 | `data/converters/composite_format.rs` | the composite formatting of .NET (`string.Format`), which the string format of a binding uses | `Float`, `FormatArg`, `FormatError`, `Number`, `Specifier` |
+| `data/core/expression_nodes/function_node.rs` | **unmapped** | `ArgumentObserver`, `ArgumentValue`, `FunctionNode` |
 | `data/core/plugins/markup_members.rs` | member lookup over markup metadata: what the string-path bindings use where upstream reflects over the run-time type of a source object | `MarkupPropertyInfo`, `MethodLookup` |
 | `data/core/plugins/property_info_accessor_factory.rs` | the accessor factories of compiled binding paths for plain properties, in the crate of the paths; upstream's are in `MarkupExtensions/CompiledBindings/PropertyInfoAccessorFactory.cs` of Avalonia.Markup.Xaml | `IndexerAccessor`, `PropertyInfoAccessorFactory` |
 | `data/core/plugins/untyped_accessor_plugin.rs` | property accessors over untyped getters and setters of the markup metadata: takes the place of the accessors upstream builds from `PropertyInfo` | `UntypedAccessor`, `UntypedAccessorPlugin`, `UntypedCanExecute`, `UntypedCommand`, `UntypedCreateDelegate`, `UntypedExecute`, `UntypedGetter`, `UntypedMember`, `UntypedSetter` |
 | `data/core/weak_value.rs` | a reference to a binding source that does not keep it alive: a weak reference to an object upstream | `WeakValue` |
+| `data/local_binding_reload.rs` | **unmapped** | `LocalBindingReload`, `State` |
 | `data/model/i_bindable_indexer.rs` | the contracts of the .NET runtime library that bindings observe on a model object (`INotifyPropertyChanged`, `INotifyCollectionChanged`, `INotifyDataErrorInfo`, events, indexers) and the declaration of a model type, which takes the place of reflection over the object | `BindableArray`, `BindableDictionary`, `IBindableArray`, `IBindableIndexer` |
 | `data/model/i_notify_collection_changed.rs` | the contracts of the .NET runtime library that bindings observe on a model object (`INotifyPropertyChanged`, `INotifyCollectionChanged`, `INotifyDataErrorInfo`, events, indexers) and the declaration of a model type, which takes the place of reflection over the object | `BindableList`, `IBindableList` |
 | `data/model/i_notify_data_error_info.rs` | the contracts of the .NET runtime library that bindings observe on a model object (`INotifyPropertyChanged`, `INotifyCollectionChanged`, `INotifyDataErrorInfo`, events, indexers) and the declaration of a model type, which takes the place of reflection over the object | `INotifyDataErrorInfo` |
 | `data/model/model_type.rs` | the contracts of the .NET runtime library that bindings observe on a model object (`INotifyPropertyChanged`, `INotifyCollectionChanged`, `INotifyDataErrorInfo`, events, indexers) and the declaration of a model type, which takes the place of reflection over the object | `Model`, `ModelMethod`, `ModelType`, `ModelTypeBuilder`, `ModelTypes` |
 | `diagnostics/perf_counters.rs` | counters of the work the framework does per operation, behind the feature `perf-counters` (docs/porting/performance, design 09): not from upstream, which is measured with the tools of its runtime | `PerfCountersSnapshot` |
 | `element_ref.rs` | a reference to an element that the holder does not own, held weakly and compared by identity: the value type of properties that point sideways or up the tree (a placement target, the target of a label), a plain object reference upstream | `ElementRef` |
+| `ferro_property_metadata_construction_oracles.rs` | **unmapped** | `CallbackDrop`, `Event`, `Failure`, `Kind`, `Observation`, `Snapshot`, `Trace`, `Tracked` |
 | `i_support_initialize.rs` | counterpart of .NET `System.ComponentModel.ISupportInitialize` | `ISupportInitialize`, `InitializationError`, `StyledElementInitialize` |
 | `input/i_command.rs` | counterpart of .NET `System.Windows.Input.ICommand` | `ICommand` |
+| `input/input_element_effects.rs` | **unmapped** | `EffectInputAttachment` |
+| `input/input_scope.rs` | **unmapped** | `InputScope`, `InputScopeAddChild`, `InputScopeName` |
+| `input/input_scope_name_value.rs` | **unmapped** | `InputScopeNameValue` |
 | `input/platform/clipboard_error.rs` | the error of a failed clipboard operation, by category: upstream lets the exceptions of the platform through | `ClipboardError`, `ClipboardErrorKind` |
+| `input/text_input/text_input_method_connection.rs` | **unmapped** | `ClientStateVersion`, `CommitAction`, `CompositionState`, `TextInputMethodCommit`, `TextInputMethodComposition`, `TextInputMethodConnection`, `TextInputMethodEditing`, `TextInputMethodError` |
+| `input/text_input/text_input_method_edit.rs` | **unmapped** | `TextInputMethodEdit`, `TextInputMethodState` |
+| `input/text_input/text_input_method_range_geometry.rs` | **unmapped** | `TextInputMethodRangeGeometry`, `TextInputMethodTextBounds` |
 | `layout/layout_manager_tests_bring_into_view.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `LayoutTestControl`, `TestRequest` |
+| `layout/measure_hold.rs` | **unmapped** | `MeasureHold` |
 | `layout/testing.rs` | the private setters of the layout flags of a layoutable, for the benchmarks (the `testing` feature): upstream's layout benchmark reaches them with `UnsafeAccessor` |  |
 | `markup_types/animation.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |  |
 | `markup_types/classes.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |  |
@@ -1987,7 +2160,24 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `markup_types/enums.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |  |
 | `markup_types/named_values.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |  |
 | `markup_types/plain.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |  |
+| `markup_types/rich_text.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |  |
 | `markup_types/values.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |  |
+| `media/acrylic_brush.rs` | **unmapped** | `AcrylicBrush`, `AcrylicBrushBackgroundSource`, `AcrylicState`, `Hsv` |
+| `media/color_matrix.rs` | **unmapped** | `ColorMatrix`, `ColorMatrixAlphaMode` |
+| `media/convolve_matrix.rs` | **unmapped** | `ConvolveMatrix` |
+| `media/effects/custom_effect.rs` | **unmapped** | `AnyCustomEffect`, `CustomEffect`, `CustomEffectClass`, `EffectParameterValue`, `ImmutableCustomEffect` |
+| `media/effects/custom_effect_graph.rs` | **unmapped** | `CustomEffectGraph`, `Loaded` |
+| `media/effects/custom_effect_registry.rs` | **unmapped** | `CustomEffectRegistrationError`, `CustomEffectRegistry`, `ParseFn`, `Registration` |
+| `media/effects/custom_effect_shader.rs` | **unmapped** | `Loaded`, `ShaderEffectDescription`, `ShaderEffectMode`, `ShaderEffectPadding`, `ShaderUniformType`, `ShaderUniformValue` |
+| `media/effects/effect_image.rs` | **unmapped** | `EffectImage`, `EffectImageInner`, `EffectImagePixels`, `EffectImageWeak` |
+| `media/effects/effect_input.rs` | **unmapped** | `EffectHostContext`, `IEffectInputHandler` |
+| `media/effects/immutable_luminance_to_alpha_effect.rs` | **unmapped** | `ImmutableLuminanceToAlphaEffect` |
+| `media/effects/library.rs` | **unmapped** | `BrightnessContrastEffect`, `EdgeDetectEffect`, `GlowEffect`, `GrayscaleEffect`, `InvertEffect`, `SaturationEffect`, `SepiaEffect`, `SharpenEffect`, `TintEffect` |
+| `media/effects/library/interactive.rs` | **unmapped** | `Animated`, `BurningFlameShaderEffect`, `FrameLoop`, `InteractiveBurningFlameEffect`, `InteractivePointerSpotlightEffect`, `InteractiveReactiveGridEffect`, `InteractiveWaterRippleEffect`, `PointerSpotlightShaderEffect`, `ReactiveGridShaderEffect`, `RippleWave`, `WaterRippleShaderEffect` |
+| `media/effects/library/shaders.rs` | **unmapped** | `GridShaderEffect`, `PixelateEffect`, `ScanlineShaderEffect`, `SpotlightShaderEffect` |
+| `media/effects/library/transitions.rs` | **unmapped** | `DissolveTransitionEffect`, `MaskTransitionEffect` |
+| `media/font_fallback_mapping.rs` | **unmapped** | `FontFallbackMapping`, `FontFallbackMappingResult` |
+| `media/font_typography.rs` | **unmapped** | `FontCapitals`, `FontEastAsianLanguage`, `FontEastAsianWidths`, `FontFraction`, `FontNumeralAlignment`, `FontNumeralStyle`, `FontVariants` |
 | `media/fonts/tables/testing/big_endian_buffer.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `BigEndianBuffer` |
 | `media/fonts/tables/testing/synthetic_font.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `SyntheticFont`, `SyntheticFontMemory` |
 | `media/fonts/testing/test_asset_loader.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `TestAssetLoader` |
@@ -1996,17 +2186,28 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `media/fonts/testing/test_font_scope.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `TestFontScope` |
 | `media/fonts/testing/test_fonts.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |  |
 | `media/fonts/testing/test_platform_typeface.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `TestPlatformTypeface` |
+| `media/geometry_path_data.rs` | **unmapped** | `GeometryPath`, `GeometryPathData`, `GeometryPathSegment` |
 | `media/known_color_brushes.rs` | the brush lookups of the known colours, a part of `Media/KnownColors.cs` upstream |  |
+| `media/material_policy.rs` | **unmapped** | `MaterialPolicy`, `PlatformMaterialState`, `PolicyHandler`, `PolicyState` |
 | `media/media_collection.rs` | a reference-counted handle to an observable list that compares by identity, as the media object model shares its collections: object references upstream | `MediaCollection` |
+| `media/path_commands.rs` | **unmapped** | `PathCommand`, `Recorder` |
 | `media/ref_adapter.rs` | the bridge between class handles and the media interfaces (`IBrush`, `IPen`, `ITransform`), which immutable values and mutable classes both implement: an interface cast upstream | `RefAdapter` |
 | `media/shared_brush.rs` | The values of an immutable brush or pen in a form that is Send + Sync: the handles of the brush contract are Rc, so what the render thread draws with is a copy with a stable identity (render thread, stage R1) | `BrushValues`, `Gradient`, `Kind`, `PenValues`, `SharedBrush`, `SharedImageSource`, `SharedPen`, `Tile` |
 | `media/testing.rs` | the glyph bounds of the font tables (`GlyphTypeface.TryGetGlyphBounds`, `GlyphBounds`), for the benchmarks (the `testing` feature): internal upstream, reached by upstream's benchmark project through its access to the internals |  |
+| `media/text_formatting/font_family_line_metrics.rs` | **unmapped** | `FontFamilyLineMetrics` |
 | `media/text_formatting/i_text_drawing_sink.rs` | the drawing calls text needs, as a contract that mirrors the members of `DrawingContext` one to one and that the drawing context implements: upstream draws text onto a `DrawingContext` | `ITextDrawingSink` |
+| `media/text_formatting/shaping_edit.rs` | **unmapped** |  |
 | `media/text_formatting/testing/drawing.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `DrawCall`, `RecordingDrawingSink` |
 | `media/text_formatting/testing/fonts.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `TestFont`, `TestFontManagerImpl`, `TestPlatformTypeface` |
 | `media/text_formatting/testing/shaper.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `TestTextShaperImpl`, `TestTextShaperTypeface` |
 | `media/text_formatting/testing/sources.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `CustomDrawableRun`, `EndOfLineTextSource`, `InvisibleRun`, `ListTextSource`, `MultiBufferTextSource`, `SingleBufferTextSource` |
+| `media/text_formatting/text_geometry_sink.rs` | **unmapped** | `TextGeometrySink` |
 | `media/text_formatting/text_index.rs` | conversion between UTF-16 code unit indices, the index unit of the text subsystem, and UTF-8 byte offsets of a `&str` |  |
+| `media/text_formatting/text_layout_cache.rs` | **unmapped** | `Entry`, `HashKeyHasher`, `Key`, `ParagraphKey`, `PlainTextLayoutRequest`, `State`, `TextLayoutCache` |
+| `media/text_formatting/text_line_metrics_mode.rs` | **unmapped** | `TextLineMetricsMode` |
+| `media/text_formatting/text_paragraph_style.rs` | **unmapped** | `StyledParagraph`, `TextParagraphStyle`, `TextParagraphStyles` |
+| `media/text_formatting/text_tab_layout.rs` | **unmapped** |  |
+| `media/text_formatting/text_tab_stop.rs` | **unmapped** | `TabAlignment`, `TabLeader`, `TextTabError`, `TextTabStop`, `TextTabStops` |
 | `media/text_formatting/unicode/bidi_trie.rs` | generated by scripts/convert-unicode-tries.py from the upstream data file of the same name (`*.trie.cs`) | `BiDiTrie` |
 | `media/text_formatting/unicode/east_asian_width_trie.rs` | generated by scripts/convert-unicode-tries.py from the upstream data file of the same name (`*.trie.cs`) | `EastAsianWidthTrie` |
 | `media/text_formatting/unicode/script_extensions_data.rs` | generated by scripts/convert-unicode-tries.py from the upstream data file `ScriptExtensions.data.cs` |  |
@@ -2015,10 +2216,15 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `media/text_formatting/unicode/ucd_test_data.rs` | helpers of the Unicode conformance tests, which read the test files of the Unicode Character Database from the repository where upstream downloads them at test time |  |
 | `media/text_formatting/unicode/unicode_data_trie.rs` | generated by scripts/convert-unicode-tries.py from the upstream data file of the same name (`*.trie.cs`) | `UnicodeDataTrie` |
 | `media/text_line_bounds.rs` | **unmapped** | `TextLineBounds` |
+| `media/theme_shadow.rs` | **unmapped** | `DropShadowRecipe`, `Shadow`, `ThemeShadow`, `ThemeShadowError`, `ThemeShadowTheme`, `UIElementWeakCollection` |
 | `media/tile_mode.rs` | the enum `TileMode`, declared in `Media/TileBrush.cs` upstream | `TileMode` |
+| `media/xaml_composition_brush_base.rs` | **unmapped** | `XamlBrushChanges`, `XamlBrushState`, `XamlCompositionBrushBase`, `XamlCompositionBrushBaseImpl` |
+| `media/xaml_light.rs` | **unmapped** | `XamlLight`, `XamlLightImpl`, `XamlLightState` |
+| `metadata/accessor.rs` | **unmapped** | `OwnedMarkupAccessorFallback`, `SharedMarkupAccessor` |
 | `metadata/markup_macros.rs` | the declaration forms of markup metadata (`ferro_markup_type!` and its kin): take the place of the attributes and the reflection of upstream |  |
 | `metadata/members.rs` | **unmapped** |  |
 | `metadata/property_accessors.rs` | the Rust accessors of registered property definitions, for the Rust emitter of the XAML compiler (docs/porting/xaml.md, section 9): upstream's compiler loads a property definition from its static field | `PropertyAccessor` |
+| `metadata/receiver.rs` | **unmapped** | `MarkupReceiverProbe`, `OwnedMarkupReceiverFallback`, `SharedMarkupReceiver` |
 | `metadata/service_provider.rs` | counterpart of .NET `System.IServiceProvider`, the service provider contract of markup | `EmptyServiceProvider`, `IServiceProvider` |
 | `metadata/typed_path.rs` | the typed path hook of a plain property declared in markup metadata, with which a compiled binding of one plain property is evaluated without boxing | `TypedPathElement`, `TypedPathFallback`, `TypedPathGetter`, `TypedPathNotifying`, `TypedPathProbe`, `TypedPathSetter`, `TypedPathShared` |
 | `numerics/matrix3x2.rs` | the `System.Numerics` types the composition API takes (Vector2, Vector3, Vector4, Matrix3x2, Matrix4x4, Quaternion) and their scalar helpers: part of the .NET runtime library upstream | `Matrix3x2` |
@@ -2029,28 +2235,40 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `numerics/vector2.rs` | the `System.Numerics` types the composition API takes (Vector2, Vector3, Vector4, Matrix3x2, Matrix4x4, Quaternion) and their scalar helpers: part of the .NET runtime library upstream | `Vector2` |
 | `numerics/vector3.rs` | the `System.Numerics` types the composition API takes (Vector2, Vector3, Vector4, Matrix3x2, Matrix4x4, Quaternion) and their scalar helpers: part of the .NET runtime library upstream | `Vector3` |
 | `numerics/vector4.rs` | the `System.Numerics` types the composition API takes (Vector2, Vector3, Vector4, Matrix3x2, Matrix4x4, Quaternion) and their scalar helpers: part of the .NET runtime library upstream | `Vector4` |
+| `platform/gpu_effects.rs` | **unmapped** | `EffectRasterRegion`, `LightingParameters`, `PixelOperation`, `PositionedLight` |
 | `platform/i_drawing_context_impl_with_effects.rs` | the contract `IDrawingContextImplWithEffects`, declared in `Platform/IDrawingContextImpl.cs` upstream | `IDrawingContextImplWithEffects` |
 | `platform/i_drawing_context_impl_with_fragments.rs` | **unmapped** | `IDrawingContextImplWithFragments`, `IDrawingFragment` |
+| `platform/i_drawing_context_impl_with_layer_effects.rs` | **unmapped** | `IDrawingContextImplWithLayerEffects`, `MultiplyLayerFactors` |
+| `platform/i_drawing_context_impl_with_scene_3d.rs` | **unmapped** | `IDrawingContextImplWithScene3D` |
+| `platform/i_font_fallback_mapper.rs` | **unmapped** | `IFontFallbackMapper` |
+| `platform/leased_platform_handle.rs` | **unmapped** | `LeasedPlatformHandle` |
 | `platform/native_library.rs` | A shared library opened at run time and its functions resolved by name: what the runtime of the original does for a platform invoke (`DllImport`); the one loader of the X11 (GLib, GTK, libSM, libICE), Wayland (libgbm, libdrm) and Linux framebuffer (libinput, libdrm, libgbm) backends | `NativeLibrary`, `NativeLibraryError` |
 | `platform/render_interface_access.rs` | access to the platform render interface registered by the rendering backend, in one place (a service locator lookup at each site upstream) |  |
 | `platform/storage/file_io/path.rs` | the path string operations of .NET `System.IO.Path` the storage helpers need |  |
 | `platform/surfaces/platform_text_rendering_parameters.rs` | **unmapped** | `PlatformTextRenderingParameters`, `SubpixelGeometry` |
+| `property_store/boxed_binding_entry.rs` | **unmapped** | `BoxedBindingEntry`, `BoxedBindingObserver` |
+| `property_store/boxed_local_value_binding_observer.rs` | **unmapped** | `BoxedLocalValueBindingObserver`, `Observer` |
+| `property_store/hot_value.rs` | **unmapped** | `HotStamp`, `HotValue` |
+| `property_store/setter_binding_entry.rs` | **unmapped** | `SetterBindingEntry`, `State` |
 | `register_types.rs` | the type table of the crate (porting guide, Classes): its namespaces, its classes and what it states about itself for markup; takes the place of the assembly metadata the upstream compiler and loader reflect over |  |
 | `rendering/auto_reset_event.rs` | counterpart of .NET `AutoResetEvent` for the waits of the render thread; bare WebAssembly has no blocking wait | `AutoResetEvent` |
+| `rendering/composition/alpha_mask.rs` | **unmapped** | `AlphaMask` |
 | `rendering/composition/animations/animation_controller.rs` | **unmapped** | `AnimationController`, `AnimationControllerClock`, `AnimationControllerProgressBehavior`, `PreparedAnimation`, `ProgressSpan` |
 | `rendering/composition/animations/composition_easing_function.rs` | **unmapped** | `BackEasingFunction`, `BounceEasingFunction`, `CircleEasingFunction`, `CompositionEasingFunction`, `CompositionEasingFunctionMode`, `CubicBezierEasingFunction`, `ElasticEasingFunction`, `ExponentialEasingFunction`, `LinearEasingFunction`, `PowerEasingFunction`, `SineEasingFunction`, `StepEasingFunction`, ... (13 total) |
 | `rendering/composition/animations/natural_motion_animation.rs` | **unmapped** | `NaturalMotionAnimation` |
 | `rendering/composition/animations/natural_motion_animation_instance.rs` | **unmapped** | `SpringNaturalMotionAnimationInstance`, `SpringNaturalMotionParameters`, `SpringValue` |
 | `rendering/composition/animations/subchannel_animation_instance.rs` | **unmapped** | `Subchannel`, `SubchannelAnimation`, `SubchannelAnimationInstance` |
-| `rendering/composition/brushes/composition_effect_brush.rs` | **unmapped** | `CompositionBackdropBrush`, `CompositionEffectBrush`, `CompositionEffectBrushData` |
+| `rendering/composition/brushes/composition_effect_brush.rs` | **unmapped** | `CompositionBackdropBrush`, `CompositionEffectBrush`, `CompositionEffectBrushData`, `CompositionHostBackdropBrush` |
 | `rendering/composition/brushes/composition_gradient_winui.rs` | **unmapped** | `IServerBrushWinUiTransform` |
 | `rendering/composition/brushes/composition_nine_grid_brush.rs` | **unmapped** | `CompositionMaskBrush`, `CompositionNineGridBrush` |
-| `rendering/composition/brushes/server_composition_effect_brush.rs` | **unmapped** | `EffectBrushChanges`, `LayerPhase`, `ServerCompositionBackdropBrush`, `ServerCompositionEffectBrush` |
+| `rendering/composition/brushes/server_composition_effect_brush.rs` | **unmapped** | `EffectBrushChanges`, `EffectGraphHost`, `EffectGraphPainter`, `LayerPhase`, `ServerCompositionBackdropBrush`, `ServerCompositionEffectBrush`, `ServerCompositionHostBackdropBrush` |
 | `rendering/composition/brushes/server_composition_nine_grid_brush.rs` | **unmapped** | `NineGridEdges`, `ServerCompositionMaskBrush`, `ServerCompositionNineGridBrush` |
 | `rendering/composition/brushes/server_composition_surface_brush.rs` | **unmapped** | `ServerCompositionSurfaceBrush` |
+| `rendering/composition/brushes/server_xaml_composition_brush.rs` | **unmapped** | `ServerXamlCompositionBrush` |
 | `rendering/composition/composition_batch.rs` | **unmapped** | `AnimationCompletion`, `BatchCompletionGuard`, `BatchShared`, `BatchState`, `CompletedHandlers`, `CompositionBatchCompletedEventArgs`, `CompositionBatchTypes`, `CompositionCommitBatch`, `CompositionScopedBatch`, `CompositorBatches` |
 | `rendering/composition/composition_cache_mode.rs` | `CompositionCacheMode` and `CompositionBitmapCache`, classes that upstream's source generator writes from `composition-schema.xml`: the only cache mode is the bitmap cache, so the abstract class is an alias of it | `CompositionBitmapCache`, `CompositionCacheMode` |
 | `rendering/composition/composition_clip.rs` | **unmapped** | `CompositionClip`, `CompositionClipKind`, `GeometricClip`, `InsetClip`, `RectangleClip` |
+| `rendering/composition/composition_draw_item.rs` | **unmapped** | `ChunkBounds`, `CompositionDrawItem`, `CompositionEntry`, `DrawItemList` |
 | `rendering/composition/composition_geometry.rs` | **unmapped** | `CompositionGeometry`, `CompositionGeometryKind`, `CompositionPath` |
 | `rendering/composition/composition_light.rs` | **unmapped** | `CompositionLight`, `CompositionLightKind`, `VisualUnorderedCollection` |
 | `rendering/composition/composition_object_impls.rs` | **unmapped** |  |
@@ -2064,10 +2282,17 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `rendering/composition/composition_winui_enums.rs` | **unmapped** | `CompositionBackfaceVisibility`, `CompositionBorderMode`, `CompositionCompositeMode`, `CompositionMappingMode` |
 | `rendering/composition/composition_winui_factories.rs` | **unmapped** |  |
 | `rendering/composition/composition_winui_layer_factories.rs` | **unmapped** |  |
+| `rendering/composition/drawing/composition_painted_brush.rs` | **unmapped** | `CompositionPaintedBrush`, `PaintedShape` |
 | `rendering/composition/drop_shadow.rs` | **unmapped** | `DropShadow` |
 | `rendering/composition/effects/composition_effect_factory.rs` | **unmapped** | `CompositionEffectFactory`, `CompositionEffectFactoryError`, `CompositionEffectFactoryLoadStatus` |
-| `rendering/composition/effects/effect_graph.rs` | **unmapped** | `EffectColor`, `EffectGraph`, `EffectNode`, `EffectNodeKind`, `EffectPropertyValue`, `EffectScalar`, `LoadError` |
-| `rendering/composition/effects/graphics_effects.rs` | **unmapped** | `CanvasComposite`, `ColorSourceEffect`, `CompositeEffect`, `CompositionEffectSourceParameter`, `CrossFadeEffect`, `EffectBorderMode`, `EffectOptimization`, `GaussianBlurEffect`, `GraphicsEffect`, `GraphicsEffectSource`, `OpacityEffect`, `SaturationEffect` |
+| `rendering/composition/effects/custom_effect_painting.rs` | **unmapped** | `CustomEffectGraphHost` |
+| `rendering/composition/effects/effect_graph.rs` | **unmapped** | `EffectColor`, `EffectGraph`, `EffectMatrix`, `EffectMemberKind`, `EffectNode`, `EffectNodeKind`, `EffectPropertyValue`, `EffectScalar`, `LoadError`, `PixelOp` |
+| `rendering/composition/effects/effect_prewarm.rs` | **unmapped** | `EffectPrewarmList`, `PrewarmEntry`, `PrewarmItem` |
+| `rendering/composition/effects/graphics_effects.rs` | **unmapped** | `AlphaMaskEffect`, `ArithmeticCompositeEffect`, `BlendEffect`, `BlendEffectMode`, `BorderEffect`, `CanvasComposite`, `CanvasEdgeBehavior`, `ColorMatrixEffect`, `ColorSourceEffect`, `CompositeEffect`, `CompositionEffectSourceParameter`, `ConvolveMatrixEffect`, ... (28 total) |
+| `rendering/composition/frames/lifetime.rs` | **unmapped** | `BudgetInner`, `CompletionInner`, `CompletionState`, `FrameBudget`, `FrameBudgetLimits`, `FrameBudgetUsage`, `FrameInner`, `FrameLease`, `FrameMailbox`, `FrameMailboxSubscription`, `FrameReservation`, `FrameRetirement`, ... (17 total) |
+| `rendering/composition/frames/metadata.rs` | **unmapped** | `DeviceIdentity`, `FrameAlpha`, `FrameColor`, `FrameError`, `FrameFormat`, `FrameIdentity`, `FrameMetadata`, `FramePlane`, `FrameRegion`, `FrameRotation` |
+| `rendering/composition/frames/policy.rs` | **unmapped** | `Acceleration`, `FrameImportCapabilities`, `FrameTransferCounters`, `FrameTransferSnapshot`, `GpuTransferCount`, `GpuTransferReason`, `PixelTransferCount`, `PixelTransferPurpose`, `PresentationPolicy`, `PresentationRoute`, `PresentationSelection` |
+| `rendering/composition/frames/tests.rs` | the unit tests of the module | `Resource` |
 | `rendering/composition/generated/ambient_light.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `AmbientLightChangedFields`, `AmbientLightHooks`, `AmbientLightProps`, `ServerAmbientLightHooks`, `ServerAmbientLightProps` |
 | `rendering/composition/generated/composition_animations.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time |  |
 | `rendering/composition/generated/composition_bitmap_cache.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionBitmapCacheChangedFields`, `CompositionBitmapCacheHooks`, `CompositionBitmapCacheProps`, `ServerCompositionBitmapCacheHooks`, `ServerCompositionBitmapCacheProps` |
@@ -2109,7 +2334,7 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `rendering/composition/generated/composition_target.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionTargetChangedFields`, `CompositionTargetHooks`, `CompositionTargetProps`, `ServerCompositionTargetHooks`, `ServerCompositionTargetProps` |
 | `rendering/composition/generated/composition_tile_brush.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionTileBrushChangedFields`, `ServerCompositionTileBrushHooks`, `ServerCompositionTileBrushProps` |
 | `rendering/composition/generated/composition_view_box.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionViewBoxChangedFields`, `CompositionViewBoxHooks`, `CompositionViewBoxProps`, `ServerCompositionViewBoxHooks`, `ServerCompositionViewBoxProps` |
-| `rendering/composition/generated/composition_visual.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionVisualChangedFields`, `CompositionVisualHooks`, `CompositionVisualProps`, `ServerCompositionVisualHooks`, `ServerCompositionVisualProps` |
+| `rendering/composition/generated/composition_visual.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionVisualChangedFields`, `CompositionVisualHooks`, `CompositionVisualProps`, `CompositionVisualRareProps`, `ServerCompositionVisualHooks`, `ServerCompositionVisualProps`, `ServerCompositionVisualRareProps` |
 | `rendering/composition/generated/composition_visual_collection.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionVisualCollectionHooks`, `CompositionVisualCollectionProps`, `ServerCompositionVisualCollectionHooks`, `ServerCompositionVisualCollectionProps` |
 | `rendering/composition/generated/composition_visual_surface.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionVisualSurfaceChangedFields`, `CompositionVisualSurfaceHooks`, `CompositionVisualSurfaceProps`, `ServerCompositionVisualSurfaceHooks`, `ServerCompositionVisualSurfaceProps` |
 | `rendering/composition/generated/distant_light.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `DistantLightChangedFields`, `DistantLightHooks`, `DistantLightProps`, `ServerDistantLightHooks`, `ServerDistantLightProps` |
@@ -2130,22 +2355,25 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `rendering/composition/interactions/interaction_tracker.rs` | **unmapped** | `CompositionInteractionSourceCollection`, `CustomKind`, `CustomRun`, `IInteractionTrackerOwner`, `InertiaRun`, `InteractionTracker`, `InteractionTrackerAnimation`, `InteractionTrackerClampingOption`, `InteractionTrackerCustomAnimationStateEnteredArgs`, `InteractionTrackerIdleStateEnteredArgs`, `InteractionTrackerInertiaStateEnteredArgs`, `InteractionTrackerInteractingStateEnteredArgs`, ... (21 total) |
 | `rendering/composition/interactions/interaction_tracker_inertia_modifier.rs` | **unmapped** | `InteractionTrackerInertiaModifier`, `InteractionTrackerInertiaMotion`, `InteractionTrackerInertiaRestingValue` |
 | `rendering/composition/interactions/visual_interaction_source.rs` | **unmapped** | `InteractionChainingMode`, `InteractionSourceConfiguration`, `InteractionSourceMode`, `InteractionSourceRedirectionMode`, `Manipulation`, `Rail`, `VisualInteractionSource`, `VisualInteractionSourceRedirectionMode` |
+| `rendering/composition/kept_composition_visuals.rs` | **unmapped** | `KeptComposition`, `KeptCompositionVisual`, `KeptCompositionVisuals` |
 | `rendering/composition/layer_visual.rs` | **unmapped** | `LayerVisual` |
 | `rendering/composition/loaded_image_surface.rs` | **unmapped** | `LoadedImageSourceLoadStatus`, `LoadedImageSurface` |
 | `rendering/composition/redirect_visual.rs` | **unmapped** | `RedirectVisual` |
 | `rendering/composition/render_interface_feature.rs` | a feature of the render interface as a handle bound to the compositor lock, which lends the feature inside the lock and is dropped there: upstream hands the feature object itself to the UI thread and the garbage collector shares it (render thread, stage R5.8) | `RenderInterfaceFeature` |
-| `rendering/composition/server/compositor_lock.rs` | The compositor lock as a type: upstream confines the server side to lock (_lock) by convention, here the lock holds the server compositor (render thread, stage R5) | `CompositorLock`, `CompositorLockGuard`, `LockBound`, `LockState`, `LockedServerCompositor` |
+| `rendering/composition/server/compositor_lock.rs` | The compositor lock as a type: upstream confines the server side to lock (_lock) by convention, here the lock holds the server compositor (render thread, stage R5) | `CompositorLock`, `CompositorLockGuard`, `DeferredDrop`, `LockBound`, `LockState`, `LockedServerCompositor` |
+| `rendering/composition/server/render_scope.rs` | **unmapped** | `RenderRoot` |
 | `rendering/composition/server/server_composition_cache_mode.rs` | the server side of `CompositionCacheMode`, a class that upstream's source generator writes from `composition-schema.xml`; `Rendering/Composition/Server/ServerCompositionCacheMode.cs` itself is mapped to the bitmap cache |  |
 | `rendering/composition/server/server_composition_clip.rs` | **unmapped** | `CompositionClipShape` |
 | `rendering/composition/server/server_composition_geometry.rs` | **unmapped** | `GeometryCache`, `IServerCompositionGeometry` |
-| `rendering/composition/server/server_composition_light.rs` | **unmapped** | `IServerCompositionLight`, `LightAttenuation`, `LightColor`, `LightMap`, `LightObserver`, `LightSource`, `LitContent`, `ServerLightState`, `ServerVisualUnorderedCollection` |
+| `rendering/composition/server/server_composition_light.rs` | **unmapped** | `IServerCompositionLight`, `LightAttenuation`, `LightColor`, `LightMap`, `LightObserver`, `LightSource`, `LightingMaterial`, `LitContent`, `LitContentKind`, `ServerLightState`, `ServerVisualUnorderedCollection`, `XamlLightChanges` |
 | `rendering/composition/server/server_composition_property_set.rs` | **unmapped** | `PropertySetChanges`, `ServerCompositionPropertySet` |
 | `rendering/composition/server/server_composition_shape.rs` | **unmapped** | `CompositionShapePen`, `ServerCompositionShapeCollection` |
 | `rendering/composition/server/server_composition_view_box.rs` | **unmapped** | `ServerCompositionViewBox`, `ViewBoxMapping` |
 | `rendering/composition/server/server_composition_visual/composition_clip.rs` | **unmapped** |  |
 | `rendering/composition/server/server_composition_visual/winui_members.rs` | **unmapped** |  |
-| `rendering/composition/server/server_composition_visual_collection.rs` | the server side of the children collection of a visual, a class that upstream's source generator writes whole from `composition-schema.xml` | `ServerCompositionVisualCollection` |
+| `rendering/composition/server/server_composition_visual_collection.rs` | the server side of the children collection of a visual, a class that upstream's source generator writes whole from `composition-schema.xml` | `ChildrenTable`, `ServerCompositionVisualCollection` |
 | `rendering/composition/server/server_composition_visual_surface.rs` | **unmapped** | `FrozenContent`, `ServerCompositionVisualSurface` |
+| `rendering/composition/server/server_draw_items.rs` | **unmapped** | `ServerDrawItem`, `ServerDrawItems` |
 | `rendering/composition/server/server_drop_shadow.rs` | **unmapped** | `ServerDropShadow` |
 | `rendering/composition/server/server_layer_visual.rs` | **unmapped** | `LayerMode`, `ServerLayerVisual` |
 | `rendering/composition/server/server_loaded_image_surface.rs` | **unmapped** | `ServerLoadedImageSurface` |
@@ -2155,23 +2383,32 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `rendering/composition/server/server_sprite_visual.rs` | **unmapped** | `ServerSpriteVisual` |
 | `rendering/composition/shape_visual.rs` | **unmapped** | `ShapeVisual` |
 | `rendering/composition/sprite_visual.rs` | **unmapped** | `SpriteVisual` |
+| `rendering/composition/system_backdrops.rs` | **unmapped** | `ControllerCore`, `Decision`, `DesktopAcrylicController`, `DesktopAcrylicKind`, `ICompositionSupportsSystemBackdrop`, `MicaController`, `MicaKind`, `PlatformSystemBackdrop`, `PlatformSystemBackdropKind`, `SystemBackdropColors`, `SystemBackdropConfiguration`, `SystemBackdropController`, ... (16 total) |
 | `rendering/composition/test_compositor.rs` | a compositor for the tests of the composition API that need no visual tree (upstream's `CompositorTestServices` without its top-level) | `TestCompositor` |
 | `rendering/composition/testing.rs` | a draw list visual without a visual of the tree, for the benchmarks (the `testing` feature): the internal constructor of `CompositionDrawListVisual` that upstream's benchmark project calls through its access to the internals |  |
+| `rendering/composition/theme_shadow_visual.rs` | **unmapped** | `ShadowShape`, `ThemeShadowHandler`, `ThemeShadowVisual` |
 | `rendering/i_hit_tester.rs` | the contract `IHitTester`, declared in `Rendering/IRenderer.cs` upstream | `IHitTester` |
 | `rendering/managed_hit_tester.rs` | a hit tester that walks the visual tree directly (an implementation of `IHitTester` that needs no compositor) | `ManagedHitTester` |
+| `rendering/native_render_scope.rs` | **unmapped** | `Pool` |
+| `rendering/scene3d/tests.rs` | the unit tests of the module |  |
 | `rendering/scene_graph/scene_graph_test_support.rs` | test doubles of the scene graph unit tests (the Moq mocks of `Rendering/SceneGraph/*Tests.cs`) | `Counter`, `TestBitmapImpl`, `TestCustomOperation`, `TestGeometryImpl`, `TestPen` |
-| `rendering/testing/mock_drawing_context_impl.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `DrawingLog`, `MockDrawingContextImpl`, `MockDrawingContextLayerImpl`, `MockRenderTargetBitmapImpl` |
+| `rendering/testing/mock_drawing_context_impl.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `DrawingLog`, `EntryHook`, `MockDrawingContextImpl`, `MockDrawingContextLayerImpl`, `MockLockedFramebuffer`, `MockRenderTargetBitmapImpl` |
 | `rendering/testing/mock_platform_render_interface.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `BackendContextFactory`, `MockGeometryImpl`, `MockGlyphRunImpl`, `MockPlatformRenderInterface`, `MockPlatformRenderInterfaceContext`, `MockRegion`, `MockRenderTarget`, `MockStreamGeometryBuilder`, `MockStreamGeometryImpl` |
 | `rust_paths.rs` | generated by scripts/generate_markup_types.py: the public Rust paths of the registered types of the crate, which the emitter of the XAML compiler writes into generated code |  |
+| `styling/selector_candidates.rs` | **unmapped** | `Cache`, `CandidateCache`, `IndexLink`, `IndexState`, `Narrowed`, `StyleCandidates`, `TypeCandidate` |
+| `styling/target_property_path.rs` | **unmapped** | `TargetPropertyPath` |
 | `styling/test_support.rs` | classes shared by the styling tests: the control library is a separate crate, so the tests use minimal classes in place of the controls of the upstream tests | `ChildIndexHandlers`, `Class1`, `Class2`, `Class3`, `PanelIndexProvider`, `StyledAsClass1`, `TestPanel`, `TestRoot` |
 | `styling/testing.rs` | the port of `StyleHelpers` of the upstream test projects, for this crate and the crates built on it, and the members of styling the benchmarks reach (the trait of the kinds of selectors, the styling pass of the value store), which upstream's benchmark project reaches through its access to the internals |  |
-| `threading/dispatcher_task.rs` | futures that run on a dispatcher: the executor half of what upstream gets from `Task` and its synchronization context (porting guide: asynchronous members return DispatcherTask) | `DispatcherTask`, `LocalTask`, `TaskCompletion`, `TaskShared`, `TaskState`, `TaskStatus`, `TaskWaker` |
+| `styling/theme_candidates.rs` | **unmapped** | `Builder`, `Cache`, `Node`, `Plan`, `SelectorBound`, `Step`, `ThemeCandidates`, `ThemePlans` |
+| `threading/dispatcher_spawn.rs` | **unmapped** | `DispatcherSchedule` |
+| `threading/dispatcher_task.rs` | futures that run on a dispatcher: the executor half of what upstream gets from `Task` and its synchronization context (porting guide: asynchronous members return DispatcherTask) | `DispatcherTask`, `TaskBody`, `TaskCompletion`, `TaskShared`, `TaskStart`, `TaskState`, `TaskStatus` |
 | `threading/dispatcher_tests_exception.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `DispatcherTests` |
-| `type_system.rs` | object model runtime (Ref/WeakRef handles, TypeInfo, class macros): replaces the CLR type system, virtual dispatch and GC references | `ClassDefaults`, `IntoRef`, `Nullable`, `ObjectType`, `Ref`, `StaticType`, `Subclassable`, `TypeInfo`, `TypeRegistry`, `Upcast`, `WeakRef` |
+| `type_system.rs` | object model runtime (Ref/WeakRef handles, TypeInfo, class macros): replaces the CLR type system, virtual dispatch and GC references | `ClassDefaults`, `DefaultConstructible`, `IntoRef`, `Nullable`, `ObjectType`, `Ref`, `StaticType`, `Subclassable`, `TypeIdentity`, `TypeInfo`, `TypeRegistry`, `Upcast`, ... (13 total) |
 | `utilities/cancel_event_args.rs` | counterpart of .NET `System.ComponentModel.CancelEventArgs` | `CancelEventArgs` |
 | `utilities/compare_info.rs` | counterpart of .NET `StringComparison`, `CompareOptions` and `CultureInfo.CompareInfo` | `CompareInfo`, `CompareOptions`, `ICompareRules`, `OrdinalUnits`, `StringComparison` |
-| `utilities/culture_info.rs` | minimal counterpart of .NET `System.Globalization.CultureInfo` | `CultureInfo`, `CultureTypes` |
-| `utilities/date_time.rs` | counterpart of a .NET runtime library type: `System.DateTime`, `DateTimeOffset`, `DateTimeKind`, `DateTimeStyles`, `DateTimeFormatInfo` and the engine of their format strings | `DateTime`, `UtcNowProvider` |
+| `utilities/culture_info.rs` | minimal counterpart of .NET `System.Globalization.CultureInfo` | `CultureIdentity`, `CultureInfo`, `CultureTypes` |
+| `utilities/current_locale.rs` | **unmapped** | `Ambient` |
+| `utilities/date_time.rs` | counterpart of a .NET runtime library type: `System.DateTime`, `DateTimeOffset`, `DateTimeKind`, `DateTimeStyles`, `DateTimeFormatInfo` and the engine of their format strings | `DateTime`, `SystemTimeRangeError`, `UtcNowProvider` |
 | `utilities/date_time_format.rs` | counterpart of a .NET runtime library type: `System.DateTime`, `DateTimeOffset`, `DateTimeKind`, `DateTimeStyles`, `DateTimeFormatInfo` and the engine of their format strings | `Cursor`, `DateNumber`, `DateOrder`, `Fields`, `FormatContext`, `Parsed` |
 | `utilities/date_time_format_info.rs` | counterpart of a .NET runtime library type: `System.DateTime`, `DateTimeOffset`, `DateTimeKind`, `DateTimeStyles`, `DateTimeFormatInfo` and the engine of their format strings | `CalendarWeekRule`, `DateTimeFormatInfo`, `DateTimeFormatInfoRef`, `DateTimeFormatProvider` |
 | `utilities/date_time_kind.rs` | counterpart of a .NET runtime library type: `System.DateTime`, `DateTimeOffset`, `DateTimeKind`, `DateTimeStyles`, `DateTimeFormatInfo` and the engine of their format strings | `DateTimeKind` |
@@ -2187,12 +2424,16 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `utilities/number_format.rs` | counterpart of a .NET runtime library type: `System.Globalization.NumberFormatInfo`, `NumberStyles` and the numeric format strings | `NumberBuffer`, `NumberParseError` |
 | `utilities/number_format_info.rs` | counterpart of a .NET runtime library type: `System.Globalization.NumberFormatInfo`, `NumberStyles` and the numeric format strings | `NumberFormatInfo` |
 | `utilities/number_styles.rs` | counterpart of a .NET runtime library type: `System.Globalization.NumberFormatInfo`, `NumberStyles` and the numeric format strings | `NumberStyles` |
+| `utilities/option_cell.rs` | **unmapped** | `OptionCell` |
 | `utilities/read_only_memory.rs` | counterpart of .NET `ReadOnlyMemory&lt;T&gt;`: the text of the text formatting subsystem | `ReadOnlyMemory` |
+| `utilities/release_excess.rs` | **unmapped** | `ReleaseExcess` |
 | `utilities/test_culture_data_provider.rs` | a culture data provider for tests (`en`, `en-US`, `en-GB`, with the values .NET reports) | `TestCultureDataProvider` |
 | `utilities/text_info.rs` | minimal counterpart of .NET `System.Globalization.TextInfo` | `TextInfo` |
 | `utilities/thread_bound.rs` | A part of a shared render resource that stays on the thread that created it; the original relies on convention where Rust needs the object to be Send + Sync (render thread, stage R1) | `ThreadBound` |
 | `utilities/time_zone_info.rs` | minimal counterpart of .NET `System.TimeZoneInfo`: the offset of local time comes from a provider of the platform layer | `LocalUtcOffsetProvider`, `TimeZoneInfo` |
-| `utilities/uri.rs` | minimal counterpart of .NET `System.Uri`, covering what resource and font keys need | `Uri`, `UriFormatError`, `UriKind` |
+| `utilities/uri.rs` | minimal counterpart of .NET `System.Uri`, covering what resource and font keys need | `Uri`, `UriFormatError`, `UriKind`, `UriToUrlError` |
+| `utilities/uri_ref.rs` | **unmapped** | `UriRef` |
 | `visual/composition_facades.rs` | **unmapped** | `CompositionFacades`, `FacadeTransitions`, `ScalarTransition`, `Vector3Transition`, `Vector3TransitionComponents` |
+| `visual/theme_shadow.rs` | **unmapped** |  |
 
-Tests, examples and build scripts (not scanned): `animation/tests/animatable_tests.rs`, `animation/tests/animation_iteration_tests.rs`, `animation/tests/brush_transition_tests.rs`, `animation/tests/effect_tests.rs`, `animation/tests/key_spline_tests.rs`, `animation/tests/mod.rs`, `animation/tests/page_transition_tests.rs`, `animation/tests/spring_tests.rs`, `animation/tests/style_animation_tests.rs`, `animation/tests/transitions_tests.rs`, `build.rs`, `controls/resource_tests.rs`, `data/converters/composite_format_tests.rs`, `data/core/plugins/markup_members_tests.rs`, `diagnostics/diagnostics_tests.rs`, `diagnostics/perf_counters_tests.rs`, `ferro_object_tests.rs`, `flow_direction_tests.rs`, `input/data_transfer_tests.rs`, `input/input_tests.rs`, `interactivity/interactive_tests.rs`, `layout/layout_helper_tests.rs`, `layout/layout_queue_tests.rs`, `logical_tree/logical_extensions_tests.rs`, `markup_types/markup_types_tests.rs`, `media/color_tests.rs`, `media/drawing_context_tests.rs`, `media/font_manager_tests.rs`, `media/fonts/font_collection_tests.rs`, `media/fonts/tables/cmap/cmap_table_tests.rs`, `media/fonts/tables/glyf/glyf_table_contour_walk_tests.rs`, `media/fonts/tables/glyf/glyf_table_point_matching_tests.rs`, `media/fonts/tables/glyf/glyf_table_tests.rs`, `media/fonts/tables/head_table_tests.rs`, `media/fonts/tables/loca_table_tests.rs`, `media/fonts/tables/maxp_table_tests.rs`, `media/fonts/tables/os2_table_tests.rs`, `media/formatted_text_tests.rs`, `media/glyph_run_tests.rs`, `media/glyph_typeface_tests.rs`, `media/imaging/imaging_tests.rs`, `media/media_context_tests.rs`, `media/synthetic_font_variable_tests.rs`, `media/text_formatting/shaped_buffer_tests.rs`, `media/text_formatting/split_text_runs_tests.rs`, `media/text_formatting/text_characters_tests.rs`, `media/text_formatting/text_collapsing_bidi_tests.rs`, `media/text_formatting/text_formatter_tests.rs`, `media/text_formatting/text_formatter_wrap_characterization_tests.rs`, `media/text_formatting/text_layout_tests.rs`, `media/text_formatting/text_line_bounds_tests.rs`, `media/text_formatting/text_line_tests.rs`, `media/text_formatting/text_run_cache_tests.rs`, `media/text_formatting/unicode/bidi_algorithm_tests.rs`, `media/text_formatting/unicode/bidi_class_tests.rs`, `media/text_formatting/unicode/bidi_data_tests.rs`, `media/text_formatting/unicode/codepoint_has_script_extension_tests.rs`, `media/text_formatting/unicode/codepoint_tests.rs`, `media/text_formatting/unicode/grapheme_break_class_trie_generator_tests.rs`, `media/text_formatting/unicode/line_break_enumerator_tests.rs`, `media/text_formatting/unicode/property_value_alias_helper_tests.rs`, `media/text_formatting/unicode/sentence_break_enumerator_tests.rs`, `media/text_formatting/unicode/unicode_data_tests.rs`, `media/text_formatting/unicode/unicode_trie_tests.rs`, `media/text_formatting/unicode/utf16_utils_tests.rs`, `media/text_formatting/unicode/word_break_enumerator_tests.rs`, `metadata/markup_type_tests.rs`, `platform/storage/file_io/bcl_storage_tests.rs`, `platform/storage/file_io/storage_provider_helper_tests.rs`, `platform/storage/storage_tests.rs`, `rendering/composition/animations/animation_controller_tests.rs`, `rendering/composition/animations/composition_animation_tests.rs`, `rendering/composition/animations/composition_easing_function_tests.rs`, `rendering/composition/animations/natural_motion_animation_tests.rs`, `rendering/composition/brushes/composition_brush_tests.rs`, `rendering/composition/composition_batch_tests.rs`, `rendering/composition/composition_drawing_surface_tests.rs`, `rendering/composition/composition_light_tests.rs`, `rendering/composition/composition_property_set_tests.rs`, `rendering/composition/composition_shape_tests.rs`, `rendering/composition/composition_winui_effect_tests.rs`, `rendering/composition/composition_winui_layer_tests.rs`, `rendering/composition/composition_winui_visual_tests.rs`, `rendering/composition/compositor_tests.rs`, `rendering/composition/drawing/render_data_tests.rs`, `rendering/composition/drawing/render_resource_tests.rs`, `rendering/composition/expressions/expression_tests.rs`, `rendering/composition/interactions/interaction_tracker_tests.rs`, `rendering/composition/render_thread_tests.rs`, `rendering/scene_graph/draw_operation_tests.rs`, `rendering/scene_graph/render_data_resources_tests.rs`, `rendering/scene_graph/render_data_stream_bounds_tests.rs`, `rendering/scene_graph/render_data_stream_effect_tests.rs`, `rendering/scene_graph/render_data_stream_ellipse_hit_test_tests.rs`, `rendering/scene_graph/render_data_stream_hit_test_tests.rs`, `rendering/scene_graph/render_data_stream_line_hit_test_tests.rs`, `rendering/scene_graph/render_data_stream_serialization_tests.rs`, `rendering/scene_graph/render_data_stream_tests.rs`, `rendering/scene_graph/render_data_writer_reader_tests.rs`, `styling/container_tests.rs`, `styling/selector_tests.rs`, `styling/style_tests.rs`, `tests/attached_property_tests.rs`, `tests/binding_default_value_converter_tests.rs`, `tests/binding_expression_observer_indexer_tests.rs`, `tests/binding_expression_tests_attached_property.rs`, `tests/binding_expression_tests_data_validation.rs`, `tests/binding_expression_tests_ferro_property.rs`, `tests/binding_expression_tests_get_value.rs`, `tests/binding_expression_tests_indexer.rs`, `tests/binding_expression_tests_mode.rs`, `tests/binding_expression_tests_negation.rs`, `tests/binding_expression_tests_observable.rs`, `tests/binding_expression_tests_property.rs`, `tests/binding_expression_tests_set_value.rs`, `tests/binding_expression_tests_task.rs`, `tests/binding_expression_tests_update_source_trigger.rs`, `tests/binding_model_tests.rs`, `tests/binding_null_conditional_tests.rs`, `tests/binding_operations_tests.rs`, `tests/binding_plugin_tests.rs`, `tests/binding_setter_tests.rs`, `tests/binding_test_support.rs`, `tests/binding_typed_expression_tests.rs`, `tests/class_registration_tests.rs`, `tests/compiled_binding_tests_create.rs`, `tests/direct_property_tests.rs`, `tests/ferro_object_tests_add_owner.rs`, `tests/ferro_object_tests_attached.rs`, `tests/ferro_object_tests_binding.rs`, `tests/ferro_object_tests_binding_two_way.rs`, `tests/ferro_object_tests_coercion.rs`, `tests/ferro_object_tests_data_validation.rs`, `tests/ferro_object_tests_direct.rs`, `tests/ferro_object_tests_get_observable.rs`, `tests/ferro_object_tests_get_value.rs`, `tests/ferro_object_tests_inheritance.rs`, `tests/ferro_object_tests_metadata.rs`, `tests/ferro_object_tests_multi_binding.rs`, `tests/ferro_object_tests_notification_order.rs`, `tests/ferro_object_tests_on_property_changed.rs`, `tests/ferro_object_tests_reentrancy.rs`, `tests/ferro_object_tests_set_current_value.rs`, `tests/ferro_object_tests_set_value.rs`, `tests/ferro_object_tests_validation.rs`, `tests/ferro_property_registry_tests.rs`, `tests/ferro_property_tests.rs`, `tests/mod.rs`, `tests/property_registration_tests.rs`, `tests/property_store/frame_priority_extensions_tests.rs`, `tests/property_store/mod.rs`, `tests/property_store/value_store_tests_frames.rs`, `tests/property_store/value_store_tests_inheritance.rs`, `tests/reference_semantics_tests.rs`, `tests/styled_property_tests.rs`, `tests/virtual_dispatch_tests.rs`, `threading/dispatcher_priority_queue_tests.rs`, `threading/dispatcher_tests.rs`, `tree_tests.rs`, `utilities/date_time_net_tests.rs`, `utilities/date_time_tests.rs`, `utilities/number_format_net_tests.rs`, `utilities/safe_enumerable_ferro_list_tests.rs`, `utilities/string_splitter_tests.rs`, `visual/composition_facades_tests.rs`, `visual_render_tests.rs`.
+Tests, examples and build scripts (not scanned): `animation/tests/animatable_tests.rs`, `animation/tests/animation_iteration_tests.rs`, `animation/tests/brush_transition_tests.rs`, `animation/tests/effect_tests.rs`, `animation/tests/key_spline_tests.rs`, `animation/tests/mod.rs`, `animation/tests/page_transition_tests.rs`, `animation/tests/spring_tests.rs`, `animation/tests/style_animation_tests.rs`, `animation/tests/transitions_tests.rs`, `build.rs`, `controls/resource_tests.rs`, `data/converters/composite_format_tests.rs`, `data/core/plugins/markup_members_tests.rs`, `data/core/value_type_nullable_operation_tests.rs`, `diagnostics/diagnostics_tests.rs`, `diagnostics/perf_counters_tests.rs`, `ferro_object_tests.rs`, `flow_direction_tests.rs`, `input/data_transfer_tests.rs`, `input/effect_input_tests.rs`, `input/input_scope_tests.rs`, `input/input_tests.rs`, `input/text_input/text_input_method_options_tests.rs`, `input/text_input/text_input_method_revision_tests.rs`, `interactivity/interactive_tests.rs`, `layout/hot_value_tests.rs`, `layout/layout_helper_tests.rs`, `layout/layout_queue_tests.rs`, `logical_tree/logical_extensions_tests.rs`, `markup_types/markup_types_tests.rs`, `media/color_tests.rs`, `media/drawing_context_tests.rs`, `media/effects/custom_effect_shader_tests.rs`, `media/effects/custom_effect_tests.rs`, `media/effects/effect_image_tests.rs`, `media/effects/interactive_effect_tests.rs`, `media/effects/library_tests.rs`, `media/font_manager_tests.rs`, `media/fonts/font_collection_tests.rs`, `media/fonts/tables/cmap/cmap_table_tests.rs`, `media/fonts/tables/glyf/glyf_table_contour_walk_tests.rs`, `media/fonts/tables/glyf/glyf_table_point_matching_tests.rs`, `media/fonts/tables/glyf/glyf_table_tests.rs`, `media/fonts/tables/head_table_tests.rs`, `media/fonts/tables/loca_table_tests.rs`, `media/fonts/tables/maxp_table_tests.rs`, `media/fonts/tables/os2_table_tests.rs`, `media/formatted_text_tests.rs`, `media/glyph_run_tests.rs`, `media/glyph_typeface_tests.rs`, `media/imaging/imaging_tests.rs`, `media/media_context_tests.rs`, `media/synthetic_font_variable_tests.rs`, `media/text_formatting/font_fallback_scale_tests.rs`, `media/text_formatting/font_family_line_metrics_tests.rs`, `media/text_formatting/shaped_buffer_tests.rs`, `media/text_formatting/split_text_runs_tests.rs`, `media/text_formatting/text_break_table_tests.rs`, `media/text_formatting/text_characters_tests.rs`, `media/text_formatting/text_collapsing_bidi_tests.rs`, `media/text_formatting/text_formatter_tests.rs`, `media/text_formatting/text_formatter_wrap_characterization_tests.rs`, `media/text_formatting/text_layout_cache_tests.rs`, `media/text_formatting/text_layout_tests.rs`, `media/text_formatting/text_layout_width_hold_tests.rs`, `media/text_formatting/text_line_bounds_tests.rs`, `media/text_formatting/text_line_break_object_tests.rs`, `media/text_formatting/text_line_tests.rs`, `media/text_formatting/text_paragraph_tests.rs`, `media/text_formatting/text_run_cache_tests.rs`, `media/text_formatting/text_tab_layout_tests.rs`, `media/text_formatting/unicode/bidi_algorithm_tests.rs`, `media/text_formatting/unicode/bidi_class_tests.rs`, `media/text_formatting/unicode/bidi_data_tests.rs`, `media/text_formatting/unicode/codepoint_has_script_extension_tests.rs`, `media/text_formatting/unicode/codepoint_tests.rs`, `media/text_formatting/unicode/grapheme_break_class_trie_generator_tests.rs`, `media/text_formatting/unicode/line_break_enumerator_tests.rs`, `media/text_formatting/unicode/property_value_alias_helper_tests.rs`, `media/text_formatting/unicode/sentence_break_enumerator_tests.rs`, `media/text_formatting/unicode/unicode_data_tests.rs`, `media/text_formatting/unicode/unicode_trie_tests.rs`, `media/text_formatting/unicode/utf16_utils_tests.rs`, `media/text_formatting/unicode/word_break_enumerator_tests.rs`, `media/theme_shadow_tests.rs`, `metadata/accessor_tests.rs`, `metadata/markup_type_tests.rs`, `metadata/receiver_tests.rs`, `platform/storage/file_io/bcl_storage_tests.rs`, `platform/storage/file_io/storage_provider_helper_tests.rs`, `platform/storage/storage_tests.rs`, `property_store/effective_value_coercion_tests.rs`, `property_store/effective_value_construction_tests.rs`, `property_store/effective_value_inheritance_tests.rs`, `property_store/value_store_default_coercion_tests.rs`, `rendering/composition/animations/animation_controller_tests.rs`, `rendering/composition/animations/composition_animation_tests.rs`, `rendering/composition/animations/composition_easing_function_tests.rs`, `rendering/composition/animations/natural_motion_animation_tests.rs`, `rendering/composition/brushes/composition_brush_tests.rs`, `rendering/composition/composition_batch_tests.rs`, `rendering/composition/composition_custom_effect_tests.rs`, `rendering/composition/composition_drawing_surface_tests.rs`, `rendering/composition/composition_light_tests.rs`, `rendering/composition/composition_property_set_tests.rs`, `rendering/composition/composition_shadow_tests.rs`, `rendering/composition/composition_shape_tests.rs`, `rendering/composition/composition_theme_shadow_tests.rs`, `rendering/composition/composition_winui_effect_tests.rs`, `rendering/composition/composition_winui_layer_tests.rs`, `rendering/composition/composition_winui_lighting_tests.rs`, `rendering/composition/composition_winui_material_tests.rs`, `rendering/composition/composition_winui_visual_tests.rs`, `rendering/composition/compositor_tests.rs`, `rendering/composition/drawing/render_data_tests.rs`, `rendering/composition/drawing/render_resource_tests.rs`, `rendering/composition/expressions/expression_tests.rs`, `rendering/composition/interactions/interaction_tracker_tests.rs`, `rendering/composition/object_size_tests.rs`, `rendering/composition/pending_disposals_tests.rs`, `rendering/composition/render_thread_tests.rs`, `rendering/composition/server/server_composition_visual/readback_tests.rs`, `rendering/scene_graph/draw_operation_tests.rs`, `rendering/scene_graph/render_data_resources_tests.rs`, `rendering/scene_graph/render_data_stream_bounds_tests.rs`, `rendering/scene_graph/render_data_stream_effect_tests.rs`, `rendering/scene_graph/render_data_stream_ellipse_hit_test_tests.rs`, `rendering/scene_graph/render_data_stream_hit_test_tests.rs`, `rendering/scene_graph/render_data_stream_line_hit_test_tests.rs`, `rendering/scene_graph/render_data_stream_serialization_tests.rs`, `rendering/scene_graph/render_data_stream_tests.rs`, `rendering/scene_graph/render_data_writer_reader_tests.rs`, `styling/container_tests.rs`, `styling/selector_candidate_tests.rs`, `styling/selector_tests.rs`, `styling/style_tests.rs`, `styling/theme_candidate_tests.rs`, `tests/attached_property_tests.rs`, `tests/binding_default_value_converter_tests.rs`, `tests/binding_expression_observer_indexer_tests.rs`, `tests/binding_expression_tests_attached_property.rs`, `tests/binding_expression_tests_data_validation.rs`, `tests/binding_expression_tests_ferro_property.rs`, `tests/binding_expression_tests_get_value.rs`, `tests/binding_expression_tests_indexer.rs`, `tests/binding_expression_tests_mode.rs`, `tests/binding_expression_tests_negation.rs`, `tests/binding_expression_tests_observable.rs`, `tests/binding_expression_tests_property.rs`, `tests/binding_expression_tests_set_value.rs`, `tests/binding_expression_tests_task.rs`, `tests/binding_expression_tests_update_source_trigger.rs`, `tests/binding_model_tests.rs`, `tests/binding_null_conditional_tests.rs`, `tests/binding_operations_tests.rs`, `tests/binding_plugin_tests.rs`, `tests/binding_setter_tests.rs`, `tests/binding_test_support.rs`, `tests/binding_typed_expression_tests.rs`, `tests/class_registration_tests.rs`, `tests/compiled_binding_tests_create.rs`, `tests/direct_property_tests.rs`, `tests/ferro_object_tests_add_owner.rs`, `tests/ferro_object_tests_attached.rs`, `tests/ferro_object_tests_binding.rs`, `tests/ferro_object_tests_binding_two_way.rs`, `tests/ferro_object_tests_coercion.rs`, `tests/ferro_object_tests_data_validation.rs`, `tests/ferro_object_tests_direct.rs`, `tests/ferro_object_tests_get_observable.rs`, `tests/ferro_object_tests_get_value.rs`, `tests/ferro_object_tests_inheritance.rs`, `tests/ferro_object_tests_metadata.rs`, `tests/ferro_object_tests_multi_binding.rs`, `tests/ferro_object_tests_notification_order.rs`, `tests/ferro_object_tests_on_property_changed.rs`, `tests/ferro_object_tests_reentrancy.rs`, `tests/ferro_object_tests_set_current_value.rs`, `tests/ferro_object_tests_set_value.rs`, `tests/ferro_object_tests_validation.rs`, `tests/ferro_property_registry_tests.rs`, `tests/ferro_property_tests.rs`, `tests/mod.rs`, `tests/property_registration_tests.rs`, `tests/property_store/frame_priority_extensions_tests.rs`, `tests/property_store/mod.rs`, `tests/property_store/style_work_tests.rs`, `tests/property_store/value_store_tests_frames.rs`, `tests/property_store/value_store_tests_inheritance.rs`, `tests/reference_semantics_tests.rs`, `tests/styled_property_tests.rs`, `tests/value_type_first_use_tests.rs`, `tests/virtual_dispatch_tests.rs`, `threading/dispatcher_ordering_tests.rs`, `threading/dispatcher_priority_queue_tests.rs`, `threading/dispatcher_schedule_tests.rs`, `threading/dispatcher_tests.rs`, `tree_tests.rs`, `type_identity_tests.rs`, `utilities/date_time_net_tests.rs`, `utilities/date_time_tests.rs`, `utilities/number_format_net_tests.rs`, `utilities/safe_enumerable_ferro_list_tests.rs`, `utilities/string_splitter_tests.rs`, `visual/composition_facades_tests.rs`, `visual_render_tests.rs`.
