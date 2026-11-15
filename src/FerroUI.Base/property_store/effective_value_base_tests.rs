@@ -93,10 +93,10 @@ fn a_value_without_an_animation_over_it_is_kept_once() {
     assert!(base_is_the_value(&owner, property));
     assert_eq!(number(owner.get_base_value(property)), Some(2));
 
-    // A value of a style is one as well.
+    // A value of a style is one as well, beside the one its frame keeps.
     let (owner, property, alive, before) = counted();
     let style = owner.set_value_with_priority(property, Counted::new(3, &alive), BindingPriority::Style);
-    assert_eq!(alive.get(), before + 1);
+    assert_eq!(alive.get(), before + 2);
     assert!(base_is_the_value(&owner, property));
     assert_eq!(number(owner.get_base_value(property)), Some(3));
     drop(style);
@@ -111,14 +111,15 @@ fn an_animation_over_a_value_leaves_the_value_as_the_base_value() {
     assert_eq!(owner.get_value(property).number, 5);
     assert_eq!(number(owner.get_base_value(property)), Some(1));
     assert!(!base_is_the_value(&owner, property));
-    assert_eq!(alive.get(), before + 2);
+    // The base value, the value, and the one the frame of the animation keeps.
+    assert_eq!(alive.get(), before + 3);
 
     // A set under the animation replaces the base value alone.
     owner.set_value(property, Counted::new(2, &alive));
     assert_eq!(owner.get_value(property).number, 5);
     assert_eq!(number(owner.get_base_value(property)), Some(2));
     assert!(!base_is_the_value(&owner, property));
-    assert_eq!(alive.get(), before + 2);
+    assert_eq!(alive.get(), before + 3);
 
     // Without the animation the base value is the value, kept once again.
     animation.expect("a disposable").dispose();
@@ -141,7 +142,7 @@ fn a_value_set_under_an_animation_that_came_first_is_the_base_value_alone() {
     assert_eq!(owner.get_value(property).number, 5);
     assert_eq!(number(owner.get_base_value(property)), Some(1));
     assert!(!base_is_the_value(&owner, property));
-    assert_eq!(alive.get(), before + 2);
+    assert_eq!(alive.get(), before + 3);
 
     animation.expect("a disposable").dispose();
     assert_eq!(owner.get_value(property).number, 1);
