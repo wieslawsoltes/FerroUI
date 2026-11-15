@@ -135,3 +135,38 @@ fn double_transition_animates_attached_control() {
     assert_eq!(border.opacity(), 0.0);
     assert!(!border.is_animating(Visual::opacity_property()));
 }
+
+#[test]
+fn only_an_object_with_transitions_keeps_data_for_them() {
+    // Two flags and one word beside the object: what transitions need is behind the word.
+    let words = std::mem::size_of::<usize>();
+    assert!(std::mem::size_of::<crate::animation::Animatable>() <= std::mem::size_of::<FerroObject>() + 2 * words);
+
+    let _clock = TestClock::new();
+    let border = Border::new();
+
+    // A property change, a detach and an attach, and a report outside a transition make no data
+    // on an object without transitions.
+    border.set_opacity(0.5);
+    border.disable_transitions();
+    border.enable_transitions();
+    border.report_transition_interruption_state(Rc::new(1.0_f64));
+    assert!(border.take_transition_interruption_state::<f64>().is_none());
+    assert!(!border.has_transition_data());
+
+    // The first transitions the object is given make it, and the transitions run with it.
+    let transitions = opacity_transitions();
+    let transition = transitions.snapshot()[0].clone();
+    border.set_transitions(Some(transitions));
+    assert!(border.has_transition_data());
+    assert!(border.try_get_transition_instance(&transition).is_none());
+
+    border.set_opacity(0.0);
+    assert!(border.try_get_transition_instance(&transition).is_some());
+
+    // Without its transitions the object keeps the data and runs none.
+    border.set_transitions(None);
+    assert!(border.try_get_transition_instance(&transition).is_none());
+    border.set_opacity(1.0);
+    assert_eq!(border.opacity(), 1.0);
+}

@@ -1,14 +1,14 @@
 use super::{EffectiveViewportChangedEventArgs, ILayoutManager, LayoutHelper, MinMax};
 use crate::reactive::{Disposable, Subscription};
 use crate::styling::{Container, ContainerSizing};
-use crate::utilities::{HandlerList, MathUtilities};
+use crate::utilities::{HandlerList, MathUtilities, OptionCell};
 use crate::{
     ferro_class, ferro_property, instantiate, DirectProperty, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
     FerroPropertyChangedEventArgs, ObjectType, Point, PropertyChangeHandler, Rect, Ref, Size, StyledElementImpl,
     StyledElementImplExt, StyledProperty, StyledPropertyOptions, Thickness, Upcast, Visual, VisualImpl, VisualImplExt,
     VisualTreeAttachmentEventArgs,
 };
-use std::cell::{Cell, RefCell};
+use std::cell::Cell;
 use std::rc::Rc;
 
 /// Defines how a control aligns itself horizontally in its parent control.
@@ -62,7 +62,8 @@ pub struct Layoutable {
     is_attaching_to_visual_tree: Cell<bool>,
     effective_viewport_changed: HandlerList<dyn Fn(&EffectiveViewportChangedEventArgs)>,
     layout_updated: HandlerList<dyn Fn()>,
-    layout_updated_subscription: RefCell<Option<(Rc<dyn ILayoutManager>, u64)>>,
+    // Behind a word: an element is subscribed while it has handlers of `layout_updated`, which few have.
+    layout_updated_subscription: OptionCell<Box<(Rc<dyn ILayoutManager>, u64)>>,
 }
 
 ferro_class! {
@@ -585,7 +586,7 @@ impl Layoutable {
             is_attaching_to_visual_tree: Cell::new(false),
             effective_viewport_changed: HandlerList::new(),
             layout_updated: HandlerList::new(),
-            layout_updated_subscription: RefCell::new(None),
+            layout_updated_subscription: OptionCell::new(),
         }
     }
 
@@ -639,7 +640,7 @@ impl Layoutable {
     }
 
     fn subscribe_layout_updated(&self, manager: Rc<dyn ILayoutManager>) {
-        if self.layout_updated_subscription.borrow().is_some() {
+        if self.layout_updated_subscription.is_some() {
             return;
         }
         let weak = self.to_ref().downgrade();
@@ -652,11 +653,12 @@ impl Layoutable {
                 }
             }
         }));
-        *self.layout_updated_subscription.borrow_mut() = Some((manager, token));
+        self.layout_updated_subscription.set(Some(Box::new((manager, token))));
     }
 
     fn unsubscribe_layout_updated(&self) {
-        if let Some((manager, token)) = self.layout_updated_subscription.take() {
+        if let Some(subscription) = self.layout_updated_subscription.take() {
+            let (manager, token) = *subscription;
             manager.remove_layout_updated(token);
         }
     }

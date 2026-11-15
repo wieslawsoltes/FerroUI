@@ -346,3 +346,44 @@ fn moving_a_visual_invalidates_its_composition_properties_and_resizing_it_its_dr
     assert_eq!(1, renderer.dirty.get());
     assert_eq!(1, renderer.properties.get());
 }
+
+#[test]
+fn only_a_visual_with_a_value_that_tells_its_changes_keeps_subscriptions() {
+    let (visual, renderer) = attached();
+
+    // A value that cannot change, taking a value away and the detach of a visual without
+    // subscriptions make none.
+    let effect: Rc<dyn IEffect> = Rc::new(ImmutableBlurEffect::new(4.0));
+    visual.set_effect(Some(effect));
+    visual.set_effect(None);
+    visual.set_render_transform(None);
+    assert!(!visual.has_subscriptions());
+    visual.set_presentation_source_for_root_visual(None);
+    assert!(!visual.has_subscriptions());
+    let source: Rc<dyn IPresentationSource> = Rc::new(TestSource { root: visual.clone(), renderer: renderer.clone() });
+    visual.set_presentation_source_for_root_visual(Some(source));
+    assert!(!visual.has_subscriptions());
+
+    // An effect and a transform that tell when they change make them, and both are heard.
+    let effect = BlurEffect::new();
+    visual.set_effect(Some(effect.clone().into()));
+    assert!(visual.has_subscriptions());
+    let transform = TranslateTransform::new();
+    visual.set_render_transform(Some((&transform).into()));
+
+    renderer.dirty.set(0);
+    renderer.properties.set(0);
+    effect.set_radius(10.0);
+    assert_eq!(1, renderer.dirty.get());
+    transform.set_x(5.0);
+    assert_eq!(1, renderer.properties.get());
+
+    // Without the values nothing is heard.
+    visual.set_effect(None);
+    visual.set_render_transform(None);
+    renderer.dirty.set(0);
+    renderer.properties.set(0);
+    effect.set_radius(20.0);
+    transform.set_x(6.0);
+    assert_eq!((0, 0), (renderer.dirty.get(), renderer.properties.get()));
+}

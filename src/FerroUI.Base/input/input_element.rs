@@ -41,7 +41,8 @@ pub struct InputElement {
     gesture_recognizers: OnceCell<GestureRecognizerCollection>,
     /// The interactive effect the element routes its pointer input to, with
     /// the guards of its handlers (#455, E7; `input_element_effects.rs`).
-    pub(super) effect_input: RefCell<Option<super::input_element_effects::EffectInputAttachment>>,
+    // In a box: few elements have an interactive effect.
+    pub(super) effect_input: RefCell<Option<Box<super::input_element_effects::EffectInputAttachment>>>,
 }
 
 ferro_class! {
