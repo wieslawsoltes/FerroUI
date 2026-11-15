@@ -31,7 +31,9 @@ pub struct LogicalDescendants {
 
 impl LogicalDescendants {
     fn push_children(&mut self, logical: &StyledElement) {
-        let children = logical.logical_children().snapshot();
+        let Some(children) = logical.logical_children_snapshot() else {
+            return;
+        };
         if !children.is_empty() {
             self.stack.push((children, 0));
         }
@@ -91,7 +93,7 @@ impl StyledElement {
     /// The logical children of the element.
     // Deviation (DEVIATIONS.md, Logical tree): upstream returns the collection itself; this is a snapshot of it.
     pub fn get_logical_children(&self) -> Rc<Vec<Ref<StyledElement>>> {
-        self.logical_children().snapshot()
+        self.logical_children_snapshot().unwrap_or_default()
     }
 
     /// Enumerates the descendants of the element in the logical tree, in
@@ -137,7 +139,7 @@ impl StyledElement {
     // Deviation (DEVIATIONS.md, Logical tree): upstream enumerates the parent's children lazily; this is a snapshot.
     pub fn get_logical_siblings(&self) -> Rc<Vec<Ref<StyledElement>>> {
         match self.parent() {
-            Some(parent) => parent.logical_children().snapshot(),
+            Some(parent) => parent.logical_children_snapshot().unwrap_or_default(),
             None => Rc::default(),
         }
     }
@@ -158,7 +160,7 @@ impl StyledElement {
     }
 
     fn find_descendant_of_type_core<T: ObjectType>(logical: &StyledElement) -> Option<Ref<T>> {
-        let logical_children = logical.logical_children().snapshot();
+        let logical_children = logical.logical_children_snapshot()?;
 
         for child in logical_children.iter() {
             if let Some(result) = child.clone().cast::<T>() {

@@ -140,7 +140,7 @@ impl SelectingItemsControlSelectionAdapter {
     /// to be scrolled to the top.
     fn reset_scroll_viewer(&self) {
         fn first_scroll_viewer(element: &StyledElement) -> Option<Ref<ScrollViewer>> {
-            let children = element.logical_children().snapshot();
+            let children = element.logical_children_snapshot()?;
             for child in children.iter() {
                 if let Some(scroll_viewer) = child.clone().cast::<ScrollViewer>() {
                     return Some(scroll_viewer);

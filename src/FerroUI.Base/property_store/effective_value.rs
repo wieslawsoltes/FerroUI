@@ -2,6 +2,7 @@ use super::{entry_ptr_eq, IValueEntry};
 use crate::data::{BindingPriority, BindingValueType};
 use crate::ferro_property::value_equals;
 use crate::ferro_property_metadata::{CoerceValueCallback, CoercionOperations, DefaultCoercionOperations};
+use crate::utilities::OptionCell;
 use crate::{BoxedValue, FerroObject, FerroProperty, PropertyValue, StyledProperty, StyledPropertyMetadata};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
@@ -50,10 +51,13 @@ pub(crate) struct EffectiveValueState {
     property: &'static FerroProperty,
     priority: Cell<BindingPriority>,
     base_priority: Cell<BindingPriority>,
-    value_entry: RefCell<Option<Rc<dyn IValueEntry>>>,
-    base_value_entry: RefCell<Option<Rc<dyn IValueEntry>>>,
+    value_entry: OptionCell<Rc<dyn IValueEntry>>,
+    base_value_entry: OptionCell<Rc<dyn IValueEntry>>,
     is_overriden_current_value: Cell<bool>,
     is_coerced_default_value: Cell<bool>,
+    /// The base value is the value (`EffectiveValue::base_value`): what a value without an animation over it
+    /// has, and it is then kept once.
+    base_is_value: Cell<bool>,
 }
 
 impl EffectiveValueState {
@@ -62,17 +66,18 @@ impl EffectiveValueState {
             property,
             priority: Cell::new(BindingPriority::Unset),
             base_priority: Cell::new(BindingPriority::Unset),
-            value_entry: RefCell::new(None),
-            base_value_entry: RefCell::new(None),
+            value_entry: OptionCell::new(),
+            base_value_entry: OptionCell::new(),
             is_overriden_current_value: Cell::new(false),
             is_coerced_default_value: Cell::new(false),
+            base_is_value: Cell::new(false),
         }
     }
 
     fn update_value_entry(&self, entry: Option<&Rc<dyn IValueEntry>>, priority: BindingPriority) {
         debug_assert!(priority != BindingPriority::LocalValue);
 
-        fn same(a: &Option<Rc<dyn IValueEntry>>, b: Option<&Rc<dyn IValueEntry>>) -> bool {
+        fn same(a: Option<&Rc<dyn IValueEntry>>, b: Option<&Rc<dyn IValueEntry>>) -> bool {
             match (a, b) {
                 (Some(a), Some(b)) => entry_ptr_eq(a, b),
                 (None, None) => true,
@@ -80,8 +85,8 @@ impl EffectiveValueState {
             }
         }
 
-        fn replace(slot: &RefCell<Option<Rc<dyn IValueEntry>>>, entry: Option<&Rc<dyn IValueEntry>>) {
-            if !same(&slot.borrow(), entry) {
+        fn replace(slot: &OptionCell<Rc<dyn IValueEntry>>, entry: Option<&Rc<dyn IValueEntry>>) {
+            if !slot.with(|current| same(current, entry)) {
                 let old = slot.replace(entry.cloned());
                 if let Some(old) = old {
                     old.unsubscribe();
@@ -96,7 +101,7 @@ impl EffectiveValueState {
             if current > BindingPriority::LocalValue && current < BindingPriority::Inherited {
                 let entry = self.value_entry.take();
                 debug_assert!(entry.is_some());
-                *self.base_value_entry.borrow_mut() = entry;
+                self.base_value_entry.set(entry);
             }
             replace(&self.value_entry, entry);
         } else if current <= BindingPriority::Animation {
@@ -134,8 +139,9 @@ impl EffectiveValueState {
     }
 
     fn data_validation_enabled(&self) -> bool {
-        let has = |slot: &RefCell<Option<Rc<dyn IValueEntry>>>| {
-            slot.borrow().as_ref().map(|e| e.get_data_validation_state().is_some())
+        // The entry is read outside the cell: what it answers with may read this value.
+        let has = |slot: &OptionCell<Rc<dyn IValueEntry>>| {
+            slot.get().map(|e| e.get_data_validation_state().is_some())
         };
         has(&self.value_entry).or_else(|| has(&self.base_value_entry)).unwrap_or(false)
     }
@@ -190,7 +196,7 @@ impl dyn EffectiveValueDyn {
     }
 
     pub(crate) fn value_entry(&self) -> Option<Rc<dyn IValueEntry>> {
-        self.state().value_entry.borrow().clone()
+        self.state().value_entry.get()
     }
 
     pub(crate) fn is_overriden_current_value(&self) -> bool {
@@ -256,7 +262,10 @@ pub(crate) struct EffectiveValue<T> {
     metadata: Rc<StyledPropertyMetadata<T>>,
     state: EffectiveValueState,
     value: RefCell<T>,
-    base_value: RefCell<Option<T>>,
+    /// The base value where it is not the value: under an animation, and while a value is evaluated again. Where
+    /// it is the value (`EffectiveValueState::base_is_value`, nearly every value) this holds nothing and the
+    /// value is kept once.
+    base_value: OptionCell<Rc<T>>,
     /// What a property with a coercion callback keeps: boxed, so that a value
     /// of a property without one (nearly every value) is not the larger for
     /// it.
@@ -272,6 +281,47 @@ impl<T: Clone + 'static> EffectiveValue<T> {
 
     pub fn with_value<R>(&self, read: impl FnOnce(&T) -> R) -> R {
         read(&self.value.borrow())
+    }
+
+    /// Calls `read` with the base value, whichever of the two it is kept as.
+    pub(crate) fn with_base_value<R>(&self, read: impl FnOnce(Option<&T>) -> R) -> R {
+        if self.state.base_is_value.get() {
+            read(Some(&self.value.borrow()))
+        } else {
+            // Outside the cell: `read` compares values, and a comparison may read this one.
+            let base = self.base_value.get();
+            read(base.as_deref())
+        }
+    }
+
+    /// A clone of the base value.
+    fn base_value(&self) -> Option<T> {
+        self.with_base_value(|base| base.cloned())
+    }
+
+    /// Replaces the value alone. A base value that was the value stays what it was: the value that is replaced
+    /// becomes it.
+    fn set_value_alone(&self, value: T) {
+        // `replace` releases the borrow before the previous value is dropped: dropping a value may run code
+        // that reads the property.
+        let previous = self.value.replace(value);
+        if self.state.base_is_value.get() {
+            self.base_value.set(Some(Rc::new(previous)));
+            self.state.base_is_value.set(false);
+        }
+    }
+
+    /// Replaces the base value alone, with a value of its own.
+    pub(crate) fn set_base_value(&self, base: T) {
+        let previous = self.base_value.replace(Some(Rc::new(base)));
+        self.state.base_is_value.set(false);
+        drop(previous);
+    }
+
+    /// Makes the value the base value as well.
+    fn set_base_to_value(&self) {
+        self.state.base_is_value.set(true);
+        self.base_value.set(None);
     }
 
     // Preserve the two owned-value frames and their argument evaluation:
@@ -323,15 +373,20 @@ impl<T: Clone + 'static> EffectiveValue<T> {
 
         if !(operations.equals)(&*self.value.borrow(), &v) {
             owner.values().advance_value_generation();
-            self.value.replace(v.clone());
+            self.set_value_alone(v.clone());
             value_changed = true;
             if let Some(uncommon) = &self.uncommon {
                 uncommon.uncoerced_value.replace(value);
             }
         }
 
-        if !self.base_value.borrow().as_ref().is_some_and(|base| (operations.equals)(base, &bv)) {
-            self.base_value.replace(Some(v));
+        if !self.with_base_value(|base| base.is_some_and(|base| (operations.equals)(base, &bv))) {
+            // The base value becomes `v`: the value itself where the value has just become it.
+            if value_changed {
+                self.set_base_to_value();
+            } else {
+                self.set_base_value(v);
+            }
             base_value_changed = true;
             if let Some(uncommon) = &self.uncommon {
                 uncommon.uncoerced_value.replace(base_value);
@@ -383,7 +438,7 @@ impl<T: PropertyValue> EffectiveValue<T> {
             metadata,
             state: EffectiveValueState::new(property),
             value: RefCell::new(value),
-            base_value: RefCell::new(None),
+            base_value: OptionCell::new(),
             uncommon,
         }
     }
@@ -403,7 +458,7 @@ impl<T: PropertyValue> EffectiveValue<T> {
     /// The base value, if there is one.
     pub fn try_get_base_value(&self) -> Option<T> {
         if self.state.base_priority.get() != BindingPriority::Unset {
-            self.base_value.borrow().clone()
+            self.base_value()
         } else {
             None
         }
@@ -453,22 +508,48 @@ impl<T: PropertyValue> EffectiveValue<T> {
             _ => (value, None),
         };
 
+        let sets_base = |state: &EffectiveValueState| {
+            priority <= state.base_priority.get() && priority >= BindingPriority::LocalValue
+        };
+
         if priority <= self.state.priority.get() {
             value_changed = !value_equals(&*self.value.borrow(), &v);
-            // `replace` releases the borrow before the previous value is
-            // dropped: dropping a value may run code that reads the property.
             // Before the write: dropping the previous value may read the property.
             owner.values().advance_value_generation();
-            self.value.replace(v.clone());
-            self.state.priority.set(priority);
-            if let Some((uncommon, value)) = &uncoerced {
-                uncommon.uncoerced_value.replace(value.clone());
+            if sets_base(&self.state) {
+                // The value and the base value at once, which is every set without an animation over the
+                // value: `v` is kept once, and a base value that was the value changed if the value did.
+                if self.state.base_is_value.get() {
+                    // `replace` releases the borrow before the previous value is dropped: dropping a value
+                    // may run code that reads the property.
+                    drop(self.value.replace(v));
+                    base_value_changed = value_changed;
+                } else {
+                    drop(self.value.replace(v));
+                    let value = self.value.borrow();
+                    base_value_changed =
+                        !self.with_base_value(|base| base.is_some_and(|base| value_equals(base, &value)));
+                    drop(value);
+                    self.set_base_to_value();
+                }
+                self.state.priority.set(priority);
+                if let Some((uncommon, value)) = &uncoerced {
+                    uncommon.uncoerced_value.replace(value.clone());
+                }
+                self.state.base_priority.set(priority);
+                if let Some((uncommon, value)) = uncoerced {
+                    uncommon.uncoerced_base_value.replace(value);
+                }
+            } else {
+                self.set_value_alone(v);
+                self.state.priority.set(priority);
+                if let Some((uncommon, value)) = uncoerced {
+                    uncommon.uncoerced_value.replace(value);
+                }
             }
-        }
-
-        if priority <= self.state.base_priority.get() && priority >= BindingPriority::LocalValue {
-            base_value_changed = !self.base_value.borrow().as_ref().is_some_and(|base| value_equals(base, &v));
-            self.base_value.replace(Some(v));
+        } else if sets_base(&self.state) {
+            base_value_changed = !self.with_base_value(|base| base.is_some_and(|base| value_equals(base, &v)));
+            self.set_base_value(v);
             self.state.base_priority.set(priority);
             if let Some((uncommon, value)) = uncoerced {
                 uncommon.uncoerced_base_value.replace(value);
@@ -502,7 +583,7 @@ impl<T: PropertyValue> EffectiveValue<T> {
     }
 
     fn notify_base_value_changed(&self, owner: &FerroObject) {
-        let base = self.base_value.borrow().clone();
+        let base = self.base_value();
         if let Some(base) = base {
             owner.raise_property_changed(self.state.property, None, &base, self.state.base_priority.get(), false);
         }
@@ -553,7 +634,7 @@ impl<T: PropertyValue> EffectiveValueDyn for EffectiveValue<T> {
         debug_assert!(self.state.priority.get() != BindingPriority::Animation);
         debug_assert!(self.state.base_priority.get() != BindingPriority::Unset);
         self.state.update_value_entry(None, BindingPriority::Animation);
-        let base = self.base_value.borrow().clone().expect("base value is set");
+        let base = self.base_value().expect("base value is set");
         self.set_and_raise_core(owner, base, self.state.base_priority.get(), false, false);
     }
 
@@ -597,3 +678,7 @@ mod inheritance_tests;
 #[cfg(test)]
 #[path = "effective_value_construction_tests.rs"]
 mod construction_tests;
+
+#[cfg(test)]
+#[path = "effective_value_base_tests.rs"]
+mod base_tests;

@@ -60,6 +60,7 @@ mod ferro_object_tests_set_value;
 mod ferro_object_tests_validation;
 mod ferro_property_registry_tests;
 mod ferro_property_tests;
+mod property_change_handler_tests;
 mod property_registration_tests;
 mod property_store;
 mod styled_property_tests;

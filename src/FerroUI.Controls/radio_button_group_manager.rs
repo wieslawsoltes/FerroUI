@@ -219,7 +219,7 @@ impl RadioButtonGroupManager {
                 parent = current.logical().parent().and_then(|parent| as_radio_button(&parent));
             }
         } else if let Some(parent) = this_button.parent() {
-            for sibling in parent.logical_children().snapshot().iter() {
+            for sibling in parent.get_logical_children().iter() {
                 if *sibling == this_button {
                     continue;
                 }

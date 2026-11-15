@@ -449,7 +449,11 @@ impl TemplatedControl {
     pub fn apply_templated_parent(control: &StyledElement, templated_parent: Option<&Ref<FerroObject>>) {
         control.set_templated_parent(Nullable(templated_parent.cloned()));
 
-        let children = control.logical_children().snapshot();
+        // Read without creating the collection: most elements of a template are leaves, and the
+        // collection of each would stay with it for nothing (desktop-performance.md, section 9.63).
+        let Some(children) = control.logical_children_snapshot() else {
+            return;
+        };
 
         for child in children.iter() {
             if child.templated_parent().is_none() {

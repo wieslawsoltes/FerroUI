@@ -105,6 +105,22 @@ fn templated_children_should_have_templated_parent_set() {
     assert!(templated_parents.iter().all(|x| *x == as_object(&target)));
 }
 
+/// Not from upstream (desktop-performance.md, section 9.63): giving the elements of a template their templated
+/// parent reads their logical children, and makes no collection for those that have none.
+#[test]
+fn templated_children_without_children_get_no_logical_children_collection() {
+    let target = TemplatedControl::new();
+    target.set_template(template(decorator_panel_tree));
+
+    target.apply_template();
+
+    // The decorator and the panel have a child; the control and the border in the panel have none.
+    let descendants: Vec<_> = target.get_visual_descendants().collect();
+    let collections: Vec<bool> = descendants.iter().map(|x| x.logical_children_snapshot().is_some()).collect();
+    assert_eq!(vec![true, true, false, false], collections);
+    assert!(descendants.iter().all(|x| x.templated_parent() == as_object(&target)));
+}
+
 #[test]
 fn templated_child_should_have_parent_set() {
     let target = TemplatedControl::new();
