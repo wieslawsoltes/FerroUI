@@ -5224,3 +5224,414 @@ back and is taken away by the next value without one) and
 `a_template_binding_that_follows_its_parent_makes_no_rare_state` (bound to a control with
 a templated parent and following it; the default value of a binding that lost its parent
 is kept in the state).
+
+### 9.62 An effective value keeps its base value only where an animation is over it
+
+The second row of the table of section 9.61 is the effective values: 134,509 of them at
+the show of 1,600 templated controls, 19.77 MB, 154 bytes each on average. An effective
+value is what a property of an element currently is, with the priority it came from. It
+also has a base value: what the property would be without its animations, which is what
+a transition starts from and what `get_base_value` returns.
+
+**What an effective value carried.** Two values of the property's type, the value and the
+base value, each with its priority, and the two entries they came from, each a `RefCell`
+of an option. Nearly every value of a tree has no animation over it, and then the base
+value is the value: a second copy of a thickness, a brush reference or a string, kept in
+step with the first by a clone and a comparison in every set.
+
+**The change.** The base value is a field only of a value that has one of its own.
+
+- `EffectiveValueState::base_is_value` says that the base value is the value. It is set
+  by a set at a priority that is a base priority (local value or below) which nothing
+  above overrides, and cleared by an animation that takes the value alone.
+- `EffectiveValue<T>::base_value` is an `OptionCell<Rc<T>>` (section 9.40), empty while
+  the flag is set and while there is no base value at all. It is filled when an
+  animation is put over a value (the value that was moves there), and emptied when the
+  last animation leaves and the base value becomes the value again.
+- The two entries are `OptionCell`s as well.
+
+The three states are told apart by the flag and the cell: neither (no base value: an
+animation alone), the flag (the base value is the value), the cell (a base value of its
+own, under an animation). Both at once is not a state, and the tests assert it wherever
+they read one.
+
+| Bytes | Before | After |
+| --- | ---: | ---: |
+| `EffectiveValue<bool>` | 120 | 96 |
+| `EffectiveValue<f64>` | 128 | 96 |
+| `EffectiveValue<Option<BoxedValue>>` | 144 | 104 |
+| `EffectiveValue<Thickness>` | 176 | 120 |
+
+A set without an animation over it now makes one clone and one comparison of the value
+fewer than it did.
+
+**Measured** with the census of section 9.61 (what the show of 1,600 templated controls
+leaves allocated), on a branch with sections 9.61 to 9.66 together against section 9.61
+alone. The five sections change different owners, so each is read from its own rows; the
+whole and the gate are at the end of section 9.66.
+
+| Left by the show | MB before | MB after | blocks |
+| --- | ---: | ---: | ---: |
+| `ValueStore::create_effective_value` | 19.77 | 15.21 | 134,509 |
+
+119 bytes a value where they were 154, 4.56 MB.
+
+**What stays as it was.** The value, the base value and their priorities as every reader
+sees them (`get_value`, `get_base_value`, the changes raised to
+`on_property_changed_core` with their old and new base values, the transitions that start
+from the base value); coercion, which coerces both. The construction and the coercion
+oracles of the tests, which state the rules of upstream's `EffectiveValue` member by
+member, run against the new representation unchanged in what they expect.
+
+**Other backends.** All of it is in `ferroui_base`.
+
+**Not upstream.** Upstream's `EffectiveValue<T>` has both values inline; `DEVIATIONS.md`
+has the row.
+
+**Tests.** `effective_value_base_tests.rs`:
+`an_effective_value_has_no_field_for_a_base_value_that_is_the_value` (the sizes),
+`a_value_without_an_animation_over_it_is_kept_once` (counted by the live copies of a
+value type that counts them), `an_animation_over_a_value_leaves_the_value_as_the_base_value`
+and `a_value_set_under_an_animation_that_came_first_is_the_base_value_alone`; the
+construction and coercion suites of the effective values (sections 9.28 and 9.59).
+
+### 9.63 The logical children of an element are read without making their collection
+
+The collection of the logical children of an element is made by the first to ask for it
+(`StyledElement::logical_children`): a list, the vector it shares with its snapshots, and
+the handler that keeps the logical tree, three blocks and about 210 bytes. That is right
+for the code that adds a child. It was also what a read cost, and one read is made of
+every element of every template: `TemplatedControl::apply_templated_parent` gives an
+element its templated parent and walks on to its logical children. Most elements of a
+template are leaves (a text, a rectangle, a path, a presenter without content), and each
+of them kept from then on the collection the walk had asked for. The census of the start
+of section 9.61 gave that function the lists of 12,008 elements:
+
+| Left by the show of 1,600 templated controls | MB | blocks |
+| --- | ---: | ---: |
+| Lists made by `apply_templated_parent` | 1.56 | 24,016 |
+| Their handlers | 0.92 | 12,008 |
+
+**The change.** `StyledElement::logical_children_snapshot` gives the children of an
+element that has a collection and `None` for one that never had it, and
+`logical_children_count` the number; neither makes anything. They are what
+`Visual::visual_children_snapshot` and `visual_children_count` are for the visual
+children. The readers ask them: `apply_templated_parent`, the members of
+the logical tree extensions (`get_logical_children`, `get_logical_siblings`,
+`get_logical_descendants`, `find_logical_descendant_of_type`), the group of a radio
+button, the scroll viewer a selection adapter looks for and the recycled rows of a
+`TreeDataGrid` presenter. `logical_children` is unchanged and is for the code that adds
+or removes.
+
+**Measured** as in section 9.62:
+
+| Left by the show | MB before | MB after | blocks before | blocks after |
+| --- | ---: | ---: | ---: | ---: |
+| `FerroList::new` | 6.85 | 5.29 | 104,734 | 80,718 |
+| `FerroList::add_collection_changed` | 3.48 | 2.56 | 45,626 | 33,618 |
+| `TemplatedControl::apply_templated_parent` | 0.37 | none | 12,008 | none |
+
+The 24,016 blocks of the lists and the 12,008 handlers are gone, and with them the 12,008
+blocks of 32 bytes the function itself was counted for: 2.85 MB and 48,032 blocks.
+
+**What stays as it was.** What a read returns: an element without a collection has no
+children. The collection, its handler and the order of the logical tree events of an
+element that gets a child. The public API: two methods are new.
+
+**Other backends.** All of it is in `ferroui_base` and the controls.
+
+**Not upstream.** Upstream makes the collection with the element. Here it is made for
+the first to ask, and this section is the read that does not count as asking.
+
+**Tests.** `logical_extensions_tests.rs`:
+`reading_the_children_of_a_leaf_makes_it_no_collection` (the readers on a leaf and on its
+tree, then the same readers after the first child). `templated_control_tests.rs`:
+`templated_children_without_children_get_no_logical_children_collection` (a template of a
+decorator, a panel and two leaves: all four have the templated parent, and the leaves no
+collection).
+
+### 9.64 A style instance keeps what only a style with animations needs in a box
+
+A style that matches a control leaves an instance on it: a value frame with the entries of
+its setters and the activator of its selector (`StyleBase::try_attach_instance`). The
+census of the start of section 9.61 has 38,416 of them, 240 bytes each with the counts of
+their `Rc`, 8.79 MB.
+
+128 of the 224 bytes of a `StyleInstance` were four fields that an instance of a theme
+style never uses: the setter instances that are no value entries, the animations of the
+style, what applying them made, and the subject that triggers them. A style of value
+setters, which is nearly every style of a theme, has entries and an activator and nothing
+else.
+
+**The change.**
+
+- `StyleInstance` keeps the four in a box of their own (`StyleInstanceExtras`), made for
+  the first of them (`update_extras`). An instance of value setters alone has no box and
+  one word for it.
+- `ValueFrameBase::owner` is an `OptionCell` instead of a `RefCell` of an option: one word
+  less in every frame, the style instances and the others.
+
+| Bytes | Before | After |
+| --- | ---: | ---: |
+| `StyleInstance` | 224 | 112 |
+| `ValueFrameBase` | 64 | 56 |
+| `ImmediateValueFrame` | 72 | 64 |
+
+**Measured** as in section 9.62:
+
+| Left by the show | MB before | MB after | blocks before | blocks after |
+| --- | ---: | ---: | ---: | ---: |
+| `StyleBase::try_attach_instance` | 8.79 | 5.87 | 38,416 | 76,832 |
+| `ValueFrameBase::reserve` | 1.18 | none | 38,416 | none |
+
+The second row is the vector of the entries of an instance, which the build with this
+section counts for the first: the same 76,832 blocks, 9.97 MB before and 5.87 MB after.
+
+**What stays as it was.** What an instance does: the order of its entries, its
+activation, its animations and their disposal on detach. An instance with animations pays
+one allocation more, once. No public API changes.
+
+**Other backends.** All of it is in `ferroui_base`.
+
+**Not upstream.** Upstream's `StyleInstance` has the four as fields; the fields and what
+they do are the same, and where they are kept is not.
+
+**Tests.** `style_animation_tests.rs`: `only_a_style_instance_with_animations_keeps_extras`
+(of two instances with the same activator only the one of the style with an animation has
+extras; both are activated and deactivated together, the animation runs and stops, and
+both are gone on detach; the sizes of a frame and of an instance are held against their
+fields).
+
+### 9.65 The layers of an element keep what few elements have behind one word
+
+The elements themselves are the largest owner of the census of section 9.61:
+`type_system::instantiate` leaves 39.08 MB, 29,229 elements of 1,402 bytes on average. An
+element carries the fields of every layer below its class (`FerroObject`, `Animatable`,
+`StyledElement`, `Visual`, `Layoutable`, `Interactive`, `InputElement`), and several of
+those fields are state that few elements ever have: every text block had 120 bytes for
+transitions it is never given.
+
+**The change.** Such state is kept behind one word and made when it is first needed.
+
+| Layer | What | Before | After |
+| --- | --- | ---: | ---: |
+| `Animatable` | The transitions: their states, the subscriptions to the collection, the instance being applied, the context (`TransitionData`) | 120 | 8 |
+| `Visual` | The subscriptions to the render transform and to the values that affect the rendering (`VisualSubscriptions`) | 64 | 8 |
+| `Visual` | The composition visual of the children | 16 | 8 |
+| `Layoutable` | The subscription to the layout manager for `layout_updated` | 32 | 8 |
+| `InputElement` | The attachment of an interactive effect | 40 | 16 |
+| `StyledElement` | The name | 32 | 16 |
+| `StyledElement` | The resources | 16 | 8 |
+
+- The transitions are in a `OnceCell` of a box, with the cells they had inside it: a
+  transition that is applied calls back into the object, and the context is entered across
+  that call, so the data has to stay where it is while it is read. The box is made by the
+  first transitions that are added while transitions are enabled, and stays. The path of
+  every property change reads one pointer and returns where there is no box.
+- The subscriptions of a visual are in an `OptionCell` of a box that stays once made: a
+  visual whose brush changes with every frame makes it once. Removing a subscription from
+  a visual that has none makes no box. They are not part of the composition extras of the
+  visual, whose existence says that the visual needs a composition visual of its own.
+
+The layers, each with the layers below it:
+
+| Bytes | Before | After |
+| --- | ---: | ---: |
+| `Animatable` | 440 | 336 |
+| `StyledElement` | 712 | 584 |
+| `Visual` | 1,016 | 824 |
+| `Layoutable` | 1,304 | 1,088 |
+| `Interactive` | 1,336 | 1,120 |
+| `InputElement` | 1,408 | 1,160 |
+
+**Measured** as in section 9.62:
+
+| Left by the show | MB before | MB after | blocks before | blocks after |
+| --- | ---: | ---: | ---: | ---: |
+| `type_system::instantiate`, with `RepeatButton::new` | 40.45 | 35.34 | 30,029 | 30,043 |
+| `Visual::update_affects_render_subscription` | 0.85 | 1.15 | 15,206 | 21,609 |
+| `Animatable::subscribe_to_collection` | 0.07 | 0.16 | 1,602 | 2,403 |
+| `Layoutable::subscribe_layout_updated` | 0.01 | 0.02 | 401 | 802 |
+
+The first row is the elements: 1,233 bytes on average where they were 1,412 (the 800
+repeat buttons of the scene are counted for their constructor in the first build and for
+`instantiate` in the second, so the row has both). The other rows are the boxes of the
+elements that have the state: 6,403 visuals with a subscription, 801 objects with
+transitions and 401 elements with a `layout_updated` handler. 5.11 MB less in the
+elements and 0.40 MB more in the boxes.
+
+**The blocks.** The census counts the bytes that were asked for. What the process keeps is
+the block the allocator gives, and above 1,008 bytes the allocator of macOS has four block
+sizes for each doubling: 1,024, 1,280, 1,536, 1,792, 2,048, 2,560 and so on (`malloc_size`
+of blocks of every size). An element is allocated with its two counts, 16 bytes, and nearly
+every element type moves to the size below:
+
+| Element, with its counts | Bytes before | Bytes after | Block before | Block after |
+| --- | ---: | ---: | ---: | ---: |
+| `ScrollViewer` | 1,888 | 1,640 | 2,048 | 1,792 |
+| `Border` | 1,880 | 1,632 | 2,048 | 1,792 |
+| `TextBlock`, `ContentPresenter` | 1,848 | 1,600 | 2,048 | 1,792 |
+| `Grid` | 1,840 | 1,592 | 2,048 | 1,792 |
+| `ScrollBar`, `Slider` | 1,816 | 1,568 | 2,048 | 1,792 |
+| `Button`, `CheckBox`, `ToggleButton` | 1,760 | 1,512 | 1,792 | 1,536 |
+| `Rectangle`, `Path` | 1,728 | 1,480 | 1,792 | 1,536 |
+| `ItemsPresenter` | 1,680 | 1,432 | 1,792 | 1,536 |
+| `ContentControl`, `Thumb` | 1,592 | 1,344 | 1,792 | 1,536 |
+| `Panel`, `StackPanel`, `Canvas` | 1,576 | 1,328 | 1,792 | 1,536 |
+| `RepeatButton` | 1,776 | 1,528 | 1,792 | 1,792 |
+| `TextBox` | 2,032 | 1,784 | 2,048 | 2,048 |
+
+So an element of nearly every type keeps 256 bytes less, which is a little more than the
+248 bytes it asks less for. `RepeatButton` is 8 bytes and `TextBox` 8 bytes short of the
+size below; section 9.67 takes them there.
+
+**Two lines of the gate in time alone.** The gate of this change alone against the commit
+before it has two lines over tolerance, with the instructions of the base, in benchmarks
+that read 10,000 controls that are not in the cache:
+
+| Read of 10,000 controls | Before | After | Time | Instructions |
+| --- | ---: | ---: | ---: | ---: |
+| `ControlRead.hot_copy` | 4.45 ns | 2.38 ns | -46.5 % | +0.00 % |
+| `ControlRead.unset_beside_values` | 6.89 ns | 6.24 ns | -9.4 % | +0.00 % |
+| `ControlRead.local_value` | 5.95 ns | 5.00 ns | -16.0 % | +0.00 % |
+| `ControlRead.non_copy_value` | 8.66 ns | 7.41 ns | -14.4 % | +0.00 % |
+| `ControlRead.inherited_unheld` | 4.15 ns | 3.48 ns | -16.1 % | +0.00 % |
+| `ControlRead.attached_unset` | 7.11 ns | 6.25 ns | -12.1 % | +0.00 % |
+| `ControlRead.inherited_held` | 10.29 ns | 12.89 ns | +25.3 % | +0.65 % |
+| `TextBlockConstraintBenchmark.measure_then_arrange_rounded[Texts=Paragraph]` | 2.712 us | 3.163 us | +16.6 % | +0.00 % |
+
+Six reads get faster and one slower; the same reads of 16 controls, which stay in the
+cache, do not move. The two lines stayed in a second run, so they were checked as section
+8.1 asks, and a step further:
+
+- *The code.* The read of an inherited value touches no field of this change, and the
+  value store of an element is at the same offset before and after (the layouts of both
+  builds, `-Zprint-type-sizes`).
+- *Where the blocks are.* The 10,000 borders of the benchmark are made one after another.
+  Their blocks are 2,048 bytes apart before and 1,792 after (the addresses in both
+  builds). The blocks of their values and of their inherited lookups are where they were,
+  192 and 96 bytes apart in both.
+- *The block size alone.* The commit of this change against itself with 192 unused bytes
+  at the end of `Border` and `TextBlock`, which puts them back into blocks of 2,048 bytes:
+  `inherited_held` 15.17 to 10.61 ns, `Paragraph` 3.155 to 2.766 us, `hot_copy` 2.87 to
+  4.28 ns. All three go back to what the base measures.
+
+So the lines are what a walk over blocks 1,792 bytes apart costs on this processor against
+one over blocks 2,048 bytes apart: the same instructions over the same fields at other
+addresses, faster for six reads and slower for two. Nothing of the change is slower by
+itself, and the tree of an application is not 10,000 blocks at one distance. The lines are
+recorded here as they are; the gate is not told to pass them.
+
+**What stays as it was.** What the elements do: transitions run, are interrupted and
+removed as before, a visual hears the changes of its brushes, effects and transforms, and
+`layout_updated` is raised. An object with transitions, a visual with a subscription and
+an element with a `layout_updated` handler pay one allocation more, once. No public API
+changes.
+
+**Other backends.** All of it is in `ferroui_base`.
+
+**Not upstream.** Upstream has these as fields of the classes; what they hold is the
+same.
+
+**Tests.** `transitions_tests.rs`: `only_an_object_with_transitions_keeps_data_for_them`.
+`visual_render_tests.rs`:
+`only_a_visual_with_a_value_that_tells_its_changes_keeps_subscriptions`. The transition,
+rendering, layout, effect and resource suites cover the rest.
+
+### 9.66 The activator of a class selector is the listener of the classes of its control
+
+A control has an activator for every style with a class selector that matches its type
+(`TypeNameAndClassSelector`), whether or not it has the class: the activator is what
+turns the style on when the class is set. The census of the start of section 9.61 has
+45,204 of them, 104 bytes each with the counts of their `Rc`, 4.48 MB, and 45,204 closures
+of 24 bytes beside them, 1.03 MB: what the classes of the control called when they
+changed was a routine that held the activator weakly and called it.
+
+**The change.**
+
+- `Classes` tells objects (`IClassesChangedListener`, internal to `ferroui_base`), and a
+  `StyleClassActivator` is added as itself (`add_changed_listener`): no closure, no block.
+  `Classes::add_listener` takes a routine as before and wraps it.
+- The token the activator listens with is an `Option<NonZeroU64>`: the tokens of a
+  `HandlerList` start at one, so none needs no word of its own.
+- The sink of `StyleActivatorBase` is an `OptionCell` instead of a `RefCell` of an option:
+  no borrow flag, in every activator and not only those of classes.
+
+| Bytes | Before | After |
+| --- | ---: | ---: |
+| `StyleClassActivator` | 88 | 72 |
+| `StyleActivatorBase` | 32 | 24 |
+
+**Measured** as in section 9.62:
+
+| Left by the show | MB before | MB after | blocks before | blocks after |
+| --- | ---: | ---: | ---: | ---: |
+| The activators (`TypeNameAndClassSelector`, `evaluate`) | 4.48 | 3.79 | 45,204 | 45,204 |
+| Their closures (`StyleClassActivator`, `initialize`) | 1.03 | none | 45,204 | none |
+
+1.72 MB and 45,204 blocks.
+
+**Sections 9.61 to 9.66 together.** What the show of 1,600 templated controls leaves
+allocated:
+
+| | bytes | blocks |
+| --- | ---: | ---: |
+| Before section 9.61 | 192,057,582 | 1,453,268 |
+| Section 9.61 | 180,032,550 | 1,456,096 |
+| Sections 9.61 to 9.66 | 160,852,624 | 1,368,851 |
+
+16.2 per cent of the bytes and 84,417 blocks less than before section 9.61.
+
+**The gate** (section 8.1), run once for sections 9.62 to 9.66 together on top of section
+9.61, against the commit before section 9.61:
+
+| Part | Metrics | Over tolerance |
+| --- | ---: | --- |
+| Framework | 171 | 3 (below) |
+| Counters, gauntlet, frames | 130 | none |
+| TreeDataGrid | 71 | none |
+| Window | 15 | none |
+
+The start of 1,600 templated controls in that run:
+
+| `startup/controls` | Before | After | |
+| --- | ---: | ---: | ---: |
+| `show_mb` | 198.0 | 166.9 | -15.7 % |
+| `startup_mb` | 285.0 | 252.8 | -11.3 % |
+| `show_ms` | 203.4 | 195.9 | -3.7 % |
+| `startup_ms` | 262.6 | 254.8 | -3.0 % |
+
+The three framework lines:
+
+- `ControlRead.inherited_held[Objects=10000]` and
+  `TextBlockConstraintBenchmark.measure_then_arrange_rounded[Texts=Paragraph]`, in time
+  alone. They stayed in a second run and are the block size of section 9.65, where they
+  are followed to their cause.
+- `ResourceLookup.find_merged[Depth=8, Merged=16]`, +6.3 per cent of instructions with the
+  time unchanged: the hash of a resource key was a call where it had been inlined into the
+  lookup of a dictionary. No code of that path changed, and the build of section 9.61
+  alone has the call as well. Marking the hash and the comparison of `ResourceKey`
+  `#[inline]` was tried and does not bring the count back (5,549 instructions without it,
+  5,616 with it, against 5,220 before section 9.61), so it was not made; the count of
+  today is the base of the gate from here. What would take more off that lookup than the
+  line added is hashing the key once for a lookup through merged dictionaries, which
+  hashes it for each of them today.
+
+**What stays as it was.** When an activator is told and what it tells its sink. The
+classes hold the activator that listens, where they held a closure with a weak reference
+to it: until it unsubscribes, which a style instance does on detach, or until the control
+goes away. The activator holds its control weakly, so the two make no cycle. No public API
+changes.
+
+**Other backends.** All of it is in `ferroui_base`.
+
+**Not upstream.** Upstream's activator is the listener of the classes as well
+(`IClassesChangedListener`); this section brings the port back to that shape. The option
+cell and the token are of this port.
+
+**Tests.** `classes.rs`: `an_object_that_listens_is_notified_and_held_until_it_is_removed`.
+`style_class_activator.rs`:
+`the_activator_listens_to_the_classes_itself_while_it_is_subscribed` (one listener and the
+activator held while subscribed, the sink told once for each change of the match, nothing
+after unsubscribing, and let go when the control goes away),
+`an_activator_keeps_no_word_for_what_is_absent`.
