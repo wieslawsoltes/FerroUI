@@ -2451,7 +2451,7 @@ impl Visual {
     /// The control's parent visual.
     #[inline]
     pub fn visual_parent(&self) -> Option<Ref<Visual>> {
-        self.visual_parent.with(|parent| parent.and_then(WeakRef::upgrade))
+        self.visual_parent.upgrade()
     }
 
     /// The number of visuals attached to a rooted visual tree (on this

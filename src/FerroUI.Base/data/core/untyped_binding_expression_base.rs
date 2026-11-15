@@ -283,7 +283,7 @@ impl UntypedBindingExpressionBase {
 
     /// The target of the binding expression, if it is attached and alive.
     pub fn try_get_target(&self) -> Option<Ref<FerroObject>> {
-        self.target.with(|target| target.and_then(WeakRef::upgrade))
+        self.target.upgrade()
     }
 
     /// Converts a value using a value converter, logging a warning if the

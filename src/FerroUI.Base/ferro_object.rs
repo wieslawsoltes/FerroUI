@@ -416,7 +416,7 @@ impl FerroObject {
 
     /// The parent object that inherited property values are inherited from.
     pub fn inheritance_parent(&self) -> Option<Ref<FerroObject>> {
-        self.inheritance_parent.with(|parent| parent.and_then(WeakRef::upgrade))
+        self.inheritance_parent.upgrade()
     }
 
     /// Whether `parent` is the inheritance parent of the object (`InheritanceParent == parent`),

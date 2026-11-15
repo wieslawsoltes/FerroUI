@@ -686,7 +686,7 @@ impl StyledElement {
 
     /// The styled element whose lookless template this element is part of.
     pub fn templated_parent(&self) -> Option<Ref<FerroObject>> {
-        self.templated_parent.with(|parent| parent.and_then(WeakRef::upgrade))
+        self.templated_parent.upgrade()
     }
 
     /// Sets the templated parent. Called by the template that creates the
@@ -741,7 +741,7 @@ impl StyledElement {
 
     /// The styled element's logical parent.
     pub fn parent(&self) -> Option<Ref<StyledElement>> {
-        self.parent.with(|parent| parent.and_then(WeakRef::upgrade))
+        self.parent.upgrade()
     }
 
     // --- initialization and styling ---------------------------------------
@@ -883,7 +883,7 @@ impl StyledElement {
     }
 
     fn logical_root(&self) -> Option<Ref<StyledElement>> {
-        self.logical_root.with(|root| root.and_then(WeakRef::upgrade))
+        self.logical_root.upgrade()
     }
 
     fn find_logical_root(&self) -> Option<Ref<StyledElement>> {

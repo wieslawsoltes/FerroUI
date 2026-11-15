@@ -203,7 +203,7 @@ impl ValueStore {
     }
 
     pub fn inheritance_ancestor(&self) -> Option<Ref<FerroObject>> {
-        self.inheritance_ancestor.with(|ancestor| ancestor.and_then(WeakRef::upgrade))
+        self.inheritance_ancestor.upgrade()
     }
 
     pub fn begin_styling(&self) {
