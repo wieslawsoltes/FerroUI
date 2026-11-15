@@ -4818,6 +4818,141 @@ heap, where a slot costs nothing; the box is a cost of this port.
 **Tests on the branch.** `batch_stream.rs`: `a_shared_payload_is_its_own_slot`.
 `render_data_tests.rs`: `shared_resources_cross_a_batch_as_its_slots`.
 
+### 9.59 A class names the properties its `on_property_changed` reacts to
+
+A change of a property is told to the object it changed on
+(`FerroObject::notify_property_changed`), and the object hands it to
+`on_property_changed`, a virtual member every class of the object may override; each
+override calls the one of its base class first. A `TextBlock` has seven
+of them. At tier 16 of the gauntlet the notification is 6.0 per cent of the samples of the
+UI thread, and what the handlers do for the change is the smaller part of it:
+
+| Of the UI thread at tier 16 | per cent |
+| --- | ---: |
+| `notify_property_changed`, all of it | 6.0 |
+| of it from `Layoutable::arrange_core`, the bounds after an arrange | 2.7 |
+| The handlers of the six base classes, their own time | 1.1 |
+| Lookups of thread-local cells from those handlers | 0.55 |
+
+The six handlers of the base classes (`Animatable`, `StyledElement`, `Visual`, `Layoutable`,
+`InputElement`, `Control`) each compare the property of the change with the properties
+their class reacts to, one after the other: thirteen comparisons, and each of them calls
+the accessor of a property, which reads a cell of the thread. For the changes a frame of
+the scene makes (a text, a width, the bounds) none of the thirteen is true, except the
+bounds for `Control`.
+
+**The change.** A class names the properties its handler reacts to, once, and the handler
+asks whether the property of a change is one of them before it compares.
+
+- `PropertyChangeHandler` has a variant for each of the six classes.
+  `PropertyChangeHandler::reacts_to(&[..])`, called from the static constructor of the
+  class, sets the bit of the handler on each property it is given.
+- `FerroPropertyChangedEventArgs::reaches(handler)` is the question: a load and a test of
+  a bit. A handler leaves when the answer is no.
+- `FerroPropertyChangedEventArgs::is_for(handler, property)` is the comparison a handler
+  makes, and `FerroProperty::has_change_handler` reads the bit.
+
+The static constructor of a class runs before the first instance of the class exists, and
+those of its base classes before it, so a handler never runs before its properties are
+named.
+
+**No memory for it.** The bits are a word in the state a property shares with the
+properties added to other owners, beside the count of its holders (section 9.21): the
+shared block is two words where it was one, once for each registered property. The
+property struct, the value store and the objects are the sizes they were
+(`sizes_of_an_element` of the frame benchmarks prints the same on both sides:
+`FerroObject` 320 bytes, `Layoutable` 1304, `Control` 1544).
+
+**A handler that reacts to a property its class did not name** would miss the change in a
+release build. A debug build therefore answers `reaches` with yes for every change, runs
+the comparisons, and `is_for` fails, with the names of the property and of the handler,
+when a comparison is true for a property that was not named. Every test that changes such
+a property finds the missing name.
+
+**Measured** with the local gate against the main branch (section 8.1, the median of
+three rounds; 387 lines in four runs, none over its tolerance):
+
+| Line | Main | Branch | Time | Instructions |
+| --- | ---: | ---: | ---: | ---: |
+| `ControlWrite.local_changed`, `Border` | 35.68 ns | 25.42 ns | -28.8 % | -29.22 % |
+| `ControlWrite.local_changed`, `Button` | 45.68 ns | 35.18 ns | -23.0 % | -23.74 % |
+| `ControlWrite.local_changed_affects_measure`, `Border` | 36.00 ns | 24.82 ns | -31.1 % | -28.94 % |
+| `ControlWrite.attached_changed`, `Border` | 39.18 ns | 27.55 ns | -29.7 % | -29.68 % |
+| `ControlWrite.inherited_changed`, `Border` | 33.35 ns | 23.42 ns | -29.8 % | -30.37 % |
+| `ControlWrite.non_copy_changed`, `Border` | 64.66 ns | 50.81 ns | -21.4 % | -20.19 % |
+| `ControlWrite.set_and_clear`, `Border` | 111.76 ns | 88.21 ns | -21.1 % | -17.90 % |
+| `SetterApply.plain`, 1000 controls, 8 setters | 681.4 us | 580.4 us | -14.8 % | -12.86 % |
+| `SetterApply.plain`, 1000 controls, 32 setters | 2.399 ms | 2.064 ms | -14.0 % | -14.02 % |
+| `Propagation.theme_variant`, 2000 tiles | 1.340 ms | 876.0 us | -34.6 % | -24.90 % |
+| `Propagation.data_context`, 2000 tiles | 1.302 ms | 967.3 us | -25.7 % | -22.73 % |
+| `Propagation.is_enabled`, 2000 tiles | 2.009 ms | 1.634 ms | -18.7 % | -11.85 % |
+| `Propagation.flow_direction`, 2000 tiles | 2.329 ms | 2.092 ms | -10.2 % | -10.80 % |
+| `SizeChange.wrap`, 1000 leaves | 83.40 us | 70.79 us | -15.1 % | -10.63 % |
+| `AttachedLayoutProperties.dock`, 1000 children | 101.96 us | 87.09 us | -14.6 % | -10.67 % |
+| `Visibility.stack_panel`, 1000 children | 93.02 us | 81.11 us | -12.8 % | -10.50 % |
+| `Text.narrow_and_lay_out`, 2000 labels | 51.48 us | 44.98 us | -12.6 % | -8.85 % |
+
+A write of a property that changes its value is a quarter to a third shorter, and so is
+everything made of such writes: the setters of a style, an inherited value on its way down
+a tree, the bounds of the children of a panel after an arrange. In the frame benchmarks it
+is the build of a scene and its start:
+
+| Frame benchmarks | Main | Branch | |
+| --- | ---: | ---: | ---: |
+| `frames/items`, build | 5.963 ms | 4.994 ms | -16.3 % |
+| `frames/items`, start | 11.545 ms | 10.004 ms | -13.3 % |
+| `frames/deep`, build | 28.769 ms | 25.480 ms | -11.4 % |
+| `frames/cards`, build | 23.944 ms | 21.625 ms | -9.7 % |
+| `frames/wall`, build | 140.861 ms | 128.212 ms | -9.0 % |
+| `startup/tiles`, build | 422.164 ms | 383.747 ms | -9.1 % |
+| `frames/rows`, start | 236.063 ms | 218.124 ms | -7.6 % |
+| `frames/recolor`, start | 291.796 ms | 271.381 ms | -7.0 % |
+| `gauntlet/16`, the UI thread a frame | 11.933 ms | 11.916 ms | -0.1 % |
+
+The frame of tier 16 is what it was. The profile gave the six handlers 1.1 per cent of its
+UI thread and their lookups 0.55, and a frame of that scene changes few properties beside
+the bounds, which `Control` reacts to as before: what is saved there is below what the
+gate tells apart. The gain is where properties are written in numbers.
+
+Two lines are faster in time alone, at the instructions of the main branch
+(`Propagation.is_visible` -13.5 per cent, `Styling.resource_changed` -26.3): where the
+build put the code, as in section 9.57 and in the other direction. They are not counted.
+The benchmarks of the tree data grid have two lines of it, the recycling of template
+cells (`same_template_provider` 1.190 to 1.022 us, -14.0 per cent in time and -11.65 in
+instructions; `alternating_template_providers` -15.0 and -12.12). In a window the frames
+are those of the display on both sides; the first frame of the wall comes after 586 ms
+where it came after 631, and that of the list after 187 where it came after 206, both
+inside the tolerance of the gate.
+
+**What stays as it was.** What a handler does for a property it reacts to, the order of
+the handlers, and every handler of a class outside the six, which compares as before. A
+class derived from one of the six is called as before: the base handler returns early,
+the override goes on.
+
+**Proposal 8, handles of a pass instead of lookups in the thread, is closed with this
+section.** The lookups of thread-local cells are 1.3 per cent of the UI thread at tier 16
+(`_tlv_get_addr`, its own time). The six handlers were 0.55 of it. What is left is spread
+over more than twenty callers, the largest `Visual::cache_mode` with 0.15 per cent and
+`Layoutable::use_layout_rounding` with 0.09, the rest 0.02 to 0.07 each: accessors of
+properties in the measure, the arrange and the render of single controls. A handle handed
+down the layout pass would replace none of them, since what they look up is the property,
+not the pass, and there is no place left that is worth an API of its own.
+
+**Other backends.** All of it is in `ferroui_base` and the controls; nothing of it knows
+what draws.
+
+**Not upstream.** Upstream's `OnPropertyChanged` compares in every class;
+`DEVIATIONS.md` has the row.
+
+**Tests.** `property_change_handler_tests.rs` of the base crate:
+`a_class_names_the_properties_its_handler_reacts_to`,
+`a_property_added_to_another_owner_is_named_with_the_property_it_was_added_from`,
+`a_change_reaches_the_handlers_its_property_was_named_for`,
+`a_handler_that_reacts_to_a_property_its_class_did_not_name_fails_in_a_debug_build`.
+`property_change_handler_tests.rs` of the controls:
+`control_names_the_bounds_for_its_handler_and_no_class_names_a_text`,
+`a_change_of_the_bounds_still_raises_size_changed`.
+
 ### 9.60 A dynamic resource follows its element by a token, and a style instance is made with room for its setters
 
 Styling is the seventh of the architecture proposals. It is 0.4 to 0.5 per cent of the UI

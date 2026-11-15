@@ -384,6 +384,18 @@ impl PropertyChangedObservable {
 
 static NEXT_ID: AtomicU32 = AtomicU32::new(0);
 
+/// The state of a property that the properties added to other owners share with it.
+struct SharedState {
+    /// The value stores that hold an effective value of the property, when it inherits: while
+    /// none does, every element inherits its default, and a lookup need not walk the ancestors.
+    /// An addition (FerroUI deviation, desktop-performance.md section 9.21).
+    holders: Cell<u32>,
+    /// The classes whose `on_property_changed` reacts to a change of the property, a bit for
+    /// each ([`PropertyChangeHandler`](crate::PropertyChangeHandler)). An addition (FerroUI
+    /// deviation, desktop-performance.md section 9.59).
+    change_handlers: Cell<u32>,
+}
+
 /// Base class for properties: the untyped identity and description of a
 /// property that can be set on a [`FerroObject`].
 pub struct FerroProperty {
@@ -394,11 +406,9 @@ pub struct FerroProperty {
     id: u32,
     inherits: bool,
     inherited_value_changed: Cell<Option<InheritedValueChanged>>,
-    /// The value stores that hold an effective value of the property, when it inherits: while
-    /// none does, every element inherits its default, and a lookup need not walk the ancestors.
-    /// An addition (FerroUI deviation, desktop-performance.md section 9.21). Shared with the
-    /// properties added to other owners: they are the same property.
-    holders: Rc<Cell<u32>>,
+    /// What the property has in common with the properties added to other owners: they are the
+    /// same property.
+    shared: Rc<SharedState>,
     is_attached: bool,
     is_direct: bool,
     is_read_only: bool,
@@ -446,7 +456,7 @@ impl FerroProperty {
             id: NEXT_ID.fetch_add(1, Ordering::Relaxed),
             inherits: init.inherits,
             inherited_value_changed: Cell::new(None),
-            holders: Rc::new(Cell::new(0)),
+            shared: Rc::new(SharedState { holders: Cell::new(0), change_handlers: Cell::new(0) }),
             is_attached: init.is_attached,
             is_direct: init.is_direct,
             is_read_only: init.is_read_only,
@@ -469,7 +479,7 @@ impl FerroProperty {
             id: source.id,
             inherits: source.inherits,
             inherited_value_changed: source.inherited_value_changed.clone(),
-            holders: source.holders.clone(),
+            shared: source.shared.clone(),
             is_attached: source.is_attached,
             is_direct: source.is_direct,
             is_read_only,
@@ -569,15 +579,32 @@ impl FerroProperty {
 
     /// The value stores that hold an effective value of the property (inheriting properties).
     pub(crate) fn holders(&self) -> u32 {
-        self.holders.get()
+        self.shared.holders.get()
     }
 
     pub(crate) fn add_holder(&self) {
-        self.holders.set(self.holders.get() + 1);
+        self.shared.holders.set(self.shared.holders.get() + 1);
     }
 
     pub(crate) fn remove_holder(&self) {
-        self.holders.set(self.holders.get().saturating_sub(1));
+        self.shared.holders.set(self.shared.holders.get().saturating_sub(1));
+    }
+
+    /// The classes whose `on_property_changed` reacts to the property, a bit for each.
+    #[inline]
+    pub(crate) fn change_handlers(&self) -> u32 {
+        self.shared.change_handlers.get()
+    }
+
+    pub(crate) fn add_change_handlers(&self, bits: u32) {
+        self.shared.change_handlers.set(self.shared.change_handlers.get() | bits);
+    }
+
+    /// Whether the `on_property_changed` of a class said that it reacts to a change of this
+    /// property ([`PropertyChangeHandler::reacts_to`](crate::PropertyChangeHandler::reacts_to)).
+    #[inline]
+    pub fn has_change_handler(&self, handler: crate::PropertyChangeHandler) -> bool {
+        self.change_handlers() & handler.bit() != 0
     }
 
     /// Whether this is an attached property.
