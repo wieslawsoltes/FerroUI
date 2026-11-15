@@ -842,7 +842,7 @@ mod __main_window_xaml {
                 // MainWindow.xaml(11,6) Style
                 let style_0: Ref<Style> = Style::new();
                 // MainWindow.xaml(11,13) Selector
-                style_0.set_selector(Some(Selectors::class(Some(Selectors::of_type_info(None, TextBlock::TYPE)), "title")));
+                style_0.set_selector(Some(Selectors::class(Some(Selectors::of_type_identity(None, TextBlock::IDENTITY)), "title")));
                 // MainWindow.xaml(12,8) Setter
                 let setter_0: Rc<Setter> = Setter::empty();
                 // MainWindow.xaml(12,16) Property
@@ -2548,7 +2548,7 @@ For applications, `export_metadata()` can generate the whole function (`$OUT_DIR
 | `FerroXamlIlContextNameScopeField` | `FerroNameScopeField` filled from the parent provider | `ctx.name_scope()` (field of `XamlIlContext`, filled in `new`) | — |
 | `FerroXamlIlContextEagerParentStackProvider` | `IFerroXamlIlEagerParentStackProvider` on the context | implemented by `XamlIlContext` | — |
 | `XamlIlSelectorInitialNode` | `None` | `None` | — |
-| `XamlIlTypeSelector` | `Selectors::of_type_info` / `is_type_info` | same calls with `T::TYPE` | — |
+| `XamlIlTypeSelector` | `Selectors::of_type_info` / `is_type_info` | `Selectors::of_type_identity` / `is_type_identity` with `<T as ObjectType>::IDENTITY`: the selector does not keep the class (`docs/binary-size.md`, 4.20) | — |
 | `XamlIlStringSelector` | `Selectors::class` / `name` | same | — |
 | `XamlIlCombinatorSelector` | `Selectors::child` / `descendant` / `template` | same | — |
 | `XamlIlNotSelector` | `Selectors::not(previous, argument)` | same | null argument is a build error |

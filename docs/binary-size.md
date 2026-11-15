@@ -76,6 +76,14 @@ No functionality was removed, no executable packer is used, and the panic strate
   matches, for example `'NavigationView\$u20\$as.*StaticType.*TYPE'` for the `TypeInfo` of a
   control. Apple's linker ignores `-why_live`, and the chains often run through anonymous tables
   that a linker reports only by address.
+  `scripts/ircut.py <module.ll> <binary> ...` answers the next question on the same graph, before
+  anything is changed: what the executable loses when a reference goes. With patterns it gives the
+  bytes reachable only through the symbols that match (a family of classes, say); `--classes`
+  lists every class by what its `TYPE` alone keeps; `--referrers` lists where a family is entered
+  from outside; `--edges <from> <to>` gives the effect of removing the references between two
+  sets of symbols and nothing else, which is what one change in the source does. A class that
+  several things name keeps little by itself, and the sum over its family is what counts: cut the
+  family first, then find its referrers, then try the edges (section 4.20).
 
 Every number below comes from this procedure; the commands are in section 9.
 
@@ -923,6 +931,59 @@ The units other applications keep, before and after:
 | `virtualization-demo` | Fluent | 32 of 75 | 32 of 75 | the same units |
 | `render-demo` | Fluent | 33 of 75 | 33 of 75 | the same units |
 | `reactive-demo` | WinUI | 45 of 166 | 47 of 166 | the tool tip and its resources, which its documents set and it had no theme for |
+
+### 4.20 A style, a native menu and an automation peer do not keep the menu classes (#570, #612)
+
+Hello world still linked 136 classes, among them the context menu, the menu item, the menu base,
+the selecting, headered and plain items controls, the radio and toggle buttons, the virtualizing
+and wrap panels and the presenter of a menu flyout: 14 classes of menus and lists in a window with
+one text block. `scripts/ircut.py` (section 2) put a number on them before anything was changed:
+no class of the family kept more than 16 kB by itself, the family together kept 372 kB, and three
+references from outside were all that entered it.
+
+- **A style.** `MenuItem > PathIcon`, the one global style of the WinUI theme, is built by the
+  function that builds the theme for every application. The unit graph no longer counts the menu
+  item as a type of the application (section 4.19), but the generated code still wrote the selector
+  with `<MenuItem as StaticType>::TYPE`, and the `TypeInfo` of a class names its initialisation: the
+  base classes, every property and every class handler. A selector needs none of that. Compiled
+  markup now writes `Selectors::of_type_identity` and `Selectors::is_type_identity` with the
+  identity of the class (`ObjectType::IDENTITY`, the static that `is::<T>()` compares since #612),
+  in the generated functions and in the static selector chains of the themes alike. The selector
+  matches by the identity, the candidate index of a style collection files it by the identity, and
+  its text comes from the name the identity carries. `Selector::target_type` finds the `TypeInfo`
+  through the identity once the class is initialised (`TypeIdentity::registered_type`, a look-up
+  among the known types of the name, which the selector remembers); before that nothing is of the
+  class. Selectors built in code and by the run-time loader are as they were.
+- **The native menu.** Every application on macOS has a native menu. `NativeMenuItem` took
+  `IsChecked`, `Command` and `CommandParameter` from `MenuItem` by adding itself as an owner, which
+  initialises `MenuItem` and, through `GroupName`, the radio button. `Command` and
+  `CommandParameter` of the menu item are the properties of the button: the native menu item now
+  adds itself to those, and they stay one property in the three classes. `IsChecked` is a
+  property of the native menu item alone; that of the menu item is as it was (the snapshot of the
+  property defaults only grows).
+- **The automation peer of every control.** `ControlAutomationPeer::show_context_menu_core` called
+  `ContextMenu::open_at`. It now calls `Control::open_context_menu`, which goes through a function
+  the context menu class states when it is initialised; a control cannot have a context menu
+  before that.
+
+`ircut.py --edges` on the whole-program module predicted 342 kB and the 14 classes from these
+three changes; the thin-LTO build of the default profile gives more, because value types that only
+those classes used go with them. The local gate on styling, the trees, element construction, the
+counters, the gauntlet and the frame benchmarks shows no change (218 metrics; one line slower in
+time alone with the instructions of the base did not repeat in a second run):
+
+| `samples/HelloWorld`, release, macOS (`scripts/symsize.py`) | Before | After | Change |
+|---|---:|---:|---:|
+| Classes linked | 136 | 122 | -14 |
+| Attributed to symbols | 19.48 MB | 19.01 MB | -0.47 MB (-2.4 %) |
+| Machine code | 15,831,928 bytes | 15,461,764 bytes | -370,164 bytes |
+| `ferroui_base` | 7.24 MB | 7.07 MB | -0.17 MB |
+| `ferroui_controls` | 1.09 MB | 0.94 MB | -0.15 MB |
+
+What the same analysis says of the rest, for later: the automation peers together keep 469 kB,
+which only an application that gives up accessibility could leave out; the typography and inline
+classes of the text block keep 165 kB; the view box, the layout transform control and the
+validation errors keep 125 kB, the first two through templates of the kept theme units.
 
 ## 5. What an executable is made of
 

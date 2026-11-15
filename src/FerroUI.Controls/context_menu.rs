@@ -180,6 +180,11 @@ impl ContextMenu {
     fn static_constructor() {
         Self::placement_property().override_default_value::<ContextMenu>(PlacementMode::Pointer);
         Control::context_menu_property().changed().subscribe(Self::context_menu_changed).detach();
+        Control::set_context_menu_opener(|control| {
+            if let Some(context_menu) = control.context_menu() {
+                context_menu.open_at(Some(control));
+            }
+        });
         crate::automation::AutomationProperties::accessibility_view_property()
             .override_default_value::<ContextMenu>(crate::automation::AccessibilityView::Control);
         crate::automation::AutomationProperties::control_type_override_property()
