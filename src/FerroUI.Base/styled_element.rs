@@ -683,6 +683,24 @@ impl StyledElement {
         })
     }
 
+    /// The number of logical children, without creating the collection.
+    #[inline]
+    pub fn logical_children_count(&self) -> usize {
+        self.logical_children.get().map_or(0, FerroList::count)
+    }
+
+    /// A snapshot of the logical children, without creating the collection: `None` for an element
+    /// that never had one.
+    ///
+    /// [`StyledElement::logical_children`] makes the collection of an element that has none, with
+    /// the handler that keeps the logical tree, which is for the code that adds a child. Code that
+    /// reads the children of every element it walks asks here: most elements of a tree are leaves,
+    /// and a leaf that was only read keeps no collection (desktop-performance.md, section 9.63).
+    #[inline]
+    pub fn logical_children_snapshot(&self) -> Option<Rc<Vec<Ref<StyledElement>>>> {
+        self.logical_children.get().map(FerroList::snapshot)
+    }
+
     /// Whether the element is attached to a rooted logical tree.
     pub fn is_attached_to_logical_tree(&self) -> bool {
         self.logical_root.borrow().is_some()
