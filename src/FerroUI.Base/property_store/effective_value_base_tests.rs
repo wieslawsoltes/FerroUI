@@ -44,7 +44,7 @@ impl Drop for Counted {
 }
 
 /// An object, a property of counted values, and the count of those alive before a value is set.
-fn counted() -> (FerroObject, &'static StyledProperty<Counted>, Rc<Cell<usize>>, usize) {
+fn counted() -> (crate::Ref<FerroObject>, &'static StyledProperty<Counted>, Rc<Cell<usize>>, usize) {
     let alive = Rc::new(Cell::new(0));
     let default = Counted::new(0, &alive);
     let property = FerroProperty::register_with::<FerroObject, _>(&unique_name(), StyledPropertyOptions::new(default));
