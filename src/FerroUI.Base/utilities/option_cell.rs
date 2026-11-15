@@ -15,39 +15,39 @@ use std::fmt;
 /// does not. A write puts the new value in before the old one is dropped, so
 /// what the old value does when it is dropped can read the cell and sees the
 /// new value.
-pub(crate) struct OptionCell<T> {
+pub struct OptionCell<T> {
     value: Cell<Option<T>>,
 }
 
 impl<T> OptionCell<T> {
     /// A cell that holds nothing.
     #[inline]
-    pub(crate) const fn new() -> Self {
+    pub const fn new() -> Self {
         Self { value: Cell::new(None) }
     }
 
     /// Replaces the value. The old value is dropped after the cell holds the
     /// new one.
     #[inline]
-    pub(crate) fn set(&self, value: Option<T>) {
+    pub fn set(&self, value: Option<T>) {
         drop(self.value.replace(value));
     }
 
     /// Replaces the value and returns the one the cell held.
     #[inline]
-    pub(crate) fn replace(&self, value: Option<T>) -> Option<T> {
+    pub fn replace(&self, value: Option<T>) -> Option<T> {
         self.value.replace(value)
     }
 
     /// Takes the value out: the cell holds nothing afterwards.
     #[inline]
-    pub(crate) fn take(&self) -> Option<T> {
+    pub fn take(&self) -> Option<T> {
         self.value.take()
     }
 
     /// Calls `read` with the value, without cloning it. `read` must not read the cell.
     #[inline]
-    pub(crate) fn with<R>(&self, read: impl FnOnce(Option<&T>) -> R) -> R {
+    pub fn with<R>(&self, read: impl FnOnce(Option<&T>) -> R) -> R {
         let value = self.value.take();
         let result = read(value.as_ref());
         self.value.set(value);
@@ -56,7 +56,7 @@ impl<T> OptionCell<T> {
 
     /// Whether the cell holds a value, without cloning it.
     #[inline]
-    pub(crate) fn is_some(&self) -> bool {
+    pub fn is_some(&self) -> bool {
         let value = self.value.take();
         let result = value.is_some();
         self.value.set(value);
@@ -67,7 +67,7 @@ impl<T> OptionCell<T> {
 impl<T: Clone> OptionCell<T> {
     /// A clone of the value.
     #[inline]
-    pub(crate) fn get(&self) -> Option<T> {
+    pub fn get(&self) -> Option<T> {
         let value = self.value.take();
         let result = value.clone();
         self.value.set(value);
