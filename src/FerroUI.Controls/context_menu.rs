@@ -374,7 +374,7 @@ impl ContextMenu {
 
         if let Some(old_menu) = old_value {
             if let Some((context_requested, context_canceled, attached, detached)) =
-                control.context_menu_handlers().take()
+                control.take_context_menu_handlers()
             {
                 control.remove_handler(InputElement::context_requested_event(), context_requested);
                 control.remove_handler(InputElement::context_canceled_event(), context_canceled);
@@ -407,7 +407,12 @@ impl ContextMenu {
                     Self::control_detached_from_visual_tree(&control, e);
                 }
             });
-            control.context_menu_handlers().set(Some((context_requested, context_canceled, attached.detach(), detached.detach())));
+            control.set_context_menu_handlers((
+                context_requested,
+                context_canceled,
+                attached.detach(),
+                detached.detach(),
+            ));
         }
 
         if control.is_attached_to_visual_tree() {

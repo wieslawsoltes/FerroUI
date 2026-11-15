@@ -690,3 +690,29 @@ fn closed_context_menu_is_released_with_its_owner() {
     drop(sut);
     assert!(weak.upgrade().is_none());
 }
+
+/// Not in the reference (desktop-performance.md, section 9.68): the handlers of a context menu,
+/// those of a context flyout, the focus adorner and the automation peer are state few controls
+/// have, and a control makes a place for it with the first of it.
+#[test]
+fn only_a_control_with_a_context_menu_keeps_the_state_few_controls_have() {
+    let _app = application();
+    let plain = Panel::new();
+    let sut = ContextMenu::new();
+    let target = panel_with(&sut);
+
+    // Taking away a menu that was never there makes nothing.
+    plain.set_context_menu(None);
+    assert!(!plain.has_rare_state());
+    assert!(target.has_rare_state());
+
+    // The menu opens through the handlers kept there, and no longer once they are taken away.
+    let _window = prepared_window(Some(target.clone().upcast()));
+    target.raise_event(&ContextRequestedEventArgs::new());
+    assert!(sut.is_open());
+    sut.close();
+
+    target.set_context_menu(None);
+    target.raise_event(&ContextRequestedEventArgs::new());
+    assert!(!sut.is_open());
+}
