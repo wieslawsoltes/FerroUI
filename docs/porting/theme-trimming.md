@@ -695,9 +695,11 @@ adds the roots it reads from sources beside them, through `Roots::extend` (secti
 roots are:
 
 - the types the compiled documents of the application construct, select or name in `{x:Type}`
-  (elements, template content included, `TargetType`, the type selectors of selectors). The unit
-  graph reads them with the rules it uses for theme documents
-  (`rust_emitter::document_references`). Each type comes with its base classes, which the type
+  (elements, template content included, `TargetType`, the type selectors of selectors, the owner
+  of `ToolTip.Tip`). The unit graph reads them as it reads theme documents
+  (`rust_emitter::document_references`), with one difference: the types a theme unit only selects
+  are conditions and do not make its types live (`docs/binary-size.md`, section 4.19), while an
+  application's selectors root what they name. Each type comes with its base classes, which the type
   models give (`theme_roots::BaseClasses`, by the Rust name of the base; `TypeGraph` since step 4). That covers a subclass
   that does not override its style key;
 - every identifier token of the attribute values and text of the documents, and the argument of
@@ -712,7 +714,9 @@ The closure (`theme_roots::kept_units`): the ambient unit is always kept. A unit
 defines a live key or the type key of a live type, or when it is named. A kept unit makes its
 `references` live keys (StaticResource, DynamicResource, BasedOn, `Theme=` and every other mention
 of a key of the group). It makes its `types` live types, with their base classes, so the controls
-its templates construct root their own control themes. The result is the canonical indices,
+its templates construct root their own control themes. The types of a unit are what it constructs
+(its elements, its `TargetType`s, its `{x:Type}`s, the owner of `ToolTip.Tip`), not what its
+selectors select. The result is the canonical indices,
 ascending. Every definition of a live key is kept: overrides and the theme dictionaries of every
 variant. A control that only Rust code creates was not a root in step 3 and needed a
 `theme-roots` entry (see 10.5). Since step 4 the names of the application's sources and the

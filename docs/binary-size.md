@@ -880,6 +880,50 @@ that never does links neither.
 A load of `AboutFerroDialog.xaml` by its URI before any dialog was made finds the document only
 with the tables of types; the dialog itself is unchanged.
 
+### 4.19 A type a theme style only selects is not a type its unit constructs (#568, #612)
+
+Hello world kept 30 of the 166 units of the WinUI theme: besides the text block and the button of
+the window's caption, the menu item, the menu scroll viewer, the scroll viewer, the scroll bar, the
+repeat button, the thumb and the items control, with their resources. None of them is in a window
+with one text block.
+
+A kept unit makes the types it names live, so that the controls its templates construct root their
+own themes (`docs/porting/theme-trimming.md`, section 10). The types of a unit were those of its
+elements, of its `TargetType`s, of its `{x:Type}`s and of the type selectors of its selectors. The
+ambient unit, which every application keeps, has one global style, `MenuItem > PathIcon`, for the
+icon of a menu item. Its selector made the menu item a type of every application, and the unit of
+the menu item brought the rest: its template constructs a popup and a scroll viewer, whose
+templates construct scroll bars, repeat buttons and thumbs.
+
+A selector is a condition: a style that selects a type styles it where something else made it. The
+unit graph (`theme_unit_graph.rs`) now keeps the types of selectors apart from the types a unit
+constructs, and only those make a unit's types live. The documents of an application root what
+their selectors name as before: an application that styles a type is taken to use it.
+
+One type was kept by a selector alone and is constructed by no element: a tool tip, which the
+framework makes for an element with `ToolTip.Tip`. The Fluent theme named it in a selector of its
+validation errors; under the WinUI theme an application with `ToolTip.Tip` on a button kept no
+theme for it at all. A document that sets `ToolTip.Tip`, as an attribute or as a property element,
+now constructs a `ToolTip` (`ATTACHED_CONSTRUCTIONS`).
+
+| `samples/HelloWorld`, release, macOS (`scripts/symsize.py`) | Before | After | Change |
+|---|---:|---:|---:|
+| Units of the theme | 30 of 166 | 16 of 166 | |
+| Attributed to symbols | 21.36 MB | 19.48 MB | -1.88 MB (-8.8 %) |
+| Machine code | 17,365,212 bytes | 15,831,876 bytes | -1,533,336 bytes |
+| `ferroui_base` | 7.96 MB | 7.24 MB | -0.72 MB |
+| `ferroui_controls` | 1.33 MB | 1.10 MB | -0.23 MB |
+| `ferroui_themes_winui` | 0.98 MB | 0.46 MB | -0.52 MB |
+
+The units other applications keep, before and after:
+
+| Sample | Theme | Before | After | |
+|---|---|---:|---:|---|
+| `binding-demo` | Fluent | 29 of 75 | 29 of 75 | the same units |
+| `virtualization-demo` | Fluent | 32 of 75 | 32 of 75 | the same units |
+| `render-demo` | Fluent | 33 of 75 | 33 of 75 | the same units |
+| `reactive-demo` | WinUI | 45 of 166 | 47 of 166 | the tool tip and its resources, which its documents set and it had no theme for |
+
 ## 5. What an executable is made of
 
 ### 5.1 Sections (macOS, release, unstripped)
