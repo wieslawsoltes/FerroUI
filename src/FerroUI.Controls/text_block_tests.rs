@@ -1262,6 +1262,27 @@ const LONG_LOREM_TEXT: &str = concat!(
 const LONG_ARABIC_TEXT: &str =
     "مرحبا بكم في اختبار التخطيط للنصوص الطويلة التي تلتف عبر عدة أسطر للتحقق من سلوك علامة الحذف عند الاقتصاص.";
 
+/// Not in the reference: the collection of inlines is made by the first read (section 9.21 of
+/// desktop-performance.md), and that read invalidates nothing. A tool that lists the properties
+/// of a text block from a render read it there, and the invalidation it caused was one in the
+/// render pass.
+#[test]
+fn the_first_read_of_the_inlines_invalidates_nothing() {
+    let _scope = test_scope();
+    let target = text_block("Hello");
+    target.measure(infinity());
+    target.arrange(Rect::from_size(target.desired_size()));
+    assert!(target.is_measure_valid() && target.is_arrange_valid());
+
+    let inlines = target.inlines().expect("the collection is made by the read");
+
+    assert!(target.is_measure_valid() && target.is_arrange_valid());
+    assert_eq!(inlines.count(), 0);
+    // The collection is connected all the same: what is added to it is laid out.
+    inlines.add(Run::with_text(Some("World")));
+    assert!(!target.is_measure_valid());
+}
+
 #[test]
 fn should_shape_inlines_when_text_layout_is_created_before_measure() {
     let _scope = test_scope();
