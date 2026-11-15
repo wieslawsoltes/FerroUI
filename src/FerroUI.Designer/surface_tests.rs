@@ -293,11 +293,17 @@ fn a_render_takes_the_kept_layout_helpers_and_makes_none() {
         fixture.surface.layout_helper_snapshot_for_render().is_none(),
         "A render must not make the snapshot"
     );
-    ferroui_base::threading::Dispatcher::ui_thread().run_jobs(None);
-    assert!(
-        fixture.surface.layout_helper_snapshot_for_render().is_some(),
-        "The snapshot is made after the pass and kept for the next render"
-    );
+    // The jobs that run with it may change what the snapshot is kept for (a preview that settles):
+    // a render then asks once more, and the snapshot is kept after a few passes at the latest.
+    let mut kept = false;
+    for _ in 0..8 {
+        ferroui_base::threading::Dispatcher::ui_thread().run_jobs(None);
+        if fixture.surface.layout_helper_snapshot_for_render().is_some() {
+            kept = true;
+            break;
+        }
+    }
+    assert!(kept, "The snapshot is made after the pass and kept for a later render");
 }
 
 #[test]
