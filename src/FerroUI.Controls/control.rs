@@ -110,6 +110,17 @@ pub struct Control {
     base: InputElement,
     load_state: Cell<LoadState>,
     data_templates: OnceCell<DataTemplates>,
+    /// What few controls have (`RareState`), made with the first of it.
+    // Not upstream (docs/porting/desktop-performance.md, section 9.68): the four fields were 120
+    // bytes of every control, and an element is kept in the block its size falls into.
+    rare: OnceCell<Box<RareState>>,
+}
+
+/// The state of a control that few controls have: the focus adorner of one that has the keyboard
+/// focus, the handlers of one with a context menu or a context flyout, and the automation peer of
+/// one that was asked for it.
+#[derive(Default)]
+struct RareState {
     focus_adorner: RefCell<Option<Ref<Control>>>,
     context_flyout_handlers: Cell<Option<(RoutedEventHandlerToken, RoutedEventHandlerToken)>>,
     context_menu_handlers: Cell<Option<ContextMenuHandlers>>,
@@ -220,19 +231,19 @@ impl InputElementImpl for Control {
             && (e.navigation_method == NavigationMethod::Tab || e.navigation_method == NavigationMethod::Directional)
         {
             if let Some(adorner_layer) = AdornerLayer::get_adorner_layer(this) {
-                if this.focus_adorner.borrow().is_none() {
+                if this.focus_adorner_element().is_none() {
                     let template = if this.is_set(Self::focus_adorner_property().as_property()) {
                         this.get_value(Self::focus_adorner_property())
                     } else {
                         adorner_layer.default_focus_adorner()
                     };
 
-                    if let Some(template) = template {
-                        *this.focus_adorner.borrow_mut() = template.build_typed();
+                    if let Some(focus_adorner) = template.and_then(|template| template.build_typed()) {
+                        *this.rare().focus_adorner.borrow_mut() = Some(focus_adorner);
                     }
                 }
 
-                let focus_adorner = this.focus_adorner.borrow().clone();
+                let focus_adorner = this.focus_adorner_element();
                 if let (Some(focus_adorner), Some(target)) = (focus_adorner, this.get_template_focus_target()) {
                     AdornerLayer::set_adorned_element(&focus_adorner, target);
                     adorner_layer.children().add(focus_adorner);
@@ -242,7 +253,7 @@ impl InputElementImpl for Control {
 
         // Reveal focus (winui-materials.md): a glow around the focus visual.
         if this.is_focused() {
-            let target = if this.focus_adorner.borrow().is_some() { this.get_template_focus_target() } else { None };
+            let target = if this.focus_adorner_element().is_some() { this.get_template_focus_target() } else { None };
             crate::media::on_control_got_focus(
                 target.as_ref().map(|target| {
                     let visual: &ferroui_base::Visual = target;
@@ -265,11 +276,12 @@ impl InputElementImpl for Control {
             }),
         );
 
-        let focus_adorner = this.focus_adorner.borrow().clone();
-        if let Some(focus_adorner) = focus_adorner {
+        if let Some(focus_adorner) = this.focus_adorner_element() {
             if let Some(adorner_layer) = focus_adorner.parent().and_then(|parent| parent.cast::<Panel>()) {
                 adorner_layer.children().remove(focus_adorner);
-                *this.focus_adorner.borrow_mut() = None;
+                if let Some(rare) = this.rare.get() {
+                    *rare.focus_adorner.borrow_mut() = None;
+                }
             }
         }
     }
@@ -398,17 +410,38 @@ impl Control {
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
     pub fn construct() -> Self {
-        Self { base: InputElement::construct(), load_state: Cell::new(LoadState::Unloaded), data_templates: OnceCell::new(), focus_adorner: RefCell::new(None), context_flyout_handlers: Cell::new(None), context_menu_handlers: Cell::new(None), automation_peer: RefCell::new(None) }
+        Self {
+            base: InputElement::construct(),
+            load_state: Cell::new(LoadState::Unloaded),
+            data_templates: OnceCell::new(),
+            rare: OnceCell::new(),
+        }
     }
 
     pub fn new() -> Ref<Self> {
         instantiate(Self::construct())
     }
 
+    /// The state few controls have, made when the first of it is set.
+    fn rare(&self) -> &RareState {
+        self.rare.get_or_init(Default::default)
+    }
+
+    /// Whether the control keeps the state few controls have.
+    #[cfg(test)]
+    pub(crate) fn has_rare_state(&self) -> bool {
+        self.rare.get().is_some()
+    }
+
+    /// The focus adorner the control built for itself when it got the keyboard focus.
+    fn focus_adorner_element(&self) -> Option<Ref<Control>> {
+        self.rare.get().and_then(|rare| rare.focus_adorner.borrow().clone())
+    }
+
     /// Gets the automation peer of the control, if it has been created.
     pub(crate) fn get_automation_peer(&self) -> Option<Ref<AutomationPeer>> {
         self.verify_access();
-        self.automation_peer.borrow().clone()
+        self.rare.get().and_then(|rare| rare.automation_peer.borrow().clone())
     }
 
     /// Gets the automation peer of the control, creating it with
@@ -416,12 +449,12 @@ impl Control {
     pub(crate) fn get_or_create_automation_peer(&self) -> Ref<AutomationPeer> {
         self.verify_access();
 
-        if let Some(peer) = self.automation_peer.borrow().clone() {
+        if let Some(peer) = self.rare.get().and_then(|rare| rare.automation_peer.borrow().clone()) {
             return peer;
         }
 
         let peer = self.on_create_automation_peer();
-        *self.automation_peer.borrow_mut() = Some(peer.clone());
+        *self.rare().automation_peer.borrow_mut() = Some(peer.clone());
         peer
     }
 
@@ -456,9 +489,14 @@ impl Control {
         self.set_value(Self::context_menu_property(), value.into().0)
     }
 
-    /// The handlers the context menu support attached to this control.
-    pub(crate) fn context_menu_handlers(&self) -> &Cell<Option<ContextMenuHandlers>> {
-        &self.context_menu_handlers
+    /// Takes the handlers the context menu support attached to this control.
+    pub(crate) fn take_context_menu_handlers(&self) -> Option<ContextMenuHandlers> {
+        self.rare.get().and_then(|rare| rare.context_menu_handlers.take())
+    }
+
+    /// Keeps the handlers the context menu support attached to this control.
+    pub(crate) fn set_context_menu_handlers(&self, handlers: ContextMenuHandlers) {
+        self.rare().context_menu_handlers.set(Some(handlers));
     }
 
     /// A context flyout to the control.
@@ -470,10 +508,15 @@ impl Control {
         self.set_value(Self::context_flyout_property(), value.into().0)
     }
 
-    /// The handlers the context flyout support attached to this control
+    /// Takes the handlers the context flyout support attached to this control
     /// for its context requested and context canceled events.
-    pub(crate) fn context_flyout_handlers(&self) -> &Cell<Option<(RoutedEventHandlerToken, RoutedEventHandlerToken)>> {
-        &self.context_flyout_handlers
+    pub(crate) fn take_context_flyout_handlers(&self) -> Option<(RoutedEventHandlerToken, RoutedEventHandlerToken)> {
+        self.rare.get().and_then(|rare| rare.context_flyout_handlers.take())
+    }
+
+    /// Keeps the handlers the context flyout support attached to this control.
+    pub(crate) fn set_context_flyout_handlers(&self, handlers: (RoutedEventHandlerToken, RoutedEventHandlerToken)) {
+        self.rare().context_flyout_handlers.set(Some(handlers));
     }
 
     /// Whether the control is fully constructed in the visual tree and both
