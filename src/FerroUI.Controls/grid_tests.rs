@@ -327,6 +327,23 @@ fn execute_shared_size_layout_pass(root: &TestRoot) {
     execute_layout_pass(root);
 }
 
+/// Not in the reference (desktop-performance.md, section 9.70): the extended data of a grid is in
+/// a box made on demand, and a grid without definitions is measured and arranged without it.
+#[test]
+fn a_grid_without_definitions_makes_no_extended_data() {
+    let plain = Grid::new();
+    plain.children().add(border(Some(100.0), Some(25.0)));
+    plain.measure(Size::INFINITY);
+    plain.arrange(Rect::from_size(plain.desired_size()));
+
+    assert_eq!(plain.desired_size(), Size::new(100.0, 25.0));
+    assert!(!plain.has_extended_data());
+
+    let target = Grid::new();
+    target.set_column_definitions(ColumnDefinitions::from_items([ColumnDefinition::with_width(GridLength::AUTO)]));
+    assert!(target.has_extended_data());
+}
+
 #[test]
 fn calculates_colspan_correctly() {
     let target = Grid::new();
