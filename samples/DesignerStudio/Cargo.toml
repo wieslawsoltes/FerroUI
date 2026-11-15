@@ -16,10 +16,13 @@ name = "designer-studio"
 path = "program.rs"
 
 [features]
-default = ["desktop", "mcp"]
+default = ["desktop", "mcp", "collaboration"]
 desktop = ["dep:ferroui-desktop"]
 headless = ["dep:ferroui-headless"]
 mcp = ["ferroui-designer/mcp"]
+# Sharing a document through the collaboration host; off for a browser host, whose target has no TLS
+# random source for the client (the feature `collaboration-client` of `ferroui-designer`).
+collaboration = ["ferroui-designer/collaboration-client"]
 
 [dependencies]
 ferroui-base.workspace = true

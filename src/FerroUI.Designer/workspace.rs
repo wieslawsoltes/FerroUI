@@ -78,7 +78,9 @@ pub struct DesignerWorkspace {
     authoring: RefCell<authoring::AuthoringUi>,
     components: RefCell<components::ComponentUi>,
     animation_program_ids: RefCell<Vec<u64>>,
+    #[cfg(feature = "collaboration-client")]
     sharing: RefCell<Option<Rc<crate::sharing::SharingController>>>,
+    #[cfg(feature = "collaboration-client")]
     sharing_panel: RefCell<Option<Rc<sharing::SharingPanel>>>,
     shell: shell::WorkspaceShell,
     preview_environment: RefCell<preview_environment::PreviewEnvironmentUi>,
@@ -157,7 +159,9 @@ impl DesignerWorkspace {
             authoring: RefCell::new(Default::default()),
             components: RefCell::new(Default::default()),
             animation_program_ids: RefCell::new(Vec::new()),
+            #[cfg(feature = "collaboration-client")]
             sharing: RefCell::new(None),
+            #[cfg(feature = "collaboration-client")]
             sharing_panel: RefCell::new(None),
             shell: shell::WorkspaceShell::default(),
             preview_environment: RefCell::new(Default::default()),
@@ -476,6 +480,7 @@ impl DesignerWorkspace {
                 };
                 let now = Dispatcher::ui_thread().now();
                 this.poll_project();
+                #[cfg(feature = "collaboration-client")]
                 this.tick_sharing();
                 let delta = (now - this.last_tick.replace(now)).max(0) as f64 / 1000.0;
                 if this.pending_source.get() && now - this.source_changed_at.get() >= 180 {
@@ -831,6 +836,7 @@ impl DesignerWorkspace {
 }
 impl Drop for DesignerWorkspace {
     fn drop(&mut self) {
+        #[cfg(feature = "collaboration-client")]
         if let Some(controller) = self.sharing.get_mut().take() {
             controller.disconnect();
         }
@@ -910,8 +916,18 @@ pub(crate) mod prototype;
 pub use prototype::PreviewPrototypePlaybackInfo;
 #[path = "workspace_project.rs"]
 mod project;
+#[cfg(feature = "collaboration-client")]
 #[path = "workspace_sharing.rs"]
 mod sharing;
+
+/// Without the feature `collaboration-client` the workspace has no sharing: the Share button of the shell is
+/// hidden, and the sharing panel and its controller do not exist.
+#[cfg(not(feature = "collaboration-client"))]
+impl DesignerWorkspace {
+    fn connect_sharing(self: &Rc<Self>) {
+        self.root.get_control::<Button>("Share").set_is_visible(false);
+    }
+}
 #[path = "source_editor.rs"]
 mod source_tools;
 #[path = "workspace_timeline.rs"]

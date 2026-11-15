@@ -4,6 +4,10 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ## [Unreleased]
 
+### Added
+
+- **The collaboration client of the designer is a feature** (`ferroui-designer`, [docs/designer/README.md](docs/designer/README.md)): `collaboration-client`, on by default, brings sharing a document through the collaboration host (`ferroui_designer::sharing`, the Share panel of the workspace) and its HTTPS client, whose TLS has no random source on `wasm32-unknown-emscripten`. A browser host turns the default features off; the workspace then hides its Share button. Designer Studio has it as its feature `collaboration` (on by default), and the facade's feature `designer` turns it on, so every build that had sharing keeps it. The workspace dependency `ferroui-designer` of the root manifest no longer selects the default features: each member names the features it uses.
+
 ### Changed
 
 - **The workspace at 0.5.1-preview.1**: 0.5.0 is published, and `main` carries the previews of 0.5.1 (owner decision, 2026-11-14). Unlike the previews of a minor version, they keep the public API of 0.5: the API gate compares every pull request with `v0.5.0` (`scripts/api-gate/semver_checks.py`, docs/release.md, section 3.1), and a change that breaks it waits for 0.6.0.

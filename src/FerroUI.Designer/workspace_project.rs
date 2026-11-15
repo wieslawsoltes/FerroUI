@@ -179,6 +179,7 @@ impl DesignerWorkspace {
                 tab.preview_uri.clone(),
             )
         };
+        #[cfg(feature = "collaboration-client")]
         self.disconnect_sharing();
         self.session
             .borrow_mut()
