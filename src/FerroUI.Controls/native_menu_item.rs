@@ -108,11 +108,11 @@ ferro_properties! {
 
         /// Defines the `IsChecked` property.
         ///
-        /// Deviation (DEVIATIONS.md, Native menu): upstream registers `IsChecked` with the menu
-        /// item and adds the native menu item as an owner. Here the native menu item registers
-        /// it and the menu item adds itself (`MenuItem::is_checked_property`): both have the one
-        /// property either way, and an application with a native menu and no menu (every
-        /// application on macOS) does not keep the menu classes.
+        /// Deviation (DEVIATIONS.md, Native menu): upstream adds the native menu item as an owner
+        /// to `IsChecked` of the menu item. Here it is a property of the native menu item alone:
+        /// adding an owner to a property of the menu item initialises the menu item, and an
+        /// application with a native menu and no menu (every application on macOS) would keep
+        /// the menu classes.
         pub fn is_checked_property() -> StyledProperty<bool> {
             FerroProperty::register::<NativeMenuItem, _>("IsChecked", false)
         }

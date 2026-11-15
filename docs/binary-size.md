@@ -958,8 +958,9 @@ references from outside were all that entered it.
   `IsChecked`, `Command` and `CommandParameter` from `MenuItem` by adding itself as an owner, which
   initialises `MenuItem` and, through `GroupName`, the radio button. `Command` and
   `CommandParameter` of the menu item are the properties of the button: the native menu item now
-  adds itself to those. `IsChecked` is registered by the native menu item and the menu item adds
-  itself. All three stay one property in both classes.
+  adds itself to those, and they stay one property in the three classes. `IsChecked` is a
+  property of the native menu item alone; that of the menu item is as it was (the snapshot of the
+  property defaults only grows).
 - **The automation peer of every control.** `ControlAutomationPeer::show_context_menu_core` called
   `ContextMenu::open_at`. It now calls `Control::open_context_menu`, which goes through a function
   the context menu class states when it is initialised; a control cannot have a context menu
@@ -967,13 +968,15 @@ references from outside were all that entered it.
 
 `ircut.py --edges` on the whole-program module predicted 342 kB and the 14 classes from these
 three changes; the thin-LTO build of the default profile gives more, because value types that only
-those classes used go with them:
+those classes used go with them. The local gate on styling, the trees, element construction, the
+counters, the gauntlet and the frame benchmarks shows no change (218 metrics; one line slower in
+time alone with the instructions of the base did not repeat in a second run):
 
 | `samples/HelloWorld`, release, macOS (`scripts/symsize.py`) | Before | After | Change |
 |---|---:|---:|---:|
 | Classes linked | 136 | 122 | -14 |
 | Attributed to symbols | 19.48 MB | 19.01 MB | -0.47 MB (-2.4 %) |
-| Machine code | 15,831,928 bytes | 15,458,388 bytes | -373,540 bytes |
+| Machine code | 15,831,928 bytes | 15,461,764 bytes | -370,164 bytes |
 | `ferroui_base` | 7.24 MB | 7.07 MB | -0.17 MB |
 | `ferroui_controls` | 1.09 MB | 0.94 MB | -0.15 MB |
 
