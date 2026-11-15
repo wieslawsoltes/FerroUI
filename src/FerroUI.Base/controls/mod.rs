@@ -23,6 +23,7 @@ pub mod resource_preview;
 mod resources_changed_event_args;
 
 pub use child_name_scope::ChildNameScope;
+pub(crate) use classes::IClassesChangedListener;
 pub use classes::{Classes, IPseudoClasses};
 pub use i_deferred_content::{DeferredContentFailed, DeferredResourceGroup, IDeferredContent, IDeferredResourceGroup};
 pub use i_name_scope::{INameScope, NameScopeError, NameScopeRef, NameScopeValueError};
