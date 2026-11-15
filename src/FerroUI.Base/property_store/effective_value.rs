@@ -27,20 +27,31 @@ pub(crate) trait EffectiveValueDyn: Any {
     );
 }
 
+/// The write of a value of a property with a coercion callback (`EffectiveValue::set_and_raise_coerced`).
+type CoercedSet<T> = fn(&EffectiveValue<T>, &FerroObject, T, BindingPriority, bool, bool);
+
 pub(crate) struct UncommonFields<T> {
     coerce: CoerceValueCallback<T>,
     uncoerced_value: RefCell<T>,
     uncoerced_base_value: RefCell<T>,
+    /// The write of a value with the callback. Its address is taken here alone, where a coercion callback
+    /// was registered, and not by the write of every value type.
+    set: CoercedSet<T>,
+    /// The typed leaves of that write (the comparison and the two notifications), named once where the
+    /// value is made: named in the write of every value type, each copy of the write kept copies of them.
+    operations: CoercionOperations<T>,
 }
 
-impl<T: Clone> UncommonFields<T> {
-    pub(crate) fn new(coerce: &CoerceValueCallback<T>, value: &T) -> Self {
+impl<T: Clone + 'static> UncommonFields<T> {
+    pub(crate) fn new(coerce: &CoerceValueCallback<T>, value: &T, operations: CoercionOperations<T>) -> Self {
         // Preserve the original map closure's initialization and partial-drop
         // order. In particular, the callback is cloned before either T clone.
         Self {
             coerce: coerce.clone(),
             uncoerced_value: RefCell::new(value.clone()),
             uncoerced_base_value: RefCell::new(value.clone()),
+            set: EffectiveValue::<T>::set_and_raise_coerced,
+            operations,
         }
     }
 }
@@ -346,6 +357,91 @@ impl<T: Clone + 'static> EffectiveValue<T> {
         }
     }
 
+    /// The write of a value of a property with a coercion callback: what `set_and_raise_core` does for every
+    /// other property, with the coercion and the two uncoerced values. It is reached through the uncommon
+    /// fields, which only the registration of a coercion callback makes (docs/binary-size.md, section 4.17), so
+    /// a value type without one does not carry it.
+    pub(crate) fn set_and_raise_coerced(
+        &self,
+        owner: &FerroObject,
+        value: T,
+        priority: BindingPriority,
+        is_overridden_current_value: bool,
+        is_coerced_default_value: bool,
+    ) {
+        let operations = &self.uncommon.as_ref().expect("a coerced write has the uncommon fields").operations;
+        let old_value = self.value();
+        let mut value_changed = false;
+        let mut base_value_changed = false;
+
+        self.state.is_overriden_current_value.set(is_overridden_current_value);
+        self.state.is_coerced_default_value.set(is_coerced_default_value);
+
+        // `v = value`, or the coerced value. The value as it was given is
+        // only read again where it is stored uncoerced, so without a
+        // coercion `v` is the value itself and not a copy of it.
+        let (v, uncoerced) = match &self.uncommon {
+            Some(uncommon) if !is_coerced_default_value => {
+                ((uncommon.coerce)(owner, value.clone()), Some((uncommon, value)))
+            }
+            _ => (value, None),
+        };
+
+        let sets_base = |state: &EffectiveValueState| {
+            priority <= state.base_priority.get() && priority >= BindingPriority::LocalValue
+        };
+
+        if priority <= self.state.priority.get() {
+            value_changed = !(operations.equals)(&*self.value.borrow(), &v);
+            // Before the write: dropping the previous value may read the property.
+            owner.values().advance_value_generation();
+            if sets_base(&self.state) {
+                // The value and the base value at once, which is every set without an animation over the
+                // value: `v` is kept once, and a base value that was the value changed if the value did.
+                if self.state.base_is_value.get() {
+                    // `replace` releases the borrow before the previous value is dropped: dropping a value
+                    // may run code that reads the property.
+                    drop(self.value.replace(v));
+                    base_value_changed = value_changed;
+                } else {
+                    drop(self.value.replace(v));
+                    let value = self.value.borrow();
+                    base_value_changed =
+                        !self.with_base_value(|base| base.is_some_and(|base| (operations.equals)(base, &value)));
+                    drop(value);
+                    self.set_base_to_value();
+                }
+                self.state.priority.set(priority);
+                if let Some((uncommon, value)) = &uncoerced {
+                    uncommon.uncoerced_value.replace(value.clone());
+                }
+                self.state.base_priority.set(priority);
+                if let Some((uncommon, value)) = uncoerced {
+                    uncommon.uncoerced_base_value.replace(value);
+                }
+            } else {
+                self.set_value_alone(v);
+                self.state.priority.set(priority);
+                if let Some((uncommon, value)) = uncoerced {
+                    uncommon.uncoerced_value.replace(value);
+                }
+            }
+        } else if sets_base(&self.state) {
+            base_value_changed = !self.with_base_value(|base| base.is_some_and(|base| (operations.equals)(base, &v)));
+            self.set_base_value(v);
+            self.state.base_priority.set(priority);
+            if let Some((uncommon, value)) = uncoerced {
+                uncommon.uncoerced_base_value.replace(value);
+            }
+        }
+
+        if value_changed {
+            (operations.notify_value_changed)(self, owner, old_value);
+        } else if base_value_changed {
+            (operations.notify_base_value_changed)(self, owner);
+        }
+    }
+
     fn set_and_raise_core_with_base(
         &self,
         owner: &FerroObject,
@@ -433,7 +529,16 @@ impl<T: PropertyValue> EffectiveValue<T> {
             Some(inherited) => inherited.value(),
             None => metadata.default_value().clone(),
         };
-        let uncommon = metadata.coercion().map(|coercion| Box::new(coercion.initialize_uncommon(&value)));
+        let uncommon = metadata.coercion().map(|coercion| {
+            Box::new(coercion.initialize_uncommon(
+                &value,
+                CoercionOperations {
+                    equals: value_equals::<T>,
+                    notify_value_changed: Self::notify_value_changed,
+                    notify_base_value_changed: Self::notify_base_value_changed,
+                },
+            ))
+        });
         Self {
             metadata,
             state: EffectiveValueState::new(property),
@@ -491,41 +596,33 @@ impl<T: PropertyValue> EffectiveValue<T> {
         is_overridden_current_value: bool,
         is_coerced_default_value: bool,
     ) {
-        let old_value = self.value();
-        let mut value_changed = false;
-        let mut base_value_changed = false;
+        // A property with a coercion callback: its write is made with the callback (the uncommon fields carry
+        // it), so that the write of every other value type is only what follows.
+        if let Some(uncommon) = &self.uncommon {
+            return (uncommon.set)(self, owner, value, priority, is_overridden_current_value, is_coerced_default_value);
+        }
 
         self.state.is_overriden_current_value.set(is_overridden_current_value);
         self.state.is_coerced_default_value.set(is_coerced_default_value);
 
-        // `v = value`, or the coerced value. The value as it was given is
-        // only read again where it is stored uncoerced, so without a
-        // coercion `v` is the value itself and not a copy of it.
-        let (v, uncoerced) = match &self.uncommon {
-            Some(uncommon) if !is_coerced_default_value => {
-                ((uncommon.coerce)(owner, value.clone()), Some((uncommon, value)))
-            }
-            _ => (value, None),
-        };
-
-        let sets_base = |state: &EffectiveValueState| {
-            priority <= state.base_priority.get() && priority >= BindingPriority::LocalValue
-        };
+        let sets_base = priority <= self.state.base_priority.get() && priority >= BindingPriority::LocalValue;
+        let mut value_changed = false;
+        let mut base_value_changed = false;
+        // The value that is replaced is the old value of the change. It is kept to the end, as the copy of it
+        // was that this function began with: what dropping it does happens after the notification.
+        let mut old_value = None;
 
         if priority <= self.state.priority.get() {
-            value_changed = !value_equals(&*self.value.borrow(), &v);
+            value_changed = !value_equals(&*self.value.borrow(), &value);
             // Before the write: dropping the previous value may read the property.
             owner.values().advance_value_generation();
-            if sets_base(&self.state) {
+            let previous = self.value.replace(value);
+            if sets_base {
                 // The value and the base value at once, which is every set without an animation over the
-                // value: `v` is kept once, and a base value that was the value changed if the value did.
+                // value: the value is kept once, and a base value that was the value changed if the value did.
                 if self.state.base_is_value.get() {
-                    // `replace` releases the borrow before the previous value is dropped: dropping a value
-                    // may run code that reads the property.
-                    drop(self.value.replace(v));
                     base_value_changed = value_changed;
                 } else {
-                    drop(self.value.replace(v));
                     let value = self.value.borrow();
                     base_value_changed =
                         !self.with_base_value(|base| base.is_some_and(|base| value_equals(base, &value)));
@@ -533,31 +630,28 @@ impl<T: PropertyValue> EffectiveValue<T> {
                     self.set_base_to_value();
                 }
                 self.state.priority.set(priority);
-                if let Some((uncommon, value)) = &uncoerced {
-                    uncommon.uncoerced_value.replace(value.clone());
-                }
                 self.state.base_priority.set(priority);
-                if let Some((uncommon, value)) = uncoerced {
-                    uncommon.uncoerced_base_value.replace(value);
-                }
+                old_value = Some(previous);
             } else {
-                self.set_value_alone(v);
-                self.state.priority.set(priority);
-                if let Some((uncommon, value)) = uncoerced {
-                    uncommon.uncoerced_value.replace(value);
+                // The value alone. A base value that was the value stays what it was: the value that is
+                // replaced becomes it.
+                if self.state.base_is_value.get() {
+                    old_value = value_changed.then(|| previous.clone());
+                    self.base_value.set(Some(Rc::new(previous)));
+                    self.state.base_is_value.set(false);
+                } else {
+                    old_value = Some(previous);
                 }
+                self.state.priority.set(priority);
             }
-        } else if sets_base(&self.state) {
-            base_value_changed = !self.with_base_value(|base| base.is_some_and(|base| value_equals(base, &v)));
-            self.set_base_value(v);
+        } else if sets_base {
+            base_value_changed = !self.with_base_value(|base| base.is_some_and(|base| value_equals(base, &value)));
+            self.set_base_value(value);
             self.state.base_priority.set(priority);
-            if let Some((uncommon, value)) = uncoerced {
-                uncommon.uncoerced_base_value.replace(value);
-            }
         }
 
         if value_changed {
-            self.notify_value_changed(owner, old_value);
+            self.notify_value_changed(owner, old_value.expect("the old value of a changed value is kept"));
         } else if base_value_changed {
             self.notify_base_value_changed(owner);
         }

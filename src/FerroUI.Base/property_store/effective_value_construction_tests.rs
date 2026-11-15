@@ -23,6 +23,12 @@ impl<T: PropertyValue> EffectiveValue<T> {
                 coerce: coerce.clone(),
                 uncoerced_value: RefCell::new(value.clone()),
                 uncoerced_base_value: RefCell::new(value.clone()),
+                set: EffectiveValue::<T>::set_and_raise_coerced,
+                operations: crate::ferro_property_metadata::CoercionOperations {
+                    equals: crate::ferro_property::value_equals::<T>,
+                    notify_value_changed: EffectiveValue::<T>::notify_value_changed,
+                    notify_base_value_changed: EffectiveValue::<T>::notify_base_value_changed,
+                },
             })
         });
         Self {

@@ -109,6 +109,7 @@ enum CoercionRequest<'a, T> {
     InitializeUncommon {
         callback: &'a CoerceValueCallback<T>,
         value: &'a T,
+        operations: CoercionOperations<T>,
         result: &'a mut Option<UncommonFields<T>>,
     },
 }
@@ -163,13 +164,14 @@ impl<T> Coercion<T> {
         result.expect("coercion dispatch returns type-safe metadata")
     }
 
-    pub(crate) fn initialize_uncommon(&self, value: &T) -> UncommonFields<T> {
+    pub(crate) fn initialize_uncommon(&self, value: &T, operations: CoercionOperations<T>) -> UncommonFields<T> {
         let mut result = None;
         // Borrow the callback here. Its original Rc clone belongs inside the
         // initializer, before either value clone, including partial unwind.
         (self.apply)(CoercionRequest::InitializeUncommon {
             callback: &self.callback,
             value,
+            operations,
             result: &mut result,
         });
         result.expect("coercion dispatch initializes uncommon fields")
@@ -195,8 +197,8 @@ impl<T: Clone + 'static> Coercion<T> {
                 // frame; only explicit coercer construction roots this call.
                 *result = Some(StyledPropertyMetadata::generate_type_safe_metadata(metadata));
             }
-            CoercionRequest::InitializeUncommon { callback, value, result } => {
-                *result = Some(UncommonFields::new(callback, value));
+            CoercionRequest::InitializeUncommon { callback, value, operations, result } => {
+                *result = Some(UncommonFields::new(callback, value, operations));
             }
         }
     }
