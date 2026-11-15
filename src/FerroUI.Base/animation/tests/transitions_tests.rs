@@ -142,8 +142,9 @@ fn only_an_object_with_transitions_keeps_data_for_them() {
     let words = std::mem::size_of::<usize>();
     assert!(std::mem::size_of::<crate::animation::Animatable>() <= std::mem::size_of::<FerroObject>() + 2 * words);
 
-    let _clock = TestClock::new();
+    let clock = TestClock::new();
     let border = Border::new();
+    border.set_clock(Some(clock.as_clock()));
 
     // A property change, a detach and an attach, and a report outside a transition make no data
     // on an object without transitions.
