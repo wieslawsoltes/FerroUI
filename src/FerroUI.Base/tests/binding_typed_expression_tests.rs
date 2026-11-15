@@ -1174,9 +1174,10 @@ fn an_expression_makes_the_state_few_expressions_have_with_the_first_of_it() {
 
     #[cfg(target_pointer_width = "64")]
     {
-        assert!(std::mem::size_of::<UntypedBindingExpressionBase>() <= 144);
-        assert!(std::mem::size_of::<TemplateBindingExpression>() <= 224);
-        assert!(std::mem::size_of::<BindingExpression>() <= 296);
+        // Without a copy of the target type, which is read from the target property.
+        assert!(std::mem::size_of::<UntypedBindingExpressionBase>() <= 112);
+        assert!(std::mem::size_of::<TemplateBindingExpression>() <= 192);
+        assert!(std::mem::size_of::<BindingExpression>() <= 264);
     }
 
     let expression = TemplateBindingExpression::new(None, None, None, None, BindingMode::OneWay);

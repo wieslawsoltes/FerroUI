@@ -26,7 +26,6 @@ pub struct UntypedBindingExpressionBase {
     default_priority: BindingPriority,
     priority: Cell<BindingPriority>,
     target_property: Cell<Option<&'static FerroProperty>>,
-    target_type: Cell<ValueType>,
     is_data_validation_enabled: Cell<bool>,
     /// What few expressions have (`RareState`): made with the first of them.
     rare: OptionCell<Box<RareState>>,
@@ -74,7 +73,6 @@ impl UntypedBindingExpressionBase {
             default_priority,
             priority: Cell::new(default_priority),
             target_property: Cell::new(target_property),
-            target_type: Cell::new(target_property.map_or_else(ValueType::object, property_value_type)),
             is_data_validation_enabled: Cell::new(is_data_validation_enabled),
             rare: OptionCell::new(),
             frame: OptionCell::new(),
@@ -198,9 +196,13 @@ impl UntypedBindingExpressionBase {
         }
     }
 
-    /// The type that values produced by the expression are converted to.
+    /// The type that values produced by the expression are converted to: that of the target
+    /// property, or `object` where there is none.
+    // Read from the property, not kept (docs/porting/desktop-performance.md, section 9.72): the
+    // copy was 32 bytes of every binding expression, and a template makes one for every binding
+    // of every control it builds.
     pub fn target_type(&self) -> ValueType {
-        self.target_type.get()
+        self.target_property.get().map_or_else(ValueType::object, property_value_type)
     }
 
     /// The current value of the binding expression, or the unset marker if
@@ -277,7 +279,6 @@ impl UntypedBindingExpressionBase {
         self.frame.set(frame);
         self.target.set(Some(target.to_weak()));
         self.target_property.set(target_property);
-        self.target_type.set(target_property.map_or_else(ValueType::object, property_value_type));
         self.priority.set(priority);
     }
 
