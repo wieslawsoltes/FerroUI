@@ -30,8 +30,8 @@ use ferroui_base::data::{BindingBase, BindingPriority};
 use ferroui_base::metadata::{MarkupType, MarkupTyped, MarkupValue};
 use ferroui_base::styling::{ControlTheme, Selector, Selectors, Setter, SetterBase, Style, StyleBase};
 use ferroui_base::{
-    BoxedValue, CornerRadius, FerroObject, FerroProperty, PropertyValue, Ref, StaticType, StyledProperty, Thickness, TypeInfo,
-    UnsetValueType,
+    BoxedValue, CornerRadius, FerroObject, FerroProperty, PropertyValue, Ref, StaticType, StyledProperty, Thickness,
+    TypeIdentity, TypeInfo, UnsetValueType,
 };
 
 use super::compiled::{
@@ -72,10 +72,11 @@ pub enum SelectorStep {
     Child,
     /// `Selectors::descendant(previous)` (a space).
     Descendant,
-    /// `Selectors::of_type_info(previous, type)`: exactly the type.
-    OfType(&'static TypeInfo),
-    /// `Selectors::is_type_info(previous, type)` (`:is(Type)`): the type or a derived one.
-    Is(&'static TypeInfo),
+    /// `Selectors::of_type_identity(previous, identity)`: exactly the class.
+    OfType(&'static TypeIdentity),
+    /// `Selectors::is_type_identity(previous, identity)` (`:is(Type)`): the class or a derived
+    /// one.
+    Is(&'static TypeIdentity),
     /// `Selectors::nth_child(previous, step, offset)`.
     NthChild(i32, i32),
     /// `Selectors::nth_last_child(previous, step, offset)`.
@@ -103,8 +104,8 @@ pub fn build_selector(steps: &[SelectorStep]) -> Option<Selector> {
             SelectorStep::Template => Selectors::template(current.take()),
             SelectorStep::Child => Selectors::child(current.take()),
             SelectorStep::Descendant => Selectors::descendant(current.take()),
-            SelectorStep::OfType(type_) => Selectors::of_type_info(current.take(), type_),
-            SelectorStep::Is(type_) => Selectors::is_type_info(current.take(), type_),
+            SelectorStep::OfType(identity) => Selectors::of_type_identity(current.take(), identity),
+            SelectorStep::Is(identity) => Selectors::is_type_identity(current.take(), identity),
             SelectorStep::NthChild(step, offset) => Selectors::nth_child(current.take(), step, offset),
             SelectorStep::NthLastChild(step, offset) => Selectors::nth_last_child(current.take(), step, offset),
             SelectorStep::Not { argument } => {

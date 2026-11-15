@@ -428,6 +428,7 @@ FerroUI.Controls.NativeMenuBar overrides FerroUI.Controls.Primitives.TemplatedCo
 FerroUI.Controls.NativeMenuItem.Gesture: Option<KeyGesture> = (null); OneWay
 FerroUI.Controls.NativeMenuItem.Header: Option<String> = (null); OneWay
 FerroUI.Controls.NativeMenuItem.Icon: Option<Rc<dyn IBitmap>> = (null); OneWay
+FerroUI.Controls.NativeMenuItem.IsChecked: bool = False; OneWay
 FerroUI.Controls.NativeMenuItem.IsEnabled: bool = True; OneWay
 FerroUI.Controls.NativeMenuItem.Menu: Option<Ref<NativeMenu>> = (null); OneWay
 FerroUI.Controls.NativeMenuItem.ToggleType: MenuItemToggleType = None; OneWay

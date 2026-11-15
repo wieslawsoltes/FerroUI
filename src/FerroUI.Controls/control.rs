@@ -96,6 +96,9 @@ impl LoadedQueues {
 
 ferroui_base::ferro_thread_local! {
     static LOADED: RefCell<LoadedQueues> = RefCell::new(LoadedQueues::default());
+    /// How the context menu of a control is opened at the control: what the context menu class
+    /// states when it is initialised ([`Control::set_context_menu_opener`]).
+    static CONTEXT_MENU_OPENER: Cell<Option<fn(&Ref<Control>)>> = const { Cell::new(None) };
 }
 
 /// Base class for controls.
@@ -487,6 +490,30 @@ impl Control {
 
     pub fn set_context_menu(&self, value: impl Into<Nullable<ContextMenu>>) {
         self.set_value(Self::context_menu_property(), value.into().0)
+    }
+
+    /// States how the context menu of a control is opened at the control. The context menu
+    /// class does when it is initialised, which is before a control can have a context menu.
+    pub(crate) fn set_context_menu_opener(open: fn(&Ref<Control>)) {
+        CONTEXT_MENU_OPENER.set(Some(open));
+    }
+
+    /// Opens the context menu of the control at the control and returns whether the control
+    /// has one. The call goes through what the context menu class stated
+    /// ([`set_context_menu_opener`](Self::set_context_menu_opener)) and names nothing of the
+    /// class, so that what asks for a context menu on behalf of every control (the automation
+    /// peer of a control) does not keep the menu classes in an application without a menu.
+    pub(crate) fn open_context_menu(&self) -> bool {
+        if self.context_menu().is_none() {
+            return false;
+        }
+        match CONTEXT_MENU_OPENER.get() {
+            Some(open) => {
+                open(&self.to_ref());
+                true
+            }
+            None => false,
+        }
     }
 
     /// Takes the handlers the context menu support attached to this control.

@@ -53,6 +53,21 @@ fn indexes_respect_exact_derived_and_overridden_style_keys() {
 }
 
 #[test]
+fn selectors_by_identity_are_indexed_like_selectors_by_type() {
+    let styles = styles();
+    let exact = indexed(Selectors::of_type_identity(None, Class1::IDENTITY), "exact");
+    let derived = indexed(Selectors::is_type_identity(None, Class1::IDENTITY), "derived");
+    styles.add(exact.clone());
+    styles.add(derived.clone());
+    assert!(selected(&styles, Class1::TYPE) == vec![exact.clone().into(), derived.clone().into()]);
+    assert!(selected(&styles, Class2::TYPE) == vec![derived.clone().into()]);
+    let target = StyledAsClass1::new();
+    target.styles().add(&styles);
+    target.apply_styling();
+    assert_eq!(target.foo(), "derived");
+}
+
+#[test]
 fn replacing_selector_invalidates_excluded_entries_and_can_deoptimize() {
     let styles = styles();
     assert!(selected(&styles, Class1::TYPE).is_empty());

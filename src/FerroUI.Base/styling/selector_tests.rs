@@ -16,6 +16,7 @@
 use super::activators::{IStyleActivator, IStyleActivatorSink};
 use super::test_support::*;
 use super::*;
+use crate::layout::{Layoutable, LayoutableImpl};
 use crate::*;
 use std::cell::Cell;
 use std::rc::{Rc, Weak};
@@ -149,6 +150,58 @@ fn of_type_and_is_selector_strings() {
     assert_eq!(Selectors::of_type::<Class1>().to_string(), "Class1");
     assert_eq!(Selectors::is::<Class1>().to_string(), ":is(Class1)");
     assert_eq!(Selectors::of_type::<Class1>().target_type(), Some(Class1::TYPE));
+}
+
+// Not from the reference tests: the selectors compiled markup writes name a class by its
+// identity, so that a style for a class the application never creates does not keep the class.
+#[test]
+fn selectors_by_identity_match_what_the_selectors_by_type_match() {
+    use SelectorMatchResult::{AlwaysThisType, NeverThisType};
+    let exact = Selectors::of_type_identity(None, Class1::IDENTITY);
+    let derived = Selectors::is_type_identity(None, Class1::IDENTITY);
+    let controls = [
+        (element(&Class1::new()), AlwaysThisType, AlwaysThisType),
+        (element(&Class2::new()), NeverThisType, AlwaysThisType),
+        (element(&Class3::new()), NeverThisType, NeverThisType),
+        (element(&StyledAsClass1::new()), AlwaysThisType, AlwaysThisType),
+    ];
+    for (control, exactly, derived_from) in controls {
+        assert_eq!(exact.match_(&control, None, true).result(), exactly);
+        assert_eq!(derived.match_(&control, None, true).result(), derived_from);
+    }
+    assert_eq!(exact.to_string(), "Class1");
+    assert_eq!(derived.to_string(), ":is(Class1)");
+    assert_eq!(exact.target_type(), Some(Class1::TYPE));
+    // A condition after the class is part of the same selector, as with a selector by type.
+    let with_class = Selectors::of_type_identity(None, Class1::IDENTITY).class("foo");
+    assert_eq!(with_class.to_string(), "Class1.foo");
+    assert_eq!(with_class.match_(&element(&Class3::new()), None, true).result(), NeverThisType);
+}
+
+/// A class of [`a_selector_by_identity_has_no_type_before_the_class_is_initialised`] alone.
+#[repr(C)]
+struct NeverSeen {
+    base: Layoutable,
+}
+
+ferro_class!(NeverSeen: Layoutable);
+ferro_impl_classes!(NeverSeen: FerroObjectImpl, StyledElementImpl, VisualImpl, LayoutableImpl);
+
+// Not from the reference tests.
+#[test]
+fn a_selector_by_identity_has_no_type_before_the_class_is_initialised() {
+    let target = Selectors::of_type_identity(None, NeverSeen::IDENTITY);
+    // Nothing is of the class yet, and the selector says which class it is for all the same.
+    assert_eq!(target.target_type(), None);
+    assert_eq!(target.to_string(), "NeverSeen");
+    assert_eq!(
+        target.match_(&element(&Class1::new()), None, true).result(),
+        SelectorMatchResult::NeverThisType
+    );
+
+    let control: Ref<NeverSeen> = instantiate(NeverSeen { base: Layoutable::construct() });
+    assert_eq!(target.target_type(), Some(NeverSeen::TYPE));
+    assert_eq!(target.match_(&element(&control), None, true).result(), SelectorMatchResult::AlwaysThisType);
 }
 
 // --- name --------------------------------------------------------------------

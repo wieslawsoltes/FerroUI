@@ -2229,7 +2229,7 @@ fn build_controls_simplecontrols_xaml_property_19() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_0: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_0: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter")];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_20() -> &'static ::ferroui_base::FerroProperty {
@@ -2237,10 +2237,10 @@ fn build_controls_simplecontrols_xaml_property_20() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_1: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_1: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_2: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_2: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_3: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled")];
@@ -2313,7 +2313,7 @@ fn build_controls_simplecontrols_xaml_deferred_2_value_1() -> ::ferroui_base::me
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_4: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("border")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_4: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("border")];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_22() -> &'static ::ferroui_base::FerroProperty {
@@ -2321,7 +2321,7 @@ fn build_controls_simplecontrols_xaml_property_22() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_5: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("checkMark")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_5: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("checkMark")];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_23() -> &'static ::ferroui_base::FerroProperty {
@@ -2334,16 +2334,16 @@ fn build_controls_simplecontrols_xaml_property_24() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_6: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("indeterminateMark")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_6: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("indeterminateMark")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_7: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("checkMark")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_7: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("checkMark")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_8: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":indeterminate"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("indeterminateMark")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_8: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":indeterminate"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("indeterminateMark")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_9: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("border")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_9: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("border")];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_4`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_4_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -2505,7 +2505,7 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_BINDINGS_5: &[rt::TemplateBindingRow] 
 ];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_10: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_10: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter")];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_8`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_8_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -2609,7 +2609,7 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_BINDINGS_7: &[rt::TemplateBindingRow] 
 ];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_11: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::PathIcon as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("DropDownGlyph")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_11: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::PathIcon as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("DropDownGlyph")];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_28() -> &'static ::ferroui_base::FerroProperty {
@@ -2617,10 +2617,10 @@ fn build_controls_simplecontrols_xaml_property_28() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_12: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("RootBorder")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_12: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("RootBorder")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_13: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("RootBorder")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_13: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("RootBorder")];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_10`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_10_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -2782,22 +2782,22 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_BINDINGS_11: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_14: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("border")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_14: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("border")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_15: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("checkMark")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_15: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("checkMark")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_16: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("indeterminateMark")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_16: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("indeterminateMark")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_17: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("checkMark")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_17: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("checkMark")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_18: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":indeterminate"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("indeterminateMark")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_18: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":indeterminate"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("indeterminateMark")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_19: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("border")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_19: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("border")];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_14`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_14_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -2972,16 +2972,16 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_BINDINGS_17: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_20: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_20: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_21: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Class(":focus"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_21: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Class(":focus"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_22: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_22: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_23: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Class(":focus"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_23: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Class(":focus"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter")];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_20`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_20_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -3608,7 +3608,7 @@ fn build_controls_simplecontrols_xaml_property_70() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_25: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":visited"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_25: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":visited"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter")];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_71() -> &'static ::ferroui_base::FerroProperty {
@@ -3739,19 +3739,19 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_BINDINGS_40: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_26: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_26: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_27: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_27: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_28: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Class(":focus"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_28: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Class(":focus"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_29: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_29: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_30: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Class(":focus"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_30: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Class(":focus"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_46`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_46_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -4019,7 +4019,7 @@ fn build_controls_simplecontrols_xaml_selector_value_1() -> ::ferroui_base::Boxe
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_31: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_80, value: build_controls_simplecontrols_xaml_selector_value_1 }];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_32: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_80, value: build_controls_simplecontrols_xaml_selector_value_1 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ItemsPresenter")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_32: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_80, value: build_controls_simplecontrols_xaml_selector_value_1 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ItemsPresenter")];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_81() -> &'static ::ferroui_base::FerroProperty {
@@ -4032,7 +4032,7 @@ fn build_controls_simplecontrols_xaml_selector_value_2() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_33: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_80, value: build_controls_simplecontrols_xaml_selector_value_2 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ItemsPresenter")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_33: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_80, value: build_controls_simplecontrols_xaml_selector_value_2 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ItemsPresenter")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_34: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_80, value: build_controls_simplecontrols_xaml_selector_value_2 }];
@@ -4043,10 +4043,10 @@ fn build_controls_simplecontrols_xaml_selector_value_3() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_35: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_80, value: build_controls_simplecontrols_xaml_selector_value_3 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ItemsPresenter")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_35: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_80, value: build_controls_simplecontrols_xaml_selector_value_3 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ItemsPresenter")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_36: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_80, value: build_controls_simplecontrols_xaml_selector_value_3 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ItemsPresenter"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::WrapPanel as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_36: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_80, value: build_controls_simplecontrols_xaml_selector_value_3 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ItemsPresenter"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::WrapPanel as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_82() -> &'static ::ferroui_base::FerroProperty {
@@ -4062,10 +4062,10 @@ fn build_controls_simplecontrols_xaml_selector_value_4() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_38: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_80, value: build_controls_simplecontrols_xaml_selector_value_4 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ItemsPresenter")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_38: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_80, value: build_controls_simplecontrols_xaml_selector_value_4 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ItemsPresenter")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_39: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_80, value: build_controls_simplecontrols_xaml_selector_value_4 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ItemsPresenter"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::WrapPanel as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_39: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_80, value: build_controls_simplecontrols_xaml_selector_value_4 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ItemsPresenter"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::WrapPanel as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_40: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_80, value: build_controls_simplecontrols_xaml_selector_value_4 }];
@@ -4222,7 +4222,7 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_BINDINGS_50: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_41: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_41: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter")];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_84() -> &'static ::ferroui_base::FerroProperty {
@@ -4349,13 +4349,13 @@ fn build_controls_simplecontrols_xaml_property_86() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_43: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":vertical"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PreviousButton"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::PathIcon as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_43: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":vertical"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PreviousButton"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::PathIcon as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_44: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":vertical"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_NextButton"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::PathIcon as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_44: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":vertical"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_NextButton"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::PathIcon as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_45: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_45: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_87() -> &'static ::ferroui_base::FerroProperty {
@@ -4363,7 +4363,7 @@ fn build_controls_simplecontrols_xaml_property_87() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_46: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":first-page"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PreviousButton")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_46: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":first-page"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PreviousButton")];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_88() -> &'static ::ferroui_base::FerroProperty {
@@ -4371,7 +4371,7 @@ fn build_controls_simplecontrols_xaml_property_88() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_47: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":last-page"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_NextButton")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_47: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":last-page"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_NextButton")];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_59`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_59_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -4592,16 +4592,16 @@ fn build_controls_simplecontrols_xaml_deferred_65_value_1() -> ::ferroui_base::m
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_48: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":topleft"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ReversibleStackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Items")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_48: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":topleft"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ReversibleStackPanel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Items")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_49: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":topright"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ReversibleStackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Items")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_49: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":topright"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ReversibleStackPanel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Items")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_50: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":topcenter"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ReversibleStackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Items")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_50: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":topcenter"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ReversibleStackPanel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Items")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_51: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":bottomleft"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ReversibleStackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Items")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_51: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":bottomleft"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ReversibleStackPanel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Items")];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_93() -> &'static ::ferroui_base::FerroProperty {
@@ -4609,10 +4609,10 @@ fn build_controls_simplecontrols_xaml_property_93() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_52: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":bottomright"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ReversibleStackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Items")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_52: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":bottomright"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ReversibleStackPanel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Items")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_53: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":bottomcenter"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ReversibleStackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Items")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_53: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":bottomcenter"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ReversibleStackPanel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Items")];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_67`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_67_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -4931,19 +4931,19 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_BINDINGS_61: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_54: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Background")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_54: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Background")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_55: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Background")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_55: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Background")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_56: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SelectedBackground")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_56: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SelectedBackground")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_57: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":inactive"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_57: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":inactive"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_58: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":btnfocused"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("FocusVisual")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_58: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":btnfocused"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("FocusVisual")];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_81`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_81_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -5031,19 +5031,19 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_BINDINGS_63: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_59: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Background")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_59: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Background")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_60: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":dayfocused"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("FocusVisual")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_60: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":dayfocused"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("FocusVisual")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_61: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":today"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("TodayBackground")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_61: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":today"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("TodayBackground")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_62: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":today"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_62: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":today"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_63: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":blackout"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("BlackoutVisual")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_63: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":blackout"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("BlackoutVisual")];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_83`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_83_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -5176,16 +5176,16 @@ fn build_controls_simplecontrols_xaml_property_97() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_64: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":calendardisabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("DisabledVisual")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_64: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":calendardisabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("DisabledVisual")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_65: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":hasweeknumbers")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_66: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ElementWeekNumberLabels")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_66: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ElementWeekNumberLabels")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_67: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::ContentControl as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_67: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::ContentControl as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_85`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_85_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -5435,7 +5435,7 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_BINDINGS_68: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_68: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":focus"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TextBox")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_68: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":focus"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBox as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TextBox")];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_90`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_90_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -5702,7 +5702,7 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_BINDINGS_78: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_69: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HeaderPresenter")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_69: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_HeaderPresenter")];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_103`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_103_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -5818,7 +5818,7 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_BINDINGS_82: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_70: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_70: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_109`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_109_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -5851,7 +5851,7 @@ fn build_controls_simplecontrols_xaml_deferred_109_value_1() -> ::ferroui_base::
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_71: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_71: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_149() -> &'static ::ferroui_base::FerroProperty {
@@ -6102,7 +6102,7 @@ fn build_controls_simplecontrols_xaml_selector_value_6() -> ::ferroui_base::Boxe
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_72: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_152, value: build_controls_simplecontrols_xaml_selector_value_6 }];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_73: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_toggle")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_73: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_toggle")];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_153() -> &'static ::ferroui_base::FerroProperty {
@@ -6254,22 +6254,22 @@ fn build_controls_simplecontrols_xaml_property_156() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_77: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter"), rt::SelectorStep::Class(":empty")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_77: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter"), rt::SelectorStep::Class(":empty")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_78: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("OuterBorder")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_78: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("OuterBorder")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_79: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobOff")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_79: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchKnobOff")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_80: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobOn")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_80: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchKnobOn")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_81: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobBounds")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_81: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchKnobBounds")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_82: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchAreaGrid")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_82: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchAreaGrid")];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_157() -> &'static ::ferroui_base::FerroProperty {
@@ -6277,67 +6277,67 @@ fn build_controls_simplecontrols_xaml_property_157() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_83: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("OuterBorder")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_83: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("OuterBorder")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_84: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobBounds")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_84: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchKnobBounds")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_85: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobOff")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_85: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchKnobOff")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_86: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobOn")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_86: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchKnobOn")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_87: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchAreaGrid")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_87: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchAreaGrid")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_88: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("OuterBorder")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_88: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("OuterBorder")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_89: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobOff")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_89: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchKnobOff")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_90: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobOn")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_90: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchKnobOn")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_91: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobBounds")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_91: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchKnobBounds")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_92: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("OuterBorder")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_92: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("OuterBorder")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_93: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobOff")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_93: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchKnobOff")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_94: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobBounds")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_94: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchKnobBounds")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_95: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobOn")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_95: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchKnobOn")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_96: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_OffContentPresenter")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_96: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_OffContentPresenter")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_97: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_OnContentPresenter")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_97: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_OnContentPresenter")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_98: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":unchecked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("OuterBorder")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_98: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":unchecked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("OuterBorder")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_99: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":unchecked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobOff")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_99: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":unchecked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchKnobOff")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_100: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":unchecked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobOn")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_100: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":unchecked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchKnobOn")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_101: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":unchecked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobBounds")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_101: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":unchecked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchKnobBounds")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_102: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":unchecked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_OffContentPresenter")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_102: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":unchecked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_OffContentPresenter")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_103: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":unchecked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_OnContentPresenter")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_103: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":unchecked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_OnContentPresenter")];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_120`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_120_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -6678,7 +6678,7 @@ fn build_controls_simplecontrols_xaml_deferred_120_value_8() -> ::ferroui_base::
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_104: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":pointerover")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_104: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Class(":pointerover")];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_122`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_122_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -6733,13 +6733,13 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_BINDINGS_102: &[rt::TemplateBindingRow
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_105: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":left")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_106: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::UniformGrid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SpinnerPanel")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_106: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::UniformGrid as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SpinnerPanel")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_107: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":focus"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("border")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_107: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":focus"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("border")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_108: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":error"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("border")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_108: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":error"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("border")];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_123`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_123_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -6826,7 +6826,7 @@ fn build_controls_simplecontrols_xaml_property_158() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_109: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_109: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_127`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_127_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -6911,10 +6911,10 @@ fn build_controls_simplecontrols_xaml_property_162() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_110: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":has-shadow"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_UnderlayWrapper")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_110: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":has-shadow"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_UnderlayWrapper")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_111: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":has-shadow"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_WindowBorder")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_111: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":has-shadow"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_WindowBorder")];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_163() -> &'static ::ferroui_base::FerroProperty {
@@ -6922,55 +6922,55 @@ fn build_controls_simplecontrols_xaml_property_163() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_112: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":has-shadow"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_OverlayWrapper")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_112: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":has-shadow"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_OverlayWrapper")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_113: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":has-border"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TitleTextPanel")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_113: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":has-border"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TitleTextPanel")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_114: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":has-border"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TitleBar")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_114: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":has-border"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TitleBar")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_115: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":has-border"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_OverlayPanel")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_115: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":has-border"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_OverlayPanel")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_116: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":maximized"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("RestoreButtonPath")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_116: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":maximized"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("RestoreButtonPath")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_117: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":disabled")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_117: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Class(":disabled")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_118: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-minimize")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_MinimizeButton")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_118: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-minimize")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_MinimizeButton")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_119: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-maximize")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_MaximizeButton")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_119: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-maximize")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_MaximizeButton")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_120: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-fullscreen")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_FullScreenButton")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_120: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-fullscreen")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_FullScreenButton")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_121: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-fullscreen")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PopoverFullScreenButton")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_121: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-fullscreen")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PopoverFullScreenButton")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_122: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-close")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_CloseButton")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_122: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-close")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_CloseButton")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_123: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-close")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PopoverCloseButton")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_123: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-close")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PopoverCloseButton")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_124: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-title")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TitleTextPanel")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_124: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-title")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TitleTextPanel")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_125: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-title")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PopoverTitleText")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_125: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-title")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PopoverTitleText")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_126: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":fullscreen"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TitleTextPanel")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_126: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":fullscreen"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TitleTextPanel")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_127: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":fullscreen"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_OverlayPanel")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_127: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":fullscreen"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_OverlayPanel")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_128: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":fullscreen"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TitleBar")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_128: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":fullscreen"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TitleBar")];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_129`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_129_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -7210,10 +7210,10 @@ fn build_controls_simplecontrols_xaml_deferred_135_value_0() -> ::ferroui_base::
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_129: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":unchecked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_GlyphElement_Hide")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_129: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":unchecked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_GlyphElement_Hide")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_130: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_GlyphElement_Reveal")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_130: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_GlyphElement_Reveal")];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_137`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_137_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -7482,10 +7482,10 @@ fn build_controls_simplecontrols_xaml_property_196() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_131: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::DockPanel as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_131: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::DockPanel as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_132: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("floatingPlaceholder")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_132: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("floatingPlaceholder")];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_197() -> &'static ::ferroui_base::FerroProperty {
@@ -7498,7 +7498,7 @@ fn build_controls_simplecontrols_xaml_selector_value_10() -> ::ferroui_base::Box
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_133: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class("clearButton"), rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_197, value: build_controls_simplecontrols_xaml_selector_value_10 }, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_130, value: build_controls_simplecontrols_xaml_selector_value_10 }, rt::SelectorStep::Class(":focus"), rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":empty")] }];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_133: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class("clearButton"), rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_197, value: build_controls_simplecontrols_xaml_selector_value_10 }, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_130, value: build_controls_simplecontrols_xaml_selector_value_10 }, rt::SelectorStep::Class(":focus"), rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::TextBox as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Class(":empty")] }];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_198() -> &'static ::ferroui_base::FerroProperty {
@@ -7506,7 +7506,7 @@ fn build_controls_simplecontrols_xaml_property_198() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_134: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class("revealPasswordButton"), rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_197, value: build_controls_simplecontrols_xaml_selector_value_10 }, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_130, value: build_controls_simplecontrols_xaml_selector_value_10 }, rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":empty")] }];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_134: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class("revealPasswordButton"), rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_197, value: build_controls_simplecontrols_xaml_selector_value_10 }, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_130, value: build_controls_simplecontrols_xaml_selector_value_10 }, rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::TextBox as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Class(":empty")] }];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_139`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_139_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -7774,31 +7774,31 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_135: &[rt::SelectorStep] = &[
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_136: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":vertical")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_137: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::Thumb as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("thumb")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_137: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::Thumb as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("thumb")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_138: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::Thumb as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("thumb"), rt::SelectorStep::Class(":pointerover")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_138: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::Thumb as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("thumb"), rt::SelectorStep::Class(":pointerover")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_139: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::Thumb as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("thumb"), rt::SelectorStep::Class(":pressed")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_139: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::Thumb as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("thumb"), rt::SelectorStep::Class(":pressed")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_140: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":horizontal"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::Thumb as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("thumb")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_140: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":horizontal"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::Thumb as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("thumb")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_141: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":vertical"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::Thumb as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("thumb")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_141: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":vertical"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::Thumb as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("thumb")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_142: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class("repeat")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_142: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Class("repeat")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_143: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class("repeattrack")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_143: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Class("repeattrack")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_144: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_144: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_145: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_145: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_148`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_148_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -8072,22 +8072,22 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_BINDINGS_120: &[rt::TemplateBindingRow
 ];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_147: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SelectionBorder"), rt::SelectorStep::Class(":pointerover")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_147: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SelectionBorder"), rt::SelectorStep::Class(":pointerover")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_148: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SelectionBorder")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_148: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SelectionBorder")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_149: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SelectionBorder"), rt::SelectorStep::Class(":focus")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_149: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SelectionBorder"), rt::SelectorStep::Class(":focus")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_150: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SelectionBorder"), rt::SelectorStep::Class(":pointerover")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_150: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SelectionBorder"), rt::SelectorStep::Class(":pointerover")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_151: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SelectionBorder"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Class(":focus")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_151: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SelectionBorder"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Class(":focus")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_152: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":empty"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ExpandCollapseChevron")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_152: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":empty"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ExpandCollapseChevron")];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_159`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_159_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -8185,10 +8185,10 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_BINDINGS_122: &[rt::TemplateBindingRow
 ];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_153: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("root")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_153: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("root")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_154: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":empty"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("rightArrow")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_154: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":empty"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("rightArrow")];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_164`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_164_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -8271,16 +8271,16 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_BINDINGS_124: &[rt::TemplateBindingRow
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_155: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":separator")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_156: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ContentControl as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ToggleIconPresenter")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ContentControl as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ToggleIconPresenter")]] }];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_156: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ContentControl as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ToggleIconPresenter")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ContentControl as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ToggleIconPresenter")]] }];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_157: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_IconPresenter")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_IconPresenter")]] }];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_157: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_IconPresenter")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_IconPresenter")]] }];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_158: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ContentControl as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ToggleIconPresenter")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_158: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ContentControl as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ToggleIconPresenter")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_159: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Class(":radio"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ContentControl as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ToggleIconPresenter")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_159: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Class(":radio"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ContentControl as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ToggleIconPresenter")];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_170`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_170_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -8414,7 +8414,7 @@ fn build_controls_simplecontrols_xaml_deferred_176_value_0() -> ::ferroui_base::
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_160: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::Track as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Track")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_160: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::Track as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Track")];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_218() -> &'static ::ferroui_base::FerroProperty {
@@ -8422,10 +8422,10 @@ fn build_controls_simplecontrols_xaml_property_218() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_161: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("TrackBackground")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_161: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("TrackBackground")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_162: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_162: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_219() -> &'static ::ferroui_base::FerroProperty {
@@ -8433,7 +8433,7 @@ fn build_controls_simplecontrols_xaml_property_219() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_163: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("grid")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_163: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("grid")];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_178`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_178_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -8545,10 +8545,10 @@ fn build_controls_simplecontrols_xaml_deferred_178_value_3(
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_164: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_165: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PressedBackground")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_165: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PressedBackground")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_166: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_166: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_167: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class("MonthItem")];
@@ -8891,13 +8891,13 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_BINDINGS_132: &[rt::TemplateBindingRow
 ];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_168: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_168: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_169: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_FlyoutButton"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_169: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_FlyoutButton"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_170: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":hasnodate"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_FlyoutButton"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_170: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":hasnodate"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_FlyoutButton"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_192`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_192_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -8975,10 +8975,10 @@ fn build_controls_simplecontrols_xaml_property_222() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_171: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_171: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_172: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_172: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_194`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_194_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -9135,7 +9135,7 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_BINDINGS_140: &[rt::TemplateBindingRow
 ];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_173: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":hasnotime"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_FlyoutButton"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_173: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":hasnotime"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_FlyoutButton"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_198`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_198_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -9264,7 +9264,7 @@ fn build_controls_simplecontrols_xaml_property_225() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_174: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":overlay"), rt::SelectorStep::Class(":left"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_174: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":overlay"), rt::SelectorStep::Class(":left"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_226() -> &'static ::ferroui_base::FerroProperty {
@@ -9277,58 +9277,58 @@ fn build_controls_simplecontrols_xaml_property_227() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_175: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":overlay"), rt::SelectorStep::Class(":left"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_175: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":overlay"), rt::SelectorStep::Class(":left"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ContentRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_176: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactinline"), rt::SelectorStep::Class(":left"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_176: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactinline"), rt::SelectorStep::Class(":left"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_177: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactinline"), rt::SelectorStep::Class(":left"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_177: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactinline"), rt::SelectorStep::Class(":left"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ContentRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_178: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactoverlay"), rt::SelectorStep::Class(":left"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_178: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactoverlay"), rt::SelectorStep::Class(":left"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_179: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactoverlay"), rt::SelectorStep::Class(":left"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_179: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactoverlay"), rt::SelectorStep::Class(":left"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ContentRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_180: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":inline"), rt::SelectorStep::Class(":left"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_180: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":inline"), rt::SelectorStep::Class(":left"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_181: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":inline"), rt::SelectorStep::Class(":left"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_181: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":inline"), rt::SelectorStep::Class(":left"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ContentRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_182: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":right")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_183: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":overlay"), rt::SelectorStep::Class(":right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_183: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":overlay"), rt::SelectorStep::Class(":right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_184: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":overlay"), rt::SelectorStep::Class(":right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_184: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":overlay"), rt::SelectorStep::Class(":right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ContentRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_185: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactinline"), rt::SelectorStep::Class(":right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_185: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactinline"), rt::SelectorStep::Class(":right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_186: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactinline"), rt::SelectorStep::Class(":right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_186: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactinline"), rt::SelectorStep::Class(":right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ContentRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_187: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactoverlay"), rt::SelectorStep::Class(":right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_187: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactoverlay"), rt::SelectorStep::Class(":right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_188: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactoverlay"), rt::SelectorStep::Class(":right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_188: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactoverlay"), rt::SelectorStep::Class(":right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ContentRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_189: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":inline"), rt::SelectorStep::Class(":right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_189: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":inline"), rt::SelectorStep::Class(":right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_190: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":inline"), rt::SelectorStep::Class(":right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_190: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":inline"), rt::SelectorStep::Class(":right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ContentRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_191: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":top")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_192: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":overlay"), rt::SelectorStep::Class(":top"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_192: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":overlay"), rt::SelectorStep::Class(":top"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_228() -> &'static ::ferroui_base::FerroProperty {
@@ -9341,88 +9341,88 @@ fn build_controls_simplecontrols_xaml_property_229() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_193: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":overlay"), rt::SelectorStep::Class(":top"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_193: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":overlay"), rt::SelectorStep::Class(":top"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ContentRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_194: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactinline"), rt::SelectorStep::Class(":top"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_194: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactinline"), rt::SelectorStep::Class(":top"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_195: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactinline"), rt::SelectorStep::Class(":top"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_195: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactinline"), rt::SelectorStep::Class(":top"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ContentRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_196: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactoverlay"), rt::SelectorStep::Class(":top"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_196: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactoverlay"), rt::SelectorStep::Class(":top"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_197: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactoverlay"), rt::SelectorStep::Class(":top"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_197: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactoverlay"), rt::SelectorStep::Class(":top"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ContentRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_198: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":inline"), rt::SelectorStep::Class(":top"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_198: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":inline"), rt::SelectorStep::Class(":top"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_199: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":inline"), rt::SelectorStep::Class(":top"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_199: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":inline"), rt::SelectorStep::Class(":top"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ContentRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_200: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":bottom")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_201: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":overlay"), rt::SelectorStep::Class(":bottom"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_201: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":overlay"), rt::SelectorStep::Class(":bottom"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_202: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":overlay"), rt::SelectorStep::Class(":bottom"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_202: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":overlay"), rt::SelectorStep::Class(":bottom"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ContentRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_203: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactinline"), rt::SelectorStep::Class(":bottom"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_203: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactinline"), rt::SelectorStep::Class(":bottom"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_204: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactinline"), rt::SelectorStep::Class(":bottom"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_204: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactinline"), rt::SelectorStep::Class(":bottom"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ContentRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_205: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactoverlay"), rt::SelectorStep::Class(":bottom"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_205: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactoverlay"), rt::SelectorStep::Class(":bottom"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_206: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactoverlay"), rt::SelectorStep::Class(":bottom"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_206: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactoverlay"), rt::SelectorStep::Class(":bottom"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ContentRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_207: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":inline"), rt::SelectorStep::Class(":bottom"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_207: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":inline"), rt::SelectorStep::Class(":bottom"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_208: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":inline"), rt::SelectorStep::Class(":bottom"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_208: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":inline"), rt::SelectorStep::Class(":bottom"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ContentRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_209: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":left"), rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_209: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":left"), rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_210: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":right"), rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_210: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":right"), rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_211: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":left"), rt::SelectorStep::Class(":closed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_211: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":left"), rt::SelectorStep::Class(":closed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_212: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":right"), rt::SelectorStep::Class(":closed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_212: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":right"), rt::SelectorStep::Class(":closed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_213: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":top"), rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_213: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":top"), rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_214: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":bottom"), rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_214: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":bottom"), rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_215: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":top"), rt::SelectorStep::Class(":closed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_215: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":top"), rt::SelectorStep::Class(":closed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_216: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":bottom"), rt::SelectorStep::Class(":closed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_216: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":bottom"), rt::SelectorStep::Class(":closed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_217: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LightDismissLayer")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_217: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("LightDismissLayer")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_218: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":lightDismiss"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LightDismissLayer")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_218: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":lightDismiss"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("LightDismissLayer")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_219: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":overlay"), rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LightDismissLayer")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_219: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":overlay"), rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("LightDismissLayer")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_220: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactoverlay"), rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LightDismissLayer")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_220: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactoverlay"), rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("LightDismissLayer")];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_203`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_203_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -10771,7 +10771,7 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_BINDINGS_145: &[rt::TemplateBindingRow
 ];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_221: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_221: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_231() -> &'static ::ferroui_base::FerroProperty {
@@ -10784,7 +10784,7 @@ fn build_controls_simplecontrols_xaml_selector_value_11() -> ::ferroui_base::Box
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_222: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_231, value: build_controls_simplecontrols_xaml_selector_value_11 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_222: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_231, value: build_controls_simplecontrols_xaml_selector_value_11 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// The value of a property selector of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_selector_value_12() -> ::ferroui_base::BoxedValue {
@@ -10800,7 +10800,7 @@ fn build_controls_simplecontrols_xaml_selector_value_13() -> ::ferroui_base::Box
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_224: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_231, value: build_controls_simplecontrols_xaml_selector_value_13 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_224: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_231, value: build_controls_simplecontrols_xaml_selector_value_13 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_224`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_224_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -11012,13 +11012,13 @@ fn build_controls_simplecontrols_xaml_property_234() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_225: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":flyout-open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_225: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":flyout-open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_226: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_226: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_227: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Class(":flyout-open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_227: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Class(":flyout-open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_226`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_226_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -11124,7 +11124,7 @@ fn build_controls_simplecontrols_xaml_deferred_228_value_0(
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_229: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":caret"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Image as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HandlePathIcon")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_229: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":caret"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Image as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_HandlePathIcon")];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_236() -> &'static ::ferroui_base::FerroProperty {
@@ -11132,16 +11132,16 @@ fn build_controls_simplecontrols_xaml_property_236() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_230: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":start"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Image as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HandlePathIcon")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_230: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":start"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Image as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_HandlePathIcon")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_231: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":caret"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Indicator")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_231: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":caret"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Indicator")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_232: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":end"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Indicator")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_232: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":end"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Indicator")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_233: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":start"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Indicator")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_233: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":start"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Indicator")];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_233`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_233_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -11252,10 +11252,10 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_BINDINGS_152: &[rt::TemplateBindingRow
 ];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_234: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Border")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_234: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Border")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_235: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Border")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_235: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Border")];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_238() -> &'static ::ferroui_base::FerroProperty {
@@ -11266,7 +11266,7 @@ fn build_controls_simplecontrols_xaml_property_238() -> &'static ::ferroui_base:
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_236: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_238, value: build_controls_simplecontrols_xaml_selector_value_0 }];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_237: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_238, value: build_controls_simplecontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Label")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_237: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_238, value: build_controls_simplecontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Label")];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_239() -> &'static ::ferroui_base::FerroProperty {
@@ -11282,7 +11282,7 @@ fn build_controls_simplecontrols_xaml_selector_value_14() -> ::ferroui_base::Box
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_238: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_239, value: build_controls_simplecontrols_xaml_selector_value_14 }];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_239: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_239, value: build_controls_simplecontrols_xaml_selector_value_14 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_239: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_239, value: build_controls_simplecontrols_xaml_selector_value_14 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot")];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_240() -> &'static ::ferroui_base::FerroProperty {
@@ -11290,10 +11290,10 @@ fn build_controls_simplecontrols_xaml_property_240() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_240: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_239, value: build_controls_simplecontrols_xaml_selector_value_14 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_IconPresenter")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_240: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_239, value: build_controls_simplecontrols_xaml_selector_value_14 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_IconPresenter")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_241: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_239, value: build_controls_simplecontrols_xaml_selector_value_14 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Label")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_241: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_239, value: build_controls_simplecontrols_xaml_selector_value_14 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Label")];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_241() -> &'static ::ferroui_base::FerroProperty {
@@ -11304,7 +11304,7 @@ fn build_controls_simplecontrols_xaml_property_241() -> &'static ::ferroui_base:
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_242: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_241, value: build_controls_simplecontrols_xaml_selector_value_0 }];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_243: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_241, value: build_controls_simplecontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_243: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_241, value: build_controls_simplecontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot")];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_242() -> &'static ::ferroui_base::FerroProperty {
@@ -11312,10 +11312,10 @@ fn build_controls_simplecontrols_xaml_property_242() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_244: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_241, value: build_controls_simplecontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_IconPresenter")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_244: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_241, value: build_controls_simplecontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_IconPresenter")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_245: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_241, value: build_controls_simplecontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Label")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_245: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_241, value: build_controls_simplecontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Label")];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_235`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_235_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -11550,7 +11550,7 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_BINDINGS_154: &[rt::TemplateBindingRow
 ];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_246: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Border")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_246: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Border")];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_244() -> &'static ::ferroui_base::FerroProperty {
@@ -11561,7 +11561,7 @@ fn build_controls_simplecontrols_xaml_property_244() -> &'static ::ferroui_base:
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_247: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_244, value: build_controls_simplecontrols_xaml_selector_value_0 }];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_248: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_244, value: build_controls_simplecontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Label")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_248: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_244, value: build_controls_simplecontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Label")];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_245() -> &'static ::ferroui_base::FerroProperty {
@@ -11572,13 +11572,13 @@ fn build_controls_simplecontrols_xaml_property_245() -> &'static ::ferroui_base:
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_249: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_245, value: build_controls_simplecontrols_xaml_selector_value_14 }];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_250: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_245, value: build_controls_simplecontrols_xaml_selector_value_14 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_250: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_245, value: build_controls_simplecontrols_xaml_selector_value_14 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_251: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_245, value: build_controls_simplecontrols_xaml_selector_value_14 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_IconPresenter")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_251: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_245, value: build_controls_simplecontrols_xaml_selector_value_14 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_IconPresenter")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_252: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_245, value: build_controls_simplecontrols_xaml_selector_value_14 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Label")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_252: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_245, value: build_controls_simplecontrols_xaml_selector_value_14 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Label")];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_246() -> &'static ::ferroui_base::FerroProperty {
@@ -11589,13 +11589,13 @@ fn build_controls_simplecontrols_xaml_property_246() -> &'static ::ferroui_base:
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_253: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_246, value: build_controls_simplecontrols_xaml_selector_value_0 }];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_254: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_246, value: build_controls_simplecontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_254: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_246, value: build_controls_simplecontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_255: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_246, value: build_controls_simplecontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_IconPresenter")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_255: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_246, value: build_controls_simplecontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_IconPresenter")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_256: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_246, value: build_controls_simplecontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Label")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_256: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_246, value: build_controls_simplecontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Label")];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_237`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_237_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -12008,13 +12008,13 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_BINDINGS_162: &[rt::TemplateBindingRow
 ];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_258: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneButton")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_258: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneButton")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_259: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-bottom"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TopBar")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_259: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-bottom"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TopBar")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_260: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-bottom"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_BottomBar")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_260: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-bottom"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_BottomBar")];
 
 /// The value of a property selector of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_selector_value_15() -> ::ferroui_base::BoxedValue {
@@ -12022,7 +12022,7 @@ fn build_controls_simplecontrols_xaml_selector_value_15() -> ::ferroui_base::Box
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_261: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-bottom"), rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_252, value: build_controls_simplecontrols_xaml_selector_value_15 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_BottomBar")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_261: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-bottom"), rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_252, value: build_controls_simplecontrols_xaml_selector_value_15 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_BottomBar")];
 
 /// The value of a property selector of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_selector_value_16() -> ::ferroui_base::BoxedValue {
@@ -12030,13 +12030,13 @@ fn build_controls_simplecontrols_xaml_selector_value_16() -> ::ferroui_base::Box
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_262: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-bottom"), rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_252, value: build_controls_simplecontrols_xaml_selector_value_16 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_BottomBar")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_262: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-bottom"), rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_252, value: build_controls_simplecontrols_xaml_selector_value_16 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_BottomBar")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_263: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-bottom"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_CompactPaneToggle")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_263: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-bottom"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_CompactPaneToggle")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_264: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-top"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_CompactPaneToggle")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_264: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-top"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_CompactPaneToggle")];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_262() -> &'static ::ferroui_base::FerroProperty {
@@ -12049,7 +12049,7 @@ fn build_controls_simplecontrols_xaml_selector_value_17() -> ::ferroui_base::Box
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_265: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_262, value: build_controls_simplecontrols_xaml_selector_value_17 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TopBar")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_265: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_262, value: build_controls_simplecontrols_xaml_selector_value_17 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TopBar")];
 
 /// The value of a property selector of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_selector_value_18() -> ::ferroui_base::BoxedValue {
@@ -12057,22 +12057,22 @@ fn build_controls_simplecontrols_xaml_selector_value_18() -> ::ferroui_base::Box
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_266: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_262, value: build_controls_simplecontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TopBar")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_266: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_262, value: build_controls_simplecontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TopBar")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_267: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":detail-is-navpage"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TopBar")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_267: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":detail-is-navpage"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TopBar")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_268: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_252, value: build_controls_simplecontrols_xaml_selector_value_15 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TopBar")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_268: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_252, value: build_controls_simplecontrols_xaml_selector_value_15 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TopBar")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_269: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_252, value: build_controls_simplecontrols_xaml_selector_value_15 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_CompactPaneToggle")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_269: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_252, value: build_controls_simplecontrols_xaml_selector_value_15 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_CompactPaneToggle")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_270: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_252, value: build_controls_simplecontrols_xaml_selector_value_16 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TopBar")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_270: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_252, value: build_controls_simplecontrols_xaml_selector_value_16 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TopBar")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_271: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_252, value: build_controls_simplecontrols_xaml_selector_value_16 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_CompactPaneToggle")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_271: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_252, value: build_controls_simplecontrols_xaml_selector_value_16 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_CompactPaneToggle")];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_263() -> &'static ::ferroui_base::FerroProperty {
@@ -12080,10 +12080,10 @@ fn build_controls_simplecontrols_xaml_property_263() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_272: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_263, value: build_controls_simplecontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TopBar")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_272: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_263, value: build_controls_simplecontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TopBar")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_273: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":detail-is-navpage"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_CompactPaneToggle")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_273: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":detail-is-navpage"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_CompactPaneToggle")];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_246`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_246_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -12266,13 +12266,13 @@ fn build_controls_simplecontrols_xaml_property_265() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_274: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_NavigationBar")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_274: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_NavigationBar")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_275: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":nav-bar-inset"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_NavBarSpacer")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_275: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":nav-bar-inset"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_NavBarSpacer")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_276: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":nav-bar-compact"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TopCommandBar"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::CommandBar as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_276: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":nav-bar-compact"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TopCommandBar"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::CommandBar as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_266() -> &'static ::ferroui_base::FerroProperty {
@@ -12391,7 +12391,7 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_BINDINGS_164: &[rt::TemplateBindingRow
 ];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_277: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_80, value: build_controls_simplecontrols_xaml_selector_value_3 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ItemsPresenter"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::primitives::UniformGrid as ::ferroui_base::StaticType>::TYPE)], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_80, value: build_controls_simplecontrols_xaml_selector_value_4 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ItemsPresenter"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::primitives::UniformGrid as ::ferroui_base::StaticType>::TYPE)]] }];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_277: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_80, value: build_controls_simplecontrols_xaml_selector_value_3 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ItemsPresenter"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::primitives::UniformGrid as ::ferroui_base::ObjectType>::IDENTITY)], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_80, value: build_controls_simplecontrols_xaml_selector_value_4 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ItemsPresenter"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::primitives::UniformGrid as ::ferroui_base::ObjectType>::IDENTITY)]] }];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_267() -> &'static ::ferroui_base::FerroProperty {
@@ -12454,7 +12454,7 @@ fn build_controls_simplecontrols_xaml_property_269() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_278: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SelectedPipe")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_278: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")];
 
 /// The value of a property selector of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_selector_value_19() -> ::ferroui_base::BoxedValue {
@@ -12462,7 +12462,7 @@ fn build_controls_simplecontrols_xaml_selector_value_19() -> ::ferroui_base::Box
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_279: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_84, value: build_controls_simplecontrols_xaml_selector_value_19 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SelectedPipe")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_279: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_84, value: build_controls_simplecontrols_xaml_selector_value_19 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")];
 
 /// The value of a property selector of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_selector_value_20() -> ::ferroui_base::BoxedValue {
@@ -12470,10 +12470,10 @@ fn build_controls_simplecontrols_xaml_selector_value_20() -> ::ferroui_base::Box
 }
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_280: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_84, value: build_controls_simplecontrols_xaml_selector_value_20 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SelectedPipe")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_280: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_84, value: build_controls_simplecontrols_xaml_selector_value_20 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_281: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_84, value: build_controls_simplecontrols_xaml_selector_value_5 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SelectedPipe")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_281: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_84, value: build_controls_simplecontrols_xaml_selector_value_5 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")];
 
 /// The value of a property selector of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_selector_value_21() -> ::ferroui_base::BoxedValue {
@@ -12484,25 +12484,25 @@ fn build_controls_simplecontrols_xaml_selector_value_21() -> ::ferroui_base::Box
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_282: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_84, value: build_controls_simplecontrols_xaml_selector_value_21 }];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_283: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_84, value: build_controls_simplecontrols_xaml_selector_value_21 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SelectedPipe")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_283: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_simplecontrols_xaml_property_84, value: build_controls_simplecontrols_xaml_selector_value_21 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_284: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_284: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_285: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_285: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_286: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_286: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_287: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_287: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_288: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_288: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_289: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":focus-visible"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_289: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":focus-visible"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot")];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_270`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_270_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -12920,19 +12920,19 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_BINDINGS_174: &[rt::TemplateBindingRow
 ];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_290: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Border")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_290: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Border")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_291: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Border")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_291: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Border")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_292: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Border")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_292: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Border")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_293: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Border")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_293: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Border")];
 
 /// A selector chain of `Controls/SimpleControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_294: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":focus")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Border")];
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_294: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":focus")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Border")];
 
 /// The control theme built by `build_controls_simplecontrols_xaml_deferred_286`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_286_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -14536,7 +14536,7 @@ fn build_controls_simplecontrols_xaml_deferred_34(
     let style_0 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_0.clone()));
     // Controls/SimpleControls.xaml(33,14) Selector
-    let selector_0 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::ToolTip as ::ferroui_base::StaticType>::TYPE);
+    let selector_0 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::ToolTip as ::ferroui_base::ObjectType>::IDENTITY);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_0.clone()));
     // Controls/SimpleControls.xaml(34,16) Content
     // Controls/SimpleControls.xaml(34,46) Value
@@ -15284,7 +15284,7 @@ fn build_controls_simplecontrols_xaml_deferred_60(
     // Controls/SimpleControls.xaml(59,22) Style
     let style_0 = ::ferroui_base::styling::Style::new();
     // Controls/SimpleControls.xaml(59,22) Selector
-    let selector_0 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE);
+    let selector_0 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::ScrollViewer as ::ferroui_base::ObjectType>::IDENTITY);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_0.clone()));
     // Controls/SimpleControls.xaml(60,26) Content
     rt::add_setter(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::clip_to_bounds_property()), rt::to_object(::core::clone::Clone::clone(&false)));
@@ -15295,7 +15295,7 @@ fn build_controls_simplecontrols_xaml_deferred_60(
     let style_1 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_1.clone()));
     // Controls/SimpleControls.xaml(62,22) Selector
-    let selector_1 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE);
+    let selector_1 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::ListBoxItem as ::ferroui_base::ObjectType>::IDENTITY);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_1, ::core::option::Option::Some(selector_1.clone()));
     // Controls/SimpleControls.xaml(63,27) Content
     rt::add_setter(style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::width_property()), rt::to_object(12.0_f64));
@@ -15331,10 +15331,10 @@ fn build_controls_simplecontrols_xaml_deferred_60(
     let style_2 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_2.clone()));
     // Controls/SimpleControls.xaml(85,22) Selector
-    let selector_2 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE);
+    let selector_2 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::ListBoxItem as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_3 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_2), ":pointerover");
     let selector_4 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_3));
-    let selector_5 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_4), <::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE);
+    let selector_5 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_4), <::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_6 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_5), "Pip");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_2, ::core::option::Option::Some(selector_6.clone()));
     // Controls/SimpleControls.xaml(86,26) Content
@@ -15348,10 +15348,10 @@ fn build_controls_simplecontrols_xaml_deferred_60(
     let style_3 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_3.clone()));
     // Controls/SimpleControls.xaml(88,22) Selector
-    let selector_7 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE);
+    let selector_7 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::ListBoxItem as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_8 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_7), ":selected");
     let selector_9 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_8));
-    let selector_10 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_9), <::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE);
+    let selector_10 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_9), <::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_11 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_10), "Pip");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_3, ::core::option::Option::Some(selector_11.clone()));
     // Controls/SimpleControls.xaml(89,26) Content
@@ -15364,10 +15364,10 @@ fn build_controls_simplecontrols_xaml_deferred_60(
     // Controls/SimpleControls.xaml(92,22) Style
     let style_4 = ::ferroui_base::styling::Style::new();
     // Controls/SimpleControls.xaml(92,22) Selector
-    let selector_12 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::PipsPager as ::ferroui_base::StaticType>::TYPE);
+    let selector_12 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::PipsPager as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_13 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_12), ":vertical");
     let selector_14 = ::ferroui_base::styling::Selectors::descendant(::core::option::Option::Some(selector_13));
-    let selector_15 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_14), <::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE);
+    let selector_15 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_14), <::ferroui_controls::ListBoxItem as ::ferroui_base::ObjectType>::IDENTITY);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_4, ::core::option::Option::Some(selector_15.clone()));
     // Controls/SimpleControls.xaml(93,26) Content
     rt::add_setter(style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::width_property()), rt::to_object(24.0_f64));
@@ -15380,11 +15380,11 @@ fn build_controls_simplecontrols_xaml_deferred_60(
     let style_5 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_5.clone()));
     // Controls/SimpleControls.xaml(96,22) Selector
-    let selector_16 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE);
+    let selector_16 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::ListBoxItem as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_17 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_16), ":selected");
     let selector_18 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_17), ":pointerover");
     let selector_19 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_18));
-    let selector_20 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_19), <::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE);
+    let selector_20 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_19), <::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_21 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_20), "Pip");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_5, ::core::option::Option::Some(selector_21.clone()));
     // Controls/SimpleControls.xaml(97,26) Content
@@ -15398,10 +15398,10 @@ fn build_controls_simplecontrols_xaml_deferred_60(
     let style_6 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_6.clone()));
     // Controls/SimpleControls.xaml(99,22) Selector
-    let selector_22 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE);
+    let selector_22 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::ListBoxItem as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_23 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_22), ":pressed");
     let selector_24 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_23));
-    let selector_25 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_24), <::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE);
+    let selector_25 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_24), <::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_26 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_25), "Pip");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_6, ::core::option::Option::Some(selector_26.clone()));
     // Controls/SimpleControls.xaml(100,26) Content
@@ -16460,7 +16460,7 @@ fn build_controls_simplecontrols_xaml_deferred_86(
     // Controls/SimpleControls.xaml(40,20) Style
     let style_0 = ::ferroui_base::styling::Style::new();
     // Controls/SimpleControls.xaml(40,20) Selector
-    let selector_0 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_0 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_1 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_0), "CalendarHeader");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_1.clone()));
     // Controls/SimpleControls.xaml(41,22) Content
@@ -16475,11 +16475,11 @@ fn build_controls_simplecontrols_xaml_deferred_86(
     // Controls/SimpleControls.xaml(45,20) Style
     let style_1 = ::ferroui_base::styling::Style::new();
     // Controls/SimpleControls.xaml(45,20) Selector
-    let selector_2 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_2 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_3 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_2), "CalendarHeader");
     let selector_4 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_3), ":pressed");
     let selector_5 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_4));
-    let selector_6 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_5), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE);
+    let selector_6 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_5), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_1, ::core::option::Option::Some(selector_6.clone()));
     // Controls/SimpleControls.xaml(46,22) Content
     rt::add_setter(style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()), rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32)));
@@ -16489,7 +16489,7 @@ fn build_controls_simplecontrols_xaml_deferred_86(
     // Controls/SimpleControls.xaml(49,20) Style
     let style_2 = ::ferroui_base::styling::Style::new();
     // Controls/SimpleControls.xaml(49,20) Selector
-    let selector_7 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_7 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_8 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_7), "CalendarNavigation");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_2, ::core::option::Option::Some(selector_8.clone()));
     // Controls/SimpleControls.xaml(50,22) Content
@@ -16503,10 +16503,10 @@ fn build_controls_simplecontrols_xaml_deferred_86(
     let style_3 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_3.clone()));
     // Controls/SimpleControls.xaml(53,20) Selector
-    let selector_9 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_9 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_10 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_9), "CalendarNavigation");
     let selector_11 = ::ferroui_base::styling::Selectors::child(::core::option::Option::Some(selector_10));
-    let selector_12 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_11), <::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE);
+    let selector_12 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_11), <::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_3, ::core::option::Option::Some(selector_12.clone()));
     // Controls/SimpleControls.xaml(54,22) Content
     // Controls/SimpleControls.xaml(54,45) Value
@@ -16519,11 +16519,11 @@ fn build_controls_simplecontrols_xaml_deferred_86(
     let style_4 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_4.clone()));
     // Controls/SimpleControls.xaml(56,20) Selector
-    let selector_13 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_13 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_14 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_13), "CalendarNavigation");
     let selector_15 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_14), ":pointerover");
     let selector_16 = ::ferroui_base::styling::Selectors::child(::core::option::Option::Some(selector_15));
-    let selector_17 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_16), <::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE);
+    let selector_17 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_16), <::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_4, ::core::option::Option::Some(selector_17.clone()));
     // Controls/SimpleControls.xaml(57,22) Content
     // Controls/SimpleControls.xaml(57,45) Value
@@ -16536,7 +16536,7 @@ fn build_controls_simplecontrols_xaml_deferred_86(
     let style_5 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_5.clone()));
     // Controls/SimpleControls.xaml(60,20) Selector
-    let selector_18 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_18 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_19 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_18), "HeaderButton");
     let selector_20 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_19), ":pointerover");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_5, ::core::option::Option::Some(selector_20.clone()));
@@ -17230,7 +17230,7 @@ fn build_controls_simplecontrols_xaml_deferred_91(
     let style_0 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_0.clone()));
     // Controls/SimpleControls.xaml(26,14) Selector
-    let selector_0 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_0 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_1 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_0), "CalendarDropDown");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_1.clone()));
     // Controls/SimpleControls.xaml(27,16) Content
@@ -17250,10 +17250,10 @@ fn build_controls_simplecontrols_xaml_deferred_91(
     // Controls/SimpleControls.xaml(82,14) Style
     let style_1 = ::ferroui_base::styling::Style::new();
     // Controls/SimpleControls.xaml(82,14) Selector
-    let selector_2 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_2 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_3 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_2), "CalendarDropDown");
     let selector_4 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_3));
-    let selector_5 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_4), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
+    let selector_5 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_4), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_6 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_5), "Highlight");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_1, ::core::option::Option::Some(selector_6.clone()));
     // Controls/SimpleControls.xaml(83,16) Content
@@ -17264,11 +17264,11 @@ fn build_controls_simplecontrols_xaml_deferred_91(
     // Controls/SimpleControls.xaml(85,14) Style
     let style_2 = ::ferroui_base::styling::Style::new();
     // Controls/SimpleControls.xaml(85,14) Selector
-    let selector_7 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_7 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_8 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_7), "CalendarDropDown");
     let selector_9 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_8), ":pressed");
     let selector_10 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_9));
-    let selector_11 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_10), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
+    let selector_11 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_10), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_12 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_11), "Highlight");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_2, ::core::option::Option::Some(selector_12.clone()));
     // Controls/SimpleControls.xaml(86,16) Content
@@ -17280,11 +17280,11 @@ fn build_controls_simplecontrols_xaml_deferred_91(
     let style_3 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_3.clone()));
     // Controls/SimpleControls.xaml(89,14) Selector
-    let selector_13 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_13 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_14 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_13), "CalendarDropDown");
     let selector_15 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_14), ":pointerover");
     let selector_16 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_15));
-    let selector_17 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_16), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
+    let selector_17 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_16), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_18 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_17), "Background");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_3, ::core::option::Option::Some(selector_18.clone()));
     // Controls/SimpleControls.xaml(90,16) Content
@@ -17787,7 +17787,7 @@ fn build_controls_simplecontrols_xaml_deferred_93(
     let selector_1 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_2 = ::ferroui_base::styling::Selectors::property_equals_untyped(::core::option::Option::Some(selector_1), rt::property(::ferroui_controls::NotificationCard::is_closing_property()), ::std::rc::Rc::new(::core::clone::Clone::clone(&true)));
     let selector_3 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_2));
-    let selector_4 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_3), <::ferroui_controls::LayoutTransformControl as ::ferroui_base::StaticType>::TYPE);
+    let selector_4 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_3), <::ferroui_controls::LayoutTransformControl as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_5 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_4), "PART_LayoutTransformControl");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_1, ::core::option::Option::Some(selector_5.clone()));
     // Controls/SimpleControls.xaml(54,10) Animations
@@ -20789,7 +20789,7 @@ fn build_controls_simplecontrols_xaml_deferred_140(
     // Controls/SimpleControls.xaml(171,22) Style
     let style_0 = ::ferroui_base::styling::Style::new();
     // Controls/SimpleControls.xaml(171,22) Selector
-    let selector_0 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::presenters::ScrollContentPresenter as ::ferroui_base::StaticType>::TYPE);
+    let selector_0 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::presenters::ScrollContentPresenter as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_1 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_0), "PART_ContentPresenter");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_1.clone()));
     // Controls/SimpleControls.xaml(172,24) Content
@@ -20981,7 +20981,7 @@ fn build_controls_simplecontrols_xaml_deferred_142(
     // Controls/SimpleControls.xaml(221,16) Style
     let style_0 = ::ferroui_base::styling::Style::new();
     // Controls/SimpleControls.xaml(221,16) Selector
-    let selector_0 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE);
+    let selector_0 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_1 = ::ferroui_base::styling::Selectors::property_equals_untyped(::core::option::Option::Some(selector_0), rt::property(::ferroui_controls::primitives::ToggleButton::is_checked_property()), ::std::rc::Rc::new(::core::option::Option::Some(::core::clone::Clone::clone(&true))));
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_1.clone()));
     // Controls/SimpleControls.xaml(222,18) Content
@@ -20992,7 +20992,7 @@ fn build_controls_simplecontrols_xaml_deferred_142(
     // Controls/SimpleControls.xaml(224,16) Style
     let style_1 = ::ferroui_base::styling::Style::new();
     // Controls/SimpleControls.xaml(224,16) Selector
-    let selector_2 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE);
+    let selector_2 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_3 = ::ferroui_base::styling::Selectors::property_equals_untyped(::core::option::Option::Some(selector_2), rt::property(::ferroui_controls::primitives::ToggleButton::is_checked_property()), ::std::rc::Rc::new(::core::option::Option::Some(::core::clone::Clone::clone(&false))));
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_1, ::core::option::Option::Some(selector_3.clone()));
     // Controls/SimpleControls.xaml(225,18) Content
@@ -22967,7 +22967,7 @@ fn build_controls_simplecontrols_xaml_deferred_162(
     let selector_0 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_1 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_0), ":horizontal");
     let selector_2 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_1));
-    let selector_3 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_2), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
+    let selector_3 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_2), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_4 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_3), "PART_Indicator");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_4.clone()));
     // Controls/SimpleControls.xaml(61,8) Content
@@ -22982,7 +22982,7 @@ fn build_controls_simplecontrols_xaml_deferred_162(
     let selector_5 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_6 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_5), ":vertical");
     let selector_7 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_6));
-    let selector_8 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_7), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
+    let selector_8 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_7), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_9 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_8), "PART_Indicator");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_1, ::core::option::Option::Some(selector_9.clone()));
     // Controls/SimpleControls.xaml(65,8) Content
@@ -23021,7 +23021,7 @@ fn build_controls_simplecontrols_xaml_deferred_162(
     let selector_14 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_15 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_14), ":vertical");
     let selector_16 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_15));
-    let selector_17 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_16), <::ferroui_controls::LayoutTransformControl as ::ferroui_base::StaticType>::TYPE);
+    let selector_17 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_16), <::ferroui_controls::LayoutTransformControl as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_18 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_17), "PART_LayoutTransformControl");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_4, ::core::option::Option::Some(selector_18.clone()));
     // Controls/SimpleControls.xaml(77,8) Content
@@ -23043,7 +23043,7 @@ fn build_controls_simplecontrols_xaml_deferred_162(
     let selector_20 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_19), ":horizontal");
     let selector_21 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_20), ":indeterminate");
     let selector_22 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_21));
-    let selector_23 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_22), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
+    let selector_23 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_22), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_24 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_23), "PART_IndeterminateIndicator");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_5, ::core::option::Option::Some(selector_24.clone()));
     // Controls/SimpleControls.xaml(86,10) Animations
@@ -23150,7 +23150,7 @@ fn build_controls_simplecontrols_xaml_deferred_162(
     let selector_26 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_25), ":vertical");
     let selector_27 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_26), ":indeterminate");
     let selector_28 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_27));
-    let selector_29 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_28), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
+    let selector_29 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_28), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_30 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_29), "PART_IndeterminateIndicator");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_6, ::core::option::Option::Some(selector_30.clone()));
     // Controls/SimpleControls.xaml(101,10) Animations
@@ -25011,9 +25011,9 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     let style_0 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_0.clone()));
     // Controls/SimpleControls.xaml(195,18) Selector
-    let selector_0 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::date_time_pickers::DateTimePickerPanel as ::ferroui_base::StaticType>::TYPE);
+    let selector_0 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::date_time_pickers::DateTimePickerPanel as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_1 = ::ferroui_base::styling::Selectors::child(::core::option::Option::Some(selector_0));
-    let selector_2 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_1), <::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE);
+    let selector_2 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_1), <::ferroui_controls::ListBoxItem as ::ferroui_base::ObjectType>::IDENTITY);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_2.clone()));
     // Controls/SimpleControls.xaml(196,20) Content
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::StyledElement::theme_property()));
@@ -25975,9 +25975,9 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     let style_0 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_0.clone()));
     // Controls/SimpleControls.xaml(227,18) Selector
-    let selector_0 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::date_time_pickers::DateTimePickerPanel as ::ferroui_base::StaticType>::TYPE);
+    let selector_0 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::date_time_pickers::DateTimePickerPanel as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_1 = ::ferroui_base::styling::Selectors::child(::core::option::Option::Some(selector_0));
-    let selector_2 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_1), <::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE);
+    let selector_2 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_1), <::ferroui_controls::ListBoxItem as ::ferroui_base::ObjectType>::IDENTITY);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_2.clone()));
     // Controls/SimpleControls.xaml(228,20) Content
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::StyledElement::theme_property()));
@@ -27810,7 +27810,7 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     // Controls/SimpleControls.xaml(100,20) Style
     let style_0 = ::ferroui_base::styling::Style::new();
     // Controls/SimpleControls.xaml(100,20) Selector
-    let selector_0 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_0 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_0.clone()));
     // Controls/SimpleControls.xaml(101,22) Content
     rt::add_setter(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::margin_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64)));
@@ -31070,10 +31070,10 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     // Controls/SimpleControls.xaml(82,18) Style
     let style_0 = ::ferroui_base::styling::Style::new();
     // Controls/SimpleControls.xaml(82,18) Selector
-    let selector_0 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_0 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_1 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_0), "PART_BackButton");
     let selector_2 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_1));
-    let selector_3 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_2), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE);
+    let selector_3 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_2), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_4 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_3), "PART_ContentPresenter");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_4.clone()));
     // Controls/SimpleControls.xaml(83,20) Content
@@ -31087,11 +31087,11 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     let style_1 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_1.clone()));
     // Controls/SimpleControls.xaml(86,18) Selector
-    let selector_5 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_5 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_6 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_5), "PART_BackButton");
     let selector_7 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_6), ":pointerover");
     let selector_8 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_7));
-    let selector_9 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_8), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE);
+    let selector_9 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_8), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_10 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_9), "PART_ContentPresenter");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_1, ::core::option::Option::Some(selector_10.clone()));
     // Controls/SimpleControls.xaml(87,20) Content
@@ -31105,11 +31105,11 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     let style_2 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_2.clone()));
     // Controls/SimpleControls.xaml(89,18) Selector
-    let selector_11 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_11 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_12 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_11), "PART_BackButton");
     let selector_13 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_12), ":pressed");
     let selector_14 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_13));
-    let selector_15 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_14), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE);
+    let selector_15 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_14), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_16 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_15), "PART_ContentPresenter");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_2, ::core::option::Option::Some(selector_16.clone()));
     // Controls/SimpleControls.xaml(90,20) Content
@@ -31122,7 +31122,7 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     // Controls/SimpleControls.xaml(92,18) Style
     let style_3 = ::ferroui_base::styling::Style::new();
     // Controls/SimpleControls.xaml(92,18) Selector
-    let selector_17 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_17 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_18 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_17), "PART_BackButton");
     let selector_19 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_18), ":disabled");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_3, ::core::option::Option::Some(selector_19.clone()));
@@ -31135,11 +31135,11 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     let style_4 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_4.clone()));
     // Controls/SimpleControls.xaml(95,18) Selector
-    let selector_20 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_20 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_21 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_20), "PART_BackButton");
     let selector_22 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_21), ":focus-visible");
     let selector_23 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_22));
-    let selector_24 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_23), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE);
+    let selector_24 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_23), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_25 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_24), "PART_ContentPresenter");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_4, ::core::option::Option::Some(selector_25.clone()));
     // Controls/SimpleControls.xaml(96,20) Content
@@ -31156,10 +31156,10 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     // Controls/SimpleControls.xaml(100,18) Style
     let style_5 = ::ferroui_base::styling::Style::new();
     // Controls/SimpleControls.xaml(100,18) Selector
-    let selector_26 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_26 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_27 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_26), ":disabled");
     let selector_28 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_27));
-    let selector_29 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_28), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE);
+    let selector_29 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_28), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_30 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_29), "PART_ContentPresenter");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_5, ::core::option::Option::Some(selector_30.clone()));
     // Controls/SimpleControls.xaml(101,20) Content
@@ -31170,10 +31170,10 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     // Controls/SimpleControls.xaml(103,18) Style
     let style_6 = ::ferroui_base::styling::Style::new();
     // Controls/SimpleControls.xaml(103,18) Selector
-    let selector_31 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_31 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_32 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_31), "PART_OverflowButton");
     let selector_33 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_32));
-    let selector_34 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_33), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE);
+    let selector_34 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_33), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_35 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_34), "PART_ContentPresenter");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_6, ::core::option::Option::Some(selector_35.clone()));
     // Controls/SimpleControls.xaml(104,20) Content
@@ -31187,11 +31187,11 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     let style_7 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_7.clone()));
     // Controls/SimpleControls.xaml(107,18) Selector
-    let selector_36 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_36 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_37 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_36), "PART_OverflowButton");
     let selector_38 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_37), ":pointerover");
     let selector_39 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_38));
-    let selector_40 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_39), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE);
+    let selector_40 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_39), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_41 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_40), "PART_ContentPresenter");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_7, ::core::option::Option::Some(selector_41.clone()));
     // Controls/SimpleControls.xaml(108,20) Content
@@ -31205,11 +31205,11 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     let style_8 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_8.clone()));
     // Controls/SimpleControls.xaml(110,18) Selector
-    let selector_42 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_42 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_43 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_42), "PART_OverflowButton");
     let selector_44 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_43), ":pressed");
     let selector_45 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_44));
-    let selector_46 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_45), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE);
+    let selector_46 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_45), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_47 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_46), "PART_ContentPresenter");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_8, ::core::option::Option::Some(selector_47.clone()));
     // Controls/SimpleControls.xaml(111,20) Content
@@ -31421,7 +31421,7 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     // Controls/SimpleControls.xaml(156,20) Style
     let style_9 = ::ferroui_base::styling::Style::new();
     // Controls/SimpleControls.xaml(156,20) Selector
-    let selector_48 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::CommandBar as ::ferroui_base::StaticType>::TYPE);
+    let selector_48 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::CommandBar as ::ferroui_base::ObjectType>::IDENTITY);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_9, ::core::option::Option::Some(selector_48.clone()));
     // Controls/SimpleControls.xaml(157,22) Content
     rt::add_setter(style_9.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32)));

@@ -387,7 +387,7 @@ literal form (enumerations, `GridLength`) stay direct calls.
 
 - **Selectors.** 1,586 selector chains with 6,952 `Selectors::` calls (6,917 of them in ControlTheme
   factories), but only 611 distinct chains. A chain is a short sequence (`nesting`, `class`,
-  `template`, `of_type_info`, `name`, ...). As a static slice of selector operations built by one
+  `template`, `of_type_identity`, `name`, ...). As a static slice of selector operations built by one
   function, a chain costs data instead of code, and identical chains share one slice.
 - **Nested styles.** 1,540 `Style::new()` with `__markup_set_Selector` and `StyleBase::__markup_Add_1`.
   About 273 style bodies occur more than once, ignoring local names and positions.
@@ -1030,7 +1030,7 @@ objects built are the same.
 | Generated code before | Table | Interpreter |
 |---|---|---|
 | the factory of a `ControlTheme` | `ControlThemeTable { parent, members: &[StyleMember] }` | `build_control_theme(context, table)` |
-| a selector chain (`Selectors::nesting(..)`, `class`, `template`, `of_type_info`, `name`, `not`, `or`, `property_equals_untyped`, ..) | `&'static [SelectorStep]` | `build_selector(steps)` |
+| a selector chain (`Selectors::nesting(..)`, `class`, `template`, `of_type_identity`, `name`, `not`, `or`, `property_equals_untyped`, ..) | `&'static [SelectorStep]` | `build_selector(steps)` |
 | the `is_instance` chain of a `{StaticResource}` value | `ResourceChoice` | `assign_resource_value(target, property, value, choice, priority)` |
 | consecutive `rt::bind_template_binding` on one object | `&'static [TemplateBindingRow]` | `bind_template_bindings(target, rows)` |
 

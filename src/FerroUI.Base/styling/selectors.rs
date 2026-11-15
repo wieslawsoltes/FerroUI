@@ -2,7 +2,9 @@ use super::{
     ChildSelector, DescendantSelector, NestingSelector, NotSelector, NthChildSelector, NthLastChildSelector,
     OrSelector, PropertyEqualsSelector, Selector, TemplateSelector, TypeNameAndClassSelector,
 };
-use crate::{BoxedValue, FerroProperty, ObjectType, PropertyValue, StyledElement, StyledProperty, TypeInfo, Upcast};
+use crate::{
+    BoxedValue, FerroProperty, ObjectType, PropertyValue, StyledElement, StyledProperty, TypeIdentity, TypeInfo, Upcast,
+};
 use std::rc::Rc;
 
 /// Functions for building [`Selector`]s.
@@ -47,6 +49,13 @@ impl Selectors {
     /// Returns a selector which matches a type or a derived type.
     pub fn is_type_info(previous: Option<Selector>, type_: &'static TypeInfo) -> Selector {
         Selector::new(TypeNameAndClassSelector::is(previous, type_))
+    }
+
+    /// Returns a selector which matches the class with the identity `identity` or a class
+    /// derived from it: what [`is_type_info`](Self::is_type_info) matches with the type of the
+    /// class, without keeping the class in an executable that never creates one.
+    pub fn is_type_identity(previous: Option<Selector>, identity: &'static TypeIdentity) -> Selector {
+        Selector::new(TypeNameAndClassSelector::of_identity(previous, identity, true))
     }
 
     /// Returns a selector which matches class `T` or a class derived from it.
@@ -102,6 +111,13 @@ impl Selectors {
     /// Returns a selector which matches a type.
     pub fn of_type_info(previous: Option<Selector>, type_: &'static TypeInfo) -> Selector {
         Selector::new(TypeNameAndClassSelector::of_type(previous, type_))
+    }
+
+    /// Returns a selector which matches the class with the identity `identity` exactly: what
+    /// [`of_type_info`](Self::of_type_info) matches with the type of the class, without keeping
+    /// the class in an executable that never creates one.
+    pub fn of_type_identity(previous: Option<Selector>, identity: &'static TypeIdentity) -> Selector {
+        Selector::new(TypeNameAndClassSelector::of_identity(previous, identity, false))
     }
 
     /// Returns a selector which matches class `T` exactly.

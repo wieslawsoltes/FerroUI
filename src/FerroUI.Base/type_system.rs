@@ -59,6 +59,18 @@ impl TypeIdentity {
         Self { name }
     }
 
+    /// The class with this identity, once it is known: after its initialisation on any thread
+    /// or its registration with a table of types ([`TypeInfo::register`]). `None` before, when
+    /// no object of the class exists. Reading it does not keep the class in the executable.
+    ///
+    /// It is looked up among the known types of the name; the identity itself stays constant
+    /// data, which a constant may refer to.
+    pub fn registered_type(&'static self) -> Option<&'static TypeInfo> {
+        let registry = read_registry();
+        let known = registry.by_name.get(self.name)?;
+        known.iter().copied().find(|type_| type_.identity.is_some_and(|own| std::ptr::eq(own, self)))
+    }
+
     /// The name of the class, for diagnostics.
     pub const fn name(&self) -> &'static str {
         self.name

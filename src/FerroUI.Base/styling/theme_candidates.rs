@@ -22,7 +22,7 @@
 //! is applied (attaching a style can run code) ends the use of the plan, and the traversal goes
 //! on from that entry as the ordinary one does (`StyledElement::apply_control_theme_core`).
 
-use super::selector_candidates::TypeCandidate;
+use super::selector_candidates::{CandidateType, TypeCandidate};
 use super::{ControlTheme, IStyle, StyleBase};
 use crate::{StyledElement, TypeInfo};
 use rustc_hash::FxHashMap;
@@ -167,7 +167,7 @@ fn build(theme: &ControlTheme, key: &'static TypeInfo) -> Option<Plan> {
     BUILDS.with(|builds| builds.set(builds.get() + 1));
     let mut builder = Builder { key, collections: Vec::new(), nodes: Vec::new() };
     // What the nesting selector of a child of the theme evaluates.
-    let bound = theme.target_type().map(|type_| TypeCandidate { type_, exact: false });
+    let bound = theme.target_type().map(|type_| TypeCandidate { type_: CandidateType::Type(type_), exact: false });
     builder.collection(theme.children().snapshot(), theme, bound, NO_PARENT, 0)?;
     Some(Plan { collections: builder.collections.into(), nodes: builder.nodes.into() })
 }

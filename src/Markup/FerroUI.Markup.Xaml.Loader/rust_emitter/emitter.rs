@@ -3351,14 +3351,16 @@ impl<'a> Emitter<'a> {
             let path = class
                 .rust_path()
                 .ok_or_else(|| unsupported(node, format!("no public Rust path is recorded for {}", class.full_name())))?;
-            Ok(format!("<{} as ::ferroui_base::StaticType>::TYPE", absolute(path)))
+            // The identity of the class, not its type: a style for a class the application never
+            // creates does not keep the class in the executable.
+            Ok(format!("<{} as ::ferroui_base::ObjectType>::IDENTITY", absolute(path)))
         };
         let call = if let Some(n) = node.cast::<XamlIlTypeSelector>() {
             let previous = previous(self, &n.base.previous)?;
             let class = class_of(&n.target_type)?;
             match n.concrete {
-                true => format!("{SELECTORS}::of_type_info({previous}, {class})"),
-                false => format!("{SELECTORS}::is_type_info({previous}, {class})"),
+                true => format!("{SELECTORS}::of_type_identity({previous}, {class})"),
+                false => format!("{SELECTORS}::is_type_identity({previous}, {class})"),
             }
         } else if let Some(n) = node.cast::<XamlIlStringSelector>() {
             let previous = previous(self, &n.base.previous)?;
