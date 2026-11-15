@@ -854,6 +854,32 @@ of the gate (65 metrics, none over tolerance):
 | `ControlWrite.attached_changed[Control=Border]` | 28.48 ns | 30.03 ns | +5.4 % | -2.50 % |
 | `SetterApply.plain[Controls=1000, Setters=32]` | 2.084 ms | 2.033 ms | -2.4 % | -0.81 % |
 
+### 4.18 The About dialog, its document and its font are linked with the first dialog (#612)
+
+Hello world shows one text block and linked 171 classes, `ferroui_dialogs::AboutFerroDialog` among
+them. Root A of #612 took the dialog out of the macOS application menu; it was still reached another
+way. Every theme registers the types of `ferroui-dialogs`, for the managed file chooser it styles,
+and that registration also made the compiled markup of the crate known: the loader table that
+answers a load of `AboutFerroDialog.xaml` by its URI with an instance of the dialog, and the font of
+the document (`Roboto-Light.ttf`, 170 kB). A table of loaders is a list of functions, so the dialog,
+its compiled document and what the document uses were in every application with a theme.
+
+The registration of the types now makes the compiled markup known only with the tables of types
+(`ValueTypes::TYPE_TABLES`: the run-time loader, the designer, hot reload, where a document is
+loaded by a URI that nothing in the code names). Without them the constructor of the dialog
+registers the font and the loader table, so an application that shows the dialog has both, and one
+that never does links neither.
+
+| `samples/HelloWorld`, release, macOS (`scripts/symsize.py`) | Before | After | Change |
+|---|---:|---:|---:|
+| Attributed to symbols | 21.83 MB | 21.36 MB | -0.47 MB (-2.2 %) |
+| Machine code | 17,612,808 bytes | 17,365,212 bytes | -247,596 bytes |
+| `ferroui_base` | 8.12 MB | 7.96 MB | -0.16 MB |
+| Anonymous data (the font) | 1.86 MB | 1.66 MB | -0.20 MB |
+
+A load of `AboutFerroDialog.xaml` by its URI before any dialog was made finds the document only
+with the tables of types; the dialog itself is unchanged.
+
 ## 5. What an executable is made of
 
 ### 5.1 Sections (macOS, release, unstripped)
