@@ -147,6 +147,30 @@ fn disposing_local_value_binding_should_not_revert_to_set_local_value() {
 }
 
 #[test]
+fn only_an_object_with_a_local_value_binding_keeps_the_lists_of_them() {
+    let target = Class1::new();
+    let style = Source::behavior(bv("style"));
+    let local = Source::behavior(bv("local"));
+    let property = Class1::foo_property();
+
+    // Values, a binding of a style, the questions about local value bindings and clearing make none.
+    target.set_value(property, s("set"));
+    target.bind_value(property, style.observable(), BindingPriority::Style);
+    assert!(!target.values().has_local_value_binding(property));
+    let _ = target.values().get_expression(property);
+    target.clear_value(property);
+    assert_eq!("style", target.get_value(property));
+    assert!(!target.values().has_local_bindings());
+
+    // A local value binding does, and it is found there.
+    target.bind_value(property, local.observable(), LOCAL);
+    assert!(target.values().has_local_bindings());
+    assert!(target.values().has_local_value_binding(property));
+    assert!(!target.values().has_local_value_binding(Class1::qux_property()));
+    assert_eq!("local", target.get_value(property));
+}
+
+#[test]
 fn local_value_binding_should_override_style_binding() {
     let target = Class1::new();
     let source1 = Source::behavior(bv("foo"));
