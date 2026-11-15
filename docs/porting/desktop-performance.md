@@ -645,8 +645,12 @@ What it measures:
   sizes of the objects an element is made of (the element class by class, its composition visual
   and the visual of the render thread); the gate compares each. With the `counters` feature
   (`--features counters`) a start also prints the allocations of each phase and the blocks it
-  left alive by size class, and the counters of the framework (section 9.40). The gate runs every
-  test of the frame benchmarks in a process of its own: a start is the start of a process that
+  left alive by size class, and the counters of the framework (section 9.40). With
+  `FERROUI_HEAP_SITES=build|show|first|all` beside the feature it keeps, for every block of that
+  phase, the frames of the call that allocated it, and prints the blocks still allocated at the
+  first frame by those frames; `python3 scripts/perf/heap-sites.py <output>` names them and adds
+  them up by the function that owns them. The gate runs every test of the frame benchmarks in
+  a process of its own: a start is the start of a process that
   has built nothing yet, and a scene leaves the heap and the caches of the process in a state
   that moves what is measured after it. The `text` scene builds in 3.65 ms in a process of the
   frames alone and in 4.2 to 5.0 ms after the two starts; the `list` scene, measured after six
