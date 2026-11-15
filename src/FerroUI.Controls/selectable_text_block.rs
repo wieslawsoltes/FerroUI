@@ -97,7 +97,10 @@ impl FerroObjectImpl for SelectableTextBlock {
                 *this.inlines_invalidated.borrow_mut() = Some(subscription);
             }
 
-            this.on_text_or_inlines_changed();
+            // Not for the collection a first read makes: nothing of the content changed.
+            if !this.is_making_inlines() {
+                this.on_text_or_inlines_changed();
+            }
         } else if change.property() == TextBlock::text_property().as_property() {
             this.on_text_or_inlines_changed();
         } else if change.property() == Self::selection_start_property().as_property()

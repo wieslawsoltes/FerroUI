@@ -271,6 +271,35 @@ fn native_occupied_content_drop_is_rejected_without_falling_through_to_canvas() 
     assert_eq!(fixture.source(), LAYOUT_SOURCE);
 }
 
+// Making a snapshot of the layout helpers reads the live controls of the preview, and a read may
+// make what it reads, which in a render pass is an invalidation the renderer refuses (a click
+// on a text block of the artboard did that in the browser). A render takes the kept snapshot
+// and makes none: one that is due is made after the pass.
+#[test]
+fn a_render_takes_the_kept_layout_helpers_and_makes_none() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let fixture = SurfaceFixture::with_source(LAYOUT_SOURCE);
+    let left = fixture
+        .session
+        .borrow()
+        .document()
+        .ast()
+        .find_name("Left")
+        .unwrap();
+    fixture.session.borrow_mut().select([left]);
+    fixture.surface.invalidate_layout_helpers();
+
+    assert!(
+        fixture.surface.layout_helper_snapshot_for_render().is_none(),
+        "A render must not make the snapshot"
+    );
+    ferroui_base::threading::Dispatcher::ui_thread().run_jobs(None);
+    assert!(
+        fixture.surface.layout_helper_snapshot_for_render().is_some(),
+        "The snapshot is made after the pass and kept for the next render"
+    );
+}
+
 #[test]
 fn native_gap_handle_drag_and_keyboard_edits_are_staged_cancellable_and_undoable() {
     let _app = UnitTestApplication::start(TestServices::styled_window());

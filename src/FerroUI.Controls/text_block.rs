@@ -49,6 +49,10 @@ pub struct TextBlock {
     /// its logical children and its subscription in the constructor of every text block; most
     /// text blocks show `Text` and never use it.
     inlines_made: Cell<bool>,
+    /// Set while the first use of `inlines` makes the collection and raises the change that
+    /// connects it: an empty collection in place of none changes nothing of what the text block
+    /// shows, so the change invalidates nothing (a read of a property does not invalidate).
+    making_inlines: Cell<bool>,
     inlines_invalidated: OptionCell<Box<Subscription>>,
     inline_host: OnceCell<Rc<dyn IInlineHost>>,
     clear_text_internal: Cell<bool>,
@@ -150,7 +154,13 @@ ferroui_base::ferro_overrides! { impl FerroObjectImpl for TextBlock {
             "Inlines" => {
                 let (old_value, new_value) = change.get_old_and_new_value::<Option<InlineCollection>>();
                 this.on_inlines_changed(old_value, new_value);
-                this.invalidate_text_layout();
+                // The collection made by a first read is empty and replaces none: the text and
+                // its layout are what they were. Invalidating here made a read of the property
+                // (an inspector listing the properties of a text block, from a render) an
+                // invalidation in the render pass.
+                if !this.is_making_inlines() {
+                    this.invalidate_text_layout();
+                }
             }
             _ => {}
         }
@@ -458,7 +468,11 @@ struct TextBlockInlineHost(WeakRef<TextBlock>);
 impl IInlineHost for TextBlockInlineHost {
     fn invalidate(&self) {
         if let Some(text_block) = self.0.upgrade() {
-            text_block.invalidate_text_layout();
+            // The collection a first read makes is given its host, which invalidates the host:
+            // nothing of the text changed with an empty collection.
+            if !text_block.is_making_inlines() {
+                text_block.invalidate_text_layout();
+            }
         }
     }
 
@@ -696,6 +710,7 @@ impl TextBlock {
             text_runs_embed_controls: Cell::new(true),
             inlines: RefCell::new(None),
             inlines_made: Cell::new(false),
+            making_inlines: Cell::new(false),
             inlines_invalidated: OptionCell::new(),
             inline_host: OnceCell::new(),
             clear_text_internal: Cell::new(false),
@@ -981,9 +996,24 @@ impl TextBlock {
             // Made on first use and set as upstream's constructor sets it: the change it raises
             // connects the collection (here and in derived controls).
             self.inlines_made.set(true);
+            // The flag is cleared by a guard: a handler of the change may panic in a test.
+            struct Made<'a>(&'a Cell<bool>);
+            impl Drop for Made<'_> {
+                fn drop(&mut self) {
+                    self.0.set(false);
+                }
+            }
+            self.making_inlines.set(true);
+            let _made = Made(&self.making_inlines);
             self.set_and_raise(Self::inlines_property(), &self.inlines, Some(InlineCollection::new()));
         }
         self.inlines.borrow().clone()
+    }
+
+    /// Whether the change of `Inlines` being raised is the collection made on first use: no
+    /// content changed, and a handler has nothing to lay out or draw again for it.
+    pub(crate) fn is_making_inlines(&self) -> bool {
+        self.making_inlines.get()
     }
 
     pub fn set_inlines(&self, value: Option<InlineCollection>) {
@@ -1425,7 +1455,12 @@ impl TextBlock {
     }
 
     fn on_inlines_changed(&self, old_value: Option<InlineCollection>, new_value: Option<InlineCollection>) {
-        self.visual_children().clear();
+        // The visual children are the controls the inlines embed. The collection a first read makes
+        // replaces none: there are no such controls, and clearing the list would tell the renderer
+        // that the children changed.
+        if !self.is_making_inlines() {
+            self.visual_children().clear();
+        }
 
         if let Some(old_value) = old_value {
             old_value.set_logical_children(None);
