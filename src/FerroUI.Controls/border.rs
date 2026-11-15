@@ -2,7 +2,7 @@ use crate::{ControlImpl, Decorator};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{LayoutHelper, Layoutable, LayoutableImpl};
-use crate::utils::BorderRenderHelper;
+use crate::utils::LazyBorderRenderHelper;
 use ferroui_base::media::{BackgroundSizing, BoxShadows, DrawingContext, IBrush};
 use ferroui_base::property_store::HotValue;
 use ferroui_base::utilities::MathUtilities;
@@ -20,7 +20,7 @@ pub struct Border {
     base: Decorator,
     layout_thickness: Cell<Option<Thickness>>,
     scale: Cell<f64>,
-    border_render_helper: RefCell<BorderRenderHelper>,
+    border_render_helper: LazyBorderRenderHelper,
     border_visual: RefCell<Option<crate::border_visual::CompositionBorderVisual>>,
     /// Not upstream: the value properties layout and rendering read, kept while the value store
     /// of the border is unchanged (docs/porting/desktop-performance.md, section 9.28).
@@ -41,7 +41,7 @@ ferro_impl_classes!(Border: StyledElementImpl, InteractiveImpl, InputElementImpl
 
 impl VisualImpl for Border {
     fn render(this: &Self, context: &mut DrawingContext) {
-        this.border_render_helper.borrow_mut().render(
+        this.border_render_helper.render(
             context,
             this.bounds().size(),
             this.layout_thickness(),
@@ -187,7 +187,14 @@ impl Border {
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
     pub fn construct() -> Self {
-        Self { base: Decorator::construct(), layout_thickness: Cell::new(None), scale: Cell::new(0.0), border_render_helper: RefCell::new(BorderRenderHelper::new()), border_visual: RefCell::new(None), kept: HotValue::default() }
+        Self {
+            base: Decorator::construct(),
+            layout_thickness: Cell::new(None),
+            scale: Cell::new(0.0),
+            border_render_helper: LazyBorderRenderHelper::default(),
+            border_visual: RefCell::new(None),
+            kept: HotValue::default(),
+        }
     }
 
     pub fn new() -> Ref<Self> {
@@ -210,6 +217,12 @@ impl Border {
 
     pub fn set_background(&self, value: Option<Rc<dyn IBrush>>) {
         self.set_value(Self::background_property(), value)
+    }
+
+    /// Whether a render of the border made its renderer.
+    #[cfg(test)]
+    pub(crate) fn has_border_renderer(&self) -> bool {
+        self.border_render_helper.is_made()
     }
 
     /// How the background is drawn relative to the border.
