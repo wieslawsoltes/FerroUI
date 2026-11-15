@@ -893,6 +893,61 @@ a rule ([PORTING-GUIDE.md](porting/PORTING-GUIDE.md), "Binary size: what a port 
 Unwind tables and landing pads (`__eh_frame`, `__gcc_except_tab`, `__unwind_info`) are 10.3 MB on
 top of the machine code (#567).
 
+### 5.5 Hello world by mechanism on main after 0.5.0 (macOS, release, 2026-11-15)
+
+The same executable after the changes of sections 4.5 to 4.16 (`scripts/symsize.py`, unstripped
+release): the file is 31.18 MB, and 21.85 MB of it are attributed to symbols (18.65 MB of machine
+code, 2.85 MB of constants).
+
+| Origin | Size | Share |
+|---|---:|---:|
+| `ferroui_base` | 8.14 MB | 37.3 % |
+| Skia and the other C, C++ and Objective-C code | 4.70 MB | 21.5 % |
+| `core` | 1.91 MB | 8.7 % |
+| Anonymous data | 1.86 MB | 8.5 % |
+| `ferroui_controls` | 1.35 MB | 6.2 % |
+| `ferroui_themes_winui` (the compiled markup that is left after trimming) | 0.98 MB | 4.5 % |
+| `alloc` | 0.80 MB | 3.7 % |
+| `std` | 0.31 MB | 1.4 % |
+| `ferroui_native`, `ferroui_markup_xaml`, `ferroui_skia`, `hashbrown`, `smallvec` | 1.08 MB | 4.9 % |
+
+The mechanisms of section 5.4 in the 400 largest families of functions (10.96 MB):
+
+| Mechanism | Size | Instances | After #565 (section 5.4) |
+|---|---:|---:|---:|
+| Property code per value type: `EffectiveValue<T>`, the generic paths of `ValueStore`, the routes of `StyledProperty<T>` and `DirectProperty<T>`, `MetadataTable<T>` | 2.81 MB | 7,769 | 1.84 MB of routes and entries, counted more narrowly |
+| Drop glue (`drop_in_place`, `Rc::drop_slow`) | 0.93 MB | 4,903 | 2.86 MB |
+| Closures: `FnOnce::call_once` bodies and their shims | 0.76 MB | 8,606 | 2.69 MB |
+| Nullable operations, conversions and casts per type | 0.55 MB | 2,542 | 1.70 MB |
+| `AnyValue` per value type (`any_value_eq`, `type_id`) | 0.32 MB | 5,215 | 0.58 MB |
+| Observers per value type | 0.30 MB | 435 | 1.43 MB |
+| Class registration and vtables | 0.15 MB | 500 | 1.77 MB |
+| `IDisposable` adapters and subscriptions | 0.14 MB | 728 | 0.34 MB |
+
+The property code per value type is now the largest mechanism: 159 value types reach hello world,
+about 18 kB of code each. Its largest families:
+
+| Family | Size | Instances |
+|---|---:|---:|
+| `EffectiveValue<T>::set_and_raise_core` (1.2 to 4.0 kB a copy) | 0.44 MB | 232 |
+| `ValueStore::set_value`, `get_value`, `get_base_value`, `inherited_or_default`, `create_effective_value` | 0.44 MB | 149 to 233 each |
+| The routes of `StyledProperty<T>` (`route_get_value`, `route_set_value`, `route_set_current_value`, `route_set_local_value`, `route_copy_value` and nine smaller ones) | 0.60 MB | 159 each |
+| `EffectiveValueDyn` of `EffectiveValue<T>` (`raise_unset`, `apply_entry`, `remove_animation_and_raise`, `boxed_value`), `new`, the two notifications | 0.42 MB | 159 each |
+| `MetadataTable<T>::get` and `unregister` | 0.21 MB | 197 to 256 |
+
+What the smallest copy of `set_and_raise_core` is made of (290 instructions): nine checks of a
+borrow with their panic calls, seven places where a copy of the value is dropped, and the handling
+of a coerced value, which every copy carries though few properties have a coercion callback.
+`MetadataTable<T>::unregister` is reached only through the route of
+`FerroPropertyRegistry::unregister_by_module`, which no application calls, and is kept alive by the
+property's table of routes.
+
+The next steps for this mechanism, each measured with the property benchmarks of the gate: the
+handling of a coerced value leaves the set of every value type and is reached through the
+registration of the coercion callback, as the recoercion already is (section 4.4); the set takes
+the previous value out of its cell instead of copying it first; the parts of the generic paths of
+`ValueStore` that do not touch the value move into functions that are not generic.
+
 ## 6. The settings applications should use
 
 - `cargo run --profile fast-release -p <application>` to try an application with optimised code:
