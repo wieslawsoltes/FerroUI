@@ -6199,7 +6199,7 @@ fn build_controls_fluentcontrols_xaml_property_21() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_0: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_0: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_22() -> &'static ::ferroui_base::FerroProperty {
@@ -6207,7 +6207,7 @@ fn build_controls_fluentcontrols_xaml_property_22() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_1: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_1: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_23() -> &'static ::ferroui_base::FerroProperty {
@@ -6218,10 +6218,10 @@ fn build_controls_fluentcontrols_xaml_property_23() -> &'static ::ferroui_base::
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_2: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_3: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_3: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_4: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_4: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_5: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class("accent")];
@@ -6661,7 +6661,7 @@ fn build_controls_fluentcontrols_xaml_property_51() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_6: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Border")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_6: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Border")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_52() -> &'static ::ferroui_base::FerroProperty {
@@ -6669,13 +6669,13 @@ fn build_controls_fluentcontrols_xaml_property_52() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_7: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Border")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_7: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Border")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_8: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_9: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Root")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_9: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Root")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_53() -> &'static ::ferroui_base::FerroProperty {
@@ -6683,7 +6683,7 @@ fn build_controls_fluentcontrols_xaml_property_53() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_10: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Border")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_10: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Border")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_54() -> &'static ::ferroui_base::FerroProperty {
@@ -6697,7 +6697,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_11: &[rt::SelectorStep] = &[r
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_12: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":inactive")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_13: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":blackout"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_13: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":blackout"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter")];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_10`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_10_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -7321,7 +7321,7 @@ fn build_controls_fluentcontrols_xaml_deferred_23_value_1() -> ::ferroui_base::m
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_15: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::Viewbox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_15: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::Viewbox as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_70() -> &'static ::ferroui_base::FerroProperty {
@@ -7797,7 +7797,7 @@ fn build_controls_fluentcontrols_xaml_selector_value_0() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_16: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_103, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ScrollBarsSeparator")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_16: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_103, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ScrollBarsSeparator")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_104() -> &'static ::ferroui_base::FerroProperty {
@@ -7805,7 +7805,7 @@ fn build_controls_fluentcontrols_xaml_property_104() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_17: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_68, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ScrollContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_17: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_68, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ScrollContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_105() -> &'static ::ferroui_base::FerroProperty {
@@ -8240,16 +8240,16 @@ fn build_controls_fluentcontrols_xaml_deferred_50_value_3() -> ::ferroui_base::m
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_20: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":topleft"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ReversibleStackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Items")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_20: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":topleft"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ReversibleStackPanel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Items")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_21: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":topright"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ReversibleStackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Items")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_21: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":topright"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ReversibleStackPanel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Items")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_22: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":topcenter"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ReversibleStackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Items")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_22: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":topcenter"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ReversibleStackPanel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Items")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_23: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":bottomleft"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ReversibleStackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Items")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_23: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":bottomleft"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ReversibleStackPanel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Items")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_107() -> &'static ::ferroui_base::FerroProperty {
@@ -8257,10 +8257,10 @@ fn build_controls_fluentcontrols_xaml_property_107() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_24: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":bottomright"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ReversibleStackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Items")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_24: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":bottomright"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ReversibleStackPanel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Items")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_25: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":bottomcenter"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ReversibleStackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Items")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_25: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":bottomcenter"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ReversibleStackPanel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Items")];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_52`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_52_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -8445,16 +8445,16 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_42: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_26: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_26: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_27: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_27: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_28: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_28: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_29: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_29: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_58`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_58_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -8682,7 +8682,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_47: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_30: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HeaderPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_30: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_HeaderPresenter")];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_68`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_68_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -8769,10 +8769,10 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_49: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_31: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Border")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_31: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Border")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_32: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Border")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_32: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Border")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_119() -> &'static ::ferroui_base::FerroProperty {
@@ -8783,7 +8783,7 @@ fn build_controls_fluentcontrols_xaml_property_119() -> &'static ::ferroui_base:
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_33: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_119, value: build_controls_fluentcontrols_xaml_selector_value_0 }];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_34: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_119, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Label")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_34: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_119, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Label")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_120() -> &'static ::ferroui_base::FerroProperty {
@@ -8804,7 +8804,7 @@ fn build_controls_fluentcontrols_xaml_selector_value_1() -> ::ferroui_base::Boxe
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_35: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_121, value: build_controls_fluentcontrols_xaml_selector_value_1 }];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_36: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_121, value: build_controls_fluentcontrols_xaml_selector_value_1 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_36: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_121, value: build_controls_fluentcontrols_xaml_selector_value_1 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_122() -> &'static ::ferroui_base::FerroProperty {
@@ -8812,10 +8812,10 @@ fn build_controls_fluentcontrols_xaml_property_122() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_37: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_121, value: build_controls_fluentcontrols_xaml_selector_value_1 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_IconPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_37: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_121, value: build_controls_fluentcontrols_xaml_selector_value_1 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_IconPresenter")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_38: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_121, value: build_controls_fluentcontrols_xaml_selector_value_1 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Label")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_38: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_121, value: build_controls_fluentcontrols_xaml_selector_value_1 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Label")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_123() -> &'static ::ferroui_base::FerroProperty {
@@ -8826,7 +8826,7 @@ fn build_controls_fluentcontrols_xaml_property_123() -> &'static ::ferroui_base:
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_39: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_123, value: build_controls_fluentcontrols_xaml_selector_value_0 }];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_40: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_123, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_40: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_123, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_124() -> &'static ::ferroui_base::FerroProperty {
@@ -8834,10 +8834,10 @@ fn build_controls_fluentcontrols_xaml_property_124() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_41: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_123, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_IconPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_41: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_123, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_IconPresenter")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_42: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_123, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Label")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_42: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_123, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Label")];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_72`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_72_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -9072,7 +9072,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_51: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_43: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Border")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_43: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Border")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_126() -> &'static ::ferroui_base::FerroProperty {
@@ -9083,7 +9083,7 @@ fn build_controls_fluentcontrols_xaml_property_126() -> &'static ::ferroui_base:
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_44: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_126, value: build_controls_fluentcontrols_xaml_selector_value_0 }];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_45: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_126, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Label")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_45: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_126, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Label")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_127() -> &'static ::ferroui_base::FerroProperty {
@@ -9094,13 +9094,13 @@ fn build_controls_fluentcontrols_xaml_property_127() -> &'static ::ferroui_base:
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_46: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_127, value: build_controls_fluentcontrols_xaml_selector_value_1 }];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_47: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_127, value: build_controls_fluentcontrols_xaml_selector_value_1 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_47: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_127, value: build_controls_fluentcontrols_xaml_selector_value_1 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_48: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_127, value: build_controls_fluentcontrols_xaml_selector_value_1 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_IconPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_48: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_127, value: build_controls_fluentcontrols_xaml_selector_value_1 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_IconPresenter")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_49: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_127, value: build_controls_fluentcontrols_xaml_selector_value_1 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Label")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_49: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_127, value: build_controls_fluentcontrols_xaml_selector_value_1 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Label")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_128() -> &'static ::ferroui_base::FerroProperty {
@@ -9111,13 +9111,13 @@ fn build_controls_fluentcontrols_xaml_property_128() -> &'static ::ferroui_base:
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_50: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_128, value: build_controls_fluentcontrols_xaml_selector_value_0 }];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_51: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_128, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_51: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_128, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_52: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_128, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_IconPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_52: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_128, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_IconPresenter")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_53: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_128, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Label")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_53: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_128, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Label")];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_74`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_74_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -9537,7 +9537,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_59: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_55: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneButton")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_55: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneButton")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_146() -> &'static ::ferroui_base::FerroProperty {
@@ -9545,10 +9545,10 @@ fn build_controls_fluentcontrols_xaml_property_146() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_56: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-bottom"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TopBar")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_56: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-bottom"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TopBar")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_57: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-bottom"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_BottomBar")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_57: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-bottom"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_BottomBar")];
 
 /// The value of a property selector of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_selector_value_2() -> ::ferroui_base::BoxedValue {
@@ -9556,7 +9556,7 @@ fn build_controls_fluentcontrols_xaml_selector_value_2() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_58: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-bottom"), rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_134, value: build_controls_fluentcontrols_xaml_selector_value_2 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_BottomBar")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_58: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-bottom"), rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_134, value: build_controls_fluentcontrols_xaml_selector_value_2 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_BottomBar")];
 
 /// The value of a property selector of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_selector_value_3() -> ::ferroui_base::BoxedValue {
@@ -9564,13 +9564,13 @@ fn build_controls_fluentcontrols_xaml_selector_value_3() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_59: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-bottom"), rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_134, value: build_controls_fluentcontrols_xaml_selector_value_3 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_BottomBar")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_59: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-bottom"), rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_134, value: build_controls_fluentcontrols_xaml_selector_value_3 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_BottomBar")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_60: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-bottom"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_CompactPaneToggle")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_60: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-bottom"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_CompactPaneToggle")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_61: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-top"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_CompactPaneToggle")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_61: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-top"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_CompactPaneToggle")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_147() -> &'static ::ferroui_base::FerroProperty {
@@ -9583,7 +9583,7 @@ fn build_controls_fluentcontrols_xaml_selector_value_4() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_62: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_147, value: build_controls_fluentcontrols_xaml_selector_value_4 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TopBar")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_62: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_147, value: build_controls_fluentcontrols_xaml_selector_value_4 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TopBar")];
 
 /// The value of a property selector of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_selector_value_5() -> ::ferroui_base::BoxedValue {
@@ -9591,22 +9591,22 @@ fn build_controls_fluentcontrols_xaml_selector_value_5() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_63: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_147, value: build_controls_fluentcontrols_xaml_selector_value_5 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TopBar")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_63: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_147, value: build_controls_fluentcontrols_xaml_selector_value_5 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TopBar")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_64: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":detail-is-navpage"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TopBar")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_64: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":detail-is-navpage"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TopBar")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_65: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_134, value: build_controls_fluentcontrols_xaml_selector_value_2 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TopBar")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_65: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_134, value: build_controls_fluentcontrols_xaml_selector_value_2 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TopBar")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_66: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_134, value: build_controls_fluentcontrols_xaml_selector_value_2 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_CompactPaneToggle")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_66: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_134, value: build_controls_fluentcontrols_xaml_selector_value_2 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_CompactPaneToggle")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_67: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_134, value: build_controls_fluentcontrols_xaml_selector_value_3 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TopBar")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_67: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_134, value: build_controls_fluentcontrols_xaml_selector_value_3 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TopBar")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_68: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_134, value: build_controls_fluentcontrols_xaml_selector_value_3 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_CompactPaneToggle")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_68: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_134, value: build_controls_fluentcontrols_xaml_selector_value_3 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_CompactPaneToggle")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_148() -> &'static ::ferroui_base::FerroProperty {
@@ -9614,10 +9614,10 @@ fn build_controls_fluentcontrols_xaml_property_148() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_69: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_148, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TopBar")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_69: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_148, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TopBar")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_70: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":detail-is-navpage"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_CompactPaneToggle")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_70: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":detail-is-navpage"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_CompactPaneToggle")];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_84`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_84_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -9800,13 +9800,13 @@ fn build_controls_fluentcontrols_xaml_property_150() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_71: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_NavigationBar")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_71: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_NavigationBar")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_72: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":nav-bar-inset"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_NavBarSpacer")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_72: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":nav-bar-inset"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_NavBarSpacer")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_73: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":nav-bar-compact"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TopCommandBar"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::CommandBar as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_73: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":nav-bar-compact"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TopCommandBar"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::CommandBar as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_151() -> &'static ::ferroui_base::FerroProperty {
@@ -9940,7 +9940,7 @@ fn build_controls_fluentcontrols_xaml_selector_value_7() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_74: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_152, value: build_controls_fluentcontrols_xaml_selector_value_6 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ItemsPresenter"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::primitives::UniformGrid as ::ferroui_base::StaticType>::TYPE)], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_152, value: build_controls_fluentcontrols_xaml_selector_value_7 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ItemsPresenter"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::primitives::UniformGrid as ::ferroui_base::StaticType>::TYPE)]] }];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_74: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_152, value: build_controls_fluentcontrols_xaml_selector_value_6 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ItemsPresenter"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::primitives::UniformGrid as ::ferroui_base::ObjectType>::IDENTITY)], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_152, value: build_controls_fluentcontrols_xaml_selector_value_7 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ItemsPresenter"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::primitives::UniformGrid as ::ferroui_base::ObjectType>::IDENTITY)]] }];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_153() -> &'static ::ferroui_base::FerroProperty {
@@ -10008,7 +10008,7 @@ fn build_controls_fluentcontrols_xaml_property_156() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_75: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SelectedPipe")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_75: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_157() -> &'static ::ferroui_base::FerroProperty {
@@ -10021,7 +10021,7 @@ fn build_controls_fluentcontrols_xaml_selector_value_8() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_76: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_8 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SelectedPipe")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_76: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_8 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")];
 
 /// The value of a property selector of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_selector_value_9() -> ::ferroui_base::BoxedValue {
@@ -10029,7 +10029,7 @@ fn build_controls_fluentcontrols_xaml_selector_value_9() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_77: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_9 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SelectedPipe")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_77: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_9 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")];
 
 /// The value of a property selector of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_selector_value_10() -> ::ferroui_base::BoxedValue {
@@ -10040,7 +10040,7 @@ fn build_controls_fluentcontrols_xaml_selector_value_10() -> ::ferroui_base::Box
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_78: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_10 }];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_79: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_10 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SelectedPipe")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_79: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_10 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")];
 
 /// The value of a property selector of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_selector_value_11() -> ::ferroui_base::BoxedValue {
@@ -10051,25 +10051,25 @@ fn build_controls_fluentcontrols_xaml_selector_value_11() -> ::ferroui_base::Box
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_80: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_11 }];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_81: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_11 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SelectedPipe")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_81: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_11 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_82: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_82: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_83: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_83: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_84: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_84: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_85: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_85: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_86: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_86: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_87: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":focus-visible"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_87: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":focus-visible"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot")];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_108`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_108_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -10332,10 +10332,10 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_67: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_88: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("RootBorder")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_88: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("RootBorder")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_89: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("OuterEllipse")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_89: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("OuterEllipse")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_158() -> &'static ::ferroui_base::FerroProperty {
@@ -10343,43 +10343,43 @@ fn build_controls_fluentcontrols_xaml_property_158() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_90: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckOuterEllipse")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_90: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("CheckOuterEllipse")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_91: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_91: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("CheckGlyph")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_92: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("RootBorder")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_92: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("RootBorder")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_93: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("OuterEllipse")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_93: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("OuterEllipse")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_94: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckOuterEllipse")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_94: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("CheckOuterEllipse")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_95: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_95: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("CheckGlyph")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_96: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("RootBorder")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_96: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("RootBorder")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_97: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("OuterEllipse")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_97: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("OuterEllipse")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_98: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckOuterEllipse")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_98: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("CheckOuterEllipse")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_99: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_99: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("CheckGlyph")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_100: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_100: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("CheckGlyph")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_101: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("OuterEllipse")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_101: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("OuterEllipse")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_102: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckOuterEllipse")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_102: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("CheckOuterEllipse")];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_115`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_115_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -10620,7 +10620,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_69: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_103: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevron")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_103: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ExpandCollapseChevron")];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_119`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_119_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -10766,13 +10766,13 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_73: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_104: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderHeader"), rt::SelectorStep::Class(":pressed")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_104: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ExpanderHeader"), rt::SelectorStep::Class(":pressed")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_105: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":left"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderHeader")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderHeader")]] }];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_105: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":left"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ExpanderHeader")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ExpanderHeader")]] }];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_106: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderHeader")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_106: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ExpanderHeader")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_161() -> &'static ::ferroui_base::FerroProperty {
@@ -10780,43 +10780,43 @@ fn build_controls_fluentcontrols_xaml_property_161() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_107: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":expanded")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderHeader")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_107: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":expanded")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ExpanderHeader")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_108: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded"), rt::SelectorStep::Class(":up"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderHeader")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_108: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded"), rt::SelectorStep::Class(":up"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ExpanderHeader")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_109: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded"), rt::SelectorStep::Class(":up"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderContent")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_109: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded"), rt::SelectorStep::Class(":up"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ExpanderContent")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_110: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded"), rt::SelectorStep::Class(":down"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderHeader")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_110: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded"), rt::SelectorStep::Class(":down"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ExpanderHeader")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_111: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded"), rt::SelectorStep::Class(":down"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderContent")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_111: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded"), rt::SelectorStep::Class(":down"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ExpanderContent")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_112: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded"), rt::SelectorStep::Class(":left"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderHeader")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_112: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded"), rt::SelectorStep::Class(":left"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ExpanderHeader")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_113: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded"), rt::SelectorStep::Class(":left"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderContent")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_113: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded"), rt::SelectorStep::Class(":left"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ExpanderContent")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_114: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded"), rt::SelectorStep::Class(":right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderHeader")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_114: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded"), rt::SelectorStep::Class(":right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ExpanderHeader")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_115: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded"), rt::SelectorStep::Class(":right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderContent")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_115: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded"), rt::SelectorStep::Class(":right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ExpanderContent")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_116: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":left"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderHeader")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_116: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":left"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ExpanderHeader")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_117: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":up"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderHeader")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_117: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":up"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ExpanderHeader")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_118: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderHeader")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_118: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ExpanderHeader")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_119: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":down"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderHeader")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_119: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":down"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ExpanderHeader")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_162() -> &'static ::ferroui_base::FerroProperty {
@@ -10824,16 +10824,16 @@ fn build_controls_fluentcontrols_xaml_property_162() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_120: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":left"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderContent")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_120: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":left"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ExpanderContent")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_121: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":up"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderContent")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_121: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":up"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ExpanderContent")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_122: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderContent")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_122: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ExpanderContent")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_123: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":down"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderContent")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_123: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":down"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ExpanderContent")];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_123`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_123_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -11348,10 +11348,10 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_83: &[rt::TemplateBindingRow]
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_124: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":left")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_125: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SpinnerPanel")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_125: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SpinnerPanel")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_126: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_126: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_127: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":error")];
@@ -11592,25 +11592,25 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_88: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_128: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Background")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_128: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Background")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_129: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Background")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_129: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Background")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_130: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_131: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Background")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_131: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Background")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_132: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Button")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_132: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Button")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_133: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":focus-within"), rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::CalendarDatePicker as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":focus")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Background")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_133: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":focus-within"), rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::CalendarDatePicker as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Class(":focus")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Background")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_134: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":error"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Background")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_134: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":error"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Background")];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_138`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_138_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -11790,19 +11790,19 @@ fn build_controls_fluentcontrols_xaml_property_183() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_135: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_135: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_136: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_136: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_137: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":hasweeknumbers")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_138: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ElementWeekNumberLabels")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_138: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ElementWeekNumberLabels")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_139: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::ContentControl as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_139: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::ContentControl as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_142`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_142_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -11899,16 +11899,16 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_91: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_140: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Border")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_140: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Border")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_141: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("NormalRectangle")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_141: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("NormalRectangle")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_142: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_142: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("CheckGlyph")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_143: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_143: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter")];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_146`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_146_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -12802,7 +12802,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_102: &[rt::TemplateBindingRow
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_145: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":focus")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_145: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":focus")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter")];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_155`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_155_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -12906,13 +12906,13 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_103: &[rt::TemplateBindingRow
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_146: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_146: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_147: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot"), rt::SelectorStep::Class(":pointerover")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_147: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot"), rt::SelectorStep::Class(":pointerover")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_148: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HeaderPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_148: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_HeaderPresenter")];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_157`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_157_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -13045,37 +13045,37 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_105: &[rt::TemplateBindingRow
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_149: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":icon"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ContentControl as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_IconPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_149: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":icon"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ContentControl as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_IconPresenter")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_150: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_InputGestureText")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_150: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_InputGestureText")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_151: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ChevronPath")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_151: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ChevronPath")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_152: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_InputGestureText")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_152: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_InputGestureText")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_153: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ChevronPath")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_153: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ChevronPath")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_154: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ChevronPath")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_154: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ChevronPath")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_155: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":empty"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ChevronPath")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_155: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":empty"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ChevronPath")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_156: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":separator")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_157: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Image as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ToggleIconImage")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_157: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Image as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ToggleIconImage")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_158: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ContentControl as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ToggleIconPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_158: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ContentControl as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ToggleIconPresenter")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_159: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Class(":radio"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ContentControl as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ToggleIconPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_159: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Class(":radio"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ContentControl as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ToggleIconPresenter")];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_163`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_163_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -13486,34 +13486,34 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_263_THEME: rt::ControlThemeTa
 };
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_160: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Pip")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_160: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Pip")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_161: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PipBackground")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_161: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PipBackground")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_162: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Pip")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_162: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Pip")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_163: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PipBackground")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_163: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PipBackground")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_164: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Pip")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_164: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Pip")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_165: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PipBackground")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_165: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PipBackground")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_166: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Pip")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_166: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Pip")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_167: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PipBackground")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_167: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PipBackground")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_168: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Pip")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_168: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Pip")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_169: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PipBackground")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_169: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PipBackground")];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_264`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_264_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -13689,28 +13689,28 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_111: &[rt::TemplateBindingRow
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_170: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":horizontal"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_RootPanel")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_170: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":horizontal"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_RootPanel")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_171: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":vertical"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ListBox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_171: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":vertical"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ListBox as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::ListBoxItem as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_172: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":vertical"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_RootPanel")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_172: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":vertical"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_RootPanel")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_173: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":vertical"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PreviousButton"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::PathIcon as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PreviousButtonIcon")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_173: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":vertical"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PreviousButton"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::PathIcon as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PreviousButtonIcon")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_174: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":vertical"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_NextButton"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::PathIcon as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("NextButtonIcon")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_174: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":vertical"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_NextButton"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::PathIcon as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("NextButtonIcon")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_175: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":first-page"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PreviousButton")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_175: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":first-page"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PreviousButton")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_176: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":last-page"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_NextButton")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_176: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":last-page"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_NextButton")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_177: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PreviousButton"), rt::SelectorStep::Class(":pressed")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_177: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PreviousButton"), rt::SelectorStep::Class(":pressed")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_197() -> &'static ::ferroui_base::FerroProperty {
@@ -13718,7 +13718,7 @@ fn build_controls_fluentcontrols_xaml_property_197() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_178: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_NextButton"), rt::SelectorStep::Class(":pressed")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_178: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_NextButton"), rt::SelectorStep::Class(":pressed")];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_266`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_266_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -13885,13 +13885,13 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_112: &[rt::TemplateBindingRow
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_179: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_179: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_180: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_180: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_181: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_181: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_271`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_271_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -14162,13 +14162,13 @@ fn build_controls_fluentcontrols_xaml_property_208() -> &'static ::ferroui_base:
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_184: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_208, value: build_controls_fluentcontrols_xaml_selector_value_0 }];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_185: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Root")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_185: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Root")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_186: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("TrackRect")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_186: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("TrackRect")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_187: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::Thumb as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_187: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::Thumb as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_277`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_277_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -14280,7 +14280,7 @@ fn build_controls_fluentcontrols_xaml_selector_value_12() -> ::ferroui_base::Box
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_188: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_161, value: build_controls_fluentcontrols_xaml_selector_value_12 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_188: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_161, value: build_controls_fluentcontrols_xaml_selector_value_12 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// The value of a property selector of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_selector_value_13() -> ::ferroui_base::BoxedValue {
@@ -14296,7 +14296,7 @@ fn build_controls_fluentcontrols_xaml_selector_value_14() -> ::ferroui_base::Box
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_190: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_161, value: build_controls_fluentcontrols_xaml_selector_value_14 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_190: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_161, value: build_controls_fluentcontrols_xaml_selector_value_14 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_283`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_283_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -14465,13 +14465,13 @@ fn build_controls_fluentcontrols_xaml_property_211() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_191: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":flyout-open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_191: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":flyout-open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_192: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_192: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_193: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Class(":flyout-open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_193: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Class(":flyout-open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_285`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_285_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -14551,7 +14551,7 @@ fn build_controls_fluentcontrols_xaml_property_212() -> &'static ::ferroui_base:
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_194: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":overlay")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_195: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_195: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_213() -> &'static ::ferroui_base::FerroProperty {
@@ -14559,7 +14559,7 @@ fn build_controls_fluentcontrols_xaml_property_213() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_196: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentRoot")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_196: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ContentRoot")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_197: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactinline")];
@@ -14585,37 +14585,37 @@ fn build_controls_fluentcontrols_xaml_property_214() -> &'static ::ferroui_base:
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_202: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":bottom")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_203: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":left"), rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_203: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":left"), rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_204: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":right"), rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_204: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":right"), rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_205: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":left"), rt::SelectorStep::Class(":closed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_205: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":left"), rt::SelectorStep::Class(":closed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_206: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":right"), rt::SelectorStep::Class(":closed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_206: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":right"), rt::SelectorStep::Class(":closed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_207: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":top"), rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_207: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":top"), rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_208: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":bottom"), rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_208: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":bottom"), rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_209: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":top"), rt::SelectorStep::Class(":closed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_209: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":top"), rt::SelectorStep::Class(":closed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_210: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":bottom"), rt::SelectorStep::Class(":closed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneRoot")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_210: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":bottom"), rt::SelectorStep::Class(":closed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_211: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":lightDismiss"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LightDismissLayer")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_211: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":lightDismiss"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("LightDismissLayer")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_212: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":overlay"), rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LightDismissLayer")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_212: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":overlay"), rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("LightDismissLayer")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_213: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactoverlay"), rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LightDismissLayer")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_213: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactoverlay"), rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("LightDismissLayer")];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_288`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_288_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -15964,7 +15964,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_128: &[rt::TemplateBindingRow
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_214: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_152, value: build_controls_fluentcontrols_xaml_selector_value_6 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ItemsPresenter"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::WrapPanel as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_214: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_152, value: build_controls_fluentcontrols_xaml_selector_value_6 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ItemsPresenter"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::WrapPanel as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_217() -> &'static ::ferroui_base::FerroProperty {
@@ -15972,7 +15972,7 @@ fn build_controls_fluentcontrols_xaml_property_217() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_215: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_152, value: build_controls_fluentcontrols_xaml_selector_value_7 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ItemsPresenter"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::WrapPanel as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_215: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_152, value: build_controls_fluentcontrols_xaml_selector_value_7 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ItemsPresenter"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::WrapPanel as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// The value of a property selector of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_selector_value_15() -> ::ferroui_base::BoxedValue {
@@ -15980,7 +15980,7 @@ fn build_controls_fluentcontrols_xaml_selector_value_15() -> ::ferroui_base::Box
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_216: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_152, value: build_controls_fluentcontrols_xaml_selector_value_15 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ItemsPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_216: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_152, value: build_controls_fluentcontrols_xaml_selector_value_15 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ItemsPresenter")];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_293`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -16047,22 +16047,22 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_130: &[rt::TemplateBindingRow
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_217: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SelectedPipe")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_217: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_218: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_11 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SelectedPipe")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_218: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_11 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_219: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_11 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_219: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_11 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_220: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_8 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SelectedPipe")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_9 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SelectedPipe")]] }];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_220: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_8 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_9 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")]] }];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_221: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_10 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SelectedPipe")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_221: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_10 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_222: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_10 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_222: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_10 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter")];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_295`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_295_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -16276,7 +16276,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_131: &[rt::TemplateBindingRow
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_223: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_68, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::DockPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentPanel")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_223: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_68, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::DockPanel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ContentPanel")];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_297`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_297_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -16450,7 +16450,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_137: &[rt::TemplateBindingRow
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_224: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Border")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_224: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Border")];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_306`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_306_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -16710,7 +16710,7 @@ fn build_controls_fluentcontrols_xaml_deferred_315_value_0(
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_225: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE)], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":indeterminate"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE)]] }];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_225: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY)], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":indeterminate"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY)]] }];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_317`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_317_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -16946,19 +16946,19 @@ fn build_controls_fluentcontrols_xaml_property_250() -> &'static ::ferroui_base:
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_226: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":touch-mode")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_227: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_BorderElement")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_227: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_BorderElement")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_228: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":focus")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_229: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":error"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_BorderElement")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_229: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":error"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_BorderElement")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_230: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_FloatingPlaceholder")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_230: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_FloatingPlaceholder")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_231: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_165, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":empty")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_FloatingPlaceholder")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_231: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_165, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":empty")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_FloatingPlaceholder")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_251() -> &'static ::ferroui_base::FerroProperty {
@@ -16971,7 +16971,7 @@ fn build_controls_fluentcontrols_xaml_selector_value_16() -> ::ferroui_base::Box
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_232: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class("revealPasswordButton"), rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_251, value: build_controls_fluentcontrols_xaml_selector_value_16 }, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_79, value: build_controls_fluentcontrols_xaml_selector_value_16 }, rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":empty")] }];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_232: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class("revealPasswordButton"), rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_251, value: build_controls_fluentcontrols_xaml_selector_value_16 }, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_79, value: build_controls_fluentcontrols_xaml_selector_value_16 }, rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::TextBox as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Class(":empty")] }];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_252() -> &'static ::ferroui_base::FerroProperty {
@@ -16979,7 +16979,7 @@ fn build_controls_fluentcontrols_xaml_property_252() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_233: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class("clearButton"), rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_251, value: build_controls_fluentcontrols_xaml_selector_value_16 }, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_79, value: build_controls_fluentcontrols_xaml_selector_value_16 }, rt::SelectorStep::Class(":focus"), rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":empty")] }];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_233: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class("clearButton"), rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_251, value: build_controls_fluentcontrols_xaml_selector_value_16 }, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_79, value: build_controls_fluentcontrols_xaml_selector_value_16 }, rt::SelectorStep::Class(":focus"), rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::TextBox as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Class(":empty")] }];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_319`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_319_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -17190,85 +17190,85 @@ fn build_controls_fluentcontrols_xaml_property_253() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_234: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter"), rt::SelectorStep::Class(":empty")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_234: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter"), rt::SelectorStep::Class(":empty")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_235: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("OuterBorder")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_235: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("OuterBorder")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_236: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobOff")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_236: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchKnobOff")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_237: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobOn")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_237: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchKnobOn")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_238: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobBounds")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_238: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchKnobBounds")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_239: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchAreaGrid")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_239: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchAreaGrid")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_240: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("OuterBorder")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_240: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("OuterBorder")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_241: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobBounds")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_241: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchKnobBounds")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_242: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobOff")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_242: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchKnobOff")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_243: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobOn")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_243: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchKnobOn")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_244: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchAreaGrid")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_244: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchAreaGrid")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_245: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("OuterBorder")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_245: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("OuterBorder")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_246: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobOff")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_246: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchKnobOff")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_247: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobOn")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_247: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchKnobOn")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_248: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobBounds")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_248: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchKnobBounds")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_249: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("OuterBorder")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_249: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("OuterBorder")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_250: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobOff")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_250: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchKnobOff")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_251: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobBounds")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_251: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchKnobBounds")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_252: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobOn")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_252: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchKnobOn")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_253: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_OffContentPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_253: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_OffContentPresenter")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_254: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_OnContentPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_254: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_OnContentPresenter")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_255: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":unchecked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("OuterBorder")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_255: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":unchecked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("OuterBorder")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_256: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":unchecked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobOff")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_256: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":unchecked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchKnobOff")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_257: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":unchecked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobOn")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_257: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":unchecked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchKnobOn")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_258: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":unchecked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobBounds")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_258: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":unchecked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchKnobBounds")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_259: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":unchecked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_OffContentPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_259: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":unchecked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_OffContentPresenter")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_260: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":unchecked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_OnContentPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_260: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":unchecked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_OnContentPresenter")];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_323`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_323_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -17658,7 +17658,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_149: &[rt::TemplateBindingRow
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_262: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ChevronPath")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_262: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ChevronPath")];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_329`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_329_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -17715,46 +17715,46 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_152: &[rt::TemplateBindingRow
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_263: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot"), rt::SelectorStep::Class(":pointerover")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_263: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot"), rt::SelectorStep::Class(":pointerover")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_264: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HeaderPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_264: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_HeaderPresenter")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_265: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HeaderPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_265: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_HeaderPresenter")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_266: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HeaderPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_266: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_HeaderPresenter")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_267: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_267: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_268: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HeaderPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_268: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_HeaderPresenter")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_269: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot"), rt::SelectorStep::Class(":pointerover")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_269: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot"), rt::SelectorStep::Class(":pointerover")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_270: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HeaderPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_270: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_HeaderPresenter")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_271: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot"), rt::SelectorStep::Class(":pointerover")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_271: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot"), rt::SelectorStep::Class(":pointerover")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_272: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HeaderPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_272: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_HeaderPresenter")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_273: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_273: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_274: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HeaderPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_274: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_HeaderPresenter")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_275: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":empty"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ExpandCollapseChevron")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_275: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":empty"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ExpandCollapseChevron")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_276: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":empty"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ExpandCollapseChevronContainer")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_276: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":empty"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ExpandCollapseChevronContainer")];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_331`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_331_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -18032,10 +18032,10 @@ fn build_controls_fluentcontrols_xaml_property_263() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_277: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":has-shadow"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_UnderlayWrapper")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_277: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":has-shadow"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_UnderlayWrapper")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_278: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":has-shadow"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_WindowBorder")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_278: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":has-shadow"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_WindowBorder")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_264() -> &'static ::ferroui_base::FerroProperty {
@@ -18043,55 +18043,55 @@ fn build_controls_fluentcontrols_xaml_property_264() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_279: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":has-shadow"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_OverlayWrapper")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_279: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":has-shadow"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_OverlayWrapper")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_280: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":has-border"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TitleTextPanel")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_280: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":has-border"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TitleTextPanel")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_281: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":has-border"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TitleBar")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_281: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":has-border"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TitleBar")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_282: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":has-border"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_OverlayPanel")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_282: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":has-border"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_OverlayPanel")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_283: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":maximized"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("RestoreButtonPath")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_283: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":maximized"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("RestoreButtonPath")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_284: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":disabled")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_284: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Class(":disabled")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_285: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-minimize")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_MinimizeButton")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_285: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-minimize")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_MinimizeButton")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_286: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-maximize")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_MaximizeButton")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_286: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-maximize")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_MaximizeButton")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_287: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-fullscreen")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_FullScreenButton")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_287: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-fullscreen")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_FullScreenButton")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_288: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-fullscreen")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PopoverFullScreenButton")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_288: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-fullscreen")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PopoverFullScreenButton")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_289: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-close")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_CloseButton")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_289: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-close")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_CloseButton")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_290: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-close")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PopoverCloseButton")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_290: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-close")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PopoverCloseButton")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_291: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-title")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TitleTextPanel")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_291: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-title")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TitleTextPanel")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_292: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-title")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PopoverTitleText")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_292: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":has-title")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PopoverTitleText")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_293: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":fullscreen"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TitleTextPanel")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_293: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":fullscreen"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TitleTextPanel")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_294: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":fullscreen"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_OverlayPanel")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_294: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":fullscreen"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_OverlayPanel")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_295: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":fullscreen"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TitleBar")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_295: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":fullscreen"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TitleBar")];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_337`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -18397,19 +18397,19 @@ fn build_controls_fluentcontrols_xaml_property_270() -> &'static ::ferroui_base:
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_296: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":focus"), rt::SelectorStep::Class(":pressed")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_297: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ContentControl as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_297: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ContentControl as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ContentPresenter")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_298: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PlaceholderTextBlock")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_298: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PlaceholderTextBlock")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_299: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::PathIcon as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("DropDownGlyph")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_299: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::PathIcon as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("DropDownGlyph")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_300: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":focus-visible")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_301: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("HighlightBackground")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_301: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("HighlightBackground")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_271() -> &'static ::ferroui_base::FerroProperty {
@@ -18766,7 +18766,7 @@ fn build_controls_fluentcontrols_xaml_deferred_348_value_0(
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_303: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PressedBackground")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_303: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PressedBackground")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_304: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class("MonthItem")];
@@ -19052,16 +19052,16 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_168: &[rt::TemplateBindingRow
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_305: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_305: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_306: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_FlyoutButton"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_306: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_FlyoutButton"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_307: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":hasnodate"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_FlyoutButton"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_307: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":hasnodate"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_FlyoutButton"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_308: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":error"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_FlyoutButton")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_308: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":error"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_FlyoutButton")];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_360`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_360_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -19144,10 +19144,10 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_169: &[rt::TemplateBindingRow
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_309: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_309: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_310: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_310: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_362`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_362_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -19258,7 +19258,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_171: &[rt::TemplateBindingRow
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_311: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":hasnotime"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_FlyoutButton"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_311: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":hasnotime"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_FlyoutButton"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_366`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_366_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -19391,13 +19391,13 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_174: &[rt::TemplateBindingRow
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_312: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::PathIcon as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("DropDownGlyph")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_312: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::PathIcon as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("DropDownGlyph")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_313: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::PathIcon as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("DropDownGlyph")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_313: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::PathIcon as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("DropDownGlyph")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_314: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::PathIcon as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("DropDownGlyph")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_314: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::PathIcon as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("DropDownGlyph")];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_370`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_370_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -19677,10 +19677,10 @@ fn build_controls_fluentcontrols_xaml_selector_value_18() -> ::ferroui_base::Box
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_315: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_283, value: build_controls_fluentcontrols_xaml_selector_value_17 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LeftTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_283, value: build_controls_fluentcontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LeftTickBar")]] }];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_315: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_283, value: build_controls_fluentcontrols_xaml_selector_value_17 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("LeftTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_283, value: build_controls_fluentcontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("LeftTickBar")]] }];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_316: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_283, value: build_controls_fluentcontrols_xaml_selector_value_17 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("TopTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_283, value: build_controls_fluentcontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("TopTickBar")]] }];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_316: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_283, value: build_controls_fluentcontrols_xaml_selector_value_17 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("TopTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_283, value: build_controls_fluentcontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("TopTickBar")]] }];
 
 /// The value of a property selector of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_selector_value_19() -> ::ferroui_base::BoxedValue {
@@ -19688,22 +19688,22 @@ fn build_controls_fluentcontrols_xaml_selector_value_19() -> ::ferroui_base::Box
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_317: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_283, value: build_controls_fluentcontrols_xaml_selector_value_19 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("BottomTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_283, value: build_controls_fluentcontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("BottomTickBar")]] }];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_317: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_283, value: build_controls_fluentcontrols_xaml_selector_value_19 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("BottomTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_283, value: build_controls_fluentcontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("BottomTickBar")]] }];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_318: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_283, value: build_controls_fluentcontrols_xaml_selector_value_19 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("RightTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_283, value: build_controls_fluentcontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("RightTickBar")]] }];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_318: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_283, value: build_controls_fluentcontrols_xaml_selector_value_19 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("RightTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_283, value: build_controls_fluentcontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("RightTickBar")]] }];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_319: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SliderContainer")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_319: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SliderContainer")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_320: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_IncreaseButton")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_320: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_IncreaseButton")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_321: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_DecreaseButton")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_321: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_DecreaseButton")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_322: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_322: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_284() -> &'static ::ferroui_base::FerroProperty {
@@ -20025,7 +20025,7 @@ fn build_controls_fluentcontrols_xaml_deferred_395_value_0(
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_324: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":caret"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Image as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HandlePathIcon")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_324: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":caret"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Image as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_HandlePathIcon")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_286() -> &'static ::ferroui_base::FerroProperty {
@@ -20033,16 +20033,16 @@ fn build_controls_fluentcontrols_xaml_property_286() -> &'static ::ferroui_base:
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_325: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":start"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Image as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HandlePathIcon")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_325: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":start"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Image as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_HandlePathIcon")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_326: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":caret"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Indicator")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_326: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":caret"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Indicator")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_327: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":end"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Indicator")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_327: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":end"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Indicator")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_328: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":start"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Indicator")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_328: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":start"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Indicator")];
 
 /// The control theme built by `build_controls_fluentcontrols_xaml_deferred_400`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_400_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -21387,7 +21387,7 @@ fn build_controls_fluentcontrols_xaml_deferred_27(
     let selector_0 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_1 = ::ferroui_base::styling::Selectors::property_equals_untyped(::core::option::Option::Some(selector_0), rt::property(::ferroui_controls::NotificationCard::is_closing_property()), ::std::rc::Rc::new(::core::clone::Clone::clone(&true)));
     let selector_2 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_1));
-    let selector_3 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_2), <::ferroui_controls::LayoutTransformControl as ::ferroui_base::StaticType>::TYPE);
+    let selector_3 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_2), <::ferroui_controls::LayoutTransformControl as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_4 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_3), "PART_LayoutTransformControl");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_4.clone()));
     // Controls/FluentControls.xaml(59,10) Animations
@@ -21523,7 +21523,7 @@ fn build_controls_fluentcontrols_xaml_deferred_27(
     let selector_7 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_8 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_7), ":information");
     let selector_9 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_8));
-    let selector_10 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_9), <::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE);
+    let selector_10 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_9), <::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_11 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_10), "PART_HeaderBar");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_2, ::core::option::Option::Some(selector_11.clone()));
     // Controls/FluentControls.xaml(87,8) Content
@@ -21539,7 +21539,7 @@ fn build_controls_fluentcontrols_xaml_deferred_27(
     let selector_12 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_13 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_12), ":success");
     let selector_14 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_13));
-    let selector_15 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_14), <::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE);
+    let selector_15 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_14), <::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_16 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_15), "PART_HeaderBar");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_3, ::core::option::Option::Some(selector_16.clone()));
     // Controls/FluentControls.xaml(90,8) Content
@@ -21555,7 +21555,7 @@ fn build_controls_fluentcontrols_xaml_deferred_27(
     let selector_17 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_18 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_17), ":warning");
     let selector_19 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_18));
-    let selector_20 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_19), <::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE);
+    let selector_20 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_19), <::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_21 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_20), "PART_HeaderBar");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_4, ::core::option::Option::Some(selector_21.clone()));
     // Controls/FluentControls.xaml(93,8) Content
@@ -21571,7 +21571,7 @@ fn build_controls_fluentcontrols_xaml_deferred_27(
     let selector_22 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_23 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_22), ":error");
     let selector_24 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_23));
-    let selector_25 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_24), <::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE);
+    let selector_25 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_24), <::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_26 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_25), "PART_HeaderBar");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_5, ::core::option::Option::Some(selector_26.clone()));
     // Controls/FluentControls.xaml(96,8) Content
@@ -23922,10 +23922,10 @@ fn build_controls_fluentcontrols_xaml_deferred_85(
     // Controls/FluentControls.xaml(89,24) Style
     let style_0 = ::ferroui_base::styling::Style::new();
     // Controls/FluentControls.xaml(89,24) Selector
-    let selector_0 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_0 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_1 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_0), ":disabled");
     let selector_2 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_1));
-    let selector_3 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_2), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE);
+    let selector_3 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_2), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_4 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_3), "PART_ContentPresenter");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_4.clone()));
     // Controls/FluentControls.xaml(90,26) Content
@@ -24144,10 +24144,10 @@ fn build_controls_fluentcontrols_xaml_deferred_85(
     // Controls/FluentControls.xaml(137,24) Style
     let style_1 = ::ferroui_base::styling::Style::new();
     // Controls/FluentControls.xaml(137,24) Selector
-    let selector_5 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_5 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_6 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_5), ":disabled");
     let selector_7 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_6));
-    let selector_8 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_7), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE);
+    let selector_8 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_7), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_9 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_8), "PART_ContentPresenter");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_1, ::core::option::Option::Some(selector_9.clone()));
     // Controls/FluentControls.xaml(138,26) Content
@@ -24615,10 +24615,10 @@ fn build_controls_fluentcontrols_xaml_deferred_92(
     // Controls/FluentControls.xaml(87,18) Style
     let style_0 = ::ferroui_base::styling::Style::new();
     // Controls/FluentControls.xaml(87,18) Selector
-    let selector_0 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_0 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_1 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_0), "PART_BackButton");
     let selector_2 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_1));
-    let selector_3 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_2), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE);
+    let selector_3 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_2), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_4 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_3), "PART_ContentPresenter");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_4.clone()));
     // Controls/FluentControls.xaml(88,20) Content
@@ -24632,11 +24632,11 @@ fn build_controls_fluentcontrols_xaml_deferred_92(
     let style_1 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_1.clone()));
     // Controls/FluentControls.xaml(91,18) Selector
-    let selector_5 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_5 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_6 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_5), "PART_BackButton");
     let selector_7 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_6), ":pointerover");
     let selector_8 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_7));
-    let selector_9 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_8), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE);
+    let selector_9 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_8), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_10 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_9), "PART_ContentPresenter");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_1, ::core::option::Option::Some(selector_10.clone()));
     // Controls/FluentControls.xaml(92,20) Content
@@ -24650,11 +24650,11 @@ fn build_controls_fluentcontrols_xaml_deferred_92(
     let style_2 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_2.clone()));
     // Controls/FluentControls.xaml(94,18) Selector
-    let selector_11 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_11 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_12 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_11), "PART_BackButton");
     let selector_13 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_12), ":pressed");
     let selector_14 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_13));
-    let selector_15 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_14), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE);
+    let selector_15 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_14), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_16 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_15), "PART_ContentPresenter");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_2, ::core::option::Option::Some(selector_16.clone()));
     // Controls/FluentControls.xaml(95,20) Content
@@ -24667,7 +24667,7 @@ fn build_controls_fluentcontrols_xaml_deferred_92(
     // Controls/FluentControls.xaml(97,18) Style
     let style_3 = ::ferroui_base::styling::Style::new();
     // Controls/FluentControls.xaml(97,18) Selector
-    let selector_17 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_17 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_18 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_17), "PART_BackButton");
     let selector_19 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_18), ":disabled");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_3, ::core::option::Option::Some(selector_19.clone()));
@@ -24680,11 +24680,11 @@ fn build_controls_fluentcontrols_xaml_deferred_92(
     let style_4 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_4.clone()));
     // Controls/FluentControls.xaml(100,18) Selector
-    let selector_20 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_20 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_21 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_20), "PART_BackButton");
     let selector_22 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_21), ":focus-visible");
     let selector_23 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_22));
-    let selector_24 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_23), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE);
+    let selector_24 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_23), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_25 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_24), "PART_ContentPresenter");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_4, ::core::option::Option::Some(selector_25.clone()));
     // Controls/FluentControls.xaml(101,20) Content
@@ -24701,10 +24701,10 @@ fn build_controls_fluentcontrols_xaml_deferred_92(
     // Controls/FluentControls.xaml(105,18) Style
     let style_5 = ::ferroui_base::styling::Style::new();
     // Controls/FluentControls.xaml(105,18) Selector
-    let selector_26 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_26 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_27 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_26), ":disabled");
     let selector_28 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_27));
-    let selector_29 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_28), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE);
+    let selector_29 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_28), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_30 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_29), "PART_ContentPresenter");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_5, ::core::option::Option::Some(selector_30.clone()));
     // Controls/FluentControls.xaml(106,20) Content
@@ -24715,10 +24715,10 @@ fn build_controls_fluentcontrols_xaml_deferred_92(
     // Controls/FluentControls.xaml(108,18) Style
     let style_6 = ::ferroui_base::styling::Style::new();
     // Controls/FluentControls.xaml(108,18) Selector
-    let selector_31 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_31 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_32 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_31), "PART_OverflowButton");
     let selector_33 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_32));
-    let selector_34 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_33), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE);
+    let selector_34 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_33), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_35 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_34), "PART_ContentPresenter");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_6, ::core::option::Option::Some(selector_35.clone()));
     // Controls/FluentControls.xaml(109,20) Content
@@ -24732,11 +24732,11 @@ fn build_controls_fluentcontrols_xaml_deferred_92(
     let style_7 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_7.clone()));
     // Controls/FluentControls.xaml(112,18) Selector
-    let selector_36 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_36 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_37 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_36), "PART_OverflowButton");
     let selector_38 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_37), ":pointerover");
     let selector_39 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_38));
-    let selector_40 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_39), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE);
+    let selector_40 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_39), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_41 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_40), "PART_ContentPresenter");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_7, ::core::option::Option::Some(selector_41.clone()));
     // Controls/FluentControls.xaml(113,20) Content
@@ -24750,11 +24750,11 @@ fn build_controls_fluentcontrols_xaml_deferred_92(
     let style_8 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_8.clone()));
     // Controls/FluentControls.xaml(115,18) Selector
-    let selector_42 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_42 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_43 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_42), "PART_OverflowButton");
     let selector_44 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_43), ":pressed");
     let selector_45 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_44));
-    let selector_46 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_45), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE);
+    let selector_46 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_45), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_47 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_46), "PART_ContentPresenter");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_8, ::core::option::Option::Some(selector_47.clone()));
     // Controls/FluentControls.xaml(116,20) Content
@@ -24966,7 +24966,7 @@ fn build_controls_fluentcontrols_xaml_deferred_92(
     // Controls/FluentControls.xaml(162,20) Style
     let style_9 = ::ferroui_base::styling::Style::new();
     // Controls/FluentControls.xaml(162,20) Selector
-    let selector_48 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::CommandBar as ::ferroui_base::StaticType>::TYPE);
+    let selector_48 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::CommandBar as ::ferroui_base::ObjectType>::IDENTITY);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_9, ::core::option::Option::Some(selector_48.clone()));
     // Controls/FluentControls.xaml(163,22) Content
     rt::add_setter(style_9.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32)));
@@ -24983,7 +24983,7 @@ fn build_controls_fluentcontrols_xaml_deferred_92(
     let style_10 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_10.clone()));
     // Controls/FluentControls.xaml(168,20) Selector
-    let selector_49 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::CommandBarButton as ::ferroui_base::StaticType>::TYPE);
+    let selector_49 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::CommandBarButton as ::ferroui_base::ObjectType>::IDENTITY);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_10, ::core::option::Option::Some(selector_49.clone()));
     // Controls/FluentControls.xaml(169,22) Content
     rt::add_setter(style_10.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::min_height_property()), rt::to_object(0.0_f64));
@@ -24998,7 +24998,7 @@ fn build_controls_fluentcontrols_xaml_deferred_92(
     let style_11 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_11.clone()));
     // Controls/FluentControls.xaml(172,20) Selector
-    let selector_50 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::CommandBarToggleButton as ::ferroui_base::StaticType>::TYPE);
+    let selector_50 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::CommandBarToggleButton as ::ferroui_base::ObjectType>::IDENTITY);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_11, ::core::option::Option::Some(selector_50.clone()));
     // Controls/FluentControls.xaml(173,22) Content
     rt::add_setter(style_11.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::min_height_property()), rt::to_object(0.0_f64));
@@ -25013,7 +25013,7 @@ fn build_controls_fluentcontrols_xaml_deferred_92(
     let style_12 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_12.clone()));
     // Controls/FluentControls.xaml(176,20) Selector
-    let selector_51 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_51 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_52 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_51), "PART_OverflowButton");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_12, ::core::option::Option::Some(selector_52.clone()));
     // Controls/FluentControls.xaml(177,22) Content
@@ -25768,7 +25768,7 @@ fn build_controls_fluentcontrols_xaml_deferred_117(
     let selector_0 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_1 = ::ferroui_base::styling::Selectors::property_equals_untyped(::core::option::Option::Some(selector_0), rt::property(::ferroui_controls::Control::tag_property()), ::std::rc::Rc::new(rt::string_object("expanded")));
     let selector_2 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_1));
-    let selector_3 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_2), <::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE);
+    let selector_3 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_2), <::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_4 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_3), "ExpandCollapseChevron");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_4.clone()));
     // Controls/FluentControls.xaml(120,10) Animations
@@ -25805,7 +25805,7 @@ fn build_controls_fluentcontrols_xaml_deferred_117(
     let selector_5 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_6 = ::ferroui_base::styling::Selectors::property_equals_untyped(::core::option::Option::Some(selector_5), rt::property(::ferroui_controls::Control::tag_property()), ::std::rc::Rc::new(rt::string_object("collapsed")));
     let selector_7 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_6));
-    let selector_8 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_7), <::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE);
+    let selector_8 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_7), <::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_9 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_8), "ExpandCollapseChevron");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_1, ::core::option::Option::Some(selector_9.clone()));
     // Controls/FluentControls.xaml(130,10) Animations
@@ -25859,7 +25859,7 @@ fn build_controls_fluentcontrols_xaml_deferred_117(
     let selector_10 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_11 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_10), ":pointerover");
     let selector_12 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_11));
-    let selector_13 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_12), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
+    let selector_13 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_12), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_14 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_13), "ToggleButtonBackground");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_2, ::core::option::Option::Some(selector_14.clone()));
     // Controls/FluentControls.xaml(143,8) Content
@@ -25878,7 +25878,7 @@ fn build_controls_fluentcontrols_xaml_deferred_117(
     let selector_15 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_16 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_15), ":pointerover");
     let selector_17 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_16));
-    let selector_18 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_17), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE);
+    let selector_18 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_17), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_19 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_18), "PART_ContentPresenter");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_3, ::core::option::Option::Some(selector_19.clone()));
     // Controls/FluentControls.xaml(147,8) Content
@@ -25894,7 +25894,7 @@ fn build_controls_fluentcontrols_xaml_deferred_117(
     let selector_20 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_21 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_20), ":pointerover");
     let selector_22 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_21));
-    let selector_23 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_22), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
+    let selector_23 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_22), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_24 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_23), "ExpandCollapseChevronBorder");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_4, ::core::option::Option::Some(selector_24.clone()));
     // Controls/FluentControls.xaml(150,8) Content
@@ -25913,7 +25913,7 @@ fn build_controls_fluentcontrols_xaml_deferred_117(
     let selector_25 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_26 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_25), ":pointerover");
     let selector_27 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_26));
-    let selector_28 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_27), <::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE);
+    let selector_28 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_27), <::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_29 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_28), "ExpandCollapseChevron");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_5, ::core::option::Option::Some(selector_29.clone()));
     // Controls/FluentControls.xaml(154,8) Content
@@ -25929,7 +25929,7 @@ fn build_controls_fluentcontrols_xaml_deferred_117(
     let selector_30 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_31 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_30), ":pressed");
     let selector_32 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_31));
-    let selector_33 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_32), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
+    let selector_33 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_32), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_34 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_33), "ToggleButtonBackground");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_6, ::core::option::Option::Some(selector_34.clone()));
     // Controls/FluentControls.xaml(159,8) Content
@@ -25948,7 +25948,7 @@ fn build_controls_fluentcontrols_xaml_deferred_117(
     let selector_35 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_36 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_35), ":pressed");
     let selector_37 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_36));
-    let selector_38 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_37), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE);
+    let selector_38 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_37), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_39 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_38), "PART_ContentPresenter");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_7, ::core::option::Option::Some(selector_39.clone()));
     // Controls/FluentControls.xaml(163,8) Content
@@ -25964,7 +25964,7 @@ fn build_controls_fluentcontrols_xaml_deferred_117(
     let selector_40 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_41 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_40), ":pressed");
     let selector_42 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_41));
-    let selector_43 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_42), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
+    let selector_43 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_42), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_44 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_43), "ExpandCollapseChevronBorder");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_8, ::core::option::Option::Some(selector_44.clone()));
     // Controls/FluentControls.xaml(166,8) Content
@@ -25983,7 +25983,7 @@ fn build_controls_fluentcontrols_xaml_deferred_117(
     let selector_45 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_46 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_45), ":pressed");
     let selector_47 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_46));
-    let selector_48 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_47), <::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE);
+    let selector_48 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_47), <::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_49 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_48), "ExpandCollapseChevron");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_9, ::core::option::Option::Some(selector_49.clone()));
     // Controls/FluentControls.xaml(170,8) Content
@@ -25999,7 +25999,7 @@ fn build_controls_fluentcontrols_xaml_deferred_117(
     let selector_50 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_51 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_50), ":disabled");
     let selector_52 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_51));
-    let selector_53 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_52), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
+    let selector_53 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_52), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_54 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_53), "ToggleButtonBackground");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_10, ::core::option::Option::Some(selector_54.clone()));
     // Controls/FluentControls.xaml(175,8) Content
@@ -26018,7 +26018,7 @@ fn build_controls_fluentcontrols_xaml_deferred_117(
     let selector_55 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_56 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_55), ":disabled");
     let selector_57 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_56));
-    let selector_58 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_57), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE);
+    let selector_58 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_57), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_59 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_58), "PART_ContentPresenter");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_11, ::core::option::Option::Some(selector_59.clone()));
     // Controls/FluentControls.xaml(179,8) Content
@@ -26034,7 +26034,7 @@ fn build_controls_fluentcontrols_xaml_deferred_117(
     let selector_60 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_61 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_60), ":disabled");
     let selector_62 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_61));
-    let selector_63 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_62), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
+    let selector_63 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_62), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_64 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_63), "ExpandCollapseChevronBorder");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_12, ::core::option::Option::Some(selector_64.clone()));
     // Controls/FluentControls.xaml(182,8) Content
@@ -26053,7 +26053,7 @@ fn build_controls_fluentcontrols_xaml_deferred_117(
     let selector_65 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_66 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_65), ":disabled");
     let selector_67 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_66));
-    let selector_68 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_67), <::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE);
+    let selector_68 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_67), <::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_69 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_68), "ExpandCollapseChevron");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_13, ::core::option::Option::Some(selector_69.clone()));
     // Controls/FluentControls.xaml(186,8) Content
@@ -26387,7 +26387,7 @@ fn build_controls_fluentcontrols_xaml_deferred_126(
     let selector_0 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_1 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_0), ":horizontal");
     let selector_2 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_1));
-    let selector_3 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_2), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
+    let selector_3 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_2), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_4 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_3), "PART_Indicator");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_4.clone()));
     // Controls/FluentControls.xaml(97,8) Content
@@ -26402,7 +26402,7 @@ fn build_controls_fluentcontrols_xaml_deferred_126(
     let selector_5 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_6 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_5), ":vertical");
     let selector_7 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_6));
-    let selector_8 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_7), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
+    let selector_8 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_7), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_9 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_8), "PART_Indicator");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_1, ::core::option::Option::Some(selector_9.clone()));
     // Controls/FluentControls.xaml(101,8) Content
@@ -26441,7 +26441,7 @@ fn build_controls_fluentcontrols_xaml_deferred_126(
     let selector_14 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_15 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_14), ":vertical");
     let selector_16 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_15));
-    let selector_17 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_16), <::ferroui_controls::LayoutTransformControl as ::ferroui_base::StaticType>::TYPE);
+    let selector_17 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_16), <::ferroui_controls::LayoutTransformControl as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_18 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_17), "PART_LayoutTransformControl");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_4, ::core::option::Option::Some(selector_18.clone()));
     // Controls/FluentControls.xaml(113,8) Content
@@ -26461,7 +26461,7 @@ fn build_controls_fluentcontrols_xaml_deferred_126(
     let selector_19 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_20 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_19), ":indeterminate");
     let selector_21 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_20));
-    let selector_22 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_21), <::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE);
+    let selector_22 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_21), <::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_23 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_22), "DeterminateRoot");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_5, ::core::option::Option::Some(selector_23.clone()));
     // Controls/FluentControls.xaml(120,8) Content
@@ -26474,7 +26474,7 @@ fn build_controls_fluentcontrols_xaml_deferred_126(
     let selector_24 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_25 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_24), ":indeterminate");
     let selector_26 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_25));
-    let selector_27 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_26), <::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE);
+    let selector_27 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_26), <::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_28 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_27), "IndeterminateRoot");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_6, ::core::option::Option::Some(selector_28.clone()));
     // Controls/FluentControls.xaml(123,8) Content
@@ -26489,7 +26489,7 @@ fn build_controls_fluentcontrols_xaml_deferred_126(
     let selector_30 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_29), ":horizontal");
     let selector_31 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_30), ":indeterminate");
     let selector_32 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_31));
-    let selector_33 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_32), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
+    let selector_33 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_32), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_34 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_33), "IndeterminateProgressBarIndicator");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_7, ::core::option::Option::Some(selector_34.clone()));
     // Controls/FluentControls.xaml(127,10) Animations
@@ -26618,7 +26618,7 @@ fn build_controls_fluentcontrols_xaml_deferred_126(
     let selector_36 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_35), ":horizontal");
     let selector_37 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_36), ":indeterminate");
     let selector_38 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_37));
-    let selector_39 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_38), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
+    let selector_39 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_38), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_40 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_39), "IndeterminateProgressBarIndicator2");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_8, ::core::option::Option::Some(selector_40.clone()));
     // Controls/FluentControls.xaml(142,10) Animations
@@ -26747,7 +26747,7 @@ fn build_controls_fluentcontrols_xaml_deferred_126(
     let selector_42 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_41), ":vertical");
     let selector_43 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_42), ":indeterminate");
     let selector_44 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_43));
-    let selector_45 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_44), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
+    let selector_45 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_44), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_46 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_45), "IndeterminateProgressBarIndicator");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_9, ::core::option::Option::Some(selector_46.clone()));
     // Controls/FluentControls.xaml(157,10) Animations
@@ -26876,7 +26876,7 @@ fn build_controls_fluentcontrols_xaml_deferred_126(
     let selector_48 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_47), ":vertical");
     let selector_49 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_48), ":indeterminate");
     let selector_50 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_49));
-    let selector_51 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_50), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
+    let selector_51 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_50), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_52 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_51), "IndeterminateProgressBarIndicator2");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_10, ::core::option::Option::Some(selector_52.clone()));
     // Controls/FluentControls.xaml(172,10) Animations
@@ -27004,7 +27004,7 @@ fn build_controls_fluentcontrols_xaml_deferred_126(
     let selector_53 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_54 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_53), ":horizontal");
     let selector_55 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_54));
-    let selector_56 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_55), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
+    let selector_56 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_55), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_57 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_56), "IndeterminateProgressBarIndicator");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_11, ::core::option::Option::Some(selector_57.clone()));
     // Controls/FluentControls.xaml(186,8) Content
@@ -27032,7 +27032,7 @@ fn build_controls_fluentcontrols_xaml_deferred_126(
     let selector_58 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_59 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_58), ":horizontal");
     let selector_60 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_59));
-    let selector_61 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_60), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
+    let selector_61 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_60), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_62 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_61), "IndeterminateProgressBarIndicator2");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_12, ::core::option::Option::Some(selector_62.clone()));
     // Controls/FluentControls.xaml(189,8) Content
@@ -27060,7 +27060,7 @@ fn build_controls_fluentcontrols_xaml_deferred_126(
     let selector_63 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_64 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_63), ":vertical");
     let selector_65 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_64));
-    let selector_66 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_65), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
+    let selector_66 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_65), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_67 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_66), "IndeterminateProgressBarIndicator");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_13, ::core::option::Option::Some(selector_67.clone()));
     // Controls/FluentControls.xaml(192,8) Content
@@ -27088,7 +27088,7 @@ fn build_controls_fluentcontrols_xaml_deferred_126(
     let selector_68 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_69 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_68), ":vertical");
     let selector_70 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_69));
-    let selector_71 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_70), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
+    let selector_71 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_70), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_72 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_71), "IndeterminateProgressBarIndicator2");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_14, ::core::option::Option::Some(selector_72.clone()));
     // Controls/FluentControls.xaml(195,8) Content
@@ -27928,11 +27928,11 @@ fn build_controls_fluentcontrols_xaml_deferred_139(
     // Controls/FluentControls.xaml(105,20) Style
     let style_0 = ::ferroui_base::styling::Style::new();
     // Controls/FluentControls.xaml(105,20) Selector
-    let selector_0 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE);
+    let selector_0 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::TextBox as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_1 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_0), "PART_TextBox");
     let selector_2 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_1), ":focus");
     let selector_3 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_2));
-    let selector_4 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_3), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
+    let selector_4 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_3), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_5 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_4), "PART_BorderElement");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_5.clone()));
     // Controls/FluentControls.xaml(107,22) Content
@@ -27948,7 +27948,7 @@ fn build_controls_fluentcontrols_xaml_deferred_139(
     let style_1 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_1.clone()));
     // Controls/FluentControls.xaml(111,20) Selector
-    let selector_6 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE);
+    let selector_6 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::TextBox as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_7 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_6), "PART_TextBox");
     let selector_8 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_7), ":disabled");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_1, ::core::option::Option::Some(selector_8.clone()));
@@ -27958,7 +27958,7 @@ fn build_controls_fluentcontrols_xaml_deferred_139(
     // Controls/FluentControls.xaml(112,22) Selector
     let selector_9 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_10 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_9));
-    let selector_11 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_10), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
+    let selector_11 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_10), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_12 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_11), "PART_BorderElement");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_2, ::core::option::Option::Some(selector_12.clone()));
     // Controls/FluentControls.xaml(114,24) Content
@@ -27973,11 +27973,11 @@ fn build_controls_fluentcontrols_xaml_deferred_139(
     // Controls/FluentControls.xaml(117,22) Selector
     let selector_13 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_14 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_13));
-    let selector_15 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_14), <::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE);
+    let selector_15 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_14), <::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_16 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_15), "PART_Placeholder");
     let selector_17 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_18 = ::ferroui_base::styling::Selectors::descendant(::core::option::Option::Some(selector_17));
-    let selector_19 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_18), <::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE);
+    let selector_19 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_18), <::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_20 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_19), "PART_FloatingPlaceholder");
     let selector_21 = ::ferroui_base::styling::Selectors::or([selector_16, selector_20]);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_3, ::core::option::Option::Some(selector_21.clone()));
@@ -30587,7 +30587,7 @@ fn build_controls_fluentcontrols_xaml_deferred_267(
     // Controls/FluentControls.xaml(196,16) Style
     let style_0 = ::ferroui_base::styling::Style::new();
     // Controls/FluentControls.xaml(196,16) Selector
-    let selector_0 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE);
+    let selector_0 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::ScrollViewer as ::ferroui_base::ObjectType>::IDENTITY);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_0.clone()));
     // Controls/FluentControls.xaml(197,18) Content
     rt::add_setter(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::clip_to_bounds_property()), rt::to_object(::core::clone::Clone::clone(&false)));
@@ -34221,7 +34221,7 @@ fn build_controls_fluentcontrols_xaml_deferred_320(
     // Controls/FluentControls.xaml(186,24) Style
     let style_0 = ::ferroui_base::styling::Style::new();
     // Controls/FluentControls.xaml(186,24) Selector
-    let selector_0 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::presenters::ScrollContentPresenter as ::ferroui_base::StaticType>::TYPE);
+    let selector_0 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::presenters::ScrollContentPresenter as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_1 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_0), "PART_ContentPresenter");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_1.clone()));
     // Controls/FluentControls.xaml(187,26) Content
@@ -36429,7 +36429,7 @@ fn build_controls_fluentcontrols_xaml_deferred_347(
     // Controls/FluentControls.xaml(56,14) Style
     let style_0 = ::ferroui_base::styling::Style::new();
     // Controls/FluentControls.xaml(56,14) Selector
-    let selector_0 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE);
+    let selector_0 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_0.clone()));
     // Controls/FluentControls.xaml(57,16) Content
     rt::add_setter(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::TextBlock::text_wrapping_property()), rt::to_object(::ferroui_base::media::TextWrapping::Wrap));
@@ -36564,7 +36564,7 @@ fn build_controls_fluentcontrols_xaml_deferred_350(
     // Controls/FluentControls.xaml(91,14) Style
     let style_0 = ::ferroui_base::styling::Style::new();
     // Controls/FluentControls.xaml(91,14) Selector
-    let selector_0 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE);
+    let selector_0 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_1 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_0), "PART_InlineErrorTemplatePanel");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_1.clone()));
     // Controls/FluentControls.xaml(92,16) Content
@@ -36576,10 +36576,10 @@ fn build_controls_fluentcontrols_xaml_deferred_350(
     let style_1 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_1.clone()));
     // Controls/FluentControls.xaml(94,14) Selector
-    let selector_2 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE);
+    let selector_2 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_3 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_2), "PART_InlineErrorTemplatePanel");
     let selector_4 = ::ferroui_base::styling::Selectors::descendant(::core::option::Option::Some(selector_3));
-    let selector_5 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_4), <::ferroui_controls::ToolTip as ::ferroui_base::StaticType>::TYPE);
+    let selector_5 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_4), <::ferroui_controls::ToolTip as ::ferroui_base::ObjectType>::IDENTITY);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_1, ::core::option::Option::Some(selector_5.clone()));
     // Controls/FluentControls.xaml(95,16) Content
     // Controls/FluentControls.xaml(95,46) Value
@@ -36591,12 +36591,12 @@ fn build_controls_fluentcontrols_xaml_deferred_350(
     // Controls/FluentControls.xaml(97,14) Style
     let style_2 = ::ferroui_base::styling::Style::new();
     // Controls/FluentControls.xaml(97,14) Selector
-    let selector_6 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE);
+    let selector_6 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_7 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_6), "PART_InlineErrorTemplatePanel");
     let selector_8 = ::ferroui_base::styling::Selectors::descendant(::core::option::Option::Some(selector_7));
-    let selector_9 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_8), <::ferroui_controls::ToolTip as ::ferroui_base::StaticType>::TYPE);
+    let selector_9 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_8), <::ferroui_controls::ToolTip as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_10 = ::ferroui_base::styling::Selectors::descendant(::core::option::Option::Some(selector_9));
-    let selector_11 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_10), <::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE);
+    let selector_11 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_10), <::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_2, ::core::option::Option::Some(selector_11.clone()));
     // Controls/FluentControls.xaml(98,16) Content
     rt::add_setter(style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::TextBlock::text_wrapping_property()), rt::to_object(::ferroui_base::media::TextWrapping::Wrap));
@@ -37180,9 +37180,9 @@ fn build_controls_fluentcontrols_xaml_deferred_363(
     let style_0 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_0.clone()));
     // Controls/FluentControls.xaml(169,18) Selector
-    let selector_0 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::date_time_pickers::DateTimePickerPanel as ::ferroui_base::StaticType>::TYPE);
+    let selector_0 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::date_time_pickers::DateTimePickerPanel as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_1 = ::ferroui_base::styling::Selectors::child(::core::option::Option::Some(selector_0));
-    let selector_2 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_1), <::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE);
+    let selector_2 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_1), <::ferroui_controls::ListBoxItem as ::ferroui_base::ObjectType>::IDENTITY);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_2.clone()));
     // Controls/FluentControls.xaml(170,20) Content
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::StyledElement::theme_property()));
@@ -38124,9 +38124,9 @@ fn build_controls_fluentcontrols_xaml_deferred_369(
     let style_0 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_0.clone()));
     // Controls/FluentControls.xaml(211,18) Selector
-    let selector_0 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::date_time_pickers::DateTimePickerPanel as ::ferroui_base::StaticType>::TYPE);
+    let selector_0 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::date_time_pickers::DateTimePickerPanel as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_1 = ::ferroui_base::styling::Selectors::child(::core::option::Option::Some(selector_0));
-    let selector_2 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_1), <::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE);
+    let selector_2 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_1), <::ferroui_controls::ListBoxItem as ::ferroui_base::ObjectType>::IDENTITY);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_2.clone()));
     // Controls/FluentControls.xaml(212,20) Content
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::StyledElement::theme_property()));
@@ -39070,7 +39070,7 @@ fn build_controls_fluentcontrols_xaml_deferred_379(
     let style_0 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_0.clone()));
     // Controls/FluentControls.xaml(106,22) Selector
-    let selector_0 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::TickBar as ::ferroui_base::StaticType>::TYPE);
+    let selector_0 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_0.clone()));
     // Controls/FluentControls.xaml(107,24) Content
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::TickBar::reserved_space_property()));
@@ -39384,7 +39384,7 @@ fn build_controls_fluentcontrols_xaml_deferred_380(
     let style_0 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_0.clone()));
     // Controls/FluentControls.xaml(204,22) Selector
-    let selector_0 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::TickBar as ::ferroui_base::StaticType>::TYPE);
+    let selector_0 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_0.clone()));
     // Controls/FluentControls.xaml(205,24) Content
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::TickBar::reserved_space_property()));
@@ -39707,7 +39707,7 @@ fn build_controls_fluentcontrols_xaml_deferred_381(
     // Controls/FluentControls.xaml(280,6) Selector
     let selector_0 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_1 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_0));
-    let selector_2 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_1), <::ferroui_controls::ListBox as ::ferroui_base::StaticType>::TYPE);
+    let selector_2 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_1), <::ferroui_controls::ListBox as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_3 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_2), "QuickLinks");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_3.clone()));
     // Controls/FluentControls.xaml(281,8) Content
@@ -39765,7 +39765,7 @@ fn build_controls_fluentcontrols_xaml_deferred_381(
     let selector_4 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_5 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_4), ":pointerover");
     let selector_6 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_5));
-    let selector_7 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_6), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
+    let selector_7 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_6), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_8 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_7), "LayoutRoot");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_1, ::core::option::Option::Some(selector_8.clone()));
     // Controls/FluentControls.xaml(322,14) Content
@@ -39781,7 +39781,7 @@ fn build_controls_fluentcontrols_xaml_deferred_381(
     let selector_9 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_10 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_9), ":selected");
     let selector_11 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_10));
-    let selector_12 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_11), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
+    let selector_12 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_11), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_13 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_12), "LayoutRoot");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_2, ::core::option::Option::Some(selector_13.clone()));
     // Controls/FluentControls.xaml(325,14) Content
@@ -39800,16 +39800,16 @@ fn build_controls_fluentcontrols_xaml_deferred_381(
     // Controls/FluentControls.xaml(331,6) Selector
     let selector_14 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_15 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_14));
-    let selector_16 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_15), <::ferroui_controls::DockPanel as ::ferroui_base::StaticType>::TYPE);
+    let selector_16 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_15), <::ferroui_controls::DockPanel as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_17 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_16), "NavBar");
     let selector_18 = ::ferroui_base::styling::Selectors::descendant(::core::option::Option::Some(selector_17));
-    let selector_19 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_18), <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_19 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_18), <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_20 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_21 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_20));
-    let selector_22 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_21), <::ferroui_controls::DockPanel as ::ferroui_base::StaticType>::TYPE);
+    let selector_22 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_21), <::ferroui_controls::DockPanel as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_23 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_22), "NavBar");
     let selector_24 = ::ferroui_base::styling::Selectors::descendant(::core::option::Option::Some(selector_23));
-    let selector_25 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_24), <::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE);
+    let selector_25 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_24), <::ferroui_controls::TextBox as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_26 = ::ferroui_base::styling::Selectors::or([selector_19, selector_25]);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_3, ::core::option::Option::Some(selector_26.clone()));
     // Controls/FluentControls.xaml(332,8) Content
@@ -39824,10 +39824,10 @@ fn build_controls_fluentcontrols_xaml_deferred_381(
     // Controls/FluentControls.xaml(334,6) Selector
     let selector_27 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_28 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_27));
-    let selector_29 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_28), <::ferroui_controls::DockPanel as ::ferroui_base::StaticType>::TYPE);
+    let selector_29 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_28), <::ferroui_controls::DockPanel as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_30 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_29), "NavBar");
     let selector_31 = ::ferroui_base::styling::Selectors::descendant(::core::option::Option::Some(selector_30));
-    let selector_32 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_31), <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_32 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_31), <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_4, ::core::option::Option::Some(selector_32.clone()));
     // Controls/FluentControls.xaml(335,8) Content
     rt::add_setter(style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::vertical_alignment_property()), rt::to_object(::ferroui_base::layout::VerticalAlignment::Stretch));
@@ -39844,10 +39844,10 @@ fn build_controls_fluentcontrols_xaml_deferred_381(
     // Controls/FluentControls.xaml(339,6) Selector
     let selector_33 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_34 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_33));
-    let selector_35 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_34), <::ferroui_controls::DockPanel as ::ferroui_base::StaticType>::TYPE);
+    let selector_35 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_34), <::ferroui_controls::DockPanel as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_36 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_35), "NavBar");
     let selector_37 = ::ferroui_base::styling::Selectors::descendant(::core::option::Option::Some(selector_36));
-    let selector_38 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_37), <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_38 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_37), <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_39 = ::ferroui_base::styling::Selectors::class(::core::option::Option::None, ":pointerover");
     let selector_40 = ::ferroui_base::styling::Selectors::not(::core::option::Option::Some(selector_38), selector_39);
     let selector_41 = ::ferroui_base::styling::Selectors::class(::core::option::Option::None, ":pressed");
@@ -39862,10 +39862,10 @@ fn build_controls_fluentcontrols_xaml_deferred_381(
     // Controls/FluentControls.xaml(343,6) Selector
     let selector_43 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_44 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_43));
-    let selector_45 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_44), <::ferroui_controls::primitives::UniformGrid as ::ferroui_base::StaticType>::TYPE);
+    let selector_45 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_44), <::ferroui_controls::primitives::UniformGrid as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_46 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_45), "Finalize");
     let selector_47 = ::ferroui_base::styling::Selectors::child(::core::option::Option::Some(selector_46));
-    let selector_48 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_47), <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
+    let selector_48 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_47), <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_6, ::core::option::Option::Some(selector_48.clone()));
     // Controls/FluentControls.xaml(344,8) Content
     rt::add_setter(style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::ContentControl::horizontal_content_alignment_property()), rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center));
@@ -41098,7 +41098,7 @@ fn build_controls_fluentcontrols_xaml_deferred_386(
     let style_0 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_0.clone()));
     // Controls/FluentControls.xaml(213,20) Selector
-    let selector_0 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::GridSplitter as ::ferroui_base::StaticType>::TYPE);
+    let selector_0 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::GridSplitter as ::ferroui_base::ObjectType>::IDENTITY);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_0.clone()));
     // Controls/FluentControls.xaml(214,22) Content
     // Controls/FluentControls.xaml(214,51) Value

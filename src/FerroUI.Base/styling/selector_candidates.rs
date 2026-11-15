@@ -15,23 +15,47 @@
 //! no other.
 
 use super::IStyle;
-use crate::TypeInfo;
+use crate::{TypeIdentity, TypeInfo};
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::cell::{Cell, OnceCell, RefCell};
 use std::rc::{Rc, Weak};
 
+/// The type a selector requires of an element: the type itself, or the identity of a class. A
+/// selector of compiled markup names a class by its identity alone, so that a style for a class
+/// the application never creates does not keep the class in the executable.
+#[derive(Clone, Copy)]
+pub(super) enum CandidateType {
+    Type(&'static TypeInfo),
+    Identity(&'static TypeIdentity),
+}
+
+impl PartialEq for CandidateType {
+    fn eq(&self, other: &Self) -> bool {
+        match (*self, *other) {
+            (CandidateType::Type(own), CandidateType::Type(other)) => own == other,
+            (CandidateType::Identity(own), CandidateType::Identity(other)) => std::ptr::eq(own, other),
+            _ => false,
+        }
+    }
+}
+
+impl Eq for CandidateType {}
+
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub(super) struct TypeCandidate {
-    pub type_: &'static TypeInfo,
+    pub type_: CandidateType,
     pub exact: bool,
 }
 
 impl TypeCandidate {
     pub(super) fn matches(self, target: &'static TypeInfo) -> bool {
-        if self.exact {
-            self.type_ == target
-        } else {
-            self.type_.is_assignable_from(target)
+        match (self.type_, self.exact) {
+            (CandidateType::Type(type_), true) => type_ == target,
+            (CandidateType::Type(type_), false) => type_.is_assignable_from(target),
+            (CandidateType::Identity(identity), true) => {
+                target.identity().is_some_and(|own| std::ptr::eq(own, identity))
+            }
+            (CandidateType::Identity(identity), false) => target.derives_from(identity),
         }
     }
 }

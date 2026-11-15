@@ -53,7 +53,7 @@ fn button_factory() -> Vec<String> {
             format!("let {} = {SELECTORS}::class(::core::option::Option::Some({}), \":pointerover\");", selectors[1], selectors[0]),
             format!("let {} = {SELECTORS}::template(::core::option::Option::Some({}));", selectors[2], selectors[1]),
             format!(
-                "let {} = {SELECTORS}::of_type_info(::core::option::Option::Some({}), <{PRESENTER} as ::ferroui_base::StaticType>::TYPE);",
+                "let {} = {SELECTORS}::of_type_identity(::core::option::Option::Some({}), <{PRESENTER} as ::ferroui_base::ObjectType>::IDENTITY);",
                 selectors[3], selectors[2]
             ),
             format!("{STYLE}::__markup_set_Selector(&{style}, ::core::option::Option::Some({}.clone()));", selectors[3]),
@@ -122,7 +122,7 @@ fn a_factory_becomes_a_tree_of_its_members() {
         Step::Nesting,
         Step::Class("\":pointerover\"".to_string()),
         Step::Template,
-        Step::OfType(format!("<{PRESENTER} as ::ferroui_base::StaticType>::TYPE")),
+        Step::OfType(format!("<{PRESENTER} as ::ferroui_base::ObjectType>::IDENTITY")),
     ]));
     assert_eq!(style.members.len(), 1);
     assert_eq!(theme.members[8], theme.members[7]);
@@ -139,7 +139,7 @@ fn a_table_shares_its_properties_and_selector_chains() {
     assert_eq!(items.matches("fn build_controls_fluentcontrols_xaml_property_").count(), 7);
     assert_eq!(items.matches("static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_").count(), 1);
     assert!(items.contains(&format!(
-        "static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_0: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(\":pointerover\"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<{PRESENTER} as ::ferroui_base::StaticType>::TYPE)];"
+        "static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_0: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(\":pointerover\"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<{PRESENTER} as ::ferroui_base::ObjectType>::IDENTITY)];"
     )));
     assert!(items.contains("static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_0_THEME: rt::ControlThemeTable = rt::ControlThemeTable {\n    parent: true,\n    members: &[\n        rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),\n"));
     assert!(items.contains("        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_0, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic(\"ButtonBackground\") }),\n"));

@@ -186,8 +186,9 @@ impl AutomationPeerImpl for ControlAutomationPeer {
         let mut c = Some(this.owner());
 
         while let Some(control) = c {
-            if let Some(context_menu) = control.context_menu() {
-                context_menu.open_at(Some(&control));
+            // Deviation (DEVIATIONS.md, Automation peers): upstream calls `ContextMenu.Open(control)`;
+            // see `Control::open_context_menu` for why the menu is not named here.
+            if control.open_context_menu() {
                 return true;
             }
 

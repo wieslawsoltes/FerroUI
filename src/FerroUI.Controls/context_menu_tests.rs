@@ -259,6 +259,33 @@ fn opening_raises_single_opened_event() {
     assert_eq!(1, opened_count.get());
 }
 
+// Not from the reference tests. The peer of a control opens the context menu through
+// `Control::open_context_menu` and names nothing of the menu classes (docs/binary-size.md, 4.20).
+#[test]
+fn the_automation_peer_of_a_control_opens_the_context_menu_of_the_nearest_control_that_has_one() {
+    use crate::automation::peers::ControlAutomationPeer;
+
+    let _app = application();
+    let sut = ContextMenu::new();
+    let target = panel_with(&sut);
+    let child = TextBlock::new();
+    target.children().add(child.clone());
+    let _window = prepared_window(Some(target.clone().upcast()));
+
+    // A control without a context menu above it opens none.
+    let alone = TextBlock::new();
+    assert!(!ControlAutomationPeer::create_peer_for_element(&alone).show_context_menu());
+    assert!(!sut.is_open());
+
+    assert!(ControlAutomationPeer::create_peer_for_element(&child).show_context_menu());
+    assert!(sut.is_open());
+    sut.close();
+    assert!(!sut.is_open());
+
+    assert!(ControlAutomationPeer::create_peer_for_element(&target).show_context_menu());
+    assert!(sut.is_open());
+}
+
 #[test]
 fn open_should_use_default_control() {
     let _app = application();

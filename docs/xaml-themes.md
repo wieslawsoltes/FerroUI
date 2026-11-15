@@ -152,6 +152,16 @@ children of a control theme or of a style, a `Styles` collection) keeps, for eac
 asked for, the list of its entries that can match an element of that key, in source order, and
 applying styles visits the entries of the list.
 
+**How compiled markup names the type.** A type selector of compiled markup, in a generated
+function or in a static selector chain, names its class by the identity of the class
+(`Selectors::of_type_identity`, `Selectors::is_type_identity` with `ObjectType::IDENTITY`), not by
+its `TypeInfo`. The selector matches by the identity and the index files it by the identity, with
+the results they had by type. The `TypeInfo` of a class names the initialisation of the class, so
+a style written with it kept the class, its base classes, their properties and their handlers in
+the executable whether or not the application creates one; a style that only selects a class no
+longer does (`docs/binary-size.md`, section 4.20). `Selector::target_type` of such a selector is
+the `TypeInfo` once the class is initialised and `None` before.
+
 **What falls back.** An entry is left out of a list only when it is an index-enabled style without
 child styles and the type of its selector rules the style key out. Everything else stays in every
 list and goes through the ordinary matcher:

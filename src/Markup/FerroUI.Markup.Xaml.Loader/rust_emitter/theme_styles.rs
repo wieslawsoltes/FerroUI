@@ -206,6 +206,14 @@ fn is_plain_call(text: &str) -> bool {
     text.starts_with("::") && text.ends_with("()") && !text[..text.len() - 2].contains(['(', ')', ' ', '<', '>', ','])
 }
 
+/// Whether `text` is `<Path as ::ferroui_base::ObjectType>::IDENTITY` for an absolute path: the
+/// class a selector names.
+fn is_class_identity(text: &str) -> bool {
+    text.strip_prefix('<')
+        .and_then(|rest| rest.strip_suffix(" as ::ferroui_base::ObjectType>::IDENTITY"))
+        .is_some_and(|path| path.starts_with("::") && !path.contains(['(', ')', ' ', '<', '>', ',']))
+}
+
 /// Whether `text` is `<Path as ::ferroui_base::StaticType>::TYPE` for an absolute path.
 fn is_static_type(text: &str) -> bool {
     text.strip_prefix('<')
@@ -649,10 +657,10 @@ impl<'s> Parser<'s> {
                         _ => Step::Name(name),
                     }
                 }
-                "of_type_info" | "is_type_info" => {
-                    let type_ = operand.filter(|type_| is_static_type(type_))?.to_string();
+                "of_type_identity" | "is_type_identity" => {
+                    let type_ = operand.filter(|type_| is_class_identity(type_))?.to_string();
                     match operation {
-                        "of_type_info" => Step::OfType(type_),
+                        "of_type_identity" => Step::OfType(type_),
                         _ => Step::Is(type_),
                     }
                 }

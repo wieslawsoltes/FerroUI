@@ -118,7 +118,7 @@ impl Selector {
                 if current.0.move_previous().is_some_and(|previous| !previous.is_combinator()) {
                     return None;
                 }
-                return node.own_target_type().map(|type_| super::selector_candidates::TypeCandidate {
+                return node.own_candidate_type().map(|type_| super::selector_candidates::TypeCandidate {
                     type_, exact: node.is_concrete_type(),
                 });
             }

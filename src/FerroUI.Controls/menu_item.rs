@@ -18,7 +18,7 @@ use crate::radio_button_group_manager::{register_radio_button, IRadioButton};
 use crate::templates::{FuncTemplate, ITemplateOf};
 use crate::{
     Button, Control, ControlImpl, HotKeyManager, ItemsControl, ItemsControlImpl, Menu, MenuBase, MenuItemToggleType,
-    Panel, RadioButton, StackPanel,
+    NativeMenuItem, Panel, RadioButton, StackPanel,
 };
 use ferroui_base::data::{BindingError, BindingPriority, BindingValueType};
 use ferroui_base::input::{
@@ -598,7 +598,9 @@ ferro_properties! {
 
         /// Defines the `IsChecked` property.
         pub fn is_checked_property() -> StyledProperty<bool> {
-            FerroProperty::register::<MenuItem, _>("IsChecked", false)
+            // Deviation (DEVIATIONS.md, Native menu): registered by the native menu item (see
+            // `NativeMenuItem::is_checked_property`); upstream registers it here.
+            NativeMenuItem::is_checked_property().add_owner::<MenuItem>()
         }
 
         /// Defines the `GroupName` property.

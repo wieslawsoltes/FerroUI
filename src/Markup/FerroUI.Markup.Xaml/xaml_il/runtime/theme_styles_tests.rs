@@ -9,6 +9,7 @@ use ferroui_base::controls::ResourceDictionary;
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::media::{Color, SolidColorBrush};
 use ferroui_base::metadata::IServiceProvider;
+use ferroui_base::ObjectType;
 use ferroui_controls::primitives::TemplatedControl;
 use ferroui_controls::{Border, Button};
 use std::cell::RefCell;
@@ -59,7 +60,7 @@ static CHAIN: &[SelectorStep] = &[
     SelectorStep::Nesting,
     SelectorStep::Class(":pointerover"),
     SelectorStep::Template,
-    SelectorStep::OfType(<Border as StaticType>::TYPE),
+    SelectorStep::OfType(<Border as ObjectType>::IDENTITY),
     SelectorStep::Name("PART_Border"),
 ];
 
@@ -91,7 +92,7 @@ static OR: &[SelectorStep] = &[
         alternatives: &[&[SelectorStep::Nesting, SelectorStep::Class(":pressed")], &[SelectorStep::Nesting, SelectorStep::Class(":checked")]],
     },
     SelectorStep::Descendant,
-    SelectorStep::Is(<Border as StaticType>::TYPE),
+    SelectorStep::Is(<Border as ObjectType>::IDENTITY),
 ];
 
 static EQUALS: &[SelectorStep] = &[
@@ -374,8 +375,14 @@ fn candidate_width() -> &'static FerroProperty {
 #[test]
 fn generated_type_candidates_keep_template_activators_and_selector_replacement() {
     use ferroui_base::styling::IStyle;
-    static MISS: &[SelectorStep] = &[SelectorStep::Nesting, SelectorStep::Template, SelectorStep::OfType(Button::TYPE)];
-    static HIT: &[SelectorStep] = &[SelectorStep::Nesting, SelectorStep::Template, SelectorStep::OfType(Border::TYPE), SelectorStep::Class(":active")];
+    static MISS: &[SelectorStep] =
+        &[SelectorStep::Nesting, SelectorStep::Template, SelectorStep::OfType(<Button as ObjectType>::IDENTITY)];
+    static HIT: &[SelectorStep] = &[
+        SelectorStep::Nesting,
+        SelectorStep::Template,
+        SelectorStep::OfType(<Border as ObjectType>::IDENTITY),
+        SelectorStep::Class(":active"),
+    ];
     let rule = |selector| StyleMember::Style { parent: false, selector: Some(selector), members: &[
         StyleMember::Setter(ThemeSetter { property: candidate_width, form: SetterForm::Plain, value: ThemeValue::Double(42.0) }),
     ], line: 1, position: 1 };
