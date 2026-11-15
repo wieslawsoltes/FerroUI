@@ -502,6 +502,63 @@ fn animations_are_disposed_when_the_style_is_detached() {
     assert!(!clock.has_observers());
 }
 
+/// The style instances of `target` that have extras, of all its style instances.
+fn instances_with_extras(target: &Border) -> (usize, usize) {
+    let frames = target.values().frames();
+    let instances: Vec<&crate::styling::StyleInstance> =
+        frames.iter().filter_map(|frame| frame.as_any().downcast_ref()).collect();
+    (instances.iter().filter(|instance| instance.has_extras()).count(), instances.len())
+}
+
+#[test]
+fn only_a_style_instance_with_animations_keeps_extras() {
+    // Section 9.64 of desktop-performance.md: what few instances have is not a part of every instance.
+    // A frame is its entries, its owner and its priorities; an instance adds itself, its activator, its
+    // extras, whether it is active and its source.
+    let words = std::mem::size_of::<usize>();
+    let weak = std::mem::size_of::<WeakRef<FerroObject>>();
+    let frame = std::mem::size_of::<crate::property_store::ValueFrameBase>();
+    assert!(frame <= 5 * words + weak, "{frame}");
+    let instance = std::mem::size_of::<crate::styling::StyleInstance>();
+    assert!(instance <= frame + 5 * words + weak, "{instance}");
+
+    let clock = start();
+    let animation = create_opacity_animation(
+        SetterValue::Value(Rc::new(1.0_f64)),
+        SetterValue::Value(Rc::new(0.0_f64)),
+    );
+    animation.set_fill_mode(FillMode::None);
+    let animated = Style::with_selector(Selectors::of_type::<Border>().class("foo"));
+    animated.add_animation(&animation);
+    let setters = Style::with_selector(Selectors::of_type::<Border>().class("foo"));
+    setters.add(Setter::new(Layoutable::width_property(), 12.0_f64));
+    let root = TestRoot::new();
+    root.styles().add(animated);
+    root.styles().add(setters);
+    let target = Border::new();
+    root.set_child(&target);
+
+    assert_eq!(instances_with_extras(&target), (1, 2));
+
+    // The instance without extras is activated and deactivated as the one with them.
+    clock.pulse(SignedDuration::ZERO);
+    target.classes().add("foo");
+    assert_eq!(target.width(), 12.0);
+    clock.pulse(seconds(1.0));
+    clock.pulse(seconds(1.5));
+    assert_eq!(target.opacity(), 0.5);
+    assert_eq!(instances_with_extras(&target), (1, 2));
+
+    target.classes().remove("foo");
+    assert!(target.width().is_nan());
+    assert_eq!(target.opacity(), 1.0);
+
+    root.styles().clear();
+    assert_eq!(instances_with_extras(&target), (0, 0));
+    clock.pulse(seconds(1.75));
+    assert!(!clock.has_observers());
+}
+
 // --- The animation tests of the upstream style tests (`Styling/StyleTests.cs`) ---
 //
 // They are here because they need the clocks of the animation tests. `Class1`
