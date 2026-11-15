@@ -1,5 +1,6 @@
 use super::{FramePriority, FrameType, IValueEntry};
 use crate::data::BindingPriority;
+use crate::utilities::OptionCell;
 use crate::{FerroObject, FerroProperty, Ref, WeakRef};
 use smallvec::SmallVec;
 use std::any::Any;
@@ -9,7 +10,7 @@ use std::rc::Rc;
 /// State shared by all value frame kinds.
 pub(crate) struct ValueFrameBase {
     entries: RefCell<Vec<Rc<dyn IValueEntry>>>,
-    owner: RefCell<Option<WeakRef<FerroObject>>>,
+    owner: OptionCell<WeakRef<FerroObject>>,
     is_shared: Cell<bool>,
     priority: BindingPriority,
     frame_priority: FramePriority,
@@ -19,7 +20,7 @@ impl ValueFrameBase {
     pub fn new(priority: BindingPriority, type_: FrameType) -> Self {
         Self {
             entries: RefCell::new(Vec::new()),
-            owner: RefCell::new(None),
+            owner: OptionCell::new(),
             is_shared: Cell::new(false),
             priority,
             frame_priority: FramePriority::new(priority, type_),
@@ -42,7 +43,7 @@ impl ValueFrameBase {
     /// single owner.
     pub fn make_shared(&self) {
         self.is_shared.set(true);
-        *self.owner.borrow_mut() = None;
+        self.owner.set(None);
     }
 
     #[inline]
@@ -63,18 +64,17 @@ impl ValueFrameBase {
     /// The object whose value store owns the frame.
     pub fn owner(&self) -> Option<Ref<FerroObject>> {
         assert!(!self.is_shared.get(), "Cannot get owner for shared ValueFrame");
-        self.owner.borrow().as_ref().and_then(WeakRef::upgrade)
+        self.owner.with(|owner| owner.and_then(WeakRef::upgrade))
     }
 
     pub fn set_owner(&self, owner: Option<WeakRef<FerroObject>>) {
         if self.is_shared.get() {
             return;
         }
-        let mut current = self.owner.borrow_mut();
-        if current.is_some() && owner.is_some() {
+        if owner.is_some() && self.owner.is_some() {
             panic!("ValueFrame already has an owner.");
         }
-        *current = owner;
+        self.owner.set(owner);
     }
 
     pub fn contains(&self, property: &FerroProperty) -> bool {
