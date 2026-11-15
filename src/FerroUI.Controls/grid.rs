@@ -278,7 +278,10 @@ pub struct Grid {
     base: Panel,
     /// The extended data instantiated on demand, for the handling of the
     /// non-trivial case only.
-    ext_data: OnceCell<ExtendedData>,
+    // In a box, as upstream has it in an object of its own
+    // (docs/porting/desktop-performance.md, section 9.70): inline it was 168 bytes of every grid,
+    // also of one without definitions, which never makes it.
+    ext_data: OnceCell<Box<ExtendedData>>,
     /// The grid validity / property caches dirtiness flags.
     flags: Cell<u32>,
     /// Keeps track of definition indices.
@@ -1158,9 +1161,15 @@ impl Grid {
         self.row_definitions().set_is_dirty(value)
     }
 
+    /// Whether the grid made its extended data.
+    #[cfg(test)]
+    pub(crate) fn has_extended_data(&self) -> bool {
+        self.ext_data.get().is_some()
+    }
+
     /// The extended data, created on demand.
     fn ext(&self) -> &ExtendedData {
-        self.ext_data.get_or_init(ExtendedData::new)
+        self.ext_data.get_or_init(|| Box::new(ExtendedData::new()))
     }
 
     /// Lays out cells according to rows and columns, and creates lookup
