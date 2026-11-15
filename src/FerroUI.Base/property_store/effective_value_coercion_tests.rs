@@ -161,7 +161,7 @@ fn run(original: bool, same_priority: bool, matches: (bool, bool), injection: Op
     // The real store owns the entry. Configure both animation/base branches
     // directly, without adding observer handles that could mask a drop.
     typed.value.replace(trace.value(if matches.0 { 14 } else { 10 }));
-    typed.base_value.replace(Some(trace.value(if matches.1 { if same_priority { 23 } else { 24 } } else { 20 })));
+    typed.set_base_value(trace.value(if matches.1 { if same_priority { 23 } else { 24 } } else { 20 }));
     uncommon.uncoerced_value.replace(trace.value(13));
     uncommon.uncoerced_base_value.replace(trace.value(23));
     typed.state.priority.set(if same_priority { BindingPriority::LocalValue } else { BindingPriority::Animation });
@@ -177,7 +177,7 @@ fn run(original: bool, same_priority: bool, matches: (bool, bool), injection: Op
     // Reads of fields make no additional value clones or equality calls.
     let values = (
         typed.value.borrow().number,
-        typed.base_value.borrow().as_ref().map(|value| value.number),
+        typed.with_base_value(|base| base.map(|value| value.number)),
         uncommon.uncoerced_value.borrow().number,
         uncommon.uncoerced_base_value.borrow().number,
     );
@@ -381,7 +381,8 @@ fn recoercion_keeps_nan_equality() {
     }
 }
 
-// Copied from 4622c95a: only the two oracle method names and their call differ.
+// Copied from 4622c95a: only the two oracle method names and their call differ, and the base value is read and
+// written as the value keeps it (once, where it is the value).
 impl<T: PropertyValue> EffectiveValue<T> {
     fn original_coerce_value(&self, owner: &FerroObject) {
         let Some(uncommon) = &self.uncommon else { return };
@@ -415,15 +416,19 @@ impl<T: PropertyValue> EffectiveValue<T> {
         }
 
         if !value_equals(&*self.value.borrow(), &v) {
-            self.value.replace(v.clone());
+            self.set_value_alone(v.clone());
             value_changed = true;
             if let Some(uncommon) = &self.uncommon {
                 uncommon.uncoerced_value.replace(value);
             }
         }
 
-        if !self.base_value.borrow().as_ref().is_some_and(|base| value_equals(base, &bv)) {
-            self.base_value.replace(Some(v));
+        if !self.with_base_value(|base| base.is_some_and(|base| value_equals(base, &bv))) {
+            if value_changed {
+                self.set_base_to_value();
+            } else {
+                self.set_base_value(v);
+            }
             base_value_changed = true;
             if let Some(uncommon) = &self.uncommon {
                 uncommon.uncoerced_value.replace(base_value);
@@ -487,7 +492,7 @@ mod end_reevaluation_tests {
         let uncommon = typed.uncommon.as_ref().unwrap();
         let values = (
             typed.value.borrow().number,
-            typed.base_value.borrow().as_ref().map(|value| value.number),
+            typed.with_base_value(|base| base.map(|value| value.number)),
             uncommon.uncoerced_value.borrow().number,
             uncommon.uncoerced_base_value.borrow().number,
         );

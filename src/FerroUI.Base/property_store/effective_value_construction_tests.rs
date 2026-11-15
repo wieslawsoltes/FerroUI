@@ -29,7 +29,7 @@ impl<T: PropertyValue> EffectiveValue<T> {
             metadata,
             state: EffectiveValueState::new(property),
             value: RefCell::new(value),
-            base_value: RefCell::new(None),
+            base_value: OptionCell::new(),
             uncommon,
         }
     }
@@ -242,7 +242,7 @@ fn run(original: bool, inherited: bool, coerce: bool, replace_on_clone: Option<u
                 _ => false,
             },
             value: effective.value.borrow().number,
-            base_value: effective.base_value.borrow().as_ref().map(|value| value.number),
+            base_value: effective.with_base_value(|base| base.map(|value| value.number)),
             uncommon_values: effective.uncommon.as_ref().map(|fields| (
                 fields.uncoerced_value.borrow().number,
                 fields.uncoerced_base_value.borrow().number,
