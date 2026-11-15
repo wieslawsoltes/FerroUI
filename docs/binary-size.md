@@ -815,6 +815,45 @@ The ControlCatalog page tour (127 pages) and the trimmed samples (HelloWorld, Re
 VirtualizationDemo, BehaviorsGallery) ran with no conversion or registration error and the same
 binding messages as main; the `dist` build of hello world smoke-runs cleanly.
 
+### 4.17 The write of a value carries its coercion only where a callback is registered (#570)
+
+`EffectiveValue<T>::set_and_raise_core` is the write of a value: every local value, style value
+and binding result goes through it, and it is compiled once for each value type (section 5.5:
+0.44 MB in 232 copies in hello world). Every copy handled a coerced value (the callback, the two
+uncoerced values), though 12 of the 159 value types of hello world have a property with a coercion
+callback, and every copy began with a copy of the value it was about to replace.
+
+- The write of a property with a callback is `set_and_raise_coerced`: the body the write had. It is
+  reached through the uncommon fields of the value, which only the registration of a coercion
+  callback makes (section 4.4), so a value type without one does not carry it.
+- Its typed leaves (the comparison and the two notifications) are named once, where the value is
+  made, and kept with the uncommon fields. Named in the write itself, each copy of the write kept
+  copies of the notifications: 233 where there were 159. A function named by its address in a
+  generic function is kept for every copy of that function.
+- The write of every other property takes the previous value out of its cell and keeps it to the
+  end, where the copy was dropped: it is the old value of the change, and what dropping it does
+  still happens after the notification. Under an animation, where the replaced value becomes the
+  base value, it is copied only if the value changed.
+
+| `samples/HelloWorld`, release, macOS | Before | After |
+|---|---:|---:|
+| `set_and_raise_core`, 232 copies | 0.438 MB | 0.381 MB |
+| `set_and_raise_coerced`, 12 copies | | 0.016 MB |
+| Machine code | 17,630,412 bytes | 17,612,808 bytes |
+
+The writes lose a copy and a drop of the value. The property, setter, styling and tree benchmarks
+of the gate (65 metrics, none over tolerance):
+
+| Benchmark | Before | After | Time | Instructions |
+|---|---:|---:|---:|---:|
+| `ControlWrite.local_unchanged[Control=Border]` | 9.69 ns | 8.59 ns | -11.4 % | -6.19 % |
+| `ControlWrite.non_copy_changed[Control=Border]` | 45.71 ns | 44.47 ns | -2.7 % | -4.83 % |
+| `ControlWrite.local_changed[Control=Border]` | 25.50 ns | 25.40 ns | -0.4 % | -2.44 % |
+| `ControlWrite.local_changed[Control=Button]` | 35.92 ns | 35.16 ns | -2.1 % | -1.84 % |
+| `ControlWrite.inherited_changed[Control=Border]` | 23.61 ns | 24.25 ns | +2.7 % | -2.56 % |
+| `ControlWrite.attached_changed[Control=Border]` | 28.48 ns | 30.03 ns | +5.4 % | -2.50 % |
+| `SetterApply.plain[Controls=1000, Setters=32]` | 2.084 ms | 2.033 ms | -2.4 % | -0.81 % |
+
 ## 5. What an executable is made of
 
 ### 5.1 Sections (macOS, release, unstripped)
@@ -942,11 +981,12 @@ of a coerced value, which every copy carries though few properties have a coerci
 `FerroPropertyRegistry::unregister_by_module`, which no application calls, and is kept alive by the
 property's table of routes.
 
-The next steps for this mechanism, each measured with the property benchmarks of the gate: the
-handling of a coerced value leaves the set of every value type and is reached through the
-registration of the coercion callback, as the recoercion already is (section 4.4); the set takes
-the previous value out of its cell instead of copying it first; the parts of the generic paths of
-`ValueStore` that do not touch the value move into functions that are not generic.
+Section 4.17 took the handling of a coerced value out of the set of every value type and the copy
+of the previous value out of every set. What is left of this mechanism is thin typed code in many
+small functions (the routes, the entries, the generic paths of `ValueStore`), 159 times: less of it
+needs either fewer value types reaching an application, which is what the trimming of sections 4.11
+to 4.16 does, or one untyped core under the typed surface, which is a redesign of the property
+store and not a step.
 
 ## 6. The settings applications should use
 
