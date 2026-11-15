@@ -5089,3 +5089,138 @@ styling does not know what draws it.
 `an_expression_takes_its_handlers_out_of_the_element_it_follows` (two expressions of an
 element stopped in turn, one stopped twice, one released while it runs with the object it
 is the value of, and one whose element is gone before it stops).
+
+### 9.61 A binding expression keeps the state few expressions have apart
+
+The first frame of a start is on the screen with the heap its controls left, and how much
+that is decides how many controls a page can have before memory, not time, is what a
+start costs. The start of the controls scene of the frame benchmarks (`startup/controls`,
+1,600 templated controls: buttons, check boxes, text boxes, sliders and progress bars
+under the Fluent theme) leaves 192,057,582 bytes in 1,453,268 blocks when its window is
+shown. The census of the heap by allocation site (section 8, `FERROUI_HEAP_SITES=show`
+and `scripts/perf/heap-sites.py`) says whose they are:
+
+| Left by the show of 1,600 templated controls | MB | blocks | bytes a block |
+| --- | ---: | ---: | ---: |
+| The elements (`type_system::instantiate`) | 39.08 | 29,229 | 1,402 |
+| Effective values (`ValueStore::create_effective_value`) | 19.77 | 134,509 | 154 |
+| Template binding expressions | 18.97 | 45,214 | 440 |
+| Style instances (`StyleBase::try_attach_instance`) | 9.97 | 76,832 | 136 |
+| Lists of children and classes (`FerroList::new`) | 6.79 | 103,930 | 69 |
+| Dynamic resource expressions of setters | 6.57 | 14,838 | 464 |
+| The tables of the effective values of an element | 6.46 | 25,651 | 264 |
+| Setter instances (`Setter::instance`) | 4.69 | 61,616 | 80 |
+| Class activators of selectors | 4.48 | 45,204 | 104 |
+| Dynamic resource expressions of elements | 4.47 | 18,406 | 255 |
+| The handlers of the lists (`add_collection_changed`) | 3.48 | 45,626 | 80 |
+| All | 183.16 | 1,453,268 | 126 |
+
+This section is the first of a series that takes the rows of that table in turn, each
+measured by the same number. It starts with the expressions: a template makes one for
+every `TemplateBinding` of every control it builds, 28 for each control of the scene, and
+a theme one for every dynamic resource of its setters.
+
+**What an expression carried.** Every expression has the state of
+`UntypedBindingExpressionBase`, 248 bytes, and a template binding 424 with its own. Most
+of it is for what few expressions do:
+
+- an error, the default value of the target property (read when the expression has no
+  value) and the adapter of an expression that is observed instead of bound: three fields
+  and 64 bytes, of which a template binding that follows its parent uses none;
+- the sink, the frame, the target and the value, each a `RefCell` of an option whose
+  reads clone and whose writes replace: a borrow flag of eight bytes each;
+- in a template binding, a converter with its culture and its parameter (56 bytes), and
+  the handler and the subscription for the property changes of the target (40 bytes),
+  which only the modes that write to the source have.
+
+**The change.**
+
+- `UntypedBindingExpressionBase` keeps the error, the default value and the adapter in a
+  `RareState` it makes with the first of them (one `OptionCell<Box<RareState>>`). No
+  error where there was none makes nothing. The sink, the frame, the target and the value
+  are `OptionCell`s (section 9.40); a null value is the empty cell.
+- `TemplateBindingExpression` keeps the converter, its culture and its parameter in a
+  `Conversion`, boxed, of an expression that has a converter; the culture and the
+  parameter are read for a converter alone. The handler and the subscription of the
+  target are a `TargetLink` made when an expression of a mode that writes to the source
+  starts for the first time. The subscription to the templated parent is an `OptionCell`.
+
+| Bytes | Before | After |
+| --- | ---: | ---: |
+| `UntypedBindingExpressionBase` | 248 | 144 |
+| `TemplateBindingExpression` | 424 | 224 |
+| `BindingExpression` | 400 | 296 |
+
+**Measured** with the census of the same start:
+
+| The show of 1,600 templated controls | Before | After | |
+| --- | ---: | ---: | ---: |
+| Bytes left | 192,057,582 | 180,032,550 | -6.3 % |
+| Blocks left | 1,453,268 | 1,456,096 | +0.2 % |
+| Template binding expressions, MB | 18.97 | 10.35 | -45 % |
+| Dynamic resource expressions of setters, MB | 6.57 | 5.09 | -23 % |
+| Dynamic resource expressions of elements, MB | 4.47 | 3.56 | -20 % |
+| Binding expressions, MB | 2.38 | 1.82 | -24 % |
+
+The blocks that are new are the states that were made: 2,028 expressions of the scene
+publish an error and have a `RareState` of 56 bytes (0.11 MB), and its 1,600 template
+bindings that write to their source have a `TargetLink` of 32 (0.05 MB).
+
+**The gate** (section 8.1; macOS, the base with the census of the heap in it):
+
+| Part | Metrics | Over tolerance |
+| --- | ---: | --- |
+| Framework benchmarks | 171 | none in the second run (three in time alone in the first) |
+| Counters, gauntlet, frames | 130 | 14, in time alone (below) |
+| TreeDataGrid | 71 | none |
+| Window | 15 | none |
+
+| `startup/controls` | Base | This section | |
+| --- | ---: | ---: | ---: |
+| `show_ms` | 206.958 | 206.638 | -0.2 % |
+| `startup_ms` | 266.157 | 265.377 | -0.3 % |
+| `show_mb` (resident) | 198.2 | 186.0 | -6.2 % |
+| `startup_mb` (resident) | 285.0 | 272.9 | -4.2 % |
+
+*The three lines of the framework benchmarks.* `trees::Propagation.is_visible`,
+`trees::Styling.toggle_class` and `trees::Styling.resource_changed` at 2,000 tiles were 11
+to 27 per cent over in time with the instructions of the base (+0.83, +0.08 and +0.00 per
+cent). The second run, five rounds, has them at -0.8, -4.4 and +0.6 per cent.
+
+*The fourteen lines of the frames.* The show of the scenes of tiles (`frames/wall`,
+`wall+pointer`, `grow`, `pile`, `recolor`, and `startup/tiles`) took 9 to 12 per cent
+longer, and their start, and that of `moves` and `reorder`, 5.5 to 8.5 per cent. These
+scenes have no binding: a profile of `startup/tiles` has no frame of an expression on
+either side, so the code of this section does not run in them. The checks of section 8.1,
+with `frames/wall` (the test program of the gate, run by itself, the sides in turn):
+
+| `frames/wall` | Base | This section | Padded by 36 bytes | Padded by 100 bytes |
+| --- | ---: | ---: | ---: | ---: |
+| Instructions of the process, million | 18,614 | 18,624 | 18,639 | |
+| Cycles of the process, million | 6,070 | 6,268 | 6,171 | 6,207 |
+| `show_ms`, the median | 252.6 | 288.6 | 271.8 | 273.2 |
+| `show_ms`, the runs | 250 to 262 | 255 to 296 | 257 to 290 | 260 to 284 |
+
+(The medians are of nine rounds; the last column is of a run of seven, in which the base
+showed the scene in 257.0 ms and this section in 288.0.) The instructions are those of the
+base. The program of this section showed the scene in
+255 ms in one of its 26 runs and in under 272 in four more, and the same sources with a
+few bytes in front of the code of the libraries are in between: the time moves with where
+the build put code that this section did not change. The gate is not told to pass these
+lines; they are here with their counts.
+
+**What stays as it was.** What an expression publishes, when, and in which order; the
+errors it reports and logs; the public API of the expressions. An expression that has no
+value still reads the default value of its target property once and keeps it, now in the
+state it makes for it.
+
+**Other backends.** All of it is in `ferroui_base`; the expressions do not know what
+draws their targets, and Skia, Vello and ProGPU start with the same smaller heap.
+
+**Tests.** `binding_typed_expression_tests.rs`:
+`an_expression_makes_the_state_few_expressions_have_with_the_first_of_it` (the three
+sizes; a value, a null value and no error make nothing; an error makes the state, is read
+back and is taken away by the next value without one) and
+`a_template_binding_that_follows_its_parent_makes_no_rare_state` (bound to a control with
+a templated parent and following it; the default value of a binding that lost its parent
+is kept in the state).
