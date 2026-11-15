@@ -5635,3 +5635,405 @@ cell and the token are of this port.
 activator held while subscribed, the sink told once for each change of the match, nothing
 after unsubscribing, and let go when the control goes away),
 `an_activator_keeps_no_word_for_what_is_absent`.
+
+### 9.67 An element fits the block below: parents without a borrow flag, rare lists behind a word
+
+Section 9.65 showed that what the process keeps for an element is the block the allocator
+gives it, one of four sizes for each doubling (1,280, 1,536, 1,792, 2,048), and that
+several element types asked for a little more than the size below:
+
+| Element, with its counts | Bytes | Block | Over the block below |
+| --- | ---: | ---: | ---: |
+| `TextBox` | 1,800 | 2,048 | 8 |
+| `RepeatButton` | 1,544 | 1,792 | 8 |
+| `ScrollBar`, `Slider` | 1,584 | 1,792 | 48 |
+| `Grid` | 1,608 | 1,792 | 72 |
+| `TextBlock`, `ContentPresenter` | 1,616 | 1,792 | 80 |
+| `Border` | 1,648 | 1,792 | 112 |
+| `ScrollViewer` | 1,656 | 1,792 | 120 |
+| `Control` | 1,312 | 1,536 | 32 |
+| `Panel`, `StackPanel`, `Canvas` | 1,344 | 1,536 | 64 |
+| `Decorator` | 1,352 | 1,536 | 72 |
+| `ContentControl`, `Thumb` | 1,360 | 1,536 | 80 |
+| `Track` | 1,400 | 1,536 | 120 |
+
+So the bytes that matter are the ones between an element type and the size below it. The
+fields of the layers were read again for words that buy nothing.
+
+**The change**, in three parts, all in the fields of the layers.
+
+1. *A parent is a cell without a borrow flag.* The visual parent, the logical parent, the
+   logical root, the templated parent, the inheritance parent, the inheritance ancestor of
+   the value store and the presentation source of a visual were a `RefCell` of an option:
+   the value and eight bytes of borrow flag. Each is read by upgrading or cloning and
+   written whole, which is what `OptionCell` is for (section 9.40). A read that calls out
+   while it holds the value (the renderer asked whether it keeps a departed composition
+   visual, the layout scaling of the presentation source) clones the handle first, so what
+   it calls can read the field.
+2. *The local value bindings of a value store are made with the first one.* The store kept
+   two lists, the local value bindings and those of them that are binding expressions: 64
+   bytes of every object, used by 2,421 of the 30,043 elements of the scene. They are one
+   box behind a `OnceCell` (`LocalBindings`). The questions about them (is there one for
+   this property, which expression) answer without it where there is none.
+3. *The events few elements have a handler for are made with the first handler.* A handler
+   list is one word. `StyledElement` had six and `Visual` three. Attached to and detached
+   from the logical tree, the data context changed and initialized are one box of the
+   styled element; attached to and detached from the visual tree and the effective
+   visibility changed are one box of the visual (`RareEvents`, a `OnceCell` of a box each).
+   The resources changed and the theme variant changed stay in the element: every dynamic
+   resource subscribes to them, 15,248 lists in the scene.
+
+152 bytes less for every element:
+
+| Bytes | Before | After |
+| --- | ---: | ---: |
+| `FerroObject` (its value store 216 to 152) | 320 | 248 |
+| `Animatable` | 336 | 264 |
+| `StyledElement` | 584 | 464 |
+| `Visual` | 824 | 672 |
+| `Layoutable` | 1,088 | 936 |
+| `InputElement` | 1,160 | 1,008 |
+
+| Element, with its counts | Bytes before | Bytes after | Block before | Block after |
+| --- | ---: | ---: | ---: | ---: |
+| `TextBox` | 1,800 | 1,648 | 2,048 | 1,792 |
+| `ScrollViewer` | 1,656 | 1,504 | 1,792 | 1,536 |
+| `Border` | 1,648 | 1,496 | 1,792 | 1,536 |
+| `TextBlock`, `ContentPresenter` | 1,616 | 1,464 | 1,792 | 1,536 |
+| `Grid` | 1,608 | 1,456 | 1,792 | 1,536 |
+| `ScrollBar`, `Slider` | 1,584 | 1,432 | 1,792 | 1,536 |
+| `RepeatButton` | 1,544 | 1,392 | 1,792 | 1,536 |
+| `Track` | 1,400 | 1,248 | 1,536 | 1,280 |
+| `ContentControl`, `Thumb` | 1,360 | 1,208 | 1,536 | 1,280 |
+| `Decorator` | 1,352 | 1,200 | 1,536 | 1,280 |
+| `Panel`, `StackPanel`, `Canvas` | 1,344 | 1,192 | 1,536 | 1,280 |
+| `Control` | 1,312 | 1,160 | 1,536 | 1,280 |
+| `Button`, `CheckBox`, `ToggleButton` | 1,528 | 1,376 | 1,536 | 1,536 |
+| `Rectangle`, `Path` | 1,496 | 1,344 | 1,536 | 1,536 |
+| `ItemsPresenter` | 1,448 | 1,296 | 1,536 | 1,536 |
+
+The last three rows stay in their block, 96, 64 and 16 bytes over the one below; section
+9.68 takes them there.
+
+**The order of the fields of a value store was measured and left to the compiler.** With
+152 bytes less, the fields a read touches (the effective values, the inherited lookups and
+their generation) are no longer in one cache line of 128 bytes: the compiler puts the
+lookups across the end of the first one. A store with the order written out (`repr(C)`:
+the generation, the ancestor, the effective values and the lookups in the first 88 bytes)
+against the store as the compiler lays it out, the reads of 10,000 controls that are not in
+the cache: the inherited read of a held value 9.44 to 8.90 ns, that of a value nobody holds
+2.49 to 2.72 ns, a value that is not copied 6.13 to 6.37 ns, the other five within a
+fiftieth of a nanosecond; the eight together 40.78 ns on both sides. It moves time from one
+read to another and wins nothing, so the order stays the compiler's.
+
+**Measured** as in section 9.62, against sections 9.61 to 9.66:
+
+The census and the gate of this change and of the five after it are at the end of section
+9.72.
+
+**A parent is read where it is.** A read of an option cell takes the value out, reads it
+and puts it back, which is more than the borrow flag it replaced where the value is only
+looked at. The parents of an element are read in every walk up a tree, and the first gate
+of this change said so: the effective viewport of 1,000 listeners, which reads the visual
+parent of each, took 9.3 per cent more instructions
+(`LayoutListeners.effective_viewport_idle`). A cell of a weak handle now upgrades it in
+place (`OptionCell::upgrade`), and `is_some` looks without taking. Both read through the
+pointer of the cell, in two lines of `unsafe`: the cell is not `Sync`, and an upgrade
+reads and writes the counts of the allocation the handle points to and runs no code of the
+object, so nothing can write to the cell while it is looked at. The eight reads of a
+parent use it (the visual parent, the logical parent and root, the templated parent, the
+inheritance parent and ancestor, the owner of a value frame, the target of a binding
+expression). The same benchmark then takes 10.0 per cent fewer instructions than before
+the change, and `effective_viewport_moved` 3.6 per cent fewer.
+
+**One frame scene in time alone.** `frames/reorder` (a wrapping panel of thousands of
+tiles, two of which change places in every frame) is over tolerance in the UI thread and
+in wall time, in every run:
+
+| `frames/reorder`, a frame | Before | This change alone | Sections 9.67 to 9.72 |
+| --- | ---: | ---: | ---: |
+| UI thread | 1.34 ms | 1.62 ms (+20.7 %) | 1.65 ms (+23.3 %) |
+| Render thread | 2.39 ms | | 2.35 ms (-1.4 %) |
+| Wall time | 2.39 ms | | 3.27 ms (+36.5 %) |
+
+The checks of section 8.1:
+
+- *The instructions.* The scene retires the same instructions on both sides: 19.45 and
+  19.30 thousand million in two runs of the base, 19.31 and 19.34 with the change
+  (`/usr/bin/time -l` of the benchmark of the scene, the whole process). The cycles are 3
+  to 5 per cent more.
+- *The block size alone.* The change with 152 unused bytes at the end of every element,
+  which puts the elements back into the blocks they had, against the base, three runs of
+  each side twice: 1.30 to 1.44 ms of UI thread and 2.36 to 2.50 ms of wall time a frame,
+  where the base has 1.24 to 1.35 and 2.36 to 2.48, and the change without the bytes 1.40
+  to 1.57 and 2.84 to 3.19.
+- *What the wall time is.* The scene runs without a display clock, as fast as its two
+  threads go. On the base a frame takes what the render thread takes (2.39 ms of wall
+  time, 2.39 ms of render thread): the UI thread has its next batch ready before the
+  render thread asks. With the change the render thread waits for the batch in every
+  frame (3.27 ms of wall time, 2.35 ms of render thread), though the UI thread works 1.65
+  ms of them.
+
+So the line is the walk over the tiles in blocks at another distance, a few per cent of
+cycles as in section 9.65, and what the hand-over between the two threads of a scene
+without a display clock makes of them. Nothing of the change does more work. The line is
+recorded as it is; the gate is not told to pass it. That the wall time of the scene turns
+on a few per cent of its UI thread is a finding of its own, for the frame pacing.
+
+**What stays as it was.** What the fields hold and when the events are raised. An element
+without a handler for those events reads one pointer where it read the list; one with a
+handler pays one allocation, once, and the box stays. A local value binding pays the box
+of the two lists once for its object. No public API changes.
+
+**Other backends.** All of it is in `ferroui_base`.
+
+**Not upstream.** Upstream has these as fields of the classes; what they hold is the
+same.
+
+**Tests.** `tree_tests.rs`:
+`only_an_element_with_a_handler_keeps_the_events_few_elements_have_one_for` (two leaves
+through the same life in the trees: the one with handlers hears all of it, the other one
+makes no box, and a handler taken away hears nothing).
+`ferro_object_tests_binding.rs`:
+`only_an_object_with_a_local_value_binding_keeps_the_lists_of_them`. The tree, binding,
+styling and rendering suites cover the rest.
+
+### 9.68 A control keeps what few controls have behind one word
+
+After section 9.67 `Button`, `Rectangle`, `Path` and `ItemsPresenter` were 96, 64 and 16
+bytes over the block below theirs, and `Control` had four fields that few controls ever
+use, 120 bytes of every control:
+
+| Field | Bytes | Used by |
+| --- | ---: | --- |
+| The focus adorner | 24 | A control that has the keyboard focus from the keyboard |
+| The handlers of a context flyout | 24 | A control with a context flyout |
+| The handlers of a context menu | 48 | A control with a context menu |
+| The automation peer | 24 | A control an accessibility client asked about |
+
+**The change.** The four are one box (`RareState`) behind a `OnceCell`, made with the first
+of them. A control without any reads one pointer where it read the field; taking away a
+context menu or a context flyout that was never set makes no box. The cells of the
+handlers were handed out by `Control`; it now has a method that takes them and one that
+sets them, so that the read does not make the box.
+
+112 bytes less for every control:
+
+| Element, with its counts | Bytes before | Bytes after | Block before | Block after |
+| --- | ---: | ---: | ---: | ---: |
+| `Button`, `CheckBox`, `ToggleButton` | 1,376 | 1,264 | 1,536 | 1,280 |
+| `Rectangle`, `Path` | 1,344 | 1,232 | 1,536 | 1,280 |
+| `ItemsPresenter` | 1,296 | 1,184 | 1,536 | 1,280 |
+| `Border` | 1,496 | 1,384 | 1,536 | 1,536 |
+| `TextBlock`, `ContentPresenter` | 1,464 | 1,352 | 1,536 | 1,536 |
+| `Grid` | 1,456 | 1,344 | 1,536 | 1,536 |
+| `Panel`, `StackPanel`, `Canvas` | 1,192 | 1,080 | 1,280 | 1,280 |
+
+The last four rows stay in their block and come closer to the one below; sections 9.69 to
+9.71 take the first three of them there.
+
+**One line of the gate in instructions.** `ScrollContent.offset[Rows=1000]` (the offset of a
+scroll viewer over 1,000 rows changes) takes 224,482 instructions before sections 9.67 to
+9.72 and 232,474 with them, 8 for a row and 3.6 per cent more; its time is inside its
+tolerance. What was established, each branch against the same base:
+
+| Branch | Instructions of `ScrollContent.offset` |
+| --- | ---: |
+| Section 9.67 alone | -0.08 % |
+| Section 9.72 alone | +0.01 % |
+| Sections 9.67 and 9.69 | -0.04 % |
+| Sections 9.67 and 9.70 | -0.03 % |
+| Sections 9.67 and 9.71 | -0.05 % |
+| Sections 9.67 to 9.71 before the parent read of section 9.67 | +0.04 % |
+| Section 9.67 and this section | +3.55 % |
+| The same, `Control` padded back to its size | +3.48 % |
+
+So it needs this change and the parent read of section 9.67 together, it is not the size of
+the control, and no code of this change is on that path: layout reads neither the focus
+adorner nor the context handlers nor the automation peer. Forcing the two reads of the
+option cell inline, and the walk to the visual parent of `Visual::elided_origin` written
+without a closure, do not move it. It is in the code the compiler makes of the controls
+crate for that combination; which function was not found. The line is recorded as it is,
+and the gate is not told to pass it.
+
+**What stays as it was.** When a focus adorner is built and removed, what the context menu
+and the context flyout handle, and when an automation peer is made. A control with one of
+them pays one allocation, once, of 128 bytes. No public API changes.
+
+**Other backends.** All of it is in `ferroui_controls`.
+
+**Not upstream.** Upstream has these as fields of `Control`; what they hold is the same.
+
+**Tests.** `context_menu_tests.rs`:
+`only_a_control_with_a_context_menu_keeps_the_state_few_controls_have`. The context menu,
+flyout, focus and automation suites cover the rest.
+
+### 9.69 A border makes its renderer with the first render that has something to draw
+
+A `Border` and a `ContentPresenter` each held a `BorderRenderHelper`, 144 bytes: the
+geometries, the pen and the values it was last asked to draw with. An element with no
+background, no border brush and no shadow never asks it for anything: `DrawingContext`
+leaves a draw without a brush, a visible pen and a shadow out. A content presenter is such
+an element nearly always, and so is a border that is there for its padding or its layout.
+
+**The change.** The renderer of the two is one word and a box made by the first render
+that has a brush or a shadow (`LazyBorderRenderHelper`, in the crate). A render with none
+returns before it, where it updated the geometries of the renderer for nothing. What is
+drawn is the same. `BorderRenderHelper` and its public API are untouched; the other
+elements that hold one (a layout panel, the ink toolbar, the text field border of the
+Material theme) keep it as a field.
+
+136 bytes less for every border and content presenter:
+
+| Element, with its counts | Bytes before | Bytes after | Block before | Block after |
+| --- | ---: | ---: | ---: | ---: |
+| `Border` | 1,384 | 1,248 | 1,536 | 1,280 |
+| `ContentPresenter` | 1,352 | 1,216 | 1,536 | 1,280 |
+
+A border that draws keeps 1,280 and 176 bytes where it kept 1,536.
+
+**What stays as it was.** What a border and a content presenter draw, and when. One that
+draws pays one allocation, once, of 176 bytes, and reads one pointer more in its render;
+the gate below has the frames. No public API changes.
+
+**Other backends.** All of it is in `ferroui_controls`.
+
+**Not upstream.** Upstream has the renderer as a field of both classes.
+
+**Tests.** `compositor_hit_testing_tests.rs`:
+`only_a_border_with_something_to_draw_makes_its_renderer` (a border with a background
+inside the compositor makes its renderer, the one without does not until it is given a
+brush).
+
+### 9.70 The extended data of a grid is in a box made on demand
+
+A grid kept its extended data (the definitions, the cell caches and the cell groups)
+inline behind a `OnceCell`: 168 bytes of every grid, also of one without definitions, which
+never makes it. With sections 9.67 and 9.68 a grid with its counts was 1,344 bytes, 64 over
+the block of 1,280, and the start of 1,600 templated controls has 3,201 of them.
+
+**The change.** The extended data is a box made on demand, as upstream has it in an object
+of its own. A grid with definitions pays one allocation of 160 bytes when they are first
+read. 160 bytes less for every grid: 1,184 with its counts, in a block of 1,280.
+
+**What stays as it was.** When the extended data is made and what it holds. No public API
+changes.
+
+**Other backends.** All of it is in `ferroui_controls`.
+
+**Tests.** `grid_tests.rs`: `a_grid_without_definitions_makes_no_extended_data`.
+
+### 9.71 A text block keeps its layout state in cells without a borrow flag
+
+With sections 9.67 and 9.68 a `TextBlock` with its counts was 1,352 bytes, 72 over the
+block of 1,280.
+
+**The change.**
+
+| Field of `TextBlock` | Before | After |
+| --- | ---: | ---: |
+| The text layout | 16 | 8 |
+| The run properties | 24 | 16 |
+| The paragraph properties | 24 | 16 |
+| The text run cache | 16 | 8 |
+| The subscription to the inlines | 32 | 8 |
+| The subscription to the font features | 32 | 8 |
+
+The first four are read by cloning and written whole: an `OptionCell` (section 9.40), eight
+bytes less than a `RefCell` of an option. The two subscriptions, which few text blocks
+have, are a box each. 80 bytes less for every text block: 1,272 with its counts, in a block
+of 1,280.
+
+`OptionCell` was private to `ferroui_base` and is public in `ferroui_base::utilities`, so
+that the controls can use it: the one addition to the public API.
+
+**What stays as it was.** When a layout, its properties and its run cache are made, kept
+and dropped. A read of the layout clones the handle as before.
+
+**Other backends.** The fields are in `ferroui_controls`, the cell in `ferroui_base`.
+
+**Tests.** The text block, selectable text block and text layout suites.
+
+### 9.72 A binding expression reads its target type from the target property
+
+The second block of the census of section 9.61: `TemplateBindingExpression::new` leaves
+10.35 MB in the start of 1,600 templated controls, 45,214 expressions of 224 bytes.
+
+**The change.** Every binding expression kept a copy of the type its values are converted
+to (`target_type: Cell<ValueType>`, 32 bytes). It was always the type and the type name of
+the target property, or `object` where there is none, set where the property is set.
+`UntypedBindingExpressionBase::target_type` reads it from the property: two fields behind
+a pointer the expression already has.
+
+| Bytes | Before | After |
+| --- | ---: | ---: |
+| `UntypedBindingExpressionBase` | 144 | 112 |
+| `TemplateBindingExpression` | 224 | 192 |
+| `BindingExpression` | 296 | 264 |
+
+`TemplateBindingExpression::new` leaves 8.97 MB where it left 10.35 MB.
+
+**What stays as it was.** What the type is, and when it changes: with the target property.
+No public API changes.
+
+**Other backends.** All of it is in `ferroui_base`.
+
+**Tests.** `binding_typed_expression_tests.rs`:
+`an_expression_makes_the_state_few_expressions_have_with_the_first_of_it` holds the three
+sizes.
+
+**Sections 9.67 to 9.72 together.** The six changes were measured as one branch. The heap
+the show of 1,600 templated controls leaves:
+
+| | Before | After |
+| --- | ---: | ---: |
+| Bytes asked for | 160,852,624 | 151,028,736 (-6.1 %) |
+| Kept in the blocks of the allocator (`heap-sites.py --kept`, an estimate) | 160.90 MB | 150.35 MB |
+| Elements in blocks of 1,792 bytes | 14,008 | 803 |
+| Elements in blocks of 1,536 bytes | 8,011 | 2,803 |
+| Elements in blocks of 1,280 bytes | 2 | 18,816 |
+| The blocks of the elements | 35.68 MB | 28.49 MB |
+
+`heap-sites.py --kept` counts the blocks the allocator gives instead of the bytes asked
+for: every site is taken as blocks of its average size, and a block as the size the
+allocator of macOS gives for it.
+
+**The gate** (section 8.1):
+
+| Part | Metrics | Over tolerance |
+| --- | ---: | --- |
+| Framework | 171 | 1: `ScrollContent.offset`, in instructions (section 9.68) |
+| Counters, gauntlet, frames | 130 | 2: `frames/reorder`, UI thread and wall time, in time alone (section 9.67) |
+| TreeDataGrid | 71 | none |
+| Window | 15 | none |
+
+The TreeDataGrid and window parts are from the run of sections 9.67 to 9.71 before the
+parent read of section 9.67 and without section 9.72. The framework table is the median of
+three rounds of the base and of two and a half rounds of the branch: a disk fault ended
+the last round, and the table was made from the logs of the rounds.
+
+| `startup/controls` | Before | After | |
+| --- | ---: | ---: | ---: |
+| `show_mb` | 166.8 | 157.7 | -5.5 % |
+| `startup_mb` | 252.7 | 243.2 | -3.8 % |
+| `show_ms` | 197.7 | 193.1 | -2.3 % |
+| `first_frame_ms` | 42.2 | 40.6 | -3.9 % |
+| `startup_ms` | 255.0 | 247.9 | -2.8 % |
+
+What the smaller blocks and the cells without a flag do for the walks of a tree:
+
+| Framework benchmark | Before | After | Time | Instructions |
+| --- | ---: | ---: | ---: | ---: |
+| `ControlRead.inherited_held[Objects=10000]` | 13.16 ns | 8.45 ns | -35.8 % | -2.56 % |
+| `ControlRead.inherited_unheld[Objects=10000]` | 3.48 ns | 2.30 ns | -33.9 % | +0.00 % |
+| `ControlRead.hot_copy[Objects=10000]` | 2.39 ns | 1.73 ns | -27.6 % | +0.00 % |
+| `trees::Lifetime.detach[Tiles=2000]` | 4.520 ms | 3.316 ms | -26.6 % | -2.76 % |
+| `trees::Lifetime.attach[Tiles=2000]` | 5.345 ms | 4.000 ms | -25.2 % | -5.86 % |
+| `trees::Propagation.font_family[Tiles=2000]` | 1.387 ms | 1.018 ms | -26.6 % | -1.94 % |
+| `trees::Lifetime.lay_out[Tiles=2000]` | 7.271 ms | 6.454 ms | -11.2 % | -0.10 % |
+| `ElementConstructionBenchmark.create_attach_and_lay_out[Tiles=1000]` | 16.783 ms | 15.215 ms | -9.3 % | -2.74 % |
+| `PanelMeasureArrange.canvas[Children=1000]` | 101.440 us | 92.156 us | -9.2 % | +0.27 % |
+| `LayoutListeners.effective_viewport_idle[Leaves=1000]` | 6.348 us | 6.658 us | +4.9 % | -10.01 % |
+
+The inherited read of a held value, which section 9.65 left slower by the distance between
+its blocks, is faster than before that section.
