@@ -153,16 +153,38 @@ fn a_unit_defines_its_keys_and_type_keys_and_references_the_keys_it_names() {
 }
 
 #[test]
-fn a_unit_constructs_and_selects_the_types_of_its_elements_targets_selectors_and_type_extensions() {
+fn a_unit_constructs_the_types_of_its_elements_targets_and_type_extensions_and_not_those_it_selects() {
     let plan = plan(&theme(), &merged()).expect("units");
     let button = unit(&plan, "Controls/Button.xaml");
-    // The elements (template content included), the targets, the type selectors and the
-    // `{x:Type}` of `BasedOn`; nothing of `Design.PreviewWith`, no class, name or pseudo-class
-    // of a selector.
+    // The elements (template content included), the targets and the `{x:Type}` of `BasedOn`;
+    // nothing of `Design.PreviewWith`, and nothing of a selector: neither its classes, names and
+    // pseudo-classes nor the types it selects.
     assert_eq!(button.types, strings(&["Button", "ContentPresenter", "ControlTemplate", "ControlTheme", "ResourceDictionary", "Setter", "Style"]));
     assert!(!button.types.iter().any(|name| name == "Border" || name == "PART_ContentPresenter" || name == "pointerover"));
+    // A global style that selects a menu item and its icon constructs neither: the ambient unit,
+    // which every application keeps, does not make the menu item a type of every application.
     let ambient = unit(&plan, AMBIENT);
-    assert!(ambient.types.contains(&"MenuItem".to_string()) && ambient.types.contains(&"PathIcon".to_string()), "{:?}", ambient.types);
+    assert!(!ambient.types.iter().any(|name| name == "MenuItem" || name == "PathIcon"), "{:?}", ambient.types);
+}
+
+#[test]
+fn a_tool_tip_set_on_an_element_constructs_a_tool_tip() {
+    // As an attribute and as a property element; another attached property constructs nothing.
+    let attribute = r#"<Panel xmlns="https://github.com/ferroui"><Button ToolTip.Tip="Close" Grid.Row="1" /></Panel>"#;
+    let element =
+        r#"<Panel xmlns="https://github.com/ferroui"><Path><ToolTip.Tip><TextBlock /></ToolTip.Tip></Path></Panel>"#;
+    for xaml in [attribute, element] {
+        let references = document_references(xaml).expect("plain XML");
+        assert!(references.types.contains("ToolTip"), "{:?}", references.types);
+        assert!(!references.types.contains("Grid"), "{:?}", references.types);
+    }
+}
+
+#[test]
+fn the_document_of_an_application_roots_the_types_its_selectors_name() {
+    let styles = r#"<Styles xmlns="https://github.com/ferroui"><Style Selector="MenuItem > PathIcon" /></Styles>"#;
+    let references = document_references(styles).expect("plain XML");
+    assert!(references.types.contains("MenuItem") && references.types.contains("PathIcon"), "{:?}", references.types);
 }
 
 #[test]

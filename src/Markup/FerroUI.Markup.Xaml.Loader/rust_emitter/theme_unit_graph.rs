@@ -19,8 +19,13 @@
 //! identifier token of its attribute values and text that is a key of the group (conservative:
 //! a `TargetType`, a selector or a text that happens to spell a key keeps it), and the argument
 //! of every `{StaticResource}`, `{DynamicResource}` and `ResourceKey`, which may be any key. It
-//! constructs or selects the types of its elements, of its `TargetType`s, of the type selectors
-//! of its selectors and of its `{x:Type}`s. The `Source` of an include and the content of
+//! constructs the types of its elements, of its `TargetType`s and of its `{x:Type}`s, and the owner
+//! of an attached property that makes the framework construct it (`ToolTip.Tip`). The types of
+//! the type selectors of its selectors are not among them: a selector is a condition, and a style
+//! that selects a type styles it where something else made it. Counted as constructed, the one
+//! global style of a theme that selects a menu item kept the themes of the menu item, the scroll
+//! viewer, the scroll bar and what their templates construct in every application
+//! (docs/binary-size.md, section 4.19). The `Source` of an include and the content of
 //! `Design.PreviewWith` are not read. A group with a document that is not plain XML (one with a
 //! DTD, for example) has no units.
 
@@ -40,6 +45,17 @@ pub(crate) const AMBIENT: &str = "ambient";
 /// name them to need them.
 pub(crate) const FRAMEWORK_HOSTS: &[&str] =
     &["Window", "PopupRoot", "OverlayPopupHost", "AdornerLayer", "EmbeddableControlRoot", "ThemeVariantScope"];
+
+/// The attached properties whose value makes the framework construct an instance of their owner:
+/// `ToolTip.Tip` on any element shows a `ToolTip`, which no element of the document is. A document
+/// that sets one constructs the owner, as an attribute or as a property element.
+const ATTACHED_CONSTRUCTIONS: &[(&str, &str)] = &[("ToolTip", "Tip")];
+
+/// The owner of the attached property `name` (`Owner.Property`) if setting it constructs the owner.
+fn attached_construction(name: &str) -> Option<&'static str> {
+    let (owner, property) = name.split_once('.')?;
+    ATTACHED_CONSTRUCTIONS.iter().find(|(o, p)| *o == owner && *p == property).map(|(owner, _)| *owner)
+}
 
 /// The units of the compiled markup of a class.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -202,6 +218,8 @@ struct DocumentFacts {
     tokens: BTreeSet<String>,
     extension_keys: BTreeSet<String>,
     types: BTreeSet<String>,
+    /// The types the type selectors of the selectors name: conditions, not constructions.
+    selected_types: BTreeSet<String>,
     /// An entry no root can name (see the module documentation).
     opaque: bool,
 }
@@ -256,8 +274,16 @@ fn facts_of(xml: &Document<'_>) -> DocumentFacts {
         if !tag.name().contains('.') && tag.namespace() != Some(XamlNamespaces::XAML2006) {
             facts.types.insert(tag.name().to_string());
         }
+        if let Some(owner) = attached_construction(tag.name()) {
+            facts.types.insert(owner.to_string());
+        }
         for attribute in node.attributes() {
             let value = attribute.value();
+            if attribute.namespace().is_none() {
+                if let Some(owner) = attached_construction(attribute.name()) {
+                    facts.types.insert(owner.to_string());
+                }
+            }
             if attribute.namespace().is_none() && attribute.name() == "TargetType" {
                 let target = type_extension(value).unwrap_or(value);
                 let target = local_type_name(target);
@@ -266,7 +292,7 @@ fn facts_of(xml: &Document<'_>) -> DocumentFacts {
                 }
             }
             if attribute.namespace().is_none() && attribute.name() == "Selector" {
-                facts.types.extend(selector_types(value).into_iter().map(str::to_string));
+                facts.selected_types.extend(selector_types(value).into_iter().map(str::to_string));
             }
             if skipped_attribute(node, &attribute) {
                 continue;
@@ -316,7 +342,11 @@ pub fn document_references(xaml: &str) -> Option<DocumentReferences> {
     let facts = facts_of(&xml);
     let mut keys = facts.tokens;
     keys.extend(facts.extension_keys);
-    Some(DocumentReferences { types: facts.types, keys })
+    // The documents of an application root what their selectors name as well: an application
+    // that styles a type is taken to use it, by whatever means it makes it.
+    let mut types = facts.types;
+    types.extend(facts.selected_types);
+    Some(DocumentReferences { types, keys })
 }
 
 /// The units of the group `documents` (`(name, xaml, URI)`, the document of the class first),
