@@ -34,15 +34,18 @@ pub struct StyledElement {
     init_count: Cell<u32>,
     name: OptionCell<Box<str>>,
     classes: OnceCell<Classes>,
-    logical_root: RefCell<Option<WeakRef<StyledElement>>>,
+    // Not upstream (docs/porting/desktop-performance.md, section 9.67): the root, the parent and
+    // the templated parent are read by upgrading and written whole, so they are cells without
+    // a borrow flag.
+    logical_root: OptionCell<WeakRef<StyledElement>>,
     logical_children: OnceCell<FerroList<Ref<StyledElement>>>,
-    parent: RefCell<Option<WeakRef<StyledElement>>>,
+    parent: OptionCell<WeakRef<StyledElement>>,
     resources: OptionCell<Ref<ResourceDictionary>>,
     styles: OnceCell<Ref<Styles>>,
     styles_applied: Cell<bool>,
     theme_applied: Cell<bool>,
     templated_parent_theme_applied: Cell<bool>,
-    templated_parent: RefCell<Option<WeakRef<FerroObject>>>,
+    templated_parent: OptionCell<WeakRef<FerroObject>>,
     data_context_updating: Cell<bool>,
     implicit_theme: RefCell<ImplicitTheme>,
     last_resources_changed_event_args: Cell<ResourcesChangedEventArgs>,
@@ -51,12 +54,22 @@ pub struct StyledElement {
     /// collection and not added back since. Avoids a costly quadratic
     /// `contains` check when attaching to the logical tree.
     removed_from_logical_parent: Cell<bool>,
+    // Not upstream (docs/porting/desktop-performance.md, section 9.67): the events few elements
+    // have a handler for, made with the first handler. The two below them are subscribed to
+    // by every dynamic resource and stay in the element.
+    rare_events: OnceCell<Box<RareEvents>>,
+    resources_changed: HandlerList<dyn Fn(&ResourcesChangedEventArgs)>,
+    actual_theme_variant_changed: HandlerList<dyn Fn()>,
+}
+
+/// The events of a styled element that few elements have a handler for
+/// (`StyledElement::rare_events`).
+#[derive(Default)]
+struct RareEvents {
     attached_to_logical_tree: HandlerList<dyn Fn(&LogicalTreeAttachmentEventArgs)>,
     detached_from_logical_tree: HandlerList<dyn Fn(&LogicalTreeAttachmentEventArgs)>,
     data_context_changed: HandlerList<dyn Fn()>,
     initialized: HandlerList<dyn Fn()>,
-    resources_changed: HandlerList<dyn Fn(&ResourcesChangedEventArgs)>,
-    actual_theme_variant_changed: HandlerList<dyn Fn()>,
 }
 
 /// The control theme found for an element whose `Theme` property is not set.
@@ -138,7 +151,7 @@ crate::ferro_overrides! { impl FerroObjectImpl for StyledElement {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         if this.is_logical_root() {
-            *this.logical_root.borrow_mut() = Some(this.to_ref().downgrade());
+            this.logical_root.set(Some(this.to_ref().downgrade()));
         }
     }
 
@@ -171,7 +184,7 @@ impl StyledElementImpl for StyledElement {
         let count = this.init_count.get();
         assert!(count != 0, "BeginInit was not called.");
         this.init_count.set(count - 1);
-        if count == 1 && this.logical_root.borrow().is_some() {
+        if count == 1 && this.logical_root.is_some() {
             this.try_apply_styling()?;
             this.initialize_if_needed();
         }
@@ -198,8 +211,8 @@ impl StyledElementImpl for StyledElement {
     fn on_detached_from_logical_tree(_this: &Self, _e: &LogicalTreeAttachmentEventArgs) {}
 
     fn on_data_context_changed(this: &Self) {
-        if !this.data_context_changed.is_empty() {
-            for (_, handler) in this.data_context_changed.snapshot().iter() {
+        if let Some(events) = this.rare_events.get().filter(|events| !events.data_context_changed.is_empty()) {
+            for (_, handler) in events.data_context_changed.snapshot().iter() {
                 handler();
             }
         }
@@ -345,24 +358,21 @@ impl StyledElement {
             init_count: Cell::new(0),
             name: OptionCell::new(),
             classes: OnceCell::new(),
-            logical_root: RefCell::new(None),
+            logical_root: OptionCell::new(),
             logical_children: OnceCell::new(),
-            parent: RefCell::new(None),
+            parent: OptionCell::new(),
             resources: OptionCell::new(),
             styles: OnceCell::new(),
             styles_applied: Cell::new(false),
             theme_applied: Cell::new(false),
             templated_parent_theme_applied: Cell::new(false),
-            templated_parent: RefCell::new(None),
+            templated_parent: OptionCell::new(),
             data_context_updating: Cell::new(false),
             implicit_theme: RefCell::new(ImplicitTheme::Unknown),
             last_resources_changed_event_args: Cell::new(ResourcesChangedEventArgs::default()),
             is_initialized: Cell::new(false),
             removed_from_logical_parent: Cell::new(false),
-            attached_to_logical_tree: HandlerList::new(),
-            detached_from_logical_tree: HandlerList::new(),
-            data_context_changed: HandlerList::new(),
-            initialized: HandlerList::new(),
+            rare_events: OnceCell::new(),
             resources_changed: HandlerList::new(),
             actual_theme_variant_changed: HandlerList::new(),
         }
@@ -374,16 +384,27 @@ impl StyledElement {
 
     // --- events -----------------------------------------------------------
 
+    /// The events few elements have a handler for, made when one is added.
+    fn rare_events(&self) -> &RareEvents {
+        self.rare_events.get_or_init(Default::default)
+    }
+
+    /// Whether the element keeps the events few elements have a handler for.
+    #[cfg(test)]
+    pub(crate) fn has_rare_events(&self) -> bool {
+        self.rare_events.get().is_some()
+    }
+
     /// Raised when the styled element is attached to a rooted logical tree.
     pub fn attached_to_logical_tree(
         &self,
         handler: impl Fn(&LogicalTreeAttachmentEventArgs) + 'static,
     ) -> Subscription {
-        let token = self.attached_to_logical_tree.add(Rc::new(handler));
+        let token = self.rare_events().attached_to_logical_tree.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
         Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
-                this.attached_to_logical_tree.remove(token);
+                this.rare_events().attached_to_logical_tree.remove(token);
             }
         }))
     }
@@ -393,33 +414,33 @@ impl StyledElement {
         &self,
         handler: impl Fn(&LogicalTreeAttachmentEventArgs) + 'static,
     ) -> Subscription {
-        let token = self.detached_from_logical_tree.add(Rc::new(handler));
+        let token = self.rare_events().detached_from_logical_tree.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
         Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
-                this.detached_from_logical_tree.remove(token);
+                this.rare_events().detached_from_logical_tree.remove(token);
             }
         }))
     }
 
     /// Occurs when the data context property changes.
     pub fn data_context_changed(&self, handler: impl Fn() + 'static) -> Subscription {
-        let token = self.data_context_changed.add(Rc::new(handler));
+        let token = self.rare_events().data_context_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
         Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
-                this.data_context_changed.remove(token);
+                this.rare_events().data_context_changed.remove(token);
             }
         }))
     }
 
     /// Occurs when the styled element has finished initialization.
     pub fn initialized(&self, handler: impl Fn() + 'static) -> Subscription {
-        let token = self.initialized.add(Rc::new(handler));
+        let token = self.rare_events().initialized.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
         Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
-                this.initialized.remove(token);
+                this.rare_events().initialized.remove(token);
             }
         }))
     }
@@ -665,7 +686,7 @@ impl StyledElement {
 
     /// The styled element whose lookless template this element is part of.
     pub fn templated_parent(&self) -> Option<Ref<FerroObject>> {
-        self.templated_parent.borrow().as_ref().and_then(WeakRef::upgrade)
+        self.templated_parent.upgrade()
     }
 
     /// Sets the templated parent. Called by the template that creates the
@@ -674,7 +695,7 @@ impl StyledElement {
         let value = value.into().0;
         let old = self.templated_parent();
         if old != value {
-            *self.templated_parent.borrow_mut() = value.as_ref().map(Ref::downgrade);
+            self.templated_parent.set(value.as_ref().map(Ref::downgrade));
             self.values().templated_parent_changed();
             self.raise_direct_property_changed(Self::templated_parent_property(), &old, &value);
         }
@@ -715,12 +736,12 @@ impl StyledElement {
 
     /// Whether the element is attached to a rooted logical tree.
     pub fn is_attached_to_logical_tree(&self) -> bool {
-        self.logical_root.borrow().is_some()
+        self.logical_root.is_some()
     }
 
     /// The styled element's logical parent.
     pub fn parent(&self) -> Option<Ref<StyledElement>> {
-        self.parent.borrow().as_ref().and_then(WeakRef::upgrade)
+        self.parent.upgrade()
     }
 
     // --- initialization and styling ---------------------------------------
@@ -785,8 +806,8 @@ impl StyledElement {
         if self.init_count.get() == 0 && !self.is_initialized.get() {
             self.is_initialized.set(true);
             self.on_initialized();
-            if !self.initialized.is_empty() {
-                for (_, handler) in self.initialized.snapshot().iter() {
+            if let Some(events) = self.rare_events.get().filter(|events| !events.initialized.is_empty()) {
+                for (_, handler) in events.initialized.snapshot().iter() {
                     handler();
                 }
             }
@@ -818,7 +839,7 @@ impl StyledElement {
             self.set_inheritance_parent(parent.clone().map(Ref::upcast::<FerroObject>));
         }
 
-        *self.parent.borrow_mut() = parent.as_ref().map(Ref::downgrade);
+        self.parent.set(parent.as_ref().map(Ref::downgrade));
 
         let this = self.to_ref();
         let old_root = self.logical_root();
@@ -862,7 +883,7 @@ impl StyledElement {
     }
 
     fn logical_root(&self) -> Option<Ref<StyledElement>> {
-        self.logical_root.borrow().as_ref().and_then(WeakRef::upgrade)
+        self.logical_root.upgrade()
     }
 
     fn find_logical_root(&self) -> Option<Ref<StyledElement>> {
@@ -896,16 +917,16 @@ impl StyledElement {
         // - ListBox template gets applied; making its Panel get attached to
         //   the logical tree
         // - That AttachedToLogicalTree signal travels down to the ListBoxItem
-        if self.logical_root.borrow().is_none() {
+        if !self.logical_root.is_some() {
             crate::perf_count!(LogicalTreeAttachments);
-            *self.logical_root.borrow_mut() = Some(e.root().downgrade());
+            self.logical_root.set(Some(e.root().downgrade()));
             self.reevaluate_implicit_theme();
             self.apply_styling();
             // One notification for the subtree, numbered when it was attached.
             self.notify_resources_changed(e.resources_changed(), false);
             self.on_attached_to_logical_tree(e);
-            if !self.attached_to_logical_tree.is_empty() {
-                for (_, handler) in self.attached_to_logical_tree.snapshot().iter() {
+            if let Some(events) = self.rare_events.get().filter(|events| !events.attached_to_logical_tree.is_empty()) {
+                for (_, handler) in events.attached_to_logical_tree.snapshot().iter() {
                     handler(e);
                 }
             }
@@ -924,13 +945,14 @@ impl StyledElement {
     }
 
     fn on_detached_from_logical_tree_core(&self, e: &LogicalTreeAttachmentEventArgs) {
-        if self.logical_root.borrow().is_some() {
+        if self.logical_root.is_some() {
             crate::perf_count!(LogicalTreeDetachments);
-            *self.logical_root.borrow_mut() = None;
+            self.logical_root.set(None);
             self.invalidate_styles(false);
             self.on_detached_from_logical_tree(e);
-            if !self.detached_from_logical_tree.is_empty() {
-                for (_, handler) in self.detached_from_logical_tree.snapshot().iter() {
+            if let Some(events) = self.rare_events.get().filter(|events| !events.detached_from_logical_tree.is_empty())
+            {
+                for (_, handler) in events.detached_from_logical_tree.snapshot().iter() {
                     handler(e);
                 }
             }
@@ -1005,7 +1027,7 @@ impl StyledElement {
     fn apply_templated_parent_control_theme(&self) -> Result<(), DuplicateSetterError> {
         // Most elements have no templated parent: avoid upgrading the weak
         // reference for them.
-        if self.templated_parent.borrow().is_none() {
+        if !self.templated_parent.is_some() {
             return Ok(());
         }
         let parent_theme = self

@@ -55,8 +55,10 @@ const ELIDED_MOVE_NODES: u32 = 32;
 pub struct Visual {
     base: StyledElement,
     bounds: Cell<Rect>,
-    presentation_source: RefCell<Option<Rc<dyn IPresentationSource>>>,
-    visual_parent: RefCell<Option<WeakRef<Visual>>>,
+    // Not upstream (docs/porting/desktop-performance.md, section 9.67): the two are read by
+    // cloning and written whole, so they are cells without a borrow flag.
+    presentation_source: OptionCell<Rc<dyn IPresentationSource>>,
+    visual_parent: OptionCell<WeakRef<Visual>>,
     has_mirror_transform: Cell<bool>,
     // Deviation (DEVIATIONS.md, Visual tree): whether `RenderTransform` has a value, kept by its
     // change handler, so that the transforms of the visual tree skip the property read.
@@ -72,9 +74,9 @@ pub struct Visual {
     is_effectively_visible: Cell<bool>,
     has_non_uniform_z_index_children: Cell<bool>,
     visual_children: OnceCell<FerroList<Ref<Visual>>>,
-    attached_to_visual_tree: HandlerList<dyn Fn(&VisualTreeAttachmentEventArgs)>,
-    detached_from_visual_tree: HandlerList<dyn Fn(&VisualTreeAttachmentEventArgs)>,
-    is_effectively_visible_changed: HandlerList<dyn Fn()>,
+    // Not upstream (docs/porting/desktop-performance.md, section 9.67): the events few visuals
+    // have a handler for, made with the first handler.
+    rare_events: OnceCell<Box<RareEvents>>,
     render_options: Cell<RenderOptions>,
     text_options: Cell<TextOptions>,
     composition_visual: OptionCell<CompositionDrawListVisual>,
@@ -128,6 +130,14 @@ struct CompositionStyledInputs {
     has_cache_mode: bool,
     has_effect: bool,
     has_render_transform: bool,
+}
+
+/// The events of a visual that few visuals have a handler for (`Visual::rare_events`).
+#[derive(Default)]
+struct RareEvents {
+    attached_to_visual_tree: HandlerList<dyn Fn(&VisualTreeAttachmentEventArgs)>,
+    detached_from_visual_tree: HandlerList<dyn Fn(&VisualTreeAttachmentEventArgs)>,
+    is_effectively_visible_changed: HandlerList<dyn Fn()>,
 }
 
 /// The subscriptions of a visual to values of its properties that tell when they change.
@@ -387,7 +397,7 @@ impl VisualImpl for Visual {
     fn render(_this: &Self, _context: &mut DrawingContext) {}
 
     fn on_attached_to_visual_tree_core(this: &Self, e: &VisualTreeAttachmentEventArgs) {
-        *this.presentation_source.borrow_mut() = Some(e.presentation_source().clone());
+        this.presentation_source.set(Some(e.presentation_source().clone()));
         bump_composition_holder_version();
         ROOTED_VISUAL_CHILDREN_COUNT.with(|count| count.set(count.get() + 1));
 
@@ -411,7 +421,7 @@ impl VisualImpl for Visual {
             // visual gets its composition visual from the update pass of the renderer, once it
             // is known to show something, or when something asks for it.
             if !Self::composition_visuals_on_demand()
-                || this.visual_parent.borrow().is_none()
+                || !this.visual_parent.is_some()
                 || this.composition_visual_departed.get()
                 || this.composition_visual.is_some()
             {
@@ -429,8 +439,8 @@ impl VisualImpl for Visual {
         let parent = this.visual_parent();
         this.update_is_effectively_visible(parent.as_ref().is_none_or(|p| p.is_effectively_visible()));
         this.on_attached_to_visual_tree(e);
-        if !this.attached_to_visual_tree.is_empty() {
-            for (_, handler) in this.attached_to_visual_tree.snapshot().iter() {
+        if let Some(events) = this.rare_events.get().filter(|events| !events.attached_to_visual_tree.is_empty()) {
+            for (_, handler) in events.attached_to_visual_tree.snapshot().iter() {
                 handler(e);
             }
         }
@@ -468,14 +478,14 @@ impl VisualImpl for Visual {
         this.update_is_effectively_visible(true);
         this.on_detached_from_visual_tree(e);
         this.detach_from_compositor();
-        if !this.detached_from_visual_tree.is_empty() {
-            for (_, handler) in this.detached_from_visual_tree.snapshot().iter() {
+        if let Some(events) = this.rare_events.get().filter(|events| !events.detached_from_visual_tree.is_empty()) {
+            for (_, handler) in events.detached_from_visual_tree.snapshot().iter() {
                 handler(e);
             }
         }
         // The renderer is told once the visual is out of the tree: that is how it knows a visual
         // that left from one that has no composition visual (section 9.41).
-        let source = this.presentation_source.borrow_mut().take();
+        let source = this.presentation_source.take();
         bump_composition_holder_version();
         if let Some(source) = source {
             source.renderer().add_dirty(this);
@@ -1134,8 +1144,8 @@ impl Visual {
         Self {
             base: StyledElement::construct(),
             bounds: Cell::new(Rect::default()),
-            presentation_source: RefCell::new(None),
-            visual_parent: RefCell::new(None),
+            presentation_source: OptionCell::new(),
+            visual_parent: OptionCell::new(),
             has_mirror_transform: Cell::new(false),
             has_render_transform: Cell::new(false),
             hot_is_visible: Default::default(),
@@ -1144,9 +1154,7 @@ impl Visual {
             is_effectively_visible: Cell::new(true),
             has_non_uniform_z_index_children: Cell::new(false),
             visual_children: OnceCell::new(),
-            attached_to_visual_tree: HandlerList::new(),
-            detached_from_visual_tree: HandlerList::new(),
-            is_effectively_visible_changed: HandlerList::new(),
+            rare_events: OnceCell::new(),
             render_options: Cell::new(RenderOptions::default()),
             text_options: Cell::new(TextOptions::default()),
             composition_visual: OptionCell::new(),
@@ -1167,16 +1175,21 @@ impl Visual {
 
     // --- events -----------------------------------------------------------
 
+    /// The events few visuals have a handler for, made when one is added.
+    fn rare_events(&self) -> &RareEvents {
+        self.rare_events.get_or_init(Default::default)
+    }
+
     /// Raised when the control is attached to a rooted visual tree.
     pub fn attached_to_visual_tree(
         &self,
         handler: impl Fn(&VisualTreeAttachmentEventArgs) + 'static,
     ) -> Subscription {
-        let token = self.attached_to_visual_tree.add(Rc::new(handler));
+        let token = self.rare_events().attached_to_visual_tree.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
         Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
-                this.attached_to_visual_tree.remove(token);
+                this.rare_events().attached_to_visual_tree.remove(token);
             }
         }))
     }
@@ -1186,22 +1199,22 @@ impl Visual {
         &self,
         handler: impl Fn(&VisualTreeAttachmentEventArgs) + 'static,
     ) -> Subscription {
-        let token = self.detached_from_visual_tree.add(Rc::new(handler));
+        let token = self.rare_events().detached_from_visual_tree.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
         Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
-                this.detached_from_visual_tree.remove(token);
+                this.rare_events().detached_from_visual_tree.remove(token);
             }
         }))
     }
 
     /// Raised when `is_effectively_visible` changes.
     pub fn is_effectively_visible_changed(&self, handler: impl Fn() + 'static) -> Subscription {
-        let token = self.is_effectively_visible_changed.add(Rc::new(handler));
+        let token = self.rare_events().is_effectively_visible_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
         Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
-                this.is_effectively_visible_changed.remove(token);
+                this.rare_events().is_effectively_visible_changed.remove(token);
             }
         }))
     }
@@ -1426,14 +1439,14 @@ impl Visual {
     /// The presentation source the visual is attached to.
     #[inline]
     pub fn presentation_source(&self) -> Option<Rc<dyn IPresentationSource>> {
-        self.presentation_source.borrow().clone()
+        self.presentation_source.get()
     }
 
     /// The layout scaling of the presentation source the visual is attached
     /// to, read in place: layout asks for every element it rounds.
     #[inline]
     pub(crate) fn layout_scaling_of_presentation_source(&self) -> Option<f64> {
-        self.presentation_source.borrow().as_ref().map(|source| source.layout_root_scaling())
+        self.presentation_source.get().map(|source| source.layout_root_scaling())
     }
 
     /// The root of the visual tree, if the control is attached to one.
@@ -1538,7 +1551,7 @@ impl Visual {
     /// nothing has none (section 9.41).
     pub(crate) fn needs_own_composition_visual(&self) -> bool {
         if !Self::composition_visuals_on_demand()
-            || self.visual_parent.borrow().is_none()
+            || !self.visual_parent.is_some()
             || self.composition_extras.borrow().is_some()
             || self.child_composition_visual.is_some()
             || self.has_mirror_transform.get()
@@ -1931,8 +1944,7 @@ impl Visual {
         }
         let kept = self
             .presentation_source
-            .borrow()
-            .as_ref()
+            .get()
             .is_some_and(|source| source.renderer().keep_departed_composition_item(self));
         if kept {
             item.set_departed(true);
@@ -1996,8 +2008,7 @@ impl Visual {
         let kept = self.composition_visual_is_untouched(&composition_visual)
             && self
                 .presentation_source
-                .borrow()
-                .as_ref()
+                .get()
                 .is_some_and(|source| source.renderer().keep_departed_composition_visual(self, &composition_visual));
         if kept {
             self.composition_visual_departed.set(true);
@@ -2434,13 +2445,13 @@ impl Visual {
     /// Whether this control is attached to a visual root.
     #[inline]
     pub fn is_attached_to_visual_tree(&self) -> bool {
-        self.presentation_source.borrow().is_some()
+        self.presentation_source.is_some()
     }
 
     /// The control's parent visual.
     #[inline]
     pub fn visual_parent(&self) -> Option<Ref<Visual>> {
-        self.visual_parent.borrow().as_ref().and_then(WeakRef::upgrade)
+        self.visual_parent.upgrade()
     }
 
     /// The number of visuals attached to a rooted visual tree (on this
@@ -2591,6 +2602,12 @@ impl Visual {
         Some(result)
     }
 
+    /// Whether the visual keeps the events few visuals have a handler for.
+    #[cfg(test)]
+    pub(crate) fn has_rare_visual_events(&self) -> bool {
+        self.rare_events.get().is_some()
+    }
+
     /// Whether the visual keeps subscriptions to the values of its properties.
     #[cfg(test)]
     pub(crate) fn has_subscriptions(&self) -> bool {
@@ -2618,7 +2635,7 @@ impl Visual {
             self.on_detached_from_visual_tree_core(&VisualTreeAttachmentEventArgs::new(None, current));
         }
 
-        *self.presentation_source.borrow_mut() = presentation_source.clone();
+        self.presentation_source.set(presentation_source.clone());
         bump_composition_holder_version();
 
         if let Some(source) = presentation_source {
@@ -2633,8 +2650,9 @@ impl Visual {
             return;
         }
         self.is_effectively_visible.set(is_effectively_visible);
-        if !self.is_effectively_visible_changed.is_empty() {
-            for (_, handler) in self.is_effectively_visible_changed.snapshot().iter() {
+        if let Some(events) = self.rare_events.get().filter(|events| !events.is_effectively_visible_changed.is_empty())
+        {
+            for (_, handler) in events.is_effectively_visible_changed.snapshot().iter() {
                 handler();
             }
         }
@@ -2651,7 +2669,7 @@ impl Visual {
         if old.as_ref() == value {
             return;
         }
-        *self.visual_parent.borrow_mut() = value.map(Ref::downgrade);
+        self.visual_parent.set(value.map(Ref::downgrade));
         bump_geometry_version();
 
         if let (Some(source), Some(old)) = (self.presentation_source(), &old) {

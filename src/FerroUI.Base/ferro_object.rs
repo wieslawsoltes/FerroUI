@@ -3,7 +3,7 @@ use crate::property_store::{BindingSource, DirectBindingObserver, LocalValueBind
 use crate::reactive::{Disposable, IDisposable, IObservable};
 use crate::threading::Dispatcher;
 use crate::type_system::{__forwards_to_parent, cast_this, parent_vtable};
-use crate::utilities::HandlerList;
+use crate::utilities::{HandlerList, OptionCell};
 use crate::{
     BoxedValue, DirectPropertyBase, FerroProperty, FerroPropertyChangedEventArgs, FerroPropertyRegistry,
     Nullable, ObjectType, PropertyValue, Ref, StaticType, StyledProperty, Subclassable, TypeIdentity, TypeInfo, Upcast, WeakRef,
@@ -33,7 +33,9 @@ pub struct FerroObject {
     this: OnceCell<Weak<dyn Any>>,
     vtable: Cell<Option<&'static FerroObjectVTable>>,
     values: ValueStore,
-    inheritance_parent: RefCell<Option<WeakRef<FerroObject>>>,
+    // Not upstream (docs/porting/desktop-performance.md, section 9.67): read by upgrading and
+    // written whole, so a cell without a borrow flag.
+    inheritance_parent: OptionCell<WeakRef<FerroObject>>,
     /// The inheritance children, in the order they were added. A deque searched from both ends:
     /// a panel unlinks its children from the first or from the last, and each is found at once
     /// and removed without moving the others (FerroUI deviation, desktop-performance.md section
@@ -252,7 +254,7 @@ impl FerroObject {
             this: OnceCell::new(),
             vtable: Cell::new(None),
             values: ValueStore::new(),
-            inheritance_parent: RefCell::new(None),
+            inheritance_parent: OptionCell::new(),
             inheritance_children: RefCell::new(std::collections::VecDeque::new()),
             property_changed: HandlerList::new(),
             dispatcher: OnceCell::new(),
@@ -414,13 +416,13 @@ impl FerroObject {
 
     /// The parent object that inherited property values are inherited from.
     pub fn inheritance_parent(&self) -> Option<Ref<FerroObject>> {
-        self.inheritance_parent.borrow().as_ref().and_then(WeakRef::upgrade)
+        self.inheritance_parent.upgrade()
     }
 
     /// Whether `parent` is the inheritance parent of the object (`InheritanceParent == parent`),
     /// without taking a handle to it.
     pub(crate) fn is_inheritance_parent(&self, parent: &FerroObject) -> bool {
-        self.inheritance_parent.borrow().as_ref().is_some_and(|weak| weak.points_at(parent))
+        self.inheritance_parent.with(|weak| weak.is_some_and(|weak| weak.points_at(parent)))
     }
 
     /// Sets the parent object that inherited property values are inherited
@@ -440,7 +442,7 @@ impl FerroObject {
         if let Some(old) = &old {
             old.remove_inheritance_child(self);
         }
-        *self.inheritance_parent.borrow_mut() = value.map(Ref::downgrade);
+        self.inheritance_parent.set(value.map(Ref::downgrade));
         if let Some(new) = value {
             let mut children = new.inheritance_children.borrow_mut();
             if children.len() == children.capacity() {

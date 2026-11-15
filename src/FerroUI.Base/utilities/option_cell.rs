@@ -1,3 +1,4 @@
+use crate::type_system::{ObjectType, Ref, WeakRef};
 use std::cell::Cell;
 use std::fmt;
 
@@ -57,10 +58,22 @@ impl<T> OptionCell<T> {
     /// Whether the cell holds a value, without cloning it.
     #[inline]
     pub fn is_some(&self) -> bool {
-        let value = self.value.take();
-        let result = value.is_some();
-        self.value.set(value);
-        result
+        // SAFETY: the cell is not `Sync`, and nothing runs between taking the pointer and the end
+        // of the read, so nothing writes to the cell while the value is looked at.
+        unsafe { (*self.value.as_ptr()).is_some() }
+    }
+}
+
+impl<T: ObjectType> OptionCell<WeakRef<T>> {
+    /// The object the handle of the cell points to, if the cell holds one and the object is
+    /// alive: what `with` and an upgrade give, without taking the handle out and putting it back.
+    /// The parents of an element are read this way in every walk up a tree.
+    #[inline]
+    pub fn upgrade(&self) -> Option<Ref<T>> {
+        // SAFETY: as in `is_some`. The upgrade of a weak handle reads and writes the counts of
+        // the allocation it points to and runs no code of the object, so it cannot reach the
+        // cell while the handle is looked at.
+        unsafe { (*self.value.as_ptr()).as_ref() }.and_then(WeakRef::upgrade)
     }
 }
 
@@ -91,6 +104,7 @@ impl<T: Clone + fmt::Debug> fmt::Debug for OptionCell<T> {
 #[cfg(test)]
 mod tests {
     use super::OptionCell;
+    use crate::{FerroObject, WeakRef};
     use std::cell::RefCell;
     use std::mem::size_of;
     use std::rc::Rc;
@@ -204,5 +218,25 @@ mod tests {
         assert_eq!(size_of::<OptionCell<Rc<dyn Named>>>(), size_of::<Option<Rc<dyn Named>>>());
         assert_eq!(size_of::<OptionCell<Rc<dyn Named>>>(), 2 * size_of::<usize>());
         assert!(size_of::<RefCell<Option<Rc<dyn Named>>>>() > size_of::<OptionCell<Rc<dyn Named>>>());
+    }
+
+    #[test]
+    fn the_object_of_a_weak_handle_is_read_while_the_handle_stays_in_the_cell() {
+        let cell: OptionCell<WeakRef<FerroObject>> = OptionCell::new();
+        assert!(!cell.is_some());
+        assert!(cell.upgrade().is_none());
+
+        let object = FerroObject::new();
+        cell.set(Some(object.downgrade()));
+        assert!(cell.is_some());
+        let read = cell.upgrade().expect("the object is alive");
+        assert!(std::ptr::eq(&*read, &*object));
+        // The handle is where it was: a second read gives the object again.
+        assert!(cell.upgrade().is_some());
+
+        drop(read);
+        drop(object);
+        assert!(cell.is_some());
+        assert!(cell.upgrade().is_none());
     }
 }

@@ -64,7 +64,7 @@ impl ValueFrameBase {
     /// The object whose value store owns the frame.
     pub fn owner(&self) -> Option<Ref<FerroObject>> {
         assert!(!self.is_shared.get(), "Cannot get owner for shared ValueFrame");
-        self.owner.with(|owner| owner.and_then(WeakRef::upgrade))
+        self.owner.upgrade()
     }
 
     pub fn set_owner(&self, owner: Option<WeakRef<FerroObject>>) {
