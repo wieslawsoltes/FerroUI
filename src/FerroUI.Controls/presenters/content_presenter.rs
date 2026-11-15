@@ -9,7 +9,7 @@ use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{HorizontalAlignment, LayoutHelper, Layoutable, LayoutableImpl, VerticalAlignment};
 use ferroui_base::logical_tree::LogicalTreeAttachmentEventArgs;
-use crate::utils::BorderRenderHelper;
+use crate::utils::LazyBorderRenderHelper;
 use ferroui_base::media::{
     BackgroundSizing, BoxShadows, DrawingContext, FontFamily, FontStretch, FontStyle, FontWeight, IBrush,
     TextAlignment, TextTrimming, TextWrapping,
@@ -37,7 +37,7 @@ pub struct ContentPresenter {
     layout_thickness: Cell<Option<Thickness>>,
     scale: Cell<f64>,
     host: RefCell<Option<WeakRef<FerroObject>>>,
-    border_renderer: RefCell<BorderRenderHelper>,
+    border_renderer: LazyBorderRenderHelper,
 }
 
 ferro_class!(ContentPresenter: Control);
@@ -46,7 +46,7 @@ ferro_impl_classes!(ContentPresenter: InteractiveImpl, InputElementImpl, Control
 
 impl VisualImpl for ContentPresenter {
     fn render(this: &Self, context: &mut DrawingContext) {
-        this.border_renderer.borrow_mut().render(
+        this.border_renderer.render(
             context,
             this.bounds().size(),
             this.layout_thickness(),
@@ -320,7 +320,7 @@ impl ContentPresenter {
             layout_thickness: Cell::new(None),
             scale: Cell::new(0.0),
             host: RefCell::new(None),
-            border_renderer: RefCell::new(BorderRenderHelper::new()),
+            border_renderer: LazyBorderRenderHelper::default(),
         }
     }
 

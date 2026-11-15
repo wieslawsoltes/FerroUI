@@ -5,6 +5,7 @@ use ferroui_base::media::{
 use ferroui_base::platform::render_interface;
 use ferroui_base::utilities::MathUtilities;
 use ferroui_base::{CornerRadius, Rect, Ref, RoundedRect, Size, Thickness};
+use std::cell::{OnceCell, RefCell};
 use std::rc::Rc;
 
 /// Renders a border with a background, caching the geometries between
@@ -21,6 +22,49 @@ pub struct BorderRenderHelper {
     background_sizing: Option<BackgroundSizing>,
     initialized: bool,
     cached_pen: Option<Rc<dyn IPen>>,
+}
+
+/// The border renderer of an element, made by the first render that has something to draw.
+// Not upstream (docs/porting/desktop-performance.md, section 9.69): the renderer is 144 bytes, and
+// an element without a background, a border brush and a shadow never asks it for anything. A
+// content presenter is such an element nearly always.
+#[derive(Default)]
+pub(crate) struct LazyBorderRenderHelper(OnceCell<Box<RefCell<BorderRenderHelper>>>);
+
+impl LazyBorderRenderHelper {
+    /// As [`BorderRenderHelper::render`]. A render with no brush and no shadow draws nothing
+    /// (`DrawingContext` leaves such a draw out), and makes no renderer.
+    pub(crate) fn render(
+        &self,
+        context: &mut DrawingContext,
+        final_size: Size,
+        border_thickness: Thickness,
+        corner_radius: CornerRadius,
+        background_sizing: BackgroundSizing,
+        background: Option<&Rc<dyn IBrush>>,
+        border_brush: Option<&Rc<dyn IBrush>>,
+        box_shadows: &BoxShadows,
+    ) {
+        if background.is_none() && border_brush.is_none() && box_shadows.count() == 0 {
+            return;
+        }
+        self.0.get_or_init(Default::default).borrow_mut().render(
+            context,
+            final_size,
+            border_thickness,
+            corner_radius,
+            background_sizing,
+            background,
+            border_brush,
+            box_shadows,
+        );
+    }
+
+    /// Whether a render made the renderer.
+    #[cfg(test)]
+    pub(crate) fn is_made(&self) -> bool {
+        self.0.get().is_some()
+    }
 }
 
 impl BorderRenderHelper {
