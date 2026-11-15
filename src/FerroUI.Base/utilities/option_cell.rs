@@ -16,39 +16,39 @@ use std::fmt;
 /// does not. A write puts the new value in before the old one is dropped, so
 /// what the old value does when it is dropped can read the cell and sees the
 /// new value.
-pub(crate) struct OptionCell<T> {
+pub struct OptionCell<T> {
     value: Cell<Option<T>>,
 }
 
 impl<T> OptionCell<T> {
     /// A cell that holds nothing.
     #[inline]
-    pub(crate) const fn new() -> Self {
+    pub const fn new() -> Self {
         Self { value: Cell::new(None) }
     }
 
     /// Replaces the value. The old value is dropped after the cell holds the
     /// new one.
     #[inline]
-    pub(crate) fn set(&self, value: Option<T>) {
+    pub fn set(&self, value: Option<T>) {
         drop(self.value.replace(value));
     }
 
     /// Replaces the value and returns the one the cell held.
     #[inline]
-    pub(crate) fn replace(&self, value: Option<T>) -> Option<T> {
+    pub fn replace(&self, value: Option<T>) -> Option<T> {
         self.value.replace(value)
     }
 
     /// Takes the value out: the cell holds nothing afterwards.
     #[inline]
-    pub(crate) fn take(&self) -> Option<T> {
+    pub fn take(&self) -> Option<T> {
         self.value.take()
     }
 
     /// Calls `read` with the value, without cloning it. `read` must not read the cell.
     #[inline]
-    pub(crate) fn with<R>(&self, read: impl FnOnce(Option<&T>) -> R) -> R {
+    pub fn with<R>(&self, read: impl FnOnce(Option<&T>) -> R) -> R {
         let value = self.value.take();
         let result = read(value.as_ref());
         self.value.set(value);
@@ -57,7 +57,7 @@ impl<T> OptionCell<T> {
 
     /// Whether the cell holds a value, without cloning it.
     #[inline]
-    pub(crate) fn is_some(&self) -> bool {
+    pub fn is_some(&self) -> bool {
         // SAFETY: the cell is not `Sync`, and nothing runs between taking the pointer and the end
         // of the read, so nothing writes to the cell while the value is looked at.
         unsafe { (*self.value.as_ptr()).is_some() }
@@ -69,7 +69,7 @@ impl<T: ObjectType> OptionCell<WeakRef<T>> {
     /// alive: what `with` and an upgrade give, without taking the handle out and putting it back.
     /// The parents of an element are read this way in every walk up a tree.
     #[inline]
-    pub(crate) fn upgrade(&self) -> Option<Ref<T>> {
+    pub fn upgrade(&self) -> Option<Ref<T>> {
         // SAFETY: as in `is_some`. The upgrade of a weak handle reads and writes the counts of
         // the allocation it points to and runs no code of the object, so it cannot reach the
         // cell while the handle is looked at.
@@ -80,7 +80,7 @@ impl<T: ObjectType> OptionCell<WeakRef<T>> {
 impl<T: Clone> OptionCell<T> {
     /// A clone of the value.
     #[inline]
-    pub(crate) fn get(&self) -> Option<T> {
+    pub fn get(&self) -> Option<T> {
         let value = self.value.take();
         let result = value.clone();
         self.value.set(value);

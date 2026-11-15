@@ -46,7 +46,7 @@ mod release_excess;
 mod uri_extensions;
 
 pub use disposable_lock::DisposableLock;
-pub(crate) use option_cell::OptionCell;
+pub use option_cell::OptionCell;
 pub use ref_countable::{RefCountable, RefCounted};
 pub use release_excess::{ReleaseExcess, RETAINED_BUFFER_BYTES};
 mod thread_bound;
