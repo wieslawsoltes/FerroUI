@@ -173,10 +173,14 @@ impl FerroHeadlessPlatform {
             };
 
             let frame = DispatcherFrame::new();
-            // `RequestCommitAsync` of the original is the processed signal of the batch.
+            // `RequestCommitAsync` of the original is the processed signal of the batch, which a
+            // render thread gives before it draws the frame of the batch. The tick waits for the
+            // frame (the rendered signal), so that a capture right after it holds what the batch
+            // changed (not from upstream, DEVIATIONS.md: the frame a capture read was the one
+            // before the change whenever the commit that follows was asked for early).
             let batch = compositor.request_commit_async();
             let continuation_frame = frame.clone();
-            batch.processed().on_completed(move || continuation_frame.set_continue(false));
+            batch.rendered().on_completed(move || continuation_frame.set_continue(false));
             Dispatcher::current_dispatcher().push_frame(&frame);
         }
     }
