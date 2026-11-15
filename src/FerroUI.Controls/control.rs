@@ -20,7 +20,8 @@ use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::utilities::ReleaseExcess;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, ferro_routed_event, instantiate, AnyValue, BoxedValue,
-    FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, IntoRef, Nullable, Rect,
+    FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, IntoRef, Nullable,
+    PropertyChangeHandler, Rect,
     Ref, Size, StyledElement, StyledElementImpl, StyledProperty, Visual, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs,
 };
 use std::cell::{Cell, OnceCell, RefCell};
@@ -155,7 +156,12 @@ ferroui_base::ferro_overrides! { impl FerroObjectImpl for Control {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
-        if change.property() == Visual::bounds_property().as_property() {
+        const HANDLER: PropertyChangeHandler = PropertyChangeHandler::Control;
+        if !change.reaches(HANDLER) {
+            return;
+        }
+
+        if change.is_for(HANDLER, Visual::bounds_property().as_property()) {
             let (old_value, new_value) = change.get_old_and_new_value::<Rect>();
 
             // Bounds is a rect with a position as well as a height and width.
@@ -358,6 +364,10 @@ ferroui_base::ferro_properties! { impl Control {
 } }
 
 impl Control {
+    fn static_constructor() {
+        PropertyChangeHandler::Control.reacts_to(&[Visual::bounds_property().as_property()]);
+    }
+
     ferro_routed_event!(
         /// Event raised when an element wishes to be scrolled into view.
         pub fn request_bring_into_view_event() -> RoutedEvent<RequestBringIntoViewEventArgs> {

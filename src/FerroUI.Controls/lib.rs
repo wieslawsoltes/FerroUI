@@ -192,6 +192,8 @@ pub use repeat_button::RepeatButton;
 #[cfg(test)]
 mod button_tests;
 #[cfg(test)]
+mod property_change_handler_tests;
+#[cfg(test)]
 mod property_defaults_tests;
 #[cfg(test)]
 mod timer_interval_tests;
