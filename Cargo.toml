@@ -330,7 +330,7 @@ ferroui-designer-language = { version = "=0.5.1-preview.1", path = "src/FerroUI.
 ferroui-designer-animation = { version = "=0.5.1-preview.1", path = "src/FerroUI.Designer.Animation" }
 ferroui-designer-collaboration = { version = "=0.5.1-preview.1", path = "src/FerroUI.Designer.Collaboration" }
 ferroui-designer-collaboration-host = { version = "=0.5.1-preview.1", path = "src/FerroUI.Designer.Collaboration.Host" }
-ferroui-designer = { version = "=0.5.1-preview.1", path = "src/FerroUI.Designer" }
+ferroui-designer = { version = "=0.5.1-preview.1", path = "src/FerroUI.Designer", default-features = false }
 ferroui-hot-reload = { version = "=0.5.1-preview.1", path = "src/FerroUI.HotReload" }
 ferroui-hot-patch = { version = "=0.5.1-preview.1", path = "src/FerroUI.HotPatch" }
 ferroui-inspect = { version = "=0.5.1-preview.1", path = "src/FerroUI.Inspect" }

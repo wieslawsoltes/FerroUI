@@ -840,6 +840,15 @@ fn native_tabs_and_refactorings_share_one_identity_for_symlink_aliases() {
     std::fs::remove_dir_all(directory).unwrap();
 }
 
+#[cfg(not(feature = "collaboration-client"))]
+#[test]
+fn without_the_collaboration_client_the_share_button_is_hidden() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let workspace = DesignerWorkspace::new(STARTER_XAML).unwrap();
+    assert!(!workspace.control().get_control::<ferroui_controls::Button>("Share").is_visible());
+}
+
+#[cfg(feature = "collaboration-client")]
 #[test]
 fn sharing_panel_opens_without_starting_transport_or_mutating_the_document() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
