@@ -951,9 +951,9 @@ references from outside were all that entered it.
   in the generated functions and in the static selector chains of the themes alike. The selector
   matches by the identity, the candidate index of a style collection files it by the identity, and
   its text comes from the name the identity carries. `Selector::target_type` finds the `TypeInfo`
-  through the identity once the class is initialised (`TypeIdentity::registered_type`, one atomic
-  read); before that nothing is of the class. Selectors built in code and by the run-time loader
-  are as they were.
+  through the identity once the class is initialised (`TypeIdentity::registered_type`, a look-up
+  among the known types of the name, which the selector remembers); before that nothing is of the
+  class. Selectors built in code and by the run-time loader are as they were.
 - **The native menu.** Every application on macOS has a native menu. `NativeMenuItem` took
   `IsChecked`, `Command` and `CommandParameter` from `MenuItem` by adding itself as an owner, which
   initialises `MenuItem` and, through `GroupName`, the radio button. `Command` and
@@ -973,7 +973,7 @@ those classes used go with them:
 |---|---:|---:|---:|
 | Classes linked | 136 | 122 | -14 |
 | Attributed to symbols | 19.48 MB | 19.01 MB | -0.47 MB (-2.4 %) |
-| Machine code | 15,831,928 bytes | 15,457,644 bytes | -374,284 bytes |
+| Machine code | 15,831,928 bytes | 15,458,388 bytes | -373,540 bytes |
 | `ferroui_base` | 7.24 MB | 7.07 MB | -0.17 MB |
 | `ferroui_controls` | 1.09 MB | 0.94 MB | -0.15 MB |
 

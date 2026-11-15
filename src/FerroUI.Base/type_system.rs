@@ -36,7 +36,6 @@ use std::hash::{Hash, Hasher};
 use std::marker::PhantomData;
 use std::ops::Deref;
 use std::rc::{Rc, Weak};
-use std::sync::atomic::{AtomicPtr, Ordering};
 use std::sync::{OnceLock, RwLock};
 
 /// The identity of a class: what a type check (`is::<T>()`, `cast::<T>()`,
@@ -50,8 +49,6 @@ use std::sync::{OnceLock, RwLock};
 /// that never creates one (#612).
 pub struct TypeIdentity {
     name: &'static str,
-    /// The class, once it is known ([`TypeInfo::register`]): null before.
-    type_: AtomicPtr<TypeInfo>,
 }
 
 impl TypeIdentity {
@@ -59,16 +56,19 @@ impl TypeIdentity {
     /// this type; two identities are the same only if they are the same
     /// static.
     pub const fn new(name: &'static str) -> Self {
-        Self { name, type_: AtomicPtr::new(std::ptr::null_mut()) }
+        Self { name }
     }
 
     /// The class with this identity, once it is known: after its initialisation on any thread
     /// or its registration with a table of types ([`TypeInfo::register`]). `None` before, when
     /// no object of the class exists. Reading it does not keep the class in the executable.
-    #[inline]
-    pub fn registered_type(&self) -> Option<&'static TypeInfo> {
-        // SAFETY: the pointer is null or the address of the `TypeInfo` static of the class.
-        unsafe { self.type_.load(Ordering::Relaxed).cast_const().as_ref() }
+    ///
+    /// It is looked up among the known types of the name; the identity itself stays constant
+    /// data, which a constant may refer to.
+    pub fn registered_type(&'static self) -> Option<&'static TypeInfo> {
+        let registry = read_registry();
+        let known = registry.by_name.get(self.name)?;
+        known.iter().copied().find(|type_| type_.identity.is_some_and(|own| std::ptr::eq(own, self)))
     }
 
     /// The name of the class, for diagnostics.
@@ -443,7 +443,6 @@ impl TypeInfo {
     /// crate's `register_types()` function registers all of its types up
     /// front so that types that were never used are known too.
     pub fn register(type_: &'static TypeInfo) {
-        type_.link_identity();
         if read_registry().contains(type_) {
             return;
         }
@@ -451,14 +450,6 @@ impl TypeInfo {
         // As for the types of a table: see `register_all`.
         if let Some(handle_registration) = type_.handle_registration {
             crate::data::core::ValueTypes::register_global(handle_registration);
-        }
-    }
-
-    /// Tells the identity of the class which class it is ([`TypeIdentity::registered_type`]).
-    #[inline]
-    fn link_identity(&'static self) {
-        if let Some(identity) = self.identity {
-            identity.type_.store(std::ptr::from_ref(self).cast_mut(), Ordering::Relaxed);
         }
     }
 
@@ -507,7 +498,6 @@ impl TypeInfo {
         {
             let mut registry = write_registry();
             for type_ in types {
-                type_.link_identity();
                 registry.insert(type_);
             }
         }

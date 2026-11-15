@@ -19,6 +19,8 @@ pub(crate) struct TypeNameAndClassSelector {
     /// selector then has no `target_type` of its own and does not keep the class in the
     /// executable.
     target_identity: Option<&'static TypeIdentity>,
+    /// The class of `target_identity`, once it was found initialised.
+    identity_type: Cell<Option<&'static TypeInfo>>,
     is_concrete_type: Cell<bool>,
     name: RefCell<Option<String>>,
     selector_string: OnceCell<String>,
@@ -31,6 +33,7 @@ impl TypeNameAndClassSelector {
             classes: RefCell::new(Rc::from(Vec::new())),
             target_type,
             target_identity: None,
+            identity_type: Cell::new(None),
             is_concrete_type: Cell::new(is_concrete_type),
             name: RefCell::new(None),
             selector_string: OnceCell::new(),
@@ -69,6 +72,13 @@ impl TypeNameAndClassSelector {
     /// The type this node itself requires, if it requires one.
     pub(super) fn own_candidate_type(&self) -> Option<CandidateType> {
         self.target_identity.map(CandidateType::Identity).or_else(|| self.target_type.map(CandidateType::Type))
+    }
+
+    /// The class a node names by its identity, once the class is initialised.
+    fn identity_type(&self) -> Option<&'static TypeInfo> {
+        let found = self.identity_type.get().or_else(|| self.target_identity?.registered_type());
+        self.identity_type.set(found);
+        found
     }
 
     /// The name of the class this node itself requires.
@@ -154,7 +164,7 @@ impl SelectorNode for TypeNameAndClassSelector {
         // required by its identity is known once it is initialised; before that no element is
         // of the class.
         self.target_type
-            .or_else(|| self.target_identity.and_then(TypeIdentity::registered_type))
+            .or_else(|| self.identity_type())
             .or_else(|| self.previous.as_ref().and_then(Selector::target_type))
     }
 
