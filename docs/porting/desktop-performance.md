@@ -6037,3 +6037,43 @@ What the smaller blocks and the cells without a flag do for the walks of a tree:
 
 The inherited read of a held value, which section 9.65 left slower by the distance between
 its blocks, is faster than before that section.
+
+### 9.73 The size limits of an element are made in the measure and the arrange, not in a call
+
+The search for the scroll line of section 9.68 compared the functions of two builds, and
+one that came and went between them was `MinMax::new`: the four limits of an element (its
+width and height with their minima and maxima), which `measure_core` and `arrange_core`
+make for every element they lay out. It reads six values the element keeps (section 9.28)
+and clamps them. Whether the compiler inlined it turned on code that has nothing to do
+with it, and on the main branch it was a call.
+
+**The change.** `MinMax::new` is `#[inline(always)]`.
+
+**Measured** against the commit before it (the framework part of the gate, the layout
+benchmarks):
+
+| Benchmark | Before | After | Time | Instructions |
+| --- | ---: | ---: | ---: | ---: |
+| `PanelMeasureArrange.stack_vertical[Children=1000]` | 99.160 us | 90.745 us | -8.5 % | -8.18 % |
+| `PanelMeasureArrange.stack_horizontal[Children=1000]` | 97.408 us | 90.165 us | -7.4 % | -8.13 % |
+| `PanelMeasureArrange.grid[Children=1000]` | 117.455 us | 105.147 us | -10.5 % | -7.10 % |
+| `PanelMeasureArrange.grid_spans[Children=1000]` | 129.378 us | 116.605 us | -9.9 % | -6.91 % |
+| `PanelMeasureArrange.dock[Children=1000]` | 114.793 us | 106.456 us | -7.3 % | -7.76 % |
+| `PanelMeasureArrange.wrap[Children=1000]` | 100.438 us | 93.729 us | -6.7 % | -7.76 % |
+| `PanelMeasureArrange.canvas[Children=1000]` | 101.510 us | 93.743 us | -7.7 % | -8.14 % |
+| `PanelMeasureArrange.uniform_grid[Children=1000]` | 91.089 us | 82.122 us | -9.8 % | -8.75 % |
+| `NestedDepth.remeasure_rearrange[Depth=200]` | 45.072 us | 43.227 us | -4.1 % | -5.67 % |
+| `NestedDepth.remeasure_rearrange_unrounded[Depth=200]` | 42.889 us | 41.188 us | -4.0 % | -6.33 % |
+| `SizeChange.wrap[Leaves=1000]` | 72.079 us | 70.233 us | -2.6 % | -5.07 % |
+| `SizeChange.stretch_stack[Leaves=1000]` | 101.298 us | 97.432 us | -3.8 % | -3.94 % |
+| `SizeChange.star_grid[Leaves=1000]` | 98.237 us | 94.783 us | -3.5 % | -4.04 % |
+| `trees::Lifetime.lay_out[Tiles=2000]` | 7.027 ms | 7.303 ms | +3.9 % | -2.45 % |
+
+30 metrics of the layout, scroll, tree and construction benchmarks, none over tolerance.
+The scroll line of section 9.68 is not this: `ScrollContent.offset` is at -0.12 per cent
+of instructions with it alone, and stays where it was with it on top of sections 9.67 and
+9.68.
+
+**What stays as it was.** The limits and where they are made. No public API changes.
+
+**Other backends.** It is in `ferroui_base`.
