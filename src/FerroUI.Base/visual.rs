@@ -97,15 +97,17 @@ pub struct Visual {
     // composition visual of its own keeps for the composition visuals below it (`ELIDED_*`),
     // and whether one with a composition visual listed what is below it (`CHILDREN_LISTED`).
     elided_state: Cell<u8>,
-    child_composition_visual: RefCell<Option<Rc<CompositionVisual>>>,
+    child_composition_visual: OptionCell<Rc<CompositionVisual>>,
     /// What the composition API of WinUI adds to the visual (the `Translation` facade, the
     /// requests to hide the composition visual, the layer composition visual): boxed and
     /// created on first use, so that a visual that uses none of it pays one pointer.
     composition_extras: RefCell<Option<Box<CompositionExtras>>>,
     /// The subscription to the `changed` notification of the render
     /// transform, held while the visual is attached to a visual tree.
-    render_transform_subscription: RefCell<Option<Subscription>>,
-    affects_render_subscriptions: RefCell<Vec<(&'static FerroProperty, Rc<dyn IDisposable>)>>,
+    // Not upstream (docs/porting/desktop-performance.md, section 9.65): the subscriptions of the
+    // visual to values that tell when they change, made with the first one. Few visuals have one,
+    // and the others keep a word for them.
+    subscriptions: OptionCell<Box<VisualSubscriptions>>,
     // Not upstream (docs/porting/desktop-performance.md, section 9.40): the sets of its
     // renderer the visual is in, for the next update pass: the epoch of the sets and a bit for
     // each (`rendering::composition::compositing_renderer::VisualSets`).
@@ -126,6 +128,15 @@ struct CompositionStyledInputs {
     has_cache_mode: bool,
     has_effect: bool,
     has_render_transform: bool,
+}
+
+/// The subscriptions of a visual to values of its properties that tell when they change.
+#[derive(Default)]
+struct VisualSubscriptions {
+    /// To the `changed` notification of the render transform, while the visual is attached.
+    render_transform: Option<Subscription>,
+    /// To the invalidation of the values of render-affecting properties, by property.
+    affects_render: Vec<(&'static FerroProperty, Rc<dyn IDisposable>)>,
 }
 
 #[derive(Default)]
@@ -551,7 +562,7 @@ impl VisualImpl for Visual {
         // that is the case of most visuals a frame draws, and it is answered without the lists
         // below (docs/porting/desktop-performance.md, section 9.28).
         if this.visual_children.get().is_none_or(FerroList::is_empty)
-            && this.child_composition_visual.borrow().is_none()
+            && !this.child_composition_visual.is_some()
             && this.composition_extras.borrow().is_none()
         {
             if composition_children.count() != 0 {
@@ -889,8 +900,10 @@ impl VisualImpl for Visual {
 // weak reference holds, for every visual that ever drew it.
 impl Drop for Visual {
     fn drop(&mut self) {
-        for (_, subscription) in self.affects_render_subscriptions.get_mut().drain(..) {
-            subscription.dispose();
+        if let Some(mut subscriptions) = self.subscriptions.take() {
+            for (_, subscription) in subscriptions.affects_render.drain(..) {
+                subscription.dispose();
+            }
         }
     }
 }
@@ -1141,10 +1154,9 @@ impl Visual {
             composition_visual_departed: Cell::new(false),
             composition_visual_handed_out: Cell::new(false),
             elided_state: Cell::new(0),
-            child_composition_visual: RefCell::new(None),
+            child_composition_visual: OptionCell::new(),
             composition_extras: RefCell::new(None),
-            render_transform_subscription: RefCell::new(None),
-            affects_render_subscriptions: RefCell::new(Vec::new()),
+            subscriptions: OptionCell::new(),
             renderer_sets: Cell::new(0),
         }
     }
@@ -1528,7 +1540,7 @@ impl Visual {
         if !Self::composition_visuals_on_demand()
             || self.visual_parent.borrow().is_none()
             || self.composition_extras.borrow().is_some()
-            || self.child_composition_visual.borrow().is_some()
+            || self.child_composition_visual.is_some()
             || self.has_mirror_transform.get()
             || self.has_manipulation_transform.get()
             || self.render_options.get() != RenderOptions::default()
@@ -1966,7 +1978,7 @@ impl Visual {
     /// it is in a tree (`ICompositionDrawListVisualExtension::follows_control_out_of_tree`).
     fn composition_visual_is_untouched(&self, composition_visual: &CompositionDrawListVisual) -> bool {
         !self.composition_visual_handed_out.get()
-            && self.child_composition_visual.borrow().is_none()
+            && !self.child_composition_visual.is_some()
             && self.composition_extras.borrow().is_none()
             && composition_visual.can_be_kept_out_of_tree()
     }
@@ -2072,11 +2084,11 @@ impl Visual {
     /// The composition visual shown as the last child of the composition
     /// visual of this visual (see `ElementComposition`).
     pub fn child_composition_visual(&self) -> Option<Rc<CompositionVisual>> {
-        self.child_composition_visual.borrow().clone()
+        self.child_composition_visual.get()
     }
 
     pub fn set_child_composition_visual(&self, value: Option<Rc<CompositionVisual>>) {
-        *self.child_composition_visual.borrow_mut() = value;
+        self.child_composition_visual.set(value);
     }
 
     fn with_composition_extras<R>(&self, f: impl FnOnce(&mut CompositionExtras) -> R) -> R {
@@ -2497,12 +2509,11 @@ impl Visual {
     /// from its old value to its new value.
     fn update_affects_render_subscription(&self, e: &FerroPropertyChangedEventArgs<'_>) {
         let property = e.property();
-        let old = {
-            let mut subscriptions = self.affects_render_subscriptions.borrow_mut();
-            let position = subscriptions.iter().position(|(p, _)| *p == property);
-            position.map(|position| subscriptions.swap_remove(position))
-        };
-        if let Some((_, subscription)) = old {
+        let old = self.change_subscriptions(|subscriptions| {
+            let position = subscriptions.affects_render.iter().position(|(p, _)| *p == property);
+            position.map(|position| subscriptions.affects_render.swap_remove(position))
+        });
+        if let Some((_, subscription)) = old.flatten() {
             subscription.dispose();
         }
 
@@ -2516,7 +2527,7 @@ impl Visual {
                 target.invalidate_visual();
             }
         }));
-        self.affects_render_subscriptions.borrow_mut().push((property, subscription));
+        self.with_subscriptions(|subscriptions| subscriptions.affects_render.push((property, subscription)));
     }
 
     /// Called when a visual's render transform property changes: while the
@@ -2553,10 +2564,37 @@ impl Visual {
     }
 
     fn set_render_transform_subscription(&self, value: Option<Subscription>) {
-        let previous = self.render_transform_subscription.replace(value);
+        // Taking a subscription that is not there makes nothing.
+        let previous = match value {
+            Some(value) => self.with_subscriptions(|subscriptions| subscriptions.render_transform.replace(value)),
+            None => self.change_subscriptions(|subscriptions| subscriptions.render_transform.take()).flatten(),
+        };
         if let Some(previous) = previous {
             previous.dispose();
         }
+    }
+
+    /// Changes the subscriptions of the visual, which are made when it has none.
+    fn with_subscriptions<R>(&self, change: impl FnOnce(&mut VisualSubscriptions) -> R) -> R {
+        let mut subscriptions = self.subscriptions.take().unwrap_or_default();
+        let result = change(&mut subscriptions);
+        self.subscriptions.set(Some(subscriptions));
+        result
+    }
+
+    /// Changes the subscriptions of the visual if it has any. They stay once they were made: a
+    /// visual whose brush tells when it changes is given such a brush again.
+    fn change_subscriptions<R>(&self, change: impl FnOnce(&mut VisualSubscriptions) -> R) -> Option<R> {
+        let mut subscriptions = self.subscriptions.take()?;
+        let result = change(&mut subscriptions);
+        self.subscriptions.set(Some(subscriptions));
+        Some(result)
+    }
+
+    /// Whether the visual keeps subscriptions to the values of its properties.
+    #[cfg(test)]
+    pub(crate) fn has_subscriptions(&self) -> bool {
+        self.subscriptions.is_some()
     }
 
     /// Attaches or detaches the root visual of a presentation source.

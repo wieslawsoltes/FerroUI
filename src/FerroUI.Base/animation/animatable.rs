@@ -8,7 +8,7 @@ use crate::{
     StyledPropertyOptions, UnsetValueType,
 };
 use std::any::Any;
-use std::cell::{Cell, RefCell};
+use std::cell::{Cell, OnceCell, RefCell};
 use std::rc::Rc;
 
 /// Base class for all animatable objects.
@@ -17,6 +17,14 @@ pub struct Animatable {
     base: FerroObject,
     transitions_enabled: Cell<bool>,
     is_subscribed_to_transitions_collection: Cell<bool>,
+    /// What the transitions of the object need, made with the first transitions the object is
+    /// given: most objects are never given any, and keep one word for it.
+    transition_data: OnceCell<Box<TransitionData>>,
+}
+
+/// The state of the transitions of an object.
+#[derive(Default)]
+struct TransitionData {
     transition_state: RefCell<Option<Vec<(Rc<dyn ITransition>, Rc<TransitionState>)>>>,
     /// The collections whose changes are being listened to, with the tokens
     /// of the subscriptions.
@@ -125,8 +133,9 @@ crate::ferro_overrides! { impl FerroObjectImpl for Animatable {
         } else if this.transitions_enabled.get()
             && !change.property().is_direct()
             && change.priority() > BindingPriority::Animation
-            && this.transition_state.borrow().is_some()
+            && this.has_transition_states()
         {
+            let data = this.transition_data_or_new();
             if let Some(transitions) = this.transitions() {
                 let transitions = transitions.snapshot();
                 for transition in transitions.iter().rev() {
@@ -157,11 +166,11 @@ crate::ferro_overrides! { impl FerroObjectImpl for Animatable {
                         if let Some(instance) = instance {
                             instance.dispose();
                         }
-                        *this.applying_transition_instance.borrow_mut() = None;
-                        let context = TransitionContext::enter(&this.transition_context, interruption_state);
+                        *data.applying_transition_instance.borrow_mut() = None;
+                        let context = TransitionContext::enter(&data.transition_context, interruption_state);
                         let instance = transition.apply(this, clock, &old_value, &new_value);
                         *state.interruption_state.borrow_mut() = context.finish();
-                        *state.progress.borrow_mut() = this.applying_transition_instance.borrow_mut().take();
+                        *state.progress.borrow_mut() = data.applying_transition_instance.borrow_mut().take();
                         *state.instance.borrow_mut() = Some(Subscription::new(instance));
                         return;
                     }
@@ -200,11 +209,29 @@ impl Animatable {
             base: FerroObject::construct(),
             transitions_enabled: Cell::new(true),
             is_subscribed_to_transitions_collection: Cell::new(false),
-            transition_state: RefCell::new(None),
-            collection_subscriptions: RefCell::new(Vec::new()),
-            applying_transition_instance: RefCell::new(None),
-            transition_context: RefCell::new(TransitionContextState::default()),
+            transition_data: OnceCell::new(),
         }
+    }
+
+    /// The state of the transitions of the object, when it was given transitions.
+    fn transition_data(&self) -> Option<&TransitionData> {
+        self.transition_data.get().map(|data| &**data)
+    }
+
+    fn transition_data_or_new(&self) -> &TransitionData {
+        self.transition_data.get_or_init(Box::default)
+    }
+
+    /// Whether the object has the states of its transitions, which it has from the first transitions
+    /// it was given while transitions were enabled.
+    fn has_transition_states(&self) -> bool {
+        self.transition_data().is_some_and(|data| data.transition_state.borrow().is_some())
+    }
+
+    /// Whether the object keeps state for transitions.
+    #[cfg(test)]
+    pub(crate) fn has_transition_data(&self) -> bool {
+        self.transition_data.get().is_some()
     }
 
     pub fn new() -> Ref<Self> {
@@ -290,14 +317,14 @@ impl Animatable {
                 }
             });
         let token = transitions.add_collection_changed(handler);
-        self.collection_subscriptions.borrow_mut().push((transitions.clone(), token));
+        self.transition_data_or_new().collection_subscriptions.borrow_mut().push((transitions.clone(), token));
     }
 
     fn unsubscribe_from_collection(&self, transitions: &Transitions) {
-        let token = {
-            let mut subscriptions = self.collection_subscriptions.borrow_mut();
+        let token = self.transition_data().and_then(|data| {
+            let mut subscriptions = data.collection_subscriptions.borrow_mut();
             subscriptions.iter().rposition(|(t, _)| t.ptr_eq(transitions)).map(|index| subscriptions.remove(index).1)
-        };
+        });
         if let Some(token) = token {
             transitions.remove_collection_changed(token);
         }
@@ -325,9 +352,10 @@ impl Animatable {
             return;
         }
 
+        let data = self.transition_data_or_new();
         for t in items {
             let base_value = self.get_animation_base_value(t.property());
-            let mut transition_state = self.transition_state.borrow_mut();
+            let mut transition_state = data.transition_state.borrow_mut();
             let transition_state = transition_state.get_or_insert_with(Vec::new);
             if transition_state.iter().any(|(key, _)| key == t) {
                 panic!("An item with the same key has already been added.");
@@ -342,15 +370,15 @@ impl Animatable {
                 }),
             ));
         }
-        if self.transition_state.borrow().is_none() {
-            *self.transition_state.borrow_mut() = Some(Vec::new());
+        if data.transition_state.borrow().is_none() {
+            *data.transition_state.borrow_mut() = Some(Vec::new());
         }
     }
 
     fn remove_transitions(&self, items: &[Rc<dyn ITransition>]) {
-        if self.transition_state.borrow().is_none() {
+        let Some(data) = self.transition_data().filter(|data| data.transition_state.borrow().is_some()) else {
             return;
-        }
+        };
 
         for t in items {
             let Some(state) = self.try_get_state(t) else { continue };
@@ -360,7 +388,7 @@ impl Animatable {
             if let Some(instance) = instance {
                 instance.dispose();
             }
-            if let Some(transition_state) = &mut *self.transition_state.borrow_mut() {
+            if let Some(transition_state) = &mut *data.transition_state.borrow_mut() {
                 transition_state.retain(|(key, _)| key != t);
             }
         }
@@ -377,7 +405,7 @@ impl Animatable {
     /// Called by a transition while it is being applied, with the progress
     /// that drives the values it binds.
     pub(crate) fn report_transition_instance(&self, instance: &Rc<TransitionInstance>) {
-        *self.applying_transition_instance.borrow_mut() = Some(instance.clone());
+        *self.transition_data_or_new().applying_transition_instance.borrow_mut() = Some(instance.clone());
     }
 
     /// Takes state left by the preceding application of the same transition on this object.
@@ -387,7 +415,7 @@ impl Animatable {
     /// a transition definition that may be shared by several controls. Removal or visual-tree
     /// detachment discards the state. Normal duration-based transitions do not use this hook.
     pub fn take_transition_interruption_state<T: Any>(&self) -> Option<Rc<T>> {
-        self.transition_context.borrow_mut().interruption.take()?.downcast().ok()
+        self.transition_data()?.transition_context.borrow_mut().interruption.take()?.downcast().ok()
     }
 
     /// Reports state to carry into the next application of this transition on this object.
@@ -396,14 +424,16 @@ impl Animatable {
     /// but must not strongly own the target object. Outside a transition application this has
     /// no effect. Store zero velocity when an animation completes or is accessibility-canceled.
     pub fn report_transition_interruption_state<T: Any>(&self, state: Rc<T>) {
-        let mut context = self.transition_context.borrow_mut();
+        // Without the data of transitions no transition is being applied.
+        let Some(data) = self.transition_data() else { return };
+        let mut context = data.transition_context.borrow_mut();
         if context.applying {
             context.interruption = Some(state);
         }
     }
 
     fn try_get_state(&self, transition: &Rc<dyn ITransition>) -> Option<Rc<TransitionState>> {
-        let transition_state = self.transition_state.borrow();
+        let transition_state = self.transition_data()?.transition_state.borrow();
         transition_state
             .as_ref()
             .and_then(|states| states.iter().find(|(key, _)| key == transition).map(|(_, state)| state.clone()))

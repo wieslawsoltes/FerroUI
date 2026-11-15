@@ -12,7 +12,7 @@ use crate::styling::{
     DuplicateSetterError, ContainerQuery, ControlTheme, IStyle, IStyleHost, IThemeVariantHost, Style, StyleBase, StyleHostRef,
     StyleInstance, Styles, ThemeVariant,
 };
-use crate::utilities::HandlerList;
+use crate::utilities::{HandlerList, OptionCell};
 use crate::InitializationError;
 use crate::{
     ferro_class, ferro_property, instantiate, AnyValue, BoxedValue, DirectProperty, FerroObject, FerroObjectImpl,
@@ -32,12 +32,12 @@ use std::rc::Rc;
 pub struct StyledElement {
     base: Animatable,
     init_count: Cell<u32>,
-    name: RefCell<Option<String>>,
+    name: OptionCell<Box<str>>,
     classes: OnceCell<Classes>,
     logical_root: RefCell<Option<WeakRef<StyledElement>>>,
     logical_children: OnceCell<FerroList<Ref<StyledElement>>>,
     parent: RefCell<Option<WeakRef<StyledElement>>>,
-    resources: RefCell<Option<Ref<ResourceDictionary>>>,
+    resources: OptionCell<Ref<ResourceDictionary>>,
     styles: OnceCell<Ref<Styles>>,
     styles_applied: Cell<bool>,
     theme_applied: Cell<bool>,
@@ -343,12 +343,12 @@ impl StyledElement {
         Self {
             base: Animatable::construct(),
             init_count: Cell::new(0),
-            name: RefCell::new(None),
+            name: OptionCell::new(),
             classes: OnceCell::new(),
             logical_root: RefCell::new(None),
             logical_children: OnceCell::new(),
             parent: RefCell::new(None),
-            resources: RefCell::new(None),
+            resources: OptionCell::new(),
             styles: OnceCell::new(),
             styles_applied: Cell::new(false),
             theme_applied: Cell::new(false),
@@ -501,19 +501,19 @@ impl StyledElement {
     /// An element's name is used to uniquely identify it within its name
     /// scope. Once the element has been styled its name may not be changed.
     pub fn name(&self) -> Option<String> {
-        self.name.borrow().clone()
+        self.name.with(|name| name.map(|name| String::from(&**name)))
     }
 
     /// Whether the name of the styled element is `name`, without a copy of the name (the name
     /// selectors of styles test it for every element they are evaluated on).
     #[inline]
     pub fn has_name(&self, name: &str) -> bool {
-        self.name.borrow().as_deref() == Some(name)
+        self.name.with(|own| own.is_some_and(|own| **own == *name))
     }
 
     pub fn set_name(&self, value: Option<String>) {
         assert!(!self.styles_applied.get(), "Cannot set Name : styled element already styled.");
-        *self.name.borrow_mut() = value;
+        self.name.set(value.map(String::into_boxed_str));
     }
 
     /// The styled element's classes.
@@ -585,27 +585,27 @@ impl StyledElement {
 
     /// The styled element's resource dictionary.
     pub fn resources(&self) -> Ref<ResourceDictionary> {
-        if let Some(resources) = &*self.resources.borrow() {
-            return resources.clone();
+        if let Some(resources) = self.resources.get() {
+            return resources;
         }
         let resources = ResourceDictionary::with_owner(self.to_ref());
-        *self.resources.borrow_mut() = Some(resources.clone());
+        self.resources.set(Some(resources.clone()));
         resources
     }
 
     /// The resource dictionary of the element if it has been created; unlike `resources`, this
     /// does not create one.
     pub fn resources_if_created(&self) -> Option<Ref<ResourceDictionary>> {
-        self.resources.borrow().clone()
+        self.resources.get()
     }
 
     pub fn set_resources(&self, value: Ref<ResourceDictionary>) {
         let this = ResourceHostRef::Element(self.to_ref());
-        let old = self.resources.borrow_mut().take();
+        let old = self.resources.take();
         if let Some(old) = old {
             old.remove_owner(&this);
         }
-        *self.resources.borrow_mut() = Some(value.clone());
+        self.resources.set(Some(value.clone()));
         value.add_owner(&this);
     }
 
@@ -630,14 +630,14 @@ impl StyledElement {
 
     /// Whether the element or its styles have resources.
     pub fn has_resources(&self) -> bool {
-        self.resources.borrow().as_ref().is_some_and(|r| r.has_resources())
+        self.resources.with(|r| r.is_some_and(|r| r.has_resources()))
             || self.styles.get().is_some_and(|s| s.has_resources())
     }
 
     /// Tries to find a resource within the element: in its resource
     /// dictionary, then in its styles.
     pub fn try_get_resource(&self, key: &ResourceKey, theme: Option<&ThemeVariant>) -> Option<ResourceValue> {
-        let resources = self.resources.borrow().clone();
+        let resources = self.resources.get();
         if let Some(resources) = resources {
             if let Some(value) = resources.try_get_resource(key, theme) {
                 return Some(value);
