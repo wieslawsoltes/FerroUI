@@ -18,6 +18,11 @@ to be the build that ran. Two tables come out:
 - by path (`--paths N`): the largest sites with the owner and the frames outside it, which says
   on whose behalf the owner allocated.
 
+The bytes are the ones that were asked for. `--kept` counts the blocks instead: every site is taken
+as blocks of its average size, and a block as the size the allocator of macOS gives for it (steps
+of 16 bytes up to 1,008, then four sizes for each doubling: 1,024, 1,280, 1,536, 1,792, 2,048 and
+so on). It is an estimate where the blocks of a site differ in size, as those of a vector that grew.
+
 A function inlined into its caller has no frame and is counted for the caller; a build of the
 crates in question with line tables (`profile.release.package.<name>.debug = "line-tables-only"`)
 lets `atos -i` name the inlined ones too.
@@ -89,6 +94,23 @@ def is_plumbing(name, skip):
     return name.startswith(skip) or name.startswith("0x")
 
 
+def block_size(asked):
+    """The size of the block the allocator of macOS gives for a request of `asked` bytes."""
+    if asked <= 1008:
+        return max(16, (asked + 15) // 16 * 16)
+    doubling = 1024
+    while True:
+        for quarter in range(4, 9):
+            if asked <= doubling * quarter // 4:
+                return doubling * quarter // 4
+        doubling *= 2
+
+
+def kept(size, blocks):
+    """The bytes the blocks of a site take, each as a block of the site's average size."""
+    return block_size(-(-size // blocks)) * blocks if blocks else 0
+
+
 def megabytes(count):
     return f"{count / (1024 * 1024):9.2f}"
 
@@ -102,6 +124,7 @@ def main():
     parser.add_argument("--skip", action="append", default=[], help="a prefix of names that own nothing")
     parser.add_argument("--inlined", action="store_true", help="ask atos for the inlined functions (-i)")
     parser.add_argument("--match", help="only the sites with a frame whose name contains this")
+    parser.add_argument("--kept", action="store_true", help="count the blocks the allocator gives, not the bytes asked")
     arguments = parser.parse_args()
     skip = PLUMBING + tuple(arguments.skip)
 
@@ -110,6 +133,8 @@ def main():
 
     paths = []
     for size, blocks, allocations, frames in sites:
+        if arguments.kept:
+            size = kept(size, blocks)
         # An inlined group is several functions of one frame, the innermost first.
         path = [name for frame in frames for name in named[frame].split(" < ")]
         if arguments.match and not any(arguments.match in name for name in path):
@@ -120,7 +145,8 @@ def main():
 
     total = sum(path[0] for path in paths) or 1
     print(f"{sums}")
-    print(f"{megabytes(total)} MB in {sum(path[1] for path in paths)} blocks of the sites read\n")
+    what = "kept in the blocks of the allocator (an estimate)" if arguments.kept else "asked for"
+    print(f"{megabytes(total)} MB {what}, in {sum(path[1] for path in paths)} blocks of the sites read\n")
 
     owners = {}
     for size, blocks, allocations, owner, _ in paths:

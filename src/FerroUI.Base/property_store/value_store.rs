@@ -12,9 +12,10 @@ use crate::diagnostics::{
 use crate::data::{BindingExpressionBase, BindingPriority, BindingValueType};
 use crate::ferro_property_metadata::{DefaultCoercionOperations, DefaultEffectiveValueFactory};
 use crate::reactive::{IDisposable, IObservable};
+use crate::utilities::OptionCell;
 use crate::{BoxedValue, DirectPropertyBase, FerroObject, FerroProperty, PropertyValue, Ref, StyledProperty, WeakRef};
 use std::any::Any;
-use std::cell::{Cell, RefCell};
+use std::cell::{Cell, OnceCell, RefCell};
 use std::rc::Rc;
 
 type EffectiveValueRef = Rc<dyn EffectiveValueDyn>;
@@ -69,6 +70,14 @@ crate::ferro_thread_local! {
     static REEVALUATION_LISTS: RefCell<Vec<Vec<EffectiveValueRef>>> = const { RefCell::new(Vec::new()) };
 }
 
+/// The local value bindings of a store (`ValueStore::local_bindings`).
+#[derive(Default)]
+struct LocalBindings {
+    bindings: RefCell<Vec<(u32, Rc<dyn IDisposable>)>>,
+    /// The local value bindings that are binding expressions.
+    expressions: RefCell<Vec<(u32, Rc<dyn BindingExpressionBase>)>>,
+}
+
 /// Stores the styled property values of a [`FerroObject`] and resolves the
 /// effective value of each property from the values supplied at different
 /// priorities.
@@ -80,9 +89,10 @@ pub(crate) struct ValueStore {
     frames: RefCell<Vec<Rc<dyn ValueFrame>>>,
     #[cfg(all(debug_assertions, feature = "hot-reload"))]
     local_write_versions: RefCell<Vec<(u32, u64, u64)>>,
-    local_value_bindings: RefCell<Vec<(u32, Rc<dyn IDisposable>)>>,
-    /// The local value bindings that are binding expressions.
-    local_value_expressions: RefCell<Vec<(u32, Rc<dyn BindingExpressionBase>)>>,
+    /// The local value bindings of the store, made with the first one.
+    // Not upstream (docs/porting/desktop-performance.md, section 9.67): few objects have a local
+    // value binding, and the two lists were 64 bytes of every store.
+    local_bindings: OnceCell<Box<LocalBindings>>,
     /// Effective values sorted by property ID.
     effective_values: RefCell<Vec<(u32, EffectiveValueRef)>>,
     inherited_value_count: Cell<u32>,
@@ -104,7 +114,7 @@ pub(crate) struct ValueStore {
     reads_templated_parent: Cell<bool>,
     /// The nearest ancestor that holds inherited values. `Some(Weak)` pointing
     /// at the owner itself when the owner holds inherited values.
-    inheritance_ancestor: RefCell<Option<WeakRef<FerroObject>>>,
+    inheritance_ancestor: OptionCell<WeakRef<FerroObject>>,
     /// The inherited lookups of this store (property id, the effective value found or `None`),
     /// valid while the thread's inheritance generation is `inherited_lookups_generation`
     /// (FerroUI deviation, desktop-performance.md, section 9.3).
@@ -118,8 +128,7 @@ impl ValueStore {
             frames: RefCell::new(Vec::new()),
             #[cfg(all(debug_assertions, feature = "hot-reload"))]
             local_write_versions: RefCell::new(Vec::new()),
-            local_value_bindings: RefCell::new(Vec::new()),
-            local_value_expressions: RefCell::new(Vec::new()),
+            local_bindings: OnceCell::new(),
             effective_values: RefCell::new(Vec::new()),
             inherited_value_count: Cell::new(0),
             value_generation: Cell::new(1),
@@ -128,7 +137,7 @@ impl ValueStore {
             styling: Cell::new(0),
             reevaluation_pending: Cell::new(false),
             reads_templated_parent: Cell::new(false),
-            inheritance_ancestor: RefCell::new(None),
+            inheritance_ancestor: OptionCell::new(),
             inherited_lookups: RefCell::new(Vec::new()),
             inherited_lookups_generation: Cell::new(0),
         }
@@ -182,8 +191,19 @@ impl ValueStore {
         self.frames.borrow()[index].clone()
     }
 
+    /// The local value bindings, made when the first one is set.
+    fn local_bindings(&self) -> &LocalBindings {
+        self.local_bindings.get_or_init(Default::default)
+    }
+
+    /// Whether the store keeps the lists of its local value bindings.
+    #[cfg(test)]
+    pub(crate) fn has_local_bindings(&self) -> bool {
+        self.local_bindings.get().is_some()
+    }
+
     pub fn inheritance_ancestor(&self) -> Option<Ref<FerroObject>> {
-        self.inheritance_ancestor.borrow().as_ref().and_then(WeakRef::upgrade)
+        self.inheritance_ancestor.upgrade()
     }
 
     pub fn begin_styling(&self) {
@@ -317,7 +337,7 @@ impl ValueStore {
             self.dispose_existing_local_value_binding(property);
             let disposable: Rc<dyn IDisposable> = source.clone();
             self.set_local_value_binding(property, disposable);
-            self.local_value_expressions.borrow_mut().push((property.id(), source.clone()));
+            self.local_bindings().expressions.borrow_mut().push((property.id(), source.clone()));
             source.attach(SinkRef::Store(owner.to_weak()), None, owner, property, BindingPriority::LocalValue);
             source.start(true);
         } else {
@@ -351,7 +371,10 @@ impl ValueStore {
         }
         let mut index = 0;
         loop {
-            let expression = self.local_value_expressions.borrow().get(index).map(|(_, e)| e.clone());
+            let expression = self
+                .local_bindings
+                .get()
+                .and_then(|local| local.expressions.borrow().get(index).map(|(_, e)| e.clone()));
             let Some(expression) = expression else { break };
             if let Some(untyped) = expression.as_untyped() {
                 untyped.templated_parent_changed();
@@ -378,13 +401,11 @@ impl ValueStore {
     /// any.
     pub fn get_expression(&self, property: &'static FerroProperty) -> Option<Rc<dyn BindingExpressionBase>> {
         let local = || {
-            self.local_value_expressions
-                .borrow()
-                .iter()
-                .find(|(id, _)| *id == property.id())
-                .map(|(_, e)| e.clone())
+            self.local_bindings.get().and_then(|local| {
+                local.expressions.borrow().iter().find(|(id, _)| *id == property.id()).map(|(_, e)| e.clone())
+            })
         };
-        let has_local = self.local_value_bindings.borrow().iter().any(|(id, _)| *id == property.id());
+        let has_local = self.has_local_value_binding(property);
 
         for frame in self.frames().iter().rev() {
             if frame.base().priority() > BindingPriority::LocalValue && has_local {
@@ -403,14 +424,15 @@ impl ValueStore {
         property: &'static FerroProperty,
         expression: &Rc<dyn BindingExpressionBase>,
     ) -> bool {
-        let mut expressions = self.local_value_expressions.borrow_mut();
+        let Some(local) = self.local_bindings.get() else { return false };
+        let mut expressions = local.expressions.borrow_mut();
         let Some(index) = expressions.iter().position(|(id, value)| {
             *id == property.id() && Rc::ptr_eq(value, expression)
         }) else {
             return false;
         };
         expressions.remove(index);
-        self.local_value_bindings.borrow_mut().retain(|(id, _)| *id != property.id());
+        local.bindings.borrow_mut().retain(|(id, _)| *id != property.id());
         self.record_local_write(property);
         true
     }
@@ -426,7 +448,7 @@ impl ValueStore {
     ) {
         assert!(!self.has_local_value_binding(property));
         self.set_local_value_binding(property, expression.clone());
-        self.local_value_expressions.borrow_mut().push((property.id(), expression));
+        self.local_bindings().expressions.borrow_mut().push((property.id(), expression));
     }
 
     fn is_current_local_expression(
@@ -434,8 +456,8 @@ impl ValueStore {
         property: &'static FerroProperty,
         expression: &Rc<dyn BindingExpressionBase>,
     ) -> bool {
-        self.local_value_expressions.borrow().iter().any(|(id, value)| {
-            *id == property.id() && Rc::ptr_eq(value, expression)
+        self.local_bindings.get().is_some_and(|local| {
+            local.expressions.borrow().iter().any(|(id, value)| *id == property.id() && Rc::ptr_eq(value, expression))
         })
     }
 
@@ -624,7 +646,9 @@ impl ValueStore {
     }
 
     pub fn has_local_value_binding(&self, property: &FerroProperty) -> bool {
-        self.local_value_bindings.borrow().iter().any(|(id, _)| *id == property.id())
+        self.local_bindings
+            .get()
+            .is_some_and(|local| local.bindings.borrow().iter().any(|(id, _)| *id == property.id()))
     }
 
     pub fn coerce_value(&self, owner: &FerroObject, property: &'static FerroProperty) {
@@ -860,7 +884,7 @@ impl ValueStore {
             std::ptr::eq(a, owner)
         });
         if !is_self {
-            *self.inheritance_ancestor.borrow_mut() = ancestor.map(Ref::downgrade);
+            self.inheritance_ancestor.set(ancestor.map(Ref::downgrade));
             inheritance_generation::advance();
             if self.inherited_value_count.get() > 0 {
                 return;
@@ -890,17 +914,17 @@ impl ValueStore {
         property: &'static FerroProperty,
         observer: &dyn IDisposable,
     ) {
-        let removed = {
-            let mut bindings = self.local_value_bindings.borrow_mut();
+        let removed = self.local_bindings.get().is_some_and(|local| {
+            let mut bindings = local.bindings.borrow_mut();
             match bindings.iter().position(|(id, _)| *id == property.id()) {
                 Some(index) if std::ptr::addr_eq(Rc::as_ptr(&bindings[index].1), std::ptr::from_ref(observer)) => {
                     bindings.remove(index);
-                    self.local_value_expressions.borrow_mut().retain(|(id, _)| *id != property.id());
+                    local.expressions.borrow_mut().retain(|(id, _)| *id != property.id());
                     true
                 }
                 _ => false,
             }
-        };
+        });
         if removed {
             self.clear_value(owner, property);
         }
@@ -1119,7 +1143,7 @@ impl ValueStore {
                 let ancestor = owner.inheritance_parent().and_then(|p| Self::ancestor_for(&p));
                 // Detach the self-marker first so the notification is not
                 // mistaken for "the owner is the ancestor".
-                *self.inheritance_ancestor.borrow_mut() = ancestor.as_ref().map(Ref::downgrade);
+                self.inheritance_ancestor.set(ancestor.as_ref().map(Ref::downgrade));
                 inheritance_generation::advance();
                 owner.for_each_inheritance_child(|child| {
                     child.values().on_inheritance_ancestor_changed(child, ancestor.as_ref());
@@ -1429,8 +1453,9 @@ impl ValueStore {
         self.record_local_write(property);
         // The slot is being taken over: a binding expression that held it is
         // no longer the property's local value binding.
-        self.local_value_expressions.borrow_mut().retain(|(id, _)| *id != property.id());
-        let mut bindings = self.local_value_bindings.borrow_mut();
+        let local = self.local_bindings();
+        local.expressions.borrow_mut().retain(|(id, _)| *id != property.id());
+        let mut bindings = local.bindings.borrow_mut();
         match bindings.iter_mut().find(|(id, _)| *id == property.id()) {
             Some(slot) => slot.1 = binding,
             None => bindings.push((property.id(), binding)),
@@ -1438,8 +1463,9 @@ impl ValueStore {
     }
 
     fn dispose_existing_local_value_binding(&self, property: &FerroProperty) {
-        let existing =
-            self.local_value_bindings.borrow().iter().find(|(id, _)| *id == property.id()).map(|(_, b)| b.clone());
+        let existing = self.local_bindings.get().and_then(|local| {
+            local.bindings.borrow().iter().find(|(id, _)| *id == property.id()).map(|(_, b)| b.clone())
+        });
         if let Some(existing) = existing {
             existing.dispose();
         }
