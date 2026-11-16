@@ -6205,3 +6205,59 @@ attached and its next sibling is built, for less than one per cent of the build 
 children. No public API changes.
 
 **Other backends.** It is in `ferroui_base` and `ferroui_controls`.
+
+### 9.76 What a tree records when it is attached for its first frame (left out)
+
+Experiment #753 supposed that a tree shown for the first time makes records visual by visual
+(dirty rectangles, composition changes, entries of the layout and render queues) that the
+first frame does not need, because that frame draws the whole window, and that the root
+could stand for all of them.
+
+**Counted** between the build and the first frame of the two start scenes, with the counters
+of the framework and four more for this measurement (the requests of a visual to be drawn
+again, the visuals put into the dirty set of the renderer, the requests for a place in the
+queues of the layout manager, the entries of those queues). The four are not kept: the
+counters are a public enumeration, and a patch release adds nothing to one (section 3.1 of
+`docs/release.md`); they can come back with the next minor version.
+
+| | `startup/controls` | `startup/tiles` |
+| --- | ---: | ---: |
+| Elements attached | 23,616 | 352,186 |
+| Layout queue requests, entries | 400, 800 | 0, 0 |
+| Measures, arranges executed | 24,418, 23,217 | 352,187, 352,187 |
+| Visual invalidations requested | 46,569 | 704,376 |
+| Visuals queued for the update pass | 24,017 | 352,187 |
+| Visuals recorded | 24,017 | 352,187 |
+| Composition visuals created | 9,073 | 58,699 |
+| Composition batch objects | 123,487 | 1,760,940 |
+| Composition batch value bytes | 1.18 MB | 28.2 MB |
+| Dirty rectangles on the UI thread | none | none |
+| Shown in, memory of the show | 261 ms, 158 MB | 757 ms, 295 MB |
+
+**What the counts say.**
+
+- The layout queues are not filled element by element. A tree that is attached is measured
+  and arranged from its root, each element once; the 800 entries of the controls scene are
+  400 elements that invalidate their measure during the pass, each queued for its measure
+  and then for its arrange.
+- The record of a visual for the update pass is one entry of eight bytes in the dirty set
+  and a few bits in the visual. A visual asks about twice; the second request finds the bits
+  set. The set of the tiles scene is 2.8 MB at its largest (352,187 entries of eight bytes),
+  one per cent of the memory of the show, and a request is a few loads and a test of the
+  bits.
+- The UI thread makes no dirty rectangles: the render side computes them, and its first
+  frame draws the target whole.
+- What is large is the composition batch: 14 objects for each composition visual of the
+  controls and 30 for each of the tiles, 28 MB in the tiles scene. It is the state the first
+  frame draws from (the properties and the drawing of each visual), so the root cannot stand
+  for it.
+- The containers of that burst give their storage back already: the serialization queues of
+  the compositor, the streams of a batch and the passes of the server compositor release
+  what they hold beyond 4 MB (`ReleaseExcess`).
+
+**Outcome.** Nothing is changed in the renderer. Marking the root in place of the visuals
+would save the requests and the entries of the dirty set, which the counts show to be small
+beside the show, and the update pass would walk the tree to find what the set lists now. The
+time of the requests alone was not measured.
+
+**Other backends.** Nothing changed.
