@@ -791,10 +791,17 @@ impl<M: PropertyMetadata> MetadataTable<M> {
         &self.default_metadata
     }
 
-    // Not inlined: the callers are typed too, and each would carry the choice below.
+    // Not inlined: the callers are typed too, and each would carry the choices below.
     #[inline(never)]
     pub fn get(&self, type_: &'static TypeInfo) -> Rc<M> {
-        match MetadataEntries::lookup(&self.inner, Rc::as_ptr(&self.default_metadata).cast(), type_) {
+        let default: RawValue = Rc::as_ptr(&self.default_metadata).cast();
+        // The table of nearly every property has the one registration it was made with, whose
+        // metadata is the default metadata itself: that is answered here. The call of the shared
+        // look-up for it cost the styling and the propagation benchmarks a tenth of their time.
+        if matches!(&*self.inner.borrow(), MetadataEntries::Single(Some((_, value))) if std::ptr::eq(*value, default)) {
+            return self.default_metadata.clone();
+        }
+        match MetadataEntries::lookup(&self.inner, default, type_) {
             // SAFETY: the look-up returns a value of the entries of this table, and nothing ran
             // between its return and here that could take the value out.
             Some(raw) => unsafe { Self::share(raw) },
