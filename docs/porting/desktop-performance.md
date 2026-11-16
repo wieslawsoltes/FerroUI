@@ -6474,13 +6474,19 @@ is slower, so these are shares more than times):
 | Before the first instruction of the program: the system checks a program it never ran | 420 to 630 ms |
 | The first paint, waiting for Metal: libraries compiled from source | 550 to 700 ms |
 | The first paint, waiting for Metal: pipeline states | 215 to 260 ms |
-| AppKit, `finishLaunching`: the text input items of the main menu | 120 to 180 ms |
 | The application: platform set-up, mount of the tree, first layout | about 300 ms |
-| From the application's first frame to the window on the display | about 300 ms |
+| From the application's first tick to the window on the display | about 300 ms |
 
 The check before the first instruction grows with the size of the program (the harness's
-own notes have 270 ms for 12 MB and 380 ms for 24 MB), so the size of an application is a
-part of its first start.
+own notes have 214 ms for 3 MB, 270 ms for 12 MB and 380 ms for 24 MB, about 8 ms a
+megabyte), so the size of an application is a part of its first start: the comparison's
+application is 30.5 MB stripped, 10 MB of code more than hello world, because the
+declarative layer keeps the tables of types and with them every control.
+
+A sample also shows 120 to 180 ms in `-[NSApplication finishLaunching]`, where AppKit loads
+a library for the text input items of the main menu. That time is the sampler's: the
+system tells an attached sampler of every library a process loads and waits for its answer
+(`notifyDebuggerLoad`). It is not a cost of a start that nothing watches.
 
 **The first paint.** Graphite makes the pipeline of a draw when the recording that holds it
 is added to the context, and without a thread pool it makes them one after another on the
@@ -6510,8 +6516,8 @@ wait for the pool. The second start is the same with and without (0.54 to 0.57 s
 fps): its pipelines come from Metal's cache.
 
 **What is left of a first start**, in the order of what it costs: the system's check of
-the program (its size), the wait for the pool (pipelines that could be asked for before the
-first paint), the text input items of the main menu, and the application's own start.
+the program (its size), the application's own start, and the wait for the pool (pipelines
+that could be asked for before the first paint).
 
 **Tests.** `gpu/metal/tests.rs`: `the_pipeline_threads_follow_the_cores_and_the_environment`
 and `the_process_has_a_pipeline_pool_unless_the_environment_asks_for_none`; the drawing
