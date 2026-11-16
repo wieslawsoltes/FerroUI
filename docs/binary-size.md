@@ -1025,6 +1025,56 @@ two levels this scene has (`docs/porting/desktop-performance.md`, section 9.67).
 The pattern, for the next case: where code is needed only after something was used, let the use
 state the function and let the common path call what was stated. A boolean keeps the code.
 
+### 4.22 Adding and removing a registration of a metadata table are shared (#570)
+
+`MetadataTable<M>` holds the metadata a property has for its owners: the registrations, the
+look-up along the base classes of the type that is asked for, and the cache of that look-up. Its
+values were `Rc<M>`, so its functions were compiled once for every value type of a property: in
+hello world 161 copies of `unregister` (103 kB), 215 of `get` (73 kB) and 8 of
+`override_metadata`. `unregister` is named by nothing but the table of virtual functions of a
+property (`route_unregister`, for `FerroPropertyRegistry::unregister_by_module`): every property
+type carried a copy that no application calls.
+
+Adding and removing a registration work on the types of the owners and not on the metadata. The
+entries (`MetadataEntries`, not generic) now hold each value as the pointer `Rc::into_raw` gives
+for the handle the table owns, and one copy of `insert` and `remove` serves every table. The
+table knows `M` and turns a pointer back; a value that leaves the entries is given up through
+one small function per metadata type, which the shared code is handed. A table is as large as it
+was.
+
+The look-up stays with the metadata type. It runs for every read of a default value and of the
+metadata of a property, and sharing it was measured twice before it was left alone:
+
+| Version | Machine code | Speed |
+|---|---:|---|
+| `get` inlined, the look-up shared | +5 kB | not measured |
+| `get` out of line, the look-up shared behind it | -141 kB | `styling_subsystem::SelectorMatch.none` +11 % in time alone, +9.5 % with the code moved (section 8.1 of `desktop-performance.md`): real |
+| the whole look-up in one shared call | -139 kB | the indexed styling benchmarks +7 to +9 %, the propagation of a property +7 % |
+| the look-up as it was, adding and removing shared | -125 kB (-119 kB on the main branch of the table below) | nine benchmarks of styling, propagation and the property system between -3.9 % and +0.1 % |
+
+Two things worth keeping from the first two rows. The sum of the symbols
+(`scripts/symsize.py`) fell by 0.10 MB in the first version while the machine code of the
+executable (`size -m`, `__TEXT,__text`) grew: with `get` inlined, each typed caller carried the
+choice between a registered value and the default, and the `Drop` of a table was compiled per
+type. The section sizes of the linker are the measure; the sum of the symbols follows what is
+inlined where. And a call is not free where the code runs ten thousand times a pass: the second
+version retired fewer instructions than the base and took a tenth longer.
+
+| `samples/HelloWorld`, release, macOS (`size -m`) | Before | After | Change |
+|---|---:|---:|---:|
+| Machine code (`__TEXT,__text`) | 15,315,420 bytes | 15,196,012 bytes | -119,408 bytes (-0.8 %) |
+| Constants (`__TEXT,__const` and `__DATA_CONST,__const`) | 2,315,118 bytes | 2,316,750 bytes | +1,632 bytes |
+| File | 28,133,136 bytes | 27,900,928 bytes | -232,208 bytes |
+
+The local gate on the property system, styling, the trees, element construction, the counters,
+the gauntlet and the frame benchmarks: 244 metrics, one over its tolerance,
+`trees::Propagation.data_context` at +15.4 % in time alone with the instructions of the base. A
+second run of nine rounds had it at +1.1 %, and the candidate built with 36 bytes in front of
+its code (the placement check of section 8.1 of `desktop-performance.md`) ran the eight
+propagation benchmarks between -5.0 % and +3.0 % of the base. The eight move together with the
+build: the two gates of section 4.20, a change that touches no propagation, had them between
+-31 % and +16 %.
+
 ## 5. What an executable is made of
 
 ### 5.1 Sections (macOS, release, unstripped)
