@@ -78,9 +78,10 @@ fn a_preview_outside_the_artboard_has_the_theme_the_flow_direction_and_the_backi
     window.show();
     let host = |workspace: &DesignerWorkspace| {
         let document: Ref<Control> = Border::new().upcast();
-        let host = workspace.view_preview_host(document.clone());
+        let host = workspace.view_preview_host(document.clone(), ferroui_base::Size::new(400.0, 300.0));
         let fit = host.cast::<ferroui_controls::Viewbox>().expect("a box that fits the preview");
         assert_eq!(fit.stretch_direction(), ferroui_base::media::StretchDirection::DownOnly);
+        assert_eq!((fit.max_width(), fit.max_height()), (352.0, 252.0), "the room, less the margin");
         let scope = fit.child().and_then(|child| child.cast::<ThemeVariantScope>()).expect("a theme scope");
         let backing = scope.child().and_then(|child| child.cast::<Border>()).expect("a backing");
         assert_eq!((backing.width(), backing.height()), workspace.artboard_size());
@@ -92,9 +93,28 @@ fn a_preview_outside_the_artboard_has_the_theme_the_flow_direction_and_the_backi
         border.background().is_some_and(|brush| Rc::ptr_eq(&brush, &artboard))
     };
 
-    // The styles of the editor chrome do not reach the document: nothing above it has their class.
-    let flyout = workspace.view_preview_flyout(Border::new().upcast());
+    // The styles of the editor chrome do not reach the document: the presenter has none of their
+    // classes, and nothing above what the flyout opens over has (the styles select what is below
+    // a class of the chrome, and a flyout is below what it opens at).
+    let flyout = workspace.view_preview_flyout(Border::new().upcast(), ferroui_base::Size::new(400.0, 300.0));
     assert!(!flyout.flyout_presenter_classes().contains("designer-chrome"));
+    let mut above: Option<Ref<ferroui_base::StyledElement>> = Some(workspace.view_preview_target().upcast());
+    while let Some(element) = above {
+        assert!(!element.classes().contains("designer-chrome"), "{:?} is of the chrome", element.name());
+        above = element.parent();
+    }
+    // The button that opens the preview is of the chrome: the flyout does not open at it.
+    let button = named::<Button>(&workspace, "NativePreview");
+    let mut above: Option<Ref<ferroui_base::StyledElement>> = Some(button.upcast());
+    let mut of_the_chrome = false;
+    while let Some(element) = above {
+        of_the_chrome |= element.classes().contains("designer-chrome");
+        above = element.parent();
+    }
+    assert!(of_the_chrome);
+    // A room that has no size yet limits nothing.
+    let unsized_host = workspace.view_preview_host(Border::new().upcast(), ferroui_base::Size::default());
+    assert!(unsized_host.max_width().is_infinite());
 
     // The default artboard is light inside the dark editor.
     let (scope, backing) = host(&workspace);

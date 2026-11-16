@@ -464,12 +464,27 @@ impl DesignerWorkspace {
             });
         }
     }
-    /// The flyout that shows a preview in the view. Its presenter has no class of the editor
-    /// chrome: the styles of the chrome select what is below such a class (its buttons, its text
-    /// boxes), and the document is no part of the chrome.
-    pub(crate) fn view_preview_flyout(&self, control: Ref<Control>) -> Ref<ferroui_controls::Flyout> {
+    /// What a preview in the view opens over: the area of the canvas. It is no part of the
+    /// editor chrome, and what a flyout shows is, for the styles, below what it opens at: opened
+    /// at a button of the application bar, the document took the buttons and the text boxes of
+    /// the chrome.
+    pub(crate) fn view_preview_target(&self) -> Ref<Control> {
+        self.root.get_control::<Control>("ArtboardScroll")
+    }
+
+    /// The flyout that shows a preview in the view, for the room `room` of what it opens over.
+    /// Its presenter has a class of its own and none of the editor chrome (`DesignerChrome.xaml`,
+    /// `FlyoutPresenter.designer-preview-flyout`: no limit of the theme on its size, which cut a
+    /// document wider than a menu).
+    pub(crate) fn view_preview_flyout(
+        &self,
+        control: Ref<Control>,
+        room: ferroui_base::Size,
+    ) -> Ref<ferroui_controls::Flyout> {
         let flyout = ferroui_controls::Flyout::new();
-        flyout.set_content(Some(Control::boxed(self.view_preview_host(control))));
+        flyout.flyout_presenter_classes().add("designer-preview-flyout");
+        flyout.set_placement(ferroui_controls::PlacementMode::Center);
+        flyout.set_content(Some(Control::boxed(self.view_preview_host(control, room))));
         flyout
     }
 
@@ -484,7 +499,8 @@ impl DesignerWorkspace {
         }
         // The session is not borrowed while the flyout opens: showing it lays the view out.
         let control = self.session.borrow_mut().open_view_preview()?;
-        let flyout = self.view_preview_flyout(control);
+        let target = self.view_preview_target();
+        let flyout = self.view_preview_flyout(control, target.bounds().size());
         // The flyout lives until it is closed, which a click outside it does.
         let keep = Rc::new(RefCell::new(Some(flyout.clone())));
         flyout
@@ -492,7 +508,7 @@ impl DesignerWorkspace {
                 keep.borrow_mut().take();
             })
             .detach();
-        flyout.show_at(&self.root.get_control::<Button>("NativePreview"));
+        flyout.show_at(&target);
         Ok(())
     }
 
