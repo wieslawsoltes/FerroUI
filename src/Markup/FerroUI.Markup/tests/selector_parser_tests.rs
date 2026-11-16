@@ -129,6 +129,7 @@ fn a_type_the_resolver_does_not_know_is_an_error_unless_it_may_be_matched_by_nam
     let known = SelectorParser::new(|_ns, type_| (type_ == "Known").then_some(Control::TYPE)).unknown_types_by_name();
     let selector = known.parse("Known").expect("parses").expect("a selector");
     assert_eq!(selector.target_type(), Some(Control::TYPE));
-    // The selector of a property needs its type, to find the property.
-    assert!(by_name.parse("TextBlock[IsPointerOver=True]").is_err());
+    // The selector of a property needs its type, to find the property: a class that is known
+    // by then has it, one that nothing knows does not.
+    assert!(by_name.parse("NoClassOfThisNameIsKnown[IsPointerOver=True]").is_err());
 }

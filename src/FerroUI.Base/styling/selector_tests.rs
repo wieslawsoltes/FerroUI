@@ -197,8 +197,6 @@ fn selectors_by_name_match_what_the_selectors_by_type_match() {
     }
     assert_eq!(exact.to_string(), "Class1");
     assert_eq!(derived.to_string(), ":is(Class1)");
-    // The class is known by now: the selector has its type as one by type has.
-    assert_eq!(exact.target_type(), Some(Class1::TYPE));
     let with_class = Selectors::of_type_name(None, "Class1").class("foo");
     assert_eq!(with_class.to_string(), "Class1.foo");
     assert_eq!(with_class.match_(&element(&Class3::new()), None, true).result(), NeverThisType);
@@ -206,6 +204,34 @@ fn selectors_by_name_match_what_the_selectors_by_type_match() {
     let nobody = Selectors::of_type_name(None, "NoClassHasThisName");
     assert_eq!(nobody.match_(&element(&Class1::new()), None, true).result(), NeverThisType);
     assert_eq!(nobody.target_type(), None);
+}
+
+/// A class of [`a_selector_by_name_has_its_type_once_the_class_is_known`] alone: no other class
+/// of the process has its name.
+#[repr(C)]
+struct KnownByItsNameAlone {
+    base: Layoutable,
+}
+
+ferro_class!(KnownByItsNameAlone: Layoutable);
+ferro_impl_classes!(KnownByItsNameAlone: FerroObjectImpl, StyledElementImpl, VisualImpl, LayoutableImpl);
+
+// Not from the reference tests.
+#[test]
+fn a_selector_by_name_has_its_type_once_the_class_is_known() {
+    let target = Selectors::of_type_name(None, "KnownByItsNameAlone");
+    // Nothing is of the class yet: no type, and no element matches.
+    assert_eq!(target.target_type(), None);
+    assert_eq!(target.to_string(), "KnownByItsNameAlone");
+    assert_eq!(
+        target.match_(&element(&Class1::new()), None, true).result(),
+        SelectorMatchResult::NeverThisType
+    );
+
+    let control: Ref<KnownByItsNameAlone> = instantiate(KnownByItsNameAlone { base: Layoutable::construct() });
+    assert_eq!(target.match_(&element(&control), None, true).result(), SelectorMatchResult::AlwaysThisType);
+    // The class is known by now: the selector has its type as one by type has.
+    assert_eq!(target.target_type(), Some(KnownByItsNameAlone::TYPE));
 }
 
 /// A class of [`a_selector_by_identity_has_no_type_before_the_class_is_initialised`] alone.
