@@ -6140,3 +6140,68 @@ are measured and arranged by the layout manager, the events of the layout. No pu
 changes. The deviation is recorded in `DEVIATIONS.md` (Layout).
 
 **Other backends.** It is in `ferroui_base`.
+
+### 9.75 A child added to a panel makes no list of itself
+
+Experiment #754 asked whether a parent that is given many children can take them in one
+operation, and whether anything in the attachment of a child grows faster than the number of
+children.
+
+**The benchmark.** `trees::Children` adds 64, 256 and 1,024 children to an empty panel, one
+by one (`children().add`) and as one range (`children().add_range`), to a panel a root shows
+and to a panel in no tree. The time is that of one child. On the main branch:
+
+| Per child | 64 | 256 | 1,024 |
+| --- | ---: | ---: | ---: |
+| One by one, attached | 394 ns | 373 ns | 367 ns |
+| Range, attached | 283 ns | 273 ns | 274 ns |
+| One by one, detached | 168 ns | 155 ns | 149 ns |
+| Range, detached | 76 ns | 78 ns | 78 ns |
+
+The cost of a child does not grow with the number of children: nothing here grows faster
+than its input. A range is one change, one invalidation and one walk of the lists of the
+parent already, and it is a quarter cheaper for an attached parent and half for a detached
+one. What was left to explain is what a single `add` pays beside the attachment of the
+child, 70 to 90 nanoseconds.
+
+**What it paid.** A panel put the child of an `Add` into its logical and its visual children
+with `insert_range`, which collects what it is given into a list before it inserts it: two
+allocations for every child added one at a time, which is how markup and most code add
+children.
+
+**The change.** A panel inserts one child as one item (`insert`); the lists raise the change
+they raised. `FerroList::insert_range` collects a range of up to four items without the
+heap, and a longer one, or one that does not say how long it is, as before.
+
+**Measured** against the commit before it (`scripts/perf/gate.py`, 3 rounds):
+
+| Benchmark | Before | After | Time | Instructions |
+| --- | ---: | ---: | ---: | ---: |
+| `Children.one_by_one[Children=1024, Parent=detached]` | 148.8 ns | 106.2 ns | -28.6 % | |
+| `Children.one_by_one[Children=256, Parent=detached]` | 155.3 ns | 110.6 ns | -28.8 % | |
+| `Children.one_by_one[Children=64, Parent=detached]` | 167.9 ns | 127.2 ns | -24.3 % | |
+| `Children.one_by_one[Children=1024, Parent=attached]` | 366.6 ns | 347.4 ns | -5.3 % | |
+| `ElementConstructionBenchmark.create[Tiles=1000]` | 5.054 ms | 4.876 ms | -3.5 % | -4.95 % |
+| `ElementConstructionBenchmark.create_and_attach[Tiles=1000]` | 7.301 ms | 7.180 ms | -1.7 % | -3.70 % |
+| `ElementConstructionBenchmark.create_attach_and_lay_out[Tiles=1000]` | 14.907 ms | 14.956 ms | +0.3 % | -2.59 % |
+| `ElementConstructionBenchmark.create[Tiles=10000]` | 57.186 ms | 55.858 ms | -2.3 % | -4.95 % |
+| `ElementConstructionBenchmark.create_attach_and_lay_out[Tiles=10000]` | 178.118 ms | 172.942 ms | -2.9 % | -2.63 % |
+| `trees::Lifetime.build[Tiles=2000]` | 10.887 ms | 10.630 ms | -2.4 % | -4.99 % |
+| `trees::Lifetime.attach_top_down[Tiles=2000]` | 11.895 ms | 11.651 ms | -2.1 % | -4.87 % |
+
+The rows of `Children` are five alternating runs of the two programs (the benchmark is new,
+so the gate has no base for it). 182 metrics of the trees, element construction, the layout,
+the counters, the gauntlet and the frame benchmarks; four of the eight `trees::Propagation`
+lines were over in time alone with the instructions of the base (11 to 36 per cent), and a
+second run of nine rounds had them between -1.0 and +9.8 per cent and others of the eight 11
+to 13 per cent faster. The eight move together with any build: they did so for the three
+changes before this one, which touch no propagation either.
+
+**Left out.** Markup could add the children of a panel as one range. It would save what is
+left between the two ways (about 30 ns a child now) and change the order in which a child is
+attached and its next sibling is built, for less than one per cent of the build of a tile.
+
+**What stays as it was.** The changes the lists raise, their order, the order of the
+children. No public API changes.
+
+**Other backends.** It is in `ferroui_base` and `ferroui_controls`.
