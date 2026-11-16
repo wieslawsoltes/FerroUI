@@ -69,10 +69,12 @@ fn main() {
     // The thread pool of Graphite's pipeline compiles (Graphite only).
     if env::var("CARGO_CFG_FERRO_SKIA_APPLE_GANESH").is_err() {
         println!("cargo:rerun-if-changed=gpu/graphite/pipeline_executor.cpp");
+        println!("cargo:rerun-if-changed=gpu/graphite/pipeline_record.cpp");
         cc::Build::new()
             .cpp(true)
             .std("c++17")
             .file("gpu/graphite/pipeline_executor.cpp")
+            .file("gpu/graphite/pipeline_record.cpp")
             .compile("ferroui_pipeline_executor");
     }
     println!("cargo:rustc-link-lib=framework=Metal");

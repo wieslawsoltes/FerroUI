@@ -71,6 +71,13 @@ impl SkiaMetalGpu {
         let backend_context = unsafe { BackendContext::new(device.device(), device.command_queue()) };
 
         let context = context_factory::make_metal(&backend_context, &ordered_recordings_options())
+            .map(|mut context| {
+                // The pipelines of the records are asked for now, on the pipeline pool, while the
+                // application goes on starting (`pipeline_record.rs`).
+                let records = pipeline_records();
+                drop(crate::gpu::graphite::pipeline_record::precompile(&mut context, records));
+                context
+            })
             .and_then(GraphiteGrContext::new)
             .unwrap_or_else(|| panic!("Unable to create a Skia GPU context from the Metal device."));
 
@@ -439,8 +446,22 @@ fn ordered_recordings_options() -> skia_safe::gpu::graphite::ContextOptions {
             .cast::<skia_bindings::skgpu_graphite_ContextOptions>();
         native.fRequireOrderedRecordings = true;
         native.fExecutor = pipeline_executor().cast();
+        // The pipelines are reported while something records them (`pipeline_record.rs`).
+        let callback = crate::gpu::graphite::pipeline_record::caching_callback();
+        native.fPipelineCachingCallback = std::mem::transmute::<*const std::ffi::c_void, _>(callback);
     }
     options
+}
+
+/// The records of pipelines to make ahead when a context is made: the file
+/// `FERROUI_PIPELINE_PRECOMPILE` names, for now.
+#[cfg(not(ferro_skia_apple_ganesh))]
+fn pipeline_records() -> Vec<std::borrow::Cow<'static, [u8]>> {
+    std::env::var_os("FERROUI_PIPELINE_PRECOMPILE")
+        .and_then(|path| std::fs::read(path).ok())
+        .map(std::borrow::Cow::Owned)
+        .into_iter()
+        .collect()
 }
 
 /// The thread pool the Graphite contexts of the process compile their pipelines on
