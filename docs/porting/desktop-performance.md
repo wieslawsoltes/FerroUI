@@ -6389,3 +6389,56 @@ another thread. The prewarm of the effects of a theme and of the frame stays as 
 
 **Other backends.** The browser's first frame (step 4 of the experiment: one draw, not one
 to find the pipelines and one to show) was not measured and stays open.
+
+### 9.79 The frames drawn whole at launch, counted (nothing to remove)
+
+Experiment #758 asked how many frames a launch draws whole, and why: a frame drawn whole
+after the first one is work a window should not do (section 9.53 removed one such cause on
+the patchwork screen, which drew the whole window in every frame of its first seconds).
+
+**Counted** on the main branch with a line a drawn frame, written for the measurement and
+not kept: the share of the target inside the bounds of the dirty region, and what made the
+frame whole when it was (a new layer, a change of the target that asks for a whole frame, a
+target that keeps no frame, or a dirty region that covers the target by itself).
+
+| Launch | Frames | Whole | Share of the target in the frames after the first (median) |
+| --- | ---: | ---: | ---: |
+| macOS, Metal: gauntlet, tier 16, 4 s | 213 | 1 | 89 % |
+| macOS, Metal: still wall, tier 16, 4 s | 188 | 1 | 9 % |
+| macOS, Metal: patchwork, tier 17, 4 s | 198 | 1 | 92 % |
+| macOS, Metal: control catalog, 5 s | 138 | 1 | 20 % |
+| Android, OpenGL ES (emulator): wall, 6 s | 35 | 1 | 10 % |
+| Android, OpenGL ES (emulator): text, 6 s | 86 | 1 | 84 % |
+| Android, OpenGL ES (emulator): transforms, 6 s | 41 | 1 | 78 % |
+| Android, OpenGL ES (emulator): list, 6 s | 47 | 1 | 90 % |
+
+The Android rows are the scenes of the frame benchmarks (`tests/FerroUI.FrameBenchmarks`),
+each started twice; both launches of every scene have one whole frame.
+
+**The one whole frame** of every launch is its first: the target has just been given its
+size and its root, which asks for a whole frame, and the layer the frame is drawn into is
+new. It is the frame that carries the content, so there is no frame to make partial.
+
+**The frames after it** are as large as what changes. The gauntlet and the patchwork animate
+across the window, and the bounds of what moves are nine tenths of it; the wall changes a
+few tiles a frame. The control catalog draws 128 frames of a fifth of its window in its
+first 2.3 seconds and then stops: three elements of its first page animate, and the fifth is
+the bounds of the three together (their rectangles move by a fraction of a pixel a frame).
+None of these frames waits for a policy before it is partial: the first frame after the
+whole one already is.
+
+**Why there is no second whole frame.** A window target of the Skia backends is drawn
+through a layer that keeps the frame (`RenderTargetProperties::default()`: the target is
+not drawn directly), so a surface that hands out a cleared image each frame costs a blit of
+the layer and not a redraw of the tree. A whole frame is drawn again when the layer is made
+again (a change of size, a lost context) or when the target changes (its size, its scaling,
+its transparency), and a launch does neither after its first frame.
+
+**Outcome.** Nothing is changed and no counter is added. A frame drawn whole after the first
+one would show as a time in the window suite of the gate (`first frame`, `second frame` and
+the frame times of a scene).
+
+**Not counted.** The browser (WebGL): the build needs a toolchain that is not on the
+measuring machine. Its window target is the same Skia target drawn through a layer, so the
+same rule holds by construction, with one case of its own, a resize of the canvas, which
+makes the layer again.
