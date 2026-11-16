@@ -6349,3 +6349,43 @@ anything else.
 **What stays as it was.** Everything: the pull request adds the benchmark.
 
 **Other backends.** Nothing changed.
+
+### 9.78 The first frame of a first launch, measured again (nothing to change)
+
+Experiment #759 started from a first frame that took 2.1 to 2.6 seconds on a first launch of
+the gauntlet against half a second on a later one, with the pipelines of the first frame
+compiled on the UI thread inside the first paint, and proposed to compile them on the
+prewarm thread and to keep a record of them between launches.
+
+**Measured** on the main branch before anything was changed: the time from the start of the
+process to the first frame of the benchmark application (Metal, macOS), a first launch being
+one after the cache of compiled Metal shaders of unbundled applications is removed, as the
+comparison's harness makes one.
+
+| Scene | First launch | Later launch |
+| --- | ---: | ---: |
+| Gauntlet, tier 16 (five launches each) | 0.242 to 0.280 s | 0.209 to 0.230 s |
+| Patchwork, tier 17 (three launches each) | 0.409 to 0.436 s | 0.384 to 0.402 s |
+
+A first launch is three hundredths of a second behind a later one. The gap the experiment
+set out to close is not there: a first launch no longer waits for Metal. (The numbers of the
+experiment were the harness's of 13 November; what moved the compilation since then was not
+traced back.)
+
+One launch is slow, and it is not the one the harness measures: the first run of an
+executable file the system has not run before. The file just built took 1.66 s to its first
+frame, and a copy of the same file at another path, with the caches of Metal in place, 1.06
+s, then 0.24 and 0.22 s. A sample of that launch has about 0.8 s in the loader of the system
+before the program starts (`_dyld_start`) and no compilation of a Metal library or pipeline
+on any thread of the application. That time belongs to the system's first run of a new
+executable, and what an application can do about it is to be a smaller file.
+
+**Not measured.** A machine on which Metal has never seen the shaders (its front-end cache
+empty as well). The harness does not remove that cache, and it is shared by every
+application of the user; removing it is the owner's call.
+
+**Outcome.** Nothing is changed: there is no first-launch cost of this size left to move to
+another thread. The prewarm of the effects of a theme and of the frame stays as it is.
+
+**Other backends.** The browser's first frame (step 4 of the experiment: one draw, not one
+to find the pipelines and one to show) was not measured and stays open.
