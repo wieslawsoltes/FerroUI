@@ -1,5 +1,5 @@
-// Shader libraries made when the application was built (docs/porting/gpu-rendering.md, "Shader
-// libraries made ahead").
+// Shader libraries made when the application was built (docs/porting/gpu-rendering.md, "Pipelines
+// made ahead of their first draw").
 //
 // Skia hands Metal the text of every shader of a pipeline (`newLibraryWithSource:`), and Metal
 // compiles it in a helper process: three quarters of the time a pipeline takes to make. A

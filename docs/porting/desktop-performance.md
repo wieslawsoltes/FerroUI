@@ -6732,3 +6732,54 @@ frame) and sets the points of two shapes, which measure for them.
 immutable brushes share, another colour or opacity does not, two brushes that can change do
 not). `src/FerroUI.View/tests/builder_tests.rs`:
 `elements_that_name_a_color_share_its_brush`.
+
+### 9.85 A first start: shader libraries made when the application is built
+
+**Where the time of a pipeline goes.** After sections 9.81 and 9.83 the pipelines of a first
+start are made on eight threads, most of them before the first frame asks. A sample of those
+threads (the comparison's program, a first start): of the time in
+`MtlGraphicsPipeline::Make`, three quarters is `newLibraryWithSource:` (313 of 424 samples
+on a thread, the same on each), Metal compiling the text of a shader in a helper process,
+and a quarter is `newRenderPipelineStateWithDescriptor:`.
+
+**The change.** The first part is done ahead. The Metal compiler of Xcode makes the same
+library from the same text (`scripts/perf/metal-libraries.py`), a table holds the libraries
+by their text, and the device is asked through a front on its own
+`newLibraryWithSource:options:error:` (`gpu/metal/shader_libraries.m`), which loads the
+library of a text the table has and lets the device compile any other. The crate carries
+the table of ordinary drawing for macOS on Apple silicon, 77 libraries, 115 KB packed;
+an application registers the table of its own screens beside it
+(`ferroui_skia::register_metal_libraries`). The mechanism, why it is a front on the device
+and not a change of Skia, and what the other platforms have, are in
+`docs/porting/gpu-rendering.md` ("Pipelines made ahead of their first draw").
+
+**Measured** (the comparison's own program built from the branch with its profile, its
+harness, gauntlet tier 16, five starts each of one binary, the table of the crate asked
+and, with `FERROUI_METAL_LIBRARIES=off`, not asked; the median, and the five):
+
+| | Table off | Table of the crate |
+| --- | ---: | ---: |
+| First start: first frame | 1.246 s | 1.018 s |
+| the five | 1.142, 1.147, 1.246, 1.269, 1.320 | 1.003, 1.005, 1.018, 1.024, 1.081 |
+| First start: frames a second over the run | 40.6 | 42.1 |
+| Second start: first frame | 0.524 s | 0.523 s |
+| Second start: frames a second over the run | 44.0 | 44.3 |
+| The program | 23,064,208 bytes | 23,180,752 bytes |
+
+A first start shows its first frame 0.23 s sooner and its starts differ by 0.08 s where
+they differed by 0.18 s; a second start, which finds what the system kept of the first, is
+the same. The pictures are the same: no pixel differs between a frame drawn with the table
+and one drawn without (gauntlet tier 5 and patchwork tier 5, frame 120). The texts are the
+same from run to run and from build to build (two recordings of 71 texts, the same 71 keys),
+and the 71 of the comparison's program are among the 77 the sample of this repository
+writes.
+
+**What is left of a first start**: the system's check of a program it never ran, the
+pipeline states themselves (a quarter of a pipeline; Metal's binary archives are of one GPU
+and one system version, so they are not shipped), and the application's own start.
+
+**Tests.** `metal_libraries.rs` (the key, the table, a packed table unpacked by the system,
+what a library is given for, the table the crate carries), `gpu/metal/tests.rs`:
+`the_libraries_of_ordinary_drawing_are_found_by_the_pipelines_of_the_record` (fails when
+Skia writes other texts than the table was made of). The 648 tests of the crate, the Metal
+drawing tests among them, run with the table in front of the device.
