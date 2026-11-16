@@ -13,7 +13,8 @@ use crate::media::text_formatting::{
     GenericTextRunProperties, ITextSource, TextLayout, TextParagraphProperties, TextRunProperties,
 };
 use crate::media::{
-    BaselineAlignment, Brushes, Colors, FlowDirection, FontFeatureCollection, FontManager, IBrush, TextAlignment, TextDecorationCollection, TextTrimming, TextWrapping, Typeface,
+    BaselineAlignment, Brushes, Colors, FlowDirection, FontFeatureCollection, FontManager, IBrush, SolidColorBrush,
+    TextAlignment, TextDecorationCollection, TextTrimming, TextWrapping, Typeface,
 };
 
 fn layout_with(
@@ -129,7 +130,7 @@ fn what_a_layout_is_made_of_tells_layouts_apart() {
 }
 
 #[test]
-fn a_layout_is_shared_for_the_same_brush_object_only() {
+fn a_layout_is_shared_for_the_same_brush_and_for_equal_brushes_that_cannot_change() {
     let _scope = TextTestScope::new();
 
     let brush: Rc<dyn IBrush> = Brushes::black();
@@ -137,14 +138,30 @@ fn a_layout_is_shared_for_the_same_brush_object_only() {
     let second = layout("abc", &with_brush(Some(brush)), f64::INFINITY);
     assert!(Rc::ptr_eq(&first, &second));
 
-    // Brushes are told apart as objects: one of the same colour that is another object can
-    // get another colour later, and the layout draws with the brush it was made with.
+    // Two brushes that cannot change and are equal draw the same now and later: the elements of
+    // a list whose colour is written where each is made share the layout of a text.
     let red: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::new(Colors::RED));
     let other_red: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::new(Colors::RED));
-    let with_red = layout("abc", &with_brush(Some(red)), f64::INFINITY);
+    let with_red = layout("abc", &with_brush(Some(red.clone())), f64::INFINITY);
     let with_other_red = layout("abc", &with_brush(Some(other_red)), f64::INFINITY);
-    assert!(!Rc::ptr_eq(&with_red, &with_other_red));
+    assert!(Rc::ptr_eq(&with_red, &with_other_red));
     assert!(!Rc::ptr_eq(&first, &with_red));
+
+    // Not when what they are differs: the colour, the opacity.
+    let blue: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::new(Colors::BLUE));
+    assert!(!Rc::ptr_eq(&with_red, &layout("abc", &with_brush(Some(blue)), f64::INFINITY)));
+    let faint_red: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::with_opacity(Colors::RED, 0.5));
+    assert!(!Rc::ptr_eq(&with_red, &layout("abc", &with_brush(Some(faint_red)), f64::INFINITY)));
+
+    // A brush that can change is told apart as an object: one of the same colour that is
+    // another object can get another colour later, and the layout draws with the brush it was
+    // made with.
+    let changing: Rc<dyn IBrush> = SolidColorBrush::with_color(Colors::RED).into();
+    let other_changing: Rc<dyn IBrush> = SolidColorBrush::with_color(Colors::RED).into();
+    let with_changing = layout("abc", &with_brush(Some(changing.clone())), f64::INFINITY);
+    assert!(!Rc::ptr_eq(&with_changing, &layout("abc", &with_brush(Some(other_changing)), f64::INFINITY)));
+    assert!(!Rc::ptr_eq(&with_changing, &with_red));
+    assert!(Rc::ptr_eq(&with_changing, &layout("abc", &with_brush(Some(changing)), f64::INFINITY)));
 
     let without = layout("abc", &with_brush(None), f64::INFINITY);
     assert!(!Rc::ptr_eq(&first, &without));
