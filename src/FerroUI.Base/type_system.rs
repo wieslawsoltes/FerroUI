@@ -141,6 +141,19 @@ impl TypeInfo {
     /// [`is_assignable_from`](Self::is_assignable_from) with `T::TYPE`, does not
     /// keep the initialisation, the constructor and the markup metadata of `T`
     /// in the executable (#612).
+    /// Whether this type or a type it derives from is named `name`: the type check of a
+    /// selector that knows a class by its name alone.
+    pub fn is_or_derives_from_named(&self, name: &str) -> bool {
+        let mut current = Some(self);
+        while let Some(type_) = current {
+            if type_.name == name {
+                return true;
+            }
+            current = type_.base;
+        }
+        false
+    }
+
     #[inline]
     pub fn derives_from(&self, identity: &'static TypeIdentity) -> bool {
         let mut current = Some(self);
