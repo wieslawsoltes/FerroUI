@@ -6672,3 +6672,63 @@ one), `gpu/metal/tests.rs`: `the_record_of_ordinary_drawing_is_taken_whole_where
 (a Metal device takes every key of the record the crate carries; it found the refused blur
 keys), `rendering/first_frame.rs` (the names of the environment). The Metal drawing tests
 make their contexts with the record asked for.
+
+### 9.84 The declarative program: texts of one colour share their layouts
+
+**What was counted.** The comparison's own FerroUI program and the sample of this repository
+were built with the counters of the UI thread (`perf-counters`, `FERROUI_FRAME_TIMES=1`) and
+run at tier 16. A frame of each, side by side:
+
+| A frame, gauntlet tier 16 | The declarative program | The sample of this repository |
+| --- | ---: | ---: |
+| Text blocks whose layout was dropped for a new text | 732 | 745 |
+| Text layouts made | 781 | 431 |
+| Layouts found in the cache of the font manager (section 9.29) | 7 | 347 |
+| Measures run | 4,457 | 1,148 |
+| Objects made | 1,122 | 493 |
+
+Both change the same 740 texts a frame (400 quotes of two texts each). The sample finds 45 %
+of them in the cache; the declarative program found one in a hundred.
+
+**The cause.** The cache told brushes apart as objects, because a brush that can change may
+get another colour after a layout was made with it. An element of the declarative layer
+that is written `.foreground("#64748B")` made a brush of its own from the text, so 400 quotes
+of one colour had 400 brushes and no two of them could share the layout of `+0.12%`. The
+sample holds one brush a colour.
+
+**The change**, two parts.
+
+- `text_layout_cache.rs`, `same_brush`: two brushes are the same brush to the cache when they
+  are one object, or when neither can change (`IBrush::as_immutable_brush`) and they are
+  equal (`IBrush::equals`: for an immutable solid colour brush its colour, opacity and
+  transforms) with the same transform origin. A brush that can change is still told apart
+  from every other object. This holds for any application: a colour written in a data
+  template or parsed for each item is an immutable brush of its own.
+- `src/FerroUI.View/conversions.rs`, `brush_of`: a colour given to a setter of the
+  declarative layer (a `Color`, `"#1E293B"`, a name) is one brush for the thread, for the
+  first 1,024 colours; a value that runs through colours gets brushes of its own past that.
+  A screen of ten thousand elements in a dozen colours holds a dozen brushes.
+
+**Measured** (the comparison's program built from the branch with its own profile, its
+harness, gauntlet tier 16, three starts each, the median; the counters from the build with
+counters):
+
+| | Before | After |
+| --- | ---: | ---: |
+| Text layouts made a frame | 781 | 435 |
+| Layouts found in the cache a frame | 7 | 353 |
+| Second start: frames a second over the run | 44.4 | 48.9 |
+| Second start: CPU a frame | 57.3 ms | 52.6 ms |
+| First start: frames a second over the run | 41.1 | 45.5 |
+| First start: first frame | 1.12 s | 1.14 s |
+
+**What is left in that program**: four times the measures of the sample. Its quotes hug
+their texts, so a text that changes its width measures the tile around it; each card
+replaces the two column definitions of its progress bar every frame (545 definitions made a
+frame) and sets the points of two shapes, which measure for them.
+
+**Tests.** `text_layout_cache_tests.rs`:
+`a_layout_is_shared_for_the_same_brush_and_for_equal_brushes_that_cannot_change` (equal
+immutable brushes share, another colour or opacity does not, two brushes that can change do
+not). `src/FerroUI.View/tests/builder_tests.rs`:
+`elements_that_name_a_color_share_its_brush`.

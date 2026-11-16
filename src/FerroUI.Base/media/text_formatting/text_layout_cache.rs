@@ -27,7 +27,7 @@ use std::rc::Rc;
 use crate::media::text_formatting::{
     TextLayout, TextLineMetricsMode, TextParagraphProperties, TextRunProperties,
 };
-use crate::media::{FlowDirection, TextAlignment, TextLineBounds, TextTrimming, TextWrapping};
+use crate::media::{FlowDirection, IBrush, TextAlignment, TextLineBounds, TextTrimming, TextWrapping};
 
 /// The layouts nothing holds that are kept for the next use of their text.
 pub(crate) const IDLE_CAPACITY: usize = 4096;
@@ -158,8 +158,9 @@ impl Key {
 }
 
 /// Whether two sets of run properties of shareable requests shape and draw a text the same
-/// way, now and after any change to an object they refer to: brushes are compared by identity,
-/// because the runs of a layout draw with the brush object they were made with.
+/// way, now and after any change to an object they refer to: the runs of a layout draw with
+/// the brush object they were made with, so a brush that can change is the same brush as
+/// itself only ([`same_brush`]).
 fn same_run_properties(a: &Rc<dyn TextRunProperties>, b: &Rc<dyn TextRunProperties>) -> bool {
     if Rc::ptr_eq(a, b) {
         return true;
@@ -168,18 +169,29 @@ fn same_run_properties(a: &Rc<dyn TextRunProperties>, b: &Rc<dyn TextRunProperti
     a.font_rendering_em_size().to_bits() == b.font_rendering_em_size().to_bits()
         && a.font_scale().to_bits() == b.font_scale().to_bits()
         && a.baseline_alignment() == b.baseline_alignment()
-        && same_object(a.foreground_brush(), b.foreground_brush())
-        && same_object(a.background_brush(), b.background_brush())
+        && same_brush(a.foreground_brush(), b.foreground_brush())
+        && same_brush(a.background_brush(), b.background_brush())
         && a.typeface() == b.typeface()
         && a.requested_font_family() == b.requested_font_family()
         && a.culture_info() == b.culture_info()
         // Neither has text decorations or font features (`is_shareable`).
 }
 
-fn same_object<T: ?Sized>(a: Option<&Rc<T>>, b: Option<&Rc<T>>) -> bool {
+/// Whether a run drawn with one brush is, now and at any later time, a run drawn with the
+/// other: the same object, or two brushes that cannot change and are equal (two immutable
+/// brushes of one colour, which is what every element of a list has when its colour is written
+/// where the element is made). A brush that can change is told apart from every other object:
+/// one of the same colour can get another colour later.
+fn same_brush(a: Option<&Rc<dyn IBrush>>, b: Option<&Rc<dyn IBrush>>) -> bool {
     match (a, b) {
         (None, None) => true,
-        (Some(a), Some(b)) => Rc::ptr_eq(a, b),
+        (Some(a), Some(b)) => {
+            Rc::ptr_eq(a, b)
+                || (a.as_immutable_brush().is_some()
+                    && b.as_immutable_brush().is_some()
+                    && a.transform_origin() == b.transform_origin()
+                    && a.equals(&**b))
+        }
         _ => false,
     }
 }

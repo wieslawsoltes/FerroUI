@@ -15,12 +15,47 @@
 //!
 //! A color text that does not parse panics with the text: it is a mistake
 //! in the source, like an attribute XAML does not compile.
+//!
+//! The brush of a color is one object for every element that names the
+//! color ([`brush_of`]): a list of a thousand rows written with `"#1E293B"`
+//! holds one brush, not a thousand.
 
 use crate::builder::{FromValue, IntoValue};
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
 use ferroui_base::media::{Brush, Color, IBrush};
 use ferroui_base::{BoxedValue, CornerRadius, PropertyValue, Thickness};
+use std::cell::RefCell;
+use std::collections::HashMap;
 use std::rc::Rc;
+
+/// The colors whose brush is kept. A value that runs through colors (an
+/// animated one, a color computed from data) gets a brush of its own for
+/// each color past this many.
+const KEPT_BRUSHES: usize = 1024;
+
+thread_local! {
+    static BRUSHES: RefCell<HashMap<u32, Rc<dyn IBrush>>> = RefCell::new(HashMap::new());
+}
+
+/// The brush of `color`: the same object for the same color, on one thread,
+/// for the first [`KEPT_BRUSHES`] colors. The brush cannot change, so what
+/// shares it cannot tell.
+pub(crate) fn brush_of(color: Color) -> Rc<dyn IBrush> {
+    let make = || -> Rc<dyn IBrush> { Rc::new(ImmutableSolidColorBrush::new(color)) };
+    BRUSHES
+        .try_with(|brushes| {
+            let mut brushes = brushes.borrow_mut();
+            if let Some(brush) = brushes.get(&color.to_uint32()) {
+                return brush.clone();
+            }
+            let brush = make();
+            if brushes.len() < KEPT_BRUSHES {
+                brushes.insert(color.to_uint32(), brush.clone());
+            }
+            brush
+        })
+        .unwrap_or_else(|_| make())
+}
 
 impl<T: PropertyValue> IntoValue<Option<T>> for T {
     fn into_value(self) -> Option<T> {
@@ -131,12 +166,15 @@ impl IntoValue<CornerRadius> for i32 {
 
 impl IntoValue<Option<Rc<dyn IBrush>>> for Color {
     fn into_value(self) -> Option<Rc<dyn IBrush>> {
-        Some(Rc::new(ImmutableSolidColorBrush::new(self)))
+        Some(brush_of(self))
     }
 }
 
 impl IntoValue<Option<Rc<dyn IBrush>>> for &str {
     fn into_value(self) -> Option<Rc<dyn IBrush>> {
-        Some(Brush::parse(self).unwrap_or_else(|_| panic!("`{self}` is not a color")))
+        Some(match Color::try_parse(self) {
+            Some(color) => brush_of(color),
+            None => Brush::parse(self).unwrap_or_else(|_| panic!("`{self}` is not a color")),
+        })
     }
 }
