@@ -48,6 +48,9 @@ pub type SelectorTypeResolver = dyn Fn(&str, &str) -> Option<&'static TypeInfo>;
 /// Parses a [`Selector`] from text.
 pub struct SelectorParser {
     type_resolver: Box<SelectorTypeResolver>,
+    /// Whether a type the resolver does not know is matched by its name
+    /// ([`unknown_types_by_name`](Self::unknown_types_by_name)).
+    unknown_by_name: bool,
 }
 
 impl SelectorParser {
@@ -56,7 +59,18 @@ impl SelectorParser {
     /// `type_resolver` resolves the types the selector names: it is given
     /// the namespace prefix and the type name.
     pub fn new(type_resolver: impl Fn(&str, &str) -> Option<&'static TypeInfo> + 'static) -> Self {
-        Self { type_resolver: Box::new(type_resolver) }
+        Self { type_resolver: Box::new(type_resolver), unknown_by_name: false }
+    }
+
+    /// A type the resolver does not know is no error: the selector matches the class of that
+    /// name (`Selectors::of_type_name`, `Selectors::is_type_name`). Not from the managed
+    /// original, whose parser has every type through reflection. For a parser of an application
+    /// that keeps no tables of types: a class is known there once an object of it exists, and a
+    /// style is often written before that. The selectors of a property (`Button[IsDefault=True]`)
+    /// still need their type known, to find the property.
+    pub fn unknown_types_by_name(mut self) -> Self {
+        self.unknown_by_name = true;
+        self
     }
 
     /// Parses a [`Selector`] from text. `None` for an empty selector.
@@ -72,10 +86,18 @@ impl SelectorParser {
         for i in syntax {
             match i {
                 SelectorSyntax::OfType { type_name, xmlns } => {
-                    result = Some(Selectors::of_type_info(result, self.resolve(xmlns, type_name)?));
+                    result = Some(match (self.type_resolver)(xmlns, type_name) {
+                        Some(type_) => Selectors::of_type_info(result, type_),
+                        None if self.unknown_by_name => Selectors::of_type_name(result, type_name),
+                        None => return Err(Self::unresolved(xmlns, type_name)),
+                    });
                 }
                 SelectorSyntax::Is { type_name, xmlns } => {
-                    result = Some(Selectors::is_type_info(result, self.resolve(xmlns, type_name)?));
+                    result = Some(match (self.type_resolver)(xmlns, type_name) {
+                        Some(type_) => Selectors::is_type_info(result, type_),
+                        None if self.unknown_by_name => Selectors::is_type_name(result, type_name),
+                        None => return Err(Self::unresolved(xmlns, type_name)),
+                    });
                 }
                 SelectorSyntax::Class { class } => {
                     result = Some(Selectors::class(result, class));
@@ -194,14 +216,12 @@ impl SelectorParser {
     }
 
     fn resolve(&self, xmlns: &str, type_name: &str) -> Result<&'static TypeInfo, SelectorParserError> {
-        match (self.type_resolver)(xmlns, type_name) {
-            Some(result) => Ok(result),
-            None => {
-                let type_ =
-                    if xmlns.trim().is_empty() { type_name.to_string() } else { format!("{xmlns}:{type_name}") };
-                Err(SelectorParserError::InvalidOperation(format!("Could not resolve type '{type_}'")))
-            }
-        }
+        (self.type_resolver)(xmlns, type_name).ok_or_else(|| Self::unresolved(xmlns, type_name))
+    }
+
+    fn unresolved(xmlns: &str, type_name: &str) -> SelectorParserError {
+        let type_ = if xmlns.trim().is_empty() { type_name.to_string() } else { format!("{xmlns}:{type_name}") };
+        SelectorParserError::InvalidOperation(format!("Could not resolve type '{type_}'"))
     }
 }
 

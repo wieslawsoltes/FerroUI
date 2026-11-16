@@ -58,6 +58,14 @@ impl Selectors {
         Selector::new(TypeNameAndClassSelector::of_identity(previous, identity, true))
     }
 
+    /// Returns a selector which matches the class named `name` or a class derived from it: what
+    /// [`is_type_info`](Self::is_type_info) matches, for a selector written as text whose class
+    /// is not known yet (no object of it was made, and the application keeps no tables of types).
+    /// Two classes of one name are both matched.
+    pub fn is_type_name(previous: Option<Selector>, name: &str) -> Selector {
+        Selector::new(TypeNameAndClassSelector::of_type_name(previous, name, true))
+    }
+
     /// Returns a selector which matches class `T` or a class derived from it.
     pub fn is<T: ObjectType + Upcast<StyledElement>>() -> Selector {
         Self::is_type_info(None, T::TYPE)
@@ -118,6 +126,13 @@ impl Selectors {
     /// the class in an executable that never creates one.
     pub fn of_type_identity(previous: Option<Selector>, identity: &'static TypeIdentity) -> Selector {
         Selector::new(TypeNameAndClassSelector::of_identity(previous, identity, false))
+    }
+
+    /// Returns a selector which matches the class named `name` exactly: what
+    /// [`of_type_info`](Self::of_type_info) matches, for a selector written as text whose class
+    /// is not known yet. See [`is_type_name`](Self::is_type_name).
+    pub fn of_type_name(previous: Option<Selector>, name: &str) -> Selector {
+        Selector::new(TypeNameAndClassSelector::of_type_name(previous, name, false))
     }
 
     /// Returns a selector which matches class `T` exactly.

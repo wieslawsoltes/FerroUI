@@ -27,6 +27,9 @@ use std::rc::{Rc, Weak};
 pub(super) enum CandidateType {
     Type(&'static TypeInfo),
     Identity(&'static TypeIdentity),
+    /// The name of a class: a selector written as text for a class that was not known when the
+    /// selector was made (`TypeNameAndClassSelector::of_type_name`).
+    Name(&'static str),
 }
 
 impl PartialEq for CandidateType {
@@ -34,6 +37,7 @@ impl PartialEq for CandidateType {
         match (*self, *other) {
             (CandidateType::Type(own), CandidateType::Type(other)) => own == other,
             (CandidateType::Identity(own), CandidateType::Identity(other)) => std::ptr::eq(own, other),
+            (CandidateType::Name(own), CandidateType::Name(other)) => own == other,
             _ => false,
         }
     }
@@ -56,6 +60,8 @@ impl TypeCandidate {
                 target.identity().is_some_and(|own| std::ptr::eq(own, identity))
             }
             (CandidateType::Identity(identity), false) => target.derives_from(identity),
+            (CandidateType::Name(name), true) => target.name() == name,
+            (CandidateType::Name(name), false) => target.is_or_derives_from_named(name),
         }
     }
 }

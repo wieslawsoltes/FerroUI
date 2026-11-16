@@ -178,6 +178,36 @@ fn selectors_by_identity_match_what_the_selectors_by_type_match() {
     assert_eq!(with_class.match_(&element(&Class3::new()), None, true).result(), NeverThisType);
 }
 
+// Not from the reference tests: a selector written as text for a class that is not known when
+// it is parsed names the class by its name alone (docs/binary-size.md, section 4.23).
+#[test]
+fn selectors_by_name_match_what_the_selectors_by_type_match() {
+    use SelectorMatchResult::{AlwaysThisType, NeverThisType};
+    let exact = Selectors::of_type_name(None, "Class1");
+    let derived = Selectors::is_type_name(None, "Class1");
+    let controls = [
+        (element(&Class1::new()), AlwaysThisType, AlwaysThisType),
+        (element(&Class2::new()), NeverThisType, AlwaysThisType),
+        (element(&Class3::new()), NeverThisType, NeverThisType),
+        (element(&StyledAsClass1::new()), AlwaysThisType, AlwaysThisType),
+    ];
+    for (control, exactly, derived_from) in controls {
+        assert_eq!(exact.match_(&control, None, true).result(), exactly);
+        assert_eq!(derived.match_(&control, None, true).result(), derived_from);
+    }
+    assert_eq!(exact.to_string(), "Class1");
+    assert_eq!(derived.to_string(), ":is(Class1)");
+    // The class is known by now: the selector has its type as one by type has.
+    assert_eq!(exact.target_type(), Some(Class1::TYPE));
+    let with_class = Selectors::of_type_name(None, "Class1").class("foo");
+    assert_eq!(with_class.to_string(), "Class1.foo");
+    assert_eq!(with_class.match_(&element(&Class3::new()), None, true).result(), NeverThisType);
+    // A name no class has matches nothing and has no type.
+    let nobody = Selectors::of_type_name(None, "NoClassHasThisName");
+    assert_eq!(nobody.match_(&element(&Class1::new()), None, true).result(), NeverThisType);
+    assert_eq!(nobody.target_type(), None);
+}
+
 /// A class of [`a_selector_by_identity_has_no_type_before_the_class_is_initialised`] alone.
 #[repr(C)]
 struct NeverSeen {
