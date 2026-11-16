@@ -9,3 +9,8 @@ node_modules/
 # The toolchain of the browser target installed by scripts/browser/setup.sh.
 /.tools/
 __pycache__/
+
+# The builds and the results of the framework comparison (benchmarks/comparison/compare.py).
+/benchmarks/comparison/target/
+/benchmarks/comparison/results/
+/benchmarks/comparison/ferroui-local/Cargo.lock

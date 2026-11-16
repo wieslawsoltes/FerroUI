@@ -866,6 +866,31 @@ the machine, the emulator or the simulator; the browser suite counts what WebGL 
   same run, and never with the numbers of another platform. A virtual machine or an emulator runs
   alone while it is measured.
 
+### 8.3 The comparison's own FerroUI application, from this checkout and from the published crates
+
+The comparison publishes numbers for a FerroUI application of its own, written on the
+declarative layer, and not for `samples/GauntletBenchmark` (section 9.82 has what differs).
+`benchmarks/comparison` builds that application, unchanged, two ways: from the FerroUI of
+this checkout (`ferroui-local/Cargo.toml`) and from the published crates its own manifest
+names. Its sources are a submodule that a clone does not fetch
+(`git submodule update --init --checkout benchmarks/comparison/upstream`).
+`benchmarks/comparison/compare.py build` builds the two, and `compare.py run --scenario
+gauntlet:16 --rounds 2` runs the comparison's harness on each and prints them beside each
+other. The first run, a display with other windows on it (`--diagnostic`), the main branch
+against 0.5.0:
+
+| Gauntlet, tier 16 | This checkout | Published 0.5.0 |
+| --- | ---: | ---: |
+| First start: frames a second over the run | 33.8 | 28.4 |
+| First start: first frame | 1.39 s | 2.02 s |
+| Second start: frames a second over the run | 37.5 | 35.0 |
+| Second start: first frame | 0.56 s | 0.55 s |
+| Second start: CPU a frame | 67.1 ms | 70.3 ms |
+
+The harness measures a window on a display from outside the application, so this is not a
+suite of the gate; it is where a change to the declarative layer or to the start is measured
+as the comparison will measure it.
+
 ## 9. Deviations from upstream for frame cost
 
 Each deviation keeps the observable behaviour of upstream (the same events, the same order, the
