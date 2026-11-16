@@ -79,8 +79,11 @@ fn a_preview_outside_the_artboard_has_the_theme_the_flow_direction_and_the_backi
     let host = |workspace: &DesignerWorkspace| {
         let document: Ref<Control> = Border::new().upcast();
         let host = workspace.view_preview_host(document.clone());
-        let scope = host.cast::<ThemeVariantScope>().expect("a theme scope");
+        let fit = host.cast::<ferroui_controls::Viewbox>().expect("a box that fits the preview");
+        assert_eq!(fit.stretch_direction(), ferroui_base::media::StretchDirection::DownOnly);
+        let scope = fit.child().and_then(|child| child.cast::<ThemeVariantScope>()).expect("a theme scope");
         let backing = scope.child().and_then(|child| child.cast::<Border>()).expect("a backing");
+        assert_eq!((backing.width(), backing.height()), workspace.artboard_size());
         assert!(backing.child().is_some_and(|child| child.ptr_eq(&document)));
         (scope, backing)
     };
@@ -88,6 +91,10 @@ fn a_preview_outside_the_artboard_has_the_theme_the_flow_direction_and_the_backi
         let artboard = workspace.artboard.background().expect("the artboard has a background");
         border.background().is_some_and(|brush| Rc::ptr_eq(&brush, &artboard))
     };
+
+    // The styles of the editor chrome do not reach the document: nothing above it has their class.
+    let flyout = workspace.view_preview_flyout(Border::new().upcast());
+    assert!(!flyout.flyout_presenter_classes().contains("designer-chrome"));
 
     // The default artboard is light inside the dark editor.
     let (scope, backing) = host(&workspace);

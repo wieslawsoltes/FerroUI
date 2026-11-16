@@ -464,6 +464,15 @@ impl DesignerWorkspace {
             });
         }
     }
+    /// The flyout that shows a preview in the view. Its presenter has no class of the editor
+    /// chrome: the styles of the chrome select what is below such a class (its buttons, its text
+    /// boxes), and the document is no part of the chrome.
+    pub(crate) fn view_preview_flyout(&self, control: Ref<Control>) -> Ref<ferroui_controls::Flyout> {
+        let flyout = ferroui_controls::Flyout::new();
+        flyout.set_content(Some(Control::boxed(self.view_preview_host(control))));
+        flyout
+    }
+
     /// Opens the preview of the document: in a window of the platform, or, where the platform
     /// shows a single view and has no windows (a browser, a phone), in a flyout of the view.
     fn open_preview(self: &Rc<Self>) -> Result<(), String> {
@@ -475,9 +484,7 @@ impl DesignerWorkspace {
         }
         // The session is not borrowed while the flyout opens: showing it lays the view out.
         let control = self.session.borrow_mut().open_view_preview()?;
-        let flyout = ferroui_controls::Flyout::new();
-        flyout.flyout_presenter_classes().add("designer-chrome");
-        flyout.set_content(Some(Control::boxed(self.view_preview_host(control))));
+        let flyout = self.view_preview_flyout(control);
         // The flyout lives until it is closed, which a click outside it does.
         let keep = Rc::new(RefCell::new(Some(flyout.clone())));
         flyout
