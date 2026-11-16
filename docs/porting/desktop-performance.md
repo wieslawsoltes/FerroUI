@@ -6593,3 +6593,63 @@ quarter makes text layouts again every frame.
 `a_source_a_run_does_not_read_again_is_followed_no_more`,
 `sources_read_in_another_order_are_all_kept` and
 `a_source_disposed_while_its_subscriber_runs_is_forgotten`.
+
+### 9.83 A first start: pipelines from a record, asked for when the platform starts
+
+After section 9.81 the first paint of a first start still waits for the pipelines of the
+frame, side by side on the pool. This section asks for them before the first paint.
+
+**What other renderers do** (the research is in #786). A renderer with a closed set of
+shaders compiles them when it is built (Flutter's Impeller, Qt's shader tool). One with an
+open set records what an application draws and compiles the record before it is needed
+(Unreal's bundled pipeline caches, Chrome's start with Skia Graphite, the framework that
+leads the published comparison, which also draws its first frames with a few simple
+pipelines compiled first and alone). Skia is of the second kind. All of them draw the first
+frame on the GPU, and so does this.
+
+**The record.** Graphite reports every pipeline it makes with a key that can be stored, and
+makes a pipeline from such a key before a draw needs it. A record is the keys of the
+pipelines an application made: `FERROUI_PIPELINE_RECORD=<file>` writes one, an application
+ships its own (`ferroui_skia::register_pipeline_record`), and the Skia crate carries one of
+ordinary drawing, 37 pipelines in 2.3 kB (fills, rounded rectangles, borders, text, the
+shadow of a box, a small gradient, clips), for macOS on Apple silicon, where it was
+recorded. When the context is made, the keys go to the pipeline pool on a thread of their
+own.
+
+**The context, sooner.** The render context was made by the first frame. With
+`FirstFramePipelines::Prewarm` (the default; `FERROUI_FIRST_FRAME=wait` is the behaviour
+before) the native platform makes it when it starts (`Compositor::prepare_render_interface`),
+so the record compiles while the application builds its first screen.
+
+**What a record cannot hold** in the pinned Skia: a pipeline that samples a texture (14 of
+the gauntlet's 45: the path from a key fails in the snippet that normalises the coordinates
+and the process ends) and Skia's own runtime effects (the passes of a blur: refused in a
+context that has not drawn with them). They are made at their first draw, on the pool.
+
+**Measured** as section 9.81 measures a first start (the comparison's own application built
+from the branch, gauntlet tier 16, three starts each):
+
+| | `wait` | `prewarm` |
+| --- | ---: | ---: |
+| First frame, first start | 1.370, 1.385, 1.391 s | 1.345, 1.418, 1.259 s |
+| First frame, second start | 0.562, 0.572, 0.556 s | 0.553, 0.565, 0.600 s |
+| First paint of a sampled first start | 259 ms | 137 ms |
+| of it, the wait for pipelines | 194 ms | 70 ms |
+
+The first paint is half of what it was, and the first frame moves by less than its own
+scatter (0.04 s at the median): a first start of this application is now the system's
+check of a 30 MB program it never ran (0.42 s), the application's own start and the time
+to the window on the display. The context made sooner without a record changes nothing
+(1.39 and 1.40 s).
+
+**What is next for the pipelines** (#786): the texture pipelines, through the form of
+Graphite's precompile that takes paint options (what Chrome uses), and shader libraries
+compiled when the application is built, loaded where Skia hands text to Metal. Both need the
+patched Skia binding. **And for the first start**: the size of an application on the
+declarative layer, which keeps every control because one selector is a string.
+
+**Tests.** `gpu/graphite/pipeline_record.rs` (the format of a record; what stays out of
+one), `gpu/metal/tests.rs`: `the_record_of_ordinary_drawing_is_taken_whole_where_it_is_used`
+(a Metal device takes every key of the record the crate carries; it found the refused blur
+keys), `rendering/first_frame.rs` (the names of the environment). The Metal drawing tests
+make their contexts with the record asked for.
