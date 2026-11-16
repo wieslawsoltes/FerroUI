@@ -26,7 +26,9 @@ pub struct Panel {
     base: Control,
     children: Controls,
     is_items_host: Cell<bool>,
-    child_index_changed: Rc<ChildIndexChangedHandlers>,
+    /// The handlers of the changes of the indexes of the children: made when the first one is
+    /// added, which few panels see (a style that selects a child by its position).
+    child_index_changed: OnceCell<Rc<ChildIndexChangedHandlers>>,
     child_index_provider: OnceCell<Rc<PanelChildIndexProvider>>,
 }
 
@@ -175,7 +177,7 @@ impl Panel {
             base: Control::construct(),
             children: Controls::new(),
             is_items_host: Cell::new(false),
-            child_index_changed: Rc::new(HandlerList::new()),
+            child_index_changed: OnceCell::new(),
             child_index_provider: OnceCell::new(),
         }
     }
@@ -244,8 +246,8 @@ impl Panel {
     }
 
     fn raise_child_index_changed(&self, e: &ChildIndexChangedEventArgs) {
-        if !self.child_index_changed.is_empty() {
-            for (_, handler) in self.child_index_changed.snapshot().iter() {
+        if let Some(handlers) = self.child_index_changed.get().filter(|handlers| !handlers.is_empty()) {
+            for (_, handler) in handlers.snapshot().iter() {
                 handler(e);
             }
         }
@@ -273,8 +275,9 @@ impl IChildIndexProvider for PanelChildIndexProvider {
 
     fn child_index_changed(&self, handler: Rc<dyn Fn(&ChildIndexChangedEventArgs)>) -> Rc<dyn IDisposable> {
         let Some(owner) = self.owner.upgrade() else { return Disposable::empty() };
-        let token = owner.child_index_changed.add(handler);
-        let handlers = Rc::downgrade(&owner.child_index_changed);
+        let handlers = owner.child_index_changed.get_or_init(|| Rc::new(HandlerList::new()));
+        let token = handlers.add(handler);
+        let handlers = Rc::downgrade(handlers);
         Disposable::create(move || {
             if let Some(handlers) = handlers.upgrade() {
                 handlers.remove(token);
