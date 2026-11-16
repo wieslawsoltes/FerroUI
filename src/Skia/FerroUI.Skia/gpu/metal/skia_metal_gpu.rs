@@ -74,7 +74,7 @@ impl SkiaMetalGpu {
             .map(|mut context| {
                 // The pipelines of the records are asked for now, on the pipeline pool, while the
                 // application goes on starting (`pipeline_record.rs`).
-                let records = pipeline_records();
+                let records = crate::gpu::graphite::pipeline_record::records_to_make_ahead();
                 drop(crate::gpu::graphite::pipeline_record::precompile(&mut context, records));
                 context
             })
@@ -437,7 +437,7 @@ impl ISkiaGpuRenderSession for SkiaMetalRenderSession {
 /// (`tools/window/GraphiteNativeMetalWindowContext.mm`). The window inserts its recordings in
 /// order already. skia-safe has no setter for the option.
 #[cfg(not(ferro_skia_apple_ganesh))]
-fn ordered_recordings_options() -> skia_safe::gpu::graphite::ContextOptions {
+pub(super) fn ordered_recordings_options() -> skia_safe::gpu::graphite::ContextOptions {
     let mut options = skia_safe::gpu::graphite::ContextOptions::new();
     // SAFETY: `Handle<N>` is `repr(transparent)` over `UnsafeCell<N>`, itself transparent over the
     // native `skgpu::graphite::ContextOptions`, whose `fRequireOrderedRecordings` is a plain bool.
@@ -451,17 +451,6 @@ fn ordered_recordings_options() -> skia_safe::gpu::graphite::ContextOptions {
         native.fPipelineCachingCallback = std::mem::transmute::<*const std::ffi::c_void, _>(callback);
     }
     options
-}
-
-/// The records of pipelines to make ahead when a context is made: the file
-/// `FERROUI_PIPELINE_PRECOMPILE` names, for now.
-#[cfg(not(ferro_skia_apple_ganesh))]
-fn pipeline_records() -> Vec<std::borrow::Cow<'static, [u8]>> {
-    std::env::var_os("FERROUI_PIPELINE_PRECOMPILE")
-        .and_then(|path| std::fs::read(path).ok())
-        .map(std::borrow::Cow::Owned)
-        .into_iter()
-        .collect()
 }
 
 /// The thread pool the Graphite contexts of the process compile their pipelines on

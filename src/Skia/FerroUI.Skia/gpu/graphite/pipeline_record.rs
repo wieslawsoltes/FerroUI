@@ -14,6 +14,12 @@
 //! - `FERROUI_PIPELINE_RECORD=<file>`: the keys of the pipelines the process makes are appended
 //!   to the file as they are made (a record), and a line a pipeline goes to `<file>.txt`: the
 //!   milliseconds since the first, whether it came from a record, and Skia's label of it.
+//! - `FERROUI_PIPELINE_PRECOMPILE=<file>`: a record that is made ahead beside the others.
+//!
+//! What is made ahead when a context is made, unless the process waits
+//! (`ferroui_base::rendering::FirstFramePipelines::Wait`): the record of ordinary drawing this
+//! crate carries for the kind of device it was recorded on, the records an application
+//! registered (`ferroui_skia::register_pipeline_record`), and the file of the environment.
 
 use skia_safe::gpu::graphite;
 use skia_safe::Data;
@@ -26,11 +32,17 @@ use std::time::Instant;
 const MAGIC: &[u8; 4] = b"FPR1";
 
 /// Parts of Skia's label of a pipeline that keep its key out of a record: pipelines the pinned
-/// Skia cannot make from a key. A pipeline that samples an image through the snippet that
-/// normalises its coordinates (`CoordNormalize`, every draw of a texture) has a shader node with
-/// no function of its own, which the path from a key calls (`invoke_node`, a null name): the
-/// process ends there. Such pipelines are made when they are first drawn, on the pipeline pool.
-const NOT_FROM_A_KEY: [&str; 1] = ["CoordNormalize"];
+/// Skia does not make from a key.
+///
+/// - `CoordNormalize`: a pipeline that samples a texture through the snippet that normalises its
+///   coordinates (every draw of an image or of a layer) has a shader node with no function of
+///   its own, which the path from a key calls (`invoke_node`, a null name): the process ends
+///   there.
+/// - `$`: Skia's own runtime effects (the passes of a blur, `$1DBlur8`). Their keys are refused
+///   in a context that has not drawn with the effect yet, which is every context at its start.
+///
+/// Such pipelines are made when they are first drawn, on the pipeline pool.
+const NOT_FROM_A_KEY: [&str; 2] = ["CoordNormalize", "$"];
 
 /// Whether the key of the pipeline Skia labels `label` may go into a record.
 fn may_be_recorded(label: &str) -> bool {
@@ -141,6 +153,36 @@ pub(crate) fn keys(record: &[u8]) -> Option<Vec<&[u8]>> {
     Some(keys)
 }
 
+/// The record this crate carries: the pipelines of ordinary drawing (fills, rounded rectangles,
+/// borders, text, shadows, gradients, clips), recorded from the screens of the benchmarks on a
+/// Mac with an Apple GPU (`scripts/perf/pipeline-records.py` says how). A key belongs to a kind
+/// of device, and whether Skia refuses a key of another kind or fails on it is not known, so the
+/// record is used where it was made: macOS on Apple silicon.
+#[cfg(all(target_os = "macos", target_arch = "aarch64"))]
+const ORDINARY: Option<&[u8]> = Some(include_bytes!("records/ordinary-macos-apple.fpr"));
+#[cfg(not(all(target_os = "macos", target_arch = "aarch64")))]
+const ORDINARY: Option<&[u8]> = None;
+
+/// The record this crate carries for this kind of device, if it has one (tests).
+#[cfg(test)]
+pub(crate) fn ordinary_record() -> Option<&'static [u8]> {
+    ORDINARY
+}
+
+/// The records whose pipelines are asked for when a context is made.
+pub(crate) fn records_to_make_ahead() -> Vec<std::borrow::Cow<'static, [u8]>> {
+    use ferroui_base::rendering::FirstFramePipelines;
+    if FirstFramePipelines::current() == FirstFramePipelines::Wait {
+        return Vec::new();
+    }
+    let mut records = Vec::new();
+    records.extend(ORDINARY.map(std::borrow::Cow::Borrowed));
+    records.extend(crate::pipeline_records::registered());
+    let from_environment = std::env::var_os("FERROUI_PIPELINE_PRECOMPILE").and_then(|path| std::fs::read(path).ok());
+    records.extend(from_environment.map(std::borrow::Cow::Owned));
+    records
+}
+
 /// A precompile context on its way to the thread that uses it.
 struct Precompile(*mut c_void);
 
@@ -210,7 +252,8 @@ mod tests {
     fn a_pipeline_skia_cannot_make_from_its_key_stays_out_of_a_record() {
         let pass = "RP((RGBA8+D32F_S8 x4->1).rgba) + ";
         assert!(may_be_recorded(&format!("{pass}AnalyticRRectRenderStep + SolidColor SrcOver")));
-        assert!(may_be_recorded(&format!("{pass}CoverBoundsRenderStep[NonAAFill] + $1DBlur4[ImageShaderClamp(0)] Src")));
+        assert!(may_be_recorded(&format!("{pass}AnalyticBlurRenderStep + SolidColor SrcOver AnalyticClip")));
+        assert!(!may_be_recorded(&format!("{pass}CoverBoundsRenderStep[NonAAFill] + $1DBlur4[ImageShaderClamp(0)] Src")));
         let image = "LocalMatrix[CoordNormalize[HardwareImage(0)]+PreAlpha] SrcOver";
         assert!(!may_be_recorded(&format!("{pass}CoverBoundsRenderStep[NonAAFill] + {image}")));
     }

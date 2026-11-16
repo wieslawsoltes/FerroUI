@@ -376,6 +376,13 @@ impl FerroNativePlatform {
         // timer, so the compositor renders there; this thread renders at the
         // synchronous points, as the reference does on this platform.
         let compositor = Compositor::new(platform_graphics, true);
+        // The graphics context is made now and not by the first frame, so that a backend with
+        // records of pipelines makes them while the application builds its first screen
+        // (desktop-performance.md, section 9.83).
+        use ferroui_base::rendering::FirstFramePipelines;
+        if FirstFramePipelines::current() == FirstFramePipelines::Prewarm {
+            compositor.prepare_render_interface();
+        }
         COMPOSITOR.with(|slot| *slot.borrow_mut() = Some(compositor.clone()));
         locator.bind_to_self(compositor);
     }

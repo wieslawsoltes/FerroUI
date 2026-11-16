@@ -557,6 +557,27 @@ impl Compositor {
         })
     }
 
+    /// Makes the context of the render interface now, on this thread and under the compositor
+    /// lock, where the first frame would make it otherwise. Not from upstream: a backend that
+    /// has work to do as soon as its context exists (the pipelines of a record, compiled on
+    /// threads while the application builds its first screen) is given that head start
+    /// (desktop-performance.md, section 9.83). Returns whether a context exists afterwards;
+    /// nothing is made when the platform graphics are not ready yet or when only the render
+    /// thread may touch the context.
+    pub fn prepare_render_interface(&self) -> bool {
+        if self.is_confined_to_render_thread() {
+            return false;
+        }
+        self.server.with(|server| {
+            let render_interface = server.render_interface();
+            if !render_interface.is_ready() {
+                return false;
+            }
+            render_interface.ensure_valid_backend_context();
+            true
+        })
+    }
+
     /// Whether the thread that ticks the render loop renders the frames,
     /// not the thread of this compositor.
     pub fn renders_on_render_thread(&self) -> bool {

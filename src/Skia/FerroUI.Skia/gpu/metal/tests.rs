@@ -2386,3 +2386,41 @@ fn the_process_has_a_pipeline_pool_unless_the_environment_asks_for_none() {
     use super::skia_metal_gpu::pipeline_executor_for_tests;
     assert!(pipeline_executor_for_tests(), "the process has a pool unless the environment asks for none");
 }
+
+/// The record of ordinary drawing this crate carries is a record, and where it is used (macOS on
+/// Apple silicon) the device takes every key of it: a key Skia refused would be a record made
+/// with another Skia or on another kind of device (desktop-performance.md, section 9.83).
+#[test]
+fn the_record_of_ordinary_drawing_is_taken_whole_where_it_is_used() {
+    use crate::gpu::graphite::pipeline_record::{keys, ordinary_record, precompile};
+    use skia_safe::gpu::graphite::mtl::{context_factory, BackendContext};
+
+    let Some(record) = ordinary_record() else { return };
+    let count = keys(record).expect("a record").len();
+    assert!(count > 0);
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device");
+        return;
+    };
+    // SAFETY: the device and the queue are valid for the life of `device`, which outlives the
+    // context.
+    let backend_context = unsafe { BackendContext::new(device.device as _, device.queue as _) };
+    // The options of the contexts of the windows.
+    let options = super::skia_metal_gpu::ordered_recordings_options();
+    let mut context = context_factory::make_metal(&backend_context, &options).expect("a context");
+    let refused: Vec<usize> = keys(record)
+        .expect("a record")
+        .iter()
+        .enumerate()
+        .filter(|(_, key)| {
+            let mut one = b"FPR1".to_vec();
+            one.extend((key.len() as u32).to_le_bytes());
+            one.extend(key.iter());
+            let thread = precompile(&mut context, vec![std::borrow::Cow::Owned(one)]).expect("a thread");
+            thread.join().expect("the thread ends") == 0
+        })
+        .map(|(index, _)| index)
+        .collect();
+    assert_eq!(refused, Vec::<usize>::new(), "keys of the record of {count} the device refused");
+    drop(context);
+}
