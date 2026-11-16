@@ -518,7 +518,7 @@ fn the_preview_of_a_single_view_application_is_a_control_and_makes_no_window() {
 
     let source = format!("<ItemsControl {NS} d:ItemsSource='{{d:SampleData ItemCount=4}}'/>");
     let mut session = DesignerSession::new(source.clone(), ContentControl::new()).unwrap();
-    let error = session.open_native_preview().err().expect("no window on a single view");
+    let error = session.open_native_preview().expect_err("no window on a single view");
     assert!(error.contains("single view"), "{error}");
 
     let control = session.open_view_preview().unwrap();
