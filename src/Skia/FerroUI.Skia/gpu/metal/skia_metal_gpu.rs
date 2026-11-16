@@ -438,6 +438,54 @@ fn ordered_recordings_options() -> skia_safe::gpu::graphite::ContextOptions {
         let native = &mut *(&mut options as *mut skia_safe::gpu::graphite::ContextOptions)
             .cast::<skia_bindings::skgpu_graphite_ContextOptions>();
         native.fRequireOrderedRecordings = true;
+        native.fExecutor = pipeline_executor().cast();
     }
     options
 }
+
+/// The thread pool the Graphite contexts of the process compile their pipelines on
+/// (`ContextOptions::fExecutor`; desktop-performance.md, section 9.81). Without one Graphite makes
+/// the pipelines of a recording one after another on the thread that snaps it, which for the
+/// first frame of a first start is the UI thread inside the first paint: each waits for Metal to
+/// compile two libraries from source. With one, the pipelines a recording needs are compiled side
+/// by side and the thread waits for the last. Made once and kept: Skia asks that the executor
+/// outlive every context made with it. Null when `FERROUI_PIPELINE_THREADS=0` asks for none.
+#[cfg(not(ferro_skia_apple_ganesh))]
+fn pipeline_executor() -> *mut std::ffi::c_void {
+    unsafe extern "C" {
+        fn ferroui_skia_pipeline_executor_new(threads: std::ffi::c_int) -> *mut std::ffi::c_void;
+    }
+    static EXECUTOR: std::sync::OnceLock<usize> = std::sync::OnceLock::new();
+    *EXECUTOR.get_or_init(|| {
+        let asked = std::env::var("FERROUI_PIPELINE_THREADS").ok();
+        let cores = std::thread::available_parallelism().map_or(2, |cores| cores.get());
+        let threads = pipeline_threads(asked.as_deref(), cores);
+        if threads == 0 {
+            return 0;
+        }
+        // SAFETY: the shim returns an executor it made, or null.
+        unsafe { ferroui_skia_pipeline_executor_new(threads) as usize }
+    }) as *mut std::ffi::c_void
+}
+
+/// Whether the process has a pool for its pipeline compiles (tests).
+#[cfg(all(test, not(ferro_skia_apple_ganesh)))]
+pub(super) fn pipeline_executor_for_tests() -> bool {
+    std::env::var("FERROUI_PIPELINE_THREADS").is_ok_and(|value| value.trim() == "0") != !pipeline_executor().is_null()
+}
+
+/// How many threads compile pipelines: what `FERROUI_PIPELINE_THREADS` asks for (0 for none),
+/// else one for each core, [`PIPELINE_THREADS`] at most.
+#[cfg(not(ferro_skia_apple_ganesh))]
+pub(super) fn pipeline_threads(asked: Option<&str>, cores: usize) -> i32 {
+    match asked.and_then(|value| value.trim().parse::<i32>().ok()) {
+        Some(asked) => asked.clamp(0, 64),
+        None => (cores as i32).clamp(1, PIPELINE_THREADS),
+    }
+}
+
+/// The most threads the pipeline compiles of the process use. Measured on a first start of the
+/// gauntlet (eleven cores): the first frame came after 2.30 s with none, 1.80 s with 2, 1.52 s
+/// with 4, 1.38 s with 8 and 1.50 s with 12. The threads sleep when there is nothing to compile.
+#[cfg(not(ferro_skia_apple_ganesh))]
+const PIPELINE_THREADS: i32 = 8;
