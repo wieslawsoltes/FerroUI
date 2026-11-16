@@ -33,7 +33,7 @@ use std::rc::Rc;
 /// each color past this many.
 const KEPT_BRUSHES: usize = 1024;
 
-thread_local! {
+ferroui_base::ferro_thread_local! {
     static BRUSHES: RefCell<HashMap<u32, Rc<dyn IBrush>>> = RefCell::new(HashMap::new());
 }
 
