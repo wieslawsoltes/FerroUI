@@ -503,10 +503,10 @@ pub(crate) struct MetadataTable<M> {
 /// A value of a table as the code all tables share holds it: the pointer `Rc::into_raw` gives
 /// for an `Rc<M>` the table owns. Only the table knows `M` and turns the pointer back.
 ///
-/// The registrations, the look-up along the base classes and its cache do not depend on the
-/// type of the metadata. With the values typed, each of them was compiled once for every value
-/// type of a property (`get`, `override_metadata` and `unregister`, the last of which nothing but
-/// the table of virtual functions of a property names): docs/binary-size.md, section 4.22.
+/// The registrations do not depend on the type of the metadata. With the values typed, adding
+/// and removing one was compiled once for every value type of a property (`override_metadata`
+/// and `unregister`, the second of which nothing but the table of virtual functions of a property
+/// names): docs/binary-size.md, section 4.22.
 type RawValue = *const ();
 
 // The normal property has only its registration. Do not allocate the host
@@ -526,23 +526,6 @@ struct MetadataOverrides {
 }
 
 impl MetadataEntries {
-    /// The value registered for `type_` or for the nearest base class of it, or `None` where
-    /// the default metadata applies. `default` is the address of the default metadata: a single
-    /// registration that is the default metadata itself applies to every type.
-    #[inline(never)]
-    fn lookup(entries: &RefCell<Self>, default: RawValue, type_: &'static TypeInfo) -> Option<RawValue> {
-        let mut inner = entries.borrow_mut();
-        let table = match &mut *inner {
-            MetadataEntries::Single(Some((host, value))) => {
-                return (std::ptr::eq(*value, default) || host.is_assignable_from(type_)).then_some(*value);
-            }
-            MetadataEntries::Single(None) => return None,
-            MetadataEntries::Multiple(table) => table,
-        };
-        let slot = table.hosts.resolve(type_);
-        table.values.get(slot).copied()
-    }
-
     /// Whether `type_` itself has a registration.
     fn has(entries: &RefCell<Self>, type_: &'static TypeInfo) -> bool {
         match &*entries.borrow() {
@@ -791,20 +774,29 @@ impl<M: PropertyMetadata> MetadataTable<M> {
         &self.default_metadata
     }
 
-    // Not inlined: the callers are typed too, and each would carry the choices below.
-    #[inline(never)]
+    // The look-up stays with the metadata type, as it was: it runs for every read of a default
+    // value and of the metadata of a property, and one call more for it (to code all tables
+    // share) cost the styling and the propagation benchmarks up to a tenth of their time. Only
+    // the values are read as the pointers the entries hold (docs/binary-size.md, section 4.22).
     pub fn get(&self, type_: &'static TypeInfo) -> Rc<M> {
-        let default: RawValue = Rc::as_ptr(&self.default_metadata).cast();
-        // The table of nearly every property has the one registration it was made with, whose
-        // metadata is the default metadata itself: that is answered here. The call of the shared
-        // look-up for it cost the styling and the propagation benchmarks a tenth of their time.
-        if matches!(&*self.inner.borrow(), MetadataEntries::Single(Some((_, value))) if std::ptr::eq(*value, default)) {
-            return self.default_metadata.clone();
-        }
-        match MetadataEntries::lookup(&self.inner, default, type_) {
-            // SAFETY: the look-up returns a value of the entries of this table, and nothing ran
-            // between its return and here that could take the value out.
-            Some(raw) => unsafe { Self::share(raw) },
+        let mut inner = self.inner.borrow_mut();
+        let table = match &mut *inner {
+            MetadataEntries::Single(Some((host, value))) => {
+                let default: RawValue = Rc::as_ptr(&self.default_metadata).cast();
+                return if std::ptr::eq(*value, default) || host.is_assignable_from(type_) {
+                    // SAFETY: a value of the entries of this table.
+                    unsafe { Self::share(*value) }
+                } else {
+                    self.default_metadata.clone()
+                };
+            }
+            MetadataEntries::Single(None) => return self.default_metadata.clone(),
+            MetadataEntries::Multiple(table) => table,
+        };
+        let slot = table.hosts.resolve(type_);
+        match table.values.get(slot) {
+            // SAFETY: a value of the entries of this table.
+            Some(value) => unsafe { Self::share(*value) },
             None => self.default_metadata.clone(),
         }
     }
