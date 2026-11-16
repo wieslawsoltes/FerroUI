@@ -121,6 +121,9 @@ impl VisualSets {
         }
         let (bits, bit) = (self.bits(visual), 1 << set as u64);
         if bits & bit == 0 {
+            if matches!(set, VisualSet::Dirty) {
+                crate::perf_count!(VisualsQueuedDirty);
+            }
             self.set_bits(visual, bits | bit);
             self.items[set as usize].push(visual.to_ref());
             self.live[set as usize] += 1;
@@ -571,6 +574,7 @@ impl CompositingRenderer {
         if self.updating.get() {
             panic!("Visual was invalidated during the render pass");
         }
+        crate::perf_count!(VisualInvalidationsRequested);
 
         // A visual says so when it leaves the tree. One that is in the tree without a
         // composition visual is queued like any other: the pass finds out whether it needs one

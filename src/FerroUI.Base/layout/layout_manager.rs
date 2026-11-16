@@ -409,6 +409,7 @@ impl ILayoutManager for LayoutManager {
             crate::perf_count!(LayoutMeasureInvalidatedInPass);
         }
 
+        crate::perf_count!(LayoutQueueRequests);
         self.to_measure.borrow_mut().enqueue(control.to_ref());
         self.queue_layout_pass();
     }
@@ -428,6 +429,7 @@ impl ILayoutManager for LayoutManager {
         }
         assert!(self.is_owned_root(control), "Attempt to call InvalidateArrange on wrong LayoutManager.");
 
+        crate::perf_count!(LayoutQueueRequests);
         self.to_arrange.borrow_mut().enqueue(control.to_ref());
         self.queue_layout_pass();
     }
