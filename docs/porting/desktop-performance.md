@@ -6522,3 +6522,49 @@ that could be asked for before the first paint).
 **Tests.** `gpu/metal/tests.rs`: `the_pipeline_threads_follow_the_cores_and_the_environment`
 and `the_process_has_a_pipeline_pool_unless_the_environment_asks_for_none`; the drawing
 tests of that file make their contexts with the pool and read their pixels back.
+
+### 9.82 The declarative layer: an effect that runs again does not search the subscribers of its sources
+
+The published comparison measures a gauntlet written on the declarative layer
+(`ferroui-view`: signals, effects, a keyed list), which is not the program of
+`samples/GauntletBenchmark` (the controls themselves, a virtualizing list that recycles its
+rows, bars and sparklines that draw themselves). The two draw the same screen; at tier 16
+the sample of this repository runs at 53 to 60 frames a second and the declarative program
+at 37 to 38.
+
+**Where the declarative program was** (a sample of its UI thread in the steady state, four
+seconds): 45 % in the layout pass, 34 % in the reactive runtime of the declarative layer,
+2 % idle, against 32 %, none and 30 % for the sample of this repository. Two thirds of the
+time in the runtime was bookkeeping: `Runtime::clear_sources` and `Runtime::track`.
+
+**The cause.** A screen like this has one frame signal that thousands of effects read. An
+effect that ran again first left the subscribers of every source it had
+(`subscribers.retain`, a walk of the whole list of the signal) and then, as it read the
+signal again, asked whether it was among them (`subscribers.contains`, another walk) and
+was appended. Every frame each of N effects walked a list of N twice.
+
+**The change** (`src/FerroUI.View/reactive.rs`). A node is among the subscribers of exactly
+what it has as a source, so whether it follows a source is a question to its own few
+sources. A run keeps what the run before read (`previous`): a source read again, in the
+order of the run before or in another, is taken from there and the subscribers of the
+source are not touched; a source read for the first time is appended to them; what the run
+did not read again is left at its end, which is the one walk that remains and happens only
+when an effect stops reading something. The order in which the effects of a signal run is
+the order they were made in and no longer rotates.
+
+| The comparison's FerroUI program, gauntlet tier 16, its harness (two starts each) | Before | After |
+| --- | ---: | ---: |
+| Second start: frames a second over the run | 37.8, 37.4 | 42.5, 43.4 |
+| Second start: CPU a frame | 64.6, 65.4 ms | 60.3, 58.0 ms |
+| First start: frames a second over the run | 33.2, 33.8 | 37.1, 38.1 |
+| UI thread in the reactive runtime (sampled) | 34 % | 13 % |
+| UI thread idle (sampled) | 2 % | 14 % |
+
+**What is next for that program**: the layout pass (48 % of its UI thread), of which a
+quarter makes text layouts again every frame.
+
+**Tests.** `src/FerroUI.View/tests/reactive_tests.rs`:
+`effects_that_run_again_stay_one_subscriber_each_in_the_order_they_were_made`,
+`a_source_a_run_does_not_read_again_is_followed_no_more`,
+`sources_read_in_another_order_are_all_kept` and
+`a_source_disposed_while_its_subscriber_runs_is_forgotten`.

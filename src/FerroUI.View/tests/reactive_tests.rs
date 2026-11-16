@@ -1,4 +1,4 @@
-use crate::reactive::{batch, effect, memo, on_cleanup, signal, untrack, Owner};
+use crate::reactive::{batch, effect, memo, on_cleanup, signal, subscriber_count, untrack, Owner};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -164,4 +164,119 @@ fn a_signal_of_a_disposed_owner_panics_when_read() {
     let (value, owner) = in_owner(|| signal(0));
     owner.dispose();
     value.get();
+}
+
+/// An effect follows a signal once, however often it runs again: a run that reads what the run
+/// before read leaves the subscribers of its sources as they were (section 9.82 of
+/// docs/porting/desktop-performance.md).
+#[test]
+fn effects_that_run_again_stay_one_subscriber_each_in_the_order_they_were_made() {
+    let order = Rc::new(RefCell::new(Vec::new()));
+    let (frame, owner) = in_owner(|| {
+        let frame = signal(0);
+        for index in 0..50 {
+            let order = order.clone();
+            effect(move || {
+                frame.get();
+                frame.get();
+                order.borrow_mut().push(index);
+            });
+        }
+        frame
+    });
+    assert_eq!(subscriber_count(&frame), 50);
+    for value in 1..=3 {
+        order.borrow_mut().clear();
+        frame.set(value);
+        assert_eq!(subscriber_count(&frame), 50);
+        assert_eq!(*order.borrow(), (0..50).collect::<Vec<_>>(), "write {value}");
+    }
+    owner.dispose();
+    assert_eq!(subscriber_count(&frame), 0);
+}
+
+#[test]
+fn a_source_a_run_does_not_read_again_is_followed_no_more() {
+    let runs = Rc::new(Cell::new(0));
+    let ((choose, first, second), owner) = in_owner(|| {
+        let (choose, first, second) = (signal(true), signal(1), signal(10));
+        let runs = runs.clone();
+        effect(move || {
+            runs.set(runs.get() + 1);
+            if choose.get() {
+                first.get();
+            } else {
+                second.get();
+            }
+        });
+        (choose, first, second)
+    });
+    assert_eq!((subscriber_count(&first), subscriber_count(&second)), (1, 0));
+    choose.set(false);
+    assert_eq!((runs.get(), subscriber_count(&first), subscriber_count(&second)), (2, 0, 1));
+    first.set(2);
+    assert_eq!(runs.get(), 2, "what the effect no longer reads does not run it");
+    second.set(11);
+    assert_eq!(runs.get(), 3);
+    choose.set(true);
+    assert_eq!((runs.get(), subscriber_count(&first), subscriber_count(&second)), (4, 1, 0));
+    owner.dispose();
+    assert_eq!((subscriber_count(&choose), subscriber_count(&first)), (0, 0));
+}
+
+#[test]
+fn sources_read_in_another_order_are_all_kept() {
+    let runs = Rc::new(Cell::new(0));
+    let ((flip, a, b, c), owner) = in_owner(|| {
+        let (flip, a, b, c) = (signal(false), signal(1), signal(2), signal(3));
+        let runs = runs.clone();
+        effect(move || {
+            runs.set(runs.get() + 1);
+            if flip.get() {
+                c.get();
+                b.get();
+                a.get();
+            } else {
+                a.get();
+                b.get();
+                c.get();
+            }
+        });
+        (flip, a, b, c)
+    });
+    flip.set(true);
+    assert_eq!((subscriber_count(&a), subscriber_count(&b), subscriber_count(&c)), (1, 1, 1));
+    for (index, source) in [a, b, c].into_iter().enumerate() {
+        source.set(100 + index as i32);
+        assert_eq!(runs.get(), 3 + index);
+    }
+    owner.dispose();
+}
+
+/// A signal disposed inside the run of an effect that read it in the run before: the effect
+/// goes on, and follows what it reads after.
+#[test]
+fn a_source_disposed_while_its_subscriber_runs_is_forgotten() {
+    let runs = Rc::new(Cell::new(0));
+    let ((trigger, after), owner) = in_owner(|| {
+        let (trigger, after) = (signal(0), signal(0));
+        let inner = Owner::new_root();
+        let doomed = inner.with(|| signal(7));
+        let runs = runs.clone();
+        effect(move || {
+            runs.set(runs.get() + 1);
+            if trigger.get() == 0 {
+                doomed.get();
+            } else {
+                inner.dispose();
+            }
+            after.get();
+        });
+        (trigger, after)
+    });
+    trigger.set(1);
+    assert_eq!((runs.get(), subscriber_count(&trigger), subscriber_count(&after)), (2, 1, 1));
+    after.set(1);
+    assert_eq!(runs.get(), 3);
+    owner.dispose();
 }
