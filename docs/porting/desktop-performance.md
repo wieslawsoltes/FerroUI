@@ -6519,9 +6519,10 @@ for every second child (-61 %), 23.8 to 9.2 ms for the first (-61 %).
 the front of an array has what follows it moved down, in the children of the panel and in
 the two lists that mirror them: a sample of the removal of the first child has half its time
 in that move, and nothing else that grows. That is about 7 instructions for every child the
-panel has, against the 50 before, and it is what the reference's list does as well. The pair of the gate removes the child before the last, which moves one child and
-still fails for anything that walks or searches the children for every removal (it had 11.77
-on the main branch).
+panel has, against the 50 before, and it is what the reference's list does as well. The pair
+of the gate removes the child before the last, which moves one child and still fails for
+anything that walks or searches the children for every removal (it had 11.77 on the main
+branch).
 
 **Tests.** `panel_tests.rs`:
 `children_removed_one_at_a_time_and_as_a_range_leave_the_lists_in_step` (the lists and the
