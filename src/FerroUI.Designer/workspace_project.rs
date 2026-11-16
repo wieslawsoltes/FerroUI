@@ -477,7 +477,7 @@ impl DesignerWorkspace {
         let control = self.session.borrow_mut().open_view_preview()?;
         let flyout = ferroui_controls::Flyout::new();
         flyout.flyout_presenter_classes().add("designer-chrome");
-        flyout.set_content(Some(Control::boxed(control)));
+        flyout.set_content(Some(Control::boxed(self.view_preview_host(control))));
         // The flyout lives until it is closed, which a click outside it does.
         let keep = Rc::new(RefCell::new(Some(flyout.clone())));
         flyout
