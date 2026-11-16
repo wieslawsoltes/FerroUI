@@ -2364,3 +2364,25 @@ mod custom_effect_validation {
 }
 
 mod pipelined_frames;
+
+/// Not from the reference: the thread pool of Graphite's pipeline compiles
+/// (desktop-performance.md, section 9.81).
+#[test]
+fn the_pipeline_threads_follow_the_cores_and_the_environment() {
+    use super::skia_metal_gpu::pipeline_threads;
+    assert_eq!(pipeline_threads(None, 1), 1);
+    assert_eq!(pipeline_threads(None, 4), 4);
+    assert_eq!(pipeline_threads(None, 11), 8, "eight at most");
+    assert_eq!(pipeline_threads(Some("0"), 11), 0, "none when asked: Graphite compiles on the thread that snaps");
+    assert_eq!(pipeline_threads(Some(" 3 "), 11), 3);
+    assert_eq!(pipeline_threads(Some("many"), 11), 8, "what is no number asks for nothing");
+    assert_eq!(pipeline_threads(Some("-2"), 11), 0);
+}
+
+/// The contexts of this file are made with the pool, so every test here that draws and reads
+/// its pixels back draws with pipelines compiled on it.
+#[test]
+fn the_process_has_a_pipeline_pool_unless_the_environment_asks_for_none() {
+    use super::skia_metal_gpu::pipeline_executor_for_tests;
+    assert!(pipeline_executor_for_tests(), "the process has a pool unless the environment asks for none");
+}

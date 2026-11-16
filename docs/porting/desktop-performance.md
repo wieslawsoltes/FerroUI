@@ -6387,6 +6387,11 @@ application of the user; removing it is the owner's call.
 **Outcome.** Nothing is changed: there is no first-launch cost of this size left to move to
 another thread. The prewarm of the effects of a theme and of the frame stays as it is.
 
+**Correction (section 9.81).** The launches measured here started the same file again, and
+that is not a first start: the system had run the program before, and Metal's own cache of
+compiled sources, which is not the one removed here, still had every shader. A first start
+of a program the system has never run does wait, for both, and section 9.81 measures it.
+
 **Other backends.** The browser's first frame (step 4 of the experiment: one draw, not one
 to find the pipelines and one to show) was not measured and stays open.
 
@@ -6442,3 +6447,78 @@ the frame times of a scene).
 measuring machine. Its window target is the same Skia target drawn through a layer, so the
 same rule holds by construction, with one case of its own, a resize of the canvas, which
 makes the layer again.
+
+### 9.81 A first start: the pipelines of the first frame compile side by side
+
+The published comparison of 0.5.0 has the first frame of the gauntlet 2.6 seconds after a
+first start, against 0.7 to 1.2 seconds for the frameworks that lead it, and a rate over
+the ten seconds of the run that the wait takes a quarter of. Section 9.78 looked for that
+wait and did not find it, because it did not make a first start.
+
+**What a first start is.** The comparison's harness copies the program, signs the copy
+again with a code hash the system has not seen, removes the cache of compiled Metal shaders
+and launches it; the first frame is the first picture of the window, taken from outside the
+application. Measured here the same way, with the comparison's own FerroUI application
+(the declarative layer, the Simple theme, a 46 MB program) built from the main branch, the
+gauntlet at tier 16, a display at 60 Hz with other windows on it:
+
+| | First frame, first start | Rate of the run | First frame, second start | Rate |
+| --- | ---: | ---: | ---: | ---: |
+| Main | 2.30 s (2.35, 2.24) | 29.3 fps | 0.57 s | 37.0 fps |
+
+**Where the 2.3 seconds go** (a sample of the main thread of a first start; a sampled start
+is slower, so these are shares more than times):
+
+| Part | Sampled time |
+| --- | ---: |
+| Before the first instruction of the program: the system checks a program it never ran | 420 to 630 ms |
+| The first paint, waiting for Metal: libraries compiled from source | 550 to 700 ms |
+| The first paint, waiting for Metal: pipeline states | 215 to 260 ms |
+| The application: platform set-up, mount of the tree, first layout | about 300 ms |
+| From the application's first tick to the window on the display | about 300 ms |
+
+The check before the first instruction grows with the size of the program (the harness's
+own notes have 214 ms for 3 MB, 270 ms for 12 MB and 380 ms for 24 MB, about 8 ms a
+megabyte), so the size of an application is a part of its first start: the comparison's
+application is 30.5 MB stripped, 10 MB of code more than hello world, because the
+declarative layer keeps the tables of types and with them every control.
+
+A sample also shows 120 to 180 ms in `-[NSApplication finishLaunching]`, where AppKit loads
+a library for the text input items of the main menu. That time is the sampler's: the
+system tells an attached sampler of every library a process loads and waits for its answer
+(`notifyDebuggerLoad`). It is not a cost of a start that nothing watches.
+
+**The first paint.** Graphite makes the pipeline of a draw when the recording that holds it
+is added to the context, and without a thread pool it makes them one after another on the
+thread that does that: on a first start the UI thread, inside the first paint. Each pipeline
+is two Metal libraries compiled from source and a pipeline state, tens of milliseconds
+each, and the first frame of the gauntlet needs a few dozen.
+
+**The change.** The Graphite context of the process is given a thread pool
+(`ContextOptions::fExecutor`, `skia_metal_gpu.rs`), which Graphite's pipeline manager uses
+as it is: the pipelines a recording needs become tasks of the pool, and the thread that
+adds the recording waits for the last of them. The Skia binding has the option as a field
+and no way to make an executor, so a file of its own asks Skia for one
+(`gpu/graphite/pipeline_executor.cpp`). One pool for the process, a thread for each core
+and eight at most; `FERROUI_PIPELINE_THREADS` sets the number, and 0 leaves Graphite as it
+was. The threads sleep when nothing compiles.
+
+| Pipeline threads | First frame, first start (two starts) | Rate of the run |
+| ---: | ---: | ---: |
+| none (before) | 2.35, 2.24 s | 28.4, 30.1 fps |
+| 2 | 1.83, 1.78 s | 32.0, 32.2 |
+| 4 | 1.61, 1.43 s | 32.5, 32.9 |
+| 8 (the default on this machine) | 1.38, 1.37 s | 33.6, 33.9 |
+| 12 | 1.56, 1.44 s | 32.4, 32.0 |
+
+The first paint of the sampled first start goes from 814 ms to 259 ms, 194 of them the
+wait for the pool. The second start is the same with and without (0.54 to 0.57 s, 37 to 38
+fps): its pipelines come from Metal's cache.
+
+**What is left of a first start**, in the order of what it costs: the system's check of
+the program (its size), the application's own start, and the wait for the pool (pipelines
+that could be asked for before the first paint).
+
+**Tests.** `gpu/metal/tests.rs`: `the_pipeline_threads_follow_the_cores_and_the_environment`
+and `the_process_has_a_pipeline_pool_unless_the_environment_asks_for_none`; the drawing
+tests of that file make their contexts with the pool and read their pixels back.
