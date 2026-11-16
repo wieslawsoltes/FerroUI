@@ -4,7 +4,7 @@ use crate::{PreviewEnvironment, PreviewEnvironmentEditor, PreviewFlowDirection, 
 use ferroui_base::Visual;
 use ferroui_base::media::{FlowDirection, SolidColorBrush};
 use ferroui_base::styling::ThemeVariant;
-use ferroui_controls::{Flyout, ThemeVariantScope};
+use ferroui_controls::{Border, Flyout, ThemeVariantScope};
 use std::rc::Weak;
 
 #[derive(Default)]
@@ -193,6 +193,26 @@ impl DesignerWorkspace {
             invalidation.changed();
         }
         Ok(())
+    }
+
+    /// Hosts a preview that is shown outside the artboard under the conditions of the artboard:
+    /// its theme, its flow direction and its backing. Without them the preview takes the theme of
+    /// the editor chrome around it, which is not the theme the document is designed in.
+    pub(crate) fn view_preview_host(&self, control: Ref<Control>) -> Ref<Control> {
+        let artboard = self
+            .root
+            .get_control::<ThemeVariantScope>("PreviewThemeScope");
+        let scope = ThemeVariantScope::new();
+        // The theme the artboard has now, which for "App theme" is the one it inherits.
+        scope.set_requested_theme_variant(artboard.actual_theme_variant());
+        if artboard.is_set(Visual::flow_direction_property()) {
+            scope.set_flow_direction(artboard.flow_direction());
+        }
+        let backing = Border::new();
+        backing.set_background(self.artboard.background());
+        backing.set_child(Some(control));
+        scope.set_child(Some(backing.upcast()));
+        scope.upcast()
     }
 
     pub fn rotate_preview(&self) -> Result<(), String> {
