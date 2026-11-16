@@ -924,23 +924,36 @@ impl Layoutable {
             self.measure(self.previous_measure.get().unwrap_or(rect.size()));
         }
 
-        let previous = self.previous_arrange.get();
-        if !self.is_arrange_valid.get() || previous != Some(rect) {
-            // See `arrange_moved_only`. An element that is not visible was not arranged. One that
-            // is not in a tree has no layout manager that arranges what is invalid below it: the
-            // arrangement of its inside is the visit that finds it (a tree measured and arranged
-            // by hand).
-            let moved_only = self.is_arrange_valid.get()
-                && previous.is_some_and(|previous| previous.size() == rect.size())
-                && self.is_attached_to_visual_tree()
-                && self.is_visible();
-            self.arrange_moved_only.set(moved_only);
-            self.is_arrange_valid.set(true);
-            crate::perf_count!(ArrangesExecuted);
+        // What follows for an element that stays where it is, which most are in a pass, is this
+        // test and nothing more; the arrangement itself is out of line so that the visit of a
+        // child stays as short as it was.
+        if !self.is_arrange_valid.get() || self.previous_arrange.get() != Some(rect) {
+            self.arrange_at(rect);
+        }
+    }
+
+    /// Arranges the element at `rect`: its arrangement is invalid or `rect` is not the rectangle
+    /// it was arranged at.
+    #[inline(never)]
+    fn arrange_at(&self, rect: Rect) {
+        let valid = self.is_arrange_valid.get();
+        self.is_arrange_valid.set(true);
+        crate::perf_count!(ArrangesExecuted);
+        // See `arrange_moved_only`. An element that is not in a tree has no layout manager that
+        // arranges what is invalid below it: the arrangement of its inside is the visit that
+        // finds it (a tree measured and arranged by hand). One that was not visible when it was
+        // arranged last is invalid: it invalidates itself when it is shown.
+        if valid
+            && self.previous_arrange.get().is_some_and(|previous| previous.size() == rect.size())
+            && self.is_attached_to_visual_tree()
+        {
+            self.arrange_moved_only.set(true);
             self.arrange_core(rect);
             self.arrange_moved_only.set(false);
-            self.previous_arrange.set(Some(rect));
+        } else {
+            self.arrange_core(rect);
         }
+        self.previous_arrange.set(Some(rect));
     }
 
     /// Clears `subtree_measure_invalid` of this element and of the ancestors that have it: one

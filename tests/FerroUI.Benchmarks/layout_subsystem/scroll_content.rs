@@ -5,7 +5,9 @@
 //! not change are left alone).
 //!
 //! - `offset`: the offset of the viewer changes and the layout manager runs a pass: the presenter
-//!   of the content arranges the content at its new place, and no row moves inside it;
+//!   of the content arranges the content at its new place, and no row moves inside it. It is
+//!   measured with a thousand and with four thousand rows: the content moves as one, so the pass
+//!   does not depend on the number of rows (section 9.74);
 //! - `viewport`: the height of the root changes and the layout manager runs a pass: the viewer and
 //!   the parts of its template are measured and arranged at the new size; the content, measured
 //!   without a limit on its height, is not measured again;
@@ -22,6 +24,8 @@ use ferroui_controls::{Border, Control, ScrollViewer, StackPanel};
 use std::cell::Cell;
 
 const ROWS: usize = 1_000;
+/// The rows of the second `offset` benchmark.
+const MANY_ROWS: usize = 4_000;
 const ROW_HEIGHT: f64 = 20.0;
 
 /// Two offsets inside the range of the viewer, each a whole number of rows.
@@ -37,8 +41,16 @@ pub struct ScrollContent {
 
 impl ScrollContent {
     fn new() -> Self {
+        Self::with_rows(ROWS)
+    }
+
+    fn with_many_rows() -> Self {
+        Self::with_rows(MANY_ROWS)
+    }
+
+    fn with_rows(count: usize) -> Self {
         let fixture = Fixture::new();
-        let rows = leaves(ROWS, 200.0, ROW_HEIGHT, &fixture.brushes);
+        let rows = leaves(count, 200.0, ROW_HEIGHT, &fixture.brushes);
         let content = StackPanel::new();
         for row in &rows {
             content.children().add(row);
@@ -93,6 +105,7 @@ pub fn register(registry: &mut Registry) {
     let mut class = registry.class("layout_subsystem", "ScrollContent").min_iteration_time(200);
     let parameters = format!("Rows={ROWS}");
     class.benchmark("offset", parameters.clone(), ScrollContent::new, ScrollContent::offset);
+    class.benchmark("offset", format!("Rows={MANY_ROWS}"), ScrollContent::with_many_rows, ScrollContent::offset);
     class.benchmark("viewport", parameters.clone(), ScrollContent::new, ScrollContent::viewport);
     class.benchmark("content_resized", parameters, ScrollContent::new, ScrollContent::content_resized);
 }
