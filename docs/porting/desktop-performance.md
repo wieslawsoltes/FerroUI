@@ -6261,3 +6261,91 @@ beside the show, and the update pass would walk the tree to find what the set li
 time of the requests alone was not measured.
 
 **Other backends.** Nothing changed.
+
+### 9.77 A census of the construction of an element (one change tried and left out)
+
+Experiment #756 supposed that part of the construction of an element is repeated or empty
+for most elements, and asked for a census of it.
+
+**The census.** `layout::ElementCensus` constructs a thousand elements of a class, with
+nothing set and not attached, and reports the instructions and the time of one. The
+difference between a class and its base is what the class adds to every element of it.
+
+| Class | Instructions | Time |
+| --- | ---: | ---: |
+| `Visual` | 782 | 39 ns |
+| `Layoutable` | 958 | 57 ns |
+| `Interactive` | 984 | 61 ns |
+| `Control` | 1,082 | 69 ns |
+| `Decorator` | 1,093 | 73 ns |
+| `Border` | 1,160 | 84 ns |
+| `TextBlock` | 1,188 | 91 ns |
+| `Rectangle` | 1,162 | 97 ns |
+| `Panel` | 2,589 | 135 ns |
+| `StackPanel`, `Canvas`, `Grid` | 2,595, 2,594, 2,640 | 143 to 156 ns |
+| `ContentControl` | 3,111 | 171 ns |
+| `ContentPresenter` | 3,172 | 187 ns |
+| `Button` | 3,184 | 174 ns |
+
+The steps after the construction, for the elements of a tile of the wall:
+
+| Step | Instructions |
+| --- | ---: |
+| The first value of a border (`Width`) | 1,249 |
+| The five values a tile sets on its border | 5,616 |
+| The three values a label sets on its text block | 5,205 |
+| Drop of a border, a text block, a stack panel, a button with nothing set | 485, 540, 1,604, 1,532 |
+| Drop of a border with five values, of a text block with three | 2,088, 1,968 |
+
+A tile of seven elements is 87,065 instructions to create and drop
+(`ElementConstructionBenchmark.create[Tiles=1000]`). Its seven constructions are 9,886 of
+them, 11 per cent. The values it sets are about a third (about 1,100 instructions a value,
+1,700 for the values of a text), and the rest is the children it adds and the drop.
+
+**What the census points at.**
+
+- A panel adds 1,500 instructions to a control when it is constructed and 1,100 when it is
+  dropped: its list of children, the handler of the changes of that list, and a list of the
+  handlers of the changes of its child indexes.
+- A content control, a content presenter and a button add 2,000: the `:empty` pseudo-class
+  they set when they are constructed makes the classes of the element. Styles select
+  `:empty`, so it stays.
+- The lookups that find nothing are not in the construction. The implicit theme and the
+  styles are looked up when an element is attached (section 9.76 has the counts of a start).
+
+**Tried and left out.** A panel that makes the list of the handlers of its child indexes
+with the first handler (few panels get one: a style that selects a child by its position
+asks for it) is 234 instructions less to construct and 213 less to drop, and a thousand
+tiles are 86,178,623 instructions in place of 87,064,804 to create and drop (-1.0 per cent).
+The frame benchmarks of the gate said otherwise about the start of a scene, over nine
+rounds:
+
+| Start of a scene | Before | After | Change |
+| --- | ---: | ---: | ---: |
+| `frames/wall`, built in | 104.900 ms | 109.268 ms | +4.2 % |
+| `frames/wall`, shown in | 204.492 ms | 221.078 ms | +8.1 % |
+| `frames/wall+pointer`, shown in | 204.299 ms | 223.228 ms | +9.3 % |
+| `frames/reorder`, shown in | 59.479 ms | 64.036 ms | +7.7 % |
+| `frames/grow`, shown in | 148.994 ms | 160.256 ms | +7.6 % |
+| `frames/recolor`, shown in | 148.237 ms | 157.746 ms | +6.4 % |
+| `frames/cards`, shown in | 30.635 ms | 32.634 ms | +6.5 % |
+| `startup/controls`, shown in | 195.208 ms | 189.933 ms | -2.7 % |
+
+Eleven lines were over their tolerance, all of them the start of a scene with many panels.
+The wall run by itself retired the instructions of the base (18.0 thousand million for the
+process on both sides) in the memory of the base (750 MB) and was shown in 226 ms against
+215. The work is the same; what differs is where the elements lie on the heap (the candidate
+has one small block less between a panel and what is allocated after it), which was not
+looked into further. A change that removes instructions and makes the start of a wall slower
+is not kept.
+
+**Not tried.** The list of children of a panel and its handler (four allocations) could be
+one allocation with the panel, which would take about 600 more instructions off a panel; it
+changes the list every collection of the framework is made of. The classes of an element
+could keep the well-known pseudo-classes as bits. Neither is done here, and the result above
+says that a change of what a panel allocates is measured on the start of a scene before
+anything else.
+
+**What stays as it was.** Everything: the pull request adds the benchmark.
+
+**Other backends.** Nothing changed.
