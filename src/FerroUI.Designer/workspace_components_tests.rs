@@ -34,6 +34,32 @@ fn click(workspace: &DesignerWorkspace, name: &str) {
         .raise_event(&RoutedEventArgs::with_event(Button::click_event()));
 }
 
+// The Preview button of a workspace in a single view (a browser, a phone). The window it opened
+// there stopped the application with the session borrowed, and every later event failed on that
+// borrow: the preview opens in the view, and nothing is left borrowed.
+#[test]
+fn the_preview_button_of_a_single_view_application_opens_no_window() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let workspace = workspace();
+    let window = ferroui_controls::Window::new();
+    window.set_content(Some(Control::boxed(workspace.control())));
+    window.show();
+    let application = ferroui_controls::Application::current().expect("an application");
+    application.set_application_lifetime(Some(Rc::new(crate::design_time::tests::SingleView)));
+
+    click(&workspace, "NativePreview");
+
+    assert!(workspace.session.try_borrow_mut().is_ok(), "the session is not left borrowed");
+    let status = workspace.status.text().unwrap_or_default();
+    assert!(!status.contains("no windows"), "the preview opened in the view: {status}");
+    // The command can be given again, and the workspace goes on working.
+    click(&workspace, "NativePreview");
+    workspace.refresh(true);
+
+    application.set_application_lifetime(None);
+    window.close();
+}
+
 #[test]
 fn scope_roundtrip_retires_definition_drafts_even_with_the_same_source_and_selection() {
     let _app = UnitTestApplication::start(TestServices::styled_window());

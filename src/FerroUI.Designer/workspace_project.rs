@@ -451,9 +451,7 @@ impl DesignerWorkspace {
                             this.start_project_task(TaskKind::Run { target }, false)
                         }
                         "CancelBuild" => this.cancel_project_task(),
-                        "NativePreview" => {
-                            this.session.borrow_mut().open_native_preview().map(|_| ())
-                        }
+                        "NativePreview" => this.open_preview(),
                         _ => {
                             this.root
                                 .get_control::<Border>("BuildDrawer")
@@ -466,6 +464,31 @@ impl DesignerWorkspace {
             });
         }
     }
+    /// Opens the preview of the document: in a window of the platform, or, where the platform
+    /// shows a single view and has no windows (a browser, a phone), in a flyout of the view.
+    fn open_preview(self: &Rc<Self>) -> Result<(), String> {
+        if DesignerSession::platform_shows_windows() {
+            return self.session.borrow_mut().open_native_preview().map(|_| ());
+        }
+        if self.pending_source.get() {
+            self.apply_source();
+        }
+        // The session is not borrowed while the flyout opens: showing it lays the view out.
+        let control = self.session.borrow_mut().open_view_preview()?;
+        let flyout = ferroui_controls::Flyout::new();
+        flyout.flyout_presenter_classes().add("designer-chrome");
+        flyout.set_content(Some(Control::boxed(control)));
+        // The flyout lives until it is closed, which a click outside it does.
+        let keep = Rc::new(RefCell::new(Some(flyout.clone())));
+        flyout
+            .closed(move || {
+                keep.borrow_mut().take();
+            })
+            .detach();
+        flyout.show_at(&self.root.get_control::<Button>("NativePreview"));
+        Ok(())
+    }
+
     pub(super) fn poll_project(self: &Rc<Self>) {
         let discovery =
             self.project
