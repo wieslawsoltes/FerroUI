@@ -102,6 +102,17 @@ fn remove_mirrored<T: Clone + PartialEq + 'static>(
     }
 }
 
+/// The children a panel lost, removed from its logical and its visual children. Out of line: the
+/// handler of the changes of the children is on the path of every child added, and stays the
+/// code it was.
+#[inline(never)]
+fn remove_from_mirrors(this: &Panel, index: i32, children: &[Ref<Control>]) {
+    if !this.is_items_host() {
+        remove_mirrored(this.logical_children(), index, children, |c| c.clone().upcast::<StyledElement>());
+    }
+    remove_mirrored(this.visual_children(), index, children, |c| c.clone().upcast::<Visual>());
+}
+
 impl StyledElementImpl for Panel {
     fn child_index_provider(this: &Self) -> Option<Rc<dyn IChildIndexProvider>> {
         let provider = this
@@ -148,14 +159,7 @@ impl PanelImpl for Panel {
                     e.new_starting_index as usize,
                 );
             }
-            NotifyCollectionChangedAction::Remove => {
-                let index = e.old_starting_index;
-                if !this.is_items_host() {
-                    let logical = |c: &Ref<Control>| c.clone().upcast::<StyledElement>();
-                    remove_mirrored(this.logical_children(), index, e.old_items, logical);
-                }
-                remove_mirrored(this.visual_children(), index, e.old_items, |c| c.clone().upcast::<Visual>());
-            }
+            NotifyCollectionChangedAction::Remove => remove_from_mirrors(this, e.old_starting_index, e.old_items),
             NotifyCollectionChangedAction::Replace => {
                 for i in 0..e.old_items.len() {
                     let index = i + e.old_starting_index as usize;
