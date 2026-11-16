@@ -887,6 +887,25 @@ against 0.5.0:
 | Second start: first frame | 0.56 s | 0.55 s |
 | Second start: CPU a frame | 67.1 ms | 70.3 ms |
 
+The same run at the end of that day, three starts each, with what sections 9.81 to 9.83
+and section 4.23 of `docs/binary-size.md` changed on the main branch (the pipelines of a
+frame compiled side by side, the reactive runtime, the records of pipelines, the selectors
+by name):
+
+| Gauntlet, tier 16 | This checkout | Published 0.5.0 |
+| --- | ---: | ---: |
+| First start: frames a second over the run | 39.9 | 28.7 |
+| First start: first frame | 1.12 s | 2.03 s |
+| First start: CPU a frame | 58.8 ms | 69.2 ms |
+| Second start: frames a second over the run | 43.3 | 34.9 |
+| Second start: first frame | 0.53 s | 0.56 s |
+| Second start: CPU a frame | 58.1 ms | 67.4 ms |
+
+What is left in the steady rate of that application (a sample of its UI thread, the time of
+each class's own layout, beside the sample of this repository): text measured, 537 ms
+against 428; the shapes of its sparklines measured every frame, 114 ms against none; its
+grids measured, 112 ms against 22.
+
 The harness measures a window on a display from outside the application, so this is not a
 suite of the gate; it is where a change to the declarative layer or to the start is measured
 as the comparison will measure it.
