@@ -759,6 +759,21 @@ Each of the three fails the gate. A benchmark that took less time with the instr
 base is `faster (time alone)`: a quieter round, or memory and code that lie better, and not
 less work.
 
+Scaling pairs. A benchmark compared at one size cannot tell a cost that is linear at that size
+and quadratic above it. The benchmarks of `trees::Scaling` (the start of a wall of tiles, its
+attachment, its detachment, the clearing of a canvas, the removal of every second child, a class
+set on every tile, a resource of the root replaced) and `layout_subsystem::ScrollContent.offset`
+are measured at a size and at four times that size, each one whole operation, and the gate adds
+a line for each pair, `scaling/<benchmark>[<parameter>=<size>..<four times the size>]`: the
+instructions at the larger size over those at the smaller, for the base and for the candidate. A
+cost linear in the size has 4 or less (the fixed part of an operation does not grow), one that
+grows with the size times its logarithm 4.8 at these sizes, a quadratic one 16. The limit is 4.6.
+A pair over it is `REGRESSED (scaling)` and fails the gate, unless the base is over it too and
+the candidate is not further over than the tolerance of the instructions: that is
+`over its limit (as the base)`, a finding that is on the base already, shown in every table until
+it is fixed. The pairs need the instructions, so they are there where the system counts them.
+Section 9.80 has the pairs of the main branch.
+
 Tolerances. A metric regresses when the candidate is slower than the base by more than
 `--tolerance` (default 5 %) times the factor of the metric, and by more than a floor below which
 the measurement resolves nothing (0.05 ms a frame, 2 ns an operation):
@@ -775,6 +790,7 @@ the measurement resolves nothing (0.05 ms a frame, 2 ns an operation):
 | First frame of a scene of the start (`first_frame_ms`) | 1.5 | measured once a run |
 | Memory of a start (`build_mb`, `show_mb`, `first_frame_mb`; `startup_mb`) | 2; 1 | resident memory moves with what the allocator returns to the system; the sum less (floor 1 MB) |
 | Size of an object of an element (`sizes/...`) | 0 | exact: any growth is a regression |
+| Scaling pair (`scaling/...`) | a ratio of at most 4.6 | instructions at four times the size over those at the size: 4 is linear |
 | Window: first frame and time a frame | 2 | a real process: the display, the system compositor, the disk and the shader caches (floors 20 ms and 0.5 ms) |
 
 A regression the gate reports after its extra rounds is a real one; a change that is meant to
@@ -6442,3 +6458,77 @@ the frame times of a scene).
 measuring machine. Its window target is the same Skia target drawn through a layer, so the
 same rule holds by construction, with one case of its own, a resize of the canvas, which
 makes the layer again.
+
+### 9.80 Scaling pairs in the gate, and a panel that loses its children one at a time
+
+Experiment #755. The regressions that cost the most were quadratic: the disposal queue, the
+buckets of the hit test, the removal of every child of a parent. Each was linear at the size
+its benchmark had. The gate compared a branch with the main branch at one size, so a cost of
+that kind passed as long as the size of the benchmark was below the knee.
+
+**What is added.** `trees::Scaling` (`tests/FerroUI.Benchmarks/trees/scaling.rs`): seven
+operations on a wall of tiles at 1,000 and at 4,000 tiles, each one whole operation, built
+from the benchmarks of `trees::Lifetime` and `trees::Styling`. The gate pairs the two sizes
+of a benchmark (and those of `layout_subsystem::ScrollContent.offset`, which has both sizes
+since section 9.74) and reports the instructions at the larger size over those at the
+smaller, with a limit of 4.6 (section 8.1, "Scaling pairs"). The verdict reads instructions
+and not times, so it does not move with the machine: two runs of one build differ by a
+hundredth of a percent.
+
+**The pairs of the main branch**, before the fix below.
+
+| Pair | Instructions at 1,000 | at 4,000 | Ratio | Time at 1,000 | at 4,000 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `start` (build, show, lay out) | 129.3 M | 517.0 M | 4.00 | 7.74 ms | 42.1 ms |
+| `attach` | 24.9 M | 99.9 M | 4.00 | 1.67 ms | 10.2 ms |
+| `detach` | 12.0 M | 47.9 M | 4.00 | 1.06 ms | 9.39 ms |
+| `clear` | 24.1 M | 96.5 M | 4.00 | 1.53 ms | 9.07 ms |
+| `remove_half` | 38.2 M | 450.0 M | **11.77** | 1.83 ms | 21.9 ms |
+| `toggle_class` | 2.14 M | 8.57 M | 4.00 | 150 us | 819 us |
+| `resource_changed` | 0.44 M | 1.74 M | 3.99 | 78 us | 833 us |
+| `ScrollContent.offset` (rows) | 21,633 | 21,619 | 1.00 | 1.20 us | 1.19 us |
+
+Seven of the eight are linear to the third digit, and the scroll offset does not grow with
+the rows at all (section 9.74).
+
+**The finding: a child removed from a panel.** Removing half the children of a panel one at
+a time took 11.8 times the instructions for four times the children: 76,000 instructions a
+removal among 1,000 children and 225,000 among 4,000, about 50 for every child the panel
+has, on top of what the tile itself costs to take out. `Panel::children_changed` removed
+the child from the logical and from the visual children with `FerroList::remove_all`, which
+walks the whole list for the items to remove, whatever their number and wherever they are:
+two lists, every child of each, once a removal. Where the child was did not matter; the
+last child cost as much as the first.
+
+**The fix.** The two lists mirror the children of the panel, and the change says where the
+children had what they lost. The panel removes that range from each list when the list has
+the children there, and falls back to the search when it does not (a derived panel that
+keeps a visual of its own among them). The lists report the same change either way.
+
+| Removal of half the children, one at a time | Main: 1,000 | 4,000 | Ratio | Fix: 1,000 | 4,000 | Ratio |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| the one before the last (`remove_half`) | 38.2 M | 450.0 M | 11.77 | 13.1 M | 52.4 M | 4.00 |
+| the last | 38.2 M | 449.6 M | 11.79 | 13.0 M | 52.1 M | 4.00 |
+| every second, from the last down | 42.8 M | 525.9 M | 12.28 | 17.7 M | 128.3 M | 7.25 |
+| the first | 41.5 M | 503.7 M | 12.13 | 16.4 M | 106.1 M | 6.47 |
+
+In time, at 4,000 children: 21.9 to 4.95 ms for the pair of the gate (-77 %), 26.9 to 10.5 ms
+for every second child (-61 %), 23.8 to 9.2 ms for the first (-61 %).
+
+**What is left** in the last two rows is the list itself. A child taken from the middle or
+the front of an array has what follows it moved down, in the children of the panel and in
+the two lists that mirror them: a sample of the removal of the first child has half its time
+in that move, and nothing else that grows. That is about 7 instructions for every child the
+panel has, against the 50 before, and it is what the reference's list does as well. The pair of the gate removes the child before the last, which moves one child and
+still fails for anything that walks or searches the children for every removal (it had 11.77
+on the main branch).
+
+**Tests.** `panel_tests.rs`:
+`children_removed_one_at_a_time_and_as_a_range_leave_the_lists_in_step` (the lists and the
+changes they report) and `a_child_is_removed_from_a_list_that_has_it_at_another_index`.
+
+**The times.** Four of the linear pairs take 5.5 to 10.6 times the time for four times the
+instructions (`detach` 8.9, `resource_changed` 10.6): the elements of 4,000 tiles no longer
+fit the caches that hold those of 1,000. That is the memory an element takes, which the heap
+census of the start is about, and not a cost that grows faster than the tree; the pairs do
+not judge it.

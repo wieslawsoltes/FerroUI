@@ -1,5 +1,5 @@
 use crate::{Border, Control, ControlImpl, Controls};
-use ferroui_base::collections::{NotifyCollectionChangedAction, NotifyCollectionChangedEventArgs};
+use ferroui_base::collections::{FerroList, NotifyCollectionChangedAction, NotifyCollectionChangedEventArgs};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
@@ -80,6 +80,28 @@ ferroui_base::ferro_overrides! { impl FerroObjectImpl for Panel {
     }
 } }
 
+/// Removes the children a panel lost from a list that mirrors its children (the logical or the
+/// visual ones): at the index the children had them, when the list has them there, and wherever
+/// they are when it does not (a list a derived panel keeps other elements in). The reference
+/// removes them wherever they are, which walks the whole list for every removal: a panel that
+/// loses its children one at a time paid for every child it had left, in both lists
+/// (desktop-performance.md, section 9.80). The list reports the same change either way.
+fn remove_mirrored<T: Clone + PartialEq + 'static>(
+    list: &FerroList<T>,
+    index: i32,
+    children: &[Ref<Control>],
+    cast: impl Fn(&Ref<Control>) -> T,
+) {
+    let at_the_index = usize::try_from(index).ok().filter(|index| {
+        index + children.len() <= list.count()
+            && children.iter().enumerate().all(|(offset, child)| list.get(index + offset) == cast(child))
+    });
+    match at_the_index {
+        Some(index) => list.remove_range(index, children.len()),
+        None => list.remove_all(children.iter().map(cast)),
+    }
+}
+
 impl StyledElementImpl for Panel {
     fn child_index_provider(this: &Self) -> Option<Rc<dyn IChildIndexProvider>> {
         let provider = this
@@ -127,11 +149,12 @@ impl PanelImpl for Panel {
                 );
             }
             NotifyCollectionChangedAction::Remove => {
+                let index = e.old_starting_index;
                 if !this.is_items_host() {
-                    this.logical_children()
-                        .remove_all(e.old_items.iter().map(|c| c.clone().upcast::<StyledElement>()));
+                    let logical = |c: &Ref<Control>| c.clone().upcast::<StyledElement>();
+                    remove_mirrored(this.logical_children(), index, e.old_items, logical);
                 }
-                this.visual_children().remove_all(e.old_items.iter().map(|c| c.clone().upcast::<Visual>()));
+                remove_mirrored(this.visual_children(), index, e.old_items, |c| c.clone().upcast::<Visual>());
             }
             NotifyCollectionChangedAction::Replace => {
                 for i in 0..e.old_items.len() {

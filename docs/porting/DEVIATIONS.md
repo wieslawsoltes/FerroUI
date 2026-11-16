@@ -328,6 +328,12 @@ The port binds through compiled paths and through the metadata types declare, ne
 | The constructor of `ItemsSourceView` is `private protected`; a view is created by `GetOrCreate`. | `ItemsSourceView::new` and `ItemsSourceViewOf::new` are public, and markup constructs a view (`ItemsSourceView(ItemsSource)`, `src/FerroUI.Controls/markup_types/plain.rs`) with WinUI's members `Count`, `GetAt`, `IndexOf`, `HasKeyIndexMapping`, `KeyFromIndex` and `IndexFromKey`. | Behaviour | WinUI's constructor is public (`ItemsSourceView(Object source)`), and a document can give a control a view as its items source. | 2026-10-23 |
 | `ItemsSourceView` implements `IReadOnlyList<object?>`, `IList` and `INotifyCollectionChanged`: a view is an enumerable, assignable to an items source, and `GetOrCreate` returns a view it is given as it is. | `ItemsSourceView` implements `IItemsList` (its items, its changes and the unique keys of its source), `ItemsSource` converts from `Rc<ItemsSourceView>` (and a cast and a binding conversion are registered for it), and `get_or_create` returns the view a source holds. | Representation | The interfaces of the runtime library are the contract of the untyped lists of items here. Before, a view could not be an items source at all. | 2026-10-23 |
 
+### Panel (`src/FerroUI.Controls/panel.rs`)
+
+| Upstream | Port | Kind | Why | Since |
+|---|---|---|---|---|
+| `Panel.ChildrenChanged` removes the children a panel lost from its logical and its visual children with `RemoveAll`, which looks for the items in the whole list. | The panel removes them at the index the change names, as one range, when the list has them there, and falls back to the search when it does not (a derived panel that keeps other elements in the list). The lists report the same change. | Performance | The search walks every child of both lists for each removal, wherever the child is: a panel that lost its children one at a time paid 50 instructions for every child it had, for each removal (desktop-performance.md, section 9.80). | 0.5.1 |
+
 ### Grid (`src/FerroUI.Controls/grid.rs`)
 
 | Upstream | Port | Kind | Why | Since |

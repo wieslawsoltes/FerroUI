@@ -1,5 +1,7 @@
 use crate::{Control, Panel};
 use ferroui_base::{Ref, StyledElement, Visual};
+use std::cell::RefCell;
+use std::rc::Rc;
 
 fn logical(children: &[&Ref<Control>]) -> Vec<Ref<StyledElement>> {
     children.iter().map(|c| (*c).clone().upcast()).collect()
@@ -86,6 +88,47 @@ fn removing_child_control_should_remove_from_panel_logical_and_visual_children()
     assert!(panel.children().is_empty());
     assert!(panel.logical_children().is_empty());
     assert!(panel.visual_children().is_empty());
+}
+
+/// Not from the reference: the panel removes a child at its index in the lists that mirror its
+/// children, and reports each removal as the reference does (desktop-performance.md, 9.80).
+#[test]
+fn children_removed_one_at_a_time_and_as_a_range_leave_the_lists_in_step() {
+    let panel = Panel::new();
+    let children: Vec<Ref<Control>> = (0..6).map(|_| Control::new()).collect();
+    panel.children().add_range(children.iter().cloned());
+    let removals = Rc::new(RefCell::new(Vec::new()));
+    let seen = removals.clone();
+    panel.visual_children().add_collection_changed(Rc::new(move |e| {
+        seen.borrow_mut().push((e.old_starting_index, e.old_items.len()));
+    }));
+
+    panel.children().remove_at(4);
+    panel.children().remove(&children[1]);
+    panel.children().remove_range(1, 2);
+
+    let left = [&children[0], &children[5]];
+    assert_eq!(panel.logical_children().to_vec(), logical(&left));
+    assert_eq!(panel.visual_children().to_vec(), visual(&left));
+    assert_eq!(*removals.borrow(), [(4, 1), (1, 1), (1, 2)]);
+    assert!(children[4].parent().is_none() && children[4].visual_parent().is_none());
+}
+
+/// A list that does not have the children where the panel has them (a derived panel that keeps
+/// a visual of its own in front of them) still loses the child, wherever it is.
+#[test]
+fn a_child_is_removed_from_a_list_that_has_it_at_another_index() {
+    let panel = Panel::new();
+    let children: Vec<Ref<Control>> = (0..3).map(|_| Control::new()).collect();
+    panel.children().add_range(children.iter().cloned());
+    let own = Control::new();
+    panel.visual_children().insert(0, own.clone().upcast::<Visual>());
+
+    panel.children().remove_at(1);
+    panel.children().remove_at(1);
+
+    assert_eq!(panel.logical_children().to_vec(), logical(&[&children[0]]));
+    assert_eq!(panel.visual_children().to_vec(), visual(&[&own, &children[0]]));
 }
 
 #[test]

@@ -35,7 +35,12 @@ What is measured (see docs/porting/desktop-performance.md, section 8.1):
   counts them, the instructions the processor retires for it. Each class of benchmarks runs in a
   process of its own. A time over its tolerance whose instructions are not is reported as
   `REGRESSED (time alone)`: the work is the same, and the time is that of where this build put
-  the code and the data, or of the machine.
+  the code and the data, or of the machine;
+- the scaling pairs (`scaling/...`): for a benchmark of `trees::Scaling` and of
+  `layout_subsystem::ScrollContent` that is measured at a size and at four times that size, the
+  instructions at the larger size over those at the smaller. A cost linear in the size has 4 or
+  less; a pair over 4.6 regressed (`REGRESSED (scaling)`), unless the base is over it as well
+  (`over its limit (as the base)`: a finding that is there already).
 
 What is checked without a measurement, on the candidate alone and once (`counters`): the tests
 that assert how much work an operation does, read from the framework's performance counters
@@ -284,6 +289,17 @@ TDG_FLOOR_NS = 2.0
 #   counted more than every round of the base.
 INSTRUCTIONS_TOLERANCE = 0.02
 INSTRUCTIONS_FLOOR = 1.0
+# - A scaling pair: one benchmark of the classes below at a size and at `SCALING_FACTOR` times that
+#   size (its only parameter, as in `Tiles=1000` and `Tiles=4000`), each one whole operation. The
+#   metric is the instructions at the larger size over those at the smaller, and its limit is the
+#   factor and 15 % more (4.6): a cost linear in the size has the factor or less (the fixed part
+#   of an operation does not grow), one that grows with the size times its logarithm has 4.8 at
+#   these sizes, a quadratic one 16. A pair over its limit regressed, unless the base is over it
+#   too and the candidate is not further over it than the tolerance of the instructions: that is
+#   a finding the base has already, shown in the table and not held against the candidate.
+SCALING_CLASSES = ("trees::Scaling", "layout_subsystem::ScrollContent")
+SCALING_FACTOR = 4
+SCALING_TOLERANCE = 0.15
 
 
 @dataclass
@@ -1164,6 +1180,46 @@ def compare(base: Side, candidate: Side, tolerance: float) -> list[Row]:
     return rows
 
 
+SIZED_KEY = re.compile(r"^(?P<name>[\w:]+\.\w+)\[(?P<parameter>\w+)=(?P<size>\d+)\]$")
+
+
+def scaling_pairs(instructions: dict[str, list[float]]) -> dict[str, float]:
+    """The scaling pairs among the benchmarks a side counted the instructions of: by the key of
+    the pair (`scaling/<benchmark>[<parameter>=<size>..<larger size>]`), the instructions at the
+    larger size over those at the smaller."""
+    sized: dict[tuple[str, str], dict[int, float]] = {}
+    for key, values in instructions.items():
+        match = SIZED_KEY.match(key)
+        if match and values and match["name"].rsplit(".", 1)[0] in SCALING_CLASSES:
+            sized.setdefault((match["name"], match["parameter"]), {})[int(match["size"])] = statistics.median(values)
+    pairs = {}
+    for (name, parameter), sizes in sized.items():
+        for size, counted in sizes.items():
+            larger = sizes.get(size * SCALING_FACTOR)
+            if larger is not None and counted > 0:
+                pairs[f"scaling/{name}[{parameter}={size}..{size * SCALING_FACTOR}]"] = larger / counted
+    return pairs
+
+
+def scaling_rows(base: Side, candidate: Side) -> list[Row]:
+    """A row for each scaling pair of the candidate: the ratio of the base, that of the candidate,
+    and whether the candidate is over the limit of a pair (see `SCALING_CLASSES`)."""
+    limit = SCALING_FACTOR * (1 + SCALING_TOLERANCE)
+    ratios_b, ratios_c = scaling_pairs(base.instructions), scaling_pairs(candidate.instructions)
+    rows = []
+    for key, c in ratios_c.items():
+        b = ratios_b.get(key)
+        change = f"{(c - b) / b * 100:+.1f} %" if b else ""
+        if c <= limit:
+            verdict, regressed = "ok", False
+        elif b is not None and b > limit and c <= b * (1 + INSTRUCTIONS_TOLERANCE):
+            verdict, regressed = "over its limit (as the base)", False
+        else:
+            verdict, regressed = "REGRESSED (scaling)", True
+        rows.append(Row(key, f"{b:.2f}x" if b else "-", f"{c:.2f}x", change, f"{limit:g}x", verdict, regressed))
+    return rows
+
+
 HEADER = ("Metric", "Base", "Candidate", "Change", "Instructions", "Tolerance", "Verdict")
 INSTRUCTIONS_COLUMN = HEADER.index("Instructions")
 
@@ -1517,7 +1573,7 @@ def gate(options: argparse.Namespace) -> int:
         measure(rounds, measured, rounds + 1)
         rounds += 1
 
-    rows = [*check_rows, *compare(base, candidate, options.tolerance)]
+    rows = [*check_rows, *compare(base, candidate, options.tolerance), *scaling_rows(base, candidate)]
     regressions = [row for row in rows if row.regressed]
     time_alone = sum(row.verdict == "REGRESSED (time alone)" for row in regressions)
     summary = (
