@@ -6607,11 +6607,22 @@ the order they were made in and no longer rotates.
 **What is next for that program**: the layout pass (48 % of its UI thread), of which a
 quarter makes text layouts again every frame.
 
+**A run asks for no memory** (a later change to the same lists). The start of a run moved
+what the run before read into `previous` and left the list of the run empty, without its
+room, and `Vec::split_off(0)` on the emptied `previous` made a list of the same room to
+throw away: every run of every effect made two lists and freed two. The two lists now
+change places at the start of a run (`begin_tracking`: `swap`, then `append` for what a run
+that did not end left unread), so a run fills the list of two runs ago. The comparison's
+program runs about two thousand effects a frame; over three starts each its frames a second
+go from 44.0 to 44.5 on a second start and from 40.8 to 41.6 on a first one, and its CPU a
+frame from 57.2 to 56.7 ms: one in a hundred, for nothing.
+
 **Tests.** `src/FerroUI.View/tests/reactive_tests.rs`:
 `effects_that_run_again_stay_one_subscriber_each_in_the_order_they_were_made`,
 `a_source_a_run_does_not_read_again_is_followed_no_more`,
-`sources_read_in_another_order_are_all_kept` and
-`a_source_disposed_while_its_subscriber_runs_is_forgotten`.
+`sources_read_in_another_order_are_all_kept`,
+`a_source_disposed_while_its_subscriber_runs_is_forgotten` and
+`an_effect_that_runs_again_fills_the_list_of_two_runs_ago`.
 
 ### 9.83 A first start: pipelines from a record, asked for when the platform starts
 
