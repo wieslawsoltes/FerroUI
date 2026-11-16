@@ -985,6 +985,46 @@ which only an application that gives up accessibility could leave out; the typog
 classes of the text block keep 165 kB; the view box, the layout transform control and the
 validation errors keep 125 kB, the first two through templates of the kept theme units.
 
+### 4.21 The typography properties are linked with their first use (#570)
+
+A text block asks for the effective font features of its text each time it lays the text out
+(`Typography::effective_font_features`). The function resolved the 43 inherited typography
+properties only after one of them had changed on the thread, behind a flag, so an application
+without typography paid one read of a flag. The executable paid all the same: the function named
+the resolution (`TypographyFormat::effective`), which reads the 43 properties, whose registration
+brings the property code of their value types. A flag that is tested at run time unlinks nothing.
+
+`scripts/ircut.py` found a second reference. The property-changed handlers of the text block and
+of the text element ask whether a changed property is a typography property, and compared its
+owner with `Typography::TYPE`. Naming the type keeps its initialisation, which registers the 43
+properties. Eleven references from outside the typography modules kept 144 kB.
+
+- The flag is the function now: a typography property that changes sets how typography is
+  resolved (`TYPOGRAPHY_IN_USE`, an `Option` of a function), and `effective_font_features` calls
+  what was set or reads `FontFeatures` when nothing was.
+- `Typography::is_property` compares the owner of the property with the type the typography
+  properties stated when they were registered on the thread (`TYPOGRAPHY_TYPE`). Before one is
+  registered no property is a typography property.
+
+An application that uses typography behaves as before: reading or setting its first typography
+property registers the properties, and the first change turns the resolution on.
+
+| `samples/HelloWorld`, release, macOS (`scripts/symsize.py`) | Before | After | Change |
+|---|---:|---:|---:|
+| Attributed to symbols | 19.01 MB | 18.84 MB | -0.17 MB (-0.9 %) |
+| Machine code | 15,461,764 bytes | 15,315,420 bytes | -146,344 bytes |
+| `ferroui_base` | 7.07 MB | 6.98 MB | -0.09 MB |
+| `ferroui_controls` | 0.94 MB | 0.89 MB | -0.05 MB |
+| Symbols of the typography modules | 170 | 5 | |
+
+The local gate on the text benchmarks, element construction, the property system and the frame
+benchmarks shows no change (348 metrics). `frames/reorder` was 17 % over on the UI thread in the
+first run and equal in a second run of five rounds, in which both sides ran at the slower of the
+two levels this scene has (`docs/porting/desktop-performance.md`, section 9.67).
+
+The pattern, for the next case: where code is needed only after something was used, let the use
+state the function and let the common path call what was stated. A boolean keeps the code.
+
 ## 5. What an executable is made of
 
 ### 5.1 Sections (macOS, release, unstripped)
