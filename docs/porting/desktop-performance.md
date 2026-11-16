@@ -6341,9 +6341,10 @@ is not kept.
 
 **Not tried.** The list of children of a panel and its handler (four allocations) could be
 one allocation with the panel, which would take about 600 more instructions off a panel; it
-changes the list every collection of the framework is made of. The classes of an element could keep the
-well-known pseudo-classes as bits. Neither is done here, and the result above says that a
-change of what a panel allocates is measured on the start of a scene before anything else.
+changes the list every collection of the framework is made of. The classes of an element
+could keep the well-known pseudo-classes as bits. Neither is done here, and the result above
+says that a change of what a panel allocates is measured on the start of a scene before
+anything else.
 
 **What stays as it was.** Everything: the pull request adds the benchmark.
 
