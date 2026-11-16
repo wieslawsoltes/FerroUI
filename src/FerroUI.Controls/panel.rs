@@ -94,16 +94,23 @@ impl PanelImpl for Panel {
     fn children_changed(this: &Self, e: &NotifyCollectionChangedEventArgs<'_, Ref<Control>>) {
         match e.action {
             NotifyCollectionChangedAction::Add => {
-                if !this.is_items_host() {
-                    this.logical_children().insert_range(
-                        e.new_starting_index as usize,
-                        e.new_items.iter().map(|c| c.clone().upcast::<StyledElement>()),
-                    );
+                let index = e.new_starting_index as usize;
+                // One child, as markup and most code add them: `insert_range` makes a list of
+                // what it is given, which was two allocations for every child added
+                // (desktop-performance.md, section 9.75).
+                if let [child] = e.new_items {
+                    if !this.is_items_host() {
+                        this.logical_children().insert(index, child.clone().upcast::<StyledElement>());
+                    }
+                    this.visual_children().insert(index, child.clone().upcast::<Visual>());
+                } else {
+                    if !this.is_items_host() {
+                        this.logical_children()
+                            .insert_range(index, e.new_items.iter().map(|c| c.clone().upcast::<StyledElement>()));
+                    }
+                    this.visual_children()
+                        .insert_range(index, e.new_items.iter().map(|c| c.clone().upcast::<Visual>()));
                 }
-                this.visual_children().insert_range(
-                    e.new_starting_index as usize,
-                    e.new_items.iter().map(|c| c.clone().upcast::<Visual>()),
-                );
             }
             NotifyCollectionChangedAction::Move => {
                 if !this.is_items_host() {
