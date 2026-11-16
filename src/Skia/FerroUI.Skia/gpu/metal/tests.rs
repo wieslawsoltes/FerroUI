@@ -2387,6 +2387,63 @@ fn the_process_has_a_pipeline_pool_unless_the_environment_asks_for_none() {
     assert!(pipeline_executor_for_tests(), "the process has a pool unless the environment asks for none");
 }
 
+/// The table of shader libraries this crate carries is made of the texts Skia writes today: the
+/// pipelines of the record of ordinary drawing find theirs in it. When they do not, the table
+/// was made with another Skia and is made again (`scripts/perf/metal-libraries.py`; with
+/// `FERROUI_METAL_LIBRARY_RECORD=<folder>` this test, run alone, writes the texts of the record).
+#[test]
+fn the_libraries_of_ordinary_drawing_are_found_by_the_pipelines_of_the_record() {
+    use crate::gpu::graphite::pipeline_record::{ordinary_record, precompile};
+    use crate::metal_libraries::{counts, found_keys, ordinary_table, parse};
+    use skia_safe::gpu::graphite::mtl::{context_factory, BackendContext};
+    use std::time::{Duration, Instant};
+
+    /// The shader texts the pipelines of the record compile (what a recording run of this test
+    /// writes).
+    const TEXTS_OF_THE_RECORD: usize = 35;
+
+    let (Some(table), Some(record)) = (ordinary_table(), ordinary_record()) else { return };
+    let recording = std::env::var_os("FERROUI_METAL_LIBRARY_RECORD").is_some();
+    let libraries: Vec<u64> = parse(table).into_iter().map(|(key, _)| key).collect();
+    assert!(libraries.len() >= TEXTS_OF_THE_RECORD, "{} libraries", libraries.len());
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device");
+        return;
+    };
+    assert!(super::shader_libraries::install(device.device as _), "the table is in front of the device");
+    // SAFETY: the device and the queue are valid for the life of `device`, which outlives the
+    // context.
+    let backend_context = unsafe { BackendContext::new(device.device as _, device.queue as _) };
+    let options = super::skia_metal_gpu::ordered_recordings_options();
+    let mut context = context_factory::make_metal(&backend_context, &options).expect("a context");
+    let thread = precompile(&mut context, vec![std::borrow::Cow::Borrowed(record)]).expect("a thread");
+    assert!(thread.join().expect("the thread ends") > 0);
+
+    // The pipelines are made on the pool of the context after the thread has handed them over.
+    let deadline = Instant::now() + Duration::from_secs(60);
+    let mut quiet_since = (counts(), Instant::now());
+    loop {
+        let found = found_keys().lock().expect("the keys").clone();
+        let found = libraries.iter().filter(|key| found.contains(key)).count();
+        let now = counts();
+        if now != quiet_since.0 {
+            quiet_since = (now, Instant::now());
+        }
+        // Recording: until the device has been given no text for a while.
+        let done =
+            if recording { quiet_since.1.elapsed() > Duration::from_secs(3) } else { found >= TEXTS_OF_THE_RECORD };
+        if done {
+            break;
+        }
+        assert!(
+            Instant::now() < deadline,
+            "the pipelines of the record found {found} of their {TEXTS_OF_THE_RECORD} libraries in the table"
+        );
+        std::thread::sleep(Duration::from_millis(20));
+    }
+    drop(context);
+}
+
 /// The record of ordinary drawing this crate carries is a record, and where it is used (macOS on
 /// Apple silicon) the device takes every key of it: a key Skia refused would be a record made
 /// with another Skia or on another kind of device (desktop-performance.md, section 9.83).

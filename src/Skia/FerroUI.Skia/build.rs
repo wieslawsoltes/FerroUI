@@ -63,7 +63,10 @@ fn main() {
     // The texture of a pipelined frame layer (Graphite only; the source is small and has no
     // dependency on Skia, so it is compiled for every Apple configuration).
     println!("cargo:rerun-if-changed=gpu/graphite/pipelined_layer_texture.m");
+    // The table of shader libraries made ahead, in front of the device's shader compiler.
+    println!("cargo:rerun-if-changed=gpu/metal/shader_libraries.m");
     frame_build.file("gpu/metal/frame_completion.m")
+        .file("gpu/metal/shader_libraries.m")
         .file("gpu/graphite/pipelined_layer_texture.m")
         .flag("-fobjc-arc").flag("-fblocks").compile("ferroui_frame_completion");
     // The thread pool of Graphite's pipeline compiles (Graphite only).
