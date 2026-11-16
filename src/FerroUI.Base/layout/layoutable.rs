@@ -55,6 +55,10 @@ pub struct Layoutable {
     pub(crate) subtree_measure_invalid: Cell<bool>,
     is_arrange_valid: Cell<bool>,
     measuring: Cell<bool>,
+    /// Set for the arrange of an element that was arranged, is still valid and is given the
+    /// size it had at another place: its arrangement inside is what it was (`arrange`). An
+    /// addition (FerroUI deviation, desktop-performance.md section 9.74).
+    arrange_moved_only: Cell<bool>,
     previous_measure: Cell<Option<Size>>,
     /// The available sizes over which the last measure holds (section 9.15).
     measure_hold: Cell<Option<crate::layout::MeasureHold>>,
@@ -384,7 +388,17 @@ impl LayoutableImpl for Layoutable {
             available_size_minus_margins = LayoutHelper::round_layout_size_up(available_size_minus_margins, scale);
         }
 
-        size = this.arrange_override(size).constrain(size);
+        // Deviation (DEVIATIONS.md, Layout): upstream arranges the inside of an element again
+        // whenever its rectangle changes. An element that only moves is given the size it was
+        // given before, and nothing that the arrangement of its inside reads has changed since,
+        // or the element would not be valid: the size it took then is the size it takes now, and
+        // its children are where they were. A scroll moves a content of a thousand rows without
+        // a visit to one of them (section 9.74).
+        size = if this.arrange_moved_only.get() {
+            this.bounds().size()
+        } else {
+            this.arrange_override(size).constrain(size)
+        };
 
         match horizontal_alignment {
             HorizontalAlignment::Center | HorizontalAlignment::Stretch => {
@@ -579,6 +593,7 @@ impl Layoutable {
             is_measure_valid: Cell::new(false),
             subtree_measure_invalid: Cell::new(false),
             is_arrange_valid: Cell::new(false),
+            arrange_moved_only: Cell::new(false),
             measuring: Cell::new(false),
             previous_measure: Cell::new(None),
             measure_hold: Cell::new(None),
@@ -909,12 +924,36 @@ impl Layoutable {
             self.measure(self.previous_measure.get().unwrap_or(rect.size()));
         }
 
+        // What follows for an element that stays where it is, which most are in a pass, is this
+        // test and nothing more; the arrangement itself is out of line so that the visit of a
+        // child stays as short as it was.
         if !self.is_arrange_valid.get() || self.previous_arrange.get() != Some(rect) {
-            self.is_arrange_valid.set(true);
-            crate::perf_count!(ArrangesExecuted);
-            self.arrange_core(rect);
-            self.previous_arrange.set(Some(rect));
+            self.arrange_at(rect);
         }
+    }
+
+    /// Arranges the element at `rect`: its arrangement is invalid or `rect` is not the rectangle
+    /// it was arranged at.
+    #[inline(never)]
+    fn arrange_at(&self, rect: Rect) {
+        let valid = self.is_arrange_valid.get();
+        self.is_arrange_valid.set(true);
+        crate::perf_count!(ArrangesExecuted);
+        // See `arrange_moved_only`. An element that is not in a tree has no layout manager that
+        // arranges what is invalid below it: the arrangement of its inside is the visit that
+        // finds it (a tree measured and arranged by hand). One that was not visible when it was
+        // arranged last is invalid: it invalidates itself when it is shown.
+        if valid
+            && self.previous_arrange.get().is_some_and(|previous| previous.size() == rect.size())
+            && self.is_attached_to_visual_tree()
+        {
+            self.arrange_moved_only.set(true);
+            self.arrange_core(rect);
+            self.arrange_moved_only.set(false);
+        } else {
+            self.arrange_core(rect);
+        }
+        self.previous_arrange.set(Some(rect));
     }
 
     /// Clears `subtree_measure_invalid` of this element and of the ancestors that have it: one

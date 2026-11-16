@@ -6077,3 +6077,66 @@ of instructions with it alone, and stays where it was with it on top of sections
 **What stays as it was.** The limits and where they are made. No public API changes.
 
 **Other backends.** It is in `ferroui_base`.
+
+### 9.74 An element that only moves keeps the arrangement of its inside
+
+Experiment #757 asked whether a scroll can move the content as one unit.
+`ScrollContent.offset[Rows=1000]` took about 232,000 instructions on the main branch, 230
+for every row of the content, though no row changes its place in the content. The presenter of a
+scroll viewer arranges its content at another place when the offset changes, with the size
+the content had. `Layoutable::arrange` saw another rectangle and ran `arrange_core`, which
+arranges the inside of the element: the stack asked each of its thousand rows to arrange
+itself where it already was, and each answered that it is valid. Upstream does the same.
+
+**The change.** An element that is arranged at another place keeps the arrangement of its
+inside when all of this holds: its arrangement is valid, the rectangle it is given has the
+size of the rectangle it was arranged at, and it is in a visual tree. `arrange_core` then
+takes the size the element took last time (the size of its bounds) where it would call
+`arrange_override`, and computes the place as it always does, with the margin, the alignment
+and the rounding. Nothing the arrangement of the inside reads can have changed: a property
+that affects it invalidates the arrangement, a child that desires another size invalidates
+the measure of its parent, and an invalid element is not taken this way.
+
+- An element below it whose arrangement is invalid is in the queue of the layout manager and
+  is arranged in the same pass, as it is below any valid element.
+- An element that is in no tree has no layout manager. A tree that is measured and arranged
+  by hand relies on the visit to reach what is invalid below, so it is visited as before
+  (a test of the scroll presenter arranges such a tree).
+- The classes that override `arrange_core` (the window base, the handle of a text selection,
+  the remote widget, the tray icon of Windows) are as they were unless they call the base.
+- The flag that says so (`arrange_moved_only`) is a byte among the flags of `Layoutable`,
+  where four bytes were free: the element is as large as it was.
+
+The test of an element that stays where it is, which most elements of a pass are, is the
+test it was. The arrangement itself moved out of line (`arrange_at`): with it in `arrange`
+the function was no longer inlined into the loop of a panel, and a pass that visits four
+thousand children for one that changed retired 3 per cent more instructions
+(`Invalidation.resize_one_leaf`).
+
+**Measured** against the commit before it (`scripts/perf/gate.py`, 3 rounds):
+
+| Benchmark | Before | After | Time | Instructions |
+| --- | ---: | ---: | ---: | ---: |
+| `ScrollContent.offset[Rows=1000]` | 9.682 us | 1.182 us | -87.8 % | -90.65 % |
+| `ScrollContent.offset[Rows=4000]` (added) | | 1.19 us | | |
+| `LayoutListeners.moved[Leaves=1000]` | 11.634 us | 269.39 ns | -97.7 % | -97.67 % |
+| `LayoutListeners.effective_viewport_moved[Leaves=1000]` | 23.988 us | 11.793 us | -50.8 % | -53.10 % |
+| `SizeChange.wrap[Leaves=1000]` | 69.970 us | 63.679 us | -9.0 % | -11.21 % |
+| `trees::Text.narrow_and_lay_out[Labels=2000]` | 45.050 us | 35.032 us | -22.2 % | -24.06 % |
+| `Invalidation.resize_one_leaf[Leaves=4000]` | 47.683 us | 46.559 us | -2.4 % | -0.91 % |
+| `ScrollContent.content_resized[Rows=1000]` | 18.745 us | 18.503 us | -1.3 % | +0.01 % |
+| `ScrollContent.viewport[Rows=1000]` | 3.164 us | 3.178 us | +0.4 % | +0.08 % |
+| `frames/reorder`, UI thread and wall time of a frame | 1.822 ms, 3.433 ms | 1.616 ms, 2.604 ms | -11.3 %, -24.1 % | |
+| `frames/moves`, UI thread time of a frame | 0.974 ms | 0.900 ms | -7.6 % | |
+| TreeDataGrid `forced_stationary_vertical_layouts` | 1.791 us | 1.426 us | -20.4 % | +0.50 % |
+
+The cost of a scroll step no longer depends on the number of rows: a thousand rows and four
+thousand take the same 1.2 microseconds. What is left of the step is the presenter, the
+content and the offset of the viewer. The gain reaches further than scrolling: a wrap panel
+whose rows shift, a child that moves in a canvas, the items after two that change places.
+
+**What stays as it was.** The bounds every element gets, the order in which invalid elements
+are measured and arranged by the layout manager, the events of the layout. No public API
+changes. The deviation is recorded in `DEVIATIONS.md` (Layout).
+
+**Other backends.** It is in `ferroui_base`.
