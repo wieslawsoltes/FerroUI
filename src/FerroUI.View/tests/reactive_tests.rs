@@ -1,4 +1,4 @@
-use crate::reactive::{batch, effect, memo, on_cleanup, signal, subscriber_count, untrack, Owner};
+use crate::reactive::{batch, effect, memo, on_cleanup, signal, subscriber_count, tracking_lists, untrack, Owner};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -193,6 +193,34 @@ fn effects_that_run_again_stay_one_subscriber_each_in_the_order_they_were_made()
     }
     owner.dispose();
     assert_eq!(subscriber_count(&frame), 0);
+}
+
+#[test]
+fn an_effect_that_runs_again_fills_the_list_of_two_runs_ago() {
+    let (frame, owner) = in_owner(|| {
+        let (frame, other) = (signal(0), signal(0));
+        for _ in 0..8 {
+            effect(move || {
+                frame.get();
+                other.get();
+            });
+        }
+        frame
+    });
+    // After its second run an effect has its two lists; from then on they change places and
+    // no run asks for memory.
+    frame.set(1);
+    let mut before = tracking_lists(&frame);
+    assert_eq!(before.len(), 8);
+    for value in 2..=5 {
+        frame.set(value);
+        let now = tracking_lists(&frame);
+        for ((sources, previous), (sources_before, previous_before)) in now.iter().zip(&before) {
+            assert_eq!((sources, previous), (previous_before, sources_before), "write {value}");
+        }
+        before = now;
+    }
+    owner.dispose();
 }
 
 #[test]

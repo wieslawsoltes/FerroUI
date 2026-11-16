@@ -199,11 +199,16 @@ impl Runtime {
     fn begin_tracking(&self, id: NodeId) {
         let mut nodes = self.nodes.borrow_mut();
         let Some(node) = Self::node_mut(&mut nodes, id) else { return };
-        // A run that did not end (a panic unwound through it) left what it had not read again.
+        // What the run before left in `previous` is nothing, unless it did not end (a panic
+        // unwound through it): then it is what that run had not read again, which is followed
+        // still. The two lists change places, so a run fills the list of two runs ago and no
+        // run of an effect that reads what it read before asks for memory.
         let kept = std::mem::take(&mut node.kept);
-        let unread = node.previous.split_off(kept.min(node.previous.len()));
-        node.previous = std::mem::take(&mut node.sources);
-        node.previous.extend(unread);
+        let read = kept.min(node.previous.len());
+        node.previous.drain(..read);
+        std::mem::swap(&mut node.previous, &mut node.sources);
+        let Node { previous, sources, .. } = node;
+        previous.append(sources);
     }
 
     /// The end of a run of `id`: what the run did not read again is followed no more.
@@ -222,6 +227,10 @@ impl Runtime {
             if let Some(source) = Self::node_mut(&mut nodes, source) {
                 source.subscribers.retain(|subscriber| *subscriber != id);
             }
+        }
+        unread.clear();
+        if let Some(node) = Self::node_mut(&mut nodes, id) {
+            node.previous = unread;
         }
     }
 
@@ -390,6 +399,24 @@ pub(crate) fn subscriber_count<T>(signal: &Signal<T>) -> usize {
     with_runtime(|runtime| {
         let mut nodes = runtime.nodes.borrow_mut();
         Runtime::node_mut(&mut nodes, signal.id).map_or(0, |node| node.subscribers.len())
+    })
+}
+
+/// Where the two lists of sources of each memo and effect that follows `signal` are in memory:
+/// the list of what it read in its last run, and the list its next run fills (tests).
+#[cfg(test)]
+pub(crate) fn tracking_lists<T>(signal: &Signal<T>) -> Vec<(usize, usize)> {
+    with_runtime(|runtime| {
+        let mut nodes = runtime.nodes.borrow_mut();
+        let subscribers = Runtime::node_mut(&mut nodes, signal.id).map(|node| node.subscribers.clone());
+        subscribers
+            .unwrap_or_default()
+            .into_iter()
+            .filter_map(|subscriber| {
+                let node = Runtime::node_mut(&mut nodes, subscriber)?;
+                Some((node.sources.as_ptr() as usize, node.previous.as_ptr() as usize))
+            })
+            .collect()
     })
 }
 
