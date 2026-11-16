@@ -4,7 +4,8 @@ use crate::{PreviewEnvironment, PreviewEnvironmentEditor, PreviewFlowDirection, 
 use ferroui_base::Visual;
 use ferroui_base::media::{FlowDirection, SolidColorBrush};
 use ferroui_base::styling::ThemeVariant;
-use ferroui_controls::{Border, Flyout, ThemeVariantScope};
+use ferroui_base::media::{Stretch, StretchDirection};
+use ferroui_controls::{Border, Flyout, ThemeVariantScope, Viewbox};
 use std::rc::Weak;
 
 #[derive(Default)]
@@ -196,8 +197,10 @@ impl DesignerWorkspace {
     }
 
     /// Hosts a preview that is shown outside the artboard under the conditions of the artboard:
-    /// its theme, its flow direction and its backing. Without them the preview takes the theme of
-    /// the editor chrome around it, which is not the theme the document is designed in.
+    /// its theme, its flow direction, its backing and its size. Without them the preview takes
+    /// the theme of the editor chrome around it and the size of what shows it, which are not
+    /// what the document is designed in. Where the view has less room than the artboard, the
+    /// preview is scaled down to fit, never up.
     pub(crate) fn view_preview_host(&self, control: Ref<Control>) -> Ref<Control> {
         let artboard = self
             .root
@@ -210,9 +213,16 @@ impl DesignerWorkspace {
         }
         let backing = Border::new();
         backing.set_background(self.artboard.background());
+        let (width, height) = self.artboard_size();
+        backing.set_width(width);
+        backing.set_height(height);
         backing.set_child(Some(control));
         scope.set_child(Some(backing.upcast()));
-        scope.upcast()
+        let fit = Viewbox::new();
+        fit.set_stretch(Stretch::Uniform);
+        fit.set_stretch_direction(StretchDirection::DownOnly);
+        fit.set_child(Some(scope.upcast::<Control>()));
+        fit.upcast()
     }
 
     pub fn rotate_preview(&self) -> Result<(), String> {
