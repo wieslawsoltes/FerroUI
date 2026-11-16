@@ -120,7 +120,6 @@ impl<T: LayoutQueueItem> LayoutQueue<T> {
 
         if !info.active {
             if info.count < self.max_enqueue_count_per_loop {
-                crate::perf_count!(LayoutQueueEntries);
                 self.inner.push_back(item.clone());
                 self.loop_queue_info.set(item, Info { active: true, count: info.count + 1 });
             } else if let Some(logger) = Logger::try_get(LogEventLevel::Warning, LogArea::LAYOUT) {

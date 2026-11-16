@@ -6213,9 +6213,12 @@ Experiment #753 supposed that a tree shown for the first time makes records visu
 first frame does not need, because that frame draws the whole window, and that the root
 could stand for all of them.
 
-**Counted** with four counters added for it (`visual invalidations requested`, `visuals
-queued for the update pass`, `layout queue requests`, `layout queue entries`; feature
-`perf-counters`), between the build and the first frame of the two start scenes:
+**Counted** between the build and the first frame of the two start scenes, with the counters
+of the framework and four more for this measurement (the requests of a visual to be drawn
+again, the visuals put into the dirty set of the renderer, the requests for a place in the
+queues of the layout manager, the entries of those queues). The four are not kept: the
+counters are a public enumeration, and a patch release adds nothing to one (section 3.1 of
+`docs/release.md`); they can come back with the next minor version.
 
 | | `startup/controls` | `startup/tiles` |
 | --- | ---: | ---: |
@@ -6255,7 +6258,6 @@ queued for the update pass`, `layout queue requests`, `layout queue entries`; fe
 **Outcome.** Nothing is changed in the renderer. Marking the root in place of the visuals
 would save the requests and the entries of the dirty set, which the counts show to be small
 beside the show, and the update pass would walk the tree to find what the set lists now. The
-time of the requests alone was not measured. The counters stay: they are how a later change
-of the attachment is measured.
+time of the requests alone was not measured.
 
-**Other backends.** The counters are in `ferroui_base`.
+**Other backends.** Nothing changed.

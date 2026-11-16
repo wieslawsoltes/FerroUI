@@ -250,21 +250,11 @@ perf_counters! {
     /// and no instance handler on the thread, so its route was left empty without walking the
     /// ancestors.
     RoutedEventRoutesSkipped => "routed event routes skipped (nothing listens)",
-    /// `LayoutManager::invalidate_measure` and `invalidate_arrange`: an element asked for a
-    /// place in the queues of the layout manager (experiment #753).
-    LayoutQueueRequests => "layout queue requests",
-    /// `LayoutQueue::enqueue`: an element was put into a queue of the layout manager.
-    LayoutQueueEntries => "layout queue entries",
     /// `LayoutManager::inner_layout_pass`: a round of measure and arrange passes.
     LayoutPassRounds => "layout pass rounds",
     /// `LayoutManager::invalidate_measure`: the measure of an element was invalidated while a
     /// layout pass ran (what makes a pass take another round).
     LayoutMeasureInvalidatedInPass => "measures invalidated during a layout pass",
-    /// `CompositingRenderer::add_dirty_visual`: a visual asked to be drawn again (experiment
-    /// #753).
-    VisualInvalidationsRequested => "visual invalidations requested",
-    /// `VisualSets::add`: a visual was put into the dirty set of its renderer.
-    VisualsQueuedDirty => "visuals queued for the update pass",
     /// `CompositingRenderer::update_core`: the drawing of a visual was recorded.
     VisualsRecorded => "visuals recorded",
     /// `CompositingRenderer::update_core`: a recorded drawing was the one the visual had, and
