@@ -7137,3 +7137,61 @@ new values, and a change reported). `shapes/polyline_tests.rs`:
 `a_polyline_given_other_points_keeps_its_geometry_which_takes_them` (the new collection is
 followed; without points the geometry is let go) and
 `the_geometry_of_a_polyline_has_the_collection_of_the_polyline`.
+
+### 9.89 A visual that draws nothing of its size is not drawn again when it is resized
+
+**The rule of section 9.87, where it belongs** (section 8.4, rule 1). Section 9.87 found
+text blocks that were recorded again for a new width and drew what they had drawn, and gave
+`Visual` a member a class can answer: whether a new size alone changes its drawing. The
+text block was the class the count named. The same holds for every visual whose `render`
+does not read its size, and on a screen that is resized most visuals are of that kind: the
+panels, borders and presenters that hold the layout together and draw nothing.
+
+**The change.**
+
+- `VisualImpl::resize_changes_drawing` is declared as following `render`: a class has the
+  answer of its base class only where it has the `render` of its base class. `Visual`
+  draws nothing and answers that a new size changes nothing; a class that overrides
+  `render` without answering, and any class written as a plain `impl`, is drawn again when
+  it is resized, as every visual was. `Layoutable`, `InputElement` and `Control`, which do
+  not draw, pass the answer of the base on.
+- `Panel`: draws its background, as large as it is; without one a new size is not a new
+  drawing.
+- `Border` and `ContentPresenter`: draw a background, a border and shadows; with none of
+  them, nothing.
+- `Shape`: draws its geometry under the transform of its arrange, not its size. A geometry
+  that changes has the shape measured and recorded again (also the geometry of a rectangle
+  or an ellipse, which is made of the size), and a transform that changes now invalidates
+  the visual where the arrange sets it.
+- A visual that is not drawn again has its size, and the clip to its bounds, sent to the
+  compositor as properties, as its position is (section 9.13).
+
+**Looked at and not changed** (rule 2). `Image` draws its source scaled to its size.
+`TemplatedControl` and the controls derived from it draw nothing themselves and get the
+answer of `Visual`. A control with a `render` of its own that this pass did not read keeps
+the answer every visual had.
+
+**Measured** (the declarative gauntlet of the comparison, tier 16; the counts from a build
+with counters, the rates from its harness, three starts each, the median). The column
+before is the stack below this change (sections 9.87 and 9.88); the main branch is beside
+it:
+
+| | Main | Before | After |
+| --- | ---: | ---: | ---: |
+| Visuals recorded a frame | 5,695 | 4,812 | 3,387 |
+| Objects sent to the render thread a frame | 10,587 | 10,641 | 7,391 |
+| Objects made a frame | 1,116 | 1,122 | 602 |
+| Second start: frames a second over the run | 49.4 | 50.0 | 52.1 |
+| First start: frames a second over the run | 45.6 | 46.4 | 49.6 |
+| Second start: CPU a frame | 51.5 ms | 51.2 ms | 49.8 ms |
+
+No pixel of the content differs between the bottom and the top of the stack on five frozen
+frames (gauntlet tier 5, frame 120, twice; gauntlet tier 12, frame 300; patchwork tier 5;
+wall tier 8).
+
+**Tests.** `panel_tests.rs`:
+`a_visual_that_draws_nothing_of_its_size_is_not_drawn_again_when_it_is_resized` (a renderer
+that keeps how each visual was marked; of a panel with and without a background, a border
+with and without a border, a decorator, a content presenter, a rectangle and a polyline,
+resized, the panel with a background and the border with a border are drawn again).
+

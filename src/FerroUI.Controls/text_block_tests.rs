@@ -1845,65 +1845,6 @@ fn a_layout_made_of_more_than_a_plain_text_is_not_shared() {
     assert!(!selectable.text_layout().is_shared());
 }
 
-/// A renderer that keeps how each visual was marked: drawn again, or its properties alone.
-#[derive(Default)]
-struct MarkingRenderer {
-    drawn_again: std::cell::RefCell<Vec<usize>>,
-    properties: std::cell::RefCell<Vec<usize>>,
-}
-
-impl MarkingRenderer {
-    fn key(visual: &Visual) -> usize {
-        visual as *const Visual as usize
-    }
-
-    /// How often `visual` was marked to be drawn again, and for its properties alone, since
-    /// the last call.
-    fn take(&self, visual: &Visual) -> (usize, usize) {
-        let key = Self::key(visual);
-        let count = |marks: &std::cell::RefCell<Vec<usize>>| {
-            let mut marks = marks.borrow_mut();
-            let before = marks.len();
-            marks.retain(|mark| *mark != key);
-            before - marks.len()
-        };
-        (count(&self.drawn_again), count(&self.properties))
-    }
-}
-
-impl ferroui_base::rendering::IRenderer for MarkingRenderer {
-    fn diagnostics(&self) -> Rc<ferroui_base::rendering::RendererDiagnostics> {
-        ferroui_base::rendering::RendererDiagnostics::new()
-    }
-    fn scene_invalidated(
-        &self,
-        _handler: Rc<dyn Fn(&ferroui_base::rendering::SceneInvalidatedEventArgs)>,
-    ) -> Rc<dyn ferroui_base::reactive::IDisposable> {
-        ferroui_base::reactive::Disposable::empty()
-    }
-    fn try_get_render_interface_feature(
-        &self,
-        _feature_type: std::any::TypeId,
-    ) -> ferroui_base::rendering::composition::LocalFuture<
-        Option<ferroui_base::rendering::composition::RenderInterfaceFeature>,
-    > {
-        Box::pin(std::future::ready(None))
-    }
-    fn add_dirty(&self, visual: &Visual) {
-        self.drawn_again.borrow_mut().push(Self::key(visual));
-    }
-    fn add_dirty_for_layout(&self, _visual: &Visual) {}
-    fn add_dirty_properties(&self, visual: &Visual) {
-        self.properties.borrow_mut().push(Self::key(visual));
-    }
-    fn recalculate_children(&self, _visual: &Visual) {}
-    fn resized(&self, _size: Size) {}
-    fn paint(&self, _rect: Rect) {}
-    fn start(&self) {}
-    fn stop(&self) {}
-    fn dispose(&self) {}
-}
-
 /// Section 9.87: a text block that is given another size and keeps its layout is not drawn
 /// again; one that has a background, that is lower than its text, or that gets a new layout is.
 #[test]
@@ -1921,7 +1862,7 @@ fn a_text_block_that_is_resized_and_keeps_its_layout_is_not_drawn_again() {
     let host = Border::new();
     host.set_child(&stack);
     let root = TestRoot::with_child(&host);
-    let renderer = Rc::new(MarkingRenderer::default());
+    let renderer = Rc::new(crate::test_support::MarkingRenderer::default());
     root.set_renderer(renderer.clone());
     host.set_width(400.0);
     root.execute_initial_layout_pass();
