@@ -386,7 +386,9 @@ impl CameraPreview {
                 }
                 true
             },
-            Duration::from_millis(16),
+            // Android camera acquisition, texture conversion and fence
+            // completion each need a poll. Advance them within a display frame.
+            Duration::from_millis(if cfg!(target_os = "android") { 4 } else { 16 }),
             DispatcherPriority::NORMAL,
         );
         self.timer.replace(Some(timer));

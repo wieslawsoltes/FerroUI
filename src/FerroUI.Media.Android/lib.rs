@@ -251,19 +251,7 @@ impl AndroidFrameStream {
                     .as_ref()
                     .is_some_and(|source| call_boolean(&source.0.java, "pending", "()Z", &[])))
     }
-    pub fn take_frame(&self, width: u32, height: u32) -> Result<Option<FrameLease>, MediaError> {
-        self.take_oriented_frame(width, height, FrameRotation::None, false)
-    }
-    pub fn take_oriented_frame(
-        &self,
-        width: u32,
-        height: u32,
-        rotation: FrameRotation,
-        mirrored: bool,
-    ) -> Result<Option<FrameLease>, MediaError> {
-        if self.stopped.get() || width == 0 || height == 0 {
-            return Ok(None);
-        }
+    fn take_pending_frame(&self) -> Result<Option<FrameLease>, MediaError> {
         let ready = self
             .pending
             .borrow()
@@ -283,20 +271,42 @@ impl AndroidFrameStream {
                 },
             );
         }
+        Ok(None)
+    }
+
+    fn poll_frame_job(&self) -> Result<(), MediaError> {
         let result = {
             let mut job = self.job.borrow_mut();
             job.as_mut()
                 .map(|job| job.as_mut().poll(&mut Context::from_waker(Waker::noop())))
         };
-        if let Some(result) = result {
-            match result {
-                Poll::Pending => return Ok(None),
-                Poll::Ready(result) => {
-                    self.job.borrow_mut().take();
-                    self.pending.replace(result?);
-                    return Ok(None);
-                }
-            }
+        if let Some(Poll::Ready(result)) = result {
+            self.job.borrow_mut().take();
+            self.pending.replace(result?);
+        }
+        Ok(())
+    }
+
+    pub fn take_frame(&self, width: u32, height: u32) -> Result<Option<FrameLease>, MediaError> {
+        self.take_oriented_frame(width, height, FrameRotation::None, false)
+    }
+
+    pub fn take_oriented_frame(
+        &self,
+        width: u32,
+        height: u32,
+        rotation: FrameRotation,
+        mirrored: bool,
+    ) -> Result<Option<FrameLease>, MediaError> {
+        if self.stopped.get() || width == 0 || height == 0 {
+            return Ok(None);
+        }
+        self.poll_frame_job()?;
+        if self.pending.borrow().is_some() {
+            return self.take_pending_frame();
+        }
+        if self.job.borrow().is_some() {
+            return Ok(None);
         }
         let Some(source) = self.source.borrow().clone() else {
             return Ok(None);
@@ -510,6 +520,9 @@ impl AndroidFrameStream {
             }
             Ok(output)
         })));
-        Ok(None)
+        // Start acquisition now. When the GPU has completed, the next poll can
+        // advance the job and take its ready fence in the same call.
+        self.poll_frame_job()?;
+        self.take_pending_frame()
     }
 }

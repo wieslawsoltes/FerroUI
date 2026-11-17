@@ -16,6 +16,7 @@ import android.hardware.camera2.TotalCaptureResult;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Range;
 import android.util.Size;
 import android.view.Surface;
 import androidx.camera.camera2.interop.Camera2CameraInfo;
@@ -92,12 +93,12 @@ public final class CameraController implements LifecycleOwner,Application.Activi
     private CameraRecordingRequest activeRecording;
     private boolean recordingSuspendedStill;
     private final String selectedId;
-    private final int facing,preferredWidth,preferredHeight;
+    private final int facing,preferredWidth,preferredHeight,preferredFps;
     private final boolean exact;
 
-    public CameraController(Activity activity,SurfaceFrames frames,String id,int facing,int width,int height,boolean exact,int colorProfile) {
+    public CameraController(Activity activity,SurfaceFrames frames,String id,int facing,int width,int height,int fps,boolean exact,int colorProfile) {
         this.activity=activity;this.frames=frames;frames.setCameraColorMode(colorProfile);this.selectedId=id;this.facing=facing;
-        preferredWidth=width;preferredHeight=height;this.exact=exact;
+        preferredWidth=width;preferredHeight=height;preferredFps=fps;this.exact=exact;
         Handler handler=new Handler(Looper.getMainLooper());main=command->handler.post(command);
         activity.getApplication().registerActivityLifecycleCallbacks(this);
         activity.getApplication().registerComponentCallbacks(this);
@@ -134,6 +135,7 @@ public final class CameraController implements LifecycleOwner,Application.Activi
                     else if(facing==1 || facing==2) selector.requireLensFacing(facing==1 ? CameraSelector.LENS_FACING_FRONT : CameraSelector.LENS_FACING_BACK);
                     Preview.Builder builder=new Preview.Builder().setTargetRotation(displayRotation())
                         .setDynamicRange(DynamicRange.SDR);
+                    if(preferredFps>0) builder.setTargetFrameRate(new Range<>(preferredFps,preferredFps));
                     if(preferredWidth>0 && preferredHeight>0) builder.setResolutionSelector(new ResolutionSelector.Builder()
                         .setResolutionStrategy(new ResolutionStrategy(new Size(preferredWidth,preferredHeight),
                             ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER)).build());

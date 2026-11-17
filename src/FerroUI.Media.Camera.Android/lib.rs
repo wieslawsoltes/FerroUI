@@ -177,7 +177,7 @@ impl CameraProvider for AndroidCameraProvider {
             let format = selection.format;
             let java = new_object(
                 &class,
-                "(Landroid/app/Activity;Lorg/ferroui/media/SurfaceFrames;Ljava/lang/String;IIIZI)V",
+                "(Landroid/app/Activity;Lorg/ferroui/media/SurfaceFrames;Ljava/lang/String;IIIIZI)V",
                 &[
                     JavaValue::Object(Some(&activity)),
                     JavaValue::Object(Some(&source.java())),
@@ -189,6 +189,7 @@ impl CameraProvider for AndroidCameraProvider {
                     }),
                     JavaValue::Int(format.map(|v| v.width as i32).unwrap_or(0)),
                     JavaValue::Int(format.map(|v| v.height as i32).unwrap_or(0)),
+                    JavaValue::Int(format.map(|v| v.frames_per_second.round() as i32).unwrap_or(0)),
                     JavaValue::Boolean(selection.exact),
                     JavaValue::Int(color_profile),
                 ],
@@ -282,6 +283,9 @@ impl NativeCameraSession for Session {
     }
     fn take_frame(&self) -> Result<Option<FrameLease>, CameraError> {
         self.check()?;
+        if !self.stream.has_pending_frame_work() {
+            return Ok(None);
+        }
         let info = self.info();
         let size = dimensions(&info);
         let rotation = match info["rotation"].as_u64() {
