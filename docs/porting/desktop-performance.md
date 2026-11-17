@@ -901,10 +901,32 @@ by name):
 | Second start: first frame | 0.53 s | 0.56 s |
 | Second start: CPU a frame | 58.1 ms | 67.4 ms |
 
-What is left in the steady rate of that application (a sample of its UI thread, the time of
-each class's own layout, beside the sample of this repository): text measured, 537 ms
-against 428; the shapes of its sparklines measured every frame, 114 ms against none; its
+What was left in the steady rate of that application then (a sample of its UI thread, the
+time of each class's own layout, beside the sample of this repository): text measured, 537
+ms against 428; the shapes of its sparklines measured every frame, 114 ms against none; its
 grids measured, 112 ms against 22.
+
+The same run a day later, three starts each, with sections 9.82 (a run of an effect asks for
+no memory) and 9.84 to 9.86 on the main branch (texts of one colour share their layouts,
+shader libraries made when the application is built, measure holds of a canvas, of a grid of
+one star row and of an axis that is cut):
+
+| Gauntlet, tier 16 | This checkout | Published 0.5.0 |
+| --- | ---: | ---: |
+| First start: frames a second over the run | 46.8 | 28.7 |
+| First start: first frame | 1.04 s | 2.08 s |
+| First start: CPU a frame | 51.3 ms | 69.0 ms |
+| Second start: frames a second over the run | 49.5 | 35.7 |
+| Second start: first frame | 0.52 s | 0.56 s |
+| Second start: CPU a frame | 51.2 ms | 65.9 ms |
+
+What is left in its steady rate: its UI thread is busy 88 % of the time and its render
+thread 48 %, so the UI thread sets the rate. A frame of it runs 2,410 measures against 1,148
+of the sample of this repository and makes 1,122 objects against 493 (each card replaces
+the two column definitions of its progress bar and the geometries of two shapes); the rest
+is recording, text and the reactive runtime, none of them above a quarter. What is left of
+its first start is the system's check of a program it never ran and the application's own
+start (section 9.85).
 
 The harness measures a window on a display from outside the application, so this is not a
 suite of the gate; it is where a change to the declarative layer or to the start is measured
