@@ -27,6 +27,15 @@ impl ShapeImpl for Rectangle {
 
         Some(RectangleGeometry::with_rect_and_radii(rect, this.radius_x(), this.radius_y()).upcast())
     }
+
+    /// The rectangle geometry takes the rectangle and the radii the shape has now.
+    fn update_defining_geometry(this: &Self, geometry: &Ref<Geometry>) -> bool {
+        let Some(geometry) = geometry.cast::<RectangleGeometry>() else { return false };
+        geometry.set_rect(Rect::from_size(this.bounds().size()).deflate(this.stroke_thickness() / 2.0));
+        geometry.set_radius_x(this.radius_x());
+        geometry.set_radius_y(this.radius_y());
+        true
+    }
 }
 
 impl LayoutableImpl for Rectangle {

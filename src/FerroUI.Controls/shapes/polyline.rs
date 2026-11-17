@@ -46,6 +46,24 @@ impl ShapeImpl for Polyline {
         };
         Some(geometry.upcast())
     }
+
+    /// The polyline geometry takes the collection of points the shape has now and follows it.
+    /// The fill rule is what a polyline geometry is made with: another one is another geometry.
+    fn update_defining_geometry(this: &Self, geometry: &Ref<Geometry>) -> bool {
+        let (Some(geometry), Some(points)) = (geometry.cast::<PolylineGeometry>(), this.points()) else {
+            return false;
+        };
+        if geometry.fill_rule() != this.fill_rule() {
+            return false;
+        }
+        geometry.set_is_filled(this.fill().is_some());
+        if !geometry.points().ptr_eq(&points) {
+            geometry.set_points(points);
+            // The geometry follows the changes of a collection, not the change of collection.
+            geometry.invalidate_geometry();
+        }
+        true
+    }
 }
 
 ferroui_base::ferro_properties! { impl Polyline {
@@ -67,17 +85,10 @@ ferroui_base::ferro_properties! { impl Polyline {
 impl Polyline {
     fn static_constructor() {
         Shape::stroke_thickness_property().override_default_value::<Polyline>(1.0);
-        Shape::affects_geometry::<Polyline>(&[Self::fill_rule_property().as_property()]);
-        // Other points go to the geometry the shape has (`Shape::polyline_points_changed`).
-        Self::points_property()
-            .changed()
-            .subscribe(|e| {
-                if let Some(sender) = e.sender().downcast_ref::<Polyline>() {
-                    let shape: &Shape = sender.upcast();
-                    shape.polyline_points_changed(e.get_new_value::<Option<Points>>());
-                }
-            })
-            .detach();
+        Shape::affects_geometry::<Polyline>(&[
+            Self::points_property().as_property(),
+            Self::fill_rule_property().as_property(),
+        ]);
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

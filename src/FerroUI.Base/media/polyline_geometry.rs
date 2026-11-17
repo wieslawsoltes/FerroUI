@@ -36,7 +36,7 @@ impl GeometryImpl for PolylineGeometry {
         builder.set_fill_rule(this.fill_rule);
         let points = this.points();
         let is_filled = this.is_filled();
-        let count = points.count();
+        let count = points.len();
         if count > 0 {
             builder.begin_figure(points.get(0), is_filled);
             for index in 1..count {

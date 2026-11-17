@@ -125,17 +125,18 @@ fn a_polyline_given_other_points_keeps_its_geometry_which_takes_them() {
     let polyline = kept.cast::<PolylineGeometry>().expect("a polyline geometry");
     assert_eq!(polyline.points().to_vec(), other.to_vec());
 
-    // It follows the collection it was given, and no longer the one it had.
+    // It follows the collection it was given, and no longer the one it had. (A shape in a tree
+    // listens to its geometry and is measured again:
+    // `polyline_will_update_geometry_on_shapes_collection_content_change`.)
     other.add(Point::new(40.0, 0.0));
     assert_eq!(changes.get(), 2);
-    assert!(!target.is_measure_valid());
 
     // Without points the geometry is let go, as before; with points again there is a new one.
     target.set_points(None);
     target.measure(Size::INFINITY);
     let empty = target.defining_geometry().expect("a geometry");
     assert!(!empty.ptr_eq(&geometry));
-    assert_eq!(empty.cast::<PolylineGeometry>().expect("a polyline geometry").points().count(), 0);
+    assert_eq!(empty.cast::<PolylineGeometry>().expect("a polyline geometry").points().len(), 0);
 }
 
 /// The geometry of a polyline is made of its own collection of points, not of a copy.
@@ -152,6 +153,6 @@ fn the_geometry_of_a_polyline_has_the_collection_of_the_polyline() {
     let geometry = target.defining_geometry().and_then(|g| g.cast::<PolylineGeometry>()).expect("a polyline geometry");
     assert!(geometry.is_filled());
     points.add(Point::new(20.0, 0.0));
-    assert_eq!(geometry.points().count(), 3);
+    assert_eq!(geometry.points().len(), 3);
 }
 

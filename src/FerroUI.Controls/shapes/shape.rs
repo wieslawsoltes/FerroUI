@@ -4,7 +4,7 @@ use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::{
     DrawingContext, Geometry, IBrush, IPen, MatrixTransform, MediaCollection, Pen, PenLineCap, PenLineJoin, Stretch,
-    StrokeDashArray, PolylineGeometry,
+    StrokeDashArray,
 };
 use ferroui_base::reactive::Subscription;
 use ferroui_base::rendering::composition::{AlphaMask, CompositionBrush};
@@ -36,6 +36,15 @@ ferro_class! {
         /// Creates the shape's defining geometry.
         fn create_defining_geometry(this) -> Option<Ref<Geometry>>;
 
+        /// Gives the geometry the shape has what the shape is now (a property the geometry is
+        /// made of changed), and says whether it did. The geometry is then kept and builds
+        /// itself again, where the reference lets it go and makes another one for every
+        /// change: a shape that is resized, or whose points change, every frame made and
+        /// dropped an object and a subscription a frame. The default does not, and the shape
+        /// makes a new geometry as before (a FerroUI addition, desktop-performance.md,
+        /// section 9.88).
+        fn update_defining_geometry(this, geometry: &Ref<Geometry>) -> bool;
+
         /// Called when the underlying [`Geometry`] changed.
         fn on_geometry_changed(this);
     }
@@ -46,6 +55,10 @@ ferro_impl_classes!(Shape: StyledElementImpl, InteractiveImpl, InputElementImpl,
 impl ShapeImpl for Shape {
     fn create_defining_geometry(_this: &Self) -> Option<Ref<Geometry>> {
         panic!("Shape is abstract: 'create_defining_geometry' must be implemented by the deriving class")
+    }
+
+    fn update_defining_geometry(_this: &Self, _geometry: &Ref<Geometry>) -> bool {
+        false
     }
 
     fn on_geometry_changed(this: &Self) {
@@ -423,24 +436,20 @@ impl Shape {
         }
     }
 
-    /// A shape whose geometry is a polyline (`Polyline`, `Polygon`) was given other points.
-    /// The geometry it has takes them and is built again, where the reference lets the
-    /// geometry go and makes another: a shape whose points change every frame (a sparkline)
-    /// made and dropped an object, a copy of its points and a subscription a frame
-    /// (desktop-performance.md, section 9.88). Without a geometry, or without points, the
-    /// shape is invalidated as before.
-    pub(crate) fn polyline_points_changed(&self, points: Option<ferroui_base::media::Points>) {
-        let kept = self.defining_geometry.borrow().clone().and_then(|geometry| geometry.cast::<PolylineGeometry>());
-        match (kept, points) {
-            (Some(geometry), Some(points)) => {
-                geometry.set_points(points);
-                // The geometry follows the changes of a collection, not the change of collection.
-                geometry.invalidate_geometry();
-                *self.rendered_geometry.borrow_mut() = None;
-                self.invalidate_measure();
-            }
-            _ => self.invalidate_geometry(),
+    /// A property the geometry of the shape is made of changed. The geometry the shape has is
+    /// given what the shape is now, where its class can do that (`update_defining_geometry`),
+    /// and the shape is measured again; else the geometry is let go, as in the reference.
+    fn geometry_property_changed(&self) {
+        let kept = self.defining_geometry.borrow().clone();
+        if kept.is_some_and(|geometry| self.update_defining_geometry(&geometry)) {
+            // What `on_geometry_changed` does for a geometry that says it changed, also where
+            // nothing listens to the geometry (a shape that is not in a tree) or nothing of it
+            // changed.
+            *self.rendered_geometry.borrow_mut() = None;
+            self.invalidate_measure();
+            return;
         }
+        self.invalidate_geometry();
     }
 
     /// Invalidates the geometry of this shape.
@@ -538,7 +547,7 @@ impl Shape {
             }
         }
 
-        control.invalidate_geometry();
+        control.geometry_property_changed();
     }
 
     /// Listens to changes of the defining geometry. At most one subscription

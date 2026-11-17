@@ -30,6 +30,7 @@ pub mod listeners;
 pub mod nested_depth;
 pub mod panel_measure_arrange;
 pub mod scroll_content;
+pub mod shape_geometry;
 pub mod size_change;
 pub mod visibility;
 
@@ -41,6 +42,7 @@ pub fn register(registry: &mut Registry) {
     size_change::register(registry);
     visibility::register(registry);
     scroll_content::register(registry);
+    shape_geometry::register(registry);
     attached_layout_properties::register(registry);
     listeners::register(registry);
 }

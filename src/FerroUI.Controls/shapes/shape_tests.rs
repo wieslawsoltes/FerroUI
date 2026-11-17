@@ -197,3 +197,64 @@ fn no_stroke_produces_no_pen() {
 
     assert!(pen.is_none());
 }
+
+/// Section 9.88: a shape that makes its own geometry gives the geometry it has what it is now,
+/// when a property the geometry is made of changes: the geometry is the same object, built
+/// again, and the shape is measured again.
+#[test]
+fn a_shape_whose_geometry_properties_change_keeps_its_geometry() {
+    use super::{Ellipse, Line, Rectangle};
+    use ferroui_base::media::{EllipseGeometry, LineGeometry, RectangleGeometry};
+    use ferroui_base::{Point, Rect, Size};
+
+    let _scope = crate::test_support::test_scope();
+    let _app = crate::test_support_shapes::MockRenderInterfaceScope::install();
+    let arranged = |shape: &Shape, size: Size| {
+        shape.measure(Size::INFINITY);
+        shape.arrange(Rect::from_size(size));
+    };
+
+    // A rectangle that is resized, and whose radii change.
+    let rectangle = Rectangle::new();
+    rectangle.set_stroke_thickness(2.0);
+    arranged(&rectangle, Size::new(100.0, 40.0));
+    let geometry = rectangle.defining_geometry().expect("a geometry");
+    let changes = std::rc::Rc::new(std::cell::Cell::new(0));
+    let counted = changes.clone();
+    geometry.changed(move || counted.set(counted.get() + 1)).detach();
+    arranged(&rectangle, Size::new(140.0, 40.0));
+    let kept = rectangle.defining_geometry().expect("a geometry");
+    assert!(kept.ptr_eq(&geometry), "the same geometry");
+    assert!(changes.get() >= 1, "the geometry says it changed");
+    assert_eq!(kept.cast::<RectangleGeometry>().expect("a rectangle").rect(), Rect::new(1.0, 1.0, 138.0, 38.0));
+    rectangle.set_radius_x(6.0);
+    assert!(!rectangle.is_measure_valid());
+    let kept = rectangle.defining_geometry().expect("a geometry");
+    assert!(kept.ptr_eq(&geometry));
+    assert_eq!(kept.cast::<RectangleGeometry>().expect("a rectangle").radius_x(), 6.0);
+
+    // An ellipse that is resized.
+    let ellipse = Ellipse::new();
+    arranged(&ellipse, Size::new(50.0, 50.0));
+    let geometry = ellipse.defining_geometry().expect("a geometry");
+    arranged(&ellipse, Size::new(80.0, 60.0));
+    let kept = ellipse.defining_geometry().expect("a geometry");
+    assert!(kept.ptr_eq(&geometry));
+    let stroke = ellipse.stroke_thickness();
+    assert_eq!(
+        kept.cast::<EllipseGeometry>().expect("an ellipse").rect(),
+        Rect::from_size(Size::new(80.0, 60.0)).deflate(stroke / 2.0)
+    );
+
+    // A line whose end moves.
+    let line = Line::new();
+    line.set_end_point(Point::new(10.0, 10.0));
+    line.measure(Size::INFINITY);
+    let geometry = line.defining_geometry().expect("a geometry");
+    line.set_end_point(Point::new(30.0, 5.0));
+    assert!(!line.is_measure_valid());
+    let kept = line.defining_geometry().expect("a geometry");
+    assert!(kept.ptr_eq(&geometry));
+    assert_eq!(kept.cast::<LineGeometry>().expect("a line").end_point(), Point::new(30.0, 5.0));
+}
+
