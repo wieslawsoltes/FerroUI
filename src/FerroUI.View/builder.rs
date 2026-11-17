@@ -147,6 +147,39 @@ fn boxed<T: PropertyValue>(value: T) -> BoxedValue {
     Rc::new(value)
 }
 
+/// The box of the value of a reactive property, kept between the runs of its effect
+/// (docs/porting/desktop-performance.md, section 9.94). The property takes a copy of the value
+/// and the effect lets the box go, so a run can write its value into the box of the run before,
+/// where every run asked the allocator for a box and gave it back. A property that is computed
+/// once keeps nothing: the box is kept from the second run on, and only while nothing else
+/// holds it.
+struct KeptBox<T> {
+    kept: std::cell::RefCell<Option<Rc<T>>>,
+    ran: std::cell::Cell<bool>,
+}
+
+impl<T: PropertyValue> KeptBox<T> {
+    fn new() -> Self {
+        Self { kept: std::cell::RefCell::new(None), ran: std::cell::Cell::new(false) }
+    }
+
+    fn boxed(&self, value: T) -> BoxedValue {
+        if !self.ran.replace(true) {
+            // The first run, and for most properties the only one.
+            return Rc::new(value);
+        }
+        let mut kept = self.kept.borrow_mut();
+        match kept.as_mut().and_then(Rc::get_mut) {
+            Some(inside) => *inside = value,
+            None => *kept = Some(Rc::new(value)),
+        }
+        match &*kept {
+            Some(kept) => kept.clone(),
+            None => unreachable!("the box was just kept"),
+        }
+    }
+}
+
 impl<T: PropertyValue, V: IntoValue<T>> IntoProp<T, markers::Value> for V {
     fn into_prop(self) -> PropValue {
         PropValue::Value(boxed(self.into_value()))
@@ -155,19 +188,22 @@ impl<T: PropertyValue, V: IntoValue<T>> IntoProp<T, markers::Value> for V {
 
 impl<T: PropertyValue, V: IntoValue<T> + Clone + 'static> IntoProp<T, markers::FromSignal<V>> for Signal<V> {
     fn into_prop(self) -> PropValue {
-        PropValue::Follows { source: self.source_id(), compute: Rc::new(move || boxed(self.get().into_value())) }
+        let kept = KeptBox::<T>::new();
+        PropValue::Follows { source: self.source_id(), compute: Rc::new(move || kept.boxed(self.get().into_value())) }
     }
 }
 
 impl<T: PropertyValue, V: IntoValue<T> + Clone + 'static> IntoProp<T, markers::FromMemo<V>> for Memo<V> {
     fn into_prop(self) -> PropValue {
-        PropValue::Follows { source: self.source_id(), compute: Rc::new(move || boxed(self.get().into_value())) }
+        let kept = KeptBox::<T>::new();
+        PropValue::Follows { source: self.source_id(), compute: Rc::new(move || kept.boxed(self.get().into_value())) }
     }
 }
 
 impl<T: PropertyValue, V: IntoValue<T>, F: Fn() -> V + 'static> IntoProp<T, markers::FromClosure<V>> for F {
     fn into_prop(self) -> PropValue {
-        PropValue::Dynamic(Rc::new(move || boxed(self().into_value())))
+        let kept = KeptBox::<T>::new();
+        PropValue::Dynamic(Rc::new(move || kept.boxed(self().into_value())))
     }
 }
 
