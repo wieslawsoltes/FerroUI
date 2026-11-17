@@ -177,7 +177,7 @@ impl CameraProvider for AndroidCameraProvider {
             let format = selection.format;
             let java = new_object(
                 &class,
-                "(Landroid/app/Activity;Lorg/ferroui/media/SurfaceFrames;Ljava/lang/String;IIIZI)V",
+                "(Landroid/app/Activity;Lorg/ferroui/media/SurfaceFrames;Ljava/lang/String;IIIIZI)V",
                 &[
                     JavaValue::Object(Some(&activity)),
                     JavaValue::Object(Some(&source.java())),
@@ -189,6 +189,7 @@ impl CameraProvider for AndroidCameraProvider {
                     }),
                     JavaValue::Int(format.map(|v| v.width as i32).unwrap_or(0)),
                     JavaValue::Int(format.map(|v| v.height as i32).unwrap_or(0)),
+                    JavaValue::Int(format.map(|v| v.frames_per_second.round() as i32).unwrap_or(0)),
                     JavaValue::Boolean(selection.exact),
                     JavaValue::Int(color_profile),
                 ],
@@ -282,22 +283,7 @@ impl NativeCameraSession for Session {
     }
     fn take_frame(&self) -> Result<Option<FrameLease>, CameraError> {
         self.check()?;
-        let info = self.info();
-        let size = dimensions(&info);
-        let rotation = match info["rotation"].as_u64() {
-            Some(90) => FrameRotation::Clockwise90,
-            Some(180) => FrameRotation::Clockwise180,
-            Some(270) => FrameRotation::Clockwise270,
-            _ => FrameRotation::None,
-        };
-        self.stream
-            .take_oriented_frame(
-                size.width,
-                size.height,
-                rotation,
-                info["mirrored"].as_bool().unwrap_or(false),
-            )
-            .map_err(native)
+        self.stream.take_clocked_frame().map_err(native)
     }
     fn photo(&self) -> CameraFuture<CameraPhoto> {
         let Some(java) = call_object(

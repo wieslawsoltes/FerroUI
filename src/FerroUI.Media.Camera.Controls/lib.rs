@@ -386,7 +386,11 @@ impl CameraPreview {
                 }
                 true
             },
-            Duration::from_millis(16),
+            // On Android the render job that acquires and converts a camera
+            // image and the fence of that conversion each need a poll, and an
+            // image whose capture metadata is not recorded yet is retried at
+            // the next one. Advance them within a display frame.
+            Duration::from_millis(if cfg!(target_os = "android") { 4 } else { 16 }),
             DispatcherPriority::NORMAL,
         );
         self.timer.replace(Some(timer));
