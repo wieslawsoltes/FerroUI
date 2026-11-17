@@ -46,7 +46,8 @@ use ferroui_browser::interop::canvas_helper::{RENDER_TARGET_KIND_SOFTWARE, RENDE
 use ferroui_browser::interop::{navigation_helper, thread_proxy};
 use ferroui_browser::rendering::{BrowserSharedRenderLoop, RenderStatistics, RenderWorker};
 use ferroui_browser::{
-    BrowserAccessibility, BrowserAppBuilder, BrowserPlatformOptions, BrowserRenderer, BrowserRenderingMode, FerroView,
+    BrowserAccessibility, BrowserAppBuilder, BrowserNavigationHistory, BrowserPlatformOptions, BrowserRenderer,
+    BrowserRenderingMode, FerroView,
 };
 use ferroui_controls::{
     AppBuilder, Application, ApplicationImpl, ApplicationImplExt, Border, Button, CheckBox, Control, ListBox,
@@ -60,6 +61,7 @@ use wasm_bindgen::prelude::*;
 
 /// The controls of the view whose state the behaviour tests read.
 struct Controls {
+    title: Ref<TextBlock>,
     button: Ref<Button>,
     check_box: Ref<CheckBox>,
     text_box: Ref<TextBox>,
@@ -89,6 +91,8 @@ ferroui_base::ferro_thread_local! {
     static THEME_VARIANT: RefCell<Option<String>> = const { RefCell::new(None) };
     static CONTROLS: RefCell<Option<Controls>> = const { RefCell::new(None) };
     static SERVICES: RefCell<Services> = RefCell::new(Services::default());
+    static HISTORY: RefCell<Option<BrowserNavigationHistory>> = const { RefCell::new(None) };
+    static HISTORY_DELTA: Cell<i32> = const { Cell::new(0) };
 }
 
 fn with_services(f: impl FnOnce(&mut Services)) {
@@ -198,7 +202,7 @@ fn create_main_view() -> Ref<Control> {
     let panel = StackPanel::new();
     panel.set_spacing(10.0);
     panel.set_margin(Thickness::uniform(16.0));
-    panel.children().add(title);
+    panel.children().add(title.clone());
     panel.children().add(button.clone());
     panel.children().add(check_box.clone());
     panel.children().add(text_box.clone());
@@ -209,6 +213,7 @@ fn create_main_view() -> Ref<Control> {
 
     CONTROLS.with(|controls| {
         *controls.borrow_mut() = Some(Controls {
+            title,
             button: button.clone(),
             check_box: check_box.clone(),
             text_box: text_box.clone(),
@@ -408,6 +413,43 @@ pub fn themed_view_install_back_handler() {
         e.set_handled(true);
     });
     navigation_helper::add_back_handler();
+}
+
+fn show_history_route(route: &str, delta: i32) {
+    CONTROLS.with(|controls| {
+        if let Some(controls) = controls.borrow().as_ref() {
+            controls.title.set_text(Some(route));
+        }
+    });
+    HISTORY_DELTA.with(|position| position.set(delta));
+}
+
+/// Uses the view's title as the current route for the browser history checks.
+#[wasm_bindgen(js_name = themedViewStartHistory)]
+pub fn themed_view_start_history(route: &str) -> Result<(), JsValue> {
+    let history = BrowserNavigationHistory::new(route, show_history_route)?;
+    HISTORY.with(|slot| *slot.borrow_mut() = Some(history));
+    show_history_route(route, 0);
+    Ok(())
+}
+
+#[wasm_bindgen(js_name = themedViewPushHistory)]
+pub fn themed_view_push_history(route: &str) -> Result<(), JsValue> {
+    HISTORY.with(|slot| slot.borrow().as_ref().expect("history is active").push(route))?;
+    show_history_route(route, 0);
+    Ok(())
+}
+
+#[wasm_bindgen(js_name = themedViewStopHistory)]
+pub fn themed_view_stop_history() {
+    HISTORY.with(|slot| drop(slot.borrow_mut().take()));
+}
+
+#[wasm_bindgen(js_name = themedViewHistoryState)]
+pub fn themed_view_history_state() -> String {
+    let route = CONTROLS.with(|controls| controls.borrow().as_ref().and_then(|controls| controls.title.text()));
+    let delta = HISTORY_DELTA.with(Cell::get);
+    format!("{}:{delta}", route.unwrap_or_default())
 }
 
 /// Changes the native control host of the view: `add` puts it into the

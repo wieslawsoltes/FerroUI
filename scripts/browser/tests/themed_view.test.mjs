@@ -619,6 +619,58 @@ check("the back navigation of the browser is a back request of the view", async 
     assert((await page.services()).back_requests === "2", `the second back navigation was reported as ${(await page.services()).back_requests}`);
 });
 
+check("browser history restores app routes in both directions", async (page) => {
+    const history = () => page.send("Page.getNavigationHistory");
+    const route = () => page.evaluate("themedView.themedViewHistoryState()");
+    const waitForRoute = (expected) => page.waitFor(`themedView.themedViewHistoryState() === ${JSON.stringify(expected)}`, 5000);
+    const traverse = async (offset) => {
+        const { currentIndex, entries } = await history();
+        const index = currentIndex + offset;
+        await page.send("Page.navigateToHistoryEntry", { entryId: entries[index].id });
+        const deadline = Date.now() + 5000;
+        while (Date.now() < deadline) {
+            if ((await history()).currentIndex === index) { return; }
+            await sleep(50);
+        }
+        throw new Error(`history did not move by ${offset}`);
+    };
+
+    await page.evaluate(`history.replaceState({host: true}, ""); history.pushState(null, "", "#app"); true`);
+    const initial = await history();
+    const url = await page.evaluate("location.href");
+    await page.evaluate(`themedView.themedViewStartHistory("Home")`);
+    assert((await history()).entries.length === initial.entries.length, "initial route added a duplicate entry");
+    assert(await route() === "Home:0", "initial route was not shown");
+    assert(await page.evaluate(`(() => {
+        try { themedView.themedViewStartHistory("Duplicate"); return false; }
+        catch (error) { return error.message.includes("already installed"); }
+    })()`), "a second history router was installed");
+    await page.evaluate(`themedView.themedViewInstallBackHandler(); themedView.themedViewPushHistory("One"); themedView.themedViewPushHistory("Two")`);
+    assert((await history()).entries.length === initial.entries.length + 2, "each new route should add one entry");
+    assert(await page.evaluate("location.href") === url, "an app route changed the document URL");
+
+    await traverse(-1);
+    await waitForRoute("One:-1");
+    await traverse(1);
+    await waitForRoute("Two:1");
+    await traverse(-2);
+    await waitForRoute("Home:-2");
+    await traverse(-1);
+    await page.waitFor("history.state?.host === true && location.hash === ''", 5000);
+    assert(await route() === "Home:-2", "the host entry was routed into the app");
+    await traverse(1);
+    await page.waitFor("location.hash === '#app'", 5000);
+    await page.evaluate(`themedView.themedViewPushHistory("Branch")`);
+    const branch = await history();
+    assert(branch.currentIndex === branch.entries.length - 1, "new navigation retained the previous forward entries");
+    assert(branch.entries.length === initial.entries.length + 1, "new navigation should replace the forward branch");
+
+    await page.evaluate(`themedView.themedViewStopHistory(); globalThis.popped = false; window.addEventListener("popstate", () => { popped = true; }, {once: true})`);
+    await traverse(-1);
+    await page.waitFor("globalThis.popped", 5000);
+    assert(await route() === "Branch:0", "disposed router still received history changes");
+});
+
 // The native control of the native control host: the elements in the element of the view that lies over
 // its canvas, with the inline style the host gives them.
 const NATIVE_CONTROLS = `JSON.stringify(Array.from(document.querySelector("#out .ferroui-native-host").children).map((e) => ({

@@ -221,6 +221,12 @@ Decisions:
 | Accessibility | None. The canvas is opaque to assistive technology | Later, and not a port: it needs a design (an ARIA mirror tree built from automation peers). Keep the automation-peer layer platform-neutral so this stays possible |
 | Tray icon, window icon, z-order | Unsupported or stubbed | Stubs in Phase 1 |
 
+### Browser Back and Forward
+
+Opt in with `ferroui_browser::BrowserNavigationHistory::new(initial_route, on_traversed)` on the page's main thread. Keep the handle with the app's router and call `push(route)` when opening a new route. In the traversal callback, render the destination route directly. The callback receives the signed distance traveled in the app's history, including when the user jumps several entries at once. Navigating to a new route after Back clears the previous Forward entries.
+
+The browser holds route identifiers in `history.state` for this router instance, and the address bar keeps the document URL. The router takes ownership of the current entry's state when initialized. Entries outside its history follow normal browser navigation. Choose one history owner for the page. Apps using `BrowserNavigationHistory` opt out of the legacy `add_back_handler` bridge to `TopLevel::BackRequested`.
+
 ## 11. Layout, tooling and phases (question 9)
 
 ```
