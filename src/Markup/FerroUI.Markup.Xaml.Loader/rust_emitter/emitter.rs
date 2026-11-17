@@ -33,7 +33,8 @@ use crate::compiler_extensions::group_transformers::NewServiceProviderNode;
 use super::compiled_resources::CompiledDocumentBuildMethod;
 use crate::compiler_extensions::transformers::{
     ClassBindingSetter, ClassValueSetter, CombinatorSelectorType, EnsureCapacityNode, FerroNameScopeRegistrationXamlIlNode, FerroXamlIlWellKnownTypesExtensions,
-    HandleRootObjectScopeNode, InjectServiceProviderNode, OptionsMarkupExtensionMethod, ResourceAdderSetter, XamlIlAttachedPropertyEqualsSelector,
+    HandleRootObjectScopeNode, InjectServiceProviderNode, OptionsMarkupExtensionMethod, ResourceAdderSetter,
+    XamlIlAttachedPropertyEqualsSelector,
     XamlIlCombinatorSelector, XamlIlDirectCallPropertySetter, XamlIlNestingSelector, XamlIlNotSelector,
     XamlIlNthChildSelector, XamlIlNthChildSelectorType, XamlIlOrSelectorNode, XamlIlPropertyEqualsSelector,
     XamlDirectCallAddHandler, XamlIlSelectorInitialNode, XamlIlSelectorNode, XamlIlStringSelector, XamlIlStringSelectorType, XamlIlTypeSelector,

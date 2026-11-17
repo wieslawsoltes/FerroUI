@@ -346,7 +346,9 @@ if (ferro_harfbuzz_include != "") {
         return Ok(());
     }
     if source.matches(ORIGINAL).count() != 1 {
-        return Err(std::io::Error::other("Skia's HarfBuzz build has changed. Review the shared HarfBuzz configuration."));
+        return Err(std::io::Error::other(
+            "Skia's HarfBuzz build has changed. Review the shared HarfBuzz configuration.",
+        ));
     }
     std::fs::write(path, source.replace(ORIGINAL, PATCHED))
 }

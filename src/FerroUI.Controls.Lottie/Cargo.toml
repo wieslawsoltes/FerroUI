@@ -28,8 +28,13 @@ ferroui-skia = { workspace = true, optional = true }
 ferroui-markup-xaml = { workspace = true, optional = true }
 ferroui-system = { workspace = true, optional = true }
 futures-util = { workspace = true, optional = true }
-skia-safe = { workspace = true, optional = true, features = ["skottie"] }
 url = { workspace = true, optional = true }
+
+# Skottie builds Skia from source (docs/porting/lottie.md). Only the desktop targets the control
+# supports name it: on any other target the feature `skia` stops at the `compile_error!` of lib.rs
+# at once instead of starting a source build of Skia first.
+[target.'cfg(any(target_os = "macos", target_os = "windows", target_os = "linux"))'.dependencies]
+skia-safe = { workspace = true, optional = true, features = ["skottie"] }
 
 [build-dependencies]
 ferroui-build-scan.workspace = true

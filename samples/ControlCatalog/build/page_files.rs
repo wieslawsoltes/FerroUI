@@ -96,10 +96,14 @@ pub struct Plan {
 }
 
 /// The split of `assets` (rooted paths of the non-document assets, with
-/// their sizes) over the sources of the crate at `root`.
-pub fn plan(root: &Path, assets: &BTreeMap<String, u64>) -> Plan {
+/// their sizes) over the sources of the crate at `root`. The sources of
+/// `left_out` (paths relative to the crate directory, with `/`) are not
+/// compiled into this build: they are not scanned, and an entry of the page
+/// list that names one of them as its document is no page.
+pub fn plan(root: &Path, assets: &BTreeMap<String, u64>, left_out: &[&str]) -> Plan {
     let mut units = Vec::new();
     collect_units(root, root, &mut units);
+    units.retain(|unit| !left_out.contains(&unit.path.as_str()));
     units.sort_by(|a, b| a.path.cmp(&b.path));
     let index: HashMap<&str, usize> = units.iter().enumerate().map(|(i, unit)| (unit.path.as_str(), i)).collect();
 
@@ -168,7 +172,7 @@ pub fn plan(root: &Path, assets: &BTreeMap<String, u64>) -> Plan {
         }
         found
     };
-    let pages = page_list(&units, &index, &declared, &class_units);
+    let pages = page_list(&units, &index, &declared, &class_units, left_out);
     let page_roots: HashSet<usize> = pages.iter().flat_map(|page| page.roots.iter().copied()).collect();
     let mut startup_roots = Vec::new();
     for document in STARTUP_DOCUMENTS {
@@ -541,6 +545,7 @@ fn page_list(
     index: &HashMap<&str, usize>,
     declared: &HashMap<String, Vec<usize>>,
     class_units: &dyn Fn(usize) -> Vec<usize>,
+    left_out: &[&str],
 ) -> Vec<Page> {
     let list = &units[*index.get(PAGE_LIST).unwrap_or_else(|| panic!("the page list {PAGE_LIST} does not exist"))].text;
     let mut pages: Vec<Page> = Vec::new();
@@ -557,6 +562,9 @@ fn page_list(
                 let literals = string_literals(arguments, 2);
                 let [document, header] = literals.as_slice() else { panic!("{PAGE_LIST}: an entry without a document and a header") };
                 let path = document.trim_start_matches('/');
+                if left_out.contains(&path) {
+                    continue;
+                }
                 let unit = *index.get(path).unwrap_or_else(|| panic!("{PAGE_LIST}: the document {document} does not exist"));
                 Page { header: header.clone(), roots: class_units(unit) }
             }

@@ -306,9 +306,14 @@ fn main() {
     if env::var_os("CARGO_FEATURE_CLASSIC_THEMES").is_none() {
         assets.retain(|(path, _)| path != CLASSIC_THEMES_DOCUMENT);
     }
-    if env::var_os("CARGO_FEATURE_LOTTIE").is_none() {
+    // The page Lottie and its animations are part of the catalog with the feature `lottie` only
+    // (docs/porting/lottie.md): without it they are neither compiled nor embedded, and the split of
+    // the asset files does not scan the sources of the page.
+    let lottie = env::var_os("CARGO_FEATURE_LOTTIE").is_some();
+    if !lottie {
         assets.retain(|(path, _)| path != "/Pages/LottiePage.xaml" && !path.starts_with("/Assets/Lottie/"));
     }
+    let left_out: &[&str] = if lottie { &[] } else { &["Pages/LottiePage.xaml", "Pages/lottie_page.rs"] };
 
     // The application the tests of a document start: `<file> | <application>` per line.
     let test_applications_path = root.join(TEST_APPLICATION_LIST);
@@ -362,7 +367,7 @@ fn main() {
             (asset_path.clone(), size)
         })
         .collect();
-    let plan = page_files::plan(&root, &sizes);
+    let plan = page_files::plan(&root, &sizes, left_out);
 
     let separate_assets = env::var_os("CARGO_FEATURE_SEPARATE_ASSETS").is_some();
     let site = out_dir.join("browser-site");
