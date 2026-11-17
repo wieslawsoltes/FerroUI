@@ -24,7 +24,11 @@ pub struct BrowserNavigationHistory {
 
 impl BrowserNavigationHistory {
     /// Stores `initial_route` in the current browser entry, taking ownership of its
-    /// `history.state`. Render the initial route separately. On a browser traversal,
+    /// `history.state`. When that entry already holds a route of this page (the page
+    /// was reloaded on it, or a router was dropped and created again), the app history
+    /// goes on from it: Back and Forward still reach the routes around it, and
+    /// `initial_route` replaces the route of the current entry. Render the initial
+    /// route separately. On a browser traversal,
     /// `on_traversed` receives the destination route and the change in app history
     /// position. A negative change means Back and a positive change means Forward.
     /// The browser has already moved to the destination when the callback runs.

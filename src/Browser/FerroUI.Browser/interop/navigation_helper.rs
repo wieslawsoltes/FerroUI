@@ -11,7 +11,9 @@ extern "C" {
     ///
     /// The original passes the callback as a function; here the page calls
     /// the export.
-    /// Has no effect if a [`BrowserNavigationHistory`] is active.
+    ///
+    /// It is installed once: a second call, or a call while a
+    /// [`BrowserNavigationHistory`] is active, has no effect.
     #[wasm_bindgen(js_namespace = NavigationHelper, js_name = addBackHandler)]
     pub fn add_back_handler();
 
@@ -39,6 +41,9 @@ pub fn on_back_requested() -> bool {
         .is_some_and(|manager| manager.on_back_requested())
 }
 
+/// The browser moved to an entry of the app history of a
+/// [`BrowserNavigationHistory`]: `route` is the route of that entry, and `delta`
+/// the change of the position in the app history (negative for Back).
 #[wasm_bindgen(js_name = NavigationHelper_OnHistoryTraversed)]
 pub fn on_history_traversed(route: &str, delta: i32) {
     BrowserNavigationHistory::on_traversed(route, delta);

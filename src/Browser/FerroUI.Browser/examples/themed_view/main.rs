@@ -435,7 +435,10 @@ pub fn themed_view_start_history(route: &str) -> Result<(), JsValue> {
 
 #[wasm_bindgen(js_name = themedViewPushHistory)]
 pub fn themed_view_push_history(route: &str) -> Result<(), JsValue> {
-    HISTORY.with(|slot| slot.borrow().as_ref().expect("history is active").push(route))?;
+    HISTORY.with(|slot| match slot.borrow().as_ref() {
+        Some(history) => history.push(route),
+        None => Err(JsValue::from_str("the browser history of the view is not started")),
+    })?;
     show_history_route(route, 0);
     Ok(())
 }

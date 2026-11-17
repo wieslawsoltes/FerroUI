@@ -619,7 +619,10 @@ check("the back navigation of the browser is a back request of the view", async 
     assert((await page.services()).back_requests === "2", `the second back navigation was reported as ${(await page.services()).back_requests}`);
 });
 
-check("browser history restores app routes in both directions", async (page) => {
+// The app history of the view (BrowserNavigationHistory): the session history of the page as the
+// browser has it, the route the view shows with the change of position it was reached by, and a
+// traversal of the history by `offset` entries, as the Back and Forward buttons of the browser do.
+const appHistory = (page) => {
     const history = () => page.send("Page.getNavigationHistory");
     const route = () => page.evaluate("themedView.themedViewHistoryState()");
     const waitForRoute = (expected) => page.waitFor(`themedView.themedViewHistoryState() === ${JSON.stringify(expected)}`, 5000);
@@ -634,6 +637,11 @@ check("browser history restores app routes in both directions", async (page) => 
         }
         throw new Error(`history did not move by ${offset}`);
     };
+    return { history, route, waitForRoute, traverse };
+};
+
+check("browser history restores app routes in both directions", async (page) => {
+    const { history, route, waitForRoute, traverse } = appHistory(page);
 
     await page.evaluate(`history.replaceState({host: true}, ""); history.pushState(null, "", "#app"); true`);
     const initial = await history();
@@ -669,6 +677,32 @@ check("browser history restores app routes in both directions", async (page) => 
     await traverse(-1);
     await page.waitFor("globalThis.popped", 5000);
     assert(await route() === "Branch:0", "disposed router still received history changes");
+    // The back handler installed while the router was active was not installed.
+    assert((await page.services()).back_requests === "0", `the history was reported as back requests: ${(await page.services()).back_requests}`);
+});
+
+check("browser history goes on from the current entry after a reload", async (page) => {
+    const { history, route, waitForRoute, traverse } = appHistory(page);
+
+    await page.evaluate(`themedView.themedViewStartHistory("Home"); themedView.themedViewPushHistory("One"); themedView.themedViewPushHistory("Two"); true`);
+    const before = await history();
+    const origin = await page.evaluate("performance.timeOrigin");
+    await page.send("Page.reload");
+    await page.waitFor(`performance.timeOrigin !== ${origin} && globalThis.themedView !== undefined`);
+    await page.waitForView();
+    const after = await history();
+    assert(after.entries.length === before.entries.length && after.currentIndex === before.currentIndex, "the reload changed the history");
+
+    // The new router takes the place of the route of the current entry and keeps the routes before it.
+    await page.evaluate(`themedView.themedViewStartHistory("Restarted")`);
+    assert(await route() === "Restarted:0", "the initial route was not shown after the reload");
+    assert((await history()).entries.length === before.entries.length, "the router added an entry after the reload");
+    await traverse(-1);
+    await waitForRoute("One:-1");
+    await traverse(-1);
+    await waitForRoute("Home:-1");
+    await traverse(2);
+    await waitForRoute("Restarted:2");
 });
 
 // The native control of the native control host: the elements in the element of the view that lies over
