@@ -125,7 +125,7 @@ FRAMES_BINARY = "frame-benchmarks"
 FRAMEWORK_PACKAGE = "ferroui-benchmarks"
 FRAMEWORK_CRATE = Path("tests/FerroUI.Benchmarks")
 FRAMEWORK_FILTER = (
-    "trees::,layout_subsystem::,styling_subsystem::,property_subsystem::,"
+    "trees::,layout_subsystem::,styling_subsystem::,property_subsystem::,declarative::,"
     "layout::ElementConstructionBenchmark,"
     "text::TextBlockConstraintBenchmark,text::TextBlockChangingTextBenchmark,"
     "text::BidiScalingBenchmark"
