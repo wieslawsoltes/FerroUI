@@ -1057,7 +1057,14 @@ impl IRenderer for CompositingRenderer {
             self.sets.borrow_mut().remove(VisualSet::PropertiesDirty, visual);
             return;
         }
-        self.sets.borrow_mut().add(VisualSet::PropertiesDirty, visual);
+        {
+            // A visual whose drawing is recorded again in the pass has its properties
+            // synchronized there, and the pass leaves it out of this set: it is not put in.
+            let mut sets = self.sets.borrow_mut();
+            if !sets.contains(VisualSet::Dirty, visual) {
+                sets.add(VisualSet::PropertiesDirty, visual);
+            }
+        }
         self.queue_update();
     }
 
