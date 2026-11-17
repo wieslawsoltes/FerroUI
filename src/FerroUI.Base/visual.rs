@@ -1111,9 +1111,14 @@ impl Visual {
                     }
                     // A new size is a new drawing for most visuals. One whose drawing does not
                     // read its size draws what it drew: its size, and with it the clip to its
-                    // bounds, reaches the compositor as a property (section 9.87).
-                    let redraws =
-                        resized && old.is_none_or(|old| visual.resize_changes_drawing(old.size(), new.size()));
+                    // bounds, reaches the compositor as a property (section 9.87). A visual that
+                    // had no size is not asked: it gets its first one (every element of a tree
+                    // that is laid out for the first time), and is drawn.
+                    let redraws = resized
+                        && old.is_none_or(|old| {
+                            let old = old.size();
+                            old.width == 0.0 || old.height == 0.0 || visual.resize_changes_drawing(old, new.size())
+                        });
                     if redraws {
                         visual.invalidate_visual();
                     } else {
