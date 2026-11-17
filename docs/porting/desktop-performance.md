@@ -6991,3 +6991,59 @@ longer makes the stack measure at every width of a window that is resized.
 each out at every quarter of a pixel around a width and compares it with a tree made for
 that width (one box is lower than a line of text: its texts are cut and hold nothing).
 `layout/measure_hold.rs`: `an_axis_cut_to_the_available_size_holds_at_that_size`.
+
+### 9.87 A text block that is only resized is not drawn again
+
+**What was counted.** After section 9.86 recording for the render thread is the largest part
+of the UI thread of the declarative gauntlet (a third of its busy time). A count of the
+drawings that come out the same as the one before, by class: 880 text blocks a frame were
+invalidated, recorded again and drew what they had drawn. They are the texts of the cards:
+the width of the screen changes every frame, each block is arranged as wide as its column,
+and a visual whose size changes is drawn again (section 9.13 took the position out of that
+rule, not the size). A text block draws its layout from its padding; as long as it keeps the
+layout, a new width draws the same glyphs at the same places.
+
+**The change.**
+
+- `Visual` has a member a class can override, `resize_changes_drawing(old, new)`: whether a
+  change of size alone changes what `render` draws. The default is that it does. When a
+  class says it does not, a resize marks the visual for its composition properties and not
+  for its drawing: the new size, and with it the clip to the bounds, reaches the compositor
+  as the offset does (section 9.13), and nothing is recorded.
+- `TextBlock` says so when it has no background, no inlines, and is as tall as its text
+  before and after (below that height the vertical alignment moves the text). The classes
+  derived from it draw more than the text and keep the default.
+- A new layout is a new drawing whether the size changes or not, so `measure_override` and
+  `arrange_override` of the text block invalidate the visual where they make one. Before,
+  a block whose layout was made again at the same size was drawn again only because
+  something else had invalidated it.
+
+**Measured** (the declarative gauntlet of the comparison, tier 16; the counts from a build
+with counters, the rates from its harness, three starts each, the median, against the branch
+below):
+
+| | Before | After |
+| --- | ---: | ---: |
+| Text blocks drawn a frame | 1,708 | 836 |
+| Visuals recorded a frame | 5,695 | 4,812 |
+| of them, drawings that came out the same | 1,316 | 441 |
+| Second start: frames a second over the run | 49.3 | 50.7 |
+| First start: frames a second over the run | 45.1 | 46.9 |
+| Second start: CPU a frame | 51.6 ms | 50.4 ms |
+
+No pixel differs between a frame of the two builds (gauntlet tier 5 and patchwork tier 5,
+frame 120, taken twice each).
+
+**Left out: an assignment of the value a property has** (the first part of experiment
+#761). The setters of the animated properties of a composition visual send the property
+again when it is assigned the value it has, to stop an animation; that would be wasted for
+a visual that never had one. Counted in the same program: 760 assignments a frame, none of
+them of the value the property had (section 9.59 stops them before the setter). There is
+nothing to drop, and the change was not made.
+
+**Tests.** `text_block_tests.rs`:
+`a_text_block_that_is_resized_and_keeps_its_layout_is_not_drawn_again` (a renderer that
+keeps how each visual was marked: a plain and a wrapped block resized within their layout
+get their properties alone; a block with a background, a block whose layout is made again
+and a block lower than its text are drawn again).
+

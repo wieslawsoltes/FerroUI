@@ -1844,3 +1844,119 @@ fn a_layout_made_of_more_than_a_plain_text_is_not_shared() {
     selectable.measure(Size::new(200.0, 100.0));
     assert!(!selectable.text_layout().is_shared());
 }
+
+/// A renderer that keeps how each visual was marked: drawn again, or its properties alone.
+#[derive(Default)]
+struct MarkingRenderer {
+    drawn_again: std::cell::RefCell<Vec<usize>>,
+    properties: std::cell::RefCell<Vec<usize>>,
+}
+
+impl MarkingRenderer {
+    fn key(visual: &Visual) -> usize {
+        visual as *const Visual as usize
+    }
+
+    /// How often `visual` was marked to be drawn again, and for its properties alone, since
+    /// the last call.
+    fn take(&self, visual: &Visual) -> (usize, usize) {
+        let key = Self::key(visual);
+        let count = |marks: &std::cell::RefCell<Vec<usize>>| {
+            let mut marks = marks.borrow_mut();
+            let before = marks.len();
+            marks.retain(|mark| *mark != key);
+            before - marks.len()
+        };
+        (count(&self.drawn_again), count(&self.properties))
+    }
+}
+
+impl ferroui_base::rendering::IRenderer for MarkingRenderer {
+    fn diagnostics(&self) -> Rc<ferroui_base::rendering::RendererDiagnostics> {
+        ferroui_base::rendering::RendererDiagnostics::new()
+    }
+    fn scene_invalidated(
+        &self,
+        _handler: Rc<dyn Fn(&ferroui_base::rendering::SceneInvalidatedEventArgs)>,
+    ) -> Rc<dyn ferroui_base::reactive::IDisposable> {
+        ferroui_base::reactive::Disposable::empty()
+    }
+    fn try_get_render_interface_feature(
+        &self,
+        _feature_type: std::any::TypeId,
+    ) -> ferroui_base::rendering::composition::LocalFuture<
+        Option<ferroui_base::rendering::composition::RenderInterfaceFeature>,
+    > {
+        Box::pin(std::future::ready(None))
+    }
+    fn add_dirty(&self, visual: &Visual) {
+        self.drawn_again.borrow_mut().push(Self::key(visual));
+    }
+    fn add_dirty_for_layout(&self, _visual: &Visual) {}
+    fn add_dirty_properties(&self, visual: &Visual) {
+        self.properties.borrow_mut().push(Self::key(visual));
+    }
+    fn recalculate_children(&self, _visual: &Visual) {}
+    fn resized(&self, _size: Size) {}
+    fn paint(&self, _rect: Rect) {}
+    fn start(&self) {}
+    fn stop(&self) {}
+    fn dispose(&self) {}
+}
+
+/// Section 9.87: a text block that is given another size and keeps its layout is not drawn
+/// again; one that has a background, that is lower than its text, or that gets a new layout is.
+#[test]
+fn a_text_block_that_is_resized_and_keeps_its_layout_is_not_drawn_again() {
+    let _scope = test_scope();
+    let block = text_block("Hello World");
+    let filled = text_block("Hello World");
+    filled.set_background(Some(Brushes::white()));
+    let wrapped = text_block("Hello World, and some more words to wrap");
+    wrapped.set_text_wrapping(TextWrapping::Wrap);
+    let stack = StackPanel::new();
+    for child in [&block, &filled, &wrapped] {
+        stack.children().add(child);
+    }
+    let host = Border::new();
+    host.set_child(&stack);
+    let root = TestRoot::with_child(&host);
+    let renderer = Rc::new(MarkingRenderer::default());
+    root.set_renderer(renderer.clone());
+    host.set_width(400.0);
+    root.execute_initial_layout_pass();
+    let layout = |width: f64| {
+        host.set_width(width);
+        root.layout_manager().execute_layout_pass();
+    };
+    assert_eq!(block.bounds().width, 400.0);
+    for child in [&block, &filled, &wrapped] {
+        renderer.take(child);
+    }
+    let layout_of = |child: &Ref<TextBlock>| child.text_layout();
+    let (block_layout, wrapped_layout) = (layout_of(&block), layout_of(&wrapped));
+
+    // Narrower, and every text still fits its line: the blocks are as wide as the stack.
+    layout(360.0);
+    assert_eq!(block.bounds().width, 360.0);
+    assert!(Rc::ptr_eq(&block_layout, &layout_of(&block)));
+    assert_eq!(renderer.take(&block), (0, 1), "a new size alone: its properties, not its drawing");
+    assert_eq!(renderer.take(&filled).0, 1, "a background is as large as the block");
+    assert!(Rc::ptr_eq(&wrapped_layout, &layout_of(&wrapped)));
+    assert_eq!(renderer.take(&wrapped), (0, 1));
+
+    // Narrow enough for the wrapped text to break another way: a new layout is a new drawing.
+    layout(120.0);
+    assert!(!Rc::ptr_eq(&wrapped_layout, &layout_of(&wrapped)));
+    assert!(renderer.take(&wrapped).0 >= 1);
+    assert_eq!(renderer.take(&block), (0, 1));
+
+    // Lower than its text, the vertical alignment moves the text: drawn again.
+    block.set_vertical_alignment(VerticalAlignment::Center);
+    renderer.take(&block);
+    block.set_height(6.0);
+    root.layout_manager().execute_layout_pass();
+    assert!(block.bounds().height < block.text_layout().height());
+    assert!(renderer.take(&block).0 >= 1);
+}
+
