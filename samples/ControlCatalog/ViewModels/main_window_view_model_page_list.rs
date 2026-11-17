@@ -153,6 +153,8 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             // Not from upstream: SymbolIcon and FontIcon of WinUI (docs/porting/winui-controls.md) and PathIcon.
             s.add("/Pages/IconElementPage.xaml", "IconElement", Icons::SPARKLE, "Symbol, font and path icons");
             s.add("/Pages/ImagePage.xaml", "Image", Icons::IMAGE, "Display bitmaps with different stretch modes");
+            #[cfg(feature = "lottie")]
+            s.add("/Pages/LottiePage.xaml", "Lottie", Icons::MEDIA, "Play and scrub vector animations");
             // Not from upstream: the pages of the port of the inking controls of WinUI.
             s.add("/Pages/InkCanvasPage.xaml", "InkCanvas", Icons::CANVAS, "Pressure-sensitive ink from pen, mouse and touch");
             s.add("/Pages/InkToolbarPage.xaml", "InkToolbar", Icons::BRUSH, "Pens, eraser and stencil guides for an InkCanvas");

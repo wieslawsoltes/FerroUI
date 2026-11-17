@@ -1,0 +1,41 @@
+[package]
+name = "ferroui-controls-lottie"
+description = "Lottie animation playback and Skia composition controls for FerroUI"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+build = "build.rs"
+links = "ferroui_controls_lottie_xaml"
+
+[lib]
+path = "lib.rs"
+
+[features]
+skia = ["dep:ferroui-skia", "dep:skia-safe", "dep:futures-util", "dep:ferroui-markup-xaml", "dep:url", "dep:ferroui-system"]
+markup-functions = ["ferroui-base/markup-functions"]
+compiler-metadata = ["markup-functions", "ferroui-base/compiler-metadata"]
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-skia = { workspace = true, optional = true }
+ferroui-markup-xaml = { workspace = true, optional = true }
+ferroui-system = { workspace = true, optional = true }
+futures-util = { workspace = true, optional = true }
+skia-safe = { workspace = true, optional = true, features = ["skottie"] }
+url = { workspace = true, optional = true }
+
+[build-dependencies]
+ferroui-build-scan.workspace = true
+
+[target.'cfg(target_os = "macos")'.dev-dependencies]
+ferroui-metal = { workspace = true, features = ["offscreen"] }
+
+[package.metadata.release]
+group = "controls"

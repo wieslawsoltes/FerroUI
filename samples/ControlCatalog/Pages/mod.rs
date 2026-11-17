@@ -50,6 +50,8 @@ mod ferro_board_page;
 mod headered_content_page;
 mod home_page;
 mod image_page;
+#[cfg(feature = "lottie")]
+mod lottie_page;
 mod ink_canvas_page;
 mod ink_toolbar_page;
 mod icon_element_page;
@@ -210,6 +212,8 @@ pub use gestures::{GesturePinchRotationPage, GesturePinchZoomPage, GesturePullPa
 pub use headered_content_page::HeaderedContentPage;
 pub use home_page::HomePage;
 pub use image_page::ImagePage;
+#[cfg(feature = "lottie")]
+pub use lottie_page::LottiePage;
 pub use ink_canvas_page::InkCanvasPage;
 pub use ink_toolbar_page::InkToolbarPage;
 pub use icon_element_page::IconElementPage;
@@ -393,6 +397,8 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     HeaderedContentPage::TYPE,
     HomePage::TYPE,
     ImagePage::TYPE,
+    #[cfg(feature = "lottie")]
+    LottiePage::TYPE,
     LabelsPage::TYPE,
     LayoutTransformControlPage::TYPE,
     ListBoxPage::TYPE,
@@ -500,6 +506,8 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &HeaderedContentPage::XAML_CLASS,
     &HomePage::XAML_CLASS,
     &ImagePage::XAML_CLASS,
+    #[cfg(feature = "lottie")]
+    &LottiePage::XAML_CLASS,
     &LabelsPage::XAML_CLASS,
     &LayoutTransformControlPage::XAML_CLASS,
     &ListBoxPage::XAML_CLASS,

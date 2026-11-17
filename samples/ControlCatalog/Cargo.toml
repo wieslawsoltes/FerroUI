@@ -20,6 +20,7 @@ path = "lib.rs"
 
 [features]
 default = []
+lottie = ["dep:ferroui-controls-lottie", "ferroui-controls-lottie/skia", "ferroui-controls-lottie/markup-functions"]
 # The assets other than the markup documents are not embedded in the binary: the build script
 # copies them as plain files, with a list of the files each page needs, for the host to fetch and
 # register (see build.rs). For the browser, where the WebAssembly module is downloaded and has a
@@ -88,6 +89,7 @@ custom-effects = { path = "../CustomEffects", default-features = false }
 ferroui-controls-repeater = { workspace = true }
 # The inking controls and their WinUI styles (the page Inking, not in the original).
 ferroui-controls-inking = { workspace = true }
+ferroui-controls-lottie = { workspace = true, optional = true }
 # The Cartesian, pie, polar, Sankey and treemap charts and the geographic map of the LiveCharts2
 # port (the pages CartesianChart, PieChart, PolarChart, SankeyChart, TreemapChart and GeoMap, not
 # in the original).

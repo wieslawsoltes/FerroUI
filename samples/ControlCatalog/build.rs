@@ -306,6 +306,9 @@ fn main() {
     if env::var_os("CARGO_FEATURE_CLASSIC_THEMES").is_none() {
         assets.retain(|(path, _)| path != CLASSIC_THEMES_DOCUMENT);
     }
+    if env::var_os("CARGO_FEATURE_LOTTIE").is_none() {
+        assets.retain(|(path, _)| path != "/Pages/LottiePage.xaml" && !path.starts_with("/Assets/Lottie/"));
+    }
 
     // The application the tests of a document start: `<file> | <application>` per line.
     let test_applications_path = root.join(TEST_APPLICATION_LIST);

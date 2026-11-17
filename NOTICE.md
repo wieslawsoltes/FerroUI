@@ -35,6 +35,12 @@ SOFTWARE.
 
 Avalonia itself incorporates code from other projects (for example WPF-derived layout and text code under the MIT license from the .NET Foundation, and Chromium-derived snippets in the native macOS backend); those notices are carried in the upstream `NOTICE.md` and, where the corresponding code is ported or imported here, in the component-level notices.
 
+## Lottie
+
+- Project: <https://github.com/wieslawsoltes/Lottie> (commit `94523554a96cbbc0a4282ef4564b32fe84c667e5`)
+- License: MIT, Copyright (c) Wiesław Šoltés
+- Used for: the player and the composition animation control in `src/FerroUI.Controls.Lottie`. See the component's `NOTICE.md` for the license text.
+
 ## XamlX
 
 - Project: <https://github.com/kekekeks/XamlX>

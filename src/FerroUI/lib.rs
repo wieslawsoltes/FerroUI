@@ -173,6 +173,8 @@ pub use ferroui_controls_color_picker as controls_color_picker;
 pub use ferroui_controls_charts as controls_charts;
 #[cfg(feature = "inking")]
 pub use ferroui_controls_inking as controls_inking;
+#[cfg(feature = "lottie")]
+pub use ferroui_controls_lottie as controls_lottie;
 #[cfg(feature = "repeater")]
 pub use ferroui_controls_repeater as controls_repeater;
 #[cfg(feature = "pretext")]

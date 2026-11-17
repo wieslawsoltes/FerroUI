@@ -1,0 +1,57 @@
+<ContentPage xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:lottie="https://ferroui.dev/lottie"
+             x:Class="ControlCatalog.Pages.LottiePage"
+             Header="Lottie"
+             Theme="{StaticResource ScrollPage}">
+  <StackPanel Spacing="16" Margin="24" MaxWidth="720">
+    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+      <ComboBox x:Name="Animation" PlaceholderText="Animation" SelectedIndex="0" HorizontalAlignment="Stretch"
+                AutomationProperties.Name="Animation" SelectionChanged="OnAnimationChanged">
+        <ComboBoxItem>Orbit</ComboBoxItem>
+        <ComboBoxItem>Signal</ComboBoxItem>
+      </ComboBox>
+      <ComboBox x:Name="Fit" Grid.Column="1" SelectedIndex="0" HorizontalAlignment="Stretch"
+                AutomationProperties.Name="Animation stretch" SelectionChanged="OnStretchChanged">
+        <ComboBoxItem>Fit</ComboBoxItem>
+        <ComboBoxItem>Fill</ComboBoxItem>
+        <ComboBoxItem>Crop to fill</ComboBoxItem>
+        <ComboBoxItem>Original size</ComboBoxItem>
+      </ComboBox>
+      <ComboBox x:Name="Repeats" Grid.Column="2" SelectedIndex="0" HorizontalAlignment="Stretch"
+                AutomationProperties.Name="Repeat count" SelectionChanged="OnRepeatChanged">
+        <ComboBoxItem>Repeat forever</ComboBoxItem>
+        <ComboBoxItem>Play once</ComboBoxItem>
+        <ComboBoxItem>Play twice</ComboBoxItem>
+      </ComboBox>
+    </Grid>
+
+    <Border Height="280" CornerRadius="8" ClipToBounds="True"
+            Background="{DynamicResource ControlFillColorSecondaryBrush}">
+      <lottie:Lottie x:Name="Player" Path="../Assets/Lottie/Orbit.json" PlaybackRate="{Binding #Rate.Value}" />
+    </Border>
+    <TextBlock Text="{Binding #Player.Status}" TextWrapping="Wrap" />
+
+    <WrapPanel ItemSpacing="8" LineSpacing="8">
+      <Button Click="OnPlay">Play</Button>
+      <Button Click="OnPause">Pause</Button>
+      <Button Click="OnResume">Resume</Button>
+      <Button Click="OnStop">Stop</Button>
+    </WrapPanel>
+
+    <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="8">
+      <TextBlock Text="Position" VerticalAlignment="Center" />
+      <Slider x:Name="PositionSlider" Grid.Column="1" Minimum="0"
+              Maximum="{Binding #Player.DurationSeconds}"
+              Value="{Binding #Player.PositionSeconds, Mode=TwoWay}"
+              AutomationProperties.Name="Playback position" />
+      <TextBlock Grid.Column="2" VerticalAlignment="Center"
+                 Text="{Binding #Player.PositionSeconds, StringFormat=\{0:0.0\} s}" />
+      <TextBlock Grid.Row="1" Text="Speed" VerticalAlignment="Center" />
+      <Slider x:Name="Rate" Grid.Row="1" Grid.Column="1" Minimum="0.25" Maximum="3" Value="1"
+              AutomationProperties.Name="Playback speed" />
+      <TextBlock Grid.Row="1" Grid.Column="2" VerticalAlignment="Center"
+                 Text="{Binding #Rate.Value, StringFormat=\{0:0.0\}×}" />
+    </Grid>
+  </StackPanel>
+</ContentPage>
