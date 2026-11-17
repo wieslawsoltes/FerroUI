@@ -770,6 +770,23 @@ Each of the three fails the gate. A benchmark that took less time with the instr
 base is `faster (time alone)`: a quieter round, or memory and code that lie better, and not
 less work.
 
+The frame scenes are counted as well (#783). A scene prints the instructions of a frame
+(`instructions_per_frame` in its `GATE` line: those the process retired over the measured
+frames, of every thread, read as the harness of the benchmarks reads them), and the gate
+judges the three times of a frame of the scene with them, so a scene whose UI thread took
+longer for the same work says `time alone`, and one that does more work says so at 2 %. The
+count is the steadier of the two by far: five runs of one build gave `frames/text` 97.62 to
+97.89 million instructions a frame (0.3 %) and 4.13 to 4.66 ms on the UI thread (13 %),
+`frames/reorder` 40.08 to 40.15 million (0.2 %) and 1.76 to 1.93 ms, `frames/wall` 21.904 to
+21.906 million, `frames/items` 157.4 to 158.0 million (0.4 %). A base whose frame scenes do
+not count is judged by its times alone, as before (`--copy-gate` gives it the scenes of the
+candidate). What the counts are for: one round of the main branch against itself with other
+benchmark code (two builds of the same framework) had nine lines of the frame scenes over
+their tolerance in time, by 7 to 43 % (`frames/reorder ui_ms_per_frame` 1.467 and 1.869 ms,
+`frames/text` 3.656 and 4.139 ms, `frames/width` 0.358 and 0.414 ms), every one of them
+within 0.2 % in instructions. The time of a scene differs from build to build by more than
+its tolerance; its instructions do not, and a line now says which of the two moved.
+
 Scaling pairs. A benchmark compared at one size cannot tell a cost that is linear at that size
 and quadratic above it. The benchmarks of `trees::Scaling` (the start of a wall of tiles, its
 attachment, its detachment, the clearing of a canvas, the removal of every second child, a class
