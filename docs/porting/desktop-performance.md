@@ -7204,6 +7204,31 @@ tier 5; wall tier 8; chat), the two that are redrawn most taken three times on e
 (A frame taken right after a program is built can differ from every other frame of the same
 program: it is taken again.)
 
+**What the question costs, and what the gate found.** The whole gate on the stack stopped
+after its first round: a resize of a thousand borders took 2.9 and 4.1 % more instructions
+(`layout_subsystem::SizeChange.stretch_stack` and `star_grid`), the first layout of two
+thousand tiles 2.2 % (`trees::Lifetime.lay_out`) and a forced layout of the rows of a
+TreeDataGrid 2.2 %. A layout benchmark records nothing, so it shows the question and not
+what the answer saves; the question was made cheap where it is asked:
+
+- A visual that had no size is not asked: it gets its first size (every element of a tree
+  that is laid out for the first time) and is drawn, as before.
+- `Panel`, `ContentPresenter` and `TextBlock` look at their brush where it is
+  (`with_value`) and do not take a reference to it.
+- `Border` keeps its answer with the values it keeps for layout (section 9.28), and the
+  read of those values from the value store is a function of its own, out of line. It was
+  part of every reader before: a reader that found the values kept still carried the six
+  reads of the store. That was 42 of the 65 instructions the question cost a border, and
+  it was in every measure and arrange of a border on the main branch as well.
+  `Visual::composition_styled_inputs`, the other group of kept values that is read from
+  several properties, reads them out of line too; the kept values that are one property
+  (`Decorator::padding`, the sizes of a grid definition, `Visual::is_visible`) are left.
+
+Against the main branch after that (two rounds, instructions): the forced layout of the
+TreeDataGrid -0.15 %, `trees::Lifetime.lay_out` +1.1 %, and the resize of a thousand
+borders +0.7 % against the bottom of the stack, of which the question is a virtual call
+and a comparison of two generations.
+
 **Tests.** `panel_tests.rs`:
 `a_visual_that_draws_nothing_of_its_size_is_not_drawn_again_when_it_is_resized` (a renderer
 that keeps how each visual was marked; of a panel with and without a background, a border

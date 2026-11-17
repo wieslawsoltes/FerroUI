@@ -1065,7 +1065,15 @@ impl Visual {
     /// The styled values [`Self::synchronize_composition_properties`] reads, kept while the value
     /// store of the visual is unchanged (none of the properties inherits).
     fn composition_styled_inputs(&self) -> CompositionStyledInputs {
-        self.hot_composition_inputs.get(self.values().value_generation(), || CompositionStyledInputs {
+        self.hot_composition_inputs.get(self.values().value_generation(), || self.read_composition_styled_inputs())
+    }
+
+    /// The values `composition_styled_inputs` keeps, read from the value store. Out of line: a
+    /// reader finds the kept values, and carries only the comparison of the generations.
+    #[cold]
+    #[inline(never)]
+    fn read_composition_styled_inputs(&self) -> CompositionStyledInputs {
+        CompositionStyledInputs {
             opacity: self.opacity() as f32,
             clip_to_bounds: self.clip_to_bounds(),
             has_clip: self.clip().is_some(),
@@ -1073,7 +1081,7 @@ impl Visual {
             has_cache_mode: self.cache_mode().is_some(),
             has_effect: self.effect().is_some(),
             has_render_transform: self.render_transform().is_some(),
-        })
+        }
     }
 
     fn static_constructor() {
