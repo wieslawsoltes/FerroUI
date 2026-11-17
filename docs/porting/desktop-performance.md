@@ -7600,3 +7600,38 @@ back, and after three thousand frames the layer asks once in five hundred),
 number of bands shows what the layer draws; a layer has no more bands than its context has
 threads.
 
+### 9.93 Tried and left out: the rounding step in the hold of a star column, and what the measures of the gauntlet are
+
+Experiment #802. The hold of a cell in a star column of a grid maps back to the widths of
+the grid less a margin on each side, and under layout rounding the margin had a rounding
+step in it (section 9.57). At the sizes of the gauntlet at tier 16, where a wrapped title
+holds a pixel or two of width, two steps are all of the hold, and the hypothesis was that
+about a thousand of the 2,400 measures of a frame are cards that could have held.
+
+**The step is not needed.** A measure gives a cell of a star column its share as it is; the
+columns are rounded when they are arranged, which a hold says nothing about. Without the
+step the two sweeps of `measure_hold_tests.rs` pass as before (a tree laid out again inside
+its holds is the tree made for that width: eleven shapes of grids, the layout rounded and
+not, every quarter of a pixel), and so does a sweep of narrow trees at every sixteenth. The
+change is on the branch `perf/grid-hold-under-rounding`.
+
+**It is not what costs the measures.** The declarative gauntlet runs 2,402 measures a frame
+on the main branch and 2,401 with the exact hold. The measures are not elements that were
+offered a size outside their hold: they are invalidated. A frame invalidates 2,054
+measures, counted by class and by what invalidated them:
+
+| Class | A frame | By |
+| --- | ---: | --- |
+| `TextBlock` | 758 | itself: its text changes |
+| `Border` | 399 | itself: a size set by an effect |
+| `Grid` | 264 | itself: the column definitions of a progress bar replaced (#803) |
+| `Polyline` | 259 | itself: the points of a sparkline replaced |
+| `Polygon` | 259 | itself: the points of a sparkline replaced |
+| `Canvas` | 88 | a child whose desired size changed |
+| Others | 27 | |
+
+A card holds nothing because what is in it changes, not because its hold is too narrow. The
+change is left out (section 8.4, rule 6): it does not improve what it was made for. What is
+left to win in the measures of this scene is in the grids whose definitions are replaced
+every frame and in the shapes that are measured again for every change of their points.
+
