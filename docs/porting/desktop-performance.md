@@ -989,6 +989,83 @@ These hold for every change that is made for speed, memory or size.
 7. **The gate.** A narrow change gets a gate of the suites that run it; the whole gate runs on
    the last part of a stack of changes, before the stack lands (section 8.1).
 
+### 8.5 The goal: a smooth 60 frames a second in the scenes of the comparison
+
+The goal (#807) is that the FerroUI program of the framework comparison, which is written on
+the declarative layer, holds 60 frames a second in its three scenes (the gauntlet, the still
+wall, the patchwork) at the tiers the comparison publishes, on a first and on a second start,
+and shows its first frame as soon as the fastest programs do. The sample of this repository,
+written on the controls, runs the same gauntlet at 55 to 60; the difference is what the
+declarative layer and the paths it takes through the controls still cost.
+
+Where it stands, with the harness of the comparison (gauntlet, tier 16, three starts each,
+the median):
+
+| | Published 0.5.0 | Main branch | With sections 9.87 to 9.89 |
+| --- | ---: | ---: | ---: |
+| Second start: frames a second | 35.7 | 49.7 | 51.9 |
+| First start: frames a second | 28.7 | 46.4 | 49.6 |
+| First start: first frame | 2.08 s | 1.04 s | 1.03 s |
+| Second start: first frame | 0.56 s | 0.52 s | 0.49 s |
+| Second start: CPU a frame | 65.9 ms | 51.5 ms | 49.4 ms |
+
+The leader of the comparison runs the scene at 54 to 58 with a first frame at 0.66 to
+0.87 s.
+
+**What sets the rate.** The UI thread: on the main branch it is busy 88 % of the time and
+the render thread 48 %. A frame has 16.7 ms, and a frame that misses the display takes two,
+so the rate falls in steps: 52 frames a second is one frame in seven late, not a frame that
+is 15 % too slow. What a frame of the declarative program does, counted with `perf-
+counters`, beside the sample of this repository:
+
+| A frame, gauntlet tier 16 | The declarative program | Before sections 9.84 to 9.89 | The sample | What is left |
+| --- | ---: | ---: | ---: | --- |
+| Measures | 2,410 | 4,457 | 1,148 | #802 |
+| Objects made | 602 | 1,116 | 493 | #803, #805 |
+| Property changes raised | 11,800 | 12,280 | 6,080 | #803 |
+| Runs of effects of the declarative layer | about 2,000 | about 2,000 | none | #804 |
+| Visuals recorded | 3,387 | 5,695 | 4,968 | |
+| Text blocks drawn | 836 | 1,708 | | |
+| Text layouts made | 435 | 781 | 431 | |
+| Objects of a batch to the render thread | 7,391 | 10,587 | | |
+
+**What is missing**, in the order of what it is expected to give:
+
+1. **Measures** (#802). A cell of a star column holds over the widths of the grid at which
+   the column keeps the cell inside the cell's own hold, and under layout rounding the grid
+   takes one rounding step off each side of that range. At tier 16 every size is multiplied
+   by 0.12: a wrapped title holds one or two pixels of width, the two steps take all of it,
+   the header grid of every card holds one width, and so does the card. About a thousand of
+   the 2,410 measures are cards that could have held.
+2. **Notifications and objects** (#803). Each card replaces the two column definitions of its
+   progress bar every frame: 545 definitions made and dropped. A definition that gets an
+   inheritance parent is told every inherited value of the tree above it, whether or not
+   something hears it: about 4,200 of the 11,800 property changes.
+3. **The declarative layer** (#804). A property that follows a closure boxes the value of
+   every run and sets it through the untyped setter: about 2,000 runs a frame, and the
+   runtime is 17 % of the UI thread, two thirds of it in these runs.
+4. **Geometries that are written again** (#805). Section 9.88 keeps the geometry of the
+   shapes whose geometry is a rectangle, an ellipse, a line or a list of points; the stream
+   geometries (arcs, sectors, a border with unequal corners) are still made new.
+5. **The other two scenes** (#801). The wall and the patchwork of the declarative program
+   were measured last at 0.5.0; they are counted and sampled first, because they say what
+   else there is.
+6. **The first start** (#806, #786). Of the 1.03 s to the first frame, the system's check of
+   a program it never ran is about 0.19 s and 8 ms for every megabyte of the program
+   (23.0 MB), the application's own start is about 0.3 s, and the states of the pipelines
+   are still made on the first frames (the libraries are not, section 9.85).
+
+**The order of the work.** The changes that are open and the experiments that were planned
+before (#763) are finished first; the experiments of this goal follow them, #801 first; the
+work on the size of the binary (#570) goes on beside both, and each megabyte it takes off
+is also time off the first start.
+
+**The goal is reached** when the three scenes hold 60 frames a second at the published tiers
+on a second start, with a first start within two frames a second of it, or when each scene
+that does not has what limits it named and measured. The rules of section 8.4 hold for every
+step: the change is in the mechanism, the connected places get it, a benchmark of the gate
+holds it.
+
 ## 9. Deviations from upstream for frame cost
 
 Each deviation keeps the observable behaviour of upstream (the same events, the same order, the
