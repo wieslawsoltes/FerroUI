@@ -34,3 +34,19 @@ by downstream crates.io consumers.
 Measured failures, attribution and native reruns are recorded in
 `docs/media/MACOS-VERIFICATION.md` in the repository. Retest the resize/reset
 soak before removing this patch or changing the pinned Skia revision.
+
+# Skottie with the HarfBuzz of FerroUI
+
+The feature `skottie` (turned on by `ferroui-controls-lottie`, see
+`docs/porting/lottie.md`) builds Skia from source on every target: the published
+archives link a HarfBuzz of their own, which cannot share its symbols with the
+`harfbuzz-sys` library FerroUI shapes text with. With the feature, the bindings
+depend on that `harfbuzz-sys` (bundled), `build_support/skia/config.rs` adds a
+`ferro_harfbuzz_include` argument to `third_party/harfbuzz/BUILD.gn` (an exact,
+idempotent edit that rejects a changed file) and points it at the headers of
+the bundled library, the PDF subsetter does not use HarfBuzz, the Linux link
+does not ask pkg-config for a system HarfBuzz, and bindgen leaves out the libc++
+hash table that the Skottie resource headers include. Without the feature the
+download, the arguments of the build and the bindings are those of upstream (and
+of the Graphite Metal fix above); the edited `BUILD.gn` has the behaviour of the
+original while the argument is not given.
