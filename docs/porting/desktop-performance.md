@@ -568,7 +568,13 @@ spread of its own rounds on either side is not decided yet: one disturbed round 
 of three that far (a still wall run beside a busy machine went from 1.7 to 2.2 ms on one side
 only). The gate then measures another round of that suite, alternately again, until the change is
 larger than the spread or `--max-rounds` (default 9) is reached, and decides on the medians of all
-the rounds. Cargo runs through `FERROUI_CARGO` when it is
+the rounds. Two things end a run sooner than its rounds. A line that takes more instructions, or a
+scaling pair over its limit, after the first round takes them in every round: the gate stops there
+and says so, a third of the way in (`--keep-going` measures the other rounds all the same). And a
+run that measures prints a line for each benchmark or scene it finishes; one that prints nothing
+for six minutes is stuck (a process that cannot read its own program back from a drive that
+faulted spins there for ever), and is stopped and started once more, where the whole gate used to
+wait with it. Cargo runs through `FERROUI_CARGO` when it is
 set (a wrapper that serialises the builds of the machine; the runs go through it too, so no other
 build starts during a measurement), else `cargo`. The logs of every build and run are kept under
 `<scratch>/logs`. Exit status: 0 when nothing regressed beyond its tolerance, 1 when something

@@ -580,18 +580,54 @@ def run_tool(command: list[str], env: dict[str, str] | None = None, cwd: Path | 
     return result.stdout
 
 
-def run_cargo(side: Side, args: list[str], env: dict[str, str], log: Path, echo: bool) -> str:
+# A run that measures prints a line for every benchmark or scene it finishes. One that prints
+# nothing for this long is stuck (it has happened: a process that cannot page in its own program
+# from the drive spins there for ever), and is stopped and started once more.
+STALL_SECONDS = 360.0
+
+
+class Stalled(Exception):
+    """A measuring run printed nothing for `STALL_SECONDS`."""
+
+
+def run_cargo_once(side: Side, args: list[str], env: dict[str, str], log: Path, echo: bool, stall: float | None) -> str:
     command = [*cargo_command(), *args]
     full_env = {**os.environ, **env, "CARGO_TARGET_DIR": str(side.target)}
     print(f"[{side.name}] {' '.join(shlex.quote(part) for part in command)}", flush=True)
     log.parent.mkdir(parents=True, exist_ok=True)
     with open(log, "w", encoding="utf-8") as out:
+        # A session of its own: a run that is stuck is stopped with what it started.
         process = subprocess.Popen(
-            command, cwd=side.root, env=full_env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True
+            command,
+            cwd=side.root,
+            env=full_env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            start_new_session=stall is not None,
         )
         lines = []
         assert process.stdout is not None
-        for line in process.stdout:
+        printed: queue.Queue[str | None] = queue.Queue()
+
+        def pump(stream=process.stdout) -> None:
+            for line in stream:
+                printed.put(line)
+            printed.put(None)
+
+        threading.Thread(target=pump, daemon=True).start()
+        while True:
+            try:
+                line = printed.get(timeout=stall)
+            except queue.Empty:
+                try:
+                    os.killpg(process.pid, 9)
+                except OSError:
+                    process.kill()
+                process.wait()
+                raise Stalled from None
+            if line is None:
+                break
             out.write(line)
             lines.append(line)
             if echo or line.startswith(("GATE ", "error")) or "panicked" in line:
@@ -600,6 +636,27 @@ def run_cargo(side: Side, args: list[str], env: dict[str, str], log: Path, echo:
     if status != 0:
         raise GateError(f"[{side.name}] cargo {' '.join(args)} failed with status {status}; the log is {log}")
     return "".join(lines)
+
+
+def run_cargo(side: Side, args: list[str], env: dict[str, str], log: Path, echo: bool, measuring: bool = False) -> str:
+    """Runs cargo for `side`. A run that measures (`measuring`) and prints nothing for
+    `STALL_SECONDS` is stopped and run once more; a build is given the time it takes."""
+    if not measuring:
+        return run_cargo_once(side, args, env, log, echo, None)
+    try:
+        return run_cargo_once(side, args, env, log, echo, STALL_SECONDS)
+    except Stalled:
+        print(
+            f"[{side.name}] nothing printed for {STALL_SECONDS / 60:g} minutes: the run was stopped and is started again",
+            flush=True,
+        )
+    try:
+        return run_cargo_once(side, args, env, log, echo, STALL_SECONDS)
+    except Stalled:
+        raise GateError(
+            f"[{side.name}] cargo {' '.join(args)} printed nothing for {STALL_SECONDS / 60:g} minutes, twice; "
+            f"the log is {log}"
+        ) from None
 
 
 def frame_tests(side: Side, env: dict[str, str], log: Path, echo: bool) -> list[str]:
@@ -614,7 +671,7 @@ def run_frames(side: Side, tests: list[str], env: dict[str, str], log: Path, ech
     output = ""
     for test in tests:
         test_log = log.with_name(f"{log.stem}-{test}{log.suffix}")
-        output += run_cargo(side, [*FRAMES_TEST, test, "--exact", *TEST_ARGS], env, test_log, echo)
+        output += run_cargo(side, [*FRAMES_TEST, test, "--exact", *TEST_ARGS], env, test_log, echo, measuring=True)
     return output
 
 
@@ -642,11 +699,11 @@ def run_benchmarks(side: Side, suite: str, classes: list[str] | None, env: dict[
     """The benchmarks of `suite`: each of `classes` in a process of its own, or all of them in
     one when there is no list of classes."""
     if classes is None:
-        return run_cargo(side, SUITES[suite]["run"], env, log, echo)
+        return run_cargo(side, SUITES[suite]["run"], env, log, echo, measuring=True)
     output = ""
     for name in classes:
         class_log = log.with_name(f"{log.stem}-{name.replace('::', '-')}{log.suffix}")
-        output += run_cargo(side, SUITES[suite]["run"], {**env, BENCH_CLASS: name}, class_log, echo)
+        output += run_cargo(side, SUITES[suite]["run"], {**env, BENCH_CLASS: name}, class_log, echo, measuring=True)
     return output
 
 
@@ -1285,6 +1342,12 @@ def main() -> int:
         help="the rounds per side up to which a metric over its tolerance by less than the spread of its rounds is measured again (default 9)",
     )
     parser.add_argument(
+        "--keep-going",
+        action="store_true",
+        help="measure every round although a line takes more instructions after the first (the gate stops there: "
+        "instructions do not change from round to round)",
+    )
+    parser.add_argument(
         "--only",
         default="all",
         help="what to measure, comma separated: counters, gauntlet, frames, framework, tdg, window, or all (default all); "
@@ -1545,7 +1608,7 @@ def gate(options: argparse.Namespace) -> int:
                 elif suite in HARNESS_SUITES:
                     output = run_benchmarks(side, suite, classes[suite, side.name], env[suite], log, options.verbose)
                 else:
-                    output = run_cargo(side, SUITES[suite]["run"], env[suite], log, options.verbose)
+                    output = run_cargo(side, SUITES[suite]["run"], env[suite], log, options.verbose, measuring=True)
                 if suite in ("gauntlet", "frames"):
                     found = parse_gate(output)
                     if not found:
@@ -1560,11 +1623,26 @@ def gate(options: argparse.Namespace) -> int:
                     suite_of.update((metric.key, suite) for metric, _ in found)
                     side.failed |= failed
 
+    # Instructions are the same from round to round: a line that takes more of them after the
+    # first round takes more of them after the last. The gate says so then, and not an hour later.
+    stopped_early: list[str] = []
     for round_index in range(options.rounds):
         measure(round_index, suites, options.rounds)
+        if round_index == 0 and options.rounds > 1 and not options.keep_going:
+            counted = [*compare(base, candidate, options.tolerance), *scaling_rows(base, candidate)]
+            stopped_early = [
+                row.key for row in counted if row.regressed and ("instructions" in row.verdict or "scaling" in row.verdict)
+            ]
+            if stopped_early:
+                print(
+                    f"more instructions after the first round: {', '.join(stopped_early)}; "
+                    "the other rounds would say the same and are not measured (--keep-going measures them)",
+                    flush=True,
+                )
+                break
 
     rounds = options.rounds
-    while rounds < options.max_rounds:
+    while rounds < options.max_rounds and not stopped_early:
         doubtful = [row.key for row in compare(base, candidate, options.tolerance) if row.measured and is_within_spread(base, candidate, row.key)]
         if not doubtful:
             break
@@ -1582,6 +1660,8 @@ def gate(options: argparse.Namespace) -> int:
         if regressions
         else f"{len(rows)} metrics, none regressed beyond its tolerance"
     )
+    if stopped_early:
+        summary += "; stopped after the first round: the lines that take more instructions take them in every round"
     print()
     print(text_table(rows))
     print()
