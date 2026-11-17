@@ -220,6 +220,8 @@ macro_rules! ferro_markup_type {
 
         impl $crate::metadata::MarkupTyped for $type_ {
             const MARKUP: &'static $crate::metadata::MarkupType = {
+                // Kept by its crate for the crates that refer to it (see `ferro_markup_enum!`).
+                #[used]
                 static MARKUP: $crate::metadata::MarkupType = {
                     #[allow(unused_mut)]
                     let mut markup = $crate::metadata::MarkupType::new(
@@ -306,6 +308,12 @@ macro_rules! ferro_markup_enum {
     ($type_:ident { $($member:ident $(= $variant:ident)?),* $(,)? } $(, { $($body:tt)* })?) => {
         impl $crate::metadata::MarkupTyped for $type_ {
             const MARKUP: &'static $crate::metadata::MarkupType = {
+                // Kept by the crate that declares the enumeration, whether or not that crate
+                // uses it: a crate that uses the constant refers to this static by name, and
+                // link-time optimization across crates dropped the definition where only
+                // another crate referred to it (the storage view of the browser failed to
+                // link: `Orientation`, which only the controls use). The linker still drops
+                // it from a program that does not refer to it.
                 #[used]
                 static MARKUP: $crate::metadata::MarkupType = {
                     #[allow(unused_mut)]
@@ -351,6 +359,8 @@ macro_rules! ferro_markup_enum {
     (flags $type_:ident { $($member:ident = $value:expr),* $(,)? } $(, { $($body:tt)* })?) => {
         impl $crate::metadata::MarkupTyped for $type_ {
             const MARKUP: &'static $crate::metadata::MarkupType = {
+                // Kept by its crate for the crates that refer to it (see `ferro_markup_enum!`).
+                #[used]
                 static MARKUP: $crate::metadata::MarkupType = {
                     #[allow(unused_mut)]
                     let mut markup = $crate::metadata::MarkupType::new(
