@@ -263,13 +263,18 @@ ferro_class! {
         /// (section 9.42).
         fn requires_composition_visual(this) -> bool;
         /// Whether a change of the size of the visual from `old` to `new`, with nothing else
-        /// changed, changes what `render` draws. A visual draws in its own coordinates, so most
-        /// drawings follow the size (a background, a border), and the default is `true`: the
-        /// visual is recorded again when it is resized. A class whose drawing does not read
-        /// its size says so, and is then not recorded again for a new size alone; whatever
-        /// else changes its drawing invalidates it as before (a FerroUI addition,
-        /// docs/porting/desktop-performance.md, section 9.87).
-        fn resize_changes_drawing(this, old: crate::Size, new: crate::Size) -> bool;
+        /// changed, changes what `render` draws. A visual of a class that says it does not is
+        /// not recorded again for a new size alone: its size, and the clip to its bounds,
+        /// reach the compositor as properties; whatever else changes its drawing invalidates
+        /// it as before (a FerroUI addition, docs/porting/desktop-performance.md, sections
+        /// 9.87 and 9.89).
+        ///
+        /// The member describes `render` and is inherited only with it: `Visual` draws
+        /// nothing, and a new size changes nothing; a class that overrides `render` and not
+        /// this member, and any class written as a plain `impl`, is drawn again when it is
+        /// resized, as every visual was.
+        fn resize_changes_drawing(this, old: crate::Size, new: crate::Size) -> bool,
+            follows render else Visual::resize_redraws;
     }
 }
 
@@ -553,7 +558,8 @@ impl VisualImpl for Visual {
     }
 
     fn resize_changes_drawing(_this: &Self, _old: crate::Size, _new: crate::Size) -> bool {
-        true
+        // `render` of this class draws nothing.
+        false
     }
 
     fn detach_from_compositor(this: &Self) {
@@ -1250,6 +1256,13 @@ impl Visual {
             bump_geometry_version();
         }
         self.set_and_raise_cell(Self::bounds_property(), &self.bounds, value);
+    }
+
+    /// The answer of a class that overrides `render` and not `resize_changes_drawing`: a
+    /// drawing that is not known to ignore the size is made again for a new size (the fallback
+    /// of the member in the class declaration).
+    pub(crate) fn resize_redraws(&self, _old: crate::Size, _new: crate::Size) -> bool {
+        true
     }
 
     /// Whether the control should be clipped to its bounds.

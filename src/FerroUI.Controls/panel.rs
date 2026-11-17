@@ -52,6 +52,12 @@ impl VisualImpl for Panel {
 
         Self::parent_render(this, context);
     }
+
+    /// A panel draws its background, as large as it is, and nothing else: without one a new
+    /// size is not a new drawing (desktop-performance.md, section 9.89).
+    fn resize_changes_drawing(this: &Self, _old: ferroui_base::Size, _new: ferroui_base::Size) -> bool {
+        this.background().is_some()
+    }
 }
 
 ferroui_base::ferro_overrides! { impl FerroObjectImpl for Panel {

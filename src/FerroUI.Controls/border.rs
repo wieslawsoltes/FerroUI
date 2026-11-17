@@ -53,6 +53,12 @@ impl VisualImpl for Border {
         );
     }
 
+    /// A border draws its background, its border and its shadows, each as large as it is: one
+    /// that has none of them draws nothing, at any size (desktop-performance.md, section 9.89).
+    fn resize_changes_drawing(this: &Self, _old: ferroui_base::Size, _new: ferroui_base::Size) -> bool {
+        this.background().is_some() || this.border_brush().is_some() || this.box_shadow().count() > 0
+    }
+
     // The rounded clip of the immediate renderer (`IVisualWithRoundRectClip`
     // upstream).
     fn clip_to_bounds_radius(this: &Self) -> Option<CornerRadius> {

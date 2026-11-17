@@ -57,6 +57,12 @@ impl VisualImpl for ContentPresenter {
             &this.box_shadow(),
         );
     }
+
+    /// As a border: without a background, a border and shadows it draws nothing, at any size
+    /// (desktop-performance.md, section 9.89).
+    fn resize_changes_drawing(this: &Self, _old: ferroui_base::Size, _new: ferroui_base::Size) -> bool {
+        this.background().is_some() || this.border_brush().is_some() || this.box_shadow().count() > 0
+    }
 }
 
 ferroui_base::ferro_overrides! { impl FerroObjectImpl for ContentPresenter {

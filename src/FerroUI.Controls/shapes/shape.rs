@@ -117,6 +117,14 @@ impl VisualImpl for Shape {
         }
     }
 
+    /// A shape draws its geometry under the transform its arrange gives it, not its size: a
+    /// geometry that changes has the shape measured and recorded again (also the geometry of a
+    /// rectangle or an ellipse, which is made of the size), and a transform that changes
+    /// invalidates the visual in `arrange_override` (desktop-performance.md, section 9.89).
+    fn resize_changes_drawing(_this: &Self, _old: Size, _new: Size) -> bool {
+        false
+    }
+
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
 
@@ -155,6 +163,9 @@ impl LayoutableImpl for Shape {
             if this.transform.get() != transform {
                 this.transform.set(transform);
                 *this.rendered_geometry.borrow_mut() = None;
+                // Another transform is another drawing, whether the size changed or not
+                // (`resize_changes_drawing`).
+                this.invalidate_visual();
             }
 
             return final_size;
