@@ -7523,3 +7523,80 @@ was built from, a font family made for every text block).
 patch with the same identities, attached again by a patch with other ones, and let go with
 the control.
 
+### 9.92 The number of bands of a frame follows what the frame costs
+
+Experiment #810. A frame of a pipelined layer is recorded in horizontal bands, each by a
+thread of its own, and is in the context when its slowest band is (section 9.33). The
+number of bands was the number of the options, two by default: at the gauntlet of tier 16
+the slowest band was as slow with four bands as with two, and every further band cost 4.5
+ms of a core. A frame that costs more than two bands record between two frames ran at half
+the rate of the display: the patchwork of the declarative program of the comparison at tier
+20 had its UI thread busy 29 % of the time, its render thread 50 %, and its two band
+threads 87 and 81 %. A fixed higher number is wrong the other way (section 8.5): three
+bands cost the frames that fit a tenth more processor time for nothing, and four cost the
+patchwork at tier 17 ten frames a second, six busy threads on five performance cores.
+
+**The rule** (`BandBalance::recount`). The layer already measures how long each band works,
+to move the rows the bands meet at. It has no clock of the display, as the policy that
+decides whether a layer pipelines has none; what it adds is how far apart its frames are.
+At every look (eight frames):
+
+- when the slowest band worked for six tenths of the time between two frames or more
+  (`GROW_SHARE`), three looks in a row, the layer takes a band more, up to the most it may
+  have. Such a band is what the frames wait for, whether they come one display interval
+  apart or two;
+- the band taken last has to make the slowest band a tenth faster by the next look
+  (`GROW_GAIN`). If it does not, it is given back, and the layer asks again after looks
+  that double, up to 64: a cost that cannot be divided stays in one band however many
+  there are;
+- when the bands, one fewer of them, would fit four tenths of the time between two frames
+  (`SHRINK_SHARE`, with a quarter added for what a band of fewer does more), eight looks in
+  a row, the layer gives a band back.
+
+The bands of a new number start at the rows that divide the cost kept so far evenly
+(`resize`), and the frames after a change are not counted while each band draws the glyphs
+that are new to its recorder.
+
+**How many a layer may take** (`most_bands`). The performance cores of the machine less the
+UI thread and the render thread, and two more than the default at most: three on a machine
+of five performance cores. A band on an efficiency core finishes after the others and is
+what the frame waits for. Only a layer with the default number follows its frames; a number
+an application sets in `SkiaOptions::frame_pipelining_bands` is kept as it is. The threads
+of a context are made for the most its first layer may take: one thread and one recorder
+more than before on that machine, idle until a frame needs them.
+
+**Measured** (the declarative program of the comparison, its harness, second start, two
+rounds; frames a second):
+
+| Scene | Two bands (main) | Three bands, fixed | Four bands, fixed | This change |
+| --- | ---: | ---: | ---: | ---: |
+| Patchwork, tier 20 | 34.3 | 43.2 | 45.0 | 41.7, 42.4 |
+| Patchwork, tier 17 | 55.4 | 55.5 | 45.2 | 55.3, 54.9 |
+| Patchwork, tier 12 | 57.4 | | | 57.4, 57.4 |
+| Gauntlet, tier 16 | 52.4 | 52.3 | 51.4 | 50.9, 51.5 |
+| Still wall, tier 20 | 48.6 | | | 48.4, 48.1 |
+
+The run of this change was made while the machine indexed its drive (three to six cores of
+other processes, where the other columns had half a core); the scene that was limited by
+its bands gained what a fixed third band gave it, and the scenes that fit kept their bands.
+
+The local gate (the window scenes, which draw through a pipelined layer, and the gauntlet;
+two rounds): 24 metrics, none over its tolerance; every window scene keeps its 16.667 ms a
+frame. (The first frames of two of the window scenes came sooner in that run, 1.03 to 0.71 s
+and 0.22 to 0.17 s; the machine was busy and nothing is claimed for them.)
+
+**Looked at and not changed** (section 8.4, rule 2). The layers of the other backends are
+not pipelined (the pipelined layer is the Metal layer of Graphite), so there is no number
+of bands to follow there. The picture of a frame is replayed by every band without a
+spatial index; whether an index makes a third band cheaper is experiment #817.
+
+**Tests.** `pipelined_layer.rs`:
+`a_layer_takes_bands_while_its_frames_wait_for_the_slowest_and_gives_them_back` (frames of
+an even cost at the pace of a display: two bands become four, the most, and two again when
+the frames are light), `a_layer_whose_frames_fit_keeps_its_bands`,
+`a_band_that_does_not_help_is_given_back` (a cost in one strip of rows: the band is given
+back, and after three thousand frames the layer asks once in five hundred),
+`a_layer_with_a_fixed_number_of_bands_keeps_it`. `pipelined_frames.rs`: a frame in any
+number of bands shows what the layer draws; a layer has no more bands than its context has
+threads.
+

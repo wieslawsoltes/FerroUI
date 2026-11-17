@@ -87,6 +87,11 @@ pub struct SkiaOptions {
     /// low layer has fewer. The threads are made by the first layer of a
     /// GPU context that pipelines a frame, as many as that layer has bands
     /// (docs/porting/desktop-performance.md, section 9.33).
+    ///
+    /// A layer with the default number follows what its frames cost: when its slowest band
+    /// works for most of the time between two frames it takes a band more, up to the
+    /// performance cores of the machine less the UI thread and the render thread, and gives
+    /// it back when the frames are light again. A number set here is kept as it is.
     pub frame_pipelining_bands: usize,
 }
 

@@ -731,20 +731,22 @@ fn a_layer_has_no_more_bands_than_its_context_has_threads() {
         return;
     };
 
-    // The first layer that pipelines a frame makes the threads: two.
-    let layers = Layers::with_bands(&device, SkiaFramePipelining::On, 2);
+    // The first layer that pipelines a frame makes the threads: three, a number of its own (a
+    // layer with the default number makes as many as it may come to take, which follows the
+    // machine).
+    let layers = Layers::with_bands(&device, SkiaFramePipelining::On, 3);
     layers.draw(draw_scene);
     layers.assert_same_pixels("the frame of the first layer");
 
-    // A layer of the same context that asks for four draws in two.
+    // A layer of the same context that asks for four draws in three.
     let (second, surface) = layers.add_pipelined(&device, 4);
     assert_eq!(4, surface.bands());
-    layers.draw_ordinary_in_bands(2, true, &draw_scene);
+    layers.draw_ordinary_in_bands(3, true, &draw_scene);
     let mut drawing_context = second.create_drawing_context();
     draw_scene(&mut *drawing_context);
     drawing_context.dispose();
     assert!(second.has_pending_frame());
-    assert!(bytes(&layers.ordinary) == bytes(&second), "the frame of the second layer is drawn in two bands");
+    assert!(bytes(&layers.ordinary) == bytes(&second), "the frame of the second layer is drawn in three bands");
 
     second.dispose();
     layers.dispose();
