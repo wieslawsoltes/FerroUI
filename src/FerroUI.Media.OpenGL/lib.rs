@@ -190,9 +190,10 @@ impl NativeGlFrameProducer {
         })
     }
 
-    /// Acquires a source image and submits its conversion in one render job.
-    /// The prepared frame still reserves storage before allocation and retains
-    /// the source until its producer fence completes.
+    /// Runs `prepare` (for example the acquisition of a source image) and the
+    /// draw it returns in one render job. `prepare` returning None queues no
+    /// draw. As in `produce_owned`, storage is reserved before allocation and
+    /// `producer_owner` is retained until the producer fence completes.
     pub fn produce_prepared_owned<O, D>(
         &self,
         producer_owner: O,
