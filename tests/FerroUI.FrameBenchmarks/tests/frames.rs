@@ -18,12 +18,14 @@
 //! Each scene prints a line for the gate,
 //!
 //! ```text
-//! GATE {"bench":"frames/text","frames":240,"warmup":60,"ui_ms_per_frame":1.2,"render_ms_per_frame":2.3,"wall_ms_per_frame":2.5,"rendered":241,"build_ms":12.3,"show_ms":45.6,"startup_ms":57.9}
+//! GATE {"bench":"frames/text","frames":240,"warmup":60,"ui_ms_per_frame":1.2,"render_ms_per_frame":2.3,"wall_ms_per_frame":2.5,"rendered":241,"build_ms":12.3,"show_ms":45.6,"startup_ms":57.9,"instructions_per_frame":97000000}
 //! ```
 //!
 //! with, per frame: the time the UI thread spent running its jobs, the time the render thread spent
 //! in its ticks and the wall time; and, once: the time the scene took to build and the window to
-//! show it (its first layout, recording and commit).
+//! show it (its first layout, recording and commit). Where the system counts them, the line has
+//! the instructions the process retired for a measured frame, on all its threads: the gate reads
+//! them to tell a time that changed from work that changed.
 //!
 //! The scenes of the start (`STARTUP_SCENES`) are shown once and measured to their first frame,
 //!
@@ -542,6 +544,32 @@ fn warm_up_the_process() {
     });
 }
 
+/// The instructions the processor retired for the process up to now, where the system counts
+/// them (macOS on Apple silicon: `proc_pid_rusage` with `RUSAGE_INFO_V4`, whose thirtieth 64-bit
+/// field after the identifier they are, as the harness of the benchmarks reads them). The
+/// instructions of a frame, of every thread of the process, say whether a time that changed is
+/// work that changed: they do not move with where a build puts its code or with what else the
+/// machine does.
+#[cfg(target_os = "macos")]
+fn instructions() -> Option<u64> {
+    const FLAVOR: i32 = 4;
+    const INSTRUCTIONS: usize = 2 + 29;
+    unsafe extern "C" {
+        fn proc_pid_rusage(pid: i32, flavor: i32, buffer: *mut u64) -> i32;
+        fn getpid() -> i32;
+    }
+    let mut buffer = [0_u64; 64];
+    // SAFETY: the buffer is longer than the structure of the flavor asked for and aligned as its
+    // 64-bit fields are; the call writes that structure and nothing else.
+    let status = unsafe { proc_pid_rusage(getpid(), FLAVOR, buffer.as_mut_ptr()) };
+    (status == 0 && buffer[INSTRUCTIONS] != 0).then_some(buffer[INSTRUCTIONS])
+}
+
+#[cfg(not(target_os = "macos"))]
+fn instructions() -> Option<u64> {
+    None
+}
+
 /// Shows the scene, runs the warm-up frames and the measured ones, and prints the line of the gate
 /// and a summary.
 fn measure(scene: &Scene) {
@@ -554,7 +582,13 @@ fn measure(scene: &Scene) {
     gate.move_pointer();
     gate.run(warmup.min(10));
     let counters = ferroui_base::diagnostics::perf_counters::snapshot();
+    let before = instructions();
     let run = gate.run(frames);
+    let counted = before
+        .zip(instructions())
+        .map(|(before, after)| after.saturating_sub(before) as f64 / f64::from(run.frames))
+        .map(|counted| format!(",\"instructions_per_frame\":{counted:.0}"))
+        .unwrap_or_default();
     let counters = ferroui_base::diagnostics::perf_counters::snapshot().since(&counters);
     assert!(run.rendered > 0, "{bench}: the surface received no frame");
 
@@ -565,7 +599,7 @@ fn measure(scene: &Scene) {
     println!(
         "GATE {{\"bench\":\"{bench}\",\"frames\":{},\"warmup\":{warmup},\"ui_ms_per_frame\":{ui:.4},\
          \"render_ms_per_frame\":{render:.4},\"wall_ms_per_frame\":{wall:.4},\"rendered\":{},\
-         \"build_ms\":{build:.3},\"show_ms\":{show:.3},\"startup_ms\":{:.3}}}",
+         \"build_ms\":{build:.3},\"show_ms\":{show:.3},\"startup_ms\":{:.3}{counted}}}",
         run.frames,
         run.rendered,
         build + show
