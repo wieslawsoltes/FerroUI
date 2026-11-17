@@ -7635,3 +7635,31 @@ change is left out (section 8.4, rule 6): it does not improve what it was made f
 left to win in the measures of this scene is in the grids whose definitions are replaced
 every frame and in the shapes that are measured again for every change of their points.
 
+### 9.94 The value of a reactive property is written into the box of the run before
+
+A first step of experiment #804. A property of the declarative layer that follows a signal,
+a memo or a closure is an effect: when what it read changes it computes the value again,
+puts it in a box (`BoxedValue`, an allocation) and sets the property from the box, which
+takes a copy of the value; the box is then dropped. The declarative gauntlet of the
+comparison runs about 2,000 such effects a frame: 2,000 boxes asked of the allocator and
+given back.
+
+The closure that computes the value keeps the box of the run before (`KeptBox` in
+`builder.rs`): a run writes its value into that box when nothing else holds it any more,
+and makes a new one only then. A property that is computed once keeps nothing: the box is
+kept from the second run on, so a tree of rows that each follow a signal that never changes
+holds what it held. The representation of a property value (`PropValue`) is the same, and
+so is the untyped setter the value goes through; the typed path of #804 is what is left.
+
+**Measured** with the gate, against the commit that adds the benchmark (two rounds):
+
+| `declarative::ViewBenchmark` | Before | After | Time | Instructions |
+| --- | ---: | ---: | ---: | ---: |
+| `shared_signal_changed` (a thousand properties follow one signal, the signal written) | 84.7 us | 70.6 us | -16.7 % | -22.50 % |
+| `fine_grained_one_row_changed` (one text follows its signal) | 213.4 ns | 190.4 ns | -10.8 % | -9.53 % |
+
+The other nine lines of the class are within 0.2 % in instructions (one within 1.3 %).
+
+**Tests.** The 79 tests of `ferroui-view`; the benchmark `shared_signal_changed` is new and
+runs with the gate (section 9.91).
+
