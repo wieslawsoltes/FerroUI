@@ -574,7 +574,12 @@ and says so, a third of the way in (`--keep-going` measures the other rounds all
 run that measures prints a line for each benchmark or scene it finishes; one that prints nothing
 for six minutes is stuck (a process that cannot read its own program back from a drive that
 faulted spins there for ever), and is stopped and started once more, where the whole gate used to
-wait with it. Cargo runs through `FERROUI_CARGO` when it is
+wait with it. A run whose files cannot be read (the drive left) waits up to ten minutes for its
+source tree to be there again and runs again. With `--resume <folder>` what each measuring run
+printed is kept in the folder, and a gate that was stopped half way and is started again with
+the same folder measures only what it does not have: the folder belongs to one gate (the same
+base, the same candidate, the same options), and a run is found there by its side, its commit,
+its arguments and its environment. Cargo runs through `FERROUI_CARGO` when it is
 set (a wrapper that serialises the builds of the machine; the runs go through it too, so no other
 build starts during a measurement), else `cargo`. The logs of every build and run are kept under
 `<scratch>/logs`. Exit status: 0 when nothing regressed beyond its tolerance, 1 when something

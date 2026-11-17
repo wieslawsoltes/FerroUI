@@ -91,6 +91,7 @@ from __future__ import annotations
 
 import argparse
 import datetime
+import hashlib
 import json
 import os
 import platform
@@ -638,25 +639,81 @@ def run_cargo_once(side: Side, args: list[str], env: dict[str, str], log: Path, 
     return "".join(lines)
 
 
+# The folder of `--resume`: what each measuring run printed is kept there, and a run that is
+# there is not made again. A gate that was stopped half way (the machine, a drive that left) is
+# started again with the same folder and goes on where it was.
+RESUME: Path | None = None
+
+# How long a measuring run waits for the source tree of its side to be there again when the
+# system says the files cannot be read (a drive that left and comes back), and how often.
+DRIVE_WAIT_SECONDS = 600.0
+DRIVE_ATTEMPTS = 3
+
+
+def kept_output(side: Side, args: list[str], env: dict[str, str], log: Path) -> Path | None:
+    """Where `--resume` keeps the output of this run: by its log, and by what was run (the
+    side and its commit, the arguments, the environment), so that another gate finds nothing."""
+    if RESUME is None:
+        return None
+    identity = "\n".join([side.label, *args, *(f"{name}={value}" for name, value in sorted(env.items()))])
+    return RESUME / f"{log.stem}-{hashlib.sha256(identity.encode()).hexdigest()[:12]}.out"
+
+
+def wait_for_drive(side: Side, error: OSError) -> None:
+    print(f"[{side.name}] {error}: waiting for {side.root} to be there again", flush=True)
+    until = time.monotonic() + DRIVE_WAIT_SECONDS
+    while time.monotonic() < until:
+        try:
+            if (side.root / "Cargo.toml").is_file() and side.target.is_dir():
+                # What comes back is given a moment before it is read from.
+                time.sleep(15)
+                return
+        except OSError:
+            pass
+        time.sleep(5)
+    raise GateError(f"[{side.name}] {side.root} did not come back in {DRIVE_WAIT_SECONDS / 60:g} minutes ({error})")
+
+
 def run_cargo(side: Side, args: list[str], env: dict[str, str], log: Path, echo: bool, measuring: bool = False) -> str:
     """Runs cargo for `side`. A run that measures (`measuring`) and prints nothing for
-    `STALL_SECONDS` is stopped and run once more; a build is given the time it takes."""
+    `STALL_SECONDS` is stopped and run once more, and one whose files cannot be read waits for
+    them and runs again; a build is given the time it takes. With `--resume` the output of a
+    measuring run is kept, and a run that was kept is not made again."""
     if not measuring:
         return run_cargo_once(side, args, env, log, echo, None)
-    try:
-        return run_cargo_once(side, args, env, log, echo, STALL_SECONDS)
-    except Stalled:
-        print(
-            f"[{side.name}] nothing printed for {STALL_SECONDS / 60:g} minutes: the run was stopped and is started again",
-            flush=True,
-        )
-    try:
-        return run_cargo_once(side, args, env, log, echo, STALL_SECONDS)
-    except Stalled:
-        raise GateError(
-            f"[{side.name}] cargo {' '.join(args)} printed nothing for {STALL_SECONDS / 60:g} minutes, twice; "
-            f"the log is {log}"
-        ) from None
+    kept = kept_output(side, args, env, log)
+    if kept is not None and kept.is_file():
+        print(f"[{side.name}] kept from the run before: {log.name}", flush=True)
+        return kept.read_text(encoding="utf-8")
+    stalls = 0
+    faults = 0
+    while True:
+        try:
+            output = run_cargo_once(side, args, env, log, echo, STALL_SECONDS)
+            break
+        except Stalled:
+            stalls += 1
+            if stalls == 2:
+                raise GateError(
+                    f"[{side.name}] cargo {' '.join(args)} printed nothing for {STALL_SECONDS / 60:g} minutes, twice; "
+                    f"the log is {log}"
+                ) from None
+            print(
+                f"[{side.name}] nothing printed for {STALL_SECONDS / 60:g} minutes: "
+                "the run was stopped and is started again",
+                flush=True,
+            )
+        except OSError as error:
+            faults += 1
+            if faults > DRIVE_ATTEMPTS:
+                raise GateError(f"[{side.name}] cargo {' '.join(args)}: {error}; the log is {log}") from None
+            wait_for_drive(side, error)
+    if kept is not None:
+        kept.parent.mkdir(parents=True, exist_ok=True)
+        temporary = kept.with_suffix(".tmp")
+        temporary.write_text(output, encoding="utf-8")
+        temporary.replace(kept)
+    return output
 
 
 def frame_tests(side: Side, env: dict[str, str], log: Path, echo: bool) -> list[str]:
@@ -1342,6 +1399,12 @@ def main() -> int:
         help="the rounds per side up to which a metric over its tolerance by less than the spread of its rounds is measured again (default 9)",
     )
     parser.add_argument(
+        "--resume",
+        help="a folder that keeps what each measuring run printed: a gate that was stopped half way is started "
+        "again with the same folder and does not measure again what it has (a folder for one gate: the same base, "
+        "the same candidate, the same options)",
+    )
+    parser.add_argument(
         "--keep-going",
         action="store_true",
         help="measure every round although a line takes more instructions after the first (the gate stops there: "
@@ -1403,6 +1466,9 @@ def gate(options: argparse.Namespace) -> int:
     # machine that gets its sources copied; the base is then a copy as well, `--base-dir`).
     root = Path(__file__).resolve().parents[2]
     checkout = checkout_root(root) is not None
+    if options.resume:
+        global RESUME
+        RESUME = Path(options.resume).resolve()
     scratch = Path(options.scratch).resolve() if options.scratch else (root.parent / "ferroui-gate-scratch")
     base_dir = Path(options.base_dir).resolve() if options.base_dir else None
     if base_dir is not None:
