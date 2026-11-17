@@ -7410,6 +7410,18 @@ start; CPU a frame, the frames a second are the same):
 | Patchwork, tier 17 | 41.3 ms | 39.8 ms |
 | Gauntlet, tier 16 | 49.5 ms | 50.2 ms |
 
+The local gate (the gauntlet and the frame scenes, two rounds): 127 metrics, none over its
+tolerance, seven faster. The scenes of the gate that have many items under one composition
+visual hold the change (section 8.4, rule 3):
+
+| Line of the gate | Main | This change | |
+| --- | ---: | ---: | ---: |
+| `frames/deep render_ms_per_frame` | 2.187 ms | 1.585 ms | -27.5 % |
+| `frames/deep ui_ms_per_frame` | 0.244 ms | 0.181 ms | -25.7 % |
+| `wall/20 wall_ms_per_frame` | 1.713 ms | 1.614 ms | -5.8 % |
+| `startup/tiles show_ms` | 550.7 ms | 499.5 ms | -9.3 % |
+| `gauntlet/16 render_ms_per_frame` | 33.282 ms | 33.408 ms | +0.4 % |
+
 **Looked at and not changed** (section 8.4, rule 2). The child composition visuals of a
 visual are walked one by one in the same passes (`ServerCompositionVisual::render`, the
 update pass): they carry their own bounds and the walk leaves a child whose bounds miss the
