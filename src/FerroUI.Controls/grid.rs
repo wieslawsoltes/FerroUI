@@ -319,7 +319,12 @@ impl LayoutableImpl for Grid {
     ///   columns are resolved before any of their cells is measured, with no minimum to give way
     ///   to, so the share is exact, and the hold of the cell maps back as `hold * W / w + F`
     ///   (less a rounding step of the cell on each side when the layout is rounded, and with
-    ///   several star columns less what the division may round away).
+    ///   several star columns less what the division may round away);
+    /// - the same with one row that is a star row, at a finite height (a grid without row
+    ///   definitions in a box of a set height), at that height alone: the row is the height of
+    ///   the grid, so at the same height every cell gets the height it got (section 9.86).
+    ///   Several rows of which some are star rows hold nothing at a finite height, as before:
+    ///   the walk of the cells below would be paid by every measure of a grid of many rows.
     ///
     /// Any other grid holds nothing.
     fn measure_hold_override(this: &Self, constraint: Size) -> Option<ferroui_base::layout::MeasureHold> {
@@ -361,18 +366,32 @@ impl LayoutableImpl for Grid {
             return None;
         }
         // Star rows share a finite height; at an infinite height they size to their content as
-        // auto rows do.
+        // auto rows do. One star row alone is the height of the grid: the grid then holds at
+        // that height.
+        let mut rows_share_the_height = false;
         for index in 0..definitions_v.count() {
             let definition = &definitions_v[index];
-            if definition.is_shared() || (definition.user_size().is_star() && constraint.height.is_finite()) {
+            if definition.is_shared() {
                 return None;
+            }
+            if definition.user_size().is_star() && constraint.height.is_finite() {
+                if definitions_v.count() != 1 {
+                    return None;
+                }
+                rows_share_the_height = true;
             }
         }
         let step = if this.use_layout_rounding() { 1.0 / LayoutHelper::get_layout_scale(this) } else { 0.0 };
         let last_column = definitions_u.count() as i32 - 1;
         // A finite width stays finite and an infinite height infinite: the grid sizes to its
         // content along an infinite axis.
-        let height = if constraint.height.is_finite() { (f64::NEG_INFINITY, f64::MAX) } else { (f64::INFINITY, f64::INFINITY) };
+        let height = if rows_share_the_height {
+            (constraint.height, constraint.height.next_up())
+        } else if constraint.height.is_finite() {
+            (f64::NEG_INFINITY, f64::MAX)
+        } else {
+            (f64::INFINITY, f64::INFINITY)
+        };
         let mut hold = MeasureHold::new((f64::NEG_INFINITY, f64::MAX), height);
         for child in children.iter().filter(|child| child.is_visible()) {
             if Grid::get_column_span(child) != 1 || Grid::get_row_span(child) != 1 {
