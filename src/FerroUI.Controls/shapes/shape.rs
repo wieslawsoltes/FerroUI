@@ -4,7 +4,7 @@ use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::{
     DrawingContext, Geometry, IBrush, IPen, MatrixTransform, MediaCollection, Pen, PenLineCap, PenLineJoin, Stretch,
-    StrokeDashArray,
+    StrokeDashArray, PolylineGeometry,
 };
 use ferroui_base::reactive::Subscription;
 use ferroui_base::rendering::composition::{AlphaMask, CompositionBrush};
@@ -420,6 +420,26 @@ impl Shape {
                     Shape::affects_geometry_invalidate(shape, e);
                 }
             }).detach();
+        }
+    }
+
+    /// A shape whose geometry is a polyline (`Polyline`, `Polygon`) was given other points.
+    /// The geometry it has takes them and is built again, where the reference lets the
+    /// geometry go and makes another: a shape whose points change every frame (a sparkline)
+    /// made and dropped an object, a copy of its points and a subscription a frame
+    /// (desktop-performance.md, section 9.88). Without a geometry, or without points, the
+    /// shape is invalidated as before.
+    pub(crate) fn polyline_points_changed(&self, points: Option<ferroui_base::media::Points>) {
+        let kept = self.defining_geometry.borrow().clone().and_then(|geometry| geometry.cast::<PolylineGeometry>());
+        match (kept, points) {
+            (Some(geometry), Some(points)) => {
+                geometry.set_points(points);
+                // The geometry follows the changes of a collection, not the change of collection.
+                geometry.invalidate_geometry();
+                *self.rendered_geometry.borrow_mut() = None;
+                self.invalidate_measure();
+            }
+            _ => self.invalidate_geometry(),
         }
     }
 

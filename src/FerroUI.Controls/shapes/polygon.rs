@@ -37,16 +37,12 @@ impl FerroObjectImpl for Polygon {
 
 impl ShapeImpl for Polygon {
     fn create_defining_geometry(this: &Self) -> Option<Ref<Geometry>> {
-        let points = this.points();
-        let geometry = PolylineGeometry::with_points_and_fill_rule(
-            points.as_ref().map(|p| p.to_vec()).unwrap_or_default(),
-            true,
-            this.fill_rule(),
-        );
-        // Re-assign the live collection so the geometry observes changes to it (#20565).
-        if let Some(points) = points {
-            geometry.set_points(points);
-        }
+        // The geometry is made of the live collection, so that it observes changes to it
+        // (#20565).
+        let geometry = match this.points() {
+            Some(points) => PolylineGeometry::of_points(points, true, this.fill_rule()),
+            None => PolylineGeometry::with_points_and_fill_rule(std::iter::empty(), true, this.fill_rule()),
+        };
         Some(geometry.upcast())
     }
 }
@@ -69,10 +65,17 @@ ferroui_base::ferro_properties! { impl Polygon {
 
 impl Polygon {
     fn static_constructor() {
-        Shape::affects_geometry::<Polygon>(&[
-            Self::points_property().as_property(),
-            Self::fill_rule_property().as_property(),
-        ]);
+        Shape::affects_geometry::<Polygon>(&[Self::fill_rule_property().as_property()]);
+        // Other points go to the geometry the shape has (`Shape::polyline_points_changed`).
+        Self::points_property()
+            .changed()
+            .subscribe(|e| {
+                if let Some(sender) = e.sender().downcast_ref::<Polygon>() {
+                    let shape: &Shape = sender.upcast();
+                    shape.polyline_points_changed(e.get_new_value::<Option<Points>>());
+                }
+            })
+            .detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

@@ -38,16 +38,12 @@ impl FerroObjectImpl for Polyline {
 impl ShapeImpl for Polyline {
     fn create_defining_geometry(this: &Self) -> Option<Ref<Geometry>> {
         let is_filled = this.fill().is_some();
-        let points = this.points();
-        let geometry = PolylineGeometry::with_points_and_fill_rule(
-            points.as_ref().map(|p| p.to_vec()).unwrap_or_default(),
-            is_filled,
-            this.fill_rule(),
-        );
-        // Re-assign the live collection so the geometry observes changes to it (#20565).
-        if let Some(points) = points {
-            geometry.set_points(points);
-        }
+        // The geometry is made of the live collection, so that it observes changes to it
+        // (#20565).
+        let geometry = match this.points() {
+            Some(points) => PolylineGeometry::of_points(points, is_filled, this.fill_rule()),
+            None => PolylineGeometry::with_points_and_fill_rule(std::iter::empty(), is_filled, this.fill_rule()),
+        };
         Some(geometry.upcast())
     }
 }
@@ -71,10 +67,17 @@ ferroui_base::ferro_properties! { impl Polyline {
 impl Polyline {
     fn static_constructor() {
         Shape::stroke_thickness_property().override_default_value::<Polyline>(1.0);
-        Shape::affects_geometry::<Polyline>(&[
-            Self::points_property().as_property(),
-            Self::fill_rule_property().as_property(),
-        ]);
+        Shape::affects_geometry::<Polyline>(&[Self::fill_rule_property().as_property()]);
+        // Other points go to the geometry the shape has (`Shape::polyline_points_changed`).
+        Self::points_property()
+            .changed()
+            .subscribe(|e| {
+                if let Some(sender) = e.sender().downcast_ref::<Polyline>() {
+                    let shape: &Shape = sender.upcast();
+                    shape.polyline_points_changed(e.get_new_value::<Option<Points>>());
+                }
+            })
+            .detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
