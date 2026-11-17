@@ -318,8 +318,11 @@ impl LayoutableImpl for Grid {
     ///   (the other columns and the spacing; `W` is the weight of all star columns). The star
     ///   columns are resolved before any of their cells is measured, with no minimum to give way
     ///   to, so the share is exact, and the hold of the cell maps back as `hold * W / w + F`
-    ///   (less a rounding step of the cell on each side when the layout is rounded, and with
-    ///   several star columns less what the division may round away);
+    ///   (with several star columns less what the division may round away). Layout rounding
+    ///   takes nothing off it: a measure gives a cell its share as it is, and the columns are
+    ///   rounded when they are arranged, which a hold says nothing about (section 9.93; the
+    ///   hold used to give up a rounding step on each side, which at small sizes was all of
+    ///   it);
     /// - the same with one row that is a star row, at a finite height (a grid without row
     ///   definitions in a box of a set height), at that height alone: the row is the height of
     ///   the grid, so at the same height every cell gets the height it got (section 9.86).
@@ -381,7 +384,6 @@ impl LayoutableImpl for Grid {
                 rows_share_the_height = true;
             }
         }
-        let step = if this.use_layout_rounding() { 1.0 / LayoutHelper::get_layout_scale(this) } else { 0.0 };
         let last_column = definitions_u.count() as i32 - 1;
         // A finite width stays finite and an infinite height infinite: the grid sizes to its
         // content along an infinite axis.
@@ -425,7 +427,7 @@ impl LayoutableImpl for Grid {
             let (ratio, slack) =
                 if star_columns == 1 { (1.0, 0.0) } else { (star_weight / weight, STAR_SHARE_SLACK) };
             let fixed = constraint.width - measured * ratio;
-            let margin = (step + slack) * ratio;
+            let margin = slack * ratio;
             let width = (child_hold.width.0 * ratio + fixed + margin, child_hold.width.1 * ratio + fixed - margin);
             hold = hold.intersect(MeasureHold::new(width, MeasureHold::ANY.height))?;
         }

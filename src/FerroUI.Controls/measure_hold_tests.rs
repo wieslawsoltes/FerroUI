@@ -210,13 +210,25 @@ fn layout(root: &Border, width: f64) {
 /// a pixel within `reach` of it, and compares each layout with the one of a tree made for that
 /// width. Returns how many of the widths the root held.
 fn lays_out_as_a_new_one(centered: bool, columns: Option<Columns>, rounding: bool, step: usize, reach: f64) -> usize {
+    lays_out_as_a_new_one_around(centered, columns, rounding, (60..=420).step_by(step), reach, 0.25)
+}
+
+/// As [`lays_out_as_a_new_one`], from the given widths and at every `increment` around each.
+fn lays_out_as_a_new_one_around(
+    centered: bool,
+    columns: Option<Columns>,
+    rounding: bool,
+    starts: impl Iterator<Item = i32>,
+    reach: f64,
+    increment: f64,
+) -> usize {
     let make = || {
         let root = tree(centered, columns);
         root.set_use_layout_rounding(rounding);
         root
     };
     let mut held = 0;
-    for start in (60..=420).step_by(step) {
+    for start in starts {
         let start = f64::from(start);
         let root = make();
         layout(&root, start);
@@ -236,10 +248,26 @@ fn lays_out_as_a_new_one(centered: bool, columns: Option<Columns>, rounding: boo
                      rounding {rounding}"
                 );
             }
-            width += 0.25;
+            width += increment;
         }
     }
     held
+}
+
+/// Section 9.93: the hold of a grid of star columns gives up nothing for layout rounding. Narrow
+/// trees, where a text holds a pixel or two of width, laid out again at every sixteenth of a
+/// pixel around the width they were made at, are the trees made for those widths, with the
+/// layout rounded and not.
+#[test]
+fn a_narrow_grid_of_star_columns_measured_inside_its_holds_lays_out_as_a_new_one() {
+    let _scope = test_scope();
+    for columns in [GRIDS[0], GRIDS[1], GRIDS[2], GRIDS[3], GRIDS[6]] {
+        for rounding in [true, false] {
+            // What is asserted is in the sweep: every layout is the one of a new tree. (A tree
+            // this narrow holds few widths, and none with some of the columns.)
+            lays_out_as_a_new_one_around(false, columns, rounding, (24..=72).step_by(12), 3.0, 1.0 / 16.0);
+        }
+    }
 }
 
 #[test]
@@ -291,8 +319,9 @@ fn a_grid_of_several_star_columns_holds_what_its_cells_hold_at_their_share() {
             };
             // The text was measured at its share of the width, and the grid holds the widths
             // that give it a share inside the hold of the text, less a margin at each end: the
-            // rounding step and the slack of the division, as wide as they are for the grid.
-            let margin = (1.0 + 1.0 / 65536.0) / share;
+            // slack of the division, as wide as it is for the grid. (No rounding step: a measure
+            // does not round the share, section 9.93.)
+            let margin = (1.0 / 65536.0) / share;
             let (low, high) = (cell_hold.width.0 / share + margin, cell_hold.width.1 / share - margin);
             let hold = grid.measure_hold().expect("a measured grid");
             if low <= width && width < high {
