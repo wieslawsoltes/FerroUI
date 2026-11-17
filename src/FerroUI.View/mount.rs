@@ -557,7 +557,9 @@ struct ControlState {
     name: Option<String>,
     classes: Vec<String>,
     props: Vec<MountedProp>,
-    handlers: Owner,
+    /// What owns the attached handlers: nothing for a control without handlers, which is most
+    /// of a tree (docs/porting/desktop-performance.md, section 9.91).
+    handlers: Option<Owner>,
     /// The handlers attached: their identities and cells, which a patch
     /// with the same identities swaps the closures into.
     attached: Vec<(usize, Rc<dyn Any>, fn(&dyn Any, &dyn Any))>,
@@ -762,11 +764,14 @@ fn mount_control(element: ControlElement, host: &Rc<Host>) -> Rc<ControlInstance
             }
         }
         let props = element.props.into_iter().map(|entry| mount_prop(&control, entry.property, entry.value)).collect();
-        let handlers = Owner::new();
-        handlers.with(|| {
-            for handler in &element.handlers {
-                (handler.attach)(&control);
-            }
+        let handlers = (!element.handlers.is_empty()).then(|| {
+            let handlers = Owner::new();
+            handlers.with(|| {
+                for handler in &element.handlers {
+                    (handler.attach)(&control);
+                }
+            });
+            handlers
         });
         count(|stats| stats.handler_attachments += element.handlers.len() as u64);
         let attached = element.handlers.iter().map(|h| (h.identity, h.cell.clone(), h.swap)).collect();
@@ -1237,13 +1242,18 @@ fn patch_control(instance: &ControlInstance, element: ControlElement) {
             swap(&**old, &*handler.cell);
         }
     } else {
-        let handlers = instance.owner.with(Owner::new);
-        handlers.with(|| {
-            for handler in &element.handlers {
-                (handler.attach)(control);
-            }
+        let handlers = (!element.handlers.is_empty()).then(|| {
+            let handlers = instance.owner.with(Owner::new);
+            handlers.with(|| {
+                for handler in &element.handlers {
+                    (handler.attach)(control);
+                }
+            });
+            handlers
         });
-        std::mem::replace(&mut state.handlers, handlers).dispose();
+        if let Some(replaced) = std::mem::replace(&mut state.handlers, handlers) {
+            replaced.dispose();
+        }
         count(|stats| stats.handler_attachments += element.handlers.len() as u64);
         state.attached = element.handlers.iter().map(|h| (h.identity, h.cell.clone(), h.swap)).collect();
     }
