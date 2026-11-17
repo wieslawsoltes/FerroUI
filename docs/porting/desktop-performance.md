@@ -7366,6 +7366,32 @@ TreeDataGrid -0.15 %, `trees::Lifetime.lay_out` +1.1 %, and the resize of a thou
 borders +0.7 % against the bottom of the stack, of which the question is a virtual call
 and a comparison of two generations.
 
+**A follow-up: said once.** The whole gate of the stack had `frames/text` at the same
+picture for 0.18 % more instructions a frame (97.57 and 97.75 million). Two things were done
+twice for a text block whose text changes and whose size changes with it:
+
+- A new layout is a new drawing, and since section 9.87 a new size alone is not, so the
+  block has to say so. It said so where the layout was made, in `measure_override` and
+  `arrange_override`, also when the text or the font had changed and had invalidated the
+  visual already. It now says so where the layout is let go (a measure that was
+  invalidated, a constraint or an alignment that no longer fits, embedded controls measured
+  again), and only when there was a layout to let go
+  (`TextBlock::drop_drawn_text_layout`).
+- A visual whose size or place changed is put in the set of the visuals whose composition
+  properties are synchronized. The pass leaves out of that set the visuals whose drawing it
+  records again, which it synchronizes there; such a visual is not put in the set to begin
+  with (`CompositingRenderer::add_dirty_properties`).
+
+The local gate (the gauntlet, the frame scenes, the text and layout benchmarks, the forced
+layouts of the TreeDataGrid; two rounds; the frame scenes with the instructions of a frame,
+section 8.1): 343 metrics. `frames/text` takes 0.18 % fewer instructions a frame, what it
+had gained, and 3.561 ms on the UI thread where it took 3.721 ms. Two lines were over their
+tolerance, `wall/20 render_ms_per_frame` and `wall_ms_per_frame` of the sample (+8.3 %,
+1.637 and 1.773 ms; the sample does not count instructions). Counted and measured again
+(section 8.1): the two programs of that gate, run three times in turn, retire 204.30 to
+204.71 and 204.08 to 204.67 thousand million instructions for the whole run, and the line is
+1.62, 1.68, 1.62 ms against 1.64, 1.69, 1.69 ms.
+
 **Tests.** `panel_tests.rs`:
 `a_visual_that_draws_nothing_of_its_size_is_not_drawn_again_when_it_is_resized` (a renderer
 that keeps how each visual was marked; of a panel with and without a background, a border
