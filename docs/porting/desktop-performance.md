@@ -7047,3 +7047,34 @@ keeps how each visual was marked: a plain and a wrapped block resized within the
 get their properties alone; a block with a background, a block whose layout is made again
 and a block lower than its text are drawn again).
 
+### 9.88 A polyline or polygon given other points keeps its geometry
+
+**What was counted.** The declarative gauntlet draws a sparkline in every card as a
+`Polygon` and a `Polyline` whose `Points` it replaces every frame: 522 geometries a frame.
+A sample of its UI thread has the two shapes at 7 % of its busy time: their measure (which
+builds the geometry), the invalidation of the shape, and the geometries let go while the
+frame is recorded.
+
+**The cause.** A shape drops its geometry when a property its geometry is made of changes
+(`Shape::affects_geometry`), and makes another when it is measured. For these two shapes
+that was, for every change of `Points`: the subscription to the geometry dropped, the
+geometry object dropped, a new one made with a copy of the points, the live collection
+given to it right after (so that it follows the collection; the copy was let go), and a
+new subscription.
+
+**The change.**
+
+- `Shape::polyline_points_changed`: the geometry the shape has takes the new collection
+  (`PolylineGeometry::set_points`), follows it, and is built again
+  (`Geometry::invalidate_geometry`: the geometry follows the changes of a collection, not
+  the change of collection). The shape is measured again as before. Without a geometry, or
+  without points, the shape is invalidated as before.
+- `PolylineGeometry::of_points`: a polyline geometry of a collection, which it follows.
+  `Polyline` and `Polygon` make their geometry of their own collection; nothing is copied.
+- `PolylineGeometry` builds its figure from the collection in place.
+
+**Tests.** `shapes/polyline_tests.rs`:
+`a_polyline_given_other_points_keeps_its_geometry_which_takes_them` (the same geometry, the
+new points, the new collection followed, a change reported; without points the geometry is
+let go) and `the_geometry_of_a_polyline_has_the_collection_of_the_polyline`.
+
