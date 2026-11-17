@@ -58,6 +58,11 @@ def source_fingerprint(source: Path, excluded: Path) -> str:
             digest.update(b"submodule\0" + subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=path).strip())
             digest.update(subprocess.check_output(["git", "status", "--porcelain=v1", "-z", "--untracked-files=all"], cwd=path))
             digest.update(subprocess.check_output(["git", "diff", "--binary", "HEAD"], cwd=path))
+        elif path.is_dir() and not any(path.iterdir()):
+            # A submodule that is not checked out (benchmarks/comparison/upstream in CI): the commit
+            # the index records for it.
+            digest.update(b"gitlink\0" + subprocess.check_output(
+                ["git", "ls-files", "--stage", "-z", "--", os.fsdecode(name)], cwd=source))
         else:
             raise RuntimeError(f"Unexpanded tracked directory in source fingerprint: {path}")
     return digest.hexdigest()

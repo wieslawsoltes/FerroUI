@@ -32,6 +32,10 @@ type std___2_string = std_string;
 
 include!(concat!(env!("OUT_DIR"), "/skia/bindings.rs"));
 
+// The source build of Skottie uses the same HarfBuzz archive as FerroUI.
+#[cfg(feature = "skottie")]
+extern crate harfbuzz_sys as _;
+
 mod defaults;
 #[allow(unused_imports)]
 pub use defaults::*;

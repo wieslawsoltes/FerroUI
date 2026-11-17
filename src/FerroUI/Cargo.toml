@@ -38,6 +38,7 @@ color-picker = ["dep:ferroui-controls-color-picker"]
 charts = ["dep:ferroui-controls-charts"]
 repeater = ["dep:ferroui-controls-repeater"]
 inking = ["dep:ferroui-controls-inking"]
+lottie = ["dep:ferroui-controls-lottie", "ferroui-controls-lottie/skia", "ferroui-controls-lottie/markup-functions"]
 pretext = ["dep:ferroui-pretext", "dep:ferroui-pretext-layout", "dep:ferroui-pretext-media"]
 livecharts = ["dep:ferroui-livecharts", "dep:ferroui-controls-livecharts"]
 treedatagrid = ["dep:ferroui-controls-treedatagrid", "dep:ferroui-treedatagrid-core"]
@@ -92,6 +93,7 @@ ferroui-controls-charts = { workspace = true, optional = true }
 ferroui-controls-repeater = { workspace = true, optional = true }
 ferroui-markup-xaml-winui = { workspace = true, optional = true }
 ferroui-controls-inking = { workspace = true, optional = true }
+ferroui-controls-lottie = { workspace = true, optional = true }
 ferroui-pretext = { workspace = true, optional = true }
 ferroui-pretext-layout = { workspace = true, optional = true }
 ferroui-pretext-media = { workspace = true, optional = true }

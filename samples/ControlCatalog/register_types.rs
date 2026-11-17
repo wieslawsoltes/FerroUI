@@ -85,6 +85,8 @@ pub fn register_types() {
         ferroboard_controls::register_types();
         ferroui_controls_color_picker::register_types();
         ferroui_controls_inking::register_types();
+        #[cfg(feature = "lottie")]
+        ferroui_controls_lottie::register_types();
         ferroui_controls_repeater::register_types();
         ferroui_controls_livecharts::register_types();
         treedatagrid_demo::register_types();

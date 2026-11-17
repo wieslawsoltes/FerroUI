@@ -1108,6 +1108,10 @@ fn every_class_with_a_document_populates_itself() {
                 if !cfg!(feature = "classic-themes") && path.file_name().is_some_and(|name| name == "classic_themes.rs") {
                     continue;
                 }
+                // So is the page Lottie, with the feature `lottie`.
+                if !cfg!(feature = "lottie") && path.file_name().is_some_and(|name| name == "lottie_page.rs") {
+                    continue;
+                }
                 let source = std::fs::read_to_string(&path).expect("a source of the sample");
                 let classes = source.lines().filter(|line| line.starts_with("xaml_class!(")).count();
                 *declared += classes;

@@ -199,6 +199,12 @@ pub fn generate_bindings(
         builder = builder.blocklist_type(t);
     }
 
+    if build.features[feature::SKOTTIE] {
+        // Skottie's resource headers pull in the libc++ hash table, which
+        // bindgen emits with unbound template parameters in nested aliases.
+        builder = builder.blocklist_file(".*/__hash_table");
+    }
+
     let mut cc_build = Build::new();
 
     for source in &build.binding_sources {

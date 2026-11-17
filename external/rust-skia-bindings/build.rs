@@ -110,7 +110,10 @@ fn main() -> Result<(), io::Error> {
         let build_skia = true;
 
         #[cfg(feature = "binary-cache")]
-        let build_skia = if cargo_target.system == "darwin" && features.graphite() && features["metal"] {
+        let build_skia = if features[features::feature::SKOTTIE] {
+            cargo::warning("FerroUI Skottie uses the same bundled HarfBuzz as framework text shaping");
+            true
+        } else if cargo_target.system == "darwin" && features.graphite() && features["metal"] {
             // Published m153 Graphite binaries leak retained MTL functions and
             // descriptors. Build the reviewed source ownership fix on macOS.
             cargo::warning("FerroUI Graphite Metal ownership fix: using patched Skia source");

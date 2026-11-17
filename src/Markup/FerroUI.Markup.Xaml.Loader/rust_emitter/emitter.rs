@@ -33,7 +33,8 @@ use crate::compiler_extensions::group_transformers::NewServiceProviderNode;
 use super::compiled_resources::CompiledDocumentBuildMethod;
 use crate::compiler_extensions::transformers::{
     ClassBindingSetter, ClassValueSetter, CombinatorSelectorType, EnsureCapacityNode, FerroNameScopeRegistrationXamlIlNode, FerroXamlIlWellKnownTypesExtensions,
-    HandleRootObjectScopeNode, OptionsMarkupExtensionMethod, ResourceAdderSetter, XamlIlAttachedPropertyEqualsSelector,
+    HandleRootObjectScopeNode, InjectServiceProviderNode, OptionsMarkupExtensionMethod, ResourceAdderSetter,
+    XamlIlAttachedPropertyEqualsSelector,
     XamlIlCombinatorSelector, XamlIlDirectCallPropertySetter, XamlIlNestingSelector, XamlIlNotSelector,
     XamlIlNthChildSelector, XamlIlNthChildSelectorType, XamlIlOrSelectorNode, XamlIlPropertyEqualsSelector,
     XamlDirectCallAddHandler, XamlIlSelectorInitialNode, XamlIlSelectorNode, XamlIlStringSelector, XamlIlStringSelectorType, XamlIlTypeSelector,
@@ -1167,6 +1168,10 @@ impl<'a> Emitter<'a> {
         }
         if let Some(n) = node.cast::<XamlAstRuntimeCastNode>() {
             return self.runtime_cast(node, &n);
+        }
+        if node.is::<InjectServiceProviderNode>() {
+            self.uses_context = true;
+            return Ok(self.service_provider_argument());
         }
         if let Some(n) = node.cast::<XamlAstContextLocalNode>() {
             return self.context_local(node, &n);

@@ -89,6 +89,7 @@ fn the_view_model_lists_every_upstream_page_as_available_or_unavailable() {
         // The first page of the section "Composition" is the upstream page "Composition".
         .chain(COMPOSITION_PAGES.into_iter().skip(1))
         .chain(CUSTOM_EFFECTS_PAGES)
+        .chain(cfg!(feature = "lottie").then_some("Lottie"))
         .collect::<Vec<_>>();
     assert_eq!(74 + additional_pages.len(), available + view_model.unavailable_pages().len());
     for header in additional_pages {

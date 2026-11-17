@@ -87,7 +87,7 @@ jpeg-encode = []
 metal = []
 no-compile = []
 pdf = ["jpeg"]
-skottie = ["textlayout"]
+skottie = ["textlayout", "dep:harfbuzz-sys"]
 svg = ["textlayout"]
 textlayout = []
 use-system-jpeg-turbo = ["dep:mozjpeg-sys"]
@@ -109,6 +109,12 @@ doctest = false
 [[test]]
 name = "build_support"
 path = "tests/build_support.rs"
+
+[dependencies.harfbuzz-sys]
+version = "0.8"
+default-features = false
+features = ["bundled"]
+optional = true
 
 [dependencies.mozjpeg-sys]
 version = "2"

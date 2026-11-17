@@ -76,6 +76,7 @@ The first preview added the five other names of section 2.2 as placeholders (37 
 
 `ferroui-controls-charts` (`src/FerroUI.Controls.Charts`, Controls and themes; the port of the public contract of WinUI Charts, docs/porting/winui-charts.md) joined with #282. It is an optional part of the facade (`charts`), and its sample `samples/ChartsDemo` is not published.
 `ferroui-controls-inking` (`src/FerroUI.Controls.Inking`, Controls and themes; the port of the inking controls of WinUI with the WinUI styles of the toolbar, docs/porting/winui-inking.md) joined with #283. It compiles its theme documents in its build script (`links = "ferroui_controls_inking_xaml"`) and depends on the WinUI theme, so it is published after it; it is an optional part of the facade (`inking`).
+`ferroui-controls-lottie` (`src/FerroUI.Controls.Lottie`, Controls and themes; Lottie playback on Skottie, docs/porting/lottie.md) joined for 0.5.1. It exports its type model in its build script (`links = "ferroui_controls_lottie_xaml"`). Without its feature `skia` it is empty; the feature needs a source build of Skia with Skottie (the patched `skia-bindings` of the workspace), so it is an optional part of the facade (`lottie`) that docs.rs does not document.
 `ferroui-controls-repeater` (`src/FerroUI.Controls.Repeater`, Controls and themes; the port of the Repeater of WinUI, docs/porting/winui-repeater/README.md) joined with #269. It is an optional part of the facade (`repeater`).
 `ferroui-markup-xaml-winui` (`src/Markup/FerroUI.Markup.Xaml.WinUI`, Markup; the WinUI XAML importer and its run-time loading entry points, from #286, W9; its x:Bind property-path adapter was removed in #525, X6, for the x:Bind core of `ferroui-markup-xaml`) joined with the W9 pull request. It exports its type model in its build script (`links = "ferroui_markup_xaml_winui_xaml"`) and is an optional part of the facade (`winui-xaml`).
 
@@ -154,6 +155,7 @@ Two names are not under the `ferroui-` prefix. The owner decided on 2026-10-10 t
   | `charts` | `ferroui-controls-charts` (WinUI public-contract port) | `controls_charts` | no |
   | `inking` | `ferroui-controls-inking` (the port of WinUI's inking controls) | `controls_inking` | no |
   | `repeater` | `ferroui-controls-repeater` (the port of WinUI's Repeater) | `controls_repeater` | no |
+  | `lottie` | `ferroui-controls-lottie` with its features `skia` and `markup-functions` (Lottie playback on Skottie; builds Skia from source, desktop only) | `controls_lottie` | no |
   | `devtools` | `ferroui-devtools`, `ferroui-inspect` (opt-in CDP inspection and automation) | `devtools` | no |
   | `diagnostics` | `ferroui-diagnostics` (added for 0.4) | `diagnostics` | no |
   | `treedatagrid` | `ferroui-controls-treedatagrid` and `ferroui-treedatagrid-core` (added for 0.2) | `controls_treedatagrid`, `treedatagrid_core` | no |
