@@ -1101,7 +1101,7 @@ impl<T: PropertyValue + crate::metadata::MarkupTyped> __RegisterValueMarkup
 {
     #[inline(always)]
     fn __register_value_markup(&self) {
-        crate::metadata::MarkupType::register_used(T::MARKUP);
+        crate::metadata::MarkupType::register_used_of::<T>();
     }
 }
 
@@ -1110,7 +1110,7 @@ impl<T: PropertyValue + crate::metadata::MarkupTyped> __RegisterValueMarkup
 {
     #[inline(always)]
     fn __register_value_markup(&self) {
-        crate::metadata::MarkupType::register_used(T::MARKUP);
+        crate::metadata::MarkupType::register_used_of::<T>();
     }
 }
 
@@ -1119,7 +1119,7 @@ impl<O: crate::ObjectType, T: PropertyValue + crate::metadata::MarkupTyped> __Re
 {
     #[inline(always)]
     fn __register_value_markup(&self) {
-        crate::metadata::MarkupType::register_used(T::MARKUP);
+        crate::metadata::MarkupType::register_used_of::<T>();
     }
 }
 
@@ -1129,7 +1129,7 @@ impl<T: PropertyValue + crate::metadata::MarkupTyped> __RegisterValueMarkup
 {
     #[inline(always)]
     fn __register_value_markup(&self) {
-        crate::metadata::MarkupType::register_used(T::MARKUP);
+        crate::metadata::MarkupType::register_used_of::<T>();
     }
 }
 
@@ -1138,7 +1138,7 @@ impl<T: PropertyValue + crate::metadata::MarkupTyped> __RegisterValueMarkup
 {
     #[inline(always)]
     fn __register_value_markup(&self) {
-        crate::metadata::MarkupType::register_used(T::MARKUP);
+        crate::metadata::MarkupType::register_used_of::<T>();
     }
 }
 
@@ -1147,7 +1147,7 @@ impl<O: crate::ObjectType, T: PropertyValue + crate::metadata::MarkupTyped> __Re
 {
     #[inline(always)]
     fn __register_value_markup(&self) {
-        crate::metadata::MarkupType::register_used(T::MARKUP);
+        crate::metadata::MarkupType::register_used_of::<T>();
     }
 }
 

@@ -215,7 +215,7 @@ impl LayoutableImpl for TextBlock {
         if this.has_text_layout() {
             ferroui_base::perf_count!(TextBlockLayoutDropsMeasureInvalidated);
         }
-        this.dispose_text_layout();
+        this.drop_drawn_text_layout();
 
         Self::parent_on_measure_invalidated(this);
     }
@@ -275,7 +275,7 @@ impl LayoutableImpl for TextBlock {
                 if this.has_text_layout() {
                     ferroui_base::perf_count!(TextBlockLayoutDropsMeasureConstraint);
                 }
-                this.dispose_text_layout();
+                this.drop_drawn_text_layout();
             }
             this.constraint.set(deflated_size);
 
@@ -292,16 +292,13 @@ impl LayoutableImpl for TextBlock {
             if this.has_text_layout() {
                 ferroui_base::perf_count!(TextBlockLayoutDropsEmbeddedControls);
             }
-            this.dispose_text_layout();
+            this.drop_drawn_text_layout();
         }
 
         // This implicitly recreates the text layout with a new constraint if
         // we previously reset it.
         if !this.has_text_layout() {
             ferroui_base::perf_count!(TextBlockLayoutsCreatedByMeasure);
-            // A new layout is a new drawing, whether the size of the block changes or not
-            // (`resize_changes_drawing`).
-            this.invalidate_visual();
         }
         let text_layout = this.text_layout();
 
@@ -334,14 +331,14 @@ impl LayoutableImpl for TextBlock {
             if this.has_text_layout() {
                 ferroui_base::perf_count!(TextBlockLayoutDropsArrangeAlignment);
             }
-            this.dispose_text_layout();
+            this.drop_drawn_text_layout();
             this.constraint.set(available_size);
         } else if this.constraint.get() != available_size {
             if !this.keeps_text_layout_for(available_size) {
                 if this.has_text_layout() {
                     ferroui_base::perf_count!(TextBlockLayoutDropsArrangeConstraint);
                 }
-                this.dispose_text_layout();
+                this.drop_drawn_text_layout();
             }
             this.constraint.set(available_size);
         }
@@ -349,8 +346,6 @@ impl LayoutableImpl for TextBlock {
         // This implicitly recreates the text layout with a new constraint.
         if !this.has_text_layout() {
             ferroui_base::perf_count!(TextBlockLayoutsCreatedByArrange);
-            // A new layout is a new drawing (`resize_changes_drawing`).
-            this.invalidate_visual();
         }
         let text_layout = this.text_layout();
 
@@ -1335,6 +1330,18 @@ impl TextBlock {
 
     pub(crate) fn has_text_layout(&self) -> bool {
         self.text_layout.is_some()
+    }
+
+    /// Lets go of the layout the block has, which layout makes again, and says that the block
+    /// draws something else: a new layout is a new drawing whether the size of the block
+    /// changes or not (`resize_changes_drawing`). A block that has no layout says nothing:
+    /// what let its layout go said so (a text or a font that changed invalidates the visual
+    /// itself), or the block was never drawn.
+    fn drop_drawn_text_layout(&self) {
+        if self.has_text_layout() {
+            self.dispose_text_layout();
+            self.invalidate_visual();
+        }
     }
 
     /// Whether the current text layout is the one a layout created for
