@@ -6808,17 +6808,26 @@ hold, and 386 more borders had none. Three rules gave up where they need not.
   size, no desired size) and no hold, so it held at the width it got and nowhere else, and so did
   the stack around it: one sparkline in a card, and the card was measured at every width. Its
   measure does not read the constraint: it now holds at every size (`MeasureHold::ANY`).
-- *A grid whose star rows share a finite height held nothing.* A grid without row definitions
-  has one star row; in a box of a set height (the track of a progress bar) that row shares a
-  finite height, and the grid reported no hold at all. The rows share the height by what
-  their cells want, which is the same wherever the cells hold: such a grid now holds at that
-  height alone, over the widths its columns give it.
+- *A grid of one star row at a finite height held nothing.* A grid without row definitions
+  has one star row; in a box of a set height (the track of a progress bar) that row has a
+  finite height, and the grid reported no hold at all. The row is the height of the grid, so
+  at the same height every cell gets the height it got: such a grid now holds at that height
+  alone, over the widths its columns give it. A grid of several rows of which some are star
+  rows holds nothing at a finite height, as before: the first form of this change held there
+  too, and the walk of the cells it needs cost a grid of a thousand cells 17 % more
+  instructions a measure (`PanelMeasureArrange.grid` of the gate), for a hold a grid of rows
+  seldom needs.
 - *An element cut on one axis held nothing on either.* A desired size larger than the
   available size is cut to it, so that axis depends on the available size; the hold of the
   other axis was dropped with it. At tier 16 every size is multiplied by 0.12, a bar is 0.72
   of a pixel high, its rounded height is one pixel, and so every fill was cut and nothing
   above it held. The cut axis now holds at the available size it was measured at
   (`map_axis_or_its_size`) and the other over its range.
+
+With the third rule an element that is cut has a hold where it had none, and a measure asked
+its hold before it looked whether the size was the one it had: `Layoutable::measure` now
+looks at that first, which is what most measures of a pass are, and asks the hold only for
+another size.
 
 What is left is the rounding step a grid takes from the hold of a cell of a star column on
 each side: at 0.12 the hold of a wrapped title is narrower than two pixels and nothing of

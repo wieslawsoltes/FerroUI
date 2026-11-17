@@ -874,40 +874,43 @@ impl Layoutable {
             panic!("Cannot call Measure using a size with NaN values.");
         }
 
-        if self.is_measure_valid.get()
-            && self.previous_measure.get().is_some()
-            && self.measure_hold.get().is_some_and(|hold| hold.contains(available_size))
-        {
-            // The measure holds at this size (section 9.15): nothing to do.
-            self.previous_measure.set(Some(available_size));
-            return;
+        if self.is_measure_valid.get() {
+            // The size it was measured at, which most measures of a pass are: nothing to do, and
+            // nothing to ask a hold.
+            let previous = self.previous_measure.get();
+            if previous == Some(available_size) {
+                return;
+            }
+            if previous.is_some() && self.measure_hold.get().is_some_and(|hold| hold.contains(available_size)) {
+                // The measure holds at this size (section 9.15): nothing to do.
+                self.previous_measure.set(Some(available_size));
+                return;
+            }
         }
 
-        if !self.is_measure_valid.get() || self.previous_measure.get() != Some(available_size) {
-            let previous_desired_size = self.desired_size();
-            self.measure_hold.set(None);
-            crate::perf_count!(MeasuresExecuted);
+        let previous_desired_size = self.desired_size();
+        self.measure_hold.set(None);
+        crate::perf_count!(MeasuresExecuted);
 
-            self.is_measure_valid.set(true);
-            self.clear_subtree_measure_invalid();
+        self.is_measure_valid.set(true);
+        self.clear_subtree_measure_invalid();
 
-            self.measuring.set(true);
-            let guard = MeasuringGuard(&self.measuring);
-            let desired_size = self.measure_core(available_size);
-            drop(guard);
+        self.measuring.set(true);
+        let guard = MeasuringGuard(&self.measuring);
+        let desired_size = self.measure_core(available_size);
+        drop(guard);
 
-            if Self::is_invalid_size(desired_size) {
-                panic!("Invalid size returned for Measure.");
-            }
+        if Self::is_invalid_size(desired_size) {
+            panic!("Invalid size returned for Measure.");
+        }
 
-            self.set_desired_size(desired_size);
-            self.previous_measure.set(Some(available_size));
+        self.set_desired_size(desired_size);
+        self.previous_measure.set(Some(available_size));
 
-            if self.desired_size() != previous_desired_size {
-                if let Some(parent) = self.visual_parent() {
-                    if let Some(parent) = parent.downcast_ref::<Layoutable>() {
-                        parent.child_desired_size_changed(self);
-                    }
+        if self.desired_size() != previous_desired_size {
+            if let Some(parent) = self.visual_parent() {
+                if let Some(parent) = parent.downcast_ref::<Layoutable>() {
+                    parent.child_desired_size_changed(self);
                 }
             }
         }
