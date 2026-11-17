@@ -1075,6 +1075,45 @@ propagation benchmarks between -5.0 % and +3.0 % of the base. The eight move tog
 build: the two gates of section 4.20, a change that touches no propagation, had them between
 -31 % and +16 %.
 
+### 4.23 A style written as text does not keep every control (the declarative layer)
+
+An application on the declarative layer (`ferroui-view`) was 10 MB larger than hello world
+whatever it showed: the published comparison's FerroUI application, three screens of borders,
+text, panels and a list, was 30.5 MB.
+
+**The root.** `ferroui-view` turned the tables of types on (`ferroui-base/type-tables`, section
+4.6) for one function, `parse_selector`, behind `style("ListBoxItem")`: a selector in text names
+its classes, the parser looked a name up in the table of every type, and the function registered
+the tables of the framework first. With the tables registered every control is reachable, and
+the linker keeps all of them. One style in text anywhere in an application was enough.
+
+**The change.** A selector may know a class by its name alone
+(`Selectors::of_type_name`, `Selectors::is_type_name`): it matches an element whose class, or
+with `:is(..)` one of its base classes, has that name, and takes the type itself once the class
+is known. The parser of selectors falls back to it for a name its resolver does not know
+(`SelectorParser::unknown_types_by_name`). `parse_selector` looks a name up among the classes
+that are known when it runs (a class is known once an object of it exists) and uses the name for
+the rest; it registers no table. `ferroui-view` turns the tables on only with its feature
+`xaml`, which loads markup at run time and needs them.
+
+A name no class has matches nothing, where it was an error before; the selector of a property
+(`Button[IsDefault=True]`) still needs its class known.
+
+| The comparison's FerroUI application (release, macOS, stripped) | Before | After |
+|---|---:|---:|
+| File | 30.53 MB | 23.05 MB |
+| `__TEXT,__text` | 25.58 MB | 19.46 MB |
+
+Its three screens draw the same pixels before and after (the gauntlet and the patchwork frozen
+on one frame, compared pixel by pixel). A first start of a program the system never ran checks
+the whole file, so the size is start time too: the first frame of a first start went from 1.41 s
+to 1.27 s at the median of the comparison's harness (docs/porting/desktop-performance.md,
+section 9.83).
+
+Tests: `selectors_by_name_match_what_the_selectors_by_type_match` (`styling/selector_tests.rs`),
+`a_type_the_resolver_does_not_know_is_an_error_unless_it_may_be_matched_by_name` (the parser's
+tests); the 75 tests of `ferroui-view` pass without the tables.
+
 ## 5. What an executable is made of
 
 ### 5.1 Sections (macOS, release, unstripped)

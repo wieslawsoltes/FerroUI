@@ -3,6 +3,7 @@ use crate::reactive::{signal, Owner};
 use crate::{Element, GridDefinitions, IntoElement};
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::layout::HorizontalAlignment;
+use ferroui_base::media::Color;
 use ferroui_base::{BoxedValue, Ref, Thickness};
 use ferroui_controls::{Button, Control, Grid, StackPanel, TextBlock, TextBox};
 use std::cell::Cell;
@@ -37,6 +38,31 @@ fn setters_give_the_properties_their_values_with_the_conversions() {
     assert_eq!(text.name().as_deref(), Some("greeting"));
     assert!(text.classes().contains("title") && text.classes().contains("large"));
     owner.dispose();
+}
+
+#[test]
+fn elements_that_name_a_color_share_its_brush() {
+    let (first, first_owner) = mount(text_block().text("a").foreground("#1E293B"));
+    let (second, second_owner) = mount(text_block().text("b").foreground("#1e293b"));
+    let (third, third_owner) = mount(text_block().text("c").foreground(Color::from_rgb(0x1E, 0x29, 0x3B)));
+    let (other, other_owner) = mount(text_block().text("d").foreground("#1E293C"));
+    let brush = |control: &Ref<Control>| {
+        control.cast::<TextBlock>().expect("a text block").foreground().expect("a brush")
+    };
+    let color = |control: &Ref<Control>| brush(control).as_solid_color_brush().map(|solid| solid.color());
+
+    // One color, written three ways, is one brush; another color is another.
+    assert!(Rc::ptr_eq(&brush(&first), &brush(&second)));
+    assert!(Rc::ptr_eq(&brush(&first), &brush(&third)));
+    assert!(!Rc::ptr_eq(&brush(&first), &brush(&other)));
+    assert_eq!(color(&first), Some(Color::from_rgb(0x1E, 0x29, 0x3B)));
+    // A name is a color too.
+    let (named, named_owner) = mount(text_block().text("e").foreground("Red"));
+    assert_eq!(color(&named), Some(Color::from_rgb(0xFF, 0, 0)));
+
+    for owner in [first_owner, second_owner, third_owner, other_owner, named_owner] {
+        owner.dispose();
+    }
 }
 
 #[test]

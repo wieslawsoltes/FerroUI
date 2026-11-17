@@ -1,0 +1,5 @@
+[submodule "benchmarks/comparison/upstream"]
+	path = benchmarks/comparison/upstream
+	url = https://github.com/samoylenkodmitry/Cranpose.git
+	shallow = true
+	update = none

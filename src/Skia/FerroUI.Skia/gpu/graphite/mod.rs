@@ -2,6 +2,7 @@
 
 mod graphite_gr_context;
 mod graphite_prewarm;
+pub(crate) mod pipeline_record;
 mod pipelined_layer;
 
 pub use graphite_gr_context::GraphiteGrContext;

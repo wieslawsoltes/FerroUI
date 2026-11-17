@@ -882,6 +882,72 @@ the machine, the emulator or the simulator; the browser suite counts what WebGL 
   same run, and never with the numbers of another platform. A virtual machine or an emulator runs
   alone while it is measured.
 
+### 8.3 The comparison's own FerroUI application, from this checkout and from the published crates
+
+The comparison publishes numbers for a FerroUI application of its own, written on the
+declarative layer, and not for `samples/GauntletBenchmark` (section 9.82 has what differs).
+`benchmarks/comparison` builds that application, unchanged, two ways: from the FerroUI of
+this checkout (`ferroui-local/Cargo.toml`) and from the published crates its own manifest
+names. Its sources are a submodule that a clone does not fetch
+(`git submodule update --init --checkout benchmarks/comparison/upstream`).
+`benchmarks/comparison/compare.py build` builds the two, and `compare.py run --scenario
+gauntlet:16 --rounds 2` runs the comparison's harness on each and prints them beside each
+other. The first run, a display with other windows on it (`--diagnostic`), the main branch
+against 0.5.0:
+
+| Gauntlet, tier 16 | This checkout | Published 0.5.0 |
+| --- | ---: | ---: |
+| First start: frames a second over the run | 33.8 | 28.4 |
+| First start: first frame | 1.39 s | 2.02 s |
+| Second start: frames a second over the run | 37.5 | 35.0 |
+| Second start: first frame | 0.56 s | 0.55 s |
+| Second start: CPU a frame | 67.1 ms | 70.3 ms |
+
+The same run at the end of that day, three starts each, with what sections 9.81 to 9.83
+and section 4.23 of `docs/binary-size.md` changed on the main branch (the pipelines of a
+frame compiled side by side, the reactive runtime, the records of pipelines, the selectors
+by name):
+
+| Gauntlet, tier 16 | This checkout | Published 0.5.0 |
+| --- | ---: | ---: |
+| First start: frames a second over the run | 39.9 | 28.7 |
+| First start: first frame | 1.12 s | 2.03 s |
+| First start: CPU a frame | 58.8 ms | 69.2 ms |
+| Second start: frames a second over the run | 43.3 | 34.9 |
+| Second start: first frame | 0.53 s | 0.56 s |
+| Second start: CPU a frame | 58.1 ms | 67.4 ms |
+
+What was left in the steady rate of that application then (a sample of its UI thread, the
+time of each class's own layout, beside the sample of this repository): text measured, 537
+ms against 428; the shapes of its sparklines measured every frame, 114 ms against none; its
+grids measured, 112 ms against 22.
+
+The same run a day later, three starts each, with sections 9.82 (a run of an effect asks for
+no memory) and 9.84 to 9.86 on the main branch (texts of one colour share their layouts,
+shader libraries made when the application is built, measure holds of a canvas, of a grid of
+one star row and of an axis that is cut):
+
+| Gauntlet, tier 16 | This checkout | Published 0.5.0 |
+| --- | ---: | ---: |
+| First start: frames a second over the run | 46.8 | 28.7 |
+| First start: first frame | 1.04 s | 2.08 s |
+| First start: CPU a frame | 51.3 ms | 69.0 ms |
+| Second start: frames a second over the run | 49.5 | 35.7 |
+| Second start: first frame | 0.52 s | 0.56 s |
+| Second start: CPU a frame | 51.2 ms | 65.9 ms |
+
+What is left in its steady rate: its UI thread is busy 88 % of the time and its render
+thread 48 %, so the UI thread sets the rate. A frame of it runs 2,410 measures against 1,148
+of the sample of this repository and makes 1,122 objects against 493 (each card replaces
+the two column definitions of its progress bar and the geometries of two shapes); the rest
+is recording, text and the reactive runtime, none of them above a quarter. What is left of
+its first start is the system's check of a program it never ran and the application's own
+start (section 9.85).
+
+The harness measures a window on a display from outside the application, so this is not a
+suite of the gate; it is where a change to the declarative layer or to the start is measured
+as the comparison will measure it.
+
 ## 9. Deviations from upstream for frame cost
 
 Each deviation keeps the observable behaviour of upstream (the same events, the same order, the
@@ -6403,6 +6469,11 @@ application of the user; removing it is the owner's call.
 **Outcome.** Nothing is changed: there is no first-launch cost of this size left to move to
 another thread. The prewarm of the effects of a theme and of the frame stays as it is.
 
+**Correction (section 9.81).** The launches measured here started the same file again, and
+that is not a first start: the system had run the program before, and Metal's own cache of
+compiled sources, which is not the one removed here, still had every shader. A first start
+of a program the system has never run does wait, for both, and section 9.81 measures it.
+
 **Other backends.** The browser's first frame (step 4 of the experiment: one draw, not one
 to find the pipelines and one to show) was not measured and stays open.
 
@@ -6533,3 +6604,369 @@ instructions (`detach` 8.9, `resource_changed` 10.6): the elements of 4,000 tile
 fit the caches that hold those of 1,000. That is the memory an element takes, which the heap
 census of the start is about, and not a cost that grows faster than the tree; the pairs do
 not judge it.
+
+### 9.81 A first start: the pipelines of the first frame compile side by side
+
+The published comparison of 0.5.0 has the first frame of the gauntlet 2.6 seconds after a
+first start, against 0.7 to 1.2 seconds for the frameworks that lead it, and a rate over
+the ten seconds of the run that the wait takes a quarter of. Section 9.78 looked for that
+wait and did not find it, because it did not make a first start.
+
+**What a first start is.** The comparison's harness copies the program, signs the copy
+again with a code hash the system has not seen, removes the cache of compiled Metal shaders
+and launches it; the first frame is the first picture of the window, taken from outside the
+application. Measured here the same way, with the comparison's own FerroUI application
+(the declarative layer, the Simple theme, a 46 MB program) built from the main branch, the
+gauntlet at tier 16, a display at 60 Hz with other windows on it:
+
+| | First frame, first start | Rate of the run | First frame, second start | Rate |
+| --- | ---: | ---: | ---: | ---: |
+| Main | 2.30 s (2.35, 2.24) | 29.3 fps | 0.57 s | 37.0 fps |
+
+**Where the 2.3 seconds go** (a sample of the main thread of a first start; a sampled start
+is slower, so these are shares more than times):
+
+| Part | Sampled time |
+| --- | ---: |
+| Before the first instruction of the program: the system checks a program it never ran | 420 to 630 ms |
+| The first paint, waiting for Metal: libraries compiled from source | 550 to 700 ms |
+| The first paint, waiting for Metal: pipeline states | 215 to 260 ms |
+| The application: platform set-up, mount of the tree, first layout | about 300 ms |
+| From the application's first tick to the window on the display | about 300 ms |
+
+The check before the first instruction grows with the size of the program (the harness's
+own notes have 214 ms for 3 MB, 270 ms for 12 MB and 380 ms for 24 MB, about 8 ms a
+megabyte), so the size of an application is a part of its first start: the comparison's
+application is 30.5 MB stripped, 10 MB of code more than hello world, because the
+declarative layer keeps the tables of types and with them every control.
+
+A sample also shows 120 to 180 ms in `-[NSApplication finishLaunching]`, where AppKit loads
+a library for the text input items of the main menu. That time is the sampler's: the
+system tells an attached sampler of every library a process loads and waits for its answer
+(`notifyDebuggerLoad`). It is not a cost of a start that nothing watches.
+
+**The first paint.** Graphite makes the pipeline of a draw when the recording that holds it
+is added to the context, and without a thread pool it makes them one after another on the
+thread that does that: on a first start the UI thread, inside the first paint. Each pipeline
+is two Metal libraries compiled from source and a pipeline state, tens of milliseconds
+each, and the first frame of the gauntlet needs a few dozen.
+
+**The change.** The Graphite context of the process is given a thread pool
+(`ContextOptions::fExecutor`, `skia_metal_gpu.rs`), which Graphite's pipeline manager uses
+as it is: the pipelines a recording needs become tasks of the pool, and the thread that
+adds the recording waits for the last of them. The Skia binding has the option as a field
+and no way to make an executor, so a file of its own asks Skia for one
+(`gpu/graphite/pipeline_executor.cpp`). One pool for the process, a thread for each core
+and eight at most; `FERROUI_PIPELINE_THREADS` sets the number, and 0 leaves Graphite as it
+was. The threads sleep when nothing compiles.
+
+| Pipeline threads | First frame, first start (two starts) | Rate of the run |
+| ---: | ---: | ---: |
+| none (before) | 2.35, 2.24 s | 28.4, 30.1 fps |
+| 2 | 1.83, 1.78 s | 32.0, 32.2 |
+| 4 | 1.61, 1.43 s | 32.5, 32.9 |
+| 8 (the default on this machine) | 1.38, 1.37 s | 33.6, 33.9 |
+| 12 | 1.56, 1.44 s | 32.4, 32.0 |
+
+The first paint of the sampled first start goes from 814 ms to 259 ms, 194 of them the
+wait for the pool. The second start is the same with and without (0.54 to 0.57 s, 37 to 38
+fps): its pipelines come from Metal's cache.
+
+**What is left of a first start**, in the order of what it costs: the system's check of
+the program (its size), the application's own start, and the wait for the pool (pipelines
+that could be asked for before the first paint).
+
+**Tests.** `gpu/metal/tests.rs`: `the_pipeline_threads_follow_the_cores_and_the_environment`
+and `the_process_has_a_pipeline_pool_unless_the_environment_asks_for_none`; the drawing
+tests of that file make their contexts with the pool and read their pixels back.
+
+### 9.82 The declarative layer: an effect that runs again does not search the subscribers of its sources
+
+The published comparison measures a gauntlet written on the declarative layer
+(`ferroui-view`: signals, effects, a keyed list), which is not the program of
+`samples/GauntletBenchmark` (the controls themselves, a virtualizing list that recycles its
+rows, bars and sparklines that draw themselves). The two draw the same screen; at tier 16
+the sample of this repository runs at 53 to 60 frames a second and the declarative program
+at 37 to 38.
+
+**Where the declarative program was** (a sample of its UI thread in the steady state, four
+seconds): 45 % in the layout pass, 34 % in the reactive runtime of the declarative layer,
+2 % idle, against 32 %, none and 30 % for the sample of this repository. Two thirds of the
+time in the runtime was bookkeeping: `Runtime::clear_sources` and `Runtime::track`.
+
+**The cause.** A screen like this has one frame signal that thousands of effects read. An
+effect that ran again first left the subscribers of every source it had
+(`subscribers.retain`, a walk of the whole list of the signal) and then, as it read the
+signal again, asked whether it was among them (`subscribers.contains`, another walk) and
+was appended. Every frame each of N effects walked a list of N twice.
+
+**The change** (`src/FerroUI.View/reactive.rs`). A node is among the subscribers of exactly
+what it has as a source, so whether it follows a source is a question to its own few
+sources. A run keeps what the run before read (`previous`): a source read again, in the
+order of the run before or in another, is taken from there and the subscribers of the
+source are not touched; a source read for the first time is appended to them; what the run
+did not read again is left at its end, which is the one walk that remains and happens only
+when an effect stops reading something. The order in which the effects of a signal run is
+the order they were made in and no longer rotates.
+
+| The comparison's FerroUI program, gauntlet tier 16, its harness (two starts each) | Before | After |
+| --- | ---: | ---: |
+| Second start: frames a second over the run | 37.8, 37.4 | 42.5, 43.4 |
+| Second start: CPU a frame | 64.6, 65.4 ms | 60.3, 58.0 ms |
+| First start: frames a second over the run | 33.2, 33.8 | 37.1, 38.1 |
+| UI thread in the reactive runtime (sampled) | 34 % | 13 % |
+| UI thread idle (sampled) | 2 % | 14 % |
+
+**What is next for that program**: the layout pass (48 % of its UI thread), of which a
+quarter makes text layouts again every frame.
+
+**A run asks for no memory** (a later change to the same lists). The start of a run moved
+what the run before read into `previous` and left the list of the run empty, without its
+room, and `Vec::split_off(0)` on the emptied `previous` made a list of the same room to
+throw away: every run of every effect made two lists and freed two. The two lists now
+change places at the start of a run (`begin_tracking`: `swap`, then `append` for what a run
+that did not end left unread), so a run fills the list of two runs ago. The comparison's
+program runs about two thousand effects a frame; over three starts each its frames a second
+go from 44.0 to 44.5 on a second start and from 40.8 to 41.6 on a first one, and its CPU a
+frame from 57.2 to 56.7 ms: one in a hundred, for nothing.
+
+**Tests.** `src/FerroUI.View/tests/reactive_tests.rs`:
+`effects_that_run_again_stay_one_subscriber_each_in_the_order_they_were_made`,
+`a_source_a_run_does_not_read_again_is_followed_no_more`,
+`sources_read_in_another_order_are_all_kept`,
+`a_source_disposed_while_its_subscriber_runs_is_forgotten` and
+`an_effect_that_runs_again_fills_the_list_of_two_runs_ago`.
+
+### 9.83 A first start: pipelines from a record, asked for when the platform starts
+
+After section 9.81 the first paint of a first start still waits for the pipelines of the
+frame, side by side on the pool. This section asks for them before the first paint.
+
+**What other renderers do** (the research is in #786). A renderer with a closed set of
+shaders compiles them when it is built (Flutter's Impeller, Qt's shader tool). One with an
+open set records what an application draws and compiles the record before it is needed
+(Unreal's bundled pipeline caches, Chrome's start with Skia Graphite, the framework that
+leads the published comparison, which also draws its first frames with a few simple
+pipelines compiled first and alone). Skia is of the second kind. All of them draw the first
+frame on the GPU, and so does this.
+
+**The record.** Graphite reports every pipeline it makes with a key that can be stored, and
+makes a pipeline from such a key before a draw needs it. A record is the keys of the
+pipelines an application made: `FERROUI_PIPELINE_RECORD=<file>` writes one, an application
+ships its own (`ferroui_skia::register_pipeline_record`), and the Skia crate carries one of
+ordinary drawing, 37 pipelines in 2.3 kB (fills, rounded rectangles, borders, text, the
+shadow of a box, a small gradient, clips), for macOS on Apple silicon, where it was
+recorded. When the context is made, the keys go to the pipeline pool on a thread of their
+own.
+
+**The context, sooner.** The render context was made by the first frame. With
+`FirstFramePipelines::Prewarm` (the default; `FERROUI_FIRST_FRAME=wait` is the behaviour
+before) the native platform makes it when it starts (`Compositor::prepare_render_interface`),
+so the record compiles while the application builds its first screen.
+
+**What a record cannot hold** in the pinned Skia: a pipeline that samples a texture (14 of
+the gauntlet's 45: the path from a key fails in the snippet that normalises the coordinates
+and the process ends) and Skia's own runtime effects (the passes of a blur: refused in a
+context that has not drawn with them). They are made at their first draw, on the pool.
+
+**Measured** as section 9.81 measures a first start (the comparison's own application built
+from the branch, gauntlet tier 16, three starts each):
+
+| | `wait` | `prewarm` |
+| --- | ---: | ---: |
+| First frame, first start | 1.370, 1.385, 1.391 s | 1.345, 1.418, 1.259 s |
+| First frame, second start | 0.562, 0.572, 0.556 s | 0.553, 0.565, 0.600 s |
+| First paint of a sampled first start | 259 ms | 137 ms |
+| of it, the wait for pipelines | 194 ms | 70 ms |
+
+The first paint is half of what it was, and the first frame moves by less than its own
+scatter (0.04 s at the median): a first start of this application is now the system's
+check of a 30 MB program it never ran (0.42 s), the application's own start and the time
+to the window on the display. The context made sooner without a record changes nothing
+(1.39 and 1.40 s).
+
+**What is next for the pipelines** (#786): the texture pipelines, through the form of
+Graphite's precompile that takes paint options (what Chrome uses), and shader libraries
+compiled when the application is built, loaded where Skia hands text to Metal. Both need the
+patched Skia binding. **And for the first start**: the size of an application on the
+declarative layer, which keeps every control because one selector is a string.
+
+**Tests.** `gpu/graphite/pipeline_record.rs` (the format of a record; what stays out of
+one), `gpu/metal/tests.rs`: `the_record_of_ordinary_drawing_is_taken_whole_where_it_is_used`
+(a Metal device takes every key of the record the crate carries; it found the refused blur
+keys), `rendering/first_frame.rs` (the names of the environment). The Metal drawing tests
+make their contexts with the record asked for.
+
+### 9.84 The declarative program: texts of one colour share their layouts
+
+**What was counted.** The comparison's own FerroUI program and the sample of this repository
+were built with the counters of the UI thread (`perf-counters`, `FERROUI_FRAME_TIMES=1`) and
+run at tier 16. A frame of each, side by side:
+
+| A frame, gauntlet tier 16 | The declarative program | The sample of this repository |
+| --- | ---: | ---: |
+| Text blocks whose layout was dropped for a new text | 732 | 745 |
+| Text layouts made | 781 | 431 |
+| Layouts found in the cache of the font manager (section 9.29) | 7 | 347 |
+| Measures run | 4,457 | 1,148 |
+| Objects made | 1,122 | 493 |
+
+Both change the same 740 texts a frame (400 quotes of two texts each). The sample finds 45 %
+of them in the cache; the declarative program found one in a hundred.
+
+**The cause.** The cache told brushes apart as objects, because a brush that can change may
+get another colour after a layout was made with it. An element of the declarative layer
+that is written `.foreground("#64748B")` made a brush of its own from the text, so 400 quotes
+of one colour had 400 brushes and no two of them could share the layout of `+0.12%`. The
+sample holds one brush a colour.
+
+**The change**, two parts.
+
+- `text_layout_cache.rs`, `same_brush`: two brushes are the same brush to the cache when they
+  are one object, or when neither can change (`IBrush::as_immutable_brush`) and they are
+  equal (`IBrush::equals`: for an immutable solid colour brush its colour, opacity and
+  transforms) with the same transform origin. A brush that can change is still told apart
+  from every other object. This holds for any application: a colour written in a data
+  template or parsed for each item is an immutable brush of its own.
+- `src/FerroUI.View/conversions.rs`, `brush_of`: a colour given to a setter of the
+  declarative layer (a `Color`, `"#1E293B"`, a name) is one brush for the thread, for the
+  first 1,024 colours; a value that runs through colours gets brushes of its own past that.
+  A screen of ten thousand elements in a dozen colours holds a dozen brushes.
+
+**Measured** (the comparison's program built from the branch with its own profile, its
+harness, gauntlet tier 16, three starts each, the median; the counters from the build with
+counters):
+
+| | Before | After |
+| --- | ---: | ---: |
+| Text layouts made a frame | 781 | 435 |
+| Layouts found in the cache a frame | 7 | 353 |
+| Second start: frames a second over the run | 44.4 | 48.9 |
+| Second start: CPU a frame | 57.3 ms | 52.6 ms |
+| First start: frames a second over the run | 41.1 | 45.5 |
+| First start: first frame | 1.12 s | 1.14 s |
+
+**What is left in that program**: four times the measures of the sample. Its quotes hug
+their texts, so a text that changes its width measures the tile around it; each card
+replaces the two column definitions of its progress bar every frame (545 definitions made a
+frame) and sets the points of two shapes, which measure for them.
+
+**Tests.** `text_layout_cache_tests.rs`:
+`a_layout_is_shared_for_the_same_brush_and_for_equal_brushes_that_cannot_change` (equal
+immutable brushes share, another colour or opacity does not, two brushes that can change do
+not). `src/FerroUI.View/tests/builder_tests.rs`:
+`elements_that_name_a_color_share_its_brush`.
+
+### 9.85 A first start: shader libraries made when the application is built
+
+**Where the time of a pipeline goes.** After sections 9.81 and 9.83 the pipelines of a first
+start are made on eight threads, most of them before the first frame asks. A sample of those
+threads (the comparison's program, a first start): of the time in
+`MtlGraphicsPipeline::Make`, three quarters is `newLibraryWithSource:` (313 of 424 samples
+on a thread, the same on each), Metal compiling the text of a shader in a helper process,
+and a quarter is `newRenderPipelineStateWithDescriptor:`.
+
+**The change.** The first part is done ahead. The Metal compiler of Xcode makes the same
+library from the same text (`scripts/perf/metal-libraries.py`), a table holds the libraries
+by their text, and the device is asked through a front on its own
+`newLibraryWithSource:options:error:` (`gpu/metal/shader_libraries.m`), which loads the
+library of a text the table has and lets the device compile any other. The crate carries
+the table of ordinary drawing for macOS on Apple silicon, 77 libraries, 115 KB packed;
+an application registers the table of its own screens beside it
+(`ferroui_skia::register_metal_libraries`). The mechanism, why it is a front on the device
+and not a change of Skia, and what the other platforms have, are in
+`docs/porting/gpu-rendering.md` ("Pipelines made ahead of their first draw").
+
+**Measured** (the comparison's own program built from the branch with its profile, its
+harness, gauntlet tier 16, five starts each of one binary, the table of the crate asked
+and, with `FERROUI_METAL_LIBRARIES=off`, not asked; the median, and the five):
+
+| | Table off | Table of the crate |
+| --- | ---: | ---: |
+| First start: first frame | 1.246 s | 1.018 s |
+| the five | 1.142, 1.147, 1.246, 1.269, 1.320 | 1.003, 1.005, 1.018, 1.024, 1.081 |
+| First start: frames a second over the run | 40.6 | 42.1 |
+| Second start: first frame | 0.524 s | 0.523 s |
+| Second start: frames a second over the run | 44.0 | 44.3 |
+| The program | 23,064,208 bytes | 23,180,752 bytes |
+
+A first start shows its first frame 0.23 s sooner and its starts differ by 0.08 s where
+they differed by 0.18 s; a second start, which finds what the system kept of the first, is
+the same. The pictures are the same: no pixel differs between a frame drawn with the table
+and one drawn without (gauntlet tier 5 and patchwork tier 5, frame 120). The texts are the
+same from run to run and from build to build (two recordings of 71 texts, the same 71 keys),
+and the 71 of the comparison's program are among the 77 the sample of this repository
+writes.
+
+**What is left of a first start**: the system's check of a program it never ran, the
+pipeline states themselves (a quarter of a pipeline; Metal's binary archives are of one GPU
+and one system version, so they are not shipped), and the application's own start.
+
+**Tests.** `metal_libraries.rs` (the key, the table, a packed table unpacked by the system,
+what a library is given for, the table the crate carries), `gpu/metal/tests.rs`:
+`the_libraries_of_ordinary_drawing_are_found_by_the_pipelines_of_the_record` (fails when
+Skia writes other texts than the table was made of). The 648 tests of the crate, the Metal
+drawing tests among them, run with the table in front of the device.
+
+### 9.86 Measure holds: a canvas, star rows at a set height, an axis cut to the available size
+
+**What was counted.** After section 9.84 the declarative program of the comparison still ran
+4,457 measures a frame at tier 16, against 1,148 of the sample of this repository, on a
+screen whose width changes every frame: the case measure holds are for (section 9.15). A
+count by class and by reason (a temporary one) said why its cards were measured again: 926
+borders, 573 grids and 200 stack panels a frame were valid and offered a width outside their
+hold, and 386 more borders had none. Three rules gave up where they need not.
+
+- *A canvas held nothing.* `Canvas` has a measure of its own (every child at an infinite
+  size, no desired size) and no hold, so it held at the width it got and nowhere else, and so did
+  the stack around it: one sparkline in a card, and the card was measured at every width. Its
+  measure does not read the constraint: it now holds at every size (`MeasureHold::ANY`).
+- *A grid of one star row at a finite height held nothing.* A grid without row definitions
+  has one star row; in a box of a set height (the track of a progress bar) that row has a
+  finite height, and the grid reported no hold at all. The row is the height of the grid, so
+  at the same height every cell gets the height it got: such a grid now holds at that height
+  alone, over the widths its columns give it. A grid of several rows of which some are star
+  rows holds nothing at a finite height, as before: the first form of this change held there
+  too, and the walk of the cells it needs cost a grid of a thousand cells 17 % more
+  instructions a measure (`PanelMeasureArrange.grid` of the gate), for a hold a grid of rows
+  seldom needs.
+- *An element cut on one axis held nothing on either.* A desired size larger than the
+  available size is cut to it, so that axis depends on the available size; the hold of the
+  other axis was dropped with it. At tier 16 every size is multiplied by 0.12, a bar is 0.72
+  of a pixel high, its rounded height is one pixel, and so every fill was cut and nothing
+  above it held. The cut axis now holds at the available size it was measured at
+  (`map_axis_or_its_size`) and the other over its range.
+
+With the third rule an element that is cut has a hold where it had none, and a measure asked
+its hold before it looked whether the size was the one it had: `Layoutable::measure` now
+looks at that first, which is what most measures of a pass are, and asks the hold only for
+another size.
+
+What is left is the rounding step a grid takes from the hold of a cell of a star column on
+each side: at 0.12 the hold of a wrapped title is narrower than two pixels and nothing of
+it is left, so the header of a card, and with it the card, still holds one width. At the
+sizes applications have, a hold is tens of pixels wide.
+
+**Measured** (the comparison's program at tier 16; the counts from a build with counters,
+the rates from its harness, three starts each, the median, against the same commit without
+the change):
+
+| | Before | After |
+| --- | ---: | ---: |
+| Measures a frame | 4,457 | 2,410 |
+| Second start: frames a second over the run | 49.0 | 50.0 |
+| First start: frames a second over the run | 45.1 | 46.0 |
+| Second start: CPU a frame | 52.4 ms | 51.1 ms |
+
+Half the measures and a fiftieth of the frame: a measure that returns what it had costs
+about a third of a microsecond. The rules hold for any tree: a canvas inside a stack no
+longer makes the stack measure at every width of a window that is resized.
+
+**Tests.** `measure_hold_tests.rs`:
+`a_canvas_holds_at_every_size_and_the_stack_around_it_what_its_other_children_hold`,
+`a_bar_of_two_star_columns_in_a_track_of_a_set_height_holds_at_other_widths` (a bar 6 and
+0.72 high, rounded and not), and four grids in a box of a set height among the grids of
+`a_grid_of_several_star_columns_measured_inside_its_holds_lays_out_as_a_new_one`, which lays
+each out at every quarter of a pixel around a width and compares it with a tree made for
+that width (one box is lower than a line of text: its texts are cut and hold nothing).
+`layout/measure_hold.rs`: `an_axis_cut_to_the_available_size_holds_at_that_size`.

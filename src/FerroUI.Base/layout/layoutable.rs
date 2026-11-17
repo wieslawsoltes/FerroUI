@@ -281,10 +281,16 @@ impl LayoutableImpl for Layoutable {
         // The hold of the constraint, in the space of the available size (section 9.15).
         if let Some(hold) = hold {
             let valid = min_max.min_width <= min_max.max_width && min_max.min_height <= min_max.max_height;
-            let width_range = crate::layout::measure_hold::map_axis(
-                hold.width, margin.left + margin.right, min_max.min_width, min_max.max_width, width, available_size.width);
-            let height_range = crate::layout::measure_hold::map_axis(
-                hold.height, margin.top + margin.bottom, min_max.min_height, min_max.max_height, height, available_size.height);
+            // An axis whose desired size is cut to the available size holds at that available
+            // size, and the other axis over its range (section 9.86).
+            use crate::layout::measure_hold::map_axis_or_its_size;
+            let (across, along) = (margin.left + margin.right, margin.top + margin.bottom);
+            let width_range = map_axis_or_its_size(
+                hold.width, across, min_max.min_width, min_max.max_width, width, available_size.width,
+                constrained_size.width);
+            let height_range = map_axis_or_its_size(
+                hold.height, along, min_max.min_height, min_max.max_height, height, available_size.height,
+                constrained_size.height);
             if let (true, Some(width_range), Some(height_range)) = (valid, width_range, height_range) {
                 this.measure_hold.set(Some(crate::layout::MeasureHold::new(width_range, height_range)));
             }
@@ -868,40 +874,43 @@ impl Layoutable {
             panic!("Cannot call Measure using a size with NaN values.");
         }
 
-        if self.is_measure_valid.get()
-            && self.previous_measure.get().is_some()
-            && self.measure_hold.get().is_some_and(|hold| hold.contains(available_size))
-        {
-            // The measure holds at this size (section 9.15): nothing to do.
-            self.previous_measure.set(Some(available_size));
-            return;
+        if self.is_measure_valid.get() {
+            // The size it was measured at, which most measures of a pass are: nothing to do, and
+            // nothing to ask a hold.
+            let previous = self.previous_measure.get();
+            if previous == Some(available_size) {
+                return;
+            }
+            if previous.is_some() && self.measure_hold.get().is_some_and(|hold| hold.contains(available_size)) {
+                // The measure holds at this size (section 9.15): nothing to do.
+                self.previous_measure.set(Some(available_size));
+                return;
+            }
         }
 
-        if !self.is_measure_valid.get() || self.previous_measure.get() != Some(available_size) {
-            let previous_desired_size = self.desired_size();
-            self.measure_hold.set(None);
-            crate::perf_count!(MeasuresExecuted);
+        let previous_desired_size = self.desired_size();
+        self.measure_hold.set(None);
+        crate::perf_count!(MeasuresExecuted);
 
-            self.is_measure_valid.set(true);
-            self.clear_subtree_measure_invalid();
+        self.is_measure_valid.set(true);
+        self.clear_subtree_measure_invalid();
 
-            self.measuring.set(true);
-            let guard = MeasuringGuard(&self.measuring);
-            let desired_size = self.measure_core(available_size);
-            drop(guard);
+        self.measuring.set(true);
+        let guard = MeasuringGuard(&self.measuring);
+        let desired_size = self.measure_core(available_size);
+        drop(guard);
 
-            if Self::is_invalid_size(desired_size) {
-                panic!("Invalid size returned for Measure.");
-            }
+        if Self::is_invalid_size(desired_size) {
+            panic!("Invalid size returned for Measure.");
+        }
 
-            self.set_desired_size(desired_size);
-            self.previous_measure.set(Some(available_size));
+        self.set_desired_size(desired_size);
+        self.previous_measure.set(Some(available_size));
 
-            if self.desired_size() != previous_desired_size {
-                if let Some(parent) = self.visual_parent() {
-                    if let Some(parent) = parent.downcast_ref::<Layoutable>() {
-                        parent.child_desired_size_changed(self);
-                    }
+        if self.desired_size() != previous_desired_size {
+            if let Some(parent) = self.visual_parent() {
+                if let Some(parent) = parent.downcast_ref::<Layoutable>() {
+                    parent.child_desired_size_changed(self);
                 }
             }
         }

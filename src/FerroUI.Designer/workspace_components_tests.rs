@@ -61,6 +61,90 @@ fn the_preview_button_of_a_single_view_application_opens_no_window() {
 }
 
 #[test]
+fn a_preview_outside_the_artboard_has_the_theme_the_flow_direction_and_the_backing_of_the_artboard() {
+    use crate::{PreviewEnvironment, PreviewFlowDirection, PreviewTheme};
+    use ferroui_base::media::FlowDirection;
+    use ferroui_base::styling::ThemeVariant;
+    use ferroui_controls::ThemeVariantScope;
+
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let workspace = workspace();
+    // The editor around the artboard is dark, as the chrome of the designer is.
+    let editor = ThemeVariantScope::new();
+    editor.set_requested_theme_variant(Some(ThemeVariant::dark()));
+    editor.set_child(Some(workspace.control()));
+    let window = ferroui_controls::Window::new();
+    window.set_content(Some(Control::boxed(editor)));
+    window.show();
+    let host = |workspace: &DesignerWorkspace| {
+        let document: Ref<Control> = Border::new().upcast();
+        let host = workspace.view_preview_host(document.clone(), ferroui_base::Size::new(400.0, 300.0));
+        let fit = host.cast::<ferroui_controls::Viewbox>().expect("a box that fits the preview");
+        assert_eq!(fit.stretch_direction(), ferroui_base::media::StretchDirection::DownOnly);
+        assert_eq!((fit.max_width(), fit.max_height()), (352.0, 252.0), "the room, less the margin");
+        let scope = fit.child().and_then(|child| child.cast::<ThemeVariantScope>()).expect("a theme scope");
+        let backing = scope.child().and_then(|child| child.cast::<Border>()).expect("a backing");
+        assert_eq!((backing.width(), backing.height()), workspace.artboard_size());
+        assert!(backing.child().is_some_and(|child| child.ptr_eq(&document)));
+        (scope, backing)
+    };
+    let same_backing = |workspace: &DesignerWorkspace, border: &Border| {
+        let artboard = workspace.artboard.background().expect("the artboard has a background");
+        border.background().is_some_and(|brush| Rc::ptr_eq(&brush, &artboard))
+    };
+
+    // The styles of the editor chrome do not reach the document: the presenter has none of their
+    // classes, and nothing above what the flyout opens over has (the styles select what is below
+    // a class of the chrome, and a flyout is below what it opens at).
+    let flyout = workspace.view_preview_flyout(Border::new().upcast(), ferroui_base::Size::new(400.0, 300.0));
+    assert!(!flyout.flyout_presenter_classes().contains("designer-chrome"));
+    let mut above: Option<Ref<ferroui_base::StyledElement>> = Some(workspace.view_preview_target().upcast());
+    while let Some(element) = above {
+        assert!(!element.classes().contains("designer-chrome"), "{:?} is of the chrome", element.name());
+        above = element.parent();
+    }
+    // The button that opens the preview is of the chrome: the flyout does not open at it.
+    let button = named::<Button>(&workspace, "NativePreview");
+    let mut above: Option<Ref<ferroui_base::StyledElement>> = Some(button.upcast());
+    let mut of_the_chrome = false;
+    while let Some(element) = above {
+        of_the_chrome |= element.classes().contains("designer-chrome");
+        above = element.parent();
+    }
+    assert!(of_the_chrome);
+    // A room that has no size yet limits nothing.
+    let unsized_host = workspace.view_preview_host(Border::new().upcast(), ferroui_base::Size::default());
+    assert!(unsized_host.max_width().is_infinite());
+
+    // The default artboard is light inside the dark editor.
+    let (scope, backing) = host(&workspace);
+    assert_eq!(scope.requested_theme_variant(), Some(ThemeVariant::light()));
+    assert!(!scope.is_set(ferroui_base::Visual::flow_direction_property()));
+    let light = workspace.artboard.background().expect("a background");
+    assert!(same_backing(&workspace, &backing));
+
+    let environment = PreviewEnvironment {
+        theme: PreviewTheme::Dark,
+        flow_direction: PreviewFlowDirection::RightToLeft,
+        ..workspace.preview_environment()
+    };
+    workspace.set_preview_environment(environment).unwrap();
+    let (scope, backing) = host(&workspace);
+    assert_eq!(scope.requested_theme_variant(), Some(ThemeVariant::dark()));
+    assert_eq!(scope.flow_direction(), FlowDirection::RightToLeft);
+    assert!(same_backing(&workspace, &backing));
+    assert!(!Rc::ptr_eq(&light, &workspace.artboard.background().unwrap()), "the dark artboard has its own backing");
+
+    // "App theme" is the theme the artboard inherits, here the one of the editor.
+    let environment = PreviewEnvironment { theme: PreviewTheme::Inherit, ..workspace.preview_environment() };
+    workspace.set_preview_environment(environment).unwrap();
+    let (scope, _) = host(&workspace);
+    assert_eq!(scope.requested_theme_variant(), Some(ThemeVariant::dark()));
+
+    window.close();
+}
+
+#[test]
 fn scope_roundtrip_retires_definition_drafts_even_with_the_same_source_and_selection() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let workspace = workspace();
