@@ -3,7 +3,9 @@
 //! arranged, the bounds of a tree measured and arranged at the second width from nothing.
 
 use crate::test_support::test_scope;
-use crate::{Border, ColumnDefinitions, Control, ControlImpl, Decorator, Grid, Panel, StackPanel, TextBlock, WrapPanel};
+use crate::{
+    Border, Canvas, ColumnDefinitions, Control, ControlImpl, Decorator, Grid, Panel, StackPanel, TextBlock, WrapPanel,
+};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{Layoutable, LayoutableImpl, LayoutableImplExt};
@@ -35,14 +37,30 @@ struct Columns {
     definitions: &'static str,
     spacing: f64,
     default_measure: bool,
+    /// The height of the box around the grid, when it has one: the grid, which has no row
+    /// definitions, then has one star row at a finite height (section 9.86).
+    box_height: Option<f64>,
 }
 
 const fn columns(definitions: &'static str, spacing: f64, default_measure: bool) -> Option<Columns> {
-    Some(Columns { definitions, spacing, default_measure })
+    Some(Columns { definitions, spacing, default_measure, box_height: None })
 }
 
+const fn columns_in_a_box(
+    definitions: &'static str,
+    spacing: f64,
+    default_measure: bool,
+    height: f64,
+) -> Option<Columns> {
+    Some(Columns { definitions, spacing, default_measure, box_height: Some(height) })
+}
+
+/// A box lower than a line of text: a text that is cut by its height depends on it and holds
+/// nothing, and neither does the grid around it.
+const LOW_BOX: f64 = 8.0;
+
 /// The grids of several star columns the tests lay out.
-const GRIDS: [Option<Columns>; 7] = [
+const GRIDS: [Option<Columns>; 11] = [
     columns("*,*", 0.0, false),
     columns("2*,*", 0.0, false),
     columns("*,*,*", 6.0, false),
@@ -50,6 +68,12 @@ const GRIDS: [Option<Columns>; 7] = [
     columns("1.5*,24,*", 2.5, false),
     columns("*,*", 0.0, true),
     columns("2*,3*", 6.0, true),
+    // In a box of a set height: a star row at a finite height, taller and lower than the texts.
+    // (The texts of these columns are of one to four lines of about sixteen units.)
+    columns_in_a_box("*,*", 0.0, false, 200.0),
+    columns_in_a_box("2*,3*", 6.0, false, LOW_BOX),
+    columns_in_a_box("*,Auto,3*", 4.0, false, 240.5),
+    columns_in_a_box("2*,3*", 6.0, true, 260.0),
 ];
 
 fn grid(columns: Columns) -> Ref<Grid> {
@@ -125,6 +149,9 @@ fn tree(centered: bool, columns: Option<Columns>) -> Ref<Border> {
     // Several star columns: each has its share of the width (section 9.57).
     if let Some(columns) = columns {
         let columns_box = Border::new();
+        if let Some(height) = columns.box_height {
+            columns_box.set_height(height);
+        }
         columns_box.set_child(&grid(columns));
         stack.children().add(&columns_box);
     }
@@ -234,7 +261,8 @@ fn a_grid_of_several_star_columns_measured_inside_its_holds_lays_out_as_a_new_on
     for columns in GRIDS {
         for rounding in [true, false] {
             let held = lays_out_as_a_new_one(false, columns, rounding, 90, 30.0);
-            assert!(held > 50, "only {held} widths were held: {columns:?}, rounding {rounding}");
+            let cut = columns.is_some_and(|columns| columns.box_height == Some(LOW_BOX));
+            assert!(held > 50 || cut, "only {held} widths were held: {columns:?}, rounding {rounding}");
         }
     }
 }
@@ -324,6 +352,117 @@ ferro_overrides! {
     impl LayoutableImpl for Arranger {
         fn arrange_override(this: &Self, final_size: Size) -> Size {
             Self::parent_arrange_override(this, final_size)
+        }
+    }
+}
+
+/// Section 9.86: a canvas measures its children at an infinite size whatever it is offered, so
+/// it holds at every size, and what is around it holds what its other children hold.
+#[test]
+fn a_canvas_holds_at_every_size_and_the_stack_around_it_what_its_other_children_hold() {
+    let _scope = test_scope();
+    let make = || {
+        let positioned = Control::new();
+        positioned.set_min_width(500.0);
+        positioned.set_min_height(20.0);
+        let canvas = Canvas::new();
+        canvas.set_height(36.0);
+        canvas.children().add(&positioned);
+        let stack = StackPanel::new();
+        stack.children().add(&text(TEXTS[1], TextWrapping::NoWrap));
+        stack.children().add(&canvas);
+        let root = Border::new();
+        root.set_child(&stack);
+        (root, stack, canvas, positioned)
+    };
+
+    let (root, stack, canvas, positioned) = make();
+    layout(&root, 300.0);
+    // The canvas at any width, and at any height its set height fits; the stack wherever its
+    // text fits.
+    let hold = canvas.measure_hold().expect("the canvas holds");
+    for size in [Size::new(0.0, 36.0), Size::new(120.5, 100.0), Size::new(5000.0, f64::INFINITY)] {
+        assert!(hold.contains(size), "{size:?} in {hold:?}");
+    }
+    let hold = stack.measure_hold().expect("the stack holds");
+    assert!(hold.contains(Size::new(260.0, f64::INFINITY)) && hold.contains(Size::new(1000.0, f64::INFINITY)));
+    assert_eq!(positioned.desired_size(), Size::new(500.0, 20.0));
+
+    // Laid out at other widths, it is the tree a new one laid out at that width is.
+    for width in [260.0, 301.25, 180.0, 640.0] {
+        layout(&root, width);
+        let (fresh, ..) = make();
+        layout(&fresh, width);
+        assert_eq!(sizes(&root), sizes(&fresh), "at {width}");
+    }
+
+    // A child that changes its size makes the canvas measure again (the layout manager measures
+    // both, the child first): it holds as before, and nothing around it was measured.
+    let stack_hold = stack.measure_hold();
+    positioned.set_min_height(28.0);
+    positioned.measure(Size::new(f64::INFINITY, f64::INFINITY));
+    assert_eq!(positioned.desired_size(), Size::new(500.0, 28.0));
+    assert_eq!(canvas.measure_hold(), None, "a canvas whose child changed is measured again");
+    canvas.measure(Size::new(640.0, f64::INFINITY));
+    assert!(canvas.measure_hold().is_some_and(|hold| hold.contains(Size::new(77.0, 40.0))));
+    assert_eq!(stack.measure_hold(), stack_hold);
+}
+
+/// Section 9.86: a progress bar made of a track of a set height around a grid of two star
+/// columns holds at other widths, also where its height is a part of a pixel and the rounded
+/// height of its fill is cut to it; and so does what is around it.
+#[test]
+fn a_bar_of_two_star_columns_in_a_track_of_a_set_height_holds_at_other_widths() {
+    let _scope = test_scope();
+    for (height, rounding) in [(6.0, true), (6.0, false), (0.72, true), (0.72, false)] {
+        let make = || {
+            let fill = Border::new();
+            fill.set_height(height);
+            let bar = Grid::new();
+            bar.set_column_definitions(ColumnDefinitions::parse("0.4*,0.6*").expect("columns"));
+            bar.children().add(&fill);
+            let track = Border::new();
+            track.set_height(height);
+            track.set_clip_to_bounds(true);
+            track.set_child(&bar);
+            let cell = Border::new();
+            cell.set_child(&track);
+            let percent = text("42%", TextWrapping::NoWrap);
+            Grid::set_column(&percent, 2);
+            let progress = Grid::new();
+            progress.set_column_definitions(ColumnDefinitions::parse("*,6,Auto").expect("columns"));
+            progress.children().add(&cell);
+            progress.children().add(&percent);
+            let stack = StackPanel::new();
+            stack.children().add(&progress);
+            let root = Border::new();
+            root.set_use_layout_rounding(rounding);
+            root.set_child(&stack);
+            (root, bar, progress)
+        };
+        let (root, bar, progress) = make();
+        layout(&root, 120.0);
+        let holds_other_widths = |element: &Layoutable, at: f64, other: f64, height: f64| {
+            element.measure_hold().is_some_and(|hold| {
+                hold.contains(Size::new(at, height)) && hold.contains(Size::new(other, height))
+            })
+        };
+        let bar_at = bar.previous_measure().expect("the bar was measured");
+        assert!(
+            holds_other_widths(&bar, bar_at.width, bar_at.width + 20.0, bar_at.height),
+            "the bar, {height} high, rounding {rounding}: {:?}",
+            bar.measure_hold()
+        );
+        assert!(
+            holds_other_widths(&progress, 120.0, 150.0, f64::INFINITY),
+            "the row, {height} high, rounding {rounding}: {:?}",
+            progress.measure_hold()
+        );
+        for width in [150.0, 119.25, 90.0, 300.5] {
+            layout(&root, width);
+            let (fresh, ..) = make();
+            layout(&fresh, width);
+            assert_eq!(sizes(&root), sizes(&fresh), "at {width}, {height} high, rounding {rounding}");
         }
     }
 }

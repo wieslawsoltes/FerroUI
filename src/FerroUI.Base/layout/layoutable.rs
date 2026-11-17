@@ -281,10 +281,16 @@ impl LayoutableImpl for Layoutable {
         // The hold of the constraint, in the space of the available size (section 9.15).
         if let Some(hold) = hold {
             let valid = min_max.min_width <= min_max.max_width && min_max.min_height <= min_max.max_height;
-            let width_range = crate::layout::measure_hold::map_axis(
-                hold.width, margin.left + margin.right, min_max.min_width, min_max.max_width, width, available_size.width);
-            let height_range = crate::layout::measure_hold::map_axis(
-                hold.height, margin.top + margin.bottom, min_max.min_height, min_max.max_height, height, available_size.height);
+            // An axis whose desired size is cut to the available size holds at that available
+            // size, and the other axis over its range (section 9.86).
+            use crate::layout::measure_hold::map_axis_or_its_size;
+            let (across, along) = (margin.left + margin.right, margin.top + margin.bottom);
+            let width_range = map_axis_or_its_size(
+                hold.width, across, min_max.min_width, min_max.max_width, width, available_size.width,
+                constrained_size.width);
+            let height_range = map_axis_or_its_size(
+                hold.height, along, min_max.min_height, min_max.max_height, height, available_size.height,
+                constrained_size.height);
             if let (true, Some(width_range), Some(height_range)) = (valid, width_range, height_range) {
                 this.measure_hold.set(Some(crate::layout::MeasureHold::new(width_range, height_range)));
             }
