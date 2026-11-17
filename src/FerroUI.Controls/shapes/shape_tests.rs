@@ -1,4 +1,4 @@
-use super::{Shape, ShapeImpl};
+use super::{Rectangle, Shape, ShapeImpl};
 use crate::test_support_shapes::MockRenderInterfaceScope;
 use crate::ControlImpl;
 use ferroui_base::input::InputElementImpl;
@@ -42,6 +42,35 @@ impl ShapeImpl for TestShape {
 impl TestShape {
     fn new() -> Ref<Self> {
         instantiate(Self { base: Shape::construct() })
+    }
+}
+
+/// A rectangle with a geometry of its own (inset by five) and no update of it.
+#[repr(C)]
+struct InsetRectangle {
+    base: Rectangle,
+}
+
+ferro_class!(InsetRectangle: Rectangle);
+ferro_impl_classes!(
+    InsetRectangle: FerroObjectImpl,
+    StyledElementImpl,
+    VisualImpl,
+    LayoutableImpl,
+    InteractiveImpl,
+    InputElementImpl,
+    ControlImpl
+);
+
+impl ShapeImpl for InsetRectangle {
+    fn create_defining_geometry(this: &Self) -> Option<Ref<Geometry>> {
+        Some(RectangleGeometry::with_rect(Rect::from_size(this.bounds().size()).deflate(5.0)).upcast())
+    }
+}
+
+impl InsetRectangle {
+    fn new() -> Ref<Self> {
+        instantiate(Self { base: Rectangle::construct() })
     }
 }
 
@@ -203,7 +232,7 @@ fn no_stroke_produces_no_pen() {
 /// again, and the shape is measured again.
 #[test]
 fn a_shape_whose_geometry_properties_change_keeps_its_geometry() {
-    use super::{Ellipse, Line, Rectangle};
+    use super::{Ellipse, Line};
     use ferroui_base::media::{EllipseGeometry, LineGeometry, RectangleGeometry};
     use ferroui_base::{Point, Rect, Size};
 
@@ -256,5 +285,41 @@ fn a_shape_whose_geometry_properties_change_keeps_its_geometry() {
     let kept = line.defining_geometry().expect("a geometry");
     assert!(kept.ptr_eq(&geometry));
     assert_eq!(kept.cast::<LineGeometry>().expect("a line").end_point(), Point::new(30.0, 5.0));
+
+    // The indicator of a selection fits its radii to its size, in the geometry it keeps too.
+    let indicator = crate::SelectionIndicator::new();
+    indicator.set_radius_x(8.0);
+    indicator.set_radius_y(8.0);
+    arranged(&indicator, Size::new(3.0, 16.0));
+    let geometry = indicator.defining_geometry().expect("a geometry");
+    arranged(&indicator, Size::new(3.0, 24.0));
+    let kept = indicator.defining_geometry().expect("a geometry");
+    assert!(kept.ptr_eq(&geometry));
+    let drawn = Rect::from_size(Size::new(3.0, 24.0)).deflate(indicator.stroke_thickness() / 2.0);
+    let kept = kept.cast::<RectangleGeometry>().expect("a rectangle");
+    assert_eq!(kept.rect(), drawn);
+    assert_eq!(kept.radius_x(), drawn.width / 2.0, "the radius is fitted to the width");
+    assert_eq!(kept.radius_y(), 8.0);
+}
+
+/// Section 9.88: an update describes one `create_defining_geometry`. A class that makes a
+/// geometry of its own and says nothing of an update does not take the update of its base
+/// class: its geometry is made again, by its own code, as before.
+#[test]
+fn a_shape_with_a_geometry_of_its_own_does_not_take_the_update_of_its_base_class() {
+    use ferroui_base::Size;
+
+    let _scope = crate::test_support::test_scope();
+    let _app = crate::test_support_shapes::MockRenderInterfaceScope::install();
+    let shape = InsetRectangle::new();
+    shape.measure(Size::INFINITY);
+    shape.arrange(Rect::from_size(Size::new(100.0, 40.0)));
+    let first = shape.defining_geometry().expect("a geometry");
+    assert_eq!(first.cast::<RectangleGeometry>().expect("a rectangle").rect(), Rect::new(5.0, 5.0, 90.0, 30.0));
+    shape.measure(Size::INFINITY);
+    shape.arrange(Rect::from_size(Size::new(140.0, 40.0)));
+    let second = shape.defining_geometry().expect("a geometry");
+    assert!(!second.ptr_eq(&first), "a new geometry, made by the class");
+    assert_eq!(second.cast::<RectangleGeometry>().expect("a rectangle").rect(), Rect::new(5.0, 5.0, 130.0, 30.0));
 }
 

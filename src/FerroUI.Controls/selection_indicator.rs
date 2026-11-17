@@ -70,6 +70,17 @@ impl ShapeImpl for SelectionIndicator {
         let radius = this.radius();
         Some(RectangleGeometry::with_rect_and_radii(this.drawing_rect(), radius.x, radius.y).upcast())
     }
+
+    /// The geometry the indicator has takes the rectangle and the fitted radii of the indicator
+    /// as it is now: the same values a new geometry would be made of.
+    fn update_defining_geometry(this: &Self, geometry: &Ref<Geometry>) -> bool {
+        let Some(geometry) = geometry.cast::<RectangleGeometry>() else { return false };
+        let radius = this.radius();
+        geometry.set_rect(this.drawing_rect());
+        geometry.set_radius_x(radius.x);
+        geometry.set_radius_y(radius.y);
+        true
+    }
 }
 
 impl StyledElementImpl for SelectionIndicator {
