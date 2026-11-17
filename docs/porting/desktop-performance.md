@@ -7181,13 +7181,15 @@ it:
 | Visuals recorded a frame | 5,695 | 4,812 | 3,387 |
 | Objects sent to the render thread a frame | 10,587 | 10,641 | 7,391 |
 | Objects made a frame | 1,116 | 1,122 | 602 |
-| Second start: frames a second over the run | 49.4 | 50.0 | 52.1 |
-| First start: frames a second over the run | 45.6 | 46.4 | 49.6 |
-| Second start: CPU a frame | 51.5 ms | 51.2 ms | 49.8 ms |
+| Second start: frames a second over the run | 49.7 | 50.4 | 51.9 |
+| First start: frames a second over the run | 46.4 | 46.4 | 49.6 |
+| Second start: CPU a frame | 51.5 ms | 51.2 ms | 49.4 ms |
 
-No pixel of the content differs between the bottom and the top of the stack on five frozen
-frames (gauntlet tier 5, frame 120, twice; gauntlet tier 12, frame 300; patchwork tier 5;
-wall tier 8).
+No pixel of the content differs between the bottom and the top of the stack on frozen
+frames of five scenes (gauntlet tier 5, frame 120; gauntlet tier 12, frame 300; patchwork
+tier 5; wall tier 8; chat), the two that are redrawn most taken three times on each build.
+(A frame taken right after a program is built can differ from every other frame of the same
+program: it is taken again.)
 
 **Tests.** `panel_tests.rs`:
 `a_visual_that_draws_nothing_of_its_size_is_not_drawn_again_when_it_is_resized` (a renderer
