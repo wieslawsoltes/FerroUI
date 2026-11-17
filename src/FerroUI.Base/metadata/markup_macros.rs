@@ -306,6 +306,7 @@ macro_rules! ferro_markup_enum {
     ($type_:ident { $($member:ident $(= $variant:ident)?),* $(,)? } $(, { $($body:tt)* })?) => {
         impl $crate::metadata::MarkupTyped for $type_ {
             const MARKUP: &'static $crate::metadata::MarkupType = {
+                #[used]
                 static MARKUP: $crate::metadata::MarkupType = {
                     #[allow(unused_mut)]
                     let mut markup = $crate::metadata::MarkupType::new(
