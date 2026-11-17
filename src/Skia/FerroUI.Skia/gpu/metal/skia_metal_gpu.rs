@@ -68,6 +68,8 @@ impl SkiaMetalGpu {
         // SAFETY: the device contract hands out valid `id<MTLDevice>` and
         // `id<MTLCommandQueue>` handles; Skia retains both for the lifetime
         // of the backend context.
+        // Shader libraries made ahead, before the device compiles its first text.
+        super::shader_libraries::install(device.device());
         let backend_context = unsafe { BackendContext::new(device.device(), device.command_queue()) };
 
         let context = context_factory::make_metal(&backend_context, &ordered_recordings_options())
@@ -113,6 +115,8 @@ impl SkiaMetalGpu {
         // `id<MTLCommandQueue>` handles; the backend context retains both
         // until it is dropped, and the direct context takes references of
         // its own.
+        // Shader libraries made ahead, before the device compiles its first text.
+        super::shader_libraries::install(device.device());
         let backend_context = unsafe { mtl::BackendContext::new(device.device() as _, device.command_queue() as _) };
         let mut options = ContextOptions::default();
         options.avoid_stencil_buffers = avoid_stencil_buffers;
