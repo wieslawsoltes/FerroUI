@@ -1012,6 +1012,25 @@ the median):
 The leader of the comparison runs the scene at 54 to 58 with a first frame at 0.66 to
 0.87 s.
 
+**The three scenes** (#801; the main branch with sections 9.87 to 9.89, the harness of the
+comparison, three rounds, the median). A run of the harness is 10 s and its rate counts the
+time before the first frame:
+
+| Scene | First start | Second start | First frame, first / second start | CPU a frame |
+| --- | ---: | ---: | ---: | ---: |
+| Gauntlet, tier 16 | 49.5 | 52.4 | 1.01 s / 0.51 s | 49.5 ms |
+| Wall, tier 20 | 45.5 | 48.6 | 2.41 s / 1.91 s | 26.2 ms |
+| Patchwork, tier 12 | 54.5 | 57.4 | 0.93 s / 0.42 s | 20.4 ms |
+| Patchwork, tier 17 | 52.1 | 55.4 | 1.26 s / 0.74 s | 41.3 ms |
+| Patchwork, tier 20 | 31.8 | 34.3 | 1.65 s / 1.12 s | 79.4 ms |
+
+The wall at tier 20 and the patchwork at tiers 12 and 17 lose no frame once they run: their
+rate is 60 less the share of the run before the first frame (60 x (1 - 1.91 / 10) = 48.5 for
+the wall; 57.5 and 55.6 for the patchworks). On these three the whole distance to 60 is the
+time to the first frame. The gauntlet loses about 3 frames a second to its start and about
+4.5 to frames that are late. The patchwork at tier 20 is the one scene its steady rate
+limits.
+
 **What sets the rate.** The UI thread: on the main branch it is busy 88 % of the time and
 the render thread 48 %. A frame has 16.7 ms, and a frame that misses the display takes two,
 so the rate falls in steps: 52 frames a second is one frame in seven late, not a frame that
@@ -1047,18 +1066,42 @@ is 15 % too slow. What a frame of the declarative program does, counted with
 4. **Geometries that are written again** (#805). Section 9.88 keeps the geometry of the
    shapes whose geometry is a rectangle, an ellipse, a line or a list of points; the stream
    geometries (arcs, sectors, a border with unequal corners) are still made new.
-5. **The other two scenes** (#801). The wall and the patchwork of the declarative program
-   were measured last at 0.5.0; they are counted and sampled first, because they say what
-   else there is.
-6. **The first start** (#806, #786). Of the 1.03 s to the first frame, the system's check of
+5. **The bands of a frame** (#810). The patchwork at tier 20 is limited by drawing: its UI
+   thread is busy 29 % of the time, its render thread 50 %, and the two threads that record
+   the bands of a frame 87 and 81 %. With the default of the bands changed for the
+   measurement (second start, frames a second and CPU a frame):
+
+   | Bands | Patchwork 20 | Gauntlet 16 | Patchwork 17 |
+   | --- | ---: | ---: | ---: |
+   | 2 (the default) | 34.3, 79 ms | 52.4, 50 ms | 55.4, 41 ms |
+   | 3 | 43.2, 81 ms | 52.3, 55 ms | 55.5, 48 ms |
+   | 4 | 45.0, 92 ms | 51.4, 58 ms | 45.2, 61 ms |
+
+   A third band gives the frame that does not fit a quarter more frames; the frames that fit
+   pay a tenth more CPU for nothing, and a fourth band costs the patchwork of tier 17 ten
+   frames a second (six busy threads on five performance cores). The number of bands has to
+   follow what the frame costs.
+6. **The start of a large tree** (#811). The wall at tier 20 is 288,000 elements (57,600
+   tiles of a border, a grid, two text blocks and a dot). At its first frame the program
+   holds 2.1 GB of heap in 13.7 million blocks: 47 blocks and 7.6 kB an element. Of its UI
+   thread's start, building the tree is about 40 %, the first layout 22 %, recording and the
+   commit 25 %. By the function that asked (a tile of the wall at tier 10, 266 blocks and
+   46 kB): the five elements 6.4 kB in 5 blocks; the owners of the declarative layer 4.9 kB
+   in 24; the effective values of the properties 4.7 kB in 32; the nodes of the reactive
+   runtime 3.1 kB (two owners for every element, with or without handlers); the recorded
+   drawings 4.2 kB in 20; the text layouts of the two texts 4.2 kB in 21; the properties of
+   the builder 1.1 kB in 27; a font family made for every text block 0.8 kB; the default
+   run properties of every text block 0.6 kB. A static element need not keep an owner, a
+   node or the boxed properties it was built from.
+7. **The first start** (#806, #786). Of the 1.03 s to the first frame, the system's check of
    a program it never ran is about 0.19 s and 8 ms for every megabyte of the program
    (23.0 MB), the application's own start is about 0.3 s, and the states of the pipelines
    are still made on the first frames (the libraries are not, section 9.85).
 
 **The order of the work.** The changes that are open and the experiments that were planned
-before (#763) are finished first; the experiments of this goal follow them, #801 first; the
-work on the size of the binary (#570) goes on beside both, and each megabyte it takes off
-is also time off the first start.
+before (#763) are finished first; the experiments of this goal follow them (#801, the
+measurement, is the table above); the work on the size of the binary (#570) goes on beside
+both, and each megabyte it takes off is also time off the first start.
 
 **The goal is reached** when the three scenes hold 60 frames a second at the published tiers
 on a second start, with a first start within two frames a second of it, or when each scene
