@@ -6605,6 +6605,21 @@ fit the caches that hold those of 1,000. That is the memory an element takes, wh
 census of the start is about, and not a cost that grows faster than the tree; the pairs do
 not judge it.
 
+**`measure` and `arrange` say what is inline.** The gate of this change failed on lines the
+change does not run: `Invalidation.resize_one_leaf` took 4.4 % more instructions,
+`ScrollContent.content_resized` 3.2 % and the forced layouts of the TreeDataGrid 3.3 %. A
+few new functions in the file of the panel had moved where the compiler cut the crate, and
+with it whether `Layoutable::measure` and `arrange` were inlined into the decorators that
+call them for their child. That is not a thing to leave to where a build puts its code.
+Both now have the same shape: the test for what most calls of a pass are (an element offered
+the size it was measured at, or one inside its hold; an element arranged where it is) is
+`#[inline]` and is all a caller gets, and everything else is one function out of line
+(`measure_at`, `arrange_at`), the checks for a size or a rectangle that is not one included:
+such a value was never the one an element had, so it reaches them. Against the main branch,
+in instructions: `resize_one_leaf` -11.7 %, `content_resized` -15.7 %, the text block
+measured at one width and arranged at another -52.9 %, the forced layouts of the
+TreeDataGrid +1.5 %, the panels within 0.2 %.
+
 ### 9.81 A first start: the pipelines of the first frame compile side by side
 
 The published comparison of 0.5.0 has the first frame of the gauntlet 2.6 seconds after a
