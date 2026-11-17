@@ -238,6 +238,25 @@ class IsolationTests(unittest.TestCase):
                 subprocess.run(git + ["commit", "-q", "-am", "second"], cwd=submodule, check=True)
                 self.assertNotIn(cache.source_fingerprint(root, report), {before, edited})
 
+    def test_source_fingerprint_follows_the_recorded_commit_of_a_submodule_not_checked_out(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            report = root / "report"
+            report.mkdir()
+            (root / "benchmarks" / "upstream").mkdir(parents=True)
+            stage = [b"160000 1111111111111111111111111111111111111111 0\tbenchmarks/upstream\0"]
+
+            def check_output(command, *args, **kwargs):
+                if command[:3] == ["git", "ls-files", "--stage"]:
+                    return stage[0]
+                return b"benchmarks/upstream\0"
+
+            with patch.object(cache.subprocess, "check_output", side_effect=check_output):
+                before = cache.source_fingerprint(root, report)
+                self.assertEqual(before, cache.source_fingerprint(root, report))
+                stage[0] = b"160000 2222222222222222222222222222222222222222 0\tbenchmarks/upstream\0"
+                self.assertNotEqual(before, cache.source_fingerprint(root, report))
+
 class FailureDetectionTests(unittest.TestCase):
     def test_exit_zero_without_cargo_build_success_is_rejected(self):
         with tempfile.TemporaryDirectory() as temporary:
