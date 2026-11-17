@@ -29,6 +29,26 @@ pub(crate) const DRAW_ITEM_CLIP: u8 = 8;
 /// the last.
 const REMOVED_RECTS: usize = 16;
 
+/// The items of a range whose bounds are kept (docs/porting/desktop-performance.md, section
+/// 9.90): the items are in the order they are painted in, which is the order of the tree, so
+/// the items of a range lie close together and their bounds are small.
+const RANGE: usize = 64;
+
+/// What is kept of a range of [`RANGE`] items.
+#[derive(Clone, Copy)]
+struct ItemRange {
+    /// The bounds of the items of the range, in the holder, when `known`.
+    bounds: Option<LtrbRect>,
+    /// Whether `bounds` is what the items have now: no item of the range changed since.
+    known: bool,
+    /// Whether an item of the range changed since the dirty region was last told.
+    changed: bool,
+}
+
+impl ItemRange {
+    const CHANGED: ItemRange = ItemRange { bounds: None, known: false, changed: true };
+}
+
 /// Draws `commands` from the fragment the backend kept of them when it can, and keeps a new
 /// one when it cannot.
 ///
@@ -67,6 +87,9 @@ pub struct ServerDrawItem {
     announced: Cell<Option<LtrbRect>>,
     /// Whether something of the item changed since.
     dirty: Cell<bool>,
+    /// Where the item is among the items of its holder: the range it belongs to is told when
+    /// its drawing changes.
+    index: Cell<u32>,
 }
 
 impl ServerDrawItem {
@@ -83,6 +106,7 @@ impl ServerDrawItem {
             clip: Cell::new(None),
             announced: Cell::new(None),
             dirty: Cell::new(true),
+            index: Cell::new(0),
         });
         item.read_data(compositor, reader);
         item.read_offset(reader);
@@ -153,6 +177,10 @@ impl IServerRenderResourceObserver for ServerDrawItem {
         self.fragment.set(None);
         self.dirty.set(true);
         if let Some(holder) = self.holder.upgrade() {
+            // The bounds of the drawing may be other ones.
+            if let Some(items) = holder.draw_items() {
+                items.item_changed(self.index.get() as usize);
+            }
             holder.content_items_changed();
         }
     }
@@ -167,6 +195,10 @@ pub struct ServerDrawItems {
     child_positions: RefCell<Vec<u32>>,
     /// The bounds of the items that were removed since the dirty region was last told.
     removed: RefCell<Vec<LtrbRect>>,
+    /// What is kept of each range of [`RANGE`] items, in their order: a frame asks the ranges
+    /// and looks only at the items of those that changed or that it draws, where it looked at
+    /// every item three times (their bounds, their changes, what of them meets the dirty area).
+    ranges: RefCell<Vec<ItemRange>>,
 }
 
 impl ServerDrawItems {
@@ -209,6 +241,14 @@ impl ServerDrawItems {
                     }
                 }
             }
+            // The items from the first new one on are somewhere else among the items, and so
+            // in other ranges.
+            for (index, item) in items.iter().enumerate().skip(start) {
+                item.index.set(index as u32);
+            }
+            let mut ranges = self.ranges.borrow_mut();
+            ranges.truncate(start / RANGE);
+            ranges.resize(items.len().div_ceil(RANGE), ItemRange::CHANGED);
         }
 
         if reader.read::<u8>() != 0 {
@@ -242,17 +282,46 @@ impl ServerDrawItems {
                 item.read_clip(reader);
             }
             item.dirty.set(true);
+            self.item_changed(index);
         }
 
         visual.set_has_draw_items(!self.items.borrow().is_empty());
         visual.content_items_changed();
     }
 
+    /// The item `index` changed: what is kept of its range is not what the items have.
+    fn item_changed(&self, index: usize) {
+        if let Some(range) = self.ranges.borrow_mut().get_mut(index / RANGE) {
+            range.known = false;
+            range.changed = true;
+        }
+    }
+
+    /// The bounds of the items of the range `range`, in the holder: the kept ones, or those of
+    /// its items now, kept.
+    fn range_bounds(&self, items: &[Rc<ServerDrawItem>], range: usize) -> Option<LtrbRect> {
+        if let Some(kept) = self.ranges.borrow().get(range).filter(|kept| kept.known) {
+            return kept.bounds;
+        }
+        let start = range * RANGE;
+        let end = (start + RANGE).min(items.len());
+        let mut bounds = None;
+        for item in &items[start.min(end)..end] {
+            bounds = LtrbRect::full_union(bounds, item.bounds());
+        }
+        if let Some(kept) = self.ranges.borrow_mut().get_mut(range) {
+            kept.bounds = bounds;
+            kept.known = true;
+        }
+        bounds
+    }
+
     /// The bounds of the items, in the holder.
     pub(super) fn bounds(&self) -> Option<LtrbRect> {
+        let items = self.items.borrow();
         let mut bounds = None;
-        for item in self.items.borrow().iter() {
-            bounds = LtrbRect::full_union(bounds, item.bounds());
+        for range in 0..items.len().div_ceil(RANGE) {
+            bounds = LtrbRect::full_union(bounds, self.range_bounds(&items, range));
         }
         bounds
     }
@@ -263,16 +332,28 @@ impl ServerDrawItems {
         for rect in self.removed.borrow_mut().drain(..) {
             add(rect);
         }
-        for item in self.items.borrow().iter() {
-            if !item.dirty.replace(false) {
+        let items = self.items.borrow();
+        for range in 0..items.len().div_ceil(RANGE) {
+            // Only a range that was told of a change has an item that changed.
+            let changed = match self.ranges.borrow_mut().get_mut(range) {
+                Some(kept) => std::mem::replace(&mut kept.changed, false),
+                None => true,
+            };
+            if !changed {
                 continue;
             }
-            let bounds = item.bounds();
-            if let Some(old) = item.announced.replace(bounds) {
-                add(old);
-            }
-            if let Some(bounds) = bounds {
-                add(bounds);
+            let start = range * RANGE;
+            for item in &items[start..(start + RANGE).min(items.len())] {
+                if !item.dirty.replace(false) {
+                    continue;
+                }
+                let bounds = item.bounds();
+                if let Some(old) = item.announced.replace(bounds) {
+                    add(old);
+                }
+                if let Some(bounds) = bounds {
+                    add(bounds);
+                }
             }
         }
     }
@@ -308,25 +389,39 @@ impl ServerDrawItems {
         dirty_rects: Option<&dyn IDirtyRectTracker>,
     ) -> bool {
         let items = self.items.borrow();
-        let mut moved = false;
-        for item in &items[range] {
-            let Some(bounds) = item.bounds() else { continue };
+        let meets = |bounds: LtrbRect| {
             let world = bounds.transform_to_aabb(transform);
-            if !clip.intersects(world) || dirty_rects.is_some_and(|dirty_rects| !dirty_rects.intersects(world)) {
+            clip.intersects(world) && dirty_rects.is_none_or(|dirty_rects| dirty_rects.intersects(world))
+        };
+        let mut moved = false;
+        let mut next = range.start.min(range.end);
+        while next < range.end {
+            // The items of `range` that are of one range of kept bounds: none of them is drawn
+            // when the bounds of the range are outside the clip and the dirty region.
+            let kept = next / RANGE;
+            let end = ((kept + 1) * RANGE).min(range.end);
+            let part = next..end;
+            next = end;
+            if !self.range_bounds(&items, kept).is_some_and(meets) {
                 continue;
             }
-            let Some(data) = item.data.get() else { continue };
-            crate::perf_count!(RenderItemsDrawn);
-            let (x, y) = item.offset.get();
-            canvas.set_transform(Matrix::create_translation(x, y) * transform);
-            moved = true;
-            let clip = item.clip.get();
-            if let Some((width, height)) = clip {
-                canvas.push_clip(Rect::new(0.0, 0.0, width, height));
-            }
-            draw_with_fragment(&data, &item.fragment, canvas);
-            if clip.is_some() {
-                canvas.pop_clip();
+            for item in &items[part] {
+                if !item.bounds().is_some_and(meets) {
+                    continue;
+                }
+                let Some(data) = item.data.get() else { continue };
+                crate::perf_count!(RenderItemsDrawn);
+                let (x, y) = item.offset.get();
+                canvas.set_transform(Matrix::create_translation(x, y) * transform);
+                moved = true;
+                let clip = item.clip.get();
+                if let Some((width, height)) = clip {
+                    canvas.push_clip(Rect::new(0.0, 0.0, width, height));
+                }
+                draw_with_fragment(&data, &item.fragment, canvas);
+                if clip.is_some() {
+                    canvas.pop_clip();
+                }
             }
         }
         moved
@@ -336,5 +431,6 @@ impl ServerDrawItems {
         self.items.borrow_mut().clear();
         self.child_positions.borrow_mut().clear();
         self.removed.borrow_mut().clear();
+        self.ranges.borrow_mut().clear();
     }
 }
