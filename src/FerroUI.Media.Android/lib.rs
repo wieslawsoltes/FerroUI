@@ -178,7 +178,7 @@ pub struct AndroidFrameStream {
     pending: RefCell<Option<ReadyGlFrame>>,
     stopped: Cell<bool>,
     epoch: Arc<std::sync::atomic::AtomicU64>,
-    job_epoch: Rc<Cell<u64>>,
+    job_epoch: Cell<u64>,
     frame_clock: Option<JavaObject>,
     capture_identity: bool,
     clock_nanoseconds: bool,
@@ -203,7 +203,7 @@ impl AndroidFrameStream {
             pending: RefCell::new(None),
             stopped: Cell::new(false),
             epoch: Arc::new(std::sync::atomic::AtomicU64::new(0)),
-            job_epoch: Rc::new(Cell::new(0)),
+            job_epoch: Cell::new(0),
             frame_clock: None,
             capture_identity: false,
             clock_nanoseconds: false,
@@ -298,21 +298,35 @@ impl AndroidFrameStream {
         rotation: FrameRotation,
         mirrored: bool,
     ) -> Result<Option<FrameLease>, MediaError> {
-        if self.stopped.get() || width == 0 || height == 0 {
+        if width == 0 || height == 0 {
+            return Ok(None);
+        }
+        self.take_frame_inner(Some((width, height, rotation, mirrored)))
+    }
+
+    /// Reads geometry from the native clock for the acquired frame. Live
+    /// capture does not need to serialize session settings on each UI poll.
+    pub fn take_clocked_frame(&self) -> Result<Option<FrameLease>, MediaError> {
+        self.take_frame_inner(None)
+    }
+
+    fn take_frame_inner(
+        &self,
+        fallback: Option<(u32, u32, FrameRotation, bool)>,
+    ) -> Result<Option<FrameLease>, MediaError> {
+        if self.stopped.get() || (self.frame_clock.is_none() && fallback.is_none()) {
             return Ok(None);
         }
         self.poll_frame_job()?;
-        if self.pending.borrow().is_some() {
-            return self.take_pending_frame();
-        }
-        if self.job.borrow().is_some() {
-            return Ok(None);
+        let ready = self.take_pending_frame()?;
+        if self.pending.borrow().is_some() || self.job.borrow().is_some() {
+            return Ok(ready);
         }
         let Some(source) = self.source.borrow().clone() else {
-            return Ok(None);
+            return Ok(ready);
         };
         if !call_boolean(&source.0.java, "pending", "()Z", &[]) {
-            return Ok(None);
+            return Ok(ready);
         }
         let producer = self.producer.clone();
         let last = self.last_sequence.clone();
@@ -323,40 +337,29 @@ impl AndroidFrameStream {
         let requested_epoch = self.epoch.load(std::sync::atomic::Ordering::Acquire);
         self.job_epoch.set(requested_epoch);
         let epoch = self.epoch.clone();
-        let job_epoch = self.job_epoch.clone();
-        self.job.replace(Some(Box::pin(async move {
-            let native = source.clone();
-            let acquisition_epoch = epoch.clone();
-            let acquired = producer
-                .invoke(move |_| {
-                    // An obsolete queued job must not consume a newly sought
-                    // paused frame: there may never be another frame callback.
-                    if acquisition_epoch.load(std::sync::atomic::Ordering::Acquire)
-                        != requested_epoch
-                    {
-                        return Ok(None);
-                    }
-                    if !call_boolean(&native.0.java, "pending", "()Z", &[]) {
-                        return Ok(None);
-                    }
-                    let error = text(&native.0.java, "acquire");
-                    if !error.is_empty() {
-                        return Err(if call_boolean(&native.0.java, "unsupported", "()Z", &[]) {
-                            MediaError::new(MediaErrorKind::Unsupported, error)
-                        } else {
-                            native_error(error)
-                        });
-                    }
-                    Ok(Some((
-                        call_long(&native.0.java, "sequence", "()J", &[]) as u64,
-                        call_long(&native.0.java, "timestamp", "()J", &[]).max(0) as u64,
-                        call_boolean(&native.0.java, "swapsAxes", "()Z", &[]),
-                    )))
-                })
-                .await?;
-            let Some((sequence, timestamp, swaps_axes)) = acquired else {
+        let device = producer.device();
+        let device_generation = producer.device_generation();
+        let counters = producer.budget().counters();
+        let owner = source.clone();
+        self.job.replace(Some(producer.produce_prepared_owned(owner, move || {
+            // An obsolete queued job must not consume a newly sought paused
+            // frame. There may never be another frame callback.
+            if epoch.load(std::sync::atomic::Ordering::Acquire) != requested_epoch
+                || !call_boolean(&source.0.java, "pending", "()Z", &[])
+            {
                 return Ok(None);
-            };
+            }
+            let error = text(&source.0.java, "acquire");
+            if !error.is_empty() {
+                return Err(if call_boolean(&source.0.java, "unsupported", "()Z", &[]) {
+                    MediaError::new(MediaErrorKind::Unsupported, error)
+                } else {
+                    native_error(error)
+                });
+            }
+            let sequence = call_long(&source.0.java, "sequence", "()J", &[]) as u64;
+            let timestamp = call_long(&source.0.java, "timestamp", "()J", &[]).max(0) as u64;
+            let swaps_axes = call_boolean(&source.0.java, "swapsAxes", "()Z", &[]);
             if sequence <= last.load(std::sync::atomic::Ordering::Acquire) {
                 return Ok(None);
             }
@@ -434,10 +437,7 @@ impl AndroidFrameStream {
                             })
                         },
                     )
-                } else {
-                    if epoch.load(std::sync::atomic::Ordering::Acquire) != requested_epoch {
-                        return Ok(None);
-                    }
+                } else if let Some((width, height, rotation, mirrored)) = fallback {
                     (
                         timestamp,
                         width,
@@ -447,12 +447,15 @@ impl AndroidFrameStream {
                         mirrored,
                         None,
                     )
+                } else {
+                    return Ok(None);
                 };
-            // A seek can race the render-thread acquisition itself. The
-            // playback clock accepts only a frame belonging to its current
-            // epoch; keep that newly sought frame instead of discarding the
-            // sole paused callback just because the job was queued earlier.
-            job_epoch.set(epoch.load(std::sync::atomic::Ordering::Acquire));
+            // A seek can race acquisition. Leave an image latched but undrawn
+            // so the next job can match it against the new playback clock,
+            // even if there is no later frame callback while paused.
+            if epoch.load(std::sync::atomic::Ordering::Acquire) != requested_epoch {
+                return Ok(None);
+            }
             // SurfaceTexture's native transform may already orient the image.
             // Preserve its aspect instead of rotating it again in composition.
             let (width, height) = if swaps_axes {
@@ -478,8 +481,8 @@ impl AndroidFrameStream {
                 mirrored,
                 top_left_origin: false,
                 timestamp: Duration::from_nanos(timestamp),
-                device: Some(producer.device()),
-                device_generation: producer.device_generation(),
+                device: Some(device),
+                device_generation,
                 planes: vec![FramePlane {
                     offset: 0,
                     stride: width as u64 * 4,
@@ -488,41 +491,36 @@ impl AndroidFrameStream {
                 retained_bytes: bytes,
             };
             let normalize_color = call_boolean(&source.0.java, "colorConversion", "()Z", &[]);
-            let counters = producer.budget().counters();
-            let owner = source.clone();
-            let output = producer
-                .produce_owned(metadata, owner, move |_, output| {
-                    counters.gpu_conversion(GpuTransferReason::PixelFormatConversion);
-                    if normalize_color {
-                        counters.gpu_conversion(GpuTransferReason::ColorSpaceConversion);
-                    }
-                    let error = call_object(
-                        &source.0.java,
-                        "draw",
-                        "(III)Ljava/lang/String;",
-                        &[
-                            JavaValue::Int(output as i32),
-                            JavaValue::Int(width as i32),
-                            JavaValue::Int(height as i32),
-                        ],
-                    )
-                    .map(|v| string_of(&v))
-                    .unwrap_or_default();
-                    if error.is_empty() {
-                        Ok(())
-                    } else {
-                        Err(native_error(error))
-                    }
-                })
-                .await?;
-            if output.is_some() {
-                last.store(sequence, std::sync::atomic::Ordering::Release);
-            }
-            Ok(output)
+            let draw = move |_: &Rc<dyn ferroui_opengl::IGlContext>, output| {
+                counters.gpu_conversion(GpuTransferReason::PixelFormatConversion);
+                if normalize_color {
+                    counters.gpu_conversion(GpuTransferReason::ColorSpaceConversion);
+                }
+                let error = call_object(
+                    &source.0.java,
+                    "draw",
+                    "(III)Ljava/lang/String;",
+                    &[
+                        JavaValue::Int(output as i32),
+                        JavaValue::Int(width as i32),
+                        JavaValue::Int(height as i32),
+                    ],
+                )
+                .map(|v| string_of(&v))
+                .unwrap_or_default();
+                if error.is_empty() {
+                    last.store(sequence, std::sync::atomic::Ordering::Release);
+                    Ok(())
+                } else {
+                    Err(native_error(error))
+                }
+            };
+            Ok(Some((metadata, draw)))
         })));
-        // Start acquisition now. When the GPU has completed, the next poll can
-        // advance the job and take its ready fence in the same call.
         self.poll_frame_job()?;
+        if ready.is_some() {
+            return Ok(ready);
+        }
         self.take_pending_frame()
     }
 }

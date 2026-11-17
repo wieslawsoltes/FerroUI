@@ -283,25 +283,7 @@ impl NativeCameraSession for Session {
     }
     fn take_frame(&self) -> Result<Option<FrameLease>, CameraError> {
         self.check()?;
-        if !self.stream.has_pending_frame_work() {
-            return Ok(None);
-        }
-        let info = self.info();
-        let size = dimensions(&info);
-        let rotation = match info["rotation"].as_u64() {
-            Some(90) => FrameRotation::Clockwise90,
-            Some(180) => FrameRotation::Clockwise180,
-            Some(270) => FrameRotation::Clockwise270,
-            _ => FrameRotation::None,
-        };
-        self.stream
-            .take_oriented_frame(
-                size.width,
-                size.height,
-                rotation,
-                info["mirrored"].as_bool().unwrap_or(false),
-            )
-            .map_err(native)
+        self.stream.take_clocked_frame().map_err(native)
     }
     fn photo(&self) -> CameraFuture<CameraPhoto> {
         let Some(java) = call_object(
