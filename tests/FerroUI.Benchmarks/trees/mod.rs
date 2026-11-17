@@ -15,6 +15,7 @@ pub mod children;
 pub mod fixture;
 pub mod lifetime;
 pub mod propagation;
+pub mod scaling;
 pub mod styling;
 pub mod text;
 
@@ -22,6 +23,7 @@ pub fn register(registry: &mut Registry) {
     children::register(registry);
     lifetime::register(registry);
     propagation::register(registry);
+    scaling::register(registry);
     styling::register(registry);
     text::register(registry);
 }

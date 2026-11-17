@@ -207,6 +207,12 @@ ferroui_base::ferro_overrides! { impl FerroObjectImpl for Control {
 } }
 
 impl VisualImpl for Control {
+    /// `render` is the one of the base class, and so is what a new size does to it: a class
+    /// that draws nothing is not drawn again when it is resized (section 9.89).
+    fn resize_changes_drawing(this: &Self, old: ferroui_base::Size, new: ferroui_base::Size) -> bool {
+        Self::parent_resize_changes_drawing(this, old, new)
+    }
+
     fn on_attached_to_visual_tree_core(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree_core(this, e);
 

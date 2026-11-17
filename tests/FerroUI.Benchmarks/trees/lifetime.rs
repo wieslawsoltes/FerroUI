@@ -24,16 +24,16 @@ pub struct Lifetime {
 }
 
 impl Lifetime {
-    fn new(tiles: usize) -> Self {
+    pub(super) fn new(tiles: usize) -> Self {
         Self { fixture: Fixture::new(), tiles, pending: None }
     }
 
-    fn build(&self) -> Ref<Canvas> {
+    pub(super) fn build(&self) -> Ref<Canvas> {
         wall(self.tiles, &self.fixture.brushes)
     }
 
     /// The root empty and a new wall waiting to be attached.
-    fn prepare_detached(&mut self) {
+    pub(super) fn prepare_detached(&mut self) {
         self.fixture.show(None);
         // The layout queue holds what was detached until its next pass: freed here, unmeasured.
         self.fixture.lay_out();
@@ -48,7 +48,7 @@ impl Lifetime {
     }
 
     /// A new wall attached and laid out.
-    fn prepare_laid_out(&mut self) {
+    pub(super) fn prepare_laid_out(&mut self) {
         self.prepare_attached();
         self.fixture.lay_out();
     }
@@ -63,7 +63,7 @@ impl Lifetime {
         self.pending = Some(canvas);
     }
 
-    fn attach(&mut self) {
+    pub(super) fn attach(&mut self) {
         let canvas = self.pending.clone().expect("a wall").upcast::<Control>();
         self.fixture.show(Some(&canvas));
     }
@@ -81,7 +81,49 @@ impl Lifetime {
         }
     }
 
-    fn clear(&mut self) {
+    /// A canvas of tiles in no tree: the children of the canvas are the tiles.
+    pub(super) fn prepare_canvas(&mut self) {
+        self.fixture.show(None);
+        self.fixture.lay_out();
+        let canvas = Canvas::new();
+        for index in 0..self.tiles {
+            canvas.children().add(tile(index, &self.fixture.brushes));
+        }
+        self.pending = Some(canvas);
+    }
+
+    /// A new wall built, shown and laid out: the start of a screen.
+    pub(super) fn start(&mut self) {
+        let canvas = self.build().upcast::<Control>();
+        self.fixture.show(Some(&canvas));
+        self.fixture.lay_out();
+    }
+
+    /// The root empty, and what was detached freed.
+    pub(super) fn prepare_start(&mut self) {
+        self.pending = None;
+        self.fixture.show(None);
+        self.fixture.lay_out();
+    }
+
+    /// Half the children of the canvas removed one at a time, each the one before the last: a
+    /// removal that is not at the end of the lists (what looks for the child from either end
+    /// finds it at once), with one child behind it to move. A removal further from the end also
+    /// moves what follows the child in the three lists of the panel, which grows with the
+    /// children and is the cost of a list (desktop-performance.md, section 9.80).
+    pub(super) fn remove_half(&mut self) {
+        let canvas = self.pending.clone().expect("a wall");
+        let children = canvas.children();
+        for _ in 0..self.tiles / 2 {
+            children.remove_at(children.count() - 2);
+        }
+    }
+
+    pub(super) fn detach(&mut self) {
+        self.fixture.show(None);
+    }
+
+    pub(super) fn clear(&mut self) {
         let canvas = self.pending.clone().expect("a wall");
         canvas.children().clear();
     }
@@ -109,15 +151,7 @@ pub fn register(registry: &mut Registry) {
         "clear",
         parameters,
         || Lifetime::new(TILES),
-        |b: &mut Lifetime| {
-            b.fixture.show(None);
-            b.fixture.lay_out();
-            let canvas = Canvas::new();
-            for index in 0..b.tiles {
-                canvas.children().add(tile(index, &b.fixture.brushes));
-            }
-            b.pending = Some(canvas);
-        },
+        Lifetime::prepare_canvas,
         Lifetime::clear,
     );
 }

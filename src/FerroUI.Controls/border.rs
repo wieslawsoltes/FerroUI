@@ -33,6 +33,8 @@ struct KeptBorderValues {
     border_thickness: Thickness,
     corner_radius: CornerRadius,
     background_sizing: BackgroundSizing,
+    /// Whether the border has something to draw: a background, a border brush or a shadow.
+    draws: bool,
 }
 
 ferro_class!(Border: Decorator);
@@ -51,6 +53,13 @@ impl VisualImpl for Border {
             this.border_brush().as_ref(),
             &this.box_shadow(),
         );
+    }
+
+    /// A border draws its background, its border and its shadows, each as large as it is: one
+    /// that has none of them draws nothing, at any size (desktop-performance.md, section 9.89).
+    fn resize_changes_drawing(this: &Self, _old: ferroui_base::Size, _new: ferroui_base::Size) -> bool {
+        // Asked for every new size: the answer is kept with the other values of the border.
+        this.kept_values().draws
     }
 
     // The rounded clip of the immediate renderer (`IVisualWithRoundRectClip`
@@ -203,11 +212,22 @@ impl Border {
 
     #[inline]
     fn kept_values(&self) -> KeptBorderValues {
-        self.kept.get_for(self, || KeptBorderValues {
+        self.kept.get_for(self, || self.read_kept_values())
+    }
+
+    /// The values `kept_values` keeps, read from the value store. Not part of the readers: they
+    /// are asked on every measure, arrange and new size, and find the kept values there.
+    #[cold]
+    #[inline(never)]
+    fn read_kept_values(&self) -> KeptBorderValues {
+        KeptBorderValues {
             border_thickness: self.get_value(Self::border_thickness_property()),
             corner_radius: self.get_value(Self::corner_radius_property()),
             background_sizing: self.get_value(Self::background_sizing_property()),
-        })
+            draws: self.with_value(Self::background_property(), Option::is_some)
+                || self.with_value(Self::border_brush_property(), Option::is_some)
+                || self.with_value(Self::box_shadow_property(), |shadows| shadows.count() > 0),
+        }
     }
 
     /// A brush with which to paint the background.

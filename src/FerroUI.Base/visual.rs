@@ -262,6 +262,19 @@ ferro_class! {
         /// is an item of the composition visual of the nearest visual above it that has one
         /// (section 9.42).
         fn requires_composition_visual(this) -> bool;
+        /// Whether a change of the size of the visual from `old` to `new`, with nothing else
+        /// changed, changes what `render` draws. A visual of a class that says it does not is
+        /// not recorded again for a new size alone: its size, and the clip to its bounds,
+        /// reach the compositor as properties; whatever else changes its drawing invalidates
+        /// it as before (a FerroUI addition, docs/porting/desktop-performance.md, sections
+        /// 9.87 and 9.89).
+        ///
+        /// The member describes `render` and is inherited only with it: `Visual` draws
+        /// nothing, and a new size changes nothing; a class that overrides `render` and not
+        /// this member, and any class written as a plain `impl`, is drawn again when it is
+        /// resized, as every visual was.
+        fn resize_changes_drawing(this, old: crate::Size, new: crate::Size) -> bool,
+            follows render else Visual::resize_redraws;
     }
 }
 
@@ -541,6 +554,11 @@ impl VisualImpl for Visual {
     }
 
     fn requires_composition_visual(_this: &Self) -> bool {
+        false
+    }
+
+    fn resize_changes_drawing(_this: &Self, _old: crate::Size, _new: crate::Size) -> bool {
+        // `render` of this class draws nothing.
         false
     }
 
@@ -1047,7 +1065,15 @@ impl Visual {
     /// The styled values [`Self::synchronize_composition_properties`] reads, kept while the value
     /// store of the visual is unchanged (none of the properties inherits).
     fn composition_styled_inputs(&self) -> CompositionStyledInputs {
-        self.hot_composition_inputs.get(self.values().value_generation(), || CompositionStyledInputs {
+        self.hot_composition_inputs.get(self.values().value_generation(), || self.read_composition_styled_inputs())
+    }
+
+    /// The values `composition_styled_inputs` keeps, read from the value store. Out of line: a
+    /// reader finds the kept values, and carries only the comparison of the generations.
+    #[cold]
+    #[inline(never)]
+    fn read_composition_styled_inputs(&self) -> CompositionStyledInputs {
+        CompositionStyledInputs {
             opacity: self.opacity() as f32,
             clip_to_bounds: self.clip_to_bounds(),
             has_clip: self.clip().is_some(),
@@ -1055,7 +1081,7 @@ impl Visual {
             has_cache_mode: self.cache_mode().is_some(),
             has_effect: self.effect().is_some(),
             has_render_transform: self.render_transform().is_some(),
-        })
+        }
     }
 
     fn static_constructor() {
@@ -1091,7 +1117,17 @@ impl Visual {
                     if state & ELIDED_OFFSET_THROUGH != 0 && old.is_none_or(|old| old.position() != new.position()) {
                         visual.elided_state.set(state | ELIDED_OFFSET_MOVED);
                     }
-                    if resized {
+                    // A new size is a new drawing for most visuals. One whose drawing does not
+                    // read its size draws what it drew: its size, and with it the clip to its
+                    // bounds, reaches the compositor as a property (section 9.87). A visual that
+                    // had no size is not asked: it gets its first one (every element of a tree
+                    // that is laid out for the first time), and is drawn.
+                    let redraws = resized
+                        && old.is_none_or(|old| {
+                            let old = old.size();
+                            old.width == 0.0 || old.height == 0.0 || visual.resize_changes_drawing(old, new.size())
+                        });
+                    if redraws {
                         visual.invalidate_visual();
                     } else {
                         visual.invalidate_composition_properties();
@@ -1233,6 +1269,13 @@ impl Visual {
             bump_geometry_version();
         }
         self.set_and_raise_cell(Self::bounds_property(), &self.bounds, value);
+    }
+
+    /// The answer of a class that overrides `render` and not `resize_changes_drawing`: a
+    /// drawing that is not known to ignore the size is made again for a new size (the fallback
+    /// of the member in the class declaration).
+    pub(crate) fn resize_redraws(&self, _old: crate::Size, _new: crate::Size) -> bool {
+        true
     }
 
     /// Whether the control should be clipped to its bounds.

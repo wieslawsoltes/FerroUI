@@ -1844,3 +1844,60 @@ fn a_layout_made_of_more_than_a_plain_text_is_not_shared() {
     selectable.measure(Size::new(200.0, 100.0));
     assert!(!selectable.text_layout().is_shared());
 }
+
+/// Section 9.87: a text block that is given another size and keeps its layout is not drawn
+/// again; one that has a background, that is lower than its text, or that gets a new layout is.
+#[test]
+fn a_text_block_that_is_resized_and_keeps_its_layout_is_not_drawn_again() {
+    let _scope = test_scope();
+    let block = text_block("Hello World");
+    let filled = text_block("Hello World");
+    filled.set_background(Some(Brushes::white()));
+    let wrapped = text_block("Hello World, and some more words to wrap");
+    wrapped.set_text_wrapping(TextWrapping::Wrap);
+    let stack = StackPanel::new();
+    for child in [&block, &filled, &wrapped] {
+        stack.children().add(child);
+    }
+    let host = Border::new();
+    host.set_child(&stack);
+    let root = TestRoot::with_child(&host);
+    let renderer = Rc::new(crate::test_support::MarkingRenderer::default());
+    root.set_renderer(renderer.clone());
+    host.set_width(400.0);
+    root.execute_initial_layout_pass();
+    let layout = |width: f64| {
+        host.set_width(width);
+        root.layout_manager().execute_layout_pass();
+    };
+    assert_eq!(block.bounds().width, 400.0);
+    for child in [&block, &filled, &wrapped] {
+        renderer.take(child);
+    }
+    let layout_of = |child: &Ref<TextBlock>| child.text_layout();
+    let (block_layout, wrapped_layout) = (layout_of(&block), layout_of(&wrapped));
+
+    // Narrower, and every text still fits its line: the blocks are as wide as the stack.
+    layout(360.0);
+    assert_eq!(block.bounds().width, 360.0);
+    assert!(Rc::ptr_eq(&block_layout, &layout_of(&block)));
+    assert_eq!(renderer.take(&block), (0, 1), "a new size alone: its properties, not its drawing");
+    assert_eq!(renderer.take(&filled).0, 1, "a background is as large as the block");
+    assert!(Rc::ptr_eq(&wrapped_layout, &layout_of(&wrapped)));
+    assert_eq!(renderer.take(&wrapped), (0, 1));
+
+    // Narrow enough for the wrapped text to break another way: a new layout is a new drawing.
+    layout(120.0);
+    assert!(!Rc::ptr_eq(&wrapped_layout, &layout_of(&wrapped)));
+    assert!(renderer.take(&wrapped).0 >= 1);
+    assert_eq!(renderer.take(&block), (0, 1));
+
+    // Lower than its text, the vertical alignment moves the text: drawn again.
+    block.set_vertical_alignment(VerticalAlignment::Center);
+    renderer.take(&block);
+    block.set_height(6.0);
+    root.layout_manager().execute_layout_pass();
+    assert!(block.bounds().height < block.text_layout().height());
+    assert!(renderer.take(&block).0 >= 1);
+}
+

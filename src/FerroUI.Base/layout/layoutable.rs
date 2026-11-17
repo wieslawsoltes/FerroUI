@@ -174,6 +174,12 @@ impl StyledElementImpl for Layoutable {
 }
 
 impl VisualImpl for Layoutable {
+    /// `render` is the one of the base class, and so is what a new size does to it: a class
+    /// that draws nothing is not drawn again when it is resized (section 9.89).
+    fn resize_changes_drawing(this: &Self, old: Size, new: Size) -> bool {
+        Self::parent_resize_changes_drawing(this, old, new)
+    }
+
     fn on_attached_to_visual_tree_core(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         this.is_attaching_to_visual_tree.set(true);
         Self::parent_on_attached_to_visual_tree_core(this, e);
@@ -869,14 +875,15 @@ impl Layoutable {
     // --- layout -----------------------------------------------------------
 
     /// Carries out a measure of the control.
+    ///
+    /// What most measures of a pass are, an element offered the size it was measured at or one
+    /// inside its hold, is the test below and nothing more, where the element is measured from;
+    /// the measure itself is out of line (`measure_at`), as the arrangement is. Which of the two
+    /// a caller gets is said here and not left to where a build puts its code (section 9.80).
+    #[inline]
     pub fn measure(&self, available_size: Size) {
-        if available_size.width.is_nan() || available_size.height.is_nan() {
-            panic!("Cannot call Measure using a size with NaN values.");
-        }
-
         if self.is_measure_valid.get() {
-            // The size it was measured at, which most measures of a pass are: nothing to do, and
-            // nothing to ask a hold.
+            // The size it was measured at: nothing to do, and nothing to ask a hold.
             let previous = self.previous_measure.get();
             if previous == Some(available_size) {
                 return;
@@ -886,6 +893,16 @@ impl Layoutable {
                 self.previous_measure.set(Some(available_size));
                 return;
             }
+        }
+        self.measure_at(available_size);
+    }
+
+    /// Measures the element at `available_size`: its measure is invalid, or the size is neither
+    /// the one it was measured at nor inside its hold. (A size that is not a number is neither.)
+    #[inline(never)]
+    fn measure_at(&self, available_size: Size) {
+        if available_size.width.is_nan() || available_size.height.is_nan() {
+            panic!("Cannot call Measure using a size with NaN values.");
         }
 
         let previous_desired_size = self.desired_size();
@@ -924,7 +941,23 @@ impl Layoutable {
     }
 
     /// Arranges the control and its children.
+    ///
+    /// For an element that stays where it is, which most are in a pass, this is the test below
+    /// and nothing more, where the element is arranged from; everything else is out of line
+    /// (`arrange_at`), as with `measure`. A rectangle that is not one was never the rectangle an
+    /// element was arranged at, so it is told there.
+    #[inline]
     pub fn arrange(&self, rect: Rect) {
+        if self.is_measure_valid.get() && self.is_arrange_valid.get() && self.previous_arrange.get() == Some(rect) {
+            return;
+        }
+        self.arrange_at(rect);
+    }
+
+    /// Arranges the element at `rect`: its measure or its arrangement is invalid, or `rect` is
+    /// not the rectangle it was arranged at.
+    #[inline(never)]
+    fn arrange_at(&self, rect: Rect) {
         if Self::is_invalid_rect(rect) {
             panic!("Invalid Arrange rectangle.");
         }
@@ -933,18 +966,11 @@ impl Layoutable {
             self.measure(self.previous_measure.get().unwrap_or(rect.size()));
         }
 
-        // What follows for an element that stays where it is, which most are in a pass, is this
-        // test and nothing more; the arrangement itself is out of line so that the visit of a
-        // child stays as short as it was.
-        if !self.is_arrange_valid.get() || self.previous_arrange.get() != Some(rect) {
-            self.arrange_at(rect);
+        // Measured again, and still where it was.
+        if self.is_arrange_valid.get() && self.previous_arrange.get() == Some(rect) {
+            return;
         }
-    }
 
-    /// Arranges the element at `rect`: its arrangement is invalid or `rect` is not the rectangle
-    /// it was arranged at.
-    #[inline(never)]
-    fn arrange_at(&self, rect: Rect) {
         let valid = self.is_arrange_valid.get();
         self.is_arrange_valid.set(true);
         crate::perf_count!(ArrangesExecuted);
