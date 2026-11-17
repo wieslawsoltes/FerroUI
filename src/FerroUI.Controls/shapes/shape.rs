@@ -43,7 +43,12 @@ ferro_class! {
         /// dropped an object and a subscription a frame. The default does not, and the shape
         /// makes a new geometry as before (a FerroUI addition, desktop-performance.md,
         /// section 9.88).
-        fn update_defining_geometry(this, geometry: &Ref<Geometry>) -> bool;
+        ///
+        /// An update describes one `create_defining_geometry` and is inherited only with it: a
+        /// class that makes a geometry of its own and does not say how to update it has no
+        /// update, whatever its base class has, and its geometry is made again as before.
+        fn update_defining_geometry(this, geometry: &Ref<Geometry>) -> bool,
+            follows create_defining_geometry else Shape::keeps_no_geometry;
 
         /// Called when the underlying [`Geometry`] changed.
         fn on_geometry_changed(this);
@@ -254,6 +259,13 @@ ferroui_base::ferro_properties! { impl Shape {
 } }
 
 impl Shape {
+    /// The update of a class that overrides `create_defining_geometry` and not
+    /// `update_defining_geometry`: none, whatever its base class does (the fallback of the member
+    /// in the class declaration).
+    pub(crate) fn keeps_no_geometry(&self, _geometry: &Ref<Geometry>) -> bool {
+        false
+    }
+
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
     pub fn construct() -> Self {
         Self {

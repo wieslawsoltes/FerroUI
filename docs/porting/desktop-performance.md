@@ -7107,6 +7107,14 @@ given the live collection right after.
 - `PolylineGeometry::of_points`: a polyline geometry of a collection, which it follows.
   `Polyline` and `Polygon` make their geometry of their own collection; nothing is copied.
   `PolylineGeometry` builds its figure from the collection in place.
+- **An update is inherited only with the geometry it updates.** `update_defining_geometry`
+  follows `create_defining_geometry` in the declaration of the class: a class that derives
+  from one of these shapes and makes a geometry of its own has no update unless it says how,
+  so its geometry is made again by its own code, as before, and never filled by the code of
+  its base class. `SelectionIndicator` is such a class in this repository (a rectangle whose
+  radii are fitted to its size): a render test of the navigation indicator showed the caps of
+  a plain rectangle in its place before the rule, and it now updates its own geometry with
+  the fitted radii.
 
 **Looked at and not changed** (section 8.4, rule 2). `Arc` and `Sector` build a stream
 geometry, or an ellipse, by their angles: keeping one means writing a stream geometry again
