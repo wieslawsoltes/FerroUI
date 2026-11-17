@@ -3608,6 +3608,63 @@ fn a_visual_that_draws_is_an_item_of_the_composition_visual_above_it() {
     assert_eq!(0, root_visual.children().count());
 }
 
+/// Section 9.90: the items of a composition visual are asked by ranges whose bounds are kept. A
+/// frame finds the item that changed and draws what meets its area, whichever range the item is
+/// in, also after items came and went before it and after it moved.
+#[test]
+fn an_item_among_many_is_found_and_drawn_where_it_is() {
+    let s = CompositorCanvas::new();
+    let log = s.render_interface.log().clone();
+    // Three hundred items in rows of twenty: more than four ranges of items.
+    let borders: Vec<Ref<TestBorder>> = (0..300)
+        .map(|index| {
+            let border = TestBorder::filled(f64::from(index % 20) * 20.0, f64::from(index / 20) * 20.0, 10.0, 10.0);
+            s.canvas.add(&border);
+            border
+        })
+        .collect();
+    s.run_jobs();
+    assert_eq!(300, server_items(&s, &s.root).len());
+    s.events.rects.borrow_mut().clear();
+
+    // An item that changes is the one the dirty region is told of, and the one that is drawn.
+    let recolored = |index: usize| {
+        let border = &borders[index];
+        border.set_background(Some(Brushes::green()));
+        log.clear();
+        s.assert_rects(&[border.bounds()]);
+        assert_eq!(vec!["Green"], rectangles(&log), "item {index}");
+        border.set_background(Some(Brushes::red()));
+        s.run_jobs();
+        s.events.rects.borrow_mut().clear();
+    };
+    for index in [0, 63, 64, 150, 299] {
+        recolored(index);
+    }
+
+    // Items that go before it move it among the items.
+    s.canvas.remove(&borders[10]);
+    s.canvas.remove(&borders[70]);
+    s.run_jobs();
+    assert_eq!(298, server_items(&s, &s.root).len());
+    s.events.rects.borrow_mut().clear();
+    for index in [11, 64, 65, 200, 299] {
+        recolored(index);
+    }
+
+    // An item that moves is drawn where it is now, and its range knows where that is: the
+    // item is drawn again there when it changes.
+    let moved = &borders[100];
+    let old = moved.bounds();
+    let new = Rect::new(600.0, 600.0, 10.0, 10.0);
+    moved.set_bounds(new);
+    log.clear();
+    s.assert_rects(&[old, new]);
+    assert_eq!(vec!["Red"], rectangles(&log));
+    recolored(100);
+    recolored(101);
+}
+
 #[test]
 fn an_item_is_clipped_to_the_size_of_a_visual_that_clips_to_its_bounds() {
     let s = CompositorCanvas::new();

@@ -230,6 +230,11 @@ impl ServerCompositionVisual {
         self.draw_item_flags.get() & DRAW_ITEMS_DIRTY != 0
     }
 
+    /// The drawing items of the content, when it has had any.
+    pub(crate) fn draw_items(&self) -> Option<&super::ServerDrawItems> {
+        self.content.draw_items()
+    }
+
     /// Something of the drawing items of the content changed: the update pass adds where
     /// the changed items were and are to the dirty region, as the extra dirty rects of the
     /// visual, and the bounds of the content are computed again. The visual is not dirty for
