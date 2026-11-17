@@ -1015,8 +1015,8 @@ The leader of the comparison runs the scene at 54 to 58 with a first frame at 0.
 **What sets the rate.** The UI thread: on the main branch it is busy 88 % of the time and
 the render thread 48 %. A frame has 16.7 ms, and a frame that misses the display takes two,
 so the rate falls in steps: 52 frames a second is one frame in seven late, not a frame that
-is 15 % too slow. What a frame of the declarative program does, counted with `perf-
-counters`, beside the sample of this repository:
+is 15 % too slow. What a frame of the declarative program does, counted with
+`perf-counters`, beside the sample of this repository:
 
 | A frame, gauntlet tier 16 | The declarative program | Before sections 9.84 to 9.89 | The sample | What is left |
 | --- | ---: | ---: | ---: | --- |
