@@ -35,7 +35,12 @@ What is measured (see docs/porting/desktop-performance.md, section 8.1):
   counts them, the instructions the processor retires for it. Each class of benchmarks runs in a
   process of its own. A time over its tolerance whose instructions are not is reported as
   `REGRESSED (time alone)`: the work is the same, and the time is that of where this build put
-  the code and the data, or of the machine.
+  the code and the data, or of the machine;
+- the scaling pairs (`scaling/...`): for a benchmark of `trees::Scaling` and of
+  `layout_subsystem::ScrollContent` that is measured at a size and at four times that size, the
+  instructions at the larger size over those at the smaller. A cost linear in the size has 4 or
+  less; a pair over 4.6 regressed (`REGRESSED (scaling)`), unless the base is over it as well
+  (`over its limit (as the base)`: a finding that is there already).
 
 What is checked without a measurement, on the candidate alone and once (`counters`): the tests
 that assert how much work an operation does, read from the framework's performance counters
@@ -86,6 +91,7 @@ from __future__ import annotations
 
 import argparse
 import datetime
+import hashlib
 import json
 import os
 import platform
@@ -284,6 +290,17 @@ TDG_FLOOR_NS = 2.0
 #   counted more than every round of the base.
 INSTRUCTIONS_TOLERANCE = 0.02
 INSTRUCTIONS_FLOOR = 1.0
+# - A scaling pair: one benchmark of the classes below at a size and at `SCALING_FACTOR` times that
+#   size (its only parameter, as in `Tiles=1000` and `Tiles=4000`), each one whole operation. The
+#   metric is the instructions at the larger size over those at the smaller, and its limit is the
+#   factor and 15 % more (4.6): a cost linear in the size has the factor or less (the fixed part
+#   of an operation does not grow), one that grows with the size times its logarithm has 4.8 at
+#   these sizes, a quadratic one 16. A pair over its limit regressed, unless the base is over it
+#   too and the candidate is not further over it than the tolerance of the instructions: that is
+#   a finding the base has already, shown in the table and not held against the candidate.
+SCALING_CLASSES = ("trees::Scaling", "layout_subsystem::ScrollContent")
+SCALING_FACTOR = 4
+SCALING_TOLERANCE = 0.15
 
 
 @dataclass
@@ -564,18 +581,54 @@ def run_tool(command: list[str], env: dict[str, str] | None = None, cwd: Path | 
     return result.stdout
 
 
-def run_cargo(side: Side, args: list[str], env: dict[str, str], log: Path, echo: bool) -> str:
+# A run that measures prints a line for every benchmark or scene it finishes. One that prints
+# nothing for this long is stuck (it has happened: a process that cannot page in its own program
+# from the drive spins there for ever), and is stopped and started once more.
+STALL_SECONDS = 360.0
+
+
+class Stalled(Exception):
+    """A measuring run printed nothing for `STALL_SECONDS`."""
+
+
+def run_cargo_once(side: Side, args: list[str], env: dict[str, str], log: Path, echo: bool, stall: float | None) -> str:
     command = [*cargo_command(), *args]
     full_env = {**os.environ, **env, "CARGO_TARGET_DIR": str(side.target)}
     print(f"[{side.name}] {' '.join(shlex.quote(part) for part in command)}", flush=True)
     log.parent.mkdir(parents=True, exist_ok=True)
     with open(log, "w", encoding="utf-8") as out:
+        # A session of its own: a run that is stuck is stopped with what it started.
         process = subprocess.Popen(
-            command, cwd=side.root, env=full_env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True
+            command,
+            cwd=side.root,
+            env=full_env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            start_new_session=stall is not None,
         )
         lines = []
         assert process.stdout is not None
-        for line in process.stdout:
+        printed: queue.Queue[str | None] = queue.Queue()
+
+        def pump(stream=process.stdout) -> None:
+            for line in stream:
+                printed.put(line)
+            printed.put(None)
+
+        threading.Thread(target=pump, daemon=True).start()
+        while True:
+            try:
+                line = printed.get(timeout=stall)
+            except queue.Empty:
+                try:
+                    os.killpg(process.pid, 9)
+                except OSError:
+                    process.kill()
+                process.wait()
+                raise Stalled from None
+            if line is None:
+                break
             out.write(line)
             lines.append(line)
             if echo or line.startswith(("GATE ", "error")) or "panicked" in line:
@@ -584,6 +637,83 @@ def run_cargo(side: Side, args: list[str], env: dict[str, str], log: Path, echo:
     if status != 0:
         raise GateError(f"[{side.name}] cargo {' '.join(args)} failed with status {status}; the log is {log}")
     return "".join(lines)
+
+
+# The folder of `--resume`: what each measuring run printed is kept there, and a run that is
+# there is not made again. A gate that was stopped half way (the machine, a drive that left) is
+# started again with the same folder and goes on where it was.
+RESUME: Path | None = None
+
+# How long a measuring run waits for the source tree of its side to be there again when the
+# system says the files cannot be read (a drive that left and comes back), and how often.
+DRIVE_WAIT_SECONDS = 600.0
+DRIVE_ATTEMPTS = 3
+
+
+def kept_output(side: Side, args: list[str], env: dict[str, str], log: Path) -> Path | None:
+    """Where `--resume` keeps the output of this run: by its log, and by what was run (the
+    side and its commit, the arguments, the environment), so that another gate finds nothing."""
+    if RESUME is None:
+        return None
+    identity = "\n".join([side.label, *args, *(f"{name}={value}" for name, value in sorted(env.items()))])
+    return RESUME / f"{log.stem}-{hashlib.sha256(identity.encode()).hexdigest()[:12]}.out"
+
+
+def wait_for_drive(side: Side, error: OSError) -> None:
+    print(f"[{side.name}] {error}: waiting for {side.root} to be there again", flush=True)
+    until = time.monotonic() + DRIVE_WAIT_SECONDS
+    while time.monotonic() < until:
+        try:
+            if (side.root / "Cargo.toml").is_file() and side.target.is_dir():
+                # What comes back is given a moment before it is read from.
+                time.sleep(15)
+                return
+        except OSError:
+            pass
+        time.sleep(5)
+    raise GateError(f"[{side.name}] {side.root} did not come back in {DRIVE_WAIT_SECONDS / 60:g} minutes ({error})")
+
+
+def run_cargo(side: Side, args: list[str], env: dict[str, str], log: Path, echo: bool, measuring: bool = False) -> str:
+    """Runs cargo for `side`. A run that measures (`measuring`) and prints nothing for
+    `STALL_SECONDS` is stopped and run once more, and one whose files cannot be read waits for
+    them and runs again; a build is given the time it takes. With `--resume` the output of a
+    measuring run is kept, and a run that was kept is not made again."""
+    if not measuring:
+        return run_cargo_once(side, args, env, log, echo, None)
+    kept = kept_output(side, args, env, log)
+    if kept is not None and kept.is_file():
+        print(f"[{side.name}] kept from the run before: {log.name}", flush=True)
+        return kept.read_text(encoding="utf-8")
+    stalls = 0
+    faults = 0
+    while True:
+        try:
+            output = run_cargo_once(side, args, env, log, echo, STALL_SECONDS)
+            break
+        except Stalled:
+            stalls += 1
+            if stalls == 2:
+                raise GateError(
+                    f"[{side.name}] cargo {' '.join(args)} printed nothing for {STALL_SECONDS / 60:g} minutes, twice; "
+                    f"the log is {log}"
+                ) from None
+            print(
+                f"[{side.name}] nothing printed for {STALL_SECONDS / 60:g} minutes: "
+                "the run was stopped and is started again",
+                flush=True,
+            )
+        except OSError as error:
+            faults += 1
+            if faults > DRIVE_ATTEMPTS:
+                raise GateError(f"[{side.name}] cargo {' '.join(args)}: {error}; the log is {log}") from None
+            wait_for_drive(side, error)
+    if kept is not None:
+        kept.parent.mkdir(parents=True, exist_ok=True)
+        temporary = kept.with_suffix(".tmp")
+        temporary.write_text(output, encoding="utf-8")
+        temporary.replace(kept)
+    return output
 
 
 def frame_tests(side: Side, env: dict[str, str], log: Path, echo: bool) -> list[str]:
@@ -598,7 +728,7 @@ def run_frames(side: Side, tests: list[str], env: dict[str, str], log: Path, ech
     output = ""
     for test in tests:
         test_log = log.with_name(f"{log.stem}-{test}{log.suffix}")
-        output += run_cargo(side, [*FRAMES_TEST, test, "--exact", *TEST_ARGS], env, test_log, echo)
+        output += run_cargo(side, [*FRAMES_TEST, test, "--exact", *TEST_ARGS], env, test_log, echo, measuring=True)
     return output
 
 
@@ -626,11 +756,11 @@ def run_benchmarks(side: Side, suite: str, classes: list[str] | None, env: dict[
     """The benchmarks of `suite`: each of `classes` in a process of its own, or all of them in
     one when there is no list of classes."""
     if classes is None:
-        return run_cargo(side, SUITES[suite]["run"], env, log, echo)
+        return run_cargo(side, SUITES[suite]["run"], env, log, echo, measuring=True)
     output = ""
     for name in classes:
         class_log = log.with_name(f"{log.stem}-{name.replace('::', '-')}{log.suffix}")
-        output += run_cargo(side, SUITES[suite]["run"], {**env, BENCH_CLASS: name}, class_log, echo)
+        output += run_cargo(side, SUITES[suite]["run"], {**env, BENCH_CLASS: name}, class_log, echo, measuring=True)
     return output
 
 
@@ -1164,6 +1294,46 @@ def compare(base: Side, candidate: Side, tolerance: float) -> list[Row]:
     return rows
 
 
+SIZED_KEY = re.compile(r"^(?P<name>[\w:]+\.\w+)\[(?P<parameter>\w+)=(?P<size>\d+)\]$")
+
+
+def scaling_pairs(instructions: dict[str, list[float]]) -> dict[str, float]:
+    """The scaling pairs among the benchmarks a side counted the instructions of: by the key of
+    the pair (`scaling/<benchmark>[<parameter>=<size>..<larger size>]`), the instructions at the
+    larger size over those at the smaller."""
+    sized: dict[tuple[str, str], dict[int, float]] = {}
+    for key, values in instructions.items():
+        match = SIZED_KEY.match(key)
+        if match and values and match["name"].rsplit(".", 1)[0] in SCALING_CLASSES:
+            sized.setdefault((match["name"], match["parameter"]), {})[int(match["size"])] = statistics.median(values)
+    pairs = {}
+    for (name, parameter), sizes in sized.items():
+        for size, counted in sizes.items():
+            larger = sizes.get(size * SCALING_FACTOR)
+            if larger is not None and counted > 0:
+                pairs[f"scaling/{name}[{parameter}={size}..{size * SCALING_FACTOR}]"] = larger / counted
+    return pairs
+
+
+def scaling_rows(base: Side, candidate: Side) -> list[Row]:
+    """A row for each scaling pair of the candidate: the ratio of the base, that of the candidate,
+    and whether the candidate is over the limit of a pair (see `SCALING_CLASSES`)."""
+    limit = SCALING_FACTOR * (1 + SCALING_TOLERANCE)
+    ratios_b, ratios_c = scaling_pairs(base.instructions), scaling_pairs(candidate.instructions)
+    rows = []
+    for key, c in ratios_c.items():
+        b = ratios_b.get(key)
+        change = f"{(c - b) / b * 100:+.1f} %" if b else ""
+        if c <= limit:
+            verdict, regressed = "ok", False
+        elif b is not None and b > limit and c <= b * (1 + INSTRUCTIONS_TOLERANCE):
+            verdict, regressed = "over its limit (as the base)", False
+        else:
+            verdict, regressed = "REGRESSED (scaling)", True
+        rows.append(Row(key, f"{b:.2f}x" if b else "-", f"{c:.2f}x", change, f"{limit:g}x", verdict, regressed))
+    return rows
+
+
 HEADER = ("Metric", "Base", "Candidate", "Change", "Instructions", "Tolerance", "Verdict")
 INSTRUCTIONS_COLUMN = HEADER.index("Instructions")
 
@@ -1229,6 +1399,18 @@ def main() -> int:
         help="the rounds per side up to which a metric over its tolerance by less than the spread of its rounds is measured again (default 9)",
     )
     parser.add_argument(
+        "--resume",
+        help="a folder that keeps what each measuring run printed: a gate that was stopped half way is started "
+        "again with the same folder and does not measure again what it has (a folder for one gate: the same base, "
+        "the same candidate, the same options)",
+    )
+    parser.add_argument(
+        "--keep-going",
+        action="store_true",
+        help="measure every round although a line takes more instructions after the first (the gate stops there: "
+        "instructions do not change from round to round)",
+    )
+    parser.add_argument(
         "--only",
         default="all",
         help="what to measure, comma separated: counters, gauntlet, frames, framework, tdg, window, or all (default all); "
@@ -1284,6 +1466,9 @@ def gate(options: argparse.Namespace) -> int:
     # machine that gets its sources copied; the base is then a copy as well, `--base-dir`).
     root = Path(__file__).resolve().parents[2]
     checkout = checkout_root(root) is not None
+    if options.resume:
+        global RESUME
+        RESUME = Path(options.resume).resolve()
     scratch = Path(options.scratch).resolve() if options.scratch else (root.parent / "ferroui-gate-scratch")
     base_dir = Path(options.base_dir).resolve() if options.base_dir else None
     if base_dir is not None:
@@ -1489,7 +1674,7 @@ def gate(options: argparse.Namespace) -> int:
                 elif suite in HARNESS_SUITES:
                     output = run_benchmarks(side, suite, classes[suite, side.name], env[suite], log, options.verbose)
                 else:
-                    output = run_cargo(side, SUITES[suite]["run"], env[suite], log, options.verbose)
+                    output = run_cargo(side, SUITES[suite]["run"], env[suite], log, options.verbose, measuring=True)
                 if suite in ("gauntlet", "frames"):
                     found = parse_gate(output)
                     if not found:
@@ -1504,11 +1689,26 @@ def gate(options: argparse.Namespace) -> int:
                     suite_of.update((metric.key, suite) for metric, _ in found)
                     side.failed |= failed
 
+    # Instructions are the same from round to round: a line that takes more of them after the
+    # first round takes more of them after the last. The gate says so then, and not an hour later.
+    stopped_early: list[str] = []
     for round_index in range(options.rounds):
         measure(round_index, suites, options.rounds)
+        if round_index == 0 and options.rounds > 1 and not options.keep_going:
+            counted = [*compare(base, candidate, options.tolerance), *scaling_rows(base, candidate)]
+            stopped_early = [
+                row.key for row in counted if row.regressed and ("instructions" in row.verdict or "scaling" in row.verdict)
+            ]
+            if stopped_early:
+                print(
+                    f"more instructions after the first round: {', '.join(stopped_early)}; "
+                    "the other rounds would say the same and are not measured (--keep-going measures them)",
+                    flush=True,
+                )
+                break
 
     rounds = options.rounds
-    while rounds < options.max_rounds:
+    while rounds < options.max_rounds and not stopped_early:
         doubtful = [row.key for row in compare(base, candidate, options.tolerance) if row.measured and is_within_spread(base, candidate, row.key)]
         if not doubtful:
             break
@@ -1517,7 +1717,7 @@ def gate(options: argparse.Namespace) -> int:
         measure(rounds, measured, rounds + 1)
         rounds += 1
 
-    rows = [*check_rows, *compare(base, candidate, options.tolerance)]
+    rows = [*check_rows, *compare(base, candidate, options.tolerance), *scaling_rows(base, candidate)]
     regressions = [row for row in rows if row.regressed]
     time_alone = sum(row.verdict == "REGRESSED (time alone)" for row in regressions)
     summary = (
@@ -1526,6 +1726,8 @@ def gate(options: argparse.Namespace) -> int:
         if regressions
         else f"{len(rows)} metrics, none regressed beyond its tolerance"
     )
+    if stopped_early:
+        summary += "; stopped after the first round: the lines that take more instructions take them in every round"
     print()
     print(text_table(rows))
     print()

@@ -100,3 +100,59 @@ fn polyline_should_invalidate_geometry_when_points_collection_changes() {
 
     assert!(invalidated.get());
 }
+
+/// Section 9.88: a polyline given another collection of points keeps its geometry, which takes
+/// the points, follows the new collection and is built again.
+#[test]
+fn a_polyline_given_other_points_keeps_its_geometry_which_takes_them() {
+    let _scope = test_scope();
+    let _app = MockRenderInterfaceScope::install();
+
+    let target = triangle(None, FillRule::EvenOdd);
+    target.measure(Size::INFINITY);
+    let geometry = target.defining_geometry().expect("a geometry");
+    let changes = Rc::new(std::cell::Cell::new(0));
+    let counted = changes.clone();
+    geometry.changed(move || counted.set(counted.get() + 1)).detach();
+
+    let other = Points::from_items([Point::new(0.0, 0.0), Point::new(30.0, 5.0)]);
+    target.set_points(Some(other.clone()));
+    assert!(!target.is_measure_valid());
+    assert_eq!(changes.get(), 1, "the geometry says it changed");
+    target.measure(Size::INFINITY);
+    let kept = target.defining_geometry().expect("a geometry");
+    assert!(kept.ptr_eq(&geometry), "the same geometry");
+    let polyline = kept.cast::<PolylineGeometry>().expect("a polyline geometry");
+    assert_eq!(polyline.points().to_vec(), other.to_vec());
+
+    // It follows the collection it was given, and no longer the one it had. (A shape in a tree
+    // listens to its geometry and is measured again:
+    // `polyline_will_update_geometry_on_shapes_collection_content_change`.)
+    other.add(Point::new(40.0, 0.0));
+    assert_eq!(changes.get(), 2);
+
+    // Without points the geometry is let go, as before; with points again there is a new one.
+    target.set_points(None);
+    target.measure(Size::INFINITY);
+    let empty = target.defining_geometry().expect("a geometry");
+    assert!(!empty.ptr_eq(&geometry));
+    assert_eq!(empty.cast::<PolylineGeometry>().expect("a polyline geometry").points().len(), 0);
+}
+
+/// The geometry of a polyline is made of its own collection of points, not of a copy.
+#[test]
+fn the_geometry_of_a_polyline_has_the_collection_of_the_polyline() {
+    let _scope = test_scope();
+    let _app = MockRenderInterfaceScope::install();
+
+    let points = Points::from_items([Point::new(0.0, 0.0), Point::new(10.0, 10.0)]);
+    let target = Polyline::new();
+    target.set_points(Some(points.clone()));
+    target.set_fill(red());
+    target.measure(Size::INFINITY);
+    let geometry = target.defining_geometry().and_then(|g| g.cast::<PolylineGeometry>()).expect("a polyline geometry");
+    assert!(geometry.is_filled());
+    points.add(Point::new(20.0, 0.0));
+    assert_eq!(geometry.points().len(), 3);
+}
+

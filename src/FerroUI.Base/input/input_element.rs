@@ -195,6 +195,12 @@ crate::ferro_overrides! { impl FerroObjectImpl for InputElement {
 } }
 
 impl VisualImpl for InputElement {
+    /// `render` is the one of the base class, and so is what a new size does to it: a class
+    /// that draws nothing is not drawn again when it is resized (section 9.89).
+    fn resize_changes_drawing(this: &Self, old: crate::Size, new: crate::Size) -> bool {
+        Self::parent_resize_changes_drawing(this, old, new)
+    }
+
     fn on_detached_from_visual_tree_core(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_detached_from_visual_tree_core(this, e);
 

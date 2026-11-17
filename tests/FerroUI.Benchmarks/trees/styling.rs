@@ -93,7 +93,7 @@ impl Styling {
         self.fixture.show(Some(&canvas));
     }
 
-    fn new_attached(tiles: usize) -> Self {
+    pub(super) fn new_attached(tiles: usize) -> Self {
         let mut this = Self::new(tiles);
         this.prepare_detached();
         this.attach();
@@ -101,11 +101,11 @@ impl Styling {
         this
     }
 
-    fn settle(&mut self) {
+    pub(super) fn settle(&mut self) {
         self.fixture.lay_out();
     }
 
-    fn toggle_class(&mut self) {
+    pub(super) fn toggle_class(&mut self) {
         let hot = !self.flip.get();
         self.flip.set(hot);
         for tile in &self.built {
@@ -113,7 +113,7 @@ impl Styling {
         }
     }
 
-    fn resource_changed(&mut self) {
+    pub(super) fn resource_changed(&mut self) {
         let value = !self.flip.get();
         self.flip.set(value);
         let accent: ferroui_base::BoxedValue = std::rc::Rc::new(i32::from(value));
