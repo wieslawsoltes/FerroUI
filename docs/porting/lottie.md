@@ -13,9 +13,9 @@ Enable the `lottie` feature of `ferroui` to use the desktop Skia player from Rus
 cargo run -p control-catalog-desktop --features lottie
 ```
 
-Select **Media & Graphics → Lottie**. Skottie adds a native Skia feature and its text layout dependency. On targets where the rust-skia binary release lacks the matching feature set, the configured rust-skia build compiles Skia from source. Those builds need the C++ toolchain, Python, and Ninja. Set `SKIA_NINJA_COMMAND` if Ninja is outside `PATH`. Feature-off builds retain their existing Skia configuration.
+Select **Media & Graphics → Lottie**. The opt-in build compiles Skia from source so that Skottie's text layout can share the single HarfBuzz library that FerroUI already uses for text shaping. The rust-skia binaries ship their own HarfBuzz, which cannot safely share symbols with FerroUI's version. The source build needs a C++ toolchain, Python, and Ninja. Set `SKIA_NINJA_COMMAND` if Ninja is outside `PATH`. Feature-off builds retain their existing Skia configuration.
 
-The workspace's rust-skia patch excludes an internal libc++ header from Skottie binding generation. This fixes unbound template parameters produced by bindgen on the tested Xcode toolchain. An affected source build using the crates.io bindings needs the same patch until it is available upstream.
+Lottie applications built outside the FerroUI workspace need the workspace's `skia-bindings` patch. The patch shares HarfBuzz and excludes an internal libc++ header that produced invalid generated bindings on the tested Xcode toolchain.
 
 ## Source mapping
 

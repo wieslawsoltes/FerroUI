@@ -1,4 +1,5 @@
 use crate::markup::{content_page_class, xaml_class};
+use ferroui_base::controls::NameScopeExtensions;
 use ferroui_base::interactivity::IRoutedEventArgs;
 use ferroui_base::media::Stretch;
 use ferroui_base::{BoxedValue, Ref, ferro_class_info, instantiate};
@@ -49,12 +50,11 @@ impl LottiePage {
     }
 
     fn player(&self) -> Option<Ref<Lottie>> {
-        self.find_control::<Lottie>("Player")
+        NameScopeExtensions::find(self, "Player")
     }
 
     fn selection(&self, name: &str) -> Option<i32> {
-        self.find_control::<ComboBox>(name)
-            .map(|combo| combo.selected_index())
+        NameScopeExtensions::find::<ComboBox>(self, name).map(|combo| combo.selected_index())
     }
 
     fn change_animation(&self) {

@@ -6460,6 +6460,7 @@ dependencies = [
  "bindgen",
  "cc",
  "flate2",
+ "harfbuzz-sys",
  "heck",
  "pkg-config",
  "regex",

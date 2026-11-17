@@ -60,7 +60,9 @@ pub fn link_libraries(features: &Features) -> Vec<String> {
         // Use pkg-config for these libraries
         add_pkg_config_libs(&mut libs, "libpng", &["png16"]);
         add_pkg_config_libs(&mut libs, "zlib", &["z"]);
-        add_pkg_config_libs(&mut libs, "harfbuzz", &["harfbuzz"]);
+        if !features[feature::SKOTTIE] {
+            add_pkg_config_libs(&mut libs, "harfbuzz", &["harfbuzz"]);
+        }
         add_pkg_config_libs(&mut libs, "expat", &["expat"]);
 
         // ICU libraries - try pkg-config first, fallback to manual linking

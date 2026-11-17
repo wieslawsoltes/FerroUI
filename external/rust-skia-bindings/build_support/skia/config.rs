@@ -177,14 +177,20 @@ impl FinalBuildConfiguration {
             }
 
             if features[feature::TEXTLAYOUT] {
+                let shared_harfbuzz = features[feature::SKOTTIE];
                 builder
                     .arg("skia_enable_skshaper", yes())
                     .arg("skia_use_icu", yes())
                     .arg("skia_use_system_icu", yes_if(use_system_libraries))
                     .arg("skia_use_harfbuzz", yes())
-                    .arg("skia_pdf_subset_harfbuzz", yes())
-                    .arg("skia_use_system_harfbuzz", yes_if(use_system_libraries))
+                    .arg("skia_pdf_subset_harfbuzz", yes_if(!shared_harfbuzz))
+                    .arg("skia_use_system_harfbuzz", yes_if(use_system_libraries || shared_harfbuzz))
                     .arg("skia_enable_skparagraph", yes());
+                if shared_harfbuzz {
+                    let include = cargo::env_var("DEP_HARFBUZZ_INCLUDE")
+                        .expect("harfbuzz-sys did not export its bundled headers");
+                    builder.arg("ferro_harfbuzz_include", quote(&include.replace('\\', "/")));
+                }
                 // note: currently, tests need to be enabled, because modules/skparagraph
                 // is not included in the default dependency configuration.
                 // ("paragraph_tests_enabled", no()),
@@ -315,8 +321,34 @@ pub fn build(
             .expect("apply pinned Graphite Metal ownership fix");
         println!("cargo:warning=FerroUI Graphite Metal ownership fix applied (manual reference counting)");
     }
+    if config.features[feature::SKOTTIE] {
+        configure_shared_harfbuzz(&build.skia_source_dir)
+            .expect("configure the pinned Skia build to use the Cargo HarfBuzz library");
+    }
     configure_skia(build, config, python, gn_command.as_deref());
     build_skia(config, &ninja);
+}
+
+fn configure_shared_harfbuzz(source_dir: &Path) -> std::io::Result<()> {
+    const ORIGINAL: &str = "if (skia_use_system_harfbuzz) {";
+    const PATCHED: &str = r#"declare_args() {
+  ferro_harfbuzz_include = ""
+}
+
+if (ferro_harfbuzz_include != "") {
+  system("harfbuzz") {
+    include_dirs = [ ferro_harfbuzz_include ]
+  }
+} else if (skia_use_system_harfbuzz) {"#;
+    let path = source_dir.join("third_party/harfbuzz/BUILD.gn");
+    let source = std::fs::read_to_string(&path)?;
+    if source.contains(PATCHED) {
+        return Ok(());
+    }
+    if source.matches(ORIGINAL).count() != 1 {
+        return Err(std::io::Error::other("Skia's HarfBuzz build has changed. Review the shared HarfBuzz configuration."));
+    }
+    std::fs::write(path, source.replace(ORIGINAL, PATCHED))
 }
 
 /// Configures Skia by calling gn
