@@ -427,6 +427,26 @@ def parse_gate(output: str) -> list[tuple[Metric, float]]:
     return found
 
 
+def parse_gate_instructions(output: str) -> dict[str, float]:
+    """The instructions of a frame of the `GATE {...}` lines that count them
+    (`instructions_per_frame`, those of every thread of the process), by the key of each time of a
+    frame of the record: the times of a scene are then judged as those of a benchmark that
+    counts are, and a time that changed with the same instructions says so."""
+    counted = {}
+    for line in output.splitlines():
+        match = GATE_LINE.match(line.strip())
+        if not match:
+            continue
+        record = json.loads(match.group(1))
+        if "instructions_per_frame" not in record:
+            continue
+        instructions = float(record["instructions_per_frame"]) * presented_frames(record)
+        for name in PRESENTED_FRAME_TIMES:
+            if name in record:
+                counted[f"{record['bench']} {name}"] = instructions
+    return counted
+
+
 TIME = re.compile(r"^([0-9]+(?:\.[0-9]+)?) (ns|us|ms|s)$")
 TIME_SCALE = {"ns": 1.0, "us": 1e3, "ms": 1e6, "s": 1e9}
 CLASS_LINE = re.compile(r"^([A-Za-z0-9_]+)::([A-Za-z0-9_]+)$")
@@ -1679,7 +1699,7 @@ def gate(options: argparse.Namespace) -> int:
                     found = parse_gate(output)
                     if not found:
                         raise GateError(f"[{side.name}] the {suite} run printed no GATE line; the log is {log}")
-                    record(side, found)
+                    record(side, found, parse_gate_instructions(output))
                     suite_of.update((metric.key, suite) for metric, _ in found)
                 else:
                     found, failed, instructions = parse_tdg(output)
