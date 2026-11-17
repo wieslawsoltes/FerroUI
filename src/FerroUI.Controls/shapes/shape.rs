@@ -36,6 +36,15 @@ ferro_class! {
         /// Creates the shape's defining geometry.
         fn create_defining_geometry(this) -> Option<Ref<Geometry>>;
 
+        /// Gives the geometry the shape has what the shape is now (a property the geometry is
+        /// made of changed), and says whether it did. The geometry is then kept and builds
+        /// itself again, where the reference lets it go and makes another one for every
+        /// change: a shape that is resized, or whose points change, every frame made and
+        /// dropped an object and a subscription a frame. The default does not, and the shape
+        /// makes a new geometry as before (a FerroUI addition, desktop-performance.md,
+        /// section 9.88).
+        fn update_defining_geometry(this, geometry: &Ref<Geometry>) -> bool;
+
         /// Called when the underlying [`Geometry`] changed.
         fn on_geometry_changed(this);
     }
@@ -46,6 +55,10 @@ ferro_impl_classes!(Shape: StyledElementImpl, InteractiveImpl, InputElementImpl,
 impl ShapeImpl for Shape {
     fn create_defining_geometry(_this: &Self) -> Option<Ref<Geometry>> {
         panic!("Shape is abstract: 'create_defining_geometry' must be implemented by the deriving class")
+    }
+
+    fn update_defining_geometry(_this: &Self, _geometry: &Ref<Geometry>) -> bool {
+        false
     }
 
     fn on_geometry_changed(this: &Self) {
@@ -434,6 +447,22 @@ impl Shape {
         }
     }
 
+    /// A property the geometry of the shape is made of changed. The geometry the shape has is
+    /// given what the shape is now, where its class can do that (`update_defining_geometry`),
+    /// and the shape is measured again; else the geometry is let go, as in the reference.
+    fn geometry_property_changed(&self) {
+        let kept = self.defining_geometry.borrow().clone();
+        if kept.is_some_and(|geometry| self.update_defining_geometry(&geometry)) {
+            // What `on_geometry_changed` does for a geometry that says it changed, also where
+            // nothing listens to the geometry (a shape that is not in a tree) or nothing of it
+            // changed.
+            *self.rendered_geometry.borrow_mut() = None;
+            self.invalidate_measure();
+            return;
+        }
+        self.invalidate_geometry();
+    }
+
     /// Invalidates the geometry of this shape.
     pub fn invalidate_geometry(&self) {
         if self.defining_geometry.borrow().is_some() {
@@ -529,7 +558,7 @@ impl Shape {
             }
         }
 
-        control.invalidate_geometry();
+        control.geometry_property_changed();
     }
 
     /// Listens to changes of the defining geometry. At most one subscription

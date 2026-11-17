@@ -954,6 +954,36 @@ The harness measures a window on a display from outside the application, so this
 suite of the gate; it is where a change to the declarative layer or to the start is measured
 as the comparison will measure it.
 
+### 8.4 The rules of an optimization
+
+These hold for every change that is made for speed, memory or size.
+
+1. **Hard rule: not for the benchmark alone.** A benchmark is where a cost is found, not what
+   the change is for. The change is made in the mechanism that has the cost, so that every
+   user of the mechanism gets it, and not in the one path the benchmark runs. Before the pull
+   request goes up, the places connected to it are looked for: the other classes that go
+   through the same code, the other callers of the same function, the same pattern in the
+   sibling backends and platforms. They get the change in the same pull request or in the
+   next part of its stack. (Section 9.88: the cost was found in the polylines of one
+   screen; the change is in `Shape`, and rectangles, ellipses and lines that are resized or
+   moved got it too.)
+2. **The search has an end.** One pass over the same mechanism: its classes, its callers,
+   its siblings. What that pass finds and does not change is written down, with the reason,
+   in the section of the change; nothing further is hunted. A place that would need a design
+   of its own is a ticket, not a detour.
+3. **Every optimization has a benchmark in the gate.** If no suite of the gate runs the code
+   that was changed, a benchmark that does is part of the change (section 8.1), so that the
+   gain is held and the general case is measured, not only the screen that showed the cost.
+4. **Drawing stays on the GPU.** Nothing that is drawn by the GPU is moved to the CPU for a
+   number, in any backend.
+5. **The pictures and the public API are the same.** A change that draws another picture or
+   changes a signature is not an optimization; what a deviation from the reference changes is
+   in `DEVIATIONS.md`.
+6. **Measured, both ways.** The numbers before and after are in the section of the change; a
+   change that does not improve what it was made for is left out, with its numbers.
+7. **The gate.** A narrow change gets a gate of the suites that run it; the whole gate runs on
+   the last part of a stack of changes, before the stack lands (section 8.1).
+
 ## 9. Deviations from upstream for frame cost
 
 Each deviation keeps the observable behaviour of upstream (the same events, the same order, the
@@ -7047,3 +7077,63 @@ keeps how each visual was marked: a plain and a wrapped block resized within the
 get their properties alone; a block with a background, a block whose layout is made again
 and a block lower than its text are drawn again).
 
+### 9.88 A shape keeps its geometry when what the geometry is made of changes
+
+**What was counted.** The declarative gauntlet draws a sparkline in every card as a
+`Polygon` and a `Polyline` whose `Points` it replaces every frame: 522 geometries a frame.
+A sample of its UI thread has the two shapes at 7 % of its busy time: their measure (which
+builds the geometry), the invalidation of the shape, and the geometries let go while the
+frame is recorded.
+
+**The cause, which is not the polyline's.** A shape drops its geometry when a property its
+geometry is made of changes (`Shape::affects_geometry`), and makes another when it needs
+one. That is every shape that makes its own geometry: a `Rectangle` or an `Ellipse` whose
+size changes (the size is one of those properties), a `Line` whose end moves, a `Polyline`
+or `Polygon` given other points. Each change was a subscription to the geometry dropped,
+the geometry object dropped, a new object made, and a new subscription; for the two shapes
+with points also a copy of the points that the new geometry let go at once, because it was
+given the live collection right after.
+
+**The change** is in `Shape`, for every shape (section 8.4, rule 1).
+
+- `ShapeImpl::update_defining_geometry(geometry)`: a class gives the geometry the shape has
+  what the shape is now, and says whether it could. `Shape` asks it when a property of the
+  geometry changes: the geometry is then kept and builds itself again (its own properties
+  invalidate it), and the shape is measured again as before. A class that cannot, and the
+  default, lets the geometry go as before.
+- `Rectangle` (the rectangle and the radii), `Ellipse` (the rectangle), `Line` (the two
+  points), `Polyline` and `Polygon` (the collection of points, which the geometry then
+  follows; another fill rule is another geometry) implement it.
+- `PolylineGeometry::of_points`: a polyline geometry of a collection, which it follows.
+  `Polyline` and `Polygon` make their geometry of their own collection; nothing is copied.
+  `PolylineGeometry` builds its figure from the collection in place.
+
+**Looked at and not changed** (section 8.4, rule 2). `Arc` and `Sector` build a stream
+geometry, or an ellipse, by their angles: keeping one means writing a stream geometry again
+in place, which no geometry does yet. `Path` draws the geometry it is given and makes none.
+`Border` draws equal corners and thicknesses without a geometry; for unequal ones its
+render helper keeps two stream geometries by the size and makes them again when the size
+changes, which is the case of `Arc` and `Sector`. A stream geometry written again in place
+would serve all three, and is a change of its own.
+
+**The benchmark of the gate** (section 8.4, rule 3): `layout_subsystem::ShapeGeometry`, 500
+shapes on a canvas, each changed, laid out and asked for the geometry it draws:
+`polyline_points_replaced`, `polygon_points_replaced`, `rectangle_resized`,
+`ellipse_resized`, `line_moved`. Against the main branch (the benchmark copied to the base,
+two rounds):
+
+| `layout_subsystem::ShapeGeometry`, 500 shapes | Main | This change | Time | Instructions |
+| --- | ---: | ---: | ---: | ---: |
+| `polyline_points_replaced` | 636.2 us | 461.4 us | -27.5 % | -24.6 % |
+| `polygon_points_replaced` | 615.1 us | 428.6 us | -30.3 % | -26.0 % |
+| `rectangle_resized` | 796.3 us | 643.5 us | -19.2 % | -19.4 % |
+| `ellipse_resized` | 481.6 us | 401.7 us | -16.6 % | -18.0 % |
+| `line_moved` | 388.6 us | 276.1 us | -28.9 % | -28.3 % |
+
+**Tests.** `shapes/shape_tests.rs`:
+`a_shape_whose_geometry_properties_change_keeps_its_geometry` (a rectangle resized and given
+other radii, an ellipse resized, a line whose end moves: the same geometry object, with the
+new values, and a change reported). `shapes/polyline_tests.rs`:
+`a_polyline_given_other_points_keeps_its_geometry_which_takes_them` (the new collection is
+followed; without points the geometry is let go) and
+`the_geometry_of_a_polyline_has_the_collection_of_the_polyline`.
