@@ -189,7 +189,7 @@ impl VisualImpl for TextBlock {
     /// than the text (a selection, an access key) and keep the default.
     fn resize_changes_drawing(this: &Self, old: Size, new: Size) -> bool {
         if !std::ptr::eq(this.get_type(), <TextBlock as ferroui_base::StaticType>::TYPE)
-            || this.background().is_some()
+            || this.with_value(Self::background_property(), Option::is_some)
             || this.has_complex_content()
         {
             return true;

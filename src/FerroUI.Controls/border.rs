@@ -33,6 +33,8 @@ struct KeptBorderValues {
     border_thickness: Thickness,
     corner_radius: CornerRadius,
     background_sizing: BackgroundSizing,
+    /// Whether the border has something to draw: a background, a border brush or a shadow.
+    draws: bool,
 }
 
 ferro_class!(Border: Decorator);
@@ -56,7 +58,8 @@ impl VisualImpl for Border {
     /// A border draws its background, its border and its shadows, each as large as it is: one
     /// that has none of them draws nothing, at any size (desktop-performance.md, section 9.89).
     fn resize_changes_drawing(this: &Self, _old: ferroui_base::Size, _new: ferroui_base::Size) -> bool {
-        this.background().is_some() || this.border_brush().is_some() || this.box_shadow().count() > 0
+        // Asked for every new size: the answer is kept with the other values of the border.
+        this.kept_values().draws
     }
 
     // The rounded clip of the immediate renderer (`IVisualWithRoundRectClip`
@@ -213,6 +216,9 @@ impl Border {
             border_thickness: self.get_value(Self::border_thickness_property()),
             corner_radius: self.get_value(Self::corner_radius_property()),
             background_sizing: self.get_value(Self::background_sizing_property()),
+            draws: self.with_value(Self::background_property(), Option::is_some)
+                || self.with_value(Self::border_brush_property(), Option::is_some)
+                || self.with_value(Self::box_shadow_property(), |shadows| shadows.count() > 0),
         })
     }
 
