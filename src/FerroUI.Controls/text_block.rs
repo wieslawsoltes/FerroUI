@@ -181,6 +181,24 @@ impl VisualImpl for TextBlock {
         }
     }
 
+    /// The text is drawn from the padding with the layout the block has, whatever its size: a
+    /// block without a background that is as tall as its text before and after draws the same.
+    /// (Below the height of its text the vertical alignment moves the text.) A new layout is a
+    /// new drawing, and says so where it is made: `measure_override` and `arrange_override`
+    /// invalidate the visual when they make one. The classes derived from this one draw more
+    /// than the text (a selection, an access key) and keep the default.
+    fn resize_changes_drawing(this: &Self, old: Size, new: Size) -> bool {
+        if !std::ptr::eq(this.get_type(), <TextBlock as ferroui_base::StaticType>::TYPE)
+            || this.background().is_some()
+            || this.has_complex_content()
+        {
+            return true;
+        }
+        let Some(text_layout) = this.text_layout.get() else { return true };
+        let text_height = text_layout.height();
+        old.height < text_height || new.height < text_height
+    }
+
     fn bypass_flow_direction_policies(_this: &Self) -> bool {
         true
     }
@@ -281,6 +299,9 @@ impl LayoutableImpl for TextBlock {
         // we previously reset it.
         if !this.has_text_layout() {
             ferroui_base::perf_count!(TextBlockLayoutsCreatedByMeasure);
+            // A new layout is a new drawing, whether the size of the block changes or not
+            // (`resize_changes_drawing`).
+            this.invalidate_visual();
         }
         let text_layout = this.text_layout();
 
@@ -328,6 +349,8 @@ impl LayoutableImpl for TextBlock {
         // This implicitly recreates the text layout with a new constraint.
         if !this.has_text_layout() {
             ferroui_base::perf_count!(TextBlockLayoutsCreatedByArrange);
+            // A new layout is a new drawing (`resize_changes_drawing`).
+            this.invalidate_visual();
         }
         let text_layout = this.text_layout();
 

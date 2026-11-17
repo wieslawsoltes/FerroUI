@@ -262,6 +262,14 @@ ferro_class! {
         /// is an item of the composition visual of the nearest visual above it that has one
         /// (section 9.42).
         fn requires_composition_visual(this) -> bool;
+        /// Whether a change of the size of the visual from `old` to `new`, with nothing else
+        /// changed, changes what `render` draws. A visual draws in its own coordinates, so most
+        /// drawings follow the size (a background, a border), and the default is `true`: the
+        /// visual is recorded again when it is resized. A class whose drawing does not read
+        /// its size says so, and is then not recorded again for a new size alone; whatever
+        /// else changes its drawing invalidates it as before (a FerroUI addition,
+        /// docs/porting/desktop-performance.md, section 9.87).
+        fn resize_changes_drawing(this, old: crate::Size, new: crate::Size) -> bool;
     }
 }
 
@@ -542,6 +550,10 @@ impl VisualImpl for Visual {
 
     fn requires_composition_visual(_this: &Self) -> bool {
         false
+    }
+
+    fn resize_changes_drawing(_this: &Self, _old: crate::Size, _new: crate::Size) -> bool {
+        true
     }
 
     fn detach_from_compositor(this: &Self) {
@@ -1091,7 +1103,12 @@ impl Visual {
                     if state & ELIDED_OFFSET_THROUGH != 0 && old.is_none_or(|old| old.position() != new.position()) {
                         visual.elided_state.set(state | ELIDED_OFFSET_MOVED);
                     }
-                    if resized {
+                    // A new size is a new drawing for most visuals. One whose drawing does not
+                    // read its size draws what it drew: its size, and with it the clip to its
+                    // bounds, reaches the compositor as a property (section 9.87).
+                    let redraws =
+                        resized && old.is_none_or(|old| visual.resize_changes_drawing(old.size(), new.size()));
+                    if redraws {
                         visual.invalidate_visual();
                     } else {
                         visual.invalidate_composition_properties();
