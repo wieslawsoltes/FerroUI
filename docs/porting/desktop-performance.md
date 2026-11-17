@@ -7355,3 +7355,69 @@ that keeps how each visual was marked; of a panel with and without a background,
 with and without a border, a decorator, a content presenter, a rectangle and a polyline,
 resized, the panel with a background and the border with a border are drawn again).
 
+### 9.90 The drawing items of a composition visual are asked by ranges whose bounds are kept
+
+Experiment #762, in two halves: one left out, one kept.
+
+**Left out: a finer rule for joining the dirty rectangles of a frame.** The hypothesis was
+that a frame with many small changes far apart draws what lies between them, and that more
+rectangles, joined by the pixels a join adds, would draw less. Traced on the declarative
+program of the framework comparison (what the rectangles a frame adds cover, each point
+once, beside what the frame draws with the eight rectangles of the default tracker and the
+rules of section 9.54):
+
+| Scene | Rectangles added a frame | They cover | The frame draws |
+| --- | ---: | ---: | ---: |
+| Patchwork, tier 12 | 268 | 25 to 41 % | 32 to 43 % |
+| Patchwork, tier 17 | 354 | 19 to 40 % | 26 to 42 % |
+| Patchwork, tier 20 | 430 | 19 to 40 % | 23 to 42 % |
+| Still wall, tier 20 | 4 | 0.1 % | 0.1 % (three rectangles) |
+| Gauntlet, tier 16 | 2,500 to 3,500 | 86 to 92 % | 87 to 93 % (one rectangle) |
+
+A frame draws between a point and seven points of the surface more than what changed. No
+rule can win more than that, and each further rectangle is a further clip for every drawing
+of the frame (section 9.54). (The counter `render: pixels of the dirty bounds` says 92 % for
+the patchwork: it is the box around the rectangles, not what is drawn.)
+
+**Kept: a frame does not look at every item.** A composition visual shows the drawings of
+the visuals below it that have no composition visual of their own as its drawing items
+(section 9.42); a wall of tiles is one composition visual with an item for every drawing.
+A frame looked at every item of it three times: for the bounds of the content
+(`ServerDrawItems::bounds`, in the update pass), for the items that changed
+(`drain_dirty_rects`), and for the items that meet the clip and the dirty area (`render`:
+the bounds of the item, moved into the space of the walk, against the clip and against the
+region). The still wall at tier 20 has 288,000 items and draws 13 of them in a frame; the
+three walks were a third of what its render thread did.
+
+The items are in the order they are painted in, which is the order of the tree, so the
+items of a range lie close together. `ServerDrawItems` keeps, for each range of 64 items,
+the bounds of the range and whether an item of it changed. The bounds of the content are
+the union of the ranges; the dirty region is told of the items of the ranges that changed;
+the render walk asks a range first and looks at its items only when the range meets the
+clip and the dirty area. An item knows where it is among the items and tells its range when
+its drawing, its place or its clip changes, or a resource of its drawing; items that come
+or go move the ones after them, whose ranges are made again. A range that was told nothing
+has the bounds it had, so the pictures are the same: an item is drawn when its own bounds
+meet the area, as before.
+
+**Measured** (the declarative program of the comparison, its harness, two rounds, second
+start; CPU a frame, the frames a second are the same):
+
+| Scene | Main | This change |
+| --- | ---: | ---: |
+| Still wall, tier 20 | 26.2 ms | 14.7 ms |
+| Patchwork, tier 20 | 79.4 ms | 74.9 ms |
+| Patchwork, tier 17 | 41.3 ms | 39.8 ms |
+| Gauntlet, tier 16 | 49.5 ms | 50.2 ms |
+
+**Looked at and not changed** (section 8.4, rule 2). The child composition visuals of a
+visual are walked one by one in the same passes (`ServerCompositionVisual::render`, the
+update pass): they carry their own bounds and the walk leaves a child whose bounds miss the
+area at once, without looking below it. The hit test on the UI thread has its own index
+(sections 9.2 and 9.49).
+
+**Tests.** `compositor_tests.rs`: `an_item_among_many_is_found_and_drawn_where_it_is` (300
+items in more than four ranges: an item that changes is the one rectangle of the dirty
+region and the one drawing of the frame, at the ends of the ranges and in their middle, after
+items before it went, and after it moved).
+
