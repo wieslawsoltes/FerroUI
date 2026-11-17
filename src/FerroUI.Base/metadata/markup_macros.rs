@@ -239,6 +239,14 @@ macro_rules! ferro_markup_type {
                 };
                 &MARKUP
             };
+
+            // Compiled in the crate that declares the type, which is where the static above
+            // is: a crate that asks for the metadata calls this function and does not name
+            // the static of another crate (`MarkupTyped::__markup`).
+            #[inline(never)]
+            fn __markup() -> &'static $crate::metadata::MarkupType {
+                <Self as $crate::metadata::MarkupTyped>::MARKUP
+            }
         }
     };
     // Finds the `this:` part, wherever it is written; the declared type is
@@ -345,6 +353,14 @@ macro_rules! ferro_markup_enum {
                 };
                 &MARKUP
             };
+
+            // Compiled in the crate that declares the type, which is where the static above
+            // is: a crate that asks for the metadata calls this function and does not name
+            // the static of another crate (`MarkupTyped::__markup`).
+            #[inline(never)]
+            fn __markup() -> &'static $crate::metadata::MarkupType {
+                <Self as $crate::metadata::MarkupTyped>::MARKUP
+            }
         }
     };
     (flags $type_:ident { $($member:ident = $value:expr),* $(,)? } $(, { $($body:tt)* })?) => {
@@ -395,6 +411,14 @@ macro_rules! ferro_markup_enum {
                 };
                 &MARKUP
             };
+
+            // Compiled in the crate that declares the type, which is where the static above
+            // is: a crate that asks for the metadata calls this function and does not name
+            // the static of another crate (`MarkupTyped::__markup`).
+            #[inline(never)]
+            fn __markup() -> &'static $crate::metadata::MarkupType {
+                <Self as $crate::metadata::MarkupTyped>::MARKUP
+            }
         }
 
         $crate::__ferro_markup_functions!(impl $type_ {

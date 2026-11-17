@@ -1203,6 +1203,20 @@ impl MarkupType {
         registry().write().unwrap_or_else(|e| e.into_inner()).insert(type_);
     }
 
+    /// [`Self::register_used`] for the metadata of `T`, which is asked of the crate that
+    /// declares `T` ([`MarkupTyped::__markup`]). With the tables of types every type is
+    /// registered already and nothing is asked.
+    #[cfg(any(feature = "type-tables", test))]
+    #[inline(always)]
+    pub fn register_used_of<T: MarkupTyped + ?Sized>() {}
+
+    /// Trimmed (without `type-tables`): see the other definition.
+    #[cfg(not(any(feature = "type-tables", test)))]
+    #[inline]
+    pub fn register_used_of<T: MarkupTyped + ?Sized>() {
+        Self::register_used(T::__markup());
+    }
+
     /// Registers the Rust type `H` as one more handle of the registered type `type_`: a
     /// type of another crate whose values are values of `type_` (a wrapper a property
     /// holds the value in), next to the [`handles`](Self::handles) the declaration lists.
@@ -1276,6 +1290,20 @@ impl fmt::Debug for MarkupType {
 pub trait MarkupTyped {
     /// The markup metadata of the type.
     const MARKUP: &'static MarkupType;
+
+    /// The markup metadata of the type, asked of the crate that declares it.
+    ///
+    /// The macros that declare metadata implement it as a function of their own crate, out of
+    /// line. Code of another crate that needs the metadata of a type it only names (the
+    /// registration of a property whose value is of the type) calls it, so the crate that
+    /// declares the type has the reference to its static. Naming the static from the other
+    /// crate (`T::MARKUP`) left a program without the definition: link-time optimization
+    /// across crates dropped the static of `Orientation`, which only the controls name, from
+    /// a browser build that trims the tables of types.
+    #[doc(hidden)]
+    fn __markup() -> &'static MarkupType {
+        Self::MARKUP
+    }
 }
 
 /// The metadata of a type, if it has metadata ([`MarkupProperty::value_markup`]): chosen
@@ -1298,28 +1326,28 @@ pub trait __TypeMarkup {
 impl<T: MarkupTyped> __TypeMarkup for &__TypeMarkupProbe<T> {
     #[inline(always)]
     fn __type_markup(&self) -> Option<&'static MarkupType> {
-        Some(T::MARKUP)
+        Some(T::__markup())
     }
 }
 
 impl<T: MarkupTyped> __TypeMarkup for &__TypeMarkupProbe<Option<T>> {
     #[inline(always)]
     fn __type_markup(&self) -> Option<&'static MarkupType> {
-        Some(T::MARKUP)
+        Some(T::__markup())
     }
 }
 
 impl<T: ?Sized + MarkupTyped> __TypeMarkup for &__TypeMarkupProbe<std::rc::Rc<T>> {
     #[inline(always)]
     fn __type_markup(&self) -> Option<&'static MarkupType> {
-        Some(T::MARKUP)
+        Some(T::__markup())
     }
 }
 
 impl<T: ?Sized + MarkupTyped> __TypeMarkup for &__TypeMarkupProbe<Option<std::rc::Rc<T>>> {
     #[inline(always)]
     fn __type_markup(&self) -> Option<&'static MarkupType> {
-        Some(T::MARKUP)
+        Some(T::__markup())
     }
 }
 
