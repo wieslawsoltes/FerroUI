@@ -700,7 +700,9 @@ What it measures:
   states, the flow direction, the data context, the theme variant and styles passed down an
   attached wall; class styles and resources on it; and the text of many short labels. The suite
   runs `trees::` and `layout::ElementConstructionBenchmark` (`--framework-filter`) with the
-  TreeDataGrid suite's iterations. When the base has no `trees` category, the candidate's
+  TreeDataGrid suite's iterations, and with them the benchmarks of the subsystems and of the
+  declarative layer (`declarative::ViewBenchmark`: a thousand rows mounted and run again with
+  `ferroui-view`, beside the same controls made directly; section 9.91). When the base has no `trees` category, the candidate's
   `tests/FerroUI.Benchmarks` is copied into it.
 - **The window suite** (`window`): the desktop program of the frame benchmarks (`frame-benchmarks`)
   opened once per scene (`--window-scenes`, default `text,list,transforms,wall`) for
@@ -1098,9 +1100,10 @@ is 15 % too slow. What a frame of the declarative program does, counted with
    pay a tenth more CPU for nothing, and a fourth band costs the patchwork of tier 17 ten
    frames a second (six busy threads on five performance cores). The number of bands has to
    follow what the frame costs.
-6. **The start of a large tree** (#811). The wall at tier 20 is 288,000 elements (57,600
-   tiles of a border, a grid, two text blocks and a dot). At its first frame the program
-   holds 2.1 GB of heap in 13.7 million blocks: 47 blocks and 7.6 kB an element. Of its UI
+6. **The start of a large tree** (#811). The wall at tier 20 is 293,480 elements (58,696
+   tiles of a border, a grid, two text blocks and a dot) and the rows that hold them. At
+   its first frame the program holds 2.1 GB of heap in 13.7 million blocks: 47 blocks and
+   7.5 kB an element. Of its UI
    thread's start, building the tree is about 40 %, the first layout 22 %, recording and the
    commit 25 %. By the function that asked (a tile of the wall at tier 10, 266 blocks and
    46 kB): the five elements 6.4 kB in 5 blocks; the owners of the declarative layer 4.9 kB
@@ -7429,7 +7432,7 @@ A frame looked at every item of it three times: for the bounds of the content
 (`ServerDrawItems::bounds`, in the update pass), for the items that changed
 (`drain_dirty_rects`), and for the items that meet the clip and the dirty area (`render`:
 the bounds of the item, moved into the space of the walk, against the clip and against the
-region). The still wall at tier 20 has 288,000 items and draws 13 of them in a frame; the
+region). The still wall at tier 20 has about 290,000 items and draws 13 of them in a frame; the
 three walks were a third of what its render thread did.
 
 The items are in the order they are painted in, which is the order of the tree, so the
@@ -7475,4 +7478,48 @@ area at once, without looking below it. The hit test on the UI thread has its ow
 items in more than four ranges: an item that changes is the one rectangle of the dirty
 region and the one drawing of the frame, at the ends of the ranges and in their middle, after
 items before it went, and after it moved).
+
+### 9.91 A mounted control without handlers has no owner for them
+
+The first step of experiment #811 (the start of a large tree of the declarative layer,
+section 8.5). The wall of the framework comparison at tier 20 mounts 293,480 controls and
+holds 2.1 GB at its first frame; by the function that asked, the declarative layer itself
+has about 2 kB and 14 blocks of an element (its owners, the nodes of the runtime, the slots
+and the properties of the builder).
+
+`mount_control` made two owners for every control: one for what the control owns (its
+effects, its children) and one for its handlers, so that a patch with other handlers can
+let the old ones go. The second was made whether the element had handlers or not, and most
+elements of a tree have none: a label, a border, a panel. A node of the runtime for each
+was the price. The owner for the handlers is now made when an element has handlers, at the
+mount and at a patch (`ControlState::handlers` is an `Option`); an element that gets its
+first handlers in a patch gets its owner then, and one that loses them all lets it go.
+
+**Measured.** The allocation sites of the wall at tier 10 (5,025 tiles of five controls;
+the stacks of the system's allocator), for a tile:
+
+| | Main | This change |
+| --- | ---: | ---: |
+| The nodes of the reactive runtime: bytes | 3,078 | 1,525 |
+| The nodes of the reactive runtime: blocks | 5.0 | 2.0 |
+| The heap of the scene at its first frame | 229.6 MB | 221.6 MB |
+
+The benchmark of the gate is `declarative::ViewBenchmark` (a thousand rows mounted on the
+declarative layer, beside the same controls made directly), which the gate now runs by
+default (`FRAMEWORK_FILTER`, section 8.1). Two rounds against the main branch:
+
+| `declarative::ViewBenchmark` | Main | This change | Time | Instructions |
+| --- | ---: | ---: | ---: | ---: |
+| `mount_list_run_once` | 733.7 us | 681.9 us | -7.1 % | -6.75 % |
+| `mount_list_rerender` | 734.4 us | 683.8 us | -6.9 % | -6.69 % |
+| `mount_list_controls` (the controls made directly) | 407.0 us | 410.5 us | +0.8 % | +0.05 % |
+
+The other seven lines of the class are within 0.2 % in instructions. A row mounted on the
+declarative layer still costs 1.7 times the control alone: what else an element keeps is
+the rest of the experiment (its own owner where it owns nothing, the boxed properties it
+was built from, a font family made for every text block).
+
+**Tests.** The tests of `ferroui-view` (79): handlers attached at the mount, swapped by a
+patch with the same identities, attached again by a patch with other ones, and let go with
+the control.
 
