@@ -319,6 +319,87 @@ const BALANCE_GAIN: f64 = 0.03;
 /// The most looks that are skipped after moves that did not help.
 const MAX_BALANCE_HOLD: u32 = 64;
 
+/// The share of the time between two frames of a layer that its slowest band works, from which the layer
+/// takes a band more ([`BandBalance::recount`]). A frame is in the context when its slowest band is; a band
+/// that works for most of the time between two frames is what the next frame waits for.
+const GROW_SHARE: f64 = 0.6;
+
+/// How many looks in a row the slowest band has to work that long before the layer takes a band more.
+const GROW_LOOKS: u32 = 3;
+
+/// By how much a band more has to lower the time of the slowest band. A band that does not is given back,
+/// and the looks that follow take none, twice as many each time: a cost that cannot be divided stays in
+/// one band however many there are.
+const GROW_GAIN: f64 = 0.1;
+
+/// The share of the time between two frames that the bands may work, one fewer of them, for the layer to
+/// give a band back: well below [`GROW_SHARE`], so that a layer does not take and give back in turn.
+const SHRINK_SHARE: f64 = 0.4;
+
+/// What a band of one band fewer is taken to work more than its even share of the work of all of them.
+const SHRINK_MARGIN: f64 = 1.25;
+
+/// How many looks in a row the bands have to be that light before the layer gives a band back.
+const SHRINK_LOOKS: u32 = 8;
+
+/// The frames after a change of the number of bands that are not counted: every band draws glyphs that are
+/// new to its recorder.
+const COUNT_SETTLE_FRAMES: u32 = 4;
+
+/// The bands a layer may take when it is asked for `asked` of them (docs/porting/desktop-performance.md,
+/// section 9.92). A layer that was asked for the default number follows what its frames cost: it may take
+/// bands up to the performance cores of the machine less the UI thread and the render thread, and two more
+/// than the default at most. A number an application chose is kept as it is.
+pub(crate) fn most_bands(asked: usize) -> usize {
+    if asked != crate::skia_options::DEFAULT_FRAME_PIPELINING_BANDS {
+        return asked;
+    }
+    asked.max(performance_cores().saturating_sub(2).min(asked + 2)).min(crate::skia_options::MAX_FRAME_PIPELINING_BANDS)
+}
+
+/// The performance cores of the machine: the threads that record bands are worth their cost only on a core
+/// that is as fast as the one the frame waits on.
+fn performance_cores() -> usize {
+    static CORES: std::sync::OnceLock<usize> = std::sync::OnceLock::new();
+    *CORES.get_or_init(|| {
+        #[cfg(any(target_os = "macos", target_os = "ios"))]
+        if let Some(cores) = performance_cores_of_the_system() {
+            return cores;
+        }
+        // Without a count of the system: half the logical processors.
+        thread::available_parallelism().map_or(1, |count| count.get() / 2).max(1)
+    })
+}
+
+/// `hw.perflevel0.physicalcpu`: the cores of the fastest kind.
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+fn performance_cores_of_the_system() -> Option<usize> {
+    use std::ffi::{c_char, c_int};
+    unsafe extern "C" {
+        fn sysctlbyname(
+            name: *const c_char,
+            old: *mut c_void,
+            old_length: *mut usize,
+            new: *mut c_void,
+            new_length: usize,
+        ) -> c_int;
+    }
+    let mut cores: i32 = 0;
+    let mut length = size_of::<i32>();
+    // SAFETY: the name is a C string, the buffer is an `i32` of the length passed with it, which is what
+    // the system writes for this name; nothing is set.
+    let status = unsafe {
+        sysctlbyname(
+            c"hw.perflevel0.physicalcpu".as_ptr(),
+            (&raw mut cores).cast(),
+            &raw mut length,
+            std::ptr::null_mut(),
+            0,
+        )
+    };
+    (status == 0 && cores > 0).then_some(cores as usize)
+}
+
 /// The rows the bands of a layer meet at, moved until the threads work as long as each other.
 ///
 /// The bands begin as equal strips. What a frame costs is rarely spread evenly over the rows of a window, and
@@ -352,6 +433,23 @@ struct BandBalance {
     hold: u32,
     /// The looks still to skip.
     skip: u32,
+    /// The fewest and the most bands the layer has: the number it was asked for, and what it may take when
+    /// its frames cost more than that many bands record in time ([`Self::recount`]). Equal for a layer
+    /// whose number of bands is fixed.
+    least: usize,
+    most: usize,
+    /// The time between the frames since the last look, in seconds, and how many frames told it.
+    period: f64,
+    periods: u32,
+    /// The looks in a row at which the slowest band worked for most of the time between two frames.
+    late: u32,
+    /// The looks in a row at which one band fewer would have been enough.
+    light: u32,
+    /// The time of the slowest band before the layer took the band it took last, until the look after.
+    grown: Option<f64>,
+    /// The looks at which no band is taken after a band that did not help, and those still to pass.
+    count_hold: u32,
+    count_skip: u32,
 }
 
 impl BandBalance {
@@ -370,7 +468,28 @@ impl BandBalance {
             before_move: None,
             hold: 0,
             skip: 0,
+            least: bands,
+            most: bands,
+            period: 0.0,
+            periods: 0,
+            late: 0,
+            light: 0,
+            grown: None,
+            count_hold: 0,
+            count_skip: 0,
         }
+    }
+
+    /// `least` equal strips of a layer of `height` rows that may become up to `most`.
+    fn following(height: i32, least: usize, most: usize) -> Self {
+        let mut balance = Self::new(height, least);
+        balance.most = most.max(balance.least);
+        balance
+    }
+
+    /// Whether the layer has `least` bands at least and `most` at most.
+    fn follows(&self, least: usize, most: usize) -> bool {
+        self.least == least.max(1) && self.most == most.max(least.max(1))
     }
 
     fn bands(&self) -> usize {
@@ -393,8 +512,16 @@ impl BandBalance {
     }
 
     /// How long the threads worked on the bands of a frame, by band. Returns whether the bands were moved.
+    #[cfg(test)]
     fn frame(&mut self, busy: &[Duration]) -> bool {
-        if busy.len() != self.bands() || busy.len() < 2 {
+        self.frame_after(busy, None)
+    }
+
+    /// How long the threads worked on the bands of a frame, by band, and the time since the frame before
+    /// it when the two follow each other. Returns whether the bands are other ones for the next frame:
+    /// moved, or one more or fewer.
+    fn frame_after(&mut self, busy: &[Duration], period: Option<Duration>) -> bool {
+        if busy.len() != self.bands() || (busy.len() < 2 && self.most < 2) {
             return false;
         }
         if self.settle > 0 {
@@ -404,15 +531,86 @@ impl BandBalance {
         for (sum, band) in self.busy.iter_mut().zip(busy) {
             *sum += band.as_secs_f64();
         }
+        if let Some(period) = period {
+            self.period += period.as_secs_f64();
+            self.periods += 1;
+        }
         self.frames += 1;
         if self.frames < BALANCE_FRAMES {
             return false;
         }
         let frames = f64::from(self.frames);
         let busy: Vec<f64> = self.busy.iter().map(|sum| sum / frames).collect();
+        let period = (self.periods > 0).then(|| self.period / f64::from(self.periods));
         self.busy.fill(0.0);
         self.frames = 0;
-        self.look(&busy)
+        self.period = 0.0;
+        self.periods = 0;
+        if period.is_some_and(|period| self.recount(&busy, period)) {
+            return true;
+        }
+        busy.len() >= 2 && self.look(&busy)
+    }
+
+    /// Looks at the time a frame took in each band against the time between two frames, and takes a band
+    /// more or gives one back. Returns whether the number of bands changed.
+    ///
+    /// The layer has no clock of the display, as [`PipelinePolicy`] has none: what it knows is how long
+    /// its bands work and how far apart its frames are. A slowest band that works for
+    /// [`GROW_SHARE`] of that time is what the frames wait for, whether they come one display interval
+    /// apart or two; bands that would fit [`SHRINK_SHARE`] of it with one fewer are more than the frame
+    /// needs, and each costs a thread its fixed work for every frame.
+    fn recount(&mut self, busy: &[f64], period: f64) -> bool {
+        if self.most <= self.least || period <= 0.0 {
+            return false;
+        }
+        let bands = busy.len();
+        let slowest = busy.iter().copied().fold(0.0, f64::max);
+        let total: f64 = busy.iter().sum();
+
+        // The band taken last has to have lowered the slowest band.
+        if let Some(before) = self.grown.take() {
+            if slowest > before * (1.0 - GROW_GAIN) && bands > self.least {
+                self.count_hold = (self.count_hold * 2).clamp(1, MAX_BALANCE_HOLD);
+                self.count_skip = self.count_hold;
+                self.resize(bands - 1);
+                return true;
+            }
+            self.count_hold = 0;
+        }
+
+        let late = slowest >= period * GROW_SHARE && slowest >= MIN_LATE_COST.as_secs_f64();
+        self.late = if late { self.late + 1 } else { 0 };
+        if self.count_skip > 0 {
+            self.count_skip -= 1;
+        } else if self.late >= GROW_LOOKS && bands < self.most && self.before_move.is_none() {
+            self.grown = Some(slowest);
+            self.resize(bands + 1);
+            return true;
+        }
+
+        let light = bands > self.least && total / (bands - 1) as f64 * SHRINK_MARGIN <= period * SHRINK_SHARE;
+        self.light = if light { self.light + 1 } else { 0 };
+        if self.light >= SHRINK_LOOKS {
+            self.resize(bands - 1);
+            return true;
+        }
+        false
+    }
+
+    /// Divides the layer into `bands` bands, at the rows that divide the cost kept so far evenly.
+    fn resize(&mut self, bands: usize) {
+        self.busy = vec![0.0; bands.clamp(self.least, self.most)];
+        self.edges = if self.bands() > 1 { self.balanced_edges() } else { Vec::new() };
+        self.frames = 0;
+        self.period = 0.0;
+        self.periods = 0;
+        self.settle = COUNT_SETTLE_FRAMES;
+        self.before_move = None;
+        self.hold = 0;
+        self.skip = 0;
+        self.late = 0;
+        self.light = 0;
     }
 
     /// Looks at the time a frame took in each band, and moves the bands when one of them is slow.
@@ -926,6 +1124,9 @@ pub(super) struct BandParts<'a> {
 struct PendingFrame {
     clips: Vec<(usize, IRect)>,
     sent: usize,
+    /// The time since the frame before this one was handed to the threads, when the two follow each
+    /// other.
+    period: Option<Duration>,
     /// Held until the bands have answered, so that what the picture holds is
     /// released on the render thread, and for the bands that fail.
     picture: Picture,
@@ -1013,6 +1214,11 @@ struct PipelinedLayer {
     /// How many bands a pipelined frame of the layer is divided into, when
     /// the context has that many threads.
     bands: usize,
+    /// How many bands it may be divided into when its frames cost more than
+    /// `bands` of them record in time ([`most_bands`]).
+    most: usize,
+    /// When the frame before was handed to the threads.
+    last_played: Cell<Option<Instant>>,
     color_type: ColorType,
     props: SurfaceProps,
     /// The texture wrapped on the recorder of the context: what the layer
@@ -1126,7 +1332,7 @@ impl PipelinedLayer {
         if !missing.is_empty() {
             self.play_on_main(&previous.picture, Some(missing.as_slice()));
             self.policy.borrow_mut().frame_needed_direct();
-        } else if previous.sent == busy.len() && self.balance.borrow_mut().frame(&busy) {
+        } else if previous.sent == busy.len() && self.balance.borrow_mut().frame_after(&busy, previous.period) {
             ferroui_base::perf_count!(SkiaBandsMoved);
         }
     }
@@ -1141,9 +1347,18 @@ impl PipelinedLayer {
         // before this frame's.
         self.flush_pending();
 
+        // How far apart the frames are, when one follows the other: a
+        // frame after a pause tells nothing.
+        let now = Instant::now();
+        let period = self
+            .last_played
+            .replace(Some(now))
+            .map(|last| now.saturating_duration_since(last))
+            .filter(|period| *period <= STREAM_GAP);
+
         let played = self.context.with_band_parts(|parts| {
             let BandParts { pool, recorder, context, recording_failed } = parts;
-            let threads = pool.ensure(context, self.bands);
+            let threads = pool.ensure(context, self.most);
             if threads == 0 {
                 return Err(Fallback::PoolUnavailable);
             }
@@ -1152,9 +1367,9 @@ impl PipelinedLayer {
             // as many as there are threads.
             let clips = {
                 let mut balance = self.balance.borrow_mut();
-                let bands = self.bands.min(threads);
-                if balance.bands() != bands {
-                    *balance = BandBalance::new(self.size.1, bands);
+                let (least, most) = (self.bands.min(threads), self.most.min(threads));
+                if !balance.follows(least, most) {
+                    *balance = BandBalance::following(self.size.1, least, most);
                 }
                 balance.clips(self.size.0)
             };
@@ -1193,7 +1408,7 @@ impl PipelinedLayer {
             }
             // A band that was not sent is found missing when the frame is
             // collected, and played on the recorder of the context then.
-            *self.pending.borrow_mut() = Some(PendingFrame { clips, sent, picture: picture.clone() });
+            *self.pending.borrow_mut() = Some(PendingFrame { clips, sent, period, picture: picture.clone() });
             Ok(())
         });
 
@@ -1254,6 +1469,8 @@ impl PipelinedLayerSurface {
         // The size of the surface of an ordinary layer.
         let (width, height) = (size.width.max(1), size.height.max(1));
         let bands = band_count(height, bands)?;
+        // What the layer may take when its frames cost more: as many as fit it.
+        let most = band_count(height, most_bands(bands)).map_or(bands, |most| most.max(bands));
 
         // The colour type of an ordinary layer, in the format of the texture.
         let color_type = ColorType::N32;
@@ -1286,6 +1503,8 @@ impl PipelinedLayerSurface {
             id: NEXT_LAYER_ID.fetch_add(1, Ordering::Relaxed),
             size: (width, height),
             bands,
+            most,
+            last_played: Cell::new(None),
             color_type,
             props: *props,
             surface: RefCell::new(Some(surface)),
@@ -1295,7 +1514,7 @@ impl PipelinedLayerSurface {
             last_frame: Cell::new(None),
             direct_only_draws: Cell::new(context.direct_only_draws()),
             busy: Cell::new(Duration::ZERO),
-            balance: RefCell::new(BandBalance::new(height, bands)),
+            balance: RefCell::new(BandBalance::following(height, bands, most)),
             pending: RefCell::new(None),
         })))
     }
@@ -1427,6 +1646,82 @@ mod tests {
     fn slowest_to_mean(balance: &BandBalance, cost: &dyn Fn(i32) -> f64) -> f64 {
         let times: Vec<f64> = band_times(balance, cost).iter().map(Duration::as_secs_f64).collect();
         times.iter().copied().fold(0.0, f64::max) / (times.iter().sum::<f64>() / times.len() as f64)
+    }
+
+    /// Draws `frames` such frames one after the other, each as far from the one before as a display that
+    /// shows a frame every [`FRAME`] lets it be: one interval when its slowest band fits one, else as many
+    /// as the band takes. Returns how many times the number of bands changed.
+    fn draw_at_the_pace_of_the_display(balance: &mut BandBalance, frames: u32, cost: &dyn Fn(i32) -> f64) -> u32 {
+        let mut changes = 0;
+        for _ in 0..frames {
+            let times = band_times(balance, cost);
+            let slowest = times.iter().copied().max().unwrap_or_default();
+            let intervals = (slowest.as_secs_f64() / FRAME.as_secs_f64()).ceil().max(1.0);
+            let before = balance.bands();
+            balance.frame_after(&times, Some(FRAME.mul_f64(intervals)));
+            changes += u32::from(balance.bands() != before);
+            let clips = balance.clips(100);
+            assert_eq!(clips.len(), balance.bands());
+            assert_eq!(clips[clips.len() - 1].1.bottom, balance.height);
+            for (index, (_, clip)) in clips.iter().enumerate() {
+                assert!(clip.height() >= MIN_BAND_HEIGHT, "band {index} is {} rows", clip.height());
+            }
+        }
+        changes
+    }
+
+    /// Section 9.92: a layer whose slowest band works for most of the time between two frames takes a
+    /// band more, up to the most it may have, and gives the bands back when the frames are light again.
+    #[test]
+    fn a_layer_takes_bands_while_its_frames_wait_for_the_slowest_and_gives_them_back() {
+        let mut balance = BandBalance::following(1024, 2, 4);
+        // 48 ms of work a frame, spread evenly: 24 ms a band of two, 16 of three, 12 of four.
+        let heavy = |_row: i32| 0.048 / 1024.0;
+        draw_at_the_pace_of_the_display(&mut balance, 400, &heavy);
+        assert_eq!(4, balance.bands(), "as many as it may have");
+        let changes = draw_at_the_pace_of_the_display(&mut balance, 400, &heavy);
+        assert_eq!(0, changes, "and it rests there");
+
+        // 3 ms of work a frame: two bands are more than enough.
+        let light = |_row: i32| 0.003 / 1024.0;
+        draw_at_the_pace_of_the_display(&mut balance, 600, &light);
+        assert_eq!(2, balance.bands(), "the number it was asked for");
+        assert_eq!(0, draw_at_the_pace_of_the_display(&mut balance, 400, &light));
+    }
+
+    /// A frame that fits its interval with the bands it has keeps them: 16 ms of work in two bands.
+    #[test]
+    fn a_layer_whose_frames_fit_keeps_its_bands() {
+        let mut balance = BandBalance::following(1024, 2, 4);
+        let fits = |_row: i32| 0.016 / 1024.0;
+        assert_eq!(0, draw_at_the_pace_of_the_display(&mut balance, 600, &fits));
+        assert_eq!(2, balance.bands());
+    }
+
+    /// A cost that cannot be divided stays in one band: the band taken for it is given back, and the
+    /// layer asks again at intervals that double.
+    #[test]
+    fn a_band_that_does_not_help_is_given_back() {
+        let mut balance = BandBalance::following(1024, 2, 4);
+        // All the work of the frame in one strip of rows, lower than a band may be.
+        let knot = |row: i32| if row < BALANCE_ROWS { 0.030 / f64::from(BALANCE_ROWS) } else { 0.0 };
+        let changes = draw_at_the_pace_of_the_display(&mut balance, 3_000, &knot);
+        assert!((2..=24).contains(&changes), "{changes} changes of the number of bands");
+        // By then the layer asks once in more than five hundred frames.
+        let later = draw_at_the_pace_of_the_display(&mut balance, 500, &knot);
+        assert!(later <= 2, "{later} changes in five hundred frames");
+        assert!(balance.bands() <= 3);
+    }
+
+    /// A layer with a number of bands of its own keeps it whatever its frames cost.
+    #[test]
+    fn a_layer_with_a_fixed_number_of_bands_keeps_it() {
+        let mut balance = BandBalance::new(1024, 2);
+        let heavy = |_row: i32| 0.048 / 1024.0;
+        assert_eq!(0, draw_at_the_pace_of_the_display(&mut balance, 600, &heavy));
+        assert_eq!(2, balance.bands());
+        assert_eq!(4, most_bands(4), "a number an application chose is kept");
+        assert!(most_bands(crate::skia_options::DEFAULT_FRAME_PIPELINING_BANDS) >= 2);
     }
 
     /// Draws `frames` such frames, and returns how many times the bands were moved. The bands are checked
