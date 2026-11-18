@@ -1275,7 +1275,10 @@ fn gauge_generator_builds_solid_and_angular_gauges_with_the_theme_rules() {
     assert!(solid[2].is_fill_series() && solid[2].is_gauge());
     assert_eq!(solid[2].values().count(), 2);
     assert_eq!(solid[2].inner_radius(), 20.0);
-    assert!(solid.iter().all(|s| s.hover_push_out() == 0.0));
+    // `AsSeries` clears the hover push-out of every gauge series; the fill series of a solid
+    // gauge keeps the default of the source (only the angular one clears it).
+    assert!(solid[..2].iter().all(|s| s.hover_push_out() == 0.0));
+    assert_eq!(solid[2].hover_push_out(), 20.0);
     let angular = GaugeGenerator::build_angular_gauge_sections(&[
         GaugeItem::new(60.0),
         GaugeItem::new(30.0),
