@@ -37,8 +37,14 @@ impl BitmapTypeConverter {
             return Bitmap::from_file(&path).map_err(io_error);
         }
 
-        let assets = FerroLocator::current().get_required_service::<dyn IAssetLoader>();
         let base_uri = service_provider_of(context).and_then(|sp| sp.get_context_base_uri());
+        if let Some(path) = base_uri.as_ref().filter(|base| base.scheme() == "file")
+            .and_then(|base| UriExtensions::ensure_absolute(&uri, Some(base)).ok())
+            .and_then(|url| url.to_file_path().ok())
+        {
+            return Bitmap::from_file(&path.to_string_lossy()).map_err(io_error);
+        }
+        let assets = FerroLocator::current().get_required_service::<dyn IAssetLoader>();
         let mut stream = assets.open(&uri, base_uri.as_ref()).map_err(io_error)?;
         Bitmap::from_stream(&mut *stream).map_err(io_error)
     }
