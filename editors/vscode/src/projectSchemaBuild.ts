@@ -41,9 +41,9 @@ export class ProjectSchemaBuild implements vscode.Disposable {
         }
     }
 
-    dispose(): void {
+    async dispose(): Promise<void> {
         this.disposed = true;
         this.command.dispose();
-        this.active?.stop();
+        await this.active?.stop();
     }
 }

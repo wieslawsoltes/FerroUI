@@ -11,7 +11,7 @@ import { RsxLanguage } from './rsxLanguage';
 import { StagesPanel } from './stagesPanel';
 import { xamlLanguage, XamlServer } from './xamlServer';
 
-let managedReload: HotReload | undefined;
+let stopProcesses: (() => Promise<void>) | undefined;
 
 export function activate(context: vscode.ExtensionContext) {
     const languageOutput = vscode.window.createOutputChannel('FerroUI XAML');
@@ -23,7 +23,7 @@ export function activate(context: vscode.ExtensionContext) {
     const hosted = new HostedDesign(context, previewOutput, metadata => server.updateProject(metadata));
     const stages = new StagesPanel(context, previewOutput);
     const reload = new HotReload();
-    managedReload = reload;
+    stopProcesses = async () => { await Promise.all([reload.stop(), hosted.dispose(), schemaBuild.dispose()]); };
     const runtimes = new RuntimeConnections(reload);
     const liveApp = new RuntimePanel(context, runtimes, reload, designer);
     const mcp = new FerroMcpProvider(context, new AgentTools(designer, reload, stages), previewOutput, runtimes);
@@ -48,6 +48,6 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export async function deactivate(): Promise<void> {
-    await managedReload?.stop();
-    managedReload = undefined;
+    await stopProcesses?.();
+    stopProcesses = undefined;
 }

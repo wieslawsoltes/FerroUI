@@ -13,6 +13,8 @@ import { isInside, isWorkspaceFile } from './workspacePaths';
 export class HostedDesign implements vscode.Disposable {
     private readonly command: vscode.Disposable;
     private readonly sessions = new Map<string, HostedSession>();
+    private readonly retiring = new Set<Promise<void>>();
+    private stopped?: Promise<void>;
 
     constructor(context: vscode.ExtensionContext, output: vscode.OutputChannel, built: (metadata: ProjectMetadata) => void) {
         this.command = vscode.commands.registerCommand('ferroui.openHostedDesign', async () => {
@@ -27,12 +29,18 @@ export class HostedDesign implements vscode.Disposable {
                 const current = this.sessions.get(key);
                 if (current) { current.panel.reveal(); return; }
                 const target = await selectCargoTarget('Select a Cargo binary that supports --ferroui-preview');
-                if (!target || document.isClosed) return;
+                if (!target || document.isClosed || this.stopped) return;
+                const opened = this.sessions.get(key);
+                if (opened) { opened.panel.reveal(); return; }
                 if (!isInside(path.dirname(target.manifest), document.uri.fsPath)) throw new Error('Select the Cargo package containing this source file.');
                 const panel = vscode.window.createWebviewPanel('ferroui.hostedDesign', `App Preview · ${path.basename(document.fileName)}`,
                     { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true },
                     { ...webviewOptions(context.extensionUri), retainContextWhenHidden: true });
-                const session = new HostedSession(context, output, panel, editor, language, target, built, () => this.sessions.delete(key));
+                const session = new HostedSession(context, output, panel, editor, language, target, built, closing => {
+                    this.sessions.delete(key);
+                    this.retiring.add(closing);
+                    void closing.then(() => this.retiring.delete(closing));
+                });
                 this.sessions.set(key, session);
             } catch (error) {
                 void vscode.window.showErrorMessage(errorMessage(error));
@@ -40,16 +48,24 @@ export class HostedDesign implements vscode.Disposable {
         });
     }
 
-    dispose(): void {
+    dispose(): Promise<void> {
+        if (this.stopped) return this.stopped;
         this.command.dispose();
-        for (const session of this.sessions.values()) session.panel.dispose();
+        const sessions = [...this.sessions.values()];
+        this.sessions.clear();
+        this.stopped = Promise.all([...this.retiring, ...sessions.map(session => session.dispose())]).then(() => undefined);
+        for (const session of sessions) session.panel.dispose();
+        return this.stopped;
     }
 }
 
 class HostedSession {
     private readonly subscriptions: vscode.Disposable[];
+    private readonly startup: Promise<void>;
     private compiler?: ReloadProcess;
     private application?: ReloadProcess;
+    private retiring?: Promise<void>;
+    private stopped?: Promise<void>;
     private client?: NativePreview;
     private frame?: HostedFrame;
     private timer?: ReturnType<typeof setTimeout>;
@@ -62,18 +78,18 @@ class HostedSession {
 
     constructor(private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel,
         readonly panel: vscode.WebviewPanel, private readonly editor: vscode.TextEditor, private readonly language: Language,
-        private readonly target: CargoTarget, built: (metadata: ProjectMetadata) => void, remove: () => void) {
+        private readonly target: CargoTarget, built: (metadata: ProjectMetadata) => void, remove: (closing: Promise<void>) => void) {
         this.subscriptions = [
             vscode.workspace.onDidChangeTextDocument(event => { if (event.document === editor.document) this.update(); }),
             vscode.window.onDidChangeTextEditorSelection(event => {
                 if (language === 'rust' && event.textEditor === editor) this.update();
             }),
             panel.onDidChangeViewState(() => this.schedule(0)),
-            panel.onDidDispose(() => { this.dispose(); remove(); }),
+            panel.onDidDispose(() => remove(this.dispose())),
             panel.webview.onDidReceiveMessage((message: FromHosted) => { void this.receive(message); }),
         ];
         panel.webview.html = hostedHtml(panel.webview, context.extensionUri);
-        void this.start(built);
+        this.startup = this.start(built);
     }
 
     private async start(built: (metadata: ProjectMetadata) => void): Promise<void> {
@@ -93,7 +109,7 @@ class HostedSession {
             const args = ['--ferroui-preview', '--transport', `tcp-bson://127.0.0.1:${port}/`, '--session-id', nonce,
                 '--method', 'ferroui-remote', artifact];
             const launch = await launchArtifact(artifact, { ...this.target, args }, this.output, () => {}, () => {});
-            if (this.disposed) { launch.process.stop(); return; }
+            if (this.disposed) { await launch.process.stop(); return; }
             this.application = launch.process;
             void launch.process.closed.then(code => this.ended(`The design host stopped (${code ?? 'terminated'}).`), error => this.ended(errorMessage(error)));
             this.report('Waiting for the application preview…');
@@ -105,7 +121,7 @@ class HostedSession {
         if (this.disposed) return;
         this.client?.dispose();
         this.client = undefined;
-        this.application?.stop();
+        this.retiring = this.application?.stop();
         this.application = undefined;
         this.report(message);
     }
@@ -175,12 +191,13 @@ class HostedSession {
         if (this.ready && !this.disposed) void this.panel.webview.postMessage(message);
     }
 
-    private dispose(): void {
+    dispose(): Promise<void> {
+        if (this.stopped) return this.stopped;
         this.disposed = true;
         clearTimeout(this.timer);
-        this.compiler?.stop();
-        this.application?.stop();
         this.client?.dispose();
         this.subscriptions.forEach(subscription => subscription.dispose());
+        this.stopped = Promise.all([this.startup, this.compiler?.stop(), this.application?.stop(), this.retiring]).then(() => undefined);
+        return this.stopped;
     }
 }
