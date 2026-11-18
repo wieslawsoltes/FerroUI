@@ -1,9 +1,10 @@
 //! A native preview test uses the same renderer, source projections and input as the editor.
 use crate::protocol::{Image, Language, Render, Source, MAX_SOURCE_BYTES};
 use crate::renderer::Renderer;
+use crate::scenario_stages::PrototypeRun;
 use base64::{engine::general_purpose::STANDARD, Engine};
 use ferroui_designer_language::Position;
-use ferroui_designer_tools::scenario::{Scenario, ScenarioStep};
+use ferroui_designer_tools::scenario::{Scenario, ScenarioPosition, ScenarioStep};
 use serde::Serialize;
 use std::fs::File;
 use std::io::{self, Read, Write};
@@ -78,7 +79,7 @@ pub(crate) fn command() -> io::Result<()> {
     }
 }
 
-fn read_text(path: &Path) -> Result<String, String> {
+pub(crate) fn read_text(path: &Path) -> Result<String, String> {
     let error = |error: io::Error| format!("{}: {error}", path.display());
     let mut text = String::new();
     File::open(path)
@@ -103,51 +104,40 @@ fn run(path: &Path, workspace: &Path, artifacts: &Path, accept: bool) -> Result<
     let scenario: Scenario = serde_json::from_str(source.trim_start_matches('\u{feff}'))
         .map_err(|error| error.to_string())?;
     scenario.validate()?;
-    let document_path = base
-        .join(&scenario.document)
-        .canonicalize()
-        .map_err(|error| error.to_string())?;
-    if !document_path.starts_with(workspace) {
-        return Err("Scenario source must belong to the selected workspace".into());
-    }
-    let extension = document_path
-        .extension()
-        .and_then(|value| value.to_str())
-        .unwrap_or("")
-        .to_ascii_lowercase();
-    let language = match extension.as_str() {
-        "xaml" => Language::Xaml,
-        "rs" => Language::Rust,
-        _ => return Err("Choose a FerroUI XAML or Rust view".into()),
+    let document_path = existing_workspace_path(base.join(&scenario.document), workspace)?;
+    let document = read_source(&document_path, scenario.caret)?;
+    let (surface, notices) = match &scenario.prototype {
+        Some(prototype) => (
+            ScenarioSurface::Prototype(PrototypeRun::start(document, prototype, base, workspace)?),
+            Vec::new(),
+        ),
+        None => {
+            let input = Render {
+                document,
+                width: scenario.viewport.width,
+                height: scenario.viewport.height,
+                dark: scenario.viewport.dark,
+                frame: 1,
+                workspace_root: None,
+            };
+            let mut renderer = Renderer::new();
+            let preview = crate::snapshot::render(&mut renderer, &input, None)?;
+            if preview.image.is_none() {
+                return Err(preview
+                    .render_error
+                    .unwrap_or_else(|| "No accepted native preview".into()));
+            }
+            (
+                ScenarioSurface::Design {
+                    renderer,
+                    frame: input.frame,
+                },
+                preview.notices,
+            )
+        }
     };
-    let input = Render {
-        document: Source {
-            language,
-            uri: ferroui_designer_project::file_uri(&document_path)
-                .map_err(|error| error.to_string())?,
-            source: read_text(&document_path)?,
-            caret: Position {
-                line: scenario.caret.line,
-                character: scenario.caret.character,
-            },
-            project: None,
-        },
-        width: scenario.viewport.width,
-        height: scenario.viewport.height,
-        dark: scenario.viewport.dark,
-        frame: 1,
-        workspace_root: None,
-    };
-    let mut renderer = Renderer::new();
-    let preview = crate::snapshot::render(&mut renderer, &input, None)?;
-    if preview.image.is_none() {
-        return Err(preview
-            .render_error
-            .unwrap_or_else(|| "No accepted native preview".into()));
-    }
     let mut runner = Run {
-        renderer,
-        frame: input.frame,
+        surface,
         base,
         workspace,
         artifacts,
@@ -158,7 +148,7 @@ fn run(path: &Path, workspace: &Path, artifacts: &Path, accept: bool) -> Result<
         name: scenario.name,
         document: document_path,
         passed: true,
-        notices: preview.notices,
+        notices,
         steps: Vec::new(),
     };
     for (index, step) in scenario.steps.into_iter().enumerate() {
@@ -179,9 +169,71 @@ fn run(path: &Path, workspace: &Path, artifacts: &Path, accept: bool) -> Result<
     Ok(report)
 }
 
+pub(crate) fn existing_workspace_path(path: PathBuf, workspace: &Path) -> Result<PathBuf, String> {
+    let path = path.canonicalize().map_err(|error| error.to_string())?;
+    if !path.starts_with(workspace) || !path.is_file() {
+        return Err("Scenario inputs must be files in the selected workspace".into());
+    }
+    Ok(path)
+}
+
+pub(crate) fn read_source(path: &Path, caret: ScenarioPosition) -> Result<Source, String> {
+    let extension = path
+        .extension()
+        .and_then(|value| value.to_str())
+        .unwrap_or("")
+        .to_ascii_lowercase();
+    let language = match extension.as_str() {
+        "xaml" => Language::Xaml,
+        "rs" => Language::Rust,
+        _ => return Err("Choose a FerroUI XAML or Rust view".into()),
+    };
+    Ok(Source {
+        language,
+        uri: ferroui_designer_project::file_uri(path).map_err(|error| error.to_string())?,
+        source: read_text(path)?,
+        caret: Position {
+            line: caret.line,
+            character: caret.character,
+        },
+        project: None,
+    })
+}
+
+enum ScenarioSurface {
+    Design { renderer: Renderer, frame: u64 },
+    Prototype(PrototypeRun),
+}
+
+impl ScenarioSurface {
+    fn capture(&mut self) -> Result<Image, String> {
+        match self {
+            Self::Design { renderer, frame } => {
+                let session = &renderer.stage(*frame)?.session;
+                Ok(crate::renderer::capture(&mut session.borrow_mut())?.image)
+            }
+            Self::Prototype(prototype) => prototype.capture(),
+        }
+    }
+
+    fn inspect(&mut self, step: ScenarioStep) -> Result<String, String> {
+        match self {
+            Self::Design { renderer, frame } => {
+                let host = renderer
+                    .stage(*frame)?
+                    .session
+                    .borrow()
+                    .preview_host()
+                    .upcast();
+                crate::scenario_input::execute(&host, step)
+            }
+            Self::Prototype(prototype) => prototype.inspect(step),
+        }
+    }
+}
+
 struct Run<'a> {
-    renderer: Renderer,
-    frame: u64,
+    surface: ScenarioSurface,
     base: &'a Path,
     workspace: &'a Path,
     artifacts: &'a Path,
@@ -198,6 +250,7 @@ impl Run<'_> {
                 channel_tolerance,
             } => self.screenshot(&baseline, number, channel_tolerance, max_changed_pixels),
             step => self
+                .surface
                 .inspect(step)
                 .map(|message| (true, message, Vec::new())),
         };
@@ -224,8 +277,7 @@ impl Run<'_> {
         {
             return Err("Screenshot baselines require a .png path".into());
         }
-        let session = &self.renderer.stage(self.frame)?.session;
-        let Image { png, .. } = crate::renderer::capture(&mut session.borrow_mut())?.image;
+        let Image { png, .. } = self.surface.capture()?;
         let image = STANDARD.decode(png).map_err(|error| error.to_string())?;
         let baseline = workspace_path(self.base, self.workspace, baseline)?;
         if self.accept {
@@ -248,16 +300,6 @@ impl Run<'_> {
             maximum,
         )?;
         Ok((!result.failure, result.message, result.artifacts))
-    }
-
-    fn inspect(&self, step: ScenarioStep) -> Result<String, String> {
-        let host = self
-            .renderer
-            .stage(self.frame)?
-            .session
-            .borrow()
-            .preview_host();
-        crate::scenario_input::execute(&host, step)
     }
 }
 

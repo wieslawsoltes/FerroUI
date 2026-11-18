@@ -1,5 +1,6 @@
 //! Versioned scenario input shared by designer hosts and native test runners.
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -11,6 +12,7 @@ pub struct Scenario {
     pub viewport: ScenarioViewport,
     #[serde(default)]
     pub caret: ScenarioPosition,
+    pub prototype: Option<ScenarioPrototype>,
     pub steps: Vec<ScenarioStep>,
 }
 
@@ -24,6 +26,11 @@ impl Scenario {
         }
         if self.name.trim().is_empty() || self.document.trim().is_empty() || self.steps.is_empty() {
             return Err("A scenario needs a name, source document, and at least one step".into());
+        }
+        if let Some(prototype) = &self.prototype {
+            if prototype.stage_set.trim().is_empty() || prototype.flow.trim().is_empty() {
+                return Err("A prototype scenario needs a saved stage set and a flow name".into());
+            }
         }
         Ok(())
     }
@@ -47,11 +54,28 @@ impl Default for ScenarioViewport {
     }
 }
 
-#[derive(Debug, Default, Deserialize)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq)]
 #[serde(deny_unknown_fields)]
 pub struct ScenarioPosition {
     pub line: u32,
     pub character: u32,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ScenarioPrototype {
+    pub stage_set: String,
+    pub flow: String,
+    /// Remap a saved source URI to a document in the selected test workspace.
+    #[serde(default)]
+    pub sources: BTreeMap<String, ScenarioStageSource>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ScenarioStageSource {
+    pub path: String,
+    pub caret: Option<ScenarioPosition>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -62,6 +86,15 @@ pub struct ScenarioPosition {
     deny_unknown_fields
 )]
 pub enum ScenarioStep {
+    ActivateLink {
+        name: String,
+    },
+    ExpectStage {
+        name: String,
+    },
+    ExpectOverlay {
+        name: Option<String>,
+    },
     Click {
         selector: String,
     },

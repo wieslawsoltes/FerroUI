@@ -112,6 +112,8 @@ The document and baseline paths are relative to the scenario. A Rust scenario ca
 
 Run the same scenario in CI with `ferroui-designer-preview --scenario customer-search.ferroui-scenario.json`. Use `--workspace` for scenarios stored below their workspace root and `--artifacts` to choose a directory for visual evidence. The runner prints a JSON report and returns a failing status for a failed assertion. Agents use `ferroui_scenario_run` on the same saved file.
 
+Set `prototype` to run a saved `.ferrostages` file through the native Stages player. Supply its `stageSet` path and `flow` name. The optional `sources` map assigns a saved source URI to a workspace-relative `path` and optional RSX `caret` for a portable scenario. Paths are resolved from the scenario folder. Use `activateLink` with an authored interaction name, `expectStage` with the underlying screen name, and `expectOverlay` with the top overlay name or `null`. Input, accessibility, property checks, and PNG comparisons use the current native screen or overlay. The customer review fixture follows a saved flow through two screens and a notes overlay. [Customer review scenario](test/fixtures/customer-review.ferroui-scenario.json)
+
 ## Hot reload a running application
 
 Run **FerroUI: Run with Hot Reload** from a local Cargo workspace and select a development binary. Try `hot-reload-demo` for XAML or `view-gallery` for Rust. The extension uses Cargo metadata and enables a package’s `hot-reload` feature when defined. Save your changes in the editor or save a design edit to update the application. The status bar and **FerroUI: Show Hot Reload Output** report in-place updates, rejected edits, and rebuilds.

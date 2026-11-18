@@ -20,6 +20,7 @@ mod rsx_placement;
 mod scenario;
 mod scenario_images;
 mod scenario_input;
+mod scenario_stages;
 mod snapshot;
 mod stages;
 mod stages_prototype;

@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "name": "Customer review prototype",
+  "document": "SettingsView.xaml",
+  "prototype": {
+    "stageSet": "customer-review.ferrostages",
+    "flow": "Customer review",
+    "sources": {
+      "workspace:/overview": { "path": "SettingsView.xaml" },
+      "workspace:/details": { "path": "PreviewChecks.xaml" },
+      "workspace:/notes": { "path": "PrototypeNotes.xaml" }
+    }
+  },
+  "steps": [
+    { "action": "expectStage", "name": "Overview" },
+    { "action": "activateLink", "name": "Open details" },
+    { "action": "expectStage", "name": "Details" },
+    { "action": "activateLink", "name": "Open notes" },
+    { "action": "expectOverlay", "name": "Notes" },
+    { "action": "expectAccessible", "name": "Close notes", "role": "Button" },
+    { "action": "expectScreenshot", "baseline": "Baselines/review-notes.png" },
+    { "action": "activateLink", "name": "Close notes" },
+    { "action": "expectOverlay", "name": null },
+    { "action": "expectStage", "name": "Details" }
+  ]
+}

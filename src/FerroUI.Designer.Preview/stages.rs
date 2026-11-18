@@ -50,10 +50,10 @@ impl StageSource {
 
 #[derive(Deserialize)]
 pub(crate) struct Sync {
-    source: Source,
-    manifest: Option<PreviewStageManifest>,
+    pub(crate) source: Source,
+    pub(crate) manifest: Option<PreviewStageManifest>,
     #[serde(default)]
-    additional: Vec<Source>,
+    pub(crate) additional: Vec<Source>,
 }
 
 #[derive(Deserialize)]
@@ -98,8 +98,8 @@ pub(crate) struct Model {
 
 #[derive(Deserialize)]
 pub(crate) struct StageTarget {
-    id: PreviewStageId,
-    epoch: u64,
+    pub(crate) id: PreviewStageId,
+    pub(crate) epoch: u64,
 }
 
 #[derive(Serialize)]
@@ -338,7 +338,7 @@ impl Stages {
         Ok(json!({"range":range,"uri":source.uri}))
     }
 
-    fn mounted(&mut self, target: &StageTarget) -> Result<Ref<Control>, String> {
+    pub(crate) fn mounted(&mut self, target: &StageTarget) -> Result<Ref<Control>, String> {
         let info = self
             .board
             .stage(target.id)

@@ -1,11 +1,11 @@
 //! Input and assertions against the same native inspector used by the designer.
 use ferroui_base::{threading::Dispatcher, Ref};
-use ferroui_controls::ContentControl;
+use ferroui_controls::Control;
 use ferroui_designer_tools::scenario::ScenarioStep;
 use ferroui_inspect::{Inspector, Permissions};
 use serde_json::{json, Value};
 
-pub(crate) fn execute(host: &Ref<ContentControl>, step: ScenarioStep) -> Result<String, String> {
+pub(crate) fn execute(host: &Ref<Control>, step: ScenarioStep) -> Result<String, String> {
     Dispatcher::ui_thread().run_jobs(None);
     host.update_layout();
     let shared = Inspector::shared();
@@ -79,6 +79,11 @@ pub(crate) fn execute(host: &Ref<ContentControl>, step: ScenarioStep) -> Result<
             Ok(format!("Sent {key} to {selector}"))
         }
         ScenarioStep::ExpectScreenshot { .. } => unreachable!(),
+        ScenarioStep::ActivateLink { .. }
+        | ScenarioStep::ExpectStage { .. }
+        | ScenarioStep::ExpectOverlay { .. } => {
+            Err("This step requires a prototype stage set".into())
+        }
     }
 }
 

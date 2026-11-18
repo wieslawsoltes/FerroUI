@@ -10,14 +10,14 @@ pub(crate) struct Playback(Option<PreviewPrototypeSession>);
 
 #[derive(Deserialize)]
 pub(crate) struct Control {
-    epoch: u64,
+    pub(crate) epoch: u64,
     #[serde(flatten)]
-    action: Command,
+    pub(crate) action: Command,
 }
 
 #[derive(Deserialize)]
 #[serde(tag = "action", rename_all = "camelCase")]
-enum Command {
+pub(crate) enum Command {
     Start { flow: String },
     Back,
     CloseOverlay,
@@ -29,9 +29,9 @@ enum Command {
 #[derive(Serialize)]
 pub(crate) struct Scene {
     flow: String,
-    screen: PreviewStageId,
-    current: PreviewStageId,
-    overlays: Vec<PreviewPrototypeOverlay>,
+    pub(crate) screen: PreviewStageId,
+    pub(crate) current: PreviewStageId,
+    pub(crate) overlays: Vec<PreviewPrototypeOverlay>,
     can_go_back: bool,
 }
 

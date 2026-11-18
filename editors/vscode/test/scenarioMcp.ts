@@ -35,5 +35,16 @@ export async function verifyScenarioMcp({ invoke, content }: McpFixture): Promis
     } finally {
         await vscode.workspace.fs.writeFile(uri, original);
     }
+    const prototype = 'customer-review.ferroui-scenario.json';
+    const runPrototype = async (accept_baselines = false) => content<ScenarioReport>(
+        await invoke('ferroui_scenario_run', { path: prototype, accept_baselines }));
+    const recorded = await runPrototype(true);
+    assert.equal(recorded.passed, true, JSON.stringify(recorded.steps));
+    assert.equal(recorded.steps.length, 10);
+    assert.match(recorded.steps[4].message, /Showing overlay "Notes"/);
+    assert.match(recorded.steps[8].message, /No overlay is open/);
+    const replayed = await runPrototype();
+    assert.equal(replayed.passed, true, JSON.stringify(replayed.steps));
     console.log('VS Code ran native input and accessibility assertions, accepted a PNG baseline and detected a real visual diff');
+    console.log('VS Code replayed a saved native prototype across two screens and an overlay, then matched its screenshot baseline');
 }
