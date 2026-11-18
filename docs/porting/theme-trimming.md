@@ -1392,6 +1392,63 @@ function (`_deferred_<n>`, `_part_<n>`, `_unit_<n>`, `_untyped`).
 - `tests/FerroUI.Markup.Xaml.UnitTests/emitter/build_diagnostics.rs`: the error and the
   disambiguation reported by a build.
 
+## 17. Roots across targets, from dependencies, and only of the documents compiled (#847)
+
+The review found roots of theme trimming that were missed and roots that were over-collected.
+
+### 17.1 Every production target
+
+The build read the sources of a crate from one root file: `src/lib.rs`, else `lib.rs`, else
+`src/main.rs`. `ListBox::new()` in the binary of a package that also has a library therefore rooted
+nothing (#832 names the same limit for the samples).
+
+`theme_roots::binary_roots` (new) reads the binaries of the package as Cargo finds them:
+- the `path` of each `[[bin]]` table, or for a `[[bin]]` without a path, the file its name gives
+  (`src/bin/<name>.rs`, `src/bin/<name>/main.rs` or `src/main.rs`);
+- unless `[package]` states `autobins = false`, `src/main.rs`, `src/bin/*.rs` and
+  `src/bin/*/main.rs`.
+
+The build scans each binary for its names and string literals, as it scans the library, and adds
+them to the roots of the sources. Examples, tests and benchmarks are not production targets and are
+not read.
+
+`$OUT_DIR/xaml/theme_roots.txt` lists, for each target (by its root file), the types and keys its
+sources root. A kept unit can therefore be traced to the target that named it.
+
+The manifest is read by the small reader of section 10.1, extended to `[[bin]]` tables. It moves to
+the TOML reader of #850 when that is merged.
+
+### 17.2 What a dependency's code makes
+
+A dependency that is code only (`ListBox::new()` in a free function) exported nothing. The creates
+edges belong to classes of the model, and a free function has no owner. Exporting every name and
+literal of every dependency's code would root every control of `ferroui-view` (whose builders name
+each one) in every application that uses it, so this is not done automatically.
+
+Instead, a crate states what its code constructs with `Build::theme_roots(&[..])`. The build exports
+those names with the references of the crate's documents (`references.types` and `.keys` of its
+`.xamlmeta`), and every application that depends on the crate roots them.
+
+### 17.3 Only the documents a class compiles
+
+The build collected roots from every document given to a group, before it knew which documents
+belong to the class. A `NeverIncluded.xaml` with a `<ListBox />`, given to a class group but
+included by no document of it, is never compiled, yet it rooted 13 more units.
+
+For the group of a class, the roots now come from the documents of its group only: the document of
+the class and the documents it includes, directly or not (`class_document_group`). An ordinary
+group still roots every document it compiles.
+
+### 17.4 Tests
+
+- `theme_roots_tests.rs` (`the_binaries_of_a_package_are_its_production_targets`): explicit
+  binaries, a binary by its name, discovered binaries, `autobins = false`, and files that do not
+  exist.
+- `lib.rs` (`every_production_target_roots_the_themes`): a package whose binary names `ListBox` and a
+  key keeps their units while its library names neither. The binary is an input of the build,
+  `theme_roots.txt` names it with its types and keys, and a root the build script states is in the
+  exported references.
+
 ## 19. Why each unit is kept (#852, first step)
 
 Issue #852 asks whether a graph of entries could split the high-fanout dictionaries of a theme
