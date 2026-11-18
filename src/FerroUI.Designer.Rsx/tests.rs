@@ -113,6 +113,18 @@ fn markup_and_unmapped_rust_are_reported_without_silently_converting() {
 }
 
 #[test]
+fn comments_in_counterpart_drafts_require_the_authored_format() {
+    let source = "<Button Content=\"Save\"/>";
+    let xaml = Document::new(source).unwrap();
+    let rsx = xaml_to_rsx(&xaml).unwrap();
+    assert!(apply_rsx(&xaml, &format!("// keep this comment\n{rsx}")).is_err());
+    let projection = project_rust(&rsx, 0).unwrap();
+    assert!(projection
+        .apply_xaml(&format!("<!-- keep this comment -->{source}"))
+        .is_err());
+}
+
+#[test]
 fn text_shorthand_maps_to_the_text_literal() {
     let rust = r#"rsx! { TextBlock { "Hello" } }"#;
     let projection = project_rust(rust, 0).unwrap();

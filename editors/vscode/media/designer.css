@@ -101,14 +101,14 @@ input[readonly], textarea[readonly] { color: var(--muted); }
 }
 .artboard {
     position: relative;
-    max-inline-size: 100%;
+    inline-size: min(var(--frame-width), 100%, calc(100cqh * var(--frame-aspect)));
     overflow: hidden;
     background: #fff;
     box-shadow: 0 0 0 1px var(--line), 0 6px 26px #0004;
 }
 .artboard[data-theme=dark] { background: #202020; }
 .artboard.stale { opacity: .58; }
-.artboard img { display: block; height: auto; max-inline-size: 100%; max-block-size: 100cqh; cursor: crosshair; }
+.artboard img { display: block; inline-size: 100%; height: auto; cursor: crosshair; }
 .artboard.stale img { cursor: default; }
 .selection-box {
     position: absolute;

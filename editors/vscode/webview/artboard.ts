@@ -28,6 +28,8 @@ export class Artboard {
             this.frame.src = `data:image/png;base64,${image.png}`;
             this.frame.width = image.width;
             this.frame.height = image.height;
+            this.holder.style.setProperty('--frame-width', `${image.width}px`);
+            this.holder.style.setProperty('--frame-aspect', String(image.width / image.height));
             this.holder.dataset.theme = dark ? 'dark' : 'light';
             this.holder.hidden = false;
             this.placeholder.hidden = true;

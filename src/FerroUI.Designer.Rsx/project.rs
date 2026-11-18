@@ -3,7 +3,7 @@ use crate::catalog::{self, Children};
 use crate::literal;
 use crate::tree::{replacement, Element, MAX_DEPTH};
 use crate::xaml::XamlTree;
-use ferroui_designer_core::{Document, SourceSpan, TextPatch};
+use ferroui_designer_core::{Document, NodeKind, SourceSpan, TextPatch};
 use ferroui_view_syntax::{Attribute, Node};
 use proc_macro2::TokenStream;
 use std::collections::{BTreeMap, BTreeSet};
@@ -70,10 +70,15 @@ impl RsxProjection<'_> {
             );
         }
         let document = Document::new(draft).map_err(|e| e.to_string())?;
-        let draft = XamlTree::parse(&document)?;
-        if draft.inner_trivia {
+        if document.ast().nodes().any(|node| {
+            matches!(
+                node.kind,
+                NodeKind::Comment | NodeKind::ProcessingInstruction
+            )
+        }) {
             return Err("Keep comments and processing instructions in the authored format".into());
         }
+        let draft = XamlTree::parse(&document)?;
         if let Some(changes) = self.tree.changes(&draft.tree) {
             return changes
                 .iter()
@@ -116,8 +121,11 @@ pub fn project_rust(source: &str, caret: usize) -> Result<RsxProjection<'_>, Str
 }
 
 pub(crate) fn parse_draft(source: &str) -> Result<Element, String> {
+    let tokens: TokenStream = source
+        .parse()
+        .map_err(|e| format!("Invalid RSX tokens: {e}"))?;
     let draft: syn::ExprMacro =
-        syn::parse_str(source).map_err(|e| format!("Expected an rsx! expression: {e}"))?;
+        syn::parse2(tokens.clone()).map_err(|e| format!("Expected an rsx! expression: {e}"))?;
     if draft
         .mac
         .path
@@ -127,19 +135,14 @@ pub(crate) fn parse_draft(source: &str) -> Result<Element, String> {
     {
         return Err("Expected an rsx! expression".into());
     }
-    let (tree, state) = parse_body(draft.mac.tokens.clone())?;
+    let (tree, state) = parse_body(draft.mac.tokens)?;
     if state.omitted_count != 0 {
         return Err(format!(
             "The RSX draft must be fully convertible: {}",
             state.omissions.join("; ")
         ));
     }
-    let span = draft.mac.delimiter.span();
-    let body = SourceSpan::new(
-        span.open().byte_range().end,
-        span.close().byte_range().start,
-    );
-    if contains_trivia(source, draft.mac.tokens, body) {
+    if contains_trivia(source, tokens, SourceSpan::new(0, source.len())) {
         return Err("Keep comments in the authored format".into());
     }
     Ok(tree)
