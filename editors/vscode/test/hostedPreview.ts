@@ -3,13 +3,16 @@ import { spawn } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import type { NativePreview } from '../src/nativePreview';
 import type { HostedSource } from '../src/hostedProtocol';
+import { verifyHostedAnimation } from './hostedAnimation';
 
 export async function verifyHostedPreview(preview: NativePreview, uri: string): Promise<void> {
     const app = process.env.FERROUI_TEST_HOSTED_APP;
     if (!app) return;
     const nonce = randomBytes(32).toString('hex');
-    const { port } = await preview.listenHosted(nonce);
-    const child = spawn(app, ['--ferroui-preview', '--transport', `tcp-bson://127.0.0.1:${port}/`,
+    const { port, animationQuery } = await preview.listenHosted(nonce);
+    const endpoint = new URL(`tcp-bson://127.0.0.1:${port}/`);
+    if (animationQuery) endpoint.search = animationQuery;
+    const child = spawn(app, ['--ferroui-preview', '--transport', endpoint.toString(),
         '--session-id', nonce, '--method', 'ferroui-remote', app], { stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true });
     let log = '';
     child.stdout.on('data', chunk => { log = (log + chunk).slice(-10000); });
@@ -57,6 +60,7 @@ export async function verifyHostedPreview(preview: NativePreview, uri: string): 
         assert.equal(one.fixture, 'One task');
         assert.notEqual(one.image.png, rsx.image.png);
         assert.notEqual((await preview.renderHosted(hostedRsx(10, 'Empty queue'))).image.png, one.image.png);
+        await verifyHostedAnimation(preview, update);
         assert.equal(child.exitCode, null);
         console.log('App-hosted design rendered a custom control, native bindings and registered XAML/Rust fixtures, and fenced invalid updates and stale input');
     } catch (error) {

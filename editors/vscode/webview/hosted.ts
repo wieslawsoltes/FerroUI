@@ -1,8 +1,10 @@
 import type { FromHosted, HostedFrame, ToHosted } from '../src/hostedProtocol';
 import { element } from './dom';
+import { HostedAnimationView } from './hostedAnimations';
 
 declare function acquireVsCodeApi(): { postMessage(message: FromHosted): void };
 const vscode = acquireVsCodeApi();
+const animations = new HostedAnimationView(message => vscode.postMessage(message));
 const canvas = element<HTMLImageElement>('hosted-image');
 const status = element('hosted-status');
 const input = element<HTMLFormElement>('hosted-input');
@@ -17,8 +19,10 @@ let interactive = false;
 let request = 0;
 
 window.addEventListener('message', async ({ data }: MessageEvent<ToHosted>) => {
+    if (data.type === 'animations') { animations.update(data.state); return; }
+    if (data.type === 'animationReply') { animations.reply(data.request); return; }
     if (data.type === 'status') {
-        status.textContent = data.message;
+        if (status.textContent !== data.message) status.textContent = data.message;
         interactive = data.interactive;
         text.disabled = !interactive;
         send.disabled = !interactive;
@@ -42,6 +46,7 @@ window.addEventListener('message', async ({ data }: MessageEvent<ToHosted>) => {
     canvas.src = decoded.src;
     canvas.hidden = false;
     input.hidden = false;
+    animations.rendered(current);
 });
 
 function position(event?: MouseEvent) {

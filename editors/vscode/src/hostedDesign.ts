@@ -3,8 +3,10 @@ import * as path from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 import * as vscode from 'vscode';
 import type { BuiltProject } from './builtProjects';
-import { type CargoTarget, selectCargoTarget } from './cargoTarget';
-import type { FromHosted, HostedFixtureCatalog, HostedFrame, ToHosted } from './hostedProtocol';
+import { type CargoSelection, type CargoTarget, discoverCargoTargets, selectCargoTarget } from './cargoTarget';
+import type { HostedAnimationControl, HostedAnimationFrame, HostedAnimationRequest } from './hostedAnimationProtocol';
+import { HostedAnimations } from './hostedAnimations';
+import type { FromHosted, HostedAnimationSample, HostedFixtureCatalog, HostedFrame, ToHosted } from './hostedProtocol';
 import { NativePreview } from './nativePreview';
 import { errorMessage, type Language } from './protocol';
 import { buildCargo, launchArtifact, type ProjectMetadata, type ReloadProcess } from './reloadProcess';
@@ -19,7 +21,8 @@ export class HostedDesign implements vscode.Disposable {
     private nextSession = 0;
     private stopped?: Promise<void>;
 
-    constructor(context: vscode.ExtensionContext, output: vscode.OutputChannel, built: (metadata: ProjectMetadata) => void) {
+    constructor(private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel,
+        private readonly built: (metadata: ProjectMetadata) => void) {
         this.command = vscode.commands.registerCommand('ferroui.openHostedDesign', async () => {
             try {
                 const editor = vscode.window.activeTextEditor;
@@ -28,31 +31,83 @@ export class HostedDesign implements vscode.Disposable {
                 if (!editor || !document || !language || !vscode.workspace.isTrusted || !await isWorkspaceFile(document.uri)) {
                     throw new Error('Open a FerroUI source file from a trusted Cargo workspace.');
                 }
-                const key = document.uri.toString();
-                const current = this.sessions.get(key);
+                const current = this.sessions.get(document.uri.toString());
                 if (current) { current.panel.reveal(); return; }
                 const target = await selectCargoTarget('Select a Cargo binary that supports --ferroui-preview');
-                if (!target || document.isClosed || this.stopped) return;
-                const opened = this.sessions.get(key);
-                if (opened) { opened.panel.reveal(); return; }
-                if (!isInside(path.dirname(target.manifest), document.uri.fsPath)) throw new Error('Select the Cargo package containing this source file.');
-                const panel = vscode.window.createWebviewPanel('ferroui.hostedDesign', `App Preview · ${path.basename(document.fileName)}`,
-                    { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true },
-                    { ...webviewOptions(context.extensionUri), retainContextWhenHidden: true });
-                const session = new HostedSession(context, output, panel, editor, language, target, ++this.nextSession, built, closing => {
-                    this.sessions.delete(key);
-                    this.retiring.add(closing);
-                    void closing.then(() => this.retiring.delete(closing));
-                });
-                this.sessions.set(key, session);
+                if (target) this.mount(editor, language, target);
             } catch (error) {
                 void vscode.window.showErrorMessage(errorMessage(error));
             }
         });
     }
 
+    async open(document: vscode.TextDocument, selection: CargoSelection, signal: AbortSignal): Promise<HostedFixtureCatalog> {
+        signal.throwIfAborted();
+        const existing = this.sessions.get(document.uri.toString());
+        if (existing) {
+            existing.panel.reveal(existing.panel.viewColumn, true);
+            return existing.fixtures();
+        }
+        const language = languageOf(document);
+        if (!language || !await isWorkspaceFile(document.uri)) throw new Error('Open a FerroUI source file in the Cargo package.');
+        const folder = vscode.workspace.getWorkspaceFolder(document.uri);
+        const targets = await discoverCargoTargets({ ...selection, folder: selection.folder ?? folder?.uri.toString() });
+        const local = targets.filter(target => isInside(path.dirname(target.manifest), document.uri.fsPath));
+        if (local.length !== 1) throw new Error('Choose one configured Cargo target for the source document.');
+        signal.throwIfAborted();
+        const editor = vscode.window.visibleTextEditors.find(editor => editor.document === document)
+            ?? await vscode.window.showTextDocument(document, { preview: false });
+        signal.throwIfAborted();
+        return this.mount(editor, language, local[0]).fixtures();
+    }
+
+    private mount(editor: vscode.TextEditor, language: Language, target: CargoTarget): HostedSession {
+        const document = editor.document;
+        if (document.isClosed || this.stopped) throw new Error('The source editor was closed.');
+        if (!isInside(path.dirname(target.manifest), document.uri.fsPath)) throw new Error('Select the Cargo package containing this source file.');
+        const key = document.uri.toString();
+        const existing = this.sessions.get(key);
+        if (existing) { existing.panel.reveal(); return existing; }
+        const panel = vscode.window.createWebviewPanel('ferroui.hostedDesign', `App Preview · ${path.basename(document.fileName)}`,
+            { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true },
+            { ...webviewOptions(this.context.extensionUri), retainContextWhenHidden: true });
+        const session = new HostedSession(this.context, this.output, panel, editor, language, target, ++this.nextSession, this.built, closing => {
+            this.sessions.delete(key);
+            this.retiring.add(closing);
+            void closing.then(() => this.retiring.delete(closing));
+        });
+        this.sessions.set(key, session);
+        return session;
+    }
+
     fixtures(uri: vscode.Uri): HostedFixtureCatalog {
         return this.session(uri).fixtures();
+    }
+
+    animations(uri: vscode.Uri) {
+        const session = this.session(uri);
+        return { generation: session.generation, status: session.message, ...session.animations.state };
+    }
+
+    image(uri: vscode.Uri) {
+        const session = this.session(uri);
+        const frame = session.currentFrame;
+        if (!frame) throw new Error('Wait for the current application preview.');
+        const { image: { png, width, height }, revision, sequence } = frame;
+        return { mimeType: 'image/png', data: png, width, height, revision, sequence, generation: session.generation, uri: uri.toString() };
+    }
+
+    async animate(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame,
+        control: HostedAnimationControl | { action: 'reveal'; program: number }, signal: AbortSignal) {
+        signal.throwIfAborted();
+        const session = this.session(uri);
+        if (session.generation !== generation) throw new Error('Read the current application preview generation.');
+        if (control.action === 'reveal') await session.revealAnimation(frame, control.program);
+        else {
+            session.panel.reveal(session.panel.viewColumn, true);
+            await session.animations.control(frame, control, signal);
+        }
+        return this.animations(uri);
     }
 
     async chooseFixture(uri: vscode.Uri, generation: number, revision: number, name: string | null, signal: AbortSignal): Promise<HostedFixtureCatalog> {
@@ -82,6 +137,7 @@ export class HostedDesign implements vscode.Disposable {
 }
 
 class HostedSession {
+    readonly animations: HostedAnimations;
     private readonly subscriptions: vscode.Disposable[];
     private readonly startup: Promise<void>;
     private compiler?: ReloadProcess;
@@ -104,6 +160,8 @@ class HostedSession {
     constructor(private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel,
         readonly panel: vscode.WebviewPanel, private readonly editor: vscode.TextEditor, private readonly language: Language,
         private readonly target: CargoTarget, readonly generation: number, built: (metadata: ProjectMetadata) => void, remove: (closing: Promise<void>) => void) {
+        this.animations = new HostedAnimations((request, signal) => this.sampleAnimation(request, signal),
+            state => this.post({ type: 'animations', state }), error => this.report(errorMessage(error), Boolean(this.currentFrame)));
         this.subscriptions = [
             vscode.workspace.onDidChangeTextDocument(event => { if (event.document === editor.document) this.update(); }),
             vscode.window.onDidChangeTextEditorSelection(event => {
@@ -131,9 +189,11 @@ class HostedSession {
             if (this.disposed) { client.dispose(); return; }
             this.client = client;
             const nonce = randomBytes(32).toString('hex');
-            const { port } = await client.listenHosted(nonce);
+            const { port, animationQuery } = await client.listenHosted(nonce);
             if (this.disposed) return;
-            const args = ['--ferroui-preview', '--transport', `tcp-bson://127.0.0.1:${port}/`, '--session-id', nonce,
+            const endpoint = new URL(`tcp-bson://127.0.0.1:${port}/`);
+            if (animationQuery) endpoint.search = animationQuery;
+            const args = ['--ferroui-preview', '--transport', endpoint.toString(), '--session-id', nonce,
                 '--method', 'ferroui-remote', artifact];
             const launch = await launchArtifact(artifact, { ...this.target, args }, this.output, () => {}, () => {});
             if (this.disposed) { await launch.process.stop(); return; }
@@ -150,12 +210,14 @@ class HostedSession {
         this.client = undefined;
         this.retiring = this.application?.stop();
         this.application = undefined;
+        this.animations.invalidate();
         this.report(message);
     }
 
     private update(): void {
         ++this.revision;
         this.failed = undefined;
+        this.animations.invalidate();
         if (!this.application) return;
         this.report('Rendering the current source…');
         this.schedule(180);
@@ -170,7 +232,7 @@ class HostedSession {
 
     private async tick(): Promise<void> {
         const client = this.client;
-        if (!client || this.pending) return;
+        if (!client || this.pending || this.animations.driving) return;
         const revision = this.revision;
         this.pending = true;
         try {
@@ -188,9 +250,7 @@ class HostedSession {
                 frame = await client.renderHosted({ revision, assembly, projectPath, document: source, fixture: this.fixture });
             } else frame = await client.hostedFrame();
             if (!this.disposed && client === this.client && frame?.revision === this.revision) {
-                this.frame = frame;
-                this.post({ type: 'frame', frame });
-                this.report(`${this.target.label} · App-hosted design${frame.fixture ? ` · ${frame.fixture}` : ''}`, true);
+                this.accept(frame);
             }
         } catch (error) {
             if (client === this.client && revision === this.revision) {
@@ -204,15 +264,85 @@ class HostedSession {
         }
     }
 
+    get currentFrame(): HostedFrame | undefined {
+        if (this.client && this.frame?.revision === this.revision) return this.frame;
+    }
+
+    get message(): string { return this.status; }
+
+    private accept(frame: HostedFrame): void {
+        this.frame = frame;
+        this.post({ type: 'frame', frame });
+        this.animations.accept(frame);
+        this.report(`${this.target.label} · App-hosted design${frame.fixture ? ` · ${frame.fixture}` : ''}`, true);
+    }
+
+    private async sampleAnimation(request: HostedAnimationRequest, signal: AbortSignal): Promise<HostedAnimationSample> {
+        const client = this.client;
+        signal.throwIfAborted();
+        if (!client || this.pending || request.revision !== this.revision || request.sequence !== this.currentFrame?.sequence) {
+            throw new Error('Wait for the current application preview frame.');
+        }
+        clearTimeout(this.timer);
+        this.pending = true;
+        try {
+            const sample = await client.sampleHostedAnimation(request);
+            if (this.disposed || client !== this.client || sample.frame.revision !== this.revision) {
+                throw new Error('The application preview changed while sampling the animation.');
+            }
+            this.accept(sample.frame);
+            return sample;
+        } finally {
+            this.pending = false;
+            this.schedule(this.requested === this.revision ? 160 : 0);
+        }
+    }
+
+    async revealAnimation(frame: HostedAnimationFrame, id: number): Promise<void> {
+        if (this.language !== 'xaml') throw new Error('The application animation has no mapped Rust declaration.');
+        const program = this.animations.program(frame, id);
+        const document = this.editor.document;
+        const position = document.positionAt(program.sourceOffset);
+        const editor = await vscode.window.showTextDocument(document, { viewColumn: this.editor.viewColumn });
+        if (frame.revision !== this.revision) throw new Error('The source changed before revealing the animation.');
+        editor.selection = new vscode.Selection(position, position);
+        editor.revealRange(new vscode.Range(position, position), vscode.TextEditorRevealType.InCenterIfOutsideViewport);
+    }
+
+    private async chooseAnimationTargets(frame: HostedAnimationFrame, id: number): Promise<void> {
+        const program = this.animations.program(frame, id);
+        const state = this.animations.state;
+        const chosen = state.overrides[id] ?? program.defaultTargets;
+        const controls = state.targets.filter(target => program.compatibleTargets.includes(target.id));
+        const choice = await vscode.window.showQuickPick(controls.map(target => ({ label: target.label,
+            description: target.label === target.typeName ? undefined : target.typeName, target: target.id, picked: chosen.includes(target.id) })), {
+            canPickMany: true, title: `Preview targets · ${program.name}`, placeHolder: 'Choose compatible controls',
+        });
+        if (!choice) return;
+        const current = this.animations.state.frame;
+        if (!current || current.revision !== frame.revision) throw new Error('The application source changed while choosing targets.');
+        await this.animations.control(current, { action: 'targets', program: id, targets: choice.map(item => item.target) }, AbortSignal.timeout(15_000));
+    }
+
     private async receive(message: FromHosted): Promise<void> {
         if (message.type === 'ready') {
             this.ready = true;
             if (this.frame) this.post({ type: 'frame', frame: this.frame });
+            this.post({ type: 'animations', state: this.animations.state });
             this.report(this.status, this.frame?.revision === this.revision && Boolean(this.client));
             this.schedule(0);
             return;
         }
         if (message.type === 'refresh') { this.update(); return; }
+        if (message.type === 'animation' || message.type === 'animationTargets' || message.type === 'animationSource') {
+            try {
+                if (message.type === 'animation') await this.animations.control(message.frame, message.control, AbortSignal.timeout(15_000));
+                else if (message.type === 'animationTargets') await this.chooseAnimationTargets(message.frame, message.program);
+                else await this.revealAnimation(message.frame, message.program);
+            } catch (error) { this.report(errorMessage(error), Boolean(this.currentFrame)); }
+            if (message.type === 'animation') this.post({ type: 'animationReply', request: message.request });
+            return;
+        }
         if (message.type === 'fixture') {
             try { this.selectFixture(message.revision, message.name); }
             catch (error) { this.report(errorMessage(error), this.frame?.revision === this.revision); }
@@ -264,6 +394,7 @@ class HostedSession {
         if (this.stopped) return this.stopped;
         this.disposed = true;
         clearTimeout(this.timer);
+        this.animations.invalidate();
         this.client?.dispose();
         this.subscriptions.forEach(subscription => subscription.dispose());
         this.stopped = Promise.all([this.startup, this.compiler?.stop(), this.application?.stop(), this.retiring]).then(() => undefined);

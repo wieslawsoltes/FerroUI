@@ -8,6 +8,7 @@ import type { DesignerWorkbench } from './designerWorkbench';
 import { runEditorHistory } from './editorHistory';
 import type { HotReload } from './hotReload';
 import type { HostedDesign } from './hostedDesign';
+import type { HostedAnimationControl } from './hostedAnimationProtocol';
 import type { ProjectFile, ProjectInventory } from './projectInventory';
 import type { ProjectScaffold } from './projectScaffold';
 import type { RuntimeSourceTools } from './runtimeSourceTools';
@@ -29,6 +30,7 @@ interface Arguments extends CanvasAction, CargoSelection {
     expected_revision: number;
     expected_version: number;
     expected_generation: number;
+    expected_sequence: number;
     runtime?: RuntimeTarget;
     accept_baselines?: boolean;
     path: string;
@@ -142,9 +144,15 @@ export class AgentTools {
         signal.throwIfAborted();
         const document = panel.document;
         switch (tool) {
+            case 'designer_hosted_open': return this.hosted.open(document, args, signal);
             case 'designer_hosted_fixtures': return this.hosted.fixtures(document.uri);
             case 'designer_hosted_fixture':
                 return this.hosted.chooseFixture(document.uri, args.expected_generation, args.expected_revision, args.fixture ?? null, signal);
+            case 'designer_hosted_animations': return this.hosted.animations(document.uri);
+            case 'designer_hosted_image': return this.hosted.image(document.uri);
+            case 'designer_hosted_animation':
+                return this.hosted.animate(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },
+                    args.arguments as HostedAnimationControl | { action: 'reveal'; program: number }, signal);
             case 'designer_document': {
                 if (args.include_counterpart) {
                     await panel.waitForSnapshot(signal).catch(error => { if (signal.aborted) throw error; });

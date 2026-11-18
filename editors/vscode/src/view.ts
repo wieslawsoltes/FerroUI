@@ -266,6 +266,22 @@ export function hostedHtml(webview: vscode.Webview, root: vscode.Uri): string {
     <label id="hosted-fixture-label" class="metric" hidden>${icon('database')}<select id="hosted-fixture" aria-label="Preview fixture"></select></label>
     ${tool('hosted-refresh', 'refresh', 'Refresh Source')}
 </header>
+<section id="hosted-animations" aria-label="Application animations" hidden>
+    <div class="toolbar hosted-animation-toolbar">
+        <select id="hosted-animation-program" aria-label="Application animation"></select>
+        <div class="tool-group" role="group" aria-label="Animation actions">
+            ${tool('hosted-animation-targets', 'target', 'Choose preview targets')}
+            ${tool('hosted-animation-source', 'go-to-file', 'Reveal animation in source')}
+            <span class="toolbar-divider" aria-hidden="true"></span>
+            ${tool('hosted-animation-play', 'play', 'Play application animation')}
+            ${tool('hosted-animation-stop', 'debug-stop', 'Stop application animation')}
+        </div>
+    </div>
+    <div class="hosted-animation-clock">
+        <input id="hosted-animation-seek" type="range" min="0" step="0.001" aria-label="Application animation playhead">
+        <output id="hosted-animation-time" for="hosted-animation-seek"></output>
+    </div>
+</section>
 <p id="hosted-status" class="dock-message" role="status">Starting application preview…</p>
 <main class="hosted-canvas preview-surface" aria-label="Application artboard"><img id="hosted-image" alt="App-hosted FerroUI design" draggable="false" hidden></main>
 <form id="hosted-input" class="toolbar" aria-label="Preview input" hidden>

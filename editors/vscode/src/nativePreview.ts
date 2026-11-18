@@ -8,7 +8,8 @@ import type { TimelinePreviewPose, TimelineTargetOverrides } from './timelinePro
 import type { NativeProjectInventory } from './projectInventory';
 import type { Asset, CanvasInteraction, CanvasPresentation, DesignDataPresentation, DropHint, EditResult, Inspection, InspectionTarget, Operation, Placement, PreviewSourceBuffer, ResourceRow, Snapshot, Source, Viewport } from './protocol';
 import type { RsxLanguageDocument } from './rsxLanguageTypes';
-import type { HostedFrame, HostedInput, HostedSource } from './hostedProtocol';
+import type { HostedAnimationRequest } from './hostedAnimationProtocol';
+import type { HostedAnimationSample, HostedFrame, HostedInput, HostedSource } from './hostedProtocol';
 import type { NativeStageChange, PrototypeCommand, PrototypeHotspot, PrototypeScene, StageChecks, StageDocument, StageImage, StageManifest, StageModel, StagePick, StagePointer, StageStateOptions, StageTarget } from './stagesProtocol';
 import { commandFor } from './tools';
 
@@ -97,7 +98,7 @@ export class NativePreview implements vscode.Disposable {
         return this.send('designTokens', request);
     }
 
-    listenHosted(nonce: string): Promise<{ port: number }> {
+    listenHosted(nonce: string): Promise<{ port: number; animationQuery?: string }> {
         if (!this.capabilities.appHostedDesign) throw new Error('Update the FerroUI preview helper to use app-hosted design.');
         return this.send('hostedListen', { nonce });
     }
@@ -108,6 +109,9 @@ export class NativePreview implements vscode.Disposable {
     }
     hostedFrame(): Promise<HostedFrame | null> { return this.send('hostedFrame'); }
     hostedInput(input: HostedInput): Promise<void> { return this.send('hostedInput', input); }
+    sampleHostedAnimation(request: HostedAnimationRequest): Promise<HostedAnimationSample> {
+        return this.send('hostedAnimate', request, 12_000);
+    }
 
     syncStages(source: StageDocument, manifest?: StageManifest, additional: StageDocument[] = [], localSources?: PreviewSourceBuffer[]): Promise<StageModel> {
         if (!this.capabilities.stages) throw new Error('Update the FerroUI preview helper to use Stages.');
