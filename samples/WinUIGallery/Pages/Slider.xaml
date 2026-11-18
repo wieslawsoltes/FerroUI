@@ -1,4 +1,85 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <Slider x:Name="Primary" Width="300" HorizontalAlignment="Left" Minimum="500" Maximum="1000" TickFrequency="10" IsSnapToTickEnabled="True" SmallChange="10" Value="800"/><Slider Width="300" HorizontalAlignment="Left" Value="35"/><TextBlock x:Name="Output" Text="Value: 800"/>
+<!-- Adapted from the four pinned Slider examples of WinUI Gallery (14061eea) and
+     SnapsToRadioButtons_SelectionChanged of SliderPage.xaml.cs (button_samples.rs); see
+     ../NOTICE.md. The outputs and the range options keep the source's OneWay x:Bind (Value is
+     bound as it is; the source calls Value.ToString()). FerroUI's Slider has no Header (composed),
+     no StepFrequency and no SnapsTo: StepFrequency is TickFrequency with IsSnapToTickEnabled, and
+     SnapsTo Ticks is IsSnapToTickEnabled; SnapsTo StepValues (integer steps) has no counterpart,
+     so the page is partial. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="SliderExample1" Spacing="8">
+    <TextBlock Text="A simple Slider." FontSize="18" />
+    <StackPanel Orientation="Horizontal">
+      <Slider x:Name="Slider1" Width="200" AutomationProperties.Name="Simple example" />
+    </StackPanel>
+    <TextBlock x:Name="Slider1Output" Text="{x:Bind Slider1.Value, Mode=OneWay}" />
+  </StackPanel>
+
+  <StackPanel x:Name="SliderExample2" Spacing="8">
+    <TextBlock Text="A Slider with range and steps specified." FontSize="18" />
+    <StackPanel x:Name="Control2" VerticalAlignment="Center" Spacing="4">
+      <TextBlock Text="Control header" />
+      <Slider x:Name="Slider2"
+              Width="200"
+              Margin="0,0,10,0"
+              HorizontalAlignment="Left"
+              AutomationProperties.Name="Control header"
+              IsSnapToTickEnabled="True"
+              Maximum="{x:Bind MaximumValue.Value, Mode=OneWay}"
+              Minimum="{x:Bind MinimumValue.Value, Mode=OneWay}"
+              SmallChange="{x:Bind SmallChangeValue.Value, Mode=OneWay}"
+              TickFrequency="{x:Bind StepFrequencyValue.Value, Mode=OneWay}"
+              Value="800" />
+    </StackPanel>
+    <TextBlock x:Name="Slider2Output" Text="{x:Bind Slider2.Value, Mode=OneWay}" />
+    <Grid ColumnDefinitions="Auto,Auto" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="8">
+      <TextBlock x:Name="MinimumLabel" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Text="Minimum:" />
+      <NumberBox x:Name="MinimumValue" Grid.Row="0" Grid.Column="1" MinWidth="80" Margin="10,0,0,0"
+                 AutomationProperties.Name="Minimum" SpinButtonPlacementMode="Compact" Value="500" />
+      <TextBlock x:Name="MaximumLabel" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Text="Maximum:" />
+      <NumberBox x:Name="MaximumValue" Grid.Row="1" Grid.Column="1" MinWidth="80" Margin="10,0,0,0"
+                 AutomationProperties.Name="Maximum" SpinButtonPlacementMode="Compact" Value="1000" />
+      <TextBlock x:Name="StepFrequencyLabel" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center"
+                 Text="StepFrequency:" />
+      <NumberBox x:Name="StepFrequencyValue" Grid.Row="2" Grid.Column="1" MinWidth="80" Margin="10,0,0,0"
+                 AutomationProperties.Name="Step Frequency" Minimum="1" SpinButtonPlacementMode="Compact"
+                 Value="10" />
+      <TextBlock x:Name="SmallChangeLabel" Grid.Row="3" Grid.Column="0" VerticalAlignment="Center"
+                 Text="SmallChange:" />
+      <NumberBox x:Name="SmallChangeValue" Grid.Row="3" Grid.Column="1" MinWidth="80" Margin="10,0,0,0"
+                 AutomationProperties.Name="Small Change" SpinButtonPlacementMode="Compact" Value="10" />
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="SliderExample3" Spacing="8">
+    <TextBlock Text="A Slider with tick marks." FontSize="18" />
+    <StackPanel Orientation="Horizontal">
+      <Slider x:Name="Slider3"
+              Width="290"
+              AutomationProperties.Name="Example with ticks"
+              TickFrequency="20"
+              TickPlacement="Outside" />
+    </StackPanel>
+    <TextBlock x:Name="Slider3Output" Text="{x:Bind Slider3.Value, Mode=OneWay}" />
+    <RadioButtons x:Name="SnapsToRadioButtons" Header="Snaps to:" SelectedIndex="0">
+      <x:String>StepValues</x:String>
+      <x:String>Ticks</x:String>
+    </RadioButtons>
+  </StackPanel>
+
+  <StackPanel x:Name="SliderExample4" Spacing="8">
+    <TextBlock Text="A vertical slider with range and tick marks specified." FontSize="18" />
+    <StackPanel Orientation="Horizontal">
+      <Slider x:Name="Slider4"
+              Width="100"
+              Height="100"
+              AutomationProperties.Name="Vertical example"
+              Maximum="50"
+              Minimum="-50"
+              Orientation="Vertical"
+              TickFrequency="10"
+              TickPlacement="Outside" />
+    </StackPanel>
+    <TextBlock x:Name="Slider4Output" Text="{x:Bind Slider4.Value, Mode=OneWay}" />
+  </StackPanel>
 </StackPanel>
