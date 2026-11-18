@@ -1,6 +1,6 @@
 //! Shell navigation is independent of document edits and runtime inspection.
 //! Hiding a pane keeps its control, selection, pending text and scroll state alive.
-use super::{DesignerWorkspace, OutlineCommand, OutlineMode};
+use super::{DesignerWorkspace, OutlineCommand, OutlineMode, RuntimeOutlineMode};
 use ferroui_base::input::{InputElement, Key, KeyModifiers};
 use ferroui_controls::{Border, Button, Control, Grid, GridLength, MenuItem, TextBlock};
 use ferroui_designer_tools::{Alignment, Axis};
@@ -460,15 +460,15 @@ impl DesignerWorkspace {
 
     pub(super) fn refresh_shell(&self) {
         for (name, mode) in [
-            ("SourceMode", OutlineMode::Source),
-            ("VisualMode", OutlineMode::Visual),
-            ("LogicalMode", OutlineMode::Logical),
-            ("CombinedMode", OutlineMode::Combined),
+            ("SourceMode", None),
+            ("VisualMode", Some(RuntimeOutlineMode::Visual)),
+            ("LogicalMode", Some(RuntimeOutlineMode::Logical)),
+            ("CombinedMode", Some(RuntimeOutlineMode::Combined)),
         ] {
             self.root
                 .get_control::<Button>(name)
                 .classes()
-                .set("active", mode == self.outline_mode());
+                .set("active", mode == self.runtime_outline_mode());
         }
         let selecting = self.surface.is_hit_test_visible();
         self.root

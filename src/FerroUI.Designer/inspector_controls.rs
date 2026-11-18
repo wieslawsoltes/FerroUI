@@ -561,7 +561,7 @@ struct OutlineSnapshot {
     revision: u64,
     ast: Arc<ferroui_designer_core::Ast>,
     generation: u64,
-    mode: OutlineMode,
+    mode: Option<RuntimeOutlineMode>,
     filter: String,
     scope: Option<NodeId>,
     layer_epoch: u64,
@@ -615,9 +615,7 @@ impl InspectorControls {
         self.outline_snapshot
             .borrow()
             .as_ref()
-            .is_some_and(|snapshot| {
-                snapshot.mode == OutlineMode::Source && snapshot.matches_document(session)
-            })
+            .is_some_and(|snapshot| snapshot.mode.is_none() && snapshot.matches_document(session))
     }
 
     pub fn new(root: &Ref<Control>) -> Self {
@@ -1420,12 +1418,12 @@ impl DesignerWorkspace {
             uri: session.document_uri().to_owned(),
             revision: session.document().revision(),
             ast: session.document().ast_snapshot(),
-            generation: if self.outline_mode.get() == OutlineMode::Source {
+            generation: if self.runtime_outline_mode().is_none() {
                 0
             } else {
                 session.generation()
             },
-            mode: self.outline_mode.get(),
+            mode: self.runtime_outline_mode(),
             scope: session.definition_scope().map(|scope| scope.node),
             layer_epoch: session.layer_view_epoch(),
             scope_epoch: session.definition_scope_epoch(),
@@ -1449,7 +1447,7 @@ impl DesignerWorkspace {
                 self.inspectors.outline.expansion.borrow_mut().clear();
                 self.inspectors.outline.paths.borrow_mut().clear();
             }
-            let entries = if snapshot.mode == OutlineMode::Source {
+            let entries = if snapshot.mode.is_none() {
                 session
                     .document()
                     .ast()
@@ -1503,7 +1501,7 @@ impl DesignerWorkspace {
                     .collect()
             } else {
                 session
-                    .runtime_outline(snapshot.mode.runtime().expect("runtime mode"))
+                    .runtime_outline(snapshot.mode.expect("runtime mode"))
                     .into_iter()
                     .map(|entry| {
                         let row = entry.node;
@@ -1513,15 +1511,23 @@ impl DesignerWorkspace {
                             _ => "Logical",
                         };
                         TreeEntry {
-                        key: format!("runtime:{}", row.inspector_id),
-                        parent: row.parent.map(|id| format!("runtime:{id}")),
-                        label: row.type_name,
-                        name: row.name.unwrap_or_default(),
-                        detail: format!("{} · {membership}", if row.source_id.is_some() { "XAML" } else { "Runtime" }),
-                        source: row.source_id,
-                        runtime: Some(row.inspector_id),
-                        ..Default::default()
-                    }})
+                            key: format!("runtime:{}", row.inspector_id),
+                            parent: row.parent.map(|id| format!("runtime:{id}")),
+                            label: row.type_name,
+                            name: row.name.unwrap_or_default(),
+                            detail: format!(
+                                "{} · {membership}",
+                                if row.source_id.is_some() {
+                                    "XAML"
+                                } else {
+                                    "Runtime"
+                                }
+                            ),
+                            source: row.source_id,
+                            runtime: Some(row.inspector_id),
+                            ..Default::default()
+                        }
+                    })
                     .collect()
             };
             self.inspectors.outline.replace(entries, &snapshot.filter);

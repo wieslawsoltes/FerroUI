@@ -1,6 +1,6 @@
 use crate::{
     DesignGesture, DesignSurface, DesignerSession, PreviewStatus, PropertyEditorContext,
-    PropertyEditorFactory,
+    PropertyEditorFactory, RuntimeOutlineMode,
 };
 use ferroui_base::input::{InputElement, Key, KeyModifiers};
 use ferroui_base::layout::{HorizontalAlignment, Orientation};
@@ -32,19 +32,6 @@ pub enum OutlineMode {
     Source,
     Visual,
     Logical,
-    Combined,
-}
-
-impl OutlineMode {
-    fn runtime(self) -> Option<crate::RuntimeOutlineMode> {
-        use crate::RuntimeOutlineMode;
-        match self {
-            Self::Source => None,
-            Self::Visual => Some(RuntimeOutlineMode::Visual),
-            Self::Logical => Some(RuntimeOutlineMode::Logical),
-            Self::Combined => Some(RuntimeOutlineMode::Combined),
-        }
-    }
 }
 
 /// A native, embeddable workspace. The host retains the returned `Rc` for the lifetime of the
@@ -70,7 +57,7 @@ pub struct DesignerWorkspace {
     last_revision: Cell<u64>,
     last_selection: RefCell<Vec<NodeId>>,
     last_generation: Cell<u64>,
-    outline_mode: Cell<OutlineMode>,
+    runtime_outline_mode: Cell<Option<RuntimeOutlineMode>>,
     runtime_selection: Cell<Option<u64>>,
     navigation: navigation::NavigationUi,
     guides: guides::GuidesUi,
@@ -151,7 +138,7 @@ impl DesignerWorkspace {
             last_revision: Cell::new(u64::MAX),
             last_selection: RefCell::new(Vec::new()),
             last_generation: Cell::new(u64::MAX),
-            outline_mode: Cell::new(OutlineMode::Source),
+            runtime_outline_mode: Cell::new(None),
             runtime_selection: Cell::new(None),
             navigation: navigation::NavigationUi::default(),
             guides: guides::GuidesUi::default(),
@@ -227,12 +214,29 @@ impl DesignerWorkspace {
         }
         Ok(())
     }
+    /// Returns the outline mode available to existing hosts. Combined uses the visual hierarchy.
     pub fn outline_mode(&self) -> OutlineMode {
-        self.outline_mode.get()
+        match self.runtime_outline_mode() {
+            None => OutlineMode::Source,
+            Some(RuntimeOutlineMode::Visual | RuntimeOutlineMode::Combined) => OutlineMode::Visual,
+            Some(RuntimeOutlineMode::Logical) => OutlineMode::Logical,
+        }
     }
     pub fn set_outline_mode(self: &Rc<Self>, mode: OutlineMode) {
-        self.outline_mode.set(mode);
-        if mode == OutlineMode::Source {
+        self.set_runtime_outline_mode(match mode {
+            OutlineMode::Source => None,
+            OutlineMode::Visual => Some(RuntimeOutlineMode::Visual),
+            OutlineMode::Logical => Some(RuntimeOutlineMode::Logical),
+        });
+    }
+    /// The runtime hierarchy shown by the Outline. Source mode returns `None`.
+    pub fn runtime_outline_mode(&self) -> Option<RuntimeOutlineMode> {
+        self.runtime_outline_mode.get()
+    }
+    /// Select the runtime hierarchy or pass `None` to return to the authored outline.
+    pub fn set_runtime_outline_mode(self: &Rc<Self>, mode: Option<RuntimeOutlineMode>) {
+        self.runtime_outline_mode.set(mode);
+        if mode.is_none() {
             self.runtime_selection.set(None);
         }
         self.rebuild_outline();
@@ -601,7 +605,7 @@ impl DesignerWorkspace {
                 Ok(())
             }
             Action::Combined => {
-                self.set_outline_mode(OutlineMode::Combined);
+                self.set_runtime_outline_mode(Some(RuntimeOutlineMode::Combined));
                 Ok(())
             }
             Action::Play => {
