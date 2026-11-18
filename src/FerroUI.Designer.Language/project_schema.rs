@@ -226,7 +226,7 @@ mod tests {
     use ferroui_designer_project::{Solution, file_uri};
 
     #[test]
-    fn metadata_refresh_is_package_scoped_and_workspace_overrides_win() {
+    fn metadata_refresh_for_nested_packages_is_scoped_and_workspace_overrides_win() {
         let folder = std::env::temp_dir().join(format!("ferroui-schema-{}", std::process::id()));
         let first = folder.join("first");
         let second = folder.join("second");
@@ -270,15 +270,14 @@ mod tests {
 
         let mut service = LanguageService::default();
         service
-            .index_solution(&Solution::discover(&first).unwrap())
-            .unwrap();
-        service
-            .index_solution(&Solution::discover(&second).unwrap())
+            .index_solution(&Solution::discover(&folder).unwrap())
             .unwrap();
         let uri = file_uri(first.join("Card.xaml")).unwrap();
         let elsewhere = file_uri(second.join("Card.xaml")).unwrap();
         let manifest = first.join("Cargo.toml");
-        service.set_project_metadata(&manifest, &[output]).unwrap();
+        service
+            .set_project_metadata(&manifest, std::slice::from_ref(&output))
+            .unwrap();
         let get = |schema: &Schema| {
             schema
                 .type_info("StatusCard", Some("urn:test:controls"))
@@ -300,6 +299,12 @@ mod tests {
         service.set_type_overrides(vec![]);
         service.set_project_metadata(&manifest, &[]).unwrap();
         assert!(get(service.schema_for(&uri)).is_none());
+        service
+            .set_project_metadata(&manifest, std::slice::from_ref(&output))
+            .unwrap();
+        service.remove_solution(&folder);
+        assert!(get(service.schema_for(&uri)).is_none());
+        assert!(service.set_project_metadata(&manifest, &[]).is_err());
         std::fs::remove_dir_all(folder).unwrap();
     }
 }

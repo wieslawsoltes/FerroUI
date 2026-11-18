@@ -39,6 +39,12 @@ pub struct Solution {
     pub projects: Vec<ProjectDescriptor>,
 }
 impl Solution {
+    /// An explicit build can select a nested Cargo package inside the indexed root.
+    /// Cargo workspace members can also have their own project roots.
+    pub fn owns_package_root(&self, root: &Path) -> bool {
+        root.starts_with(&self.root) || self.projects.iter().any(|project| project.root == root)
+    }
+
     /// Cargo is used as the manifest authority, including workspace membership and target paths.
     /// --locked/--offline prevent discovery from changing the dependency graph or downloading code.
     pub fn discover(path: impl AsRef<Path>) -> Result<Self> {

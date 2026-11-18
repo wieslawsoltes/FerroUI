@@ -241,9 +241,8 @@ impl LanguageService {
         require(
             self.workspaces
                 .values()
-                .flat_map(|workspace| &workspace.solution.projects)
-                .any(|project| project.root == root),
-            "Cargo metadata must belong to an indexed package",
+                .any(|workspace| workspace.solution.owns_package_root(&root)),
+            "Cargo metadata must belong to an indexed workspace",
         )?;
         let schema = ProjectSchema::load(&self.schema, &self.overrides, directories)?;
         self.package_schemas.insert(root, schema);
@@ -489,8 +488,7 @@ impl LanguageService {
         self.package_schemas.retain(|root, _| {
             self.workspaces
                 .values()
-                .flat_map(|workspace| &workspace.solution.projects)
-                .any(|project| &project.root == root)
+                .any(|workspace| workspace.solution.owns_package_root(root))
         });
         let retained: BTreeSet<_> = self
             .workspaces
