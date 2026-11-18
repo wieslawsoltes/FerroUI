@@ -38,6 +38,7 @@ impl BitmapTypeConverter {
         }
 
         let base_uri = service_provider_of(context).and_then(|sp| sp.get_context_base_uri());
+        #[cfg(any(unix, windows, target_os = "redox", target_os = "wasi", target_os = "hermit"))]
         if let Some(path) = base_uri.as_ref().filter(|base| base.scheme() == "file")
             .and_then(|base| UriExtensions::ensure_absolute(&uri, Some(base)).ok())
             .and_then(|url| url.to_file_path().ok())
