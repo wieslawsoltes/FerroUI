@@ -1,4 +1,5 @@
 import { strict as assert } from 'node:assert';
+import { randomBytes } from 'node:crypto';
 import { access } from 'node:fs/promises';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
@@ -16,7 +17,7 @@ export async function run(): Promise<void> {
     assert.equal(vscode.workspace.getConfiguration('ferroui.preview').get('path'), '');
     await Promise.all([
         ...['ferroui-xaml-lsp', 'ferroui-designer-preview'].map(name => access(path.join(extension.extensionPath, 'bin', name + suffix))),
-        ...['timeline.js', 'designData.js'].map(name => access(path.join(extension.extensionPath, 'dist', name))),
+        ...['timeline.js', 'designData.js', 'hosted.js'].map(name => access(path.join(extension.extensionPath, 'dist', name))),
     ]);
     const workspace = vscode.workspace.workspaceFolders![0];
     const document = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(workspace.uri, 'SettingsView.xaml'));
@@ -45,6 +46,8 @@ export async function run(): Promise<void> {
         assert.equal(Buffer.from(snapshot.image.png, 'base64').subarray(1, 4).toString(), 'PNG');
         const project = await native.projectInventory(workspace.uri.fsPath);
         assert.ok(project.files.some(file => file.kind === 'rsx' && file.path === 'views.rs'));
+        const { animationQuery } = await native.listenHosted(randomBytes(32).toString('hex'));
+        assert.equal(animationQuery, 'ferroui-design-animation=1', 'The installed relay negotiates native application animations');
         console.log(`Installed FerroUI ${extension.packageJSON.version} passed on VS Code ${vscode.version} (${process.platform}-${process.arch}).`);
     } finally {
         native.dispose();
