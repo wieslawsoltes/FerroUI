@@ -31,7 +31,7 @@ pub enum EasingMode {
     EaseInOut = 2,
 }
 
-ferroui_base::ferro_markup_enum!(EasingMode { EaseOut, EaseIn, EaseInOut }, { namespace: "FerroUI.Animation" });
+ferroui_base::ferro_markup_enum!(EasingMode { EaseOut, EaseIn, EaseInOut }, { namespace: "FerroUI.Controls" });
 
 /// The curve of one of the easing functions, with its parameters.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -149,7 +149,7 @@ pub struct EasingFunctionBase {
 }
 
 ferro_class!(EasingFunctionBase: FerroObject);
-ferro_class_info!(EasingFunctionBase { markup: { namespace: "FerroUI.Animation" } });
+ferro_class_info!(EasingFunctionBase { markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(EasingFunctionBase: FerroObjectImpl);
 
 ferro_properties! { impl EasingFunctionBase {
@@ -240,7 +240,7 @@ pub struct CircleEase {
 }
 
 ferro_class!(CircleEase: EasingFunctionBase);
-ferro_class_info!(CircleEase { new: CircleEase::new, markup: { namespace: "FerroUI.Animation" } });
+ferro_class_info!(CircleEase { new: CircleEase::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(CircleEase: FerroObjectImpl);
 
 impl CircleEase {
@@ -269,7 +269,7 @@ pub struct CubicEase {
 }
 
 ferro_class!(CubicEase: EasingFunctionBase);
-ferro_class_info!(CubicEase { new: CubicEase::new, markup: { namespace: "FerroUI.Animation" } });
+ferro_class_info!(CubicEase { new: CubicEase::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(CubicEase: FerroObjectImpl);
 
 impl CubicEase {
@@ -298,7 +298,7 @@ pub struct QuadraticEase {
 }
 
 ferro_class!(QuadraticEase: EasingFunctionBase);
-ferro_class_info!(QuadraticEase { new: QuadraticEase::new, markup: { namespace: "FerroUI.Animation" } });
+ferro_class_info!(QuadraticEase { new: QuadraticEase::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(QuadraticEase: FerroObjectImpl);
 
 impl QuadraticEase {
@@ -327,7 +327,7 @@ pub struct QuarticEase {
 }
 
 ferro_class!(QuarticEase: EasingFunctionBase);
-ferro_class_info!(QuarticEase { new: QuarticEase::new, markup: { namespace: "FerroUI.Animation" } });
+ferro_class_info!(QuarticEase { new: QuarticEase::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(QuarticEase: FerroObjectImpl);
 
 impl QuarticEase {
@@ -356,7 +356,7 @@ pub struct QuinticEase {
 }
 
 ferro_class!(QuinticEase: EasingFunctionBase);
-ferro_class_info!(QuinticEase { new: QuinticEase::new, markup: { namespace: "FerroUI.Animation" } });
+ferro_class_info!(QuinticEase { new: QuinticEase::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(QuinticEase: FerroObjectImpl);
 
 impl QuinticEase {
@@ -385,7 +385,7 @@ pub struct SineEase {
 }
 
 ferro_class!(SineEase: EasingFunctionBase);
-ferro_class_info!(SineEase { new: SineEase::new, markup: { namespace: "FerroUI.Animation" } });
+ferro_class_info!(SineEase { new: SineEase::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(SineEase: FerroObjectImpl);
 
 impl SineEase {
@@ -414,7 +414,7 @@ pub struct BackEase {
 }
 
 ferro_class!(BackEase: EasingFunctionBase);
-ferro_class_info!(BackEase { new: BackEase::new, markup: { namespace: "FerroUI.Animation" } });
+ferro_class_info!(BackEase { new: BackEase::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(BackEase: FerroObjectImpl);
 
 ferro_properties! { impl BackEase {
@@ -458,7 +458,7 @@ pub struct BounceEase {
 }
 
 ferro_class!(BounceEase: EasingFunctionBase);
-ferro_class_info!(BounceEase { new: BounceEase::new, markup: { namespace: "FerroUI.Animation" } });
+ferro_class_info!(BounceEase { new: BounceEase::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(BounceEase: FerroObjectImpl);
 
 ferro_properties! { impl BounceEase {
@@ -516,7 +516,7 @@ pub struct ElasticEase {
 }
 
 ferro_class!(ElasticEase: EasingFunctionBase);
-ferro_class_info!(ElasticEase { new: ElasticEase::new, markup: { namespace: "FerroUI.Animation" } });
+ferro_class_info!(ElasticEase { new: ElasticEase::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(ElasticEase: FerroObjectImpl);
 
 ferro_properties! { impl ElasticEase {
@@ -573,7 +573,7 @@ pub struct ExponentialEase {
 }
 
 ferro_class!(ExponentialEase: EasingFunctionBase);
-ferro_class_info!(ExponentialEase { new: ExponentialEase::new, markup: { namespace: "FerroUI.Animation" } });
+ferro_class_info!(ExponentialEase { new: ExponentialEase::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(ExponentialEase: FerroObjectImpl);
 
 ferro_properties! { impl ExponentialEase {
@@ -617,7 +617,7 @@ pub struct PowerEase {
 }
 
 ferro_class!(PowerEase: EasingFunctionBase);
-ferro_class_info!(PowerEase { new: PowerEase::new, markup: { namespace: "FerroUI.Animation" } });
+ferro_class_info!(PowerEase { new: PowerEase::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(PowerEase: FerroObjectImpl);
 
 ferro_properties! { impl PowerEase {

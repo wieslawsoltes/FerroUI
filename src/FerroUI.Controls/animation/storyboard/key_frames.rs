@@ -56,7 +56,7 @@ pub struct DoubleKeyFrame {
 }
 
 ferro_class!(DoubleKeyFrame: FerroObject);
-ferro_class_info!(DoubleKeyFrame { markup: { namespace: "FerroUI.Animation" } });
+ferro_class_info!(DoubleKeyFrame { markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(DoubleKeyFrame: FerroObjectImpl);
 
 ferro_properties! { impl DoubleKeyFrame {
@@ -105,7 +105,7 @@ pub struct DiscreteDoubleKeyFrame {
 ferro_class!(DiscreteDoubleKeyFrame: DoubleKeyFrame);
 ferro_class_info!(DiscreteDoubleKeyFrame {
     new: DiscreteDoubleKeyFrame::new,
-    markup: { namespace: "FerroUI.Animation" },
+    markup: { namespace: "FerroUI.Controls" },
 });
 ferro_impl_classes!(DiscreteDoubleKeyFrame: FerroObjectImpl);
 
@@ -136,7 +136,7 @@ pub struct LinearDoubleKeyFrame {
 }
 
 ferro_class!(LinearDoubleKeyFrame: DoubleKeyFrame);
-ferro_class_info!(LinearDoubleKeyFrame { new: LinearDoubleKeyFrame::new, markup: { namespace: "FerroUI.Animation" } });
+ferro_class_info!(LinearDoubleKeyFrame { new: LinearDoubleKeyFrame::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(LinearDoubleKeyFrame: FerroObjectImpl);
 
 impl LinearDoubleKeyFrame {
@@ -166,7 +166,7 @@ pub struct SplineDoubleKeyFrame {
 }
 
 ferro_class!(SplineDoubleKeyFrame: DoubleKeyFrame);
-ferro_class_info!(SplineDoubleKeyFrame { new: SplineDoubleKeyFrame::new, markup: { namespace: "FerroUI.Animation" } });
+ferro_class_info!(SplineDoubleKeyFrame { new: SplineDoubleKeyFrame::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(SplineDoubleKeyFrame: FerroObjectImpl);
 
 ferro_properties! { impl SplineDoubleKeyFrame {
@@ -204,7 +204,7 @@ pub struct EasingDoubleKeyFrame {
 }
 
 ferro_class!(EasingDoubleKeyFrame: DoubleKeyFrame);
-ferro_class_info!(EasingDoubleKeyFrame { new: EasingDoubleKeyFrame::new, markup: { namespace: "FerroUI.Animation" } });
+ferro_class_info!(EasingDoubleKeyFrame { new: EasingDoubleKeyFrame::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(EasingDoubleKeyFrame: FerroObjectImpl);
 
 ferro_properties! { impl EasingDoubleKeyFrame {
@@ -250,7 +250,7 @@ ferro_class!(DoubleAnimationUsingKeyFrames: Timeline);
 ferro_class_info!(DoubleAnimationUsingKeyFrames {
     new: DoubleAnimationUsingKeyFrames::new,
     markup: {
-        namespace: "FerroUI.Animation",
+        namespace: "FerroUI.Controls",
         content: KeyFrames,
         properties: [
             KeyFrames: FerroList<Ref<DoubleKeyFrame>> { get: DoubleAnimationUsingKeyFrames::key_frames },
@@ -300,7 +300,7 @@ pub struct ColorKeyFrame {
 }
 
 ferro_class!(ColorKeyFrame: FerroObject);
-ferro_class_info!(ColorKeyFrame { markup: { namespace: "FerroUI.Animation" } });
+ferro_class_info!(ColorKeyFrame { markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(ColorKeyFrame: FerroObjectImpl);
 
 ferro_properties! { impl ColorKeyFrame {
@@ -349,7 +349,7 @@ pub struct DiscreteColorKeyFrame {
 ferro_class!(DiscreteColorKeyFrame: ColorKeyFrame);
 ferro_class_info!(DiscreteColorKeyFrame {
     new: DiscreteColorKeyFrame::new,
-    markup: { namespace: "FerroUI.Animation" },
+    markup: { namespace: "FerroUI.Controls" },
 });
 ferro_impl_classes!(DiscreteColorKeyFrame: FerroObjectImpl);
 
@@ -380,7 +380,7 @@ pub struct LinearColorKeyFrame {
 }
 
 ferro_class!(LinearColorKeyFrame: ColorKeyFrame);
-ferro_class_info!(LinearColorKeyFrame { new: LinearColorKeyFrame::new, markup: { namespace: "FerroUI.Animation" } });
+ferro_class_info!(LinearColorKeyFrame { new: LinearColorKeyFrame::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(LinearColorKeyFrame: FerroObjectImpl);
 
 impl LinearColorKeyFrame {
@@ -410,7 +410,7 @@ pub struct SplineColorKeyFrame {
 }
 
 ferro_class!(SplineColorKeyFrame: ColorKeyFrame);
-ferro_class_info!(SplineColorKeyFrame { new: SplineColorKeyFrame::new, markup: { namespace: "FerroUI.Animation" } });
+ferro_class_info!(SplineColorKeyFrame { new: SplineColorKeyFrame::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(SplineColorKeyFrame: FerroObjectImpl);
 
 ferro_properties! { impl SplineColorKeyFrame {
@@ -448,7 +448,7 @@ pub struct EasingColorKeyFrame {
 }
 
 ferro_class!(EasingColorKeyFrame: ColorKeyFrame);
-ferro_class_info!(EasingColorKeyFrame { new: EasingColorKeyFrame::new, markup: { namespace: "FerroUI.Animation" } });
+ferro_class_info!(EasingColorKeyFrame { new: EasingColorKeyFrame::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(EasingColorKeyFrame: FerroObjectImpl);
 
 ferro_properties! { impl EasingColorKeyFrame {
@@ -494,7 +494,7 @@ ferro_class!(ColorAnimationUsingKeyFrames: Timeline);
 ferro_class_info!(ColorAnimationUsingKeyFrames {
     new: ColorAnimationUsingKeyFrames::new,
     markup: {
-        namespace: "FerroUI.Animation",
+        namespace: "FerroUI.Controls",
         content: KeyFrames,
         properties: [
             KeyFrames: FerroList<Ref<ColorKeyFrame>> { get: ColorAnimationUsingKeyFrames::key_frames },
@@ -544,7 +544,7 @@ pub struct PointKeyFrame {
 }
 
 ferro_class!(PointKeyFrame: FerroObject);
-ferro_class_info!(PointKeyFrame { markup: { namespace: "FerroUI.Animation" } });
+ferro_class_info!(PointKeyFrame { markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(PointKeyFrame: FerroObjectImpl);
 
 ferro_properties! { impl PointKeyFrame {
@@ -593,7 +593,7 @@ pub struct DiscretePointKeyFrame {
 ferro_class!(DiscretePointKeyFrame: PointKeyFrame);
 ferro_class_info!(DiscretePointKeyFrame {
     new: DiscretePointKeyFrame::new,
-    markup: { namespace: "FerroUI.Animation" },
+    markup: { namespace: "FerroUI.Controls" },
 });
 ferro_impl_classes!(DiscretePointKeyFrame: FerroObjectImpl);
 
@@ -624,7 +624,7 @@ pub struct LinearPointKeyFrame {
 }
 
 ferro_class!(LinearPointKeyFrame: PointKeyFrame);
-ferro_class_info!(LinearPointKeyFrame { new: LinearPointKeyFrame::new, markup: { namespace: "FerroUI.Animation" } });
+ferro_class_info!(LinearPointKeyFrame { new: LinearPointKeyFrame::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(LinearPointKeyFrame: FerroObjectImpl);
 
 impl LinearPointKeyFrame {
@@ -654,7 +654,7 @@ pub struct SplinePointKeyFrame {
 }
 
 ferro_class!(SplinePointKeyFrame: PointKeyFrame);
-ferro_class_info!(SplinePointKeyFrame { new: SplinePointKeyFrame::new, markup: { namespace: "FerroUI.Animation" } });
+ferro_class_info!(SplinePointKeyFrame { new: SplinePointKeyFrame::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(SplinePointKeyFrame: FerroObjectImpl);
 
 ferro_properties! { impl SplinePointKeyFrame {
@@ -692,7 +692,7 @@ pub struct EasingPointKeyFrame {
 }
 
 ferro_class!(EasingPointKeyFrame: PointKeyFrame);
-ferro_class_info!(EasingPointKeyFrame { new: EasingPointKeyFrame::new, markup: { namespace: "FerroUI.Animation" } });
+ferro_class_info!(EasingPointKeyFrame { new: EasingPointKeyFrame::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(EasingPointKeyFrame: FerroObjectImpl);
 
 ferro_properties! { impl EasingPointKeyFrame {
@@ -738,7 +738,7 @@ ferro_class!(PointAnimationUsingKeyFrames: Timeline);
 ferro_class_info!(PointAnimationUsingKeyFrames {
     new: PointAnimationUsingKeyFrames::new,
     markup: {
-        namespace: "FerroUI.Animation",
+        namespace: "FerroUI.Controls",
         content: KeyFrames,
         properties: [
             KeyFrames: FerroList<Ref<PointKeyFrame>> { get: PointAnimationUsingKeyFrames::key_frames },
@@ -791,7 +791,7 @@ pub struct ObjectKeyFrame {
 }
 
 ferro_class!(ObjectKeyFrame: FerroObject);
-ferro_class_info!(ObjectKeyFrame { markup: { namespace: "FerroUI.Animation" } });
+ferro_class_info!(ObjectKeyFrame { markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(ObjectKeyFrame: FerroObjectImpl);
 
 ferro_properties! { impl ObjectKeyFrame {
@@ -840,7 +840,7 @@ pub struct DiscreteObjectKeyFrame {
 ferro_class!(DiscreteObjectKeyFrame: ObjectKeyFrame);
 ferro_class_info!(DiscreteObjectKeyFrame {
     new: DiscreteObjectKeyFrame::new,
-    markup: { namespace: "FerroUI.Animation" },
+    markup: { namespace: "FerroUI.Controls" },
 });
 ferro_impl_classes!(DiscreteObjectKeyFrame: FerroObjectImpl);
 
@@ -876,7 +876,7 @@ ferro_class!(ObjectAnimationUsingKeyFrames: Timeline);
 ferro_class_info!(ObjectAnimationUsingKeyFrames {
     new: ObjectAnimationUsingKeyFrames::new,
     markup: {
-        namespace: "FerroUI.Animation",
+        namespace: "FerroUI.Controls",
         content: KeyFrames,
         properties: [
             KeyFrames: FerroList<Ref<ObjectKeyFrame>> { get: ObjectAnimationUsingKeyFrames::key_frames },

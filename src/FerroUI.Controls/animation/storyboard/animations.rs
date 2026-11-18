@@ -23,7 +23,7 @@ pub struct DoubleAnimation {
 }
 
 ferro_class!(DoubleAnimation: Timeline);
-ferro_class_info!(DoubleAnimation { new: DoubleAnimation::new, markup: { namespace: "FerroUI.Animation" } });
+ferro_class_info!(DoubleAnimation { new: DoubleAnimation::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(DoubleAnimation: FerroObjectImpl);
 
 ferro_properties! { impl DoubleAnimation {
@@ -119,7 +119,7 @@ pub struct ColorAnimation {
 }
 
 ferro_class!(ColorAnimation: Timeline);
-ferro_class_info!(ColorAnimation { new: ColorAnimation::new, markup: { namespace: "FerroUI.Animation" } });
+ferro_class_info!(ColorAnimation { new: ColorAnimation::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(ColorAnimation: FerroObjectImpl);
 
 ferro_properties! { impl ColorAnimation {
@@ -215,7 +215,7 @@ pub struct PointAnimation {
 }
 
 ferro_class!(PointAnimation: Timeline);
-ferro_class_info!(PointAnimation { new: PointAnimation::new, markup: { namespace: "FerroUI.Animation" } });
+ferro_class_info!(PointAnimation { new: PointAnimation::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(PointAnimation: FerroObjectImpl);
 
 ferro_properties! { impl PointAnimation {

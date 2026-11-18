@@ -62,7 +62,7 @@ ferro_class!(Storyboard: Timeline);
 ferro_class_info!(Storyboard {
     new: Storyboard::new,
     markup: {
-        namespace: "FerroUI.Animation",
+        namespace: "FerroUI.Controls",
         content: Children,
         properties: [
             Children: FerroList<Ref<Timeline>> { get: Storyboard::children },

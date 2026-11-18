@@ -372,25 +372,28 @@ implementations, so they also fit FerroUI's transitions), `RepeatBehavior`, `Fil
   points of an animation from, to or by a value, and the segment and eased progress of the key
   frames (discrete, linear, spline, easing). The storyboard classes of `ferroui-controls` read
   them with the time of their clock.
-- **The storyboard classes (second step of VSM-3, done).** `ferroui_controls::animation`
-  (markup namespace `FerroUI.Animation`) has `Timeline`, `Storyboard` (children, the attached
-  `TargetName` and `TargetProperty`, `SetTarget`, `Begin`, `Stop`, `Pause`, `Resume`, `Seek`,
-  `SeekAlignedToLastTick`, `SkipToFill`, `GetCurrentState`, `GetCurrentTime`, `Completed`),
-  `DoubleAnimation`, `ColorAnimation`, `PointAnimation`, the `Double`, `Color` and `Point` key
-  frame animations with their `Discrete`, `Linear`, `Spline` and `Easing` key frames,
+- **The storyboard classes (second step of VSM-3, done).** `ferroui_controls::animation` (markup
+  namespace `FerroUI.Controls`, as the other WinUI additions of the crate: the framework XML
+  namespace maps the `FerroUI.Animation` namespace to the types of `ferroui-base` only) has
+  `Timeline`, `Storyboard` (children, the attached `TargetName` and `TargetProperty`,
+  `SetTarget`, `Begin`, `Stop`, `Pause`, `Resume`, `Seek`, `SeekAlignedToLastTick`,
+  `SkipToFill`, `GetCurrentState`, `GetCurrentTime`, `Completed`), `DoubleAnimation`,
+  `ColorAnimation`, `PointAnimation`, the `Double`, `Color` and `Point` key frame animations
+  with their `Discrete`, `Linear`, `Spline` and `Easing` key frames,
   `ObjectAnimationUsingKeyFrames` with `DiscreteObjectKeyFrame`, `EasingFunctionBase` with
   `EasingMode` and the eleven easing functions (`to_easing` hands one to the transitions of the
   framework), and `VisualState.Storyboard` (the content property of a state: it begins when the
   state is entered and stops when it is left; `GoToState` to the current state without
   transitions skips it to its fill). The markup types `Duration`, `RepeatBehavior` and
-  `FillBehavior` of `ferroui-base` parse as WinUI writes them (`Automatic`, `Forever`, `0:0:0.25`;
-  `2x`). Deviations: a storyboard applies the values of its start at once when it begins and of
-  the time it seeks to at once (WinUI on the next tick); `TargetName` is looked up in the
-  elements of the template or the name scope of the document of the element given to
-  `Storyboard::set_target_scope` (the visual states set it), not in the name scope the storyboard
-  was loaded in; key frame values written as text are converted to the type of the property when
-  the animation begins (the compiler does not type them yet); colours interpolate channel by
-  channel in sRGB, as WinUI does. Tests: `ferroui-controls`, `animation/storyboard/storyboard_tests.rs`.
+  `FillBehavior` of `ferroui-base` parse as WinUI writes them (`Automatic`, `Forever`,
+  `0:0:0.25`; `2x`). Deviations: a storyboard applies the values of its start at once when it
+  begins and of the time it seeks to at once (WinUI on the next tick); `TargetName` is looked up
+  in the elements of the template or the name scope of the document of the element given to
+  `Storyboard::set_target_scope` (the visual states set it), not in the name scope the
+  storyboard was loaded in; key frame values written as text are converted to the type of the
+  property when the animation begins (the compiler does not type them yet); colours interpolate
+  channel by channel in sRGB, as WinUI does. Tests: `ferroui-controls`,
+  `animation/storyboard/storyboard_tests.rs`.
 - **Not in scope:** theme animations (`PointerDownThemeAnimation` and the others, theme G-22),
   `Storyboard.TargetName` across namescopes, dependent animation throttling
   (`EnableDependentAnimation` is accepted and has no effect: FerroUI animates every property on the
