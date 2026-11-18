@@ -1,73 +1,52 @@
-//! Reuse the loaded framework animation objects for values owned by native animators.
-use crate::runtime::RuntimePreview;
-use crate::PreviewStatus;
-use ferroui_base::animation::{Animatable, Animation, IAnimation, IClock, PlayState, SignedDuration};
-use ferroui_base::controls::ResourceDictionary;
-use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
-use ferroui_base::styling::{IStyle, StyleBase, Styles};
-use ferroui_base::{BoxedValue, FerroObject, Ref, StyledElement};
-use ferroui_designer_animation::{AnimationProgram, Repeat, Timeline};
+//! Bind Designer Studio's authored nodes to the shared native animation preview.
+use crate::{runtime::RuntimePreview, PreviewStatus};
+use ferroui_base::animation::Animatable;
+use ferroui_base::StyledElement;
+use ferroui_designer_animation::native::{
+    animation_timing, validate_animation_target, NativePlayback, NativeProgramIndex,
+    NativeSourceIndex,
+};
+use ferroui_designer_animation::{AnimationProgram, Timeline};
 use ferroui_designer_core::{Document, NodeId};
-use ferroui_markup_xaml::diagnostics::XamlSourceInfo;
-use ferroui_markup_xaml::FromXamlObject;
-use std::cell::Cell;
-use std::collections::{BTreeMap, BTreeSet};
-use std::rc::Rc;
+use std::collections::BTreeSet;
 
 #[derive(Default)]
 pub(crate) struct NativeAnimations {
-    objects: BTreeMap<NodeId, Rc<dyn IAnimation>>,
+    index: NativeProgramIndex,
     factory_programs: BTreeSet<NodeId>,
     active: Vec<NodeId>,
-    runs: Vec<NativeRun>,
-    time: f64,
+    playback: NativePlayback,
 }
-struct NativeRun {
-    clock: Rc<NativeClock>,
-    subscription: Rc<dyn IDisposable>,
-    complete: Rc<Cell<bool>>,
-}
-impl Drop for NativeRun {
-    fn drop(&mut self) {
-        self.clock.state.set(PlayState::Stop);
-        self.subscription.dispose();
-    }
-}
-impl Drop for NativeAnimations {
-    fn drop(&mut self) {
-        self.stop();
-    }
-}
+
 impl NativeAnimations {
     pub(crate) fn stop(&mut self) {
-        self.runs.clear();
+        self.playback.stop();
         self.active.clear();
-        self.time = 0.0;
     }
+
     pub(crate) fn clear(&mut self) {
         self.stop();
-        self.objects.clear();
+        self.index = NativeProgramIndex::default();
         self.factory_programs.clear();
     }
+
     pub(crate) fn uses_factory_target(&self, id: NodeId) -> bool {
         self.factory_programs.contains(&id)
     }
+
+    pub(crate) fn uses_custom_animators(&self, id: NodeId) -> bool {
+        self.index.uses_custom_animators(id)
+    }
+
     pub(crate) fn duration(&self, id: NodeId) -> Option<f64> {
-        let animation = self.objects.get(&id)?.as_object()?.cast::<Animation>()?;
-        let value = animation.duration().total_seconds();
+        let value = self.index.animation(id)?.duration().total_seconds();
         (value.is_finite() && value > 0.0).then_some(value)
     }
+
     pub(crate) fn timing(&self, id: NodeId) -> Option<Timeline> {
-        let animation = self.objects.get(&id)?.as_object()?.cast::<Animation>()?;
-        let mut timing = Timeline::new(animation.duration().total_seconds()).ok()?;
-        timing.delay = animation.delay().total_seconds();
-        timing.delay_between_iterations = animation.delay_between_iterations().total_seconds();
-        timing.speed_ratio = animation.speed_ratio();
-        let count = animation.iteration_count();
-        timing.repeat = if count.is_infinite() { Repeat::Infinite } else { Repeat::Count(count.value()) };
-        timing.validate().ok()?;
-        Some(timing)
+        animation_timing(self.index.animation(id)?)
     }
+
     pub(crate) fn refresh(
         &mut self,
         document: &Document,
@@ -75,192 +54,20 @@ impl NativeAnimations {
         programs: &[AnimationProgram],
     ) {
         self.clear();
-        if !matches!(preview.status, PreviewStatus::Ready { revision } if revision == document.revision())
+        if programs.is_empty()
+            || !matches!(preview.status, PreviewStatus::Ready { revision } if revision == document.revision())
         {
             return;
         }
         let Some(root) = preview.root() else { return };
-        let root_value: BoxedValue = Rc::new(root.clone());
-        let source_uris = XamlSourceInfo::get_xaml_source_info(&root_value)
-            .and_then(|provenance| provenance.source_uri().cloned())
-            .map(|uri| vec![uri])
-            .unwrap_or_else(|| {
-                // SourceInfo treats the loader's Document argument as a file path, even
-                // when a host identifies that document with an absolute resource URI.
-                // Debug reload canonicalizes URI authority before supplying Document;
-                // direct release factories can retain the original spelling. Compare
-                // only those two exact identities, preserving path case and provenance.
-                let canonical = ferroui_base::utilities::UriRef::parse_absolute(preview.uri())
-                    .map(String::from)
-                    .unwrap_or_else(|_| preview.uri().to_owned());
-                [preview.uri(), canonical.as_str()]
-                    .into_iter()
-                    .filter_map(|document| {
-                        XamlSourceInfo::new(1, 1, Some(document))
-                            .source_uri()
-                            .cloned()
-                    })
-                    .collect::<Vec<_>>()
-            });
-        let mut positions = BTreeMap::<usize, Vec<(usize, NodeId)>>::new();
-        let mut previous = 0;
-        let (mut line, mut column) = (1, 1);
-        let mut sorted = programs.iter().collect::<Vec<_>>();
-        sorted.sort_by_key(|program| program.span.start);
-        for program in sorted {
-            for character in document.valid_source()[previous..program.span.start].chars() {
-                if character == '\n' {
-                    line += 1;
-                    column = 1;
-                } else {
-                    column += 1;
-                }
-            }
-            previous = program.span.start;
-            positions
-                .entry(line)
-                .or_default()
-                .push((column, program.id));
-        }
-        let resource_names = programs
-            .iter()
-            .filter_map(|program| {
-                document
-                    .ast()
-                    .node(program.id)?
-                    .attributes
-                    .iter()
-                    .find(|attribute| {
-                        attribute.namespace_uri.as_deref()
-                            == Some("http://schemas.microsoft.com/winfx/2006/xaml")
-                            && attribute.name.rsplit(':').next() == Some("Key")
-                    })
-                    .map(|attribute| attribute.value.clone())
-            })
-            .collect::<BTreeSet<_>>();
-        let mut styles = Vec::<Rc<dyn IStyle>>::new();
-        let mut dictionaries = Vec::<Ref<ResourceDictionary>>::new();
-        let mut controls = vec![root.upcast::<StyledElement>()];
-        controls.extend(
+        let source = NativeSourceIndex::new(document, &root, preview.uri());
+        let controls = std::iter::once(root.upcast::<StyledElement>()).chain(
             document
                 .ast()
                 .elements()
                 .filter_map(|node| preview.visual(node.id)?.cast::<StyledElement>()),
         );
-        let mut seen = BTreeSet::new();
-        for control in controls {
-            if seen.insert(&*control as *const StyledElement as usize) {
-                styles.extend(control.styles().snapshot().iter().cloned());
-                dictionaries.push(control.resources());
-                dictionaries.push(control.styles().resources());
-                if let Some(theme) = control.theme() {
-                    styles.push(theme.into());
-                }
-            }
-        }
-        let mut animations = Vec::<(Rc<dyn IAnimation>, Option<XamlSourceInfo>)>::new();
-        seen.clear();
-        while let Some(style) = styles.pop() {
-            if let Some(object) = style.as_object() {
-                if !seen.insert(object as *const FerroObject as usize) {
-                    continue;
-                }
-                if let Some(base) = object.downcast_ref::<StyleBase>() {
-                    animations.extend(
-                        base.animations()
-                            .snapshot()
-                            .iter()
-                            .map(|animation| (animation.clone(), None)),
-                    );
-                    dictionaries.push(base.resources());
-                } else if let Some(collection) = object.downcast_ref::<Styles>() {
-                    dictionaries.push(collection.resources());
-                }
-            }
-            styles.extend(style.children().iter().cloned());
-        }
-        seen.clear();
-        while let Some(dictionary) = dictionaries.pop() {
-            if !seen.insert(&*dictionary as *const ResourceDictionary as usize) {
-                continue;
-            }
-            // Materialize only animation resource keys authored in this document.
-            for key in dictionary.keys().into_iter().filter(|key| {
-                key.as_str()
-                    .is_some_and(|name| resource_names.contains(name))
-            }) {
-                let source_info = XamlSourceInfo::get_xaml_source_info_for_key(
-                    &(dictionary.clone().into()),
-                    key.clone(),
-                );
-                // A deferred resource that fails to build reports its error to the error scope
-                // and is left out, without unwinding (#567).
-                // Boundary (#567): the builder runs constructors of the previewed application,
-                // whose panic leaves the key out too; isolating them needs a build that unwinds
-                // (`dev`, `release` or `dist-unwind` profile).
-                let value = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                    ferroui_markup_xaml::xaml_error_scope::with_xaml_errors(|| Ok(dictionary.get(&key)))
-                        .ok()
-                        .flatten()
-                }))
-                .ok()
-                .flatten();
-                if let Some(value) = value {
-                    if let Some(animation) = Ref::<Animation>::from_xaml_object(&value) {
-                        animations.push((animation.into(), source_info));
-                    } else if let Some(animation) = value.downcast_ref::<Rc<dyn IAnimation>>() {
-                        animations.push((animation.clone(), source_info));
-                    }
-                }
-            }
-            for provider in dictionary.merged_dictionaries().snapshot().iter() {
-                if let Some(dictionary) = provider
-                    .as_object()
-                    .and_then(|object| object.downcast_ref::<ResourceDictionary>())
-                {
-                    dictionaries.push(dictionary.to_ref());
-                }
-            }
-            for (_, provider) in dictionary.theme_dictionaries_snapshot() {
-                if let Some(dictionary) = provider
-                    .as_object()
-                    .and_then(|object| object.downcast_ref::<ResourceDictionary>())
-                {
-                    dictionaries.push(dictionary.to_ref());
-                }
-            }
-        }
-        for (animation, keyed_info) in animations {
-            let Some(object) = animation.as_object() else {
-                continue;
-            };
-            let value: BoxedValue = Rc::new(object);
-            let Some(info) = XamlSourceInfo::get_xaml_source_info(&value).or(keyed_info) else {
-                continue;
-            };
-            if !info
-                .source_uri()
-                .is_some_and(|uri| source_uris.contains(uri))
-            {
-                continue;
-            }
-            let Some(candidates) = positions.get(&(info.line_number().max(1) as usize)) else {
-                continue;
-            };
-            let column = info.line_position().max(1) as usize;
-            let Some((distance, id)) = candidates
-                .iter()
-                .map(|(expected, id)| (expected.abs_diff(column), *id))
-                .min()
-            else {
-                continue;
-            };
-            // The parser may point at '<' or at the first name character. Never bind a
-            // different source program merely because it is on the same line.
-            if distance <= 2 {
-                self.objects.entry(id).or_insert(animation);
-            }
-        }
+        self.index = NativeProgramIndex::discover(document, &source, programs, controls);
         if document
             .ast()
             .node(document.ast().root())
@@ -272,166 +79,78 @@ impl NativeAnimations {
                     .filter(|program| {
                         program.style.is_none()
                             && program.targets.is_empty()
-                            && self.objects.contains_key(&program.id)
+                            && self.index.animation(program.id).is_some()
                     })
                     .map(|program| program.id),
             );
         }
     }
+
     pub(crate) fn seek(
         &mut self,
         programs: &[AnimationProgram],
         preview: &RuntimePreview,
         elapsed: f64,
     ) -> Result<(), String> {
-        validate_time(elapsed)?;
-        let mut pending = Vec::new();
-        for program in programs {
-            if program.targets.is_empty() && !self.factory_programs.contains(&program.id) {
-                continue;
-            }
-            let animation = self.objects.get(&program.id).ok_or_else(|| format!("Native program '{}' is not available in the accepted preview; load its defining style/resource and select preview targets", program.name))?.as_object().and_then(|animation| animation.cast::<Animation>()).ok_or("The source program has no preview-capable native Animation object")?;
-            if program.targets.is_empty() && self.factory_programs.contains(&program.id) {
-                let target = preview
-                    .root()
-                    .ok_or("The resource preview factory has no live root")?
-                    .upcast::<Animatable>();
-                for keyframe in animation.children().snapshot().iter() {
-                    for setter in keyframe.setters().snapshot().iter() {
-                        let property = setter
-                            .property()
-                            .ok_or("Native animation Setter has no target property")?;
-                        if !property.is_attached()
-                            && !property.owner_type().is_assignable_from(target.get_type())
-                            && !ferroui_base::media::Transform::TYPE
-                                .is_assignable_from(property.owner_type())
-                        {
-                            return Err(format!("Resource program '{}' targets {}, which is incompatible with factory preview root {}; return a compatible control from the resource factory", program.name, property, target.get_type()));
-                        }
-                    }
-                }
-                pending.push((animation.clone(), target));
-            }
-            for target in &program.targets {
-                let visual = preview
-                    .visual(*target)
-                    .ok_or("Native animation target was removed")?;
-                let target = visual
-                    .cast::<Animatable>()
-                    .ok_or("Target is not animatable")?;
-                pending.push((animation.clone(), target));
-            }
-        }
-        if pending.is_empty() {
-            return Err("Choose live preview targets for this animation program".into());
-        }
-        self.stop();
-        let mut runs = Vec::new();
-        for (animation, target) in pending {
-            let clock = Rc::new(NativeClock::default());
-            let complete = Rc::new(Cell::new(false));
-            let completed = complete.clone();
-            let applied = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                animation.apply_for_preview(
-                    &target,
-                    Some(clock.clone()),
-                    Some(Rc::new(move || completed.set(true))),
-                )
-            }));
-            let subscription = applied.map_err(|payload| {
-                format!(
-                    "Native animation rejected the program: {}",
-                    panic_message(payload)
-                )
-            })?;
-            runs.push(NativeRun {
-                clock,
-                subscription,
-                complete,
-            });
-        }
-        pulse(&runs, 0.0)?;
-        pulse(&runs, elapsed)?;
-        self.active = programs.iter().map(|program| program.id).collect();
-        self.runs = runs;
-        self.time = elapsed;
-        Ok(())
+        self.restart(programs, preview, elapsed).map(|_| ())
     }
+
     pub(crate) fn advance_to(
         &mut self,
         programs: &[AnimationProgram],
         preview: &RuntimePreview,
         elapsed: f64,
     ) -> Result<bool, String> {
-        validate_time(elapsed)?;
-        let ids = programs
+        if !self
+            .active
             .iter()
-            .map(|program| program.id)
-            .collect::<Vec<_>>();
-        if self.active != ids || self.runs.is_empty() || elapsed < self.time {
-            self.seek(programs, preview, elapsed)?;
-        } else {
-            if let Err(error) = pulse(&self.runs, elapsed) {
-                self.stop();
-                return Err(error);
+            .copied()
+            .eq(programs.iter().map(|program| program.id))
+            || !self.playback.is_active()
+            || elapsed < self.playback.elapsed()
+        {
+            return self.restart(programs, preview, elapsed);
+        }
+        self.playback.advance_to(elapsed)
+    }
+
+    fn restart(
+        &mut self,
+        programs: &[AnimationProgram],
+        preview: &RuntimePreview,
+        elapsed: f64,
+    ) -> Result<bool, String> {
+        let mut bindings = Vec::new();
+        for program in programs {
+            let uses_root = program.targets.is_empty() && self.uses_factory_target(program.id);
+            if program.targets.is_empty() && !uses_root {
+                continue;
             }
-            self.time = elapsed;
+            let animation = self.index.animation(program.id).ok_or_else(|| {
+                format!(
+                    "Native program '{}' is not available in the accepted preview",
+                    program.name
+                )
+            })?;
+            if uses_root {
+                let target = preview
+                    .root()
+                    .ok_or("The resource preview factory has no live root")?
+                    .upcast::<Animatable>();
+                validate_animation_target(animation, &target)
+                    .map_err(|error| format!("Resource program '{}': {error}", program.name))?;
+                bindings.push((animation.clone(), target));
+            }
+            for id in &program.targets {
+                let target = preview
+                    .visual(*id)
+                    .and_then(|visual| visual.cast::<Animatable>())
+                    .ok_or("The native animation target is no longer available")?;
+                bindings.push((animation.clone(), target));
+            }
         }
-        Ok(self.runs.iter().all(|run| run.complete.get()))
-    }
-}
-fn pulse(runs: &[NativeRun], seconds: f64) -> Result<(), String> {
-    // Boundary (#567): a frame runs the interpolation of the animators and the property
-    // changed handlers of the previewed application; the animators validate on apply, and a
-    // timing error of a frame is an observable error, not a panic. Isolating the application
-    // needs a build that unwinds (`dev`, `release` or `dist-unwind` profile).
-    std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-        for run in runs {
-            run.clock.subject.on_next(SignedDuration::from_seconds(seconds));
-        }
-    }))
-    .map_err(|payload| format!("Native animation frame failed: {}", panic_message(payload)))
-}
-fn validate_time(value: f64) -> Result<(), String> {
-    if value.is_finite() && value >= 0.0 && value * 10_000_000.0 < i64::MAX as f64 {
-        Ok(())
-    } else {
-        Err("Native animation time is outside the clock range".into())
-    }
-}
-fn panic_message(value: Box<dyn std::any::Any + Send>) -> String {
-    value
-        .downcast_ref::<String>()
-        .cloned()
-        .or_else(|| {
-            value
-                .downcast_ref::<&str>()
-                .map(|value| (*value).to_owned())
-        })
-        .unwrap_or_else(|| "runtime callback failed".into())
-}
-struct NativeClock {
-    subject: LightweightSubject<SignedDuration>,
-    state: Cell<PlayState>,
-}
-impl Default for NativeClock {
-    fn default() -> Self {
-        Self {
-            subject: LightweightSubject::new(),
-            state: Cell::new(PlayState::Run),
-        }
-    }
-}
-impl IObservable<SignedDuration> for NativeClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
-        self.subject.subscribe(observer)
-    }
-}
-impl IClock for NativeClock {
-    fn play_state(&self) -> PlayState {
-        self.state.get()
-    }
-    fn set_play_state(&self, value: PlayState) {
-        self.state.set(value);
+        let complete = self.playback.seek(bindings, elapsed)?;
+        self.active = programs.iter().map(|program| program.id).collect();
+        Ok(complete)
     }
 }

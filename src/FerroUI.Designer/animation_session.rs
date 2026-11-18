@@ -310,10 +310,15 @@ impl DesignerSession {
             .find(|program| Some(program.id) == self.animation.active && self.requires_native_animation(program))
             .cloned()
         {
+            let elapsed = if self.seeks_animation_elapsed(&program) {
+                time
+            } else {
+                self.animation.compiled.elapsed_at_playhead(time).map_err(|error| error.to_string())?
+            };
             self.preview.clear_animation();
             self.animation
                 .native
-                .seek(&[program], &self.preview, time)?;
+                .seek(&[program], &self.preview, elapsed)?;
             self.animation
                 .player
                 .seek(time)
@@ -364,7 +369,7 @@ impl DesignerSession {
             return Err("The authored animation is unavailable in the current native preview".into());
         }
         if let Some(time) = time.or_else(|| self.animation.play_all.then_some(0.0)) {
-            let elapsed = if from_playhead && !native {
+            let elapsed = if from_playhead && !self.seeks_animation_elapsed(program) {
                 self.animation.compiled.elapsed_at_playhead(time).map_err(|error| error.to_string())?
             } else {
                 time
@@ -1178,7 +1183,7 @@ impl DesignerSession {
     }
 
     fn animation_timing(&self, program: &AnimationProgram) -> Timeline {
-        if self.requires_native_animation(program) {
+        if self.seeks_animation_elapsed(program) {
             if let Some(clock) = self.animation.native.timing(program.id) {
                 return clock;
             }

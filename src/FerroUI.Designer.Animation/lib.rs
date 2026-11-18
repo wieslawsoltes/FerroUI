@@ -10,6 +10,9 @@ mod timeline;
 mod value;
 mod xaml;
 
+#[cfg(feature = "native-preview")]
+pub mod native;
+
 pub use easing::Easing;
 pub use interactions::{BehaviorAction, BehaviorModel, BehaviorTrigger};
 pub use keyframe_edits::{KeyframeGroupEdit, KeyframeLocation};

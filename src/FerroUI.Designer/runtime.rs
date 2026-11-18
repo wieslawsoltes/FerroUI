@@ -1,11 +1,10 @@
-use ferroui_base::animation::{IClock, PlayState, SignedDuration};
 use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::data::BindingPriority;
-use ferroui_base::reactive::IDisposable;
-use ferroui_base::reactive::{Disposable, IObservable, IObserver, Subscription};
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{BoxedValue, FerroObject, FerroProperty, Rect, Ref, StyledElement, Visual, WeakRef};
 use ferroui_controls::{ContentControl, Control};
 use ferroui_designer_animation::{AnimationValue, Sample};
+use ferroui_designer_animation::native::FrozenPreviewClock;
 use ferroui_designer_core::{Document, NodeId};
 use ferroui_inspect::{Inspector, TreeKind};
 use ferroui_markup_xaml::diagnostics::XamlSourceInfo;
@@ -103,7 +102,7 @@ impl RuntimePreview {
         }
         options.configuration.design_mode = true;
         options.configuration.set_create_source_info(true);
-        host.set_clock(Some(Rc::new(DesignClock)));
+        host.set_clock(Some(Rc::new(FrozenPreviewClock)));
         #[cfg(debug_assertions)]
         let reload_driver = if isolated {
             None
@@ -608,7 +607,7 @@ impl RuntimePreview {
         self.host.set_clock(if interactive {
             None
         } else {
-            Some(Rc::new(DesignClock))
+            Some(Rc::new(FrozenPreviewClock))
         });
     }
 
@@ -946,19 +945,4 @@ impl Drop for RuntimePreview {
         self.clear_animation();
         self.close_native();
     }
-}
-
-// Design mode owns time. Inherited runtime animations and transitions remain frozen until the
-// host explicitly enables interaction; timeline sampling uses disposable animation layers.
-struct DesignClock;
-impl IObservable<SignedDuration> for DesignClock {
-    fn subscribe(&self, _observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
-        Disposable::empty()
-    }
-}
-impl IClock for DesignClock {
-    fn play_state(&self) -> PlayState {
-        PlayState::Pause
-    }
-    fn set_play_state(&self, _value: PlayState) {}
 }

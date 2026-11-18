@@ -223,3 +223,5 @@ mod render_tests;
 
 #[cfg(test)]
 mod animation_integration_tests;
+#[cfg(test)]
+mod native_custom_animation_tests;

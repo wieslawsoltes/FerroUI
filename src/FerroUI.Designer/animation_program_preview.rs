@@ -30,8 +30,13 @@ pub(crate) struct ProgramPreview {
 }
 
 impl DesignerSession {
+    pub(crate) fn seeks_animation_elapsed(&self, program: &AnimationProgram) -> bool {
+        program.timeline.is_none()
+            || self.animation.native.uses_factory_target(program.id)
+    }
+
     pub(crate) fn requires_native_animation(&self, program: &AnimationProgram) -> bool {
-        program.timeline.is_none() || self.animation.native.uses_factory_target(program.id)
+        self.seeks_animation_elapsed(program) || self.animation.native.uses_custom_animators(program.id)
     }
 
     pub(crate) fn has_animation_targets(&self, program: &AnimationProgram) -> bool {
@@ -46,7 +51,7 @@ impl DesignerSession {
 
     #[cfg(feature = "mcp")]
     pub(crate) fn program_preview(&self, program: &AnimationProgram) -> Option<ProgramPreview> {
-        let native = self.requires_native_animation(program);
+        let native = self.seeks_animation_elapsed(program);
         let timing;
         let clock = if native {
             timing = self.animation.native.timing(program.id)?;
@@ -58,7 +63,7 @@ impl DesignerSession {
             native,
             duration: clock.duration,
             total_duration: clock.total_duration(),
-            available: self.has_animation_targets(program),
+            available: self.animation_preview_available(program),
             explicit_targets: self.animation.preview_targets.contains_key(&program.id),
         })
     }

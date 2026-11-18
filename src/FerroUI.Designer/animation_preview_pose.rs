@@ -115,11 +115,11 @@ impl DesignerSession {
 
     pub(crate) fn uses_native_timeline_clock(&self) -> bool {
         self.animation_programs().iter().any(|program| Some(program.id) == self.active_animation_program()
-            && self.requires_native_animation(program))
+            && self.seeks_animation_elapsed(program))
     }
 
     fn preview_seek_limit(&self, program: &AnimationProgram) -> Result<Option<f64>, String> {
-        if self.requires_native_animation(program) {
+        if self.seeks_animation_elapsed(program) {
             return self.animation.native.timing(program.id).map(|clock| clock.total_duration())
                 .ok_or_else(|| "The authored animation is unavailable in the current native preview".into());
         }

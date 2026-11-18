@@ -23,6 +23,7 @@ path = "lib.rs"
 [dependencies]
 ferroui-base = { workspace = true, features = ["full-themes"] }
 ferroui-controls.workspace = true
+ferroui-designer-animation = { workspace = true, features = ["native-preview"] }
 ferroui-designer-core.workspace = true
 # The contract of the run-time XAML loader, which the host registers.
 ferroui-markup-xaml.workspace = true
