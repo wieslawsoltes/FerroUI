@@ -142,13 +142,23 @@ impl OwnedStyles {
     }
     /// The resource lookup order after commit, without changing any live owner.
     pub(crate) fn preview_dictionary(&self, candidate: &ResourceDictionary, key: &ResourceKey, theme: Option<&ThemeVariant>) -> Option<ResourceValue> {
-        self.resources.preview_resource(candidate, key, theme)
-            .unwrap_or_else(|error| std::panic::panic_any(ReloadError::RestartRequired(error)))
+        // A dictionary the application replaced fails the reload (#567): the key is not found.
+        self.resources.preview_resource(candidate, key, theme).unwrap_or_else(|error| {
+            crate::raise_reload_error(ReloadError::RestartRequired(error));
+            None
+        })
     }
     pub(crate) fn preview_resource(&self, candidate: &Styles, key: &ResourceKey, theme: Option<&ThemeVariant>) -> Option<ResourceValue> {
         self.preview_dictionary(&candidate.resources(), key, theme)
             .or_else(|| {
-                let (container, index, old) = self.current().unwrap_or_else(|error| std::panic::panic_any(error));
+                // Inline styles that are no longer the owned ones fail the reload (#567).
+                let (container, index, old) = match self.current() {
+                    Ok(current) => current,
+                    Err(error) => {
+                        crate::raise_reload_error(error);
+                        return None;
+                    }
+                };
                 let current = container.snapshot();
                 let new = candidate.snapshot();
                 current[index + old.len()..].iter().rev()
