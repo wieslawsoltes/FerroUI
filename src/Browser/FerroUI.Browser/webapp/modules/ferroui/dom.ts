@@ -282,10 +282,11 @@ export class FerroDOM {
         probe.style.display = "none";
         body.appendChild(probe);
         const keywords = ["Canvas", "CanvasText", "ButtonFace", "ButtonText", "Highlight", "HighlightText", "LinkText", "GrayText"];
+        const rgba = /rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:[,\s/]+([\d.]+))?\s*\)/;
         const colors: number[] = [];
         for (const keyword of keywords) {
             probe.style.color = keyword;
-            const match = /rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:[,\s/]+([\d.]+))?\s*\)/.exec(globalThis.getComputedStyle(probe).color);
+            const match = rgba.exec(globalThis.getComputedStyle(probe).color);
             if (match === null) {
                 probe.remove();
                 return [];
