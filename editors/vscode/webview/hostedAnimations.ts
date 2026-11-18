@@ -22,13 +22,13 @@ export class HostedAnimationView {
     private request = 0;
     private pending?: number;
     private documentVersion = 0;
-    private restoreKeyframeFocus = false;
     readonly keyframes: HostedKeyframeEditor;
 
     constructor(private readonly send: (message: FromHosted) => void) {
         this.keyframes = new HostedKeyframeEditor(send, () => {
-            this.restoreKeyframeFocus = true;
-            this.paint();
+            // Applying a key retires the animation toolbar until the next frame.
+            const button = this.edit.disabled || this.edit.hidden ? element('hosted-refresh') : this.edit;
+            button.focus({ preventScroll: true });
         });
         this.programs.onchange = () => { this.queued = undefined; this.keyframes.close(); this.paint(); };
         this.targets.onclick = () => this.choose('animationTargets');
@@ -128,10 +128,6 @@ export class HostedAnimationView {
         this.source.disabled = !usable;
         this.edit.hidden = !program?.authoring;
         this.edit.disabled = !usable;
-        if (this.restoreKeyframeFocus && usable) {
-            this.restoreKeyframeFocus = false;
-            if (document.activeElement === document.body) (this.edit.hidden ? this.programs : this.edit).focus();
-        }
         this.keyframes.follow(usable ? this.state.frame : undefined, this.documentVersion, program?.id);
         this.play.disabled = playing ? !this.canUse(true) : !usable || !available;
         labelButton(this.play, playing ? 'Pause application animation' : current && !current.completed ? 'Resume application animation' : 'Play application animation',
