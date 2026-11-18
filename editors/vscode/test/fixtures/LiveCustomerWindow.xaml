@@ -1,0 +1,17 @@
+<Window xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Customer workbench" Width="536" Height="310">
+    <Window.Styles>
+        <Style Selector="TextBlock.heading">
+            <Setter Property="FontSize" Value="27" />
+            <Setter Property="Foreground" Value="#174438" />
+        </Style>
+    </Window.Styles>
+    <Border Background="#E4EEE8" Padding="30">
+        <StackPanel Spacing="12">
+            <!-- 👋 Customer overview --> <TextBlock Classes="heading" x:Name="Heading" Text="Open customer records" />
+            <TextBox x:Name="Search" PlaceholderText="Filter customers" Text="" />
+            <TextBlock x:Name="Result" Text="{Binding Text, ElementName=Search}" />
+        </StackPanel>
+    </Border>
+</Window>

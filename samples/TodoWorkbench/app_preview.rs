@@ -1,13 +1,19 @@
 use ferroui_base::{
-    FerroObjectImpl, Ref, StyledElementImpl, TypeInfo, VisualImpl, ferro_class, ferro_class_info,
-    ferro_impl_classes, input::InputElementImpl, instantiate, interactivity::InteractiveImpl,
-    layout::LayoutableImpl, metadata::MarkupAssembly,
+    ferro_class, ferro_class_info, ferro_impl_classes,
+    input::InputElementImpl,
+    instantiate,
+    interactivity::InteractiveImpl,
+    layout::LayoutableImpl,
+    metadata::{from_markup_value, MarkupAssembly},
+    platform::storage::file_io::StorageProviderHelpers,
+    FerroObjectImpl, Ref, StyledElementImpl, TypeInfo, VisualImpl,
 };
-use ferroui_controls::{AppBuilder, Application, ControlImpl, TextBlock, TextBlockImpl};
+use ferroui_controls::{AppBuilder, Application, ControlImpl, TextBlock, TextBlockImpl, Window};
 use ferroui_designer_support::remote::RemoteDesignerEntryPoint;
 use ferroui_harfbuzz::HarfBuzzApplicationExtensions;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use ferroui_skia::SkiaApplicationExtensions;
+use std::{fs::File, path::Path};
 
 static ASSEMBLY: MarkupAssembly = MarkupAssembly {
     name: "todo-workbench",
@@ -26,17 +32,40 @@ pub(crate) fn start_if_requested() {
             .use_skia()
             .use_harfbuzz()
             .after_setup(|builder| {
-                FerroRuntimeXamlLoader::register();
-                ferroui_themes_winui::register_types();
-                TypeInfo::register_namespaces(&[(module_path!(), "TodoWorkbench.Design")]);
-                TypeInfo::register_all(&[PreviewBadge::TYPE]);
-                MarkupAssembly::register(&ASSEMBLY);
+                register_markup();
                 if let Some(app) = builder.instance() {
                     app.styles()
                         .add(ferroui_themes_winui::WinUITheme::new().as_style());
                 }
             })
     });
+}
+
+fn register_markup() {
+    FerroRuntimeXamlLoader::register();
+    ferroui_themes_winui::register_types();
+    TypeInfo::register_namespaces(&[(module_path!(), "TodoWorkbench.Design")]);
+    TypeInfo::register_all(&[PreviewBadge::TYPE]);
+    MarkupAssembly::register(&ASSEMBLY);
+}
+
+pub(crate) fn load_window(path: &Path) -> Result<Ref<Window>, Box<dyn std::error::Error>> {
+    register_markup();
+    let path = path.canonicalize()?;
+    let uri = path
+        .to_str()
+        .and_then(|path| StorageProviderHelpers::try_get_uri_from_file_path(path, false))
+        .ok_or("The XAML window path cannot be expressed as a file URI")?;
+    let file = File::open(&path)?;
+    let loaded = FerroRuntimeXamlLoader::load_stream(
+        Box::new(file),
+        Some(&ASSEMBLY),
+        None,
+        Some(uri),
+        false,
+    )?;
+    from_markup_value(&Some(loaded))
+        .ok_or_else(|| "The XAML document must contain a Window root".into())
 }
 
 #[repr(C)]
@@ -63,7 +92,9 @@ impl PreviewBadge {
 }
 
 impl ferroui_view::ViewClass for PreviewBadge {
-    fn create() -> Ref<Self> { Self::new() }
+    fn create() -> Ref<Self> {
+        Self::new()
+    }
 }
 
 #[cfg(test)]

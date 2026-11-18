@@ -10,18 +10,20 @@ import { verifyXamlRefactoring } from './xamlLanguage';
 import { verifyRuntimeClient } from './runtimeClient';
 import { verifyHostedPreview } from './hostedPreview';
 import { verifyLiveApp } from './liveApp';
+import { verifyLiveXaml } from './liveXaml';
 import { verifyProcessShutdown, verifyReloadHistory } from './reloadProcess';
 import { until } from './wait';
 import type { DesignerWorkbench } from '../src/designerWorkbench';
+import type { RuntimeSourceEditor } from '../src/runtimeSource';
 
 const editorPosition = (line = 0, character = 0) => new vscode.Position(line, character);
 const viewport = { width: 640, height: 420, dark: false };
 
 export async function run(): Promise<void> {
     const workspace = vscode.workspace.workspaceFolders![0].uri;
-    const extension = vscode.extensions.getExtension<{ designer: DesignerWorkbench }>('FerroUI.ferroui')!;
+    const extension = vscode.extensions.getExtension<{ designer: DesignerWorkbench; runtimeSource: RuntimeSourceEditor }>('FerroUI.ferroui')!;
     assert.ok(extension, 'FerroUI extension is installed in the Extension Development Host');
-    const { designer } = await extension.activate();
+    const { designer, runtimeSource } = await extension.activate();
     await verifyProcessShutdown();
     verifyReloadHistory();
     await verifyRuntimeClient();
@@ -148,6 +150,7 @@ export async function run(): Promise<void> {
         await verifyStudioPresentations(preview, xamlInput.uri);
         await verifyHostedPreview(preview, xamlInput.uri);
         await verifyLiveApp();
+        await verifyLiveXaml(workspace, runtimeSource);
         const commands = await vscode.commands.getCommands(true);
         assert.ok(commands.includes('ferroui.outline.focus'), 'Outline is a contributed VS Code view');
         assert.ok(commands.includes('ferroui.properties.focus'), 'Properties is a separate contributed VS Code view');

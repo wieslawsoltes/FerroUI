@@ -29,6 +29,22 @@ export async function isWorkspaceFile(uri: vscode.Uri): Promise<boolean> {
     } catch { return false; }
 }
 
+/** Map a native application's physical source path to the workspace's editor URI. */
+export async function workspaceSourceUri(uri: vscode.Uri): Promise<vscode.Uri | undefined> {
+    if (uri.scheme !== 'file') return;
+    if (await isWorkspaceFile(uri)) return uri;
+    try {
+        const [file, info] = await Promise.all([realpath(uri.fsPath), stat(uri.fsPath)]);
+        if (!info.isFile()) return;
+        const mapped = await Promise.all(localFolders().map(async folder => {
+            const root = await realpath(folder.uri.fsPath).catch(() => undefined);
+            if (root && isInside(root, file)) return vscode.Uri.file(path.join(folder.uri.fsPath, path.relative(root, file)));
+        }));
+        const matches = mapped.filter(uri => uri !== undefined);
+        if (matches.length === 1) return matches[0];
+    } catch { return; }
+}
+
 export async function resolveWorkspaceFile(input: string, reference?: string): Promise<vscode.Uri> {
     const folders = workspaceFolders(reference);
     const paths = new Set(folders.flatMap(folder => {

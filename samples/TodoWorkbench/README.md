@@ -40,6 +40,17 @@ save source. With **FerroUI Managed Application**, the agent can use
 `click`. Save a heading text edit to see the live title update alongside the
 tasks you already entered. [VS Code extension guide](../../editors/vscode/README.md)
 
+## Attach to a XAML window
+
+The app-preview feature can open a file-backed XAML Window with the same
+WinUI theme and local inspector. Enable source metadata to use **Reveal Source**
+and **Apply to Source** after attaching from VS Code.
+
+```sh
+FERROUI_EDITOR_SOURCE=1 cargo run -p todo-workbench --features app-preview,mcp -- \
+  --xaml-live path/to/Window.xaml --mcp --mcp-input
+```
+
 ## App-hosted design
 
 Add `"app-preview"` to the target's features and open
