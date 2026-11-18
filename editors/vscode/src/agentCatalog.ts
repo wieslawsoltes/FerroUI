@@ -95,6 +95,8 @@ export const agentCatalog = {
         { ...session, stage: node, expected_epoch: integer(0) }, ['session', 'stage', 'expected_epoch']),
     designer_stage_hotspots: tool('List source-anchored prototype hotspot choices from a ready stage. Pass its current ID and epoch.',
         { ...session, stage: node, expected_epoch: integer(0) }, ['session', 'stage', 'expected_epoch']),
+    designer_stage_checks: tool('Read source-linked accessibility and clipping findings from the current native stage.',
+        { ...session, stage: node, expected_epoch: integer(0) }, ['session', 'stage', 'expected_epoch']),
     designer_stage_change: tool('Apply a board action. Use add with name, width, height, dark and optional sourcePath inside the workspace, update with id and configuration, remove or refresh with id, or setPrototype with a graph using zero-based stage indices.',
         { ...session, expected_epoch: integer(0), arguments: object }, ['session', 'expected_epoch', 'arguments'], true, false),
     designer_stage_prototype: tool('Drive the stage-set prototype using start with flow, activate with link index, back, closeOverlay, restart or stop.',

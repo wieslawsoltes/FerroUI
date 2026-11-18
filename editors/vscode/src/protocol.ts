@@ -2,6 +2,7 @@ export interface Position { line: number; character: number }
 export interface Range { start: Position; end: Position }
 export interface TextEdit { range: Range; newText: string }
 export interface EditResult { edits: TextEdit[]; selection: Range | null }
+export interface PreviewFinding { node: number; control: string; name: string | null; code: string; message: string }
 export type Language = 'xaml' | 'rust';
 
 export interface Source {

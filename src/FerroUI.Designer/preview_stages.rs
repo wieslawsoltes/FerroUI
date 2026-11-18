@@ -1038,6 +1038,13 @@ impl PreviewStageBoard {
         }))
     }
 
+    /// Inspect only the current native frame for this stage's source and environment.
+    pub fn preview_checks(&self, id: PreviewStageId) -> Result<Vec<crate::PreviewFinding>, String> {
+        let stage = &self.stages[self.index(id)?];
+        let rendered = self.current(stage)?;
+        crate::preview_checks::check_preview(&rendered.document, &rendered.preview, &stage.control.clone().upcast())
+    }
+
     /// Resolve one authored hotspot against the exact accepted native graph. The
     /// returned axis-aligned rectangle uses stage logical coordinates and is clipped
     /// to the stage viewport and native ancestor clips. Call again immediately before

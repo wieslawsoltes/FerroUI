@@ -1,4 +1,4 @@
-import type { Range, Snapshot, Source } from './protocol';
+import type { PreviewFinding, Range, Snapshot, Source } from './protocol';
 
 export type StageImage = NonNullable<Snapshot['image']>;
 export interface StageConfiguration {
@@ -46,6 +46,7 @@ export type PrototypeCommand = { action: 'start'; flow: string } | { action: 'ac
     | { action: 'back' | 'closeOverlay' | 'restart' | 'stop' };
 export interface StageModel { epoch: number; manifest: StageManifest; stages: StageInfo[]; prototype: PrototypeScene | null }
 export interface StageTarget { id: number; epoch: number }
+export interface StageChecks { uri: string; findings: (PreviewFinding & { range: Range | null })[] }
 export interface StagePointer extends StageTarget { x: number; y: number }
 export interface StagePick { range?: Range; uri?: string; interacted?: boolean; prototype?: PrototypeScene }
 interface AddStage { action: 'add'; name: string; width: number; height: number; dark: boolean; epoch: number }
@@ -56,7 +57,8 @@ type ExistingStageChange = (
 export type StageChange = ExistingStageChange | (AddStage & { sourcePath?: string });
 export type NativeStageChange = ExistingStageChange | (AddStage & { source?: Source });
 export type FromStages = { type: 'ready' | 'add' | 'saveManifest' | 'loadManifest' }
-    | ({ type: 'pointer' } & StagePointer) | { type: 'edit'; epoch: number; id: number; field: 'name' | 'environment' | 'mode' | 'layout' | 'pause' | 'refresh' | 'remove' | 'export' };
+    | ({ type: 'pointer' } & StagePointer) | ({ type: 'checks' } & StageTarget)
+    | { type: 'edit'; epoch: number; id: number; field: 'name' | 'environment' | 'mode' | 'layout' | 'pause' | 'refresh' | 'remove' | 'export' };
 export type StagesRequest = FromStages | { type: 'prototype'; command?: PrototypeCommand } | { type: 'editPrototype' };
 export type ToStages = { type: 'model'; model: StageModel; uri: string }
     | ({ type: 'image'; image: StageImage } & StageTarget) | { type: 'status'; message: string }

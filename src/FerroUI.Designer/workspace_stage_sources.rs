@@ -103,6 +103,14 @@ impl DesignerWorkspace {
             })
     }
 
+    /// Source-linked checks for the stage's current native composition.
+    pub fn preview_stage_checks(&self, id: PreviewStageId) -> Result<Vec<crate::PreviewFinding>, String> {
+        if !self.preview_stage_source_is_current(id) {
+            return Err("Refresh this stage before checking its preview".into());
+        }
+        self.preview_stages.board.borrow().preview_checks(id)
+    }
+
     /// Image capture may use a paused frame while its accepted source and all
     /// native include dependencies remain exact. This never enables selection/input.
     pub fn preview_stage_image_source_is_current(&self, id: PreviewStageId) -> bool {

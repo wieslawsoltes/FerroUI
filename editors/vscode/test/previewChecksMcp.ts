@@ -1,5 +1,7 @@
 import { strict as assert } from 'node:assert';
 import * as vscode from 'vscode';
+import type { StageChecks, StageModel } from '../src/stagesProtocol';
+import { asRange } from '../src/textDocument';
 import type { McpFixture } from './mcp';
 
 export async function verifyPreviewChecks({ invoke, content }: McpFixture): Promise<void> {
@@ -21,8 +23,21 @@ export async function verifyPreviewChecks({ invoke, content }: McpFixture): Prom
     assert.ok(!(await read()).findings.some(finding => finding.name === 'UnlabeledInput'));
     content(await invoke('designer_history', { session, expected_version: document.version, action: 'undo' }));
     assert.equal(document.getText(), original);
+    const board = content<StageModel>(await invoke('designer_stages_open', { session }));
+    const stage = board.stages[0];
+    assert.ok(stage);
+    const target = { session, stage: stage.id, expected_epoch: stage.epoch };
+    const stageReport = content<StageChecks>(await invoke('designer_stage_checks', target));
+    const clipped = stageReport.findings.find(finding => finding.code === 'clippedLayout' && finding.name === 'CutOffAction');
+    assert.ok(clipped?.range);
+    assert.equal(document.getText(asRange(clipped.range)), 'Button');
+    content(await invoke('designer_stage_change', { session, expected_epoch: board.epoch, arguments: {
+        action: 'update', id: stage.id, configuration: { ...stage.configuration,
+            environment: { ...stage.configuration.environment, width: stage.configuration.environment.width + 24 } },
+    } }));
+    assert.ok((await invoke('designer_stage_checks', target)).isError);
     const tabs = vscode.window.tabGroups.all.flatMap(group => group.tabs)
-        .filter(tab => tab.label === path || tab.label === `Design · ${path}`);
+        .filter(tab => tab.label === path || tab.label === `Design · ${path}` || tab.label === `Stages · ${path}`);
     await vscode.window.tabGroups.close(tabs);
-    console.log('VS Code native preview checks linked clipping, contrast and names to authored controls and cleared a repaired finding');
+    console.log('VS Code native checks linked clipping, contrast and names to authored controls, cleared a repaired finding and rejected a retired stage');
 }

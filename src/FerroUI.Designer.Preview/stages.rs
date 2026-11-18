@@ -8,12 +8,12 @@ use base64::{Engine, engine::general_purpose::STANDARD};
 use ferroui_base::{Point, Ref, threading::Dispatcher};
 use ferroui_controls::{Control, SizeToContent, Window, WindowDecorations};
 use ferroui_designer::{
-    PreviewEnvironment, PreviewHostOptions, PreviewPrototypeElementChoice,
+    PreviewEnvironment, PreviewFinding, PreviewHostOptions, PreviewPrototypeElementChoice,
     PreviewPrototypeManifest, PreviewStageBoard, PreviewStageConfiguration, PreviewStageId,
     PreviewStageInfo, PreviewStageManifest, PreviewStageMode, PreviewStageSource,
     PreviewStageStatus, PreviewTheme, capture_preview_stage_png,
 };
-use ferroui_designer_language::{LineIndex, Range};
+use ferroui_designer_language::Range;
 use ferroui_inspect::{Inspector, Permissions};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
@@ -100,6 +100,19 @@ pub(crate) struct Model {
 pub(crate) struct StageTarget {
     id: PreviewStageId,
     epoch: u64,
+}
+
+#[derive(Serialize)]
+pub(crate) struct StageChecks {
+    uri: String,
+    findings: Vec<StageFinding>,
+}
+
+#[derive(Serialize)]
+struct StageFinding {
+    #[serde(flatten)]
+    finding: PreviewFinding,
+    range: Option<Range>,
 }
 
 #[derive(Deserialize)]
@@ -271,6 +284,18 @@ impl Stages {
         })
     }
 
+    pub(crate) fn checks(&mut self, target: StageTarget, projects: &Projects) -> Result<StageChecks, String> {
+        self.mounted(&target)?;
+        let stage = self.board.stage(target.id).ok_or("The stage was removed")?;
+        let uri = stage.configuration.source_uri;
+        let source = &self.sources.get(&uri).ok_or("Open the stage's source document first")?.authored;
+        let document = DesignDocument::parse(source, projects.source(source)?)?;
+        let findings = self.board.preview_checks(target.id)?.into_iter().map(|finding| StageFinding {
+            range: document.node_name_range(finding.node).ok(), finding,
+        }).collect();
+        Ok(StageChecks { uri, findings })
+    }
+
     pub(crate) fn pointer(&mut self, request: Pointer, projects: &Projects) -> Result<Value, String> {
         if !(0.0..=1.0).contains(&request.x) || !(0.0..=1.0).contains(&request.y) {
             return Err("Choose a point inside the stage".into());
@@ -309,19 +334,7 @@ impl Stages {
             .ok_or("Open the stage's source document first")?;
         let source = &source.authored;
         let parsed = DesignDocument::parse(source, projects.source(source)?)?;
-        let range: Range = if let Some((_, node)) = parsed.rsx_node(selection.node) {
-            parsed.range(node.name)?
-        } else {
-            let span = parsed
-                .xaml
-                .ast()
-                .node(selection.node)
-                .ok_or("The source selection changed")?
-                .name_span;
-            LineIndex::new(&source.source)
-                .range(span)
-                .map_err(|error| error.to_string())?
-        };
+        let range = parsed.node_name_range(selection.node)?;
         Ok(json!({"range":range,"uri":source.uri}))
     }
 

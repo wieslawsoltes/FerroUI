@@ -2,7 +2,7 @@ import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { DesignerPanel } from './designerPanel';
 import type { DesignerWorkbench } from './designerWorkbench';
-import { errorMessage } from './protocol';
+import { errorMessage, type PreviewFinding } from './protocol';
 import type { ReloadHistory, ReloadRecord } from './reloadHistory';
 import { RuntimeClient } from './runtimeClient';
 import type { RuntimeConnections } from './runtimeConnections';
@@ -13,7 +13,6 @@ import { isWorkspaceFile } from './workspacePaths';
 const viewId = 'ferroui.diagnostics';
 const captions = { applied: 'Reloaded in place', rejected: 'Edit rejected', rebuilt: 'Candidate activated', buildFailed: 'Candidate failed',
     superseded: 'Superseded by a newer save', stopped: 'Session stopped' };
-interface PreviewFinding { node: number; control: string; name: string | null; code: string; message: string }
 type Item = { type: 'group'; group: 'preview' | 'reload' | 'binding' | 'layout' }
     | { type: 'notice'; label: string }
     | { type: 'reload'; record: ReloadRecord }

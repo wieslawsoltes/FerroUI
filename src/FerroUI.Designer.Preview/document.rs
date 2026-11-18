@@ -64,6 +64,15 @@ impl<'a> DesignDocument<'a> {
         self.index.range(span).map_err(|e| e.to_string())
     }
 
+    pub(crate) fn node_name_range(&self, id: NodeId) -> Result<Range, String> {
+        let span = if self.rsx.is_some() {
+            self.rsx_node(id).ok_or("This native control has no Rust source mapping")?.1.name
+        } else {
+            self.xaml.ast().node(id).ok_or("The source selection changed")?.name_span
+        };
+        self.range(span)
+    }
+
     pub(crate) fn schema(&self) -> &Schema {
         match self.project { Some(project) => &project.schema, None => schema() }
     }

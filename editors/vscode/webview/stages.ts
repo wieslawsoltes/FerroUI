@@ -56,6 +56,10 @@ function update(stage: StageInfo): void {
     control(stage.configuration.mode === 'select' ? 'Select' : 'Interact', 'mode');
     control(stage.configuration.auto_update ? 'Pause' : 'Resume', 'pause');
     control('Refresh', 'refresh');
+    const checks = create('button', 'Checks');
+    checks.disabled = stage.status.state !== 'ready';
+    checks.addEventListener('click', () => vscode.postMessage({ type: 'checks', id: stage.id, epoch: stage.epoch }));
+    row.append(checks);
     control('Rename', 'name');
     control('Save PNG', 'export');
     control('Remove', 'remove');

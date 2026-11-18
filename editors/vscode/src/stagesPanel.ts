@@ -5,8 +5,8 @@ import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { BuiltProjects } from './builtProjects';
 import { NativePreview } from './nativePreview';
-import { errorMessage } from './protocol';
-import type { FromStages, NativeStageChange, PrototypeCommand, StageChange, StageInfo, StageManifest, StageModel, StagesRequest, ToStages } from './stagesProtocol';
+import { errorMessage, type Range } from './protocol';
+import type { FromStages, NativeStageChange, PrototypeCommand, StageChange, StageInfo, StageManifest, StageModel, StageTarget, StagesRequest, ToStages } from './stagesProtocol';
 import { editPrototype } from './stagePrototypeEditor';
 import { choose, editText } from './studioContext';
 import { asRange, languageOf, sourceOf } from './textDocument';
@@ -77,6 +77,7 @@ class StageSession {
     private client?: Promise<NativePreview>;
     private model?: StageModel;
     private modelVersion?: number;
+    private modelGeneration?: number;
     private timer?: ReturnType<typeof setTimeout>;
     private generation = 0;
     private ready = false;
@@ -110,28 +111,34 @@ class StageSession {
         for (;;) {
             timeout.throwIfAborted();
             if (this.disposed) throw new Error('The Stages board was closed.');
-            if (!this.busy && !this.timer && this.model && this.modelVersion === this.document.version) return this.model;
+            if (!this.busy && !this.timer && this.model && this.modelGeneration === this.generation && this.modelVersion === this.document.version) return this.model;
             if (!this.busy && !this.timer) await this.sync();
             await delay(80, undefined, { signal: timeout });
         }
     }
 
-    async capture(id: number, epoch: number, signal: AbortSignal) {
-        const model = await this.wait(signal);
-        if (!model.stages.some(stage => stage.id === id && stage.epoch === epoch)) throw new Error('Read the current stage ID and epoch.');
-        const image = await (await this.getClient()).stageImage({ id, epoch });
-        signal.throwIfAborted();
-        if (this.model !== model || this.modelVersion !== this.document.version || this.timer) throw new Error('The stage changed during capture.');
-        return image;
+    capture(id: number, epoch: number, signal: AbortSignal) {
+        return this.readStage({ id, epoch }, signal, (client, stage) => client.stageImage(stage));
     }
 
-    async hotspots(id: number, epoch: number, signal: AbortSignal) {
+    hotspots(id: number, epoch: number, signal: AbortSignal) {
+        return this.readStage({ id, epoch }, signal, (client, stage) => client.stagePrototypeElements(stage));
+    }
+
+    checks(id: number, epoch: number, signal: AbortSignal) {
+        return this.readStage({ id, epoch }, signal, (client, stage) => client.stageChecks(stage));
+    }
+
+    private async readStage<T>(target: StageTarget, signal: AbortSignal, read: (client: NativePreview, target: StageTarget) => Promise<T>): Promise<T> {
         const model = await this.wait(signal);
-        if (!model.stages.some(stage => stage.id === id && stage.epoch === epoch)) throw new Error('Read the current stage ID and epoch.');
-        const choices = await (await this.getClient()).stagePrototypeElements({ id, epoch });
+        if (!model.stages.some(stage => stage.id === target.id && stage.epoch === target.epoch)) throw new Error('Read the current stage ID and epoch.');
+        const generation = this.generation;
+        const value = await read(await this.getClient(), target);
         signal.throwIfAborted();
-        if (this.model !== model || this.modelVersion !== this.document.version || this.timer) throw new Error('The stage changed during hotspot discovery.');
-        return choices;
+        if (this.model !== model || generation !== this.generation || this.modelVersion !== this.document.version || this.disposed) {
+            throw new Error('The stage changed. Open its current frame.');
+        }
+        return value;
     }
 
     async applyChange(change: StageChange, signal: AbortSignal): Promise<StageModel> {
@@ -214,6 +221,7 @@ class StageSession {
         if (generation !== this.generation || this.disposed) return;
         this.model = model;
         this.modelVersion = this.document.version;
+        this.modelGeneration = generation;
         await this.context.workspaceState.update(this.cacheKey, model.manifest);
         this.post({ type: 'model', uri: this.document.uri.toString(), model });
         for (const stage of model.stages) {
@@ -232,7 +240,7 @@ class StageSession {
 
     private async receive(message: StagesRequest): Promise<void> {
         if (message.type === 'ready') { this.ready = true; this.schedule(); return; }
-        if (this.busy || this.timer || !this.model || this.disposed || this.modelVersion !== this.document.version) return;
+        if (this.busy || this.timer || !this.model || this.disposed || this.modelGeneration !== this.generation || this.modelVersion !== this.document.version) return;
         const model = this.model;
         const generation = this.generation;
         try {
@@ -253,15 +261,19 @@ class StageSession {
                     this.post({ type: 'prototype', scene: result.prototype });
                 }
                 if (result.range && result.uri) {
-                    const uri = vscode.Uri.parse(result.uri, true);
-                    if (uri.toString() !== this.document.uri.toString() && !await isWorkspaceFile(uri)) return;
-                    const document = await vscode.workspace.openTextDocument(uri);
-                    const editor = vscode.window.visibleTextEditors.find(editor => editor.document === document);
-                    const range = asRange(result.range);
-                    await vscode.window.showTextDocument(document, { viewColumn: editor?.viewColumn ?? vscode.ViewColumn.Beside, preserveFocus: true, selection: range });
+                    await this.revealStageSource(result.uri, result.range, generation);
                 }
                 const stage = model.stages.find(stage => stage.id === message.id);
                 if (result.interacted && stage) await this.image(client, stage);
+                return;
+            }
+            if (message.type === 'checks') {
+                const { uri, findings } = await this.checks(message.id, message.epoch, AbortSignal.timeout(15_000));
+                if (!findings.length) { void vscode.window.showInformationMessage('No findings in this stage.'); return; }
+                const issue = await choose('Stage Preview Checks', findings.map(finding => ({
+                    label: finding.message, description: finding.name ?? finding.control, range: finding.range,
+                })));
+                if (issue?.range) await this.revealStageSource(uri, issue.range, generation);
                 return;
             }
             if (message.type === 'saveManifest') {
@@ -287,6 +299,15 @@ class StageSession {
             if (!change || generation !== this.generation || model !== this.model) return;
             await this.applyChange(change, AbortSignal.timeout(15_000));
         } catch (error) { this.report(error); }
+    }
+
+    private async revealStageSource(source: string, selection: Range, generation: number): Promise<void> {
+        const uri = vscode.Uri.parse(source, true);
+        if (uri.toString() !== this.document.uri.toString() && !await isWorkspaceFile(uri)) return;
+        const document = await vscode.workspace.openTextDocument(uri);
+        if (generation !== this.generation || this.disposed) return;
+        const editor = vscode.window.visibleTextEditors.find(editor => editor.document === document);
+        await vscode.window.showTextDocument(document, { viewColumn: editor?.viewColumn ?? vscode.ViewColumn.Beside, preserveFocus: true, selection: asRange(selection) });
     }
 
     private async editPrototype(model: StageModel): Promise<StageChange | undefined> {
