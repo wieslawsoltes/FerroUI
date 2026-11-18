@@ -53,7 +53,7 @@ Reviewing the native renders beside the upstream references of the 55 scenarios 
 
 One difference is the upstream's: for an empty series (`LineSeriesTests.VectorOperationsClear`) the reference image draws the X axis from 10 to 0, because the source's `Scaler` passes the sentinel bounds of the series to `AxisLimit.ValidateLimits` in swapped order. The native axis keeps the default range from 0 to 10 in the order of the axis; the disposition of the scenario says so.
 
-Still different from the source theme (named in the disposition of every scenario): the gauge rules (no stroke, centred data labels, corner radius 8, the translucent fill series; the gauge scenarios set them), the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides.
+Still different from the source theme (named in the disposition of every scenario): the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides.
 
 ### L4: the polar chart
 
@@ -126,11 +126,18 @@ The `TooltipFormatter` of a map (`IGeoMapView`) is a code-only property of the c
 
 `mapping.json` records as ported `GeoMap_TooltipFormatter_IsAppliedToEachValue` and `LabelsMeasureTest.MaxWidth`, and `DrawingTextExtensions` partial (the shaping, right-to-left text and typeface fallback are the native text stack's): the report counts 212 ported and 111 partial test declarations.
 
+### #624: `GaugeGenerator`, the theme's gauge rules and the needle animation
+
+`gauges.rs` of `ferroui-controls-livecharts` ports `GaugeGenerator`, `GaugeItem` and `BaseGaugeItem`: `GaugeGenerator::build_solid_gauge` makes a gauge series for each item with its value at the place of the item among empty values (a ring each) and `build_angular_gauge_sections` one of a single value relative to the minimum, without a hover push-out or data labels (`PieChartExtensions.AsSeries` with `GaugeOptions`); both add the fill series, a zero for each item, styled by the background items (`GaugeItem::BACKGROUND`), and run the builder of each item after the series is set up.
+
+The theme's gauge rules (`HasRuleForGaugeSeries` and `HasRuleForGaugeFillSeries` of the default theme) apply to every gauge series, built by the generator or by hand: what a gauge series does not set takes the rule (no stroke, data labels at the chart centre in (70, 70, 70), a corner radius of 8, the palette colour; a fill series of (30, 30, 30) at alpha 10), as a theme rule gives way to what a series sets.
+
+A needle turns to a new value over the animations speed of the chart in the cubic out easing of the transitions (the source animates the rotation of `NeedleGeometry`): the chart draws the needle at its value of the moment, frame by frame, so the needle goes the way its value does, the long way round a gauge of more than 180 degrees too. Its first value is drawn at once. A frame of the needles keeps a scene transition in progress on its clock, and a scene equal to the one before starts none. The scenarios of `snapshots.rs` still build their gauges by hand, as the generator does.
+
 ## Remaining (#442)
 
 - Geographic map: a custom tooltip object (`IGeoMapTooltip`; no chart kind has one natively, `hover_changed` serves), visual elements other than circle markers at a coordinate, and the theme rules of the view.
 - Sankey and treemap: the entrance and exit animations of each node, ribbon and label (the native scene transition animates the scene instead), and the mappers of custom node models.
 - Polar: the placement of the tooltip of the source (the suggested locations of the hover areas, `GetTooltipLocation` and the layout of the default tooltip), which every chart kind shares; the polar chart shows the native tooltip, finds and labels its points as the source (#624). The source draws no axis names and has no polar sub-separators.
 - Heat series: SVG cell geometries and the colour animation of the cells; the heat legend has no label wrapping, background or animation (#624).
-- Angular gauge: `GaugeGenerator` and the theme's gauge rules (the scenarios set them), and the animation of the needle.
 - Tooltips and animations of the OHLC, error and heat series, which wait for the tooltip and animation suites.

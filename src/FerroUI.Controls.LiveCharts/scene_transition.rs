@@ -157,6 +157,13 @@ impl SceneTransition {
         self
     }
 
+    /// The same transition, with its start, duration and easing, to another end scene (a frame
+    /// of the needles of a gauge while the scene moves).
+    pub(crate) fn retarget(&self, to: Rc<Scene>) -> Self {
+        Self::new(self.from.clone(), to, self.started_ms, self.duration_ms)
+            .with_easing(self.easing.clone())
+    }
+
     pub fn is_completed(&self, now_ms: f64) -> bool {
         !self.duration_ms.is_finite()
             || self.duration_ms <= 0.0

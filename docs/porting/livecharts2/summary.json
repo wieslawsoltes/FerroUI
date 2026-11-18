@@ -7,10 +7,10 @@
   "source_types": 1024,
   "source_members": 4859,
   "source_status": {
-    "native-replacement": 63,
+    "native-replacement": 65,
     "partial": 44,
-    "pending": 543,
-    "ported": 48
+    "pending": 539,
+    "ported": 50
   },
   "member_status": {
     "native-replacement": 19,
