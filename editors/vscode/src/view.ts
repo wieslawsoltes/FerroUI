@@ -230,6 +230,7 @@ export function runtimeHtml(webview: vscode.Webview, root: vscode.Uri): string {
         <ul id="runtime-tree" aria-label="Application hierarchy"></ul>
         <label>Inspect <select id="runtime-detail"><option value="properties">Properties</option><option value="styles">Styles</option><option value="resources">Resources</option><option value="diagnostics">Diagnostics</option></select></label>
         <button id="runtime-reveal" hidden>Reveal Source</button>
+        <input id="runtime-property-filter" type="search" placeholder="Filter properties" aria-label="Filter runtime properties" hidden>
         <div id="runtime-details" aria-label="Runtime details"></div>
     </aside>
 </main>`);

@@ -10,6 +10,7 @@ const hierarchy = element<HTMLSelectElement>('runtime-hierarchy');
 const detail = element<HTMLSelectElement>('runtime-detail');
 const tree = element('runtime-tree');
 const filter = element<HTMLInputElement>('runtime-filter');
+const propertyFilter = element<HTMLInputElement>('runtime-property-filter');
 const inspector = element('runtime-details');
 const image = element<HTMLImageElement>('runtime-image');
 const problem = element('runtime-problem');
@@ -69,6 +70,7 @@ function renderTree() {
 function showProperties(data: RuntimeProperty[], canApply: boolean) {
     const rows = data.map(property => {
         const row = create('form');
+        row.dataset.property = property.name;
         const name = create('label', property.name);
         name.append(create('small', ` · ${property.priority}${property.binding ? ' · binding' : ''}`));
         const value = create('input');
@@ -77,11 +79,13 @@ function showProperties(data: RuntimeProperty[], canApply: boolean) {
         const editable = !property.read_only && !property.binding && (property.value === null || typeof property.value !== 'object');
         value.readOnly = !editable;
         const apply = create('button', 'Set live');
+        apply.setAttribute('aria-label', `Set ${property.name} live`);
         apply.type = 'submit';
         apply.disabled = !editable;
         row.append(name, value, apply);
         if (canApply && editable) {
             const source = create('button', 'Apply to Source');
+            source.setAttribute('aria-label', `Apply ${property.name} to Source`);
             source.type = 'button';
             source.onclick = () => {
                 if (frame && selected !== undefined) send({ type: 'assignSource', token: frame.token, node: selected, property: property.name, value: value.value });
@@ -96,6 +100,14 @@ function showProperties(data: RuntimeProperty[], canApply: boolean) {
         return row;
     });
     inspector.replaceChildren(...rows);
+    filterProperties();
+}
+
+function filterProperties(): void {
+    const search = propertyFilter.value.trim().toLocaleLowerCase();
+    for (const row of inspector.querySelectorAll<HTMLElement>('[data-property]')) {
+        row.hidden = !(row.dataset.property ?? '').toLocaleLowerCase().includes(search);
+    }
 }
 
 window.addEventListener('message', async (event: MessageEvent<ToRuntime>) => {
@@ -123,6 +135,7 @@ window.addEventListener('message', async (event: MessageEvent<ToRuntime>) => {
             main.setAttribute('aria-busy', 'true');
             inspector.replaceChildren();
             reveal.hidden = true;
+            propertyFilter.hidden = true;
             problem.hidden = true;
             setMode(false);
         }
@@ -144,6 +157,7 @@ window.addEventListener('message', async (event: MessageEvent<ToRuntime>) => {
         selected = message.node;
         detail.value = message.view;
         reveal.hidden = !message.canReveal;
+        propertyFilter.hidden = message.view !== 'properties';
         setMode(interaction);
         for (const button of tree.querySelectorAll('button')) button.setAttribute('aria-pressed', String(button.dataset.node === String(selected)));
         if (message.view === 'properties') showProperties(message.data as RuntimeProperty[], message.canApply);
@@ -163,6 +177,7 @@ windowChoice.onchange = () => send({ type: 'window', id: Number(windowChoice.val
 hierarchy.onchange = () => send({ type: 'hierarchy', tree: hierarchy.value as RuntimeHierarchy });
 detail.onchange = () => { if (frame) inspect(selected ?? frame.root.node_id); };
 filter.oninput = renderTree;
+propertyFilter.oninput = filterProperties;
 selectMode.onclick = () => setMode(false);
 interactMode.onclick = () => setMode(true);
 image.onclick = event => {
