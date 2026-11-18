@@ -1,5 +1,6 @@
 use crate::{
     hosted_frame,
+    projects::Projects,
     protocol::{Image, MAX_SOURCE_BYTES, Source},
 };
 use ferroui_remote_protocol::designer::{
@@ -206,7 +207,7 @@ impl Relay {
         Ok(connection)
     }
 
-    pub(crate) fn render(&mut self, design: Design) -> Result<Frame, String> {
+    pub(crate) fn render(&mut self, design: Design, projects: &Projects) -> Result<Frame, String> {
         let revision = design.revision;
         if revision < 1
             || !design.document.uri.starts_with("file:")
@@ -224,7 +225,7 @@ impl Relay {
         {
             return Err("Choose a valid preview document and Cargo assembly".into());
         }
-        let document = crate::document::DesignDocument::parse(&design.document)?;
+        let document = crate::document::DesignDocument::parse(&design.document, projects.source(&design.document)?)?;
         let connection = self.connection()?;
         {
             let mut state = self.events.0.lock().unwrap();

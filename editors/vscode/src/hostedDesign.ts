@@ -1,6 +1,7 @@
 import { randomBytes } from 'node:crypto';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
+import type { BuiltProject } from './builtProjects';
 import { type CargoTarget, selectCargoTarget } from './cargoTarget';
 import type { FromHosted, HostedFrame, ToHosted } from './hostedProtocol';
 import { NativePreview } from './nativePreview';
@@ -67,6 +68,7 @@ class HostedSession {
     private retiring?: Promise<void>;
     private stopped?: Promise<void>;
     private client?: NativePreview;
+    private project?: BuiltProject;
     private frame?: HostedFrame;
     private timer?: ReturnType<typeof setTimeout>;
     private revision = 1;
@@ -99,7 +101,9 @@ class HostedSession {
             const artifact = await build.artifact;
             if (this.disposed) return;
             this.compiler = undefined;
-            built(build.metadata());
+            const metadata = build.metadata();
+            this.project = { metadata, workspaceRoot: this.target.folder.uri.fsPath };
+            built(metadata);
             const client = await NativePreview.start(this.context, this.output);
             if (this.disposed) { client.dispose(); return; }
             this.client = client;
@@ -154,7 +158,8 @@ class HostedSession {
                 .get<string>('hostedPreview.assembly') || this.target.packageName;
             const projectPath = '/' + path.relative(path.dirname(this.target.manifest), document.uri.fsPath).split(path.sep).map(encodeURIComponent).join('/');
             const frame = update ? await client.renderHosted({ revision, assembly, projectPath,
-                document: sourceOf(document, this.language, this.editor.selection.active) }) : await client.hostedFrame();
+                document: await client.inProject(sourceOf(document, this.language, this.editor.selection.active), this.project),
+            }) : await client.hostedFrame();
             if (!this.disposed && client === this.client && frame?.revision === this.revision) {
                 this.frame = frame;
                 this.post({ type: 'frame', frame });

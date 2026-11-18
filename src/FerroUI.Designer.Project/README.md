@@ -14,6 +14,8 @@ Save candidates are reserved with exclusive creation and bounded collision retri
 
 ## Resource and task integration
 
+The selected package's `Check` and `Build` tasks retain Cargo's reported build-script output directories after a successful exit. `BuildMetadata::catalog` reads versioned `.xamlmeta` from those directories. Language and Toolbox hosts use that shared registry for XAML properties, transitive control ancestry, and assembly-qualified insertion. [Cargo JSON messages](https://doc.rust-lang.org/cargo/reference/external-tools.html#json-messages)
+
 Native `resm:` embedded names resolve from discovered document paths and optional `assembly=` queries. A host can use `register_resource` for custom embedded names; mappings retain the same canonical-root checks as ordinary file paths. File URI aliases share one buffer, and relative URI resolution preserves Unicode and escaped characters. `ferres` traversal cannot leave the selected assembly root even when another root belongs to the same solution.
 
 All buffer operations accept filesystem aliases, including updates, history storage, saves, activation and close. Canonical identity is checked before validating a multi-document batch, so two URI spellings cannot apply conflicting updates to the same file. `file_uri` remains a lexical encoder; `canonical_file_uri` resolves existing files and the nearest existing parent of a new file when a host needs the identity used by project and language services.

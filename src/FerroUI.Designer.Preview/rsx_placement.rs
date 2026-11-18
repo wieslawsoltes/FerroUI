@@ -1,7 +1,6 @@
 use crate::document::DesignDocument;
 use crate::protocol::DragOrigin;
 use ferroui_designer_core::{Document, Edit, NodeId, TextPatch};
-use ferroui_designer_rsx::project_rust;
 use std::collections::{BTreeMap, BTreeSet};
 
 pub(crate) struct PlacementPolicy {
@@ -158,7 +157,7 @@ pub(crate) fn patches(
     for patch in ordered {
         draft_source.replace_range(patch.span.range(), &patch.replacement);
     }
-    let reparsed = project_rust(&draft_source, rsx.invocation.start)?;
+    let reparsed = design.rsx_catalog().project(&draft_source, rsx.invocation.start)?;
     if !reparsed.matches_xaml(draft.source())? {
         return Err("This placement cannot preserve the authored Rust layout".into());
     }

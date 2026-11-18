@@ -1,10 +1,10 @@
-use crate::document::{schema, DesignDocument};
+use crate::document::DesignDocument;
+use crate::projects::Projects;
 use crate::property_fields::{can_add_property, registry};
 use crate::protocol::{EditRequest, EditResult, Operation, MAX_SOURCE_BYTES};
 use crate::renderer::Renderer;
 use ferroui_designer_core::{Edit, Node, NodeId, NodeKind, TextPatch};
 use ferroui_designer_language::{TextEdit, plan_event_handler, routed_events};
-use ferroui_designer_rsx::{apply_rsx, project_rust};
 use ferroui_designer_tools::ExpressionPolicy;
 
 const COMMON_PROPERTIES: &[&str] = &[
@@ -28,8 +28,8 @@ const COMMON_PROPERTIES: &[&str] = &[
     "Canvas.Top",
 ];
 
-pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>) -> Result<EditResult, String> {
-    let design = DesignDocument::parse(&request.document)?;
+pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>, projects: &Projects) -> Result<EditResult, String> {
+    let design = DesignDocument::parse(&request.document, projects.source(&request.document)?)?;
     let mut candidate = design.xaml.snapshot_without_history();
     let mut selected = None;
     let patches = match &request.operation {
@@ -39,7 +39,7 @@ pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>) -> Result
             }
             match &design.rsx {
                 Some(rsx) => rsx.apply_xaml(source)?,
-                None => apply_rsx(&design.xaml, source)?,
+                None => design.rsx_catalog().apply_rsx(&design.xaml, source)?,
             }
         }
         Operation::SetProperty { node, name, .. } | Operation::ResetProperty { node, name } => {
@@ -74,13 +74,13 @@ pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>) -> Result
         Operation::SetEvent { node, name, value } => {
             let target = editable_node(&design, *node)?;
             if let Some((i, _)) = design.rsx_node(*node) {
-                if !routed_events(schema(), &design.xaml, target).contains_key(name) {
+                if !routed_events(design.schema(), &design.xaml, target).contains_key(name) {
                     return Err(format!("{name} is unavailable for this control"));
                 }
                 let rsx = design.rsx.as_ref().unwrap();
                 return rust_edit(&design, rsx.set_event(i, name, value.as_deref())?);
             }
-            let edit = plan_event_handler(schema(), &candidate, target, name, value.as_deref())?;
+            let edit = plan_event_handler(design.schema(), &candidate, target, name, value.as_deref())?;
             candidate.apply("Edit event handler", vec![edit]).map_err(|error| error.to_string())?.patches
         }
         Operation::ApplyResource { frame, node, resource, property, dynamic } => {
@@ -154,7 +154,7 @@ fn rust_edit(design: &DesignDocument<'_>, patch: TextPatch) -> Result<EditResult
     if candidate.len() > MAX_SOURCE_BYTES {
         return Err("Designer source exceeds 1 MiB".into());
     }
-    project_rust(&candidate, design.rsx.as_ref().unwrap().invocation.start)?;
+    design.rsx_catalog().project(&candidate, design.rsx.as_ref().unwrap().invocation.start)?;
     editor_edits(design, vec![patch])
 }
 
@@ -221,7 +221,7 @@ pub(crate) fn editable_attribute(design: &DesignDocument<'_>, node: &Node, name:
                     name.ends_with(":Name")
                 } else {
                     attr.namespace_uri.is_none()
-                        && schema()
+                        && design.schema()
                             .property(node.local_name(), node.namespace_uri.as_deref(), name)
                             .is_none_or(|info| !info.read_only && !info.event)
                 }

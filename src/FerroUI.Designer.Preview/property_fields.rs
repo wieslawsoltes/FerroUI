@@ -1,4 +1,4 @@
-use crate::document::{DesignDocument, schema};
+use crate::document::DesignDocument;
 use crate::edits::editable_attribute;
 use ferroui_base::{BoxedValue, media::IBrush};
 use ferroui_designer_core::{Node, NodeKind, SourceSpan};
@@ -78,7 +78,7 @@ pub(crate) fn property_fields(
         .into_iter()
         .map(|info| (info.name.clone(), info))
         .collect();
-    let mut schema_fields = schema().properties(node.local_name(), node.namespace_uri.as_deref());
+    let mut schema_fields = design.schema().properties(node.local_name(), node.namespace_uri.as_deref());
     let descriptors: BTreeMap<_, _> = registry()
         .descriptors(&design.xaml, node.id)
         .unwrap_or_default()
@@ -86,14 +86,14 @@ pub(crate) fn property_fields(
         .map(|descriptor| (descriptor.name.clone(), descriptor))
         .collect();
     for name in descriptors.keys().filter(|name| name.contains('.')) {
-        if let Some(info) = member(node, name) {
+        if let Some(info) = member(design, node, name) {
             schema_fields.insert(name.clone(), info);
         }
     }
     for attribute in node.attributes.iter().filter(|attr| !attr.is_namespace()) {
         schema_fields
             .entry(attribute.name.clone())
-            .or_insert_with(|| member(node, &attribute.name).unwrap_or_default());
+            .or_insert_with(|| member(design, node, &attribute.name).unwrap_or_default());
     }
     let element_values = object_fields(design, node);
     for name in element_values.keys() {
@@ -181,7 +181,7 @@ fn display_brush(brush: &dyn IBrush) -> String {
 }
 
 pub(crate) fn can_add_property(design: &DesignDocument<'_>, node: &Node, name: &str) -> bool {
-    let Some(info) = member(node, name) else {
+    let Some(info) = member(design, node, name) else {
         return false;
     };
     let descriptor = if name.contains('.') {
@@ -233,8 +233,8 @@ fn can_add(
         })
 }
 
-fn member(node: &Node, name: &str) -> Option<PropertyInfo> {
-    schema().property(node.local_name(), node.namespace_uri.as_deref(), name)
+fn member(design: &DesignDocument<'_>, node: &Node, name: &str) -> Option<PropertyInfo> {
+    design.schema().property(node.local_name(), node.namespace_uri.as_deref(), name)
 }
 
 fn object_fields(design: &DesignDocument<'_>, node: &Node) -> BTreeMap<String, SourceSpan> {
@@ -246,7 +246,7 @@ fn object_fields(design: &DesignDocument<'_>, node: &Node) -> BTreeMap<String, S
                 return None;
             }
             let (owner, name) = child.local_name().split_once('.')?;
-            let name = if owner == node.local_name() || member(node, name).is_some() {
+            let name = if owner == node.local_name() || member(design, node, name).is_some() {
                 name
             } else {
                 child.local_name()

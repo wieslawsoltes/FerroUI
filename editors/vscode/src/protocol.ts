@@ -9,6 +9,7 @@ export interface Source {
     uri: string;
     source: string;
     caret: Position;
+    project?: number;
 }
 export interface Viewport { width: number; height: number; dark: boolean }
 export const DEFAULT_VIEWPORT: Viewport = { width: 800, height: 520, dark: false };

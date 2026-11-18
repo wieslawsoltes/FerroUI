@@ -1,5 +1,6 @@
 //! Selection metadata is fetched independently of the bitmap and authored outline.
 use crate::document::DesignDocument;
+use crate::projects::Projects;
 use crate::event_fields::{EventField, event_fields};
 use crate::property_fields::{PropertyField, property_fields};
 use crate::protocol::Source;
@@ -33,11 +34,12 @@ pub(crate) struct Inspection {
 pub(crate) fn inspect(
     input: &InspectionRequest,
     renderer: Option<&Renderer>,
+    projects: &Projects,
 ) -> Result<Inspection, String> {
     let stage = renderer.and_then(|renderer| renderer.stage(input.frame).ok());
     match input.target {
         InspectionTarget::Source { node } => {
-            let design = DesignDocument::parse(&input.source)?;
+            let design = DesignDocument::parse(&input.source, projects.source(&input.source)?)?;
             let element = design
                 .xaml
                 .ast()
@@ -56,7 +58,7 @@ pub(crate) fn inspect(
             if !(2..=128).contains(&nodes.len()) || distinct.len() != nodes.len() {
                 return Err("Inspect between two and 128 distinct source elements".into());
             }
-            let design = DesignDocument::parse(&input.source)?;
+            let design = DesignDocument::parse(&input.source, projects.source(&input.source)?)?;
             let session = stage.ok_or("Wait for the current preview")?.session.borrow();
             let mut fields = nodes.iter().rev().map(|id| {
                 let node = design.xaml.ast().node(*id).ok_or("Unknown selected element")?;

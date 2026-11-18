@@ -9,6 +9,7 @@ mod hosted_frame;
 mod hosted_relay;
 mod inspection;
 mod placement;
+mod projects;
 mod property_fields;
 mod protocol;
 mod renderer;
@@ -57,6 +58,7 @@ struct Session {
     renderer: Option<Renderer>,
     hosted: Option<hosted_relay::Relay>,
     stages: stages::Stages,
+    projects: projects::Projects,
 }
 
 fn respond(
@@ -64,7 +66,7 @@ fn respond(
     session: &mut Session,
     output: &mut impl Write,
 ) -> io::Result<()> {
-    let Session { renderer, hosted, stages } = session;
+    let Session { renderer, hosted, stages, projects } = session;
     let id = &message["id"];
     let Some(method) = message["method"]
         .as_str()
@@ -80,9 +82,25 @@ fn respond(
     }
     let result = match method {
         "initialize" => Ok(json!({"version": protocol::PROTOCOL_VERSION, "assets": toolbox::catalog(),
-            "capabilities": {"isolatedDesign":true,"appHostedDesign":true,"rsxLanguage":true,"stages":true,"prototypeEditing":true}})),
+            "capabilities": {"isolatedDesign":true,"appHostedDesign":true,"rsxLanguage":true,"stages":true,"prototypeEditing":true,"projectCatalog":true}})),
+        "configureProject" => serde_json::from_value(message["params"].clone())
+            .map_err(|error| error.to_string()).and_then(|request| {
+                let retired = projects.register(request)?;
+                if let Some(renderer) = renderer.as_mut().filter(|renderer| retired.is_some()
+                    && renderer.stage.as_ref().is_some_and(|stage| stage.project == retired)) {
+                    renderer.stage = None;
+                }
+                Ok(Value::Null)
+            }),
         "rsxLanguage" => match message["params"]["source"].as_str() {
-            Some(source) if source.len() <= protocol::MAX_SOURCE_BYTES => serialize(Ok(ferroui_designer_rsx::analyze_rsx(source))),
+            Some(source) if source.len() <= protocol::MAX_SOURCE_BYTES => {
+                let params = &message["params"];
+                projects.document(params["project"].as_u64(), params["uri"].as_str().unwrap_or(""))
+                    .and_then(|project| serialize(Ok(match project {
+                        Some(project) => project.rsx.analyze(source),
+                        None => ferroui_designer_rsx::analyze_rsx(source),
+                    })))
+            }
             _ => Err("RSX language source must be at most 1 MiB".into()),
         },
         "hostedListen" => hosted_relay::Relay::listen(message["params"]["nonce"].as_str().unwrap_or("")).map(|relay| {
@@ -91,42 +109,44 @@ fn respond(
             json!({"port":port})
         }),
         "hostedRender" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
-            .and_then(|design| serialize(hosted.as_mut().ok_or("Start an app-hosted session")?.render(design))),
+            .and_then(|design| serialize(hosted.as_mut().ok_or("Start an app-hosted session")?.render(design, projects))),
         "hostedFrame" => hosted.as_mut().ok_or_else(|| "Start an app-hosted session".into()).and_then(|relay| serialize(relay.frame())),
         "hostedInput" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|input| serialize(hosted.as_ref().ok_or("Start an app-hosted session")?.input(input))),
         "stagesSync" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|request| {
                 renderer.get_or_insert_with(Renderer::new);
-                serialize(stages.sync(request))
+                serialize(stages.sync(request, projects))
             }),
         "stagesEdit" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
-            .and_then(|request| serialize(stages.edit(request))),
+            .and_then(|request| serialize(stages.edit(request, projects))),
         "stagesImage" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|request| serialize(stages.image(request))),
         "stagesPointer" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
-            .and_then(|request| stages.pointer(request)),
+            .and_then(|request| stages.pointer(request, projects)),
         "stagesPrototypeElements" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|request| serialize(stages.prototype_elements(request))),
         "stagesPrototype" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|request| serialize(stages.playback.control(&stages.board, request))),
         "render" => serde_json::from_value(message["params"].clone())
             .map_err(|e| e.to_string())
-            .and_then(|input| {
+            .and_then(|input: protocol::Render| {
+                let project = projects.source(&input.document)?;
                 serialize(snapshot::render(
                     renderer.get_or_insert_with(Renderer::new),
                     &input,
+                    project,
                 ))
             }),
         "edit" => serde_json::from_value(message["params"].clone())
             .map_err(|e| e.to_string())
-            .and_then(|input| serialize(edits::edit(&input, renderer.as_ref()))),
+            .and_then(|input| serialize(edits::edit(&input, renderer.as_ref(), projects))),
         "inspect" => serde_json::from_value(message["params"].clone())
             .map_err(|e| e.to_string())
-            .and_then(|input| serialize(inspection::inspect(&input, renderer.as_ref()))),
+            .and_then(|input| serialize(inspection::inspect(&input, renderer.as_ref(), projects))),
         "resources" => serde_json::from_value(message["params"].clone())
             .map_err(|e| e.to_string())
-            .and_then(|input| serialize(resources::list(&input, renderer.as_ref()))),
+            .and_then(|input| serialize(resources::list(&input, renderer.as_ref(), projects))),
         "placement" => serde_json::from_value::<protocol::PlacementRequest>(message["params"].clone())
             .map_err(|e| e.to_string())
             .and_then(|input| {
@@ -146,7 +166,7 @@ fn respond(
             .map_err(|e| e.to_string())
             .and_then(|edit| {
                 let renderer = renderer.as_mut().ok_or("Open a designer first")?;
-                serialize(studio::edit(renderer, edit))
+                serialize(studio::edit(renderer, edit, projects))
             }),
         _ => {
             return write_frame(

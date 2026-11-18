@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
+import type { BuiltProject, BuiltProjects } from './builtProjects';
 import { NativePreview } from './nativePreview';
-import { errorMessage } from './protocol';
+import { errorMessage, type Source } from './protocol';
 import type { RsxLanguageDocument, RsxProperty } from './rsxLanguageTypes';
 import { asRange } from './textDocument';
 
@@ -8,10 +9,11 @@ const rust = { language: 'rust', scheme: 'file' };
 
 export class RsxLanguage implements vscode.Disposable {
     private readonly subscriptions: vscode.Disposable[];
-    private drafts = new WeakMap<vscode.TextDocument, { version: number; value: Promise<RsxLanguageDocument | undefined> }>();
+    private drafts = new WeakMap<vscode.TextDocument, { version: number; project?: BuiltProject; value: Promise<RsxLanguageDocument | undefined> }>();
     private client?: Promise<NativePreview>;
 
-    constructor(private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel) {
+    constructor(private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel,
+        private readonly projects: BuiltProjects) {
         this.subscriptions = [
             vscode.languages.registerCompletionItemProvider(rust, { provideCompletionItems: this.complete.bind(this) }),
             vscode.languages.registerHoverProvider(rust, { provideHover: this.hover.bind(this) }),
@@ -24,22 +26,24 @@ export class RsxLanguage implements vscode.Disposable {
 
     private async analyze(document: vscode.TextDocument, token: vscode.CancellationToken) {
         const version = document.version;
+        const project = this.projects.forDocument(document.uri);
         let draft = this.drafts.get(document);
-        if (draft?.version !== version) {
+        if (draft?.version !== version || draft.project !== project) {
             const source = document.getText();
             if (token.isCancellationRequested || !/\brsx\s*!/.test(source) || Buffer.byteLength(source) > 1024 * 1024) return;
-            const value = this.read(source).catch(error => {
+            const value = this.read({ source, uri: document.uri.toString(), language: 'rust', caret: { line: 0, character: 0 } }, project).catch(error => {
                 this.output.appendLine(`RSX language tools: ${errorMessage(error)}`);
                 return undefined;
             });
-            draft = { version, value };
+            draft = { version, project, value };
             this.drafts.set(document, draft);
         }
         const model = await draft.value;
-        if (!token.isCancellationRequested && !document.isClosed && document.version === version) return model;
+        if (!token.isCancellationRequested && !document.isClosed && document.version === version
+            && this.projects.forDocument(document.uri) === project) return model;
     }
 
-    private async read(source: string) {
+    private async read(source: Source, project?: BuiltProject) {
         let client = this.client;
         if (client && (await client).closed) {
             if (client === this.client) this.client = undefined;
@@ -50,7 +54,8 @@ export class RsxLanguage implements vscode.Disposable {
             this.client = client;
             void client.catch(() => { if (this.client === client) this.client = undefined; });
         }
-        return (await client).rsxLanguage(source);
+        const native = await client;
+        return native.rsxLanguage(await native.inProject(source, project));
     }
 
     private async complete(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken) {
@@ -60,7 +65,7 @@ export class RsxLanguage implements vscode.Disposable {
             const field = control.fields.find(field => !field.attached && asRange(field.range).contains(position));
             if (!field || !model) continue;
             const existing = new Set(control.fields.filter(other => other !== field).map(other => other.name));
-            return model.properties[control.class].filter(property => !existing.has(property.setter)).map(property => {
+            return (model.properties[control.key ?? control.class] ?? []).filter(property => !existing.has(property.setter)).map(property => {
                 const item = new vscode.CompletionItem(property.setter, vscode.CompletionItemKind.Property);
                 item.range = asRange(field.range);
                 item.detail = `${control.class}.${property.xamlName} · ${property.valueType}`;

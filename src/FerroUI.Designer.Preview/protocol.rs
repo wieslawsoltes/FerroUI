@@ -17,6 +17,7 @@ pub(crate) struct Source {
     pub(crate) uri: String,
     pub(crate) source: String,
     pub(crate) caret: Position,
+    pub(crate) project: Option<u64>,
 }
 
 #[derive(Deserialize)]
@@ -110,7 +111,7 @@ pub(crate) struct EditResult {
     pub(crate) selection: Option<Range>,
 }
 
-#[derive(Serialize)]
+#[derive(Clone, Serialize)]
 pub(crate) struct Asset {
     pub(crate) id: String,
     pub(crate) title: String,

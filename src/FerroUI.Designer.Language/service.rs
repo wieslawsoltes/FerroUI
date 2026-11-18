@@ -212,7 +212,11 @@ impl LanguageService {
             {
                 if let Some(schema) = path
                     .ancestors()
-                    .find_map(|root| self.package_schemas.get(root))
+                    .skip(1)
+                    .find(|root| {
+                        self.package_schemas.contains_key(*root) || root.join("Cargo.toml").is_file()
+                    })
+                    .and_then(|root| self.package_schemas.get(root))
                 {
                     return &schema.effective;
                 }

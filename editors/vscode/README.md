@@ -5,7 +5,7 @@ Open a FerroUI `.xaml` file or a Rust file containing `ferroui_view::rsx!`, then
 ## Working in the designer
 
 - **Toolbox, Outline, Properties, Events, Resources, and Assets** are independent VS Code views. Open them from the canvas toolbar or the Command Palette. Use **View: Move View** to keep Tools and Outline beside the editor and put Properties in the Secondary Side Bar. **View: Toggle Maximize Editor Group** gives the canvas the space of both editor groups. [VS Code custom layout](https://code.visualstudio.com/docs/configure/custom-layout)
-- **Toolbox** shares Designer Studio’s 20 built-in controls, layouts, and shapes. Add single-root XAML snippets to `.ferroui/toolbox` at the workspace root or in a Cargo package. The active package can replace a workspace snippet with the same filename. Compatible snippets also appear when editing RSX. Search by name, category, or description and switch between lists and tiles. Drag a control onto the canvas or Outline. Press Enter to insert into the selected container or its nearest parent with room.
+- **Toolbox** shares Designer Studio’s 20 built-in controls, layouts, and shapes. After a schema or application build, **Project controls** and **Dependency controls** show the constructible controls exported by that Cargo target. Add single-root XAML snippets to `.ferroui/toolbox` at the workspace root or in a Cargo package. The active package can replace a workspace snippet with the same filename. Mapped controls and compatible snippets also appear when editing RSX. Search by name, category, or description and switch between lists and tiles. Drag a control onto the canvas or Outline. Press Enter to insert into the selected container or its nearest parent with room.
 - **Placement** uses the same layout planners as Studio. The canvas shows the insertion location and resolves occupied content hosts through an eligible ancestor or the layout body inside a wrapper. In Source Outline, the top and bottom of a row insert before and after it. Drop in the middle of an available container to nest. Use `Alt` + `↑` or `↓` for keyboard reordering. Canvas placement uses the measured layout, including grid cells and Canvas coordinates. One drop makes one source edit that VS Code can undo.
 - **Outline** offers Source, Visual, Logical, and Combined. The combined hierarchy keeps visual nesting and adds logical-only objects under their logical parent. Select a runtime-only template part to inspect its effective properties and see its bounds. Source mode supports structural edits.
 - **Properties** displays measured X, Y, width, and height alongside editable size, layout, content, and appearance fields supported by the selected control. Search the additional property groups for less common settings. Reset removes an authored literal so the default or style can take effect. Bindings and Rust expressions have a source navigation action.
@@ -51,10 +51,23 @@ npm run package:platform -- ../../target/dist-unwind
 ## Preview and round-trip coverage
 
 - FerroUI XAML uses the designer's runtime loader, design-time projection, WinUI theme, and project-relative file URIs. Run **Build Project XAML Schema** to publish versioned `.xamlmeta` files for a Cargo package. Launch and app-hosted design builds also publish metadata, and `ferroui.types` overrides it. The XAML server supports range formatting, linked tags, namespace imports, spelling fixes, and binding type inlay hints. [XAML language service](../../src/FerroUI.Designer.Language/README.md)
-- Static RSX conversion supports one built-in control tree with common containers and controls, string and numeric literals, boolean values, standard alignment and orientation enums, brushes written as color strings, common attached properties, and grid definitions. Generated RSX expects `use ferroui_view::prelude::*;` and the FerroUI crate dependencies named by any qualified enum paths in the output.
+- Static RSX conversion supports a single tree of built-in and explicitly mapped controls, string and numeric literals, boolean values, standard alignment and orientation enums, brushes written as color strings, common attached properties, and grid definitions. Generated RSX expects `use ferroui_view::prelude::*;` and the FerroUI crate dependencies named by any qualified paths in the output.
 - In Rust source that includes handlers, computed values, control flow, or custom components, the preview shows the supported controls and literals and lists omitted items. The inspector can edit mapped literals and routed handler expressions. Insertions and moves preserve comments and expressions when the edited container has a fully mapped child list. Dynamic child lists are edited in the Rust editor. The alternate tab is read-only for a partial preview.
 - XAML with bindings, styles, resource objects, application directives or property elements remains editable in XAML. The RSX tab explains whichever construct prevents conversion. Value-only counterpart edits preserve unrelated bytes in both formats. A structural conversion regenerates the selected tree in the authored language and requires a tree where it can preserve comments. The Rust file outside the selected tree stays intact.
 - FerroUI adds mapped RSX property completion and hover using the macro's own grammar. Enable `ferroui.rsx.inlayHints` to see types beside mapped literal fields.
+
+### Map an application control to RSX
+
+Export `MarkupAssembly` with `ferroui-build-scan` and add a metadata entry whose key uses `FerroUI.Designer.Rsx.v1:` followed by the full XAML type name. The JSON value names the equivalent Rust builder type. Use a `crate::` path for a local builder or a qualified public crate path for a dependency builder.
+
+```rust
+(
+    "FerroUI.Designer.Rsx.v1:Review.Controls.StatusCard",
+    r#"{"path":"crate::views::StatusCard","properties":{"Caption":"heading"}}"#,
+)
+```
+
+`properties` maps writable XAML properties to the corresponding Rust builder method names. Set `inherit` to `true` for an `El<T>` builder that uses the mapped base control's FerroUI properties, events, and content slot. Open the view with **Open App-Hosted Design** to render its registered native implementation. [Todo Workbench mapping](../../samples/TodoWorkbench/app_preview.rs)
 
 ## App-hosted design and Live App
 

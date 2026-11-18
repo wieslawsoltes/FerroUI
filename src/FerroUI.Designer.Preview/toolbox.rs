@@ -1,7 +1,7 @@
 use crate::protocol::Asset;
 use ferroui_designer::{default_designer_assets, DesignerAsset};
 use ferroui_designer_core::Document;
-use ferroui_designer_rsx::xaml_to_rsx;
+use ferroui_designer_rsx::RsxCatalog;
 use std::sync::OnceLock;
 
 pub(crate) fn assets() -> &'static [DesignerAsset] {
@@ -10,10 +10,10 @@ pub(crate) fn assets() -> &'static [DesignerAsset] {
 }
 
 pub(crate) fn catalog() -> Vec<Asset> {
-    assets().iter().map(describe).collect()
+    assets().iter().map(|asset| describe(asset, RsxCatalog::built_in())).collect()
 }
 
-pub(crate) fn describe(asset: &DesignerAsset) -> Asset {
+pub(crate) fn describe(asset: &DesignerAsset, catalog: &RsxCatalog) -> Asset {
     Asset {
             id: asset.id.clone(),
             title: asset.title.clone(),
@@ -22,7 +22,7 @@ pub(crate) fn describe(asset: &DesignerAsset) -> Asset {
             icon: asset.icon.path().trim_start_matches("F1 ").to_owned(),
             rust: Document::new(&asset.source)
                 .ok()
-                .is_some_and(|document| xaml_to_rsx(&document).is_ok()),
+                .is_some_and(|document| catalog.xaml_to_rsx(&document).is_ok()),
     }
 }
 

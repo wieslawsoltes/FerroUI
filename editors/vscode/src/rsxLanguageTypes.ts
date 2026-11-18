@@ -9,5 +9,5 @@ export interface RsxField {
     shorthand: boolean;
     attached: boolean;
 }
-export interface RsxControl { class: string; name: Range; fields: RsxField[] }
+export interface RsxControl { class: string; key?: string; name: Range; fields: RsxField[] }
 export interface RsxLanguageDocument { nodes: RsxControl[]; properties: Record<string, RsxProperty[]> }

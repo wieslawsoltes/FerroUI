@@ -1,5 +1,6 @@
 import * as path from 'node:path';
 import * as vscode from 'vscode';
+import type { BuiltProjects } from './builtProjects';
 import { ASSETS_VIEW, AssetsView } from './assetsView';
 import { DetailsViews, EVENTS_VIEW, RESOURCES_VIEW } from './detailsViews';
 import { DesignerPanel } from './designerPanel';
@@ -43,7 +44,8 @@ export class DesignerWorkbench implements vscode.Disposable {
     private disposed = false;
     private active?: DesignerPanel;
 
-    constructor(private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel) {
+    constructor(private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel,
+        private readonly projects: BuiltProjects) {
         const changed = () => this.updateDocks();
         this.inspection = new SelectionInspection(changed);
         this.outline = new OutlineView(context.extensionUri, changed, message => { void this.outlineMessage(message); });
@@ -152,7 +154,7 @@ export class DesignerWorkbench implements vscode.Disposable {
     private attach(panel: vscode.WebviewPanel, document: vscode.TextDocument, language: Language,
         caret: vscode.Position, viewport?: Viewport): DesignerPanel {
         const key = document.uri.toString();
-        const designer: DesignerPanel = new DesignerPanel(this.context, this.output, panel, document, ++this.nextSession, language,
+        const designer: DesignerPanel = new DesignerPanel(this.context, this.output, this.projects, panel, document, ++this.nextSession, language,
             caret, () => { this.panels.delete(key); this.followFocus(); }, message => {
                 void this.drag.receive(designer, message).catch(error => designer.post({ type: 'edit', error: errorMessage(error) }));
             }, viewport);

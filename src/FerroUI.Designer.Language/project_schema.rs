@@ -222,6 +222,10 @@ mod tests {
             .unwrap();
         let uri = file_uri(first.join("Card.xaml")).unwrap();
         let elsewhere = file_uri(second.join("Card.xaml")).unwrap();
+        let nested = first.join("nested");
+        std::fs::create_dir_all(&nested).unwrap();
+        std::fs::write(nested.join("Cargo.toml"), "[package]\nname='nested'\nversion='0.1.0'\n").unwrap();
+        let nested_uri = file_uri(nested.join("Draft.xaml")).unwrap();
         let manifest = first.join("Cargo.toml");
         service
             .set_project_metadata(&manifest, std::slice::from_ref(&output))
@@ -234,6 +238,7 @@ mod tests {
         let mut override_type = get(service.schema_for(&uri)).unwrap();
         assert_eq!(override_type.properties["Caption"].type_name, "String");
         assert!(get(service.schema_for(&elsewhere)).is_none());
+        assert!(get(service.schema_for(&nested_uri)).is_none());
         override_type
             .properties
             .get_mut("Caption")

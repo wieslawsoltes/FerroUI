@@ -66,7 +66,7 @@ export class ReloadProcess {
     }
 }
 
-export interface ProjectMetadata { manifest: string; directories: string[] }
+export interface ProjectMetadata { manifest: string; directories: string[]; package?: string }
 
 export function buildCargo(target: CargoTarget, output: ProcessOutput): { process: ReloadProcess; artifact: Promise<string>; metadata(): ProjectMetadata } {
     const args = ['build', '--manifest-path', target.manifest, '--package', target.packageName,
@@ -89,7 +89,7 @@ export function buildCargo(target: CargoTarget, output: ProcessOutput): { proces
         } catch { output.appendLine(line); }
     });
     lines(child.stderr, line => output.appendLine(line));
-    return { process: proc, metadata: () => ({ manifest: target.manifest, directories: [...directories] }), artifact: proc.closed.then(code => {
+    return { process: proc, metadata: () => ({ manifest: target.manifest, directories: [...directories], package: target.packageName }), artifact: proc.closed.then(code => {
         if (code !== 0) throw new Error(`Cargo build failed${code === null ? '' : ` with exit code ${code}`}.`);
         if (!artifact) throw new Error('Cargo did not report an executable for the selected binary.');
         return artifact;

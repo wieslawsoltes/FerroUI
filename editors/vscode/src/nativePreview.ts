@@ -1,6 +1,7 @@
 import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { createMessageConnection, StreamMessageReader, StreamMessageWriter } from 'vscode-jsonrpc/node';
 import type * as vscode from 'vscode';
+import type { BuiltProject } from './builtProjects';
 import type { Asset, DropHint, EditResult, Inspection, InspectionTarget, Operation, Placement, ResourceRow, Snapshot, Source, StudioPresentation, Viewport } from './protocol';
 import type { RsxLanguageDocument } from './rsxLanguageTypes';
 import type { HostedFrame, HostedInput, HostedSource } from './hostedProtocol';
@@ -12,8 +13,10 @@ export class NativePreview implements vscode.Disposable {
     private readonly connection;
     private stopped = false;
     private failure?: Error;
+    private readonly projects = new WeakMap<BuiltProject, Promise<number>>();
+    private nextProject = 0;
     assets: readonly Asset[] = [];
-    capabilities: { isolatedDesign?: boolean; appHostedDesign?: boolean; rsxLanguage?: boolean; stages?: boolean; prototypeEditing?: boolean } = {};
+    capabilities: { isolatedDesign?: boolean; appHostedDesign?: boolean; rsxLanguage?: boolean; stages?: boolean; prototypeEditing?: boolean; projectCatalog?: boolean } = {};
 
     private constructor(command: string, channel: vscode.OutputChannel) {
         this.child = spawn(command, [], { windowsHide: true });
@@ -46,8 +49,20 @@ export class NativePreview implements vscode.Disposable {
 
     get closed(): boolean { return this.stopped; }
 
-    rsxLanguage(source: string): Promise<RsxLanguageDocument | undefined> {
-        return this.capabilities.rsxLanguage ? this.send('rsxLanguage', { source }) : Promise.resolve(undefined);
+    async inProject(source: Source, project?: BuiltProject): Promise<Source> {
+        if (!project || !this.capabilities.projectCatalog) return source;
+        let configured = this.projects.get(project);
+        if (!configured) {
+            const id = ++this.nextProject;
+            configured = this.send('configureProject', { id, workspaceRoot: project.workspaceRoot, ...project.metadata }).then(() => id);
+            this.projects.set(project, configured);
+            void configured.catch(() => this.projects.delete(project));
+        }
+        return { ...source, project: await configured };
+    }
+
+    rsxLanguage(source: Source): Promise<RsxLanguageDocument | undefined> {
+        return this.capabilities.rsxLanguage ? this.send('rsxLanguage', source) : Promise.resolve(undefined);
     }
 
     listenHosted(nonce: string): Promise<{ port: number }> {

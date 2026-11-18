@@ -14,7 +14,10 @@ static ASSEMBLY: MarkupAssembly = MarkupAssembly {
     crate_name: "todo_workbench",
     xmlns_definitions: &[],
     xmlns_prefixes: &[],
-    metadata: &[],
+    metadata: &[(
+        "FerroUI.Designer.Rsx.v1:TodoWorkbench.Design.PreviewBadge",
+        r#"{"path":"crate::app_preview::PreviewBadge","inherit":true}"#,
+    )],
 };
 
 pub(crate) fn start_if_requested() {
@@ -37,7 +40,7 @@ pub(crate) fn start_if_requested() {
 }
 
 #[repr(C)]
-struct PreviewBadge {
+pub(crate) struct PreviewBadge {
     base: TextBlock,
 }
 
@@ -57,4 +60,15 @@ impl PreviewBadge {
         badge.set_font_size(24.0);
         badge
     }
+}
+
+impl ferroui_view::ViewClass for PreviewBadge {
+    fn create() -> Ref<Self> { Self::new() }
+}
+
+#[cfg(test)]
+#[test]
+fn registered_preview_badge_can_be_used_in_rsx() {
+    use ferroui_view::prelude::*;
+    let _ = rsx! { crate::app_preview::PreviewBadge { text: "Design review" } };
 }

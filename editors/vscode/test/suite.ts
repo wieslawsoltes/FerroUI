@@ -155,7 +155,7 @@ export async function run(): Promise<void> {
         await vscode.commands.executeCommand('ferroui.showProperties');
         await vscode.commands.executeCommand('ferroui.showToolbox');
         await vscode.commands.executeCommand('ferroui.showStudio');
-        await verifyCargoTarget(workspace);
+        await verifyCargoTarget(workspace, designer);
         console.log('VS Code docked views, native XAML and RSX rendering, both projection directions, guarded edits and undo passed');
     } finally {
         preview.dispose();

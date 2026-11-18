@@ -2,7 +2,6 @@ use crate::document::DesignDocument;
 use crate::protocol::DragOrigin;
 use ferroui_designer_core::{ChangeSet, Document, NodeId, NodeKind, TextPatch};
 use ferroui_designer_language::{LineIndex, Range};
-use ferroui_designer_rsx::project_rust;
 
 pub(crate) fn dropped_node(
     document: &Document,
@@ -41,7 +40,7 @@ pub(crate) fn authored_range(
         for patch in ordered {
             edited.replace_range(patch.span.range(), &patch.replacement);
         }
-        let projection = project_rust(&edited, rsx.invocation.start).ok()?;
+        let projection = design.rsx_catalog().project(&edited, rsx.invocation.start).ok()?;
         LineIndex::new(&edited)
             .range(projection.nodes.get(index)?.name)
             .ok()

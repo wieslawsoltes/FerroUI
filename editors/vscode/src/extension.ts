@@ -1,10 +1,12 @@
 import * as vscode from 'vscode';
 import { AgentTools } from './agentTools';
+import { BuiltProjects } from './builtProjects';
 import { DesignerWorkbench } from './designerWorkbench';
 import { HotReload } from './hotReload';
 import { HostedDesign } from './hostedDesign';
 import { FerroMcpProvider } from './mcpProvider';
 import { ProjectSchemaBuild } from './projectSchemaBuild';
+import type { ProjectMetadata } from './reloadProcess';
 import { RuntimeConnections } from './runtimeConnections';
 import { RuntimePanel } from './runtimePanel';
 import { RsxLanguage } from './rsxLanguage';
@@ -17,11 +19,14 @@ export function activate(context: vscode.ExtensionContext) {
     const languageOutput = vscode.window.createOutputChannel('FerroUI XAML');
     const previewOutput = vscode.window.createOutputChannel('FerroUI Designer');
     const server = new XamlServer(context, languageOutput);
-    const schemaBuild = new ProjectSchemaBuild(languageOutput, metadata => server.updateProject(metadata));
-    const rsx = new RsxLanguage(context, languageOutput);
-    const designer = new DesignerWorkbench(context, previewOutput);
-    const hosted = new HostedDesign(context, previewOutput, metadata => server.updateProject(metadata));
-    const stages = new StagesPanel(context, previewOutput);
+    const projects = new BuiltProjects(context.workspaceState, languageOutput);
+    const publish = (metadata: ProjectMetadata) => { projects.update(metadata); server.updateProject(metadata); };
+    projects.metadata.forEach(metadata => server.updateProject(metadata));
+    const schemaBuild = new ProjectSchemaBuild(languageOutput, publish);
+    const rsx = new RsxLanguage(context, languageOutput, projects);
+    const designer = new DesignerWorkbench(context, previewOutput, projects);
+    const hosted = new HostedDesign(context, previewOutput, publish);
+    const stages = new StagesPanel(context, previewOutput, projects);
     const reload = new HotReload();
     stopProcesses = async () => { await Promise.all([reload.stop(), hosted.dispose(), schemaBuild.dispose()]); };
     const runtimes = new RuntimeConnections(reload);
@@ -31,8 +36,8 @@ export function activate(context: vscode.ExtensionContext) {
         if (document.languageId === xamlLanguage && document.uri.scheme === 'file') void server.start();
     };
     context.subscriptions.push(
-        schemaBuild, server, rsx, designer, hosted, stages, liveApp, reload, runtimes, mcp, languageOutput, previewOutput,
-        reload.onDidBuild(metadata => server.updateProject(metadata)),
+        projects, schemaBuild, server, rsx, designer, hosted, stages, liveApp, reload, runtimes, mcp, languageOutput, previewOutput,
+        reload.onDidBuild(publish),
         vscode.workspace.onDidOpenTextDocument(startForXaml),
         vscode.workspace.onDidChangeConfiguration(event => {
             if ((event.affectsConfiguration('ferroui.languageServer.path') || event.affectsConfiguration('ferroui.types'))

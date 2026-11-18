@@ -3,6 +3,7 @@ import { pathToFileURL } from 'node:url';
 import { setTimeout as delay } from 'node:timers/promises';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
+import type { BuiltProjects } from './builtProjects';
 import { NativePreview } from './nativePreview';
 import { errorMessage } from './protocol';
 import type { FromStages, NativeStageChange, PrototypeCommand, StageChange, StageInfo, StageManifest, StageModel, StagesRequest, ToStages } from './stagesProtocol';
@@ -18,7 +19,8 @@ export class StagesPanel implements vscode.Disposable {
     private readonly subscriptions: vscode.Disposable[];
     private readonly views = new Map<string, StageSession>();
 
-    constructor(private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel) {
+    constructor(private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel,
+        private readonly projects: BuiltProjects) {
         this.subscriptions = [
             vscode.commands.registerCommand('ferroui.openStages', () => {
                 const editor = vscode.window.activeTextEditor;
@@ -57,7 +59,7 @@ export class StagesPanel implements vscode.Disposable {
 
     private attach(panel: vscode.WebviewPanel, document: vscode.TextDocument, caret: vscode.Position): StageSession {
         const key = document.uri.toString();
-        const session = new StageSession(panel, document, caret, this.context, this.output);
+        const session = new StageSession(panel, document, caret, this.context, this.output, this.projects);
         this.views.set(key, session);
         panel.onDidDispose(() => this.views.delete(key));
         return session;
@@ -83,13 +85,15 @@ class StageSession {
     private manifest?: StageManifest;
 
     constructor(readonly panel: vscode.WebviewPanel, private readonly document: vscode.TextDocument,
-        private readonly caret: vscode.Position, private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel) {
+        private readonly caret: vscode.Position, private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel,
+        private readonly projects: BuiltProjects) {
         this.cacheKey = `ferroui.stages:${document.uri.toString()}`;
         this.manifest = context.workspaceState.get<StageManifest>(this.cacheKey);
         this.subscriptions = [
             panel.onDidDispose(() => this.dispose()),
             panel.onDidChangeViewState(() => this.schedule()),
             panel.webview.onDidReceiveMessage((message: StagesRequest) => { void this.receive(message); }),
+            projects.onDidChange(() => this.schedule()),
             vscode.workspace.onDidChangeTextDocument(event => {
                 const language = languageOf(event.document);
                 if (!language || !event.contentChanges.length) return;
@@ -137,7 +141,7 @@ class StageSession {
         this.busy = true;
         try {
             const client = await this.getClient();
-            const request = await this.nativeChange(change);
+            const request = await this.nativeChange(change, client);
             signal.throwIfAborted();
             if (generation !== this.generation || this.disposed) throw new Error('The stage set changed. Repeat the change on its current board.');
             const model = await client.editStages(request);
@@ -150,7 +154,7 @@ class StageSession {
         }
     }
 
-    private async nativeChange(change: StageChange): Promise<NativeStageChange> {
+    private async nativeChange(change: StageChange, client: NativePreview): Promise<NativeStageChange> {
         if (change.action !== 'add') return change;
         const { action, epoch, name, width, height, dark, sourcePath } = change;
         let source;
@@ -161,7 +165,7 @@ class StageSession {
             if (!language) throw new Error('Choose a FerroUI XAML or Rust file.');
             const caret = vscode.window.visibleTextEditors.find(editor => editor.document === document)?.selection.active
                 ?? new vscode.Position(0, 0);
-            source = sourceOf(document, language, caret);
+            source = await client.inProject(sourceOf(document, language, caret), this.projects.forDocument(document.uri));
         }
         return { action, epoch, name, width, height, dark, source };
     }
@@ -193,8 +197,9 @@ class StageSession {
         try {
             const client = await this.getClient();
             const manifest = this.manifest;
-            const active = sourceOf(this.document, language, this.document.validatePosition(this.caret));
-            const additional = await this.stageSources(manifest ?? this.model?.manifest, active.uri);
+            const active = await client.inProject(sourceOf(this.document, language, this.document.validatePosition(this.caret)),
+                this.projects.forDocument(this.document.uri));
+            const additional = await this.stageSources(manifest ?? this.model?.manifest, active.uri, client);
             const model = await client.syncStages(active, manifest, additional);
             if (manifest === this.manifest) this.manifest = undefined;
             await this.publish(model, client, generation);
@@ -289,7 +294,7 @@ class StageSession {
         if (graph) return { action: 'setPrototype', graph, epoch: model.epoch };
     }
 
-    private async stageSources(manifest: StageManifest | undefined, active: string) {
+    private async stageSources(manifest: StageManifest | undefined, active: string, client?: NativePreview) {
         const paths = [...new Set((manifest?.stages ?? []).map(stage => stage.source_uri))].filter(uri => uri !== active);
         if (paths.length > 15) throw new Error('A Stages board supports up to 16 source documents.');
         return Promise.all(paths.map(async path => {
@@ -298,7 +303,8 @@ class StageSession {
             const document = await vscode.workspace.openTextDocument(uri);
             const language = languageOf(document);
             if (!language) throw new Error('A stage source must be a FerroUI XAML or Rust file.');
-            return { ...sourceOf(document, language, new vscode.Position(0, 0)), uri: path };
+            const source = { ...sourceOf(document, language, new vscode.Position(0, 0)), uri: path };
+            return client ? client.inProject(source, this.projects.forDocument(uri)) : source;
         }));
     }
 

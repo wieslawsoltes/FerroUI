@@ -1,6 +1,7 @@
 use crate::stages_prototype::Playback;
 use crate::{
     document::DesignDocument,
+    projects::Projects,
     protocol::{Image, Source},
 };
 use base64::{Engine, engine::general_purpose::STANDARD};
@@ -33,12 +34,13 @@ struct StageSource {
 }
 
 impl StageSource {
-    fn parse(authored: Source, existing: Option<&Self>) -> Result<Self, String> {
+    fn parse(authored: Source, existing: Option<&Self>, projects: &Projects) -> Result<Self, String> {
+        let project = projects.source(&authored)?;
         let preview = match existing.filter(|source| source.authored == authored) {
             Some(source) => source.preview.clone(),
             None => PreviewStageSource {
                 uri: authored.uri.clone(),
-                document: DesignDocument::parse(&authored)?.xaml,
+                document: DesignDocument::parse(&authored, project)?.xaml,
                 pending: false,
             },
         };
@@ -109,7 +111,7 @@ pub(crate) struct Pointer {
 }
 
 impl Stages {
-    pub(crate) fn sync(&mut self, request: Sync) -> Result<Model, String> {
+    pub(crate) fn sync(&mut self, request: Sync, projects: &Projects) -> Result<Model, String> {
         let uri = request.source.uri.clone();
         if request.additional.len() >= ferroui_designer::MAX_PREVIEW_STAGES {
             return Err("Open at most 16 preview documents".into());
@@ -122,7 +124,7 @@ impl Stages {
             }
             sources.insert(
                 key.clone(),
-                StageSource::parse(source, self.sources.get(&key))?,
+                StageSource::parse(source, self.sources.get(&key), projects)?,
             );
         }
         let epoch = self.board.epoch();
@@ -162,7 +164,7 @@ impl Stages {
         Ok(self.model())
     }
 
-    pub(crate) fn edit(&mut self, request: Change) -> Result<Model, String> {
+    pub(crate) fn edit(&mut self, request: Change, projects: &Projects) -> Result<Model, String> {
         if request.epoch != self.board.epoch() {
             return Err("Read the current Stages board first".into());
         }
@@ -175,7 +177,7 @@ impl Stages {
                 height,
                 dark,
                 source,
-            } => self.add(name, width, height, dark, source)?,
+            } => self.add(name, width, height, dark, source, projects)?,
             Action::Remove { id } => self.board.remove(id)?,
             Action::Update { id, configuration } => {
                 let previous = self.board.stage(id).ok_or("The stage was removed")?;
@@ -208,6 +210,7 @@ impl Stages {
         height: f64,
         dark: bool,
         source: Option<Source>,
+        projects: &Projects,
     ) -> Result<(), String> {
         let active = self.active.as_deref().ok_or("Open a Stages board")?;
         let uri = source
@@ -234,7 +237,7 @@ impl Stages {
         }
         if let Some(source) = source {
             let uri = source.uri.clone();
-            let entry = StageSource::parse(source, self.sources.get(&uri))?;
+            let entry = StageSource::parse(source, self.sources.get(&uri), projects)?;
             let documents = self
                 .sources
                 .iter()
@@ -268,7 +271,7 @@ impl Stages {
         })
     }
 
-    pub(crate) fn pointer(&mut self, request: Pointer) -> Result<Value, String> {
+    pub(crate) fn pointer(&mut self, request: Pointer, projects: &Projects) -> Result<Value, String> {
         if !(0.0..=1.0).contains(&request.x) || !(0.0..=1.0).contains(&request.y) {
             return Err("Choose a point inside the stage".into());
         }
@@ -305,7 +308,7 @@ impl Stages {
             .get(&selection.source_uri)
             .ok_or("Open the stage's source document first")?;
         let source = &source.authored;
-        let parsed = DesignDocument::parse(source)?;
+        let parsed = DesignDocument::parse(source, projects.source(source)?)?;
         let range: Range = if let Some((_, node)) = parsed.rsx_node(selection.node) {
             parsed.range(node.name)?
         } else {

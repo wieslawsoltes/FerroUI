@@ -1,7 +1,8 @@
 use crate::protocol::{Counterpart, Language, Source, MAX_SOURCE_BYTES};
+use crate::projects::Project;
 use ferroui_designer_core::{Document, NodeId, SourceSpan};
 use ferroui_designer_language::{LineIndex, Range, Schema};
-use ferroui_designer_rsx::{project_rust, xaml_to_rsx, RsxNode, RsxProjection};
+use ferroui_designer_rsx::{RsxCatalog, RsxNode, RsxProjection};
 use std::collections::BTreeMap;
 use std::sync::OnceLock;
 
@@ -10,11 +11,12 @@ pub(crate) struct DesignDocument<'a> {
     pub(crate) source: &'a str,
     pub(crate) rsx: Option<RsxProjection<'a>>,
     pub(crate) index: LineIndex,
+    pub(crate) project: Option<&'a Project>,
     rsx_nodes: BTreeMap<NodeId, usize>,
 }
 
 impl<'a> DesignDocument<'a> {
-    pub(crate) fn parse(input: &'a Source) -> Result<Self, String> {
+    pub(crate) fn parse(input: &'a Source, project: Option<&'a Project>) -> Result<Self, String> {
         if input.source.len() > MAX_SOURCE_BYTES {
             return Err("Designer source exceeds 1 MiB".into());
         }
@@ -24,7 +26,7 @@ impl<'a> DesignDocument<'a> {
         let index = LineIndex::new(&input.source);
         let rsx = match input.language {
             Language::Xaml => None,
-            Language::Rust => Some(project_rust(
+            Language::Rust => Some(rsx_catalog(project).project(
                 &input.source,
                 index.offset(input.caret).map_err(|e| e.to_string())?,
             )?),
@@ -53,6 +55,7 @@ impl<'a> DesignDocument<'a> {
             source: &input.source,
             rsx,
             index,
+            project,
             rsx_nodes,
         })
     }
@@ -60,6 +63,12 @@ impl<'a> DesignDocument<'a> {
     pub(crate) fn range(&self, span: SourceSpan) -> Result<Range, String> {
         self.index.range(span).map_err(|e| e.to_string())
     }
+
+    pub(crate) fn schema(&self) -> &Schema {
+        match self.project { Some(project) => &project.schema, None => schema() }
+    }
+
+    pub(crate) fn rsx_catalog(&self) -> &RsxCatalog { rsx_catalog(self.project) }
 
     pub(crate) fn rsx_node(&self, id: NodeId) -> Option<(usize, &RsxNode)> {
         let index = *self.rsx_nodes.get(&id)?;
@@ -87,7 +96,7 @@ impl<'a> DesignDocument<'a> {
                 }),
             };
         }
-        match xaml_to_rsx(&self.xaml) {
+        match self.rsx_catalog().xaml_to_rsx(&self.xaml) {
             Ok(source) => Counterpart {
                 source: Some(source),
                 editable: true,
@@ -100,6 +109,10 @@ impl<'a> DesignDocument<'a> {
             },
         }
     }
+}
+
+fn rsx_catalog(project: Option<&Project>) -> &RsxCatalog {
+    match project { Some(project) => &project.rsx, None => RsxCatalog::built_in() }
 }
 
 pub(crate) fn schema() -> &'static Schema {

@@ -24,6 +24,7 @@ pub(crate) struct Renderer {
 pub(crate) struct Stage {
     pub(crate) session: Rc<RefCell<DesignerSession>>,
     pub(crate) token: u64,
+    pub(crate) project: Option<u64>,
     pub(crate) width: u32,
     pub(crate) height: u32,
     pub(crate) placement_policy: Option<PlacementPolicy>,
@@ -87,6 +88,7 @@ impl Renderer {
         self.stage = Some(Stage {
             session: Rc::new(RefCell::new(session)),
             token: input.frame,
+            project: input.document.project,
             width: input.width,
             height: input.height,
             placement_policy: None,

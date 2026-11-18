@@ -105,8 +105,8 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
     provider.call(&query.name, &query.arguments, Permissions::default())
 }
 
-pub(crate) fn edit(renderer: &mut Renderer, request: Edit) -> Result<EditResult, String> {
-    let design = DesignDocument::parse(&request.document)?;
+pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::projects::Projects) -> Result<EditResult, String> {
+    let design = DesignDocument::parse(&request.document, projects.source(&request.document)?)?;
     let query = request.query;
     if design.rsx.is_some()
         && (!matches!(query.name.as_str(), "designer_selection_layout_edit" | "designer_property") || !design.editable_structure())

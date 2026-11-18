@@ -1,4 +1,5 @@
-use crate::document::{DesignDocument, schema};
+use crate::document::DesignDocument;
+use crate::projects::Projects;
 use crate::protocol::Source;
 use crate::renderer::Renderer;
 use ferroui_designer_core::{Edit, Node, NodeId};
@@ -34,8 +35,9 @@ pub(crate) struct ResourceRow {
 pub(crate) fn list(
     input: &ResourceRequest,
     renderer: Option<&Renderer>,
+    projects: &Projects,
 ) -> Result<Vec<ResourceRow>, String> {
-    let design = DesignDocument::parse(&input.source)?;
+    let design = DesignDocument::parse(&input.source, projects.source(&input.source)?)?;
     if design.rsx.is_some() {
         return Ok(Vec::new());
     }
@@ -148,7 +150,7 @@ fn compatible_properties(
     target: &Node,
 ) -> Vec<String> {
     let kind = resource.local_name();
-    schema()
+    design.schema()
         .properties(target.local_name(), target.namespace_uri.as_deref())
         .into_values()
         .filter(|info| !info.attached && !info.read_only && !info.event)

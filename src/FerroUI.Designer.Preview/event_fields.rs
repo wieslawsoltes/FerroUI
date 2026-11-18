@@ -1,4 +1,4 @@
-use crate::document::{DesignDocument, schema};
+use crate::document::DesignDocument;
 use ferroui_designer_core::Node;
 use ferroui_designer_language::{Range, event_handler_name, event_object_span, routed_events};
 use serde::Serialize;
@@ -18,16 +18,16 @@ pub(crate) fn event_fields(
     node: &Node,
 ) -> Result<Vec<EventField>, String> {
     let rsx = design.rsx_node(node.id).map(|(_, node)| node);
-    routed_events(schema(), &design.xaml, node)
+    routed_events(design.schema(), &design.xaml, node)
         .into_iter()
         .map(|(name, info)| {
             let (handler, span, editable) = if let Some(rsx) = rsx {
                 let setter = ferroui_designer_rsx::event_setter(&name);
-                rsx.events.get(&setter).map_or((None, None, true), |event| {
+                rsx.events.get(&setter).map_or((None, None, rsx.supports_events()), |event| {
                     (
                         design.source.get(event.value.range()).map(str::to_owned),
                         Some(event.value),
-                        event.editable(),
+                        event.editable() && rsx.supports_events(),
                     )
                 })
             } else {

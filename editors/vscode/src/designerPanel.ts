@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import type { BuiltProject, BuiltProjects } from './builtProjects';
 import { CanvasRequests } from './canvasRequests';
 import { NativePreview } from './nativePreview';
 import { DEFAULT_VIEWPORT, errorMessage, isViewport, type Asset, type CanvasSnapshot, type DragMessage, type DropHint, type FrameTarget, type FromDesigner, type Language, type NodeOperation, type NodeTarget, type Operation, type Placement, type Snapshot, type Source, type ToDesigner, type Viewport } from './protocol';
@@ -39,11 +40,13 @@ export class DesignerPanel implements vscode.Disposable {
     private selection: number[] = [];
     private runtime?: RuntimeRow;
     private blockOffset?: number;
+    private project?: BuiltProject;
     assets: readonly Asset[] = [];
 
     constructor(
         private readonly context: vscode.ExtensionContext,
         private readonly output: vscode.OutputChannel,
+        projects: BuiltProjects,
         readonly panel: vscode.WebviewPanel,
         readonly document: vscode.TextDocument,
         readonly session: number,
@@ -55,6 +58,7 @@ export class DesignerPanel implements vscode.Disposable {
     ) {
         this.caret = caret;
         this.viewport = viewport;
+        this.project = projects.forDocument(document.uri);
         let visible = panel.visible;
         this.subscriptions.push(
             panel.onDidDispose(() => { this.dispose(); onClose(); }),
@@ -67,6 +71,12 @@ export class DesignerPanel implements vscode.Disposable {
                 this.changed.fire();
             }),
             panel.webview.onDidReceiveMessage((message: FromDesigner) => { void this.message(message); }),
+            projects.onDidChange(() => {
+                const project = projects.forDocument(document.uri);
+                if (project === this.project) return;
+                this.project = project;
+                this.schedule(0);
+            }),
             vscode.workspace.onDidChangeTextDocument(event => {
                 if (event.document !== document || !event.contentChanges.length) return;
                 if (this.blockOffset !== undefined) {
@@ -402,9 +412,11 @@ export class DesignerPanel implements vscode.Disposable {
         const viewport = this.viewport;
         const caret = this.language === 'rust' && this.blockOffset !== undefined
             ? this.document.positionAt(this.blockOffset) : this.document.validatePosition(this.caret);
-        const input = sourceOf(this.document, this.language, caret);
+        const source = sourceOf(this.document, this.language, caret);
+        const project = this.project;
         try {
             const client = await this.getClient();
+            const input = await client.inProject(source, project);
             const folder = vscode.workspace.getWorkspaceFolder(this.document.uri);
             const snapshot = await client.render(input, viewport, token, folder?.uri.scheme === 'file' ? folder.uri.fsPath : undefined);
             if (this.disposed || token !== this.generation || version !== this.document.version) return;
