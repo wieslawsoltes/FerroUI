@@ -36,10 +36,14 @@ fn main() {
 }
 
 #[cfg(feature = "mcp")]
-fn start_mcp(window: &Window) {
+fn start_mcp(window: &ferroui_base::Ref<Window>) {
     if !std::env::args().any(|arg| arg == "--mcp") {
         return;
     }
+    let root = window.clone().upcast();
+    ferroui_inspect::Inspector::shared()
+        .borrow_mut()
+        .register_root(&root);
     let allow_input = std::env::args().any(|arg| arg == "--mcp-input");
     match ferroui_mcp::serve(ferroui_mcp::Options {
         permissions: ferroui_mcp::Permissions {
@@ -50,9 +54,11 @@ fn start_mcp(window: &Window) {
     }) {
         Ok(server) => {
             let server = std::cell::RefCell::new(Some(server));
-            window.closed(move || {
-                server.borrow_mut().take();
-            }).detach();
+            window
+                .closed(move || {
+                    server.borrow_mut().take();
+                })
+                .detach();
         }
         Err(error) => eprintln!("Could not start Todo MCP: {error}"),
     }

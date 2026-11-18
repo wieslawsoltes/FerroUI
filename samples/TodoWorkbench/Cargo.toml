@@ -14,11 +14,12 @@ test = false
 
 [features]
 hot-reload = ["ferroui-view/hot-reload"]
-mcp = ["dep:ferroui-mcp"]
+mcp = ["dep:ferroui-inspect", "dep:ferroui-mcp"]
 
 [dependencies]
 ferroui-base = { workspace = true }
 ferroui-view = { workspace = true, features = ["desktop"] }
 ferroui-themes-winui = { workspace = true }
+ferroui-inspect = { workspace = true, optional = true }
 ferroui-mcp = { workspace = true, optional = true }
 todo-mvc = { path = "../TodoMvc" }
