@@ -238,13 +238,45 @@ needs. The build computes the table from the roots:
 3. the types and keys the compiled documents of its dependencies name (a control library's
    templates);
 4. the class names and string literals in the application's Rust sources that match a type key
-   or a key of the theme (`Button::new()`, `"AccentButtonStyle"`);
+   or a key of the theme (`Button::new()`, `"AccentButtonStyle"`), and the functions and
+   methods the sources call, read as class names (`text_block()` is `TextBlock`,
+   `.tool_tip("..")` is `ToolTip`): the builders of the declarative layer are named after the
+   classes they make;
 5. the creates edges of the type models: the controls a class's code constructs (`ListBox`
    creates `ListBoxItem`), transitively;
 6. the names in `[package.metadata.ferroui] theme-roots = [..]`.
 
 From the roots, the closure follows the unit graph. The kept units are listed in
 `$OUT_DIR/xaml/theme_parts.txt`.
+
+**An application without markup.** An application whose interface is Rust code (the builders and
+`rsx!` of `ferroui-view`) constructs its theme in code, and `WinUITheme::new()` is every unit of
+the theme. Its build script names the theme, and its code constructs the theme from the table
+the build writes:
+
+```rust
+// build.rs; the manifest has ferroui-build under [build-dependencies] and ferroui-markup-xaml
+// under [dependencies] (the table names the type of a unit).
+fn main() {
+    ferroui_build::Build::from_env().type_system(ferroui_build::TypeSystem::Model).theme("WinUITheme").run();
+}
+
+// main.rs
+ferroui_markup_xaml::include_compiled_xaml!();
+use compiled_markup::THEME_PARTS_FERROUI_THEMES_WINUI_WINUITHEME as THEME_PARTS;
+
+launch_themed(|| WinUITheme::with_parts(None, THEME_PARTS).as_style(), view, |_| {});
+```
+
+The roots are the ones of the list above without the documents: what the sources name and call
+(4), what the code of the live classes creates (5), and `theme-roots` (6). The build reads the
+sources from the root file of the crate (`src/lib.rs`, else `lib.rs`, else `src/main.rs`) and
+the modules it declares: an application with a library and a binary keeps its interface in the
+library, or names in `theme-roots` the controls only the binary makes. The table is named after
+the full name of the class of the theme, in upper case. With `theme-trimming = false` it holds
+every unit, so the code is the same either way. The three declarative versions of hello world
+(`samples/HelloWorld.Builders`, `.Macros`, `.Hooks`) are built this way, and keep the 16 units of
+the WinUI theme the XAML version keeps.
 
 **Reflection-binding paths follow their unit.** A path such as
 `{Binding (controls:TextBox.Text)}` names a class. The generated code yields it through a function
