@@ -176,6 +176,7 @@ def fixture_checks(sources: dict[str, Path], temporary: Path, output: Path, env:
         marker, asset_text, exclusion = "source-one", "asset-one", ""
         initial_generated = None
         previous_generated = None
+        initial_units = None
         cases = [("populate", None), ("absent-repeat", None),
                  ("create", "create"), ("create-repeat", None),
                  ("edit", "edit"), ("edit-repeat", None),
@@ -206,8 +207,15 @@ def fixture_checks(sources: dict[str, Path], temporary: Path, output: Path, env:
                 raise RuntimeError(f"{label} fixture {phase}: stale or incorrect generated/compiled output")
             if not record["generated"]:
                 raise RuntimeError("SampleBuild fixture produced no generated-output evidence")
+            graph = definitions(record)
+            if initial_units is None:
+                initial_units = graph
+            elif graph != initial_units:
+                raise RuntimeError(f"{label} fixture {phase}: the dependency graph changed within one revision")
             if initial_generated is None:
                 initial_generated = record["generated"]
+            if change is None and previous_generated is not None and record["generated"] != previous_generated:
+                raise RuntimeError(f"{label} fixture {phase}: unchanged generated output differs from the previous build")
             if change in {"create", "edit", "delete"} and record["generated"] == previous_generated:
                 raise RuntimeError(f"{label} fixture {phase}: generated exclusion table did not change")
             if phase == "delete" and record["generated"] != initial_generated:
@@ -221,22 +229,25 @@ def fixture_checks(sources: dict[str, Path], temporary: Path, output: Path, env:
             if label == "candidate" and phase.endswith("repeat") and not record["all_units_fresh"]:
                 raise RuntimeError(f"candidate fixture {phase}: unchanged build was unnecessarily rebuilt")
             equivalence = {"generated": record["generated"], "runtime": record["consumer_stdout"],
-                           "units": definitions(record)}
+                           "units": graph}
             if label == "baseline":
                 reference_outputs[phase] = equivalence
             elif equivalence != reference_outputs[phase]:
                 reference = reference_outputs[phase]
-                # An acknowledged output change (label build-output-changes) may change the generated
-                # files; the runtime result (checked against its expected value above) and the graph
-                # still have to be the baseline's.
-                if not (accept_output_changes and equivalence["runtime"] == reference["runtime"]
-                        and without_features(equivalence["units"]) == without_features(reference["units"])):
+                if not accept_output_changes or equivalence["runtime"] != reference["runtime"]:
                     raise RuntimeError(f"fixture {phase}: baseline/candidate generated output, runtime or graph differs")
-                report.setdefault("fixture_output_changes", {})[phase] = changed_outputs(
-                    reference["generated"], equivalence["generated"])
-                if equivalence["units"] != reference["units"]:
-                    report.setdefault("fixture_feature_changes", {})[phase] = changed_features(
-                        reference["units"], equivalence["units"])
+                # The same documented acknowledgement applies to SampleBuild's dependencies.
+                # Each revision repeats its own graph and generated files and every phase checks
+                # the consumer output above.
+                unit_changes = compare_sample_graph(reference["units"], graph, accept_changes=True)
+                if any(unit_changes.values()):
+                    report["fixture_unit_changes"] = unit_changes
+                output_changes = changed_outputs(reference["generated"], equivalence["generated"])
+                if output_changes:
+                    report.setdefault("fixture_output_changes", {})[phase] = output_changes
+                feature_changes = changed_features(reference["units"], graph)
+                if feature_changes:
+                    report.setdefault("fixture_feature_changes", {})[phase] = feature_changes
             previous_generated = record["generated"]
             report["fixture"].append(record)
             save()
@@ -362,6 +373,7 @@ def main() -> int:
                              "graph_unit_changes": report.get("graph_unit_changes", {"added": [], "removed": []}),
                              "fixture_output_changes": report.get("fixture_output_changes", {}),
                              "fixture_feature_changes": report.get("fixture_feature_changes", {}),
+                             "fixture_unit_changes": report.get("fixture_unit_changes", {"added": [], "removed": []}),
                              "candidate_unchanged_builds_all_fresh": True,
                              "optional_file_and_source_and_asset_invalidation": True,
                              "fixture_runtime_and_generated_outputs_equal": not report.get("fixture_output_changes")}
@@ -396,11 +408,13 @@ def main() -> int:
                      "These units use different features in the baseline and candidate.\n\n"
                      + "".join(f"- `{name}`\n" for name in feature_changes[:50]))
         unit_changes = report["summary"]["graph_unit_changes"]
-        if any(unit_changes.values()):
+        fixture_units = report["summary"]["fixture_unit_changes"]
+        if any(unit_changes.values()) or any(fixture_units.values()):
             text += ("\n### Dependency changes acknowledged (`build-output-changes`)\n\n"
-                     "The medians compare different workloads. Shared units keep their profiles.\n\n"
-                     + "".join(f"- Added `{unit}`\n" for unit in unit_changes["added"][:50])
-                     + "".join(f"- Removed `{unit}`\n" for unit in unit_changes["removed"][:50]))
+                     "Shared units keep their profiles in each workload.\n\n"
+                     + "".join(f"- {workload}: {action} `{unit}`\n"
+                               for workload, changes in (("Sample", unit_changes), ("Fixture", fixture_units))
+                               for action, units in changes.items() for unit in units[:50]))
         if args.minimum_speedup:
             text += (f"\nRequested unchanged-build threshold: **{args.minimum_speedup:.2f}×**; "
                      f"passed: **{report['summary']['requested_speedup_gate_passed']}**.\n")
