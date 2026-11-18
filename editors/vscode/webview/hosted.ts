@@ -7,6 +7,7 @@ const canvas = element<HTMLImageElement>('hosted-image');
 const status = element('hosted-status');
 const input = element<HTMLFormElement>('hosted-input');
 const text = element<HTMLInputElement>('hosted-text');
+const send = input.querySelector<HTMLButtonElement>('button[type=submit]')!;
 const fixtureLabel = element('hosted-fixture-label');
 const fixture = element<HTMLSelectElement>('hosted-fixture');
 let fixtureRevision = 0;
@@ -20,6 +21,7 @@ window.addEventListener('message', async ({ data }: MessageEvent<ToHosted>) => {
         status.textContent = data.message;
         interactive = data.interactive;
         text.disabled = !interactive;
+        send.disabled = !interactive;
         const { available, selected, revision, pending } = data.fixtures;
         fixtureRevision = revision;
         fixtureLabel.hidden = !available.length;

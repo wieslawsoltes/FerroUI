@@ -1,6 +1,6 @@
 import type { FrameTarget } from '../src/protocol';
 import type { FromTimeline, TimelineControl, TimelineProgram, TimelineState, ToTimeline } from '../src/timelineProtocol';
-import { element } from './dom';
+import { element, labelButton } from './dom';
 import { dragKeyframe } from './timelineKeyDrag';
 
 declare function acquireVsCodeApi(): { postMessage(message: FromTimeline): void; getState(): number | undefined; setState(program: number): void };
@@ -9,7 +9,6 @@ const status = element('timeline-status');
 const container = element('timeline-program');
 const programs = element<HTMLSelectElement>('timeline-programs');
 const play = element<HTMLButtonElement>('timeline-play');
-const playIcon = play.querySelector('.codicon')!;
 const slider = element<HTMLInputElement>('timeline-seek');
 const time = element<HTMLOutputElement>('timeline-time');
 const ruler = element('timeline-ruler');
@@ -75,7 +74,7 @@ function showTracks(): void {
     const timeline = selected?.timeline;
     container.hidden = !selected || !timeline;
     if (!selected || !timeline) return;
-    const content = JSON.stringify([available.map(({ id, name }) => [id, name]), selected, model.names]);
+    const content = JSON.stringify([available.map(({ id, name }) => [id, name]), selected, model.names, model.writable]);
     if (lastContent !== content) {
         lastContent = content;
         programs.replaceChildren(...available.map(item => new Option(item.name, String(item.id))));
@@ -84,6 +83,7 @@ function showTracks(): void {
         ruler.replaceChildren(...[0, .25, .5, .75, 1].map(proportion => {
             const mark = document.createElement('span');
             mark.textContent = number.format(timeline.duration * proportion);
+            mark.style.left = `${proportion * 100}%`;
             return mark;
         }));
         tracks.replaceChildren(...timeline.tracks.map((track, index) => {
@@ -132,9 +132,7 @@ function showPosition(): void {
     slider.setAttribute('aria-valuetext', `${number.format(seconds)} of ${number.format(timeline.duration)} seconds`);
     tracks.style.setProperty('--timeline-position', `${percent(seconds, timeline.duration)}%`);
     time.value = `${number.format(seconds)} / ${number.format(timeline.duration)} s`;
-    playIcon.className = `codicon codicon-${playing ? 'debug-pause' : 'play'}`;
-    play.title = playing ? 'Pause animation' : 'Play animation';
-    play.setAttribute('aria-label', play.title);
+    labelButton(play, playing ? 'Pause animation' : 'Play animation', playing ? 'debug-pause' : 'play');
     play.disabled = !model.frame || (!playing && (pending || timeline.duration <= 0));
     slider.disabled = !model.frame || playing || timeline.duration <= 0;
     programs.disabled = pending || !model.frame;

@@ -47,7 +47,7 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
 <div class="designer-content">
 <div id="status" class="status" role="status" hidden></div>
 <main id="preview" aria-label="Design" aria-busy="true">
-    <div id="canvas" class="canvas" tabindex="0" role="region" aria-label="Preview canvas" aria-keyshortcuts="0 1 + - Space Enter ArrowUp ArrowDown">
+    <div id="canvas" class="canvas preview-surface" tabindex="0" role="region" aria-label="Preview canvas" aria-keyshortcuts="0 1 + - Space Enter ArrowUp ArrowDown">
         <div id="stage" class="stage">
             <div id="placeholder" class="placeholder">${icon('preview')}<span id="empty-state">Rendering preview…</span></div>
             <div id="artboard" class="artboard" hidden>
@@ -121,13 +121,13 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
 export function outlineHtml(webview: vscode.Webview, root: vscode.Uri): string {
     return page(webview, root, 'outline', 'FerroUI Outline', `
 <main class="outline">
-    <label class="outline-mode">Hierarchy
-        <select id="outline-mode">
+    <div class="toolbar outline-toolbar">
+        <select id="outline-mode" aria-label="Hierarchy">
             <option value="source">Source</option><option value="combined">Combined</option>
             <option value="visual">Visual</option><option value="logical">Logical</option>
         </select>
-    </label>
-    <button type="button" id="outline-layout" disabled>Arrange selection…</button>
+        ${tool('outline-layout', 'layout', 'Arrange selection…', 'disabled')}
+    </div>
     <p class="dock-message" id="outline-message" role="status"></p>
     <ul id="outline-tree" role="tree" aria-label="Control hierarchy"></ul>
 </main>`);
@@ -194,11 +194,11 @@ export function assetsHtml(webview: vscode.Webview, root: vscode.Uri): string {
     <section id="project-asset-preview" class="asset-preview" aria-label="Selected project asset" hidden>
         <img id="asset-thumbnail" alt="" hidden>
         <strong id="asset-title"></strong><code id="asset-path"></code>
-        <div class="asset-actions">
-            <button id="asset-open" type="button">Open</button>
-            <button id="asset-copy" type="button">Copy path</button>
+        <div class="asset-actions tool-group" role="group" aria-label="Asset actions">
+            ${tool('asset-open', 'go-to-file', 'Open asset')}
+            ${tool('asset-copy', 'copy', 'Copy asset path')}
+            ${tool('asset-place', 'insert', 'Choose image placement…', 'hidden')}
             <button id="asset-insert" class="primary" type="button" hidden>Insert image</button>
-            <button id="asset-place" type="button" hidden>Place image…</button>
         </div>
     </section>
     <ul id="project-asset-list" aria-label="Project files"></ul>
@@ -208,71 +208,110 @@ export function assetsHtml(webview: vscode.Webview, root: vscode.Uri): string {
 
 export function runtimeHtml(webview: vscode.Webview, root: vscode.Uri): string {
     return page(webview, root, 'runtime', 'FerroUI Live App', `
-<header class="runtime-toolbar" aria-label="Live App controls">
-    <select id="runtime-target" aria-label="Runtime connection"></select>
-    <select id="runtime-window" aria-label="Application window"></select>
-    <button id="runtime-start">Run with Hot Reload</button>
-    <button id="runtime-attach">Connect</button>
-    <button id="runtime-refresh" title="Reconnect and refresh">Refresh</button>
+<header class="toolbar" aria-label="Live App controls">
+    <div class="runtime-targets">
+        <select id="runtime-target" aria-label="Runtime connection"></select>
+        <select id="runtime-window" aria-label="Application window"></select>
+    </div>
+    <div class="tool-group toolbar-divider" role="group" aria-label="Application actions">
+        ${tool('runtime-start', 'debug-start', 'Run with Hot Reload')}
+        ${tool('runtime-attach', 'plug', 'Connect to application')}
+        ${tool('runtime-refresh', 'refresh', 'Reconnect and refresh')}
+    </div>
 </header>
-<p id="runtime-status" role="status">Connecting…</p>
-<p id="runtime-problem" role="alert" hidden></p>
+<p id="runtime-status" class="dock-message" role="status">Connecting…</p>
+<p id="runtime-problem" class="dock-message error" role="alert" hidden></p>
 <main class="runtime-main" hidden>
     <section class="runtime-stage" aria-label="Running application">
-        <div class="runtime-controls">
-            <button id="runtime-inspect" aria-pressed="true">Inspect</button>
-            <button id="runtime-interact" aria-pressed="false">Interact</button>
+        <div class="toolbar runtime-controls">
+            <div class="segments" role="group" aria-label="Live preview mode">
+                <button id="runtime-inspect" aria-pressed="true">${icon('inspect')}Inspect</button>
+                <button id="runtime-interact" aria-pressed="false">${icon('run')}Interact</button>
+            </div>
         </div>
-        <div class="runtime-canvas"><img id="runtime-image" alt="Running FerroUI window" draggable="false"></div>
+        <div class="runtime-canvas preview-surface"><img id="runtime-image" alt="Running FerroUI window" draggable="false"></div>
         <form id="runtime-input" aria-label="Send input to the selected control" hidden>
             <select id="runtime-input-kind" aria-label="Input kind"><option value="text">Text</option><option value="key">Key gesture</option></select>
             <input id="runtime-input-value" aria-label="Text or key gesture" required maxlength="8192">
-            <button type="submit">Send</button>
+            <button type="submit" class="tool" aria-label="Send input" title="Send input">${icon('send')}</button>
         </form>
     </section>
     <aside aria-label="Runtime inspection">
-        <label>Hierarchy <select id="runtime-hierarchy"><option value="visual">Visual</option><option value="logical">Logical</option><option value="automation">Accessibility</option></select></label>
-        <input id="runtime-filter" type="search" placeholder="Filter elements" aria-label="Filter elements">
-        <ul id="runtime-tree" aria-label="Application hierarchy"></ul>
-        <label>Inspect <select id="runtime-detail"><option value="properties">Properties</option><option value="styles">Styles</option><option value="resources">Resources</option><option value="diagnostics">Diagnostics</option></select></label>
-        <button id="runtime-reveal" hidden>Reveal Source</button>
-        <input id="runtime-property-filter" type="search" placeholder="Filter properties" aria-label="Filter runtime properties" hidden>
-        <div id="runtime-details" aria-label="Runtime details"></div>
+        <section class="runtime-inspect-section" aria-label="Application hierarchy">
+            <div class="runtime-inspect-toolbar">
+                <select id="runtime-hierarchy" aria-label="Hierarchy type"><option value="visual">Visual tree</option><option value="logical">Logical tree</option><option value="automation">Accessibility tree</option></select>
+                <input id="runtime-filter" type="search" placeholder="Filter elements" aria-label="Filter elements">
+            </div>
+            <ul id="runtime-tree" aria-label="Application elements"></ul>
+        </section>
+        <section class="runtime-inspect-section" aria-label="Selected element">
+            <div class="runtime-inspect-toolbar">
+                <select id="runtime-detail" aria-label="Inspection category"><option value="properties">Properties</option><option value="styles">Styles</option><option value="resources">Resources</option><option value="diagnostics">Diagnostics</option></select>
+                ${tool('runtime-reveal', 'go-to-file', 'Reveal Source', 'hidden')}
+            </div>
+            <input id="runtime-property-filter" type="search" placeholder="Filter properties" aria-label="Filter runtime properties" hidden>
+            <div id="runtime-details" aria-label="Runtime details"></div>
+        </section>
     </aside>
 </main>`);
 }
 
 export function hostedHtml(webview: vscode.Webview, root: vscode.Uri): string {
     return page(webview, root, 'hosted', 'FerroUI App Preview', `
-<header class="runtime-header">
-    <button id="hosted-refresh">Refresh Source</button>
-    <label id="hosted-fixture-label" hidden>Fixture <select id="hosted-fixture"></select></label>
+<header class="toolbar hosted-toolbar" aria-label="Application preview controls">
+    <label id="hosted-fixture-label" class="metric" hidden>${icon('database')}<select id="hosted-fixture" aria-label="Preview fixture"></select></label>
+    ${tool('hosted-refresh', 'refresh', 'Refresh Source')}
 </header>
-<p id="hosted-status" role="status">Starting application preview…</p>
-<div class="runtime-canvas"><img id="hosted-image" alt="App-hosted FerroUI design" draggable="false" hidden></div>
-<form id="hosted-input" hidden>
+<p id="hosted-status" class="dock-message" role="status">Starting application preview…</p>
+<main class="hosted-canvas preview-surface" aria-label="Application artboard"><img id="hosted-image" alt="App-hosted FerroUI design" draggable="false" hidden></main>
+<form id="hosted-input" class="toolbar" aria-label="Preview input" hidden>
     <input id="hosted-text" aria-label="Text for the focused preview control" required maxlength="8192">
-    <button type="submit">Send Text</button>
+    <button type="submit" class="tool" title="Send Text" aria-label="Send Text">${icon('send')}</button>
 </form>`);
 }
 
 export function stagesHtml(webview: vscode.Webview, root: vscode.Uri): string {
     return page(webview, root, 'stages', 'FerroUI Stages', `
-<header class="stage-toolbar">
-    <button id="stages-add">Add Stage</button><button id="stages-save">Save Stage Set</button><button id="stages-load">Open Stage Set</button>
-    <button id="stages-edit-prototype" aria-controls="prototype-graph" aria-pressed="false">Prototype Graph</button>
-    <button id="stages-prototype">Play Prototype</button>
+<header class="toolbar stage-toolbar" aria-label="Stages controls">
+    <nav id="stages-tabs" class="segments" aria-label="Stage workbench">
+        <button id="stages-show" aria-controls="stage-cards" aria-pressed="true">${icon('layout')}Stages</button>
+        <button id="stages-edit-prototype" aria-controls="prototype-graph" aria-pressed="false">${icon('git-branch')}Prototype</button>
+    </nav>
+    <div id="stages-commands" class="tool-group" role="group" aria-label="Stage set commands">
+        ${tool('stages-add', 'add', 'Add Stage')}
+        ${tool('stages-load', 'folder-opened', 'Open Stage Set')}
+        ${tool('stages-save', 'save', 'Save Stage Set', 'disabled')}
+        <span class="toolbar-divider" aria-hidden="true"></span>
+        ${tool('stages-prototype', 'play', 'Play Prototype', 'disabled')}
+    </div>
+    <nav id="prototype-actions" class="prototype-controls" aria-label="Prototype playback" hidden></nav>
 </header>
-<p id="stages-status" role="status">Rendering stages…</p>
-<div id="prototype-actions" class="stage-toolbar" aria-label="Prototype controls" hidden></div>
-<main id="stage-cards" aria-label="Native preview stages"></main>
-<section id="prototype-graph" aria-label="Prototype graph" hidden>
-    <header class="stage-toolbar">
-        <button id="prototype-add-flow">Add flow</button><button id="prototype-add-link">Add interaction</button>
-    </header>
-    <ul id="prototype-flows" class="prototype-flows" aria-label="Prototype flows"></ul>
-    <div id="prototype-stages" class="prototype-stages" aria-label="Stage connections"></div>
-</section>`);
+<main class="stage-workspace preview-surface">
+    <p id="stages-status" class="dock-message stage-board-message" role="status">Rendering stages…</p>
+    <section id="stage-cards" aria-label="Native preview stages"></section>
+    <section id="prototype-graph" aria-label="Prototype graph" hidden>
+        <header class="prototype-heading">
+            <ul id="prototype-flows" class="prototype-flows" aria-label="Prototype flows"></ul>
+            <div class="tool-group" role="group" aria-label="Prototype authoring">
+                ${tool('prototype-add-flow', 'add', 'Add flow')}
+                ${tool('prototype-add-link', 'link', 'Add interaction')}
+            </div>
+        </header>
+        <div id="prototype-stages" class="prototype-stages" aria-label="Stage connections"></div>
+    </section>
+</main>
+<div id="stage-menu" class="popover command-menu" popover aria-label="Stage actions">
+    <button type="button" data-stage-action="environment" autofocus>${icon('paintcan')}Environment…</button>
+    <button type="button" data-stage-action="layout">${icon('layout')}Sizing…</button>
+    <button type="button" data-stage-action="designData">${icon('database')}Design data…</button>
+    <button type="button" data-stage-action="state">${icon('symbol-enum')}Visual states…</button>
+    <hr>
+    <button type="button" data-stage-action="refresh">${icon('refresh')}Refresh stage</button>
+    <button type="button" data-stage-action="export">${icon('file-media')}Save PNG…</button>
+    <button type="button" data-stage-action="name">${icon('edit')}Rename…</button>
+    <hr>
+    <button type="button" data-stage-action="remove" class="danger">${icon('trash')}Remove stage</button>
+</div>`);
 }
 
 export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string {
@@ -281,13 +320,12 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
     <p id="timeline-status" role="status" hidden></p>
     <section id="timeline-program" aria-label="Selected animation" hidden>
         <div class="timeline-toolbar">
-            <label for="timeline-programs">Program</label>
-            <select id="timeline-programs"></select>
-            <button type="button" id="timeline-play" aria-label="Play animation" title="Play animation">${icon('play')}</button>
+            ${tool('timeline-play', 'play', 'Play animation')}
+            <select id="timeline-programs" aria-label="Animation program"></select>
             <output id="timeline-time" for="timeline-seek" aria-live="off"></output>
         </div>
-        <input id="timeline-seek" type="range" min="0" value="0" step="any" aria-label="Animation playhead">
         <div class="timeline-grid">
+            <input id="timeline-seek" type="range" min="0" value="0" step="any" aria-label="Animation playhead">
             <div id="timeline-ruler" class="timeline-ruler" aria-hidden="true"></div>
             <ol id="timeline-tracks" aria-label="Property tracks"></ol>
         </div>
@@ -301,17 +339,20 @@ export function designDataHtml(webview: vscode.Webview, root: vscode.Uri): strin
     <p id="data-status" role="status">Reading design data…</p>
     <p id="data-error" role="alert" hidden></p>
     <section id="data-editor" class="data-editor" hidden>
-        <label for="data-preview">Preview data</label>
-        <select id="data-preview"></select>
-        <label for="data-source">Fixtures JSON</label>
+        <div class="data-preview-field">
+            ${icon('database')}<select id="data-preview" aria-label="Preview data"></select>
+        </div>
+        <div class="data-toolbar">
+            <label for="data-source">Fixtures JSON</label>
+            <div class="tool-group" role="group" aria-label="Draft actions">
+                ${tool('data-examples', 'sparkle', 'Create example fixtures')}
+                ${tool('data-discard', 'discard', 'Discard draft')}
+                <button type="button" id="data-apply" class="primary" aria-label="Apply fixtures">Apply</button>
+            </div>
+        </div>
         <textarea id="data-source" spellcheck="false" autocapitalize="off" autocorrect="off"
             aria-describedby="data-fixture-hint"></textarea>
-        <p id="data-fixture-hint">Bind to fields under data. Empty JSON text clears the fixtures.</p>
-        <div class="data-actions">
-            <button type="button" id="data-apply">Apply fixtures</button>
-            <button type="button" id="data-discard">Discard draft</button>
-            <button type="button" id="data-examples">Create example fixtures</button>
-        </div>
+        <p id="data-fixture-hint">Bind to fields under <code>data</code>. Clear the JSON to remove the fixtures.</p>
     </section>
 </main>`);
 }

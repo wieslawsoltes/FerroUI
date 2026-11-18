@@ -1,6 +1,6 @@
 import type { FromRuntime, RuntimeFrame, RuntimeHierarchy, RuntimeInspection, RuntimeNode, RuntimeProperty, ToRuntime } from '../src/runtimeProtocol';
 import type { RuntimeTarget } from '../src/runtimeConnections';
-import { create, element } from './dom';
+import { create, element, iconButton } from './dom';
 
 declare function acquireVsCodeApi(): { postMessage(message: FromRuntime): void };
 const vscode = acquireVsCodeApi();
@@ -13,6 +13,7 @@ const filter = element<HTMLInputElement>('runtime-filter');
 const propertyFilter = element<HTMLInputElement>('runtime-property-filter');
 const inspector = element('runtime-details');
 const image = element<HTMLImageElement>('runtime-image');
+const surface = image.parentElement!;
 const problem = element('runtime-problem');
 const main = document.querySelector<HTMLElement>('.runtime-main')!;
 const form = element<HTMLFormElement>('runtime-input');
@@ -39,6 +40,7 @@ function label(node: RuntimeNode) {
 
 function setMode(interact: boolean) {
     interaction = interact;
+    surface.dataset.mode = interact ? 'interact' : 'inspect';
     selectMode.setAttribute('aria-pressed', String(!interact));
     interactMode.setAttribute('aria-pressed', String(interact));
     form.hidden = !interact || selected === undefined;
@@ -78,18 +80,14 @@ function showProperties(data: RuntimeProperty[], canApply: boolean) {
         value.setAttribute('aria-label', property.name);
         const editable = !property.read_only && !property.binding && (property.value === null || typeof property.value !== 'object');
         value.readOnly = !editable;
-        const apply = create('button', 'Set live');
-        apply.setAttribute('aria-label', `Set ${property.name} live`);
+        const apply = iconButton('check', `Set ${property.name} live`);
         apply.type = 'submit';
         apply.disabled = !editable;
         row.append(name, value, apply);
         if (canApply && editable) {
-            const source = create('button', 'Apply to Source');
-            source.setAttribute('aria-label', `Apply ${property.name} to Source`);
-            source.type = 'button';
-            source.onclick = () => {
+            const source = iconButton('edit', `Apply ${property.name} to Source`, () => {
                 if (frame && selected !== undefined) send({ type: 'assignSource', token: frame.token, node: selected, property: property.name, value: value.value });
-            };
+            });
             row.append(source);
         }
         row.addEventListener('submit', event => {

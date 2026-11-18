@@ -4,7 +4,7 @@
 .asset-preview { display: grid; gap: 4px; padding: 8px; border-block: 1px solid var(--line); }
 .asset-preview img { max-inline-size: 100%; max-block-size: 110px; object-fit: contain; margin-inline: auto; border-radius: 3px; }
 .asset-preview code { color: var(--muted); overflow-wrap: anywhere; }
-.asset-actions { display: flex; flex-wrap: wrap; gap: 4px; }
+.asset-actions { flex-wrap: wrap; }
 #assets-more { margin: 4px 8px; color: var(--vscode-textLink-foreground); }
 #project-asset-list { list-style: none; margin: 0; padding: 2px 0; }
 #project-asset-list button {

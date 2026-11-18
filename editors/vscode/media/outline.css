@@ -1,5 +1,5 @@
-.outline-mode { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-block-end: 1px solid var(--line); }
-.outline-mode select { flex: 1; }
+.outline-toolbar { flex-wrap: nowrap; }
+.outline-toolbar select { flex: 1; }
 #outline-tree { list-style: none; margin: 0; padding: 2px 0; }
 #outline-tree li {
     display: flex;

@@ -5,38 +5,10 @@ body {
     overflow: hidden;
     background: var(--vscode-editor-background);
 }
-.toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 4px 8px;
-    padding: 4px 8px;
-    border-block-end: 1px solid var(--line);
-    background: var(--vscode-editorGroupHeader-tabsBackground, var(--vscode-editor-background));
-}
-.segments, .canvas-tools, .zoom-controls, .dock-tools { display: flex; align-items: center; gap: 2px; }
-.segments { margin-inline-end: auto; flex: none; gap: 0; }
-.segments button { padding-inline: 9px; color: var(--muted); }
-.segments button[aria-pressed=true] { color: var(--vscode-foreground); font-weight: 600; }
+.canvas-tools, .zoom-controls, .dock-tools { display: flex; align-items: center; gap: 2px; }
 .canvas-tools { gap: 5px; }
 .canvas-mode { margin-inline-end: 0; }
 .zoom-controls, .dock-tools { padding-inline-start: 5px; border-inline-start: 1px solid var(--line); }
-.tool {
-    display: inline-grid;
-    flex: none;
-    place-items: center;
-    inline-size: 26px;
-    block-size: 26px;
-    padding: 0;
-}
-.metric {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    font-variant-numeric: tabular-nums;
-}
-.metric .codicon-chevron-down { font-size: 12px; color: var(--muted); }
 #zoom-value { min-inline-size: 27px; }
 .zoom-menu .compact-action { display: none; }
 #blocks { max-inline-size: 133px; color: var(--vscode-dropdown-foreground); background: var(--vscode-dropdown-background); }
@@ -82,9 +54,6 @@ body {
     overflow: auto;
     outline: none;
     overscroll-behavior: contain;
-    background-color: var(--vscode-editor-background);
-    background-image: radial-gradient(circle, color-mix(in srgb, var(--muted) 29%, transparent) 0.75px, transparent 0.95px);
-    background-size: 16px 16px;
     user-select: none;
 }
 .canvas:focus-visible { outline: 1px solid var(--focus); outline-offset: -1px; }
@@ -189,23 +158,6 @@ main:has(.drop-hint:not([hidden])) .selection-label { visibility: hidden; }
 .selection-label:disabled { opacity: 1; }
 #selected-control { overflow: hidden; text-overflow: ellipsis; }
 
-.popover {
-    --popover-width: 248px;
-    position: fixed;
-    inset: auto;
-    inset-block-start: calc(var(--anchor-bottom, 34px) + 6px);
-    inset-inline-start: clamp(8px, calc(var(--anchor-right, 256px) - var(--popover-width)), calc(100vw - 8px - var(--popover-width)));
-    inline-size: min(var(--popover-width), calc(100vw - 16px));
-    max-block-size: calc(100vh - var(--anchor-bottom, 34px) - 14px);
-    margin: 0;
-    overflow: auto;
-    padding: 8px;
-    border: 1px solid var(--vscode-editorWidget-border, var(--line));
-    border-radius: 6px;
-    box-shadow: 0 5px 18px #0004;
-    color: var(--vscode-foreground);
-    background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
-}
 .viewport-menu form { display: grid; gap: 7px; }
 .viewport-menu .field { font-weight: 600; }
 .dimension-fields { display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 6px; }

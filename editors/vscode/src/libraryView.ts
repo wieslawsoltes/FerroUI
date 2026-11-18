@@ -2,10 +2,21 @@ import * as vscode from 'vscode';
 import type { DesignerPanel } from './designerPanel';
 import { errorMessage } from './protocol';
 import { action, StudioContext, type StudioItem } from './studioContext';
-import { componentActions, componentKind, createTemplate, findDefinition, readLibrary, type Component } from './studioLibrary';
+import { componentActions, componentKind, createTemplate, readLibrary, type Component } from './studioLibrary';
 
 export const LIBRARY_VIEW = 'ferroui.library';
 const run = 'ferroui.library.runAction';
+const kindIcons: Record<string, string> = {
+    UserControl: 'symbol-class',
+    CustomControl: 'symbol-class',
+    ControlTemplate: 'symbol-structure',
+    DataTemplate: 'symbol-interface',
+    ControlTheme: 'color-mode',
+    Style: 'paintcan',
+    Resource: 'symbol-property',
+    ResourceDictionary: 'folder-library',
+};
+
 
 export class LibraryView implements vscode.TreeDataProvider<StudioItem>, vscode.Disposable {
     private readonly changed = new vscode.EventEmitter<void>();
@@ -59,7 +70,6 @@ export class LibraryView implements vscode.TreeDataProvider<StudioItem>, vscode.
                 items.push({ ...action('document', 'Return to document preview',
                     () => context.present('designer_definition', { action: 'exit' }), 'arrow-left'), description: scope.definition.title });
             }
-            if (components.length) items.push(action('find', 'Find Definition…', () => findDefinition(context, components), 'search'));
             const owner = panel.nodes[0]?.id;
             if (context.writable && owner !== undefined) {
                 items.push(action('create', 'New Template…', () => createTemplate(context, owner), 'add'));
@@ -71,11 +81,12 @@ export class LibraryView implements vscode.TreeDataProvider<StudioItem>, vscode.
                 groups.set(component.kind, entries);
             }
             return items.concat([...groups].map(([kind, entries]) => ({
-                id: `kind:${kind}`, label: componentKind(kind), description: String(entries.length), icon: 'library',
+                id: `kind:${kind}`, label: componentKind(kind), description: String(entries.length), icon: kindIcons[kind] ?? 'library',
                 children: async () => entries.map(component => ({
                     id: `component:${component.node}`,
                     label: component.display_name,
-                    description: [component.target_type, component.usages && `${component.usages} uses`].filter(Boolean).join(' · '),
+                    description: [component.target_type, component.usages && `${component.usages} ${component.usages === 1 ? 'use' : 'uses'}`]
+                        .filter(Boolean).join(' · '),
                     children: async () => componentActions(context, component),
                 })),
             })));

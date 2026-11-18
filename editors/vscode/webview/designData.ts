@@ -1,5 +1,5 @@
 import type { DesignDataState, FromDesignData, ToDesignData } from '../src/designDataProtocol';
-import { element } from './dom';
+import { element, labelButton } from './dom';
 
 declare function acquireVsCodeApi(): { postMessage(message: FromDesignData): void };
 const vscode = acquireVsCodeApi();
@@ -102,7 +102,7 @@ function display(): void {
     examples.hidden = Boolean(catalog.manifest);
     examples.disabled = pending || !model.frame || stale;
     discard.disabled = !draft || pending;
-    discard.textContent = stale ? 'Reload from source' : 'Discard draft';
+    labelButton(discard, stale ? 'Reload from source' : 'Discard draft', stale ? 'refresh' : 'discard');
     apply.disabled = !draft || !!draft.applied || stale || pending || !model.frame;
     showChoices();
 }
