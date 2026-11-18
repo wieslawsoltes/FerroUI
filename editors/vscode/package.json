@@ -2,7 +2,7 @@
   "name": "ferroui",
   "displayName": "FerroUI Designer",
   "description": "FerroUI XAML and RSX design, native hot reload, and MCP tools for VS Code.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "publisher": "FerroUI",
   "license": "MIT",
   "repository": {
@@ -88,6 +88,24 @@
         "title": "Show Toolbox",
         "category": "FerroUI",
         "icon": "$(extensions)"
+      },
+      {
+        "command": "ferroui.showEvents",
+        "title": "Show Events",
+        "category": "FerroUI",
+        "icon": "$(symbol-event)"
+      },
+      {
+        "command": "ferroui.showResources",
+        "title": "Show Resources",
+        "category": "FerroUI",
+        "icon": "$(library)"
+      },
+      {
+        "command": "ferroui.showAssets",
+        "title": "Show Assets",
+        "category": "FerroUI",
+        "icon": "$(file-media)"
       },
       {
         "command": "ferroui.revealDesignerSource",
@@ -284,6 +302,30 @@
           "name": "Properties",
           "icon": "dist/icons/settings-gear.svg",
           "contextualTitle": "FerroUI Properties"
+        },
+        {
+          "type": "webview",
+          "id": "ferroui.events",
+          "name": "Events",
+          "icon": "dist/icons/symbol-event.svg",
+          "contextualTitle": "FerroUI Events",
+          "visibility": "collapsed"
+        },
+        {
+          "type": "webview",
+          "id": "ferroui.resources",
+          "name": "Resources",
+          "icon": "dist/icons/library.svg",
+          "contextualTitle": "FerroUI Resources",
+          "visibility": "collapsed"
+        },
+        {
+          "type": "webview",
+          "id": "ferroui.assets",
+          "name": "Assets",
+          "icon": "dist/icons/file-media.svg",
+          "contextualTitle": "FerroUI Assets",
+          "visibility": "collapsed"
         }
       ]
     }

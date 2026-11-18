@@ -3,6 +3,7 @@ import { NativePreview } from './nativePreview';
 import { DEFAULT_VIEWPORT, MAX_VIEWPORT_SIZE, MIN_VIEWPORT_SIZE, errorMessage, type Asset, type CanvasSnapshot, type DragMessage, type DropHint, type FrameTarget, type FromDesigner, type Language, type NodeOperation, type NodeTarget, type Operation, type Placement, type Snapshot, type Source, type ToDesigner, type Viewport } from './protocol';
 import { applyTextEdits, asPosition, asRange, sourceOf } from './textDocument';
 import { designerHtml } from './view';
+import type { Inspection, InspectionTarget, Range, ResourceRow, RuntimeRow, RuntimeTreeMode } from './protocol';
 
 interface Frame {
     token: number;
@@ -32,6 +33,7 @@ export class DesignerPanel implements vscode.Disposable {
     private problem?: string;
     private caret: vscode.Position;
     private selected?: number;
+    private runtime?: RuntimeRow;
     private blockOffset?: number;
     assets: readonly Asset[] = [];
 
@@ -93,7 +95,8 @@ export class DesignerPanel implements vscode.Disposable {
     }
 
     get nodes(): readonly Snapshot['nodes'][number][] { return this.frame?.snapshot.nodes ?? emptyNodes; }
-    get selectedNode(): Snapshot['nodes'][number] | undefined { return this.nodes.find(node => node.id === this.selected); }
+    get selectedNode(): Snapshot['nodes'][number] | undefined { return this.runtime ? undefined : this.nodes.find(node => node.id === this.selected); }
+    get runtimeSelection(): RuntimeRow | undefined { return this.runtime; }
     get dimensions(): Viewport { return this.viewport; }
     get status(): string | undefined {
         if (this.editing) return 'Applying edit…';
@@ -117,10 +120,48 @@ export class DesignerPanel implements vscode.Disposable {
         await this.reveal(range, openSource);
     }
 
+    async runtimeTree(target: FrameTarget, tree: RuntimeTreeMode): Promise<RuntimeRow[]> {
+        if (!this.canUse(target)) throw new Error('Wait for the current preview.');
+        const answer = await (await this.getClient()).studioQuery(target.token, 'designer_tree', { tree }, this.selected);
+        return (answer as { nodes: RuntimeRow[] }).nodes;
+    }
+
+    async inspect(frame: FrameTarget, target: InspectionTarget): Promise<Inspection> {
+        if (!this.canUse(frame) || !this.frame) throw new Error('Wait for the current preview.');
+        const source = this.frame.source;
+        return (await this.getClient()).inspect(source, frame.token, target);
+    }
+
+    async resources(frame: FrameTarget, target?: number): Promise<ResourceRow[]> {
+        if (!this.canUse(frame) || !this.frame) throw new Error('Wait for the current preview.');
+        const source = this.frame.source;
+        return (await this.getClient()).resources(source, frame.token, target);
+    }
+
+    async revealSource(frame: FrameTarget, range: Range): Promise<void> {
+        if (this.canUse(frame)) await this.reveal(this.document.validateRange(asRange(range)), true);
+    }
+
+    async selectRuntime(target: FrameTarget, runtime: RuntimeRow, openSource: boolean): Promise<void> {
+        if (!this.canUse(target)) return;
+        if (runtime.source_id !== null) {
+            await this.select({ ...target, node: runtime.source_id }, openSource);
+            return;
+        }
+        this.runtime = runtime;
+        this.post({ type: 'selection', token: target.token, selected: undefined, runtime });
+        this.changed.fire();
+    }
+
+    clearRuntimeSelection(): void {
+        if (this.runtime) this.setSelection(this.selected);
+    }
+
     async editNode(target: NodeTarget, operation: NodeOperation): Promise<void> {
-        if (!this.canUse(target) || operation.node !== target.node || this.selected !== target.node) {
+        if (!this.canUse(target) || operation.node !== target.node || this.selectedNode?.id !== target.node) {
             throw new Error('The selection changed. Use the current Properties view to retry.');
         }
+        if (operation.type === 'applyResource' && operation.frame !== target.token) throw new Error('Read the current resource scope.');
         await this.edit(this.frame!, operation);
     }
 
@@ -184,7 +225,8 @@ export class DesignerPanel implements vscode.Disposable {
     }
 
     private setSelection(id: number | undefined): void {
-        if (id === this.selected) return;
+        if (id === this.selected && !this.runtime) return;
+        this.runtime = undefined;
         this.selected = id;
         const token = this.currentToken;
         if (token !== undefined) this.post({ type: 'selection', token, selected: id });
@@ -240,6 +282,7 @@ export class DesignerPanel implements vscode.Disposable {
             this.assets = client.assets.filter(asset => this.language === 'xaml' || asset.rust);
             const nodes = snapshot.nodes.map(({ id, label, name, bounds, canMove }) => ({ id, label, name, bounds, canMove }));
             this.frame = { token, version, viewport, source: input, snapshot, canvas: { ...snapshot, nodes } };
+            this.runtime = undefined;
             this.selected = selectionAt(snapshot, this.caret) ?? (sameView ? this.selected : undefined) ?? snapshot.nodes[0]?.id;
             if (anchor) this.blockOffset = this.document.offsetAt(asPosition(anchor));
             this.syncCanvas();
@@ -269,7 +312,8 @@ export class DesignerPanel implements vscode.Disposable {
             return;
         }
         if (message.type === 'dock') {
-            const commands = { outline: 'ferroui.showOutline', properties: 'ferroui.showProperties', toolbox: 'ferroui.showToolbox' } as const;
+            const commands = { outline: 'ferroui.showOutline', properties: 'ferroui.showProperties', toolbox: 'ferroui.showToolbox',
+                events: 'ferroui.showEvents', resources: 'ferroui.showResources', assets: 'ferroui.showAssets' } as const;
             await vscode.commands.executeCommand(commands[message.view], this.session);
             return;
         }
@@ -351,7 +395,7 @@ export class DesignerPanel implements vscode.Disposable {
         if (frame && this.currentToken !== undefined) {
             const anchor = frame.snapshot.activeBlock?.start;
             const sourceKey = `${frame.version}:${anchor?.line ?? 0}:${anchor?.character ?? 0}`;
-            this.post({ type: 'snapshot', frame: { session: this.session, token: frame.token }, sourceKey, snapshot: frame.canvas, viewport: frame.viewport, selected: this.selected });
+            this.post({ type: 'snapshot', frame: { session: this.session, token: frame.token }, sourceKey, snapshot: frame.canvas, viewport: frame.viewport, selected: this.selected, runtime: this.runtime });
         } else if (this.problem) {
             this.post({ type: 'error', message: this.problem });
         } else {

@@ -1,7 +1,7 @@
 import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { createMessageConnection, StreamMessageReader, StreamMessageWriter } from 'vscode-jsonrpc/node';
 import type * as vscode from 'vscode';
-import type { Asset, DropHint, EditResult, Operation, Placement, Snapshot, Source, Viewport } from './protocol';
+import type { Asset, DropHint, EditResult, Inspection, InspectionTarget, Operation, Placement, ResourceRow, Snapshot, Source, Viewport } from './protocol';
 import { commandFor } from './tools';
 
 export class NativePreview implements vscode.Disposable {
@@ -30,7 +30,7 @@ export class NativePreview implements vscode.Disposable {
         const client = new NativePreview(command, channel);
         try {
             const hello = await client.send<{ version: number; assets: Asset[] }>('initialize');
-            if (hello.version !== 2) throw new Error(`Preview protocol ${hello.version} is incompatible with this extension.`);
+            if (hello.version !== 3) throw new Error(`Preview protocol ${hello.version} is incompatible with this extension.`);
             client.assets = hello.assets;
             return client;
         } catch (error) {
@@ -47,6 +47,14 @@ export class NativePreview implements vscode.Disposable {
 
     placement(frame: number, placement: Placement): Promise<DropHint> {
         return this.send('placement', { frame, placement });
+    }
+
+    inspect(source: Source, frame: number, target: InspectionTarget): Promise<Inspection> {
+        return this.send('inspect', { ...source, frame, target });
+    }
+
+    resources(source: Source, frame: number, target?: number): Promise<ResourceRow[]> {
+        return this.send('resources', { ...source, frame, target });
     }
 
     studioTools(): Promise<object[]> { return this.send('studioTools'); }

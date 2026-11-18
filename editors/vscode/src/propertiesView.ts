@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import type { FromProperties, NodeOperation, NodeTarget, PropertiesState, ToProperties } from './protocol';
+import type { FrameTarget, FromProperties, NodeOperation, NodeTarget, PropertiesState, Range, ToProperties } from './protocol';
 import { errorMessage } from './protocol';
 import { propertiesHtml, webviewOptions } from './view';
 
@@ -16,6 +16,7 @@ export class PropertiesView implements vscode.WebviewViewProvider, vscode.Dispos
         private readonly visibilityChanged: () => void,
         private readonly edit: (target: NodeTarget, operation: NodeOperation) => Promise<void>,
         private readonly openToolbox: () => void,
+        private readonly reveal: (frame: FrameTarget, range: Range) => Promise<void>,
     ) {}
 
     get visible(): boolean { return this.view?.visible ?? false; }
@@ -46,6 +47,8 @@ export class PropertiesView implements vscode.WebviewViewProvider, vscode.Dispos
             this.sendState();
         } else if (message.type === 'toolbox') {
             this.openToolbox();
+        } else if (message.type === 'reveal') {
+            await this.reveal(message.frame, message.range);
         } else if (message.type === 'edit') {
             let error: string | undefined;
             try {

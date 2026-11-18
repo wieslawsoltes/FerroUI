@@ -13,7 +13,8 @@ const [host] = await Promise.all([
         sourcemap: true,
     }),
     build({
-        entryPoints: { designer: 'webview/main.ts', properties: 'webview/properties.ts', outline: 'webview/outline.ts', toolbox: 'webview/toolbox.ts' },
+        entryPoints: { designer: 'webview/main.ts', properties: 'webview/properties.ts', outline: 'webview/outline.ts',
+            toolbox: 'webview/toolbox.ts', details: 'webview/details.ts', assets: 'webview/assets.ts' },
         outdir: 'dist',
         bundle: true,
         platform: 'browser',
@@ -26,7 +27,8 @@ const codicons = 'node_modules/@vscode/codicons';
 await mkdir('dist/icons', { recursive: true });
 await Promise.all([
     ...['codicon.css', 'codicon.ttf'].map(file => copyFile(`${codicons}/dist/${file}`, `dist/icons/${file}`)),
-    ...['preview.svg', 'list-tree.svg', 'settings-gear.svg', 'extensions.svg'].map(file => copyFile(`${codicons}/src/icons/${file}`, `dist/icons/${file}`)),
+    ...['preview.svg', 'list-tree.svg', 'settings-gear.svg', 'extensions.svg', 'symbol-event.svg', 'library.svg', 'file-media.svg']
+        .map(file => copyFile(`${codicons}/src/icons/${file}`, `dist/icons/${file}`)),
 ]);
 
 const output = Object.entries(host.metafile.outputs)

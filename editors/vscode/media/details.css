@@ -1,0 +1,18 @@
+.details-header { display: grid; gap: 5px; padding: 7px 9px 5px; }
+.details-filter { display: flex; align-items: center; gap: 6px; color: var(--muted); }
+.details-filter input { inline-size: 100%; }
+.details-option { display: flex; align-items: center; gap: 5px; color: var(--muted); }
+.details-option input { min-block-size: auto; margin-inline: 0; accent-color: var(--focus); }
+.detail-row { display: grid; gap: 4px; padding: 6px 9px; border-block-start: 1px solid var(--line); }
+.detail-heading { display: flex; align-items: center; min-inline-size: 0; min-block-size: 22px; gap: 6px; }
+.detail-heading strong { overflow-wrap: anywhere; }
+.detail-heading code { color: var(--muted); font-size: .85em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.detail-heading .row-action { margin-inline-start: auto; }
+.detail-meta { margin: 0; color: var(--muted); overflow-wrap: anywhere; font-size: .9em; }
+.detail-controls { display: flex; align-items: center; gap: 4px; padding-block-end: 2px; }
+.detail-controls input, .detail-controls textarea { flex: 1; min-inline-size: 0; inline-size: 100%; padding: 4px 5px; }
+.detail-controls textarea { resize: vertical; }
+.detail-controls select { max-inline-size: 100%; }
+.apply-resource { flex-wrap: wrap; }
+.apply-resource select:first-child { min-inline-size: 0; flex: 1 1 75px; }
+.row-action { display: inline-grid; place-items: center; padding: 2px 4px; min-block-size: 22px; }

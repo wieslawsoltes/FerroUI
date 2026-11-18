@@ -1,134 +1,178 @@
-import type { NodeOperation, OutlineNode, Property } from '../src/protocol';
-import { choices, create, element } from './dom';
+import type { Bounds, NodeOperation, PropertiesState, PropertyField, Range } from '../src/protocol';
+import { create, element } from './dom';
+import { propertyEditor } from './propertyEditor';
+
+const common = [
+    ['Position and size', ['Canvas.Left', 'Canvas.Top', 'Grid.Row', 'Grid.Column', 'Width', 'Height']],
+    ['Layout', ['HorizontalAlignment', 'VerticalAlignment', 'Orientation', 'Direction', 'Spacing', 'Margin', 'Padding']],
+    ['Content', ['Content', 'Header', 'Text', 'Source', 'FontSize', 'Foreground']],
+    ['Appearance', ['Background', 'Fill', 'Stroke', 'BorderBrush', 'StrokeThickness', 'BorderThickness', 'CornerRadius', 'Opacity', 'IsVisible']],
+] as const;
 
 export class Inspector {
     private readonly target = element('properties');
     private readonly selection = element('element-properties');
     private readonly filter = element<HTMLInputElement>('filter');
+    private readonly metrics = element('property-metrics');
     private selectedKey?: string;
     private contentKey?: string;
-    private inputs = new Map<string, HTMLInputElement>();
+    private readonly expanded = new Set<string>();
 
     constructor(
         private readonly edit: (operation: NodeOperation) => void,
         private readonly openToolbox: () => void,
+        private readonly reveal: (range: Range) => void,
     ) {
         this.filter.addEventListener('input', () => this.applyFilter());
     }
 
-    show(session: number | undefined, node: OutlineNode | undefined, enabled: boolean): void {
-        this.selection.hidden = !node;
-        this.target.toggleAttribute('inert', !enabled);
-        if (!node) {
-            this.selectedKey = undefined;
-            this.contentKey = undefined;
+    show(state: PropertiesState, enabled: boolean): void {
+        const { node, runtime, fields } = state;
+        const label = runtime?.type ?? node?.label;
+        this.selection.hidden = !label;
+        // A source range can still be revealed on a read-only row.
+        this.target.toggleAttribute('inert', !state.frame || Boolean(node && !enabled));
+        if (!label) {
+            this.selectedKey = this.contentKey = undefined;
             this.target.replaceChildren();
             return;
         }
-        const selectedKey = `${session}:${node.id}`;
-        const changedSelection = selectedKey !== this.selectedKey;
-        this.selectedKey = selectedKey;
-        const contentKey = JSON.stringify([selectedKey, node.label, node.name, node.properties,
-            node.addableProperties, node.canInsert, node.canRemove]);
+        const key = `${state.session}:${runtime ? 'runtime' : 'source'}:${node?.id ?? runtime?.inspector_id}`;
+        const changedSelection = key !== this.selectedKey;
+        this.selectedKey = key;
+        if (changedSelection) this.filter.value = '';
+        element('control-type').textContent = label;
+        const name = element('control-name');
+        name.textContent = runtime ? [runtime.name, 'Runtime'].filter(Boolean).join(' · ') : node?.name ?? '';
+        name.hidden = !name.textContent;
+        this.showMetrics(runtime?.bounds ?? node?.bounds);
+        element('filter-row').hidden = !fields?.length;
+
+        // Keep the existing rows mounted across an edit and its rerender. The host frame gate
+        // keeps stale fields inert while the next inspection is being fetched.
+        if (!fields && !changedSelection) return;
+        const contentKey = JSON.stringify([key, fields, node?.canInsert, node?.canRemove]);
         if (this.contentKey === contentKey) return;
         this.contentKey = contentKey;
-        if (changedSelection) this.filter.value = '';
-        element('control-type').textContent = node.label;
-        const name = element('control-name');
-        name.textContent = node.name ?? '';
-        name.hidden = !node.name;
-        element('filter-row').hidden = node.properties.length < 5 && !this.filter.value;
-
-        const focus = document.activeElement instanceof HTMLInputElement ? document.activeElement.dataset.property : undefined;
-        this.inputs.clear();
-        const form = create('div');
-        form.className = 'property-list';
-        for (const property of node.properties) form.append(this.property(node.id, property));
-        if (!node.properties.length) {
-            const hint = create('p', 'No authored properties.');
-            hint.className = 'hint';
-            form.append(hint);
-        } else {
-            const empty = create('p', 'No matching properties.');
-            empty.className = 'hint';
-            empty.id = 'filter-empty';
-            form.append(empty);
+        const focus = (document.activeElement as HTMLElement | null)?.dataset.property;
+        const byName = new Map(fields?.map(field => [field.name, field]));
+        const sections: HTMLElement[] = [];
+        for (const [group, names] of common) {
+            const visible = names.flatMap(name => {
+                const field = byName.get(name);
+                byName.delete(name);
+                return field ? [field] : [];
+            });
+            if (visible.length) sections.push(this.commonSection(group, visible, node?.id));
         }
-        if (node.addableProperties.length) form.append(this.addProperty(node));
-        if (node.canInsert || node.canRemove) form.append(this.structure(node));
-        this.target.replaceChildren(form);
+        const groups = new Map<string, PropertyField[]>();
+        for (const field of byName.values()) {
+            let group = groups.get(field.group);
+            if (!group) groups.set(field.group, group = []);
+            group.push(field);
+        }
+        if (groups.size) {
+            const more = create('h3', node ? 'More properties' : 'Runtime properties');
+            more.className = 'properties-more';
+            sections.push(more);
+            for (const [group, members] of [...groups].sort(([a], [b]) => a.localeCompare(b))) {
+                sections.push(this.detail(group, members, node?.id));
+            }
+        }
+        if (fields?.length) {
+            const empty = create('p', 'No matching properties.');
+            empty.id = 'filter-empty';
+            empty.className = 'hint';
+            empty.hidden = true;
+            sections.push(empty);
+        }
+        if (node && (node.canInsert || node.canRemove)) sections.push(this.structure(node.id, node.canInsert, node.canRemove));
+        this.target.replaceChildren(...sections);
         this.applyFilter();
-        if (focus && enabled && !changedSelection) this.inputs.get(focus)?.focus();
+        if (focus && enabled && !changedSelection) {
+            this.target.querySelector<HTMLElement>(`[data-property="${CSS.escape(focus)}"]`)?.focus({ preventScroll: true });
+        }
+    }
+
+    private showMetrics(bounds?: Bounds | null): void {
+        this.metrics.hidden = !bounds;
+        if (!bounds) return;
+        for (const output of this.metrics.querySelectorAll<HTMLElement>('[data-metric]')) {
+            const value = bounds[output.dataset.metric as keyof Bounds];
+            output.textContent = Number(value.toFixed(1)).toString();
+        }
+    }
+
+    private commonSection(name: string, fields: PropertyField[], node?: number): HTMLElement {
+        const box = create('section');
+        box.className = 'property-section';
+        box.dataset.section = name;
+        const heading = create('h3', name);
+        const list = create('div');
+        list.className = name === 'Position and size' ? 'property-list size-grid' : 'property-list';
+        list.append(...fields.map(field => this.field(field, node)));
+        box.append(heading, list);
+        return box;
+    }
+
+    private detail(name: string, fields: PropertyField[], node?: number): HTMLElement {
+        const detail = create('details');
+        detail.className = 'property-section extra-properties';
+        detail.dataset.section = name;
+        detail.open = this.expanded.has(name) || node === undefined;
+        const summary = create('summary', name);
+        summary.addEventListener('click', () => {
+            if (detail.open) this.expanded.delete(name);
+            else this.expanded.add(name);
+        });
+        const rows = create('div');
+        rows.className = 'property-list';
+        rows.append(...fields.map(field => this.field(field, node)));
+        detail.append(summary, rows);
+        return detail;
+    }
+
+    private field(field: PropertyField, node?: number): HTMLElement {
+        return propertyEditor(field, {
+            set: value => { if (node !== undefined) this.edit({ type: 'setProperty', node, name: field.name, value }); },
+            reset: () => { if (node !== undefined) this.edit({ type: 'resetProperty', node, name: field.name }); },
+            reveal: this.reveal,
+        });
     }
 
     private applyFilter(): void {
         const needle = this.filter.value.trim().toLowerCase();
-        const rows = this.target.querySelectorAll<HTMLElement>('[data-attribute]');
-        let matching = 0;
-        for (const row of rows) {
-            row.hidden = !(row.dataset.attribute ?? '').toLowerCase().includes(needle);
-            if (!row.hidden) matching++;
+        let matches = 0;
+        for (const section of this.target.querySelectorAll<HTMLElement>('[data-section]')) {
+            let visible = 0;
+            for (const row of section.querySelectorAll<HTMLElement>('[data-attribute]')) {
+                const haystack = `${section.dataset.section} ${row.dataset.attribute}`.toLowerCase();
+                row.hidden = !haystack.includes(needle);
+                if (!row.hidden) visible++;
+            }
+            section.hidden = visible === 0;
+            matches += visible;
+            if (section instanceof HTMLDetailsElement) section.open = Boolean(needle) || this.expanded.has(section.dataset.section ?? '') || section.dataset.section === 'Runtime';
         }
         const empty = document.getElementById('filter-empty');
-        if (empty) empty.hidden = matching > 0;
+        if (empty) empty.hidden = matches > 0 || !needle;
+        const more = this.target.querySelector<HTMLElement>('.properties-more');
+        if (more) more.hidden = !this.target.querySelector('details:not([hidden])');
     }
 
-    private property(id: number, property: Property): HTMLElement {
-        const row = create('form');
-        row.className = 'property';
-        row.dataset.attribute = property.name;
-        const label = create('label', property.name);
-        label.title = property.name;
-        const input = create('input');
-        input.id = `property-${this.inputs.size}`;
-        label.htmlFor = input.id;
-        input.dataset.property = property.name;
-        input.value = property.value;
-        input.readOnly = !property.editable;
-        const commit = () => {
-            if (property.editable && input.value !== property.value) {
-                this.edit({ type: 'setProperty', node: id, name: property.name, value: input.value });
-            }
-        };
-        row.addEventListener('submit', event => { event.preventDefault(); commit(); });
-        input.addEventListener('change', commit);
-        row.append(label, input);
-        this.inputs.set(property.name, input);
-        return row;
-    }
-
-    private addProperty(node: OutlineNode): HTMLElement {
-        const form = create('form');
-        form.className = 'add-property';
-        form.setAttribute('aria-label', 'Add property');
-        const property = choices(node.addableProperties, 'New property');
-        const value = create('input');
-        value.setAttribute('aria-label', 'Property value');
-        value.placeholder = 'Value';
-        const add = create('button', 'Set');
-        add.type = 'submit';
-        add.className = 'primary';
-        form.append(property, value, add);
-        form.addEventListener('submit', event => {
-            event.preventDefault();
-            this.edit({ type: 'setProperty', node: node.id, name: property.value, value: value.value });
-        });
-        return form;
-    }
-
-    private structure(node: OutlineNode): HTMLElement {
+    private structure(node: number, canInsert: boolean, canRemove: boolean): HTMLElement {
         const row = create('div');
         row.className = 'structure';
-        if (node.canInsert) {
+        if (canInsert) {
             const button = create('button', 'Open Toolbox');
             button.className = 'secondary';
             button.addEventListener('click', this.openToolbox);
             row.append(button);
         }
-        if (node.canRemove) {
-            const remove = create('button', 'Remove');
+        if (canRemove) {
+            const remove = create('button', 'Remove control');
             remove.className = 'secondary';
-            remove.addEventListener('click', () => this.edit({ type: 'removeNode', node: node.id }));
+            remove.addEventListener('click', () => this.edit({ type: 'removeNode', node }));
             row.append(remove);
         }
         return row;

@@ -1,25 +1,38 @@
 import * as path from 'node:path';
 import * as vscode from 'vscode';
+import { ASSETS_VIEW, AssetsView } from './assetsView';
+import { DetailsViews, EVENTS_VIEW, RESOURCES_VIEW } from './detailsViews';
 import { DesignerPanel } from './designerPanel';
 import { DesignerDrag } from './designerDrag';
 import { DockView } from './dockView';
+import { OutlineView } from './outlineView';
+import { SelectionInspection } from './selectionInspection';
 import { PROPERTIES_VIEW, PropertiesView } from './propertiesView';
-import { errorMessage, type FrameTarget, type FromOutline, type FromToolbox, type NodeOperation, type NodeTarget, type OutlineState, type ToolboxState, type ToOutline, type ToToolbox } from './protocol';
+import { errorMessage, type DesignerView, type DetailsView, type DragOrigin, type FrameTarget, type FromAssets, type FromDetails, type FromOutline, type FromToolbox, type NodeOperation, type NodeTarget, type OutlineMode, type ToolboxState, type ToToolbox } from './protocol';
 import { languageOf } from './textDocument';
-import { outlineHtml, toolboxHtml, webviewOptions } from './view';
+import { toolboxHtml, webviewOptions } from './view';
 
 const OUTLINE_VIEW = 'ferroui.outline';
 const TOOLBOX_VIEW = 'ferroui.toolbox';
+const docks = { outline: OUTLINE_VIEW, properties: PROPERTIES_VIEW, toolbox: TOOLBOX_VIEW,
+    assets: ASSETS_VIEW, events: EVENTS_VIEW, resources: RESOURCES_VIEW } as const;
 
 export class DesignerWorkbench implements vscode.Disposable {
     private readonly panels = new Map<string, DesignerPanel>();
-    private readonly outline: DockView<OutlineState, FromOutline, ToOutline>;
+    private readonly outline: OutlineView;
     private readonly toolbox: DockView<ToolboxState, FromToolbox, ToToolbox>;
     private readonly properties: PropertiesView;
+    private readonly inspection: SelectionInspection;
+    private readonly details: DetailsViews;
+    private readonly assets: AssetsView;
     private readonly drag = new DesignerDrag(update => {
         this.outline.post(update);
         this.toolbox.post(update);
+        this.assets.view.post(update);
         for (const panel of this.panels.values()) panel.post(update);
+    }, origin => this.assets.ownsImage(origin), async (panel, origin) => {
+        const source = await this.assets.library.imageSource(panel.document.uri, origin.asset ?? '');
+        if (source !== origin.source) throw new Error('The image changed during the drag. Start again from Assets.');
     });
     private readonly subscriptions: vscode.Disposable[];
     private nextSession = 0;
@@ -28,14 +41,21 @@ export class DesignerWorkbench implements vscode.Disposable {
 
     constructor(private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel) {
         const changed = () => this.updateDocks();
-        this.outline = new DockView(context.extensionUri, outlineHtml, changed, message => { void this.outlineMessage(message); });
+        this.inspection = new SelectionInspection(changed);
+        this.outline = new OutlineView(context.extensionUri, changed, message => { void this.outlineMessage(message); });
         this.toolbox = new DockView(context.extensionUri, toolboxHtml, changed, message => { void this.toolboxMessage(message); });
+        this.details = new DetailsViews(context.extensionUri, changed, (view, message) => { void this.detailsMessage(view, message); });
+        this.assets = new AssetsView(context.extensionUri, changed, message => { void this.assetsMessage(message); });
         this.properties = new PropertiesView(context.extensionUri, changed, (target, operation) => this.edit(target, operation),
-            () => { void this.showDock(TOOLBOX_VIEW); });
+            () => { void this.showDock(TOOLBOX_VIEW); },
+            async (frame, range) => { await this.active?.revealSource(frame, range); });
         this.subscriptions = [
             vscode.window.registerWebviewViewProvider(OUTLINE_VIEW, this.outline),
             vscode.window.registerWebviewViewProvider(TOOLBOX_VIEW, this.toolbox),
             vscode.window.registerWebviewViewProvider(PROPERTIES_VIEW, this.properties),
+            vscode.window.registerWebviewViewProvider(EVENTS_VIEW, this.details.events),
+            vscode.window.registerWebviewViewProvider(RESOURCES_VIEW, this.details.resources),
+            vscode.window.registerWebviewViewProvider(ASSETS_VIEW, this.assets.view),
             vscode.window.onDidChangeActiveTextEditor(() => this.followFocus()),
             vscode.window.tabGroups.onDidChangeTabGroups(() => this.followFocus()),
             vscode.window.tabGroups.onDidChangeTabs(() => this.followFocus()),
@@ -43,6 +63,9 @@ export class DesignerWorkbench implements vscode.Disposable {
             vscode.commands.registerCommand('ferroui.showOutline', (session?: number) => this.showDock(OUTLINE_VIEW, session)),
             vscode.commands.registerCommand('ferroui.showProperties', (session?: number) => this.showDock(PROPERTIES_VIEW, session)),
             vscode.commands.registerCommand('ferroui.showToolbox', (session?: number) => this.showDock(TOOLBOX_VIEW, session)),
+            vscode.commands.registerCommand('ferroui.showEvents', (session?: number) => this.showDock(EVENTS_VIEW, session)),
+            vscode.commands.registerCommand('ferroui.showResources', (session?: number) => this.showDock(RESOURCES_VIEW, session)),
+            vscode.commands.registerCommand('ferroui.showAssets', (session?: number) => this.showDock(ASSETS_VIEW, session)),
             vscode.commands.registerCommand('ferroui.revealDesignerSource', () => {
                 const panel = this.active;
                 const node = panel?.selectedNode;
@@ -91,11 +114,26 @@ export class DesignerWorkbench implements vscode.Disposable {
     designs(): readonly DesignerPanel[] { return [...this.panels.values()]; }
     get activeDesign(): DesignerPanel | undefined { return this.active; }
 
-    async revealDesign(panel: DesignerPanel, view: 'canvas' | 'outline' | 'properties' | 'toolbox'): Promise<void> {
+    async revealDesign(panel: DesignerPanel, view: DesignerView): Promise<void> {
         if (view === 'canvas') {
             panel.panel.reveal(undefined, false);
             this.setActive(panel);
-        } else await this.showDock({ outline: OUTLINE_VIEW, properties: PROPERTIES_VIEW, toolbox: TOOLBOX_VIEW }[view], panel.session);
+        } else await this.showDock(docks[view], panel.session);
+    }
+
+    setOutlineMode(panel: DesignerPanel, mode: OutlineMode): void {
+        this.setActive(panel);
+        this.outline.switch(mode, panel);
+    }
+
+    async projectAssets(panel: DesignerPanel) {
+        const folder = vscode.workspace.getWorkspaceFolder(panel.document.uri);
+        return folder ? this.assets.library.list(folder, panel.document.uri, panel.language === 'xaml') : [];
+    }
+
+    async projectImage(panel: DesignerPanel, id: string): Promise<Extract<DragOrigin, { type: 'image' }>> {
+        if (panel.language !== 'xaml') throw new Error('Project image placement is available in XAML.');
+        return { type: 'image', source: await this.assets.library.imageSource(panel.document.uri, id) };
     }
 
     private followFocus(): void {
@@ -118,21 +156,27 @@ export class DesignerWorkbench implements vscode.Disposable {
 
     private updateDocks(): void {
         const panel = this.active;
-        panel?.setInspected(this.outline.visible || this.properties.visible || this.toolbox.visible);
+        panel?.setInspected(this.outline.visible || this.properties.visible || this.toolbox.visible
+            || this.details.events.visible || this.details.resources.visible || this.assets.view.visible);
         const file = panel ? vscode.workspace.asRelativePath(panel.document.uri, false) : '';
         const token = panel?.currentToken;
         const node = panel?.selectedNode;
         const frame = panel && token !== undefined && !panel.status ? { session: panel.session, token } : undefined;
-        this.outline.show({ frame, session: panel?.session, selected: node?.id, message: panel?.status,
-            nodes: panel?.nodes.map(({ id, parent, label, name, canMove, canInsert }) => ({ id, parent, label, name, canMove, canInsert })) ?? [] }, file);
+        const inspection = this.properties.visible || this.details.events.visible ? this.inspection.read(panel, frame) : {};
+        this.outline.update(panel, frame, file);
         this.toolbox.show({ frame, assets: panel ? [...panel.assets] : [], canInsert: Boolean(panel && this.insertionParent(panel)),
             message: panel?.status }, file);
         this.properties.show({
             session: panel?.session,
             node,
+            runtime: panel?.runtimeSelection,
+            frame,
+            fields: inspection.data?.properties,
             target: panel && node && token !== undefined && !panel.status ? { session: panel.session, token, node: node.id } : undefined,
-            message: panel?.status,
+            message: panel?.status ?? inspection.message,
         }, file);
+        this.details.update(panel, frame, file, inspection);
+        this.assets.update(panel, frame, Boolean(panel && this.insertionParent(panel)));
     }
 
     private insertionParent(panel: DesignerPanel): number | undefined {
@@ -152,7 +196,8 @@ export class DesignerWorkbench implements vscode.Disposable {
     private async outlineMessage(message: FromOutline): Promise<void> {
         try {
             switch (message.type) {
-                case 'select': return await this.select(message.target, message.openSource);
+                case 'mode': return this.outline.switch(message.mode, this.active);
+                case 'select': return await this.outline.select(this.panelFor(message.frame), message.frame, message.id, message.openSource);
                 case 'reorder': return await this.panelFor(message.frame).place(message.frame, {
                     origin: { type: 'node', node: message.node },
                     target: { type: 'outline', node: message.anchor, position: message.position },
@@ -179,6 +224,40 @@ export class DesignerWorkbench implements vscode.Disposable {
             }
         } catch (error) {
             this.toolbox.post({ type: 'edit', error: errorMessage(error) });
+        }
+    }
+
+    private async detailsMessage(view: DetailsView, message: FromDetails): Promise<void> {
+        if (message.type === 'reveal') {
+            await this.active?.revealSource(message.frame, message.range);
+            return;
+        }
+        if (message.type !== 'edit') return;
+        try {
+            const correctOperation = view === 'events' ? message.operation.type === 'setEvent' : message.operation.type === 'applyResource';
+            if (!correctOperation) throw new Error('Use the matching designer view for this edit.');
+            await this.edit(message.target, message.operation);
+            this.details[view].post({ type: 'edit', request: message.request });
+        } catch (error) {
+            this.details[view].post({ type: 'edit', request: message.request, error: errorMessage(error) });
+        }
+    }
+
+    private async assetsMessage(message: FromAssets): Promise<void> {
+        try {
+            if (message.type === 'preview' || message.type === 'open' || message.type === 'copy') {
+                await this.assets.browse(message.type, message.id);
+            } else if (message.type === 'insert') {
+                const panel = this.panelFor(message.frame);
+                const node = this.insertionParent(panel);
+                if (node === undefined) throw new Error('Select a panel that accepts children or drag the image onto the canvas.');
+                const origin = await this.projectImage(panel, message.id);
+                await panel.place(message.frame, { origin, target: { type: 'outline', node, position: 'inside' } });
+            } else if ((message.type === 'beginDrag' || message.type === 'endDrag' || message.type === 'drop') && this.active) {
+                await this.drag.receive(this.active, message);
+            }
+        } catch (error) {
+            this.assets.view.post({ type: 'assetStatus', message: errorMessage(error), error: true });
         }
     }
 
@@ -212,6 +291,8 @@ export class DesignerWorkbench implements vscode.Disposable {
         this.outline.dispose();
         this.toolbox.dispose();
         this.properties.dispose();
+        this.details.dispose();
+        this.assets.dispose();
         const panels = [...this.panels.values()];
         this.panels.clear();
         this.active = undefined;

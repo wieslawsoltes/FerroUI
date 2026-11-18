@@ -1,10 +1,11 @@
 use crate::document::{schema, DesignDocument};
+use crate::property_fields::{can_add_property, registry};
 use crate::protocol::{EditRequest, EditResult, Operation, MAX_SOURCE_BYTES};
 use crate::renderer::Renderer;
 use ferroui_designer_core::{Edit, Node, NodeId, NodeKind, TextPatch};
-use ferroui_designer_language::TextEdit;
-use ferroui_designer_rsx::apply_rsx;
-use ferroui_designer_tools::{ExpressionPolicy, PropertyRegistry};
+use ferroui_designer_language::{TextEdit, plan_event_handler, routed_events};
+use ferroui_designer_rsx::{apply_rsx, project_rust};
+use ferroui_designer_tools::ExpressionPolicy;
 
 const COMMON_PROPERTIES: &[&str] = &[
     "Name",
@@ -41,25 +42,25 @@ pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>) -> Result
                 None => apply_rsx(&design.xaml, source)?,
             }
         }
-        Operation::SetProperty { node, name, value } => {
+        Operation::SetProperty { node, name, .. } | Operation::ResetProperty { node, name } => {
             let target = editable_node(&design, *node)?;
-            if let Some((i, mapped)) = design.rsx_node(*node) {
-                if mapped.properties.contains_key(name) {
-                    return editor_edits(
-                        &design,
-                        vec![design.rsx.as_ref().unwrap().set_property(i, name, value)?],
-                    );
-                }
-            }
-            if !editable_attribute(&design, target, name) && !addable(&design, target, name) {
+            let value = match &request.operation {
+                Operation::SetProperty { value, .. } => Some(value.as_str()),
+                _ => None,
+            };
+            if !editable_attribute(&design, target, name) && !(value.is_some() && can_add_property(&design, target, name)) {
                 return Err(format!("{name} is unavailable in the property inspector"));
             }
-            let edits = PropertyRegistry::built_in()
+            if let Some((i, _)) = design.rsx_node(*node) {
+                let rsx = design.rsx.as_ref().unwrap();
+                return rust_edit(&design, rsx.edit_property(i, name, value)?);
+            }
+            let edits = registry()
                 .plan(
                     &candidate,
                     &[*node],
                     name,
-                    Some(value),
+                    value,
                     ExpressionPolicy::PreserveExpressions,
                 )
                 .map_err(|e| e.to_string())?;
@@ -67,6 +68,22 @@ pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>) -> Result
                 .apply("Set property", edits)
                 .map_err(|e| e.to_string())?;
             translated_patches(&design, candidate.source(), change.patches)?
+        }
+        Operation::SetEvent { node, name, value } => {
+            let target = editable_node(&design, *node)?;
+            if let Some((i, _)) = design.rsx_node(*node) {
+                if !routed_events(schema(), &design.xaml, target).contains_key(name) {
+                    return Err(format!("{name} is unavailable for this control"));
+                }
+                let rsx = design.rsx.as_ref().unwrap();
+                return rust_edit(&design, rsx.set_event(i, name, value.as_deref())?);
+            }
+            let edit = plan_event_handler(schema(), &candidate, target, name, value.as_deref())?;
+            candidate.apply("Edit event handler", vec![edit]).map_err(|error| error.to_string())?.patches
+        }
+        Operation::ApplyResource { frame, node, resource, property, dynamic } => {
+            let edits = crate::resources::apply(&design, renderer, *frame, *node, *resource, property, *dynamic)?;
+            candidate.apply("Apply resource", edits).map_err(|error| error.to_string())?.patches
         }
         Operation::RemoveNode { node } => {
             let target = editable_node(&design, *node)?;
@@ -79,9 +96,6 @@ pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>) -> Result
             translated_patches(&design, candidate.source(), change.patches)?
         }
         Operation::Place { frame, placement } => {
-            if !design.editable_structure() {
-                return Err("Edit this RSX structure in Rust to preserve its expressions and comments".into());
-            }
             let stage = renderer.ok_or("Render the design before placing controls")?.stage(*frame)?;
             let session = stage.session.borrow();
             if session.document().source() != design.xaml.source()
@@ -91,11 +105,15 @@ pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>) -> Result
             }
             drop(session);
             let (edits, hint) = stage.plan(placement)?;
-            let change = candidate.apply(hint.description, edits).map_err(|error| error.to_string())?;
+            let change = candidate.apply(hint.description, edits.clone()).map_err(|error| error.to_string())?;
             if !change.is_empty() {
                 selected = crate::edit_selection::dropped_node(&candidate, &change, &placement.origin);
             }
-            translated_patches(&design, candidate.source(), change.patches)?
+            if design.rsx.is_some() {
+                selected.map_or_else(|| Ok(Vec::new()), |node| {
+                    crate::rsx_placement::patches(&design, &candidate, node, &placement.origin, &edits)
+                })?
+            } else { change.patches }
         }
         Operation::Apply { label, edits } => {
             if !design.editable_structure() {
@@ -115,6 +133,16 @@ pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>) -> Result
     let mut result = editor_edits(&design, patches)?;
     result.selection = selection;
     Ok(result)
+}
+
+fn rust_edit(design: &DesignDocument<'_>, patch: TextPatch) -> Result<EditResult, String> {
+    let mut candidate = design.source.to_owned();
+    candidate.replace_range(patch.span.range(), &patch.replacement);
+    if candidate.len() > MAX_SOURCE_BYTES {
+        return Err("Designer source exceeds 1 MiB".into());
+    }
+    project_rust(&candidate, design.rsx.as_ref().unwrap().invocation.start)?;
+    editor_edits(design, vec![patch])
 }
 
 fn translated_patches(
@@ -187,25 +215,10 @@ pub(crate) fn editable_attribute(design: &DesignDocument<'_>, node: &Node, name:
         })
 }
 
-fn addable(design: &DesignDocument<'_>, node: &Node, name: &str) -> bool {
-    COMMON_PROPERTIES.contains(&name)
-        && design.editable_structure()
-        && node.kind == NodeKind::Element
-        && node.attribute_info(name).is_none()
-        && !(name == "Name" && node.xaml_name().is_some())
-        && design
-            .rsx_node(node.id)
-            .is_none_or(|(_, node)| node.supports_literal(name))
-        && schema()
-            .property(node.local_name(), node.namespace_uri.as_deref(), name)
-            .is_some_and(|info| !info.read_only && !info.event)
-        && (name != "Content" || node.children.is_empty())
-}
-
 pub(crate) fn addable_properties(design: &DesignDocument<'_>, node: &Node) -> Vec<String> {
     COMMON_PROPERTIES
         .iter()
-        .filter(|name| addable(design, node, name))
+        .filter(|name| can_add_property(design, node, name))
         .map(|name| (*name).into())
         .collect()
 }

@@ -1,4 +1,4 @@
-import type { CanvasSnapshot, FromDesigner, ToDesigner } from '../src/protocol';
+import type { CanvasSnapshot, FromDesigner, RuntimeRow, ToDesigner } from '../src/protocol';
 import { Artboard } from './artboard';
 import { CanvasDrag } from './canvasDrag';
 import { CanvasInput } from './canvasInput';
@@ -24,6 +24,7 @@ const actionsMenu = element('actions-menu');
 const selectedControl = element('selected-control');
 let snapshot: CanvasSnapshot | undefined;
 let selected: number | undefined;
+let runtime: RuntimeRow | undefined;
 let token = 0;
 let current = false;
 let applying = false;
@@ -51,7 +52,7 @@ for (const preset of zoomMenu.querySelectorAll<HTMLButtonElement>('[data-scale]'
 element('fit').addEventListener('click', () => { viewport.fit(); zoomMenu.hidePopover(); });
 element('actual').addEventListener('click', () => { viewport.zoom(1); zoomMenu.hidePopover(); });
 fitSelection.addEventListener('click', () => {
-    const bounds = selectedNode()?.bounds;
+    const bounds = runtime?.bounds ?? selectedNode()?.bounds;
     if (bounds) viewport.fitSelection(bounds);
     zoomMenu.hidePopover();
 });
@@ -70,6 +71,12 @@ for (const [action, id, message] of actions) {
         vscode.postMessage(message);
     });
 }
+for (const view of ['events', 'resources', 'assets'] as const) {
+    element(`menu-${view}`).addEventListener('click', () => {
+        actionsMenu.hidePopover();
+        vscode.postMessage({ type: 'dock', view });
+    });
+}
 blocks.addEventListener('change', () => vscode.postMessage({ type: 'block', token, index: blocks.selectedIndex }));
 previewTab.addEventListener('click', () => showDesign(true));
 sourceTab.addEventListener('click', () => showDesign(false));
@@ -85,12 +92,13 @@ function showDesign(show: boolean): void {
 }
 
 function reveal(): void {
-    if (selected !== undefined) select(selected, true);
+    if (!runtime && selected !== undefined) select(selected, true);
 }
 
 function select(id: number, openSource: boolean): void {
     if (!current || applying) return;
     selected = id;
+    runtime = undefined;
     updateSelection();
     vscode.postMessage({ type: 'select', token, id, openSource });
 }
@@ -107,10 +115,12 @@ function selectedNode() { return snapshot?.nodes.find(node => node.id === select
 function updateSelection(): void {
     const node = selectedNode();
     const enabled = current && !applying;
-    artboard.select(node);
-    selectionLabel.hidden = !enabled || !node?.bounds || !snapshot?.image;
+    if (runtime) artboard.inspect(runtime.bounds);
+    else artboard.select(node);
+    selectionLabel.hidden = !enabled || !node?.bounds || !snapshot?.image || Boolean(runtime);
     if (node) selectedControl.textContent = node.name ? `${node.label} · ${node.name}` : node.label;
-    fitSelection.disabled = !enabled || !snapshot?.image || !node?.bounds?.width || !node.bounds.height;
+    const bounds = runtime?.bounds ?? node?.bounds;
+    fitSelection.disabled = !enabled || !snapshot?.image || !bounds?.width || !bounds.height;
     counterpart.setEnabled(enabled);
     blocks.disabled = !enabled;
 }
@@ -142,6 +152,7 @@ function receive(message: ToDesigner): void {
             snapshot = message.snapshot;
             token = message.frame.token;
             selected = message.selected;
+            runtime = message.runtime;
             current = true;
             artboard.show(snapshot, message.viewport);
             drag.setFrame(snapshot.image ? message.frame : undefined);
@@ -159,7 +170,10 @@ function receive(message: ToDesigner): void {
             break;
         }
         case 'selection':
-            if (message.token === token) selected = message.selected;
+            if (message.token === token) {
+                selected = message.selected;
+                runtime = message.runtime;
+            }
             break;
         case 'edit':
             if (message.error) showStatus('error', message.error);

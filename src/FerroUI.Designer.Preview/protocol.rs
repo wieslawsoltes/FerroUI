@@ -1,7 +1,7 @@
 use ferroui_designer_language::{Position, Range};
 use serde::{Deserialize, Serialize};
 
-pub(crate) const PROTOCOL_VERSION: u32 = 2;
+pub(crate) const PROTOCOL_VERSION: u32 = 3;
 pub(crate) const MAX_SOURCE_BYTES: usize = 1024 * 1024;
 
 #[derive(Clone, Copy, Deserialize)]
@@ -44,6 +44,9 @@ pub(crate) enum Operation {
         name: String,
         value: String,
     },
+    ResetProperty { node: u64, name: String },
+    SetEvent { node: u64, name: String, value: Option<String> },
+    ApplyResource { frame: u64, node: u64, resource: u64, property: String, dynamic: bool },
     RemoveNode {
         node: u64,
     },
@@ -76,6 +79,7 @@ pub(crate) struct Placement {
 #[serde(tag = "type", rename_all = "camelCase")]
 pub(crate) enum DragOrigin {
     Asset { control: String },
+    Image { source: String },
     Node { node: u64, grab: Option<ferroui_designer_tools::Point> },
 }
 

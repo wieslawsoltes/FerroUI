@@ -1,11 +1,11 @@
-import type { FromProperties, NodeOperation, NodeTarget, PropertiesState, ToProperties } from '../src/protocol';
+import type { FromProperties, NodeOperation, NodeTarget, PropertiesState, Range, ToProperties } from '../src/protocol';
 import { element } from './dom';
 import { Inspector } from './inspector';
 
 declare function acquireVsCodeApi(): { postMessage(message: FromProperties): void };
 const vscode = acquireVsCodeApi();
 const message = element('view-message');
-const inspector = new Inspector(edit, () => vscode.postMessage({ type: 'toolbox' }));
+const inspector = new Inspector(edit, () => vscode.postMessage({ type: 'toolbox' }), reveal);
 let state: PropertiesState = {};
 let error: string | undefined;
 let request = 0;
@@ -23,6 +23,10 @@ function edit(operation: NodeOperation): void {
     show();
 }
 
+function reveal(range: Range): void {
+    if (state.frame) vscode.postMessage({ type: 'reveal', frame: state.frame, range });
+}
+
 function receive(next: ToProperties): void {
     if (next.type === 'state') {
         if (state.session !== next.state.session || state.node?.id !== next.state.node?.id) error = undefined;
@@ -37,9 +41,9 @@ function receive(next: ToProperties): void {
 
 function show(): void {
     const status = error ?? (pending ? 'Applying edit…' : state.message);
-    const text = status ?? (state.node ? '' : 'Select a control on the canvas or in the outline.');
+    const text = status ?? (state.node || state.runtime ? '' : 'Select a control on the canvas or in the outline.');
     message.textContent = text;
     message.hidden = !text;
     message.classList.toggle('error', Boolean(error));
-    inspector.show(state.session, state.node, Boolean(state.target && !pending));
+    inspector.show(state, Boolean(state.target && state.fields && !pending));
 }

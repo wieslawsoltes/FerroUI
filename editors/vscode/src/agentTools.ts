@@ -6,7 +6,7 @@ import { isInside } from './cargoTarget';
 import type { DesignerPanel } from './designerPanel';
 import type { DesignerWorkbench } from './designerWorkbench';
 import type { HotReload } from './hotReload';
-import type { DragOrigin, DropTarget } from './protocol';
+import type { DesignerView, DragOrigin, DropTarget, OutlineMode } from './protocol';
 import { applyTextEdits } from './textDocument';
 
 interface Arguments {
@@ -21,13 +21,22 @@ interface Arguments {
     node?: number;
     offset?: number;
     limit?: number;
-    view?: 'canvas' | 'outline' | 'properties' | 'toolbox';
+    view?: DesignerView;
+    outline_mode?: OutlineMode;
+    inspector_id?: number;
     width?: number;
     height?: number;
     dark?: boolean;
     refresh?: boolean;
     reveal_source?: boolean;
     asset?: string;
+    project_asset?: string;
+    property: string;
+    event: string;
+    handler?: string;
+    value?: string;
+    resource: number;
+    dynamic?: boolean;
     anchor?: number;
     position?: 'inside' | 'before' | 'after';
     x?: number;
@@ -104,6 +113,26 @@ export class AgentTools {
             case 'designer_toolbox':
                 await panel.waitForSnapshot(signal);
                 return { assets: panel.assets };
+            case 'designer_inspect': {
+                await panel.waitForSnapshot(signal);
+                const frame = { session: panel.session, token: panel.currentToken! };
+                if (args.node !== undefined && args.inspector_id !== undefined) throw new Error('Choose one source or runtime object.');
+                const node = args.node ?? panel.selectedNode?.id;
+                const runtime = args.inspector_id ?? (args.node === undefined ? panel.runtimeSelection?.inspector_id : undefined);
+                if (runtime === undefined && node === undefined) throw new Error('Select a control or provide its node ID.');
+                const result = await panel.inspect(frame, runtime === undefined ? { type: 'source', node: node! } : { type: 'runtime', id: runtime });
+                return { revision: frame.token, ...result };
+            }
+            case 'designer_resources': {
+                await panel.waitForSnapshot(signal);
+                const frame = { session: panel.session, token: panel.currentToken! };
+                return { revision: frame.token, resources: await panel.resources(frame, args.node ?? panel.selectedNode?.id) };
+            }
+            case 'designer_assets': {
+                const assets = await this.workbench.projectAssets(panel);
+                const offset = args.offset ?? 0;
+                return { assets: assets.slice(offset, offset + (args.limit ?? 100)), offset, total: assets.length };
+            }
             case 'designer_preview_image': {
                 const snapshot = await panel.waitForSnapshot(signal);
                 if (!snapshot.image) throw new Error(snapshot.renderError ?? 'The native preview image is unavailable.');
@@ -111,6 +140,7 @@ export class AgentTools {
                 return { mimeType: 'image/png', data: png, width, height, revision: panel.currentToken, uri: document.uri.toString() };
             }
             case 'designer_view': {
+                if (args.outline_mode) this.workbench.setOutlineMode(panel, args.outline_mode);
                 if (args.view) await this.workbench.revealDesign(panel, args.view);
                 const { width, height, dark } = args;
                 const viewport = { width: width ?? panel.dimensions.width, height: height ?? panel.dimensions.height, dark: dark ?? panel.dimensions.dark };
@@ -118,14 +148,27 @@ export class AgentTools {
                 return describe(panel);
             }
             case 'designer_select': {
-                const target = { session: panel.session, token: args.expected_revision, node: args.node! };
-                if (!panel.canUse(target) || !panel.nodes.some(node => node.id === target.node)) throw new Error('Read the current outline before selecting.');
-                await panel.select(target, args.reveal_source);
+                const frame = { session: panel.session, token: args.expected_revision };
+                if (!panel.canUse(frame)) throw new Error('Read the current outline before selecting.');
+                if ((args.node === undefined) === (args.inspector_id === undefined)) throw new Error('Choose one source or runtime object.');
+                if (args.inspector_id !== undefined) {
+                    const row = (await panel.runtimeTree(frame, 'combined')).find(row => row.inspector_id === args.inspector_id);
+                    signal.throwIfAborted();
+                    if (!row || !panel.canUse(frame)) throw new Error('Read the current runtime tree before selecting.');
+                    await panel.selectRuntime(frame, row, args.reveal_source ?? false);
+                } else {
+                    if (!panel.nodes.some(node => node.id === args.node)) throw new Error('Read the current source outline before selecting.');
+                    await panel.select({ ...frame, node: args.node! }, args.reveal_source);
+                }
                 return describe(panel);
             }
             case 'designer_place': {
-                if ((args.node === undefined) === (args.asset === undefined)) throw new Error('Specify one asset ID or one source node.');
-                const origin: DragOrigin = args.node !== undefined ? { type: 'node', node: args.node } : { type: 'asset', control: args.asset! };
+                if ([args.node, args.asset, args.project_asset].filter(value => value !== undefined).length !== 1) {
+                    throw new Error('Specify one Toolbox control, project image, or source node.');
+                }
+                const origin: DragOrigin = args.node !== undefined ? { type: 'node', node: args.node }
+                    : args.project_asset !== undefined ? await this.workbench.projectImage(panel, args.project_asset)
+                        : { type: 'asset', control: args.asset! };
                 const hasOutline = args.anchor !== undefined && args.position !== undefined;
                 const hasPoint = args.x !== undefined && args.y !== undefined;
                 if (hasOutline === hasPoint) throw new Error('Specify one outline anchor and position or one canvas point.');
@@ -134,6 +177,21 @@ export class AgentTools {
                 await panel.agentEdit(args.expected_revision, { type: 'place', frame: args.expected_revision, placement: { origin, target } }, signal);
                 break;
             }
+            case 'designer_edit_property':
+                if (args.action === 'set' && args.value === undefined) throw new Error('Supply the property value.');
+                await panel.agentEdit(args.expected_revision, args.action === 'set'
+                    ? { type: 'setProperty', node: args.node!, name: args.property, value: args.value! }
+                    : { type: 'resetProperty', node: args.node!, name: args.property }, signal);
+                break;
+            case 'designer_set_event':
+                if (args.action === 'set' && !args.handler) throw new Error('Supply a handler name or expression.');
+                await panel.agentEdit(args.expected_revision, { type: 'setEvent', node: args.node!, name: args.event,
+                    value: args.action === 'set' ? args.handler! : null }, signal);
+                break;
+            case 'designer_apply_resource':
+                await panel.agentEdit(args.expected_revision, { type: 'applyResource', frame: args.expected_revision,
+                    resource: args.resource, node: args.node!, property: args.property, dynamic: args.dynamic ?? false }, signal);
+                break;
             case 'designer_apply':
                 await panel.agentEdit(args.expected_revision, { type: 'apply', label: args.label, edits: args.edits }, signal);
                 break;
@@ -167,7 +225,8 @@ export class AgentTools {
 
 function describe(panel: DesignerPanel) {
     return { session: panel.session, uri: panel.document.uri.toString(), language: panel.language, version: panel.document.version,
-        revision: panel.currentToken ?? null, selected: panel.selectedNode?.id ?? null, dirty: panel.document.isDirty,
+        revision: panel.currentToken ?? null, selected: panel.selectedNode?.id ?? null,
+        inspected: panel.runtimeSelection?.inspector_id ?? null, dirty: panel.document.isDirty,
         viewport: panel.dimensions, status: panel.status ?? panel.snapshot?.renderError ?? 'Ready', notices: panel.snapshot?.notices ?? [] };
 }
 

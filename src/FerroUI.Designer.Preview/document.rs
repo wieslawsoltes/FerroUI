@@ -72,6 +72,10 @@ impl<'a> DesignDocument<'a> {
             .is_none_or(RsxProjection::can_replace_structure)
     }
 
+    pub(crate) fn editable_children(&self, id: NodeId) -> bool {
+        self.rsx.is_none() || self.rsx_node(id).is_some_and(|(_, node)| node.editable_children())
+    }
+
     pub(crate) fn counterpart(&self) -> Counterpart {
         if let Some(rsx) = &self.rsx {
             let complete = rsx.omitted_count == 0;

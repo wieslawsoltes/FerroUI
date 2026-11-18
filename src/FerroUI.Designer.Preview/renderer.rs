@@ -1,4 +1,5 @@
 use crate::protocol::{Bounds, Image, Render};
+use crate::rsx_placement::PlacementPolicy;
 use base64::{engine::general_purpose::STANDARD, Engine};
 use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
 use ferroui_base::styling::ThemeVariant;
@@ -25,6 +26,7 @@ pub(crate) struct Stage {
     pub(crate) token: u64,
     pub(crate) width: u32,
     pub(crate) height: u32,
+    pub(crate) placement_policy: Option<PlacementPolicy>,
     _window: PreviewWindow,
 }
 
@@ -111,6 +113,7 @@ impl Renderer {
             token: input.frame,
             width: input.width,
             height: input.height,
+            placement_policy: None,
             _window: window,
         });
         Ok(Frame {

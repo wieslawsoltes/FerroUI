@@ -1,4 +1,4 @@
-import { errorMessage, type DragGesture, type DragMessage, type DragUpdate, type FromDesigner } from './protocol';
+import { errorMessage, type DragGesture, type DragMessage, type DragOrigin, type DragUpdate, type FromDesigner } from './protocol';
 import type { DesignerPanel } from './designerPanel';
 
 export type DragRequest = DragMessage | Extract<FromDesigner, { type: 'previewDrop' }>;
@@ -8,7 +8,11 @@ export class DesignerDrag {
     private ending?: ReturnType<typeof setTimeout>;
     private expiry?: ReturnType<typeof setTimeout>;
 
-    constructor(private readonly publish: (update: DragUpdate) => void) {}
+    constructor(
+        private readonly publish: (update: DragUpdate) => void,
+        private readonly ownsImage: (origin: Extract<DragOrigin, { type: 'image' }>) => boolean,
+        private readonly authorizeImage: (panel: DesignerPanel, origin: Extract<DragOrigin, { type: 'image' }>) => Promise<void>,
+    ) {}
 
     async receive(panel: DesignerPanel, message: DragRequest): Promise<void> {
         if (message.type === 'beginDrag') {
@@ -16,7 +20,8 @@ export class DesignerDrag {
             if (!gesture || !/^[a-f0-9-]{36}$/.test(gesture.id) || !panel.canUse(gesture.frame)) return;
             const origin = gesture.origin;
             if (!origin || !(origin.type === 'asset' ? panel.assets.some(asset => asset.id === origin.control)
-                : origin.type === 'node' && panel.nodes.some(node => node.id === origin.node && node.canMove))) return;
+                : origin.type === 'image' ? panel.language === 'xaml' && this.ownsImage(origin)
+                    : origin.type === 'node' && panel.nodes.some(node => node.id === origin.node && node.canMove))) return;
             clearTimeout(this.ending);
             clearTimeout(this.expiry);
             this.active = gesture;
@@ -37,6 +42,7 @@ export class DesignerDrag {
         if (message.type === 'drop') {
             this.clear();
             if (!valid) throw new Error('The design changed during the drag. Use the current view to retry.');
+            if (gesture.origin.type === 'image') await this.authorizeImage(panel, gesture.origin);
             await panel.place(message.frame, placement);
         } else if (valid) {
             const response = { type: 'placement', id: gesture.id, sequence: message.sequence } as const;

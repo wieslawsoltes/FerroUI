@@ -1,16 +1,21 @@
-import type { DragGesture, FromOutline, OutlinePosition, OutlineRow, OutlineState, ToOutline } from '../src/protocol';
+import type { DragGesture, FromOutline, OutlineMode, OutlinePosition, OutlineRow, OutlineState, ToOutline } from '../src/protocol';
 import { create, element } from './dom';
 import { DragSource, finishDrop, matchDrag } from './drag';
 
-declare function acquireVsCodeApi(): { postMessage(message: FromOutline): void };
+declare function acquireVsCodeApi(): {
+    postMessage(message: FromOutline): void;
+    getState(): { mode: OutlineMode } | undefined;
+    setState(state: { mode: OutlineMode }): void;
+};
 const vscode = acquireVsCodeApi();
 const tree = element<HTMLUListElement>('outline-tree');
 const status = element('outline-message');
+const mode = element<HTMLSelectElement>('outline-mode');
 let state: OutlineState = { nodes: [] };
-let rows = new Map<number, OutlineRow>();
-let children = new Map<number | null, OutlineRow[]>();
-let elements = new Map<number, HTMLLIElement>();
-const collapsed = new Set<number>();
+let rows = new Map<string, OutlineRow>();
+let children = new Map<string | null, OutlineRow[]>();
+let elements = new Map<string, HTMLLIElement>();
+const collapsed = new Set<string>();
 let key = '';
 let structureKey = '';
 let drag: DragGesture | undefined;
@@ -21,8 +26,8 @@ let error: string | undefined;
 
 const dragSource = new DragSource(tree, event => {
     const item = rowAt(event);
-    if (item?.row.canMove && state.frame && !(event.target as Element).closest('.twisty')) {
-        return { frame: state.frame, origin: { type: 'node', node: item.row.id } };
+    if (item?.row.canMove && item.row.source !== undefined && state.frame && !(event.target as Element).closest('.twisty')) {
+        return { frame: state.frame, origin: { type: 'node', node: item.row.source } };
     }
 }, vscode.postMessage, gesture => { drag = gesture; });
 
@@ -41,12 +46,13 @@ window.addEventListener('message', ({ data }: MessageEvent<ToOutline>) => {
         return;
     }
     if (data.type === 'state') {
-        if (state.session !== data.state.session) {
+        if (state.session !== data.state.session || state.mode !== data.state.mode) {
             collapsed.clear();
             error = undefined;
         }
         const picked = state.selected !== data.state.selected || state.session !== data.state.session;
         state = data.state;
+        mode.value = state.mode ?? 'source';
         const next = JSON.stringify(state.nodes);
         if (next !== key) {
             key = next;
@@ -67,7 +73,8 @@ window.addEventListener('message', ({ data }: MessageEvent<ToOutline>) => {
         syncRows();
         if (picked && state.selected !== undefined && !drag) elements.get(state.selected)?.scrollIntoView({ block: 'nearest' });
     } else error = data.error;
-    const text = error ?? state.message ?? (state.nodes.length ? '' : 'Open a FerroUI designer to browse its controls.');
+    const text = error ?? state.message ?? (state.nodes.length ? '' : state.session === undefined
+        ? 'Open a FerroUI designer to browse its controls.' : 'This preview has no controls in this hierarchy.');
     status.textContent = text;
     status.hidden = !text;
     status.classList.toggle('error', Boolean(error));
@@ -89,19 +96,19 @@ tree.addEventListener('dblclick', event => {
 tree.addEventListener('keydown', event => {
     const item = rowAt(event);
     if (!item) return;
-    const { id, parent, canMove } = item.row;
+    const { id, parent, canMove, source } = item.row;
     const frame = state.frame;
-    if (event.altKey && canMove && frame && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+    if (event.altKey && canMove && source !== undefined && frame && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
         event.preventDefault();
         const above = event.key === 'ArrowUp';
         const siblings = (children.get(parent) ?? []).filter(row => row.canMove);
         const sibling = siblings[siblings.findIndex(row => row.id === id) + (above ? -1 : 1)];
-        if (sibling) vscode.postMessage({ type: 'reorder', frame, node: id, anchor: sibling.id, position: above ? 'before' : 'after' });
+        if (sibling?.source !== undefined) vscode.postMessage({ type: 'reorder', frame, node: source, anchor: sibling.source, position: above ? 'before' : 'after' });
         return;
     }
     const visible = [...elements.keys()];
     const index = visible.indexOf(id);
-    let next: number | undefined;
+    let next: string | undefined;
     switch (event.key) {
         case 'ArrowDown': next = visible[index + 1]; break;
         case 'ArrowUp': next = visible[index - 1]; break;
@@ -129,8 +136,8 @@ tree.addEventListener('pointermove', event => {
         clearMarker();
         marker = target.item;
         marker.dataset.drop = target.position;
-        if (target.position === 'inside' && collapsed.has(target.node)) {
-            expansion = setTimeout(() => { collapsed.delete(target.node); render(); }, 480);
+        if (target.position === 'inside' && collapsed.has(target.id)) {
+            expansion = setTimeout(() => { collapsed.delete(target.id); render(); }, 480);
         }
     }
     cancelAnimationFrame(hoverScroll);
@@ -143,17 +150,24 @@ tree.addEventListener('pointerup', event => {
     if (target && event.button === 0) finishDrop(state.frame, drag, { type: 'outline', node: target.node, position: target.position }, vscode.postMessage);
     clearMarker();
 });
+mode.addEventListener('change', () => {
+    const value = mode.value as OutlineMode;
+    vscode.setState({ mode: value });
+    vscode.postMessage({ type: 'mode', mode: value });
+});
+const savedMode = vscode.getState()?.mode;
+if (savedMode) vscode.postMessage({ type: 'mode', mode: savedMode });
 vscode.postMessage({ type: 'ready' });
 
 function render(focus = (document.activeElement as HTMLElement | null)?.dataset.node): void {
     elements = new Map();
     const visible: HTMLLIElement[] = [];
-    function add(parent: number | null, level: number): void {
+    function add(parent: string | null, level: number): void {
         for (const row of children.get(parent) ?? []) {
             const item = create('li');
             item.setAttribute('role', 'treeitem');
             item.setAttribute('aria-level', String(level + 1));
-            item.dataset.node = String(row.id);
+            item.dataset.node = row.id;
             item.style.setProperty('--level', String(level));
             const branch = children.has(row.id);
             const open = !collapsed.has(row.id);
@@ -161,6 +175,14 @@ function render(focus = (document.activeElement as HTMLElement | null)?.dataset.
             if (branch) item.setAttribute('aria-expanded', String(open));
             item.append(twisty, glyph(row.canInsert || branch ? 'symbol-structure' : 'symbol-field'), create('span', row.label));
             if (row.name) item.append(Object.assign(create('span', row.name), { className: 'outline-name' }));
+            if (row.runtime) {
+                const runtime = row.runtime;
+                const provenance = runtime.visual && runtime.logical ? 'Visual and logical' : runtime.visual ? 'Visual' : 'Logical';
+                const origin = create('span', runtime.source_id === null ? 'Runtime' : 'Source');
+                origin.className = 'outline-origin';
+                origin.title = provenance;
+                item.append(origin);
+            }
             visible.push(item);
             elements.set(row.id, item);
             if (open) add(row.id, level + 1);
@@ -169,7 +191,7 @@ function render(focus = (document.activeElement as HTMLElement | null)?.dataset.
     add(null, 0);
     tree.replaceChildren(...visible);
     syncRows();
-    if (focus) elements.get(Number(focus))?.focus({ preventScroll: true });
+    if (focus) elements.get(focus)?.focus({ preventScroll: true });
 }
 
 function syncRows(): void {
@@ -190,22 +212,22 @@ function glyph(name: string, variant = ''): HTMLSpanElement {
 
 function rowAt(event: Event) {
     const item = (event.target as HTMLElement).closest<HTMLLIElement>('[data-node]');
-    const row = item && rows.get(Number(item.dataset.node));
+    const row = item && rows.get(item.dataset.node ?? '');
     return item && row ? { item, row } : undefined;
 }
 
-function select(node: number, openSource = false): void {
+function select(id: string, openSource = false): void {
     if (!state.frame) return;
     error = undefined;
-    vscode.postMessage({ type: 'select', target: { ...state.frame, node }, openSource });
+    vscode.postMessage({ type: 'select', frame: state.frame, id, openSource });
 }
 
-function toggle(id: number): void {
+function toggle(id: string): void {
     if (!collapsed.delete(id)) collapsed.add(id);
     render(String(id));
 }
 
-function expandTo(node?: number): void {
+function expandTo(node?: string): void {
     let row = node === undefined ? undefined : rows.get(node);
     while (row && row.parent !== null) {
         collapsed.delete(row.parent);
@@ -218,9 +240,10 @@ function dropTarget(event: PointerEvent) {
     const found = rowAt(event);
     if (!found) return undefined;
     const { row, item } = found;
+    if (row.source === undefined || state.mode !== 'source') return undefined;
     if (drag.origin.type === 'node') {
-        for (let ancestor: OutlineRow | undefined = row; ancestor; ancestor = rows.get(ancestor.parent ?? -1)) {
-            if (ancestor.id === drag.origin.node) return undefined;
+        for (let ancestor: OutlineRow | undefined = row; ancestor; ancestor = rows.get(ancestor.parent ?? '')) {
+            if (ancestor.source === drag.origin.node) return undefined;
         }
     }
     const rect = item.getBoundingClientRect();
@@ -228,7 +251,7 @@ function dropTarget(event: PointerEvent) {
     const position: OutlinePosition = row.canInsert && (row.parent === null || fraction >= .25 && fraction <= .75)
         ? 'inside' : fraction < .5 ? 'before' : 'after';
     if (position !== 'inside' && !row.canMove) return undefined;
-    return { node: row.id, position, item };
+    return { id: row.id, node: row.source, position, item };
 }
 
 function clearMarker(): void {

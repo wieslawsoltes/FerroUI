@@ -1,6 +1,6 @@
 import { randomBytes } from 'node:crypto';
 import * as vscode from 'vscode';
-import { DEFAULT_VIEWPORT, MAX_VIEWPORT_SIZE, MIN_VIEWPORT_SIZE, type Language } from './protocol';
+import { DEFAULT_VIEWPORT, MAX_VIEWPORT_SIZE, MIN_VIEWPORT_SIZE, type DetailsView, type Language } from './protocol';
 
 export function webviewOptions(root: vscode.Uri): vscode.WebviewOptions {
     return {
@@ -91,6 +91,9 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
     <button type="button" id="menu-toolbox">Show Toolbox</button>
     <button type="button" id="menu-outline">Show Outline</button>
     <button type="button" id="menu-properties">Show Properties</button>
+    <button type="button" id="menu-events">Show Events</button>
+    <button type="button" id="menu-resources">Show Resources</button>
+    <button type="button" id="menu-assets">Show Assets</button>
     <button type="button" id="menu-refresh">Refresh preview</button>
 </div>`);
 }
@@ -98,6 +101,12 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
 export function outlineHtml(webview: vscode.Webview, root: vscode.Uri): string {
     return page(webview, root, 'outline', 'FerroUI Outline', `
 <main class="outline">
+    <label class="outline-mode">Hierarchy
+        <select id="outline-mode">
+            <option value="source">Source</option><option value="combined">Combined</option>
+            <option value="visual">Visual</option><option value="logical">Logical</option>
+        </select>
+    </label>
     <p class="dock-message" id="outline-message" role="status"></p>
     <ul id="outline-tree" role="tree" aria-label="Control hierarchy"></ul>
 </main>`);
@@ -124,11 +133,54 @@ export function propertiesHtml(webview: vscode.Webview, root: vscode.Uri): strin
             ${icon('symbol-field')}
             <div><strong id="control-type"></strong><code id="control-name"></code></div>
         </header>
+        <dl id="property-metrics" class="property-metrics" aria-label="Measured artboard bounds" title="Measured bounds in artboard units" hidden>
+            <div><dt>X</dt><dd data-metric="x"></dd></div><div><dt>Y</dt><dd data-metric="y"></dd></div>
+            <div><dt>W</dt><dd data-metric="width"></dd></div><div><dt>H</dt><dd data-metric="height"></dd></div>
+        </dl>
         <div id="filter-row" class="filter-row" hidden>
             ${icon('search')}<input type="search" id="filter" aria-label="Filter properties" placeholder="Filter properties">
         </div>
         <div id="properties"></div>
     </section>
+</main>`);
+}
+
+export function detailsHtml(webview: vscode.Webview, root: vscode.Uri, view: DetailsView): string {
+    const events = view === 'events';
+    const title = events ? 'Events' : 'Resources';
+    return page(webview, root, 'details', `FerroUI ${title}`, `
+<main class="details" id="${view}-panel" data-view="${view}">
+    <header class="details-header">
+        <strong id="details-title" hidden></strong>
+        <div class="details-filter">${icon('search')}<input type="search" id="details-search" aria-label="Filter ${view}" placeholder="Filter ${view}"></div>
+        <label class="details-option"><input type="checkbox" id="details-filtered">${events ? 'Assigned handlers only' : 'Visible to selection'}</label>
+    </header>
+    <p class="dock-message" id="details-message" role="status"></p>
+    <div id="details-list" aria-label="${title}"></div>
+</main>`);
+}
+
+export function assetsHtml(webview: vscode.Webview, root: vscode.Uri): string {
+    return page(webview, root, 'assets', 'FerroUI Assets', `
+<main class="project-assets">
+    <div class="asset-filter">
+        ${icon('search')}<input type="search" id="project-asset-search" aria-label="Filter project assets" placeholder="Filter assets">
+        <select id="project-asset-kind" aria-label="Asset type">
+            <option value="">All types</option><option>Image</option><option>Font</option><option>Media</option><option>XAML</option>
+        </select>
+    </div>
+    <p class="dock-message" id="project-asset-message" role="status"></p>
+    <section id="project-asset-preview" class="asset-preview" aria-label="Selected project asset" hidden>
+        <img id="asset-thumbnail" alt="" hidden>
+        <strong id="asset-title"></strong><code id="asset-path"></code>
+        <div class="asset-actions">
+            <button id="asset-open" type="button">Open</button>
+            <button id="asset-copy" type="button">Copy path</button>
+            <button id="asset-insert" class="primary" type="button" hidden>Insert image</button>
+        </div>
+    </section>
+    <ul id="project-asset-list" aria-label="Project files"></ul>
+    <button id="assets-more" type="button" hidden>Show more files</button>
 </main>`);
 }
 

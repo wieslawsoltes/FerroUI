@@ -4,9 +4,14 @@ mod document;
 mod editor_mcp;
 mod edit_selection;
 mod edits;
+mod event_fields;
+mod inspection;
 mod placement;
+mod property_fields;
 mod protocol;
 mod renderer;
+mod resources;
+mod rsx_placement;
 mod snapshot;
 mod studio;
 mod toolbox;
@@ -74,6 +79,12 @@ fn respond(
         "edit" => serde_json::from_value(message["params"].clone())
             .map_err(|e| e.to_string())
             .and_then(|input| serialize(edits::edit(&input, renderer.as_ref()))),
+        "inspect" => serde_json::from_value(message["params"].clone())
+            .map_err(|e| e.to_string())
+            .and_then(|input| serialize(inspection::inspect(&input, renderer.as_ref()))),
+        "resources" => serde_json::from_value(message["params"].clone())
+            .map_err(|e| e.to_string())
+            .and_then(|input| serialize(resources::list(&input, renderer.as_ref()))),
         "placement" => serde_json::from_value::<protocol::PlacementRequest>(message["params"].clone())
             .map_err(|e| e.to_string())
             .and_then(|input| {

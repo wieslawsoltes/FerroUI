@@ -66,14 +66,20 @@ export class Artboard {
         this.draw(this.selection, node?.bounds);
     }
 
+    inspect(bounds?: Bounds | null): void {
+        this.selected = undefined;
+        this.clearHover();
+        this.draw(this.selection, bounds);
+    }
+
     get hasFrame(): boolean { return !this.board.hidden; }
+    get surface(): HTMLElement { return this.viewport.element; }
 
     point(event: MouseEvent): Point | undefined {
         const image = this.snapshot?.image;
         if (!this.current || !image) return undefined;
         const rect = this.frame.getBoundingClientRect();
         const x = (event.clientX - rect.left) * image.width / rect.width;
-    get surface(): HTMLElement { return this.viewport.element; }
         const y = (event.clientY - rect.top) * image.height / rect.height;
         return x >= 0 && y >= 0 && x < image.width && y < image.height ? { x, y } : undefined;
     }

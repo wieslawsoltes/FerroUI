@@ -15,7 +15,67 @@ export const DEFAULT_VIEWPORT: Viewport = { width: 800, height: 520, dark: false
 export const MIN_VIEWPORT_SIZE = 64;
 export const MAX_VIEWPORT_SIZE = 1536;
 export interface Bounds { x: number; y: number; width: number; height: number }
+export type RuntimeTreeMode = 'visual' | 'logical' | 'combined';
+export type OutlineMode = 'source' | RuntimeTreeMode;
+export interface RuntimeRow {
+    inspector_id: number;
+    source_id: number | null;
+    parent: number | null;
+    type: string;
+    name: string | null;
+    bounds: Bounds | null;
+    visual: boolean;
+    logical: boolean;
+    logical_parent: number | null;
+}
 export interface Property { name: string; value: string; editable: boolean }
+export interface PropertyField {
+    name: string;
+    group: string;
+    kind: 'boolean' | 'number' | 'enum' | 'color' | 'thickness' | 'object' | 'text';
+    options: string[];
+    authored: string | null;
+    effective: string | null;
+    origin: string | null;
+    range: Range | null;
+    editable: boolean;
+    canReset: boolean;
+}
+export interface EventField {
+    name: string;
+    argumentType: string;
+    handler: string | null;
+    range: Range | null;
+    editable: boolean;
+}
+export interface ResourceRow {
+    id: number;
+    name: string;
+    typeName: string;
+    scope: string;
+    range: Range;
+    usages: number;
+    visible: boolean;
+    properties: string[];
+}
+export type DetailsView = 'events' | 'resources';
+export type DesignerView = 'canvas' | 'outline' | 'properties' | 'toolbox' | DetailsView | 'assets';
+export interface DetailsState {
+    frame?: FrameTarget;
+    target?: NodeTarget;
+    language?: Language;
+    label?: string;
+    events?: EventField[];
+    resources?: ResourceRow[];
+    message?: string;
+}
+export type FromDetails = { type: 'ready' }
+    | { type: 'reveal'; frame: FrameTarget; range: Range }
+    | { type: 'edit'; request: number; target: NodeTarget; operation: NodeOperation };
+export type ToDetails = { type: 'state'; state: DetailsState }
+    | { type: 'edit'; request: number; error?: string };
+export type InspectionTarget = { type: 'source'; node: number } | { type: 'runtime'; id: number };
+export interface Inspection { properties: PropertyField[]; events: EventField[] }
 export interface OutlineNode {
     id: number;
     parent: number | null;
@@ -41,6 +101,9 @@ export interface Snapshot {
 }
 export type NodeOperation =
     | { type: 'setProperty'; node: number; name: string; value: string }
+    | { type: 'resetProperty'; node: number; name: string }
+    | { type: 'setEvent'; node: number; name: string; value: string | null }
+    | { type: 'applyResource'; frame: number; node: number; resource: number; property: string; dynamic: boolean }
     | { type: 'removeNode'; node: number };
 export type Operation = NodeOperation | { type: 'applyCounterpart'; source: string }
     | { type: 'apply'; label: string; edits: object[] }
@@ -54,16 +117,43 @@ export interface PropertiesState {
     target?: NodeTarget;
     node?: OutlineNode;
     message?: string;
+    runtime?: RuntimeRow;
+    frame?: FrameTarget;
+    fields?: PropertyField[];
 }
 export type FromProperties = { type: 'ready' }
     | { type: 'toolbox' }
+    | { type: 'reveal'; frame: FrameTarget; range: Range }
     | { type: 'edit'; request: number; target: NodeTarget; operation: NodeOperation };
 export type ToProperties = { type: 'state'; state: PropertiesState }
     | { type: 'edit'; request: number; error?: string };
 
 export interface Asset { id: string; title: string; category: string; description: string; icon: string; rust: boolean }
+export interface ProjectAsset {
+    id: string;
+    label: string;
+    path: string;
+    kind: string;
+    relative: string;
+    thumbnail: boolean;
+    source?: string;
+}
+export interface AssetsState {
+    frame?: FrameTarget;
+    folder?: string;
+    assets: ProjectAsset[];
+    canInsert: boolean;
+    message?: string;
+}
+export type FromAssets = { type: 'ready' } | DragMessage
+    | { type: 'preview' | 'open' | 'copy'; id: string }
+    | { type: 'insert'; frame: FrameTarget; id: string };
+export type ToAssets = DragUpdate | { type: 'state'; state: AssetsState }
+    | { type: 'thumbnail'; id: string; uri?: string }
+    | { type: 'assetStatus'; message?: string; error?: boolean };
 export interface Point { x: number; y: number }
-export type DragOrigin = { type: 'asset'; control: string } | { type: 'node'; node: number; grab?: Point };
+export type DragOrigin = { type: 'asset'; control: string } | { type: 'node'; node: number; grab?: Point }
+    | { type: 'image'; source: string; asset?: string };
 export type OutlinePosition = 'before' | 'inside' | 'after';
 export type DropTarget = { type: 'canvas' } & Point | { type: 'outline'; node: number; position: OutlinePosition };
 export interface Placement { origin: DragOrigin; target: DropTarget }
@@ -74,11 +164,24 @@ export type DragMessage = { type: 'beginDrag'; gesture: DragGesture } | { type: 
 export type DragUpdate = { type: 'drag'; gesture?: DragGesture };
 export type PlacementResult = { type: 'placement'; id: string; sequence: number; hint?: DropHint; error?: string };
 
-export type OutlineRow = Pick<OutlineNode, 'id' | 'parent' | 'label' | 'name' | 'canMove' | 'canInsert'>;
-export interface OutlineState { frame?: FrameTarget; session?: number; nodes: OutlineRow[]; selected?: number; message?: string }
+export type OutlineRow = Omit<Pick<OutlineNode, 'id' | 'parent' | 'label' | 'name' | 'canMove' | 'canInsert'>, 'id' | 'parent'> & {
+    id: string;
+    parent: string | null;
+    source?: number;
+    runtime?: RuntimeRow;
+};
+export interface OutlineState {
+    frame?: FrameTarget;
+    session?: number;
+    mode?: OutlineMode;
+    nodes: OutlineRow[];
+    selected?: string;
+    message?: string;
+}
 export interface ToolboxState { frame?: FrameTarget; assets: Asset[]; canInsert: boolean; message?: string }
 export type FromOutline = { type: 'ready' } | DragMessage
-    | { type: 'select'; target: NodeTarget; openSource: boolean }
+    | { type: 'mode'; mode: OutlineMode }
+    | { type: 'select'; frame: FrameTarget; id: string; openSource: boolean }
     | { type: 'reorder'; frame: FrameTarget; node: number; anchor: number; position: 'before' | 'after' };
 export type ToOutline = { type: 'state'; state: OutlineState } | DragUpdate | { type: 'edit'; error?: string };
 export type FromToolbox = { type: 'ready' } | DragMessage | { type: 'insert'; frame: FrameTarget; control: string };
@@ -88,7 +191,7 @@ export type CanvasNode = Pick<OutlineNode, 'id' | 'label' | 'name' | 'bounds' | 
 export type CanvasSnapshot = Omit<Snapshot, 'nodes'> & { nodes: CanvasNode[] };
 export type FromDesigner = DragMessage
     | { type: 'ready' | 'refresh' }
-    | { type: 'dock'; view: 'outline' | 'properties' | 'toolbox' }
+    | { type: 'dock'; view: Exclude<DesignerView, 'canvas'> }
     | { type: 'previewDrop'; id: string; frame: FrameTarget; target: DropTarget; sequence: number }
     | { type: 'viewport'; viewport: Viewport }
     | { type: 'block'; token: number; index: number }
@@ -97,9 +200,9 @@ export type FromDesigner = DragMessage
 
 export type ToDesigner = DragUpdate | PlacementResult
     | { type: 'pending' }
-    | { type: 'snapshot'; frame: FrameTarget; sourceKey: string; snapshot: CanvasSnapshot; viewport: Viewport; selected: number | undefined }
+    | { type: 'snapshot'; frame: FrameTarget; sourceKey: string; snapshot: CanvasSnapshot; viewport: Viewport; selected: number | undefined; runtime?: RuntimeRow }
     | { type: 'error'; message: string }
-    | { type: 'selection'; token: number; selected: number | undefined }
+    | { type: 'selection'; token: number; selected: number | undefined; runtime?: RuntimeRow }
     | { type: 'edit'; error?: string };
 
 export function errorMessage(error: unknown): string {
