@@ -27,6 +27,8 @@ mod grid;
 mod components_tests;
 #[path = "mcp_design_workflows.rs"]
 mod design_workflows;
+#[path = "mcp_design_tokens.rs"]
+mod design_tokens;
 #[cfg(test)]
 #[path = "mcp_design_workflows_tests.rs"]
 mod design_workflows_tests;
@@ -279,6 +281,7 @@ impl UiToolProvider for DesignerMcp {
         tools.extend(design_workflows::tools());
         tools.extend(selection_workflows::tools());
         tools.extend(placement::tools());
+        tools.push(design_tokens::tool());
         if self.workspace.is_some() {
             tools.extend(workspace_tools::tools());
             tools.extend(preview_stages::tools());
@@ -305,6 +308,7 @@ impl UiToolProvider for DesignerMcp {
             || preview_stages::handles(name)
             || placement::handles(name)
             || prototype::handles(name)
+            || name == design_tokens::NAME
         {
             return schema::validate(&definition["inputSchema"], args);
         }
@@ -461,6 +465,9 @@ impl UiToolProvider for DesignerMcp {
             .unwrap();
         if definition["annotations"]["readOnlyHint"] != true && !permissions.allow_property_writes {
             return Err("Designer authoring requires allow_property_writes".into());
+        }
+        if name == design_tokens::NAME {
+            return design_tokens::call(args);
         }
         let owner = self.session()?;
         if placement::handles(name) {

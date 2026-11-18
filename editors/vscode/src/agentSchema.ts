@@ -5,10 +5,11 @@ export type Schema = {
     maximum?: number;
     maxLength?: number;
     maxItems?: number;
+    maxProperties?: number;
     items?: Schema;
     properties?: Record<string, Schema>;
     required?: readonly string[];
-    additionalProperties?: boolean;
+    additionalProperties?: boolean | Schema;
 };
 
 export const text = { type: 'string', maxLength: 1024 * 1024 };
@@ -41,11 +42,13 @@ export function validate(schema: Schema, value: unknown): void {
     } else if (schema.type === 'object') {
         if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Expected an arguments object');
         const arguments_ = value as Record<string, unknown>;
+        if (Object.keys(arguments_).length > (schema.maxProperties ?? Infinity)) throw new Error('Too many object properties');
         for (const key of schema.required ?? []) if (!Object.hasOwn(arguments_, key)) throw new Error(`Missing ${key}`);
         for (const key of Object.keys(arguments_)) {
             const child = schema.properties && Object.hasOwn(schema.properties, key) ? schema.properties[key] : undefined;
             if (child) validate(child, arguments_[key]);
             else if (schema.additionalProperties === false) throw new Error(`Unknown argument ${key}`);
+            else if (typeof schema.additionalProperties === 'object') validate(schema.additionalProperties, arguments_[key]);
         }
     }
 }

@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { agentCatalog, type AgentTool } from './agentCatalog';
 import { validate } from './agentSchema';
 import type { CargoSelection } from './cargoTarget';
+import type { TokenRequest } from './designTokenProtocol';
 import type { DesignerPanel } from './designerPanel';
 import type { DesignerWorkbench } from './designerWorkbench';
 import { runEditorHistory } from './editorHistory';
@@ -98,6 +99,7 @@ export class AgentTools {
             throw new Error('Enable ferroui.mcp.allowWrites to let agents edit files or control the designer and running application.');
         }
         if (isWorkspaceTool(tool)) return this.workspace.call(tool, input, signal);
+        if (tool === 'designer_design_tokens') return this.project.designTokens(input as TokenRequest, signal);
         const args = input as Arguments;
         if (tool === 'ferroui_designs') {
             const panels = [];

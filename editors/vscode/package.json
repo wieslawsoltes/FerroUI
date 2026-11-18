@@ -110,6 +110,16 @@
         "category": "FerroUI"
       },
       {
+        "command": "ferroui.designTokens.import",
+        "title": "Import Design Tokens",
+        "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.designTokens.export",
+        "title": "Export Design Tokens",
+        "category": "FerroUI"
+      },
+      {
         "command": "ferroui.project.runTarget",
         "title": "Run with Hot Reload",
         "category": "FerroUI",
@@ -294,6 +304,16 @@
         },
         {
           "command": "ferroui.project.newComponent",
+          "when": "view == ferroui.project && isWorkspaceTrusted",
+          "group": "ferroui"
+        },
+        {
+          "command": "ferroui.designTokens.import",
+          "when": "view == ferroui.project && isWorkspaceTrusted",
+          "group": "ferroui"
+        },
+        {
+          "command": "ferroui.designTokens.export",
           "when": "view == ferroui.project && isWorkspaceTrusted",
           "group": "ferroui"
         },

@@ -1,5 +1,6 @@
 import * as path from 'node:path';
 import * as vscode from 'vscode';
+import type { TokenRequest } from './designTokenProtocol';
 import { NativePreview } from './nativePreview';
 import type { ProjectAssets } from './projectAssets';
 import { isWorkspaceFile, workspaceFolders } from './workspacePaths';
@@ -56,6 +57,16 @@ export class ProjectInventory implements vscode.Disposable {
         const uri = vscode.Uri.joinPath(folder.uri, ...file.path.split('/'));
         if (!await isWorkspaceFile(uri)) throw new Error('The project file is unavailable inside this workspace.');
         return uri;
+    }
+
+    async designTokens(request: TokenRequest, signal: AbortSignal) {
+        signal.throwIfAborted();
+        if (Buffer.byteLength(request.source) > 1024 * 1024) throw new Error('The token handoff source exceeds 1 MiB.');
+        const client = await this.getClient();
+        signal.throwIfAborted();
+        const plan = await client.designTokens(request);
+        signal.throwIfAborted();
+        return plan;
     }
 
     refresh(): void { this.roots.clear(); this.schedule(); }

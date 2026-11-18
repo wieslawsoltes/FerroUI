@@ -126,6 +126,8 @@ remain separate from authored XAML and can be saved as a versioned set. See the
 [preview-stage guide](xcode-previews.md) for exact behavior and platform boundaries.
 Studio's `designer_preview_stage_states` MCP tool lists the scoped authored choices used
 by the stage editor and the VS Code **States…** action.
+The `designer_design_tokens` tool shares the VS Code DTCG import and export planner. It returns
+generated source, token-to-resource mappings and skipped entries for review.
 The stage editor supports fitting either or both axes using native measurement. A resize
 grip applies fixed logical dimensions while preserving Live control state; card zoom
 changes only display scale. **Compare matrix** combines size, theme, direction, design-data

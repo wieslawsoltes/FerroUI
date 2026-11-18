@@ -2,6 +2,7 @@ import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { createMessageConnection, StreamMessageReader, StreamMessageWriter } from 'vscode-jsonrpc/node';
 import type * as vscode from 'vscode';
 import type { BuiltProject } from './builtProjects';
+import type { TokenPlan, TokenRequest } from './designTokenProtocol';
 import type { NativeProjectInventory } from './projectInventory';
 import type { Asset, CanvasInteraction, CanvasPresentation, DropHint, EditResult, Inspection, InspectionTarget, Operation, Placement, PreviewSourceBuffer, ResourceRow, Snapshot, Source, Viewport } from './protocol';
 import type { RsxLanguageDocument } from './rsxLanguageTypes';
@@ -17,7 +18,7 @@ export class NativePreview implements vscode.Disposable {
     private readonly projects = new WeakMap<BuiltProject, Promise<number>>();
     private nextProject = 0;
     assets: readonly Asset[] = [];
-    capabilities: { isolatedDesign?: boolean; appHostedDesign?: boolean; rsxLanguage?: boolean; stages?: boolean; prototypeEditing?: boolean; projectCatalog?: boolean; canvasInteraction?: boolean; projectInventory?: boolean } = {};
+    capabilities: { isolatedDesign?: boolean; appHostedDesign?: boolean; rsxLanguage?: boolean; stages?: boolean; prototypeEditing?: boolean; projectCatalog?: boolean; canvasInteraction?: boolean; projectInventory?: boolean; tokenHandoff?: boolean } = {};
 
     private constructor(command: string, channel: vscode.OutputChannel) {
         this.child = spawn(command, [], { windowsHide: true });
@@ -69,6 +70,11 @@ export class NativePreview implements vscode.Disposable {
     projectInventory(workspaceRoot: string): Promise<NativeProjectInventory> {
         if (!this.capabilities.projectInventory) throw new Error('Update the FerroUI preview helper to browse project files.');
         return this.send('projectInventory', { workspaceRoot });
+    }
+
+    designTokens(request: TokenRequest): Promise<TokenPlan> {
+        if (!this.capabilities.tokenHandoff) throw new Error('Update the FerroUI preview helper to convert design tokens.');
+        return this.send('designTokens', request);
     }
 
     listenHosted(nonce: string): Promise<{ port: number }> {

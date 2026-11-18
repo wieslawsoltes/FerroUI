@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { AgentTools } from './agentTools';
 import { BuiltProjects } from './builtProjects';
+import { DesignTokenCommands } from './designTokenCommands';
 import { DesignerWorkbench } from './designerWorkbench';
 import { DiagnosticsView } from './diagnosticsView';
 import { HotReload } from './hotReload';
@@ -37,6 +38,7 @@ export function activate(context: vscode.ExtensionContext) {
     const scenarioTesting = new ScenarioTesting(scenarios);
     const assets = new ProjectAssets();
     const inventory = new ProjectInventory(context, previewOutput, assets);
+    const designTokens = new DesignTokenCommands(inventory);
     const scaffolds = new ProjectScaffold();
     const designer = new DesignerWorkbench(context, previewOutput, projects, assets);
     const hosted = new HostedDesign(context, previewOutput, publish);
@@ -54,7 +56,7 @@ export function activate(context: vscode.ExtensionContext) {
         if (document.languageId === xamlLanguage && document.uri.scheme === 'file') void server.start();
     };
     context.subscriptions.push(
-        projectView, diagnostics, projects, schemaBuild, inventory, scaffolds, assets, server, rsx, scenarioTesting, designer, hosted, stages, liveApp, reload, runtimes, mcp, languageOutput, previewOutput,
+        projectView, diagnostics, projects, schemaBuild, inventory, designTokens, scaffolds, assets, server, rsx, scenarioTesting, designer, hosted, stages, liveApp, reload, runtimes, mcp, languageOutput, previewOutput,
         reload.onDidBuild(publish),
         vscode.workspace.onDidOpenTextDocument(startForXaml),
         vscode.workspace.onDidChangeConfiguration(event => {

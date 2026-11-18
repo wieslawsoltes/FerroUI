@@ -15,6 +15,11 @@ const placement = { ...frame, asset: text, project_asset: text, node, selection:
 
 export const agentCatalog = {
     ...workspaceCatalog,
+    designer_design_tokens: tool('Plan a DTCG-to-XAML import or XAML-to-DTCG export with candidate source, mapping rows and issues. Mapping keys use token paths during import and XAML resource keys during export. Use a separate workspace creation action to write the reviewed candidate.',
+        { direction: choice('import', 'export'), source: text, options: { type: 'object', additionalProperties: false, properties: {
+            pixelsPerRem: { type: 'number' }, mappings: { type: 'object', maxProperties: 4096,
+                additionalProperties: { type: 'object', additionalProperties: false, properties: { key: text, token: text, kind: text, xamlType: text } } },
+        } } }, ['direction', 'source']),
     ferroui_project_files: tool('Browse indexed Cargo manifests, XAML, RSX invocations, assets, stage sets and scenarios in the workbench project model.',
         { folder: workspacePath, kind: choice('cargo', 'xaml', 'rsx', 'asset', 'stages', 'scenario'), offset: integer(0), limit: integer(1, 200) }),
     ferroui_project_scaffold: tool('Create a FerroUI XAML or RSX view or reusable component as a new editor file. A Rust module can import the generated view after review.',
