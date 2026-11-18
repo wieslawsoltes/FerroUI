@@ -392,8 +392,15 @@ fn public_value_rust_type(set: &ModelSet, value: &str) -> String {
     for (end, character) in value.char_indices().chain(std::iter::once((value.len(), ' '))) {
         if !separator(character) { continue; }
         let component = &value[start..end];
-        let path = set.position_of_rust_type(component).and_then(|position| public_path(set.type_at(position)));
-        result.push_str(path.as_deref().unwrap_or(component));
+        // A contract's model key includes `dyn`, while its exported path names
+        // only the trait. Keep the existing qualifier and resolve the full model key.
+        let key = if value[..start].ends_with("dyn ") {
+            format!("dyn {component}")
+        } else {
+            component.to_owned()
+        };
+        let path = set.position_of_rust_type(&key).and_then(|position| public_path(set.type_at(position)));
+        result.push_str(path.as_deref().or_else(|| set.exported_path(component)).unwrap_or(component));
         if end < value.len() { result.push(character); }
         start = end + character.len_utf8();
     }

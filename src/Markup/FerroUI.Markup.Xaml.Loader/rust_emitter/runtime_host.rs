@@ -18,7 +18,9 @@ use super::compiled::{compile_documents_with, file_of, generate_class_file_with,
 use super::compiled_resources::CompiledMarkupTypeSystem;
 use super::runtime_types::RuntimeEmitTypes;
 use super::source::function_name_of;
-use super::transform::{transform_group, DocumentSource, TransformOptions, TransformedDocument};
+use super::transform::TransformOptions;
+#[cfg(any(test, feature = "testing"))]
+use super::transform::{transform_group, DocumentSource, TransformedDocument};
 use ferroui_build_scan::xaml_metadata::XamlMetadata;
 
 impl EmitterHost<'static> {
@@ -92,8 +94,17 @@ pub fn compile_documents(
     configuration: &RuntimeXamlLoaderConfiguration,
     dependencies: &[XamlMetadata],
 ) -> Vec<CompiledDocument> {
+    compile_with_options(documents, root_uri, &TransformOptions::of(configuration), dependencies)
+}
+
+fn compile_with_options(
+    documents: &[(&str, &str)],
+    root_uri: Option<&str>,
+    options: &TransformOptions,
+    dependencies: &[XamlMetadata],
+) -> Vec<CompiledDocument> {
     match EmitterHost::runtime(dependencies) {
-        Ok(host) => compile_documents_with(&host, documents, root_uri, &TransformOptions::of(configuration)),
+        Ok(host) => compile_documents_with(&host, documents, root_uri, options),
         Err(error) => documents
             .iter()
             .map(|(name, _)| CompiledDocument {
@@ -129,7 +140,18 @@ pub fn generate_file(
     configuration: &RuntimeXamlLoaderConfiguration,
     dependencies: &[XamlMetadata],
 ) -> GeneratedFile {
-    file_of(assembly_name, root_uri, compile_documents(documents, Some(root_uri), configuration, dependencies))
+    generate_file_with_runtime_types(assembly_name, root_uri, documents, &TransformOptions::of(configuration), dependencies)
+}
+
+/// Compiles against the registered runtime types with explicitly selected emitter options.
+pub fn generate_file_with_runtime_types(
+    assembly_name: &str,
+    root_uri: &str,
+    documents: &[(&str, &str)],
+    options: &TransformOptions,
+    dependencies: &[XamlMetadata],
+) -> GeneratedFile {
+    file_of(assembly_name, root_uri, compile_with_options(documents, Some(root_uri), options, dependencies))
 }
 
 /// A group of documents with owned texts as the borrowed form

@@ -62,6 +62,10 @@ pub struct CartesianSeriesOptions {
     /// `DataLabelsPosition` of the series; `None` is the default of the family (`Middle` for a
     /// heat series, the only family that places its labels by it).
     pub data_labels_position: Option<DataLabelsPosition>,
+    /// `GeometrySvg`: the SVG path data drawn in each cell of a heat series, fitted to the cell
+    /// as the source's `VariableSVGPathGeometry`; `None` draws rectangles. Path data the parser
+    /// rejects is an error, where the source throws.
+    pub geometry_svg: Option<String>,
 }
 
 /// Calculated axes can also drive crosshairs and zoom/pan without reinterpreting pixels.
@@ -536,6 +540,9 @@ impl CartesianChartEngine {
                             .get(si)
                             .and_then(|o| o.data_labels_position)
                             .unwrap_or(DataLabelsPosition::Middle),
+                        geometry_svg: series_options
+                            .get(si)
+                            .and_then(|o| o.geometry_svg.as_deref()),
                     },
                     xs,
                     ys,
@@ -1608,6 +1615,7 @@ struct HeatDraw<'a> {
     series: &'a Series,
     points: &'a [Option<MeasuredPoint>],
     label_position: DataLabelsPosition,
+    geometry_svg: Option<&'a str>,
 }
 impl Series {
     /// The bounds of the weights of a heat series (`WeightBounds` of `CoreHeatSeries`): the
@@ -1673,8 +1681,18 @@ fn draw_heat(
         series: s,
         points,
         label_position,
+        geometry_svg,
     } = heat;
     let stops = HeatFunctions::build_color_stops(&s.heat_map, s.color_stops.as_deref())?;
+    // `VariableSVGPathGeometry`: the path is read once and fitted to every cell.
+    let svg = match geometry_svg {
+        Some(data) => {
+            let commands = crate::svg_path::parse(data)?;
+            let bounds = crate::svg_path::bounds(&commands);
+            Some((commands, bounds))
+        }
+        None => None,
+    };
     let dx = minimum_delta(
         points
             .iter()
@@ -1715,7 +1733,12 @@ fn draw_heat(
             HeatFunctions::interpolate_color(c.tertiary_value, &weights, &s.heat_map, &stops);
         scene.primitives.push(
             Primitive::new(
-                Geometry::Rectangle { rect, radius: 0.0 },
+                match &svg {
+                    Some((commands, bounds)) => {
+                        Geometry::Path(crate::svg_path::fit(commands, *bounds, rect))
+                    }
+                    None => Geometry::Rectangle { rect, radius: 0.0 },
+                },
                 PaintStyle {
                     opacity: s.opacity,
                     ..PaintStyle::fill(color)
