@@ -206,7 +206,7 @@ impl BrushTextureSource {
     /// What keeps the key unique while a texture of it is kept.
     pub fn identity(&self) -> BrushTextureIdentity {
         match &self.origin {
-            TextureOrigin::Gradient(_) => BrushTextureIdentity(None),
+            TextureOrigin::Gradient(_) => BrushTextureIdentity::none(),
             TextureOrigin::Image(bitmap) => BrushTextureIdentity(Some(Arc::downgrade(bitmap))),
         }
     }
