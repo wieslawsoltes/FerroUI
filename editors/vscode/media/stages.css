@@ -18,5 +18,7 @@
 .prototype-node[data-drop] { outline: 2px solid var(--vscode-focusBorder); outline-offset: -2px; }
 .prototype-node header { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; padding: 0; }
 .prototype-node h3 { font-size: 1em; margin: 0; }
-.prototype-node h3[draggable] { cursor: grab; }
+.prototype-node .prototype-drag-title { cursor: grab; touch-action: none; user-select: none; }
+.prototype-node .prototype-drag-title:active { cursor: grabbing; }
+.prototype-thumbnail { display: block; width: 100%; height: auto; max-height: min(200px, 32vh); object-fit: contain; margin: 6px 0; }
 .prototype-routes li { border-top: 1px solid var(--vscode-panel-border); margin-top: 6px; padding-top: 6px; }

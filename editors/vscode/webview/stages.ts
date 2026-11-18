@@ -31,6 +31,9 @@ const graph = new PrototypeGraphView(message => vscode.postMessage(message), id 
     const stage = visible.get(id);
     stage?.card.scrollIntoView({ block: 'nearest' });
     stage?.title.focus({ preventScroll: true });
+}, id => {
+    const image = visible.get(id)?.image;
+    return image && !image.hidden ? image.src : undefined;
 });
 
 window.addEventListener('message', async ({ data }: MessageEvent<ToStages>) => {
@@ -58,6 +61,7 @@ window.addEventListener('message', async ({ data }: MessageEvent<ToStages>) => {
             current.image.src = image.src;
             current.image.hidden = false;
             current.displayedEpoch = data.epoch;
+            graph.updatePreview(data.id, image.src);
         }
     }
 });

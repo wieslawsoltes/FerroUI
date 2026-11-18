@@ -1,7 +1,6 @@
 import type { PrototypeAction, PrototypeEdit, SourceAnchor, StageModel, StagesRequest } from '../src/stagesProtocol';
 import { create, element } from './dom';
-
-const stageMime = 'application/vnd.ferroui.prototype-stage';
+import { connectStageDrag } from './prototypeStageDrag';
 
 export class PrototypeGraphView {
     private readonly panel = element('prototype-graph');
@@ -11,9 +10,10 @@ export class PrototypeGraphView {
     private readonly addLink = element<HTMLButtonElement>('prototype-add-link');
     private model?: StageModel;
     private drawn?: StageModel;
-    private drag?: { source: number; epoch: number };
+    private readonly thumbnails = new Map<number, HTMLImageElement>();
 
-    constructor(private readonly send: (message: StagesRequest) => void, private readonly openStage: (id: number) => void) {
+    constructor(private readonly send: (message: StagesRequest) => void, private readonly openStage: (id: number) => void,
+        private readonly imageFor: (id: number) => string | undefined) {
         this.addFlow.onclick = () => this.edit({ kind: 'flow' });
         this.addLink.onclick = () => this.edit({ kind: 'interaction' });
     }
@@ -28,6 +28,13 @@ export class PrototypeGraphView {
         if (!this.panel.hidden) this.draw();
     }
 
+    updatePreview(id: number, src: string): void {
+        const thumbnail = this.thumbnails.get(id);
+        if (!thumbnail) return;
+        thumbnail.src = src;
+        thumbnail.hidden = false;
+    }
+
     private edit(edit: PrototypeEdit): void {
         if (this.model) this.send({ type: 'editPrototype', epoch: this.model.epoch, edit });
     }
@@ -36,7 +43,7 @@ export class PrototypeGraphView {
         const model = this.model;
         if (!model || model === this.drawn) return;
         this.drawn = model;
-        this.drag = undefined;
+        this.thumbnails.clear();
         const active = document.activeElement instanceof HTMLElement ? document.activeElement.dataset.graphFocus : undefined;
         const graph = model.manifest.prototype;
         this.addFlow.disabled = !model.stages.length;
@@ -58,16 +65,30 @@ export class PrototypeGraphView {
         const stage = model.stages[source];
         const card = create('article');
         card.className = 'prototype-node';
+        card.dataset.prototypeStage = String(source);
         const header = create('header');
         const name = stage.configuration.name;
         const title = create('h3');
-        title.append(button(name, `Show ${name} stage`, `stage-${id}`, () => this.openStage(id)));
+        const stageTitle = button(name, `Show ${name} stage`, `stage-${id}`, () => this.openStage(id));
+        title.append(stageTitle);
         const add = button('Add interaction', `Add interaction from ${name}`, `stage-add-${id}`,
             () => this.edit({ kind: 'interaction', source }));
         add.disabled = stage.status.state !== 'ready';
         header.append(title, add);
-        if (!add.disabled) this.dragFrom(title, source, model.epoch);
-        this.dropOn(card, source, model.epoch);
+        if (!add.disabled) {
+            stageTitle.title = 'Drag to another stage to create a connection';
+            stageTitle.classList.add('prototype-drag-title');
+            connectStageDrag(stageTitle, source, () => this.model === model,
+                destination => this.edit({ kind: 'interaction', source, destination }));
+        }
+        const thumbnail = create('img');
+        thumbnail.className = 'prototype-thumbnail';
+        thumbnail.alt = `${name} native preview`;
+        thumbnail.draggable = false;
+        thumbnail.hidden = true;
+        this.thumbnails.set(id, thumbnail);
+        const src = this.imageFor(id);
+        if (src) this.updatePreview(id, src);
         const routes = create('ul');
         routes.className = 'prototype-routes';
         model.manifest.prototype?.links.forEach((link, index) => {
@@ -82,7 +103,7 @@ export class PrototypeGraphView {
             row.append(edit, summary, reveal);
             routes.append(row);
         });
-        card.append(header, routes);
+        card.append(header, thumbnail, routes);
         return card;
     }
 
@@ -100,41 +121,6 @@ export class PrototypeGraphView {
         }
     }
 
-    private dragFrom(control: HTMLElement, source: number, epoch: number): void {
-        control.draggable = true;
-        control.addEventListener('dragstart', event => {
-            if (!event.dataTransfer) return;
-            this.drag = { source, epoch };
-            event.dataTransfer.setData(stageMime, String(source));
-            event.dataTransfer.effectAllowed = 'link';
-        });
-        control.addEventListener('dragend', () => {
-            this.drag = undefined;
-            for (const card of this.stages.querySelectorAll('[data-drop]')) card.removeAttribute('data-drop');
-        });
-    }
-
-    private dropOn(card: HTMLElement, destination: number, epoch: number): void {
-        const valid = (event: DragEvent) => Boolean(this.drag && this.drag.source !== destination && this.drag.epoch === epoch
-            && this.model?.epoch === epoch && event.dataTransfer?.types.includes(stageMime));
-        card.addEventListener('dragover', event => {
-            if (!valid(event) || !event.dataTransfer) return;
-            event.preventDefault();
-            event.dataTransfer.dropEffect = 'link';
-            card.dataset.drop = 'true';
-        });
-        card.addEventListener('dragleave', event => {
-            if (!(event.relatedTarget instanceof Node) || !card.contains(event.relatedTarget)) delete card.dataset.drop;
-        });
-        card.addEventListener('drop', event => {
-            delete card.dataset.drop;
-            if (!valid(event) || !this.drag) return;
-            event.preventDefault();
-            const source = this.drag.source;
-            this.drag = undefined;
-            this.edit({ kind: 'interaction', source, destination });
-        });
-    }
 }
 
 function button(label: string, accessibleName: string, focus: string, action: () => void): HTMLButtonElement {

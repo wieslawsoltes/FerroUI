@@ -349,7 +349,10 @@ class StageSession {
         const document = await vscode.workspace.openTextDocument(uri);
         if (generation !== this.generation || this.disposed) return;
         const editor = vscode.window.visibleTextEditors.find(editor => editor.document === document);
-        await vscode.window.showTextDocument(document, { viewColumn: editor?.viewColumn ?? vscode.ViewColumn.Beside, preserveFocus: true, selection: asRange(selection) });
+        const sourceGroup = vscode.window.tabGroups.all.find(group => group.viewColumn !== this.panel.viewColumn
+            && group.tabs.some(tab => tab.input instanceof vscode.TabInputText && tab.input.uri.toString() === this.document.uri.toString()));
+        await vscode.window.showTextDocument(document, { viewColumn: editor?.viewColumn ?? sourceGroup?.viewColumn ?? vscode.ViewColumn.Beside,
+            preserveFocus: true, selection: asRange(selection) });
     }
 
     private async editPrototype(model: StageModel, edit: PrototypeEdit): Promise<StageChange | undefined> {
