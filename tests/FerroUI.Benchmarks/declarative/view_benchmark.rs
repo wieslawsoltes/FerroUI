@@ -3,13 +3,27 @@
 //! components that run again.
 
 use crate::harness::Registry;
-use ferroui_base::Ref;
+use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
+use ferroui_base::media::immutable::ImmutableSolidColorBrush;
+use ferroui_base::media::{Color, FontFamily, FontWeight, IBrush};
+use ferroui_base::{CornerRadius, Ref, Thickness};
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
-use ferroui_controls::{Control, StackPanel, TextBlock};
+use ferroui_controls::{Border, Control, Grid, StackPanel, TextBlock, WrapPanel};
 use ferroui_view::prelude::*;
+use std::rc::Rc;
 
 /// The rows of the list benchmarks.
 const ROWS: u32 = 1000;
+/// The tiles of the wall benchmarks: five elements each, a fill, a label over a dot and a value,
+/// with the properties an application writes for them (a size, a corner radius, a fill given as
+/// the text of a colour, a font family given by its name, a font size, a weight, alignments,
+/// margins).
+const TILES: u32 = 1000;
+/// The fills of the wall.
+const FILLS: [&str; 4] = ["#2E7D32", "#1565C0", "#6A1B9A", "#EF6C00"];
+/// The family of the texts of the wall.
+const FAMILY: &str = "Roboto";
+
 /// The components of the component benchmarks (the cells of the 7GUIs
 /// spreadsheet, 26 columns by 100 rows).
 const COMPONENTS: u32 = 2600;
@@ -95,6 +109,92 @@ impl ViewBenchmark {
             children.add(text);
         }
         panel
+    }
+
+    /// A wall of tiles made of controls directly and let go: the baseline of the wall of
+    /// elements, which is mounted and taken out.
+    pub fn mount_wall_controls(&mut self) {
+        drop(self.wall_of_controls());
+    }
+
+    fn wall_of_controls(&self) -> Ref<WrapPanel> {
+        let brush = |text: &str| -> Option<Rc<dyn IBrush>> {
+            Some(Rc::new(ImmutableSolidColorBrush::new(Color::parse(text).expect("a colour"))))
+        };
+        let fills: Vec<_> = FILLS.iter().map(|fill| brush(fill)).collect();
+        let (ink, dot_fill) = (brush("#FFFFFF"), brush("#FFC107"));
+        let text = |content: String, size: f64, bold: bool, margin: Thickness| {
+            let block = TextBlock::new();
+            block.set_text(Some(content.as_str()));
+            block.set_font_family(FontFamily::from(FAMILY));
+            block.set_font_size(size);
+            block.set_foreground(ink.clone());
+            block.set_font_weight(if bold { FontWeight::Bold } else { FontWeight::Normal });
+            block.set_horizontal_alignment(HorizontalAlignment::Left);
+            block.set_vertical_alignment(VerticalAlignment::Top);
+            block.set_margin(margin);
+            block
+        };
+        let wall = WrapPanel::new();
+        let tiles = wall.children();
+        for i in 0..TILES {
+            let dot = Border::new();
+            dot.set_width(6.0);
+            dot.set_height(6.0);
+            dot.set_corner_radius(CornerRadius::uniform(3.0));
+            dot.set_background(dot_fill.clone());
+            dot.set_horizontal_alignment(HorizontalAlignment::Left);
+            dot.set_vertical_alignment(VerticalAlignment::Top);
+            dot.set_margin(Thickness::new(4.0, 22.0, 0.0, 0.0));
+            let grid = Grid::new();
+            let parts = grid.children();
+            parts.add(text(format!("Tile {i}"), 11.0, true, Thickness::new(4.0, 4.0, 0.0, 0.0)));
+            parts.add(dot);
+            parts.add(text(format!("{}", i * 7), 10.0, false, Thickness::new(13.0, 19.0, 0.0, 0.0)));
+            let tile = Border::new();
+            tile.set_width(64.0);
+            tile.set_height(40.0);
+            tile.set_corner_radius(CornerRadius::uniform(4.0));
+            tile.set_background(fills[i as usize % fills.len()].clone());
+            tile.set_child(Some(grid.upcast()));
+            tiles.add(tile);
+        }
+        wall
+    }
+
+    /// The same wall as elements in the run-once model, mounted and taken out.
+    pub fn mount_wall_run_once(&mut self) {
+        let text = |content: String, size: f64, bold: bool, margin: (f64, f64, f64, f64)| {
+            text_block()
+                .text(content)
+                .font_family(FontFamily::from(FAMILY))
+                .font_size(size)
+                .foreground("#FFFFFF")
+                .font_weight(if bold { FontWeight::Bold } else { FontWeight::Normal })
+                .horizontal_alignment(HorizontalAlignment::Left)
+                .vertical_alignment(VerticalAlignment::Top)
+                .margin(margin)
+        };
+        let tile = |i: u32| {
+            border().width(64.0).height(40.0).corner_radius(4.0).background(FILLS[i as usize % FILLS.len()]).child(
+                grid()
+                    .child(text(format!("Tile {i}"), 11.0, true, (4.0, 4.0, 0.0, 0.0)))
+                    .child(
+                        border()
+                            .width(6.0)
+                            .height(6.0)
+                            .corner_radius(3.0)
+                            .background("#FFC107")
+                            .horizontal_alignment(HorizontalAlignment::Left)
+                            .vertical_alignment(VerticalAlignment::Top)
+                            .margin((4.0, 22.0, 0.0, 0.0)),
+                    )
+                    .child(text(format!("{}", i * 7), 10.0, false, (13.0, 19.0, 0.0, 0.0))),
+            )
+        };
+        let owner = Owner::new_root();
+        let _ = owner.with(|| wrap_panel().children((0..TILES).map(tile).collect::<Vec<_>>()).into_element().mount());
+        owner.dispose();
     }
 
     /// The same list as elements in the run-once model, mounted and taken
@@ -207,6 +307,8 @@ pub fn register(registry: &mut Registry) {
     let mut class = registry.class("declarative", "ViewBenchmark");
     class.benchmark("mount_list_controls", "", ViewBenchmark::empty, |b| b.mount_list_controls()).baseline();
     class.benchmark("mount_list_run_once", "", ViewBenchmark::empty, |b| b.mount_list_run_once());
+    class.benchmark("mount_wall_controls", "", ViewBenchmark::empty, |b| b.mount_wall_controls());
+    class.benchmark("mount_wall_run_once", "", ViewBenchmark::empty, |b| b.mount_wall_run_once());
     class.benchmark("mount_list_rerender", "", ViewBenchmark::empty, |b| b.mount_list_rerender());
     class.benchmark("run_unchanged", "", ViewBenchmark::with_list, |b| b.run_unchanged());
     class.benchmark("run_one_row_changed", "", ViewBenchmark::with_list, |b| b.run_one_row_changed());
