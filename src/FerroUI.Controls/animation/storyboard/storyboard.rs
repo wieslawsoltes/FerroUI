@@ -555,7 +555,16 @@ fn base_values(
     // The value without animations: the base value, else the default of the property for the
     // type of the object (an inherited value is not told apart from the default here).
     let base = object.get_base_value_untyped(property);
-    let base = wrap(&base).or_else(|| wrap(&property.default_value_boxed(object.get_type())));
+    let default = || -> Option<BoxedValue> {
+        if let Some(styled) = property.as_styled::<f64>() {
+            return Some(Rc::new(styled.get_default_value_for(object)));
+        }
+        if let Some(styled) = property.as_styled::<Color>() {
+            return Some(Rc::new(styled.get_default_value_for(object)));
+        }
+        property.as_styled::<Point>().map(|styled| Rc::new(styled.get_default_value_for(object)) as BoxedValue)
+    };
+    let base = wrap(&base).or_else(|| default().and_then(|value| wrap(&value)));
     Some((current, base.unwrap_or(current)))
 }
 
