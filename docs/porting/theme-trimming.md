@@ -1391,3 +1391,68 @@ function (`_deferred_<n>`, `_part_<n>`, `_unit_<n>`, `_untyped`).
 - `theme_roots_tests.rs`: the parts statics, the capability, and the producer check.
 - `tests/FerroUI.Markup.Xaml.UnitTests/emitter/build_diagnostics.rs`: the error and the
   disambiguation reported by a build.
+
+## 16. Edges of the unit graph across themes, crates and types of one name (#848)
+
+The review found three places where the unit graph lost an edge.
+
+### 16.1 Themes used together
+
+`kept_units` closed over one theme at a time. Suppose a kept unit of theme A references a key that
+only theme B defines, or constructs a type whose control theme only B supplies. Then B kept only
+its ambient unit.
+
+`theme_roots::kept_units_across` (new) closes over every theme the application uses, in one loop:
+
+- the keys a kept unit of any theme references, and the types it constructs, become roots of every
+  theme;
+- the loop runs until no theme keeps another unit, so a cycle of references between two themes
+  ends;
+- the result for each theme does not depend on the order of the themes.
+
+The build calls it for the themes it writes tables for. An application with one theme keeps what it
+kept before.
+
+A unit records the keys of `{StaticResource}`, `{DynamicResource}` and `ResourceKey` that its
+documents name, including keys no document of its own theme defines (16.4). Without this, a key that
+only another theme provides could not root that theme.
+
+### 16.2 Crates with a theme and ordinary documents
+
+Since #849 a crate exports the references of every document except those of a class constructed
+from selected units (section 14.1). A crate with a theme class and an ordinary `Other.xaml` with
+`<ListBox />` therefore exports `ListBox`. The path that imports checked-in metadata
+(`Build::checked_in_metadata`) copied the documents and the units and dropped the references. It now
+merges them into the references the crate exports.
+
+### 16.3 Types of one name
+
+`TypeGraph` keyed its edges by local name. Two assemblies with `Left.Twin : LeftBase` and
+`Right.Twin : RightBase` gave one chain or the other, depending on the order of the models, and
+their creates edges were merged.
+
+The graph now identifies each type by its full markup name. A base class is found by its Rust path,
+and by its local Rust name only when that name is unique. Roots and units still name types by local
+name, as documents write them. A local name stands for every type of that name, and is live with the
+edges of each. Where the name is not unique, every possible provider is kept rather than one picked
+by order. No ambiguity is reported yet: old metadata and unqualified roots cannot say which type they
+mean.
+
+### 16.4 References to keys of other themes
+
+The unit graph used to drop the argument of a resource extension unless the same theme defines the
+key. It now keeps every such argument as a reference of its unit. Identifier tokens of attribute
+values are still kept only when they spell a key of the theme, since they are only conservative
+guesses. This changes the `references` of the theme units in the `.xamlmeta` of the themes, so the
+checked-in `compiled_xaml.xamlmeta` of a theme whose documents name such a key has to be regenerated
+(its `compiled_xaml_tests` say so). The generated Rust does not change.
+
+### 16.5 Tests
+
+- `theme_roots_tests.rs`:
+  - `themes_used_together_are_closed_over_together`: a key from the other theme, a type theme from
+    the other theme, a cycle, and both orders of the themes;
+  - `types_of_one_local_name_keep_their_own_edges`: both orders of the models;
+  - the existing graph tests, unchanged.
+- `theme_unit_graph_tests.rs`: an extension key that no document of the group defines is a
+  reference of its unit.

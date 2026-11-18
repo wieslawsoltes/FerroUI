@@ -230,7 +230,7 @@ use ferroui_base::metadata::MarkupAssembly;
 use xamlx::type_system::IXamlTypeSystem;
 
 use crate::export::ScanReport;
-use crate::model::{AssemblyModel, MarkupReferencesModel};
+use crate::model::{AssemblyModel, MarkupReferencesModel, ThemeUnitsModel};
 use crate::model_set::ModelSet;
 use crate::scanner::{scan_crate, InherentFunction, Scan, ScanOptions, Severity, SourceReferences};
 use crate::type_system::{ModelEmitTypes, ModelTypeSystem};
@@ -242,7 +242,7 @@ use ferroui_markup_xaml_loader::rust_emitter::{
     CompiledMarkupTypeSystem, EmitterHost, ThemePartsTables, TransformOptions, XamlMetadata, CLASS_GROUP_NOT_TRANSFORMED, GROUP_NOT_TRANSFORMED,
 };
 use crate::theme_roots::{
-    compile_bindings_from_manifest, kept_units, parts_constructor, parts_static_name, parts_static_names, source_roots,
+    compile_bindings_from_manifest, kept_units_across, parts_constructor, parts_static_name, parts_static_names, source_roots,
     unit_static_path, verify_parts_constructor, Roots, ThemeTrimming, TypeGraph,
 };
 
@@ -1039,6 +1039,10 @@ impl Build {
                 Ok(read) if read.name == assembly_name => {
                     metadata.documents.extend(read.documents);
                     metadata.theme_units.extend(read.theme_units);
+                    // What its documents name, for the applications that trim (#848): the
+                    // references travel with the documents they are of.
+                    exported_roots.types.extend(read.references.types);
+                    exported_roots.keys.extend(read.references.keys);
                 }
                 Ok(read) => errors.push(format!(
                     "{}: the file describes the assembly `{}`, the crate is `{}`",
@@ -1120,11 +1124,18 @@ impl Build {
             }
             let graph = TypeGraph::from_models(&base_models);
             roots.extend(source_roots(&source_references, dependencies.iter().flat_map(|metadata| metadata.theme_units.iter()), &graph));
-            for class in used {
-                let Some(units) = dependencies.iter().flat_map(|metadata| metadata.theme_units.iter()).find(|units| units.class == class) else {
-                    continue;
-                };
-                let kept = kept_units(units, &roots, &graph, self.full_themes);
+            // The themes used together are closed over together (#848): what a kept unit of one
+            // references or constructs roots the units of the others.
+            let used_units: Vec<(String, &ThemeUnitsModel)> = used
+                .into_iter()
+                .filter_map(|class| {
+                    let units = dependencies.iter().flat_map(|metadata| metadata.theme_units.iter()).find(|units| units.class == class)?;
+                    Some((class, units))
+                })
+                .collect();
+            let themes: Vec<&ThemeUnitsModel> = used_units.iter().map(|(_, units)| *units).collect();
+            let kept_of_themes = kept_units_across(&themes, &roots, &graph, self.full_themes);
+            for ((class, units), kept) in used_units.into_iter().zip(kept_of_themes) {
                 let name_of = |index: u32| units.units.iter().find(|unit| unit.index == index).map_or(String::new(), |unit| unit.name.clone());
                 parts_tables.push(PartsTable {
                     static_name: static_name_of(class.as_str()).unwrap_or_else(|| parts_static_name(&class)),

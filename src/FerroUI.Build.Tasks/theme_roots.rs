@@ -132,18 +132,26 @@ impl Roots {
     }
 }
 
-/// The edges between types that make a type live with another, by local name: the base class
-/// of a class (what keeps the theme of a base class for a class that does not override its
-/// style key) and the classes the code of a class creates (#568, step 4: the containers a
-/// `ListBox` creates, the selection handles of a `TextBox`).
+/// The edges between types that make a type live with another (#568, step 4; #848): the base
+/// class of a class (what keeps the theme of a base class for a class that does not override its
+/// style key) and the classes the code of a class creates (the containers a `ListBox` creates,
+/// the selection handles of a `TextBox`).
+///
+/// A type is identified by its full markup name (`Left.Twin`), so two types of one local name in
+/// two assemblies keep their own edges whatever the order of the models. The roots and the units
+/// name types by local name (`Twin`, as the documents write them): a local name stands for every
+/// type of that name, and is live with the edges of each, so no possible provider is lost where the
+/// name is not unique.
 #[derive(Clone, Debug, Default)]
 pub struct TypeGraph {
-    /// The local name of the base class of each class, by its local name.
+    /// The full name of the base class of each class, by its full name.
     base_of: BTreeMap<String, String>,
-    /// The local names of the classes the code of each class creates, by its local name.
+    /// The full names of the classes the code of each class creates, by its full name.
     creates: BTreeMap<String, BTreeSet<String>>,
-    /// The local names of the classes of the object model.
+    /// The full names of the classes of the object model.
     classes: BTreeSet<String>,
+    /// The full names of the types of each local name.
+    by_local: BTreeMap<String, BTreeSet<String>>,
 }
 
 /// The last segment of a Rust path, without generic arguments (`::a::b::Border<T>` is `Border`).
@@ -158,43 +166,77 @@ fn markup_local_name(full_name: &str) -> &str {
     full_name.rsplit('.').next().unwrap_or(full_name)
 }
 
+/// The Rust path of a type without generic arguments and a leading `::`, the key it is found by
+/// from the base of a class (`::ferroui_controls::border::Border` is
+/// `ferroui_controls::border::Border`).
+fn rust_key(text: &str) -> &str {
+    text.split('<').next().unwrap_or(text).trim().trim_start_matches("::")
+}
+
 impl TypeGraph {
     /// The edges the models state: for each class of the object model with a base class, the
-    /// markup name of the base, found by its Rust name; for each type that creates classes, their
-    /// local names.
+    /// markup name of the base, found by its Rust path (else by its local Rust name, when only one
+    /// type has it); for each type that creates classes, their full names.
     pub fn from_models<'m>(models: impl IntoIterator<Item = &'m AssemblyModel>) -> Self {
         let models: Vec<&AssemblyModel> = models.into_iter().collect();
-        // The markup name of each type, by the local name of its Rust path.
-        let mut markup_name: BTreeMap<String, String> = BTreeMap::new();
+        // The full markup name of each type, by its Rust path and by the paths other crates name
+        // it by; and the full names of each local Rust name.
+        let mut by_path: BTreeMap<String, String> = BTreeMap::new();
+        let mut by_rust_local: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
         for model in &models {
             for type_ in &model.types {
-                markup_name.entry(rust_local_name(&type_.rust_path.text).to_string()).or_insert_with(|| type_.name.clone());
+                let full = type_.full_name();
+                for path in std::iter::once(&type_.rust_path.text).chain(type_.public_path.as_ref()) {
+                    by_path.entry(rust_key(path).to_string()).or_insert_with(|| full.clone());
+                }
+                by_rust_local.entry(rust_local_name(&type_.rust_path.text).to_string()).or_default().insert(full);
             }
         }
         let mut graph = Self::default();
         for model in &models {
             for type_ in &model.types {
+                let full = type_.full_name();
+                graph.by_local.entry(type_.name.clone()).or_default().insert(full.clone());
                 if type_.object_model && type_.kind == TypeKind::Class {
-                    graph.classes.insert(type_.name.clone());
+                    graph.classes.insert(full.clone());
                 }
                 if !type_.creates.is_empty() {
-                    let created = graph.creates.entry(type_.name.clone()).or_default();
-                    created.extend(type_.creates.iter().map(|full_name| markup_local_name(full_name).to_string()).filter(|name| *name != type_.name));
+                    let created = graph.creates.entry(full.clone()).or_default();
+                    created.extend(type_.creates.iter().filter(|created| **created != full).cloned());
                 }
                 let Some(base) = &type_.base else { continue };
                 let local = rust_local_name(&base.text);
-                let base = markup_name.get(local).cloned().unwrap_or_else(|| local.to_string());
-                if !base.is_empty() && base != type_.name {
-                    graph.base_of.entry(type_.name.clone()).or_insert(base);
+                let base = match by_path.get(rust_key(&base.text)) {
+                    Some(base) => base.clone(),
+                    None => match by_rust_local.get(local) {
+                        Some(candidates) if candidates.len() == 1 => candidates.iter().next().cloned().unwrap_or_default(),
+                        _ => local.to_string(),
+                    },
+                };
+                if !base.is_empty() && base != full {
+                    graph.base_of.entry(full).or_insert(base);
                 }
             }
+        }
+        // A type named only by an edge (a created class of a crate whose model is not read) is
+        // known by its local name too.
+        let named: Vec<String> = graph.base_of.values().chain(graph.creates.values().flatten()).cloned().collect();
+        for full in named {
+            graph.by_local.entry(markup_local_name(&full).to_string()).or_default().insert(full);
         }
         graph
     }
 
-    /// The base classes stated as pairs `(class, base)`, for the tests.
+    /// The base classes stated as pairs `(class, base)`, for the tests. A name is a full name; a
+    /// name without a dot is its own local name.
     pub fn from_pairs(pairs: &[(&str, &str)]) -> Self {
-        Self { base_of: pairs.iter().map(|(class, base)| (class.to_string(), base.to_string())).collect(), ..Self::default() }
+        let mut graph = Self::default();
+        for (class, base) in pairs {
+            graph.base_of.insert(class.to_string(), base.to_string());
+            graph.know(class);
+            graph.know(base);
+        }
+        graph
     }
 
     /// The graph with the creates edges stated as pairs `(class, created)`, for the tests.
@@ -203,39 +245,72 @@ impl TypeGraph {
             self.creates.entry(class.to_string()).or_default().insert(created.to_string());
             self.classes.insert(class.to_string());
             self.classes.insert(created.to_string());
+            self.know(class);
+            self.know(created);
         }
         self
     }
 
-    /// Whether `name` is a class of the object model of the models, or a class of an edge.
-    pub fn is_class(&self, name: &str) -> bool {
-        self.classes.contains(name)
+    /// Records the full name `full` under its local name.
+    fn know(&mut self, full: &str) {
+        self.by_local.entry(markup_local_name(full).to_string()).or_default().insert(full.to_string());
     }
 
-    /// `name` and its base classes, nearest first.
+    /// The full names `name` stands for: itself when it is a full name of the graph, else the
+    /// types of that local name, else itself.
+    fn identities(&self, name: &str) -> Vec<String> {
+        if name.contains('.') && (self.base_of.contains_key(name) || self.creates.contains_key(name) || self.classes.contains(name)) {
+            return vec![name.to_string()];
+        }
+        match self.by_local.get(name) {
+            Some(full) if !full.is_empty() => full.iter().cloned().collect(),
+            _ => vec![name.to_string()],
+        }
+    }
+
+    /// Whether `name` (a local or a full name) is a class of the object model of the models, or a
+    /// class of an edge.
+    pub fn is_class(&self, name: &str) -> bool {
+        self.identities(name).iter().any(|full| self.classes.contains(full))
+    }
+
+    /// `name` and its base classes, nearest first, by local name. For a local name of several types,
+    /// the chains of all of them, each name once.
     pub fn chain(&self, name: &str) -> Vec<String> {
         let mut chain = vec![name.to_string()];
-        while let Some(base) = self.base_of.get(chain.last().map(String::as_str).unwrap_or_default()) {
-            if chain.contains(base) {
-                break;
+        for full in self.identities(name) {
+            let mut seen = vec![full.clone()];
+            while let Some(base) = self.base_of.get(seen.last().map(String::as_str).unwrap_or_default()) {
+                if seen.contains(base) {
+                    break;
+                }
+                seen.push(base.clone());
             }
-            chain.push(base.clone());
+            for full in seen {
+                let local = markup_local_name(&full).to_string();
+                if !chain.contains(&local) {
+                    chain.push(local);
+                }
+            }
         }
         chain
     }
 
-    /// The types that are live when `name` is: `name`, its base classes, the classes any of them
-    /// creates, and so on, transitively.
+    /// The types that are live when `name` is, by local name: `name`, its base classes, the classes
+    /// any of them creates, and so on, transitively.
     pub fn live(&self, name: &str) -> BTreeSet<String> {
-        let mut live = BTreeSet::new();
-        let mut pending = vec![name.to_string()];
+        let mut live = BTreeSet::from([name.to_string()]);
+        let mut seen: BTreeSet<String> = BTreeSet::new();
+        let mut pending = self.identities(name);
         while let Some(next) = pending.pop() {
-            for type_ in self.chain(&next) {
-                if !live.insert(type_.clone()) {
-                    continue;
-                }
-                pending.extend(self.creates.get(&type_).into_iter().flatten().filter(|created| !live.contains(*created)).cloned());
+            if !seen.insert(next.clone()) {
+                continue;
             }
+            live.insert(markup_local_name(&next).to_string());
+            if let Some(base) = self.base_of.get(&next) {
+                pending.push(base.clone());
+            }
+            pending.extend(self.creates.get(&next).into_iter().flatten().filter(|created| !seen.contains(*created)).cloned());
         }
         live
     }
@@ -317,6 +392,37 @@ pub fn kept_units(theme: &ThemeUnitsModel, roots: &Roots, graph: &TypeGraph, ful
     let mut indices: Vec<u32> = theme.units.iter().zip(&kept).filter(|(_, kept)| **kept).map(|(unit, _)| unit.index).collect();
     indices.sort_unstable();
     indices
+}
+
+/// The units each theme of `themes` keeps when the application uses them together (#848): the
+/// closure of [`kept_units`] over all of them. What a kept unit of one theme references (its keys)
+/// and constructs (its types) roots the units of every theme, so a key one theme uses and only
+/// another defines, and a type one theme constructs whose control theme only another supplies,
+/// keep the units that provide them. Repeated until no theme keeps another unit; the result is
+/// in the order of `themes`, each as [`kept_units`] gives it.
+pub fn kept_units_across(
+    themes: &[&ThemeUnitsModel],
+    roots: &Roots,
+    graph: &TypeGraph,
+    full_themes: bool,
+) -> Vec<Vec<u32>> {
+    let mut roots = roots.clone();
+    loop {
+        let kept: Vec<Vec<u32>> = themes.iter().map(|theme| kept_units(theme, &roots, graph, full_themes)).collect();
+        if themes.len() < 2 || roots.all || full_themes {
+            return kept;
+        }
+        let (keys, types) = (roots.keys.len(), roots.types.len());
+        for (theme, indices) in themes.iter().zip(&kept) {
+            for unit in theme.units.iter().filter(|unit| indices.contains(&unit.index)) {
+                roots.keys.extend(unit.references.iter().cloned());
+                roots.types.extend(unit.types.iter().cloned());
+            }
+        }
+        if roots.keys.len() == keys && roots.types.len() == types {
+            return kept;
+        }
+    }
 }
 
 /// The name of the static of the parts table of the class `class` (its full name) in
