@@ -31,6 +31,10 @@
 //! fitted to the scene, and three generations), which `Viewport3D` draws through the
 //! render-data operation `DrawScene3D`; the renderers are in another crate.
 //!
+//! The hit testing of WPF ([`VisualTreeHelper::hit_test`], [`VisualTreeHelper::hit_test_point`]
+//! and [`VisualTreeHelper::hit_test_ray`], reporting [`RayMeshGeometry3DHitTestResult`]s nearest
+//! first) runs on the CPU over the same tree, with a bounding-volume hierarchy per mesh.
+//!
 //! [`register_types`] adds the classes, the markup metadata of the values and collections (their
 //! text converters) and the XML namespace of the framework to the tables of the markup loader.
 #![forbid(unsafe_code)]
@@ -41,6 +45,7 @@ mod collections;
 mod controls;
 mod error;
 mod geometry_3d;
+mod hit_testing;
 mod light;
 mod markup_types;
 mod material;
@@ -70,6 +75,10 @@ pub use collections::{
 };
 pub use controls::Viewport3D;
 pub use error::{Matrix3DError, QuaternionError, Size3DError};
+pub use hit_testing::{
+    HitTestFilterBehavior, HitTestFilterCallback, HitTestResult, HitTestResultBehavior, HitTestResultCallback,
+    RayHitTestParameters, RayHitTestResult, RayMeshGeometry3DHitTestResult, Viewport3DHitTestTarget, VisualTreeHelper,
+};
 pub use geometry_3d::{Geometry3D, Geometry3DImpl, Geometry3DImplExt, Geometry3DVTable, MeshGeometry3D};
 pub use light::{AmbientLight, DirectionalLight, Light, PointLight, PointLightBase, SpotLight};
 pub use markup_types::{register_types, ASSEMBLY};
