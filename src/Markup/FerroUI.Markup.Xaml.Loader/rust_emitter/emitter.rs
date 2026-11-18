@@ -885,6 +885,36 @@ impl<'a> Emitter<'a> {
         self.lines.push(format!("    {text}"));
     }
 
+    /// The unit of `assignment` when it is the key a merged theme dictionary assigns again to the
+    /// theme dictionary `target` it was merged into (#853, with
+    /// [`theme_units::ThemeUnitPlan::keys_in_runs`]): an assignment of
+    /// `IThemeVariantProvider.Key` in the body of the function of the document, recorded as an
+    /// entry of a unit, to a dictionary the body assigned a key outside every unit before. The
+    /// merge joins only theme dictionaries with equal keys, so it writes the key the dictionary
+    /// has. Any other key assignment of a theme dictionary is recorded as its first.
+    fn theme_key_reassignment(
+        &mut self,
+        node: &Rc<dyn IXamlAstNode>,
+        assignment: &XamlPropertyAssignmentNode,
+        target: &Typed<'a>,
+    ) -> Option<u32> {
+        let plan = theme_units::ThemeUnitPlan::current();
+        if !plan.keys_in_runs() || self.deferred_depth != 0 || assignment.property.name() != "Key" {
+            return None;
+        }
+        if assignment.property.declaring_type.borrow().full_name() != "FerroUI.Controls.IThemeVariantProvider" {
+            return None;
+        }
+        let unit = self.documents.units().and_then(|units| units.unit_of(node));
+        match unit {
+            Some(unit) if self.keyed_theme_dictionaries.contains(&target.expr) => Some(unit),
+            _ => {
+                self.keyed_theme_dictionaries.insert(target.expr.clone());
+                None
+            }
+        }
+    }
+
     /// The position marker of 9.3.6: `// <document>(line,position) <what>`.
     fn marker(&mut self, node: &Rc<dyn IXamlAstNode>, what: &str) {
         let document = self.document_name.replace(['\r', '\n'], " ");
@@ -4669,36 +4699,6 @@ impl ReflectionPaths<'_> {
             .or_else(|| self.root_scope.clone())
             .map(|scope| scope.aliases().clone())
             .unwrap_or_default()
-    }
-
-    /// The unit of `assignment` when it is the key a merged theme dictionary assigns again to the
-    /// theme dictionary `target` it was merged into (#853, with
-    /// [`theme_units::ThemeUnitPlan::keys_in_runs`]): an assignment of
-    /// `IThemeVariantProvider.Key` in the body of the function of the document, recorded as an
-    /// entry of a unit, to a dictionary the body assigned a key outside every unit before. The
-    /// merge joins only theme dictionaries with equal keys, so it writes the key the dictionary
-    /// has. Any other key assignment of a theme dictionary is recorded as its first.
-    fn theme_key_reassignment(
-        &mut self,
-        node: &Rc<dyn IXamlAstNode>,
-        assignment: &XamlPropertyAssignmentNode,
-        target: &Typed<'a>,
-    ) -> Option<u32> {
-        let plan = theme_units::ThemeUnitPlan::current();
-        if !plan.keys_in_runs() || self.deferred_depth != 0 || assignment.property.name() != "Key" {
-            return None;
-        }
-        if assignment.property.declaring_type.borrow().full_name() != "FerroUI.Controls.IThemeVariantProvider" {
-            return None;
-        }
-        let unit = self.documents.units().and_then(|units| units.unit_of(node));
-        match unit {
-            Some(unit) if self.keyed_theme_dictionaries.contains(&target.expr) => Some(unit),
-            _ => {
-                self.keyed_theme_dictionaries.insert(target.expr.clone());
-                None
-            }
-        }
     }
 
     /// The unit `node` belongs to: its own, as an entry a merge inlined, or its parent's.

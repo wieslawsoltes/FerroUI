@@ -232,6 +232,12 @@ fn the_plan_of_the_runs_is_off_by_default() {
     assert_eq!(ThemeUnitPlan::current(), DEFAULT_THEME_UNIT_PLAN);
 }
 
+/// The units of the region tests: the ambient unit and three documents.
+fn four_units() -> UnitEmission {
+    let names = ["ambient", "Controls/Button.xaml", "Resources/Base.xaml", "Controls/List.xaml"];
+    UnitEmission::new(Rc::new(MergedEntryOrigins::default()), HashMap::new(), names.iter().map(|name| name.to_string()).collect())
+}
+
 /// The body of the region tests: runs of three units into one dictionary, then one into
 /// another, a call alone after an ordinary statement.
 fn region_body() -> Vec<String> {
@@ -268,7 +274,7 @@ fn region_body() -> Vec<String> {
 /// call alone stays a call of `rt::apply_theme_unit`. The runs are the same functions.
 #[test]
 fn consecutive_runs_into_one_dictionary_are_one_region() {
-    let units = units();
+    let units = four_units();
     let plan = ThemeUnitPlan::OFF.with_regions(true);
     let (written, functions) = with_theme_unit_plan(plan, || extract(region_body(), &units));
     assert_eq!(written, body(&[
@@ -283,7 +289,7 @@ fn consecutive_runs_into_one_dictionary_are_one_region() {
     ]));
     let units_after = units.runs();
     // The same runs as without regions.
-    let plain = self::units();
+    let plain = four_units();
     let (unchanged, plain_functions) = extract(region_body(), &plain);
     assert_eq!(functions, plain_functions);
     assert_eq!(units_after, plain.runs());
