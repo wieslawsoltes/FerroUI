@@ -8,6 +8,9 @@ on:
   pull_request:
     paths:
       - 'src/FerroUI.Designer*/**'
+      - 'src/FerroUI.View.Macros/**'
+      - 'src/FerroUI.View.Syntax/**'
+      - 'editors/vscode/**'
       - 'docs/designer/samples/**'
       - 'samples/DesignerStudio/**'
       - 'src/FerroUI.Mcp/**'
@@ -65,9 +68,9 @@ jobs:
           toolchain: ${{ matrix.rust }}
           components: clippy
       - name: Source preservation, transaction, language, timeline and convergence regressions
-        run: cargo test --locked -p ferroui-designer-core -p ferroui-designer-project -p ferroui-designer-tools -p ferroui-designer-language -p ferroui-designer-animation -p ferroui-designer-collaboration -p ferroui-designer-collaboration-host --features ferroui-designer-collaboration-host/client,ferroui-designer-collaboration-host/server
+        run: cargo test --locked -p ferroui-designer-core -p ferroui-designer-project -p ferroui-designer-tools -p ferroui-designer-language -p ferroui-designer-rsx -p ferroui-view-syntax -p ferroui-designer-animation -p ferroui-designer-collaboration -p ferroui-designer-collaboration-host --features ferroui-designer-collaboration-host/client,ferroui-designer-collaboration-host/server
       - name: Portable public APIs are warning-free
-        run: cargo clippy --locked -p ferroui-designer-core -p ferroui-designer-project -p ferroui-designer-tools -p ferroui-designer-language -p ferroui-designer-animation -p ferroui-designer-collaboration -p ferroui-designer-collaboration-host --features ferroui-designer-collaboration-host/client,ferroui-designer-collaboration-host/server --all-targets --no-deps -- -D warnings
+        run: cargo clippy --locked -p ferroui-designer-core -p ferroui-designer-project -p ferroui-designer-tools -p ferroui-designer-language -p ferroui-designer-rsx -p ferroui-view-syntax -p ferroui-designer-animation -p ferroui-designer-collaboration -p ferroui-designer-collaboration-host --features ferroui-designer-collaboration-host/client,ferroui-designer-collaboration-host/server --all-targets --no-deps -- -D warnings
 
   native:
     name: Native studio, MCP and render smoke
@@ -78,8 +81,11 @@ jobs:
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
         with:
           components: clippy
-      - name: Fonts for native rendering
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libfontconfig1-dev libfreetype6-dev fonts-dejavu-core
+      - name: Native fonts and the VS Code test display
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libfontconfig1-dev libfreetype6-dev fonts-dejavu-core \
+            xvfb xauth libgtk-3-0t64 libnss3 libasound2t64
       - name: Studio, MCP tools and render-smoke suites
         env:
           FERROUI_DESIGNER_RENDER_OUTPUT: ${{ github.workspace }}/designer-render
@@ -96,6 +102,18 @@ jobs:
           done
       - name: Release build without development hot reload
         run: cargo check --locked -p ferroui-designer --features mcp --release
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: editors/vscode/package-lock.json
+      - name: Build the VS Code backend tools
+        run: cargo build --locked -p ferroui-designer-language -p ferroui-designer-preview
+      - name: VS Code extension host smoke
+        working-directory: editors/vscode
+        run: |
+          npm ci
+          xvfb-run -a npm test
       - name: Render evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

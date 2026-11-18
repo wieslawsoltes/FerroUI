@@ -1,6 +1,9 @@
 # FerroUI Designer Studio
 
 Designer Studio is a native FerroUI XAML authoring workspace and a set of reusable Rust engines.
+
+The [VS Code extension](../../editors/vscode/README.md) embeds its native preview and source
+editing tools beside FerroUI XAML and Rust `rsx!` files.
 The workspace combines an artboard, synchronized source editor, object hierarchy, live visual and
 logical trees, properties, layout manipulation, and animation tracks. All authored changes pass
 through a document transaction; the artboard renders actual FerroUI controls.
