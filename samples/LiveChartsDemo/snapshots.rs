@@ -23,7 +23,8 @@ use ferroui_base::utilities::DateTime;
 use ferroui_controls_livecharts::{
     AngularTicksVisual, Axis, BoxSeries, CandlesticksSeries, CartesianChart, Chart, ChartPoint,
     ChartSeries, ChartVisualElement, ColumnSeries, DateTimeAxis, GeoMap, GeoMarker, HeatLand,
-    HeatLandSeries, HeatLands, HeatSeries, Labeler, LegendPosition, LineSeries, MapProjection,
+    HeatLandSeries, HeatLands, HeatLegend, HeatSeries, Labeler, LegendPosition, LineSeries,
+    MapProjection,
     Maps, NeedleVisual, OhlcSeries, PieChart, PieSeries, PolarChart, PolarLabelsPosition,
     PolarLineSeries, RangeColumnSeries, RangeLineSeries, RangeRowSeries, RowSeries, SankeyChart,
     SankeyLayoutKind, SankeyLink, SankeyLinks, SankeyNode, SankeyNodes, SankeySeries,
@@ -962,7 +963,6 @@ fn heat(values: impl IntoIterator<Item = Coordinate>, map: &[u32]) -> Ref<ChartS
 }
 
 fn heat_basic() -> Ref<Chart> {
-    // The SKHeatLegend on the right (its gradient and BadgePadding) has no native counterpart.
     let weights: [[f64; 6]; 4] = [
         [150., 123., 310., 225., 473., 373.],
         [432., 312., 135., 78., 124., 423.],
@@ -984,6 +984,11 @@ fn heat_basic() -> Ref<Chart> {
     chart.y_axes().add(axis(|a| {
         a.set_labels(labels(&["Jan", "Feb", "Mar", "Apr", "May", "Jun"]))
     }));
+    // The SKHeatLegend on the right with its BadgePadding.
+    let legend = HeatLegend::new();
+    legend.set_badge_padding(ferroui_base::Thickness::new(30., 20., 8., 20.));
+    chart.set_legend(Some(legend.upcast()));
+    chart.set_legend_position(LegendPosition::Right);
     chart
 }
 
@@ -1807,11 +1812,12 @@ fn map_horizon() -> Ref<Chart> {
 
 fn map_title_and_legend() -> Ref<Chart> {
     // The source title is a 20 px label with a padding of 12 in black; its legend is the
-    // gradient bar of an SKHeatLegend on the right, where the native legend lists the series.
+    // gradient bar of an SKHeatLegend on the right.
     let chart = map(MapProjection::Mercator);
     chart.set_title("World population by country".into());
     chart.set_title_size(20.);
     chart.set_legend_position(LegendPosition::Right);
+    chart.set_legend(Some(HeatLegend::new().upcast()));
     chart
 }
 

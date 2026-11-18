@@ -10,6 +10,7 @@ pub mod easing_functions;
 pub mod geo;
 pub mod geo_map_chart_engine;
 pub mod heat_functions;
+pub mod heat_legend;
 pub mod kernel;
 pub mod labelers;
 pub mod measure;
@@ -29,7 +30,8 @@ pub use axis::{
     POLAR_LABELS_PADDING,
 };
 pub use cartesian_chart_engine::{
-    CartesianChartEngine, CartesianMeasurement, CartesianOptions, CartesianSeriesBounds, Section,
+    CartesianChartEngine, CartesianMeasurement, CartesianOptions, CartesianSeriesBounds,
+    CartesianSeriesOptions, Section,
 };
 pub use easing_functions::{EasingFunctions, KeyFrame};
 pub use geo::{
@@ -41,6 +43,7 @@ pub use geo_map_chart_engine::{
     HeatLand, HeatLandSeries, MapViewport, ZoomDirection,
 };
 pub use heat_functions::HeatFunctions;
+pub use heat_legend::{HeatLegend, HeatLegendSource};
 pub use kernel::{Coordinate, Error, StackedValue, Stacker};
 pub use labelers::{as_date, as_time_span, ChartPointFormatter, Labeler, Labelers};
 pub use motion::{Animatable, Animation, MotionProperty, Repeat};
@@ -58,7 +61,7 @@ pub use scene::{
     ChartError, FindingStrategy, Geometry, HitRegion, HitShape, LegendItem, PaintStyle,
     PathCommand, PointId, Primitive, Scene, TextAnchor,
 };
-pub use series::{PolarLabelsPosition, RadialAlignment, Series, SeriesKind};
+pub use series::{DataLabelsPosition, PolarLabelsPosition, RadialAlignment, Series, SeriesKind};
 pub use treemap_chart_engine::{TreemapChartEngine, TreemapNode, TreemapOptions, TreemapSeries};
 pub use visual_states::{
     DrawnPropertiesDictionary, DrawnPropertySetter, IStateBehavior, StateBehavior, StateOrigin,
