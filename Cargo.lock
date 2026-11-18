@@ -6606,7 +6606,9 @@ name = "static-view-locator-demo"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
+ "ferroui-markup-xaml",
  "ferroui-reactiveui",
  "ferroui-reactiveui-controls",
  "ferroui-static-view-locator",
