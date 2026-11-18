@@ -132,7 +132,8 @@ export class DesignerPanel implements vscode.Disposable {
     get selectedNode(): Snapshot['nodes'][number] | undefined { return this.runtime ? undefined : this.nodes.find(node => node.id === this.selected); }
     get runtimeSelection(): RuntimeRow | undefined { return this.runtime; }
     get dimensions(): Viewport { return this.viewport; }
-    get canvasReady(): boolean { return this.ready && this.panel.visible; }
+    get isDisposed(): boolean { return this.disposed; }
+    get canvasReady(): boolean { return !this.disposed && this.ready && this.panel.visible; }
     get status(): string | undefined {
         if (this.editing) return 'Applying edit…';
         if (this.currentToken === undefined) return this.problem ?? 'Updating preview…';

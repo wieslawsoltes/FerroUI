@@ -238,8 +238,9 @@ export class DesignerWorkbench implements vscode.Disposable {
     private followFocus(): void {
         if (this.disposed) return;
         const editor = vscode.window.activeTextEditor;
-        const source = editor && this.panels.get(editor.document.uri.toString());
-        const panels = [...this.panels.values()];
+        const candidate = editor && this.panels.get(editor.document.uri.toString());
+        const source = candidate?.isDisposed ? undefined : candidate;
+        const panels = [...this.panels.values()].filter(designer => !designer.isDisposed);
         const canvas = panels.find(designer => designer.panel.active);
         const fallback = this.active && panels.includes(this.active) && this.active.panel.visible ? this.active : undefined;
         this.setActive(canvas ?? source ?? fallback ?? panels.reverse().find(designer => designer.panel.visible));
