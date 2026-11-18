@@ -3,7 +3,8 @@
      EndPoint: shape_samples.rs sets them from the four point sliders, for the source's TwoWay x:Bind
      of each coordinate; the other properties keep the source's x:Bind (Visibility is IsVisible, IsOn
      is IsChecked, the Header of a switch is its Content). FerroUI's Slider has no Header (composed)
-     and no StepFrequency or SnapsTo: the steps of 0.5 are TickFrequency with IsSnapToTickEnabled.
+     and no StepFrequency or SnapsTo: the steps of 0.5 are TickFrequency with IsSnapToTickEnabled. WinUI's Value,
+     coerced into the range, starts at the minimum: the sliders' Value is their Minimum.
      Canvas.ZIndex is the shared ZIndex; the Rect of RectangleGeometry is written x,y,width,height. -->
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
@@ -16,19 +17,19 @@
       </Canvas>
       <StackPanel Grid.Column="1" Width="220">
         <TextBlock Text="Start point X" />
-        <Slider x:Name="lineSlider1" AutomationProperties.Name="Start point X" Maximum="100" Minimum="0"
+        <Slider x:Name="lineSlider1" AutomationProperties.Name="Start point X" Maximum="100" Minimum="0" Value="0"
                 SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
         <TextBlock Text="Start point Y" />
-        <Slider x:Name="lineSlider2" AutomationProperties.Name="Start point Y" Maximum="100" Minimum="0"
+        <Slider x:Name="lineSlider2" AutomationProperties.Name="Start point Y" Maximum="100" Minimum="0" Value="0"
                 SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
         <TextBlock Text="End point X" />
-        <Slider x:Name="lineSlider3" AutomationProperties.Name="End point X" Maximum="300" Minimum="200"
+        <Slider x:Name="lineSlider3" AutomationProperties.Name="End point X" Maximum="300" Minimum="200" Value="200"
                 SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
         <TextBlock Text="End point Y" />
-        <Slider x:Name="lineSlider4" AutomationProperties.Name="End point Y" Maximum="100" Minimum="0"
+        <Slider x:Name="lineSlider4" AutomationProperties.Name="End point Y" Maximum="100" Minimum="0" Value="0"
                 SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
         <TextBlock Text="Stroke Thickness" />
-        <Slider x:Name="lineSlider5" AutomationProperties.Name="Stroke Thickness" Maximum="10" Minimum="5"
+        <Slider x:Name="lineSlider5" AutomationProperties.Name="Stroke Thickness" Maximum="10" Minimum="5" Value="5"
                 SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
       </StackPanel>
     </Grid>
@@ -55,7 +56,7 @@
       <StackPanel Grid.Column="1" Width="220">
         <ToggleSwitch x:Name="ToggleSwitch2" Content="Show points" IsChecked="False" />
         <TextBlock Text="Stroke Thickness" />
-        <Slider x:Name="polyLineSlider1" AutomationProperties.Name="Stroke Thickness" Maximum="10" Minimum="2"
+        <Slider x:Name="polyLineSlider1" AutomationProperties.Name="Stroke Thickness" Maximum="10" Minimum="2" Value="2"
                 SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
       </StackPanel>
     </Grid>
@@ -84,7 +85,7 @@
       <StackPanel Grid.Column="1" Width="220">
         <ToggleSwitch x:Name="ToggleSwitch" Content="Show points" IsChecked="False" />
         <TextBlock Text="Stroke Thickness" />
-        <Slider x:Name="pathSlider1" AutomationProperties.Name="Stroke Thickness" Maximum="10" Minimum="2"
+        <Slider x:Name="pathSlider1" AutomationProperties.Name="Stroke Thickness" Maximum="10" Minimum="2" Value="2"
                 SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
       </StackPanel>
     </Grid>
@@ -111,10 +112,10 @@
       </Canvas>
       <StackPanel Grid.Column="1" Width="220">
         <TextBlock Text="RadiusX" />
-        <Slider x:Name="geogroupslider1" AutomationProperties.Name="RadiusX" Maximum="40" Minimum="30"
+        <Slider x:Name="geogroupslider1" AutomationProperties.Name="RadiusX" Maximum="40" Minimum="30" Value="30"
                 SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
         <TextBlock Text="RadiusY" />
-        <Slider x:Name="geogroupslider2" AutomationProperties.Name="RadiusY" Maximum="50" Minimum="30"
+        <Slider x:Name="geogroupslider2" AutomationProperties.Name="RadiusY" Maximum="50" Minimum="30" Value="30"
                 SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
       </StackPanel>
     </Grid>

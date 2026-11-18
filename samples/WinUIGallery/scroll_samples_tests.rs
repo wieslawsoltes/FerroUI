@@ -40,6 +40,9 @@ fn scroll_viewer_zoom_slider_and_zoom_factor_follow_each_other() {
     window.set_content(Some(Control::boxed(root.clone())));
     window.show();
     window.update_layout();
+    // The Loaded event of the scroll viewer, raised by a job of the dispatcher.
+    ferroui_base::threading::Dispatcher::ui_thread().run_jobs(None);
+    window.update_layout();
     let viewer = root.get_control::<ScrollViewer>("ScrollViewerControl");
     let slider = root.get_control::<Slider>("ZoomSlider");
     assert_eq!(viewer.zoom_factor(), 4.0);
