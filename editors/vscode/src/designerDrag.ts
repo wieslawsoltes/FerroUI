@@ -21,7 +21,7 @@ export class DesignerDrag {
             const origin = gesture.origin;
             const movable = (id: number) => panel.nodes.some(node => node.id === id && node.canMove);
             if (!origin || !(origin.type === 'asset' ? panel.assets.some(asset => asset.id === origin.control)
-                : origin.type === 'image' ? panel.language === 'xaml' && this.ownsImage(origin)
+                : origin.type === 'image' ? this.ownsImage(origin)
                     : origin.type === 'node' ? movable(origin.node) : origin.type === 'nodes'
                         && Array.isArray(origin.nodes) && origin.nodes.length > 1 && origin.nodes.length <= 128
                         && origin.nodes.includes(origin.anchor) && origin.nodes.every(movable))) return;

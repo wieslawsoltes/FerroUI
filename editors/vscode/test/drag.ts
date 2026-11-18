@@ -5,6 +5,7 @@ import * as vscode from 'vscode';
 import { DesignerDrag } from '../src/designerDrag';
 import type { DesignerPanel } from '../src/designerPanel';
 import type { DragGesture, DragOrigin, DropTarget } from '../src/protocol';
+import { until } from './wait';
 
 export async function verifyDrag(panel: DesignerPanel): Promise<void> {
     const original = panel.document.getText();
@@ -64,4 +65,30 @@ export async function verifyDrag(panel: DesignerPanel): Promise<void> {
         drag.clear();
     }
     console.log('VS Code drag placement hints, drops on canvas and Outline, cancellation and undo passed');
+}
+
+export async function verifyRsxImageDrag(panel: DesignerPanel): Promise<void> {
+    const original = panel.document.getText();
+    const snapshot = await panel.waitForSnapshot(AbortSignal.timeout(15_000));
+    const parent = snapshot.nodes.find(node => node.label === 'StackPanel' && node.canInsert);
+    const token = panel.currentToken;
+    assert.ok(parent && token !== undefined);
+    const origin = { type: 'image', source: 'Assets/Preview%20Image.png', asset: 'Assets/Preview Image.png' } as const;
+    const frame = { session: panel.session, token };
+    const gesture = { id: randomUUID(), frame, origin };
+    let active: DragGesture | undefined;
+    const drag = new DesignerDrag(update => { active = update.gesture; }, candidate => candidate === origin,
+        async (_panel, asset) => { assert.equal(asset, origin); });
+    try {
+        await drag.receive(panel, { type: 'beginDrag', gesture });
+        assert.equal(active, gesture);
+        await drag.receive(panel, { type: 'drop', id: gesture.id, frame, target: { type: 'outline', node: parent.id, position: 'inside' } });
+        assert.match(panel.document.getText(), /include_bytes!\("Assets\/Preview Image\.png"\)/);
+        assert.equal(active, undefined);
+        await vscode.window.showTextDocument(panel.document, { viewColumn: vscode.ViewColumn.One, preserveFocus: false });
+        await until(() => vscode.window.activeTextEditor?.document === panel.document);
+        await vscode.commands.executeCommand('undo');
+        assert.equal(panel.document.getText(), original);
+    } finally { drag.clear(); }
+    console.log('VS Code accepted an authorized RSX raster drag and undid its embedded image insertion');
 }

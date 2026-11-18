@@ -5,7 +5,7 @@ import { applyTextEdits, sourceOf } from '../src/textDocument';
 import { verifyMcp } from './mcp';
 import { verifyMultiSelection, verifyStudioPresentations, verifyWorkbenchFeatures } from './workbenchFeatures';
 import { verifyCargoTarget } from './cargoTarget';
-import { verifyDrag } from './drag';
+import { verifyDrag, verifyRsxImageDrag } from './drag';
 import { verifyXamlRefactoring } from './xamlLanguage';
 import { verifyRuntimeClient } from './runtimeClient';
 import { verifyHostedPreview } from './hostedPreview';
@@ -117,6 +117,9 @@ export async function run(): Promise<void> {
         assert.equal(rust.languageId, 'rust');
         await vscode.commands.executeCommand('ferroui.openDesigner');
         await until(() => vscode.window.tabGroups.all.some(group => group.tabs.some(tab => tab.label === 'Design · views.rs')));
+        const rsxDesigner = designer.designs().find(panel => panel.document === rust);
+        assert.ok(rsxDesigner);
+        await verifyRsxImageDrag(rsxDesigner);
         const rustInput = sourceOf(rust, 'rust', editorPosition());
         const rsxField = rust.positionAt(rust.getText().indexOf('padding: 36.0') + 3);
         const rsxCompletion = await vscode.commands.executeCommand<vscode.CompletionList>('vscode.executeCompletionItemProvider', rust.uri, rsxField);
