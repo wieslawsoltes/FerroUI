@@ -20,7 +20,7 @@ pub(super) struct Program {
     namespaces: Vec<String>,
 }
 
-fn opcode(kind: RowKind) -> u8 {
+pub(super) fn opcode(kind: RowKind) -> u8 {
     match kind {
         RowKind::ResourceAlias => op::ALIAS,
         RowKind::LiteralBrush => op::LITERAL_BRUSH,

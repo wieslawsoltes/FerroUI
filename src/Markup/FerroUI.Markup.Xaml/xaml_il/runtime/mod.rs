@@ -12,6 +12,7 @@ mod runtime_list;
 mod theme_resources;
 mod theme_styles;
 mod theme_units;
+mod theme_run_program;
 mod xaml_il_context;
 mod xaml_il_parent_stack_provider_wrapper;
 mod xaml_il_runtime_helpers;

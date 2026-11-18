@@ -17,6 +17,8 @@ pub mod path_opcodes;
 pub mod resource_opcodes;
 #[doc(hidden)]
 pub mod style_opcodes;
+#[doc(hidden)]
+pub mod theme_run_opcodes;
 
 #[cfg(test)]
 mod tests;

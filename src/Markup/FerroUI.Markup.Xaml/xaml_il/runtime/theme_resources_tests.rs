@@ -599,3 +599,73 @@ fn invalid_resource_program_fails_before_dictionary_insertion() {
         assert!(dict.try_get_value(&"First".into()).is_none());
     }
 }
+
+#[test]
+fn scheduled_units_capture_deferred_factories_and_apply_rows_in_declaration_order() {
+    use crate::xaml_il::runtime::compiled as rt;
+    use ferroui_markup::theme_run_opcodes as op;
+    static ROW: TypedResourceProgram<ValueRow<&str>> =
+        TypedResourceProgram::new(&[1, 9, 1, 0, 2, 4, 1], &["Later", "first value"], &[]);
+    fn build(provider: &Rc<dyn IServiceProvider>) -> Result<MarkupValue, XamlLoadError> {
+        rt::static_resource_content(provider, &DOCUMENT, "Later", 12, 8)
+    }
+    fn run(context: &Rc<XamlIlContext>, dict: &Ref<ResourceDictionary>) -> Result<(), XamlLoadError> {
+        rt::apply_theme_run(
+            &[op::VERSION, op::DEFER_TEXT, 0, 1, 2, 4, op::TEXT, 2],
+            &[rt::ThemeRunImport::Text("Lazy"), rt::ThemeRunImport::Factory(build), rt::ThemeRunImport::Rows(&ROW)],
+            &DOCUMENT, context, dict,
+        )
+    }
+    static UNIT: rt::ThemeUnit = rt::ThemeUnit { name: "Button", index: 1, runs: &[run] };
+    let (dict, context) = populated();
+    rt::apply_theme_unit(&[], 1, 0, &context, &dict).unwrap();
+    assert!(!dict.contains_key(&"Lazy".into()) && !dict.contains_key(&"Later".into()));
+    rt::apply_theme_unit(&[&UNIT], 1, 0, &context, &dict).unwrap();
+    assert!(deferred(&dict, "Lazy"));
+    assert_eq!(resource(&dict, "Lazy").downcast_ref::<String>().map(String::as_str), Some("first value"));
+    assert!(!deferred(&dict, "Lazy"));
+    let error = run(&context, &dict).unwrap_err();
+    assert!(at_position(&error, 1, 2), "{error}");
+}
+
+#[test]
+fn scheduled_type_key_duplicate_reports_its_insertion_position_and_stops_before_the_next_entry() {
+    use crate::xaml_il::runtime::compiled as rt;
+    use ferroui_base::StaticType;
+    use ferroui_markup::theme_run_opcodes as op;
+    let (dict, context) = populated();
+    let ty = <ResourceDictionary as StaticType>::TYPE;
+    static IMPORTS: &[rt::ThemeRunImport] = &[
+        rt::ThemeRunImport::Type(<ResourceDictionary as StaticType>::TYPE),
+        rt::ThemeRunImport::Factory(generated_literal_brush),
+        rt::ThemeRunImport::Text("After"),
+    ];
+    let error = rt::apply_theme_run(
+        &[op::VERSION, op::DEFER_TYPE, 0, 1, 2, 4, 6, 8,
+          op::DEFER_TYPE, 0, 1, 10, 12, 14, 16, op::BOOL, 2, 18, 20, 1],
+        IMPORTS, &DOCUMENT, &context, &dict,
+    ).unwrap_err();
+    assert!(at_position(&error, 7, 8), "{error}");
+    assert!(dict.contains_deferred_key(&ResourceKey::Type(ty)));
+    assert!(!dict.contains_key(&"After".into()));
+}
+
+#[test]
+fn malformed_schedule_operands_leave_the_current_entry_unapplied() {
+    use crate::xaml_il::runtime::compiled as rt;
+    use ferroui_base::StaticType;
+    use ferroui_markup::theme_run_opcodes as op;
+    static IMPORTS: &[rt::ThemeRunImport] = &[
+        rt::ThemeRunImport::Text("Value"),
+        rt::ThemeRunImport::Type(<ResourceDictionary as StaticType>::TYPE),
+        rt::ThemeRunImport::Factory(generated_literal_brush),
+    ];
+    let (dict, context) = populated();
+    for code in [&[][..], &[99], &[1, 255], &[1, op::TEXT, 0], &[1, op::DEFER_TEXT, 5],
+                 &[1, op::BOOL, 0, 0, 0, 2], &[1, op::DEFER_TYPE, 1, 2, 0, 0, 0],
+                 &[1, op::INT, 0, 0, 0, 128, 0]] {
+        let error = rt::apply_theme_run(code, IMPORTS, &DOCUMENT, &context, &dict).unwrap_err();
+        assert!(error.message().contains("Invalid compiled XAML dictionary run"), "{error}");
+        assert_eq!(dict.count(), 2);
+    }
+}

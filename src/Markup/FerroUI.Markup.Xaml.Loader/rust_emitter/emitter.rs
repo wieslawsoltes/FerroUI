@@ -3140,7 +3140,7 @@ impl<'a> Emitter<'a> {
     /// `lines`, a complete body, with the runs of row statements written as row tables
     /// ([`theme_rows::row_runs`]); the build functions of the deferred rows of those runs are
     /// no longer emitted.
-    fn apply_row_runs(&mut self, lines: Vec<String>) -> Vec<String> {
+    fn apply_row_runs(&mut self, lines: Vec<String>, mut record: impl FnMut(&str, theme_rows::RowKind)) -> Vec<String> {
         let prefix = self.function_name.to_uppercase();
         let mut next = self.row_tables.len();
         let (lines, runs) = theme_rows::row_runs_with_backend(lines, &self.row_statements, &self.document, || {
@@ -3150,6 +3150,7 @@ impl<'a> Emitter<'a> {
         }, self.documents.backend.uses_theme_programs());
         let document_text = self.document_name.replace('`', "'").replace(['\r', '\n'], " ");
         for (name, run) in runs {
+            record(&name, run.kind);
             for slot in &run.slots {
                 self.deferred_functions[*slot].clear();
             }
@@ -3215,7 +3216,7 @@ impl<'a> Emitter<'a> {
         let (uses_context, uses_name_scope) = (self.uses_context || self.uses_name_scope, self.uses_name_scope);
         (self.uses_context, self.uses_name_scope) = outer_uses;
         let returned = body?;
-        let body_lines = self.apply_row_runs(body_lines);
+        let body_lines = self.apply_row_runs(body_lines, |_, _| {});
         // Runs of template bindings on one object, as tables (#568, step 5).
         let body_lines = if self.documents.backend.uses_construction_programs() {
             body_lines
@@ -5304,7 +5305,11 @@ pub fn emit_function<'a>(
     local_types.insert("root".to_string(), root_type.clone());
     local_types.insert(created.expr.clone(), root_type);
     let lines = std::mem::take(&mut emitter.lines);
-    let lines = emitter.apply_row_runs(lines);
+    let schedule_units = documents.units().is_some() && documents.backend.uses_construction_programs();
+    let mut rows = HashMap::new();
+    let lines = emitter.apply_row_runs(lines, |name, kind| {
+        if schedule_units { rows.insert(name.to_owned(), kind); }
+    });
     // The entries of the units of a theme, taken out into the functions of their runs (#568).
     let (lines, unit_runs) = match (documents.units(), types.framework_path(FrameworkType::ResourceDictionary)) {
         (Some(units), Some(dictionary)) => theme_units::extract_runs(
@@ -5314,6 +5319,7 @@ pub fn emit_function<'a>(
             &local_types,
             &format!("::ferroui_base::Ref<{}>", absolute(&dictionary)),
             units,
+            schedule_units.then_some(theme_units::Schedule { image: &documents.bytecode_image, document: &document_constant, rows: &rows }),
         ),
         // Without the units there are no markers, and without the path of the dictionary they
         // are dropped.

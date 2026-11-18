@@ -61,6 +61,10 @@ pub(super) enum RowKind {
 }
 
 impl RowKind {
+    pub(super) fn program_call(self) -> (u8, &'static str, bool) {
+        (bytecode::opcode(self), bytecode::method(self), self.is_deferred())
+    }
+
     /// The Rust type of a row of the shape.
     fn row_type(self) -> &'static str {
         match self {
@@ -193,7 +197,7 @@ fn position_of(text: &str) -> Option<(i32, i32)> {
 }
 
 /// The Rust string literal at the start of `text` and the text after it.
-fn split_string_literal(text: &str) -> Option<(&str, &str)> {
+pub(super) fn split_string_literal(text: &str) -> Option<(&str, &str)> {
     if !text.starts_with('"') {
         return None;
     }
