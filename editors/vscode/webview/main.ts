@@ -117,13 +117,9 @@ function showDesign(show: boolean): void {
 
 function controlCanvas(request: number, action: CanvasAction): void {
     const { zoom, scale, pan_x, pan_y, pan_tool, focus_order } = action;
-    const geometry = zoom || scale !== undefined || pan_x !== undefined || pan_y !== undefined;
+    const geometry = changesGeometry(action);
     if (geometry && !artboard.isCurrent) {
         vscode.postMessage({ type: 'canvasResult', request, error: 'Render an artboard before changing its zoom or pan.' });
-        return;
-    }
-    if (focus_order === true && (!artboard.isCurrent || !snapshot?.focusOrderAvailable)) {
-        vscode.postMessage({ type: 'canvasResult', request, error: 'Open a native preview with focus-order support.' });
         return;
     }
     const bounds = runtime?.bounds ?? selectedNode()?.bounds;
@@ -131,10 +127,7 @@ function controlCanvas(request: number, action: CanvasAction): void {
         vscode.postMessage({ type: 'canvasResult', request, error: 'Select a control with visible bounds first.' });
         return;
     }
-    if (action.mode && !interaction.setMode(action.mode)) {
-        vscode.postMessage({ type: 'canvasResult', request, error: 'Open an interactive native preview first.' });
-        return;
-    }
+    if (action.mode) interaction.setMode(action.mode);
     if (geometry) {
         showDesign(true);
         if (zoom === 'fit') viewport.fit();
@@ -150,6 +143,10 @@ function controlCanvas(request: number, action: CanvasAction): void {
     updateSelection();
     vscode.postMessage({ type: 'canvasResult', request, state: { tab, mode: interaction.mode, ...viewport.state, panTool: input.panTool,
         focusOrder: focusOverlay.enabled } });
+}
+
+function changesGeometry(action: CanvasAction): boolean {
+    return action.zoom !== undefined || action.scale !== undefined || action.pan_x !== undefined || action.pan_y !== undefined;
 }
 
 function reveal(): void {
@@ -271,7 +268,7 @@ function receive(message: ToDesigner): void {
     switch (message.type) {
         case 'viewState': vscode.setState(message.state); return;
         case 'canvasAction':
-            if (staged) canvasActions.push(message);
+            if (staged && (canvasActions.length || changesGeometry(message.action))) canvasActions.push(message);
             else controlCanvas(message.request, message.action);
             return;
         case 'drag': drag.setGesture(message.gesture); return;

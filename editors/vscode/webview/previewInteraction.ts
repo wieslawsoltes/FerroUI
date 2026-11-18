@@ -13,8 +13,12 @@ export class PreviewInteraction {
     private confirmedMode: CanvasMode = 'select';
 
     constructor(artboard: Artboard, panning: () => boolean, send: (action: CanvasInteraction) => void, changed: () => void) {
-        this.select.addEventListener('click', () => { if (this.setMode('select')) changed(); });
-        this.interact.addEventListener('click', () => { if (this.setMode('interact')) changed(); });
+        this.select.addEventListener('click', () => { this.setMode('select'); changed(); });
+        this.interact.addEventListener('click', () => {
+            if (!this.available) return;
+            this.setMode('interact');
+            changed();
+        });
         this.kind.addEventListener('change', () => {
             const key = this.kind.value === 'key';
             this.value.placeholder = key ? 'Enter a key such as Ctrl+A' : 'Click a control, then enter text';
@@ -44,13 +48,11 @@ export class PreviewInteraction {
 
     get mode(): CanvasMode { return this.confirmedMode; }
 
-    setMode(mode: CanvasMode): boolean {
-        if (mode === 'interact' && !this.available) return false;
+    setMode(mode: CanvasMode): void {
         this.confirmedMode = mode;
         this.select.setAttribute('aria-pressed', String(mode === 'select'));
         this.interact.setAttribute('aria-pressed', String(mode === 'interact'));
         this.form.hidden = mode !== 'interact';
-        return true;
     }
 
     setAvailable(available: boolean): void {

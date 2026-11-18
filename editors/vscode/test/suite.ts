@@ -1,5 +1,6 @@
 import { strict as assert } from 'node:assert';
 import * as vscode from 'vscode';
+import { runEditorHistory } from '../src/editorHistory';
 import { NativePreview } from '../src/nativePreview';
 import { applyTextEdits, sourceOf } from '../src/textDocument';
 import { verifyMcp } from './mcp';
@@ -74,9 +75,8 @@ export async function run(): Promise<void> {
     await verifyMcp(xaml);
 
     const undoXaml = async (expected: string) => {
-        await vscode.window.showTextDocument(xaml, { viewColumn: vscode.ViewColumn.One, preserveFocus: false });
-        await until(() => vscode.window.activeTextEditor?.document === xaml);
-        await vscode.commands.executeCommand('undo');
+        const version = xaml.version;
+        await runEditorHistory(xaml, 'undo', () => assert.equal(xaml.version, version), AbortSignal.timeout(5000));
         assert.equal(xaml.getText(), expected);
     };
 
