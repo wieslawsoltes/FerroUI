@@ -225,7 +225,7 @@ fn a_brush_texture_is_uploaded_once_per_key_and_device() {
     assert_eq!(2, executor.texture_count());
 
     // Another device uploads its own.
-    let Some((second_device, second_queue)) = device() else { return };
+    let Some((second_device, second_queue)) = self::device() else { return };
     let second_view = output(&second_device);
     let second_target = Scene3DTarget { view: &second_view, ..target };
     let mut second = Scene3DWgpuExecutor::new(&second_device).expect("the executor of the second device");
