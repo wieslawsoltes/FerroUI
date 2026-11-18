@@ -360,3 +360,50 @@ fn the_build_of_a_class_verifies_its_constructor_from_units() {
     assert_eq!(verify_parts_constructor(&model, &[], "Tests.Missing"), Ok(false));
     assert_eq!(last_segments("Option < Rc < dyn crate::IServiceProvider > >"), "Option<Rc<dynIServiceProvider>>");
 }
+
+/// Not from upstream (#852): the explained closure keeps the units [`kept_units`] keeps, with the
+/// first reason for each (stated, constructed, referenced or conservative) and the live share of
+/// its keys; the listing has the totals.
+#[test]
+fn every_kept_unit_has_a_reason() {
+    let graph = TypeGraph::from_pairs(&[("MyButton", "Button")]);
+    let documents = Roots { types: set(&["MyButton"]), keys: set(&["CaptionStyle"]), ..Roots::default() };
+    let manifest = Roots { names: set(&["Controls/Popup.xaml"]), ..Roots::default() };
+    let button_keys = ["ButtonPadding", "ButtonUnused"];
+    let theme = ThemeUnitsModel {
+        class: "Tests.Explained".to_string(),
+        table_path: "::tests::compiled_xaml::THEME_UNITS".to_string(),
+        units: vec![
+            unit(0, "ambient", &["AmbientBrush"], &[], &[], &[]),
+            unit(1, "Controls/Button.xaml", &button_keys, &["Button"], &["AccentBrush"], &["TextBlock"]),
+            unit(2, "Resources/Accent.xaml", &["AccentBrush", "AccentUnused"], &[], &[], &[]),
+            unit(3, "Controls/TextBlock.xaml", &[], &["TextBlock"], &[], &[]),
+            unit(4, "Resources/Caption.xaml", &["CaptionStyle"], &[], &[], &[]),
+            unit(5, "Controls/Popup.xaml", &[], &["Popup"], &[], &[]),
+            unit(6, "Controls/Unused.xaml", &[], &["Unused"], &[], &[]),
+        ],
+    };
+    let sources: [(&str, &Roots); 2] = [("manifest", &manifest), ("documents", &documents)];
+    let explained = explain_kept_units(&theme, &sources, &graph, false);
+    let mut union = documents.clone();
+    union.extend(manifest.clone());
+    let indices: Vec<u32> = explained.iter().map(|unit| unit.index).collect();
+    assert_eq!(indices, kept_units(&theme, &union, &graph, false));
+    assert_eq!(indices, [0, 1, 2, 3, 4, 5]);
+    let reason = |index: u32| explained.iter().find(|unit| unit.index == index).expect("kept").clone();
+    assert_eq!(reason(0).reason, "the ambient unit, always kept");
+    assert!(reason(1).reason.contains("defines the theme of Button") && reason(1).reason.contains("makes Button live"));
+    assert!(reason(1).conservative, "a type of the documents is conservative");
+    assert_eq!(reason(2).reason, "defines AccentBrush: the key AccentBrush, referenced by Controls/Button.xaml");
+    assert!(!reason(2).conservative);
+    assert_eq!((reason(2).keys, reason(2).live_keys), (2, 1));
+    let constructed = "defines the theme of TextBlock: the type TextBlock, constructed by Controls/Button.xaml";
+    assert_eq!(reason(3).reason, constructed);
+    assert!(reason(4).conservative);
+    assert!(reason(4).reason.starts_with("defines CaptionStyle: the key CaptionStyle, a root of the documents"));
+    assert_eq!(reason(5).reason, "named by the manifest");
+    let listing = why_kept_listing("Tests.Explained", &explained, theme.units.len());
+    let totals = "Tests.Explained: 6 of 7 units; 2 of 6 keys of the kept units are live\n";
+    assert!(listing.starts_with(totals), "{listing}");
+    assert!(listing.contains("Resources/Accent.xaml\t1 of 2 keys live\texact\tdefines AccentBrush"), "{listing}");
+}
