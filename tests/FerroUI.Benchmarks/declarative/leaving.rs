@@ -113,7 +113,13 @@ pub fn register(registry: &mut Registry) {
     for effects in SIZES {
         let parameters = format!("Effects={effects}");
         let new = move || Leaving::new(effects);
-        class.benchmark_with_iteration_setup("rows_leave", parameters.clone(), new, Leaving::prepare_rows, Leaving::rows_leave);
+        class.benchmark_with_iteration_setup(
+            "rows_leave",
+            parameters.clone(),
+            new,
+            Leaving::prepare_rows,
+            Leaving::rows_leave,
+        );
         class.benchmark_with_iteration_setup(
             "owner_disposed",
             parameters.clone(),
