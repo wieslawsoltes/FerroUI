@@ -10,7 +10,7 @@ use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use ferroui_skia::SkiaApplicationExtensions;
 
 static ASSEMBLY: MarkupAssembly = MarkupAssembly {
-    name: env!("CARGO_PKG_NAME"),
+    name: "todo-workbench",
     crate_name: "todo_workbench",
     xmlns_definitions: &[],
     xmlns_prefixes: &[],
