@@ -27,7 +27,7 @@ export class Artboard {
         this.frame.addEventListener('click', event => pick(event, false));
         this.frame.addEventListener('dblclick', event => pick(event, true));
         this.frame.addEventListener('pointermove', event => {
-            const node = hit(event);
+            const node = event.buttons ? undefined : hit(event);
             const id = node?.id === this.selected ? undefined : node?.id;
             if (id !== this.lastHovered) {
                 this.lastHovered = id;
@@ -73,6 +73,7 @@ export class Artboard {
         if (!this.current || !image) return undefined;
         const rect = this.frame.getBoundingClientRect();
         const x = (event.clientX - rect.left) * image.width / rect.width;
+    get surface(): HTMLElement { return this.viewport.element; }
         const y = (event.clientY - rect.top) * image.height / rect.height;
         return x >= 0 && y >= 0 && x < image.width && y < image.height ? { x, y } : undefined;
     }

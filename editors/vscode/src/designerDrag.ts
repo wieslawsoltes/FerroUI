@@ -17,7 +17,8 @@ export class DesignerDrag {
             const origin = gesture.origin;
             if (!origin || !(origin.type === 'asset' ? panel.assets.some(asset => asset.id === origin.control)
                 : origin.type === 'node' && panel.nodes.some(node => node.id === origin.node && node.canMove))) return;
-            this.clear();
+            clearTimeout(this.ending);
+            clearTimeout(this.expiry);
             this.active = gesture;
             this.expiry = setTimeout(() => this.clear(), 25_000);
             this.publish({ type: 'drag', gesture });

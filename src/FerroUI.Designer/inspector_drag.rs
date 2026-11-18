@@ -452,6 +452,16 @@ impl DesignerSession {
         host.validate_capacity_with_count(self.document(), &BTreeSet::new(), 1)
     }
 
+    pub(crate) fn wrapped_layout_child(&self, owner: NodeId) -> Option<NodeId> {
+        self.ensure_layer_manipulable(owner).ok()?;
+        let host = ContentHost::of_owner(self, owner).ok()?;
+        let children = self.document().ast().element_children(host.container);
+        let [child] = children.as_slice() else {
+            return None;
+        };
+        (!host.multiple).then_some(*child)
+    }
+
     /// Plans identity-preserving content movement at a boundary in the original AST child
     /// list. Canvas placement and outline drags share slot, capacity, cycle and order rules.
     pub(crate) fn plan_content_move(

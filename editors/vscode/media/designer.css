@@ -117,7 +117,8 @@ body {
     background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
     pointer-events: none;
 }
-.drop-hint.error { color: var(--vscode-errorForeground); border-color: currentColor; }
+.drop-hint[data-state=error] { color: var(--vscode-errorForeground); border-color: currentColor; }
+.drop-hint[data-state=pending], .drop-hint[data-state=outside] { color: var(--muted); border-color: var(--line); }
 main:has(.drop-hint:not([hidden])) .selection-label { visibility: hidden; }
 .selection-label {
     display: inline-flex;

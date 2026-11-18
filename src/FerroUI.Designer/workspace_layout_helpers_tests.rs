@@ -357,6 +357,42 @@ fn native_asset_preview_targets_transparent_nested_content_and_selects_inserted_
     assert_eq!(fixture.session.document().source(), NESTED);
 }
 
+#[test]
+fn asset_drop_resolves_occupied_hosts_and_shell_padding() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let mut fixture = Fixture::new(r#"<Border xmlns="https://github.com/ferroui" Name="Shell" Width="500" Height="300" Padding="28"><Grid Name="Body"><Border Name="Card" Width="120" Height="80"><TextBlock Text="Occupied"/></Border></Grid></Border>"#);
+    let body = fixture.id("Body");
+    for position in [fixture.center("Card"), fixture.at("Shell", 12.0, 12.0)] {
+        let preview = fixture
+            .session
+            .preview_layout_insert(r#"<Button Name="Added"/>"#, position)
+            .unwrap();
+        assert!(preview.is_accepted(), "{:?}", preview.rejection());
+        assert_eq!(preview.target(), body);
+        fixture.session.commit_layout_preview(&preview).unwrap();
+        let added = fixture.id("Added");
+        assert_eq!(
+            fixture.session.document().ast().node(added).unwrap().parent,
+            Some(body)
+        );
+        fixture.session.undo().unwrap();
+        fixture.refresh();
+    }
+}
+
+#[test]
+fn asset_drop_keeps_single_content_and_locked_body_guards() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let mut fixture = Fixture::new(r#"<Border xmlns="https://github.com/ferroui" Name="Shell" Width="500" Height="300" Padding="28"><Grid Name="Body" /></Border>"#);
+    let body = fixture.id("Body");
+    fixture.session.set_layers_locked(&[body], true).unwrap();
+    let preview = fixture
+        .session
+        .preview_layout_insert("<Button/>", fixture.at("Shell", 12.0, 12.0))
+        .unwrap();
+    assert!(!preview.is_accepted());
+}
+
 struct CustomHelpers;
 impl LayoutAdapter for CustomHelpers {
     fn panel_type(&self) -> &str {

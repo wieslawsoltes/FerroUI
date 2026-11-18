@@ -11,7 +11,6 @@ export class CanvasDrag {
     private queued?: { id: string; frame: FrameTarget; target: DropTarget; sequence: number };
     private sequence = 0;
     private requested?: string;
-    private lastError = false;
     private inFlight?: number;
     private timer?: ReturnType<typeof setTimeout>;
 
@@ -31,26 +30,30 @@ export class CanvasDrag {
                 this.clearHint();
             }
         }, true);
-        image.addEventListener('pointermove', event => {
+        artboard.surface.addEventListener('pointermove', event => {
             if (!(event.buttons & 1)) {
                 if (this.gesture) send({ type: 'endDrag', id: this.gesture.id });
                 this.clearHint();
                 return;
             }
             const point = pointerPosition(artboard, event);
-            if (!canDrag() || !this.frame || !point || !matchDrag(this.frame, this.gesture)) return;
+            if (!canDrag() || !this.frame || !matchDrag(this.frame, this.gesture)) return;
+            if (!point) {
+                this.clearHint();
+                this.feedback('Move onto the artboard to drop', 'outside');
+                return;
+            }
             image.classList.add('placing');
+            if (this.label.hidden || this.label.dataset.state === 'outside') this.feedback('Finding drop target…', 'pending');
             const key = `${Math.round(point.x)}:${Math.round(point.y)}`;
             if (key !== this.requested) {
                 this.requested = key;
-                this.lastError = false;
-                image.classList.remove('invalid-placement');
                 this.queued = { id: this.gesture.id, frame: this.frame, target: { type: 'canvas', ...point }, sequence: ++this.sequence };
                 this.timer ??= setTimeout(() => this.flush(), 55);
             }
         });
-        image.addEventListener('pointerleave', () => this.clearHint());
-        image.addEventListener('pointerup', event => {
+        artboard.surface.addEventListener('pointerleave', () => this.clearHint());
+        artboard.surface.addEventListener('pointerup', event => {
             const point = pointerPosition(artboard, event);
             if (event.button === 0 && canDrag() && point) finishDrop(this.frame, this.gesture, { type: 'canvas', ...point }, send);
             this.clearHint();
@@ -73,11 +76,9 @@ export class CanvasDrag {
         this.inFlight = undefined;
         if (this.queued) this.timer ??= setTimeout(() => this.flush(), 55);
         if (result.sequence !== this.sequence) return;
-        this.lastError = Boolean(result.error);
-        this.label.textContent = result.hint?.description ?? result.error ?? '';
-        this.label.classList.toggle('error', this.lastError);
-        this.artboard.frame.classList.toggle('invalid-placement', this.lastError);
-        this.label.hidden = !this.label.textContent;
+        const state = result.error ? 'error' : 'valid';
+        this.feedback(result.error ?? result.hint?.description ?? '', state);
+        this.artboard.frame.classList.toggle('invalid-placement', state === 'error');
         this.artboard.showDrop(result.hint?.bounds);
     }
 
@@ -93,10 +94,15 @@ export class CanvasDrag {
         clearTimeout(this.timer);
         this.timer = this.queued = this.requested = this.inFlight = undefined;
         this.sequence++;
-        this.lastError = false;
         this.artboard.showDrop();
         this.artboard.frame.classList.remove('placing', 'invalid-placement');
         this.label.hidden = true;
+    }
+
+    private feedback(text: string, state: 'pending' | 'outside' | 'valid' | 'error'): void {
+        this.label.dataset.state = state;
+        this.label.textContent = text;
+        this.label.hidden = !text;
     }
 }
 
