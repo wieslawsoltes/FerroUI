@@ -20,6 +20,8 @@ use ferroui_themes_fluent::FluentTheme;
 use std::{cell::RefCell, rc::Rc, sync::Arc, time::Duration};
 use wasm_bindgen::prelude::*;
 mod demo;
+// `compiled_markup`: the table of the units of the Fluent theme the build wrote (`build.rs`).
+ferroui_markup_xaml::include_compiled_xaml!();
 struct Probe {
     root: Ref<StackPanel>,
     views: Vec<Ref<TexturePresenter>>,
@@ -59,7 +61,9 @@ impl NewApplication for App {
 impl ApplicationImpl for App {
     fn initialize(this: &Self) {
         Self::parent_initialize(this);
-        this.styles().add(FluentTheme::new().as_style());
+        // The units of the theme the sample needs: the table the build wrote (`build.rs`).
+        this.styles()
+            .add(FluentTheme::with_parts(None, compiled_markup::THEME_PARTS_FERROUI_THEMES_FLUENT_FLUENTTHEME).as_style());
     }
     fn on_framework_initialization_completed(this: &Self) {
         if let Some(lifetime) = this
