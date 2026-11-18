@@ -11,7 +11,6 @@ use crate::test_support::TestRoot;
 use crate::text_box_tests::{templated_text_box, test_scope};
 use crate::TextBox;
 use ferroui_base::media::TextWrapping;
-use ferroui_base::reactive::IDisposable;
 use ferroui_base::{Point, Rect, Ref, Size, Thickness};
 use std::cell::Cell;
 use std::rc::Rc;
