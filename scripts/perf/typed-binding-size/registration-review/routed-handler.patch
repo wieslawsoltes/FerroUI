@@ -1,0 +1,95 @@
+diff --git a/src/FerroUI.Base/metadata/accessor.rs b/src/FerroUI.Base/metadata/accessor.rs
+index dcdcaaf9a..b2a88a759 100644
+--- a/src/FerroUI.Base/metadata/accessor.rs
++++ b/src/FerroUI.Base/metadata/accessor.rs
+@@ -119,3 +119,36 @@ pub fn invoke_static_getter(
+     MarkupArguments::new(arguments, 0)?;
+     get()
+ }
++
++/// Compile-time selection for the common routed-event handler signature.
++#[doc(hidden)]
++pub struct RoutedMethodProbe<This, A, B>(std::marker::PhantomData<fn(&This, A, B)>);
++
++#[doc(hidden)]
++pub type MethodAdapter<This, A, B> =
++    fn(&[MarkupValue], fn(&This, A, B)) -> Result<MarkupValue, MarkupInvokeError>;
++
++type RoutedEvent = std::rc::Rc<dyn crate::interactivity::IRoutedEventArgs>;
++type Sender = Option<crate::BoxedValue>;
++
++impl<T: crate::ObjectType> RoutedMethodProbe<crate::Ref<T>, Sender, RoutedEvent> {
++    pub const ADAPTER: Option<MethodAdapter<crate::Ref<T>, Sender, RoutedEvent>> = Some(invoke_routed_handler::<T>);
++}
++
++#[inline(never)]
++fn invoke_routed_handler<T: crate::ObjectType>(
++    values: &[MarkupValue],
++    handler: fn(&crate::Ref<T>, Sender, RoutedEvent),
++) -> Result<MarkupValue, MarkupInvokeError> {
++    let mut arguments = MarkupArguments::new(values, 3)?;
++    let receiver = crate::__ferro_markup_receiver!(crate::Ref<T>, arguments)?;
++    handler(&receiver, arguments.next()?, arguments.next()?);
++    Ok(None)
++}
++
++#[doc(hidden)]
++pub trait RoutedMethodFallback<This, A, B> {
++    const ADAPTER: Option<MethodAdapter<This, A, B>> = None;
++}
++
++impl<This, A, B> RoutedMethodFallback<This, A, B> for RoutedMethodProbe<This, A, B> {}
+diff --git a/src/FerroUI.Base/metadata/markup_macros.rs b/src/FerroUI.Base/metadata/markup_macros.rs
+index 0c7775ae3..2e7547771 100644
+--- a/src/FerroUI.Base/metadata/markup_macros.rs
++++ b/src/FerroUI.Base/metadata/markup_macros.rs
+@@ -1059,6 +1059,20 @@ macro_rules! __ferro_markup_methods {
+         ),] $($($rest)*)?)
+     };
+ 
++    // A literal closure can move to a typed forwarding function without moving a
++    // user-defined callable's construction or destruction across argument conversion.
++    ([$index:ident $($pool:ident)*] $this:ty; [$($done:expr,)*]
++        fn $name:ident ($a:ty, $b:ty $(,)?) =>
++        |$receiver:tt : $rty:ty, $sender:tt : $sty:ty, $event:tt : $ety:ty $(,)?| $body:expr $(, $($rest:tt)*)?
++    ) => {
++        $crate::__ferro_markup_methods!([$($pool)*] $this; [$($done,)*
++            $crate::__ferro_markup_routed_method!(
++                $index $this; $name ($a, $b)
++                (|$receiver: $rty, $sender: $sty, $event: $ety| $body)
++            ),
++        ] $($($rest)*)?)
++    };
++
+     ([$index:ident $($pool:ident)*] $this:ty; [$($done:expr,)*]
+         fn $name:ident ($($parameter:ty),* $(,)?) $(-> $return_:ty)? => $call:ident $(:: $segment:ident)* [$($attributes:tt)*] $(, $($rest:tt)*)?
+     ) => {
+@@ -1602,6 +1616,28 @@ macro_rules! __ferro_markup_fn_body {
+     };
+ }
+ 
++/// Specialize a two-parameter void closure only when its concrete receiver and
++/// arguments are the framework routed-handler types. Keep the original invoke
++/// function for user-defined receivers, other arguments and alias mismatches.
++#[doc(hidden)]
++#[macro_export]
++macro_rules! __ferro_markup_routed_method {
++    ($index:ident $this:ty; $name:ident ($a:ty, $b:ty) ($call:expr)) => { const {
++        let mut method = $crate::__ferro_markup_method!($index $this; [] [] $name ($a, $b) () ($call) []);
++        #[allow(unused_imports)]
++        use $crate::metadata::accessor::RoutedMethodFallback as _;
++        if $crate::metadata::accessor::RoutedMethodProbe::<$this, $a, $b>::ADAPTER.is_some() {
++            method.invoke = |arguments| {
++                let adapter = $crate::metadata::accessor::RoutedMethodProbe::<$this, $a, $b>::ADAPTER.unwrap();
++                adapter(arguments, |this, first, second| {
++                    let _ = ($call)(this, first, second);
++                })
++            };
++        }
++        method
++    }};
++}
++
+ /// One `MarkupMethod`: `this; [static]? [try]? Name (parameters) (return)? (callable) [attributes]`.
+ #[doc(hidden)]
+ #[macro_export]

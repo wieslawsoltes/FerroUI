@@ -304,7 +304,9 @@ node_props = {
  'HeatSeries':[('color_stops','ColorStops','Option<Vec<f64>>','None'),('point_padding','PointPadding','Thickness','Thickness::uniform(4.0)'),
   ('min_value','MinValue','Option<f64>','None'),('max_value','MaxValue','Option<f64>','None'),
   # Its DataLabelsPosition, Middle as the source's constructor sets it (#624).
-  ('data_labels_position','DataLabelsPosition','DataLabelsPosition','DataLabelsPosition::Middle')],
+  ('data_labels_position','DataLabelsPosition','DataLabelsPosition','DataLabelsPosition::Middle'),
+  # Its GeometrySvg: the SVG path data drawn in every cell, None for rectangles (#624).
+  ('geometry_svg','GeometrySvg','Option<String>','None')],
  # The tooltip label formatters of CorePolarLineSeries (code only), read by the chart (#624).
  'PolarLineSeries':[('angle_tool_tip_label_formatter','AngleToolTipLabelFormatter','Option<ChartPointFormatter>','None'),
   ('radius_tool_tip_label_formatter','RadiusToolTipLabelFormatter','Option<ChartPointFormatter>','None')]}

@@ -182,9 +182,10 @@ fn content_properties_and_dependencies_name_existing_properties() {
 fn enumeration_members_are_found_by_name() {
     let enums: Vec<_> = declared_types().into_iter().filter(|t| t.kind == MarkupTypeKind::Enum).collect();
     // `NumberStyles`, `TextLineBounds`, the three enums of the system backdrops,
-    // `AcrylicBrushBackgroundSource` and the rich text enumerations are declared next to the type.
+    // `AcrylicBrushBackgroundSource` and the rich text enumerations are declared next to the type;
+    // `FillBehavior` of the storyboards with the values.
     let rich_text_enums = super::rich_text::TYPES.iter().filter(|type_| type_.kind == MarkupTypeKind::Enum).count();
-    assert_eq!(enums.len(), super::enums::TYPES.len() + 6 + rich_text_enums);
+    assert_eq!(enums.len(), super::enums::TYPES.len() + 7 + rich_text_enums);
     for type_ in enums {
         assert!(!type_.enum_members.is_empty(), "{type_:?}");
         for member in type_.enum_members {
@@ -264,6 +265,8 @@ const PARSE_SAMPLES: &[(&str, &str)] = &[
     ("FerroUI.Input.KeyGesture", "Ctrl+A"),
     ("FerroUI.Animation.Cue", "50%"),
     ("FerroUI.Animation.IterationCount", "Infinite"),
+    ("FerroUI.Animation.TimelineDuration", "0:0:0.5"),
+    ("FerroUI.Animation.RepeatBehavior", "2x"),
     ("FerroUI.Animation.Easings.Easing", "LinearEasing"),
     ("FerroUI.Styling.ThemeVariant", "Dark"),
     ("System.TimeSpan", "0:0:1"),

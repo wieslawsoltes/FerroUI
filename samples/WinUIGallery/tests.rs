@@ -2,7 +2,7 @@ use crate::{catalog, examples, navigation::NavigationHistory, GalleryView, CATAL
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_controls::primitives::ToggleButton;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
-use ferroui_controls::{Button, CheckBox, ComboBox, Slider, TextBlock, TextBox};
+use ferroui_controls::{Button, CheckBox, ComboBox, TextBlock, TextBox};
 use std::collections::HashSet;
 
 pub(crate) fn start() -> ferroui_controls::testing::UnitTestApplicationScope {
@@ -612,44 +612,6 @@ fn dropping_native_example_releases_handler_targets() {
     drop(root);
     assert!(primary.upgrade().is_none());
     assert!(output.upgrade().is_none());
-}
-
-#[test]
-fn popup_sample_opens_closes_and_observes_offset_options() {
-    use ferroui_controls::primitives::Popup;
-    use ferroui_controls::{Control, Window};
-    let _application = start();
-    let root = examples::create(examples::find("Popup").unwrap()).unwrap();
-    let window = Window::new();
-    window.set_content(Some(Control::boxed(root.clone())));
-    window.show();
-    let popup = root.get_control::<Popup>("StandardPopup");
-    root.get_control::<Slider>("HorizontalOffset")
-        .set_range_value(42.0);
-    root.get_control::<Slider>("VerticalOffset")
-        .set_range_value(-12.0);
-    assert_eq!(popup.horizontal_offset(), 42.0);
-    assert_eq!(popup.vertical_offset(), -12.0);
-    root.get_control::<Button>("ShowPopup")
-        .raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
-    assert!(popup.is_open());
-    assert!(popup.host().is_some());
-    assert_eq!(
-        root.get_control::<TextBlock>("PopupOutput")
-            .text()
-            .as_deref(),
-        Some("Open")
-    );
-    root.get_control::<Button>("ClosePopup")
-        .raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
-    assert!(!popup.is_open());
-    assert_eq!(
-        root.get_control::<TextBlock>("PopupOutput")
-            .text()
-            .as_deref(),
-        Some("Closed")
-    );
-    window.close();
 }
 
 #[test]

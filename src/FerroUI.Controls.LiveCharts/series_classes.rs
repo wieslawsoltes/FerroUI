@@ -1006,6 +1006,9 @@ ferro_properties! { impl HeatSeries {
     pub fn data_labels_position_property() -> StyledProperty<DataLabelsPosition> {
         FerroProperty::register::<HeatSeries, _>("DataLabelsPosition", DataLabelsPosition::Middle)
     }
+    pub fn geometry_svg_property() -> StyledProperty<Option<String>> {
+        FerroProperty::register::<HeatSeries, _>("GeometrySvg", None)
+    }
 } }
 impl HeatSeries {
     pub fn color_stops(&self) -> Option<Vec<f64>> {
@@ -1037,6 +1040,12 @@ impl HeatSeries {
     }
     pub fn set_data_labels_position(&self, value: DataLabelsPosition) {
         self.set_value(Self::data_labels_position_property(), value);
+    }
+    pub fn geometry_svg(&self) -> Option<String> {
+        self.get_value(Self::geometry_svg_property())
+    }
+    pub fn set_geometry_svg(&self, value: Option<String>) {
+        self.set_value(Self::geometry_svg_property(), value);
     }
 }
 
