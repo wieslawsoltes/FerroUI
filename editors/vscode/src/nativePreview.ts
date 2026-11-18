@@ -3,12 +3,20 @@ import { createMessageConnection, StreamMessageReader, StreamMessageWriter } fro
 import type * as vscode from 'vscode';
 import type { BuiltProject } from './builtProjects';
 import type { TokenPlan, TokenRequest } from './designTokenProtocol';
+import type { LayerViewInput } from './layerViews';
 import type { NativeProjectInventory } from './projectInventory';
 import type { Asset, CanvasInteraction, CanvasPresentation, DesignDataPresentation, DropHint, EditResult, Inspection, InspectionTarget, Operation, Placement, PreviewSourceBuffer, ResourceRow, Snapshot, Source, Viewport } from './protocol';
 import type { RsxLanguageDocument } from './rsxLanguageTypes';
 import type { HostedFrame, HostedInput, HostedSource } from './hostedProtocol';
 import type { NativeStageChange, PrototypeCommand, PrototypeHotspot, PrototypeScene, StageChecks, StageDocument, StageImage, StageManifest, StageModel, StagePick, StagePointer, StageStateOptions, StageTarget } from './stagesProtocol';
 import { commandFor } from './tools';
+
+interface RenderContext {
+    workspaceRoot?: string;
+    localSources?: PreviewSourceBuffer[];
+    designData?: DesignDataPresentation;
+    layerView?: LayerViewInput;
+}
 
 export class NativePreview implements vscode.Disposable {
     private readonly child: ChildProcessWithoutNullStreams;
@@ -120,8 +128,8 @@ export class NativePreview implements vscode.Disposable {
         return this.send('stagesPrototype', { epoch, ...command });
     }
 
-    render(source: Source, viewport: Viewport, frame = 0, workspaceRoot?: string, localSources?: PreviewSourceBuffer[], designData?: DesignDataPresentation): Promise<Snapshot> {
-        return this.send('render', { ...source, ...viewport, frame, workspaceRoot, localSources, designData });
+    render(source: Source, viewport: Viewport, frame = 0, context: RenderContext = {}): Promise<Snapshot> {
+        return this.send('render', { ...source, ...viewport, frame, ...context });
     }
 
     placement(frame: number, placement: Placement): Promise<DropHint> {

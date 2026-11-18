@@ -55,7 +55,7 @@ pub(crate) fn present(renderer: &mut Renderer, request: Present) -> Result<Prese
     provider.validate(&query.name, &arguments)?;
     if let Some(selection) = &query.selection { select(stage, selection)?; }
     stage.sources.run(|| provider.call(&query.name, &arguments, Permissions { allow_property_writes: true, ..Default::default() }))?;
-    renderer.present(request.next_frame)
+    renderer.present(request.next_frame, query.name == "designer_layer")
 }
 
 fn presentation_action(tool: &str, action: Option<&str>) -> bool {

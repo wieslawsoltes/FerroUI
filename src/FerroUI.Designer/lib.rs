@@ -106,7 +106,7 @@ pub use focus_order::{
 };
 pub use focus_order_editor::FocusOrderEditor;
 pub use grid_track_editor::GridTrackEditor;
-pub use layer_state::{LayerCommand, LayerEditSnapshot, LayerState, LayerViewSnapshot};
+pub use layer_state::{LayerCommand, LayerEditSnapshot, LayerState, LayerViewSnapshot, LayerViewState};
 pub use preview_environment::{
     PREVIEW_SIZE_PRESETS, PreviewEnvironment, PreviewEnvironmentEditor, PreviewFlowDirection,
     PreviewSizePreset, PreviewTheme,

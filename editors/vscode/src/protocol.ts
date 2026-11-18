@@ -1,3 +1,5 @@
+import type { LayerViewState, LayerViewsState } from './layerViews';
+
 export interface Position { line: number; character: number }
 export interface Range { start: Position; end: Position }
 export interface TextEdit { range: Range; newText: string }
@@ -24,6 +26,7 @@ export interface DesignerViewState {
     caret: Position;
     viewport: Viewport;
     designData?: DesignDataPresentation;
+    layerViews?: LayerViewsState;
 }
 export function isViewport(value: unknown): value is Viewport {
     if (!value || typeof value !== 'object') return false;
@@ -111,6 +114,7 @@ export interface OutlineNode {
     canInsert: boolean;
     canRemove: boolean;
     canMove: boolean;
+    selectable?: boolean;
 }
 export interface Snapshot {
     nodes: OutlineNode[];
@@ -225,6 +229,7 @@ export interface CanvasPresentation {
     nodes: Array<{ id: number; bounds: Bounds | null; canInsert: boolean; canMove: boolean; selectable: boolean }>;
     notices: string[];
     selection: number[];
+    layerView?: LayerViewState;
 }
 export type CanvasSnapshot = Omit<Snapshot, 'nodes'> & { nodes: CanvasNode[]; interactive?: boolean; focusOrderAvailable?: boolean };
 export interface CanvasFocusOrder {

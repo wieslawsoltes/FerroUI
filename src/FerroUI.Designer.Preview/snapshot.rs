@@ -32,7 +32,9 @@ pub(crate) fn render(renderer: &mut Renderer, input: &Render, project: Option<&P
     let local = local_preview_sources(input.workspace_root.as_deref(), &input.document.uri, &design.xaml, &input.local_sources);
     let dependencies = local.dependencies.into_iter().collect();
     let snapshot = SourceSnapshot::new(local.accepted, local.unavailable);
-    let (image, bounds, render_error) = match snapshot.run(|| renderer.render(input, design.xaml.source(), snapshot.clone())) {
+    let layers = input.layer_view.as_ref().filter(|layers| layers.block.as_ref() == active_block.as_ref().map(|range| &range.start))
+        .and_then(|input| serde_json::from_value(input.state.clone()).ok());
+    let (image, bounds, render_error) = match snapshot.run(|| renderer.render(input, design.xaml.source(), snapshot.clone(), layers.as_ref())) {
         Ok(frame) => {
             notices.extend(frame.notices);
             (Some(frame.image), frame.bounds, None)
@@ -90,6 +92,7 @@ pub(crate) fn render(renderer: &mut Renderer, input: &Render, project: Option<&P
                 can_insert: design.editable_children(node.id) && renderer.stage.as_ref().is_some_and(|stage| stage.session.borrow().can_insert_outline_child(node.id)),
                 can_remove: can_remove(&design, node),
                 can_move: node.parent.is_some_and(|parent| design.editable_children(parent)) && renderer.stage.as_ref().is_some_and(|stage| stage.session.borrow().can_move_outline_node(node.id)),
+                selectable: renderer.stage.as_ref().is_some_and(|stage| stage.session.borrow().can_canvas_select(node.id)),
             })
         })
         .collect::<Result<_, String>>()?;

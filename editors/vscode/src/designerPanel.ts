@@ -2,14 +2,16 @@ import * as vscode from 'vscode';
 import type { BuiltProject, BuiltProjects } from './builtProjects';
 import { CanvasRequests } from './canvasRequests';
 import { DesignerDependencies, dirtyXamlSources } from './designerDependencies';
+import { LayerViews } from './layerViews';
 import { NativePreview } from './nativePreview';
 import { DEFAULT_VIEWPORT, errorMessage, isViewport, type Asset, type CanvasSnapshot, type DragMessage, type DropHint, type FrameTarget, type FromDesigner, type Language, type NodeOperation, type NodeTarget, type Operation, type Placement, type Snapshot, type Source, type ToDesigner, type Viewport } from './protocol';
-import { applyTextEdits, asPosition, asRange, sourceOf } from './textDocument';
+import { applyTextEdits, asPosition, asRange, offsetAfterChanges, sourceOf } from './textDocument';
 import { designerHtml, webviewOptions } from './view';
 import type { EditResult, Inspection, InspectionTarget, Range, ResourceRow, RuntimeRow, RuntimeTreeMode } from './protocol';
-import type { CanvasAction, CanvasFocusOrder, CanvasInteraction, CanvasPresentation, DesignDataPresentation } from './protocol';
+import type { CanvasAction, CanvasFocusOrder, CanvasInteraction, CanvasPresentation, DesignDataPresentation, DesignerViewState } from './protocol';
 
 const mappedStudioEdits = new Set(['designer_selection_layout_edit', 'designer_property', 'designer_grid_track_edit']);
+export type DesignerCanvasState = Pick<DesignerViewState, 'viewport' | 'designData' | 'layerViews'>;
 
 interface Frame {
     token: number;
@@ -23,6 +25,7 @@ interface Frame {
 export class DesignerPanel implements vscode.Disposable {
     private readonly canvasRequests = new CanvasRequests();
     private readonly dependencies = new DesignerDependencies();
+    private readonly layers: LayerViews;
     private readonly subscriptions: vscode.Disposable[] = [];
     private readonly changed = new vscode.EventEmitter<void>();
     readonly onDidChange = this.changed.event;
@@ -36,6 +39,7 @@ export class DesignerPanel implements vscode.Disposable {
     private rendering = false;
     private editing = false;
     private viewport: Viewport;
+    private designData?: DesignDataPresentation;
     private inspected = false;
     private readers = 0;
     private problem?: string;
@@ -58,11 +62,12 @@ export class DesignerPanel implements vscode.Disposable {
         caret: vscode.Position,
         onClose: () => void,
         private readonly onDrag: (message: DragMessage | Extract<FromDesigner, { type: 'previewDrop' }>) => void,
-        viewport = DEFAULT_VIEWPORT,
-        private designData?: DesignDataPresentation,
+        restored?: DesignerCanvasState,
     ) {
         this.caret = caret;
-        this.viewport = viewport;
+        this.viewport = restored?.viewport ?? DEFAULT_VIEWPORT;
+        this.designData = restored?.designData;
+        this.layers = new LayerViews(document, language, restored?.layerViews);
         this.project = projects.forDocument(document.uri);
         let visible = panel.visible;
         this.subscriptions.push(
@@ -88,6 +93,7 @@ export class DesignerPanel implements vscode.Disposable {
                 if (this.blockOffset !== undefined) {
                     this.blockOffset = offsetAfterChanges(this.blockOffset, event.contentChanges);
                 }
+                this.layers.sourceChanged(event.contentChanges);
                 this.schedule();
             }),
             vscode.workspace.onDidCloseTextDocument(closed => {
@@ -353,10 +359,11 @@ export class DesignerPanel implements vscode.Disposable {
             const metrics = new Map(presentation.nodes.map(node => [node.id, node]));
             const nodes = frame.snapshot.nodes.map(node => {
                 const change = metrics.get(node.id);
-                return { ...node, bounds: change?.bounds ?? null, canMove: change?.canMove ?? false, canInsert: change?.canInsert ?? false };
+                return { ...node, bounds: change?.bounds ?? null, canMove: change?.canMove ?? false,
+                    canInsert: change?.canInsert ?? false, selectable: change?.selectable };
             });
             const snapshot = { ...frame.snapshot, nodes, image: presentation.image, notices: presentation.notices };
-            const canvasNodes = nodes.map(({ id, label, name, bounds, canMove }) => ({ id, label, name, bounds, canMove, selectable: metrics.get(id)?.selectable }));
+            const canvasNodes = nodes.map(({ id, label, name, bounds, canMove, selectable }) => ({ id, label, name, bounds, canMove, selectable }));
             this.frame = { ...frame, token: next, snapshot, canvas: { ...frame.canvas, ...snapshot, nodes: canvasNodes } };
             this.generation = next;
             this.runtime = undefined;
@@ -364,6 +371,7 @@ export class DesignerPanel implements vscode.Disposable {
                 this.selection = presentation.selection;
                 this.selected = this.selection.at(-1);
             }
+            if (presentation.layerView) this.layers.remember(presentation.layerView, frame.snapshot.activeBlock);
             accepted?.();
             this.syncCanvas();
         } catch (error) {
@@ -463,8 +471,12 @@ export class DesignerPanel implements vscode.Disposable {
             const client = await this.getClient();
             const input = await client.inProject(source, project);
             const folder = vscode.workspace.getWorkspaceFolder(this.document.uri);
-            const snapshot = await client.render(input, viewport, token, folder?.uri.scheme === 'file' ? folder.uri.fsPath : undefined,
-                dirtyXamlSources([this.document.uri], this.document), this.designData);
+            if (this.disposed || token !== this.generation || version !== this.document.version) return;
+            const snapshot = await client.render(input, viewport, token, {
+                workspaceRoot: folder?.uri.scheme === 'file' ? folder.uri.fsPath : undefined,
+                localSources: dirtyXamlSources([this.document.uri], this.document),
+                designData: this.designData, layerView: this.layers.input(caret),
+            });
             if (this.disposed || token !== this.generation || version !== this.document.version) return;
             if (this.dependencies.accept(snapshot.dependencies ?? [])) { this.schedule(0); return; }
             const anchor = snapshot.activeBlock?.start;
@@ -472,7 +484,7 @@ export class DesignerPanel implements vscode.Disposable {
             const sameView = this.frame?.version === version && previousAnchor?.line === anchor?.line
                 && previousAnchor?.character === anchor?.character;
             this.assets = [...client.assets, ...(snapshot.projectAssets ?? [])].filter(asset => this.language === 'xaml' || asset.rust);
-            const nodes = snapshot.nodes.map(({ id, label, name, bounds, canMove }) => ({ id, label, name, bounds, canMove }));
+            const nodes = snapshot.nodes.map(({ id, label, name, bounds, canMove, selectable }) => ({ id, label, name, bounds, canMove, selectable }));
             this.frame = { token, version, viewport, source: input, snapshot,
                 canvas: { ...snapshot, nodes, interactive: Boolean(client.capabilities.canvasInteraction && snapshot.image),
                     focusOrderAvailable: Boolean(client.capabilities.canvasFocusOrder && snapshot.image) } };
@@ -621,7 +633,8 @@ export class DesignerPanel implements vscode.Disposable {
         const caret = this.blockOffset !== undefined && block && !asRange(block).contains(this.caret)
             ? this.document.positionAt(this.blockOffset) : this.document.validatePosition(this.caret);
         this.post({ type: 'viewState', state: { version: 1, uri: this.document.uri.toString(),
-            caret: { line: caret.line, character: caret.character }, viewport: this.viewport, designData: this.designData } });
+            caret: { line: caret.line, character: caret.character }, viewport: this.viewport, designData: this.designData,
+            layerViews: this.layers.saved } });
     }
 
     private async getClient(): Promise<NativePreview> {
@@ -663,14 +676,4 @@ const emptyNodes: readonly Snapshot['nodes'][number][] = [];
 function selectionAt(snapshot: Snapshot, caret: vscode.Position): number | undefined {
     // The host emits a preorder outline. The last enclosing element is the deepest.
     return snapshot.nodes.findLast(node => asRange(node.range).contains(caret))?.id;
-}
-
-function offsetAfterChanges(offset: number, changes: readonly vscode.TextDocumentContentChangeEvent[]): number {
-    let shift = 0;
-    for (const change of [...changes].sort((a, b) => a.rangeOffset - b.rangeOffset)) {
-        if (change.rangeOffset > offset) break;
-        if (offset < change.rangeOffset + change.rangeLength) return change.rangeOffset + shift;
-        shift += change.text.length - change.rangeLength;
-    }
-    return offset + shift;
 }

@@ -34,6 +34,14 @@ pub(crate) struct Render {
     pub(crate) local_sources: Vec<ferroui_designer_project::PreviewSourceBuffer>,
     #[serde(rename = "designData")]
     pub(crate) design_data: Option<DesignData>,
+    #[serde(rename = "layerView")]
+    pub(crate) layer_view: Option<LayerViewInput>,
+}
+
+#[derive(Deserialize)]
+pub(crate) struct LayerViewInput {
+    pub(crate) block: Option<Position>,
+    pub(crate) state: serde_json::Value,
 }
 
 #[derive(Deserialize)]
@@ -160,6 +168,7 @@ pub(crate) struct OutlineNode {
     pub(crate) can_insert: bool,
     pub(crate) can_remove: bool,
     pub(crate) can_move: bool,
+    pub(crate) selectable: bool,
 }
 
 #[derive(Clone, Copy, Serialize)]

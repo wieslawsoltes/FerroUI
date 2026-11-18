@@ -6,7 +6,7 @@ use ferroui_base::styling::ThemeVariant;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::Ref;
 use ferroui_controls::{AppBuilder, Application, ContentControl, Window, WindowDecorations};
-use ferroui_designer::{capture_preview_stage_png, DesignerSession, PreviewHostOptions, PreviewStatus};
+use ferroui_designer::{capture_preview_stage_png, DesignerSession, LayerViewState, PreviewHostOptions, PreviewStatus};
 use ferroui_designer_core::NodeId;
 use ferroui_harfbuzz::HarfBuzzApplicationExtensions;
 use ferroui_headless::{FerroHeadlessPlatformExtensions, FerroHeadlessPlatformOptions};
@@ -42,11 +42,14 @@ pub(crate) struct Frame {
 }
 
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 pub(crate) struct Presentation {
     image: Image,
     nodes: Vec<PresentedNode>,
     notices: Vec<String>,
     selection: Vec<NodeId>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    layer_view: Option<LayerViewState>,
 }
 
 #[derive(Serialize)]
@@ -76,7 +79,7 @@ impl Renderer {
         Self { app, stage: None }
     }
 
-    pub(crate) fn render(&mut self, input: &Render, source: &str, sources: SourceSnapshot) -> Result<Frame, String> {
+    pub(crate) fn render(&mut self, input: &Render, source: &str, sources: SourceSnapshot, layers: Option<&LayerViewState>) -> Result<Frame, String> {
         self.stage = None;
         if !(64..=1536).contains(&input.width) || !(64..=1536).contains(&input.height) {
             return Err("Preview width and height must be between 64 and 1536".into());
@@ -112,6 +115,9 @@ impl Renderer {
         window.0.set_height(f64::from(input.height));
         window.0.set_content(Some(Rc::new(host.clone())));
         window.0.show();
+        if let Some(layers) = layers.filter(|layers| !layers.is_empty()) {
+            session.restore_persisted_layer_view(layers);
+        }
         let frame = capture(&mut session)?;
         self.stage = Some(Stage {
             session: Rc::new(RefCell::new(session)),
@@ -127,7 +133,7 @@ impl Renderer {
         Ok(frame)
     }
 
-    pub(crate) fn present(&mut self, next: u64) -> Result<Presentation, String> {
+    pub(crate) fn present(&mut self, next: u64, include_layers: bool) -> Result<Presentation, String> {
         let stage = self.stage.as_mut().ok_or("Render the design first")?;
         stage.token = next;
         let mut session = stage.session.borrow_mut();
@@ -149,6 +155,7 @@ impl Renderer {
             nodes,
             notices: frame.notices,
             selection: session.selection().to_vec(),
+            layer_view: include_layers.then(|| session.persist_layer_view()),
         })
     }
 }

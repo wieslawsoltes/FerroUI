@@ -76,7 +76,7 @@ pub(crate) fn input(renderer: &mut Renderer, request: Input) -> Result<Presentat
             },
         )
     })?;
-    renderer.present(request.next_frame)
+    renderer.present(request.next_frame, false)
 }
 
 fn point(host: &Control, x: f64, y: f64) -> Result<(f64, f64), String> {

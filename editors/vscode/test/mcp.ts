@@ -8,6 +8,7 @@ import { verifyScenarioMcp } from './scenarioMcp';
 import { verifyWorkspaceMcp } from './workspaceMcp';
 import { verifyTimelineMcp } from './studioTimelineMcp';
 import { verifyDesignData } from './designDataMcp';
+import { verifyLayerViews } from './layerViewsMcp';
 import { verifyBindingMcp } from './studioBindingMcp';
 import { verifyGridMcp } from './studioGridMcp';
 import { verifyPreviewChecks } from './previewChecksMcp';
@@ -160,6 +161,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         assert.equal(document.getText(), original);
         await verifyTimelineMcp({ invoke, content }, session, document);
         await verifyDesignData({ invoke, content }, session, document);
+        await verifyLayerViews({ invoke, content }, session, document);
         await verifyBindingMcp({ invoke, content });
         await verifyGridMcp({ invoke, content });
         await verifyResourcePromotion({ invoke, content });

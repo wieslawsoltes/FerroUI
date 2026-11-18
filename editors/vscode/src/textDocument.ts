@@ -22,6 +22,16 @@ function position(pos: vscode.Position): Position {
     return { line: pos.line, character: pos.character };
 }
 
+export function offsetAfterChanges(offset: number, changes: readonly vscode.TextDocumentContentChangeEvent[]): number {
+    let shift = 0;
+    for (const change of [...changes].sort((a, b) => a.rangeOffset - b.rangeOffset)) {
+        if (change.rangeOffset > offset) break;
+        if (offset < change.rangeOffset + change.rangeLength) return change.rangeOffset + shift;
+        shift += change.text.length - change.rangeLength;
+    }
+    return offset + shift;
+}
+
 export function wireRange(range: vscode.Range): Range {
     return { start: position(range.start), end: position(range.end) };
 }

@@ -4,7 +4,7 @@ import type { BuiltProjects } from './builtProjects';
 import { ASSETS_VIEW, AssetsView } from './assetsView';
 import { DATA_VIEW, DesignDataView } from './designDataView';
 import { DetailsViews, EVENTS_VIEW, RESOURCES_VIEW } from './detailsViews';
-import { DesignerPanel } from './designerPanel';
+import { DesignerPanel, type DesignerCanvasState } from './designerPanel';
 import { DesignerDrag } from './designerDrag';
 import { DESIGNER_VIEW, restoredDesigner } from './designerViewState';
 import { DockView } from './dockView';
@@ -22,7 +22,7 @@ import { editBrush } from './studioBrush';
 import { StudioView } from './studioView';
 import type { TimelineControl } from './timelineProtocol';
 import { TIMELINE_VIEW, TimelineView } from './timelineView';
-import { errorMessage, type DesignDataPresentation, type DesignerView, type DetailsView, type DragOrigin, type FrameTarget, type FromAssets, type FromDetails, type FromOutline, type FromToolbox, type Language, type NodeOperation, type NodeTarget, type OutlineMode, type ToolboxState, type ToToolbox, type Viewport } from './protocol';
+import { errorMessage, type DesignerView, type DetailsView, type DragOrigin, type FrameTarget, type FromAssets, type FromDetails, type FromOutline, type FromToolbox, type Language, type NodeOperation, type NodeTarget, type OutlineMode, type ToolboxState, type ToToolbox } from './protocol';
 import { languageOf } from './textDocument';
 import { toolboxHtml, webviewOptions } from './view';
 
@@ -184,7 +184,7 @@ export class DesignerWorkbench implements vscode.Disposable {
                 const document = await vscode.workspace.openTextDocument(saved.uri);
                 const language = languageOf(document);
                 if (language && !this.disposed && !this.panels.has(document.uri.toString())) {
-                    this.attach(panel, document, language, document.validatePosition(saved.caret), saved.viewport, saved.designData);
+                    this.attach(panel, document, language, document.validatePosition(saved.caret), saved);
                     this.followFocus();
                     return;
                 }
@@ -196,12 +196,12 @@ export class DesignerWorkbench implements vscode.Disposable {
     }
 
     private attach(panel: vscode.WebviewPanel, document: vscode.TextDocument, language: Language,
-        caret: vscode.Position, viewport?: Viewport, designData?: DesignDataPresentation): DesignerPanel {
+        caret: vscode.Position, restored?: DesignerCanvasState): DesignerPanel {
         const key = document.uri.toString();
         const designer: DesignerPanel = new DesignerPanel(this.context, this.output, this.projects, panel, document, ++this.nextSession, language,
             caret, () => { this.panels.delete(key); this.followFocus(); }, message => {
                 void this.drag.receive(designer, message).catch(error => designer.post({ type: 'edit', error: errorMessage(error) }));
-            }, viewport, designData);
+            }, restored);
         designer.onDidChange(() => this.followFocus());
         this.panels.set(key, designer);
         return designer;
