@@ -14,7 +14,10 @@ export async function run(): Promise<void> {
     const suffix = process.platform === 'win32' ? '.exe' : '';
     assert.equal(vscode.workspace.getConfiguration('ferroui.languageServer').get('path'), '');
     assert.equal(vscode.workspace.getConfiguration('ferroui.preview').get('path'), '');
-    await Promise.all(['ferroui-xaml-lsp', 'ferroui-designer-preview'].map(name => access(path.join(extension.extensionPath, 'bin', name + suffix))));
+    await Promise.all([
+        ...['ferroui-xaml-lsp', 'ferroui-designer-preview'].map(name => access(path.join(extension.extensionPath, 'bin', name + suffix))),
+        ...['timeline.js', 'designData.js'].map(name => access(path.join(extension.extensionPath, 'dist', name))),
+    ]);
     const workspace = vscode.workspace.workspaceFolders![0];
     const document = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(workspace.uri, 'SettingsView.xaml'));
     assert.equal(document.languageId, 'ferroui-xaml');
@@ -30,6 +33,9 @@ export async function run(): Promise<void> {
     const native = await NativePreview.start(extension, output);
     try {
         assert.ok(native.capabilities.canvasInteraction);
+        assert.ok(native.capabilities.designFixtures, 'The installed preview recognizes named design fixtures');
+        assert.ok(native.capabilities.timelineGeometryRecording, 'The installed preview supports canvas animation recording');
+        assert.ok(native.capabilities.timelineKeyframeDrafts, 'The installed preview validates keyframe drafts and samples easing');
         const source = sourceOf(document, 'xaml', new vscode.Position(0, 0));
         const snapshot = await native.render(source, { width: 800, height: 520, dark: false }, 1);
         assert.ok(snapshot.image?.png, snapshot.renderError ?? undefined);
