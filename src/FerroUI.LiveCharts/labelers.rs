@@ -1,7 +1,9 @@
-//! The labelers of the pinned `Labelers`, the label function of an axis (`Labeler`), and the
+//! The labelers of the pinned `Labelers`, the label function of an axis (`Labeler`), the text of
+//! a point that the tooltip label formatters of a series give (`ChartPointFormatter`), and the
 //! date and time conversions of `LiveCharts.AsDate` and `AsTimeSpan` that the `DateTimeAxis` and
 //! `TimeSpanAxis` of the source label their ticks with.
 
+use crate::kernel::Coordinate;
 use ferroui_base::animation::SignedDuration;
 use ferroui_base::utilities::{CultureInfo, DateTime, DateTimeKind, NumberFormatInfo};
 use std::fmt;
@@ -56,6 +58,33 @@ impl PartialEq for Labeler {
 impl fmt::Debug for Labeler {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("Labeler")
+    }
+}
+
+/// The text of a point from its coordinate (the source's `Func<ChartPoint, string>`), as the
+/// tooltip label formatters of a series. Two formatters are equal when they are the same function.
+#[derive(Clone)]
+pub struct ChartPointFormatter(Rc<dyn Fn(&Coordinate) -> String>);
+
+impl ChartPointFormatter {
+    pub fn new(formatter: impl Fn(&Coordinate) -> String + 'static) -> Self {
+        Self(Rc::new(formatter))
+    }
+    /// The text of a point.
+    pub fn format(&self, point: &Coordinate) -> String {
+        (self.0)(point)
+    }
+}
+
+impl PartialEq for ChartPointFormatter {
+    fn eq(&self, other: &Self) -> bool {
+        Rc::ptr_eq(&self.0, &other.0)
+    }
+}
+
+impl fmt::Debug for ChartPointFormatter {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("ChartPointFormatter")
     }
 }
 

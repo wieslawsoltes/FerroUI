@@ -44,8 +44,29 @@ bindings build (Skia m153, skia-safe 0.153.3, `external/rust-skia-bindings`).
   `IPlatformTypeface::variation_settings` gives the position, empty by default; the Skia
   typeface reports `SkTypeface::getVariationDesignPosition`, the Vello typeface the axis values it
   was made with. They are set once, when the HarfBuzz font is made (`hb_font_set_variations`).
-- Still to do: measure how far the advances move against `CTRunGetAdvances` on macOS and against
-  DirectWrite on Windows.
+- Measured on macOS against Core Text (the width of one line of 68 characters in
+  `.AppleSystemUIFont`, in pixels, by `CTLineGetTypographicBounds`; FerroUI with the Skia
+  backend):
+
+  | Size | Core Text | Core Text, optical size 17 | FerroUI before | FerroUI now |
+  | ---: | ---: | ---: | ---: | ---: |
+  | 9 | 314.591 | 314.591 | 267.847 | 314.591 |
+  | 12 | 404.314 | 404.314 | 357.129 | 404.314 |
+  | 14 | 461.474 | 461.474 | 416.650 | 461.474 |
+  | 24 | 736.198 | 813.410 | 714.258 | 813.410 |
+  | 48 | 1452.422 | 1641.164 | 1428.516 | 1641.164 |
+
+  Before, the line was the default instance of the font without tracking (optical size 28, the
+  default of the axis: 357.129 is what Core Text gives at 12 points for that optical size), 10 to
+  15 % narrower than the glyphs drawn up to 14 points. Now it is what Core Text gives for the
+  instance of the typeface at every size.
+- Not done: the optical size. The system font has an `opsz` axis from 17 to 96 and Core Text
+  moves along it with the size of the text (17 up to 17 points, the size above); a typeface of
+  Skia stays at one optical size for every size, the one it was made at (17 here), and so do the
+  glyphs drawn and now their advances. From 20 points up a line is therefore the text design at
+  a large size, 10 to 13 % wider than the same line of a native application. Following Core Text
+  needs a typeface for each optical size, which is a change to how typefaces are made and kept.
+- Still to do: the same measurement against DirectWrite on Windows.
 - Windows is tuned already (docs/porting/text-rendering.md). That document's section 2.3 should be
   checked: this Skia version's build appears to define `SK_GAMMA_APPLY_TO_A8` for every library
   source (`BUILD.gn`), FreeType included.

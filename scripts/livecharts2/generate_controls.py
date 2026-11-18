@@ -298,11 +298,14 @@ node_props = {
   ('min_value','MinValue','Option<f64>','None'),('max_value','MaxValue','Option<f64>','None')],
  # The ColorStops, PointPadding, MinValue and MaxValue of CoreHeatSeries (L5).
  'HeatSeries':[('color_stops','ColorStops','Option<Vec<f64>>','None'),('point_padding','PointPadding','Thickness','Thickness::uniform(4.0)'),
-  ('min_value','MinValue','Option<f64>','None'),('max_value','MaxValue','Option<f64>','None')]}
+  ('min_value','MinValue','Option<f64>','None'),('max_value','MaxValue','Option<f64>','None')],
+ # The tooltip label formatters of CorePolarLineSeries (code only), read by the chart (#624).
+ 'PolarLineSeries':[('angle_tool_tip_label_formatter','AngleToolTipLabelFormatter','Option<ChartPointFormatter>','None'),
+  ('radius_tool_tip_label_formatter','RadiusToolTipLabelFormatter','Option<ChartPointFormatter>','None')]}
 classes = HEADER + '''use crate::{ChartSeries,HeatLands,SankeyLinks,SankeyNodes,TreemapNodes};
 use ferroui_base::{ferro_class,ferro_class_info,ferro_properties,instantiate,FerroObjectImpl,FerroObjectImplExt,FerroProperty,Ref,StyledProperty,Thickness};
 use ferroui_base::media::Color;
-use ferroui_livecharts::{SankeyLabelPosition,SankeyLayoutKind,SeriesKind};
+use ferroui_livecharts::{ChartPointFormatter,SankeyLabelPosition,SankeyLayoutKind,SeriesKind};
 '''
 for name,kind in families:
     owned=''.join(f'this.set_{prop}({typ}::new());' for prop,typ in node_collections.get(name,[]))

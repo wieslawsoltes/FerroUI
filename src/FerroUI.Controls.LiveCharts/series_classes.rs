@@ -5,7 +5,7 @@ use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, FerroObjectImpl,
     FerroObjectImplExt, FerroProperty, Ref, StyledProperty, Thickness,
 };
-use ferroui_livecharts::{SankeyLabelPosition, SankeyLayoutKind, SeriesKind};
+use ferroui_livecharts::{ChartPointFormatter, SankeyLabelPosition, SankeyLayoutKind, SeriesKind};
 
 #[repr(C)]
 pub struct LineSeries {
@@ -1026,5 +1026,28 @@ impl HeatSeries {
     }
     pub fn set_max_value(&self, value: Option<f64>) {
         self.set_value(Self::max_value_property(), value);
+    }
+}
+
+ferro_properties! { impl PolarLineSeries {
+    pub fn angle_tool_tip_label_formatter_property() -> StyledProperty<Option<ChartPointFormatter>> {
+        FerroProperty::register::<PolarLineSeries, _>("AngleToolTipLabelFormatter", None)
+    }
+    pub fn radius_tool_tip_label_formatter_property() -> StyledProperty<Option<ChartPointFormatter>> {
+        FerroProperty::register::<PolarLineSeries, _>("RadiusToolTipLabelFormatter", None)
+    }
+} }
+impl PolarLineSeries {
+    pub fn angle_tool_tip_label_formatter(&self) -> Option<ChartPointFormatter> {
+        self.get_value(Self::angle_tool_tip_label_formatter_property())
+    }
+    pub fn set_angle_tool_tip_label_formatter(&self, value: Option<ChartPointFormatter>) {
+        self.set_value(Self::angle_tool_tip_label_formatter_property(), value);
+    }
+    pub fn radius_tool_tip_label_formatter(&self) -> Option<ChartPointFormatter> {
+        self.get_value(Self::radius_tool_tip_label_formatter_property())
+    }
+    pub fn set_radius_tool_tip_label_formatter(&self, value: Option<ChartPointFormatter>) {
+        self.set_value(Self::radius_tool_tip_label_formatter_property(), value);
     }
 }

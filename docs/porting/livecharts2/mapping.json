@@ -136,14 +136,15 @@
       "status": "partial"
     },
     "src/LiveChartsCore/CorePolarLineSeries.cs": {
-      "reason": "The source spline of a polar line (open or closed, null splitting), its area filled with the theme's alpha 50, stacked radii, the five data label positions with the rotation flags, markers in their GeometryFill and GeometryStroke (the series paint without them) and hover areas.",
+      "reason": "The source spline of a polar line (open or closed, null splitting), its area filled with the theme's alpha 50, stacked radii, the five data label positions with the rotation flags, markers in their GeometryFill and GeometryStroke (the series paint without them), hover areas, and the tooltip texts (GetPrimaryToolTipText, GetSecondaryToolTipText: the angle only when its axis has labels or a labeler of its own) with the AngleToolTipLabelFormatter and RadiusToolTipLabelFormatter of the series.",
       "remaining": [
         "The per-point animation of the source segments is not ported, and the theme's marker paints (the light fill and the identity stroke of 4) are not applied by default."
       ],
       "rust": [
         "src/FerroUI.LiveCharts/polar_chart_engine.rs",
         "src/FerroUI.Controls.LiveCharts/series_classes.rs",
-        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs",
+        "src/FerroUI.LiveCharts/labelers.rs"
       ],
       "status": "partial"
     },
@@ -794,7 +795,7 @@
       "status": "ported"
     },
     "src/LiveChartsCore/Kernel/Drawing/RectangleHoverArea.cs": {
-      "reason": "Normalized hover bounds distinguish painted geometry from category discovery; all closest strategies choose within each series, and zero-area plots reject interactions.",
+      "reason": "Normalized hover bounds distinguish painted geometry from category discovery; all closest strategies choose within each series, and zero-area plots reject interactions. A pointer on an edge is outside and every side is at least 1 px long (IsPointerOver), for every strategy.",
       "remaining": [
         "All source SuggestedTooltipLocation/placement aggregation methods are not modeled one-to-one."
       ],
@@ -1101,7 +1102,7 @@
       "status": "native-replacement"
     },
     "src/LiveChartsCore/PieChartEngine.cs": {
-      "reason": "Native retained scenes measure category-keyed pie totals, concentric values and gauges; background fill series are excluded from hover; chart size, rotation, range, direction and explicit margins are preserved.",
+      "reason": "Native retained scenes measure category-keyed pie totals, concentric values and gauges; background fill series are excluded from hover; chart size, rotation, range, direction and explicit margins are preserved; the pie chart finds hovered points with CompareAll whatever the finding strategy of the chart (FindHoveredPointsBy).",
       "remaining": [
         "Source per-point animation entry/deletion lifecycle and event dispatch are replaced only in part by native scene transitions.",
         "All source chart measuring/tooltip placement contracts have not received direct upstream test counterparts."
@@ -1113,9 +1114,9 @@
       "status": "partial"
     },
     "src/LiveChartsCore/PolarChartEngine.cs": {
-      "reason": "The polar engine measures independent angle and radius axes, the empty and zero-width bounds, the series padding, the automatic margin of the angle labels, an explicit draw margin and the fit-to-bounds plot into a retained scene; the native PolarChart hosts it with the title and legend layout.",
+      "reason": "The polar engine measures independent angle and radius axes, the empty and zero-width bounds, the series padding, the automatic margin of the angle labels, an explicit draw margin and the fit-to-bounds plot into a retained scene; the native PolarChart hosts it with the title and legend layout; the polar chart finds hovered points with CompareAll whatever the finding strategy of the chart (FindHoveredPointsBy).",
       "remaining": [
-        "Tooltips, legends and visual elements of the source chart view, and its animated frame lifecycle, are the native host's; the source measures the axis names without drawing them, as here."
+        "The tooltip is the native one of every chart kind, without the placement of the source (the suggested locations of the hover areas); legends and visual elements of the source chart view, and its animated frame lifecycle, are the native host's; the source measures the axis names without drawing them, as here."
       ],
       "rust": [
         "src/FerroUI.LiveCharts/polar_chart_engine.rs",
@@ -1124,9 +1125,9 @@
       "status": "partial"
     },
     "src/LiveChartsCore/SankeyChartEngine.cs": {
-      "reason": "The Sankey engine measures every visible series in the whole draw margin (title, legend or an explicit margin), hides a collapsed plot, and draws the series with the paint order of the source; the native SankeyChart hosts it.",
+      "reason": "The Sankey engine measures every visible series in the whole draw margin (title, legend or an explicit margin), hides a collapsed plot, and draws the series with the paint order of the source; the native SankeyChart hosts it; the Sankey chart finds hovered points with CompareAll whatever the finding strategy of the chart (FindHoveredPointsBy).",
       "remaining": [
-        "Tooltips, legends and visual elements of the source chart view, and its animated frame lifecycle, are the native host's."
+        "The tooltip is the native one of every chart kind, without the placement of the source (the suggested locations of the hover areas); legends and visual elements of the source chart view, and its animated frame lifecycle, are the native host's."
       ],
       "rust": [
         "src/FerroUI.LiveCharts/sankey_chart_engine.rs",
@@ -1152,9 +1153,9 @@
       "status": "native-replacement"
     },
     "src/LiveChartsCore/TreemapChartEngine.cs": {
-      "reason": "The treemap engine squarifies the draw margin between the visible series by their totals (a series without a slot takes the whole margin), hides a collapsed plot and draws the tiles with the paint order of the source; the native TreemapChart hosts it.",
+      "reason": "The treemap engine squarifies the draw margin between the visible series by their totals (a series without a slot takes the whole margin), hides a collapsed plot and draws the tiles with the paint order of the source; the native TreemapChart hosts it; the treemap chart finds hovered points with CompareAll whatever the finding strategy of the chart (FindHoveredPointsBy).",
       "remaining": [
-        "Tooltips, legends and visual elements of the source chart view, and its animated frame lifecycle, are the native host's."
+        "The tooltip is the native one of every chart kind, without the placement of the source (the suggested locations of the hover areas); legends and visual elements of the source chart view, and its animated frame lifecycle, are the native host's."
       ],
       "rust": [
         "src/FerroUI.LiveCharts/treemap_chart_engine.rs",
@@ -1567,6 +1568,24 @@
       "rust": [
         "src/FerroUI.LiveCharts/series.rs::Series::relative_outer_radius",
         "src/FerroUI.LiveCharts/pie_chart_engine.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/CorePolarLineSeries.cs::LiveChartsCore.CorePolarLineSeries<TModel, TVisual, TLabel, TPathGeometry, TLineGeometry>::Func<ChartPoint<TModel, TVisual, TLabel>, string>? AngleToolTipLabelFormatter { get; set; }#L144": {
+      "reason": "The code-only AngleToolTipLabelFormatter of PolarLineSeries, a ChartPointFormatter of the coordinate of the point (the source passes the ChartPoint); the engine takes it as the angle_tool_tip_label_formatter of PolarToolTipLabelFormatters, over the text of the angle axis.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/polar_chart_engine.rs::PolarToolTipLabelFormatters",
+        "src/FerroUI.Controls.LiveCharts/series_classes.rs::PolarLineSeries"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/CorePolarLineSeries.cs::LiveChartsCore.CorePolarLineSeries<TModel, TVisual, TLabel, TPathGeometry, TLineGeometry>::Func<ChartPoint<TModel, TVisual, TLabel>, string>? RadiusToolTipLabelFormatter { get; set; }#L157": {
+      "reason": "The code-only RadiusToolTipLabelFormatter of PolarLineSeries, a ChartPointFormatter of the coordinate of the point (the source passes the ChartPoint); the engine takes it as the radius_tool_tip_label_formatter of PolarToolTipLabelFormatters, over the text of the radius axis.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/polar_chart_engine.rs::PolarToolTipLabelFormatters",
+        "src/FerroUI.Controls.LiveCharts/series_classes.rs::PolarLineSeries"
       ],
       "status": "native-replacement"
     },
@@ -2718,6 +2737,62 @@
       ],
       "status": "ported"
     },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void RectangleHoverAreaIsPointerOverCompareAll()#L350": {
+      "reason": "The source rectangles and probes, through the hit test of a scene of one rectangular hit region (the strict edges and the 1 px minimum of IsPointerOver).",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/scene.rs::tests::source_rectangle_hover_area_is_pointer_over_by_strategy"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void RectangleHoverAreaIsPointerOverCompareOnlyX()#L365": {
+      "reason": "The source rectangles and probes, through the hit test of a scene of one rectangular hit region (the strict edges and the 1 px minimum of IsPointerOver).",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/scene.rs::tests::source_rectangle_hover_area_is_pointer_over_by_strategy"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void RectangleHoverAreaIsPointerOverCompareOnlyY()#L376": {
+      "reason": "The source rectangles and probes, through the hit test of a scene of one rectangular hit region (the strict edges and the 1 px minimum of IsPointerOver).",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/scene.rs::tests::source_rectangle_hover_area_is_pointer_over_by_strategy"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void RectangleHoverAreaIsPointerOverNegativeHeight()#L472": {
+      "reason": "The source rectangles and probes, through the hit test of a scene of one rectangular hit region (the strict edges and the 1 px minimum of IsPointerOver).",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/scene.rs::tests::source_rectangle_hover_area_is_pointer_over_negative_dimensions"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void RectangleHoverAreaIsPointerOverNegativeWidth()#L489": {
+      "reason": "The source rectangles and probes, through the hit test of a scene of one rectangular hit region (the strict edges and the 1 px minimum of IsPointerOver).",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/scene.rs::tests::source_rectangle_hover_area_is_pointer_over_negative_dimensions"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void RectangleHoverAreaIsPointerOverNegativeWidthAndHeight()#L502": {
+      "reason": "The source rectangles and probes, through the hit test of a scene of one rectangular hit region (the strict edges and the 1 px minimum of IsPointerOver).",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/scene.rs::tests::source_rectangle_hover_area_is_pointer_over_negative_dimensions"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void RectangleHoverAreaMinWidthAndHeight()#L456": {
+      "reason": "The source rectangles and probes, through the hit test of a scene of one rectangular hit region (the strict edges and the 1 px minimum of IsPointerOver).",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/scene.rs::tests::source_rectangle_hover_area_min_width_and_height"
+      ],
+      "status": "ported"
+    },
     "tests/CoreTests/CoreObjectsTests/MotionlessStatePropertyTests.cs::CoreTests.CoreObjectsTests.MotionlessStatePropertyTests::void ClearStates_RestoresAMotionlessProperty()#L56": {
       "reason": "The source inputs and assertions are retained. The target is a native Animatable with the registered properties of the fixture instead of a SkiaSharp paint; the behavior under test is the visual-state dictionary, which is the same for every animatable target.",
       "remaining": [],
@@ -2739,6 +2814,22 @@
       "remaining": [],
       "rust": [
         "src/FerroUI.LiveCharts/visual_states/tests.rs::source_set_state_applies_and_clear_state_restores_motionless_property"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/RectangleHoverAreaTesting.cs::CoreTests.CoreObjectsTests.RectangleHoverAreaTesting::void IsPointerOver_ZeroHeight_NotTooltipable_OnYOnlyStrategy()#L43": {
+      "reason": "The source rectangles and probes, through the hit test of a scene of one rectangular hit region (the strict edges and the 1 px minimum of IsPointerOver).",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/scene.rs::tests::source_zero_height_is_not_tooltipable_on_y_only_strategy"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/RectangleHoverAreaTesting.cs::CoreTests.CoreObjectsTests.RectangleHoverAreaTesting::void IsPointerOver_ZeroHeight_Tooltipable_OnXOnlyStrategy()#L21": {
+      "reason": "The source rectangles and probes, through the hit test of a scene of one rectangular hit region (the strict edges and the 1 px minimum of IsPointerOver).",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/scene.rs::tests::source_zero_height_is_tooltipable_on_x_only_strategy"
       ],
       "status": "ported"
     },
@@ -3145,6 +3236,38 @@
       "remaining": [],
       "rust": [
         "src/FerroUI.LiveCharts/cartesian_series_tests.rs::source_ohlc_hit_tests"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/SeriesTests/SeriesHitTests.cs::CoreTests.SeriesTests.SeriesHitTests::void Pie_HitsInsideSlice()#L880": {
+      "reason": "The four slices of 100 and the 400 by 400 chart; the probe at 45 degrees and a radius of 80, by both dimensions through the hit test of the retained scene (the strategy the pie chart finds with).",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs::tests::source_pie_hits_inside_slice_and_misses_outside_radius"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/SeriesTests/SeriesHitTests.cs::CoreTests.SeriesTests.SeriesHitTests::void Pie_OutsideRadius_Misses()#L903": {
+      "reason": "The four slices of 100 and the 400 by 400 chart; the probe at (395, 395), by both dimensions through the hit test of the retained scene.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs::tests::source_pie_hits_inside_slice_and_misses_outside_radius"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/SeriesTests/SeriesHitTests.cs::CoreTests.SeriesTests.SeriesHitTests::void PolarLine_CompareAll_HitsAtPointCenter()#L856": {
+      "reason": "The source series, geometry size and 600 by 600 chart; the centre of the hover area of the second point, probed by both dimensions through the hit test of the retained scene (the strategy the polar chart finds with).",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/polar_chart_engine.rs::tests::source_polar_line_compare_all_hits_at_point_center"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/SeriesTests/SeriesHitTests.cs::CoreTests.SeriesTests.SeriesHitTests::void RectangleHoverArea_OnEdge_Misses()#L933": {
+      "reason": "The source rectangles and probes, through the hit test of a scene of one rectangular hit region (the strict edges and the 1 px minimum of IsPointerOver).",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/scene.rs::tests::source_rectangle_hover_area_on_edge_misses"
       ],
       "status": "ported"
     },

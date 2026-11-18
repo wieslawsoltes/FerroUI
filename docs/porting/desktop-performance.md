@@ -660,7 +660,11 @@ What it measures:
   `FERROUI_HEAP_SITES=build|show|first|all` beside the feature it keeps, for every block of that
   phase, the frames of the call that allocated it, and prints the blocks still allocated at the
   first frame by those frames; `python3 scripts/perf/heap-sites.py <output>` names them and adds
-  them up by the function that owns them. The gate runs every test of the frame benchmarks in
+  them up by the function that owns them. With `FERROUI_GATE_CLOSE=1` a start goes on after its
+  first frame: the content is taken out of the window, the two threads run for half a second,
+  and the heap and the resident memory that are left of the scene are printed
+  (`FERROUI_HEAP_SITES=close` keeps the sites of the blocks the close itself allocates and
+  keeps; section 9.98). The gate runs every test of the frame benchmarks in
   a process of its own: a start is the start of a process that
   has built nothing yet, and a scene leaves the heap and the caches of the process in a state
   that moves what is measured after it. The `text` scene builds in 3.65 ms in a process of the
@@ -788,6 +792,20 @@ their tolerance in time, by 7 to 43 % (`frames/reorder ui_ms_per_frame` 1.467 an
 `frames/text` 3.656 and 4.139 ms, `frames/width` 0.358 and 0.414 ms), every one of them
 within 0.2 % in instructions. The time of a scene differs from build to build by more than
 its tolerance; its instructions do not, and a line now says which of the two moved.
+
+The parts of a start are counted too. The build, the show and the first frame of a scene are
+each measured once in a process, so their times were the least steady lines of the gate: the
+show and the start of the large scenes moved by 6 to 12 % between two runs of one change
+(section 9.98), and a start that did more work could not be told from one that waited for the
+disk. A scene of the start prints the instructions of its build, of the taking of its content,
+of its show and of its first frame, and their sum (`build_instructions`,
+`content_instructions`, `show_instructions`, `first_frame_instructions`,
+`startup_instructions`, of every thread of the process); a frame scene prints those of its
+build and its show. The gate judges `build_ms`, `show_ms`, `first_frame_ms` and `startup_ms`
+with them. Three starts of one build: `startup/tiles` 20.735, 20.740 and 20.754 billion
+instructions from the build to the first frame (0.09 %) with 1,655 to 1,790 ms (8 %);
+`startup/controls` 2.695 to 2.714 billion (0.7 %, the first start of a new file the largest)
+with 243 to 340 ms.
 
 Scaling pairs. A benchmark compared at one size cannot tell a cost that is linear at that size
 and quadratic above it. The benchmarks of `trees::Scaling` (the start of a wall of tiles, its
@@ -7794,3 +7812,215 @@ not written: no frame has one. What would have one is an element replaced by ano
 place among many siblings that share a holder (a tile of a wall given another control); a scene
 of that kind is the measurement to make first if it is taken up again.
 
+### 9.98 What a closed screen leaves: idle text layouts and the queues of its passes
+
+Experiment #761, part (b). Whether memory comes back after a burst was not measured: the
+starts (section 9.40) end at the first frame. A start can now go on (`FERROUI_GATE_CLOSE=1`,
+section 8.1): the content is taken out of the window, the two threads run for half a second,
+and the heap that is left of the scene is printed, with the allocation sites of what was
+allocated before and during the close and is still there.
+
+**Counted** on main. `startup/tiles` (58,696 tiles, 352,187 elements) has 1,600 MB allocated at
+its first frame; after the close 350.0 MB in 1.61 million blocks were left. `startup/controls`
+(1,600 templated controls) left 38.4 MB of 211 MB.
+
+| What kept it, `startup/tiles` after the close | MB |
+| --- | ---: |
+| Text layouts of the 59,696 text blocks, in the cache of the font manager, with their runs and glyphs | 198 |
+| The layout queues: the entries of a loop and the queue (`LayoutQueue`) | 65 |
+| Emptied buffers of the compositor, the renderer and the render thread, up to 4 MB each (section 9.40) | about 64 |
+| The frame buffers of the surface | 16 |
+| The queue of the loaded controls (a hash table kept at 6.5 MB) | 6 |
+
+**The text layouts.** The cache of plain text layouts (section 9.29) keeps the layouts
+something holds and, of the ones nothing holds, the 4,096 used last. It looked for idle
+layouts when layouts were added. A screen that is closed makes every layout of its texts idle
+and adds none, so they stayed until other text was laid out. A holder that lets a shared layout
+go says so already (`TextLayout::dispose`, which a text block calls when it leaves the tree
+and before it asks for another layout). The cache now counts, on the thread, how many of its
+layouts may be idle: a holder that lets one go adds one, a request that finds an idle layout
+takes one off, and a look sets the number that is. When 4,096 more than the cache keeps idle
+may be idle, and at least a quarter of the layouts kept more, the cache looks for idle layouts
+as an addition does. A look goes over every kept layout, so it costs each holder that left at
+most four layouts looked at. The idle layouts are then at most the 4,096 and as many more.
+
+The first version counted the holders that left and nothing else, and looked at every 4,096 of
+them. A text block lets its layout go between its measure and its arrangement and gets the same
+one back, so the show of the tiles looked through a cache of up to 59,696 held layouts ten
+times and found nothing: 31 ms of a show of 485 ms (sampled), which the gate refused
+(`startup/tiles show_ms` +10.3 %, and the shows of five frame scenes by 6 to 12 %). With the
+count of the layouts that may be idle the show looks for nothing: five starts of each side in
+turn gave a show of 485 to 518 ms for main and 489 to 515 ms for the change.
+
+**The queues.** `LayoutQueue` kept the entries of its largest loop (a list and a hash table of
+every element of a first layout, and again of the layout that follows a removal) and its
+queue; the renderer kept the list of the visuals that left the tree. They give back what is
+beyond what an emptied buffer keeps, as the other queues of a first frame do.
+
+**Measured.**
+
+| After the close | Main | This change |
+| --- | ---: | ---: |
+| `startup/tiles`: heap left of the scene | 350.0 MB in 1,612,591 blocks | 135.2 MB in 164,608 blocks |
+| `startup/controls`: heap left of the scene | 38.4 MB | 38.4 MB |
+
+The gate (counters, frames and the gauntlet; 130 metrics, two rounds) has no line of a show
+or a start over its tolerance: `startup/tiles` shows in 494 ms where main takes 505 ms and
+starts in 1,636 ms against 1,647 ms. Two lines of a run were over in time (`frames/cards` on
+the UI thread with the instructions of main, and the first frame of `startup/controls`);
+seven starts of each side in turn gave a first frame of 39.7 ms for main and 39.6 ms for the
+change.
+
+**Tried and left out: a smaller buffer kept.** With 1 MB kept for an emptied buffer instead of
+4 MB (and a hash table shrunk to what fits in it: a table shrunk to a number of items has up to
+sixteen sevenths of it in places, which is how the limit of 4 MB keeps tables of 6.5 MB) the
+tiles left 87.8 MB and the controls 33.5 MB. The gate refused it (130 metrics, two rounds,
+against the change above): eight lines over, all of them the show and the start of scenes with
+many elements (`startup/tiles` `show_ms` +12.2 % and `startup_ms` +7.0 %, `frames/reorder`
+`show_ms` +9.9 %, `frames/cards` `show_ms` +8.6 %, the starts of `grow` and `pile` +5 to 6 %),
+none a steady frame. A show runs several passes, and a buffer that is shrunk at the end of one
+is grown again by the next. The limit stays at 4 MB.
+
+**What is left, and what it would take.** About 95 MB of the 135 MB are emptied buffers at
+their limit, about 24 MB the idle layouts the cache keeps by design, 16 MB the frame buffers.
+The buffers could go lower without the cost above if they were released once, when the burst
+is over, and not at the end of each pass: one job at the idle priority of the dispatcher,
+posted when a buffer is emptied above its limit. Every buffer would have to be known to that
+job, which is a change of its own. Resident memory does not follow the heap: it was 1,898 MB at
+the first frame and 1,855 MB after the close with 1,465 MB freed, because the allocator keeps
+the pages it was given.
+
+**Part (a) of the experiment, counted and left out: writes that change nothing.** A setter of
+a composition visual sends nothing for a value equal to the one it has, except the fifteen
+properties that can be animated, which send it to stop an animation of the property. Counted
+in those setters (a temporary count, removed; the declarative program of the framework
+comparison, nine seconds of each scene): none of the 550,000 writes of the gauntlet at tier 16
+and none of the 100,000 of the patchwork at tier 17 had the value the visual had; the wall at
+tier 20 wrote fewer than 50,000 times. Values that do not change are stopped before the setter
+(section 9.59), so a batch carries no equal write to drop.
+
+**Looked at and not changed** (section 8.4, rule 2). The other holders of text layouts
+(`TextPresenter`) call `TextLayout::dispose` already. The reactive runtime of `ferroui-view`
+keeps its table of nodes at the size of the largest screen (216 bytes a node); its slots are
+used again, and giving them back needs the generations kept apart from the nodes.
+
+**Tests.** `text_layout_cache_tests.rs`:
+`the_layouts_of_holders_that_leave_are_let_go_without_an_addition` (12,288 held layouts whose
+holders dispose them: at most 8,192 are kept, all idle, the ones let go last).
+
+### 9.99 A font family is read from its text once
+
+Experiment #811, part (c). An application writes the family of a text where the text is built
+(`FontFamily::from("Inter")` for every text block of a list), and markup compiled for a
+template names it once for every element made from the template. `FontFamily::new` read the
+text each time: the list of its sources, its collection of names and, for a list of names or a
+font of the application, its key with their URLs. A family of one name took 123 ns and 2,786
+instructions and left 385 bytes in five blocks; the declarative program of the framework
+comparison had 769 bytes of families for every tile of its wall (section 8.5).
+
+**The change** (`src/FerroUI.Base/media/font_family.rs`). A family is what its text and its
+base URI make it and never changes. A thread keeps the families it made by their text
+(`Made`, at most 256 families, emptied when it is full, so text that is made up at run time
+costs a bounded memory; a text of more than 256 bytes is read each time). `FontFamily::new`
+and `with_base_uri` return the family made first. A text with a source that is resolved
+against the base URI has one family for each base URI; any other text has one family whatever
+base URI it is given. `FontFamily::ptr_eq` holds for families made from the same text, where it
+held only for copies of one family before; the equality and the hash of a family are the same,
+and are found by the first comparison (the same instance) where they compared the names.
+
+**Measured** (`property_subsystem::FontFamilyMade`, a thousand families made in turn):
+
+| `property_subsystem::FontFamilyMade` | Main | This change | Instructions, main | This change |
+| --- | ---: | ---: | ---: | ---: |
+| `named` (`"Inter"`) | 122.8 ns | 7.5 ns | 2,786 | 204 |
+| `list` (`"Inter, Arial"`) | 768.6 ns | 7.8 ns | 16,306 | 201 |
+| `sourced` (`"resm:Application.Fonts#Inter"`) | 336.9 ns | 10.1 ns | 7,263 | 221 |
+| `set_unchanged` (the family of a control set to one made from its name) | 126.3 ns | 14.9 ns | 2,970 | 390 |
+
+The gate (`property_subsystem`, `declarative`, the text block benchmarks and the construction
+of elements; 63 metrics, two rounds) has nothing over its tolerance; the four lines above take
+92.5, 98.8, 97.0 and 86.9 % fewer instructions.
+
+**Looked at and not changed** (section 8.4, rule 2). `FontFamily::default_family` is one family
+of a thread already. `Typeface` and the key of a glyph typeface hold a family and compare it:
+they find equal families of one text by the instance now. The other values an application
+makes from text for every element (a brush from a colour name, a thickness) are plain values
+without a block of their own, or are made once by the compiled markup.
+
+**Tests.** `font_family.rs`: `a_text_is_read_once_on_a_thread` (the instance, the base URI of
+a relative source, a family without a base URI), `the_families_a_thread_keeps_are_bounded`.
+
+### 9.100 What a static element costs on the declarative layer: no owner, shared boxes
+
+Experiment #811, parts (a) and (b). The wall of the declarative program of the framework
+comparison builds 293,480 elements before its first frame, and building them is about 40 % of
+its start (section 8.5). Two benchmarks now hold what the declarative layer adds to that
+(`declarative::ViewBenchmark`): a wall of a thousand tiles of five elements, with the
+properties an application writes for them (a size, a corner radius, a fill, a font, a font
+size, a weight, alignments, margins), made of controls directly and let go
+(`mount_wall_controls`), and the same wall as elements, mounted and taken out
+(`mount_wall_run_once`).
+
+**Counted.** The wall of elements took 147.5 million instructions and 9.2 ms where the wall of
+controls takes 86.7 million and 4.8 ms. Sampled, function by function against the wall of
+controls (self time for the thousand tiles): the allocator has 2.2 ms more (`free` 0.9, `malloc`
+0.85, the clearing of new blocks 0.2), the mounting itself about 1.0 ms (`mount_instance`, the
+collecting of the properties and children, `Runtime::create`, `Owner::with`). The setting of
+the properties, the adding of the children and the controls themselves cost what they cost the
+wall of controls. So what the layer adds is blocks: the description of an element (a box for
+every value, lists) and what it keeps mounted (an owner, an instance, its slot, its values).
+
+**An element that starts nothing has no owner.** Every mounted control had an owner in the
+reactive runtime: a node, a cleanup that kept the instance alive, an entry in what the owner
+above owns. An owner is for what an element starts: the effects of the values that follow
+state, the handlers, what its mount hooks registered. An element with values only, no handler
+and no mount hook starts nothing, and most elements of a tree are of this kind. It is mounted
+without an owner (`ControlInstance::owner` is an option): what is mounted below it belongs to
+the nearest owner above, as does what a patch starts for it later, and taking the instance out
+takes those out one by one (`ControlInstance::dispose`). Section 9.91 did this for the second
+owner an element had for its handlers; this is the first.
+
+**Elements that give a property the same plain value share its box.** A value an element gives
+a property is described as a box (`PropValue::Value`), which cannot change and is compared by
+its value. The boxes of the last eight values of a type are kept on the thread, and a value
+among them takes its box from there (`builder::boxed`). Only for plain values of up to 32
+bytes that own nothing: a number, an alignment, a weight, a margin, a corner radius. A value
+that owns something (a text, a brush, a font family) is as costly to compare as to box and is
+boxed as before; brushes and font families are shared one level below (the brush of a colour,
+section 9.99 for a family). A new value takes the place at the end of the eight and moves
+towards the front as it is used again, so values that come once pass through one place. Of the
+27 values of a tile of the benchmark, 19 take a box that is there.
+
+**Two lists.** `flatten` made a new list of the children of every element, to take fragments
+and lists apart, also where none was among them: a list that is flat already is the one given.
+The list of the values of an element grew from nothing to four to eight entries as its setters
+ran; it takes room for eight once.
+
+**Measured** (`declarative::ViewBenchmark`, the gate, two rounds for each step against the step
+before; the change of the instructions):
+
+| `declarative::ViewBenchmark` | No owner | Shared boxes | Two lists |
+| --- | ---: | ---: | ---: |
+| `mount_wall_run_once` | -5.73 % | -4.23 % | -4.28 % |
+| `mount_list_run_once` | -11.58 % | +0.03 % | -0.43 % |
+| `mount_list_rerender` | -11.50 % | +0.17 % | -0.40 % |
+| `run_parent_of_components[memoized by default]` | +0.86 % | -3.67 % | -5.55 % |
+| `run_unchanged` | -1.24 % | +0.15 % | -1.28 % |
+| `mount_wall_controls` (the wall of controls) | +0.01 % | +0.00 % | -0.01 % |
+
+The wall of elements took 9.16 ms before the three steps and takes 7.25 ms. With the font
+family of section 9.99, which both walls make for every text, it takes 122.9 million
+instructions against 81.7 million for the wall of controls: one and a half times, where it was
+1.7 times. None of the three gates (25 metrics each) has a line over its tolerance.
+
+**Looked at and not changed** (section 8.4, rule 2). A dynamic list and a component that runs
+again keep their owners: they start an effect. The instance of a control, its slot and the
+lists of what a parent mounted are two to six blocks an element more than a control needs; a
+description that is mounted once and never patched would not need to be kept at all, which is
+the part of (b) that is left, with the typed setter of #804.
+
+**Tests.** `rerender_tests.rs`:
+`an_element_that_starts_nothing_has_no_owner_and_takes_out_what_is_below_it` (twenty-one
+static elements make no node of the runtime; a row without an owner that goes takes the effect
+of the text below it and the one a patch started for it). `builder_tests.rs`:
+`elements_that_give_the_same_plain_value_share_its_box`.

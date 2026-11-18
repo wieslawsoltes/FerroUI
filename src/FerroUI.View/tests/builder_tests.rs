@@ -65,6 +65,49 @@ fn elements_that_name_a_color_share_its_brush() {
     }
 }
 
+/// Elements that give a property the same plain value hold the same box of it (section 9.100):
+/// a width, an alignment and a margin are plain; a text has a box of its own. More values than
+/// are kept change nothing but the boxes.
+#[test]
+fn elements_that_give_the_same_plain_value_share_its_box() {
+    use crate::element::PropValue;
+    let boxes = |element: Element| -> Vec<BoxedValue> {
+        let Element::Control(control) = element else { panic!("an element of a control") };
+        let values = control.props.iter().map(|entry| match &entry.value {
+            PropValue::Value(value) => value.clone(),
+            _ => panic!("a value"),
+        });
+        values.collect()
+    };
+    let tile = |text: &str| {
+        text_block()
+            .width(64.0)
+            .horizontal_alignment(HorizontalAlignment::Center)
+            .margin((4.0, 2.0, 0.0, 0.0))
+            .text(text.to_string())
+            .into_element()
+    };
+    let (first, second) = (boxes(tile("same")), boxes(tile("same")));
+    assert_eq!(first.len(), 4);
+    for index in 0..3 {
+        assert!(Rc::ptr_eq(&first[index], &second[index]), "the plain value {index} has one box");
+    }
+    assert!(!Rc::ptr_eq(&first[3], &second[3]), "a text has a box of its own");
+    assert_eq!(first[3].downcast_ref::<Option<String>>(), second[3].downcast_ref::<Option<String>>());
+    assert_eq!(first[0].downcast_ref::<f64>(), Some(&64.0));
+    assert_eq!(first[2].downcast_ref::<Thickness>(), Some(&Thickness::new(4.0, 2.0, 0.0, 0.0)));
+
+    // A hundred other widths pass through; each element still has its own value.
+    for width in 0..100 {
+        let made = boxes(text_block().width(f64::from(width)).into_element());
+        assert_eq!(made[0].downcast_ref::<f64>(), Some(&f64::from(width)));
+    }
+    let (control, owner) = mount(tile("mounted"));
+    let text = control.cast::<TextBlock>().expect("a text block");
+    assert_eq!((text.width(), text.margin()), (64.0, Thickness::new(4.0, 2.0, 0.0, 0.0)));
+    owner.dispose();
+}
+
 #[test]
 fn set_takes_any_property_like_the_indexer_upstream() {
     let (control, owner) = mount(button().set(Grid::row_property(), 2).grid_column(1));

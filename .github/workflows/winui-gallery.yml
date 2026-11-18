@@ -4,8 +4,8 @@ on:
   pull_request:
     # The tests of the sample also run in the workspace run of ci.yml; this workflow follows the
     # sample and the WinUI controls, theme and markup it shows (docs/porting/winui-controls.md,
-    # O12: narrowed paths), and checks its two binaries. Its rendering job runs nightly and on
-    # demand only.
+    # O12: narrowed paths), checks its two binaries and renders one page with the capture tool.
+    # Its rendering job, every page, runs nightly and on demand only.
     paths:
       - '.github/workflows/winui-gallery.yml'
       - 'samples/WinUIGallery/**'
@@ -64,6 +64,15 @@ jobs:
         run: cargo test --locked -p winui-gallery --features theme --lib
       - name: The desktop and capture binaries build
         run: cargo check --locked -p winui-gallery --features desktop,capture --bins
+      # The capture tool is built with features of its own, and its application includes the
+      # WinUI styles of the inking controls: a style document it cannot load stopped it before
+      # the first page (#630), which only the nightly rendering job saw. One page, every time.
+      - name: The capture tool renders a page
+        run: |
+          out="$RUNNER_TEMP/winui-gallery-capture"
+          cargo run --locked -p winui-gallery --features capture --bin winui-gallery-capture -- \
+            --pages=InkCanvas --output-dir="$out"
+          test -s "$out/InkCanvas.png"
 
   rendering:
     name: Gallery rendering (Skia, HarfBuzz)

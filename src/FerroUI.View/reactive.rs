@@ -514,6 +514,13 @@ pub(crate) fn subscriber_count<T>(signal: &Signal<T>) -> usize {
     })
 }
 
+/// How many nodes of the runtime of the thread are alive: its signals, memos, effects and owners
+/// (tests).
+#[cfg(test)]
+pub(crate) fn live_nodes() -> usize {
+    with_runtime(|runtime| runtime.nodes.borrow().iter().filter(|node| node.alive).count())
+}
+
 /// The size of a node of the runtime, which every signal, memo, effect and owner is (tests).
 #[cfg(test)]
 pub(crate) fn node_size() -> usize {

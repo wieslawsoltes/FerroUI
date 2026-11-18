@@ -42,12 +42,13 @@ pub use geo_map_chart_engine::{
 };
 pub use heat_functions::HeatFunctions;
 pub use kernel::{Coordinate, Error, StackedValue, Stacker};
-pub use labelers::{as_date, as_time_span, Labeler, Labelers};
+pub use labelers::{as_date, as_time_span, ChartPointFormatter, Labeler, Labelers};
 pub use motion::{Animatable, Animation, MotionProperty, Repeat};
 pub use paint::BrushSpace;
 pub use pie_chart_engine::{AngularTicks, Needle, PieChartEngine, PieOptions, PieVisual};
 pub use polar_chart_engine::{
-    PolarChartEngine, PolarMeasurement, PolarOptions, PolarScale, COTANGENT_ANGLE, TANGENT_ANGLE,
+    PolarChartEngine, PolarMeasurement, PolarOptions, PolarScale, PolarToolTipLabelFormatters,
+    COTANGENT_ANGLE, TANGENT_ANGLE,
 };
 pub use sankey_chart_engine::{
     SankeyChartEngine, SankeyLabelPosition, SankeyLayoutKind, SankeyLink, SankeyNode,
