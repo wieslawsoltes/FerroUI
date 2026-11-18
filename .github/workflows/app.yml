@@ -307,7 +307,7 @@ jobs:
           cp "${CARGO_TARGET_DIR:-target}/wasm32-unknown-emscripten/browser/$name.wasm" "$out/$name.named.wasm"
           # llvm-cxxfilt of the Emscripten SDK demangles the names.
           PATH="$EMSDK/upstream/bin:$PATH" python3 -I FerroUI/scripts/browser/wasm-size-report.py \
-            "$out/$name.named.wasm" --map "$out/$name.map" --top 40 --functions 40 --marginal > "$out/report.md"
+            "$out/$name.named.wasm" --map "$out/$name.map" --top 40 --functions 40 --data 40 --marginal > "$out/report.md"
           cat "$out/report.md" >> "$GITHUB_STEP_SUMMARY"
       - name: Keep what the module is made of
         if: inputs.size-report
