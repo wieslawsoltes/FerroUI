@@ -49,11 +49,19 @@ use crate::compiler_extensions::{
 };
 use crate::back_end::{context_definition, numeric_constant, plan_setters, FRAMEWORK_CONTEXT};
 
-use super::transform::PathType;
+use super::{BytecodeImage, transform::PathType};
 use super::emit_types::{
     DeclaredKind, EmitClass, EmitMarkup, EmitProperty, EmitTypes, FieldValue, FrameworkType, Handle, Known, MethodInfo, TypeKey,
 };
 use super::source::rust_string_literal;
+
+#[path = "binding_program.rs"]
+mod binding_program;
+
+#[path = "construction.rs"]
+mod construction;
+#[path = "setter_choice.rs"]
+mod setter_choice;
 
 /// Runs of theme resources written as row tables (#568).
 #[path = "theme_rows.rs"]
@@ -63,6 +71,9 @@ mod theme_rows;
 /// tables (#568, step 5).
 #[path = "theme_styles.rs"]
 mod theme_styles;
+
+#[path = "selector_visitor.rs"]
+mod selector_visitor;
 
 /// The runs of the units of a compiled theme (#568).
 #[path = "theme_units.rs"]
@@ -512,7 +523,7 @@ fn is_string_literal(text: &str) -> bool {
 fn dynamic_resource_setter_value<'s>(types: &dyn EmitTypes, statements: &[&'s str], value: &str) -> Option<&'s str> {
     let extension = types.framework_path(FrameworkType::DynamicResourceExtension)?;
     let [create, provide] = statements else { return None };
-    let (local, key) = dynamic_resource_extension(&extension, *create)?;
+    let (local, key) = keyed_resource_extension(&extension, *create)?;
     let (provided, target) = provided_value(&extension, local, *provide)?;
     (target == "rt::setter_value_property()" && value == format!("rt::to_object(::core::clone::Clone::clone(&{provided}))"))
         .then_some(key)
@@ -520,7 +531,7 @@ fn dynamic_resource_setter_value<'s>(types: &dyn EmitTypes, statements: &[&'s st
 
 /// `let <local> = DynamicResourceExtension::__markup_new_1(rt::string_object(<key>));`: the
 /// local and the key.
-fn dynamic_resource_extension<'s>(extension: &str, statement: &'s str) -> Option<(&'s str, &'s str)> {
+fn keyed_resource_extension<'s>(extension: &str, statement: &'s str) -> Option<(&'s str, &'s str)> {
     let (local, created) = statement.strip_prefix("let ")?.split_once(" = ")?;
     let key = created.strip_prefix(&format!("{extension}::__markup_new_1(rt::string_object("))?.strip_suffix("));")?;
     (is_identifier(local) && is_string_literal(key)).then_some((local, key))
@@ -545,7 +556,7 @@ fn provided_value<'s>(extension: &str, local: &str, statement: &'s str) -> Optio
 fn fused_dynamic_resource_bind(types: &dyn EmitTypes, lines: &[String], statement: &str) -> Option<String> {
     let extension = types.framework_path(FrameworkType::DynamicResourceExtension)?;
     let [.., create, provide] = lines else { return None };
-    let (local, key) = dynamic_resource_extension(&extension, create.strip_prefix("    ")?)?;
+    let (local, key) = keyed_resource_extension(&extension, create.strip_prefix("    ")?)?;
     let (provided, target) = provided_value(&extension, local, provide.strip_prefix("    ")?)?;
     let property = target.strip_prefix("rt::property_value(")?.strip_suffix(')')?;
     let (object, rest) = statement.strip_prefix("rt::bind(")?.split_once(".upcast_ref::<::ferroui_base::FerroObject>(), ")?;
@@ -564,7 +575,7 @@ fn fused_dynamic_resource_bind(types: &dyn EmitTypes, lines: &[String], statemen
 /// of `rt::bind` with the provided binding. `rt::bind_template_binding(target, property, source,
 /// line, position)` makes the same calls in the same order. `None` (the statements are kept) for
 /// any other shape.
-fn fused_template_binding_bind(types: &dyn EmitTypes, lines: &[String], statement: &str) -> Option<String> {
+fn fused_template_binding_bind(types: &dyn EmitTypes, lines: &[String], statement: &str, source_first: bool) -> Option<String> {
     let template_binding = types.framework_path(FrameworkType::TemplateBinding)?;
     let [.., create, provide] = lines else { return None };
     let (local, source) = create.strip_prefix("    let ")?.split_once(" = ")?;
@@ -583,9 +594,12 @@ fn fused_template_binding_bind(types: &dyn EmitTypes, lines: &[String], statemen
     {
         return None;
     }
-    Some(format!(
-        "rt::bind_template_binding({object}.upcast_ref::<::ferroui_base::FerroObject>(), {property}, {source}, {line}, {column})?;"
-    ))
+    let receiver = format!("{object}.upcast_ref::<::ferroui_base::FerroObject>()");
+    Some(if source_first {
+        format!("rt::bind_template_binding_from({receiver}, {source}, {property}, {line}, {column})?;")
+    } else {
+        format!("rt::bind_template_binding({receiver}, {property}, {source}, {line}, {column})?;")
+    })
 }
 
 /// A deferred resource added to a resource dictionary under a text key, as the shared helper of
@@ -689,8 +703,8 @@ fn uri_literal(n: &XamlAstNewClrObjectNode) -> Option<String> {
 /// elements of a constant table. `None` (the text is parsed when the document is loaded, and a
 /// failure is the load error it is) for text the parser refuses and for a number a literal
 /// cannot state.
-fn path_data_literal(method: &Rc<dyn IXamlMethod>, arguments: &[Rc<dyn IXamlAstValueNode>]) -> Option<String> {
-    use ferroui_base::media::{FillRule, PathCommand, SweepDirection};
+fn path_data_literal(method: &Rc<dyn IXamlMethod>, arguments: &[Rc<dyn IXamlAstValueNode>]) -> Option<Vec<ferroui_base::media::PathCommand>> {
+    use ferroui_base::media::PathCommand;
     let declaring = method.declaring_type();
     if method.name() != "Parse" || !(declaring.is("FerroUI.Media", "StreamGeometry") || declaring.is("FerroUI.Media", "Geometry")) {
         return None;
@@ -701,6 +715,11 @@ fn path_data_literal(method: &Rc<dyn IXamlMethod>, arguments: &[Rc<dyn IXamlAstV
     if !commands.iter().all(PathCommand::is_finite) {
         return None;
     }
+    Some(commands)
+}
+
+fn native_path_commands(commands: &[ferroui_base::media::PathCommand]) -> String {
+    use ferroui_base::media::{FillRule, PathCommand, SweepDirection};
     let number = |value: f64| format!("{value:?}_f64");
     let point = |point: ferroui_base::Point| format!("::ferroui_base::Point::new({}, {})", number(point.x), number(point.y));
     let command = |command: &PathCommand| -> String {
@@ -740,7 +759,7 @@ fn path_data_literal(method: &Rc<dyn IXamlMethod>, arguments: &[Rc<dyn IXamlAstV
             PathCommand::EndFigure(is_closed) => format!("{COMMAND}::EndFigure({is_closed})"),
         }
     };
-    Some(commands.iter().map(command).collect::<Vec<_>>().join(", "))
+    commands.iter().map(command).collect::<Vec<_>>().join(", ")
 }
 
 /// The text of a culture literal: `CultureInfo.Parse(text)` of a text, what the compiler
@@ -834,6 +853,7 @@ struct Emitter<'a> {
     /// The statements written so far that a row can replace, by their text
     /// ([`theme_rows::RowStatement`]).
     row_statements: HashMap<String, theme_rows::RowStatement>,
+    resolved_calls: std::cell::RefCell<construction::Calls>,
     /// The row tables of the runs written as rows, in the order of their calls.
     row_tables: Vec<String>,
     /// How deep the content being written is in deferred content: the entries of units are
@@ -1200,12 +1220,19 @@ impl<'a> Emitter<'a> {
             .coerce(&value, object)
             .ok_or_else(|| unsupported(node, format!("the value cast to {} cannot be stated as an object", type_.full_name())))?;
         let local = self.local_named("cast");
-        self.line(format!(
-            "let {local} = rt::cast_checked({untyped}, {handle}, {}, {}, {})?;",
-            rust_string_literal(&type_.full_name()),
-            node.line(),
-            node.position()
-        ));
+        let name = rust_string_literal(&type_.full_name());
+        let expression = format!("rt::cast_checked({untyped}, {handle}, {name}, {}, {})?", node.line(), node.position());
+        if self.documents.backend.uses_construction_programs() && is_identifier(&value.expr)
+            && matches!(value.kind, Kind::Exact { id, .. } if id == object) && untyped == owned(&value.expr) {
+            self.record_resolved_call(&expression, construction::ResolvedCall {
+                kind: construction::CallKind::Member,
+                inputs: vec![construction::CallInput::Register(value.expr.clone(), false), construction::CallInput::Text(name)],
+                import: format!("Call(|args| {{ let value = args.value::<::ferroui_base::metadata::MarkupValue>()?.clone(); let name = args.text()?; let cast = rt::cast_checked(value, {handle}, name, args.line, args.column)?; Ok(Some(rt::ConstructionRegister::Value(Box::new(cast)))) }})"),
+                result: Some(("::ferroui_base::metadata::MarkupValue".to_owned(), false)),
+                line: node.line(), column: node.position(),
+            });
+        }
+        self.line(format!("let {local} = {expression};"));
         Ok(Typed { expr: local, kind: Kind::Exact { id: object, nullable: None } })
     }
 
@@ -1282,6 +1309,16 @@ impl<'a> Emitter<'a> {
             Some(element_type) => format!("rt::RuntimeList::of({})", rust_string_literal(&element_type.full_name())),
             None => "rt::RuntimeList::untyped()".to_string(),
         };
+        if self.documents.backend.uses_construction_programs() {
+            let mut inputs = Vec::new();
+            let make = construction::closed_value(&expr, &mut inputs).expect("resolved list constructor");
+            let args = if inputs.is_empty() { "_" } else { "args" };
+            self.record_resolved_call(&expr, construction::ResolvedCall {
+                kind: construction::CallKind::Member, inputs,
+                import: format!("Call(|{args}| Ok(Some(rt::ConstructionRegister::Value(Box::new({make})))))"),
+                result: Some(("rt::RuntimeList".into(), false)), line: 0, column: 0,
+            });
+        }
         Ok(self.exact(Known::RuntimeList, expr))
     }
 
@@ -1337,7 +1374,18 @@ impl<'a> Emitter<'a> {
                 format!("rt::cast_untyped({expr}, {handle}, {line}, {position})?")
             }
         };
-        self.line(format!("rt::RuntimeList::add(&{}, {item});", target.expr));
+        let statement = format!("rt::RuntimeList::add(&{}, {item})", target.expr);
+        if self.documents.backend.uses_construction_programs() && is_identifier(&target.expr) {
+            let mut inputs = vec![construction::CallInput::Register(target.expr.clone(), false)];
+            if let Some(item) = construction::closed_value(&item, &mut inputs) {
+                self.record_resolved_call(&statement, construction::ResolvedCall {
+                    kind: construction::CallKind::Member, inputs,
+                    import: format!("Call(|args| {{ let list = args.value::<rt::RuntimeList>()?; rt::RuntimeList::add(list, {item}); Ok(None) }})"),
+                    result: None, line: 0, column: 0,
+                });
+            }
+        }
+        self.line(format!("{statement};"));
         Ok(())
     }
 
@@ -1592,8 +1640,20 @@ impl<'a> Emitter<'a> {
                 .ok_or_else(|| unsupported(node, format!("{name}: the declaring type is gone")))?;
             let owner = self.type_path(node, &declaring)?;
             let local = self.local_named("value");
-            self.line(format!("let {local} = {owner}::{}();", emit.function));
-            return Ok(Typed { expr: local, kind: self.kind_of(*type_) });
+            let call = format!("{owner}::{}()", emit.function);
+            let kind = self.kind_of(*type_);
+            if self.documents.backend.uses_construction_programs() {
+                if let Some(result) = self.construction_type(kind) {
+                    let register = if result.1 { format!("rt::ConstructionRegister::Object({call}.upcast())") }
+                        else { format!("rt::ConstructionRegister::Value(Box::new({call}))") };
+                    self.record_resolved_call(&call, construction::ResolvedCall {
+                        kind: construction::CallKind::Member, inputs: Vec::new(), result: Some(result),
+                        import: format!("Call(|_| Ok(Some({register})))"), line: 0, column: 0,
+                    });
+                }
+            }
+            self.line(format!("let {local} = {call};"));
+            return Ok(Typed { expr: local, kind });
         }
         if !matches!(runtime.value, FieldValue::EnumMember) {
             return Err(unsupported(node, "a static field that is not an enumeration member"));
@@ -1662,6 +1722,24 @@ impl<'a> Emitter<'a> {
             .ok_or_else(|| unsupported(node, format!("the value type of {} is not known", declaring.full_name())))?;
         let call = invoked(format!("{owner}::{}({})", emit.function, texts.join(", ")), emit.fallible, node);
         let kind = self.kind_of(value);
+        if self.documents.backend.uses_construction_programs() {
+            if let Some(result) = self.construction_type(kind) {
+                let mut inputs = Vec::new();
+                if let Some(args) = texts.iter().map(|text| construction::closed_value(text, &mut inputs)).collect::<Option<Vec<_>>>() {
+                    let mut build = format!("{owner}::{}({})", emit.function, args.join(", "));
+                    if emit.fallible { build = format!("rt::invoked({build}, args.line, args.column)?"); }
+                    let result_value = if result.1 { format!("rt::ConstructionRegister::Object({build}.upcast())") }
+                        else { format!("rt::ConstructionRegister::Value(Box::new({build}))") };
+                    let param = if inputs.is_empty() && !emit.fallible { "_" } else { "args" };
+                    self.record_resolved_call(&call, construction::ResolvedCall {
+                        kind: construction::CallKind::Member, inputs, result: Some(result),
+                        import: format!("Call(|{param}| Ok(Some({result_value})))"),
+                        line: if emit.fallible { node.line() } else { 0 },
+                        column: if emit.fallible { node.position() } else { 0 },
+                    });
+                }
+            }
+        }
         if let Kind::Class(class) = kind {
             let local = self.local_for(class);
             self.marker(node, class.name());
@@ -2059,7 +2137,18 @@ impl<'a> Emitter<'a> {
             && self.parent_stack_nodes.contains(&node_address(node));
         if push_parent {
             self.uses_context = true;
-            self.line(format!("context.push_parent(rt::to_value({}.clone()));", target.expr));
+            let statement = format!("context.push_parent(rt::to_value({}.clone()))", target.expr);
+            if self.documents.backend.uses_construction_programs() && is_identifier(&target.expr) {
+                if let Some((ty, false)) = self.construction_type(target.kind) {
+                    self.record_resolved_call(&statement, construction::ResolvedCall {
+                        kind: construction::CallKind::ContextMember,
+                        inputs: vec![construction::CallInput::Register(target.expr.clone(), false)],
+                        import: format!("Call(|args| {{ let parent = args.value::<{ty}>()?.clone(); args.context()?.push_parent(rt::to_value(parent)); Ok(None) }})"),
+                        result: None, line: 0, column: 0,
+                    });
+                }
+            }
+            self.line(format!("{statement};"));
         }
         self.manipulation(&init.manipulation().as_node(), target)?;
         if push_parent {
@@ -2205,7 +2294,7 @@ impl<'a> Emitter<'a> {
     /// `fused_template_binding_bind`), which replaces the two statements of the value too.
     fn setter_line(&mut self, statement: String) {
         let fused = fused_dynamic_resource_bind(self.types, &self.lines, &statement)
-            .or_else(|| fused_template_binding_bind(self.types, &self.lines, &statement));
+            .or_else(|| fused_template_binding_bind(self.types, &self.lines, &statement, false));
         match fused {
             Some(fused) => {
                 self.lines.truncate(self.lines.len() - 2);
@@ -2441,7 +2530,24 @@ impl<'a> Emitter<'a> {
                 SetterValues::Checked => return Ok(String::new()),
                 SetterValues::None => return Err(unsupported(node, format!("{property_name}: a setter without its value"))),
             };
-            return Ok(format!("rt::add_handler_with_context(&context, &{}, &{event}, {handler});", target.expr));
+            let statement = format!("rt::add_handler_with_context(&context, &{}, &{event}, {handler})", target.expr);
+            if self.documents.backend.uses_construction_programs() && is_identifier(&target.expr)
+                && (handler.starts_with("rt::method_delegate(&context, ") || handler.starts_with("rt::static_method_delegate("))
+            {
+                if let Some((ty, true)) = self.construction_type(target.kind) {
+                    // method_delegate captures the document root weakly through its original
+                    // context. Its resolved method and event are the native part of this import.
+                    let call = format!("let target = args.object::<{ty}>()?; let context = args.context()?; rt::add_handler_with_context(context, &target, &{event}, {}); Ok(None)",
+                        handler.replacen("rt::method_delegate(&context, ", "rt::method_delegate(context, ", 1));
+                    self.record_resolved_call(&statement, construction::ResolvedCall {
+                        kind: construction::CallKind::ContextMember,
+                        inputs: vec![construction::CallInput::Register(target.expr.clone(), true)],
+                        import: format!("Call(|args| {{ {call} }})"),
+                        result: None, line: 0, column: 0,
+                    });
+                }
+            }
+            return Ok(format!("{statement};"));
         }
         if let Some(adder) = any.downcast_ref::<AdderSetter>() {
             return self.adder_statement(node, assignment, adder, target, values);
@@ -2490,7 +2596,53 @@ impl<'a> Emitter<'a> {
             SetterValues::None => return Err(unsupported(node, format!("{property_name}: a setter without its value"))),
         };
         let call = if property.is_direct() { "set_direct_value" } else { "set_value" };
-        Ok(format!("{}.{call}({definition}, {value});", target.expr))
+        let statement = format!("{}.{call}({definition}, {value})", target.expr);
+        if let SetterValues::Typed(source, _) = values {
+            self.record_register_setter(target, source, property.property_type(), &value, call, &definition, &statement);
+        } else if let SetterValues::Untyped(source, value_node) = values {
+            if self.documents.backend.uses_construction_programs() && is_identifier(&target.expr) && is_identifier(source) {
+                // The cast/overload produced a MarkupValue. Keep the setter's original
+                // exact argument conversion, including its member name and value position.
+                let member = rust_string_literal(&self.member_name(&runtime));
+                self.record_resolved_call(&statement, construction::ResolvedCall {
+                    kind: construction::CallKind::RegisterSetter,
+                    inputs: vec![construction::CallInput::Register(target.expr.clone(), true),
+                                 construction::CallInput::Register((*source).to_owned(), false)],
+                    import: format!("RegisterSetter(|target, input, line, column| {{ let value = input.value::<::ferroui_base::metadata::MarkupValue>()?.clone(); target.{call}({definition}, rt::exact(value, {member}, 0, line, column)?); Ok(()) }})"),
+                    result: None, line: value_node.line(), column: value_node.position(),
+                });
+            }
+        }
+        Ok(format!("{statement};"))
+    }
+
+    fn record_register_setter(&self, target: &Typed<'a>, source: &Typed<'a>, property_type: TypeKey<'a>,
+        value: &str, method: &str, definition: &str, statement: &str) {
+        if !self.documents.backend.uses_construction_programs() || !is_identifier(&target.expr)
+            || !is_identifier(&source.expr) || matches!(source.expr.as_str(), "true" | "false") {
+            return;
+        }
+        let Some((ty, object)) = self.construction_type(source.kind) else { return };
+        // A compiler local can have extra facts about a literal. Only share conversions
+        // whose expression is identical when resolved on an ordinary named operand.
+        let operand = "__ferroui_value_operand";
+        let Some(rhs) = self.coerce(&Typed { expr: operand.to_owned(), kind: source.kind }, property_type) else { return };
+        if !rhs.contains(operand) || rhs.replace(operand, &source.expr) != value {
+            return;
+        }
+        let (line, column) = self.position.get();
+        let position = format!(", {line}, {column})?");
+        let positioned = rhs.contains(&position);
+        let rhs = rhs.replace(&position, ", line, column)?").replace(operand, "(*source)");
+        let read = if object { "object_ref" } else { "value" };
+        let coordinates = if positioned { "line, column" } else { "_, _" };
+        self.record_resolved_call(statement, construction::ResolvedCall {
+            kind: construction::CallKind::RegisterSetter,
+            inputs: vec![construction::CallInput::Register(target.expr.clone(), true),
+                         construction::CallInput::Register(source.expr.clone(), object)],
+            import: format!("RegisterSetter(|target, input, {coordinates}| {{ let source = input.{read}::<{ty}>()?; target.{method}({definition}, {rhs}); Ok(()) }})"),
+            result: None, line: if positioned { line } else { 0 }, column: if positioned { column } else { 0 },
+        });
     }
 
     /// The adder of a collection property as one of the setters of a choice at run time
@@ -2745,7 +2897,7 @@ impl<'a> Emitter<'a> {
         };
         let dynamic_type = &dynamic_type;
         // The branches, decided before anything is written.
-        let mut branches: Vec<(Option<String>, Rc<dyn IXamlPropertySetter>)> = Vec::with_capacity(setters.len());
+        let mut branches: Vec<(Option<setter_choice::Predicate>, Rc<dyn IXamlPropertySetter>)> = Vec::with_capacity(setters.len());
         let mut first_allowing_null: Option<Rc<dyn IXamlPropertySetter>> = None;
         for setter in setters {
             let allows_null = setter.binder_parameters().allow_runtime_null.get();
@@ -2762,9 +2914,9 @@ impl<'a> Emitter<'a> {
                     true => parameter.generic_arguments().into_iter().next().unwrap_or_else(|| parameter.clone()),
                     false => parameter.clone(),
                 };
-                Some(format!("rt::is_instance(&{{value}}, {})", self.handle_expr(node, &checked)?))
+                Some(setter_choice::Predicate::Instance(self.handle_expr(node, &checked)?))
             } else if !allows_null {
-                Some("{value}.is_some()".to_string())
+                Some(setter_choice::Predicate::NonNull)
             } else {
                 None
             };
@@ -2778,8 +2930,24 @@ impl<'a> Emitter<'a> {
             Some(priority_node) => Some(self.priority_value(priority_node)?),
             None => None,
         };
+        let value_start = self.lines.len();
         let value = self.value(&value_node)?;
         self.position.set((node.line(), node.position()));
+        // A freshly constructed default TemplateBinding provides itself as a non-null binding.
+        // Only eliminate an ordered overload choice when that fact proves its very first branch.
+        // Priority has already been evaluated in source order; this binding setter discards it.
+        if let Some((_, first)) = branches.first().filter(|(condition, first)| {
+            self.documents.backend.uses_construction_programs() && self.lines.len() == value_start + 2
+                && matches!(condition, Some(setter_choice::Predicate::NonNull))
+                && (first.as_any().is::<BindingSetter>() || first.as_any().is::<BindingWithPrioritySetter>())
+        }) {
+            let bind = self.setter_statement(node, assignment, first, target, &SetterValues::Typed(&value, &value_node), priority.as_deref())?;
+            if let Some(fused) = fused_template_binding_bind(self.types, &self.lines[value_start..], &bind, true) {
+                self.lines.truncate(value_start);
+                self.line(fused);
+                return Ok(());
+            }
+        }
         let local = self.local_named("value");
         let untyped = match value.kind {
             Kind::SystemType { .. } => {
@@ -2795,8 +2963,8 @@ impl<'a> Emitter<'a> {
         for (index, (condition, setter)) in branches.iter().enumerate() {
             let statement = self.setter_statement(node, assignment, setter, target, &SetterValues::Untyped(&local, &value_node), priority.as_deref())?;
             match (condition, index) {
-                (Some(condition), 0) => lines.push(format!("if {} {{", condition.replace("{value}", &local))),
-                (Some(condition), _) => lines.push(format!("}} else if {} {{", condition.replace("{value}", &local))),
+                (Some(condition), 0) => lines.push(format!("if {} {{", condition.native(&local))),
+                (Some(condition), _) => lines.push(format!("}} else if {} {{", condition.native(&local))),
                 (None, 0) => lines.push("{".to_string()),
                 (None, _) => lines.push("} else {".to_string()),
             }
@@ -2824,6 +2992,10 @@ impl<'a> Emitter<'a> {
         // The choice of a `{StaticResource}` value as one call of the shared helper (#568, step 5).
         if let Some(call) = theme_styles::resource_choice(&local, &lines) {
             self.line(call);
+            return Ok(());
+        }
+        if self.documents.backend.uses_construction_programs()
+            && self.emit_setter_choice(node, assignment, target, &value_node, &local, priority.as_deref(), &branches, first_allowing_null.as_ref())? {
             return Ok(());
         }
         for line in lines {
@@ -2968,20 +3140,21 @@ impl<'a> Emitter<'a> {
     /// `lines`, a complete body, with the runs of row statements written as row tables
     /// ([`theme_rows::row_runs`]); the build functions of the deferred rows of those runs are
     /// no longer emitted.
-    fn apply_row_runs(&mut self, lines: Vec<String>) -> Vec<String> {
+    fn apply_row_runs(&mut self, lines: Vec<String>, mut record: impl FnMut(&str, theme_rows::RowKind)) -> Vec<String> {
         let prefix = self.function_name.to_uppercase();
         let mut next = self.row_tables.len();
-        let (lines, runs) = theme_rows::row_runs(lines, &self.row_statements, &self.document, || {
+        let (lines, runs) = theme_rows::row_runs_with_backend(lines, &self.row_statements, &self.document, || {
             let name = format!("{prefix}_ROWS_{next}");
             next += 1;
             name
-        });
+        }, self.documents.backend.uses_theme_programs());
         let document_text = self.document_name.replace('`', "'").replace(['\r', '\n'], " ");
         for (name, run) in runs {
+            record(&name, run.kind);
             for slot in &run.slots {
                 self.deferred_functions[*slot].clear();
             }
-            self.row_tables.push(theme_rows::row_table(&name, &document_text, &run));
+            self.row_tables.push(theme_rows::row_table_in(&name, &document_text, &run, &self.documents.bytecode_image));
         }
         lines
     }
@@ -3019,6 +3192,12 @@ impl<'a> Emitter<'a> {
         // The locals of the function are numbered from zero, independently of the function
         // around it.
         let outer_names = std::mem::take(&mut self.local_names);
+        // The same local identifier can represent a different class or overload in a
+        // nested factory. Keep the register and call metadata with its declaring body.
+        let outer_metadata = self.documents.backend.uses_construction_programs().then(|| (
+            std::mem::take(&mut self.local_types),
+            std::mem::take(self.resolved_calls.get_mut()),
+        ));
         let outer_uses = (std::mem::take(&mut self.uses_context), std::mem::take(&mut self.uses_name_scope));
         let declaration_aliases = node.namespace_scope().map(|scope| scope.aliases().clone())
             .unwrap_or_else(|| self.namespace_aliases.clone());
@@ -3030,12 +3209,20 @@ impl<'a> Emitter<'a> {
         let body_lines = std::mem::replace(&mut self.lines, outer_lines);
         self.assignments = outer_assignments;
         self.local_names = outer_names;
+        let factory_metadata = outer_metadata.map(|(types, calls)| (
+            std::mem::replace(&mut self.local_types, types),
+            std::mem::replace(self.resolved_calls.get_mut(), calls),
+        ));
         let (uses_context, uses_name_scope) = (self.uses_context || self.uses_name_scope, self.uses_name_scope);
         (self.uses_context, self.uses_name_scope) = outer_uses;
         let returned = body?;
-        let body_lines = self.apply_row_runs(body_lines);
+        let body_lines = self.apply_row_runs(body_lines, |_, _| {});
         // Runs of template bindings on one object, as tables (#568, step 5).
-        let body_lines = theme_styles::template_binding_runs(&mut self.theme_styles, body_lines);
+        let body_lines = if self.documents.backend.uses_construction_programs() {
+            body_lines
+        } else {
+            theme_styles::template_binding_runs(&mut self.theme_styles, body_lines)
+        };
 
         let document = self.document_name.replace('`', "'").replace(['\r', '\n'], " ");
         let context_name = if uses_context { "context" } else { "_context" };
@@ -3070,7 +3257,7 @@ impl<'a> Emitter<'a> {
         // A control theme whose members a table holds is built from its table (#568, step 5).
         let theme = match uses_name_scope {
             true => None,
-            false => theme_styles::parse_theme(&body_lines, &returned),
+            false => self.theme_styles.parse_resolved_theme(&body_lines, &returned),
         };
         match (fused, theme) {
             (Some(fused), _) if !uses_name_scope => {
@@ -3080,7 +3267,11 @@ impl<'a> Emitter<'a> {
                 }
             }
             (_, Some(theme)) => {
-                let call = theme_styles::control_theme_table(&mut self.theme_styles, &function, &theme);
+                let call = if self.documents.backend.uses_theme_programs() {
+                    theme_styles::control_theme_program(&mut self.theme_styles, &function, &theme, &self.documents.bytecode_image)
+                } else {
+                    theme_styles::control_theme_table(&mut self.theme_styles, &function, &theme)
+                };
                 text.push_str(&format!("    let context = rt::deferred_context(service_provider, &{document_info});\n"));
                 if let Some(marker) = body_lines.first().filter(|line| line.trim_start().starts_with("//")) {
                     text.push_str(marker);
@@ -3093,6 +3284,10 @@ impl<'a> Emitter<'a> {
                 if uses_name_scope {
                     text.push_str("    let name_scope = context.name_scope_field();\n");
                 }
+                let body_lines = match factory_metadata {
+                    Some((types, calls)) => construction::lower(&body_lines, &types, &calls, &returned, &self.documents.bytecode_image),
+                    None => body_lines,
+                };
                 for line in body_lines {
                     text.push_str(&line);
                     text.push('\n');
@@ -3147,17 +3342,38 @@ impl<'a> Emitter<'a> {
             .ok_or_else(|| unsupported(node, "ResourceDictionary.get_Count is not a method of the run-time type system"))?;
         let ensure_method = self.types.method(types.resource_dictionary_ensure_capacity.as_ref())
             .ok_or_else(|| unsupported(node, "ResourceDictionary.EnsureCapacity is not a method of the run-time type system"))?;
-        let resources = match &ensure.resources_getter {
-            Some(getter) => {
-                let getter = self.types.method(getter.as_ref())
-                    .ok_or_else(|| unsupported(node, "the getter of the resources is not a method of the run-time type system"))?;
-                if getter.declared().is_none() {
-                    return Err(unsupported(node, "the getter of the resources is not a declared member"));
-                }
-                let call = self.declared_call(node, &getter, std::slice::from_ref(target))?;
-                Typed { expr: call, kind: self.kind_of(self.declared_return(node, &getter)?) }
+        let getter = ensure.resources_getter.as_ref().map(|getter| {
+            let method = self.types.method(getter.as_ref())
+                .ok_or_else(|| unsupported(node, "the getter of the resources is not a method of the run-time type system"))?;
+            if method.declared().is_none() {
+                return Err(unsupported(node, "the getter of the resources is not a declared member"));
             }
-            None => Typed { expr: target.expr.clone(), kind: target.kind },
+            Ok(method)
+        }).transpose()?;
+        let resource_value = |receiver: &Typed<'a>| -> EmitResult<String> {
+            let value = match &getter {
+                Some(method) => Typed {
+                    expr: self.declared_call(node, method, std::slice::from_ref(receiver))?,
+                    kind: self.kind_of(self.declared_return(node, method)?),
+                },
+                None => Typed { expr: receiver.expr.clone(), kind: receiver.kind },
+            };
+            match value.kind {
+                Kind::Class(_) => Ok(format!("rt::to_value({}.clone())", value.expr)),
+                Kind::Exact { .. } => Ok(format!("rt::to_value({})", value.expr)),
+                _ => Err(unsupported(node, "resources that are not an object")),
+            }
+        };
+        let untyped = resource_value(target)?;
+        // The register reader loans exact values. Keep ownership-taking non-object receivers
+        // on their original path; the normal class receiver always carries an identity handle.
+        let import = if self.documents.backend.uses_construction_programs() && is_identifier(&target.expr) {
+            match self.construction_type(target.kind) {
+                Some((ty, true)) => Some((ty, resource_value(&Typed { expr: "receiver".to_owned(), kind: target.kind })?)),
+                _ => None,
+            }
+        } else {
+            None
         };
         let dictionary_type = &types.resource_dictionary;
         let handle = self.handle_expr(node, dictionary_type)?;
@@ -3168,24 +3384,47 @@ impl<'a> Emitter<'a> {
             .and_then(|markup| markup.this())
             .ok_or_else(|| unsupported(node, "the instance type of ResourceDictionary is not known"))?;
         let local = self.local_named("resources");
-        let untyped = match resources.kind {
-            Kind::Class(_) => format!("rt::to_value({}.clone())", resources.expr),
-            Kind::Exact { .. } => format!("rt::to_value({})", resources.expr),
-            Kind::Null | Kind::SystemType { .. } => return Err(unsupported(node, "resources that are not an object")),
+        let count_local = self.local_named("count");
+        let literal = format!("{}_i32", ensure.capacity);
+        let (resources, count_name, additional) = if import.is_some() {
+            ("resources", "count", "additional")
+        } else {
+            (local.as_str(), count_local.as_str(), literal.as_str())
         };
         // The dictionary as the instance of each call, with the loader's error naming the method.
         let instance = |member: String| Typed {
-            expr: format!("rt::exact({local}.clone(), {}, 0, {}, {})?", rust_string_literal(&member), node.line(), node.position()),
+            expr: format!("rt::exact({resources}.clone(), {}, 0, {}, {})?", rust_string_literal(&member), node.line(), node.position()),
             kind: Kind::Exact { id: this, nullable: None },
         };
-        let (count_member, ensure_member) = (self.member_name(&get_count), self.member_name(&ensure_method));
-        let count = self.declared_call(node, &get_count, &[instance(count_member)])?;
-        let count_local = self.local_named("count");
+        let count = self.declared_call(node, &get_count, &[instance(self.member_name(&get_count))])?;
         let capacity = Typed {
-            expr: format!("{count_local}.wrapping_add({}_i32)", ensure.capacity),
+            expr: format!("{count_name}.wrapping_add({additional})"),
             kind: Kind::Exact { id: self.types.known(Known::I32), nullable: None },
         };
-        let ensure_call = self.declared_call(node, &ensure_method, &[instance(ensure_member), capacity])?;
+        let ensure_call = self.declared_call(node, &ensure_method, &[instance(self.member_name(&ensure_method)), capacity])?;
+        if let Some((ty, import_value)) = import {
+            // Both the inline fallback and the typed import retain the original MarkupValue
+            // until the surrounding scope exits, including a non-dictionary getter result.
+            let markup = "::ferroui_base::metadata::MarkupValue";
+            let body = |value: &str| format!(
+                "{{ let resources: {markup} = {value}; if rt::is_instance(&resources, {handle}) {{ let count: i32 = {count}; {ensure_call}; }} resources }}"
+            );
+            let expression = format!("{{ let additional = {literal}; {} }}", body(&untyped));
+            let import = format!("let receiver = args.object_ref::<{ty}>()?; let additional = args.int()?; let value = {import_value}; let resources = {};", body("value"));
+            // Keep member/coercion positions and their original evaluation order. The adapter
+            // takes the source position and signed count from the instruction at each use.
+            let position = format!(", {}, {})?", node.line(), node.position());
+            let import = import.replace(&position, ", args.line, args.column)?");
+            self.record_resolved_call(&expression, construction::ResolvedCall {
+                kind: construction::CallKind::Member,
+                inputs: vec![construction::CallInput::Register(target.expr.clone(), true), construction::CallInput::Int(ensure.capacity)],
+                import: format!("Call(|args| {{ {import} Ok(Some(rt::ConstructionRegister::Value(Box::new(resources)))) }})"),
+                result: Some((markup.to_owned(), false)),
+                line: node.line(), column: node.position(),
+            });
+            self.line(format!("let {local} = {expression};"));
+            return Ok(());
+        }
         self.line(format!("let {local}: ::ferroui_base::metadata::MarkupValue = {untyped};"));
         self.line(format!("if rt::is_instance(&{local}, {handle}) {{"));
         self.line(format!("    let {count_local}: i32 = {count};"));
@@ -3320,6 +3559,16 @@ impl<'a> Emitter<'a> {
             calls.push(self.path_element(node, element)?);
         }
         let local = self.local_named("path");
+        if self.documents.backend.uses_construction_programs() {
+            let mut program = binding_program::Program::default();
+            for (element, call) in transform_elements.iter().chain(elements.iter()).zip(&calls) {
+                program.step(element, call);
+            }
+            let (expression, operation) = program.build(&program.program(&self.documents.bytecode_image), node.line(), node.position());
+            self.resolved_calls.borrow_mut().insert(expression.clone(), Some(operation));
+            self.line(format!("let {local} = {expression};"));
+            return Ok(Typed { expr: format!("{local}.clone()"), kind: self.kind_of(self.types.known(Known::CompiledBindingPath)) });
+        }
         self.line(format!("let {local} = {{"));
         self.line("    let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();".to_string());
         for call in calls {
@@ -3328,105 +3577,6 @@ impl<'a> Emitter<'a> {
         self.line("    builder.build()".to_string());
         self.line("};".to_string());
         Ok(Typed { expr: format!("{local}.clone()"), kind: self.kind_of(self.types.known(Known::CompiledBindingPath)) })
-    }
-
-    /// A selector (`XamlIlSelectorNode`): the selector before it, then the
-    /// builder of the styling system the node calls (`Selectors::*`), as the
-    /// interpreter's `selector` builds it. Returns the local holding the
-    /// selector, `None` for the start of a chain.
-    fn selector(&mut self, node: &Rc<dyn IXamlAstNode>) -> EmitResult<Option<String>> {
-        const SELECTORS: &str = "::ferroui_base::styling::Selectors";
-        if node.is::<XamlIlSelectorInitialNode>() {
-            return Ok(None);
-        }
-        let previous = |emitter: &mut Self, previous: &Option<Rc<dyn XamlIlSelectorNode>>| -> EmitResult<String> {
-            Ok(match previous {
-                Some(previous) => match emitter.selector(&previous.clone().as_node())? {
-                    Some(local) => format!("::core::option::Option::Some({local})"),
-                    None => "::core::option::Option::None".to_string(),
-                },
-                None => "::core::option::Option::None".to_string(),
-            })
-        };
-        let types = self.types;
-        let class_of = |type_: &Rc<dyn IXamlType>| -> EmitResult<String> {
-            let class = types
-                .class_of(&**type_)
-                .ok_or_else(|| unsupported(node, format!("{} is not a class of the object model: it cannot be used as a control type", type_.get_full_name())))?;
-            let path = class
-                .rust_path()
-                .ok_or_else(|| unsupported(node, format!("no public Rust path is recorded for {}", class.full_name())))?;
-            // The identity of the class, not its type: a style for a class the application never
-            // creates does not keep the class in the executable.
-            Ok(format!("<{} as ::ferroui_base::ObjectType>::IDENTITY", absolute(path)))
-        };
-        let call = if let Some(n) = node.cast::<XamlIlTypeSelector>() {
-            let previous = previous(self, &n.base.previous)?;
-            let class = class_of(&n.target_type)?;
-            match n.concrete {
-                true => format!("{SELECTORS}::of_type_identity({previous}, {class})"),
-                false => format!("{SELECTORS}::is_type_identity({previous}, {class})"),
-            }
-        } else if let Some(n) = node.cast::<XamlIlStringSelector>() {
-            let previous = previous(self, &n.base.previous)?;
-            let text = rust_string_literal(&n.string());
-            match n.selector_type {
-                XamlIlStringSelectorType::Class => format!("{SELECTORS}::class({previous}, {text})"),
-                XamlIlStringSelectorType::Name => format!("{SELECTORS}::name({previous}, {text})"),
-            }
-        } else if let Some(n) = node.cast::<XamlIlCombinatorSelector>() {
-            let previous = previous(self, &n.base.previous)?;
-            match n.selector_type {
-                CombinatorSelectorType::Child => format!("{SELECTORS}::child({previous})"),
-                CombinatorSelectorType::Descendant => format!("{SELECTORS}::descendant({previous})"),
-                CombinatorSelectorType::Template => format!("{SELECTORS}::template({previous})"),
-            }
-        } else if let Some(n) = node.cast::<XamlIlNotSelector>() {
-            let previous = previous(self, &n.base.previous)?;
-            let argument = self
-                .selector(&n.argument.clone().as_node())?
-                .ok_or_else(|| unsupported(node, "a not selector without an argument"))?;
-            format!("{SELECTORS}::not({previous}, {argument})")
-        } else if let Some(n) = node.cast::<XamlIlNthChildSelector>() {
-            let previous = previous(self, &n.base.previous)?;
-            match n.selector_type {
-                XamlIlNthChildSelectorType::NthChild => format!("{SELECTORS}::nth_child({previous}, {}, {})", n.step, n.offset),
-                XamlIlNthChildSelectorType::NthLastChild => {
-                    format!("{SELECTORS}::nth_last_child({previous}, {}, {})", n.step, n.offset)
-                }
-            }
-        } else if let Some(n) = node.cast::<XamlIlPropertyEqualsSelector>() {
-            let previous = previous(self, &n.base.previous)?;
-            let field = n.resolve_ferro_property_field().map_err(|e| failed(node, e))?;
-            self.property_equals(node, previous, &field, &n.value())?
-        } else if let Some(n) = node.cast::<XamlIlAttachedPropertyEqualsSelector>() {
-            let previous = previous(self, &n.base.previous)?;
-            self.property_equals(node, previous, &n.property_filed(), &n.value())?
-        } else if let Some(n) = node.cast::<XamlIlOrSelectorNode>() {
-            let alternatives = n.selectors();
-            match alternatives.as_slice() {
-                [] => return Err(unsupported(node, "an or selector without alternatives")),
-                [only] => return self.selector(&only.clone().as_node()),
-                _ => {
-                    let mut list = Vec::with_capacity(alternatives.len());
-                    for alternative in &alternatives {
-                        list.push(
-                            self.selector(&alternative.clone().as_node())?
-                                .ok_or_else(|| unsupported(node, "an alternative of an or selector that is empty"))?,
-                        );
-                    }
-                    format!("{SELECTORS}::or([{}])", list.join(", "))
-                }
-            }
-        } else if let Some(n) = node.cast::<XamlIlNestingSelector>() {
-            let previous = previous(self, &n.base.previous)?;
-            format!("{SELECTORS}::nesting({previous})")
-        } else {
-            return Err(unsupported(node, "no emitter for this selector node"));
-        };
-        let local = self.local_named("selector");
-        self.line(format!("let {local} = {call};"));
-        Ok(Some(local))
     }
 
     /// A container query (`XamlIlQueryNode`): the query before it, then the builder of the
@@ -3483,28 +3633,8 @@ impl<'a> Emitter<'a> {
         Ok(Some(local))
     }
 
-    /// `Selectors::property_equals_untyped(previous, property, value)`: the
-    /// value evaluated as an object, then held as exactly the type of the
-    /// property.
-    fn property_equals(
-        &mut self,
-        node: &Rc<dyn IXamlAstNode>,
-        previous: String,
-        field: &Rc<dyn IXamlField>,
-        value: &Rc<dyn IXamlAstValueNode>,
-    ) -> EmitResult<String> {
-        let definition = self.registered_definition(node, &field.name(), field)?;
-        let property = self.types.field(field.as_ref()).and_then(|field| field.ferro_property())
-            .ok_or_else(|| unsupported(node, format!("{}: not a registered property", field.name())))?;
-        let value_node = value.clone().as_node();
-        let value = self.value(&value_node)?;
-        let typed = self.coerce(&value, property.property_type()).ok_or_else(|| {
-            unsupported(&value_node, format!("{}: the value cannot be stated as `{}`", property.name(), property.property_type_name()))
-        })?;
-        Ok(format!(
-            "::ferroui_base::styling::Selectors::property_equals_untyped({previous}, rt::property({definition}), ::std::rc::Rc::new({typed}))"
-        ))
-    }
+
+
 
     /// The builder call of one element of a binding path (`builder` is the
     /// builder so far).
@@ -3859,22 +3989,51 @@ impl<'a> Emitter<'a> {
             {
                 self.uses_context = true;
                 let extension = &texts[0];
-                self.line(match fallible {
+                let call = match fallible {
                     true => format!(
-                        "let {local} = rt::provide_value_invoked(&context, {descriptor}, {extension}, {function}, {}, {})?;",
+                        "rt::provide_value_invoked(&context, {descriptor}, {extension}, {function}, {}, {})?",
                         node.line(),
                         node.position()
                     ),
-                    false => format!("let {local} = rt::provide_value(&context, {descriptor}, {extension}, {function});"),
-                });
+                    false => format!("rt::provide_value(&context, {descriptor}, {extension}, {function})"),
+                };
+                if self.documents.backend.uses_construction_programs() {
+                    let receiver = &arguments[0];
+                    if extension.strip_prefix('&') == Some(receiver.expr.as_str()) && is_identifier(&receiver.expr) {
+                        if let (Some((ty, object)), Some(result)) =
+                            (self.construction_type(receiver.kind), self.construction_type(self.kind_of(returned)))
+                        {
+                            let read = if object { format!("&args.object::<{ty}>()?") } else { format!("args.value::<{ty}>()?") };
+                            let invoke = if fallible {
+                                format!("rt::provide_value_invoked(args.context()?, {descriptor}, {read}, {function}, args.line, args.column)?")
+                            } else {
+                                format!("rt::provide_value(args.context()?, {descriptor}, {read}, {function})")
+                            };
+                            let wrap = if result.1 { "rt::ConstructionRegister::Object(value.upcast())" }
+                                else { "rt::ConstructionRegister::Value(Box::new(value))" };
+                            self.record_resolved_call(&call, construction::ResolvedCall {
+                                kind: construction::CallKind::ContextMember,
+                                inputs: vec![construction::CallInput::Register(receiver.expr.clone(), object)],
+                                import: format!("Call(|args| {{ let value = {invoke}; Ok(Some({wrap})) }})"),
+                                result: Some(result),
+                                line: if fallible { node.line() } else { 0 },
+                                column: if fallible { node.position() } else { 0 },
+                            });
+                        }
+                    }
+                }
+                self.line(format!("let {local} = {call};"));
             }
             descriptor => {
                 let cleared = descriptor.is_some();
                 if let Some(descriptor) = descriptor {
                     self.uses_context = true;
-                    self.line(format!("context.set_target_property({descriptor});"));
+                    self.emit_target_property(descriptor);
                 }
                 let call = invoked(format!("{function}({})", texts.join(", ")), fallible, node);
+                if self.documents.backend.uses_construction_programs() {
+                    self.record_construction_call(node, &method, &arguments, &call);
+                }
                 self.line(format!("let {local} = {call};"));
                 if cleared {
                     self.line("context.set_target_property(::core::option::Option::None);".to_string());
@@ -3889,8 +4048,20 @@ impl<'a> Emitter<'a> {
     fn set_target_property(&mut self, node: &Rc<dyn IXamlAstNode>, property: &Rc<xamlx::ast::XamlAstClrProperty>) -> EmitResult<()> {
         let descriptor = self.target_property_descriptor(node, property)?;
         self.uses_context = true;
-        self.line(format!("context.set_target_property({descriptor});"));
+        self.emit_target_property(descriptor);
         Ok(())
+    }
+
+    fn emit_target_property(&mut self, descriptor: String) {
+        let call = format!("context.set_target_property({descriptor})");
+        if self.documents.backend.uses_construction_programs() {
+            self.record_resolved_call(&call, construction::ResolvedCall {
+                kind: construction::CallKind::TargetProperty,
+                inputs: Vec::new(), result: None,
+                import: format!("TargetProperty(|| {descriptor})"), line: 0, column: 0,
+            });
+        }
+        self.line(format!("{call};"));
     }
 
     /// The provide-value target property for the property of the innermost
@@ -4077,7 +4248,18 @@ impl<'a> Emitter<'a> {
             if let Some(commands) = path_data_literal(&method, &call.arguments.borrow()) {
                 let owner = self.owner_path(node, &runtime)?;
                 let returned = self.declared_return(node, &runtime)?;
-                return Ok((format!("{{ const COMMANDS: &[::ferroui_base::media::PathCommand] = &[{commands}]; {owner}::from_commands(COMMANDS) }}"), Some(returned)));
+                let native = native_path_commands(&commands);
+                let expression = format!("{{ const COMMANDS: &[::ferroui_base::media::PathCommand] = &[{native}]; {owner}::from_commands(COMMANDS) }}");
+                if self.documents.backend.uses_construction_programs() {
+                    if let Some((ty, true)) = self.construction_type(self.kind_of(returned)) {
+                        self.record_resolved_call(&expression, construction::ResolvedCall {
+                            kind: construction::CallKind::ObjectLiteral(ferroui_markup::path_opcodes::encode(&commands)),
+                            inputs: vec![], import: "ObjectLiteral(rt::compiled_path_geometry)".into(),
+                            result: Some((ty, true)), line: 0, column: 0,
+                        });
+                    }
+                }
+                return Ok((expression, Some(returned)));
             }
         }
         let mut arguments = Vec::new();
@@ -4279,8 +4461,25 @@ impl<'a> Emitter<'a> {
         let declaring_type = field.declaring_type();
         let definition = self.types.property_definition(property, self.types.class_of(&*declaring_type))
             .map_err(|reason| unsupported(node, format!("{property_name}: {reason}")))?;
-        let call = if property.is_direct() { "get_direct_value" } else { "get_value" };
-        Ok((format!("{}.{call}({definition})", target.expr), property.property_type()))
+        let getter = if property.is_direct() { "get_direct_value" } else { "get_value" };
+        let expression = format!("{}.{getter}({definition})", target.expr);
+        let result = property.property_type();
+        if self.documents.backend.uses_construction_programs() && is_identifier(&target.expr) {
+            if let Some((ty, object)) = self.construction_type(self.kind_of(result)) {
+                let value = if object {
+                    "rt::ConstructionRegister::Object(value.upcast())"
+                } else {
+                    "rt::ConstructionRegister::Value(Box::new(value))"
+                };
+                let import = format!("Call(|args| {{ let target = args.object::<::ferroui_base::FerroObject>()?; let value = target.{getter}({definition}); Ok(Some({value})) }})");
+                self.record_resolved_call(&expression, construction::ResolvedCall {
+                    kind: construction::CallKind::Member,
+                    inputs: vec![construction::CallInput::Register(target.expr.clone(), true)],
+                    import, result: Some((ty, object)), line: 0, column: 0,
+                });
+            }
+        }
+        Ok((expression, result))
     }
 
     /// The Rust type a declared getter or method returns.
@@ -4421,7 +4620,122 @@ impl<'a> Emitter<'a> {
     /// with the failure of a fallible member as a load error at `node`.
     fn declared_call(&self, node: &Rc<dyn IXamlAstNode>, method: &MethodInfo<'a>, arguments: &[Typed<'a>]) -> EmitResult<String> {
         let (function, texts, fallible) = self.declared_call_parts(node, &method, arguments)?;
-        Ok(invoked(format!("{function}({})", texts.join(", ")), fallible, node))
+        let expression = invoked(format!("{function}({})", texts.join(", ")), fallible, node);
+        if self.documents.backend.uses_construction_programs() {
+            self.record_construction_call(node, method, arguments, &expression);
+        }
+        Ok(expression)
+    }
+
+    /// The native register representation supplied by the compiler host. A class register
+    /// preserves the FerroObject handle. A value register preserves the declared Rust type.
+    fn construction_type(&self, kind: Kind<'a>) -> Option<(String, bool)> {
+        match kind {
+            Kind::Class(class) => Some((absolute(class.rust_path()?), true)),
+            Kind::Exact { id, .. } => {
+                let ty = if id == self.types.known(Known::Object) {
+                    "::ferroui_base::metadata::MarkupValue".to_string()
+                } else if id == self.types.known(Known::RuntimeList) {
+                    "rt::RuntimeList".to_string()
+                } else if let Some(primitive) = self.types.primitive_type_name(id) {
+                    primitive.to_string()
+                } else {
+                    let markup = self.types.markup_by_handle(id)?;
+                    if markup.value() == Some(id) {
+                        markup.value_rust_type()?
+                    } else if markup.is_optional_value(id) {
+                        format!("::core::option::Option<{}>", markup.value_rust_type()?)
+                    } else {
+                        return None;
+                    }
+                };
+                Some((ty, false))
+            }
+            _ => None,
+        }
+    }
+
+    /// Reuse the resolved receiver conversion, overload and typed call ABI with register
+    /// operands. The visitor still evaluates argument expressions in their XAML order.
+    fn record_construction_call(&self, node: &Rc<dyn IXamlAstNode>, method: &MethodInfo<'a>, arguments: &[Typed<'a>], expression: &str) {
+        use construction::CallInput;
+        let mut inputs = Vec::new();
+        let mut normalized = Vec::new();
+        let mut reads = String::new();
+        let mut register = Vec::new();
+        for (i, arg) in arguments.iter().enumerate() {
+            let expr = arg.expr.as_str();
+            let name = expr.strip_suffix(".clone()").unwrap_or(expr);
+            if is_identifier(name) && !matches!(name, "false" | "true") {
+                let Some((ty, object)) = self.construction_type(arg.kind) else { return };
+                let read = if object { "object" } else { "value" };
+                let local = format!("operand_{i}");
+                reads.push_str(&format!("let {local} = args.{read}::<{ty}>()?; "));
+                inputs.push(CallInput::Register(name.to_string(), object));
+                register.push(Some(object));
+                normalized.push(Typed { expr: local, kind: arg.kind });
+            } else {
+                // Convert literals in their original expression, including the already
+                // resolved constructor overload and any coercion the host selected.
+                register.push(None);
+                normalized.push(Typed { expr: arg.expr.clone(), kind: arg.kind });
+            }
+        }
+        let Some(declared) = method.declared() else { return };
+        let result = match declared.returns {
+            Some(id) => match self.construction_type(self.kind_of(id)) {
+                Some(ty) => Some(ty),
+                None => return,
+            },
+            None => None,
+        };
+        let Ok((function, texts, fallible)) = self.declared_call_parts(node, method, &normalized) else { return };
+        let literal_pos = format!(", {}, {})?", node.line(), node.position());
+        let mut needs_context = false;
+        let Some(texts) = texts.into_iter().enumerate().map(|(i, text)| {
+            let text = text.replace(&literal_pos, ", args.line, args.column)?");
+            let source = &arguments[i].expr;
+            if matches!(source.as_str(), "rt::service_provider(&context)" | "rt::type_descriptor_context(&context)") {
+                // Both services come from the initiating document's context, including
+                // its base URI and its namespace scope at this point in execution.
+                if &text != source && text != format!("::core::option::Option::Some({source})") {
+                    return None;
+                }
+                needs_context = true;
+                return Some(text.replace("(&context)", "(args.context()?)"));
+            }
+            match register[i] {
+                Some(false) => Some(text.replace(&format!("operand_{i}"), &format!("(*operand_{i})"))),
+                Some(true) => Some(text),
+                None => construction::closed_value(&text, &mut inputs),
+            }
+        }).collect::<Option<Vec<_>>>() else { return };
+        let mut call = format!("{function}({})", texts.join(", "));
+        if fallible { call = format!("rt::invoked({call}, args.line, args.column)?"); }
+        let body = match &result {
+            Some((_, true)) => format!("Ok(Some(rt::ConstructionRegister::Object({call}.upcast())))"),
+            Some((_, false)) => format!("Ok(Some(rt::ConstructionRegister::Value(Box::new({call}))))"),
+            None => format!("{call}; Ok(None)"),
+        };
+        // Infallible getters on the same object can occur at different source positions.
+        // Their adapter and arguments are identical, so retain one resolved operation.
+        let positioned = body.contains("args.line");
+        let args = if inputs.is_empty() && !positioned && !needs_context { "_" } else { "args" };
+        let import = construction::ResolvedCall {
+            kind: if needs_context { construction::CallKind::ContextMember } else { construction::CallKind::Member },
+            inputs,
+            import: format!("Call(|{args}| {{ {reads}{body} }})"),
+            result,
+            line: if positioned { node.line() } else { 0 },
+            column: if positioned { node.position() } else { 0 },
+        };
+        self.record_resolved_call(expression, import);
+    }
+
+    fn record_resolved_call(&self, expression: &str, import: construction::ResolvedCall) {
+        self.resolved_calls.borrow_mut().entry(expression.to_string()).and_modify(|old| {
+            if old.as_ref() != Some(&import) { *old = None }
+        }).or_insert(Some(import));
     }
 
     /// The parts of [`Self::declared_call`]: the path of the typed function,
@@ -4797,6 +5111,8 @@ pub(crate) fn root_value_handle_of<'a>(types: &'a dyn EmitTypes, root: &Rc<dyn I
 /// resource include the group transformers linked) calls.
 #[derive(Default)]
 pub struct DocumentFunctions<'a> {
+    pub(super) backend: super::XamlBackend,
+    pub(super) bytecode_image: BytecodeImage,
     builds: HashMap<usize, (String, Option<TypeKey<'a>>)>,
     /// The functions the emitted documents call, in the order of the calls.
     called: std::cell::RefCell<Vec<String>>,
@@ -4915,6 +5231,7 @@ pub fn emit_function<'a>(
         row_paths: theme_rows::RowPaths::of(types),
         deferred_rows: HashMap::new(),
         row_statements: HashMap::new(),
+        resolved_calls: Default::default(),
         row_tables: Vec::new(),
         deferred_depth: 0,
         theme_styles: theme_styles::StylePool::new(function_name, &document_name.replace('`', "'").replace(['\r', '\n'], " ")),
@@ -4988,7 +5305,11 @@ pub fn emit_function<'a>(
     local_types.insert("root".to_string(), root_type.clone());
     local_types.insert(created.expr.clone(), root_type);
     let lines = std::mem::take(&mut emitter.lines);
-    let lines = emitter.apply_row_runs(lines);
+    let schedule_units = documents.units().is_some() && documents.backend.uses_construction_programs();
+    let mut rows = HashMap::new();
+    let lines = emitter.apply_row_runs(lines, |name, kind| {
+        if schedule_units { rows.insert(name.to_owned(), kind); }
+    });
     // The entries of the units of a theme, taken out into the functions of their runs (#568).
     let (lines, unit_runs) = match (documents.units(), types.framework_path(FrameworkType::ResourceDictionary)) {
         (Some(units), Some(dictionary)) => theme_units::extract_runs(
@@ -4998,12 +5319,20 @@ pub fn emit_function<'a>(
             &local_types,
             &format!("::ferroui_base::Ref<{}>", absolute(&dictionary)),
             units,
+            schedule_units.then_some(theme_units::Schedule { image: &documents.bytecode_image, document: &document_constant, rows: &rows }),
         ),
         // Without the units there are no markers, and without the path of the dictionary they
         // are dropped.
         _ => (lines.into_iter().filter(|line| theme_units::unit_marker(line).is_none()).collect(), Vec::new()),
     };
-    let (body, parts) = split_into_parts(function_name, &document_text, &lines, &local_types);
+    let calls = emitter.resolved_calls.borrow();
+    let whole = if documents.backend.uses_construction_programs() && populate.is_some() {
+        construction::document(&lines, &local_types, &calls, &documents.bytecode_image, &document_constant)
+    } else { None };
+    let (body, parts) = match whole {
+        Some(body) => (body, Vec::new()),
+        None => split_into_parts_with_backend(function_name, &document_text, &lines, &local_types, documents.backend.uses_construction_programs().then_some((&*calls, &documents.bytecode_image))),
+    };
     for line in &body {
         source.push_str(line);
         source.push('\n');
@@ -5031,6 +5360,7 @@ pub fn emit_function<'a>(
         source.push('\n');
         source.push_str(function);
     }
+    emitter.theme_styles.finish_selector_programs(&mut source, &documents.bytecode_image);
     Ok(source)
 }
 
@@ -5169,15 +5499,26 @@ fn identifiers(text: &str) -> Vec<String> {
 /// A statement stays in the body when it names a local whose Rust type is
 /// not known (`local_types`, or stated by its `let`); a part never declares
 /// a local that a later statement uses. Returns the body and the parts.
+#[cfg(test)]
 fn split_into_parts(
     function_name: &str,
     document_text: &str,
     lines: &[String],
     local_types: &HashMap<String, String>,
 ) -> (Vec<String>, Vec<String>) {
+    split_into_parts_with_backend(function_name, document_text, lines, local_types, None)
+}
+
+fn split_into_parts_with_backend(
+    function_name: &str,
+    document_text: &str,
+    lines: &[String],
+    local_types: &HashMap<String, String>,
+    calls: Option<(&construction::Calls, &BytecodeImage)>,
+) -> (Vec<String>, Vec<String>) {
     let statements = statements(lines);
     if statements.len() <= SPLIT_THRESHOLD {
-        return (lines.to_vec(), Vec::new());
+        return (calls.map_or_else(|| lines.to_vec(), |(calls, image)| construction::lower(lines, local_types, calls, "", image)), Vec::new());
     }
     // The last statement that names each local declared at the top level.
     let mut last_use: HashMap<&str, usize> = HashMap::new();
@@ -5246,11 +5587,11 @@ fn split_into_parts(
             part.push_str(&format!("    {name}: {},\n", types[name]));
         }
         part.push_str(") -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {\n");
-        for statement in &statements[index..=last] {
-            for line in statement.lines {
-                part.push_str(line);
-                part.push('\n');
-            }
+        let part_lines = statements[index..=last].iter().flat_map(|s| s.lines.iter().cloned()).collect::<Vec<_>>();
+        let part_lines = if let Some((calls, image)) = calls { construction::lower(&part_lines, &types, calls, "", image) } else { part_lines };
+        for line in part_lines {
+            part.push_str(&line);
+            part.push('\n');
         }
         part.push_str("    ::core::result::Result::Ok(())\n");
         part.push_str("}\n");
@@ -5260,11 +5601,123 @@ fn split_into_parts(
         index = last + 1;
     }
     body.extend(statements[end..].iter().flat_map(|statement| statement.lines.iter().cloned()));
+    let body = if let Some((calls, image)) = calls { construction::lower(&body, &types, calls, "", image) } else { body };
     (body, parts)
 }
 
 #[cfg(test)]
 mod tests {
+    #[cfg(feature = "runtime")]
+    #[test]
+    fn relative_font_keeps_the_document_base_uri_in_the_setter_import() {
+        use crate::rust_emitter::{compile_documents_with, with_xaml_backend, EmitterHost, TransformOptions};
+        use crate::rust_emitter::XamlBackend;
+        ferroui_markup_xaml::register_types();
+        let host = EmitterHost::runtime(&[]).unwrap();
+        let xaml = r#"<TextBlock xmlns="https://github.com/ferroui" FontFamily="/Assets/Fonts/font.ttf#Example" />"#;
+        let emit = |backend| {
+            let options = TransformOptions::default();
+            with_xaml_backend(backend, &Default::default(), || {
+                compile_documents_with(&host, &[("Views/font.xaml", xaml)], Some("ferres://Example/"), &options)
+            })
+            .pop().unwrap().source.unwrap()
+        };
+        assert!(emit(XamlBackend::Native).contains("FontFamily::__markup_new_1(context.base_uri()"));
+        let typed = emit(XamlBackend::Bytecode);
+        assert!(typed.contains("FontFamily::__markup_new_1(args.context()?.base_uri()"));
+        assert!(typed.contains("/Assets/Fonts/font.ttf#Example"));
+    }
+
+    #[cfg(feature = "runtime")]
+    #[test]
+    fn converted_image_uses_document_context_checked_cast_and_original_setter() {
+        use crate::rust_emitter::{compile_documents_with, with_xaml_backend, EmitterHost, TransformOptions};
+        use crate::rust_emitter::XamlBackend;
+        ferroui_markup_xaml::register_types();
+        let host = EmitterHost::runtime(&[]).unwrap();
+        let source = r#"<Image xmlns="https://github.com/ferroui" Source="/Assets/example.png" />"#;
+        let emit = |backend| {
+            let options = TransformOptions::default();
+            with_xaml_backend(backend, &Default::default(), || {
+                compile_documents_with(&host, &[("image.xaml", source)], Some("ferres://Example/"), &options)
+            })
+            .pop().unwrap().source.unwrap()
+        };
+        let native = emit(XamlBackend::Native);
+        assert!(native.contains("rt::type_descriptor_context(&context)"));
+        assert!(native.contains("rt::cast_checked("));
+        let typed = emit(XamlBackend::Bytecode);
+        assert!(typed.contains("rt::type_descriptor_context(args.context()?)"));
+        assert!(typed.contains("rt::cast_checked(value,"));
+        assert!(typed.contains("rt::exact(value, \"FerroUI.Controls.Image.set_Source\", 0, line, column)?"));
+        assert!(!typed.lines().any(|line| line.trim_start().starts_with("let cast_")));
+    }
+
+    #[cfg(feature = "runtime")]
+    #[test]
+    fn resource_capacity_retains_the_result_of_the_resolved_resource_access() {
+        use crate::rust_emitter::{compile_documents_with, with_xaml_backend, EmitterHost, TransformOptions};
+        use crate::rust_emitter::XamlBackend;
+        ferroui_markup_xaml::register_types();
+        let host = EmitterHost::runtime(&[]).unwrap();
+        for (root, property) in [("ResourceDictionary", None), ("Border", Some("Border.Resources"))] {
+            let entries = r#"<x:String x:Key="one">One</x:String><x:String x:Key="two">Two</x:String>"#;
+            let entries = property.map_or_else(|| entries.to_owned(), |p| format!("<{p}>{entries}</{p}>"));
+            let text = format!(r#"<{root} xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">{entries}</{root}>"#);
+            let emit = |backend| {
+                let options = TransformOptions::default();
+                with_xaml_backend(backend, &Default::default(), || {
+                    compile_documents_with(&host, &[("capacity.xaml", &text)], Some("ferres://Example/"), &options)
+                })
+                .pop().unwrap().source.unwrap()
+            };
+            let native = emit(XamlBackend::Native);
+            assert!(native.contains("wrapping_add(2_i32)"));
+            let compiled = emit(XamlBackend::Bytecode);
+            let adapter = compiled.lines().find(|line| line.contains("wrapping_add(additional)")).unwrap();
+            assert!(adapter.contains("rt::ConstructionImport::Call("));
+            assert!(adapter.contains("rt::is_instance(&resources,"));
+            assert!(adapter.contains("ResourceDictionary.get_Count\", 0, args.line, args.column"));
+            assert!(adapter.contains("ResourceDictionary.EnsureCapacity\", 0, args.line, args.column"));
+            assert!(adapter.contains("Box::new(resources)"));
+            if property.is_some() {
+                assert!(adapter.contains("StyledElement::__markup_get_Resources(receiver.upcast_ref"));
+            } else {
+                assert!(adapter.contains("rt::to_value(receiver.clone())"));
+            }
+        }
+    }
+
+    #[cfg(feature = "runtime")]
+    #[test]
+    fn proven_default_template_binding_skips_only_its_nonnull_binding_choice() {
+        use crate::rust_emitter::{compile_documents_with, with_xaml_backend, EmitterHost, TransformOptions};
+        use crate::rust_emitter::XamlBackend;
+        ferroui_markup_xaml::register_types();
+        let host = EmitterHost::runtime(&[]).unwrap();
+        let emit = |binding: &str, backend| {
+            let text = format!(r#"<ControlTemplate xmlns="https://github.com/ferroui" TargetType="Button">
+                <ContentPresenter Content="{{TemplateBinding {binding}}}" />
+            </ControlTemplate>"#);
+            let options = TransformOptions::default();
+            with_xaml_backend(backend, &Default::default(), || {
+                compile_documents_with(&host, &[("template.xaml", &text)], Some("ferres://Example/"), &options)
+            })
+            .pop().unwrap().source.unwrap()
+        };
+        let native = emit("Content", XamlBackend::Native);
+        assert!(native.contains("__markup_ProvideValue_0"));
+        assert!(native.contains(".is_some()"));
+        let optimized = emit("Content", XamlBackend::Bytecode);
+        assert!(!optimized.contains("__markup_ProvideValue_0"));
+        assert!(!optimized.contains("::markup::TemplateBinding"));
+        assert!(!optimized.contains(" = rt::to_value(provided_"));
+        let configured = emit("Content, Mode=TwoWay", XamlBackend::Bytecode);
+        assert!(configured.contains("__markup_ProvideValue_0"));
+        assert!(configured.contains("rt::ConstructionImport::MoveToMarkup("));
+        assert!(configured.contains("rt::TypedSetterChoice {"));
+    }
+
     use super::*;
 
     #[test]

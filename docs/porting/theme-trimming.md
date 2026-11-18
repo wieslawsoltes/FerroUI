@@ -1011,9 +1011,15 @@ Validated on macOS ARM64 (debug builds, a smoke run of each, and screenshots aga
   PlatformSanityChecks, ViewInterop, HelloWorld, the hot reload demo (which keeps every unit:
   `full-themes`), FerroDockReactiveUISample, SingleProjectSandbox, ChartsDemo and LiveChartsDemo
   (which has no smoke exit; its window was captured and closed): no diagnostic, no panic;
-- the ControlCatalog (desktop): it links `ferroui-diagnostics`, so it keeps every unit by design;
-  its tour selects all 127 pages with no diagnostic, and 12 of its 14 screenshots are identical to
+- the desktop ControlCatalog at the time linked `ferroui-diagnostics` and kept every unit.
+  Its tour selected all 127 pages with no diagnostic, and 12 of its 14 screenshots were identical to
   `"all"` (the home page differs in its animated banner, as between two runs of `main`).
+
+The desktop ControlCatalog links `ferroui-diagnostics` (the F12 inspector) only with its
+feature `diagnostics`, so its default build trims the WinUI theme. On native targets it keeps
+`ManagedFileChooser` as a theme root (`Build::theme_roots`), because the Dialogs page opens it
+through the managed storage provider; its template also supplies the overwrite prompt and
+references the ContentDialog resources.
 
 ### 11.9 An application without markup
 
