@@ -2,8 +2,11 @@ import { realpathSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
-import { isInside, type CargoTarget } from './cargoTarget';
+import type { CargoTarget } from './cargoTarget';
+import { isInside } from './workspacePaths';
 import { buildCargo, launchArtifact, ReloadProcess, revision, type RuntimeEvent } from './reloadProcess';
+import type { ProcessOutput } from './reloadLog';
+import type { RuntimeMcpEndpoint } from './runtimeMcp';
 
 const watchPattern = '**/{*.rs,*.xaml,Cargo.toml}';
 const reloadWindow = 1800;
@@ -28,8 +31,9 @@ export class ReloadSession implements vscode.Disposable {
     private serial = 0;
     private disposed = false;
 
-    constructor(readonly target: CargoTarget, private readonly output: vscode.OutputChannel,
-        private readonly status: (message: string, problem?: boolean) => void) {
+    constructor(readonly target: CargoTarget, private readonly output: ProcessOutput,
+        private readonly status: (message: string, problem?: boolean) => void,
+        private readonly mcpChanged: (endpoint?: RuntimeMcpEndpoint) => void) {
         this.root = fileKey(target.folder.uri.fsPath);
         this.targetDirectory = fileKey(target.targetDirectory);
         const watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(target.folder, watchPattern));
@@ -145,11 +149,16 @@ export class ReloadSession implements vscode.Disposable {
             this.compiler = undefined;
             if (this.superseded(serial)) return;
             const candidateEvents: RuntimeEvent[] = [];
+            let endpoint: RuntimeMcpEndpoint | undefined;
             let live = false;
             const candidate = await launchArtifact(artifact, this.target, this.output, event => {
                 if (this.disposed) return;
                 if (!live) candidateEvents.push(event);
                 else if (this.live === candidate.process) this.accept(event);
+            }, value => {
+                if (this.disposed) return;
+                if (!live) endpoint = value;
+                else if (this.live === candidate.process) this.mcpChanged(value);
             });
             this.candidate = candidate.process;
             if (this.superseded(serial)) return;
@@ -161,6 +170,7 @@ export class ReloadSession implements vscode.Disposable {
             this.results.clear();
             this.languages.clear();
             live = true;
+            this.mcpChanged(endpoint);
             for (const event of candidateEvents) this.accept(event);
             previous?.stop();
             this.output.appendLine(`Running ${this.target.label} · PID ${this.live.pid}${previous ? ' · rebuilt and restarted' : ''}`);
@@ -168,6 +178,7 @@ export class ReloadSession implements vscode.Disposable {
             void this.live.closed.then(code => {
                 if (this.disposed || this.live !== candidate.process) return;
                 this.live = undefined;
+                this.mcpChanged();
                 this.languages.clear();
                 this.output.appendLine(`Application exited${code === null ? '' : ` (${code})`}.`);
                 this.status('Application stopped', Boolean(code));
@@ -198,6 +209,7 @@ export class ReloadSession implements vscode.Disposable {
 
     dispose(): void {
         this.disposed = true;
+        this.mcpChanged();
         clearTimeout(this.timer);
         this.resources.forEach(resource => resource.dispose());
         this.compiler?.stop();

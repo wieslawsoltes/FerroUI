@@ -2410,6 +2410,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-controls",
  "ferroui-inspect",
+ "ferroui-reload-protocol",
  "filedescriptor",
  "getrandom 0.4.3",
  "serde_json",

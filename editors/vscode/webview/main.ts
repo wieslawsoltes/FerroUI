@@ -1,4 +1,4 @@
-import type { CanvasSnapshot, DesignerViewState, FromDesigner, RuntimeRow, ToDesigner } from '../src/protocol';
+import type { CanvasAction, CanvasSnapshot, DesignerViewState, FromDesigner, RuntimeRow, ToDesigner } from '../src/protocol';
 import { Artboard } from './artboard';
 import { CanvasDrag } from './canvasDrag';
 import { CanvasInput } from './canvasInput';
@@ -28,6 +28,7 @@ let runtime: RuntimeRow | undefined;
 let token = 0;
 let current = false;
 let applying = false;
+let tab: 'preview' | 'counterpart' = 'preview';
 
 const viewport = new CanvasViewport((fit, scale, hasImage) => {
     const percent = `${Math.round(scale * 100)}%`;
@@ -84,11 +85,32 @@ window.addEventListener('message', event => receive(event.data as ToDesigner));
 vscode.postMessage({ type: 'ready' });
 
 function showDesign(show: boolean): void {
+    tab = show ? 'preview' : 'counterpart';
     element('preview').hidden = !show;
     element('canvas-tools').hidden = !show;
     element('counterpart').hidden = show;
     previewTab.setAttribute('aria-pressed', String(show));
     sourceTab.setAttribute('aria-pressed', String(!show));
+}
+
+function controlCanvas(request: number, action: CanvasAction): void {
+    const { zoom, scale, pan_x, pan_y, pan_tool } = action;
+    const bounds = runtime?.bounds ?? selectedNode()?.bounds;
+    if (zoom === 'fit_selection' && (!bounds?.width || !bounds.height)) {
+        vscode.postMessage({ type: 'canvasResult', request, error: 'Select a control with visible bounds first.' });
+        return;
+    }
+    if (zoom || scale !== undefined || pan_x !== undefined || pan_y !== undefined) {
+        showDesign(true);
+        if (zoom === 'fit') viewport.fit();
+        else if (zoom === 'fit_selection') viewport.fitSelection(bounds!);
+        else if (zoom === 'actual') viewport.zoom(1);
+        else if (scale !== undefined) viewport.zoom(scale);
+        if (pan_x !== undefined || pan_y !== undefined) viewport.panBy(pan_x ?? 0, pan_y ?? 0);
+    }
+    if (action.tab !== undefined) showDesign(action.tab === 'preview');
+    if (pan_tool !== undefined) input.setTool(pan_tool);
+    vscode.postMessage({ type: 'canvasResult', request, state: { tab, ...viewport.state, panTool: input.panTool } });
 }
 
 function reveal(): void {
@@ -135,6 +157,7 @@ function showStatus(kind: 'busy' | 'error' | 'notice' | 'ready', text = ''): voi
 function receive(message: ToDesigner): void {
     switch (message.type) {
         case 'viewState': vscode.setState(message.state); return;
+        case 'canvasAction': controlCanvas(message.request, message.action); return;
         case 'drag': drag.setGesture(message.gesture); return;
         case 'placement': drag.show(message); return;
         case 'pending':

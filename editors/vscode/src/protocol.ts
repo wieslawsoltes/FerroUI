@@ -202,17 +202,35 @@ export type ToToolbox = DragUpdate | { type: 'state'; state: ToolboxState } | { 
 
 export type CanvasNode = Pick<OutlineNode, 'id' | 'label' | 'name' | 'bounds' | 'canMove'>;
 export type CanvasSnapshot = Omit<Snapshot, 'nodes'> & { nodes: CanvasNode[] };
+export interface CanvasAction {
+    tab?: 'preview' | 'counterpart';
+    zoom?: 'fit' | 'fit_selection' | 'actual';
+    scale?: number;
+    pan_x?: number;
+    pan_y?: number;
+    pan_tool?: boolean;
+}
+export interface CanvasState {
+    tab: 'preview' | 'counterpart';
+    scale: number;
+    fit: boolean;
+    scrollX: number;
+    scrollY: number;
+    panTool: boolean;
+}
 export type FromDesigner = DragMessage
     | { type: 'ready' | 'refresh' }
     | { type: 'dock'; view: Exclude<DesignerView, 'canvas'> }
     | { type: 'previewDrop'; id: string; frame: FrameTarget; target: DropTarget; sequence: number }
     | { type: 'viewport'; viewport: Viewport }
+    | { type: 'canvasResult'; request: number; state?: CanvasState; error?: string }
     | { type: 'block'; token: number; index: number }
     | { type: 'select'; token: number; id: number; openSource: boolean }
     | { type: 'apply'; token: number; source: string };
 
 export type ToDesigner = DragUpdate | PlacementResult
     | { type: 'viewState'; state: DesignerViewState }
+    | { type: 'canvasAction'; request: number; action: CanvasAction }
     | { type: 'pending' }
     | { type: 'snapshot'; frame: FrameTarget; sourceKey: string; snapshot: CanvasSnapshot; viewport: Viewport; selected: number | undefined; runtime?: RuntimeRow }
     | { type: 'error'; message: string }

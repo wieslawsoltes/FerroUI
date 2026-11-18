@@ -1,9 +1,11 @@
 import * as vscode from 'vscode';
+import { CanvasRequests } from './canvasRequests';
 import { NativePreview } from './nativePreview';
 import { DEFAULT_VIEWPORT, errorMessage, isViewport, type Asset, type CanvasSnapshot, type DragMessage, type DropHint, type FrameTarget, type FromDesigner, type Language, type NodeOperation, type NodeTarget, type Operation, type Placement, type Snapshot, type Source, type ToDesigner, type Viewport } from './protocol';
 import { applyTextEdits, asPosition, asRange, sourceOf } from './textDocument';
 import { designerHtml, webviewOptions } from './view';
 import type { Inspection, InspectionTarget, Range, ResourceRow, RuntimeRow, RuntimeTreeMode } from './protocol';
+import type { CanvasAction } from './protocol';
 
 interface Frame {
     token: number;
@@ -15,6 +17,7 @@ interface Frame {
 }
 
 export class DesignerPanel implements vscode.Disposable {
+    private readonly canvasRequests = new CanvasRequests();
     private readonly subscriptions: vscode.Disposable[] = [];
     private readonly changed = new vscode.EventEmitter<void>();
     readonly onDidChange = this.changed.event;
@@ -122,6 +125,41 @@ export class DesignerPanel implements vscode.Disposable {
         this.caret = range.start;
         this.setSelection(node.id);
         await this.reveal(range, openSource);
+    }
+
+    async selectBlock(target: FrameTarget, index: number, openSource = false): Promise<void> {
+        if (!this.canUse(target)) throw new Error('Read the current RSX invocations before selecting one.');
+        const block = this.frame?.snapshot.blocks[index];
+        if (!block) throw new Error('Choose an RSX invocation from the current preview.');
+        this.caret = asPosition(block.start);
+        this.blockOffset = this.document.offsetAt(this.caret);
+        this.schedule(0);
+        await this.reveal(new vscode.Range(this.caret, this.caret), openSource);
+    }
+
+    async controlCanvas(action: CanvasAction, signal: AbortSignal) {
+        if (action.zoom && action.scale !== undefined) throw new Error('Choose a zoom preset or an explicit scale.');
+        const geometry = action.zoom || action.scale !== undefined || action.pan_x !== undefined || action.pan_y !== undefined;
+        if (geometry && !(await this.waitForSnapshot(signal)).image) throw new Error('Render an artboard before changing its zoom or pan.');
+        if (!this.canvasReady) {
+            const ready = AbortSignal.any([signal, AbortSignal.timeout(5000)]);
+            await new Promise<void>((resolve, reject) => {
+                const cancel = () => end(ready.reason);
+                const end = (error?: unknown) => {
+                    change.dispose();
+                    ready.removeEventListener('abort', cancel);
+                    if (error) reject(error);
+                    else resolve();
+                };
+                const change = this.onDidChange(() => {
+                    if (this.disposed) end(new Error('The designer was closed.'));
+                    else if (this.canvasReady) end();
+                });
+                if (ready.aborted) cancel();
+                else ready.addEventListener('abort', cancel, { once: true });
+            });
+        }
+        return this.canvasRequests.execute(this.panel.webview, action, signal);
     }
 
     async runtimeTree(target: FrameTarget, tree: RuntimeTreeMode): Promise<RuntimeRow[]> {
@@ -310,7 +348,12 @@ export class DesignerPanel implements vscode.Disposable {
         if (message.type === 'ready') {
             this.ready = true;
             this.syncCanvas();
+            this.changed.fire();
             void this.render();
+            return;
+        }
+        if (message.type === 'canvasResult') {
+            this.canvasRequests.receive(message);
             return;
         }
         if (message.type === 'refresh') {
@@ -340,13 +383,7 @@ export class DesignerPanel implements vscode.Disposable {
             if (message.type === 'select') {
                 await this.select({ session: this.session, token: message.token, node: message.id }, message.openSource);
             } else if (message.type === 'block') {
-                const block = frame.snapshot.blocks[message.index];
-                if (block) {
-                    this.caret = asPosition(block.start);
-                    this.blockOffset = this.document.offsetAt(this.caret);
-                    this.schedule(0);
-                    await this.reveal(new vscode.Range(this.caret, this.caret));
-                }
+                await this.selectBlock({ session: this.session, token: message.token }, message.index);
             } else if (message.type === 'apply') {
                 await this.edit(frame, { type: 'applyCounterpart', source: message.source });
                 this.post({ type: 'edit' });
@@ -442,6 +479,7 @@ export class DesignerPanel implements vscode.Disposable {
         this.changed.fire();
         clearTimeout(this.timer);
         this.stopClient();
+        this.canvasRequests.dispose();
         this.subscriptions.forEach(subscription => subscription.dispose());
         this.changed.dispose();
     }

@@ -9,15 +9,11 @@ export class CanvasInput {
     private space = false;
     private drag?: Drag;
 
-    constructor(viewport: CanvasViewport, reveal: () => void) {
+    constructor(private readonly viewport: CanvasViewport, reveal: () => void) {
         const canvas = viewport.element;
         const updateCursor = () => { canvas.dataset.pan = this.drag ? 'dragging' : this.panning ? 'ready' : ''; };
         const resetSpace = () => { this.space = false; updateCursor(); };
-        this.pan.addEventListener('click', () => {
-            this.tool = !this.tool;
-            this.pan.setAttribute('aria-pressed', String(this.tool));
-            updateCursor();
-        });
+        this.pan.addEventListener('click', () => this.setTool(!this.tool));
         canvas.addEventListener('keydown', event => {
             if (event.ctrlKey || event.metaKey || event.altKey) return;
             switch (event.key) {
@@ -62,4 +58,11 @@ export class CanvasInput {
     }
 
     get panning(): boolean { return this.tool || this.space || this.drag !== undefined; }
+    get panTool(): boolean { return this.tool; }
+
+    setTool(enabled: boolean): void {
+        this.tool = enabled;
+        this.pan.setAttribute('aria-pressed', String(enabled));
+        this.viewport.element.dataset.pan = this.drag ? 'dragging' : this.panning ? 'ready' : '';
+    }
 }

@@ -4,8 +4,9 @@ import { copyFile, rm } from 'node:fs/promises';
 import * as path from 'node:path';
 import { createInterface } from 'node:readline';
 import { randomUUID } from 'node:crypto';
-import type { OutputChannel } from 'vscode';
 import type { CargoTarget } from './cargoTarget';
+import type { ProcessOutput } from './reloadLog';
+import { mcpEndpointPrefix, parseMcpEndpoint, type RuntimeMcpEndpoint } from './runtimeMcp';
 
 const eventPrefix = 'FERROUI_RELOAD_V1=';
 
@@ -58,7 +59,7 @@ export class ReloadProcess {
     }
 }
 
-export function buildCargo(target: CargoTarget, output: OutputChannel): { process: ReloadProcess; artifact: Promise<string> } {
+export function buildCargo(target: CargoTarget, output: ProcessOutput): { process: ReloadProcess; artifact: Promise<string> } {
     const args = ['build', '--manifest-path', target.manifest, '--package', target.packageName,
         '--bin', target.binary, '--message-format=json-render-diagnostics'];
     if (target.features.length) args.push('--features', target.features.join(','));
@@ -82,8 +83,8 @@ export function buildCargo(target: CargoTarget, output: OutputChannel): { proces
     }) };
 }
 
-export async function launchArtifact(artifact: string, target: CargoTarget, output: OutputChannel,
-    onEvent: (event: RuntimeEvent) => void): Promise<{ process: ReloadProcess; ready: Promise<void> }> {
+export async function launchArtifact(artifact: string, target: CargoTarget, output: ProcessOutput,
+    onEvent: (event: RuntimeEvent) => void, onMcp: (endpoint: RuntimeMcpEndpoint) => void): Promise<{ process: ReloadProcess; ready: Promise<void> }> {
     // Keep the live executable side by side with Cargo's output. Native libraries keep their
     // relative lookup path, and Windows lets Cargo replace its own executable on rebuild.
     const executable = path.join(path.dirname(artifact), `.ferroui-${randomUUID()}-${path.basename(artifact)}`);
@@ -94,6 +95,11 @@ export async function launchArtifact(artifact: string, target: CargoTarget, outp
     const ready = new Promise<void>(resolve => { acknowledge = resolve; });
     lines(child.stdout, line => output.appendLine(line));
     lines(child.stderr, line => {
+        if (line.startsWith(mcpEndpointPrefix)) {
+            const endpoint = parseMcpEndpoint(line.slice(mcpEndpointPrefix.length));
+            if (endpoint) onMcp(endpoint);
+            return;
+        }
         if (!line.startsWith(eventPrefix)) { output.appendLine(line); return; }
         const event = parseEvent(line.slice(eventPrefix.length));
         if (!event) return;

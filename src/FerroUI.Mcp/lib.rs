@@ -238,7 +238,9 @@ fn start(
         .spawn(task)?;
     if !is_service {
         if let (Some(address), Some(token)) = (handle.address, &handle.token) {
-            eprintln!("FerroUI MCP: http://{address}/mcp\nAuthorization: Bearer {token}");
+            if !ferroui_reload_protocol::mcp_endpoint(address, token) {
+                eprintln!("FerroUI MCP: http://{address}/mcp\nAuthorization: Bearer {token}");
+            }
         }
     }
     Ok(handle)

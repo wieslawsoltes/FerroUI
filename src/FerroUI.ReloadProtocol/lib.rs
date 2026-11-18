@@ -1,6 +1,7 @@
 //! Development acknowledgements for a child started by an editor. The child
 //! reports the exact source bytes it observed over its existing stderr pipe.
 use serde::Serialize;
+use std::net::SocketAddr;
 use std::path::Path;
 
 const PREFIX: &str = "FERROUI_RELOAD_V1=";
@@ -63,6 +64,26 @@ pub fn source(language: Language, status: Status, file: &Path, text: &str, messa
         revision: Some(format!("{hash:016x}")),
         message,
     });
+}
+
+/// Share a managed application's MCP listener with its supervising editor over stderr.
+/// Returns false when the application was started outside a development editor.
+pub fn mcp_endpoint(address: SocketAddr, token: &str) -> bool {
+    if !enabled() || !address.ip().is_loopback() {
+        return false;
+    }
+    #[derive(Serialize)]
+    struct Endpoint<'a> {
+        address: SocketAddr,
+        token: &'a str,
+    }
+    match serde_json::to_string(&Endpoint { address, token }) {
+        Ok(json) => {
+            eprintln!("FERROUI_MCP_V1={json}");
+            true
+        }
+        Err(_) => false,
+    }
 }
 
 fn emit(event: Event<'_>) {

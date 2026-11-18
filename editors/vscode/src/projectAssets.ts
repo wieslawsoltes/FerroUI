@@ -1,7 +1,7 @@
 import { open, realpath } from 'node:fs/promises';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
-import { isInside } from './cargoTarget';
+import { isInside } from './workspacePaths';
 import type { ProjectAsset } from './protocol';
 
 const formats = new Map<string, string>([

@@ -11,7 +11,7 @@ export function activate(context: vscode.ExtensionContext) {
     const server = new XamlServer(context, languageOutput);
     const designer = new DesignerWorkbench(context, previewOutput);
     const reload = new HotReload();
-    const mcp = new FerroMcpProvider(context, new AgentTools(designer, reload), previewOutput);
+    const mcp = new FerroMcpProvider(context, new AgentTools(designer, reload), previewOutput, reload);
     const startForXaml = (document: vscode.TextDocument) => {
         if (document.languageId === xamlLanguage && document.uri.scheme === 'file') void server.start();
     };

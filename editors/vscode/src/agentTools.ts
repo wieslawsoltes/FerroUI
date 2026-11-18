@@ -1,21 +1,25 @@
-import { realpath } from 'node:fs/promises';
-import * as path from 'node:path';
 import * as vscode from 'vscode';
-import { agentCatalog, validate, type AgentTool } from './agentCatalog';
-import { isInside } from './cargoTarget';
+import { agentCatalog, type AgentTool } from './agentCatalog';
+import { validate } from './agentSchema';
+import type { CargoSelection } from './cargoTarget';
 import type { DesignerPanel } from './designerPanel';
 import type { DesignerWorkbench } from './designerWorkbench';
 import type { HotReload } from './hotReload';
-import type { DesignerView, DragOrigin, DropTarget, OutlineMode } from './protocol';
+import type { CanvasAction, DesignerView, DragOrigin, DropTarget, OutlineMode, Placement } from './protocol';
 import { applyTextEdits } from './textDocument';
+import { isWorkspaceTool } from './workspaceCatalog';
+import { isWorkspaceFile, resolveWorkspaceFile } from './workspacePaths';
+import { bufferDiagnostics, WorkspaceTools } from './workspaceTools';
 
-interface Arguments {
+interface Arguments extends CanvasAction, CargoSelection {
     session: number;
     expected_revision: number;
     expected_version: number;
     path: string;
     line?: number;
     character?: number;
+    index: number;
+    lines?: number;
     include_source?: boolean;
     include_counterpart?: boolean;
     node?: number;
@@ -50,6 +54,8 @@ interface Arguments {
 }
 
 export class AgentTools {
+    private readonly workspace = new WorkspaceTools();
+
     constructor(private readonly workbench: DesignerWorkbench, private readonly reload: HotReload) {}
 
     definitions() { return Object.entries(agentCatalog).map(([name, definition]) => ({ name, ...definition })); }
@@ -63,10 +69,11 @@ export class AgentTools {
         const tool = name as AgentTool;
         const definition = agentCatalog[tool];
         validate(definition.inputSchema, input);
-        const args = input as Arguments;
         if (!definition.annotations.readOnlyHint && !config.get('allowWrites', false)) {
-            throw new Error('Enable ferroui.mcp.allowWrites to let agents edit or control the designer.');
+            throw new Error('Enable ferroui.mcp.allowWrites to let agents edit files or control the designer and running application.');
         }
+        if (isWorkspaceTool(tool)) return this.workspace.call(tool, input, signal);
+        const args = input as Arguments;
         if (tool === 'ferroui_designs') {
             const panels = [];
             for (const panel of this.workbench.designs()) {
@@ -76,7 +83,7 @@ export class AgentTools {
             return { active: panels.some(panel => panel.session === active) ? active : null, designs: panels };
         }
         if (tool === 'designer_open') {
-            const uri = await resolveFile(args.path);
+            const uri = await resolveWorkspaceFile(args.path, args.folder);
             signal.throwIfAborted();
             const position = args.line === undefined ? undefined : new vscode.Position(args.line, args.character ?? 0);
             const panel = await this.workbench.openDocument(uri, position);
@@ -84,7 +91,9 @@ export class AgentTools {
             return describe(panel);
         }
         if (tool === 'ferroui_reload_status') return this.reload.state;
-        if (tool === 'ferroui_reload_control') return this.reload.agentControl(args.action);
+        if (tool === 'ferroui_reload_targets') return this.reload.targets(args);
+        if (tool === 'ferroui_reload_output') return this.reload.recentOutput(args.lines ?? 60);
+        if (tool === 'ferroui_reload_control') return this.reload.agentControl(args.action, args, signal);
 
         const panel = this.workbench.designs().find(panel => panel.session === args.session);
         if (!panel || !await isWorkspaceFile(panel.document.uri)) throw new Error('Select an open design inside the current workspace.');
@@ -92,11 +101,14 @@ export class AgentTools {
         const document = panel.document;
         switch (tool) {
             case 'designer_document': {
+                if (args.include_counterpart) {
+                    await panel.waitForSnapshot(signal).catch(error => { if (signal.aborted) throw error; });
+                }
                 const source = args.include_source ? document.getText() : undefined;
                 if (source && Buffer.byteLength(source) > 1024 * 1024) throw new Error('The authored buffer exceeds 1 MiB.');
                 return { ...describe(panel), source,
                     counterpart: args.include_counterpart ? panel.snapshot?.counterpart : undefined,
-                    diagnostics: vscode.languages.getDiagnostics(document.uri).map(item => ({ message: item.message, range: item.range, severity: item.severity })) };
+                    diagnostics: bufferDiagnostics(document.uri) };
             }
             case 'designer_outline': {
                 const snapshot = await panel.waitForSnapshot(signal);
@@ -139,6 +151,13 @@ export class AgentTools {
                 const { png, width, height } = snapshot.image;
                 return { mimeType: 'image/png', data: png, width, height, revision: panel.currentToken, uri: document.uri.toString() };
             }
+            case 'designer_wait':
+                await panel.waitForSnapshot(signal);
+                return describe(panel);
+            case 'designer_block':
+                await panel.selectBlock({ session: panel.session, token: args.expected_revision }, args.index, args.reveal_source);
+                await panel.waitForSnapshot(signal);
+                return describe(panel);
             case 'designer_view': {
                 if (args.outline_mode) this.workbench.setOutlineMode(panel, args.outline_mode);
                 if (args.view) await this.workbench.revealDesign(panel, args.view);
@@ -147,6 +166,9 @@ export class AgentTools {
                 if (args.refresh || width !== undefined || height !== undefined || dark !== undefined) panel.configure(viewport);
                 return describe(panel);
             }
+            case 'designer_canvas':
+                await this.workbench.revealDesign(panel, 'canvas');
+                return panel.controlCanvas(args, signal);
             case 'designer_select': {
                 const frame = { session: panel.session, token: args.expected_revision };
                 if (!panel.canUse(frame)) throw new Error('Read the current outline before selecting.');
@@ -162,21 +184,18 @@ export class AgentTools {
                 }
                 return describe(panel);
             }
-            case 'designer_place': {
-                if ([args.node, args.asset, args.project_asset].filter(value => value !== undefined).length !== 1) {
-                    throw new Error('Specify one Toolbox control, project image, or source node.');
+            case 'designer_placement_hint': case 'designer_place': {
+                const placement = await this.placement(panel, args);
+                signal.throwIfAborted();
+                if (tool === 'designer_placement_hint') {
+                    return panel.previewPlacement({ session: panel.session, token: args.expected_revision }, placement);
                 }
-                const origin: DragOrigin = args.node !== undefined ? { type: 'node', node: args.node }
-                    : args.project_asset !== undefined ? await this.workbench.projectImage(panel, args.project_asset)
-                        : { type: 'asset', control: args.asset! };
-                const hasOutline = args.anchor !== undefined && args.position !== undefined;
-                const hasPoint = args.x !== undefined && args.y !== undefined;
-                if (hasOutline === hasPoint) throw new Error('Specify one outline anchor and position or one canvas point.');
-                const target: DropTarget = hasOutline ? { type: 'outline', node: args.anchor!, position: args.position! }
-                    : { type: 'canvas', x: args.x!, y: args.y! };
-                await panel.agentEdit(args.expected_revision, { type: 'place', frame: args.expected_revision, placement: { origin, target } }, signal);
+                await panel.agentEdit(args.expected_revision, { type: 'place', frame: args.expected_revision, placement }, signal);
                 break;
             }
+            case 'designer_remove':
+                await panel.agentEdit(args.expected_revision, { type: 'removeNode', node: args.node! }, signal);
+                break;
             case 'designer_edit_property':
                 if (args.action === 'set' && args.value === undefined) throw new Error('Supply the property value.');
                 await panel.agentEdit(args.expected_revision, args.action === 'set'
@@ -221,34 +240,34 @@ export class AgentTools {
         }
         return describe(panel);
     }
+
+    private async placement(panel: DesignerPanel, args: Arguments): Promise<Placement> {
+        if ([args.node, args.asset, args.project_asset].filter(value => value !== undefined).length !== 1) {
+            throw new Error('Specify one Toolbox control, project image, or source node.');
+        }
+        const origin: DragOrigin = args.node !== undefined ? { type: 'node', node: args.node }
+            : args.project_asset !== undefined ? await this.workbench.projectImage(panel, args.project_asset)
+                : { type: 'asset', control: args.asset! };
+        const hasOutline = args.anchor !== undefined && args.position !== undefined;
+        const hasPoint = args.x !== undefined && args.y !== undefined;
+        if (hasOutline === hasPoint) throw new Error('Specify one outline anchor and position or one canvas point.');
+        const target: DropTarget = hasOutline ? { type: 'outline', node: args.anchor!, position: args.position! }
+            : { type: 'canvas', x: args.x!, y: args.y! };
+        return { origin, target };
+    }
 }
 
 function describe(panel: DesignerPanel) {
+    const snapshot = panel.snapshot;
+    const active = snapshot?.activeBlock?.start;
+    const blocks = snapshot?.blocks.map((range, index) => ({ index, range,
+        active: range.start.line === active?.line && range.start.character === active.character })) ?? [];
     return { session: panel.session, uri: panel.document.uri.toString(), language: panel.language, version: panel.document.version,
         revision: panel.currentToken ?? null, selected: panel.selectedNode?.id ?? null,
         inspected: panel.runtimeSelection?.inspector_id ?? null, dirty: panel.document.isDirty,
-        viewport: panel.dimensions, status: panel.status ?? panel.snapshot?.renderError ?? 'Ready', notices: panel.snapshot?.notices ?? [] };
+        viewport: panel.dimensions, status: panel.status ?? snapshot?.renderError ?? 'Ready', notices: snapshot?.notices ?? [], blocks };
 }
 
 function assertVersion(document: vscode.TextDocument, version: number): void {
     if (document.version !== version) throw new Error('The source buffer changed. Read its latest version.');
-}
-
-async function isWorkspaceFile(uri: vscode.Uri): Promise<boolean> {
-    if (uri.scheme !== 'file') return false;
-    const folder = vscode.workspace.getWorkspaceFolder(uri);
-    if (!folder || folder.uri.scheme !== 'file') return false;
-    try { return isInside(await realpath(folder.uri.fsPath), await realpath(uri.fsPath)); } catch { return false; }
-}
-
-async function resolveFile(input: string): Promise<vscode.Uri> {
-    const paths = path.isAbsolute(input) ? [input] : (vscode.workspace.workspaceFolders ?? []).filter(folder => folder.uri.scheme === 'file')
-        .map(folder => path.resolve(folder.uri.fsPath, input));
-    const matches: vscode.Uri[] = [];
-    for (const file of paths) {
-        const uri = vscode.Uri.file(file);
-        if (await isWorkspaceFile(uri)) matches.push(uri);
-    }
-    if (matches.length !== 1) throw new Error('Provide an unambiguous file path inside the current workspace.');
-    return matches[0];
 }

@@ -3,6 +3,7 @@ import { realpath, stat } from 'node:fs/promises';
 import * as path from 'node:path';
 import { promisify } from 'node:util';
 import * as vscode from 'vscode';
+import { isInside, localFolders, workspaceFolders } from './workspacePaths';
 
 const exec = promisify(execFile);
 
@@ -28,6 +29,7 @@ export interface CargoTarget {
     folder: vscode.WorkspaceFolder;
     cargo: string;
     cargoDirectory: string;
+    discoveryManifest: string;
     manifest: string;
     packageId: string;
     packageName: string;
@@ -37,23 +39,25 @@ export interface CargoTarget {
     targetDirectory: string;
 }
 
+export interface CargoSelection {
+    folder?: string;
+    manifest_path?: string;
+    package?: string;
+    binary?: string;
+    label?: string;
+}
+
 export async function selectCargoTarget(): Promise<CargoTarget | undefined> {
     if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before running a FerroUI application.');
-    const folders = vscode.workspace.workspaceFolders?.filter(folder => folder.uri.scheme === 'file') ?? [];
+    const folders = localFolders();
     const document = vscode.window.activeTextEditor?.document;
     const owner = document && vscode.workspace.getWorkspaceFolder(document.uri);
     const folder = owner?.uri.scheme === 'file' ? owner : folders.length === 1 ? folders[0]
         : await vscode.window.showWorkspaceFolderPick({ placeHolder: 'Select a FerroUI Cargo workspace' });
     if (!folder || folder.uri.scheme !== 'file') return undefined;
-    const settings = vscode.workspace.getConfiguration('ferroui.hotReload', folder.uri);
-    const cargo = settings.get<string>('cargoPath') || 'cargo';
-    const configured = settings.get<ConfiguredTarget[]>('targets') ?? [];
-    const automatic = configured.length ? undefined : await nearestManifest(folder,
-        document?.uri.scheme === 'file' ? document.uri.fsPath : undefined);
-    let targets = (await Promise.all((configured.length ? configured : [{ manifestPath: automatic }])
-        .map(target => listTargets(folder, cargo, target)))).flat();
+    let { targets, configured } = await targetsIn(folder);
     if (!targets.length) throw new Error('No Cargo binary matches the FerroUI hot reload target.');
-    if (targets.length > 1 && !configured.length && document?.uri.scheme === 'file') {
+    if (targets.length > 1 && !configured && document?.uri.scheme === 'file') {
         const file = await realpath(document.uri.fsPath).catch(() => document.uri.fsPath);
         const local = targets.filter(target => isInside(path.dirname(target.manifest), file));
         const nearest = local.sort((a, b) => b.manifest.length - a.manifest.length)[0];
@@ -67,6 +71,38 @@ export async function selectCargoTarget(): Promise<CargoTarget | undefined> {
         target,
     })), { placeHolder: 'Select a Cargo binary with FerroUI hot reload enabled', matchOnDescription: true, matchOnDetail: true });
     return picked?.target;
+}
+
+export async function discoverCargoTargets(selection: CargoSelection): Promise<CargoTarget[]> {
+    if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before discovering Cargo targets.');
+    const folders = workspaceFolders(selection.folder);
+    const document = vscode.window.activeTextEditor?.document;
+    const absolute = selection.manifest_path && path.isAbsolute(selection.manifest_path);
+    const source = absolute ? vscode.Uri.file(selection.manifest_path!) : document?.uri;
+    const owner = source && vscode.workspace.getWorkspaceFolder(source);
+    const folder = folders.length === 1 ? folders[0] : folders.find(item => item.uri.toString() === owner?.uri.toString());
+    if (!folder) throw new Error('Specify a workspace folder from ferroui_workspace_files.');
+    const { targets } = await targetsIn(folder, selection.manifest_path);
+    return targets.filter(target => (selection.package === undefined || target.packageName === selection.package)
+        && (selection.binary === undefined || target.binary === selection.binary)
+        && (selection.label === undefined || target.label === selection.label));
+}
+
+export function describeCargoTarget(target: CargoTarget) {
+    return { folder: target.folder.uri.toString(), manifest_path: path.relative(target.folder.uri.fsPath, target.discoveryManifest),
+        package: target.packageName, binary: target.binary, label: target.label };
+}
+
+async function targetsIn(folder: vscode.WorkspaceFolder, manifest?: string) {
+    const settings = vscode.workspace.getConfiguration('ferroui.hotReload', folder.uri);
+    const cargo = settings.get<string>('cargoPath') || 'cargo';
+    const root = folder.uri.fsPath;
+    const configured = (settings.get<ConfiguredTarget[]>('targets') ?? []).filter(target => manifest === undefined
+        || path.resolve(root, target.manifestPath || 'Cargo.toml') === path.resolve(root, manifest));
+    const document = vscode.window.activeTextEditor?.document;
+    const activeFile = document?.uri.scheme === 'file' ? document.uri.fsPath : undefined;
+    const use = configured.length ? configured : [{ manifestPath: manifest ?? await nearestManifest(folder, activeFile) }];
+    return { configured: configured.length !== 0, targets: (await Promise.all(use.map(target => listTargets(folder, cargo, target)))).flat() };
 }
 
 async function listTargets(folder: vscode.WorkspaceFolder, cargo: string, target: ConfiguredTarget): Promise<CargoTarget[]> {
@@ -90,7 +126,8 @@ async function listTargets(folder: vscode.WorkspaceFolder, cargo: string, target
         && (!target.package || target.package === pkg.name))
         .flatMap(pkg => pkg.targets.filter(bin => bin.kind.includes('bin') && (!target.binary || target.binary === bin.name)).map(bin => ({
             label: target.label ?? bin.name,
-            folder, cargo, cargoDirectory: cwd, manifest: pkg.manifest_path, packageId: pkg.id, packageName: pkg.name, binary: bin.name,
+            folder, cargo, cargoDirectory: cwd, discoveryManifest: manifest, manifest: pkg.manifest_path,
+            packageId: pkg.id, packageName: pkg.name, binary: bin.name,
             features: target.features ?? (Object.hasOwn(pkg.features, 'hot-reload') ? ['hot-reload'] : []),
             args: target.args ?? [], targetDirectory: metadata.target_directory,
         })));
@@ -107,9 +144,4 @@ async function nearestManifest(folder: vscode.WorkspaceFolder, file?: string): P
         directory = parent;
     }
     return undefined;
-}
-
-export function isInside(root: string, file: string): boolean {
-    const relative = path.relative(root, file);
-    return relative !== '..' && !relative.startsWith(`..${path.sep}`) && !path.isAbsolute(relative);
 }

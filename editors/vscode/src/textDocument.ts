@@ -26,6 +26,14 @@ export function asRange(range: Range): vscode.Range {
     return new vscode.Range(asPosition(range.start), asPosition(range.end));
 }
 
+export function exactRange(document: vscode.TextDocument, range: Range): vscode.Range {
+    const start = asPosition(range.start);
+    const end = asPosition(range.end);
+    const result = new vscode.Range(start, end);
+    if (end.isBefore(start) || !document.validateRange(result).isEqual(result)) throw new Error('The requested source range is invalid.');
+    return result;
+}
+
 export async function applyTextEdits(document: vscode.TextDocument, version: number, edits: TextEdit[]): Promise<void> {
     if (document.isClosed || document.version !== version) throw new Error('The source changed. Use the current preview to retry.');
     const workspaceEdit = new vscode.WorkspaceEdit();

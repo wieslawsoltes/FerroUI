@@ -1,38 +1,20 @@
-type Schema = {
-    type?: string;
-    enum?: readonly string[];
-    minimum?: number;
-    maximum?: number;
-    maxLength?: number;
-    maxItems?: number;
-    items?: Schema;
-    properties?: Record<string, Schema>;
-    required?: readonly string[];
-    additionalProperties?: boolean;
-};
+import { choice, integer, object, text, tool, truth } from './agentSchema';
+import { workspaceCatalog } from './workspaceCatalog';
 
-const text = { type: 'string', maxLength: 1024 * 1024 };
-const object = { type: 'object' };
-const truth = { type: 'boolean' };
-const integer = (minimum: number, maximum = Number.MAX_SAFE_INTEGER) => ({ type: 'integer', minimum, maximum });
 const node = integer(1);
 const session = { session: integer(1) };
 const frame = { ...session, expected_revision: integer(0) };
 const buffer = { ...session, expected_version: integer(1) };
-const choice = (...values: string[]) => ({ type: 'string', enum: values });
-
-function tool(description: string, properties: Record<string, Schema> = {}, required: string[] = [], write = false) {
-    return {
-        description,
-        inputSchema: { type: 'object', properties, required, additionalProperties: false },
-        annotations: { readOnlyHint: !write, destructiveHint: write, openWorldHint: false },
-    };
-}
+const workspacePath = { type: 'string', maxLength: 4096 };
+const cargoSelection = { folder: workspacePath, manifest_path: workspacePath, package: workspacePath, binary: workspacePath, label: workspacePath };
+const placement = { ...frame, asset: text, project_asset: text, node, anchor: node,
+    position: choice('inside', 'before', 'after'), x: { type: 'number' }, y: { type: 'number' } };
 
 export const agentCatalog = {
+    ...workspaceCatalog,
     ferroui_designs: tool('List open FerroUI designer sessions and the active session in this VS Code window.'),
     designer_open: tool('Open a workspace XAML or Rust file and its design tab. For Rust, optionally specify a zero-based invocation position.',
-        { path: text, line: integer(0), character: integer(0) }, ['path'], true),
+        { path: workspacePath, folder: workspacePath, line: integer(0), character: integer(0) }, ['path'], true, false),
     designer_document: tool('Read the live VS Code buffer version, preview revision, selection, diagnostics, and optionally unsaved source and its XAML/RSX projection.',
         { ...session, include_source: truth, include_counterpart: truth }, ['session']),
     designer_outline: tool('Read mapped source controls, parent IDs, ranges, and native canvas bounds in document order. Optionally include the drop and property state of one node.',
@@ -45,14 +27,26 @@ export const agentCatalog = {
     designer_assets: tool('Browse project image, font, media and markup files from the Assets view.',
         { ...session, offset: integer(0), limit: integer(1, 200) }, ['session']),
     designer_preview_image: tool('Capture the current native artboard as PNG with viewport and source revision metadata.', session, ['session']),
+    designer_wait: tool('Wait for the native preview of the current authored buffer. Return the revision, RSX invocation ranges, and rendering diagnostics.',
+        session, ['session']),
+    designer_block: tool('Activate one of the indexed RSX invocations reported by designer_wait. Use the current preview revision.',
+        { ...frame, index: integer(0), reveal_source: truth }, ['session', 'expected_revision', 'index'], true, false),
     designer_view: tool('Show a designer view, refresh its preview, or set its logical width, height and appearance.',
         { ...session, view: choice('canvas', 'outline', 'properties', 'toolbox', 'events', 'resources', 'assets'),
-            outline_mode: choice('source', 'visual', 'logical', 'combined'), width: integer(64, 1536), height: integer(64, 1536), dark: truth, refresh: truth }, ['session'], true),
+            outline_mode: choice('source', 'visual', 'logical', 'combined'), width: integer(64, 1536), height: integer(64, 1536), dark: truth, refresh: truth }, ['session'], true, false),
+    designer_canvas: tool('Control the canvas Preview or alternate-source tab, zoom, pan and pan tool. Returns the webview’s applied state.',
+        { ...session, tab: choice('preview', 'counterpart'), zoom: choice('fit', 'fit_selection', 'actual'),
+            scale: { type: 'number', minimum: 0.125, maximum: 8 }, pan_x: { type: 'number' }, pan_y: { type: 'number' }, pan_tool: truth },
+        ['session'], true, false),
     designer_select: tool('Select one source node or one runtime object in the canvas, Outline and Properties.',
-        { ...frame, node, inspector_id: node, reveal_source: truth }, ['session', 'expected_revision'], true),
+        { ...frame, node, inspector_id: node, reveal_source: truth }, ['session', 'expected_revision'], true, false),
+    designer_placement_hint: tool('Validate a proposed drop and return its native landing bounds without editing the design.',
+        placement, ['session', 'expected_revision']),
     designer_place: tool('Insert a Toolbox control, place a project image in XAML, or move a control. Use an outline anchor and position or canvas coordinates.',
-        { ...frame, asset: text, project_asset: text, node, anchor: node, position: choice('inside', 'before', 'after'), x: { type: 'number' }, y: { type: 'number' } },
+        placement,
         ['session', 'expected_revision'], true),
+    designer_remove: tool('Remove a mapped authored control, preserving the other Rust or XAML source.',
+        { ...frame, node }, ['session', 'expected_revision', 'node'], true),
     designer_edit_property: tool('Set or reset a property from the Properties view while preserving Rust expressions and XAML bindings.',
         { ...frame, node, property: text, action: choice('set', 'reset'), value: text }, ['session', 'expected_revision', 'node', 'property', 'action'], true),
     designer_set_event: tool('Assign or clear a XAML handler name or RSX handler expression.',
@@ -73,33 +67,12 @@ export const agentCatalog = {
     designer_studio_query: tool('Run an original read-only Studio tool against the current native session. Use designer_studio_tools for names and argument schemas. Rust sessions expose their projected XAML in these queries.',
         { ...session, tool: text, arguments: object }, ['session', 'tool', 'arguments']),
     ferroui_reload_status: tool('Read the active managed runtime and last reported reload state.'),
-    ferroui_reload_control: tool('Open the FerroUI Cargo target chooser, rebuild the managed application, or stop it.',
-        { action: choice('start', 'rebuild', 'stop') }, ['action'], true),
+    ferroui_reload_targets: tool('Discover managed Cargo binaries and their enabled features. Supply the folder or a workspace-relative Cargo.toml for a nested project.',
+        cargoSelection),
+    ferroui_reload_control: tool('Start a single discovered Cargo target, rebuild it, stop it, or show the Hot Reload output. Pass the target fields returned by ferroui_reload_targets.',
+        { ...cargoSelection, action: choice('start', 'rebuild', 'stop', 'show_output') }, ['action'], true, false),
+    ferroui_reload_output: tool('Read the recent Cargo build and runtime output for the managed application.',
+        { lines: integer(1, 250) }),
 };
 
 export type AgentTool = keyof typeof agentCatalog;
-
-export function validate(schema: Schema, value: unknown): void {
-    if (schema.enum && !schema.enum.includes(value as string)) throw new Error('Invalid choice');
-    if (schema.type === 'number' || schema.type === 'integer') {
-        const n = value as number;
-        if (!Number.isFinite(value) || (schema.type === 'integer' && !Number.isSafeInteger(n))
-            || n < (schema.minimum ?? -Infinity) || n > (schema.maximum ?? Infinity)) throw new Error('Number is outside the allowed range');
-    } else if (schema.type === 'string') {
-        if (typeof value !== 'string' || value.length > (schema.maxLength ?? Infinity)) throw new Error('Expected a valid string');
-    } else if (schema.type === 'boolean') {
-        if (typeof value !== 'boolean') throw new Error('Expected a boolean');
-    } else if (schema.type === 'array') {
-        if (!Array.isArray(value) || value.length > (schema.maxItems ?? Infinity)) throw new Error('Expected a bounded array');
-        if (schema.items) for (const item of value) validate(schema.items, item);
-    } else if (schema.type === 'object') {
-        if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Expected an arguments object');
-        const arguments_ = value as Record<string, unknown>;
-        for (const key of schema.required ?? []) if (!Object.hasOwn(arguments_, key)) throw new Error(`Missing ${key}`);
-        for (const key of Object.keys(arguments_)) {
-            const child = schema.properties && Object.hasOwn(schema.properties, key) ? schema.properties[key] : undefined;
-            if (child) validate(child, arguments_[key]);
-            else if (schema.additionalProperties === false) throw new Error(`Unknown argument ${key}`);
-        }
-    }
-}

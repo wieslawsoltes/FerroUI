@@ -2,10 +2,16 @@ import { strict as assert } from 'node:assert';
 import { spawn } from 'node:child_process';
 import { createInterface } from 'node:readline';
 import * as vscode from 'vscode';
+import { verifyWorkspaceMcp } from './workspaceMcp';
 
 interface ToolResponse {
     content: { type: string; text?: string; data?: string }[];
     isError: boolean;
+}
+
+export interface McpFixture {
+    invoke(name: string, args?: object): Promise<ToolResponse>;
+    content<T>(result: ToolResponse): T;
 }
 
 export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
@@ -76,6 +82,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         const edit = { session, expected_revision: revision, label: 'Test agent edit', edits: [{ SetAttribute: { node: button.id, name: 'Content', value: 'MCP edited this buffer' } }] };
         const denied = await invoke('designer_apply', edit);
         assert.ok(denied.isError && denied.content[0]?.text?.includes('allowWrites'));
+        assert.ok((await invoke('ferroui_workspace_create', { path: 'Denied.rs', source: 'fn main() {}' })).isError);
         await config.update('allowWrites', true, vscode.ConfigurationTarget.Global);
         content(await invoke('designer_apply', edit));
         assert.ok(document.isDirty && document.getText().includes('Content="MCP edited this buffer"'));
@@ -88,6 +95,16 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         assert.match(document.getText(), /Click="OnSave"/);
         content(await invoke('designer_history', { session, expected_version: document.version, action: 'undo' }));
         assert.equal(document.getText(), original);
+        const canvas = content<{ tab: string; scale: number; panTool: boolean }>(await invoke('designer_canvas', { session, tab: 'preview', scale: 2, pan_tool: true }));
+        assert.deepEqual([canvas.tab, canvas.scale, canvas.panTool], ['preview', 2, true]);
+        assert.equal(content<{ tab: string }>(await invoke('designer_canvas', { session, tab: 'counterpart', pan_tool: false })).tab, 'counterpart');
+        const rust = content<{ session: number }>(await invoke('designer_open', { path: 'views.rs' }));
+        const frame = content<{ revision: number; blocks: { active: boolean }[] }>(await invoke('designer_wait', { session: rust.session }));
+        assert.equal(frame.blocks.length, 2);
+        const selected = content<{ blocks: { active: boolean }[] }>(await invoke('designer_block', { session: rust.session,
+            expected_revision: frame.revision, index: 1 }));
+        assert.deepEqual(selected.blocks.map(block => block.active), [false, true]);
+        await verifyWorkspaceMcp({ invoke, content });
         console.log('VS Code MCP discovery, shared Studio queries, PNG content, write permissions, stale revisions and editor undo passed');
     } finally {
         await config.update('allowWrites', undefined, vscode.ConfigurationTarget.Global);

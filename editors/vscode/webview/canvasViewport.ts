@@ -56,6 +56,10 @@ export class CanvasViewport {
 
     zoomBy(factor: number, anchor: Point): void { this.zoom(this.scale * factor, anchor); }
 
+    get state() { return { scale: this.scale, fit: this.fitting, scrollX: this.element.scrollLeft, scrollY: this.element.scrollTop }; }
+
+    panBy(x: number, y: number): void { this.element.scrollBy(x, y); }
+
     zoom(scale: number, anchor = this.viewportCenter()): void {
         if (!this.width || !this.height) return;
         const previous = this.artboard.getBoundingClientRect();
