@@ -1,7 +1,7 @@
 use crate::{MediaPlayerPresenter, MediaTransportControls, TextureFrameImporter};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties,
-    input::InputElementImpl,
+    input::{InputElementImpl, InputElementImplExt},
     instantiate,
     interactivity::InteractiveImpl,
     layout::{HorizontalAlignment, LayoutableImpl, VerticalAlignment},
@@ -61,7 +61,19 @@ ferro_class!(MediaPlayerElement:Panel);
 ferro_class_info!(MediaPlayerElement {
     new: MediaPlayerElement::new
 });
-ferro_impl_classes!(MediaPlayerElement:StyledElementImpl,LayoutableImpl,InteractiveImpl,InputElementImpl,PanelImpl);
+ferro_impl_classes!(MediaPlayerElement:StyledElementImpl,LayoutableImpl,InteractiveImpl,PanelImpl);
+/// WinUI shows the control panel of the transport controls on pointer input over the
+/// element, and `ShowAndHideAutomatically` hides it again while the media plays.
+impl InputElementImpl for MediaPlayerElement {
+    fn on_pointer_moved(this: &Self, e: &ferroui_base::input::PointerEventArgs) {
+        Self::parent_on_pointer_moved(this, e);
+        this.show_transport_controls();
+    }
+    fn on_pointer_pressed(this: &Self, e: &ferroui_base::input::PointerPressedEventArgs) {
+        Self::parent_on_pointer_pressed(this, e);
+        this.show_transport_controls();
+    }
+}
 ferro_properties! {impl MediaPlayerElement {
     pub fn source_property()->StyledProperty<Option<String>> {FerroProperty::register::<Self,_>("Source",None)}
     pub fn autoplay_property()->StyledProperty<bool> {FerroProperty::register::<Self,_>("AutoPlay",false)}
@@ -471,6 +483,13 @@ impl MediaPlayerElement {
     }
     pub fn set_is_full_window(&self, value: bool) {
         self.set_value(Self::is_full_window_property(), value);
+    }
+    fn show_transport_controls(&self) {
+        if self.are_transport_controls_enabled() {
+            if let Some(chrome) = self.chrome.borrow().as_ref() {
+                chrome.show();
+            }
+        }
     }
     pub fn transport_controls(&self) -> Ref<MediaTransportControls> {
         self.chrome.borrow().as_ref().unwrap().clone()
