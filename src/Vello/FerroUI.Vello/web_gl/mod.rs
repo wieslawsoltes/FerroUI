@@ -19,6 +19,17 @@
 //! Everything here belongs to the thread that draws to the canvas: the
 //! thread of the page, or the render worker the canvas was transferred to.
 //! Nothing is `Send`.
+//!
+//! Step 3 of the GPU route (docs/porting/gpu-rendering.md, #623): a scene paints with textures
+//! of the context ([`VelloWebGlTexture`], `frame_textures.rs`), and a layer with an effect is
+//! drawn on the context: its content rendered and copied into a texture of the pool, passed
+//! through a program of `layer_programs.rs` into another, which the scene the layer was pushed
+//! in paints with.
+
+mod frame_textures;
+
+pub use frame_textures::VelloWebGlTexture;
+use frame_textures::TexturePool;
 
 use crate::drawing_context_impl::{CreateInfo, DrawingContextImpl};
 use crate::helpers::pixel_format_helper::scene_size;
@@ -76,6 +87,8 @@ struct WebGlState {
     /// their pixels.
     images: HashMap<u64, ImageTexture>,
     render_count: u64,
+    /// The textures scenes paint with that were written on the context.
+    textures: TexturePool,
 }
 
 /// The WebGL2 context of a canvas as the Vello backend draws with it: what
@@ -129,7 +142,13 @@ impl VelloWebGlGpu {
             gl_context,
             gl,
             max_texture_size,
-            state: RefCell::new(Some(WebGlState { renderer, resources, images: HashMap::new(), render_count: 0 })),
+            state: RefCell::new(Some(WebGlState {
+                renderer,
+                resources,
+                images: HashMap::new(),
+                render_count: 0,
+                textures: TexturePool::default(),
+            })),
         })))
     }
 
@@ -181,10 +200,11 @@ impl VelloWebGlGpu {
     /// context current, as the compositor does before it releases a backend
     /// context.
     pub fn dispose(&self) {
-        if let Some(state) = self.state.borrow_mut().take() {
+        if let Some(mut state) = self.state.borrow_mut().take() {
             for image in state.images.values() {
                 self.gl.delete_texture(Some(&image.texture));
             }
+            state.textures.dispose(&self.gl);
         }
     }
 
@@ -198,8 +218,13 @@ impl VelloWebGlGpu {
 
     /// Renders a scene into the drawing buffer of the canvas, replacing
     /// what it held. `images` are the images the scene paints with, by the
-    /// identity of their pixels.
-    pub(crate) fn render(&self, scene: &Scene, images: &HashMap<u64, ImageData>) -> Result<(), String> {
+    /// identity of their pixels, and `textures` the textures of the context it paints with.
+    pub(crate) fn render(
+        &self,
+        scene: &Scene,
+        images: &HashMap<u64, ImageData>,
+        textures: &[Rc<VelloWebGlTexture>],
+    ) -> Result<(), String> {
         if self.is_context_lost() {
             return Err("the WebGL context of the canvas is lost".to_string());
         }
@@ -221,6 +246,9 @@ impl VelloWebGlGpu {
             texture.last_used = render_count;
             bindings.insert(TextureId(*id), texture.texture.clone());
         }
+        for texture in textures {
+            bindings.insert(texture.id, texture.texture.clone());
+        }
 
         let result = state.renderer.render(
             scene,
@@ -239,6 +267,60 @@ impl VelloWebGlGpu {
         );
 
         result.map_err(|error| error.to_string())
+    }
+
+    /// A texture of the pool for an area of `width` by `height` pixels (its size is a size of the
+    /// pool, at least the area).
+    pub(crate) fn acquire_texture(&self, width: u32, height: u32) -> Result<Rc<VelloWebGlTexture>, String> {
+        let (width, height) = frame_textures::pooled_size(width, height, self.max_texture_size);
+        let mut state = self.state.borrow_mut();
+        let state = state.as_mut().ok_or("the renderer of the canvas has been released")?;
+        state.textures.acquire(&self.gl, width, height)
+    }
+
+    /// Renders the scene of the content of a layer, which has the size of the drawing buffer,
+    /// into the drawing buffer, and copies the pixels of `area` (`x`, `y`, `width`, `height`, from
+    /// the top left of the canvas) into a texture of the pool, its first row the top one of the
+    /// area. The drawing buffer holds nothing of the frame: the scene of the frame is rendered
+    /// after its layers and clears it.
+    pub(crate) fn render_to_texture(
+        &self,
+        scene: &Scene,
+        images: &HashMap<u64, ImageData>,
+        textures: &[Rc<VelloWebGlTexture>],
+        area: (u32, u32, u32, u32),
+    ) -> Result<Rc<VelloWebGlTexture>, String> {
+        self.render(scene, images, textures)?;
+        let (x, y, width, height) = area;
+        let copied = self.acquire_texture(width, height)?;
+        let gl = &self.gl;
+        // The rows of the drawing buffer count from its bottom. The copy keeps them in that order,
+        // so the first row of the texture is the bottom one of the area; the passes that read it
+        // turn it upright (`layer_programs.rs`).
+        let bottom = gl.drawing_buffer_height() - (y + height) as i32;
+        gl.bind_framebuffer(WebGl2RenderingContext::READ_FRAMEBUFFER, None);
+        gl.active_texture(WebGl2RenderingContext::TEXTURE0);
+        gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, Some(&copied.texture));
+        gl.copy_tex_sub_image_2d(
+            WebGl2RenderingContext::TEXTURE_2D,
+            0,
+            0,
+            0,
+            x as i32,
+            bottom,
+            width as i32,
+            height as i32,
+        );
+        gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, None);
+        Ok(copied)
+    }
+
+    /// Lets go of the textures of the pool that the frames no longer use, beyond a few of each
+    /// size.
+    pub(crate) fn trim_textures(&self) {
+        if let Some(state) = self.state.borrow_mut().as_mut() {
+            state.textures.trim(&self.gl, 4);
+        }
     }
 
     /// A texture of the context with the pixels of an image, premultiplied,

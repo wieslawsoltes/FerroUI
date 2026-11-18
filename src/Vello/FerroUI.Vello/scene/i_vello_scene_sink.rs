@@ -369,6 +369,51 @@ pub trait IVelloSceneSink {
         Err(format!("The {:?} rendering mode of the Vello backend renders into memory", self.rendering_mode()))
     }
 
+    /// The WebGL2 context of the canvas this sink was made for, for a sink that belongs to one:
+    /// where a layer with an effect is drawn on the context (step 3 of the GPU route, #623).
+    #[cfg(feature = "hybrid-webgl")]
+    fn web_gl_gpu(&self) -> Option<std::rc::Rc<crate::web_gl::VelloWebGlGpu>> {
+        None
+    }
+
+    /// Fills `path` under `transform` with a texture of the WebGL2 context of the sink, whose
+    /// pixels `(0, 0)` to `size` are placed by `texture_transform` (from the pixels of the texture
+    /// to the space of the path), source-over and without anti-aliasing.
+    ///
+    /// # Panics
+    /// Panics in a sink that does not belong to a WebGL2 context
+    /// ([`web_gl_gpu`](Self::web_gl_gpu) is `None`).
+    #[cfg(feature = "hybrid-webgl")]
+    fn fill_with_web_gl_texture(
+        &mut self,
+        path: &BezPath,
+        transform: Affine,
+        texture: &std::rc::Rc<crate::web_gl::VelloWebGlTexture>,
+        size: (u32, u32),
+        texture_transform: Affine,
+    ) {
+        let _ = (path, transform, texture, size, texture_transform);
+        panic!(
+            "The {:?} rendering mode of the Vello backend paints with no texture of a WebGL context",
+            self.rendering_mode()
+        );
+    }
+
+    /// Renders the scene, which has the size of the drawing buffer of the canvas of the sink,
+    /// and copies the pixels of `area` (`x`, `y`, `width`, `height`) into a texture of the pool of
+    /// the context, its first row the bottom one of the area. Fails for a sink that does not
+    /// belong to a WebGL2 context.
+    ///
+    /// Every clip and layer has to be ended first.
+    #[cfg(feature = "hybrid-webgl")]
+    fn render_to_web_gl_texture(
+        &mut self,
+        area: (u32, u32, u32, u32),
+    ) -> Result<std::rc::Rc<crate::web_gl::VelloWebGlTexture>, String> {
+        let _ = area;
+        Err(format!("The {:?} rendering mode of the Vello backend renders into memory", self.rendering_mode()))
+    }
+
     /// What the renderer of this sink does of blurs. A sink that does not
     /// say draws none: the drawing context then renders what is blurred on
     /// the processor and gives the sink an image.

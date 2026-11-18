@@ -41,7 +41,7 @@ wgpu = { workspace = true, optional = true }
 ferroui-opengl = { workspace = true, optional = true }
 wasm-bindgen = { workspace = true, optional = true }
 js-sys = { workspace = true, optional = true }
-web-sys = { workspace = true, optional = true, features = ["HtmlCanvasElement", "WebGl2RenderingContext", "WebGlTexture"] }
+web-sys = { workspace = true, optional = true, features = ["HtmlCanvasElement", "WebGl2RenderingContext", "WebGlTexture", "WebGlFramebuffer", "WebGlProgram", "WebGlShader", "WebGlUniformLocation", "WebGlVertexArrayObject"] }
 
 # The CPU mode is always built. An application states the GPU modes it uses: each brings its renderer
 # and `wgpu` (docs/porting/vello-backend.md, section 2).
