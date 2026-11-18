@@ -793,6 +793,20 @@ their tolerance in time, by 7 to 43 % (`frames/reorder ui_ms_per_frame` 1.467 an
 within 0.2 % in instructions. The time of a scene differs from build to build by more than
 its tolerance; its instructions do not, and a line now says which of the two moved.
 
+The parts of a start are counted too. The build, the show and the first frame of a scene are
+each measured once in a process, so their times were the least steady lines of the gate: the
+show and the start of the large scenes moved by 6 to 12 % between two runs of one change
+(section 9.98), and a start that did more work could not be told from one that waited for the
+disk. A scene of the start prints the instructions of its build, of the taking of its content,
+of its show and of its first frame, and their sum (`build_instructions`,
+`content_instructions`, `show_instructions`, `first_frame_instructions`,
+`startup_instructions`, of every thread of the process); a frame scene prints those of its
+build and its show. The gate judges `build_ms`, `show_ms`, `first_frame_ms` and `startup_ms`
+with them. Three starts of one build: `startup/tiles` 20.735, 20.740 and 20.754 billion
+instructions from the build to the first frame (0.09 %) with 1,655 to 1,790 ms (8 %);
+`startup/controls` 2.695 to 2.714 billion (0.7 %, the first start of a new file the largest)
+with 243 to 340 ms.
+
 Scaling pairs. A benchmark compared at one size cannot tell a cost that is linear at that size
 and quadratic above it. The benchmarks of `trees::Scaling` (the start of a wall of tiles, its
 attachment, its detachment, the clearing of a canvas, the removal of every second child, a class
