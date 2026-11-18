@@ -51,7 +51,8 @@ pub use option_cell::OptionCell;
 pub use ref_countable::{RefCountable, RefCounted};
 pub use release_excess::{ReleaseExcess, RETAINED_BUFFER_BYTES};
 pub use resting::{
-    register_resting_buffers, release_free_pages, release_resting_buffers, ReleaseAtRest, RESTING_BUFFER_BYTES,
+    register_resting_buffers, release_free_pages, release_resting_buffers, rest_after_burst, ReleaseAtRest,
+    RESTING_BUFFER_BYTES,
 };
 mod thread_bound;
 pub use thread_bound::ThreadBound;

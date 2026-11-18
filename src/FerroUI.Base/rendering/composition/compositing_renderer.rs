@@ -255,6 +255,9 @@ pub struct CompositingRenderer {
     diagnostics: Rc<RendererDiagnostics>,
     diagnostics_subscription: RefCell<Option<Subscription>>,
     scene_invalidated: HandlerList<dyn Fn(&SceneInvalidatedEventArgs)>,
+    /// Whether the renderer is registered to have its list of departed visuals released once a
+    /// burst is over (#836).
+    resting: Cell<bool>,
 }
 
 impl CompositingRenderer {
@@ -299,6 +302,7 @@ impl CompositingRenderer {
             diagnostics: RendererDiagnostics::new(),
             diagnostics_subscription: RefCell::new(None),
             scene_invalidated: HandlerList::new(),
+            resting: Cell::new(false),
         });
         let weak = Rc::downgrade(&renderer);
         let subscription = renderer.diagnostics.property_changed(move |diagnostics, property_name| {
@@ -312,17 +316,23 @@ impl CompositingRenderer {
             renderers.retain(|_, r| r.strong_count() > 0);
             renderers.insert(key, Rc::downgrade(&renderer));
         });
-        // The list of the visuals that left with a large tree is released once the burst is over
-        // (#836).
-        let weak = Rc::downgrade(&renderer);
-        crate::utilities::register_resting_buffers(move || {
-            let Some(renderer) = weak.upgrade() else { return false };
-            if let Ok(mut departed) = renderer.departed.try_borrow_mut() {
-                departed.release_at_rest();
-            }
-            true
-        });
         renderer
+    }
+
+    /// After a large tree left: the list of its visuals is released once the burst is over
+    /// (#836, `utilities::resting`); the renderer is registered with the job of its thread the
+    /// first time.
+    fn rest_after_burst(&self) {
+        crate::utilities::rest_after_burst(&self.resting, || {
+            let weak = self.this.clone();
+            move || {
+                let Some(renderer) = weak.upgrade() else { return false };
+                if let Ok(mut departed) = renderer.departed.try_borrow_mut() {
+                    departed.release_at_rest();
+                }
+                true
+            }
+        });
     }
 
     /// The composition target the renderer draws the tree to.
@@ -569,8 +579,12 @@ impl CompositingRenderer {
         // meanwhile.
         let mut list = self.departed.borrow_mut();
         if list.is_empty() {
-            departed.release_excess_later();
+            let burst = departed.release_burst();
             *list = departed;
+            drop(list);
+            if burst {
+                self.rest_after_burst();
+            }
         }
     }
 

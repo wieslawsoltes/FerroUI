@@ -71,13 +71,15 @@ impl<T: Clone + Eq + Hash> LoopQueueInfo<T> {
         }
     }
 
-    fn clear(&mut self) {
+    /// Empties the entries, and tells whether a pass over a large tree filled them (their storage
+    /// beyond what an emptied buffer keeps was given back).
+    fn clear(&mut self) -> bool {
         self.entries.clear();
         self.index.clear();
         // A pass over a large tree (its first layout, or the layout that follows its removal)
         // has an entry for every element of it; no later pass comes near.
-        self.entries.release_excess_later();
-        self.index.release_excess_later();
+        let entries = self.entries.release_burst();
+        self.index.release_burst() | entries
     }
 
     fn release_at_rest(&mut self) {
@@ -146,14 +148,16 @@ impl<T: LayoutQueueItem> LayoutQueue<T> {
         self.max_enqueue_count_per_loop = max_enqueue_count_per_loop;
     }
 
-    pub fn end_loop(&mut self) {
+    /// Ends a layout loop, and tells whether a pass over a large tree filled the queue (its
+    /// storage beyond what an emptied buffer keeps was given back; `utilities::resting`, #836).
+    pub fn end_loop(&mut self) -> bool {
         for (item, info) in &self.loop_queue_info.entries {
             if info.count >= self.max_enqueue_count_per_loop {
                 self.not_finalized_buffer.push((item.clone(), *info));
             }
         }
 
-        self.loop_queue_info.clear();
+        let mut burst = self.loop_queue_info.clear();
 
         // Prevent layout cycle but add to next layout the non arranged/measured
         // items that might have caused cycle one more time as a final attempt.
@@ -169,8 +173,9 @@ impl<T: LayoutQueueItem> LayoutQueue<T> {
         self.not_finalized_buffer = not_finalized_buffer;
         if self.inner.is_empty() {
             // As the entries of the loop: the queue of a pass over a large tree.
-            self.inner.release_excess_later();
+            burst |= self.inner.release_burst();
         }
+        burst
     }
 
     /// Gives back what the emptied queue keeps beyond what a buffer keeps at rest, once the

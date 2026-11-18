@@ -8,20 +8,22 @@
 //! long as the window lives (docs/porting/desktop-performance.md, section 9.98: about 95 MB of the
 //! 135 MB a closed wall of 58,696 tiles left).
 //!
-//! So a holder whose buffers fill in bursts registers them here
-//! ([`register_resting_buffers`]), and empties them with
-//! [`ReleaseAtRest::release_excess_later`]: on a thread that runs a dispatcher, a buffer above the
-//! limit keeps its storage, and one job at the idle priority of the dispatcher is posted (and not
-//! again while it waits). The job runs once the burst is over, when nothing else is queued: it
-//! takes every registered buffer that is empty down to [`RESTING_BUFFER_BYTES`], and then asks the
-//! allocator to give its free pages back to the system ([`release_free_pages`]). No timer, and no
-//! work in a frame: a frame that runs before the job leaves the buffers as they are. On a thread
-//! without a dispatcher the buffer is released to the limit at once, as before. The render thread
-//! has the same step when no tick is pending (`ServerCompositor::render_core`).
+//! So an emptied buffer is still taken down to that limit at once, as before
+//! ([`ReleaseAtRest::release_burst`], which tells whether it gave storage back), and a holder
+//! whose buffer gave storage back (a burst filled it) asks for the job of its thread
+//! ([`rest_after_burst`]): the holder is registered (once in its life), and one job at the idle
+//! priority of the dispatcher is posted (and not again while it waits). The job runs once the
+//! burst is over, when nothing else is queued: it takes every registered buffer that is empty
+//! down to [`RESTING_BUFFER_BYTES`], and then asks the allocator to give its free pages back to
+//! the system ([`release_free_pages`]). No timer, and nothing in the steady path: a buffer within
+//! the limit is checked as before (one comparison of its capacity), nothing is registered and no
+//! job is posted until a buffer of the thread went beyond the limit. On a thread without a
+//! dispatcher nothing is posted. The render thread has the same step when no tick is pending
+//! (`ServerCompositor::render_core`), taken only after one of its buffers gave storage back.
 //!
 //! Not from upstream, whose buffers are collected with the heap.
 
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::mem::size_of;
 
@@ -39,10 +41,10 @@ const fn resting_items<T>(extra_bytes_per_item: usize) -> usize {
 /// A buffer that fills in bursts and gives its storage back once the burst is over.
 pub trait ReleaseAtRest {
     /// Gives back the storage beyond [`RETAINED_BUFFER_BYTES`](super::RETAINED_BUFFER_BYTES)
-    /// now, as [`release_excess`](super::ReleaseExcess::release_excess) does, unless the job of
-    /// the thread will release the buffers of its holders once the burst is over; the job is
-    /// posted then. For a buffer whose holder is registered ([`register_resting_buffers`]).
-    fn release_excess_later(&mut self);
+    /// now, as [`release_excess`](super::ReleaseExcess::release_excess) does, and tells whether
+    /// it gave any back: a burst filled the buffer, and its holder asks for the job of its thread
+    /// then ([`rest_after_burst`]). A buffer within the limit is not touched.
+    fn release_burst(&mut self) -> bool;
 
     /// Gives back the storage of an empty buffer beyond [`RESTING_BUFFER_BYTES`], and tells whether
     /// it gave any back. A buffer that holds content is not touched.
@@ -60,19 +62,21 @@ macro_rules! release_at_rest {
     }};
 }
 
-macro_rules! release_excess_later {
+macro_rules! release_burst {
     ($self:ident, $extra:expr, $item:ty) => {{
         let limit = super::RETAINED_BUFFER_BYTES / (size_of::<$item>() + $extra).max(1);
-        if $self.capacity() > limit && !release_later() {
+        let burst = $self.capacity() > limit;
+        if burst {
             super::ReleaseExcess::release_excess($self);
         }
+        burst
     }};
 }
 
 impl<T> ReleaseAtRest for Vec<T> {
     #[inline]
-    fn release_excess_later(&mut self) {
-        release_excess_later!(self, 0, T)
+    fn release_burst(&mut self) -> bool {
+        release_burst!(self, 0, T)
     }
 
     #[inline]
@@ -83,8 +87,8 @@ impl<T> ReleaseAtRest for Vec<T> {
 
 impl<T> ReleaseAtRest for VecDeque<T> {
     #[inline]
-    fn release_excess_later(&mut self) {
-        release_excess_later!(self, 0, T)
+    fn release_burst(&mut self) -> bool {
+        release_burst!(self, 0, T)
     }
 
     #[inline]
@@ -99,8 +103,8 @@ where
     S: std::hash::BuildHasher,
 {
     #[inline]
-    fn release_excess_later(&mut self) {
-        release_excess_later!(self, 1, T)
+    fn release_burst(&mut self) -> bool {
+        release_burst!(self, 1, T)
     }
 
     #[inline]
@@ -115,8 +119,8 @@ where
     S: std::hash::BuildHasher,
 {
     #[inline]
-    fn release_excess_later(&mut self) {
-        release_excess_later!(self, 1, (K, V))
+    fn release_burst(&mut self) -> bool {
+        release_burst!(self, 1, (K, V))
     }
 
     #[inline]
@@ -144,31 +148,28 @@ crate::ferro_thread_local! {
 /// empty buffer of the holder down to [`RESTING_BUFFER_BYTES`]
 /// ([`ReleaseAtRest::release_at_rest`]) and returns `false` once the holder is gone (it holds
 /// no buffer alive: a weak handle of the holder), which ends the registration. It is called on
-/// this thread, by the job of the thread.
+/// this thread, by the job of the thread. [`rest_after_burst`] registers a holder when it first
+/// needs it.
 pub fn register_resting_buffers(release: impl Fn() -> bool + 'static) {
     let release: Release = Box::new(release);
     // While the thread is torn down there is no burst to come.
     let _ = RESTING.try_with(|resting| resting.borrow_mut().holders.push(release));
 }
 
-/// Whether the job of this thread releases the buffers of its holders later: it is posted, or it
-/// is posted now. Not on a thread without holders or without a dispatcher.
-fn release_later() -> bool {
-    let posted = RESTING.try_with(|resting| {
-        let mut resting = resting.borrow_mut();
-        if resting.posted {
-            return true;
-        }
-        if resting.holders.is_empty() {
-            return false;
-        }
-        let Some(dispatcher) = Dispatcher::from_thread(std::thread::current().id()) else { return false };
-        resting.posted = true;
-        drop(resting);
+/// For a holder one of whose buffers gave storage back ([`ReleaseAtRest::release_burst`]
+/// answered `true`): registers the holder the first time (`registered` is its flag, `release`
+/// makes what releases its buffers, as [`register_resting_buffers`] takes it) and posts the job
+/// of the thread, unless it is posted already. Nothing on a thread without a dispatcher: its
+/// buffers stay at the limit they were taken down to.
+pub fn rest_after_burst<F: Fn() -> bool + 'static>(registered: &Cell<bool>, release: impl FnOnce() -> F) {
+    let Some(dispatcher) = Dispatcher::from_thread(std::thread::current().id()) else { return };
+    if !registered.replace(true) {
+        register_resting_buffers(release());
+    }
+    let post = RESTING.try_with(|resting| !std::mem::replace(&mut resting.borrow_mut().posted, true));
+    if post == Ok(true) {
         dispatcher.post_local(release_resting_buffers, DispatcherPriority::SYSTEM_IDLE);
-        true
-    });
-    posted.unwrap_or(false)
+    }
 }
 
 /// The job: every registered buffer of the thread that is empty is taken down to
@@ -227,9 +228,11 @@ pub fn release_free_pages() {
 
 #[cfg(test)]
 mod tests {
-    use super::{register_resting_buffers, release_resting_buffers, ReleaseAtRest, RESTING_BUFFER_BYTES};
+    use super::{
+        register_resting_buffers, release_resting_buffers, rest_after_burst, ReleaseAtRest, RESTING_BUFFER_BYTES,
+    };
     use crate::utilities::RETAINED_BUFFER_BYTES;
-    use std::cell::RefCell;
+    use std::cell::{Cell, RefCell};
     use std::rc::{Rc, Weak};
 
     #[test]
@@ -254,8 +257,9 @@ mod tests {
                 buffer.borrow_mut().release_at_rest();
                 true
             });
-            holder.borrow_mut().release_excess_later();
+            assert!(holder.borrow_mut().release_burst(), "the burst is given back to the limit");
             assert_eq!(holder.borrow().capacity(), RETAINED_BUFFER_BYTES);
+            assert!(!holder.borrow_mut().release_burst(), "a buffer within the limit is not touched");
 
             // The job takes it to the floor, and forgets the holder once it is gone.
             release_resting_buffers();
@@ -263,6 +267,20 @@ mod tests {
             drop(holder);
             release_resting_buffers();
             assert_eq!(super::RESTING.with(|resting| resting.borrow().holders.len()), 0);
+        })
+        .join()
+        .unwrap();
+    }
+
+    #[test]
+    fn a_holder_is_registered_after_a_burst_only_on_a_thread_with_a_dispatcher() {
+        // A thread without a dispatcher: nothing is registered, nothing is posted.
+        std::thread::spawn(|| {
+            let registered = Cell::new(false);
+            rest_after_burst(&registered, || || true);
+            assert!(!registered.get());
+            assert_eq!(super::RESTING.with(|resting| resting.borrow().holders.len()), 0);
+            assert!(!super::RESTING.with(|resting| resting.borrow().posted));
         })
         .join()
         .unwrap();

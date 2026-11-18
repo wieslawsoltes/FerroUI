@@ -50,12 +50,14 @@ pub struct LayoutManager {
     total_pass_count: Cell<i32>,
     layout_updated: HandlerList<dyn Fn()>,
     layout_pass_timed: RefCell<Option<Rc<dyn Fn(LayoutPassTiming)>>>,
+    /// Whether the manager is registered to have its queues released once a burst is over (#836).
+    resting: Cell<bool>,
 }
 
 impl LayoutManager {
     /// Creates a layout manager for a layout root.
     pub fn new(owner: Weak<dyn ILayoutRoot>) -> Rc<Self> {
-        let manager = Rc::new_cyclic(|this| Self {
+        Rc::new_cyclic(|this| Self {
             this: this.clone(),
             owner,
             to_measure: RefCell::new(LayoutQueue::new(|v| !v.is_measure_valid())),
@@ -71,20 +73,26 @@ impl LayoutManager {
             total_pass_count: Cell::new(0),
             layout_updated: HandlerList::new(),
             layout_pass_timed: RefCell::new(None),
-        });
-        // The queues of a pass over a large tree are released once the burst is over (#836).
-        let weak = Rc::downgrade(&manager);
-        crate::utilities::register_resting_buffers(move || {
-            let Some(manager) = weak.upgrade() else { return false };
-            if let Ok(mut queue) = manager.to_measure.try_borrow_mut() {
-                queue.release_at_rest();
+            resting: Cell::new(false),
+        })
+    }
+
+    /// After a pass over a large tree: the queues are released once the burst is over (#836,
+    /// `utilities::resting`); the manager is registered with the job of its thread the first time.
+    fn rest_after_burst(&self) {
+        crate::utilities::rest_after_burst(&self.resting, || {
+            let weak = self.this.clone();
+            move || {
+                let Some(manager) = weak.upgrade() else { return false };
+                if let Ok(mut queue) = manager.to_measure.try_borrow_mut() {
+                    queue.release_at_rest();
+                }
+                if let Ok(mut queue) = manager.to_arrange.try_borrow_mut() {
+                    queue.release_at_rest();
+                }
+                true
             }
-            if let Ok(mut queue) = manager.to_arrange.try_borrow_mut() {
-                queue.release_at_rest();
-            }
-            true
         });
-        manager
     }
 
     /// Whether a layout pass is currently executing.
@@ -495,8 +503,10 @@ impl ILayoutManager for LayoutManager {
                 }
             }
 
-            self.to_measure.borrow_mut().end_loop();
-            self.to_arrange.borrow_mut().end_loop();
+            let measure_burst = self.to_measure.borrow_mut().end_loop();
+            if self.to_arrange.borrow_mut().end_loop() | measure_burst {
+                self.rest_after_burst();
+            }
 
             if capture_timing {
                 let elapsed =

@@ -90,21 +90,21 @@ impl LoadedQueues {
     /// The queued controls in their order, the queue left empty.
     fn take(&mut self) -> Vec<Ref<Control>> {
         self.queued.clear();
-        // The first show of a large tree queues every control of it: the table is released once
-        // the burst is over (#836).
-        if !self.resting {
-            self.resting = true;
-            ferroui_base::utilities::register_resting_buffers(|| {
-                // The table of the thread lives as long as the thread.
-                let _ = LOADED.try_with(|loaded| {
-                    if let Ok(mut loaded) = loaded.try_borrow_mut() {
-                        loaded.queued.release_at_rest();
-                    }
-                });
-                true
+        // The first show of a large tree queues every control of it: the table is given back to
+        // what an emptied buffer keeps, and released further once the burst is over (#836).
+        if self.queued.release_burst() {
+            ferroui_base::utilities::rest_after_burst(std::cell::Cell::from_mut(&mut self.resting), || {
+                || {
+                    // The table of the thread lives as long as the thread.
+                    let _ = LOADED.try_with(|loaded| {
+                        if let Ok(mut loaded) = loaded.try_borrow_mut() {
+                            loaded.queued.release_at_rest();
+                        }
+                    });
+                    true
+                }
             });
         }
-        self.queued.release_excess_later();
         std::mem::take(&mut self.queue).into_iter().flatten().collect()
     }
 }
