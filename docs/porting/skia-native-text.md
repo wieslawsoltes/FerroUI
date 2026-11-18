@@ -60,7 +60,7 @@ bindings build (Skia m153, skia-safe 0.153.3, `external/rust-skia-bindings`).
   default of the axis: 357.129 is what Core Text gives at 12 points for that optical size), 10 to
   15 % narrower than the glyphs drawn up to 14 points. Now it is what Core Text gives for the
   instance of the typeface at every size.
-- Not done: the optical size. The system font has an `opsz` axis from 17 to 96 and Core Text
+- Not done (issue #859): the optical size. The system font has an `opsz` axis from 17 to 96 and Core Text
   moves along it with the size of the text (17 up to 17 points, the size above); a typeface of
   Skia stays at one optical size for every size, the one it was made at (17 here), and so do the
   glyphs drawn and now their advances. From 20 points up a line is therefore the text design at
