@@ -6,6 +6,7 @@ use ferroui_base::input::PointerType;
 use ferroui_base::media::Color;
 use ferroui_base::platform::{
     ColorContrastPreference, DefaultPlatformSettings, IPlatformSettings, PlatformColorValues, PlatformThemeVariant,
+    SystemColors,
 };
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::Size;
@@ -44,6 +45,31 @@ fn to_color_values(theme: FrnPlatformThemeVariant, accent_color: u32) -> Platfor
     }
 }
 
+/// The system colours of the native contrast extension (#560): the colours of the indices of
+/// `IFrnContrastSettings::GetSystemColor` (`windowBackgroundColor`, `labelColor`, `controlColor`,
+/// `controlTextColor`, `selectedContentBackgroundColor`, `alternateSelectedControlTextColor`,
+/// `linkColor`, `disabledControlTextColor`); `None` when the library answers none of an index.
+fn to_system_colors(color: impl Fn(i32) -> u32) -> Option<SystemColors> {
+    let mut colors = [Color::default(); 8];
+    for (index, slot) in colors.iter_mut().enumerate() {
+        let argb = color(index as i32);
+        if argb == 0 {
+            return None;
+        }
+        *slot = Color::from_uint32(argb);
+    }
+    let [window, window_text, button_face, button_text, highlight, highlight_text, hotlight, gray_text] = colors;
+    Some(
+        SystemColors::new(window, window_text)
+            .with_button_face(button_face)
+            .with_button_text(button_text)
+            .with_highlight(highlight)
+            .with_highlight_text(highlight_text)
+            .with_hotlight(hotlight)
+            .with_gray_text(gray_text),
+    )
+}
+
 /// The platform settings of the macOS backend.
 pub struct NativePlatformSettings {
     base: DefaultPlatformSettings,
@@ -52,6 +78,9 @@ pub struct NativePlatformSettings {
     /// The optional power extension of the native library: the low power mode (the energy
     /// saver of the material policy, docs/porting/winui-materials.md).
     power_settings: Option<ComPtr<IFrnPowerSettings>>,
+    /// The optional contrast extension of the native library: "Increase contrast" and the
+    /// system colours (#560).
+    contrast_settings: Option<ComPtr<IFrnContrastSettings>>,
     color_values: Cell<Option<PlatformColorValues>>,
     last_language: RefCell<Option<String>>,
 }
@@ -119,11 +148,13 @@ impl NativePlatformSettings {
     pub fn new(platform_settings: ComPtr<IFrnPlatformSettings>) -> Rc<NativePlatformSettings> {
         let accessibility_settings = platform_settings.cast::<IFrnAccessibilitySettings>().ok();
         let power_settings = platform_settings.cast::<IFrnPowerSettings>().ok();
+        let contrast_settings = platform_settings.cast::<IFrnContrastSettings>().ok();
         let this = Rc::new(NativePlatformSettings {
             base: DefaultPlatformSettings::new(),
             platform_settings,
             accessibility_settings,
             power_settings,
+            contrast_settings,
             color_values: Cell::new(None),
             last_language: RefCell::new(None),
         });
@@ -144,8 +175,26 @@ impl NativePlatformSettings {
         this
     }
 
+    /// The colour values of the system. High contrast is the high contrast appearances or
+    /// "Increase contrast" of the accessibility display options (#560, decision D11 of
+    /// docs/porting/winui-calculator-gaps.md); while it is on, the system colours under the
+    /// effective appearance come with it.
     fn get_uncached_color_values(&self) -> PlatformColorValues {
-        to_color_values(self.platform_settings.get_platform_theme(), self.platform_settings.get_accent_color())
+        let values =
+            to_color_values(self.platform_settings.get_platform_theme(), self.platform_settings.get_accent_color());
+        let Some(contrast) = &self.contrast_settings else {
+            return values;
+        };
+        let values = if contrast.get_increase_contrast() {
+            values.with_contrast_preference(ColorContrastPreference::High)
+        } else {
+            values
+        };
+        if values.is_high_contrast() {
+            values.with_system_colors(to_system_colors(|index| contrast.get_system_color(index)))
+        } else {
+            values
+        }
     }
 
     pub fn on_color_values_changed(&self) {
@@ -268,6 +317,8 @@ mod tests {
         callback: RefCell<Option<ComPtr<IFrnActionCallback>>>,
         low_power_mode: Cell<bool>,
         power_callback: RefCell<Option<ComPtr<IFrnActionCallback>>>,
+        increase_contrast: Cell<bool>,
+        system_colors: Cell<[u32; 8]>,
     }
 
     struct FakePlatformSettings {
@@ -299,6 +350,16 @@ mod tests {
 
         fn register_power_change(&self, callback: Option<&IFrnActionCallback>) {
             *self.accessibility.power_callback.borrow_mut() = callback.map(ComPtr::from_ref);
+        }
+    }
+
+    impl IFrnContrastSettingsImpl for FakePlatformSettings {
+        fn get_increase_contrast(&self) -> bool {
+            self.accessibility.increase_contrast.get()
+        }
+
+        fn get_system_color(&self, index: i32) -> u32 {
+            usize::try_from(index).ok().and_then(|index| self.accessibility.system_colors.get().get(index).copied()).unwrap_or(0)
         }
     }
 
@@ -404,6 +465,50 @@ mod tests {
         assert_eq!(seen.borrow().len(), 2);
         drop(settings);
         assert!(state.power_callback.borrow().is_none(), "drop unregisters the native power observer");
+    }
+
+    #[test]
+    fn increase_contrast_is_high_contrast_with_the_system_colors_and_is_raised_on_change() {
+        let state = Rc::new(AccessibilityState::default());
+        let scheme = [
+            0xFFFFFFFF, 0xFF000000, 0xFFFFFFFF, 0xFF000000, 0xFF0040DD, 0xFFFFFFFF, 0xFF0000EE, 0xFF5E5E5E,
+        ];
+        state.system_colors.set(scheme);
+        let native = make_com_with::<IFrnPlatformSettings, _, 2>(
+            FakePlatformSettings { accessibility: state.clone() },
+            [InterfaceEntry::of::<IFrnAccessibilitySettings>(), InterfaceEntry::of::<IFrnContrastSettings>()],
+        );
+        let settings = NativePlatformSettings::new(native);
+        // Off: no preference and no system colours.
+        assert!(!settings.get_color_values().is_high_contrast());
+        assert_eq!(settings.get_color_values().system_colors(), None);
+
+        let seen = Rc::new(RefCell::new(Vec::new()));
+        let _subscription = {
+            let seen = seen.clone();
+            settings.color_values_changed(Rc::new(move |values: &PlatformColorValues| seen.borrow_mut().push(*values)))
+        };
+        // "Increase contrast" turned on: the accessibility notification raises the colour values.
+        state.increase_contrast.set(true);
+        state.callback.borrow().clone().expect("native notification callback").run();
+        let values = settings.get_color_values();
+        assert!(values.is_high_contrast());
+        assert_eq!(values.theme_variant(), PlatformThemeVariant::Light);
+        let colors = values.system_colors().expect("the system colours");
+        assert_eq!(colors.window(), Color::from_uint32(0xFFFFFFFF));
+        assert_eq!(colors.window_text(), Color::from_uint32(0xFF000000));
+        assert_eq!(colors.highlight(), Color::from_uint32(0xFF0040DD));
+        assert_eq!(colors.hotlight(), Color::from_uint32(0xFF0000EE));
+        assert_eq!(colors.gray_text(), Color::from_uint32(0xFF5E5E5E));
+        assert_eq!(*seen.borrow(), [values]);
+
+        // A colour the library does not answer: no system colours (the theme's schemes apply).
+        assert_eq!(to_system_colors(|index| if index == 7 { 0 } else { 0xFF000000 }), None);
+
+        state.increase_contrast.set(false);
+        state.callback.borrow().clone().expect("native notification callback").run();
+        assert!(!settings.get_color_values().is_high_contrast());
+        assert_eq!(seen.borrow().len(), 2);
     }
 
     #[test]
