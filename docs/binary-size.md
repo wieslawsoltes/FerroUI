@@ -1295,26 +1295,51 @@ store and not a step.
   the release optimisation level without link-time optimisation, so the final link takes seconds
   instead of minutes. Its executables are somewhat larger and slower than release; benchmarks use
   release, and shipping uses `dist`.
-- `cargo build --profile dist` for what you ship (the workspace defines it; an application crate
-  outside the workspace copies it into its own manifest):
+- `cargo build --profile dist` for what you ship. **Profiles do not reach an application.** Cargo
+  reads the `[profile.*]` sections of the root manifest of the workspace that is built, and of no
+  other: an application that depends on the framework from crates.io, from a git dependency or
+  from a path into a checkout of this repository builds with its own profiles, and gets neither
+  `dist`, nor the abort on panic of `release` and `dist`, nor the per-crate levels below, unless its
+  own root `Cargo.toml` states them. An application in a repository of its own that has this one as
+  a submodule copies every `[profile.*]` section with `scripts/apps/sync-workspace.py`
+  (docs/apps.md, section 2); any other application copies them by hand:
 
   ```toml
+  [profile.release]
+  lto = "thin"
+  panic = "abort"
+
   [profile.dist]
   inherits = "release"
   lto = "fat"
   codegen-units = 1
   strip = "symbols"
+  panic = "abort"
+
+  # Compiled theme markup runs once: the theme crates it uses at "z" (section 4.14, #581).
+  [profile.dist.package.ferroui-themes-winui]
+  opt-level = "z"
+
+  [profile.dist.package.ferroui-themes-fluent]
+  opt-level = "z"
   ```
 
-  The build takes about four times as long as the release profile and its link step needs about
-  6 GB of memory. Keep the unstripped executable of a release if you need symbolised backtraces
-  from the field (on Windows keep the PDB).
+  A per-crate section names a package of the dependency graph; cargo warns about one the
+  application does not use, and the warning is harmless. `release-unwind` and `dist-unwind`
+  (`inherits` and `panic = "unwind"`) are for a program that catches panics to carry on, such as
+  a plug-in host. The `dist` build takes about four times as long as the release profile and its
+  link step needs about 6 GB of memory. Keep the unstripped executable of a release if you need
+  symbolised backtraces from the field (on Windows keep the PDB). The mobile packages take the
+  profile as an option: `scripts/android/apk.sh --profile dist` and `scripts/ios/bundle.sh
+  --profile dist`.
 - Depend only on the themes the application uses. A theme declared in a document, or registered in
   `register_types()`, is linked; a theme that is not named is not.
 - Keep theme trimming on (the default, section 4.11), leave the developer tools and the run-time
   loader out of the shipped build (they keep every unit), and
   name in `theme-roots` the controls and keys whose names the application builds at run time.
-- Leave the panic strategy alone: the framework catches panics in its render loop and dispatcher.
+- Keep `panic = "abort"` in `release` and `dist` (section 4.7): no path of the framework relies on
+  catching a panic; a panic runs the panic hook (install one for crash reports) and ends the
+  process.
 - `opt-level = "s"` for the whole program makes it about 15 % smaller still and costs about 19 % of
   processor time in layout and rendering (`docs/porting/desktop-performance.md`, section 4.1); it is
   not set by default. The browser profile uses it, with level 3 for the hot crates, because a

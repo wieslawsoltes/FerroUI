@@ -491,6 +491,50 @@ fn geo_map_hover_transitions_report_each_land() {
     assert!(events[2].is_empty());
 }
 
+/// GeoMapTests.GeoMap_TooltipFormatter_IsAppliedToEachValue through the chart: the custom tooltip
+/// of the source records the point it is shown; here a handler of `hover_changed` with the native
+/// tooltip hidden (`TooltipPosition::Hidden`) does. Hovering France with two series and the
+/// code-only `TooltipFormatter` of the map gives the formatted line of each value.
+#[test]
+fn geo_map_tooltip_formatter_writes_each_value_of_the_hovered_land() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let chart = crate::GeoMap::new().upcast::<Chart>();
+    chart.set_map_projection(ferroui_livecharts::MapProjection::Mercator);
+    for (name, value) in [("Pop", 67.5), ("GDP", 2937.0)] {
+        let series = crate::HeatLandSeries::new();
+        series.set_name(name.into());
+        series
+            .lands()
+            .add(crate::HeatLand::with_value("fra", value));
+        chart.series().add(series.upcast());
+    }
+    chart.set_tooltip_position(TooltipPosition::Hidden);
+    chart.set_tooltip_formatter(Some(crate::GeoTooltipFormatter::new(|value| {
+        format!("[{}] {:.1}", value.series_name, value.value)
+    })));
+    let _window = attach(&chart);
+    let shown = Rc::new(RefCell::new(Vec::new()));
+    let sink = shown.clone();
+    let _subscription = Subscription::new(chart.hover_changed(move |args| {
+        sink.borrow_mut().push(
+            args.points
+                .iter()
+                .map(|p| p.label.clone())
+                .collect::<Vec<_>>(),
+        )
+    }));
+    let paris = chart.project(2.35, 48.85).unwrap().unwrap();
+    moved(&chart, &mouse(), paris);
+    let shown = shown.borrow();
+    assert_eq!(shown.len(), 1);
+    assert_eq!(
+        shown[0],
+        vec!["France\n[Pop] 67.5\n[GDP] 2937.0".to_owned()]
+    );
+    let land = chart.find_land_at(paris).unwrap();
+    assert_eq!(land.values.len(), 2);
+}
+
 /// GeoMapAnimationTests.GeoMap_FirstDraw_LandColorsAppearAtFinalGradient and
 /// GeoMap_DataChange_LandColorsJumpToNewGradientPositions: the lands of a map take their colours
 /// at once; a map has no scene transition.
@@ -602,4 +646,60 @@ fn geo_map_wheel_zoom_and_drag_pan_follow_the_interaction_mode() {
     assert!((chart.zoom_level() - 0.8).abs() < 1e-9);
     chart.bounce_back();
     assert_eq!(chart.map_animation.borrow().len(), 1);
+}
+
+/// HeatSeriesAnimationTests.HeatSeries_FirstDraw_CellColorsInterpolateAcrossGradient: the four
+/// cells of the source, with axes from -0.5 to 1.5, keep their rectangles
+/// while their colours come in from transparent at the first draw, and end at distinct colours
+/// of the gradient.
+#[test]
+fn heat_cells_take_their_colours_at_the_first_draw() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let chart = Chart::new();
+    chart.set_animations_speed(1000.0);
+    let series = crate::HeatSeries::new();
+    series.set_coordinates([
+        ferroui_livecharts::kernel::Coordinate::weighted(0.0, 0.0, 1.0),
+        ferroui_livecharts::kernel::Coordinate::weighted(1.0, 0.0, 5.0),
+        ferroui_livecharts::kernel::Coordinate::weighted(0.0, 1.0, 3.0),
+        ferroui_livecharts::kernel::Coordinate::weighted(1.0, 1.0, 9.0),
+    ]);
+    chart.series().add(series.upcast());
+    for axes in [chart.x_axes(), chart.y_axes()] {
+        axes.add(Axis::new());
+        axes.get(0).set_min_limit(Some(-0.5));
+        axes.get(0).set_max_limit(Some(1.5));
+    }
+    let start = Dispatcher::ui_thread().now() as f64;
+    let _window = attach(&chart);
+    let target = chart.scene(chart.bounds().size()).unwrap();
+    let cells = |scene: &Scene| -> Vec<(Rect, Color)> {
+        scene
+            .primitives
+            .iter()
+            .filter_map(|p| match (&p.geometry, p.id) {
+                (ferroui_livecharts::Geometry::Rectangle { rect, .. }, Some(id))
+                    if id.series == 0 =>
+                {
+                    Some((*rect, p.style.fill.unwrap()))
+                }
+                _ => None,
+            })
+            .collect()
+    };
+    let end = cells(&target);
+    assert_eq!(end.len(), 4);
+    let middle = cells(&chart.presentation_scene(start + 500.0, target.clone()));
+    assert_eq!(middle.len(), 4);
+    for ((rect, color), (end_rect, end_color)) in middle.iter().zip(&end) {
+        assert_eq!(rect, end_rect, "the cells do not move");
+        assert!(
+            color.a > 0 && color.a < end_color.a,
+            "the colour comes in: {color:?}"
+        );
+    }
+    assert_ne!(
+        end[0].1, end[3].1,
+        "the lowest and highest weights take distinct colours"
+    );
 }

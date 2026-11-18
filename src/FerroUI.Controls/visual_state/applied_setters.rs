@@ -49,14 +49,14 @@ impl AppliedSetters {
 /// root and the elements under it) when the groups are on the root of a template, else the name
 /// scope of the document (the nearest of the element and its logical ancestors: the content of a
 /// document has no scope of its own, and its document root has the scope of the document).
-enum Names {
+pub(crate) enum Names {
     Template(Ref<Control>, Ref<crate::primitives::TemplatedControl>),
     Scope(NameScopeRef),
     None,
 }
 
 impl Names {
-    fn of(template_root: &Ref<Control>) -> Self {
+    pub(crate) fn of(template_root: &Ref<Control>) -> Self {
         // An element created by a template has the templated control as its templated parent.
         let templated =
             template_root.templated_parent().and_then(|parent| parent.cast::<crate::primitives::TemplatedControl>());
@@ -71,7 +71,7 @@ impl Names {
         }
     }
 
-    fn find(&self, name: &str) -> Option<Ref<FerroObject>> {
+    pub(crate) fn find(&self, name: &str) -> Option<Ref<FerroObject>> {
         match self {
             Names::Template(root, templated) => {
                 if root.name().as_deref() == Some(name) {

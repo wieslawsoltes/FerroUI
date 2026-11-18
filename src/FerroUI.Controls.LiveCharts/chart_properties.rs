@@ -5,7 +5,7 @@ use crate::{
 };
 use ferroui_base::media::Color;
 use ferroui_base::{ferro_properties, FerroProperty, Rect, Ref, StyledProperty};
-use ferroui_livecharts::{DrawnMap, FindingStrategy, MapProjection, Section};
+use ferroui_livecharts::{DrawnMap, FindingStrategy, GeoTooltipFormatter, MapProjection, Section};
 use std::rc::Rc;
 ferro_properties! { impl Chart {
     pub fn chart_kind_property() -> StyledProperty<ChartKind> {
@@ -124,6 +124,9 @@ ferro_properties! { impl Chart {
     }
     pub fn legend_property() -> StyledProperty<Option<Ref<ChartLegend>>> {
         FerroProperty::register::<Chart, _>("Legend", None)
+    }
+    pub fn tooltip_formatter_property() -> StyledProperty<Option<GeoTooltipFormatter>> {
+        FerroProperty::register::<Chart, _>("TooltipFormatter", None)
     }
 } }
 impl Chart {
@@ -360,5 +363,11 @@ impl Chart {
     }
     pub fn set_legend(&self, value: Option<Ref<ChartLegend>>) {
         self.set_value(Self::legend_property(), value);
+    }
+    pub fn tooltip_formatter(&self) -> Option<GeoTooltipFormatter> {
+        self.get_value(Self::tooltip_formatter_property())
+    }
+    pub fn set_tooltip_formatter(&self, value: Option<GeoTooltipFormatter>) {
+        self.set_value(Self::tooltip_formatter_property(), value);
     }
 }
