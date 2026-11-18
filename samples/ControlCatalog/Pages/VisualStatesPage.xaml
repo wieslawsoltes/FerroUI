@@ -64,5 +64,47 @@
     </Border>
 
     <TextBlock x:Name="CurrentStates" Text="CommonStates: (none), SizeStates: (none)"/>
+
+    <!-- A button template written as WinUI writes it, with visual states: the state mapper of the
+         button drives CommonStates from its pointer and pressed state; the setters, the storyboard
+         and the generated transition animate the template (docs/porting/winui-calculator-gaps.md,
+         VSM-3 to VSM-5). -->
+    <TextBlock TextWrapping="Wrap" Margin="0,16,0,0"
+               Text="A button whose template has visual states: point at it and press it. The button goes to Normal, PointerOver and Pressed by itself; a storyboard fades it while it is pressed, and a transition of 0.15 seconds animates between the states." />
+    <StackPanel Orientation="Horizontal" Spacing="8">
+      <Button x:Name="StatesButton" Content="Templated with visual states">
+        <Button.Template>
+          <ControlTemplate>
+            <Border x:Name="Root" Background="#FFE5E5E5" CornerRadius="4" Padding="12,6">
+              <VisualStateManager.VisualStateGroups>
+                <VisualStateGroup x:Name="CommonStates">
+                  <VisualStateGroup.Transitions>
+                    <VisualTransition GeneratedDuration="0:0:0.15"/>
+                  </VisualStateGroup.Transitions>
+                  <VisualState x:Name="Normal"/>
+                  <VisualState x:Name="PointerOver">
+                    <VisualState.Setters>
+                      <Setter Target="Root.Opacity" Value="0.85"/>
+                    </VisualState.Setters>
+                  </VisualState>
+                  <VisualState x:Name="Pressed">
+                    <Storyboard>
+                      <DoubleAnimation Storyboard.TargetName="Root" Storyboard.TargetProperty="Opacity"
+                                       To="0.6" Duration="0:0:0.1"/>
+                    </Storyboard>
+                  </VisualState>
+                  <VisualState x:Name="Disabled">
+                    <VisualState.Setters>
+                      <Setter Target="Root.Opacity" Value="0.4"/>
+                    </VisualState.Setters>
+                  </VisualState>
+                </VisualStateGroup>
+              </VisualStateManager.VisualStateGroups>
+              <ContentPresenter Content="{TemplateBinding Content}"/>
+            </Border>
+          </ControlTemplate>
+        </Button.Template>
+      </Button>
+    </StackPanel>
   </StackPanel>
 </ContentPage>
