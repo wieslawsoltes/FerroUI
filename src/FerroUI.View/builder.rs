@@ -354,6 +354,9 @@ impl<T: ViewClass> Default for El<T> {
     }
 }
 
+/// The values the list of an element has room for when it gets its first.
+const PROPS_AT_FIRST: usize = 8;
+
 /// The part of a builder the generated setters use.
 pub trait ElementBuilder: Sized {
     /// The element being built.
@@ -365,6 +368,11 @@ pub trait ElementBuilder: Sized {
         let property = property.untyped();
         let value = value.into_prop();
         let props = &mut self.element_mut().props;
+        if props.capacity() == 0 {
+            // Room for the values an element usually has, taken once: a list that grows from
+            // nothing asks for room three times on the way to eight values.
+            props.reserve(PROPS_AT_FIRST);
+        }
         props.retain(|entry| !std::ptr::eq(entry.property, property));
         props.push(PropEntry { property, value });
         self

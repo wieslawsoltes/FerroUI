@@ -681,6 +681,10 @@ pub(crate) struct ComponentInstance {
 
 /// Elements in a list, with fragments taken apart and nothing left out.
 pub(crate) fn flatten(children: Vec<Element>) -> Vec<Element> {
+    // The children of most elements are elements already: the list is the one given.
+    if !children.iter().any(|child| matches!(child, Element::Fragment(_) | Element::List(_) | Element::Empty)) {
+        return children;
+    }
     let mut flat = Vec::with_capacity(children.len());
     for child in children {
         match child {
