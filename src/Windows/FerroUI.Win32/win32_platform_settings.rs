@@ -609,7 +609,8 @@ mod tests {
 
         // The high contrast action of SystemParametersInfo, with or without a name.
         assert_eq!(setting_change_of(SPI_SETHIGHCONTRAST, None), Some(SettingChange::ColorValues));
-        assert_eq!(setting_change_of(SPI_SETHIGHCONTRAST, Some("WindowsThemeElement")), Some(SettingChange::ColorValues));
+        let named = setting_change_of(SPI_SETHIGHCONTRAST, Some("WindowsThemeElement"));
+        assert_eq!(named, Some(SettingChange::ColorValues));
         assert_eq!(setting_change_of(0, Some("intl")), Some(SettingChange::Language));
         assert_eq!(setting_change_of(0x002F, None), None);
     }
@@ -635,7 +636,8 @@ mod tests {
         // The high contrast values carry them; an unchanged scheme compares equal.
         let values = high_contrast_color_values(Some("High Contrast Black"), ACCENT).with_system_colors(Some(black));
         assert_eq!(values.system_colors(), Some(SystemColors::high_contrast_black()));
-        assert_eq!(values, high_contrast_color_values(Some("High Contrast Black"), ACCENT).with_system_colors(Some(black)));
+        let again = high_contrast_color_values(Some("High Contrast Black"), ACCENT).with_system_colors(Some(black));
+        assert_eq!(values, again);
         assert_eq!(SYS_COLOR_INDICES.len(), 8);
     }
 }
