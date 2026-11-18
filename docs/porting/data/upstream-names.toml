@@ -308,7 +308,7 @@ phase = "C3"
 pull = 466
 deprecated = "ferroui_wayland::FerroWaylandException"
 behaviour = "same"
-notes = "Its kind is ferroui_wayland::ferro_wayland_exception::FerroWaylandErrorKind (was FerroWaylandExceptionKind); the derived classes are still the factories FerroWaylandPollException and the others."
+notes = "Its kind is ferroui_wayland::ferro_wayland_exception::FerroWaylandErrorKind (was FerroWaylandExceptionKind). The derived classes are its constructors poll, network, flush and flush_errno, read and read_errno, protocol_error and protocol_error_with_code (0.5.1); the factories FerroWaylandPollException and the others are deprecated since 0.5.1."
 
 [[name]]
 upstream = "Avalonia.X11.X11Exception"
