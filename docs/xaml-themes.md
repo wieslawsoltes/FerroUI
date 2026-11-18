@@ -215,6 +215,20 @@ use, and nothing that is remembered is dropped for it.
 The deviation from upstream, which matches every child style against every element, is recorded
 in [docs/porting/desktop-performance.md](porting/desktop-performance.md), section 9.26.
 
+### 2.5 Typed construction programs (opt-in)
+
+`Build::xaml_backend` (or `FERROUI_XAML_BACKEND` read by `Build::from_env`) selects how the
+operations the compiler resolved are emitted. `native`, the default, is the generated code of
+section 2.1. `theme-bytecode` encodes resource runs and recognised control styles as instruction
+streams; `bytecode` also encodes construction, resolved calls, staged setters, the extracted
+theme unit runs and compiled binding paths of pages and templates. The streams are constant
+arrays of the generated Rust (a Cargo build packs a module's streams in `OUT_DIR` and embeds them
+with `include_bytes!`); the typed imports they call are what the linker reaches, so units and
+trimming (section 3) are unchanged, and a shape the encoder does not recognise stays native. The
+checked-in references of section 2 are native output: with another backend their comparison
+tests fail by design. Design, coverage and measurements:
+[docs/porting/typed-xaml.md](porting/typed-xaml.md).
+
 ## 3. Units and theme trimming
 
 **Units.** The documents a theme merges (`MergeResourceInclude`) are each a unit, such as
