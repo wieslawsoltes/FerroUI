@@ -325,6 +325,32 @@ that no table naming classes is reachable from code outside the units.
   Diagnostics. Looking types up by name (`type-tables`) does not keep every unit:
   `ferroui-view` and the behaviors only need the lookup, and their applications are trimmed.
 
+**What the registration of a crate keeps (#857).** `compiled_markup::register()` registers the
+loader table of the crate and its embedded assets. Without a plan the loader table answers
+every public document of every exported group and the asset table holds every embedded asset,
+so a load by URI keeps every build function and every payload. A crate that loads a known set
+of documents by URI and reads a known set of assets states it in its build script:
+
+```rust
+ferroui_build::Build::from_env()
+    .export_plan(
+        ferroui_build::ExportPlan::closed()
+            .document("ferres://myapp/Views/Settings.xaml")
+            .asset("/Assets/logo.png"),
+    )
+    .run();
+```
+
+The loader table then answers only the listed documents, each through its own build function
+(or the loader of its class), after the checked-in tables, with the same comparison without
+regard to case and the same root service provider; the asset table holds only the listed
+assets. A listed URI that is not a public document of an exported group, and a listed asset the
+crate does not embed, fail the build. Code that names a document's build function or class
+still links it. A library whose documents others load by URI keeps the default
+(`ExportPlan::all()`). Either way the build writes `$OUT_DIR/xaml/exports.txt`: every compiled
+document with its build or populate path, whether it is public and whether the loader table
+answers it, and every embedded asset with its size and whether it is registered.
+
 **When a unit is missing.** A debug build logs it once ("... was trimmed") with the control's
 name, the first time the control looks for its theme. Release builds do not check.
 
@@ -509,6 +535,7 @@ Documents loaded at run time bind the way the built application does (#604):
 | Root tables, `with_parts`, debug diagnostic (step 3) | #568, #598 | On `main` |
 | `with_parts` only for a class that has it (the capability in its type model); one allocator for generated names | #849 | In review |
 | Roots from code: creates edges, source names and literals (step 4) | #568, #600 | On `main` |
+| A closed export plan of the documents and assets a crate registers (`Build::export_plan`, opt-in); `exports.txt` | #857 | In review, to be measured |
 | Roots from the dependencies' documents; `full-themes` as the keep-all switch | #602 | On `main` |
 | Theme trimming on by default (`theme-trimming = false` to turn off) | #602 | On `main` |
 | Control theme tables, selector slices, StaticResource setter helper, template binding runs (step 5) | #568, #607 | On `main` |
