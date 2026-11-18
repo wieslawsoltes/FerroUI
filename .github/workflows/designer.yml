@@ -32,6 +32,11 @@ on:
       - 'Cargo.lock'
       - '.github/workflows/designer.yml'
   workflow_dispatch:
+    inputs:
+      installed-vsix:
+        description: Install release-helper VSIX packages on all three hosts
+        type: boolean
+        default: false
 
 concurrency:
   group: designer-${{ github.ref }}
@@ -50,6 +55,7 @@ env:
 jobs:
   portable:
     name: Portable engines (${{ matrix.os }}, Rust ${{ matrix.rust }})
+    if: github.event_name != 'workflow_dispatch' || !inputs.installed-vsix
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -77,6 +83,7 @@ jobs:
 
   native:
     name: Native studio, MCP and render smoke
+    if: github.event_name != 'workflow_dispatch' || !inputs.installed-vsix
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -134,7 +141,7 @@ jobs:
 
   packaged-vscode:
     name: Installed VS Code package (${{ matrix.os }})
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' && inputs.installed-vsix
     runs-on: ${{ matrix.os }}
     timeout-minutes: 120
     strategy:
