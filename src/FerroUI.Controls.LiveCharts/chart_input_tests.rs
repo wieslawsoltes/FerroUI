@@ -491,6 +491,50 @@ fn geo_map_hover_transitions_report_each_land() {
     assert!(events[2].is_empty());
 }
 
+/// GeoMapTests.GeoMap_TooltipFormatter_IsAppliedToEachValue through the chart: the custom tooltip
+/// of the source records the point it is shown; here a handler of `hover_changed` with the native
+/// tooltip hidden (`TooltipPosition::Hidden`) does. Hovering France with two series and the
+/// code-only `TooltipFormatter` of the map gives the formatted line of each value.
+#[test]
+fn geo_map_tooltip_formatter_writes_each_value_of_the_hovered_land() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let chart = crate::GeoMap::new().upcast::<Chart>();
+    chart.set_map_projection(ferroui_livecharts::MapProjection::Mercator);
+    for (name, value) in [("Pop", 67.5), ("GDP", 2937.0)] {
+        let series = crate::HeatLandSeries::new();
+        series.set_name(name.into());
+        series
+            .lands()
+            .add(crate::HeatLand::with_value("fra", value));
+        chart.series().add(series.upcast());
+    }
+    chart.set_tooltip_position(TooltipPosition::Hidden);
+    chart.set_tooltip_formatter(Some(crate::GeoTooltipFormatter::new(|value| {
+        format!("[{}] {:.1}", value.series_name, value.value)
+    })));
+    let _window = attach(&chart);
+    let shown = Rc::new(RefCell::new(Vec::new()));
+    let sink = shown.clone();
+    let _subscription = Subscription::new(chart.hover_changed(move |args| {
+        sink.borrow_mut().push(
+            args.points
+                .iter()
+                .map(|p| p.label.clone())
+                .collect::<Vec<_>>(),
+        )
+    }));
+    let paris = chart.project(2.35, 48.85).unwrap().unwrap();
+    moved(&chart, &mouse(), paris);
+    let shown = shown.borrow();
+    assert_eq!(shown.len(), 1);
+    assert_eq!(
+        shown[0],
+        vec!["France\n[Pop] 67.5\n[GDP] 2937.0".to_owned()]
+    );
+    let land = chart.find_land_at(paris).unwrap();
+    assert_eq!(land.values.len(), 2);
+}
+
 /// GeoMapAnimationTests.GeoMap_FirstDraw_LandColorsAppearAtFinalGradient and
 /// GeoMap_DataChange_LandColorsJumpToNewGradientPositions: the lands of a map take their colours
 /// at once; a map has no scene transition.

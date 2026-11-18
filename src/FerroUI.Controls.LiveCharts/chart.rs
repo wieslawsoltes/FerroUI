@@ -31,7 +31,8 @@ use ferroui_livecharts::{
     FindingStrategy, GeoLand, GeoMapChartEngine, GeoMapMeasurement, GeoMapOptions,
     GeographicBounds, HeatLegendSource, HitRegion, MapViewport, Maps, PieChartEngine, PieOptions, PointId,
     PolarChartEngine, PolarOptions, PolarScale, PolarToolTipLabelFormatters, SankeyChartEngine,
-    SankeyOptions, Scene, TreemapChartEngine, TreemapOptions, ZoomDirection,
+    SankeyOptions, SankeySeriesOptions, Scene, TreemapChartEngine, TreemapOptions,
+    TreemapSeriesOptions, ZoomDirection,
 };
 use std::{
     cell::{Cell, OnceCell, RefCell},
@@ -843,14 +844,26 @@ impl Chart {
                     .zip(&series)
                     .map(|(model, s)| crate::node_models::sankey_series(model, s.clone()))
                     .collect::<Result<Vec<_>, _>>()?;
+                // The `DataLabelsMaxWidth` of each series.
+                let sankey_options: Vec<_> = models
+                    .iter()
+                    .map(|model| {
+                        let mut options = SankeySeriesOptions::default();
+                        options.data_labels_max_width = model
+                            .cast::<crate::SankeySeries>()
+                            .map(|s| s.data_labels_max_width());
+                        options
+                    })
+                    .collect();
                 (
-                    SankeyChartEngine::measure_with_labels(
+                    SankeyChartEngine::measure_with_series_options(
                         size,
                         &sankey,
                         &SankeyOptions {
                             draw_margin: margin,
                         },
                         crate::decorations::text_size,
+                        &sankey_options,
                     )?,
                     Vec::new(),
                     Vec::new(),
@@ -862,14 +875,25 @@ impl Chart {
                     .zip(&series)
                     .map(|(model, s)| crate::node_models::treemap_series(model, s.clone()))
                     .collect::<Result<Vec<_>, _>>()?;
+                let treemap_options: Vec<_> = models
+                    .iter()
+                    .map(|model| {
+                        let mut options = TreemapSeriesOptions::default();
+                        options.data_labels_max_width = model
+                            .cast::<crate::TreemapSeries>()
+                            .map(|s| s.data_labels_max_width());
+                        options
+                    })
+                    .collect();
                 (
-                    TreemapChartEngine::measure_with_labels(
+                    TreemapChartEngine::measure_with_series_options(
                         size,
                         &treemap,
                         &TreemapOptions {
                             draw_margin: margin,
                         },
                         crate::decorations::text_size,
+                        &treemap_options,
                     )?,
                     Vec::new(),
                     Vec::new(),
@@ -887,12 +911,15 @@ impl Chart {
                     .collect();
                 let active = self.active_map();
                 let map: &DrawnMap = active.as_deref().unwrap_or_else(|| Maps::world_map());
-                let mut measured = GeoMapChartEngine::measure(
+                // The `TooltipFormatter` of the map writes the value lines of its tooltips.
+                let tooltip_formatter = self.tooltip_formatter();
+                let mut measured = GeoMapChartEngine::measure_with_tooltip_formatter(
                     size,
                     map,
                     &heat,
                     &markers,
                     &self.geo_options(margin),
+                    tooltip_formatter.as_ref(),
                 )?;
                 let scene = std::mem::replace(&mut measured.scene, Scene::new(size, viewport));
                 geo = Some(measured);
