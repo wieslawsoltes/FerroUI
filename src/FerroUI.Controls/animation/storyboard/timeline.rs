@@ -31,7 +31,7 @@ pub struct Timeline {
 }
 
 ferro_class!(Timeline: FerroObject);
-ferro_class_info!(Timeline { markup: { namespace: "FerroUI.Animation" } });
+ferro_class_info!(Timeline { markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(Timeline: FerroObjectImpl);
 
 ferro_properties! { impl Timeline {
