@@ -8,6 +8,7 @@ import { DesignerPanel, type DesignerCanvasState } from './designerPanel';
 import { DesignerDrag } from './designerDrag';
 import { DESIGNER_VIEW, restoredDesigner } from './designerViewState';
 import { DockView } from './dockView';
+import { LIBRARY_VIEW, LibraryView } from './libraryView';
 import { OutlineView } from './outlineView';
 import { choosePlacement } from './placementPicker';
 import { SelectionInspection } from './selectionInspection';
@@ -29,7 +30,8 @@ import { toolboxHtml, webviewOptions } from './view';
 const OUTLINE_VIEW = 'ferroui.outline';
 const TOOLBOX_VIEW = 'ferroui.toolbox';
 const docks = { outline: OUTLINE_VIEW, properties: PROPERTIES_VIEW, toolbox: TOOLBOX_VIEW,
-    assets: ASSETS_VIEW, events: EVENTS_VIEW, resources: RESOURCES_VIEW, studio: 'ferroui.studio', timeline: TIMELINE_VIEW, data: DATA_VIEW } as const;
+    assets: ASSETS_VIEW, events: EVENTS_VIEW, resources: RESOURCES_VIEW, studio: 'ferroui.studio', timeline: TIMELINE_VIEW,
+    data: DATA_VIEW, library: LIBRARY_VIEW } as const;
 
 export class DesignerWorkbench implements vscode.Disposable {
     private readonly panels = new Map<string, DesignerPanel>();
@@ -44,6 +46,7 @@ export class DesignerWorkbench implements vscode.Disposable {
     private readonly studio: StudioView;
     private readonly timeline: TimelineView;
     private readonly data: DesignDataView;
+    private readonly library: LibraryView;
     private readonly drag = new DesignerDrag(update => {
         this.outline.post(update);
         this.toolbox.post(update);
@@ -83,6 +86,7 @@ export class DesignerWorkbench implements vscode.Disposable {
         this.studio = new StudioView(changed);
         this.timeline = new TimelineView(context.extensionUri, changed);
         this.data = new DesignDataView(context.extensionUri, changed);
+        this.library = new LibraryView(changed);
         const snippets = vscode.workspace.createFileSystemWatcher('**/.ferroui/toolbox/*.xaml');
         const xaml = vscode.workspace.createFileSystemWatcher('**/*.[xX][aA][mM][lL]');
         const refreshResources = (uri: vscode.Uri) => {
@@ -121,6 +125,7 @@ export class DesignerWorkbench implements vscode.Disposable {
             vscode.commands.registerCommand('ferroui.showAssets', (session?: number) => this.showDock(ASSETS_VIEW, session)),
             vscode.commands.registerCommand('ferroui.showTimeline', (session?: number) => this.showDock(TIMELINE_VIEW, session)),
             vscode.commands.registerCommand('ferroui.showData', (session?: number) => this.showDock(DATA_VIEW, session)),
+            vscode.commands.registerCommand('ferroui.showLibrary', (session?: number) => this.showDock(LIBRARY_VIEW, session)),
             vscode.commands.registerCommand('ferroui.rsx.renameControl', async () => {
                 try {
                     const editor = vscode.window.activeTextEditor;
@@ -258,11 +263,12 @@ export class DesignerWorkbench implements vscode.Disposable {
         const panel = this.active;
         panel?.setInspected(this.outline.visible || this.properties.visible || this.toolbox.visible
             || this.details.events.visible || this.details.resources.visible || this.assets.view.visible || this.studio.visible
-            || this.timeline.view.visible || this.data.view.visible);
+            || this.timeline.view.visible || this.data.view.visible || this.library.visible);
         const file = panel ? vscode.workspace.asRelativePath(panel.document.uri, false) : '';
         this.studio.update(panel, file);
         this.timeline.update(panel, file);
         this.data.update(panel, file);
+        this.library.update(panel, file);
         const token = panel?.currentToken;
         const node = panel?.selectedNode;
         const frame = panel && token !== undefined && !panel.status ? { session: panel.session, token } : undefined;
@@ -428,6 +434,7 @@ export class DesignerWorkbench implements vscode.Disposable {
         this.studio.dispose();
         this.timeline.dispose();
         this.data.dispose();
+        this.library.dispose();
         const panels = [...this.panels.values()];
         this.panels.clear();
         this.active = undefined;

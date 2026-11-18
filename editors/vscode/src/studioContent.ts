@@ -1,6 +1,6 @@
 import { action, choose, editText, type StudioContext, type StudioItem } from './studioContext';
 
-interface Component { node: number; display_name: string; kind: string; key: string | null; usages: number }
+import { componentActions, componentKind, findDefinition, readLibrary } from './studioLibrary';
 interface DesignValue { name: string; value: string; object: boolean }
 
 export function contentSections(context: StudioContext): StudioItem[] {
@@ -11,22 +11,12 @@ export function contentSections(context: StudioContext): StudioItem[] {
 }
 
 async function library(context: StudioContext): Promise<StudioItem[]> {
-    const { components } = await context.read<{ components: Component[] }>('designer_components');
+    const { components } = await readLibrary(context);
     const items: StudioItem[] = components.map(component => ({
         id: `component:${component.node}`,
         label: component.display_name,
-        description: component.usages ? `${component.kind} · ${component.usages} uses` : component.kind,
-        run: async () => {
-            const options = [
-                { label: 'Reveal definition in source', run: () => context.reveal(component.node) },
-                { label: 'Preview definition', run: () => context.present('designer_definition', { action: 'enter', node: component.node }) },
-            ];
-            if (context.writable && component.key) options.push({ label: 'Rename resource and its references', run: async () => {
-                const key = await editText('New resource key', component.key!);
-                if (key && key !== component.key) await context.edit('designer_component', { action: 'rename_resource', resource: component.node, key });
-            } });
-            await (await choose(component.display_name, options))?.run();
-        },
+        description: component.usages ? `${componentKind(component.kind)} · ${component.usages} uses` : componentKind(component.kind),
+        run: async () => { await (await choose(component.display_name, componentActions(context, component)))?.run?.(); },
     }));
     const owner = context.node;
     if (components.length) items.unshift(action('component:find', 'Find Definition…', () => findDefinition(context, components), 'search'));
@@ -38,15 +28,6 @@ async function library(context: StudioContext): Promise<StudioItem[]> {
         if (source) await context.edit('designer_component', { action: 'create_resource', owner, key, source });
     }, 'add'));
     return items.length ? items : [{ id: 'component:empty', label: 'No definitions in this design' }];
-}
-
-export async function findDefinition(context: StudioContext, components?: Component[]): Promise<void> {
-    const available = components ?? (await context.read<{ components: Component[] }>('designer_components')).components;
-    if (!available.length) throw new Error('This design has no authored definitions.');
-    const selected = await choose('Find FerroUI Definition', available.map(component => ({
-        label: component.display_name, description: [component.kind, component.key].filter(Boolean).join(' · '), component,
-    })));
-    if (selected) await context.present('designer_definition', { action: 'enter', node: selected.component.node });
 }
 
 async function data(context: StudioContext): Promise<StudioItem[]> {

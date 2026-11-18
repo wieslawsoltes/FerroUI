@@ -112,6 +112,7 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
     <button type="button" id="menu-studio">Show Studio Tools</button>
     <button type="button" id="menu-timeline">Show Animation Timeline</button>
     <button type="button" id="menu-data">Show Design Data</button>
+    <button type="button" id="menu-library">Show Library</button>
     <button type="button" id="menu-focus-order" aria-pressed="false" disabled>Focus Order Overlay</button>
     <button type="button" class="compact-action" id="menu-refresh">Refresh preview</button>
 </div>`);

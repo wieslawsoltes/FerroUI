@@ -179,6 +179,12 @@
         "icon": "$(database)"
       },
       {
+        "command": "ferroui.showLibrary",
+        "title": "Show Library",
+        "category": "FerroUI",
+        "icon": "$(library)"
+      },
+      {
         "command": "ferroui.studio.findDefinition",
         "title": "Find Definition in Designer",
         "category": "FerroUI",
@@ -297,6 +303,11 @@
         {
           "command": "ferroui.revealDesignerSource",
           "when": "view == ferroui.outline",
+          "group": "navigation"
+        },
+        {
+          "command": "ferroui.studio.findDefinition",
+          "when": "view == ferroui.library",
           "group": "navigation"
         },
         {
@@ -564,6 +575,13 @@
           "name": "Data",
           "icon": "dist/icons/preview.svg",
           "contextualTitle": "FerroUI Design Data",
+          "visibility": "collapsed"
+        },
+        {
+          "id": "ferroui.library",
+          "name": "Library",
+          "icon": "dist/icons/library.svg",
+          "contextualTitle": "FerroUI Component Library",
           "visibility": "collapsed"
         }
       ]

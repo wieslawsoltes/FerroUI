@@ -529,7 +529,7 @@ export class DesignerPanel implements vscode.Disposable {
         if (message.type === 'dock') {
             const commands = { outline: 'ferroui.showOutline', properties: 'ferroui.showProperties', toolbox: 'ferroui.showToolbox',
                 events: 'ferroui.showEvents', resources: 'ferroui.showResources', assets: 'ferroui.showAssets',
-                studio: 'ferroui.showStudio', timeline: 'ferroui.showTimeline', data: 'ferroui.showData' } as const;
+                studio: 'ferroui.showStudio', timeline: 'ferroui.showTimeline', data: 'ferroui.showData', library: 'ferroui.showLibrary' } as const;
             await vscode.commands.executeCommand(commands[message.view], this.session);
             return;
         }
