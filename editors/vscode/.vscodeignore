@@ -1,6 +1,7 @@
 **
 !dist/designer.js
 !dist/extension.js
+!dist/THIRD-PARTY-NOTICES.txt
 !media/designer.css
 !syntaxes/ferroui-xaml.tmLanguage.json
 !bin/ferroui-xaml-lsp

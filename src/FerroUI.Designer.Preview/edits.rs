@@ -201,7 +201,7 @@ fn addable(design: &DesignDocument<'_>, node: &Node, name: &str) -> bool {
         && schema()
             .property(node.local_name(), node.namespace_uri.as_deref(), name)
             .is_some_and(|info| !info.read_only && !info.event)
-        && !(name == "Content" && !node.children.is_empty())
+        && (name != "Content" || node.children.is_empty())
 }
 
 pub(crate) fn addable_properties(design: &DesignDocument<'_>, node: &Node) -> Vec<String> {
