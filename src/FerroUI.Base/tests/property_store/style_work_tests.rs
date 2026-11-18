@@ -94,6 +94,9 @@ fn actual_theme_change_stops_at_local_override() {
     let property = ThemeVariant::actual_theme_variant_property();
     wall.root.set_value(property, Some(ThemeVariant::light()));
     wall.children[0].set_value(property, Some(ThemeVariant::light()));
+    // A probe has no handler for the theme variant: the change is raised on the child the walk
+    // reaches because something listens there (section 9.101 of desktop-performance.md).
+    wall.children[1].add_property_changed_handler(Rc::new(|_| {}));
     let before = perf_counters::snapshot();
 
     wall.root.set_value(property, Some(ThemeVariant::dark()));
