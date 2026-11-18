@@ -17,8 +17,10 @@ use crate::harness::Registry;
 
 pub mod control_read;
 pub mod control_write;
+pub mod font_family_made;
 
 pub fn register(registry: &mut Registry) {
     control_read::register(registry);
     control_write::register(registry);
+    font_family_made::register(registry);
 }
