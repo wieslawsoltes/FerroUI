@@ -1,9 +1,41 @@
 //! The settings of the system the toolkit reads: the sizes and times of
 //! mouse gestures, the colours (the theme variant, the accent colour and its
-//! shades, high contrast) and the preferred language of the user.
+//! shades, high contrast and its system colours) and the preferred language of the user.
 
 use ferroui_base::media::Color;
-use ferroui_base::platform::{AccentColorShades, ColorContrastPreference, PlatformColorValues, PlatformThemeVariant};
+use ferroui_base::platform::{
+    AccentColorShades, ColorContrastPreference, PlatformColorValues, PlatformThemeVariant, SystemColors,
+};
+
+/// `SPI_SETHIGHCONTRAST`: the `wParam` of the `WM_SETTINGCHANGE` that announces a change of the
+/// high contrast setting (`SystemParametersInfo`).
+pub(crate) const SPI_SETHIGHCONTRAST: usize = 0x0043;
+
+/// The indices of `GetSysColor` of the system colours the toolkit reports, in the order of
+/// [`system_colors_from_sys_colors`]: `COLOR_WINDOW`, `COLOR_WINDOWTEXT`, `COLOR_BTNFACE`,
+/// `COLOR_BTNTEXT`, `COLOR_HIGHLIGHT`, `COLOR_HIGHLIGHTTEXT`, `COLOR_HOTLIGHT`, `COLOR_GRAYTEXT`
+/// (the eight `SystemColor*Color` resources the WinUI theme names, #560).
+pub(crate) const SYS_COLOR_INDICES: [i32; 8] = [5, 8, 15, 18, 13, 14, 26, 17];
+
+/// A colour of `GetSysColor` (a `COLORREF`, `0x00BBGGRR`), opaque as WinUI makes it
+/// (`SystemThemingInterop::GetSystemColor`).
+pub(crate) fn color_from_colorref(colorref: u32) -> Color {
+    let [r, g, b, _] = colorref.to_le_bytes();
+    Color::from_rgb(r, g, b)
+}
+
+/// The system colours from the `COLORREF`s of [`SYS_COLOR_INDICES`].
+pub(crate) fn system_colors_from_sys_colors(colors: [u32; 8]) -> SystemColors {
+    let [window, window_text, button_face, button_text, highlight, highlight_text, hotlight, gray_text] =
+        colors.map(color_from_colorref);
+    SystemColors::new(window, window_text)
+        .with_button_face(button_face)
+        .with_button_text(button_text)
+        .with_highlight(highlight)
+        .with_highlight_text(highlight_text)
+        .with_hotlight(hotlight)
+        .with_gray_text(gray_text)
+}
 
 /// Whether the battery saver is on, from the flag of the power status
 /// (`SYSTEM_POWER_STATUS.SystemStatusFlag`: 1 while the battery saver is on), which is what
@@ -63,6 +95,16 @@ pub(crate) enum SettingChange {
     ColorValues,
     /// The language or the locale.
     Language,
+}
+
+/// The change a `WM_SETTINGCHANGE` stands for, by its `wParam` (the action of
+/// `SystemParametersInfo`, `SPI_SETHIGHCONTRAST` for high contrast, which WinUI listens for)
+/// and the name of the changed setting.
+pub(crate) fn setting_change_of(action: usize, changed_setting: Option<&str>) -> Option<SettingChange> {
+    if action == SPI_SETHIGHCONTRAST {
+        return Some(SettingChange::ColorValues);
+    }
+    setting_change(changed_setting)
 }
 
 /// The change the name of a changed setting stands for, if any.
@@ -230,6 +272,43 @@ mod imp {
             }
         }
 
+        /// Whether high contrast is on, as WinUI asks (`SystemParametersInfo(SPI_GETHIGHCONTRAST)`
+        /// with `HCF_HIGHCONTRASTON`, `SystemThemingInterop::GetSystemHighContrastTheme`); `None`
+        /// when the call fails.
+        fn read_system_high_contrast() -> Option<bool> {
+            use windows_sys::Win32::UI::WindowsAndMessaging::{SystemParametersInfoW, SPI_GETHIGHCONTRAST};
+            /// `HIGHCONTRASTW` of `Win32_UI_Accessibility`, declared here.
+            #[repr(C)]
+            struct HighContrast {
+                cb_size: u32,
+                dw_flags: u32,
+                lpsz_default_scheme: *mut u16,
+            }
+            const HCF_HIGHCONTRASTON: u32 = 0x0000_0001;
+            let mut high_contrast = HighContrast {
+                cb_size: std::mem::size_of::<HighContrast>() as u32,
+                dw_flags: 0,
+                lpsz_default_scheme: std::ptr::null_mut(),
+            };
+            // SAFETY: the structure is the one the action fills, with its size set.
+            let ok = unsafe {
+                SystemParametersInfoW(
+                    SPI_GETHIGHCONTRAST,
+                    high_contrast.cb_size,
+                    (&mut high_contrast as *mut HighContrast).cast(),
+                    0,
+                )
+            };
+            (ok != 0).then_some(high_contrast.dw_flags & HCF_HIGHCONTRASTON != 0)
+        }
+
+        /// The system colours of the active contrast theme (`GetSysColor`).
+        fn read_system_colors() -> SystemColors {
+            use windows_sys::Win32::Graphics::Gdi::GetSysColor;
+            // SAFETY: `GetSysColor` takes any index and reads no memory of the caller.
+            system_colors_from_sys_colors(SYS_COLOR_INDICES.map(|index| unsafe { GetSysColor(index) }))
+        }
+
         fn read_color_values() -> Result<PlatformColorValues, HResult> {
             let ui_settings = ui_settings::<IUISettings3>()?;
             let accent = ui_settings.get_color_value(UIColorType::Accent)?.to_ferro();
@@ -242,10 +321,16 @@ mod imp {
             let accessibility_settings = NativeWinRTMethods::create_instance::<IAccessibilitySettings>(
                 "Windows.UI.ViewManagement.AccessibilitySettings",
             )?;
-            if accessibility_settings.high_contrast()? == 1 {
+            // High contrast as WinUI reads it, `AccessibilitySettings` where that fails (#560).
+            let high_contrast = match Self::read_system_high_contrast() {
+                Some(high_contrast) => high_contrast,
+                None => accessibility_settings.high_contrast()? == 1,
+            };
+            if high_contrast {
                 let high_contrast_scheme = HStringInterop::from_handle(accessibility_settings.high_contrast_scheme()?, false);
                 Ok(high_contrast_color_values(high_contrast_scheme.value().as_deref(), accent)
-                    .with_accent_shades(accent_shades))
+                    .with_accent_shades(accent_shades)
+                    .with_system_colors(Some(Self::read_system_colors())))
             } else {
                 let background = ui_settings.get_color_value(UIColorType::Background)?.to_ferro();
                 Ok(color_values_from_background(background, accent).with_accent_shades(accent_shades))
@@ -521,5 +606,36 @@ mod tests {
         assert_eq!(setting_change(Some("intl")), Some(SettingChange::Language));
         assert_eq!(setting_change(Some("Policy")), None);
         assert_eq!(setting_change(None), None);
+
+        // The high contrast action of SystemParametersInfo, with or without a name.
+        assert_eq!(setting_change_of(SPI_SETHIGHCONTRAST, None), Some(SettingChange::ColorValues));
+        assert_eq!(setting_change_of(SPI_SETHIGHCONTRAST, Some("WindowsThemeElement")), Some(SettingChange::ColorValues));
+        assert_eq!(setting_change_of(0, Some("intl")), Some(SettingChange::Language));
+        assert_eq!(setting_change_of(0x002F, None), None);
+    }
+
+    #[test]
+    fn the_system_colors_are_read_from_the_colorrefs_of_get_sys_color() {
+        // A COLORREF is 0x00BBGGRR; the colour is made opaque.
+        assert_eq!(color_from_colorref(0x00FF_0000), Color::from_rgb(0, 0, 255));
+        assert_eq!(color_from_colorref(0x0000_00FF), Color::from_rgb(255, 0, 0));
+        assert_eq!(color_from_colorref(0xFF00_FF00), Color::from_rgb(0, 255, 0));
+
+        // "High Contrast Black" of Windows 10, in the order of SYS_COLOR_INDICES.
+        let black = system_colors_from_sys_colors([
+            0x0000_0000, 0x00FF_FFFF, 0x0000_0000, 0x00FF_FFFF, 0x00FF_EB1A, 0x0000_0000, 0x0000_FFFF, 0x003F_F23F,
+        ]);
+        assert_eq!(black, SystemColors::high_contrast_black());
+        assert_eq!(black.theme_variant(), PlatformThemeVariant::Dark);
+        // The window colour of "Desert" of Windows 11 (#FFFAEF) is light.
+        let desert = system_colors_from_sys_colors([0x00EF_FAFF, 0x003D_3D3D, 0, 0, 0, 0, 0, 0]);
+        assert_eq!(desert.window(), Color::from_rgb(0xFF, 0xFA, 0xEF));
+        assert_eq!(desert.theme_variant(), PlatformThemeVariant::Light);
+
+        // The high contrast values carry them; an unchanged scheme compares equal.
+        let values = high_contrast_color_values(Some("High Contrast Black"), ACCENT).with_system_colors(Some(black));
+        assert_eq!(values.system_colors(), Some(SystemColors::high_contrast_black()));
+        assert_eq!(values, high_contrast_color_values(Some("High Contrast Black"), ACCENT).with_system_colors(Some(black)));
+        assert_eq!(SYS_COLOR_INDICES.len(), 8);
     }
 }
