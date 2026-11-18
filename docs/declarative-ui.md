@@ -75,6 +75,8 @@ fn main() {
 }
 ```
 
+`launch` uses the Fluent theme with the control theme of every control; `launch_themed` takes the theme of the application. An application that ships constructs its theme from the units it uses: a build script of one statement (`ferroui_build::Build::theme`) and `WinUITheme::with_parts` instead of `WinUITheme::new()`, as the hello world samples do (docs/xaml-themes.md, section 3, "An application without markup"). Hello world is 39 % smaller that way (docs/binary-size.md, section 4.24).
+
 ## 2. The crates
 
 | Crate | What it holds |

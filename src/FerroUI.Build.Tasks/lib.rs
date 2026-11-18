@@ -168,6 +168,19 @@
 //! what can show any control (`ferroui-base/full-themes`, `DEP_FERROUI_BASE_XAML_FULL_THEMES`)
 //! keeps every unit. With the trimming off nothing of this is written.
 //!
+//! An application without markup, whose interface is Rust code, states the theme its code
+//! constructs ([`Build::theme`]): the build writes the table from the roots of the sources (the
+//! names, and the functions and methods the code calls, read as the names of classes:
+//! `text_block()` is `TextBlock`), and the code constructs the theme with `with_parts` and the
+//! table.
+//!
+//! ```ignore
+//! // build.rs of an application of the declarative layer
+//! fn main() {
+//!     ferroui_build::Build::from_env().type_system(ferroui_build::TypeSystem::Model).theme("WinUITheme").run();
+//! }
+//! ```
+//!
 //! # Compiled bindings
 //!
 //! `{Binding}` is a compiled binding in every document that does not say otherwise
@@ -360,6 +373,8 @@ pub struct Build {
     warnings_as_errors: bool,
     full_themes: bool,
     theme_roots: Roots,
+    /// The themes the Rust code of the crate constructs from their parts ([`Build::theme`]).
+    themes: Vec<String>,
 }
 
 impl Build {
@@ -404,6 +419,7 @@ impl Build {
             warnings_as_errors: false,
             full_themes: false,
             theme_roots: Roots::default(),
+            themes: Vec::new(),
         }
     }
 
@@ -421,6 +437,34 @@ impl Build {
     /// when the manifest turns the trimming off (`[package.metadata.ferroui] theme-trimming = false`).
     pub fn theme_roots(mut self, names: &[&str]) -> Self {
         self.theme_roots.names.extend(names.iter().map(|name| name.to_string()));
+        self
+    }
+
+    /// A theme the Rust code of the crate constructs from the units the application needs: an
+    /// application without markup, whose interface is code (the declarative layer), trims its
+    /// theme as an application with `<WinUITheme />` in a document does (#568). `class` is the
+    /// name of the class of the theme (`"WinUITheme"`, or its full name,
+    /// `"FerroUI.Themes.WinUI.WinUITheme"`), a theme of a direct dependency of the crate. The
+    /// build writes its table into `compiled_markup` (`THEME_PARTS_<FULL NAME>`, upper case with
+    /// `_` for anything else: `THEME_PARTS_FERROUI_THEMES_WINUI_WINUITHEME`), from the roots of
+    /// the sources of the crate, `theme-roots` and [`theme_roots`](Self::theme_roots); the code
+    /// constructs the theme with it:
+    ///
+    /// ```ignore
+    /// // build.rs
+    /// ferroui_build::Build::from_env().type_system(ferroui_build::TypeSystem::Model).theme("WinUITheme").run();
+    ///
+    /// // main.rs
+    /// ferroui_markup_xaml::include_compiled_xaml!();
+    /// let theme = WinUITheme::with_parts(None, compiled_markup::THEME_PARTS_FERROUI_THEMES_WINUI_WINUITHEME);
+    /// ```
+    ///
+    /// With the trimming turned off in the manifest (`theme-trimming = false`) the table has
+    /// every unit, so the code is the same either way.
+    pub fn theme(mut self, class: &str) -> Self {
+        if !self.themes.iter().any(|known| known == class) {
+            self.themes.push(class.to_string());
+        }
         self
     }
 
@@ -663,7 +707,7 @@ impl Build {
         let dependencies: Vec<XamlMetadata> = models.iter().map(AssemblyModel::metadata).collect();
         // The parts tables of the themes the application trims, by class, for the emitter; the
         // models the base classes of the roots are read from, and the roots of the documents.
-        let theme_parts: Option<Rc<ThemePartsTables>> = trimming.enabled.then(|| {
+        let theme_parts: Option<Rc<ThemePartsTables>> = (trimming.enabled || !self.themes.is_empty()).then(|| {
             let tables = dependencies
                 .iter()
                 .flat_map(|metadata| metadata.theme_units.iter())
@@ -986,8 +1030,27 @@ impl Build {
             lines.push(format!("cargo::rerun-if-env-changed={FULL_THEMES_VARIABLE}"));
             let mut roots = document_roots.clone();
             roots.names.extend(trimming.roots.iter().cloned());
-            roots.all |= trimming.all;
+            // With the trimming off the tables are written for the themes the code constructs
+            // alone (`Build::theme`), with every unit.
+            roots.all |= trimming.all || !trimming.enabled;
             roots.extend(self.theme_roots.clone());
+            // The themes the code of the crate constructs (`Build::theme`), by the name of the
+            // class or its full name.
+            for stated in &self.themes {
+                let class = dependencies
+                    .iter()
+                    .flat_map(|metadata| metadata.theme_units.iter())
+                    .map(|units| units.class.as_str())
+                    .find(|class| *class == stated || class.rsplit('.').next() == Some(stated.as_str()));
+                match class {
+                    Some(class) => {
+                        theme_parts.table_of(class);
+                    }
+                    None => errors.push(format!(
+                        "the theme `{stated}` (Build::theme) is not a theme of a direct dependency of the crate: its crate must be a dependency, and its compiled markup must have units"
+                    )),
+                }
+            }
             // The compiled documents of the dependencies run in the application too: what they
             // name roots the units it keeps (a control library's template naming a key of the
             // theme of the application).
@@ -1060,8 +1123,10 @@ impl Build {
                 errors.push(error);
             }
         }
-        // A crate that only exports its model includes nothing.
-        if self.assembly.is_some() || !self.groups.is_empty() || !self.asset_directories.is_empty() {
+        // A crate that only exports its model includes nothing; one whose code constructs a theme
+        // from its parts (`Build::theme`) includes the table.
+        let includes = self.assembly.is_some() || !self.groups.is_empty() || !self.asset_directories.is_empty();
+        if includes || !self.themes.is_empty() {
             let text = crate_file(&assembly_name, &modules, &self.loaders, &assets, &parts_tables);
             write_if_changed(&xaml_directory.join("mod.rs"), &text, &mut errors);
         }
@@ -1490,6 +1555,75 @@ mod tests {
         let missing = Build::new(fixtures.join("dependent"), out.join("missing"), "dependent", Vec::new()).source_root("main.rs").export_metadata().execute();
         assert_eq!(missing.errors.len(), 1, "{:?}", missing.errors);
         assert!(missing.errors[0].ends_with("main.rs, is not a file"), "{:?}", missing.errors);
+        let _ = fs::remove_dir_all(&out);
+    }
+
+    /// Not from upstream: a theme the code of a crate constructs (`Build::theme`) gets its table
+    /// in `compiled_markup` without a document: the units of the classes the sources name and of
+    /// the functions and methods they call (`scroll_viewer()`, `text_block()`, `.tool_tip(..)`),
+    /// not the unit of a class only test code names. A theme no dependency has is an error.
+    #[test]
+    fn a_theme_the_code_constructs_is_trimmed_by_what_the_sources_call() {
+        use ferroui_build_scan::xaml_metadata::{MarkupReferencesModel, ThemeUnitModel, ThemeUnitsModel};
+        let fixtures = Path::new(env!("CARGO_MANIFEST_DIR")).with_file_name("FerroUI.Build.Scan").join("tests").join("fixtures");
+        let out = env::temp_dir().join(format!("ferroui-build-theme-{}", std::process::id()));
+        let unit = |index: u32, name: &str, type_keys: &[&str]| ThemeUnitModel {
+            name: name.to_string(),
+            index,
+            documents: vec![name.to_string()],
+            keys: Vec::new(),
+            type_keys: type_keys.iter().map(|key| key.to_string()).collect(),
+            references: Vec::new(),
+            types: Vec::new(),
+        };
+        let theme = XamlMetadata {
+            name: "Theme".to_string(),
+            crate_name: "theme".to_string(),
+            documents: Vec::new(),
+            dependencies: Vec::new(),
+            theme_units: vec![ThemeUnitsModel {
+                class: "Tests.Theme".to_string(),
+                table_path: "::theme::compiled_xaml::THEME_UNITS".to_string(),
+                units: vec![
+                    unit(0, "ambient", &[]),
+                    unit(1, "Controls/ScrollViewer.xaml", &["ScrollViewer"]),
+                    unit(2, "Controls/SplitView.xaml", &["SplitView"]),
+                    unit(3, "Controls/TextBlock.xaml", &["TextBlock"]),
+                    unit(4, "Controls/ToolTip.xaml", &["ToolTip"]),
+                ],
+            }],
+            references: MarkupReferencesModel::default(),
+        };
+        let theme_file = out.join("theme").join("theme.xamlmeta");
+        fs::create_dir_all(out.join("theme")).expect("the directory of the theme");
+        fs::write(&theme_file, theme.to_json()).expect("the .xamlmeta of the theme");
+        let build = |name: &str, class: &str| {
+            Build::new(fixtures.join("creates"), out.join(name), "creates", vec![theme_file.clone()])
+                .source_root("lib.rs")
+                .type_system(TypeSystem::Model)
+                .theme(class)
+        };
+
+        // By the name of the class, and by its full name.
+        for (name, class) in [("short", "Theme"), ("full", "Tests.Theme")] {
+            let outcome = build(name, class).execute();
+            assert_eq!(outcome.errors, Vec::<String>::new());
+            let xaml = out.join(name).join("xaml");
+            let text = fs::read_to_string(xaml.join("mod.rs")).expect("the file the crate includes");
+            assert!(
+                text.contains(
+                    "    pub static THEME_PARTS_TESTS_THEME: &[&::ferroui_markup_xaml::xaml_il::runtime::compiled::ThemeUnit] = &[\n        &::theme::compiled_xaml::THEME_UNIT_0, // ambient\n        &::theme::compiled_xaml::THEME_UNIT_1, // Controls/ScrollViewer.xaml\n        &::theme::compiled_xaml::THEME_UNIT_3, // Controls/TextBlock.xaml\n        &::theme::compiled_xaml::THEME_UNIT_4, // Controls/ToolTip.xaml\n    ];\n"
+                ),
+                "{text}"
+            );
+            let listing = fs::read_to_string(xaml.join("theme_parts.txt")).expect("the listing of the kept units");
+            assert!(listing.starts_with("Tests.Theme: 4 of 5 units\n"), "{listing}");
+        }
+
+        let unknown = build("unknown", "OtherTheme").execute();
+        assert_eq!(unknown.errors.len(), 1, "{:?}", unknown.errors);
+        let expected = "the theme `OtherTheme` (Build::theme) is not a theme of a direct dependency of the crate";
+        assert!(unknown.errors[0].starts_with(expected), "{:?}", unknown.errors);
         let _ = fs::remove_dir_all(&out);
     }
 

@@ -604,7 +604,9 @@ needs one. In debug builds the first lookup of a trimmed control's theme logs
 `the WinUI control theme of <Type> was trimmed: add it to theme-roots`.
 Builds with `ferroui-base/full-themes` (the run-time loader, hot reload, the designer, DevTools,
 Inspect, Diagnostics) keep every unit; the tables of types alone (`type-tables`, which
-`ferroui-view` and the behaviors enable) do not. So do themes constructed in Rust with `WinUITheme::new()`.
+`ferroui-view` and the behaviors enable) do not. So do themes constructed in Rust with `WinUITheme::new()`;
+an application without markup trims its theme with `Build::theme` and `WinUITheme::with_parts`
+(section 4.24).
 The kept units are listed in `$OUT_DIR/xaml/theme_parts.txt`.
 
 | `samples/HelloWorld`, `dist`, macOS ARM64 | Size |
@@ -1113,6 +1115,45 @@ section 9.83).
 Tests: `selectors_by_name_match_what_the_selectors_by_type_match` (`styling/selector_tests.rs`),
 `a_type_the_resolver_does_not_know_is_an_error_unless_it_may_be_matched_by_name` (the parser's
 tests); the 75 tests of `ferroui-view` pass without the tables.
+
+### 4.24 An application without markup trims its theme (the declarative layer, #570)
+
+Theme trimming (section 4.11 and docs/xaml-themes.md, section 3) started from a document: the
+build wrote the table of the units an application needs where its compiled markup constructs
+the theme (`<WinUITheme />`). An application whose interface is Rust code, the builders and
+`rsx!` of `ferroui-view`, constructs its theme in code, and `WinUITheme::new()` is every unit:
+it linked every control of the theme, and was 12 MB larger than the same application in XAML.
+
+**The change.** Two additions to the build, none to the run time:
+
+- the functions and methods the sources call are roots, read as the names of classes
+  (`text_block()` is `TextBlock`, `.tool_tip("..")` is `ToolTip`): a builder is named after
+  the class it makes, and the rule that roots `Button::new()` roots `button()`;
+- `Build::theme("WinUITheme")` states a theme the code constructs, and the build writes its
+  table (`compiled_markup::THEME_PARTS_..`) for a crate without documents. The code constructs
+  the theme with `WinUITheme::with_parts(None, THEME_PARTS)`.
+
+The three declarative versions of hello world are built this way (a `build.rs` of one statement,
+two lines in `main.rs`): they keep 16 of the 166 units of the WinUI theme, the list the XAML
+version keeps.
+
+| Release, macOS ARM64 | Stripped before | Stripped after | `__TEXT,__text` before | after |
+|---|---:|---:|---:|---:|
+| `hello-world` (XAML) | | 19.29 MB | | 15.23 MB |
+| `hello-world-builders` | 31.77 MB | 19.35 MB | 25.13 MB | 15.29 MB |
+| `hello-world-macros` | 31.77 MB | 19.35 MB | 25.13 MB | 15.29 MB |
+| `hello-world-hooks` | 31.77 MB | 19.35 MB | 25.13 MB | 15.29 MB |
+
+The style of the API costs 0.06 MB again (section 3.6): the declarative versions are 39 %
+smaller than they were.
+
+The calls are as conservative as the names of step 4 are: a function of an application named
+after a control keeps the unit of that control. They add no unit to the applications that were
+trimmed already (the kept units of eight samples, docs/porting/theme-trimming.md, section
+11.9). An application that keeps `WinUITheme::new()` is as large as before.
+
+Tests: `source_references_are_the_names_and_strings_of_the_code` (the scanner),
+`a_theme_the_code_constructs_is_trimmed_by_what_the_sources_call` (`ferroui-build`).
 
 ## 5. What an executable is made of
 
