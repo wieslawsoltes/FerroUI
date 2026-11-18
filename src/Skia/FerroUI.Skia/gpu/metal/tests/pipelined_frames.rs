@@ -17,7 +17,7 @@
 //! the pixel at the crossing. The last test of the file measures it.
 
 use super::*;
-use crate::gpu::graphite::{band_clips, band_count, GraphiteGrContext, PipelinedLayerSurface};
+use crate::gpu::graphite::{band_clips, band_count, GraphiteGrContext, PictureIndex, PipelinedLayerSurface};
 use crate::gpu::{ISkiaGpu, ISkiaGrContext, ISkiaSurface};
 use crate::{
     GlyphRunImpl, ISkiaApiLeaseFeature, SkiaFramePipelining, SkiaOptions, TextRenderingSettings,
@@ -626,6 +626,43 @@ fn a_frame_in_any_number_of_bands_shows_what_the_layer_draws_band_by_band() {
         layers.draw(draw_scene);
         layers.draw(draw_update);
         layers.assert_same_pixels(&format!("{bands} bands: the fourth frame"));
+
+        layers.dispose();
+    }
+}
+
+/// #817: a picture recorded with a spatial index shows what the layer draws band by band, in two
+/// bands and in three, and the index follows the picture of the frame before.
+#[test]
+fn a_frame_recorded_with_a_spatial_index_shows_what_the_layer_draws_band_by_band() {
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+
+    for bands in [2, 3] {
+        let layers = Layers::with_bands(&device, SkiaFramePipelining::On, bands);
+        layers.surface.set_picture_index(PictureIndex::Always);
+
+        layers.draw(draw_scene);
+        assert!(layers.is_pending(), "{bands} bands: the frame is with the threads");
+        assert!(layers.surface.last_picture_indexed(), "{bands} bands: the picture has an index");
+        layers.assert_same_pixels(&format!("{bands} bands, indexed: the first frame"));
+
+        layers.draw(draw_update);
+        layers.draw(draw_scene);
+        layers.draw(draw_update);
+        layers.assert_same_pixels(&format!("{bands} bands, indexed: the fourth frame"));
+
+        // From a number of commands: the first frame has no picture before it, the second
+        // follows the first.
+        layers.surface.set_picture_index(PictureIndex::FromCommands(1));
+        layers.draw(draw_scene);
+        assert!(layers.surface.last_picture_indexed(), "{bands} bands: the picture before had commands");
+        layers.surface.set_picture_index(PictureIndex::FromCommands(usize::MAX));
+        layers.draw(draw_scene);
+        assert!(!layers.surface.last_picture_indexed(), "{bands} bands: no picture is that large");
+        layers.assert_same_pixels(&format!("{bands} bands: an indexed frame, then one without"));
 
         layers.dispose();
     }

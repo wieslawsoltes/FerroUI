@@ -10,3 +10,5 @@ pub use graphite_prewarm::GraphitePrewarmContext;
 #[cfg(test)]
 pub(crate) use pipelined_layer::{band_clips, band_count};
 pub(crate) use pipelined_layer::PipelinedLayerSurface;
+#[cfg(test)]
+pub(crate) use pipelined_layer::PictureIndex;

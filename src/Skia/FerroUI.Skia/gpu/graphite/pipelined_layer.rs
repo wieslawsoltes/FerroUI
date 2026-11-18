@@ -117,6 +117,136 @@ pub(crate) fn band_count(height: i32, asked: usize) -> Option<usize> {
 /// this to draw is not a pause, it is the frame the policy is there for.
 const STREAM_GAP: Duration = Duration::from_millis(100);
 
+/// The commands of the picture of the frame before from which a pipelined frame is recorded with
+/// a spatial index, by default ([`PictureIndex`]). Not measured: the main measurement of #817
+/// decides it.
+const INDEX_FROM_COMMANDS: usize = 2_000;
+
+/// Whether the picture of a pipelined frame is recorded with a spatial index (#817,
+/// desktop-performance.md).
+///
+/// The bands play one picture, each under the clip of its strip. A picture without an index is
+/// walked whole by every band, and Skia rejects the commands outside the strip one by one; a
+/// picture recorded with Skia's bounding-box hierarchy (`begin_recording(bounds, true)`, an
+/// R-tree) is searched for the commands that meet the clip, and a band plays only those. The index
+/// is built once a frame, when the recording ends, on the render thread; it pays when a picture
+/// has many commands and the frame has several bands. The size of a picture is not known when its
+/// recording begins, so the layer goes by the picture of the frame before. What is drawn is the
+/// same either way: the index chooses which commands are played, by bounds Skia computes for each
+/// (a command with no bounds of its own meets every clip).
+///
+/// `FERROUI_BAND_PICTURE_INDEX` chooses it for a measurement: `off`, `always`, or the number of
+/// commands of the picture before from which a frame is indexed (the default is
+/// [`INDEX_FROM_COMMANDS`]).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum PictureIndex {
+    /// Never.
+    Off,
+    /// Every pipelined frame of two bands or more.
+    Always,
+    /// A frame of two bands or more after a picture of at least this many commands.
+    FromCommands(usize),
+}
+
+impl PictureIndex {
+    /// What `FERROUI_BAND_PICTURE_INDEX` asks for, read once.
+    fn from_environment() -> Self {
+        static ASKED: std::sync::OnceLock<PictureIndex> = std::sync::OnceLock::new();
+        *ASKED.get_or_init(|| Self::parse(std::env::var("FERROUI_BAND_PICTURE_INDEX").ok().as_deref()))
+    }
+
+    /// The value of the variable: `off` (or `0`), `always`, a number of commands; anything else is
+    /// the default.
+    fn parse(value: Option<&str>) -> Self {
+        match value.map(str::trim) {
+            Some("off" | "0") => Self::Off,
+            Some("always") => Self::Always,
+            Some(value) => value.parse().map_or(Self::default(), Self::FromCommands),
+            None => Self::default(),
+        }
+    }
+
+    /// Whether a frame of `bands` bands after a picture of `last_commands` commands is indexed.
+    fn indexes(self, last_commands: usize, bands: usize) -> bool {
+        bands >= 2
+            && match self {
+                Self::Off => false,
+                Self::Always => true,
+                Self::FromCommands(least) => last_commands >= least,
+            }
+    }
+}
+
+impl Default for PictureIndex {
+    fn default() -> Self {
+        Self::FromCommands(INDEX_FROM_COMMANDS)
+    }
+}
+
+/// What the layer measured of its pipelined frames, printed to the standard error every
+/// [`BandReport::FRAMES`] frames when the environment asks for it (`FERROUI_BAND_TIMES=1`): the
+/// count #817 asks for (the commands of a picture, the time of its recording, the time of each
+/// band). A diagnostic, not from the reference.
+#[derive(Default)]
+struct BandReport {
+    frames: u32,
+    indexed: u32,
+    commands: u64,
+    recorded: Duration,
+    /// The frames whose bands were collected, the slowest band of each and all bands of each.
+    collected: u32,
+    slowest: Duration,
+    bands: Duration,
+    band_count: u64,
+}
+
+impl BandReport {
+    /// The frames of a report.
+    const FRAMES: u32 = 300;
+
+    /// A report when the environment asks for one.
+    fn from_environment() -> Option<Self> {
+        std::env::var("FERROUI_BAND_TIMES").is_ok_and(|value| value == "1").then(Self::default)
+    }
+
+    /// A pipelined frame was recorded.
+    fn recorded(&mut self, layer: u64, commands: usize, recorded: Duration, indexed: bool) {
+        self.frames += 1;
+        self.indexed += u32::from(indexed);
+        self.commands += commands as u64;
+        self.recorded += recorded;
+        if self.frames >= Self::FRAMES {
+            self.print(layer);
+            *self = Self::default();
+        }
+    }
+
+    /// The bands of a frame answered, having worked as long as `busy` says.
+    fn collected(&mut self, busy: &[Duration]) {
+        self.collected += 1;
+        self.slowest += busy.iter().copied().max().unwrap_or_default();
+        self.bands += busy.iter().sum::<Duration>();
+        self.band_count += busy.len() as u64;
+    }
+
+    fn print(&self, layer: u64) {
+        let ms = |time: Duration, count: u64| time.as_secs_f64() * 1000.0 / count.max(1) as f64;
+        let frames = u64::from(self.frames);
+        let collected = u64::from(self.collected);
+        eprintln!(
+            "band times: layer {layer}, {} frames ({} indexed): {:.0} commands a picture, recorded in {:.3} ms; \
+             {:.2} bands a frame, slowest band {:.3} ms, all bands {:.3} ms",
+            self.frames,
+            self.indexed,
+            self.commands as f64 / frames.max(1) as f64,
+            ms(self.recorded, frames),
+            self.band_count as f64 / collected.max(1) as f64,
+            ms(self.slowest, collected),
+            ms(self.bands, collected),
+        );
+    }
+}
+
 /// A frame that cost less than this is never late, whatever the period.
 const MIN_LATE_COST: Duration = Duration::from_millis(4);
 
@@ -1236,6 +1366,14 @@ struct PipelinedLayer {
     balance: RefCell<BandBalance>,
     /// The frame the threads are playing.
     pending: RefCell<Option<PendingFrame>>,
+    /// Whether the pictures of the pipelined frames are recorded with a spatial index.
+    picture_index: Cell<PictureIndex>,
+    /// The commands of the picture of the last pipelined frame.
+    last_commands: Cell<usize>,
+    /// Whether the picture being recorded has an index.
+    indexing: Cell<bool>,
+    /// `FERROUI_BAND_TIMES=1`: what the layer measured of its pipelined frames.
+    report: Option<RefCell<BandReport>>,
 }
 
 impl PipelinedLayer {
@@ -1296,6 +1434,11 @@ impl PipelinedLayer {
             return;
         };
         let recorded = started.elapsed();
+        let commands = picture.approximate_op_count();
+        self.last_commands.set(commands);
+        if let Some(report) = &self.report {
+            report.borrow_mut().recorded(self.id, commands, recorded, self.indexing.get());
+        }
 
         let direct_only = self.had_direct_only_draws() || leases.used();
         let played = if direct_only { Err(Fallback::DirectOnly) } else { self.play_bands(&picture) };
@@ -1329,6 +1472,9 @@ impl PipelinedLayer {
             return;
         };
         self.busy.set(busy.iter().sum());
+        if let Some(report) = &self.report {
+            report.borrow_mut().collected(&busy);
+        }
         if !missing.is_empty() {
             self.play_on_main(&previous.picture, Some(missing.as_slice()));
             self.policy.borrow_mut().frame_needed_direct();
@@ -1516,6 +1662,10 @@ impl PipelinedLayerSurface {
             busy: Cell::new(Duration::ZERO),
             balance: RefCell::new(BandBalance::following(height, bands, most)),
             pending: RefCell::new(None),
+            picture_index: Cell::new(PictureIndex::from_environment()),
+            last_commands: Cell::new(0),
+            indexing: Cell::new(false),
+            report: BandReport::from_environment().map(RefCell::new),
         })))
     }
 }
@@ -1525,6 +1675,19 @@ impl PipelinedLayerSurface {
     #[cfg(test)]
     pub(crate) fn bands(&self) -> usize {
         self.0.bands
+    }
+
+    /// Records the pictures of the pipelined frames with a spatial index as `index` says, in place
+    /// of what the environment asks.
+    #[cfg(test)]
+    pub(crate) fn set_picture_index(&self, index: PictureIndex) {
+        self.0.picture_index.set(index);
+    }
+
+    /// Whether the picture of the last pipelined frame was recorded with an index.
+    #[cfg(test)]
+    pub(crate) fn last_picture_indexed(&self) -> bool {
+        self.0.indexing.get()
     }
 
     /// The bands the next pipelined frame of the layer is divided into.
@@ -1594,8 +1757,11 @@ impl ISkiaSurface for PipelinedLayerSurface {
 
         let (width, height) = layer.size;
         let bounds = Rect::new(0.0, 0.0, width as f32, height as f32);
+        let bands = layer.balance.borrow().bands();
+        let indexed = layer.picture_index.get().indexes(layer.last_commands.get(), bands);
+        layer.indexing.set(indexed);
         let mut recorder = PictureRecorder::new();
-        recorder.begin_recording(bounds, false);
+        recorder.begin_recording(bounds, indexed);
         let leases = Rc::new(RecordedLeases::new(bounds));
 
         let frame_leases = leases.clone();
@@ -1687,6 +1853,24 @@ mod tests {
         draw_at_the_pace_of_the_display(&mut balance, 600, &light);
         assert_eq!(2, balance.bands(), "the number it was asked for");
         assert_eq!(0, draw_at_the_pace_of_the_display(&mut balance, 400, &light));
+    }
+
+    /// #817: the variable of the index, and when a frame is indexed.
+    #[test]
+    fn the_picture_of_a_frame_is_indexed_after_a_large_picture_in_two_bands_or_more() {
+        assert_eq!(PictureIndex::parse(None), PictureIndex::FromCommands(INDEX_FROM_COMMANDS));
+        assert_eq!(PictureIndex::parse(Some("off")), PictureIndex::Off);
+        assert_eq!(PictureIndex::parse(Some("0")), PictureIndex::Off);
+        assert_eq!(PictureIndex::parse(Some(" always ")), PictureIndex::Always);
+        assert_eq!(PictureIndex::parse(Some("500")), PictureIndex::FromCommands(500));
+        assert_eq!(PictureIndex::parse(Some("many")), PictureIndex::default());
+
+        let index = PictureIndex::FromCommands(500);
+        assert!(!index.indexes(499, 2), "a small picture before");
+        assert!(index.indexes(500, 2));
+        assert!(!index.indexes(10_000, 1), "one band plays the whole picture");
+        assert!(PictureIndex::Always.indexes(0, 3));
+        assert!(!PictureIndex::Off.indexes(10_000, 4));
     }
 
     /// A frame that fits its interval with the bands it has keeps them: 16 ms of work in two bands.
