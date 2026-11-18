@@ -9,6 +9,9 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::io::{self, BufRead, Read, Write};
 use std::sync::{Arc, Mutex, mpsc};
 
+#[path = "lsp_tokens.rs"]
+mod tokens;
+
 pub struct LspServer {
     pub service: LanguageService,
     initialized: bool,
@@ -16,6 +19,7 @@ pub struct LspServer {
     exit: bool,
     open_uris: BTreeMap<String, String>,
     cancelled: Arc<Mutex<BTreeSet<String>>>,
+    tokens: tokens::TokenResults,
 }
 impl Default for LspServer {
     fn default() -> Self {
@@ -26,6 +30,7 @@ impl Default for LspServer {
             exit: false,
             open_uris: BTreeMap::new(),
             cancelled: Arc::new(Mutex::new(BTreeSet::new())),
+            tokens: tokens::TokenResults::default(),
         }
     }
 }
@@ -135,6 +140,7 @@ impl LspServer {
                 let identity = self.service.document_uri(uri)?.into_owned();
                 self.service.close(uri)?;
                 self.open_uris.remove(&identity);
+                self.tokens.close(&identity);
                 notifications.push(json!({
                     "jsonrpc": "2.0", "method": "textDocument/publishDiagnostics",
                     "params": { "uri": uri, "diagnostics": [] }
@@ -257,26 +263,9 @@ impl LspServer {
             }
             "textDocument/documentSymbol" => Ok(json!(self.service.symbols(uri(params)?)?)),
             "textDocument/foldingRange" => Ok(json!(self.service.folding(uri(params)?)?)),
-            "textDocument/semanticTokens/full" => {
-                let mut data = Vec::new();
-                let mut line = 0;
-                let mut start = 0;
-                for token in self.service.semantic_tokens(uri(params)?)? {
-                    data.extend([
-                        token.line - line,
-                        if token.line == line {
-                            token.start - start
-                        } else {
-                            token.start
-                        },
-                        token.length,
-                        token.token_type,
-                        token.modifiers,
-                    ]);
-                    line = token.line;
-                    start = token.start;
-                }
-                Ok(json!({ "data": data }))
+            "textDocument/semanticTokens/full" => self.semantic_tokens(uri(params)?, None),
+            "textDocument/semanticTokens/full/delta" => {
+                self.semantic_tokens(uri(params)?, Some(text(params, "previousResultId")?))
             }
             "workspace/symbol" => {
                 let symbols: Vec<_> = self
@@ -427,7 +416,7 @@ impl LspServer {
                 "experimental": { "ferrouiProjectMetadata": true },
                 "semanticTokensProvider": {
                     "legend": { "tokenTypes": ["type", "property", "string", "comment", "variable", "keyword", "number", "namespace"], "tokenModifiers": [] },
-                    "full": true
+                    "full": { "delta": true }
                 },
                 "workspace": {
                     "workspaceFolders": { "supported": true, "changeNotifications": true },

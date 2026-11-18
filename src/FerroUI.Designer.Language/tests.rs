@@ -778,6 +778,84 @@ fn lsp_cancel_and_protocol_errors_are_explicit() {
         -32601
     );
 }
+
+#[test]
+fn lsp_semantic_token_deltas_rebuild_the_encoded_buffer_and_reject_retired_results() {
+    use serde_json::Value;
+
+    let mut server = lsp::LspServer::default();
+    let mut request = |method: &str, params: Value| {
+        server
+            .handle(json!({"jsonrpc":"2.0", "id":1, "method":method, "params":params}))
+            .pop()
+            .unwrap()["result"]
+            .take()
+    };
+    let document = json!({ "uri": "untitled:/Tokens.xaml" });
+    let other = json!({ "uri": "untitled:/Other.xaml" });
+    let did_open = |document: &Value, text: &str| json!({ "textDocument": { "uri": document["uri"], "version": 1, "text": text } });
+    let full = "textDocument/semanticTokens/full";
+    let delta = "textDocument/semanticTokens/full/delta";
+    assert_eq!(
+        request("initialize", json!({}))["capabilities"]["semanticTokensProvider"]["full"]["delta"],
+        true
+    );
+    let source = "<Grid>\r\n  <TextBlock Text='🦀' Name='Title'/>\r\n  <Button Content='Continue'/>\r\n</Grid>";
+    request("textDocument/didOpen", did_open(&document, source));
+    request("textDocument/didOpen", did_open(&other, "<Border/>"));
+    let first = request(full, json!({ "textDocument": document }));
+    let changed = source.replace("🦀", "🦀🐚 test");
+    request(
+        "textDocument/didChange",
+        json!({
+            "textDocument": { "uri": document["uri"], "version": 2 },
+            "contentChanges": [{"text": changed}]
+        }),
+    );
+    let update = request(
+        delta,
+        json!({ "textDocument": document, "previousResultId": first["resultId"] }),
+    );
+    let mut client_data = first["data"].as_array().unwrap().clone();
+    let edits = update["edits"].as_array().unwrap();
+    assert_eq!(edits.len(), 1);
+    for edit in edits.iter().rev() {
+        let start = edit["start"].as_u64().unwrap() as usize;
+        let removed = edit["deleteCount"].as_u64().unwrap() as usize;
+        client_data.splice(
+            start..start + removed,
+            edit["data"].as_array().unwrap().iter().cloned(),
+        );
+    }
+    assert_eq!(
+        json!(client_data),
+        request(full, json!({ "textDocument": document }))["data"]
+    );
+    assert_eq!(
+        request(
+            delta,
+            json!({ "textDocument": document, "previousResultId": update["resultId"] })
+        )["edits"],
+        json!([])
+    );
+    assert!(
+        request(
+            delta,
+            json!({ "textDocument": other, "previousResultId": update["resultId"] })
+        )["data"]
+            .is_array()
+    );
+    request("textDocument/didClose", json!({ "textDocument": document }));
+    request("textDocument/didOpen", did_open(&document, source));
+    assert!(
+        request(
+            delta,
+            json!({ "textDocument": document, "previousResultId": update["resultId"] })
+        )["data"]
+            .is_array()
+    );
+}
+
 #[test]
 fn lsp_frames_count_utf8_bytes_and_reject_ambiguous_lengths() {
     let message = json!({"jsonrpc":"2.0","id":1,"method":"test","params":{"text":"🦀"}});
