@@ -20,6 +20,7 @@ pub struct ViewBenchmark {
     version: Signal<u64>,
     changed: Signal<u32>,
     values: Vec<Signal<String>>,
+    level: Option<Signal<f64>>,
     _root: Option<Ref<Control>>,
     _app: UnitTestApplicationScope,
 }
@@ -29,7 +30,7 @@ impl ViewBenchmark {
         let app = UnitTestApplication::start(TestServices::mock_threading_interface());
         let owner = Owner::new_root();
         let (order, version, changed) = owner.with(|| (signal((0..ROWS).collect::<Vec<_>>()), signal(0_u64), signal(u32::MAX)));
-        Self { owner, order, version, changed, values: Vec::new(), _root: None, _app: app }
+        Self { owner, order, version, changed, values: Vec::new(), level: None, _root: None, _app: app }
     }
 
     /// A list of rows in a component that runs again, mounted.
@@ -50,6 +51,19 @@ impl ViewBenchmark {
             stack_panel().children(rows.iter().map(|value| text_block().text(*value)).collect::<Vec<_>>()).into_element().mount()
         }));
         this.values = values;
+        this
+    }
+
+    /// A thousand properties that follow one signal: every write of the signal runs the
+    /// effect of each.
+    fn with_shared_signal() -> Self {
+        let mut this = Self::empty();
+        let level = this.owner.with(|| signal(1.0_f64));
+        this._root = Some(this.owner.with(|| {
+            let rows = (0..ROWS).map(|_| text_block().opacity(level)).collect::<Vec<_>>();
+            stack_panel().children(rows).into_element().mount()
+        }));
+        this.level = Some(level);
         this
     }
 
@@ -142,6 +156,15 @@ impl ViewBenchmark {
     }
 
     /// A parent that runs again over its components.
+    /// Writes the signal a thousand properties follow.
+    pub fn shared_signal_changed(&mut self) {
+        let version = self.version.get_untracked() + 1;
+        self.version.set(version);
+        if let Some(level) = self.level {
+            level.set(if version % 2 == 0 { 1.0 } else { 0.5 });
+        }
+    }
+
     pub fn run_parent_of_components(&mut self) {
         self.version.update(|v| *v += 1);
     }
@@ -190,6 +213,7 @@ pub fn register(registry: &mut Registry) {
     class.benchmark("move_one_row", "", ViewBenchmark::with_list, |b| b.move_one_row());
     class.benchmark("reverse_rows", "", ViewBenchmark::with_list, |b| b.reverse_rows());
     class.benchmark("fine_grained_one_row_changed", "", ViewBenchmark::with_fine_grained_list, |b| b.fine_grained_one_row_changed());
+    class.benchmark("shared_signal_changed", "", ViewBenchmark::with_shared_signal, |b| b.shared_signal_changed());
     class.benchmark("run_parent_of_components", "always", || ViewBenchmark::with_components(false), |b| b.run_parent_of_components());
     class.benchmark("run_parent_of_components", "memoized by default", || ViewBenchmark::with_components(true), |b| b.run_parent_of_components());
 }
