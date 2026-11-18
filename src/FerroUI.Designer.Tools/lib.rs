@@ -9,6 +9,7 @@ mod layout_attributes;
 mod layout_helpers;
 mod properties;
 mod selection;
+pub mod token_handoff;
 
 pub use components::{
     ComponentAction, ComponentCatalog, ComponentEntry, ComponentKind, ComponentReference,
