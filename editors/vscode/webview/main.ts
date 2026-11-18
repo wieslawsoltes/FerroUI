@@ -10,6 +10,7 @@ import { ViewportMenu } from './viewportMenu';
 declare function acquireVsCodeApi(): { postMessage(message: FromDesigner): void; setState(state: DesignerViewState): void };
 const vscode = acquireVsCodeApi();
 const status = element('status');
+const preview = element('preview');
 const blocks = element<HTMLSelectElement>('blocks');
 const previewTab = element('preview-tab');
 const sourceTab = element('source-tab');
@@ -19,9 +20,12 @@ const zoomIn = element<HTMLButtonElement>('zoom-in');
 const zoomButton = element<HTMLButtonElement>('zoom-button');
 const zoomValue = element('zoom-value');
 const fitSelection = element<HTMLButtonElement>('fit-selection');
-const selectionLabel = element('selection-label');
+const selectionLabel = element<HTMLButtonElement>('selection-label');
 const actionsMenu = element('actions-menu');
 const selectedControl = element('selected-control');
+type SnapshotMessage = Extract<ToDesigner, { type: 'snapshot' }>;
+let staged: SnapshotMessage | undefined;
+const canvasActions: Extract<ToDesigner, { type: 'canvasAction' }>[] = [];
 let snapshot: CanvasSnapshot | undefined;
 let selected: number | undefined;
 let runtime: RuntimeRow | undefined;
@@ -86,7 +90,7 @@ vscode.postMessage({ type: 'ready' });
 
 function showDesign(show: boolean): void {
     tab = show ? 'preview' : 'counterpart';
-    element('preview').hidden = !show;
+    preview.hidden = !show;
     element('canvas-tools').hidden = !show;
     element('counterpart').hidden = show;
     previewTab.setAttribute('aria-pressed', String(show));
@@ -95,12 +99,17 @@ function showDesign(show: boolean): void {
 
 function controlCanvas(request: number, action: CanvasAction): void {
     const { zoom, scale, pan_x, pan_y, pan_tool } = action;
+    const geometry = zoom || scale !== undefined || pan_x !== undefined || pan_y !== undefined;
+    if (geometry && !artboard.isCurrent) {
+        vscode.postMessage({ type: 'canvasResult', request, error: 'Render an artboard before changing its zoom or pan.' });
+        return;
+    }
     const bounds = runtime?.bounds ?? selectedNode()?.bounds;
     if (zoom === 'fit_selection' && (!bounds?.width || !bounds.height)) {
         vscode.postMessage({ type: 'canvasResult', request, error: 'Select a control with visible bounds first.' });
         return;
     }
-    if (zoom || scale !== undefined || pan_x !== undefined || pan_y !== undefined) {
+    if (geometry) {
         showDesign(true);
         if (zoom === 'fit') viewport.fit();
         else if (zoom === 'fit_selection') viewport.fitSelection(bounds!);
@@ -114,7 +123,7 @@ function controlCanvas(request: number, action: CanvasAction): void {
 }
 
 function reveal(): void {
-    if (!runtime && selected !== undefined) select(selected, true);
+    if (artboard.isCurrent && !runtime && selected !== undefined) select(selected, true);
 }
 
 function select(id: number, openSource: boolean): void {
@@ -137,64 +146,101 @@ function selectedNode() { return snapshot?.nodes.find(node => node.id === select
 function updateSelection(): void {
     const node = selectedNode();
     const enabled = current && !applying;
-    if (runtime) artboard.inspect(runtime.bounds);
-    else artboard.select(node);
-    selectionLabel.hidden = !enabled || !node?.bounds || !snapshot?.image || Boolean(runtime);
-    if (node) selectedControl.textContent = node.name ? `${node.label} · ${node.name}` : node.label;
+    if (artboard.isCurrent) {
+        if (runtime) artboard.inspect(runtime.bounds);
+        else artboard.select(node);
+        selectionLabel.hidden = !node?.bounds || Boolean(runtime);
+        if (node) selectedControl.textContent = node.name ? `${node.label} · ${node.name}` : node.label;
+    }
+    selectionLabel.disabled = !enabled || !artboard.isCurrent;
     const bounds = runtime?.bounds ?? node?.bounds;
-    fitSelection.disabled = !enabled || !snapshot?.image || !bounds?.width || !bounds.height;
+    fitSelection.disabled = !enabled || !artboard.isCurrent || !bounds?.width || !bounds.height;
     counterpart.setEnabled(enabled);
     blocks.disabled = !enabled;
 }
 
 function showStatus(kind: 'busy' | 'error' | 'notice' | 'ready', text = ''): void {
     status.dataset.state = kind;
-    status.textContent = text;
+    if (status.textContent !== text) status.textContent = text;
     status.hidden = !text;
     if (!artboard.hasFrame) element('empty-state').textContent = kind === 'error' ? 'Preview unavailable' : 'Rendering preview…';
+}
+
+function pauseCanvas(): void {
+    current = false;
+    artboard.pause();
+    drag.setFrame(undefined);
+    updateSelection();
+}
+
+function showPreviewError(message: string): void {
+    showStatus('error', `${message}${artboard.hasFrame ? ' Showing the previous frame.' : ''}`);
+}
+
+function flushCanvasActions(): void {
+    for (const { request, action } of canvasActions.splice(0)) controlCanvas(request, action);
+}
+
+function stageSnapshot(message: SnapshotMessage): void {
+    staged = message;
+    pauseCanvas();
+    preview.setAttribute('aria-busy', 'true');
+    const image = message.snapshot.image;
+    if (image) {
+        void artboard.decode(image).then(frame => presentSnapshot(message, frame), () => presentSnapshot(message));
+    } else {
+        presentSnapshot(message);
+    }
+}
+
+function presentSnapshot(message: SnapshotMessage, frame?: HTMLImageElement): void {
+    if (staged !== message) return;
+    staged = undefined;
+    snapshot = message.snapshot;
+    token = message.frame.token;
+    selected = message.selected;
+    runtime = message.runtime;
+    current = true;
+    if (frame) artboard.present(snapshot, message.viewport, frame);
+    drag.setFrame(frame ? message.frame : undefined);
+    size.show(message.viewport);
+    counterpart.show(snapshot.counterpart, message.sourceKey);
+    blocks.replaceChildren(...snapshot.blocks.map((span, index) => new Option(`RSX · line ${span.start.line + 1}`, String(index))));
+    blocks.hidden = snapshot.blocks.length <= 1;
+    const active = snapshot.activeBlock?.start;
+    blocks.selectedIndex = snapshot.blocks.findIndex(({ start }) => start.line === active?.line && start.character === active?.character);
+    const error = snapshot.renderError ?? (snapshot.image && !frame ? 'The preview image could not be decoded.' : undefined);
+    if (error) showPreviewError(error);
+    else showStatus(snapshot.notices.length ? 'notice' : 'ready', snapshot.notices.join(' · '));
+    preview.setAttribute('aria-busy', 'false');
+    updateSelection();
+    flushCanvasActions();
 }
 
 function receive(message: ToDesigner): void {
     switch (message.type) {
         case 'viewState': vscode.setState(message.state); return;
-        case 'canvasAction': controlCanvas(message.request, message.action); return;
+        case 'canvasAction':
+            if (staged) canvasActions.push(message);
+            else controlCanvas(message.request, message.action);
+            return;
         case 'drag': drag.setGesture(message.gesture); return;
         case 'placement': drag.show(message); return;
         case 'pending':
-            current = false;
-            drag.setFrame(undefined);
-            artboard.fresh(false);
-            showStatus('busy', artboard.hasFrame ? 'Updating preview…' : '');
-            break;
         case 'error':
-            current = false;
-            drag.setFrame(undefined);
-            artboard.fresh(false);
-            showStatus('error', `${message.message}${artboard.hasFrame ? ' Showing the previous frame.' : ''}`);
-            break;
-        case 'snapshot': {
-            snapshot = message.snapshot;
-            token = message.frame.token;
-            selected = message.selected;
-            runtime = message.runtime;
-            current = true;
-            artboard.show(snapshot, message.viewport);
-            drag.setFrame(snapshot.image ? message.frame : undefined);
-            size.show(message.viewport);
-            counterpart.show(snapshot.counterpart, message.sourceKey);
-            blocks.replaceChildren(...snapshot.blocks.map((span, index) => new Option(`RSX · line ${span.start.line + 1}`, String(index))));
-            blocks.hidden = snapshot.blocks.length <= 1;
-            const active = snapshot.activeBlock?.start;
-            blocks.selectedIndex = snapshot.blocks.findIndex(({ start }) => start.line === active?.line && start.character === active?.character);
-            if (snapshot.renderError) {
-                showStatus('error', `${snapshot.renderError}${artboard.hasFrame ? ' Showing the previous frame.' : ''}`);
-            } else {
-                showStatus(snapshot.notices.length ? 'notice' : 'ready', snapshot.notices.join(' · '));
-            }
-            break;
-        }
+            staged = undefined;
+            pauseCanvas();
+            preview.setAttribute('aria-busy', String(message.type === 'pending'));
+            if (message.type === 'error') showPreviewError(message.message);
+            else if (!artboard.hasFrame) showStatus('busy');
+            flushCanvasActions();
+            return;
+        case 'snapshot': stageSnapshot(message); return;
         case 'selection':
-            if (message.token === token) {
+            if (staged && message.token === staged.frame.token) {
+                staged.selected = message.selected;
+                staged.runtime = message.runtime;
+            } else if (current && message.token === token) {
                 selected = message.selected;
                 runtime = message.runtime;
             }

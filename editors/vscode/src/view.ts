@@ -40,8 +40,9 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
         ${tool('actions-button', 'ellipsis', 'More designer actions', 'popovertarget="actions-menu"')}
     </div>
 </header>
+<div class="designer-content">
 <div id="status" class="status" role="status" hidden></div>
-<main id="preview" aria-label="Design">
+<main id="preview" aria-label="Design" aria-busy="true">
     <div id="canvas" class="canvas" tabindex="0" role="region" aria-label="Preview canvas" aria-keyshortcuts="0 1 + - Space Enter">
         <div id="stage" class="stage">
             <div id="placeholder" class="placeholder">${icon('preview')}<span id="empty-state">Rendering preview…</span></div>
@@ -64,6 +65,7 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
     </div>
     <textarea id="projection" aria-label="${alternate} source" spellcheck="false" wrap="off" readonly></textarea>
 </main>
+</div>
 <div id="viewport-menu" class="popover viewport-menu" popover>
     <form id="viewport">
         <label class="field" for="preset">Viewport</label>

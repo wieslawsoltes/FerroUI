@@ -3,9 +3,9 @@ import { CanvasViewport } from './canvasViewport';
 import { element } from './dom';
 
 export class Artboard {
-    private readonly board = element('artboard');
+    readonly element = element('artboard');
     private readonly placeholder = element('placeholder');
-    readonly frame = element<HTMLImageElement>('frame');
+    private frame = element<HTMLImageElement>('frame');
     private readonly selection = element('selection-box');
     private readonly hover = element('hover-box');
     private readonly dropBox = element('drop-box');
@@ -24,9 +24,9 @@ export class Artboard {
             const node = hit(event);
             if (node) select(node.id, openSource);
         };
-        this.frame.addEventListener('click', event => pick(event, false));
-        this.frame.addEventListener('dblclick', event => pick(event, true));
-        this.frame.addEventListener('pointermove', event => {
+        this.element.addEventListener('click', event => pick(event, false));
+        this.element.addEventListener('dblclick', event => pick(event, true));
+        this.element.addEventListener('pointermove', event => {
             const node = event.buttons ? undefined : hit(event);
             const id = node?.id === this.selected ? undefined : node?.id;
             if (id !== this.lastHovered) {
@@ -34,30 +34,40 @@ export class Artboard {
                 this.draw(this.hover, id === undefined ? undefined : node?.bounds);
             }
         });
-        this.frame.addEventListener('pointerleave', () => this.clearHover());
+        this.element.addEventListener('pointerleave', () => this.clearHover());
         viewport.element.addEventListener('pointerdown', () => this.clearHover());
     }
 
-    show(snapshot: CanvasSnapshot, viewport: Viewport): void {
-        this.snapshot = snapshot;
-        if (snapshot.image) {
-            const image = snapshot.image;
-            this.frame.src = `data:image/png;base64,${image.png}`;
-            this.frame.width = image.width;
-            this.frame.height = image.height;
-            this.board.dataset.theme = viewport.dark ? 'dark' : 'light';
-            this.board.hidden = false;
-            this.placeholder.hidden = true;
-            this.viewport.setImage(image.width, image.height);
-        }
-        this.fresh(Boolean(snapshot.image));
+    async decode(image: NonNullable<CanvasSnapshot['image']>): Promise<HTMLImageElement> {
+        if (image.png === this.snapshot?.image?.png) return this.frame;
+        const frame = new Image(image.width, image.height);
+        frame.id = this.frame.id;
+        frame.alt = this.frame.alt;
+        frame.draggable = false;
+        frame.src = `data:image/png;base64,${image.png}`;
+        await frame.decode();
+        return frame;
     }
 
-    fresh(current: boolean): void {
-        this.current = current;
-        this.board.classList.toggle('stale', !current);
+    present(snapshot: CanvasSnapshot, viewport: Viewport, frame: HTMLImageElement): void {
+        if (!snapshot.image) return;
+        this.snapshot = snapshot;
+        if (frame !== this.frame) {
+            this.frame.replaceWith(frame);
+            this.frame = frame;
+        }
+        this.element.dataset.theme = viewport.dark ? 'dark' : 'light';
+        this.element.hidden = false;
+        this.placeholder.hidden = true;
+        this.viewport.setImage(snapshot.image.width, snapshot.image.height);
+        this.current = true;
+        this.element.classList.remove('stale');
+    }
+
+    pause(): void {
+        this.current = false;
+        this.element.classList.add('stale');
         this.clearHover();
-        if (!current) this.selection.hidden = true;
     }
 
     select(node: CanvasNode | undefined): void {
@@ -72,13 +82,14 @@ export class Artboard {
         this.draw(this.selection, bounds);
     }
 
-    get hasFrame(): boolean { return !this.board.hidden; }
+    get hasFrame(): boolean { return !this.element.hidden; }
+    get isCurrent(): boolean { return this.current; }
     get surface(): HTMLElement { return this.viewport.element; }
 
     point(event: MouseEvent): Point | undefined {
         const image = this.snapshot?.image;
         if (!this.current || !image) return undefined;
-        const rect = this.frame.getBoundingClientRect();
+        const rect = this.element.getBoundingClientRect();
         const x = (event.clientX - rect.left) * image.width / rect.width;
         const y = (event.clientY - rect.top) * image.height / rect.height;
         return x >= 0 && y >= 0 && x < image.width && y < image.height ? { x, y } : undefined;

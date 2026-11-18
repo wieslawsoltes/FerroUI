@@ -15,15 +15,15 @@ export class CanvasDrag {
     private timer?: ReturnType<typeof setTimeout>;
 
     constructor(private readonly artboard: Artboard, canDrag: () => boolean, private readonly send: (message: FromDesigner) => void) {
-        const image = artboard.frame;
-        this.source = new DragSource(image, event => {
+        const board = artboard.element;
+        this.source = new DragSource(board, event => {
             const grab = pointerPosition(artboard, event);
             const node = artboard.hit(grab);
             if (grab && node?.canMove && this.frame && canDrag()) {
                 return { frame: this.frame, origin: { type: 'node', node: node.id, grab } };
             }
         }, send, gesture => this.setGesture(gesture));
-        image.addEventListener('pointerdown', () => {
+        board.addEventListener('pointerdown', () => {
             if (this.gesture) {
                 send({ type: 'endDrag', id: this.gesture.id });
                 this.gesture = undefined;
@@ -43,7 +43,7 @@ export class CanvasDrag {
                 this.feedback('Move onto the artboard to drop', 'outside');
                 return;
             }
-            image.classList.add('placing');
+            board.classList.add('placing');
             if (this.label.hidden || this.label.dataset.state === 'outside') this.feedback('Finding drop target…', 'pending');
             const key = `${Math.round(point.x)}:${Math.round(point.y)}`;
             if (key !== this.requested) {
@@ -62,6 +62,7 @@ export class CanvasDrag {
 
     setFrame(frame?: FrameTarget): void {
         this.frame = frame;
+        if (!frame) this.source.end();
         this.clearHint();
     }
 
@@ -78,7 +79,7 @@ export class CanvasDrag {
         if (result.sequence !== this.sequence) return;
         const state = result.error ? 'error' : 'valid';
         this.feedback(result.error ?? result.hint?.description ?? '', state);
-        this.artboard.frame.classList.toggle('invalid-placement', state === 'error');
+        this.artboard.element.classList.toggle('invalid-placement', state === 'error');
         this.artboard.showDrop(result.hint?.bounds);
     }
 
@@ -95,7 +96,7 @@ export class CanvasDrag {
         this.timer = this.queued = this.requested = this.inFlight = undefined;
         this.sequence++;
         this.artboard.showDrop();
-        this.artboard.frame.classList.remove('placing', 'invalid-placement');
+        this.artboard.element.classList.remove('placing', 'invalid-placement');
         this.label.hidden = true;
     }
 

@@ -40,6 +40,7 @@ body {
 .zoom-menu .compact-action { display: none; }
 #blocks { max-inline-size: 133px; color: var(--vscode-dropdown-foreground); background: var(--vscode-dropdown-background); }
 
+.designer-content { position: relative; display: flex; flex: 1; flex-direction: column; min-block-size: 0; }
 .status {
     flex: none;
     max-block-size: 25vh;
@@ -50,6 +51,11 @@ body {
     overflow-wrap: anywhere;
     color: var(--muted);
     background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
+}
+.designer-content:has(#counterpart[hidden]) .status {
+    position: absolute;
+    inset: 0 0 auto;
+    z-index: 1;
 }
 .status[data-state=error] { color: var(--vscode-errorForeground); }
 .status[data-state=notice] { color: var(--vscode-editorWarning-foreground, var(--muted)); }
@@ -88,10 +94,9 @@ body {
     box-shadow: 0 0 0 1px var(--line), 0 8px 28px color-mix(in srgb, #000 26%, transparent);
 }
 .artboard[data-theme=dark] { background: #202020; }
-.artboard.stale { opacity: .65; }
 .artboard img { display: block; inline-size: 100%; block-size: 100%; cursor: crosshair; }
-.artboard img.placing { cursor: grabbing; }
-.artboard img.invalid-placement { cursor: no-drop !important; }
+.artboard.placing img { cursor: grabbing; }
+.artboard.invalid-placement img { cursor: no-drop !important; }
 .artboard.stale img { cursor: default; }
 .control-outline {
     position: absolute;
@@ -134,6 +139,7 @@ main:has(.drop-hint:not([hidden])) .selection-label { visibility: hidden; }
     box-shadow: 0 2px 8px #0002;
 }
 .selection-label:hover:not(:disabled) { background: var(--vscode-list-hoverBackground, var(--vscode-editorWidget-background)); }
+.selection-label:disabled { opacity: 1; }
 #selected-control { overflow: hidden; text-overflow: ellipsis; }
 
 .popover {
