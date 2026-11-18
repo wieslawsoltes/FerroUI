@@ -66,14 +66,6 @@ pub(crate) struct RuntimePreview {
 }
 
 impl RuntimePreview {
-    #[cfg(test)]
-    pub fn new(
-        host: Ref<ContentControl>,
-        uri: String,
-        document: &Document,
-    ) -> Result<Self, String> {
-        Self::new_with_options(host, uri, document, Default::default())
-    }
     pub fn new_with_options(
         host: Ref<ContentControl>,
         uri: String,

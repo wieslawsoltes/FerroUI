@@ -236,15 +236,18 @@ fn transfer_model_rejects_same_source_native_reconstruction() {
     };
     // Release the original reload registration before rebuilding the same URI.
     // Keeping two concurrent sessions for one document is independently rejected.
-    let temporary = crate::runtime::RuntimePreview::new(
+    let temporary = crate::runtime::RuntimePreview::new_with_options(
         ContentControl::new(),
         format!("{uri}.replacement-fixture.xaml"),
         &document,
+        Default::default(),
     )
     .unwrap();
     let previous = std::mem::replace(&mut fixture.session.borrow_mut().preview, temporary);
     drop(previous);
-    let replacement = crate::runtime::RuntimePreview::new(host, uri, &document).unwrap();
+    let replacement =
+        crate::runtime::RuntimePreview::new_with_options(host, uri, &document, Default::default())
+            .unwrap();
     fixture.session.borrow_mut().preview = replacement;
     fixture.window.update_layout();
     fixture.session.borrow_mut().refresh_runtime_mapping();

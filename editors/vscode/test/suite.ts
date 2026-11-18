@@ -77,6 +77,7 @@ export async function run(): Promise<void> {
     const undoXaml = async (expected: string) => {
         const version = xaml.version;
         await runEditorHistory(xaml, 'undo', () => assert.equal(xaml.version, version), AbortSignal.timeout(5000));
+        await until(() => xaml.version !== version);
         assert.equal(xaml.getText(), expected);
     };
 
