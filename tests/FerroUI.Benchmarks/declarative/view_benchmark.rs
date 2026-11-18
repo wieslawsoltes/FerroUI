@@ -106,6 +106,20 @@ impl ViewBenchmark {
         this
     }
 
+    /// The same bars with their columns given as a text that follows the signal
+    /// (`GridDefinitionsText`): the definitions a grid has take the new weights.
+    fn with_followed_definitions() -> Self {
+        let mut this = Self::empty();
+        let version = this.version;
+        this._root = Some(this.owner.with(|| {
+            let rows = (0..ROWS)
+                .map(|_| grid().set(GridDefinitionsText::columns_property(), move || bar_columns(version.get())))
+                .collect::<Vec<_>>();
+            stack_panel().children(rows).into_element().mount()
+        }));
+        this
+    }
+
     /// A parent that runs again over components, memoized or not.
     fn with_components(memoized: bool) -> Self {
         let mut this = Self::empty();
@@ -354,6 +368,8 @@ pub fn register(registry: &mut Registry) {
     class.benchmark("shared_signal_changed", "", ViewBenchmark::with_shared_signal, |b| b.shared_signal_changed());
     let replaced = ViewBenchmark::with_replaced_definitions;
     class.benchmark("grid_definitions_replaced", "", replaced, |b| b.bar_weights_changed());
+    let followed = ViewBenchmark::with_followed_definitions;
+    class.benchmark("grid_definitions_followed", "", followed, |b| b.bar_weights_changed());
     class.benchmark("run_parent_of_components", "always", || ViewBenchmark::with_components(false), |b| b.run_parent_of_components());
     class.benchmark("run_parent_of_components", "memoized by default", || ViewBenchmark::with_components(true), |b| b.run_parent_of_components());
 }
