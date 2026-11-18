@@ -80,7 +80,14 @@ impl RsxSourceInfo {
 
     /// Resolve the authored source to an absolute file URI when it is available.
     pub fn source_uri(&self) -> Option<url::Url> {
-        url::Url::from_file_path(Self::resolve_file(self.file, self.manifest)?).ok()
+        #[cfg(any(unix, windows, target_os = "redox", target_os = "wasi", target_os = "hermit"))]
+        {
+            url::Url::from_file_path(Self::resolve_file(self.file, self.manifest)?).ok()
+        }
+        #[cfg(not(any(unix, windows, target_os = "redox", target_os = "wasi", target_os = "hermit")))]
+        {
+            None
+        }
     }
 
     /// Resolve a compiler path through the package or an enclosing workspace.
