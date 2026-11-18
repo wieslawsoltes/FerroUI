@@ -9,6 +9,8 @@ import { ProjectSchemaBuild } from './projectSchemaBuild';
 import type { ProjectMetadata } from './reloadProcess';
 import { RuntimeConnections } from './runtimeConnections';
 import { RuntimePanel } from './runtimePanel';
+import { RuntimeSourceEditor } from './runtimeSource';
+import { RuntimeSourceTools } from './runtimeSourceTools';
 import { RsxLanguage } from './rsxLanguage';
 import { StagesPanel } from './stagesPanel';
 import { xamlLanguage, XamlServer } from './xamlServer';
@@ -30,8 +32,9 @@ export function activate(context: vscode.ExtensionContext) {
     const reload = new HotReload();
     stopProcesses = async () => { await Promise.all([reload.stop(), hosted.dispose(), schemaBuild.dispose()]); };
     const runtimes = new RuntimeConnections(reload);
-    const liveApp = new RuntimePanel(context, runtimes, reload, designer);
-    const mcp = new FerroMcpProvider(context, new AgentTools(designer, reload, stages), previewOutput, runtimes);
+    const runtimeSource = new RuntimeSourceEditor(designer, reload);
+    const liveApp = new RuntimePanel(context, runtimes, reload, runtimeSource);
+    const mcp = new FerroMcpProvider(context, new AgentTools(designer, reload, stages, new RuntimeSourceTools(runtimes, runtimeSource)), previewOutput, runtimes);
     const startForXaml = (document: vscode.TextDocument) => {
         if (document.languageId === xamlLanguage && document.uri.scheme === 'file') void server.start();
     };

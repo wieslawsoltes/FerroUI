@@ -45,6 +45,7 @@ export interface CargoSelection {
     package?: string;
     binary?: string;
     label?: string;
+    features?: string[];
 }
 
 export async function selectCargoTarget(placeHolder = 'Select a Cargo binary with FerroUI hot reload enabled'): Promise<CargoTarget | undefined> {
@@ -85,7 +86,13 @@ export async function discoverCargoTargets(selection: CargoSelection): Promise<C
     const { targets } = await targetsIn(folder, selection.manifest_path);
     return targets.filter(target => (selection.package === undefined || target.packageName === selection.package)
         && (selection.binary === undefined || target.binary === selection.binary)
-        && (selection.label === undefined || target.label === selection.label));
+        && (selection.label === undefined || target.label === selection.label)
+        && (selection.features === undefined || sameFeatures(target.features, selection.features)));
+}
+
+function sameFeatures(current: string[], requested: string[]): boolean {
+    return current.length === requested.length && requested.every(feature => current.includes(feature))
+        && current.every(feature => requested.includes(feature));
 }
 
 export function describeCargoTarget(target: CargoTarget) {

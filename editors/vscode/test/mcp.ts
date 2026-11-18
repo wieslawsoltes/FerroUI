@@ -60,6 +60,9 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         child.stdin.write(JSON.stringify({ jsonrpc: '2.0', method: 'notifications/initialized' }) + '\n');
         const { tools } = await request<{ tools: { name: string }[] }>('tools/list');
         assert.ok(tools.some(tool => tool.name === 'designer_place'));
+        assert.ok(tools.some(tool => tool.name === 'ferroui_runtime_source'));
+        const runtimeEdit = { node: 1, property: 'Text', value: 'Draft', expected_generation: 0, expected_version: 1 };
+        assert.match((await invoke('ferroui_runtime_apply_source', runtimeEdit)).content[0]?.text ?? '', /allowWrites/);
         const { designs } = content<{ designs: { uri: string; session: number }[] }>(await invoke('ferroui_designs'));
         const session = designs.find(design => design.uri === document.uri.toString())!.session;
         const { revision, nodes } = content<{ revision: number; nodes: { name: string | null; id: number }[] }>(await invoke('designer_outline', { session }));
@@ -93,6 +96,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         assert.ok((await invoke('designer_studio_edit', designData)).isError);
         assert.ok((await invoke('ferroui_workspace_create', { path: 'Denied.rs', source: 'fn main() {}' })).isError);
         await config.update('allowWrites', true, vscode.ConfigurationTarget.Global);
+        assert.match((await invoke('ferroui_runtime_apply_source', runtimeEdit)).content[0]?.text ?? '', /managed FerroUI application/);
         const stages = content<{ epoch: number; stages: Array<{ id: number; epoch: number }> }>(await invoke('designer_stages_open', { session }));
         assert.equal(stages.stages.length, 2);
         const first = stages.stages[0];

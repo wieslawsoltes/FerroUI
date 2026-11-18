@@ -1,7 +1,7 @@
 import { strict as assert } from 'node:assert';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
-import { selectCargoTarget } from '../src/cargoTarget';
+import { describeCargoTarget, discoverCargoTargets, selectCargoTarget } from '../src/cargoTarget';
 import type { DesignerWorkbench } from '../src/designerWorkbench';
 import { buildCargo } from '../src/reloadProcess';
 
@@ -40,6 +40,9 @@ export async function verifyCargoTarget(workspace: vscode.Uri, designer: Designe
     assert.deepEqual(target.features, ['hot-reload']);
     assert.equal(target.cargoDirectory, project.fsPath);
     assert.equal(path.basename(target.targetDirectory), 'audit-output');
+    const selection = { ...describeCargoTarget(target), features: target.features };
+    assert.equal((await discoverCargoTargets(selection))[0]?.packageId, target.packageId);
+    assert.deepEqual(await discoverCargoTargets({ ...selection, features: [] }), []);
     const output = vscode.window.createOutputChannel('Cargo target test');
     try {
         const { artifact } = buildCargo(target, output);

@@ -22,7 +22,15 @@ export interface RuntimeProperty {
     binding: boolean;
 }
 
-export interface RuntimeSource { uri: string; line: number; column: number }
+export interface RuntimeSource {
+    uri: string;
+    line: number;
+    column: number;
+    language?: 'rust';
+    columnEncoding?: 'unicodeScalar';
+    invocation?: { line: number; column: number; index: number };
+    revision?: string;
+}
 
 export type RuntimeHierarchy = 'visual' | 'logical' | 'automation';
 export type RuntimeInspection = 'properties' | 'styles' | 'resources' | 'diagnostics';

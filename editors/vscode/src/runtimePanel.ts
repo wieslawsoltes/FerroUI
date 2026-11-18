@@ -1,13 +1,11 @@
 import * as vscode from 'vscode';
 import type { HotReload } from './hotReload';
-import type { DesignerWorkbench } from './designerWorkbench';
 import { errorMessage } from './protocol';
 import { RuntimeClient } from './runtimeClient';
 import type { RuntimeConnections, RuntimeTarget } from './runtimeConnections';
-import type { FromRuntime, RuntimeFrame, RuntimeHierarchy, RuntimeInspection, RuntimeNode, RuntimeProperty, RuntimeSource, ToRuntime } from './runtimeProtocol';
+import type { FromRuntime, RuntimeFrame, RuntimeHierarchy, RuntimeInspection, RuntimeNode, RuntimeProperty, ToRuntime } from './runtimeProtocol';
+import type { RuntimeSourceEditor } from './runtimeSource';
 import { runtimeHtml, webviewOptions } from './view';
-import { isWorkspaceFile } from './workspacePaths';
-import { asRange } from './textDocument';
 
 const refreshInterval = 500;
 
@@ -27,7 +25,7 @@ export class RuntimePanel implements vscode.Disposable {
     private ready = false;
 
     constructor(private readonly context: vscode.ExtensionContext, private readonly connections: RuntimeConnections,
-        private readonly reload: HotReload, private readonly designer: DesignerWorkbench) {
+        private readonly reload: HotReload, private readonly authoredSource: RuntimeSourceEditor) {
         this.subscriptions = [
             vscode.commands.registerCommand('ferroui.openLiveApp', () => this.show()),
             connections.onDidChange(() => this.reset()),
@@ -186,12 +184,10 @@ export class RuntimePanel implements vscode.Disposable {
                 return;
             }
             if (message.type === 'reveal') {
-                const anchor = await this.source(client, message.node);
-                if (!anchor || epoch !== this.epoch || this.frame?.token !== frame.token) return;
-                const document = await vscode.workspace.openTextDocument(anchor.uri);
-                const where = document.validatePosition(anchor.position);
-                if (where.isEqual(anchor.position)) await vscode.window.showTextDocument(document,
-                    { selection: new vscode.Range(where, where), viewColumn: vscode.ViewColumn.Beside });
+                const source = await this.authoredSource.read(client, message.node);
+                if (!source || epoch !== this.epoch || this.frame?.token !== frame.token) return;
+                const { document, position } = source;
+                await vscode.window.showTextDocument(document, { selection: new vscode.Range(position, position), viewColumn: vscode.ViewColumn.Beside });
                 return;
             }
             const node = nodes.find(node => node.node_id === message.node);
@@ -210,7 +206,9 @@ export class RuntimePanel implements vscode.Disposable {
                 await client.call('set_property', { node_id, property: message.property, value: message.value });
                 await this.inspect(client, epoch, frame.token, node_id, 'properties');
             } else if (message.type === 'assignSource' && typeof message.property === 'string' && typeof message.value === 'string' && message.value.length <= 4096) {
-                await this.applySource(client, epoch, frame.token, node, message.property, message.value);
+                if (this.target !== 'managed') throw new Error('Apply to Source requires a managed application.');
+                await this.authoredSource.apply(client, node, message.property, message.value, AbortSignal.timeout(15_000),
+                    () => epoch === this.epoch && this.frame?.token === frame.token);
             }
             if (message.type !== 'select') this.schedule(0);
         } catch (error) {
@@ -227,51 +225,9 @@ export class RuntimePanel implements vscode.Disposable {
             case 'diagnostics': data = { frames: await client.call('get_frame_stats'), logs: await client.call('get_logs') }; break;
             default: return;
         }
-        const anchor = await this.source(client, node);
-        const canApply = view === 'properties' && anchor && this.target === 'managed' && Boolean(await this.acceptedSource(anchor.uri));
-        if (epoch === this.epoch && this.frame?.token === token) this.post({ type: 'inspection', token, node, view, data, canReveal: Boolean(anchor), canApply: Boolean(canApply) });
-    }
-
-    private async acceptedSource(uri: vscode.Uri): Promise<vscode.TextDocument | undefined> {
-        if (!uri.fsPath.toLowerCase().endsWith('.xaml')) return;
-        const document = await vscode.workspace.openTextDocument(uri);
-        if (!document.isDirty && this.reload.containsXaml(uri.fsPath, document.getText())) return document;
-    }
-
-    private async applySource(client: RuntimeClient, epoch: number, token: number, node: RuntimeNode, name: string, value: string): Promise<void> {
-        if (this.target !== 'managed') throw new Error('A managed XAML reload must acknowledge this source before applying a runtime value.');
-        const anchor = await this.source(client, node.node_id);
-        const document = anchor && await this.acceptedSource(anchor.uri);
-        if (!anchor || !document) throw new Error('Save the XAML and wait for the managed app to accept it.');
-        const version = document.version;
-        const signal = AbortSignal.timeout(15_000);
-        const properties = await client.call<RuntimeProperty[]>('get_properties', { node_id: node.node_id, properties: [name] }, signal);
-        if (!properties.some(property => property.name === name && !property.binding && !property.read_only) || value.trimStart().startsWith('{')) {
-            throw new Error('Choose an editable literal value for this authored control.');
-        }
-        const design = await this.designer.openDocument(anchor.uri, anchor.position);
-        const snapshot = await design.waitForSnapshot(signal);
-        const type = node.type.split(/[.:]/).at(-1);
-        const matching = snapshot.nodes.filter(candidate => candidate.label.split(':').at(-1) === type
-            && (asRange(candidate.range).start.isEqual(anchor.position) || asRange(candidate.nameRange).contains(anchor.position)));
-        const source = matching.length === 1 ? matching[0] : undefined;
-        const frame = design.currentToken;
-        if (epoch !== this.epoch || this.frame?.token !== token || frame === undefined || document.version !== version
-            || !this.reload.containsXaml(anchor.uri.fsPath, document.getText()) || !source) {
-            throw new Error('The running element does not match the current authored XAML.');
-        }
-        const authored = source.properties.find(property => property.name === name);
-        if (authored?.value.trimStart().startsWith('{')) throw new Error('Edit the binding or resource reference in the designer.');
-        await design.agentEdit(frame, { type: 'setProperty', node: source.id, name, value }, signal);
-    }
-
-    private async source(client: RuntimeClient, node: number): Promise<{ uri: vscode.Uri; position: vscode.Position } | undefined> {
-        if (!Number.isSafeInteger(node) || !await client.supports('get_source')) return;
-        const source = await client.call<RuntimeSource | null>('get_source', { node_id: node });
-        if (!source || !Number.isSafeInteger(source.line) || !Number.isSafeInteger(source.column) || source.line < 1 || source.column < 1) return;
-        const uri = vscode.Uri.parse(source.uri, true);
-        if (!await isWorkspaceFile(uri)) return;
-        return { uri, position: new vscode.Position(source.line - 1, source.column - 1) };
+        const source = await this.authoredSource.read(client, node);
+        const canApply = view === 'properties' && source && this.target === 'managed' && this.authoredSource.canApply(source);
+        if (epoch === this.epoch && this.frame?.token === token) this.post({ type: 'inspection', token, node, view, data, canReveal: Boolean(source), canApply: Boolean(canApply) });
     }
 
     private post(message: ToRuntime): void {

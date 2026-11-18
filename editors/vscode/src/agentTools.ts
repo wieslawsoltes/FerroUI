@@ -5,6 +5,7 @@ import type { CargoSelection } from './cargoTarget';
 import type { DesignerPanel } from './designerPanel';
 import type { DesignerWorkbench } from './designerWorkbench';
 import type { HotReload } from './hotReload';
+import type { RuntimeSourceTools } from './runtimeSourceTools';
 import type { StagesPanel } from './stagesPanel';
 import type { PrototypeCommand, StageChange } from './stagesProtocol';
 import type { CanvasAction, CanvasInteraction, DesignerView, DragOrigin, DropTarget, OutlineMode, Placement } from './protocol';
@@ -17,6 +18,7 @@ interface Arguments extends CanvasAction, CargoSelection {
     session: number;
     expected_revision: number;
     expected_version: number;
+    expected_generation: number;
     path: string;
     line?: number;
     character?: number;
@@ -67,7 +69,8 @@ interface Arguments extends CanvasAction, CargoSelection {
 export class AgentTools {
     private readonly workspace = new WorkspaceTools();
 
-    constructor(private readonly workbench: DesignerWorkbench, private readonly reload: HotReload, private readonly stages: StagesPanel) {}
+    constructor(private readonly workbench: DesignerWorkbench, private readonly reload: HotReload, private readonly stages: StagesPanel,
+        private readonly runtimeSource: RuntimeSourceTools) {}
 
     definitions() { return Object.entries(agentCatalog).map(([name, definition]) => ({ name, ...definition })); }
 
@@ -105,6 +108,10 @@ export class AgentTools {
         if (tool === 'ferroui_reload_targets') return this.reload.targets(args);
         if (tool === 'ferroui_reload_output') return this.reload.recentOutput(args.lines ?? 60);
         if (tool === 'ferroui_reload_control') return this.reload.agentControl(args.action, args, signal, args.debug_configuration);
+        if (tool === 'ferroui_runtime_source') return this.runtimeSource.read(args.node!, signal);
+        if (tool === 'ferroui_runtime_apply_source') {
+            return this.runtimeSource.apply(args.node!, args.property, args.value!, args.expected_generation, args.expected_version, signal);
+        }
 
         const panel = this.workbench.designs().find(panel => panel.session === args.session);
         if (!panel || !await isWorkspaceFile(panel.document.uri)) throw new Error('Select an open design inside the current workspace.');

@@ -76,7 +76,9 @@ Export `MarkupAssembly` with `ferroui-build-scan` and add a metadata entry whose
 
 The [Todo Workbench sample](../../samples/TodoWorkbench/README.md) demonstrates the preview entry point. Enable its `app-preview` Cargo feature in `ferroui.hotReload.targets` to use it with the hosted design command.
 
-**Open Live App** shows actual managed or attached application windows. The visual, logical, and accessibility hierarchies use the existing authenticated runtime inspector. Inspect properties, styles, resources and diagnostics, or use Interact to send native input where the runtime permits it. Hold `Alt` while clicking in Inspect mode to choose from overlapping native visual hits. Runtime property overrides affect the attached app. **Reveal Source** uses compiler-provided locations inside the workspace, and **Apply to Source** is available for a managed XAML file when its running revision and authored element can be verified.
+**Open Live App** shows actual managed or attached application windows. The visual, logical, and accessibility hierarchies use the existing authenticated runtime inspector. Inspect properties, styles, resources and diagnostics, or use Interact to send native input where the runtime permits it. Hold `Alt` while clicking in Inspect mode to choose from overlapping native visual hits. Runtime property overrides affect the attached app. **Reveal Source** uses compiler locations inside the workspace. Managed debug builds record the source for mounted RSX controls, and compatible hot reloads update those positions. Set `FERROUI_EDITOR_SOURCE=1` when launching a debug build outside VS Code to enable compiled RSX locations for attached inspection.
+
+**Apply to Source** writes verified XAML values or mapped RSX literals to the editor as one undoable edit. The application keeps running and the buffer can be reviewed before saving. Agents can look up a managed element with `ferroui_runtime_source` and use the returned generation and buffer version with `ferroui_runtime_apply_source`. Use the managed app inspector to find runtime node IDs.
 
 ## Hot reload a running application
 

@@ -6,7 +6,8 @@ const session = { session: integer(1) };
 const frame = { ...session, expected_revision: integer(0) };
 const buffer = { ...session, expected_version: integer(1) };
 const workspacePath = { type: 'string', maxLength: 4096 };
-const cargoSelection = { folder: workspacePath, manifest_path: workspacePath, package: workspacePath, binary: workspacePath, label: workspacePath };
+const cargoSelection = { folder: workspacePath, manifest_path: workspacePath, package: workspacePath, binary: workspacePath,
+    label: workspacePath, features: { type: 'array', items: workspacePath, maxItems: 128 } };
 const unit = { type: 'number', minimum: 0, maximum: 1 };
 const wheel = { type: 'number', minimum: -64, maximum: 64 };
 const placement = { ...frame, asset: text, project_asset: text, node, selection: { type: 'array', items: node, minItems: 2, maxItems: 128 }, moving_anchor: node, anchor: node,
@@ -99,6 +100,11 @@ export const agentCatalog = {
         { ...cargoSelection, action: choice('start', 'start_debug', 'start_registered', 'rebuild', 'stop', 'show_output'), debug_configuration: text }, ['action'], true, false),
     ferroui_reload_output: tool('Read the recent Cargo build and runtime output for the managed application.',
         { lines: integer(1, 250) }),
+    ferroui_runtime_source: tool('Resolve a managed runtime node to a workspace location. Returns the process generation and editor buffer version. Get node IDs from the managed app inspector.',
+        { node }, ['node']),
+    ferroui_runtime_apply_source: tool('Apply a managed runtime property as a literal through the workbench source editor. Use the node, generation and buffer version from ferroui_runtime_source. Saving the resulting buffer is a separate action.',
+        { node, property: text, value: { type: 'string', maxLength: 4096 }, expected_generation: integer(0), expected_version: integer(1) },
+        ['node', 'property', 'value', 'expected_generation', 'expected_version'], true),
 };
 
 export type AgentTool = keyof typeof agentCatalog;

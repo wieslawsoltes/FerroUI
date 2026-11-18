@@ -278,9 +278,9 @@ export class DesignerPanel implements vscode.Disposable {
         } finally { this.readers--; }
     }
 
-    async agentEdit(token: number, operation: Operation, signal: AbortSignal): Promise<void> {
+    async agentEdit(token: number, operation: Operation, signal: AbortSignal, validate?: () => void): Promise<void> {
         if (this.currentToken !== token || !this.frame) throw new Error('Read the current designer revision before editing.');
-        await this.edit(this.frame, operation, signal);
+        await this.edit(this.frame, operation, signal, validate);
     }
 
     async studioTools() {
@@ -519,11 +519,11 @@ export class DesignerPanel implements vscode.Disposable {
         }
     }
 
-    private async edit(frame: Frame, operation: Operation, signal?: AbortSignal): Promise<void> {
-        return this.commitEdit(frame, client => client.edit(frame.source, operation), signal);
+    private async edit(frame: Frame, operation: Operation, signal?: AbortSignal, validate?: () => void): Promise<void> {
+        return this.commitEdit(frame, client => client.edit(frame.source, operation), signal, validate);
     }
 
-    private async commitEdit(frame: Frame, plan: (client: NativePreview) => Promise<EditResult>, signal?: AbortSignal): Promise<void> {
+    private async commitEdit(frame: Frame, plan: (client: NativePreview) => Promise<EditResult>, signal?: AbortSignal, validate?: () => void): Promise<void> {
         signal?.throwIfAborted();
         if (this.editing) throw new Error('A designer edit is already in progress.');
         this.editing = true;
@@ -532,6 +532,7 @@ export class DesignerPanel implements vscode.Disposable {
             const { edits, selection } = await plan(await this.getClient());
             signal?.throwIfAborted();
             if (this.currentToken !== frame.token) throw new Error('The preview changed. Use the current preview to retry.');
+            validate?.();
             await applyTextEdits(this.document, frame.version, edits);
             if (selection && edits.length && this.document.version === frame.version + 1) {
                 const range = asRange(selection);
