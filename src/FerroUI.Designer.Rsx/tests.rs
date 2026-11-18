@@ -29,13 +29,15 @@ fn selected_rsx_round_trips_unicode_literals_without_touching_surrounding_code()
         apply(source, changes),
         source.replace("r#\"Można 🧪\"#", "\"Zapisz & wyjdź\"")
     );
-    assert!(projection
-        .apply_xaml(
-            &xaml
-                .replace("TextBlock", "Button")
-                .replace("Text=", "Content=")
-        )
-        .is_err());
+    assert!(
+        projection
+            .apply_xaml(
+                &xaml
+                    .replace("TextBlock", "Button")
+                    .replace("Text=", "Content=")
+            )
+            .is_err()
+    );
 }
 
 #[test]
@@ -54,9 +56,11 @@ fn dynamic_rust_survives_visual_literal_editing() {
         apply(source, vec![patch]),
         source.replace("\"OK\"", "\"Save\"")
     );
-    assert!(projection
-        .set_property(2, "Text", "Unsafe replacement")
-        .is_err());
+    assert!(
+        projection
+            .set_property(2, "Text", "Unsafe replacement")
+            .is_err()
+    );
 }
 
 #[test]
@@ -89,10 +93,12 @@ fn structural_conversion_replaces_only_the_selected_view() {
     let edited = apply(&source, project.apply_xaml(xaml).unwrap());
     assert!(edited.starts_with("pub fn view() -> Element {\n    rsx! {\n        StackPanel {\n"));
     assert!(edited.ends_with("        }\n    }\n}\n"));
-    assert!(project_rust(&edited, 0)
-        .unwrap()
-        .xaml()
-        .contains("Text=\"New\""));
+    assert!(
+        project_rust(&edited, 0)
+            .unwrap()
+            .xaml()
+            .contains("Text=\"New\"")
+    );
 }
 
 #[test]
@@ -147,9 +153,11 @@ fn embedded_image_paths_round_trip_and_keep_unrelated_rust() {
 
     let runtime = r#"rsx! { Image { source: load_thumbnail() } }"#;
     let projected = project_rust(runtime, 0).unwrap();
-    assert!(projected
-        .edit_property(0, "Source", Some("icon.png"))
-        .is_err());
+    assert!(
+        projected
+            .edit_property(0, "Source", Some("icon.png"))
+            .is_err()
+    );
 }
 
 #[test]
@@ -159,9 +167,40 @@ fn comments_in_counterpart_drafts_require_the_authored_format() {
     let rsx = xaml_to_rsx(&xaml).unwrap();
     assert!(apply_rsx(&xaml, &format!("// keep this comment\n{rsx}")).is_err());
     let projection = project_rust(&rsx, 0).unwrap();
-    assert!(projection
-        .apply_xaml(&format!("<!-- keep this comment -->{source}"))
-        .is_err());
+    assert!(
+        projection
+            .apply_xaml(&format!("<!-- keep this comment -->{source}"))
+            .is_err()
+    );
+}
+
+#[test]
+fn alternate_rsx_literals_preserve_authored_xaml_design_metadata() {
+    let source = r#"<StackPanel xmlns="https://github.com/ferroui"
+        xmlns:preview="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="preview"
+        preview:Fixtures='{"default":"Ready","fixtures":[{"name":"Ready","data":{"Title":"Example"}}]}'>
+        <Button Content="Save" preview:Content="Fixture action"/>
+        <preview:TextBlock Text="Only visible while designing"/>
+    </StackPanel>"#;
+    let xaml = Document::new(source).unwrap();
+    let rsx = xaml_to_rsx(&xaml).unwrap();
+    assert!(rsx.contains("Save"));
+    assert!(!rsx.contains("Fixture action"));
+    assert!(!rsx.contains("Only visible"));
+    let edit = apply_rsx(&xaml, &rsx.replace("Save", "Review")).unwrap();
+    assert_eq!(
+        apply(source, edit),
+        source.replace("Content=\"Save\"", "Content=\"Review\"")
+    );
+    assert!(
+        apply_rsx(
+            &xaml,
+            r#"rsx! { StackPanel { TextBlock { text: "Replacement" } } }"#
+        )
+        .is_err()
+    );
+    assert!(project_rust(&rsx, 0).unwrap().apply_xaml(source).is_err());
 }
 
 #[test]

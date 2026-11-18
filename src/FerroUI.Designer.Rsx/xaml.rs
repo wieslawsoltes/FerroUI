@@ -1,10 +1,12 @@
 use crate::project::{accepts_control, parse_draft};
 use crate::registered::RsxCatalog;
 use crate::tree::{Element, MAX_DEPTH, escape_xml, inline_content, replacement};
+use ferroui_designer_core::design_fixtures::DESIGN_NAMESPACE;
 use ferroui_designer_core::{Document, Node, NodeKind, SourceSpan, TextPatch};
 use std::collections::BTreeMap;
 
 const XAML: &str = "http://schemas.microsoft.com/winfx/2006/xaml";
+const COMPATIBILITY: &str = "http://schemas.openxmlformats.org/markup-compatibility/2006";
 
 /// Produce an RSX expression with a statically representable view's controls and literals.
 pub fn xaml_to_rsx(document: &Document) -> Result<String, String> {
@@ -19,12 +21,12 @@ pub fn apply_rsx(document: &Document, draft: &str) -> Result<Vec<TextPatch>, Str
 
 impl RsxCatalog {
     pub fn xaml_to_rsx(&self, document: &Document) -> Result<String, String> {
-        let tree = XamlTree::parse(document, self)?.tree.rsx_body();
+        let tree = XamlTree::authored(document, self)?.tree.rsx_body();
         Ok(format!("rsx! {{\n    {}\n}}", tree.replace('\n', "\n    ")))
     }
 
     pub fn apply_rsx(&self, document: &Document, draft: &str) -> Result<Vec<TextPatch>, String> {
-        let current = XamlTree::parse(document, self)?;
+        let current = XamlTree::authored(document, self)?;
         let next = parse_draft(draft, self)?;
         if let Some(changes) = current.tree.changes(&next) {
             return changes
@@ -45,8 +47,8 @@ impl RsxCatalog {
                 })
                 .collect();
         }
-        if current.inner_trivia {
-            return Err("Edit the structure in the XAML editor to keep its comments and processing instructions".into());
+        if current.preserve_structure {
+            return Err("Edit the structure in the XAML editor to keep its comments, processing instructions, and design metadata".into());
         }
         let span = document
             .ast()
@@ -65,12 +67,20 @@ struct Origin {
 
 pub(crate) struct XamlTree {
     pub(crate) tree: Element,
-    pub(crate) inner_trivia: bool,
+    preserve_structure: bool,
     origins: Vec<BTreeMap<String, Origin>>,
 }
 
 impl XamlTree {
     pub(crate) fn parse(document: &Document, catalog: &RsxCatalog) -> Result<Self, String> {
+        Self::read(document, catalog, false)
+    }
+
+    fn authored(document: &Document, catalog: &RsxCatalog) -> Result<Self, String> {
+        Self::read(document, catalog, true)
+    }
+
+    fn read(document: &Document, catalog: &RsxCatalog, authored: bool) -> Result<Self, String> {
         if !document.is_valid() {
             return Err("Repair the XAML syntax before converting the view".into());
         }
@@ -82,13 +92,14 @@ impl XamlTree {
             document,
             catalog,
             origins: Vec::new(),
-            inner_trivia: false,
+            authored,
+            preserve_structure: false,
         };
         let tree = state.element(root, 0)?;
         Ok(Self {
             tree,
             origins: state.origins,
-            inner_trivia: state.inner_trivia,
+            preserve_structure: state.preserve_structure,
         })
     }
 }
@@ -97,7 +108,8 @@ struct ParseTree<'a> {
     document: &'a Document,
     catalog: &'a RsxCatalog,
     origins: Vec<BTreeMap<String, Origin>>,
-    inner_trivia: bool,
+    authored: bool,
+    preserve_structure: bool,
 }
 
 impl ParseTree<'_> {
@@ -114,6 +126,21 @@ impl ParseTree<'_> {
         let mut origins = BTreeMap::new();
         for attr in &node.attributes {
             if attr.is_namespace() {
+                continue;
+            }
+            if self.authored
+                && (attr.namespace_uri.as_deref() == Some(DESIGN_NAMESPACE)
+                    || (attr.namespace_uri.as_deref() == Some(COMPATIBILITY)
+                        && attr.name.ends_with(":Ignorable")
+                        && attr.value.split_whitespace().all(|prefix| {
+                            self.document
+                                .ast()
+                                .namespaces(node.id)
+                                .get(prefix)
+                                .is_some_and(|namespace| namespace == DESIGN_NAMESPACE)
+                        })))
+            {
+                self.preserve_structure = true;
                 continue;
             }
             let name = match attr.namespace_uri.as_deref() {
@@ -148,11 +175,17 @@ impl ParseTree<'_> {
             .iter()
             .filter_map(|id| self.document.ast().node(*id))
         {
+            if self.authored && child.namespace_uri.as_deref() == Some(DESIGN_NAMESPACE) {
+                self.preserve_structure = true;
+                continue;
+            }
             match child.kind {
                 NodeKind::Element if accepts_control(placement, &element) => {
                     element.children.push(self.element(child, depth + 1)?);
                 }
-                NodeKind::Comment | NodeKind::ProcessingInstruction => self.inner_trivia = true,
+                NodeKind::Comment | NodeKind::ProcessingInstruction => {
+                    self.preserve_structure = true
+                }
                 NodeKind::Text if child.text.as_deref().unwrap_or("").trim().is_empty() => (),
                 NodeKind::Text => {
                     let name = text_property
