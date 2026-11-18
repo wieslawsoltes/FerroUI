@@ -1,4 +1,4 @@
-use crate::{ferro_property, ferro_static_type, AttachedProperty, FerroObject, FerroProperty};
+use crate::{ferro_property, AttachedProperty, FerroObject, FerroProperty, StaticType, TypeInfo};
 use std::path::{Path, PathBuf};
 
 /// A location in the source used by the current Rust view.
@@ -34,7 +34,12 @@ impl PartialEq for RsxSourceInfo {
     }
 }
 
-ferro_static_type!(RsxSourceInfo);
+impl StaticType for RsxSourceInfo {
+    // This type owns a diagnostic property. It has no authoring metadata or
+    // global class registration.
+    const TYPE: &'static TypeInfo =
+        &TypeInfo::new("RsxSourceInfo", None).with_module_path(module_path!());
+}
 
 impl RsxSourceInfo {
     #[doc(hidden)]
