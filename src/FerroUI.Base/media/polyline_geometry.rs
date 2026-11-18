@@ -34,14 +34,13 @@ impl GeometryImpl for PolylineGeometry {
         let mut builder = factory.create_stream_geometry_builder(None);
 
         builder.set_fill_rule(this.fill_rule);
-        let points = this.points();
+        // The points as they are now, read once: the figure is given to the backend as one run
+        // of lines (section 9.95).
+        let points = this.points().list().snapshot();
         let is_filled = this.is_filled();
-        let count = points.len();
-        if count > 0 {
-            builder.begin_figure(points.get(0), is_filled);
-            for index in 1..count {
-                builder.line_to(points.get(index), true);
-            }
+        if let Some((first, rest)) = points.split_first() {
+            builder.begin_figure(*first, is_filled);
+            builder.lines_to(rest, true);
             builder.end_figure(is_filled);
         }
 
