@@ -65,8 +65,8 @@ function render(): void {
     }
     status.textContent = error ?? state.message ?? (state.assets.length === 0 ? 'Open a FerroUI designer to insert controls.'
         : list.childElementCount === 0 ? 'No controls match your search.'
-            : state.canInsert ? 'Drag a control into the design, or press Enter to insert it.'
-                : 'Drag a control onto the canvas or into the Source Outline.');
+            : state.canInsert ? 'Drag a control, press Enter to insert it, or press Shift+Enter to choose placement.'
+                : 'Drag a control into the design, or press Shift+Enter to choose placement.');
     status.classList.toggle('error', Boolean(error));
 }
 
@@ -77,6 +77,7 @@ function control(asset: Asset): HTMLButtonElement {
     button.dataset.asset = asset.id;
     button.title = asset.description;
     button.setAttribute('aria-disabled', String(!state.frame));
+    button.setAttribute('aria-keyshortcuts', 'Shift+Enter');
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('viewBox', '0 0 24 24');
     svg.setAttribute('aria-hidden', 'true');
@@ -84,6 +85,11 @@ function control(asset: Asset): HTMLButtonElement {
     path.setAttribute('d', asset.icon);
     svg.append(path);
     button.append(svg, create('span', asset.title));
+    button.addEventListener('keydown', event => {
+        if (event.key !== 'Enter' || !event.shiftKey || !state.frame) return;
+        event.preventDefault();
+        vscode.postMessage({ type: 'insert', frame: state.frame, control: asset.id, choosePlacement: true });
+    });
     button.addEventListener('click', () => {
         if (!state.frame) return;
         if (!state.canInsert) {

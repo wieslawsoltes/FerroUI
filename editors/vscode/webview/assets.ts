@@ -11,6 +11,7 @@ const status = element('project-asset-message');
 const details = element('project-asset-preview');
 const thumbnail = element<HTMLImageElement>('asset-thumbnail');
 const insert = element<HTMLButtonElement>('asset-insert');
+const place = element<HTMLButtonElement>('asset-place');
 const more = element<HTMLButtonElement>('assets-more');
 const pageSize = 120;
 let limit = pageSize;
@@ -81,6 +82,9 @@ element('asset-copy').addEventListener('click', () => { if (selected) vscode.pos
 insert.addEventListener('click', () => {
     if (selected?.source && state.frame) vscode.postMessage({ type: 'insert', id: selected.id, frame: state.frame });
 });
+place.addEventListener('click', () => {
+    if (selected?.source && state.frame) vscode.postMessage({ type: 'insert', id: selected.id, frame: state.frame, choosePlacement: true });
+});
 vscode.postMessage({ type: 'ready' });
 
 function render(): void {
@@ -93,6 +97,14 @@ function render(): void {
         button.title = asset.source && state.frame ? `${asset.path} · Drag to the canvas` : asset.path;
         button.dataset.asset = asset.id;
         button.toggleAttribute('data-draggable', Boolean(asset.source && state.frame));
+        if (asset.source) {
+            button.setAttribute('aria-keyshortcuts', 'Shift+Enter');
+            button.addEventListener('keydown', event => {
+                if (event.key !== 'Enter' || !event.shiftKey || !state.frame) return;
+                event.preventDefault();
+                vscode.postMessage({ type: 'insert', id: asset.id, frame: state.frame, choosePlacement: true });
+            });
+        }
         button.setAttribute('aria-pressed', String(selected?.id === asset.id));
         const icon = create('span');
         const glyph = asset.kind === 'Image' ? 'file-media' : asset.kind === 'XAML' ? 'file-code' : 'file';
@@ -125,6 +137,8 @@ function choose(asset?: ProjectAsset): void {
 function showPreviewButtons(): void {
     insert.hidden = !selected?.source;
     insert.disabled = !state.frame || !state.canInsert;
+    place.hidden = !selected?.source;
+    place.disabled = !state.frame;
     insert.title = insert.disabled ? 'Select a panel that accepts children or drag onto the artboard' : '';
 }
 

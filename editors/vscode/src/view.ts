@@ -193,6 +193,7 @@ export function assetsHtml(webview: vscode.Webview, root: vscode.Uri): string {
             <button id="asset-open" type="button">Open</button>
             <button id="asset-copy" type="button">Copy path</button>
             <button id="asset-insert" class="primary" type="button" hidden>Insert image</button>
+            <button id="asset-place" type="button" hidden>Place image…</button>
         </div>
     </section>
     <ul id="project-asset-list" aria-label="Project files"></ul>

@@ -171,7 +171,7 @@ export interface AssetsState {
 }
 export type FromAssets = { type: 'ready' } | DragMessage
     | { type: 'preview' | 'open' | 'copy'; id: string }
-    | { type: 'insert'; frame: FrameTarget; id: string };
+    | { type: 'insert'; frame: FrameTarget; id: string; choosePlacement?: boolean };
 export type ToAssets = DragUpdate | { type: 'state'; state: AssetsState }
     | { type: 'thumbnail'; id: string; uri?: string }
     | { type: 'assetStatus'; message?: string; error?: boolean };
@@ -211,7 +211,7 @@ export type FromOutline = { type: 'ready' } | DragMessage
     | { type: 'select'; frame: FrameTarget; id: string; openSource: boolean; extend?: boolean }
     | { type: 'reorder'; frame: FrameTarget; origin: Extract<DragOrigin, { type: 'node' | 'nodes' }>; anchor: number; position: 'before' | 'after' };
 export type ToOutline = { type: 'state'; state: OutlineState } | DragUpdate | { type: 'edit'; error?: string };
-export type FromToolbox = { type: 'ready' } | DragMessage | { type: 'insert'; frame: FrameTarget; control: string };
+export type FromToolbox = { type: 'ready' } | DragMessage | { type: 'insert'; frame: FrameTarget; control: string; choosePlacement?: boolean };
 export type ToToolbox = DragUpdate | { type: 'state'; state: ToolboxState } | { type: 'edit'; error?: string };
 
 export type CanvasNode = Pick<OutlineNode, 'id' | 'label' | 'name' | 'bounds' | 'canMove'> & { selectable?: boolean };

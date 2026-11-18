@@ -8,6 +8,7 @@ import { DesignerDrag } from './designerDrag';
 import { DESIGNER_VIEW, restoredDesigner } from './designerViewState';
 import { DockView } from './dockView';
 import { OutlineView } from './outlineView';
+import { choosePlacement } from './placementPicker';
 import { SelectionInspection } from './selectionInspection';
 import { PROPERTIES_VIEW, PropertiesView } from './propertiesView';
 import type { ProjectAssets } from './projectAssets';
@@ -304,10 +305,17 @@ export class DesignerWorkbench implements vscode.Disposable {
         try {
             if (message.type === 'insert') {
                 const panel = this.panelFor(message.frame);
+                const asset = panel.assets.find(asset => asset.id === message.control);
+                if (!asset) throw new Error('This control is unavailable in the current design.');
+                const origin = { type: 'asset' as const, control: asset.id };
+                if (message.choosePlacement) {
+                    const placement = await choosePlacement(panel, message.frame, origin, asset.title);
+                    if (placement) await this.panelFor(message.frame).place(message.frame, placement);
+                    return;
+                }
                 const node = this.insertionParent(panel);
                 if (node === undefined) throw new Error('Select a panel that accepts children or drag the control to a drop target.');
-                if (!panel.assets.some(asset => asset.id === message.control)) throw new Error('This control is unavailable in the current design.');
-                await panel.place(message.frame, { origin: { type: 'asset', control: message.control }, target: { type: 'outline', node, position: 'inside' } });
+                await panel.place(message.frame, { origin, target: { type: 'outline', node, position: 'inside' } });
             } else if (message.type !== 'ready' && this.active) {
                 await this.drag.receive(this.active, message);
             }
@@ -338,9 +346,17 @@ export class DesignerWorkbench implements vscode.Disposable {
                 await this.assets.browse(message.type, message.id);
             } else if (message.type === 'insert') {
                 const panel = this.panelFor(message.frame);
+                const origin = await this.projectImage(panel, message.id);
+                if (message.choosePlacement) {
+                    const placement = await choosePlacement(panel, message.frame, origin, path.basename(message.id));
+                    if (!placement) return;
+                    const current = await this.projectImage(panel, message.id);
+                    if (current.source !== origin.source) throw new Error('The image moved. Choose its placement again.');
+                    await this.panelFor(message.frame).place(message.frame, placement);
+                    return;
+                }
                 const node = this.insertionParent(panel);
                 if (node === undefined) throw new Error('Select a panel that accepts children or drag the image onto the canvas.');
-                const origin = await this.projectImage(panel, message.id);
                 await panel.place(message.frame, { origin, target: { type: 'outline', node, position: 'inside' } });
             } else if ((message.type === 'beginDrag' || message.type === 'endDrag' || message.type === 'drop') && this.active) {
                 await this.drag.receive(this.active, message);
