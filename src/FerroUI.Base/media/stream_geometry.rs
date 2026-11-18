@@ -90,6 +90,17 @@ impl StreamGeometry {
         stream_geometry
     }
 
+    /// Builds the geometry in one pass as a compiled path's commands are decoded.
+    pub fn try_from_commands<E>(commands: impl Iterator<Item = Result<PathCommand, E>>) -> Result<Ref<StreamGeometry>, E> {
+        let stream_geometry = StreamGeometry::new();
+        let mut builder = Self::create_builder(None);
+        for command in commands {
+            PathCommand::replay(std::slice::from_ref(&command?), &mut *builder);
+        }
+        *stream_geometry.impl_.borrow_mut() = Some(builder.to_geometry());
+        Ok(stream_geometry)
+    }
+
     /// Opens the geometry to start defining it.
     ///
     /// Returns a [`StreamGeometryContext`] which can be used to define the

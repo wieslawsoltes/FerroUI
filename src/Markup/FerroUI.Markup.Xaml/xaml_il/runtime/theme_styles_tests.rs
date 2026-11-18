@@ -418,3 +418,170 @@ fn generated_type_candidates_keep_template_activators_and_selector_replacement()
     assert!(target.width().is_nan());
     assert!(!last.selector().unwrap().match_(&target, last.parent().as_deref(), false).is_match());
 }
+
+mod bytecode {
+    use super::*;
+    use ferroui_markup::style_opcodes::{member as m, selector as s, value as v, VERSION};
+
+    // Same declarations, imports and source positions as THEME above. This also exercises
+    // the compact stream's negative position deltas on the way out of two nested styles.
+    static PROGRAM: TypedStyleProgram = TypedStyleProgram::new(
+        &[
+            VERSION, 1, m::TARGET, 0,
+            m::SET, 0, v::DYNAMIC, 0,
+            m::SET, 1, v::EXPRESSION, 0,
+            m::SET_CREATED, 2, v::COMPUTED, 0,
+            m::SET_PARENTED, 3, v::TEMPLATE, 3, 0, 1, 0, 18, 20,
+            m::STYLE_PARENTED, 1, s::NESTING, s::CLASS, 1, s::TEMPLATE, s::OF_TYPE, 0, s::NAME, 2, s::END,
+            m::SET_PARENTED, 4, v::STATIC, 0, 6, 20,
+            m::STYLE, 1, s::NESTING, s::PUSH, s::CLASS, 3, s::NOT, s::END,
+            m::SET, 2, v::DOUBLE, 34, m::END_STYLE, 2, 23, m::END_STYLE, 3, 3,
+        ],
+        TypedStyleImports {
+            strings: &["Accent", ":pointerover", "PART_Border", ":pressed"],
+            types: &[<Button as StaticType>::TYPE, <ferroui_controls::Control as StaticType>::TYPE],
+            identities: &[<Border as ObjectType>::IDENTITY],
+            properties: &[background, horizontal_alignment, padding, template_property, border_background],
+            expressions: &[alignment],
+            computed: &[computed],
+            templates: &[template_content],
+            ..TypedStyleImports::EMPTY
+        },
+    );
+
+    fn tree(style: &Ref<StyleBase>, output: &mut Vec<String>) {
+        output.push(format!("{:?}", setter_properties(style)));
+        for i in 0..style.children().count() {
+            let nested = nested_style(style, i);
+            output.push(nested.selector().map_or_else(String::new, |s| s.to_string()));
+            tree(nested.upcast_ref(), output);
+        }
+    }
+
+    #[test]
+    fn program_builds_the_same_tree_and_balances_parents_on_every_build() {
+        let native = theme_of(&build_control_theme(&context(), &THEME).unwrap());
+        let mut expected = Vec::new();
+        tree(native.upcast_ref(), &mut expected);
+        for _ in 0..2 {
+            let context = context();
+            let built = theme_of(&PROGRAM.build(&context).unwrap());
+            assert_eq!(built.target_type().map(TypeInfo::name), native.target_type().map(TypeInfo::name));
+            let mut found = Vec::new();
+            tree(built.upcast_ref(), &mut found);
+            assert_eq!(found, expected);
+            assert_eq!(context.parents_stack().len(), 1);
+        }
+    }
+
+    #[test]
+    fn alternative_property_and_nth_selectors_preserve_argument_order() {
+        let program = TypedStyleProgram::new(&[
+            VERSION, 0,
+            m::STYLE, 1,
+            s::PUSH, s::NESTING, s::CLASS, 0,
+            s::PUSH, s::NESTING, s::CLASS, 1,
+            s::OR, 2, s::TEMPLATE, s::OF_TYPE, 0, s::DESCENDANT, s::IS, 0, s::END, m::END_STYLE, 1, 1,
+            m::STYLE, 1, s::NESTING, s::EQUALS, 0, 0, s::TEMPLATE, s::OF_TYPE, 0, s::CHILD, s::NTH, 4, 2,
+            s::NTH_LAST, 1, 6, s::END, m::END_STYLE, 1, 1,
+        ], TypedStyleImports {
+            strings: &[":pressed", ":checked"], identities: &[<Border as ObjectType>::IDENTITY],
+            properties: &[is_enabled], selector_values: &[enabled], ..TypedStyleImports::EMPTY
+        });
+        let built = theme_of(&program.build(&context()).unwrap());
+        for (i, (steps, split)) in [(OR, 1), (EQUALS, 2)].into_iter().enumerate() {
+            let before = build_selector(&steps[..split]);
+            let template = Selectors::template(before);
+            let border = Selectors::of_type_identity(Some(template), <Border as ObjectType>::IDENTITY);
+            let expected = steps[split..].iter().fold(Some(border), selector_step).unwrap();
+            assert_eq!(nested_style(built.upcast_ref(), i).selector().unwrap().to_string(), expected.to_string());
+        }
+    }
+
+    #[test]
+    fn compiled_errors_keep_the_native_source_location_and_parent_stack() {
+        let program = TypedStyleProgram::new(&[VERSION, 1, m::BASE_TEXT, 0, 6, 80],
+            TypedStyleImports { strings: &["Missing"], ..TypedStyleImports::EMPTY });
+        let ctx = context();
+        let error = program.build(&ctx).err().unwrap();
+        let original = generated_based_on(&context(), &ControlTheme::new()).unwrap_err();
+        assert_eq!(error.message(), original.message());
+        assert!(at_position(&error, 3, 40));
+        assert_eq!(ctx.parents_stack().len(), 2);
+
+        let program = TypedStyleProgram::new(&[VERSION, 0, m::SET_CREATED, 0, v::STATIC, 0, 10, 14],
+            TypedStyleImports { strings: &["Missing"], properties: &[background], ..TypedStyleImports::EMPTY });
+        assert!(at_position(&program.build(&context()).err().unwrap(), 5, 7));
+    }
+
+    #[test]
+    fn invalid_streams_report_structural_errors_without_running_setters() {
+        for code in [
+            &[0, 1][..], &[VERSION, 1, m::TARGET, 0], &[VERSION, 1, m::SET, 0, 254],
+            &[VERSION, 1, m::SET, 0, v::NULL, 254],
+            &[VERSION, 1, m::END_STYLE, 0, 0], &[VERSION, 1, m::STYLE, 1, s::NOT],
+            &[VERSION, 1, m::STYLE, 1, s::OR, 1], &[VERSION, 1, m::STYLE, 1, s::PUSH, s::END],
+            &[VERSION, 1, m::STYLE, 1, s::OR, 0, s::END, m::END_STYLE, 0, 0],
+            &[VERSION, 1, m::STYLE, 1, s::PUSH, s::PUSH, s::NESTING, s::OR, 2, s::END, m::END_STYLE, 0, 0],
+            &[VERSION, 1, m::STYLE, 1, s::CHILD, s::END, m::END_STYLE, 0, 0],
+            &[VERSION, 1, m::STYLE, 0, m::TARGET, 0], &[VERSION, 1, m::STYLE, 1],
+            &[VERSION, 1, m::SET, 0, v::TEMPLATE, 9], &[VERSION, 1, m::SET, 0, v::DOUBLE, 255],
+        ] {
+            let program = TypedStyleProgram::new(code, TypedStyleImports {
+                properties: &[padding], ..TypedStyleImports::EMPTY
+            });
+            let ctx = context();
+            let error = program.build(&ctx).err().unwrap();
+            assert!(error.message().contains("Invalid compiled XAML control theme"), "{}", error.message());
+            assert_eq!(ctx.parents_stack().len(), 1);
+        }
+    }
+}
+
+#[test]
+fn construction_static_resource_uses_the_registered_setter_and_its_source_position() {
+    use crate::xaml_il::runtime::compiled::{ConstructionImport as Import, ConstructionImports, ConstructionInput, ConstructionProgram};
+    use ferroui_markup::construction_opcodes as op;
+    static PROGRAM: ConstructionProgram = ConstructionProgram {
+        code: &[op::STATIC_RESOURCE, 0, 0, 0, 1, 21, 60],
+        imports: &ConstructionImports { strings: &["Accent"], operations: &[
+            Import::Property(|| SolidColorBrush::color_property()),
+            Import::ResourceSetter(|target, value, line, position| {
+                assert_eq!((line, position), (21, 60));
+                assign_resource_value(target, SolidColorBrush::color_property(), value, &ResourceChoice { line, position, ..COLOR_CHOICE }, None)
+            }),
+        ] },
+    };
+    let context = context();
+    let brush = SolidColorBrush::new();
+    let input = [ConstructionInput::Object(brush.upcast_ref::<FerroObject>())];
+    PROGRAM.apply(&input, None, Some(&context)).unwrap();
+    assert_eq!(brush.color(), Color::from_uint32(0xFF33_6699));
+    let dictionary = ResourceDictionary::new();
+    dictionary.add("Accent", Some(Rc::new(String::from("not a colour")) as BoxedValue));
+    context.push_parent(to_value(dictionary));
+    let error = PROGRAM.apply(&input, None, Some(&context)).unwrap_err();
+    assert_eq!(error.message(), no_setter("Color", &to_object(String::from("not a colour")), 21, 60).message());
+}
+
+#[test]
+fn page_style_program_preserves_literal_and_dynamic_setter_order() {
+    use crate::xaml_il::runtime::compiled::{ConstructionImport as Import, ConstructionImports, ConstructionInput, ConstructionProgram};
+    use ferroui_markup::construction_opcodes as op;
+    static PROGRAM: ConstructionProgram = ConstructionProgram {
+        code: &[op::ADD_STYLE_LITERAL, 0, 0, 1, 1, 1, op::ADD_STYLE_DYNAMIC, 0, 2, 0],
+        imports: &ConstructionImports { strings: &["Accent"], operations: &[
+            Import::Property(|| ferroui_base::Visual::is_visible_property()),
+            Import::LiteralValue(|args| Ok(to_object(args.boolean()?))),
+            Import::Property(background),
+        ] },
+    };
+    let actual = Style::new();
+    let expected = Style::new();
+    let context = context();
+    PROGRAM.apply(&[ConstructionInput::Object(actual.upcast_ref::<FerroObject>())], None, Some(&context)).unwrap();
+    let base = expected.upcast_ref::<StyleBase>();
+    add_setter(base, ferroui_base::Visual::is_visible_property(), to_object(true));
+    add_dynamic_resource_setter_with_parent(&context, base, background(), "Accent");
+    assert_eq!(setter_properties(actual.upcast_ref::<StyleBase>()), setter_properties(base));
+}

@@ -100,6 +100,8 @@
 //! `runtime_types`) is the `emitter` feature, which adds the `runtime` feature
 //! and the accessor table of the base crate.
 
+mod bytecode_image;
+pub use bytecode_image::BytecodeImage;
 mod compiled;
 mod compiled_resources;
 pub mod emit_types;
@@ -121,12 +123,12 @@ pub use compiled::{
     ClassGroup, CompiledDocument, EmitterHost, GeneratedFile, CLASS_GROUP_NOT_TRANSFORMED, GROUP_NOT_TRANSFORMED,
 };
 #[cfg(any(feature = "emitter", all(test, feature = "runtime")))]
-pub use runtime_host::{compile_documents, generate_class_file, generate_file};
+pub use runtime_host::{compile_documents, generate_class_file, generate_file, generate_file_with_runtime_types};
 #[cfg(all(any(test, feature = "testing"), any(feature = "emitter", all(test, feature = "runtime"))))]
 pub use runtime_host::{transformed_class_group, transformed_tree};
 pub use transform::{
-    transform_group, DiagnosticHandler, DocumentSource, NamespaceTable, ThemePartsTables, TransformOptions, TransformedDocument, METHOD_NOT_FOUND,
-    PARTS_CONSTRUCTOR,
+    transform_group, DiagnosticHandler, DocumentSource, NamespaceTable, ThemePartsTables, TransformOptions,
+    TransformedDocument, XamlBackend, METHOD_NOT_FOUND, PARTS_CONSTRUCTOR,
 };
 pub use compiled_resources::CompiledMarkupTypeSystem;
 pub use compiled_resources::CompiledDocumentBuildMethod;

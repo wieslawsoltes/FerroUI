@@ -52,6 +52,28 @@ pub struct DocumentSource<'s> {
 /// Receives a diagnostic of a transform and returns the severity it has from then on.
 pub type DiagnosticHandler = Rc<dyn Fn(&XamlDiagnostic) -> XamlDiagnosticSeverity>;
 
+/// Representation used for the operations that the build-time host resolves.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum XamlBackend {
+    /// Existing typed Rust factories and resource tables.
+    #[default]
+    Native,
+    /// Bytecode for resource runs and recognized control styles. Keep native template and page construction.
+    ThemeBytecode,
+    /// Also lower construction, resolved calls and compiled binding paths in pages and templates.
+    Bytecode,
+}
+
+impl XamlBackend {
+    pub fn uses_theme_programs(self) -> bool {
+        self != Self::Native
+    }
+
+    pub(super) fn uses_construction_programs(self) -> bool {
+        self == Self::Bytecode
+    }
+}
+
 /// What a transform depends on beside the documents and the type system.
 #[derive(Clone, Default)]
 pub struct TransformOptions {
@@ -60,6 +82,10 @@ pub struct TransformOptions {
     pub local_assembly: Option<String>,
     /// Whether `{Binding}` is a compiled binding unless the document says otherwise.
     pub use_compiled_bindings_by_default: bool,
+    /// Emit compact programs for operations resolved by the XAML compiler.
+    pub backend: XamlBackend,
+    /// Destination of compiled instruction streams.
+    pub bytecode_image: super::BytecodeImage,
     pub design_mode: bool,
     /// Whether source information is attached to the objects the documents create.
     pub create_source_info: bool,
@@ -148,6 +174,8 @@ impl TransformOptions {
         Self {
             local_assembly: configuration.local_assembly.map(|assembly| assembly.name.to_string()),
             use_compiled_bindings_by_default: configuration.use_compiled_bindings_by_default,
+            backend: XamlBackend::Native,
+            bytecode_image: Default::default(),
             design_mode: configuration.design_mode,
             create_source_info: configuration.create_source_info(),
             diagnostic_handler,

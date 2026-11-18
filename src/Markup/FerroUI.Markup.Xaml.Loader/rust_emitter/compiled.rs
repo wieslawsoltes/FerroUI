@@ -206,6 +206,8 @@ pub fn compile_documents_with(
             let names: Vec<String> = group.iter().map(|(index, _, _, _)| compiled[*index].function_name.clone()).collect();
             let functions_of_group = || {
                 let mut functions = DocumentFunctions::default();
+                functions.backend = options.backend;
+                functions.bytecode_image = options.bytecode_image.clone();
                 for (name, transformed) in names.iter().zip(&transformed) {
                     if let (Some(build), Some(root_class)) = (&transformed.build, root_value_handle_of(types, &transformed.root)) {
                         functions.insert_value(build, name, root_class);
@@ -809,6 +811,8 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
 
     // The functions of the documents, by their build methods.
     let mut functions = DocumentFunctions::default();
+    functions.backend = options.backend;
+    functions.bytecode_image = options.bytecode_image.clone();
     let mut names = Vec::with_capacity(documents.len());
     let mut has_build = vec![false; documents.len()];
     for (index, (document, function_name)) in transformed.iter().zip(allocated).enumerate() {
