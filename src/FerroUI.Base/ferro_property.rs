@@ -945,6 +945,13 @@ impl FerroProperty {
         self.routes.get().and_then(|routes| routes.as_any().downcast_ref::<StyledProperty<T>>())
     }
 
+    /// The property as a direct property with value type `T`: the typed view needed to set it
+    /// without boxing. `None` for styled properties and when `T` is not the property's value
+    /// type.
+    pub fn as_direct<T: crate::PropertyValue>(&'static self) -> Option<&'static crate::DirectPropertyBase<T>> {
+        self.routes.get().and_then(|routes| routes.as_any().downcast_ref::<crate::DirectPropertyBase<T>>())
+    }
+
     /// The marker value that represents an unset property value.
     pub fn unset_value() -> BoxedValue {
         crate::ferro_thread_local! {
