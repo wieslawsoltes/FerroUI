@@ -9,6 +9,7 @@
     background: var(--vscode-toolbar-activeBackground, var(--vscode-toolbar-hoverBackground));
 }
 .timeline-grid {
+    position: relative;
     --track-label-width: clamp(46px, 28%, 160px);
     --lane-gap: 7px;
     --lane-inset: 11px;
@@ -47,6 +48,41 @@
 #timeline-seek:disabled::-webkit-slider-thumb {
     opacity: .6;
 }
+.timeline-scrub {
+    overflow: clip;
+    margin-inline: calc(var(--ruler-start) - 5px) calc(var(--lane-inset) - 5px);
+    padding-block: 2px;
+}
+.timeline-scrub #timeline-seek {
+    inline-size: calc((100% - 10px) * var(--timeline-scale, 1) + 10px);
+    margin-inline-start: calc((100% - 10px) * var(--timeline-shift, 0));
+}
+.timeline-pan {
+    border-block-start: 1px solid var(--line);
+    padding-inline: var(--ruler-start) var(--lane-inset);
+}
+#timeline-pan {
+    appearance: none;
+    display: block;
+    inline-size: 100%;
+    min-block-size: 20px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+}
+#timeline-pan::-webkit-slider-runnable-track {
+    block-size: 6px;
+    border-radius: 3px;
+    background: var(--vscode-scrollbarSlider-background, var(--line));
+}
+#timeline-pan::-webkit-slider-thumb {
+    appearance: none;
+    inline-size: 24px;
+    block-size: 6px;
+    border-radius: 3px;
+    background: var(--vscode-descriptionForeground, var(--muted));
+}
 .timeline-ruler {
     position: relative;
     min-block-size: 19px;
@@ -83,6 +119,15 @@
     left: var(--timeline-position, 0%);
     inset-block: 0;
     border-left: 1px solid var(--focus);
+    pointer-events: none;
+}
+.timeline-grid[data-playhead-outside] .timeline-lane::after { display: none; }
+.timeline-marquee {
+    position: absolute;
+    z-index: 2;
+    box-sizing: border-box;
+    border: 1px solid var(--focus);
+    background: color-mix(in srgb, var(--focus) 20%, transparent);
     pointer-events: none;
 }
 .timeline-key {

@@ -2,7 +2,9 @@ import type { FrameTarget } from '../src/protocol';
 import type { FromTimeline, KeyframeGroupEdit, KeyframeLocation, TimelineControl, TimelineProgram, TimelineState, ToTimeline } from '../src/timelineProtocol';
 import { element, labelButton } from './dom';
 import { dragKeyframe, type RenderedKeyframe } from './timelineKeyDrag';
+import { bindTimelineMarquee } from './timelineMarquee';
 import { TimelineSelection } from './timelineSelection';
+import { TimelineViewportView } from './timelineViewportView';
 
 interface ProgramIdentity { id: number; key?: string }
 interface SavedTimeline extends ProgramIdentity { frameRate?: number }
@@ -27,7 +29,6 @@ const actions = element<HTMLButtonElement>('timeline-actions');
 const keyActions = element<HTMLButtonElement>('timeline-key-actions');
 const slider = element<HTMLInputElement>('timeline-seek');
 const time = element<HTMLOutputElement>('timeline-time');
-const ruler = element('timeline-ruler');
 const tracks = element<HTMLOListElement>('timeline-tracks');
 const number = new Intl.NumberFormat(undefined, { maximumFractionDigits: 3 });
 let model: TimelineState = { programs: [], names: {}, writable: false };
@@ -43,8 +44,16 @@ let lastContent = '';
 let lastPrograms = '';
 const selection = new TimelineSelection();
 let renderedKeys: RenderedKeyframe[] = [];
+const viewport = new TimelineViewportView(slider, () => renderedKeys);
 let owner: { session: number; program: ProgramIdentity } | undefined;
 let keyEdit: { before: FrameTarget; accepted?: KeyframeLocation[] } | undefined;
+
+const gestureFrame = () => pending || keyEdit ? undefined : model.frame;
+bindTimelineMarquee(viewport.grid, tracks, () => renderedKeys, gestureFrame, () => viewport.range, (keys, additive) => {
+    selection.replace([...(additive ? selection.keys : []), ...keys.map(({ key }) => key)]);
+    showKeySelection();
+    (keys.at(-1)?.button ?? slider).focus({ preventScroll: true });
+});
 
 programs.addEventListener('change', () => {
     const selected = model.programs.find(item => item.id === Number(programs.value));
@@ -141,7 +150,8 @@ function current(): TimelineProgram | undefined { return model.programs.find(ite
 
 function showTracks(): void {
     const available = model.programs;
-    const selected = available.find(item => remembered?.key ? item.source_key === remembered.key : item.id === remembered?.id) ?? available[0];
+    const selected = available.find(item => item.source_key && item.source_key === remembered?.key)
+        ?? available.find(item => matchesProgram(remembered, item)) ?? available[0];
     program = selected?.id;
     if (selected && model.frame) remember(selected);
     const timeline = selected?.timeline;
@@ -157,11 +167,17 @@ function showTracks(): void {
     }
     programs.value = program === undefined ? '' : String(program);
     programs.title = selected?.name ?? 'Animation program';
-    if (!selected || !timeline) { showKeySelection(); showPosition(); return; }
+    if (!selected || !timeline) {
+        viewport.follow(undefined, false);
+        showKeySelection();
+        showPosition();
+        return;
+    }
     const frame = model.frame;
+    let newProgram = false;
     if (frame) {
-        const sameProgram = owner?.session === frame.session
-            && (owner.program.key ? owner.program.key === selected.source_key : owner.program.id === selected.id);
+        const sameProgram = owner?.session === frame.session && matchesProgram(owner.program, selected);
+        newProgram = !sameProgram;
         if (!sameProgram) selection.replace([]);
         if (keyEdit?.before.session !== frame.session) keyEdit = undefined;
         if (keyEdit?.accepted && keyEdit.before.token !== frame.token) {
@@ -171,18 +187,13 @@ function showTracks(): void {
         owner = { session: frame.session, program: { id: selected.id, key: selected.source_key ?? undefined } };
         selection.reconcile(timeline.tracks);
     }
+    const changedViewport = viewport.follow(timeline.duration, newProgram);
     const content = JSON.stringify([selected, model.names, model.writable]);
     if (lastContent !== content) {
         lastContent = content;
         const restoreFocus = renderedKeys.some(item => item.button === document.activeElement);
         renderedKeys = [];
         slider.max = String(timeline.duration);
-        ruler.replaceChildren(...[0, .25, .5, .75, 1].map(proportion => {
-            const mark = document.createElement('span');
-            mark.textContent = number.format(timeline.duration * proportion);
-            mark.style.left = `${proportion * 100}%`;
-            return mark;
-        }));
         tracks.replaceChildren(...timeline.tracks.map((track, index) => {
             const row = document.createElement('li');
             row.className = 'timeline-track';
@@ -197,15 +208,14 @@ function showTracks(): void {
                 const button = document.createElement('button');
                 button.type = 'button';
                 button.className = 'timeline-key';
-                button.style.left = `${percent(key.time, timeline.duration)}%`;
                 button.title = `${name.title}, ${number.format(key.time)}s · ${key.value_text} · ${key.easing_text}`;
                 button.setAttribute('aria-label', button.title);
                 const location = { target: track.target, property: track.property, time: key.time };
                 const rendered = { button, key: location };
                 renderedKeys.push(rendered);
-                if (model.writable && timeline.duration > 0) dragKeyframe(rendered, lane, timeline.duration,
+                if (model.writable && timeline.duration > 0) dragKeyframe(rendered, lane, () => viewport.range,
                     () => selection.has(location) ? renderedKeys.filter(item => selection.has(item.key)) : [rendered],
-                    () => pending || keyEdit ? undefined : model.frame,
+                    gestureFrame,
                     time => Math.round(time * (frameRate || 1000)) / (frameRate || 1000),
                     (keys, offset, frame) => editKeys(keys, frame, { action: 'move_keyframes', offset }));
                 button.addEventListener('click', event => {
@@ -223,13 +233,19 @@ function showTracks(): void {
             row.append(name, lane);
             return row;
         }));
+        viewport.layout();
         if (restoreFocus) {
-            const last = renderedKeys.findLast(item => selection.has(item.key));
+            const last = renderedKeys.findLast(item => !item.button.hidden && selection.has(item.key));
             (last?.button ?? slider).focus({ preventScroll: true });
         }
-    }
+    } else if (changedViewport) viewport.layout();
     showKeySelection();
     showPosition();
+}
+
+function matchesProgram(identity: ProgramIdentity | undefined, program: TimelineProgram): boolean {
+    // Authoring can assign a key to a legacy program and Undo can remove it again.
+    return Boolean(identity && (identity.key && program.source_key ? identity.key === program.source_key : identity.id === program.id));
 }
 
 function remember(program: TimelineProgram): void {
@@ -259,7 +275,7 @@ function showPosition(): void {
     const seconds = queued ?? submitted ?? position?.time ?? 0;
     slider.value = String(seconds);
     slider.setAttribute('aria-valuetext', `${number.format(seconds)} of ${number.format(timeline.duration)} seconds`);
-    tracks.style.setProperty('--timeline-position', `${percent(seconds, timeline.duration)}%`);
+    viewport.position(seconds);
     time.value = `${number.format(seconds)} / ${number.format(timeline.duration)} s`;
     if (position?.elapsed !== undefined) {
         const clock = timeline.total_duration === null ? `${number.format(position.elapsed)} s elapsed`
@@ -334,5 +350,3 @@ function showStatus(message: string | undefined): void {
     status.textContent = message ?? '';
     status.hidden = !message;
 }
-
-function percent(time: number, duration: number): number { return duration > 0 ? time * 100 / duration : 0; }

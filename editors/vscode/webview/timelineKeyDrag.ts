@@ -1,9 +1,10 @@
 import type { FrameTarget } from '../src/protocol';
 import type { KeyframeLocation } from '../src/timelineProtocol';
+import { clamp, timelinePercent, type TimelineViewport } from './timelineViewport';
 
 export interface RenderedKeyframe { key: KeyframeLocation; button: HTMLButtonElement }
 
-export function dragKeyframe(item: RenderedKeyframe, lane: HTMLElement, duration: number,
+export function dragKeyframe(item: RenderedKeyframe, lane: HTMLElement, viewport: () => TimelineViewport,
     selected: () => readonly RenderedKeyframe[], frame: () => FrameTarget | undefined,
     snapTime: (time: number) => number,
     commit: (keys: KeyframeLocation[], offset: number, frame: FrameTarget) => void): void {
@@ -14,6 +15,8 @@ export function dragKeyframe(item: RenderedKeyframe, lane: HTMLElement, duration
         const width = lane.getBoundingClientRect().width;
         if (event.button !== 0 || !event.isPrimary || !target || width <= 0) return;
         if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+        const axis = viewport();
+        const { duration, span } = axis;
         event.preventDefault();
         button.focus({ preventScroll: true });
         swallowClick = false;
@@ -27,13 +30,13 @@ export function dragKeyframe(item: RenderedKeyframe, lane: HTMLElement, duration
         const options = { capture: true, signal: listeners.signal };
         let moved = false;
         const offsetAt = (x: number) => {
-            const time = initial + (x - start) * duration / width;
+            const time = initial + (x - start) * span / width;
             const offset = snapTime(time) - initial;
             return Math.min(limits.high, Math.max(limits.low, offset));
         };
         const show = (offset: number, dragging: boolean) => {
             for (const { button, key } of group) {
-                button.style.left = `${(key.time + offset) * 100 / duration}%`;
+                button.style.left = `${clamp(timelinePercent(viewport(), key.time + offset), 0, 100)}%`;
                 button.classList.toggle('timeline-key-dragging', dragging);
             }
         };
@@ -45,6 +48,7 @@ export function dragKeyframe(item: RenderedKeyframe, lane: HTMLElement, duration
         const cancel = () => { swallowClick = true; finish(); };
         document.addEventListener('pointermove', pointer => {
             if (pointer.pointerId !== pointerId) return;
+            if (viewport() !== axis) { cancel(); return; }
             moved ||= Math.abs(pointer.clientX - start) >= 4;
             if (!moved) return;
             show(offsetAt(pointer.clientX), true);
@@ -55,7 +59,7 @@ export function dragKeyframe(item: RenderedKeyframe, lane: HTMLElement, duration
             const offset = offsetAt(pointer.clientX);
             const current = frame();
             finish();
-            if (swallowClick && offset !== 0 && current?.session === target.session && current.token === target.token) {
+            if (swallowClick && offset !== 0 && viewport() === axis && current?.session === target.session && current.token === target.token) {
                 commit(group.map(({ key }) => key), offset, target);
             }
         }, options);

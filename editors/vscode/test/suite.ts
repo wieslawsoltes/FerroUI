@@ -13,6 +13,7 @@ import { verifyHostedPreview } from './hostedPreview';
 import { verifyLiveApp } from './liveApp';
 import { verifyLiveXaml } from './liveXaml';
 import { verifyProcessShutdown, verifyReloadHistory } from './reloadProcess';
+import { verifyTimelineViewport } from './timelineViewport';
 import { until } from './wait';
 import type { DesignerWorkbench } from '../src/designerWorkbench';
 import type { RuntimeSourceEditor } from '../src/runtimeSource';
@@ -25,6 +26,7 @@ export async function run(): Promise<void> {
     const extension = vscode.extensions.getExtension<{ designer: DesignerWorkbench; runtimeSource: RuntimeSourceEditor }>('FerroUI.ferroui')!;
     assert.ok(extension, 'FerroUI extension is installed in the Extension Development Host');
     const { designer, runtimeSource } = await extension.activate();
+    verifyTimelineViewport();
     await verifyProcessShutdown();
     verifyReloadHistory();
     await verifyRuntimeClient();

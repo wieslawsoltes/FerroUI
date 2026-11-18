@@ -337,15 +337,26 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
         ${tool('timeline-record-mode', 'circle-filled', 'Record property changes', 'aria-pressed="false" hidden disabled')}
         ${tool('timeline-record', 'add', 'Add keyframe at playhead', 'hidden disabled')}
         ${tool('timeline-key-actions', 'list-selection', 'Keyframe Selection Actions', 'hidden disabled')}
+        <div id="timeline-zoom" class="tool-group" role="group" aria-label="Timeline zoom" hidden>
+            ${tool('timeline-zoom-out', 'zoom-out', 'Zoom out on timeline (−)')}
+            ${tool('timeline-fit', 'screen-normal', 'Fit timeline (0)')}
+            ${tool('timeline-zoom-in', 'zoom-in', 'Zoom in on timeline (+)')}
+        </div>
         ${tool('timeline-actions', 'ellipsis', 'More Animation Actions', 'disabled')}
     </div>
     <p id="timeline-native-source" class="dock-message" hidden>Open the authored animation through More Animation Actions.</p>
     <section id="timeline-program" aria-label="Selected animation" hidden>
-        <div class="timeline-grid">
-            <input id="timeline-seek" type="range" min="0" value="0" step="any" aria-label="Animation playhead"
-                aria-keyshortcuts="[ ]" title="Use [ and ] to seek to the previous or next keyframe">
+        <div id="timeline-grid" class="timeline-grid">
+            <div class="timeline-scrub">
+                <input id="timeline-seek" type="range" min="0" value="0" step="any" aria-label="Animation playhead"
+                    aria-keyshortcuts="[ ] + - 0 PageUp PageDown"
+                    title="[ and ] seek to nearby keyframes. + and − zoom. Page Up and Page Down pan.">
+            </div>
             <div id="timeline-ruler" class="timeline-ruler" aria-hidden="true"></div>
             <ol id="timeline-tracks" aria-label="Property tracks"></ol>
+            <div id="timeline-pan-row" class="timeline-pan" hidden>
+                <input id="timeline-pan" type="range" min="0" value="0" step="any" aria-label="Pan visible timeline">
+            </div>
         </div>
     </section>
 </main>`);
