@@ -59,7 +59,7 @@ fn preview_resources_fence_cycles_missing_and_out_of_scope_paths() {
     assert!(graph.accepted.is_empty());
     assert!(graph.unavailable[&cyclic].contains("Circular"));
     assert!(graph.unavailable[&outside_uri].contains("inside"));
-    let missing = file_uri(&fixture.0.join("Missing.xaml")).unwrap();
+    let missing = file_uri(fixture.0.join("Missing.xaml")).unwrap();
     assert!(graph.dependencies.contains(&missing));
     assert_eq!(graph.unavailable.len(), 3);
 }
