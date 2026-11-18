@@ -215,23 +215,11 @@ fn three_state_checkbox_preserves_null_and_reports_each_state() {
 }
 
 #[test]
-fn textbox_counts_unicode_scalar_values() {
-    let _application = start();
-    let root = examples::create(examples::find("TextBox").unwrap()).unwrap();
-    root.get_control::<TextBox>("Primary")
-        .set_text(Some("A🦀é"));
-    assert_eq!(
-        root.get_control::<TextBlock>("Output").text().as_deref(),
-        Some("3 characters")
-    );
-}
-
-#[test]
 fn password_examples_keep_source_validation_and_reveal_behavior() {
     let _application = start();
     let root = examples::create(examples::find("PasswordBox").unwrap()).unwrap();
     let password = root.get_control::<TextBox>("SimplePassword");
-    let validation = root.get_control::<TextBlock>("PasswordValidation");
+    let validation = root.get_control::<TextBlock>("Control1Output");
     password.set_text(Some("Password"));
     assert_eq!(password.text().as_deref(), Some(""));
     assert_eq!(
@@ -485,27 +473,6 @@ fn contrast_inputs_update_ratio_and_report_invalid_values() {
     );
     input.set_text(Some("#FFFFFF"));
     assert_eq!(ratio.text().as_deref(), Some("1.00:1"));
-}
-
-#[test]
-fn winui_numberbox_example_keeps_expression_nan_and_valuechanged_behavior() {
-    use ferroui_controls::NumberBox;
-    let _application = start();
-    let root = examples::create(examples::find("NumberBox").unwrap()).unwrap();
-    let expression = root.get_control::<NumberBox>("Expression");
-    assert!(expression.value().is_nan());
-    expression.set_text("1 + 2^2");
-    press(&expression, ferroui_base::input::Key::Enter, true);
-    assert_eq!(expression.value(), 5.0);
-    expression.set_text("");
-    press(&expression, ferroui_base::input::Key::Enter, true);
-    assert!(expression.value().is_nan());
-    root.get_control::<NumberBox>("Number")
-        .set_numeric_value(31.0);
-    assert_eq!(
-        root.get_control::<TextBlock>("Output").text().as_deref(),
-        Some("Value: 31")
-    );
 }
 
 #[test]

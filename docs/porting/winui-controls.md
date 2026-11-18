@@ -425,7 +425,7 @@ Phase G2 ports the WinUI controls the pending pages need, one control (or one sm
 
 #### G4: the partial pages (#418)
 
-Phase G4 completes the pages that had native examples for a reviewed subset only: each catalog example of the source page gets its native adaptation with the handlers of the page's code behind in Rust and the source's x:Bind, as for G1. Where the source's x:Bind path is one the x:Bind core does not compile, the page records the binding it uses instead: `IsChecked.Value.Equals(x:False)` (there is no member `Value` on a nullable boolean) is the OneWay x:Bind of `IsChecked` with the `BoolConverters.Not` converter, and a cast to a number (`(x:Int32)Slider.Value`, a type test on the core) is the path without the cast, which the binding converts. A button that opens another page of the gallery, as the source's `App.MainWindow.Navigate`, is listed in `examples::GALLERY_LINKS` and wired by the gallery. A container FerroUI does not have is composed from one it has and recorded in the page's notes: GridView and VariableSizedWrapGrid of the SplitButton flyouts are a UniformGrid of buttons, as on the RichEditBox page.
+Phase G4 completes the pages that had native examples for a reviewed subset only: each catalog example of the source page gets its native adaptation with the handlers of the page's code behind in Rust and the source's x:Bind, as for G1. Where the source's x:Bind path is one the x:Bind core does not compile, the page records the binding it uses instead: `IsChecked.Value.Equals(x:False)` (there is no member `Value` on a nullable boolean) is the OneWay x:Bind of `IsChecked` with the `BoolConverters.Not` converter, and a cast to a number (`(x:Int32)Slider.Value`, a type test on the core) is the path without the cast, which the binding converts. A button that opens another page of the gallery, as the source's `App.MainWindow.Navigate`, is listed in `examples::GALLERY_LINKS` and wired by the gallery. A container FerroUI does not have is composed from one it has and recorded in the page's notes: GridView and VariableSizedWrapGrid of the SplitButton flyouts are a UniformGrid of buttons, as on the RichEditBox page. WinUI's `CharacterSpacing`, in thousandths of an em, is FerroUI's `LetterSpacing` in pixels: the value times the font size over 1000 (200 at 24 is 4.8).
 
 | Page | Examples | State | Rust | Tests |
 |---|---:|---|---|---|
@@ -446,6 +446,10 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 | Grid | 1 of 1 | ported | `Pages/Grid.xaml` (no code-behind upstream) | `layout_samples_tests.rs` |
 | StackPanel | 1 of 1 | ported | `layout_samples.rs` | `layout_samples_tests.rs` |
 | RelativePanel | 1 of 1 | ported | `Pages/RelativePanel.xaml` (no code-behind upstream) | `layout_samples_tests.rs` |
+| TextBlock | 4 ported, 1 partial: no IsTextSelectionEnabled on TextBlock (a RichTextBlock) | partial | `Pages/TextBlock.xaml` (no code-behind upstream) | `text_input_samples_tests.rs` |
+| TextBox | 3 ported, 1 partial: no IsSpellCheckEnabled | partial | `Pages/TextBox.xaml` (no code-behind upstream) | `text_input_samples_tests.rs` |
+| PasswordBox | 3 partial: no PasswordBox (a TextBox with a PasswordChar) | partial | `input_samples.rs` | `tests.rs`, `text_input_samples_tests.rs` |
+| NumberBox | 3 of 3 | ported | `text_input_samples.rs` | `text_input_samples_tests.rs` |
 
 ### 10.8 WinUI API and Gallery scanner (W10b)
 

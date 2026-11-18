@@ -950,10 +950,11 @@
       "examples": []
     },
     "NumberBox": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/NumberBox.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/text_input_samples.rs"
       ],
       "tests": [
         {
@@ -961,45 +962,24 @@
           "name": "all_reviewed_native_adaptations_load_real_controls"
         },
         {
-          "path": "samples/WinUIGallery/tests.rs",
-          "name": "winui_numberbox_example_keeps_expression_nan_and_valuechanged_behavior"
-        }
-      ],
-      "notes": "The native NumberBox preserves spin-button, NaN and expression behavior using the original snippets. Locale-specific upstream number formatting remains pending. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
-      "examples": [
-        {
-          "source": "WinUIGallery/Samples/NumberBox/NumberboxSpinButton.txt",
-          "status": "partial",
-          "tests": [
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "all_reviewed_native_adaptations_load_real_controls"
-            },
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "winui_numberbox_example_keeps_expression_nan_and_valuechanged_behavior"
-            }
-          ],
-          "notes": "The native NumberBox preserves spin-button, NaN and expression behavior using the original snippets. Locale-specific upstream number formatting remains pending. Original source substitutions remain in the catalog viewer; chosen native inputs and Rust handlers are explicit adaptations. Rendering/accessibility/platform acceptance is pending.",
-          "source_sha256": "59699277ad9e163499f51c2cbbe822e76a458a7be9bed3b63a15d9121a94f236"
+          "path": "samples/WinUIGallery/text_input_samples_tests.rs",
+          "name": "number_box_expression_keeps_nan_and_evaluates"
         },
         {
-          "source": "WinUIGallery/Samples/NumberBox/NumberboxEvaluatesExpressions.txt",
-          "status": "partial",
-          "tests": [
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "all_reviewed_native_adaptations_load_real_controls"
-            },
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "winui_numberbox_example_keeps_expression_nan_and_valuechanged_behavior"
-            }
-          ],
-          "notes": "The native NumberBox preserves spin-button, NaN and expression behavior using the original snippets. Locale-specific upstream number formatting remains pending. Original source substitutions remain in the catalog viewer; chosen native inputs and Rust handlers are explicit adaptations. Rendering/accessibility/platform acceptance is pending.",
-          "source_sha256": "d5848adadd320cd197313234679a1920aa6def65c28c8a8c73c14d3d5d2896e1"
+          "path": "samples/WinUIGallery/text_input_samples_tests.rs",
+          "name": "spin_button_placement_group_places_the_spin_buttons"
+        },
+        {
+          "path": "samples/WinUIGallery/text_input_samples_tests.rs",
+          "name": "formatted_number_box_rounds_to_the_nearest_quarter"
+        },
+        {
+          "path": "samples/WinUIGallery/text_input_samples_tests.rs",
+          "name": "dollar_amount_formatter_rounds_half_up_and_reads_decimals"
         }
-      ]
+      ],
+      "notes": "All three source examples use native NumberBox with the code behind of NumberBoxPage.xaml.cs in Rust: the expression box, the spin button box with SpinButtonPlacementGroup_SelectionChanged (Inline, Compact; as in the source the box keeps its markup placement until the selection changes), and SetNumberBoxNumberFormatter, a formatter of two fraction digits that rounds half up to 0.25 (DecimalFormatter with an IncrementNumberRounder). The formatter writes and reads the invariant decimal separator instead of the region's.",
+      "examples": []
     },
     "PageTransition": {
       "status": "partial",
@@ -1055,59 +1035,14 @@
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "password_examples_keep_source_validation_and_reveal_behavior"
+        },
+        {
+          "path": "samples/WinUIGallery/text_input_samples_tests.rs",
+          "name": "password_box_examples_keep_the_source_characters"
         }
       ],
-      "notes": "The three source examples and original validation/reveal handlers use TextBox.PasswordChar and RevealPassword with composed Header. A distinct PasswordBox API and full input/accessibility parity remain pending. All examples remain partial pending complete input, platform, accessibility and rendering acceptance.",
-      "examples": [
-        {
-          "source": "WinUIGallery/Samples/PasswordBox/SimplePasswordbox.txt",
-          "source_sha256": "134ed71f6c67346d81b6b09a2207973f6a2028a4d970a93246b644696368788e",
-          "status": "partial",
-          "tests": [
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "all_reviewed_native_adaptations_load_real_controls"
-            },
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "password_examples_keep_source_validation_and_reveal_behavior"
-            }
-          ],
-          "notes": "The three source examples and original validation/reveal handlers use TextBox.PasswordChar and RevealPassword with composed Header. A distinct PasswordBox API and full input/accessibility parity remain pending. Original page code-behind supplies the corresponding Rust handlers; complete API/render/accessibility parity is not established."
-        },
-        {
-          "source": "WinUIGallery/Samples/PasswordBox/PasswordboxHeaderPlaceholderText.txt",
-          "source_sha256": "9702b97d4f7a7c469595c851894211da67897271815bc4388d89ea2563dbe1d8",
-          "status": "partial",
-          "tests": [
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "all_reviewed_native_adaptations_load_real_controls"
-            },
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "password_examples_keep_source_validation_and_reveal_behavior"
-            }
-          ],
-          "notes": "The three source examples and original validation/reveal handlers use TextBox.PasswordChar and RevealPassword with composed Header. A distinct PasswordBox API and full input/accessibility parity remain pending. Original page code-behind supplies the corresponding Rust handlers; complete API/render/accessibility parity is not established."
-        },
-        {
-          "source": "WinUIGallery/Samples/PasswordBox/PasswordboxRevealMode.txt",
-          "source_sha256": "3e852f716094e0f9210c3dc51b9f73dcbaadab89c12c83b5fb840b28b3283a50",
-          "status": "partial",
-          "tests": [
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "all_reviewed_native_adaptations_load_real_controls"
-            },
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "password_examples_keep_source_validation_and_reveal_behavior"
-            }
-          ],
-          "notes": "The three source examples and original validation/reveal handlers use TextBox.PasswordChar and RevealPassword with composed Header. A distinct PasswordBox API and full input/accessibility parity remain pending. Original page code-behind supplies the corresponding Rust handlers; complete API/render/accessibility parity is not established."
-        }
-      ]
+      "notes": "All three source examples with PasswordBox_PasswordChanged and RevealModeCheckbox_Changed of PasswordBoxPage.xaml.cs in Rust (input_samples.rs): the validation of an empty or 'Password' value, the header (composed), placeholder and custom character, and the reveal check box. FerroUI has no PasswordBox: each box is a TextBox with a PasswordChar whose Text, text changes and RevealPassword stand for Password, PasswordChanged and PasswordRevealMode, so the page is partial.",
+      "examples": []
     },
     "PagerControl": {
       "status": "ported",
@@ -1571,9 +1506,21 @@
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/text_input_samples_tests.rs",
+          "name": "text_block_examples_keep_the_source_style_properties_and_inlines"
+        },
+        {
+          "path": "samples/WinUIGallery/text_input_samples_tests.rs",
+          "name": "selectable_text_follows_the_selection_switch"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
         }
       ],
-      "notes": "Text content, wrapping, typography and inline text use native TextBlock. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "All five source examples: the simple text, the keyed style (a keyed ControlTheme set with Theme), the source's font, foreground, wrapping (WrapWholeWords is WrapWithOverflow) and character spacing (CharacterSpacing 200, thousandths of an em, is a LetterSpacing of 4.8 at 24), and the inline Run, LineBreak, Span, Bold, Italic and Underline. The page has no code-behind upstream. FerroUI's TextBlock has no IsTextSelectionEnabled or SelectionHighlightColor (SelectableTextBlock's selection cannot be switched off): the selectable text is a RichTextBlock, which has both, with the source's OneWay x:Bind of the switch, so the page is partial.",
       "examples": []
     },
     "TextBox": {
@@ -1588,11 +1535,11 @@
           "name": "all_reviewed_native_adaptations_load_real_controls"
         },
         {
-          "path": "samples/WinUIGallery/tests.rs",
-          "name": "textbox_counts_unicode_scalar_values"
+          "path": "samples/WinUIGallery/text_input_samples_tests.rs",
+          "name": "text_box_examples_keep_the_source_properties"
         }
       ],
-      "notes": "Text, placeholder, read-only and multiline examples use existing TextBox properties; Header is composed explicitly. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "All four source examples use native TextBox: the simple box, the box with its header (composed above the box, whose automation name it is) and placeholder, the read-only box with the source's font, foreground and character spacing (CharacterSpacing 200, thousandths of an em, is a LetterSpacing of 4.8 at 24), and the multi-line box with AcceptsReturn, wrapping and the green SelectionBrush (SelectionHighlightColor). The page has no code-behind upstream. FerroUI's TextBox has no IsSpellCheckEnabled, so the multi-line box does not check spelling and the page is partial.",
       "examples": []
     },
     "TimePicker": {

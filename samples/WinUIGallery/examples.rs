@@ -5,7 +5,7 @@ use ferroui_base::media::immutable::ImmutableSolidColorBrush;
 use ferroui_base::media::Color;
 use ferroui_base::{ObjectType, Ref, Thickness};
 use ferroui_controls::primitives::ToggleButton;
-use ferroui_controls::{Border, Button, Control, NumberBox, RadioButtons, TextBlock, TextBox};
+use ferroui_controls::{Border, Button, Control, RadioButtons, TextBlock, TextBox};
 use ferroui_markup_xaml::markup_extensions::XBindings;
 use ferroui_markup_xaml::XamlLoadError;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
@@ -66,7 +66,7 @@ pub static ADAPTATIONS: &[PageAdaptation] = &[
     page!("CommandBar", "The source primary/secondary commands use the shared CommandBar family, observable open state and an explicit HotKey adaptation. Dynamic symbol conversion and the full option set remain pending."),
     page!("AccessibilityColorContrast", "The original luminance/contrast calculation and pass thresholds run in Rust. Opaque RGB text inputs replace the Gallery's custom inline color pickers; those picker controls remain pending."),
     page!("AutoSuggestBox", "Both examples use the native AutoSuggestBox: 97 source cat names, user-only token filtering, chosen-item output and control search/query with original title/subtitle and embedded bitmap details. Catalog titles are explicit item values; CurrentCulture matching and full input/accessibility parity remain pending."),
-    page!("NumberBox", "The native NumberBox preserves spin-button, NaN and expression behavior using the original snippets. Locale-specific upstream number formatting remains pending."),
+    page!(ported "NumberBox", "All three source examples use native NumberBox with the code behind of NumberBoxPage.xaml.cs in Rust: the expression box, the spin button box with SpinButtonPlacementGroup_SelectionChanged (Inline, Compact; as in the source the box keeps its markup placement until the selection changes), and SetNumberBoxNumberFormatter, a formatter of two fraction digits that rounds half up to 0.25 (DecimalFormatter with an IncrementNumberRounder). The formatter writes and reads the invariant decimal separator instead of the region's."),
     page!(ported "PersonPicture", "The source example uses native PersonPicture (WinUI's control in ferroui-controls) with its RadioButtons handler: the profile image, the display name Jane Doe and the initials SB. The profile image is the gallery's PersonPicture image instead of the remote image of the source."),
     page!(ported "PagerControl", "All three source examples use native PagerControl (WinUI's control in ferroui-controls): the basic pager, the number box and button panel display modes, and unbounded number box and button panel pagers. The page has no code-behind upstream."),
     page!("PipsPager", "The existing PipsPager provides page counts, selection and previous/next controls; wrapping remains explicit."),
@@ -87,9 +87,9 @@ pub static ADAPTATIONS: &[PageAdaptation] = &[
     page!(ported "ToggleSwitch", "Both source examples use native ToggleSwitch: the simple switch, and the switch with its header, OnContent and OffContent and the ProgressRing bound to it with the source's OneWay x:Bind. WinUI's IsOn is IsChecked and its Header is the Content of FerroUI's ToggleSwitch, which the WinUI theme presents as the header. The page has no code-behind upstream."),
     page!(ported "CheckBox", "All three source examples use native CheckBox with the handlers of CheckBoxPage.xaml.cs in Rust: the two-state and three-state outputs, and Select all with SetCheckedState (the aggregate of the options at load and after each option) and the user cycle from checked to unchecked. The source's automation names and output automation ids are kept; rendering parity against Windows remains pending."),
     page!(ported "RadioButton", "Both source examples use native RadioButtons with the handlers of RadioButtonPage.xaml.cs in Rust: RadioButton_Checked writes the selected option, and the Background and Border groups color the border (Green, Yellow, White; DarkGreen, Gold, White). As in the source, the border keeps its markup colors until a selection changes. Rendering and screen-reader parity remain pending."),
-    page!("TextBox", "Text, placeholder, read-only and multiline examples use existing TextBox properties; Header is composed explicitly."),
-    page!("PasswordBox", "The three source examples and original validation/reveal handlers use TextBox.PasswordChar and RevealPassword with composed Header. A distinct PasswordBox API and full input/accessibility parity remain pending."),
-    page!("TextBlock", "Text content, wrapping, typography and inline text use native TextBlock."),
+    page!("TextBox", "All four source examples use native TextBox: the simple box, the box with its header (composed above the box, whose automation name it is) and placeholder, the read-only box with the source's font, foreground and character spacing (CharacterSpacing 200, thousandths of an em, is a LetterSpacing of 4.8 at 24), and the multi-line box with AcceptsReturn, wrapping and the green SelectionBrush (SelectionHighlightColor). The page has no code-behind upstream. FerroUI's TextBox has no IsSpellCheckEnabled, so the multi-line box does not check spelling and the page is partial."),
+    page!("PasswordBox", "All three source examples with PasswordBox_PasswordChanged and RevealModeCheckbox_Changed of PasswordBoxPage.xaml.cs in Rust (input_samples.rs): the validation of an empty or 'Password' value, the header (composed), placeholder and custom character, and the reveal check box. FerroUI has no PasswordBox: each box is a TextBox with a PasswordChar whose Text, text changes and RevealPassword stand for Password, PasswordChanged and PasswordRevealMode, so the page is partial."),
+    page!("TextBlock", "All five source examples: the simple text, the keyed style (a keyed ControlTheme set with Theme), the source's font, foreground, wrapping (WrapWholeWords is WrapWithOverflow) and character spacing (CharacterSpacing 200, thousandths of an em, is a LetterSpacing of 4.8 at 24), and the inline Run, LineBreak, Span, Bold, Italic and Underline. The page has no code-behind upstream. FerroUI's TextBlock has no IsTextSelectionEnabled or SelectionHighlightColor (SelectableTextBlock's selection cannot be switched off): the selectable text is a RichTextBlock, which has both, with the source's OneWay x:Bind of the switch, so the page is partial."),
     page!("Slider", "All four source examples use native Slider with the source's OneWay x:Bind of the outputs and of the range options, and SnapsToRadioButtons_SelectionChanged in Rust. FerroUI's Slider has no Header (composed), no StepFrequency (TickFrequency with IsSnapToTickEnabled) and no SnapsTo: Ticks is IsSnapToTickEnabled, and StepValues, the integer steps of the source, has no counterpart (the slider does not snap), so the page is partial. The source's Value.ToString() is the bound Value."),
     page!("ProgressBar", "Both determinate and indeterminate ProgressBar modes use the shared control."),
     page!("ComboBox", "All three source examples use native ComboBox with ColorComboBox_SelectionChanged and Combo3_Loaded of ComboBoxPage.xaml.cs in Rust: the color rectangle, the font list (FontHelper.Fonts as names; the output's font follows the selection instead of the x:Bind of FontItem.Font), and the editable font sizes with the source's OneWay x:Bind of SelectedValue to the output's font size. Header is composed. FerroUI's ComboBox has no TextSubmitted event and there is no ContentDialog, so Combo3_TextSubmitted (the check of a typed size and its dialog) is not ported and the page is partial."),
@@ -175,6 +175,7 @@ pub fn create(sample: &PageAdaptation) -> Result<Ref<Control>, XamlLoadError> {
     crate::chart_samples::wire(&root);
     crate::button_samples::wire(sample.page_id, &root);
     crate::layout_samples::wire(sample.page_id, &root);
+    crate::text_input_samples::wire(sample.page_id, &root);
     wire(&root);
     initialize_x_bind(&root)?;
     Ok(root)
@@ -199,20 +200,7 @@ fn wire(root: &Ref<Control>) {
     let Some(output) = find_control::<TextBlock>(root, "Output") else {
         return;
     };
-    if let Some(number) = find_control::<NumberBox>(root, "Number") {
-        let weak_output = output.downgrade();
-        let weak_number = number.downgrade();
-        number.value_changed(move |_| {
-            if let (Some(number), Some(output)) = (weak_number.upgrade(), weak_output.upgrade()) {
-                let value = if number.value().is_nan() {
-                    "empty".to_string()
-                } else {
-                    number.value().to_string()
-                };
-                output.set_text(Some(&format!("Value: {value}")));
-            }
-        }).detach();
-    } else if let Some(primary) = find_control::<ToggleButton>(root, "Primary") {
+    if let Some(primary) = find_control::<ToggleButton>(root, "Primary") {
         let weak_output = output.downgrade();
         let weak_primary = primary.downgrade();
         primary.property_changed(move |_| {
@@ -222,15 +210,6 @@ fn wire(root: &Ref<Control>) {
                     Some(false) => "Unchecked",
                     None => "Indeterminate",
                 }));
-            }
-        });
-    } else if let Some(primary) = find_control::<TextBox>(root, "Primary") {
-        let weak_output = output.downgrade();
-        let weak_primary = primary.downgrade();
-        primary.property_changed(move |_| {
-            if let (Some(primary), Some(output)) = (weak_primary.upgrade(), weak_output.upgrade()) {
-                let count = primary.text().unwrap_or_default().chars().count();
-                output.set_text(Some(&format!("{count} characters")));
             }
         });
     } else if let Some(primary) = find_control::<Button>(root, "Primary") {

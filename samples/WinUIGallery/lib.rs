@@ -35,6 +35,7 @@ mod navigation_view_samples;
 mod platform_samples;
 mod repeater_samples;
 mod sizing_sample;
+mod text_input_samples;
 mod text_samples;
 mod window_samples;
 
@@ -91,3 +92,6 @@ mod button_samples_tests;
 
 #[cfg(test)]
 mod layout_samples_tests;
+
+#[cfg(test)]
+mod text_input_samples_tests;
