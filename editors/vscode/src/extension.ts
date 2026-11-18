@@ -5,7 +5,7 @@ import { HotReload } from './hotReload';
 import { FerroMcpProvider } from './mcpProvider';
 import { xamlLanguage, XamlServer } from './xamlServer';
 
-export function activate(context: vscode.ExtensionContext): void {
+export function activate(context: vscode.ExtensionContext) {
     const languageOutput = vscode.window.createOutputChannel('FerroUI XAML');
     const previewOutput = vscode.window.createOutputChannel('FerroUI Designer');
     const server = new XamlServer(context, languageOutput);
@@ -24,8 +24,9 @@ export function activate(context: vscode.ExtensionContext): void {
         }),
         vscode.commands.registerCommand('ferroui.restartLanguageServer', () => server.start(true)),
     );
+    vscode.workspace.textDocuments.forEach(startForXaml);
     if (context.extensionMode === vscode.ExtensionMode.Test) {
         context.subscriptions.push(vscode.commands.registerCommand('ferroui.test.mcpDefinitions', () => mcp.provideMcpServerDefinitions()));
+        return { designer };
     }
-    vscode.workspace.textDocuments.forEach(startForXaml);
 }

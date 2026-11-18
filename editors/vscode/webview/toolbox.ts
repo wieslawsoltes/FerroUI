@@ -64,7 +64,9 @@ function render(): void {
         if (focused) [...list.querySelectorAll<HTMLButtonElement>('button')].find(button => button.dataset.asset === focused)?.focus();
     }
     status.textContent = error ?? state.message ?? (state.assets.length === 0 ? 'Open a FerroUI designer to insert controls.'
-        : list.childElementCount === 0 ? 'No controls match your search.' : 'Drag a control into the design, or press Enter to insert it.');
+        : list.childElementCount === 0 ? 'No controls match your search.'
+            : state.canInsert ? 'Drag a control into the design, or press Enter to insert it.'
+                : 'Drag a control onto the canvas or into the Source Outline.');
     status.classList.toggle('error', Boolean(error));
 }
 

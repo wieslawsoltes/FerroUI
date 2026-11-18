@@ -24,6 +24,7 @@ export class DesignerDrag {
                     : origin.type === 'node' && panel.nodes.some(node => node.id === origin.node && node.canMove))) return;
             clearTimeout(this.ending);
             clearTimeout(this.expiry);
+            this.ending = undefined;
             this.active = gesture;
             this.expiry = setTimeout(() => this.clear(), 25_000);
             this.publish({ type: 'drag', gesture });
@@ -33,8 +34,7 @@ export class DesignerDrag {
         if (!gesture || gesture.id !== message.id || gesture.frame.session !== panel.session) return;
         if (message.type === 'endDrag') {
             // Drop and dragend can arrive on different webview message queues.
-            clearTimeout(this.ending);
-            this.ending = setTimeout(() => this.clear(), 250);
+            this.ending ??= setTimeout(() => this.clear(), 250);
             return;
         }
         const valid = panel.canUse(message.frame) && message.frame.token === gesture.frame.token;
@@ -58,6 +58,7 @@ export class DesignerDrag {
     clear(): void {
         clearTimeout(this.ending);
         clearTimeout(this.expiry);
+        this.ending = this.expiry = undefined;
         if (!this.active) return;
         this.active = undefined;
         this.publish({ type: 'drag' });

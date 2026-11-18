@@ -4,21 +4,26 @@ import { NativePreview } from '../src/nativePreview';
 import { applyTextEdits, sourceOf } from '../src/textDocument';
 import { verifyMcp } from './mcp';
 import { verifyWorkbenchFeatures } from './workbenchFeatures';
+import { verifyCargoTarget } from './cargoTarget';
+import { verifyDrag } from './drag';
+import { verifyXamlRefactoring } from './xamlLanguage';
+import type { DesignerWorkbench } from '../src/designerWorkbench';
 
 const editorPosition = (line = 0, character = 0) => new vscode.Position(line, character);
 const viewport = { width: 640, height: 420, dark: false };
 
 export async function run(): Promise<void> {
     const workspace = vscode.workspace.workspaceFolders![0].uri;
-    const extension = vscode.extensions.getExtension('FerroUI.ferroui')!;
+    const extension = vscode.extensions.getExtension<{ designer: DesignerWorkbench }>('FerroUI.ferroui')!;
     assert.ok(extension, 'FerroUI extension is installed in the Extension Development Host');
+    const { designer } = await extension.activate();
     const xaml = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(workspace, 'SettingsView.xaml'));
-    await extension.activate();
     assert.equal(xaml.languageId, 'ferroui-xaml');
     const editor = await vscode.window.showTextDocument(xaml);
     await vscode.commands.executeCommand('ferroui.openDesigner');
     await until(() => vscode.window.tabGroups.all.some(group => group.tabs.some(tab => tab.label === 'Design · SettingsView.xaml')));
     assert.ok(vscode.window.visibleTextEditors.some(visible => visible.document === xaml));
+    await until(() => designer.designs().some(panel => panel.document === xaml && panel.canvasReady));
 
     await until(async () => {
         const symbols = await vscode.commands.executeCommand<vscode.DocumentSymbol[]>('vscode.executeDocumentSymbolProvider', xaml.uri);
@@ -46,6 +51,10 @@ export async function run(): Promise<void> {
     await vscode.commands.executeCommand('undo');
     await until(() => vscode.languages.getDiagnostics(xaml.uri).length === 0);
     console.log('VS Code XAML language association, symbols, hover, completion and live diagnostics passed');
+    await verifyXamlRefactoring(workspace);
+    const panel = designer.designs().find(panel => panel.document === xaml);
+    assert.ok(panel);
+    await verifyDrag(panel);
     await verifyMcp(xaml);
 
     const channel = vscode.window.createOutputChannel('FerroUI test');
@@ -120,6 +129,7 @@ export async function run(): Promise<void> {
         await vscode.commands.executeCommand('ferroui.showOutline');
         await vscode.commands.executeCommand('ferroui.showProperties');
         await vscode.commands.executeCommand('ferroui.showToolbox');
+        await verifyCargoTarget(workspace);
         console.log('VS Code docked views, native XAML and RSX rendering, both projection directions, guarded edits and undo passed');
     } finally {
         preview.dispose();
