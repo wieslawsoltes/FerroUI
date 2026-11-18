@@ -76,19 +76,21 @@ fn http_authentication_origin_sessions_and_protocol() {
         .0,
         202
     );
-    let (_, _, body) = request(
+    let (status, _, body) = request(
         address,
         "POST",
         &auth,
         r#"{"jsonrpc":"2.0","id":2,"method":"tools/list"}"#,
     );
-    assert_eq!(
-        serde_json::from_str::<Value>(&body).unwrap()["result"]["tools"]
-            .as_array()
-            .unwrap()
-            .len(),
-        16
-    );
+    assert_eq!(status, 200);
+    let listing: Value = serde_json::from_str(&body).unwrap();
+    let tools = listing["result"]["tools"].as_array().unwrap();
+    for name in ["list_windows", "get_tree", "get_element_at", "get_source", "screenshot"] {
+        assert!(
+            tools.iter().any(|tool| tool["name"] == name && tool["inputSchema"]["type"] == "object"),
+            "Missing tool or input schema for {name}"
+        );
+    }
     assert_eq!(request(address, "POST", &auth, "{").0, 400);
     assert_eq!(
         request(
