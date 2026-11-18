@@ -1,4 +1,4 @@
-use crate::{RsxProjection, catalog};
+use crate::RsxProjection;
 use ferroui_designer_core::{SourceSpan, TextPatch};
 use ferroui_view_syntax::snake_case;
 
@@ -33,13 +33,15 @@ impl RsxProjection<'_> {
             if node.properties.contains_key(name) {
                 return self.set_property(index, name, value);
             }
-            let replacement = catalog::property(&node.class, name)
+            let replacement = node
+                .class
+                .literal(name)
                 .and_then(|kind| kind.rust(value))
                 .ok_or_else(|| format!("{value:?} is outside the static RSX values for {name}"))?;
             return Ok(insert_field(
                 self.source,
                 node.open,
-                &format!("{}: {replacement}", catalog::setter(name)),
+                &format!("{}: {replacement}", node.class.setter(name)),
             ));
         }
         let span = node
@@ -56,6 +58,9 @@ impl RsxProjection<'_> {
         value: Option<&str>,
     ) -> Result<TextPatch, String> {
         let node = self.nodes.get(index).ok_or("Unknown RSX element")?;
+        if !node.supports_events() {
+            return Err("Edit this component's event in Rust source".into());
+        }
         let setter = event_setter(name);
         let existing = node.events.get(&setter);
         if existing.is_some_and(|event| !event.editable()) {

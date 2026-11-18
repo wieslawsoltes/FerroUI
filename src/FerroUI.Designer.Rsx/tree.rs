@@ -1,4 +1,4 @@
-use crate::{catalog, literal::Literal};
+use crate::{literal::Literal, registered::Class};
 use ferroui_designer_core::{SourceSpan, TextPatch};
 use ferroui_designer_language::FRAMEWORK_NAMESPACE;
 use std::collections::BTreeMap;
@@ -9,13 +9,13 @@ const INDENT: &str = "    ";
 
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) struct Element {
-    pub(crate) class: String,
+    pub(crate) class: Class,
     pub(crate) properties: BTreeMap<String, String>,
     pub(crate) children: Vec<Element>,
 }
 
 impl Element {
-    pub(crate) fn new(class: String) -> Self {
+    pub(crate) fn new(class: Class) -> Self {
         Self {
             class,
             properties: BTreeMap::new(),
@@ -31,9 +31,15 @@ impl Element {
 
     fn write_xaml(&self, output: &mut String, depth: usize) {
         let pad = INDENT.repeat(depth);
-        let _ = write!(output, "{pad}<{}", self.class);
+        let namespace = self.class.namespace();
+        let prefix = if namespace.is_some() { "ui:" } else { "" };
+        let name = self.class.name();
+        let _ = write!(output, "{pad}<{prefix}{name}");
         if depth == 0 {
             let _ = write!(output, " xmlns=\"{FRAMEWORK_NAMESPACE}\"");
+        }
+        if let Some(namespace) = namespace {
+            let _ = write!(output, " xmlns:ui=\"{}\"", escape_xml(namespace, Some('"')));
         }
         for (name, value) in &self.properties {
             let _ = write!(output, " {name}=\"{}\"", escape_xml(value, Some('"')));
@@ -47,7 +53,7 @@ impl Element {
             output.push('\n');
             child.write_xaml(output, depth + 1);
         }
-        let _ = write!(output, "\n{pad}</{}>", self.class);
+        let _ = write!(output, "\n{pad}</{prefix}{name}>");
     }
 
     pub(crate) fn rsx_body(&self) -> String {
@@ -58,10 +64,14 @@ impl Element {
 
     fn write_rsx(&self, output: &mut String, depth: usize) {
         let pad = INDENT.repeat(depth);
-        let _ = write!(output, "{pad}{} {{", self.class);
+        let _ = write!(output, "{pad}{} {{", self.class.rust_name());
         for (name, value) in &self.properties {
             let code = self.rust_value(name, value).expect("validated literal");
-            let _ = write!(output, "\n{pad}{INDENT}{}: {code},", catalog::setter(name));
+            let _ = write!(
+                output,
+                "\n{pad}{INDENT}{}: {code},",
+                self.class.setter(name)
+            );
         }
         for child in &self.children {
             output.push('\n');
@@ -74,7 +84,7 @@ impl Element {
     }
 
     pub(crate) fn rust_value(&self, name: &str, value: &str) -> Option<String> {
-        catalog::property(&self.class, name)?.rust(value)
+        self.class.literal(name)?.rust(value)
     }
 
     pub(crate) fn changes<'a>(&'a self, target: &'a Self) -> Option<Vec<ValueChange<'a>>> {

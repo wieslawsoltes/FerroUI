@@ -1,6 +1,7 @@
 use ferroui_designer_language::PropertyInfo;
 use syn::{Expr, Lit, UnOp};
 
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) enum Literal {
     Text,
     Bool,

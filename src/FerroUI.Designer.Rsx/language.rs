@@ -1,4 +1,7 @@
-use crate::{blocks::blocks, catalog, project::control};
+use crate::{
+    blocks::blocks,
+    registered::{Class, RsxCatalog},
+};
 use ferroui_designer_core::SourceSpan;
 use ferroui_designer_language::{LineIndex, Range};
 use ferroui_view_syntax::{Attribute, Node};
@@ -15,6 +18,7 @@ pub struct RsxLanguageDocument {
 #[derive(Serialize)]
 struct ControlSpan {
     class: String,
+    key: String,
     name: Range,
     fields: Vec<FieldSpan>,
 }
@@ -40,21 +44,27 @@ struct Property {
 /// Analyzes only parsed RSX elements. Branches are readable even when the visual
 /// projection omits them. Other Rust syntax belongs to rust-analyzer.
 pub fn analyze_rsx(source: &str) -> RsxLanguageDocument {
-    let Ok(blocks) = blocks(source) else {
-        return RsxLanguageDocument::default();
-    };
-    let index = LineIndex::new(source);
-    let mut result = RsxLanguageDocument::default();
-    for block in blocks {
-        if let Ok(nodes) = ferroui_view_syntax::parse(block.group.stream()) {
-            result.collect(&index, &nodes, 0);
+    RsxCatalog::built_in().analyze(source)
+}
+
+impl RsxCatalog {
+    pub fn analyze(&self, source: &str) -> RsxLanguageDocument {
+        let Ok(blocks) = blocks(source) else {
+            return RsxLanguageDocument::default();
+        };
+        let index = LineIndex::new(source);
+        let mut result = RsxLanguageDocument::default();
+        for block in blocks {
+            if let Ok(nodes) = ferroui_view_syntax::parse(block.group.stream()) {
+                result.collect(self, &index, &nodes, 0);
+            }
         }
+        result
     }
-    result
 }
 
 impl RsxLanguageDocument {
-    fn collect(&mut self, index: &LineIndex, nodes: &[Node], depth: usize) {
+    fn collect(&mut self, catalog: &RsxCatalog, index: &LineIndex, nodes: &[Node], depth: usize) {
         if depth > crate::tree::MAX_DEPTH {
             return;
         }
@@ -65,10 +75,11 @@ impl RsxLanguageDocument {
             match node {
                 Node::Element(node) => {
                     if let (Some(class), Some(name)) =
-                        (control(&node.path), range(index, node.path.span()))
+                        (catalog.rust(&node.path), range(index, node.path.span()))
                     {
+                        let key = class.rust_name().to_owned();
                         self.properties
-                            .entry(class.clone())
+                            .entry(key.clone())
                             .or_insert_with(|| supported(&class));
                         self.nodes.push(ControlSpan {
                             fields: node
@@ -76,17 +87,18 @@ impl RsxLanguageDocument {
                                 .iter()
                                 .filter_map(|attr| field(index, &class, attr))
                                 .collect(),
-                            class,
+                            class: class.name().to_owned(),
+                            key,
                             name,
                         });
                     }
-                    self.collect(index, &node.children, depth + 1);
+                    self.collect(catalog, index, &node.children, depth + 1);
                 }
-                Node::For(_, _, body, _) => self.collect(index, body, depth + 1),
+                Node::For(_, _, body, _) => self.collect(catalog, index, body, depth + 1),
                 Node::If(_, body, otherwise, _) => {
-                    self.collect(index, body, depth + 1);
+                    self.collect(catalog, index, body, depth + 1);
                     if let Some(otherwise) = otherwise {
-                        self.collect(index, otherwise, depth + 1);
+                        self.collect(catalog, index, otherwise, depth + 1);
                     }
                 }
                 Node::Expr(..) | Node::Text(..) => (),
@@ -95,7 +107,7 @@ impl RsxLanguageDocument {
     }
 }
 
-fn field(index: &LineIndex, class: &str, attr: &Attribute) -> Option<FieldSpan> {
+fn field(index: &LineIndex, class: &Class, attr: &Attribute) -> Option<FieldSpan> {
     let Attribute::Value {
         owner, name, value, ..
     } = attr
@@ -104,10 +116,12 @@ fn field(index: &LineIndex, class: &str, attr: &Attribute) -> Option<FieldSpan> 
     };
     let owner = owner.as_ref().map(|owner| owner.unraw().to_string());
     let setter = name.unraw().to_string();
-    let property =
-        catalog::from_setter(class, owner.as_deref(), &setter).map(|name| property(class, name));
+    let property = class
+        .xaml_property(owner.as_deref(), &setter)
+        .map(|name| property(class, name));
     let literal = property.as_ref().is_some_and(|property| {
-        catalog::property(class, &property.xaml_name)
+        class
+            .literal(&property.xaml_name)
             .is_some_and(|codec| codec.read_rust(value).is_some())
     });
     let name_range = range(index, name.span())?;
@@ -122,28 +136,18 @@ fn field(index: &LineIndex, class: &str, attr: &Attribute) -> Option<FieldSpan> 
     })
 }
 
-fn supported(class: &str) -> Vec<Property> {
-    let mut names: Vec<_> = catalog::schema()
-        .properties(class, None)
-        .into_values()
-        .filter(|item| !item.attached && catalog::property(class, &item.name).is_some())
-        .map(|item| item.name)
-        .collect();
-    names.extend(["Classes".to_owned(), "Name".to_owned()]);
-    names.sort();
-    names.dedup();
-    names
+fn supported(class: &Class) -> Vec<Property> {
+    class
+        .property_names()
         .into_iter()
         .map(|name| property(class, name))
         .collect()
 }
 
-fn property(class: &str, name: String) -> Property {
+fn property(class: &Class, name: String) -> Property {
     Property {
-        setter: catalog::setter(&name),
-        value_type: catalog::schema()
-            .property(class, None, &name)
-            .map_or_else(|| "String".into(), |info| info.type_name),
+        setter: class.setter(&name),
+        value_type: class.property_type(&name),
         xaml_name: name,
     }
 }

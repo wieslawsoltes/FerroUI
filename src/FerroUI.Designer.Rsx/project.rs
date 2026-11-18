@@ -1,6 +1,7 @@
 use crate::blocks::{blocks, contains_trivia};
-use crate::catalog::{self, Children};
+use crate::catalog::Children;
 use crate::literal;
+use crate::registered::{Class, RsxCatalog};
 use crate::source_edits::RsxEvent;
 use crate::tree::{Element, MAX_DEPTH, replacement};
 use crate::xaml::XamlTree;
@@ -19,7 +20,7 @@ pub struct RsxNode {
     pub expressions: BTreeMap<String, SourceSpan>,
     pub events: BTreeMap<String, RsxEvent>,
     pub(crate) fields: BTreeMap<String, SourceSpan>,
-    pub(crate) class: String,
+    pub(crate) class: Class,
     pub(crate) open: usize,
     pub(crate) close: usize,
     pub(crate) complete_children: bool,
@@ -28,17 +29,24 @@ pub struct RsxNode {
 impl RsxNode {
     /// Whether a property has a static representation in both source languages.
     pub fn supports_literal(&self, name: &str) -> bool {
-        catalog::property(&self.class, name).is_some()
+        self.class.literal(name).is_some()
+    }
+
+    pub fn supports_events(&self) -> bool {
+        self.class.mapped_events()
     }
 
     pub fn editable_children(&self) -> bool {
-        self.complete_children && !self.expressions.contains_key("Content")
+        self.class.children() != Children::None
+            && self.complete_children
+            && !self.expressions.contains_key("Content")
     }
 }
 
 /// Static markup plus the source anchors needed to edit its original Rust block.
 pub struct RsxProjection<'a> {
     pub(crate) source: &'a str,
+    pub(crate) catalog: &'a RsxCatalog,
     tree: Element,
     pub nodes: Vec<RsxNode>,
     pub blocks: Vec<SourceSpan>,
@@ -57,7 +65,7 @@ impl RsxProjection<'_> {
 
     pub fn matches_xaml(&self, source: &str) -> Result<bool, String> {
         let document = Document::new(source).map_err(|error| error.to_string())?;
-        Ok(self.tree == XamlTree::parse(&document)?.tree)
+        Ok(self.tree == XamlTree::parse(&document, self.catalog)?.tree)
     }
 
     /// Structural conversion can replace a complete tree with no interior comments.
@@ -71,7 +79,9 @@ impl RsxProjection<'_> {
             .properties
             .get(name)
             .ok_or("Edit an authored literal property")?;
-        let replacement = catalog::property(&node.class, name)
+        let replacement = node
+            .class
+            .literal(name)
             .and_then(|kind| kind.rust(value))
             .ok_or_else(|| format!("{value:?} is outside the static RSX values for {name}"))?;
         Ok(TextPatch { span, replacement })
@@ -94,7 +104,7 @@ impl RsxProjection<'_> {
         }) {
             return Err("Keep comments and processing instructions in the authored format".into());
         }
-        let draft = XamlTree::parse(&document)?;
+        let draft = XamlTree::parse(&document, self.catalog)?;
         if let Some(changes) = self.tree.changes(&draft.tree) {
             return changes
                 .iter()
@@ -114,29 +124,41 @@ impl RsxProjection<'_> {
 
 /// Selects the innermost `rsx!` enclosing the UTF-8 caret, or the first invocation.
 pub fn project_rust(source: &str, caret: usize) -> Result<RsxProjection<'_>, String> {
-    let blocks = blocks(source)?;
-    let block = blocks
-        .iter()
-        .filter(|b| b.span.start <= caret && caret <= b.span.end)
-        .min_by_key(|b| b.span.len())
-        .or_else(|| blocks.first())
-        .ok_or("Open a Rust file containing a ferroui_view::rsx! invocation")?;
-    let stream = block.group.stream();
-    let (tree, state) = parse_body(stream.clone())?;
-    let inner_trivia = contains_trivia(source, stream, state.nodes[0].span);
-    Ok(RsxProjection {
-        source,
-        tree,
-        nodes: state.nodes,
-        blocks: blocks.iter().map(|block| block.span).collect(),
-        invocation: block.span,
-        omissions: state.omissions,
-        omitted_count: state.omitted_count,
-        inner_trivia,
-    })
+    RsxCatalog::built_in().project(source, caret)
 }
 
-pub(crate) fn parse_draft(source: &str) -> Result<Element, String> {
+impl RsxCatalog {
+    /// Project the selected invocation using the imported registry for its Cargo package.
+    pub fn project<'a>(
+        &'a self,
+        source: &'a str,
+        caret: usize,
+    ) -> Result<RsxProjection<'a>, String> {
+        let blocks = blocks(source)?;
+        let block = blocks
+            .iter()
+            .filter(|b| b.span.start <= caret && caret <= b.span.end)
+            .min_by_key(|b| b.span.len())
+            .or_else(|| blocks.first())
+            .ok_or("Open a Rust file containing a ferroui_view::rsx! invocation")?;
+        let stream = block.group.stream();
+        let (tree, state) = parse_body(stream.clone(), self)?;
+        let inner_trivia = contains_trivia(source, stream, state.nodes[0].span);
+        Ok(RsxProjection {
+            source,
+            catalog: self,
+            tree,
+            nodes: state.nodes,
+            blocks: blocks.iter().map(|block| block.span).collect(),
+            invocation: block.span,
+            omissions: state.omissions,
+            omitted_count: state.omitted_count,
+            inner_trivia,
+        })
+    }
+}
+
+pub(crate) fn parse_draft(source: &str, catalog: &RsxCatalog) -> Result<Element, String> {
     let tokens: TokenStream = source
         .parse()
         .map_err(|e| format!("Invalid RSX tokens: {e}"))?;
@@ -151,7 +173,7 @@ pub(crate) fn parse_draft(source: &str) -> Result<Element, String> {
     {
         return Err("Expected an rsx! expression".into());
     }
-    let (tree, state) = parse_body(draft.mac.tokens)?;
+    let (tree, state) = parse_body(draft.mac.tokens, catalog)?;
     if state.omitted_count != 0 {
         return Err(format!(
             "The RSX draft must be fully convertible: {}",
@@ -179,7 +201,12 @@ impl State {
         }
     }
 
-    fn element(&mut self, node: &Node, depth: usize) -> Result<Element, String> {
+    fn element(
+        &mut self,
+        node: &Node,
+        depth: usize,
+        catalog: &RsxCatalog,
+    ) -> Result<Element, String> {
         if depth > MAX_DEPTH || self.nodes.len() >= 2000 {
             return Err("RSX previews support up to 2000 controls and 96 levels".into());
         }
@@ -187,8 +214,9 @@ impl State {
             return Err("A preview root must be a static FerroUI control".into());
         };
         let name = node.path.span().byte_range();
-        let class =
-            control(&node.path).ok_or("A preview root must be a built-in FerroUI control")?;
+        let class = catalog
+            .rust(&node.path)
+            .ok_or("Use a FerroUI control or a registered RSX mapping")?;
         let mut result = Element::new(class.clone());
         let index = self.nodes.len();
         self.nodes.push(RsxNode {
@@ -233,7 +261,7 @@ impl State {
             let value_span = value.span().byte_range();
             let value_span = SourceSpan::new(value_span.start, value_span.end);
             let field = SourceSpan::new(name.span().byte_range().start, value_span.end);
-            if owner.is_none() && setter.starts_with("on_") {
+            if class.mapped_events() && owner.is_none() && setter.starts_with("on_") {
                 let field = (!self.nodes[index].events.contains_key(&setter)).then_some(field);
                 self.nodes[index].events.insert(
                     setter.clone(),
@@ -245,7 +273,7 @@ impl State {
                 self.omit(format!("{class}.{setter}"));
                 continue;
             }
-            let Some(key) = catalog::from_setter(&class, owner.as_deref(), &setter) else {
+            let Some(key) = class.xaml_property(owner.as_deref(), &setter) else {
                 self.omit(format!("{class}.{setter}"));
                 continue;
             };
@@ -258,9 +286,7 @@ impl State {
                 self.omit(format!("Repeated {class}.{key}"));
                 continue;
             }
-            if let Some(text) =
-                catalog::property(&class, &key).and_then(|kind| kind.read_rust(value))
-            {
+            if let Some(text) = class.literal(&key).and_then(|kind| kind.read_rust(value)) {
                 let start = match attribute {
                     Attribute::Value {
                         owner: Some(owner), ..
@@ -279,8 +305,9 @@ impl State {
                 self.omit(format!("{class}.{key} expression"));
             }
         }
-        let placement = catalog::children(&class).expect("known control");
-        let text_property = catalog::text_property(&class, placement)
+        let placement = class.children();
+        let text_property = class
+            .text_property()
             .filter(|name| node.children.len() == 1 && !seen.contains(*name));
         for child in &node.children {
             if let (Some(name), Node::Text(value, _)) = (text_property, child) {
@@ -295,9 +322,12 @@ impl State {
             }
             match child {
                 Node::Element(element)
-                    if control(&element.path).is_some() && accepts_control(placement, &result) =>
+                    if catalog.rust(&element.path).is_some()
+                        && accepts_control(placement, &result) =>
                 {
-                    result.children.push(self.element(child, depth + 1)?)
+                    result
+                        .children
+                        .push(self.element(child, depth + 1, catalog)?)
                 }
                 _ => {
                     self.nodes[index].complete_children = false;
@@ -316,28 +346,12 @@ pub(crate) fn accepts_control(placement: Children, element: &Element) -> bool {
             && !element.properties.contains_key("Content"))
 }
 
-pub(crate) fn control(path: &syn::Path) -> Option<String> {
-    let class = path.segments.last()?.ident.unraw().to_string();
-    let module: Vec<_> = path
-        .segments
-        .iter()
-        .take(path.segments.len() - 1)
-        .map(|s| s.ident.to_string())
-        .collect();
-    let module = module.join("::");
-    (matches!(
-        module.as_str(),
-        "" | "ferroui_controls" | "ferroui_view::prelude" | "ferroui_view::generated::builders"
-    ) && catalog::children(&class).is_some())
-    .then_some(class)
-}
-
-fn parse_body(tokens: TokenStream) -> Result<(Element, State), String> {
+fn parse_body(tokens: TokenStream, catalog: &RsxCatalog) -> Result<(Element, State), String> {
     let nodes = ferroui_view_syntax::parse(tokens).map_err(|e| format!("Invalid RSX: {e}"))?;
     let [root] = nodes.as_slice() else {
         return Err("RSX preview needs one root control; wrap fragments in a panel".into());
     };
     let mut state = State::default();
-    let tree = state.element(root, 0)?;
+    let tree = state.element(root, 0, catalog)?;
     Ok((tree, state))
 }

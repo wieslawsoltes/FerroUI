@@ -10,7 +10,7 @@ impl RsxProjection<'_> {
         fragment: &str,
     ) -> Result<TextPatch, String> {
         let document = Document::new(fragment).map_err(|error| error.to_string())?;
-        let tree = XamlTree::parse(&document)?;
+        let tree = XamlTree::parse(&document, self.catalog)?;
         self.insert_element(parent, before, &tree.tree.rsx_body(), true)
     }
 

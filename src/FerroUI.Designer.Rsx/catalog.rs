@@ -54,7 +54,7 @@ pub(crate) fn property(class: &str, name: &str) -> Option<Literal> {
     property_codec(&info)
 }
 
-fn property_codec(info: &PropertyInfo) -> Option<Literal> {
+pub(crate) fn property_codec(info: &PropertyInfo) -> Option<Literal> {
     if info.event || info.read_only {
         return None;
     }
