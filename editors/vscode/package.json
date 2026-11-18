@@ -1,0 +1,135 @@
+{
+  "name": "ferroui",
+  "displayName": "FerroUI Designer",
+  "description": "Native FerroUI previews, visual authoring, and XAML language support.",
+  "version": "0.1.0",
+  "publisher": "FerroUI",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wieslawsoltes/FerroUI.git",
+    "directory": "editors/vscode"
+  },
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Visualization"
+  ],
+  "extensionKind": [
+    "workspace"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false
+    },
+    "virtualWorkspaces": {
+      "supported": false
+    }
+  },
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onLanguage:ferroui-xaml"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "ferroui-xaml",
+        "aliases": [
+          "FerroUI XAML",
+          "XAML"
+        ],
+        "extensions": [
+          ".xaml"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "ferroui-xaml",
+        "scopeName": "text.xml.ferroui-xaml",
+        "path": "./syntaxes/ferroui-xaml.tmLanguage.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "ferroui.openDesigner",
+        "title": "Open Designer",
+        "category": "FerroUI",
+        "icon": "$(preview)",
+        "enablement": "editorLangId == ferroui-xaml || editorLangId == rust"
+      },
+      {
+        "command": "ferroui.restartLanguageServer",
+        "title": "Restart XAML Language Server",
+        "category": "FerroUI"
+      }
+    ],
+    "menus": {
+      "commandPalette": [{
+        "command": "ferroui.openDesigner",
+        "when": "editorLangId == ferroui-xaml || editorLangId == rust"
+      }],
+      "editor/title": [
+        {
+          "command": "ferroui.openDesigner",
+          "when": "editorLangId == ferroui-xaml || editorLangId == rust",
+          "group": "navigation"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "ferroui.openDesigner",
+          "when": "resourceExtname == .xaml || resourceExtname == .rs"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "FerroUI",
+      "properties": {
+        "ferroui.languageServer.path": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "description": "Absolute path to ferroui-xaml-lsp. Leave empty to use the bundled binary or PATH."
+        },
+        "ferroui.preview.path": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "description": "Absolute path to ferroui-designer-preview. Leave empty to use the bundled binary or PATH."
+        },
+        "ferroui.types": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "object"
+          },
+          "description": "Custom XAML type and property metadata for the FerroUI language server."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "check": "tsc --noEmit",
+    "build": "node build.mjs",
+    "test": "npm run check && npm run build && node test/run.mjs",
+    "vscode:prepublish": "npm run build",
+    "package": "vsce package --no-dependencies",
+    "package:platform": "node package-platform.mjs"
+  },
+  "dependencies": {
+    "vscode-jsonrpc": "8.2.0",
+    "vscode-languageclient": "9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.17",
+    "@types/vscode": "1.95.0",
+    "@vscode/test-electron": "3.1.0",
+    "@vscode/vsce": "4.1.1",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3"
+  }
+}

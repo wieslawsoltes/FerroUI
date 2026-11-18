@@ -1,0 +1,117 @@
+import { strict as assert } from 'node:assert';
+import * as vscode from 'vscode';
+import { NativePreview } from '../src/nativePreview';
+import { applyTextEdits, sourceOf } from '../src/textDocument';
+
+const editorPosition = (line = 0, character = 0) => new vscode.Position(line, character);
+const viewport = { width: 640, height: 420, dark: false };
+
+export async function run(): Promise<void> {
+    const workspace = vscode.workspace.workspaceFolders![0].uri;
+    const extension = vscode.extensions.getExtension('FerroUI.ferroui')!;
+    assert.ok(extension, 'FerroUI extension is installed in the Extension Development Host');
+    const xaml = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(workspace, 'SettingsView.xaml'));
+    await extension.activate();
+    assert.equal(xaml.languageId, 'ferroui-xaml');
+    const editor = await vscode.window.showTextDocument(xaml);
+    await vscode.commands.executeCommand('ferroui.openDesigner');
+    await until(() => vscode.window.tabGroups.all.some(group => group.tabs.some(tab => tab.label === 'Design · SettingsView.xaml')));
+    assert.ok(vscode.window.visibleTextEditors.some(visible => visible.document === xaml));
+
+    await until(async () => {
+        const symbols = await vscode.commands.executeCommand<vscode.DocumentSymbol[]>('vscode.executeDocumentSymbolProvider', xaml.uri);
+        return symbols?.some(symbol => symbol.name.includes('UserControl')) ?? false;
+    });
+    const line = xaml.getText().split('\n').findIndex(text => text.includes('Content="Save changes"'));
+    const column = xaml.lineAt(line).text.indexOf('Content');
+    await until(async () => {
+        const hovers = await vscode.commands.executeCommand<vscode.Hover[]>('vscode.executeHoverProvider', xaml.uri, editorPosition(line, column + 2));
+        return Boolean(hovers?.length);
+    });
+    const completionLine = xaml.getText().split('\n').findIndex(text => text.includes('<Button'));
+    const completionColumn = xaml.lineAt(completionLine).text.indexOf('<Button') + 3;
+    await until(async () => {
+        const completions = await vscode.commands.executeCommand<vscode.CompletionList>(
+            'vscode.executeCompletionItemProvider', xaml.uri, editorPosition(completionLine, completionColumn),
+        );
+        return Boolean(completions?.items.some(item => item.label === 'Button'
+            || (typeof item.label !== 'string' && item.label.label === 'Button')));
+    });
+    const invalid = new vscode.WorkspaceEdit();
+    invalid.insert(xaml.uri, editorPosition(), '<broken');
+    assert.ok(await vscode.workspace.applyEdit(invalid));
+    await until(() => vscode.languages.getDiagnostics(xaml.uri).some(diagnostic => diagnostic.severity === vscode.DiagnosticSeverity.Error));
+    await vscode.commands.executeCommand('undo');
+    await until(() => vscode.languages.getDiagnostics(xaml.uri).length === 0);
+    console.log('VS Code XAML language association, symbols, hover, completion and live diagnostics passed');
+
+    const channel = vscode.window.createOutputChannel('FerroUI test');
+    const preview = await NativePreview.start(extension, channel);
+    try {
+        const xamlInput = sourceOf(xaml, 'xaml', editorPosition());
+        const frame = await preview.render(xamlInput, viewport);
+        assert.ok(frame.image, frame.renderError ?? 'Expected a PNG from the headless renderer');
+        assert.equal(Buffer.from(frame.image.png, 'base64').subarray(1, 4).toString(), 'PNG');
+        const button = frame.nodes.find(node => node.name === 'saveButton');
+        assert.ok(button?.bounds?.width, 'Native button bounds map to the outlined source element');
+        const version = xaml.version;
+        const edits = await preview.edit(xamlInput, { type: 'setProperty', node: button.id, name: 'Content', value: 'Ship it 🧪' });
+        await applyTextEdits(xaml, version, edits);
+        assert.ok(xaml.getText().includes('Content="Ship it 🧪"'));
+        assert.ok(xaml.isDirty, 'The designer edits the unsaved buffer');
+        await assert.rejects(applyTextEdits(xaml, version, edits), /source changed/i);
+        await vscode.window.showTextDocument(xaml, editor.viewColumn);
+        await vscode.commands.executeCommand('undo');
+        await until(() => xaml.getText() === xamlInput.source);
+        const parent = frame.nodes.find(node => node.label === 'StackPanel');
+        assert.ok(parent?.canInsert);
+        const insertion = await preview.edit(xamlInput, { type: 'insertChild', node: parent.id, control: 'TextBlock' });
+        await applyTextEdits(xaml, xaml.version, insertion);
+        assert.ok(xaml.getText().includes('Text="Text"'));
+        await vscode.commands.executeCommand('undo');
+        await until(() => xaml.getText() === xamlInput.source);
+        const draft = frame.counterpart.source?.replace('Save changes', 'Apply settings');
+        assert.ok(frame.counterpart.editable && draft);
+        const rsxEdits = await preview.edit(xamlInput, { type: 'applyCounterpart', source: draft });
+        await applyTextEdits(xaml, xaml.version, rsxEdits);
+        assert.ok(xaml.getText().includes(`x:Name="saveButton" Content="Apply settings"`));
+
+        const rust = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(workspace, 'views.rs'));
+        const rustEditor = await vscode.window.showTextDocument(rust, vscode.ViewColumn.One);
+        assert.equal(rust.languageId, 'rust');
+        await vscode.commands.executeCommand('ferroui.openDesigner');
+        await until(() => vscode.window.tabGroups.all.some(group => group.tabs.some(tab => tab.label === 'Design · views.rs')));
+        const rustInput = sourceOf(rust, 'rust', editorPosition());
+        const rustFrame = await preview.render(rustInput, viewport);
+        assert.equal(rustFrame.blocks.length, 2);
+        assert.ok(rustFrame.image, rustFrame.renderError ?? 'Expected a rendered RSX tree');
+        assert.ok(rustFrame.counterpart.editable && rustFrame.counterpart.source);
+        const xamlDraft = rustFrame.counterpart.source.replace('Workspace settings', 'Project settings');
+        const rustEdits = await preview.edit(rustInput, { type: 'applyCounterpart', source: xamlDraft });
+        await applyTextEdits(rust, rust.version, rustEdits);
+        assert.equal(rust.getText(), rustInput.source.replace('Workspace settings', 'Project settings'));
+        const rustPanel = rustFrame.nodes.find(node => node.label === 'StackPanel');
+        assert.ok(rustPanel?.canInsert);
+        const latestRust = sourceOf(rust, 'rust', editorPosition());
+        const rustInsert = await preview.edit(latestRust, { type: 'insertChild', node: rustPanel.id, control: 'TextBlock' });
+        await applyTextEdits(rust, rust.version, rustInsert);
+        assert.ok(rust.getText().includes('text: "Text"'));
+        assert.ok(rust.getText().endsWith(latestRust.source.slice(latestRust.source.indexOf('pub fn counter'))));
+        const partial = await preview.render(sourceOf(rust, 'rust', rustEditor.document.positionAt(rust.getText().lastIndexOf('"Increment"'))), viewport);
+        assert.ok(partial.image && !partial.counterpart.editable);
+        assert.ok(partial.notices.some(notice => notice.includes('omitted Rust items')));
+        console.log('VS Code split panels, native XAML and RSX rendering, both projection directions, guarded edits and undo passed');
+    } finally {
+        preview.dispose();
+        channel.dispose();
+    }
+}
+
+async function until(check: () => boolean | Promise<boolean>): Promise<void> {
+    const end = Date.now() + 20_000;
+    while (Date.now() < end) {
+        if (await check()) return;
+        await new Promise(resolve => setTimeout(resolve, 150));
+    }
+    throw new Error('Timed out waiting for a VS Code extension result');
+}
