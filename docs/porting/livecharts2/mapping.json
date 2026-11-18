@@ -86,15 +86,16 @@
       "status": "partial"
     },
     "src/LiveChartsCore/CoreHeatSeries.cs": {
-      "reason": "Heat cells span the smallest step of the data on each axis (issue 1511), inset by PointPadding (4 by default), coloured by HeatFunctions between the weight bounds (MinValue and MaxValue, else the extremes) at the ColorStops of the heat map (the source's two blues by default); the hover area is the whole cell and the data label of the primary value (the default formatter) is placed about the inset cell by DataLabelsPosition (Middle by default, GetLabelPosition), its size the text grown by DataLabelsPadding; WeightBounds is Series::weight_bounds, which the heat legend reads.",
+      "reason": "Heat cells span the smallest step of the data on each axis (issue 1511), inset by PointPadding (4 by default), coloured by HeatFunctions between the weight bounds (MinValue and MaxValue, else the extremes) at the ColorStops of the heat map (the source's two blues by default); the hover area is the whole cell and the data label of the primary value (the default formatter) is placed about the inset cell by DataLabelsPosition (Middle by default, GetLabelPosition), its size the text grown by DataLabelsPadding; WeightBounds is Series::weight_bounds, which the heat legend reads; a GeometrySvg draws its path in every cell, fitted as Svg.Draw; the colour of a cell comes in from transparent at the first draw (EnsureVisualForPoint) and moves to its new colour with the scene transition, which also fades a cell in and out (SoftDeleteOrDisposePoint).",
       "remaining": [
-        "The tooltip label of the source, SVG cell geometries and the per-cell colour animation remain pending."
+        "The tooltip label of the source."
       ],
       "rust": [
         "src/FerroUI.LiveCharts/cartesian_chart_engine.rs::draw_heat",
         "src/FerroUI.LiveCharts/series.rs",
         "src/FerroUI.Controls.LiveCharts/series_classes.rs",
-        "src/FerroUI.Controls.LiveCharts/chart.rs"
+        "src/FerroUI.Controls.LiveCharts/chart.rs",
+        "src/FerroUI.LiveCharts/svg_path.rs"
       ],
       "status": "partial"
     },
@@ -1317,6 +1318,27 @@
         "src/FerroUI.LiveCharts/sankey_chart_engine.rs"
       ],
       "status": "native-replacement"
+    },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/Svg.cs": {
+      "reason": "svg_path::fit draws a path in a rectangle as Draw without FitToSize: centred and scaled by the width and height over the larger side of the tight bounds of the path (curves sampled along their length).",
+      "remaining": [
+        "FitToSize, and the stroke width that the source adds to the bounds (the heat cells are filled)."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/svg_path.rs"
+      ],
+      "status": "partial"
+    },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/VariableSVGPathGeometry.cs": {
+      "reason": "The SVGPath of the cells of a heat series (its GeometrySvg) is read by the path markup parser of FerroUI into path commands of the scene (quadratic curves and elliptical arcs as cubic curves), as SKPath.ParseSvgPathData; the cells are paths of the native renderer.",
+      "remaining": [
+        "The SVG geometries of the other series (bars, line markers, boxes, polar markers)."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/svg_path.rs",
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs::draw_heat"
+      ],
+      "status": "partial"
     },
     "src/skiasharp/LiveChartsCore.SkiaSharp/Extensions/BaseGaugeItem.cs": {
       "reason": "GaugeItem carries BaseGaugeItem: the value, the builder, GaugeItem::BACKGROUND (double.MaxValue) and is_fill_series_builder.",
@@ -3191,6 +3213,14 @@
       "remaining": [],
       "rust": [
         "src/FerroUI.Controls.LiveCharts/chart_input_tests.rs::geo_map_land_colours_change_without_animation"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/SeriesTests/HeatSeriesAnimationTests.cs::CoreTests.SeriesTests.HeatSeriesAnimationTests::void HeatSeries_FirstDraw_CellColorsInterpolateAcrossGradient()#L45": {
+      "reason": "The four cells of the source with axes from -0.5 to 1.5 and an animation of 1000 ms: at the first draw the cells keep their rectangles while their colours come in from transparent (EnsureVisualForPoint), and the lowest and highest weights end at distinct colours. The frame-by-frame JSON baseline of the source is not compared; the native transition eases with its own curve.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/chart_input_tests.rs::heat_cells_take_their_colours_at_the_first_draw"
       ],
       "status": "ported"
     },

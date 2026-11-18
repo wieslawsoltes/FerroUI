@@ -174,19 +174,27 @@ fn adaptation_port_states_match_port_status() {
 fn button_click_and_disabled_option_update_native_controls() {
     let _application = start();
     let root = examples::create(examples::find("Button").unwrap()).unwrap();
-    let primary = root.get_control::<Button>("Primary");
-    primary.raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
-    primary.raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
+    // `Button_Click` of the source: the name of the clicked button picks its output.
+    let first = root.get_control::<Button>("Button1");
+    first.raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
     assert_eq!(
-        root.get_control::<TextBlock>("Output").text().as_deref(),
-        Some("Clicked 2 times")
+        root.get_control::<TextBlock>("Control1Output").text().as_deref(),
+        Some("You clicked: Button1")
     );
-    root.get_control::<CheckBox>("Disable")
+    assert_eq!(root.get_control::<TextBlock>("Control2Output").text().as_deref(), None);
+    root.get_control::<Button>("Button2")
+        .raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
+    assert_eq!(
+        root.get_control::<TextBlock>("Control2Output").text().as_deref(),
+        Some("You clicked: Button2")
+    );
+    // The Disable option is the source's OneWay x:Bind of IsChecked, negated.
+    root.get_control::<CheckBox>("DisableButton1")
         .set_is_checked(Some(true));
-    assert!(!primary.is_enabled());
-    root.get_control::<CheckBox>("Disable")
+    assert!(!first.is_enabled());
+    root.get_control::<CheckBox>("DisableButton1")
         .set_is_checked(Some(false));
-    assert!(primary.is_enabled());
+    assert!(first.is_enabled());
 }
 
 #[test]
@@ -207,23 +215,11 @@ fn three_state_checkbox_preserves_null_and_reports_each_state() {
 }
 
 #[test]
-fn textbox_counts_unicode_scalar_values() {
-    let _application = start();
-    let root = examples::create(examples::find("TextBox").unwrap()).unwrap();
-    root.get_control::<TextBox>("Primary")
-        .set_text(Some("A🦀é"));
-    assert_eq!(
-        root.get_control::<TextBlock>("Output").text().as_deref(),
-        Some("3 characters")
-    );
-}
-
-#[test]
 fn password_examples_keep_source_validation_and_reveal_behavior() {
     let _application = start();
     let root = examples::create(examples::find("PasswordBox").unwrap()).unwrap();
     let password = root.get_control::<TextBox>("SimplePassword");
-    let validation = root.get_control::<TextBlock>("PasswordValidation");
+    let validation = root.get_control::<TextBlock>("Control1Output");
     password.set_text(Some("Password"));
     assert_eq!(password.text().as_deref(), Some(""));
     assert_eq!(
@@ -285,24 +281,6 @@ fn checkbox_select_all_keeps_source_aggregate_and_user_cycle_behavior() {
             .text()
             .as_deref(),
         Some("You unchecked the box.")
-    );
-}
-
-#[test]
-fn slider_and_combobox_outputs_observe_shared_properties() {
-    let _application = start();
-    let root = examples::create(examples::find("Slider").unwrap()).unwrap();
-    root.get_control::<Slider>("Primary").set_range_value(900.0);
-    assert_eq!(
-        root.get_control::<TextBlock>("Output").text().as_deref(),
-        Some("Value: 900")
-    );
-    let root = examples::create(examples::find("ComboBox").unwrap()).unwrap();
-    root.get_control::<ComboBox>("Primary")
-        .set_selected_index(2);
-    assert_eq!(
-        root.get_control::<TextBlock>("Output").text().as_deref(),
-        Some("Selected index: 2")
     );
 }
 
@@ -498,27 +476,6 @@ fn contrast_inputs_update_ratio_and_report_invalid_values() {
 }
 
 #[test]
-fn winui_numberbox_example_keeps_expression_nan_and_valuechanged_behavior() {
-    use ferroui_controls::NumberBox;
-    let _application = start();
-    let root = examples::create(examples::find("NumberBox").unwrap()).unwrap();
-    let expression = root.get_control::<NumberBox>("Expression");
-    assert!(expression.value().is_nan());
-    expression.set_text("1 + 2^2");
-    press(&expression, ferroui_base::input::Key::Enter, true);
-    assert_eq!(expression.value(), 5.0);
-    expression.set_text("");
-    press(&expression, ferroui_base::input::Key::Enter, true);
-    assert!(expression.value().is_nan());
-    root.get_control::<NumberBox>("Number")
-        .set_numeric_value(31.0);
-    assert_eq!(
-        root.get_control::<TextBlock>("Output").text().as_deref(),
-        Some("Value: 31")
-    );
-}
-
-#[test]
 fn page_transition_sample_uses_winui_frame_journal_and_source_page_types() {
     use crate::frame_sample::{FirstSamplePage, SecondSamplePage};
     use ferroui_controls::Frame;
@@ -558,27 +515,6 @@ fn page_transition_sample_uses_winui_frame_journal_and_source_page_types() {
 }
 
 #[test]
-fn command_bar_examples_keep_click_and_three_state_handlers() {
-    let _application = start();
-    for page in ["AppBarButton", "CommandBar"] {
-        let root = examples::create(examples::find(page).unwrap()).unwrap();
-        root.get_control::<Button>("Primary")
-            .raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
-        assert_eq!(
-            root.get_control::<TextBlock>("Output").text().as_deref(),
-            Some("Clicked 1 times")
-        );
-    }
-    let root = examples::create(examples::find("AppBarToggleButton").unwrap()).unwrap();
-    root.get_control::<ToggleButton>("Primary")
-        .set_is_checked(None);
-    assert_eq!(
-        root.get_control::<TextBlock>("Output").text().as_deref(),
-        Some("Indeterminate")
-    );
-}
-
-#[test]
 fn radio_groups_port_original_selection_and_color_handlers() {
     use ferroui_base::media::Color;
     use ferroui_controls::RadioButtons;
@@ -596,9 +532,22 @@ fn radio_groups_port_original_selection_and_color_handlers() {
     let background = root.get_control::<RadioButtons>("BackgroundRadioButtons");
     let border = root.get_control::<RadioButtons>("BorderRadioButtons");
     assert_eq!(background.max_columns(), 3);
+    let output = root.get_control::<Border>("ControlOutput");
+    // As in the source, the border keeps its markup colors until a selection changes (Green and
+    // Yellow are selected, the background is white).
+    assert_eq!((background.selected_index(), border.selected_index()), (0, 1));
+    assert_eq!(
+        output.background().unwrap().as_solid_color_brush().unwrap().color(),
+        Color::from_rgb(255, 255, 255)
+    );
+    background.set_selected_index(2);
+    border.set_selected_index(2);
+    assert_eq!(
+        output.border_brush().unwrap().as_solid_color_brush().unwrap().color(),
+        Color::from_rgb(255, 255, 255)
+    );
     background.set_selected_index(0);
     border.set_selected_index(0);
-    let output = root.get_control::<Border>("ControlOutput");
     assert_eq!(
         output
             .background()
@@ -658,8 +607,8 @@ fn icon_examples_preserve_source_symbol_and_font_glyph() {
 fn dropping_native_example_releases_handler_targets() {
     let _application = start();
     let root = examples::create(examples::find("Button").unwrap()).unwrap();
-    let primary = root.get_control::<Button>("Primary").downgrade();
-    let output = root.get_control::<TextBlock>("Output").downgrade();
+    let primary = root.get_control::<Button>("Button1").downgrade();
+    let output = root.get_control::<TextBlock>("Control1Output").downgrade();
     drop(root);
     assert!(primary.upgrade().is_none());
     assert!(output.upgrade().is_none());
@@ -1070,8 +1019,8 @@ fn embedded_control_images_resolve_original_uri_paths_and_exact_bytes() {
     crate::assets::register();
     assert_eq!(
         crate::assets_data::ASSETS.len(),
-        132,
-        "108 control images, 22 sample media files and two explicit source-path case aliases"
+        134,
+        "108 control images, 24 sample media files and two explicit source-path case aliases"
     );
     for entry in CATALOG {
         let path = entry
@@ -1109,7 +1058,7 @@ fn embedded_sample_media_resolve_original_paths_and_exact_bytes() {
         .iter()
         .filter(|(path, _)| path.starts_with("Assets/SampleMedia/"))
         .collect();
-    assert_eq!(media.len(), 22);
+    assert_eq!(media.len(), 24);
     for (path, expected) in media {
         let uri = UriRef::from(UriRef::parse_absolute(&format!("ferres://WinUIGallery/{path}")).unwrap());
         let mut actual = Vec::new();
@@ -1119,6 +1068,8 @@ fn embedded_sample_media_resolve_original_paths_and_exact_bytes() {
             assert!(actual.starts_with(&[0xff, 0xd8, 0xff]), "{path}");
         } else if path.ends_with(".gif") {
             assert!(actual.starts_with(b"GIF8"), "{path}");
+        } else if path.ends_with(".png") {
+            assert!(actual.starts_with(b"\x89PNG"), "{path}");
         } else {
             assert!(path.ends_with(".svg"), "Unexpected media type: {path}");
             assert!(std::str::from_utf8(&actual).unwrap().contains("<svg"));

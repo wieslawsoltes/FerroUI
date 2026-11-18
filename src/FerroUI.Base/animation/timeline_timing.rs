@@ -19,7 +19,8 @@ use std::rc::Rc;
 use std::time::Duration;
 
 use super::easings::IEasing;
-use super::KeySpline;
+use super::{KeySpline, SignedDuration};
+use crate::utilities::FormatError;
 use crate::Ref;
 
 /// The tolerance of the expiration test, as WinUI's `s_timeTolerance` (0.5 milliseconds).
@@ -37,6 +38,27 @@ pub enum TimelineDuration {
     Time(Duration),
 }
 
+impl TimelineDuration {
+    /// Parses `Automatic`, `Forever` or a time span (`0:0:0.25`), as markup writes a `Duration`.
+    pub fn parse(s: &str) -> Result<TimelineDuration, FormatError> {
+        let text = s.trim();
+        if text.eq_ignore_ascii_case("Automatic") {
+            return Ok(Self::Automatic);
+        }
+        if text.eq_ignore_ascii_case("Forever") {
+            return Ok(Self::Forever);
+        }
+        parse_time(text, "Duration").map(Self::Time)
+    }
+}
+
+/// A non-negative time span of markup.
+fn parse_time(text: &str, what: &str) -> Result<Duration, FormatError> {
+    SignedDuration::parse(text)?
+        .to_duration()
+        .ok_or_else(|| FormatError::from_string(format!("A {what} cannot be negative: \"{text}\".")))
+}
+
 /// How a timeline repeats (WinUI's `RepeatBehavior`).
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum RepeatBehavior {
@@ -48,14 +70,47 @@ pub enum RepeatBehavior {
     Forever,
 }
 
+impl RepeatBehavior {
+    /// Parses `Forever`, a count (`2x`, `0.5x`) or a time span (`0:0:3`), as markup writes a
+    /// `RepeatBehavior`.
+    pub fn parse(s: &str) -> Result<RepeatBehavior, FormatError> {
+        let text = s.trim();
+        if text.eq_ignore_ascii_case("Forever") {
+            return Ok(Self::Forever);
+        }
+        if let Some(count) = text.strip_suffix(['x', 'X']) {
+            return match count.trim().parse::<f64>() {
+                Ok(count) if count >= 0.0 && count.is_finite() => Ok(Self::Count(count)),
+                _ => Err(FormatError::from_string(format!("Invalid RepeatBehavior count: \"{text}\"."))),
+            };
+        }
+        parse_time(text, "RepeatBehavior").map(Self::Duration)
+    }
+}
+
+impl Default for RepeatBehavior {
+    /// One iteration (WinUI's default `1x`).
+    fn default() -> Self {
+        Self::Count(1.0)
+    }
+}
+
+impl Default for TimelineDuration {
+    /// [`Automatic`](Self::Automatic), WinUI's default.
+    fn default() -> Self {
+        Self::Automatic
+    }
+}
+
 /// What a timeline does after its active period (WinUI's `FillBehavior`).
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+#[repr(i32)]
 pub enum FillBehavior {
     /// Holds the value of the end of the active period.
     #[default]
-    HoldEnd,
+    HoldEnd = 0,
     /// Stops: the animated value is removed.
-    Stop,
+    Stop = 1,
 }
 
 /// The state of the clock of a timeline (WinUI's `ClockState`, with the time before the begin
@@ -206,6 +261,25 @@ impl TimelineTiming {
         }
         let (progress, iteration) = self.local_progress(begin, time, natural, expired(time));
         TimelineSample { state, progress, iteration }
+    }
+
+    /// The time inside the current iteration of the timeline at the time `parent_time` of its
+    /// parent: the time its children run on. `None` before the begin time and after a stop; held
+    /// at the end of the active period while filling.
+    pub fn local_time(&self, parent_time: Duration, natural: Duration) -> Option<Duration> {
+        let sample = self.sample(parent_time, natural);
+        if matches!(sample.state, ClockState::NotStarted | ClockState::Stopped) {
+            return None;
+        }
+        let local = match self.resolved(natural) {
+            Some(duration) => sample.progress * duration.max(0.0),
+            None => {
+                let begin = self.begin_time?.as_secs_f64();
+                let end = self.effective(natural).map_or(f64::MAX, |effective| begin + effective);
+                (parent_time.as_secs_f64().min(end) - begin).max(0.0) * self.speed()
+            }
+        };
+        Some(Duration::from_secs_f64(local.max(0.0)))
     }
 
     /// WinUI's `ComputeLocalProgressAndTime`: the progress and the iteration at `time` (at least
