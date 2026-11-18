@@ -69,8 +69,7 @@ export async function run(): Promise<void> {
 
     const undoXaml = async (expected: string) => {
         await vscode.window.showTextDocument(xaml, { viewColumn: vscode.ViewColumn.One, preserveFocus: false });
-        await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
-        assert.equal(vscode.window.activeTextEditor?.document, xaml);
+        await until(() => vscode.window.activeTextEditor?.document === xaml);
         await vscode.commands.executeCommand('undo');
         assert.equal(xaml.getText(), expected);
     };
