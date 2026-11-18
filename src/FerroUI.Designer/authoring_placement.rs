@@ -50,7 +50,7 @@ impl DesignerSession {
             }
             PlacementTarget::Canvas(point) => match origin {
                 PlacementOrigin::Asset(source) => {
-                    self.measured_placement(&self.preview_layout_insert(source, point)?)
+                    self.measured_placement(&self.preview_layout_insert_nearby(source, point)?)
                 }
                 PlacementOrigin::Node { node, grab } => {
                     let artboard = self.preview.host.clone().upcast();

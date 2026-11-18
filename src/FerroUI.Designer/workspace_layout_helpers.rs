@@ -379,9 +379,33 @@ impl DesignerSession {
         position: Point,
         previous: Option<&LayoutEditPreview>,
     ) -> Result<LayoutEditPreview, String> {
+        self.preview_insert(source, position, previous, false)
+    }
+
+    pub(crate) fn preview_layout_insert_nearby(
+        &self,
+        source: &str,
+        position: Point,
+    ) -> Result<LayoutEditPreview, String> {
+        self.preview_insert(source, position, None, true)
+    }
+
+    fn preview_insert(
+        &self,
+        source: &str,
+        position: Point,
+        previous: Option<&LayoutEditPreview>,
+        find_container: bool,
+    ) -> Result<LayoutEditPreview, String> {
         writable(self)?;
         point(position)?;
-        let (target, position) = insertion_target(self, position)?;
+        let (target, position) = if find_container {
+            insertion_target(self, position)?
+        } else {
+            let target = layout_target(self, position, &[])
+                .ok_or("Choose a content holder or panel inside the artboard")?;
+            (target, position)
+        };
         self.ensure_layer_manipulable(target)?;
         let measured = measure(self, target, None)?;
         let helpers = snapshot(self, target, Some(position), &[], &measured)?;
