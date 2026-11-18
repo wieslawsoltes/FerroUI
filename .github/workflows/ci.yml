@@ -251,6 +251,16 @@ jobs:
       - name: Test the compiled resource groups (ferroui-markup-xaml on its own)
         run: xvfb-run -a cargo test --locked -p ferroui-markup-xaml --lib
 
+      # The capture tool of the WinUI Gallery (headless Skia) is built with features of its own,
+      # which no other step builds, and its application includes the WinUI styles of the inking
+      # controls. One page through it, which writes its picture (#630).
+      - name: The capture tool of the WinUI Gallery renders a page
+        run: |
+          out="$RUNNER_TEMP/winui-gallery-capture"
+          cargo run --locked -p winui-gallery --features capture --bin winui-gallery-capture -- \
+            --all --output-dir="$out"
+          test -s "$out/InkCanvas.png"
+
       - name: Test the detachable FerroBoard component
         env:
           CARGO_BUILD_JOBS: 1
