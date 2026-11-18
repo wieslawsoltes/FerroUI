@@ -14,6 +14,11 @@ rustflags = [
   # The module runs in the main thread of a web page; the script leaves out Node.js and worker support.
   "-Clink-arg=-sENVIRONMENT=web",
   "-Clink-arg=-sALLOW_MEMORY_GROWTH=1",
+  # The memory the module is instantiated with: the control catalog holds 35.1 MB at its start
+  # (docs/porting/browser-platform.md, "Memory"), so a start grows nothing; the growth after it
+  # keeps Emscripten's geometric step (#760, "Memory at the start"). A build with threads
+  # replaces it with its fixed size (scripts/build-browser.sh, FERROUI_BROWSER_THREAD_MEMORY_MB).
+  "-Clink-arg=-sINITIAL_MEMORY=64MB",
   # The default stack of 64 KB is far too small for layout and markup loading.
   "-Clink-arg=-sSTACK_SIZE=8MB",
   "-Clink-arg=-sMAX_WEBGL_VERSION=2",
