@@ -318,6 +318,13 @@ jobs:
     env:
       CARGO_PROFILE_DEV_DEBUG: 0
       CARGO_PROFILE_TEST_DEBUG: 0
+      # Since the image `windows-2025-vs2026` of 2026-11-16 the MSVC standard library of the
+      # image (14.52) refuses its libclang ("STL1000: Unexpected compiler version, expected
+      # Clang 22 or newer"), and the build script of the ANGLE binding, which generates its
+      # bindings with libclang, fails. The headers say how to pass the check; the bindings are
+      # declarations, not code that libclang compiles. The image of Visual Studio 2022 is no
+      # way out: it builds the binding, and the smoke runs through ANGLE do not end on it.
+      BINDGEN_EXTRA_CLANG_ARGS: -D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH
     defaults:
       run:
         shell: bash
