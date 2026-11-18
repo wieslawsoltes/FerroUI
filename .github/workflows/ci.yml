@@ -1058,9 +1058,15 @@ jobs:
             timeout 300 target/debug/examples/x11_window --smoke --a11y=real --skip=input,popup,resize,screens,clipboard
       # The desktop host of the ControlCatalog with its native control demo for Linux (a window of
       # the X server for mplayer, a file chooser of GTK): compiled, not run.
-      - name: The ControlCatalog host with the native control demo compiles
+      - name: Check the ControlCatalog host and its optional F12 inspector
         if: ${{ !cancelled() }}
-        run: cargo check --locked -p control-catalog-desktop
+        run: |
+          graph="$(cargo tree --locked --color never -p control-catalog-desktop -e normal --prefix none -f '{p} {f}')"
+          if grep -E '^ferroui-diagnostics |^ferroui-base .*\b(full-themes|type-tables)\b' <<< "$graph"; then
+            echo "::error::the default ControlCatalog links inspector dependencies"
+            exit 1
+          fi
+          cargo check --locked -p control-catalog-desktop --features diagnostics
       # The GpuInterop sample: its Vulkan and dma-buf demos and the Skia context over their
       # device, which need Linux and Skia with Vulkan to compile (samples/GpuInterop/GAPS.md).
       - name: The GpuInterop sample compiles
