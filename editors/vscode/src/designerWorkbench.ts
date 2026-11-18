@@ -290,6 +290,7 @@ export class DesignerWorkbench implements vscode.Disposable {
             target: panel && node && token !== undefined && !panel.status
                 ? { session: panel.session, token, node: node.id, selection: [...panel.selectedIds] } : undefined,
             selectionCount: panel?.selectedIds.length,
+            recordingTime: this.timeline.recordingTime(panel),
             message: panel?.status ?? inspection.message,
         }, file);
         this.details.update(panel, frame, file, inspection);
@@ -418,7 +419,13 @@ export class DesignerWorkbench implements vscode.Disposable {
         if (this.active?.session !== target?.session || !this.active) {
             throw new Error('The active design changed. Select a control in the current design.');
         }
-        await this.active.editNode(target, operation);
+        await this.active.editNode(target, operation, this.timeline.recordingTime(this.active) !== undefined);
+    }
+
+    editPropertyForAgent(panel: DesignerPanel, token: number, operation: Extract<NodeOperation, { type: 'setProperty' | 'resetProperty' }>,
+        signal: AbortSignal): Promise<void> {
+        return panel.editPropertyForAgent({ session: panel.session, token }, operation,
+            this.timeline.recordingTime(panel) !== undefined, signal);
     }
 
     dispose(): void {

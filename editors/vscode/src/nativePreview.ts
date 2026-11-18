@@ -4,6 +4,7 @@ import type * as vscode from 'vscode';
 import type { BuiltProject } from './builtProjects';
 import type { TokenPlan, TokenRequest } from './designTokenProtocol';
 import type { LayerViewInput } from './layerViews';
+import type { TimelinePreviewPose } from './timelineProtocol';
 import type { NativeProjectInventory } from './projectInventory';
 import type { Asset, CanvasInteraction, CanvasPresentation, DesignDataPresentation, DropHint, EditResult, Inspection, InspectionTarget, Operation, Placement, PreviewSourceBuffer, ResourceRow, Snapshot, Source, Viewport } from './protocol';
 import type { RsxLanguageDocument } from './rsxLanguageTypes';
@@ -18,6 +19,7 @@ interface RenderContext {
     localSources?: PreviewSourceBuffer[];
     designData?: DesignDataPresentation;
     layerView?: LayerViewInput;
+    timelinePose?: TimelinePreviewPose;
 }
 
 export class NativePreview implements vscode.Disposable {
@@ -32,7 +34,7 @@ export class NativePreview implements vscode.Disposable {
         isolatedDesign?: boolean; appHostedDesign?: boolean; rsxLanguage?: boolean;
         stages?: boolean; prototypeEditing?: boolean; stageIncludes?: boolean; projectCatalog?: boolean;
         canvasInteraction?: boolean; canvasFocusOrder?: boolean; projectInventory?: boolean; tokenHandoff?: boolean;
-        designFixtures?: boolean; timelineTransport?: boolean;
+        designFixtures?: boolean; timelineTransport?: boolean; timelineRecording?: boolean;
     } = {};
 
     private constructor(command: string, channel: vscode.OutputChannel) {
@@ -156,6 +158,9 @@ export class NativePreview implements vscode.Disposable {
     }
 
     studioEdit(source: Source, frame: number, name: string, args: object, selection: number[]): Promise<EditResult> {
+        if (name === 'designer_record_property' && !this.capabilities.timelineRecording) {
+            throw new Error('Update the FerroUI preview helper to record property edits.');
+        }
         return this.send('studioEdit', { ...source, frame, name, arguments: args, selection });
     }
 

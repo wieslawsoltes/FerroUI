@@ -16,6 +16,7 @@ export class Inspector {
     private readonly metrics = element('property-metrics');
     private selectedKey?: string;
     private contentKey?: string;
+    private recording = false;
     private readonly expanded = new Set<string>();
 
     constructor(
@@ -29,6 +30,7 @@ export class Inspector {
 
     show(state: PropertiesState, enabled: boolean): void {
         const { node, runtime, fields } = state;
+        this.recording = state.recordingTime !== undefined;
         const group = (state.selectionCount ?? 0) > 1;
         const label = group ? `${state.selectionCount} controls` : runtime?.type ?? node?.label;
         this.selection.hidden = !label;
@@ -39,7 +41,9 @@ export class Inspector {
             this.target.replaceChildren();
             return;
         }
-        const key = `${state.session}:${runtime ? 'runtime' : 'source'}:${node?.id ?? runtime?.inspector_id}`;
+        const key = JSON.stringify(runtime
+            ? [state.session, 'runtime', runtime.inspector_id]
+            : [state.session, 'source', node?.label, node?.name ?? node?.id, state.selectionCount]);
         const changedSelection = key !== this.selectedKey;
         this.selectedKey = key;
         if (changedSelection) this.filter.value = '';
@@ -48,12 +52,12 @@ export class Inspector {
         name.textContent = group ? '' : runtime ? [runtime.name, 'Runtime'].filter(Boolean).join(' · ') : node?.name ?? '';
         name.hidden = !name.textContent;
         this.showMetrics(group ? undefined : runtime?.bounds ?? node?.bounds);
-        element('filter-row').hidden = !fields?.length;
 
         // Keep the existing rows mounted across an edit and its rerender. The host frame gate
         // keeps stale fields inert while the next inspection is being fetched.
         if (!fields && !changedSelection) return;
-        const contentKey = JSON.stringify([key, fields, node?.canInsert, node?.canRemove]);
+        element('filter-row').hidden = !fields?.length;
+        const contentKey = JSON.stringify([key, node?.id, fields, this.recording, node?.canInsert, node?.canRemove]);
         if (this.contentKey === contentKey) return;
         this.contentKey = contentKey;
         const focus = (document.activeElement as HTMLElement | null)?.dataset.property;
@@ -135,7 +139,10 @@ export class Inspector {
     }
 
     private field(field: PropertyField, node?: number): HTMLElement {
-        return propertyEditor(field, {
+        const recording = this.recording && field.canRecord;
+        const displayed = recording ? { ...field, authored: field.effective, editable: true, canReset: false,
+            origin: field.authored ? `Animation keyframe · Base value ${field.authored}` : 'Animation keyframe' } : field;
+        return propertyEditor(displayed, {
             set: value => { if (node !== undefined) this.edit({ type: 'setProperty', node, name: field.name, value }); },
             reset: () => { if (node !== undefined) this.edit({ type: 'resetProperty', node, name: field.name }); },
             reveal: this.reveal,

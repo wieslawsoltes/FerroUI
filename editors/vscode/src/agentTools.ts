@@ -254,7 +254,7 @@ export class AgentTools {
                 break;
             case 'designer_edit_property':
                 if (args.action === 'set' && args.value === undefined) throw new Error('Supply the property value.');
-                await panel.agentEdit(args.expected_revision, args.action === 'set'
+                await this.workbench.editPropertyForAgent(panel, args.expected_revision, args.action === 'set'
                     ? { type: 'setProperty', node: args.node!, name: args.property, value: args.value! }
                     : { type: 'resetProperty', node: args.node!, name: args.property }, signal);
                 break;

@@ -2,6 +2,8 @@ body { background: var(--vscode-sideBar-background, var(--vscode-editor-backgrou
 .inspector { padding: 7px 10px 10px; }
 .view-message, .hint { color: var(--muted); margin: 4px 0 7px; line-height: 1.45; overflow-wrap: anywhere; }
 .view-message.error { color: var(--vscode-errorForeground); }
+.property-recording { display: flex; align-items: center; gap: 6px; margin: 0 0 8px; color: var(--muted); }
+.property-recording .codicon { color: var(--vscode-debugIcon-breakpointForeground, var(--vscode-errorForeground)); }
 .element-heading { display: flex; align-items: center; gap: 7px; padding-block-end: 7px; }
 .element-heading div { display: flex; align-items: baseline; gap: 6px; min-inline-size: 0; flex-wrap: wrap; }
 .element-heading .codicon, .element-heading code { color: var(--muted); }

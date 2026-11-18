@@ -4,6 +4,10 @@
 #timeline-programs { flex: 1 1 120px; min-inline-size: 0; }
 #timeline-time, .timeline-ruler { color: var(--muted); font-variant-numeric: tabular-nums; }
 #timeline-time { padding-inline: 5px 1px; white-space: nowrap; }
+#timeline-record-mode[aria-pressed="true"] {
+    color: var(--vscode-debugIcon-breakpointForeground, var(--vscode-errorForeground));
+    background: var(--vscode-toolbar-activeBackground, var(--vscode-toolbar-hoverBackground));
+}
 .timeline-grid {
     --track-label-width: clamp(46px, 28%, 160px);
     --lane-gap: 7px;

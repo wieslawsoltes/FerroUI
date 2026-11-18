@@ -1,9 +1,15 @@
 import type { LayerViewState, LayerViewsState } from './layerViews';
+import type { TimelinePreviewPose } from './timelineProtocol';
 
 export interface Position { line: number; character: number }
 export interface Range { start: Position; end: Position }
 export interface TextEdit { range: Range; newText: string }
-export interface EditResult { edits: TextEdit[]; selection: Range | null }
+export interface EditResult {
+    edits: TextEdit[];
+    selection: Range | null;
+    timelinePose?: TimelinePreviewPose;
+    retainedSelection?: Range[];
+}
 export interface PreviewFinding { node: number; control: string; name: string | null; code: string; message: string }
 export type Language = 'xaml' | 'rust';
 
@@ -64,6 +70,7 @@ export interface PropertyField {
     canBind?: boolean;
     canPromote?: boolean;
     canEditBrush?: boolean;
+    canRecord?: boolean;
     mixed?: boolean;
 }
 export interface EventField {
@@ -126,6 +133,7 @@ export interface Snapshot {
     notices: string[];
     dependencies?: string[];
     projectAssets?: Asset[];
+    timelinePose?: TimelinePreviewPose;
 }
 export type NodeOperation =
     | { type: 'setProperty'; node: number; name: string; value: string }
@@ -151,6 +159,7 @@ export interface PropertiesState {
     frame?: FrameTarget;
     fields?: PropertyField[];
     selectionCount?: number;
+    recordingTime?: number;
 }
 export type PropertyAuthoring = 'binding' | 'promoteResource' | 'brush';
 export type FromProperties = { type: 'ready' }
@@ -230,7 +239,7 @@ export interface CanvasPresentation {
     notices: string[];
     selection: number[];
     layerView?: LayerViewState;
-    timelinePosition?: { time: number; elapsed?: number; playing: boolean };
+    timelinePosition?: { time: number; elapsed?: number; playing: boolean; pose?: TimelinePreviewPose | null };
 }
 export type CanvasSnapshot = Omit<Snapshot, 'nodes'> & { nodes: CanvasNode[]; interactive?: boolean; focusOrderAvailable?: boolean };
 export interface CanvasFocusOrder {

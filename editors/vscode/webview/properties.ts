@@ -5,6 +5,9 @@ import { Inspector } from './inspector';
 declare function acquireVsCodeApi(): { postMessage(message: FromProperties): void };
 const vscode = acquireVsCodeApi();
 const message = element('view-message');
+const recording = element('property-recording');
+const recordingTime = element('property-recording-time');
+const seconds = new Intl.NumberFormat(undefined, { maximumFractionDigits: 3 });
 const inspector = new Inspector(edit, () => vscode.postMessage({ type: 'toolbox' }), reveal, author);
 let state: PropertiesState = {};
 let error: string | undefined;
@@ -54,5 +57,10 @@ function show(): void {
     message.textContent = text;
     message.hidden = !text;
     message.classList.toggle('error', Boolean(error));
+    recording.hidden = state.recordingTime === undefined || !state.node;
+    if (!recording.hidden) {
+        const label = `Recording at ${seconds.format(state.recordingTime!)} s`;
+        if (recordingTime.textContent !== label) recordingTime.textContent = label;
+    }
     inspector.show(state, Boolean(state.target && state.fields && !pending));
 }

@@ -25,11 +25,12 @@ export class TimelineView implements vscode.Disposable {
     readonly view: DockView<TimelineState, FromTimeline, ToTimeline>;
     private readonly playback: TimelinePlayback;
     private panel?: DesignerPanel;
+    private recordingPanel?: DesignerPanel;
     private file = '';
     private catalog?: Catalog;
     private shown?: string;
 
-    constructor(root: vscode.Uri, changed: () => void) {
+    constructor(root: vscode.Uri, private readonly changed: () => void) {
         this.view = new DockView(root, timelineHtml, changed, message => { void this.receive(message); });
         this.playback = new TimelinePlayback(position => {
             this.view.post({ type: 'position', position, frame: this.frame() });
@@ -40,8 +41,13 @@ export class TimelineView implements vscode.Disposable {
     update(panel: DesignerPanel | undefined, file: string): void {
         this.panel = panel;
         this.file = file;
+        if (this.recordingPanel !== panel || (panel?.snapshot?.image && !panel.authoredTimelinePose)) this.recordingPanel = undefined;
         this.playback.follow(panel);
         this.refresh();
+    }
+
+    recordingTime(panel: DesignerPanel | undefined): number | undefined {
+        return this.recordingPanel === panel ? panel?.authoredTimelinePose?.time : undefined;
     }
 
     async control(panel: DesignerPanel, frame: FrameTarget, control: TimelineControl, signal: AbortSignal) {
@@ -52,6 +58,23 @@ export class TimelineView implements vscode.Disposable {
         if (!panel.canUse(frame)) throw new Error('Read the current designer revision.');
         const program = (await this.programs(panel).pending).find(entry => entry.id === control.program);
         if (!program?.timeline) throw new Error('Choose an authored animation program from the current document.');
+        if (control.action === 'record') {
+            if (typeof control.enabled !== 'boolean') throw new Error('Choose whether to record property edits.');
+            if (!panel.supportsTimelineRecording || this.panel !== panel) throw new Error('Use the current XAML designer to record property edits.');
+            if (control.enabled) {
+                const time = control.time ?? (panel.authoredTimelinePose?.program === program.id ? panel.authoredTimelinePose.time : 0);
+                await this.playback.control(panel, frame, { action: 'seek', program: program.id, time }, program.timeline, signal);
+                if (!panel.authoredTimelinePose || this.panel !== panel) throw new Error('The recording frame is no longer current.');
+                this.recordingPanel = panel;
+            } else {
+                if (!panel.canUse(frame)) throw new Error('Read the current designer revision.');
+                this.recordingPanel = undefined;
+            }
+            this.shown = undefined;
+            this.changed();
+            return { session: panel.session, program: program.id, time: panel.authoredTimelinePose?.time ?? 0,
+                playing: false, busy: false, recording: this.recordingPanel === panel };
+        }
         return this.playback.control(panel, frame, control, program.timeline, signal);
     }
 
@@ -85,7 +108,10 @@ export class TimelineView implements vscode.Disposable {
         if (!this.view.visible) { this.shown = undefined; return; }
         const panel = this.panel;
         const frame = this.frame();
-        const position = this.playback.position;
+        const pose = panel?.snapshot?.timelinePose;
+        const position = this.playback.position ?? (panel && pose ? {
+            session: panel.session, program: pose.program, time: pose.time, playing: false, busy: false,
+        } : undefined);
         if (position?.busy && frame?.session === position.session) return;
         const key = `${panel?.session}:${frame?.token}:${panel?.status ?? ''}`;
         if (key === this.shown) return;
@@ -96,7 +122,8 @@ export class TimelineView implements vscode.Disposable {
         const message = !panel ? 'Open a FerroUI designer.' : panel.status ?? catalog?.error
             ?? (catalog?.programs ? undefined : 'Loading animation programs…');
         const names = Object.fromEntries((panel?.nodes ?? []).map(node => [node.id, node.name ?? node.label]));
-        this.view.show({ frame: catalog?.programs ? frame : undefined, programs, message, names, writable: panel?.language === 'xaml', position }, this.file);
+        this.view.show({ frame: catalog?.programs ? frame : undefined, programs, message, names, writable: panel?.language === 'xaml', position,
+            canRecord: panel?.supportsTimelineRecording, recording: this.recordingTime(panel) !== undefined }, this.file);
     }
 
     private async receive(message: FromTimeline): Promise<void> {

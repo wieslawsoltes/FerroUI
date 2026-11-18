@@ -7,6 +7,7 @@ import { verifyProjectMcp } from './projectMcp';
 import { verifyScenarioMcp } from './scenarioMcp';
 import { verifyWorkspaceMcp } from './workspaceMcp';
 import { verifyTimelineMcp } from './studioTimelineMcp';
+import { verifyTimelineRecording } from './studioTimelineRecordingMcp';
 import { verifyDesignData } from './designDataMcp';
 import { verifyLayerViews } from './layerViewsMcp';
 import { verifyBindingMcp } from './studioBindingMcp';
@@ -160,6 +161,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         content(await invoke('designer_history', { session, expected_version: document.version, action: 'undo' }));
         assert.equal(document.getText(), original);
         await verifyTimelineMcp({ invoke, content }, session, document);
+        await verifyTimelineRecording({ invoke, content }, session, document);
         await verifyDesignData({ invoke, content }, session, document);
         await verifyLayerViews({ invoke, content }, session, document);
         await verifyBindingMcp({ invoke, content });

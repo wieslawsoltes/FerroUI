@@ -149,6 +149,9 @@ export function propertiesHtml(webview: vscode.Webview, root: vscode.Uri): strin
     return page(webview, root, 'properties', 'FerroUI Properties', `
 <main class="inspector">
     <p class="view-message" id="view-message" role="status">Select a control in a FerroUI designer.</p>
+    <p class="property-recording" id="property-recording" role="status" hidden>
+        ${icon('circle-filled')}<span id="property-recording-time"></span>
+    </p>
     <section id="element-properties" aria-label="Selected control properties" hidden>
         <header class="element-heading">
             ${icon('symbol-field')}
@@ -331,6 +334,7 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
             <option value="30">30 fps</option>
             <option value="60">60 fps</option>
         </select>
+        ${tool('timeline-record-mode', 'circle-filled', 'Record property changes', 'aria-pressed="false" hidden disabled')}
         ${tool('timeline-record', 'add', 'Add keyframe at playhead', 'hidden disabled')}
         ${tool('timeline-key-actions', 'list-selection', 'Keyframe Selection Actions', 'hidden disabled')}
         ${tool('timeline-actions', 'ellipsis', 'More Animation Actions', 'disabled')}

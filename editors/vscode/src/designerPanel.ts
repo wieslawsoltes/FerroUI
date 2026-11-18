@@ -6,6 +6,7 @@ import { LayerViews } from './layerViews';
 import { NativePreview } from './nativePreview';
 import { DEFAULT_VIEWPORT, errorMessage, isViewport, type Asset, type CanvasSnapshot, type DragMessage, type DropHint, type FrameTarget, type FromDesigner, type Language, type NodeOperation, type NodeTarget, type Operation, type Placement, type Snapshot, type Source, type ToDesigner, type Viewport } from './protocol';
 import { applyTextEdits, asPosition, asRange, offsetAfterChanges, sourceOf } from './textDocument';
+import type { TimelinePreviewPose } from './timelineProtocol';
 import { designerHtml, webviewOptions } from './view';
 import type { EditResult, Inspection, InspectionTarget, Range, ResourceRow, RuntimeRow, RuntimeTreeMode } from './protocol';
 import type { CanvasAction, CanvasFocusOrder, CanvasInteraction, CanvasPresentation, DesignDataPresentation, DesignerViewState } from './protocol';
@@ -20,7 +21,10 @@ interface Frame {
     source: Source;
     snapshot: Snapshot;
     canvas: CanvasSnapshot;
+    timelineRecording: boolean;
 }
+
+type PropertyEdit = Extract<NodeOperation, { type: 'setProperty' | 'resetProperty' }>;
 
 export class DesignerPanel implements vscode.Disposable {
     private readonly canvasRequests = new CanvasRequests();
@@ -40,6 +44,8 @@ export class DesignerPanel implements vscode.Disposable {
     private editing = false;
     private viewport: Viewport;
     private designData?: DesignDataPresentation;
+    private timelinePose?: TimelinePreviewPose;
+    private retainedSelection?: { version: number; ranges: Range[] };
     private inspected = false;
     private readers = 0;
     private problem?: string;
@@ -132,6 +138,8 @@ export class DesignerPanel implements vscode.Disposable {
     get selectedNode(): Snapshot['nodes'][number] | undefined { return this.runtime ? undefined : this.nodes.find(node => node.id === this.selected); }
     get runtimeSelection(): RuntimeRow | undefined { return this.runtime; }
     get dimensions(): Viewport { return this.viewport; }
+    get authoredTimelinePose(): TimelinePreviewPose | undefined { return this.timelinePose; }
+    get supportsTimelineRecording(): boolean { return Boolean(this.language === 'xaml' && this.frame?.timelineRecording); }
     get isDisposed(): boolean { return this.disposed; }
     get canvasReady(): boolean { return !this.disposed && this.ready && this.panel.visible; }
     get status(): string | undefined {
@@ -242,12 +250,21 @@ export class DesignerPanel implements vscode.Disposable {
         if (this.runtime) this.setSelection(this.selected);
     }
 
-    async editNode(target: NodeTarget, operation: NodeOperation): Promise<void> {
-        if (!this.canUse(target) || operation.node !== target.node || this.selectedNode?.id !== target.node) {
-            throw new Error('The selection changed. Use the current Properties view to retry.');
-        }
-        if ('selection' in target && (!Array.isArray(target.selection) || target.selection.length !== this.selection.length
-            || target.selection.some((id, index) => id !== this.selection[index]))) throw new Error('The selection changed before this property edit.');
+    async editNode(target: NodeTarget, operation: NodeOperation, recording = false): Promise<void> {
+        const checkSelection = () => {
+            if (this.currentToken !== target.token || target.session !== this.session
+                || operation.node !== target.node || this.selectedNode?.id !== target.node) {
+                throw new Error('The selection changed. Use the current Properties view to retry.');
+            }
+            if ('selection' in target && (!Array.isArray(target.selection) || target.selection.length !== this.selection.length
+                || target.selection.some((id, index) => id !== this.selection[index]))) {
+                throw new Error('The selection changed before this property edit.');
+            }
+        };
+        checkSelection();
+        if (recording && operation.type === 'setProperty' && await this.recordProperty(
+            target, operation, target.selection ?? [target.node], AbortSignal.timeout(15_000), checkSelection)) return;
+        checkSelection();
         if (target.selection && target.selection.length > 1 && (operation.type === 'setProperty' || operation.type === 'resetProperty')) {
             return this.studioEdit(target.token, 'designer_property', { action: operation.type === 'setProperty' ? 'set' : 'reset',
                 property: operation.name, nodes: target.selection, ...(operation.type === 'setProperty' ? { value: operation.value } : {}) },
@@ -255,6 +272,28 @@ export class DesignerPanel implements vscode.Disposable {
         }
         if (operation.type === 'applyResource' && operation.frame !== target.token) throw new Error('Read the current resource scope.');
         await this.edit(this.frame!, operation);
+    }
+
+    async editPropertyForAgent(frame: FrameTarget, operation: PropertyEdit, recording: boolean, signal: AbortSignal): Promise<void> {
+        if (recording && operation.type === 'setProperty'
+            && await this.recordProperty(frame, operation, [operation.node], signal)) return;
+        await this.agentEdit(frame.token, operation, signal);
+    }
+
+    private async recordProperty(frame: FrameTarget, operation: Extract<PropertyEdit, { type: 'setProperty' }>,
+        nodes: number[], signal: AbortSignal, validate?: () => void): Promise<boolean> {
+        const pose = this.timelinePose;
+        if (!pose || operation.value.startsWith('{')) return false;
+        const target = nodes.length > 1 ? { type: 'selection' as const, nodes }
+            : { type: 'source' as const, node: operation.node };
+        const inspection = await this.inspect(frame, target);
+        signal.throwIfAborted();
+        if (!this.canUse(frame) || pose !== this.timelinePose) throw new Error('The recording frame changed. Use the current Properties view to retry.');
+        validate?.();
+        if (!inspection.properties.some(field => field.name === operation.name && field.canRecord)) return false;
+        await this.studioEdit(frame.token, 'designer_record_property', { program: pose.program, time: pose.time,
+            nodes, property: operation.name, value: operation.value }, undefined, signal, validate);
+        return true;
     }
 
     canUse(target: FrameTarget): boolean {
@@ -318,7 +357,8 @@ export class DesignerPanel implements vscode.Disposable {
         return client.studioQuery(token, name, args, this.studioSelection(selection));
     }
 
-    async studioEdit(token: number, name: string, args: object, selection: number[] | undefined, signal: AbortSignal): Promise<void> {
+    async studioEdit(token: number, name: string, args: object, selection: number[] | undefined, signal: AbortSignal,
+        validate?: () => void): Promise<void> {
         if (this.language === 'rust' && !mappedStudioEdits.has(name)) {
             throw new Error('This Studio operation requires XAML or a mapped RSX layout operation.');
         }
@@ -327,7 +367,7 @@ export class DesignerPanel implements vscode.Disposable {
         if (!frame || this.currentToken !== token) throw new Error('Read the current designer revision before editing.');
         const targets = this.studioSelection(selection);
         try {
-            await this.commitEdit(frame, client => client.studioEdit(frame.source, token, name, args, targets), signal);
+            await this.commitEdit(frame, client => client.studioEdit(frame.source, token, name, args, targets), signal, validate);
         } finally {
             if (this.currentToken === token) this.schedule(0);
         }
@@ -335,7 +375,10 @@ export class DesignerPanel implements vscode.Disposable {
 
     async studioPresent(token: number, name: string, args: object, selection: number[] | undefined, signal: AbortSignal): Promise<CanvasPresentation | undefined> {
         return this.present(token, signal, (client, next) => client.studioPresent(token, next, name, args, this.studioSelection(selection)), true,
-            name === 'designer_design_data_edit' ? () => this.rememberDesignData(args) : undefined);
+            presentation => {
+                if (name === 'designer_design_data_edit') this.rememberDesignData(args);
+                if (name === 'designer_program') this.timelinePose = presentation.timelinePosition?.pose ?? undefined;
+            });
     }
 
     async interact(token: number, action: CanvasInteraction, signal: AbortSignal): Promise<void> {
@@ -345,7 +388,7 @@ export class DesignerPanel implements vscode.Disposable {
 
     private async present(token: number, signal: AbortSignal,
         update: (client: NativePreview, next: number) => Promise<CanvasPresentation>, syncSelection: boolean,
-        accepted?: () => void): Promise<CanvasPresentation | undefined> {
+        accepted?: (presentation: CanvasPresentation) => void): Promise<CanvasPresentation | undefined> {
         const frame = this.frame;
         if (!frame || !this.canUse({ session: this.session, token })) throw new Error('Read the current designer revision before updating the preview.');
         this.editing = true;
@@ -364,7 +407,8 @@ export class DesignerPanel implements vscode.Disposable {
                 return { ...node, bounds: change?.bounds ?? null, canMove: change?.canMove ?? false,
                     canInsert: change?.canInsert ?? false, selectable: change?.selectable };
             });
-            const snapshot = { ...frame.snapshot, nodes, image: presentation.image, notices: presentation.notices };
+            accepted?.(presentation);
+            const snapshot = { ...frame.snapshot, nodes, image: presentation.image, notices: presentation.notices, timelinePose: this.timelinePose };
             const canvasNodes = nodes.map(({ id, label, name, bounds, canMove, selectable }) => ({ id, label, name, bounds, canMove, selectable }));
             this.frame = { ...frame, token: next, snapshot, canvas: { ...frame.canvas, ...snapshot, nodes: canvasNodes } };
             this.generation = next;
@@ -374,7 +418,6 @@ export class DesignerPanel implements vscode.Disposable {
                 this.selected = this.selection.at(-1);
             }
             if (presentation.layerView) this.layers.remember(presentation.layerView, frame.snapshot.activeBlock);
-            accepted?.();
             this.syncCanvas();
             return presentation;
         } catch (error) {
@@ -478,7 +521,7 @@ export class DesignerPanel implements vscode.Disposable {
             const snapshot = await client.render(input, viewport, token, {
                 workspaceRoot: folder?.uri.scheme === 'file' ? folder.uri.fsPath : undefined,
                 localSources: dirtyXamlSources([this.document.uri], this.document),
-                designData: this.designData, layerView: this.layers.input(caret),
+                designData: this.designData, layerView: this.layers.input(caret), timelinePose: this.timelinePose,
             });
             if (this.disposed || token !== this.generation || version !== this.document.version) return;
             if (this.dependencies.accept(snapshot.dependencies ?? [])) { this.schedule(0); return; }
@@ -488,13 +531,25 @@ export class DesignerPanel implements vscode.Disposable {
                 && previousAnchor?.character === anchor?.character;
             this.assets = [...client.assets, ...(snapshot.projectAssets ?? [])].filter(asset => this.language === 'xaml' || asset.rust);
             const nodes = snapshot.nodes.map(({ id, label, name, bounds, canMove, selectable }) => ({ id, label, name, bounds, canMove, selectable }));
-            this.frame = { token, version, viewport, source: input, snapshot,
+            if (snapshot.image) this.timelinePose = snapshot.timelinePose;
+            this.frame = { token, version, viewport, source: input, snapshot, timelineRecording: Boolean(client.capabilities.timelineRecording),
                 canvas: { ...snapshot, nodes, interactive: Boolean(client.capabilities.canvasInteraction && snapshot.image),
                     focusOrderAvailable: Boolean(client.capabilities.canvasFocusOrder && snapshot.image) } };
             this.runtime = undefined;
-            this.selected = (sameView ? this.selected : undefined) ?? selectionAt(snapshot, this.caret) ?? snapshot.nodes[0]?.id;
-            this.selection = sameView && this.selection.length ? this.selection.filter(id => snapshot.nodes.some(node => node.id === id))
-                : this.selected === undefined ? [] : [this.selected];
+            const retained = this.retainedSelection?.version === version && snapshot.image
+                ? this.retainedSelection.ranges.flatMap(range => {
+                    const node = snapshot.nodes.find(node => asRange(node.nameRange).isEqual(asRange(range)));
+                    return node ? [node.id] : [];
+                }) : [];
+            this.retainedSelection = undefined;
+            if (retained.length) {
+                this.selection = retained;
+                this.selected = retained.at(-1);
+            } else {
+                this.selected = (sameView ? this.selected : undefined) ?? selectionAt(snapshot, this.caret) ?? snapshot.nodes[0]?.id;
+                this.selection = sameView && this.selection.length ? this.selection.filter(id => snapshot.nodes.some(node => node.id === id))
+                    : this.selected === undefined ? [] : [this.selected];
+            }
             if (anchor) this.blockOffset = this.document.offsetAt(asPosition(anchor));
             this.syncCanvas();
             this.changed.fire();
@@ -585,11 +640,22 @@ export class DesignerPanel implements vscode.Disposable {
         this.editing = true;
         this.changed.fire();
         try {
-            const { edits, selection } = await plan(await this.getClient());
+            const { edits, selection, timelinePose, retainedSelection } = await plan(await this.getClient());
             signal?.throwIfAborted();
             if (this.currentToken !== frame.token) throw new Error('The preview changed. Use the current preview to retry.');
             validate?.();
-            await applyTextEdits(this.document, frame.version, edits);
+            const previous = this.timelinePose;
+            if (timelinePose) this.timelinePose = timelinePose;
+            if (retainedSelection?.length && edits.length) {
+                this.retainedSelection = { version: frame.version + 1, ranges: retainedSelection };
+            }
+            try {
+                await applyTextEdits(this.document, frame.version, edits);
+            } catch (error) {
+                if (this.timelinePose === timelinePose) this.timelinePose = previous;
+                this.retainedSelection = undefined;
+                throw error;
+            }
             if (selection && edits.length && this.document.version === frame.version + 1) {
                 const range = asRange(selection);
                 this.caret = range.start;

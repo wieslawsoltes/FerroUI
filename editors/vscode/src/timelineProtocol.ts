@@ -38,19 +38,31 @@ export interface TimelinePosition {
     busy: boolean;
 }
 
+export interface TimelinePreviewPose {
+    program: number;
+    time: number;
+    sourceKey?: string;
+    anchor?: object;
+}
+
 export interface TimelineState {
     frame?: FrameTarget;
     programs: TimelineProgram[];
     names: Record<number, string>;
     writable: boolean;
+    canRecord?: boolean;
+    recording?: boolean;
     position?: TimelinePosition;
     message?: string;
 }
 
-export type TimelineControl =
+export type TimelineTransportControl =
     | { action: 'seek'; program: number; time: number }
     | { action: 'play'; program: number; time?: number }
     | { action: 'pause' | 'stop'; program: number };
+
+export type TimelineControl = TimelineTransportControl
+    | { action: 'record'; program: number; enabled: boolean; time?: number };
 
 export type FromTimeline =
     | { type: 'ready' }

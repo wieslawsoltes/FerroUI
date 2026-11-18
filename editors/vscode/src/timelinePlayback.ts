@@ -1,7 +1,7 @@
 import { setTimeout as delay } from 'node:timers/promises';
 import type { DesignerPanel } from './designerPanel';
 import type { FrameTarget } from './protocol';
-import type { AuthoredTimeline, TimelineControl, TimelinePosition } from './timelineProtocol';
+import type { AuthoredTimeline, TimelinePosition, TimelineTransportControl } from './timelineProtocol';
 
 interface Playback {
     panel: DesignerPanel;
@@ -30,7 +30,7 @@ export class TimelinePlayback {
         this.update(undefined);
     }
 
-    async control(panel: DesignerPanel, frame: FrameTarget, control: TimelineControl, timeline: AuthoredTimeline | undefined,
+    async control(panel: DesignerPanel, frame: FrameTarget, control: TimelineTransportControl, timeline: AuthoredTimeline | undefined,
         signal: AbortSignal): Promise<TimelinePosition> {
         signal.throwIfAborted();
         const existing = this.playback;
@@ -46,8 +46,10 @@ export class TimelinePlayback {
         }
         if (!panel.canUse(frame)) throw new Error('Read the current timeline first.');
         if (existing?.position.busy) throw new Error('Wait for the current timeline frame.');
-        const previous = current?.token === frame.token ? current.position : undefined;
         const idle = { session: panel.session, program: control.program, time: 0, playing: false, busy: false };
+        const pose = panel.authoredTimelinePose;
+        const previous = current?.token === frame.token ? current.position
+            : pose?.program === control.program ? { ...idle, time: pose.time } : undefined;
         if (control.action === 'pause') return previous ?? idle;
         const playback: Playback = {
             panel, revision: panel.document.version, token: frame.token, position: previous ?? idle, running: false, interrupting: false,

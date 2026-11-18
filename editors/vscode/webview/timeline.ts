@@ -21,6 +21,7 @@ const snap = element<HTMLSelectElement>('timeline-snap');
 const transport = element('timeline-transport');
 const play = element<HTMLButtonElement>('timeline-play');
 const stop = element<HTMLButtonElement>('timeline-stop');
+const recordMode = element<HTMLButtonElement>('timeline-record-mode');
 const record = element<HTMLButtonElement>('timeline-record');
 const actions = element<HTMLButtonElement>('timeline-actions');
 const keyActions = element<HTMLButtonElement>('timeline-key-actions');
@@ -47,6 +48,9 @@ let keyEdit: { before: FrameTarget; accepted?: KeyframeLocation[] } | undefined;
 
 programs.addEventListener('change', () => {
     const selected = model.programs.find(item => item.id === Number(programs.value));
+    if (model.recording && model.frame && program !== undefined && selected && selected.id !== program) {
+        send(model.frame, { action: 'record', program, enabled: false });
+    }
     if (selected) remember(selected);
     selection.replace([]);
     queued = undefined;
@@ -65,6 +69,12 @@ play.addEventListener('click', () => {
 stop.addEventListener('click', () => {
     const selected = current();
     if (model.frame && selected) send(model.frame, { action: 'stop', program: selected.id });
+});
+recordMode.addEventListener('click', () => {
+    const selected = current();
+    if (model.frame && selected?.timeline && model.canRecord && !pending && !keyEdit) {
+        send(model.frame, { action: 'record', program: selected.id, enabled: !model.recording, time: slider.valueAsNumber });
+    }
 });
 record.addEventListener('click', () => {
     const selected = current();
@@ -239,6 +249,9 @@ function showPosition(): void {
     snap.disabled = !model.frame || pending || playing || Boolean(keyEdit);
     record.hidden = !timeline || !model.writable;
     record.disabled = !model.frame || pending || playing || Boolean(keyEdit);
+    recordMode.hidden = !timeline || !model.canRecord;
+    recordMode.disabled = !model.frame || pending || playing || Boolean(keyEdit);
+    recordMode.setAttribute('aria-pressed', String(Boolean(model.recording)));
     actions.disabled = !model.frame || pending || playing || Boolean(keyEdit) || (!selected && !model.writable);
     programs.disabled = pending || Boolean(keyEdit) || !model.frame || !selected;
     keyActions.disabled = !model.frame || pending || playing || Boolean(keyEdit);
