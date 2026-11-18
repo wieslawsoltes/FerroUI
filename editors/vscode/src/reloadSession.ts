@@ -86,6 +86,8 @@ export class ReloadSession implements vscode.Disposable {
         if (!isInside(this.root, key)) return;
         this.results.set(key, event);
         if (this.changes.has(key)) this.schedule(120);
+        // The running app may see a structural edit before VS Code's watcher reports it.
+        else if (event.status === 'rebuild') void this.observe(vscode.Uri.file(event.file));
     }
 
     private schedule(delay: number): void {
