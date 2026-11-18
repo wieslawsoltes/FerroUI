@@ -371,7 +371,8 @@ mod tests {
             build_platform_color_values(Some(PlatformThemeVariant::Dark), Some(red), None),
             defaults.with_theme_variant(PlatformThemeVariant::Dark).with_accent_color1(red)
         );
-        let high = build_platform_color_values(Some(PlatformThemeVariant::Dark), None, Some(ColorContrastPreference::High));
+        let high =
+            build_platform_color_values(Some(PlatformThemeVariant::Dark), None, Some(ColorContrastPreference::High));
         assert!(high.is_high_contrast());
         assert_eq!(high.theme_variant(), PlatformThemeVariant::Dark);
         // The portal has no system colours.
