@@ -51,7 +51,7 @@ ferroui-controls = { workspace = true }
 ferroui-markup = { workspace = true }
 ferroui-view-macros = { workspace = true }
 ferroui-view-syntax = { workspace = true, optional = true }
-ferroui-reload-protocol = { workspace = true, optional = true }
+ferroui-reload-protocol = { workspace = true, optional = true, features = ["editor-events"] }
 ferroui-desktop = { workspace = true, optional = true }
 ferroui-themes-fluent = { workspace = true, optional = true }
 ferroui-markup-xaml = { workspace = true, optional = true }
