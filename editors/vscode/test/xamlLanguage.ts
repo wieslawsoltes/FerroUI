@@ -21,6 +21,9 @@ export async function verifyXamlRefactoring(workspace: vscode.Uri): Promise<void
     }));
     const references = await vscode.commands.executeCommand<vscode.Location[]>('vscode.executeReferenceProvider', uri, declaration);
     assert.ok(references.some(location => location.uri.toString() === uri.toString() && location.range.contains(reference)));
+    const wordEnd = document.positionAt(source.indexOf('#Action.Width') + '#Action.Width'.length);
+    const hints = await vscode.commands.executeCommand<vscode.InlayHint[]>('vscode.executeInlayHintProvider', uri, new vscode.Range(0, 0, 3, 0));
+    assert.ok(hints.some(hint => hint.position.isEqual(wordEnd) && hint.kind === vscode.InlayHintKind.Type));
     const rename = await vscode.commands.executeCommand<vscode.WorkspaceEdit>('vscode.executeDocumentRenameProvider', uri, declaration, 'Submit');
     assert.deepEqual(rename.get(uri).map(edit => document.getText(edit.range)), ['Action', 'Action']);
     assert.ok(await vscode.workspace.applyEdit(rename));
@@ -35,5 +38,5 @@ export async function verifyXamlRefactoring(workspace: vscode.Uri): Promise<void
     assert.equal(document.lineAt(1).text, '  <Button Name="Submit" Content="Action"/>');
     const tokens = await vscode.commands.executeCommand<vscode.SemanticTokens>('vscode.provideDocumentSemanticTokens', uri);
     assert.ok(tokens.data.length > 0);
-    console.log('VS Code XAML definitions, references, namescope rename, formatting and semantic tokens passed');
+    console.log('VS Code XAML definitions, references, type hints, namescope rename, formatting and semantic tokens passed');
 }

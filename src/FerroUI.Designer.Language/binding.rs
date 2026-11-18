@@ -1,9 +1,51 @@
 //! Binding paths share schema metadata with ordinary property editing. Resolution uses the
 //! explicit source, a named element, template target, or nearest x:DataType in that order.
 use crate::references::{Argument, markup_arguments};
-use crate::{PropertyInfo, Schema, TypeInfo};
+use crate::{LanguageService, Position, PropertyInfo, Range, Result, Schema, TypeInfo};
 use ferroui_designer_core::{Document, MarkupValue, NodeId, SourceSpan};
 use std::collections::BTreeMap;
+
+impl LanguageService {
+    /// Locate the ends of typed binding paths visible in the requested source range.
+    pub fn binding_type_hints(&self, uri: &str, range: Range) -> Result<Vec<(Position, String)>> {
+        let index = self.index(uri)?;
+        let visible = index.span(range)?;
+        let Some(document) = self.document(uri).filter(|document| document.is_valid()) else {
+            return Ok(Vec::new());
+        };
+        let schema = self.schema_for(uri);
+        let mut hints = Vec::new();
+        for node in document.ast().elements() {
+            for attribute in &node.attributes {
+                if attribute.value_span.end < visible.start
+                    || attribute.value_span.start > visible.end
+                {
+                    continue;
+                }
+                let raw = &document.source()[attribute.value_span.range()];
+                for argument in markup_arguments(raw) {
+                    if !is_path(&argument) {
+                        continue;
+                    }
+                    let end = attribute.value_span.start + argument.span.end;
+                    let name = argument.value.rsplit('.').next().unwrap_or_default();
+                    if end < visible.start || end > visible.end || !crate::is_xaml_identifier(name)
+                    {
+                        continue;
+                    }
+                    let mut available = members(schema, document, node.id, raw, &argument.value);
+                    if let Some(property) = available
+                        .remove(name)
+                        .filter(|property| !property.type_name.is_empty())
+                    {
+                        hints.push((index.position(end)?, property.type_name));
+                    }
+                }
+            }
+        }
+        Ok(hints)
+    }
+}
 
 pub(crate) fn members(
     schema: &Schema,
@@ -55,9 +97,7 @@ pub(crate) fn at(
         }
         let raw = &document.source()[attribute.value_span.range()];
         for argument in markup_arguments(raw) {
-            if !is_binding(&argument.extension)
-                || argument.name.as_deref().is_some_and(|name| name != "Path")
-            {
+            if !is_path(&argument) {
                 continue;
             }
             let span = SourceSpan::new(
@@ -92,6 +132,10 @@ pub(crate) fn at(
         }
     }
     None
+}
+
+fn is_path(argument: &Argument) -> bool {
+    is_binding(&argument.extension) && argument.name.as_deref().is_none_or(|name| name == "Path")
 }
 
 fn is_binding(extension: &str) -> bool {

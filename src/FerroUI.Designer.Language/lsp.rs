@@ -228,6 +228,19 @@ impl LspServer {
                     |ranges| json!({"ranges": ranges, "wordPattern": "[^\\s<>/='\"]+"}),
                 ))
             }
+            "textDocument/inlayHint" => {
+                let hints = self
+                    .service
+                    .binding_type_hints(uri(params)?, decode(&params["range"])?)?;
+                Ok(json!(
+                    hints
+                        .into_iter()
+                        .map(|(position, type_name)| json!({
+                            "position": position, "label": format!(": {type_name}"), "kind": 1
+                        }))
+                        .collect::<Vec<_>>()
+                ))
+            }
             "textDocument/codeAction" => {
                 if params["context"]["only"].as_array().is_some_and(|kinds| {
                     !kinds.iter().any(|kind| kind.as_str() == Some("quickfix"))
@@ -409,7 +422,7 @@ impl LspServer {
                 "completionProvider": { "triggerCharacters": ["<", " ", ":", ".", "{", "="] },
                 "hoverProvider": true, "definitionProvider": true, "referencesProvider": true,
                 "renameProvider": { "prepareProvider": true }, "documentFormattingProvider": true,
-                "documentRangeFormattingProvider": true, "linkedEditingRangeProvider": true,
+                "documentRangeFormattingProvider": true, "linkedEditingRangeProvider": true, "inlayHintProvider": true,
                 "codeActionProvider": { "codeActionKinds": ["quickfix"] },
                 "documentSymbolProvider": true, "foldingRangeProvider": true, "workspaceSymbolProvider": true,
                 "signatureHelpProvider": { "triggerCharacters": ["{", ",", "="] },

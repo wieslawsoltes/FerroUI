@@ -1024,6 +1024,39 @@ fn typed_binding_completion_hover_and_definitions_follow_nested_property_types()
 }
 
 #[test]
+fn binding_type_hints_use_utf16_and_only_report_known_members_in_the_requested_range() {
+    let source = format!(
+        "<Grid {NS} xmlns:vm='using:Models' x:DataType='vm:ViewModel'>\r\n<!-- 😀 --><TextBlock Text='{{Binding Path=Customer.Title}}'/>\r\n<TextBlock Text='{{Binding Missing}}'/>\r\n</Grid>"
+    );
+    let mut service = service(&source);
+    binding_schema(&mut service);
+    let uri = "untitled:/View.xaml";
+    let index = LineIndex::new(&source);
+    let end = source.find("Customer.Title").unwrap() + "Customer.Title".len();
+    let expected = index.position(end).unwrap();
+    let start = index.position(0).unwrap();
+    let finish = index.position(source.len()).unwrap();
+    assert_eq!(
+        service
+            .binding_type_hints(uri, Range { start, end: finish })
+            .unwrap(),
+        vec![(expected, "String".into())]
+    );
+    assert!(
+        service
+            .binding_type_hints(
+                uri,
+                Range {
+                    start: index.position(end + 1).unwrap(),
+                    end: finish
+                }
+            )
+            .unwrap()
+            .is_empty()
+    );
+}
+
+#[test]
 fn named_element_binding_completion_uses_actual_control_type() {
     let source =
         "<Grid><TextBox Name='Input'/><TextBlock Text='{Binding Te, ElementName=Input}'/></Grid>";
