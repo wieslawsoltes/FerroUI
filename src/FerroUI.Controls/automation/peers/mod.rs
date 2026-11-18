@@ -40,6 +40,7 @@ mod items_control_automation_peer;
 mod label_automation_peer;
 mod list_box_automation_peer;
 mod list_item_automation_peer;
+mod list_view_automation_peer;
 mod menu_item_automation_peer;
 #[cfg(test)]
 mod menu_item_automation_peer_tests;
@@ -128,6 +129,9 @@ pub use items_control_automation_peer::{
 pub use label_automation_peer::LabelAutomationPeer;
 pub use list_box_automation_peer::ListBoxAutomationPeer;
 pub use list_item_automation_peer::ListItemAutomationPeer;
+pub use list_view_automation_peer::{
+    ListViewAutomationPeer, ListViewBaseAutomationPeer, ListViewBaseItemAutomationPeer, ListViewItemAutomationPeer,
+};
 pub use menu_item_automation_peer::MenuItemAutomationPeer;
 pub use native_control_host_peer::NativeControlHostPeer;
 pub use native_menu_bar_automation_peer::NativeMenuBarAutomationPeer;

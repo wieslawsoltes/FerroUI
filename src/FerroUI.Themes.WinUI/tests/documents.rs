@@ -121,6 +121,7 @@ document_tests! {
     controls_label => "/Controls/Label.xaml";
     controls_list_box => "/Controls/ListBox.xaml";
     controls_list_box_item => "/Controls/ListBoxItem.xaml";
+    controls_list_view => "/Controls/ListView.xaml";
     controls_menu => "/Controls/Menu.xaml";
     controls_menu_flyout_presenter => "/Controls/MenuFlyoutPresenter.xaml";
     controls_menu_item => "/Controls/MenuItem.xaml";

@@ -48,8 +48,8 @@
     },
     {
       "document": "dxaml/xcp/dxaml/themes/generic.xaml",
-      "key": "re:\\{(Hub|HubSection|SemanticZoom|ListView|GridView|ListViewHeaderItem|GridViewHeaderItem|GroupItem|AppBar|AppBarElementContainer|ListPickerFlyoutPresenter|PickerFlyoutPresenter)\\}|GridViewItemExpanded|FlyoutPickerListViewItemContentPresenterStyle|FlyoutPickerTitleTextBlockStyle|ListPickerFlyoutPresenterContentTemplate|BaseRichTextBlockStyle|BodyRichTextBlockStyle|LanguageSwitcherMenuFlyoutItemStyle|LanguageSwitcherMenuFlyoutSettingsRowStyle",
-      "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu)."
+      "key": "re:\\{(Hub|HubSection|SemanticZoom|GridView|ListViewHeaderItem|GridViewHeaderItem|GroupItem|AppBar|AppBarElementContainer|ListPickerFlyoutPresenter|PickerFlyoutPresenter)\\}|GridViewItemExpanded|FlyoutPickerListViewItemContentPresenterStyle|FlyoutPickerTitleTextBlockStyle|ListPickerFlyoutPresenterContentTemplate|BaseRichTextBlockStyle|BodyRichTextBlockStyle|LanguageSwitcherMenuFlyoutItemStyle|LanguageSwitcherMenuFlyoutSettingsRowStyle",
+      "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu)."
     },
     {
       "document": "dxaml/xcp/dxaml/themes/generic.xaml",

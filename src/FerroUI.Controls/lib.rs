@@ -315,6 +315,14 @@ mod info_badge_tests;
 mod info_bar_tests;
 #[cfg(test)]
 mod progress_ring_tests;
+// WinUI's ListView (docs/porting/winui-calculator-gaps.md, section 6).
+mod list_view;
+pub use list_view::{
+    ChoosingItemContainerEventArgs, ContainerContentChangingEventArgs, GroupHeaderPlacement, IncrementalLoadingTrigger,
+    ItemClickEventArgs, ItemIndexRange, ItemsStackPanel, ItemsUpdatingScrollMode, ListView, ListViewBase,
+    ListViewBaseItem, ListViewItem, ListViewItemTemplateSettings, ListViewReorderMode, ListViewSelectionMode,
+    ScrollIntoViewAlignment,
+};
 // WinUI's title bar (docs/porting/winui-controls.md).
 mod title_bar;
 pub use title_bar::TitleBar;

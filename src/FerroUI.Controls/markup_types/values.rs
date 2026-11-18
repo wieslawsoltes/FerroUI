@@ -127,6 +127,15 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <crate::media::FocusVisualKind as MarkupTyped>::MARKUP,
     // WinUI's ZoomMode of the scroll viewer (docs/porting/winui-composition.md, phase 7).
     <crate::ZoomMode as MarkupTyped>::MARKUP,
+    // WinUI's ListView (docs/porting/winui-calculator-gaps.md, LV-1).
+    <crate::ListViewSelectionMode as MarkupTyped>::MARKUP,
+    <crate::ScrollIntoViewAlignment as MarkupTyped>::MARKUP,
+    <crate::ListViewReorderMode as MarkupTyped>::MARKUP,
+    <crate::IncrementalLoadingTrigger as MarkupTyped>::MARKUP,
+    <crate::ItemsUpdatingScrollMode as MarkupTyped>::MARKUP,
+    <crate::GroupHeaderPlacement as MarkupTyped>::MARKUP,
+    <crate::ItemClickEventArgs as MarkupTyped>::MARKUP,
+    <crate::ListViewItemTemplateSettings as MarkupTyped>::MARKUP,
 ];
 
 /// Registers what the untyped value conversions need of the types of this file that
@@ -152,6 +161,12 @@ pub(super) fn register_value_type_table() {
     ValueTypes::register_used::<Symbol>();
     ValueTypes::register_used::<InfoBarSeverity>();
     ValueTypes::register_used::<crate::ZoomMode>();
+    ValueTypes::register_used::<crate::ListViewSelectionMode>();
+    ValueTypes::register_used::<crate::ScrollIntoViewAlignment>();
+    ValueTypes::register_used::<crate::ListViewReorderMode>();
+    ValueTypes::register_used::<crate::IncrementalLoadingTrigger>();
+    ValueTypes::register_used::<crate::ItemsUpdatingScrollMode>();
+    ValueTypes::register_used::<crate::GroupHeaderPlacement>();
     ValueTypes::register_used::<InfoBarCloseReason>();
     ValueTypes::register_used::<NumberBoxSpinButtonPlacementMode>();
     ValueTypes::register_used::<NumberBoxValidationMode>();
@@ -204,6 +219,42 @@ impl ferroui_base::data::core::ValueTypeRegistration for Symbol {
 impl ferroui_base::data::core::ValueTypeRegistration for InfoBarSeverity {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<InfoBarSeverity>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::ListViewSelectionMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::ListViewSelectionMode>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::ScrollIntoViewAlignment {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::ScrollIntoViewAlignment>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::ListViewReorderMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::ListViewReorderMode>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::IncrementalLoadingTrigger {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::IncrementalLoadingTrigger>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::ItemsUpdatingScrollMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::ItemsUpdatingScrollMode>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::GroupHeaderPlacement {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::GroupHeaderPlacement>();
     }
 }
 

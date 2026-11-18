@@ -84,6 +84,8 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/ItemsRepeaterPage.xaml", "ItemsRepeater", Icons::GRID, "Virtualized layouts, recycling, and collection changes across 10,000 items");
             s.add("/Pages/CarouselPage.xaml", "Carousel", Icons::SLIDES, "Cycle through a collection of items");
             s.add("/Pages/ListBoxPage.xaml", "ListBox", Icons::LIST, "A selectable, virtualized list of items");
+            // Not from upstream: ListView of WinUI (docs/porting/winui-calculator-gaps.md, LV-1).
+            s.add("/Pages/ListViewPage.xaml", "ListView", Icons::LIST, "WinUI's list with selection modes and item clicks");
             // Not from upstream: PagerControl of WinUI (docs/porting/winui-controls.md, G2).
             s.add("/Pages/PagerControlPage.xaml", "PagerControl", Icons::NUMBER, "Page through content with buttons, a combo box or a number box");
             s.add("/Pages/PipsPagerPage.xaml", "PipsPager", Icons::HORIZONTAL_DOTS, "Dot-style pager for paginated content");
