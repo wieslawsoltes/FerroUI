@@ -538,6 +538,34 @@ The owner chose the structure of WinUI over a `Carousel` base. `Pivot` derives f
 The size is about 12.5k lines of WinUI. PV-1 is therefore split into three pull requests (section
 8).
 
+**Status (PV-1, done).** `Pivot`, `PivotItem`, `PivotItemEventArgs`, `PivotPanel`,
+`PivotHeaderFocusVisualPlacement`, `PivotSlideInAnimationGroup` and the peers
+`PivotAutomationPeer` (Tab, Selection) and `PivotItemAutomationPeer` (TabItem, SelectionItem) in
+`ferroui-controls` (`pivot/`, `automation/peers/pivot_automation_peer.rs`). The state machine
+(`pivot_state_machine.rs`) is WinUI's `PivotStateMachine` ported one to one, with its callbacks
+as a trait the pivot implements; it is driven as in WinUI: measure, arrange, the selection, the
+lock, the items, the carousel. Where WinUI listens to DManip (`ViewChanging`, `ViewChanged`,
+`DirectManipulationStarted/Completed`), the port takes the scroll gestures of the scroll viewer:
+the offset changes while a gesture runs are non-inertial view changes, the end of the gesture
+(after the scroll presenter snapped to a section) is the inertial view change at the final offset
+followed by the final view; programmatic offsets are the machine's own and are not reported back.
+`SetViewportEnabled` turns the scroll gesture recognizer of the scroll viewer on and off (WinUI
+switches the scroll mode). `PivotPanel` is WinUI's: one section per measure width, a thousand
+sections while the headers wrap, a regular snap point per section. Recorded deviations: WinUI
+arranges the `PivotLayoutElement` at the start of the panel and keeps it in the viewport with a
+secondary content relationship of the scroll viewer, and moves the items with the inverse
+relationship and `ItemsPresenterTranslateTransform`; the port arranges the layout element at the
+section the viewport rests on and drives both with expression animations of the composition
+`Translation` that read the scroll viewer's manipulation property set and a property set of the
+pivot (`LayoutOffset`, `SectionOffset`), so the pan runs on the compositor and layout and hit
+testing are where the content rests. The neighbours of the selected item get their
+`Translation` of one section while a pan runs, as in WinUI. `SelectionChanged` is the base's (the
+base keeps the item and the index together). The data item peer (`PivotItemDataAutomationPeer`)
+and the Scroll and ScrollItem patterns are left out: FerroUI has no data item peers. The fly-out
+and fly-in complete on the next turn of the dispatcher without animating until PV-2. Tests:
+`pivot/pivot_state_machine_tests.rs` (the machine with recorded callbacks) and
+`pivot/pivot_tests.rs` (the control with WinUI's template parts).
+
 ### 7.2 High contrast: the base library
 
 Additive members of `ferroui-base`:
