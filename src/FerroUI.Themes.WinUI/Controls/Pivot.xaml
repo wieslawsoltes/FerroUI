@@ -86,6 +86,46 @@
     </Border>
   </ControlTemplate>
 
+  <!-- The button of NextTemplate with the CommonStates of the template (a style of the
+       pivot cannot reach into the template of its button: one template selector per style). -->
+  <ControlTheme x:Key="PivotNextButtonStyle" TargetType="Button">
+    <Setter Property="Template" Value="{StaticResource NextTemplate}" />
+    <Style Selector="^:pointerover /template/ Border#Root">
+      <Setter Property="Background" Value="{DynamicResource PivotNextButtonBackgroundPointerOver}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource PivotNextButtonBorderBrushPointerOver}" />
+    </Style>
+    <Style Selector="^:pointerover /template/ FontIcon#Arrow">
+      <Setter Property="Foreground" Value="{DynamicResource PivotNextButtonForegroundPointerOver}" />
+    </Style>
+    <Style Selector="^:pressed /template/ Border#Root">
+      <Setter Property="Background" Value="{DynamicResource PivotNextButtonBackgroundPressed}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource PivotNextButtonBorderBrushPressed}" />
+    </Style>
+    <Style Selector="^:pressed /template/ FontIcon#Arrow">
+      <Setter Property="Foreground" Value="{DynamicResource PivotNextButtonForegroundPressed}" />
+    </Style>
+  </ControlTheme>
+
+  <!-- The button of PreviousTemplate with the CommonStates of the template (a style of the
+       pivot cannot reach into the template of its button: one template selector per style). -->
+  <ControlTheme x:Key="PivotPreviousButtonStyle" TargetType="Button">
+    <Setter Property="Template" Value="{StaticResource PreviousTemplate}" />
+    <Style Selector="^:pointerover /template/ Border#Root">
+      <Setter Property="Background" Value="{DynamicResource PivotPreviousButtonBackgroundPointerOver}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource PivotPreviousButtonBorderBrushPointerOver}" />
+    </Style>
+    <Style Selector="^:pointerover /template/ FontIcon#Arrow">
+      <Setter Property="Foreground" Value="{DynamicResource PivotPreviousButtonForegroundPointerOver}" />
+    </Style>
+    <Style Selector="^:pressed /template/ Border#Root">
+      <Setter Property="Background" Value="{DynamicResource PivotPreviousButtonBackgroundPressed}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource PivotPreviousButtonBorderBrushPressed}" />
+    </Style>
+    <Style Selector="^:pressed /template/ FontIcon#Arrow">
+      <Setter Property="Foreground" Value="{DynamicResource PivotPreviousButtonForegroundPressed}" />
+    </Style>
+  </ControlTheme>
+
   <ControlTheme x:Key="TitleContentControlStyle" TargetType="ContentControl">
     <Setter Property="FontFamily" Value="{DynamicResource PivotTitleFontFamily}" />
     <Setter Property="FontWeight" Value="{DynamicResource PivotTitleThemeFontWeight}" />
@@ -169,7 +209,7 @@
                   </ContentControl>
                   <Button x:Name="PreviousButton"
                           Grid.Column="1"
-                          Template="{StaticResource PreviousTemplate}"
+                          Theme="{StaticResource PivotPreviousButtonStyle}"
                           Width="20"
                           Height="36"
                           Margin="{DynamicResource PivotNavButtonMargin}"
@@ -181,7 +221,7 @@
                           Background="Transparent" />
                   <Button x:Name="NextButton"
                           Grid.Column="1"
-                          Template="{StaticResource NextTemplate}"
+                          Theme="{StaticResource PivotNextButtonStyle}"
                           Width="20"
                           Height="36"
                           Margin="{DynamicResource PivotNavButtonMargin}"
@@ -218,35 +258,6 @@
     <Style Selector="^:next-button-visible /template/ Button#NextButton">
       <Setter Property="Opacity" Value="1" />
       <Setter Property="IsEnabled" Value="True" />
-    </Style>
-    <!-- The CommonStates of NextTemplate and PreviousTemplate. -->
-    <Style Selector="^ /template/ Button#NextButton:pointerover /template/ Border#Root">
-      <Setter Property="Background" Value="{DynamicResource PivotNextButtonBackgroundPointerOver}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource PivotNextButtonBorderBrushPointerOver}" />
-    </Style>
-    <Style Selector="^ /template/ Button#NextButton:pointerover /template/ FontIcon#Arrow">
-      <Setter Property="Foreground" Value="{DynamicResource PivotNextButtonForegroundPointerOver}" />
-    </Style>
-    <Style Selector="^ /template/ Button#NextButton:pressed /template/ Border#Root">
-      <Setter Property="Background" Value="{DynamicResource PivotNextButtonBackgroundPressed}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource PivotNextButtonBorderBrushPressed}" />
-    </Style>
-    <Style Selector="^ /template/ Button#NextButton:pressed /template/ FontIcon#Arrow">
-      <Setter Property="Foreground" Value="{DynamicResource PivotNextButtonForegroundPressed}" />
-    </Style>
-    <Style Selector="^ /template/ Button#PreviousButton:pointerover /template/ Border#Root">
-      <Setter Property="Background" Value="{DynamicResource PivotPreviousButtonBackgroundPointerOver}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource PivotPreviousButtonBorderBrushPointerOver}" />
-    </Style>
-    <Style Selector="^ /template/ Button#PreviousButton:pointerover /template/ FontIcon#Arrow">
-      <Setter Property="Foreground" Value="{DynamicResource PivotPreviousButtonForegroundPointerOver}" />
-    </Style>
-    <Style Selector="^ /template/ Button#PreviousButton:pressed /template/ Border#Root">
-      <Setter Property="Background" Value="{DynamicResource PivotPreviousButtonBackgroundPressed}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource PivotPreviousButtonBorderBrushPressed}" />
-    </Style>
-    <Style Selector="^ /template/ Button#PreviousButton:pressed /template/ FontIcon#Arrow">
-      <Setter Property="Foreground" Value="{DynamicResource PivotPreviousButtonForegroundPressed}" />
     </Style>
   </ControlTheme>
 
