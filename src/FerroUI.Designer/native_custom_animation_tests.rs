@@ -4,6 +4,10 @@ use ferroui_base::animation::{animators::CornerRadiusAnimator, Animation, Interp
 use ferroui_base::CornerRadius;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
 use ferroui_controls::{Border, ContentControl};
+use ferroui_designer_animation::{
+    AnimationCodec, AnimationError, AnimationImport, AnimationValue, ImportOptions, KeyframeEdit,
+    NativeAnimationCodec, Timeline, ValueKind,
+};
 
 #[derive(Default)]
 struct ReviewCorners;
@@ -65,4 +69,103 @@ fn timeline_uses_registered_animators_for_typed_tracks_and_native_visibility() {
     })
     .join()
     .unwrap();
+}
+
+struct ProjectedCorners;
+
+impl AnimationCodec for ProjectedCorners {
+    fn id(&self) -> &str {
+        "project.corners"
+    }
+
+    fn can_decode(&self, source: &str) -> bool {
+        source.contains("<!--project-corners-->") && NativeAnimationCodec.can_decode(source)
+    }
+
+    fn decode(
+        &self,
+        source: &str,
+        target: u64,
+        options: &ImportOptions,
+    ) -> ferroui_designer_animation::Result<AnimationImport> {
+        let mut options = options.clone();
+        options
+            .property_kinds
+            .insert("CornerRadius".into(), ValueKind::Discrete);
+        options.base_values.remove("CornerRadius");
+        options.literal_values.clear();
+        NativeAnimationCodec.decode(source, target, &options)
+    }
+
+    fn encode(
+        &self,
+        original: &str,
+        timeline: &Timeline,
+        target: u64,
+    ) -> ferroui_designer_animation::Result<String> {
+        if timeline.tracks.iter().flat_map(|track| &track.keyframes).any(|key| {
+            !matches!(&key.value, AnimationValue::Discrete(value) if value.parse::<u32>().is_ok())
+        }) {
+            return Err(AnimationError("Enter a nonnegative radius".into()));
+        }
+        NativeAnimationCodec.encode(original, timeline, target)
+    }
+}
+
+#[test]
+fn studio_keyframe_codec_edits_keep_native_interpolation_and_undo() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = r#"<Canvas xmlns="https://github.com/ferroui">
+        <Canvas.Styles><Style Selector="Border#Review"><Style.Animations>
+            <Animation Duration="0:0:2" FillMode="Both"><!--project-corners-->
+                <KeyFrame Cue="0%"><Setter Property="CornerRadius" Value="0"/></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="CornerRadius" Value="32"/></KeyFrame>
+            </Animation>
+        </Style.Animations></Style></Canvas.Styles>
+        <!-- Preserve the card declaration -->
+        <Border Name="Review" Width="160" Height="90" CornerRadius="0"/>
+    </Canvas>"#;
+    let mut studio = DesignerSession::new(source, ContentControl::new()).unwrap();
+    let _window = attach_preview(&studio);
+    studio.register_animation_codec(Box::new(ProjectedCorners));
+    let program = &studio.animation_programs()[0];
+    let (id, target) = (program.id, program.primary_target());
+    assert_eq!(program.codec.as_deref(), Some("project.corners"));
+    assert_eq!(
+        program.timeline.as_ref().unwrap().tracks[0].keyframes[1]
+            .value
+            .kind(),
+        ValueKind::Discrete
+    );
+
+    let edit = |value| KeyframeEdit::Upsert {
+        previous: Some(2.0),
+        time: 2.0,
+        value,
+        easing: "LinearEasing",
+    };
+    assert!(studio
+        .edit_program_keyframe(id, target, "CornerRadius", edit("broken"))
+        .is_err());
+    assert_eq!(studio.document().source(), source);
+    studio
+        .edit_program_keyframe(id, target, "CornerRadius", edit("64"))
+        .unwrap();
+    let changed = studio.document().source();
+    assert!(
+        changed.contains("<!--project-corners-->")
+            && changed.contains("<!-- Preserve the card declaration -->")
+    );
+    assert!(changed.contains("Value=\"64\""));
+    let id = studio.animation_programs()[0].id;
+    studio.scrub_animation_program(id, 1.0).unwrap();
+    let border = studio
+        .preview
+        .visual(target)
+        .unwrap()
+        .cast::<Border>()
+        .unwrap();
+    assert_eq!(border.corner_radius().top_left, 32.0);
+    studio.undo().unwrap();
+    assert_eq!(studio.document().source(), source);
 }

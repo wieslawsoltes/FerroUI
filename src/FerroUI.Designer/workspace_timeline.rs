@@ -1043,7 +1043,7 @@ impl DesignerWorkspace {
                         id,
                         target,
                         &property,
-                        crate::animation_keyframe_authoring::KeyframeEdit::Upsert {
+                        ferroui_designer_animation::KeyframeEdit::Upsert {
                             previous: Some(old_time),
                             time,
                             value: &value.text().unwrap_or_default(),

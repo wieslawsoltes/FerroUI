@@ -879,57 +879,8 @@ impl DesignerSession {
             } else {
                 generated
             };
-        let source = ferroui_designer_animation::native_fragment(&self.document, id, &generated)
-            .map_err(|error| error.to_string())?;
-        let mut edits = AnimationPrograms::replace_source(&self.document, id, &source)
-            .map_err(|error| error.to_string())?;
-        let mut staged = self.document.clone();
-        staged
-            .apply("Stage animation namespace composition", edits.clone())
-            .map_err(|error| error.to_string())?;
-        let original_start = self
-            .document
-            .ast()
-            .node(id)
-            .ok_or("Program source disappeared")?
-            .span
-            .start;
-        let rewritten = staged
-            .ast()
-            .elements()
-            .find(|node| node.span.start == original_start && node.local_name() == "Animation")
-            .ok_or("Rewritten animation disappeared")?;
-        let parent_scope = rewritten
-            .parent
-            .map(|parent| staged.ast().namespaces(parent))
-            .unwrap_or_default();
-        let root = staged.ast().root();
-        let mut root_scope = staged.ast().namespaces(root);
-        for attribute in rewritten
-            .attributes
-            .iter()
-            .filter(|attribute| attribute.is_namespace())
-        {
-            let prefix = attribute.name.strip_prefix("xmlns:").unwrap_or("");
-            if parent_scope.get(prefix) == Some(&attribute.value) {
-                edits.push(Edit::RemoveAttribute {
-                    node: rewritten.id,
-                    name: attribute.name.clone(),
-                });
-            } else if !prefix.is_empty() && !root_scope.contains_key(prefix) {
-                edits.push(Edit::SetAttribute {
-                    node: root,
-                    name: attribute.name.clone(),
-                    value: attribute.value.clone(),
-                });
-                edits.push(Edit::RemoveAttribute {
-                    node: rewritten.id,
-                    name: attribute.name.clone(),
-                });
-                root_scope.insert(prefix.to_owned(), attribute.value.clone());
-            }
-        }
-        Ok(edits)
+        ferroui_designer_animation::compose_animation_edit(&self.document, id, &generated)
+            .map_err(|error| error.to_string())
     }
     pub(crate) fn write_timeline_edits(
         &mut self,

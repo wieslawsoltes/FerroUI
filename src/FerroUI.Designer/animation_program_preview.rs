@@ -36,7 +36,9 @@ impl DesignerSession {
     }
 
     pub(crate) fn requires_native_animation(&self, program: &AnimationProgram) -> bool {
-        self.seeks_animation_elapsed(program) || self.animation.native.uses_custom_animators(program.id)
+        self.seeks_animation_elapsed(program)
+            || self.animation.native.uses_custom_animators(program.id)
+            || (program.has_project_codec() && self.animation.native.duration(program.id).is_some())
     }
 
     pub(crate) fn has_animation_targets(&self, program: &AnimationProgram) -> bool {

@@ -2,7 +2,7 @@
 use super::schema as s;
 use super::{decode, node_id, number, state, text, Permissions};
 use crate::DesignerSession;
-use crate::animation_keyframe_authoring::KeyframeEdit;
+use ferroui_designer_animation::KeyframeEdit;
 use ferroui_designer_animation::{
     AnimationValue, BehaviorModel, Easing, KeyframeGroupEdit, KeyframeLocation, Repeat, Timeline,
     TimelineTimingEdit, VisualStateGroup,

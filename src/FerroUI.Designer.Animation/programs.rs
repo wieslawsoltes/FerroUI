@@ -31,6 +31,10 @@ impl AnimationProgram {
     pub fn primary_target(&self) -> NodeId {
         self.targets.first().copied().unwrap_or(self.owner)
     }
+
+    pub fn has_project_codec(&self) -> bool {
+        self.codec.as_deref().is_some_and(|id| id != NativeAnimationCodec.id())
+    }
 }
 
 /// A custom codec owns the complete payload it recognizes. `encode` receives the original
@@ -53,7 +57,7 @@ pub struct AnimationCodecRegistry {
 impl Default for AnimationCodecRegistry {
     fn default() -> Self {
         Self {
-            codecs: vec![Box::new(NativeCodec)],
+            codecs: vec![Box::new(NativeAnimationCodec)],
         }
     }
 }
@@ -64,6 +68,9 @@ impl AnimationCodecRegistry {
     }
     pub fn codec_ids(&self) -> impl Iterator<Item = &str> {
         self.codecs.iter().map(|codec| codec.id())
+    }
+    pub fn has_project_codecs(&self) -> bool {
+        self.codecs.iter().any(|codec| codec.id() != NativeAnimationCodec.id())
     }
     pub fn decode(&self, program: &mut AnimationProgram, source: &str, options: &ImportOptions) {
         program.timeline = None;
@@ -96,6 +103,7 @@ impl AnimationCodecRegistry {
         original: &str,
         timeline: &Timeline,
     ) -> Result<String> {
+        timeline.validate()?;
         let id = program.codec.as_deref().ok_or_else(|| {
             AnimationError("Select a codec or edit this opaque program's source".into())
         })?;
@@ -150,8 +158,10 @@ impl AnimationCodecRegistry {
         Ok(generated.source().into())
     }
 }
-struct NativeCodec;
-impl AnimationCodec for NativeCodec {
+/// The literal XAML codec. Project codecs can delegate native timing and
+/// namespace handling to it while translating their own value representation.
+pub struct NativeAnimationCodec;
+impl AnimationCodec for NativeAnimationCodec {
     fn id(&self) -> &str {
         "ferroui.native"
     }
