@@ -793,6 +793,20 @@ their tolerance in time, by 7 to 43 % (`frames/reorder ui_ms_per_frame` 1.467 an
 within 0.2 % in instructions. The time of a scene differs from build to build by more than
 its tolerance; its instructions do not, and a line now says which of the two moved.
 
+The parts of a start are counted too. The build, the show and the first frame of a scene are
+each measured once in a process, so their times were the least steady lines of the gate: the
+show and the start of the large scenes moved by 6 to 12 % between two runs of one change
+(section 9.98), and a start that did more work could not be told from one that waited for the
+disk. A scene of the start prints the instructions of its build, of the taking of its content,
+of its show and of its first frame, and their sum (`build_instructions`,
+`content_instructions`, `show_instructions`, `first_frame_instructions`,
+`startup_instructions`, of every thread of the process); a frame scene prints those of its
+build and its show. The gate judges `build_ms`, `show_ms`, `first_frame_ms` and `startup_ms`
+with them. Three starts of one build: `startup/tiles` 20.735, 20.740 and 20.754 billion
+instructions from the build to the first frame (0.09 %) with 1,655 to 1,790 ms (8 %);
+`startup/controls` 2.695 to 2.714 billion (0.7 %, the first start of a new file the largest)
+with 243 to 340 ms.
+
 Scaling pairs. A benchmark compared at one size cannot tell a cost that is linear at that size
 and quadratic above it. The benchmarks of `trees::Scaling` (the start of a wall of tiles, its
 attachment, its detachment, the clearing of a canvas, the removal of every second child, a class
@@ -7894,3 +7908,44 @@ used again, and giving them back needs the generations kept apart from the nodes
 `the_layouts_of_holders_that_leave_are_let_go_without_an_addition` (12,288 held layouts whose
 holders dispose them: at most 8,192 are kept, all idle, the ones let go last).
 
+### 9.99 A font family is read from its text once
+
+Experiment #811, part (c). An application writes the family of a text where the text is built
+(`FontFamily::from("Inter")` for every text block of a list), and markup compiled for a
+template names it once for every element made from the template. `FontFamily::new` read the
+text each time: the list of its sources, its collection of names and, for a list of names or a
+font of the application, its key with their URLs. A family of one name took 123 ns and 2,786
+instructions and left 385 bytes in five blocks; the declarative program of the framework
+comparison had 769 bytes of families for every tile of its wall (section 8.5).
+
+**The change** (`src/FerroUI.Base/media/font_family.rs`). A family is what its text and its
+base URI make it and never changes. A thread keeps the families it made by their text
+(`Made`, at most 256 families, emptied when it is full, so text that is made up at run time
+costs a bounded memory; a text of more than 256 bytes is read each time). `FontFamily::new`
+and `with_base_uri` return the family made first. A text with a source that is resolved
+against the base URI has one family for each base URI; any other text has one family whatever
+base URI it is given. `FontFamily::ptr_eq` holds for families made from the same text, where it
+held only for copies of one family before; the equality and the hash of a family are the same,
+and are found by the first comparison (the same instance) where they compared the names.
+
+**Measured** (`property_subsystem::FontFamilyMade`, a thousand families made in turn):
+
+| `property_subsystem::FontFamilyMade` | Main | This change | Instructions, main | This change |
+| --- | ---: | ---: | ---: | ---: |
+| `named` (`"Inter"`) | 122.8 ns | 7.5 ns | 2,786 | 204 |
+| `list` (`"Inter, Arial"`) | 768.6 ns | 7.8 ns | 16,306 | 201 |
+| `sourced` (`"resm:Application.Fonts#Inter"`) | 336.9 ns | 10.1 ns | 7,263 | 221 |
+| `set_unchanged` (the family of a control set to one made from its name) | 126.3 ns | 14.9 ns | 2,970 | 390 |
+
+The gate (`property_subsystem`, `declarative`, the text block benchmarks and the construction
+of elements; 63 metrics, two rounds) has nothing over its tolerance; the four lines above take
+92.5, 98.8, 97.0 and 86.9 % fewer instructions.
+
+**Looked at and not changed** (section 8.4, rule 2). `FontFamily::default_family` is one family
+of a thread already. `Typeface` and the key of a glyph typeface hold a family and compare it:
+they find equal families of one text by the instance now. The other values an application
+makes from text for every element (a brush from a colour name, a thickness) are plain values
+without a block of their own, or are made once by the compiled markup.
+
+**Tests.** `font_family.rs`: `a_text_is_read_once_on_a_thread` (the instance, the base URI of
+a relative source, a family without a base URI), `the_families_a_thread_keeps_are_bounded`.

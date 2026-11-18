@@ -24,8 +24,9 @@
 //! with, per frame: the time the UI thread spent running its jobs, the time the render thread spent
 //! in its ticks and the wall time; and, once: the time the scene took to build and the window to
 //! show it (its first layout, recording and commit). Where the system counts them, the line has
-//! the instructions the process retired for a measured frame, on all its threads: the gate reads
-//! them to tell a time that changed from work that changed.
+//! the instructions the process retired for a measured frame, on all its threads, and those of
+//! the build and the show (`build_instructions`, `show_instructions`, `startup_instructions`):
+//! the gate reads them to tell a time that changed from work that changed.
 //!
 //! The scenes of the start (`STARTUP_SCENES`) are shown once and measured to their first frame,
 //!
@@ -39,7 +40,11 @@
 //! the jobs of the UI thread (the recording and the commit), the ticks of the render thread (the
 //! batch and the drawing) and the wall time of the two. `startup_ms` is the sum of the build, the
 //! content, the show and the wall time to the first frame. The `_mb` fields are the resident
-//! megabytes the build, the show and the first frame added to the process, and their sum.
+//! megabytes the build, the show and the first frame added to the process, and their sum. Where
+//! the system counts them, the line also has the instructions of each part and of their sum
+//! (`build_instructions`, `content_instructions`, `show_instructions`,
+//! `first_frame_instructions`, `startup_instructions`): a part is measured once, and the gate
+//! judges its time with them.
 //!
 //! With the `counters` feature a start also prints, for each of its phases, the allocations it
 //! made and the blocks it left alive by size class (`heap`), and the counters of the framework.
@@ -315,6 +320,9 @@ struct Gate {
     /// The heap at the same moments, and when the window had taken the scene as its content:
     /// zero without the feature `counters`.
     heap: [heap::Heap; 4],
+    /// The instructions the process had retired at the four moments of `heap`, where the system
+    /// counts them.
+    instructions: [Option<u64>; 4],
 }
 
 /// The memory the process holds, in megabytes: the resident set `ps` reports. Zero where
@@ -403,19 +411,23 @@ impl Gate {
         window.set_height(HEIGHT);
         window.set_can_resize(false);
         let (memory_before, heap_before) = (resident_megabytes(), heap::snapshot());
+        let instructions_before = instructions();
         heap::sites("build", true);
         let built = Instant::now();
         let screen = FrameHost::new((scene.build)());
         let build = built.elapsed();
         heap::sites("build", false);
+        let instructions_built = instructions();
         let (memory_built, heap_built) = (resident_megabytes(), heap::snapshot());
         heap::sites("show", true);
         let shown = Instant::now();
         window.set_content(Some(Control::boxed(&screen)));
         let content = shown.elapsed();
+        let instructions_content = instructions();
         let heap_content = heap::snapshot();
         window.show();
         let show = shown.elapsed();
+        let instructions_shown = instructions();
         heap::sites("show", false);
         let (memory_shown, heap_shown) = (resident_megabytes(), heap::snapshot());
         heap::sites("first", true);
@@ -437,6 +449,7 @@ impl Gate {
             content,
             memory: [memory_before, memory_built, memory_shown],
             heap: [heap_before, heap_built, heap_content, heap_shown],
+            instructions: [instructions_before, instructions_built, instructions_content, instructions_shown],
         }
     }
 
@@ -585,6 +598,12 @@ fn instructions() -> Option<u64> {
     None
 }
 
+/// The instructions between two counts, as a field of the line of the gate: nothing where the
+/// system does not count them.
+fn counted_field(name: &str, from: Option<u64>, to: Option<u64>) -> String {
+    from.zip(to).map(|(from, to)| format!(",\"{name}\":{}", to.saturating_sub(from))).unwrap_or_default()
+}
+
 /// Shows the scene, runs the warm-up frames and the measured ones, and prints the line of the gate
 /// and a summary.
 fn measure(scene: &Scene) {
@@ -604,6 +623,13 @@ fn measure(scene: &Scene) {
         .map(|(before, after)| after.saturating_sub(before) as f64 / f64::from(run.frames))
         .map(|counted| format!(",\"instructions_per_frame\":{counted:.0}"))
         .unwrap_or_default();
+    // The build and the show are measured once, and their times move with the state of the
+    // machine: the instructions they took say whether they did more.
+    let [at_start, at_built, _, at_shown] = gate.instructions;
+    let counted = counted
+        + &counted_field("build_instructions", at_start, at_built)
+        + &counted_field("show_instructions", at_built, at_shown)
+        + &counted_field("startup_instructions", at_start, at_shown);
     let counters = ferroui_base::diagnostics::perf_counters::snapshot().since(&counters);
     assert!(run.rendered > 0, "{bench}: the surface received no frame");
 
@@ -647,6 +673,7 @@ fn measure_start(scene: &Scene) {
     let counters = ferroui_base::diagnostics::perf_counters::snapshot();
     let gate = Gate::start(scene);
     let first = gate.first_frame();
+    let instructions_first = instructions();
     let counters = ferroui_base::diagnostics::perf_counters::snapshot().since(&counters);
     assert!(first.rendered > 0, "{bench}: the surface received no frame");
     heap::sites("first", false);
@@ -669,12 +696,20 @@ fn measure_start(scene: &Scene) {
     let [before, built, shown] = gate.memory;
     let (build_mb, show_mb, first_frame_mb) = (built - before, shown - built, memory_first - shown);
     let startup_mb = memory_first - before;
+    // The instructions of each part, those of every thread of the process: a part is measured
+    // once, and its time moves with the state of the machine.
+    let [at_start, at_built, at_content, at_shown] = gate.instructions;
+    let counted = counted_field("build_instructions", at_start, at_built)
+        + &counted_field("content_instructions", at_built, at_content)
+        + &counted_field("show_instructions", at_content, at_shown)
+        + &counted_field("first_frame_instructions", at_shown, instructions_first)
+        + &counted_field("startup_instructions", at_start, instructions_first);
     println!(
         "GATE {{\"bench\":\"{bench}\",\"services_ms\":{services:.3},\"build_ms\":{build:.3},\
          \"content_ms\":{content:.3},\"show_ms\":{show:.3},\"first_ui_ms\":{first_ui:.3},\
          \"first_render_ms\":{first_render:.3},\"first_frame_ms\":{first_frame:.3},\"startup_ms\":{startup:.3},\
          \"build_mb\":{build_mb:.1},\"show_mb\":{show_mb:.1},\"first_frame_mb\":{first_frame_mb:.1},\
-         \"startup_mb\":{startup_mb:.1}}}"
+         \"startup_mb\":{startup_mb:.1}{counted}}}"
     );
     println!(
         "{bench}: services in {services:.1} ms; built in {build:.1} ms, taken as the content in {content:.1} ms, \
