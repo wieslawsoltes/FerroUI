@@ -45,11 +45,11 @@ pub(crate) fn inspect(
                 .ast()
                 .node(node)
                 .ok_or("Unknown source element")?;
-            let effective = stage.map_or_else(Vec::new, |stage| {
-                stage.session.borrow().authored_preview_properties(node)
-            });
+            let session = stage.map(|stage| stage.session.borrow());
+            let effective = session.as_ref().map_or_else(Vec::new, |session| session.authored_preview_properties(node));
             Ok(Inspection {
-                properties: property_fields(&design, element, effective),
+                properties: property_fields(&design, element, effective,
+                    |property| session.as_ref().is_some_and(|session| session.can_record_property(node, property))),
                 events: event_fields(&design, element)?,
             })
         }
@@ -62,7 +62,8 @@ pub(crate) fn inspect(
             let session = stage.ok_or("Wait for the current preview")?.session.borrow();
             let mut fields = nodes.iter().rev().map(|id| {
                 let node = design.xaml.ast().node(*id).ok_or("Unknown selected element")?;
-                Ok::<_, &str>(property_fields(&design, node, session.authored_preview_properties(*id)))
+                Ok::<_, &str>(property_fields(&design, node, session.authored_preview_properties(*id),
+                    |property| session.can_record_property(*id, property)))
             });
             let mut properties = fields.next().expect("selection length validated")?;
             for fields in fields {

@@ -152,7 +152,15 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
             .into_iter()
             .collect()
     };
-    editor_edits(&design, patches)
+    let recorded = query.name == "designer_record_property";
+    let retained_selection = if recorded {
+        session.selection().iter().filter_map(|&node| crate::edit_selection::authored_range(
+            &design, session.document(), &patches, node)).collect()
+    } else { Vec::new() };
+    let mut edit = editor_edits(&design, patches)?;
+    if recorded { edit.timeline_pose = session.timeline_preview_pose(); }
+    edit.retained_selection = retained_selection;
+    Ok(edit)
 }
 
 fn select(stage: &Stage, selection: &[NodeId]) -> Result<(), String> {
@@ -191,6 +199,7 @@ fn source_action(tool: &str, action: Option<&str>) -> bool {
         // All actions for these schemas are source-backed.
         "designer_component"
         | "designer_property"
+        | "designer_record_property"
         | "designer_binding_edit"
         | "designer_grid_track_edit"
         | "designer_set_event"

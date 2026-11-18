@@ -1135,25 +1135,26 @@ impl DesignerSession {
         }
         animation_value(property, value)
     }
+    /// Whether the current authored node exposes a property supported by the
+    /// native typed animation layer.
+    pub fn can_record_property(&self, target: NodeId, property: &str) -> bool {
+        property != "Name"
+            && self.can_manipulate()
+            && self
+                .preview
+                .visual(target)
+                .and_then(|visual| ferroui_inspect::Inspector::property(&visual, property).ok())
+                .is_some_and(|info| {
+                    !info.is_direct()
+                        && !info.is_read_only()
+                        && (info.property_type_name() == "bool"
+                            || animation_value_kind(info.property_type_name()).is_some())
+                })
+    }
     fn animation_kind_for_target(&self, target: NodeId, property: &str) -> Option<ValueKind> {
         let visual = self.preview.visual(target)?;
         let property = ferroui_inspect::Inspector::property(&visual, property).ok()?;
-        let name = property.property_type_name();
-        if name.contains("Color") || name.contains("Brush") {
-            return Some(ValueKind::Color);
-        }
-        match name.rsplit([':', '.']).next().unwrap_or(name) {
-            "f64" | "f32" => Some(ValueKind::Number),
-            "Point" => Some(ValueKind::Point),
-            "Vector" => Some(ValueKind::Vector),
-            "Size" => Some(ValueKind::Size),
-            "Rect" => Some(ValueKind::Rect),
-            "CornerRadius" => Some(ValueKind::CornerRadius),
-            "RelativePoint" => Some(ValueKind::RelativePoint),
-            "RelativeScalar" => Some(ValueKind::RelativeScalar),
-            "Thickness" => Some(ValueKind::Thickness),
-            _ => None,
-        }
+        animation_value_kind(property.property_type_name())
     }
     fn animation_import_options(&self, program: &AnimationProgram) -> ImportOptions {
         let mut options = ImportOptions::default();
@@ -1290,6 +1291,24 @@ impl DesignerSession {
                     .then_some(node.id)
             })
             .collect())
+    }
+}
+
+fn animation_value_kind(name: &str) -> Option<ValueKind> {
+    if name.contains("Color") || name.contains("Brush") {
+        return Some(ValueKind::Color);
+    }
+    match name.rsplit([':', '.']).next().unwrap_or(name) {
+        "f64" | "f32" => Some(ValueKind::Number),
+        "Point" => Some(ValueKind::Point),
+        "Vector" => Some(ValueKind::Vector),
+        "Size" => Some(ValueKind::Size),
+        "Rect" => Some(ValueKind::Rect),
+        "CornerRadius" => Some(ValueKind::CornerRadius),
+        "RelativePoint" => Some(ValueKind::RelativePoint),
+        "RelativeScalar" => Some(ValueKind::RelativeScalar),
+        "Thickness" => Some(ValueKind::Thickness),
+        _ => None,
     }
 }
 

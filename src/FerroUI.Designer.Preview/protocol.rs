@@ -36,6 +36,8 @@ pub(crate) struct Render {
     pub(crate) design_data: Option<DesignData>,
     #[serde(rename = "layerView")]
     pub(crate) layer_view: Option<LayerViewInput>,
+    #[serde(rename = "timelinePose")]
+    pub(crate) timeline_pose: Option<ferroui_designer::TimelinePreviewPose>,
 }
 
 #[derive(Deserialize)]
@@ -127,6 +129,10 @@ pub(crate) struct DropHint {
 pub(crate) struct EditResult {
     pub(crate) edits: Vec<ferroui_designer_language::TextEdit>,
     pub(crate) selection: Option<Range>,
+    #[serde(rename = "timelinePose", skip_serializing_if = "Option::is_none")]
+    pub(crate) timeline_pose: Option<ferroui_designer::TimelinePreviewPose>,
+    #[serde(rename = "retainedSelection", skip_serializing_if = "Vec::is_empty")]
+    pub(crate) retained_selection: Vec<Range>,
 }
 
 #[derive(Clone, Serialize)]
@@ -151,6 +157,8 @@ pub(crate) struct Snapshot {
     pub(crate) notices: Vec<String>,
     pub(crate) dependencies: Vec<String>,
     pub(crate) project_assets: Vec<Asset>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) timeline_pose: Option<ferroui_designer::TimelinePreviewPose>,
 }
 
 #[derive(Serialize)]

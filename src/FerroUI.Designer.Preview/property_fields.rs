@@ -25,6 +25,7 @@ pub(crate) struct PropertyField {
     can_bind: bool,
     can_promote: bool,
     can_edit_brush: bool,
+    can_record: bool,
     mixed: bool,
 }
 
@@ -44,6 +45,7 @@ impl PropertyField {
             can_bind: false,
             can_promote: false,
             can_edit_brush: false,
+            can_record: false,
             mixed: false,
         }
     }
@@ -60,6 +62,7 @@ pub(crate) fn intersect(properties: &mut Vec<PropertyField>, other: Vec<Property
         field.can_bind = false;
         field.can_promote = false;
         field.can_edit_brush = false;
+        field.can_record &= other.can_record;
         field.range = None;
         if field.mixed {
             field.authored = None;
@@ -79,6 +82,7 @@ pub(crate) fn property_fields(
     design: &DesignDocument<'_>,
     node: &Node,
     effective: Vec<ferroui_inspect::PropertyInfo>,
+    recordable: impl Fn(&str) -> bool,
 ) -> Vec<PropertyField> {
     if node.kind != NodeKind::Element {
         return Vec::new();
@@ -142,6 +146,8 @@ pub(crate) fn property_fields(
                 && ferroui_designer_tools::component_property_extractable(&design.xaml, node.id, &name);
             let can_edit_brush = design.rsx.is_none() && !info.read_only
                 && info.type_name.contains("IBrush") && (object.is_some() || editable);
+            let can_record = design.rsx.is_none() && object.is_none() && (editable || can_bind)
+                && recordable(&name);
             let runtime = effective.get(&name);
             let origin = if expression.is_some() {
                 Some("Rust expression".into())
@@ -174,6 +180,7 @@ pub(crate) fn property_fields(
                 can_bind,
                 can_promote,
                 can_edit_brush,
+                can_record,
                 mixed: false,
             })
         })

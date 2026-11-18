@@ -39,6 +39,7 @@ pub(crate) struct Frame {
     pub(crate) image: Image,
     pub(crate) bounds: BTreeMap<NodeId, Bounds>,
     pub(crate) notices: Vec<String>,
+    pub(crate) timeline_pose: Option<ferroui_designer::TimelinePreviewPose>,
 }
 
 #[derive(Serialize)]
@@ -120,7 +121,13 @@ impl Renderer {
         if let Some(layers) = layers.filter(|layers| !layers.is_empty()) {
             session.restore_persisted_layer_view(layers);
         }
-        let frame = capture(&mut session)?;
+        let pose = input.timeline_pose.as_ref().map(|pose| session.restore_timeline_preview_pose(pose));
+        let mut frame = capture(&mut session)?;
+        match pose {
+            Some(Ok(pose)) => frame.timeline_pose = pose,
+            Some(Err(error)) => frame.notices.push(format!("Animation preview: {error}")),
+            None => {}
+        }
         self.stage = Some(Stage {
             session: Rc::new(RefCell::new(session)),
             token: input.frame,
@@ -192,6 +199,7 @@ pub(crate) fn capture(session: &mut DesignerSession) -> Result<Frame, String> {
             .collect();
         let notices = session.preview_notices().to_vec();
         Ok(Frame {
+            timeline_pose: None,
             image: Image {
                 png: STANDARD.encode(png.png),
                 width: png.pixel_width,

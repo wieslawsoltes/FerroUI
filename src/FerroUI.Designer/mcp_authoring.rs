@@ -23,6 +23,7 @@ pub(super) fn handles(name: &str) -> bool {
             | "designer_behavior"
             | "designer_properties"
             | "designer_property"
+            | "designer_record_property"
     )
 }
 pub(super) fn tools() -> Vec<Value> {
@@ -40,6 +41,7 @@ pub(super) fn tools() -> Vec<Value> {
         schema["minItems"] = json!(1);
         schema
     };
+    let property_value = || json!({"anyOf":[s::string(),s::number(),{"type":"boolean"},s::animation_value()]});
     vec![
         s::tool("designer_programs","Read animation programs, source keys, codec diagnostics and typed timelines. include_keyframe_text adds formatted XAML values and easing to the typed keys.",s::object(json!({"include_source":{"type":"boolean"},"include_keyframe_text":{"type":"boolean"}}), &[]),false),
         s::actions("designer_program","Author animation programs and keyframes, edit timing with proportional retiming, set selectors or preview targets, sample several programs together, or play all programs. IDs refer to the current document; every action checks expected_revision.",vec![
@@ -85,10 +87,13 @@ pub(super) fn tools() -> Vec<Value> {
             s::action("clear_preview",json!({}), &[],true),
         ],true),
         s::tool("designer_properties","Read host-registered property descriptors and per-property JSON value schemas, including custom enum/numeric constraints and authored values.",s::object(json!({"node":s::id()}), &["node"]),false),
-        s::actions("designer_property","Set or reset a property through the editor's current property registry and recording path. Values accept JSON scalars, native XAML text/bindings, or tagged animation numeric, color, geometry, relative-unit and discrete values. Per-target metadata validates the actual type before editing.",vec![
-            s::action("set",json!({"nodes":ids(),"property":s::string(),"value":{"anyOf":[s::string(),s::number(),{"type":"boolean"},s::animation_value()]}}), &["nodes","property","value"],true),
+        s::actions("designer_property","Set or reset a property through Studio. Values accept JSON scalars, native XAML text, or tagged animation values.",vec![
+            s::action("set",json!({"nodes":ids(),"property":s::string(),"value":property_value()}), &["nodes","property","value"],true),
             s::action("reset",json!({"nodes":ids(),"property":s::string()}), &["nodes","property"],true),
         ],true),
+        s::tool("designer_record_property","Record a literal property edit at an authored time in seconds. Uses Studio's recording transaction, preserves the base property and can create a scoped track for an additional target.",
+            s::object(json!({"nodes":ids(),"property":s::string(),"value":property_value(),"program":s::id(),"time":s::time(),"expected_revision":s::revision()}),
+                &["nodes","property","value","program","time","expected_revision"]),true),
     ]
 }
 
@@ -198,16 +203,9 @@ pub(super) fn call(
                 }
                 "scrub" => {
                     let id = node_id(args, "program")?;
-                    if session.active_animation_program() != Some(id) {
-                        session.select_animation_program(id)?;
-                    }
                     let time = number(args, "time")?;
-                    if time > session.timeline().duration {
-                        return Err("Choose a time within the animation duration".into());
-                    }
-                    session.pause();
-                    session.seek(time)?;
-                    return Ok(json!({"timelinePosition":{"time":time,"playing":false}}));
+                    session.scrub_animation_program(id, time)?;
+                    return Ok(json!({"timelinePosition":{"time":time,"playing":false,"pose":session.timeline_preview_pose()}}));
                 }
                 "play_program" => {
                     session.start_animation_playback(
@@ -317,30 +315,37 @@ pub(super) fn call(
                     .property_tools()
                     .state(session.document(), &[node], &descriptor.name)
                     .map_err(|error| error.to_string())?;
-                properties.push(json!({"descriptor":descriptor,"value_schema":property_schema(&descriptor.kind),"value":authored.value,"expression":authored.expression,"authored":authored.authored}));
+                properties.push(json!({"descriptor":descriptor,"value_schema":property_schema(&descriptor.kind),
+                    "value":authored.value,"expression":authored.expression,"authored":authored.authored,
+                    "can_record":session.can_record_property(node, &descriptor.name)}));
             }
             return Ok(
                 json!({"revision":session.document().revision(),"node":node,"properties":properties}),
             );
         }
-        "designer_property" => {
+        "designer_property" | "designer_record_property" => {
             let nodes: Vec<u64> = decode(args, "nodes")?;
             distinct(&nodes)?;
             let property = text(args, "property")?;
+            let recording = name == "designer_record_property";
             for node in &nodes {
                 let descriptor = session
                     .property_tools()
                     .descriptors(session.document(), *node)
                     .map_err(|error| error.to_string())?
                     .into_iter()
-                    .find(|descriptor| descriptor.name == property)
-                    .ok_or_else(|| {
-                        format!("Property {property} is not registered on node {node}")
-                    })?;
+                    .find(|descriptor| descriptor.name == property);
+                let Some(descriptor) = descriptor else {
+                    if recording && session.can_record_property(*node, &property) {
+                        // Application properties may only be registered in the live preview.
+                        continue;
+                    }
+                    return Err(format!("Property {property} is not registered on node {node}"));
+                };
                 if descriptor.read_only {
                     return Err(format!("Property {property} is read-only"));
                 }
-                if args["action"] == "set" {
+                if args["action"] != "reset" {
                     s::validate(&property_schema(&descriptor.kind), &args["value"])?;
                 }
             }
@@ -362,6 +367,10 @@ pub(super) fn call(
                     value.validate().map_err(|error| error.to_string())?;
                     value.to_xaml()
                 };
+                if recording {
+                    session.record_property_at(node_id(args, "program")?, number(args, "time")?, &nodes, &property, &value)?;
+                    return Ok(json!({"document":state(session),"timelinePose":session.timeline_preview_pose()}));
+                }
                 session.set_property(&nodes, &property, &value)?;
             }
         }

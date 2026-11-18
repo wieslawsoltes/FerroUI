@@ -52,6 +52,36 @@ fn state_group(owner: u64) -> VisualStateGroup {
         }],
     }
 }
+
+#[test]
+fn timeline_pose_resolves_a_unique_program_in_a_rebuilt_preview() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let mut session = DesignerSession::new(source(), ContentControl::new()).unwrap();
+    let owner = session.document().ast().root();
+    let target = session.document().ast().find_name("A").unwrap();
+    let id = session.create_animation_program("Fade", owner, "Button#A", 1.0).unwrap();
+    session.scrub_animation_program(id, 0.5).unwrap();
+    session.record_keyframe(target, "Opacity", AnimationValue::Number(0.625)).unwrap();
+    let pose = session.timeline_preview_pose().unwrap();
+    let program = session.animation_programs().iter().find(|program| program.id == id).unwrap();
+    let mut edited = session.document().source().to_owned();
+    edited.insert_str(program.span.start, "<!-- Design review · Łódź -->");
+    let mut rebuilt = DesignerSession::new(&edited, ContentControl::new()).unwrap();
+    let accepted = rebuilt.restore_timeline_preview_pose(&pose).unwrap().unwrap();
+    assert_eq!(accepted.source_key, pose.source_key);
+    assert_eq!(accepted.time, 0.5);
+    let target = rebuilt.document().ast().find_name("A").unwrap();
+    assert_eq!(rebuilt.preview.visual(target).unwrap().opacity(), 0.625);
+    assert_eq!(rebuilt.document().source(), edited);
+
+    let mut duplicated = session.document().source().to_owned();
+    duplicated.insert_str(program.span.end, &program.source);
+    let mut ambiguous = DesignerSession::new(&duplicated, ContentControl::new()).unwrap();
+    assert!(ambiguous.restore_timeline_preview_pose(&pose).unwrap().is_none());
+    let target = ambiguous.document().ast().find_name("A").unwrap();
+    assert_eq!(ambiguous.preview.visual(target).unwrap().opacity(), 1.0);
+}
+
 #[test]
 fn independent_programs_select_edit_and_preview_all_matching_targets() {
     let _app = UnitTestApplication::start(TestServices::styled_window());

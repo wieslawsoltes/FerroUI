@@ -5,6 +5,7 @@
 //! of that session. Neither starts a window, server or background transport.
 mod affine_manipulation;
 mod animation_keyframe_authoring;
+mod animation_preview_pose;
 mod animation_runtime;
 mod animation_session;
 mod asset_toolbox;
@@ -79,6 +80,7 @@ pub use asset_toolbox::{
 };
 pub use project_controls::registered_designer_assets;
 pub use chrome::designer_chrome_style;
+pub use animation_preview_pose::TimelinePreviewPose;
 pub use canvas_guides::{CanvasGuide, CanvasGuideAxis, CanvasGuideSettings};
 pub use canvas_guides_editor::CanvasGuidesEditor;
 pub use workspace::{CanvasGuideEditSnapshot, CanvasGuideViewSnapshot};

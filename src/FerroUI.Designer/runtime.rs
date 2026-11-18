@@ -3,9 +3,9 @@ use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::data::BindingPriority;
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::reactive::{Disposable, IObservable, IObserver, Subscription};
-use ferroui_base::{BoxedValue, FerroObject, Rect, Ref, StyledElement, Visual, WeakRef};
+use ferroui_base::{BoxedValue, FerroObject, FerroProperty, Rect, Ref, StyledElement, Visual, WeakRef};
 use ferroui_controls::{ContentControl, Control};
-use ferroui_designer_animation::Sample;
+use ferroui_designer_animation::{AnimationValue, Sample};
 use ferroui_designer_core::{Document, NodeId};
 use ferroui_inspect::{Inspector, TreeKind};
 use ferroui_markup_xaml::diagnostics::XamlSourceInfo;
@@ -895,32 +895,36 @@ impl RuntimePreview {
         rows
     }
 
+    pub(crate) fn prepare_animation_value(
+        &self,
+        target: NodeId,
+        name: &str,
+        value: &AnimationValue,
+    ) -> Result<(Ref<Visual>, &'static FerroProperty, BoxedValue), String> {
+        let object = self.visual(target).ok_or_else(|| format!("No live animation target {target}"))?;
+        let property = Inspector::property(&object, name)?;
+        if property.is_direct() || property.is_read_only() {
+            return Err(format!("{name} does not support an animation value layer"));
+        }
+        let value: BoxedValue = Rc::new(value.to_xaml());
+        let converted = ValueTypes::try_convert(
+            Some(&value),
+            ValueType::new(property.property_type(), property.property_type_name()),
+        )
+        .flatten()
+        .ok_or_else(|| format!("Cannot animate {name} with this value"))?;
+        if !property.is_valid_value(converted.as_any()) {
+            return Err(format!("Invalid animation value for {name}"));
+        }
+        Ok((object, property, converted))
+    }
+
     pub fn preview_samples(&mut self, samples: &[Sample]) -> Result<(), String> {
         // Validate every conversion before replacing the previous preview layer.
-        let mut staged = Vec::new();
-        for sample in samples {
-            let object = self
-                .visual(sample.target)
-                .ok_or_else(|| format!("No live animation target {}", sample.target))?;
-            let property = Inspector::property(&object, &sample.property)?;
-            if property.is_direct() || property.is_read_only() {
-                return Err(format!(
-                    "{} does not support an animation value layer",
-                    sample.property
-                ));
-            }
-            let value: BoxedValue = Rc::new(sample.value.to_xaml());
-            let converted = ValueTypes::try_convert(
-                Some(&value),
-                ValueType::new(property.property_type(), property.property_type_name()),
-            )
-            .flatten()
-            .ok_or_else(|| format!("Cannot animate {} with this value", sample.property))?;
-            if !property.is_valid_value(converted.as_any()) {
-                return Err(format!("Invalid animation value for {}", sample.property));
-            }
-            staged.push((object, property, converted));
-        }
+        let staged = samples
+            .iter()
+            .map(|sample| self.prepare_animation_value(sample.target, &sample.property, &sample.value))
+            .collect::<Result<Vec<_>, _>>()?;
         self.clear_animation();
         for (object, property, value) in staged {
             if let Some(guard) =
