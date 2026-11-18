@@ -885,14 +885,19 @@ impl Chart {
         } else {
             cached_size.unwrap_or(size)
         };
+        // Only the Cartesian chart finds with its finding strategy (`FindHoveredPointsBy` of
+        // `CartesianChartEngine`). The pie, polar, Sankey and treemap engines of the source
+        // always compare both dimensions (`FindingStrategy.CompareAll`), which is the strategy
+        // their native engines resolve, and a map finds the land under the pointer.
+        let strategy = if self.chart_kind() == ChartKind::Cartesian {
+            self.tooltip_finding_strategy()
+        } else {
+            FindingStrategy::Automatic
+        };
         match self.scene(size) {
             Ok(scene) => self
                 .presentation_scene(Dispatcher::ui_thread().now() as f64, scene)
-                .hit_test(
-                    position,
-                    self.tooltip_finding_strategy(),
-                    self.tooltip_tolerance(),
-                )
+                .hit_test(position, strategy, self.tooltip_tolerance())
                 .into_iter()
                 .cloned()
                 .collect(),
