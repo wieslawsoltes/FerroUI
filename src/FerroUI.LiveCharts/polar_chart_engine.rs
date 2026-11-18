@@ -1568,6 +1568,27 @@ mod tests {
         assert_eq!(marker.style.fill, Some(Color::from_rgb(250, 250, 250)));
         assert_eq!(marker.style.stroke, Some(Color::from_rgb(1, 2, 3)));
     }
+    /// SeriesTests/SeriesHitTests.PolarLine_CompareAll_HitsAtPointCenter: the source series of three
+    /// values with a geometry of 20 on a 600 by 600 chart; by both dimensions (the strategy of the
+    /// polar finder) the centre of the hover area of the second point finds it alone.
+    #[test]
+    fn source_polar_line_compare_all_hits_at_point_center() {
+        let mut s = Series::from_values(SeriesKind::PolarLine, [10.0, 20.0, 30.0]);
+        s.geometry_size = 20.0;
+        let scene = PolarChartEngine::measure(
+            Size::new(600.0, 600.0),
+            &[s],
+            &Axis::default(),
+            &Axis::default(),
+            &PolarOptions::default(),
+        )
+        .unwrap();
+        assert_eq!(scene.automatic_finding_strategy, FindingStrategy::CompareAll);
+        let center = scene.hits[1].shape.hover_center();
+        let hits = scene.hit_test(center, FindingStrategy::CompareAll, 0.0);
+        assert_eq!(hits.len(), 1);
+        assert_eq!(hits[0].id.point, 1);
+    }
     /// GetPrimaryToolTipText and GetSecondaryToolTipText of CorePolarLineSeries: the radius text
     /// always, the angle text when the angle axis has labels or a labeler of its own (the source
     /// ignores it otherwise), and the tooltip label formatters of the series over both.
