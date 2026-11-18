@@ -41,6 +41,16 @@ export async function verifyTimelineMcp(mcp: McpFixture, session: number, docume
         assert.match(key.easing_text, /0\.42/);
     };
     await check(.5, '0.75');
+    const program = (await pulse()).id;
+    const control = (revision: number, args: object) => invoke('designer_timeline_control', {
+        session, expected_revision: revision, arguments: { program, ...args },
+    });
+    const atHalf = content<{ time: number; playing: boolean; busy: boolean }>(await control(frame.revision, { action: 'seek', time: .5 }));
+    assert.equal(atHalf.time, .5);
+    assert.equal(atHalf.playing, false);
+    assert.equal(atHalf.busy, false);
+    assert.ok((await control(frame.revision, { action: 'seek', time: 0 })).isError);
+    frame = await wait();
     const duplicate = await keyframe();
     assert.ok(duplicate.isError && duplicate.content[0]?.text?.includes('occupies the destination time'));
     frame = await wait();
@@ -55,5 +65,5 @@ export async function verifyTimelineMcp(mcp: McpFixture, session: number, docume
     assert.deepEqual((await pulse()).timeline.tracks, []);
     await undo();
     assert.equal(document.getText(), original);
-    console.log('VS Code MCP authored a timeline track and keyframe, validated its time and easing, and undid each transaction');
+    console.log('VS Code MCP authored and scrubbed a native timeline, rejected a stale seek, and undid each source transaction');
 }

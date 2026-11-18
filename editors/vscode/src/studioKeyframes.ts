@@ -1,9 +1,8 @@
 import { action, choose, editText, editTime, type StudioContext, type StudioItem } from './studioContext';
+import type { TimelineKeyframe, TimelineProgram, TimelineTrack } from './timelineProtocol';
 
-interface Keyframe { time: number; value_text: string; easing_text: string }
-interface Track { target: number; property: string; keyframes: Keyframe[] }
-interface Timeline { duration: number; tracks: Track[] }
-export interface Program { id: number; name: string; owner: number; targets: number[]; selector: string; timeline: Timeline | null }
+export type Program = TimelineProgram;
+type Timeline = NonNullable<TimelineProgram['timeline']>;
 interface Property { descriptor: { name: string; category: string; read_only: boolean; animatable: boolean }; value: string | null; expression: boolean }
 
 export function trackItems(context: StudioContext, program: Program, timeline: Timeline): StudioItem[] {
@@ -34,8 +33,9 @@ export function trackItems(context: StudioContext, program: Program, timeline: T
     return items;
 }
 
-async function keyframeOptions(context: StudioContext, program: number, duration: number, track: Track, frame: Keyframe): Promise<void> {
-    const preview = () => context.present('designer_program', { action: 'preview', programs: [program], time: frame.time });
+export async function keyframeOptions(context: StudioContext, program: number, duration: number, track: TimelineTrack, frame: TimelineKeyframe,
+    seek?: () => Promise<void>): Promise<void> {
+    const preview = seek ?? (() => context.present('designer_program', { action: 'preview', programs: [program], time: frame.time }));
     if (!context.writable) return preview();
     const item = await choose(`${track.property} · ${frame.time}s`, [
         { label: 'Seek to keyframe', run: preview },
@@ -47,8 +47,8 @@ async function keyframeOptions(context: StudioContext, program: number, duration
     await item?.run();
 }
 
-async function authorKeyframe(context: StudioContext, program: number, duration: number, track: Track,
-    previous?: Keyframe, initialValue?: string): Promise<void> {
+async function authorKeyframe(context: StudioContext, program: number, duration: number, track: TimelineTrack,
+    previous?: TimelineKeyframe, initialValue?: string): Promise<void> {
     const start = previous?.time ?? (track.keyframes[0]?.time === 0 ? duration : 0);
     const time = await editTime('Keyframe time in seconds', duration, start);
     if (time === undefined) return;

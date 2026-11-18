@@ -110,6 +110,7 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
     <button type="button" id="menu-resources">Show Resources</button>
     <button type="button" id="menu-assets">Show Assets</button>
     <button type="button" id="menu-studio">Show Studio Tools</button>
+    <button type="button" id="menu-timeline">Show Animation Timeline</button>
     <button type="button" id="menu-focus-order" aria-pressed="false" disabled>Focus Order Overlay</button>
     <button type="button" class="compact-action" id="menu-refresh">Refresh preview</button>
 </div>`);
@@ -259,6 +260,26 @@ export function stagesHtml(webview: vscode.Webview, root: vscode.Uri): string {
 <p id="stages-status" role="status">Rendering stages…</p>
 <div id="prototype-actions" class="stage-toolbar" aria-label="Prototype controls" hidden></div>
 <main id="stage-cards" aria-label="Native preview stages"></main>`);
+}
+
+export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string {
+    return page(webview, root, 'timeline', 'FerroUI Timeline', `
+<main class="timeline" aria-label="Animation timeline">
+    <p id="timeline-status" role="status" hidden></p>
+    <section id="timeline-program" aria-label="Selected animation" hidden>
+        <div class="timeline-toolbar">
+            <label for="timeline-programs">Program</label>
+            <select id="timeline-programs"></select>
+            <button type="button" id="timeline-play" aria-label="Play animation" title="Play animation">${icon('play')}</button>
+            <output id="timeline-time" for="timeline-seek" aria-live="off"></output>
+        </div>
+        <input id="timeline-seek" type="range" min="0" value="0" step="any" aria-label="Animation playhead">
+        <div class="timeline-grid">
+            <div id="timeline-ruler" class="timeline-ruler" aria-hidden="true"></div>
+            <ol id="timeline-tracks" aria-label="Property tracks"></ol>
+        </div>
+    </section>
+</main>`);
 }
 
 function page(webview: vscode.Webview, root: vscode.Uri, entry: string, title: string, body: string): string {

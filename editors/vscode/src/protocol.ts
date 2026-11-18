@@ -79,7 +79,7 @@ export interface ResourceRow {
     properties: string[];
 }
 export type DetailsView = 'events' | 'resources';
-export type DesignerView = 'canvas' | 'outline' | 'properties' | 'toolbox' | DetailsView | 'assets' | 'studio';
+export type DesignerView = 'canvas' | 'outline' | 'properties' | 'toolbox' | DetailsView | 'assets' | 'studio' | 'timeline';
 export interface DetailsState {
     frame?: FrameTarget;
     target?: NodeTarget;
