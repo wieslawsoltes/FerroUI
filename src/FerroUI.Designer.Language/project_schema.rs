@@ -1,8 +1,7 @@
-use crate::{LanguageError, PropertyInfo, Result, Schema, TypeInfo, require};
+use crate::{PropertyInfo, Schema, TypeInfo};
 use ferroui_build_scan::model::{AssemblyModel, RegisteredKind, TypeModel};
+use ferroui_designer_project::MarkupCatalog;
 use std::collections::{BTreeMap, BTreeSet};
-use std::io::Read;
-use std::path::{Path, PathBuf};
 
 #[derive(Clone)]
 pub(crate) struct ProjectSchema {
@@ -11,63 +10,13 @@ pub(crate) struct ProjectSchema {
 }
 
 impl ProjectSchema {
-    pub(crate) fn load(
-        base: &Schema,
-        overrides: &[TypeInfo],
-        directories: &[PathBuf],
-    ) -> Result<Self> {
-        require(
-            directories.len() <= 1024,
-            "Too many Cargo build output directories",
-        )?;
-        let mut paths = BTreeSet::new();
-        for directory in directories {
-            if !directory.is_absolute() {
-                continue;
-            }
-            let Ok(directory) = directory.canonicalize() else {
-                continue;
-            };
-            let Ok(entries) = directory.read_dir() else {
-                continue;
-            };
-            for entry in entries.flatten() {
-                let path = entry.path();
-                if path
-                    .extension()
-                    .is_some_and(|extension| extension == "xamlmeta")
-                    && entry.file_type().is_ok_and(|kind| kind.is_file())
-                {
-                    paths.insert(path);
-                }
-            }
-        }
-        require(paths.len() <= 256, "Too many XAML metadata files")?;
-        let mut assemblies = Vec::new();
-        let mut remaining = 64 * 1024 * 1024;
-        for path in paths {
-            let mut source = String::new();
-            std::fs::File::open(&path)
-                .and_then(|file| file.take(remaining + 1).read_to_string(&mut source))
-                .map_err(|error| {
-                    LanguageError(format!("Cannot read {}: {error}", path.display()))
-                })?;
-            require(
-                source.len() as u64 <= remaining,
-                "Cargo XAML metadata exceeds 64 MiB",
-            )?;
-            remaining -= source.len() as u64;
-            assemblies.push(AssemblyModel::parse(&source).map_err(|error| {
-                LanguageError(format!("Cannot read {}: {error}", path.display()))
-            })?);
-        }
-        let types = catalog(&assemblies);
+    pub(crate) fn new(base: &Schema, overrides: &[TypeInfo], catalog: &MarkupCatalog) -> Self {
         let mut configured = Self {
-            types,
+            types: types_from_models(catalog.models().models()),
             effective: base.clone(),
         };
         configured.refresh(base, overrides);
-        Ok(configured)
+        configured
     }
 
     pub(crate) fn refresh(&mut self, base: &Schema, overrides: &[TypeInfo]) {
@@ -83,23 +32,18 @@ impl ProjectSchema {
     }
 }
 
-pub(crate) fn package_root(manifest: &Path) -> Result<PathBuf> {
-    require(
-        manifest.is_absolute()
-            && manifest
-                .file_name()
-                .is_some_and(|name| name == "Cargo.toml"),
-        "Expected an absolute Cargo manifest",
-    )?;
-    manifest
-        .canonicalize()
-        .map_err(|error| LanguageError(error.to_string()))?
-        .parent()
-        .map(Path::to_path_buf)
-        .ok_or_else(|| LanguageError("Missing package directory".into()))
+impl Schema {
+    /// Add types exported by the selected Cargo package and its dependencies.
+    pub fn register_project(&mut self, catalog: &MarkupCatalog) {
+        for info in types_from_models(catalog.models().models()) {
+            if self.type_info(&info.name, Some(&info.namespace)).is_none() {
+                self.register(info);
+            }
+        }
+    }
 }
 
-fn catalog(assemblies: &[AssemblyModel]) -> Vec<TypeInfo> {
+fn types_from_models(assemblies: &[AssemblyModel]) -> Vec<TypeInfo> {
     let enums: BTreeMap<_, _> = assemblies
         .iter()
         .flat_map(|assembly| &assembly.types)
@@ -130,6 +74,10 @@ fn catalog(assemblies: &[AssemblyModel]) -> Vec<TypeInfo> {
                         .collect();
                     if !item.namespace.is_empty() {
                         namespaces.insert(format!("using:{}", item.namespace));
+                        namespaces.insert(format!(
+                            "clr-namespace:{};assembly={}",
+                            item.namespace, assembly.name
+                        ));
                     }
                     namespaces
                         .into_iter()

@@ -306,9 +306,7 @@ impl LspServer {
                 Ok(Value::Null)
             }
             "ferroui/projectMetadata" => {
-                let manifest = std::path::Path::new(text(params, "manifest")?);
-                let directories: Vec<std::path::PathBuf> = decode(&params["directories"])?;
-                self.service.set_project_metadata(manifest, &directories)?;
+                self.service.set_build_metadata(&decode(params)?)?;
                 for uri in self.open_uris.values() {
                     self.publish(uri, notifications)?;
                 }

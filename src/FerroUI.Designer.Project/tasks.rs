@@ -1,10 +1,13 @@
-use crate::{require, ProjectDescriptor, ProjectError, Result};
+use crate::{BuildMetadata, ProjectDescriptor, ProjectError, Result, require};
 use serde::{Deserialize, Serialize};
-use std::collections::VecDeque;
+use std::collections::{BTreeSet, VecDeque};
 use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
 use std::sync::{Arc, Mutex};
+
+#[path = "tasks/cargo_output.rs"]
+mod cargo_output;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum TaskKind {
@@ -18,6 +21,8 @@ pub struct BuildTask {
     args: Vec<String>,
     cwd: PathBuf,
     pub label: String,
+    #[serde(skip)]
+    metadata: Option<BuildMetadata>,
 }
 impl BuildTask {
     pub fn cargo(project: &ProjectDescriptor, kind: TaskKind, release: bool) -> Result<Self> {
@@ -39,6 +44,20 @@ impl BuildTask {
                 .ok_or_else(|| ProjectError("Manifest path must be UTF-8".into()))?
                 .into(),
         ];
+        let metadata = if matches!(&kind, TaskKind::Run { .. }) {
+            None
+        } else {
+            args.extend([
+                "--package".into(),
+                project.id.clone(),
+                "--message-format=json-render-diagnostics".into(),
+            ]);
+            Some(BuildMetadata {
+                manifest: project.manifest_path.clone(),
+                directories: Vec::new(),
+                package: Some(project.name.clone()),
+            })
+        };
         if let TaskKind::Run { target } = kind {
             let binaries: Vec<_> = project
                 .targets
@@ -68,6 +87,7 @@ impl BuildTask {
             label: format!("{} {}", project.name, args[0]),
             args,
             cwd: project.root.clone(),
+            metadata,
         })
     }
     pub fn program(&self) -> &str {
@@ -110,13 +130,22 @@ impl BuildTask {
             ),
         ] {
             let output = output.clone();
-            std::thread::spawn(move || read_output(reader, stream, output));
+            let cargo = self.metadata.is_some() && stream == OutputStream::Stdout;
+            std::thread::spawn(move || {
+                if cargo {
+                    cargo_output::read(reader, &output);
+                    output.lock().unwrap_or_else(|e| e.into_inner()).readers -= 1;
+                } else {
+                    read_output(reader, stream, output);
+                }
+            });
         }
         Ok(TaskHandle {
             child,
             output,
             status: TaskStatus::Running,
             exit_code: None,
+            metadata: self.metadata.clone(),
         })
     }
 }
@@ -143,12 +172,14 @@ struct OutputBuffer {
     bytes: usize,
     dropped: usize,
     readers: usize,
+    directories: BTreeSet<PathBuf>,
 }
 pub struct TaskHandle {
     child: Child,
     output: Arc<Mutex<OutputBuffer>>,
     status: TaskStatus,
     exit_code: Option<Option<i32>>,
+    metadata: Option<BuildMetadata>,
 }
 impl TaskHandle {
     pub fn poll(&mut self) -> TaskStatus {
@@ -193,6 +224,18 @@ impl TaskHandle {
             output.dropped = 0;
         }
         chunks
+    }
+    /// Return the metadata from a successful check or build after Cargo's output has drained.
+    pub fn take_build_metadata(&mut self) -> Option<BuildMetadata> {
+        if self.poll() != (TaskStatus::Exited { code: Some(0) }) {
+            return None;
+        }
+        let mut metadata = self.metadata.take()?;
+        let mut output = self.output.lock().unwrap_or_else(|e| e.into_inner());
+        metadata.directories = std::mem::take(&mut output.directories)
+            .into_iter()
+            .collect();
+        Some(metadata)
     }
     pub fn cancel(&mut self) -> Result<()> {
         if self.poll() != TaskStatus::Running {
@@ -298,6 +341,7 @@ mod tests {
             ],
             cwd: std::env::temp_dir(),
             label: "test".into(),
+            metadata: None,
         };
         let mut handle = task.start().unwrap();
         let start = std::time::Instant::now();
@@ -306,12 +350,14 @@ mod tests {
             out.extend(handle.take_output());
             std::thread::sleep(std::time::Duration::from_millis(2));
         }
-        assert!(out
-            .iter()
-            .any(|s| s.stream == OutputStream::Stdout && s.text == "hello"));
-        assert!(out
-            .iter()
-            .any(|s| s.stream == OutputStream::Stderr && s.text == "error"));
+        assert!(
+            out.iter()
+                .any(|s| s.stream == OutputStream::Stdout && s.text == "hello")
+        );
+        assert!(
+            out.iter()
+                .any(|s| s.stream == OutputStream::Stderr && s.text == "error")
+        );
         assert_eq!(handle.poll(), TaskStatus::Running);
         handle.cancel().unwrap();
         assert_eq!(handle.poll(), TaskStatus::Cancelled);
@@ -326,6 +372,7 @@ mod tests {
             ],
             cwd: std::env::temp_dir(),
             label: "output".into(),
+            metadata: None,
         };
         let mut handle = task.start().unwrap();
         let start = std::time::Instant::now();
@@ -360,6 +407,7 @@ mod tests {
             args: vec!["-c".into(), "sleep 30 & exit 0".into()],
             cwd: std::env::temp_dir(),
             label: "descendant".into(),
+            metadata: None,
         };
         let mut handle = task.start().unwrap();
         let start = std::time::Instant::now();

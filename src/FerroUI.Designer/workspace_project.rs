@@ -7,6 +7,9 @@ use ferroui_designer_project::{
 };
 use std::collections::BTreeMap;
 
+#[path = "workspace_markup.rs"]
+mod markup;
+
 /// File tabs use physical identity across symlink/localhost URI aliases. Other
 /// storage-provider and resource schemes retain the host's exact URI semantics.
 pub(super) fn document_identity(uri: &str) -> Result<String, String> {
@@ -39,6 +42,7 @@ pub(super) struct ProjectUi {
         >,
     >,
     task: Option<TaskHandle>,
+    markup: markup::ProjectMarkup,
 }
 impl DesignerWorkspace {
     pub fn open_solution(self: &Rc<Self>, path: impl AsRef<std::path::Path>) -> Result<(), String> {
@@ -72,8 +76,12 @@ impl DesignerWorkspace {
             .service
             .index_solution(&solution)
             .map_err(|e| e.to_string())?;
-        self.project.borrow_mut().workspace = Some(ProjectWorkspace::new(solution));
-        self.project.borrow_mut().selected = 0;
+        {
+            let mut project = self.project.borrow_mut();
+            project.workspace = Some(ProjectWorkspace::new(solution));
+            project.selected = 0;
+            project.markup = Default::default();
+        }
         self.refresh_project_toolbox();
         self.rebuild_project_tree();
         self.refresh_components();
@@ -105,7 +113,10 @@ impl DesignerWorkspace {
             &project.root
         };
         match crate::project_designer_assets(&workspace.solution.root, document) {
-            Ok(assets) => toolbox.replace_project_assets(assets),
+            Ok(mut assets) => {
+                assets.extend_from_slice(state.markup.assets(&project.root));
+                toolbox.replace_project_assets(assets);
+            }
             Err(error) => {
                 toolbox.replace_project_assets(Vec::new());
                 self.status.set_text(Some(&error));
@@ -563,6 +574,7 @@ impl DesignerWorkspace {
                     self.source_tools.borrow_mut().service = language;
                     self.project.borrow_mut().workspace = Some(ProjectWorkspace::new(solution));
                     self.project.borrow_mut().selected = 0;
+                    self.project.borrow_mut().markup = Default::default();
                     self.refresh_project_toolbox();
                     self.rebuild_project_tree();
                     self.refresh_components();
@@ -572,6 +584,7 @@ impl DesignerWorkspace {
             }
         }
         let mut state = self.project.borrow_mut();
+        let mut build = None;
         if let Some(task) = state.task.as_mut() {
             let status = task.poll();
             let output = task.take_output();
@@ -594,6 +607,17 @@ impl DesignerWorkspace {
             self.root
                 .get_control::<TextBlock>("BuildStatus")
                 .set_text(Some(&format!("{status:?}")));
+            build = task.take_build_metadata();
+        }
+        let added = build.filter(|metadata| {
+            metadata.package_root().is_ok_and(|root| state.workspace.as_ref()
+                .is_some_and(|workspace| workspace.solution.owns_package_root(&root)))
+        }).map(|metadata| state.markup.load(metadata));
+        let refreshed = state.markup.poll();
+        drop(state);
+        if refreshed.iter().any(Result::is_ok) { self.refresh_project_toolbox(); }
+        for result in refreshed.into_iter().chain(added) {
+            if let Err(error) = result { self.status.set_text(Some(&error)); }
         }
     }
     fn rebuild_project_tree(self: &Rc<Self>) {

@@ -46,6 +46,60 @@ fn toolbox_snippets_overlay_the_active_package_and_ignore_invalid_fragments() {
     assert_eq!(files[1].title, "Sibling");
 }
 #[test]
+fn successful_cargo_task_returns_its_build_script_output() {
+    let fixture = Fixture::new();
+    fixture.write(
+        "Cargo.toml",
+        "[package]\nname='toolbox-fixture'\nversion='0.1.0'\nedition='2021'\n",
+    );
+    fixture.write("src/lib.rs", "");
+    let metadata =
+        ferroui_build_scan::model::AssemblyModel::new("ToolboxFixture", "toolbox_fixture");
+    fixture.write(
+        "build.rs",
+        &format!(
+            r##"
+fn main() {{
+    let out = std::path::PathBuf::from(std::env::var_os("OUT_DIR").unwrap());
+    std::fs::write(out.join("toolbox.xamlmeta"), r#"{}"#).unwrap();
+}}
+"##,
+            metadata.to_json()
+        ),
+    );
+    let solution = Solution::discover(&fixture.0).unwrap();
+    let task = BuildTask::cargo(&solution.projects[0], TaskKind::Check, false).unwrap();
+    let mut child = task.start().unwrap();
+    let limit = std::time::Instant::now() + std::time::Duration::from_secs(30);
+    while child.poll() == TaskStatus::Running && std::time::Instant::now() < limit {
+        std::thread::sleep(std::time::Duration::from_millis(10));
+    }
+    let output = child
+        .take_output()
+        .into_iter()
+        .map(|part| part.text)
+        .collect::<String>();
+    assert_eq!(
+        child.poll(),
+        TaskStatus::Exited { code: Some(0) },
+        "{output}"
+    );
+    let build = child.take_build_metadata().unwrap();
+    assert_eq!(build.package.as_deref(), Some("toolbox-fixture"));
+    assert_eq!(build.package_root().unwrap(), fixture.0);
+    assert!(
+        build
+            .catalog()
+            .unwrap()
+            .models()
+            .models()
+            .iter()
+            .any(|model| model.name == "ToolboxFixture")
+    );
+    assert!(child.take_build_metadata().is_none());
+    assert!(!output.contains("build-script-executed"));
+}
+#[test]
 fn paths_roundtrip_unicode_reserved_characters_and_relative_resources() {
     let fixture = Fixture::new();
     let path = fixture.0.join("Résumé #?% 🦀.xaml");

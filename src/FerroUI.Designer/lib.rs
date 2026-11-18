@@ -8,6 +8,7 @@ mod animation_keyframe_authoring;
 mod animation_runtime;
 mod animation_session;
 mod asset_toolbox;
+mod project_controls;
 mod chrome;
 mod canvas_guides;
 mod canvas_guide_overlay;
@@ -70,6 +71,7 @@ pub use asset_toolbox::{
     AssetIcon, AssetToolbox, AssetViewMode, DesignerAsset, default_designer_assets,
     project_designer_assets,
 };
+pub use project_controls::registered_designer_assets;
 pub use chrome::designer_chrome_style;
 pub use canvas_guides::{CanvasGuide, CanvasGuideAxis, CanvasGuideSettings};
 pub use canvas_guides_editor::CanvasGuidesEditor;

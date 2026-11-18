@@ -1,4 +1,5 @@
-use crate::project_schema::{ProjectSchema, package_root};
+use crate::project_schema::ProjectSchema;
+use ferroui_designer_project::BuildMetadata;
 use crate::{
     FormattingOptions, LanguageError, LineIndex, Range, Result, Schema, TextChange, TextEdit,
     TypeInfo, require,
@@ -237,14 +238,23 @@ impl LanguageService {
         manifest: &std::path::Path,
         directories: &[std::path::PathBuf],
     ) -> Result<()> {
-        let root = package_root(manifest)?;
+        self.set_build_metadata(&BuildMetadata {
+            manifest: manifest.into(),
+            directories: directories.to_vec(),
+            package: None,
+        })
+    }
+
+    pub fn set_build_metadata(&mut self, metadata: &BuildMetadata) -> Result<()> {
+        let root = metadata.package_root()?;
         require(
             self.workspaces
                 .values()
                 .any(|workspace| workspace.solution.owns_package_root(&root)),
             "Cargo metadata must belong to an indexed workspace",
         )?;
-        let schema = ProjectSchema::load(&self.schema, &self.overrides, directories)?;
+        let catalog = metadata.catalog()?;
+        let schema = ProjectSchema::new(&self.schema, &self.overrides, &catalog);
         self.package_schemas.insert(root, schema);
         Ok(())
     }
