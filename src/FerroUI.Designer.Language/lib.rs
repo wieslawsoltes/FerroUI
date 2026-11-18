@@ -5,6 +5,7 @@ mod editing;
 mod formatting;
 mod line_index;
 pub mod lsp;
+mod project_schema;
 mod references;
 mod schema;
 mod service;

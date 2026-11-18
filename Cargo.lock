@@ -1943,6 +1943,7 @@ dependencies = [
 name = "ferroui-designer-language"
 version = "0.5.1-preview.1"
 dependencies = [
+ "ferroui-build-scan",
  "ferroui-designer-core",
  "ferroui-designer-project",
  "serde",

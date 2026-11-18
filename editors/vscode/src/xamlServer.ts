@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { LanguageClient, TransportKind } from 'vscode-languageclient/node';
 import { errorMessage } from './protocol';
+import type { ProjectMetadata } from './reloadProcess';
 import { commandFor } from './tools';
 
 export const xamlLanguage = 'ferroui-xaml';
@@ -10,6 +11,7 @@ export class XamlServer implements vscode.Disposable {
     private transition = Promise.resolve();
     private disposed = false;
     private readonly watch = vscode.workspace.createFileSystemWatcher('**/*.xaml');
+    private readonly projects = new Map<string, ProjectMetadata>();
 
     constructor(private readonly context: vscode.ExtensionContext, private readonly channel: vscode.OutputChannel) {}
 
@@ -29,6 +31,7 @@ export class XamlServer implements vscode.Disposable {
             this.client = client;
             try {
                 await client.start();
+                for (const metadata of this.projects.values()) await this.publishMetadata(client, metadata);
             } catch (error) {
                 await this.stop();
                 throw error;
@@ -37,6 +40,21 @@ export class XamlServer implements vscode.Disposable {
             this.channel.appendLine(`XAML language server: ${errorMessage(error)}`);
         });
         return this.transition;
+    }
+
+    updateProject(metadata: ProjectMetadata): void {
+        this.projects.set(metadata.manifest, metadata);
+        this.transition = this.transition.then(async () => {
+            if (this.client && !this.disposed && this.projects.get(metadata.manifest) === metadata) {
+                await this.publishMetadata(this.client, metadata);
+            }
+        });
+    }
+
+    private async publishMetadata(client: LanguageClient, metadata: ProjectMetadata) {
+        if (client.initializeResult?.capabilities.experimental?.ferrouiProjectMetadata !== true) return;
+        try { await client.sendRequest('ferroui/projectMetadata', metadata); }
+        catch (error) { this.channel.appendLine(`Project XAML metadata: ${errorMessage(error)}`); }
     }
 
     private async stop(): Promise<void> {

@@ -59,24 +59,30 @@ export class ReloadProcess {
     }
 }
 
-export function buildCargo(target: CargoTarget, output: ProcessOutput): { process: ReloadProcess; artifact: Promise<string> } {
+export interface ProjectMetadata { manifest: string; directories: string[] }
+
+export function buildCargo(target: CargoTarget, output: ProcessOutput): { process: ReloadProcess; artifact: Promise<string>; metadata(): ProjectMetadata } {
     const args = ['build', '--manifest-path', target.manifest, '--package', target.packageName,
         '--bin', target.binary, '--message-format=json-render-diagnostics'];
     if (target.features.length) args.push('--features', target.features.join(','));
     const child = spawn(target.cargo, args, { ...options(target), cwd: target.cargoDirectory });
     const proc = new ReloadProcess(child);
     let artifact: string | undefined;
+    const directories = new Set<string>();
     lines(child.stdout, line => {
         try {
             const message = JSON.parse(line);
             if (message.reason === 'compiler-artifact' && message.package_id === target.packageId
                 && message.target?.name === target.binary && message.target.kind.includes('bin')
                 && typeof message.executable === 'string') artifact = message.executable;
+            if (message.reason === 'build-script-executed' && typeof message.out_dir === 'string' && path.isAbsolute(message.out_dir)) {
+                directories.add(message.out_dir);
+            }
             if (message.reason === 'compiler-message' && message.message?.rendered) output.append(message.message.rendered);
         } catch { output.appendLine(line); }
     });
     lines(child.stderr, line => output.appendLine(line));
-    return { process: proc, artifact: proc.closed.then(code => {
+    return { process: proc, metadata: () => ({ manifest: target.manifest, directories: [...directories] }), artifact: proc.closed.then(code => {
         if (code !== 0) throw new Error(`Cargo build failed${code === null ? '' : ` with exit code ${code}`}.`);
         if (!artifact) throw new Error('Cargo did not report an executable for the selected binary.');
         return artifact;

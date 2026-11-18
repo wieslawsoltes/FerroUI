@@ -4,10 +4,10 @@ use crate::{
     FormattingOptions, LanguageError, LanguageService, Location, Position, Result, TextChange,
     WorkspaceEdit,
 };
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use std::collections::{BTreeMap, BTreeSet};
 use std::io::{self, BufRead, Read, Write};
-use std::sync::{mpsc, Arc, Mutex};
+use std::sync::{Arc, Mutex, mpsc};
 
 pub struct LspServer {
     pub service: LanguageService,
@@ -217,13 +217,16 @@ impl LspServer {
                 Ok(json!(self.service.format(uri(params)?, options)?))
             }
             "textDocument/rangeFormatting" => Ok(json!(self.service.format_range(
-                uri(params)?, decode(&params["range"])?, decode(&params["options"])?,
+                uri(params)?,
+                decode(&params["range"])?,
+                decode(&params["options"])?,
             )?)),
             "textDocument/linkedEditingRange" => {
                 let (uri, offset) = self.position(params)?;
-                Ok(self.service.linked_tags(uri, offset)?.map_or(Value::Null, |ranges| {
-                    json!({"ranges": ranges, "wordPattern": "[^\\s<>/='\"]+"})
-                }))
+                Ok(self.service.linked_tags(uri, offset)?.map_or(
+                    Value::Null,
+                    |ranges| json!({"ranges": ranges, "wordPattern": "[^\\s<>/='\"]+"}),
+                ))
             }
             "textDocument/codeAction" => {
                 if params["context"]["only"].as_array().is_some_and(|kinds| {
@@ -231,7 +234,9 @@ impl LspServer {
                 }) {
                     return Ok(json!([]));
                 }
-                let fixes = self.service.quick_fixes(uri(params)?, decode(&params["range"])?)?;
+                let fixes = self
+                    .service
+                    .quick_fixes(uri(params)?, decode(&params["range"])?)?;
                 Ok(json!(fixes.into_iter().map(|fix| json!({
                     "title": fix.title, "kind": "quickfix",
                     "edit": self.workspace_edit(WorkspaceEdit { document_changes: vec![fix.edits] })
@@ -275,11 +280,24 @@ impl LspServer {
                 Ok(json!(symbols))
             }
             "workspace/didChangeConfiguration" => {
-                if let Some(types) = params["settings"]["ferroui"]["types"].as_array() {
-                    let registrations = types.iter().map(decode).collect::<Result<Vec<_>>>()?;
-                    for registration in registrations {
-                        self.service.schema_mut().register(registration);
-                    }
+                let registrations = params["settings"]["ferroui"]["types"]
+                    .as_array()
+                    .into_iter()
+                    .flatten()
+                    .map(decode)
+                    .collect::<Result<Vec<_>>>()?;
+                self.service.set_type_overrides(registrations);
+                for uri in self.open_uris.values() {
+                    self.publish(uri, notifications)?;
+                }
+                Ok(Value::Null)
+            }
+            "ferroui/projectMetadata" => {
+                let manifest = std::path::Path::new(text(params, "manifest")?);
+                let directories: Vec<std::path::PathBuf> = decode(&params["directories"])?;
+                self.service.set_project_metadata(manifest, &directories)?;
+                for uri in self.open_uris.values() {
+                    self.publish(uri, notifications)?;
                 }
                 Ok(Value::Null)
             }
@@ -302,11 +320,15 @@ impl LspServer {
                 Ok(Value::Null)
             }
             "workspace/didChangeWatchedFiles" => {
-                let changes = params["changes"].as_array()
+                let changes = params["changes"]
+                    .as_array()
                     .ok_or_else(|| LanguageError("changes array required".into()))?;
                 let mut refreshed = false;
                 for change in changes {
-                    if change["uri"].as_str().is_some_and(|uri| uri.starts_with("file:")) {
+                    if change["uri"]
+                        .as_str()
+                        .is_some_and(|uri| uri.starts_with("file:"))
+                    {
                         refreshed |= self.service.refresh_project_file(text(change, "uri")?)?;
                     }
                 }
@@ -391,6 +413,7 @@ impl LspServer {
                 "codeActionProvider": { "codeActionKinds": ["quickfix"] },
                 "documentSymbolProvider": true, "foldingRangeProvider": true, "workspaceSymbolProvider": true,
                 "signatureHelpProvider": { "triggerCharacters": ["{", ",", "="] },
+                "experimental": { "ferrouiProjectMetadata": true },
                 "semanticTokensProvider": {
                     "legend": { "tokenTypes": ["type", "property", "string", "comment", "variable", "keyword", "number", "namespace"], "tokenModifiers": [] },
                     "full": true
@@ -565,24 +588,26 @@ pub fn serve<R: BufRead + Send + 'static, W: Write>(
     let mut server = LspServer::default();
     let cancelled = server.cancelled.clone();
     let (send, receive) = mpsc::sync_channel(64);
-    std::thread::spawn(move || loop {
-        match read_frame(&mut reader) {
-            Ok(Some(message)) => {
-                if message["method"] == "$/cancelRequest" {
-                    cancelled
-                        .lock()
-                        .unwrap()
-                        .insert(message["params"]["id"].to_string());
-                    continue;
+    std::thread::spawn(move || {
+        loop {
+            match read_frame(&mut reader) {
+                Ok(Some(message)) => {
+                    if message["method"] == "$/cancelRequest" {
+                        cancelled
+                            .lock()
+                            .unwrap()
+                            .insert(message["params"]["id"].to_string());
+                        continue;
+                    }
+                    if send.send(Ok(message)).is_err() {
+                        break;
+                    }
                 }
-                if send.send(Ok(message)).is_err() {
+                Ok(None) => break,
+                Err(error) => {
+                    let _ = send.send(Err(error));
                     break;
                 }
-            }
-            Ok(None) => break,
-            Err(error) => {
-                let _ = send.send(Err(error));
-                break;
             }
         }
     });

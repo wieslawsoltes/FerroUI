@@ -1,6 +1,7 @@
+use crate::project_schema::{ProjectSchema, package_root};
 use crate::{
-    require, FormattingOptions, LanguageError, LineIndex, Range, Result, Schema, TextChange,
-    TextEdit,
+    FormattingOptions, LanguageError, LineIndex, Range, Result, Schema, TextChange, TextEdit,
+    TypeInfo, require,
 };
 use ferroui_designer_core::{Document, MarkupValue, Node, NodeKind, SourceSpan};
 use serde::{Deserialize, Serialize};
@@ -115,6 +116,9 @@ impl State {
 #[derive(Clone)]
 pub struct LanguageService {
     schema: Schema,
+    overrides: Vec<TypeInfo>,
+    configured_schema: Option<Schema>,
+    package_schemas: BTreeMap<std::path::PathBuf, ProjectSchema>,
     documents: BTreeMap<String, State>,
     workspaces: BTreeMap<std::path::PathBuf, ferroui_designer_project::ProjectWorkspace>,
     declarations: BTreeMap<String, Vec<(String, Occurrence)>>,
@@ -185,6 +189,9 @@ impl LanguageService {
     pub fn new(schema: Schema) -> Self {
         Self {
             schema,
+            overrides: Vec::new(),
+            configured_schema: None,
+            package_schemas: BTreeMap::new(),
             documents: BTreeMap::new(),
             workspaces: BTreeMap::new(),
             declarations: BTreeMap::new(),
@@ -196,8 +203,51 @@ impl LanguageService {
     pub fn schema_mut(&mut self) -> &mut Schema {
         &mut self.schema
     }
-    pub fn schema_for(&self, _uri: &str) -> &Schema {
-        &self.schema
+    pub fn schema_for(&self, uri: &str) -> &Schema {
+        if !self.package_schemas.is_empty() {
+            if let Ok(path) = self
+                .document_uri(uri)
+                .and_then(|uri| ferroui_designer_project::file_path(&uri).map_err(Into::into))
+            {
+                if let Some(schema) = path
+                    .ancestors()
+                    .find_map(|root| self.package_schemas.get(root))
+                {
+                    return &schema.effective;
+                }
+            }
+        }
+        self.configured_schema.as_ref().unwrap_or(&self.schema)
+    }
+    pub fn set_type_overrides(&mut self, overrides: Vec<TypeInfo>) {
+        self.overrides = overrides;
+        self.configured_schema = (!self.overrides.is_empty()).then(|| {
+            let mut schema = self.schema.clone();
+            for info in &self.overrides {
+                schema.register(info.clone());
+            }
+            schema
+        });
+        for project in self.package_schemas.values_mut() {
+            project.refresh(&self.schema, &self.overrides);
+        }
+    }
+    pub fn set_project_metadata(
+        &mut self,
+        manifest: &std::path::Path,
+        directories: &[std::path::PathBuf],
+    ) -> Result<()> {
+        let root = package_root(manifest)?;
+        require(
+            self.workspaces
+                .values()
+                .flat_map(|workspace| &workspace.solution.projects)
+                .any(|project| project.root == root),
+            "Cargo metadata must belong to an indexed package",
+        )?;
+        let schema = ProjectSchema::load(&self.schema, &self.overrides, directories)?;
+        self.package_schemas.insert(root, schema);
+        Ok(())
     }
     pub fn document(&self, uri: &str) -> Option<&Document> {
         self.state(uri).ok().map(|s| &s.document)
@@ -363,16 +413,28 @@ impl LanguageService {
 
         let uri = self.document_uri(uri)?.into_owned();
         let path = ferroui_designer_project::file_path(&uri)?;
-        if !path.extension().is_some_and(|extension| extension.eq_ignore_ascii_case("xaml")) {
+        if !path
+            .extension()
+            .is_some_and(|extension| extension.eq_ignore_ascii_case("xaml"))
+        {
             return Ok(false);
         }
         let contains = |project: &ferroui_designer_project::ProjectDescriptor| {
             path.strip_prefix(&project.root).is_ok_and(|relative| {
-                !relative.iter().any(|part| matches!(part.to_str(),
-                    Some(".git" | "target" | "node_modules" | "bin" | "obj")))
+                !relative.iter().any(|part| {
+                    matches!(
+                        part.to_str(),
+                        Some(".git" | "target" | "node_modules" | "bin" | "obj")
+                    )
+                })
             })
         };
-        if !self.workspaces.values().flat_map(|workspace| &workspace.solution.projects).any(contains) {
+        if !self
+            .workspaces
+            .values()
+            .flat_map(|workspace| &workspace.solution.projects)
+            .any(contains)
+        {
             return Ok(false);
         }
 
@@ -383,22 +445,34 @@ impl LanguageService {
                 use std::io::Read;
                 const MAX: u64 = 16 * 1024 * 1024;
                 let mut source = String::new();
-                std::fs::File::open(&path).and_then(|file| file.take(MAX + 1).read_to_string(&mut source))
+                std::fs::File::open(&path)
+                    .and_then(|file| file.take(MAX + 1).read_to_string(&mut source))
                     .map_err(|error| LanguageError(error.to_string()))?;
                 require(source.len() as u64 <= MAX, "Indexed file exceeds 16 MiB")?;
                 self.open(&uri, source, -1)?;
-                self.documents.get_mut(&uri).expect("snapshot inserted").opened = false;
+                self.documents
+                    .get_mut(&uri)
+                    .expect("snapshot inserted")
+                    .opened = false;
             } else {
                 self.set_state(uri.clone(), None);
             }
         }
-        for project in self.workspaces.values_mut().flat_map(|workspace| &mut workspace.solution.projects) {
+        for project in self
+            .workspaces
+            .values_mut()
+            .flat_map(|workspace| &mut workspace.solution.projects)
+        {
             if !contains(project) {
                 continue;
             }
             project.documents.retain(|entry| entry.path != path);
             if present {
-                project.documents.push(DocumentEntry { uri: uri.clone(), path: path.clone(), kind: DocumentKind::Xaml });
+                project.documents.push(DocumentEntry {
+                    uri: uri.clone(),
+                    path: path.clone(),
+                    kind: DocumentKind::Xaml,
+                });
             }
         }
         Ok(true)
@@ -412,6 +486,12 @@ impl LanguageService {
         let Some(removed) = self.workspaces.remove(&root) else {
             return 0;
         };
+        self.package_schemas.retain(|root, _| {
+            self.workspaces
+                .values()
+                .flat_map(|workspace| &workspace.solution.projects)
+                .any(|project| &project.root == root)
+        });
         let retained: BTreeSet<_> = self
             .workspaces
             .values()
@@ -437,6 +517,7 @@ impl LanguageService {
         count
     }
     pub fn diagnostics(&self, uri: &str) -> Result<Vec<Diagnostic>> {
+        let schema = self.schema_for(uri);
         let state = self.state(uri)?;
         let mut out = Vec::new();
         for diagnostic in state.document.diagnostics() {
@@ -454,7 +535,7 @@ impl LanguageService {
         for node in state.document.ast().elements() {
             if node.kind == NodeKind::PropertyElement {
                 if node.namespace_uri.as_deref() == Some(crate::design_support::DESIGN_NAMESPACE) {
-                    if crate::design_support::property_element(&self.schema, &state.document, node)
+                    if crate::design_support::property_element(schema, &state.document, node)
                         .is_none()
                     {
                         out.push(diagnostic_at(
@@ -468,12 +549,10 @@ impl LanguageService {
                     continue;
                 }
                 if let Some((owner, property)) = node.local_name().split_once('.') {
-                    if self
-                        .schema
+                    if schema
                         .type_info(owner, node.namespace_uri.as_deref())
                         .is_some()
-                        && !self
-                            .schema
+                        && !schema
                             .properties(owner, node.namespace_uri.as_deref())
                             .contains_key(property)
                     {
@@ -488,8 +567,7 @@ impl LanguageService {
                 }
                 continue;
             }
-            let known = self
-                .schema
+            let known = schema
                 .type_info(&node.name, node.namespace_uri.as_deref())
                 .is_some();
             if !known
@@ -539,9 +617,7 @@ impl LanguageService {
                         )?);
                     }
                 }
-                if let Some(property) =
-                    self.schema
-                        .attribute_property(&state.document, node, attribute)
+                if let Some(property) = schema.attribute_property(&state.document, node, attribute)
                 {
                     if !expression
                         && !property.values.is_empty()
@@ -636,6 +712,7 @@ impl LanguageService {
         Ok(out)
     }
     pub fn completions(&self, uri: &str, offset: usize) -> Result<Vec<Completion>> {
+        let schema = self.schema_for(uri);
         let uri = self.document_uri(uri)?;
         let uri = uri.as_ref();
         let state = self.state(uri)?;
@@ -687,7 +764,7 @@ impl LanguageService {
                 {
                     let extension = &value[brace + 1..];
                     if !extension.contains(|c: char| c.is_whitespace() || c == ',') {
-                        for item in self.schema.extensions.values() {
+                        for item in schema.extensions.values() {
                             proposals.insert(
                                 item.name.clone(),
                                 (
@@ -724,8 +801,7 @@ impl LanguageService {
                             .unwrap_or("");
                         let extension_namespace =
                             completion_namespace(state, name, open.unwrap(), offset);
-                        if let Some(info) = self
-                            .schema
+                        if let Some(info) = schema
                             .extension(name, extension_namespace.as_deref())
                             .or_else(|| {
                                 crate::design_support::extension(
@@ -784,7 +860,7 @@ impl LanguageService {
                                             .map(|attribute| &source[attribute.value_span.range()])
                                             .unwrap_or(value);
                                         for property in crate::binding::members(
-                                            &self.schema,
+                                            schema,
                                             &state.document,
                                             node,
                                             expression,
@@ -826,7 +902,7 @@ impl LanguageService {
                             }
                         }
                     }
-                } else if let Some(info) = self.schema.property_in_context(
+                } else if let Some(info) = schema.property_in_context(
                     tag_name,
                     namespace.as_deref(),
                     property,
@@ -862,11 +938,7 @@ impl LanguageService {
                     }
                 }
             } else if tag.contains(char::is_whitespace) && !tag.ends_with('>') {
-                for property in self
-                    .schema
-                    .properties(tag_name, namespace.as_deref())
-                    .values()
-                {
+                for property in schema.properties(tag_name, namespace.as_deref()).values() {
                     if !property.read_only {
                         proposals.insert(
                             property.name.clone(),
@@ -879,7 +951,7 @@ impl LanguageService {
                         );
                     }
                 }
-                for info in self.schema.types.values() {
+                for info in schema.types.values() {
                     for property in info.properties.values().filter(|p| p.attached) {
                         let name = format!("{}.{}", info.name, property.name);
                         proposals.insert(
@@ -909,7 +981,7 @@ impl LanguageService {
                         completion_namespace(state, prefix, open.unwrap(), offset);
                     if member_namespace.as_deref() == Some(crate::design_support::DESIGN_NAMESPACE)
                     {
-                        let mut properties = self.schema.properties(tag_name, namespace.as_deref());
+                        let mut properties = schema.properties(tag_name, namespace.as_deref());
                         for (alias, native) in
                             [("DesignWidth", "Width"), ("DesignHeight", "Height")]
                         {
@@ -920,7 +992,7 @@ impl LanguageService {
                         }
                         for member in ["PreviewWith", "DesignStyle"] {
                             if let Some(property) = crate::design_support::property(
-                                &self.schema,
+                                schema,
                                 tag_name,
                                 namespace.as_deref(),
                                 member,
@@ -928,8 +1000,7 @@ impl LanguageService {
                                 properties.insert(member.into(), property);
                             }
                         }
-                        for info in self
-                            .schema
+                        for info in schema
                             .types
                             .values()
                             .filter(|info| info.namespace == crate::schema::FRAMEWORK_NAMESPACE)
@@ -1005,8 +1076,7 @@ impl LanguageService {
                     } else {
                         namespace.clone()
                     };
-                    for property in self
-                        .schema
+                    for property in schema
                         .properties(owner, owner_namespace.as_deref())
                         .values()
                         .filter(|property| !property.read_only && !property.event)
@@ -1023,10 +1093,10 @@ impl LanguageService {
                         );
                     }
                 }
-                for info in self.schema.types.values().filter(|t| {
+                for info in schema.types.values().filter(|t| {
                     t.constructible
                         && namespace.as_deref().is_none_or(|ns| {
-                            self.schema
+                            schema
                                 .type_info(&t.name, Some(ns))
                                 .is_some_and(|resolved| resolved.namespace == t.namespace)
                         })
@@ -1047,7 +1117,7 @@ impl LanguageService {
                 }
             }
         } else {
-            for info in self.schema.types.values().filter(|t| t.constructible) {
+            for info in schema.types.values().filter(|t| t.constructible) {
                 proposals.insert(
                     info.name.clone(),
                     (
@@ -1079,12 +1149,13 @@ impl LanguageService {
         Ok(result)
     }
     pub fn hover(&self, uri: &str, offset: usize) -> Result<Option<Hover>> {
+        let schema = self.schema_for(uri);
         let state = self.state(uri)?;
         state.index.position(offset)?;
         if !state.document.is_valid() {
             return Ok(None);
         }
-        if let Some((property, span)) = crate::binding::at(&self.schema, &state.document, offset) {
+        if let Some((property, span)) = crate::binding::at(schema, &state.document, offset) {
             return Ok(Some(Hover {
                 contents: format!(
                     "{}: {}\n\n{}",
@@ -1101,9 +1172,7 @@ impl LanguageService {
         {
             for attribute in &node.attributes {
                 if attribute.span.contains(offset) {
-                    if let Some(info) =
-                        self.schema
-                            .attribute_property(&state.document, node, attribute)
+                    if let Some(info) = schema.attribute_property(&state.document, node, attribute)
                     {
                         return Ok(Some(Hover {
                             contents: format!(
@@ -1115,10 +1184,7 @@ impl LanguageService {
                     }
                 }
             }
-            if let Some(info) = self
-                .schema
-                .type_info(&node.name, node.namespace_uri.as_deref())
-            {
+            if let Some(info) = schema.type_info(&node.name, node.namespace_uri.as_deref()) {
                 return Ok(Some(Hover {
                     contents: format!("{}\n\n{}", info.name, info.documentation),
                     range: state.index.range(node.name_span)?,
@@ -1128,6 +1194,7 @@ impl LanguageService {
         Ok(None)
     }
     pub fn signature_help(&self, uri: &str, offset: usize) -> Result<Option<SignatureHelp>> {
+        let schema = self.schema_for(uri);
         let state = self.state(uri)?;
         state.index.position(offset)?;
         let Some(prefix) = attribute_prefix(state, offset) else {
@@ -1139,8 +1206,7 @@ impl LanguageService {
         let name = active_extension.name;
         let open = state.index.source()[..offset].rfind('<').unwrap_or(0);
         let namespace = completion_namespace(state, &name, open, offset);
-        let Some(info) = self
-            .schema
+        let Some(info) = schema
             .extension(&name, namespace.as_deref())
             .or_else(|| crate::design_support::extension(&name, namespace.as_deref()))
         else {
@@ -1166,6 +1232,7 @@ impl LanguageService {
         }))
     }
     pub fn definitions(&self, uri: &str, offset: usize) -> Result<Vec<Location>> {
+        let schema = self.schema_for(uri);
         let state = self.state(uri)?;
         state.index.position(offset)?;
         if let Some(occurrence) = state
@@ -1181,7 +1248,7 @@ impl LanguageService {
                 .collect();
         }
         if state.document.is_valid() {
-            if let Some((property, _)) = crate::binding::at(&self.schema, &state.document, offset) {
+            if let Some((property, _)) = crate::binding::at(schema, &state.document, offset) {
                 return Ok(property.definition.into_iter().collect());
             }
             if let Some(node) = state
@@ -1191,8 +1258,7 @@ impl LanguageService {
                 .and_then(|id| state.document.ast().node(id))
             {
                 if node.name_span.contains(offset) {
-                    return Ok(self
-                        .schema
+                    return Ok(schema
                         .type_info(&node.name, node.namespace_uri.as_deref())
                         .and_then(|t| t.definition.clone())
                         .into_iter()
@@ -1200,8 +1266,7 @@ impl LanguageService {
                 }
                 for attribute in &node.attributes {
                     if attribute.name_span.contains(offset) {
-                        return Ok(self
-                            .schema
+                        return Ok(schema
                             .attribute_property(&state.document, node, attribute)
                             .and_then(|property| property.definition)
                             .into_iter()
@@ -1366,7 +1431,12 @@ impl LanguageService {
     pub fn format(&self, uri: &str, options: FormattingOptions) -> Result<Vec<TextEdit>> {
         crate::formatting::format(&self.state(uri)?.document, options, None)
     }
-    pub fn format_range(&self, uri: &str, range: Range, options: FormattingOptions) -> Result<Vec<TextEdit>> {
+    pub fn format_range(
+        &self,
+        uri: &str,
+        range: Range,
+        options: FormattingOptions,
+    ) -> Result<Vec<TextEdit>> {
         let state = self.state(uri)?;
         crate::formatting::format(&state.document, options, Some(state.index.span(range)?))
     }

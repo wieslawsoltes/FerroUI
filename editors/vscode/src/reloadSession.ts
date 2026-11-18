@@ -4,7 +4,7 @@ import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { CargoTarget } from './cargoTarget';
 import { isInside } from './workspacePaths';
-import { buildCargo, launchArtifact, ReloadProcess, revision, type RuntimeEvent } from './reloadProcess';
+import { buildCargo, launchArtifact, ReloadProcess, revision, type ProjectMetadata, type RuntimeEvent } from './reloadProcess';
 import type { ProcessOutput } from './reloadLog';
 import type { RuntimeMcpEndpoint } from './runtimeMcp';
 
@@ -33,7 +33,8 @@ export class ReloadSession implements vscode.Disposable {
 
     constructor(readonly target: CargoTarget, private readonly output: ProcessOutput,
         private readonly status: (message: string, problem?: boolean) => void,
-        private readonly mcpChanged: (endpoint?: RuntimeMcpEndpoint) => void) {
+        private readonly mcpChanged: (endpoint?: RuntimeMcpEndpoint) => void,
+        private readonly built: (metadata: ProjectMetadata) => void) {
         this.root = fileKey(target.folder.uri.fsPath);
         this.targetDirectory = fileKey(target.targetDirectory);
         const watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(target.folder, watchPattern));
@@ -148,6 +149,7 @@ export class ReloadSession implements vscode.Disposable {
             const artifact = await build.artifact;
             this.compiler = undefined;
             if (this.superseded(serial)) return;
+            this.built(build.metadata());
             const candidateEvents: RuntimeEvent[] = [];
             let endpoint: RuntimeMcpEndpoint | undefined;
             let live = false;
