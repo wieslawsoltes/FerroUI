@@ -23,6 +23,7 @@ mod frame_sample;
 pub mod gallery;
 mod ink_samples;
 mod input_samples;
+mod layout_samples;
 mod materials_samples;
 mod media_samples;
 pub mod playback_samples;
@@ -87,3 +88,6 @@ mod x_bind_tests;
 
 #[cfg(test)]
 mod button_samples_tests;
+
+#[cfg(test)]
+mod layout_samples_tests;

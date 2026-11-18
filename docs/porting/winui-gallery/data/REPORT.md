@@ -54,8 +54,8 @@ A verified enum does not verify its consuming controls, installed fonts, inherit
 | Page state | Count |
 |---|---:|
 | pending | 35 |
-| partial | 70 |
-| ported | 21 |
+| partial | 65 |
+| ported | 26 |
 | verified | 0 |
 
 Partial pages exercise reviewed native subsets; a ported page has a native adaptation, or a recorded reason why it cannot have one, for every catalog example (`samples/WinUIGallery/port-status.json`). Neither state claims rendering parity.
@@ -78,12 +78,12 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | AutoSuggestBox | Text | partial | 2 |
 | BadgeNotificationManager | Shell | pending | 2 |
 | Binding | Fundamentals | partial | 7 |
-| Border | Layout | partial | 1 |
+| Border | Layout | ported | 1 |
 | BreadcrumbBar | Navigation | pending | 2 |
 | Button | Basic input | ported | 4 |
 | CalendarDatePicker | Date & time | partial | 1 |
 | CalendarView | Date & time | partial | 1 |
-| Canvas | Layout | partial | 1 |
+| Canvas | Layout | ported | 1 |
 | CaptureElementPreview | Media | ported | 1 |
 | Chart | Media | partial | 7 |
 | CheckBox | Basic input | ported | 3 |
@@ -106,7 +106,7 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | FlipView | Collections | partial | 2 |
 | Flyout | Dialogs & flyouts | partial | 1 |
 | Geometry | Design | partial | 1 |
-| Grid | Layout | partial | 1 |
+| Grid | Layout | ported | 1 |
 | GridView | Collections | pending | 3 |
 | HyperlinkButton | Basic input | ported | 2 |
 | IconElement | Styles | partial | 6 |
@@ -142,7 +142,7 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | RadialGradientBrush | Styles | partial | 1 |
 | RadioButton | Basic input | ported | 2 |
 | RatingControl | Basic input | partial | 2 |
-| RelativePanel | Layout | partial | 1 |
+| RelativePanel | Layout | ported | 1 |
 | RepeatButton | Basic input | ported | 1 |
 | RichEditBox | Text | partial | 5 |
 | RichTextBlock | Text | ported | 4 |
@@ -157,7 +157,7 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | Spacing | Design | partial | 0 |
 | SplitButton | Basic input | ported | 2 |
 | SplitView | Layout | partial | 1 |
-| StackPanel | Layout | partial | 1 |
+| StackPanel | Layout | ported | 1 |
 | StandardUICommand | Menus & toolbars | pending | 1 |
 | StoragePickers | System | pending | 5 |
 | SwipeControl | Menus & toolbars | pending | 5 |

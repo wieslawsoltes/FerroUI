@@ -1,11 +1,11 @@
 //! `{x:Bind}` in the gallery on the compiled x:Bind core (#525, step X7, docs/porting/x-bind.md).
 //!
-//! The native pages whose source binds with x:Bind keep it (`Binding`, `Button`, `ComboBox`,
-//! `HyperlinkButton`, `InfoBar`, `Popup`, `ProgressRing`, `RatingControl`, `RepeatButton`,
-//! `RichTextBlock`, `Slider`, `Spacing`, `SplitView`, `TitleBar`, `ToggleButton`, `ToggleSwitch` and
-//! the window of `TitleBarWindow.xaml`): the run-time loader compiles the paths of the named
-//! elements, `examples::create` initializes the bindings once the page is wired, and the attach of
-//! a page initializes them again after `StopTracking`.
+//! The native pages whose source binds with x:Bind keep it (`Binding`, `Button`, `Canvas`,
+//! `ComboBox`, `Grid`, `HyperlinkButton`, `InfoBar`, `Popup`, `ProgressRing`, `RatingControl`,
+//! `RepeatButton`, `RichTextBlock`, `Slider`, `Spacing`, `SplitView`, `StackPanel`, `TitleBar`,
+//! `ToggleButton`, `ToggleSwitch` and the window of `TitleBarWindow.xaml`): the run-time loader
+//! compiles the paths of the named elements, `examples::create` initializes the bindings once the
+//! page is wired, and the attach of a page initializes them again after `StopTracking`.
 //! The WinUI preview of the catalog runs WinUI's own x:Bind through the importer onto the same
 //! core, with no adapter.
 
@@ -21,7 +21,9 @@ use ferroui_markup_xaml::markup_extensions::XBindings;
 const X_BIND_PAGES: &[&str] = &[
     "Binding",
     "Button",
+    "Canvas",
     "ComboBox",
+    "Grid",
     "HyperlinkButton",
     "InfoBar",
     "Popup",
@@ -32,6 +34,7 @@ const X_BIND_PAGES: &[&str] = &[
     "Slider",
     "Spacing",
     "SplitView",
+    "StackPanel",
     "TitleBar",
     "ToggleButton",
     "ToggleSwitch",
