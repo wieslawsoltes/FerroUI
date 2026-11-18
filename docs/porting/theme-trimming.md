@@ -1392,11 +1392,47 @@ function (`_deferred_<n>`, `_part_<n>`, `_unit_<n>`, `_untyped`).
 - `tests/FerroUI.Markup.Xaml.UnitTests/emitter/build_diagnostics.rs`: the error and the
   disambiguation reported by a build.
 
-## 16. Edges of the unit graph across themes, crates and types of one name (#848)
+## 19. Why each unit is kept (#852, first step)
+
+Issue #852 asks whether a graph of entries could split the high-fanout dictionaries of a theme
+into clusters that link independently: `Resources/Generic.xaml` of WinUI has 330 keys, and
+`Accents/FluentControlResources.xaml` of Fluent 626 in one unit. Its rule is to count first, and to
+stop if the count does not carry the idea. This step provides the count and the reasons. It changes
+no kept unit.
+
+`$OUT_DIR/xaml/theme_parts_why.txt`, written next to `theme_parts.txt`, has a block for each theme
+the application trims:
+
+- **A line of totals:** the units kept, and of the keys the kept units define, how many are live.
+  A key is live when it is a root or a kept unit references it. A unit with few live keys is the
+  candidate for entry-level selection that the issue describes.
+- **A line for each kept unit:** its name, its live and total keys, whether its reason is
+  `conservative` or `exact`, and the first reason the closure found. A reason is one of these:
+  - the ambient unit;
+  - named by the manifest or the build script;
+  - the theme of a live type, with what made the type live (a root of the documents or the sources,
+    a type a kept unit constructs, or a base class or created class of another);
+  - a live key, with where it came from (a root, or the unit that references it).
+
+  A reason is conservative when its root is a token of a document, a name of the sources or a
+  reference of a dependency: something that may only spell the key or the type. Stated roots,
+  constructions and references of kept units are exact.
+
+`theme_roots::explain_kept_units` (new) runs the closure of `kept_units` and records the first reason
+it meets for each unit. Its units are those of `kept_units` over the union of its sources, and a test
+checks this. `theme_roots::why_kept_listing` (new) writes the block.
+
+Not done in this step:
+
+- the count for hello world and a larger sample, and the bytes behind the counts. The listing gives
+  the keys; the bytes need a link map of a build of a sample with the Skia backend.
+- clusters inside one dictionary. Whether to build them waits for that count.
+
+## 20. Edges of the unit graph across themes, crates and types of one name (#848)
 
 The review found three places where the unit graph lost an edge.
 
-### 16.1 Themes used together
+### 20.1 Themes used together
 
 `kept_units` closed over one theme at a time. Suppose a kept unit of theme A references a key that
 only theme B defines, or constructs a type whose control theme only B supplies. Then B kept only
@@ -1413,11 +1449,16 @@ its ambient unit.
 The build calls it for the themes it writes tables for. An application with one theme keeps what it
 kept before.
 
+The reasons of `theme_parts_why.txt` (section 19) follow the same closure: for each theme, what
+the kept units of the other themes reference and construct is one more source of roots, named
+`other themes used together`, which is exact. With one theme that source is empty, and the
+listing is the one of section 19.
+
 A unit records the keys of `{StaticResource}`, `{DynamicResource}` and `ResourceKey` that its
-documents name, including keys no document of its own theme defines (16.4). Without this, a key that
+documents name, including keys no document of its own theme defines (20.4). Without this, a key that
 only another theme provides could not root that theme.
 
-### 16.2 Crates with a theme and ordinary documents
+### 20.2 Crates with a theme and ordinary documents
 
 Since #849 a crate exports the references of every document except those of a class constructed
 from selected units (section 14.1). A crate with a theme class and an ordinary `Other.xaml` with
@@ -1425,7 +1466,7 @@ from selected units (section 14.1). A crate with a theme class and an ordinary `
 (`Build::checked_in_metadata`) copied the documents and the units and dropped the references. It now
 merges them into the references the crate exports.
 
-### 16.3 Types of one name
+### 20.3 Types of one name
 
 `TypeGraph` keyed its edges by local name. Two assemblies with `Left.Twin : LeftBase` and
 `Right.Twin : RightBase` gave one chain or the other, depending on the order of the models, and
@@ -1438,7 +1479,7 @@ edges of each. Where the name is not unique, every possible provider is kept rat
 by order. No ambiguity is reported yet: old metadata and unqualified roots cannot say which type they
 mean.
 
-### 16.4 References to keys of other themes
+### 20.4 References to keys of other themes
 
 The unit graph used to drop the argument of a resource extension unless the same theme defines the
 key. It now keeps every such argument as a reference of its unit. Identifier tokens of attribute
@@ -1447,7 +1488,7 @@ guesses. This changes the `references` of the theme units in the `.xamlmeta` of 
 checked-in `compiled_xaml.xamlmeta` of a theme whose documents name such a key has to be regenerated
 (its `compiled_xaml_tests` say so). The generated Rust does not change.
 
-### 16.5 Tests
+### 20.5 Tests
 
 - `theme_roots_tests.rs`:
   - `themes_used_together_are_closed_over_together`: a key from the other theme, a type theme from
