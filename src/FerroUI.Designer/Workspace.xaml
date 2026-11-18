@@ -265,6 +265,7 @@
             <Border Width="1" Height="20" Background="{DynamicResource DesignerBorderBrush}" Margin="5,0" />
             <Button Name="DesignData" Classes="nav" Content="Data" ToolTip.Tip="Design-time property overrides and sample data" />
             <Button Name="FocusOrder" Classes="nav" Content="Focus" ToolTip.Tip="Keyboard tab order and label targets" />
+            <Button Name="PreviewChecks" Classes="nav" Content="Checks" ToolTip.Tip="Check preview accessibility and clipping" />
           </StackPanel>
         </Border>
       </Grid>

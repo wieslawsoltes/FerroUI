@@ -179,6 +179,7 @@ impl DesignerWorkspace {
         this.connect_selection_layout();
         this.connect_property_transfer_commands();
         this.connect_focus_order_commands();
+        this.connect_preview_checks();
         this.connect_design_time_commands();
         this.refresh(true);
         Ok(this)
@@ -908,6 +909,8 @@ mod design_time;
 mod files;
 #[path = "workspace_focus_order.rs"]
 mod focus_order;
+#[path = "workspace_preview_checks.rs"]
+mod preview_checks;
 #[path = "inspector_drag.rs"]
 mod inspector_drag;
 #[path = "inspector_controls.rs"]

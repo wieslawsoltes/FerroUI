@@ -31,6 +31,7 @@ mod icons;
 mod interaction_session;
 mod layer_state;
 mod layout_helper_renderer;
+mod preview_checks;
 mod preview_environment;
 mod preview_host;
 mod preview_prototype;
@@ -152,6 +153,7 @@ pub use property_transfer::{
     PropertyPastePreview, PropertyTransferIssue,
 };
 pub use property_transfer_editor::PropertyTransferEditor;
+pub use preview_checks::PreviewFinding;
 pub use resource_editor::{
     DefinitionCreationKind, DefinitionEditorCommand, DefinitionPreviewSettings,
     DefinitionPropertyField, DefinitionReference, ResourceDefinitionEditor,

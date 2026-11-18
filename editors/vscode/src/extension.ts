@@ -47,7 +47,7 @@ export function activate(context: vscode.ExtensionContext) {
     const runtimes = new RuntimeConnections(reload);
     const runtimeSource = new RuntimeSourceEditor(designer, reload);
     const liveApp = new RuntimePanel(context, runtimes, reload, runtimeSource);
-    const diagnostics = new DiagnosticsView(reload.history, runtimes, runtimeSource);
+    const diagnostics = new DiagnosticsView(reload.history, runtimes, runtimeSource, designer);
     const runtimeTools = new RuntimeSourceTools(runtimes, runtimeSource);
     const mcp = new FerroMcpProvider(context, new AgentTools(designer, reload, stages, runtimeTools, inventory, scaffolds, scenarios), previewOutput, runtimes);
     const startForXaml = (document: vscode.TextDocument) => {

@@ -229,6 +229,13 @@ impl UiToolProvider for DesignerMcp {
                 false,
             ),
             definition(
+                "designer_preview_checks",
+                "Check the current native preview for missing accessible names, rectangular clipping and low contrast on supported solid text backgrounds. Findings link to authored nodes.",
+                json!({}),
+                &[],
+                false,
+            ),
+            definition(
                 "designer_timeline",
                 "Read typed keyframe tracks, playback state and import diagnostics.",
                 json!({}),
@@ -630,6 +637,7 @@ impl UiToolProvider for DesignerMcp {
                 }).collect();
                 Ok(json!({"document":state(&session),"nodes":rows}))
             }
+            "designer_preview_checks" => Ok(json!({"revision":session.document().revision(),"findings":session.preview_checks()?})),
             "designer_timeline" => Ok(
                 json!({"timeline":session.timeline(),"time":session.time(),"playing":session.is_playing(),"recording":session.recording(),"warnings":session.animation_warnings()}),
             ),

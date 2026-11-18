@@ -1,5 +1,7 @@
 import * as path from 'node:path';
 import * as vscode from 'vscode';
+import type { DesignerPanel } from './designerPanel';
+import type { DesignerWorkbench } from './designerWorkbench';
 import { errorMessage } from './protocol';
 import type { ReloadHistory, ReloadRecord } from './reloadHistory';
 import { RuntimeClient } from './runtimeClient';
@@ -11,10 +13,12 @@ import { isWorkspaceFile } from './workspacePaths';
 const viewId = 'ferroui.diagnostics';
 const captions = { applied: 'Reloaded in place', rejected: 'Edit rejected', rebuilt: 'Candidate activated', buildFailed: 'Candidate failed',
     superseded: 'Superseded by a newer save', stopped: 'Session stopped' };
-type Item = { type: 'group'; group: 'reload' | 'binding' | 'layout' }
+interface PreviewFinding { node: number; control: string; name: string | null; code: string; message: string }
+type Item = { type: 'group'; group: 'preview' | 'reload' | 'binding' | 'layout' }
     | { type: 'notice'; label: string }
     | { type: 'reload'; record: ReloadRecord }
     | { type: 'binding'; log: RuntimeLog }
+    | { type: 'preview'; panel: DesignerPanel; token: number; finding: PreviewFinding }
     | { type: 'layout'; stats: RuntimeFrameStats };
 
 export class DiagnosticsView implements vscode.TreeDataProvider<Item>, vscode.Disposable {
@@ -23,18 +27,22 @@ export class DiagnosticsView implements vscode.TreeDataProvider<Item>, vscode.Di
     readonly onDidChangeTreeData = this.changed.event;
     private current?: Promise<Awaited<ReturnType<typeof readRuntimeDiagnostics>>>;
 
-    constructor(private readonly history: ReloadHistory, private readonly runtimes: RuntimeConnections, private readonly source: RuntimeSourceEditor) {
+    constructor(private readonly history: ReloadHistory, private readonly runtimes: RuntimeConnections, private readonly source: RuntimeSourceEditor,
+        private readonly designer: DesignerWorkbench) {
         const view = vscode.window.createTreeView(viewId, { treeDataProvider: this, showCollapseAll: true });
         this.subscriptions = [view, view.onDidChangeVisibility(({ visible }) => { if (visible) this.refresh(); }),
             history.onDidChange(() => this.refresh()), runtimes.onDidChange(() => this.refresh()),
+            designer.onDidChangePreview(() => this.changed.fire()),
             vscode.commands.registerCommand('ferroui.diagnostics.refresh', () => this.refresh()),
             vscode.commands.registerCommand('ferroui.diagnostics.openSource', (item: Item) => this.openSource(item)),
         ];
     }
 
     async getChildren(item?: Item): Promise<Item[]> {
-        if (!item) return [{ type: 'group', group: 'reload' }, { type: 'group', group: 'binding' }, { type: 'group', group: 'layout' }];
+        if (!item) return [{ type: 'group', group: 'preview' }, { type: 'group', group: 'reload' },
+            { type: 'group', group: 'binding' }, { type: 'group', group: 'layout' }];
         if (item.type !== 'group') return [];
+        if (item.group === 'preview') return this.previewChecks();
         if (item.group === 'reload') {
             const recent = this.history.recent(50);
             return recent.length ? recent.map(record => ({ type: 'reload', record })) : [{ type: 'notice', label: 'Save a file while a managed app is running' }];
@@ -58,8 +66,19 @@ export class DiagnosticsView implements vscode.TreeDataProvider<Item>, vscode.Di
     getTreeItem(item: Item): vscode.TreeItem {
         if (item.type === 'notice') return new vscode.TreeItem(item.label);
         if (item.type === 'group') {
-            const title = { reload: 'Hot Reload History', binding: 'Binding Errors', layout: 'Runtime Layout' }[item.group];
-            return new vscode.TreeItem(title, vscode.TreeItemCollapsibleState.Collapsed);
+            const title = { preview: 'Preview Checks', reload: 'Hot Reload History', binding: 'Binding Errors', layout: 'Runtime Layout' }[item.group];
+            const row = new vscode.TreeItem(title, vscode.TreeItemCollapsibleState.Collapsed);
+            row.id = item.group;
+            return row;
+        }
+        if (item.type === 'preview') {
+            const { finding } = item;
+            const row = new vscode.TreeItem(finding.message);
+            row.id = `preview:${item.panel.session}:${finding.node}:${finding.code}`;
+            row.description = finding.name ? `${finding.control} · ${finding.name}` : finding.control;
+            row.iconPath = new vscode.ThemeIcon('warning');
+            row.command = { command: 'ferroui.diagnostics.openSource', title: 'Reveal Source', arguments: [item] };
+            return row;
         }
         if (item.type === 'layout') {
             const { stats } = item;
@@ -88,13 +107,30 @@ export class DiagnosticsView implements vscode.TreeDataProvider<Item>, vscode.Di
     }
 
     private async openSource(item: Item): Promise<void> {
-        if (item?.type === 'reload') {
+        if (item?.type === 'preview') {
+            const { panel, token } = item;
+            const node = panel.nodes.find(node => node.id === item.finding.node);
+            if (node && this.designer.activeDesign === panel) await panel.revealSource({ session: panel.session, token }, node.nameRange);
+        } else if (item?.type === 'reload') {
             const uri = vscode.Uri.file(item.record.file);
             if (await isWorkspaceFile(uri)) await vscode.commands.executeCommand('vscode.open', uri);
         } else if (item?.type === 'binding' && item.log.source) {
             const anchor = await this.source.resolve(item.log.source);
             if (anchor) await vscode.window.showTextDocument(anchor.document, { selection: new vscode.Range(anchor.position, anchor.position) });
         }
+    }
+
+    private async previewChecks(): Promise<Item[]> {
+        const panel = this.designer.activeDesign;
+        if (!panel) return [{ type: 'notice', label: 'Open a FerroUI designer' }];
+        const token = panel.currentToken;
+        if (token === undefined || panel.status) return [{ type: 'notice', label: panel.status ?? 'Waiting for preview' }];
+        try {
+            const result = await panel.studioQuery('designer_preview_checks', {}, undefined, AbortSignal.timeout(15_000)) as { findings: PreviewFinding[] };
+            if (this.designer.activeDesign !== panel || !panel.canUse({ session: panel.session, token })) return [];
+            if (!result.findings.length) return [{ type: 'notice', label: 'No findings in this preview' }];
+            return result.findings.map(finding => ({ type: 'preview', panel, token, finding }));
+        } catch (error) { return [{ type: 'notice', label: errorMessage(error) }]; }
     }
 
     private refresh(): void { this.current = undefined; this.changed.fire(); }

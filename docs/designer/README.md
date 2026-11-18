@@ -25,6 +25,9 @@ the existing coverage and the latest additions: [design-time values and sample d
 local layer locking/hiding/isolation, native keyboard-order and label-target authoring, and
 responsive preview environments. Open the [workflow sample](samples/DesignWorkflows.xaml)
 to exercise them together.
+Use **Checks** in the canvas toolbar to review missing accessible names, measured clipping,
+and low contrast for text on supported opaque backgrounds. Choose a finding to reveal its
+authored control. The `designer_preview_checks` MCP tool reads the same native findings.
 The [canvas navigation and icon guide](canvas-navigation.md) covers mouse-wheel modes,
 pointer-anchored zoom, hand panning, fit selection, per-tab cameras and compact vector icons.
 The [selection and appearance guide](selection-workflows.md) covers selective property copy/paste,

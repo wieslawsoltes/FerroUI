@@ -28,6 +28,8 @@ const docks = { outline: OUTLINE_VIEW, properties: PROPERTIES_VIEW, toolbox: TOO
 
 export class DesignerWorkbench implements vscode.Disposable {
     private readonly panels = new Map<string, DesignerPanel>();
+    private readonly previewChanged = new vscode.EventEmitter<void>();
+    readonly onDidChangePreview = this.previewChanged.event;
     private readonly outline: OutlineView;
     private readonly toolbox: DockView<ToolboxState, FromToolbox, ToToolbox>;
     private readonly properties: PropertiesView;
@@ -48,6 +50,7 @@ export class DesignerWorkbench implements vscode.Disposable {
     private nextSession = 0;
     private disposed = false;
     private active?: DesignerPanel;
+    private previewKey?: string;
 
     constructor(private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel,
         private readonly projects: BuiltProjects, assets: ProjectAssets) {
@@ -236,6 +239,11 @@ export class DesignerWorkbench implements vscode.Disposable {
         const token = panel?.currentToken;
         const node = panel?.selectedNode;
         const frame = panel && token !== undefined && !panel.status ? { session: panel.session, token } : undefined;
+        const previewKey = panel ? `${panel.session}:${frame?.token ?? panel.status}` : undefined;
+        if (this.previewKey !== previewKey) {
+            this.previewKey = previewKey;
+            this.previewChanged.fire();
+        }
         const inspection = this.properties.visible || this.details.events.visible ? this.inspection.read(panel, frame) : {};
         this.outline.update(panel, frame, file);
         this.toolbox.show({ frame, assets: panel ? [...panel.assets] : [], canInsert: Boolean(panel && this.insertionParent(panel)),
@@ -369,6 +377,7 @@ export class DesignerWorkbench implements vscode.Disposable {
         this.disposed = true;
         this.drag.clear();
         this.subscriptions.forEach(subscription => subscription.dispose());
+        this.previewChanged.dispose();
         this.outline.dispose();
         this.toolbox.dispose();
         this.properties.dispose();
