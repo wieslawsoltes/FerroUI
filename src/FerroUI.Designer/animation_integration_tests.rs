@@ -74,6 +74,20 @@ fn timeline_pose_resolves_a_unique_program_in_a_rebuilt_preview() {
     assert_eq!(rebuilt.preview.visual(target).unwrap().opacity(), 0.625);
     assert_eq!(rebuilt.document().source(), edited);
 
+    let marker = format!("<!--ferroui-designer-program-id:{}-->", pose.source_key.as_ref().unwrap());
+    let legacy = session.document().source().replacen(&marker, "", 1);
+    assert_ne!(&legacy, session.document().source());
+    let mut undone = DesignerSession::new(&legacy, ContentControl::new()).unwrap();
+    let accepted = undone.restore_timeline_preview_pose(&pose).unwrap().unwrap();
+    assert!(accepted.source_key.is_none());
+    assert_eq!(accepted.time, 0.5);
+    let target = undone.document().ast().find_name("A").unwrap();
+    assert_eq!(undone.preview.visual(target).unwrap().opacity(), 0.625);
+
+    let retargeted = legacy.replace("Button#A", "Button#B");
+    let mut unrelated = DesignerSession::new(&retargeted, ContentControl::new()).unwrap();
+    assert!(unrelated.restore_timeline_preview_pose(&pose).unwrap().is_none());
+
     let mut duplicated = session.document().source().to_owned();
     duplicated.insert_str(program.span.end, &program.source);
     let mut ambiguous = DesignerSession::new(&duplicated, ContentControl::new()).unwrap();

@@ -12,7 +12,15 @@ pub struct TimelinePreviewPose {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub source_key: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub anchor: Option<PreviewSourceAnchor>,
+    anchor: Option<ProgramLocator>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+struct ProgramLocator {
+    source: PreviewSourceAnchor,
+    name: String,
+    selector: String,
 }
 
 impl DesignerSession {
@@ -45,16 +53,17 @@ impl DesignerSession {
             .iter()
             .find(|program| program.id == id)?;
         let timeline = program.timeline.as_ref()?;
-        let source_key = program.source_key.clone();
-        let anchor = if source_key.is_none() {
-            PreviewSourceAnchor::capture(self.document(), id).ok()
-        } else {
-            None
-        };
+        let anchor = PreviewSourceAnchor::capture(self.document(), id)
+            .ok()
+            .map(|source| ProgramLocator {
+                source,
+                name: program.name.clone(),
+                selector: program.selector.clone(),
+            });
         Some(TimelinePreviewPose {
             program: id,
             time: self.time().min(timeline.duration),
-            source_key,
+            source_key: program.source_key.clone(),
             anchor,
         })
     }
@@ -65,25 +74,23 @@ impl DesignerSession {
         &mut self,
         pose: &TimelinePreviewPose,
     ) -> Result<Option<TimelinePreviewPose>, String> {
-        let program = if let Some(key) = &pose.source_key {
-            let mut matches = self
-                .animation_programs()
-                .iter()
-                .filter(|program| program.source_key.as_ref() == Some(key));
-            let candidate = matches.next();
-            if matches.next().is_some() {
-                None
-            } else {
-                candidate
-            }
-        } else {
-            let id = pose
-                .anchor
-                .as_ref()
-                .and_then(|anchor| anchor.resolve(self.document()).ok());
-            self.animation_programs()
-                .iter()
-                .find(|program| Some(program.id) == id)
+        let programs = self.animation_programs();
+        let mut matching_keys = programs
+            .iter()
+            .filter(|program| pose.source_key.is_some() && program.source_key == pose.source_key);
+        let program = match (matching_keys.next(), matching_keys.next()) {
+            (Some(program), None) => Some(program),
+            // A first authoring edit can add a source key that Undo later removes.
+            (None, None) => pose.anchor.as_ref().and_then(|anchor| {
+                let id = anchor.source.resolve(self.document()).ok()?;
+                programs.iter().find(|program| {
+                    program.id == id
+                        && (pose.source_key.is_none() || program.source_key.is_none())
+                        && program.name == anchor.name
+                        && program.selector == anchor.selector
+                })
+            }),
+            _ => None,
         };
         let Some((id, duration)) = program.and_then(|program| {
             program
