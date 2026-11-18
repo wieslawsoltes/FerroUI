@@ -450,6 +450,10 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 | TextBox | 3 ported, 1 partial: no IsSpellCheckEnabled | partial | `Pages/TextBox.xaml` (no code-behind upstream) | `text_input_samples_tests.rs` |
 | PasswordBox | 3 partial: no PasswordBox (a TextBox with a PasswordChar) | partial | `input_samples.rs` | `tests.rs`, `text_input_samples_tests.rs` |
 | NumberBox | 3 of 3 | ported | `text_input_samples.rs` | `text_input_samples_tests.rs` |
+| ProgressBar | 1 ported, 1 partial: no ShowPaused or ShowError | partial | `status_samples.rs` | `status_samples_tests.rs` |
+| InfoBar | 3 of 3 | ported | `control_samples.rs` | `tests.rs`, `x_bind_tests.rs` |
+| Expander | 2 of 2 | ported | `status_samples.rs` | `status_samples_tests.rs` |
+| PipsPager | 2 partial: no FlipView (a Carousel), no VisibleOnPointerOver or WrapMode | partial | `status_samples.rs` | `status_samples_tests.rs` |
 
 ### 10.8 WinUI API and Gallery scanner (W10b)
 

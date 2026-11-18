@@ -657,18 +657,23 @@
       "examples": []
     },
     "Expander": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/Expander.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/status_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/status_samples_tests.rs",
+          "name": "expand_direction_option_sets_the_direction_and_the_alignment"
         }
       ],
-      "notes": "Header, content, expanded state and alignment use the shared Expander. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "Both source examples use native Expander: the text header and content with ExpandDirectionComboBox_SelectionChanged of ExpanderPage.xaml.cs in Rust (Down from the top, Up from the bottom), and the centered header over left-aligned content (HorizontalContentAlignment Left, Padding 0). The ComboBox's Header is composed.",
       "examples": []
     },
     "Flyout": {
@@ -821,7 +826,7 @@
       ]
     },
     "InfoBar": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/InfoBar.xaml",
         "samples/WinUIGallery/examples.rs",
@@ -835,59 +840,18 @@
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "infobar_examples_keep_source_severity_message_action_and_options"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "a_page_whose_bindings_stopped_reads_its_sources_again_when_it_is_shown"
         }
       ],
-      "notes": "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. The options keep the source TwoWay x:Bind, compiled by the x:Bind core; final layout, icons and live-region acceptance remain pending. This is bounded application behavior coverage, not complete source/API/render/accessibility acceptance.",
-      "examples": [
-        {
-          "source": "WinUIGallery/Samples/InfoBar/ClosableInfobarOptionsChange.txt",
-          "source_sha256": "8d728ad450ca0731c1335724d3ae52b1b282e689c01df518f3d5c7bf0e04926c",
-          "status": "partial",
-          "tests": [
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "all_reviewed_native_adaptations_load_real_controls"
-            },
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "infobar_examples_keep_source_severity_message_action_and_options"
-            }
-          ],
-          "notes": "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. The options keep the source TwoWay x:Bind, compiled by the x:Bind core; final layout, icons and live-region acceptance remain pending."
-        },
-        {
-          "source": "WinUIGallery/Samples/InfoBar/ClosableInfobarLongShort.txt",
-          "source_sha256": "a75efd92ea14304b69005e89cb538dd5da5e6100c05a5305e6ec051f5ed50221",
-          "status": "partial",
-          "tests": [
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "all_reviewed_native_adaptations_load_real_controls"
-            },
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "infobar_examples_keep_source_severity_message_action_and_options"
-            }
-          ],
-          "notes": "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. The options keep the source TwoWay x:Bind, compiled by the x:Bind core; final layout, icons and live-region acceptance remain pending."
-        },
-        {
-          "source": "WinUIGallery/Samples/InfoBar/ClosableInfobarOptionsDisplay.txt",
-          "source_sha256": "d1a0776f95de9546186eaffe15128996cdf1129bc3a5214d09415e760bae3ff1",
-          "status": "partial",
-          "tests": [
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "all_reviewed_native_adaptations_load_real_controls"
-            },
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "infobar_examples_keep_source_severity_message_action_and_options"
-            }
-          ],
-          "notes": "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. The options keep the source TwoWay x:Bind, compiled by the x:Bind core; final layout, icons and live-region acceptance remain pending."
-        }
-      ]
+      "notes": "All three source examples use native InfoBar with the code behind of InfoBarPage.xaml.cs in Rust (control_samples.rs): SeverityComboBox_SelectionChanged (Informational, Success, Warning, Error), MessageComboBox_SelectionChanged (the short and the long message, long at load) and ActionButtonComboBox_SelectionChanged (none, the Action button, the Informational link to the Microsoft home page). The Is Open, Is Icon Visible and Is Closable options keep the source's TwoWay x:Bind, compiled by the x:Bind core. The ComboBoxes' Headers are composed; the DisplayMessage and DisplayButton values feed the source viewer's substitutions only.",
+      "examples": []
     },
     "Line": {
       "status": "partial",
@@ -1087,15 +1051,28 @@
       "status": "partial",
       "implementation": [
         "samples/WinUIGallery/Pages/PipsPager.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/status_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/status_samples_tests.rs",
+          "name": "flip_view_pager_follows_the_gallery_both_ways"
+        },
+        {
+          "path": "samples/WinUIGallery/status_samples_tests.rs",
+          "name": "options_pager_announces_the_page_and_follows_the_options"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
         }
       ],
-      "notes": "The existing PipsPager provides page counts, selection and previous/next controls; wrapping remains explicit. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "Both source examples use native PipsPager with the code behind of PipsPagerPage.xaml.cs in Rust: the pager of the source's eight Pictures, whose SelectedPageIndex keeps the source's TwoWay x:Bind of the gallery's SelectedIndex, and the pager whose TestPipsPager2_SelectedIndexChanged announces the page (a polite live region) with the orientation and button options. FerroUI has no FlipView: the gallery is a Carousel, as on the FlipView page (partial). FerroUI's PipsPager has IsPreviousButtonVisible and IsNextButtonVisible instead of PreviousButtonVisibility and NextButtonVisibility (no VisibleOnPointerOver) and no WrapMode, so those options are left out and the page is partial.",
       "examples": []
     },
     "Pivot": {
@@ -1154,15 +1131,20 @@
       "status": "partial",
       "implementation": [
         "samples/WinUIGallery/Pages/ProgressBar.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/status_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/status_samples_tests.rs",
+          "name": "progress_value_sets_the_determinate_bar_and_an_empty_box_goes_back_to_zero"
         }
       ],
-      "notes": "Both determinate and indeterminate ProgressBar modes use the shared control. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "Both source examples use native ProgressBar: the indeterminate bar, and the determinate bar set by the NumberBox with ProgressValue_ValueChanged of ProgressBarPage.xaml.cs in Rust (an empty box goes back to 0). FerroUI's ProgressBar has no ShowPaused or ShowError, so the indeterminate bar's Progress state options (Running, Paused, Error) and the source's x:Bind of IsChecked.Value are not ported and the page is partial.",
       "examples": []
     },
     "PullToRefresh": {
