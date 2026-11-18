@@ -4,8 +4,10 @@ export interface TimelineKeyframe { time: number; value_text: string; easing_tex
 export interface TimelineTrack { target: number; property: string; keyframes: TimelineKeyframe[] }
 export interface TimelineProgram {
     id: number;
+    source_key?: string | null;
     name: string;
     owner: number;
+    style?: number | null;
     targets: number[];
     selector: string;
     timeline: { duration: number; tracks: TimelineTrack[] } | null;
@@ -36,6 +38,7 @@ export type TimelineControl =
 export type FromTimeline =
     | { type: 'ready' }
     | { type: 'control'; frame: FrameTarget; control: TimelineControl }
+    | { type: 'programActions'; frame: FrameTarget; program: number | undefined }
     | { type: 'recordKeyframe'; frame: FrameTarget; program: number; time: number }
     | ({ frame: FrameTarget; program: number; track: number; time: number }
         & ({ type: 'keyframe' } | { type: 'moveKeyframe'; to: number }));

@@ -3,28 +3,39 @@ import type { FromTimeline, TimelineControl, TimelineProgram, TimelineState, ToT
 import { element, labelButton } from './dom';
 import { dragKeyframe } from './timelineKeyDrag';
 
-declare function acquireVsCodeApi(): { postMessage(message: FromTimeline): void; getState(): number | undefined; setState(program: number): void };
+interface ProgramIdentity { id: number; key?: string }
+declare function acquireVsCodeApi(): {
+    postMessage(message: FromTimeline): void;
+    getState(): ProgramIdentity | number | undefined;
+    setState(program: ProgramIdentity): void;
+};
 const vscode = acquireVsCodeApi();
 const status = element('timeline-status');
+const toolbar = element('timeline-toolbar');
 const container = element('timeline-program');
+const nativeSource = element('timeline-native-source');
 const programs = element<HTMLSelectElement>('timeline-programs');
 const play = element<HTMLButtonElement>('timeline-play');
 const record = element<HTMLButtonElement>('timeline-record');
+const actions = element<HTMLButtonElement>('timeline-actions');
 const slider = element<HTMLInputElement>('timeline-seek');
 const time = element<HTMLOutputElement>('timeline-time');
 const ruler = element('timeline-ruler');
 const tracks = element<HTMLOListElement>('timeline-tracks');
 const number = new Intl.NumberFormat(undefined, { maximumFractionDigits: 3 });
 let model: TimelineState = { programs: [], names: {}, writable: false };
-let program = vscode.getState();
+const saved = vscode.getState();
+let remembered = typeof saved === 'number' ? { id: saved } : saved;
+let program: number | undefined;
 let queued: number | undefined;
 let submitted: number | undefined;
 let pending = false;
 let lastContent = '';
+let lastPrograms = '';
 
 programs.addEventListener('change', () => {
-    program = Number(programs.value);
-    vscode.setState(program);
+    const selected = model.programs.find(item => item.id === Number(programs.value));
+    if (selected) remember(selected);
     queued = undefined;
     showTracks();
 });
@@ -39,6 +50,9 @@ record.addEventListener('click', () => {
     if (model.frame && model.writable && selected?.timeline && !pending) {
         vscode.postMessage({ type: 'recordKeyframe', frame: model.frame, program: selected.id, time: slider.valueAsNumber });
     }
+});
+actions.addEventListener('click', () => {
+    if (model.frame && !pending) vscode.postMessage({ type: 'programActions', frame: model.frame, program });
 });
 slider.addEventListener('input', () => {
     if (!model.frame || !current()?.timeline) return;
@@ -75,17 +89,26 @@ vscode.postMessage({ type: 'ready' });
 function current(): TimelineProgram | undefined { return model.programs.find(item => item.id === program); }
 
 function showTracks(): void {
-    const available = model.programs.filter(item => item.timeline);
-    const selected = available.find(item => item.id === program) ?? available[0];
+    const available = model.programs;
+    const selected = available.find(item => remembered?.key ? item.source_key === remembered.key : item.id === remembered?.id) ?? available[0];
     program = selected?.id;
+    if (selected && model.frame) remember(selected);
     const timeline = selected?.timeline;
-    container.hidden = !selected || !timeline;
-    if (!selected || !timeline) return;
-    const content = JSON.stringify([available.map(({ id, name }) => [id, name]), selected, model.names, model.writable]);
+    toolbar.hidden = !model.frame && !selected;
+    nativeSource.hidden = !selected || Boolean(timeline);
+    container.hidden = !timeline;
+    const choices = JSON.stringify(available.map(({ id, name }) => [id, name]));
+    if (lastPrograms !== choices) {
+        lastPrograms = choices;
+        programs.replaceChildren(...(available.length
+            ? available.map(item => new Option(item.name, String(item.id)))
+            : [new Option('No animations', '')]));
+    }
+    programs.value = program === undefined ? '' : String(program);
+    if (!selected || !timeline) { showPosition(); return; }
+    const content = JSON.stringify([selected, model.names, model.writable]);
     if (lastContent !== content) {
         lastContent = content;
-        programs.replaceChildren(...available.map(item => new Option(item.name, String(item.id))));
-        programs.value = String(selected.id);
         slider.max = String(timeline.duration);
         ruler.replaceChildren(...[0, .25, .5, .75, 1].map(proportion => {
             const mark = document.createElement('span');
@@ -128,12 +151,24 @@ function showTracks(): void {
     showPosition();
 }
 
+function remember(program: TimelineProgram): void {
+    const key = program.source_key ?? undefined;
+    if (remembered?.id === program.id && remembered.key === key) return;
+    remembered = { id: program.id, key };
+    vscode.setState(remembered);
+}
+
 function showPosition(): void {
     const selected = current();
     const timeline = selected?.timeline;
-    if (!timeline) return;
     const position = model.position?.program === selected?.id ? model.position : undefined;
     const playing = Boolean(position?.playing);
+    play.hidden = time.hidden = !timeline;
+    record.hidden = !timeline || !model.writable;
+    record.disabled = !model.frame || pending || playing;
+    actions.disabled = !model.frame || pending || playing || (!selected && !model.writable);
+    programs.disabled = pending || !model.frame || !selected;
+    if (!timeline) return;
     const seconds = queued ?? submitted ?? position?.time ?? 0;
     slider.value = String(seconds);
     slider.setAttribute('aria-valuetext', `${number.format(seconds)} of ${number.format(timeline.duration)} seconds`);
@@ -141,10 +176,7 @@ function showPosition(): void {
     time.value = `${number.format(seconds)} / ${number.format(timeline.duration)} s`;
     labelButton(play, playing ? 'Pause animation' : 'Play animation', playing ? 'debug-pause' : 'play');
     play.disabled = !model.frame || (!playing && (pending || timeline.duration <= 0));
-    record.hidden = !model.writable;
-    record.disabled = !model.frame || pending || playing;
     slider.disabled = !model.frame || playing || timeline.duration <= 0;
-    programs.disabled = pending || !model.frame;
     for (const button of tracks.querySelectorAll('button')) button.disabled = pending || !model.frame;
 }
 

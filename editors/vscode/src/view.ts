@@ -318,13 +318,15 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
     return page(webview, root, 'timeline', 'FerroUI Timeline', `
 <main class="timeline" aria-label="Animation timeline">
     <p id="timeline-status" role="status" hidden></p>
+    <div id="timeline-toolbar" class="timeline-toolbar" aria-label="Animation controls" hidden>
+        ${tool('timeline-play', 'play', 'Play animation', 'hidden')}
+        <select id="timeline-programs" aria-label="Animation program"></select>
+        <output id="timeline-time" for="timeline-seek" aria-live="off" hidden></output>
+        ${tool('timeline-record', 'add', 'Add keyframe at playhead', 'hidden disabled')}
+        ${tool('timeline-actions', 'ellipsis', 'More Animation Actions', 'disabled')}
+    </div>
+    <p id="timeline-native-source" class="dock-message" hidden>Open the authored animation through More Animation Actions.</p>
     <section id="timeline-program" aria-label="Selected animation" hidden>
-        <div class="timeline-toolbar">
-            ${tool('timeline-play', 'play', 'Play animation')}
-            <select id="timeline-programs" aria-label="Animation program"></select>
-            <output id="timeline-time" for="timeline-seek" aria-live="off"></output>
-            ${tool('timeline-record', 'add', 'Add keyframe at playhead', 'hidden disabled')}
-        </div>
         <div class="timeline-grid">
             <input id="timeline-seek" type="range" min="0" value="0" step="any" aria-label="Animation playhead">
             <div id="timeline-ruler" class="timeline-ruler" aria-hidden="true"></div>

@@ -4,6 +4,7 @@ import { DockView } from './dockView';
 import { errorMessage, type FrameTarget } from './protocol';
 import { choose, StudioContext } from './studioContext';
 import { keyframeOptions } from './studioKeyframes';
+import { showAnimationActions } from './studioPrograms';
 import { TimelinePlayback } from './timelinePlayback';
 import type { FromTimeline, TimelineControl, TimelineProgram, TimelineState, ToTimeline } from './timelineProtocol';
 import { timelineHtml } from './view';
@@ -12,9 +13,11 @@ export const TIMELINE_VIEW = 'ferroui.timeline';
 
 interface Catalog {
     key: string;
+    session: number;
     token: number | undefined;
     pending: Promise<TimelineProgram[]>;
     programs?: TimelineProgram[];
+    retained?: TimelineProgram[];
     error?: string;
 }
 
@@ -57,7 +60,9 @@ export class TimelineView implements vscode.Disposable {
         if (this.catalog?.key === key && (!this.catalog.error || this.catalog.token === panel.currentToken)) return this.catalog;
         const pending = panel.studioQuery('designer_programs', { include_source: false, include_keyframe_text: true },
             undefined, AbortSignal.timeout(15_000)).then(result => (result as { programs: TimelineProgram[] }).programs);
-        const catalog: Catalog = this.catalog = { key, token: panel.currentToken, pending };
+        const previous = this.catalog?.session === panel.session ? this.catalog : undefined;
+        const catalog: Catalog = this.catalog = { key, session: panel.session, token: panel.currentToken, pending,
+            retained: previous?.programs ?? previous?.retained };
         void pending.then(programs => { catalog.programs = programs; this.catalogChanged(catalog); },
             error => { catalog.error = errorMessage(error); this.catalogChanged(catalog); });
         return catalog;
@@ -85,11 +90,12 @@ export class TimelineView implements vscode.Disposable {
         if (key === this.shown) return;
         this.shown = key;
         const catalog = panel && frame && !panel.status ? this.programs(panel) : undefined;
-        const programs = catalog?.programs ?? [];
+        const retained = panel && this.catalog?.session === panel.session ? this.catalog : undefined;
+        const programs = catalog?.programs ?? retained?.programs ?? retained?.retained ?? [];
         const message = !panel ? 'Open a FerroUI designer.' : panel.status ?? catalog?.error
-            ?? (catalog?.programs ? (programs.length ? undefined : 'This design has no authored animation programs.') : 'Loading animation programs…');
+            ?? (catalog?.programs ? undefined : 'Loading animation programs…');
         const names = Object.fromEntries((panel?.nodes ?? []).map(node => [node.id, node.name ?? node.label]));
-        this.view.show({ frame: panel?.status ? undefined : frame, programs, message, names, writable: panel?.language === 'xaml', position }, this.file);
+        this.view.show({ frame: catalog?.programs ? frame : undefined, programs, message, names, writable: panel?.language === 'xaml', position }, this.file);
     }
 
     private async receive(message: FromTimeline): Promise<void> {
@@ -101,6 +107,15 @@ export class TimelineView implements vscode.Disposable {
             } else {
                 const context = new StudioContext(panel, message.frame.token, () => this.panel === panel);
                 const program = (await this.programs(panel).pending).find(entry => entry.id === message.program);
+                if (message.type === 'programActions') {
+                    if (message.program !== undefined && !program) throw new Error('Choose a current animation program.');
+                    context.ensure();
+                    await showAnimationActions(context, program);
+                    if (this.catalog?.session === panel.session) this.catalog.key = '';
+                    this.shown = undefined;
+                    this.refresh();
+                    return;
+                }
                 const timeline = program?.timeline;
                 if (!program || !timeline) throw new Error('Choose a typed animation program from the current document.');
                 context.ensure();
