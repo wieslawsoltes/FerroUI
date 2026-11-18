@@ -52,6 +52,8 @@ static FERRO_OBJECT_IDENTITY: TypeIdentity = TypeIdentity::new("FerroObject");
 
 static FERRO_OBJECT_TYPE: TypeInfo = TypeInfo::new("FerroObject", None)
     .with_identity(&FERRO_OBJECT_IDENTITY)
+    // The handlers of the root class do nothing of their own with a change.
+    .with_change_handler_layer(crate::type_system::ChangeHandlerLayer::Absent)
     .with_module_path(module_path!())
     .with_class_init(<FerroObject as ObjectType>::register_class)
     .with_handles(|| [std::any::TypeId::of::<Ref<FerroObject>>(), std::any::TypeId::of::<Option<Ref<FerroObject>>>()])
@@ -112,6 +114,11 @@ pub trait FerroObjectImpl: ObjectType {
     /// table of the class is built from it.
     #[doc(hidden)]
     const __OVERRIDES: Option<&'static [&'static str]> = None;
+
+    /// What the change handlers of this implementation react to among inherited values, where
+    /// it states it. Set by [`ferro_overrides!`](crate::ferro_overrides), never by hand.
+    #[doc(hidden)]
+    const __INHERITED_REACTIONS: Option<crate::InheritedReactions> = None;
 
     /// Called once, right after the object has been allocated. This is where
     /// constructor logic that needs a reference to the object runs. Overrides
@@ -882,6 +889,23 @@ impl FerroObject {
         property.routes().route_set_value(self, value, priority)
     }
 
+    /// Sets a property whose value type is `T` with local value priority, from the value
+    /// itself: a styled (or attached) property takes it as [`set_value`](Self::set_value)
+    /// does, a direct property as [`set_direct_value`](Self::set_direct_value), with no
+    /// untyped value and no copy of it. The value is given back when `T` is not the value type
+    /// of the property; [`set_value_untyped`](Self::set_value_untyped) converts it then.
+    pub fn try_set_value_typed<T: PropertyValue>(&self, property: &'static FerroProperty, value: T) -> Result<(), T> {
+        if let Some(styled) = property.as_styled::<T>() {
+            self.set_value(styled, value);
+            Ok(())
+        } else if let Some(direct) = property.as_direct::<T>() {
+            self.set_direct_value(direct, value);
+            Ok(())
+        } else {
+            Err(value)
+        }
+    }
+
     /// [`set_current_value`](Self::set_current_value) with an untyped value.
     pub fn set_current_value_untyped(&self, property: &'static FerroProperty, value: &dyn Any) {
         property.routes().route_set_current_value(self, value)
@@ -963,6 +987,15 @@ impl FerroObject {
     ) {
         let e = FerroPropertyChangedEventArgs::new(self, property, old_value, new_value, priority, is_effective_value);
         self.notify_property_changed(&e);
+    }
+
+    /// Whether a change of the inherited `property` that reaches this object from an ancestor
+    /// is heard here: by a listener of the object, by a handler of the property for its class
+    /// or by a change handler of its class. Where it is not, the change is not raised on the
+    /// object (FerroUI deviation, desktop-performance.md section 9.101).
+    #[inline]
+    pub(crate) fn hears_inherited(&self, property: &'static FerroProperty) -> bool {
+        property.changed().hears_inherited(self, property) || !self.property_changed.is_empty()
     }
 
     pub(crate) fn raise_inherited_property_changed(

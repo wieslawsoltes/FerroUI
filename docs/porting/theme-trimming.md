@@ -797,9 +797,11 @@ include of the theme constructs it with `new()`, and every run-time loader links
   `<WinUITheme />` is written as
   `::ferroui_themes_winui::WinUITheme::with_parts(None, crate::compiled_markup::THEME_PARTS_FERROUI_THEMES_WINUI_WINUITHEME)`.
   Without trimming it writes `WinUITheme::new()` as before. The tables record the classes they were
-  used for.
+  used for. Since #849 the tables hold only the classes that can be constructed from selected units
+  (section 14.1); any other class is written as `T::new()`.
 - `ferroui-build`, after every group: for each class used, the kept units become
-  `pub static THEME_PARTS_<CLASS>: &[&rt::ThemeUnit]` in `compiled_markup` of `$OUT_DIR/xaml/mod.rs`,
+  `pub static THEME_PARTS_<CLASS>: &[&rt::ThemeUnit]` in `compiled_markup` of `$OUT_DIR/xaml/mod.rs`
+  (the name the allocator of section 14.2 gives),
   in canonical order, each entry commented with the name of its unit. `compiled_markup::register()`
   calls `rt::register_theme_parts(<class>, THEME_PARTS_<CLASS>)`. The kept units are also listed in
   `$OUT_DIR/xaml/theme_parts.txt`, for measuring and debugging.
@@ -1302,3 +1304,126 @@ markup constructs `<MaterialTheme />`, and no sample of the repository does yet.
 Hello world with `<MaterialTheme />` in place of `<WinUITheme />` (`dist`, macOS ARM64, measured on the
 branch of #633 with main's `MaterialTheme.xaml` for the first number): 19.11 MB with the inherited documents
 in the ambient unit, 18.72 MB with them as units (-0.39 MB, -2.1%); both run.
+
+## 14. Generated Rust that compiles (#849)
+
+A review of the compiler found two cases where the build script succeeded and rustc refused the
+Rust it generated. `tests/GeneratedRustFixture` reproduces both: two workspace crates, and rustc
+compiles what the build script of the consumer writes.
+
+### 14.1 Constructed from units is a capability of the class
+
+Step 3 treated every class with units in a `.xamlmeta` as a theme with `with_parts`. Any class
+whose document merges a dictionary has units, though. For example, an application class
+`HelloWorld.App` with one `MergeResourceInclude`, constructed by another crate as
+`<local:App />`, became `::hello_world::App::with_parts(None, ..)`. `App` has `new()` only, so
+rustc refused it (E0599).
+
+Partitioning and construction from units are now separate:
+
+- **The capability.** A class can be constructed from selected units when its type has a public
+  associated function `with_parts` without `self` (the name is
+  `rust_emitter::PARTS_CONSTRUCTOR`). The function must have the signature
+  `fn(Option<Rc<dyn IServiceProvider>>, rt::ThemeParts) -> Ref<Self>`.
+- **The class's own build verifies it.** `theme_roots::verify_parts_constructor` compares the
+  signature by the last segment of each path. It does this for every class group with units. A
+  public `with_parts` with two parameters and another signature is an error of that build.
+- **Other crates read the capability from the type model.** In `.xamlmeta`, the type model of the
+  class's crate states the public functions of its types (`functions`: the name, the number of
+  parameters, `self` or not). `theme_roots::parts_constructor` finds the class there, so no field
+  of the metadata changes. A crate without a type model (a `.xamlmeta` of format 1) states no
+  capability, and its classes are constructed with `new()`.
+- **Only capable classes get a table.** `ThemePartsTables` holds only the capable classes, so the
+  emitter writes `with_parts` only for them. Any other class is `T::new()`, with every unit.
+  `Build::theme` does not depend on the capability: the application's code constructs the theme,
+  and the build writes the table for it.
+- **References follow the capability.** The `references` a crate exports are the references of
+  all its documents except those of capable classes. Before, a crate with any units exported
+  none. An ordinary class is constructed whole, so what its documents name must root the units of
+  the applications that depend on its crate. In the repository only the five themes have units,
+  and all five are capable. Their `.xamlmeta` and the kept units of the samples are therefore
+  unchanged.
+
+### 14.2 One allocator for the generated names
+
+`rust_emitter::allocate_names` names:
+
+- the build functions of an ordinary group, with their untyped wrappers;
+- the populate and build functions of a class group;
+- through `theme_roots::parts_static_names`, the parts tables of `compiled_markup`.
+
+The relation `collides` decides when two names clash. It also covers the names derived from a
+function (`_deferred_<n>`, `_part_<n>`, `_unit_<n>`, `_untyped`).
+
+- **Unique names keep their established form.** A name that collides with no other keeps its
+  established form (`function_name_of`, `parts_static_name`). The checked-in generated files and
+  the names applications write (`THEME_PARTS_FERROUI_THEMES_WINUI_WINUITHEME`) are unchanged.
+- **Every colliding name is disambiguated.** Each one gets `_` and the 32-bit FNV-1a hash of its
+  text, in eight hexadecimal digits in the case of the name. The text is the document path below
+  the root URI, or the full name of the class. The result does not depend on the order of the
+  documents. `A-B.xaml` and `A_B.xaml` in one group, or in a class group, gave `build_a_b_xaml`
+  twice (E0428). `A.B_C` and `A_B.C` gave one parts static. Each now gets a name of its own, and
+  the `.xamlmeta` records the final build path. An ordinary group used to refuse the second
+  document ("rename one of them"); it now compiles both.
+- **A public name that cannot change is an error that names both places:**
+  - two public documents whose URIs differ only in case, because the loader table compares
+    without regard to case (`rt::uri_equals`);
+  - a theme stated with `Build::theme` whose established table name another theme of the
+    dependencies also has, because the application's code names the table.
+
+### 14.3 Tests
+
+- `tests/GeneratedRustFixture/Library` has these classes, each partitioned into units:
+  - an application class with `new()` only;
+  - `GeneratedRust.Library.A_B.PartsTheme` and `GeneratedRust.Library.A.B.Partstheme`, themes with
+    `with_parts` whose full names differ only in case and punctuation;
+  - a theme whose constructor from units is named `from_parts`.
+- `tests/GeneratedRustFixture/Consumer` constructs these classes and each theme of the framework in
+  its documents. It also has an ordinary group and a class group that both contain `A-B.xaml` and
+  `A_B.xaml`. Its tests name the final functions and tables, so rustc checks them:
+  - the framework themes keep their established table names;
+  - the two colliding themes get their hashed names;
+  - the application class and the renamed theme are constructed with `new()`.
+- `rust_emitter/source.rs`: the allocator, and the case-insensitive comparison of URIs.
+- `rust_emitter/runtime_host.rs` (`colliding_function_names_are_disambiguated`): case, punctuation,
+  `_untyped` and `_deferred_<n>` collisions, an internal document beside a public one, and the
+  error for two public URIs.
+- `theme_roots_tests.rs`: the parts statics, the capability, and the producer check.
+- `tests/FerroUI.Markup.Xaml.UnitTests/emitter/build_diagnostics.rs`: the error and the
+  disambiguation reported by a build.
+
+## 19. Why each unit is kept (#852, first step)
+
+Issue #852 asks whether a graph of entries could split the high-fanout dictionaries of a theme
+into clusters that link independently: `Resources/Generic.xaml` of WinUI has 330 keys, and
+`Accents/FluentControlResources.xaml` of Fluent 626 in one unit. Its rule is to count first, and to
+stop if the count does not carry the idea. This step provides the count and the reasons. It changes
+no kept unit.
+
+`$OUT_DIR/xaml/theme_parts_why.txt`, written next to `theme_parts.txt`, has a block for each theme
+the application trims:
+
+- **A line of totals:** the units kept, and of the keys the kept units define, how many are live.
+  A key is live when it is a root or a kept unit references it. A unit with few live keys is the
+  candidate for entry-level selection that the issue describes.
+- **A line for each kept unit:** its name, its live and total keys, whether its reason is
+  `conservative` or `exact`, and the first reason the closure found. A reason is one of these:
+  - the ambient unit;
+  - named by the manifest or the build script;
+  - the theme of a live type, with what made the type live (a root of the documents or the sources,
+    a type a kept unit constructs, or a base class or created class of another);
+  - a live key, with where it came from (a root, or the unit that references it).
+
+  A reason is conservative when its root is a token of a document, a name of the sources or a
+  reference of a dependency: something that may only spell the key or the type. Stated roots,
+  constructions and references of kept units are exact.
+
+`theme_roots::explain_kept_units` (new) runs the closure of `kept_units` and records the first reason
+it meets for each unit. Its units are those of `kept_units` over the union of its sources, and a test
+checks this. `theme_roots::why_kept_listing` (new) writes the block.
+
+Not done in this step:
+
+- the count for hello world and a larger sample, and the bytes behind the counts. The listing gives
+  the keys; the bytes need a link map of a build of a sample with the Skia backend.
+- clusters inside one dictionary. Whether to build them waits for that count.

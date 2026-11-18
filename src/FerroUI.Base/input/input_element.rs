@@ -157,6 +157,11 @@ crate::ferro_class_info!(InputElement { new: InputElement::new });
 ferro_impl_classes!(InputElement: StyledElementImpl, LayoutableImpl, InteractiveImpl);
 
 crate::ferro_overrides! { impl FerroObjectImpl for InputElement {
+    // The handler leaves where the property is not one it named (`reacts_to`).
+    inherited_reactions: crate::InheritedReactions::to(|property| {
+        property.has_change_handler(PropertyChangeHandler::InputElement).into()
+    });
+
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.update_pseudo_classes(Some(this.is_focused()), Some(this.is_pointer_over()));

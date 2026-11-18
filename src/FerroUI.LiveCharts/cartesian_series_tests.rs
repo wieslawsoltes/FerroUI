@@ -706,3 +706,110 @@ fn source_heat_hit_tests() {
         )
         .is_empty());
 }
+
+// HeatSeriesTest.ShouldPlaceDataLabel: the source's nine cells (weights 0 to 2 by column) on a
+// 500 by 500 chart with a draw margin of 100 and hidden axes. Without data labels a cell has no
+// label; with them, the label of the primary value is centred on the inset cell (`Middle`, the
+// default of a heat series) or beside it at the `Top`, `Bottom`, `Left` and `Right`, its size
+// the text grown by `DataLabelsPadding`. `End` and `Start` go below and above the cells of this
+// fixture, whose primary values are not greater than the pivot or are (rows 1 and 2).
+#[test]
+fn source_heat_should_place_data_label() {
+    let metrics =
+        |text: &str, size: f64| Size::new(text.chars().count() as f64 * size * 0.6, size * 1.2);
+    let mut series = Series::new(SeriesKind::Heat);
+    series.values = (0..9)
+        .map(|i| Coordinate::weighted((i % 3) as f64, (i / 3) as f64, (i % 3) as f64))
+        .collect();
+    series.data_padding = ferroui_base::Point::new(0.0, 0.0);
+    let hidden = Axis {
+        visible: false,
+        ..Axis::default()
+    };
+    // The cell visual and the centre and size of the label of every point.
+    let place = |series: &Series, position: Option<DataLabelsPosition>| {
+        let mut options = CartesianSeriesOptions::default();
+        options.data_labels_position = position;
+        let scene = CartesianChartEngine::measure_with_series_options(
+            Size::new(500.0, 500.0),
+            std::slice::from_ref(series),
+            std::slice::from_ref(&hidden),
+            std::slice::from_ref(&hidden),
+            &CartesianOptions {
+                draw_margin: Some(Rect::new(100.0, 100.0, 300.0, 300.0)),
+                ..CartesianOptions::default()
+            },
+            metrics,
+            &[options],
+        )
+        .unwrap()
+        .scene;
+        let cells = rectangles(&scene, 0);
+        let labels: Vec<_> = scene
+            .primitives
+            .iter()
+            .filter_map(|p| match (&p.geometry, p.id) {
+                (
+                    Geometry::Text {
+                        origin, text, size, ..
+                    },
+                    Some(id),
+                ) if id.series == 0 => {
+                    let measured = metrics(text, *size);
+                    let label = Size::new(
+                        measured.width + crate::series::DATA_LABELS_PADDING.0 * 2.0,
+                        measured.height + crate::series::DATA_LABELS_PADDING.1 * 2.0,
+                    );
+                    let center =
+                        ferroui_base::Point::new(origin.x, origin.y + measured.height * 0.5);
+                    Some((id.point, center, label))
+                }
+                _ => None,
+            })
+            .collect();
+        (cells, labels)
+    };
+    let (cells, labels) = place(&series, None);
+    assert_eq!(cells.len(), 9);
+    assert!(labels.is_empty(), "no labels without DataLabels");
+    series.data_labels = true;
+    let check = |position: Option<DataLabelsPosition>,
+                 expected: &dyn Fn(Rect, Size, usize) -> (f64, f64)| {
+        let (cells, labels) = place(&series, position);
+        assert_eq!(labels.len(), 9, "{position:?}");
+        for (point, center, label) in labels {
+            let (x, y) = expected(cells[point], label, point);
+            assert_close(center.x, x, "label x");
+            assert_close(center.y, y, "label y");
+        }
+    };
+    let middle = |v: Rect, _: Size, _: usize| (v.x + v.width * 0.5, v.y + v.height * 0.5);
+    let top = |v: Rect, l: Size, _: usize| (v.x + v.width * 0.5, v.y - l.height * 0.5);
+    let bottom =
+        |v: Rect, l: Size, _: usize| (v.x + v.width * 0.5, v.y + v.height + l.height * 0.5);
+    check(None, &middle);
+    check(Some(DataLabelsPosition::Middle), &middle);
+    check(Some(DataLabelsPosition::Top), &top);
+    check(Some(DataLabelsPosition::Bottom), &bottom);
+    check(Some(DataLabelsPosition::Right), &|v, l, _| {
+        (v.x + v.width + l.width * 0.5, v.y + v.height * 0.5)
+    });
+    check(Some(DataLabelsPosition::Left), &|v, l, _| {
+        (v.x - l.width * 0.5, v.y + v.height * 0.5)
+    });
+    // The primary value of the first row is the pivot (0): its end is below, its start above.
+    check(Some(DataLabelsPosition::End), &|v, l, point| {
+        if point < 3 {
+            bottom(v, l, point)
+        } else {
+            top(v, l, point)
+        }
+    });
+    check(Some(DataLabelsPosition::Start), &|v, l, point| {
+        if point < 3 {
+            top(v, l, point)
+        } else {
+            bottom(v, l, point)
+        }
+    });
+}

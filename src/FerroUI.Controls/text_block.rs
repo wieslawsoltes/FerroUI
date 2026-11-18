@@ -100,6 +100,37 @@ impl ControlImpl for TextBlock {
 ferroui_base::ferro_impl_classes!(TextBlock: StyledElementImpl);
 
 ferroui_base::ferro_overrides! { impl FerroObjectImpl for TextBlock {
+    // What the handler below compares with: the typography properties and the names it
+    // matches. A name added to the handler is added here.
+    inherited_reactions: ferroui_base::InheritedReactions::to(|property| {
+        (Typography::is_property(property)
+            || matches!(
+                property.name(),
+                "FontSize"
+                    | "FontWeight"
+                    | "FontStyle"
+                    | "FontFamily"
+                    | "FontStretch"
+                    | "FlowDirection"
+                    | "LetterSpacing"
+                    | "TextDecorations"
+                    | "FontFeatures"
+                    | "Foreground"
+                    | "Text"
+                    | "TextWrapping"
+                    | "TextTrimming"
+                    | "TextAlignment"
+                    | "Padding"
+                    | "LineHeight"
+                    | "LineSpacing"
+                    | "MaxLines"
+                    | "TextLineBounds"
+                    | "LayoutRoundingPlacement"
+                    | "Inlines"
+            ))
+        .into()
+    });
+
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         // The inline collection is made on first use (`inlines`), not here.
@@ -126,6 +157,7 @@ ferroui_base::ferro_overrides! { impl FerroObjectImpl for TextBlock {
             }
         }
 
+        // A name added here is added to `inherited_reactions` above.
         match change.property().name() {
             // Properties that affect shaping: invalidate the run cache + layout.
             "FontSize" | "FontWeight" | "FontStyle" | "FontFamily" | "FontStretch" | "FlowDirection"

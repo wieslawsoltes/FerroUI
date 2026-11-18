@@ -587,8 +587,86 @@ impl ReloadOutcome {
 #[cfg(test)]
 mod tests;
 
+ferroui_base::ferro_thread_local! {
+    /// The open scopes of [`catch_reload`] on the thread, innermost last: the first
+    /// [`ReloadError`] raised in each ([`raise_reload_error`]).
+    static RELOAD_SCOPES: std::cell::RefCell<Vec<Option<ReloadError>>> = const { std::cell::RefCell::new(Vec::new()) };
+}
+
+/// An open scope of [`catch_reload`]; closed when dropped, also when the action panics.
+struct ReloadScope {
+    depth: usize,
+}
+
+impl ReloadScope {
+    fn open() -> Self {
+        let depth = RELOAD_SCOPES.with(|scopes| {
+            let mut scopes = scopes.borrow_mut();
+            scopes.push(None);
+            scopes.len()
+        });
+        Self { depth }
+    }
+
+    /// The first error raised in the scope.
+    fn close(self) -> Option<ReloadError> {
+        let error = RELOAD_SCOPES.with(|scopes| {
+            let mut scopes = scopes.borrow_mut();
+            if scopes.len() == self.depth {
+                scopes.pop().flatten()
+            } else {
+                None
+            }
+        });
+        std::mem::forget(self);
+        error
+    }
+}
+
+impl Drop for ReloadScope {
+    fn drop(&mut self) {
+        RELOAD_SCOPES.with(|scopes| {
+            let mut scopes = scopes.borrow_mut();
+            if scopes.len() == self.depth {
+                scopes.pop();
+            }
+        });
+    }
+}
+
+/// Raises `error` in the innermost scope of [`catch_reload`], which returns the first error
+/// raised in it (#567): a resource lookup of a candidate that has no error channel (the
+/// lookup returns a value) records why the reload cannot go on and returns its fallback, and
+/// the reload fails with the error when the action ends. Outside a scope the error is raised
+/// as a panic, as before.
+pub(crate) fn raise_reload_error(error: ReloadError) {
+    let unraised = RELOAD_SCOPES.with(|scopes| match scopes.borrow_mut().last_mut() {
+        Some(scope) => {
+            if scope.is_none() {
+                *scope = Some(error);
+            }
+            None
+        }
+        None => Some(error),
+    });
+    if let Some(error) = unraised {
+        std::panic::panic_any(error);
+    }
+}
+
+/// Runs a step of a reload: its error, else the first error raised in it
+/// ([`raise_reload_error`]), else the error of a panic of an adapter, of an application
+/// callback or of the XAML runtime while the candidate is populated.
 fn catch_reload<T>(action: impl FnOnce() -> Result<T, ReloadError>) -> Result<T, ReloadError> {
-    std::panic::catch_unwind(std::panic::AssertUnwindSafe(action)).unwrap_or_else(|payload| {
+    let scope = ReloadScope::open();
+    // Boundary (#567): adapters and application callbacks run here, and the contract of
+    // `apply_pending_with` names their panics; a throw of the XAML runtime during population
+    // is a panic too. With `panic = "abort"` these end the process.
+    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(action));
+    if let Some(error) = scope.close() {
+        return Err(error);
+    }
+    result.unwrap_or_else(|payload| {
         if let Some(error) = payload.downcast_ref::<ReloadError>() {
             return Err(error.clone());
         }

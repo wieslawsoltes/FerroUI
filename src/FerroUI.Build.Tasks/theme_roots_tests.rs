@@ -242,3 +242,168 @@ fn the_manifest_states_whether_bindings_compile() {
     // The key does not change the trimming of the themes.
     assert_eq!(ThemeTrimming::from_manifest("[package.metadata.ferroui]\ncompile-bindings = false\n"), Ok(ThemeTrimming::default()));
 }
+
+/// Not from upstream (#849): the established name of a parts table is kept where no other class has
+/// it (every theme of the framework); classes whose full names differ in case or punctuation only
+/// get names disambiguated from their full names, the same whatever the order.
+#[test]
+fn parts_tables_of_classes_that_collide_get_two_names() {
+    let themes = ["FerroUI.Themes.WinUI.WinUITheme", "FerroUI.Themes.Fluent.FluentTheme", "A.B_C", "A_B.C", "a.b.c"];
+    let names = parts_static_names(&themes);
+    assert_eq!(names[0], "THEME_PARTS_FERROUI_THEMES_WINUI_WINUITHEME");
+    assert_eq!(names[1], "THEME_PARTS_FERROUI_THEMES_FLUENT_FLUENTTHEME");
+    for name in &names[2..] {
+        assert!(name.starts_with("THEME_PARTS_A_B_C_") && name.len() == "THEME_PARTS_A_B_C_".len() + 8, "{name}");
+        assert_eq!(name.to_ascii_uppercase(), *name);
+    }
+    assert_ne!(names[2], names[3]);
+    assert_ne!(names[3], names[4]);
+    assert_ne!(names[2], names[4]);
+    let reversed = parts_static_names(&["a.b.c", "A_B.C", "A.B_C"]);
+    assert_eq!(reversed, [names[4].clone(), names[3].clone(), names[2].clone()]);
+    // A class alone keeps its established name.
+    assert_eq!(parts_static_names(&["A.B_C"]), ["THEME_PARTS_A_B_C"]);
+}
+
+/// A model of the crate `themes` with the class `Tests.Theme` (units, and the public functions
+/// `functions` of its type, as names and numbers of parameters) and the class `Tests.App` (units,
+/// and `new()` only).
+fn model_with(functions: &[(&str, usize, bool)]) -> AssemblyModel {
+    use ferroui_build_scan::model::{FunctionModel, FunctionsModel};
+    let mut model = AssemblyModel::new("Tests", "themes");
+    for (name, module) in [("Theme", "themes::theme"), ("App", "themes::app")] {
+        let rust_path = RustType::resolved(&format!("::{module}::{name}"));
+        let mut type_ = TypeModel::new(name, TypeKind::Class, rust_path, module);
+        type_.namespace = "Tests".to_string();
+        type_.public_path = Some(format!("::themes::{name}"));
+        model.types.push(type_);
+        model.theme_units.push(ThemeUnitsModel {
+            class: format!("Tests.{name}"),
+            table_path: format!("::themes::compiled_{}::THEME_UNITS", name.to_lowercase()),
+            units: vec![unit(0, "ambient", &[], &[], &[], &[])],
+        });
+    }
+    let function = |name: &str, parameters: usize, receiver: bool| FunctionModel {
+        name: name.to_string(),
+        receiver,
+        parameters,
+        declared_by: None,
+    };
+    model.functions = vec![
+        FunctionsModel {
+            owner: "::themes::theme::Theme".to_string(),
+            public_path: "::themes::Theme".to_string(),
+            functions: functions.iter().map(|(name, count, receiver)| function(name, *count, *receiver)).collect(),
+        },
+        FunctionsModel {
+            owner: "::themes::app::App".to_string(),
+            public_path: "::themes::App".to_string(),
+            functions: vec![function("new", 0, false)],
+        },
+    ];
+    model
+}
+
+/// Not from upstream (#849): another crate constructs a class from selected units only when its
+/// type model states a public `with_parts` of two parameters without `self`; an ordinary class
+/// whose markup is partitioned into units, a class of no crate's units and a function of another
+/// shape are not that capability.
+#[test]
+fn a_class_is_constructed_from_units_only_with_its_constructor_from_units() {
+    let models = [model_with(&[("new", 0, false), ("with_parts", 2, false)])];
+    assert_eq!(parts_constructor(&models, "Tests.Theme"), Some("::themes::Theme::with_parts".to_string()));
+    assert_eq!(parts_constructor(&models, "Tests.App"), None);
+    assert_eq!(parts_constructor(&models, "Tests.Missing"), None);
+    for functions in [&[("from_parts", 2, false)][..], &[("with_parts", 1, false)], &[("with_parts", 2, true)]] {
+        assert_eq!(parts_constructor(&[model_with(functions)], "Tests.Theme"), None, "{functions:?}");
+    }
+}
+
+/// An inherent function of the type `Tests.Theme` of [`model_with`], as the scanner reads it.
+fn inherent(name: &str, visibility: &str, parameters: &[&str], return_type: &str) -> InherentFunction {
+    InherentFunction {
+        owner: "::themes::theme::Theme".to_string(),
+        name: name.to_string(),
+        visibility: visibility.to_string(),
+        receiver: false,
+        parameters: strings(parameters),
+        return_type: Some(return_type.to_string()),
+        declared_by: None,
+        module: "themes::theme".to_string(),
+        file: std::path::PathBuf::from("theme.rs"),
+        line: 1,
+    }
+}
+
+/// Not from upstream (#849): the build of the crate of a class verifies the signature of its
+/// constructor from units, whatever the paths and the white space are written with; a public
+/// `with_parts` of two parameters and another signature is an error, since other crates would call
+/// it; no such function, or a private one, is an ordinary class.
+#[test]
+fn the_build_of_a_class_verifies_its_constructor_from_units() {
+    let model = model_with(&[]);
+    let verify = |functions: &[InherentFunction]| verify_parts_constructor(&model, functions, "Tests.Theme");
+    let sp = "Option<Rc<dyn IServiceProvider>>";
+    assert_eq!(verify(&[inherent("with_parts", "pub", &[sp, "rt::ThemeParts"], "Ref<Self>")]), Ok(true));
+    let qualified = [
+        "::core::option::Option< ::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider> >",
+        "ferroui_markup_xaml::xaml_il::runtime::compiled::ThemeParts",
+    ];
+    assert_eq!(verify(&[inherent("with_parts", "pub", &qualified, "ferroui_base::Ref<Theme>")]), Ok(true));
+    assert_eq!(verify(&[]), Ok(false));
+    assert_eq!(verify(&[inherent("with_parts", "", &[sp, "rt::ThemeParts"], "Ref<Self>")]), Ok(false));
+    assert_eq!(verify(&[inherent("from_parts", "pub", &[sp, "rt::ThemeParts"], "Ref<Self>")]), Ok(false));
+    let wrong = verify(&[inherent("with_parts", "pub", &[sp, "Vec<u32>"], "Ref<Self>")]);
+    let named = |reason: &String| reason.starts_with("`Tests.Theme` has `pub fn with_parts(");
+    assert!(wrong.as_ref().is_err_and(named), "{wrong:?}");
+    // A class of no type of the model.
+    assert_eq!(verify_parts_constructor(&model, &[], "Tests.Missing"), Ok(false));
+    assert_eq!(last_segments("Option < Rc < dyn crate::IServiceProvider > >"), "Option<Rc<dynIServiceProvider>>");
+}
+
+/// Not from upstream (#852): the explained closure keeps the units [`kept_units`] keeps, with the
+/// first reason for each (stated, constructed, referenced or conservative) and the live share of
+/// its keys; the listing has the totals.
+#[test]
+fn every_kept_unit_has_a_reason() {
+    let graph = TypeGraph::from_pairs(&[("MyButton", "Button")]);
+    let documents = Roots { types: set(&["MyButton"]), keys: set(&["CaptionStyle"]), ..Roots::default() };
+    let manifest = Roots { names: set(&["Controls/Popup.xaml"]), ..Roots::default() };
+    let button_keys = ["ButtonPadding", "ButtonUnused"];
+    let theme = ThemeUnitsModel {
+        class: "Tests.Explained".to_string(),
+        table_path: "::tests::compiled_xaml::THEME_UNITS".to_string(),
+        units: vec![
+            unit(0, "ambient", &["AmbientBrush"], &[], &[], &[]),
+            unit(1, "Controls/Button.xaml", &button_keys, &["Button"], &["AccentBrush"], &["TextBlock"]),
+            unit(2, "Resources/Accent.xaml", &["AccentBrush", "AccentUnused"], &[], &[], &[]),
+            unit(3, "Controls/TextBlock.xaml", &[], &["TextBlock"], &[], &[]),
+            unit(4, "Resources/Caption.xaml", &["CaptionStyle"], &[], &[], &[]),
+            unit(5, "Controls/Popup.xaml", &[], &["Popup"], &[], &[]),
+            unit(6, "Controls/Unused.xaml", &[], &["Unused"], &[], &[]),
+        ],
+    };
+    let sources: [(&str, &Roots); 2] = [("manifest", &manifest), ("documents", &documents)];
+    let explained = explain_kept_units(&theme, &sources, &graph, false);
+    let mut union = documents.clone();
+    union.extend(manifest.clone());
+    let indices: Vec<u32> = explained.iter().map(|unit| unit.index).collect();
+    assert_eq!(indices, kept_units(&theme, &union, &graph, false));
+    assert_eq!(indices, [0, 1, 2, 3, 4, 5]);
+    let reason = |index: u32| explained.iter().find(|unit| unit.index == index).expect("kept").clone();
+    assert_eq!(reason(0).reason, "the ambient unit, always kept");
+    assert!(reason(1).reason.contains("defines the theme of Button") && reason(1).reason.contains("makes Button live"));
+    assert!(reason(1).conservative, "a type of the documents is conservative");
+    assert_eq!(reason(2).reason, "defines AccentBrush: the key AccentBrush, referenced by Controls/Button.xaml");
+    assert!(!reason(2).conservative);
+    assert_eq!((reason(2).keys, reason(2).live_keys), (2, 1));
+    let constructed = "defines the theme of TextBlock: the type TextBlock, constructed by Controls/Button.xaml";
+    assert_eq!(reason(3).reason, constructed);
+    assert!(reason(4).conservative);
+    assert!(reason(4).reason.starts_with("defines CaptionStyle: the key CaptionStyle, a root of the documents"));
+    assert_eq!(reason(5).reason, "named by the manifest");
+    let listing = why_kept_listing("Tests.Explained", &explained, theme.units.len());
+    let totals = "Tests.Explained: 6 of 7 units; 2 of 6 keys of the kept units are live\n";
+    assert!(listing.starts_with(totals), "{listing}");
+    assert!(listing.contains("Resources/Accent.xaml\t1 of 2 keys live\texact\tdefines AccentBrush"), "{listing}");
+}

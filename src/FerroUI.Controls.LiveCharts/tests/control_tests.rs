@@ -1065,3 +1065,187 @@ fn polar_tooltip_text_takes_the_angle_labels_and_the_formatters_of_the_series() 
     })));
     assert_eq!(label(&chart), "Wind: 90 degrees: 5 km/h");
 }
+
+/// The gradient bar of a `HeatLegend` (`Legend` of a chart, the source's `SKHeatLegend`).
+fn heat_legend_bar(scene: &ferroui_livecharts::Scene) -> ferroui_base::Rect {
+    scene
+        .primitives
+        .iter()
+        .find_map(|p| match p.geometry {
+            ferroui_livecharts::Geometry::Rectangle { rect, .. }
+                if p.id.is_none() && p.style.fill_brush.is_some() =>
+            {
+                Some(rect)
+            }
+            _ => None,
+        })
+        .expect("the gradient bar of the heat legend")
+}
+
+fn has_text(scene: &ferroui_livecharts::Scene, wanted: &str) -> bool {
+    scene.primitives.iter().any(|p| {
+        matches!(&p.geometry, ferroui_livecharts::Geometry::Text { text, .. } if text == wanted)
+    })
+}
+
+/// SKChartingVisualsTests.SKHeatLegend_IsDrawnWhenAttachedToCartesianChartWithHeatSeries and
+/// SKHeatLegend_HorizontalPositionExercisesBottomBranch, from markup: a `HeatLegend` at the right
+/// of a 400 by 400 chart draws the gradient of its heat series beside the plot with its lowest
+/// and highest weights, and at the bottom with a `BadgeWidth` of 25 a bar 25 high under it; the
+/// legend object is observed. A heat series places its data labels by `DataLabelsPosition`.
+#[test]
+fn heat_legend_and_heat_data_label_positions_load_from_markup() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    register_types();
+    let loaded = FerroRuntimeXamlLoader::parse(
+        r##"<lc:CartesianChart xmlns:lc="https://ferroui.dev/livecharts" LegendPosition="Right">
+          <lc:CartesianChart.Legend>
+            <lc:HeatLegend />
+          </lc:CartesianChart.Legend>
+          <lc:HeatSeries DataLabels="True" DataLabelsPosition="Top">
+            <lc:ChartPoint X="0" Y="0" TertiaryValue="10" />
+            <lc:ChartPoint X="0" Y="1" TertiaryValue="20" />
+            <lc:ChartPoint X="1" Y="0" TertiaryValue="30" />
+            <lc:ChartPoint X="1" Y="1" TertiaryValue="40" />
+          </lc:HeatSeries>
+        </lc:CartesianChart>"##,
+        Some(&ASSEMBLY),
+    )
+    .unwrap_or_else(|error| panic!("{}; {:?}", error.message(), error.inner_exception()));
+    let chart = from_markup_value::<Ref<CartesianChart>>(&Some(loaded)).unwrap();
+    chart.set_animations_speed(0.0);
+    let legend = chart.legend().unwrap().cast::<HeatLegend>().unwrap();
+    assert_eq!(
+        legend.badge_padding(),
+        ferroui_base::Thickness::uniform(10.0)
+    );
+    let heat = chart.series().get(0).cast::<HeatSeries>().unwrap();
+    assert_eq!(heat.data_labels_position(), DataLabelsPosition::Top);
+    assert_eq!(
+        HeatSeries::new().data_labels_position(),
+        DataLabelsPosition::Middle
+    );
+    let size = Size::new(400.0, 400.0);
+    let scene = chart.scene(size).unwrap();
+    let bar = heat_legend_bar(&scene);
+    let plot = scene.plot_bounds;
+    assert!(bar.x >= plot.x + plot.width, "the bar is right of the plot");
+    assert!(bar.x + bar.width < 400.0);
+    assert!((bar.height - (plot.height - 20.0)).abs() < 1e-6);
+    assert!(has_text(&scene, "10") && has_text(&scene, "40"));
+    // The label of each cell is above it.
+    let cell = |point: usize| {
+        scene
+            .primitives
+            .iter()
+            .find_map(|p| match (&p.geometry, p.id) {
+                (ferroui_livecharts::Geometry::Rectangle { rect, .. }, Some(id))
+                    if id.point == point =>
+                {
+                    Some(*rect)
+                }
+                _ => None,
+            })
+            .unwrap()
+    };
+    let label_y = |point: usize| {
+        scene
+            .primitives
+            .iter()
+            .find_map(|p| match (&p.geometry, p.id) {
+                (ferroui_livecharts::Geometry::Text { origin, .. }, Some(id))
+                    if id.point == point =>
+                {
+                    Some(origin.y)
+                }
+                _ => None,
+            })
+            .unwrap()
+    };
+    for point in 0..4 {
+        assert!(
+            label_y(point) < cell(point).y,
+            "the label of {point} is above its cell"
+        );
+    }
+    // At the bottom with a badge width of 25.
+    chart.set_legend_position(LegendPosition::Bottom);
+    let revision = chart.revision();
+    legend.set_badge_width(Some(25.0));
+    assert!(chart.revision() > revision);
+    let scene = chart.scene(size).unwrap();
+    let bar = heat_legend_bar(&scene);
+    let plot = scene.plot_bounds;
+    assert_eq!(bar.height, 25.0);
+    assert!(bar.y >= plot.y + plot.height, "the bar is under the plot");
+    // Without a legend object the chart lists its series again.
+    chart.set_legend(None);
+    let scene = chart.scene(size).unwrap();
+    assert!(!scene
+        .primitives
+        .iter()
+        .any(|p| p.id.is_none() && p.style.fill_brush.is_some()));
+}
+
+/// GeoMapTests.GeoMap_HeatLegendRight_ReducesDrawMarginWidth: a heat legend at the right of an
+/// 800 by 600 map takes its width from the map and draws the gradient of the heat land series.
+#[test]
+fn geo_map_heat_legend_right_reduces_the_draw_margin_width() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let chart = GeoMap::new();
+    chart.set_animations_speed(0.0);
+    let series = HeatLandSeries::new();
+    heat_lands(&series, &[("rus", 1.0), ("usa", 9.0)]);
+    chart.series().add(series.upcast());
+    chart.set_legend_position(LegendPosition::Right);
+    chart.set_legend(Some(HeatLegend::new().upcast()));
+    let scene = chart.scene(Size::new(800.0, 600.0)).unwrap();
+    let plot = scene.plot_bounds;
+    assert!(plot.x + plot.width < 800.0);
+    let bar = heat_legend_bar(&scene);
+    assert!(bar.x >= plot.x + plot.width);
+    assert!(has_text(&scene, "1") && has_text(&scene, "9"));
+}
+
+/// `DataLabelsMaxWidth` of the Sankey and treemap series (the source's 170 by default) from
+/// markup: a treemap label that fits its tile of 120 only when broken at the width is drawn on
+/// two lines, and a width of 400 leaves it on one line, which the tile culls.
+#[test]
+fn sankey_and_treemap_data_labels_max_width_load_from_markup() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    register_types();
+    assert_eq!(SankeySeries::new().data_labels_max_width(), 170.0);
+    assert_eq!(TreemapSeries::new().data_labels_max_width(), 170.0);
+    let loaded = FerroRuntimeXamlLoader::parse(
+        r##"<lc:TreemapChart xmlns:lc="https://ferroui.dev/livecharts">
+          <lc:TreemapSeries Padding="0" DataLabels="True" DataLabelsMaxWidth="100">
+            <lc:TreemapSeries.Nodes>
+              <lc:TreemapNode Name="United States of America" Value="10" />
+            </lc:TreemapSeries.Nodes>
+          </lc:TreemapSeries>
+        </lc:TreemapChart>"##,
+        Some(&ASSEMBLY),
+    )
+    .unwrap_or_else(|error| panic!("{}; {:?}", error.message(), error.inner_exception()));
+    let chart = from_markup_value::<Ref<TreemapChart>>(&Some(loaded)).unwrap();
+    chart.set_animations_speed(0.0);
+    let series = chart.series().get(0).cast::<TreemapSeries>().unwrap();
+    assert_eq!(series.data_labels_max_width(), 100.0);
+    let size = Size::new(120.0, 300.0);
+    let texts = |chart: &TreemapChart| {
+        chart
+            .scene(size)
+            .unwrap()
+            .primitives
+            .iter()
+            .filter(|p| {
+                p.id.is_some() && matches!(p.geometry, ferroui_livecharts::Geometry::Text { .. })
+            })
+            .count()
+    };
+    assert!(texts(&chart) >= 2, "the label breaks into lines");
+    let revision = chart.revision();
+    series.set_data_labels_max_width(400.0);
+    assert!(chart.revision() > revision);
+    assert_eq!(texts(&chart), 0, "one line is wider than the tile");
+}

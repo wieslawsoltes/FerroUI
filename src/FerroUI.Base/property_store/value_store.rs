@@ -946,7 +946,9 @@ impl ValueStore {
         if let Some(notifying) = notifying {
             notifying(owner, true);
         }
-        owner.raise_inherited_property_changed(property, old_value, new_value, BindingPriority::Inherited);
+        if notifying.is_some() || owner.hears_inherited(property) {
+            owner.raise_inherited_property_changed(property, old_value, new_value, BindingPriority::Inherited);
+        }
         owner.for_each_inheritance_child(|child| {
             child.values().on_ancestor_inherited_value_changed(child, property, old_value, new_value);
         });
@@ -1173,9 +1175,12 @@ impl ValueStore {
             notifying(owner, true);
         }
 
-        // Raise PropertyChanged on this object if necessary.
-        let raiser = old_value.or(new_value).expect("one of the values is set");
-        raiser.raise_inherited_value_changed(property, owner, old_value, new_value);
+        // Raise PropertyChanged on this object if necessary: where something there can hear it
+        // (section 9.101 of desktop-performance.md).
+        if notifying.is_some() || owner.hears_inherited(property) {
+            let raiser = old_value.or(new_value).expect("one of the values is set");
+            raiser.raise_inherited_value_changed(property, owner, old_value, new_value);
+        }
 
         owner.for_each_inheritance_child(|child| {
             child.values().inherited_value_changed(child, property, old_value, new_value)

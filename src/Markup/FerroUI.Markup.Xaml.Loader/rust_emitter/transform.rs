@@ -70,13 +70,21 @@ pub struct TransformOptions {
     pub theme_parts: Option<Rc<ThemePartsTables>>,
 }
 
+/// The associated function a class is constructed from selected units of its compiled markup with
+/// (#568, #849): `fn with_parts(Option<Rc<dyn IServiceProvider>>, rt::ThemeParts) -> Ref<Self>`.
+/// A class whose markup is partitioned into units has the capability only when it has a public
+/// function of that name and signature (the themes of the framework); any other class is
+/// constructed with `new()`, however its markup is partitioned.
+pub const PARTS_CONSTRUCTOR: &str = "with_parts";
+
 /// The parts tables of the themes an application trims (#568, step 3 of
-/// docs/porting/theme-trimming.md): for each class whose compiled markup is partitioned into
-/// units, the expression of the static table of the units the application keeps
-/// (`crate::compiled_markup::THEME_PARTS_<CLASS>`). The emitter writes a construction of such a
-/// class in the documents (`<WinUITheme />`) as `Class::with_parts(None, <table>)` instead of
-/// `Class::new()`, and records the class; the build writes the tables, after every group is
-/// compiled, from the roots of all of them.
+/// docs/porting/theme-trimming.md): for each class that can be constructed from selected units of
+/// its compiled markup ([`PARTS_CONSTRUCTOR`]; the build states which, #849), the expression of
+/// the static table of the units the application keeps (`crate::compiled_markup::THEME_PARTS_<CLASS>`,
+/// the name the build allocated). The emitter writes a construction of such a class in the
+/// documents (`<WinUITheme />`) as `Class::with_parts(None, <table>)` instead of `Class::new()`,
+/// and records the class; the build writes the tables, after every group is compiled, from the
+/// roots of all of them. A class that is not in the tables is constructed with `new()`.
 #[derive(Debug, Default)]
 pub struct ThemePartsTables {
     /// The expression of the table of each class, by the full name of the class.

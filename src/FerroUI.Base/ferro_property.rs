@@ -3,15 +3,17 @@ use crate::ferro_property_metadata::Coercion;
 use crate::property_store::{EffectiveValue, EffectiveValueDyn, IValueEntry};
 use crate::reactive::{Disposable, IDisposable, IObservable, Subscription};
 use crate::utilities::HandlerList;
+use crate::type_system::{ChangeHandlerLayer, InheritedReaction};
 use crate::{
     AttachedProperty, DirectProperty, DirectPropertyMetadata, FerroObject, FerroPropertyChangedEventArgs,
     FerroPropertyMetadata, FerroPropertyRegistry, ObjectType, StaticType, StyledProperty, StyledPropertyMetadata,
-    TypeInfo,
+    TypeIdentity, TypeInfo,
 };
 use std::any::{Any, TypeId};
-use std::cell::{Cell, OnceCell};
+use std::cell::{Cell, OnceCell, RefCell};
+use std::collections::HashMap;
 use std::fmt;
-use std::hash::{Hash, Hasher};
+use std::hash::{BuildHasherDefault, Hash, Hasher};
 use std::rc::Rc;
 use std::sync::atomic::{AtomicU32, Ordering};
 
@@ -334,11 +336,218 @@ type ChangedHandler = dyn Fn(&FerroPropertyChangedEventArgs<'_>);
 /// The stream of change notifications of a property across all objects.
 pub struct PropertyChangedObservable {
     handlers: HandlerList<ChangedHandler>,
+    /// Who hears a change of the property that reaches an object from an ancestor: kept for a
+    /// property that inherits only.
+    hearing: Option<Box<Hearing>>,
+}
+
+/// Whether a change of an inherited property that reaches an object from an ancestor is heard
+/// by an object of a class.
+#[derive(Clone, Copy)]
+enum Heard {
+    /// No handler of the class reacts to the property and the property has no handler for it.
+    No,
+    Yes,
+    /// Only while the question is `true` for the object (`InheritedReaction::While`, a class
+    /// handler with a condition).
+    One(Question),
+    /// Only while one of several questions is: their place in `Hearing::asked`.
+    While(u16),
+}
+
+/// A question to an object.
+type Question = fn(&FerroObject) -> bool;
+
+/// The questions kept for a class: more than these are answered with yes.
+type Questions = [Option<Question>; 3];
+
+/// What is known of who hears a change of an inherited property (FerroUI deviation,
+/// desktop-performance.md section 9.101). The answers are for a class; they are made when a
+/// class is first asked for and dropped when a handler of the property comes or goes.
+struct Hearing {
+    /// The class each handler of the property is for, with its token (`None` for a handler of
+    /// every class), and the question it asks an object before it runs, where it has one.
+    targets: RefCell<Vec<(u64, Option<&'static TypeIdentity>, Option<Question>)>>,
+    /// The answers for the classes asked last, at a place made of a few bits of the address of
+    /// the class: a walk over a tree asks for a handful of classes in turn.
+    recent: [Cell<(*const TypeInfo, Heard)>; RECENT],
+    by_class: RefCell<HashMap<*const TypeInfo, Heard, BuildHasherDefault<ClassHasher>>>,
+    /// The questions of the classes that have some.
+    asked: RefCell<Vec<Questions>>,
+}
+
+/// The places of `Hearing::recent`.
+const RECENT: usize = 8;
+
+/// The place of a class in `Hearing::recent`.
+#[inline]
+fn recent_place(class: *const TypeInfo) -> usize {
+    let address = class as usize;
+    ((address >> 4) ^ (address >> 8) ^ (address >> 12)) & (RECENT - 1)
+}
+
+/// The hash of the address of the type information of a class: the addresses of statics, which
+/// differ above their alignment.
+#[derive(Default)]
+struct ClassHasher(u64);
+
+impl Hasher for ClassHasher {
+    fn finish(&self) -> u64 {
+        self.0
+    }
+
+    fn write(&mut self, bytes: &[u8]) {
+        for byte in bytes {
+            self.0 = (self.0 << 8) | u64::from(*byte);
+        }
+    }
+
+    fn write_usize(&mut self, address: usize) {
+        self.0 = (address as u64 >> 3).wrapping_mul(0x9E37_79B9_7F4A_7C15);
+    }
+}
+
+impl Hearing {
+    fn new() -> Self {
+        Self {
+            targets: RefCell::new(Vec::new()),
+            recent: std::array::from_fn(|_| Cell::new((std::ptr::null(), Heard::Yes))),
+            by_class: RefCell::new(HashMap::default()),
+            asked: RefCell::new(Vec::new()),
+        }
+    }
+
+    fn forget(&self) {
+        for recent in &self.recent {
+            recent.set((std::ptr::null(), Heard::Yes));
+        }
+        self.by_class.borrow_mut().clear();
+        self.asked.borrow_mut().clear();
+    }
+
+    fn handler_added(&self, token: u64, target: Option<&'static TypeIdentity>, question: Option<Question>) {
+        self.targets.borrow_mut().push((token, target, question));
+        self.forget();
+    }
+
+    fn handler_removed(&self, token: u64) {
+        self.targets.borrow_mut().retain(|(candidate, _, _)| *candidate != token);
+        self.forget();
+    }
+
+    #[cold]
+    #[inline(never)]
+    fn of_class(&self, class: &'static TypeInfo, property: &'static FerroProperty) -> Heard {
+        let known = self.by_class.borrow().get(&std::ptr::from_ref(class)).copied();
+        let heard = known.unwrap_or_else(|| {
+            let heard = self.find(class, property);
+            self.by_class.borrow_mut().insert(class, heard);
+            heard
+        });
+        self.recent[recent_place(class)].set((class, heard));
+        heard
+    }
+
+    #[cold]
+    #[inline(never)]
+    fn ask(&self, questions: u16, object: &FerroObject) -> bool {
+        let questions = self.asked.borrow()[usize::from(questions)];
+        questions.iter().flatten().any(|question| question(object))
+    }
+
+    fn find(&self, class: &'static TypeInfo, property: &'static FerroProperty) -> Heard {
+        let mut questions: Questions = [None; 3];
+        let mut asked = 0;
+        let mut ask = |question: Question| {
+            let kept = asked < questions.len();
+            if kept {
+                questions[asked] = Some(question);
+                asked += 1;
+            }
+            kept
+        };
+        // The handlers of the property for the class, or for every class.
+        for (_, target, question) in self.targets.borrow().iter() {
+            if target.is_none_or(|target| class.derives_from(target)) {
+                match question {
+                    Some(question) if ask(*question) => {}
+                    _ => return Heard::Yes,
+                }
+            }
+        }
+        // The change handlers of the class and of its base classes.
+        let mut current = Some(class);
+        while let Some(layer) = current {
+            match layer.change_handler_layer() {
+                ChangeHandlerLayer::Absent => {}
+                ChangeHandlerLayer::Unknown => return Heard::Yes,
+                ChangeHandlerLayer::Stated(reactions) => match reactions.reaction_to(property) {
+                    InheritedReaction::Never => {}
+                    InheritedReaction::Always => return Heard::Yes,
+                    InheritedReaction::While(question) => {
+                        if !ask(question) {
+                            return Heard::Yes;
+                        }
+                    }
+                },
+            }
+            current = layer.base_type();
+        }
+        match (asked, questions[0]) {
+            (0, _) => return Heard::No,
+            (1, Some(question)) => return Heard::One(question),
+            _ => {}
+        }
+        let mut kept = self.asked.borrow_mut();
+        let place = kept.iter().position(|candidate| *candidate == questions).unwrap_or_else(|| {
+            kept.push(questions);
+            kept.len() - 1
+        });
+        u16::try_from(place).map_or(Heard::Yes, Heard::While)
+    }
 }
 
 impl PropertyChangedObservable {
-    fn new() -> Self {
-        Self { handlers: HandlerList::new() }
+    fn new(inherits: bool) -> Self {
+        Self { handlers: HandlerList::new(), hearing: inherits.then(|| Box::new(Hearing::new())) }
+    }
+
+    /// Whether a change of the property that reaches `object` from an ancestor has anything to
+    /// reach there but the listeners of the object: a handler of the property for the class of
+    /// the object, or a change handler of the class that reacts to the property. `true` where
+    /// that is not known.
+    #[inline]
+    pub(crate) fn hears_inherited(&self, object: &FerroObject, property: &'static FerroProperty) -> bool {
+        let Some(hearing) = &self.hearing else {
+            return true;
+        };
+        let class = object.get_type();
+        let (recent, heard) = hearing.recent[recent_place(class)].get();
+        let heard = if std::ptr::eq(recent, class) { heard } else { hearing.of_class(class, property) };
+        match heard {
+            Heard::Yes => true,
+            Heard::No => false,
+            Heard::One(question) => question(object),
+            Heard::While(questions) => hearing.ask(questions, object),
+        }
+    }
+
+    fn subscribe_for(
+        &'static self,
+        target: Option<&'static TypeIdentity>,
+        question: Option<Question>,
+        handler: Rc<ChangedHandler>,
+    ) -> Subscription {
+        let token = self.handlers.add(handler);
+        if let Some(hearing) = &self.hearing {
+            hearing.handler_added(token, target, question);
+        }
+        Subscription::new(Disposable::create(move || {
+            self.handlers.remove(token);
+            if let Some(hearing) = &self.hearing {
+                hearing.handler_removed(token);
+            }
+        }))
     }
 
     /// Subscribes to changes of the property on any object.
@@ -347,10 +556,7 @@ impl PropertyChangedObservable {
     /// [`detach`](Subscription::detach) to keep it for the life of the
     /// property.
     pub fn subscribe(&'static self, handler: impl Fn(&FerroPropertyChangedEventArgs<'_>) + 'static) -> Subscription {
-        let token = self.handlers.add(Rc::new(handler));
-        Subscription::new(Disposable::create(move || {
-            self.handlers.remove(token);
-        }))
+        self.subscribe_for(None, None, Rc::new(handler))
     }
 
     /// Subscribes a handler that is only invoked for objects of class
@@ -363,11 +569,40 @@ impl PropertyChangedObservable {
         &'static self,
         handler: impl Fn(&TTarget, &FerroPropertyChangedEventArgs<'_>) + 'static,
     ) -> Subscription {
-        self.subscribe(move |e| {
-            if let Some(target) = e.sender().downcast_ref::<TTarget>() {
-                handler(target, e);
-            }
-        })
+        self.subscribe_for(
+            Some(TTarget::IDENTITY),
+            None,
+            Rc::new(move |e: &FerroPropertyChangedEventArgs<'_>| {
+                if let Some(target) = e.sender().downcast_ref::<TTarget>() {
+                    handler(target, e);
+                }
+            }),
+        )
+    }
+
+    /// Subscribes a handler that is only invoked for the objects of class `TTarget` (or of
+    /// classes derived from it) that `concerns` is `true` for when the change is raised: a class
+    /// handler that looks at a state of the object first and leaves where it is not concerned
+    /// states that as its condition. An inherited value that reaches an object the handler is
+    /// not concerned with need not be raised there for it (FerroUI addition,
+    /// desktop-performance.md section 9.101). `concerns` is only asked for objects of class
+    /// `TTarget`.
+    pub fn add_class_handler_where<TTarget: ObjectType>(
+        &'static self,
+        concerns: fn(&FerroObject) -> bool,
+        handler: impl Fn(&TTarget, &FerroPropertyChangedEventArgs<'_>) + 'static,
+    ) -> Subscription {
+        self.subscribe_for(
+            Some(TTarget::IDENTITY),
+            Some(concerns),
+            Rc::new(move |e: &FerroPropertyChangedEventArgs<'_>| {
+                if let Some(target) = e.sender().downcast_ref::<TTarget>() {
+                    if concerns(e.sender()) {
+                        handler(target, e);
+                    }
+                }
+            }),
+        )
     }
 
     #[inline]
@@ -463,7 +698,7 @@ impl FerroProperty {
             assign_binding: Cell::new(false),
             host_type: Cell::new(None),
             notifying: notifying.map(Rc::from),
-            changed: Rc::new(PropertyChangedObservable::new()),
+            changed: Rc::new(PropertyChangedObservable::new(init.inherits)),
             routes: OnceCell::new(),
         }
     }
@@ -708,6 +943,13 @@ impl FerroProperty {
     /// type.
     pub fn as_styled<T: crate::PropertyValue>(&'static self) -> Option<&'static StyledProperty<T>> {
         self.routes.get().and_then(|routes| routes.as_any().downcast_ref::<StyledProperty<T>>())
+    }
+
+    /// The property as a direct property with value type `T`: the typed view needed to set it
+    /// without boxing. `None` for styled properties and when `T` is not the property's value
+    /// type.
+    pub fn as_direct<T: crate::PropertyValue>(&'static self) -> Option<&'static crate::DirectPropertyBase<T>> {
+        self.routes.get().and_then(|routes| routes.as_any().downcast_ref::<crate::DirectPropertyBase<T>>())
     }
 
     /// The marker value that represents an unset property value.

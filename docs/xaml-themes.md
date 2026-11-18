@@ -247,7 +247,38 @@ needs. The build computes the table from the roots:
 6. the names in `[package.metadata.ferroui] theme-roots = [..]`.
 
 From the roots, the closure follows the unit graph. The kept units are listed in
-`$OUT_DIR/xaml/theme_parts.txt`.
+`$OUT_DIR/xaml/theme_parts.txt`. `$OUT_DIR/xaml/theme_parts_why.txt` (#852) explains each one: its
+first reason, whether that reason is conservative or exact, and how many of its keys are live.
+See docs/porting/theme-trimming.md, section 19.
+
+**Which classes are constructed from units (#849).** Partitioning a class into units and
+constructing it from some of them are two separate things. Any class whose document merges
+another one has units: a theme, but also an application class or a user control with a merged
+dictionary. Only a class with a public associated function
+`with_parts(Option<Rc<dyn IServiceProvider>>, rt::ThemeParts) -> Ref<Self>` can be constructed
+from selected units, and the generated code calls `with_parts` only for such a class. Every
+other class is constructed with `new()` and keeps all of its units, however its markup is
+partitioned. The build of the class's crate checks the signature. A public `with_parts` with two
+parameters and another signature is a build error, because other crates would call it. The
+crates that construct the class read this capability from the class's type model in the
+`.xamlmeta` (its public functions). An ordinary class is constructed whole, so the references of
+its documents are exported to the applications that depend on its crate, like the references of
+a crate without units. Only the documents of a class constructed from units are rooted through
+its unit graph.
+
+**Generated names are allocated, not assumed (#849).** One allocator names the build and
+populate functions of the documents of a group (with their untyped, deferred, part and unit
+functions) and the parts tables of `compiled_markup`. A name that no other item of the module has
+keeps its established form, so every existing name stays the same (`THEME_PARTS_` and the full
+name of the class in upper case; `build_` and the document path in snake case). When names
+collide, every one of them gets `_` and the FNV-1a hash of its document path or class full name,
+in eight hexadecimal digits, whatever the order. `A-B.xaml` and `A_B.xaml` get
+`build_a_b_xaml_<hash>` and `build_a_b_xaml_<other hash>`. `A.B_C` and `A_B.C` get
+`THEME_PARTS_A_B_C_<HASH>` and `THEME_PARTS_A_B_C_<OTHER HASH>`. The `.xamlmeta` records the
+final paths. Two cases are errors that name both places instead:
+- two public documents whose URIs differ only in case, which the loader table cannot tell apart;
+- a theme named in `Build::theme` whose established table name another theme of the dependencies
+  also has, because the application's code names the table by that name.
 
 **An application without markup.** An application whose interface is Rust code (the builders and
 `rsx!` of `ferroui-view`) constructs its theme in code, and `WinUITheme::new()` is every unit of
@@ -478,6 +509,7 @@ Documents loaded at run time bind the way the built application does (#604):
 | Resource and constant rows (step 1) | #568 | On `main` |
 | Units and the unit graph, all four checked-in themes (step 2) | #568 | On `main` |
 | Root tables, `with_parts`, debug diagnostic (step 3) | #568, #598 | On `main` |
+| `with_parts` only for a class that has it (the capability in its type model); one allocator for generated names | #849 | In review |
 | Roots from code: creates edges, source names and literals (step 4) | #568, #600 | On `main` |
 | Roots from the dependencies' documents; `full-themes` as the keep-all switch | #602 | On `main` |
 | Theme trimming on by default (`theme-trimming = false` to turn off) | #602 | On `main` |

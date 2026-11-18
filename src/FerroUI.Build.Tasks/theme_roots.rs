@@ -31,8 +31,9 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use ferroui_build_scan::model::{AssemblyModel, TypeKind};
-use ferroui_build_scan::scanner::SourceReferences;
+use ferroui_build_scan::scanner::{InherentFunction, SourceReferences};
 use ferroui_build_scan::xaml_metadata::ThemeUnitsModel;
+use ferroui_markup_xaml_loader::rust_emitter::{allocate_names, PARTS_CONSTRUCTOR};
 
 /// The key of the manifest table the trimming is read from.
 pub const MANIFEST_TABLE: &str = "package.metadata.ferroui";
@@ -318,12 +319,282 @@ pub fn kept_units(theme: &ThemeUnitsModel, roots: &Roots, graph: &TypeGraph, ful
     indices
 }
 
+/// Why a unit of a theme is kept, and how much of it is used (#852).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct KeptUnit {
+    /// The canonical index of the unit.
+    pub index: u32,
+    /// The name of the unit (the path of its document).
+    pub name: String,
+    /// The first reason the closure found, with where the root came from.
+    pub reason: String,
+    /// Whether the reason is a conservative one: a token of a document or a name of the sources
+    /// that happens to spell a key or a type, rather than a construction, a reference of a kept
+    /// unit or a stated root.
+    pub conservative: bool,
+    /// The keys the unit defines.
+    pub keys: usize,
+    /// The keys the unit defines that are live: a root, or referenced by a kept unit.
+    pub live_keys: usize,
+}
+
+/// [`kept_units`], with the reason each unit is kept (#852): the same closure, which records the
+/// first reason it meets for a unit. `sources` are the roots by where they come from (`"documents"`,
+/// `"sources"`, `"dependencies"`, `"manifest"`, `"build script"`), whose union the closure is over;
+/// a source named `"documents"`, `"sources"` or `"dependencies"` is conservative (its keys are tokens
+/// and names that may spell a key), the others are stated. The result is in canonical order, the
+/// units of [`kept_units`] over the union of the sources.
+pub fn explain_kept_units(
+    theme: &ThemeUnitsModel,
+    sources: &[(&str, &Roots)],
+    graph: &TypeGraph,
+    full_themes: bool,
+) -> Vec<KeptUnit> {
+    let conservative_source = |label: &str| matches!(label, "documents" | "sources" | "dependencies");
+    let all = full_themes || sources.iter().any(|(_, roots)| roots.all);
+    let mut reasons: Vec<Option<(String, bool)>> = vec![None; theme.units.len()];
+    // What made each key and type live, first reason first.
+    let mut live_keys: BTreeMap<String, (String, bool)> = BTreeMap::new();
+    let mut live_types: BTreeMap<String, (String, bool)> = BTreeMap::new();
+    let mut pending: Vec<usize> = Vec::new();
+    let make_live = |live_types: &mut BTreeMap<String, (String, bool)>, type_: &str, why: &str, conservative: bool| {
+        for live in graph.live(type_) {
+            let reason = match live == type_ {
+                true => why.to_string(),
+                false => format!("{why}, which makes {live} live (base class or created)"),
+            };
+            live_types.entry(live).or_insert((reason, conservative));
+        }
+    };
+    for (label, roots) in sources {
+        for type_ in &roots.types {
+            let why = format!("the type {type_}, a root of the {label}");
+            make_live(&mut live_types, type_, &why, conservative_source(label));
+        }
+        for key in &roots.keys {
+            let why = format!("the key {key}, a root of the {label}");
+            live_keys.entry(key.clone()).or_insert((why, conservative_source(label)));
+        }
+        for name in &roots.names {
+            match theme.units.iter().position(|unit| unit.name == *name) {
+                Some(position) => {
+                    if reasons[position].is_none() {
+                        reasons[position] = Some((format!("named by the {label}"), false));
+                        pending.push(position);
+                    }
+                }
+                None => {
+                    let why = format!("the name {name}, a root of the {label}");
+                    live_keys.entry(name.clone()).or_insert((why.clone(), false));
+                    make_live(&mut live_types, name, &why, false);
+                }
+            }
+        }
+    }
+    if let Some(position) = theme.units.iter().position(|unit| unit.index == 0) {
+        if reasons[position].is_none() {
+            reasons[position] = Some(("the ambient unit, always kept".to_string(), false));
+            pending.push(position);
+        }
+    }
+    let mut kept = vec![false; theme.units.len()];
+    loop {
+        while let Some(position) = pending.pop() {
+            if std::mem::replace(&mut kept[position], true) {
+                continue;
+            }
+            let unit = &theme.units[position];
+            for key in &unit.references {
+                let why = format!("the key {key}, referenced by {}", unit.name);
+                live_keys.entry(key.clone()).or_insert((why, false));
+            }
+            for type_ in &unit.types {
+                make_live(&mut live_types, type_, &format!("the type {type_}, constructed by {}", unit.name), false);
+            }
+        }
+        for position in 0..theme.units.len() {
+            if kept[position] || reasons[position].is_some() {
+                continue;
+            }
+            let unit = &theme.units[position];
+            let by_type = || {
+                unit.type_keys.iter().find_map(|type_key| {
+                    let (why, conservative) = live_types.get(type_key)?;
+                    Some((format!("defines the theme of {type_key}: {why}"), *conservative))
+                })
+            };
+            let by_key = || {
+                unit.keys.iter().find_map(|key| {
+                    let (why, conservative) = live_keys.get(key)?;
+                    Some((format!("defines {key}: {why}"), *conservative))
+                })
+            };
+            let found = match all {
+                true => Some(("every unit is kept (theme-roots = \"all\" or full-themes)".to_string(), false)),
+                false => by_type().or_else(by_key),
+            };
+            if let Some(found) = found {
+                reasons[position] = Some(found);
+                pending.push(position);
+            }
+        }
+        if pending.is_empty() {
+            break;
+        }
+    }
+    let mut explained: Vec<KeptUnit> = theme
+        .units
+        .iter()
+        .zip(&kept)
+        .zip(reasons)
+        .filter(|((_, kept), _)| **kept)
+        .map(|((unit, _), reason)| {
+            let (reason, conservative) = reason.unwrap_or_default();
+            KeptUnit {
+                index: unit.index,
+                name: unit.name.clone(),
+                reason,
+                conservative,
+                keys: unit.keys.len(),
+                live_keys: unit.keys.iter().filter(|key| live_keys.contains_key(*key)).count(),
+            }
+        })
+        .collect();
+    explained.sort_by_key(|unit| unit.index);
+    explained
+}
+
+/// The text of `theme_parts_why.txt` for one theme (#852): a line per kept unit, with the share of
+/// its keys that are live and the reason it is kept, after a line with the totals.
+pub fn why_kept_listing(class: &str, units: &[KeptUnit], total: usize) -> String {
+    let keys: usize = units.iter().map(|unit| unit.keys).sum();
+    let live: usize = units.iter().map(|unit| unit.live_keys).sum();
+    let count = units.len();
+    let mut text = format!("{class}: {count} of {total} units; {live} of {keys} keys of the kept units are live\n");
+    for unit in units {
+        let kind = if unit.conservative { "conservative" } else { "exact" };
+        let (name, live, keys, reason) = (&unit.name, unit.live_keys, unit.keys, &unit.reason);
+        text.push_str(&format!("{name}\t{live} of {keys} keys live\t{kind}\t{reason}\n"));
+    }
+    text
+}
+
 /// The name of the static of the parts table of the class `class` (its full name) in
 /// `compiled_markup`: `THEME_PARTS_` and the name in upper case, with `_` for anything that is
-/// not a letter or a digit (`THEME_PARTS_FERROUI_THEMES_WINUI_WINUITHEME`).
+/// not a letter or a digit (`THEME_PARTS_FERROUI_THEMES_WINUI_WINUITHEME`). It is the established
+/// name: two classes may have one (`A.B_C` and `A_B.C`), and [`parts_static_names`] gives the
+/// names a build writes.
 pub fn parts_static_name(class: &str) -> String {
     let name: String = class.chars().map(|c| if c.is_ascii_alphanumeric() { c.to_ascii_uppercase() } else { '_' }).collect();
     format!("THEME_PARTS_{name}")
+}
+
+/// The names of the statics of the parts tables of the classes `classes` (their full names) in
+/// `compiled_markup`, in order (#849): the established name ([`parts_static_name`]) of a class
+/// whose established name no other class has, and for the classes that share one, that name
+/// disambiguated from the full name of each class (`allocate_names` of the emitter:
+/// `THEME_PARTS_A_B_C_1F0E2D3C`).
+pub fn parts_static_names(classes: &[&str]) -> Vec<String> {
+    let established: Vec<String> = classes.iter().map(|class| parts_static_name(class)).collect();
+    let requests: Vec<(&str, &str)> =
+        established.iter().zip(classes).map(|(name, class)| (name.as_str(), *class)).collect();
+    allocate_names(&requests, |a, b| a == b)
+}
+
+/// The path of the function another crate constructs the class `class` (its full name) with from
+/// selected units of its compiled markup (#849), as the type models of the crates state it: the
+/// class has units (`theme_units` of the model of its crate), and its type has a public associated
+/// function [`PARTS_CONSTRUCTOR`] of two parameters (the `functions` of the model), which the build
+/// of its crate verified to be `fn(Option<Rc<dyn IServiceProvider>>, rt::ThemeParts) -> Ref<Self>`
+/// ([`verify_parts_constructor`]). `None` for any other class, whose markup may still be
+/// partitioned into units: it is constructed with `new()`.
+pub fn parts_constructor(models: &[AssemblyModel], class: &str) -> Option<String> {
+    let model = models.iter().find(|model| model.theme_units.iter().any(|units| units.class == class))?;
+    let type_ = model.types.iter().find(|type_| type_.full_name() == class)?;
+    let functions = model.functions.iter().find(|functions| {
+        functions.owner == type_.rust_path.text || type_.public_path.as_deref() == Some(functions.public_path.as_str())
+    })?;
+    let found = functions.functions.iter().any(|function| {
+        function.name == PARTS_CONSTRUCTOR
+            && !function.receiver
+            && function.parameters == 2
+            && function.declared_by.is_none()
+    });
+    found.then(|| format!("{}::{PARTS_CONSTRUCTOR}", functions.public_path))
+}
+
+/// Whether the class `class` (its full name) of the crate whose scan is `model` and `functions`
+/// can be constructed from selected units of its compiled markup (#849): its type has a public
+/// associated function [`PARTS_CONSTRUCTOR`] (without `self`) of the signature
+/// `fn(Option<Rc<dyn IServiceProvider>>, rt::ThemeParts) -> Ref<Self>`, compared by the last
+/// segment of each path. `Err` when it has a public one of two parameters and another signature:
+/// the type models of the crate state the function to other crates by its name and its number of
+/// parameters ([`parts_constructor`]), so a build of another crate would call it.
+pub fn verify_parts_constructor(
+    model: &AssemblyModel,
+    functions: &[InherentFunction],
+    class: &str,
+) -> Result<bool, String> {
+    let Some(type_) = model.types.iter().find(|type_| type_.full_name() == class) else {
+        return Ok(false);
+    };
+    let local = rust_local_name(&type_.rust_path.text);
+    let owned = |function: &&InherentFunction| {
+        function.owner == type_.rust_path.text || type_.public_path.as_deref() == Some(function.owner.as_str())
+    };
+    let Some(function) = functions.iter().filter(owned).find(|function| {
+        function.name == PARTS_CONSTRUCTOR
+            && function.visibility == "pub"
+            && !function.receiver
+            && function.parameters.len() == 2
+    }) else {
+        return Ok(false);
+    };
+    let parameters: Vec<String> = function.parameters.iter().map(|parameter| last_segments(parameter)).collect();
+    let returned = function.return_type.as_deref().map(last_segments).unwrap_or_default();
+    let fits = parameters[0] == "Option<Rc<dynIServiceProvider>>"
+        && parameters[1] == "ThemeParts"
+        && (returned == "Ref<Self>" || returned == format!("Ref<{local}>"));
+    match fits {
+        true => Ok(true),
+        false => Err(format!(
+            "`{class}` has `pub fn {PARTS_CONSTRUCTOR}({}) -> {}`, which other crates construct the class \
+             with from selected units of its compiled markup (#568): its signature must be \
+             `fn(Option<Rc<dyn IServiceProvider>>, rt::ThemeParts) -> Ref<Self>`; give the function \
+             another name if it is not that constructor",
+            function.parameters.join(", "),
+            function.return_type.as_deref().unwrap_or("()")
+        )),
+    }
+}
+
+/// `text` (a Rust type as written) without white space and with every path reduced to its last
+/// segment (`::core::option::Option<Rc<dyn crate::IServiceProvider>>` is
+/// `Option<Rc<dynIServiceProvider>>`).
+fn last_segments(text: &str) -> String {
+    let mut result = String::with_capacity(text.len());
+    let mut segment = String::new();
+    let mut rest = text;
+    while let Some(character) = rest.chars().next() {
+        if let Some(after) = rest.strip_prefix("::") {
+            // A qualifier: the segment before it is not the last one of its path.
+            segment.clear();
+            rest = after;
+            continue;
+        }
+        rest = &rest[character.len_utf8()..];
+        if character.is_alphanumeric() || character == '_' {
+            segment.push(character);
+            continue;
+        }
+        result.push_str(&segment);
+        segment.clear();
+        if !character.is_whitespace() {
+            result.push(character);
+        }
+    }
+    result.push_str(&segment);
+    result
 }
 
 /// The path of the static of the unit `index` of the theme whose table of all units is

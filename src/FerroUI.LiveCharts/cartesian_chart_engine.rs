@@ -6,7 +6,7 @@ use crate::heat_functions::HeatFunctions;
 use crate::kernel::Coordinate;
 use crate::measure::{AxisOrientation, Bounds};
 use crate::scene::*;
-use crate::series::{Series, SeriesKind};
+use crate::series::{DataLabelsPosition, Series, SeriesKind, DATA_LABELS_PADDING};
 use ferroui_base::{media::Color, Point, Rect, Size};
 use std::collections::BTreeMap;
 
@@ -53,6 +53,17 @@ impl Default for CartesianOptions {
     }
 }
 
+/// The properties of a series of a Cartesian chart that [`Series`] does not carry, in the order of
+/// the series ([`CartesianChartEngine::measure_with_series_options`]). It is `non_exhaustive`:
+/// start from `CartesianSeriesOptions::default()` and set the fields.
+#[derive(Clone, Debug, Default, PartialEq)]
+#[non_exhaustive]
+pub struct CartesianSeriesOptions {
+    /// `DataLabelsPosition` of the series; `None` is the default of the family (`Middle` for a
+    /// heat series, the only family that places its labels by it).
+    pub data_labels_position: Option<DataLabelsPosition>,
+}
+
 /// Calculated axes can also drive crosshairs and zoom/pan without reinterpreting pixels.
 #[derive(Clone, Debug, PartialEq)]
 pub struct CartesianMeasurement {
@@ -97,7 +108,28 @@ impl CartesianChartEngine {
         x_axes: &[Axis],
         y_axes: &[Axis],
         options: &CartesianOptions,
+        measure_text: impl FnMut(&str, f64) -> Size,
+    ) -> Result<CartesianMeasurement, ChartError> {
+        Self::measure_with_series_options(
+            size,
+            series,
+            x_axes,
+            y_axes,
+            options,
+            measure_text,
+            &[],
+        )
+    }
+    /// [`Self::measure_with_axes_and_labels`] with the options of the series, in their order; a
+    /// series without an entry takes the defaults.
+    pub fn measure_with_series_options(
+        size: Size,
+        series: &[Series],
+        x_axes: &[Axis],
+        y_axes: &[Axis],
+        options: &CartesianOptions,
         mut measure_text: impl FnMut(&str, f64) -> Size,
+        series_options: &[CartesianSeriesOptions],
     ) -> Result<CartesianMeasurement, ChartError> {
         validate_size(size)?;
         let defaults = [Axis::default()];
@@ -494,7 +526,23 @@ impl CartesianChartEngine {
                     draw_bars(&mut scene, si, s, series, points, xs, ys, x_axes, y_axes)
                 }
                 SeriesKind::Scatter => draw_scatter(&mut scene, si, s, points, xs, ys),
-                SeriesKind::Heat => draw_heat(&mut scene, si, s, points, xs, ys, x_axes, y_axes)?,
+                SeriesKind::Heat => draw_heat(
+                    &mut scene,
+                    HeatDraw {
+                        index: si,
+                        series: s,
+                        points,
+                        label_position: series_options
+                            .get(si)
+                            .and_then(|o| o.data_labels_position)
+                            .unwrap_or(DataLabelsPosition::Middle),
+                    },
+                    xs,
+                    ys,
+                    x_axes,
+                    y_axes,
+                    &mut measure_text,
+                )?,
                 SeriesKind::Financial => draw_financial(&mut scene, si, s, points, xs, ys, x_axes),
                 SeriesKind::Ohlc => draw_ohlc(&mut scene, si, s, points, xs, ys, x_axes),
                 SeriesKind::Box => draw_box(&mut scene, si, s, series, points, xs, ys, x_axes),
@@ -1090,30 +1138,16 @@ fn append_hit(
             text
         ),
     });
-    if s.data_labels {
-        // A heat cell centres its label (the source's `DataLabelsPosition.Middle`) and labels
-        // the primary value, as the default `DataLabelsFormatter` of a source series.
-        let (origin, anchor, text) = if s.kind == SeriesKind::Heat {
-            (
-                Point::new(center.x, center.y - s.data_labels_size * 0.6),
-                TextAnchor::Center,
-                format_number(p.coordinate.primary_value),
-            )
-        } else {
-            (
-                Point::new(center.x + 4.0, center.y - s.data_labels_size - 4.0),
-                TextAnchor::Start,
-                text,
-            )
-        };
+    // A heat series places its labels in its cells (`draw_heat`).
+    if s.data_labels && s.kind != SeriesKind::Heat {
         scene.primitives.push(
             Primitive::new(
                 Geometry::Text {
-                    origin,
+                    origin: Point::new(center.x + 4.0, center.y - s.data_labels_size - 4.0),
                     text,
                     size: s.data_labels_size,
                     rotation: 0.0,
-                    anchor,
+                    anchor: TextAnchor::Start,
                 },
                 PaintStyle::fill(s.data_labels_color.unwrap_or_else(|| s.color(si))),
             )
@@ -1568,6 +1602,57 @@ fn draw_scatter(
         draw_errors(scene, si, s, p, x, y, 0.0);
     }
 }
+/// A heat series being drawn: its index, its points and where its labels go.
+struct HeatDraw<'a> {
+    index: usize,
+    series: &'a Series,
+    points: &'a [Option<MeasuredPoint>],
+    label_position: DataLabelsPosition,
+}
+impl Series {
+    /// The bounds of the weights of a heat series (`WeightBounds` of `CoreHeatSeries`): the
+    /// tertiary values of its valid points, with `min_value` and `max_value` in place of their
+    /// extremes when they are set.
+    pub fn weight_bounds(&self) -> Bounds {
+        let mut weights = Bounds::default();
+        for c in self.values.iter().filter(|c| valid_point(self, c)) {
+            weights.append_value(c.tertiary_value);
+        }
+        if let Some(min) = self.min_value {
+            weights.min = min;
+        }
+        if let Some(max) = self.max_value {
+            weights.max = max;
+        }
+        weights
+    }
+}
+/// `CartesianSeries.GetLabelPosition` for a series whose primary axis is vertical (the heat
+/// series): the centre of a label of `label` size about the rectangle of its point.
+fn data_label_center(
+    rect: Rect,
+    label: Size,
+    position: DataLabelsPosition,
+    greater_than_pivot: bool,
+) -> Point {
+    let middle_x = rect.x + rect.width * 0.5;
+    let middle_y = rect.y + rect.height * 0.5;
+    let top = Point::new(middle_x, rect.y - label.height * 0.5);
+    let bottom = Point::new(middle_x, rect.y + rect.height + label.height * 0.5);
+    match position {
+        DataLabelsPosition::Middle => Point::new(middle_x, middle_y),
+        DataLabelsPosition::Top => top,
+        DataLabelsPosition::Bottom => bottom,
+        DataLabelsPosition::Left => Point::new(rect.x - label.width * 0.5, middle_y),
+        DataLabelsPosition::Right => {
+            Point::new(rect.x + rect.width + label.width * 0.5, middle_y)
+        }
+        DataLabelsPosition::End if greater_than_pivot => top,
+        DataLabelsPosition::End => bottom,
+        DataLabelsPosition::Start if greater_than_pivot => bottom,
+        DataLabelsPosition::Start => top,
+    }
+}
 /// `CoreHeatSeries`: each cell spans the smallest step of the data on each axis (issue 1511;
 /// the axis unit width without one), inset by `PointPadding`, in the colour of its weight
 /// (`HeatFunctions.InterpolateColor`) between the weight bounds (`MinValue` and `MaxValue`, else
@@ -1576,14 +1661,19 @@ fn draw_scatter(
 /// count, is an error where the source throws.
 fn draw_heat(
     scene: &mut Scene,
-    si: usize,
-    s: &Series,
-    points: &[Option<MeasuredPoint>],
+    heat: HeatDraw<'_>,
     x: AxisScale,
     y: AxisScale,
     xa: &[Axis],
     ya: &[Axis],
+    measure_text: &mut dyn FnMut(&str, f64) -> Size,
 ) -> Result<(), ChartError> {
+    let HeatDraw {
+        index: si,
+        series: s,
+        points,
+        label_position,
+    } = heat;
     let stops = HeatFunctions::build_color_stops(&s.heat_map, s.color_stops.as_deref())?;
     let dx = minimum_delta(
         points
@@ -1594,16 +1684,7 @@ fn draw_heat(
     .unwrap_or(xa[s.x_axis].unit_width);
     let dy = minimum_delta(points.iter().flatten().map(|p| p.coordinate.primary_value))
         .unwrap_or(ya[s.y_axis].unit_width);
-    let mut weights = Bounds::default();
-    for p in points.iter().flatten() {
-        weights.append_value(p.coordinate.tertiary_value);
-    }
-    if let Some(min) = s.min_value {
-        weights.min = min;
-    }
-    if let Some(max) = s.max_value {
-        weights.max = max;
-    }
+    let weights = s.weight_bounds();
     let padding = s.point_padding;
     for p in points.iter().flatten() {
         let c = p.coordinate;
@@ -1654,6 +1735,36 @@ fn draw_heat(
             HitShape::Rectangle(cell),
             Point::new(cell.x + cell.width * 0.5, cell.y + cell.height * 0.5),
         );
+        if s.data_labels {
+            // The label of the primary value (the default `DataLabelsFormatter` of a source
+            // series), measured with its `DataLabelsPadding` and placed about the inset cell
+            // (`GetLabelPosition` with the rectangle of the visual).
+            let id = PointId {
+                series: si,
+                point: p.index,
+            };
+            let text = format_number(c.primary_value);
+            let measured = measure_text(&text, s.data_labels_size);
+            let label = Size::new(
+                measured.width + DATA_LABELS_PADDING.0 * 2.0,
+                measured.height + DATA_LABELS_PADDING.1 * 2.0,
+            );
+            let center = data_label_center(rect, label, label_position, c.primary_value > s.pivot);
+            scene.primitives.push(
+                Primitive::new(
+                    Geometry::Text {
+                        origin: Point::new(center.x, center.y - measured.height * 0.5),
+                        text,
+                        size: s.data_labels_size,
+                        rotation: 0.0,
+                        anchor: TextAnchor::Center,
+                    },
+                    PaintStyle::fill(s.data_labels_color.unwrap_or_else(|| s.color(si))),
+                )
+                .clipped(scene.plot_bounds)
+                .identified(id),
+            );
+        }
     }
     Ok(())
 }

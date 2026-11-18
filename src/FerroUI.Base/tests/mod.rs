@@ -50,6 +50,7 @@ mod ferro_object_tests_direct;
 mod ferro_object_tests_get_observable;
 mod ferro_object_tests_get_value;
 mod ferro_object_tests_inheritance;
+mod ferro_object_tests_inherited_hearing;
 mod ferro_object_tests_metadata;
 mod ferro_object_tests_multi_binding;
 mod ferro_object_tests_notification_order;
