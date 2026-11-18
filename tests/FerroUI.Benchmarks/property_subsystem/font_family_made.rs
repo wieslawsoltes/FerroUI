@@ -64,8 +64,12 @@ impl FontFamilyMade {
 pub fn register(registry: &mut Registry) {
     let mut class = registry.class("property_subsystem", "FontFamilyMade").min_iteration_time(200);
     let parameters = format!("Objects={OBJECTS}");
-    class.benchmark("named", parameters.clone(), FontFamilyMade::new, FontFamilyMade::named).operations_per_invoke(OBJECTS as u32);
-    class.benchmark("list", parameters.clone(), FontFamilyMade::new, FontFamilyMade::list).operations_per_invoke(OBJECTS as u32);
+    class
+        .benchmark("named", parameters.clone(), FontFamilyMade::new, FontFamilyMade::named)
+        .operations_per_invoke(OBJECTS as u32);
+    class
+        .benchmark("list", parameters.clone(), FontFamilyMade::new, FontFamilyMade::list)
+        .operations_per_invoke(OBJECTS as u32);
     class
         .benchmark("sourced", parameters.clone(), FontFamilyMade::new, FontFamilyMade::sourced)
         .operations_per_invoke(OBJECTS as u32);
