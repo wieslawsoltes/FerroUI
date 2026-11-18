@@ -10,7 +10,7 @@ use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, FerroObject, FerroObjectImpl, FerroProperty,
     Ref, StyledProperty, WeakRef,
 };
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::time::Duration;
 
@@ -28,6 +28,8 @@ pub struct Timeline {
     completed: HandlerList<CompletedHandler>,
     // The target object given in code (WinUI's `Storyboard.SetTarget`).
     target: RefCell<Option<WeakRef<FerroObject>>>,
+    // The target property given in code (the generated animations of a visual transition).
+    property: Cell<Option<&'static FerroProperty>>,
 }
 
 ferro_class!(Timeline: FerroObject);
@@ -79,6 +81,7 @@ impl Timeline {
             base: FerroObject::construct(),
             completed: HandlerList::new(),
             target: RefCell::new(None),
+            property: Cell::new(None),
         }
     }
 
@@ -174,5 +177,13 @@ impl Timeline {
 
     pub(crate) fn set_explicit_target(&self, target: Option<&FerroObject>) {
         *self.target.borrow_mut() = target.map(|target| target.to_ref().downgrade());
+    }
+
+    pub(crate) fn explicit_property(&self) -> Option<&'static FerroProperty> {
+        self.property.get()
+    }
+
+    pub(crate) fn set_explicit_property(&self, property: Option<&'static FerroProperty>) {
+        self.property.set(property);
     }
 }
