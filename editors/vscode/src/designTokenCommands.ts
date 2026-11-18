@@ -1,9 +1,9 @@
-import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { TokenDirection, TokenOptions, TokenPlan } from './designTokenProtocol';
 import type { ProjectInventory } from './projectInventory';
 import { errorMessage } from './protocol';
 import { choose } from './studioContext';
+import { localFolders } from './workspacePaths';
 import { WorkspaceTools } from './workspaceTools';
 
 const scheme = 'ferroui-token-review';
@@ -86,17 +86,18 @@ export class DesignTokenCommands implements vscode.Disposable {
     }
 
     private async save(original: vscode.Uri, name: string, plan: TokenPlan, requireSource: () => void): Promise<void> {
-        const directory = vscode.workspace.getWorkspaceFolder(original)?.uri ?? vscode.workspace.workspaceFolders?.[0]?.uri;
-        if (!directory) throw new Error('Open a workspace to save the reviewed token conversion.');
-        const uri = await vscode.window.showSaveDialog({ defaultUri: vscode.Uri.joinPath(directory, name) });
-        if (!uri) return;
-        const folder = vscode.workspace.getWorkspaceFolder(uri);
+        const folders = localFolders();
+        if (!folders.length) throw new Error('Open a workspace to save the reviewed token conversion.');
+        const owner = vscode.workspace.getWorkspaceFolder(original);
+        const folder = owner?.uri.scheme === 'file' ? owner : folders.length === 1 ? folders[0]
+            : await vscode.window.showWorkspaceFolderPick({ placeHolder: 'Select a workspace folder for the token conversion' });
+        if (!folder) return;
         const extension = name.endsWith('.json') ? '.json' : '.xaml';
-        if (uri.scheme !== 'file' || !folder || !uri.path.toLowerCase().endsWith(extension)) {
-            throw new Error(`Choose a new ${extension} file inside the workspace.`);
-        }
+        const destination = await vscode.window.showInputBox({ title, prompt: `New file path relative to ${folder.name}`, value: name,
+            validateInput: value => value.trim().toLowerCase().endsWith(extension) ? undefined : `Choose a ${extension} file.` });
+        if (!destination) return;
         requireSource();
-        await this.files.call('ferroui_workspace_create', { path: path.relative(folder.uri.fsPath, uri.fsPath),
+        await this.files.call('ferroui_workspace_create', { path: destination.trim(),
             folder: folder.uri.toString(), source: plan.source, open: true }, AbortSignal.timeout(15_000));
     }
 
