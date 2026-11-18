@@ -49,6 +49,8 @@ npm ci
 npm run package:platform -- ../../target/dist-unwind
 ```
 
+After building the extension, run `npm run test:vsix -- <package.vsix>` to install the package and smoke-test the minimum supported and current stable releases of VS Code. The Visual designer workflow provides a manual installed-package matrix for macOS, Linux, and Windows.
+
 ## Preview and round-trip coverage
 
 - FerroUI XAML uses the designer's runtime loader, design-time projection, WinUI theme, and project-relative file URIs. Run **Build Project XAML Schema** to publish versioned `.xamlmeta` files for a Cargo package. Launch and app-hosted design builds also publish metadata, and `ferroui.types` overrides it. The XAML server supports range formatting, linked tags, namespace imports, spelling fixes, and binding type inlay hints. [XAML language service](../../src/FerroUI.Designer.Language/README.md)

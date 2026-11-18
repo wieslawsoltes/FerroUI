@@ -8,8 +8,10 @@ on:
   pull_request:
     paths:
       - 'src/FerroUI.Designer*/**'
+      - 'src/FerroUI.View/**'
       - 'src/FerroUI.View.Macros/**'
       - 'src/FerroUI.View.Syntax/**'
+      - 'src/FerroUI.ReloadProtocol/**'
       - 'editors/vscode/**'
       - 'docs/designer/samples/**'
       - 'samples/DesignerStudio/**'
@@ -129,3 +131,51 @@ jobs:
           name: designer-native-renders
           path: designer-render
           if-no-files-found: warn
+
+  packaged-vscode:
+    name: Installed VS Code package (${{ matrix.os }})
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, ubuntu-24.04, windows-latest]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: editors/vscode/package-lock.json
+      - name: Linux native dependencies and display
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libfontconfig1-dev libfreetype6-dev fonts-dejavu-core \
+            xvfb xauth libgtk-3-0t64 libnss3 libasound2t64 \
+            libx11-dev libx11-xcb-dev libxi-dev libxrandr-dev libxcursor-dev libxfixes-dev libxext-dev libxtst-dev libxkbcommon-dev \
+            libgl1-mesa-dev libegl1-mesa-dev
+      - name: Compile the release helpers for the workspace host
+        run: cargo build --locked --profile dist-unwind -p ferroui-designer-language -p ferroui-designer-preview
+      - name: Package the native VSIX
+        working-directory: editors/vscode
+        run: |
+          npm ci
+          npm run check
+          npm run build
+          npm run package:platform -- ../../target/dist-unwind ferroui-designer.vsix
+      - name: Install and smoke-test minimum and stable VS Code
+        if: runner.os != 'Linux'
+        working-directory: editors/vscode
+        run: npm run test:vsix -- ferroui-designer.vsix
+      - name: Install and smoke-test minimum and stable VS Code under Xvfb
+        if: runner.os == 'Linux'
+        working-directory: editors/vscode
+        run: xvfb-run -a npm run test:vsix -- ferroui-designer.vsix
+      - name: Package evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ferroui-vsix-${{ runner.os }}-${{ runner.arch }}
+          path: editors/vscode/ferroui-designer.vsix

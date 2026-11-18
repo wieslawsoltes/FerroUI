@@ -3,7 +3,7 @@ import { copyFile, mkdir, readFile, readdir, writeFile } from 'node:fs/promises'
 
 const [host] = await Promise.all([
     build({
-        entryPoints: { extension: 'src/extension.ts', test: 'test/suite.ts' },
+        entryPoints: { extension: 'src/extension.ts', test: 'test/suite.ts', 'installed-test': 'test/installed.ts' },
         outdir: 'dist',
         bundle: true,
         platform: 'node',
