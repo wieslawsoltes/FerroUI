@@ -45,5 +45,6 @@ tasks you already entered. [VS Code extension guide](../../editors/vscode/README
 Add `"app-preview"` to the target's features and open
 `samples/TodoWorkbench/HostedPreview.xaml`. Run **FerroUI: Open App-Hosted Design**.
 The application registers its own `PreviewBadge` control and markup assembly.
+Its build exports the control's XAML schema for completion and type checking.
 Edit the XAML, or click the preview's text box and use **Send Text**. The app's
 native binding updates the badge. [Preview entry point](app_preview.rs)

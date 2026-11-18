@@ -15,7 +15,7 @@ test = false
 [features]
 hot-reload = ["ferroui-view/hot-reload"]
 mcp = ["dep:ferroui-inspect", "dep:ferroui-mcp"]
-app-preview = ["dep:ferroui-controls", "dep:ferroui-designer-support", "dep:ferroui-markup-xaml-loader", "dep:ferroui-skia", "dep:ferroui-harfbuzz"]
+app-preview = ["dep:ferroui-build-scan", "dep:ferroui-controls", "dep:ferroui-designer-support", "dep:ferroui-markup-xaml-loader", "dep:ferroui-skia", "dep:ferroui-harfbuzz"]
 
 [dependencies]
 ferroui-base = { workspace = true }
@@ -29,3 +29,6 @@ ferroui-markup-xaml-loader = { workspace = true, optional = true, features = ["r
 ferroui-skia = { workspace = true, optional = true }
 ferroui-harfbuzz = { workspace = true, optional = true }
 todo-mvc = { path = "../TodoMvc" }
+
+[build-dependencies]
+ferroui-build-scan = { workspace = true, optional = true }

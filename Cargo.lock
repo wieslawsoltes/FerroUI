@@ -6844,6 +6844,7 @@ name = "todo-workbench"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build-scan",
  "ferroui-controls",
  "ferroui-designer-support",
  "ferroui-harfbuzz",
