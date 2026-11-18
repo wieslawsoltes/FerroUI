@@ -3869,6 +3869,8 @@ name = "hello-world-builders"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
+ "ferroui-markup-xaml",
  "ferroui-themes-winui",
  "ferroui-view",
 ]
@@ -3894,6 +3896,8 @@ name = "hello-world-hooks"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
+ "ferroui-markup-xaml",
  "ferroui-themes-winui",
  "ferroui-view",
 ]
@@ -3903,6 +3907,8 @@ name = "hello-world-macros"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
+ "ferroui-markup-xaml",
  "ferroui-themes-winui",
  "ferroui-view",
 ]
