@@ -123,6 +123,7 @@ fn run(path: &Path, workspace: &Path, artifacts: &Path, accept: bool) -> Result<
                 design_data: None,
                 layer_view: None,
                 timeline_pose: None,
+                timeline_targets: None,
             };
             let mut renderer = Renderer::new();
             let preview = crate::snapshot::render(&mut renderer, &input, None)?;

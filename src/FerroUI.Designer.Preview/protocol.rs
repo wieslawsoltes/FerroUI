@@ -38,6 +38,8 @@ pub(crate) struct Render {
     pub(crate) layer_view: Option<LayerViewInput>,
     #[serde(rename = "timelinePose")]
     pub(crate) timeline_pose: Option<ferroui_designer::TimelinePreviewPose>,
+    #[serde(rename = "timelineTargets")]
+    pub(crate) timeline_targets: Option<ferroui_designer::TimelineTargetOverrides>,
 }
 
 #[derive(Deserialize)]

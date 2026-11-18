@@ -20,11 +20,14 @@ pub(crate) struct AnimationSession {
     codecs: AnimationCodecRegistry,
     active: Option<NodeId>,
     warnings: Vec<String>,
-    play_all: bool,
+    pub(crate) play_all: bool,
+    pub(crate) elapsed_clock: bool,
+    pub(crate) playback_completed: bool,
+    pub(crate) pending_playback: Option<crate::TimelinePreviewPose>,
     compiled_programs: BTreeMap<NodeId, CompiledTimeline>,
     compiled_targets: BTreeMap<(NodeId, NodeId), CompiledTimeline>,
-    preview_targets: BTreeMap<NodeId, Vec<NodeId>>,
-    target_elapsed: BTreeMap<(NodeId, NodeId), f64>,
+    pub(crate) preview_targets: BTreeMap<NodeId, Vec<NodeId>>,
+    pub(crate) target_elapsed: BTreeMap<(NodeId, NodeId), f64>,
 }
 impl AnimationSession {
     pub(crate) fn clear_program_state(&mut self) {
@@ -33,6 +36,9 @@ impl AnimationSession {
         self.preview_targets.clear();
         self.compiled_targets.clear();
         self.play_all = false;
+        self.elapsed_clock = false;
+        self.playback_completed = false;
+        self.pending_playback = None;
         self.target_elapsed.clear();
     }
     pub(crate) fn new() -> Result<Self, String> {
@@ -49,6 +55,9 @@ impl AnimationSession {
             active: None,
             warnings: Vec::new(),
             play_all: false,
+            elapsed_clock: false,
+            playback_completed: false,
+            pending_playback: None,
             compiled_programs: BTreeMap::new(),
             compiled_targets: BTreeMap::new(),
             preview_targets: BTreeMap::new(),
@@ -95,16 +104,15 @@ impl DesignerSession {
             .iter()
             .find(|program| program.id == id)
             .ok_or("Unknown animation program")?;
-        let timeline = program.timeline.clone().unwrap_or_else(|| {
-            Timeline::new(self.animation.native.duration(id).unwrap_or(3.0))
-                .expect("native duration")
-        });
+        let timeline = self.animation_timing(program);
         self.animation.compiled = timeline.compile().map_err(|error| error.to_string())?;
         self.animation.timeline = timeline;
         self.animation.active = Some(id);
         self.animation.player.stop();
         self.animation.target_elapsed.clear();
         self.animation.play_all = false;
+        self.animation.elapsed_clock = false;
+        self.animation.playback_completed = false;
         self.preview.clear_animation();
         self.generation += 1;
         Ok(())
@@ -215,6 +223,10 @@ impl DesignerSession {
         }
         self.preview.clear_animation();
         self.import_animations();
+        self.animation.player.stop();
+        self.animation.play_all = false;
+        self.animation.elapsed_clock = false;
+        self.animation.pending_playback = None;
         self.generation += 1;
         Ok(())
     }
@@ -235,7 +247,7 @@ impl DesignerSession {
         let edits = self.program_edits(id, &timeline)?;
         self.apply("Edit animation program", edits)
             .map_err(|error| error.to_string())?;
-        if active {
+        if active && !self.animation.elapsed_clock {
             self.seek(self.animation.player.time())?;
         }
         Ok(())
@@ -295,7 +307,7 @@ impl DesignerSession {
             .animation
             .programs
             .iter()
-            .find(|program| Some(program.id) == self.animation.active && program.timeline.is_none())
+            .find(|program| Some(program.id) == self.animation.active && self.requires_native_animation(program))
             .cloned()
         {
             self.preview.clear_animation();
@@ -307,6 +319,10 @@ impl DesignerSession {
                 .seek(time)
                 .map_err(|error| error.to_string())?;
             self.preview.host.update_layout();
+            self.animation.target_elapsed.clear();
+            self.animation.elapsed_clock = false;
+            self.animation.playback_completed = false;
+            self.animation.play_all = false;
             self.generation += 1;
             return Ok(());
         }
@@ -319,6 +335,9 @@ impl DesignerSession {
         let samples = self.sample_active_program(self.animation.player.time(), true)?;
         self.preview.preview_samples(&samples)?;
         self.animation.target_elapsed.clear();
+        self.animation.elapsed_clock = false;
+        self.animation.playback_completed = false;
+        self.animation.play_all = false;
         self.generation += 1;
         Ok(())
     }
@@ -336,9 +355,16 @@ impl DesignerSession {
         if self.animation.active != Some(id) {
             self.select_animation_program(id)?;
         }
-        self.editable_program()?;
-        if let Some(time) = time {
-            let elapsed = if from_playhead {
+        let program = self.animation.programs.iter().find(|program| program.id == id).ok_or("Unknown animation program")?;
+        if !self.has_animation_targets(program) {
+            return Err("Choose live preview targets for this animation program".into());
+        }
+        let native = self.requires_native_animation(program);
+        if native && self.animation.native.timing(id).is_none() {
+            return Err("The authored animation is unavailable in the current native preview".into());
+        }
+        if let Some(time) = time.or_else(|| self.animation.play_all.then_some(0.0)) {
+            let elapsed = if from_playhead && !native {
                 self.animation.compiled.elapsed_at_playhead(time).map_err(|error| error.to_string())?
             } else {
                 time
@@ -357,6 +383,22 @@ impl DesignerSession {
         self.animation.player.play();
         self.generation += 1;
     }
+
+    #[cfg(feature = "mcp")]
+    pub(crate) fn start_combined_playback(&mut self, reference: Option<NodeId>, elapsed: Option<f64>) -> Result<(), String> {
+        if !self.animation.programs.iter().any(|program| self.animation_preview_available(program)) {
+            return Err("Choose live preview targets for an animation before playing all programs".into());
+        }
+        if let Some(id) = reference.filter(|id| self.active_animation_program() != Some(*id)) {
+            self.select_animation_program(id)?;
+        }
+        if let Some(time) = elapsed.or_else(|| (!self.animation.play_all || !self.animation.elapsed_clock).then_some(0.0)) {
+            self.animation.player.seek(time).map_err(|error| error.to_string())?;
+            self.animation.target_elapsed.clear();
+        }
+        self.play_all_animation_programs();
+        self.advance(0.0)
+    }
     pub fn set_interactive(&mut self, value: bool) {
         self.animation.player.pause();
         self.animation.native.stop();
@@ -368,12 +410,19 @@ impl DesignerSession {
         self.generation += 1;
     }
     pub fn stop(&mut self) {
+        self.stop_animation_playback();
+        self.clear_interaction_preview();
+        self.generation += 1;
+    }
+    pub(crate) fn stop_animation_playback(&mut self) {
         self.animation.player.stop();
         self.animation.native.stop();
         self.animation.target_elapsed.clear();
+        self.animation.elapsed_clock = false;
+        self.animation.playback_completed = false;
+        self.animation.play_all = false;
+        self.animation.pending_playback = None;
         self.preview.clear_animation();
-        self.clear_interaction_preview();
-        self.generation += 1;
     }
     pub fn preview_animation_programs(
         &mut self,
@@ -396,25 +445,27 @@ impl DesignerSession {
             .animation
             .programs
             .iter()
-            .filter(|program| selected.contains(&program.id))
+            .filter(|program| selected.contains(&program.id) && self.has_animation_targets(program))
             .cloned()
             .collect::<Vec<_>>();
         if native_programs
             .iter()
-            .any(|program| program.timeline.is_none())
+            .any(|program| self.requires_native_animation(program))
         {
             self.preview.clear_animation();
             self.animation
                 .native
                 .seek(&native_programs, &self.preview, elapsed)?;
             self.preview.host.update_layout();
+            self.animation.player.pause();
+            self.animation.elapsed_clock = false;
             self.generation += 1;
             return Ok(());
         }
         self.animation.native.stop();
         let mut values = BTreeMap::new();
         for program in &self.animation.programs {
-            if !selected.contains(&program.id) {
+            if !selected.contains(&program.id) || !self.has_animation_targets(program) {
                 continue;
             }
             if !self.animation.compiled_programs.contains_key(&program.id) {
@@ -429,6 +480,8 @@ impl DesignerSession {
         }
         self.preview
             .preview_samples(&values.into_values().collect::<Vec<_>>())?;
+        self.animation.player.pause();
+        self.animation.elapsed_clock = false;
         self.generation += 1;
         Ok(())
     }
@@ -443,12 +496,12 @@ impl DesignerSession {
             .animation
             .programs
             .iter()
-            .filter(|program| self.animation.play_all || Some(program.id) == self.animation.active)
+            .filter(|program| (self.animation.play_all || Some(program.id) == self.animation.active) && self.animation_preview_available(program))
             .cloned()
             .collect::<Vec<_>>();
         if native_programs
             .iter()
-            .any(|program| program.timeline.is_none())
+            .any(|program| self.requires_native_animation(program))
         {
             let elapsed = self.animation.player.time() + seconds;
             self.preview.clear_animation();
@@ -464,6 +517,8 @@ impl DesignerSession {
                 self.animation.player.pause();
             }
             self.preview.host.update_layout();
+            self.animation.elapsed_clock = true;
+            self.animation.playback_completed = complete;
             self.generation += 1;
             return Ok(());
         }
@@ -555,6 +610,8 @@ impl DesignerSession {
         if completed {
             self.animation.player.pause();
         }
+        self.animation.elapsed_clock = true;
+        self.animation.playback_completed = completed;
         self.generation += 1;
         Ok(())
     }
@@ -718,7 +775,10 @@ impl DesignerSession {
         self.write_timeline_edits(candidate, label, Vec::new())?;
         // Reload replaces the runtime graph. Keep the artboard at its edit position after
         // key/value/curve changes instead of displaying the unanimated base until the next drag.
-        self.seek(self.animation.player.time())
+        if !self.animation.elapsed_clock {
+            self.seek(self.animation.player.time())?;
+        }
+        Ok(())
     }
     pub(crate) fn program_edits(&self, id: NodeId, timeline: &Timeline) -> Result<Vec<Edit>, String> {
         let program = self
@@ -1107,22 +1167,25 @@ impl DesignerSession {
             .animation
             .active
             .and_then(|id| programs.iter().find(|program| program.id == id))
-            .and_then(|program| program.timeline.clone())
-            .unwrap_or_else(|| {
-                Timeline::new(
-                    self.animation
-                        .active
-                        .and_then(|id| self.animation.native.duration(id))
-                        .unwrap_or(duration),
-                )
-                .expect("retained duration")
-            });
+            .map(|program| self.animation_timing(program))
+            .unwrap_or_else(|| Timeline::new(duration).expect("retained duration"));
         self.animation.compiled = self
             .animation
             .timeline
             .compile()
             .expect("validated timeline");
         self.animation.programs = programs;
+    }
+
+    fn animation_timing(&self, program: &AnimationProgram) -> Timeline {
+        if self.requires_native_animation(program) {
+            if let Some(clock) = self.animation.native.timing(program.id) {
+                return clock;
+            }
+        }
+        program.timeline.clone().unwrap_or_else(|| {
+            Timeline::new(self.animation.native.duration(program.id).unwrap_or(3.0)).expect("native duration")
+        })
     }
     pub(crate) fn animation_value_for_target(
         &self,

@@ -324,6 +324,7 @@ impl DesignerSession {
                 collaboration.draft_base = Some(collaboration.replica.source().to_owned());
             }
         }
+        self.remember_playback_for_reload();
         let update = self.document.update_source("Edit XAML", source);
         self.animation.player.pause();
         self.animation.native.clear();
@@ -349,6 +350,7 @@ impl DesignerSession {
         if self.collaboration.is_some() {
             return self.collaborative_history(false);
         }
+        self.remember_playback_for_reload();
         let change = self.document.undo()?;
         self.changed(true);
         Ok(change)
@@ -358,6 +360,7 @@ impl DesignerSession {
         if self.collaboration.is_some() {
             return self.collaborative_history(true);
         }
+        self.remember_playback_for_reload();
         let change = self.document.redo()?;
         self.changed(true);
         Ok(change)
@@ -409,6 +412,7 @@ impl DesignerSession {
             }
             state.local(before, operation);
         }
+        self.remember_playback_for_reload();
         self.document = document;
         self.collaboration = collaboration;
         Ok(change)
@@ -617,6 +621,7 @@ impl DesignerSession {
                     }],
                 )
                 .map_err(|error| error.to_string())?;
+            self.remember_playback_for_reload();
             self.document = document;
         }
         self.collaboration = Some(candidate);
@@ -633,6 +638,7 @@ impl DesignerSession {
         let source = state.replica.source().to_owned();
         state.draft_base = None;
         state.error = None;
+        self.remember_playback_for_reload();
         let update = self
             .document
             .update_source("Discard local collaboration draft", source);
@@ -657,6 +663,7 @@ impl DesignerSession {
         Document::new(source.clone()).map_err(|error| error.to_string())?;
         state.draft_base = Some(state.replica.source().to_owned());
         state.error = None;
+        self.remember_playback_for_reload();
         self.document
             .update_source("Resolve collaboration source", source);
         self.publish_source_draft()?;
@@ -735,6 +742,7 @@ impl DesignerSession {
             next.expected_version = candidate.replica.version();
         }
         candidate.outgoing.push(operation);
+        self.remember_playback_for_reload();
         self.document = document;
         self.collaboration = Some(candidate);
         self.changed(true);
@@ -857,6 +865,7 @@ impl DesignerSession {
             self.import_animations();
         }
         self.refresh_layer_visuals();
+        self.restore_playback_after_reload();
         self.generation += 1;
     }
 

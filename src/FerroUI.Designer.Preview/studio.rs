@@ -57,6 +57,8 @@ pub(crate) fn present(renderer: &mut Renderer, request: Present) -> Result<Prese
     let result = stage.sources.run(|| provider.call(&query.name, &arguments, Permissions { allow_property_writes: true, ..Default::default() }))?;
     let mut presentation = renderer.present(request.next_frame, query.name == "designer_layer")?;
     presentation.timeline_position = result.get("timelinePosition").cloned();
+    presentation.timeline_targets = result.get("timelineTargets").cloned();
+    presentation.transition_position = result.get("transitionPosition").cloned();
     Ok(presentation)
 }
 
@@ -64,9 +66,9 @@ fn presentation_action(tool: &str, action: Option<&str>) -> bool {
     match tool {
         "designer_program" => matches!(
             action,
-            Some("preview" | "preview_targets" | "scrub" | "play_program" | "advance_program" | "pause_program" | "stop_program")
+            Some("preview" | "preview_targets" | "scrub" | "play_program" | "advance_program" | "pause_program" | "stop_program" | "play_all")
         ),
-        "designer_state" => matches!(action, Some("preview" | "advance_preview" | "clear_preview")),
+        "designer_state" => matches!(action, Some("preview" | "preview_transition" | "advance_preview" | "clear_preview")),
         "designer_definition" => matches!(action, Some("enter" | "exit")),
         "designer_design_data_edit" => matches!(action, Some("enabled" | "fixture")),
         "designer_layer" => action.is_some(),

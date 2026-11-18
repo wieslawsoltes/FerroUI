@@ -6,7 +6,7 @@ use ferroui_base::controls::ResourceDictionary;
 use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
 use ferroui_base::styling::{IStyle, StyleBase, Styles};
 use ferroui_base::{BoxedValue, FerroObject, Ref, StyledElement};
-use ferroui_designer_animation::AnimationProgram;
+use ferroui_designer_animation::{AnimationProgram, Repeat, Timeline};
 use ferroui_designer_core::{Document, NodeId};
 use ferroui_markup_xaml::diagnostics::XamlSourceInfo;
 use ferroui_markup_xaml::FromXamlObject;
@@ -56,6 +56,17 @@ impl NativeAnimations {
         let animation = self.objects.get(&id)?.as_object()?.cast::<Animation>()?;
         let value = animation.duration().total_seconds();
         (value.is_finite() && value > 0.0).then_some(value)
+    }
+    pub(crate) fn timing(&self, id: NodeId) -> Option<Timeline> {
+        let animation = self.objects.get(&id)?.as_object()?.cast::<Animation>()?;
+        let mut timing = Timeline::new(animation.duration().total_seconds()).ok()?;
+        timing.delay = animation.delay().total_seconds();
+        timing.delay_between_iterations = animation.delay_between_iterations().total_seconds();
+        timing.speed_ratio = animation.speed_ratio();
+        let count = animation.iteration_count();
+        timing.repeat = if count.is_infinite() { Repeat::Infinite } else { Repeat::Count(count.value()) };
+        timing.validate().ok()?;
+        Some(timing)
     }
     pub(crate) fn refresh(
         &mut self,

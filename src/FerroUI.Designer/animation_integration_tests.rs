@@ -11,7 +11,7 @@ use ferroui_designer_core::Edit;
 fn source() -> &'static str {
     r#"<Canvas xmlns="https://github.com/ferroui" Name="Owner" Width="400" Height="240"><Button Name="A" Width="100" Height="40" Opacity="1"/><Button Name="B" Width="200" Height="40" Opacity="1" Canvas.Top="60"/></Canvas>"#
 }
-fn attach_preview(session: &DesignerSession) -> ferroui_base::Ref<ferroui_controls::Window> {
+pub(super) fn attach_preview(session: &DesignerSession) -> ferroui_base::Ref<ferroui_controls::Window> {
     let window = ferroui_controls::Window::new();
     window.set_width(400.0);
     window.set_height(240.0);
@@ -597,6 +597,36 @@ fn attached_state_clock_samples_literal_and_resource_transitions_through_native_
         assert_eq!(session.preview.visual(a).unwrap().opacity(), 1.0);
         window.close();
     }
+}
+
+#[test]
+fn timeline_transition_seek_reconstructs_native_route_after_visiting_its_endpoint() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = "<Canvas xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Name='Owner'><Canvas.Resources><x:Double x:Key='MutedOpacity'>0.25</x:Double></Canvas.Resources><Button Name='A' Opacity='1' Width='100' Height='40'/></Canvas>";
+    let mut session = DesignerSession::new(source, ContentControl::new()).unwrap();
+    let _window = attach_preview(&session);
+    let owner = session.document().ast().root();
+    let target = session.document().ast().find_name("A").unwrap();
+    let mut group = state_group(owner);
+    group.states[1].setters[0].value = "{StaticResource MutedOpacity}".into();
+    group.transitions.push(StateTransition {
+        from: None, to: "Muted".into(), duration: 0.8, easing: Easing::Linear,
+    });
+    session.upsert_state_group(group).unwrap();
+    let authored = session.document().source().to_owned();
+    let opacity = |session: &DesignerSession| session.preview.visual(target).unwrap().opacity();
+    session.preview_state_transition(owner, "Interaction", Some("Normal"), "Muted", 0.2).unwrap();
+    assert!((opacity(&session) - 0.625).abs() < 1e-6, "Directional midpoint opacity was {}", opacity(&session));
+    session.advance_state_preview(5.0).unwrap();
+    assert!((opacity(&session) - 0.25).abs() < 1e-6, "Destination opacity was {}", opacity(&session));
+    session.preview_state_transition(owner, "Interaction", Some("Normal"), "Muted", 0.1).unwrap();
+    assert!((opacity(&session) - 0.8125).abs() < 1e-6, "Backward seek opacity was {}", opacity(&session));
+    session.preview_state_transition(owner, "Interaction", None, "Muted", 0.4).unwrap();
+    assert!((opacity(&session) - 0.625).abs() < 1e-6, "Default midpoint opacity was {}", opacity(&session));
+    assert!(session.preview_state_transition(owner, "Interaction", Some("Normal"), "Muted", 0.8).is_err());
+    assert_eq!(session.document().source(), authored);
+    session.clear_interaction_preview();
+    assert_eq!(opacity(&session), 1.0);
 }
 
 #[test]

@@ -53,6 +53,10 @@ pub(crate) struct Presentation {
     layer_view: Option<LayerViewState>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) timeline_position: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) timeline_targets: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) transition_position: Option<serde_json::Value>,
 }
 
 #[derive(Serialize)]
@@ -121,6 +125,9 @@ impl Renderer {
         if let Some(layers) = layers.filter(|layers| !layers.is_empty()) {
             session.restore_persisted_layer_view(layers);
         }
+        if let Some(targets) = &input.timeline_targets {
+            session.restore_timeline_targets(targets);
+        }
         let pose = input.timeline_pose.as_ref().map(|pose| session.restore_timeline_preview_pose(pose));
         let mut frame = capture(&mut session)?;
         match pose {
@@ -166,6 +173,8 @@ impl Renderer {
             selection: session.selection().to_vec(),
             layer_view: include_layers.then(|| session.persist_layer_view()),
             timeline_position: None,
+            timeline_targets: None,
+            transition_position: None,
         })
     }
 }

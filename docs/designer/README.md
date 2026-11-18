@@ -418,9 +418,10 @@ content hosts and generated containers continue to enforce their actual ownershi
 The animation model uses FerroUI's native `Animation`, `KeyFrame` and `Setter` markup. It does not
 introduce a second runtime animation dialect. The workspace imports supported animation markup,
 records property changes as keyframes, writes them through the document transaction, and samples
-preview values at animation priority. Disposable preview layers restore ordinary source/style
-values on Stop, preview reload or switching to Interact. Natural playback completion respects
-the animation's fill mode and can retain the final sample.
+preview values at animation priority. Stop restores ordinary source and style values. Source
+reload restores the elapsed playback position when the authored program can be resolved. The
+typed sampler retains per-target visibility clocks. Natural playback completion respects the
+animation's fill mode and can retain the final sample.
 
 The program picker enumerates every Animation in local/shared/nested styles and resources. Each
 program retains its own selector, targets, timing, tracks and persisted UUID. Create, rename,
@@ -463,6 +464,8 @@ The **States** panel authors groups, named states, target setters, default/direc
 durations and easing. Source models emit real FerroUI classes, styles, native Animation objects
 and existing behavior actions. State navigation, seeking and playback use actual runtime values.
 Directional routes use the framework's existing ConditionalAction implementation.
+In VS Code, the States action opens a route in the Timeline. The `designer_state` tool can
+sample the same explicit route at a requested time through `preview_transition`.
 
 The **Behaviors** panel authors event/data triggers and property, command, method and class actions.
 Custom trigger/action objects retain their raw markup and can be edited in source. The designer

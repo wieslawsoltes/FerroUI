@@ -16,6 +16,15 @@ pub(crate) struct InteractionSession {
     behavior_modified: bool,
     clock: Option<Rc<StatePreviewClock>>,
     clock_time: f64,
+    transition: Option<TransitionPreview>,
+}
+
+#[derive(Clone)]
+struct TransitionPreview {
+    owner: NodeId,
+    group: String,
+    to: String,
+    duration: f64,
 }
 impl DesignerSession {
     pub fn state_groups(&self) -> Vec<VisualStateGroup> {
@@ -63,9 +72,62 @@ impl DesignerSession {
         state: Option<&str>,
         elapsed: Option<f64>,
     ) -> Result<(), String> {
-        if elapsed.is_some_and(|time| {
-            !time.is_finite() || time < 0.0 || time * 10_000_000.0 >= i64::MAX as f64
-        }) {
+        self.sample_state(owner, name, state, elapsed, None)
+    }
+
+    /// Sample an explicit authored route independently of the currently previewed state.
+    /// Reconstruct the initial endpoint before sampling the destination so backward seeks
+    /// and repeated seeks use the same native starting value and easing.
+    pub fn preview_state_transition(
+        &mut self, owner: NodeId, name: &str, from: Option<&str>, to: &str, elapsed: f64,
+    ) -> Result<(), String> {
+        let groups = self.state_groups();
+        let group = groups.iter().find(|group| group.owner == owner && group.name == name)
+            .ok_or("Unknown visual state group")?;
+        if from == Some(to) || from.is_some_and(|from| !group.states.iter().any(|state| state.name == from))
+            || !group.states.iter().any(|state| state.name == to)
+        {
+            return Err("Choose distinct authored endpoints for this visual state transition".into());
+        }
+        let duration = group.transition(from, to).ok_or("No authored transition connects these states")?.duration;
+        if !valid_state_time(duration) || !valid_state_time(elapsed) || elapsed > duration {
+            return Err("Choose a time within the native state transition duration".into());
+        }
+        if !self.preview.visual(owner).and_then(|visual| visual.cast::<StyledElement>())
+            .is_some_and(|owner| owner.is_attached_to_logical_tree())
+        {
+            return Err("Attach the preview host to a rooted logical tree before sampling state transitions".into());
+        }
+        self.stop_animation_playback();
+        self.preview_state_at(owner, name, from, None)?;
+        let transition = TransitionPreview { owner, group: name.into(), to: to.into(), duration };
+        if elapsed >= duration {
+            return self.finish_state_transition(transition);
+        }
+        self.sample_state(owner, name, Some(to), Some(elapsed), Some(from))?;
+        self.interactions.transition = Some(transition);
+        Ok(())
+    }
+
+    #[cfg(feature = "mcp")]
+    pub(crate) fn state_transition_position(&self) -> Option<(f64, f64)> {
+        Some((self.interactions.clock_time, self.interactions.transition.as_ref()?.duration))
+    }
+
+    fn finish_state_transition(&mut self, transition: TransitionPreview) -> Result<(), String> {
+        // Legacy generated styles can start both the default and the directional
+        // animations. Once the selected route ends, hold the native destination.
+        self.sample_state(transition.owner, &transition.group, Some(&transition.to), None, Some(None))?;
+        self.interactions.clock_time = transition.duration;
+        self.interactions.transition = Some(transition);
+        Ok(())
+    }
+
+    fn sample_state(
+        &mut self, owner: NodeId, name: &str, state: Option<&str>, elapsed: Option<f64>,
+        source_state: Option<Option<&str>>,
+    ) -> Result<(), String> {
+        if elapsed.is_some_and(|time| !valid_state_time(time)) {
             return Err("State preview time is outside the native clock range".into());
         }
         let groups = self.state_groups();
@@ -116,34 +178,18 @@ impl DesignerSession {
             return Err("Attach the preview host to a Window or rooted logical tree before sampling native state transitions, bindings or resources".into());
         }
         let key = (owner, name.to_owned());
-        let from = group
-            .states
-            .iter()
-            .find(|state| {
-                owner_visual
-                    .classes()
-                    .contains(&group.class_name(&state.name))
-            })
-            .map(|state| state.name.clone())
-            .or_else(|| self.interactions.active_states.get(&key).cloned());
+        let from = source_state.unwrap_or_else(|| {
+            group.states.iter().find(|state| owner_visual.classes().contains(&group.class_name(&state.name)))
+                .map(|state| state.name.as_str()).or_else(|| self.interactions.active_states.get(&key).map(String::as_str))
+        });
         let mut next = self.interactions.active_states.clone();
         if let Some(state) = selected {
             next.insert(key.clone(), state.name.clone());
         } else {
             next.remove(&key);
         }
-        let duration = selected
-            .and_then(|state| {
-                group
-                    .transitions
-                    .iter()
-                    .find(|transition| transition.to == state.name && transition.from == from)
-                    .or_else(|| {
-                        group.transitions.iter().find(|transition| {
-                            transition.to == state.name && transition.from.is_none()
-                        })
-                    })
-            })
+        let transition = selected.and_then(|state| group.transition(from, &state.name));
+        let duration = transition
             .map_or(0.000_000_1, |transition| {
                 transition.duration.max(0.000_000_1)
             });
@@ -204,14 +250,19 @@ impl DesignerSession {
             classes.remove(class);
         }
         if let Some(state) = selected {
-            if let Some(from) = from.filter(|from| {
-                group.transitions.iter().any(|transition| {
-                    transition.from.as_deref() == Some(from.as_str()) && transition.to == state.name
-                })
-            }) {
-                classes.add(&group.transition_class(&from, &state.name));
+            let class = group.class_name(&state.name);
+            let route = transition.and_then(|transition| transition.from.as_deref());
+            if let Some(from) = route.filter(|_| source_state.is_some()) {
+                // During an explicit seek, start the selected route last. Existing
+                // XAML can match the default style along with the directional style.
+                classes.add(&class);
+                classes.add(&group.transition_class(from, &state.name));
+            } else {
+                if let Some(from) = route {
+                    classes.add(&group.transition_class(from, &state.name));
+                }
+                classes.add(&class);
             }
-            classes.add(&group.class_name(&state.name));
         } else if let Some(original) = self.interactions.original_classes.remove(&key) {
             for class in original {
                 classes.add(&class);
@@ -223,6 +274,7 @@ impl DesignerSession {
         clock.subject.on_next(SignedDuration::from_seconds(time));
         self.interactions.clock = Some(clock);
         self.interactions.clock_time = time;
+        self.interactions.transition = None;
         self.interactions.behavior_modified = true;
         // Literal endpoint overlays remain deterministic even in a disconnected design tree.
         // Intermediate frames use the actual runtime animation to preserve native easing.
@@ -234,14 +286,15 @@ impl DesignerSession {
         Ok(())
     }
     pub fn advance_state_preview(&mut self, seconds: f64) -> Result<(), String> {
-        let time = self.interactions.clock_time + seconds;
-        if !seconds.is_finite()
-            || seconds < 0.0
-            || !time.is_finite()
-            || time * 10_000_000.0 >= i64::MAX as f64
-        {
+        let requested = self.interactions.clock_time + seconds;
+        if !valid_state_time(seconds) || !valid_state_time(requested) {
             return Err("State clock delta is outside the native clock range".into());
         }
+        if let Some(transition) = self.interactions.transition.as_ref().filter(|transition| requested >= transition.duration) {
+            return if self.interactions.clock_time >= transition.duration { Ok(()) }
+                else { self.finish_state_transition(transition.clone()) };
+        }
+        let time = requested;
         let clock = self
             .interactions
             .clock
@@ -425,6 +478,10 @@ impl DesignerSession {
         }
         self.interactions = InteractionSession::default();
     }
+}
+
+fn valid_state_time(time: f64) -> bool {
+    time.is_finite() && time >= 0.0 && time * 10_000_000.0 < i64::MAX as f64
 }
 
 struct StatePreviewClock {

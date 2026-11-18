@@ -40,6 +40,18 @@ pub struct VisualStateGroup {
     pub transitions: Vec<StateTransition>,
 }
 impl VisualStateGroup {
+    /// Directional transitions take precedence over the same destination's default.
+    pub fn transition(&self, from: Option<&str>, to: &str) -> Option<&StateTransition> {
+        self.transitions
+            .iter()
+            .find(|transition| transition.to == to && transition.from.as_deref() == from)
+            .or_else(|| {
+                self.transitions
+                    .iter()
+                    .find(|transition| transition.to == to && transition.from.is_none())
+            })
+    }
+
     pub fn validate(&self) -> Result<()> {
         validate_name(&self.name)?;
         require(self.owner > 0, "State group owner must be nonzero")?;

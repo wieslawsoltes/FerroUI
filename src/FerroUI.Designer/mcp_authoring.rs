@@ -73,13 +73,14 @@ pub(super) fn tools() -> Vec<Value> {
             s::action("advance_program",json!({"program":s::id(),"seconds":s::time()}), &["program","seconds"],true),
             s::action("pause_program",json!({"program":s::id()}), &["program"],true),
             s::action("stop_program",json!({}), &[],true),
-            s::action("play_all",json!({}), &[],true),
+            s::action("play_all",json!({"program":s::id(),"time":s::time()}), &[],true),
         ],true),
         s::tool("designer_states","Read source-backed visual-state groups, setters and directional transitions, optionally for one owner.",s::object(json!({"owner":s::id()}), &[]),false),
         s::actions("designer_state","Author a validated visual-state group or remove it. Preview/advance/clear change live classes and animation clocks without changing source. Setter values use native XAML text and may contain bindings/resources.",vec![
             s::action("upsert",json!({"model":s::state_group()}), &["model"],true),
             s::action("remove",json!({"owner":s::id(),"group":s::string()}), &["owner","group"],true),
             s::action("preview",json!({"owner":s::id(),"group":s::string(),"state":s::nullable(s::string()),"time":s::time()}), &["owner","group","state"],true),
+            s::action("preview_transition",json!({"owner":s::id(),"group":s::string(),"from":s::nullable(s::string()),"to":s::string(),"time":s::time()}), &["owner","group","from","to","time"],true),
             s::action("advance_preview",json!({"seconds":s::time()}), &["seconds"],true),
             s::action("clear_preview",json!({}), &[],true),
         ],true),
@@ -198,10 +199,10 @@ pub(super) fn call(
                     let keys: Vec<KeyframeLocation> = decode(args, "keyframes")?;
                     keyframes = Some(session.edit_program_keyframes(node_id(args, "program")?, &keys, edit)?);
                 }
-                "preview_targets" => session.set_animation_program_preview_targets(
-                    node_id(args, "program")?,
-                    decode(args, "targets")?,
-                )?,
+                "preview_targets" => {
+                    session.set_animation_program_preview_targets(node_id(args, "program")?, decode(args, "targets")?)?;
+                    return Ok(json!({"document":state(session),"timelineTargets":session.timeline_target_overrides()}));
+                }
                 "preview" => {
                     let programs: Vec<u64> = decode(args, "programs")?;
                     distinct(&programs)?;
@@ -219,7 +220,7 @@ pub(super) fn call(
                         args["time"].as_f64(),
                         args["from_playhead"] == true,
                     )?;
-                    return playback_position(session);
+                    return Ok(playback_position(session));
                 }
                 action @ ("advance_program" | "pause_program") => {
                     if session.active_animation_program() != Some(node_id(args, "program")?) {
@@ -230,13 +231,16 @@ pub(super) fn call(
                     } else {
                         session.pause();
                     }
-                    return playback_position(session);
+                    return Ok(playback_position(session));
                 }
                 "stop_program" => {
                     session.stop();
                     return Ok(json!({"timelinePosition":{"time":0,"playing":false}}));
                 }
-                "play_all" => session.play_all_animation_programs(),
+                "play_all" => {
+                    session.start_combined_playback(args["program"].as_u64(), args["time"].as_f64())?;
+                    return Ok(playback_position(session));
+                }
                 _ => return Err("Unknown animation program action".into()),
             }
             let mut result = json!({"document":state(session),"active":session.active_animation_program(),"created":created,"programs":session.animation_programs()});
@@ -265,7 +269,15 @@ pub(super) fn call(
                 args["state"].as_str(),
                 args["time"].as_f64(),
             )?,
-            "advance_preview" => session.advance_state_preview(number(args, "seconds")?)?,
+            "preview_transition" => {
+                session.preview_state_transition(node_id(args, "owner")?, &text(args, "group")?, args["from"].as_str(),
+                    &text(args, "to")?, number(args, "time")?)?;
+                return Ok(state_transition_position(session));
+            }
+            "advance_preview" => {
+                session.advance_state_preview(number(args, "seconds")?)?;
+                return Ok(state_transition_position(session));
+            }
             "clear_preview" => session.clear_interaction_preview(),
             _ => return Err("Unknown visual-state action".into()),
         },
@@ -384,10 +396,19 @@ pub(super) fn call(
     }
     Ok(json!({"document":state(session)}))
 }
-fn playback_position(session: &DesignerSession) -> Result<Value, String> {
+fn playback_position(session: &DesignerSession) -> Value {
     let elapsed = session.time();
-    let time = session.animation.compiled.playback_position(elapsed).map_err(|error| error.to_string())?;
-    Ok(json!({"timelinePosition":{"time":time,"elapsed":elapsed,"playing":session.is_playing()}}))
+    let pose = session.timeline_playback_pose();
+    let time = pose.as_ref().map_or(elapsed, |pose| pose.time);
+    json!({"timelinePosition":{"time":time,"elapsed":elapsed,"playing":session.is_playing(),"all":session.animation.play_all,
+        "completed":session.animation.playback_completed,"pose":pose}})
+}
+fn state_transition_position(session: &DesignerSession) -> Value {
+    let mut result = json!({"document":state(session)});
+    if let Some((time, duration)) = session.state_transition_position() {
+        result["transitionPosition"] = json!({"time":time,"duration":duration});
+    }
+    result
 }
 fn animation_programs(session: &DesignerSession, args: &Value) -> Result<Vec<Value>, String> {
     session.animation_programs().iter().map(|program| {
@@ -409,6 +430,9 @@ fn animation_programs(session: &DesignerSession, args: &Value) -> Result<Vec<Val
             model["timeline"]["repeat_text"] = json!(timeline.repeat.to_string());
             model["timeline"]["easing_text"] = json!(timeline.easing.to_xaml());
             model["timeline"]["total_duration"] = json!(timeline.total_duration());
+        }
+        if let Some(preview) = session.program_preview(program) {
+            model["preview"] = json!(preview);
         }
         Ok(model)
     }).collect()
