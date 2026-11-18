@@ -25,8 +25,9 @@ pub struct ModelSet {
     /// Every public path of every model, with the path of the declaring module.
     exports: HashMap<String, String>,
     /// Preferred exported spellings for types mentioned inside generated signatures,
-    /// including generic collection types with no XAML declaration of their own.
-    public_names: std::cell::OnceCell<HashMap<String, String>>,
+    /// including generic collection types with no XAML declaration of their own. A `OnceLock`
+    /// keeps the set `Sync` and `RefUnwindSafe`, as it was in 0.5.0.
+    public_names: std::sync::OnceLock<HashMap<String, String>>,
     /// The types by the text of their Rust type, the first of a text.
     types: HashMap<String, (usize, usize)>,
     /// The accessors of registered properties that are functions of another type than the
@@ -46,7 +47,14 @@ impl ModelSet {
                 exports.entry(export.path.clone()).or_insert_with(|| export.declared.clone());
             }
         }
-        let mut set = Self { models, exports, public_names: Default::default(), types: HashMap::new(), functions: HashMap::new(), aliases: HashMap::new() };
+        let mut set = Self {
+            models,
+            exports,
+            public_names: Default::default(),
+            types: HashMap::new(),
+            functions: HashMap::new(),
+            aliases: HashMap::new(),
+        };
         let mut types = HashMap::new();
         let mut functions = HashMap::new();
         let mut aliases = HashMap::new();
