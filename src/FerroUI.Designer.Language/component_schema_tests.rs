@@ -93,6 +93,9 @@ fn builtin_aliases_require_the_declaring_namespace_and_assembly() {
     // `ferro_markup_type! ... as` exposes the authored name, not its Rust carrier.
     assert!(schema.type_info("Type", Some("using:System")).is_some());
     assert!(schema.type_info("TypeInfo", Some("using:System")).is_none());
+    assert!(schema.type_info("TimeSpan", Some("using:System")).is_some());
+    assert!(schema.type_info("TimeSpan", Some("clr-namespace:System;assembly=FerroUI.Base")).is_some());
+    assert!(schema.type_info("TimeSpan", Some("clr-namespace:System;assembly=Wrong")).is_none());
     for namespace in [
         TEMPLATES,
         "clr-namespace:FerroUI.Markup.Xaml.Templates;assembly=FerroUI.Markup.Xaml",
@@ -136,6 +139,18 @@ fn builtin_aliases_require_the_declaring_namespace_and_assembly() {
             .type_info("Grid", Some("using:FerroUI.Application"))
             .is_none()
     );
+}
+
+#[test]
+fn native_scalar_resource_types_work_in_standalone_dictionaries() {
+    let source = r##"<ResourceDictionary xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="using:System">
+        <sys:TimeSpan x:Key="Fade">0.00:00:00.2500000</sys:TimeSpan>
+        <x:Double x:Key="CardWidth">320</x:Double>
+        <Color x:Key="CardTint">#2D6A51</Color>
+    </ResourceDictionary>"##;
+    let diagnostics = service(source).diagnostics(URI).unwrap();
+    assert!(diagnostics.is_empty(), "{diagnostics:?}");
 }
 
 #[test]

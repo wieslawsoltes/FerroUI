@@ -1192,6 +1192,18 @@
     ]
   },
   {
+    "name": "BeginEditGestures",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_treedatagrid::models::BeginEditGestures",
+    "base": null,
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Models.TreeDataGrid",
+      "clr-namespace:FerroUI.Controls.Models.TreeDataGrid;assembly=FerroUI.Controls.TreeDataGrid"
+    ]
+  },
+  {
     "name": "BezierSegment",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::media::BezierSegment",
@@ -1535,6 +1547,70 @@
     "namespace_aliases": [
       "using:FerroUI.Animation.Easings",
       "clr-namespace:FerroUI.Animation.Easings;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "BoxShadow",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::media::BoxShadow",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "OffsetX": {
+        "name": "OffsetX",
+        "type_name": "f64",
+        "documentation": "BoxShadow.OffsetX: f64",
+        "values": []
+      },
+      "OffsetY": {
+        "name": "OffsetY",
+        "type_name": "f64",
+        "documentation": "BoxShadow.OffsetY: f64",
+        "values": []
+      },
+      "Blur": {
+        "name": "Blur",
+        "type_name": "f64",
+        "documentation": "BoxShadow.Blur: f64",
+        "values": []
+      },
+      "Spread": {
+        "name": "Spread",
+        "type_name": "f64",
+        "documentation": "BoxShadow.Spread: f64",
+        "values": []
+      },
+      "Color": {
+        "name": "Color",
+        "type_name": "Color",
+        "documentation": "BoxShadow.Color: Color",
+        "values": []
+      },
+      "IsInset": {
+        "name": "IsInset",
+        "type_name": "bool",
+        "documentation": "BoxShadow.IsInset: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Media",
+      "clr-namespace:FerroUI.Media;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "BoxShadows",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::media::BoxShadows",
+    "base": null,
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Media",
+      "clr-namespace:FerroUI.Media;assembly=FerroUI.Base"
     ]
   },
   {
@@ -2474,6 +2550,43 @@
     "namespace_aliases": [
       "using:FerroUI.Data.Core",
       "clr-namespace:FerroUI.Data.Core;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "Color",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::media::Color",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "A": {
+        "name": "A",
+        "type_name": "u8",
+        "documentation": "Color.A: u8",
+        "values": []
+      },
+      "R": {
+        "name": "R",
+        "type_name": "u8",
+        "documentation": "Color.R: u8",
+        "values": []
+      },
+      "G": {
+        "name": "G",
+        "type_name": "u8",
+        "documentation": "Color.G: u8",
+        "values": []
+      },
+      "B": {
+        "name": "B",
+        "type_name": "u8",
+        "documentation": "Color.B: u8",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Media",
+      "clr-namespace:FerroUI.Media;assembly=FerroUI.Base"
     ]
   },
   {
@@ -4631,6 +4744,18 @@
     ]
   },
   {
+    "name": "ConvertedLength",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ConvertedLength",
+    "base": null,
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Data",
+      "clr-namespace:FerroUI.Data;assembly=FerroUI.Base"
+    ]
+  },
+  {
     "name": "ConvertedShape",
     "namespace": "https://github.com/ferroui",
     "documentation": "ConvertedShape",
@@ -4652,6 +4777,52 @@
     "namespace_aliases": [
       "using:FerroUI.Data",
       "clr-namespace:FerroUI.Data;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "CornerRadius",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::CornerRadius",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "TopLeft": {
+        "name": "TopLeft",
+        "type_name": "f64",
+        "documentation": "CornerRadius.TopLeft: f64",
+        "values": []
+      },
+      "TopRight": {
+        "name": "TopRight",
+        "type_name": "f64",
+        "documentation": "CornerRadius.TopRight: f64",
+        "values": []
+      },
+      "BottomRight": {
+        "name": "BottomRight",
+        "type_name": "f64",
+        "documentation": "CornerRadius.BottomRight: f64",
+        "values": []
+      },
+      "BottomLeft": {
+        "name": "BottomLeft",
+        "type_name": "f64",
+        "documentation": "CornerRadius.BottomLeft: f64",
+        "values": []
+      },
+      "IsUniform": {
+        "name": "IsUniform",
+        "type_name": "bool",
+        "documentation": "CornerRadius.IsUniform: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI",
+      "clr-namespace:FerroUI;assembly=FerroUI.Base"
     ]
   },
   {
@@ -4813,6 +4984,25 @@
     "namespace_aliases": [
       "using:FerroUI.Animation.Easings",
       "clr-namespace:FerroUI.Animation.Easings;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "Cue",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::Cue",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "CueValue": {
+        "name": "CueValue",
+        "type_name": "f64",
+        "documentation": "Cue.CueValue: f64",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Animation",
+      "clr-namespace:FerroUI.Animation;assembly=FerroUI.Base"
     ]
   },
   {
@@ -5229,6 +5419,121 @@
     ]
   },
   {
+    "name": "DateTime",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::utilities::DateTime",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "Date": {
+        "name": "Date",
+        "type_name": "DateTime",
+        "documentation": "DateTime.Date: DateTime",
+        "values": []
+      },
+      "Day": {
+        "name": "Day",
+        "type_name": "i32",
+        "documentation": "DateTime.Day: i32",
+        "values": []
+      },
+      "DayOfWeek": {
+        "name": "DayOfWeek",
+        "type_name": "DayOfWeek",
+        "documentation": "DateTime.DayOfWeek: DayOfWeek",
+        "values": [
+          "Sunday",
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday"
+        ]
+      },
+      "DayOfYear": {
+        "name": "DayOfYear",
+        "type_name": "i32",
+        "documentation": "DateTime.DayOfYear: i32",
+        "values": []
+      },
+      "Hour": {
+        "name": "Hour",
+        "type_name": "i32",
+        "documentation": "DateTime.Hour: i32",
+        "values": []
+      },
+      "Kind": {
+        "name": "Kind",
+        "type_name": "DateTimeKind",
+        "documentation": "DateTime.Kind: DateTimeKind",
+        "values": [
+          "Unspecified",
+          "Utc",
+          "Local"
+        ]
+      },
+      "Millisecond": {
+        "name": "Millisecond",
+        "type_name": "i32",
+        "documentation": "DateTime.Millisecond: i32",
+        "values": []
+      },
+      "Minute": {
+        "name": "Minute",
+        "type_name": "i32",
+        "documentation": "DateTime.Minute: i32",
+        "values": []
+      },
+      "Month": {
+        "name": "Month",
+        "type_name": "i32",
+        "documentation": "DateTime.Month: i32",
+        "values": []
+      },
+      "Second": {
+        "name": "Second",
+        "type_name": "i32",
+        "documentation": "DateTime.Second: i32",
+        "values": []
+      },
+      "Ticks": {
+        "name": "Ticks",
+        "type_name": "i64",
+        "documentation": "DateTime.Ticks: i64",
+        "values": []
+      },
+      "TimeOfDay": {
+        "name": "TimeOfDay",
+        "type_name": "SignedDuration",
+        "documentation": "DateTime.TimeOfDay: SignedDuration",
+        "values": []
+      },
+      "Year": {
+        "name": "Year",
+        "type_name": "i32",
+        "documentation": "DateTime.Year: i32",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:System",
+      "clr-namespace:System;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "DateTimeOffset",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::utilities::DateTimeOffset",
+    "base": null,
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:System",
+      "clr-namespace:System;assembly=FerroUI.Base"
+    ]
+  },
+  {
     "name": "DateTimePickerPanel",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::date_time_pickers::DateTimePickerPanel",
@@ -5359,6 +5664,18 @@
     "namespace_aliases": [
       "using:FerroUI.Controls.Primitives",
       "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "Decimal",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::utilities::Decimal",
+    "base": null,
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:System",
+      "clr-namespace:System;assembly=FerroUI.Base"
     ]
   },
   {
@@ -7290,6 +7607,18 @@
     ]
   },
   {
+    "name": "FontWeight",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::media::FontWeight",
+    "base": null,
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Media",
+      "clr-namespace:FerroUI.Media;assembly=FerroUI.Base"
+    ]
+  },
+  {
     "name": "Frame",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::Frame",
@@ -7701,6 +8030,62 @@
     ]
   },
   {
+    "name": "GridLength",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::GridLength",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "Value": {
+        "name": "Value",
+        "type_name": "f64",
+        "documentation": "GridLength.Value: f64",
+        "values": []
+      },
+      "GridUnitType": {
+        "name": "GridUnitType",
+        "type_name": "GridUnitType",
+        "documentation": "GridLength.GridUnitType: GridUnitType",
+        "values": [
+          "Auto",
+          "Pixel",
+          "Star"
+        ]
+      },
+      "IsAbsolute": {
+        "name": "IsAbsolute",
+        "type_name": "bool",
+        "documentation": "GridLength.IsAbsolute: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      },
+      "IsAuto": {
+        "name": "IsAuto",
+        "type_name": "bool",
+        "documentation": "GridLength.IsAuto: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      },
+      "IsStar": {
+        "name": "IsStar",
+        "type_name": "bool",
+        "documentation": "GridLength.IsStar: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "GridLinesRenderer",
     "namespace": "https://github.com/ferroui",
     "documentation": "GridLinesRenderer",
@@ -7929,6 +8314,80 @@
     "namespace_aliases": [
       "using:FerroUI.Controls",
       "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "HslColor",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::media::HslColor",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "A": {
+        "name": "A",
+        "type_name": "f64",
+        "documentation": "HslColor.A: f64",
+        "values": []
+      },
+      "H": {
+        "name": "H",
+        "type_name": "f64",
+        "documentation": "HslColor.H: f64",
+        "values": []
+      },
+      "S": {
+        "name": "S",
+        "type_name": "f64",
+        "documentation": "HslColor.S: f64",
+        "values": []
+      },
+      "L": {
+        "name": "L",
+        "type_name": "f64",
+        "documentation": "HslColor.L: f64",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Media",
+      "clr-namespace:FerroUI.Media;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "HsvColor",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::media::HsvColor",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "A": {
+        "name": "A",
+        "type_name": "f64",
+        "documentation": "HsvColor.A: f64",
+        "values": []
+      },
+      "H": {
+        "name": "H",
+        "type_name": "f64",
+        "documentation": "HsvColor.H: f64",
+        "values": []
+      },
+      "S": {
+        "name": "S",
+        "type_name": "f64",
+        "documentation": "HsvColor.S: f64",
+        "values": []
+      },
+      "V": {
+        "name": "V",
+        "type_name": "f64",
+        "documentation": "HsvColor.V: f64",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Media",
+      "clr-namespace:FerroUI.Media;assembly=FerroUI.Base"
     ]
   },
   {
@@ -10801,6 +11260,43 @@
     ]
   },
   {
+    "name": "IterationCount",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::IterationCount",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "Value": {
+        "name": "Value",
+        "type_name": "u64",
+        "documentation": "IterationCount.Value: u64",
+        "values": []
+      },
+      "RepeatType": {
+        "name": "RepeatType",
+        "type_name": "IterationType",
+        "documentation": "IterationCount.RepeatType: IterationType",
+        "values": [
+          "Many",
+          "Infinite"
+        ]
+      },
+      "IsInfinite": {
+        "name": "IsInfinite",
+        "type_name": "bool",
+        "documentation": "IterationCount.IsInfinite: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Animation",
+      "clr-namespace:FerroUI.Animation;assembly=FerroUI.Base"
+    ]
+  },
+  {
     "name": "KeyBinding",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::input::KeyBinding",
@@ -11345,8 +11841,8 @@
     "constructible": false,
     "properties": {},
     "namespace_aliases": [
-      "using:FerroUI.Layout",
-      "clr-namespace:FerroUI.Layout;assembly=FerroUI.Base"
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -12174,6 +12670,91 @@
     "namespace_aliases": [
       "using:FerroUI.Controls",
       "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "Matrix",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::Matrix",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "M11": {
+        "name": "M11",
+        "type_name": "f64",
+        "documentation": "Matrix.M11: f64",
+        "values": []
+      },
+      "M12": {
+        "name": "M12",
+        "type_name": "f64",
+        "documentation": "Matrix.M12: f64",
+        "values": []
+      },
+      "M13": {
+        "name": "M13",
+        "type_name": "f64",
+        "documentation": "Matrix.M13: f64",
+        "values": []
+      },
+      "M21": {
+        "name": "M21",
+        "type_name": "f64",
+        "documentation": "Matrix.M21: f64",
+        "values": []
+      },
+      "M22": {
+        "name": "M22",
+        "type_name": "f64",
+        "documentation": "Matrix.M22: f64",
+        "values": []
+      },
+      "M23": {
+        "name": "M23",
+        "type_name": "f64",
+        "documentation": "Matrix.M23: f64",
+        "values": []
+      },
+      "M31": {
+        "name": "M31",
+        "type_name": "f64",
+        "documentation": "Matrix.M31: f64",
+        "values": []
+      },
+      "M32": {
+        "name": "M32",
+        "type_name": "f64",
+        "documentation": "Matrix.M32: f64",
+        "values": []
+      },
+      "M33": {
+        "name": "M33",
+        "type_name": "f64",
+        "documentation": "Matrix.M33: f64",
+        "values": []
+      },
+      "IsIdentity": {
+        "name": "IsIdentity",
+        "type_name": "bool",
+        "documentation": "Matrix.IsIdentity: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      },
+      "HasInverse": {
+        "name": "HasInverse",
+        "type_name": "bool",
+        "documentation": "Matrix.HasInverse: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI",
+      "clr-namespace:FerroUI;assembly=FerroUI.Base"
     ]
   },
   {
@@ -15678,6 +16259,153 @@
     ]
   },
   {
+    "name": "PixelPoint",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::PixelPoint",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "X": {
+        "name": "X",
+        "type_name": "i32",
+        "documentation": "PixelPoint.X: i32",
+        "values": []
+      },
+      "Y": {
+        "name": "Y",
+        "type_name": "i32",
+        "documentation": "PixelPoint.Y: i32",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI",
+      "clr-namespace:FerroUI;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "PixelRect",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::PixelRect",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "X": {
+        "name": "X",
+        "type_name": "i32",
+        "documentation": "PixelRect.X: i32",
+        "values": []
+      },
+      "Y": {
+        "name": "Y",
+        "type_name": "i32",
+        "documentation": "PixelRect.Y: i32",
+        "values": []
+      },
+      "Width": {
+        "name": "Width",
+        "type_name": "i32",
+        "documentation": "PixelRect.Width: i32",
+        "values": []
+      },
+      "Height": {
+        "name": "Height",
+        "type_name": "i32",
+        "documentation": "PixelRect.Height: i32",
+        "values": []
+      },
+      "Position": {
+        "name": "Position",
+        "type_name": "PixelPoint",
+        "documentation": "PixelRect.Position: PixelPoint",
+        "values": []
+      },
+      "Size": {
+        "name": "Size",
+        "type_name": "PixelSize",
+        "documentation": "PixelRect.Size: PixelSize",
+        "values": []
+      },
+      "Right": {
+        "name": "Right",
+        "type_name": "i32",
+        "documentation": "PixelRect.Right: i32",
+        "values": []
+      },
+      "Bottom": {
+        "name": "Bottom",
+        "type_name": "i32",
+        "documentation": "PixelRect.Bottom: i32",
+        "values": []
+      },
+      "TopLeft": {
+        "name": "TopLeft",
+        "type_name": "PixelPoint",
+        "documentation": "PixelRect.TopLeft: PixelPoint",
+        "values": []
+      },
+      "TopRight": {
+        "name": "TopRight",
+        "type_name": "PixelPoint",
+        "documentation": "PixelRect.TopRight: PixelPoint",
+        "values": []
+      },
+      "BottomLeft": {
+        "name": "BottomLeft",
+        "type_name": "PixelPoint",
+        "documentation": "PixelRect.BottomLeft: PixelPoint",
+        "values": []
+      },
+      "BottomRight": {
+        "name": "BottomRight",
+        "type_name": "PixelPoint",
+        "documentation": "PixelRect.BottomRight: PixelPoint",
+        "values": []
+      },
+      "Center": {
+        "name": "Center",
+        "type_name": "PixelPoint",
+        "documentation": "PixelRect.Center: PixelPoint",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI",
+      "clr-namespace:FerroUI;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "PixelSize",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::PixelSize",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "Width": {
+        "name": "Width",
+        "type_name": "i32",
+        "documentation": "PixelSize.Width: i32",
+        "values": []
+      },
+      "Height": {
+        "name": "Height",
+        "type_name": "i32",
+        "documentation": "PixelSize.Height: i32",
+        "values": []
+      },
+      "AspectRatio": {
+        "name": "AspectRatio",
+        "type_name": "f64",
+        "documentation": "PixelSize.AspectRatio: f64",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI",
+      "clr-namespace:FerroUI;assembly=FerroUI.Base"
+    ]
+  },
+  {
     "name": "PlatformFeedback",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::PlatformFeedback",
@@ -15724,6 +16452,31 @@
     "namespace_aliases": [
       "using:FerroUI.Controls.Converters",
       "clr-namespace:FerroUI.Controls.Converters;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "Point",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::Point",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "X": {
+        "name": "X",
+        "type_name": "f64",
+        "documentation": "Point.X: f64",
+        "values": []
+      },
+      "Y": {
+        "name": "Y",
+        "type_name": "f64",
+        "documentation": "Point.Y: f64",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI",
+      "clr-namespace:FerroUI;assembly=FerroUI.Base"
     ]
   },
   {
@@ -17290,6 +18043,109 @@
     ]
   },
   {
+    "name": "Rect",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::Rect",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "X": {
+        "name": "X",
+        "type_name": "f64",
+        "documentation": "Rect.X: f64",
+        "values": []
+      },
+      "Y": {
+        "name": "Y",
+        "type_name": "f64",
+        "documentation": "Rect.Y: f64",
+        "values": []
+      },
+      "Width": {
+        "name": "Width",
+        "type_name": "f64",
+        "documentation": "Rect.Width: f64",
+        "values": []
+      },
+      "Height": {
+        "name": "Height",
+        "type_name": "f64",
+        "documentation": "Rect.Height: f64",
+        "values": []
+      },
+      "Position": {
+        "name": "Position",
+        "type_name": "Point",
+        "documentation": "Rect.Position: Point",
+        "values": []
+      },
+      "Size": {
+        "name": "Size",
+        "type_name": "Size",
+        "documentation": "Rect.Size: Size",
+        "values": []
+      },
+      "Right": {
+        "name": "Right",
+        "type_name": "f64",
+        "documentation": "Rect.Right: f64",
+        "values": []
+      },
+      "Bottom": {
+        "name": "Bottom",
+        "type_name": "f64",
+        "documentation": "Rect.Bottom: f64",
+        "values": []
+      },
+      "Left": {
+        "name": "Left",
+        "type_name": "f64",
+        "documentation": "Rect.Left: f64",
+        "values": []
+      },
+      "Top": {
+        "name": "Top",
+        "type_name": "f64",
+        "documentation": "Rect.Top: f64",
+        "values": []
+      },
+      "TopLeft": {
+        "name": "TopLeft",
+        "type_name": "Point",
+        "documentation": "Rect.TopLeft: Point",
+        "values": []
+      },
+      "TopRight": {
+        "name": "TopRight",
+        "type_name": "Point",
+        "documentation": "Rect.TopRight: Point",
+        "values": []
+      },
+      "BottomLeft": {
+        "name": "BottomLeft",
+        "type_name": "Point",
+        "documentation": "Rect.BottomLeft: Point",
+        "values": []
+      },
+      "BottomRight": {
+        "name": "BottomRight",
+        "type_name": "Point",
+        "documentation": "Rect.BottomRight: Point",
+        "values": []
+      },
+      "Center": {
+        "name": "Center",
+        "type_name": "Point",
+        "documentation": "Rect.Center: Point",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI",
+      "clr-namespace:FerroUI;assembly=FerroUI.Base"
+    ]
+  },
+  {
     "name": "Rectangle",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::shapes::Rectangle",
@@ -17827,6 +18683,34 @@
     ]
   },
   {
+    "name": "RelativePoint",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::RelativePoint",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "Point": {
+        "name": "Point",
+        "type_name": "Point",
+        "documentation": "RelativePoint.Point: Point",
+        "values": []
+      },
+      "Unit": {
+        "name": "Unit",
+        "type_name": "RelativeUnit",
+        "documentation": "RelativePoint.Unit: RelativeUnit",
+        "values": [
+          "Relative",
+          "Absolute"
+        ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI",
+      "clr-namespace:FerroUI;assembly=FerroUI.Base"
+    ]
+  },
+  {
     "name": "RelativePointTransition",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::animation::RelativePointTransition",
@@ -17836,6 +18720,62 @@
     "namespace_aliases": [
       "using:FerroUI.Animation",
       "clr-namespace:FerroUI.Animation;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "RelativeRect",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::RelativeRect",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "Unit": {
+        "name": "Unit",
+        "type_name": "RelativeUnit",
+        "documentation": "RelativeRect.Unit: RelativeUnit",
+        "values": [
+          "Relative",
+          "Absolute"
+        ]
+      },
+      "Rect": {
+        "name": "Rect",
+        "type_name": "Rect",
+        "documentation": "RelativeRect.Rect: Rect",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI",
+      "clr-namespace:FerroUI;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "RelativeScalar",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::RelativeScalar",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "Scalar": {
+        "name": "Scalar",
+        "type_name": "f64",
+        "documentation": "RelativeScalar.Scalar: f64",
+        "values": []
+      },
+      "Unit": {
+        "name": "Unit",
+        "type_name": "RelativeUnit",
+        "documentation": "RelativeScalar.Unit: RelativeUnit",
+        "values": [
+          "Relative",
+          "Absolute"
+        ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI",
+      "clr-namespace:FerroUI;assembly=FerroUI.Base"
     ]
   },
   {
@@ -20671,6 +21611,37 @@
     "namespace_aliases": [
       "using:FerroUI.Animation.Easings",
       "clr-namespace:FerroUI.Animation.Easings;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "Size",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::Size",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "Width": {
+        "name": "Width",
+        "type_name": "f64",
+        "documentation": "Size.Width: f64",
+        "values": []
+      },
+      "Height": {
+        "name": "Height",
+        "type_name": "f64",
+        "documentation": "Size.Height: f64",
+        "values": []
+      },
+      "AspectRatio": {
+        "name": "AspectRatio",
+        "type_name": "f64",
+        "documentation": "Size.AspectRatio: f64",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI",
+      "clr-namespace:FerroUI;assembly=FerroUI.Base"
     ]
   },
   {
@@ -24325,6 +25296,31 @@
     ]
   },
   {
+    "name": "TextRange",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::documents::TextHighlightRange",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "StartIndex": {
+        "name": "StartIndex",
+        "type_name": "i32",
+        "documentation": "TextRange.StartIndex: i32",
+        "values": []
+      },
+      "Length": {
+        "name": "Length",
+        "type_name": "i32",
+        "documentation": "TextRange.Length: i32",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Documents",
+      "clr-namespace:FerroUI.Controls.Documents;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "TextRangeCollection",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::documents::TextRangeCollection",
@@ -24400,6 +25396,18 @@
     ]
   },
   {
+    "name": "TextTabStops",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::media::text_formatting::TextTabStops",
+    "base": null,
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Media.TextFormatting",
+      "clr-namespace:FerroUI.Media.TextFormatting;assembly=FerroUI.Base"
+    ]
+  },
+  {
     "name": "ThemeShadow",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::media::ThemeShadow",
@@ -24470,6 +25478,52 @@
     "namespace_aliases": [
       "using:FerroUI.Controls",
       "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "Thickness",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::Thickness",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "Left": {
+        "name": "Left",
+        "type_name": "f64",
+        "documentation": "Thickness.Left: f64",
+        "values": []
+      },
+      "Top": {
+        "name": "Top",
+        "type_name": "f64",
+        "documentation": "Thickness.Top: f64",
+        "values": []
+      },
+      "Right": {
+        "name": "Right",
+        "type_name": "f64",
+        "documentation": "Thickness.Right: f64",
+        "values": []
+      },
+      "Bottom": {
+        "name": "Bottom",
+        "type_name": "f64",
+        "documentation": "Thickness.Bottom: f64",
+        "values": []
+      },
+      "IsUniform": {
+        "name": "IsUniform",
+        "type_name": "bool",
+        "documentation": "Thickness.IsUniform: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI",
+      "clr-namespace:FerroUI;assembly=FerroUI.Base"
     ]
   },
   {
@@ -24824,6 +25878,37 @@
     "namespace_aliases": [
       "using:FerroUI.Controls",
       "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "TimeSpan",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::SignedDuration",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "Ticks": {
+        "name": "Ticks",
+        "type_name": "i64",
+        "documentation": "TimeSpan.Ticks: i64",
+        "values": []
+      },
+      "TotalSeconds": {
+        "name": "TotalSeconds",
+        "type_name": "f64",
+        "documentation": "TimeSpan.TotalSeconds: f64",
+        "values": []
+      },
+      "TotalMilliseconds": {
+        "name": "TotalMilliseconds",
+        "type_name": "f64",
+        "documentation": "TimeSpan.TotalMilliseconds: f64",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:System",
+      "clr-namespace:System;assembly=FerroUI.Base"
     ]
   },
   {
@@ -26491,6 +27576,18 @@
     ]
   },
   {
+    "name": "TreeDataGridSelectionMode",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_treedatagrid::TreeDataGridSelectionMode",
+    "base": null,
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.TreeDataGrid"
+    ]
+  },
+  {
     "name": "TreeDataGridTemplateCell",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls_treedatagrid::primitives::TreeDataGridTemplateCell",
@@ -27631,6 +28728,80 @@
     ]
   },
   {
+    "name": "Vector",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::Vector",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "X": {
+        "name": "X",
+        "type_name": "f64",
+        "documentation": "Vector.X: f64",
+        "values": []
+      },
+      "Y": {
+        "name": "Y",
+        "type_name": "f64",
+        "documentation": "Vector.Y: f64",
+        "values": []
+      },
+      "Length": {
+        "name": "Length",
+        "type_name": "f64",
+        "documentation": "Vector.Length: f64",
+        "values": []
+      },
+      "SquaredLength": {
+        "name": "SquaredLength",
+        "type_name": "f64",
+        "documentation": "Vector.SquaredLength: f64",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI",
+      "clr-namespace:FerroUI;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "Vector3D",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::Vector3D",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "X": {
+        "name": "X",
+        "type_name": "f64",
+        "documentation": "Vector3D.X: f64",
+        "values": []
+      },
+      "Y": {
+        "name": "Y",
+        "type_name": "f64",
+        "documentation": "Vector3D.Y: f64",
+        "values": []
+      },
+      "Z": {
+        "name": "Z",
+        "type_name": "f64",
+        "documentation": "Vector3D.Z: f64",
+        "values": []
+      },
+      "Length": {
+        "name": "Length",
+        "type_name": "f64",
+        "documentation": "Vector3D.Length: f64",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI",
+      "clr-namespace:FerroUI;assembly=FerroUI.Base"
+    ]
+  },
+  {
     "name": "VectorTransition",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::animation::VectorTransition",
@@ -28620,6 +29791,18 @@
     "namespace_aliases": [
       "using:FerroUI.Controls.Notifications",
       "clr-namespace:FerroUI.Controls.Notifications;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "WindowTransparencyLevel",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::WindowTransparencyLevel",
+    "base": null,
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {
