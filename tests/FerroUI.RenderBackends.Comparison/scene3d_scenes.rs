@@ -1,7 +1,10 @@
-//! The comparison scenes of 3D (#608, step D3 of `docs/porting/media3d.md`): eleven snapshots of
+//! The comparison scenes of 3D (#608, steps D3 and D6 of `docs/porting/media3d.md`): snapshots of
 //! `Viewport3D` scenes, made by hand with WPF's camera matrices, drawn through the contracts as
 //! the render walk draws them (`rendering::scene3d::draw_scene_3d` on a drawing context), at 96
-//! and 192 DPI on a square of [`SIDE`] logical pixels.
+//! and 192 DPI on a square of [`SIDE`] logical pixels: the eleven scenes of D3, and the six of the
+//! materials from brushes of D6 (gradients, the lookup texture of many stops, absolute mapping,
+//! image brushes with tiles, viewbox and stretch, and the specular and emissive layers of a
+//! `MaterialGroup` painting with brushes).
 //!
 //! Each scene states its golden properties as pixel probes with analytic expectations: the
 //! colours WPF's lighting gives at the probed point (computed here from the formulas, in double
@@ -11,15 +14,24 @@
 
 use crate::custom_effect_scenes::{Tolerance, SIDE};
 use crate::Pixels;
-use ferroui_base::media::immutable::ImmutableSolidColorBrush;
-use ferroui_base::media::{Color, SharedBrush};
+use ferroui_base::media::imaging::{Bitmap, BitmapEncoderOptions};
+use ferroui_base::media::immutable::{
+    ImmutableGradientStop, ImmutableImageBrush, ImmutableLinearGradientBrush, ImmutableRadialGradientBrush,
+    ImmutableSolidColorBrush,
+};
+use ferroui_base::media::{AlignmentX, AlignmentY, Color, GradientSpreadMethod, IBrush, SharedBrush, Stretch, TileMode};
 use ferroui_base::numerics::{Matrix4x4, Vector2, Vector3};
-use ferroui_base::platform::IDrawingContextImpl;
+use ferroui_base::platform::{
+    AlphaFormat, IBitmapImpl, IDrawingContextImpl, ILockedFramebuffer, IReadableBitmapImpl, PixelFormat,
+    SharedBitmapImpl,
+};
 use ferroui_base::rendering::scene3d::{
     draw_scene_3d, MeshData, Scene3DBounds, Scene3DCamera, Scene3DCameraKind, Scene3DLight, Scene3DMaterialKind,
     Scene3DMaterialLayer, Scene3DModel, Scene3DSnapshot,
 };
-use ferroui_base::{Matrix, Point, Rect};
+use ferroui_base::{Matrix, PixelSize, Point, Rect, RelativePoint, RelativeRect, RelativeUnit, Vector};
+use std::cell::RefCell;
+use std::rc::Rc;
 use std::sync::Arc;
 
 /// A 3D comparison scene.
@@ -45,6 +57,10 @@ pub struct Scene3DCase {
     /// the device and by the ordered grid of the reference, so the edge bounds of a GPU executor
     /// grow with it. The interior bound does not.
     pub layers: u32,
+    /// Whether the GPU executors of the device modes draw the scene as the CPU reference does:
+    /// not yet for the brushes of step D6, which the wgpu executor samples from its next part on
+    /// (until then they are drawn there with the layers' colours).
+    pub device: bool,
 }
 
 /// A pixel with the colour it has (premultiplied RGBA), within `levels`.
@@ -771,7 +787,17 @@ fn case(
     scene: fn() -> Arc<Scene3DSnapshot>,
     probes: fn(usize) -> Vec<Probe>,
 ) -> Scene3DCase {
-    Scene3DCase { name, scene, draw: draw_plain, plain: true, probes, tolerance: Tolerance::Largest(2), bound: 0.05, layers: 1 }
+    Scene3DCase {
+        name,
+        scene,
+        draw: draw_plain,
+        plain: true,
+        probes,
+        tolerance: Tolerance::Largest(2),
+        bound: 0.05,
+        layers: 1,
+        device: true,
+    }
 }
 
 /// The eleven scenes of step D3.
@@ -795,7 +821,462 @@ pub fn scenes() -> Vec<Scene3DCase> {
             tolerance: Tolerance::Moves,
             bound: 3.0,
             layers: 1,
+            device: true,
         },
         case("empty", empty_scene, empty_probes),
+        brush_case("linear-gradient", linear_gradient_scene, linear_gradient_probes),
+        brush_case("radial-gradient", radial_gradient_scene, radial_gradient_probes),
+        brush_case("gradient-lookup-absolute", gradient_lookup_scene, gradient_lookup_probes),
+        brush_case("image-brush-tiles", image_tiles_scene, image_tiles_probes),
+        brush_case("image-brush-viewbox", image_viewbox_scene, image_viewbox_probes),
+        Scene3DCase { layers: 3, ..brush_case("brush-material-group", brush_group_scene, brush_group_probes) },
     ]
+}
+
+// Step D6: materials from brushes. Every scene is a quad over the whole square, seen by the
+// orthographic camera of width 2 (x and y from -1 to 1), so the texture coordinate of a sample is
+// a linear function of its position in the image.
+
+/// The brush of a layer of `kind`: the material's `Color` white.
+fn brush_layer(kind: Scene3DMaterialKind, brush: &dyn IBrush, specular_power: f32) -> Scene3DMaterialLayer {
+    let brush = SharedBrush::from_brush(brush);
+    Scene3DMaterialLayer { kind, color: WHITE, ambient_color: WHITE, specular_power, brush }
+}
+
+/// A quad over the square from (-1, -1) to (1, 1) with the texture coordinates `uv0` at its top
+/// left and `uv1` at its bottom right (WPF's texture space has y down).
+fn textured_square(id: u64, uv0: [f32; 2], uv1: [f32; 2]) -> Arc<MeshData> {
+    let positions = vec![
+        Vector3::new(-1.0, -1.0, 0.0),
+        Vector3::new(1.0, -1.0, 0.0),
+        Vector3::new(1.0, 1.0, 0.0),
+        Vector3::new(-1.0, 1.0, 0.0),
+    ];
+    let texture_coordinates = vec![
+        Vector2::new(uv0[0], uv1[1]),
+        Vector2::new(uv1[0], uv1[1]),
+        Vector2::new(uv1[0], uv0[1]),
+        Vector2::new(uv0[0], uv0[1]),
+    ];
+    let bounds = Scene3DBounds::of_points(positions.iter().copied());
+    Arc::new(MeshData {
+        id,
+        version: 1,
+        positions,
+        normals: vec![Vector3::new(0.0, 0.0, 1.0); 4],
+        normals_generated: false,
+        texture_coordinates,
+        indices: vec![0, 1, 2, 0, 2, 3],
+        bounds,
+    })
+}
+
+fn brush_camera() -> Scene3DCamera {
+    orthographic([0.0, 0.0, 5.0], 2.0, 1.0, 10.0)
+}
+
+/// A square of `layers` lit by a white ambient light: a diffuse layer is its brush.
+fn brush_square(id: u64, uv0: [f32; 2], uv1: [f32; 2], layers: Vec<Scene3DMaterialLayer>) -> Arc<Scene3DSnapshot> {
+    let square = model(textured_square(id, uv0, uv1), Matrix4x4::IDENTITY, layers, vec![]);
+    snapshot(Some(brush_camera()), vec![square], vec![Scene3DLight::Ambient { color: WHITE }])
+}
+
+/// The texture coordinate of the point at `x`, `y` (in pixels) of an image of `side` pixels of a
+/// square with `uv0` at its top left and `uv1` at its bottom right.
+fn uv_at(side: usize, x: f64, y: f64, uv0: [f64; 2], uv1: [f64; 2]) -> [f64; 2] {
+    let (fx, fy) = (x / side as f64, y / side as f64);
+    [uv0[0] + (uv1[0] - uv0[0]) * fx, uv0[1] + (uv1[1] - uv0[1]) * fy]
+}
+
+/// The pixel at `px`, `py` resolved from its four samples, each the straight colour `color` of
+/// the brush at its texture coordinate (opaque colours: premultiplied is straight), rounded.
+fn resolved_brush(
+    side: usize,
+    px: usize,
+    py: usize,
+    uv0: [f64; 2],
+    uv1: [f64; 2],
+    color: &dyn Fn([f64; 2]) -> [f64; 4],
+) -> [u8; 4] {
+    let mut sum = [0.0; 4];
+    for (sx, sy) in [(0.25, 0.25), (0.75, 0.25), (0.25, 0.75), (0.75, 0.75)] {
+        let sample = color(uv_at(side, px as f64 + sx, py as f64 + sy, uv0, uv1));
+        for i in 0..4 {
+            sum[i] += sample[i].clamp(0.0, 1.0) / 4.0;
+        }
+    }
+    sum.map(|value| (value.clamp(0.0, 1.0) * 255.0 + 0.5) as u8)
+}
+
+/// The probe of the pixel at the fractions `fx`, `fy` with the colour of `color` there.
+fn brush_probe(
+    what: &'static str,
+    side: usize,
+    fx: f64,
+    fy: f64,
+    uv: ([f64; 2], [f64; 2]),
+    color: &dyn Fn([f64; 2]) -> [f64; 4],
+) -> Probe {
+    let mut probe = Probe::at(what, side, fx, fy, TRANSPARENT, 2);
+    probe.expected = resolved_brush(side, probe.x, probe.y, uv.0, uv.1, color);
+    probe
+}
+
+fn stops_of(colors: &[(f64, Color)]) -> Vec<ImmutableGradientStop> {
+    colors.iter().map(|(offset, color)| ImmutableGradientStop::new(*offset, *color)).collect()
+}
+
+/// Red to blue, straight.
+fn red_to_blue(t: f64) -> [f64; 4] {
+    let t = t.clamp(0.0, 1.0);
+    [1.0 - t, 0.0, t, 1.0]
+}
+
+const UNIT_UV: ([f64; 2], [f64; 2]) = ([0.0, 0.0], [1.0, 1.0]);
+
+fn linear_gradient_brush() -> ImmutableLinearGradientBrush {
+    // Relative to the box of the texture coordinates, from its top left to its right edge.
+    ImmutableLinearGradientBrush::new(
+        &stops_of(&[(0.0, RED), (1.0, BLUE)]),
+        1.0,
+        None,
+        None,
+        GradientSpreadMethod::Pad,
+        Some(RelativePoint::new(0.0, 0.0, RelativeUnit::Relative)),
+        Some(RelativePoint::new(1.0, 0.0, RelativeUnit::Relative)),
+        None,
+    )
+}
+
+fn linear_gradient_scene() -> Arc<Scene3DSnapshot> {
+    let layer = brush_layer(Scene3DMaterialKind::Diffuse, &linear_gradient_brush(), 0.0);
+    brush_square(20, [0.0, 0.0], [1.0, 1.0], vec![layer])
+}
+
+/// A diffuse `LinearGradientBrush` relative to the box of the texture coordinates: red at the
+/// left edge, blue at the right, linear between.
+fn linear_gradient_probes(side: usize) -> Vec<Probe> {
+    let color = |uv: [f64; 2]| red_to_blue(uv[0]);
+    vec![
+        brush_probe("the left edge: red", side, 0.0, 0.5, UNIT_UV, &color),
+        brush_probe("a quarter across", side, 0.25, 0.3, UNIT_UV, &color),
+        brush_probe("the middle", side, 0.5, 0.8, UNIT_UV, &color),
+        brush_probe("the right edge: blue", side, 0.995, 0.5, UNIT_UV, &color),
+    ]
+}
+
+/// The focus of the radial gradient: a quarter of the way from the left of the box.
+const RADIAL_FOCUS: [f64; 2] = [0.25, 0.5];
+
+fn radial_gradient_scene() -> Arc<Scene3DSnapshot> {
+    let brush = ImmutableRadialGradientBrush::new(
+        &stops_of(&[(0.0, RED), (1.0, BLUE)]),
+        1.0,
+        None,
+        None,
+        GradientSpreadMethod::Pad,
+        None,
+        Some(RelativePoint::new(RADIAL_FOCUS[0], RADIAL_FOCUS[1], RelativeUnit::Relative)),
+        None,
+        None,
+        None,
+    );
+    brush_square(21, [0.0, 0.0], [1.0, 1.0], vec![brush_layer(Scene3DMaterialKind::Diffuse, &brush, 0.0)])
+}
+
+/// The parameter of WPF's radial gradient of centre (0.5, 0.5), radii 0.5 and the focus
+/// [`RADIAL_FOCUS`] at `uv`: the distance from the focus over the distance from the focus to the
+/// circle along the same ray.
+fn radial_t(uv: [f64; 2]) -> f64 {
+    let (fx, fy) = ((RADIAL_FOCUS[0] - 0.5) / 0.5, (RADIAL_FOCUS[1] - 0.5) / 0.5);
+    let (qx, qy) = ((uv[0] - 0.5) / 0.5, (uv[1] - 0.5) / 0.5);
+    let (dx, dy) = (qx - fx, qy - fy);
+    let distance = dx.hypot(dy);
+    if distance < 1e-9 {
+        return 0.0;
+    }
+    let (ux, uy) = (dx / distance, dy / distance);
+    // The ray from the focus along (ux, uy) meets the unit circle at s: |f + s u| = 1.
+    let b = fx * ux + fy * uy;
+    let s = -b + (b * b - (fx * fx + fy * fy - 1.0)).sqrt();
+    distance / s
+}
+
+fn radial_gradient_probes(side: usize) -> Vec<Probe> {
+    let color = |uv: [f64; 2]| red_to_blue(radial_t(uv));
+    vec![
+        brush_probe("at the focus: red", side, 0.25, 0.5, UNIT_UV, &color),
+        brush_probe("between the focus and the circle", side, 0.6, 0.5, UNIT_UV, &color),
+        brush_probe("above the focus", side, 0.3, 0.25, UNIT_UV, &color),
+        brush_probe("outside the circle: blue", side, 0.03, 0.03, UNIT_UV, &color),
+    ]
+}
+
+/// The texture coordinates of the square of the lookup scene: half of the absolute gradient.
+const LOOKUP_UV: ([f64; 2], [f64; 2]) = ([0.0, 0.0], [0.5, 1.0]);
+
+/// Twelve stops alternating red and blue at elevenths, sampled from the lookup texture.
+fn lookup_stops() -> Vec<(f64, Color)> {
+    (0..12).map(|index| (f64::from(index) / 11.0, if index % 2 == 0 { RED } else { BLUE })).collect()
+}
+
+fn gradient_lookup_scene() -> Arc<Scene3DSnapshot> {
+    // Absolute: from (0, 0) to (1, 0) in texture coordinates, over a square whose texture
+    // coordinates span only half of it.
+    let brush = ImmutableLinearGradientBrush::new(
+        &stops_of(&lookup_stops()),
+        1.0,
+        None,
+        None,
+        GradientSpreadMethod::Pad,
+        Some(RelativePoint::new(0.0, 0.0, RelativeUnit::Absolute)),
+        Some(RelativePoint::new(1.0, 0.0, RelativeUnit::Absolute)),
+        None,
+    );
+    let uv1 = [LOOKUP_UV.1[0] as f32, LOOKUP_UV.1[1] as f32];
+    brush_square(22, [0.0, 0.0], uv1, vec![brush_layer(Scene3DMaterialKind::Diffuse, &brush, 0.0)])
+}
+
+/// The colour of the twelve stops at `t`: red and blue alternating, linear between.
+fn lookup_color(t: f64) -> [f64; 4] {
+    let scaled = (t.clamp(0.0, 1.0) * 11.0).min(11.0);
+    let index = scaled.floor().min(10.0);
+    let f = scaled - index;
+    let from_red = index as u32 % 2 == 0;
+    red_to_blue(if from_red { f } else { 1.0 - f })
+}
+
+/// Half of the absolute gradient across the square: the stops at elevenths of the texture
+/// coordinates, so one at 0.09, the next at 0.18. The probes avoid the texels around a stop,
+/// where the linear filter of the lookup texture rounds the corner of the colours.
+fn gradient_lookup_probes(side: usize) -> Vec<Probe> {
+    let color = |uv: [f64; 2]| lookup_color(uv[0]);
+    let mut probes = Vec::new();
+    for fx in [0.05, 0.27, 0.6, 0.81] {
+        let mut probe = brush_probe("between two stops", side, fx, 0.5, LOOKUP_UV, &color);
+        probe.levels = 3;
+        probes.push(probe);
+    }
+    probes
+}
+
+/// A bitmap of 4 by 4 opaque pixels in quadrants of 2 by 2: red, green / blue, white.
+fn quadrant_bitmap() -> Arc<SharedBitmapImpl> {
+    let mut pixels = Vec::new();
+    for y in 0..4 {
+        for x in 0..4 {
+            pixels.extend_from_slice(QUADRANT_COLORS[usize::from(y >= 2) * 2 + usize::from(x >= 2)].as_slice());
+        }
+    }
+    Arc::new(PixelBitmap { width: 4, height: 4, pixels })
+}
+
+/// The colours of the quadrants of [`quadrant_bitmap`]: top left, top right, bottom left, bottom
+/// right.
+const QUADRANT_COLORS: [[u8; 4]; 4] = [[255, 0, 0, 255], [0, 255, 0, 255], [0, 0, 255, 255], [255, 255, 255, 255]];
+
+fn image_brush(
+    stretch: Stretch,
+    tile_mode: TileMode,
+    destination: RelativeRect,
+    source: RelativeRect,
+) -> ImmutableImageBrush {
+    let bitmap = Rc::new(Bitmap::from_impl(quadrant_bitmap()));
+    ImmutableImageBrush::new(
+        Some(bitmap),
+        AlignmentX::Center,
+        AlignmentY::Center,
+        Some(destination),
+        1.0,
+        None,
+        RelativePoint::new(0.0, 0.0, RelativeUnit::Relative),
+        Some(source),
+        stretch,
+        tile_mode,
+        None,
+    )
+}
+
+fn image_tiles_scene() -> Arc<Scene3DSnapshot> {
+    let half = RelativeRect::new(0.0, 0.0, 0.5, 0.5, RelativeUnit::Relative);
+    let brush = image_brush(Stretch::Fill, TileMode::FlipX, half, RelativeRect::FILL);
+    brush_square(23, [0.0, 0.0], [1.0, 1.0], vec![brush_layer(Scene3DMaterialKind::Diffuse, &brush, 0.0)])
+}
+
+fn quadrant(index: usize) -> [u8; 4] {
+    QUADRANT_COLORS[index]
+}
+
+/// An `ImageBrush` tiled in four tiles of half the box, the odd columns mirrored (`FlipX`): the
+/// probes sit in the middle of the quadrants of the bitmap in each tile, away from the texels
+/// the linear filter mixes.
+fn image_tiles_probes(side: usize) -> Vec<Probe> {
+    let at = |what, fx, fy, color| Probe::at(what, side, fx, fy, color, 2);
+    vec![
+        at("the first tile, its top left: red", 0.125, 0.125, quadrant(0)),
+        at("the first tile, its top right: green", 0.375, 0.125, quadrant(1)),
+        at("the second tile, mirrored: green on its left", 0.625, 0.125, quadrant(1)),
+        at("the second tile, mirrored: red on its right", 0.875, 0.125, quadrant(0)),
+        at("the second row, not mirrored: blue", 0.125, 0.875, quadrant(2)),
+        at("the last tile, mirrored: white on its left", 0.625, 0.875, quadrant(3)),
+    ]
+}
+
+fn image_viewbox_scene() -> Arc<Scene3DSnapshot> {
+    // The viewbox is the bottom half of the bitmap (blue, white), stretched uniformly into the box
+    // of the texture coordinates, which is twice as high as wide: centred, with transparent bands
+    // above and below.
+    let source = RelativeRect::new(0.0, 0.5, 1.0, 0.5, RelativeUnit::Relative);
+    let brush = image_brush(Stretch::Uniform, TileMode::None, RelativeRect::FILL, source);
+    brush_square(24, [0.0, 0.0], [1.0, 2.0], vec![brush_layer(Scene3DMaterialKind::Diffuse, &brush, 0.0)])
+}
+
+/// The viewbox of 4 by 2 pixels placed uniformly in a box of 1 by 2: 1 by 0.5, from 0.75 to 1.25
+/// of the height of the texture coordinates, so from 37.5 % to 62.5 % of the image.
+fn image_viewbox_probes(side: usize) -> Vec<Probe> {
+    vec![
+        Probe::at("above the viewbox: transparent", side, 0.5, 0.2, TRANSPARENT, 0),
+        Probe::at("the viewbox, its left half: blue", side, 0.2, 0.5, quadrant(2), 2),
+        Probe::at("the viewbox, its right half: white", side, 0.8, 0.5, quadrant(3), 2),
+        Probe::at("below the viewbox: transparent", side, 0.5, 0.8, TRANSPARENT, 0),
+    ]
+}
+
+/// A dim green bitmap of 2 by 2 pixels for the emissive layer.
+fn dim_green_bitmap() -> Arc<SharedBitmapImpl> {
+    Arc::new(PixelBitmap { width: 2, height: 2, pixels: [0, 64, 0, 255].repeat(4) })
+}
+
+fn brush_group_scene() -> Arc<Scene3DSnapshot> {
+    let emissive_brush = ImmutableImageBrush::new(
+        Some(Rc::new(Bitmap::from_impl(dim_green_bitmap()))),
+        AlignmentX::Center,
+        AlignmentY::Center,
+        None,
+        1.0,
+        None,
+        RelativePoint::new(0.0, 0.0, RelativeUnit::Relative),
+        None,
+        Stretch::Fill,
+        TileMode::None,
+        None,
+    );
+    let layers = vec![
+        brush_layer(Scene3DMaterialKind::Diffuse, &ImmutableSolidColorBrush::new(gray(64)), 0.0),
+        brush_layer(Scene3DMaterialKind::Specular, &linear_gradient_brush(), 40.0),
+        brush_layer(Scene3DMaterialKind::Emissive, &emissive_brush, 0.0),
+    ];
+    let square = model(textured_square(25, [0.0, 0.0], [1.0, 1.0]), Matrix4x4::IDENTITY, layers, vec![]);
+    snapshot(Some(brush_camera()), vec![square], vec![directional(WHITE, [0.0, 0.0, -1.0])])
+}
+
+/// A `MaterialGroup` lit head on by a white directional light, seen by an orthographic camera
+/// along the light: the grey diffuse layer at 64, the highlight of the specular layer (1
+/// everywhere: N, L and H along +z) times its gradient brush, and the dim green image of the
+/// emissive layer, added in order.
+fn brush_group_probes(side: usize) -> Vec<Probe> {
+    let color = |uv: [f64; 2]| {
+        let gradient = red_to_blue(uv[0]);
+        [LEVEL_64 + gradient[0], LEVEL_64 + LEVEL_64, LEVEL_64 + gradient[2], 1.0]
+    };
+    vec![
+        brush_probe("a third across", side, 0.3, 0.5, UNIT_UV, &color),
+        brush_probe("the middle", side, 0.5, 0.2, UNIT_UV, &color),
+        brush_probe("two thirds across", side, 0.7, 0.7, UNIT_UV, &color),
+    ]
+}
+
+/// A step D6 scene: plain, held to the CPU reference.
+fn brush_case(name: &'static str, scene: fn() -> Arc<Scene3DSnapshot>, probes: fn(usize) -> Vec<Probe>) -> Scene3DCase {
+    Scene3DCase { device: false, ..case(name, scene, probes) }
+}
+
+/// A bitmap of premultiplied RGBA pixels in memory at 96 DPI, read through its framebuffer: the
+/// image of the image brushes of the scenes, the same for every backend.
+struct PixelBitmap {
+    width: i32,
+    height: i32,
+    pixels: Vec<u8>,
+}
+
+impl IBitmapImpl for PixelBitmap {
+    fn dpi(&self) -> Vector {
+        Vector::new(96.0, 96.0)
+    }
+
+    fn pixel_size(&self) -> PixelSize {
+        PixelSize::new(self.width, self.height)
+    }
+
+    fn version(&self) -> i32 {
+        0
+    }
+
+    fn save(&self, _stream: &mut dyn std::io::Write, _options: &BitmapEncoderOptions) -> std::io::Result<()> {
+        Err(std::io::Error::new(std::io::ErrorKind::Unsupported, "the bitmap of a scene is not saved"))
+    }
+
+    fn dispose(&self) {}
+
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+
+    fn as_readable_bitmap(&self) -> Option<&dyn IReadableBitmapImpl> {
+        Some(self)
+    }
+}
+
+impl IReadableBitmapImpl for PixelBitmap {
+    fn format(&self) -> Option<PixelFormat> {
+        Some(PixelFormat::RGBA8888)
+    }
+
+    fn alpha_format(&self) -> Option<AlphaFormat> {
+        Some(AlphaFormat::Premul)
+    }
+
+    fn lock(&self) -> Rc<dyn ILockedFramebuffer> {
+        Rc::new(PixelFramebuffer {
+            data: RefCell::new(self.pixels.clone()),
+            size: PixelSize::new(self.width, self.height),
+        })
+    }
+}
+
+struct PixelFramebuffer {
+    data: RefCell<Vec<u8>>,
+    size: PixelSize,
+}
+
+impl ILockedFramebuffer for PixelFramebuffer {
+    fn address(&self) -> *mut u8 {
+        self.data.borrow_mut().as_mut_ptr()
+    }
+
+    fn with_data(&self, access: &mut dyn FnMut(&mut [u8])) {
+        access(&mut self.data.borrow_mut());
+    }
+
+    fn size(&self) -> PixelSize {
+        self.size
+    }
+
+    fn row_bytes(&self) -> i32 {
+        self.size.width * 4
+    }
+
+    fn dpi(&self) -> Vector {
+        Vector::new(96.0, 96.0)
+    }
+
+    fn format(&self) -> PixelFormat {
+        PixelFormat::RGBA8888
+    }
+
+    fn alpha_format(&self) -> AlphaFormat {
+        AlphaFormat::Premul
+    }
+
+    fn dispose(&self) {}
 }

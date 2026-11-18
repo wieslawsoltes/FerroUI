@@ -125,6 +125,9 @@ fn every_scene_3d_matches_its_cpu_reference_in_every_backend_and_mode() {
     for backend in backends() {
         for scale in [1, 2] {
             for case in scenes().into_iter().filter(|case| case.plain) {
+                if draws_on_device(&backend) && !case.device {
+                    continue;
+                }
                 let scene = (case.scene)();
                 let expected = reference(&scene, scale);
                 let actual = render_at(&backend, scale, &|context| (case.draw)(context, &scene)).rgba;
@@ -177,6 +180,9 @@ fn every_scene_3d_has_its_golden_properties_in_every_backend_and_mode() {
         for scale in [1, 2] {
             let side = (SIDE * scale) as usize;
             for case in scenes() {
+                if draws_on_device(&backend) && !case.device {
+                    continue;
+                }
                 let scene = (case.scene)();
                 let drawn = render_at(&backend, scale, &|context| (case.draw)(context, &scene));
                 for probe in (case.probes)(side) {
@@ -227,6 +233,9 @@ fn the_backends_draw_every_scene_3d_alike() {
         println!("|---|---|---|---|---|---|");
         for scale in [1, 2] {
             for case in scenes() {
+                if on_device && !case.device {
+                    continue;
+                }
                 let scene = (case.scene)();
                 let skia_drawn = render_at(&skia, scale, &|context| (case.draw)(context, &scene));
                 let vello_drawn = render_at(&vello, scale, &|context| (case.draw)(context, &scene));

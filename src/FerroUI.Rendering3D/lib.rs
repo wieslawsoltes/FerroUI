@@ -11,6 +11,8 @@
 //!   the shaders of the GPU executors (step D4) share.
 //! - [`lighting`]: the lighting of WPF's lights and materials per pixel, ported from ProGPU's
 //!   `ComputeWpfLighting`.
+//! - [`brush`]: the brushes of the material layers as the renderers sample them (gradients and
+//!   images, with WPF's mapping of texture coordinates to a brush; step D6).
 //! - [`output_cache`]: the output of a scene kept while the scene, the size and the scale are
 //!   unchanged.
 //! - [`shader`]: `scene3d.wgsl`, the one shader of the GPU executors, restricted to what WebGL2
@@ -23,6 +25,7 @@
 
 #![forbid(unsafe_code)]
 
+pub mod brush;
 pub mod cpu;
 pub mod lighting;
 mod math;
@@ -102,8 +105,8 @@ pub(crate) fn note_lights_left_out(count: usize) {
 }
 
 /// How many material layers were drawn with their `Color` alone because the renderer cannot
-/// sample their brush yet (a gradient, an image, a visual or drawing brush: step D6 of the port),
-/// since the process started.
+/// sample their brush (a conic gradient, an image whose pixels cannot be read, a visual or
+/// drawing brush without a shared form; [`brush::MaterialBrush`]), since the process started.
 pub fn layers_with_unsampled_brushes() -> u64 {
     UNSAMPLED_BRUSHES.load(Ordering::Relaxed)
 }
@@ -116,8 +119,9 @@ pub(crate) fn note_unsampled_brush() {
     if let Some(logger) = Logger::try_get(LogEventLevel::Warning, LogArea::VISUAL) {
         logger.log(
             None,
-            "A material of a 3D scene paints with a brush the 3D renderer cannot sample yet (only solid colour brushes \
-             are drawn before step D6): the layer is drawn with its Color (docs/porting/media3d.md).",
+            "A material of a 3D scene paints with a brush the 3D renderer cannot sample (solid colours, linear and \
+             radial gradients and readable images are sampled): the layer is drawn with its Color \
+             (docs/porting/media3d.md, section 3.16).",
         );
     }
 }

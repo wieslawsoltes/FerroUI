@@ -618,10 +618,10 @@ ambient_color + diffuse))` with the alpha of the colour; for a specular layer `s
 specular)` with alpha 0; for an emissive layer the colour with alpha 0. The view direction is toward
 the camera's position, or the one direction of an orthographic camera.
 
-**Brushes.** A solid colour brush is its colour and opacity. Any other brush (gradients, images,
-and the visual and drawing brushes without a shared form) is drawn with the layer's `Color` and the
-brush's opacity, counted (`ferroui_render3d::layers_with_unsampled_brushes`) and reported once,
-until D6.
+**Brushes.** A solid colour brush is its colour and opacity. As built in D3, any other brush was
+drawn with the layer's `Color` and the brush's opacity, counted
+(`ferroui_render3d::layers_with_unsampled_brushes`) and reported once; D6 samples gradients and
+images (section 3.16).
 
 **Performance.** Nothing is allocated per pixel or per triangle: a `CpuRasterizer` keeps its
 vertex, triangle, pass, bin and tile buffers from one render to the next; rows are slices of the
@@ -765,6 +765,77 @@ the same or the other mode, which draws on the same device, makes none). The uni
 and an emissive layer (and three again on a second device), and a moving camera writing only the
 frame block.
 
+### 3.16 Materials from brushes as built (D6)
+
+**The description** (`src/FerroUI.Rendering3D/brush.rs`). The snapshot keeps the brush of a
+layer in its shared form (`SharedBrush`: the values of a solid colour, a gradient with its stops,
+an image brush with its tile settings and a counted reference to its bitmap). What a draw samples
+is made of it on the render thread, the same for the CPU reference and the executors:
+`MaterialBrush::of(brush, texture_bounds)` gives the variant of the shader (`BrushShader`:
+`Solid`, `Gradient`, `GradientTexture`, `Image`), the uniforms (`BrushUniforms`) and, where the
+brush samples a texture, its source (`BrushTextureSource`) with the key of the texture
+(`BrushTextureKey`).
+
+| Brush | Sampled as |
+|---|---|
+| `SolidColorBrush` | the colour of the draw uniforms, as in D3 (`BrushShader::Solid`) |
+| `LinearGradientBrush`, `RadialGradientBrush` with up to 8 stops | the stops inline in the uniforms (`BrushShader::Gradient`) |
+| the same with more stops | a lookup texture of 256 by 1 straight RGBA8 texels, texel `i` the colour at `i / 255`, sampled with linear filtering at the centre of texel `t * 255` (`BrushShader::GradientTexture`); made once per set of stops (`BrushTextureKey::Gradient`, a hash of the sorted offsets and colours) |
+| `ImageBrush` | the pixels of its bitmap, premultiplied RGBA8 (8-bit RGBA or BGRA, premultiplied, straight or opaque, read through the bitmap's framebuffer), sampled bilinearly with the edges clamped and divided by the alpha (`BrushShader::Image`); read once per `(identity, version)` of the bitmap (`BrushTextureKey::Image`) |
+| an `ImageBrush` without an image | nothing (transparent), as in 2D |
+| a conic gradient, an image whose pixels cannot be read, a visual or drawing brush (until the third part of D6) | the layer's `Color` with the brush's opacity, counted (`layers_with_unsampled_brushes`) and reported once |
+
+**The mapping** is WPF's: the texture coordinate of a point is a point of the brush's 2D space,
+and a brush relative to its bounding box (the default of `RelativePoint`, `RelativeRect` and
+`RelativeScalar`) is mapped onto the bounding box of the mesh's texture coordinates
+(`texture_coordinate_bounds`; a mesh without texture coordinates has the empty box at the origin);
+an absolute brush takes the texture coordinates as they are. The brush's `RelativeTransform`
+(conjugated into the box) and `Transform` (about its `TransformOrigin`) apply in that space as
+they do over the bounds of a 2D element (the composition of Skia's brushes); the uniforms hold
+their inverse, the texture coordinate to the brush's space, as two rows.
+
+**Gradients.** A linear gradient's parameter is the projection onto its axis; a radial gradient's
+is, in the unit circle of its ellipse, the distance from the focus (`GradientOrigin`) over the
+distance from the focus to the circle along the same ray (the focus is moved inside the circle
+when it is outside). The spread method (`Pad`, `Reflect`, `Repeat`) applies to the parameter;
+the stops, sorted by offset (stable), are interpolated as straight colours in WPF's space (the
+gamma-encoded components).
+
+**Image brushes.** The tile is the brush's `DestinationRect` (WPF's `Viewport`) in the brush's
+space; the `SourceRect` (WPF's `Viewbox`) of the bitmap (in device-independent pixels, its pixels
+at 96 DPI) is stretched (`Stretch`) and aligned (`AlignmentX`, `AlignmentY`) into it as a 2D tile
+brush places it (`MediaExtensions::calculate_scaling`, `TileBrushCalculator::calculate_translate`);
+outside the viewbox the tile is transparent, outside the tile of `TileMode::None` the brush is;
+the other tile modes repeat the tile, `FlipX`, `FlipY` and `FlipXY` mirroring its odd columns,
+rows or both.
+
+**Colour.** A sample is a straight colour that multiplies the colour of the draw (the material's
+`Color` and the brush's opacity), which `lighting::shade_color` lights: a diffuse layer lit, a
+specular layer times its highlight, an emissive layer added without light. The specular and
+emissive layers of a `MaterialGroup` paint with their brushes like the diffuse layers.
+
+**The CPU reference** samples the brush per sample at the perspective-correct texture coordinate
+(the attributes of D3) and keeps the texels of each `BrushTextureKey` while it draws them
+(`cpu::brush_textures_read` counts the reads), with a weak handle to the bitmap so that its
+address names one bitmap while the texels are kept. The output caches of the backends also key on
+the identities and versions of the bitmaps of a scene (`brush::scene_texture_inputs`): new pixels
+of a bitmap change no generation of the snapshot.
+
+**Tests.** `brush_tests.rs`: the layout of `BrushUniforms` and its WGSL declaration, relative and
+absolute linear gradients, the spread methods, radial gradients with a moved focus, sorted stops
+with straight colours, the lookup texture (its ends, within the rounding of its texels, one key per
+set of stops), the relative transform and the transform, image brushes (fill, viewbox, uniform
+stretch, tiles, `FlipX`), an image brush without an image, the reading of BGRA straight pixels, the
+key of a bitmap and the inputs of a scene following its version, the box of the texture
+coordinates. `cpu/tests.rs`: a diffuse gradient with 2 and 12 stops over a quad, the specular and
+emissive layers of a group painting with a gradient and an image, the texels read once while kept
+and again for a new version. The comparison scenes (`scene3d_scenes.rs`): `linear-gradient`,
+`radial-gradient`, `gradient-lookup-absolute` (12 stops through the lookup texture, absolute
+mapping over half of the gradient), `image-brush-tiles` (`FlipX` tiles of half the box),
+`image-brush-viewbox` (the bottom half of the bitmap, `Uniform` into a box twice as high as wide)
+and `brush-material-group` (a grey diffuse layer, a specular layer with a gradient and an emissive
+layer with an image), with probes computed from the formulas in double precision.
+
 ## 4. Steps
 
 Each step is one pull request from main. Each updates the row "3D scenes (Viewport3D)" of
@@ -779,7 +850,7 @@ this page.
 | D3 | The CPU reference rasterizer (`src/FerroUI.Rendering3D/cpu`) and 11 comparison scenes in `tests/FerroUI.RenderBackends.Comparison` (`scene3d_scenes.rs`, `scene3d_tests.rs`; 100 pixels, scales 1 and 2): a lit cube (ambient and directional), a point light with attenuation and range, a spot light cone, the orthographic camera, the matrix camera, front and back materials with culling, `MaterialGroup` with specular and emissive, transparent overlap in tree order, near and far clipping, `ClipToBounds` with opacity and a rotated viewport, the empty scene. Every backend draws the CPU reference from here, recorded as a gap | additions | medium | in review |
 | D4 | `scene3d.wgsl` and the wgpu executor (section 3.15): `ferroui-render3d`'s `shader` module and feature `wgpu` (the pipeline cache by a `Copy` key, the mesh cache by `(id, version)`, uniform buffers with dynamic offsets written only where they changed, the depth, MSAA and resolve pools, the fallback to one sample), and Vello's hybrid and GPU modes drawing on the device (`gpu/scene3d_passes.rs`: the outputs kept per device, painted as textures of the device, the CPU reference as the reported and counted last resort). Tests: `every_scene_3d_matches_its_cpu_reference_in_every_backend_and_mode` and `the_backends_draw_every_scene_3d_alike` with the GPU modes, `steady_frames_of_a_moving_camera_upload_only_uniforms_and_allocate_no_texture`, `a_static_viewport_issues_no_3d_pass`, `pipelines_are_created_once_per_device`, the naga validation and GLSL ES 3.00 of the shader; run by `vello.yml` on Metal (its paths now include `src/FerroUI.Rendering3D/`), Vulkan with D9 | additions (the module `wgpu_executor`, `ferroui_vello::gpu::scene3d_counters`) | high: the first GPU route; the uniform layout and alignment (dynamic offsets at the device's alignment) | in review |
 | D5 | Skia Graphite on Metal: the Metal executor (MSL from naga at build time) in or next to `ferroui-metal`, `ferroui-skia/gpu/scene3d.rs`, the output wrapped by `backend_textures::make_metal` and `wrap_texture`, ordered before `insert_recording`, the prewarm hook. Tests: `graphite_draws_every_scene_3d_as_its_cpu_reference` (`gpu/metal/tests.rs`), the steady state, compile once; iOS simulator and device measurements | none new | high: cross-API ordering on Apple | planned |
-| D6 | Materials from brushes: gradients (inline stops and the lookup texture), `ImageBrush` (the backend image caches), `VisualBrush` and `DrawingBrush` (offscreen renders, again only when dirty), WPF's texture-coordinate mapping, the specular and emissive passes. Tests: a comparison scene per brush, an image uploaded once per device, a visual brush rendered again only when its visual changes | none new | medium | planned |
+| D6 | Materials from brushes (section 3.16): gradients (inline stops and the lookup texture), `ImageBrush` (the backend image caches), `VisualBrush` and `DrawingBrush` (offscreen renders, again only when dirty), WPF's texture-coordinate mapping, the specular and emissive passes. Tests: a comparison scene per brush, an image uploaded once per device, a visual brush rendered again only when its visual changes | additions (the module `brush`, `cpu::brush_textures_read`, `lighting::shade_color`) | medium | in review, in three parts: the description and the CPU reference (part 1); the shader and the wgpu executor (part 2); visual and drawing brushes (part 3) |
 | D7 | Video and shared-texture materials, Metal routes first: `ISharedGpuTexture` and `GpuTextureRef` in `src/FerroUI.Base/platform/`, the accessors of `LeasedGpuBitmap`, `VelloSharedFrameBitmap` and `SharedFrameTexture`, the import cache by `FrameIdentity` that `TexturePresenter` also uses, `VideoBrush` and the visual-brush fast path, `sample_frame()`. Tests: `a_video_material_samples_the_frame_without_a_copy` (`FrameTransferCounters`: `gpu_import` only on Graphite, one shared `gpu_conversion` on Vello), one import for a frame shown flat and on a cube, the lease released after GPU completion, no mesh or record upload for a new frame; a "video on a cube" scene in `samples/PortableMedia` | additions | high: lifetimes across 2D and 3D | planned |
 | D8 | The GL executor (Skia Ganesh GL everywhere: ANGLE, EGL, Android GLES, CGL, WebGL2): GLSL ES 3.00 from naga at build time, framebuffer, depth renderbuffer and MSAA resolve, the reset of Skia's GL state after drawing, video through `SharedFrameTexture` ids on the same context. Tests: the comparison scenes under ANGLE on WARP (Windows CI), llvmpipe EGL (Linux CI), the Android emulator, a browser smoke run; browser and Android frame times | none new | high: Skia's GL state | planned |
 | D9 | Vello on Vulkan, DX12 and GLES, validated in the Windows and Linux virtual machines (one at a time); the Vulkan executor (SPIR-V) for Skia Vulkan with lavapipe in CI. The video gaps of those routes stay recorded gaps | none new | medium | planned |
@@ -842,6 +913,10 @@ To be checked against WPF's documentation and behaviour before the tests freeze 
 - The `SpotLight` angle convention (full cone angles) and the falloff between the cones.
 - The order and blending of the passes of a `MaterialGroup` (diffuse, specular, emissive).
 - The mapping of a relative brush onto the bounding box of the texture coordinates.
+- What WPF draws for a non-solid brush on a mesh without texture coordinates (the port takes the
+  colour at the brush's origin), and for a radial gradient whose origin is outside its ellipse.
+- Whether WPF interpolates the stops of a material's gradient straight or premultiplied (the port:
+  straight, as its 2D backends).
 - The hit-testing rules for front and back faces (`Material` and `BackMaterial`).
 - No sorting of transparent models.
 - `Viewport3D.ClipToBounds` true by default.
