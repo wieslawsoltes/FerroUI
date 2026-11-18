@@ -223,6 +223,9 @@ struct DocumentFacts {
     selected_types: BTreeSet<String>,
     /// An entry no root can name (see the module documentation).
     opaque: bool,
+    /// Every text key the document defines, at any depth: the outermost entries and the entries of
+    /// nested dictionaries, which a reference of the document resolves locally (#848).
+    local_keys: BTreeSet<String>,
 }
 
 /// Whether the attribute is not read for references: the `Source` of an include, and the
@@ -255,6 +258,9 @@ fn facts_of(xml: &Document<'_>) -> DocumentFacts {
         if is_framework(node, "Design.PreviewWith") {
             design_end = node.range().end;
             continue;
+        }
+        if let Key::Text(key) = key_of(node) {
+            facts.local_keys.insert(key.to_string());
         }
         if start >= entry_end && is_entry(node) {
             entry_end = node.range().end;
@@ -408,9 +414,16 @@ pub(crate) fn plan(documents: &[(String, String, Option<String>)], merged: &[Str
                 types.extend(document.types.iter().cloned());
                 references.extend(document.tokens.iter().filter(|token| keys.contains(token.as_str())).cloned());
                 // The argument of a resource extension names a key, whichever document defines it:
-                // another theme the application uses, or the application (#848). A token is only a
-                // guess, so it counts when it spells a key of the group.
-                references.extend(document.extension_keys.iter().cloned());
+                // another theme the application uses, or the application (#848), unless the
+                // document defines it itself in a nested dictionary and resolves it there. A token
+                // is only a guess, so it counts when it spells a key of the group.
+                references.extend(
+                    document
+                        .extension_keys
+                        .iter()
+                        .filter(|key| keys.contains(key.as_str()) || !document.local_keys.contains(*key))
+                        .cloned(),
+                );
             }
             unit.keys = defined.into_iter().collect();
             unit.type_keys = type_keys.into_iter().collect();
