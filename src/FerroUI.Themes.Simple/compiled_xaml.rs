@@ -113,7 +113,7 @@ pub fn populate_simpletheme_xaml(
     let value_44 = build_controls_simplecontrols_xaml(rt::cast(service_provider_0.clone(), 13, 17)?)?;
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(root.upcast_ref::<::ferroui_base::styling::Styles>(), rt::cast(value_44.clone(), 13, 4)?), 13, 4)?;
     context.pop_parent();
-    rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 1, 3)?;
+    rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(())
 }
 

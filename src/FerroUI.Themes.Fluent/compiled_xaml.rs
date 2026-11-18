@@ -159,7 +159,7 @@ pub fn populate_fluenttheme_xaml(
     let value_17 = build_controls_fluentcontrols_xaml(rt::cast(service_provider_1.clone(), 26, 17)?)?;
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(root.upcast_ref::<::ferroui_base::styling::Styles>(), rt::cast(value_17.clone(), 26, 4)?), 26, 4)?;
     context.pop_parent();
-    rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 1, 3)?;
+    rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4215,7 +4215,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT: rt::DocumentInfo = rt::Docum
 pub fn build_controls_fluentcontrols_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_base::styling::Styles>, ::ferroui_markup_xaml::XamlLoadError> {
-    // Controls/FluentControls.xaml(1,3) Styles
+    // Controls/FluentControls.xaml(1,2) Styles
     let styles_0 = ::ferroui_base::styling::Styles::new();
     let context = rt::populate_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, rt::to_value(styles_0.clone()));
     let name_scope = context.name_scope_field();
@@ -4388,7 +4388,7 @@ pub fn build_controls_fluentcontrols_xaml(
     context.pop_parent();
     rt::invoked(::ferroui_base::styling::Styles::__markup_set_Resources(&styles_0, rt::cast(resource_dictionary_0.clone(), 7, 10)?), 7, 10)?;
     context.pop_parent();
-    rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 1, 3)?;
+    rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(styles_0)
 }
 
@@ -42261,7 +42261,7 @@ static BUILD_ACCENTS_BASECOLORSPALETTE_XAML_DOCUMENT: rt::DocumentInfo = rt::Doc
 pub fn build_accents_basecolorspalette_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>, ::ferroui_markup_xaml::XamlLoadError> {
-    // Accents/BaseColorsPalette.xaml(1,3) ResourceDictionary
+    // Accents/BaseColorsPalette.xaml(1,2) ResourceDictionary
     let resource_dictionary_0 = ::ferroui_base::controls::ResourceDictionary::new();
     let context = rt::populate_context(service_provider, &BUILD_ACCENTS_BASECOLORSPALETTE_XAML_DOCUMENT, rt::to_value(resource_dictionary_0.clone()));
     let name_scope = context.name_scope_field();
@@ -42297,7 +42297,7 @@ pub fn build_accents_basecolorspalette_xaml(
     // Accents/BaseColorsPalette.xaml(38,41) Content (resource)
     rt::add_color_resources(&resource_dictionary_2, BUILD_ACCENTS_BASECOLORSPALETTE_XAML_ROWS_1)?;
     rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_1, ::core::clone::Clone::clone(&value_31), rt::cast(resource_dictionary_2.clone(), 37, 6)?), 37, 6)?;
-    rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 1, 3)?;
+    rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(resource_dictionary_0)
 }
 
@@ -42374,14 +42374,14 @@ static BUILD_DENSITYSTYLES_COMPACT_XAML_DOCUMENT: rt::DocumentInfo = rt::Documen
 pub fn build_densitystyles_compact_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>, ::ferroui_markup_xaml::XamlLoadError> {
-    // DensityStyles/Compact.xaml(1,3) ResourceDictionary
+    // DensityStyles/Compact.xaml(1,2) ResourceDictionary
     let resource_dictionary_0 = ::ferroui_base::controls::ResourceDictionary::new();
     let context = rt::populate_context(service_provider, &BUILD_DENSITYSTYLES_COMPACT_XAML_DOCUMENT, rt::to_value(resource_dictionary_0.clone()));
     let name_scope = context.name_scope_field();
     let resources_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(resource_dictionary_0.clone());
     if rt::is_instance(&resources_0, rt::class_handle(<::ferroui_base::controls::ResourceDictionary as ::ferroui_base::StaticType>::TYPE)) {
-        let count_0: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 1, 3)?);
-        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 1, 3)?, count_0.wrapping_add(39_i32));
+        let count_0: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 1, 2)?);
+        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 1, 2)?, count_0.wrapping_add(39_i32));
     }
     // DensityStyles/Compact.xaml(4,49) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_0)?;
@@ -42409,7 +42409,7 @@ pub fn build_densitystyles_compact_xaml(
     rt::add_thickness_resources(&resource_dictionary_0, BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_7)?;
     // DensityStyles/Compact.xaml(35,44) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_8)?;
-    rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 1, 3)?;
+    rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(resource_dictionary_0)
 }
 
