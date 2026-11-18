@@ -1438,14 +1438,23 @@ impl Chart {
             return;
         }
         let now = Dispatcher::ui_thread().now() as f64;
+        // The nodes, ribbons and tiles of a Sankey or treemap chart enter and leave as the
+        // source's visuals do, also at the first draw (`SceneTransition::with_node_motion`).
+        let node_motion = matches!(self.chart_kind(), ChartKind::Sankey | ChartKind::Treemap);
         let from = self
             .transition
             .borrow()
             .as_ref()
             .map(|transition| Rc::new(transition.sample(now)))
-            .or(previous);
+            .or(previous)
+            .or_else(|| node_motion.then(|| Rc::new(Scene::new(next.size, next.plot_bounds))));
         if let Some(from) = from {
-            *self.transition.borrow_mut() = Some(SceneTransition::new(from, next, now, duration));
+            let transition = SceneTransition::new(from, next, now, duration);
+            *self.transition.borrow_mut() = Some(if node_motion {
+                transition.with_node_motion()
+            } else {
+                transition
+            });
             let timer = self.animation_timer.borrow().clone();
             if let Some(timer) = timer {
                 timer.start();

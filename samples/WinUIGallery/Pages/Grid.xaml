@@ -1,4 +1,61 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <Grid Width="240" Height="180" HorizontalAlignment="Left" Background="Gray" ColumnDefinitions="50,50,50" RowDefinitions="50,50,50" ColumnSpacing="8" RowSpacing="8"><Rectangle Fill="Red"/><Rectangle Fill="Blue" Grid.Row="1"/><Rectangle Fill="Green" Grid.Column="1"/><Rectangle Fill="Yellow" Grid.Column="1" Grid.Row="1"/></Grid>
+<!-- Ported from the pinned Grid example of WinUI Gallery (14061eea); see ../NOTICE.md. The page has
+     no code-behind upstream. The spacings, the column and the row keep the source's OneWay x:Bind
+     of the sliders (without the source's (x:Int32) cast: the x:Bind core's cast is a type test, and
+     the binding converts the value). FerroUI's Slider has no Header (composed) and no StepFrequency
+     or SnapsTo: the steps of 1 are TickFrequency with IsSnapToTickEnabled. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="GridExample1" Spacing="8">
+    <TextBlock Text="A 3x3 Grid control." FontSize="18" />
+    <Grid x:Name="Control1"
+          Width="240"
+          Height="160"
+          HorizontalAlignment="Left"
+          VerticalAlignment="Top"
+          Background="Gray"
+          ColumnDefinitions="50, 50, 50"
+          RowDefinitions="50, 50, 50"
+          ColumnSpacing="{x:Bind ColumnSpacingSlider.Value, Mode=OneWay}"
+          RowSpacing="{x:Bind RowSpacingSlider.Value, Mode=OneWay}">
+      <Grid.Styles>
+        <Style Selector="Rectangle">
+          <Setter Property="Height" Value="40" />
+          <Setter Property="Width" Value="40" />
+        </Style>
+      </Grid.Styles>
+      <Rectangle x:Name="Rectangle1"
+                 Grid.Column="{x:Bind ColumnSlider.Value, Mode=OneWay}"
+                 Grid.Row="{x:Bind RowSlider.Value, Mode=OneWay}"
+                 Width="50" Height="50" Fill="Red" />
+      <Rectangle Grid.Row="1" Width="50" Height="50" Fill="Blue" />
+      <Rectangle Grid.Column="1" Width="50" Height="50" Fill="Green" />
+      <Rectangle Grid.Column="1" Grid.Row="1" Width="50" Height="50" Fill="Yellow" />
+    </Grid>
+    <Grid ColumnDefinitions="Auto,Auto" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="12">
+      <TextBlock Grid.Column="0" Grid.Row="0" Text="Grid" />
+      <StackPanel Grid.Column="0" Grid.Row="1" Margin="16,0,0,0">
+        <TextBlock Text="ColumnSpacing" />
+        <Slider x:Name="ColumnSpacingSlider" Width="150" AutomationProperties.Name="ColumnSpacing"
+                Maximum="16" Minimum="0" IsSnapToTickEnabled="True" TickFrequency="1" Value="8" />
+      </StackPanel>
+      <StackPanel Grid.Column="1" Grid.Row="1">
+        <TextBlock Margin="0,0,0,10" Text="RowSpacing" />
+        <Slider x:Name="RowSpacingSlider" Height="100" VerticalAlignment="Top" AutomationProperties.Name="RowSpacing"
+                IsDirectionReversed="True" Maximum="16" Minimum="0" Orientation="Vertical"
+                IsSnapToTickEnabled="True" TickFrequency="1" Value="8" />
+      </StackPanel>
+      <TextBlock Grid.Column="0" Grid.Row="2" Text="Red block" />
+      <StackPanel Grid.Column="0" Grid.Row="3" Margin="16,0,0,0">
+        <TextBlock Text="Grid.Column" />
+        <Slider x:Name="ColumnSlider" Width="150" AutomationProperties.Name="Grid.Column"
+                Maximum="2" Minimum="0" IsSnapToTickEnabled="True" TickFrequency="1" />
+      </StackPanel>
+      <StackPanel Grid.Column="1" Grid.Row="3">
+        <TextBlock Margin="0,0,0,10" Text="Grid.Row" />
+        <Slider x:Name="RowSlider" Height="100" VerticalAlignment="Top" AutomationProperties.Name="Grid.Row"
+                IsDirectionReversed="True" Maximum="2" Minimum="0" Orientation="Vertical"
+                IsSnapToTickEnabled="True" TickFrequency="1" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
 </StackPanel>
