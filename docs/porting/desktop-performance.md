@@ -7700,3 +7700,32 @@ of 1, 2, 3 and 48 points, filled and not, closed and open: the path of the strok
 path of the fill are the ones the same lines give point by point). The tests of the shapes
 and of the geometries.
 
+### 9.97 Counted and left out: drawing items replaced one for one
+
+Experiment #820. When the drawing items of a composition visual come or go,
+`ServerDrawItems::deserialize` gives every item after the change its new place and makes every
+range of 64 items after it unknown (section 9.90). That is what an insertion or a removal
+needs; a replacement of as many items as it removes moves nothing and would not need it. The
+experiment was to count how the changes of real frames divide before writing that case.
+
+**Counted** (a temporary count in `deserialize`, removed; the declarative program of the
+framework comparison, nine seconds of each scene):
+
+| Scene | Changes of the items | As many added as removed | Only added | Only removed | Both, unequal | Items after a change |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| gauntlet, tier 16 | 4,000 | 0 | 2,702 | 1,292 | 6 | 22 in all |
+| patchwork, tier 17 | fewer than 2,000 | | | | | |
+| wall, tier 20 | fewer than 2,000 | | | | | |
+
+No change of the gauntlet replaces items one for one, and no insertion or removal has an item
+after it: rows come and go at the end of the items of their holder, and what changes in a row
+that stays is an update of its item (its content, its offset, its clip), which touches one
+range already. The patchwork and the wall change their items so seldom that the count, which
+prints at every 2,000 changes, printed nothing.
+
+**Left out.** The walk of the items after a change and the ranges made again after it cost
+nothing in these scenes, because nothing is after a change. The case of an equal replacement is
+not written: no frame has one. What would have one is an element replaced by another at its
+place among many siblings that share a holder (a tile of a wall given another control); a scene
+of that kind is the measurement to make first if it is taken up again.
+
