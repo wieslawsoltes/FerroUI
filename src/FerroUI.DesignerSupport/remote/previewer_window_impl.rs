@@ -5,7 +5,7 @@ use ferroui_base::platform::surfaces::IPlatformRenderSurface;
 use ferroui_base::platform::{ICursorImpl, IOptionalFeatureProvider};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::rendering::composition::Compositor;
-use ferroui_base::threading::DispatcherPriority;
+use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{PixelPoint, Point, Rect, Size, Thickness};
 use ferroui_controls::platform::{
     IPlatformHandle, IPopupImpl, ITopLevelImpl, IWindowBaseImpl, IWindowIconImpl, IWindowImpl,
@@ -409,7 +409,17 @@ impl IWindowImpl for PreviewerWindowImpl {
             height: (client_size.height * render_scaling).ceil(),
         }));
         self.base.set_client_size(client_size);
-        self.base.render_and_send_frame_if_needed();
+        // SizeToContent calls resize while the new window is still arranging. Painting
+        // synchronously can publish the old 1×1 scene into the new framebuffer.
+        let base = Rc::downgrade(&self.base);
+        Dispatcher::ui_thread().post_local(
+            move || {
+                if let Some(base) = base.upgrade() {
+                    base.render_and_send_frame_if_needed();
+                }
+            },
+            DispatcherPriority::AFTER_RENDER,
+        );
     }
 
     fn move_(&self, _point: PixelPoint) {}
