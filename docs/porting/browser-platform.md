@@ -194,6 +194,26 @@ Threads: upstream's multithreaded mode moves the UI to a worker with a blocking 
 | Cursors | Cursor factory producing CSS cursor strings; custom cursors as `url(data:...) x y, fallback`. Set on the host style | 2 |
 | Context menu, browser gestures | `oncontextmenu` returns false; `touch-action: none` | 1 |
 
+**Pointer positions.** Not as upstream, which passes `offsetX` and `offsetY` of each event and
+takes them for logical units. Those are relative to the padding corner of the target of the event,
+which is the canvas while the pointer is free and the element of the view while it is captured,
+and they are in CSS pixels, while the view is laid out in `pixels / dpr` units over the canvas.
+Every position (pointer down, move, up and cancel, the coalesced points of a move, the wheel and
+the drag events) is computed by one helper, `pointerPosition.ts`: the client coordinates of the
+event, less the bounding rectangle of the canvas, divided by the scale of a transform or `zoom`
+of an ancestor (rectangle size over border-box size), less the canvas's border and padding, times
+the logical units per CSS pixel of the content box (backing width over the scaling, over the CSS
+content width; per axis). The backing size and the scaling are the ones the framework last got
+from the resize observer, so the position follows what is drawn even where the browser's
+`devicePixelRatio` and its device-pixel box of the canvas disagree, and it never depends on which
+element the browser hit. The rectangle and the style are read at each event, not cached. Where
+the two agree, the result equals `offsetX` on the canvas to within the rounding of the backing
+size (less than a device pixel across the view). Written for issue #534 (an offset between the
+pointer and the view in Firefox under Wayland with fractional scaling), which was not reproduced
+on that system; `webapp/tests/pointer-position.test.mjs` checks the conversion at 1x, 1.25x,
+1.5x, 1.75x and 2x, at fractional corners, with a border and padding, `border-box`, a transform,
+and a scaling that differs from the ratio of the backing size.
+
 ## 9. Fonts and text (question 7)
 
 There are no system fonts. Upstream uses the Skia font manager as it exists in the WASM build and returns `SKTypeface.Default.FamilyName` as the default family; applications add fonts as embedded resources through font collections. What the SkiaSharp WASM binary embeds as its default typeface is **[U]**; with `skia-safe` on Emscripten assume **no usable default font**.
