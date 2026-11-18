@@ -144,7 +144,7 @@ fn respond(
         "stagesPointer" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|request| stages.pointer(request, projects)),
         "stagesPrototypeElements" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
-            .and_then(|request| serialize(stages.prototype_elements(request))),
+            .and_then(|request| serialize(stages.prototype_elements(request, projects))),
         "stagesPrototype" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|request| serialize(stages.playback.control(&stages.board, request))),
         "render" => serde_json::from_value(message["params"].clone())

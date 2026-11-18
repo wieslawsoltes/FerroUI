@@ -35,7 +35,9 @@ export interface PrototypeGraph {
     flows: Array<{ name: string; start: number }>;
     links: Array<{ name: string; source: number; trigger: unknown; action: PrototypeAction }>;
 }
-export interface PrototypeHotspot { stage: number; label: string; anchor: unknown }
+export interface PrototypeHotspot { stage: number; label: string; anchor: unknown; uri?: string; range?: Range | null }
+export type PrototypeEdit = { kind: 'flow'; index?: number }
+    | { kind: 'interaction'; index?: number; source?: number; destination?: number };
 export interface PrototypeScene {
     flow: string;
     screen: number;
@@ -64,7 +66,9 @@ export type NativeStageChange = ExistingStageChange | (AddStage & { source?: Sta
 export type FromStages = { type: 'ready' | 'add' | 'saveManifest' | 'loadManifest' }
     | ({ type: 'pointer' } & StagePointer) | ({ type: 'checks' } & StageTarget)
     | { type: 'edit'; epoch: number; id: number; field: 'name' | 'environment' | 'mode' | 'layout' | 'pause' | 'refresh' | 'remove' | 'export' | 'designData' | 'state' };
-export type StagesRequest = FromStages | { type: 'prototype'; command?: PrototypeCommand } | { type: 'editPrototype' };
+export type StagesRequest = FromStages | { type: 'prototype'; command?: PrototypeCommand }
+    | { type: 'editPrototype'; epoch: number; edit: PrototypeEdit }
+    | { type: 'revealTrigger'; epoch: number; index: number };
 export type ToStages = { type: 'model'; model: StageModel; uri: string }
     | ({ type: 'image'; image: StageImage } & StageTarget) | { type: 'status'; message: string }
     | { type: 'prototype'; scene: PrototypeScene | null };

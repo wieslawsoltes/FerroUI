@@ -7,7 +7,7 @@ import type { BuiltProjects } from './builtProjects';
 import { DesignerDependencies, dirtyXamlSources } from './designerDependencies';
 import { NativePreview } from './nativePreview';
 import { errorMessage, type Range, type Source } from './protocol';
-import type { FromStages, NativeStageChange, PrototypeCommand, StageChange, StageDocument, StageInfo, StageManifest, StageModel, StageTarget, StagesRequest, ToStages } from './stagesProtocol';
+import type { FromStages, NativeStageChange, PrototypeCommand, PrototypeEdit, StageChange, StageDocument, StageInfo, StageManifest, StageModel, StageTarget, StagesRequest, ToStages } from './stagesProtocol';
 import { editPrototype } from './stagePrototypeEditor';
 import { chooseStageState } from './stageStatePicker';
 import { choose, editText } from './studioContext';
@@ -283,6 +283,18 @@ class StageSession {
                 }
                 return;
             }
+            if (message.type === 'editPrototype' || message.type === 'revealTrigger') {
+                if (message.epoch !== model.epoch) throw new Error('The prototype changed. Use its current graph.');
+                if (message.type === 'revealTrigger') {
+                    await this.revealPrototypeTrigger(model, message.index, generation);
+                } else {
+                    const change = await this.editPrototype(model, message.edit);
+                    if (change && generation === this.generation && model === this.model) {
+                        await this.applyChange(change, AbortSignal.timeout(15_000));
+                    }
+                }
+                return;
+            }
             if (message.type === 'pointer') {
                 const version = this.document.version;
                 const result = await client.stagePointer(message);
@@ -325,8 +337,7 @@ class StageSession {
                 return;
             }
             const change = message.type === 'add' ? await this.add(model) : message.type === 'edit'
-                ? await this.change(client, model, message) : message.type === 'editPrototype'
-                    ? await this.editPrototype(model) : undefined;
+                ? await this.change(client, model, message) : undefined;
             if (!change || generation !== this.generation || model !== this.model) return;
             await this.applyChange(change, AbortSignal.timeout(15_000));
         } catch (error) { this.report(error); }
@@ -341,9 +352,20 @@ class StageSession {
         await vscode.window.showTextDocument(document, { viewColumn: editor?.viewColumn ?? vscode.ViewColumn.Beside, preserveFocus: true, selection: asRange(selection) });
     }
 
-    private async editPrototype(model: StageModel): Promise<StageChange | undefined> {
-        const graph = await editPrototype(model, stage => this.hotspots(stage.id, stage.epoch, AbortSignal.timeout(15_000)));
+    private async editPrototype(model: StageModel, edit: PrototypeEdit): Promise<StageChange | undefined> {
+        const graph = await editPrototype(model, stage => this.hotspots(stage.id, stage.epoch, AbortSignal.timeout(15_000)), edit);
         if (graph) return { action: 'setPrototype', graph, epoch: model.epoch };
+    }
+
+    private async revealPrototypeTrigger(model: StageModel, index: number, generation: number): Promise<void> {
+        const link = model.manifest.prototype?.links[index];
+        const stage = link && model.stages[link.source];
+        if (!stage) throw new Error('Choose an interaction with a current source stage.');
+        const key = JSON.stringify(link.trigger);
+        const trigger = (await this.hotspots(stage.id, stage.epoch, AbortSignal.timeout(15_000)))
+            .find(candidate => JSON.stringify(candidate.anchor) === key);
+        if (!trigger?.uri || !trigger.range) throw new Error('The trigger is unavailable in the current native preview.');
+        await this.revealStageSource(trigger.uri, trigger.range, generation);
     }
 
     private async stageSources(manifest: StageManifest | undefined, active: string, client?: NativePreview) {

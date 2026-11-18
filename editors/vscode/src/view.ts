@@ -259,11 +259,19 @@ export function stagesHtml(webview: vscode.Webview, root: vscode.Uri): string {
     return page(webview, root, 'stages', 'FerroUI Stages', `
 <header class="stage-toolbar">
     <button id="stages-add">Add Stage</button><button id="stages-save">Save Stage Set</button><button id="stages-load">Open Stage Set</button>
-    <button id="stages-edit-prototype">Edit Prototype</button><button id="stages-prototype">Play Prototype</button>
+    <button id="stages-edit-prototype" aria-controls="prototype-graph" aria-pressed="false">Prototype Graph</button>
+    <button id="stages-prototype">Play Prototype</button>
 </header>
 <p id="stages-status" role="status">Rendering stages…</p>
 <div id="prototype-actions" class="stage-toolbar" aria-label="Prototype controls" hidden></div>
-<main id="stage-cards" aria-label="Native preview stages"></main>`);
+<main id="stage-cards" aria-label="Native preview stages"></main>
+<section id="prototype-graph" aria-label="Prototype graph" hidden>
+    <header class="stage-toolbar">
+        <button id="prototype-add-flow">Add flow</button><button id="prototype-add-link">Add interaction</button>
+    </header>
+    <ul id="prototype-flows" class="prototype-flows" aria-label="Prototype flows"></ul>
+    <div id="prototype-stages" class="prototype-stages" aria-label="Stage connections"></div>
+</section>`);
 }
 
 export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string {

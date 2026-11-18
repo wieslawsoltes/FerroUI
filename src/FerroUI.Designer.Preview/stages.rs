@@ -105,6 +105,14 @@ struct StageFinding {
     range: Option<Range>,
 }
 
+#[derive(Serialize)]
+pub(crate) struct StagePrototypeHotspot {
+    #[serde(flatten)]
+    element: PreviewPrototypeElementChoice,
+    uri: String,
+    range: Option<Range>,
+}
+
 #[derive(Deserialize)]
 pub(crate) struct Pointer {
     #[serde(flatten)]
@@ -240,9 +248,18 @@ impl Stages {
     pub(crate) fn prototype_elements(
         &mut self,
         target: StageTarget,
-    ) -> Result<Vec<PreviewPrototypeElementChoice>, String> {
+        projects: &Projects,
+    ) -> Result<Vec<StagePrototypeHotspot>, String> {
         self.mounted(&target)?;
-        self.board.prototype_elements(target.id)
+        let stage = self.board.stage(target.id).ok_or("The stage was removed")?;
+        let uri = stage.configuration.source_uri;
+        let source = &self.sources.get(&uri).ok_or("Open the stage's source document first")?.authored;
+        let document = DesignDocument::parse(source, projects.source(source)?)?;
+        Ok(self.board.prototype_elements(target.id)?.into_iter().map(|element| {
+            let range = element.anchor.resolve(&document.xaml)
+                .and_then(|node| document.node_name_range(node)).ok();
+            StagePrototypeHotspot { element, uri: uri.clone(), range }
+        }).collect())
     }
 
     pub(crate) fn image(&mut self, request: StageTarget) -> Result<Image, String> {

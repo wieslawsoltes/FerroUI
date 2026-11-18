@@ -9,3 +9,14 @@
 .prototype-view .stage-card h2, .prototype-view .stage-actions, .prototype-view .stage-card p { display: none; }
 .prototype-view .prototype-overlay { position: absolute; }
 .prototype-view .dim-background { box-shadow: 0 0 0 100vmax rgb(0 0 0 / 48%); }
+.prototype-flows, .prototype-routes { list-style: none; margin: 0; padding: 0; }
+.prototype-flows { display: grid; gap: 5px; margin-bottom: 12px; }
+.prototype-flows li, .prototype-routes li { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.prototype-flows li span, .prototype-routes li span { flex: 1; color: var(--vscode-descriptionForeground); }
+.prototype-stages { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 310px), 1fr)); gap: 10px; }
+.prototype-node { border: 1px solid var(--vscode-panel-border); padding: 8px; min-width: 0; background: var(--vscode-editorWidget-background); }
+.prototype-node[data-drop] { outline: 2px solid var(--vscode-focusBorder); outline-offset: -2px; }
+.prototype-node header { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; padding: 0; }
+.prototype-node h3 { font-size: 1em; margin: 0; }
+.prototype-node h3[draggable] { cursor: grab; }
+.prototype-routes li { border-top: 1px solid var(--vscode-panel-border); margin-top: 6px; padding-top: 6px; }

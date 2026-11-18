@@ -1,11 +1,13 @@
 import type { FromStages, PrototypeCommand, PrototypeScene, StageInfo, StageModel, StagesRequest, ToStages } from '../src/stagesProtocol';
 import { create, element } from './dom';
+import { PrototypeGraphView } from './prototypeGraph';
 
 declare function acquireVsCodeApi(): { postMessage(message: StagesRequest): void; setState(state: { uri: string }): void };
 const vscode = acquireVsCodeApi();
 const status = element('stages-status');
 const root = element('stage-cards');
 const controls = element('prototype-actions');
+const graphButton = element<HTMLButtonElement>('stages-edit-prototype');
 type StageField = Extract<FromStages, { type: 'edit' }>['field'];
 interface StageCard {
     stage: StageInfo;
@@ -22,6 +24,14 @@ interface StageCard {
 const visible = new Map<number, StageCard>();
 let model: StageModel | undefined;
 let scene: PrototypeScene | null = null;
+let graphOpen = false;
+const graph = new PrototypeGraphView(message => vscode.postMessage(message), id => {
+    graphOpen = false;
+    showSurface();
+    const stage = visible.get(id);
+    stage?.card.scrollIntoView({ block: 'nearest' });
+    stage?.title.focus({ preventScroll: true });
+});
 
 window.addEventListener('message', async ({ data }: MessageEvent<ToStages>) => {
     if (data.type === 'status') { status.textContent = data.message; return; }
@@ -35,6 +45,7 @@ window.addEventListener('message', async ({ data }: MessageEvent<ToStages>) => {
             if (!keep.has(id)) { previous.card.remove(); visible.delete(id); }
         }
         for (const stage of data.model.stages) update(stage);
+        graph.update(data.model);
         showPrototype(model.prototype);
         if (!keep.size) status.textContent = 'Add a stage to compare this design.';
     } else {
@@ -78,6 +89,7 @@ function createStageCard(stage: StageInfo): StageCard {
     const card = create('article');
     card.className = 'stage-card';
     const title = create('h2');
+    title.tabIndex = -1;
     const row = create('div');
     row.className = 'stage-actions';
     const info = create('p');
@@ -125,6 +137,7 @@ function sendPrototype(command: PrototypeCommand): void { vscode.postMessage({ t
 
 function showPrototype(next: PrototypeScene | null): void {
     scene = next;
+    showSurface();
     controls.replaceChildren();
     controls.hidden = !scene;
     root.classList.toggle('prototype-view', Boolean(scene));
@@ -169,6 +182,15 @@ function showPrototype(next: PrototypeScene | null): void {
 element('stages-add').onclick = () => vscode.postMessage({ type: 'add' });
 element('stages-save').onclick = () => vscode.postMessage({ type: 'saveManifest' });
 element('stages-load').onclick = () => vscode.postMessage({ type: 'loadManifest' });
-element('stages-edit-prototype').onclick = () => vscode.postMessage({ type: 'editPrototype' });
+function showSurface(): void {
+    const showGraph = graphOpen && !scene;
+    root.hidden = showGraph;
+    graph.show(showGraph);
+    graphButton.disabled = Boolean(scene);
+    graphButton.setAttribute('aria-pressed', String(showGraph));
+    graphButton.textContent = showGraph ? 'Preview Stages' : 'Prototype Graph';
+}
+
+graphButton.onclick = () => { graphOpen = !graphOpen; showSurface(); };
 element('stages-prototype').onclick = () => vscode.postMessage({ type: 'prototype' });
 vscode.postMessage({ type: 'ready' });
