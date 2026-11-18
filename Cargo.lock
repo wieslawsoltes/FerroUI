@@ -7241,6 +7241,7 @@ name = "view-gallery"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
  "ferroui-controls-color-picker",
  "ferroui-controls-treedatagrid",
