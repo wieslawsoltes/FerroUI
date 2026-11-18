@@ -74,11 +74,14 @@ fn timeline_rebuild_preserves_elapsed_iteration_and_individual_visibility_clocks
 #[test]
 fn timeline_native_resource_keeps_explicit_targets_and_samples_after_rebuild() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
+    let uri = "file:///AnimationResource.xaml";
     let source = r#"<Canvas xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-      <Canvas.Resources><Animation x:Key="Shadow" x:SetterTargetType="Border" Duration="0:0:2" FillMode="Forward">
-        <KeyFrame Cue="0%"><Setter Property="BoxShadow" Value="0 0 0 0 Red"/></KeyFrame>
-        <KeyFrame Cue="100%"><Setter Property="BoxShadow" Value="20 30 10 4 Blue"/></KeyFrame>
-      </Animation></Canvas.Resources>
+      <Canvas.Resources>
+        <Animation x:Key="Shadow" x:SetterTargetType="Border" Duration="0:0:2" FillMode="Forward">
+          <KeyFrame Cue="0%"><Setter Property="BoxShadow" Value="0 0 0 0 Red"/></KeyFrame>
+          <KeyFrame Cue="100%"><Setter Property="BoxShadow" Value="20 30 10 4 Blue"/></KeyFrame>
+        </Animation>
+      </Canvas.Resources>
       <Border Name="Card" Width="100" Height="60"/><Border Name="Other"/>
     </Canvas>"#;
     let shadow = |session: &DesignerSession, name: &str| {
@@ -91,8 +94,9 @@ fn timeline_native_resource_keeps_explicit_targets_and_samples_after_rebuild() {
             .unwrap()
             .box_shadow()
     };
-    let mut session = DesignerSession::new(source, ContentControl::new()).unwrap();
-    let _window = attach_preview(&session);
+    let mut session =
+        DesignerSession::with_uri(source, ContentControl::new(), uri.into()).unwrap();
+    let window = attach_preview(&session);
     let id = session.active_animation_program().unwrap();
     let target = session.document().ast().find_name("Card").unwrap();
     assert!(session.animation_programs()[0].timeline.is_none());
@@ -106,11 +110,14 @@ fn timeline_native_resource_keeps_explicit_targets_and_samples_after_rebuild() {
     assert_eq!(shadow(&session, "Other").count(), 0);
     let pose = session.timeline_playback_pose().unwrap();
     let targets = session.timeline_target_overrides();
+    drop(window);
+    drop(session);
     let replacement = source.replace(
         "<Canvas.Resources>",
         "<TextBlock Text=\"Added\"/><Canvas.Resources>",
     );
-    let mut rebuilt = DesignerSession::new(&replacement, ContentControl::new()).unwrap();
+    let mut rebuilt =
+        DesignerSession::with_uri(&replacement, ContentControl::new(), uri.into()).unwrap();
     let _window = attach_preview(&rebuilt);
     rebuilt.restore_timeline_targets(&targets);
     let held = rebuilt

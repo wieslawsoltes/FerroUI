@@ -1,4 +1,4 @@
-use super::{source::source_info, NativeSourceIndex};
+use super::NativeSourceIndex;
 use crate::AnimationProgram;
 use ferroui_base::animation::{Animatable, Animation, IAnimation};
 use ferroui_base::controls::ResourceDictionary;
@@ -74,7 +74,7 @@ impl NativeProgramIndex {
                 if let Some(base) = object.downcast_ref::<StyleBase>() {
                     for animation in base.animations().snapshot().iter() {
                         if let Some(animation) = native_object(animation) {
-                            let info = source_info(&animation);
+                            let info = XamlSourceInfo::for_object(&animation);
                             index.insert(
                                 source,
                                 &ids,
@@ -104,11 +104,9 @@ impl NativeProgramIndex {
                     &dictionary.clone().into(),
                     key.clone(),
                 );
-                if keyed.as_ref().is_some_and(|info| !source.contains(info)) {
-                    continue;
-                }
                 // Only authored animation keys are materialized. A failing application
-                // resource is left out of the catalog and can still be inspected in source.
+                // resource is left out of the catalog. A deferred resource can acquire
+                // its own provenance on construction, so validate the object first.
                 let value = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
                     ferroui_markup_xaml::xaml_error_scope::with_xaml_errors(|| {
                         Ok(dictionary.get(&key))
@@ -127,7 +125,7 @@ impl NativeProgramIndex {
                         .and_then(native_object)
                 });
                 if let Some(animation) = animation {
-                    let info = source_info(&animation).or(keyed);
+                    let info = XamlSourceInfo::for_object(&animation).or(keyed);
                     index.insert(source, &ids, animation, info, None);
                 }
             }

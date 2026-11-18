@@ -1,8 +1,7 @@
-use ferroui_base::{BoxedValue, FerroObject};
+use ferroui_base::FerroObject;
 use ferroui_designer_core::{Document, NodeId};
 use ferroui_markup_xaml::diagnostics::XamlSourceInfo;
 use std::collections::{BTreeMap, BTreeSet};
-use std::rc::Rc;
 
 /// Matches live objects to declarations in one accepted XAML document.
 pub struct NativeSourceIndex {
@@ -34,7 +33,7 @@ impl NativeSourceIndex {
     }
 
     pub fn resolve_object(&self, object: &FerroObject) -> Option<NodeId> {
-        self.resolve(&source_info(object)?, |_| true)
+        self.resolve(&XamlSourceInfo::for_object(object)?, |_| true)
     }
 
     pub(crate) fn resolve(
@@ -65,22 +64,16 @@ impl NativeSourceIndex {
         best
     }
 
-    pub(crate) fn contains(&self, info: &XamlSourceInfo) -> bool {
+    fn contains(&self, info: &XamlSourceInfo) -> bool {
         info.source_uri()
             .is_some_and(|uri| self.sources.contains(uri.as_str()))
     }
 }
 
-pub(super) fn source_info(object: &FerroObject) -> Option<XamlSourceInfo> {
-    let value: BoxedValue = Rc::new(object.to_ref());
-    XamlSourceInfo::get_xaml_source_info(&value)
-}
-
 fn source_identities(root: &FerroObject, name: &str) -> BTreeSet<String> {
-    if let Some(info) = source_info(root) {
-        if let Some(uri) = info.source_uri() {
-            return BTreeSet::from([uri.to_string()]);
-        }
+    if let Some(uri) = XamlSourceInfo::for_object(root).and_then(|info| info.source_uri().cloned())
+    {
+        return BTreeSet::from([uri.to_string()]);
     }
     // The reload and release loaders can retain different authority spelling.
     let canonical = ferroui_base::utilities::UriRef::parse_absolute(name)
