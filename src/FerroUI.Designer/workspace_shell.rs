@@ -463,6 +463,7 @@ impl DesignerWorkspace {
             ("SourceMode", OutlineMode::Source),
             ("VisualMode", OutlineMode::Visual),
             ("LogicalMode", OutlineMode::Logical),
+            ("CombinedMode", OutlineMode::Combined),
         ] {
             self.root
                 .get_control::<Button>(name)

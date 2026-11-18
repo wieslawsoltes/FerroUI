@@ -1503,27 +1503,25 @@ impl DesignerWorkspace {
                     .collect()
             } else {
                 session
-                    .runtime_tree(if snapshot.mode == OutlineMode::Visual {
-                        TreeKind::Visual
-                    } else {
-                        TreeKind::Logical
-                    })
+                    .runtime_outline(snapshot.mode.runtime().expect("runtime mode"))
                     .into_iter()
-                    .map(|row| TreeEntry {
+                    .map(|entry| {
+                        let row = entry.node;
+                        let membership = match (entry.visual, entry.logical) {
+                            (true, true) => "Visual + Logical",
+                            (true, false) => "Visual",
+                            _ => "Logical",
+                        };
+                        TreeEntry {
                         key: format!("runtime:{}", row.inspector_id),
                         parent: row.parent.map(|id| format!("runtime:{id}")),
                         label: row.type_name,
                         name: row.name.unwrap_or_default(),
-                        detail: if row.source_id.is_some() {
-                            "XAML"
-                        } else {
-                            "Runtime"
-                        }
-                        .into(),
+                        detail: format!("{} · {membership}", if row.source_id.is_some() { "XAML" } else { "Runtime" }),
                         source: row.source_id,
                         runtime: Some(row.inspector_id),
                         ..Default::default()
-                    })
+                    }})
                     .collect()
             };
             self.inspectors.outline.replace(entries, &snapshot.filter);

@@ -82,7 +82,8 @@
           <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="3" Margin="10,2,10,4">
             <Button Name="SourceMode" Classes="nav active" Content="Source" FontSize="11" Padding="8,3" ToolTip.Tip="Authored XAML hierarchy · drag to reorder or nest" />
             <Button Name="VisualMode" Classes="nav" Content="Visual" FontSize="11" Padding="8,3" ToolTip.Tip="Inspect the live visual tree" />
-            <Button Name="LogicalMode" Classes="nav" Content="Logical" FontSize="11" Padding="8,3" ToolTip.Tip="Inspect the live logical tree" />
+            <Button Name="LogicalMode" Classes="nav" Content="Logical" FontSize="11" Padding="5,3" ToolTip.Tip="Inspect the live logical tree" />
+            <Button Name="CombinedMode" Classes="nav" Content="Both" FontSize="11" Padding="5,3" ToolTip.Tip="Inspect the combined visual and logical trees" />
             <Button Name="LayerActions" Classes="icon" Width="24" Height="26" ToolTip.Tip="Layer visibility, locking, isolation and selection"><PathIcon Classes="designer-icon" Width="14" Height="14" Data="F1 M2 7A1 1 0 1 1 2 9A1 1 0 1 1 2 7Z M8 7A1 1 0 1 1 8 9A1 1 0 1 1 8 7Z M14 7A1 1 0 1 1 14 9A1 1 0 1 1 14 7Z" />
               <Button.Flyout>
                 <MenuFlyout>

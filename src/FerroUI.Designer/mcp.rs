@@ -3,7 +3,7 @@
 use crate::{DesignerSession, DesignerWorkspace, Edit, PreviewStatus};
 use ferroui_designer_animation::{AnimationValue, Easing};
 use ferroui_designer_collaboration::{Presence, Snapshot, SyncMessage, VersionVector};
-use ferroui_inspect::TreeKind;
+use crate::RuntimeOutlineMode;
 use ferroui_mcp::UiToolProvider;
 use serde_json::{Value, json};
 use std::cell::RefCell;
@@ -217,8 +217,8 @@ impl UiToolProvider for DesignerMcp {
             ),
             definition(
                 "designer_tree",
-                "Read the live preview visual or logical tree with inspector IDs, source AST IDs and artboard bounds.",
-                json!({"tree":{"enum":["visual","logical"]}}),
+                "Read the visual, logical or combined live preview tree with inspector IDs, source IDs and bounds.",
+                json!({"tree":{"enum":["visual","logical","combined"]}}),
                 &[],
                 false,
             ),
@@ -341,9 +341,9 @@ impl UiToolProvider for DesignerMcp {
             }
             "designer_tree" => {
                 if object.contains_key("tree")
-                    && !matches!(args["tree"].as_str(), Some("visual" | "logical"))
+                    && !matches!(args["tree"].as_str(), Some("visual" | "logical" | "combined"))
                 {
-                    return Err("tree must be visual or logical".into());
+                    return Err("tree must be visual, logical or combined".into());
                 }
             }
             "designer_animation" => match text(args, "action")?.as_str() {
@@ -593,12 +593,20 @@ impl UiToolProvider for DesignerMcp {
                 Ok(state(&session))
             }
             "designer_tree" => {
-                let kind = if args["tree"] == "logical" {
-                    TreeKind::Logical
-                } else {
-                    TreeKind::Visual
+                let mode = match args["tree"].as_str() {
+                    Some("logical") => RuntimeOutlineMode::Logical,
+                    Some("combined") => RuntimeOutlineMode::Combined,
+                    _ => RuntimeOutlineMode::Visual,
                 };
-                let rows: Vec<Value> = session.runtime_tree(kind).iter().map(|row| json!({"inspector_id":row.inspector_id,"source_id":row.source_id,"parent":row.parent,"depth":row.depth,"type":row.type_name,"name":row.name,"bounds":row.bounds.map(|b| json!({"x":b.x,"y":b.y,"width":b.width,"height":b.height}))})).collect();
+                let rows: Vec<Value> = session.runtime_outline(mode).into_iter().map(|entry| {
+                    let row = entry.node;
+                    json!({
+                        "inspector_id": row.inspector_id, "source_id": row.source_id, "parent": row.parent,
+                        "depth": row.depth, "type": row.type_name, "name": row.name,
+                        "bounds": row.bounds.map(|b| json!({"x":b.x,"y":b.y,"width":b.width,"height":b.height})),
+                        "visual": entry.visual, "logical": entry.logical, "logical_parent": entry.logical_parent
+                    })
+                }).collect();
                 Ok(json!({"document":state(&session),"nodes":rows}))
             }
             "designer_timeline" => Ok(

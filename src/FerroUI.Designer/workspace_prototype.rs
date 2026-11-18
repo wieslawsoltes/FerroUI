@@ -9,6 +9,7 @@ use crate::{
 };
 use ferroui_base::Rect;
 use ferroui_controls::Flyout;
+use ferroui_inspect::TreeKind;
 use serde::Serialize;
 use std::collections::BTreeMap;
 use std::hash::{Hash, Hasher};

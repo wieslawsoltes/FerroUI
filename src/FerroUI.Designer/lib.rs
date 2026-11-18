@@ -55,6 +55,7 @@ mod property_transfer;
 mod property_transfer_editor;
 mod resource_editor;
 mod runtime;
+mod runtime_outline;
 mod selection_layout;
 mod session;
 #[cfg(feature = "collaboration-client")]
@@ -151,6 +152,7 @@ pub use resource_editor::{
     ResourceDefinitionModel,
 };
 pub use runtime::{PreviewStatus, RuntimeNode};
+pub use runtime_outline::{RuntimeOutlineMode, RuntimeOutlineRow};
 pub use authoring_placement::{PlacementOrigin, PlacementPlan, PlacementTarget};
 pub use selection_layout::{LayoutMatch, LayoutReset};
 pub use session::DesignerSession;

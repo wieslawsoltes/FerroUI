@@ -12,7 +12,7 @@ use ferroui_controls::{
 };
 use ferroui_designer_animation::{AnimationValue, Easing};
 use ferroui_designer_core::NodeId;
-use ferroui_inspect::{Inspector, TreeKind};
+use ferroui_inspect::Inspector;
 use ferroui_markup_xaml::FromXamlObject;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use std::cell::{Cell, RefCell};
@@ -32,6 +32,19 @@ pub enum OutlineMode {
     Source,
     Visual,
     Logical,
+    Combined,
+}
+
+impl OutlineMode {
+    fn runtime(self) -> Option<crate::RuntimeOutlineMode> {
+        use crate::RuntimeOutlineMode;
+        match self {
+            Self::Source => None,
+            Self::Visual => Some(RuntimeOutlineMode::Visual),
+            Self::Logical => Some(RuntimeOutlineMode::Logical),
+            Self::Combined => Some(RuntimeOutlineMode::Combined),
+        }
+    }
 }
 
 /// A native, embeddable workspace. The host retains the returned `Rc` for the lifetime of the
@@ -284,6 +297,7 @@ impl DesignerWorkspace {
             ("SourceMode", Action::Source),
             ("VisualMode", Action::Visual),
             ("LogicalMode", Action::Logical),
+            ("CombinedMode", Action::Combined),
             ("Play", Action::Play),
             ("Stop", Action::Stop),
             ("Record", Action::Record),
@@ -524,6 +538,7 @@ impl DesignerWorkspace {
                 | Action::Source
                 | Action::Visual
                 | Action::Logical
+                | Action::Combined
         );
         if self.pending_source.get() && !view_only {
             self.apply_source();
@@ -583,6 +598,10 @@ impl DesignerWorkspace {
             }
             Action::Logical => {
                 self.set_outline_mode(OutlineMode::Logical);
+                Ok(())
+            }
+            Action::Combined => {
+                self.set_outline_mode(OutlineMode::Combined);
                 Ok(())
             }
             Action::Play => {
@@ -861,6 +880,7 @@ enum Action {
     Source,
     Visual,
     Logical,
+    Combined,
     Play,
     Stop,
     Record,
