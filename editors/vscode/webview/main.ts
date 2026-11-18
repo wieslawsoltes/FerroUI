@@ -1,81 +1,122 @@
-import type { FromDesigner, Operation, Snapshot, ToDesigner } from '../src/protocol';
+import type { CanvasSnapshot, FromDesigner, ToDesigner } from '../src/protocol';
 import { Artboard } from './artboard';
+import { CanvasInput } from './canvasInput';
+import { CanvasViewport } from './canvasViewport';
 import { Counterpart } from './counterpart';
-import { element } from './dom';
-import { Inspector } from './inspector';
-import { Outline } from './outline';
+import { anchorPopover, element } from './dom';
+import { ViewportMenu } from './viewportMenu';
 
 declare function acquireVsCodeApi(): { postMessage(message: FromDesigner): void };
 const vscode = acquireVsCodeApi();
-
 const status = element('status');
 const blocks = element<HTMLSelectElement>('blocks');
-const theme = element<HTMLSelectElement>('theme');
-const width = element<HTMLInputElement>('width');
-const height = element<HTMLInputElement>('height');
 const previewTab = element('preview-tab');
 const sourceTab = element('source-tab');
-let snapshot: Snapshot | undefined;
+const zoomMenu = element('zoom-menu');
+const zoomOut = element<HTMLButtonElement>('zoom-out');
+const zoomIn = element<HTMLButtonElement>('zoom-in');
+const zoomButton = element<HTMLButtonElement>('zoom-button');
+const zoomValue = element('zoom-value');
+const fitSelection = element<HTMLButtonElement>('fit-selection');
+const selectionLabel = element('selection-label');
+const actionsMenu = element('actions-menu');
+const selectedControl = element('selected-control');
+let snapshot: CanvasSnapshot | undefined;
 let selected: number | undefined;
 let token = 0;
 let current = false;
-let operation: Operation | undefined;
-let renderedDark = false;
-const outline = new Outline(select);
-const artboard = new Artboard(select);
-const inspector = new Inspector(edit);
-const counterpart = new Counterpart(source => edit({ type: 'applyCounterpart', source }));
+let applying = false;
 
-element('refresh').addEventListener('click', () => vscode.postMessage({ type: 'refresh' }));
+const viewport = new CanvasViewport((fit, scale, hasImage) => {
+    const percent = `${Math.round(scale * 100)}%`;
+    zoomValue.textContent = fit ? 'Fit' : percent;
+    zoomButton.title = fit ? `Fit to view · ${percent}` : `Canvas zoom · ${percent}`;
+    zoomButton.disabled = !hasImage;
+    zoomIn.disabled = !hasImage || scale >= 8;
+    zoomOut.disabled = !hasImage || scale <= 0.125;
+});
+const input = new CanvasInput(viewport, reveal);
+const artboard = new Artboard(viewport, () => !input.panning, select);
+const size = new ViewportMenu(viewport => vscode.postMessage({ type: 'viewport', viewport }));
+const counterpart = new Counterpart(apply);
+
+anchorPopover(zoomButton, zoomMenu);
+zoomOut.addEventListener('click', () => viewport.step(-1));
+zoomIn.addEventListener('click', () => viewport.step(1));
+for (const preset of zoomMenu.querySelectorAll<HTMLButtonElement>('[data-scale]')) {
+    preset.addEventListener('click', () => { viewport.zoom(Number(preset.dataset.scale)); zoomMenu.hidePopover(); });
+}
+element('fit').addEventListener('click', () => { viewport.fit(); zoomMenu.hidePopover(); });
+element('actual').addEventListener('click', () => { viewport.zoom(1); zoomMenu.hidePopover(); });
+fitSelection.addEventListener('click', () => {
+    const bounds = selectedNode()?.bounds;
+    if (bounds) viewport.fitSelection(bounds);
+    zoomMenu.hidePopover();
+});
+selectionLabel.addEventListener('click', reveal);
+anchorPopover(element('actions-button'), actionsMenu);
+const actions = [
+    ['outline', 'outline-button', { type: 'dock', view: 'outline' }],
+    ['properties', 'properties-button', { type: 'dock', view: 'properties' }],
+    ['refresh', 'refresh', { type: 'refresh' }],
+] satisfies [string, string, FromDesigner][];
+for (const [action, id, message] of actions) {
+    element(id).addEventListener('click', () => vscode.postMessage(message));
+    element(`menu-${action}`).addEventListener('click', () => {
+        actionsMenu.hidePopover();
+        vscode.postMessage(message);
+    });
+}
 blocks.addEventListener('change', () => vscode.postMessage({ type: 'block', token, index: blocks.selectedIndex }));
-element('viewport').addEventListener('submit', event => { event.preventDefault(); updateViewport(); });
-theme.addEventListener('change', updateViewport);
 previewTab.addEventListener('click', () => showDesign(true));
 sourceTab.addEventListener('click', () => showDesign(false));
 window.addEventListener('message', event => receive(event.data as ToDesigner));
 vscode.postMessage({ type: 'ready' });
 
-function updateViewport(): void {
-    if (width.validity.valid && height.validity.valid) {
-        renderedDark = theme.value === 'dark';
-        vscode.postMessage({ type: 'viewport', viewport: { width: width.valueAsNumber, height: height.valueAsNumber, dark: renderedDark } });
-    }
-}
-
 function showDesign(show: boolean): void {
     element('preview').hidden = !show;
+    element('canvas-tools').hidden = !show;
     element('counterpart').hidden = show;
     previewTab.setAttribute('aria-pressed', String(show));
     sourceTab.setAttribute('aria-pressed', String(!show));
 }
 
-function select(id: number): void {
-    if (!current) return;
+function reveal(): void {
+    if (selected !== undefined) select(selected, true);
+}
+
+function select(id: number, openSource: boolean): void {
+    if (!current || applying) return;
     selected = id;
     updateSelection();
-    vscode.postMessage({ type: 'select', token, id });
+    vscode.postMessage({ type: 'select', token, id, openSource });
 }
 
-function edit(next: Operation): void {
-    if (!current || operation) return;
-    operation = next;
+function apply(source: string): void {
+    if (!current || applying) return;
+    applying = true;
     updateSelection();
-    vscode.postMessage({ type: 'edit', token, operation: next });
+    vscode.postMessage({ type: 'apply', token, source });
 }
+
+function selectedNode() { return snapshot?.nodes.find(node => node.id === selected); }
 
 function updateSelection(): void {
-    const node = snapshot?.nodes.find(node => node.id === selected);
-    const enabled = current && !operation;
-    outline.select(selected, enabled);
+    const node = selectedNode();
+    const enabled = current && !applying;
     artboard.select(node);
-    inspector.show(node, enabled);
+    selectionLabel.hidden = !enabled || !node?.bounds || !snapshot?.image;
+    if (node) selectedControl.textContent = node.name ? `${node.label} · ${node.name}` : node.label;
+    fitSelection.disabled = !enabled || !snapshot?.image || !node?.bounds?.width || !node.bounds.height;
     counterpart.setEnabled(enabled);
     blocks.disabled = !enabled;
 }
 
-function showStatus(text: string, state: 'ready' | 'busy' | 'error'): void {
+function showStatus(kind: 'busy' | 'error' | 'notice' | 'ready', text = ''): void {
+    status.dataset.state = kind;
     status.textContent = text;
-    status.dataset.state = state;
+    status.hidden = !text;
+    if (!artboard.hasFrame) element('empty-state').textContent = kind === 'error' ? 'Preview unavailable' : 'Rendering preview…';
 }
 
 function receive(message: ToDesigner): void {
@@ -83,29 +124,29 @@ function receive(message: ToDesigner): void {
         case 'pending':
             current = false;
             artboard.fresh(false);
-            showStatus('Rendering the current buffer…', 'busy');
+            showStatus('busy', artboard.hasFrame ? 'Updating preview…' : '');
             break;
         case 'error':
             current = false;
             artboard.fresh(false);
-            showStatus(`${message.message}${artboard.hasFrame ? ' Showing the previous frame.' : ''}`, 'error');
+            showStatus('error', `${message.message}${artboard.hasFrame ? ' Showing the previous frame.' : ''}`);
             break;
         case 'snapshot': {
             snapshot = message.snapshot;
             token = message.token;
             selected = message.selected;
             current = true;
-            artboard.show(snapshot, renderedDark);
-            outline.show(snapshot.nodes);
+            artboard.show(snapshot, message.viewport);
+            size.show(message.viewport);
             counterpart.show(snapshot.counterpart, message.sourceKey);
-            blocks.replaceChildren(...snapshot.blocks.map((span, index) => new Option(`RSX at line ${span.start.line + 1}`, String(index))));
+            blocks.replaceChildren(...snapshot.blocks.map((span, index) => new Option(`RSX · line ${span.start.line + 1}`, String(index))));
             blocks.hidden = snapshot.blocks.length <= 1;
-            blocks.selectedIndex = snapshot.blocks.findIndex(span => span.start.line === snapshot!.activeBlock?.start.line
-                && span.start.character === snapshot!.activeBlock?.start.character);
+            const active = snapshot.activeBlock?.start;
+            blocks.selectedIndex = snapshot.blocks.findIndex(({ start }) => start.line === active?.line && start.character === active?.character);
             if (snapshot.renderError) {
-                showStatus(`${snapshot.renderError}${artboard.hasFrame ? ' Showing the previous frame.' : ''}`, 'error');
+                showStatus('error', `${snapshot.renderError}${artboard.hasFrame ? ' Showing the previous frame.' : ''}`);
             } else {
-                showStatus(snapshot.notices.join(' · ') || 'Preview up to date', 'ready');
+                showStatus(snapshot.notices.length ? 'notice' : 'ready', snapshot.notices.join(' · '));
             }
             break;
         }
@@ -113,9 +154,9 @@ function receive(message: ToDesigner): void {
             if (message.token === token) selected = message.selected;
             break;
         case 'edit':
-            if (message.error) showStatus(message.error, 'error');
-            else if (operation?.type === 'applyCounterpart') counterpart.accepted();
-            operation = undefined;
+            if (message.error) showStatus('error', message.error);
+            else if (applying) counterpart.accepted();
+            applying = false;
             break;
     }
     updateSelection();

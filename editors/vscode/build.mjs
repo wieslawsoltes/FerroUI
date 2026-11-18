@@ -1,5 +1,5 @@
 import { build } from 'esbuild';
-import { readFile, readdir, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 
 const [host] = await Promise.all([
     build({
@@ -13,13 +13,20 @@ const [host] = await Promise.all([
         sourcemap: true,
     }),
     build({
-        entryPoints: ['webview/main.ts'],
-        outfile: 'dist/designer.js',
+        entryPoints: { designer: 'webview/main.ts', properties: 'webview/properties.ts' },
+        outdir: 'dist',
         bundle: true,
         platform: 'browser',
         target: 'chrome128',
         sourcemap: true,
     }),
+]);
+
+const codicons = 'node_modules/@vscode/codicons';
+await mkdir('dist/icons', { recursive: true });
+await Promise.all([
+    ...['codicon.css', 'codicon.ttf'].map(file => copyFile(`${codicons}/dist/${file}`, `dist/icons/${file}`)),
+    ...['preview.svg', 'list-tree.svg', 'settings-gear.svg'].map(file => copyFile(`${codicons}/src/icons/${file}`, `dist/icons/${file}`)),
 ]);
 
 const output = Object.entries(host.metafile.outputs)
@@ -34,4 +41,5 @@ const licenses = await Promise.all([...new Set(modules)].sort().map(async name =
     if (!license) throw new Error(`Missing bundled license for ${name}`);
     return `${name}\n${(await readFile(`${dir}/${license}`, 'utf8')).trim()}`;
 }));
+licenses.push(`Microsoft VS Code Codicons (https://github.com/microsoft/vscode-codicons)\n${(await readFile(`${codicons}/LICENSE`, 'utf8')).trim()}\n\n${(await readFile(`${codicons}/LICENSE-CODE`, 'utf8')).trim()}`);
 await writeFile('dist/THIRD-PARTY-NOTICES.txt', `${licenses.join('\n\n')}\n`);

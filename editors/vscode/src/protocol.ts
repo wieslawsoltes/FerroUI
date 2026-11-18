@@ -10,6 +10,9 @@ export interface Source {
     caret: Position;
 }
 export interface Viewport { width: number; height: number; dark: boolean }
+export const DEFAULT_VIEWPORT: Viewport = { width: 800, height: 520, dark: false };
+export const MIN_VIEWPORT_SIZE = 64;
+export const MAX_VIEWPORT_SIZE = 1536;
 export interface Bounds { x: number; y: number; width: number; height: number }
 export interface Property { name: string; value: string; editable: boolean }
 export interface OutlineNode {
@@ -34,22 +37,38 @@ export interface Snapshot {
     renderError: string | null;
     notices: string[];
 }
-export type Operation =
+export type NodeOperation =
     | { type: 'setProperty'; node: number; name: string; value: string }
     | { type: 'insertChild'; node: number; control: string }
-    | { type: 'removeNode'; node: number }
-    | { type: 'applyCounterpart'; source: string };
+    | { type: 'removeNode'; node: number };
+export type Operation = NodeOperation | { type: 'applyCounterpart'; source: string };
 
+// Node IDs and tokens are local to a designer session.
+export interface NodeTarget { session: number; token: number; node: number }
+export interface PropertiesState {
+    session?: number;
+    target?: NodeTarget;
+    node?: OutlineNode;
+    message?: string;
+}
+export type FromProperties = { type: 'ready' }
+    | { type: 'edit'; request: number; target: NodeTarget; operation: NodeOperation };
+export type ToProperties = { type: 'state'; state: PropertiesState }
+    | { type: 'edit'; request: number; error?: string };
+
+export type CanvasNode = Pick<OutlineNode, 'id' | 'label' | 'name' | 'bounds'>;
+export type CanvasSnapshot = Omit<Snapshot, 'nodes'> & { nodes: CanvasNode[] };
 export type FromDesigner =
     | { type: 'ready' | 'refresh' }
+    | { type: 'dock'; view: 'outline' | 'properties' }
     | { type: 'viewport'; viewport: Viewport }
     | { type: 'block'; token: number; index: number }
-    | { type: 'select'; token: number; id: number }
-    | { type: 'edit'; token: number; operation: Operation };
+    | { type: 'select'; token: number; id: number; openSource: boolean }
+    | { type: 'apply'; token: number; source: string };
 
 export type ToDesigner =
     | { type: 'pending' }
-    | { type: 'snapshot'; token: number; sourceKey: string; snapshot: Snapshot; selected: number | undefined }
+    | { type: 'snapshot'; token: number; sourceKey: string; snapshot: CanvasSnapshot; viewport: Viewport; selected: number | undefined }
     | { type: 'error'; message: string }
     | { type: 'selection'; token: number; selected: number | undefined }
     | { type: 'edit'; error?: string };

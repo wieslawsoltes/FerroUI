@@ -1,18 +1,22 @@
 import * as vscode from 'vscode';
 import { NativePreview } from './nativePreview';
-import { type FromDesigner, type Language, type Operation, type Snapshot, type Source, type ToDesigner, type Viewport, errorMessage } from './protocol';
+import { DEFAULT_VIEWPORT, MAX_VIEWPORT_SIZE, MIN_VIEWPORT_SIZE, errorMessage, type CanvasSnapshot, type FromDesigner, type Language, type NodeOperation, type NodeTarget, type Operation, type Snapshot, type Source, type ToDesigner, type Viewport } from './protocol';
 import { applyTextEdits, asPosition, asRange, sourceOf } from './textDocument';
 import { designerHtml } from './view';
 
 interface Frame {
     token: number;
     version: number;
+    viewport: Viewport;
     source: Source;
     snapshot: Snapshot;
+    canvas: CanvasSnapshot;
 }
 
 export class DesignerPanel implements vscode.Disposable {
     private readonly subscriptions: vscode.Disposable[] = [];
+    private readonly changed = new vscode.EventEmitter<void>();
+    readonly onDidChange = this.changed.event;
     private client?: Promise<NativePreview>;
     private frame?: Frame;
     private disposed = false;
@@ -22,7 +26,9 @@ export class DesignerPanel implements vscode.Disposable {
     private pending = true;
     private rendering = false;
     private editing = false;
-    private viewport: Viewport = { width: 800, height: 520, dark: false };
+    private viewport = DEFAULT_VIEWPORT;
+    private inspected = false;
+    private problem?: string;
     private caret: vscode.Position;
     private selected?: number;
     private blockOffset?: number;
@@ -30,16 +36,25 @@ export class DesignerPanel implements vscode.Disposable {
     constructor(
         private readonly context: vscode.ExtensionContext,
         private readonly output: vscode.OutputChannel,
-        private readonly panel: vscode.WebviewPanel,
-        private readonly document: vscode.TextDocument,
+        readonly panel: vscode.WebviewPanel,
+        readonly document: vscode.TextDocument,
+        readonly session: number,
         private readonly language: Language,
         caret: vscode.Position,
         onClose: () => void,
     ) {
         this.caret = caret;
+        let visible = panel.visible;
         this.subscriptions.push(
             panel.onDidDispose(() => { this.dispose(); onClose(); }),
-            panel.onDidChangeViewState(() => { if (panel.visible) void this.render(); }),
+            panel.onDidChangeViewState(() => {
+                if (panel.visible && !visible) {
+                    this.syncCanvas();
+                    void this.render();
+                }
+                visible = panel.visible;
+                this.changed.fire();
+            }),
             panel.webview.onDidReceiveMessage((message: FromDesigner) => { void this.message(message); }),
             vscode.workspace.onDidChangeTextDocument(event => {
                 if (event.document !== document || !event.contentChanges.length) return;
@@ -68,6 +83,56 @@ export class DesignerPanel implements vscode.Disposable {
         this.panel.reveal(undefined, true);
     }
 
+    get currentToken(): number | undefined {
+        const frame = this.frame;
+        if (frame && !this.disposed && frame.token === this.generation && frame.version === this.document.version) return frame.token;
+        return undefined;
+    }
+
+    get nodes(): readonly Snapshot['nodes'][number][] { return this.frame?.snapshot.nodes ?? emptyNodes; }
+    get selectedNode(): Snapshot['nodes'][number] | undefined { return this.nodes.find(node => node.id === this.selected); }
+    get status(): string | undefined {
+        if (this.editing) return 'Applying edit…';
+        if (this.currentToken === undefined) return this.problem ?? 'Updating preview…';
+        return undefined;
+    }
+
+    setInspected(inspected: boolean): void {
+        if (inspected === this.inspected) return;
+        this.inspected = inspected;
+        if (inspected) void this.render();
+    }
+
+    async select(target: NodeTarget, openSource = false): Promise<void> {
+        if (!this.canUse(target)) return;
+        const node = this.nodes.find(node => node.id === target.node);
+        if (!node) return;
+        const range = asRange(node.nameRange);
+        this.caret = range.start;
+        this.setSelection(node.id);
+        await this.reveal(range, openSource);
+    }
+
+    async editNode(target: NodeTarget, operation: NodeOperation): Promise<void> {
+        if (!this.canUse(target) || operation.node !== target.node || this.selected !== target.node) {
+            throw new Error('The selection changed. Use the current Properties view to retry.');
+        }
+        await this.edit(this.frame!, operation);
+    }
+
+    private canUse(target: NodeTarget): boolean {
+        const token = this.currentToken;
+        return token !== undefined && target?.session === this.session && target.token === token;
+    }
+
+    private setSelection(id: number | undefined): void {
+        if (id === this.selected) return;
+        this.selected = id;
+        const token = this.currentToken;
+        if (token !== undefined) this.post({ type: 'selection', token, selected: id });
+        this.changed.fire();
+    }
+
     private updateCaret(caret: vscode.Position): void {
         this.caret = caret;
         const frame = this.frame;
@@ -83,38 +148,48 @@ export class DesignerPanel implements vscode.Disposable {
                 return;
             }
         }
-        this.selected = selectionAt(frame.snapshot, caret) ?? this.selected;
-        if (frame.token === this.generation) this.post({ type: 'selection', token: frame.token, selected: this.selected });
+        if (this.currentToken !== undefined) this.setSelection(selectionAt(frame.snapshot, caret) ?? this.selected);
     }
 
     private schedule(delay = 180): void {
         this.generation++;
         this.pending = true;
-        if (this.ready) this.post({ type: 'pending' });
+        this.problem = undefined;
+        this.post({ type: 'pending' });
+        this.changed.fire();
         clearTimeout(this.timer);
         this.timer = setTimeout(() => { this.timer = undefined; void this.render(); }, delay);
     }
 
     private async render(): Promise<void> {
-        if (this.disposed || !this.panel.visible || !this.ready || !this.pending || this.rendering || this.timer) return;
+        if (this.disposed || !(this.inspected || this.panel.visible && this.ready) || !this.pending || this.rendering || this.timer) return;
         this.rendering = true;
         this.pending = false;
         const token = this.generation;
         const version = this.document.version;
+        const viewport = this.viewport;
         const caret = this.language === 'rust' && this.blockOffset !== undefined
             ? this.document.positionAt(this.blockOffset) : this.document.validatePosition(this.caret);
         const input = sourceOf(this.document, this.language, caret);
         try {
-            const snapshot = await (await this.getClient()).render(input, this.viewport);
+            const snapshot = await (await this.getClient()).render(input, viewport);
             if (this.disposed || token !== this.generation || version !== this.document.version) return;
-            this.frame = { token, version, source: input, snapshot };
-            this.selected = selectionAt(snapshot, this.caret) ?? snapshot.nodes[0]?.id;
             const anchor = snapshot.activeBlock?.start;
+            const previousAnchor = this.frame?.snapshot.activeBlock?.start;
+            const sameView = this.frame?.version === version && previousAnchor?.line === anchor?.line
+                && previousAnchor?.character === anchor?.character;
+            const nodes = snapshot.nodes.map(({ id, label, name, bounds }) => ({ id, label, name, bounds }));
+            this.frame = { token, version, viewport, source: input, snapshot, canvas: { ...snapshot, nodes } };
+            this.selected = selectionAt(snapshot, this.caret) ?? (sameView ? this.selected : undefined) ?? snapshot.nodes[0]?.id;
             if (anchor) this.blockOffset = this.document.offsetAt(asPosition(anchor));
-            const sourceKey = `${version}:${anchor?.line ?? 0}:${anchor?.character ?? 0}`;
-            this.post({ type: 'snapshot', token, sourceKey, snapshot, selected: this.selected });
+            this.syncCanvas();
+            this.changed.fire();
         } catch (error) {
-            if (token === this.generation) this.post({ type: 'error', message: errorMessage(error) });
+            if (!this.disposed && token === this.generation) {
+                this.problem = errorMessage(error);
+                this.syncCanvas();
+                this.changed.fire();
+            }
         } finally {
             this.rendering = false;
             void this.render();
@@ -123,27 +198,36 @@ export class DesignerPanel implements vscode.Disposable {
 
     private async message(message: FromDesigner): Promise<void> {
         if (this.disposed || !message) return;
-        if (message.type === 'ready' || message.type === 'refresh') {
+        if (message.type === 'ready') {
             this.ready = true;
+            this.syncCanvas();
+            void this.render();
+            return;
+        }
+        if (message.type === 'refresh') {
             this.schedule(0);
+            return;
+        }
+        if (message.type === 'dock') {
+            await vscode.commands.executeCommand(message.view === 'outline' ? 'ferroui.showOutline' : 'ferroui.showProperties', this.session);
             return;
         }
         if (message.type === 'viewport') {
             const value = message.viewport;
-            if ([value.width, value.height].some(n => !Number.isInteger(n) || n < 64 || n > 1536) || typeof value.dark !== 'boolean') return;
+            if (!value || [value.width, value.height].some(n => !Number.isInteger(n) || n < MIN_VIEWPORT_SIZE || n > MAX_VIEWPORT_SIZE)
+                || typeof value.dark !== 'boolean') return;
             this.viewport = value;
             this.schedule(0);
             return;
         }
         const frame = this.frame;
-        if (!frame || !('token' in message) || frame.token !== message.token || frame.token !== this.generation || frame.version !== this.document.version) {
-            if (message.type === 'edit') this.post({ type: 'edit', error: 'The source changed. Use the current preview to retry.' });
+        if (!frame || !('token' in message) || this.currentToken === undefined || this.currentToken !== message.token) {
+            if (message.type === 'apply') this.post({ type: 'edit', error: 'The source changed. Use the current preview to retry.' });
             return;
         }
         try {
             if (message.type === 'select') {
-                const node = frame.snapshot.nodes.find(node => node.id === message.id);
-                if (node) await this.reveal(asRange(node.nameRange));
+                await this.select({ session: this.session, token: message.token, node: message.id }, message.openSource);
             } else if (message.type === 'block') {
                 const block = frame.snapshot.blocks[message.index];
                 if (block) {
@@ -152,8 +236,9 @@ export class DesignerPanel implements vscode.Disposable {
                     this.schedule(0);
                     await this.reveal(new vscode.Range(this.caret, this.caret));
                 }
-            } else if (message.type === 'edit') {
-                await this.edit(frame, message.operation);
+            } else if (message.type === 'apply') {
+                await this.edit(frame, { type: 'applyCounterpart', source: message.source });
+                this.post({ type: 'edit' });
             }
         } catch (error) {
             this.post({ type: 'edit', error: errorMessage(error) });
@@ -163,24 +248,43 @@ export class DesignerPanel implements vscode.Disposable {
     private async edit(frame: Frame, operation: Operation): Promise<void> {
         if (this.editing) throw new Error('A designer edit is already in progress.');
         this.editing = true;
+        this.changed.fire();
         try {
             const edits = await (await this.getClient()).edit(frame.source, operation);
-            if (this.disposed || frame.token !== this.generation) throw new Error('The preview changed. Use the current preview to retry.');
+            if (this.currentToken !== frame.token) throw new Error('The preview changed. Use the current preview to retry.');
             await applyTextEdits(this.document, frame.version, edits);
-            this.post({ type: 'edit' });
         } finally {
             this.editing = false;
+            this.changed.fire();
         }
     }
 
-    private async reveal(range: vscode.Range): Promise<void> {
-        const visible = vscode.window.visibleTextEditors.find(editor => editor.document === this.document);
-        const editor = visible ?? await vscode.window.showTextDocument(this.document, {
-            viewColumn: vscode.ViewColumn.One, preserveFocus: true,
-        });
+    private async reveal(range: vscode.Range, openSource = false): Promise<void> {
+        const version = this.document.version;
+        let editor = vscode.window.visibleTextEditors.find(editor => editor.document === this.document);
+        if (!editor && openSource) {
+            editor = await vscode.window.showTextDocument(this.document, {
+                viewColumn: this.panel.viewColumn === vscode.ViewColumn.One ? vscode.ViewColumn.Beside : vscode.ViewColumn.One,
+                preserveFocus: true,
+            });
+        }
+        if (!editor || this.disposed || version !== this.document.version) return;
         editor.selection = new vscode.Selection(range.start, range.end);
         editor.revealRange(range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
         this.updateCaret(range.start);
+    }
+
+    private syncCanvas(): void {
+        const frame = this.frame;
+        if (frame && this.currentToken !== undefined) {
+            const anchor = frame.snapshot.activeBlock?.start;
+            const sourceKey = `${frame.version}:${anchor?.line ?? 0}:${anchor?.character ?? 0}`;
+            this.post({ type: 'snapshot', token: frame.token, sourceKey, snapshot: frame.canvas, viewport: frame.viewport, selected: this.selected });
+        } else if (this.problem) {
+            this.post({ type: 'error', message: this.problem });
+        } else {
+            this.post({ type: 'pending' });
+        }
     }
 
     private async getClient(): Promise<NativePreview> {
@@ -202,7 +306,7 @@ export class DesignerPanel implements vscode.Disposable {
     }
 
     private post(message: ToDesigner): void {
-        if (!this.disposed) void this.panel.webview.postMessage(message);
+        if (!this.disposed && this.ready && this.panel.visible) void this.panel.webview.postMessage(message);
     }
 
     dispose(): void {
@@ -212,8 +316,11 @@ export class DesignerPanel implements vscode.Disposable {
         this.stopClient();
         this.panel.dispose();
         this.subscriptions.forEach(subscription => subscription.dispose());
+        this.changed.dispose();
     }
 }
+
+const emptyNodes: readonly Snapshot['nodes'][number][] = [];
 
 function selectionAt(snapshot: Snapshot, caret: vscode.Position): number | undefined {
     // The host emits a preorder outline. The last enclosing element is the deepest.

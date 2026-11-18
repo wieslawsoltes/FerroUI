@@ -1,46 +1,81 @@
-import type { Operation, OutlineNode, Property } from '../src/protocol';
+import type { NodeOperation, OutlineNode, Property } from '../src/protocol';
 import { choices, create, element } from './dom';
 
 export class Inspector {
     private readonly target = element('properties');
-    private selected?: OutlineNode;
+    private readonly selection = element('element-properties');
+    private readonly filter = element<HTMLInputElement>('filter');
+    private selectedKey?: string;
+    private contentKey?: string;
     private inputs = new Map<string, HTMLInputElement>();
 
-    constructor(private readonly edit: (operation: Operation) => void) {}
+    constructor(private readonly edit: (operation: NodeOperation) => void) {
+        this.filter.addEventListener('input', () => this.applyFilter());
+    }
 
-    show(node: OutlineNode | undefined, enabled: boolean): void {
-        if (this.selected === node && this.target.childNodes.length) {
-            this.target.toggleAttribute('inert', !enabled);
-            return;
-        }
-        const focus = document.activeElement instanceof HTMLInputElement ? document.activeElement.dataset.property : undefined;
-        this.inputs.clear();
-        this.selected = node;
+    show(session: number | undefined, node: OutlineNode | undefined, enabled: boolean): void {
+        this.selection.hidden = !node;
         this.target.toggleAttribute('inert', !enabled);
         if (!node) {
-            const hint = create('p', 'Select a control on the canvas or in the outline.');
-            hint.className = 'hint';
-            this.target.replaceChildren(hint);
+            this.selectedKey = undefined;
+            this.contentKey = undefined;
+            this.target.replaceChildren();
             return;
         }
+        const selectedKey = `${session}:${node.id}`;
+        const changedSelection = selectedKey !== this.selectedKey;
+        this.selectedKey = selectedKey;
+        const contentKey = JSON.stringify([selectedKey, node.label, node.name, node.properties,
+            node.addableProperties, node.canInsert, node.canRemove]);
+        if (this.contentKey === contentKey) return;
+        this.contentKey = contentKey;
+        if (changedSelection) this.filter.value = '';
+        element('control-type').textContent = node.label;
+        const name = element('control-name');
+        name.textContent = node.name ?? '';
+        name.hidden = !node.name;
+        element('filter-row').hidden = node.properties.length < 5 && !this.filter.value;
+
+        const focus = document.activeElement instanceof HTMLInputElement ? document.activeElement.dataset.property : undefined;
+        this.inputs.clear();
         const form = create('div');
         form.className = 'property-list';
         for (const property of node.properties) form.append(this.property(node.id, property));
         if (!node.properties.length) {
-            const hint = create('p', 'This control has no authored attributes.');
+            const hint = create('p', 'No authored properties.');
             hint.className = 'hint';
             form.append(hint);
+        } else {
+            const empty = create('p', 'No matching properties.');
+            empty.className = 'hint';
+            empty.id = 'filter-empty';
+            form.append(empty);
         }
         if (node.addableProperties.length) form.append(this.addProperty(node));
         if (node.canInsert || node.canRemove) form.append(this.structure(node));
         this.target.replaceChildren(form);
-        if (focus && enabled) this.inputs.get(focus)?.focus();
+        this.applyFilter();
+        if (focus && enabled && !changedSelection) this.inputs.get(focus)?.focus();
+    }
+
+    private applyFilter(): void {
+        const needle = this.filter.value.trim().toLowerCase();
+        const rows = this.target.querySelectorAll<HTMLElement>('[data-attribute]');
+        let matching = 0;
+        for (const row of rows) {
+            row.hidden = !(row.dataset.attribute ?? '').toLowerCase().includes(needle);
+            if (!row.hidden) matching++;
+        }
+        const empty = document.getElementById('filter-empty');
+        if (empty) empty.hidden = matching > 0;
     }
 
     private property(id: number, property: Property): HTMLElement {
         const row = create('form');
         row.className = 'property';
+        row.dataset.attribute = property.name;
         const label = create('label', property.name);
+        label.title = property.name;
         const input = create('input');
         input.id = `property-${this.inputs.size}`;
         label.htmlFor = input.id;
@@ -69,6 +104,7 @@ export class Inspector {
         value.placeholder = 'Value';
         const add = create('button', 'Set');
         add.type = 'submit';
+        add.className = 'primary';
         form.append(property, value, add);
         form.addEventListener('submit', event => {
             event.preventDefault();

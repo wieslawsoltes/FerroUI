@@ -1,0 +1,56 @@
+:root {
+    color-scheme: light dark;
+    --line: var(--vscode-panel-border, transparent);
+    --muted: var(--vscode-descriptionForeground, var(--vscode-foreground));
+    --focus: var(--vscode-focusBorder, currentColor);
+    --tool-hover: var(--vscode-toolbar-hoverBackground, var(--vscode-list-hoverBackground));
+    --tool-active: var(--vscode-toolbar-activeBackground, var(--vscode-list-inactiveSelectionBackground));
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+    margin: 0;
+    padding: 0;
+    color: var(--vscode-foreground);
+    font: var(--vscode-font-size) var(--vscode-font-family);
+}
+
+button, select, input, textarea { font: inherit; }
+button, input, select { min-block-size: 26px; }
+button {
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 3px 7px;
+    color: inherit;
+    background: transparent;
+    cursor: pointer;
+    white-space: nowrap;
+}
+button:hover:not(:disabled) { background: var(--tool-hover); }
+button[aria-pressed=true] { background: var(--tool-active); }
+button:disabled { opacity: .5; cursor: default; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 1px solid var(--focus);
+    outline-offset: -1px;
+}
+button.primary {
+    background: var(--vscode-button-background);
+    border-color: var(--vscode-button-border, transparent);
+    color: var(--vscode-button-foreground);
+}
+button.primary:hover:not(:disabled) { background: var(--vscode-button-hoverBackground); }
+button.secondary {
+    color: var(--vscode-button-secondaryForeground);
+    background: var(--vscode-button-secondaryBackground);
+}
+button.secondary:hover:not(:disabled) { background: var(--vscode-button-secondaryHoverBackground); }
+input, select, textarea {
+    min-inline-size: 0;
+    border: 1px solid var(--vscode-input-border, var(--line));
+    border-radius: 4px;
+    padding: 3px 6px;
+    background: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+}
+input[readonly], textarea[readonly] { color: var(--muted); }

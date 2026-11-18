@@ -100,7 +100,12 @@ export async function run(): Promise<void> {
         const partial = await preview.render(sourceOf(rust, 'rust', rustEditor.document.positionAt(rust.getText().lastIndexOf('"Increment"'))), viewport);
         assert.ok(partial.image && !partial.counterpart.editable);
         assert.ok(partial.notices.some(notice => notice.includes('omitted Rust items')));
-        console.log('VS Code split panels, native XAML and RSX rendering, both projection directions, guarded edits and undo passed');
+        const commands = await vscode.commands.getCommands(true);
+        assert.ok(commands.includes('ferroui.outline.focus'), 'Outline is a contributed VS Code view');
+        assert.ok(commands.includes('ferroui.properties.focus'), 'Properties is a separate contributed VS Code view');
+        await vscode.commands.executeCommand('ferroui.showOutline');
+        await vscode.commands.executeCommand('ferroui.showProperties');
+        console.log('VS Code docked views, native XAML and RSX rendering, both projection directions, guarded edits and undo passed');
     } finally {
         preview.dispose();
         channel.dispose();

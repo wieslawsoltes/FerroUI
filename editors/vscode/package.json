@@ -2,7 +2,7 @@
   "name": "ferroui",
   "displayName": "FerroUI Designer",
   "description": "Native FerroUI previews, visual authoring, and XAML language support.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "FerroUI",
   "license": "MIT",
   "repository": {
@@ -58,20 +58,39 @@
         "command": "ferroui.openDesigner",
         "title": "Open Designer",
         "category": "FerroUI",
-        "icon": "$(preview)",
-        "enablement": "editorLangId == ferroui-xaml || editorLangId == rust"
+        "icon": "$(preview)"
       },
       {
         "command": "ferroui.restartLanguageServer",
         "title": "Restart XAML Language Server",
         "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.showOutline",
+        "title": "Show Outline",
+        "category": "FerroUI",
+        "icon": "$(list-tree)"
+      },
+      {
+        "command": "ferroui.showProperties",
+        "title": "Show Properties",
+        "category": "FerroUI",
+        "icon": "$(settings-gear)"
+      },
+      {
+        "command": "ferroui.revealDesignerSource",
+        "title": "Reveal Selected Control in Source",
+        "category": "FerroUI",
+        "icon": "$(go-to-file)"
       }
     ],
     "menus": {
-      "commandPalette": [{
-        "command": "ferroui.openDesigner",
-        "when": "editorLangId == ferroui-xaml || editorLangId == rust"
-      }],
+      "commandPalette": [
+        {
+          "command": "ferroui.openDesigner",
+          "when": "editorLangId == ferroui-xaml || editorLangId == rust"
+        }
+      ],
       "editor/title": [
         {
           "command": "ferroui.openDesigner",
@@ -83,6 +102,13 @@
         {
           "command": "ferroui.openDesigner",
           "when": "resourceExtname == .xaml || resourceExtname == .rs"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "ferroui.revealDesignerSource",
+          "when": "view == ferroui.outline",
+          "group": "navigation"
         }
       ]
     },
@@ -110,6 +136,32 @@
           "description": "Custom XAML type and property metadata for the FerroUI language server."
         }
       }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ferrouiWorkbench",
+          "title": "FerroUI",
+          "icon": "dist/icons/preview.svg"
+        }
+      ]
+    },
+    "views": {
+      "ferrouiWorkbench": [
+        {
+          "id": "ferroui.outline",
+          "name": "Outline",
+          "icon": "dist/icons/list-tree.svg",
+          "contextualTitle": "FerroUI Outline"
+        },
+        {
+          "type": "webview",
+          "id": "ferroui.properties",
+          "name": "Properties",
+          "icon": "dist/icons/settings-gear.svg",
+          "contextualTitle": "FerroUI Properties"
+        }
+      ]
     }
   },
   "scripts": {
@@ -127,6 +179,7 @@
   "devDependencies": {
     "@types/node": "22.19.17",
     "@types/vscode": "1.95.0",
+    "@vscode/codicons": "0.0.45",
     "@vscode/test-electron": "3.1.0",
     "@vscode/vsce": "4.1.1",
     "esbuild": "0.28.2",
