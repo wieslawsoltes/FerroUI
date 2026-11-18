@@ -333,18 +333,19 @@ export class DesignerPanel implements vscode.Disposable {
         }
     }
 
-    async studioPresent(token: number, name: string, args: object, selection: number[] | undefined, signal: AbortSignal): Promise<void> {
+    async studioPresent(token: number, name: string, args: object, selection: number[] | undefined, signal: AbortSignal): Promise<CanvasPresentation | undefined> {
         return this.present(token, signal, (client, next) => client.studioPresent(token, next, name, args, this.studioSelection(selection)), true,
             name === 'designer_design_data_edit' ? () => this.rememberDesignData(args) : undefined);
     }
 
     async interact(token: number, action: CanvasInteraction, signal: AbortSignal): Promise<void> {
         if (!this.frame?.canvas.interactive) throw new Error('Open an interactive native preview first.');
-        return this.present(token, signal, (client, next) => client.canvasInput(token, next, action), false);
+        await this.present(token, signal, (client, next) => client.canvasInput(token, next, action), false);
     }
 
     private async present(token: number, signal: AbortSignal,
-        update: (client: NativePreview, next: number) => Promise<CanvasPresentation>, syncSelection: boolean, accepted?: () => void): Promise<void> {
+        update: (client: NativePreview, next: number) => Promise<CanvasPresentation>, syncSelection: boolean,
+        accepted?: () => void): Promise<CanvasPresentation | undefined> {
         const frame = this.frame;
         if (!frame || !this.canUse({ session: this.session, token })) throw new Error('Read the current designer revision before updating the preview.');
         this.editing = true;
@@ -375,6 +376,7 @@ export class DesignerPanel implements vscode.Disposable {
             if (presentation.layerView) this.layers.remember(presentation.layerView, frame.snapshot.activeBlock);
             accepted?.();
             this.syncCanvas();
+            return presentation;
         } catch (error) {
             if (this.currentToken === token) this.schedule(0);
             throw error;

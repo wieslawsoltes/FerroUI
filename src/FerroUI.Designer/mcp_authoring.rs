@@ -47,6 +47,11 @@ pub(super) fn tools() -> Vec<Value> {
             s::action("remove_keyframe",json!({"program":s::id(),"target":s::id(),"property":s::string(),"time":s::time()}), &["program","target","property","time"],true),
             s::action("preview_targets",json!({"program":s::id(),"targets":s::nullable(s::array(s::id(),4096))}), &["program","targets"],true),
             s::action("preview",json!({"programs":ids(),"time":s::time()}), &["programs","time"],true),
+            s::action("scrub",json!({"program":s::id(),"time":s::time()}), &["program","time"],true),
+            s::action("play_program",json!({"program":s::id(),"time":s::time(),"from_playhead":{"type":"boolean"}}), &["program"],true),
+            s::action("advance_program",json!({"program":s::id(),"seconds":s::time()}), &["program","seconds"],true),
+            s::action("pause_program",json!({"program":s::id()}), &["program"],true),
+            s::action("stop_program",json!({}), &[],true),
             s::action("play_all",json!({}), &[],true),
         ],true),
         s::tool("designer_states","Read source-backed visual-state groups, setters and directional transitions, optionally for one owner.",s::object(json!({"owner":s::id()}), &[]),false),
@@ -167,6 +172,42 @@ pub(super) fn call(
                     let programs: Vec<u64> = decode(args, "programs")?;
                     distinct(&programs)?;
                     session.preview_animation_programs(&programs, number(args, "time")?)?;
+                }
+                "scrub" => {
+                    let id = node_id(args, "program")?;
+                    if session.active_animation_program() != Some(id) {
+                        session.select_animation_program(id)?;
+                    }
+                    let time = number(args, "time")?;
+                    if time > session.timeline().duration {
+                        return Err("Choose a time within the animation duration".into());
+                    }
+                    session.pause();
+                    session.seek(time)?;
+                    return Ok(json!({"timelinePosition":{"time":time,"playing":false}}));
+                }
+                "play_program" => {
+                    session.start_animation_playback(
+                        node_id(args, "program")?,
+                        args["time"].as_f64(),
+                        args["from_playhead"] == true,
+                    )?;
+                    return playback_position(session);
+                }
+                action @ ("advance_program" | "pause_program") => {
+                    if session.active_animation_program() != Some(node_id(args, "program")?) {
+                        return Err("Play this animation program before advancing or pausing it".into());
+                    }
+                    if action == "advance_program" {
+                        session.advance(number(args, "seconds")?)?;
+                    } else {
+                        session.pause();
+                    }
+                    return playback_position(session);
+                }
+                "stop_program" => {
+                    session.stop();
+                    return Ok(json!({"timelinePosition":{"time":0,"playing":false}}));
                 }
                 "play_all" => session.play_all_animation_programs(),
                 _ => return Err("Unknown animation program action".into()),
@@ -302,6 +343,11 @@ pub(super) fn call(
         _ => return Err("Unknown designer authoring tool".into()),
     }
     Ok(json!({"document":state(session)}))
+}
+fn playback_position(session: &DesignerSession) -> Result<Value, String> {
+    let elapsed = session.time();
+    let time = session.animation.compiled.playback_position(elapsed).map_err(|error| error.to_string())?;
+    Ok(json!({"timelinePosition":{"time":time,"elapsed":elapsed,"playing":session.is_playing()}}))
 }
 fn animation_programs(session: &DesignerSession, args: &Value) -> Result<Vec<Value>, String> {
     session.animation_programs().iter().map(|program| {

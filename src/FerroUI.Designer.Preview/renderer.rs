@@ -50,6 +50,8 @@ pub(crate) struct Presentation {
     selection: Vec<NodeId>,
     #[serde(skip_serializing_if = "Option::is_none")]
     layer_view: Option<LayerViewState>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) timeline_position: Option<serde_json::Value>,
 }
 
 #[derive(Serialize)]
@@ -156,6 +158,7 @@ impl Renderer {
             notices: frame.notices,
             selection: session.selection().to_vec(),
             layer_view: include_layers.then(|| session.persist_layer_view()),
+            timeline_position: None,
         })
     }
 }

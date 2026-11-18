@@ -54,13 +54,18 @@ pub(crate) fn present(renderer: &mut Renderer, request: Present) -> Result<Prese
     let provider = DesignerMcp::new(&stage.session);
     provider.validate(&query.name, &arguments)?;
     if let Some(selection) = &query.selection { select(stage, selection)?; }
-    stage.sources.run(|| provider.call(&query.name, &arguments, Permissions { allow_property_writes: true, ..Default::default() }))?;
-    renderer.present(request.next_frame, query.name == "designer_layer")
+    let result = stage.sources.run(|| provider.call(&query.name, &arguments, Permissions { allow_property_writes: true, ..Default::default() }))?;
+    let mut presentation = renderer.present(request.next_frame, query.name == "designer_layer")?;
+    presentation.timeline_position = result.get("timelinePosition").cloned();
+    Ok(presentation)
 }
 
 fn presentation_action(tool: &str, action: Option<&str>) -> bool {
     match tool {
-        "designer_program" => matches!(action, Some("preview" | "preview_targets")),
+        "designer_program" => matches!(
+            action,
+            Some("preview" | "preview_targets" | "scrub" | "play_program" | "advance_program" | "pause_program" | "stop_program")
+        ),
         "designer_state" => matches!(action, Some("preview" | "advance_preview" | "clear_preview")),
         "designer_definition" => matches!(action, Some("enter" | "exit")),
         "designer_design_data_edit" => matches!(action, Some("enabled" | "fixture")),

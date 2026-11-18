@@ -230,6 +230,7 @@ export interface CanvasPresentation {
     notices: string[];
     selection: number[];
     layerView?: LayerViewState;
+    timelinePosition?: { time: number; elapsed?: number; playing: boolean };
 }
 export type CanvasSnapshot = Omit<Snapshot, 'nodes'> & { nodes: CanvasNode[]; interactive?: boolean; focusOrderAvailable?: boolean };
 export interface CanvasFocusOrder {

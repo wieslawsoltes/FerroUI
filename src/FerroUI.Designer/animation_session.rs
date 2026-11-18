@@ -327,6 +327,31 @@ impl DesignerSession {
         self.animation.player.play();
         self.generation += 1;
     }
+    pub(crate) fn start_animation_playback(
+        &mut self,
+        id: NodeId,
+        time: Option<f64>,
+        from_playhead: bool,
+    ) -> Result<(), String> {
+        if self.animation.active != Some(id) {
+            self.select_animation_program(id)?;
+        }
+        self.editable_program()?;
+        if let Some(time) = time {
+            let elapsed = if from_playhead {
+                self.animation.compiled.elapsed_at_playhead(time).map_err(|error| error.to_string())?
+            } else {
+                time
+            };
+            if self.animation.timeline.total_duration().is_some_and(|end| elapsed > end) {
+                return Err("Choose a time within the total playback duration".into());
+            }
+            self.animation.player.seek(elapsed).map_err(|error| error.to_string())?;
+            self.animation.target_elapsed.clear();
+        }
+        self.play();
+        self.advance(0.0)
+    }
     pub fn play_all_animation_programs(&mut self) {
         self.animation.play_all = true;
         self.animation.player.play();

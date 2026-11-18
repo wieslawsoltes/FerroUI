@@ -1,18 +1,19 @@
 import { setTimeout as delay } from 'node:timers/promises';
 import type { DesignerPanel } from './designerPanel';
 import type { FrameTarget } from './protocol';
-import type { TimelineControl, TimelinePosition } from './timelineProtocol';
+import type { AuthoredTimeline, TimelineControl, TimelinePosition } from './timelineProtocol';
 
 interface Playback {
     panel: DesignerPanel;
     revision: number;
     token: number;
-    duration: number;
-    running: boolean;
     position: TimelinePosition;
+    loop?: Promise<void>;
+    running: boolean;
+    interrupting: boolean;
 }
 
-/** One accepted native render at a time, including the final frame after Pause. */
+/** The extension measures elapsed time while Studio owns the clock and native values. */
 export class TimelinePlayback {
     private playback?: Playback;
 
@@ -29,71 +30,121 @@ export class TimelinePlayback {
         this.update(undefined);
     }
 
-    async control(panel: DesignerPanel, frame: FrameTarget, control: TimelineControl, duration: number, signal: AbortSignal): Promise<TimelinePosition> {
+    async control(panel: DesignerPanel, frame: FrameTarget, control: TimelineControl, timeline: AuthoredTimeline | undefined,
+        signal: AbortSignal): Promise<TimelinePosition> {
         signal.throwIfAborted();
         const existing = this.playback;
-        if (control.action === 'pause' && existing?.panel === panel && existing.position.program === control.program) {
-            if (frame.session !== panel.session || existing.revision !== panel.document.version) throw new Error('Read the current timeline first.');
-            existing.running = false;
-            return this.commit(existing, { playing: false });
+        const current = existing?.panel === panel && existing.revision === panel.document.version
+            && existing.position.program === control.program ? existing : undefined;
+        if ((control.action === 'pause' || control.action === 'stop') && current?.loop) {
+            // The button can still show the preceding frame while the next one is
+            // crossing the webview boundary. Both belong to this native clock.
+            if (frame.session !== panel.session || (frame.token !== current.token && frame.token !== current.token - 1)) {
+                throw new Error('Read the current timeline first.');
+            }
+            return this.interrupt(current, control.action, signal);
         }
         if (!panel.canUse(frame)) throw new Error('Read the current timeline first.');
-        if (!Number.isFinite(duration) || duration < 0) throw new Error('The program has no finite duration.');
-        if (control.action === 'seek' && !Number.isFinite(control.time)) throw new Error('Supply a seek time in seconds.');
         if (existing?.position.busy) throw new Error('Wait for the current timeline frame.');
-        if (existing) existing.running = false;
-        const previous = existing?.panel === panel && existing.revision === panel.document.version
-            && existing.position.program === control.program ? existing.position.time : 0;
-        if (control.action === 'pause') return { session: panel.session, program: control.program, time: previous, playing: false, busy: false };
-        let time = control.time ?? previous;
-        if (!Number.isFinite(time) || time < 0 || time > duration) throw new Error('Choose a time within the animation duration.');
-        const running = control.action === 'play' && duration > 0;
-        if (running && time === duration) time = 0;
+        const previous = current?.token === frame.token ? current.position : undefined;
+        const idle = { session: panel.session, program: control.program, time: 0, playing: false, busy: false };
+        if (control.action === 'pause') return previous ?? idle;
         const playback: Playback = {
-            panel, revision: panel.document.version, token: frame.token, duration, running,
-            position: { session: panel.session, program: control.program, time: previous, playing: running, busy: true },
+            panel, revision: panel.document.version, token: frame.token, position: previous ?? idle, running: false, interrupting: false,
         };
         this.playback = playback;
-        this.update(playback.position);
-        if (!running) {
-            try { await this.render(playback, time, signal); }
-            finally { this.commit(playback, { playing: false, busy: false }); }
-            return playback.position;
+        this.commit(playback, { busy: true });
+        try {
+            if (control.action === 'stop') {
+                await this.render(playback, { action: 'stop_program' }, signal);
+            } else if (control.action === 'seek' && timeline) {
+                if (!Number.isFinite(control.time) || control.time < 0 || control.time > timeline.duration) {
+                    throw new Error('Choose a time within the animation duration.');
+                }
+                await this.render(playback, { action: 'scrub', program: control.program, time: control.time }, signal);
+            } else if (control.action === 'play' && timeline) {
+                await this.start(playback, control.time, previous, timeline, signal);
+            } else {
+                throw new Error('Choose an authored animation program from the current document.');
+            }
+        } finally {
+            if (!playback.loop) this.commit(playback, { busy: false });
         }
-        void this.play(playback, time);
         return playback.position;
     }
 
-    private async play(playback: Playback, initialTime: number): Promise<void> {
-        const start = performance.now();
-        let time = initialTime;
+    private async start(playback: Playback, time: number | undefined, previous: TimelinePosition | undefined,
+        timeline: AuthoredTimeline, signal: AbortSignal): Promise<void> {
+        const end = timeline.total_duration;
+        if (time !== undefined && (!Number.isFinite(time) || time < 0 || (end !== null && time > end))) {
+            throw new Error('Choose a time within the total playback duration.');
+        }
+        const resume = previous?.elapsed !== undefined && (end === null || previous.elapsed < end);
+        const fromPlayhead = previous?.elapsed === undefined && previous !== undefined && previous.time > 0
+            && previous.time < timeline.duration;
+        const request = { action: 'play_program', program: playback.position.program };
+        const position = await this.render(playback, time !== undefined
+            ? { ...request, time: time === end ? 0 : time }
+            : resume ? request : { ...request, time: fromPlayhead ? previous.time : 0, from_playhead: fromPlayhead }, signal);
+        if (position.playing) {
+            playback.running = true;
+            playback.loop = this.advance(playback);
+        }
+    }
+
+    private async advance(playback: Playback): Promise<void> {
+        let last = performance.now();
         try {
             while (playback.running) {
-                await this.render(playback, time, AbortSignal.timeout(15_000));
-                if (!playback.running || time === playback.duration) break;
-                // Sample wall time after each accepted frame. Slow rendering drops
-                // intermediate samples and never builds up a queue of old frames.
                 await delay(16);
-                time = Math.min(playback.duration, initialTime + (performance.now() - start) / 1000);
+                if (!playback.running) break;
+                const now = performance.now();
+                const seconds = (now - last) / 1000;
+                last = now;
+                const position = await this.render(playback,
+                    { action: 'advance_program', program: playback.position.program, seconds }, AbortSignal.timeout(15_000));
+                if (!position.playing) break;
             }
         } catch (error) {
             if (this.playback === playback && playback.running) this.reportError(error);
         } finally {
             playback.running = false;
-            this.commit(playback, { playing: false, busy: false });
+            playback.loop = undefined;
+            if (!playback.interrupting) this.commit(playback, { playing: false, busy: false });
         }
     }
 
-    private async render(playback: Playback, time: number, signal: AbortSignal): Promise<TimelinePosition> {
+    private async interrupt(playback: Playback, action: 'pause' | 'stop', signal: AbortSignal): Promise<TimelinePosition> {
+        if (playback.interrupting) throw new Error('Wait for the current timeline action.');
+        playback.interrupting = true;
+        playback.running = false;
+        this.commit(playback, { playing: false });
+        try {
+            await playback.loop;
+            signal.throwIfAborted();
+            await this.render(playback, action === 'pause'
+                ? { action: 'pause_program', program: playback.position.program }
+                : { action: 'stop_program' }, signal);
+        } finally {
+            playback.interrupting = false;
+            this.commit(playback, { busy: false });
+        }
+        return playback.position;
+    }
+
+    private async render(playback: Playback, request: object, signal: AbortSignal): Promise<TimelinePosition> {
         const { panel, token, revision } = playback;
         if (this.playback !== playback || panel.document.version !== revision || panel.currentToken !== token) {
             throw new Error('The design changed during animation playback.');
         }
-        await panel.studioPresent(token, 'designer_program', { action: 'preview', programs: [playback.position.program], time },
-            undefined, signal);
-        if (panel.document.version !== revision || panel.currentToken !== token + 1) throw new Error('The preview changed during playback.');
+        const presentation = await panel.studioPresent(token, 'designer_program', request, undefined, signal);
+        if (this.playback !== playback || panel.document.version !== revision || panel.currentToken !== token + 1) {
+            throw new Error('The preview changed during playback.');
+        }
+        if (!presentation?.timelinePosition) throw new Error('The native preview did not report a timeline position.');
         playback.token = token + 1;
-        return this.commit(playback, { time });
+        const { elapsed, time, playing } = presentation.timelinePosition;
+        return this.commit(playback, { elapsed, time, playing: playing && !playback.interrupting });
     }
 
     private commit(playback: Playback, change: Partial<TimelinePosition>): TimelinePosition {

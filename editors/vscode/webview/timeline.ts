@@ -15,7 +15,9 @@ const toolbar = element('timeline-toolbar');
 const container = element('timeline-program');
 const nativeSource = element('timeline-native-source');
 const programs = element<HTMLSelectElement>('timeline-programs');
+const transport = element('timeline-transport');
 const play = element<HTMLButtonElement>('timeline-play');
+const stop = element<HTMLButtonElement>('timeline-stop');
 const record = element<HTMLButtonElement>('timeline-record');
 const actions = element<HTMLButtonElement>('timeline-actions');
 const slider = element<HTMLInputElement>('timeline-seek');
@@ -44,6 +46,10 @@ play.addEventListener('click', () => {
     if (!model.frame || !selected) return;
     const playing = model.position?.program === selected.id && model.position.playing;
     send(model.frame, { action: playing ? 'pause' : 'play', program: selected.id });
+});
+stop.addEventListener('click', () => {
+    const selected = current();
+    if (model.frame && selected) send(model.frame, { action: 'stop', program: selected.id });
 });
 record.addEventListener('click', () => {
     const selected = current();
@@ -163,7 +169,7 @@ function showPosition(): void {
     const timeline = selected?.timeline;
     const position = model.position?.program === selected?.id ? model.position : undefined;
     const playing = Boolean(position?.playing);
-    play.hidden = time.hidden = !timeline;
+    transport.hidden = time.hidden = !timeline;
     record.hidden = !timeline || !model.writable;
     record.disabled = !model.frame || pending || playing;
     actions.disabled = !model.frame || pending || playing || (!selected && !model.writable);
@@ -174,8 +180,16 @@ function showPosition(): void {
     slider.setAttribute('aria-valuetext', `${number.format(seconds)} of ${number.format(timeline.duration)} seconds`);
     tracks.style.setProperty('--timeline-position', `${percent(seconds, timeline.duration)}%`);
     time.value = `${number.format(seconds)} / ${number.format(timeline.duration)} s`;
+    if (position?.elapsed !== undefined) {
+        const clock = timeline.total_duration === null ? `${number.format(position.elapsed)} s elapsed`
+            : `${number.format(position.elapsed)} / ${number.format(timeline.total_duration)} s elapsed`;
+        time.title = clock;
+    } else {
+        time.removeAttribute('title');
+    }
     labelButton(play, playing ? 'Pause animation' : 'Play animation', playing ? 'debug-pause' : 'play');
     play.disabled = !model.frame || (!playing && (pending || timeline.duration <= 0));
+    stop.disabled = !model.frame || !position || (!playing && pending);
     slider.disabled = !model.frame || playing || timeline.duration <= 0;
     for (const button of tracks.querySelectorAll('button')) button.disabled = pending || !model.frame;
 }

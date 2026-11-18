@@ -11,6 +11,8 @@ import type { HostedFrame, HostedInput, HostedSource } from './hostedProtocol';
 import type { NativeStageChange, PrototypeCommand, PrototypeHotspot, PrototypeScene, StageChecks, StageDocument, StageImage, StageManifest, StageModel, StagePick, StagePointer, StageStateOptions, StageTarget } from './stagesProtocol';
 import { commandFor } from './tools';
 
+const timelineActions = new Set(['scrub', 'play_program', 'advance_program', 'pause_program', 'stop_program']);
+
 interface RenderContext {
     workspaceRoot?: string;
     localSources?: PreviewSourceBuffer[];
@@ -30,7 +32,7 @@ export class NativePreview implements vscode.Disposable {
         isolatedDesign?: boolean; appHostedDesign?: boolean; rsxLanguage?: boolean;
         stages?: boolean; prototypeEditing?: boolean; stageIncludes?: boolean; projectCatalog?: boolean;
         canvasInteraction?: boolean; canvasFocusOrder?: boolean; projectInventory?: boolean; tokenHandoff?: boolean;
-        designFixtures?: boolean;
+        designFixtures?: boolean; timelineTransport?: boolean;
     } = {};
 
     private constructor(command: string, channel: vscode.OutputChannel) {
@@ -158,6 +160,10 @@ export class NativePreview implements vscode.Disposable {
     }
 
     studioPresent(frame: number, nextFrame: number, name: string, args: object, selection: number[]): Promise<CanvasPresentation> {
+        const { action } = args as { action?: string };
+        if (name === 'designer_program' && action && timelineActions.has(action) && !this.capabilities.timelineTransport) {
+            throw new Error('Update the FerroUI preview helper to use the Timeline playback controls.');
+        }
         return this.send('studioPresent', { frame, nextFrame, name, arguments: args, selection });
     }
 

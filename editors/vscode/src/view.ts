@@ -319,7 +319,10 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
 <main class="timeline" aria-label="Animation timeline">
     <p id="timeline-status" role="status" hidden></p>
     <div id="timeline-toolbar" class="timeline-toolbar" aria-label="Animation controls" hidden>
-        ${tool('timeline-play', 'play', 'Play animation', 'hidden')}
+        <div id="timeline-transport" class="tool-group" role="group" aria-label="Playback" hidden>
+            ${tool('timeline-play', 'play', 'Play animation')}
+            ${tool('timeline-stop', 'debug-stop', 'Stop animation')}
+        </div>
         <select id="timeline-programs" aria-label="Animation program"></select>
         <output id="timeline-time" for="timeline-seek" aria-live="off" hidden></output>
         ${tool('timeline-record', 'add', 'Add keyframe at playhead', 'hidden disabled')}

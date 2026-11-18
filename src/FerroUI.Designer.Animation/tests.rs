@@ -77,6 +77,31 @@ fn timing_changes_scale_keys_and_keep_untouched_fields() {
         .is_err());
 }
 #[test]
+fn playhead_uses_the_native_clock_and_scrub_stays_in_edit_time() {
+    let timeline = numeric()
+        .with_timing(TimelineTimingEdit {
+            delay: Some(0.25),
+            delay_between_iterations: Some(0.5),
+            speed_ratio: Some(2.0),
+            repeat: Some(Repeat::Count(2)),
+            playback_direction: Some(PlaybackDirection::AlternateReverse),
+            fill: Some(FillMode::None),
+            ..Default::default()
+        })
+        .unwrap();
+    let clock = timeline.compile().unwrap();
+    assert_eq!(clock.total_duration(), Some(2.375));
+    assert_eq!(clock.playback_position(0.0).unwrap(), 2.0);
+    assert!(clock.sample(0.0).unwrap().is_empty());
+    assert_eq!(clock.elapsed_at_playhead(1.5).unwrap(), 0.375);
+    assert_eq!(clock.playback_position(0.375).unwrap(), 1.5);
+    assert_eq!(clock.playback_position(1.25).unwrap(), 0.0);
+    assert_eq!(clock.playback_position(1.625).unwrap(), 0.5);
+    assert_eq!(clock.playback_position(2.375).unwrap(), 2.0);
+    assert!(clock.sample(2.375).unwrap().is_empty());
+    assert_eq!(clock.scrub(0.5).unwrap()[0].value, AnimationValue::Number(0.25));
+}
+#[test]
 fn bezier_solves_x_and_rejects_invalid_controls() {
     let curve = Easing::CubicBezier {
         x1: 0.8,

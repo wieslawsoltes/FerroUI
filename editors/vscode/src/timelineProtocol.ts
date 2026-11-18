@@ -30,6 +30,7 @@ export interface TimelinePosition {
     session: number;
     program: number;
     time: number;
+    elapsed?: number;
     playing: boolean;
     busy: boolean;
 }
@@ -46,7 +47,7 @@ export interface TimelineState {
 export type TimelineControl =
     | { action: 'seek'; program: number; time: number }
     | { action: 'play'; program: number; time?: number }
-    | { action: 'pause'; program: number };
+    | { action: 'pause' | 'stop'; program: number };
 
 export type FromTimeline =
     | { type: 'ready' }

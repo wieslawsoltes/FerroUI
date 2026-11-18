@@ -45,13 +45,14 @@ export class TimelineView implements vscode.Disposable {
     }
 
     async control(panel: DesignerPanel, frame: FrameTarget, control: TimelineControl, signal: AbortSignal) {
-        if (control.action === 'pause' && this.playback.position?.session === panel.session) {
-            return this.playback.control(panel, frame, control, 0, signal);
+        if ((control.action === 'pause' || control.action === 'stop')
+            && this.playback.position?.session === panel.session && this.playback.position.program === control.program) {
+            return this.playback.control(panel, frame, control, undefined, signal);
         }
         if (!panel.canUse(frame)) throw new Error('Read the current designer revision.');
         const program = (await this.programs(panel).pending).find(entry => entry.id === control.program);
         if (!program?.timeline) throw new Error('Choose an authored animation program from the current document.');
-        return this.playback.control(panel, frame, control, program.timeline.duration, signal);
+        return this.playback.control(panel, frame, control, program.timeline, signal);
     }
 
     private programs(panel: DesignerPanel): Catalog {
