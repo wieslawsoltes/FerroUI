@@ -1,5 +1,6 @@
 use crate::document::{schema, DesignDocument};
 use crate::protocol::{EditRequest, Operation, MAX_SOURCE_BYTES};
+use crate::renderer::Renderer;
 use ferroui_designer_core::{Edit, Node, NodeId, NodeKind, TextPatch};
 use ferroui_designer_language::TextEdit;
 use ferroui_designer_rsx::apply_rsx;
@@ -26,7 +27,7 @@ const COMMON_PROPERTIES: &[&str] = &[
     "Canvas.Top",
 ];
 
-pub(crate) fn edit(request: &EditRequest) -> Result<Vec<TextEdit>, String> {
+pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>) -> Result<Vec<TextEdit>, String> {
     let design = DesignDocument::parse(&request.document)?;
     let mut candidate = design.xaml.snapshot_without_history();
     let patches = match &request.operation {
@@ -66,31 +67,6 @@ pub(crate) fn edit(request: &EditRequest) -> Result<Vec<TextEdit>, String> {
                 .map_err(|e| e.to_string())?;
             translated_patches(&design, candidate.source(), change.patches)?
         }
-        Operation::InsertChild { node, control } => {
-            let parent = editable_node(&design, *node)?;
-            if !can_insert(&design, parent) {
-                return Err("Select a panel that accepts children".into());
-            }
-            let source = match control.as_str() {
-                "Button" => r#"<Button xmlns="https://github.com/ferroui" Content="Button"/>"#,
-                "TextBlock" => r#"<TextBlock xmlns="https://github.com/ferroui" Text="Text"/>"#,
-                "StackPanel" => r#"<StackPanel xmlns="https://github.com/ferroui"/>"#,
-                "Border" => r#"<Border xmlns="https://github.com/ferroui" Padding="12"/>"#,
-                _ => return Err("Unknown toolbox control".into()),
-            };
-            let index = candidate.ast().element_children(*node).len();
-            let change = candidate
-                .apply(
-                    "Insert control",
-                    vec![Edit::InsertChild {
-                        parent: *node,
-                        index,
-                        source: source.into(),
-                    }],
-                )
-                .map_err(|e| e.to_string())?;
-            translated_patches(&design, candidate.source(), change.patches)?
-        }
         Operation::RemoveNode { node } => {
             let target = editable_node(&design, *node)?;
             if !can_remove(&design, target) {
@@ -99,6 +75,20 @@ pub(crate) fn edit(request: &EditRequest) -> Result<Vec<TextEdit>, String> {
             let change = candidate
                 .apply("Remove control", vec![Edit::RemoveNode { node: *node }])
                 .map_err(|e| e.to_string())?;
+            translated_patches(&design, candidate.source(), change.patches)?
+        }
+        Operation::Place { frame, placement } => {
+            if !design.editable_structure() {
+                return Err("Edit this RSX structure in Rust to preserve its expressions and comments".into());
+            }
+            let stage = renderer.ok_or("Render the design before placing controls")?.stage(*frame)?;
+            if stage.session.document().source() != design.xaml.source()
+                || stage.session.document_uri() != request.document.uri
+            {
+                return Err("The source changed during the drag. Start again with the current preview.".into());
+            }
+            let (edits, hint) = stage.plan(placement)?;
+            let change = candidate.apply(hint.description, edits).map_err(|error| error.to_string())?;
             translated_patches(&design, candidate.source(), change.patches)?
         }
     };
@@ -147,21 +137,6 @@ fn editable_node<'a>(design: &'a DesignDocument<'_>, id: NodeId) -> Result<&'a N
         .node(id)
         .filter(|node| node.kind == NodeKind::Element)
         .ok_or_else(|| "Select a source control".into())
-}
-
-pub(crate) fn can_insert(design: &DesignDocument<'_>, node: &Node) -> bool {
-    if !design.editable_structure() || node.kind != NodeKind::Element {
-        return false;
-    }
-    schema()
-        .type_info(node.local_name(), node.namespace_uri.as_deref())
-        .is_some_and(|info| {
-            info.namespace == ferroui_designer_language::FRAMEWORK_NAMESPACE
-                && matches!(
-                    info.name.as_str(),
-                    "Grid" | "StackPanel" | "Canvas" | "WrapPanel" | "DockPanel" | "UniformGrid"
-                )
-        })
 }
 
 pub(crate) fn can_remove(design: &DesignDocument<'_>, node: &Node) -> bool {

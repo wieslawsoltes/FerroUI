@@ -9,7 +9,10 @@ export class Inspector {
     private contentKey?: string;
     private inputs = new Map<string, HTMLInputElement>();
 
-    constructor(private readonly edit: (operation: NodeOperation) => void) {
+    constructor(
+        private readonly edit: (operation: NodeOperation) => void,
+        private readonly openToolbox: () => void,
+    ) {
         this.filter.addEventListener('input', () => this.applyFilter());
     }
 
@@ -117,11 +120,10 @@ export class Inspector {
         const row = create('div');
         row.className = 'structure';
         if (node.canInsert) {
-            const control = choices(['TextBlock', 'Button', 'Border', 'StackPanel'], 'Control to insert');
-            const button = create('button', 'Insert child');
+            const button = create('button', 'Open Toolbox');
             button.className = 'secondary';
-            button.addEventListener('click', () => this.edit({ type: 'insertChild', node: node.id, control: control.value }));
-            row.append(control, button);
+            button.addEventListener('click', this.openToolbox);
+            row.append(button);
         }
         if (node.canRemove) {
             const remove = create('button', 'Remove');

@@ -1,7 +1,7 @@
 use ferroui_designer_language::{Position, Range};
 use serde::{Deserialize, Serialize};
 
-pub(crate) const PROTOCOL_VERSION: u32 = 1;
+pub(crate) const PROTOCOL_VERSION: u32 = 2;
 pub(crate) const MAX_SOURCE_BYTES: usize = 1024 * 1024;
 
 #[derive(Clone, Copy, Deserialize)]
@@ -26,6 +26,7 @@ pub(crate) struct Render {
     pub(crate) width: u32,
     pub(crate) height: u32,
     pub(crate) dark: bool,
+    pub(crate) frame: u64,
 }
 
 #[derive(Deserialize)]
@@ -43,16 +44,62 @@ pub(crate) enum Operation {
         name: String,
         value: String,
     },
-    InsertChild {
-        node: u64,
-        control: String,
-    },
     RemoveNode {
         node: u64,
+    },
+    Place {
+        frame: u64,
+        placement: Placement,
     },
     ApplyCounterpart {
         source: String,
     },
+}
+
+#[derive(Deserialize)]
+pub(crate) struct PlacementRequest {
+    pub(crate) frame: u64,
+    pub(crate) placement: Placement,
+}
+
+#[derive(Deserialize)]
+pub(crate) struct Placement {
+    pub(crate) origin: DragOrigin,
+    pub(crate) target: DropTarget,
+}
+
+#[derive(Deserialize)]
+#[serde(tag = "type", rename_all = "camelCase")]
+pub(crate) enum DragOrigin {
+    Asset { control: String },
+    Node { node: u64, grab: Option<ferroui_designer_tools::Point> },
+}
+
+#[derive(Deserialize)]
+#[serde(tag = "type", rename_all = "camelCase")]
+pub(crate) enum DropTarget {
+    Canvas { x: f64, y: f64 },
+    Outline { node: u64, position: DropPosition },
+}
+
+#[derive(Clone, Copy, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) enum DropPosition { Inside, Before, After }
+
+#[derive(Serialize)]
+pub(crate) struct DropHint {
+    pub(crate) bounds: Option<ferroui_designer_tools::Rect>,
+    pub(crate) description: String,
+}
+
+#[derive(Serialize)]
+pub(crate) struct Asset {
+    pub(crate) id: String,
+    pub(crate) title: String,
+    pub(crate) category: String,
+    pub(crate) description: String,
+    pub(crate) icon: String,
+    pub(crate) rust: bool,
 }
 
 #[derive(Serialize)]
@@ -81,6 +128,7 @@ pub(crate) struct OutlineNode {
     pub(crate) addable_properties: Vec<String>,
     pub(crate) can_insert: bool,
     pub(crate) can_remove: bool,
+    pub(crate) can_move: bool,
 }
 
 #[derive(Clone, Copy, Serialize)]

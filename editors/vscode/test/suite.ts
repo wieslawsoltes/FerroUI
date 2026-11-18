@@ -48,6 +48,7 @@ export async function run(): Promise<void> {
     const channel = vscode.window.createOutputChannel('FerroUI test');
     const preview = await NativePreview.start(extension, channel);
     try {
+        assert.ok(preview.assets.length >= 20 && preview.assets.every(asset => asset.rust));
         const xamlInput = sourceOf(xaml, 'xaml', editorPosition());
         const frame = await preview.render(xamlInput, viewport);
         assert.ok(frame.image, frame.renderError ?? 'Expected a PNG from the headless renderer');
@@ -65,7 +66,9 @@ export async function run(): Promise<void> {
         await until(() => xaml.getText() === xamlInput.source);
         const parent = frame.nodes.find(node => node.label === 'StackPanel');
         assert.ok(parent?.canInsert);
-        const insertion = await preview.edit(xamlInput, { type: 'insertChild', node: parent.id, control: 'TextBlock' });
+        const placement = { origin: { type: 'asset', control: 'TextBlock' }, target: { type: 'outline', node: parent.id, position: 'inside' } } as const;
+        await assert.rejects(preview.placement(1, placement), /rendered layout changed/i);
+        const insertion = await preview.edit(xamlInput, { type: 'place', frame: 0, placement });
         await applyTextEdits(xaml, xaml.version, insertion);
         assert.ok(xaml.getText().includes('Text="Text"'));
         await vscode.commands.executeCommand('undo');
@@ -93,7 +96,10 @@ export async function run(): Promise<void> {
         const rustPanel = rustFrame.nodes.find(node => node.label === 'StackPanel');
         assert.ok(rustPanel?.canInsert);
         const latestRust = sourceOf(rust, 'rust', editorPosition());
-        const rustInsert = await preview.edit(latestRust, { type: 'insertChild', node: rustPanel.id, control: 'TextBlock' });
+        await preview.render(latestRust, viewport, 2);
+        const rustInsert = await preview.edit(latestRust, { type: 'place', frame: 2, placement: {
+            origin: { type: 'asset', control: 'TextBlock' }, target: { type: 'outline', node: rustPanel.id, position: 'inside' },
+        } });
         await applyTextEdits(rust, rust.version, rustInsert);
         assert.ok(rust.getText().includes('text: "Text"'));
         assert.ok(rust.getText().endsWith(latestRust.source.slice(latestRust.source.indexOf('pub fn counter'))));
@@ -103,8 +109,10 @@ export async function run(): Promise<void> {
         const commands = await vscode.commands.getCommands(true);
         assert.ok(commands.includes('ferroui.outline.focus'), 'Outline is a contributed VS Code view');
         assert.ok(commands.includes('ferroui.properties.focus'), 'Properties is a separate contributed VS Code view');
+        assert.ok(commands.includes('ferroui.toolbox.focus'), 'Toolbox is a separate contributed VS Code view');
         await vscode.commands.executeCommand('ferroui.showOutline');
         await vscode.commands.executeCommand('ferroui.showProperties');
+        await vscode.commands.executeCommand('ferroui.showToolbox');
         console.log('VS Code docked views, native XAML and RSX rendering, both projection directions, guarded edits and undo passed');
     } finally {
         preview.dispose();

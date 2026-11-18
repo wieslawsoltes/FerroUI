@@ -33,6 +33,7 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
         ${tool('pan', 'move', 'Pan canvas (Space and drag)', 'aria-pressed="false"')}
     </div>
     <div class="dock-tools" role="group" aria-label="Workbench views">
+        ${tool('toolbox-button', 'extensions', 'Show Toolbox')}
         ${tool('outline-button', 'list-tree', 'Show Outline')}
         ${tool('properties-button', 'settings-gear', 'Show Properties')}
         ${tool('refresh', 'refresh', 'Refresh preview')}
@@ -45,13 +46,15 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
         <div id="stage" class="stage">
             <div id="placeholder" class="placeholder">${icon('preview')}<span id="empty-state">Rendering preview…</span></div>
             <div id="artboard" class="artboard" hidden>
-                <img id="frame" alt="Rendered FerroUI view" draggable="false">
+                <img id="frame" alt="Rendered FerroUI view" draggable="true">
                 <div id="hover-box" class="control-outline hover-outline" hidden></div>
                 <div id="selection-box" class="control-outline" hidden></div>
+                <div id="drop-box" class="control-outline drop-outline" hidden></div>
             </div>
         </div>
     </div>
     <button id="selection-label" class="selection-label" title="Reveal selection in source" hidden>${icon('go-to-file')}<span id="selected-control"></span></button>
+    <output id="drop-hint" class="drop-hint" aria-live="polite" hidden></output>
 </main>
 <main id="counterpart" aria-label="${alternate} projection" hidden>
     <div class="counterpart-toolbar">
@@ -85,10 +88,31 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
     </div>
 </div>
 <div id="actions-menu" class="popover zoom-menu" popover>
+    <button type="button" id="menu-toolbox">Show Toolbox</button>
     <button type="button" id="menu-outline">Show Outline</button>
     <button type="button" id="menu-properties">Show Properties</button>
     <button type="button" id="menu-refresh">Refresh preview</button>
 </div>`);
+}
+
+export function outlineHtml(webview: vscode.Webview, root: vscode.Uri): string {
+    return page(webview, root, 'outline', 'FerroUI Outline', `
+<main class="outline">
+    <p class="dock-message" id="outline-message" role="status"></p>
+    <ul id="outline-tree" role="tree" aria-label="Control hierarchy"></ul>
+</main>`);
+}
+
+export function toolboxHtml(webview: vscode.Webview, root: vscode.Uri): string {
+    return page(webview, root, 'toolbox', 'FerroUI Toolbox', `
+<main class="toolbox">
+    <div class="toolbox-search">
+        ${icon('search')}<input type="search" id="asset-search" aria-label="Filter controls" placeholder="Filter controls">
+        ${tool('asset-view', 'list-flat', 'Toggle list or tile view', 'aria-pressed="false"')}
+    </div>
+    <p class="dock-message" id="toolbox-message" role="status">Open a FerroUI designer to insert controls.</p>
+    <div id="asset-list" aria-label="Toolbox controls"></div>
+</main>`);
 }
 
 export function propertiesHtml(webview: vscode.Webview, root: vscode.Uri): string {

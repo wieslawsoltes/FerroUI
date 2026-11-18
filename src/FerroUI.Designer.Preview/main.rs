@@ -2,9 +2,11 @@
 //! applies returned UTF-16 edits through the editor's undo/redo transaction.
 mod document;
 mod edits;
+mod placement;
 mod protocol;
 mod renderer;
 mod snapshot;
+mod toolbox;
 
 use ferroui_designer_language::lsp::{read_frame, write_frame};
 use renderer::Renderer;
@@ -52,7 +54,7 @@ fn respond(
         return Ok(());
     }
     let result = match method {
-        "initialize" => Ok(json!({"version": protocol::PROTOCOL_VERSION})),
+        "initialize" => Ok(json!({"version": protocol::PROTOCOL_VERSION, "assets": toolbox::catalog()})),
         "render" => serde_json::from_value(message["params"].clone())
             .map_err(|e| e.to_string())
             .and_then(|input| {
@@ -63,7 +65,13 @@ fn respond(
             }),
         "edit" => serde_json::from_value(message["params"].clone())
             .map_err(|e| e.to_string())
-            .and_then(|input| serialize(edits::edit(&input))),
+            .and_then(|input| serialize(edits::edit(&input, renderer.as_ref()))),
+        "placement" => serde_json::from_value::<protocol::PlacementRequest>(message["params"].clone())
+            .map_err(|e| e.to_string())
+            .and_then(|input| {
+                let stage = renderer.as_ref().ok_or("Render the design before placing controls")?.stage(input.frame)?;
+                serialize(stage.plan(&input.placement).map(|(_, hint)| hint))
+            }),
         _ => {
             return write_frame(
                 output,

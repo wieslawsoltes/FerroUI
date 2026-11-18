@@ -1,11 +1,15 @@
 **
 !dist/designer.js
 !dist/properties.js
+!dist/outline.js
+!dist/toolbox.js
 !dist/icons/*
 !dist/extension.js
 !dist/THIRD-PARTY-NOTICES.txt
 !media/designer.css
 !media/properties.css
+!media/outline.css
+!media/toolbox.css
 !media/workbench.css
 !syntaxes/ferroui-xaml.tmLanguage.json
 !bin/ferroui-xaml-lsp

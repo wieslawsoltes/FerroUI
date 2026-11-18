@@ -54,7 +54,8 @@ pub enum AssetIcon {
     CustomPath(String),
 }
 impl AssetIcon {
-    fn path(&self) -> &str {
+    /// A 24 × 24 path in FerroUI geometry syntax.
+    pub fn path(&self) -> &str {
         match self {
             Self::Control => "F1 M3 5H21V19H3Z M5 7V17H19V7Z M7 10H17V14H7Z",
             Self::Text => "F1 M3 4H21V7H14V21H10V7H3Z",

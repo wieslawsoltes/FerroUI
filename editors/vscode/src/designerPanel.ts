@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { NativePreview } from './nativePreview';
-import { DEFAULT_VIEWPORT, MAX_VIEWPORT_SIZE, MIN_VIEWPORT_SIZE, errorMessage, type CanvasSnapshot, type FromDesigner, type Language, type NodeOperation, type NodeTarget, type Operation, type Snapshot, type Source, type ToDesigner, type Viewport } from './protocol';
+import { DEFAULT_VIEWPORT, MAX_VIEWPORT_SIZE, MIN_VIEWPORT_SIZE, errorMessage, type Asset, type CanvasSnapshot, type DragMessage, type DropHint, type FrameTarget, type FromDesigner, type Language, type NodeOperation, type NodeTarget, type Operation, type Placement, type Snapshot, type Source, type ToDesigner, type Viewport } from './protocol';
 import { applyTextEdits, asPosition, asRange, sourceOf } from './textDocument';
 import { designerHtml } from './view';
 
@@ -32,6 +32,7 @@ export class DesignerPanel implements vscode.Disposable {
     private caret: vscode.Position;
     private selected?: number;
     private blockOffset?: number;
+    assets: readonly Asset[] = [];
 
     constructor(
         private readonly context: vscode.ExtensionContext,
@@ -39,9 +40,10 @@ export class DesignerPanel implements vscode.Disposable {
         readonly panel: vscode.WebviewPanel,
         readonly document: vscode.TextDocument,
         readonly session: number,
-        private readonly language: Language,
+        readonly language: Language,
         caret: vscode.Position,
         onClose: () => void,
+        private readonly onDrag: (message: DragMessage | Extract<FromDesigner, { type: 'previewDrop' }>) => void,
     ) {
         this.caret = caret;
         let visible = panel.visible;
@@ -120,9 +122,19 @@ export class DesignerPanel implements vscode.Disposable {
         await this.edit(this.frame!, operation);
     }
 
-    private canUse(target: NodeTarget): boolean {
+    canUse(target: FrameTarget): boolean {
         const token = this.currentToken;
         return token !== undefined && target?.session === this.session && target.token === token;
+    }
+
+    async place(target: FrameTarget, placement: Placement): Promise<void> {
+        if (!this.canUse(target) || !this.frame?.snapshot.image) throw new Error('Wait for the current layout before placing controls.');
+        await this.edit(this.frame, { type: 'place', frame: target.token, placement });
+    }
+
+    async previewPlacement(target: FrameTarget, placement: Placement): Promise<DropHint> {
+        if (!this.canUse(target)) throw new Error('The design changed during the drag.');
+        return (await this.getClient()).placement(target.token, placement);
     }
 
     private setSelection(id: number | undefined): void {
@@ -172,13 +184,15 @@ export class DesignerPanel implements vscode.Disposable {
             ? this.document.positionAt(this.blockOffset) : this.document.validatePosition(this.caret);
         const input = sourceOf(this.document, this.language, caret);
         try {
-            const snapshot = await (await this.getClient()).render(input, viewport);
+            const client = await this.getClient();
+            const snapshot = await client.render(input, viewport, token);
             if (this.disposed || token !== this.generation || version !== this.document.version) return;
             const anchor = snapshot.activeBlock?.start;
             const previousAnchor = this.frame?.snapshot.activeBlock?.start;
             const sameView = this.frame?.version === version && previousAnchor?.line === anchor?.line
                 && previousAnchor?.character === anchor?.character;
-            const nodes = snapshot.nodes.map(({ id, label, name, bounds }) => ({ id, label, name, bounds }));
+            this.assets = client.assets.filter(asset => this.language === 'xaml' || asset.rust);
+            const nodes = snapshot.nodes.map(({ id, label, name, bounds, canMove }) => ({ id, label, name, bounds, canMove }));
             this.frame = { token, version, viewport, source: input, snapshot, canvas: { ...snapshot, nodes } };
             this.selected = selectionAt(snapshot, this.caret) ?? (sameView ? this.selected : undefined) ?? snapshot.nodes[0]?.id;
             if (anchor) this.blockOffset = this.document.offsetAt(asPosition(anchor));
@@ -209,7 +223,12 @@ export class DesignerPanel implements vscode.Disposable {
             return;
         }
         if (message.type === 'dock') {
-            await vscode.commands.executeCommand(message.view === 'outline' ? 'ferroui.showOutline' : 'ferroui.showProperties', this.session);
+            const commands = { outline: 'ferroui.showOutline', properties: 'ferroui.showProperties', toolbox: 'ferroui.showToolbox' } as const;
+            await vscode.commands.executeCommand(commands[message.view], this.session);
+            return;
+        }
+        if (message.type === 'beginDrag' || message.type === 'endDrag' || message.type === 'drop' || message.type === 'previewDrop') {
+            this.onDrag(message);
             return;
         }
         if (message.type === 'viewport') {
@@ -279,7 +298,7 @@ export class DesignerPanel implements vscode.Disposable {
         if (frame && this.currentToken !== undefined) {
             const anchor = frame.snapshot.activeBlock?.start;
             const sourceKey = `${frame.version}:${anchor?.line ?? 0}:${anchor?.character ?? 0}`;
-            this.post({ type: 'snapshot', token: frame.token, sourceKey, snapshot: frame.canvas, viewport: frame.viewport, selected: this.selected });
+            this.post({ type: 'snapshot', frame: { session: this.session, token: frame.token }, sourceKey, snapshot: frame.canvas, viewport: frame.viewport, selected: this.selected });
         } else if (this.problem) {
             this.post({ type: 'error', message: this.problem });
         } else {
@@ -305,7 +324,7 @@ export class DesignerPanel implements vscode.Disposable {
         this.client = undefined;
     }
 
-    private post(message: ToDesigner): void {
+    post(message: ToDesigner): void {
         if (!this.disposed && this.ready && this.panel.visible) void this.panel.webview.postMessage(message);
     }
 

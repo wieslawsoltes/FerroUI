@@ -1,13 +1,14 @@
-import type { Bounds, CanvasNode, CanvasSnapshot, Viewport } from '../src/protocol';
+import type { Bounds, CanvasNode, CanvasSnapshot, Point, Viewport } from '../src/protocol';
 import { CanvasViewport } from './canvasViewport';
 import { element } from './dom';
 
 export class Artboard {
     private readonly board = element('artboard');
     private readonly placeholder = element('placeholder');
-    private readonly frame = element<HTMLImageElement>('frame');
+    readonly frame = element<HTMLImageElement>('frame');
     private readonly selection = element('selection-box');
     private readonly hover = element('hover-box');
+    private readonly dropBox = element('drop-box');
     private snapshot?: CanvasSnapshot;
     private current = false;
     private selected?: number;
@@ -18,7 +19,7 @@ export class Artboard {
         canSelect: () => boolean,
         select: (id: number, openSource: boolean) => void,
     ) {
-        const hit = (event: MouseEvent) => this.current && canSelect() ? this.hit(event) : undefined;
+        const hit = (event: MouseEvent) => this.current && canSelect() ? this.hit(this.point(event)) : undefined;
         const pick = (event: MouseEvent, openSource: boolean) => {
             const node = hit(event);
             if (node) select(node.id, openSource);
@@ -67,20 +68,30 @@ export class Artboard {
 
     get hasFrame(): boolean { return !this.board.hidden; }
 
-    private hit(event: MouseEvent): CanvasNode | undefined {
+    point(event: MouseEvent): Point | undefined {
         const image = this.snapshot?.image;
-        if (!this.snapshot || !image) return undefined;
+        if (!this.current || !image) return undefined;
         const rect = this.frame.getBoundingClientRect();
         const x = (event.clientX - rect.left) * image.width / rect.width;
         const y = (event.clientY - rect.top) * image.height / rect.height;
-        return this.snapshot.nodes.findLast(({ bounds: b }) => b && b.width > 0 && b.height > 0
+        return x >= 0 && y >= 0 && x < image.width && y < image.height ? { x, y } : undefined;
+    }
+
+    hit(point?: Point): CanvasNode | undefined {
+        if (!point) return undefined;
+        const { x, y } = point;
+        return this.snapshot?.nodes.findLast(({ bounds: b }) => b && b.width > 0 && b.height > 0
             && x >= b.x && y >= b.y && x < b.x + b.width && y < b.y + b.height);
     }
 
-    private draw(element: HTMLElement, bounds: Bounds | null | undefined): void {
+    showDrop(bounds?: Bounds | null): void {
+        this.draw(this.dropBox, bounds, true);
+    }
+
+    private draw(element: HTMLElement, bounds: Bounds | null | undefined, allowLine = false): void {
         const image = this.snapshot?.image;
         element.hidden = true;
-        if (!this.current || !image || !bounds || bounds.width <= 0 || bounds.height <= 0) return;
+        if (!this.current || !image || !bounds || (!allowLine && (bounds.width <= 0 || bounds.height <= 0))) return;
         element.style.left = `${bounds.x * 100 / image.width}%`;
         element.style.top = `${bounds.y * 100 / image.height}%`;
         element.style.width = `${bounds.width * 100 / image.width}%`;

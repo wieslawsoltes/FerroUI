@@ -5,7 +5,7 @@ import { Inspector } from './inspector';
 declare function acquireVsCodeApi(): { postMessage(message: FromProperties): void };
 const vscode = acquireVsCodeApi();
 const message = element('view-message');
-const inspector = new Inspector(edit);
+const inspector = new Inspector(edit, () => vscode.postMessage({ type: 'toolbox' }));
 let state: PropertiesState = {};
 let error: string | undefined;
 let request = 0;

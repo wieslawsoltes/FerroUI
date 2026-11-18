@@ -98,6 +98,25 @@ body {
     pointer-events: none;
 }
 .hover-outline { border-style: dashed; opacity: .62; }
+.drop-outline {
+    min-inline-size: 2px;
+    min-block-size: 2px;
+    border-width: 2px;
+    background: color-mix(in srgb, var(--focus) 12%, transparent);
+}
+.drop-hint {
+    position: absolute;
+    inset-block-end: 12px;
+    inset-inline-end: 12px;
+    max-inline-size: calc(100% - 24px);
+    border: 1px solid var(--focus);
+    border-radius: 4px;
+    padding: 4px 8px;
+    background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
+    pointer-events: none;
+}
+.drop-hint.error { color: var(--vscode-errorForeground); border-color: currentColor; }
+main:has(.drop-hint:not([hidden])) .selection-label { visibility: hidden; }
 .selection-label {
     display: inline-flex;
     position: absolute;
@@ -172,8 +191,8 @@ body {
     .zoom-controls, .dock-tools { padding-inline-start: 2px; }
     #dimensions { display: none; }
 }
-@media (max-width: 445px) {
-    #outline-button, #properties-button, #refresh { display: none; }
+@media (max-width: 475px) {
+    #outline-button, #properties-button, #toolbox-button, #refresh { display: none; }
     #actions-button { display: inline-grid; }
 }
 @media (max-width: 390px) {

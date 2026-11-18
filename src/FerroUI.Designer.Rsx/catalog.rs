@@ -19,9 +19,10 @@ pub(crate) fn children(class: &str) -> Option<Children> {
             Children::Panel
         }
         "Border" | "Viewbox" => Children::Single,
-        "Button" | "CheckBox" | "ContentControl" | "ScrollViewer" | "ToggleButton"
-        | "UserControl" | "Window" => Children::Content,
-        "ProgressBar" | "Separator" | "Slider" | "TextBlock" | "TextBox" => Children::None,
+        "Button" | "CheckBox" | "ContentControl" | "RadioButton" | "ScrollViewer"
+        | "ToggleButton" | "ToggleSwitch" | "UserControl" | "Window" => Children::Content,
+        "ComboBox" | "Ellipse" | "ProgressBar" | "Rectangle" | "Separator" | "Slider"
+        | "TextBlock" | "TextBox" => Children::None,
         _ => return None,
     })
 }

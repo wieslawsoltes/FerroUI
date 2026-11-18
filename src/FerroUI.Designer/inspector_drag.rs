@@ -34,6 +34,24 @@ pub enum OutlineCommand {
     Outdent,
 }
 
+/// Positions relative to an authored outline row, shared by designer hosts.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum OutlinePlacement {
+    Inside,
+    Before,
+    After,
+}
+
+impl From<OutlinePlacement> for DropPosition {
+    fn from(placement: OutlinePlacement) -> Self {
+        match placement {
+            OutlinePlacement::Inside => Self::Inside,
+            OutlinePlacement::Before => Self::Before,
+            OutlinePlacement::After => Self::After,
+        }
+    }
+}
+
 impl OutlineCommand {
     fn label(self) -> &'static str {
         match self {
@@ -375,6 +393,55 @@ impl OutlineDrag {
 }
 
 impl DesignerSession {
+    /// Whether a source row belongs to a content slot that the outline can move.
+    pub fn can_move_outline_node(&self, node: NodeId) -> bool {
+        self.can_manipulate()
+            && self.ensure_layer_manipulable(node).is_ok()
+            && ContentHost::of_child(self, node).is_ok()
+    }
+
+    /// Whether a source row currently has room for another authored child.
+    pub fn can_insert_outline_child(&self, node: NodeId) -> bool {
+        self.can_manipulate() && self.validate_content_insertion(node).is_ok()
+    }
+
+    /// Plan an outline move against the same content rules as the native tree.
+    pub fn plan_outline_move(
+        &self,
+        node: NodeId,
+        target: NodeId,
+        position: OutlinePlacement,
+    ) -> Result<Vec<Edit>, String> {
+        OutlineDrag::capture(self, [node])?.plan(self, target, position.into())
+    }
+
+    /// Plan an asset insertion at an authored outline boundary without applying it.
+    pub fn plan_outline_insert(
+        &self,
+        source: &str,
+        target: NodeId,
+        position: OutlinePlacement,
+    ) -> Result<Vec<Edit>, String> {
+        ensure_editable(self)?;
+        let host = match position {
+            OutlinePlacement::Inside => ContentHost::of_target(self, target)?,
+            _ => ContentHost::of_child(self, target)?,
+        };
+        self.validate_content_insertion(host.owner)?;
+        let document = self.document();
+        let children = document.ast().element_children(host.container);
+        let index = match position {
+            OutlinePlacement::Inside => children.len(),
+            _ => children.iter().position(|id| *id == target)
+                .ok_or("The insertion anchor no longer belongs to the target collection")?
+                + usize::from(position == OutlinePlacement::After),
+        };
+        let (source, declaration) = crate::preview_source::embed_native_fragment(document, source)?;
+        let mut edits = declaration.into_iter().collect::<Vec<_>>();
+        edits.push(Edit::InsertChild { parent: host.container, index, source });
+        Ok(edits)
+    }
+
     pub(crate) fn content_target_container(&self, owner: NodeId) -> Result<NodeId, String> {
         ContentHost::of_owner(self, owner).map(|host| host.container)
     }

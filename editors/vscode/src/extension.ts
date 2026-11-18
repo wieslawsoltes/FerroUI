@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { DesignerWorkbench } from './designerWorkbench';
+import { HotReload } from './hotReload';
 import { xamlLanguage, XamlServer } from './xamlServer';
 
 export function activate(context: vscode.ExtensionContext): void {
@@ -11,7 +12,7 @@ export function activate(context: vscode.ExtensionContext): void {
         if (document.languageId === xamlLanguage && document.uri.scheme === 'file') void server.start();
     };
     context.subscriptions.push(
-        server, designer, languageOutput, previewOutput,
+        server, designer, new HotReload(), languageOutput, previewOutput,
         vscode.workspace.onDidOpenTextDocument(startForXaml),
         vscode.workspace.onDidChangeConfiguration(event => {
             if ((event.affectsConfiguration('ferroui.languageServer.path') || event.affectsConfiguration('ferroui.types'))

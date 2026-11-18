@@ -23,7 +23,7 @@ use std::time::Duration;
 #[path = "workspace_shell.rs"]
 pub(crate) mod shell;
 
-pub use inspector_drag::OutlineCommand;
+pub use inspector_drag::{OutlineCommand, OutlinePlacement};
 pub use selection_tools::{CanvasLayerChoice, CanvasSelectionSnapshot};
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]

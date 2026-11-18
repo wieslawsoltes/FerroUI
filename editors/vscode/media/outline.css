@@ -1,0 +1,37 @@
+#outline-tree { list-style: none; margin: 0; padding: 2px 0; }
+#outline-tree li {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    position: relative;
+    min-block-size: 24px;
+    padding-inline: calc(5px + var(--level) * 13px) 8px;
+    overflow: hidden;
+    white-space: nowrap;
+    cursor: default;
+    user-select: none;
+}
+#outline-tree li:hover { background: var(--vscode-list-hoverBackground); }
+#outline-tree li[aria-selected=true] {
+    color: var(--vscode-list-inactiveSelectionForeground, var(--vscode-foreground));
+    background: var(--vscode-list-inactiveSelectionBackground);
+}
+#outline-tree:focus-within li[aria-selected=true] {
+    color: var(--vscode-list-activeSelectionForeground);
+    background: var(--vscode-list-activeSelectionBackground);
+}
+#outline-tree li:focus-visible { outline: 1px solid var(--focus); outline-offset: -1px; }
+#outline-tree li[draggable=true] { cursor: grab; }
+.outline-name { color: inherit; opacity: .72; overflow: hidden; text-overflow: ellipsis; }
+.twisty { inline-size: 14px; flex: 0 0 14px; }
+li[aria-expanded] .twisty { cursor: pointer; }
+#outline-tree [data-drop=inside] { box-shadow: inset 0 0 0 1px var(--focus); }
+[data-drop=before]::after, [data-drop=after]::after {
+    content: '';
+    position: absolute;
+    inset-inline: calc(5px + var(--level) * 13px) 5px;
+    block-size: 2px;
+    background: var(--focus);
+}
+[data-drop=before]::after { inset-block-start: 0; }
+[data-drop=after]::after { inset-block-end: 0; }

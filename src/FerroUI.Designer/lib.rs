@@ -159,7 +159,7 @@ pub use viewport::{CanvasViewport, CanvasWheelMode};
 pub use workspace::shell::{NavigationPane, WorkspaceViewMode};
 pub use workspace::{
     CanvasLayerChoice, CanvasSelectionSnapshot, DesignerDefinitionAsset, DesignerWorkspace,
-    OutlineCommand, OutlineMode, PreviewPrototypePlaybackInfo,
+    OutlineCommand, OutlineMode, OutlinePlacement, PreviewPrototypePlaybackInfo,
 };
 
 /// The self-contained example opened by Designer Studio and usable by hosts.

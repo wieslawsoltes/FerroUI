@@ -54,3 +54,18 @@ input, select, textarea {
     color: var(--vscode-input-foreground);
 }
 input[readonly], textarea[readonly] { color: var(--muted); }
+
+.dock-message { margin: 6px 10px; color: var(--muted); line-height: 1.4; overflow-wrap: anywhere; }
+.dock-message.error { color: var(--vscode-errorForeground); }
+.drag-label {
+    position: fixed;
+    inset: 0 auto auto 0;
+    z-index: 10;
+    display: inline-block;
+    padding: 4px 9px;
+    border: 1px solid var(--focus);
+    border-radius: 4px;
+    color: var(--vscode-editorWidget-foreground, var(--vscode-foreground));
+    background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
+    pointer-events: none;
+}

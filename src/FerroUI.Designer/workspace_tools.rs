@@ -41,6 +41,20 @@ pub(crate) fn is_custom_panel(session: &DesignerSession, node: NodeId) -> bool {
 /// Discoverable native fallback: unknown Panel subclasses retain their layout algorithm;
 /// manipulation authors a render adjustment, while child insertion/order uses Panel.Children.
 impl DesignerSession {
+    /// Plan translation when an artboard drag stays within its current layout owner.
+    pub fn plan_artboard_translation(
+        &self,
+        node: NodeId,
+        position: ferroui_base::Point,
+        delta: ferroui_base::Point,
+    ) -> Result<Vec<Edit>, String> {
+        let owner = parent(self, node)?;
+        if crate::workspace_layout_helpers::layout_target(self, position, &[node]) != Some(owner) {
+            return Err("Choose a valid drop target inside the artboard".into());
+        }
+        plan_moves(self, BTreeMap::from([(node, Point::new(delta.x, delta.y))]))
+    }
+
     /// Plans a panel-specific edit against the current, measured native preview.
     /// The returned edits share the same coordinate and expression rules as pointer tools.
     pub fn plan_layout_action(&self, action: LayoutAction) -> Result<Vec<Edit>, String> {

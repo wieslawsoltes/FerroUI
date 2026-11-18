@@ -78,10 +78,37 @@
         "icon": "$(settings-gear)"
       },
       {
+        "command": "ferroui.showToolbox",
+        "title": "Show Toolbox",
+        "category": "FerroUI",
+        "icon": "$(extensions)"
+      },
+      {
         "command": "ferroui.revealDesignerSource",
         "title": "Reveal Selected Control in Source",
         "category": "FerroUI",
         "icon": "$(go-to-file)"
+      },
+      {
+        "command": "ferroui.hotReload.start",
+        "title": "Run with Hot Reload",
+        "category": "FerroUI",
+        "icon": "$(flame)"
+      },
+      {
+        "command": "ferroui.hotReload.rebuild",
+        "title": "Rebuild Hot Reload Application",
+        "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.hotReload.stop",
+        "title": "Stop Hot Reload Application",
+        "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.hotReload.showOutput",
+        "title": "Show Hot Reload Output",
+        "category": "FerroUI"
       }
     ],
     "menus": {
@@ -115,6 +142,30 @@
     "configuration": {
       "title": "FerroUI",
       "properties": {
+        "ferroui.hotReload.cargoPath": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "description": "Path to the Cargo executable used by Run with Hot Reload. Leave empty to use Cargo from PATH."
+        },
+        "ferroui.hotReload.targets": {
+          "type": "array",
+          "default": [],
+          "scope": "resource",
+          "description": "Cargo binaries offered by Run with Hot Reload. An empty list discovers binaries from Cargo.toml.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "label": { "type": "string" },
+              "manifestPath": { "type": "string", "description": "Path to Cargo.toml relative to the workspace folder." },
+              "package": { "type": "string" },
+              "binary": { "type": "string" },
+              "features": { "type": "array", "items": { "type": "string" }, "description": "Cargo features. The package's hot-reload feature is enabled by default when present." },
+              "args": { "type": "array", "items": { "type": "string" }, "description": "Arguments for the application." }
+            }
+          }
+        },
         "ferroui.languageServer.path": {
           "type": "string",
           "default": "",
@@ -149,6 +200,14 @@
     "views": {
       "ferrouiWorkbench": [
         {
+          "type": "webview",
+          "id": "ferroui.toolbox",
+          "name": "Toolbox",
+          "icon": "dist/icons/extensions.svg",
+          "contextualTitle": "FerroUI Toolbox"
+        },
+        {
+          "type": "webview",
           "id": "ferroui.outline",
           "name": "Outline",
           "icon": "dist/icons/list-tree.svg",

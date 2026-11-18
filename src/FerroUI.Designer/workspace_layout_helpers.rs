@@ -145,6 +145,15 @@ impl LayoutEditPreview {
     pub fn is_current(&self, session: &DesignerSession) -> bool {
         self.guard.validate(session).is_ok()
     }
+
+    /// Return the approved transaction to an editor that owns the source buffer.
+    pub fn source_edits(&self, session: &DesignerSession) -> Result<Vec<Edit>, String> {
+        self.guard.validate(session)?;
+        match &self.rejection {
+            Some(reason) => Err(reason.clone()),
+            None => Ok(self.edits.clone()),
+        }
+    }
 }
 
 impl DesignerSession {

@@ -1,7 +1,7 @@
 import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { createMessageConnection, StreamMessageReader, StreamMessageWriter } from 'vscode-jsonrpc/node';
 import type * as vscode from 'vscode';
-import type { Operation, Snapshot, Source, TextEdit, Viewport } from './protocol';
+import type { Asset, DropHint, Operation, Placement, Snapshot, Source, TextEdit, Viewport } from './protocol';
 import { commandFor } from './tools';
 
 export class NativePreview implements vscode.Disposable {
@@ -9,6 +9,7 @@ export class NativePreview implements vscode.Disposable {
     private readonly connection;
     private stopped = false;
     private failure?: Error;
+    assets: readonly Asset[] = [];
 
     private constructor(command: string, channel: vscode.OutputChannel) {
         this.child = spawn(command, [], { windowsHide: true });
@@ -28,8 +29,9 @@ export class NativePreview implements vscode.Disposable {
         const command = await commandFor('preview', context);
         const client = new NativePreview(command, channel);
         try {
-            const hello = await client.send<{ version: number }>('initialize');
-            if (hello.version !== 1) throw new Error(`Preview protocol ${hello.version} is incompatible with this extension.`);
+            const hello = await client.send<{ version: number; assets: Asset[] }>('initialize');
+            if (hello.version !== 2) throw new Error(`Preview protocol ${hello.version} is incompatible with this extension.`);
+            client.assets = hello.assets;
             return client;
         } catch (error) {
             client.dispose();
@@ -39,8 +41,12 @@ export class NativePreview implements vscode.Disposable {
 
     get closed(): boolean { return this.stopped; }
 
-    render(source: Source, viewport: Viewport): Promise<Snapshot> {
-        return this.send('render', { ...source, ...viewport });
+    render(source: Source, viewport: Viewport, frame = 0): Promise<Snapshot> {
+        return this.send('render', { ...source, ...viewport, frame });
+    }
+
+    placement(frame: number, placement: Placement): Promise<DropHint> {
+        return this.send('placement', { frame, placement });
     }
 
     edit(source: Source, operation: Operation): Promise<TextEdit[]> {

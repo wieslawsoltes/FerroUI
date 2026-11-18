@@ -1,5 +1,6 @@
 import type { CanvasSnapshot, FromDesigner, ToDesigner } from '../src/protocol';
 import { Artboard } from './artboard';
+import { CanvasDrag } from './canvasDrag';
 import { CanvasInput } from './canvasInput';
 import { CanvasViewport } from './canvasViewport';
 import { Counterpart } from './counterpart';
@@ -37,6 +38,7 @@ const viewport = new CanvasViewport((fit, scale, hasImage) => {
 });
 const input = new CanvasInput(viewport, reveal);
 const artboard = new Artboard(viewport, () => !input.panning, select);
+const drag = new CanvasDrag(artboard, () => current && !applying && !input.panning, vscode.postMessage);
 const size = new ViewportMenu(viewport => vscode.postMessage({ type: 'viewport', viewport }));
 const counterpart = new Counterpart(apply);
 
@@ -56,6 +58,7 @@ fitSelection.addEventListener('click', () => {
 selectionLabel.addEventListener('click', reveal);
 anchorPopover(element('actions-button'), actionsMenu);
 const actions = [
+    ['toolbox', 'toolbox-button', { type: 'dock', view: 'toolbox' }],
     ['outline', 'outline-button', { type: 'dock', view: 'outline' }],
     ['properties', 'properties-button', { type: 'dock', view: 'properties' }],
     ['refresh', 'refresh', { type: 'refresh' }],
@@ -121,22 +124,27 @@ function showStatus(kind: 'busy' | 'error' | 'notice' | 'ready', text = ''): voi
 
 function receive(message: ToDesigner): void {
     switch (message.type) {
+        case 'drag': drag.setGesture(message.gesture); return;
+        case 'placement': drag.show(message); return;
         case 'pending':
             current = false;
+            drag.setFrame(undefined);
             artboard.fresh(false);
             showStatus('busy', artboard.hasFrame ? 'Updating preview…' : '');
             break;
         case 'error':
             current = false;
+            drag.setFrame(undefined);
             artboard.fresh(false);
             showStatus('error', `${message.message}${artboard.hasFrame ? ' Showing the previous frame.' : ''}`);
             break;
         case 'snapshot': {
             snapshot = message.snapshot;
-            token = message.token;
+            token = message.frame.token;
             selected = message.selected;
             current = true;
             artboard.show(snapshot, message.viewport);
+            drag.setFrame(snapshot.image ? message.frame : undefined);
             size.show(message.viewport);
             counterpart.show(snapshot.counterpart, message.sourceKey);
             blocks.replaceChildren(...snapshot.blocks.map((span, index) => new Option(`RSX · line ${span.start.line + 1}`, String(index))));

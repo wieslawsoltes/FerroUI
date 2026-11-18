@@ -16,6 +16,16 @@ use std::rc::Rc;
 
 pub(crate) struct Renderer {
     app: Ref<Application>,
+    pub(crate) stage: Option<Stage>,
+}
+
+pub(crate) struct Stage {
+    pub(crate) session: DesignerSession,
+    pub(crate) token: u64,
+    pub(crate) width: u32,
+    pub(crate) height: u32,
+    pub(crate) bounds: BTreeMap<NodeId, Bounds>,
+    _window: PreviewWindow,
 }
 
 pub(crate) struct Frame {
@@ -38,10 +48,11 @@ impl Renderer {
         ferroui_themes_winui::register_types();
         app.styles()
             .add(ferroui_themes_winui::WinUITheme::new().as_style());
-        Self { app }
+        Self { app, stage: None }
     }
 
-    pub(crate) fn render(&self, input: &Render, source: &str) -> Result<Frame, String> {
+    pub(crate) fn render(&mut self, input: &Render, source: &str) -> Result<Frame, String> {
+        self.stage = None;
         if !(64..=1536).contains(&input.width) || !(64..=1536).contains(&input.height) {
             return Err("Preview width and height must be between 64 and 1536".into());
         }
@@ -74,7 +85,7 @@ impl Renderer {
         session.refresh_runtime_mapping();
         let control = host.upcast();
         let png = capture_preview_stage_png(&control, Default::default())?;
-        let bounds = session
+        let bounds: BTreeMap<NodeId, Bounds> = session
             .runtime_tree(TreeKind::Visual)
             .into_iter()
             .filter_map(|node| {
@@ -94,6 +105,15 @@ impl Renderer {
                     ))
             })
             .collect();
+        let notices = session.preview_notices().to_vec();
+        self.stage = Some(Stage {
+            session,
+            token: input.frame,
+            width: input.width,
+            height: input.height,
+            bounds: bounds.clone(),
+            _window: window,
+        });
         Ok(Frame {
             image: Image {
                 png: STANDARD.encode(png.png),
@@ -101,7 +121,7 @@ impl Renderer {
                 height: png.pixel_height,
             },
             bounds,
-            notices: session.preview_notices().to_vec(),
+            notices,
         })
     }
 }
