@@ -8146,6 +8146,17 @@ The times of the two last runs of the gate are not given: other work ran on the 
 moved them by tens of per cent in both directions. A run of an earlier state of the change on a
 quiet machine had the show of the tile start at 514 ms where it was 559 ms.
 
+The harness of the framework comparison does not resolve the change (two rounds in turn, the
+commit before against the change, on a machine that idled at 1.3 to 2 cores; second start):
+
+| Scene | First frame before | After | Frames a second before | After |
+| --- | ---: | ---: | ---: | ---: |
+| Wall, tier 20 | 1.77 s, 1.86 s | 1.82 s, 1.84 s | 49.4, 48.9 | 49.1, 49.0 |
+| Gauntlet, tier 16 | 0.51 s, 0.55 s | 0.50 s, 0.53 s | 52.1, 50.8 | 52.6, 50.7 |
+| Patchwork, tier 17 | 0.71 s, 0.73 s | 0.70 s, 0.74 s | 55.2, 55.2 | 55.5, 55.1 |
+
+The program of the comparison is 16.5 kB larger (23,296,928 to 23,313,472 bytes).
+
 **Two reads found by the gate.** The first runs had the lines of the layout benchmarks 2 to 5 %
 up in instructions, which the change does not touch. Sampled, base against candidate: a small
 accessor on the path of every child was a call where it had been inlined
