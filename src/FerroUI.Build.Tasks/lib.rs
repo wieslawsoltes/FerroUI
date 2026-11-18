@@ -232,7 +232,7 @@ use xamlx::type_system::IXamlTypeSystem;
 use crate::export::ScanReport;
 use crate::model::{AssemblyModel, MarkupReferencesModel};
 use crate::model_set::ModelSet;
-use crate::scanner::{scan_crate, Scan, ScanOptions, Severity, SourceReferences};
+use crate::scanner::{scan_crate, InherentFunction, Scan, ScanOptions, Severity, SourceReferences};
 use crate::type_system::{ModelEmitTypes, ModelTypeSystem};
 pub use ferroui_markup_xaml_loader::rust_emitter::ClassConstructor;
 use crate::xaml_compiler_diagnostics_filter::XamlCompilerDiagnosticsFilter;
@@ -241,7 +241,10 @@ use ferroui_markup_xaml_loader::rust_emitter::{
     class_document_group, class_of_document, document_references, generate_class_file_with, generate_file_with, rust_string_literal, ClassGroup,
     CompiledMarkupTypeSystem, EmitterHost, ThemePartsTables, TransformOptions, XamlMetadata, CLASS_GROUP_NOT_TRANSFORMED, GROUP_NOT_TRANSFORMED,
 };
-use crate::theme_roots::{compile_bindings_from_manifest, kept_units, parts_static_name, source_roots, unit_static_path, Roots, ThemeTrimming, TypeGraph};
+use crate::theme_roots::{
+    compile_bindings_from_manifest, kept_units, parts_constructor, parts_static_name, parts_static_names, source_roots,
+    unit_static_path, verify_parts_constructor, Roots, ThemeTrimming, TypeGraph,
+};
 
 /// The name of the module of the default group ([`Build::compile_xaml`]).
 pub const DEFAULT_MODULE: &str = "compiled_xaml";
@@ -705,13 +708,27 @@ impl Build {
             rerun(&mut lines, file);
         }
         let dependencies: Vec<XamlMetadata> = models.iter().map(AssemblyModel::metadata).collect();
-        // The parts tables of the themes the application trims, by class, for the emitter; the
-        // models the base classes of the roots are read from, and the roots of the documents.
+        // The names of the statics of the parts tables, allocated over every class with units of
+        // the dependencies (#849): the established name where it is unique, else one disambiguated
+        // from the full name of the class.
+        let unit_classes: Vec<&str> = dependencies
+            .iter()
+            .flat_map(|metadata| metadata.theme_units.iter())
+            .map(|units| units.class.as_str())
+            .collect();
+        let static_names: Vec<(String, String)> =
+            unit_classes.iter().map(|class| class.to_string()).zip(parts_static_names(&unit_classes)).collect();
+        let static_name_of =
+            |class: &str| static_names.iter().find(|(known, _)| known == class).map(|(_, name)| name.clone());
+        // The parts tables of the themes the application trims, by class, for the emitter: the
+        // classes that can be constructed from selected units (#849; any other class, whatever its
+        // markup is partitioned into, is constructed with `new()`). The models the base classes of
+        // the roots are read from, and the roots of the documents.
         let theme_parts: Option<Rc<ThemePartsTables>> = (trimming.enabled || !self.themes.is_empty()).then(|| {
-            let tables = dependencies
+            let tables = static_names
                 .iter()
-                .flat_map(|metadata| metadata.theme_units.iter())
-                .map(|units| (units.class.clone(), format!("crate::compiled_markup::{}", parts_static_name(&units.class))))
+                .filter(|(class, _)| parts_constructor(&models, class).is_some())
+                .map(|(class, name)| (class.clone(), format!("crate::compiled_markup::{name}")))
                 .collect();
             Rc::new(ThemePartsTables::new(tables))
         });
@@ -722,6 +739,13 @@ impl Build {
         let mut document_roots = Roots::default();
         // The names and string literals of the sources of the crate (#568, step 4).
         let mut source_references = SourceReferences::default();
+        // What the compiled documents name that no unit graph of a class constructed from selected
+        // units roots: what the `.xamlmeta` states for the applications that depend on the crate
+        // (#568, #849).
+        let mut exported_roots = Roots::default();
+        // The functions of the inherent `impl` blocks of the crate: what a class whose markup is
+        // partitioned into units is checked against for its constructor from units (#849).
+        let mut scanned_functions: Vec<InherentFunction> = Vec::new();
 
         // The type model of the crate, from its sources.
         let scanned = self.export_metadata || on_models;
@@ -747,6 +771,7 @@ impl Build {
                         base_models.push(scan.model.clone());
                         source_references = std::mem::take(&mut scan.references);
                     }
+                    scanned_functions = std::mem::take(&mut scan.functions);
                     model = Some(scan.model);
                 }
                 Err(error) => {
@@ -872,12 +897,14 @@ impl Build {
             // What the documents name that roots the units of the themes (#568, step 3): the
             // roots of an application that trims, and what the `.xamlmeta` of a crate without
             // units states for the applications that depend on it.
+            let mut group_roots = Roots::default();
             for (_, xaml) in &documents {
                 if let Some(references) = document_references(xaml) {
-                    document_roots.types.extend(references.types);
-                    document_roots.keys.extend(references.keys);
+                    group_roots.types.extend(references.types);
+                    group_roots.keys.extend(references.keys);
                 }
             }
+            document_roots.extend(group_roots.clone());
             let path = xaml_directory.join(format!("{}.rs", group.module));
             let module_path = format!("::{}::{}", self.crate_name, group.module);
 
@@ -910,6 +937,23 @@ impl Build {
                         }
                         write_if_changed(&path, &file.source, &mut errors);
                         let class_metadata = file.metadata(&[]);
+                        // Whether the class can be constructed from selected units of its markup
+                        // (#849): only then are its documents rooted through its unit graph in the
+                        // applications that construct it; an ordinary class is constructed whole.
+                        let mut from_units = false;
+                        for units in &class_metadata.theme_units {
+                            let Some(model) = &model else { continue };
+                            match verify_parts_constructor(model, &scanned_functions, &units.class) {
+                                Ok(verified) => from_units |= verified,
+                                Err(reason) => {
+                                    let code = FerroXamlDiagnosticCodes::EMIT_ERROR;
+                                    errors.push(diagnostics::error(code, class_document, &reason));
+                                }
+                            }
+                        }
+                        if !from_units {
+                            exported_roots.extend(group_roots);
+                        }
                         if group.exported {
                             compiled_documents.extend(class_metadata.documents.iter().filter_map(|document| document_path(&document.uri)));
                             metadata.documents.extend(class_metadata.documents);
@@ -939,6 +983,7 @@ impl Build {
                 continue;
             }
 
+            exported_roots.extend(group_roots);
             let file = match &model_host {
                 Some((type_system, _, types)) => {
                     let host = EmitterHost { type_system: type_system.clone(), types, parsers: Vec::new() };
@@ -1035,7 +1080,9 @@ impl Build {
             roots.all |= trimming.all || !trimming.enabled;
             roots.extend(self.theme_roots.clone());
             // The themes the code of the crate constructs (`Build::theme`), by the name of the
-            // class or its full name.
+            // class or its full name. The code names the table by its established name, so a name
+            // another class of the dependencies has too is an error that names both (#849).
+            let mut used = theme_parts.used();
             for stated in &self.themes {
                 let class = dependencies
                     .iter()
@@ -1044,7 +1091,20 @@ impl Build {
                     .find(|class| *class == stated || class.rsplit('.').next() == Some(stated.as_str()));
                 match class {
                     Some(class) => {
-                        theme_parts.table_of(class);
+                        let established = parts_static_name(class);
+                        let other = unit_classes
+                            .iter()
+                            .find(|other| **other != class && parts_static_name(other) == established);
+                        if let Some(other) = other {
+                            errors.push(format!(
+                                "the theme `{class}` (Build::theme) has the parts table \
+                                 `compiled_markup::{established}`, the name of the table of the theme `{other}` \
+                                 of the dependencies too: the code of the crate cannot name either"
+                            ));
+                        }
+                        if !used.iter().any(|known| known == class) {
+                            used.push(class.to_string());
+                        }
                     }
                     None => errors.push(format!(
                         "the theme `{stated}` (Build::theme) is not a theme of a direct dependency of the crate: its crate must be a dependency, and its compiled markup must have units"
@@ -1060,14 +1120,14 @@ impl Build {
             }
             let graph = TypeGraph::from_models(&base_models);
             roots.extend(source_roots(&source_references, dependencies.iter().flat_map(|metadata| metadata.theme_units.iter()), &graph));
-            for class in theme_parts.used() {
+            for class in used {
                 let Some(units) = dependencies.iter().flat_map(|metadata| metadata.theme_units.iter()).find(|units| units.class == class) else {
                     continue;
                 };
                 let kept = kept_units(units, &roots, &graph, self.full_themes);
                 let name_of = |index: u32| units.units.iter().find(|unit| unit.index == index).map_or(String::new(), |unit| unit.name.clone());
                 parts_tables.push(PartsTable {
-                    static_name: parts_static_name(&class),
+                    static_name: static_name_of(class.as_str()).unwrap_or_else(|| parts_static_name(&class)),
                     class,
                     units: kept.iter().map(|&index| (unit_static_path(&units.table_path, index), name_of(index))).collect(),
                     total: units.units.len(),
@@ -1086,14 +1146,14 @@ impl Build {
         // A crate whose compiled markup has units is built with the `cfg` of `full-themes` when
         // the base crate has it (#568, step 3).
         let has_theme_units = !metadata.theme_units.is_empty();
-        // What the compiled documents of a crate without units name, for the applications that
-        // trim (#568). The documents of a theme are rooted through its unit graph instead.
-        if !has_theme_units {
-            metadata.references = MarkupReferencesModel {
-                types: document_roots.types.iter().cloned().collect(),
-                keys: document_roots.keys.iter().cloned().collect(),
-            };
-        }
+        // What the compiled documents of the crate name, for the applications that trim (#568):
+        // every document but the ones of a class constructed from selected units, which are rooted
+        // through its unit graph instead (#849: an ordinary class whose markup is partitioned into
+        // units is constructed whole, so what its documents name is a root).
+        metadata.references = MarkupReferencesModel {
+            types: exported_roots.types.iter().cloned().collect(),
+            keys: exported_roots.keys.iter().cloned().collect(),
+        };
 
         // 4. The `.xamlmeta` (with the type model of the crate, when it was scanned) and
         // the file the crate includes.

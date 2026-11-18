@@ -3642,6 +3642,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "generated-rust-fixture-consumer"
+version = "0.5.1-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-themes-fluent",
+ "ferroui-themes-macos",
+ "ferroui-themes-material",
+ "ferroui-themes-simple",
+ "ferroui-themes-winui",
+ "generated-rust-fixture-library",
+]
+
+[[package]]
+name = "generated-rust-fixture-library"
+version = "0.5.1-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-markup-xaml",
+]
+
+[[package]]
 name = "generic-array"
 version = "0.14.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
