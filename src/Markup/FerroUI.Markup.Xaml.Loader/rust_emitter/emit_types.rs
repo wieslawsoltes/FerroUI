@@ -213,6 +213,12 @@ pub trait EmitMarkup {
     fn flags_compose(&self, value: i64) -> bool;
     /// `other` is this metadata.
     fn same(&self, other: &dyn EmitMarkup) -> bool;
+    /// The position of the plain property `name` in the list the declaration states it in (the
+    /// static properties when `is_static`), which the run-time metadata has in the same order
+    /// (#603); `None` when the type system does not know it.
+    fn property_index(&self, _name: &str, _is_static: bool) -> Option<usize> {
+        None
+    }
     fn as_any(&self) -> &dyn Any;
 
     /// The first handle.

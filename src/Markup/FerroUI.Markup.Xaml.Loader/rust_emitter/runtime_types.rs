@@ -126,6 +126,10 @@ impl EmitMarkup for RuntimeMarkup {
     fn full_name(&self) -> String {
         self.0.full_name()
     }
+    fn property_index(&self, name: &str, is_static: bool) -> Option<usize> {
+        let list = if is_static { self.0.static_properties } else { self.0.properties };
+        list.iter().position(|property| property.name == name)
+    }
     fn rust_path(&self) -> Option<&str> {
         self.0.rust_path()
     }
