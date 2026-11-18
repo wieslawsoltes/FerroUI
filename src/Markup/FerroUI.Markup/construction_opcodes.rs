@@ -39,6 +39,14 @@ pub const DROP_NAMESPACE: u8 = 33;
 pub const SET_REGISTER: u8 = 34;
 /// Construct an object from compiler-resolved binary literal operands.
 pub const OBJECT_LITERAL: u8 = 35;
+/// Create the actual Setter before evaluating the statements of its value.
+pub const BEGIN_SETTER: u8 = 36;
+/// Push the new Setter on the context's parent stack during value evaluation.
+pub const BEGIN_PARENTED_SETTER: u8 = 37;
+/// Convert the value register, write the Setter, then attach it to the style.
+pub const FINISH_SETTER: u8 = 38;
+/// Pop the Setter after assigning its value and before attaching it.
+pub const FINISH_PARENTED_SETTER: u8 = 39;
 /// Template binding whose source accessor precedes its target accessor.
 pub const TEMPLATE_BIND_FROM: u8 = 60;
 

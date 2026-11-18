@@ -585,3 +585,64 @@ fn page_style_program_preserves_literal_and_dynamic_setter_order() {
     add_dynamic_resource_setter_with_parent(&context, base, background(), "Accent");
     assert_eq!(setter_properties(actual.upcast_ref::<StyleBase>()), setter_properties(base));
 }
+
+#[test]
+fn page_setter_resource_evaluates_with_the_same_parent_and_source_position_as_native() {
+    use crate::xaml_il::runtime::compiled::{ConstructionImport as Import, ConstructionImports, ConstructionInput, ConstructionProgram, ConstructionRegister};
+    use ferroui_markup::construction_opcodes as op;
+
+    static PROGRAM: ConstructionProgram = ConstructionProgram {
+        code: &[
+            op::BEGIN_PARENTED_SETTER, 0,
+            op::CALL_RESULT, 1, 21, 60, 2, 1, 2, // created setter, external resource key
+            op::FINISH_PARENTED_SETTER, 0, 1, 2, 3,
+        ],
+        imports: &ConstructionImports { strings: &[], operations: &[
+            Import::Property(|| SolidColorBrush::color_property()),
+            Import::Call(|args| {
+                let setter = args.value::<Rc<Setter>>()?;
+                let key = args.value::<&str>()?;
+                let ctx = args.context()?;
+                let parents = ctx.parents_stack();
+                let parent = parents.last().unwrap().as_ref().unwrap().downcast_ref::<Rc<Setter>>().unwrap();
+                assert!(Rc::ptr_eq(parent, setter));
+                assert_eq!(setter.property().unwrap().name(), "Color");
+                assert!(setter.value().is_none());
+                let item = theme_value(ctx, &ThemeValue::Static { key, line: args.line, position: args.column })?;
+                Ok(Some(ConstructionRegister::Value(Box::new(item))))
+            }),
+            Import::SetterValue(|value| Ok(value.value::<MarkupValue>()?.clone())),
+        ] },
+    };
+    for key in ["Accent", "Missing"] {
+        let actual = Style::new();
+        let ctx = context();
+        let outcome = PROGRAM.results(&[
+            ConstructionInput::Object(actual.upcast_ref::<FerroObject>()), ConstructionInput::Value(&key),
+        ], None, Some(&ctx));
+        let native_ctx = context();
+        let expected = Style::new();
+        let setter = new_setter_with_parent(&native_ctx, SolidColorBrush::color_property());
+        let native = theme_value(&native_ctx, &ThemeValue::Static { key, line: 21, position: 60 })
+            .map(|item| add_setter_value_with_parent(&native_ctx, expected.upcast_ref(), &setter, item));
+        assert_eq!(ctx.parents_stack().len(), native_ctx.parents_stack().len());
+        assert_eq!(setter_properties(actual.upcast_ref()), setter_properties(expected.upcast_ref()));
+        if key == "Missing" {
+            let error = native.unwrap_err();
+            let typed_error = outcome.err().expect("the missing resource must fail");
+            assert_eq!(typed_error.message(), error.message());
+            assert!(at_position(&typed_error, 21, 60));
+        } else {
+            native.unwrap();
+            let mut results = outcome.unwrap();
+            let created = results.reader().next_value::<Rc<Setter>>().unwrap();
+            let stored = actual.upcast_ref::<StyleBase>().setters().get(0);
+            assert!(std::ptr::eq(stored.as_any().unwrap().downcast_ref::<Setter>().unwrap(), &*created));
+            let color = |setter: &Setter| match setter.value() {
+                Some(ferroui_base::styling::SetterValue::Value(value)) => *value.downcast_ref::<Color>().unwrap(),
+                _ => panic!("expected the resolved color"),
+            };
+            assert_eq!(color(&created), color(&setter));
+        }
+    }
+}

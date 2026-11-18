@@ -199,3 +199,29 @@ fn a_document_the_models_cannot_answer_for_is_refused() {
     assert_eq!(outcome.same.len(), DOCUMENTS.len() - ASK_FOR_A_CAST_THAT_IS_NOT_REGISTERED.len());
     assert!(!outcome.same_file);
 }
+
+#[test]
+fn page_setters_lower_the_resource_result_and_the_items_panel_template() {
+    use ferroui_markup_xaml_loader::rust_emitter::XamlBackend;
+    let system = ModelTypeSystem::new(scanned_models());
+    let types = ModelEmitTypes::new(system.clone(), Vec::new());
+    let host = EmitterHost { type_system: system.as_type_system(), types: &types, parsers: Vec::new() };
+    // The nested ItemsPanel setter follows TabbedPageFabPage.xaml, with a built-in panel.
+    let xaml = r#"<TabControl xmlns="https://github.com/ferroui">
+        <TabControl.Styles><Style Selector="TabControl">
+            <Setter Property="MinHeight" Value="{StaticResource Height}" />
+            <Setter Property="ItemsPanel"><Setter.Value>
+                <ItemsPanelTemplate><StackPanel /></ItemsPanelTemplate>
+            </Setter.Value></Setter>
+        </Style></TabControl.Styles>
+    </TabControl>"#;
+    let emit = |backend| compile_documents_with(&host, &[("page.xaml", xaml)], Some("ferres://Tests/"),
+        &TransformOptions { backend, ..Default::default() }).pop().unwrap().source.unwrap();
+    let native = emit(XamlBackend::Native);
+    assert!(native.contains("rt::new_setter_with_parent("), "{native}");
+    assert!(native.contains("rt::add_setter_value("), "{native}");
+    let typed = emit(XamlBackend::Bytecode);
+    assert!(typed.contains("SetterValue(|input| Ok(input.value::<::ferroui_base::metadata::MarkupValue>()?.clone()))"), "{typed}");
+    assert!(typed.contains("SetterValue(|input| Ok(rt::to_object("), "{typed}");
+    assert!(!typed.contains("rt::new_setter") && !typed.contains("rt::add_setter_value"), "{typed}");
+}

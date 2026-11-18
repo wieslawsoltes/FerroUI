@@ -11,6 +11,8 @@ pub(super) use literals::closed_value;
 
 type Types = HashMap<String, String>;
 const NAMESPACE_SCOPE: &str = "::ferroui_markup_xaml::xaml_il::runtime::XamlStaticProviderScope";
+const SETTER: &str = "::std::rc::Rc<::ferroui_base::styling::Setter>";
+const MARKUP_VALUE: &str = "::ferroui_base::metadata::MarkupValue";
 
 fn class<'a>(types: &'a Types, name: &str) -> Option<&'a str> {
     types
@@ -40,6 +42,8 @@ enum Instruction<'a> {
     NewBinding(&'a str, &'a str),
     StyleLiteral(&'a str, &'a str, String, Vec<CallInput>),
     DynamicStyle(&'a str, &'a str, &'a str),
+    BeginSetter { name: &'a str, property: &'a str, parented: bool },
+    FinishSetter { style: &'a str, setter: &'a str, source: &'a str, object: bool, adapter: String, parented: bool },
     PropertyLiteral(&'a str, String, Vec<CallInput>),
     StaticResource(StaticResource<'a>),
     ProvideBinding(&'a str, &'a str, &'a str, i32, i32),
@@ -95,7 +99,32 @@ pub(super) struct ResolvedCall {
 
 pub(super) type Calls = HashMap<String, Option<ResolvedCall>>;
 
-fn parse<'a>(line: &'a str, types: &'a Types, calls: &'a Calls) -> Option<Instruction<'a>> {
+/// The final setter argument is either a MarkupValue or a typed clone boxed as System.Object.
+/// Use the native conversion verbatim for both VM locals and borrowed inputs.
+fn setter_operand<'a>(value: &'a str, types: &Types, locals: &[(&str, &str, bool)]) -> Option<(&'a str, bool, String)> {
+    let (value, boxed) = match value.strip_prefix("rt::to_object(") {
+        Some(value) => (value.strip_suffix(')')?, true),
+        None => (value, false),
+    };
+    let source = value.strip_prefix("::core::clone::Clone::clone(&")?.strip_suffix(')')?;
+    if !is_identifier(source) {
+        return None;
+    }
+    if !boxed {
+        return Some((source, false, format!("SetterValue(|input| Ok(input.value::<{MARKUP_VALUE}>()?.clone()))")));
+    }
+    let (ty, object) = if let Some(&(_, ty, object)) = locals.iter().find(|&&(name, _, _)| name == source) {
+        (ty, object)
+    } else if let Some(ty) = class(types, source) {
+        (ty, true)
+    } else {
+        (types.get(source)?.as_str(), false)
+    };
+    let read = if object { "object_ref" } else { "value" };
+    Some((source, object, format!("SetterValue(|input| Ok(rt::to_object(input.{read}::<{ty}>()?.clone())))")))
+}
+
+fn parse<'a>(line: &'a str, types: &'a Types, calls: &'a Calls, locals: &[(&str, &str, bool)]) -> Option<Instruction<'a>> {
     let line = line.strip_prefix("    ")?;
     if let Some(args) = line.strip_prefix("rt::complete_root_name_scope(") {
         let (root, pos) = args.split_once(", name_scope.as_ref(), ")?;
@@ -154,6 +183,17 @@ fn parse<'a>(line: &'a str, types: &'a Types, calls: &'a Calls) -> Option<Instru
         {
             return Some(Instruction::Parent(name, class(types, name)?, opcode));
         }
+    }
+    let finish_setter = line.strip_prefix("rt::add_setter_value(").map(|args| (args, false))
+        .or_else(|| line.strip_prefix("rt::add_setter_value_with_parent(&context, ").map(|args| (args, true)));
+    if let Some((args, parented)) = finish_setter {
+        let (style, args) = args.split_once(".upcast_ref::<::ferroui_base::styling::StyleBase>(), &")?;
+        let (setter, value) = args.strip_suffix(");")?.split_once(", ")?;
+        if !is_identifier(style) || class(types, style).is_none() || !is_identifier(setter) {
+            return None;
+        }
+        let (source, object, adapter) = setter_operand(value, types, locals)?;
+        return Some(Instruction::FinishSetter { style, setter, source, object, adapter, parented });
     }
     let style_setter = line
         .strip_prefix("rt::add_setter(")
@@ -224,6 +264,13 @@ fn parse<'a>(line: &'a str, types: &'a Types, calls: &'a Calls) -> Option<Instru
     if let Some(binding) = line.strip_prefix("let ") {
         let (name, value) = binding.split_once(" = ")?;
         let expr = value.strip_suffix(';')?;
+        let setter = expr.strip_prefix("rt::new_setter(").map(|args| (args, false))
+            .or_else(|| expr.strip_prefix("rt::new_setter_with_parent(&context, ").map(|args| (args, true)));
+        if let Some((args, parented)) = setter {
+            let (property, rest) = theme_styles::split_property(args)?;
+            return (is_identifier(name) && rest == ")")
+                .then_some(Instruction::BeginSetter { name, property, parented });
+        }
         if let Some(path) = expr.strip_prefix("::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_new_1(")
             .and_then(|s| s.strip_suffix(".clone())")).filter(|s| is_identifier(s)) {
             return Some(Instruction::NewBinding(name, path));
@@ -593,6 +640,20 @@ impl<'a> Program<'a> {
                 let param = if operands.is_empty() { "_" } else { "args" };
                 self.import(imports, format!("LiteralValue(|{param}| Ok({expression}))"));
                 self.literal_operands(imports, &operands);
+            }
+            Instruction::BeginSetter { name, property, parented } => {
+                self.uses_context |= parented;
+                self.code.push(if parented { op::BEGIN_PARENTED_SETTER } else { op::BEGIN_SETTER });
+                self.import(imports, format!("Property(|| {property})"));
+                self.locals.push((name, SETTER, false));
+            }
+            Instruction::FinishSetter { style, setter, source, object, adapter, parented } => {
+                self.uses_context |= parented;
+                self.code.push(if parented { op::FINISH_PARENTED_SETTER } else { op::FINISH_SETTER });
+                self.register(style);
+                self.operand(setter, false);
+                self.import(imports, adapter);
+                self.operand(source, object);
             }
             Instruction::DynamicStyle(style, property, key) => {
                 self.uses_context = true;
@@ -1077,7 +1138,7 @@ fn lower_body(
         }
         if line.trim_start().starts_with("//") {
             output.push(line.clone());
-        } else if let Some(instruction) = parse(line, types, calls) {
+        } else if let Some(instruction) = parse(line, types, calls, &program.locals) {
             program.add(instruction, &mut imports);
         } else {
             if document.is_some() {
@@ -1127,4 +1188,22 @@ fn lower_body(
         );
     }
     Some(output)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn unsupported_setter_value_keeps_the_native_call_and_its_created_setter() {
+        let types = Types::from([("style".into(), "::ferroui_base::Ref<::ferroui_base::styling::Style>".into())]);
+        let lines = [
+            "    let setter = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::Visual::is_visible_property()));",
+            "    let unknown = compute(&context)?;",
+            "    rt::add_setter_value_with_parent(&context, style.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter, rt::to_object(::core::clone::Clone::clone(&unknown)));",
+        ].map(String::from);
+        let lowered = lower(&lines, &types, &Calls::new(), "", &super::super::BytecodeImage::default());
+        assert_eq!(&lowered[lowered.len() - 2..], &lines[1..]);
+        assert!(lowered.iter().any(|line| line.contains("created.next_value::<::std::rc::Rc<::ferroui_base::styling::Setter>>()?")));
+    }
 }

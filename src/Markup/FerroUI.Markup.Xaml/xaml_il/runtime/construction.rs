@@ -25,6 +25,7 @@ pub enum ConstructionImport {
     Constant(fn(&FerroObject)),
     Object(fn(&FerroObject, &Ref<FerroObject>) -> Result<(), XamlLoadError>),
     RegisterSetter(fn(&FerroObject, ConstructionInput<'_>, i32, i32) -> Result<(), XamlLoadError>),
+    SetterValue(fn(ConstructionInput<'_>) -> Result<ferroui_base::metadata::MarkupValue, XamlLoadError>),
     Markup(fn(&Ref<FerroObject>) -> Result<ferroui_base::metadata::MarkupValue, XamlLoadError>),
     Property(PropertyFn),
     TargetProperty(fn() -> ferroui_base::metadata::MarkupValue),
@@ -474,6 +475,17 @@ impl ConstructionProgram {
                     created.push(ConstructionRegister::Object(make()));
                     continue;
                 }
+                if matches!(opcode, op::BEGIN_SETTER | op::BEGIN_PARENTED_SETTER) {
+                    let Import::Property(get) = import(&mut code)? else { return Err(invalid()) };
+                    let property = get();
+                    let setter = if opcode == op::BEGIN_PARENTED_SETTER {
+                        super::compiled::new_setter_with_parent(context.ok_or_else(invalid)?, property)
+                    } else {
+                        super::compiled::new_setter(property)
+                    };
+                    created.push(ConstructionRegister::Value(Box::new(setter)));
+                    continue;
+                }
                 if opcode == op::POP_PARENT {
                     context.ok_or_else(invalid)?.pop_parent();
                     continue;
@@ -547,6 +559,17 @@ impl ConstructionProgram {
                     continue;
                 }
                 match opcode {
+                    op::FINISH_SETTER | op::FINISH_PARENTED_SETTER => {
+                        let style = target.cast_ref::<ferroui_base::styling::StyleBase>().ok_or_else(invalid)?;
+                        let setter = value::<Rc<ferroui_base::styling::Setter>>(inputs, &created, &mut code)?;
+                        let Import::SetterValue(convert) = import(&mut code)? else { return Err(invalid()) };
+                        let item = convert(register(inputs, &created, &mut code)?)?;
+                        if opcode == op::FINISH_PARENTED_SETTER {
+                            super::compiled::add_setter_value_with_parent(context.ok_or_else(invalid)?, style, setter, item);
+                        } else {
+                            super::compiled::add_setter_value(style, setter, item);
+                        }
+                    }
                     op::SET_REGISTER => {
                         let Import::RegisterSetter(write) = import(&mut code)? else { return Err(invalid()) };
                         let source = register(inputs, &created, &mut code)?;
@@ -1096,6 +1119,10 @@ mod tests {
             &[op::BEGIN_INIT, 1],
             &[op::NEW, 0],
             &[op::SET_F64, 0, 1, 255, 5],
+            &[op::BEGIN_SETTER],
+            &[op::BEGIN_PARENTED_SETTER, 0],
+            &[op::FINISH_SETTER, 0, 1],
+            &[op::FINISH_PARENTED_SETTER, 1],
             &[255, 0],
         ] {
             // Tests use static images like the generated modules do.
