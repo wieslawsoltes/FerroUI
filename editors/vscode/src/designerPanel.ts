@@ -7,7 +7,7 @@ import { DEFAULT_VIEWPORT, errorMessage, isViewport, type Asset, type CanvasSnap
 import { applyTextEdits, asPosition, asRange, sourceOf } from './textDocument';
 import { designerHtml, webviewOptions } from './view';
 import type { EditResult, Inspection, InspectionTarget, Range, ResourceRow, RuntimeRow, RuntimeTreeMode } from './protocol';
-import type { CanvasAction, CanvasInteraction, CanvasPresentation } from './protocol';
+import type { CanvasAction, CanvasFocusOrder, CanvasInteraction, CanvasPresentation } from './protocol';
 
 const mappedStudioEdits = new Set(['designer_selection_layout_edit', 'designer_property', 'designer_grid_track_edit']);
 
@@ -168,6 +168,10 @@ export class DesignerPanel implements vscode.Disposable {
         if (action.zoom && action.scale !== undefined) throw new Error('Choose a zoom preset or an explicit scale.');
         const geometry = action.zoom || action.scale !== undefined || action.pan_x !== undefined || action.pan_y !== undefined;
         if (geometry && !(await this.waitForSnapshot(signal)).image) throw new Error('Render an artboard before changing its zoom or pan.');
+        if (action.focus_order === true) {
+            await this.waitForSnapshot(signal);
+            if (!this.frame?.canvas.focusOrderAvailable) throw new Error('Open a native preview with focus-order support.');
+        }
         if (action.mode === 'interact') {
             await this.waitForSnapshot(signal);
             if (!this.frame?.canvas.interactive) throw new Error('Open an interactive native preview first.');
@@ -458,7 +462,8 @@ export class DesignerPanel implements vscode.Disposable {
             this.assets = [...client.assets, ...(snapshot.projectAssets ?? [])].filter(asset => this.language === 'xaml' || asset.rust);
             const nodes = snapshot.nodes.map(({ id, label, name, bounds, canMove }) => ({ id, label, name, bounds, canMove }));
             this.frame = { token, version, viewport, source: input, snapshot,
-                canvas: { ...snapshot, nodes, interactive: Boolean(client.capabilities.canvasInteraction && snapshot.image) } };
+                canvas: { ...snapshot, nodes, interactive: Boolean(client.capabilities.canvasInteraction && snapshot.image),
+                    focusOrderAvailable: Boolean(client.capabilities.canvasFocusOrder && snapshot.image) } };
             this.runtime = undefined;
             this.selected = (sameView ? this.selected : undefined) ?? selectionAt(snapshot, this.caret) ?? snapshot.nodes[0]?.id;
             this.selection = sameView && this.selection.length ? this.selection.filter(id => snapshot.nodes.some(node => node.id === id))
@@ -517,7 +522,13 @@ export class DesignerPanel implements vscode.Disposable {
             return;
         }
         try {
-            if (message.type === 'select') {
+            if (message.type === 'focusOrder') {
+                if (!frame.canvas.focusOrderAvailable) return;
+                const client = await this.getClient();
+                if (this.currentToken !== frame.token) return;
+                const { overlay } = await client.studioQuery(frame.token, 'designer_focus_order', { overlay: true }) as { overlay: CanvasFocusOrder };
+                if (this.currentToken === frame.token) this.post({ type: 'focusOrder', token: frame.token, overlay });
+            } else if (message.type === 'select') {
                 await this.select({ session: this.session, token: message.token, node: message.id }, message.openSource, message.extend);
             } else if (message.type === 'block') {
                 await this.selectBlock({ session: this.session, token: message.token }, message.index);
@@ -531,7 +542,9 @@ export class DesignerPanel implements vscode.Disposable {
                 this.post({ type: 'edit' });
             }
         } catch (error) {
-            this.post({ type: 'edit', error: errorMessage(error) });
+            if (message.type === 'focusOrder') {
+                if (this.currentToken === frame.token) this.post({ type: 'focusOrder', token: frame.token, error: errorMessage(error) });
+            } else this.post({ type: 'edit', error: errorMessage(error) });
         }
     }
 

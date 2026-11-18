@@ -6,6 +6,7 @@ import { CanvasInput } from './canvasInput';
 import { CanvasViewport } from './canvasViewport';
 import { Counterpart } from './counterpart';
 import { anchorPopover, element } from './dom';
+import { FocusOverlay } from './focusOverlay';
 import { PreviewInteraction } from './previewInteraction';
 import { ViewportMenu } from './viewportMenu';
 
@@ -58,6 +59,7 @@ const resize = new ResizeHandles(artboard, gesture => {
 });
 const size = new ViewportMenu(viewport => vscode.postMessage({ type: 'viewport', viewport }));
 const counterpart = new Counterpart(apply);
+const focusOverlay = new FocusOverlay(token => vscode.postMessage({ type: 'focusOrder', token }), node => select(node, true));
 
 anchorPopover(zoomButton, zoomMenu);
 zoomOut.addEventListener('click', () => viewport.step(-1));
@@ -74,6 +76,11 @@ fitSelection.addEventListener('click', () => {
 });
 selectionLabel.addEventListener('click', reveal);
 anchorPopover(element('actions-button'), actionsMenu);
+focusOverlay.toggle.addEventListener('click', () => {
+    focusOverlay.setEnabled(!focusOverlay.enabled);
+    actionsMenu.hidePopover();
+    updateSelection();
+});
 const actions = [
     ['toolbox', 'toolbox-button', { type: 'dock', view: 'toolbox' }],
     ['outline', 'outline-button', { type: 'dock', view: 'outline' }],
@@ -109,10 +116,14 @@ function showDesign(show: boolean): void {
 }
 
 function controlCanvas(request: number, action: CanvasAction): void {
-    const { zoom, scale, pan_x, pan_y, pan_tool } = action;
+    const { zoom, scale, pan_x, pan_y, pan_tool, focus_order } = action;
     const geometry = zoom || scale !== undefined || pan_x !== undefined || pan_y !== undefined;
     if (geometry && !artboard.isCurrent) {
         vscode.postMessage({ type: 'canvasResult', request, error: 'Render an artboard before changing its zoom or pan.' });
+        return;
+    }
+    if (focus_order === true && (!artboard.isCurrent || !snapshot?.focusOrderAvailable)) {
+        vscode.postMessage({ type: 'canvasResult', request, error: 'Open a native preview with focus-order support.' });
         return;
     }
     const bounds = runtime?.bounds ?? selectedNode()?.bounds;
@@ -135,8 +146,10 @@ function controlCanvas(request: number, action: CanvasAction): void {
     if (action.tab !== undefined) showDesign(action.tab === 'preview');
     else if (action.mode === 'interact') showDesign(true);
     if (pan_tool !== undefined) input.setTool(pan_tool);
+    if (focus_order !== undefined) focusOverlay.setEnabled(focus_order);
     updateSelection();
-    vscode.postMessage({ type: 'canvasResult', request, state: { tab, mode: interaction.mode, ...viewport.state, panTool: input.panTool } });
+    vscode.postMessage({ type: 'canvasResult', request, state: { tab, mode: interaction.mode, ...viewport.state, panTool: input.panTool,
+        focusOrder: focusOverlay.enabled } });
 }
 
 function reveal(): void {
@@ -167,6 +180,9 @@ function updateSelection(): void {
     const node = selectedNode();
     const enabled = current && !applying;
     const selecting = interaction.mode === 'select';
+    const image = artboard.isCurrent ? snapshot?.image : undefined;
+    focusOverlay.update(Boolean(snapshot?.focusOrderAvailable), selecting, enabled && image
+        ? { token, width: image.width, height: image.height, nodes: snapshot!.nodes } : undefined);
     viewport.element.dataset.mode = interaction.mode;
     interaction.setAvailable(enabled && artboard.isCurrent && Boolean(snapshot?.interactive));
     resize.update(enabled && selecting && !runtime && selection.length === 1 ? node : undefined);
@@ -270,6 +286,10 @@ function receive(message: ToDesigner): void {
             flushCanvasActions();
             return;
         case 'snapshot': stageSnapshot(message); return;
+        case 'focusOrder':
+            if (message.overlay) focusOverlay.show(message.token, message.overlay);
+            else if (message.token === token && message.error) showStatus('notice', message.error);
+            return;
         case 'selection':
             if (staged && message.token === staged.frame.token) {
                 staged.selected = message.selected;

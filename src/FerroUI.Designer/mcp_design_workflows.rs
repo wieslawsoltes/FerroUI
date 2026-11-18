@@ -75,8 +75,8 @@ pub(super) fn tools() -> Vec<Value> {
         ),
         s::tool(
             "designer_focus_order",
-            "Read accepted native keyboard-navigation groups, authored/generated entries, label targets and model token. Runtime group IDs and model are ephemeral; obtain a new model after any preview change.",
-            s::object(json!({}), &[]),
+            "Read accepted native keyboard-navigation groups, authored/generated entries, label targets and model token. Set overlay to include measured focus badges, navigation links and label connections. Runtime group IDs and model are ephemeral; obtain a new model after any preview change.",
+            s::object(json!({"overlay":{"type":"boolean"}}), &[]),
             false,
         ),
         s::actions(
@@ -228,10 +228,13 @@ pub(super) fn call(
             Ok(state(session))
         }
         "designer_focus_order" => {
-            let catalog = focus_catalog(&session.focus_order_catalog()?);
-            Ok(
-                json!({"revision":session.document().revision(),"scope_epoch":session.definition_scope_epoch(),"model":model_token(session,&catalog),"catalog":catalog}),
-            )
+            let order = session.focus_order_catalog()?;
+            let catalog = focus_catalog(&order);
+            let mut result = json!({"revision":session.document().revision(),"scope_epoch":session.definition_scope_epoch(),"model":model_token(session,&catalog),"catalog":catalog});
+            if args["overlay"].as_bool() == Some(true) {
+                result["overlay"] = json!(session.focus_order_overlay(&order));
+            }
+            Ok(result)
         }
         "designer_focus_edit" => {
             let snapshot = session.focus_order_snapshot()?;

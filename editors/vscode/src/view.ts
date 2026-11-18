@@ -56,6 +56,7 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
                 <div id="selection-box" class="control-outline" hidden><div id="resize-handles" role="group" aria-label="Resize handles" hidden></div></div>
                 <div id="selection-group" aria-hidden="true"></div>
                 <div id="drop-box" class="control-outline drop-outline" hidden></div>
+                <div id="focus-order" class="focus-overlay" role="group" aria-label="Native keyboard navigation" hidden></div>
             </div>
         </div>
     </div>
@@ -109,6 +110,7 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
     <button type="button" id="menu-resources">Show Resources</button>
     <button type="button" id="menu-assets">Show Assets</button>
     <button type="button" id="menu-studio">Show Studio Tools</button>
+    <button type="button" id="menu-focus-order" aria-pressed="false" disabled>Focus Order Overlay</button>
     <button type="button" class="compact-action" id="menu-refresh">Refresh preview</button>
 </div>`);
 }

@@ -224,7 +224,12 @@ export interface CanvasPresentation {
     notices: string[];
     selection: number[];
 }
-export type CanvasSnapshot = Omit<Snapshot, 'nodes'> & { nodes: CanvasNode[]; interactive?: boolean };
+export type CanvasSnapshot = Omit<Snapshot, 'nodes'> & { nodes: CanvasNode[]; interactive?: boolean; focusOrderAvailable?: boolean };
+export interface CanvasFocusOrder {
+    badges: { node: number; group: number; rank: number; label: string; bounds: Bounds; groupEntry: boolean }[];
+    links: [number, number][];
+    labels: { node: number; target: number; label: string; from: Point; to: Point }[];
+}
 export type CanvasMode = 'select' | 'interact';
 export type CanvasInteraction =
     | ({ kind: 'click' } & Point)
@@ -239,6 +244,7 @@ export interface CanvasAction {
     pan_x?: number;
     pan_y?: number;
     pan_tool?: boolean;
+    focus_order?: boolean;
 }
 export interface CanvasState {
     tab: 'preview' | 'counterpart';
@@ -248,6 +254,7 @@ export interface CanvasState {
     scrollX: number;
     scrollY: number;
     panTool: boolean;
+    focusOrder: boolean;
 }
 export type FromDesigner = DragMessage
     | { type: 'ready' | 'refresh' }
@@ -255,6 +262,7 @@ export type FromDesigner = DragMessage
     | { type: 'previewDrop'; id: string; frame: FrameTarget; target: DropTarget; sequence: number }
     | { type: 'viewport'; viewport: Viewport }
     | { type: 'canvasResult'; request: number; state?: CanvasState; error?: string }
+    | { type: 'focusOrder'; token: number }
     | { type: 'block'; token: number; index: number }
     | { type: 'select'; token: number; id: number; openSource: boolean; extend?: boolean }
     | { type: 'interaction'; token: number; action: CanvasInteraction }
@@ -268,6 +276,7 @@ export type ToDesigner = DragUpdate | PlacementResult
     | { type: 'snapshot'; frame: FrameTarget; sourceKey: string; snapshot: CanvasSnapshot; viewport: Viewport; selected: number | undefined; selection?: number[]; runtime?: RuntimeRow }
     | { type: 'error'; message: string }
     | { type: 'selection'; token: number; selected: number | undefined; selection?: number[]; runtime?: RuntimeRow }
+    | { type: 'focusOrder'; token: number; overlay?: CanvasFocusOrder; error?: string }
     | { type: 'edit'; error?: string };
 
 export function errorMessage(error: unknown): string {

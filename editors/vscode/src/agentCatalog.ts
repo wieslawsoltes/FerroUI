@@ -48,9 +48,9 @@ export const agentCatalog = {
     designer_view: tool('Show a designer view, refresh its preview, or set its logical width, height and appearance.',
         { ...session, view: choice('canvas', 'outline', 'properties', 'toolbox', 'events', 'resources', 'assets', 'studio'),
             outline_mode: choice('source', 'visual', 'logical', 'combined'), width: integer(64, 1536), height: integer(64, 1536), dark: truth, refresh: truth }, ['session'], true, false),
-    designer_canvas: tool('Choose the canvas tab, Select or Interact mode, zoom and pan. Returns the applied workbench state.',
+    designer_canvas: tool('Choose the canvas tab, Select or Interact mode, zoom, pan, and focus-order overlay. Returns the applied workbench state.',
         { ...session, tab: choice('preview', 'counterpart'), mode: choice('select', 'interact'), zoom: choice('fit', 'fit_selection', 'actual'),
-            scale: { type: 'number', minimum: 0.125, maximum: 8 }, pan_x: { type: 'number' }, pan_y: { type: 'number' }, pan_tool: truth },
+            scale: { type: 'number', minimum: 0.125, maximum: 8 }, pan_x: { type: 'number' }, pan_y: { type: 'number' }, pan_tool: truth, focus_order: truth },
         ['session'], true, false),
     designer_canvas_input: tool('Interact with the native design preview at the current revision. Click or scroll at normalized x and y. Send text or a key gesture to the focused preview control.',
         { ...frame, input: { type: 'object', additionalProperties: false, required: ['kind'], properties: {

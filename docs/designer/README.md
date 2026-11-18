@@ -638,6 +638,7 @@ The additional tools are:
 | `designer_properties` / `designer_property` | Runtime-derived property schemas, typed values and transactional edits |
 | `designer_brush_draft` | Draft typed solid and gradient properties and stops. Apply the resulting source with `designer_component` and the current document revision. |
 | `designer_layers` / `designer_layer` | Local layer presentation, hierarchy navigation and exact control-type selection with scope/epoch guards |
+| `designer_focus_order` / `designer_focus_edit` | Inspect native focus scopes and label targets, request measured overlay geometry, and apply guarded tab-order and label edits |
 | `designer_selection_layout` / `designer_selection_layout_edit` | Inspect exact reset/size-match edits and apply the accepted plan in one transaction |
 | `designer_property_transfer` / `designer_property_transfer_edit` | Inspect authored appearance, compatible destination edits and skipped values, then apply the accepted transfer |
 | `designer_components` / `designer_component` | Component catalog and transactional resource/template/theme authoring |
