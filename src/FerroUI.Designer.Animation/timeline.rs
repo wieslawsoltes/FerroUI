@@ -29,6 +29,25 @@ impl Default for Repeat {
         Self::Count(1)
     }
 }
+impl Repeat {
+    pub fn parse(text: &str) -> Result<Self> {
+        if text.eq_ignore_ascii_case("Infinite") {
+            Ok(Self::Infinite)
+        } else {
+            text.parse()
+                .map(Self::Count)
+                .map_err(|_| AnimationError("Invalid repeat count".into()))
+        }
+    }
+}
+impl std::fmt::Display for Repeat {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Count(count) => write!(formatter, "{count}"),
+            Self::Infinite => formatter.write_str("Infinite"),
+        }
+    }
+}
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub enum FillMode {
     None,
@@ -275,6 +294,22 @@ pub struct Timeline {
     pub easing: Easing,
     pub tracks: Vec<Track>,
 }
+
+/// Changes to the authored clock. Unspecified fields retain their values.
+#[derive(Clone, Debug, Default, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct TimelineTimingEdit {
+    pub duration: Option<f64>,
+    pub delay: Option<f64>,
+    pub delay_between_iterations: Option<f64>,
+    pub playback_behavior: Option<PlaybackBehavior>,
+    pub speed_ratio: Option<f64>,
+    pub repeat: Option<Repeat>,
+    pub playback_direction: Option<PlaybackDirection>,
+    pub fill: Option<FillMode>,
+    pub easing: Option<Easing>,
+}
+
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Sample {
     pub target: u64,
@@ -297,6 +332,35 @@ impl Timeline {
         };
         result.validate()?;
         Ok(result)
+    }
+    /// Change timing as a group, preserving each keyframe's position within the iteration.
+    pub fn with_timing(&self, edit: TimelineTimingEdit) -> Result<Self> {
+        let duration = edit.duration.unwrap_or(self.duration);
+        let mut next = Self {
+            duration,
+            delay: edit.delay.unwrap_or(self.delay),
+            delay_between_iterations: edit
+                .delay_between_iterations
+                .unwrap_or(self.delay_between_iterations),
+            playback_behavior: edit.playback_behavior.unwrap_or(self.playback_behavior),
+            speed_ratio: edit.speed_ratio.unwrap_or(self.speed_ratio),
+            repeat: edit.repeat.unwrap_or(self.repeat),
+            playback_direction: edit.playback_direction.unwrap_or(self.playback_direction),
+            fill: edit.fill.unwrap_or(self.fill),
+            easing: edit.easing.unwrap_or_else(|| self.easing.clone()),
+            tracks: self.tracks.clone(),
+        };
+        if duration != self.duration {
+            require(
+                self.duration.is_finite() && self.duration > 0.0,
+                "The original duration must be finite and positive",
+            )?;
+            for key in next.tracks.iter_mut().flat_map(|track| &mut track.keyframes) {
+                key.time = key.time / self.duration * duration;
+            }
+        }
+        next.validate()?;
+        Ok(next)
     }
     pub fn validate(&self) -> Result<()> {
         require(

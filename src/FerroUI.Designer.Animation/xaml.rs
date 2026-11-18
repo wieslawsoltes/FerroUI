@@ -62,10 +62,6 @@ impl Timeline {
                     .all(|track| track.muted || track.keyframes.is_empty()),
             "No enabled tracks for this target",
         )?;
-        let repeat = match self.repeat {
-            Repeat::Count(n) => n.to_string(),
-            Repeat::Infinite => "Infinite".into(),
-        };
         let easing_element = self.easing.property_element();
         let easing_attribute = if easing_element.is_none() {
             format!(" Easing=\"{}\"", escape(&self.easing.to_xaml()))
@@ -79,7 +75,7 @@ impl Timeline {
             time_string(self.delay_between_iterations),
             self.playback_behavior,
             self.speed_ratio,
-            repeat,
+            self.repeat,
             self.playback_direction,
             self.fill,
             easing_attribute
@@ -217,14 +213,7 @@ impl Timeline {
         if let Some(value) = root.attribute("SpeedRatio") {
             timeline.speed_ratio = parse_number(value)?;
         }
-        timeline.repeat = match root.attribute("IterationCount").unwrap_or("1") {
-            value if value.eq_ignore_ascii_case("Infinite") => Repeat::Infinite,
-            value => Repeat::Count(
-                value
-                    .parse()
-                    .map_err(|_| AnimationError("Invalid IterationCount".into()))?,
-            ),
-        };
+        timeline.repeat = Repeat::parse(root.attribute("IterationCount").unwrap_or("1"))?;
         timeline.playback_direction = match root.attribute("PlaybackDirection").unwrap_or("Normal")
         {
             "Normal" => PlaybackDirection::Normal,

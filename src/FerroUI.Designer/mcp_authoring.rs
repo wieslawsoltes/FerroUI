@@ -3,7 +3,9 @@ use super::schema as s;
 use super::{decode, node_id, number, state, text, Permissions};
 use crate::DesignerSession;
 use crate::animation_keyframe_authoring::KeyframeEdit;
-use ferroui_designer_animation::{AnimationValue, BehaviorModel, Timeline, VisualStateGroup};
+use ferroui_designer_animation::{
+    AnimationValue, BehaviorModel, Easing, Repeat, Timeline, TimelineTimingEdit, VisualStateGroup,
+};
 use ferroui_designer_tools::PropertyKind;
 use serde_json::{json, Value};
 use std::collections::BTreeSet;
@@ -30,7 +32,7 @@ pub(super) fn tools() -> Vec<Value> {
     };
     vec![
         s::tool("designer_programs","Read animation programs, source keys, codec diagnostics and typed timelines. include_keyframe_text adds formatted XAML values and easing to the typed keys.",s::object(json!({"include_source":{"type":"boolean"},"include_keyframe_text":{"type":"boolean"}}), &[]),false),
-        s::actions("designer_program","Author animation programs and keyframes, set selectors or preview targets, scrub several programs together, or play all programs. IDs refer to the current document; every action checks expected_revision.",vec![
+        s::actions("designer_program","Author animation programs and keyframes, edit timing with proportional retiming, set selectors or preview targets, sample several programs together, or play all programs. IDs refer to the current document; every action checks expected_revision.",vec![
             s::action("create",json!({"name":s::string(),"owner":s::id(),"selector":s::string(),"duration":s::time()}), &["name","owner","selector","duration"],true),
             s::action("select",json!({"program":s::id()}), &["program"],true),
             s::action("rename",json!({"program":s::id(),"name":s::string()}), &["program","name"],true),
@@ -39,6 +41,7 @@ pub(super) fn tools() -> Vec<Value> {
             s::action("selector",json!({"program":s::id(),"selector":s::string()}), &["program","selector"],true),
             s::action("source",json!({"program":s::id(),"source":s::string()}), &["program","source"],true),
             s::action("update",json!({"program":s::id(),"timeline":s::timeline()}), &["program","timeline"],true),
+            s::action("update_timing",json!({"program":s::id(),"timing":s::timing_edit()}), &["program","timing"],true),
             s::action("upsert_keyframe",json!({"program":s::id(),"target":s::id(),"property":s::string(),"previous":s::time(),"time":s::time(),"value":s::string(),"easing":s::string()}), &["program","target","property","time","value","easing"],true),
             s::action("record_keyframe",json!({"program":s::id(),"target":s::id(),"property":s::string(),"time":s::time()}), &["program","target","property","time"],true),
             s::action("remove_keyframe",json!({"program":s::id(),"target":s::id(),"property":s::string(),"time":s::time()}), &["program","target","property","time"],true),
@@ -117,6 +120,18 @@ pub(super) fn call(
                     let timeline: Timeline = decode(args, "timeline")?;
                     timeline.validate().map_err(|error| error.to_string())?;
                     session.update_animation_program(node_id(args, "program")?, timeline)?;
+                }
+                "update_timing" => {
+                    let mut fields = args["timing"].clone();
+                    if let Some(repeat) = fields["repeat"].as_str() {
+                        fields["repeat"] = json!(Repeat::parse(repeat).map_err(|error| error.to_string())?);
+                    }
+                    if let Some(easing) = fields["easing"].as_str() {
+                        fields["easing"] = json!(Easing::parse(easing).map_err(|error| error.to_string())?);
+                    }
+                    let timing: TimelineTimingEdit = serde_json::from_value(fields)
+                        .map_err(|error| format!("Invalid timing: {error}"))?;
+                    session.edit_animation_timing(node_id(args, "program")?, timing)?;
                 }
                 "upsert_keyframe" => session.edit_program_keyframe(
                     node_id(args, "program")?, node_id(args, "target")?, &text(args, "property")?,
@@ -302,6 +317,11 @@ fn animation_programs(session: &DesignerSession, args: &Value) -> Result<Vec<Val
                     model["easing_text"] = json!(authored.easing.to_xaml());
                 }
             }
+        }
+        if let Some(timeline) = &program.timeline {
+            model["timeline"]["repeat_text"] = json!(timeline.repeat.to_string());
+            model["timeline"]["easing_text"] = json!(timeline.easing.to_xaml());
+            model["timeline"]["total_duration"] = json!(timeline.total_duration());
         }
         Ok(model)
     }).collect()

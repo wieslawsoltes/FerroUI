@@ -4,7 +4,7 @@ use ferroui_base::styling::Style;
 use ferroui_base::{StyledElement, TypeInfo};
 use ferroui_designer_animation::{
     AnimationCodec, AnimationCodecRegistry, AnimationProgram, AnimationPrograms, AnimationValue,
-    CompiledTimeline, Easing, ImportOptions, Player, Sample, Timeline, ValueKind,
+    CompiledTimeline, Easing, ImportOptions, Player, Sample, Timeline, TimelineTimingEdit, ValueKind,
 };
 use ferroui_designer_core::{Document, Edit, NodeId};
 use ferroui_markup::markup::parsers::SelectorParser;
@@ -239,6 +239,27 @@ impl DesignerSession {
             self.seek(self.animation.player.time())?;
         }
         Ok(())
+    }
+    /// Edit a program's clock with the same source transaction used by typed track updates.
+    pub fn edit_animation_timing(
+        &mut self,
+        id: NodeId,
+        changes: TimelineTimingEdit,
+    ) -> Result<(), String> {
+        let timeline = self
+            .animation
+            .programs
+            .iter()
+            .find(|program| program.id == id)
+            .ok_or("Unknown animation program")?
+            .timeline
+            .as_ref()
+            .ok_or("Edit an opaque animation through its source or register a codec")?;
+        let next = timeline.with_timing(changes).map_err(|error| error.to_string())?;
+        if &next == timeline {
+            return Ok(());
+        }
+        self.update_animation_program(id, next)
     }
     fn editable_program(&self) -> Result<(), String> {
         if let Some(id) = self.animation.active {
@@ -556,17 +577,10 @@ impl DesignerSession {
     }
     pub fn set_duration(&mut self, duration: f64) -> Result<(), String> {
         self.editable_program()?;
-        if !duration.is_finite() || duration <= 0.0 {
-            return Err("Duration must be finite and positive".into());
-        }
-        let mut candidate = self.animation.timeline.clone();
-        let scale = duration / candidate.duration;
-        for track in &mut candidate.tracks {
-            for key in &mut track.keyframes {
-                key.time *= scale;
-            }
-        }
-        candidate.duration = duration;
+        let candidate = self.animation.timeline.with_timing(TimelineTimingEdit {
+            duration: Some(duration),
+            ..Default::default()
+        }).map_err(|error| error.to_string())?;
         self.write_timeline(candidate, "Change animation duration")
     }
     pub fn record_keyframe(

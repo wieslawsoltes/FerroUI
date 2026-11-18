@@ -42,6 +42,41 @@ fn delay_speed_and_fill_are_respected() {
     assert_eq!(number(&timeline, 3.0), 1.0);
 }
 #[test]
+fn timing_changes_scale_keys_and_keep_untouched_fields() {
+    let mut original = numeric();
+    original.delay = 0.125;
+    original
+        .record(1, "Opacity", 0.5, AnimationValue::Number(0.33))
+        .unwrap();
+    let next = original
+        .with_timing(TimelineTimingEdit {
+            duration: Some(3.0),
+            repeat: Some(Repeat::Count(2)),
+            playback_direction: Some(PlaybackDirection::Alternate),
+            ..Default::default()
+        })
+        .unwrap();
+    assert_eq!(next.delay, 0.125);
+    assert_eq!(next.total_duration(), Some(6.125));
+    assert_eq!(next.tracks[0].keyframes[0].time, 0.0);
+    assert_eq!(next.tracks[0].keyframes[1].time, 0.75);
+    assert_eq!(next.tracks[0].keyframes[2].time, 3.0);
+    assert_eq!(next.tracks[0].keyframes[1].value, AnimationValue::Number(0.33));
+    assert_eq!(original.tracks[0].keyframes[1].time, 0.5);
+    assert!(next
+        .with_timing(TimelineTimingEdit {
+            duration: Some(0.0),
+            ..Default::default()
+        })
+        .is_err());
+    assert!(next
+        .with_timing(TimelineTimingEdit {
+            repeat: Some(Repeat::parse("9223372036854775808").unwrap()),
+            ..Default::default()
+        })
+        .is_err());
+}
+#[test]
 fn bezier_solves_x_and_rejects_invalid_controls() {
     let curve = Easing::CubicBezier {
         x1: 0.8,

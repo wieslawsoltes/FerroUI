@@ -1,5 +1,6 @@
 import { strict as assert } from 'node:assert';
 import type * as vscode from 'vscode';
+import type { TimelineProgram } from '../src/timelineProtocol';
 import type { McpFixture } from './mcp';
 
 export async function verifyTimelineMcp(mcp: McpFixture, session: number, document: vscode.TextDocument): Promise<void> {
@@ -12,9 +13,7 @@ export async function verifyTimelineMcp(mcp: McpFixture, session: number, docume
     const edit = async (revision: number, args: object) => invoke('designer_studio_edit', {
         session, expected_revision: revision, tool: 'designer_program', arguments: args,
     });
-    const programs = async () => content<{ programs: { id: number; name: string; targets: number[]; owner: number; timeline: {
-        tracks: { keyframes: { time: number; value_text: string; easing_text: string }[] }[];
-    } }[] }>(await invoke('designer_studio_query', { session, tool: 'designer_programs', arguments: {
+    const programs = async () => content<{ programs: TimelineProgram[] }>(await invoke('designer_studio_query', { session, tool: 'designer_programs', arguments: {
         include_source: false, include_keyframe_text: true,
     } })).programs;
     const undo = async () => content(await invoke('designer_history', { session, expected_version: document.version, action: 'undo' }));
@@ -23,8 +22,8 @@ export async function verifyTimelineMcp(mcp: McpFixture, session: number, docume
     frame = await wait();
     const pulse = async () => {
         const program = (await programs()).find(({ name }) => name === 'Pulse');
-        assert.ok(program);
-        return program;
+        assert.ok(program?.timeline);
+        return { ...program, timeline: program.timeline };
     };
     const keyframe = async (options: object = {}) => {
         const program = await pulse();
@@ -68,6 +67,25 @@ export async function verifyTimelineMcp(mcp: McpFixture, session: number, docume
     await undo();
     assert.equal(document.getText(), beforeRecording);
     frame = await wait();
+    const timing = { duration: 2, delay: .25, delay_between_iterations: .25, speed_ratio: 2, repeat: '3',
+        playback_direction: 'Alternate', playback_behavior: 'OnlyIfVisible', fill: 'Both', easing: 'LinearEasing' };
+    content(await edit(frame.revision, { action: 'update_timing', program, timing }));
+    assert.ok((await edit(frame.revision, { action: 'update_timing', program, timing: { delay: 0 } })).isError);
+    frame = await wait();
+    const updated = (await pulse()).timeline;
+    assert.equal(updated.duration, 2);
+    assert.equal(updated.playback_direction, 'Alternate');
+    assert.equal(updated.playback_behavior, 'OnlyIfVisible');
+    assert.equal(updated.fill, 'Both');
+    assert.equal(updated.repeat_text, '3');
+    assert.equal(updated.total_duration, 3.375);
+    await check(1, '0.75');
+    assert.ok((await edit(frame.revision, { action: 'update_timing', program, timing: { repeat: '9223372036854775808' } })).isError);
+    frame = await wait();
+    assert.equal((await pulse()).timeline.total_duration, 3.375);
+    await undo();
+    assert.equal(document.getText(), beforeRecording);
+    frame = await wait();
     const duplicate = await keyframe();
     assert.ok(duplicate.isError && duplicate.content[0]?.text?.includes('occupies the destination time'));
     frame = await wait();
@@ -82,5 +100,5 @@ export async function verifyTimelineMcp(mcp: McpFixture, session: number, docume
     assert.deepEqual((await pulse()).timeline.tracks, []);
     await undo();
     assert.equal(document.getText(), original);
-    console.log('VS Code MCP authored and scrubbed a native timeline, recorded an effective value, rejected a stale seek, and undid each source transaction');
+    console.log('VS Code MCP authored, scrubbed and retimed a native timeline, recorded an effective value, and undid each source transaction');
 }

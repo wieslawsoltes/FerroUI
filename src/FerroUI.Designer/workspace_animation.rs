@@ -4,8 +4,8 @@ use ferroui_base::media::{FontWeight, TextWrapping};
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::{ColumnDefinitions, ComboBox, ScrollViewer, ToolTip};
 use ferroui_designer_animation::{
-    BehaviorAction, BehaviorModel, BehaviorTrigger, FillMode, PlaybackDirection, Repeat,
-    StateSetter, StateTransition, VisualState, VisualStateGroup,
+    BehaviorAction, BehaviorModel, BehaviorTrigger, FillMode, PlaybackBehavior, PlaybackDirection,
+    Repeat, StateSetter, StateTransition, TimelineTimingEdit, VisualState, VisualStateGroup,
 };
 
 #[derive(Default)]
@@ -463,10 +463,7 @@ impl DesignerWorkspace {
         let repeat = field(
             panel,
             "Repeat (count or Infinite)",
-            &match timeline.repeat {
-                Repeat::Count(n) => n.to_string(),
-                Repeat::Infinite => "Infinite".into(),
-            },
+            &timeline.repeat.to_string(),
         );
         let direction = choice_field(
             panel,
@@ -488,52 +485,40 @@ impl DesignerWorkspace {
             &timeline.easing.to_xaml(),
         );
         action(panel, "Apply animation settings", self, move |this| {
-            let mut timeline = timeline.clone();
-            let next_duration: f64 = text(&duration).parse().map_err(|_| "Invalid duration")?;
-            if !next_duration.is_finite() || next_duration <= 0.0 {
-                return Err("Duration must be finite and positive".into());
-            }
-            let scale = next_duration / timeline.duration;
-            for track in &mut timeline.tracks {
-                for key in &mut track.keyframes {
-                    key.time *= scale;
-                }
-            }
-            timeline.duration = next_duration;
-            timeline.delay = text(&delay).parse().map_err(|_| "Invalid delay")?;
-            timeline.delay_between_iterations = text(&iteration_delay)
-                .parse()
-                .map_err(|_| "Invalid iteration delay")?;
-            timeline.playback_behavior = match choice(&playback).as_str() {
-                "Auto" => ferroui_designer_animation::PlaybackBehavior::Auto,
-                "Always" => ferroui_designer_animation::PlaybackBehavior::Always,
-                "OnlyIfVisible" => ferroui_designer_animation::PlaybackBehavior::OnlyIfVisible,
+            let behavior = match choice(&playback).as_str() {
+                "Auto" => PlaybackBehavior::Auto,
+                "Always" => PlaybackBehavior::Always,
+                "OnlyIfVisible" => PlaybackBehavior::OnlyIfVisible,
                 _ => return Err("Invalid playback behavior".into()),
             };
-            timeline.speed_ratio = text(&speed).parse().map_err(|_| "Invalid speed")?;
-            timeline.repeat = if text(&repeat).eq_ignore_ascii_case("Infinite") {
-                Repeat::Infinite
-            } else {
-                Repeat::Count(text(&repeat).parse().map_err(|_| "Invalid repeat count")?)
-            };
-            timeline.playback_direction = match choice(&direction).as_str() {
+            let direction = match choice(&direction).as_str() {
                 "Normal" => PlaybackDirection::Normal,
                 "Reverse" => PlaybackDirection::Reverse,
                 "Alternate" => PlaybackDirection::Alternate,
                 "AlternateReverse" => PlaybackDirection::AlternateReverse,
                 _ => return Err("Invalid playback direction".into()),
             };
-            timeline.fill = match choice(&fill).as_str() {
+            let fill = match choice(&fill).as_str() {
                 "None" => FillMode::None,
                 "Forward" => FillMode::Forward,
                 "Backward" => FillMode::Backward,
                 "Both" => FillMode::Both,
                 _ => return Err("Invalid fill mode".into()),
             };
-            timeline.easing = Easing::parse(&text(&easing)).map_err(|e| e.to_string())?;
-            this.session
-                .borrow_mut()
-                .update_animation_program(id, timeline)
+            let changes = TimelineTimingEdit {
+                duration: Some(text(&duration).parse().map_err(|_| "Invalid duration")?),
+                delay: Some(text(&delay).parse().map_err(|_| "Invalid delay")?),
+                delay_between_iterations: Some(text(&iteration_delay)
+                    .parse()
+                    .map_err(|_| "Invalid iteration delay")?),
+                playback_behavior: Some(behavior),
+                speed_ratio: Some(text(&speed).parse().map_err(|_| "Invalid speed")?),
+                repeat: Some(Repeat::parse(&text(&repeat)).map_err(|error| error.to_string())?),
+                playback_direction: Some(direction),
+                fill: Some(fill),
+                easing: Some(Easing::parse(&text(&easing)).map_err(|error| error.to_string())?),
+            };
+            this.session.borrow_mut().edit_animation_timing(id, changes)
         });
         section(panel, "Preview targets");
         action(panel, "Preview on current selection", self, move |this| {

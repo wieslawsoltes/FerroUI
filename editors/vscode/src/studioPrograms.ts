@@ -1,4 +1,5 @@
 import { choose, editText, editTime, type StudioContext } from './studioContext';
+import { editAnimationTiming } from './studioAnimationTiming';
 import type { TimelineProgram } from './timelineProtocol';
 
 export async function createAnimationProgram(context: StudioContext, owner: number): Promise<void> {
@@ -36,6 +37,8 @@ export async function showAnimationActions(context: StudioContext, program: Time
         actions.push({ label: '$(discard) Restore selector preview targets', run: () =>
             context.present('designer_program', { action: 'preview_targets', program: id, targets: null }) });
         if (context.writable) {
+            const timeline = program.timeline;
+            if (timeline) actions.push({ label: '$(watch) Timing and Playback…', run: () => editAnimationTiming(context, id, timeline) });
             actions.push(
                 { label: '$(edit) Rename animation…', run: () => renameAnimationProgram(context, program) },
                 { label: '$(copy) Duplicate animation…', run: async () => {

@@ -56,8 +56,8 @@ export function action(id: string, label: string, run: () => Promise<void>, icon
     return { id, label, run, icon };
 }
 
-export function editText(prompt: string, value?: string): Thenable<string | undefined> {
-    return vscode.window.showInputBox({ title: 'FerroUI Studio', prompt, value, ignoreFocusOut: true });
+export function editText(prompt: string, value?: string, validateInput?: (input: string) => string | undefined): Thenable<string | undefined> {
+    return vscode.window.showInputBox({ title: 'FerroUI Studio', prompt, value, validateInput, ignoreFocusOut: true });
 }
 
 export async function editTime(prompt: string, maximum: number, initial: number): Promise<number | undefined> {

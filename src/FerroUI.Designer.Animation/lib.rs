@@ -21,7 +21,7 @@ pub use states::{
 };
 pub use timeline::{
     CompiledTimeline, FillMode, Keyframe, PlaybackBehavior, PlaybackDirection, Player, Repeat,
-    Sample, Timeline, Track,
+    Sample, Timeline, TimelineTimingEdit, Track,
 };
 pub use value::{AnimationValue, RelativeUnit, ValueKind};
 pub use xaml::{AnimationImport, ImportOptions};

@@ -2,6 +2,19 @@ import type { FrameTarget } from './protocol';
 
 export interface TimelineKeyframe { time: number; value_text: string; easing_text: string }
 export interface TimelineTrack { target: number; property: string; keyframes: TimelineKeyframe[] }
+export interface AuthoredTimeline {
+    duration: number;
+    delay: number;
+    delay_between_iterations: number;
+    speed_ratio: number;
+    repeat_text: string;
+    playback_direction: string;
+    playback_behavior: string;
+    fill: string;
+    easing_text: string;
+    total_duration: number | null;
+    tracks: TimelineTrack[];
+}
 export interface TimelineProgram {
     id: number;
     source_key?: string | null;
@@ -10,7 +23,7 @@ export interface TimelineProgram {
     style?: number | null;
     targets: number[];
     selector: string;
-    timeline: { duration: number; tracks: TimelineTrack[] } | null;
+    timeline: AuthoredTimeline | null;
 }
 
 export interface TimelinePosition {

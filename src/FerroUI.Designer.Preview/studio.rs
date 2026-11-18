@@ -175,7 +175,7 @@ fn source_action(tool: &str, action: Option<&str>) -> bool {
     match tool {
         "designer_program" => matches!(
             action,
-            Some("create" | "rename" | "duplicate" | "remove" | "selector" | "source" | "update" |
+            Some("create" | "rename" | "duplicate" | "remove" | "selector" | "source" | "update" | "update_timing" |
                 "upsert_keyframe" | "record_keyframe" | "remove_keyframe")
         ),
         "designer_state" => matches!(action, Some("upsert" | "remove")),

@@ -111,13 +111,10 @@ pub(super) fn timeline() -> Value {
         json!({"target":id(),"property":string(),"keyframes":array(keyframe,100000),"base_value":nullable(animation_value()),"muted":{"type":"boolean"}}),
         &["target", "property", "keyframes", "muted"],
     );
-    let repeat = json!({"oneOf":[{"const":"Infinite"},object(json!({"Count":{"type":"integer","minimum":1}}), &["Count"])]});
+    let mut properties = timing_properties();
+    properties["tracks"] = array(track, 4096);
     object(
-        json!({
-            "duration":{"type":"number","exclusiveMinimum":0},"delay":time(),"delay_between_iterations":time(),"playback_behavior":{"enum":["Auto","Always","OnlyIfVisible"]},
-            "speed_ratio":{"type":"number","exclusiveMinimum":0},"repeat":repeat,"playback_direction":{"enum":["Normal","Reverse","Alternate","AlternateReverse"]},
-            "fill":{"enum":["None","Forward","Backward","Both"]},"easing":easing(),"tracks":array(track,4096)
-        }),
+        properties,
         &[
             "duration",
             "delay",
@@ -129,6 +126,20 @@ pub(super) fn timeline() -> Value {
             "tracks",
         ],
     )
+}
+fn timing_properties() -> Value {
+    let repeat = json!({"oneOf":[{"const":"Infinite"},object(json!({"Count":{"type":"integer","minimum":1}}), &["Count"])]});
+    json!({
+        "duration":{"type":"number","exclusiveMinimum":0},"delay":time(),"delay_between_iterations":time(),"playback_behavior":{"enum":["Auto","Always","OnlyIfVisible"]},
+        "speed_ratio":{"type":"number","exclusiveMinimum":0},"repeat":repeat,"playback_direction":{"enum":["Normal","Reverse","Alternate","AlternateReverse"]},
+        "fill":{"enum":["None","Forward","Backward","Both"]},"easing":easing()
+    })
+}
+pub(super) fn timing_edit() -> Value {
+    let mut properties = timing_properties();
+    properties["repeat"] = json!({"type":"string","description":"Repeat count as a decimal integer, or Infinite."});
+    properties["easing"] = json!({"type":"string","description":"Native FerroUI easing name, cubic Bézier coordinates, or spring settings."});
+    object(properties, &[])
 }
 pub(super) fn state_group() -> Value {
     let setter = object(
