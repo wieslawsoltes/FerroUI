@@ -11,18 +11,18 @@ SOURCE_COMMIT = "14061eeac21c38ae99f302edf3d9136d4f652c4c"
 METADATA = "WinUIGallery/SampleSupport/Data/ControlInfoData.json"
 
 # Original media used by the reviewed Image, FlipView, ConnectedAnimation, Button,
-# AppBarButton and AppBarToggleButton pages. Keep this list explicit: an embedded asset does not establish a port of
+# AppBarButton, AppBarToggleButton and TreeView pages. Keep this list explicit: an embedded asset does not establish a port of
 # the source feature (for example animated GIF playback or SVG decoding).
 SAMPLE_MEDIA = [
     *(f"LandscapeImage{number}.jpg" for number in range(1, 14)),
     "MirrorPCConsent.svg", "animated.gif", "cliff.jpg", "grapes.jpg",
     "ninegrid.gif", "rainier.jpg", "sunset.jpg", "treetops.jpg", "valley.jpg",
-    "Slices.png", "Slices2.png",
+    "Slices.png", "Slices2.png", "folder.png",
 ]
 MEDIA_PAGES = [
     f"WinUIGallery/Samples/{page}/{page}Page{suffix}"
     for page in ["Image", "FlipView", "ConnectedAnimation", "Button", "AppBarButton",
-                 "AppBarToggleButton"]
+                 "AppBarToggleButton", "TreeView"]
     for suffix in [".xaml", ".xaml.cs"]
 ]
 

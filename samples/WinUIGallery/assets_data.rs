@@ -128,6 +128,7 @@ pub(crate) static ASSETS: &[(&str, &[u8])] = &[
     ("Assets/SampleMedia/Slices2.png", include_bytes!("Assets/SampleMedia/Slices2.png") as &[u8]),
     ("Assets/SampleMedia/animated.gif", include_bytes!("Assets/SampleMedia/animated.gif") as &[u8]),
     ("Assets/SampleMedia/cliff.jpg", include_bytes!("Assets/SampleMedia/cliff.jpg") as &[u8]),
+    ("Assets/SampleMedia/folder.png", include_bytes!("Assets/SampleMedia/folder.png") as &[u8]),
     ("Assets/SampleMedia/grapes.jpg", include_bytes!("Assets/SampleMedia/grapes.jpg") as &[u8]),
     ("Assets/SampleMedia/ninegrid.gif", include_bytes!("Assets/SampleMedia/ninegrid.gif") as &[u8]),
     ("Assets/SampleMedia/rainier.jpg", include_bytes!("Assets/SampleMedia/rainier.jpg") as &[u8]),

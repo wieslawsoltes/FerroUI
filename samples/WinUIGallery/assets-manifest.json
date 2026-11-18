@@ -53,6 +53,14 @@
     {
       "path": "WinUIGallery/Samples/AppBarToggleButton/AppBarToggleButtonPage.xaml.cs",
       "sha256": "069e4500270d204e531908f7b8e37c5fd803a135bb7bc1e1cfcc7ea5ca003994"
+    },
+    {
+      "path": "WinUIGallery/Samples/TreeView/TreeViewPage.xaml",
+      "sha256": "4008ad501812b8a1aaffb9e0da4a12e3514d948834ec37cf2726e27250b39d31"
+    },
+    {
+      "path": "WinUIGallery/Samples/TreeView/TreeViewPage.xaml.cs",
+      "sha256": "c2fdead0696d5d519cfa3d158ff94ce9258fc9d2ca30c623f150f6e96170987c"
     }
   ],
   "assembly": "WinUIGallery",
@@ -1569,6 +1577,18 @@
       ],
       "source_uris": [
         "ms-appx:///Assets/SampleMedia/cliff.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/folder.png",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/folder.png",
+      "sha256": "e79df2908d7027c58f49724b0c4a0a4727549b3621dcd30eaf43616b19449e3e",
+      "size_bytes": 17187,
+      "registered_paths": [
+        "Assets/SampleMedia/folder.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/folder.png"
       ]
     },
     {

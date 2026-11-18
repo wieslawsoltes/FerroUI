@@ -26,6 +26,7 @@ pub mod gallery;
 mod ink_samples;
 mod input_samples;
 mod layout_samples;
+mod list_samples;
 mod materials_samples;
 mod menu_samples;
 mod media_samples;
@@ -41,6 +42,7 @@ mod sizing_sample;
 mod status_samples;
 mod text_input_samples;
 mod text_samples;
+mod tree_samples;
 mod window_samples;
 
 #[cfg(any(feature = "desktop", feature = "capture"))]
@@ -111,3 +113,9 @@ mod menu_samples_tests;
 
 #[cfg(test)]
 mod date_samples_tests;
+
+#[cfg(test)]
+mod list_samples_tests;
+
+#[cfg(test)]
+mod tree_samples_tests;
