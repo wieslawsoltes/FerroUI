@@ -6,6 +6,7 @@ mod interactions;
 mod keyframe_draft;
 mod keyframe_edits;
 mod program_edit;
+mod program_locator;
 mod programs;
 mod states;
 mod timeline;
@@ -20,6 +21,7 @@ pub use interactions::{BehaviorAction, BehaviorModel, BehaviorTrigger};
 pub use keyframe_draft::{KeyframeDraftPreview, KeyframeEdit};
 pub use keyframe_edits::{KeyframeGroupEdit, KeyframeLocation};
 pub use program_edit::compose_animation_edit;
+pub use program_locator::AnimationProgramLocator;
 pub use programs::{
     fragment as animation_fragment, native_fragment, rekey_copied_programs, AnimationCodec,
     AnimationCodecRegistry, AnimationProgram, AnimationPrograms, NativeAnimationCodec,

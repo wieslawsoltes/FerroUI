@@ -1,7 +1,6 @@
 //! Playback capabilities and preview-only target assignments for authored programs.
-use crate::animation_preview_pose::ProgramLocator;
 use crate::{DesignerSession, PreviewSourceAnchor};
-use ferroui_designer_animation::AnimationProgram;
+use ferroui_designer_animation::{AnimationProgram, AnimationProgramLocator as ProgramLocator};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 

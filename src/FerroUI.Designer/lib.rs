@@ -138,8 +138,9 @@ pub use preview_prototype_player::{
     PreviewPrototypePlayerView,
 };
 pub use preview_prototype_view::{PreviewPrototypeView, PreviewPrototypeViewAction};
+pub use ferroui_designer_core::{SourceAnchor as PreviewSourceAnchor, SourceSegment as PreviewSourceSegment};
 pub use preview_stages::{
-    MAX_PREVIEW_STAGES, PreviewSourceAnchor, PreviewSourceSegment, PreviewStageBoard,
+    MAX_PREVIEW_STAGES, PreviewStageBoard,
     PreviewStageConfiguration, PreviewStageId, PreviewStageInfo, PreviewStageManifest,
     PreviewStageLayout, PreviewStageSize, PreviewStageMode, PreviewStageSelection, PreviewStageSelectionToken, PreviewStageSnapshot,
     PreviewStageSource, PreviewStageState, PreviewStageStatus, PreviewStageTarget,

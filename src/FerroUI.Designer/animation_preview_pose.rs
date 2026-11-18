@@ -1,7 +1,6 @@
-use crate::{DesignerSession, PreviewSourceAnchor};
+use crate::DesignerSession;
 use crate::animation_playback_pose::PlaybackPose;
-use ferroui_designer_animation::AnimationProgram;
-use ferroui_designer_core::Document;
+use ferroui_designer_animation::{AnimationProgram, AnimationProgramLocator as ProgramLocator};
 use ferroui_designer_core::NodeId;
 use serde::{Deserialize, Serialize};
 
@@ -18,35 +17,6 @@ pub struct TimelinePreviewPose {
     anchor: Option<ProgramLocator>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub(crate) playback: Option<PlaybackPose>,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
-#[serde(deny_unknown_fields)]
-pub(crate) struct ProgramLocator {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    source: Option<PreviewSourceAnchor>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    owner: Option<PreviewSourceAnchor>,
-    name: Option<String>,
-    selector: String,
-}
-
-impl ProgramLocator {
-    pub(crate) fn capture(document: &Document, program: &AnimationProgram) -> Option<Self> {
-        let source = PreviewSourceAnchor::capture(document, program.id).ok();
-        let owner = PreviewSourceAnchor::capture(document, program.owner).ok();
-        (source.is_some() || owner.is_some()).then(|| Self {
-            source,
-            owner,
-            name: stable_name(program).map(str::to_owned),
-            selector: program.selector.clone(),
-        })
-    }
-}
-
-fn stable_name(program: &AnimationProgram) -> Option<&str> {
-    let generated = program.name.strip_prefix("Animation ").and_then(|id| id.parse().ok()) == Some(program.id);
-    (!generated).then_some(program.name.as_str())
 }
 
 impl DesignerSession {
@@ -127,30 +97,7 @@ impl DesignerSession {
     }
 
     pub(crate) fn resolve_preview_program(&self, key: Option<&str>, anchor: Option<&ProgramLocator>) -> Option<&AnimationProgram> {
-        let programs = self.animation_programs();
-        let mut matching_keys = programs
-            .iter()
-            .filter(|program| key.is_some() && program.source_key.as_deref() == key);
-        match (matching_keys.next(), matching_keys.next()) {
-            (Some(program), None) => Some(program),
-            // A first authoring edit can add a source key that Undo later removes.
-            (None, None) => {
-                let anchor = anchor?;
-                let matches = |program: &&AnimationProgram| {
-                    (key.is_none() || program.source_key.is_none())
-                        && stable_name(program) == anchor.name.as_deref()
-                        && program.selector == anchor.selector
-                };
-                if let Some(id) = anchor.source.as_ref().and_then(|source| source.resolve(self.document()).ok()) {
-                    return programs.iter().filter(matches).find(|program| program.id == id);
-                }
-                let owner = anchor.owner.as_ref()?.resolve(self.document()).ok()?;
-                let mut candidates = programs.iter().filter(matches).filter(|program| program.owner == owner);
-                let only = candidates.next()?;
-                candidates.next().is_none().then_some(only)
-            }
-            _ => None,
-        }
+        ProgramLocator::resolve(self.document(), self.animation_programs(), key, anchor)
     }
 
     #[cfg(feature = "mcp")]

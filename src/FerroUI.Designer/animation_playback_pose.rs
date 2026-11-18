@@ -1,5 +1,5 @@
 //! Capture and restore the native clocks that produced an accepted preview frame.
-use crate::animation_preview_pose::ProgramLocator;
+use ferroui_designer_animation::AnimationProgramLocator as ProgramLocator;
 use crate::{DesignerSession, PreviewSourceAnchor, PreviewStatus, TimelinePreviewPose};
 use ferroui_designer_core::NodeId;
 use serde::{Deserialize, Serialize};
