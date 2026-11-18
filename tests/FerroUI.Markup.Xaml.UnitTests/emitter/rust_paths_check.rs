@@ -216,6 +216,8 @@ pub fn classes() -> Vec<(&'static ::ferroui_base::TypeInfo, &'static str)> {
         (<::ferroui_controls::PipsPager as ::ferroui_base::StaticType>::TYPE, "ferroui_controls::PipsPager"),
         (<::ferroui_controls::PipsPagerTemplateSettings as ::ferroui_base::StaticType>::TYPE, "ferroui_controls::PipsPagerTemplateSettings"),
         (<::ferroui_controls::Pivot as ::ferroui_base::StaticType>::TYPE, "ferroui_controls::Pivot"),
+        (<::ferroui_controls::PivotHeaderItem as ::ferroui_base::StaticType>::TYPE, "ferroui_controls::PivotHeaderItem"),
+        (<::ferroui_controls::PivotHeaderPanel as ::ferroui_base::StaticType>::TYPE, "ferroui_controls::PivotHeaderPanel"),
         (<::ferroui_controls::PivotItem as ::ferroui_base::StaticType>::TYPE, "ferroui_controls::PivotItem"),
         (<::ferroui_controls::PivotPanel as ::ferroui_base::StaticType>::TYPE, "ferroui_controls::PivotPanel"),
         (<::ferroui_controls::PlatformFeedback as ::ferroui_base::StaticType>::TYPE, "ferroui_controls::PlatformFeedback"),
