@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { chmod, copyFile, mkdir, stat } from 'node:fs/promises';
+import { chmod, copyFile, mkdir, mkdtemp, rename, rm, stat } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 
 const [directory, output] = process.argv.slice(2);
@@ -13,10 +13,17 @@ for (const name of names) {
     if (!info.isFile()) throw new Error(`Expected a native executable at ${join(directory, name)}`);
 }
 await mkdir('bin', { recursive: true });
-for (const name of names) {
-    const destination = join('bin', name);
-    await copyFile(join(directory, name), destination);
-    if (platform !== 'win32') await chmod(destination, 0o755);
+const staging = await mkdtemp(join('bin', '.package-'));
+try {
+    // Give each executable a new inode so running development hosts keep their old signed file.
+    for (const name of names) {
+        const file = join(staging, name);
+        await copyFile(join(directory, name), file);
+        if (platform !== 'win32') await chmod(file, 0o755);
+    }
+    for (const name of names) await rename(join(staging, name), join('bin', name));
+} finally {
+    await rm(staging, { recursive: true, force: true });
 }
 const packager = resolve('node_modules/@vscode/vsce/vsce');
 const args = [packager, 'package', '--no-dependencies', '--target', `${platform}-${arch}`];
