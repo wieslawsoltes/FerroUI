@@ -14,6 +14,7 @@ def load(name, file):
 
 compare = load("compare", "compare.py")
 scanner = load("scanner", "scanner.py")
+sample = load("sample_freshness", "sample-freshness.py")
 UNITS = [{"package": "p", "name": "p", "kind": ["lib"], "features": [], "profile": {"opt_level": "0"}, "fresh": False}]
 
 
@@ -80,6 +81,19 @@ class CompareTests(unittest.TestCase):
 class ScannerTests(unittest.TestCase):
     def test_changed_files(self):
         self.assertEqual(scanner.changed_files({"a": "1", "b": "2"}, {"a": "1", "b": "3", "c": "4"}), ["b", "c"])
+
+
+class SampleTests(unittest.TestCase):
+    def test_sample_graph_records_acknowledged_dependencies_and_keeps_shared_profiles(self):
+        added = dict(UNITS[0], package="reload-protocol", name="reload-protocol")
+        candidate = [dict(UNITS[0], features=["type-tables"]), added]
+        with self.assertRaisesRegex(RuntimeError, "sample graph"):
+            sample.compare_sample_graph(UNITS, candidate, accept_changes=False)
+        self.assertEqual(sample.compare_sample_graph(UNITS, candidate, accept_changes=True),
+                         {"added": ["reload-protocol reload-protocol lib"], "removed": []})
+        candidate[0] = dict(candidate[0], profile={"opt_level": "3"})
+        with self.assertRaisesRegex(RuntimeError, "shared profiles"):
+            sample.compare_sample_graph(UNITS, candidate, accept_changes=True)
 
 
 if __name__ == "__main__":

@@ -25,7 +25,8 @@ import sys
 import tempfile
 import time
 
-from compare import generated_outputs, identity, normalized, units
+from compare import (changed_features, changed_outputs, changed_unit_set, common_units,
+                     generated_outputs, identity, normalized, units, without_features)
 
 
 FIXTURE_PACKAGE = "sample-freshness-fixture"
@@ -45,20 +46,11 @@ def definitions(record: dict) -> list[dict]:
                    for unit in record["units"]), key=lambda value: json.dumps(value, sort_keys=True))
 
 
-def without_features(units: list[dict]) -> list[dict]:
-    return sorted(({key: value for key, value in unit.items() if key != "features"} for unit in units),
-                  key=lambda value: json.dumps(value, sort_keys=True))
-
-
-def changed_features(first: list[dict], second: list[dict]) -> list[str]:
-    """The units (name and kind) whose features differ between two graphs."""
-    def features(units):
-        found = {}
-        for unit in units:
-            found.setdefault(f"{unit.get('name')} {unit.get('kind')}", []).append(unit.get("features"))
-        return {key: sorted(map(json.dumps, value)) for key, value in found.items()}
-    first, second = features(first), features(second)
-    return sorted(key for key in first.keys() | second.keys() if first.get(key) != second.get(key))
+def compare_sample_graph(baseline: list[dict], candidate: list[dict], accept_changes: bool) -> dict:
+    if baseline != candidate and not (accept_changes and
+            without_features(common_units(baseline, candidate)) == without_features(common_units(candidate, baseline))):
+        raise RuntimeError("Baseline/candidate sample graph units, features or shared profiles differ")
+    return changed_unit_set(baseline, candidate)
 
 
 def is_fresh(record: dict) -> bool:
@@ -169,11 +161,6 @@ def make_fixture(directory: Path, source: Path, env: dict) -> None:
     # dependency versions. All timed builds stay locked/offline.
     subprocess.run(["cargo", "metadata", "--offline", "--format-version=1"], cwd=directory,
                    env=env, stdout=subprocess.DEVNULL, check=True)
-
-
-def changed_outputs(first: dict, second: dict) -> list[str]:
-    """The generated outputs whose hashes differ between two builds."""
-    return sorted(str(key) for key in first.keys() | second.keys() if first.get(key) != second.get(key))
 
 
 def fixture_checks(sources: dict[str, Path], temporary: Path, output: Path, env: dict,
@@ -326,27 +313,24 @@ def main() -> int:
             temporary = Path(temporary_path).resolve()
             if not args.fixture_only:
                 package = "control-catalog-desktop" if args.catalog else "treedatagrid-demo"
-                # The graph of every build is the baseline's; the generated files of a revision are its
-                # own first build's, and the baseline's unless an output change is acknowledged.
+                # Each revision repeats its own first graph and generated output. Acknowledged
+                # dependency changes may change the workload while shared units keep their profiles.
                 references = {}
                 for label, source in sources.items():
                     target = temporary / f"target-{label}"
                     record = build(source, source, target, output / "graph", label, "populate", package,
                                    env, args.jobs, library=not args.catalog, no_default_features=not args.catalog)
                     references[label] = (definitions(record), record["generated"])
+                    report["population"].append(record)
+                    save()
                     baseline_reference = references["baseline"]
-                    if references[label][0] != baseline_reference[0]:
-                        # An acknowledged change (label build-output-changes) may build some units with
-                        # other features; the units and their profiles are still the baseline's.
-                        if not (args.accept_output_changes and without_features(references[label][0])
-                                == without_features(baseline_reference[0])):
-                            raise RuntimeError("Baseline/candidate graph units, features, profiles or generated files differ")
-                        report["graph_feature_changes"] = changed_features(baseline_reference[0], references[label][0])
+                    report["graph_unit_changes"] = compare_sample_graph(baseline_reference[0], references[label][0],
+                                                                       args.accept_output_changes)
+                    report["graph_feature_changes"] = changed_features(baseline_reference[0], references[label][0])
                     if references[label][1] != baseline_reference[1]:
                         if not args.accept_output_changes:
-                            raise RuntimeError("Baseline/candidate graph units, features, profiles or generated files differ")
+                            raise RuntimeError("Baseline/candidate generated sample files differ")
                         report["graph_output_changes"] = changed_outputs(baseline_reference[1], references[label][1])
-                    report["population"].append(record)
                     save()
                 for repetition in range(1, args.repetitions + 1):
                     order = list(sources.items())
@@ -370,15 +354,17 @@ def main() -> int:
                              "initial_population_seconds": {row["label"]: row["seconds"] for row in report["population"]},
                              "same_graph_features_profiles_and_generated_files": (
                                  not report.get("graph_output_changes") and not report.get("graph_feature_changes")
+                                 and not any(report.get("graph_unit_changes", {}).values())
                                  if medians else None),
                              "output_changes_acknowledged": args.accept_output_changes,
                              "graph_output_changes": report.get("graph_output_changes", []),
                              "graph_feature_changes": report.get("graph_feature_changes", []),
+                             "graph_unit_changes": report.get("graph_unit_changes", {"added": [], "removed": []}),
                              "fixture_output_changes": report.get("fixture_output_changes", {}),
                              "fixture_feature_changes": report.get("fixture_feature_changes", {}),
                              "candidate_unchanged_builds_all_fresh": True,
                              "optional_file_and_source_and_asset_invalidation": True,
-                             "fixture_runtime_and_generated_outputs_equal": True}
+                             "fixture_runtime_and_generated_outputs_equal": not report.get("fixture_output_changes")}
         report["summary"]["requested_speedup_gate_passed"] = (
             report["summary"]["repeat_speedup"] >= args.minimum_speedup
             if args.minimum_speedup else None)
@@ -388,20 +374,18 @@ def main() -> int:
             text += ("| Workload | Baseline median | Candidate median | Speedup |\n|---|---:|---:|---:|\n"
                      f"| Unchanged repeated Cargo build | {medians['baseline']:.3f}s | {medians['candidate']:.3f}s | "
                      f"{report['summary']['repeat_speedup']:.2f}× |\n\n"
-                     "Initial population of each target is reported separately; these numbers do not measure cold compilation. "
-                     "The same real dependency graph, features, profiles and generated Rust/metadata were verified across "
-                     "all alternating repeats. No optional build-tool optimization config was used.\n\n")
+                     "Each revision repeated its own real dependency graph and generated output. "
+                     "The timings measure warm builds after the initial population of each target.\n\n")
         text += ("The regression fixture uses the real SampleBuild library and runs a dependent executable. "
                  "Creating, editing and deleting the optional exclusion file, editing Rust source and editing an asset "
                  "all rebuilt the affected crate and consumer with the correct runtime output. Every unchanged candidate "
-                 "build was fresh. Generated files and runtime results agree with the baseline. Raw Cargo JSON, verbose "
+                 "build was fresh. Fixture runtime results agree with the baseline. Raw Cargo JSON, verbose "
                  "dirty reasons, timings and output hashes are in the artifact.\n")
         changes = report["summary"]["graph_output_changes"]
         fixture_changes = report["summary"]["fixture_output_changes"]
         if changes or fixture_changes:
             text += ("\n### Output changes acknowledged (`build-output-changes`)\n\n"
-                     "The graph and the runtime results are the baseline's, and every build repeats the generated "
-                     "files of its revision; these generated files differ from the baseline's:\n\n"
+                     "Every build repeats the generated files of its revision. These outputs differ from the baseline.\n\n"
                      + "".join(f"- `{name}`\n" for name in changes[:50])
                      + "".join(f"- fixture {phase}: {len(names)} files\n" for phase, names in fixture_changes.items()))
         feature_changes = report["summary"]["graph_feature_changes"] + [
@@ -409,9 +393,14 @@ def main() -> int:
             for name in names]
         if feature_changes:
             text += ("\n### Feature changes acknowledged (`build-output-changes`)\n\n"
-                     "The units and profiles of the graph are the baseline's and every repeat builds the graph of its "
-                     "revision; these units are built with other features than the baseline's:\n\n"
+                     "These units use different features in the baseline and candidate.\n\n"
                      + "".join(f"- `{name}`\n" for name in feature_changes[:50]))
+        unit_changes = report["summary"]["graph_unit_changes"]
+        if any(unit_changes.values()):
+            text += ("\n### Dependency changes acknowledged (`build-output-changes`)\n\n"
+                     "The medians compare different workloads. Shared units keep their profiles.\n\n"
+                     + "".join(f"- Added `{unit}`\n" for unit in unit_changes["added"][:50])
+                     + "".join(f"- Removed `{unit}`\n" for unit in unit_changes["removed"][:50]))
         if args.minimum_speedup:
             text += (f"\nRequested unchanged-build threshold: **{args.minimum_speedup:.2f}×**; "
                      f"passed: **{report['summary']['requested_speedup_gate_passed']}**.\n")
