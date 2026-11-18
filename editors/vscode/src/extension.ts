@@ -11,6 +11,8 @@ import { RsxLanguage } from './rsxLanguage';
 import { StagesPanel } from './stagesPanel';
 import { xamlLanguage, XamlServer } from './xamlServer';
 
+let managedReload: HotReload | undefined;
+
 export function activate(context: vscode.ExtensionContext) {
     const languageOutput = vscode.window.createOutputChannel('FerroUI XAML');
     const previewOutput = vscode.window.createOutputChannel('FerroUI Designer');
@@ -21,6 +23,7 @@ export function activate(context: vscode.ExtensionContext) {
     const hosted = new HostedDesign(context, previewOutput, metadata => server.updateProject(metadata));
     const stages = new StagesPanel(context, previewOutput);
     const reload = new HotReload();
+    managedReload = reload;
     const runtimes = new RuntimeConnections(reload);
     const liveApp = new RuntimePanel(context, runtimes, reload, designer);
     const mcp = new FerroMcpProvider(context, new AgentTools(designer, reload, stages), previewOutput, runtimes);
@@ -42,4 +45,9 @@ export function activate(context: vscode.ExtensionContext) {
         context.subscriptions.push(vscode.commands.registerCommand('ferroui.test.mcpDefinitions', () => mcp.provideMcpServerDefinitions()));
         return { designer };
     }
+}
+
+export async function deactivate(): Promise<void> {
+    await managedReload?.stop();
+    managedReload = undefined;
 }

@@ -26,6 +26,7 @@ export class ReloadSession implements vscode.Disposable {
     private live?: ReloadProcess;
     private compiler?: ReloadProcess;
     private candidate?: ReloadProcess;
+    private replacement?: Promise<void>;
     private timer?: ReturnType<typeof setTimeout>;
     private building = false;
     private rebuild = false;
@@ -137,7 +138,10 @@ export class ReloadSession implements vscode.Disposable {
         }
         if (this.rebuild) {
             this.rebuild = false;
-            await this.replace();
+            const replacement = this.replace();
+            this.replacement = replacement;
+            try { await replacement; }
+            finally { if (this.replacement === replacement) this.replacement = undefined; }
         } else if (wait) {
             this.status('Waiting for the running app');
             this.schedule(wait);
@@ -185,7 +189,7 @@ export class ReloadSession implements vscode.Disposable {
             this.mcpChanged(endpoint);
             for (const event of candidateEvents) this.accept(event);
             if (this.live.pid) this.activated(this.live.pid);
-            previous?.stop();
+            const retired = previous?.stop();
             this.output.appendLine(`Running ${this.target.label} · PID ${this.live.pid}${previous ? ' · rebuilt and restarted' : ''}`);
             this.status(previous ? 'Rebuilt and restarted' : 'Watching saves');
             void this.live.closed.then(code => {
@@ -196,6 +200,7 @@ export class ReloadSession implements vscode.Disposable {
                 this.output.appendLine(`Application exited${code === null ? '' : ` (${code})`}.`);
                 this.status('Application stopped', Boolean(code));
             }, error => this.output.appendLine(String(error)));
+            await retired;
         } catch (error) {
             if (this.disposed || this.serial !== serial) return;
             this.changes.clear();
@@ -203,8 +208,9 @@ export class ReloadSession implements vscode.Disposable {
             this.status(this.live ? 'Update failed · app still running' : 'Launch failed', true);
         } finally {
             this.compiler = undefined;
-            this.candidate?.stop();
+            const stopped = this.candidate?.stop();
             this.candidate = undefined;
+            await stopped;
             this.building = false;
             if (!this.disposed && (this.serial !== serial || this.rebuild)) {
                 if (!this.live) this.rebuild = true;
@@ -220,14 +226,12 @@ export class ReloadSession implements vscode.Disposable {
         return true;
     }
 
-    dispose(): void {
+    async dispose(): Promise<void> {
         this.disposed = true;
         this.mcpChanged();
         clearTimeout(this.timer);
         this.resources.forEach(resource => resource.dispose());
-        this.compiler?.stop();
-        this.candidate?.stop();
-        this.live?.stop();
+        await Promise.all([this.compiler?.stop(), this.candidate?.stop(), this.live?.stop(), this.replacement]);
     }
 }
 

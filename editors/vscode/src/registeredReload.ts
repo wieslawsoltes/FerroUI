@@ -53,8 +53,8 @@ export class RegisteredReload implements vscode.Disposable {
         return session;
     }
 
-    dispose(): void {
+    dispose(): Promise<void> {
         this.disposed = true;
-        this.process.stop();
+        return this.process.stop();
     }
 }

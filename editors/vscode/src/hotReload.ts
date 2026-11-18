@@ -25,6 +25,7 @@ export class HotReload implements vscode.Disposable {
     private choosing = false;
     private generation = 0;
     private message = 'Stopped';
+    private shutdown = Promise.resolve();
 
     constructor() {
         this.indicator.name = 'FerroUI Hot Reload';
@@ -69,7 +70,7 @@ export class HotReload implements vscode.Disposable {
             if (folders.length !== 1) throw new Error('Choose a single workspace folder for the registered supervisor.');
             await this.startRegistered(folders[0], signal);
         }
-        else if (action === 'stop') this.stop();
+        else if (action === 'stop') await this.stop();
         else if (action === 'show_output') this.output.show(true);
         else if (action === 'rebuild') {
             if (!this.session) throw new Error('Start a managed FerroUI application first.');
@@ -120,9 +121,7 @@ export class HotReload implements vscode.Disposable {
                 if (!configuration || this.generation !== generation) return;
                 this.debugger.prepare(target.folder, configuration);
             } else this.debugger.detach();
-            this.session?.dispose();
-            this.registered?.dispose();
-            this.registered = undefined;
+            void this.retireProcesses();
             this.log.reset();
             this.session = new ReloadSession(target, this.log, (message, problem) => {
                 this.report(target.label, message, problem);
@@ -178,19 +177,24 @@ export class HotReload implements vscode.Disposable {
         this.indicator.show();
     }
 
-    private stop(): void {
+    stop(): Promise<void> {
         this.generation++;
         this.debugger.detach();
-        this.session?.dispose();
-        this.session = undefined;
-        this.registered?.dispose();
-        this.registered = undefined;
         this.message = 'Stopped';
         this.indicator.hide();
+        return this.retireProcesses();
+    }
+
+    private retireProcesses(): Promise<void> {
+        const previous = [this.session?.dispose(), this.registered?.dispose()];
+        this.session = undefined;
+        this.registered = undefined;
+        this.shutdown = Promise.all([this.shutdown, ...previous]).then(() => undefined);
+        return this.shutdown;
     }
 
     dispose(): void {
-        this.stop();
+        void this.stop();
         this.subscriptions.forEach(subscription => subscription.dispose());
         this.indicator.dispose();
         this.debugger.dispose();

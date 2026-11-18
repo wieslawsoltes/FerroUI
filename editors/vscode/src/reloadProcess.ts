@@ -43,19 +43,26 @@ export class ReloadProcess {
 
     get pid(): number | undefined { return this.child.pid; }
 
-    stop(): void {
+    stop(): Promise<void> {
+        const stopped = this.closed.then(() => undefined, () => undefined);
         const pid = this.pid;
-        if (this.exited || this.stopping || !pid) return;
+        if (this.exited || this.stopping || !pid) return stopped;
         this.stopping = true;
         if (process.platform === 'win32') {
             const shutdown = spawn('taskkill.exe', ['/pid', String(pid), '/t', '/f'], { stdio: 'ignore', windowsHide: true });
             shutdown.on('error', () => this.child.kill());
             shutdown.on('exit', code => { if (code) this.child.kill(); });
-            return;
+            return stopped;
         }
-        try { process.kill(-pid, 'SIGTERM'); } catch { return; }
-        this.escalation = setTimeout(() => { try { process.kill(-pid, 'SIGKILL'); } catch { /* process group exited */ } }, 1500);
+        this.signalGroup(pid, 'SIGTERM');
+        this.escalation = setTimeout(() => this.signalGroup(pid, 'SIGKILL'), 1500);
         this.escalation.unref();
+        return stopped;
+    }
+
+    private signalGroup(pid: number, signal: NodeJS.Signals): void {
+        try { process.kill(-pid, signal); }
+        catch { this.child.kill(signal); }
     }
 }
 

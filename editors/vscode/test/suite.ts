@@ -10,6 +10,7 @@ import { verifyXamlRefactoring } from './xamlLanguage';
 import { verifyRuntimeClient } from './runtimeClient';
 import { verifyHostedPreview } from './hostedPreview';
 import { verifyLiveApp } from './liveApp';
+import { verifyProcessShutdown } from './reloadProcess';
 import type { DesignerWorkbench } from '../src/designerWorkbench';
 
 const editorPosition = (line = 0, character = 0) => new vscode.Position(line, character);
@@ -20,6 +21,7 @@ export async function run(): Promise<void> {
     const extension = vscode.extensions.getExtension<{ designer: DesignerWorkbench }>('FerroUI.ferroui')!;
     assert.ok(extension, 'FerroUI extension is installed in the Extension Development Host');
     const { designer } = await extension.activate();
+    await verifyProcessShutdown();
     await verifyRuntimeClient();
     await vscode.commands.executeCommand('ferroui.openLiveApp');
     await until(() => vscode.window.tabGroups.all.some(group => group.tabs.some(tab => tab.label === 'FerroUI Live App')));
