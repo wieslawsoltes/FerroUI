@@ -2,7 +2,8 @@
      page has no code-behind upstream: the shapes keep the source's TwoWay x:Bind of the sliders, and
      the point labels its OneWay x:Bind of the switch (Visibility is IsVisible, IsOn is IsChecked, the
      Header of the switch is its Content). FerroUI's Slider has no Header (composed) and no
-     StepFrequency or SnapsTo: the steps of 0.5 are TickFrequency with IsSnapToTickEnabled.
+     StepFrequency or SnapsTo: the steps of 0.5 are TickFrequency with IsSnapToTickEnabled. WinUI's Value,
+     coerced into the range, starts at the minimum: the sliders' Value is their Minimum.
      Canvas.ZIndex is the shared ZIndex. -->
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
@@ -16,13 +17,13 @@
                StrokeThickness="{x:Bind slider3.Value, Mode=TwoWay}" />
       <StackPanel Grid.Column="1" Width="220">
         <TextBlock Text="Height" />
-        <Slider x:Name="slider1" AutomationProperties.Name="Height" Maximum="150" Minimum="100"
+        <Slider x:Name="slider1" AutomationProperties.Name="Height" Maximum="150" Minimum="100" Value="100"
                 SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
         <TextBlock Text="Width" />
-        <Slider x:Name="slider2" AutomationProperties.Name="Width" Maximum="150" Minimum="100"
+        <Slider x:Name="slider2" AutomationProperties.Name="Width" Maximum="150" Minimum="100" Value="100"
                 SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
         <TextBlock Text="Stroke Thickness" />
-        <Slider x:Name="slider3" AutomationProperties.Name="Stroke Thickness" Maximum="10" Minimum="2"
+        <Slider x:Name="slider3" AutomationProperties.Name="Stroke Thickness" Maximum="10" Minimum="2" Value="2"
                 SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
       </StackPanel>
     </Grid>
@@ -41,19 +42,19 @@
                  StrokeThickness="{x:Bind recSlider3.Value, Mode=TwoWay}" />
       <StackPanel Grid.Column="1" Width="220">
         <TextBlock Text="Height" />
-        <Slider x:Name="recSlider1" AutomationProperties.Name="Height" Maximum="150" Minimum="100"
+        <Slider x:Name="recSlider1" AutomationProperties.Name="Height" Maximum="150" Minimum="100" Value="100"
                 SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
         <TextBlock Text="Width" />
-        <Slider x:Name="recSlider2" AutomationProperties.Name="Width" Maximum="150" Minimum="100"
+        <Slider x:Name="recSlider2" AutomationProperties.Name="Width" Maximum="150" Minimum="100" Value="100"
                 SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
         <TextBlock Text="Stroke Thickness" />
-        <Slider x:Name="recSlider3" AutomationProperties.Name="Stroke Thickness" Maximum="10" Minimum="2"
+        <Slider x:Name="recSlider3" AutomationProperties.Name="Stroke Thickness" Maximum="10" Minimum="2" Value="2"
                 SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
         <TextBlock Text="Radius Y" />
-        <Slider x:Name="recSlider4" AutomationProperties.Name="Radius Y" Maximum="100" Minimum="0"
+        <Slider x:Name="recSlider4" AutomationProperties.Name="Radius Y" Maximum="100" Minimum="0" Value="0"
                 SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
         <TextBlock Text="Radius X" />
-        <Slider x:Name="recSlider5" AutomationProperties.Name="Radius X" Maximum="100" Minimum="0"
+        <Slider x:Name="recSlider5" AutomationProperties.Name="Radius X" Maximum="100" Minimum="0" Value="0"
                 SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
       </StackPanel>
     </Grid>
@@ -80,7 +81,7 @@
       <StackPanel Grid.Column="1" Width="220">
         <ToggleSwitch x:Name="ToggleSwitchPoly" Content="Show points" IsChecked="False" />
         <TextBlock Text="Stroke Thickness" />
-        <Slider x:Name="polySlider1" AutomationProperties.Name="Stroke Thickness" Maximum="10" Minimum="2"
+        <Slider x:Name="polySlider1" AutomationProperties.Name="Stroke Thickness" Maximum="10" Minimum="2" Value="2"
                 SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
       </StackPanel>
     </Grid>
