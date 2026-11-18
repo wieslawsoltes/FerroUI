@@ -63,9 +63,10 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         const { revision, nodes } = content<{ revision: number; nodes: { name: string | null; id: number }[] }>(await invoke('designer_outline', { session }));
         const button = nodes.find(node => node.name === 'saveButton');
         assert.ok(button);
-        const studio = content<{ tools: { name: string }[] }>(await invoke('designer_studio_tools', { session }));
+        const studio = content<{ tools: { name: string }[]; edits: { name: string }[] }>(await invoke('designer_studio_tools', { session }));
         assert.ok(studio.tools.some(tool => tool.name === 'designer_ast'));
         assert.ok(studio.tools.some(tool => tool.name === 'designer_events'));
+        assert.ok(studio.edits.some(tool => tool.name === 'designer_program'));
         content(await invoke('designer_studio_query', { session, tool: 'designer_ast', arguments: { depth: 2 } }));
         const combined = content<{ nodes: { visual: boolean; logical: boolean }[] }>(
             await invoke('designer_studio_query', { session, tool: 'designer_tree', arguments: { tree: 'combined' } }));
@@ -82,8 +83,31 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         const edit = { session, expected_revision: revision, label: 'Test agent edit', edits: [{ SetAttribute: { node: button.id, name: 'Content', value: 'MCP edited this buffer' } }] };
         const denied = await invoke('designer_apply', edit);
         assert.ok(denied.isError && denied.content[0]?.text?.includes('allowWrites'));
+        const designData = { session, expected_revision: revision, tool: 'designer_design_data_edit',
+            arguments: { action: 'set_value', node: button.id, property: 'Content', value: 'Studio sample' } };
+        assert.ok((await invoke('designer_studio_edit', designData)).isError);
         assert.ok((await invoke('ferroui_workspace_create', { path: 'Denied.rs', source: 'fn main() {}' })).isError);
         await config.update('allowWrites', true, vscode.ConfigurationTarget.Global);
+        content(await invoke('designer_studio_edit', designData));
+        assert.match(document.getText(), /d:Content="Studio sample"/);
+        assert.ok((await invoke('designer_studio_edit', designData)).isError);
+        content(await invoke('designer_history', { session, expected_version: document.version, action: 'undo' }));
+        assert.equal(document.getText(), original);
+        const layoutFrame = content<{ revision: number; nodes: { label: string; id: number }[] }>(
+            await invoke('designer_outline', { session }));
+        const borders = layoutFrame.nodes.filter(node => node.label === 'Border');
+        const selection = [button.id, borders[1].id];
+        const arguments_ = { operation: 'reset_alignment' };
+        const layout = content<{ model: string; edit_count: number }>(await invoke('designer_studio_query', {
+            session, tool: 'designer_selection_layout', arguments: arguments_, selection,
+        }));
+        assert.ok(layout.edit_count >= 2);
+        content(await invoke('designer_studio_edit', { session, expected_revision: layoutFrame.revision,
+            tool: 'designer_selection_layout_edit', arguments: { ...arguments_, expected_model: layout.model }, selection }));
+        assert.ok(!document.getText().includes('HorizontalAlignment='));
+        content(await invoke('designer_history', { session, expected_version: document.version, action: 'undo' }));
+        assert.equal(document.getText(), original);
+        edit.expected_revision = content<{ revision: number }>(await invoke('designer_wait', { session })).revision;
         content(await invoke('designer_apply', edit));
         assert.ok(document.isDirty && document.getText().includes('Content="MCP edited this buffer"'));
         assert.equal((await invoke('designer_apply', edit)).isError, true);
@@ -98,6 +122,11 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         const canvas = content<{ tab: string; scale: number; panTool: boolean }>(await invoke('designer_canvas', { session, tab: 'preview', scale: 2, pan_tool: true }));
         assert.deepEqual([canvas.tab, canvas.scale, canvas.panTool], ['preview', 2, true]);
         assert.equal(content<{ tab: string }>(await invoke('designer_canvas', { session, tab: 'counterpart', pan_tool: false })).tab, 'counterpart');
+        const language = content<{ result: { items: { name: string; range: { start: { line: number } } }[] } }>(
+            await invoke('ferroui_workspace_language', { path: 'SettingsView.xaml', action: 'symbols' }));
+        const saveLine = document.positionAt(original.indexOf('x:Name="saveButton"')).line;
+        assert.ok(language.result.items.some(item => item.name === 'saveButton' && item.range.start.line === saveLine),
+            JSON.stringify(language.result));
         const rust = content<{ session: number }>(await invoke('designer_open', { path: 'views.rs' }));
         const frame = content<{ revision: number; blocks: { active: boolean }[] }>(await invoke('designer_wait', { session: rust.session }));
         assert.equal(frame.blocks.length, 2);

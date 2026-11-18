@@ -4,7 +4,7 @@ import { NativePreview } from './nativePreview';
 import { DEFAULT_VIEWPORT, errorMessage, isViewport, type Asset, type CanvasSnapshot, type DragMessage, type DropHint, type FrameTarget, type FromDesigner, type Language, type NodeOperation, type NodeTarget, type Operation, type Placement, type Snapshot, type Source, type ToDesigner, type Viewport } from './protocol';
 import { applyTextEdits, asPosition, asRange, sourceOf } from './textDocument';
 import { designerHtml, webviewOptions } from './view';
-import type { Inspection, InspectionTarget, Range, ResourceRow, RuntimeRow, RuntimeTreeMode } from './protocol';
+import type { EditResult, Inspection, InspectionTarget, Range, ResourceRow, RuntimeRow, RuntimeTreeMode } from './protocol';
 import type { CanvasAction } from './protocol';
 
 interface Frame {
@@ -164,7 +164,7 @@ export class DesignerPanel implements vscode.Disposable {
 
     async runtimeTree(target: FrameTarget, tree: RuntimeTreeMode): Promise<RuntimeRow[]> {
         if (!this.canUse(target)) throw new Error('Wait for the current preview.');
-        const answer = await (await this.getClient()).studioQuery(target.token, 'designer_tree', { tree }, this.selected);
+        const answer = await (await this.getClient()).studioQuery(target.token, 'designer_tree', { tree });
         return (answer as { nodes: RuntimeRow[] }).nodes;
     }
 
@@ -253,12 +253,35 @@ export class DesignerPanel implements vscode.Disposable {
         await this.edit(this.frame, operation, signal);
     }
 
-    async studioTools(): Promise<object[]> { return (await this.getClient()).studioTools(); }
+    async studioTools() {
+        const { tools, xamlEdits } = await (await this.getClient()).studioTools();
+        return { tools, edits: this.language === 'xaml' ? xamlEdits : [] };
+    }
 
-    async studioQuery(name: string, args: object, signal: AbortSignal): Promise<unknown> {
+    async studioQuery(name: string, args: object, selection: number[] | undefined, signal: AbortSignal): Promise<unknown> {
         await this.waitForSnapshot(signal);
+        const token = this.currentToken!;
+        const client = await this.getClient();
         signal.throwIfAborted();
-        return (await this.getClient()).studioQuery(this.currentToken!, name, args, this.selected);
+        if (this.editing || this.currentToken !== token) throw new Error('Wait for the current preview.');
+        return client.studioQuery(token, name, args, this.studioSelection(selection));
+    }
+
+    async studioEdit(token: number, name: string, args: object, selection: number[] | undefined, signal: AbortSignal): Promise<void> {
+        if (this.language !== 'xaml') throw new Error('Use the mapped designer tools or edit the authored Rust buffer for RSX.');
+        if (this.editing) throw new Error('A designer edit is already in progress.');
+        const frame = this.frame;
+        if (!frame || this.currentToken !== token) throw new Error('Read the current designer revision before editing.');
+        const targets = this.studioSelection(selection);
+        try {
+            await this.commitEdit(frame, client => client.studioEdit(frame.source, token, name, args, targets), signal);
+        } finally {
+            if (this.currentToken === token) this.schedule(0);
+        }
+    }
+
+    private studioSelection(selection?: number[]): number[] {
+        return selection ?? (this.selected === undefined ? [] : [this.selected]);
     }
 
     configure(viewport?: Viewport): void {
@@ -394,12 +417,16 @@ export class DesignerPanel implements vscode.Disposable {
     }
 
     private async edit(frame: Frame, operation: Operation, signal?: AbortSignal): Promise<void> {
+        return this.commitEdit(frame, client => client.edit(frame.source, operation), signal);
+    }
+
+    private async commitEdit(frame: Frame, plan: (client: NativePreview) => Promise<EditResult>, signal?: AbortSignal): Promise<void> {
         signal?.throwIfAborted();
         if (this.editing) throw new Error('A designer edit is already in progress.');
         this.editing = true;
         this.changed.fire();
         try {
-            const { edits, selection } = await (await this.getClient()).edit(frame.source, operation);
+            const { edits, selection } = await plan(await this.getClient());
             signal?.throwIfAborted();
             if (this.currentToken !== frame.token) throw new Error('The preview changed. Use the current preview to retry.');
             await applyTextEdits(this.document, frame.version, edits);

@@ -2,8 +2,9 @@ import { createHash } from 'node:crypto';
 import { realpath } from 'node:fs/promises';
 import * as vscode from 'vscode';
 import type { Position, Range, TextEdit } from './protocol';
-import { asPosition, exactRange } from './textDocument';
+import { asPosition, exactRange, wireRange } from './textDocument';
 import type { WorkspaceTool } from './workspaceCatalog';
+import { queryLanguage, type LanguageQuery } from './workspaceLanguage';
 import { localFolders, newWorkspaceFile, resolveWorkspaceFile, workspaceFolders } from './workspacePaths';
 
 const maxSource = 1024 * 1024;
@@ -41,6 +42,16 @@ export class WorkspaceTools {
                 const document = await vscode.workspace.openTextDocument(uri);
                 if (request.open) await vscode.window.showTextDocument(document);
                 return describeBuffer(document);
+            }
+            case 'ferroui_workspace_language': {
+                const request = args as Location & LanguageQuery;
+                const document = await this.open(request);
+                const buffer = describeBuffer(document);
+                signal.throwIfAborted();
+                const result = await queryLanguage(document, request);
+                signal.throwIfAborted();
+                requireRevision(document, buffer.revision);
+                return { buffer, result };
             }
             case 'ferroui_workspace_edit':
                 return this.edit((args as { files: FileEdit[] }).files, signal);
@@ -146,7 +157,7 @@ export class WorkspaceTools {
 }
 
 export function bufferDiagnostics(uri: vscode.Uri) {
-    return vscode.languages.getDiagnostics(uri).map(item => ({ message: item.message, range: item.range, severity: item.severity,
+    return vscode.languages.getDiagnostics(uri).map(item => ({ message: item.message, range: wireRange(item.range), severity: item.severity,
         source: item.source, code: item.code }));
 }
 

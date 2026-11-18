@@ -30,7 +30,7 @@ export class NativePreview implements vscode.Disposable {
         const client = new NativePreview(command, channel);
         try {
             const hello = await client.send<{ version: number; assets: Asset[] }>('initialize');
-            if (hello.version !== 3) throw new Error(`Preview protocol ${hello.version} is incompatible with this extension.`);
+            if (hello.version !== 4) throw new Error(`Preview protocol ${hello.version} is incompatible with this extension.`);
             client.assets = hello.assets;
             return client;
         } catch (error) {
@@ -57,10 +57,14 @@ export class NativePreview implements vscode.Disposable {
         return this.send('resources', { ...source, frame, target });
     }
 
-    studioTools(): Promise<object[]> { return this.send('studioTools'); }
+    studioTools(): Promise<{ tools: object[]; xamlEdits: object[] }> { return this.send('studioTools'); }
 
-    studioQuery(frame: number, name: string, args: object, selected?: number): Promise<unknown> {
-        return this.send('studioQuery', { frame, name, arguments: args, selected });
+    studioQuery(frame: number, name: string, args: object, selection?: number[]): Promise<unknown> {
+        return this.send('studioQuery', { frame, name, arguments: args, selection });
+    }
+
+    studioEdit(source: Source, frame: number, name: string, args: object, selection: number[]): Promise<EditResult> {
+        return this.send('studioEdit', { ...source, frame, name, arguments: args, selection });
     }
 
     edit(source: Source, operation: Operation): Promise<EditResult> {

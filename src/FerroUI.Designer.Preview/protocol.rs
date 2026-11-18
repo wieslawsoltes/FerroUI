@@ -1,7 +1,7 @@
 use ferroui_designer_language::{Position, Range};
 use serde::{Deserialize, Serialize};
 
-pub(crate) const PROTOCOL_VERSION: u32 = 3;
+pub(crate) const PROTOCOL_VERSION: u32 = 4;
 pub(crate) const MAX_SOURCE_BYTES: usize = 1024 * 1024;
 
 #[derive(Clone, Copy, Deserialize)]

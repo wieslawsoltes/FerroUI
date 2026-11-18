@@ -22,6 +22,10 @@ function position(pos: vscode.Position): Position {
     return { line: pos.line, character: pos.character };
 }
 
+export function wireRange(range: vscode.Range): Range {
+    return { start: position(range.start), end: position(range.end) };
+}
+
 export function asRange(range: Range): vscode.Range {
     return new vscode.Range(asPosition(range.start), asPosition(range.end));
 }

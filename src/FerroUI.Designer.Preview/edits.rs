@@ -158,7 +158,7 @@ fn translated_patches(
     }
 }
 
-fn editor_edits(
+pub(crate) fn editor_edits(
     design: &DesignDocument<'_>,
     patches: Vec<TextPatch>,
 ) -> Result<EditResult, String> {

@@ -91,12 +91,18 @@ fn respond(
                 let stage = renderer.as_ref().ok_or("Render the design before placing controls")?.stage(input.frame)?;
                 serialize(stage.plan(&input.placement).map(|(_, hint)| hint))
             }),
-        "studioTools" => serialize(Ok(studio::catalog())),
+        "studioTools" => Ok(studio::catalog()),
         "studioQuery" => serde_json::from_value::<studio::Query>(message["params"].clone())
             .map_err(|e| e.to_string())
             .and_then(|query| {
                 let stage = renderer.as_ref().ok_or("Open a designer first")?.stage(query.frame)?;
                 studio::query(stage, &query)
+            }),
+        "studioEdit" => serde_json::from_value::<studio::Edit>(message["params"].clone())
+            .map_err(|e| e.to_string())
+            .and_then(|edit| {
+                let renderer = renderer.as_mut().ok_or("Open a designer first")?;
+                serialize(studio::edit(renderer, edit))
             }),
         _ => {
             return write_frame(

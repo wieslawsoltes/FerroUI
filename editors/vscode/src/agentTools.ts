@@ -51,6 +51,7 @@ interface Arguments extends CanvasAction, CargoSelection {
     action: string;
     tool: string;
     arguments: object;
+    selection?: number[];
 }
 
 export class AgentTools {
@@ -235,8 +236,11 @@ export class AgentTools {
                 assertVersion(document, args.expected_version);
                 if (!await document.save()) throw new Error('VS Code could not save the buffer.');
                 break;
-            case 'designer_studio_tools': return { tools: await panel.studioTools() };
-            case 'designer_studio_query': return panel.studioQuery(args.tool, args.arguments, signal);
+            case 'designer_studio_tools': return panel.studioTools();
+            case 'designer_studio_query': return panel.studioQuery(args.tool, args.arguments, args.selection, signal);
+            case 'designer_studio_edit':
+                await panel.studioEdit(args.expected_revision, args.tool, args.arguments, args.selection, signal);
+                break;
         }
         return describe(panel);
     }

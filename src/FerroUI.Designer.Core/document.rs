@@ -132,6 +132,13 @@ pub struct TextPatch {
     pub replacement: String,
 }
 
+impl TextPatch {
+    /// Compute a single UTF-8-safe replacement to synchronize two source snapshots.
+    pub fn between(before: &str, after: &str) -> Option<Self> {
+        changes::minimal_patch(before, after)
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ChangeSet {
     pub label: String,
