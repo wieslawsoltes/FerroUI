@@ -79,6 +79,7 @@ impl Decorator {
     }
 
     /// The decorated control.
+    #[inline]
     pub fn child(&self) -> Option<Ref<Control>> {
         self.get_value(Self::child_property())
     }
@@ -88,6 +89,7 @@ impl Decorator {
     }
 
     /// The padding to place around the child control.
+    #[inline]
     pub fn padding(&self) -> Thickness {
         self.kept_padding.get_for(self, || self.get_value(Self::padding_property()))
     }
