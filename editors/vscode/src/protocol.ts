@@ -14,6 +14,19 @@ export interface Viewport { width: number; height: number; dark: boolean }
 export const DEFAULT_VIEWPORT: Viewport = { width: 800, height: 520, dark: false };
 export const MIN_VIEWPORT_SIZE = 64;
 export const MAX_VIEWPORT_SIZE = 1536;
+export interface DesignerViewState {
+    version: 1;
+    uri: string;
+    caret: Position;
+    viewport: Viewport;
+}
+export function isViewport(value: unknown): value is Viewport {
+    if (!value || typeof value !== 'object') return false;
+    const { width, height, dark } = value as Partial<Viewport>;
+    const validSize = (size: unknown): boolean => typeof size === 'number' && Number.isInteger(size)
+        && size >= MIN_VIEWPORT_SIZE && size <= MAX_VIEWPORT_SIZE;
+    return validSize(width) && validSize(height) && typeof dark === 'boolean';
+}
 export interface Bounds { x: number; y: number; width: number; height: number }
 export type RuntimeTreeMode = 'visual' | 'logical' | 'combined';
 export type OutlineMode = 'source' | RuntimeTreeMode;
@@ -199,6 +212,7 @@ export type FromDesigner = DragMessage
     | { type: 'apply'; token: number; source: string };
 
 export type ToDesigner = DragUpdate | PlacementResult
+    | { type: 'viewState'; state: DesignerViewState }
     | { type: 'pending' }
     | { type: 'snapshot'; frame: FrameTarget; sourceKey: string; snapshot: CanvasSnapshot; viewport: Viewport; selected: number | undefined; runtime?: RuntimeRow }
     | { type: 'error'; message: string }

@@ -1,6 +1,6 @@
 # FerroUI Designer for VS Code
 
-Open a FerroUI `.xaml` file or a Rust file containing `ferroui_view::rsx!`, then choose **FerroUI: Open Designer** from the editor toolbar or Command Palette. The designer opens beside the text editor and renders its unsaved buffer.
+Open a FerroUI `.xaml` file or a Rust file containing `ferroui_view::rsx!`, then choose **FerroUI: Open Designer** from the editor toolbar or Command Palette. The designer opens beside the text editor and renders its unsaved buffer. When VS Code restores a designer tab, it reopens its source, preview dimensions, theme, and selected RSX invocation.
 
 ## Working in the designer
 
@@ -61,7 +61,7 @@ Run **FerroUI: Run with Hot Reload** from a local Cargo workspace and select a d
 - Rust uses `ferroui-view` with `hot-reload` in a debug build. `launch` registers the watcher and startup acknowledgement. Eligible literals are patched through mounted reactive views. RSX structure, Rust logic, and literals without a live reactive reader use a Cargo rebuild.
 - The previous app runs while Cargo builds and the candidate opens its window. A failed build or launch leaves that app running. Rebuilds start a new process, so in-memory state is retained by in-place edits and by any persistence the application implements. Use **FerroUI: Rebuild Hot Reload Application** to request a build and **FerroUI: Stop Hot Reload Application** to end the session.
 
-Configured targets can specify `label`, a workspace-relative `manifestPath`, `package`, `binary`, `features`, and application `args` in `ferroui.hotReload.targets`. The extension uses `ferroui.hotReload.cargoPath` or Cargo from PATH. The existing native Rust hot-patch supervisor remains available for applications registered with it. [FerroUI hot-reload engine](../../docs/development/hot-reload.md)
+Discovery starts at the active file and uses the nearest Cargo manifest inside the workspace. Configured targets can specify `label`, a workspace-relative `manifestPath`, `package`, `binary`, `features`, and application `args` in `ferroui.hotReload.targets`. Cargo discovery and builds both start in the selected manifest's directory, so they use the same Cargo configuration. The extension uses `ferroui.hotReload.cargoPath` or Cargo from PATH. [FerroUI hot-reload engine](../../docs/development/hot-reload.md)
 
 ## Drive the designer with MCP
 

@@ -1,4 +1,4 @@
-import type { CanvasSnapshot, FromDesigner, RuntimeRow, ToDesigner } from '../src/protocol';
+import type { CanvasSnapshot, DesignerViewState, FromDesigner, RuntimeRow, ToDesigner } from '../src/protocol';
 import { Artboard } from './artboard';
 import { CanvasDrag } from './canvasDrag';
 import { CanvasInput } from './canvasInput';
@@ -7,7 +7,7 @@ import { Counterpart } from './counterpart';
 import { anchorPopover, element } from './dom';
 import { ViewportMenu } from './viewportMenu';
 
-declare function acquireVsCodeApi(): { postMessage(message: FromDesigner): void };
+declare function acquireVsCodeApi(): { postMessage(message: FromDesigner): void; setState(state: DesignerViewState): void };
 const vscode = acquireVsCodeApi();
 const status = element('status');
 const blocks = element<HTMLSelectElement>('blocks');
@@ -134,6 +134,7 @@ function showStatus(kind: 'busy' | 'error' | 'notice' | 'ready', text = ''): voi
 
 function receive(message: ToDesigner): void {
     switch (message.type) {
+        case 'viewState': vscode.setState(message.state); return;
         case 'drag': drag.setGesture(message.gesture); return;
         case 'placement': drag.show(message); return;
         case 'pending':

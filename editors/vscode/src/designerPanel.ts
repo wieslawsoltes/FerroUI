@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import { NativePreview } from './nativePreview';
-import { DEFAULT_VIEWPORT, MAX_VIEWPORT_SIZE, MIN_VIEWPORT_SIZE, errorMessage, type Asset, type CanvasSnapshot, type DragMessage, type DropHint, type FrameTarget, type FromDesigner, type Language, type NodeOperation, type NodeTarget, type Operation, type Placement, type Snapshot, type Source, type ToDesigner, type Viewport } from './protocol';
+import { DEFAULT_VIEWPORT, errorMessage, isViewport, type Asset, type CanvasSnapshot, type DragMessage, type DropHint, type FrameTarget, type FromDesigner, type Language, type NodeOperation, type NodeTarget, type Operation, type Placement, type Snapshot, type Source, type ToDesigner, type Viewport } from './protocol';
 import { applyTextEdits, asPosition, asRange, sourceOf } from './textDocument';
-import { designerHtml } from './view';
+import { designerHtml, webviewOptions } from './view';
 import type { Inspection, InspectionTarget, Range, ResourceRow, RuntimeRow, RuntimeTreeMode } from './protocol';
 
 interface Frame {
@@ -27,7 +27,7 @@ export class DesignerPanel implements vscode.Disposable {
     private pending = true;
     private rendering = false;
     private editing = false;
-    private viewport = DEFAULT_VIEWPORT;
+    private viewport: Viewport;
     private inspected = false;
     private readers = 0;
     private problem?: string;
@@ -47,8 +47,10 @@ export class DesignerPanel implements vscode.Disposable {
         caret: vscode.Position,
         onClose: () => void,
         private readonly onDrag: (message: DragMessage | Extract<FromDesigner, { type: 'previewDrop' }>) => void,
+        viewport = DEFAULT_VIEWPORT,
     ) {
         this.caret = caret;
+        this.viewport = viewport;
         let visible = panel.visible;
         this.subscriptions.push(
             panel.onDidDispose(() => { this.dispose(); onClose(); }),
@@ -68,7 +70,7 @@ export class DesignerPanel implements vscode.Disposable {
                 }
                 this.schedule();
             }),
-            vscode.workspace.onDidCloseTextDocument(closed => { if (closed === document) this.dispose(); }),
+            vscode.workspace.onDidCloseTextDocument(closed => { if (closed === document) panel.dispose(); }),
             vscode.window.onDidChangeTextEditorSelection(event => {
                 if (event.textEditor.document === document && event.selections[0]) this.updateCaret(event.selections[0].active);
             }),
@@ -76,6 +78,7 @@ export class DesignerPanel implements vscode.Disposable {
                 if (event.affectsConfiguration('ferroui.preview.path')) { this.stopClient(); this.schedule(0); }
             }),
         );
+        panel.webview.options = webviewOptions(context.extensionUri);
         panel.webview.html = designerHtml(panel.webview, context.extensionUri, language);
     }
 
@@ -98,6 +101,7 @@ export class DesignerPanel implements vscode.Disposable {
     get selectedNode(): Snapshot['nodes'][number] | undefined { return this.runtime ? undefined : this.nodes.find(node => node.id === this.selected); }
     get runtimeSelection(): RuntimeRow | undefined { return this.runtime; }
     get dimensions(): Viewport { return this.viewport; }
+    get canvasReady(): boolean { return this.ready && this.panel.visible; }
     get status(): string | undefined {
         if (this.editing) return 'Applying edit…';
         if (this.currentToken === undefined) return this.problem ?? 'Updating preview…';
@@ -230,6 +234,7 @@ export class DesignerPanel implements vscode.Disposable {
         this.selected = id;
         const token = this.currentToken;
         if (token !== undefined) this.post({ type: 'selection', token, selected: id });
+        this.rememberView();
         this.changed.fire();
     }
 
@@ -256,13 +261,14 @@ export class DesignerPanel implements vscode.Disposable {
         this.pending = true;
         this.problem = undefined;
         this.post({ type: 'pending' });
+        this.rememberView();
         this.changed.fire();
         clearTimeout(this.timer);
         this.timer = setTimeout(() => { this.timer = undefined; void this.render(); }, delay);
     }
 
     private async render(): Promise<void> {
-        if (this.disposed || !(this.inspected || this.readers || this.panel.visible && this.ready) || !this.pending || this.rendering || this.timer) return;
+        if (this.disposed || !(this.inspected || this.readers || this.canvasReady) || !this.pending || this.rendering || this.timer) return;
         this.rendering = true;
         this.pending = false;
         const token = this.generation;
@@ -322,11 +328,7 @@ export class DesignerPanel implements vscode.Disposable {
             return;
         }
         if (message.type === 'viewport') {
-            const value = message.viewport;
-            if (!value || [value.width, value.height].some(n => !Number.isInteger(n) || n < MIN_VIEWPORT_SIZE || n > MAX_VIEWPORT_SIZE)
-                || typeof value.dark !== 'boolean') return;
-            this.viewport = value;
-            this.schedule(0);
+            if (isViewport(message.viewport)) this.configure(message.viewport);
             return;
         }
         const frame = this.frame;
@@ -391,6 +393,7 @@ export class DesignerPanel implements vscode.Disposable {
     }
 
     private syncCanvas(): void {
+        this.rememberView();
         const frame = this.frame;
         if (frame && this.currentToken !== undefined) {
             const anchor = frame.snapshot.activeBlock?.start;
@@ -401,6 +404,14 @@ export class DesignerPanel implements vscode.Disposable {
         } else {
             this.post({ type: 'pending' });
         }
+    }
+
+    private rememberView(): void {
+        const block = this.frame?.snapshot.activeBlock;
+        const caret = this.blockOffset !== undefined && block && !asRange(block).contains(this.caret)
+            ? this.document.positionAt(this.blockOffset) : this.document.validatePosition(this.caret);
+        this.post({ type: 'viewState', state: { version: 1, uri: this.document.uri.toString(),
+            caret: { line: caret.line, character: caret.character }, viewport: this.viewport } });
     }
 
     private async getClient(): Promise<NativePreview> {
@@ -422,7 +433,7 @@ export class DesignerPanel implements vscode.Disposable {
     }
 
     post(message: ToDesigner): void {
-        if (!this.disposed && this.ready && this.panel.visible) void this.panel.webview.postMessage(message);
+        if (!this.disposed && this.canvasReady) void this.panel.webview.postMessage(message);
     }
 
     dispose(): void {
@@ -431,7 +442,6 @@ export class DesignerPanel implements vscode.Disposable {
         this.changed.fire();
         clearTimeout(this.timer);
         this.stopClient();
-        this.panel.dispose();
         this.subscriptions.forEach(subscription => subscription.dispose());
         this.changed.dispose();
     }

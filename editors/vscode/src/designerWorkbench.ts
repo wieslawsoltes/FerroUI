@@ -4,11 +4,12 @@ import { ASSETS_VIEW, AssetsView } from './assetsView';
 import { DetailsViews, EVENTS_VIEW, RESOURCES_VIEW } from './detailsViews';
 import { DesignerPanel } from './designerPanel';
 import { DesignerDrag } from './designerDrag';
+import { DESIGNER_VIEW, restoredDesigner } from './designerViewState';
 import { DockView } from './dockView';
 import { OutlineView } from './outlineView';
 import { SelectionInspection } from './selectionInspection';
 import { PROPERTIES_VIEW, PropertiesView } from './propertiesView';
-import { errorMessage, type DesignerView, type DetailsView, type DragOrigin, type FrameTarget, type FromAssets, type FromDetails, type FromOutline, type FromToolbox, type NodeOperation, type NodeTarget, type OutlineMode, type ToolboxState, type ToToolbox } from './protocol';
+import { errorMessage, type DesignerView, type DetailsView, type DragOrigin, type FrameTarget, type FromAssets, type FromDetails, type FromOutline, type FromToolbox, type Language, type NodeOperation, type NodeTarget, type OutlineMode, type ToolboxState, type ToToolbox, type Viewport } from './protocol';
 import { languageOf } from './textDocument';
 import { toolboxHtml, webviewOptions } from './view';
 
@@ -50,6 +51,9 @@ export class DesignerWorkbench implements vscode.Disposable {
             () => { void this.showDock(TOOLBOX_VIEW); },
             async (frame, range) => { await this.active?.revealSource(frame, range); });
         this.subscriptions = [
+            vscode.window.registerWebviewPanelSerializer(DESIGNER_VIEW, {
+                deserializeWebviewPanel: (panel, state) => this.restore(panel, state),
+            }),
             vscode.window.registerWebviewViewProvider(OUTLINE_VIEW, this.outline),
             vscode.window.registerWebviewViewProvider(TOOLBOX_VIEW, this.toolbox),
             vscode.window.registerWebviewViewProvider(PROPERTIES_VIEW, this.properties),
@@ -98,16 +102,41 @@ export class DesignerWorkbench implements vscode.Disposable {
             this.setActive(previous);
             return previous;
         }
-        const panel = vscode.window.createWebviewPanel('ferroui.designer', `Design · ${path.basename(document.fileName)}`, {
+        const panel = vscode.window.createWebviewPanel(DESIGNER_VIEW, `Design · ${path.basename(document.fileName)}`, {
             viewColumn: vscode.ViewColumn.Beside, preserveFocus: true,
         }, { ...webviewOptions(this.context.extensionUri), retainContextWhenHidden: true });
+        const designer = this.attach(panel, document, language, position);
+        this.setActive(designer);
+        return designer;
+    }
+
+    private async restore(panel: vscode.WebviewPanel, state: unknown): Promise<void> {
+        try {
+            const saved = restoredDesigner(state);
+            if (saved) {
+                const document = await vscode.workspace.openTextDocument(saved.uri);
+                const language = languageOf(document);
+                if (language && !this.disposed && !this.panels.has(document.uri.toString())) {
+                    this.attach(panel, document, language, document.validatePosition(saved.caret), saved.viewport);
+                    this.followFocus();
+                    return;
+                }
+            }
+        } catch (error) {
+            this.output.appendLine(`Could not restore the designer. ${errorMessage(error)}`);
+        }
+        panel.dispose();
+    }
+
+    private attach(panel: vscode.WebviewPanel, document: vscode.TextDocument, language: Language,
+        caret: vscode.Position, viewport?: Viewport): DesignerPanel {
+        const key = document.uri.toString();
         const designer: DesignerPanel = new DesignerPanel(this.context, this.output, panel, document, ++this.nextSession, language,
-            position, () => { this.panels.delete(key); this.followFocus(); }, message => {
+            caret, () => { this.panels.delete(key); this.followFocus(); }, message => {
                 void this.drag.receive(designer, message).catch(error => designer.post({ type: 'edit', error: errorMessage(error) }));
-            });
+            }, viewport);
         designer.onDidChange(() => this.followFocus());
         this.panels.set(key, designer);
-        this.setActive(designer);
         return designer;
     }
 

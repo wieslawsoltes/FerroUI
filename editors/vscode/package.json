@@ -30,7 +30,8 @@
   },
   "main": "./dist/extension.js",
   "activationEvents": [
-    "onLanguage:ferroui-xaml"
+    "onLanguage:ferroui-xaml",
+    "onWebviewPanel:ferroui.designer"
   ],
   "contributes": {
     "mcpServerDefinitionProviders": [
