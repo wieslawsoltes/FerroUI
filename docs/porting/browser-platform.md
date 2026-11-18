@@ -745,8 +745,72 @@ went to 17 MB on 2026-10-31 and back to 16 MB with #441.
 
 The module with threads follows within 0.1 MB (13.81 MB on 87c21343c). The step that took most
 off the transfer is the end of unwinding: without landing pads and their cleanup code the module
-lost 8.5 MB raw and 2.2 MB with gzip. What the module is made of now, by crate, is in the
-summary of a run of `browser.yml` by hand with the input `size-report`.
+lost 8.5 MB raw and 2.2 MB with gzip. What the module is made of now is in the next section.
+
+### What the module is made of (2026-11-18, #441)
+
+Run 44320313956 of `browser.yml` with the input `size-report`, on `main` at eb4bfd6b5 with the
+tooling of #441: the published module is 39.65 MB raw, 13.88 MB with gzip -9 and 9.26 MB with
+Brotli -11 (`module-sizes.mjs` on the site of the run). The attribution is of the same build
+linked again with its function names (`--profiling-funcs`, no change of code) and the link map of
+wasm-ld, by `wasm-size-report.py --map` on the artifact of the run; its gzip columns are Python's
+zlib, and "saved" is how much smaller the gzip of the whole code section is without the row.
+
+| Section of the module | MB | MB gzip |
+|---|---:|---:|
+| code | 30.70 | 9.24 |
+| data (constants and embedded files) | 8.50 | 3.43 |
+| function table (element section) | 0.30 | 0.24 |
+
+Code by origin (the crate of the name of a function; a generic function instantiated for a type of
+another crate counts for the crate that defines it):
+
+| Origin | MB | MB gzip (alone) | MB gzip saved |
+|---|---:|---:|---:|
+| `ferroui_base` | 9.63 | 2.51 | 2.52 |
+| `control_catalog` (the compiled pages and the code of the sample) | 4.56 | 1.15 | 1.15 |
+| Skia with FreeType (C++) | 3.37 | 1.27 | 1.28 |
+| `ferroui_controls` | 3.08 | 1.11 | 1.13 |
+| `ferroui_themes_winui` | 1.28 | 0.31 | 0.31 |
+| `core`, `alloc`, `std`, `hashbrown` | 1.46 | 0.45 | 0.48 |
+| `ferroui_treedatagrid_core`, `ferroui_controls_treedatagrid`, `treedatagrid_demo` | 1.25 | 0.31 | 0.32 |
+| `ferroui_markup_xaml` (the runtime library of compiled markup) | 0.55 | 0.13 | 0.15 |
+| `ferroboard_core`, `ferroboard_core_ferro`, `ferroboard_controls` | 0.83 | 0.27 | 0.28 |
+| `ferroui_controls_color_picker` | 0.37 | 0.09 | 0.09 |
+| HarfBuzz, the image codecs of Skia and zlib, the C and C++ runtime | 0.79 | 0.27 | 0.28 |
+
+The largest mechanisms: closures (`FnOnce::call_once`, 14,424 functions, 5.60 MB, 1.45 MB saved
+with gzip), of which the 203 build closures of the compiled pages of the catalog are 3.29 MB
+(0.79 MB with gzip alone), the type and markup metadata closures 0.49 MB and the class vtables
+0.29 MB; the deferred control themes of the WinUI theme 1.03 MB; drop glue 0.45 MB; the property
+code per value type (`set_and_raise_core`, `update_source`, the routes of `StyledProperty<T>`,
+`any_value_*`) a few tenths of a MB per family, as in `binary-size.md`, section 5.5.
+
+Constant data by crate, from the link map (8.90 MB, sizes of the link before wasm-opt):
+
+| Origin | MB | What |
+|---|---:|---|
+| `ferroui_fonts_inter` | 1.88 | the six Inter fonts (0.93 MB with gzip), the default family of the browser |
+| `ferroboard_core` | 1.51 | the 206 resources of the keyboard: JSON layouts (0.60 MB, 0.05 MB with gzip) and gzip files, the English dictionary and the emoji lists of seven languages (0.63 MB, incompressible) |
+| `control_catalog` | 0.84 | strings and tables of the pages |
+| `ferroui_base` | 0.78 | the Unicode tries of text formatting (0.29 MB), strings, tables |
+| `ferroui_themes_winui` | 0.75 | the rows of the compiled theme |
+| `ferroui_controls` | 0.65 | strings and tables |
+| `ferroui_livecharts`, `ferroui_dialogs` | 0.37 | the world map of the GeoMap page (0.18 MB) and the font of the About dialog (0.17 MB) |
+
+What else the attribution found, each measured as the gzip of the code section without it:
+
+| Candidate | MB raw | MB gzip saved | Why it is not changed here |
+|---|---:|---:|---|
+| The Inter fonts as files of the site, fetched with the start-up files as the catalog's own fonts are | 1.88 | 0.93 | Moves bytes out of the module without making the site smaller; needs a start-up file list in the script of the platform for a crate other than the application |
+| The gzip resources of the keyboard fetched on demand | 0.63 | 0.63 | A change of how FerroBoard loads its resources |
+| The Simple theme of the colour picker (`ferroui_controls_color_picker::compiled_xaml::*simple*`), which the catalog does not use | 0.16 | 0.04 | Its document is public, and the loader table of the crate answers its URI, which keeps it linked (`xaml-themes.md`, section 4.1); a document loaded at run time can include it by URI (the tests of the catalog do) |
+| `image`, `png`, `fdeflate` and `miniz_oxide` 0.8, a second PNG decoder for the bundled QR image of the QR page | 0.08 | 0.04 | Small; the framework's decoder needs the render interface on the thread of the page and in the unit test of the sample |
+| `ferroui-markup-xaml` at `opt-level = "s"` instead of 3 | at most 0.55 | at most 0.15 for the whole crate | It runs at the construction of the theme and of every page |
+| `unicode-normalization` replaced by the NFKD of `icu_normalizer`, which `url` already links | 0.10 | less than 0.05 | Small; the NFKD data of ICU would be added |
+
+The `browser` profile already has every cold crate at `opt-level = "z"`: only the property system
+and the controls (`"s"`, scrolling) and the markup crates (3, start-up) are faster.
 
 ### Not done, and why
 
