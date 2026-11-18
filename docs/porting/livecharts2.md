@@ -126,6 +126,12 @@ The `TooltipFormatter` of a map (`IGeoMapView`) is a code-only property of the c
 
 `mapping.json` records as ported `GeoMap_TooltipFormatter_IsAppliedToEachValue` and `LabelsMeasureTest.MaxWidth`, and `DrawingTextExtensions` partial (the shaping, right-to-left text and typeface fallback are the native text stack's): the report counts 212 ported and 111 partial test declarations.
 
+### #624: the motion of the Sankey and treemap visuals and the mappers of custom models
+
+The other chart kinds animate through the native scene transition: a primitive of a point that was drawn before moves to its new geometry, and one that enters or leaves fades. `SceneTransition::with_node_motion` gives the Sankey and treemap charts the entrances and exits of the source's visuals (`EnsureVisualForNode`, `EnsureVisualForLink`, `EnsureArcVisualForNode`, `EnsureChordVisualForLink` and the `CollapseRemoved*` of `CoreSankeySeries`; `EnsureVisual` and `CollapseRemovedVisual` of `CoreTreemapSeries`): a new node rectangle or tile grows from the zero size at its centre and a removed one collapses to it; a new ribbon opens from the middle of its source edge and a removed one narrows to the middles of both its edges; a new arc node opens from its middle angle and a removed one closes on its start angle; a chord grows from and collapses into the centre of the arcs; the labels fade in and out as the source sets their opacity, and a primitive without a point (the title, the legend) appears at once. The chart uses it for these two kinds, also at the first draw, as the source animates the first measure.
+
+The mappers of custom models (`LabelMapper`, `NodeColorMapper` and `LinkColorMapper` of the Sankey series, `ValueMapper`, `ChildrenMapper` and `LabelMapper` of the treemap series) map once, as `set_mapped_values` maps the points of a Cartesian series: `SankeySeries::set_mapped_nodes` makes a node for each model with its name and colour and returns them, `SankeySeries::set_mapped_links` makes the links between them by index with their weights and colours, and `TreemapSeries::set_mapped_nodes` makes the tree of the models with their weights and names. The tooltip formatters of these series are not ported.
+
 ### #624: `GaugeGenerator`, the theme's gauge rules and the needle animation
 
 `gauges.rs` of `ferroui-controls-livecharts` ports `GaugeGenerator`, `GaugeItem` and `BaseGaugeItem`: `GaugeGenerator::build_solid_gauge` makes a gauge series for each item with its value at the place of the item among empty values (a ring each) and `build_angular_gauge_sections` one of a single value relative to the minimum, without a hover push-out or data labels (`PieChartExtensions.AsSeries` with `GaugeOptions`); both add the fill series, a zero for each item, styled by the background items (`GaugeItem::BACKGROUND`), and run the builder of each item after the series is set up.
@@ -137,7 +143,7 @@ A needle turns to a new value over the animations speed of the chart in the cubi
 ## Remaining (#442)
 
 - Geographic map: a custom tooltip object (`IGeoMapTooltip`; no chart kind has one natively, `hover_changed` serves), visual elements other than circle markers at a coordinate, and the theme rules of the view.
-- Sankey and treemap: the entrance and exit animations of each node, ribbon and label (the native scene transition animates the scene instead), and the mappers of custom node models.
+- Sankey and treemap: the tooltip formatters of the series (the tooltip is the node name and value).
 - Polar: the placement of the tooltip of the source (the suggested locations of the hover areas, `GetTooltipLocation` and the layout of the default tooltip), which every chart kind shares; the polar chart shows the native tooltip, finds and labels its points as the source (#624). The source draws no axis names and has no polar sub-separators.
 - Heat series: SVG cell geometries and the colour animation of the cells; the heat legend has no label wrapping, background or animation (#624).
 - Tooltips and animations of the OHLC, error and heat series, which wait for the tooltip and animation suites.

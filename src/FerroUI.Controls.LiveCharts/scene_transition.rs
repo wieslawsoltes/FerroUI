@@ -88,6 +88,7 @@ pub struct SceneTransition {
     pairs: Vec<(Option<usize>, usize)>,
     exits: Vec<usize>,
     hit_pairs: Vec<Option<usize>>,
+    node_motion: bool,
 }
 
 impl SceneTransition {
@@ -149,6 +150,7 @@ impl SceneTransition {
             pairs,
             exits,
             hit_pairs,
+            node_motion: false,
         }
     }
 
@@ -157,11 +159,26 @@ impl SceneTransition {
         self
     }
 
-    /// The same transition, with its start, duration and easing, to another end scene (a frame
-    /// of the needles of a gauge while the scene moves).
+    /// The same transition, with its start, duration, easing and node motion, to another end
+    /// scene (a frame of the needles of a gauge while the scene moves).
     pub(crate) fn retarget(&self, to: Rc<Scene>) -> Self {
-        Self::new(self.from.clone(), to, self.started_ms, self.duration_ms)
-            .with_easing(self.easing.clone())
+        let mut transition = Self::new(self.from.clone(), to, self.started_ms, self.duration_ms)
+            .with_easing(self.easing.clone());
+        transition.node_motion = self.node_motion;
+        transition
+    }
+
+    /// The entrance and exit of the nodes, ribbons and tiles of a Sankey or treemap scene, as
+    /// the source's `EnsureVisualForNode`, `EnsureVisualForLink`, `EnsureArcVisualForNode`,
+    /// `EnsureChordVisualForLink` and `CollapseRemoved*`: a new rectangle grows from the zero
+    /// size at its centre and a removed one collapses to it; a new ribbon opens from the middle
+    /// of its source and a removed one narrows to the middles of its ends; an arc node opens
+    /// from its middle angle and a removed one closes on its start angle; a chord grows from and
+    /// collapses into the centre of the arcs. Labels fade in and out as other primitives do; a
+    /// new primitive without a point (a title, a legend) appears at once.
+    pub fn with_node_motion(mut self) -> Self {
+        self.node_motion = true;
+        self
     }
 
     pub fn is_completed(&self, now_ms: f64) -> bool {
@@ -199,6 +216,16 @@ impl SceneTransition {
         for &index in &self.exits {
             let mut old = self.from.primitives[index].clone();
             old.entity_key = primitive_entity_key(&self.from, &old);
+            if let Some(geometry) = self
+                .node_motion
+                .then(|| collapsed(&self.from, &old, false))
+                .flatten()
+                .and_then(|end| interpolate_geometry(&old.geometry, &end, geometry_progress))
+            {
+                old.geometry = geometry;
+                scene.primitives.push(old);
+                continue;
+            }
             old.style.opacity *= 1.0 - alpha_progress;
             if old.style.opacity > 0.0 {
                 scene.primitives.push(old);
@@ -240,6 +267,19 @@ impl SceneTransition {
             }
             let mut entering = target.clone();
             entering.entity_key = primitive_entity_key(&self.to, target);
+            if self.node_motion && old_index.is_none() {
+                if let Some(geometry) = collapsed(&self.to, target, true).and_then(|start| {
+                    interpolate_geometry(&start, &target.geometry, geometry_progress)
+                }) {
+                    entering.geometry = geometry;
+                    scene.primitives.push(entering);
+                    continue;
+                }
+                if target.id.is_none() {
+                    scene.primitives.push(entering);
+                    continue;
+                }
+            }
             entering.style.opacity *= alpha_progress;
             if entering.style.opacity > 0.0 {
                 scene.primitives.push(entering);
@@ -266,6 +306,117 @@ impl SceneTransition {
         scene.entity_keys = self.to.entity_keys.clone();
         scene
     }
+}
+
+/// The seed (`entering`) or the end of an exit of a node primitive (`with_node_motion`); `None`
+/// for a primitive that fades.
+fn collapsed(scene: &Scene, primitive: &Primitive, entering: bool) -> Option<Geometry> {
+    let id = primitive.id?;
+    match &primitive.geometry {
+        Geometry::Rectangle { rect, radius } => Some(Geometry::Rectangle {
+            rect: Rect::new(
+                rect.x + rect.width * 0.5,
+                rect.y + rect.height * 0.5,
+                0.0,
+                0.0,
+            ),
+            radius: *radius,
+        }),
+        Geometry::Path(commands) => {
+            let sector = |hit: &HitRegion| match hit.shape {
+                HitShape::AnnularSector {
+                    center,
+                    start_angle,
+                    sweep_angle,
+                    ..
+                } => Some((center, start_angle, sweep_angle)),
+                _ => None,
+            };
+            if let Some((center, start, sweep)) =
+                scene.hits.iter().filter(|h| h.id == id).find_map(sector)
+            {
+                // An arc node: every point at its radius on the middle angle (an entrance) or
+                // the start angle (an exit).
+                let angle = (if entering { start + sweep * 0.5 } else { start }).to_radians();
+                return Some(Geometry::Path(map_points(commands, |p| {
+                    let radius = (p.x - center.x).hypot(p.y - center.y);
+                    Point::new(
+                        center.x + radius * angle.cos(),
+                        center.y + radius * angle.sin(),
+                    )
+                })));
+            }
+            if let Some((center, _, _)) = scene.hits.iter().find_map(sector) {
+                // A chord of the arcs: the centre of the arcs.
+                return Some(Geometry::Path(map_points(commands, |_| center)));
+            }
+            // A ribbon of the vertical layout, from the source edge (the first and the last
+            // point) to the target edge: an entrance starts at the middle of the source, an exit
+            // narrows each end to its middle.
+            let points = path_points(commands);
+            let (first, last) = (*points.first()?, *points.last()?);
+            let source_middle = (first.y + last.y) * 0.5;
+            let target: Vec<_> = points
+                .iter()
+                .map(|p| p.y)
+                .filter(|&y| y != first.y && y != last.y)
+                .collect();
+            let target_middle = if target.is_empty() {
+                source_middle
+            } else {
+                let (low, high) = target
+                    .iter()
+                    .fold((f64::INFINITY, f64::NEG_INFINITY), |(lo, hi), &y| {
+                        (lo.min(y), hi.max(y))
+                    });
+                (low + high) * 0.5
+            };
+            Some(Geometry::Path(map_points(commands, |p| {
+                let y = if entering || p.y == first.y || p.y == last.y {
+                    source_middle
+                } else {
+                    target_middle
+                };
+                Point::new(p.x, y)
+            })))
+        }
+        _ => None,
+    }
+}
+
+fn path_points(commands: &[PathCommand]) -> Vec<Point> {
+    commands
+        .iter()
+        .flat_map(|command| match *command {
+            PathCommand::MoveTo(p) | PathCommand::LineTo(p) => vec![p],
+            PathCommand::CubicTo {
+                control1,
+                control2,
+                end,
+            } => vec![control1, control2, end],
+            PathCommand::Close => Vec::new(),
+        })
+        .collect()
+}
+
+fn map_points(commands: &[PathCommand], map: impl Fn(Point) -> Point) -> Vec<PathCommand> {
+    commands
+        .iter()
+        .map(|command| match *command {
+            PathCommand::MoveTo(p) => PathCommand::MoveTo(map(p)),
+            PathCommand::LineTo(p) => PathCommand::LineTo(map(p)),
+            PathCommand::CubicTo {
+                control1,
+                control2,
+                end,
+            } => PathCommand::CubicTo {
+                control1: map(control1),
+                control2: map(control2),
+                end: map(end),
+            },
+            PathCommand::Close => PathCommand::Close,
+        })
+        .collect()
 }
 
 fn interpolate(a: f64, b: f64, p: f64) -> f64 {
@@ -848,5 +999,190 @@ mod tests {
             assert!(t.is_completed(0.0));
             assert_eq!(t.sample(0.0), end);
         }
+    }
+
+    fn node_scene(primitives: Vec<Primitive>, hits: Vec<HitRegion>) -> Scene {
+        let mut s = Scene::new(Size::new(200.0, 200.0), Rect::new(0.0, 0.0, 200.0, 200.0));
+        s.primitives = primitives;
+        s.hits = hits;
+        s
+    }
+    fn node(point: usize, geometry: Geometry) -> Primitive {
+        Primitive::new(geometry, PaintStyle::fill(Color::from_rgb(0, 0, 255)))
+            .identified(PointId { series: 0, point })
+    }
+    fn rectangle(scene: &Scene, index: usize) -> Rect {
+        match scene.primitives[index].geometry {
+            Geometry::Rectangle { rect, .. } => rect,
+            _ => panic!("a rectangle"),
+        }
+    }
+    fn close(a: Point, b: Point) -> bool {
+        (a.x - b.x).abs() < 1e-9 && (a.y - b.y).abs() < 1e-9
+    }
+
+    /// CoreSankeySeries and CoreTreemapSeries: a new node or tile grows from the zero size at its
+    /// centre and a removed one collapses to it, at full opacity; a label fades and a primitive
+    /// without a point (a title) appears at once. Without node motion the new node fades in.
+    #[test]
+    fn nodes_grow_from_and_collapse_to_their_centre() {
+        let tile = |point| {
+            node(
+                point,
+                Geometry::Rectangle {
+                    rect: Rect::new(20.0, 40.0, 80.0, 40.0),
+                    radius: 0.0,
+                },
+            )
+        };
+        let label = Primitive::new(
+            Geometry::Text {
+                origin: Point::new(60.0, 50.0),
+                text: "A".into(),
+                size: 12.0,
+                rotation: 0.0,
+                anchor: ferroui_livecharts::TextAnchor::Center,
+            },
+            PaintStyle::fill(Color::from_rgb(0, 0, 0)),
+        )
+        .identified(PointId {
+            series: 0,
+            point: 0,
+        });
+        let title = Primitive::new(
+            Geometry::Text {
+                origin: Point::new(16.0, 10.0),
+                text: "Title".into(),
+                size: 20.0,
+                rotation: 0.0,
+                anchor: ferroui_livecharts::TextAnchor::Start,
+            },
+            PaintStyle::fill(Color::from_rgb(0, 0, 0)),
+        );
+        let empty = node_scene(Vec::new(), Vec::new());
+        let full = node_scene(vec![tile(0), label, title], Vec::new());
+        let mid = linear(empty.clone(), full.clone())
+            .with_node_motion()
+            .sample(50.0);
+        assert_eq!(rectangle(&mid, 0), Rect::new(40.0, 50.0, 40.0, 20.0));
+        assert_eq!(mid.primitives[0].style.opacity, 1.0);
+        assert_eq!(mid.primitives[1].style.opacity, 0.5, "the label fades in");
+        assert_eq!(
+            mid.primitives[2].style.opacity, 1.0,
+            "the title appears at once"
+        );
+        let faded = linear(empty, full.clone()).sample(50.0);
+        assert_eq!(rectangle(&faded, 0), Rect::new(20.0, 40.0, 80.0, 40.0));
+        assert_eq!(faded.primitives[0].style.opacity, 0.5);
+        let gone = node_scene(Vec::new(), Vec::new());
+        let leaving = linear(full, gone).with_node_motion().sample(50.0);
+        assert_eq!(rectangle(&leaving, 0), Rect::new(40.0, 50.0, 40.0, 20.0));
+        assert_eq!(leaving.primitives[0].style.opacity, 1.0);
+    }
+
+    /// A ribbon of the vertical layout opens from the middle of its source edge and narrows to
+    /// the middles of its ends when it leaves (`EnsureVisualForLink`, `CollapseRemovedRibbon`).
+    #[test]
+    fn ribbons_open_from_their_source_and_narrow_to_the_middles_of_their_ends() {
+        let ribbon = node(
+            5,
+            Geometry::Path(vec![
+                PathCommand::MoveTo(Point::new(10.0, 0.0)),
+                PathCommand::CubicTo {
+                    control1: Point::new(50.0, 0.0),
+                    control2: Point::new(50.0, 100.0),
+                    end: Point::new(90.0, 100.0),
+                },
+                PathCommand::LineTo(Point::new(90.0, 140.0)),
+                PathCommand::CubicTo {
+                    control1: Point::new(50.0, 140.0),
+                    control2: Point::new(50.0, 20.0),
+                    end: Point::new(10.0, 20.0),
+                },
+                PathCommand::Close,
+            ]),
+        );
+        let points = |scene: &Scene| match &scene.primitives[0].geometry {
+            Geometry::Path(commands) => path_points(commands),
+            _ => panic!("a path"),
+        };
+        let empty = node_scene(Vec::new(), Vec::new());
+        let full = node_scene(vec![ribbon], Vec::new());
+        let target = points(&full);
+        let entering = points(
+            &linear(empty.clone(), full.clone())
+                .with_node_motion()
+                .sample(50.0),
+        );
+        for (p, t) in entering.iter().zip(&target) {
+            assert!(close(*p, Point::new(t.x, (10.0 + t.y) * 0.5)), "{p:?}");
+        }
+        let leaving = points(&linear(full, empty).with_node_motion().sample(50.0));
+        // The source edge (0 to 20) narrows to 10 and the target edge (100 to 140) to 120.
+        assert!(close(leaving[0], Point::new(10.0, 5.0)));
+        assert!(close(leaving[3], Point::new(90.0, 110.0)));
+        assert!(close(leaving[4], Point::new(90.0, 130.0)));
+    }
+
+    /// An arc node opens from its middle angle (`EnsureArcVisualForNode`) and a chord grows from
+    /// the centre of the arcs (`EnsureChordVisualForLink`).
+    #[test]
+    fn arc_nodes_open_from_their_middle_angle_and_chords_from_the_centre() {
+        let center = Point::new(100.0, 100.0);
+        let at = |radius: f64, degrees: f64| {
+            let (sin, cos) = degrees.to_radians().sin_cos();
+            Point::new(center.x + radius * cos, center.y + radius * sin)
+        };
+        let arc = node(
+            0,
+            Geometry::Path(vec![
+                PathCommand::MoveTo(at(80.0, 0.0)),
+                PathCommand::LineTo(at(80.0, 90.0)),
+                PathCommand::LineTo(at(60.0, 90.0)),
+                PathCommand::Close,
+            ]),
+        );
+        let chord = node(
+            3,
+            Geometry::Path(vec![
+                PathCommand::MoveTo(at(60.0, 10.0)),
+                PathCommand::LineTo(at(60.0, 200.0)),
+                PathCommand::Close,
+            ]),
+        );
+        let hit = HitRegion {
+            id: PointId {
+                series: 0,
+                point: 0,
+            },
+            shape: HitShape::AnnularSector {
+                center,
+                inner_radius: 60.0,
+                outer_radius: 80.0,
+                start_angle: 0.0,
+                sweep_angle: 90.0,
+            },
+            center: at(80.0, 45.0),
+            value: 1.0,
+            label: String::new(),
+        };
+        let empty = node_scene(Vec::new(), Vec::new());
+        let full = node_scene(vec![arc, chord], vec![hit]);
+        let start = linear(empty, full.clone()).with_node_motion().sample(0.001);
+        let Geometry::Path(arc) = &start.primitives[0].geometry else {
+            panic!("the arc")
+        };
+        let seed = path_points(arc);
+        assert!(
+            seed[0].x > center.x && seed[0].y > center.y,
+            "on the middle angle"
+        );
+        assert!(((seed[0].y - center.y) - (seed[0].x - center.x)).abs() < 0.5);
+        let Geometry::Path(chord) = &start.primitives[1].geometry else {
+            panic!("the chord")
+        };
+        assert!(path_points(chord)
+            .iter()
+            .all(|p| (p.x - center.x).abs() < 0.5 && (p.y - center.y).abs() < 0.5));
     }
 }
