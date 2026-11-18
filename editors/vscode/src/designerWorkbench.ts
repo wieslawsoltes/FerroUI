@@ -75,6 +75,10 @@ export class DesignerWorkbench implements vscode.Disposable {
             });
         this.studio = new StudioView(changed);
         const snippets = vscode.workspace.createFileSystemWatcher('**/.ferroui/toolbox/*.xaml');
+        const xaml = vscode.workspace.createFileSystemWatcher('**/*.[xX][aA][mM][lL]');
+        const refreshResources = (uri: vscode.Uri) => {
+            for (const panel of this.panels.values()) panel.dependencyChanged(uri);
+        };
         const refreshToolbox = (uri: vscode.Uri) => {
             const folder = vscode.workspace.getWorkspaceFolder(uri);
             if (!folder) return;
@@ -84,6 +88,7 @@ export class DesignerWorkbench implements vscode.Disposable {
         };
         this.subscriptions = [
             snippets, snippets.onDidCreate(refreshToolbox), snippets.onDidChange(refreshToolbox), snippets.onDidDelete(refreshToolbox),
+            xaml, xaml.onDidCreate(refreshResources), xaml.onDidChange(refreshResources), xaml.onDidDelete(refreshResources),
             vscode.window.registerWebviewPanelSerializer(DESIGNER_VIEW, {
                 deserializeWebviewPanel: (panel, state) => this.restore(panel, state),
             }),

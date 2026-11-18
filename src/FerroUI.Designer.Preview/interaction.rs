@@ -28,7 +28,7 @@ pub(crate) fn input(renderer: &mut Renderer, request: Input) -> Result<Presentat
         return Err("Use a new canvas frame for preview input".into());
     }
     let host: Ref<Control> = stage.session.borrow().preview_host().upcast();
-    {
+    stage.sources.run(|| {
         let inspector = Inspector::shared();
         let mut inspector = inspector.borrow_mut();
         let (tool, args) = match request.action {
@@ -74,8 +74,8 @@ pub(crate) fn input(renderer: &mut Renderer, request: Input) -> Result<Presentat
                 allow_input: true,
                 ..Default::default()
             },
-        )?;
-    }
+        )
+    })?;
     renderer.present(request.next_frame)
 }
 

@@ -30,6 +30,8 @@ pub(crate) struct Render {
     pub(crate) frame: u64,
     #[serde(default, rename = "workspaceRoot")]
     pub(crate) workspace_root: Option<std::path::PathBuf>,
+    #[serde(default, rename = "localSources")]
+    pub(crate) local_sources: Vec<ferroui_designer_project::PreviewSourceBuffer>,
 }
 
 #[derive(Deserialize)]
@@ -131,6 +133,7 @@ pub(crate) struct Snapshot {
     pub(crate) image: Option<Image>,
     pub(crate) render_error: Option<String>,
     pub(crate) notices: Vec<String>,
+    pub(crate) dependencies: Vec<String>,
     pub(crate) project_assets: Vec<Asset>,
 }
 

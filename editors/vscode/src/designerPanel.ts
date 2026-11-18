@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import type { BuiltProject, BuiltProjects } from './builtProjects';
 import { CanvasRequests } from './canvasRequests';
+import { DesignerDependencies, dirtyXamlSources } from './designerDependencies';
 import { NativePreview } from './nativePreview';
 import { DEFAULT_VIEWPORT, errorMessage, isViewport, type Asset, type CanvasSnapshot, type DragMessage, type DropHint, type FrameTarget, type FromDesigner, type Language, type NodeOperation, type NodeTarget, type Operation, type Placement, type Snapshot, type Source, type ToDesigner, type Viewport } from './protocol';
 import { applyTextEdits, asPosition, asRange, sourceOf } from './textDocument';
@@ -21,6 +22,7 @@ interface Frame {
 
 export class DesignerPanel implements vscode.Disposable {
     private readonly canvasRequests = new CanvasRequests();
+    private readonly dependencies = new DesignerDependencies();
     private readonly subscriptions: vscode.Disposable[] = [];
     private readonly changed = new vscode.EventEmitter<void>();
     readonly onDidChange = this.changed.event;
@@ -80,13 +82,17 @@ export class DesignerPanel implements vscode.Disposable {
                 this.schedule(0);
             }),
             vscode.workspace.onDidChangeTextDocument(event => {
-                if (event.document !== document || !event.contentChanges.length) return;
+                if (!event.contentChanges.length) return;
+                if (event.document !== document) { this.dependencyChanged(event.document.uri); return; }
                 if (this.blockOffset !== undefined) {
                     this.blockOffset = offsetAfterChanges(this.blockOffset, event.contentChanges);
                 }
                 this.schedule();
             }),
-            vscode.workspace.onDidCloseTextDocument(closed => { if (closed === document) panel.dispose(); }),
+            vscode.workspace.onDidCloseTextDocument(closed => {
+                if (closed === document) panel.dispose();
+                else if (closed.isDirty) this.dependencyChanged(closed.uri);
+            }),
             vscode.window.onDidChangeTextEditorSelection(event => {
                 if (event.textEditor.document === document && event.selections[0]) this.updateCaret(event.selections[0].active);
             }),
@@ -421,6 +427,10 @@ export class DesignerPanel implements vscode.Disposable {
         this.timer = setTimeout(() => { this.timer = undefined; void this.render(); }, delay);
     }
 
+    dependencyChanged(uri: vscode.Uri): void {
+        if (!this.disposed && this.dependencies.change(uri)) this.schedule();
+    }
+
     private async render(): Promise<void> {
         if (this.disposed || !(this.inspected || this.readers || this.canvasReady) || !this.pending || this.rendering || this.timer) return;
         this.rendering = true;
@@ -432,12 +442,15 @@ export class DesignerPanel implements vscode.Disposable {
             ? this.document.positionAt(this.blockOffset) : this.document.validatePosition(this.caret);
         const source = sourceOf(this.document, this.language, caret);
         const project = this.project;
+        this.dependencies.start();
         try {
             const client = await this.getClient();
             const input = await client.inProject(source, project);
             const folder = vscode.workspace.getWorkspaceFolder(this.document.uri);
-            const snapshot = await client.render(input, viewport, token, folder?.uri.scheme === 'file' ? folder.uri.fsPath : undefined);
+            const snapshot = await client.render(input, viewport, token, folder?.uri.scheme === 'file' ? folder.uri.fsPath : undefined,
+                dirtyXamlSources(this.document, folder));
             if (this.disposed || token !== this.generation || version !== this.document.version) return;
+            if (this.dependencies.accept(snapshot.dependencies ?? [])) { this.schedule(0); return; }
             const anchor = snapshot.activeBlock?.start;
             const previousAnchor = this.frame?.snapshot.activeBlock?.start;
             const sameView = this.frame?.version === version && previousAnchor?.line === anchor?.line
@@ -460,6 +473,7 @@ export class DesignerPanel implements vscode.Disposable {
                 this.changed.fire();
             }
         } finally {
+            this.dependencies.stop();
             this.rendering = false;
             void this.render();
         }

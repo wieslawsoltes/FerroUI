@@ -54,7 +54,7 @@ pub(crate) fn present(renderer: &mut Renderer, request: Present) -> Result<Prese
     let provider = DesignerMcp::new(&stage.session);
     provider.validate(&query.name, &arguments)?;
     if let Some(selection) = &query.selection { select(stage, selection)?; }
-    provider.call(&query.name, &arguments, Permissions { allow_property_writes: true, ..Default::default() })?;
+    stage.sources.run(|| provider.call(&query.name, &arguments, Permissions { allow_property_writes: true, ..Default::default() }))?;
     renderer.present(request.next_frame)
 }
 
@@ -130,14 +130,14 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     // Retire the frame before touching the native session. VS Code owns the undo
     // transaction and renders a new frame from its buffer even on rejection.
     let stage = renderer.stage.take().expect("frame checked above");
-    provider.call(
+    stage.sources.run(|| provider.call(
         &query.name,
         &arguments,
         Permissions {
             allow_property_writes: true,
             ..Default::default()
         },
-    )?;
+    ))?;
     let session = stage.session.borrow();
     let source = session.document().source();
     let patches = if let Some(projection) = &design.rsx {

@@ -11,6 +11,7 @@ use ferroui_designer_core::NodeId;
 use ferroui_harfbuzz::HarfBuzzApplicationExtensions;
 use ferroui_headless::{FerroHeadlessPlatformExtensions, FerroHeadlessPlatformOptions};
 use ferroui_inspect::TreeKind;
+use ferroui_markup_xaml::source_overlay::SourceSnapshot;
 use ferroui_vello::VelloApplicationExtensions;
 use serde::Serialize;
 use std::collections::BTreeMap;
@@ -30,6 +31,7 @@ pub(crate) struct Stage {
     pub(crate) height: u32,
     pub(crate) placement_policy: Option<PlacementPolicy>,
     pub(crate) project_assets: Vec<ferroui_designer::DesignerAsset>,
+    pub(crate) sources: SourceSnapshot,
     _window: PreviewWindow,
 }
 
@@ -74,7 +76,7 @@ impl Renderer {
         Self { app, stage: None }
     }
 
-    pub(crate) fn render(&mut self, input: &Render, source: &str) -> Result<Frame, String> {
+    pub(crate) fn render(&mut self, input: &Render, source: &str, sources: SourceSnapshot) -> Result<Frame, String> {
         self.stage = None;
         if !(64..=1536).contains(&input.width) || !(64..=1536).contains(&input.height) {
             return Err("Preview width and height must be between 64 and 1536".into());
@@ -112,6 +114,7 @@ impl Renderer {
             height: input.height,
             placement_policy: None,
             project_assets: Vec::new(),
+            sources,
             _window: window,
         });
         Ok(frame)
@@ -121,7 +124,7 @@ impl Renderer {
         let stage = self.stage.as_mut().ok_or("Render the design first")?;
         stage.token = next;
         let mut session = stage.session.borrow_mut();
-        let frame = capture(&mut session)?;
+        let frame = stage.sources.run(|| capture(&mut session))?;
         let nodes = session
             .document()
             .ast()

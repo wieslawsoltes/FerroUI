@@ -3,6 +3,8 @@ use crate::edits::{addable_properties, can_remove, editable_attribute};
 use crate::protocol::{OutlineNode, Property, Render, Snapshot};
 use crate::projects::Project;
 use crate::renderer::Renderer;
+use ferroui_designer_project::local_preview_sources;
+use ferroui_markup_xaml::source_overlay::SourceSnapshot;
 
 pub(crate) fn render(renderer: &mut Renderer, input: &Render, project: Option<&Project>) -> Result<Snapshot, String> {
     renderer.stage = None;
@@ -27,7 +29,10 @@ pub(crate) fn render(renderer: &mut Renderer, input: &Render, project: Option<&P
     } else {
         (Vec::new(), None)
     };
-    let (image, bounds, render_error) = match renderer.render(input, design.xaml.source()) {
+    let local = local_preview_sources(input.workspace_root.as_deref(), &input.document.uri, &design.xaml, &input.local_sources);
+    let dependencies = local.dependencies.into_iter().collect();
+    let snapshot = SourceSnapshot::new(local.accepted, local.unavailable);
+    let (image, bounds, render_error) = match snapshot.run(|| renderer.render(input, design.xaml.source(), snapshot.clone())) {
         Ok(frame) => {
             notices.extend(frame.notices);
             (Some(frame.image), frame.bounds, None)
@@ -96,6 +101,7 @@ pub(crate) fn render(renderer: &mut Renderer, input: &Render, project: Option<&P
         image,
         render_error,
         notices,
+        dependencies,
         project_assets,
     })
 }

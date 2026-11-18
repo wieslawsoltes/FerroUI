@@ -3,7 +3,7 @@ import { createMessageConnection, StreamMessageReader, StreamMessageWriter } fro
 import type * as vscode from 'vscode';
 import type { BuiltProject } from './builtProjects';
 import type { NativeProjectInventory } from './projectInventory';
-import type { Asset, CanvasInteraction, CanvasPresentation, DropHint, EditResult, Inspection, InspectionTarget, Operation, Placement, ResourceRow, Snapshot, Source, Viewport } from './protocol';
+import type { Asset, CanvasInteraction, CanvasPresentation, DropHint, EditResult, Inspection, InspectionTarget, Operation, Placement, PreviewSourceBuffer, ResourceRow, Snapshot, Source, Viewport } from './protocol';
 import type { RsxLanguageDocument } from './rsxLanguageTypes';
 import type { HostedFrame, HostedInput, HostedSource } from './hostedProtocol';
 import type { NativeStageChange, PrototypeCommand, PrototypeHotspot, PrototypeScene, StageChecks, StageImage, StageManifest, StageModel, StagePick, StagePointer, StageStateOptions, StageTarget } from './stagesProtocol';
@@ -103,8 +103,8 @@ export class NativePreview implements vscode.Disposable {
         return this.send('stagesPrototype', { epoch, ...command });
     }
 
-    render(source: Source, viewport: Viewport, frame = 0, workspaceRoot?: string): Promise<Snapshot> {
-        return this.send('render', { ...source, ...viewport, frame, workspaceRoot });
+    render(source: Source, viewport: Viewport, frame = 0, workspaceRoot?: string, localSources?: PreviewSourceBuffer[]): Promise<Snapshot> {
+        return this.send('render', { ...source, ...viewport, frame, workspaceRoot, localSources });
     }
 
     placement(frame: number, placement: Placement): Promise<DropHint> {

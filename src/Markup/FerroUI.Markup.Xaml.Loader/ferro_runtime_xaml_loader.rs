@@ -102,7 +102,7 @@ impl FerroRuntimeXamlLoader {
             .map_err(|e| XamlLoadError::with_inner(format!("Unable to read the XAML document: {e}"), e))?;
         let mut included = Vec::new();
         let mut visited: Vec<String> = uri.iter().map(|uri| uri.as_str().to_string()).collect();
-        collect_included_documents(&*asset_loader(), uri.as_ref(), &text, &mut visited, &|_| false, &mut included);
+        collect_included_documents(&*asset_loader(), uri.as_ref(), &text, &mut visited, &|_| false, &mut included)?;
 
         // The text was read: the document is given again, with the same properties.
         let stream: Box<dyn Read> = Box::new(Cursor::new(text.into_bytes()));
@@ -280,7 +280,7 @@ impl FerroRuntimeXamlLoader {
         // included objects), so that the populated instance is the one compiled markup
         // builds.
         let mut included = Vec::new();
-        collect_included_documents(&*assets, Some(&uri), &text, &mut vec![uri.as_str().to_string()], skip, &mut included);
+        collect_included_documents(&*assets, Some(&uri), &text, &mut vec![uri.as_str().to_string()], skip, &mut included)?;
         Ok(DocumentGroup { uri, text, included, assembly: MarkupAssembly::find(assembly.name()) })
     }
 
@@ -367,7 +367,7 @@ fn collect_included_documents(
     visited: &mut Vec<String>,
     skip: &dyn Fn(&url::Url) -> bool,
     documents: &mut Vec<(url::Url, String)>,
-) {
+) -> Result<(), XamlLoadError> {
     for source in include_sources(xaml) {
         let Ok(reference) = UriRef::parse(&source) else { continue };
         // A relative source needs the URL of the including document.
@@ -384,9 +384,10 @@ fn collect_included_documents(
             continue;
         }
         visited.push(key);
-        #[cfg(all(feature = "hot-reload", debug_assertions))]
-        let overlay = ferroui_markup_xaml::source_overlay::source(included.as_str());
-        #[cfg(not(all(feature = "hot-reload", debug_assertions)))]
+        #[cfg(feature = "source-overlays")]
+        let overlay = ferroui_markup_xaml::source_overlay::try_source(included.as_str())
+            .map_err(XamlLoadError::with_message)?;
+        #[cfg(not(feature = "source-overlays"))]
         let overlay: Option<String> = None;
         let text = match overlay {
             Some(text) => text,
@@ -399,7 +400,8 @@ fn collect_included_documents(
         };
         let at = documents.len();
         documents.push((included.clone(), String::new()));
-        collect_included_documents(assets, Some(&included), &text, visited, skip, documents);
+        collect_included_documents(assets, Some(&included), &text, visited, skip, documents)?;
         documents[at].1 = text;
     }
+    Ok(())
 }

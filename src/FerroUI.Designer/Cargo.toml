@@ -47,7 +47,7 @@ ferroui-treedatagrid-core.workspace = true
 ferroui-inspect.workspace = true
 ferroui-hot-reload.workspace = true
 ferroui-markup-xaml = { workspace = true, features = ["source-overlays"] }
-ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
+ferroui-markup-xaml-loader = { workspace = true, features = ["source-overlays"] }
 ferroui-designer-core = { workspace = true }
 ferroui-designer-animation = { workspace = true }
 ferroui-designer-collaboration = { workspace = true }

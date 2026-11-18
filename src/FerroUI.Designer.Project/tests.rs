@@ -30,6 +30,41 @@ impl Drop for Fixture {
 }
 
 #[test]
+fn preview_resources_resolve_transitive_files_with_owned_drafts_and_uri_aliases() {
+    let fixture = Fixture::new();
+    let source = r#"<Grid xmlns="https://github.com/ferroui"><ResourceInclude Source="Resources/Outer.xaml"/></Grid>"#;
+    let uri = fixture.write("View.xaml", source);
+    let outer = fixture.write("Resources/Outer.xaml", r#"<ResourceDictionary xmlns="https://github.com/ferroui"><ResourceInclude><ResourceInclude.Source>Color%20and%20size.xaml</ResourceInclude.Source></ResourceInclude></ResourceDictionary>"#);
+    let values = fixture.write("Resources/Color and size.xaml", "\u{feff}<ResourceDictionary/>");
+    let overrides = [PreviewSourceBuffer { uri: values.clone(), source: Some("<ResourceDictionary><!-- draft --></ResourceDictionary>".into()) }];
+    let document = ferroui_designer_core::Document::new(source).unwrap();
+    let graph = local_preview_sources(Some(&fixture.0), &uri, &document, &overrides);
+    assert_eq!(graph.dependencies.len(), 2);
+    assert!(graph.accepted.contains_key(&outer));
+    assert!(graph.accepted[&values].contains("<!-- draft -->"));
+    assert!(graph.unavailable.is_empty());
+    let graph = local_preview_sources(Some(&fixture.0), &uri, &document, &[]);
+    assert_eq!(graph.accepted[&values], "<ResourceDictionary/>");
+}
+
+#[test]
+fn preview_resources_fence_cycles_missing_and_out_of_scope_paths() {
+    let fixture = Fixture::new();
+    let outside = Fixture::new();
+    let outside_uri = outside.write("Sensitive.xaml", "<ResourceDictionary/>");
+    let source = format!(r#"<Grid xmlns="https://github.com/ferroui" xmlns:other="urn:vendor"><ResourceInclude Source="A.xaml"/><ResourceInclude Source="Missing.xaml"/><ResourceInclude Source="{outside_uri}"/><other:ResourceInclude Source="Ignored.xaml"/></Grid>"#);
+    let uri = fixture.write("View.xaml", &source);
+    let cyclic = fixture.write("A.xaml", r#"<ResourceDictionary xmlns="https://github.com/ferroui"><ResourceInclude Source="A.xaml"/></ResourceDictionary>"#);
+    let graph = local_preview_sources(Some(&fixture.0), &uri, &ferroui_designer_core::Document::new(source).unwrap(), &[]);
+    assert!(graph.accepted.is_empty());
+    assert!(graph.unavailable[&cyclic].contains("Circular"));
+    assert!(graph.unavailable[&outside_uri].contains("inside"));
+    let missing = file_uri(&fixture.0.join("Missing.xaml")).unwrap();
+    assert!(graph.dependencies.contains(&missing));
+    assert_eq!(graph.unavailable.len(), 3);
+}
+
+#[test]
 fn toolbox_snippets_overlay_the_active_package_and_ignore_invalid_fragments() {
     let fixture = Fixture::new();
     fixture.write(".ferroui/toolbox/Card.xaml", "<Button Content='Shared'/>");

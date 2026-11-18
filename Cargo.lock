@@ -1966,6 +1966,7 @@ dependencies = [
  "ferroui-harfbuzz",
  "ferroui-headless",
  "ferroui-inspect",
+ "ferroui-markup-xaml",
  "ferroui-mcp",
  "ferroui-remote-protocol",
  "ferroui-themes-winui",

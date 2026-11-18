@@ -28,6 +28,7 @@ ferroui-designer-tools.workspace = true
 ferroui-harfbuzz.workspace = true
 ferroui-headless.workspace = true
 ferroui-inspect.workspace = true
+ferroui-markup-xaml = { workspace = true, features = ["source-overlays"] }
 ferroui-mcp.workspace = true
 ferroui-remote-protocol.workspace = true
 ferroui-themes-winui.workspace = true

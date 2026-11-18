@@ -118,7 +118,8 @@ fn run(path: &Path, workspace: &Path, artifacts: &Path, accept: bool) -> Result<
                 height: scenario.viewport.height,
                 dark: scenario.viewport.dark,
                 frame: 1,
-                workspace_root: None,
+                workspace_root: Some(workspace.into()),
+                local_sources: Vec::new(),
             };
             let mut renderer = Renderer::new();
             let preview = crate::snapshot::render(&mut renderer, &input, None)?;

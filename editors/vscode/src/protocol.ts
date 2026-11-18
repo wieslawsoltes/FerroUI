@@ -12,6 +12,7 @@ export interface Source {
     caret: Position;
     project?: number;
 }
+export interface PreviewSourceBuffer { uri: string; source: string | null }
 export interface Viewport { width: number; height: number; dark: boolean }
 export const DEFAULT_VIEWPORT: Viewport = { width: 800, height: 520, dark: false };
 export const MIN_VIEWPORT_SIZE = 64;
@@ -116,6 +117,7 @@ export interface Snapshot {
     image: { png: string; width: number; height: number } | null;
     renderError: string | null;
     notices: string[];
+    dependencies?: string[];
     projectAssets?: Asset[];
 }
 export type NodeOperation =

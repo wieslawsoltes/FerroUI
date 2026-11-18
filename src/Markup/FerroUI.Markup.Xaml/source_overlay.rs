@@ -61,27 +61,23 @@ pub(crate) fn capture_snapshot() -> Option<SourceSnapshot> {
 
 /// Native includes preserve errors as errors instead of silently reading older
 /// assets when an explicitly supplied source is temporarily unavailable.
-pub(crate) fn try_source(uri: &str) -> Result<Option<String>, String> {
-    if let Some(snapshot) = capture_snapshot() {
+pub fn try_source(uri: &str) -> Result<Option<String>, String> {
+    let snapshot = capture_snapshot();
+    if let Some(snapshot) = &snapshot {
         snapshot.record_request(uri);
         if let Some(message) = snapshot.unavailable.get(uri) {
             return Err(message.clone());
         }
     }
-    Ok(source(uri))
+    let current = CURRENT.with(|slot| slot.borrow().get(uri).cloned())
+        .or_else(|| snapshot.as_ref().and_then(|snapshot| snapshot.sources.get(uri).cloned()));
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    let current = current.or_else(|| publication::published_source(uri));
+    Ok(current)
 }
 
 pub fn source(uri: &str) -> Option<String> {
-    if let Some(snapshot) = capture_snapshot() {
-        snapshot.record_request(uri);
-        if snapshot.unavailable.contains_key(uri) {
-            return None;
-        }
-    }
-    let current = CURRENT.with(|slot| slot.borrow().get(uri).cloned());
-    #[cfg(all(feature = "hot-reload", debug_assertions))]
-    let current = current.or_else(|| publication::published_source(uri));
-    current
+    try_source(uri).ok().flatten()
 }
 /// Restores the prior snapshot on normal return and unwind. Never transfers UI objects across threads.
 pub fn with_sources<T>(sources: Rc<Sources>, action: impl FnOnce() -> T) -> T {
@@ -204,6 +200,23 @@ mod publication {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn explicit_includes_survive_the_authored_document_transaction() {
+        let primary = "file:///workspace/View.xaml";
+        let included = "file:///workspace/Colors.xaml";
+        let invalid = "file:///workspace/Broken.xaml";
+        let snapshot = SourceSnapshot::new(
+            Sources::from([(included.into(), "draft resources".into())]),
+            BTreeMap::from([(invalid.into(), "included source needs repair".into())]),
+        );
+        snapshot.run(|| with_sources(Rc::new(Sources::from([(primary.into(), "view".into())])), || {
+            assert_eq!(try_source(primary).unwrap().as_deref(), Some("view"));
+            assert_eq!(try_source(included).unwrap().as_deref(), Some("draft resources"));
+            assert_eq!(try_source(invalid).unwrap_err(), "included source needs repair");
+        }));
+        assert!(try_source(included).unwrap().is_none());
+    }
 
     #[cfg(all(feature = "hot-reload", debug_assertions))]
     #[test]
