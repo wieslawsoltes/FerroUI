@@ -359,7 +359,8 @@ mod tests {
         }
 
         fn get_system_color(&self, index: i32) -> u32 {
-            usize::try_from(index).ok().and_then(|index| self.accessibility.system_colors.get().get(index).copied()).unwrap_or(0)
+            let colors = self.accessibility.system_colors.get();
+            usize::try_from(index).ok().and_then(|index| colors.get(index).copied()).unwrap_or(0)
         }
     }
 
