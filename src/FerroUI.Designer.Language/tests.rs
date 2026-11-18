@@ -1157,6 +1157,33 @@ fn symlink_document_aliases_share_versions_symbols_and_project_snapshots() {
     assert_eq!(service.version(&alias), Some(-1));
     assert_eq!(service.remove_solution(&directory), 1);
     assert!(service.document(&uri).is_none());
+
+    let mut server = lsp::LspServer::default();
+    server.handle(json!({"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}));
+    server.handle(json!({
+        "jsonrpc":"2.0","method":"textDocument/didOpen",
+        "params":{"textDocument":{"uri":alias,"version":5,"text":source}}
+    }));
+    let positions = json!({
+        "textDocument":{"uri":alias}, "position":{"line":0,"character":offset}
+    });
+    let definitions = server.handle(json!({
+        "jsonrpc":"2.0","id":2,"method":"textDocument/definition","params":positions
+    }));
+    assert_eq!(definitions[0]["result"][0]["uri"], alias);
+    let references = server.handle(json!({
+        "jsonrpc":"2.0","id":3,"method":"textDocument/references","params":positions
+    }));
+    assert_eq!(references[0]["result"][0]["uri"], alias);
+    let mut rename_args = positions;
+    rename_args["newName"] = json!("Renamed");
+    let rename = server.handle(json!({
+        "jsonrpc":"2.0","id":4,"method":"textDocument/rename","params":rename_args
+    }));
+    assert_eq!(
+        rename[0]["result"]["documentChanges"][0]["textDocument"],
+        json!({"uri":alias,"version":5})
+    );
     std::fs::remove_dir_all(directory).unwrap();
 }
 

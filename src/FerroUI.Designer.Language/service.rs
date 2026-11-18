@@ -1593,7 +1593,7 @@ impl LanguageService {
             .get(self.document_uri(uri)?.as_ref())
             .ok_or_else(|| LanguageError(format!("Document is not indexed: {uri}")))
     }
-    fn document_uri<'a>(&self, uri: &'a str) -> Result<Cow<'a, str>> {
+    pub(crate) fn document_uri<'a>(&self, uri: &'a str) -> Result<Cow<'a, str>> {
         if self.documents.contains_key(uri) || !uri.starts_with("file://") {
             Ok(Cow::Borrowed(uri))
         } else {

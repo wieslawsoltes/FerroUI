@@ -1,7 +1,8 @@
 //! Framed JSON-RPC over stdio. Only this adapter uses LSP wire types; native callers use the
 //! same portable service directly. No network listener or external language process is started.
 use crate::{
-    FormattingOptions, LanguageError, LanguageService, Position, Result, TextChange, WorkspaceEdit,
+    FormattingOptions, LanguageError, LanguageService, Location, Position, Result, TextChange,
+    WorkspaceEdit,
 };
 use serde_json::{json, Value};
 use std::collections::{BTreeMap, BTreeSet};
@@ -13,6 +14,7 @@ pub struct LspServer {
     initialized: bool,
     shutdown: bool,
     exit: bool,
+    open_uris: BTreeMap<String, String>,
     cancelled: Arc<Mutex<BTreeSet<String>>>,
 }
 impl Default for LspServer {
@@ -22,6 +24,7 @@ impl Default for LspServer {
             initialized: false,
             shutdown: false,
             exit: false,
+            open_uris: BTreeMap::new(),
             cancelled: Arc::new(Mutex::new(BTreeSet::new())),
         }
     }
@@ -113,6 +116,8 @@ impl LspServer {
                 let uri = text(document, "uri")?;
                 self.service
                     .open(uri, text(document, "text")?, integer(document, "version")?)?;
+                let identity = self.service.document_uri(uri)?.into_owned();
+                self.open_uris.insert(identity, uri.into());
                 self.publish(uri, notifications)?;
                 Ok(Value::Null)
             }
@@ -127,7 +132,9 @@ impl LspServer {
             }
             "textDocument/didClose" => {
                 let uri = uri(params)?;
+                let identity = self.service.document_uri(uri)?.into_owned();
                 self.service.close(uri)?;
+                self.open_uris.remove(&identity);
                 notifications.push(json!({
                     "jsonrpc": "2.0", "method": "textDocument/publishDiagnostics",
                     "params": { "uri": uri, "diagnostics": [] }
@@ -174,16 +181,17 @@ impl LspServer {
             }
             "textDocument/definition" => {
                 let (uri, offset) = self.position(params)?;
-                Ok(json!(self.service.definitions(uri, offset)?))
+                Ok(self.locations(self.service.definitions(uri, offset)?))
             }
             "textDocument/references" => {
                 let (uri, offset) = self.position(params)?;
                 let include = params["context"]["includeDeclaration"]
                     .as_bool()
                     .unwrap_or(false);
-                Ok(json!(self
-                    .service
-                    .references_with_declarations(uri, offset, include)?))
+                Ok(self.locations(
+                    self.service
+                        .references_with_declarations(uri, offset, include)?,
+                ))
             }
             "textDocument/prepareRename" => {
                 let (uri, offset) = self.position(params)?;
@@ -198,7 +206,7 @@ impl LspServer {
             }
             "textDocument/rename" => {
                 let (uri, offset) = self.position(params)?;
-                Ok(workspace_edit(self.service.rename(
+                Ok(self.workspace_edit(self.service.rename(
                     uri,
                     offset,
                     text(params, "newName")?,
@@ -239,7 +247,7 @@ impl LspServer {
                     .map(|(uri, symbol)| {
                         json!({
                             "name": symbol.name, "kind": symbol.kind,
-                            "location": { "uri": uri, "range": symbol.selection_range }
+                            "location": { "uri": self.client_uri(&uri), "range": symbol.selection_range }
                         })
                     })
                     .collect();
@@ -274,13 +282,30 @@ impl LspServer {
             }
             "workspace/willRenameFiles" => self.will_rename_files(params),
             "workspace/didRenameFiles" => {
-                let files = params["files"]
+                let files: Vec<(String, String)> = params["files"]
                     .as_array()
                     .ok_or_else(|| LanguageError("files array required".into()))?
                     .iter()
                     .map(|file| Ok((text(file, "oldUri")?.into(), text(file, "newUri")?.into())))
                     .collect::<Result<Vec<_>>>()?;
+                let mut moved = Vec::new();
+                for (old, new) in &files {
+                    let identity = self.service.document_uri(old)?.into_owned();
+                    if self.open_uris.contains_key(&identity) {
+                        moved.push((
+                            identity,
+                            self.service.document_uri(new)?.into_owned(),
+                            new.clone(),
+                        ));
+                    }
+                }
                 self.service.rename_uris(&files)?;
+                for (old, _, _) in &moved {
+                    self.open_uris.remove(old);
+                }
+                for (_, new, uri) in moved {
+                    self.open_uris.insert(new, uri);
+                }
                 Ok(Value::Null)
             }
             "$/setTrace" => Ok(Value::Null),
@@ -376,9 +401,27 @@ impl LspServer {
                 &document.edits,
             )?;
         }
-        Ok(workspace_edit(WorkspaceEdit {
+        Ok(self.workspace_edit(WorkspaceEdit {
             document_changes: grouped.into_values().collect(),
         }))
+    }
+    fn client_uri<'a>(&'a self, identity: &'a str) -> &'a str {
+        // Editors track buffers by the URI they opened, including symlink aliases.
+        self.open_uris
+            .get(identity)
+            .map_or(identity, String::as_str)
+    }
+    fn locations(&self, locations: Vec<Location>) -> Value {
+        json!(locations
+            .into_iter()
+            .map(|location| json!({"uri": self.client_uri(&location.uri), "range": location.range}))
+            .collect::<Vec<_>>())
+    }
+    fn workspace_edit(&self, edit: WorkspaceEdit) -> Value {
+        json!({"documentChanges":edit.document_changes.into_iter().map(|document|json!({
+            "textDocument":{"uri":self.client_uri(&document.uri),"version":if document.version<0{Value::Null}else{json!(document.version)}},
+            "edits":document.edits
+        })).collect::<Vec<_>>()})
     }
     fn position<'a>(&self, params: &'a Value) -> Result<(&'a str, usize)> {
         let uri = uri(params)?;
@@ -405,9 +448,6 @@ fn uri(params: &Value) -> Result<&str> {
 }
 fn decode<T: serde::de::DeserializeOwned>(value: &Value) -> Result<T> {
     serde_json::from_value(value.clone()).map_err(|e| LanguageError(e.to_string()))
-}
-fn workspace_edit(edit: WorkspaceEdit) -> Value {
-    json!({"documentChanges":edit.document_changes.into_iter().map(|document|json!({"textDocument":{"uri":document.uri,"version":if document.version<0{Value::Null}else{json!(document.version)}},"edits":document.edits})).collect::<Vec<_>>()})
 }
 fn error(id: Value, code: i64, message: &str) -> Value {
     json!({"jsonrpc":"2.0","id":id,"error":{"code":code,"message":message}})
