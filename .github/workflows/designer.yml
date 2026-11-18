@@ -34,12 +34,21 @@ on:
   workflow_dispatch:
     inputs:
       installed-vsix:
-        description: Install release-helper VSIX packages on all three hosts
+        description: Run installed VSIX smoke tests
         type: boolean
         default: false
+      installed-vsix-os:
+        description: Select hosts for installed VSIX smoke tests
+        type: choice
+        default: all
+        options:
+          - all
+          - ubuntu-24.04
+          - macos-15
+          - windows-latest
 
 concurrency:
-  group: designer-${{ github.ref }}
+  group: designer-${{ github.ref }}${{ inputs.installed-vsix && format('-vsix-{0}', inputs.installed-vsix-os) || '' }}
   cancel-in-progress: true
 
 permissions:
@@ -147,7 +156,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-15, ubuntu-24.04, windows-latest]
+        os: ${{ fromJSON(inputs.installed-vsix-os == 'all' && '["macos-15","ubuntu-24.04","windows-latest"]' || format('["{0}"]', inputs.installed-vsix-os)) }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
@@ -182,7 +191,9 @@ jobs:
         working-directory: editors/vscode
         run: xvfb-run -a npm run test:vsix -- ferroui-designer.vsix
       - name: Package evidence
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ferroui-vsix-${{ runner.os }}-${{ runner.arch }}
           path: editors/vscode/ferroui-designer.vsix
+          if-no-files-found: warn
