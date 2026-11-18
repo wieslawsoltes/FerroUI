@@ -889,6 +889,23 @@ impl FerroObject {
         property.routes().route_set_value(self, value, priority)
     }
 
+    /// Sets a property whose value type is `T` with local value priority, from the value
+    /// itself: a styled (or attached) property takes it as [`set_value`](Self::set_value)
+    /// does, a direct property as [`set_direct_value`](Self::set_direct_value), with no
+    /// untyped value and no copy of it. The value is given back when `T` is not the value type
+    /// of the property; [`set_value_untyped`](Self::set_value_untyped) converts it then.
+    pub fn try_set_value_typed<T: PropertyValue>(&self, property: &'static FerroProperty, value: T) -> Result<(), T> {
+        if let Some(styled) = property.as_styled::<T>() {
+            self.set_value(styled, value);
+            Ok(())
+        } else if let Some(direct) = property.as_direct::<T>() {
+            self.set_direct_value(direct, value);
+            Ok(())
+        } else {
+            Err(value)
+        }
+    }
+
     /// [`set_current_value`](Self::set_current_value) with an untyped value.
     pub fn set_current_value_untyped(&self, property: &'static FerroProperty, value: &dyn Any) {
         property.routes().route_set_current_value(self, value)

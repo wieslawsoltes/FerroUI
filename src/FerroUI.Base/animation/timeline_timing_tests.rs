@@ -171,3 +171,39 @@ fn a_spline_key_frame_eases_its_segment() {
     assert!(close(eased, 100.0 * spline.get_spline_progress(0.5)), "{eased}");
     assert!(eased > 50.0, "{eased}");
 }
+
+#[test]
+fn durations_and_repeat_behaviors_parse_as_markup_writes_them() {
+    assert_eq!(TimelineDuration::parse("Automatic").unwrap(), TimelineDuration::Automatic);
+    assert_eq!(TimelineDuration::parse(" forever ").unwrap(), TimelineDuration::Forever);
+    assert_eq!(TimelineDuration::parse("0:0:0.25").unwrap(), TimelineDuration::Time(seconds(0.25)));
+    assert!(TimelineDuration::parse("-0:0:1").is_err());
+    assert!(TimelineDuration::parse("soon").is_err());
+    assert_eq!(RepeatBehavior::parse("Forever").unwrap(), RepeatBehavior::Forever);
+    assert_eq!(RepeatBehavior::parse("2x").unwrap(), RepeatBehavior::Count(2.0));
+    assert_eq!(RepeatBehavior::parse("0.5X").unwrap(), RepeatBehavior::Count(0.5));
+    assert_eq!(RepeatBehavior::parse("0:0:3").unwrap(), RepeatBehavior::Duration(seconds(3.0)));
+    assert!(RepeatBehavior::parse("-1x").is_err());
+    assert_eq!(RepeatBehavior::default(), RepeatBehavior::Count(1.0));
+    assert_eq!(TimelineDuration::default(), TimelineDuration::Automatic);
+}
+
+#[test]
+fn the_local_time_is_the_time_inside_the_iteration_and_is_held_while_filling() {
+    let delayed = TimelineTiming { begin_time: Some(seconds(1.0)), ..timing(2.0) };
+    assert_eq!(delayed.local_time(seconds(0.5), NATURAL), None);
+    assert!(close(delayed.local_time(seconds(2.0), NATURAL).unwrap().as_secs_f64(), 1.0));
+    // Held at the end of the active period.
+    assert!(close(delayed.local_time(seconds(10.0), NATURAL).unwrap().as_secs_f64(), 2.0));
+    // Stopped: no time.
+    let stopping = TimelineTiming { fill_behavior: FillBehavior::Stop, ..timing(1.0) };
+    assert_eq!(stopping.local_time(seconds(2.0), NATURAL), None);
+    // Repeating: the time inside the iteration; reversing: running back.
+    let repeating = TimelineTiming { repeat_behavior: RepeatBehavior::Count(3.0), ..timing(1.0) };
+    assert!(close(repeating.local_time(seconds(1.25), NATURAL).unwrap().as_secs_f64(), 0.25));
+    let reversing = TimelineTiming { auto_reverse: true, ..timing(1.0) };
+    assert!(close(reversing.local_time(seconds(1.25), NATURAL).unwrap().as_secs_f64(), 0.75));
+    // For ever: the time since the begin time, at the speed ratio.
+    let forever = TimelineTiming { duration: TimelineDuration::Forever, speed_ratio: 2.0, ..TimelineTiming::default() };
+    assert!(close(forever.local_time(seconds(1.5), NATURAL).unwrap().as_secs_f64(), 3.0));
+}
