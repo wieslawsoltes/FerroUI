@@ -3,12 +3,15 @@ import { WebRenderTargetRegistry } from "./webRenderTargetRegistry";
 import { FerroDOM } from "../dom";
 import { BrowserRenderingMode } from "./renderingMode";
 import { FerroExports } from "../ferroExports";
+import { clearViewCanvas, setViewCanvas } from "../pointerPosition";
 
 export class CanvasSurface {
     public targetId: number;
     private sizeParams: [number, number, number];
+    private readonly container: HTMLElement;
 
     constructor(public canvas: HTMLCanvasElement, container: HTMLElement, modes: BrowserRenderingMode[], topLevelId: number, threadId: number) {
+        this.container = container;
         this.targetId = WebRenderTargetRegistry.create(threadId, canvas, modes);
         const presenter = WebRenderTargetRegistry.presenterOf(this.targetId);
         if (presenter != null) {
@@ -32,6 +35,9 @@ export class CanvasSurface {
 
             FerroExports.CanvasHelper?.OnSizeChanged(topLevelId, width, height, dpr);
         });
+        // Not in the original: the pointer positions of the view are measured on this canvas, at
+        // the size and scaling the framework renders it at (pointerPosition.ts).
+        setViewCanvas(container, this);
     }
 
     public get width() {
@@ -47,6 +53,7 @@ export class CanvasSurface {
     }
 
     public destroy(): void {
+        clearViewCanvas(this.container, this);
     }
 
     public static create(container: HTMLElement, modes: BrowserRenderingMode[] | Int32Array, topLevelId: number, threadId: number): CanvasSurface {
