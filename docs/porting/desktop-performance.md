@@ -7876,6 +7876,15 @@ job, which is a change of its own. Resident memory does not follow the heap: it 
 the first frame and 1,855 MB after the close with 1,465 MB freed, because the allocator keeps
 the pages it was given.
 
+**Part (a) of the experiment, counted and left out: writes that change nothing.** A setter of
+a composition visual sends nothing for a value equal to the one it has, except the fifteen
+properties that can be animated, which send it to stop an animation of the property. Counted
+in those setters (a temporary count, removed; the declarative program of the framework
+comparison, nine seconds of each scene): none of the 550,000 writes of the gauntlet at tier 16
+and none of the 100,000 of the patchwork at tier 17 had the value the visual had; the wall at
+tier 20 wrote fewer than 50,000 times. Values that do not change are stopped before the setter
+(section 9.59), so a batch carries no equal write to drop.
+
 **Looked at and not changed** (section 8.4, rule 2). The other holders of text layouts
 (`TextPresenter`) call `TextLayout::dispose` already. The reactive runtime of `ferroui-view`
 keeps its table of nodes at the size of the largest screen (216 bytes a node); its slots are
