@@ -12,7 +12,8 @@ export function propertyEditor(property: PropertyField, actions: Actions): HTMLE
     row.className = 'property';
     row.dataset.attribute = property.name;
     const label = create('label');
-    label.textContent = property.name;
+    label.textContent = property.name === 'HorizontalAlignment' ? 'Align horizontal'
+        : property.name === 'VerticalAlignment' ? 'Align vertical' : property.name;
     label.title = property.origin ? `${property.name} · ${property.origin}` : property.name;
     const value = create('div');
     value.className = 'property-value';
@@ -32,6 +33,7 @@ export function propertyEditor(property: PropertyField, actions: Actions): HTMLE
         pick.setAttribute('aria-label', `Choose ${property.name} color`);
         const hex = asHex(initial) ?? asHex(effective);
         pick.value = hex ?? '#000000';
+        pick.toggleAttribute('data-unset', !hex);
         pick.addEventListener('change', () => actions.set(pick.value.toUpperCase()));
         value.prepend(pick);
     }

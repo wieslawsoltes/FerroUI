@@ -9,7 +9,7 @@ export async function verifyWorkbenchFeatures(preview: NativePreview, xamlUri: s
     let xaml: Source = { language: 'xaml', uri: xamlUri, caret, source: `
 <UserControl xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <UserControl.Resources><SolidColorBrush x:Key="AccentBrush" Color="#655DD7"/></UserControl.Resources>
-    <Border Padding="48"><StackPanel Name="Body"><Button Name="Save" Click="OnSave" Content="Save"/></StackPanel></Border>
+    <Border Padding="48"><StackPanel Name="Body"><Button Name="Save" Click="OnSave" Content="Save" Background="#FF655DD7"/></StackPanel></Border>
 </UserControl>` };
     const frame = await preview.render(xaml, viewport, 10);
     assert.ok(frame.image, frame.renderError ?? 'XAML events preserve a frame');
@@ -18,7 +18,7 @@ export async function verifyWorkbenchFeatures(preview: NativePreview, xamlUri: s
     const details = await preview.inspect(xaml, 10, { type: 'source', node: button.id });
     assert.equal(details.events.find(event => event.name === 'Click')?.handler, 'OnSave');
     assert.ok(details.properties.some(field => field.name === 'Width' && field.group === 'Layout' && field.editable));
-    assert.ok(details.properties.some(field => field.name === 'Background' && field.kind === 'color'));
+    assert.ok(details.properties.some(field => field.name === 'Background' && field.kind === 'color' && field.effective === '#FF655DD7'));
     assert.ok(!details.properties.some(field => field.name === 'Click'));
     const runtime = await preview.studioQuery(10, 'designer_tree', { tree: 'combined' }) as {
         nodes: { inspector_id: number; visual: boolean; logical: boolean; source_id: number | null }[];

@@ -1,10 +1,12 @@
 use crate::document::{DesignDocument, schema};
 use crate::edits::editable_attribute;
+use ferroui_base::{BoxedValue, media::IBrush};
 use ferroui_designer_core::{Node, NodeKind, SourceSpan};
 use ferroui_designer_language::{PropertyInfo, Range};
 use ferroui_designer_tools::{PropertyDescriptor, PropertyKind, PropertyRegistry};
 use serde::Serialize;
 use std::collections::BTreeMap;
+use std::rc::Rc;
 use std::sync::OnceLock;
 
 #[derive(Serialize)]
@@ -127,7 +129,7 @@ pub(crate) fn property_fields(
                 kind,
                 options,
                 authored,
-                effective: runtime.map(|info| ferroui_inspect::display_value(Some(&info.value))),
+                effective: runtime.and_then(|info| effective_value(&info.value)),
                 range: span.and_then(|span| design.range(span).ok()),
                 origin,
                 editable,
@@ -135,6 +137,26 @@ pub(crate) fn property_fields(
             })
         })
         .collect()
+}
+
+fn effective_value(value: &BoxedValue) -> Option<String> {
+    if let Some(brush) = value.downcast_ref::<Option<Rc<dyn IBrush>>>() {
+        return brush.as_deref().map(display_brush);
+    }
+    if let Some(brush) = value.downcast_ref::<Rc<dyn IBrush>>() {
+        return Some(display_brush(brush.as_ref()));
+    }
+    Some(ferroui_inspect::display_value(Some(value)))
+}
+
+fn display_brush(brush: &dyn IBrush) -> String {
+    if let Some(solid) = brush.as_solid_color_brush() {
+        format!("#{:08X}", solid.color().to_uint32())
+    } else if brush.as_gradient_brush().is_some() {
+        "Gradient brush".into()
+    } else {
+        "Brush".into()
+    }
 }
 
 pub(crate) fn can_add_property(design: &DesignDocument<'_>, node: &Node, name: &str) -> bool {
