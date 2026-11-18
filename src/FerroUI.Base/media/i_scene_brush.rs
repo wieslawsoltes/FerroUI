@@ -3,6 +3,7 @@ use crate::media::immutable::ImmutableTileBrush;
 use crate::media::ref_adapter::RefAdapter;
 use crate::media::{Brush, DrawingBrush, IImmutableBrush, ITileBrush, VisualBrush};
 use crate::platform::IDrawingContextImpl;
+use crate::reactive::Subscription;
 use crate::{Matrix, ObjectType, Rect, Upcast};
 use std::rc::Rc;
 
@@ -10,6 +11,16 @@ use std::rc::Rc;
 pub trait ISceneBrush: ITileBrush {
     /// Records the current content of the brush.
     fn create_content(&self) -> Option<Rc<dyn ISceneBrushContent>>;
+
+    /// Calls `handler` when what the brush draws changes without a change of a property of the
+    /// brush itself: the drawing of a `DrawingBrush` invalidated (a change of a 3D material's
+    /// content, `docs/porting/media3d.md`, section 3.16), until the returned subscription is
+    /// dropped or disposed. `None` when the brush raises no such change (by default, and for a
+    /// `VisualBrush`, whose visual is followed by the 2D compositor).
+    fn subscribe_content_changed(&self, handler: Rc<dyn Fn()>) -> Option<Subscription> {
+        let _ = handler;
+        None
+    }
 }
 
 /// The scene brush classes ([`VisualBrush`], [`DrawingBrush`]) behind a
@@ -20,6 +31,11 @@ impl<T: ObjectType + Upcast<Brush>> ISceneBrush for RefAdapter<T> {
             Some(visual_brush) => visual_brush.create_content(),
             None => self.class::<DrawingBrush>().create_content(),
         }
+    }
+
+    fn subscribe_content_changed(&self, handler: Rc<dyn Fn()>) -> Option<Subscription> {
+        let drawing = self.object().downcast_ref::<DrawingBrush>()?.drawing()?;
+        Some(drawing.invalidated(move || handler()))
     }
 }
 

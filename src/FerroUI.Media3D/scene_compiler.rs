@@ -10,7 +10,6 @@ use crate::{
     MaterialGroup, Matrix3D, MeshGeometry3D, Model3D, Model3DGroup, ModelVisual3D, PerspectiveCamera, Point3D,
     PointLight, ProjectionCamera, Rect3D, SpecularMaterial, SpotLight, Vector3D, Visual3D, Visual3DCollection,
 };
-use ferroui_base::media::shared_brush_of;
 use ferroui_base::numerics::{Matrix4x4, Vector3};
 use ferroui_base::rendering::scene3d::{
     Scene3DBounds, Scene3DCamera, Scene3DCameraKind, Scene3DLight, Scene3DMaterialKind, Scene3DMaterialLayer,
@@ -143,7 +142,7 @@ fn collect_layers(material: &Ref<Material>, layers: &mut Vec<Scene3DMaterialLaye
                 color: diffuse.color(),
                 ambient_color: diffuse.ambient_color(),
                 specular_power: 0.0,
-                brush: shared_brush_of(&*brush),
+                brush: material.layer_brush(&brush),
             });
         }
     } else if let Some(specular) = material.cast::<SpecularMaterial>() {
@@ -153,7 +152,7 @@ fn collect_layers(material: &Ref<Material>, layers: &mut Vec<Scene3DMaterialLaye
                 color: specular.color(),
                 ambient_color: WHITE,
                 specular_power: specular.specular_power() as f32,
-                brush: shared_brush_of(&*brush),
+                brush: material.layer_brush(&brush),
             });
         }
     } else if let Some(emissive) = material.cast::<EmissiveMaterial>() {
@@ -163,7 +162,7 @@ fn collect_layers(material: &Ref<Material>, layers: &mut Vec<Scene3DMaterialLaye
                 color: emissive.color(),
                 ambient_color: WHITE,
                 specular_power: 0.0,
-                brush: shared_brush_of(&*brush),
+                brush: material.layer_brush(&brush),
             });
         }
     }
