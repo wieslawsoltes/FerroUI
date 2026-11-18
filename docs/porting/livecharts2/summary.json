@@ -13,16 +13,16 @@
     "ported": 47
   },
   "member_status": {
-    "native-replacement": 17,
+    "native-replacement": 19,
     "partial": 1,
-    "pending": 4840,
+    "pending": 4838,
     "ported": 1
   },
   "test_declarations": 1066,
   "test_status": {
     "partial": 112,
-    "pending": 761,
-    "ported": 193
+    "pending": 748,
+    "ported": 206
   },
   "test_declarations_by_suite": {
     "ConsoleTests": 33,

@@ -971,3 +971,97 @@ fn heat_series_release_their_points() {
     };
     assert!(survivors.iter().all(|alive| !alive()));
 }
+
+/// `FindHoveredPointsBy` of `PolarChartEngine` and `PieChartEngine`: the polar and pie charts
+/// find hovered points with `FindingStrategy.CompareAll` whatever the finding strategy of the
+/// chart, while a Cartesian chart finds with its strategy.
+#[test]
+fn polar_and_pie_charts_find_by_both_dimensions_whatever_the_strategy() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let size = Size::new(600.0, 600.0);
+    let polar = PolarChart::new();
+    polar.set_animations_speed(0.0);
+    polar.set_tooltip_tolerance(0.0);
+    let series = PolarLineSeries::new();
+    series.set_numeric_values([10.0, 20.0, 30.0]);
+    polar.series().add(series.upcast());
+    let scene = polar.scene(size).unwrap();
+    let point = scene.hits[2].center;
+    let center = polar.polar_scale(0, 0).unwrap().unwrap().center;
+    // Thirty pixels from the point towards the centre, in its column but off its hover area.
+    let probe = ferroui_base::Point::new(point.x, point.y + 30.0_f64.copysign(center.y - point.y));
+    assert!(!scene
+        .hit_test(probe, FindingStrategy::CompareOnlyX, 0.0)
+        .is_empty());
+    assert!(scene
+        .hit_test(probe, FindingStrategy::CompareAll, 0.0)
+        .is_empty());
+    polar.set_tooltip_finding_strategy(FindingStrategy::CompareOnlyX);
+    assert!(polar.find_points(probe).is_empty());
+    assert_eq!(polar.find_points(point).len(), 1);
+
+    let pie = PieChart::new();
+    pie.set_animations_speed(0.0);
+    pie.set_tooltip_tolerance(0.0);
+    for _ in 0..4 {
+        let slice = PieSeries::new();
+        slice.set_numeric_values([100.0]);
+        pie.series().add(slice.upcast());
+    }
+    let scene = pie.scene(size).unwrap();
+    let inside = scene.hits[0].shape.hover_center();
+    assert!(
+        scene
+            .hit_test(inside, FindingStrategy::CompareOnlyX, 0.0)
+            .len()
+            > 1
+    );
+    pie.set_tooltip_finding_strategy(FindingStrategy::CompareOnlyX);
+    let hits = pie.find_points(inside);
+    assert_eq!(hits.len(), 1);
+    assert_eq!(hits[0].id, scene.hits[0].id);
+
+    // A Cartesian chart keeps its strategy: the column of a point finds it off its marker.
+    let cartesian = CartesianChart::new();
+    cartesian.set_animations_speed(0.0);
+    cartesian.set_tooltip_tolerance(0.0);
+    cartesian.series().add(line().upcast());
+    let scene = cartesian.scene(size).unwrap();
+    let top = scene.hits[1].center;
+    let below = ferroui_base::Point::new(top.x, top.y + 60.0);
+    cartesian.set_tooltip_finding_strategy(FindingStrategy::CompareAll);
+    assert!(cartesian.find_points(below).is_empty());
+    cartesian.set_tooltip_finding_strategy(FindingStrategy::CompareOnlyX);
+    assert_eq!(cartesian.find_points(below).len(), 1);
+}
+
+/// The tooltip text of a polar point (`GetPrimaryToolTipText`, `GetSecondaryToolTipText` of
+/// `CorePolarLineSeries`): the angle when its axis has labels, and the code-only
+/// `RadiusToolTipLabelFormatter` and `AngleToolTipLabelFormatter` of `PolarLineSeries`.
+#[test]
+fn polar_tooltip_text_takes_the_angle_labels_and_the_formatters_of_the_series() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let size = Size::new(600.0, 600.0);
+    let chart = PolarChart::new();
+    chart.set_animations_speed(0.0);
+    let series = PolarLineSeries::new();
+    series.set_name("Wind".into());
+    series.set_coordinates([Coordinate::new(1.0, 5.0)]);
+    chart.series().add(series.clone().upcast());
+    let label = |chart: &PolarChart| chart.scene(size).unwrap().hits[0].label.clone();
+    assert_eq!(label(&chart), "Wind: 5");
+    let angles = Axis::new();
+    angles.set_labels(vec!["N".into(), "E".into(), "S".into(), "W".into()]);
+    chart.x_axes().add(angles);
+    assert_eq!(label(&chart), "Wind: E: 5");
+    let revision = chart.revision();
+    series.set_radius_tool_tip_label_formatter(Some(ChartPointFormatter::new(|point| {
+        format!("{} km/h", point.primary_value)
+    })));
+    assert!(chart.revision() > revision);
+    assert_eq!(label(&chart), "Wind: E: 5 km/h");
+    series.set_angle_tool_tip_label_formatter(Some(ChartPointFormatter::new(|point| {
+        format!("{} degrees", point.secondary_value * 90.0)
+    })));
+    assert_eq!(label(&chart), "Wind: 90 degrees: 5 km/h");
+}

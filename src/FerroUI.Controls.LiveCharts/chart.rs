@@ -4,8 +4,8 @@ use crate::renderer::NativeScene;
 use crate::scene_transition::SceneTransition;
 use crate::{
     Axes, Axis, ChartKind, ChartSeries, ChartSeriesCollection, ChartVisualElement,
-    ChartVisualElements, GeoMarkers, HeatSeries, MapInteractionMode, TooltipPosition,
-    ZoomAndPanMode,
+    ChartVisualElements, GeoMarkers, HeatSeries, MapInteractionMode, PolarLineSeries,
+    TooltipPosition, ZoomAndPanMode,
 };
 use ferroui_base::collections::FerroList;
 use ferroui_base::input::{
@@ -30,8 +30,8 @@ use ferroui_livecharts::{
     AxisScale, CartesianChartEngine, CartesianOptions, ChartError, DrawnMap, EasingFunctions,
     FindingStrategy, GeoLand, GeoMapChartEngine, GeoMapMeasurement, GeoMapOptions,
     GeographicBounds, HitRegion, MapViewport, Maps, PieChartEngine, PieOptions, PointId,
-    PolarChartEngine, PolarOptions, PolarScale, SankeyChartEngine, SankeyOptions, Scene,
-    TreemapChartEngine, TreemapOptions, ZoomDirection,
+    PolarChartEngine, PolarOptions, PolarScale, PolarToolTipLabelFormatters, SankeyChartEngine,
+    SankeyOptions, Scene, TreemapChartEngine, TreemapOptions, ZoomDirection,
 };
 use std::{
     cell::{Cell, OnceCell, RefCell},
@@ -727,7 +727,21 @@ impl Chart {
                 // engine measures the viewport and the scene moves into it; an explicit
                 // drawing margin keeps control coordinates.
                 let local = self.draw_margin().is_none();
-                let mut measured = PolarChartEngine::measure_with_axes_and_labels(
+                let formatters: Vec<_> = models
+                    .iter()
+                    .map(|model| {
+                        model
+                            .cast::<PolarLineSeries>()
+                            .map(|polar| PolarToolTipLabelFormatters {
+                                angle_tool_tip_label_formatter: polar
+                                    .angle_tool_tip_label_formatter(),
+                                radius_tool_tip_label_formatter: polar
+                                    .radius_tool_tip_label_formatter(),
+                            })
+                            .unwrap_or_default()
+                    })
+                    .collect();
+                let mut measured = PolarChartEngine::measure_with_tool_tip_label_formatters(
                     if local { viewport.size() } else { size },
                     &series,
                     &xs,
@@ -740,6 +754,7 @@ impl Chart {
                         fit_to_bounds: self.fit_to_bounds(),
                     },
                     crate::decorations::text_size,
+                    &formatters,
                 )?;
                 if local {
                     let offset = Point::new(viewport.x, viewport.y);
@@ -885,14 +900,19 @@ impl Chart {
         } else {
             cached_size.unwrap_or(size)
         };
+        // Only the Cartesian chart finds with its finding strategy (`FindHoveredPointsBy` of
+        // `CartesianChartEngine`). The pie, polar, Sankey and treemap engines of the source
+        // always compare both dimensions (`FindingStrategy.CompareAll`), which is the strategy
+        // their native engines resolve, and a map finds the land under the pointer.
+        let strategy = if self.chart_kind() == ChartKind::Cartesian {
+            self.tooltip_finding_strategy()
+        } else {
+            FindingStrategy::Automatic
+        };
         match self.scene(size) {
             Ok(scene) => self
                 .presentation_scene(Dispatcher::ui_thread().now() as f64, scene)
-                .hit_test(
-                    position,
-                    self.tooltip_finding_strategy(),
-                    self.tooltip_tolerance(),
-                )
+                .hit_test(position, strategy, self.tooltip_tolerance())
                 .into_iter()
                 .cloned()
                 .collect(),

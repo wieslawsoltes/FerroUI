@@ -36,9 +36,9 @@ pub use collections::{
 };
 pub use enums::{ChartKind, LegendPosition, MapInteractionMode, TooltipPosition, ZoomAndPanMode};
 pub use ferroui_livecharts::{
-    AxisPosition, BrushSpace, DrawnMap, FindingStrategy, GeoLand, GeoTooltipValue, Labeler,
-    Labelers, MapProjection, MapViewport, Maps, PolarLabelsPosition, PolarScale, RadialAlignment,
-    SankeyLabelPosition, SankeyLayoutKind, SeriesKind, ZoomDirection,
+    AxisPosition, BrushSpace, ChartPointFormatter, DrawnMap, FindingStrategy, GeoLand,
+    GeoTooltipValue, Labeler, Labelers, MapProjection, MapViewport, Maps, PolarLabelsPosition,
+    PolarScale, RadialAlignment, SankeyLabelPosition, SankeyLayoutKind, SeriesKind, ZoomDirection,
 };
 pub use geo_models::{GeoMarker, HeatLand};
 pub use node_models::{SankeyLink, SankeyNode, TreemapNode};
