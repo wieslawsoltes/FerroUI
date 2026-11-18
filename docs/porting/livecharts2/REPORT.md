@@ -42,8 +42,8 @@ Counts are source/API/test declarations, not executed tests or behavioral equiva
 
 | Disposition | Count |
 |---|---:|
-| partial | 111 |
-| pending | 743 |
+| partial | 112 |
+| pending | 742 |
 | ported | 212 |
 
 ## Test declarations by suite

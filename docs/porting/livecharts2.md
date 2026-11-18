@@ -126,6 +126,12 @@ The `TooltipFormatter` of a map (`IGeoMapView`) is a code-only property of the c
 
 `mapping.json` records as ported `GeoMap_TooltipFormatter_IsAppliedToEachValue` and `LabelsMeasureTest.MaxWidth`, and `DrawingTextExtensions` partial (the shaping, right-to-left text and typeface fallback are the native text stack's): the report counts 212 ported and 111 partial test declarations.
 
+### #624: the first draw of the financial bars, and what the tooltip and animation suites need
+
+At the first draw the bars of a financial or OHLC series grow from their open, as the source seeds its `CoreFinancialSeries` visuals (`OhlcSeriesAnimationTests`): `CartesianChartEngine::first_draw_seed` makes the scene the first scene transition starts from, with every line of a bar at the pixel of its open and a candle body of no height there, and the chart starts the first draw of a Cartesian chart with such series from it. On a change of the data a bar moves to its new values with the scene transition. The error bars move with their points, as the lines of the scene they are.
+
+The tooltip tests of these series (`HeatSeriesTest.ShouldPlaceToolTips` and those of the financial series) assert the placement of the tooltip of the source (`GetTooltipLocation`, the suggested locations of the hover areas and the layout of `SKDefaultTooltip`), which no chart kind has natively; the native tooltip shows their values and their hover areas are the source's. The animation tests compare frame-by-frame baselines of the source's visuals (`AnimationBaselines/*.json`), with the `EasingFunction` of the chart (`Lineal` in the tests) and the per-point visuals of the source; the native transition eases with cubic out and the chart has no `EasingFunction`, so the first-draw cases are recorded partial and `OhlcSeries_DataChange_BarsAnimateOHLCToNewValues` stays pending (the source replaces the models, which enter at their open; native points that are replaced enter by fading).
+
 ## Remaining (#442)
 
 - Geographic map: a custom tooltip object (`IGeoMapTooltip`; no chart kind has one natively, `hover_changed` serves), visual elements other than circle markers at a coordinate, and the theme rules of the view.
@@ -133,4 +139,4 @@ The `TooltipFormatter` of a map (`IGeoMapView`) is a code-only property of the c
 - Polar: the placement of the tooltip of the source (the suggested locations of the hover areas, `GetTooltipLocation` and the layout of the default tooltip), which every chart kind shares; the polar chart shows the native tooltip, finds and labels its points as the source (#624). The source draws no axis names and has no polar sub-separators.
 - Heat series: SVG cell geometries and the colour animation of the cells; the heat legend has no label wrapping, background or animation (#624).
 - Angular gauge: `GaugeGenerator` and the theme's gauge rules (the scenarios set them), and the animation of the needle.
-- Tooltips and animations of the OHLC, error and heat series, which wait for the tooltip and animation suites.
+- Tooltips of the OHLC, error and heat series (`HeatSeriesTest.ShouldPlaceToolTips` and the financial tooltip tests): they place the tooltip of the source (`GetTooltipLocation`, the suggested locations of the hover areas, the layout of `SKDefaultTooltip`), which every chart kind shares and which needs an API decision; the native tooltip already shows their values. The animation suites compare frame-by-frame baselines of the source (`AnimationBaselines/*.json`) made with the `EasingFunction` of a chart and the per-point visuals of the source, which the native scene transition does not have; their first draws are ported where a visual starts away from its place (the heat colours, the financial bars).

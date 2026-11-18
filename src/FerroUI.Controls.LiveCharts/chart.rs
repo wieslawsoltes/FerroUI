@@ -966,6 +966,15 @@ impl Chart {
         }
         let scene = Rc::new(scene);
         let previous = self.measurement.borrow().as_ref().map(|m| m.scene.clone());
+        // The first draw of a Cartesian chart grows its financial and OHLC bars from their open.
+        let financial = series.iter().any(|s| {
+            use ferroui_livecharts::SeriesKind::{Financial, Ohlc};
+            matches!(s.kind, Financial | Ohlc)
+        });
+        let previous = previous.or_else(|| {
+            (self.chart_kind() == ChartKind::Cartesian && financial)
+                .then(|| Rc::new(CartesianChartEngine::first_draw_seed(&scene, &series, &y_scales)))
+        });
         self.start_transition(previous, scene.clone());
         *self.measurement.borrow_mut() = Some(Measurement {
             revision,

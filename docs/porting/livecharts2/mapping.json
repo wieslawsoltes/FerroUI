@@ -62,7 +62,7 @@
       "status": "partial"
     },
     "src/LiveChartsCore/CoreFinancialSeries.cs": {
-      "reason": "OHLC coordinates render candlesticks (and the I-bars of an OHLC series), wicks, bullish/bearish defaults, full category hover and all OHLC values in tooltip text.",
+      "reason": "OHLC coordinates render candlesticks (and the I-bars of an OHLC series), wicks, bullish/bearish defaults, full category hover and all OHLC values in tooltip text; at the first draw a bar grows from its open (its high, close and low start at the open, as the source seeds its visuals), and on a change it moves with the scene transition.",
       "remaining": [
         "Separate UpFill/DownFill/UpStroke/DownStroke properties, generic financial visuals and all source data label placement behavior remain pending."
       ],
@@ -3212,6 +3212,16 @@
       ],
       "rust": [
         "src/FerroUI.LiveCharts/upstream_regression_tests.rs::line_series_scale_has_even_categories_and_exponential_values"
+      ],
+      "status": "partial"
+    },
+    "tests/CoreTests/SeriesTests/OhlcSeriesAnimationTests.cs::CoreTests.SeriesTests.OhlcSeriesAnimationTests::void OhlcSeries_FirstDraw_BarsAppearWithOHLC()#L43": {
+      "reason": "The source's three I-bars with a Y axis from 0 to 40: the first draw starts with the high, the close and the low of each bar at its open and ends with the low below the high (CartesianChartEngine::first_draw_seed, the start of the scene transition of the first draw).",
+      "remaining": [
+        "The frame-by-frame baseline of the source (OhlcSeries_FirstDraw.json, with the Lineal easing of the chart) is not compared: the native transition eases with cubic out and the chart has no EasingFunction."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_series_tests.rs::source_ohlc_first_draw_bars_grow_from_their_open"
       ],
       "status": "partial"
     },
