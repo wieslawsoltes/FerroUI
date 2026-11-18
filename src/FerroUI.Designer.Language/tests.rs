@@ -571,6 +571,14 @@ fn resource_definitions_references_and_rename_cross_documents_atomically() {
         .rename("untitled:/View.xaml", offset, "Primary")
         .unwrap();
     assert_eq!(edit.document_changes.len(), 2);
+    service
+        .replace("untitled:/View.xaml", &usage, 8)
+        .unwrap();
+    assert!(service.apply_workspace_edit(&edit).is_err());
+    assert_eq!(service.document("untitled:/Resources.xaml").unwrap().source(), resources);
+    let edit = service
+        .rename("untitled:/View.xaml", offset, "Primary")
+        .unwrap();
     service.apply_workspace_edit(&edit).unwrap();
     assert!(service
         .document("untitled:/Resources.xaml")
@@ -868,15 +876,51 @@ fn rename_does_not_guess_which_ambiguous_resource_a_reference_uses() {
     assert!(service
         .rename("untitled:/View.xaml", 37, "Different")
         .is_err());
-    let edit = service
+    assert!(service
         .rename(
             "untitled:/A.xaml",
             first.find("Shared").unwrap(),
             "Different",
         )
-        .unwrap();
-    assert_eq!(edit.document_changes.len(), 1);
-    assert_eq!(edit.document_changes[0].uri, "untitled:/A.xaml");
+        .is_err());
+}
+
+#[test]
+fn resource_rename_preserves_consumers_across_merged_and_local_dictionaries() {
+    let resources = format!(
+        "<ResourceDictionary {NS}><Color x:Key='Original'/><Color x:Key='Outer'/></ResourceDictionary>"
+    );
+    let view = format!(
+        "<Grid {NS}><Grid.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceInclude Source='Colors.xaml'/></ResourceDictionary.MergedDictionaries></ResourceDictionary></Grid.Resources><Border><Border.Resources><Color x:Key='Shadow'/><Color x:Key='Inner'/></Border.Resources><Button Background='{{StaticResource Original}}' Tag='{{DynamicResource Outer}}'/></Border></Grid>"
+    );
+    let mut service = service(&view);
+    let dictionary = "untitled:/Colors.xaml";
+    let view_uri = "untitled:/View.xaml";
+    service.open(dictionary, &resources, 1).unwrap();
+
+    // Both rewriting a reference to a shadowed key and capturing an unchanged
+    // reference are semantic changes, even when declarations occupy different scopes.
+    assert!(service.rename(dictionary, resources.find("Original").unwrap(), "Shadow").is_err());
+    assert!(service.rename(view_uri, view.find("Inner").unwrap(), "Outer").is_err());
+    assert_eq!(service.document(view_uri).unwrap().source(), view);
+    assert_eq!(service.document(dictionary).unwrap().source(), resources);
+
+    let edit = service.rename(dictionary, resources.find("Original").unwrap(), "New").unwrap();
+    service.apply_workspace_edit(&edit).unwrap();
+    let updated = service.document(view_uri).unwrap().source();
+    assert!(updated.contains("DynamicResource Outer"));
+    assert_eq!(service.definitions(view_uri, updated.find("New").unwrap()).unwrap()[0].uri, dictionary);
+}
+
+#[test]
+fn name_rename_refuses_to_capture_an_unresolved_reference_in_its_namescope() {
+    let source = format!("<Grid {NS}><Button x:Name='Original'/><Button Tag='{{x:Reference Missing}}'/><ControlTemplate><Border Tag='{{x:Reference TemplateOnly}}'/></ControlTemplate></Grid>");
+    let service = service(&source);
+    let uri = "untitled:/View.xaml";
+    let offset = source.find("Original").unwrap();
+    assert!(service.rename(uri, offset, "Missing").is_err());
+    let edit = service.rename(uri, offset, "TemplateOnly").unwrap();
+    assert_eq!(edit.document_changes[0].edits.len(), 1);
 }
 
 #[test]
@@ -1024,6 +1068,37 @@ fn typed_binding_completion_hover_and_definitions_follow_nested_property_types()
 }
 
 #[test]
+fn binding_case_fixes_use_the_owning_extension_and_its_proven_source_type() {
+    let source = format!(
+        "<Grid {NS} xmlns:vm='using:Models' x:DataType='vm:ViewModel'>\r\n<!-- 😀 --><TextBlock Text='{{CompiledBinding Customer.title, Converter={{Binding Foo, ElementName=Input}}}}'/><TextBox Name='Input'/><TextBlock Text='{{Binding #Input.teXT}}'/><TextBlock Text='{{Binding Customer.title}}'/><TextBlock Text='{{vm:CompiledBinding Customer.title}}'/><TextBlock Text='{{CompiledBinding Customer.title, Source={{StaticResource Other}}}}'/></Grid>"
+    );
+    let mut service = service(&source);
+    binding_schema(&mut service);
+    let uri = "untitled:/View.xaml";
+    let index = LineIndex::new(&source);
+    let diagnostics = service.diagnostics(uri).unwrap();
+    let mismatches: Vec<_> = diagnostics
+        .iter()
+        .filter(|diagnostic| diagnostic.code == "binding-member-case")
+        .map(|diagnostic| &source[diagnostic.span.range()])
+        .collect();
+    assert_eq!(mismatches, ["title", "teXT"]);
+    let range = index.range(ferroui_designer_core::SourceSpan::new(0, source.len())).unwrap();
+    let fixes = service.quick_fixes(uri, range).unwrap();
+    let mut edits = Vec::new();
+    for fix in fixes {
+        if matches!(fix.title.as_str(), "Use Title" | "Use Text") {
+            edits.extend(fix.edits.edits);
+        }
+    }
+    assert_eq!(edits.len(), 2);
+    assert_eq!(
+        apply_text_edits(&source, &edits).unwrap(),
+        source.replacen("Customer.title", "Customer.Title", 1).replace("#Input.teXT", "#Input.Text")
+    );
+}
+
+#[test]
 fn binding_type_hints_use_utf16_and_only_report_known_members_in_the_requested_range() {
     let source = format!(
         "<Grid {NS} xmlns:vm='using:Models' x:DataType='vm:ViewModel'>\r\n<!-- 😀 --><TextBlock Text='{{Binding Path=Customer.Title}}'/>\r\n<TextBlock Text='{{Binding Missing}}'/>\r\n</Grid>"
@@ -1098,31 +1173,52 @@ fn indexed_projects_survive_close_and_support_multiple_workspace_roots() {
     std::fs::create_dir_all(directory.join("two")).unwrap();
     let directory = directory.canonicalize().unwrap();
     let first = format!("<ResourceDictionary {NS}><Color x:Key='Saved'/></ResourceDictionary>");
+    let other_source =
+        format!("<Grid {NS}><Border Background='{{StaticResource Saved}}'/></Grid>");
     std::fs::write(directory.join("one/Colors.xaml"), &first).unwrap();
-    std::fs::write(directory.join("two/View.xaml"), "<Grid/>").unwrap();
+    std::fs::write(directory.join("two/View.xaml"), &other_source).unwrap();
+    std::fs::write(directory.join("two/Colors.xaml"), &first).unwrap();
     let one = Solution::discover(directory.join("one")).unwrap();
     let two = Solution::discover(directory.join("two")).unwrap();
     let uri = file_uri(directory.join("one/Colors.xaml")).unwrap();
     let other = file_uri(directory.join("two/View.xaml")).unwrap();
+    let local = file_uri(directory.join("two/Colors.xaml")).unwrap();
     let mut service = LanguageService::default();
     assert_eq!(service.index_solution(&one).unwrap(), 1);
-    assert_eq!(service.index_solution(&two).unwrap(), 1);
+    assert_eq!(service.index_solution(&two).unwrap(), 2);
+    assert_eq!(
+        service.definitions(&other, other_source.find("Saved").unwrap()).unwrap()[0].uri,
+        local,
+    );
+    let stale = service.rename(&other, other_source.find("Saved").unwrap(), "Updated").unwrap();
+    let changed = format!("<!-- Changed on disk -->\n{first}");
+    std::fs::write(directory.join("two/Colors.xaml"), &changed).unwrap();
+    assert!(service.refresh_project_file(&local).unwrap());
+    assert!(service.apply_workspace_edit(&stale).is_err());
+    assert_eq!(service.document(&other).unwrap().source(), other_source);
+    assert_eq!(service.document(&local).unwrap().source(), changed);
     assert_eq!(
         service
             .resource_uri(&other, "ferres://one/Colors.xaml")
             .unwrap(),
         uri
     );
+    let explicit = format!("<Grid {NS}><Grid.Resources><ResourceInclude Source='ferres://one/Colors.xaml'/></Grid.Resources><Border Background='{{StaticResource Saved}}'/></Grid>");
+    service.open(&other, &explicit, 1).unwrap();
+    assert_eq!(
+        service.definitions(&other, explicit.find("Saved").unwrap()).unwrap()[0].uri,
+        uri,
+    );
     service
         .open(&uri, first.replace("Saved", "Draft"), 1)
         .unwrap();
     service.close(&uri).unwrap();
     assert_eq!(service.document(&uri).unwrap().source(), first);
-    assert_eq!(service.version(&uri), Some(-1));
-    service.open(&other, "<Button/>", 1).unwrap();
+    assert!(service.version(&uri).unwrap() < 0);
+    service.replace(&other, "<Button/>", 2).unwrap();
     assert_eq!(service.remove_solution(&one.root), 1);
     assert!(service.document(&uri).is_none());
-    assert_eq!(service.remove_solution(&two.root), 0);
+    assert_eq!(service.remove_solution(&two.root), 1);
     assert_eq!(service.document(&other).unwrap().source(), "<Button/>");
     std::fs::remove_dir_all(directory).unwrap();
 }
@@ -1187,7 +1283,7 @@ fn symlink_document_aliases_share_versions_symbols_and_project_snapshots() {
     service.replace(&alias, "<Grid/>", 3).unwrap();
     service.close(&alias).unwrap();
     assert_eq!(service.document(&alias).unwrap().source(), source);
-    assert_eq!(service.version(&alias), Some(-1));
+    assert!(service.version(&alias).unwrap() < 0);
     assert_eq!(service.remove_solution(&directory), 1);
     assert!(service.document(&uri).is_none());
 

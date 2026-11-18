@@ -11,6 +11,7 @@ import { verifyRuntimeClient } from './runtimeClient';
 import { verifyHostedPreview } from './hostedPreview';
 import { verifyLiveApp } from './liveApp';
 import { verifyProcessShutdown } from './reloadProcess';
+import { until } from './wait';
 import type { DesignerWorkbench } from '../src/designerWorkbench';
 
 const editorPosition = (line = 0, character = 0) => new vscode.Position(line, character);
@@ -161,13 +162,4 @@ export async function run(): Promise<void> {
         preview.dispose();
         channel.dispose();
     }
-}
-
-async function until(check: () => boolean | Promise<boolean>): Promise<void> {
-    const end = Date.now() + 20_000;
-    while (Date.now() < end) {
-        if (await check()) return;
-        await new Promise(resolve => setTimeout(resolve, 150));
-    }
-    throw new Error('Timed out waiting for a VS Code extension result');
 }

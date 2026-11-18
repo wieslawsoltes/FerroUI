@@ -9,6 +9,8 @@ use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::collections::{BTreeMap, BTreeSet};
 
+mod refactoring;
+
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Location {
     pub uri: String,
@@ -122,8 +124,10 @@ pub struct LanguageService {
     package_schemas: BTreeMap<std::path::PathBuf, ProjectSchema>,
     documents: BTreeMap<String, State>,
     workspaces: BTreeMap<std::path::PathBuf, ferroui_designer_project::ProjectWorkspace>,
-    declarations: BTreeMap<String, Vec<(String, Occurrence)>>,
+    declarations: DeclarationIndex,
+    disk_revision: i64,
 }
+type DeclarationIndex = BTreeMap<String, Vec<(String, Occurrence)>>;
 #[derive(Clone, Debug, PartialEq, Eq)]
 enum SymbolKind {
     Name(u64),
@@ -196,6 +200,7 @@ impl LanguageService {
             documents: BTreeMap::new(),
             workspaces: BTreeMap::new(),
             declarations: BTreeMap::new(),
+            disk_revision: 0,
         }
     }
     pub fn schema(&self) -> &Schema {
@@ -314,6 +319,18 @@ impl LanguageService {
         );
         Ok(())
     }
+    fn index_disk(&mut self, uri: &str, source: String) -> Result<()> {
+        if self.documents.get(uri).is_some_and(|state| {
+            !state.opened && state.index.source() == source
+        }) {
+            return Ok(());
+        }
+        let version = previous_disk_revision(self.disk_revision)?;
+        self.open(uri, source, version)?;
+        self.documents.get_mut(uri).expect("indexed snapshot").opened = false;
+        self.disk_revision = version;
+        Ok(())
+    }
     pub fn close(&mut self, uri: &str) -> Result<()> {
         let uri = self.document_uri(uri)?.into_owned();
         let uri = uri.as_str();
@@ -343,8 +360,7 @@ impl LanguageService {
             .transpose()?;
         self.set_state(uri.into(), None);
         if let Some(source) = snapshot {
-            self.open(uri, source, -1)?;
-            self.documents.get_mut(uri).unwrap().opened = false;
+            self.index_disk(uri, source)?;
         }
         Ok(())
     }
@@ -412,8 +428,7 @@ impl LanguageService {
             staged.insert(uri, source);
         }
         for (uri, source) in staged {
-            self.open(&uri, source, -1)?;
-            self.documents.get_mut(&uri).unwrap().opened = false;
+            self.index_disk(&uri, source)?;
             added += 1;
         }
         self.workspaces.insert(root, workspace);
@@ -462,11 +477,7 @@ impl LanguageService {
                     .and_then(|file| file.take(MAX + 1).read_to_string(&mut source))
                     .map_err(|error| LanguageError(error.to_string()))?;
                 require(source.len() as u64 <= MAX, "Indexed file exceeds 16 MiB")?;
-                self.open(&uri, source, -1)?;
-                self.documents
-                    .get_mut(&uri)
-                    .expect("snapshot inserted")
-                    .opened = false;
+                self.index_disk(&uri, source)?;
             } else {
                 self.set_state(uri.clone(), None);
             }
@@ -608,14 +619,36 @@ impl LanguageService {
                 let expression =
                     attribute.value.starts_with('{') && !attribute.value.starts_with("{}");
                 if expression {
-                    if let Err(error) = attribute.markup() {
-                        out.push(diagnostic_at(
+                    match attribute.markup() {
+                        Err(error) => out.push(diagnostic_at(
                             state,
                             attribute.value_span,
                             1,
                             "markup",
                             &error,
-                        )?);
+                        )?),
+                        Ok(MarkupValue::Extension(extension)) => {
+                            if let Some(problem) = crate::binding::case_mismatch(
+                                schema,
+                                &state.document,
+                                node,
+                                attribute.value_span,
+                                &extension,
+                                |name| self.binding_named_element(uri, node.id, name),
+                            ) {
+                                out.push(diagnostic_at(
+                                    state,
+                                    problem.span,
+                                    2,
+                                    "binding-member-case",
+                                    &format!(
+                                        "Binding member {} has a case mismatch. The registered spelling is {}.",
+                                        problem.authored, problem.registered,
+                                    ),
+                                )?);
+                            }
+                        }
+                        Ok(MarkupValue::Literal(_)) => (),
                     }
                     if let Some(message) =
                         crate::design_support::sample_diagnostic(&state.document, node, attribute)
@@ -1327,117 +1360,29 @@ impl LanguageService {
         }
         Ok(result)
     }
-    pub fn rename(&self, uri: &str, offset: usize, new_name: &str) -> Result<WorkspaceEdit> {
-        let target = self
-            .target(uri, offset)?
-            .ok_or_else(|| LanguageError("No unambiguous symbol at the caret".into()))?;
-        require(
-            match target.1.kind {
-                SymbolKind::Name(_) => crate::references::identifier(new_name),
-                SymbolKind::Resource => {
-                    !new_name.is_empty()
-                        && new_name.chars().all(|c| {
-                            matches!(c, '\t' | '\n' | '\r')
-                                || c >= ' ' && c != '\u{fffe}' && c != '\u{ffff}'
-                        })
-                }
-            },
-            "Names must be XAML identifiers; resource keys must be nonempty XML text",
-        )?;
-        let target_state = self.state(&target.0)?;
-        require(
-            !target_state.symbols.iter().any(|o| {
-                o.declaration
-                    && o.name == new_name
-                    && o.kind == target.1.kind
-                    && o.span != target.1.span
-                    && (o.kind != SymbolKind::Resource
-                        || resource_scope(&target_state.document, o.node)
-                            == resource_scope(&target_state.document, target.1.node))
-            }),
-            "A declaration with this name already exists in scope",
-        )?;
-        let mut grouped = BTreeMap::<String, Vec<TextEdit>>::new();
-        for (uri, state) in &self.documents {
-            for occurrence in &state.symbols {
-                let resolution = self.resolve_with_context(uri, occurrence);
-                let resolved = resolution.matches;
-                require(
-                    target.1.kind != SymbolKind::Resource
-                        || !resolution.themed
-                        || resolved.len() <= 1
-                        || !resolved.iter().any(|candidate| {
-                            candidate.0 == target.0 && candidate.1.span == target.1.span
-                        }),
-                    "This resource has references that select different declarations across themes or providers; rename the resource family together in source",
-                )?;
-                if resolved.len() != 1
-                    || resolved[0].0 != target.0
-                    || resolved[0].1.span != target.1.span
-                {
-                    continue;
-                }
-                let replacement =
-                    if occurrence.kind == SymbolKind::Resource && !occurrence.declaration {
-                        let quote = occurrence.quote.or_else(|| {
-                            new_name
-                                .chars()
-                                .any(|c| {
-                                    c.is_whitespace()
-                                        || matches!(c, '{' | '}' | ',' | '=' | '\'' | '"' | '\\')
-                                })
-                                .then_some('\'')
-                        });
-                        if let Some(quote) = quote {
-                            let value = new_name
-                                .replace('\\', "\\\\")
-                                .replace(quote, &format!("\\{quote}"));
-                            if occurrence.quote.is_some() {
-                                value
-                            } else {
-                                format!("{quote}{value}{quote}")
-                            }
-                        } else {
-                            new_name.into()
-                        }
-                    } else {
-                        new_name.into()
-                    };
-                grouped.entry(uri.clone()).or_default().push(TextEdit {
-                    range: state.index.range(occurrence.span)?,
-                    new_text: escape_xml(&replacement),
-                });
-            }
-        }
-        let document_changes = grouped
-            .into_iter()
-            .map(|(uri, edits)| DocumentEdits {
-                version: self.documents[&uri].version,
-                uri,
-                edits,
-            })
-            .collect();
-        Ok(WorkspaceEdit { document_changes })
-    }
     pub fn apply_workspace_edit(&mut self, edit: &WorkspaceEdit) -> Result<()> {
         let mut staged = Vec::new();
         let mut seen = BTreeSet::new();
+        let mut disk_revision = self.disk_revision;
         for changes in &edit.document_changes {
             let uri = self.document_uri(&changes.uri)?.into_owned();
             require(seen.insert(uri.clone()), "Duplicate document edit")?;
             let state = self.state(&uri)?;
             require(state.version == changes.version, "Workspace edit is stale")?;
             let source = apply_text_edits(state.index.source(), &changes.edits)?;
-            let version = state
-                .version
-                .checked_add(1)
-                .ok_or_else(|| LanguageError("Version exhausted".into()))?;
+            let version = if state.opened {
+                state.version.checked_add(1).ok_or_else(|| LanguageError("Version exhausted".into()))?
+            } else {
+                disk_revision = previous_disk_revision(disk_revision)?;
+                disk_revision
+            };
             let state = state.with_text(LineIndex::new(&source), version, "Workspace refactoring");
             staged.push((uri, state));
         }
         for (uri, state) in staged {
             self.set_state(uri, Some(state));
         }
+        self.disk_revision = disk_revision;
         Ok(())
     }
     pub fn format(&self, uri: &str, options: FormattingOptions) -> Result<Vec<TextEdit>> {
@@ -1590,6 +1535,13 @@ impl LanguageService {
     pub fn resource_uri(&self, base: &str, reference: &str) -> Result<String> {
         let resolved = ferroui_designer_project::resolve_uri(base, reference)?;
         if resolved.starts_with("ferres://") || resolved.starts_with("resm:") {
+            let owner = self.document_uri(base)?;
+            if let Some(path) = self
+                .workspace_root(&owner)
+                .and_then(|root| self.workspaces[root].resolve_path(&resolved).ok())
+            {
+                return Ok(ferroui_designer_project::file_uri(path)?);
+            }
             let mut matches = BTreeSet::new();
             for workspace in self.workspaces.values() {
                 if let Ok(path) = workspace.resolve_path(&resolved) {
@@ -1744,6 +1696,22 @@ impl LanguageService {
             range: self.state(uri)?.index.range(span)?,
         })
     }
+    fn workspace_root(&self, uri: &str) -> Option<&std::path::PathBuf> {
+        let path = ferroui_designer_project::file_path(uri).ok()?;
+        self.workspaces
+            .keys()
+            .filter(|root| path.starts_with(root))
+            .max_by_key(|root| root.as_os_str().len())
+    }
+    pub(crate) fn binding_named_element(&self, uri: &str, anchor: u64, name: &str) -> Option<u64> {
+        let uri = self.document_uri(uri).ok()?;
+        let scope = self.documents.get(uri.as_ref())?.document.ast().name_scope(anchor);
+        let mut targets = self.declarations.get(name)?.iter().filter(|(source, occurrence)| {
+            source == uri.as_ref() && occurrence.kind == SymbolKind::Name(scope)
+        });
+        let node = targets.next()?.1.node;
+        targets.next().is_none().then_some(node)
+    }
     fn all_declarations(&self) -> Vec<(String, Occurrence)> {
         self.declarations.values().flatten().cloned().collect()
     }
@@ -1765,6 +1733,24 @@ impl LanguageService {
         self.resolve_with_context(uri, reference).matches
     }
     fn resolve_with_context(&self, uri: &str, reference: &Occurrence) -> ResourceLookup {
+        self.resolve_with_declarations(uri, reference, &DeclarationIndex::new())
+    }
+    fn declarations_for<'a>(
+        &'a self,
+        name: &str,
+        overrides: &'a DeclarationIndex,
+    ) -> &'a [(String, Occurrence)] {
+        overrides
+            .get(name)
+            .or_else(|| self.declarations.get(name))
+            .map_or(&[], Vec::as_slice)
+    }
+    fn resolve_with_declarations(
+        &self,
+        uri: &str,
+        reference: &Occurrence,
+        overrides: &DeclarationIndex,
+    ) -> ResourceLookup {
         let Ok(uri) = self.document_uri(uri) else {
             return ResourceLookup::missing();
         };
@@ -1777,10 +1763,8 @@ impl LanguageService {
             };
         }
         let found: Vec<_> = self
-            .declarations
-            .get(&reference.name)
-            .into_iter()
-            .flatten()
+            .declarations_for(&reference.name, overrides)
+            .iter()
             .filter(|(candidate, o)| {
                 o.name == reference.name
                     && match (&o.kind, &reference.kind) {
@@ -1797,7 +1781,7 @@ impl LanguageService {
             if let Some(state) = self.documents.get(uri) {
                 let mut current = Some(reference.node);
                 while let Some(scope) = current {
-                    result.fallback(self.resources_at(uri, scope, &reference.name, &seen));
+                    result.fallback(self.resources_at(uri, scope, &reference.name, &seen, overrides));
                     if !result.may_be_missing {
                         return result;
                     }
@@ -1809,13 +1793,16 @@ impl LanguageService {
                 }
             }
             // Standalone dictionaries and application resources may provide global resources.
-            // Never expose private resources belonging to another control/view as globals.
+            // Implicit lookup stays in the owning workspace. Explicit imports have
+            // already been resolved through the document's dictionary graph.
+            let home = self.workspace_root(uri);
             let candidates: BTreeSet<_> = found
                 .iter()
                 .filter_map(|(candidate, _)| {
                     let state = self.documents.get(candidate)?;
                     let root = state.document.ast().node(state.document.ast().root())?;
                     (candidate != uri
+                        && self.workspace_root(candidate) == home
                         && matches!(
                             root.local_name(),
                             "ResourceDictionary" | "Application" | "Styles" | "Theme"
@@ -1826,7 +1813,9 @@ impl LanguageService {
             let mut globals = ResourceLookup::missing();
             for candidate in candidates {
                 let root = self.documents[&candidate].document.ast().root();
-                globals.alternative(self.resources_at(&candidate, root, &reference.name, &seen));
+                globals.alternative(self.resources_at(
+                    &candidate, root, &reference.name, &seen, overrides,
+                ));
             }
             result.fallback(globals);
             return result;
@@ -1843,6 +1832,7 @@ impl LanguageService {
         scope: u64,
         name: &str,
         seen: &BTreeSet<(String, u64)>,
+        overrides: &DeclarationIndex,
     ) -> ResourceLookup {
         let mut seen = seen.clone();
         if !seen.insert((uri.into(), scope)) {
@@ -1856,10 +1846,8 @@ impl LanguageService {
             return ResourceLookup::missing();
         };
         let found: Vec<_> = self
-            .declarations
-            .get(name)
-            .into_iter()
-            .flatten()
+            .declarations_for(name, overrides)
+            .iter()
             .filter(|(candidate, occurrence)| {
                 candidate == uri
                     && occurrence.kind == SymbolKind::Resource
@@ -1887,7 +1875,7 @@ impl LanguageService {
             } else {
                 (uri.into(), edge.node)
             };
-            let mut result = self.resources_at(&target, next, name, &seen);
+            let mut result = self.resources_at(&target, next, name, &seen, overrides);
             if edge.kind != ResourceEdgeKind::Collection && !result.matches.is_empty() {
                 result.themed = true;
             }
@@ -1957,6 +1945,11 @@ impl Default for LanguageService {
     fn default() -> Self {
         Self::new(Schema::ferroui())
     }
+}
+fn previous_disk_revision(revision: i64) -> Result<i64> {
+    // Keep server-owned disk identities disjoint from editor versions. LSP
+    // clients receive a null document version for these unopened snapshots.
+    revision.checked_sub(1).ok_or_else(|| LanguageError("Disk revision exhausted".into()))
 }
 fn diagnostic_at(
     state: &State,

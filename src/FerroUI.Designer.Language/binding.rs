@@ -5,6 +5,9 @@ use crate::{LanguageService, Position, PropertyInfo, Range, Result, Schema, Type
 use ferroui_designer_core::{Document, MarkupValue, NodeId, SourceSpan};
 use std::collections::BTreeMap;
 
+mod fixes;
+pub(crate) use fixes::case_mismatch;
+
 impl LanguageService {
     /// Locate the ends of typed binding paths visible in the requested source range.
     pub fn binding_type_hints(&self, uri: &str, range: Range) -> Result<Vec<(Position, String)>> {
@@ -56,8 +59,16 @@ pub(crate) fn members(
 ) -> BTreeMap<String, PropertyInfo> {
     let arguments = markup_arguments(expression);
     let mut path = path;
-    let Some(mut owner) = source_type(schema, document, node, expression, &arguments, &mut path)
-    else {
+    let Some(mut owner) = source_type(
+        schema, document, node, expression, &arguments, &mut path, |name| {
+            let scope = crate::name_scope(document, node);
+            let mut targets = crate::name_occurrences(document).into_iter().filter(|occurrence| {
+                occurrence.declaration && occurrence.scope == scope && occurrence.name == name
+            });
+            let node = targets.next()?.node;
+            targets.next().is_none().then_some(node)
+        },
+    ) else {
         return BTreeMap::new();
     };
     if let Some((prefix, _)) = path.rsplit_once('.') {
@@ -139,8 +150,9 @@ fn is_path(argument: &Argument) -> bool {
 }
 
 fn is_binding(extension: &str) -> bool {
+    let extension = extension.rsplit(':').next().unwrap_or(extension);
     matches!(
-        extension.rsplit(':').next().unwrap_or(extension),
+        extension.strip_suffix("Extension").unwrap_or(extension),
         "Binding" | "CompiledBinding" | "ReflectionBinding"
     )
 }
@@ -151,6 +163,7 @@ fn source_type<'a>(
     expression: &str,
     arguments: &[Argument],
     path: &mut &str,
+    named_element: impl FnOnce(&str) -> Option<NodeId>,
 ) -> Option<&'a TypeInfo> {
     let parameters: BTreeMap<_, _> = arguments
         .iter()
@@ -169,17 +182,7 @@ fn source_type<'a>(
         *path = rest;
     }
     if let Some(name) = element {
-        let scope = crate::name_scope(document, node);
-        let targets: Vec<_> = crate::name_occurrences(document)
-            .into_iter()
-            .filter(|occurrence| {
-                occurrence.declaration && occurrence.scope == scope && occurrence.name == name
-            })
-            .collect();
-        if targets.len() != 1 {
-            return None;
-        }
-        let target = document.ast().node(targets[0].node)?;
+        let target = document.ast().node(named_element(name)?)?;
         return schema.type_info(&target.name, target.namespace_uri.as_deref());
     }
     if path.starts_with("$self.") || expression.contains("{RelativeSource Self}") {

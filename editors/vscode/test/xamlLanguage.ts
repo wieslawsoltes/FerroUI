@@ -1,5 +1,7 @@
 import { strict as assert } from 'node:assert';
+import { realpath } from 'node:fs/promises';
 import * as vscode from 'vscode';
+import { until } from './wait';
 
 export async function verifyXamlRefactoring(workspace: vscode.Uri): Promise<void> {
     const uri = vscode.Uri.joinPath(workspace, 'Namescope.xaml');
@@ -38,5 +40,49 @@ export async function verifyXamlRefactoring(workspace: vscode.Uri): Promise<void
     assert.equal(document.lineAt(1).text, '  <Button Name="Submit" Content="Action"/>');
     const tokens = await vscode.commands.executeCommand<vscode.SemanticTokens>('vscode.provideDocumentSemanticTokens', uri);
     assert.ok(tokens.data.length > 0);
+    await verifyResourceEdits(workspace);
     console.log('VS Code XAML definitions, references, type hints, namescope rename, formatting and semantic tokens passed');
+}
+
+async function verifyResourceEdits(workspace: vscode.Uri): Promise<void> {
+    const dictionary = vscode.Uri.joinPath(workspace, 'SafeResources.xaml');
+    const uri = vscode.Uri.joinPath(workspace, 'ResourceConsumers.xaml');
+    const source = '<Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">\r\n'
+        + '<Grid.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries>'
+        + '<ResourceInclude Source="SafeResources.xaml"/></ResourceDictionary.MergedDictionaries></ResourceDictionary></Grid.Resources>\r\n'
+        + '<Border><Border.Resources><Color x:Key="Shadow"/></Border.Resources><!-- 😀 -->'
+        + '<Button Background="{StaticResource Primary}" Tag="{DynamicResource \'shade\'}"/></Border>\r\n'
+        + '<TextBox Name="Input"/><TextBlock Text="{Binding #Input.teXT}"/></Grid>\r\n';
+    await vscode.workspace.fs.writeFile(dictionary, Buffer.from('<ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">'
+        + '<Color x:Key="Primary"/><Color x:Key="Shade"/></ResourceDictionary>'));
+    await vscode.workspace.fs.writeFile(uri, Buffer.from(source));
+    const document = await vscode.workspace.openTextDocument(uri);
+    const target = document.positionAt(source.indexOf('Primary'));
+    const indexedDictionary = vscode.Uri.file(await realpath(dictionary.fsPath));
+    await until(async () => {
+        const definitions = await vscode.commands.executeCommand<vscode.Location[]>(
+            'vscode.executeDefinitionProvider', uri, target);
+        return definitions.some(definition => definition.uri.toString() === indexedDictionary.toString());
+    });
+    for (const [offset, original, replacement] of [
+        [source.indexOf("'shade'") + 1, 'shade', 'Shade'],
+        [source.indexOf('teXT'), 'teXT', 'Text'],
+    ] as const) {
+        const problem = document.positionAt(offset);
+        const range = new vscode.Range(problem, problem.translate(0, original.length));
+        const actions = await vscode.commands.executeCommand<vscode.CodeAction[]>(
+            'vscode.executeCodeActionProvider', uri, range, vscode.CodeActionKind.QuickFix.value);
+        const fix = actions.find(action => action.title === `Use ${replacement}`);
+        assert.ok(fix?.edit, `The LSP suggests ${replacement} for ${original}`);
+        assert.equal(fix.edit.get(uri)[0].newText, replacement);
+    }
+    await assert.rejects(async () => vscode.commands.executeCommand(
+        'vscode.executeDocumentRenameProvider', uri, target, 'Shadow'), /would change the resolution of Primary/);
+    const checked = await vscode.commands.executeCommand<vscode.WorkspaceEdit>(
+        'vscode.executeDocumentRenameProvider', uri, target, 'Available');
+    assert.equal(checked.size, 2, 'Rename includes the unopened dictionary and the active view');
+    assert.ok(await vscode.workspace.applyEdit(checked));
+    assert.equal(document.getText(), source.replace('Primary', 'Available'));
+    assert.ok((await vscode.workspace.openTextDocument(indexedDictionary)).getText().includes('x:Key="Available"'));
+    console.log('VS Code XAML provided typed and scoped quick fixes and guarded cross-file resource rename');
 }

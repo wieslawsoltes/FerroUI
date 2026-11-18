@@ -234,6 +234,7 @@ fn skip_space(source: &str, start: usize) -> usize {
 #[derive(Clone, Debug)]
 pub(crate) struct Argument {
     pub extension: String,
+    pub depth: usize,
     pub name: Option<String>,
     pub value: String,
     pub span: SourceSpan,
@@ -298,7 +299,7 @@ fn parse_extension(source: &Decoded, open: usize, depth: usize, out: &mut Vec<Ar
                 }
             }
             ',' | '}' => {
-                push_argument(source, extension, segment, at, equal, out);
+                push_argument(source, extension, depth, segment, at, equal, out);
                 if ch == '}' {
                     return next;
                 }
@@ -309,12 +310,13 @@ fn parse_extension(source: &Decoded, open: usize, depth: usize, out: &mut Vec<Ar
         }
         at = next;
     }
-    push_argument(source, extension, segment, at, equal, out);
+    push_argument(source, extension, depth, segment, at, equal, out);
     at
 }
 fn push_argument(
     source: &Decoded,
     extension: &str,
+    depth: usize,
     start: usize,
     end: usize,
     equal: Option<usize>,
@@ -366,6 +368,7 @@ fn push_argument(
     }
     out.push(Argument {
         extension: extension.into(),
+        depth,
         name,
         value,
         span: SourceSpan::new(source.boundaries[start], source.boundaries[end]),

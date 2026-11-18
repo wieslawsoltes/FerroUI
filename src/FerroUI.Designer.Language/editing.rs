@@ -1,5 +1,5 @@
 use crate::{DocumentEdits, LanguageService, Range, Result, TextEdit, apply_text_edits};
-use ferroui_designer_core::{Document, Node, SourceSpan};
+use ferroui_designer_core::{Document, MarkupValue, Node, SourceSpan};
 
 #[derive(Clone, Debug)]
 pub struct QuickFix {
@@ -44,6 +44,15 @@ impl LanguageService {
             let proposed = match diagnostic.code.as_str() {
                 "unknown-type" => self.namespace_fixes(uri, document, diagnostic.span)?,
                 "unknown-property" => self.property_fix(uri, document, diagnostic.span)?,
+                "unresolved-reference" => self
+                    .reference_case_fix(uri, diagnostic.span)?
+                    .into_iter()
+                    .map(|(title, text)| (title, vec![(diagnostic.span, text)]))
+                    .collect(),
+                "binding-member-case" => self
+                    .binding_fix(uri, document, diagnostic.span)
+                    .into_iter()
+                    .collect(),
                 _ => Vec::new(),
             };
             for (title, patches) in proposed {
@@ -68,6 +77,22 @@ impl LanguageService {
             }
         }
         Ok(fixes)
+    }
+
+    fn binding_fix(&self, uri: &str, document: &Document, span: SourceSpan) -> Option<Proposal> {
+        let ast = document.ast();
+        let node = ast.node(ast.element_at(span.start)?)?;
+        let attribute = node.attributes.iter().find(|attr| attr.value_span.contains(span.start))?;
+        let MarkupValue::Extension(extension) = attribute.markup().ok()? else {
+            return None;
+        };
+        let problem = crate::binding::case_mismatch(
+            self.schema_for(uri), document, node, attribute.value_span, &extension,
+            |name| self.binding_named_element(uri, node.id, name),
+        )?;
+        (problem.span == span).then(|| {
+            (format!("Use {}", problem.registered), vec![(span, problem.registered)])
+        })
     }
 
     fn namespace_fixes(
@@ -255,5 +280,20 @@ mod tests {
         let fixed = apply_text_edits(source, &fixes[0].edits.edits).unwrap();
         assert!(fixed.contains(r#"xmlns:app2="using:Example""#));
         assert!(fixed.contains(r#"<app2:StatusCard Width="40"></app2:StatusCard>"#));
+    }
+
+    #[test]
+    fn resource_case_fix_requires_one_reachable_dictionary_key() {
+        let source = "<Grid xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\r\n<Grid.Resources><Color x:Key='Accent'/><Color x:Key='aCCent'/></Grid.Resources><Border><Border.Resources><Color x:Key='Private'/></Border.Resources><!-- 😀 --><Button Background=\"{DynamicResource 'private'}\"/></Border><Button Background='{StaticResource private}' Tag='{StaticResource accent}'/></Grid>";
+        let mut service = LanguageService::default();
+        service.open(URI, source, 3).unwrap();
+        let index = LineIndex::new(source);
+        let range = index.range(SourceSpan::new(0, source.len())).unwrap();
+        let fixes = service.quick_fixes(URI, range).unwrap();
+        assert_eq!(fixes.len(), 1);
+        assert_eq!(fixes[0].title, "Use Private");
+        assert_eq!(fixes[0].edits.version, 3);
+        let fixed = apply_text_edits(source, &fixes[0].edits.edits).unwrap();
+        assert_eq!(fixed, source.replacen("'private'", "'Private'", 1));
     }
 }
