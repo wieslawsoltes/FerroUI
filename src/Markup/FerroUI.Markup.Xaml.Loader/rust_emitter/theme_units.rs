@@ -19,8 +19,22 @@
 //! unmarked, when it is not one or more complete statements at the top level of the body, when
 //! it names a local of the body other than the context and one dictionary, or when a local it
 //! declares is named after it. The markers never reach the generated file.
+//!
+//! **The plan of the runs (#853), an experiment that is off by default.** [`ThemeUnitPlan`]
+//! has two switches. With `keys_in_runs`, the key that a merged theme dictionary assigns
+//! again to the theme dictionary it was merged into (`<ResourceDictionary x:Key="Default">` of
+//! every `*_themeresources.xaml`) is an entry of the unit of its document, when the build has
+//! assigned the dictionary a key outside every unit before: the merge joins only dictionaries
+//! whose keys are equal, so the assignment writes the value the dictionary has, and a unit that
+//! is trimmed takes it with it instead of leaving it in the function of the theme. With
+//! `regions`, consecutive calls of runs that add to one dictionary, with only comments between
+//! them, are one region: one call of `rt::apply_theme_region` with the units and runs of the
+//! region in their order, instead of one call of `rt::apply_theme_unit` each. A region applies
+//! the same runs in the same order and stops at the same failure. [`DEFAULT_THEME_UNIT_PLAN`]
+//! is what the build and the reference tests of the themes use; [`with_theme_unit_plan`]
+//! chooses another one for the emission of a closure.
 
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 
@@ -43,6 +57,79 @@ pub(crate) const TABLE: &str = "THEME_UNITS";
 /// The function of the generated file that gives the table the builds apply the units through:
 /// the active table of the class (#568, step 3).
 pub(crate) const ACTIVE: &str = "active_theme_units";
+
+/// The function of the runtime that applies a region of runs (#853).
+const APPLY_REGION: &str = "rt::apply_theme_region";
+
+/// The experiment of #853: how the runs of the units of a theme are applied. Both switches are
+/// off by default ([`DEFAULT_THEME_UNIT_PLAN`]), and then the generated files are what they were
+/// before the experiment, byte for byte.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct ThemeUnitPlan {
+    regions: bool,
+    keys_in_runs: bool,
+}
+
+impl ThemeUnitPlan {
+    /// Both switches off: one call of `rt::apply_theme_unit` for each run, and the key
+    /// assignments of merged theme dictionaries in the function of the document.
+    pub const OFF: Self = Self { regions: false, keys_in_runs: false };
+
+    /// Both switches on.
+    pub const ON: Self = Self { regions: true, keys_in_runs: true };
+
+    /// Consecutive calls of runs that add to one dictionary written as one call of
+    /// `rt::apply_theme_region`.
+    pub const fn with_regions(self, on: bool) -> Self {
+        Self { regions: on, ..self }
+    }
+
+    /// The key a merged theme dictionary assigns again to the dictionary it was merged into
+    /// written as an entry of the unit of its document.
+    pub const fn with_keys_in_runs(self, on: bool) -> Self {
+        Self { keys_in_runs: on, ..self }
+    }
+
+    /// Whether regions are written.
+    pub const fn regions(self) -> bool {
+        self.regions
+    }
+
+    /// Whether the key assignments of merged theme dictionaries are entries of their units.
+    pub const fn keys_in_runs(self) -> bool {
+        self.keys_in_runs
+    }
+
+    /// The plan of the emission on this thread: the one [`with_theme_unit_plan`] chose, else
+    /// [`DEFAULT_THEME_UNIT_PLAN`].
+    pub fn current() -> Self {
+        PLAN.with(|plan| plan.get()).unwrap_or(DEFAULT_THEME_UNIT_PLAN)
+    }
+}
+
+/// The plan the build and the reference tests of the themes emit with. The experiment of #853
+/// is turned on here (`ThemeUnitPlan::ON`); the checked-in generated files of the themes and of
+/// the emitter tests are then regenerated.
+pub const DEFAULT_THEME_UNIT_PLAN: ThemeUnitPlan = ThemeUnitPlan::OFF;
+
+ferroui_base::ferro_thread_local! {
+    /// The plan [`with_theme_unit_plan`] chose for the emission on this thread.
+    static PLAN: Cell<Option<ThemeUnitPlan>> = const { Cell::new(None) };
+}
+
+/// Runs `emit` with `plan` as the plan of the runs of theme units (#853) on this thread, and
+/// restores the plan before it afterwards, also when `emit` panics.
+pub fn with_theme_unit_plan<R>(plan: ThemeUnitPlan, emit: impl FnOnce() -> R) -> R {
+    struct Restore(Option<ThemeUnitPlan>);
+    impl Drop for Restore {
+        fn drop(&mut self) {
+            let before = self.0;
+            PLAN.with(|plan| plan.set(before));
+        }
+    }
+    let _restore = Restore(PLAN.with(|current| current.replace(Some(plan))));
+    emit()
+}
 
 /// The marker that opens an entry of the unit `unit`, indented as a statement of a body.
 pub(crate) fn begin_marker(unit: u32) -> String {
@@ -212,6 +299,7 @@ pub(super) fn extract_runs(
         functions: Vec::new(),
         run: None,
         pending_comments: Vec::new(),
+        calls: Vec::new(),
     };
     let mut depth: i64 = 0;
     let mut index = 0;
@@ -267,6 +355,17 @@ struct Extractor<'e> {
     run: Option<Run>,
     /// The comments of the body since the last run, which belong to what follows them.
     pending_comments: Vec<String>,
+    /// The calls of runs written into the body: their lines, units, runs and dictionaries.
+    calls: Vec<Call>,
+}
+
+/// A call of a run the body has: the index of its line in the body, the unit, the index of the
+/// run among the runs of the unit, and the local of the dictionary it adds to.
+struct Call {
+    line: usize,
+    unit: u32,
+    run: usize,
+    dictionary: String,
 }
 
 impl Extractor<'_> {
@@ -394,14 +493,79 @@ impl Extractor<'_> {
         text.push_str("}\n");
         self.functions.push(text);
         let index = self.units.push_run(run.unit, function);
+        self.calls.push(Call { line: self.body.len(), unit: run.unit, run: index, dictionary: run.dictionary.clone() });
         self.body.push(format!("    rt::apply_theme_unit({ACTIVE}(), {}, {index}, &context, &{})?;", run.unit, run.dictionary));
     }
 
     fn finish(mut self) -> (Vec<String>, Vec<String>) {
         self.flush();
         self.body.append(&mut self.pending_comments);
-        (self.body, self.functions)
+        let body = match ThemeUnitPlan::current().regions() {
+            true => regions(self.body, &self.calls),
+            false => self.body,
+        };
+        (body, self.functions)
     }
+}
+
+/// The calls of a region (#853) as the operand of `rt::apply_theme_region`: the pairs of the
+/// unit and the index of its run, in their order, or `None` when an index does not fit the
+/// 16 bits of a pair (the calls then stay as they are).
+fn region_operand(calls: &[&Call]) -> Option<String> {
+    let pairs = calls
+        .iter()
+        .map(|call| {
+            let unit = u16::try_from(call.unit).ok()?;
+            let run = u16::try_from(call.run).ok()?;
+            Some(format!("({unit}, {run})"))
+        })
+        .collect::<Option<Vec<_>>>()?;
+    Some(format!("&[{}]", pairs.join(", ")))
+}
+
+/// `body` with each region of `calls` (two or more calls of runs that add to one dictionary,
+/// with only comments between them) written as one call of `rt::apply_theme_region`, after the
+/// comments of the region (#853). A call alone stays a call of `rt::apply_theme_unit`.
+fn regions(body: Vec<String>, calls: &[Call]) -> Vec<String> {
+    let call_at: HashMap<usize, &Call> = calls.iter().map(|call| (call.line, call)).collect();
+    let is_comment = |line: &str| line.trim_start().starts_with("//");
+    let mut written = Vec::with_capacity(body.len());
+    let mut index = 0;
+    while index < body.len() {
+        let Some(first) = call_at.get(&index) else {
+            written.push(body[index].clone());
+            index += 1;
+            continue;
+        };
+        // The region: the calls of the dictionary of the first, over comments.
+        let mut region = vec![*first];
+        let mut comments = Vec::new();
+        let mut end = index + 1;
+        let mut next = index + 1;
+        while next < body.len() {
+            if let Some(call) = call_at.get(&next) {
+                if call.dictionary != first.dictionary {
+                    break;
+                }
+                region.push(*call);
+                end = next + 1;
+            } else if !is_comment(&body[next]) {
+                break;
+            }
+            next += 1;
+        }
+        let operand = (region.len() > 1).then(|| region_operand(&region)).flatten();
+        let Some(operand) = operand else {
+            written.push(body[index].clone());
+            index += 1;
+            continue;
+        };
+        comments.extend((index..end).filter(|line| !call_at.contains_key(line)).map(|line| body[line].clone()));
+        written.extend(comments);
+        written.push(format!("    {APPLY_REGION}({ACTIVE}(), {operand}, &context, &{})?;", first.dictionary));
+        index = end;
+    }
+    written
 }
 
 #[cfg(test)]

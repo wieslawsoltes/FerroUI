@@ -131,5 +131,6 @@ pub use transform::{
 pub use compiled_resources::CompiledMarkupTypeSystem;
 pub use compiled_resources::CompiledDocumentBuildMethod;
 pub use emitter::{emit_document, UnsupportedNode};
+pub use emitter::theme_units::{with_theme_unit_plan, ThemeUnitPlan, DEFAULT_THEME_UNIT_PLAN};
 pub use ferroui_build_scan::xaml_metadata::{DocumentModel, ThemeUnitModel, ThemeUnitsModel, XamlMetadata};
 pub use source::{allocate_names, function_name_of, rust_string_literal};

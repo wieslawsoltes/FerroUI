@@ -60,8 +60,9 @@ pub use super::theme_styles::{
 // The units of a compiled theme (#568, `theme_units.rs`): a unit, its runs and the function the
 // builds of the dictionaries apply them with.
 pub use super::theme_units::{
-    active_theme_units, apply_theme_unit, find_theme_unit, register_theme_parts, register_theme_parts_if_absent,
-    registered_theme_parts, report_trimmed_theme, set_active_theme_units, trimmed_type_keys, ThemeParts, ThemeUnit, ThemeUnitRun,
+    active_theme_units, apply_theme_region, apply_theme_unit, find_theme_unit, register_theme_parts,
+    register_theme_parts_if_absent, registered_theme_parts, report_trimmed_theme, set_active_theme_units,
+    trimmed_type_keys, ThemeParts, ThemeUnit, ThemeUnitRun,
 };
 
 /// The exception a step of generated code failed with: the type name of the
