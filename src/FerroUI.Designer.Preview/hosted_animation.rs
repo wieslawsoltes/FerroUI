@@ -1,5 +1,7 @@
 use crate::hosted_relay::Frame;
-use ferroui_remote_protocol::designer::DesignAnimationCatalogMessage;
+use ferroui_remote_protocol::designer::{
+    DesignAnimationAuthoringResult, DesignAnimationCatalogMessage,
+};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
@@ -20,6 +22,32 @@ pub(crate) struct Sample {
     pub(crate) completed: bool,
 }
 
+#[derive(Deserialize)]
+pub(crate) struct KeyframeDraft {
+    pub(crate) revision: i64,
+    pub(crate) sequence: i64,
+    pub(crate) program: i64,
+    pub(crate) target: i64,
+    pub(crate) property: String,
+    pub(crate) previous: Option<f64>,
+    pub(crate) time: f64,
+    pub(crate) value: String,
+    pub(crate) easing: String,
+}
+
+pub(crate) fn keyframe(result: DesignAnimationAuthoringResult) -> Result<Value, String> {
+    if let Some(error) = result.error {
+        return Err(error);
+    }
+    Ok(json!({
+        "samples": result.samples,
+        "valueKind": result.value_kind,
+        "patch": result.patch.map(|patch| json!({
+            "start": patch.start, "end": patch.end, "expected": patch.expected, "replacement": patch.replacement,
+        })),
+    }))
+}
+
 pub(crate) fn catalog(catalog: DesignAnimationCatalogMessage) -> Value {
     let programs = catalog
         .programs
@@ -35,6 +63,16 @@ pub(crate) fn catalog(catalog: DesignAnimationCatalogMessage) -> Value {
                 "compatibleTargets": program.compatible_targets,
                 "sourceOffset": program.source_utf16,
                 "customAnimator": program.custom_animator,
+                "authoring": program.authoring.map(|authoring| json!({
+                    "codec": authoring.codec,
+                    "tracks": authoring.tracks.into_iter().map(|track| json!({
+                        "target": track.target,
+                        "property": track.property,
+                        "keyframes": track.keys.into_iter().map(|key| json!({
+                            "time": key.time, "value_text": key.value, "easing_text": key.easing, "value_kind": key.value_kind,
+                        })).collect::<Vec<_>>(),
+                    })).collect::<Vec<_>>(),
+                })),
             })
         })
         .collect::<Vec<_>>();

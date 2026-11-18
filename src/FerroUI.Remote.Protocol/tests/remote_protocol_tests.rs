@@ -13,9 +13,10 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use ferroui_remote_protocol::designer::{
-    DesignAnimationCatalogMessage, DesignAnimationProgram, DesignAnimationRequestMessage,
-    DesignAnimationResultMessage, DesignAnimationTarget, ExceptionDetails, StartDesignerSessionMessage,
-    UpdateXamlMessage, UpdateXamlResultMessage,
+    DesignAnimationAuthoring, DesignAnimationAuthoringRequest, DesignAnimationAuthoringResult,
+    DesignAnimationCatalogMessage, DesignAnimationKeyframe, DesignAnimationProgram, DesignAnimationRequestMessage,
+    DesignAnimationResultMessage, DesignAnimationSourcePatch, DesignAnimationTarget, DesignAnimationTrack,
+    ExceptionDetails, StartDesignerSessionMessage, UpdateXamlMessage, UpdateXamlResultMessage,
 };
 use ferroui_remote_protocol::input::{
     InputEventMessageBase, InputModifiers, Key, KeyEventMessage, MouseButton, PhysicalKey, PointerEventMessageBase,
@@ -167,6 +168,17 @@ fn entities() -> Vec<Message> {
                 compatible_targets: vec![12, 14],
                 source_utf16: 71,
                 custom_animator: true,
+                authoring: Some(DesignAnimationAuthoring {
+                    codec: "project.review".into(),
+                    tracks: vec![DesignAnimationTrack {
+                        target: 12,
+                        property: "CornerRadius".into(),
+                        keys: vec![DesignAnimationKeyframe {
+                            time: 1.25, value: "16".into(), easing: "Linear".into(),
+                            value_kind: "CornerRadius".into(),
+                        }],
+                    }],
+                }),
             }],
             targets: vec![DesignAnimationTarget { id: 12, label: "ReviewCard".into(), type_name: "Border".into() }],
         }),
@@ -176,6 +188,15 @@ fn entities() -> Vec<Message> {
         Arc::new(DesignAnimationResultMessage {
             revision: 40, request: 31, elapsed: 1.25, completed: true, after_sequence: 9,
             error: Some("Portable BSON result".into()),
+        }),
+        Arc::new(DesignAnimationAuthoringRequest {
+            revision: 40, request: 32, program: 6, target: 12, property: "CornerRadius".into(),
+            previous: Some(1.25), time: 1.5, value: "18".into(), easing: "Linear".into(),
+        }),
+        Arc::new(DesignAnimationAuthoringResult {
+            revision: 40, request: 32, samples: vec![0.0, 0.5, 1.0], value_kind: "CornerRadius".into(),
+            patch: Some(DesignAnimationSourcePatch { start: 62, end: 64, expected: "16".into(), replacement: "18".into() }),
+            error: Some("Portable draft result".into()),
         }),
     ]
 }

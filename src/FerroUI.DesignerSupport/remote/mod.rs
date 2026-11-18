@@ -4,6 +4,7 @@
 pub(crate) mod detachable_transport_connection;
 pub(crate) mod file_watcher_transport;
 mod hosted_animation;
+mod hosted_keyframes;
 pub mod html_transport;
 pub(crate) mod previewer_window_impl;
 pub(crate) mod previewer_windowing_platform;

@@ -2,9 +2,10 @@ use crate::{
     hosted_animation,
     hosted_frame,
     projects::Projects,
-    protocol::{Image, MAX_SOURCE_BYTES, Source},
+    protocol::{Image, Language, MAX_SOURCE_BYTES, Source},
 };
 use ferroui_remote_protocol::designer::{
+    DesignAnimationAuthoringRequest, DesignAnimationAuthoringResult,
     DesignAnimationCatalogMessage, DesignAnimationRequestMessage, DesignAnimationResultMessage,
     DesignFrameMessage, DesignFrameReceivedMessage, StartDesignerSessionMessage,
     UpdateDesignMessage, UpdateDesignResultMessage, UpdateXamlMessage,
@@ -21,6 +22,7 @@ use ferroui_remote_protocol::{
     exception_handler, message_handler,
 };
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeSet;
 use std::net::{IpAddr, Ipv4Addr};
 use std::sync::{
     Arc, Condvar, Mutex,
@@ -44,6 +46,9 @@ struct Events {
     animation_catalog: Option<DesignAnimationCatalogMessage>,
     animation_request: Option<i64>,
     animation_result: Option<DesignAnimationResultMessage>,
+    keyframe_result: Option<DesignAnimationAuthoringResult>,
+    authorable: BTreeSet<i64>,
+    authored_xaml: bool,
     disconnected: bool,
 }
 
@@ -171,11 +176,23 @@ impl Relay {
             if let Some(catalog) = message.downcast_ref::<DesignAnimationCatalogMessage>() {
                 if state.requested == Some(catalog.revision) {
                     state.animation_supported = true;
-                    state.animation_catalog = Some(catalog.clone());
+                    let mut catalog = catalog.clone();
+                    if state.authored_xaml {
+                        state.authorable = catalog.programs.iter().filter(|program| program.authoring.is_some())
+                            .map(|program| program.id).collect();
+                    } else {
+                        catalog.programs.iter_mut().for_each(|program| program.authoring = None);
+                    }
+                    state.animation_catalog = Some(catalog);
                 }
             } else if let Some(outcome) = message.downcast_ref::<DesignAnimationResultMessage>() {
                 if state.requested == Some(outcome.revision) && state.animation_request == Some(outcome.request) {
                     state.animation_result = Some(outcome.clone());
+                    result.1.notify_all();
+                }
+            } else if let Some(outcome) = message.downcast_ref::<DesignAnimationAuthoringResult>() {
+                if state.requested == Some(outcome.revision) && state.animation_request == Some(outcome.request) {
+                    state.keyframe_result = Some(outcome.clone());
                     result.1.notify_all();
                 }
             } else if let Some(outcome) = message.downcast_ref::<UpdateDesignResultMessage>() {
@@ -273,6 +290,7 @@ impl Relay {
             }
             *state = Events {
                 requested: Some(revision),
+                authored_xaml: design.document.language == Language::Xaml,
                 fixture: design.fixture.clone(),
                 ..Events::default()
             };
@@ -333,24 +351,29 @@ impl Relay {
         }))
     }
 
-    pub(crate) fn animate(&mut self, command: hosted_animation::Command) -> Result<hosted_animation::Sample, String> {
-        if self.sent != Some((command.revision, command.sequence)) {
+    fn start_animation_request(&mut self, revision: i64, sequence: i64) -> Result<(Connection, i64), String> {
+        if self.sent != Some((revision, sequence)) {
             return Err("The application preview frame changed".into());
         }
-        let connection = self.connection.as_ref().ok_or("Open the application preview first")?;
+        let connection = self.connection.clone().ok_or("Open the application preview first")?;
+        let state = self.events.0.lock().unwrap();
+        if !state.animation_supported || state.requested != Some(revision)
+            || !matches!(state.outcome, Some(Ok(()))) || state.disconnected
+        {
+            return Err("Open a current application preview with native animation support".into());
+        }
         self.next_animation = self.next_animation.checked_add(1).ok_or("The animation session retired")?;
-        let request = self.next_animation;
+        Ok((connection, self.next_animation))
+    }
+
+    pub(crate) fn animate(&mut self, command: hosted_animation::Command) -> Result<hosted_animation::Sample, String> {
+        let (connection, request) = self.start_animation_request(command.revision, command.sequence)?;
         {
             let mut state = self.events.0.lock().unwrap();
-            if !state.animation_supported || state.requested != Some(command.revision)
-                || !matches!(state.outcome, Some(Ok(()))) || state.disconnected
-            {
-                return Err("Open a current application preview with native animation support".into());
-            }
             state.animation_request = Some(request);
             state.animation_result = None;
         }
-        send(connection, Arc::new(DesignAnimationRequestMessage {
+        send(&connection, Arc::new(DesignAnimationRequestMessage {
             revision: command.revision, request, program: command.program, targets: command.targets,
             elapsed: command.elapsed, restart: command.restart,
         }))?;
@@ -376,6 +399,28 @@ impl Relay {
         drop(state);
         let frame = self.frame()?.ok_or("The application animation frame retired")?;
         Ok(hosted_animation::Sample { frame, elapsed: result.elapsed, completed: result.completed })
+    }
+
+    pub(crate) fn plan_keyframe(&mut self, draft: hosted_animation::KeyframeDraft) -> Result<serde_json::Value, String> {
+        let (connection, request) = self.start_animation_request(draft.revision, draft.sequence)?;
+        {
+            let mut state = self.events.0.lock().unwrap();
+            if !state.authorable.contains(&draft.program) {
+                return Err("Choose an XAML program with a registered project animation codec".into());
+            }
+            state.animation_request = Some(request);
+            state.keyframe_result = None;
+        }
+        send(&connection, Arc::new(DesignAnimationAuthoringRequest {
+            revision: draft.revision, request, program: draft.program, target: draft.target,
+            property: draft.property, previous: draft.previous, time: draft.time, value: draft.value, easing: draft.easing,
+        }))?;
+        let (mut state, _) = self.events.1.wait_timeout_while(self.events.0.lock().unwrap(), FRAME_TIMEOUT, |state| {
+            !state.disconnected && state.keyframe_result.is_none()
+        }).unwrap();
+        state.animation_request = None;
+        let result = state.keyframe_result.take().ok_or("The application did not return an animation edit plan")?;
+        hosted_animation::keyframe(result)
     }
 
     pub(crate) fn input(&self, input: Input) -> Result<(), String> {

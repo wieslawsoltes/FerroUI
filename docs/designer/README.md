@@ -460,6 +460,13 @@ typed edits require a codec that represents them faithfully. See the
 [animation crate documentation](../../src/FerroUI.Designer.Animation/README.md) for interchange
 rules and runtime semantic tests.
 
+Register the same codec with `DesignerSession::register_animation_codec` for an embedded Studio
+session and `ferroui_designer_support::register_preview_animation_codec` in the application
+preview's UI-thread setup for VS Code. App Preview offers keyframe editing when the codec can
+decode an accepted XAML clip and round-trip its key values. The authored track can present a
+text value for a native property such as `BoxShadows`. Playback still resolves the property's
+actual native animator. [Todo Workbench shadow codec](../../samples/TodoWorkbench/app_preview/animation_codec.rs)
+
 ## Visual states, transitions and behaviors
 
 The **States** panel authors groups, named states, target setters, default/directional transitions,

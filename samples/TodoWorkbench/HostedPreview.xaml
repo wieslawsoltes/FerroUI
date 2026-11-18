@@ -11,6 +11,10 @@
           <KeyFrame Cue="0%"><Setter Property="CornerRadius" Value="0" /></KeyFrame>
           <KeyFrame Cue="100%"><Setter Property="CornerRadius" Value="32" /></KeyFrame>
         </Animation>
+        <Animation Duration="0:0:2" FillMode="Both"><!--ferroui-designer-program:52657669657720736861646f77--><!--todo-workbench-review-shadow-->
+          <KeyFrame Cue="0%"><Setter Property="BoxShadow" Value="0 0 0 0 #00000000" /></KeyFrame>
+          <KeyFrame Cue="100%"><Setter Property="BoxShadow" Value="8 14 24 2 #60244B90" /></KeyFrame>
+        </Animation>
       </Style.Animations>
     </Style>
   </Window.Styles>

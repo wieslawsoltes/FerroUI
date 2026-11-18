@@ -61,6 +61,12 @@ Edit the XAML, or click the preview's text box and use **Send Text**. The app's
 native binding updates the badge. Choose **Loading** or **Ready** in Fixture to
 apply the registered data context. [Preview entry point](app_preview.rs)
 
+Choose **Review shadow** in the animation picker, then select the pencil icon to
+edit the `BoxShadow` key at 2 seconds. For example, enter `12 18 30 3 #88244B90`
+and apply it to the XAML buffer. Seek to 2 seconds to see the new native shadow.
+The sample codec validates the authored literal and the app animates it as a
+native shadow collection. [Review shadow codec](app_preview/animation_codec.rs)
+
 After a build, **Project controls** in the Toolbox includes `PreviewBadge`.
 Open the `rsx!` invocation in `app_preview.rs` to edit its mapped `text` literal
 or open the same Rust document in app-hosted design. Both use the control's

@@ -18,6 +18,8 @@ use ferroui_skia::SkiaApplicationExtensions;
 use std::{fs::File, path::Path};
 use std::rc::Rc;
 
+mod animation_codec;
+
 static ASSEMBLY: MarkupAssembly = MarkupAssembly {
     name: "todo-workbench",
     crate_name: "todo_workbench",
@@ -37,6 +39,7 @@ pub(crate) fn start_if_requested() {
             .after_setup(|builder| {
                 register_markup();
                 register_fixtures();
+                ferroui_designer_support::register_preview_animation_codec(Box::new(animation_codec::ReviewShadowCodec));
                 if let Some(app) = builder.instance() {
                     app.styles()
                         .add(ferroui_themes_winui::WinUITheme::new().as_style());

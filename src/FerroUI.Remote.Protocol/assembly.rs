@@ -5,6 +5,7 @@
 //! A crate that declares message classes of its own has such a table and
 //! passes it to [`DefaultMessageTypeResolver::new`](crate::DefaultMessageTypeResolver::new).
 
+use crate::design_animation_authoring::{DesignAnimationAuthoringRequest, DesignAnimationAuthoringResult};
 use crate::design_animation_messages::{DesignAnimationCatalogMessage, DesignAnimationRequestMessage, DesignAnimationResultMessage};
 use crate::design_messages::{DesignFrameMessage, DesignFrameReceivedMessage, StartDesignerSessionMessage, UpdateDesignMessage, UpdateDesignResultMessage, UpdateXamlMessage, UpdateXamlResultMessage};
 use crate::ferro_remote_message_guid_attribute::{FerroRemoteMessage, FerroRemoteMessageGuidAttribute};
@@ -68,6 +69,8 @@ pub static ASSEMBLY: Assembly = Assembly {
         ExportedType::of::<DesignAnimationCatalogMessage>(),
         ExportedType::of::<DesignAnimationRequestMessage>(),
         ExportedType::of::<DesignAnimationResultMessage>(),
+        ExportedType::of::<DesignAnimationAuthoringRequest>(),
+        ExportedType::of::<DesignAnimationAuthoringResult>(),
         // TransportMessages
         ExportedType::of::<HtmlTransportStartedMessage>(),
     ],

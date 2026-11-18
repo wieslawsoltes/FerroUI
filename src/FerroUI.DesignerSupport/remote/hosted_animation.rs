@@ -1,6 +1,7 @@
 //! Timeline commands run on the application UI thread, beside its registered animators.
 
 use crate::design_window_loader::LoadedDesign;
+use super::hosted_keyframes::HostedKeyframes;
 use crate::remote::previewer_windowing_platform::PreviewerWindowingPlatform;
 use ferroui_base::animation::Animatable;
 use ferroui_base::{Ref, StyledElement, Visual};
@@ -12,9 +13,10 @@ use ferroui_designer_animation::native::{
 use ferroui_designer_animation::{AnimationProgram, AnimationPrograms};
 use ferroui_designer_core::{Document, NodeId};
 use ferroui_remote_protocol::designer::{
+    DesignAnimationAuthoringRequest, DesignAnimationAuthoringResult,
     DesignAnimationCatalogMessage, DesignAnimationProgram, DesignAnimationRequestMessage,
     DesignAnimationResultMessage, DesignAnimationTarget, UpdateDesignMessage,
-    DESIGN_ANIMATION_QUERY, DESIGN_ANIMATION_VERSION,
+    DESIGN_ANIMATION_AUTHORING_QUERY, DESIGN_ANIMATION_QUERY, DESIGN_ANIMATION_VERSION,
 };
 use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, BTreeSet};
@@ -22,19 +24,18 @@ use url::Url;
 
 ferroui_base::ferro_thread_local! {
     static ENABLED: Cell<bool> = const { Cell::new(false) };
+    static AUTHORING: Cell<bool> = const { Cell::new(false) };
     static ACTIVE: RefCell<Option<HostedAnimations>> = const { RefCell::new(None) };
 }
 
 pub(super) fn configure(transport: Option<&Url>, remote: bool) {
-    ENABLED.set(
-        remote
-            && transport.is_some_and(|uri| {
-                uri.scheme() == "tcp-bson"
-                    && uri.query_pairs().any(|(key, version)| {
-                        key == DESIGN_ANIMATION_QUERY && version == DESIGN_ANIMATION_VERSION
-                    })
-            }),
-    );
+    let uri = transport.filter(|uri| remote && uri.scheme() == "tcp-bson");
+    let requested = |key: &str| uri.is_some_and(|uri| {
+        uri.query_pairs().any(|(name, version)| name == key && version == DESIGN_ANIMATION_VERSION)
+    });
+    let enabled = requested(DESIGN_ANIMATION_QUERY);
+    ENABLED.set(enabled);
+    AUTHORING.set(enabled && requested(DESIGN_ANIMATION_AUTHORING_QUERY));
     ACTIVE.with(|active| active.borrow_mut().take());
 }
 
@@ -115,6 +116,25 @@ pub(super) fn sample(
     answer
 }
 
+pub(super) fn plan_keyframe(request: &DesignAnimationAuthoringRequest) -> DesignAnimationAuthoringResult {
+    let plan = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        ACTIVE.with(|active| {
+            let mut active = active.borrow_mut();
+            let host = active.as_mut().ok_or("Open an app-hosted animation preview first")?;
+            host.claim(request.revision, request.request)?;
+            host.keyframes.as_ref().ok_or("The application preview has no registered authoring codecs")?.plan(request)
+        })
+    }));
+    let error = match plan {
+        Ok(Ok(plan)) => return plan,
+        Ok(Err(error)) => error,
+        Err(_) => "The project animation codec could not plan this edit".into(),
+    };
+    DesignAnimationAuthoringResult {
+        revision: request.revision, request: request.request, error: Some(error), ..Default::default()
+    }
+}
+
 struct HostedAnimations {
     revision: i64,
     last_request: i64,
@@ -123,6 +143,7 @@ struct HostedAnimations {
     targets: BTreeMap<i64, Ref<StyledElement>>,
     current: Option<(i64, Vec<i64>)>,
     playback: NativePlayback,
+    keyframes: Option<HostedKeyframes>,
 }
 
 impl HostedAnimations {
@@ -176,6 +197,11 @@ impl HostedAnimations {
                 }
             })
             .collect();
+        let authoring = AUTHORING.get()
+            && crate::animation_codecs::with_codecs(ferroui_designer_animation::AnimationCodecRegistry::has_project_codecs);
+        let keyframes = authoring.then(|| {
+            HostedKeyframes::mount(source.document, source.programs, &mut catalog.programs)
+        });
         Self {
             revision,
             last_request: 0,
@@ -184,14 +210,20 @@ impl HostedAnimations {
             targets,
             current: None,
             playback: NativePlayback::default(),
+            keyframes,
         }
     }
 
-    fn sample(&mut self, command: &DesignAnimationRequestMessage) -> Result<bool, String> {
-        if command.revision != self.revision || command.request <= self.last_request {
+    fn claim(&mut self, revision: i64, request: i64) -> Result<(), String> {
+        if revision != self.revision || request <= self.last_request {
             return Err("Read the current app-hosted preview frame".into());
         }
-        self.last_request = command.request;
+        self.last_request = request;
+        Ok(())
+    }
+
+    fn sample(&mut self, command: &DesignAnimationRequestMessage) -> Result<bool, String> {
+        self.claim(command.revision, command.request)?;
         let Some(id) = command.program else {
             self.current = None;
             self.playback.stop();
@@ -272,6 +304,7 @@ fn catalog_entry(
         compatible_targets,
         source_utf16: i32::try_from(utf16).ok()?,
         custom_animator: index.uses_custom_animators(program.id),
+        authoring: None,
     })
 }
 

@@ -6885,6 +6885,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
  "ferroui-controls",
+ "ferroui-designer-animation",
  "ferroui-designer-support",
  "ferroui-harfbuzz",
  "ferroui-inspect",
