@@ -197,10 +197,10 @@
       "status": "partial"
     },
     "src/LiveChartsCore/CoreSankeySeries.cs": {
-      "reason": "Vertical and bipartite arc measurement: node rectangles and arc sectors with the corner radius, ribbons and chords under the nodes, the ribbon paint (link colour, then the source node colour at half alpha, then LinkFill, then the theme's LinkFill at alpha 90; a null LinkFill takes the node fill), Auto, Outside and Inside labels with the room they reserve and the radial label margin, and rectangle and annular sector hover areas with the default tooltip text.",
+      "reason": "Vertical and bipartite arc measurement: node rectangles and arc sectors with the corner radius, ribbons and chords under the nodes, the ribbon paint (link colour, then the source node colour at half alpha, then LinkFill, then the theme's LinkFill at alpha 90; a null LinkFill takes the node fill), Auto, Outside and Inside labels with the room they reserve and the radial label margin, and rectangle and annular sector hover areas with the default tooltip text; labels break into lines at DataLabelsMaxWidth (170) less the label padding, which the room of the labels counts.",
       "remaining": [
         "The per-node, per-ribbon and per-label visual lifecycle of the source (entrance at zero size, exit collapse) is replaced by the native scene transition.",
-        "LabelMapper, NodeColorMapper, LinkColorMapper and ToolTipLabelFormatter delegates are replaced by the node names and the colours of nodes and links; DataLabelsMaxWidth wrapping is not ported."
+        "LabelMapper, NodeColorMapper, LinkColorMapper and ToolTipLabelFormatter delegates are replaced by the node names and the colours of nodes and links."
       ],
       "rust": [
         "src/FerroUI.LiveCharts/sankey_chart_engine.rs",
@@ -258,10 +258,10 @@
       "status": "partial"
     },
     "src/LiveChartsCore/CoreTreemapSeries.cs": {
-      "reason": "The weight roll-up (a nonzero explicit value, else the sum of the children), the padding inset of every level, tiles in the order of the source, hover areas and centred data labels culled when they do not fit on the leaves only, and the leaf that becomes internal losing both.",
+      "reason": "The weight roll-up (a nonzero explicit value, else the sum of the children), the padding inset of every level, tiles in the order of the source, hover areas and centred data labels culled when they do not fit on the leaves only, and the leaf that becomes internal losing both; labels break into lines at DataLabelsMaxWidth (170) less the label padding and are culled by the size of their lines.",
       "remaining": [
         "ValueMapper, ChildrenMapper, LabelMapper and the tooltip formatter of a custom model are not ported: the native TreemapNode is the model.",
-        "The per-tile visual lifecycle of the source is replaced by the native scene transition; DataLabelsMaxWidth wrapping is not ported."
+        "The per-tile visual lifecycle of the source is replaced by the native scene transition."
       ],
       "rust": [
         "src/FerroUI.LiveCharts/treemap_chart_engine.rs",
@@ -531,9 +531,9 @@
       "status": "partial"
     },
     "src/LiveChartsCore/Geo/IGeoMapTooltip.cs": {
-      "reason": "The native tooltip of the chart shows the land and its values at the anchor of the land.",
+      "reason": "The native tooltip of the chart shows the land and its values at the anchor of the land, with the lines of the TooltipFormatter of the map; HoveredPointsChanged reports the hovered land to the application.",
       "remaining": [
-        "A custom tooltip object of the application."
+        "A custom Tooltip object: the native chart has none for any chart kind; an application hides the native tooltip (TooltipPosition Hidden) and shows its own from HoveredPointsChanged (hover_changed), whose points carry the text and the land."
       ],
       "rust": [
         "src/FerroUI.Controls.LiveCharts/chart.rs",
@@ -542,9 +542,9 @@
       "status": "partial"
     },
     "src/LiveChartsCore/Geo/IGeoMapView.cs": {
-      "reason": "The properties of the view are styled properties of the native chart with the source defaults: ActiveMap (None is the bundled world map), Stroke, Fill, MapProjection, the latitude and longitude bounds (None is the default of the projection, the source NaN), InteractionMode, ZoomingSpeed, MinZoomLevel and MaxZoomLevel; Series takes heat land series.",
+      "reason": "The properties of the view are styled properties of the native chart with the source defaults: ActiveMap (None is the bundled world map), Stroke, Fill, MapProjection, the latitude and longitude bounds (None is the default of the projection, the source NaN), InteractionMode, ZoomingSpeed, MinZoomLevel and MaxZoomLevel; Series takes heat land series; TooltipFormatter is a code-only property of the chart (a GeoTooltipFormatter).",
       "remaining": [
-        "TooltipFormatter, and a custom Tooltip."
+        "A custom Tooltip object: the native chart has none for any chart kind; an application hides the native tooltip (TooltipPosition Hidden) and shows its own from HoveredPointsChanged (hover_changed), whose points carry the text and the land."
       ],
       "rust": [
         "src/FerroUI.Controls.LiveCharts/chart_properties.rs",
@@ -1232,6 +1232,16 @@
       ],
       "status": "ported"
     },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/DrawingTextExtensions.cs": {
+      "reason": "label_lines.rs ports Tokenize and BlobArray.Measure for the data labels of the Sankey and treemap series: words end after a white space, a line feed is a word, a carriage return is dropped, a word that passes the largest width starts a line (a first word wider than it leaves an empty line, as the source); lines start at the left of their block (LinesAlignment.Start). Each line is a text of the scene.",
+      "remaining": [
+        "Shaping, right-to-left text, the typeface fallback and the drawing of the glyphs are the native text stack; the labels of the other series and of the axes do not break."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/label_lines.rs"
+      ],
+      "status": "partial"
+    },
     "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/DoughnutGeometry.cs": {
       "reason": "Classic and rounded/inverted doughnut outlines become FerroUI cubic path commands, with tangent arcs and quarter-circle segmentation; actual Pushout is applied to geometry and hit coordinates.",
       "remaining": [
@@ -1345,7 +1355,7 @@
       "status": "native-replacement"
     },
     "src/skiasharp/LiveChartsCore.SkiaSharp/SKCharts/SKDefaultGeoTooltip.cs": {
-      "reason": "The text of the tooltip: the name of the land in title case, then a line for each series value, {name}: {value:N2}; placed above the anchor of the land, below it when there is no room.",
+      "reason": "The text of the tooltip: the name of the land in title case, then a line for each series value, {name}: {value:N2} or the text of the TooltipFormatter of the map; placed above the anchor of the land, below it when there is no room.",
       "remaining": [
         "The pop-up geometry with its wedge, its drop shadow and its animation, the tooltip paints and text size of the view."
       ],
@@ -1423,9 +1433,9 @@
       "status": "native-replacement"
     },
     "src/skiasharp/_Shared/SourceGenMapChart.shared.cs": {
-      "reason": "The native GeoMap is a Chart of the kind GeoMap: the world map as its active map by default, GetPointsAt (find_points), DataPointerDown and HoveredPointsChanged (the chart events), and the title and legend of the chart.",
+      "reason": "The native GeoMap is a Chart of the kind GeoMap: the world map as its active map by default, GetPointsAt (find_points), DataPointerDown and HoveredPointsChanged (the chart events), and the title and legend of the chart; TooltipFormatter (code only).",
       "remaining": [
-        "TooltipFormatter, the theme of the view and the visual elements other than markers."
+        "The theme of the view and the visual elements other than markers."
       ],
       "rust": [
         "src/FerroUI.Controls.LiveCharts/chart_classes.rs",
@@ -1767,6 +1777,15 @@
       "remaining": [],
       "rust": [
         "src/FerroUI.LiveCharts/geo_map_chart_engine_tests.rs::geo_map_tooltip_anchor_picks_largest_contour_not_union_bbox"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/ChartTests/GeoMapTests.cs::CoreTests.ChartTests.GeoMapTests::void GeoMap_TooltipFormatter_IsAppliedToEachValue()#L305": {
+      "reason": "The source's two series of France on a 600 by 600 Mercator map: the TooltipFormatter of the map writes the line of each value of the tooltip, once per value in the order of the series. The recording custom tooltip of the source is a handler of HoveredPointsChanged (hover_changed) with the native tooltip hidden, which receives the formatted text of the land on hover.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart_engine_tests.rs::source_geo_map_tooltip_formatter_is_applied_to_each_value",
+        "src/FerroUI.Controls.LiveCharts/chart_input_tests.rs::geo_map_tooltip_formatter_writes_each_value_of_the_hovered_land"
       ],
       "status": "ported"
     },
@@ -3041,6 +3060,14 @@
       "remaining": [],
       "rust": [
         "src/FerroUI.Controls.LiveCharts/chart_input_tests.rs::geo_map_reattaches_and_detaching_ends_the_hover"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/OtherTests/LabelsMeasureTest.cs::CoreTests.OtherTests.LabelsMeasureTest::void MaxWidth()#L111": {
+      "reason": "The line breaking of a label of a largest width with fixed text metrics: a long text of words (with a blank line) in a label of 400 with a horizontal padding of 10 keeps its lines within the width less the padding; the five lines of the long words, wider than 100; the six lines of the text with a line feed.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/label_lines.rs::tests::source_labels_measure_max_width"
       ],
       "status": "ported"
     },

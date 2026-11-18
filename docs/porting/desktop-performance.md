@@ -8157,6 +8157,13 @@ commit before against the change, on a machine that idled at 1.3 to 2 cores; sec
 
 The program of the comparison is 16.5 kB larger (23,296,928 to 23,313,472 bytes).
 
+Counted in that program (the gauntlet at tier 16, the counters of a build with them, 1,500 layout
+passes): 11,668 property changes are raised a frame before the change and 8,258 after it. The
+column definitions the cards replace every frame still walk (1,036 changes of an inheritance
+ancestor a frame, 4,142 inherited values that differ, 4,663 objects visited): 3,410 of those
+values are no longer raised on a definition, which has no use for a font. What is left of part
+(b) of the experiment is that walk.
+
 **Two reads found by the gate.** The first runs had the lines of the layout benchmarks 2 to 5 %
 up in instructions, which the change does not touch. Sampled, base against candidate: a small
 accessor on the path of every child was a call where it had been inlined
