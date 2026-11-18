@@ -53,6 +53,51 @@ impl FerroWaylandError {
         Self { kind, message: message.into(), inner: None }
     }
 
+    /// `poll` failed (`FerroWaylandErrorKind::Poll`).
+    pub fn poll() -> Self {
+        Self::of_kind(FerroWaylandErrorKind::Poll, "poll failed")
+    }
+
+    /// An error of the socket (`FerroWaylandErrorKind::Network`).
+    pub fn network(message: impl Into<String>) -> Self {
+        Self::of_kind(FerroWaylandErrorKind::Network, message)
+    }
+
+    /// The requests could not be written to the socket (`FerroWaylandErrorKind::Flush`).
+    pub fn flush(message: impl Into<String>) -> Self {
+        Self::of_kind(FerroWaylandErrorKind::Flush, message)
+    }
+
+    /// [`flush`](Self::flush) for an error number of the C library.
+    pub fn flush_errno(errno: i32) -> Self {
+        Self::flush(format!("wl_display_flush failed, errno: {errno}"))
+    }
+
+    /// The events could not be read from the socket (`FerroWaylandErrorKind::Read`).
+    pub fn read(message: impl Into<String>) -> Self {
+        Self::of_kind(FerroWaylandErrorKind::Read, message)
+    }
+
+    /// [`read`](Self::read) for an error number of the C library.
+    pub fn read_errno(errno: i32) -> Self {
+        Self::read(format!("wl_display_read_events failed, errno: {errno}"))
+    }
+
+    /// The compositor reported a protocol error (`FerroWaylandErrorKind::ProtocolError`), with
+    /// no code.
+    pub fn protocol_error() -> Self {
+        Self::of_kind(FerroWaylandErrorKind::ProtocolError { error_code: 0, error_message: None }, "protocol error")
+    }
+
+    /// The protocol error with the code and the message of the compositor.
+    pub fn protocol_error_with_code(error_code: u32, error_message: impl Into<String>) -> Self {
+        let error_message = error_message.into();
+        Self::of_kind(
+            FerroWaylandErrorKind::ProtocolError { error_code, error_message: Some(error_message.clone()) },
+            format!("protocol error: {error_code} {error_message}"),
+        )
+    }
+
     pub fn kind(&self) -> &FerroWaylandErrorKind {
         &self.kind
     }
@@ -93,75 +138,85 @@ impl fmt::Display for FerroWaylandError {
 
 impl std::error::Error for FerroWaylandError {}
 
+// The factories of the derived classes of the reference, before 0.5.1: each is a unit struct
+// whose `new` gives the one error type. The constructors of `FerroWaylandError` replace them
+// (#423, C3); they are removed after 0.5 with the other deprecated forms.
+
 /// `poll` failed.
+#[deprecated(since = "0.5.1", note = "use `FerroWaylandError::poll`")]
 pub struct FerroWaylandPollException;
 
+#[allow(deprecated)]
 impl FerroWaylandPollException {
     #[allow(clippy::new_ret_no_self)]
     pub fn new() -> FerroWaylandError {
-        FerroWaylandError::of_kind(FerroWaylandErrorKind::Poll, "poll failed")
+        FerroWaylandError::poll()
     }
 }
 
 /// An error of the socket.
+#[deprecated(since = "0.5.1", note = "use `FerroWaylandError::network`")]
 pub struct FerroWaylandNetworkException;
 
+#[allow(deprecated)]
 impl FerroWaylandNetworkException {
     #[allow(clippy::new_ret_no_self)]
     pub fn new(message: impl Into<String>) -> FerroWaylandError {
-        FerroWaylandError::of_kind(FerroWaylandErrorKind::Network, message)
+        FerroWaylandError::network(message)
     }
 }
 
 /// The requests could not be written to the socket.
+#[deprecated(since = "0.5.1", note = "use `FerroWaylandError::flush` and `FerroWaylandError::flush_errno`")]
 pub struct FerroWaylandFlushException;
 
+#[allow(deprecated)]
 impl FerroWaylandFlushException {
     #[allow(clippy::new_ret_no_self)]
     pub fn new(message: impl Into<String>) -> FerroWaylandError {
-        FerroWaylandError::of_kind(FerroWaylandErrorKind::Flush, message)
+        FerroWaylandError::flush(message)
     }
 
     /// The error for an error number of the C library.
     pub fn from_errno(errno: i32) -> FerroWaylandError {
-        Self::new(format!("wl_display_flush failed, errno: {errno}"))
+        FerroWaylandError::flush_errno(errno)
     }
 }
 
 /// The events could not be read from the socket.
+#[deprecated(since = "0.5.1", note = "use `FerroWaylandError::read` and `FerroWaylandError::read_errno`")]
 pub struct FerroWaylandReadException;
 
+#[allow(deprecated)]
 impl FerroWaylandReadException {
     #[allow(clippy::new_ret_no_self)]
     pub fn new(message: impl Into<String>) -> FerroWaylandError {
-        FerroWaylandError::of_kind(FerroWaylandErrorKind::Read, message)
+        FerroWaylandError::read(message)
     }
 
     /// The error for an error number of the C library.
     pub fn from_errno(errno: i32) -> FerroWaylandError {
-        Self::new(format!("wl_display_read_events failed, errno: {errno}"))
+        FerroWaylandError::read_errno(errno)
     }
 }
 
 /// The compositor reported a protocol error.
+#[deprecated(
+    since = "0.5.1",
+    note = "use `FerroWaylandError::protocol_error` and `FerroWaylandError::protocol_error_with_code`"
+)]
 pub struct FerroWaylandProtocolErrorException;
 
+#[allow(deprecated)]
 impl FerroWaylandProtocolErrorException {
     #[allow(clippy::new_ret_no_self)]
     pub fn new() -> FerroWaylandError {
-        FerroWaylandError::of_kind(
-            FerroWaylandErrorKind::ProtocolError { error_code: 0, error_message: None },
-            "protocol error",
-        )
+        FerroWaylandError::protocol_error()
     }
 
     /// The error with the code and the message of the compositor.
     pub fn with_code(error_code: u32, error_message: impl Into<String>) -> FerroWaylandError {
-        let error_message = error_message.into();
-        FerroWaylandError::of_kind(
-            FerroWaylandErrorKind::ProtocolError { error_code, error_message: Some(error_message.clone()) },
-            format!("protocol error: {error_code} {error_message}"),
-        )
+        FerroWaylandError::protocol_error_with_code(error_code, error_message)
     }
 }
 
@@ -172,19 +227,36 @@ mod tests {
 
     #[test]
     fn the_classes_keep_their_messages_and_their_place_in_the_hierarchy() {
-        assert_eq!(FerroWaylandPollException::new().message(), "poll failed");
-        assert!(!FerroWaylandPollException::new().is_network());
-        assert_eq!(FerroWaylandFlushException::from_errno(32).message(), "wl_display_flush failed, errno: 32");
-        assert!(FerroWaylandFlushException::from_errno(32).is_network());
-        assert_eq!(FerroWaylandReadException::from_errno(104).message(), "wl_display_read_events failed, errno: 104");
-        assert!(FerroWaylandReadException::from_errno(104).is_network());
-        assert!(FerroWaylandNetworkException::new("x").is_network());
-        assert_eq!(FerroWaylandProtocolErrorException::new().message(), "protocol error");
-        let error = FerroWaylandProtocolErrorException::with_code(3, "bad surface");
+        assert_eq!(FerroWaylandError::poll().message(), "poll failed");
+        assert!(!FerroWaylandError::poll().is_network());
+        assert_eq!(FerroWaylandError::flush_errno(32).message(), "wl_display_flush failed, errno: 32");
+        assert!(FerroWaylandError::flush_errno(32).is_network());
+        assert_eq!(FerroWaylandError::read_errno(104).message(), "wl_display_read_events failed, errno: 104");
+        assert!(FerroWaylandError::read_errno(104).is_network());
+        assert!(FerroWaylandError::network("x").is_network());
+        assert_eq!(FerroWaylandError::protocol_error().message(), "protocol error");
+        let error = FerroWaylandError::protocol_error_with_code(3, "bad surface");
         assert_eq!(error.message(), "protocol error: 3 bad surface");
         assert_eq!(
             error.kind(),
             &FerroWaylandErrorKind::ProtocolError { error_code: 3, error_message: Some("bad surface".to_string()) }
+        );
+    }
+
+    /// Not from the reference: the deprecated factories give the errors of the constructors.
+    #[test]
+    #[allow(deprecated)]
+    fn the_deprecated_factories_give_the_errors_of_the_constructors() {
+        assert_eq!(FerroWaylandPollException::new(), FerroWaylandError::poll());
+        assert_eq!(FerroWaylandNetworkException::new("x"), FerroWaylandError::network("x"));
+        assert_eq!(FerroWaylandFlushException::new("x"), FerroWaylandError::flush("x"));
+        assert_eq!(FerroWaylandFlushException::from_errno(32), FerroWaylandError::flush_errno(32));
+        assert_eq!(FerroWaylandReadException::new("x"), FerroWaylandError::read("x"));
+        assert_eq!(FerroWaylandReadException::from_errno(104), FerroWaylandError::read_errno(104));
+        assert_eq!(FerroWaylandProtocolErrorException::new(), FerroWaylandError::protocol_error());
+        assert_eq!(
+            FerroWaylandProtocolErrorException::with_code(3, "bad surface"),
+            FerroWaylandError::protocol_error_with_code(3, "bad surface")
         );
     }
 
