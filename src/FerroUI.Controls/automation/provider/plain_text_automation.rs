@@ -64,7 +64,8 @@ impl PlainTextContext {
     }
 
     fn text(&self) -> Result<Vec<u16>, ProviderError> {
-        Ok(utf16(&self.owner()?))
+        let owner = self.owner()?;
+        Ok(utf16(&owner))
     }
 
     fn make_range(&self, range: Range<usize>) -> Rc<dyn ITextRangeProvider> {
@@ -390,7 +391,8 @@ impl PlainTextAutomationRange {
     }
 
     fn attribute(&self, attribute: TextAttribute) -> Result<TextAttributeValue, ProviderError> {
-        Ok(attribute_value(&self.context.owner()?, attribute))
+        let owner = self.context.owner()?;
+        Ok(attribute_value(&owner, attribute))
     }
 }
 
@@ -543,12 +545,14 @@ impl ITextRangeProvider for PlainTextAutomationRange {
     }
 
     fn add_to_selection(&self) -> Result<(), ProviderError> {
-        let current = selection(&self.context.owner()?);
+        let owner = self.context.owner()?;
+        let current = selection(&owner);
         self.select_range(selection_with(current, self.range()?)?)
     }
 
     fn remove_from_selection(&self) -> Result<(), ProviderError> {
-        let current = selection(&self.context.owner()?);
+        let owner = self.context.owner()?;
+        let current = selection(&owner);
         self.select_range(selection_without(current, self.range()?)?)
     }
 
