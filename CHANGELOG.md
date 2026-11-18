@@ -48,6 +48,10 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 - **The workspace at 0.5.1-preview.1**: 0.5.0 is published, and `main` carries the previews of 0.5.1 (owner decision, 2026-11-14). Unlike the previews of a minor version, they keep the public API of 0.5: the API gate compares every pull request with `v0.5.0` (`scripts/api-gate/semver_checks.py`, docs/release.md, section 3.1), and a change that breaks it waits for 0.6.0.
 
+### Fixed
+
+- **The capture tool of the WinUI Gallery fails with an error, and CI runs it** (#630, `samples/WinUIGallery`): `winui-gallery-capture` panicked before the first page with "No precompiled XAML found for ferres://ferroui.controls.inking/Themes/WinUI.xaml". The application of the gallery includes the WinUI styles of the inking controls, and only the creation of a native example registered the inking crate, its compiled markup and its assets, while the tool sets the theme variant, which looks the styles up, before any example exists; `App::initialize` registers the crate before it adds the include. The tool now loads the style documents with `App::try_load_styles` before the first lookup, so a document it cannot load ends it with an error and a non-zero exit instead of a panic (#567), and the WinUI Gallery workflow renders the InkCanvas page with it on every pull request it runs for, not only in its nightly rendering job.
+
 ## [0.5.0] - 2026-11-14
 
 The fifth release. It adds, among the entries below:
