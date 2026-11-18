@@ -349,7 +349,7 @@
       "examples": []
     },
     "CheckBox": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/CheckBox.xaml",
         "samples/WinUIGallery/examples.rs",
@@ -369,7 +369,7 @@
           "name": "checkbox_select_all_keeps_source_aggregate_and_user_cycle_behavior"
         }
       ],
-      "notes": "All three source compositions use native CheckBox with original two/three-state output and select-all synchronization. Keyboard, accessibility and exact rendering acceptance remain pending. All examples remain partial pending complete input, platform, accessibility and rendering acceptance.",
+      "notes": "All three source examples use native CheckBox with the handlers of CheckBoxPage.xaml.cs in Rust: the two-state and three-state outputs, and Select all with SetCheckedState (the aggregate of the options when the page loads and after each option) and the user cycle from checked to unchecked through indeterminate. The source's automation names and output automation ids are kept; rendering parity against Windows remains pending.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/CheckBox/CheckBoxTwoState.txt",
@@ -619,7 +619,7 @@
       "examples": []
     },
     "DropDownButton": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/DropDownButton.xaml",
         "samples/WinUIGallery/examples.rs"
@@ -628,9 +628,13 @@
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/button_samples_tests.rs",
+          "name": "drop_down_buttons_open_the_source_menus_with_their_icons"
         }
       ],
-      "notes": "MenuFlyout entries map to native MenuItem headers; flyout ownership remains native. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "Both source examples use native DropDownButton with a MenuFlyout placed BottomEdgeAlignedLeft: the text button and the icon button, with the source's FontIcon glyphs on the button and on the items. WinUI's MenuFlyoutItem is MenuItem (Text is Header). The page has no code-behind upstream. The glyphs need the symbol font of the platform (Segoe Fluent Icons on Windows).",
       "examples": []
     },
     "Expander": {
@@ -1429,18 +1433,27 @@
       "examples": []
     },
     "SplitButton": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/SplitButton.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/button_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/button_samples_tests.rs",
+          "name": "split_button_colors_the_editor_text_with_its_swatches"
+        },
+        {
+          "path": "samples/WinUIGallery/button_samples_tests.rs",
+          "name": "split_button_swatches_close_their_flyouts"
         }
       ],
-      "notes": "Native SplitButton and Flyout keep separate primary and secondary actions. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "Both source examples use native SplitButton with the constructor and the handlers of SplitButtonPage.xaml.cs in Rust: the RichEditBox starts with the source's text in green, the primary part colors the selection with the swatch it shows (myColorButton_Click), a swatch of the flyout colors the selection and the primary part and closes the flyout (GridView_ItemClick), new text takes the current color (MyRichEditBox_TextChanged), and the text button's swatches close its flyout (RevealColorButton_Click). FerroUI has no GridView and no VariableSizedWrapGrid: both flyouts are a UniformGrid of three columns (MaximumRowsOrColumns) whose swatches are buttons, and GridView_ItemClick is their Click, so the GridView's item selection visuals are not shown. The source's delayed Flyout.Hide, a workaround of a GridView defect, closes at once.",
       "examples": []
     },
     "SplitView": {
@@ -1580,15 +1593,20 @@
       "status": "partial",
       "implementation": [
         "samples/WinUIGallery/Pages/ToggleSplitButton.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/button_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/button_samples_tests.rs",
+          "name": "toggle_split_button_bullets_set_the_symbol_the_name_and_the_checked_state"
         }
       ],
-      "notes": "Native ToggleSplitButton owns its checked state and secondary flyout. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The source example uses native ToggleSplitButton with BulletButton_Click of ToggleSplitButtonPage.xaml.cs in Rust: the clicked bullet button sets the symbol (List or Bullets) and the automation name (Bullets or Roman Numerals), checks the button, closes the flyout and focuses the RichEditBox. Missing: FerroUI's RichEditBox has no paragraph list type (ITextParagraphFormat.ListType, MarkerType), so neither BulletButton_Click nor MyListButton_IsCheckedChanged sets or removes the list of the text; the page stays partial until RichEditBox has it.",
       "examples": []
     },
     "ToggleSwitch": {

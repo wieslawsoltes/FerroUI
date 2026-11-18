@@ -1,12 +1,21 @@
-//! The code behind of the pinned Button, RepeatButton and ToggleButton pages in Rust: the click,
-//! checked and unchecked handlers of `ButtonPage.xaml.cs`, `RepeatButtonPage.xaml.cs` and
-//! `ToggleButtonPage.xaml.cs`. The HyperlinkButton page's handler navigates the gallery
-//! (`examples::GALLERY_LINKS`). The controls own input, repetition and checked state; the sample
-//! owns only its output.
+//! The code behind of the pinned Button, RepeatButton, ToggleButton, SplitButton and
+//! ToggleSplitButton pages in Rust: the handlers of `ButtonPage.xaml.cs`,
+//! `RepeatButtonPage.xaml.cs`, `ToggleButtonPage.xaml.cs`, `SplitButtonPage.xaml.cs` and
+//! `ToggleSplitButtonPage.xaml.cs`. The HyperlinkButton page's handler navigates the gallery
+//! (`examples::GALLERY_LINKS`). The controls own input, repetition, flyouts, editing and checked
+//! state; the sample owns only its output.
 
+use ferroui_base::media::immutable::ImmutableSolidColorBrush;
+use ferroui_base::media::{Color, Colors, IBrush};
 use ferroui_base::Ref;
+use ferroui_controls::automation::AutomationProperties;
+use ferroui_controls::documents::CharacterFormat;
 use ferroui_controls::primitives::ToggleButton;
-use ferroui_controls::{Button, Control, Image, RepeatButton, TextBlock};
+use ferroui_controls::shapes::Rectangle;
+use ferroui_controls::{
+    Border, Button, Control, Image, RepeatButton, RichEditBox, SplitButton, Symbol, SymbolIcon, TextBlock,
+    ToggleSplitButton,
+};
 use std::cell::Cell;
 use std::rc::Rc;
 
@@ -18,6 +27,8 @@ pub(crate) fn wire(page_id: &str, root: &Ref<Control>) {
         "Button" => wire_button(root),
         "RepeatButton" => wire_repeat_button(root),
         "ToggleButton" => wire_toggle_button(root),
+        "SplitButton" => wire_split_button(root),
+        "ToggleSplitButton" => wire_toggle_split_button(root),
         _ => {}
     }
 }
@@ -92,4 +103,182 @@ fn wire_toggle_button(root: &Ref<Control>) {
             None => {}
         }
     });
+}
+
+fn solid(color: Color) -> Rc<dyn IBrush> {
+    Rc::new(ImmutableSolidColorBrush::new(color))
+}
+
+fn brush_color(brush: &Rc<dyn IBrush>) -> Option<Color> {
+    brush.as_solid_color_brush().map(|brush| brush.color())
+}
+
+/// `Document.Selection.CharacterFormat.ForegroundColor = color`.
+fn set_selection_foreground(editor: &RichEditBox, color: Color) {
+    let _ = editor.text_document().selection().set_character_format(&CharacterFormat {
+        foreground: Some(Some(solid(color))),
+        ..CharacterFormat::default()
+    });
+}
+
+/// The swatch buttons of the first flyout (the source's GridView items) and of the second.
+pub(crate) const SWATCHES: [&str; 8] = ["Red", "Orange", "Yellow", "Green", "Blue", "Indigo", "Violet", "Gray"];
+
+/// The text the constructor of `SplitButtonPage.xaml.cs` writes into the editor.
+pub(crate) const SPLIT_BUTTON_TEXT: &str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, \
+    sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Tempor commodo ullamcorper a lacus.";
+
+/// The constructor and the handlers of `SplitButtonPage.xaml.cs`: `currentColor` is the color of
+/// the text, green at first; the primary part gives the text the color of the swatch it shows,
+/// a swatch of the flyout (`GridView_ItemClick`) becomes that color, and new text takes it
+/// (`MyRichEditBox_TextChanged`). The second button's swatches close its flyout
+/// (`RevealColorButton_Click`).
+fn wire_split_button(root: &Ref<Control>) {
+    let editor = root.get_control::<RichEditBox>("myRichEditBox");
+    let current_color = Rc::new(Cell::new(Colors::GREEN));
+
+    // `MyRichEditBox_TextChanged`, wired in the markup of the source before the constructor runs.
+    let weak_editor = editor.downgrade();
+    let color = current_color.clone();
+    editor.text_changed(move |_, _| {
+        let Some(editor) = weak_editor.upgrade() else {
+            return;
+        };
+        let foreground = editor
+            .text_document()
+            .selection()
+            .character_format()
+            .ok()
+            .and_then(|format| format.foreground.flatten())
+            .and_then(|brush| brush_color(&brush));
+        if foreground != Some(color.get()) {
+            set_selection_foreground(&editor, color.get());
+        }
+    });
+    // `Selection.CharacterFormat.ForegroundColor = currentColor` and `Selection.SetText`: the text
+    // replaces the selection with the selection's format, and the selection covers it after.
+    set_selection_foreground(&editor, current_color.get());
+    if let Ok(range) = editor.text_document().selection().range() {
+        if range.set_text(SPLIT_BUTTON_TEXT).is_ok() {
+            let _ = range.set_character_format(&CharacterFormat {
+                foreground: Some(Some(solid(current_color.get()))),
+                ..CharacterFormat::default()
+            });
+            let _ = range.select();
+        }
+    }
+
+    // `myColorButton_Click`: the color of the swatch the primary part shows.
+    let split_button = root.get_control::<SplitButton>("myColorButton");
+    let weak_editor = editor.downgrade();
+    let color = current_color.clone();
+    split_button.click(move |sender, _| {
+        let Some(editor) = weak_editor.upgrade() else {
+            return;
+        };
+        let Some(swatch) = sender
+            .to_ref()
+            .cast::<SplitButton>()
+            .and_then(|button| button.content())
+            .and_then(|content| Control::from_boxed(&content))
+            .and_then(|content| content.cast::<Border>())
+            .and_then(|border| border.background())
+            .and_then(|background| brush_color(&background))
+        else {
+            return;
+        };
+        set_selection_foreground(&editor, swatch);
+        color.set(swatch);
+    });
+
+    // `GridView_ItemClick`: the clicked swatch colors the text and the primary part.
+    let current = root.get_control::<Border>("CurrentColor");
+    for name in SWATCHES {
+        let button = root.get_control::<Button>(&format!("{name}SwatchButton"));
+        let weak_button = button.downgrade();
+        let weak_editor = editor.downgrade();
+        let weak_current = current.downgrade();
+        let weak_split_button = split_button.downgrade();
+        let color = current_color.clone();
+        button.click(move |_, _| {
+            let (Some(button), Some(editor), Some(current)) =
+                (weak_button.upgrade(), weak_editor.upgrade(), weak_current.upgrade())
+            else {
+                return;
+            };
+            let Some(swatch) = button
+                .content()
+                .and_then(|content| Control::from_boxed(&content))
+                .and_then(|content| content.cast::<Rectangle>())
+                .and_then(|rectangle| rectangle.fill())
+                .and_then(|fill| brush_color(&fill))
+            else {
+                return;
+            };
+            set_selection_foreground(&editor, swatch);
+            current.set_background(Some(solid(swatch)));
+            editor.focus();
+            color.set(swatch);
+            // The source hides the flyout after a delay that works around a GridView defect; the
+            // swatches here are buttons, so it closes at once.
+            if let Some(split_button) = weak_split_button.upgrade() {
+                split_button.close_flyout();
+            }
+        });
+    }
+
+    // `RevealColorButton_Click`.
+    let reveal = root.get_control::<SplitButton>("myColorButtonReveal");
+    for name in SWATCHES.iter().copied().chain(["Black"]) {
+        let weak_reveal = reveal.downgrade();
+        root.get_control::<Button>(&format!("{name}RevealButton")).click(move |_, _| {
+            if let Some(reveal) = weak_reveal.upgrade() {
+                reveal.close_flyout();
+            }
+        });
+    }
+}
+
+/// `BulletButton_Click` of `ToggleSplitButtonPage.xaml.cs`: the symbol of the clicked button
+/// becomes the symbol and the automation name of the toggle split button, which is checked and
+/// closes its flyout, and the editor takes the focus. The source also sets the list type of the
+/// paragraph (`ParagraphFormat.ListType`) here and in `MyListButton_IsCheckedChanged`; FerroUI's
+/// RichEditBox has no list type, so the page is partial.
+fn wire_toggle_split_button(root: &Ref<Control>) {
+    let list_button = root.get_control::<ToggleSplitButton>("myListButton");
+    let symbol_icon = root.get_control::<SymbolIcon>("mySymbolIcon");
+    let editor = root.get_control::<RichEditBox>("myRichEditBox");
+    for name in ["BulletedListButton", "RomanNumeralsListButton"] {
+        let weak_list_button = list_button.downgrade();
+        let weak_symbol_icon = symbol_icon.downgrade();
+        let weak_editor = editor.downgrade();
+        root.get_control::<Button>(name).click(move |sender, _| {
+            let (Some(list_button), Some(symbol_icon), Some(editor)) =
+                (weak_list_button.upgrade(), weak_symbol_icon.upgrade(), weak_editor.upgrade())
+            else {
+                return;
+            };
+            let symbol = sender
+                .to_ref()
+                .cast::<Button>()
+                .and_then(|button| button.content())
+                .and_then(|content| Control::from_boxed(&content))
+                .and_then(|content| content.cast::<SymbolIcon>())
+                .map(|icon| icon.symbol());
+            match symbol {
+                Some(Symbol::List) => {
+                    symbol_icon.set_symbol(Symbol::List);
+                    AutomationProperties::set_name(&list_button, Some("Bullets"));
+                }
+                Some(Symbol::Bullets) => {
+                    symbol_icon.set_symbol(Symbol::Bullets);
+                    AutomationProperties::set_name(&list_button, Some("Roman Numerals"));
+                }
+                _ => {}
+            }
+            list_button.set_is_checked(true);
+            list_button.close_flyout();
+            editor.focus();
+        });
+    }
 }

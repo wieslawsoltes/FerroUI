@@ -425,7 +425,7 @@ Phase G2 ports the WinUI controls the pending pages need, one control (or one sm
 
 #### G4: the partial pages (#418)
 
-Phase G4 completes the pages that had native examples for a reviewed subset only: each catalog example of the source page gets its native adaptation with the handlers of the page's code behind in Rust and the source's x:Bind, as for G1. Where the source's x:Bind path is one the x:Bind core does not compile, the page records the binding it uses instead: `IsChecked.Value.Equals(x:False)` (there is no member `Value` on a nullable boolean) is the OneWay x:Bind of `IsChecked` with the `BoolConverters.Not` converter. A button that opens another page of the gallery, as the source's `App.MainWindow.Navigate`, is listed in `examples::GALLERY_LINKS` and wired by the gallery.
+Phase G4 completes the pages that had native examples for a reviewed subset only: each catalog example of the source page gets its native adaptation with the handlers of the page's code behind in Rust and the source's x:Bind, as for G1. Where the source's x:Bind path is one the x:Bind core does not compile, the page records the binding it uses instead: `IsChecked.Value.Equals(x:False)` (there is no member `Value` on a nullable boolean) is the OneWay x:Bind of `IsChecked` with the `BoolConverters.Not` converter. A button that opens another page of the gallery, as the source's `App.MainWindow.Navigate`, is listed in `examples::GALLERY_LINKS` and wired by the gallery. A container FerroUI does not have is composed from one it has and recorded in the page's notes: GridView and VariableSizedWrapGrid of the SplitButton flyouts are a UniformGrid of buttons, as on the RichEditBox page.
 
 | Page | Examples | State | Rust | Tests |
 |---|---:|---|---|---|
@@ -433,6 +433,10 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 | RepeatButton | 1 of 1 | ported | `button_samples.rs` | `button_samples_tests.rs` |
 | HyperlinkButton | 2 of 2 | ported | `gallery.rs` (`examples::GALLERY_LINKS`) | `button_samples_tests.rs` |
 | ToggleButton | 1 of 1 | ported | `button_samples.rs` | `button_samples_tests.rs` |
+| DropDownButton | 2 of 2 | ported | `Pages/DropDownButton.xaml` (no code-behind upstream) | `button_samples_tests.rs` |
+| SplitButton | 2 of 2 | ported | `button_samples.rs` | `button_samples_tests.rs` |
+| ToggleSplitButton | 1 partial: RichEditBox has no paragraph list type | partial | `button_samples.rs` | `button_samples_tests.rs` |
+| CheckBox | 3 of 3 | ported | `input_samples.rs` | `tests.rs` |
 
 ### 10.8 WinUI API and Gallery scanner (W10b)
 

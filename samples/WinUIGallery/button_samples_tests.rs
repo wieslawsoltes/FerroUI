@@ -1,6 +1,7 @@
-//! The ported Button, RepeatButton, HyperlinkButton and ToggleButton pages: each catalog example
-//! of the source with its handler and its Disable option (`button_samples.rs`). The Button page's
-//! click outputs are in `tests.rs` (`button_click_and_disabled_option_update_native_controls`).
+//! The ported Button, RepeatButton, HyperlinkButton, ToggleButton, DropDownButton and SplitButton
+//! pages and the ToggleSplitButton page: each catalog example of the source with its handlers and
+//! options (`button_samples.rs`). The Button page's click outputs are in `tests.rs`
+//! (`button_click_and_disabled_option_update_native_controls`), the CheckBox handlers too.
 
 use crate::{examples, tests::start, GalleryView};
 use ferroui_base::interactivity::RoutedEventArgs;
@@ -124,4 +125,151 @@ fn hyperlink_button_click_opens_the_toggle_button_page_of_the_gallery() {
     assert_eq!(gallery.current_page(), Some("ToggleButton"));
     assert!(gallery.go_back());
     assert_eq!(gallery.current_page(), Some("HyperlinkButton"));
+}
+
+/// The headers and icon glyphs of the items of a drop-down button's menu flyout.
+fn menu_items(button: &ferroui_controls::DropDownButton) -> Vec<(String, Option<String>)> {
+    use ferroui_controls::{FontIcon, MenuFlyout, MenuItem};
+    let flyout = button.flyout().and_then(|flyout| flyout.cast::<MenuFlyout>()).expect("a menu flyout");
+    assert_eq!(flyout.placement(), ferroui_controls::PlacementMode::BottomEdgeAlignedLeft);
+    flyout
+        .items()
+        .iter()
+        .map(|item| {
+            let item = item.and_then(|item| Control::from_boxed(&item)).and_then(|item| item.cast::<MenuItem>());
+            let item = item.expect("a menu item");
+            let header = item.header().and_then(|header| header.downcast_ref::<String>().cloned()).unwrap_or_default();
+            let glyph = item
+                .icon()
+                .and_then(|icon| Control::from_boxed(&icon))
+                .and_then(|icon| icon.cast::<FontIcon>())
+                .map(|icon| icon.glyph());
+            (header, glyph)
+        })
+        .collect()
+}
+
+#[test]
+fn drop_down_buttons_open_the_source_menus_with_their_icons() {
+    use ferroui_controls::{DropDownButton, FontIcon};
+    let _application = start();
+    let root = page("DropDownButton");
+    let headers = ["Send", "Reply", "Reply All"];
+    let simple = menu_items(&root.get_control::<DropDownButton>("EmailDropDownButton"));
+    assert_eq!(simple, headers.map(|header| (header.to_string(), None)).to_vec());
+    let icons = root.get_control::<DropDownButton>("EmailIconDropDownButton");
+    assert_eq!(root.get_control::<FontIcon>("EmailIcon").glyph(), "\u{e715}");
+    assert_eq!(
+        ferroui_controls::automation::AutomationProperties::get_name(&icons).as_deref(),
+        Some("Email")
+    );
+    let glyphs = ["\u{e725}", "\u{e8ca}", "\u{e8c2}"];
+    let expected: Vec<_> = headers
+        .iter()
+        .zip(glyphs)
+        .map(|(header, glyph)| (header.to_string(), Some(glyph.to_string())))
+        .collect();
+    assert_eq!(menu_items(&icons), expected);
+}
+
+/// The color of the source's text in the split button page's editor (`None` when it is mixed).
+fn text_color(editor: &ferroui_controls::RichEditBox) -> Option<ferroui_base::media::Color> {
+    use ferroui_controls::rich_text::TextFormatValue;
+    let length = crate::button_samples::SPLIT_BUTTON_TEXT.len();
+    let range = editor.text_document().get_range(0, length).ok()?;
+    match range.character_format().ok()? {
+        TextFormatValue::Uniform(format) => format
+            .foreground
+            .flatten()
+            .and_then(|brush| brush.as_solid_color_brush().map(|brush| brush.color())),
+        TextFormatValue::Mixed => None,
+    }
+}
+
+fn selection_color(editor: &ferroui_controls::RichEditBox) -> Option<ferroui_base::media::Color> {
+    editor
+        .text_document()
+        .selection()
+        .character_format()
+        .ok()
+        .and_then(|format| format.foreground.flatten())
+        .and_then(|brush| brush.as_solid_color_brush().map(|brush| brush.color()))
+}
+
+#[test]
+fn split_button_colors_the_editor_text_with_its_swatches() {
+    use ferroui_base::media::Colors;
+    use ferroui_controls::{Border, RichEditBox, SplitButton};
+    let _application = start();
+    let root = page("SplitButton");
+    let editor = root.get_control::<RichEditBox>("myRichEditBox");
+    // The constructor writes the source's text in the current color, green.
+    assert_eq!(editor.text_document().text().trim_end(), crate::button_samples::SPLIT_BUTTON_TEXT);
+    assert_eq!(text_color(&editor), Some(Colors::GREEN));
+    // `GridView_ItemClick`: a swatch of the flyout colors the selection and the primary part.
+    click(&root.get_control::<Button>("BlueSwatchButton"));
+    assert_eq!(selection_color(&editor), Some(Colors::BLUE));
+    let current = root.get_control::<Border>("CurrentColor");
+    assert_eq!(
+        current.background().and_then(|brush| brush.as_solid_color_brush().map(|brush| brush.color())),
+        Some(Colors::BLUE)
+    );
+    // `myColorButton_Click`: the primary part applies the color it shows, blue now.
+    let _ = editor.text_document().selection().select_all();
+    let _ = editor.text_document().selection().set_character_format(&ferroui_controls::documents::CharacterFormat {
+        foreground: Some(Some(std::rc::Rc::new(ferroui_base::media::immutable::ImmutableSolidColorBrush::new(
+            Colors::GRAY,
+        )))),
+        ..Default::default()
+    });
+    assert_eq!(text_color(&editor), Some(Colors::GRAY));
+    let split = root.get_control::<SplitButton>("myColorButton");
+    split.raise_event(&RoutedEventArgs::with_event(&SplitButton::click_event()));
+    assert_eq!(text_color(&editor), Some(Colors::BLUE));
+    // Every swatch of both flyouts is a button with the source's color name.
+    for name in crate::button_samples::SWATCHES {
+        root.get_control::<Button>(&format!("{name}SwatchButton"));
+        root.get_control::<Button>(&format!("{name}RevealButton"));
+    }
+    root.get_control::<Button>("BlackRevealButton");
+}
+
+#[test]
+fn split_button_swatches_close_their_flyouts() {
+    use ferroui_controls::{SplitButton, Window};
+    let _application = start();
+    let root = page("SplitButton");
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(root.clone())));
+    window.show();
+    window.update_layout();
+    for (button, swatch) in [("myColorButton", "RedSwatchButton"), ("myColorButtonReveal", "BlackRevealButton")] {
+        let split = root.get_control::<SplitButton>(button);
+        split.open_flyout();
+        let flyout = split.flyout().expect("the flyout of the split button");
+        assert!(flyout.is_open(), "{button}");
+        click(&root.get_control::<Button>(swatch));
+        assert!(!flyout.is_open(), "{button}");
+    }
+    window.close();
+}
+
+#[test]
+fn toggle_split_button_bullets_set_the_symbol_the_name_and_the_checked_state() {
+    use ferroui_controls::automation::AutomationProperties;
+    use ferroui_controls::{Symbol, SymbolIcon, ToggleSplitButton};
+    let _application = start();
+    let root = page("ToggleSplitButton");
+    let list_button = root.get_control::<ToggleSplitButton>("myListButton");
+    let icon = root.get_control::<SymbolIcon>("mySymbolIcon");
+    assert!(!list_button.is_checked());
+    click(&root.get_control::<Button>("RomanNumeralsListButton"));
+    assert_eq!(icon.symbol(), Symbol::Bullets);
+    assert_eq!(AutomationProperties::get_name(&list_button).as_deref(), Some("Roman Numerals"));
+    assert!(list_button.is_checked());
+    list_button.set_is_checked(false);
+    click(&root.get_control::<Button>("BulletedListButton"));
+    assert_eq!(icon.symbol(), Symbol::List);
+    assert_eq!(AutomationProperties::get_name(&list_button).as_deref(), Some("Bullets"));
+    assert!(list_button.is_checked());
 }

@@ -6,8 +6,7 @@ use ferroui_base::media::Color;
 use ferroui_base::{ObjectType, Ref, Thickness};
 use ferroui_controls::primitives::ToggleButton;
 use ferroui_controls::{
-    Border, Button, ComboBox, Control, NumberBox, RadioButtons, Slider, SplitButton,
-    TextBlock, TextBox, ToggleSplitButton,
+    Border, Button, ComboBox, Control, NumberBox, RadioButtons, Slider, TextBlock, TextBox,
 };
 use ferroui_markup_xaml::markup_extensions::XBindings;
 use ferroui_markup_xaml::XamlLoadError;
@@ -88,7 +87,7 @@ pub static ADAPTATIONS: &[PageAdaptation] = &[
     page!(ported "RepeatButton", "The source example uses native RepeatButton with RepeatButton_Click of RepeatButtonPage.xaml.cs in Rust: the static click count and the polite live-region output. The Disable option is the source's OneWay x:Bind of IsChecked, negated by BoolConverters.Not instead of IsChecked.Value.Equals(x:False)."),
     page!(ported "ToggleButton", "The source example uses native ToggleButton with the constructor and the Checked/Unchecked handlers of ToggleButtonPage.xaml.cs in Rust (On and Off, over IsCheckedChanged). The Disable option is the source's OneWay x:Bind of IsChecked, negated by BoolConverters.Not instead of IsChecked.Value.Equals(x:False)."),
     page!("ToggleSwitch", "IsOn maps to IsChecked on the existing ToggleSwitch; Header is composed with a label and an automation name, and states remain observable."),
-    page!("CheckBox", "All three source compositions use native CheckBox with original two/three-state output and select-all synchronization. Keyboard, accessibility and exact rendering acceptance remain pending."),
+    page!(ported "CheckBox", "All three source examples use native CheckBox with the handlers of CheckBoxPage.xaml.cs in Rust: the two-state and three-state outputs, and Select all with SetCheckedState (the aggregate of the options at load and after each option) and the user cycle from checked to unchecked. The source's automation names and output automation ids are kept; rendering parity against Windows remains pending."),
     page!("RadioButton", "Both original groups use native RadioButtons with the existing native RadioButton, source labels and Rust selection/color handlers. Focus, layout and screen-reader parity still require host verification."),
     page!("TextBox", "Text, placeholder, read-only and multiline examples use existing TextBox properties; Header is composed explicitly."),
     page!("PasswordBox", "The three source examples and original validation/reveal handlers use TextBox.PasswordChar and RevealPassword with composed Header. A distinct PasswordBox API and full input/accessibility parity remain pending."),
@@ -106,9 +105,9 @@ pub static ADAPTATIONS: &[PageAdaptation] = &[
     page!("WrapPanel", "The source wrapping layout uses shared WrapPanel; ItemsStretch and Padding require explicit owner adaptation."),
     page!("ScrollViewer", "Native ScrollViewer hosts oversized content and scroll bars."),
     page!("Flyout", "Native Button.Flyout hosts the confirmation content; the action uses a Rust click handler."),
-    page!("DropDownButton", "MenuFlyout entries map to native MenuItem headers; flyout ownership remains native."),
-    page!("SplitButton", "Native SplitButton and Flyout keep separate primary and secondary actions."),
-    page!("ToggleSplitButton", "Native ToggleSplitButton owns its checked state and secondary flyout."),
+    page!(ported "DropDownButton", "Both source examples use native DropDownButton with a MenuFlyout placed BottomEdgeAlignedLeft: the text button and the icon button with the source's FontIcon glyphs on the button and the items. WinUI's MenuFlyoutItem is MenuItem (Text is Header). The page has no code-behind upstream. The glyphs need the symbol font of the platform (Segoe Fluent Icons on Windows)."),
+    page!(ported "SplitButton", "Both source examples use native SplitButton with the constructor and handlers of SplitButtonPage.xaml.cs in Rust: the primary part colors the RichEditBox text with its swatch, a flyout swatch colors the text and the primary part and closes the flyout, new text takes the current color (TextChanged), and the text button's swatches close its flyout. FerroUI has no GridView and no VariableSizedWrapGrid: both flyouts are a UniformGrid of three columns whose swatches are buttons, and GridView_ItemClick is their Click."),
+    page!("ToggleSplitButton", "The source example uses native ToggleSplitButton with BulletButton_Click of ToggleSplitButtonPage.xaml.cs in Rust: the clicked bullet button sets the symbol and the automation name, checks the button, closes the flyout and focuses the RichEditBox. FerroUI's RichEditBox has no paragraph list type (ParagraphFormat.ListType, MarkerType), so neither the bullet buttons nor MyListButton_IsCheckedChanged set the list of the text, and the page stays partial."),
     page!("ToolTip", "ToolTipService.ToolTip is explicitly mapped to the shared ToolTip.Tip attached property."),
     page!(ported "HyperlinkButton", "Both source examples use native HyperlinkButton: NavigateUri opens the Microsoft home page through the top level's launcher, with the Disable option as the source's OneWay x:Bind of IsChecked negated by BoolConverters.Not; GoToHyperlinkButton_Click navigates the gallery to the ToggleButton page, as the source's App.MainWindow.Navigate does."),
     page!("CalendarDatePicker", "Native CalendarDatePicker; header is composed and placeholder uses the shared property."),
@@ -214,18 +213,6 @@ fn wire(root: &Ref<Control>) {
                 output.set_text(Some(&format!("Value: {value}")));
             }
         }).detach();
-    } else if let Some(primary) = find_control::<ToggleSplitButton>(root, "Primary") {
-        let weak_output = output.downgrade();
-        let weak_primary = primary.downgrade();
-        primary.property_changed(move |_| {
-            if let (Some(primary), Some(output)) = (weak_primary.upgrade(), weak_output.upgrade()) {
-                output.set_text(Some(if primary.is_checked() {
-                    "Checked"
-                } else {
-                    "Unchecked"
-                }));
-            }
-        });
     } else if let Some(primary) = find_control::<ToggleButton>(root, "Primary") {
         let weak_output = output.downgrade();
         let weak_primary = primary.downgrade();
@@ -264,15 +251,6 @@ fn wire(root: &Ref<Control>) {
                     "Selected index: {}",
                     primary.selected_index()
                 )));
-            }
-        });
-    } else if let Some(primary) = find_control::<SplitButton>(root, "Primary") {
-        let count = Rc::new(Cell::new(0u64));
-        let weak_output = output.downgrade();
-        primary.click(move |_, _| {
-            count.set(count.get().saturating_add(1));
-            if let Some(output) = weak_output.upgrade() {
-                output.set_text(Some(&format!("Clicked {} times", count.get())));
             }
         });
     } else if let Some(primary) = find_control::<Button>(root, "Primary") {
