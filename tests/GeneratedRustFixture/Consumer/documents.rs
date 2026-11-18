@@ -39,6 +39,10 @@ pub const DOCUMENTS: &[(&str, &str)] = &[
   <winui:WinUITheme/>
 </Styles>",
     ),
+    // Two public documents whose established build functions are one name: both are compiled,
+    // with names disambiguated from their paths.
+    ("Views/A-B.xaml", "<Border xmlns='https://github.com/ferroui'/>"),
+    ("Views/A_B.xaml", "<Border xmlns='https://github.com/ferroui'/>"),
 ];
 
 /// The class [`crate::CollisionStyles`] and the documents it includes: `Styles/A-B.xaml` and

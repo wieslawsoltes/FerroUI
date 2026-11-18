@@ -58,3 +58,6 @@ pub fn register_types() {
         compiled_markup::register();
     });
 }
+
+#[cfg(test)]
+mod tests;

@@ -1367,10 +1367,15 @@ impl<'a> Emitter<'a> {
         self.marker(node, class.name());
         // A theme the application trims (#568, step 3) is constructed from the units the
         // application keeps: `with_parts` over the table of the build, which `new()` is
-        // `with_parts` over the table of all units with.
+        // `with_parts` over the table of all units with. The tables have the classes that can be
+        // constructed so (#849); any other class is constructed with `new()`.
         let parts = self.configuration.get_extra::<super::transform::ThemePartsTables>().ok();
         match parts.as_ref().and_then(|parts| parts.table_of(&class.full_name()).map(str::to_string)) {
-            Some(table) => self.line(format!("let {local} = {}::with_parts(::core::option::Option::None, {table});", absolute(path))),
+            Some(table) => self.line(format!(
+                "let {local} = {}::{}(::core::option::Option::None, {table});",
+                absolute(path),
+                super::transform::PARTS_CONSTRUCTOR
+            )),
             None => self.line(format!("let {local} = {}::new();", absolute(path))),
         }
         self.local_types.insert(local.clone(), format!("::ferroui_base::Ref<{}>", absolute(path)));
