@@ -1,4 +1,38 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <TextBlock Text="Arrival time"/><TimePicker HorizontalAlignment="Left" MinuteIncrement="15"/><TextBlock Text="24-hour clock"/><TimePicker HorizontalAlignment="Left" ClockIdentifier="24HourClock"/>
+<!-- Ported from the three pinned TimePicker examples of WinUI Gallery (14061eea); see
+     ../NOTICE.md. The page has no code-behind upstream. FerroUI's TimePicker has no Header
+     (composed above it, whose automation name it is); without a ClockIdentifier it uses the clock
+     of the current culture, as WinUI's. The source's SelectedTime of the third example is the
+     x:Bind of the static path sys:DateTime.Now.TimeOfDay, which the x:Bind core does not compile
+     (a member of a .NET type): the time of day is set once in Rust (date_samples.rs), as that
+     OneTime binding does. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="TimePickerExample1" Spacing="8">
+    <TextBlock Text="A simple TimePicker that uses the clock format for the user's region." FontSize="18" />
+    <TimePicker x:Name="Control1" />
+  </StackPanel>
+
+  <StackPanel x:Name="TimePickerExample2" Spacing="8">
+    <TextBlock Text="A TimePicker with a header and minute increments specified." FontSize="18" />
+    <StackPanel Spacing="4">
+      <TextBlock Text="Arrival time" />
+      <TimePicker x:Name="Control2" AutomationProperties.Name="Arrival time" MinuteIncrement="15" />
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="TimePickerExample3" Spacing="8">
+    <TextBlock Text="Use ClockIdentifier to override the regional clock format." FontSize="18" />
+    <StackPanel Spacing="8">
+      <StackPanel Spacing="4">
+        <TextBlock Text="12-hour clock" />
+        <TimePicker x:Name="TwelveHourPicker" AutomationProperties.Name="12-hour clock"
+                    ClockIdentifier="12HourClock" />
+      </StackPanel>
+      <StackPanel Spacing="4">
+        <TextBlock Text="24-hour clock" />
+        <TimePicker x:Name="TwentyFourHourPicker" AutomationProperties.Name="24-hour clock"
+                    ClockIdentifier="24HourClock" />
+      </StackPanel>
+    </StackPanel>
+  </StackPanel>
 </StackPanel>

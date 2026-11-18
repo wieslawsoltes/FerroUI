@@ -1,4 +1,14 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <TextBlock Text="Pick a date"/><CalendarDatePicker PlaceholderText="Select a date" Width="240" HorizontalAlignment="Left"/>
+<!-- Ported from the pinned CalendarDatePicker example of WinUI Gallery (14061eea); see
+     ../NOTICE.md. The page has no code-behind upstream. FerroUI's CalendarDatePicker has no Header
+     (composed above it, whose automation name it is). -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="CalendarDatePickerExample1" Spacing="8">
+    <TextBlock Text="CalendarDatePicker with a header and placeholder text." FontSize="18" />
+    <StackPanel Spacing="4">
+      <TextBlock Text="Calendar" />
+      <CalendarDatePicker x:Name="Control1" HorizontalAlignment="Left"
+                          AutomationProperties.Name="Calendar" PlaceholderText="Pick a date" />
+    </StackPanel>
+  </StackPanel>
 </StackPanel>
