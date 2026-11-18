@@ -199,11 +199,10 @@ export class DesignerWorkbench implements vscode.Disposable {
 
     async projectAssets(panel: DesignerPanel) {
         const folder = vscode.workspace.getWorkspaceFolder(panel.document.uri);
-        return folder ? this.assets.library.list(folder, panel.document.uri, panel.language === 'xaml') : [];
+        return folder ? this.assets.library.list(folder, panel.document.uri, true) : [];
     }
 
     async projectImage(panel: DesignerPanel, id: string): Promise<Extract<DragOrigin, { type: 'image' }>> {
-        if (panel.language !== 'xaml') throw new Error('Project image placement is available in XAML.');
         return { type: 'image', source: await this.assets.library.imageSource(panel.document.uri, id) };
     }
 

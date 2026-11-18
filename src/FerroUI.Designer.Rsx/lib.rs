@@ -3,6 +3,7 @@
 
 mod blocks;
 mod catalog;
+mod image_source;
 mod language;
 mod literal;
 mod placement;

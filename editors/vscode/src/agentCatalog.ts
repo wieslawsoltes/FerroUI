@@ -57,7 +57,7 @@ export const agentCatalog = {
         ['session', 'expected_revision'], true, false),
     designer_placement_hint: tool('Validate a proposed drop and return its native landing bounds without editing the design.',
         placement, ['session', 'expected_revision']),
-    designer_place: tool('Insert a Toolbox control, place a project image in XAML, or move an authored control or selection. Use an outline anchor and position or canvas coordinates.',
+    designer_place: tool('Insert a Toolbox control, place a project image in XAML or mapped RSX, or move an authored control or selection. Use an outline anchor and position or canvas coordinates.',
         placement,
         ['session', 'expected_revision'], true),
     designer_resize: tool('Resize one authored control with a native layout plan. Handles zero through seven are ordered clockwise from top left. dx and dy are logical artboard units.',

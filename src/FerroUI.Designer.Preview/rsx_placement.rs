@@ -98,7 +98,7 @@ pub(crate) fn patches(
         })
         .transpose()?;
     let patches = match origin {
-        DragOrigin::Asset { .. } => {
+        DragOrigin::Asset { .. } | DragOrigin::Image { .. } => {
             let fragment = ferroui_designer_tools::component_fragment(draft, id)
                 .map_err(|error| error.to_string())?;
             vec![rsx.insert_child(parent, before, &fragment)?]
@@ -145,9 +145,6 @@ pub(crate) fn patches(
             } else {
                 rsx.move_child(index, parent, before, merge_insertions(values))?
             }
-        }
-        DragOrigin::Image { .. } => {
-            return Err("Place a project image in XAML or use a Rust image expression".into());
         }
         DragOrigin::Nodes { .. } => unreachable!("group placement handled above"),
     };

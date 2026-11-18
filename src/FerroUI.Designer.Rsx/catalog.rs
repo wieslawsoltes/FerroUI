@@ -21,7 +21,7 @@ pub(crate) fn children(class: &str) -> Option<Children> {
         "Border" | "Viewbox" => Children::Single,
         "Button" | "CheckBox" | "ContentControl" | "RadioButton" | "ScrollViewer"
         | "ToggleButton" | "ToggleSwitch" | "UserControl" | "Window" => Children::Content,
-        "ComboBox" | "Ellipse" | "ProgressBar" | "Rectangle" | "Separator" | "Slider"
+        "ComboBox" | "Ellipse" | "Image" | "ProgressBar" | "Rectangle" | "Separator" | "Slider"
         | "TextBlock" | "TextBox" => Children::None,
         _ => return None,
     })
@@ -70,10 +70,11 @@ pub(crate) fn property_codec(info: &PropertyInfo) -> Option<Literal> {
         "f64" => Literal::Number,
         "CornerRadius" => Literal::UniformRadius,
         "Thickness" => Literal::Thickness,
+        "Option<Rc<dyn IImage>>" => Literal::EmbeddedImage,
         "HorizontalAlignment" | "VerticalAlignment" | "Orientation" => {
             Literal::enumeration("ferroui_base::layout", info)
         }
-        "TextAlignment" | "TextWrapping" | "FlowDirection" => {
+        "TextAlignment" | "TextWrapping" | "FlowDirection" | "Stretch" | "StretchDirection" => {
             Literal::enumeration("ferroui_base::media", info)
         }
         "Dock" => Literal::enumeration("ferroui_controls", info),

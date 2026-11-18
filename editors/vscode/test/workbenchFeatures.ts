@@ -87,7 +87,18 @@ fn view() { rsx! {
     assert.equal(dynamicFrame.nodes[0].canInsert, false);
     await assert.rejects(preview.placement(14, { origin: { type: 'asset', control: 'Button' },
         target: { type: 'outline', node: dynamicFrame.nodes[0].id, position: 'inside' } }), /fully mapped children/);
-    console.log('VS Code native hierarchy, grouped properties, resources, relative image drops and expression-preserving RSX placement passed');
+    const imageTarget = await preview.render(rust, viewport, 15);
+    const rustImage = { origin: placement.origin, target: { type: 'outline', node: imageTarget.nodes[0].id, position: 'inside' } } as const;
+    assert.ok((await preview.placement(15, rustImage)).description);
+    const insertedImage = await preview.edit(rust, { type: 'place', frame: 15, placement: rustImage });
+    const withImage = apply(rust.source, insertedImage.edits);
+    assert.ok(withImage.includes('::ferroui_view::embedded_image(::core::include_bytes!("Assets/Preview Image.png"))'));
+    assert.match(withImage, /sibling comment/);
+    assert.match(withImage, /move \|\| title\(\)/);
+    const rustAssetFrame = await preview.render({ ...rust, source: withImage }, viewport, 16);
+    assert.ok(rustAssetFrame.image, rustAssetFrame.renderError ?? 'Embedded Rust asset renders in the artboard');
+    assert.ok(rustAssetFrame.nodes.some(node => node.label === 'Image' && node.bounds?.height));
+    console.log('VS Code native hierarchy, grouped properties, resources, image drops in XAML and RSX, and expression-preserving placement passed');
 }
 
 export async function verifyMultiSelection(preview: NativePreview, xamlUri: string, rustUri: string): Promise<void> {

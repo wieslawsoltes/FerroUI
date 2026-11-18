@@ -32,7 +32,7 @@ export class AssetsView {
             return;
         }
         if (!this.view.visible) return;
-        const canPlace = panel?.language === 'xaml';
+        const canPlace = panel !== undefined;
         const key = `${folder.uri}:${panel?.document.uri ?? ''}:${canPlace}`;
         if (this.cache?.key !== key) {
             const query: Query = { key };

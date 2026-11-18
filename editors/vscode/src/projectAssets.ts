@@ -76,7 +76,7 @@ export class ProjectAssets implements vscode.Disposable {
         const folder = vscode.workspace.getWorkspaceFolder(document);
         if (!folder || folder.uri.scheme !== 'file') throw new Error('Open a local workspace to place a project image.');
         const asset = await this.resolve(folder, id);
-        if (!asset.mime) throw new Error('Choose a raster image to place in XAML.');
+        if (!asset.mime) throw new Error('Choose a raster image from the project Assets view.');
         const directory = await realpath(path.dirname(document.fsPath));
         const root = await realpath(folder.uri.fsPath);
         if (!isInside(root, directory) && root !== directory) throw new Error('The design resolves outside the workspace.');

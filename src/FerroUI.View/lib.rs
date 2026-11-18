@@ -56,6 +56,7 @@ pub mod error_boundary;
 mod extras;
 pub mod hooks;
 pub mod hot;
+mod image;
 pub mod inspect;
 mod mount;
 pub mod reactive;
@@ -97,6 +98,7 @@ pub use hooks::{
     use_data_context, use_data_context_value, use_effect, use_effect_with, use_hook, use_memo, use_parent_control,
     use_parent_property, use_resource, use_resource_as, use_signal, use_theme_variant,
 };
+pub use image::embedded_image;
 pub use animation::{
     animation, ms, transition, transition_eased, transitions, use_animation, AnimationBuilder, KeyFrameBuilder,
     Transitionable,

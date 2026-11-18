@@ -113,6 +113,46 @@ fn markup_and_unmapped_rust_are_reported_without_silently_converting() {
 }
 
 #[test]
+fn embedded_image_paths_round_trip_and_keep_unrelated_rust() {
+    let source = r#"<Image xmlns="https://github.com/ferroui" Source="../Assets/%C5%81%C3%B3d%C5%BA%20%23%25.png" Stretch="Uniform"/>"#;
+    let xaml = Document::new(source).unwrap();
+    let rsx = xaml_to_rsx(&xaml).unwrap();
+    assert!(rsx.contains(
+        r#"::ferroui_view::embedded_image(::core::include_bytes!("../Assets/Łódź #%.png"))"#
+    ));
+    assert!(apply_rsx(&xaml, &rsx).unwrap().is_empty());
+
+    let rust =
+        format!("// Preserve this comment\nfn view() {{ let _ = {rsx}; }}\nfn untouched() {{}}\n");
+    let projected = project_rust(&rust, rust.find("include_bytes").unwrap()).unwrap();
+    assert_eq!(projected.omitted_count, 0);
+    let replacement = projected
+        .set_property(0, "Source", "../Assets/Summer%20palette.png")
+        .unwrap();
+    assert_eq!(
+        apply(&rust, vec![replacement]),
+        rust.replace("Łódź #%.png", "Summer palette.png")
+    );
+    for value in [
+        "../Assets/foo%2Fbar.png",
+        "%2Fetc/hosts",
+        "file:///tmp/foo.png",
+        "{Binding Logo}",
+    ] {
+        assert!(
+            projected.set_property(0, "Source", value).is_err(),
+            "{value}"
+        );
+    }
+
+    let runtime = r#"rsx! { Image { source: load_thumbnail() } }"#;
+    let projected = project_rust(runtime, 0).unwrap();
+    assert!(projected
+        .edit_property(0, "Source", Some("icon.png"))
+        .is_err());
+}
+
+#[test]
 fn comments_in_counterpart_drafts_require_the_authored_format() {
     let source = "<Button Content=\"Save\"/>";
     let xaml = Document::new(source).unwrap();

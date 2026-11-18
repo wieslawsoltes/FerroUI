@@ -27,9 +27,6 @@ impl Stage {
                 PlacementOrigin::Asset(&asset.source)
             }
             DragOrigin::Image { source } => {
-                if self.placement_policy.is_some() {
-                    return Err("Place a project image in XAML or use a Rust image expression".into());
-                }
                 image = image_fragment(source)?;
                 PlacementOrigin::Asset(&image)
             }
@@ -82,9 +79,7 @@ impl Stage {
 }
 
 fn image_fragment(source: &str) -> Result<String, String> {
-    if source.is_empty() || source.len() > 4096 || source.starts_with('/') || source.contains([':', '\\', '#', '?'])
-        || source.chars().any(char::is_control)
-    {
+    if source.len() > 4096 || ferroui_designer_project::relative_asset_path(source).is_none() {
         return Err("Choose a relative image from the project Assets view".into());
     }
     let mut document = Document::new(r#"<Image xmlns="https://github.com/ferroui" Stretch="Uniform" Width="120"/>"#)

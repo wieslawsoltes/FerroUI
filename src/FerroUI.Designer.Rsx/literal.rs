@@ -9,6 +9,7 @@ pub(crate) enum Literal {
     Number,
     UniformRadius,
     Thickness,
+    EmbeddedImage,
     Enum {
         module: &'static str,
         name: String,
@@ -42,6 +43,7 @@ impl Literal {
             },
             Self::Integer => Some(integer(expr)?.to_string()),
             Self::Number | Self::UniformRadius => Some(number(expr)?.to_string()),
+            Self::EmbeddedImage => crate::image_source::read(expr),
             Self::Thickness => match expr {
                 Expr::Tuple(tuple) if matches!(tuple.elems.len(), 2 | 4) => Some(
                     tuple
@@ -94,6 +96,7 @@ impl Literal {
             },
             Self::Integer => value.trim().parse::<i32>().ok()?.to_string(),
             Self::Number | Self::UniformRadius => format!("{:?}", parse_number(value.trim())?),
+            Self::EmbeddedImage => crate::image_source::rust(value)?,
             Self::Thickness => {
                 let values = value
                     .split(|c: char| c == ',' || c.is_whitespace())
