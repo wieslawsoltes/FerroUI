@@ -1737,6 +1737,7 @@ dependencies = [
  "naga",
  "roxmltree 0.20.0",
  "serde_json",
+ "toml",
  "xamlx",
 ]
 
