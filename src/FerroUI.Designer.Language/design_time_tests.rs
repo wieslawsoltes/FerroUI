@@ -81,6 +81,22 @@ fn design_namespace_aliases_resolve_native_controls_overrides_and_compatibility_
 }
 
 #[test]
+fn fixture_attributes_use_json_diagnostics_in_the_design_namespace() {
+    let fixture = r#"{"default":"Content","fixtures":[{"name":"Content","data":{"Title":"Ready","Amount":42}}]}"#;
+    let valid = format!("<Grid {NS} compat:Ignorable='preview' preview:Fixtures='{fixture}'/>");
+    assert!(service(&valid).diagnostics(URI).unwrap().is_empty());
+    let invalid = valid.replacen("Content", "Missing", 1);
+    let diagnostics = service(&invalid).diagnostics(URI).unwrap();
+    assert_eq!(diagnostics.len(), 1);
+    assert_eq!(diagnostics[0].code, "design-fixtures");
+    let nested = format!("<Grid {NS}><Border preview:Fixtures='{fixture}'/></Grid>");
+    assert_eq!(
+        service(&nested).diagnostics(URI).unwrap()[0].code,
+        "design-fixtures"
+    );
+}
+
+#[test]
 fn design_metadata_preserves_unknown_type_property_and_value_diagnostics() {
     let source = format!(
         "<Grid {NS} preview:DesignWidth='wide' preview:Unknown='bad' preview:Name='identity'>\

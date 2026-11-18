@@ -10,6 +10,7 @@
 //! named elements are reconciled when source is replaced. No rendering platform,
 //! dispatcher or runtime loader is required.
 mod ast;
+pub mod design_fixtures;
 mod document;
 mod markup;
 

@@ -272,6 +272,11 @@ impl Stages {
         self.board.state_options(target.id)
     }
 
+    pub(crate) fn fixture_options(&self, target: StageTarget) -> Result<Vec<String>, String> {
+        self.stage_info(&target)?;
+        self.board.fixture_options(target.id)
+    }
+
     pub(crate) fn pointer(&mut self, request: Pointer, projects: &Projects) -> Result<Value, String> {
         if !(0.0..=1.0).contains(&request.x) || !(0.0..=1.0).contains(&request.y) {
             return Err("Choose a point inside the stage".into());

@@ -51,6 +51,15 @@ impl DesignerSession {
         preview_host: Ref<ContentControl>,
         uri: String,
     ) -> Result<Self, String> {
+        Self::with_preview_options(source, preview_host, uri, Default::default())
+    }
+
+    pub fn with_preview_options(
+        source: impl Into<String>,
+        preview_host: Ref<ContentControl>,
+        uri: String,
+        options: crate::PreviewHostOptions,
+    ) -> Result<Self, String> {
         let source = source.into();
         let (document, invalid_source) = match Document::new(source.clone()) {
             Ok(document) => (document, None),
@@ -63,7 +72,7 @@ impl DesignerSession {
         ferroui_xaml_interactivity::register_types();
         ferroui_xaml_interactions::register_types();
         ferroui_xaml_interactions_custom::register_types();
-        let preview = RuntimePreview::new(preview_host, uri, &document)?;
+        let preview = RuntimePreview::new_with_options(preview_host, uri, &document, options)?;
         let mut result = Self {
             document,
             preview,

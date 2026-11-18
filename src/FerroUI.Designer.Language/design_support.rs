@@ -1,9 +1,10 @@
 //! Namespace-exact metadata for the designer's preview projection. This remains portable:
 //! native control properties still come from the generated framework schema.
 use crate::{ExtensionInfo, PropertyInfo, Schema};
+use ferroui_designer_core::design_fixtures::FIXTURES_ATTRIBUTE;
 use ferroui_designer_core::{Attribute, Document, MarkupValue, Node};
 
-pub(crate) const DESIGN_NAMESPACE: &str = "http://schemas.microsoft.com/expression/blend/2008";
+pub(crate) use ferroui_designer_core::design_fixtures::DESIGN_NAMESPACE;
 pub(crate) const COMPATIBILITY_NAMESPACE: &str =
     "http://schemas.openxmlformats.org/markup-compatibility/2006";
 
@@ -67,6 +68,15 @@ pub(crate) fn ignorable_property() -> PropertyInfo {
         name: "Ignorable".into(),
         type_name: "String".into(),
         documentation: "Space-separated XML namespace prefixes that a runtime may ignore. Design-time preview members use the Blend namespace.".into(),
+        ..Default::default()
+    }
+}
+
+pub(crate) fn fixtures_property() -> PropertyInfo {
+    PropertyInfo {
+        name: FIXTURES_ATTRIBUTE.into(),
+        type_name: "JSON".into(),
+        documentation: "Named preview-only data contexts on the view root. Set a default name and provide the fixtures with name and data fields.".into(),
         ..Default::default()
     }
 }

@@ -235,6 +235,8 @@ pub struct PreviewStageConfiguration {
     #[serde(default)]
     pub layout: PreviewStageLayout,
     pub design_time_data: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub design_fixture: Option<String>,
     pub states: Vec<PreviewStageState>,
     pub pinned: bool,
     pub auto_update: bool,
@@ -254,6 +256,7 @@ impl PreviewStageConfiguration {
             environment,
             layout: PreviewStageLayout::Fixed,
             design_time_data: true,
+            design_fixture: None,
             states: Vec::new(),
             pinned: false,
             auto_update: true,
@@ -265,6 +268,9 @@ impl PreviewStageConfiguration {
         bounded(&self.name, 128, "Stage name", false)?;
         validate_uri(&self.source_uri)?;
         self.environment.validate()?;
+        if let Some(name) = &self.design_fixture {
+            ferroui_designer_core::design_fixtures::validate_name(name)?;
+        }
         if let PreviewStageTarget::Definition { anchor, options } = &self.target {
             anchor.validate()?;
             options.validate()?;
@@ -297,6 +303,7 @@ impl PreviewStageConfiguration {
     fn text_size(&self) -> usize {
         self.name.len()
             + self.source_uri.len()
+            + self.design_fixture.as_ref().map_or(0, String::len)
             + 256
             + match &self.target {
                 PreviewStageTarget::Document => 0,
@@ -319,6 +326,7 @@ impl PreviewStageConfiguration {
             && self.environment.theme == other.environment.theme
             && self.environment.flow_direction == other.environment.flow_direction
             && self.design_time_data == other.design_time_data
+            && self.design_fixture == other.design_fixture
             && self.states == other.states
     }
 
@@ -370,6 +378,16 @@ pub struct PreviewStageSource {
     pub uri: String,
     pub document: Document,
     pub pending: bool,
+}
+
+impl PreviewStageSource {
+    pub(crate) fn fixture_options(&self) -> Result<Vec<String>, String> {
+        if self.pending || !self.document.is_valid() {
+            return Err("Repair the stage source before choosing design fixtures".into());
+        }
+        Ok(ferroui_designer_core::design_fixtures::DesignFixtures::from_document(&self.document)?
+            .into_iter().flat_map(|set| set.fixtures).map(|fixture| fixture.name).collect())
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -1066,6 +1084,13 @@ impl PreviewStageBoard {
         crate::preview_stage_state_options::source_options(source, &stage.configuration.target)
     }
 
+    pub fn fixture_options(&self, id: PreviewStageId) -> Result<Vec<String>, String> {
+        let stage = &self.stages[self.index(id)?];
+        let source = self.sources.get(&stage.configuration.source_uri)
+            .ok_or("Open the stage source before choosing design fixtures")?;
+        source.fixture_options()
+    }
+
     /// Resolve one authored hotspot against the exact accepted native graph. The
     /// returned axis-aligned rectangle uses stage logical coordinates and is clipped
     /// to the stage viewport and native ancestor clips. Call again immediately before
@@ -1647,6 +1672,7 @@ impl PreviewStageBoard {
             source_snapshot.run(|| {
                 let mut options = self.options.clone();
                 options.design_time_data = config.design_time_data;
+                options.design_fixture = config.design_fixture.clone();
                 let mut preview = RuntimePreview::new_isolated(
                     host,
                     config.source_uri.clone(),

@@ -63,7 +63,7 @@ fn presentation_action(tool: &str, action: Option<&str>) -> bool {
         "designer_program" => matches!(action, Some("preview" | "preview_targets")),
         "designer_state" => matches!(action, Some("preview" | "advance_preview" | "clear_preview")),
         "designer_definition" => matches!(action, Some("enter" | "exit")),
-        "designer_design_data_edit" => action == Some("enabled"),
+        "designer_design_data_edit" => matches!(action, Some("enabled" | "fixture")),
         "designer_layer" => action.is_some(),
         _ => false,
     }

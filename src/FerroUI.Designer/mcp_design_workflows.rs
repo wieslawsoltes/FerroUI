@@ -10,6 +10,7 @@ pub(super) fn handles(name: &str) -> bool {
     matches!(
         name,
         "designer_design_data"
+            | "designer_design_fixtures"
             | "designer_design_data_edit"
             | "designer_focus_order"
             | "designer_focus_edit"
@@ -36,6 +37,12 @@ pub(super) fn tools() -> Vec<Value> {
         s::action(name, properties, &required, true)
     };
     vec![
+        s::tool(
+            "designer_design_fixtures",
+            "Read the view root's named typed design fixtures, authored default, and current preview override.",
+            s::object(json!({}), &[]),
+            false,
+        ),
         s::tool(
             "designer_design_data",
             "Read design-time overrides for an authored node, preview enablement and design size. Omitted node uses the first selected node or document root. Source and preview are unchanged.",
@@ -68,6 +75,12 @@ pub(super) fn tools() -> Vec<Value> {
                     "enabled",
                     json!({"enabled":{"type":"boolean"}}),
                     &["enabled"],
+                    true,
+                ),
+                s::action(
+                    "fixture",
+                    json!({"name":s::nullable(s::string())}),
+                    &["name"],
                     true,
                 ),
             ],
@@ -188,6 +201,12 @@ pub(super) fn call(
     args: &Value,
 ) -> Result<Value, String> {
     match name {
+        "designer_design_fixtures" => Ok(json!({
+            "node": session.document().ast().root(),
+            "manifest": ferroui_designer_core::design_fixtures::DesignFixtures::from_document(session.document())?,
+            "selected": session.design_fixture(),
+            "enabled": session.design_time_enabled(),
+        })),
         "designer_design_data" => {
             let node = args["node"]
                 .as_u64()
@@ -218,6 +237,10 @@ pub(super) fn call(
                 }),
                 "enabled" => {
                     session.set_design_time_enabled(args["enabled"].as_bool().unwrap())?;
+                    None
+                }
+                "fixture" => {
+                    session.set_design_fixture(args["name"].as_str().map(str::to_owned))?;
                     None
                 }
                 _ => return Err("Unknown design-data action".into()),

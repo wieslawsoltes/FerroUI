@@ -1,19 +1,13 @@
 //! Deterministic, immutable design records. No application viewmodel constructor or
 //! setter is invoked to populate sample data; ordinary preview bindings read this plugin.
-use ferroui_base::data::core::plugins::{
-    AccessorListener, BindingPlugins, IPropertyAccessor, IPropertyAccessorPlugin,
-};
-use ferroui_base::data::core::{ValueType, ValueTypes, WeakValue};
-use ferroui_base::data::{BindingError, BindingPriority};
-use ferroui_base::reactive::IDisposable;
-use ferroui_base::{
-    AnyValue, BoxedValue, FerroObject, FerroPropertyRegistry, Ref, StyledElement, Visual,
-};
+use crate::design_records::{DesignRecord, SampleValue, register_accessors};
+use ferroui_base::data::BindingPriority;
+use ferroui_base::data::core::{ValueType, ValueTypes};
+use ferroui_base::{BoxedValue, FerroObject, FerroPropertyRegistry, Ref, StyledElement, Visual};
 use ferroui_controls::Control;
 use ferroui_designer_core::{Document, MarkupValue, Node, NodeId, SourceSpan};
 use ferroui_inspect::{Inspector, TreeKind};
 use ferroui_markup_xaml::diagnostics::XamlSourceInfo;
-use std::cell::RefCell;
 use std::collections::{BTreeMap, BTreeSet};
 use std::rc::Rc;
 
@@ -34,6 +28,7 @@ pub(crate) struct SampleRequest {
     pub property: String,
     pub count: usize,
     fields: BTreeMap<String, SampleKind>,
+    fixture: Option<DesignRecord>,
     /// Anonymous records have runtime members. The application retains its compiled
     /// bindings; only the temporary sample-data projection uses reflection access.
     pub binding_replacements: Vec<(SourceSpan, String)>,
@@ -85,6 +80,7 @@ pub(crate) fn request(
     node: NodeId,
     property: &str,
     count: usize,
+    fixture: Option<DesignRecord>,
     notices: &mut Vec<String>,
 ) -> SampleRequest {
     let mut fields = BTreeMap::new();
@@ -177,6 +173,9 @@ pub(crate) fn request(
                             .replace('\'', "&apos;"),
                     ));
                 }
+                if fixture.is_some() {
+                    continue;
+                }
                 let Some(MarkupValue::Literal(path)) = extension
                     .arguments
                     .iter()
@@ -207,6 +206,7 @@ pub(crate) fn request(
         property: property.into(),
         count,
         fields,
+        fixture,
         binding_replacements,
     }
 }
@@ -277,57 +277,12 @@ fn property_kind(
     }
 }
 
-#[derive(Clone, PartialEq)]
-struct DesignRecord {
-    fields: BTreeMap<String, SampleValue>,
-}
-#[derive(Clone, PartialEq)]
-enum SampleValue {
-    Text(String),
-    Boolean(bool),
-    Number(f64),
-    Record(DesignRecord),
-}
-impl SampleValue {
-    fn boxed(&self) -> BoxedValue {
-        match self {
-            Self::Text(value) => Rc::new(value.clone()),
-            Self::Boolean(value) => Rc::new(*value),
-            Self::Number(value) => Rc::new(*value),
-            Self::Record(value) => Rc::new(value.clone()),
-        }
-    }
-    fn value_type(&self) -> ValueType {
-        match self {
-            Self::Text(_) => ValueType::of::<String>(),
-            Self::Boolean(_) => ValueType::of::<bool>(),
-            Self::Number(_) => ValueType::of::<f64>(),
-            Self::Record(_) => ValueType::of::<DesignRecord>(),
-        }
-    }
-}
-
-impl DesignRecord {
-    fn insert(&mut self, path: &[&str], value: SampleValue) {
-        if path.len() == 1 {
-            self.fields.entry(path[0].into()).or_insert(value);
-            return;
-        }
-        let nested = self.fields.entry(path[0].into()).or_insert_with(|| {
-            SampleValue::Record(DesignRecord {
-                fields: BTreeMap::new(),
-            })
-        });
-        if let SampleValue::Record(record) = nested {
-            record.insert(&path[1..], value);
-        }
-    }
-}
-
 impl SampleRequest {
     pub fn value(&self) -> BoxedValue {
         register_accessors();
-        if self.property == "DataContext" {
+        if let Some(fixture) = &self.fixture {
+            Rc::new(fixture.clone())
+        } else if self.property == "DataContext" {
             self.record(0)
         } else {
             Rc::new(Some(ferroui_controls::ItemsSource::from_items(
@@ -339,9 +294,7 @@ impl SampleRequest {
         if self.fields.is_empty() {
             return Rc::new(format!("Sample item {}", row + 1));
         }
-        let mut record = DesignRecord {
-            fields: BTreeMap::new(),
-        };
+        let mut record = DesignRecord::new();
         for (path, kind) in &self.fields {
             let parts = path.split('.').collect::<Vec<_>>();
             let value = match kind {
@@ -551,68 +504,4 @@ fn display_name(name: &str) -> String {
         result.push(character);
     }
     result
-}
-
-fn register_accessors() {
-    let probe = DesignRecord {
-        fields: BTreeMap::from([(
-            "__FerroDesignerSampleProbe".into(),
-            SampleValue::Text(String::new()),
-        )]),
-    };
-    BindingPlugins::update_property_accessors(|plugins| {
-        if !plugins
-            .iter()
-            .any(|plugin| plugin.match_(&probe, "__FerroDesignerSampleProbe"))
-        {
-            plugins.insert(0, Rc::new(SampleAccessorPlugin));
-        }
-    });
-}
-struct SampleAccessorPlugin;
-impl IPropertyAccessorPlugin for SampleAccessorPlugin {
-    fn match_(&self, object: &dyn AnyValue, name: &str) -> bool {
-        object
-            .downcast_ref::<DesignRecord>()
-            .is_some_and(|record| record.fields.contains_key(name))
-    }
-    fn start(&self, reference: &WeakValue, name: &str) -> Option<Rc<dyn IPropertyAccessor>> {
-        let object = reference.upgrade()?;
-        let value = object
-            .downcast_ref::<DesignRecord>()?
-            .fields
-            .get(name)?
-            .clone();
-        Some(Rc::new(SampleAccessor {
-            value,
-            listener: RefCell::new(None),
-        }))
-    }
-}
-struct SampleAccessor {
-    value: SampleValue,
-    listener: RefCell<Option<AccessorListener>>,
-}
-impl IDisposable for SampleAccessor {
-    fn dispose(&self) {
-        self.listener.borrow_mut().take();
-    }
-}
-impl IPropertyAccessor for SampleAccessor {
-    fn property_type(&self) -> Option<ValueType> {
-        Some(self.value.value_type())
-    }
-    fn value(&self) -> Option<BoxedValue> {
-        Some(self.value.boxed())
-    }
-    fn set_value(&self, _: Option<&BoxedValue>, _: BindingPriority) -> Result<bool, BindingError> {
-        Ok(false)
-    }
-    fn subscribe(&self, listener: AccessorListener) {
-        *self.listener.borrow_mut() = Some(listener.clone());
-        listener(self.value());
-    }
-    fn unsubscribe(&self) {
-        self.listener.borrow_mut().take();
-    }
 }

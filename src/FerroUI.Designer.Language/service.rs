@@ -616,6 +616,17 @@ impl LanguageService {
                 {
                     continue;
                 }
+                if ferroui_designer_core::design_fixtures::is_fixtures(attribute) {
+                    let result = if node.id == state.document.ast().root() {
+                        ferroui_designer_core::design_fixtures::DesignFixtures::parse(&attribute.value).map(|_| ())
+                    } else {
+                        Err("Design fixtures belong on the view root.".into())
+                    };
+                    if let Err(message) = result {
+                        out.push(diagnostic_at(state, attribute.value_span, 1, "design-fixtures", &message)?);
+                    }
+                    continue;
+                }
                 let expression =
                     attribute.value.starts_with('{') && !attribute.value.starts_with("{}");
                 if expression {
@@ -1027,6 +1038,10 @@ impl LanguageService {
                     if member_namespace.as_deref() == Some(crate::design_support::DESIGN_NAMESPACE)
                     {
                         let mut properties = schema.properties(tag_name, namespace.as_deref());
+                        if state.document.ast().element_at(open.unwrap()) == Some(state.document.ast().root()) {
+                            let property = crate::design_support::fixtures_property();
+                            properties.insert(property.name.clone(), property);
+                        }
                         for (alias, native) in
                             [("DesignWidth", "Width"), ("DesignHeight", "Height")]
                         {

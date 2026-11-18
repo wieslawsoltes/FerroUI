@@ -328,6 +328,9 @@ impl Schema {
         member_namespace: Option<&str>,
     ) -> Option<PropertyInfo> {
         if member_namespace == Some(crate::design_support::DESIGN_NAMESPACE) {
+            if name.rsplit(':').next() == Some(ferroui_designer_core::design_fixtures::FIXTURES_ATTRIBUTE) {
+                return Some(crate::design_support::fixtures_property());
+            }
             if name.contains(':')
                 && matches!(
                     name.rsplit(':').next(),

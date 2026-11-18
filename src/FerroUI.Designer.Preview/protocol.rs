@@ -32,6 +32,14 @@ pub(crate) struct Render {
     pub(crate) workspace_root: Option<std::path::PathBuf>,
     #[serde(default, rename = "localSources")]
     pub(crate) local_sources: Vec<ferroui_designer_project::PreviewSourceBuffer>,
+    #[serde(rename = "designData")]
+    pub(crate) design_data: Option<DesignData>,
+}
+
+#[derive(Deserialize)]
+pub(crate) struct DesignData {
+    pub(crate) enabled: bool,
+    pub(crate) fixture: Option<String>,
 }
 
 #[derive(Deserialize)]

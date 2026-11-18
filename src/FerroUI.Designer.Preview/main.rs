@@ -90,7 +90,7 @@ fn respond(
     }
     let result = match method {
         "initialize" => Ok(json!({"version": protocol::PROTOCOL_VERSION, "assets": toolbox::catalog(),
-            "capabilities": {"isolatedDesign":true,"appHostedDesign":true,"rsxLanguage":true,"stages":true,"prototypeEditing":true,"stageIncludes":true,"projectCatalog":true,"canvasInteraction":true,"canvasFocusOrder":true,"projectInventory":true,"tokenHandoff":true}})),
+            "capabilities": {"isolatedDesign":true,"appHostedDesign":true,"rsxLanguage":true,"stages":true,"prototypeEditing":true,"stageIncludes":true,"projectCatalog":true,"canvasInteraction":true,"canvasFocusOrder":true,"projectInventory":true,"tokenHandoff":true,"designFixtures":true}})),
         "designTokens" => serde_json::from_value::<ferroui_designer_tools::token_handoff::Request>(message["params"].clone())
             .map_err(|error| error.to_string()).and_then(|request| serialize(request.plan().map_err(|error| error.to_string()))),
         "configureProject" => serde_json::from_value(message["params"].clone())
@@ -139,6 +139,8 @@ fn respond(
             .and_then(|request| serialize(stages.checks(request, projects))),
         "stagesStateOptions" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|request| serialize(stages.state_options(request))),
+        "stagesFixtureOptions" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
+            .and_then(|request| serialize(stages.fixture_options(request))),
         "stagesPointer" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|request| stages.pointer(request, projects)),
         "stagesPrototypeElements" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())

@@ -1,9 +1,9 @@
 //! A complete, staged editor for one native preview scenario. Controls edit only a
 //! detached configuration; the host validates the accepted board/source epoch on Apply.
 use crate::{
-    DefinitionPreviewOptions, PreviewEnvironment, PreviewFlowDirection, PreviewSourceAnchor,
-    PreviewStageConfiguration, PreviewStageLayout, PreviewStageMode, PreviewStageSource,
-    PreviewStageState, PreviewStageTarget, PreviewTheme, PREVIEW_SIZE_PRESETS,
+    DefinitionPreviewOptions, PREVIEW_SIZE_PRESETS, PreviewEnvironment, PreviewFlowDirection,
+    PreviewSourceAnchor, PreviewStageConfiguration, PreviewStageLayout, PreviewStageMode,
+    PreviewStageSource, PreviewStageState, PreviewStageTarget, PreviewTheme,
 };
 use ferroui_base::input::{InputElement, Key};
 use ferroui_base::layout::{HorizontalAlignment, Orientation};
@@ -53,6 +53,8 @@ pub struct PreviewStageEditor {
     flow: Ref<ComboBox>,
     mode: Ref<ComboBox>,
     design_data: Ref<CheckBox>,
+    design_fixture: Ref<ComboBox>,
+    fixtures: RefCell<Vec<String>>,
     pinned: Ref<CheckBox>,
     auto_update: Ref<CheckBox>,
     state_host: Ref<StackPanel>,
@@ -244,6 +246,8 @@ impl PreviewStageEditor {
         for value in [&design_data, &pinned, &auto_update] {
             body.children().add(value.clone().upcast::<Control>());
         }
+        let design_fixture = picker("StageDesignFixture", "Design fixture");
+        row(&body, "Design fixture", &design_fixture);
         let state_title = label("Visual states");
         state_title.set_font_weight(FontWeight::SemiBold);
         state_title.set_margin(Thickness::new(0.0, 8.0, 0.0, 0.0));
@@ -307,6 +311,8 @@ impl PreviewStageEditor {
             flow,
             mode,
             design_data,
+            design_fixture,
+            fixtures: RefCell::new(Vec::new()),
             pinned,
             auto_update,
             state_host,
@@ -321,6 +327,7 @@ impl PreviewStageEditor {
         });
         editor.rebuild_targets(Some(&initial.target));
         editor.rebuild_states(&initial.states);
+        editor.rebuild_fixtures(initial.design_fixture.as_deref());
         editor.refresh_layout_captions();
         editor.guard.set(false);
         let weak = Rc::downgrade(&editor);
@@ -337,6 +344,7 @@ impl PreviewStageEditor {
                     editor.retained_states.borrow_mut().clear();
                     editor.rebuild_targets(None);
                     editor.rebuild_states(&[]);
+                    editor.rebuild_fixtures(None);
                     editor.guard.set(false);
                 }
             }
@@ -496,6 +504,34 @@ impl PreviewStageEditor {
             .set_is_visible(self.target.selected_index() > 0);
     }
 
+    fn rebuild_fixtures(&self, selected: Option<&str>) {
+        let mut fixtures = self
+            .selected_source()
+            .and_then(|source| source.fixture_options().ok())
+            .unwrap_or_default();
+        self.design_fixture.items().clear();
+        item(&self.design_fixture, "View default");
+        for name in &fixtures {
+            item(&self.design_fixture, name);
+        }
+        let index = selected.map_or(0, |name| {
+            fixtures
+                .iter()
+                .position(|candidate| candidate == name)
+                .map_or_else(
+                    || {
+                        item(&self.design_fixture, &format!("{name} (unavailable)"));
+                        fixtures.push(name.into());
+                        fixtures.len()
+                    },
+                    |index| index + 1,
+                )
+        });
+        self.design_fixture.set_selected_index(index as i32);
+        self.design_fixture.set_is_enabled(!fixtures.is_empty());
+        *self.fixtures.borrow_mut() = fixtures;
+    }
+
     fn rebuild_states(&self, selected: &[PreviewStageState]) {
         self.state_host.children().clear();
         self.states.borrow_mut().clear();
@@ -540,7 +576,11 @@ impl PreviewStageEditor {
                 0
             };
             control.set_selected_index(index as i32);
-            row(&self.state_host, &format!("{owner_name}\n{group}"), &control);
+            row(
+                &self.state_host,
+                &format!("{owner_name}\n{group}"),
+                &control,
+            );
             rows.push(StateChoice {
                 owner,
                 group,
@@ -649,6 +689,10 @@ impl PreviewStageEditor {
                 },
             },
             design_time_data: self.design_data.is_checked() == Some(true),
+            design_fixture: usize::try_from(self.design_fixture.selected_index())
+                .ok()
+                .and_then(|index| index.checked_sub(1))
+                .and_then(|index| self.fixtures.borrow().get(index).cloned()),
             states,
             pinned: self.pinned.is_checked() == Some(true),
             auto_update: self.auto_update.is_checked() == Some(true),

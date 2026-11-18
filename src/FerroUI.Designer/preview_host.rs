@@ -104,6 +104,8 @@ pub struct PreviewHostOptions {
     /// Show authored d: values and sample data in this designer host. This option is
     /// independent from the normal runtime loader and never changes saved XAML.
     pub design_time_data: bool,
+    /// Per-preview override for the authored default design fixture.
+    pub design_fixture: Option<String>,
 }
 impl Default for PreviewHostOptions {
     fn default() -> Self {
@@ -116,6 +118,7 @@ impl Default for PreviewHostOptions {
             resource_factory: None,
             configuration,
             design_time_data: true,
+            design_fixture: None,
         }
     }
 }
@@ -150,6 +153,7 @@ impl PreviewHostOptions {
                 &document,
                 source,
                 self.design_time_data && self.configuration.design_mode,
+                self.design_fixture.as_deref(),
             )?
             .map(|projection| projection.document.source().to_owned()),
             uri: uri.into(),

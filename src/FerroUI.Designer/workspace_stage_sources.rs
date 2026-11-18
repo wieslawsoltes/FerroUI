@@ -16,6 +16,7 @@ struct FocusContext {
     definition: Option<(NodeId, DefinitionPreviewOptions)>,
     environment: PreviewEnvironment,
     design_time_data: bool,
+    fixture: Option<String>,
     states: Vec<(NodeId, String, String)>,
     interactive: bool,
     selection: Vec<NodeId>,
@@ -104,7 +105,10 @@ impl DesignerWorkspace {
     }
 
     /// Source-linked checks for the stage's current native composition.
-    pub fn preview_stage_checks(&self, id: PreviewStageId) -> Result<Vec<crate::PreviewFinding>, String> {
+    pub fn preview_stage_checks(
+        &self,
+        id: PreviewStageId,
+    ) -> Result<Vec<crate::PreviewFinding>, String> {
         if !self.preview_stage_source_is_current(id) {
             return Err("Refresh this stage before checking its preview".into());
         }
@@ -116,13 +120,26 @@ impl DesignerWorkspace {
         &self,
         id: PreviewStageId,
     ) -> Result<Vec<crate::PreviewStageStateOptions>, String> {
-        let stage = self.preview_stage(id).ok_or("The preview stage was removed")?;
+        let stage = self
+            .preview_stage(id)
+            .ok_or("The preview stage was removed")?;
         let source = self
             .preview_stage_sources()
             .into_iter()
             .find(|source| source.uri == stage.configuration.source_uri)
             .ok_or("Open the stage source before choosing its states")?;
         crate::preview_stage_state_options::source_options(&source, &stage.configuration.target)
+    }
+
+    pub fn preview_stage_fixture_options(&self, id: PreviewStageId) -> Result<Vec<String>, String> {
+        let stage = self
+            .preview_stage(id)
+            .ok_or("The preview stage was removed")?;
+        self.preview_stage_sources()
+            .into_iter()
+            .find(|source| source.uri == stage.configuration.source_uri)
+            .ok_or("Open the stage source before choosing design fixtures")?
+            .fixture_options()
     }
 
     /// Image capture may use a paused frame while its accepted source and all
@@ -207,6 +224,7 @@ impl DesignerWorkspace {
             definition,
             environment: configuration.environment,
             design_time_data: configuration.design_time_data,
+            fixture: configuration.design_fixture.clone(),
             states,
             interactive: configuration.mode == PreviewStageMode::Live,
             selection: Vec::new(),
@@ -270,6 +288,7 @@ impl DesignerWorkspace {
                 .map(|scope| (scope.node, scope.options.clone())),
             environment: self.preview_environment(),
             design_time_data: session.design_time_enabled(),
+            fixture: session.design_fixture().map(str::to_owned),
             states: session.active_preview_states(),
             interactive: self.surface.interactive(),
             selection: session.selection().to_vec(),
@@ -295,8 +314,10 @@ impl DesignerWorkspace {
                     session.exit_definition_scope()?;
                 }
             }
-            if session.design_time_enabled() != context.design_time_data {
-                session.set_design_time_enabled(context.design_time_data)?;
+            if session.design_time_enabled() != context.design_time_data
+                || session.design_fixture() != context.fixture.as_deref()
+            {
+                session.configure_design_data(context.design_time_data, context.fixture.clone())?;
             }
             if !matches!(session.preview_status(), crate::PreviewStatus::Ready { .. }) {
                 return Err("The source could not be loaded in the authoring preview".into());

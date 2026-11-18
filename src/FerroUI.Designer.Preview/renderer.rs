@@ -6,7 +6,7 @@ use ferroui_base::styling::ThemeVariant;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::Ref;
 use ferroui_controls::{AppBuilder, Application, ContentControl, Window, WindowDecorations};
-use ferroui_designer::{capture_preview_stage_png, DesignerSession, PreviewStatus};
+use ferroui_designer::{capture_preview_stage_png, DesignerSession, PreviewHostOptions, PreviewStatus};
 use ferroui_designer_core::NodeId;
 use ferroui_harfbuzz::HarfBuzzApplicationExtensions;
 use ferroui_headless::{FerroHeadlessPlatformExtensions, FerroHeadlessPlatformOptions};
@@ -90,8 +90,15 @@ impl Renderer {
         let host = ContentControl::new();
         host.set_horizontal_content_alignment(HorizontalAlignment::Stretch);
         host.set_vertical_content_alignment(VerticalAlignment::Stretch);
-        let mut session =
-            DesignerSession::with_uri(source, host.clone(), input.document.uri.clone())?;
+        let mut options = PreviewHostOptions::default();
+        if let Some(data) = &input.design_data {
+            if let Some(name) = &data.fixture {
+                ferroui_designer_core::design_fixtures::validate_name(name)?;
+            }
+            options.design_time_data = data.enabled;
+            options.design_fixture = data.fixture.clone();
+        }
+        let mut session = DesignerSession::with_preview_options(source, host.clone(), input.document.uri.clone(), options)?;
         match session.preview_status() {
             PreviewStatus::Ready { .. } => (),
             PreviewStatus::InvalidSource { .. } => {

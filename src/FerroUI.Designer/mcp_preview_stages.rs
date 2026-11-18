@@ -19,6 +19,7 @@ pub(super) fn handles(name: &str) -> bool {
             | "designer_preview_image"
             | "designer_preview_stage_checks"
             | "designer_preview_stage_states"
+            | "designer_preview_stage_fixtures"
     )
 }
 
@@ -59,7 +60,8 @@ fn configuration_schema() -> Value {
     );
     s::object(
         json!({"name":bounded_string(128),"source_uri":bounded_string(8192),"target":target,
-        "environment":environment_schema(),"layout":{"enum":["fixed","size_that_fits","fixed_width","fixed_height"]},"design_time_data":{"type":"boolean"},"states":s::array(state,32),
+        "environment":environment_schema(),"layout":{"enum":["fixed","size_that_fits","fixed_width","fixed_height"]},"design_time_data":{"type":"boolean"},
+        "design_fixture":s::nullable(bounded_string(128)),"states":s::array(state,32),
         "pinned":{"type":"boolean"},"auto_update":{"type":"boolean"},"mode":{"enum":["select","live"]}}),
         &[
             "name",
@@ -188,6 +190,11 @@ pub(super) fn tools() -> Vec<Value> {
             "Read the authored state choices and owner anchors for one current stage. Update the stage's configuration to select states or change its design data flag.",
             s::object(json!({"stage":s::id(),"expected_model":bounded_string(16)}), &["stage","expected_model"]), false,
         ),
+        s::tool(
+            "designer_preview_stage_fixtures",
+            "Read the authored design fixtures for a stage. Set design_fixture in its configuration to select one.",
+            s::object(json!({"stage":s::id(),"expected_model":bounded_string(16)}), &["stage","expected_model"]), false,
+        ),
         edit,
     ]
 }
@@ -292,6 +299,10 @@ pub(super) fn call(
     if name == "designer_preview_stage_states" {
         let id = integer(args, "stage")?;
         return Ok(json!({"stage":id,"groups":workspace.preview_stage_state_options(id)?}));
+    }
+    if name == "designer_preview_stage_fixtures" {
+        let id = integer(args, "stage")?;
+        return Ok(json!({"stage":id,"fixtures":workspace.preview_stage_fixture_options(id)?}));
     }
     if name == "designer_preview_image" {
         let id = integer(args, "stage")?;

@@ -19,6 +19,8 @@ mod component_session;
 mod definition_manipulation;
 mod definition_projection;
 mod definition_session;
+mod design_fixture_editor;
+mod design_records;
 mod design_time;
 mod native_types;
 mod design_time_samples;
@@ -87,6 +89,7 @@ pub use design_time::{
     DesignTimeEdit, DesignTimeEditor, DesignTimeEditorModel, DesignTimeProperty,
     DesignTimeSnapshot, plan_design_time_edits,
 };
+pub use design_fixture_editor::DesignFixtureEditorModel;
 pub use editors::{
     PropertyBindingDraft, PropertyBindingEditor, PropertyBindingOption, PropertyBindingSource,
     PropertyEditorContext, PropertyEditorFactory, PropertyEditorKind, PropertyEditorMetadata,

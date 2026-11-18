@@ -120,6 +120,7 @@ fn run(path: &Path, workspace: &Path, artifacts: &Path, accept: bool) -> Result<
                 frame: 1,
                 workspace_root: Some(workspace.into()),
                 local_sources: Vec::new(),
+                design_data: None,
             };
             let mut renderer = Renderer::new();
             let preview = crate::snapshot::render(&mut renderer, &input, None)?;

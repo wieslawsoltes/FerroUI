@@ -66,6 +66,7 @@ pub(crate) struct RuntimePreview {
 }
 
 impl RuntimePreview {
+    #[cfg(test)]
     pub fn new(
         host: Ref<ContentControl>,
         uri: String,
@@ -236,12 +237,17 @@ impl RuntimePreview {
         self.options.design_time_data
     }
 
-    pub(crate) fn set_design_time_enabled(
+    pub(crate) fn design_fixture(&self) -> Option<&str> {
+        self.options.design_fixture.as_deref()
+    }
+
+    pub(crate) fn configure_design_data(
         &mut self,
         enabled: bool,
+        fixture: Option<String>,
         document: &Document,
     ) -> Result<(), String> {
-        if enabled == self.options.design_time_data {
+        if enabled == self.options.design_time_data && fixture == self.options.design_fixture {
             return Ok(());
         }
         let status = self.status.clone();
@@ -249,6 +255,7 @@ impl RuntimePreview {
         let options_epoch = self.options_epoch;
         let mut options = self.options.clone();
         options.design_time_data = enabled;
+        options.design_fixture = fixture;
         if let Err(error) = self.configure(options, document) {
             self.status = status;
             self.notices = notices;
@@ -371,6 +378,7 @@ impl RuntimePreview {
                     &projection.document,
                     projection.document.valid_source(),
                     self.options.design_time_data,
+                    self.design_fixture(),
                 )?;
                 self.apply_source(
                     design
@@ -394,6 +402,7 @@ impl RuntimePreview {
                 document,
                 document.valid_source(),
                 self.options.design_time_data,
+                self.design_fixture(),
             )
             .and_then(|design| {
                 // The factory receives exact authored source. PreviewRequest::populate
@@ -412,6 +421,7 @@ impl RuntimePreview {
                     document,
                     &projection.source,
                     self.options.design_time_data,
+                    self.design_fixture(),
                 )?;
                 self.apply_source(
                     design
@@ -530,6 +540,7 @@ impl RuntimePreview {
             &document,
             &projection.source,
             self.options.design_time_data,
+            self.design_fixture(),
         )?;
         let control = self.options.control(
             design
@@ -556,8 +567,12 @@ impl RuntimePreview {
         let _design_mode =
             crate::preview_host::DesignModeGuard::new(self.options.configuration.design_mode);
         let document = Document::new(&source).map_err(|error| error.to_string())?;
-        let design =
-            crate::design_time::project(&document, &source, self.options.design_time_data)?;
+        let design = crate::design_time::project(
+            &document,
+            &source,
+            self.options.design_time_data,
+            self.design_fixture(),
+        )?;
         let loaded = self.options.load(&source, &self.uri)?;
         let sample_root = Ref::<Control>::from_xaml_object(&loaded);
         let window =

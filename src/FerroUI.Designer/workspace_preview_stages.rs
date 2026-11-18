@@ -634,6 +634,7 @@ impl DesignerWorkspace {
             self.preview_environment(),
         );
         configuration.design_time_data = session.design_time_enabled();
+        configuration.design_fixture = session.design_fixture().map(str::to_owned);
         configuration.mode = if self.surface.interactive() {
             PreviewStageMode::Live
         } else {
