@@ -18,7 +18,8 @@
 //! entry belong to the entry). It references every key of the group that its text names: every
 //! identifier token of its attribute values and text that is a key of the group (conservative:
 //! a `TargetType`, a selector or a text that happens to spell a key keeps it), and the argument
-//! of every `{StaticResource}`, `{DynamicResource}` and `ResourceKey`, which may be any key. It
+//! of every `{StaticResource}`, `{DynamicResource}` and `ResourceKey`, which may be any key: since
+//! #848 also a key no document of the group defines, which another theme may provide. It
 //! constructs the types of its elements, of its `TargetType`s and of its `{x:Type}`s, and the owner
 //! of an attached property that makes the framework construct it (`ToolTip.Tip`). The types of
 //! the type selectors of its selectors are not among them: a selector is a condition, and a style
@@ -406,7 +407,10 @@ pub(crate) fn plan(documents: &[(String, String, Option<String>)], merged: &[Str
                 type_keys.extend(document.type_keys.iter().cloned());
                 types.extend(document.types.iter().cloned());
                 references.extend(document.tokens.iter().filter(|token| keys.contains(token.as_str())).cloned());
-                references.extend(document.extension_keys.iter().filter(|key| keys.contains(key.as_str())).cloned());
+                // The argument of a resource extension names a key, whichever document defines it:
+                // another theme the application uses, or the application (#848). A token is only a
+                // guess, so it counts when it spells a key of the group.
+                references.extend(document.extension_keys.iter().cloned());
             }
             unit.keys = defined.into_iter().collect();
             unit.type_keys = type_keys.into_iter().collect();
