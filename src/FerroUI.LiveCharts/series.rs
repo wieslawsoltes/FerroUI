@@ -189,6 +189,10 @@ pub const DATA_LABELS_COLOR: Color = Color::from_rgb(45, 45, 45);
 /// A label measures its text grown by it when it is culled or reserves room.
 pub const DATA_LABELS_PADDING: (f64, f64) = (6.0, 8.0);
 
+/// The default `DataLabelsMaxWidth` of a source series (`MaxTooltipsAndLegendsLabelsWidth` of
+/// the settings): a label of a longer text breaks into lines of this width, its padding included.
+pub const DATA_LABELS_MAX_WIDTH: f64 = 170.0;
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct Series {
     pub name: String,
