@@ -1447,8 +1447,8 @@ impl DesignerWorkspace {
                 self.inspectors.outline.expansion.borrow_mut().clear();
                 self.inspectors.outline.paths.borrow_mut().clear();
             }
-            let entries = if snapshot.mode.is_none() {
-                session
+            let entries = match snapshot.mode {
+                None => session
                     .document()
                     .ast()
                     .nodes_in_source_order()
@@ -1498,10 +1498,9 @@ impl DesignerWorkspace {
                             ..Default::default()
                         }
                     })
-                    .collect()
-            } else {
-                session
-                    .runtime_outline(snapshot.mode.expect("runtime mode"))
+                    .collect(),
+                Some(mode) => session
+                    .runtime_outline(mode)
                     .into_iter()
                     .map(|entry| {
                         let row = entry.node;
@@ -1528,7 +1527,7 @@ impl DesignerWorkspace {
                             ..Default::default()
                         }
                     })
-                    .collect()
+                    .collect(),
             };
             self.inspectors.outline.replace(entries, &snapshot.filter);
             *self.inspectors.outline_snapshot.borrow_mut() = Some(snapshot);
