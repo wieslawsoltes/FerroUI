@@ -132,11 +132,17 @@ The other chart kinds animate through the native scene transition: a primitive o
 
 The mappers of custom models (`LabelMapper`, `NodeColorMapper` and `LinkColorMapper` of the Sankey series, `ValueMapper`, `ChildrenMapper` and `LabelMapper` of the treemap series) map once, as `set_mapped_values` maps the points of a Cartesian series: `SankeySeries::set_mapped_nodes` makes a node for each model with its name and colour and returns them, `SankeySeries::set_mapped_links` makes the links between them by index with their weights and colours, and `TreemapSeries::set_mapped_nodes` makes the tree of the models with their weights and names. The tooltip formatters of these series are not ported.
 
+### #624: the SVG cells and the colour animation of the heat series
+
+`GeometrySvg` of a heat series (a property of the generated `HeatSeries`, markup and code; the source's `HeatSeries<TModel, VariableSVGPathGeometry>`) draws its SVG path data in every cell. `svg_path.rs` reads the data with the path markup parser of FerroUI, as `SKPath.ParseSvgPathData`, into the path commands of the scene (quadratic curves and elliptical arcs become cubic curves, an arc by the endpoint parametrization of SVG in curves of at most a quarter turn), and fits it to the inset cell as `Svg.Draw` without `FitToSize`: centred, scaled by the width and height of the cell over the larger side of the tight bounds of the path. Path data the parser rejects is an error, where the source throws. The path reaches the engine in `CartesianSeriesOptions::geometry_svg`. The cells are paths of the native renderer, on the GPU path of every backend.
+
+The colour of a heat cell animates as the source's: at the first draw a cell starts transparent in its colour (`EnsureVisualForPoint`) and takes it over the animation, its rectangle in place (`HeatSeriesAnimationTests`); on a change of the data a cell moves to its new colour with the scene transition, which interpolates the fills, and a cell that enters or leaves fades (the alpha of `SoftDeleteOrDisposePoint`). The chart starts the first-draw transition of a Cartesian chart with heat series from its scene with the cells transparent; nothing else of the scene moves. `mapping.json` records `HeatSeries_FirstDraw_CellColorsInterpolateAcrossGradient` as ported (without the frame baseline of the source, whose easing differs) and `Svg` and `VariableSVGPathGeometry` partial.
+
 ## Remaining (#442)
 
 - Geographic map: a custom tooltip object (`IGeoMapTooltip`; no chart kind has one natively, `hover_changed` serves), visual elements other than circle markers at a coordinate, and the theme rules of the view.
 - Sankey and treemap: the tooltip formatters of the series (the tooltip is the node name and value).
 - Polar: the placement of the tooltip of the source (the suggested locations of the hover areas, `GetTooltipLocation` and the layout of the default tooltip), which every chart kind shares; the polar chart shows the native tooltip, finds and labels its points as the source (#624). The source draws no axis names and has no polar sub-separators.
-- Heat series: SVG cell geometries and the colour animation of the cells; the heat legend has no label wrapping, background or animation (#624).
+- Heat series: the heat legend has no label wrapping, background or animation (#624); the SVG geometries of the other series.
 - Angular gauge: `GaugeGenerator` and the theme's gauge rules (the scenarios set them), and the animation of the needle.
 - Tooltips and animations of the OHLC, error and heat series, which wait for the tooltip and animation suites.
