@@ -1,5 +1,6 @@
 use crate::logging::{LogArea, LogEventLevel, Logger};
 use super::Layoutable;
+use crate::utilities::ReleaseExcess;
 use crate::Ref;
 use std::any::Any;
 use rustc_hash::FxHashMap;
@@ -73,6 +74,10 @@ impl<T: Clone + Eq + Hash> LoopQueueInfo<T> {
     fn clear(&mut self) {
         self.entries.clear();
         self.index.clear();
+        // A pass over a large tree (its first layout, or the layout that follows its removal)
+        // has an entry for every element of it; no later pass comes near.
+        self.entries.release_excess();
+        self.index.release_excess();
     }
 }
 
@@ -157,6 +162,10 @@ impl<T: LayoutQueueItem> LayoutQueue<T> {
 
         not_finalized_buffer.clear();
         self.not_finalized_buffer = not_finalized_buffer;
+        if self.inner.is_empty() {
+            // As the entries of the loop: the queue of a pass over a large tree.
+            self.inner.release_excess();
+        }
     }
 
     pub fn dispose(&mut self) {
