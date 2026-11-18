@@ -242,8 +242,9 @@ use ferroui_markup_xaml_loader::rust_emitter::{
     CompiledMarkupTypeSystem, EmitterHost, ThemePartsTables, TransformOptions, XamlMetadata, CLASS_GROUP_NOT_TRANSFORMED, GROUP_NOT_TRANSFORMED,
 };
 use crate::theme_roots::{
-    compile_bindings_from_manifest, kept_units, parts_constructor, parts_static_name, parts_static_names, source_roots,
-    unit_static_path, verify_parts_constructor, Roots, ThemeTrimming, TypeGraph,
+    compile_bindings_from_manifest, explain_kept_units, kept_units, parts_constructor, parts_static_name,
+    parts_static_names, source_roots, unit_static_path, verify_parts_constructor, why_kept_listing, Roots, ThemeTrimming,
+    TypeGraph,
 };
 
 /// The name of the module of the default group ([`Build::compile_xaml`]).
@@ -1119,12 +1120,36 @@ impl Build {
                 roots.keys.extend(dependency.references.keys.iter().cloned());
             }
             let graph = TypeGraph::from_models(&base_models);
-            roots.extend(source_roots(&source_references, dependencies.iter().flat_map(|metadata| metadata.theme_units.iter()), &graph));
+            let themes = dependencies.iter().flat_map(|metadata| metadata.theme_units.iter());
+            let from_sources = source_roots(&source_references, themes, &graph);
+            roots.extend(from_sources.clone());
+            // The same roots by where they come from, for the reasons of `theme_parts_why.txt`
+            // (#852).
+            let mut from_dependencies = Roots::default();
+            for dependency in &dependencies {
+                from_dependencies.types.extend(dependency.references.types.iter().cloned());
+                from_dependencies.keys.extend(dependency.references.keys.iter().cloned());
+            }
+            let from_manifest = Roots {
+                names: trimming.roots.iter().cloned().collect(),
+                all: trimming.all || !trimming.enabled,
+                ..Roots::default()
+            };
+            let sources: [(&str, &Roots); 5] = [
+                ("manifest", &from_manifest),
+                ("build script", &self.theme_roots),
+                ("documents", &document_roots),
+                ("sources", &from_sources),
+                ("dependencies", &from_dependencies),
+            ];
+            let mut why = String::new();
             for class in used {
                 let Some(units) = dependencies.iter().flat_map(|metadata| metadata.theme_units.iter()).find(|units| units.class == class) else {
                     continue;
                 };
                 let kept = kept_units(units, &roots, &graph, self.full_themes);
+                let explained = explain_kept_units(units, &sources, &graph, self.full_themes);
+                why.push_str(&why_kept_listing(&class, &explained, units.units.len()));
                 let name_of = |index: u32| units.units.iter().find(|unit| unit.index == index).map_or(String::new(), |unit| unit.name.clone());
                 parts_tables.push(PartsTable {
                     static_name: static_name_of(class.as_str()).unwrap_or_else(|| parts_static_name(&class)),
@@ -1142,6 +1167,7 @@ impl Build {
                 })
                 .collect();
             write_if_changed(&xaml_directory.join("theme_parts.txt"), &listing, &mut errors);
+            write_if_changed(&xaml_directory.join("theme_parts_why.txt"), &why, &mut errors);
         }
         // A crate whose compiled markup has units is built with the `cfg` of `full-themes` when
         // the base crate has it (#568, step 3).
