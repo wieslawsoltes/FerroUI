@@ -57,7 +57,7 @@ use super::source::rust_string_literal;
 
 /// Runs of theme resources written as row tables (#568).
 #[path = "theme_rows.rs"]
-mod theme_rows;
+pub(crate) mod theme_rows;
 
 /// Control themes, selector chains, resource setter choices and template bindings written as
 /// tables (#568, step 5).

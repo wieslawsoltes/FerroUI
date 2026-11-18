@@ -48,6 +48,9 @@ use crate::XamlLoadError;
 
 #[path = "compact_resource_rows.rs"]
 mod compact;
+#[path = "packed_resource_rows.rs"]
+mod packed;
+pub use packed::PackedRows;
 
 /// A resource that is `{StaticResource target}` alone (a resource that names another one),
 /// added under `key`.
@@ -283,6 +286,51 @@ fn build_static_brush(
     }
     context.pop_parent();
     Ok(to_value(brush.clone()))
+}
+
+/// [`add_resource_aliases`] of the rows of a packed table (#855): the same additions and builds,
+/// in the same order, with the same errors at the same positions.
+#[inline(never)]
+pub fn add_packed_resource_aliases(
+    dictionary: &Ref<ResourceDictionary>,
+    context: &Rc<XamlIlContext>,
+    document: &'static DocumentInfo,
+    rows: &'static PackedRows,
+) -> Result<(), XamlLoadError> {
+    compact::add_rows(dictionary, context, document, packed::PackedSource::<ResourceAliasRow>::new(rows))
+}
+
+/// [`add_literal_brushes`] of the rows of a packed table (#855).
+#[inline(never)]
+pub fn add_packed_literal_brushes(
+    dictionary: &Ref<ResourceDictionary>,
+    context: &Rc<XamlIlContext>,
+    document: &'static DocumentInfo,
+    rows: &'static PackedRows,
+) -> Result<(), XamlLoadError> {
+    compact::add_rows(dictionary, context, document, packed::PackedSource::<LiteralBrushRow>::new(rows))
+}
+
+/// [`add_dynamic_brushes`] of the rows of a packed table (#855).
+#[inline(never)]
+pub fn add_packed_dynamic_brushes(
+    dictionary: &Ref<ResourceDictionary>,
+    context: &Rc<XamlIlContext>,
+    document: &'static DocumentInfo,
+    rows: &'static PackedRows,
+) -> Result<(), XamlLoadError> {
+    compact::add_rows(dictionary, context, document, packed::PackedSource::<DynamicBrushRow>::new(rows))
+}
+
+/// [`add_static_brushes`] of the rows of a packed table (#855).
+#[inline(never)]
+pub fn add_packed_static_brushes(
+    dictionary: &Ref<ResourceDictionary>,
+    context: &Rc<XamlIlContext>,
+    document: &'static DocumentInfo,
+    rows: &'static PackedRows,
+) -> Result<(), XamlLoadError> {
+    compact::add_rows(dictionary, context, document, packed::PackedSource::<StaticBrushRow>::new(rows))
 }
 
 /// `IDictionary.Add(key, value)` of a plain value, as the statement of generated code makes it:

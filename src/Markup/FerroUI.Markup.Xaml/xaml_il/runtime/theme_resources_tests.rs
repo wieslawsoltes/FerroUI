@@ -511,3 +511,83 @@ fn a_plain_value_added_twice_is_the_error_at_its_row() {
     assert_eq!(resource(&dictionary, "Margin").downcast_ref::<Thickness>(), Some(&Thickness::new(1.0, 1.0, 1.0, 1.0)));
     assert!(dictionary.try_get_value(&ResourceKey::from("After")).is_none());
 }
+
+// --- packed tables (#855) -----------------------------------------------------------------
+
+/// `ALIASES` as a packed table: the pool "FirstAccentSecondText", the scoped namespaces as
+/// table 1.
+static PACKED_ALIASES: PackedRows = PackedRows {
+    strings: "FirstAccentSecondText",
+    namespaces: &[SCOPED],
+    records: &[0, 5, 5, 6, 0, 3, 5, 3, 40, 11, 6, 17, 4, 1, 4, 5, 4, 40],
+};
+
+#[test]
+fn a_packed_table_decodes_to_the_rows_it_was_written_from() {
+    use super::compact::RowSource;
+    let source = packed::PackedSource::<ResourceAliasRow>::new(&PACKED_ALIASES);
+    assert_eq!(source.len(), ALIASES.len());
+    for (index, expected) in ALIASES.iter().enumerate() {
+        let row = source.row(index).expect("a row in range");
+        assert_eq!((row.key, row.target, row.line, row.position), (expected.key, expected.target, expected.line, expected.position));
+        assert_eq!((row.value_line, row.value_position), (expected.value_line, expected.value_position));
+        assert_eq!(row.namespaces.map(<[_]>::len), expected.namespaces.map(<[_]>::len));
+    }
+    assert!(source.row(2).is_err());
+}
+
+#[test]
+fn packed_aliases_build_what_the_rows_build() {
+    let (dictionary, context) = populated();
+    add_packed_resource_aliases(&dictionary, &context, &DOCUMENT, &PACKED_ALIASES).expect("the aliases are added");
+    assert_eq!(dictionary.count(), 4);
+    assert!(deferred(&dictionary, "First") && deferred(&dictionary, "Second"));
+    assert_eq!(resource(&dictionary, "First").downcast_ref::<Color>(), Some(&Color::from_uint32(ACCENT)));
+    assert_eq!(resource(&dictionary, "Second").downcast_ref::<String>().map(String::as_str), Some("not a colour"));
+}
+
+#[test]
+fn packed_rows_keep_the_order_and_the_position_of_the_first_failure() {
+    // The rows of `rows_are_added_in_order_and_the_first_failure_stops_the_run`.
+    static DUPLICATE: PackedRows = PackedRows {
+        strings: "OneAccentTextTwo",
+        namespaces: &[],
+        records: &[0, 3, 3, 6, 0, 1, 2, 1, 3, 0, 3, 9, 4, 0, 5, 6, 5, 7, 13, 3, 3, 6, 0, 8, 9, 8, 10],
+    };
+    let (dictionary, context) = populated();
+    let error = add_packed_resource_aliases(&dictionary, &context, &DOCUMENT, &DUPLICATE).expect_err("a key is added twice");
+    assert!(error.message().contains("An item with the same key has already been added"), "{}", error.message());
+    assert!(at_position(&error, 5, 6), "{}", error.message());
+    assert_eq!(resource(&dictionary, "One").downcast_ref::<Color>(), Some(&Color::from_uint32(ACCENT)));
+    assert!(dictionary.try_get_value(&ResourceKey::from("Two")).is_none());
+}
+
+#[test]
+fn packed_brushes_build_what_the_rows_build() {
+    static LITERAL: PackedRows =
+        PackedRows { strings: "Literal", namespaces: &[], records: &[0, 7, (ACCENT & 0xFFFF) as u16, (ACCENT >> 16) as u16, 0, 2, 8] };
+    static DYNAMIC: PackedRows = PackedRows { strings: "DynamicAccent", namespaces: &[], records: &[0, 7, 7, 6, 0, 1, 2, 1, 10] };
+    static STATIC: PackedRows = PackedRows { strings: "StaticAccent", namespaces: &[], records: &[0, 6, 6, 6, 0, 1, 2, 1, 10] };
+    let (dictionary, context) = populated();
+    add_packed_literal_brushes(&dictionary, &context, &DOCUMENT, &LITERAL).expect("the literal brush");
+    add_packed_dynamic_brushes(&dictionary, &context, &DOCUMENT, &DYNAMIC).expect("the dynamic brush");
+    add_packed_static_brushes(&dictionary, &context, &DOCUMENT, &STATIC).expect("the static brush");
+    for key in ["Literal", "Dynamic", "Static"] {
+        assert_eq!(brush_color(&resource(&dictionary, key)), Color::from_uint32(ACCENT), "{key}");
+    }
+}
+
+#[test]
+fn a_packed_record_out_of_range_is_an_error_not_a_panic() {
+    static BROKEN: PackedRows = PackedRows { strings: "Key", namespaces: &[], records: &[0, 9, 0, 3, 0, 1, 2, 1, 3] };
+    static NO_TABLE: PackedRows = PackedRows { strings: "KeyTarget", namespaces: &[], records: &[0, 3, 3, 6, 2, 1, 2, 1, 3] };
+    static SHORT: PackedRows = PackedRows { strings: "Key", namespaces: &[], records: &[0, 3, 0, 3, 0, 1, 2, 1, 3, 0, 3] };
+    let (dictionary, context) = populated();
+    for table in [&BROKEN, &NO_TABLE] {
+        let error = add_packed_resource_aliases(&dictionary, &context, &DOCUMENT, table).expect_err("out of range");
+        assert!(error.message().contains("out of range"), "{}", error.message());
+    }
+    // A trailing partial record is not a row.
+    add_packed_resource_aliases(&dictionary, &context, &DOCUMENT, &SHORT).expect("the complete record");
+    assert!(deferred(&dictionary, "Key"));
+}
