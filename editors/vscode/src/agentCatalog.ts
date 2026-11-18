@@ -86,8 +86,8 @@ export const agentCatalog = {
     ferroui_reload_status: tool('Read the active managed runtime and last reported reload state.'),
     ferroui_reload_targets: tool('Discover managed Cargo binaries and their enabled features. Supply the folder or a workspace-relative Cargo.toml for a nested project.',
         cargoSelection),
-    ferroui_reload_control: tool('Start a single discovered Cargo target, rebuild it, stop it, or show the Hot Reload output. Pass the target fields returned by ferroui_reload_targets.',
-        { ...cargoSelection, action: choice('start', 'start_registered', 'rebuild', 'stop', 'show_output') }, ['action'], true, false),
+    ferroui_reload_control: tool('Start a single discovered Cargo target, start it with a configured debugger, rebuild, stop, or show output. Pass the target fields from ferroui_reload_targets and the attach configuration name from launch.json if there are several.',
+        { ...cargoSelection, action: choice('start', 'start_debug', 'start_registered', 'rebuild', 'stop', 'show_output'), debug_configuration: text }, ['action'], true, false),
     ferroui_reload_output: tool('Read the recent Cargo build and runtime output for the managed application.',
         { lines: integer(1, 250) }),
 };

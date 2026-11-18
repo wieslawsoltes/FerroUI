@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { describeCargoTarget, discoverCargoTargets, selectCargoTarget, type CargoSelection, type CargoTarget } from './cargoTarget';
 import { errorMessage } from './protocol';
 import { ReloadLog } from './reloadLog';
-import { ReloadDebugger } from './reloadDebugger';
+import { managedProcessVariable, ReloadDebugger } from './reloadDebugger';
 import { RegisteredReload } from './registeredReload';
 import type { ProjectMetadata } from './reloadProcess';
 import { ReloadSession } from './reloadSession';
@@ -31,6 +31,7 @@ export class HotReload implements vscode.Disposable {
         this.indicator.command = 'ferroui.hotReload.showOutput';
         this.subscriptions = [
             vscode.commands.registerCommand('ferroui.hotReload.start', () => this.startInteractive()),
+            vscode.commands.registerCommand('ferroui.hotReload.runAndDebug', () => this.startInteractive(true)),
             vscode.commands.registerCommand('ferroui.hotReload.startRegistered', () => this.startRegisteredInteractive()),
             vscode.commands.registerCommand('ferroui.hotReload.rebuild', () => {
                 if (this.session) return this.session.build();
@@ -57,12 +58,12 @@ export class HotReload implements vscode.Disposable {
         return { targets: targets.map(target => ({ ...describeCargoTarget(target), features: target.features })) };
     }
 
-    async agentControl(action: string, selection: CargoSelection, signal: AbortSignal): Promise<object> {
-        if (action === 'start') await this.start(async () => {
+    async agentControl(action: string, selection: CargoSelection, signal: AbortSignal, debugConfiguration?: string): Promise<object> {
+        if (action === 'start' || action === 'start_debug') await this.start(async () => {
             const targets = await discoverCargoTargets(selection);
             if (targets.length !== 1) throw new Error('Choose a single Cargo target from ferroui_reload_targets.');
             return targets[0];
-        }, signal);
+        }, signal, action === 'start_debug' ? folder => selectDebugConfiguration(folder, false, debugConfiguration) : undefined);
         else if (action === 'start_registered') {
             const folders = workspaceFolders(selection.folder);
             if (folders.length !== 1) throw new Error('Choose a single workspace folder for the registered supervisor.');
@@ -77,10 +78,10 @@ export class HotReload implements vscode.Disposable {
         return this.state;
     }
 
-    private async startInteractive(): Promise<void> {
+    private async startInteractive(debug = false): Promise<void> {
         if (this.choosing) return;
         try {
-            await this.start(() => selectCargoTarget());
+            await this.start(() => selectCargoTarget(), undefined, debug ? selectDebugConfiguration : undefined);
         } catch (error) {
             this.output.appendLine(errorMessage(error));
             void vscode.window.showErrorMessage(`FerroUI hot reload could not start. ${errorMessage(error)}`);
@@ -97,22 +98,15 @@ export class HotReload implements vscode.Disposable {
         try {
             const pid = this.requirePid();
             const folder = this.session?.target.folder ?? this.registered!.folder;
-            const configurations = vscode.workspace.getConfiguration('launch', folder.uri)
-                .get<vscode.DebugConfiguration[]>('configurations', [])
-                .filter(configuration => configuration.request === 'attach'
-                    && JSON.stringify(configuration).includes('${command:ferroui.hotReload.processId}'));
-            if (!configurations.length) throw new Error('Add a Rust attach configuration with ${command:ferroui.hotReload.processId} as its process ID.');
-            const selected = configurations.length === 1 ? configurations[0] : (await vscode.window.showQuickPick(
-                configurations.map(configuration => ({ label: configuration.name, configuration })),
-                { placeHolder: 'Debug the managed FerroUI application' },
-            ))?.configuration;
+            const selected = await selectDebugConfiguration(folder);
             if (selected && this.requirePid() === pid) await this.debugger.attach(folder, selected, pid);
         } catch (error) {
             void vscode.window.showErrorMessage(errorMessage(error));
         }
     }
 
-    private async start(resolveTarget: () => Promise<CargoTarget | undefined>, signal?: AbortSignal): Promise<void> {
+    private async start(resolveTarget: () => Promise<CargoTarget | undefined>, signal?: AbortSignal,
+        debug?: (folder: vscode.WorkspaceFolder) => Promise<vscode.DebugConfiguration | undefined>): Promise<void> {
         if (this.choosing) throw new Error('A FerroUI Cargo target is already being selected.');
         const generation = ++this.generation;
         this.choosing = true;
@@ -120,7 +114,12 @@ export class HotReload implements vscode.Disposable {
             const target = await resolveTarget();
             signal?.throwIfAborted();
             if (!target || this.generation !== generation) return;
-            this.debugger.detach();
+            if (debug) {
+                const configuration = await debug(target.folder);
+                signal?.throwIfAborted();
+                if (!configuration || this.generation !== generation) return;
+                this.debugger.prepare(target.folder, configuration);
+            } else this.debugger.detach();
             this.session?.dispose();
             this.registered?.dispose();
             this.registered = undefined;
@@ -199,4 +198,20 @@ export class HotReload implements vscode.Disposable {
         this.runtimeChanged.dispose();
         this.built.dispose();
     }
+}
+
+async function selectDebugConfiguration(folder: vscode.WorkspaceFolder, interactive = true, name?: string): Promise<vscode.DebugConfiguration | undefined> {
+    const configurations = vscode.workspace.getConfiguration('launch', folder.uri)
+        .get<vscode.DebugConfiguration[]>('configurations', [])
+        .filter(configuration => configuration.request === 'attach' && JSON.stringify(configuration).includes(managedProcessVariable));
+    if (!configurations.length) throw new Error(`Add a Rust attach configuration with ${managedProcessVariable} as its process ID.`);
+    if (name !== undefined) {
+        const matches = configurations.filter(configuration => configuration.name === name);
+        if (matches.length !== 1) throw new Error('Choose one attach configuration by its name in launch.json.');
+        return matches[0];
+    }
+    if (configurations.length === 1) return configurations[0];
+    if (!interactive) throw new Error('Specify debug_configuration using the attach configuration name in launch.json.');
+    return (await vscode.window.showQuickPick(configurations.map(configuration => ({ label: configuration.name, configuration })),
+        { placeHolder: 'Debug the managed FerroUI application' }))?.configuration;
 }

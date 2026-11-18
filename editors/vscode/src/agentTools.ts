@@ -60,6 +60,7 @@ interface Arguments extends CanvasAction, CargoSelection {
     selection?: number[];
     stage?: number;
     expected_epoch?: number;
+    debug_configuration?: string;
 }
 
 export class AgentTools {
@@ -102,7 +103,7 @@ export class AgentTools {
         if (tool === 'ferroui_reload_status') return this.reload.state;
         if (tool === 'ferroui_reload_targets') return this.reload.targets(args);
         if (tool === 'ferroui_reload_output') return this.reload.recentOutput(args.lines ?? 60);
-        if (tool === 'ferroui_reload_control') return this.reload.agentControl(args.action, args, signal);
+        if (tool === 'ferroui_reload_control') return this.reload.agentControl(args.action, args, signal, args.debug_configuration);
 
         const panel = this.workbench.designs().find(panel => panel.session === args.session);
         if (!panel || !await isWorkspaceFile(panel.document.uri)) throw new Error('Select an open design inside the current workspace.');

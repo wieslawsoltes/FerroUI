@@ -1,18 +1,23 @@
 import { randomUUID } from 'node:crypto';
 import * as vscode from 'vscode';
 
-interface Attachment { id: string; folder: vscode.WorkspaceFolder; configuration: vscode.DebugConfiguration; pid: number }
+export const managedProcessVariable = '${command:ferroui.hotReload.processId}';
+
+interface Attachment { id: string; folder: vscode.WorkspaceFolder; configuration: vscode.DebugConfiguration; pid?: number }
 
 export class ReloadDebugger implements vscode.Disposable {
     private readonly subscriptions: vscode.Disposable[];
     private attachment?: Attachment;
     private active?: vscode.DebugSession;
     private transition = Promise.resolve();
+    private readonly instance = randomUUID();
 
     constructor(private readonly output: vscode.OutputChannel) {
         this.subscriptions = [
             vscode.debug.onDidStartDebugSession(session => {
+                if (session.configuration.ferrouiManagedInstance !== this.instance) return;
                 if (session.configuration.ferrouiManagedSession === this.attachment?.id) this.active = session;
+                else void this.stop(session);
             }),
             vscode.debug.onDidTerminateDebugSession(session => {
                 if (this.active?.id === session.id) {
@@ -24,27 +29,38 @@ export class ReloadDebugger implements vscode.Disposable {
     }
 
     async attach(folder: vscode.WorkspaceFolder, configuration: vscode.DebugConfiguration, pid: number): Promise<void> {
+        this.prepare(folder, configuration);
+        await this.activate(pid);
+    }
+
+    prepare(folder: vscode.WorkspaceFolder, configuration: vscode.DebugConfiguration): void {
         this.detach();
-        const attachment = { id: randomUUID(), folder, configuration, pid };
-        this.attachment = attachment;
-        await this.start(attachment);
+        this.attachment = { id: randomUUID(), folder, configuration };
     }
 
     activated(pid: number): void {
+        void this.activate(pid).catch(error => this.output.appendLine(`FerroUI debugger: ${String(error)}`));
+    }
+
+    private async activate(pid: number): Promise<void> {
         const attached = this.attachment;
         if (!attached || attached.pid === pid) return;
         const old = this.active;
         this.active = undefined;
         const replacement = { ...attached, id: randomUUID(), pid };
         this.attachment = replacement;
-        this.transition = this.transition.then(async () => {
-            if (old) await vscode.debug.stopDebugging(old);
-            if (this.attachment === replacement) await this.start(replacement);
-        }).catch(error => this.output.appendLine(`FerroUI debugger: ${String(error)}`));
+        const step = this.transition.then(async () => {
+            if (old) await this.stop(old);
+            if (this.attachment === replacement) await this.start(replacement, pid);
+        });
+        this.transition = step.catch(() => undefined);
+        await step;
     }
 
-    private async start(attachment: Attachment): Promise<void> {
-        const config = { ...attachment.configuration, ferrouiManagedSession: attachment.id };
+    private async start(attachment: Attachment, pid: number): Promise<void> {
+        const config = JSON.parse(JSON.stringify(attachment.configuration).replaceAll(managedProcessVariable, String(pid))) as vscode.DebugConfiguration;
+        config.ferrouiManagedInstance = this.instance;
+        config.ferrouiManagedSession = attachment.id;
         try {
             if (!await vscode.debug.startDebugging(attachment.folder, config)) throw new Error('The configured Rust debugger did not attach.');
         } catch (error) {
@@ -57,7 +73,12 @@ export class ReloadDebugger implements vscode.Disposable {
         const active = this.active;
         this.attachment = undefined;
         this.active = undefined;
-        if (active) void Promise.resolve(vscode.debug.stopDebugging(active)).catch(error => this.output.appendLine(String(error)));
+        if (active) this.transition = this.transition.then(() => this.stop(active));
+    }
+
+    private async stop(session: vscode.DebugSession): Promise<void> {
+        try { await vscode.debug.stopDebugging(session); }
+        catch (error) { this.output.appendLine(`FerroUI debugger: ${String(error)}`); }
     }
 
     dispose(): void {

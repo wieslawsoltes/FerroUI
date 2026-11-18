@@ -143,6 +143,12 @@
         "category": "FerroUI"
       },
       {
+        "command": "ferroui.hotReload.runAndDebug",
+        "title": "Run and Debug with Hot Reload",
+        "category": "FerroUI",
+        "icon": "$(debug-alt)"
+      },
+      {
         "command": "ferroui.hotReload.rebuild",
         "title": "Rebuild Hot Reload Application",
         "category": "FerroUI"
