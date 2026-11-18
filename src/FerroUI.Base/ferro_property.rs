@@ -775,7 +775,7 @@ impl FerroProperty {
     }
 
     #[inline(never)]
-    fn register_attached_with_core<TValue: PropertyValue>(
+    pub(crate) fn register_attached_with_core<TValue: PropertyValue>(
         owner_type: &'static TypeInfo,
         host_type: &'static TypeInfo,
         name: &str,

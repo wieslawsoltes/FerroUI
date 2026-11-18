@@ -1,5 +1,9 @@
-use crate::{ferro_property, AttachedProperty, FerroObject, FerroProperty, StaticType, TypeInfo};
+use crate::{AttachedProperty, FerroObject, FerroProperty, StyledPropertyOptions, TypeInfo};
 use std::path::{Path, PathBuf};
+
+// Private owner for the typed attachment. It has no global class registration.
+static SOURCE_OWNER: TypeInfo =
+    TypeInfo::new("RsxSourceInfo", None).with_module_path(module_path!());
 
 /// A location in the source used by the current Rust view.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -34,13 +38,6 @@ impl PartialEq for RsxSourceInfo {
     }
 }
 
-impl StaticType for RsxSourceInfo {
-    // This type owns a diagnostic property. It has no authoring metadata or
-    // global class registration.
-    const TYPE: &'static TypeInfo =
-        &TypeInfo::new("RsxSourceInfo", None).with_module_path(module_path!());
-}
-
 impl RsxSourceInfo {
     #[doc(hidden)]
     pub fn new(file: &'static str, manifest: &'static str, compiled: RsxSourceLocation) -> Self {
@@ -58,15 +55,19 @@ impl RsxSourceInfo {
         self
     }
 
-    ferro_property!(
-        #[doc(hidden)]
-        pub fn location_property() -> AttachedProperty<Option<RsxSourceInfo>> {
-            FerroProperty::register_attached::<RsxSourceInfo, FerroObject, _>(
-                "RsxSourceLocation",
-                None,
-            )
+    #[doc(hidden)]
+    pub fn location_property() -> &'static AttachedProperty<Option<RsxSourceInfo>> {
+        crate::ferro_thread_local! {
+            static PROPERTY: &'static AttachedProperty<Option<RsxSourceInfo>> =
+                FerroProperty::register_attached_with_core(
+                    &SOURCE_OWNER,
+                    FerroObject::TYPE,
+                    "RsxSourceLocation",
+                    StyledPropertyOptions::new(None),
+                );
         }
-    );
+        PROPERTY.with(|property| *property)
+    }
 
     /// The source recorded for this object by the declarative view reconciler.
     pub fn get(object: &FerroObject) -> Option<Self> {
