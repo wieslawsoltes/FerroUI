@@ -1020,16 +1020,9 @@ impl DesignerWorkspace {
         property: &str,
         time: f64,
     ) -> Result<(), String> {
-        let mut session = self.session.borrow_mut();
-        session.seek(time)?;
-        let visual = session
-            .preview
-            .visual(target)
-            .ok_or("The animation target has no accepted preview")?;
-        let info = Inspector::property(&visual, property).map_err(|error| error.to_string())?;
-        let value = ferroui_inspect::display_value(Some(&visual.get_value_untyped(info)));
-        let value = session.animation_value_for_target(target, property, &value)?;
-        session.record_keyframe(target, property, value)
+        self.session
+            .borrow_mut()
+            .record_effective_keyframe(target, property, time)
     }
     fn build_keyframe_inspector(
         self: &Rc<Self>,

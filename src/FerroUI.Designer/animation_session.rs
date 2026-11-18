@@ -596,6 +596,26 @@ impl DesignerSession {
             .map_err(|error| error.to_string())?;
         self.write_timeline(candidate, "Add animation keyframe")
     }
+
+    pub(crate) fn record_effective_keyframe(
+        &mut self,
+        target: NodeId,
+        property: &str,
+        time: f64,
+    ) -> Result<(), String> {
+        self.editable_program()?;
+        self.seek(time)?;
+        let visual = self
+            .preview
+            .visual(target)
+            .ok_or("The animation target has no accepted preview")?;
+        let info =
+            ferroui_inspect::Inspector::property(&visual, property).map_err(|error| error.to_string())?;
+        let value = ferroui_inspect::display_value(Some(&visual.get_value_untyped(info)));
+        let value = self.animation_value_for_target(target, property, &value)?;
+        self.record_keyframe(target, property, value)
+    }
+
     pub fn move_keyframe(
         &mut self,
         target: NodeId,

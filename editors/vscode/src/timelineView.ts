@@ -2,7 +2,7 @@ import type * as vscode from 'vscode';
 import type { DesignerPanel } from './designerPanel';
 import { DockView } from './dockView';
 import { errorMessage, type FrameTarget } from './protocol';
-import { StudioContext } from './studioContext';
+import { choose, StudioContext } from './studioContext';
 import { keyframeOptions } from './studioKeyframes';
 import { TimelinePlayback } from './timelinePlayback';
 import type { FromTimeline, TimelineControl, TimelineProgram, TimelineState, ToTimeline } from './timelineProtocol';
@@ -102,10 +102,15 @@ export class TimelineView implements vscode.Disposable {
                 const context = new StudioContext(panel, message.frame.token, () => this.panel === panel);
                 const program = (await this.programs(panel).pending).find(entry => entry.id === message.program);
                 const timeline = program?.timeline;
-                const track = timeline?.tracks[message.track];
-                const frame = track?.keyframes.find(entry => entry.time === message.time);
-                if (!program || !timeline || !track || !frame) throw new Error('Select a keyframe from the current timeline.');
+                if (!program || !timeline) throw new Error('Choose a typed animation program from the current document.');
                 context.ensure();
+                if (message.type === 'recordKeyframe') {
+                    await this.recordKeyframe(context, program, timeline, message.time);
+                    return;
+                }
+                const track = timeline.tracks[message.track];
+                const frame = track?.keyframes.find(entry => entry.time === message.time);
+                if (!track || !frame) throw new Error('Select a keyframe from the current timeline.');
                 if (message.type === 'moveKeyframe') {
                     if (!Number.isFinite(message.to) || message.to < 0 || message.to > timeline.duration) {
                         throw new Error('Choose a time within the animation duration.');
@@ -118,6 +123,25 @@ export class TimelineView implements vscode.Disposable {
                 });
             }
         } catch (error) { this.report(error); }
+    }
+
+    private async recordKeyframe(context: StudioContext, program: TimelineProgram, timeline: NonNullable<TimelineProgram['timeline']>,
+        time: number): Promise<void> {
+        if (!context.writable) throw new Error('Recording into an authored program requires XAML.');
+        if (!Number.isFinite(time) || time < 0 || time > timeline.duration) throw new Error('Choose a time within the animation duration.');
+        const tracks = timeline.tracks;
+        let track = tracks[0];
+        if (tracks.length > 1) {
+            const nodes = new Map(context.panel.nodes.map(node => [node.id, node.name ?? node.label]));
+            const picked = await choose('Record a keyframe at the playhead', tracks.map(candidate => ({
+                label: candidate.property, description: nodes.get(candidate.target), track: candidate,
+            })));
+            if (!picked) return;
+            track = picked.track;
+        }
+        const target = track?.target ?? context.selection.find(node => program.targets.includes(node)) ?? program.targets[0] ?? program.owner;
+        await context.edit('designer_program', { action: 'record_keyframe', program: program.id, target,
+            property: track?.property ?? 'Opacity', time });
     }
 
     private report(error: unknown): void {

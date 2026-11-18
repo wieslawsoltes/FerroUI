@@ -40,6 +40,7 @@ pub(super) fn tools() -> Vec<Value> {
             s::action("source",json!({"program":s::id(),"source":s::string()}), &["program","source"],true),
             s::action("update",json!({"program":s::id(),"timeline":s::timeline()}), &["program","timeline"],true),
             s::action("upsert_keyframe",json!({"program":s::id(),"target":s::id(),"property":s::string(),"previous":s::time(),"time":s::time(),"value":s::string(),"easing":s::string()}), &["program","target","property","time","value","easing"],true),
+            s::action("record_keyframe",json!({"program":s::id(),"target":s::id(),"property":s::string(),"time":s::time()}), &["program","target","property","time"],true),
             s::action("remove_keyframe",json!({"program":s::id(),"target":s::id(),"property":s::string(),"time":s::time()}), &["program","target","property","time"],true),
             s::action("preview_targets",json!({"program":s::id(),"targets":s::nullable(s::array(s::id(),4096))}), &["program","targets"],true),
             s::action("preview",json!({"programs":ids(),"time":s::time()}), &["programs","time"],true),
@@ -124,6 +125,21 @@ pub(super) fn call(
                         value: &text(args, "value")?, easing: &text(args, "easing")?,
                     },
                 )?,
+                "record_keyframe" => {
+                    let program = node_id(args, "program")?;
+                    if session.active_animation_program() != Some(program) {
+                        session.select_animation_program(program)?;
+                    }
+                    let time = number(args, "time")?;
+                    if !(0.0..=session.timeline().duration).contains(&time) {
+                        return Err("Choose a time within the animation duration".into());
+                    }
+                    session.record_effective_keyframe(
+                        node_id(args, "target")?,
+                        &text(args, "property")?,
+                        time,
+                    )?;
+                }
                 "remove_keyframe" => session.edit_program_keyframe(
                     node_id(args, "program")?, node_id(args, "target")?, &text(args, "property")?,
                     KeyframeEdit::Remove(number(args, "time")?),

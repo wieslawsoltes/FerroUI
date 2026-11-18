@@ -36,6 +36,7 @@ export type TimelineControl =
 export type FromTimeline =
     | { type: 'ready' }
     | { type: 'control'; frame: FrameTarget; control: TimelineControl }
+    | { type: 'recordKeyframe'; frame: FrameTarget; program: number; time: number }
     | ({ frame: FrameTarget; program: number; track: number; time: number }
         & ({ type: 'keyframe' } | { type: 'moveKeyframe'; to: number }));
 

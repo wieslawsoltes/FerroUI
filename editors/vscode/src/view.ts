@@ -323,6 +323,7 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
             ${tool('timeline-play', 'play', 'Play animation')}
             <select id="timeline-programs" aria-label="Animation program"></select>
             <output id="timeline-time" for="timeline-seek" aria-live="off"></output>
+            ${tool('timeline-record', 'add', 'Add keyframe at playhead', 'hidden disabled')}
         </div>
         <div class="timeline-grid">
             <input id="timeline-seek" type="range" min="0" value="0" step="any" aria-label="Animation playhead">

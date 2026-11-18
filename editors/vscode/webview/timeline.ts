@@ -9,6 +9,7 @@ const status = element('timeline-status');
 const container = element('timeline-program');
 const programs = element<HTMLSelectElement>('timeline-programs');
 const play = element<HTMLButtonElement>('timeline-play');
+const record = element<HTMLButtonElement>('timeline-record');
 const slider = element<HTMLInputElement>('timeline-seek');
 const time = element<HTMLOutputElement>('timeline-time');
 const ruler = element('timeline-ruler');
@@ -32,6 +33,12 @@ play.addEventListener('click', () => {
     if (!model.frame || !selected) return;
     const playing = model.position?.program === selected.id && model.position.playing;
     send(model.frame, { action: playing ? 'pause' : 'play', program: selected.id });
+});
+record.addEventListener('click', () => {
+    const selected = current();
+    if (model.frame && model.writable && selected?.timeline && !pending) {
+        vscode.postMessage({ type: 'recordKeyframe', frame: model.frame, program: selected.id, time: slider.valueAsNumber });
+    }
 });
 slider.addEventListener('input', () => {
     if (!model.frame || !current()?.timeline) return;
@@ -134,6 +141,8 @@ function showPosition(): void {
     time.value = `${number.format(seconds)} / ${number.format(timeline.duration)} s`;
     labelButton(play, playing ? 'Pause animation' : 'Play animation', playing ? 'debug-pause' : 'play');
     play.disabled = !model.frame || (!playing && (pending || timeline.duration <= 0));
+    record.hidden = !model.writable;
+    record.disabled = !model.frame || pending || playing;
     slider.disabled = !model.frame || playing || timeline.duration <= 0;
     programs.disabled = pending || !model.frame;
     for (const button of tracks.querySelectorAll('button')) button.disabled = pending || !model.frame;

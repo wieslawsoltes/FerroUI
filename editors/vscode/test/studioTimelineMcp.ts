@@ -51,6 +51,23 @@ export async function verifyTimelineMcp(mcp: McpFixture, session: number, docume
     assert.equal(atHalf.busy, false);
     assert.ok((await control(frame.revision, { action: 'seek', time: 0 })).isError);
     frame = await wait();
+    const beforeRecording = document.getText();
+    const recordTime = .625;
+    content(await control(frame.revision, { action: 'seek', time: recordTime }));
+    frame = await wait();
+    const target = frame.nodes.find(node => node.name === 'saveButton')!.id;
+    const { properties } = content<{ properties: { name: string; effective: string | null }[] }>(
+        await invoke('designer_inspect', { session, node: target }));
+    const opacity = properties.find(property => property.name === 'Opacity')?.effective;
+    assert.ok(opacity && Number.isFinite(Number(opacity)));
+    content(await edit(frame.revision, { action: 'record_keyframe', program, target, property: 'Opacity', time: recordTime }));
+    await wait();
+    const recorded = (await pulse()).timeline.tracks[0].keyframes.find(key => key.time === recordTime);
+    assert.ok(recorded);
+    assert.equal(Number(recorded.value_text), Number(opacity));
+    await undo();
+    assert.equal(document.getText(), beforeRecording);
+    frame = await wait();
     const duplicate = await keyframe();
     assert.ok(duplicate.isError && duplicate.content[0]?.text?.includes('occupies the destination time'));
     frame = await wait();
@@ -65,5 +82,5 @@ export async function verifyTimelineMcp(mcp: McpFixture, session: number, docume
     assert.deepEqual((await pulse()).timeline.tracks, []);
     await undo();
     assert.equal(document.getText(), original);
-    console.log('VS Code MCP authored and scrubbed a native timeline, rejected a stale seek, and undid each source transaction');
+    console.log('VS Code MCP authored and scrubbed a native timeline, recorded an effective value, rejected a stale seek, and undid each source transaction');
 }
