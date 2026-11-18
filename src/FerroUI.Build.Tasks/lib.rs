@@ -689,7 +689,7 @@ impl Build {
         // 1. The compiled markup and the type models of the dependencies.
         let mut report = ScanReport { crate_name: self.crate_name.clone(), ..ScanReport::default() };
         let started = Instant::now();
-        let (models, dependency_files) = match ModelSet::read(&self.dependencies) {
+        let (models, dependency_files, direct_crates) = match ModelSet::read_with_direct(&self.dependencies) {
             Ok(read) => read,
             Err(error) => {
                 errors.push(format!("the .xamlmeta of a dependency cannot be read: {error}"));
@@ -724,6 +724,13 @@ impl Build {
         // classes that can be constructed from selected units (#849; any other class, whatever its
         // markup is partitioned into, is constructed with `new()`). The models the base classes of
         // the roots are read from, and the roots of the documents.
+        // The classes another crate can construct from selected units (#849), for the themes the
+        // documents of the dependencies construct (#846).
+        let constructible: Vec<String> = unit_classes
+            .iter()
+            .filter(|class| parts_constructor(&models, class).is_some())
+            .map(|class| class.to_string())
+            .collect();
         let theme_parts: Option<Rc<ThemePartsTables>> = (trimming.enabled || !self.themes.is_empty()).then(|| {
             let tables = static_names
                 .iter()
@@ -1111,6 +1118,26 @@ impl Build {
                     )),
                 }
             }
+            // The themes the compiled documents of a direct dependency construct (#846): a library
+            // with `<WinUITheme />` constructs the theme with the wider of its own table and the one
+            // the application registers (`rt::wider_theme_parts`), so the application writes and
+            // registers a table for it, with every root of the application, though its own
+            // documents do not construct the theme. Only for a theme of a direct dependency, which
+            // the table can name; a library used alone keeps its own table.
+            for units in dependencies.iter().flat_map(|metadata| metadata.theme_units.iter()) {
+                let class = units.class.as_str();
+                let local = class.rsplit('.').next().unwrap_or(class);
+                let theme_crate = units.table_path.trim_start_matches("::").split("::").next().unwrap_or_default();
+                let required = dependencies
+                    .iter()
+                    .filter(|metadata| direct_crates.contains(&metadata.crate_name))
+                    .any(|metadata| metadata.references.types.iter().any(|name| name == class || name == local));
+                let nameable = direct_crates.iter().any(|name| name == theme_crate);
+                let constructed = constructible.iter().any(|known| known == class);
+                if required && nameable && constructed && !used.iter().any(|known| known == class) {
+                    used.push(class.to_string());
+                }
+            }
             // The compiled documents of the dependencies run in the application too: what they
             // name roots the units it keeps (a control library's template naming a key of the
             // theme of the application).
@@ -1186,7 +1213,8 @@ impl Build {
         // A crate that only exports its model includes nothing; one whose code constructs a theme
         // from its parts (`Build::theme`) includes the table.
         let includes = self.assembly.is_some() || !self.groups.is_empty() || !self.asset_directories.is_empty();
-        if includes || !self.themes.is_empty() {
+        // A table for a theme a dependency constructs (#846) is written for a crate without markup too.
+        if includes || !self.themes.is_empty() || !parts_tables.is_empty() {
             let text = crate_file(&assembly_name, &modules, &self.loaders, &assets, &parts_tables);
             write_if_changed(&xaml_directory.join("mod.rs"), &text, &mut errors);
         }
@@ -1470,7 +1498,7 @@ fn crate_file(assembly_name: &str, modules: &[Module], loaders: &[String], asset
     text.push_str("        ::ferroui_markup_xaml::FerroXamlLoader::register_compiled_xaml(ASSEMBLY_NAME, try_load);\n");
     for table in parts {
         text.push_str(&format!(
-            "        ::ferroui_markup_xaml::xaml_il::runtime::compiled::register_theme_parts({}, {});\n",
+            "        ::ferroui_markup_xaml::xaml_il::runtime::compiled::register_wider_theme_parts({}, {});\n",
             rust_string_literal(&table.class),
             table.static_name
         ));
@@ -1529,7 +1557,7 @@ mod tests {
         );
         assert!(text.contains("(#568): 2 of 9,"), "{text}");
         assert!(
-            text.contains("        ::ferroui_markup_xaml::xaml_il::runtime::compiled::register_theme_parts(\"Tests.Theme\", THEME_PARTS_TESTS_THEME);\n    }\n"),
+            text.contains("        ::ferroui_markup_xaml::xaml_il::runtime::compiled::register_wider_theme_parts(\"Tests.Theme\", THEME_PARTS_TESTS_THEME);\n    }\n"),
             "{text}"
         );
         assert!(!crate_file("App", &[], &[], &[], &[]).contains("THEME_PARTS"));
@@ -1685,6 +1713,83 @@ mod tests {
         let expected = "the theme `OtherTheme` (Build::theme) is not a theme of a direct dependency of the crate";
         assert!(unknown.errors[0].starts_with(expected), "{:?}", unknown.errors);
         let _ = fs::remove_dir_all(&out);
+    }
+
+    /// Not from upstream (#846): a theme the compiled documents of a direct dependency construct gets
+    /// a table in the application and is registered with the wider of the tables; a theme the
+    /// application cannot name (its crate is not a direct dependency) gets none.
+    #[test]
+    fn a_theme_a_library_constructs_gets_the_table_of_the_application() {
+        use ferroui_build_scan::model::{FunctionModel, FunctionsModel, RustType, TypeKind, TypeModel};
+        use ferroui_build_scan::xaml_metadata::{MarkupReferencesModel, ThemeUnitModel, ThemeUnitsModel};
+        let root = env::temp_dir().join(format!("ferroui-build-required-{}", std::process::id()));
+        let unit = |index: u32, name: &str, type_keys: &[&str]| ThemeUnitModel {
+            name: name.to_string(),
+            index,
+            documents: vec![name.to_string()],
+            keys: Vec::new(),
+            type_keys: type_keys.iter().map(|key| key.to_string()).collect(),
+            references: Vec::new(),
+            types: Vec::new(),
+        };
+        // The theme: a class with units and `with_parts`.
+        let mut theme = AssemblyModel::new("Theme", "theme");
+        let mut class = TypeModel::new("Theme", TypeKind::Class, RustType::resolved("::theme::Theme"), "theme");
+        class.namespace = "Tests".to_string();
+        class.public_path = Some("::theme::Theme".to_string());
+        theme.types.push(class);
+        theme.functions.push(FunctionsModel {
+            owner: "::theme::Theme".to_string(),
+            public_path: "::theme::Theme".to_string(),
+            functions: vec![FunctionModel { name: "with_parts".into(), parameters: 2, ..FunctionModel::default() }],
+        });
+        theme.theme_units.push(ThemeUnitsModel {
+            class: "Tests.Theme".to_string(),
+            table_path: "::theme::compiled_xaml::THEME_UNITS".to_string(),
+            units: vec![
+                unit(0, "ambient", &[]),
+                unit(1, "Controls/ListBox.xaml", &["ListBox"]),
+                unit(2, "Controls/Unused.xaml", &["Unused"]),
+            ],
+        });
+        fs::create_dir_all(root.join("theme")).expect("a directory");
+        let theme_file = root.join("theme").join("theme.xamlmeta");
+        fs::write(&theme_file, theme.to_json()).expect("the .xamlmeta of the theme");
+        // The library: its documents construct the theme.
+        let library = XamlMetadata {
+            name: "Library".to_string(),
+            crate_name: "library".to_string(),
+            documents: Vec::new(),
+            dependencies: vec![theme_file.display().to_string()],
+            theme_units: Vec::new(),
+            references: MarkupReferencesModel { types: vec!["Theme".to_string()], keys: Vec::new() },
+        };
+        fs::create_dir_all(root.join("library")).expect("a directory");
+        let library_file = root.join("library").join("library.xamlmeta");
+        fs::write(&library_file, library.to_json()).expect("the .xamlmeta of the library");
+        // The application names a control and never the theme.
+        let app = root.join("app");
+        fs::create_dir_all(&app).expect("a directory");
+        fs::write(app.join("Cargo.toml"), "[package]\nname = \"app\"\n").expect("a manifest");
+        fs::write(app.join("lib.rs"), "pub fn show() {\n    let _ = ListBox::new();\n}\n").expect("the library");
+
+        let build = |name: &str, dependencies: Vec<PathBuf>| {
+            let out = root.join(name);
+            let outcome = Build::new(app.clone(), out.clone(), "app", dependencies).type_system(TypeSystem::Model);
+            let outcome = outcome.execute();
+            assert_eq!(outcome.errors, Vec::<String>::new());
+            let module = fs::read_to_string(out.join("xaml").join("mod.rs")).unwrap_or_default();
+            let listing = fs::read_to_string(out.join("xaml").join("theme_parts.txt")).expect("the listing");
+            (module, listing)
+        };
+        let (module, listing) = build("direct", vec![library_file.clone(), theme_file.clone()]);
+        assert!(listing.starts_with("Tests.Theme: 2 of 3 units\nambient\nControls/ListBox.xaml\n"), "{listing}");
+        let registered = "register_wider_theme_parts(\"Tests.Theme\", THEME_PARTS_TESTS_THEME);";
+        assert!(module.contains(registered), "{module}");
+        // Without the theme among the direct dependencies, the application cannot name its units.
+        let (module, listing) = build("transitive", vec![library_file.clone()]);
+        assert!(listing.is_empty() && !module.contains("THEME_PARTS"), "{listing}\n{module}");
+        let _ = fs::remove_dir_all(&root);
     }
 
     /// Not from upstream: the two texts of the base crate the scanner states itself, because

@@ -1391,3 +1391,57 @@ function (`_deferred_<n>`, `_part_<n>`, `_unit_<n>`, `_untyped`).
 - `theme_roots_tests.rs`: the parts statics, the capability, and the producer check.
 - `tests/FerroUI.Markup.Xaml.UnitTests/emitter/build_diagnostics.rs`: the error and the
   disambiguation reported by a build.
+
+## 18. A library that constructs a theme (#846)
+
+### 18.1 The selection reaches the library
+
+A library document with `<WinUITheme />` was compiled to
+`WinUITheme::with_parts(None, crate::compiled_markup::THEME_PARTS_..)`, with the units the library
+needs. An application that uses the library and adds `<ListBox />` computed no table for the theme,
+because the emitter records a theme as used only in the crate that writes the construction. The
+theme the library constructed then had no `Controls/ListBox.xaml`.
+
+Now:
+
+- **The construction takes the wider table.** The construction is written as
+  `with_parts(None, rt::wider_theme_parts("<class>", crate::compiled_markup::THEME_PARTS_..))`.
+  `rt::wider_theme_parts` (new) returns the parts registered for the class when they have more
+  units than the table of the crate that writes the construction, and that table otherwise.
+- **Registration keeps the wider table.** The generated `register()` of a crate registers its
+  tables with `rt::register_wider_theme_parts` (new), which keeps the wider table whichever crate
+  registers first.
+- **The application computes the table.** For each theme that the compiled documents of a direct
+  dependency name (the `references.types` of its `.xamlmeta` hold the class name), the build of the
+  application writes and registers a table. The table is computed from all the roots of the
+  application, whether or not the application's own documents construct the theme. This needs no
+  new field in the metadata: the references of the library's documents are the record of what
+  they construct.
+- **Limits.** The table is written only when the theme's crate is a direct dependency too, since
+  the table names its unit statics. A library used alone, or in an application that does not depend
+  on the theme crate, keeps its own table. A crate without markup writes the file of its tables when
+  it has one, and `register()` must run for it to take effect.
+
+The rule "the wider table" assumes that the application's table holds the library's. That is the
+usual case, since the application's roots include what the library's documents name. A library
+whose code constructs controls that its documents do not name states them with `Build::theme_roots`,
+which #847 exports.
+
+### 18.2 The selection as state of the thread (not done)
+
+`set_active_theme_units` still writes a thread-local entry for each theme class, and the generated
+builds read it. A second construction of the same theme with other parts on the same thread, or a
+deferred producer that runs later, can read the selection of another instance. Carrying the
+selection in the creation context of the document, captured by its nested and deferred factories,
+changes the generated code of the theme builds. That is left for the work on the output of the
+themes (#853 and the related issues). `register_theme_parts` still replaces an earlier
+registration; the generated `register()` now uses the wider registration instead.
+
+### 18.3 Tests
+
+- `theme_units_tests.rs` (`the_wider_table_of_a_class_is_registered_and_applied`): registering in
+  either order keeps the wider table, and a construction applies the wider table.
+- `lib.rs` (`a_theme_a_library_constructs_gets_the_table_of_the_application`):
+  - an application that never names the theme, whose control is named in its sources, gets the
+    theme's table with that control's unit, registered with the wider registration;
+  - without the theme crate among its direct dependencies, it gets no table.
