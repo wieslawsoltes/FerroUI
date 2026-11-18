@@ -95,7 +95,10 @@ export class NativePreview implements vscode.Disposable {
         return this.send('hostedListen', { nonce });
     }
 
-    renderHosted(source: HostedSource): Promise<HostedFrame> { return this.send('hostedRender', source); }
+    renderHosted(source: HostedSource): Promise<HostedFrame> {
+        // The first request covers process startup, authentication and the first native frame.
+        return this.send('hostedRender', source, 35_000);
+    }
     hostedFrame(): Promise<HostedFrame | null> { return this.send('hostedFrame'); }
     hostedInput(input: HostedInput): Promise<void> { return this.send('hostedInput', input); }
 
@@ -167,7 +170,7 @@ export class NativePreview implements vscode.Disposable {
         return this.send('edit', { ...source, operation });
     }
 
-    private async send<T>(method: string, params?: object): Promise<T> {
+    private async send<T>(method: string, params?: object, timeoutMs = 20_000): Promise<T> {
         if (this.stopped) throw new Error('The FerroUI preview process exited.');
         let timer: ReturnType<typeof setTimeout> | undefined;
         try {
@@ -178,7 +181,7 @@ export class NativePreview implements vscode.Disposable {
                         this.failure = new Error('The FerroUI preview process timed out.');
                         this.dispose();
                         reject(this.failure);
-                    }, 20_000);
+                    }, timeoutMs);
                 }),
             ]);
         } catch (error) {

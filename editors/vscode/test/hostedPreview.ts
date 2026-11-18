@@ -60,6 +60,6 @@ export async function verifyHostedPreview(preview: NativePreview, uri: string): 
         assert.equal(child.exitCode, null);
         console.log('App-hosted design rendered a custom control, native bindings and registered XAML/Rust fixtures, and fenced invalid updates and stale input');
     } catch (error) {
-        throw new Error(`App-hosted preview failed. ${String(error)}\n${launchError?.message ?? log}`, { cause: error });
+        throw new Error(`App-hosted preview failed. ${String(error)}\nHost status: ${child.exitCode ?? child.signalCode ?? 'running'}\n${launchError?.message ?? log}`, { cause: error });
     } finally { child.kill(); }
 }

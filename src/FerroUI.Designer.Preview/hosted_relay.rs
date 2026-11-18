@@ -28,7 +28,8 @@ use std::sync::{
 use std::time::Duration;
 
 type Connection = Arc<dyn IFerroRemoteTransportConnection>;
-const WAIT_FOR_APP: Duration = Duration::from_secs(8);
+const STARTUP_TIMEOUT: Duration = Duration::from_secs(24);
+const FRAME_TIMEOUT: Duration = Duration::from_secs(8);
 
 #[derive(Default)]
 struct Events {
@@ -188,7 +189,7 @@ impl Relay {
             }
         }));
         connection.start();
-        if waiting.recv_timeout(WAIT_FOR_APP) != Ok(true) {
+        if waiting.recv_timeout(STARTUP_TIMEOUT) != Ok(true) {
             connection.dispose();
         }
     }
@@ -197,7 +198,7 @@ impl Relay {
         if let Some(connection) = &self.connection {
             return Ok(connection.clone());
         }
-        let connection = self.incoming.recv_timeout(WAIT_FOR_APP)
+        let connection = self.incoming.recv_timeout(STARTUP_TIMEOUT)
             .map_err(|_| "The Cargo binary did not start a FerroUI design session. Check its preview arguments and output.")?;
         if let Some(server) = self.server.take() {
             server.dispose();
@@ -268,7 +269,7 @@ impl Relay {
         let (state, _) = self
             .events
             .1
-            .wait_timeout_while(self.events.0.lock().unwrap(), WAIT_FOR_APP, |state| {
+            .wait_timeout_while(self.events.0.lock().unwrap(), FRAME_TIMEOUT, |state| {
                 !state.disconnected
                     && !matches!(state.outcome, Some(Err(_)))
                     && (state.outcome.is_none() || state.latest.is_none())
