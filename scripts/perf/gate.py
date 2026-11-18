@@ -298,7 +298,7 @@ INSTRUCTIONS_FLOOR = 1.0
 #   these sizes, a quadratic one 16. A pair over its limit regressed, unless the base is over it
 #   too and the candidate is not further over it than the tolerance of the instructions: that is
 #   a finding the base has already, shown in the table and not held against the candidate.
-SCALING_CLASSES = ("trees::Scaling", "layout_subsystem::ScrollContent")
+SCALING_CLASSES = ("trees::Scaling", "layout_subsystem::ScrollContent", "declarative::Leaving")
 SCALING_FACTOR = 4
 SCALING_TOLERANCE = 0.15
 
