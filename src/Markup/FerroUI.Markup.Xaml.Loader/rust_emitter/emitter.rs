@@ -62,7 +62,7 @@ mod theme_rows;
 /// Control themes, selector chains, resource setter choices and template bindings written as
 /// tables (#568, step 5).
 #[path = "theme_styles.rs"]
-mod theme_styles;
+pub(crate) mod theme_styles;
 
 /// The runs of the units of a compiled theme (#568).
 #[path = "theme_units.rs"]
@@ -3034,6 +3034,9 @@ impl<'a> Emitter<'a> {
         (self.uses_context, self.uses_name_scope) = outer_uses;
         let returned = body?;
         let body_lines = self.apply_row_runs(body_lines);
+        // Template bindings whose setter is chosen at run time, resolved (#854, off by default).
+        let template_binding = self.types.framework_path(FrameworkType::TemplateBinding).map(|path| absolute(&path));
+        let body_lines = theme_styles::resolve_template_bindings(body_lines, template_binding.as_deref());
         // Runs of template bindings on one object, as tables (#568, step 5).
         let body_lines = theme_styles::template_binding_runs(&mut self.theme_styles, body_lines);
 

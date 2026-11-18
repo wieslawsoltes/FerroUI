@@ -70,6 +70,20 @@ A control theme whose content the table cannot express keeps native code for tha
 Today that means one with animations, a resource dictionary of its own, or a use of the name
 scope.
 
+**Template bindings whose setter is chosen at run time (#854, an experiment, off).** A property
+with several setters (`ContentPresenter.Content`, of type `object`) whose value is
+`{TemplateBinding Content}` is written as the choice of the setter when the template runs: the
+binding, its provided value, a test of the value, the binding branch and a branch that sets the
+value with the template priority. The provided value of a template binding is the binding
+itself, never null, so the binding branch is the one that runs. With
+`DEFAULT_RESOLVED_TEMPLATE_BINDINGS = true` (`rust_emitter/theme_styles.rs`; or
+`with_resolved_template_bindings` for the emission of a closure) the nine statements are
+`rt::bind_template_binding(..)`, the statement of a property with one setter, and they join the
+runs of template bindings of their object. The WinUI theme has 141 of these choices, Fluent 88,
+Simple 82, macOS 134. A choice whose locals are named elsewhere, or of any other shape, stays
+as it was. `scripts/themes/repeated_sequences.py` counts the repeated sequences of the template
+functions in the source and in a linked executable, for the next shared sequences.
+
 ### 2.2 Lazy resource rows: indexed deferred groups
 
 A brush row (literal, `{StaticResource}` or `{DynamicResource}` colour) and a `{StaticResource}`
@@ -512,6 +526,7 @@ Documents loaded at run time bind the way the built application does (#604):
 | Roots from the dependencies' documents; `full-themes` as the keep-all switch | #602 | On `main` |
 | Theme trimming on by default (`theme-trimming = false` to turn off) | #602 | On `main` |
 | Control theme tables, selector slices, StaticResource setter helper, template binding runs (step 5) | #568, #607 | On `main` |
+| Template bindings whose setter is chosen at run time resolved (`DEFAULT_RESOLVED_TEMPLATE_BINDINGS`, off); the count of repeated template sequences | #854 | In review, to be measured |
 | Namespace tables of reflection-binding paths per unit (root D) | #612 | On `main` |
 | Constructors only with `type-tables`; compiled `{x:Type}` of a page registers its constructor (B3) | #612 | In review |
 | Units for the Material theme (step 6): `MaterialTheme::with_parts`, control documents as units | #568 | In review |

@@ -973,6 +973,153 @@ fn flush_bindings(pool: &mut StylePool, run: &mut Vec<FoundBinding<'_>>, lines: 
 
 /// `lines`, a body the emitter wrote, with each run of consecutive template bindings on one
 /// object (position markers between them allowed) written as one call over a table.
+// --- template bindings whose setter is chosen at run time (#854) ---------------------------
+
+/// Whether the build and the reference tests of the themes write a template binding whose setter
+/// is chosen at run time as the template binding it always is (#854,
+/// [`resolved_template_bindings`]). Off: the generated files are what they were before the
+/// experiment, byte for byte. The experiment is turned on here, and the checked-in generated
+/// files of the themes are then regenerated.
+pub const DEFAULT_RESOLVED_TEMPLATE_BINDINGS: bool = false;
+
+ferroui_base::ferro_thread_local! {
+    /// The choice [`with_resolved_template_bindings`] made for the emission on this thread.
+    static RESOLVED: std::cell::Cell<Option<bool>> = const { std::cell::Cell::new(None) };
+}
+
+/// Whether the emission on this thread resolves template bindings whose setter is chosen at run
+/// time (#854): the choice of [`with_resolved_template_bindings`], else
+/// [`DEFAULT_RESOLVED_TEMPLATE_BINDINGS`].
+pub fn resolves_template_bindings() -> bool {
+    RESOLVED.with(std::cell::Cell::get).unwrap_or(DEFAULT_RESOLVED_TEMPLATE_BINDINGS)
+}
+
+/// Runs `emit` with the resolution of template bindings whose setter is chosen at run time on or
+/// off (#854) on this thread, and restores the choice before it afterwards, also when `emit`
+/// panics.
+pub fn with_resolved_template_bindings<R>(resolved: bool, emit: impl FnOnce() -> R) -> R {
+    struct Restore(Option<bool>);
+    impl Drop for Restore {
+        fn drop(&mut self) {
+            let before = self.0;
+            RESOLVED.with(|resolved| resolved.set(before));
+        }
+    }
+    let _restore = Restore(RESOLVED.with(|current| current.replace(Some(resolved))));
+    emit()
+}
+
+/// The statement of the template binding that the nine lines `lines` choose at run time, if they
+/// are that choice (#854): a property with several setters (`Content` of a `ContentPresenter`,
+/// whose type is `object`) whose value is `{TemplateBinding source}` is written as the choice of
+/// the setter when the program runs,
+///
+/// ```text
+/// let priority = BindingPriority::Template;
+/// let template_binding = TemplateBinding::__markup_new_1(rt::property(source));
+/// let provided = TemplateBinding::__markup_ProvideValue_0(&template_binding);
+/// let value: MarkupValue = rt::to_value(provided);
+/// if value.is_some() {
+///     rt::bind(object.upcast_ref::<FerroObject>(), property, value.clone(), line, position)?;
+/// } else {
+///     object.set_value_with_priority(property, rt::exact(value.clone(), ..)?, priority);
+/// }
+/// ```
+///
+/// The provided value of a template binding is the binding itself (`provide_value` returns
+/// `Rc<dyn BindingBase>`), never null, so the first branch is the one that runs: the statement
+/// is `rt::bind_template_binding(object, property, rt::property(source), line, position)`, which
+/// makes the calls of the first branch (the statement the emitter writes for a property with one
+/// setter, `fused_template_binding_bind`). `uses` counts the uses of each identifier in the body:
+/// the four locals must be named by these lines only. `template_binding` is the path of the class.
+fn resolved_template_binding(
+    lines: &[String],
+    uses: &HashMap<String, usize>,
+    template_binding: &str,
+) -> Option<String> {
+    let [priority, create, provide, value, test, bind, otherwise, fallback, end] = lines else { return None };
+    let indent = &priority[..priority.len() - priority.trim_start().len()];
+    let at = |line: &str, depth: usize| line.strip_prefix(indent).and_then(|line| {
+        let inner = "    ".repeat(depth);
+        line.strip_prefix(inner.as_str()).filter(|line| !line.starts_with(' '))
+    });
+    let (priority, rest) = at(priority, 0)?.strip_prefix("let ")?.split_once(" = ")?;
+    if !rest.ends_with("::BindingPriority::Template;") {
+        return None;
+    }
+    let (local, rest) = at(create, 0)?.strip_prefix("let ")?.split_once(" = ")?;
+    let source = rest.strip_prefix(&format!("{template_binding}::__markup_new_1(rt::property("))?.strip_suffix("));")?;
+    let (provided, rest) = at(provide, 0)?.strip_prefix("let ")?.split_once(" = ")?;
+    if rest != format!("{template_binding}::__markup_ProvideValue_0(&{local});") {
+        return None;
+    }
+    let (value_local, rest) = at(value, 0)?.strip_prefix("let ")?.split_once(&format!(": {MARKUP_VALUE} = "))?;
+    if rest != format!("rt::to_value({provided});") || at(test, 0)? != format!("if {value_local}.is_some() {{") {
+        return None;
+    }
+    let upcast = format!(".upcast_ref::<{FERRO_OBJECT}>(), ");
+    let (object, rest) = at(bind, 1)?.strip_prefix("rt::bind(")?.split_once(upcast.as_str())?;
+    let (property, rest) = rest.split_once(&format!(", {value_local}.clone(), "))?;
+    let (line, column) = rest.strip_suffix(")?;")?.split_once(", ")?;
+    if at(otherwise, 0)? != "} else {" || at(end, 0)? != "}" {
+        return None;
+    }
+    let fallback = at(fallback, 1)?;
+    if !fallback.starts_with(&format!("{object}.set_value_with_priority({property}, rt::exact({value_local}.clone(), "))
+        || !fallback.ends_with(&format!(", {priority});"))
+    {
+        return None;
+    }
+    // Each local is named by these lines only: the priority twice, the binding twice, the
+    // provided value twice, the value four times.
+    let named = |name: &str, times: usize| is_identifier(name) && uses.get(name) == Some(&times);
+    let numbers = line.parse::<i32>().is_ok() && column.parse::<i32>().is_ok();
+    let locals = named(priority, 2) && named(local, 2) && named(provided, 2) && named(value_local, 4);
+    if !(locals && numbers && is_identifier(object)) {
+        return None;
+    }
+    if !(is_plain_call(property) && is_plain_call(source)) {
+        return None;
+    }
+    Some(format!(
+        "{indent}rt::bind_template_binding({object}.upcast_ref::<{FERRO_OBJECT}>(), {property}, rt::property({source}), \
+         {line}, {column})?;"
+    ))
+}
+
+/// `lines`, a body the emitter wrote, with each template binding whose setter is chosen at run
+/// time written as the template binding it always is ([`resolved_template_binding`]), when the
+/// experiment of #854 is on ([`resolves_template_bindings`]); the statements then join the runs
+/// of [`template_binding_runs`]. `template_binding` is the path of the class `TemplateBinding`.
+pub(super) fn resolve_template_bindings(lines: Vec<String>, template_binding: Option<&str>) -> Vec<String> {
+    let Some(template_binding) = template_binding.filter(|_| resolves_template_bindings()) else {
+        return lines;
+    };
+    let marker = format!("{template_binding}::__markup_ProvideValue_0(");
+    if !lines.iter().any(|line| line.contains(&marker)) {
+        return lines;
+    }
+    let mut uses: HashMap<String, usize> = HashMap::new();
+    for line in lines.iter().map(|line| line.trim_start()).filter(|line| !line.starts_with("//")) {
+        for name in identifiers(line) {
+            *uses.entry(name).or_insert(0) += 1;
+        }
+    }
+    let mut body = Vec::with_capacity(lines.len());
+    let mut index = 0;
+    while index < lines.len() {
+        let window = lines.get(index..index + 9);
+        if let Some(statement) = window.and_then(|window| resolved_template_binding(window, &uses, template_binding)) {
+            body.push(statement);
+            index += 9;
+            continue;
+        }
+        body.push(lines[index].clone());
+        index += 1;
+    }
+    body
+}
+
 pub(super) fn template_binding_runs(pool: &mut StylePool, lines: Vec<String>) -> Vec<String> {
     if !lines.iter().any(|line| line.trim_start().starts_with("rt::bind_template_binding(")) {
         return lines;
