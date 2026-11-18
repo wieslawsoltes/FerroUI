@@ -198,15 +198,15 @@
       "status": "partial"
     },
     "src/LiveChartsCore/CoreSankeySeries.cs": {
-      "reason": "Vertical and bipartite arc measurement: node rectangles and arc sectors with the corner radius, ribbons and chords under the nodes, the ribbon paint (link colour, then the source node colour at half alpha, then LinkFill, then the theme's LinkFill at alpha 90; a null LinkFill takes the node fill), Auto, Outside and Inside labels with the room they reserve and the radial label margin, and rectangle and annular sector hover areas with the default tooltip text; labels break into lines at DataLabelsMaxWidth (170) less the label padding, which the room of the labels counts.",
+      "reason": "Vertical and bipartite arc measurement: node rectangles and arc sectors with the corner radius, ribbons and chords under the nodes, the ribbon paint (link colour, then the source node colour at half alpha, then LinkFill, then the theme's LinkFill at alpha 90; a null LinkFill takes the node fill), Auto, Outside and Inside labels with the room they reserve and the radial label margin, and rectangle and annular sector hover areas with the default tooltip text; labels break into lines at DataLabelsMaxWidth (170) less the label padding, which the room of the labels counts; nodes, ribbons, arcs and chords enter and leave as the source visuals (a node grows from the zero size at its centre and collapses to it, a ribbon opens from the middle of its source and narrows to the middles of its ends, an arc opens from its middle angle and closes on its start angle, a chord grows from and collapses into the centre), labels fade (SceneTransition::with_node_motion, also at the first draw); LabelMapper, NodeColorMapper and LinkColorMapper of custom models are SankeySeries::set_mapped_nodes and set_mapped_links.",
       "remaining": [
-        "The per-node, per-ribbon and per-label visual lifecycle of the source (entrance at zero size, exit collapse) is replaced by the native scene transition.",
-        "LabelMapper, NodeColorMapper, LinkColorMapper and ToolTipLabelFormatter delegates are replaced by the node names and the colours of nodes and links."
+        "The ToolTipLabelFormatter of the series: the tooltip text is the node name and value."
       ],
       "rust": [
         "src/FerroUI.LiveCharts/sankey_chart_engine.rs",
         "src/FerroUI.Controls.LiveCharts/series_classes.rs",
-        "src/FerroUI.Controls.LiveCharts/node_models.rs"
+        "src/FerroUI.Controls.LiveCharts/node_models.rs",
+        "src/FerroUI.Controls.LiveCharts/scene_transition.rs"
       ],
       "status": "partial"
     },
@@ -259,15 +259,15 @@
       "status": "partial"
     },
     "src/LiveChartsCore/CoreTreemapSeries.cs": {
-      "reason": "The weight roll-up (a nonzero explicit value, else the sum of the children), the padding inset of every level, tiles in the order of the source, hover areas and centred data labels culled when they do not fit on the leaves only, and the leaf that becomes internal losing both; labels break into lines at DataLabelsMaxWidth (170) less the label padding and are culled by the size of their lines.",
+      "reason": "The weight roll-up (a nonzero explicit value, else the sum of the children), the padding inset of every level, tiles in the order of the source, hover areas and centred data labels culled when they do not fit on the leaves only, and the leaf that becomes internal losing both; labels break into lines at DataLabelsMaxWidth (170) less the label padding and are culled by the size of their lines; a tile grows from the zero size at its centre and a removed one collapses to it, labels fade (SceneTransition::with_node_motion, also at the first draw); ValueMapper, ChildrenMapper and LabelMapper of custom models are TreemapSeries::set_mapped_nodes.",
       "remaining": [
-        "ValueMapper, ChildrenMapper, LabelMapper and the tooltip formatter of a custom model are not ported: the native TreemapNode is the model.",
-        "The per-tile visual lifecycle of the source is replaced by the native scene transition."
+        "The tooltip formatter of the series: the tooltip text is the node name and value."
       ],
       "rust": [
         "src/FerroUI.LiveCharts/treemap_chart_engine.rs",
         "src/FerroUI.Controls.LiveCharts/series_classes.rs",
-        "src/FerroUI.Controls.LiveCharts/node_models.rs"
+        "src/FerroUI.Controls.LiveCharts/node_models.rs",
+        "src/FerroUI.Controls.LiveCharts/scene_transition.rs"
       ],
       "status": "partial"
     },
