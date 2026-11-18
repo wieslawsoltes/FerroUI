@@ -111,3 +111,14 @@ fn markup_and_unmapped_rust_are_reported_without_silently_converting() {
     assert!(apply_rsx(&xaml, "another! { TextBlock {} }").is_err());
     assert!(apply_rsx(&xaml, "rsx! { TextBlock { text: compute() } }").is_err());
 }
+
+#[test]
+fn text_shorthand_maps_to_the_text_literal() {
+    let rust = r#"rsx! { TextBlock { "Hello" } }"#;
+    let projection = project_rust(rust, 0).unwrap();
+    assert!(projection.xaml().contains("Text=\"Hello\""));
+    let edit = projection.set_property(0, "Text", "Goodbye").unwrap();
+    assert_eq!(apply(rust, vec![edit]), rust.replace("Hello", "Goodbye"));
+    let xaml = Document::new("<TextBlock>Hello</TextBlock>").unwrap();
+    assert!(xaml_to_rsx(&xaml).unwrap().contains("text: \"Hello\""));
+}

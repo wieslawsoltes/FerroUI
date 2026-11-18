@@ -77,7 +77,7 @@ pub enum Attribute {
         /// `Owner` of `Owner.name`.
         owner: Option<Ident>,
         name: Ident,
-        value: Expr,
+        value: Box<Expr>,
         /// The number of the literal when the value is one that hot reload
         /// can change.
         hot: Option<u32>,
@@ -167,7 +167,7 @@ fn parse_node(input: ParseStream, counter: &Counter) -> syn::Result<Node> {
                 attributes.push(Attribute::Value {
                     owner: None,
                     name,
-                    value,
+                    value: Box::new(value),
                     hot: None,
                 });
             } else if is_attribute(&content) {
@@ -190,7 +190,7 @@ fn parse_node(input: ParseStream, counter: &Counter) -> syn::Result<Node> {
                 attributes.push(Attribute::Value {
                     owner,
                     name,
-                    value,
+                    value: Box::new(value),
                     hot,
                 });
             } else {

@@ -67,7 +67,9 @@ impl<'a> DesignDocument<'a> {
     }
 
     pub(crate) fn editable_structure(&self) -> bool {
-        self.rsx.as_ref().is_none_or(|rsx| rsx.omitted_count == 0)
+        self.rsx
+            .as_ref()
+            .is_none_or(RsxProjection::can_replace_structure)
     }
 
     pub(crate) fn counterpart(&self) -> Counterpart {

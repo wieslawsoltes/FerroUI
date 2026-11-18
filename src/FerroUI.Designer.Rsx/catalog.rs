@@ -26,6 +26,14 @@ pub(crate) fn children(class: &str) -> Option<Children> {
     })
 }
 
+pub(crate) fn text_property(class: &str, placement: Children) -> Option<&'static str> {
+    match (class, placement) {
+        ("TextBlock", _) => Some("Text"),
+        (_, Children::Content) => Some("Content"),
+        _ => None,
+    }
+}
+
 pub(crate) fn schema() -> &'static Schema {
     static SCHEMA: OnceLock<Schema> = OnceLock::new();
     SCHEMA.get_or_init(Schema::ferroui)

@@ -1,4 +1,4 @@
-use crate::catalog::{self, Children};
+use crate::catalog;
 use crate::project::{accepts_control, parse_draft};
 use crate::tree::{escape_xml, inline_content, replacement, Element, MAX_DEPTH};
 use ferroui_designer_core::{Document, Node, NodeKind, SourceSpan, TextPatch};
@@ -23,7 +23,8 @@ pub fn apply_rsx(document: &Document, draft: &str) -> Result<Vec<TextPatch>, Str
             .map(|change| {
                 let origin = current.origins[change.index][change.name];
                 let value = if origin.quote.is_none() {
-                    inline_content(change.value).ok_or("Use a Content attribute for this value")?
+                    inline_content(change.value)
+                        .ok_or_else(|| format!("Use a {} attribute for this value", change.name))?
                 } else {
                     change.value.to_owned()
                 };
@@ -128,6 +129,7 @@ impl ParseTree<'_> {
         let index = self.origins.len();
         self.origins.push(origins);
         let placement = catalog::children(class).expect("known control");
+        let text_property = catalog::text_property(class, placement);
         for child in node
             .children
             .iter()
@@ -139,19 +141,25 @@ impl ParseTree<'_> {
                 }
                 NodeKind::Comment | NodeKind::ProcessingInstruction => self.inner_trivia = true,
                 NodeKind::Text if child.text.as_deref().unwrap_or("").trim().is_empty() => (),
-                NodeKind::Text
-                    if placement == Children::Content
-                        && element.children.is_empty()
-                        && !element.properties.contains_key("Content") =>
-                {
-                    let value = child
-                        .text
-                        .as_deref()
-                        .and_then(inline_content)
-                        .ok_or("Use a Content attribute to convert mixed or multiline text")?;
-                    element.properties.insert("Content".into(), value);
+                NodeKind::Text => {
+                    let name = text_property
+                        .filter(|name| {
+                            element.children.is_empty() && !element.properties.contains_key(*name)
+                        })
+                        .ok_or_else(|| {
+                            format!("{class} contains mixed content outside the static RSX tree")
+                        })?;
+                    let value =
+                        child
+                            .text
+                            .as_deref()
+                            .and_then(inline_content)
+                            .ok_or_else(|| {
+                                format!("Use a {name} attribute to convert mixed or multiline text")
+                            })?;
+                    element.properties.insert(name.into(), value);
                     self.origins[index].insert(
-                        "Content".into(),
+                        name.into(),
                         Origin {
                             span: child.span,
                             quote: None,

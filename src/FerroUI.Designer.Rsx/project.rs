@@ -44,6 +44,11 @@ impl RsxProjection<'_> {
         self.tree.xaml()
     }
 
+    /// Structural conversion can replace a complete tree with no interior comments.
+    pub fn can_replace_structure(&self) -> bool {
+        self.omitted_count == 0 && !self.inner_trivia
+    }
+
     pub fn set_property(&self, index: usize, name: &str, value: &str) -> Result<TextPatch, String> {
         let node = self.nodes.get(index).ok_or("Unknown RSX element")?;
         let span = *node
@@ -113,12 +118,12 @@ pub fn project_rust(source: &str, caret: usize) -> Result<RsxProjection<'_>, Str
 pub(crate) fn parse_draft(source: &str) -> Result<Element, String> {
     let draft: syn::ExprMacro =
         syn::parse_str(source).map_err(|e| format!("Expected an rsx! expression: {e}"))?;
-    if !draft
+    if draft
         .mac
         .path
         .segments
         .last()
-        .is_some_and(|segment| segment.ident == "rsx")
+        .is_none_or(|segment| segment.ident != "rsx")
     {
         return Err("Expected an rsx! expression".into());
     }
@@ -207,21 +212,18 @@ impl State {
             }
         }
         let placement = catalog::children(&class).expect("known control");
+        let text_property = catalog::text_property(&class, placement)
+            .filter(|name| node.children.len() == 1 && !seen.contains(*name));
         for child in &node.children {
-            if placement == Children::Content
-                && node.children.len() == 1
-                && !seen.contains("Content")
-            {
-                if let Node::Text(value, _) = child {
-                    let span = value.span().byte_range();
-                    self.nodes[index]
-                        .properties
-                        .insert("Content".into(), SourceSpan::new(span.start, span.end));
-                    result
-                        .properties
-                        .insert("Content".into(), literal::text_value(&value.value()));
-                    continue;
-                }
+            if let (Some(name), Node::Text(value, _)) = (text_property, child) {
+                let span = value.span().byte_range();
+                self.nodes[index]
+                    .properties
+                    .insert(name.into(), SourceSpan::new(span.start, span.end));
+                result
+                    .properties
+                    .insert(name.into(), literal::text_value(&value.value()));
+                continue;
             }
             match child {
                 Node::Element(element)
