@@ -1210,14 +1210,16 @@ impl Scene3DWgpuExecutor {
             };
             let draw_buffer = buffer(self.draw_stride, "FerroUI 3D scene draws");
             let brush_buffer = buffer(self.brush_stride, "FerroUI 3D scene brushes");
-            let binding = |binding: u32, buffer: &wgpu::Buffer, size: usize| wgpu::BindGroupEntry {
-                binding,
-                resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding {
-                    buffer,
-                    offset: 0,
-                    size: NonZeroU64::new(size as u64),
-                }),
-            };
+            fn binding(binding: u32, buffer: &wgpu::Buffer, size: usize) -> wgpu::BindGroupEntry<'_> {
+                wgpu::BindGroupEntry {
+                    binding,
+                    resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding {
+                        buffer,
+                        offset: 0,
+                        size: NonZeroU64::new(size as u64),
+                    }),
+                }
+            }
             let group = device.create_bind_group(&wgpu::BindGroupDescriptor {
                 label: Some("FerroUI 3D scene draws"),
                 layout: &self.draw_layout,
