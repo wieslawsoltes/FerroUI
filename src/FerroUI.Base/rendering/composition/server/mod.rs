@@ -32,6 +32,7 @@ mod server_composition_visual_surface;
 mod server_compositor_animations;
 mod server_custom_composition_visual;
 mod server_draw_items;
+pub(crate) mod unchanged_drawings;
 mod server_drop_shadow;
 mod server_layer_visual;
 mod server_redirect_visual;
