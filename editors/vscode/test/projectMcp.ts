@@ -12,6 +12,7 @@ export async function verifyProjectMcp({ invoke, content }: McpFixture): Promise
     assert.ok(initial.files.some(file => file.path === 'views.rs' && file.kind === 'rsx' && file.invocations === 2));
     assert.ok(initial.files.some(file => file.path === 'McpProject/Cargo.toml' && file.kind === 'cargo'));
     assert.ok(initial.files.some(file => file.path === 'Assets/Preview Image.png' && file.kind === 'asset'));
+    assert.ok(initial.files.some(file => file.path === 'customer-search.ferroui-scenario.json' && file.kind === 'scenario'));
 
     const request = { kind: 'component', language: 'rsx', path: 'McpProject/src/revenue_card' };
     const { uri } = content<{ uri: string }>(await invoke('ferroui_project_scaffold', request));

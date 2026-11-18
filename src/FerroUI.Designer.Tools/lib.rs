@@ -3,6 +3,7 @@
 mod components;
 mod geometry;
 mod grid_tracks;
+pub mod scenario;
 mod layout;
 mod layout_attributes;
 mod layout_helpers;

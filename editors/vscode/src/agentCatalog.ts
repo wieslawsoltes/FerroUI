@@ -15,8 +15,8 @@ const placement = { ...frame, asset: text, project_asset: text, node, selection:
 
 export const agentCatalog = {
     ...workspaceCatalog,
-    ferroui_project_files: tool('Browse indexed Cargo manifests, XAML, RSX invocations, assets and saved stage sets in the same project model used by the workbench.',
-        { folder: workspacePath, kind: choice('cargo', 'xaml', 'rsx', 'asset', 'stages'), offset: integer(0), limit: integer(1, 200) }),
+    ferroui_project_files: tool('Browse indexed Cargo manifests, XAML, RSX invocations, assets, stage sets and scenarios in the workbench project model.',
+        { folder: workspacePath, kind: choice('cargo', 'xaml', 'rsx', 'asset', 'stages', 'scenario'), offset: integer(0), limit: integer(1, 200) }),
     ferroui_project_scaffold: tool('Create a FerroUI XAML or RSX view or reusable component as a new editor file. A Rust module can import the generated view after review.',
         { kind: choice('view', 'component'), language: choice('xaml', 'rsx'), path: workspacePath, folder: workspacePath }, ['kind', 'language', 'path'], true, false),
     ferroui_designs: tool('List open FerroUI designer sessions and the active session in this VS Code window.'),
@@ -113,6 +113,8 @@ export const agentCatalog = {
     ferroui_runtime_apply_source: tool('Apply a runtime property as a literal through the workbench source editor. Use the same runtime, node, generation and buffer version as ferroui_runtime_source. Saving the resulting buffer is a separate action.',
         { node, runtime: { enum: ['managed', 'attached'] }, property: text, value: { type: 'string', maxLength: 4096 }, expected_generation: integer(0), expected_version: integer(1) },
         ['node', 'property', 'value', 'expected_generation', 'expected_version'], true),
+    ferroui_scenario_run: tool('Run a saved FerroUI scenario in a fresh native preview. Returns step results and any screenshot evidence. Set accept_baselines to write baselines after the scenario assertions pass.',
+        { path: workspacePath, folder: workspacePath, accept_baselines: { type: 'boolean' } }, ['path'], true),
 };
 
 export type AgentTool = keyof typeof agentCatalog;

@@ -27,6 +27,7 @@ enum FileKind {
     Rsx,
     Xaml,
     Stages,
+    Scenario,
 }
 
 pub(crate) fn scan(root: &Path) -> Result<Inventory, String> {
@@ -69,6 +70,7 @@ fn classify(root: &Path, entry: &DocumentEntry) -> Option<WorkspaceFile> {
         {
             (FileKind::Stages, None)
         }
+        DocumentKind::Asset if path.ends_with(".ferroui-scenario.json") => (FileKind::Scenario, None),
         _ => return None,
     };
     Some(WorkspaceFile {

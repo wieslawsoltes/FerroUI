@@ -1,0 +1,13 @@
+{
+    "version": 1,
+    "name": "Customer search",
+    "document": "ScenarioView.xaml",
+    "viewport": { "width": 400, "height": 180 },
+    "steps": [
+        { "action": "expectAccessible", "name": "Customer query", "role": "Edit" },
+        { "action": "click", "selector": "#Query" },
+        { "action": "typeText", "selector": "#Query", "text": "Łódź" },
+        { "action": "expectProperty", "selector": "#Result", "property": "Text", "value": "Łódź" },
+        { "action": "expectScreenshot", "baseline": "Baselines/customer-search.png" }
+    ]
+}

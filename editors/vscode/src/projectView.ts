@@ -8,10 +8,10 @@ import { errorMessage } from './protocol';
 import { localFolders } from './workspacePaths';
 
 const viewId = 'ferroui.project';
-const categories = ['Cargo', 'Views', 'Assets', 'Stage Sets'] as const;
+const categories = ['Cargo', 'Views', 'Assets', 'Stage Sets', 'Scenarios'] as const;
 type Category = typeof categories[number];
 const kindCategory: Record<ProjectFile['kind'], Category> = {
-    cargo: 'Cargo', rsx: 'Views', xaml: 'Views', asset: 'Assets', stages: 'Stage Sets',
+    cargo: 'Cargo', rsx: 'Views', xaml: 'Views', asset: 'Assets', stages: 'Stage Sets', scenario: 'Scenarios',
 };
 
 type Item = { type: 'root'; folder: vscode.WorkspaceFolder }

@@ -89,6 +89,29 @@ Use **Find Definition in Designer** to search the active design’s component, t
 
 **Diagnostics** shows the outcome and acknowledgement time of observed saves in a managed session. It also reads layout and scene counters from the native inspector, and opens authored source from binding errors that carry an available location. MCP exposes the same history through `ferroui_reload_history` and the runtime’s logs and counters through `get_logs` and `get_frame_stats`.
 
+## Native UI scenarios
+
+Save a `*.ferroui-scenario.json` file inside a workspace. The **FerroUI Scenarios** section in Testing runs the saved source in a fresh native preview. Use FerroUI selectors to target input and property assertions. Accessibility assertions read the actual native automation tree.
+
+```json
+{
+    "version": 1,
+    "name": "Customer search",
+    "document": "CustomerSearch.xaml",
+    "viewport": { "width": 500, "height": 280 },
+    "steps": [
+        { "action": "expectAccessible", "name": "Customer query", "role": "Edit" },
+        { "action": "typeText", "selector": "#Query", "text": "Łódź" },
+        { "action": "expectProperty", "selector": "#Result", "property": "Text", "value": "Łódź" },
+        { "action": "expectScreenshot", "baseline": "Baselines/customer-search.png" }
+    ]
+}
+```
+
+The document and baseline paths are relative to the scenario. A Rust scenario can specify a zero-based UTF-16 `caret` with `line` and `character` to choose an RSX invocation. Use **Accept FerroUI Screenshot Baselines** from the Testing run profile picker to write the rendered images after the assertions pass. A mismatch links to its expected image, actual image, and highlighted pixel diff. Specify `channelTolerance` and `maxChangedPixels` on an image assertion when the fixture allows pixel variation.
+
+Run the same scenario in CI with `ferroui-designer-preview --scenario customer-search.ferroui-scenario.json`. Use `--workspace` for scenarios stored below their workspace root and `--artifacts` to choose a directory for visual evidence. The runner prints a JSON report and returns a failing status for a failed assertion. Agents use `ferroui_scenario_run` on the same saved file.
+
 ## Hot reload a running application
 
 Run **FerroUI: Run with Hot Reload** from a local Cargo workspace and select a development binary. Try `hot-reload-demo` for XAML or `view-gallery` for Rust. The extension uses Cargo metadata and enables a package’s `hot-reload` feature when defined. Save your changes in the editor or save a design edit to update the application. The status bar and **FerroUI: Show Hot Reload Output** report in-place updates, rejected edits, and rebuilds.

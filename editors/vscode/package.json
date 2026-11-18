@@ -32,6 +32,7 @@
   "activationEvents": [
     "onLanguage:ferroui-xaml",
     "onLanguage:rust",
+    "workspaceContains:**/*.ferroui-scenario.json",
     "onWebviewPanel:ferroui.designer",
     "onWebviewPanel:ferroui.stages"
   ],

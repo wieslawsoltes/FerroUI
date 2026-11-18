@@ -4,7 +4,7 @@ import { NativePreview } from './nativePreview';
 import type { ProjectAssets } from './projectAssets';
 import { isWorkspaceFile, workspaceFolders } from './workspacePaths';
 
-interface NativeProjectFile { path: string; kind: 'cargo' | 'rsx' | 'xaml' | 'stages'; invocations?: number }
+interface NativeProjectFile { path: string; kind: 'cargo' | 'rsx' | 'xaml' | 'stages' | 'scenario'; invocations?: number }
 export interface NativeProjectInventory { files: NativeProjectFile[]; truncated: boolean }
 export type ProjectFile = NativeProjectFile | { path: string; kind: 'asset'; assetKind: string };
 export interface ProjectInventorySnapshot { files: ProjectFile[]; truncated: boolean }
@@ -20,7 +20,7 @@ export class ProjectInventory implements vscode.Disposable {
 
     constructor(private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel,
         private readonly assets: ProjectAssets) {
-        const watcher = vscode.workspace.createFileSystemWatcher('**/{Cargo.toml,*.rs,*.xaml,*.XAML,*.ferrostages}');
+        const watcher = vscode.workspace.createFileSystemWatcher('**/{Cargo.toml,*.rs,*.xaml,*.XAML,*.ferrostages,*.ferroui-scenario.json}');
         const invalidate = (uri: vscode.Uri) => {
             const folder = vscode.workspace.getWorkspaceFolder(uri);
             if (!folder || path.relative(folder.uri.fsPath, uri.fsPath).split(path.sep).some(part => ignoredDirectories.has(part))) return;
