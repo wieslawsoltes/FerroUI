@@ -1,16 +1,14 @@
-use ferroui_base::{diagnostics::RsxSourceInfo, BoxedValue, FerroObject, Ref};
+use ferroui_base::{diagnostics::RsxSourceInfo, FerroObject};
 use ferroui_markup_xaml::diagnostics::XamlSourceInfo;
 use serde_json::{json, Value};
-use std::rc::Rc;
 
-pub(super) fn location(object: Ref<FerroObject>) -> Value {
-    let boxed: BoxedValue = Rc::new(object.clone());
-    let xaml = XamlSourceInfo::get_xaml_source_info(&boxed).and_then(|info| {
+pub(super) fn location(object: &FerroObject) -> Option<Value> {
+    let xaml = XamlSourceInfo::for_object(object).and_then(|info| {
         let uri = info.source_uri()?;
         Some(json!({"uri":uri.as_str(),"line":info.line_number(),"column":info.line_position()}))
     });
     xaml.or_else(|| {
-        let info = RsxSourceInfo::get(&object)?;
+        let info = RsxSourceInfo::get(object)?;
         let uri = info.source_uri()?;
         let location = info.location();
         let (line, column) = location.element;
@@ -25,5 +23,4 @@ pub(super) fn location(object: Ref<FerroObject>) -> Value {
         }
         Some(source)
     })
-    .unwrap_or(Value::Null)
 }

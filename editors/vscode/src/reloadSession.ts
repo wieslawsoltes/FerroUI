@@ -5,13 +5,14 @@ import * as vscode from 'vscode';
 import type { CargoTarget } from './cargoTarget';
 import { isInside } from './workspacePaths';
 import { buildCargo, launchArtifact, ReloadProcess, revision, type ProjectMetadata, type RuntimeEvent } from './reloadProcess';
+import type { ReloadHistory, ReloadRecord } from './reloadHistory';
 import type { ProcessOutput } from './reloadLog';
 import type { RuntimeMcpEndpoint } from './runtimeMcp';
 
 const watchPattern = '**/{*.rs,*.xaml,Cargo.toml}';
 const reloadWindow = 1800;
 
-interface SourceChange { file: string; fingerprint: string; observed: number; language?: RuntimeEvent['language'] }
+interface SourceChange { file: string; fingerprint: string; observed: number; language?: RuntimeEvent['language']; record: ReloadRecord }
 
 export class ReloadSession implements vscode.Disposable {
     private readonly resources: vscode.Disposable[] = [];
@@ -33,7 +34,7 @@ export class ReloadSession implements vscode.Disposable {
     private serial = 0;
     private disposed = false;
 
-    constructor(readonly target: CargoTarget, private readonly output: ProcessOutput,
+    constructor(readonly target: CargoTarget, private readonly output: ProcessOutput, private readonly history: ReloadHistory,
         private readonly status: (message: string, problem?: boolean) => void,
         private readonly mcpChanged: (endpoint?: RuntimeMcpEndpoint) => void,
         private readonly built: (metadata: ProjectMetadata) => void,
@@ -83,7 +84,11 @@ export class ReloadSession implements vscode.Disposable {
         if (this.disposed || this.observed.get(key) === fingerprint) return;
         this.observed.set(key, fingerprint);
         const language = fingerprint === 'deleted' ? undefined : extension === '.xaml' ? 'xaml' : extension === '.rs' ? 'rsx' : undefined;
-        this.changes.set(key, { file, fingerprint, language, observed: Date.now() });
+        const previous = this.changes.get(key);
+        if (previous) this.history.finish(previous.record, 'superseded', this.pid);
+        const observed = Date.now();
+        const record = this.history.observe(file, fingerprint, observed);
+        this.changes.set(key, { file, fingerprint, language, observed, record });
         this.serial++;
         this.schedule(120);
     }
@@ -122,9 +127,11 @@ export class ReloadSession implements vscode.Disposable {
                 else {
                     this.changes.delete(key);
                     if (result.status === 'failed') {
+                        this.history.finish(change.record, 'rejected', this.pid, result.message);
                         failed = true;
                         this.status(`${result.language.toUpperCase()} edit rejected`, true);
                     } else {
+                        this.history.finish(change.record, 'applied', this.pid, result.message);
                         if (result.language === 'xaml') this.acceptedXaml.set(key, change.fingerprint);
                         applied = `${result.language.toUpperCase()} reloaded`;
                     }
@@ -181,6 +188,7 @@ export class ReloadSession implements vscode.Disposable {
             if (this.superseded(serial)) return;
             this.live = candidate.process;
             this.candidate = undefined;
+            for (const change of this.changes.values()) this.history.finish(change.record, 'rebuilt', this.pid);
             this.changes.clear();
             this.results.clear();
             this.acceptedXaml.clear();
@@ -203,6 +211,7 @@ export class ReloadSession implements vscode.Disposable {
             await retired;
         } catch (error) {
             if (this.disposed || this.serial !== serial) return;
+            for (const change of this.changes.values()) this.history.finish(change.record, 'buildFailed', this.pid, String(error));
             this.changes.clear();
             this.output.appendLine(`${String(error)}${this.live ? ' The previous application is still running.' : ''}`);
             this.status(this.live ? 'Update failed · app still running' : 'Launch failed', true);
@@ -228,6 +237,7 @@ export class ReloadSession implements vscode.Disposable {
 
     async dispose(): Promise<void> {
         this.disposed = true;
+        for (const change of this.changes.values()) this.history.finish(change.record, 'stopped', this.pid);
         this.mcpChanged();
         clearTimeout(this.timer);
         this.resources.forEach(resource => resource.dispose());

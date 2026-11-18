@@ -1,6 +1,7 @@
 import { strict as assert } from 'node:assert';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
+import { ReloadHistory } from '../src/reloadHistory';
 import { ReloadProcess } from '../src/reloadProcess';
 
 export async function verifyProcessShutdown(): Promise<void> {
@@ -18,4 +19,19 @@ export async function verifyProcessShutdown(): Promise<void> {
     } finally {
         await processHandle.stop();
     }
+}
+
+export function verifyReloadHistory(): void {
+    const history = new ReloadHistory();
+    try {
+        const original = history.observe('View.xaml', 'old', Date.now() - 500);
+        const update = history.observe('View.xaml', 'new', Date.now());
+        history.finish(original, 'superseded', 27);
+        history.finish(update, 'applied', 27);
+        history.finish(original, 'rebuilt', 31);
+        const [last, previous] = history.recent(2);
+        assert.deepEqual([last.revision, last.outcome, last.pid], ['new', 'applied', 27]);
+        assert.deepEqual([previous.revision, previous.outcome, previous.pid], ['old', 'superseded', 27]);
+        assert.ok(previous.elapsedMs !== undefined && previous.elapsedMs >= 500);
+    } finally { history.dispose(); }
 }

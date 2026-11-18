@@ -3,6 +3,7 @@ import type { HotReload } from './hotReload';
 import { errorMessage } from './protocol';
 import { RuntimeClient } from './runtimeClient';
 import type { RuntimeConnections, RuntimeTarget } from './runtimeConnections';
+import { readRuntimeDiagnostics } from './runtimeDiagnostics';
 import type { FromRuntime, RuntimeFrame, RuntimeHierarchy, RuntimeInspection, RuntimeNode, RuntimeProperty, ToRuntime } from './runtimeProtocol';
 import type { RuntimeSourceEditor } from './runtimeSource';
 import { runtimeHtml, webviewOptions } from './view';
@@ -222,7 +223,7 @@ export class RuntimePanel implements vscode.Disposable {
             case 'properties': data = await client.call('get_properties', { node_id: node }); break;
             case 'styles': data = await client.call('get_styles', { node_id: node }); break;
             case 'resources': data = await client.call('get_resources', { node_id: node }); break;
-            case 'diagnostics': data = { frames: await client.call('get_frame_stats'), logs: await client.call('get_logs') }; break;
+            case 'diagnostics': data = await readRuntimeDiagnostics(client); break;
             default: return;
         }
         const source = await this.authoredSource.read(client, node);

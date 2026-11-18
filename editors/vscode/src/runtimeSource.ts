@@ -19,6 +19,10 @@ export class RuntimeSourceEditor {
     async read(client: RuntimeClient, node: number, signal?: AbortSignal): Promise<AuthoredSource | undefined> {
         if (!Number.isSafeInteger(node) || !await client.supports('get_source')) return;
         const anchor = await client.call<RuntimeSource | null>('get_source', { node_id: node }, signal);
+        return this.resolve(anchor);
+    }
+
+    async resolve(anchor: RuntimeSource | null): Promise<AuthoredSource | undefined> {
         if (!anchor || typeof anchor.uri !== 'string') return;
         const uri = vscode.Uri.parse(anchor.uri, true);
         if (!await isWorkspaceFile(uri)) return;

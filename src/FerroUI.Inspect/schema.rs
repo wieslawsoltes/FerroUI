@@ -86,7 +86,7 @@ pub fn tools() -> Vec<Value> {
     let mut wait = search;
     wait.as_object_mut().unwrap().extend(json!({"condition":{"enum":["exists","absent","visible","enabled","property_equals"]},"property":string,"value":{},"timeout_ms":{"type":"integer","minimum":0,"maximum":60000}}).as_object().unwrap().clone());
     add("wait_for", "Wait without blocking the UI for matching elements and a condition (default exists), up to timeout_ms (default 5000).", wait, &[], false);
-    add("get_logs", "Read the bounded diagnostic log, including binding errors. Use after as a sequence cursor.", json!({"after":{"type":"integer","minimum":0}}), &[], false);
+    add("get_logs", "Read the bounded diagnostic log, including binding errors and their authored source when available. Use after as a sequence cursor.", json!({"after":{"type":"integer","minimum":0}}), &[], false);
     add(
         "get_frame_stats",
         "Read observed rendered scene updates, update intervals and latest layout timing for each window.",

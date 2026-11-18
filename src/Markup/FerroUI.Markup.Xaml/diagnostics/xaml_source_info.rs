@@ -142,7 +142,7 @@ impl XamlSourceInfo {
     /// object, if available.
     pub fn get_xaml_source_info(obj: &BoxedValue) -> Option<XamlSourceInfo> {
         if let Some(object) = as_object(obj) {
-            object.get_value(Self::xaml_source_info_property())
+            Self::for_object(&object)
         } else {
             SOURCE_INFO.with(|table| {
                 let table = table.borrow();
@@ -154,6 +154,11 @@ impl XamlSourceInfo {
                 info.clone()
             })
         }
+    }
+
+    /// Return compiler source information for a framework object.
+    pub fn for_object(object: &FerroObject) -> Option<Self> {
+        object.get_value(Self::xaml_source_info_property())
     }
 
     /// Retrieves the XAML source information associated with the specified

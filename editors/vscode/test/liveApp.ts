@@ -5,6 +5,7 @@ import { createInterface } from 'node:readline';
 import * as vscode from 'vscode';
 import { revision } from '../src/reloadProcess';
 import { RuntimeClient } from '../src/runtimeClient';
+import { readRuntimeDiagnostics } from '../src/runtimeDiagnostics';
 import { mcpEndpointPrefix, parseMcpEndpoint, type RuntimeMcpEndpoint } from '../src/runtimeMcp';
 import type { RuntimeNode, RuntimeSource } from '../src/runtimeProtocol';
 import { sourcePosition } from '../src/runtimeSource';
@@ -53,6 +54,9 @@ export async function verifyLiveApp(): Promise<void> {
         assert.ok((await client.call<{ matched: boolean }>('wait_for', { text: 'QA task from VS Code' })).matched);
         const updated = await client.call<string>('screenshot', { node_id: window.node_id });
         assert.notEqual(updated, png);
+        const diagnostics = await readRuntimeDiagnostics(client);
+        assert.ok(diagnostics.frames.some(frame => frame.node_id === window.node_id && frame.layout_pass_count > 0));
+        assert.ok(Array.isArray(diagnostics.logs.entries));
         console.log('Live App found the authored RSX control, entered text, clicked a bound action and captured the updated native window');
     } finally {
         clearTimeout(timeout);

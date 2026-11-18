@@ -111,6 +111,7 @@ export class AgentTools {
         if (tool === 'ferroui_reload_status') return this.reload.state;
         if (tool === 'ferroui_reload_targets') return this.reload.targets(args);
         if (tool === 'ferroui_reload_output') return this.reload.recentOutput(args.lines ?? 60);
+        if (tool === 'ferroui_reload_history') return { records: this.reload.history.recent(args.limit ?? 50) };
         if (tool === 'ferroui_reload_control') return this.reload.agentControl(args.action, args, signal, args.debug_configuration);
         if (tool === 'ferroui_runtime_source') return this.runtimeSource.read(args.node!, signal);
         if (tool === 'ferroui_runtime_apply_source') {

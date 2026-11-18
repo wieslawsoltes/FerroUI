@@ -3,6 +3,7 @@ import { describeCargoTarget, discoverCargoTargets, selectCargoTarget, type Carg
 import { errorMessage } from './protocol';
 import { ReloadLog } from './reloadLog';
 import { managedProcessVariable, ReloadDebugger } from './reloadDebugger';
+import { ReloadHistory } from './reloadHistory';
 import { RegisteredReload } from './registeredReload';
 import type { ProjectMetadata } from './reloadProcess';
 import { ReloadSession } from './reloadSession';
@@ -10,6 +11,7 @@ import type { RuntimeMcpEndpoint } from './runtimeMcp';
 import { localFolders, workspaceFolders } from './workspacePaths';
 
 export class HotReload implements vscode.Disposable {
+    readonly history = new ReloadHistory();
     private readonly output = vscode.window.createOutputChannel('FerroUI Hot Reload');
     private readonly log = new ReloadLog(this.output);
     private readonly debugger = new ReloadDebugger(this.output);
@@ -123,7 +125,7 @@ export class HotReload implements vscode.Disposable {
             } else this.debugger.detach();
             void this.retireProcesses();
             this.log.reset();
-            this.session = new ReloadSession(target, this.log, (message, problem) => {
+            this.session = new ReloadSession(target, this.log, this.history, (message, problem) => {
                 this.report(target.label, message, problem);
             }, endpoint => {
                 if (endpoint?.url === this.runtimeMcp?.url && endpoint?.token === this.runtimeMcp?.token) return;
@@ -201,6 +203,7 @@ export class HotReload implements vscode.Disposable {
         this.output.dispose();
         this.runtimeChanged.dispose();
         this.built.dispose();
+        this.history.dispose();
     }
 }
 

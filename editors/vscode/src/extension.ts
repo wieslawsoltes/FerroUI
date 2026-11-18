@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { AgentTools } from './agentTools';
 import { BuiltProjects } from './builtProjects';
 import { DesignerWorkbench } from './designerWorkbench';
+import { DiagnosticsView } from './diagnosticsView';
 import { HotReload } from './hotReload';
 import { HostedDesign } from './hostedDesign';
 import { FerroMcpProvider } from './mcpProvider';
@@ -42,13 +43,14 @@ export function activate(context: vscode.ExtensionContext) {
     const runtimes = new RuntimeConnections(reload);
     const runtimeSource = new RuntimeSourceEditor(designer, reload);
     const liveApp = new RuntimePanel(context, runtimes, reload, runtimeSource);
+    const diagnostics = new DiagnosticsView(reload.history, runtimes, runtimeSource);
     const runtimeTools = new RuntimeSourceTools(runtimes, runtimeSource);
     const mcp = new FerroMcpProvider(context, new AgentTools(designer, reload, stages, runtimeTools, inventory, scaffolds), previewOutput, runtimes);
     const startForXaml = (document: vscode.TextDocument) => {
         if (document.languageId === xamlLanguage && document.uri.scheme === 'file') void server.start();
     };
     context.subscriptions.push(
-        projectView, projects, schemaBuild, inventory, scaffolds, assets, server, rsx, designer, hosted, stages, liveApp, reload, runtimes, mcp, languageOutput, previewOutput,
+        projectView, diagnostics, projects, schemaBuild, inventory, scaffolds, assets, server, rsx, designer, hosted, stages, liveApp, reload, runtimes, mcp, languageOutput, previewOutput,
         reload.onDidBuild(publish),
         vscode.workspace.onDidOpenTextDocument(startForXaml),
         vscode.workspace.onDidChangeConfiguration(event => {

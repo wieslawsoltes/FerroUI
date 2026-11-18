@@ -781,7 +781,7 @@ impl Inspector {
                 }
                 Ok(Value::Array(hits))
             }
-            "get_source" => Ok(source::location(Self::visual_object(&self.object(args)?))),
+            "get_source" => Ok(source::location(&Self::visual_object(&self.object(args)?)).unwrap_or(Value::Null)),
             "set_property" => {
                 if !permissions.allow_property_writes {
                     return Err("Property writes are disabled".into());

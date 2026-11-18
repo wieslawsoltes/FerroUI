@@ -104,6 +104,8 @@ export const agentCatalog = {
         { ...cargoSelection, action: choice('start', 'start_debug', 'start_registered', 'rebuild', 'stop', 'show_output'), debug_configuration: text }, ['action'], true, false),
     ferroui_reload_output: tool('Read the recent Cargo build and runtime output for the managed application.',
         { lines: integer(1, 250) }),
+    ferroui_reload_history: tool('Read per-file managed hot reload receipts, outcomes, and time from save observation to acknowledgement.',
+        { limit: integer(1, 200) }),
     ferroui_runtime_source: tool('Resolve a managed runtime node to a workspace location. Returns the process generation and editor buffer version. Get node IDs from the managed app inspector.',
         { node }, ['node']),
     ferroui_runtime_apply_source: tool('Apply a managed runtime property as a literal through the workbench source editor. Use the node, generation and buffer version from ferroui_runtime_source. Saving the resulting buffer is a separate action.',

@@ -62,6 +62,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         const { tools } = await request<{ tools: { name: string }[] }>('tools/list');
         assert.ok(tools.some(tool => tool.name === 'designer_place'));
         assert.ok(tools.some(tool => tool.name === 'ferroui_runtime_source'));
+        assert.deepEqual(content(await invoke('ferroui_reload_history', { limit: 1 })), { records: [] });
         const runtimeEdit = { node: 1, property: 'Text', value: 'Draft', expected_generation: 0, expected_version: 1 };
         assert.match((await invoke('ferroui_runtime_apply_source', runtimeEdit)).content[0]?.text ?? '', /allowWrites/);
         const { designs } = content<{ designs: { uri: string; session: number }[] }>(await invoke('ferroui_designs'));

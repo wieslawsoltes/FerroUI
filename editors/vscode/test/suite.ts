@@ -10,7 +10,7 @@ import { verifyXamlRefactoring } from './xamlLanguage';
 import { verifyRuntimeClient } from './runtimeClient';
 import { verifyHostedPreview } from './hostedPreview';
 import { verifyLiveApp } from './liveApp';
-import { verifyProcessShutdown } from './reloadProcess';
+import { verifyProcessShutdown, verifyReloadHistory } from './reloadProcess';
 import { until } from './wait';
 import type { DesignerWorkbench } from '../src/designerWorkbench';
 
@@ -23,6 +23,7 @@ export async function run(): Promise<void> {
     assert.ok(extension, 'FerroUI extension is installed in the Extension Development Host');
     const { designer } = await extension.activate();
     await verifyProcessShutdown();
+    verifyReloadHistory();
     await verifyRuntimeClient();
     await vscode.commands.executeCommand('ferroui.openLiveApp');
     await until(() => vscode.window.tabGroups.all.some(group => group.tabs.some(tab => tab.label === 'FerroUI Live App')));

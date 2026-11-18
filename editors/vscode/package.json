@@ -92,6 +92,12 @@
         "icon": "$(refresh)"
       },
       {
+        "command": "ferroui.diagnostics.refresh",
+        "title": "Refresh Diagnostics",
+        "category": "FerroUI",
+        "icon": "$(refresh)"
+      },
+      {
         "command": "ferroui.project.newView",
         "title": "New View",
         "category": "FerroUI",
@@ -273,6 +279,11 @@
           "command": "ferroui.project.newComponent",
           "when": "view == ferroui.project && isWorkspaceTrusted",
           "group": "ferroui"
+        },
+        {
+          "command": "ferroui.diagnostics.refresh",
+          "when": "view == ferroui.diagnostics",
+          "group": "navigation"
         }
       ],
       "view/item/context": [
@@ -430,6 +441,12 @@
           "id": "ferroui.project",
           "name": "Project",
           "contextualTitle": "FerroUI Project",
+          "visibility": "collapsed"
+        },
+        {
+          "id": "ferroui.diagnostics",
+          "name": "Diagnostics",
+          "contextualTitle": "FerroUI Diagnostics",
           "visibility": "collapsed"
         },
         {
