@@ -25,11 +25,60 @@ pub(crate) struct Edit {
     query: Query,
 }
 
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct Present {
+    #[serde(flatten)]
+    query: Query,
+    next_frame: u64,
+}
+
 pub(crate) fn catalog() -> Value {
     let (tools, edits): (Vec<_>, Vec<_>) = DesignerMcp::session_tool_definitions()
         .into_iter()
         .partition(is_query);
-    json!({"tools":tools,"xamlEdits":edits.into_iter().filter_map(edit_definition).collect::<Vec<_>>()})
+    let presentations = edits.iter().cloned().filter_map(|tool| action_definition(tool, presentation_action)).collect::<Vec<_>>();
+    json!({"tools":tools,"presentations":presentations,"xamlEdits":edits.into_iter().filter_map(|tool| action_definition(tool, source_action)).collect::<Vec<_>>()})
+}
+
+pub(crate) fn present(renderer: &mut Renderer, request: Present) -> Result<Value, String> {
+    let query = request.query;
+    if request.next_frame <= query.frame || !presentation_action(&query.name, query.arguments["action"].as_str()) {
+        return Err("Choose a current Studio presentation action".into());
+    }
+    let stage = renderer.stage(query.frame)?;
+    let mut arguments = query.arguments;
+    let revision = stage.session.borrow().document().revision();
+    arguments.as_object_mut().ok_or("arguments must be an object")?
+        .insert("expected_revision".into(), json!(revision));
+    let provider = DesignerMcp::new(&stage.session);
+    provider.validate(&query.name, &arguments)?;
+    if let Some(selection) = &query.selection { select(stage, selection)?; }
+    provider.call(&query.name, &arguments, Permissions { allow_property_writes: true, ..Default::default() })?;
+    let stage = renderer.stage.as_mut().expect("stage exists");
+    stage.token = request.next_frame;
+    let frame = {
+        let mut session = stage.session.borrow_mut();
+        let frame = crate::renderer::capture(&mut session)?;
+        let nodes = session.document().ast().elements().map(|node| json!({
+            "id":node.id,"bounds":frame.bounds.get(&node.id),
+            "canMove":session.can_move_outline_node(node.id),"canInsert":session.can_insert_outline_child(node.id),
+            "selectable":session.can_canvas_select(node.id),
+        })).collect::<Vec<_>>();
+        json!({"image":frame.image,"nodes":nodes,"notices":frame.notices,"selection":session.selection()})
+    };
+    Ok(frame)
+}
+
+fn presentation_action(tool: &str, action: Option<&str>) -> bool {
+    match tool {
+        "designer_program" => matches!(action, Some("preview" | "preview_targets")),
+        "designer_state" => matches!(action, Some("preview" | "advance_preview" | "clear_preview")),
+        "designer_definition" => matches!(action, Some("enter" | "exit")),
+        "designer_design_data_edit" => action == Some("enabled"),
+        "designer_layer" => action.is_some(),
+        _ => false,
+    }
 }
 
 fn is_query(tool: &Value) -> bool {
@@ -60,7 +109,7 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit) -> Result<EditResult,
     let design = DesignDocument::parse(&request.document)?;
     let query = request.query;
     if design.rsx.is_some()
-        && (query.name != "designer_selection_layout_edit" || !design.editable_structure())
+        && (!matches!(query.name.as_str(), "designer_selection_layout_edit" | "designer_property") || !design.editable_structure())
     {
         return Err("This Studio operation requires XAML or a fully mapped RSX layout.".into());
     }
@@ -155,12 +204,12 @@ fn source_action(tool: &str, action: Option<&str>) -> bool {
     }
 }
 
-fn edit_definition(mut tool: Value) -> Option<Value> {
+fn action_definition(mut tool: Value, allowed: impl Fn(&str, Option<&str>) -> bool) -> Option<Value> {
     let name = tool["name"].as_str()?.to_owned();
     let schema = &mut tool["inputSchema"];
     if let Some(actions) = schema.get_mut("oneOf").and_then(Value::as_array_mut) {
         actions.retain(|action| {
-            source_action(&name, action["properties"]["action"]["const"].as_str())
+            allowed(&name, action["properties"]["action"]["const"].as_str())
         });
         if actions.is_empty() {
             return None;
@@ -181,7 +230,7 @@ fn edit_definition(mut tool: Value) -> Option<Value> {
             .unwrap()
             .retain(|key, _| keys.contains(key));
         schema["properties"]["action"]["enum"] = json!(names);
-    } else if !source_action(&name, None) {
+    } else if !allowed(&name, None) {
         return None;
     }
     hide_native_revision(schema);

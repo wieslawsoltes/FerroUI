@@ -1,6 +1,7 @@
 import type { CanvasAction, CanvasSnapshot, DesignerViewState, FromDesigner, RuntimeRow, ToDesigner } from '../src/protocol';
 import { Artboard } from './artboard';
 import { CanvasDrag } from './canvasDrag';
+import { ResizeHandles } from './resizeHandles';
 import { CanvasInput } from './canvasInput';
 import { CanvasViewport } from './canvasViewport';
 import { Counterpart } from './counterpart';
@@ -46,6 +47,9 @@ const viewport = new CanvasViewport((fit, scale, hasImage) => {
 const input = new CanvasInput(viewport, reveal);
 const artboard = new Artboard(viewport, () => !input.panning, select);
 const drag = new CanvasDrag(artboard, () => current && !applying && !input.panning, vscode.postMessage);
+const resize = new ResizeHandles(artboard, gesture => {
+    if (current && !applying && !input.panning) vscode.postMessage({ type: 'resize', token, ...gesture });
+});
 const size = new ViewportMenu(viewport => vscode.postMessage({ type: 'viewport', viewport }));
 const counterpart = new Counterpart(apply);
 
@@ -144,6 +148,7 @@ function selectedNode() { return snapshot?.nodes.find(node => node.id === select
 function updateSelection(): void {
     const node = selectedNode();
     const enabled = current && !applying;
+    resize.update(enabled && !runtime && selection.length === 1 ? node : undefined);
     if (artboard.isCurrent) {
         if (runtime) artboard.inspect(runtime.bounds);
         else artboard.select(node, snapshot?.nodes.filter(item => item.id !== selected && selection.includes(item.id)));

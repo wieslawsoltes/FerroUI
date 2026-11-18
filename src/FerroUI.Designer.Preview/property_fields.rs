@@ -22,6 +22,7 @@ pub(crate) struct PropertyField {
     range: Option<Range>,
     editable: bool,
     can_reset: bool,
+    mixed: bool,
 }
 
 impl PropertyField {
@@ -37,8 +38,27 @@ impl PropertyField {
             range: None,
             editable: false,
             can_reset: false,
+            mixed: false,
         }
     }
+}
+
+pub(crate) fn intersect(properties: &mut Vec<PropertyField>, other: Vec<PropertyField>) {
+    let other: BTreeMap<_, _> = other.into_iter().map(|field| (field.name.clone(), field)).collect();
+    properties.retain_mut(|field| {
+        let Some(other) = other.get(&field.name) else { return false; };
+        if field.kind != other.kind || field.options != other.options { return false; }
+        field.mixed |= field.authored != other.authored || field.effective != other.effective;
+        field.editable &= other.editable;
+        field.can_reset = field.editable && (field.can_reset || other.can_reset);
+        field.range = None;
+        if field.mixed {
+            field.authored = None;
+            field.effective = None;
+            field.origin = Some("Mixed selection".into());
+        }
+        true
+    });
 }
 
 pub(crate) fn registry() -> &'static PropertyRegistry {
@@ -134,6 +154,7 @@ pub(crate) fn property_fields(
                 origin,
                 editable,
                 can_reset: editable && literal,
+                mixed: false,
             })
         })
         .collect()

@@ -1,0 +1,290 @@
+use crate::stages_prototype::Playback;
+use crate::{
+    document::DesignDocument,
+    protocol::{Image, Source},
+};
+use base64::{Engine, engine::general_purpose::STANDARD};
+use ferroui_base::{Point, Ref, threading::Dispatcher};
+use ferroui_controls::{Control, SizeToContent, Window, WindowDecorations};
+use ferroui_designer::{
+    PreviewEnvironment, PreviewHostOptions, PreviewStageBoard, PreviewStageConfiguration,
+    PreviewStageId, PreviewStageInfo, PreviewStageManifest, PreviewStageMode, PreviewStageSource,
+    PreviewStageStatus, PreviewTheme, capture_preview_stage_png,
+};
+use ferroui_designer_language::{LineIndex, Range};
+use ferroui_inspect::{Inspector, Permissions};
+use serde::{Deserialize, Serialize};
+use serde_json::{Value, json};
+use std::{collections::BTreeMap, rc::Rc};
+
+#[derive(Default)]
+pub(crate) struct Stages {
+    pub(crate) board: PreviewStageBoard,
+    windows: BTreeMap<PreviewStageId, StageWindow>,
+    sources: BTreeMap<String, Source>,
+    active: Option<String>,
+    pub(crate) playback: Playback,
+}
+
+#[derive(Deserialize)]
+pub(crate) struct Sync {
+    source: Source,
+    manifest: Option<PreviewStageManifest>,
+    #[serde(default)]
+    additional: Vec<Source>,
+}
+
+#[derive(Deserialize)]
+pub(crate) struct Change {
+    epoch: u64,
+    #[serde(flatten)]
+    action: Action,
+}
+
+#[derive(Deserialize)]
+#[serde(tag = "action", rename_all = "camelCase")]
+enum Action {
+    Add {
+        name: String,
+        width: f64,
+        height: f64,
+        dark: bool,
+    },
+    Remove {
+        id: PreviewStageId,
+    },
+    Update {
+        id: PreviewStageId,
+        configuration: PreviewStageConfiguration,
+    },
+    Refresh {
+        id: PreviewStageId,
+    },
+}
+
+#[derive(Serialize)]
+pub(crate) struct Model {
+    epoch: u64,
+    manifest: PreviewStageManifest,
+    stages: Vec<PreviewStageInfo>,
+    prototype: Option<crate::stages_prototype::Scene>,
+}
+
+#[derive(Deserialize)]
+pub(crate) struct StageTarget {
+    id: PreviewStageId,
+    epoch: u64,
+}
+
+#[derive(Deserialize)]
+pub(crate) struct Pointer {
+    #[serde(flatten)]
+    target: StageTarget,
+    x: f64,
+    y: f64,
+}
+
+impl Stages {
+    pub(crate) fn sync(&mut self, request: Sync) -> Result<Model, String> {
+        let uri = request.source.uri.clone();
+        if request.additional.len() >= ferroui_designer::MAX_PREVIEW_STAGES {
+            return Err("Open at most 16 preview documents".into());
+        }
+        let mut sources = BTreeMap::new();
+        let mut documents = Vec::new();
+        for source in std::iter::once(request.source).chain(request.additional) {
+            let parsed = DesignDocument::parse(&source)?;
+            documents.push(PreviewStageSource {
+                uri: source.uri.clone(),
+                document: parsed.xaml,
+                pending: false,
+            });
+            sources.insert(source.uri.clone(), source);
+        }
+        let epoch = self.board.epoch();
+        self.board
+            .sync_sources(&uri, documents, PreviewHostOptions::default(), 0)?;
+        if epoch != self.board.epoch() {
+            self.playback.stop();
+        }
+        if let Some(manifest) = request.manifest {
+            self.board.restore_manifest(manifest)?;
+        } else if self.active.is_none() {
+            self.board.add(PreviewStageConfiguration::new(
+                "Desktop",
+                &uri,
+                PreviewEnvironment::default(),
+            ))?;
+            self.board.add(PreviewStageConfiguration::new(
+                "Compact",
+                &uri,
+                PreviewEnvironment {
+                    width: 390.0,
+                    height: 680.0,
+                    theme: PreviewTheme::Dark,
+                    ..Default::default()
+                },
+            ))?;
+        }
+        self.active = Some(uri);
+        self.sources = sources;
+        Ok(self.model())
+    }
+
+    pub(crate) fn edit(&mut self, request: Change) -> Result<Model, String> {
+        if request.epoch != self.board.epoch() {
+            return Err("Read the current Stages board first".into());
+        }
+        let uri = self.active.as_ref().ok_or("Open a Stages board")?;
+        self.playback.stop();
+        match request.action {
+            Action::Add {
+                name,
+                width,
+                height,
+                dark,
+            } => {
+                self.board.add(PreviewStageConfiguration::new(
+                    name,
+                    uri,
+                    PreviewEnvironment {
+                        width,
+                        height,
+                        theme: if dark {
+                            PreviewTheme::Dark
+                        } else {
+                            PreviewTheme::Light
+                        },
+                        ..Default::default()
+                    },
+                ))?;
+            }
+            Action::Remove { id } => self.board.remove(id)?,
+            Action::Update { id, configuration } => {
+                let previous = self.board.stage(id).ok_or("The stage was removed")?;
+                if configuration.source_uri != previous.configuration.source_uri {
+                    return Err("The stage source changed. Reopen its document in Stages.".into());
+                }
+                self.board.update(id, configuration)?;
+            }
+            Action::Refresh { id } => self.board.refresh(id)?,
+        }
+        Ok(self.model())
+    }
+
+    pub(crate) fn image(&mut self, request: StageTarget) -> Result<Image, String> {
+        let control = self.mounted(&request)?;
+        let result = capture_preview_stage_png(&control, Default::default())?;
+        Ok(Image {
+            png: STANDARD.encode(result.png),
+            width: result.pixel_width,
+            height: result.pixel_height,
+        })
+    }
+
+    pub(crate) fn pointer(&mut self, request: Pointer) -> Result<Value, String> {
+        if !(0.0..=1.0).contains(&request.x) || !(0.0..=1.0).contains(&request.y) {
+            return Err("Choose a point inside the stage".into());
+        }
+        let control = self.mounted(&request.target)?;
+        let id = request.target.id;
+        let stage = self.board.stage(id).ok_or("The stage was removed")?;
+        if !matches!(stage.status, PreviewStageStatus::Ready { .. }) {
+            return Err("Refresh this stage before using it".into());
+        }
+        let size = control.bounds().size();
+        let point = Point::new(size.width * request.x, size.height * request.y);
+        if self.playback.interact(&self.board, id, point)? {
+            return Ok(json!({"prototype":self.playback.scene()}));
+        }
+        if stage.configuration.mode == PreviewStageMode::Live {
+            let inspector = Inspector::shared();
+            let mut inspector = inspector.borrow_mut();
+            let node_id = inspector.node_id(&control);
+            inspector.execute(
+                "click",
+                &json!({"node_id":node_id,"x":point.x,"y":point.y}),
+                Permissions {
+                    allow_input: true,
+                    ..Default::default()
+                },
+            )?;
+            return Ok(json!({"interacted":true}));
+        }
+        let selection = self
+            .board
+            .resolve_selection(&self.board.hit_test_selection(id, point)?)?;
+        let source = self
+            .sources
+            .get(&selection.source_uri)
+            .ok_or("Open the stage's source document first")?;
+        let parsed = DesignDocument::parse(source)?;
+        let range: Range = if let Some((_, node)) = parsed.rsx_node(selection.node) {
+            parsed.range(node.name)?
+        } else {
+            let span = parsed
+                .xaml
+                .ast()
+                .node(selection.node)
+                .ok_or("The source selection changed")?
+                .name_span;
+            LineIndex::new(&source.source)
+                .range(span)
+                .map_err(|error| error.to_string())?
+        };
+        Ok(json!({"range":range,"uri":source.uri}))
+    }
+
+    fn mounted(&mut self, target: &StageTarget) -> Result<Ref<Control>, String> {
+        let info = self
+            .board
+            .stage(target.id)
+            .filter(|info| info.epoch == target.epoch)
+            .ok_or("The stage changed. Use its current image.")?;
+        if info.rendered_revision.is_none() {
+            return Err("This stage has no accepted preview".into());
+        }
+        let control = self
+            .board
+            .control(target.id)
+            .ok_or("The stage was removed")?;
+        self.windows
+            .entry(target.id)
+            .or_insert_with(|| StageWindow::new(control.clone()));
+        Dispatcher::ui_thread().run_jobs(None);
+        control.update_layout();
+        self.board.refresh_runtime_mapping(target.id)?;
+        Ok(control)
+    }
+
+    pub(crate) fn model(&mut self) -> Model {
+        let stages = self.board.stages();
+        self.windows
+            .retain(|id, _| stages.iter().any(|stage| stage.id == *id));
+        Model {
+            epoch: self.board.epoch(),
+            manifest: self.board.manifest(),
+            stages,
+            prototype: self.playback.scene(),
+        }
+    }
+}
+
+struct StageWindow(Ref<Window>);
+
+impl StageWindow {
+    fn new(control: Ref<Control>) -> Self {
+        let window = Window::new();
+        window.set_window_decorations(WindowDecorations::None);
+        window.set_size_to_content(SizeToContent::WIDTH_AND_HEIGHT);
+        window.set_content(Some(Rc::new(control)));
+        window.show();
+        Self(window)
+    }
+}
+
+impl Drop for StageWindow {
+    fn drop(&mut self) {
+        self.0.close();
+    }
+}

@@ -102,19 +102,19 @@ export class Artboard {
     get isCurrent(): boolean { return this.current; }
     get surface(): HTMLElement { return this.viewport.element; }
 
-    point(event: MouseEvent): Point | undefined {
+    point(event: MouseEvent, outside = false): Point | undefined {
         const image = this.snapshot?.image;
         if (!this.current || !image) return undefined;
         const rect = this.element.getBoundingClientRect();
         const x = (event.clientX - rect.left) * image.width / rect.width;
         const y = (event.clientY - rect.top) * image.height / rect.height;
-        return x >= 0 && y >= 0 && x < image.width && y < image.height ? { x, y } : undefined;
+        return outside || (x >= 0 && y >= 0 && x < image.width && y < image.height) ? { x, y } : undefined;
     }
 
     hit(point?: Point): CanvasNode | undefined {
         if (!point) return undefined;
         const { x, y } = point;
-        return this.snapshot?.nodes.findLast(({ bounds: b }) => b && b.width > 0 && b.height > 0
+        return this.snapshot?.nodes.findLast(({ bounds: b, selectable }) => selectable !== false && b && b.width > 0 && b.height > 0
             && x >= b.x && y >= b.y && x < b.x + b.width && y < b.y + b.height);
     }
 

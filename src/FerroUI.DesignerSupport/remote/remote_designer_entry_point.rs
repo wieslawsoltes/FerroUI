@@ -8,7 +8,7 @@ use ferroui_base::Ref;
 use ferroui_controls::{AppBuilder, Design, Window};
 use ferroui_markup_xaml::XamlLoadError;
 use ferroui_remote_protocol::designer::{
-    ExceptionDetails, StartDesignerSessionMessage, UpdateXamlMessage, UpdateXamlResultMessage,
+    ExceptionDetails, StartDesignerSessionMessage, UpdateDesignMessage, UpdateDesignResultMessage, UpdateXamlMessage, UpdateXamlResultMessage,
 };
 use ferroui_remote_protocol::viewport::{
     ClientRenderInfoMessage, ClientSupportedPixelFormatsMessage, ClientViewportAllocatedMessage,
@@ -138,6 +138,14 @@ fn print_usage() -> ! {
 pub struct RemoteDesignerEntryPoint;
 
 impl RemoteDesignerEntryPoint {
+    /// Dispatches the editor's opt-in preview invocation before normal application startup.
+    pub fn run_if_requested(build_app: impl FnOnce() -> AppBuilder) {
+        let mut args = std::env::args().skip(1);
+        if args.next().as_deref() == Some("--ferroui-preview") {
+            Self::main(&args.collect::<Vec<_>>(), build_app);
+        }
+    }
+
     /// `ParseCommandLineArgs`. Where the original prints the usage and
     /// exits, this returns the error; [`main`](Self::main) prints and exits.
     pub fn parse_command_line_args(args: &[String]) -> Result<CommandLineArgs, UsageError> {
@@ -356,7 +364,9 @@ impl RemoteDesignerEntryPoint {
             VIEWPORT_ALLOCATED_MESSAGE.with(|slot| *slot.borrow_mut() = Some(arg.clone()));
             Self::rebuild_pre_flight();
         }
-        if let Some(xaml) = arg.downcast_ref::<UpdateXamlMessage>() {
+        let versioned = arg.downcast_ref::<UpdateDesignMessage>();
+        let source = versioned.map(|update| &update.source).or_else(|| arg.downcast_ref::<UpdateXamlMessage>());
+        if let Some(xaml) = source {
             // Keep the last valid preview alive until a replacement was successfully built.
             let current_window = CURRENT_WINDOW.with(|slot| slot.borrow().clone());
             if let Some(current_window) = &current_window {
@@ -365,6 +375,8 @@ impl RemoteDesignerEntryPoint {
             let Some(transport) = TRANSPORT.with(|slot| slot.borrow().clone()) else {
                 return;
             };
+            let revision = versioned.map(|update| update.revision);
+            let pending = PreviewerWindowingPlatform::begin_update(revision);
             // `catch (Exception e)`: an error of the document, and whatever
             // else fails while the window is built and shown (a panic here).
             let loaded = catch_unwind(AssertUnwindSafe(|| {
@@ -386,6 +398,7 @@ impl RemoteDesignerEntryPoint {
                     }
                     let handle = window.platform_impl().and_then(|platform_impl| platform_impl.handle());
                     CURRENT_WINDOW.with(|slot| *slot.borrow_mut() = Some(window));
+                    pending.accept();
                     UpdateXamlResultMessage {
                         handle: handle.map(|handle| handle.handle().to_string()),
                         ..UpdateXamlResultMessage::default()
@@ -416,7 +429,10 @@ impl RemoteDesignerEntryPoint {
                     }
                 }
             };
-            transport.send(Arc::new(result));
+            let answer: Message = if let Some(revision) = revision {
+                Arc::new(UpdateDesignResultMessage { revision, result })
+            } else { Arc::new(result) };
+            transport.send(answer);
         }
     }
 

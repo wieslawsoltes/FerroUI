@@ -748,6 +748,67 @@ fn plan_moves(
     Ok(snapshot_edits_first(edits))
 }
 
+pub(crate) fn resize_edits(
+    session: &DesignerSession,
+    node: NodeId,
+    before: ferroui_base::Rect,
+    after: ferroui_base::Rect,
+) -> Result<(Vec<Edit>, bool), String> {
+    session.ensure_layer_manipulable(node)?;
+    let measured = measure(session, parent(session, node)?, Some(node))?;
+    let transform = measured.to_artboard;
+    let visual = session
+        .preview
+        .visual(node)
+        .ok_or("No live layout for selected element")?;
+    let own = affine(
+        visual
+            .transform_to_visual(&measured.visual)
+            .ok_or("Detached element")?,
+    )?;
+    if transform.m12.abs() > 1e-9
+        || transform.m21.abs() > 1e-9
+        || transform.m11 <= 0.0
+        || transform.m22 <= 0.0
+        || own.m12.abs() > 1e-9
+        || own.m21.abs() > 1e-9
+        || (own.m11 - 1.0).abs() > 1e-9
+        || (own.m22 - 1.0).abs() > 1e-9
+    {
+        if before.width <= 0.0
+            || before.height <= 0.0
+            || after.width <= 0.0
+            || after.height <= 0.0
+        {
+            return Err("Resize dimensions must be positive".into());
+        }
+        let adjustment = Matrix::create_translation(-before.x, -before.y)
+            * Matrix::create_scale(
+                after.width / before.width,
+                after.height / before.height,
+            )
+            * Matrix::create_translation(after.x, after.y);
+        let edits = visual_adjustment(session, node, adjustment)?;
+        return Ok((edits, true));
+    }
+    let original = *measured
+        .bounds
+        .get(&node)
+        .ok_or("Missing measured layout")?;
+    let delta = measured.delta(Point::new(after.x - before.x, after.y - before.y))?;
+    let after = Rect::new(
+        original.x + delta.x,
+        original.y + delta.y,
+        after.width / transform.m11,
+        after.height / transform.m22,
+    );
+    let edits = session.layout_tools().plan(
+        &measured.context(session.document()),
+        LayoutAction::Resize { node, before: original, after },
+    ).map_err(|error| error.to_string())?;
+    Ok((edits, false))
+}
+
 pub(crate) fn commit(session: &mut DesignerSession, gesture: DesignGesture) -> Result<(), String> {
     if !session.can_manipulate() {
         return Err(
@@ -769,72 +830,12 @@ pub(crate) fn commit(session: &mut DesignerSession, gesture: DesignGesture) -> R
                     .collect(),
             )?);
         }
-        DesignGesture::Resize {
-            node,
-            before,
-            after,
-        } => {
-            session.ensure_layer_manipulable(node)?;
-            let measured = measure(session, parent(session, node)?, Some(node))?;
-            let transform = measured.to_artboard;
-            let visual = session
-                .preview
-                .visual(node)
-                .ok_or("No live layout for selected element")?;
-            let own = affine(
-                visual
-                    .transform_to_visual(&measured.visual)
-                    .ok_or("Detached element")?,
-            )?;
-            if transform.m12.abs() > 1e-9
-                || transform.m21.abs() > 1e-9
-                || transform.m11 <= 0.0
-                || transform.m22 <= 0.0
-                || own.m12.abs() > 1e-9
-                || own.m21.abs() > 1e-9
-                || (own.m11 - 1.0).abs() > 1e-9
-                || (own.m22 - 1.0).abs() > 1e-9
-            {
-                if before.width <= 0.0
-                    || before.height <= 0.0
-                    || after.width <= 0.0
-                    || after.height <= 0.0
-                {
-                    return Err("Resize dimensions must be positive".into());
-                }
-                let adjustment = Matrix::create_translation(-before.x, -before.y)
-                    * Matrix::create_scale(
-                        after.width / before.width,
-                        after.height / before.height,
-                    )
-                    * Matrix::create_translation(after.x, after.y);
-                let edits = visual_adjustment(session, node, adjustment)?;
-                return session.apply_visual("Resize transformed selection", edits);
+        DesignGesture::Resize { node, before, after } => {
+            let (planned, transformed) = resize_edits(session, node, before, after)?;
+            if transformed {
+                return session.apply_visual("Resize transformed selection", planned);
             }
-            let original = *measured
-                .bounds
-                .get(&node)
-                .ok_or("Missing measured layout")?;
-            let delta = measured.delta(Point::new(after.x - before.x, after.y - before.y))?;
-            let after = Rect::new(
-                original.x + delta.x,
-                original.y + delta.y,
-                after.width / transform.m11,
-                after.height / transform.m22,
-            );
-            edits.extend(
-                session
-                    .layout_tools()
-                    .plan(
-                        &measured.context(session.document()),
-                        LayoutAction::Resize {
-                            node,
-                            before: original,
-                            after,
-                        },
-                    )
-                    .map_err(|e| e.to_string())?,
-            );
+            edits.extend(planned);
         }
         DesignGesture::ResizeLocal { node, after } => {
             session.ensure_layer_manipulable(node)?;

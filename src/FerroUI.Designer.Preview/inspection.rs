@@ -20,6 +20,7 @@ pub(crate) struct InspectionRequest {
 #[serde(tag = "type", rename_all = "camelCase")]
 pub(crate) enum InspectionTarget {
     Source { node: NodeId },
+    Selection { nodes: Vec<NodeId> },
     Runtime { id: u64 },
 }
 
@@ -49,6 +50,23 @@ pub(crate) fn inspect(
                 properties: property_fields(&design, element, effective),
                 events: event_fields(&design, element)?,
             })
+        }
+        InspectionTarget::Selection { ref nodes } => {
+            let distinct: std::collections::BTreeSet<_> = nodes.iter().copied().collect();
+            if !(2..=128).contains(&nodes.len()) || distinct.len() != nodes.len() {
+                return Err("Inspect between two and 128 distinct source elements".into());
+            }
+            let design = DesignDocument::parse(&input.source)?;
+            let session = stage.ok_or("Wait for the current preview")?.session.borrow();
+            let mut fields = nodes.iter().rev().map(|id| {
+                let node = design.xaml.ast().node(*id).ok_or("Unknown selected element")?;
+                Ok::<_, &str>(property_fields(&design, node, session.authored_preview_properties(*id)))
+            });
+            let mut properties = fields.next().expect("selection length validated")?;
+            for fields in fields {
+                crate::property_fields::intersect(&mut properties, fields?);
+            }
+            Ok(Inspection { properties, events: Vec::new() })
         }
         InspectionTarget::Runtime { id } => {
             let properties = stage

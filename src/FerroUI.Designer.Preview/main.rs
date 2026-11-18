@@ -5,6 +5,8 @@ mod editor_mcp;
 mod edit_selection;
 mod edits;
 mod event_fields;
+mod hosted_frame;
+mod hosted_relay;
 mod inspection;
 mod placement;
 mod property_fields;
@@ -13,6 +15,8 @@ mod renderer;
 mod resources;
 mod rsx_placement;
 mod snapshot;
+mod stages;
+mod stages_prototype;
 mod studio;
 mod toolbox;
 
@@ -41,18 +45,26 @@ fn main() -> ExitCode {
 fn serve() -> io::Result<()> {
     let mut output = io::BufWriter::new(ferroui_mcp::reserve_stdout()?);
     let mut input = io::stdin().lock();
-    let mut renderer = None;
+    let mut session = Session::default();
     while let Some(message) = read_frame(&mut input)? {
-        respond(message, &mut renderer, &mut output)?;
+        respond(message, &mut session, &mut output)?;
     }
     Ok(())
 }
 
+#[derive(Default)]
+struct Session {
+    renderer: Option<Renderer>,
+    hosted: Option<hosted_relay::Relay>,
+    stages: stages::Stages,
+}
+
 fn respond(
     message: Value,
-    renderer: &mut Option<Renderer>,
+    session: &mut Session,
     output: &mut impl Write,
 ) -> io::Result<()> {
+    let Session { renderer, hosted, stages } = session;
     let id = &message["id"];
     let Some(method) = message["method"]
         .as_str()
@@ -68,11 +80,34 @@ fn respond(
     }
     let result = match method {
         "initialize" => Ok(json!({"version": protocol::PROTOCOL_VERSION, "assets": toolbox::catalog(),
-            "capabilities": {"isolatedDesign":true,"rsxLanguage":true}})),
+            "capabilities": {"isolatedDesign":true,"appHostedDesign":true,"rsxLanguage":true,"stages":true}})),
         "rsxLanguage" => match message["params"]["source"].as_str() {
             Some(source) if source.len() <= protocol::MAX_SOURCE_BYTES => serialize(Ok(ferroui_designer_rsx::analyze_rsx(source))),
             _ => Err("RSX language source must be at most 1 MiB".into()),
         },
+        "hostedListen" => hosted_relay::Relay::listen(message["params"]["nonce"].as_str().unwrap_or("")).map(|relay| {
+            let port = relay.port();
+            *hosted = Some(relay);
+            json!({"port":port})
+        }),
+        "hostedRender" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
+            .and_then(|design| serialize(hosted.as_mut().ok_or("Start an app-hosted session")?.render(design))),
+        "hostedFrame" => hosted.as_mut().ok_or_else(|| "Start an app-hosted session".into()).and_then(|relay| serialize(relay.frame())),
+        "hostedInput" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
+            .and_then(|input| serialize(hosted.as_ref().ok_or("Start an app-hosted session")?.input(input))),
+        "stagesSync" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
+            .and_then(|request| {
+                renderer.get_or_insert_with(Renderer::new);
+                serialize(stages.sync(request))
+            }),
+        "stagesEdit" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
+            .and_then(|request| serialize(stages.edit(request))),
+        "stagesImage" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
+            .and_then(|request| serialize(stages.image(request))),
+        "stagesPointer" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
+            .and_then(|request| stages.pointer(request)),
+        "stagesPrototype" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
+            .and_then(|request| serialize(stages.playback.control(&stages.board, request))),
         "render" => serde_json::from_value(message["params"].clone())
             .map_err(|e| e.to_string())
             .and_then(|input| {
@@ -97,6 +132,8 @@ fn respond(
                 serialize(stage.plan(&input.placement).map(|(_, hint)| hint))
             }),
         "studioTools" => Ok(studio::catalog()),
+        "studioPresent" => serde_json::from_value::<studio::Present>(message["params"].clone())
+            .map_err(|error| error.to_string()).and_then(|request| studio::present(renderer.as_mut().ok_or("Open a designer first")?, request)),
         "studioQuery" => serde_json::from_value::<studio::Query>(message["params"].clone())
             .map_err(|e| e.to_string())
             .and_then(|query| {

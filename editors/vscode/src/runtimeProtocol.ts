@@ -37,7 +37,7 @@ export interface RuntimeFrame {
 export type ToRuntime =
     | { type: 'state'; target?: RuntimeTarget; targets: RuntimeTarget[]; status: string; windows: RuntimeNode[]; root?: number }
     | { type: 'frame'; frame: RuntimeFrame }
-    | { type: 'inspection'; token: number; view: RuntimeInspection; node: number; data: unknown; canReveal: boolean }
+    | { type: 'inspection'; token: number; view: RuntimeInspection; node: number; data: unknown; canReveal: boolean; canApply: boolean }
     | { type: 'problem'; message: string };
 
 type RuntimeFrameAction =
@@ -47,7 +47,7 @@ type RuntimeFrameAction =
     | { type: 'text'; node: number; text: string }
     | { type: 'key'; node: number; key: string }
     | { type: 'scroll'; node: number; x: number; y: number }
-    | { type: 'assign'; node: number; property: string; value: string };
+    | { type: 'assign' | 'assignSource'; node: number; property: string; value: string };
 
 export type FromRuntime =
     | { type: 'ready' | 'refresh' | 'start' | 'attach' }

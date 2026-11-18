@@ -28,7 +28,8 @@ export class Inspector {
 
     show(state: PropertiesState, enabled: boolean): void {
         const { node, runtime, fields } = state;
-        const label = runtime?.type ?? node?.label;
+        const group = (state.selectionCount ?? 0) > 1;
+        const label = group ? `${state.selectionCount} controls` : runtime?.type ?? node?.label;
         this.selection.hidden = !label;
         // A source range can still be revealed on a read-only row.
         this.target.toggleAttribute('inert', !state.frame || Boolean(node && !enabled));
@@ -43,9 +44,9 @@ export class Inspector {
         if (changedSelection) this.filter.value = '';
         element('control-type').textContent = label;
         const name = element('control-name');
-        name.textContent = runtime ? [runtime.name, 'Runtime'].filter(Boolean).join(' · ') : node?.name ?? '';
+        name.textContent = group ? '' : runtime ? [runtime.name, 'Runtime'].filter(Boolean).join(' · ') : node?.name ?? '';
         name.hidden = !name.textContent;
-        this.showMetrics(runtime?.bounds ?? node?.bounds);
+        this.showMetrics(group ? undefined : runtime?.bounds ?? node?.bounds);
         element('filter-row').hidden = !fields?.length;
 
         // Keep the existing rows mounted across an edit and its rerender. The host frame gate
@@ -86,7 +87,7 @@ export class Inspector {
             empty.hidden = true;
             sections.push(empty);
         }
-        if (node && (node.canInsert || node.canRemove)) sections.push(this.structure(node.id, node.canInsert, node.canRemove));
+        if (node && !group && (node.canInsert || node.canRemove)) sections.push(this.structure(node.id, node.canInsert, node.canRemove));
         this.target.replaceChildren(...sections);
         this.applyFilter();
         if (focus && enabled && !changedSelection) {

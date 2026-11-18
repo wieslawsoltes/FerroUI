@@ -32,7 +32,8 @@
   "activationEvents": [
     "onLanguage:ferroui-xaml",
     "onLanguage:rust",
-    "onWebviewPanel:ferroui.designer"
+    "onWebviewPanel:ferroui.designer",
+    "onWebviewPanel:ferroui.stages"
   ],
   "contributes": {
     "mcpServerDefinitionProviders": [
@@ -110,6 +111,11 @@
         "icon": "$(file-media)"
       },
       {
+        "command": "ferroui.showStudio",
+        "title": "Show Studio Tools",
+        "category": "FerroUI"
+      },
+      {
         "command": "ferroui.studio.layout",
         "title": "Arrange Selection",
         "category": "FerroUI"
@@ -125,6 +131,11 @@
         "title": "Run with Hot Reload",
         "category": "FerroUI",
         "icon": "$(flame)"
+      },
+      {
+        "command": "ferroui.hotReload.startRegistered",
+        "title": "Run with Registered Rust Patches",
+        "category": "FerroUI"
       },
       {
         "command": "ferroui.hotReload.rebuild",
@@ -146,6 +157,16 @@
         "title": "Open Live App",
         "category": "FerroUI",
         "icon": "$(run)"
+      },
+      {
+        "command": "ferroui.openHostedDesign",
+        "title": "Open App-Hosted Design",
+        "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.openStages",
+        "title": "Open Preview Stages",
+        "category": "FerroUI"
       },
       {
         "command": "ferroui.hotReload.debug",
@@ -228,6 +249,24 @@
           "scope": "machine",
           "description": "Path to the Cargo executable used by Run with Hot Reload. Leave empty to use Cargo from PATH."
         },
+        "ferroui.hotReload.registeredSupervisor": {
+          "type": "string",
+          "scope": "resource",
+          "default": "scripts/hot-reload/supervisor.py",
+          "description": "Workspace-relative owning supervisor for registered Rust patch and state-restoration sessions."
+        },
+        "ferroui.hotReload.pythonPath": {
+          "type": "string",
+          "scope": "machine",
+          "default": "",
+          "description": "Python executable for the registered patch supervisor."
+        },
+        "ferroui.hotReload.patchCompilerPath": {
+          "type": "string",
+          "scope": "machine",
+          "default": "",
+          "description": "Path to the supervisor's pinned dx patch compiler. Leave empty to use PATH."
+        },
         "ferroui.hotReload.targets": {
           "type": "array",
           "default": [],
@@ -283,6 +322,12 @@
           "type": "boolean",
           "default": true,
           "description": "Offer FerroUI property names at mapped RSX fields alongside Rust completions."
+        },
+        "ferroui.hostedPreview.assembly": {
+          "type": "string",
+          "scope": "resource",
+          "default": "",
+          "description": "Registered markup assembly for application previews. By default, use the selected Cargo package name."
         },
         "ferroui.rsx.inlayHints": {
           "type": "boolean",
@@ -353,6 +398,13 @@
           "name": "Assets",
           "icon": "dist/icons/file-media.svg",
           "contextualTitle": "FerroUI Assets",
+          "visibility": "collapsed"
+        },
+        {
+          "id": "ferroui.studio",
+          "name": "Studio",
+          "icon": "dist/icons/preview.svg",
+          "contextualTitle": "FerroUI Studio",
           "visibility": "collapsed"
         }
       ]

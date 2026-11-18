@@ -5,7 +5,7 @@
 //! A crate that declares message classes of its own has such a table and
 //! passes it to [`DefaultMessageTypeResolver::new`](crate::DefaultMessageTypeResolver::new).
 
-use crate::design_messages::{StartDesignerSessionMessage, UpdateXamlMessage, UpdateXamlResultMessage};
+use crate::design_messages::{DesignFrameMessage, DesignFrameReceivedMessage, StartDesignerSessionMessage, UpdateDesignMessage, UpdateDesignResultMessage, UpdateXamlMessage, UpdateXamlResultMessage};
 use crate::ferro_remote_message_guid_attribute::{FerroRemoteMessage, FerroRemoteMessageGuidAttribute};
 use crate::input_messages::{
     KeyEventMessage, PointerMovedEventMessage, PointerPressedEventMessage, PointerReleasedEventMessage,
@@ -60,6 +60,10 @@ pub static ASSEMBLY: Assembly = Assembly {
         ExportedType::of::<UpdateXamlMessage>(),
         ExportedType::of::<UpdateXamlResultMessage>(),
         ExportedType::of::<StartDesignerSessionMessage>(),
+        ExportedType::of::<UpdateDesignMessage>(),
+        ExportedType::of::<UpdateDesignResultMessage>(),
+        ExportedType::of::<DesignFrameMessage>(),
+        ExportedType::of::<DesignFrameReceivedMessage>(),
         // TransportMessages
         ExportedType::of::<HtmlTransportStartedMessage>(),
     ],
@@ -182,7 +186,7 @@ mod tests {
     #[test]
     fn every_upstream_message_class_is_in_the_table_with_its_identifier() {
         assert_eq!(UPSTREAM_MESSAGES.len(), 17);
-        assert_eq!(ASSEMBLY.exported_types.len(), UPSTREAM_MESSAGES.len());
+        assert_eq!(ASSEMBLY.exported_types.len(), UPSTREAM_MESSAGES.len() + 4);
         for (name, guid) in UPSTREAM_MESSAGES {
             let exported = ASSEMBLY
                 .exported_types
@@ -192,7 +196,7 @@ mod tests {
             assert_eq!(exported.attribute.unwrap().guid(), Uuid::parse_str(guid).unwrap(), "{}", name);
         }
         let guids: HashSet<Uuid> = ASSEMBLY.exported_types.iter().map(|t| t.attribute.unwrap().guid()).collect();
-        assert_eq!(guids.len(), UPSTREAM_MESSAGES.len());
+        assert_eq!(guids.len(), ASSEMBLY.exported_types.len());
     }
 
     #[test]
@@ -207,6 +211,17 @@ mod tests {
         assert!(matches!(resolver.get_by_guid(Uuid::nil()), Err(crate::Error::KeyNotFound(_))));
         assert!(matches!(resolver.get_guid(ExceptionDetails::CLASS), Err(crate::Error::KeyNotFound(_))));
         assert_eq!(MeasureViewportMessage::GUID, Uuid::parse_str("6E3C5310-E2B1-4C3D-8688-01183AA48C5B").unwrap());
+    }
+
+    #[test]
+    fn tagged_design_frames_preserve_nested_binary_data_and_revision() {
+        let packet = DesignFrameMessage {
+            revision: 12,
+            frame: FrameMessage { data: Some(vec![1, 2, 3, 4]), sequence_id: 7, ..Default::default() },
+        };
+        let message: Message = Arc::new(packet.clone());
+        let Value::Object(decoded) = round_trip(&message) else { panic!("Expected a design frame") };
+        assert_eq!(decoded.downcast_ref::<DesignFrameMessage>(), Some(&packet));
     }
 
     #[test]

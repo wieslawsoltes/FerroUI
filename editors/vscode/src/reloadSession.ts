@@ -19,6 +19,7 @@ export class ReloadSession implements vscode.Disposable {
     private readonly observed = new Map<string, string>();
     private readonly waitingReads = new Map<string, object>();
     private readonly results = new Map<string, RuntimeEvent>();
+    private readonly acceptedXaml = new Map<string, string>();
     private readonly languages = new Set<RuntimeEvent['language']>();
     private readonly root: string;
     private readonly targetDirectory: string;
@@ -34,7 +35,8 @@ export class ReloadSession implements vscode.Disposable {
     constructor(readonly target: CargoTarget, private readonly output: ProcessOutput,
         private readonly status: (message: string, problem?: boolean) => void,
         private readonly mcpChanged: (endpoint?: RuntimeMcpEndpoint) => void,
-        private readonly built: (metadata: ProjectMetadata) => void) {
+        private readonly built: (metadata: ProjectMetadata) => void,
+        private readonly activated: (pid: number) => void) {
         this.root = fileKey(target.folder.uri.fsPath);
         this.targetDirectory = fileKey(target.targetDirectory);
         const watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(target.folder, watchPattern));
@@ -44,6 +46,10 @@ export class ReloadSession implements vscode.Disposable {
     }
 
     get pid(): number | undefined { return this.live?.pid; }
+
+    containsXaml(file: string, source: string): boolean {
+        return this.live !== undefined && this.acceptedXaml.get(fileKey(file)) === revision(Buffer.from(source));
+    }
 
     build(): void {
         this.rebuild = true;
@@ -117,7 +123,10 @@ export class ReloadSession implements vscode.Disposable {
                     if (result.status === 'failed') {
                         failed = true;
                         this.status(`${result.language.toUpperCase()} edit rejected`, true);
-                    } else applied = `${result.language.toUpperCase()} reloaded`;
+                    } else {
+                        if (result.language === 'xaml') this.acceptedXaml.set(key, change.fingerprint);
+                        applied = `${result.language.toUpperCase()} reloaded`;
+                    }
                 }
             } else if (!this.live || !change.language || !this.languages.has(change.language)) this.rebuild = true;
             else {
@@ -170,10 +179,12 @@ export class ReloadSession implements vscode.Disposable {
             this.candidate = undefined;
             this.changes.clear();
             this.results.clear();
+            this.acceptedXaml.clear();
             this.languages.clear();
             live = true;
             this.mcpChanged(endpoint);
             for (const event of candidateEvents) this.accept(event);
+            if (this.live.pid) this.activated(this.live.pid);
             previous?.stop();
             this.output.appendLine(`Running ${this.target.label} · PID ${this.live.pid}${previous ? ' · rebuilt and restarted' : ''}`);
             this.status(previous ? 'Rebuilt and restarted' : 'Watching saves');

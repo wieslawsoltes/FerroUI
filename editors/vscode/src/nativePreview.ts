@@ -1,8 +1,10 @@
 import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { createMessageConnection, StreamMessageReader, StreamMessageWriter } from 'vscode-jsonrpc/node';
 import type * as vscode from 'vscode';
-import type { Asset, DropHint, EditResult, Inspection, InspectionTarget, Operation, Placement, ResourceRow, Snapshot, Source, Viewport } from './protocol';
+import type { Asset, DropHint, EditResult, Inspection, InspectionTarget, Operation, Placement, ResourceRow, Snapshot, Source, StudioPresentation, Viewport } from './protocol';
 import type { RsxLanguageDocument } from './rsxLanguageTypes';
+import type { HostedFrame, HostedInput, HostedSource } from './hostedProtocol';
+import type { PrototypeCommand, PrototypeScene, StageChange, StageImage, StageManifest, StageModel, StagePick, StagePointer, StageTarget } from './stagesProtocol';
 import { commandFor } from './tools';
 
 export class NativePreview implements vscode.Disposable {
@@ -11,7 +13,7 @@ export class NativePreview implements vscode.Disposable {
     private stopped = false;
     private failure?: Error;
     assets: readonly Asset[] = [];
-    capabilities: { isolatedDesign?: boolean; rsxLanguage?: boolean } = {};
+    capabilities: { isolatedDesign?: boolean; appHostedDesign?: boolean; rsxLanguage?: boolean; stages?: boolean } = {};
 
     private constructor(command: string, channel: vscode.OutputChannel) {
         this.child = spawn(command, [], { windowsHide: true });
@@ -48,6 +50,27 @@ export class NativePreview implements vscode.Disposable {
         return this.capabilities.rsxLanguage ? this.send('rsxLanguage', { source }) : Promise.resolve(undefined);
     }
 
+    listenHosted(nonce: string): Promise<{ port: number }> {
+        if (!this.capabilities.appHostedDesign) throw new Error('Update the FerroUI preview helper to use app-hosted design.');
+        return this.send('hostedListen', { nonce });
+    }
+
+    renderHosted(source: HostedSource): Promise<HostedFrame> { return this.send('hostedRender', source); }
+    hostedFrame(): Promise<HostedFrame | null> { return this.send('hostedFrame'); }
+    hostedInput(input: HostedInput): Promise<void> { return this.send('hostedInput', input); }
+
+    syncStages(source: Source, manifest?: StageManifest, additional: Source[] = []): Promise<StageModel> {
+        if (!this.capabilities.stages) throw new Error('Update the FerroUI preview helper to use Stages.');
+        return this.send('stagesSync', { source, manifest, additional });
+    }
+
+    editStages(change: StageChange): Promise<StageModel> { return this.send('stagesEdit', change); }
+    stageImage(target: StageTarget): Promise<StageImage> { return this.send('stagesImage', target); }
+    stagePointer(input: StagePointer): Promise<StagePick> { return this.send('stagesPointer', input); }
+    stagePrototype(epoch: number, command: PrototypeCommand): Promise<PrototypeScene | null> {
+        return this.send('stagesPrototype', { epoch, ...command });
+    }
+
     render(source: Source, viewport: Viewport, frame = 0): Promise<Snapshot> {
         return this.send('render', { ...source, ...viewport, frame });
     }
@@ -64,7 +87,7 @@ export class NativePreview implements vscode.Disposable {
         return this.send('resources', { ...source, frame, target });
     }
 
-    studioTools(): Promise<{ tools: object[]; xamlEdits: object[] }> { return this.send('studioTools'); }
+    studioTools(): Promise<{ tools: object[]; xamlEdits: object[]; presentations?: object[] }> { return this.send('studioTools'); }
 
     studioQuery(frame: number, name: string, args: object, selection?: number[]): Promise<unknown> {
         return this.send('studioQuery', { frame, name, arguments: args, selection });
@@ -72,6 +95,10 @@ export class NativePreview implements vscode.Disposable {
 
     studioEdit(source: Source, frame: number, name: string, args: object, selection: number[]): Promise<EditResult> {
         return this.send('studioEdit', { ...source, frame, name, arguments: args, selection });
+    }
+
+    studioPresent(frame: number, nextFrame: number, name: string, args: object, selection: number[]): Promise<StudioPresentation> {
+        return this.send('studioPresent', { frame, nextFrame, name, arguments: args, selection });
     }
 
     edit(source: Source, operation: Operation): Promise<EditResult> {

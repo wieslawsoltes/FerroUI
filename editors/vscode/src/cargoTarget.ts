@@ -47,7 +47,7 @@ export interface CargoSelection {
     label?: string;
 }
 
-export async function selectCargoTarget(): Promise<CargoTarget | undefined> {
+export async function selectCargoTarget(placeHolder = 'Select a Cargo binary with FerroUI hot reload enabled'): Promise<CargoTarget | undefined> {
     if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before running a FerroUI application.');
     const folders = localFolders();
     const document = vscode.window.activeTextEditor?.document;
@@ -69,7 +69,7 @@ export async function selectCargoTarget(): Promise<CargoTarget | undefined> {
         description: target.packageName,
         detail: vscode.workspace.asRelativePath(target.manifest),
         target,
-    })), { placeHolder: 'Select a Cargo binary with FerroUI hot reload enabled', matchOnDescription: true, matchOnDetail: true });
+    })), { placeHolder, matchOnDescription: true, matchOnDetail: true });
     return picked?.target;
 }
 

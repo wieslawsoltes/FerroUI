@@ -25,6 +25,16 @@ pub struct PlacementPlan {
 }
 
 impl DesignerSession {
+    pub fn plan_resize_handle(&self, node: NodeId, handle: u8, dx: f64, dy: f64) -> Result<Vec<Edit>, String> {
+        if handle > 7 || ![dx, dy].iter().all(|value| value.is_finite() && value.abs() <= 6144.0) || !self.can_manipulate() {
+            return Err("Resize a current preview control with a valid handle and displacement".into());
+        }
+        let host = self.preview.host.clone().upcast();
+        let before = self.preview.bounds(node, &host).ok_or("The selected control has no measured bounds")?;
+        let after = crate::affine_manipulation::resize(before, dx, dy, handle);
+        crate::workspace_tools::resize_edits(self, node, before, after).map(|(edits, _)| edits)
+    }
+
     /// Resolve a gesture against the current native layout and return a source transaction.
     pub fn plan_placement(
         &self,

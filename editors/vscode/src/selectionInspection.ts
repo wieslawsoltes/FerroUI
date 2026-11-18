@@ -16,10 +16,12 @@ export class SelectionInspection {
         if (!panel || !frame) return {};
         const node = panel.selectedNode;
         const runtime = panel.runtimeSelection;
+        const selection = panel.selectedIds;
         const target: InspectionTarget | undefined = runtime ? { type: 'runtime', id: runtime.inspector_id }
+            : selection.length > 1 ? { type: 'selection', nodes: [...selection] }
             : node ? { type: 'source', node: node.id } : undefined;
         if (!target) return {};
-        const key = `${frame.session}:${frame.token}:${node?.id ?? 'runtime'}:${runtime?.inspector_id ?? ''}`;
+        const key = `${frame.session}:${frame.token}:${selection.join(',')}:${runtime?.inspector_id ?? ''}`;
         if (this.current?.key !== key) {
             const query: Query = { key };
             this.current = query;

@@ -106,6 +106,16 @@ body {
 }
 .hover-outline { border-style: dashed; opacity: .62; }
 .additional-outline { border-style: dashed; }
+.resize-handle { position: absolute; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; padding: 0; pointer-events: auto; border: 1px solid var(--focus); background: var(--vscode-editor-background); }
+.resize-0, .resize-1, .resize-2 { top: 0; }
+.resize-4, .resize-5, .resize-6 { top: 100%; }
+.resize-3, .resize-7 { top: 50%; }
+.resize-0, .resize-6, .resize-7 { left: 0; }
+.resize-2, .resize-3, .resize-4 { left: 100%; }
+.resize-1, .resize-5 { left: 50%; cursor: ns-resize; }
+.resize-3, .resize-7 { cursor: ew-resize; }
+.resize-0, .resize-4 { cursor: nwse-resize; }
+.resize-2, .resize-6 { cursor: nesw-resize; }
 .drop-outline {
     min-inline-size: 2px;
     min-block-size: 2px;

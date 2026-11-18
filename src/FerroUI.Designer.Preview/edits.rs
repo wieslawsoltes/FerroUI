@@ -117,6 +117,17 @@ pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>) -> Result
                 })?
             } else { change.patches }
         }
+        Operation::Resize { frame, node, handle, dx, dy } => {
+            let stage = renderer.ok_or("Render the design before resizing")?.stage(*frame)?;
+            let session = stage.session.borrow();
+            if session.document().source() != design.xaml.source() || session.document_uri() != request.document.uri {
+                return Err("The source changed during the resize".into());
+            }
+            let edits = session.plan_resize_handle(*node, *handle, *dx, *dy)?;
+            if !edits.is_empty() { selected = Some(*node); }
+            let change = candidate.apply("Resize control", edits).map_err(|error| error.to_string())?;
+            translated_patches(&design, candidate.source(), change.patches)?
+        }
         Operation::Apply { label, edits } => {
             if !design.editable_structure() {
                 return Err("Author this Rust block directly to preserve its expressions and comments".into());

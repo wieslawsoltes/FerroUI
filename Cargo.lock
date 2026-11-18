@@ -1966,8 +1966,10 @@ dependencies = [
  "ferroui-headless",
  "ferroui-inspect",
  "ferroui-mcp",
+ "ferroui-remote-protocol",
  "ferroui-themes-winui",
  "ferroui-vello",
+ "png",
  "serde",
  "serde_json",
 ]
@@ -6841,8 +6843,13 @@ name = "todo-workbench"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-controls",
+ "ferroui-designer-support",
+ "ferroui-harfbuzz",
  "ferroui-inspect",
+ "ferroui-markup-xaml-loader",
  "ferroui-mcp",
+ "ferroui-skia",
  "ferroui-themes-winui",
  "ferroui-view",
  "todo-mvc",

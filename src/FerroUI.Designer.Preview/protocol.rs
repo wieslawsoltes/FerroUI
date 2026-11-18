@@ -54,6 +54,7 @@ pub(crate) enum Operation {
         frame: u64,
         placement: Placement,
     },
+    Resize { frame: u64, node: u64, handle: u8, dx: f64, dy: f64 },
     Apply {
         label: String,
         edits: Vec<ferroui_designer_core::Edit>,

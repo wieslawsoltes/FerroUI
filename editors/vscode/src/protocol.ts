@@ -53,6 +53,7 @@ export interface PropertyField {
     range: Range | null;
     editable: boolean;
     canReset: boolean;
+    mixed?: boolean;
 }
 export interface EventField {
     name: string;
@@ -87,7 +88,7 @@ export type FromDetails = { type: 'ready' }
     | { type: 'edit'; request: number; target: NodeTarget; operation: NodeOperation };
 export type ToDetails = { type: 'state'; state: DetailsState }
     | { type: 'edit'; request: number; error?: string };
-export type InspectionTarget = { type: 'source'; node: number } | { type: 'runtime'; id: number };
+export type InspectionTarget = { type: 'source'; node: number } | { type: 'selection'; nodes: number[] } | { type: 'runtime'; id: number };
 export interface Inspection { properties: PropertyField[]; events: EventField[] }
 export interface OutlineNode {
     id: number;
@@ -120,11 +121,13 @@ export type NodeOperation =
     | { type: 'removeNode'; node: number };
 export type Operation = NodeOperation | { type: 'applyCounterpart'; source: string }
     | { type: 'apply'; label: string; edits: object[] }
-    | { type: 'place'; frame: number; placement: Placement };
+    | { type: 'place'; frame: number; placement: Placement }
+    | ({ type: 'resize'; frame: number } & ResizeGesture);
+export interface ResizeGesture { node: number; handle: number; dx: number; dy: number }
 
 // Node IDs and tokens are local to a designer session.
 export interface FrameTarget { session: number; token: number }
-export interface NodeTarget extends FrameTarget { node: number }
+export interface NodeTarget extends FrameTarget { node: number; selection?: number[] }
 export interface PropertiesState {
     session?: number;
     target?: NodeTarget;
@@ -133,6 +136,7 @@ export interface PropertiesState {
     runtime?: RuntimeRow;
     frame?: FrameTarget;
     fields?: PropertyField[];
+    selectionCount?: number;
 }
 export type FromProperties = { type: 'ready' }
     | { type: 'toolbox' }
@@ -203,7 +207,13 @@ export type ToOutline = { type: 'state'; state: OutlineState } | DragUpdate | { 
 export type FromToolbox = { type: 'ready' } | DragMessage | { type: 'insert'; frame: FrameTarget; control: string };
 export type ToToolbox = DragUpdate | { type: 'state'; state: ToolboxState } | { type: 'edit'; error?: string };
 
-export type CanvasNode = Pick<OutlineNode, 'id' | 'label' | 'name' | 'bounds' | 'canMove'>;
+export type CanvasNode = Pick<OutlineNode, 'id' | 'label' | 'name' | 'bounds' | 'canMove'> & { selectable?: boolean };
+export interface StudioPresentation {
+    image: NonNullable<Snapshot['image']>;
+    nodes: Array<{ id: number; bounds: Bounds | null; canInsert: boolean; canMove: boolean; selectable: boolean }>;
+    notices: string[];
+    selection: number[];
+}
 export type CanvasSnapshot = Omit<Snapshot, 'nodes'> & { nodes: CanvasNode[] };
 export interface CanvasAction {
     tab?: 'preview' | 'counterpart';
@@ -229,6 +239,7 @@ export type FromDesigner = DragMessage
     | { type: 'canvasResult'; request: number; state?: CanvasState; error?: string }
     | { type: 'block'; token: number; index: number }
     | { type: 'select'; token: number; id: number; openSource: boolean; extend?: boolean }
+    | ({ type: 'resize'; token: number } & ResizeGesture)
     | { type: 'apply'; token: number; source: string };
 
 export type ToDesigner = DragUpdate | PlacementResult

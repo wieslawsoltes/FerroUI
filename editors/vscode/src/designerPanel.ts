@@ -212,13 +212,20 @@ export class DesignerPanel implements vscode.Disposable {
         if (!this.canUse(target) || operation.node !== target.node || this.selectedNode?.id !== target.node) {
             throw new Error('The selection changed. Use the current Properties view to retry.');
         }
+        if ('selection' in target && (!Array.isArray(target.selection) || target.selection.length !== this.selection.length
+            || target.selection.some((id, index) => id !== this.selection[index]))) throw new Error('The selection changed before this property edit.');
+        if (target.selection && target.selection.length > 1 && (operation.type === 'setProperty' || operation.type === 'resetProperty')) {
+            return this.studioEdit(target.token, 'designer_property', { action: operation.type === 'setProperty' ? 'set' : 'reset',
+                property: operation.name, nodes: target.selection, ...(operation.type === 'setProperty' ? { value: operation.value } : {}) },
+            target.selection, AbortSignal.timeout(15_000));
+        }
         if (operation.type === 'applyResource' && operation.frame !== target.token) throw new Error('Read the current resource scope.');
         await this.edit(this.frame!, operation);
     }
 
     canUse(target: FrameTarget): boolean {
         const token = this.currentToken;
-        return token !== undefined && target?.session === this.session && target.token === token;
+        return !this.editing && token !== undefined && target?.session === this.session && target.token === token;
     }
 
     async place(target: FrameTarget, placement: Placement): Promise<void> {
@@ -263,9 +270,9 @@ export class DesignerPanel implements vscode.Disposable {
     }
 
     async studioTools() {
-        const { tools, xamlEdits } = await (await this.getClient()).studioTools();
-        return { tools, edits: this.language === 'xaml' ? xamlEdits : xamlEdits.filter(tool =>
-            (tool as { name?: string }).name === 'designer_selection_layout_edit') };
+        const { tools, xamlEdits, presentations } = await (await this.getClient()).studioTools();
+        return { tools, presentations: presentations ?? [], edits: this.language === 'xaml' ? xamlEdits : xamlEdits.filter(tool =>
+            ['designer_selection_layout_edit', 'designer_property'].includes((tool as { name: string }).name)) };
     }
 
     async studioQuery(name: string, args: object, selection: number[] | undefined, signal: AbortSignal): Promise<unknown> {
@@ -278,7 +285,7 @@ export class DesignerPanel implements vscode.Disposable {
     }
 
     async studioEdit(token: number, name: string, args: object, selection: number[] | undefined, signal: AbortSignal): Promise<void> {
-        if (this.language === 'rust' && name !== 'designer_selection_layout_edit') {
+        if (this.language === 'rust' && !['designer_selection_layout_edit', 'designer_property'].includes(name)) {
             throw new Error('This Studio operation requires XAML or a mapped RSX layout operation.');
         }
         if (this.editing) throw new Error('A designer edit is already in progress.');
@@ -289,6 +296,41 @@ export class DesignerPanel implements vscode.Disposable {
             await this.commitEdit(frame, client => client.studioEdit(frame.source, token, name, args, targets), signal);
         } finally {
             if (this.currentToken === token) this.schedule(0);
+        }
+    }
+
+    async studioPresent(token: number, name: string, args: object, selection: number[] | undefined, signal: AbortSignal): Promise<void> {
+        const frame = this.frame;
+        if (!frame || !this.canUse({ session: this.session, token })) throw new Error('Read the current designer revision before presenting a Studio view.');
+        this.editing = true;
+        this.changed.fire();
+        this.post({ type: 'pending' });
+        try {
+            const client = await this.getClient();
+            signal.throwIfAborted();
+            if (this.currentToken !== token) throw new Error('The source changed before the Studio action.');
+            const next = token + 1;
+            const presentation = await client.studioPresent(token, next, name, args, this.studioSelection(selection));
+            if (this.currentToken !== token) return;
+            const metrics = new Map(presentation.nodes.map(node => [node.id, node]));
+            const nodes = frame.snapshot.nodes.map(node => {
+                const change = metrics.get(node.id);
+                return { ...node, bounds: change?.bounds ?? null, canMove: change?.canMove ?? false, canInsert: change?.canInsert ?? false };
+            });
+            const snapshot = { ...frame.snapshot, nodes, image: presentation.image, notices: presentation.notices };
+            const canvasNodes = nodes.map(({ id, label, name, bounds, canMove }) => ({ id, label, name, bounds, canMove, selectable: metrics.get(id)?.selectable }));
+            this.frame = { ...frame, token: next, snapshot, canvas: { ...snapshot, nodes: canvasNodes } };
+            this.generation = next;
+            this.runtime = undefined;
+            this.selection = presentation.selection;
+            this.selected = this.selection.at(-1);
+            this.syncCanvas();
+        } catch (error) {
+            if (this.currentToken === token) this.schedule(0);
+            throw error;
+        } finally {
+            this.editing = false;
+            this.changed.fire();
         }
     }
 
@@ -432,6 +474,9 @@ export class DesignerPanel implements vscode.Disposable {
                 await this.select({ session: this.session, token: message.token, node: message.id }, message.openSource, message.extend);
             } else if (message.type === 'block') {
                 await this.selectBlock({ session: this.session, token: message.token }, message.index);
+            } else if (message.type === 'resize' && !this.editing && this.selection.length === 1 && this.selected === message.node) {
+                const { node, handle, dx, dy } = message;
+                await this.edit(frame, { type: 'resize', frame: message.token, node, handle, dx, dy });
             } else if (message.type === 'apply') {
                 await this.edit(frame, { type: 'applyCounterpart', source: message.source });
                 this.post({ type: 'edit' });

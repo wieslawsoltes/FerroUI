@@ -1,0 +1,5 @@
+.runtime-header { padding: 8px 0; }
+.runtime-canvas { display: grid; justify-items: center; overflow: auto; background: var(--vscode-editor-background); padding: 12px; }
+.runtime-canvas img { max-width: 100%; height: auto; border: 1px solid var(--vscode-panel-border); }
+#hosted-input { display: flex; gap: 8px; padding: 8px 0; }
+#hosted-input input { flex: 1; }

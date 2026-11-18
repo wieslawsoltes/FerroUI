@@ -2,13 +2,17 @@ import * as vscode from 'vscode';
 import { describeCargoTarget, discoverCargoTargets, selectCargoTarget, type CargoSelection, type CargoTarget } from './cargoTarget';
 import { errorMessage } from './protocol';
 import { ReloadLog } from './reloadLog';
+import { ReloadDebugger } from './reloadDebugger';
+import { RegisteredReload } from './registeredReload';
 import type { ProjectMetadata } from './reloadProcess';
 import { ReloadSession } from './reloadSession';
 import type { RuntimeMcpEndpoint } from './runtimeMcp';
+import { localFolders, workspaceFolders } from './workspacePaths';
 
 export class HotReload implements vscode.Disposable {
     private readonly output = vscode.window.createOutputChannel('FerroUI Hot Reload');
     private readonly log = new ReloadLog(this.output);
+    private readonly debugger = new ReloadDebugger(this.output);
     private readonly indicator = vscode.window.createStatusBarItem('ferroui.hotReload', vscode.StatusBarAlignment.Left, 35);
     private readonly subscriptions: vscode.Disposable[];
     private readonly runtimeChanged = new vscode.EventEmitter<void>();
@@ -17,6 +21,7 @@ export class HotReload implements vscode.Disposable {
     readonly onDidBuild = this.built.event;
     runtimeMcp?: RuntimeMcpEndpoint;
     private session?: ReloadSession;
+    private registered?: RegisteredReload;
     private choosing = false;
     private generation = 0;
     private message = 'Stopped';
@@ -26,7 +31,12 @@ export class HotReload implements vscode.Disposable {
         this.indicator.command = 'ferroui.hotReload.showOutput';
         this.subscriptions = [
             vscode.commands.registerCommand('ferroui.hotReload.start', () => this.startInteractive()),
-            vscode.commands.registerCommand('ferroui.hotReload.rebuild', () => this.session ? this.session.build() : this.startInteractive()),
+            vscode.commands.registerCommand('ferroui.hotReload.startRegistered', () => this.startRegisteredInteractive()),
+            vscode.commands.registerCommand('ferroui.hotReload.rebuild', () => {
+                if (this.session) return this.session.build();
+                if (this.registered) return this.output.show(true);
+                return this.startInteractive();
+            }),
             vscode.commands.registerCommand('ferroui.hotReload.stop', () => this.stop()),
             vscode.commands.registerCommand('ferroui.hotReload.showOutput', () => this.output.show(true)),
             vscode.commands.registerCommand('ferroui.hotReload.debug', () => this.attachDebugger()),
@@ -36,11 +46,12 @@ export class HotReload implements vscode.Disposable {
 
     get state() {
         const target = this.session?.target;
-        return { target: target?.label ?? null, pid: this.session?.pid ?? null, status: this.message,
+        return { target: target?.label ?? (this.registered ? 'Registered patch supervisor' : null), pid: this.session?.pid ?? this.registered?.pid ?? null, status: this.message,
             selection: target ? describeCargoTarget(target) : null, mcpAvailable: this.runtimeMcp !== undefined };
     }
 
     recentOutput(lines: number) { return { ...this.state, output: this.log.tail(lines) }; }
+    containsXaml(file: string, source: string): boolean { return this.session?.containsXaml(file, source) ?? false; }
     async targets(selection: CargoSelection) {
         const targets = await discoverCargoTargets(selection);
         return { targets: targets.map(target => ({ ...describeCargoTarget(target), features: target.features })) };
@@ -52,6 +63,11 @@ export class HotReload implements vscode.Disposable {
             if (targets.length !== 1) throw new Error('Choose a single Cargo target from ferroui_reload_targets.');
             return targets[0];
         }, signal);
+        else if (action === 'start_registered') {
+            const folders = workspaceFolders(selection.folder);
+            if (folders.length !== 1) throw new Error('Choose a single workspace folder for the registered supervisor.');
+            await this.startRegistered(folders[0], signal);
+        }
         else if (action === 'stop') this.stop();
         else if (action === 'show_output') this.output.show(true);
         else if (action === 'rebuild') {
@@ -64,7 +80,7 @@ export class HotReload implements vscode.Disposable {
     private async startInteractive(): Promise<void> {
         if (this.choosing) return;
         try {
-            await this.start(selectCargoTarget);
+            await this.start(() => selectCargoTarget());
         } catch (error) {
             this.output.appendLine(errorMessage(error));
             void vscode.window.showErrorMessage(`FerroUI hot reload could not start. ${errorMessage(error)}`);
@@ -72,15 +88,15 @@ export class HotReload implements vscode.Disposable {
     }
 
     private requirePid(): number {
-        const pid = this.session?.pid;
+        const pid = this.session?.pid ?? this.registered?.pid;
         if (!pid) throw new Error('Start a managed FerroUI application first.');
         return pid;
     }
 
     private async attachDebugger(): Promise<void> {
         try {
-            this.requirePid();
-            const folder = this.session!.target.folder;
+            const pid = this.requirePid();
+            const folder = this.session?.target.folder ?? this.registered!.folder;
             const configurations = vscode.workspace.getConfiguration('launch', folder.uri)
                 .get<vscode.DebugConfiguration[]>('configurations', [])
                 .filter(configuration => configuration.request === 'attach'
@@ -90,7 +106,7 @@ export class HotReload implements vscode.Disposable {
                 configurations.map(configuration => ({ label: configuration.name, configuration })),
                 { placeHolder: 'Debug the managed FerroUI application' },
             ))?.configuration;
-            if (selected) await vscode.debug.startDebugging(folder, selected);
+            if (selected && this.requirePid() === pid) await this.debugger.attach(folder, selected, pid);
         } catch (error) {
             void vscode.window.showErrorMessage(errorMessage(error));
         }
@@ -104,19 +120,18 @@ export class HotReload implements vscode.Disposable {
             const target = await resolveTarget();
             signal?.throwIfAborted();
             if (!target || this.generation !== generation) return;
+            this.debugger.detach();
             this.session?.dispose();
+            this.registered?.dispose();
+            this.registered = undefined;
             this.log.reset();
             this.session = new ReloadSession(target, this.log, (message, problem) => {
-                this.message = message;
-                this.indicator.text = `$(flame) ${message}`;
-                this.indicator.tooltip = `${target.label} · ${message}\nShow FerroUI Hot Reload output`;
-                this.indicator.backgroundColor = problem ? new vscode.ThemeColor('statusBarItem.errorBackground') : undefined;
-                this.indicator.show();
+                this.report(target.label, message, problem);
             }, endpoint => {
                 if (endpoint?.url === this.runtimeMcp?.url && endpoint?.token === this.runtimeMcp?.token) return;
                 this.runtimeMcp = endpoint;
                 this.runtimeChanged.fire();
-            }, metadata => this.built.fire(metadata));
+            }, metadata => this.built.fire(metadata), pid => this.debugger.activated(pid));
             this.message = 'Build queued';
             this.session.build();
         } finally {
@@ -124,10 +139,53 @@ export class HotReload implements vscode.Disposable {
         }
     }
 
+    private async startRegisteredInteractive(): Promise<void> {
+        try {
+            const document = vscode.window.activeTextEditor?.document;
+            const folders = localFolders();
+            const folder = (document && vscode.workspace.getWorkspaceFolder(document.uri))
+                ?? (folders.length === 1 ? folders[0] : await vscode.window.showWorkspaceFolderPick());
+            if (folder) await this.startRegistered(folder);
+        } catch (error) {
+            this.output.appendLine(errorMessage(error));
+            void vscode.window.showErrorMessage(errorMessage(error));
+        }
+    }
+
+    private async startRegistered(folder: vscode.WorkspaceFolder, signal?: AbortSignal): Promise<void> {
+        if (this.choosing) throw new Error('A FerroUI target is already being selected.');
+        this.choosing = true;
+        try {
+            const generation = this.generation + 1;
+            signal?.throwIfAborted();
+            const session = await RegisteredReload.start(folder, this.log, (message, pid, problem) => {
+                if (this.generation !== generation) return;
+                this.report('Registered patch supervisor', message, problem);
+                if (pid) this.debugger.activated(pid);
+            });
+            if (signal?.aborted || generation !== this.generation + 1) { session.dispose(); signal?.throwIfAborted(); return; }
+            this.stop();
+            this.registered = session;
+            this.log.reset();
+            this.report('Registered patch supervisor', 'Starting registered target');
+        } finally { this.choosing = false; }
+    }
+
+    private report(target: string, message: string, problem?: boolean): void {
+        this.message = message;
+        this.indicator.text = `$(flame) ${message}`;
+        this.indicator.tooltip = `${target} · ${message}\nShow FerroUI Hot Reload output`;
+        this.indicator.backgroundColor = problem ? new vscode.ThemeColor('statusBarItem.errorBackground') : undefined;
+        this.indicator.show();
+    }
+
     private stop(): void {
         this.generation++;
+        this.debugger.detach();
         this.session?.dispose();
         this.session = undefined;
+        this.registered?.dispose();
+        this.registered = undefined;
         this.message = 'Stopped';
         this.indicator.hide();
     }
@@ -136,6 +194,7 @@ export class HotReload implements vscode.Disposable {
         this.stop();
         this.subscriptions.forEach(subscription => subscription.dispose());
         this.indicator.dispose();
+        this.debugger.dispose();
         this.output.dispose();
         this.runtimeChanged.dispose();
         this.built.dispose();

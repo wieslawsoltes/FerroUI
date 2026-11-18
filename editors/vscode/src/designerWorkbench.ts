@@ -10,6 +10,7 @@ import { OutlineView } from './outlineView';
 import { SelectionInspection } from './selectionInspection';
 import { PROPERTIES_VIEW, PropertiesView } from './propertiesView';
 import { chooseLayout } from './studioLayout';
+import { StudioView } from './studioView';
 import { errorMessage, type DesignerView, type DetailsView, type DragOrigin, type FrameTarget, type FromAssets, type FromDetails, type FromOutline, type FromToolbox, type Language, type NodeOperation, type NodeTarget, type OutlineMode, type ToolboxState, type ToToolbox, type Viewport } from './protocol';
 import { languageOf } from './textDocument';
 import { toolboxHtml, webviewOptions } from './view';
@@ -27,6 +28,7 @@ export class DesignerWorkbench implements vscode.Disposable {
     private readonly inspection: SelectionInspection;
     private readonly details: DetailsViews;
     private readonly assets: AssetsView;
+    private readonly studio: StudioView;
     private readonly drag = new DesignerDrag(update => {
         this.outline.post(update);
         this.toolbox.post(update);
@@ -51,6 +53,7 @@ export class DesignerWorkbench implements vscode.Disposable {
         this.properties = new PropertiesView(context.extensionUri, changed, (target, operation) => this.edit(target, operation),
             () => { void this.showDock(TOOLBOX_VIEW); },
             async (frame, range) => { await this.active?.revealSource(frame, range); });
+        this.studio = new StudioView(changed);
         this.subscriptions = [
             vscode.window.registerWebviewPanelSerializer(DESIGNER_VIEW, {
                 deserializeWebviewPanel: (panel, state) => this.restore(panel, state),
@@ -195,8 +198,9 @@ export class DesignerWorkbench implements vscode.Disposable {
     private updateDocks(): void {
         const panel = this.active;
         panel?.setInspected(this.outline.visible || this.properties.visible || this.toolbox.visible
-            || this.details.events.visible || this.details.resources.visible || this.assets.view.visible);
+            || this.details.events.visible || this.details.resources.visible || this.assets.view.visible || this.studio.visible);
         const file = panel ? vscode.workspace.asRelativePath(panel.document.uri, false) : '';
+        this.studio.update(panel, file);
         const token = panel?.currentToken;
         const node = panel?.selectedNode;
         const frame = panel && token !== undefined && !panel.status ? { session: panel.session, token } : undefined;
@@ -210,7 +214,9 @@ export class DesignerWorkbench implements vscode.Disposable {
             runtime: panel?.runtimeSelection,
             frame,
             fields: inspection.data?.properties,
-            target: panel && node && token !== undefined && !panel.status ? { session: panel.session, token, node: node.id } : undefined,
+            target: panel && node && token !== undefined && !panel.status
+                ? { session: panel.session, token, node: node.id, selection: [...panel.selectedIds] } : undefined,
+            selectionCount: panel?.selectedIds.length,
             message: panel?.status ?? inspection.message,
         }, file);
         this.details.update(panel, frame, file, inspection);
@@ -336,6 +342,7 @@ export class DesignerWorkbench implements vscode.Disposable {
         this.properties.dispose();
         this.details.dispose();
         this.assets.dispose();
+        this.studio.dispose();
         const panels = [...this.panels.values()];
         this.panels.clear();
         this.active = undefined;

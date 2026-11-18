@@ -286,7 +286,7 @@ fn resources_styles_screenshots_waits_and_stats() {
 }
 #[test]
 fn schemas_reject_invalid_input_before_mutating() {
-    assert_eq!(tools().len(), 16);
+    assert_eq!(tools().len(), 18);
     for args in [
         json!({"node_id":0}),
         json!({"node_id":-1}),
@@ -298,6 +298,25 @@ fn schemas_reject_invalid_input_before_mutating() {
     assert!(validate("get_tree", &json!({"depth":100})).is_err());
     assert!(validate("screenshot", &json!({"scale":0})).is_err());
     assert!(validate("unknown", &json!({})).is_err());
+}
+
+#[test]
+fn native_hits_and_compiler_locations_share_runtime_ids() {
+    run(|| {
+        let (window, button, _, mut inspector) = fixture();
+        let root = inspector.node_id(&window);
+        let id = inspector.node_id(&button);
+        assert!(inspector.execute("get_source", &json!({"node_id":id})).unwrap().is_null());
+        let boxed: BoxedValue = Rc::new(button.clone());
+        XamlSourceInfo::set_xaml_source_info(&boxed, Some(XamlSourceInfo::new(3, 5, Some("/source/View.xaml"))));
+        assert_eq!(inspector.execute("get_source", &json!({"node_id":id})).unwrap(),
+            json!({"uri":"file:///source/View.xaml","line":3,"column":5}));
+        let local = Point::new(button.bounds().width / 2.0, button.bounds().height / 2.0);
+        let at = button.translate_point(local, &window.clone().upcast()).unwrap();
+        let hits = inspector.execute("get_element_at", &json!({"node_id":root,"x":at.x,"y":at.y})).unwrap();
+        assert!(hits.as_array().unwrap().iter().any(|node| node["node_id"] == id));
+        window.close();
+    });
 }
 #[test]
 fn one_inspector_serves_the_tools_and_the_targets() {

@@ -49,7 +49,7 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
             <div id="artboard" class="artboard" hidden>
                 <img id="frame" alt="Rendered FerroUI view" draggable="false">
                 <div id="hover-box" class="control-outline hover-outline" hidden></div>
-                <div id="selection-box" class="control-outline" hidden></div>
+                <div id="selection-box" class="control-outline" hidden><div id="resize-handles" role="group" aria-label="Resize handles" hidden></div></div>
                 <div id="selection-group" aria-hidden="true"></div>
                 <div id="drop-box" class="control-outline drop-outline" hidden></div>
             </div>
@@ -221,6 +221,28 @@ export function runtimeHtml(webview: vscode.Webview, root: vscode.Uri): string {
         <div id="runtime-details" aria-label="Runtime details"></div>
     </aside>
 </main>`);
+}
+
+export function hostedHtml(webview: vscode.Webview, root: vscode.Uri): string {
+    return page(webview, root, 'hosted', 'FerroUI App Preview', `
+<header class="runtime-header"><button id="hosted-refresh">Refresh Source</button></header>
+<p id="hosted-status" role="status">Starting application preview…</p>
+<div class="runtime-canvas"><img id="hosted-image" alt="App-hosted FerroUI design" draggable="false" hidden></div>
+<form id="hosted-input" hidden>
+    <input id="hosted-text" aria-label="Text for the focused preview control" required maxlength="8192">
+    <button type="submit">Send Text</button>
+</form>`);
+}
+
+export function stagesHtml(webview: vscode.Webview, root: vscode.Uri): string {
+    return page(webview, root, 'stages', 'FerroUI Stages', `
+<header class="stage-toolbar">
+    <button id="stages-add">Add Stage</button><button id="stages-save">Save Stage Set</button><button id="stages-load">Open Stage Set</button>
+    <button id="stages-prototype">Play Prototype</button>
+</header>
+<p id="stages-status" role="status">Rendering stages…</p>
+<div id="prototype-actions" class="stage-toolbar" aria-label="Prototype controls" hidden></div>
+<main id="stage-cards" aria-label="Native preview stages"></main>`);
 }
 
 function page(webview: vscode.Webview, root: vscode.Uri, entry: string, title: string, body: string): string {

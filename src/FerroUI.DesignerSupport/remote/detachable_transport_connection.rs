@@ -2,6 +2,8 @@ use ferroui_remote_protocol::{
     message_handler, Delegate, Error, ExceptionHandler, HandlerToken, IFerroRemoteTransportConnection, Message,
     MessageHandler, Task,
 };
+use ferroui_remote_protocol::designer::{DesignFrameMessage, DesignFrameReceivedMessage};
+use ferroui_remote_protocol::viewport::{FrameMessage, FrameReceivedMessage};
 use std::sync::{Arc, Mutex, PoisonError, Weak};
 
 /// A connection around another one that can be cut off from it: after
@@ -11,6 +13,7 @@ use std::sync::{Arc, Mutex, PoisonError, Weak};
 /// connection of the session.
 pub(crate) struct DetachableTransportConnection {
     inner: Mutex<Option<Arc<dyn IFerroRemoteTransportConnection>>>,
+    revision: Option<i64>,
     // The handler added to the inner connection (`FireOnMessage` as a
     // delegate, which `Dispose` removes).
     inner_token: HandlerToken,
@@ -21,7 +24,7 @@ pub(crate) struct DetachableTransportConnection {
 }
 
 impl DetachableTransportConnection {
-    pub(crate) fn new(inner: Arc<dyn IFerroRemoteTransportConnection>) -> Arc<DetachableTransportConnection> {
+    pub(crate) fn new(inner: Arc<dyn IFerroRemoteTransportConnection>, revision: Option<i64>) -> Arc<DetachableTransportConnection> {
         Arc::new_cyclic(|this: &Weak<DetachableTransportConnection>| {
             let this = this.clone();
             let inner_token = inner.on_message(message_handler(move |transport, obj| {
@@ -31,6 +34,7 @@ impl DetachableTransportConnection {
             }));
             DetachableTransportConnection {
                 inner: Mutex::new(Some(inner)),
+                revision,
                 inner_token,
                 on_message: Mutex::new(Delegate::new()),
                 on_exception: Mutex::new(Delegate::new()),
@@ -43,6 +47,13 @@ impl DetachableTransportConnection {
     }
 
     pub(crate) fn fire_on_message(&self, transport: &dyn IFerroRemoteTransportConnection, obj: &Message) {
+        if let Some(ack) = obj.downcast_ref::<DesignFrameReceivedMessage>() {
+            if self.revision == Some(ack.revision) {
+                let received: Message = Arc::new(FrameReceivedMessage { sequence_id: ack.sequence_id });
+                self.fire_on_message(transport, &received);
+            }
+            return;
+        }
         let handlers = self.on_message.lock().unwrap_or_else(PoisonError::into_inner).snapshot();
         for handler in &handlers {
             handler(transport, obj);
@@ -61,6 +72,9 @@ impl IFerroRemoteTransportConnection for DetachableTransportConnection {
     /// The original returns no task at all once the connection is detached;
     /// here the task of a message that goes nowhere is a completed one.
     fn send(&self, data: Message) -> Task {
+        let data = if let (Some(revision), Some(frame)) = (self.revision, data.downcast_ref::<FrameMessage>()) {
+            Arc::new(DesignFrameMessage { revision, frame: frame.clone() }) as Message
+        } else { data };
         match self.inner() {
             Some(inner) => inner.send(data),
             None => Task::completed(),
@@ -106,7 +120,7 @@ mod tests {
     #[test]
     fn messages_and_sends_pass_until_the_connection_is_detached() {
         let inner = TestConnection::new();
-        let detachable = DetachableTransportConnection::new(inner.clone());
+        let detachable = DetachableTransportConnection::new(inner.clone(), None);
         let received = Arc::new(AtomicUsize::new(0));
         let counter = received.clone();
         let token = detachable.on_message(message_handler(move |_, _| {
@@ -145,7 +159,7 @@ mod tests {
     #[test]
     fn exception_handlers_are_accepted_and_never_called() {
         let inner = TestConnection::new();
-        let detachable = DetachableTransportConnection::new(inner.clone());
+        let detachable = DetachableTransportConnection::new(inner.clone(), None);
         let token = detachable.on_exception(exception_handler(|_, _| panic!("never called")));
         inner.raise_exception(Error::EndOfStream);
         assert_eq!(0, inner.exception_handlers());

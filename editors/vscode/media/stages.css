@@ -1,0 +1,11 @@
+.stage-toolbar, .stage-actions { display: flex; margin: 6px 0; flex-wrap: wrap; gap: 5px; }
+#stage-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 275px), 1fr)); gap: 12px; align-items: start; }
+.stage-card { padding: 10px; border: 1px solid var(--vscode-panel-border); min-width: 0; }
+.stage-card h2 { margin: 0 0 6px; font-size: 1em; }
+.stage-card p { margin: 8px 0; color: var(--vscode-descriptionForeground); }
+.stage-card img { max-width: 100%; height: auto; display: block; margin: 0 auto; cursor: crosshair; }
+#stage-cards.prototype-view { display: block; position: relative; overflow: hidden; width: fit-content; max-width: 100%; margin: 0 auto; }
+.prototype-view .stage-card { padding: 0; border: 0; }
+.prototype-view .stage-card h2, .prototype-view .stage-actions, .prototype-view .stage-card p { display: none; }
+.prototype-view .prototype-overlay { position: absolute; }
+.prototype-view .dim-background { box-shadow: 0 0 0 100vmax rgb(0 0 0 / 48%); }

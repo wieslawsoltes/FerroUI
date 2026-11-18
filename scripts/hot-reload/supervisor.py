@@ -11,6 +11,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import signal
 import stat
 import subprocess
 import tempfile
@@ -250,7 +251,7 @@ class Application:
 
 
 class Supervisor:
-    def __init__(self, source, directory, dx, extra_inputs=()):
+    def __init__(self, source, directory, dx, extra_inputs=(), editor_events=False):
         verify_toolchain(source, dx)
         self.source, self.directory, self.dx = source.resolve(), directory.resolve(), dx
         self.extra_inputs = tuple(extra_inputs)
@@ -258,6 +259,14 @@ class Supervisor:
         self.generation = 0
         self.active_directory = None
         self.retired = []
+        self.editor_events = editor_events
+
+    def report(self, status):
+        if self.editor_events:
+            print('FERROUI_SUPERVISOR_V1=' + json.dumps({
+                'status': status,
+                'pid': self.application.process.pid if self.application else None,
+            }), flush=True)
 
     def current(self, files):
         return stable_capture(self.source, self.extra_inputs) == files
@@ -287,12 +296,14 @@ class Supervisor:
         root = directory / 'workspace'
         stage(root, files)
         print(f'Building replacement {self.generation}; current application stays running', flush=True)
+        self.report('building')
         output = run([self.dx, 'build', '--fat-binary', '--platform', 'server',
             '--package', 'hot-reload-demo', '--features', 'patch-control', '--locked', '--json-output'], root, timeout=1200, env=dict(os.environ, CARGO_TARGET_DIR=str(root / 'target')))
         client = next(event['BuildsFinished']['client'] for event in events(output) if 'BuildsFinished' in event)
         client = select_tip_artifacts(client, root, 'hot_reload_demo', PROGRAM)
         if not self.current(files):
             print('Discarded superseded replacement build', flush=True)
+            self.report('superseded')
             return False
         previous = self.application
         previous_directory = self.active_directory
@@ -330,6 +341,7 @@ class Supervisor:
                 self.discard(previous_directory)
             print(f'Running PID {candidate.process.pid}; replacement restored and acknowledged' if state else
                   f'Running PID {candidate.process.pid}', flush=True)
+            self.report('restored' if state else 'ready')
             return True
         finally:
             if candidate is not None and self.application is not candidate:
@@ -354,6 +366,8 @@ class Supervisor:
             print(json.dumps(result), flush=True)
             if result['status'] == 'restart_required':
                 self.rebuild(files)
+            else:
+                self.report('xaml_applied' if result['status'] == 'applied' else 'rejected')
             return
         # Keep compiled XAML baseline in the patch snapshot. Unsaved/runtime markup
         # accompanies the same admitted UI transaction without rebuilding assets.
@@ -398,6 +412,7 @@ class Supervisor:
             print(json.dumps(result), flush=True)
             if result['status'] == 'applied':
                 app.files = patch_files
+                self.report('patch_applied')
         finally:
             app.command({'op': 'cancel'})
         if result['status'] == 'restart_required':
@@ -421,6 +436,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--source', type=Path, default=ROOT)
     parser.add_argument('--interval', type=float, default=.5)
+    parser.add_argument('--editor-events', action='store_true', help='Publish managed lifecycle events to the editor')
     parser.add_argument('--input', action='append', default=[], metavar='PATH',
                         help='Include an ignored workspace-relative build input (file or whole directory); repeatable')
     args = parser.parse_args()
@@ -428,8 +444,12 @@ def main():
         parser.error('--interval must be at least 0.05 seconds')
     source = args.source.resolve()
     dx = os.environ.get('FERROUI_DX', 'dx')
+    if args.editor_events:
+        def stop_editor_session(_signal, _frame):
+            raise KeyboardInterrupt
+        signal.signal(signal.SIGTERM, stop_editor_session)
     with tempfile.TemporaryDirectory(prefix='ferroui-supervisor-') as directory:
-        supervisor = Supervisor(source, Path(directory), dx, args.input)
+        supervisor = Supervisor(source, Path(directory), dx, args.input, editor_events=args.editor_events)
         try:
             observed_stamps = stamps(source, args.input)
             observed = stable_capture(source, args.input)
@@ -455,10 +475,12 @@ def main():
                     # Malformed compiler output must not tear down the last-good app.
                     # KeyboardInterrupt/SystemExit still stop the owned session.
                     print(f'Revision failed; retaining running application: {error}', flush=True)
+                    supervisor.report('rejected')
         except KeyboardInterrupt:
             pass
         finally:
             supervisor.close()
+            supervisor.report('stopped')
 
 
 if __name__ == '__main__':

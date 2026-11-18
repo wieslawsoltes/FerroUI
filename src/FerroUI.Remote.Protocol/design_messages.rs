@@ -1,4 +1,43 @@
 use crate::{bson_class, ferro_remote_message_guid};
+use crate::viewport_messages::FrameMessage;
+
+/// An editor update tagged with its authored buffer revision. Legacy preview clients
+/// can continue to use UpdateXamlMessage and receive untagged frames.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct UpdateDesignMessage {
+    pub revision: i64,
+    pub source: UpdateXamlMessage,
+}
+
+ferro_remote_message_guid!(UpdateDesignMessage, "58FA5FA8-5669-4C04-80FA-8F573BA45ACD");
+bson_class!(UpdateDesignMessage as "UpdateDesignMessage" {"Revision" => revision: i64, "Source" => source: UpdateXamlMessage});
+
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct UpdateDesignResultMessage {
+    pub revision: i64,
+    pub result: UpdateXamlResultMessage,
+}
+
+ferro_remote_message_guid!(UpdateDesignResultMessage, "CB085DBB-7231-4C16-8797-D8D97BCF9341");
+bson_class!(UpdateDesignResultMessage as "UpdateDesignResultMessage" {"Revision" => revision: i64, "Result" => result: UpdateXamlResultMessage});
+
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct DesignFrameMessage {
+    pub revision: i64,
+    pub frame: FrameMessage,
+}
+
+ferro_remote_message_guid!(DesignFrameMessage, "F7176EE5-1A68-4ECB-A986-8F461D21C13C");
+bson_class!(DesignFrameMessage as "DesignFrameMessage" {"Revision" => revision: i64, "Frame" => frame: FrameMessage});
+
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct DesignFrameReceivedMessage {
+    pub revision: i64,
+    pub sequence_id: i64,
+}
+
+ferro_remote_message_guid!(DesignFrameReceivedMessage, "1E9E50A0-F95D-48C0-AB8B-B2C800ACC09C");
+bson_class!(DesignFrameReceivedMessage as "DesignFrameReceivedMessage" {"Revision" => revision: i64, "SequenceId" => sequence_id: i64});
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct UpdateXamlMessage {

@@ -1,11 +1,15 @@
 //! A small native Todo app for the FerroUI VS Code workflow.
 
 mod view;
+#[cfg(feature = "app-preview")]
+mod app_preview;
 
 use ferroui_view::prelude::*;
 use todo_mvc::model::Todos;
 
 fn main() {
+    #[cfg(feature = "app-preview")]
+    app_preview::start_if_requested();
     let demo = std::env::args().any(|arg| arg == "--demo");
     let initial = if demo {
         Todos::from_titles(&[

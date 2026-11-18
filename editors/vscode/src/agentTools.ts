@@ -43,6 +43,9 @@ interface Arguments extends CanvasAction, CargoSelection {
     dynamic?: boolean;
     anchor?: number;
     moving_anchor?: number;
+    handle?: number;
+    dx?: number;
+    dy?: number;
     position?: 'inside' | 'before' | 'after';
     x?: number;
     y?: number;
@@ -202,6 +205,10 @@ export class AgentTools {
             case 'designer_remove':
                 await panel.agentEdit(args.expected_revision, { type: 'removeNode', node: args.node! }, signal);
                 break;
+            case 'designer_resize':
+                await panel.agentEdit(args.expected_revision, { type: 'resize', frame: args.expected_revision,
+                    node: args.node!, handle: args.handle!, dx: args.dx!, dy: args.dy! }, signal);
+                break;
             case 'designer_edit_property':
                 if (args.action === 'set' && args.value === undefined) throw new Error('Supply the property value.');
                 await panel.agentEdit(args.expected_revision, args.action === 'set'
@@ -245,6 +252,9 @@ export class AgentTools {
             case 'designer_studio_query': return panel.studioQuery(args.tool, args.arguments, args.selection, signal);
             case 'designer_studio_edit':
                 await panel.studioEdit(args.expected_revision, args.tool, args.arguments, args.selection, signal);
+                break;
+            case 'designer_studio_present':
+                await panel.studioPresent(args.expected_revision, args.tool, args.arguments, args.selection, signal);
                 break;
         }
         return describe(panel);

@@ -3,11 +3,13 @@ import * as vscode from 'vscode';
 import { NativePreview } from '../src/nativePreview';
 import { applyTextEdits, sourceOf } from '../src/textDocument';
 import { verifyMcp } from './mcp';
-import { verifyMultiSelection, verifyWorkbenchFeatures } from './workbenchFeatures';
+import { verifyMultiSelection, verifyStudioPresentations, verifyWorkbenchFeatures } from './workbenchFeatures';
 import { verifyCargoTarget } from './cargoTarget';
 import { verifyDrag } from './drag';
 import { verifyXamlRefactoring } from './xamlLanguage';
 import { verifyRuntimeClient } from './runtimeClient';
+import { verifyHostedPreview } from './hostedPreview';
+import { verifyLiveApp } from './liveApp';
 import type { DesignerWorkbench } from '../src/designerWorkbench';
 
 const editorPosition = (line = 0, character = 0) => new vscode.Position(line, character);
@@ -21,6 +23,8 @@ export async function run(): Promise<void> {
     await verifyRuntimeClient();
     await vscode.commands.executeCommand('ferroui.openLiveApp');
     await until(() => vscode.window.tabGroups.all.some(group => group.tabs.some(tab => tab.label === 'FerroUI Live App')));
+    const live = vscode.window.tabGroups.all.flatMap(group => group.tabs).find(tab => tab.label === 'FerroUI Live App');
+    if (live) await vscode.window.tabGroups.close(live);
     const xaml = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(workspace, 'SettingsView.xaml'));
     assert.equal(xaml.languageId, 'ferroui-xaml');
     const editor = await vscode.window.showTextDocument(xaml);
@@ -52,7 +56,9 @@ export async function run(): Promise<void> {
     invalid.insert(xaml.uri, editorPosition(), '<broken');
     assert.ok(await vscode.workspace.applyEdit(invalid));
     await until(() => vscode.languages.getDiagnostics(xaml.uri).some(diagnostic => diagnostic.severity === vscode.DiagnosticSeverity.Error));
-    await vscode.commands.executeCommand('undo');
+    const repair = new vscode.WorkspaceEdit();
+    repair.delete(xaml.uri, new vscode.Range(editorPosition(), editorPosition(0, '<broken'.length)));
+    assert.ok(await vscode.workspace.applyEdit(repair));
     await until(() => vscode.languages.getDiagnostics(xaml.uri).length === 0);
     console.log('VS Code XAML language association, symbols, hover, completion and live diagnostics passed');
     await verifyXamlRefactoring(workspace);
@@ -131,6 +137,9 @@ export async function run(): Promise<void> {
         assert.ok(partial.notices.some(notice => notice.includes('omitted Rust items')));
         await verifyWorkbenchFeatures(preview, xamlInput.uri, rustInput.uri);
         await verifyMultiSelection(preview, xamlInput.uri, rustInput.uri);
+        await verifyStudioPresentations(preview, xamlInput.uri);
+        await verifyHostedPreview(preview, xamlInput.uri);
+        await verifyLiveApp();
         const commands = await vscode.commands.getCommands(true);
         assert.ok(commands.includes('ferroui.outline.focus'), 'Outline is a contributed VS Code view');
         assert.ok(commands.includes('ferroui.properties.focus'), 'Properties is a separate contributed VS Code view');
@@ -139,6 +148,7 @@ export async function run(): Promise<void> {
         await vscode.commands.executeCommand('ferroui.showOutline');
         await vscode.commands.executeCommand('ferroui.showProperties');
         await vscode.commands.executeCommand('ferroui.showToolbox');
+        await vscode.commands.executeCommand('ferroui.showStudio');
         await verifyCargoTarget(workspace);
         console.log('VS Code docked views, native XAML and RSX rendering, both projection directions, guarded edits and undo passed');
     } finally {

@@ -57,7 +57,7 @@ function inputFor(property: PropertyField, initial: string, effective: string): 
     const options = property.kind === 'boolean' ? ['True', 'False'] : property.options;
     if (property.editable && options.length) {
         const select = create('select');
-        const unset = new Option(effective || 'Unset', '');
+        const unset = new Option(property.mixed ? 'Mixed values' : effective || 'Unset', '');
         unset.disabled = true;
         select.append(unset, ...options.map(value => new Option(value)));
         const canonical = options.find(option => option.toLowerCase() === initial.toLowerCase());
@@ -68,7 +68,7 @@ function inputFor(property: PropertyField, initial: string, effective: string): 
     const input = create('input');
     input.readOnly = !property.editable;
     input.value = property.editable ? initial : initial || effective || property.origin || '';
-    input.placeholder = effective === 'NaN' ? 'Auto' : effective || 'Unset';
+    input.placeholder = property.mixed ? 'Mixed values' : effective === 'NaN' ? 'Auto' : effective || 'Unset';
     input.title = [property.authored ?? property.effective, property.origin].filter(Boolean).join(' · ');
     input.spellcheck = false;
     if (property.kind === 'number') input.inputMode = 'decimal';

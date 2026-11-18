@@ -66,7 +66,7 @@ function renderTree() {
     if (focused && /^\d+$/.test(focused)) tree.querySelector<HTMLElement>(`[data-node="${focused}"]`)?.focus();
 }
 
-function showProperties(data: RuntimeProperty[]) {
+function showProperties(data: RuntimeProperty[], canApply: boolean) {
     const rows = data.map(property => {
         const row = create('form');
         const name = create('label', property.name);
@@ -80,6 +80,14 @@ function showProperties(data: RuntimeProperty[]) {
         apply.type = 'submit';
         apply.disabled = !editable;
         row.append(name, value, apply);
+        if (canApply && editable) {
+            const source = create('button', 'Apply to Source');
+            source.type = 'button';
+            source.onclick = () => {
+                if (frame && selected !== undefined) send({ type: 'assignSource', token: frame.token, node: selected, property: property.name, value: value.value });
+            };
+            row.append(source);
+        }
         row.addEventListener('submit', event => {
             event.preventDefault();
             if (editable && frame && selected !== undefined) send({ type: 'assign', token: frame.token,
@@ -112,7 +120,7 @@ window.addEventListener('message', async (event: MessageEvent<ToRuntime>) => {
             pending++;
             frame = undefined;
             selected = undefined;
-            main.hidden = true;
+            main.setAttribute('aria-busy', 'true');
             inspector.replaceChildren();
             reveal.hidden = true;
             problem.hidden = true;
@@ -128,6 +136,7 @@ window.addEventListener('message', async (event: MessageEvent<ToRuntime>) => {
         frame = message.frame;
         image.src = decoded.src;
         main.hidden = false;
+        main.setAttribute('aria-busy', 'false');
         problem.hidden = true;
         if (changed) renderTree();
     } else if (message.type === 'inspection') {
@@ -137,7 +146,7 @@ window.addEventListener('message', async (event: MessageEvent<ToRuntime>) => {
         reveal.hidden = !message.canReveal;
         setMode(interaction);
         for (const button of tree.querySelectorAll('button')) button.setAttribute('aria-pressed', String(button.dataset.node === String(selected)));
-        if (message.view === 'properties') showProperties(message.data as RuntimeProperty[]);
+        if (message.view === 'properties') showProperties(message.data as RuntimeProperty[], message.canApply);
         else inspector.replaceChildren(create('pre', JSON.stringify(message.data, null, 2)));
     } else if (message.type === 'problem') {
         problem.textContent = message.message;

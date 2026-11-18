@@ -82,6 +82,21 @@ impl Renderer {
         window.0.set_height(f64::from(input.height));
         window.0.set_content(Some(Rc::new(host.clone())));
         window.0.show();
+        let frame = capture(&mut session)?;
+        self.stage = Some(Stage {
+            session: Rc::new(RefCell::new(session)),
+            token: input.frame,
+            width: input.width,
+            height: input.height,
+            placement_policy: None,
+            _window: window,
+        });
+        Ok(frame)
+    }
+}
+
+pub(crate) fn capture(session: &mut DesignerSession) -> Result<Frame, String> {
+        let host = session.preview_host();
         Dispatcher::ui_thread().run_jobs(None);
         host.update_layout();
         session.refresh_runtime_mapping();
@@ -108,14 +123,6 @@ impl Renderer {
             })
             .collect();
         let notices = session.preview_notices().to_vec();
-        self.stage = Some(Stage {
-            session: Rc::new(RefCell::new(session)),
-            token: input.frame,
-            width: input.width,
-            height: input.height,
-            placement_policy: None,
-            _window: window,
-        });
         Ok(Frame {
             image: Image {
                 png: STANDARD.encode(png.png),
@@ -125,7 +132,6 @@ impl Renderer {
             bounds,
             notices,
         })
-    }
 }
 
 // The headless window roots layout and styles for the duration of capture.
