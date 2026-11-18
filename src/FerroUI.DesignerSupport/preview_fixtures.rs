@@ -11,7 +11,7 @@ pub enum PreviewFixture {
 }
 
 type Factory = Rc<dyn Fn() -> Result<PreviewFixture, String>>;
-thread_local! {
+ferroui_base::ferro_thread_local! {
     static FIXTURES: RefCell<BTreeMap<String, BTreeMap<String, Factory>>> = const { RefCell::new(BTreeMap::new()) };
 }
 
