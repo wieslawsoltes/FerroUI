@@ -18,6 +18,8 @@ use crate::series::{Series, SeriesKind};
 use ferroui_base::{media::Color, Point, Rect, Size};
 use std::collections::HashMap;
 use std::f64::consts::{PI, TAU};
+use std::fmt;
+use std::rc::Rc;
 
 /// The chart's default land stroke (`Stroke` of the source map view).
 pub const MAP_STROKE: Color = Color::from_rgb(255, 255, 255);
@@ -353,6 +355,34 @@ pub struct GeoTooltipValue {
     pub value: f64,
 }
 
+/// The text of the line of a series value in the tooltip of a land (the source's
+/// `Func<GeoTooltipValue, string>`, the `TooltipFormatter` of a map). Two formatters are equal
+/// when they are the same function.
+#[derive(Clone)]
+pub struct GeoTooltipFormatter(Rc<dyn Fn(&GeoTooltipValue) -> String>);
+
+impl GeoTooltipFormatter {
+    pub fn new(formatter: impl Fn(&GeoTooltipValue) -> String + 'static) -> Self {
+        Self(Rc::new(formatter))
+    }
+    /// The line of a value.
+    pub fn format(&self, value: &GeoTooltipValue) -> String {
+        (self.0)(value)
+    }
+}
+
+impl PartialEq for GeoTooltipFormatter {
+    fn eq(&self, other: &Self) -> bool {
+        Rc::ptr_eq(&self.0, &other.0)
+    }
+}
+
+impl fmt::Debug for GeoTooltipFormatter {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("GeoTooltipFormatter")
+    }
+}
+
 /// A land as hovered or clicked (`GeoTooltipPoint`, and the result of `FindLandAt`): its
 /// identity in the scene, its names, the values of the series that have one in the order of the
 /// series, the anchor of its tooltip (the middle of its largest visible ring) and its screen
@@ -440,6 +470,19 @@ impl GeoMapChartEngine {
         series: &[HeatLandSeries],
         markers: &[GeoMarker],
         options: &GeoMapOptions,
+    ) -> Result<GeoMapMeasurement, ChartError> {
+        Self::measure_with_tooltip_formatter(size, map, series, markers, options, None)
+    }
+
+    /// [`Self::measure`] with the `TooltipFormatter` of the map, which writes the line of each
+    /// series value in the tooltip of a land ([`tooltip_label_with`]).
+    pub fn measure_with_tooltip_formatter(
+        size: Size,
+        map: &DrawnMap,
+        series: &[HeatLandSeries],
+        markers: &[GeoMarker],
+        options: &GeoMapOptions,
+        tooltip_formatter: Option<&GeoTooltipFormatter>,
     ) -> Result<GeoMapMeasurement, ChartError> {
         validate_size(size)?;
         validate_options(options)?;
@@ -604,7 +647,7 @@ impl GeoMapChartEngine {
                     },
                     center,
                     value: geo_land.value(),
-                    label: tooltip_label(&geo_land),
+                    label: tooltip_label_with(&geo_land, tooltip_formatter),
                 });
                 lands.push(geo_land);
             }
@@ -786,14 +829,25 @@ fn extent(points: impl Iterator<Item = Point>) -> Option<(Point, Point)> {
 /// title case, then a line for each series value, `{name}: {value:N2}` (the value alone for a
 /// series without a name).
 pub fn tooltip_label(land: &GeoLand) -> String {
+    tooltip_label_with(land, None)
+}
+
+/// [`tooltip_label`] with the `TooltipFormatter` of a map: a formatter writes the line of each
+/// series value in place of `{name}: {value:N2}` (`SKDefaultGeoTooltip.GetLayout`).
+pub fn tooltip_label_with(land: &GeoLand, formatter: Option<&GeoTooltipFormatter>) -> String {
     let mut label = title_case(&land.name);
     for value in &land.values {
         label.push('\n');
-        if !value.series_name.is_empty() {
-            label.push_str(&value.series_name);
-            label.push_str(": ");
+        match formatter {
+            Some(formatter) => label.push_str(&formatter.format(value)),
+            None => {
+                if !value.series_name.is_empty() {
+                    label.push_str(&value.series_name);
+                    label.push_str(": ");
+                }
+                label.push_str(&format_n2(value.value));
+            }
         }
-        label.push_str(&format_n2(value.value));
     }
     label
 }
