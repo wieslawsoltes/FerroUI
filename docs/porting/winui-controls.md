@@ -423,6 +423,17 @@ Phase G2 ports the WinUI controls the pending pages need, one control (or one sm
 | PagerControl | 3 of 3 | ported | `Pages/PagerControl.xaml` (no code-behind upstream) | `feedback_samples_tests.rs` |
 | PersonPicture | 1 of 1 | ported | `feedback_samples.rs` | `feedback_samples_tests.rs` |
 
+#### G4: the partial pages (#418)
+
+Phase G4 completes the pages that had native examples for a reviewed subset only: each catalog example of the source page gets its native adaptation with the handlers of the page's code behind in Rust and the source's x:Bind, as for G1. Where the source's x:Bind path is one the x:Bind core does not compile, the page records the binding it uses instead: `IsChecked.Value.Equals(x:False)` (there is no member `Value` on a nullable boolean) is the OneWay x:Bind of `IsChecked` with the `BoolConverters.Not` converter. A button that opens another page of the gallery, as the source's `App.MainWindow.Navigate`, is listed in `examples::GALLERY_LINKS` and wired by the gallery.
+
+| Page | Examples | State | Rust | Tests |
+|---|---:|---|---|---|
+| Button | 4 of 4 | ported | `button_samples.rs` | `tests.rs`, `button_samples_tests.rs` |
+| RepeatButton | 1 of 1 | ported | `button_samples.rs` | `button_samples_tests.rs` |
+| HyperlinkButton | 2 of 2 | ported | `gallery.rs` (`examples::GALLERY_LINKS`) | `button_samples_tests.rs` |
+| ToggleButton | 1 of 1 | ported | `button_samples.rs` | `button_samples_tests.rs` |
+
 ### 10.8 WinUI API and Gallery scanner (W10b)
 
 `scripts/winui-gallery/scan.py` (from #286) compares the public API of WinUI and the pages of WinUI Gallery with FerroUI's sources at the pins of `docs/porting/winui-gallery/data/sources.lock.json` (WinUI `7e4b0c2`, O13; Gallery `14061eea`). Its result is a report of candidates: 1,545 public WinUI types and 7,462 public members are scanned, a same-name Rust type or member in the mapped namespace is a *candidate*, and no candidate counts as behaviour, which the tests of the controls and of the sample establish. The pages have the states of `samples/WinUIGallery/port-status.json`.

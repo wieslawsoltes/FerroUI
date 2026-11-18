@@ -174,19 +174,27 @@ fn adaptation_port_states_match_port_status() {
 fn button_click_and_disabled_option_update_native_controls() {
     let _application = start();
     let root = examples::create(examples::find("Button").unwrap()).unwrap();
-    let primary = root.get_control::<Button>("Primary");
-    primary.raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
-    primary.raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
+    // `Button_Click` of the source: the name of the clicked button picks its output.
+    let first = root.get_control::<Button>("Button1");
+    first.raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
     assert_eq!(
-        root.get_control::<TextBlock>("Output").text().as_deref(),
-        Some("Clicked 2 times")
+        root.get_control::<TextBlock>("Control1Output").text().as_deref(),
+        Some("You clicked: Button1")
     );
-    root.get_control::<CheckBox>("Disable")
+    assert_eq!(root.get_control::<TextBlock>("Control2Output").text().as_deref(), None);
+    root.get_control::<Button>("Button2")
+        .raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
+    assert_eq!(
+        root.get_control::<TextBlock>("Control2Output").text().as_deref(),
+        Some("You clicked: Button2")
+    );
+    // The Disable option is the source's OneWay x:Bind of IsChecked, negated.
+    root.get_control::<CheckBox>("DisableButton1")
         .set_is_checked(Some(true));
-    assert!(!primary.is_enabled());
-    root.get_control::<CheckBox>("Disable")
+    assert!(!first.is_enabled());
+    root.get_control::<CheckBox>("DisableButton1")
         .set_is_checked(Some(false));
-    assert!(primary.is_enabled());
+    assert!(first.is_enabled());
 }
 
 #[test]
@@ -658,8 +666,8 @@ fn icon_examples_preserve_source_symbol_and_font_glyph() {
 fn dropping_native_example_releases_handler_targets() {
     let _application = start();
     let root = examples::create(examples::find("Button").unwrap()).unwrap();
-    let primary = root.get_control::<Button>("Primary").downgrade();
-    let output = root.get_control::<TextBlock>("Output").downgrade();
+    let primary = root.get_control::<Button>("Button1").downgrade();
+    let output = root.get_control::<TextBlock>("Control1Output").downgrade();
     drop(root);
     assert!(primary.upgrade().is_none());
     assert!(output.upgrade().is_none());
@@ -1070,8 +1078,8 @@ fn embedded_control_images_resolve_original_uri_paths_and_exact_bytes() {
     crate::assets::register();
     assert_eq!(
         crate::assets_data::ASSETS.len(),
-        132,
-        "108 control images, 22 sample media files and two explicit source-path case aliases"
+        133,
+        "108 control images, 23 sample media files and two explicit source-path case aliases"
     );
     for entry in CATALOG {
         let path = entry
@@ -1109,7 +1117,7 @@ fn embedded_sample_media_resolve_original_paths_and_exact_bytes() {
         .iter()
         .filter(|(path, _)| path.starts_with("Assets/SampleMedia/"))
         .collect();
-    assert_eq!(media.len(), 22);
+    assert_eq!(media.len(), 23);
     for (path, expected) in media {
         let uri = UriRef::from(UriRef::parse_absolute(&format!("ferres://WinUIGallery/{path}")).unwrap());
         let mut actual = Vec::new();
@@ -1119,6 +1127,8 @@ fn embedded_sample_media_resolve_original_paths_and_exact_bytes() {
             assert!(actual.starts_with(&[0xff, 0xd8, 0xff]), "{path}");
         } else if path.ends_with(".gif") {
             assert!(actual.starts_with(b"GIF8"), "{path}");
+        } else if path.ends_with(".png") {
+            assert!(actual.starts_with(b"\x89PNG"), "{path}");
         } else {
             assert!(path.ends_with(".svg"), "Unexpected media type: {path}");
             assert!(std::str::from_utf8(&actual).unwrap().contains("<svg"));

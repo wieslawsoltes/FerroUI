@@ -84,9 +84,9 @@ pub static ADAPTATIONS: &[PageAdaptation] = &[
     page!("Templates", "A shared ControlTemplate presents button content through TemplateBinding."),
     page!("CustomUserControls", "A native UserControl hosts the counter behavior; the original additional custom controls remain pending."),
     page!("AccessibilityScreenReader", "Native automation names and decorative accessibility views are assigned; screen-reader execution remains unverified."),
-    page!("Button", "Text, graphical content, disabled state and click output use native Button; custom styles remain tracked separately."),
-    page!("RepeatButton", "Native RepeatButton repeats the same Rust click handler; holding behavior belongs to FerroUI input."),
-    page!("ToggleButton", "Native ToggleButton checked state and output; the original handler is ported to Rust."),
+    page!(ported "Button", "All four source examples use native Button with Button_Click of ButtonPage.xaml.cs in Rust: the text button and its Disable option (the source's OneWay x:Bind of IsChecked, negated by BoolConverters.Not instead of IsChecked.Value.Equals(x:False)), the graphical button with the source's Slices.png, the WinUI theme's AccentButtonStyle and SubtleButtonStyle, and the wrapping layouts (WrapWholeWords is WrapWithOverflow)."),
+    page!(ported "RepeatButton", "The source example uses native RepeatButton with RepeatButton_Click of RepeatButtonPage.xaml.cs in Rust: the static click count and the polite live-region output. The Disable option is the source's OneWay x:Bind of IsChecked, negated by BoolConverters.Not instead of IsChecked.Value.Equals(x:False)."),
+    page!(ported "ToggleButton", "The source example uses native ToggleButton with the constructor and the Checked/Unchecked handlers of ToggleButtonPage.xaml.cs in Rust (On and Off, over IsCheckedChanged). The Disable option is the source's OneWay x:Bind of IsChecked, negated by BoolConverters.Not instead of IsChecked.Value.Equals(x:False)."),
     page!("ToggleSwitch", "IsOn maps to IsChecked on the existing ToggleSwitch; Header is composed with a label and an automation name, and states remain observable."),
     page!("CheckBox", "All three source compositions use native CheckBox with original two/three-state output and select-all synchronization. Keyboard, accessibility and exact rendering acceptance remain pending."),
     page!("RadioButton", "Both original groups use native RadioButtons with the existing native RadioButton, source labels and Rust selection/color handlers. Focus, layout and screen-reader parity still require host verification."),
@@ -110,7 +110,7 @@ pub static ADAPTATIONS: &[PageAdaptation] = &[
     page!("SplitButton", "Native SplitButton and Flyout keep separate primary and secondary actions."),
     page!("ToggleSplitButton", "Native ToggleSplitButton owns its checked state and secondary flyout."),
     page!("ToolTip", "ToolTipService.ToolTip is explicitly mapped to the shared ToolTip.Tip attached property."),
-    page!("HyperlinkButton", "Native HyperlinkButton is used; external navigation remains explicit through NavigateUri."),
+    page!(ported "HyperlinkButton", "Both source examples use native HyperlinkButton: NavigateUri opens the Microsoft home page through the top level's launcher, with the Disable option as the source's OneWay x:Bind of IsChecked negated by BoolConverters.Not; GoToHyperlinkButton_Click navigates the gallery to the ToggleButton page, as the source's App.MainWindow.Navigate does."),
     page!("CalendarDatePicker", "Native CalendarDatePicker; header is composed and placeholder uses the shared property."),
     page!("CalendarView", "CalendarView is adapted to the shared Calendar; WinUI-specific day item customization is pending."),
     page!("DatePicker", "Native DatePicker composes a label for WinUI Header."),
@@ -138,6 +138,11 @@ pub static ADAPTATIONS: &[PageAdaptation] = &[
     page!(ported "InkCanvas", "All three source examples use the native InkCanvas, InkPresenter and InkToolbar with the handlers of InkCanvasPage.xaml.cs in Rust: input devices, ink colour, stroke width, inking enabled and clear; the toolbar's available tools, active tool in both directions, flyout placement and clear; save, clear and restore with the source's messages. Header is composed, TargetInkCanvas is set in Rust and the saved strokes are the bytes of InkStrokeContainer::save in memory. Routed window input and rendering acceptance remain pending."),
     page!("Chart", "The seven source examples map onto the native CartesianChart with the data and option handlers of ChartPage.xaml.cs in Rust: category labels, legend, bar orientation and category sort, grid lines and axis visibility, series visibility, dash style, thickness, markers and data labels, a day axis for the DateTimeAxis with its intervals and label formats, and the live series. LegendTitle, tick marks, axis brushes, marker shapes and per-point overrides are not available; rendering parity remains pending."),
 ];
+
+/// The buttons of the native examples that navigate the gallery, as the source's
+/// `App.MainWindow.Navigate(typeof(ItemPage), id)`: the page, the name of its button and the page
+/// the button opens. The gallery wires them when it shows the page (`gallery.rs`).
+pub static GALLERY_LINKS: &[(&str, &str, &str)] = &[("HyperlinkButton", "GoToToggleButton", "ToggleButton")];
 
 pub fn find(page_id: &str) -> Option<&'static PageAdaptation> {
     ADAPTATIONS.iter().find(|sample| sample.page_id == page_id)
@@ -171,6 +176,7 @@ pub fn create(sample: &PageAdaptation) -> Result<Ref<Control>, XamlLoadError> {
     crate::repeater_samples::wire(&root);
     crate::ink_samples::wire(&root);
     crate::chart_samples::wire(&root);
+    crate::button_samples::wire(sample.page_id, &root);
     wire(&root);
     initialize_x_bind(&root)?;
     Ok(root)

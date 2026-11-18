@@ -29,6 +29,14 @@
     {
       "path": "WinUIGallery/Samples/ConnectedAnimation/ConnectedAnimationPage.xaml.cs",
       "sha256": "0d3c4a3d1e17027b2e6ba7c0566326c107b0a1bebd4831ae0141656b2f72c169"
+    },
+    {
+      "path": "WinUIGallery/Samples/Button/ButtonPage.xaml",
+      "sha256": "8e7c98b2a6a862ada2fc4cdf109c4df3c6899f94d22670cd7b57445131f321db"
+    },
+    {
+      "path": "WinUIGallery/Samples/Button/ButtonPage.xaml.cs",
+      "sha256": "ad6ac974f6f9eba139069ce8e6dc272c2de0cc55e9829b8aeb5420a01502b185"
     }
   ],
   "assembly": "WinUIGallery",
@@ -1499,6 +1507,18 @@
       ],
       "source_uris": [
         "ms-appx:///Assets/SampleMedia/MirrorPCConsent.svg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/Slices.png",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/Slices.png",
+      "sha256": "dac97fd49097b9dc7518b6c3e68a5497c33074951bc8375d8cb98c3e537896fc",
+      "size_bytes": 2653,
+      "registered_paths": [
+        "Assets/SampleMedia/Slices.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/Slices.png"
       ]
     },
     {

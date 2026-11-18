@@ -8,6 +8,7 @@
 
 mod assets;
 mod assets_data;
+mod button_samples;
 mod cat_data;
 mod chart_samples;
 mod color_picker_samples;
@@ -83,3 +84,6 @@ mod chart_samples_tests;
 
 #[cfg(test)]
 mod x_bind_tests;
+
+#[cfg(test)]
+mod button_samples_tests;

@@ -53,9 +53,9 @@ A verified enum does not verify its consuming controls, installed fonts, inherit
 
 | Page state | Count |
 |---|---:|
-| pending | 38 |
-| partial | 79 |
-| ported | 9 |
+| pending | 35 |
+| partial | 75 |
+| ported | 16 |
 | verified | 0 |
 
 Partial pages exercise reviewed native subsets; a ported page has a native adaptation, or a recorded reason why it cannot have one, for every catalog example (`samples/WinUIGallery/port-status.json`). Neither state claims rendering parity.
@@ -80,11 +80,11 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | Binding | Fundamentals | partial | 7 |
 | Border | Layout | partial | 1 |
 | BreadcrumbBar | Navigation | pending | 2 |
-| Button | Basic input | partial | 4 |
+| Button | Basic input | ported | 4 |
 | CalendarDatePicker | Date & time | partial | 1 |
 | CalendarView | Date & time | partial | 1 |
 | Canvas | Layout | partial | 1 |
-| CaptureElementPreview | Media | pending | 1 |
+| CaptureElementPreview | Media | ported | 1 |
 | Chart | Media | partial | 7 |
 | CheckBox | Basic input | partial | 3 |
 | Clipboard | System | partial | 6 |
@@ -108,7 +108,7 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | Geometry | Design | partial | 1 |
 | Grid | Layout | partial | 1 |
 | GridView | Collections | pending | 3 |
-| HyperlinkButton | Basic input | partial | 2 |
+| HyperlinkButton | Basic input | ported | 2 |
 | IconElement | Styles | partial | 6 |
 | Iconography | Design | pending | 0 |
 | Image | Media | partial | 6 |
@@ -123,7 +123,7 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | Line | Styles | partial | 4 |
 | ListView | Collections | partial | 10 |
 | MapControl | Media | pending | 1 |
-| MediaPlayerElement | Media | pending | 2 |
+| MediaPlayerElement | Media | ported | 2 |
 | MenuBar | Menus & toolbars | partial | 3 |
 | MenuFlyout | Menus & toolbars | partial | 7 |
 | NavigationView | Navigation | partial | 8 |
@@ -143,7 +143,7 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | RadioButton | Basic input | partial | 2 |
 | RatingControl | Basic input | partial | 2 |
 | RelativePanel | Layout | partial | 1 |
-| RepeatButton | Basic input | partial | 1 |
+| RepeatButton | Basic input | ported | 1 |
 | RichEditBox | Text | partial | 5 |
 | RichTextBlock | Text | ported | 4 |
 | ScratchPad | Fundamentals | partial | 0 |
@@ -153,7 +153,7 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | SemanticZoom | Scrolling | pending | 1 |
 | Shape | Styles | partial | 3 |
 | Slider | Basic input | partial | 4 |
-| Sound | Media | pending | 3 |
+| Sound | Media | ported | 3 |
 | Spacing | Design | partial | 0 |
 | SplitButton | Basic input | partial | 2 |
 | SplitView | Layout | partial | 1 |
@@ -173,7 +173,7 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | ThemeTransition | Motion | pending | 5 |
 | TimePicker | Date & time | partial | 3 |
 | TitleBar | Windowing | ported | 3 |
-| ToggleButton | Basic input | partial | 1 |
+| ToggleButton | Basic input | ported | 1 |
 | ToggleSplitButton | Basic input | partial | 1 |
 | ToggleSwitch | Basic input | partial | 2 |
 | ToolTip | Status & info | partial | 3 |

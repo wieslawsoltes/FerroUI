@@ -268,10 +268,11 @@
       "examples": []
     },
     "Button": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/Button.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/button_samples.rs"
       ],
       "tests": [
         {
@@ -285,9 +286,21 @@
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "dropping_native_example_releases_handler_targets"
+        },
+        {
+          "path": "samples/WinUIGallery/button_samples_tests.rs",
+          "name": "button_page_shows_the_graphical_content_and_the_wrapping_layouts"
+        },
+        {
+          "path": "samples/WinUIGallery/button_samples_tests.rs",
+          "name": "button_page_applies_the_built_in_styles_of_the_winui_theme"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
         }
       ],
-      "notes": "Text, graphical content, disabled state and click output use native Button; custom styles remain tracked separately. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "All four source examples use native Button with Button_Click of ButtonPage.xaml.cs in Rust: the text button with its output and the Disable option, the graphical button with the source's Slices.png, AccentButtonStyle and SubtleButtonStyle of the WinUI theme, and both wrapping layouts. The Disable option is the source's OneWay x:Bind of IsChecked, negated by the BoolConverters.Not converter, because the x:Bind core has no member Value on a nullable boolean for the source's IsChecked.Value.Equals(x:False). WinUI's WrapWholeWords is WrapWithOverflow. Rendering parity against Windows remains pending.",
       "examples": []
     },
     "CalendarDatePicker": {
@@ -681,18 +694,31 @@
       "examples": []
     },
     "HyperlinkButton": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/HyperlinkButton.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/gallery.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/button_samples_tests.rs",
+          "name": "hyperlink_button_navigates_to_its_uri_and_follows_the_disable_option"
+        },
+        {
+          "path": "samples/WinUIGallery/button_samples_tests.rs",
+          "name": "hyperlink_button_click_opens_the_toggle_button_page_of_the_gallery"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
         }
       ],
-      "notes": "Native HyperlinkButton is used; external navigation remains explicit through NavigateUri. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "Both source examples use native HyperlinkButton: NavigateUri opens the Microsoft home page through the launcher of the top level, with the Disable option as the source's OneWay x:Bind of IsChecked negated by the BoolConverters.Not converter instead of IsChecked.Value.Equals(x:False); GoToHyperlinkButton_Click navigates the gallery to the ToggleButton page, as App.MainWindow.Navigate does in the source (examples::GALLERY_LINKS, wired by the gallery).",
       "examples": []
     },
     "IconElement": {
@@ -1293,18 +1319,27 @@
       "examples": []
     },
     "RepeatButton": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/RepeatButton.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/button_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/button_samples_tests.rs",
+          "name": "repeat_button_counts_every_click_and_follows_the_disable_option"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
         }
       ],
-      "notes": "Native RepeatButton repeats the same Rust click handler; holding behavior belongs to FerroUI input. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The source example uses native RepeatButton with RepeatButton_Click of RepeatButtonPage.xaml.cs in Rust: the static click count (kept when the page opens again) and the polite live-region output, whose text change is the announcement the source raises with LiveRegionChanged. The Disable option is the source's OneWay x:Bind of IsChecked, negated by the BoolConverters.Not converter instead of IsChecked.Value.Equals(x:False). The repetition while the button is held is the control's own (Delay and Interval); host input acceptance remains pending.",
       "examples": []
     },
     "ScratchPad": {
@@ -1518,18 +1553,27 @@
       "examples": []
     },
     "ToggleButton": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/ToggleButton.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/button_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/button_samples_tests.rs",
+          "name": "toggle_button_reports_on_and_off_and_follows_the_disable_option"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
         }
       ],
-      "notes": "Native ToggleButton checked state and output; the original handler is ported to Rust. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The source example uses native ToggleButton with the constructor and the Checked and Unchecked handlers of ToggleButtonPage.xaml.cs in Rust (On and Off, over IsCheckedChanged). The Disable option is the source's OneWay x:Bind of IsChecked, negated by the BoolConverters.Not converter instead of IsChecked.Value.Equals(x:False).",
       "examples": []
     },
     "ToggleSplitButton": {
