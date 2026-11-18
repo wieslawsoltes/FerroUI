@@ -2194,7 +2194,7 @@ impl TextBox {
         self.add_handler(Self::text_changing_event(), handler)
     }
 
-    fn presenter(&self) -> Option<Ref<TextPresenter>> {
+    pub(crate) fn presenter(&self) -> Option<Ref<TextPresenter>> {
         self.presenter.borrow().clone()
     }
 

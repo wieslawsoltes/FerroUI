@@ -22,9 +22,13 @@ mod i_text_edit_provider;
 mod i_text_range_provider;
 mod i_toggle_provider;
 mod i_value_provider;
+mod plain_text_automation;
+#[cfg(test)]
+mod plain_text_automation_tests;
 mod rich_text_automation;
 #[cfg(test)]
 mod rich_text_automation_tests;
+mod text_range_support;
 
 pub use i_embedded_root_provider::IEmbeddedRootProvider;
 pub use i_expand_collapse_provider::IExpandCollapseProvider;
