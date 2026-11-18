@@ -29,15 +29,13 @@ fn selected_rsx_round_trips_unicode_literals_without_touching_surrounding_code()
         apply(source, changes),
         source.replace("r#\"Można 🧪\"#", "\"Zapisz & wyjdź\"")
     );
-    assert!(
-        projection
-            .apply_xaml(
-                &xaml
-                    .replace("TextBlock", "Button")
-                    .replace("Text=", "Content=")
-            )
-            .is_err()
-    );
+    assert!(projection
+        .apply_xaml(
+            &xaml
+                .replace("TextBlock", "Button")
+                .replace("Text=", "Content=")
+        )
+        .is_err());
 }
 
 #[test]
@@ -56,11 +54,9 @@ fn dynamic_rust_survives_visual_literal_editing() {
         apply(source, vec![patch]),
         source.replace("\"OK\"", "\"Save\"")
     );
-    assert!(
-        projection
-            .set_property(2, "Text", "Unsafe replacement")
-            .is_err()
-    );
+    assert!(projection
+        .set_property(2, "Text", "Unsafe replacement")
+        .is_err());
 }
 
 #[test]
@@ -93,12 +89,10 @@ fn structural_conversion_replaces_only_the_selected_view() {
     let edited = apply(&source, project.apply_xaml(xaml).unwrap());
     assert!(edited.starts_with("pub fn view() -> Element {\n    rsx! {\n        StackPanel {\n"));
     assert!(edited.ends_with("        }\n    }\n}\n"));
-    assert!(
-        project_rust(&edited, 0)
-            .unwrap()
-            .xaml()
-            .contains("Text=\"New\"")
-    );
+    assert!(project_rust(&edited, 0)
+        .unwrap()
+        .xaml()
+        .contains("Text=\"New\""));
 }
 
 #[test]
@@ -153,11 +147,9 @@ fn embedded_image_paths_round_trip_and_keep_unrelated_rust() {
 
     let runtime = r#"rsx! { Image { source: load_thumbnail() } }"#;
     let projected = project_rust(runtime, 0).unwrap();
-    assert!(
-        projected
-            .edit_property(0, "Source", Some("icon.png"))
-            .is_err()
-    );
+    assert!(projected
+        .edit_property(0, "Source", Some("icon.png"))
+        .is_err());
 }
 
 #[test]
@@ -167,11 +159,9 @@ fn comments_in_counterpart_drafts_require_the_authored_format() {
     let rsx = xaml_to_rsx(&xaml).unwrap();
     assert!(apply_rsx(&xaml, &format!("// keep this comment\n{rsx}")).is_err());
     let projection = project_rust(&rsx, 0).unwrap();
-    assert!(
-        projection
-            .apply_xaml(&format!("<!-- keep this comment -->{source}"))
-            .is_err()
-    );
+    assert!(projection
+        .apply_xaml(&format!("<!-- keep this comment -->{source}"))
+        .is_err());
 }
 
 #[test]
