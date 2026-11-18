@@ -160,7 +160,14 @@ fn a_list_box_item_has_common_selection_and_focus_states() {
             COMMON,
             (
                 "SelectionStates",
-                &["Unselected", "Selected", "SelectedUnfocused", "SelectedDisabled", "SelectedPointerOver", "SelectedPressed"],
+                &[
+                    "Unselected",
+                    "Selected",
+                    "SelectedUnfocused",
+                    "SelectedDisabled",
+                    "SelectedPointerOver",
+                    "SelectedPressed",
+                ],
             ),
             FOCUS,
         ],
