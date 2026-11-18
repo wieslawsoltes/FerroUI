@@ -99,6 +99,7 @@ Each states `publish = false`.
 | `ferroui-markup-xaml-tests` | `tests/FerroUI.Markup.Xaml.UnitTests` | Test crate |
 | `xaml-include-fixture-theme` | `tests/XamlIncludeFixture/Theme` | Test fixture |
 | `xaml-include-fixture-application` | `tests/XamlIncludeFixture/Application` | Test fixture |
+| `generated-rust-fixture-library`, `generated-rust-fixture-consumer` | `tests/GeneratedRustFixture/Library`, `tests/GeneratedRustFixture/Consumer` | Test fixture: the generated Rust of classes another crate constructs, and of names that collide (#849) |
 | `ferroui-render-backends-comparison` | `tests/FerroUI.RenderBackends.Comparison` | Comparison harness of the render backends |
 | `ferroui-render-tests` | `tests/FerroUI.RenderTests` | Upstream's render tests against its expected images |
 

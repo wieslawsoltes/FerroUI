@@ -178,6 +178,8 @@ members = [
     "tests/FerroUI.ReactiveUI.Testing.Tests",
     "tests/XamlIncludeFixture/Theme",
     "tests/XamlIncludeFixture/Application",
+    "tests/GeneratedRustFixture/Library",
+    "tests/GeneratedRustFixture/Consumer",
     "tests/FerroUI.RenderBackends.Comparison",
     "tests/FerroUI.Rendering.Benchmarks",
     "tests/FerroUI.RenderTests",
