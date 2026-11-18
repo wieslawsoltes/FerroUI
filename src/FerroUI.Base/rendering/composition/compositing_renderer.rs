@@ -12,7 +12,7 @@ use crate::rendering::{
     IHitTester, IPresentationSource, IRenderer, RendererDiagnostics, SceneInvalidatedEventArgs,
 };
 use crate::threading::DispatcherPriority;
-use crate::utilities::HandlerList;
+use crate::utilities::{HandlerList, ReleaseExcess};
 use crate::visual::CompositionItemPlacements;
 use crate::{Matrix, Point, Rect, Ref, Size, Visual};
 use std::any::{Any, TypeId};
@@ -554,9 +554,12 @@ impl CompositingRenderer {
         // nothing here relies on that.
         let mut departed = std::mem::take(&mut *self.departed.borrow_mut());
         release_kept_composition_visuals(&mut departed);
-        // The storage is kept for the next pass, unless something was queued meanwhile.
+        // The storage is kept for the next pass, up to what an emptied buffer keeps (a large
+        // tree that leaves has an entry for every visual of it), unless something was queued
+        // meanwhile.
         let mut list = self.departed.borrow_mut();
         if list.is_empty() {
+            departed.release_excess();
             *list = departed;
         }
     }

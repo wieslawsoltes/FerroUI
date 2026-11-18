@@ -8,7 +8,9 @@ use crate::media::text_formatting::testing::{
     line_text, paragraph_properties, paragraph_properties_with, run_properties, SingleBufferTextSource,
     TextTestScope,
 };
-use crate::media::text_formatting::text_layout_cache::{IDLE_CAPACITY, IDLE_TEXT_CAPACITY, MAX_TEXT_LENGTH};
+use crate::media::text_formatting::text_layout_cache::{
+    IDLE_CAPACITY, IDLE_TEXT_CAPACITY, LEFT_INTERVAL, MAX_TEXT_LENGTH,
+};
 use crate::media::text_formatting::{
     GenericTextRunProperties, ITextSource, TextLayout, TextParagraphProperties, TextRunProperties,
 };
@@ -268,6 +270,33 @@ fn the_layouts_nothing_holds_are_let_go_from_the_oldest() {
     let first = layout("0", &properties, f64::INFINITY);
     assert!(first.is_shared());
     assert_eq!(before + 1, kept());
+}
+
+/// A screen that is closed: every holder lets its layout go and no layout is added. The layouts
+/// are let go all the same, down to the idle ones the cache keeps and what one more look would
+/// find (section 9.98).
+#[test]
+fn the_layouts_of_holders_that_leave_are_let_go_without_an_addition() {
+    let _scope = TextTestScope::new();
+
+    let properties = plain(12.0);
+    let count = 3 * IDLE_CAPACITY;
+    let held: Vec<Rc<TextLayout>> =
+        (0..count).map(|index| layout(&index.to_string(), &properties, f64::INFINITY)).collect();
+    assert_eq!((count, 0), (kept(), FontManager::current().text_layouts().idle_len()));
+
+    // What a text block does with the layout it lets go.
+    for layout in held {
+        layout.dispose();
+    }
+
+    let most = IDLE_CAPACITY + LEFT_INTERVAL as usize;
+    let idle = FontManager::current().text_layouts().idle_len();
+    assert!(kept() <= most && idle == kept(), "{} layouts are kept, {idle} of them idle", kept());
+    // The ones that were let go last are the ones that are kept.
+    let before = kept();
+    assert!(layout(&(count - 1).to_string(), &properties, f64::INFINITY).is_shared());
+    assert_eq!(before, kept());
 }
 
 #[test]
