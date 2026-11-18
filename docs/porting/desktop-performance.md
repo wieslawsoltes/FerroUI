@@ -7700,3 +7700,68 @@ of 1, 2, 3 and 48 points, filled and not, closed and open: the path of the strok
 path of the fill are the ones the same lines give point by point). The tests of the shapes
 and of the geometries.
 
+### 9.96 An effect leaves a signal of many subscribers without a search
+
+Experiment #818. The reactive runtime of the declarative layer keeps, for a signal, the list of
+the effects that read it, and for an owner the list of what it owns. An effect that was
+disposed, or that stopped reading a signal, was searched for in the list of the signal
+(`retain`), and a node disposed by itself in the list of its owner. A signal every element of a
+screen follows (a frame counter, a theme, a selection) has as many subscribers as the screen has
+elements, so each element that went cost the size of the screen, and a screen of n elements
+cost n squared to dispose. Counted with a new pair of benchmarks (below): at 4,000 effects the
+three ways of leaving cost 14 times what they cost at 1,000.
+
+**The change** (`src/FerroUI.View/reactive.rs`). A list of up to 16 entries is searched as
+before. A longer list keeps the entry of what left it and is marked (`Runtime::leave`); it is
+swept (`Runtime::sweep`) in one pass:
+
+- before the source notifies its subscribers, so nothing that left is run or even looked at
+  twice;
+- before a subscriber is added to a list that is full, so a list is never longer than what it
+  had room for (a list did not give its room back before either);
+- before a node that may have an entry among what left follows the source again, so a node
+  has one entry.
+
+Nothing is recorded for an entry. A disposed node is told from the others by its generation,
+which its entry carries; a node that stopped reading is told by what it follows now (its own few
+sources), and the list remembers only whether such a node may be in it. The list of what an
+owner owns is swept of disposed nodes before it would grow. A node of the runtime is no larger
+(216 bytes, held by a test), and the order in which a signal notifies is the order in which its
+subscribers came, as before.
+
+**Measured** (`declarative::Leaving`, instructions of one whole operation; the pair is the
+larger size over the smaller, 4.0 for a cost that is linear):
+
+| `declarative::Leaving` | Main, 1,000 | Main, 4,000 | Pair | This change, 1,000 | 4,000 | Pair |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `rows_leave` (rows disposed one by one) | 9.25 M | 133.02 M | 14.4 | 1.21 M | 4.86 M | 4.0 |
+| `owner_disposed` (a screen disposed) | 5.23 M | 74.92 M | 14.3 | 0.72 M | 2.89 M | 4.0 |
+| `stop_reading` (a condition goes) | 4.97 M | 67.88 M | 13.7 | 0.96 M | 3.83 M | 4.0 |
+| `broadcast` (the signal is written) | 0.615 M | 2.455 M | 4.0 | 0.617 M | 2.463 M | 4.0 |
+
+At 4,000 effects (the gate, two rounds) rows that leave take 0.21 ms where they took 5.07 ms, a
+disposed screen 0.12 ms where it took 2.49 ms, and effects that stop reading 0.15 ms where they
+took 2.69 ms. A write of the signal costs 0.3 % more instructions (2 for each subscriber), and
+a write of a signal with one subscriber as much as before (`fine_grained_one_row_changed`,
++0.28 %): the sweeps are out of line, so the usual path is one look at the mark. The first
+version looked the source up twice there and cost that benchmark 2.0 %, which the gate
+refused. The gate holds the three pairs from now on (`SCALING_CLASSES`).
+
+A mounted screen, measured once with a benchmark that is not kept: a panel of text blocks whose
+opacity follows one signal, mounted and then disposed with its owner. Disposing 4,000 rows took
+89.4 M instructions (3.35 ms) and takes 17.4 M (0.92 ms); the pair of the two sizes was 10.1 and
+is 4.0, so nothing else in the unmounting of controls grows faster than the rows. Mounting is
+the same (45.0 M against 44.9 M).
+
+**Looked at and not changed** (section 8.4, rule 2). `dispose` of a source takes itself out of
+the sources of each subscriber, a search of the few sources of a node. The queue of dirty
+effects and the cleanups of an owner are not searched. `notify` copies the list of
+subscribers for each write, which is linear and is what a write costs.
+
+**Tests.** `reactive_tests.rs`: rows that leave a signal of many subscribers are not notified,
+nor are effects that take their places in the runtime, and the rows that stay are notified in
+the order they came; the lists do not grow with what comes and goes; effects that stop reading
+are not run by the signal, and one that reads it again has one entry and runs once; a memo of
+many subscribers and an owner of many forget what left, and each cleanup runs once; the size
+of a node.
+
