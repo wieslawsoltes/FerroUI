@@ -5676,7 +5676,9 @@ name = "reactive-demo-components"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
+ "ferroui-markup-xaml",
  "ferroui-system",
  "ferroui-themes-winui",
  "ferroui-view",
