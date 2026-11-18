@@ -53,17 +53,20 @@ pub fn source(language: Language, status: Status, file: &Path, text: &str, messa
     if !enabled() {
         return;
     }
-    // FNV-1a identifies identical observed bytes across Rust and the VS Code host.
-    let hash = text.bytes().fold(0xcbf29ce484222325_u64, |hash, byte| {
-        (hash ^ u64::from(byte)).wrapping_mul(0x100000001b3)
-    });
     emit(Event {
         language,
         status,
         file: Some(file),
-        revision: Some(format!("{hash:016x}")),
+        revision: Some(format!("{:016x}", fingerprint(text.as_bytes()))),
         message,
     });
+}
+
+/// The FNV-1a revision shared by compiler metadata, reload receipts, and the editor.
+pub fn fingerprint(bytes: &[u8]) -> u64 {
+    bytes.iter().fold(0xcbf29ce484222325_u64, |hash, &byte| {
+        (hash ^ u64::from(byte)).wrapping_mul(0x100000001b3)
+    })
 }
 
 /// Share a managed application's MCP listener with its supervising editor over stderr.

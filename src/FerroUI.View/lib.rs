@@ -87,6 +87,8 @@ pub mod generated {
 }
 
 pub use builder::{Bind, Builder, El, ElementBuilder, FromValue, IntoProp, IntoValue, TypedProperty, ViewClass};
+#[doc(hidden)]
+pub use ferroui_base::diagnostics::{RsxSourceInfo, RsxSourceLocation};
 pub use control_flow::{dynamic, for_each, show, show_else, NodeRef};
 pub use diagnostics::{clear_diagnostics_handler, set_diagnostics_handler, Diagnostic};
 pub use element::{rerender, ComponentElement, Element, IntoChild, IntoChildren, IntoElement, Key};

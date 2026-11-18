@@ -3,10 +3,14 @@
 use ferroui_view_syntax::{Attribute, Node};
 use proc_macro2::{Delimiter, TokenStream, TokenTree};
 use std::{collections::BTreeSet, fmt::Write};
+use syn::spanned::Spanned;
+
+type Position = (usize, usize);
 
 pub(super) struct Source {
     pub(super) rsx: Vec<Invocation>,
     pub(super) signature: String,
+    revision: u64,
 }
 
 pub(super) struct Invocation {
@@ -14,6 +18,42 @@ pub(super) struct Invocation {
     pub(super) column: u32,
     pub(super) literals: Vec<String>,
     pub(super) shape: String,
+    elements: Vec<Position>,
+}
+
+pub(super) struct Locations {
+    revision: u64,
+    rsx: Vec<(Position, Vec<Position>)>,
+}
+
+impl Locations {
+    pub(super) fn resolve(
+        &self,
+        built: &Source,
+        compiled: crate::RsxSourceLocation,
+    ) -> Option<crate::RsxSourceLocation> {
+        if compiled.revision != Some(built.revision) {
+            return None;
+        }
+        let index = compiled.index as usize;
+        let invocation = built.rsx.iter().position(|invocation| {
+            invocation.position() == compiled.invocation
+                && invocation.elements.get(index) == Some(&compiled.element)
+        })?;
+        let (invocation, elements) = self.rsx.get(invocation)?;
+        Some(crate::RsxSourceLocation {
+            element: *elements.get(index)?,
+            invocation: *invocation,
+            revision: Some(self.revision),
+            ..compiled
+        })
+    }
+}
+
+impl Invocation {
+    fn position(&self) -> Position {
+        (self.line as usize, self.column as usize)
+    }
 }
 
 impl Source {
@@ -24,9 +64,21 @@ impl Source {
         let mut source = Self {
             rsx: Vec::new(),
             signature: String::new(),
+            revision: ferroui_reload_protocol::fingerprint(text.as_bytes()),
         };
         source.signature = source.describe_file(tokens, managed)?;
         Ok(source)
+    }
+
+    pub(super) fn into_locations(self) -> Locations {
+        Locations {
+            revision: self.revision,
+            rsx: self
+                .rsx
+                .into_iter()
+                .map(|invocation| (invocation.position(), invocation.elements))
+                .collect(),
+        }
     }
 
     fn describe_file(&mut self, tokens: TokenStream, managed: bool) -> Result<String, String> {
@@ -49,10 +101,11 @@ impl Source {
                 let mut literals = Vec::new();
                 let mut shape = String::new();
                 let mut hot = BTreeSet::new();
+                let mut elements = Vec::new();
                 if managed {
                     let nodes = ferroui_view_syntax::parse(group.stream())
                         .map_err(|error| error.to_string())?;
-                    hot_indices(&nodes, &mut hot);
+                    authored_nodes(&nodes, &mut hot, &mut elements);
                 }
                 describe_invocation(
                     group.stream(),
@@ -68,6 +121,7 @@ impl Source {
                     column: location.column as u32 + 1,
                     literals,
                     shape,
+                    elements,
                 });
             }
             let contents = self.describe_file(group.stream(), managed)?;
@@ -79,13 +133,15 @@ impl Source {
     }
 }
 
-fn hot_indices(nodes: &[Node], hot: &mut BTreeSet<usize>) {
+fn authored_nodes(nodes: &[Node], hot: &mut BTreeSet<usize>, elements: &mut Vec<Position>) {
     for node in nodes {
         match node {
             Node::Text(_, index) => {
                 hot.insert(*index as usize);
             }
             Node::Element(element) => {
+                let position = element.path.span().start();
+                elements.push((position.line, position.column + 1));
                 for attribute in &element.attributes {
                     if let Attribute::Value {
                         hot: Some(index), ..
@@ -94,15 +150,15 @@ fn hot_indices(nodes: &[Node], hot: &mut BTreeSet<usize>) {
                         hot.insert(*index as usize);
                     }
                 }
-                hot_indices(&element.children, hot);
+                authored_nodes(&element.children, hot, elements);
             }
             Node::If(_, then, otherwise, _) => {
-                hot_indices(then, hot);
+                authored_nodes(then, hot, elements);
                 if let Some(otherwise) = otherwise {
-                    hot_indices(otherwise, hot);
+                    authored_nodes(otherwise, hot, elements);
                 }
             }
-            Node::For(_, _, body, _) => hot_indices(body, hot),
+            Node::For(_, _, body, _) => authored_nodes(body, hot, elements),
             Node::Expr(..) => (),
         }
     }
@@ -205,5 +261,45 @@ mod tests {
             assert_ne!(signature(base), signature(&base.replace(old, new)));
         }
         assert!(Source::parse(&base.replace("width: 10.0", "width:"), true).is_err());
+    }
+
+    #[test]
+    fn maps_exact_compiler_anchors_inside_multiple_rsx_blocks() {
+        let before = "fn first() { rsx! { TextBlock { text: \"first\" } }; }\r\n\
+                      fn view() { ::ferroui_view::rsx! { StackPanel {\r\n\
+                      if cond { Button { \"yes\" } } else { TextBox { text: \"no\" } }\r\n\
+                      for row in rows { TextBlock { text: row.title } }\r\n\
+                      } }; }";
+        let after = before.replace("Button { \"yes\" }", "Button { \"👋\" }\r\n");
+        let built = Source::parse(before, true).unwrap();
+        let next = Source::parse(&after, true).unwrap();
+        assert_eq!(built.signature, next.signature);
+        let expected = next.rsx[1].elements[2];
+        let locations = next.into_locations();
+        let anchor = crate::RsxSourceLocation {
+            element: built.rsx[1].elements[2],
+            invocation: built.rsx[1].position(),
+            index: 2,
+            revision: Some(built.revision),
+        };
+        let mapped = locations.resolve(&built, anchor).unwrap();
+        assert_eq!(mapped.element, expected);
+        assert_eq!(mapped.element.0, anchor.element.0 + 1);
+        assert_eq!(
+            mapped.revision,
+            Some(ferroui_reload_protocol::fingerprint(after.as_bytes()))
+        );
+        assert!(locations
+            .resolve(
+                &built,
+                crate::RsxSourceLocation {
+                    revision: Some(0),
+                    ..anchor
+                }
+            )
+            .is_none());
+        assert!(locations
+            .resolve(&built, crate::RsxSourceLocation { index: 1, ..anchor })
+            .is_none());
     }
 }

@@ -47,12 +47,26 @@ pub trait Builder {
     type Output;
     /// Starts an element.
     fn builder() -> Self::Output;
+
+    #[doc(hidden)]
+    fn with_editor_source(output: Self::Output, _location: crate::RsxSourceInfo) -> Self::Output {
+        output
+    }
 }
 
 impl<T: ViewClass> Builder for T {
     type Output = El<T>;
     fn builder() -> El<T> {
         El::new()
+    }
+
+    #[inline]
+    fn with_editor_source(output: El<T>, location: crate::RsxSourceInfo) -> El<T> {
+        if crate::hot::record_source_locations() {
+            let location = location.with_resolver(crate::hot::source_location);
+            return output.prop(crate::RsxSourceInfo::location_property(), Some(location));
+        }
+        output
     }
 }
 

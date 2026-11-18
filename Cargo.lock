@@ -3293,6 +3293,7 @@ dependencies = [
 name = "ferroui-view-macros"
 version = "0.5.1-preview.1"
 dependencies = [
+ "ferroui-reload-protocol",
  "ferroui-view-syntax",
  "proc-macro2",
  "quote",

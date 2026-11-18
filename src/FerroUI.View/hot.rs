@@ -33,6 +33,24 @@ pub struct Site {
     pub manifest: &'static str,
 }
 
+#[inline]
+pub(crate) fn record_source_locations() -> bool {
+    static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    cfg!(debug_assertions) && *ENABLED.get_or_init(|| {
+        ["FERROUI_EDITOR_RELOAD", "FERROUI_EDITOR_SOURCE"]
+            .iter()
+            .any(|name| std::env::var_os(name).as_deref() == Some("1".as_ref()))
+    })
+}
+
+pub(crate) fn source_location(editor_source: crate::RsxSourceInfo) -> crate::RsxSourceLocation {
+    #[cfg(feature = "hot-reload")]
+    if ferroui_reload_protocol::enabled() {
+        return reload::source_location(editor_source);
+    }
+    editor_source.compiled
+}
+
 /// A literal that hot reload can give another value: what the text of the
 /// literal in the source parses to.
 pub trait HotLiteral: Sized + 'static {
@@ -154,22 +172,24 @@ mod source;
 #[cfg(feature = "hot-reload")]
 mod reload {
     use super::Site;
-    use super::source::Source;
+    use super::source::{Locations, Source};
     use crate::diagnostics::{report, Diagnostic};
     use crate::reactive::{signal, Signal};
     use ferroui_reload_protocol::{self as protocol, Language, Status};
     use std::cell::RefCell;
     use std::collections::{HashMap, HashSet};
-    use std::path::{Path, PathBuf};
+    use std::path::PathBuf;
     use std::time::SystemTime;
 
     type LiteralId = (u32, u32, u32);
 
     struct FileState {
         path: Option<PathBuf>,
+        manifest: &'static str,
         modified: Option<SystemTime>,
         /// The macros as the build saw them (the first read of the file).
         built: Option<Source>,
+        accepted: Option<Locations>,
         /// The literals that differ from the build: (line, column, index) of
         /// the build to the text in the source now.
         changed: HashMap<LiteralId, String>,
@@ -206,7 +226,7 @@ mod reload {
     }
 
     fn register(site: Site) -> FileState {
-        let path = resolve(site.file, site.manifest);
+        let path = crate::RsxSourceInfo::resolve_file(site.file, site.manifest);
         let (modified, built) = match &path {
             Some(path) => {
                 let modified = std::fs::metadata(path).and_then(|meta| meta.modified()).ok();
@@ -215,17 +235,20 @@ mod reload {
             }
             None => (None, None),
         };
-        FileState { path, modified, built, changed: HashMap::new(), awaiting_reads: HashSet::new() }
+        FileState { path, manifest: site.manifest, modified, built, accepted: None,
+            changed: HashMap::new(), awaiting_reads: HashSet::new() }
     }
 
-    /// The file of `file!()`: relative to the root of the workspace, which
-    /// is an ancestor of the directory of the crate.
-    fn resolve(file: &str, manifest: &str) -> Option<PathBuf> {
-        let file = Path::new(file);
-        if file.is_absolute() {
-            return file.exists().then(|| file.to_path_buf());
-        }
-        Path::new(manifest).ancestors().map(|dir| dir.join(file)).find(|candidate| candidate.exists())
+    pub(super) fn source_location(info: crate::RsxSourceInfo) -> crate::RsxSourceLocation {
+        let located = FILES.with(|files| {
+            let files = files.borrow();
+            let state = files.get(info.file)?;
+            if state.manifest != info.manifest {
+                return None;
+            }
+            state.accepted.as_ref()?.resolve(state.built.as_ref()?, info.compiled)
+        });
+        located.unwrap_or(info.compiled)
     }
 
     pub(super) fn watch() {
@@ -309,16 +332,21 @@ mod reload {
                 report(Diagnostic::HotReloaded { file: file.to_string(), literals: changed.len() });
                 state.changed = changed;
             }
-            Some((updated, state.path.clone()))
+            Some((updated, state.path.clone(), now))
         });
-        let Some((updated, path)) = result else { return; };
+        let Some((updated, path, now)) = result else { return; };
         if updated {
             version().update(|version| *version += 1);
         }
         if managed {
             if let Some(path) = path {
-                let visible = FILES.with(|files| files.borrow_mut().get_mut(file)
-                    .is_some_and(|state| std::mem::take(&mut state.awaiting_reads).is_empty()));
+                let visible = FILES.with(|files| files.borrow_mut().get_mut(file).is_some_and(|state| {
+                    let visible = std::mem::take(&mut state.awaiting_reads).is_empty();
+                    if visible {
+                        state.accepted = Some(now.into_locations());
+                    }
+                    visible
+                }));
                 let (status, reason) = if visible { (Status::Applied, None) } else {
                     (Status::Rebuild, Some("The changed RSX literals were not reread by a mounted reactive view"))
                 };

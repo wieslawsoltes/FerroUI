@@ -5,6 +5,7 @@ use ferroui_headless::{
     FerroHeadlessPlatformExtensions, FerroHeadlessPlatformOptions, HeadlessUnitTestSession,
     HeadlessWindowExtensions,
 };
+use ferroui_markup_xaml::diagnostics::XamlSourceInfo;
 use ferroui_skia::SkiaApplicationExtensions;
 use ferroui_themes_simple::SimpleTheme;
 use std::cell::Cell;
@@ -303,11 +304,22 @@ fn schemas_reject_invalid_input_before_mutating() {
 #[test]
 fn native_hits_and_compiler_locations_share_runtime_ids() {
     run(|| {
+        use ferroui_base::diagnostics::{RsxSourceInfo, RsxSourceLocation};
+
         let (window, button, _, mut inspector) = fixture();
         let root = inspector.node_id(&window);
         let id = inspector.node_id(&button);
         assert!(inspector.execute("get_source", &json!({"node_id":id})).unwrap().is_null());
         let boxed: BoxedValue = Rc::new(button.clone());
+        let compiled = RsxSourceInfo::new(file!(), env!("CARGO_MANIFEST_DIR"), RsxSourceLocation {
+            element: (11, 19), invocation: (9, 5), index: 2, revision: Some(42),
+        });
+        button.clone().upcast::<FerroObject>().set_value(RsxSourceInfo::location_property(), Some(compiled));
+        assert_eq!(inspector.execute("get_source", &json!({"node_id":id})).unwrap(), json!({
+            "uri":compiled.source_uri().unwrap().as_str(), "language":"rust", "line":11, "column":19,
+            "columnEncoding":"unicodeScalar", "invocation":{"line":9,"column":5,"index":2},
+            "revision":"000000000000002a"
+        }));
         XamlSourceInfo::set_xaml_source_info(&boxed, Some(XamlSourceInfo::new(3, 5, Some("/source/View.xaml"))));
         assert_eq!(inspector.execute("get_source", &json!({"node_id":id})).unwrap(),
             json!({"uri":"file:///source/View.xaml","line":3,"column":5}));

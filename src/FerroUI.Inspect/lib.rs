@@ -9,6 +9,7 @@ mod frames;
 mod input;
 mod logs;
 mod schema;
+mod source;
 pub mod target;
 use base64::Engine;
 use ferroui_base::controls::{IResourceHost, ResourceKey};
@@ -29,7 +30,6 @@ use ferroui_controls::automation::peers::{AutomationPeer, ControlAutomationPeer}
 use ferroui_controls::primitives::{AdornerLayer, TemplatedControl};
 use ferroui_controls::{Application, Border, Control, TopLevel};
 use ferroui_markup::markup::parsers::{SelectorGrammar, SelectorParser, SelectorSyntax};
-use ferroui_markup_xaml::diagnostics::XamlSourceInfo;
 pub use logs::{LogCapture, LogEntry, LogGuard};
 pub use schema::{tools, validate};
 use serde_json::{json, Value};
@@ -781,13 +781,7 @@ impl Inspector {
                 }
                 Ok(Value::Array(hits))
             }
-            "get_source" => {
-                let object: BoxedValue = Rc::new(Self::visual_object(&self.object(args)?));
-                Ok(XamlSourceInfo::get_xaml_source_info(&object).and_then(|info| {
-                    let uri = info.source_uri()?;
-                    Some(json!({"uri":uri.as_str(),"line":info.line_number(),"column":info.line_position()}))
-                }).unwrap_or(Value::Null))
-            }
+            "get_source" => Ok(source::location(Self::visual_object(&self.object(args)?))),
             "set_property" => {
                 if !permissions.allow_property_writes {
                     return Err("Property writes are disabled".into());

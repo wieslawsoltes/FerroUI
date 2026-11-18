@@ -14,6 +14,9 @@ use syn::ext::IdentExt;
 use syn::spanned::Spanned;
 use syn::{Expr, FnArg, Ident, ItemFn, Pat, Token, Type};
 
+mod rsx_sources;
+use rsx_sources::RsxSources;
+
 /// An element tree, expanded to the builders of `ferroui-view`.
 ///
 /// ```ignore
@@ -51,7 +54,8 @@ pub fn rsx(input: TokenStream) -> TokenStream {
         Ok(nodes) => nodes,
         Err(error) => return error.to_compile_error().into(),
     };
-    let elements: Vec<TokenStream2> = nodes.iter().map(node_element).collect();
+    let mut sources = RsxSources::new();
+    let elements: Vec<TokenStream2> = nodes.iter().map(|node| node_element(node, &mut sources)).collect();
     let tokens = if elements.len() == 1 {
         elements.into_iter().next().unwrap_or_default()
     } else {
@@ -72,20 +76,20 @@ fn hot_literal(index: u32, literal: &TokenStream2) -> TokenStream2 {
 }
 
 /// The node as a child expression (what `.child(..)` takes).
-fn node_child(node: &Node) -> TokenStream2 {
+fn node_child(node: &Node, sources: &mut RsxSources) -> TokenStream2 {
     match node {
-        Node::Element(element) => element_builder(element),
+        Node::Element(element) => element_builder(element, sources),
         Node::Text(text, index) => hot_literal(*index, &text.to_token_stream()),
         Node::Expr(expr, span) => quote_spanned! {*span=> #expr },
-        Node::If(..) | Node::For(..) => node_element(node),
+        Node::If(..) | Node::For(..) => node_element(node, sources),
     }
 }
 
 /// The node as an `Element`.
-fn node_element(node: &Node) -> TokenStream2 {
+fn node_element(node: &Node, sources: &mut RsxSources) -> TokenStream2 {
     match node {
         Node::Element(element) => {
-            let builder = element_builder(element);
+            let builder = element_builder(element, sources);
             quote! { ::ferroui_view::IntoElement::into_element(#builder) }
         }
         Node::Text(text, index) => {
@@ -94,12 +98,12 @@ fn node_element(node: &Node) -> TokenStream2 {
         }
         Node::Expr(expr, span) => quote_spanned! {*span=> ::ferroui_view::IntoChild::into_child(#expr) },
         Node::If(condition, then, otherwise, span) => {
-            let then = fragment(then);
-            let otherwise = otherwise.as_ref().map_or_else(|| quote! { ::ferroui_view::Element::Empty }, |nodes| fragment(nodes));
+            let then = fragment(then, sources);
+            let otherwise = otherwise.as_ref().map_or_else(|| quote! { ::ferroui_view::Element::Empty }, |nodes| fragment(nodes, sources));
             quote_spanned! {*span=> if #condition { #then } else { #otherwise } }
         }
         Node::For(pattern, items, body, span) => {
-            let body = fragment(body);
+            let body = fragment(body, sources);
             quote_spanned! {*span=>
                 ::ferroui_view::Element::List(
                     ::std::iter::IntoIterator::into_iter(#items).map(|#pattern| #body).collect::<::std::vec::Vec<_>>()
@@ -109,8 +113,9 @@ fn node_element(node: &Node) -> TokenStream2 {
     }
 }
 
-fn element_builder(element: &ElementNode) -> TokenStream2 {
+fn element_builder(element: &ElementNode, sources: &mut RsxSources) -> TokenStream2 {
     let path = &element.path;
+    let index = sources.next();
     let span = path.span();
     let mut tokens = quote_spanned! {span=> <#path as ::ferroui_view::Builder>::builder() };
     for attribute in &element.attributes {
@@ -134,14 +139,14 @@ fn element_builder(element: &ElementNode) -> TokenStream2 {
         }
     }
     for child in &element.children {
-        let child = node_child(child);
+        let child = node_child(child, sources);
         tokens = quote! { #tokens.child(#child) };
     }
-    tokens
+    sources.locate(path, tokens, index)
 }
 
-fn fragment(nodes: &[Node]) -> TokenStream2 {
-    let elements: Vec<TokenStream2> = nodes.iter().map(node_element).collect();
+fn fragment(nodes: &[Node], sources: &mut RsxSources) -> TokenStream2 {
+    let elements: Vec<TokenStream2> = nodes.iter().map(|node| node_element(node, sources)).collect();
     match elements.len() {
         0 => quote! { ::ferroui_view::Element::Empty },
         1 => elements.into_iter().next().unwrap_or_default(),
