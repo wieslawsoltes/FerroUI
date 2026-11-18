@@ -28,7 +28,7 @@ use ferroui_base::data::BindingBase;
 use ferroui_base::interactivity::{IRoutedEventArgs, Interactive, RoutedEvent};
 use ferroui_base::{AttachedProperty, BoxedValue, DirectProperty, FerroObject, FerroProperty, ObjectType, PropertyValue, Ref, StyledProperty, Upcast};
 use ferroui_controls::Control;
-use std::any::Any;
+use std::any::{Any, TypeId};
 use std::cell::RefCell;
 use std::marker::PhantomData;
 use std::rc::Rc;
@@ -143,8 +143,83 @@ pub trait IntoProp<T, M> {
     fn into_prop(self) -> PropValue;
 }
 
+/// The values of one type whose boxes are kept, by the last use.
+const KEPT_BOXES: usize = 8;
+
+/// The largest value whose box is kept, in bytes.
+const KEPT_BOX_SIZE: usize = 32;
+
+/// The identifier of a type is a hash already.
+#[derive(Default)]
+struct TypeIdHasher(u64);
+
+impl std::hash::Hasher for TypeIdHasher {
+    fn finish(&self) -> u64 {
+        self.0
+    }
+
+    fn write(&mut self, bytes: &[u8]) {
+        for byte in bytes {
+            self.0 = self.0.rotate_left(8) ^ u64::from(*byte);
+        }
+    }
+
+    fn write_u64(&mut self, value: u64) {
+        self.0 ^= value;
+    }
+}
+
+type KeptBoxes = std::collections::HashMap<TypeId, Box<dyn Any>, std::hash::BuildHasherDefault<TypeIdHasher>>;
+
+ferroui_base::ferro_thread_local! {
+    /// For a type of plain values, the boxes of the values used last (`Vec<Rc<T>>`).
+    static BOXES: RefCell<KeptBoxes> = RefCell::new(KeptBoxes::default());
+}
+
+/// The box of a value of a property.
+///
+/// A box cannot change and is compared by its value, so elements that give a property the same
+/// value can hold the same box, and an application gives the elements of a list or a wall the
+/// same few values (a width, an alignment, a margin, a font size): the boxes of the last
+/// [`KEPT_BOXES`] values of a type are kept on the thread, and a value among them takes its box
+/// from there, where every value of every element asked the allocator for one
+/// (docs/porting/desktop-performance.md, section 9.100). Only for plain values of up to
+/// [`KEPT_BOX_SIZE`] bytes: a value that owns something (a text, a brush) is as costly to
+/// compare as to box, and usually its own.
 fn boxed<T: PropertyValue>(value: T) -> BoxedValue {
-    Rc::new(value)
+    if std::mem::needs_drop::<T>() || std::mem::size_of::<T>() > KEPT_BOX_SIZE {
+        return Rc::new(value);
+    }
+    // The table is not there any more while the thread is torn down: the value gets a box of
+    // its own then.
+    let mut value = Some(value);
+    let shared = BOXES.try_with(|boxes| {
+        let Some(value) = value.take() else { unreachable!("the value is taken once") };
+        let mut boxes = boxes.borrow_mut();
+        let kept = boxes.entry(TypeId::of::<T>());
+        let kept = kept.or_insert_with(|| Box::new(Vec::<Rc<T>>::with_capacity(KEPT_BOXES)));
+        let Some(kept) = kept.downcast_mut::<Vec<Rc<T>>>() else { unreachable!("the boxes are of their type") };
+        if let Some(index) = kept.iter().position(|kept| **kept == value) {
+            // Towards the front, so that the values in use stay.
+            if index > 0 {
+                kept.swap(index, index - 1);
+            }
+            return kept[index.saturating_sub(1)].clone() as BoxedValue;
+        }
+        // A new value takes the place of the one at the end, where the next new value finds
+        // it: values that come once pass through one place and leave the others alone.
+        let made = Rc::new(value);
+        if kept.len() == KEPT_BOXES {
+            kept.pop();
+        }
+        kept.push(made.clone());
+        made as BoxedValue
+    });
+    match (shared, value) {
+        (Ok(shared), _) => shared,
+        (Err(_), Some(value)) => Rc::new(value),
+        (Err(_), None) => unreachable!("the value is taken only where the table is"),
+    }
 }
 
 /// The box of the value of a reactive property, kept between the runs of its effect
@@ -166,7 +241,7 @@ impl<T: PropertyValue> KeptBox<T> {
     fn boxed(&self, value: T) -> BoxedValue {
         if !self.ran.replace(true) {
             // The first run, and for most properties the only one.
-            return Rc::new(value);
+            return boxed(value);
         }
         let mut kept = self.kept.borrow_mut();
         match kept.as_mut().and_then(Rc::get_mut) {
