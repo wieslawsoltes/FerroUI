@@ -59,7 +59,17 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         assert.ok(button);
         const studio = content<{ tools: { name: string }[] }>(await invoke('designer_studio_tools', { session }));
         assert.ok(studio.tools.some(tool => tool.name === 'designer_ast'));
+        assert.ok(studio.tools.some(tool => tool.name === 'designer_events'));
         content(await invoke('designer_studio_query', { session, tool: 'designer_ast', arguments: { depth: 2 } }));
+        const combined = content<{ nodes: { visual: boolean; logical: boolean }[] }>(
+            await invoke('designer_studio_query', { session, tool: 'designer_tree', arguments: { tree: 'combined' } }));
+        assert.ok(combined.nodes.some(row => row.visual && row.logical));
+        const inspector = content<{ properties: { name: string; group: string }[]; events: { name: string }[] }>(
+            await invoke('designer_inspect', { session, node: button.id }));
+        assert.ok(inspector.properties.some(field => field.name === 'Width' && field.group === 'Layout'));
+        assert.ok(inspector.events.some(field => field.name === 'Click'));
+        const assets = content<{ assets: { id: string }[] }>(await invoke('designer_assets', { session }));
+        assert.ok(assets.assets.some(asset => asset.id === 'Assets/Preview Image.png'));
         const image = await invoke('designer_preview_image', { session });
         assert.equal(image.isError, false);
         assert.equal(Buffer.from(image.content.find(item => item.type === 'image')!.data!, 'base64').subarray(1, 4).toString(), 'PNG');
@@ -70,6 +80,12 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         content(await invoke('designer_apply', edit));
         assert.ok(document.isDirty && document.getText().includes('Content="MCP edited this buffer"'));
         assert.equal((await invoke('designer_apply', edit)).isError, true);
+        content(await invoke('designer_history', { session, expected_version: document.version, action: 'undo' }));
+        assert.equal(document.getText(), original);
+        const latest = content<{ revision: number }>(await invoke('designer_inspect', { session, node: button.id }));
+        content(await invoke('designer_set_event', { session, node: button.id, expected_revision: latest.revision,
+            event: 'Click', action: 'set', handler: 'OnSave' }));
+        assert.match(document.getText(), /Click="OnSave"/);
         content(await invoke('designer_history', { session, expected_version: document.version, action: 'undo' }));
         assert.equal(document.getText(), original);
         console.log('VS Code MCP discovery, shared Studio queries, PNG content, write permissions, stale revisions and editor undo passed');

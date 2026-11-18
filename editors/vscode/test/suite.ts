@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import { NativePreview } from '../src/nativePreview';
 import { applyTextEdits, sourceOf } from '../src/textDocument';
 import { verifyMcp } from './mcp';
+import { verifyWorkbenchFeatures } from './workbenchFeatures';
 
 const editorPosition = (line = 0, character = 0) => new vscode.Position(line, character);
 const viewport = { width: 640, height: 420, dark: false };
@@ -110,10 +111,12 @@ export async function run(): Promise<void> {
         const partial = await preview.render(sourceOf(rust, 'rust', rustEditor.document.positionAt(rust.getText().lastIndexOf('"Increment"'))), viewport);
         assert.ok(partial.image && !partial.counterpart.editable);
         assert.ok(partial.notices.some(notice => notice.includes('omitted Rust items')));
+        await verifyWorkbenchFeatures(preview, xamlInput.uri, rustInput.uri);
         const commands = await vscode.commands.getCommands(true);
         assert.ok(commands.includes('ferroui.outline.focus'), 'Outline is a contributed VS Code view');
         assert.ok(commands.includes('ferroui.properties.focus'), 'Properties is a separate contributed VS Code view');
         assert.ok(commands.includes('ferroui.toolbox.focus'), 'Toolbox is a separate contributed VS Code view');
+        for (const panel of ['events', 'resources', 'assets']) assert.ok(commands.includes(`ferroui.${panel}.focus`), `${panel} is a contributed VS Code view`);
         await vscode.commands.executeCommand('ferroui.showOutline');
         await vscode.commands.executeCommand('ferroui.showProperties');
         await vscode.commands.executeCommand('ferroui.showToolbox');

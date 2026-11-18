@@ -1,0 +1,102 @@
+import { strict as assert } from 'node:assert';
+import type { NativePreview } from '../src/nativePreview';
+import type { Source, TextEdit } from '../src/protocol';
+
+const viewport = { width: 640, height: 420, dark: false };
+const caret = { line: 0, character: 0 };
+
+export async function verifyWorkbenchFeatures(preview: NativePreview, xamlUri: string, rustUri: string): Promise<void> {
+    let xaml: Source = { language: 'xaml', uri: xamlUri, caret, source: `
+<UserControl xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources><SolidColorBrush x:Key="AccentBrush" Color="#655DD7"/></UserControl.Resources>
+    <Border Padding="48"><StackPanel Name="Body"><Button Name="Save" Click="OnSave" Content="Save"/></StackPanel></Border>
+</UserControl>` };
+    const frame = await preview.render(xaml, viewport, 10);
+    assert.ok(frame.image, frame.renderError ?? 'XAML events preserve a frame');
+    assert.ok(frame.notices.some(notice => notice.includes('event handlers')));
+    const button = frame.nodes.find(node => node.name === 'Save')!;
+    const details = await preview.inspect(xaml, 10, { type: 'source', node: button.id });
+    assert.equal(details.events.find(event => event.name === 'Click')?.handler, 'OnSave');
+    assert.ok(details.properties.some(field => field.name === 'Width' && field.group === 'Layout' && field.editable));
+    assert.ok(details.properties.some(field => field.name === 'Background' && field.kind === 'color'));
+    assert.ok(!details.properties.some(field => field.name === 'Click'));
+    const runtime = await preview.studioQuery(10, 'designer_tree', { tree: 'combined' }) as {
+        nodes: { inspector_id: number; visual: boolean; logical: boolean; source_id: number | null }[];
+    };
+    assert.ok(runtime.nodes.some(row => row.source_id === button.id && row.visual && row.logical));
+    const generated = runtime.nodes.find(row => row.source_id === null && row.visual)!;
+    assert.ok(generated);
+    const inspected = await preview.inspect(xaml, 10, { type: 'runtime', id: generated.inspector_id });
+    assert.ok(inspected.properties.length && inspected.properties.every(field => !field.editable));
+    await assert.rejects(preview.inspect(xaml, 9, { type: 'runtime', id: generated.inspector_id }), /current preview/);
+
+    const resources = await preview.resources(xaml, 10, button.id);
+    const accent = resources.find(resource => resource.name === 'AccentBrush')!;
+    assert.ok(accent.visible && accent.properties.includes('Background'));
+    const applied = await preview.edit(xaml, { type: 'applyResource', frame: 10, node: button.id,
+        resource: accent.id, property: 'Background', dynamic: false });
+    assert.match(apply(xaml.source, applied.edits), /Background="\{StaticResource 'AccentBrush'\}"/);
+    const ownHandler = await preview.edit(xaml, { type: 'setEvent', node: button.id, name: 'Click', value: 'OnApply' });
+    assert.match(apply(xaml.source, ownHandler.edits), /Click="OnApply"/);
+    const width = await preview.edit(xaml, { type: 'setProperty', node: button.id, name: 'Width', value: '180' });
+    const next = { ...xaml, source: apply(xaml.source, width.edits) };
+    assert.match(next.source, /Width="180"/);
+    const reset = await preview.edit(next, { type: 'resetProperty', node: button.id, name: 'Width' });
+    assert.ok(!apply(next.source, reset.edits).includes('Width='));
+
+    const point = { type: 'canvas', x: 10, y: 10 } as const;
+    const placement = { target: point, origin: { type: 'image', source: 'Assets/Preview%20Image.png' } } as const;
+    assert.ok((await preview.placement(10, placement)).bounds, 'The wrapper gutter resolves to its content body');
+    const placed = await preview.edit(xaml, { type: 'place', frame: 10, placement });
+    xaml = { ...xaml, source: apply(xaml.source, placed.edits) };
+    assert.match(xaml.source, /Source="Assets\/Preview%20Image.png"/);
+    const withAsset = await preview.render(xaml, viewport, 11);
+    assert.ok(withAsset.image, withAsset.renderError ?? 'Relative assets load in the artboard');
+    assert.ok(withAsset.nodes.some(node => node.label === 'Image' && node.bounds?.height));
+
+    let rust: Source = { language: 'rust', uri: rustUri, caret, source: `
+fn view() { rsx! {
+    StackPanel {
+        // a sibling comment
+        Button { name: "save", on_click: move |_| save(), "Save" }
+        TextBlock { name: "label", text: move || title() }
+    }
+} }` };
+    const partial = await preview.render(rust, viewport, 12);
+    const save = partial.nodes.find(node => node.name === 'save')!;
+    const label = partial.nodes.find(node => node.name === 'label')!;
+    assert.ok(partial.image && save.canMove && label.canMove);
+    const info = await preview.inspect(rust, 12, { type: 'source', node: save.id });
+    assert.equal(info.events.find(event => event.name === 'Click')?.handler, 'move |_| save()');
+    const movement = await preview.edit(rust, { type: 'place', frame: 12,
+        placement: { origin: { type: 'node', node: save.id }, target: { type: 'outline', node: label.id, position: 'after' } } });
+    const moved = apply(rust.source, movement.edits);
+    assert.ok(moved.indexOf('name: "label"') < moved.indexOf('name: "save"'));
+    assert.match(moved, /move \|_\| save\(\)/);
+    assert.match(moved, /sibling comment/);
+    assert.match(moved, /move \|\| title\(\)/);
+    rust = { ...rust, source: moved };
+    const movedFrame = await preview.render(rust, viewport, 13);
+    const movedSave = movedFrame.nodes.find(node => node.name === 'save')!;
+    const handler = await preview.edit(rust, { type: 'setEvent', node: movedSave.id, name: 'Click', value: 'move |_| apply()' });
+    assert.equal(apply(rust.source, handler.edits), rust.source.replace('move |_| save()', 'move |_| apply()'));
+    await assert.rejects(preview.edit(rust, { type: 'setEvent', node: movedSave.id, name: 'Click', value: 'move |' }), /Invalid handler/);
+    const dynamic = { ...rust, source: 'fn view() { rsx! { StackPanel { {extra()} Button { "Save" } } } }' };
+    const dynamicFrame = await preview.render(dynamic, viewport, 14);
+    assert.ok(dynamicFrame.image);
+    assert.equal(dynamicFrame.nodes[0].canInsert, false);
+    await assert.rejects(preview.placement(14, { origin: { type: 'asset', control: 'Button' },
+        target: { type: 'outline', node: dynamicFrame.nodes[0].id, position: 'inside' } }), /fully mapped children/);
+    console.log('VS Code native hierarchy, grouped properties, resources, relative image drops and expression-preserving RSX placement passed');
+}
+
+function apply(source: string, edits: TextEdit[]): string {
+    const lines = source.split('\n');
+    const offset = (line: number, character: number) =>
+        lines.slice(0, line).reduce((length, text) => length + text.length + 1, 0) + character;
+    const patches = edits.map(({ range, newText }) => ({
+        start: offset(range.start.line, range.start.character), end: offset(range.end.line, range.end.character), text: newText,
+    })).sort((a, b) => b.start - a.start);
+    for (const patch of patches) source = source.slice(0, patch.start) + patch.text + source.slice(patch.end);
+    return source;
+}

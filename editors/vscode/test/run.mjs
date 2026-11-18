@@ -12,6 +12,9 @@ const bin = resolve(process.env.FERROUI_TEST_BIN_DIR ?? join(extension, '../../t
 const executable = name => join(bin, name + (process.platform === 'win32' ? '.exe' : ''));
 try {
     await cp(join(extension, 'test/fixtures'), workspace, { recursive: true });
+    await mkdir(join(workspace, 'Assets'));
+    await writeFile(join(workspace, 'Assets', 'Preview Image.png'), Buffer.from(
+        'iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAE0lEQVR4nGNMjb3OAANMcBZeDgBQdAGhOsFZtwAAAABJRU5ErkJggg==', 'base64'));
     await mkdir(join(profile, 'User'), { recursive: true });
     await writeFile(join(profile, 'User/settings.json'), JSON.stringify({
         'ferroui.languageServer.path': executable('ferroui-xaml-lsp'),
