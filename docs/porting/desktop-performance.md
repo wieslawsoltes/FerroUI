@@ -7663,3 +7663,40 @@ The other nine lines of the class are within 0.2 % in instructions (one within 1
 **Tests.** The 79 tests of `ferroui-view`; the benchmark `shared_signal_changed` is new and
 runs with the gate (section 9.91).
 
+### 9.95 A figure of points is given to the path of the backend as one run of lines
+
+Experiment #819. A shape keeps its geometry when its points change (section 9.88), which
+saved the objects of the framework. The path of the backend was still built point by point:
+`PolylineGeometry` read each point from its collection and called `line_to` on the geometry
+context, a virtual call and one or two calls into Skia for every point (one for the path of
+the stroke, one more for the path of the fill where the two are apart), each time the path
+was made again. A frame of the declarative gauntlet makes the paths of 518 sparkline shapes
+again (section 9.93).
+
+`IGeometryContext` gets `lines_to(points, is_stroked)`, with `line_to` for every point as
+its default, so every context is right without knowing of it. `PolylineGeometry` reads its
+points once (the snapshot of the collection) and gives the figure as one run. The Skia path
+builder takes a run of stroked lines with one call for each of its paths (`polyline_to`),
+which is what Skia has for it: nothing of Skia is done again here, fewer calls are made.
+
+**Measured** with the gate (`layout_subsystem::ShapeGeometry`, 500 shapes of 24 points, each
+changed, laid out and asked for the geometry it draws; two rounds):
+
+| `layout_subsystem::ShapeGeometry` | Main | This change | Time | Instructions |
+| --- | ---: | ---: | ---: | ---: |
+| `polyline_points_replaced` | 452.1 us | 431.8 us | -4.5 % | -8.55 % |
+| `polygon_points_replaced` | 431.0 us | 407.0 us | -5.6 % | -9.20 % |
+| `rectangle_resized` | 643.0 us | 647.7 us | +0.7 % | +0.49 % |
+| `ellipse_resized` | 399.3 us | 402.6 us | +0.8 % | +0.70 % |
+| `line_moved` | 276.9 us | 276.0 us | -0.4 % | +0.66 % |
+
+**Looked at and not changed** (section 8.4, rule 2). The other backends keep the default
+until they are measured: a run is the same lines there. `PathGeometry` and the parser of
+path markup give their segments one by one as they read them; a run of line segments in a
+path figure could use the same operation and is not done here.
+
+**Tests.** `stream_geometry_builder.rs`: `a_run_of_lines_is_the_path_of_its_lines` (figures
+of 1, 2, 3 and 48 points, filled and not, closed and open: the path of the stroke and the
+path of the fill are the ones the same lines give point by point). The tests of the shapes
+and of the geometries.
+
