@@ -10,7 +10,7 @@ use ferroui_base::{Ref, Thickness, WeakRef};
 use ferroui_controls::{
     Button, ContentControl, Control, Grid, Slider, StackPanel, TextBlock, TextBox,
 };
-use ferroui_designer_animation::{AnimationValue, Easing};
+use ferroui_designer_animation::Easing;
 use ferroui_designer_core::NodeId;
 use ferroui_inspect::Inspector;
 use ferroui_markup_xaml::FromXamlObject;

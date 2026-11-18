@@ -4,6 +4,7 @@
 //! visual tools and automation. [`DesignerWorkspace`] is an optional embeddable view
 //! of that session. Neither starts a window, server or background transport.
 mod affine_manipulation;
+mod animation_keyframe_authoring;
 mod animation_runtime;
 mod animation_session;
 mod asset_toolbox;

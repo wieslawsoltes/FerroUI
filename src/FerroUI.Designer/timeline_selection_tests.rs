@@ -2,6 +2,7 @@
 use super::*;
 use ferroui_base::input::KeyEventArgs;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
+use ferroui_designer_animation::AnimationValue;
 
 fn workspace() -> (Rc<DesignerWorkspace>, NodeId) {
     let workspace = DesignerWorkspace::new(

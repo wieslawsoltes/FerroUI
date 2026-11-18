@@ -1117,7 +1117,6 @@ impl DesignerWorkspace {
         apply.set_padding(Thickness::symmetric(8.0, 3.0));
         let weak = Rc::downgrade(self);
         let selected = selected.clone();
-        let kind = key.value.kind();
         let property = selected.property.clone();
         let target = selected.target;
         let old_time = selected.time;
@@ -1139,33 +1138,21 @@ impl DesignerWorkspace {
                         .unwrap_or_default()
                         .parse()
                         .map_err(|_| "Invalid keyframe time")?;
-                    let value = AnimationValue::parse(&value.text().unwrap_or_default(), kind)
-                        .map_err(|error| error.to_string())?;
-                    let easing = Easing::parse(&curve.text().unwrap_or_default())
-                        .map_err(|error| error.to_string())?;
                     let mut session = this.session.borrow_mut();
                     let id = session
                         .active_animation_program()
                         .ok_or("Choose an animation")?;
-                    let mut timeline = session.timeline().clone();
-                    if !time.is_finite() || !(0.0..=timeline.duration).contains(&time) {
-                        return Err("Keyframe is outside the timeline".into());
-                    }
-                    let track = timeline
-                        .track_mut(target, &property)
-                        .ok_or("Animation track is no longer present")?;
-                    if time != old_time {
-                        track
-                            .move_keyframe(old_time, time)
-                            .map_err(|error| error.to_string())?;
-                    }
-                    track
-                        .record(time, value)
-                        .map_err(|error| error.to_string())?;
-                    track
-                        .set_easing(time, easing)
-                        .map_err(|error| error.to_string())?;
-                    session.update_animation_program(id, timeline)?;
+                    session.edit_program_keyframe(
+                        id,
+                        target,
+                        &property,
+                        crate::animation_keyframe_authoring::KeyframeEdit::Upsert {
+                            previous: Some(old_time),
+                            time,
+                            value: &value.text().unwrap_or_default(),
+                            easing: &curve.text().unwrap_or_default(),
+                        },
+                    )?;
                     drop(session);
                     this.remember_keyframe(SelectedKey {
                         target,

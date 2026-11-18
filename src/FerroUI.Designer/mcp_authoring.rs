@@ -2,6 +2,7 @@
 use super::schema as s;
 use super::{decode, node_id, number, state, text, Permissions};
 use crate::DesignerSession;
+use crate::animation_keyframe_authoring::KeyframeEdit;
 use ferroui_designer_animation::{AnimationValue, BehaviorModel, Timeline, VisualStateGroup};
 use ferroui_designer_tools::PropertyKind;
 use serde_json::{json, Value};
@@ -28,8 +29,8 @@ pub(super) fn tools() -> Vec<Value> {
         schema
     };
     vec![
-        s::tool("designer_programs","Read independently editable animation programs, persistent source keys, codec diagnostics and typed timelines. Opaque programs remain available as source.",s::object(json!({"include_source":{"type":"boolean"}}), &[]),false),
-        s::actions("designer_program","Create/select/rename/duplicate/remove an animation program, replace its source or complete typed model, set authored selectors or preview-only targets, scrub several programs together, or play all programs. IDs refer to the current document; every action checks expected_revision.",vec![
+        s::tool("designer_programs","Read animation programs, source keys, codec diagnostics and typed timelines. include_keyframe_text adds formatted XAML values and easing to the typed keys.",s::object(json!({"include_source":{"type":"boolean"},"include_keyframe_text":{"type":"boolean"}}), &[]),false),
+        s::actions("designer_program","Author animation programs and keyframes, set selectors or preview targets, scrub several programs together, or play all programs. IDs refer to the current document; every action checks expected_revision.",vec![
             s::action("create",json!({"name":s::string(),"owner":s::id(),"selector":s::string(),"duration":s::time()}), &["name","owner","selector","duration"],true),
             s::action("select",json!({"program":s::id()}), &["program"],true),
             s::action("rename",json!({"program":s::id(),"name":s::string()}), &["program","name"],true),
@@ -38,6 +39,8 @@ pub(super) fn tools() -> Vec<Value> {
             s::action("selector",json!({"program":s::id(),"selector":s::string()}), &["program","selector"],true),
             s::action("source",json!({"program":s::id(),"source":s::string()}), &["program","source"],true),
             s::action("update",json!({"program":s::id(),"timeline":s::timeline()}), &["program","timeline"],true),
+            s::action("upsert_keyframe",json!({"program":s::id(),"target":s::id(),"property":s::string(),"previous":s::time(),"time":s::time(),"value":s::string(),"easing":s::string()}), &["program","target","property","time","value","easing"],true),
+            s::action("remove_keyframe",json!({"program":s::id(),"target":s::id(),"property":s::string(),"time":s::time()}), &["program","target","property","time"],true),
             s::action("preview_targets",json!({"program":s::id(),"targets":s::nullable(s::array(s::id(),4096))}), &["program","targets"],true),
             s::action("preview",json!({"programs":ids(),"time":s::time()}), &["programs","time"],true),
             s::action("play_all",json!({}), &[],true),
@@ -75,13 +78,7 @@ pub(super) fn call(
 ) -> Result<Value, String> {
     match name {
         "designer_programs" => {
-            let mut programs = serde_json::to_value(session.animation_programs())
-                .map_err(|error| error.to_string())?;
-            if args["include_source"] == false {
-                for program in programs.as_array_mut().unwrap() {
-                    program.as_object_mut().unwrap().remove("source");
-                }
-            }
+            let programs = animation_programs(session, args)?;
             return Ok(
                 json!({"document":state(session),"active":session.active_animation_program(),"programs":programs}),
             );
@@ -120,6 +117,17 @@ pub(super) fn call(
                     timeline.validate().map_err(|error| error.to_string())?;
                     session.update_animation_program(node_id(args, "program")?, timeline)?;
                 }
+                "upsert_keyframe" => session.edit_program_keyframe(
+                    node_id(args, "program")?, node_id(args, "target")?, &text(args, "property")?,
+                    KeyframeEdit::Upsert {
+                        previous: args["previous"].as_f64(), time: number(args, "time")?,
+                        value: &text(args, "value")?, easing: &text(args, "easing")?,
+                    },
+                )?,
+                "remove_keyframe" => session.edit_program_keyframe(
+                    node_id(args, "program")?, node_id(args, "target")?, &text(args, "property")?,
+                    KeyframeEdit::Remove(number(args, "time")?),
+                )?,
                 "preview_targets" => session.set_animation_program_preview_targets(
                     node_id(args, "program")?,
                     decode(args, "targets")?,
@@ -264,6 +272,25 @@ pub(super) fn call(
     }
     Ok(json!({"document":state(session)}))
 }
+fn animation_programs(session: &DesignerSession, args: &Value) -> Result<Vec<Value>, String> {
+    session.animation_programs().iter().map(|program| {
+        let mut model = serde_json::to_value(program).map_err(|error| error.to_string())?;
+        if args["include_source"] == false {
+            model.as_object_mut().expect("program is an object").remove("source");
+        }
+        if args["include_keyframe_text"] == true {
+            for (track, authored) in program.timeline.iter().flat_map(|timeline| &timeline.tracks).enumerate() {
+                for (key, authored) in authored.keyframes.iter().enumerate() {
+                    let model = &mut model["timeline"]["tracks"][track]["keyframes"][key];
+                    model["value_text"] = json!(authored.value.to_xaml());
+                    model["easing_text"] = json!(authored.easing.to_xaml());
+                }
+            }
+        }
+        Ok(model)
+    }).collect()
+}
+
 fn distinct(nodes: &[u64]) -> Result<(), String> {
     if nodes.len() != nodes.iter().collect::<BTreeSet<_>>().len() {
         Err("Node IDs must be distinct".into())

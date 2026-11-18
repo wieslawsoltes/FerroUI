@@ -1,6 +1,7 @@
 use super::*;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
 use ferroui_controls::{CheckBox, NumericUpDown, Window};
+use ferroui_designer_animation::AnimationValue;
 
 const DOCUMENT: &str = r#"<Canvas xmlns="https://github.com/ferroui" Width="400" Height="300"><StackPanel Name="Group"><Button Name="First" Width="80" Content="First" /><Button Name="Second" Width="100" Content="Second" /></StackPanel></Canvas>"#;
 

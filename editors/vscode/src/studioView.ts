@@ -2,10 +2,12 @@ import * as vscode from 'vscode';
 import type { DesignerPanel } from './designerPanel';
 import { errorMessage } from './protocol';
 import { StudioContext, type StudioItem } from './studioContext';
+import { behaviorItems } from './studioBehaviors';
 import { contentSections } from './studioContent';
 import { focusItems } from './studioFocus';
 import { layerItems } from './studioLayers';
-import { stateItems, timelineItems } from './studioTimeline';
+import { stateItems } from './studioStates';
+import { timelineItems } from './studioTimeline';
 
 const viewId = 'ferroui.studio';
 const runId = 'ferroui.studio.runAction';
@@ -65,6 +67,7 @@ export class StudioView implements vscode.TreeDataProvider<StudioItem>, vscode.D
             { id: 'focus', label: 'Focus and Labels', icon: 'list-ordered', children: () => focusItems(context) },
             { id: 'timeline', label: 'Timeline', icon: 'history', children: () => timelineItems(context) },
             { id: 'states', label: 'States', icon: 'symbol-enum', children: () => stateItems(context) },
+            { id: 'behaviors', label: 'Behaviors', icon: 'run', children: () => behaviorItems(context) },
         ];
     }
 

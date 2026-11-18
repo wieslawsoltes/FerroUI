@@ -61,6 +61,14 @@ export function editText(prompt: string, value?: string): Thenable<string | unde
     return vscode.window.showInputBox({ title: 'FerroUI Studio', prompt, value, ignoreFocusOut: true });
 }
 
+export async function editTime(prompt: string, maximum: number, initial: number): Promise<number | undefined> {
+    const value = await editText(`${prompt} (0–${maximum})`, String(initial));
+    if (value === undefined) return;
+    const time = value.trim() ? Number(value) : Number.NaN;
+    if (!Number.isFinite(time) || time < 0 || time > maximum) throw new Error(`Enter a time from 0 to ${maximum} seconds.`);
+    return time;
+}
+
 export async function choose<T extends vscode.QuickPickItem>(title: string, items: readonly T[]): Promise<T | undefined> {
     return vscode.window.showQuickPick(items, { title, matchOnDescription: true });
 }
