@@ -12,6 +12,8 @@ import { SelectionInspection } from './selectionInspection';
 import { PROPERTIES_VIEW, PropertiesView } from './propertiesView';
 import type { ProjectAssets } from './projectAssets';
 import { promptRsxControlName } from './rsxRename';
+import { editBinding } from './studioBinding';
+import { StudioContext } from './studioContext';
 import { chooseLayout } from './studioLayout';
 import { StudioView } from './studioView';
 import { errorMessage, type DesignerView, type DetailsView, type DragOrigin, type FrameTarget, type FromAssets, type FromDetails, type FromOutline, type FromToolbox, type Language, type NodeOperation, type NodeTarget, type OutlineMode, type ToolboxState, type ToToolbox, type Viewport } from './protocol';
@@ -56,7 +58,14 @@ export class DesignerWorkbench implements vscode.Disposable {
         this.assets = new AssetsView(context.extensionUri, assets, changed, message => { void this.assetsMessage(message); });
         this.properties = new PropertiesView(context.extensionUri, changed, (target, operation) => this.edit(target, operation),
             () => { void this.showDock(TOOLBOX_VIEW); },
-            async (frame, range) => { await this.active?.revealSource(frame, range); });
+            async (frame, range) => { await this.active?.revealSource(frame, range); },
+            async (target, property) => {
+                const panel = this.active;
+                if (!panel?.canUse(target) || panel.selectedIds.length !== 1 || panel.selectedIds[0] !== target.node) {
+                    throw new Error('Select one control in the current preview to edit a binding.');
+                }
+                await editBinding(new StudioContext(panel, target.token, () => this.active === panel), target.node, property);
+            });
         this.studio = new StudioView(changed);
         const snippets = vscode.workspace.createFileSystemWatcher('**/.ferroui/toolbox/*.xaml');
         const refreshToolbox = (uri: vscode.Uri) => {

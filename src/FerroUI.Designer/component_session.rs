@@ -95,7 +95,7 @@ fn property_framework_extension(document: &Document, node: NodeId, name: &str) -
         })
 }
 
-fn property_schema() -> &'static ferroui_designer_language::Schema {
+pub(crate) fn property_schema() -> &'static ferroui_designer_language::Schema {
     static SCHEMA: std::sync::OnceLock<ferroui_designer_language::Schema> =
         std::sync::OnceLock::new();
     SCHEMA.get_or_init(ferroui_designer_language::Schema::ferroui)

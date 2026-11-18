@@ -49,6 +49,8 @@ mod preview_stage_scenarios;
 mod preview_stage_editor;
 mod preview_stage_view;
 mod preview_source;
+#[cfg(feature = "mcp")]
+mod property_binding_session;
 mod property_color_editor;
 mod property_controls;
 mod property_inspector_view;

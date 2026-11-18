@@ -5,6 +5,7 @@ interface Actions {
     set(value: string): void;
     reset(): void;
     reveal(range: Range): void;
+    binding?: () => void;
 }
 
 export function propertyEditor(property: PropertyField, actions: Actions): HTMLElement {
@@ -36,6 +37,9 @@ export function propertyEditor(property: PropertyField, actions: Actions): HTMLE
         pick.toggleAttribute('data-unset', !hex);
         pick.addEventListener('change', () => actions.set(pick.value.toUpperCase()));
         value.prepend(pick);
+    }
+    if (actions.binding) {
+        value.append(actionButton('link', `Edit ${property.name} binding`, actions.binding));
     }
     if (property.canReset) {
         value.append(actionButton('discard', `Reset ${property.name}`, actions.reset));

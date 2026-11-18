@@ -7,6 +7,15 @@ use std::collections::{BTreeMap, BTreeSet};
 const XAML: &str = "http://schemas.microsoft.com/winfx/2006/xaml";
 const RENAME_URI: &str = "untitled:/DesignerNameRefactoring.xaml";
 
+pub(crate) fn names_in_scope(document: &Document, node: NodeId) -> Vec<String> {
+    let ast = document.ast();
+    let scope = ast.name_scope(node);
+    ast.nodes_in_source_order()
+        .filter(|element| ast.name_scope(element.id) == scope)
+        .filter_map(|element| element.xaml_name().map(str::to_owned))
+        .collect()
+}
+
 /// Plan an atomic name change using the language service's namescope-aware reference grammar.
 /// Existing `Name`/XAML directive aliases, quoting, unrelated strings and comments are retained.
 /// `None` removes names only when doing so cannot leave a known reference unresolved.

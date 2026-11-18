@@ -22,6 +22,7 @@ export class Inspector {
         private readonly edit: (operation: NodeOperation) => void,
         private readonly openToolbox: () => void,
         private readonly reveal: (range: Range) => void,
+        private readonly binding: (property: string) => void,
     ) {
         this.filter.addEventListener('input', () => this.applyFilter());
     }
@@ -138,6 +139,7 @@ export class Inspector {
             set: value => { if (node !== undefined) this.edit({ type: 'setProperty', node, name: field.name, value }); },
             reset: () => { if (node !== undefined) this.edit({ type: 'resetProperty', node, name: field.name }); },
             reveal: this.reveal,
+            binding: node !== undefined && field.canBind ? () => this.binding(field.name) : undefined,
         });
     }
 

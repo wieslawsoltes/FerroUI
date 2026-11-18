@@ -5,7 +5,7 @@ import { Inspector } from './inspector';
 declare function acquireVsCodeApi(): { postMessage(message: FromProperties): void };
 const vscode = acquireVsCodeApi();
 const message = element('view-message');
-const inspector = new Inspector(edit, () => vscode.postMessage({ type: 'toolbox' }), reveal);
+const inspector = new Inspector(edit, () => vscode.postMessage({ type: 'toolbox' }), reveal, binding);
 let state: PropertiesState = {};
 let error: string | undefined;
 let request = 0;
@@ -14,13 +14,22 @@ let pending: { request: number; target: NodeTarget } | undefined;
 window.addEventListener('message', event => receive(event.data as ToProperties));
 vscode.postMessage({ type: 'ready' });
 
-function edit(operation: NodeOperation): void {
+function submit(message: Omit<Extract<FromProperties, { type: 'edit' }>, 'request' | 'target'>
+    | Omit<Extract<FromProperties, { type: 'binding' }>, 'request' | 'target'>): void {
     const target = state.target;
-    if (!target || operation.node !== target.node || pending) return;
+    if (!target || pending) return;
     pending = { request: ++request, target };
     error = undefined;
-    vscode.postMessage({ type: 'edit', request, target, operation });
+    vscode.postMessage({ ...message, request, target });
     show();
+}
+
+function edit(operation: NodeOperation): void {
+    if (operation.node === state.target?.node) submit({ type: 'edit', operation });
+}
+
+function binding(property: string): void {
+    submit({ type: 'binding', property });
 }
 
 function reveal(range: Range): void {

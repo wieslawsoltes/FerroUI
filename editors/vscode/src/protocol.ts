@@ -54,6 +54,7 @@ export interface PropertyField {
     range: Range | null;
     editable: boolean;
     canReset: boolean;
+    canBind?: boolean;
     mixed?: boolean;
 }
 export interface EventField {
@@ -143,6 +144,7 @@ export interface PropertiesState {
 export type FromProperties = { type: 'ready' }
     | { type: 'toolbox' }
     | { type: 'reveal'; frame: FrameTarget; range: Range }
+    | { type: 'binding'; request: number; target: NodeTarget; property: string }
     | { type: 'edit'; request: number; target: NodeTarget; operation: NodeOperation };
 export type ToProperties = { type: 'state'; state: PropertiesState }
     | { type: 'edit'; request: number; error?: string };

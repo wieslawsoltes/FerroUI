@@ -22,6 +22,7 @@ pub(crate) struct PropertyField {
     range: Option<Range>,
     editable: bool,
     can_reset: bool,
+    can_bind: bool,
     mixed: bool,
 }
 
@@ -38,6 +39,7 @@ impl PropertyField {
             range: None,
             editable: false,
             can_reset: false,
+            can_bind: false,
             mixed: false,
         }
     }
@@ -51,6 +53,7 @@ pub(crate) fn intersect(properties: &mut Vec<PropertyField>, other: Vec<Property
         field.mixed |= field.authored != other.authored || field.effective != other.effective;
         field.editable &= other.editable;
         field.can_reset = field.editable && (field.can_reset || other.can_reset);
+        field.can_bind = false;
         field.range = None;
         if field.mixed {
             field.authored = None;
@@ -115,6 +118,9 @@ pub(crate) fn property_fields(
             let object = element_values.get(&name);
             let (kind, options) = editor_kind(&name, &info, descriptors.get(&name));
             let addable = can_add(design, node, &name, &info, kind);
+            let can_bind = design.rsx.is_none() && object.is_none()
+                && name != "Name" && !name.contains(':') && !info.read_only && !info.name.is_empty()
+                && (addable || attribute.is_some_and(|attr| attr.namespace_uri.is_none()));
             if attribute.is_none()
                 && object.is_none()
                 && expression.is_none()
@@ -154,6 +160,7 @@ pub(crate) fn property_fields(
                 origin,
                 editable,
                 can_reset: editable && literal,
+                can_bind,
                 mixed: false,
             })
         })

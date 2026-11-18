@@ -1959,14 +1959,7 @@ impl DesignerWorkspace {
             .collect::<Vec<_>>();
         let scope = session.definition_scope().map(|scope| scope.node);
         let scope_epoch = session.definition_scope_epoch();
-        let name_scope = session.document().ast().name_scope(first.id);
-        let named_elements = session
-            .document()
-            .ast()
-            .nodes_in_source_order()
-            .filter(|node| session.document().ast().name_scope(node.id) == name_scope)
-            .filter_map(|node| node.xaml_name().map(str::to_owned))
-            .collect::<Vec<_>>();
+        let named_elements = crate::element_names::names_in_scope(session.document(), first.id);
         let resources = session
             .visible_component_resources(first.id)
             .unwrap_or_default()

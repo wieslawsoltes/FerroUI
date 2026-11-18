@@ -1,0 +1,5 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:f="https://github.com/ferroui">
+    <TextBox Name="Input" Text="Łódź" />
+    <!-- The designer must keep this comment and the untouched binding arguments. -->
+    <TextBlock Name="Output" Text="{f:Binding  Text, ElementName=Input, FallbackValue='No value'}" />
+</StackPanel>

@@ -185,6 +185,7 @@ fn source_action(tool: &str, action: Option<&str>) -> bool {
         // All actions for these schemas are source-backed.
         "designer_component"
         | "designer_property"
+        | "designer_binding_edit"
         | "designer_set_event"
         | "designer_focus_edit"
         | "designer_selection_layout_edit"
