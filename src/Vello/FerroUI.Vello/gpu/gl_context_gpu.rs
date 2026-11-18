@@ -53,6 +53,9 @@ fn unavailable(reason: impl Into<String>) -> VelloWgpuDeviceError {
 pub struct VelloGlGpu {
     gl_context: Rc<dyn IGlContext>,
     device: Arc<VelloWgpuDevice>,
+    /// The import of the frames the producers of the context hand out as its textures, when the
+    /// context shares its frames (#575, `gl_external_objects.rs`).
+    external_objects: Option<Rc<crate::gpu::gl_external_objects::VelloGlExternalObjectsFeature>>,
 }
 
 impl VelloGlGpu {
@@ -65,7 +68,15 @@ impl VelloGlGpu {
         let current = gl_context.make_current();
         let device = Self::create_device(&gl_context);
         current.dispose();
-        Ok(Rc::new(Self { gl_context, device: device? }))
+        let device = device?;
+        let external_objects = gl_context.shared_frame_context_id().map(|context_id| {
+            Rc::new(crate::gpu::gl_external_objects::VelloGlExternalObjectsFeature::new(
+                device.clone(),
+                context_id,
+                gl_context.shared_frame_context_generation(),
+            ))
+        });
+        Ok(Rc::new(Self { gl_context, device, external_objects }))
     }
 
     fn create_device(gl_context: &Rc<dyn IGlContext>) -> Result<Arc<VelloWgpuDevice>, VelloWgpuDeviceError> {
@@ -102,6 +113,17 @@ impl VelloGlGpu {
 impl IVelloGpu for VelloGlGpu {
     fn device(&self) -> &Arc<VelloWgpuDevice> {
         &self.device
+    }
+
+    /// The external objects feature of the GPU when the context shares the frames of its
+    /// producers.
+    fn try_get_feature(&self, feature_type: std::any::TypeId) -> Option<Rc<dyn std::any::Any>> {
+        use ferroui_base::platform::IExternalObjectsRenderInterfaceContextFeature;
+        if feature_type == std::any::TypeId::of::<dyn IExternalObjectsRenderInterfaceContextFeature>() {
+            let feature: Rc<dyn IExternalObjectsRenderInterfaceContextFeature> = self.external_objects.clone()?;
+            return Some(Rc::new(feature));
+        }
+        None
     }
 
     fn platform_graphics_context(&self) -> Rc<dyn IPlatformGraphicsContext> {
