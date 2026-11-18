@@ -1032,6 +1032,9 @@ impl TextLayout {
     /// any more.
     pub fn dispose(&self) {
         if self.shared {
+            // The font manager looks for layouts nothing holds when enough holders have let
+            // theirs go: this one is idle once the last of them has.
+            super::text_layout_cache::holder_left();
             return;
         }
 

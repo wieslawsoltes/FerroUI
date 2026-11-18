@@ -12,6 +12,12 @@
 //! go; of the ones nothing holds, the [`IDLE_CAPACITY`] used last are kept, as far as their
 //! text is within [`IDLE_TEXT_CAPACITY`].
 //!
+//! Idle layouts are looked for when layouts are added, and when enough of them may be idle
+//! because the holders of shared layouts let them go ([`holder_left`]): a screen that is closed
+//! makes every layout of its texts idle and adds none, and without the second look those
+//! layouts stayed until other text was laid out (198 MB after a wall of 58,696 texts was
+//! closed, section 9.98).
+//!
 //! A cache that is full keeps a text from the second time it is asked for: the layout of a
 //! text that is seen once (a counter, a clock, a value that never comes back) stays with its
 //! owner, as a layout that cannot be shared does, and costs the cache a lookup and nothing
@@ -19,7 +25,7 @@
 //! and was let go, long after its memory was last touched, by the look for layouts to let go
 //! that it had made necessary.
 
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::hash::{BuildHasherDefault, Hash, Hasher};
 use std::rc::Rc;
@@ -42,6 +48,64 @@ pub(crate) const MAX_TEXT_LENGTH: usize = 256;
 
 /// How many layouts are added between two looks for layouts to let go.
 const SWEEP_INTERVAL: usize = IDLE_CAPACITY / 4;
+
+/// How many layouts more than the cache keeps idle may be idle, at least, before layouts to let
+/// go are looked for because holders left. A look goes over every kept layout, so the number is
+/// also at least a quarter of the layouts kept: a look then costs each holder that left at most
+/// four layouts looked at. The idle layouts are so at most [`IDLE_CAPACITY`] and this many more.
+pub(crate) const LEFT_INTERVAL: u32 = 4 * SWEEP_INTERVAL as u32;
+
+crate::ferro_thread_local! {
+    /// How many kept layouts may be idle, and the number at which layouts to let go are looked
+    /// for. A holder that lets a shared layout go adds one (the layout is idle once its last
+    /// holder has), a request that finds an idle layout takes one off, and a look sets the
+    /// number that is: a text block that lets its layout go and asks for the same text again,
+    /// as every one does between its measure and its arrangement, leaves the number where it
+    /// was.
+    static IDLE: Cell<(u32, u32)> = const { Cell::new((0, IDLE_CAPACITY as u32 + LEFT_INTERVAL)) };
+}
+
+/// A holder of a shared layout lets it go ([`TextLayout::dispose`]). A counter of the thread
+/// and nothing else, until enough layouts may be idle to look for layouts to let go.
+#[inline]
+pub(crate) fn holder_left() {
+    let due = IDLE.with(|idle| {
+        let (count, due) = idle.get();
+        idle.set((count + 1, due));
+        count + 1 >= due
+    });
+    if due {
+        holders_left();
+    }
+}
+
+#[cold]
+#[inline(never)]
+fn holders_left() {
+    use crate::LocatorExtensions;
+    match crate::FerroLocator::current().get_service::<crate::media::FontManager>() {
+        Some(manager) => manager.text_layouts().sweep_idle(),
+        // No font manager, no layouts: the count starts again.
+        None => idle_layouts_are(0, 0),
+    }
+}
+
+/// An idle layout is held again.
+#[inline]
+fn idle_layout_taken() {
+    IDLE.with(|idle| {
+        let (count, due) = idle.get();
+        idle.set((count.saturating_sub(1), due));
+    });
+}
+
+/// A look found `idle` of the `kept` layouts idle: the next one is due when that many more
+/// than the cache keeps idle may be.
+fn idle_layouts_are(idle: usize, kept: usize) {
+    let more = LEFT_INTERVAL.max(u32::try_from(kept / 4).unwrap_or(u32::MAX));
+    let idle = u32::try_from(idle).unwrap_or(u32::MAX);
+    IDLE.with(|count| count.set((idle, (IDLE_CAPACITY as u32).saturating_add(more))));
+}
 
 /// The slots of the table of the texts a full cache was asked for and did not keep.
 const SEEN_SLOTS: usize = 16 * 1024;
@@ -268,6 +332,7 @@ impl State {
         self.sweep_at = SWEEP_INTERVAL;
         self.added_text = 0;
         self.full = false;
+        idle_layouts_are(0, 0);
     }
 
     /// Whether a request of this hash was seen before, which it is from now on. Two requests
@@ -324,8 +389,8 @@ impl State {
             }
         }
 
+        let mut released = 0;
         if let Some(cut) = cut {
-            let mut released = 0;
             self.entries.retain(|_, bucket| {
                 let mut index = 0;
                 while index < bucket.len() {
@@ -347,6 +412,7 @@ impl State {
 
         self.sweep_at = self.count + SWEEP_INTERVAL;
         self.added_text = 0;
+        idle_layouts_are(idle.len() - released, self.count);
     }
 }
 
@@ -395,6 +461,9 @@ impl TextLayoutCache {
             {
                 entry.last_used = tick;
                 crate::perf_count!(TextLayoutCacheHits);
+                if entry.is_idle() {
+                    idle_layout_taken();
+                }
                 return entry.layout.clone();
             }
             if state.full && !state.seen_before(hash) {
@@ -424,6 +493,14 @@ impl TextLayoutCache {
         }
 
         layout
+    }
+
+    /// Looks for layouts to let go now, as an addition that is due does: enough layouts may be
+    /// idle because their holders let them go ([`holder_left`]). Nothing while the cache is in
+    /// use (a layout that is being made disposes another).
+    pub(crate) fn sweep_idle(&self) {
+        let Ok(mut state) = self.state.try_borrow_mut() else { return };
+        state.sweep();
     }
 
     /// The number of layouts kept.
