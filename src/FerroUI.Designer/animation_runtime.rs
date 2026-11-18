@@ -137,7 +137,7 @@ impl NativeAnimations {
                     .root()
                     .ok_or("The resource preview factory has no live root")?
                     .upcast::<Animatable>();
-                validate_animation_target(animation, &target)
+                validate_animation_target(animation, &target, "factory preview root")
                     .map_err(|error| format!("Resource program '{}': {error}", program.name))?;
                 bindings.push((animation.clone(), target));
             }

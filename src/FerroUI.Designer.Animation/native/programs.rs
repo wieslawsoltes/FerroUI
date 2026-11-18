@@ -196,7 +196,11 @@ fn native_object(animation: &Rc<dyn IAnimation>) -> Option<Ref<Animation>> {
 }
 
 /// Validate the declared property ownership for an explicit preview target.
-pub fn validate_animation_target(animation: &Animation, target: &Animatable) -> Result<(), String> {
+pub fn validate_animation_target(
+    animation: &Animation,
+    target: &Animatable,
+    target_role: &str,
+) -> Result<(), String> {
     for keyframe in animation.children().snapshot().iter() {
         for setter in keyframe.setters().snapshot().iter() {
             let property = setter
@@ -207,7 +211,7 @@ pub fn validate_animation_target(animation: &Animation, target: &Animatable) -> 
                 && !Transform::TYPE.is_assignable_from(property.owner_type())
             {
                 return Err(format!(
-                    "{property} is incompatible with the preview target {}",
+                    "{property} is incompatible with {target_role} {}",
                     target.get_type()
                 ));
             }

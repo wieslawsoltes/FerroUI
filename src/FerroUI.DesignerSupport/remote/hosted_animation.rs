@@ -228,7 +228,7 @@ impl HostedAnimations {
                     .get(target)
                     .and_then(|target| target.cast::<Animatable>())
                     .ok_or("Choose current application preview targets")?;
-                validate_animation_target(animation, &target)?;
+                validate_animation_target(animation, &target, "the preview target")?;
                 Ok::<_, String>((animation.clone(), target))
             })
             .collect::<Result<Vec<_>, _>>()?;
@@ -250,10 +250,9 @@ fn catalog_entry(
     let mut default_targets = Vec::new();
     let mut compatible_targets = Vec::new();
     for (&id, control) in targets {
-        if !control
-            .cast::<Animatable>()
-            .is_some_and(|target| validate_animation_target(animation, &target).is_ok())
-        {
+        if !control.cast::<Animatable>().is_some_and(|target| {
+            validate_animation_target(animation, &target, "the preview target").is_ok()
+        }) {
             continue;
         }
         compatible_targets.push(id);
