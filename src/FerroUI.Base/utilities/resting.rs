@@ -249,7 +249,11 @@ mod tests {
         std::thread::spawn(|| {
             let holder = Rc::new(RefCell::new(Vec::<u8>::with_capacity(3 * RETAINED_BUFFER_BYTES)));
             let weak: Weak<RefCell<Vec<u8>>> = Rc::downgrade(&holder);
-            register_resting_buffers(move || weak.upgrade().map(|buffer| buffer.borrow_mut().release_at_rest()).is_some());
+            register_resting_buffers(move || {
+                let Some(buffer) = weak.upgrade() else { return false };
+                buffer.borrow_mut().release_at_rest();
+                true
+            });
             holder.borrow_mut().release_excess_later();
             assert_eq!(holder.borrow().capacity(), RETAINED_BUFFER_BYTES);
 
