@@ -609,7 +609,7 @@ to see. Efforts are working days of one agent, including review rounds.
 | PV-3 | The WinUI theme documents of Pivot, PivotItem and PivotHeaderItem; WinUI-only list; catalog page | PV-2 | D8 | yes: the header carousel and flick against WinUI, the Tab peers | 3 |
 | HC-1 | Base: `SystemColors`, the high contrast variant (7.2); WinUI theme: `UseSystemHighContrast`, `Accents/SystemColors` (7.3); headless tests with simulated platform settings; catalog shows the variant | | D9, D10 | no | done (#560); no catalog page |
 | HC-2 | Windows: `SPI_GETHIGHCONTRAST`, `GetSysColor`, the messages | HC-1; after #325 (it changes the same file) | | **yes** | 2 |
-| HC-3 | macOS: "Increase contrast", the `NSColor`s, the notification | HC-1; after #325 (same files) | D11 | no (macOS; the owner toggles the setting) | done (#560); validated by the owner toggling the setting |
+| HC-3 | macOS: "Increase contrast", the `NSColor`s, the notification | HC-1; after #325 (same files) | D11 | no (macOS; the owner toggles the setting) | done (#560); the owner validates it by toggling the setting |
 | HC-4 | Linux: the portal's `contrast` | HC-1 | | no (Linux VM to confirm with GNOME) | 1 |
 | Follow-ups | LV-3 drag and reorder; LV-4 ItemsView and ItemContainer on #269; deferred states (5.9); the theme migration pilot (5.11); HC-5 browser system colours; `ListViewItemPresenter` as an element (D6) | | | | |
 
