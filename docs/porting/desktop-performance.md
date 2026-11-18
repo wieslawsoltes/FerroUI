@@ -8024,3 +8024,141 @@ the part of (b) that is left, with the typed setter of #804.
 static elements make no node of the runtime; a row without an owner that goes takes the effect
 of the text below it and the one a patch started for it). `builder_tests.rs`:
 `elements_that_give_the_same_plain_value_share_its_box`.
+
+### 9.101 An inherited value is raised on an object only where something there can hear it
+
+Experiment #803, part (a). A value of an inherited property that a root or a theme sets (the
+font, the foreground, the theme variant, the colour of the system bars) is a change for every
+element below: each one is told when the value changes above it, and each one is told again
+when it gets or loses its inheritance parent. Telling is a change notification like any other:
+the change handlers of every class of the element (`on_property_changed`, seven classes deep
+for a border), the handlers of the property for classes, the listeners of the object. Most
+elements do nothing with it: a border has no use for a font.
+
+**Counted** (the start of the wall of tiles of the gate, 58,696 tiles of a border, a panel and
+two texts; a temporary count in the two walks, `ValueStore::inherited_value_changed` for an
+object that gets a parent and `on_ancestor_inherited_value_changed` for a value that changes
+above):
+
+| | Notifications |
+| --- | ---: |
+| Reached an object, all | 1,760,930 |
+| Stopped at a value the object sets itself | 234,784 |
+| Raised on a border or a panel, which do nothing with them | 1,173,924 |
+| Raised on a text for the font family, which it uses | 117,392 |
+| Raised on a text for the theme variant and the colour of the system bars | 234,784 |
+
+A sample of that start has 163 ms in the two walks: about 100 ms in the notifications (43 in
+the change handlers of the classes, 39 in the handlers of the properties) and 24 ms in the
+typed copies of the two values and their comparison before a change is raised.
+
+**What can hear a change.** Three things, and all three can be asked before the change is
+raised:
+
+- *The listeners of the object*: a list that is empty for most objects.
+- *The handlers of the property* (`PropertyChangedObservable`): each is for a class
+  (`add_class_handler`) or for every class (`subscribe`). The observable of an inherited
+  property now keeps the class of each handler. `affects_measure`, `affects_arrange` and
+  `affects_render` were handlers for every class that looked at the class themselves; they are
+  class handlers.
+- *The change handlers of the classes of the object*. The type information of a class now says
+  what the handlers of the class itself are (`ChangeHandlerLayer`): absent (the class overrides
+  neither `on_property_changed` nor `on_property_changed_core`, which
+  `ferro_impl_classes!` and `ferro_overrides!` state already for the table of the class),
+  stated, or unknown. A class states its reactions in the block that holds its handlers:
+
+  ```rust
+  ferro_overrides! { impl FerroObjectImpl for Border {
+      inherited_reactions: InheritedReactions::to(|property| {
+          matches!(property.name(), "UseLayoutRounding" | "BorderThickness" | "CornerRadius").into()
+      });
+
+      fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
+          // ..
+      }
+  } }
+  ```
+
+  The answer for a property is never, always, or while a question to the object is true
+  (`InheritedReaction`): an animatable follows every value while it has transitions under way,
+  a styled element passes the theme variant on while it has listeners for it, a visual redraws
+  for the theme variant while it may cast the shadow of the theme. A class that states nothing,
+  and every class written as a plain `impl`, is taken to react to everything, as before.
+
+The six base classes already named the properties their handlers compare with (section 9.59)
+and state exactly that; `Border`, `Shape` and `TextBlock` state the names their handlers
+match. The handler of the colour of the system bars was a class handler for every control that
+did something only for a top level and for the control right below one: it says so
+(`add_class_handler_where`, a class handler with a condition on the object).
+
+**The answer is kept by class.** For an inherited property the observable keeps, for each class
+it was asked for, whether a change reaches anything in an object of that class: no, yes, or the
+question to ask the object (three questions at most; more are a yes). It is found the first
+time an object of the class is reached (the handlers of the property for the class, then the
+layers of the class up to the root) and dropped when a handler of the property comes or goes. A
+walk finds it in a table of eight places by the address of the class, and in a map where two
+classes share a place. The two walks raise the change where the answer is yes or the object has
+a listener, and go on to the children in every case: a value below an object that does not
+hear it is passed on as before, and reads of the value never depended on the notification.
+
+**A question has to cost less than the change it saves.** The handlers of the six base classes
+already leave after a test of a bit (section 9.59), so raising a change nothing reacts to is a
+hundred instructions or so, most of them the two copies of the value and the list of the
+handlers of the property. The first version asked its questions with a checked cast (a walk up
+the classes of the object) through a list behind a cell, and a change of the font family took
+2 % more instructions than before although two thirds of the notifications were gone. A
+question is only asked for objects of the class that states it, so it takes the object as that
+class without the walk, and a single question is called directly.
+
+Nothing is kept for an object, and a property that does not inherit keeps nothing. The type
+information of a class is 16 bytes larger.
+
+**Counted again**, the same start: of the 1,526,146 notifications that did not stop at a value
+of the object, about 1.41 million are not raised; what is left is the font family on the texts
+(117,392).
+
+**Measured** (the gate, two rounds, against the commit before the change; the change of the
+instructions):
+
+| | Instructions |
+| --- | ---: |
+| `trees::Propagation.theme_variant` (the theme variant of a scope above 2,000 tiles) | -49.8 % |
+| `trees::Propagation.font_family`, `font_weight` | -10.6 %, -10.5 % |
+| `property_subsystem::InheritanceParent.definitions_replaced` | -10.7 % |
+| `property_subsystem::InheritanceParent.leaf_moved` | -10.5 % |
+| `property_subsystem::InheritanceParent.text_moved` (a text hears the font) | +1.6 % |
+| `styling_subsystem::ResourceLookup.switch_theme_variant` | -9.7 % |
+| `styling_subsystem::DynamicResources.detach`, `reattach` | -9.0 %, -6.3 % |
+| `startup/tiles`: build, show, first frame, the whole start | -4.8 %, -2.4 %, -3.3 %, -3.8 % |
+| The show of the frame scenes (`items`, `moves`, `deep`, `pile`, `wall`, `cards`, `rows`) | -8.2 % to -4.0 % |
+| `startup/controls` show | -2.2 % |
+| `trees::Propagation.flow_direction` | +2.4 % |
+| The lines of `layout_subsystem` | within 0.7 % |
+
+`InheritanceParent` is new (`tests/FerroUI.Benchmarks/property_subsystem/inheritance_parent.rs`):
+the column definitions of a grid replaced, a border and a text moved from one parent to another,
+below a panel that holds the values the theme of a window gives it.
+
+The flow direction is the case the rule costs: every visual reacts to it (it mirrors its
+transform), so every change is raised as before and the question is added for every element.
+
+The times of the two last runs of the gate are not given: other work ran on the machine and
+moved them by tens of per cent in both directions. A run of an earlier state of the change on a
+quiet machine had the show of the tile start at 514 ms where it was 559 ms.
+
+**Two reads found by the gate.** The first runs had the lines of the layout benchmarks 2 to 5 %
+up in instructions, which the change does not touch. Sampled, base against candidate: a small
+accessor on the path of every child was a call where it had been inlined
+(`StackPanel::orientation`, read for every child of an arrangement to hand it to
+`arrange_child`; then `Decorator::padding` and `Decorator::child`, which the measure of every
+border reads). What the optimizer inlines moves with code elsewhere in the crate; the reads no
+longer depend on it: the orientation is read once for an arrangement, and the two accessors are
+inline by statement. Reading the orientation once is a gain of its own: resizing one leaf of a
+wall of stack panels takes 18.9 % fewer instructions than before the change
+(`layout_subsystem::Invalidation.resize_one_leaf`), a resized row of a scrolled list 11.4 %
+(`ScrollContent.content_resized`).
+
+**Not a change of what an application sees.** A handler that reacts is called as it was, with
+the same values in the same order. What is not called did nothing. An application class written
+as a plain `impl`, or one that overrides the change handlers without stating its reactions,
+hears every change, as do the objects below it.
