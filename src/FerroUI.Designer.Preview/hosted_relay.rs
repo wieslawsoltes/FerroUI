@@ -1,9 +1,11 @@
 use crate::{
+    hosted_animation,
     hosted_frame,
     projects::Projects,
     protocol::{Image, MAX_SOURCE_BYTES, Source},
 };
 use ferroui_remote_protocol::designer::{
+    DesignAnimationCatalogMessage, DesignAnimationRequestMessage, DesignAnimationResultMessage,
     DesignFrameMessage, DesignFrameReceivedMessage, StartDesignerSessionMessage,
     UpdateDesignMessage, UpdateDesignResultMessage, UpdateXamlMessage,
 };
@@ -38,6 +40,10 @@ struct Events {
     fixtures: Option<Vec<String>>,
     outcome: Option<Result<(), String>>,
     latest: Option<DesignFrameMessage>,
+    animation_supported: bool,
+    animation_catalog: Option<DesignAnimationCatalogMessage>,
+    animation_request: Option<i64>,
+    animation_result: Option<DesignAnimationResultMessage>,
     disconnected: bool,
 }
 
@@ -47,6 +53,7 @@ pub(crate) struct Relay {
     connection: Option<Connection>,
     events: Arc<(Mutex<Events>, Condvar)>,
     sent: Option<(i64, i64)>,
+    next_animation: i64,
     size: (f64, f64),
 }
 
@@ -85,6 +92,8 @@ pub(crate) struct Frame {
     image: Image,
     fixture: Option<String>,
     fixtures: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    animations: Option<serde_json::Value>,
 }
 
 impl Relay {
@@ -114,6 +123,7 @@ impl Relay {
             connection: None,
             events,
             sent: None,
+            next_animation: 0,
             size: (0.0, 0.0),
         })
     }
@@ -158,7 +168,17 @@ impl Relay {
                 return;
             }
             let mut state = result.0.lock().unwrap();
-            if let Some(outcome) = message.downcast_ref::<UpdateDesignResultMessage>() {
+            if let Some(catalog) = message.downcast_ref::<DesignAnimationCatalogMessage>() {
+                if state.requested == Some(catalog.revision) {
+                    state.animation_supported = true;
+                    state.animation_catalog = Some(catalog.clone());
+                }
+            } else if let Some(outcome) = message.downcast_ref::<DesignAnimationResultMessage>() {
+                if state.requested == Some(outcome.revision) && state.animation_request == Some(outcome.request) {
+                    state.animation_result = Some(outcome.clone());
+                    result.1.notify_all();
+                }
+            } else if let Some(outcome) = message.downcast_ref::<UpdateDesignResultMessage>() {
                 if state.requested == Some(outcome.revision) {
                     state.fixtures = outcome.fixtures.clone();
                     state.outcome = Some(match &outcome.result.error {
@@ -284,7 +304,7 @@ impl Relay {
     }
 
     pub(crate) fn frame(&mut self) -> Result<Option<Frame>, String> {
-        let (frame, fixture, fixtures) = {
+        let (frame, fixture, fixtures, animations) = {
             let mut state = self.events.0.lock().unwrap();
             if state.disconnected {
                 return Err("The app-hosted preview disconnected".into());
@@ -292,11 +312,10 @@ impl Relay {
             if !matches!(state.outcome, Some(Ok(()))) {
                 return Ok(None);
             }
-            (state.latest.take(), state.fixture.clone(), state.fixtures.clone())
+            let Some(frame) = state.latest.take() else { return Ok(None); };
+            (frame, state.fixture.clone(), state.fixtures.clone(), state.animation_catalog.take())
         };
-        let Some(DesignFrameMessage { revision, frame }) = frame else {
-            return Ok(None);
-        };
+        let DesignFrameMessage { revision, frame } = frame;
         let image = hosted_frame::png(&frame)?;
         let sequence = frame.sequence_id;
         self.size = (
@@ -310,7 +329,53 @@ impl Relay {
             image,
             fixture,
             fixtures,
+            animations: animations.map(hosted_animation::catalog),
         }))
+    }
+
+    pub(crate) fn animate(&mut self, command: hosted_animation::Command) -> Result<hosted_animation::Sample, String> {
+        if self.sent != Some((command.revision, command.sequence)) {
+            return Err("The application preview frame changed".into());
+        }
+        let connection = self.connection.as_ref().ok_or("Open the application preview first")?;
+        self.next_animation = self.next_animation.checked_add(1).ok_or("The animation session retired")?;
+        let request = self.next_animation;
+        {
+            let mut state = self.events.0.lock().unwrap();
+            if !state.animation_supported || state.requested != Some(command.revision)
+                || !matches!(state.outcome, Some(Ok(()))) || state.disconnected
+            {
+                return Err("Open a current application preview with native animation support".into());
+            }
+            state.animation_request = Some(request);
+            state.animation_result = None;
+        }
+        send(connection, Arc::new(DesignAnimationRequestMessage {
+            revision: command.revision, request, program: command.program, targets: command.targets,
+            elapsed: command.elapsed, restart: command.restart,
+        }))?;
+        let (mut state, _) = self
+            .events
+            .1
+            .wait_timeout_while(self.events.0.lock().unwrap(), FRAME_TIMEOUT, |state| {
+                !state.disconnected
+                    && state.animation_result.as_ref().is_none_or(|result| {
+                        result.error.is_none()
+                            && state.latest.as_ref().is_none_or(|frame| {
+                                frame.frame.sequence_id <= result.after_sequence
+                            })
+                    })
+            })
+            .unwrap();
+        state.animation_request = None;
+        let result = state.animation_result.take().ok_or("The application did not acknowledge the animation sample")?;
+        if let Some(error) = result.error { return Err(error); }
+        if state.latest.as_ref().is_none_or(|frame| frame.frame.sequence_id <= result.after_sequence) {
+            return Err("The application did not render the requested animation sample".into());
+        }
+        drop(state);
+        let frame = self.frame()?.ok_or("The application animation frame retired")?;
+        Ok(hosted_animation::Sample { frame, elapsed: result.elapsed, completed: result.completed })
     }
 
     pub(crate) fn input(&self, input: Input) -> Result<(), String> {

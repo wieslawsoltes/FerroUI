@@ -28,6 +28,11 @@ impl Drop for DesignerMode {
 /// Loads the text of a XAML document into the window the previewer shows.
 pub struct DesignWindowLoader;
 
+pub(crate) struct LoadedDesign {
+    pub(crate) window: Ref<Window>,
+    pub(crate) root: Ref<Control>,
+}
+
 impl DesignWindowLoader {
     /// `LoadDesignerWindow(xaml, assemblyPath, xamlFileProjectPath)`: with a
     /// render scaling of one.
@@ -58,7 +63,8 @@ impl DesignWindowLoader {
         xaml_file_project_path: Option<&str>,
         render_scaling: f64,
     ) -> Result<Ref<Window>, XamlLoadError> {
-        Self::load_with_fixture(xaml, assembly_path, xaml_file_project_path, render_scaling, None)
+        Self::load_with_fixture(xaml, assembly_path, xaml_file_project_path, render_scaling, None, None)
+            .map(|loaded| loaded.window)
     }
 
     pub(crate) fn load_with_fixture(
@@ -67,14 +73,16 @@ impl DesignWindowLoader {
         xaml_file_project_path: Option<&str>,
         render_scaling: f64,
         fixture: Option<&str>,
-    ) -> Result<Ref<Window>, XamlLoadError> {
-        let window;
+        animation_document: Option<&str>,
+    ) -> Result<LoadedDesign, XamlLoadError> {
+        let window: Ref<Window>;
+        let control: Ref<Control>;
         {
             let _designer_mode = DesignerMode(PlatformManager::designer_mode());
             let fixture = fixture.map(|name| preview_fixtures::create(xaml_file_project_path, name))
                 .transpose().map_err(XamlLoadError::with_message)?;
 
-            let control = if let Some(PreviewFixture::RustView(control)) = &fixture {
+            control = if let Some(PreviewFixture::RustView(control)) = &fixture {
                 if control.parent().is_some() || control.visual_parent().is_some()
                     || control.cast::<ferroui_controls::TopLevel>().is_some()
                 {
@@ -82,8 +90,9 @@ impl DesignWindowLoader {
                 }
                 control.clone()
             } else {
-                load_preview_control(xaml, assembly_path, xaml_file_project_path)?
+                load_preview_control(xaml, assembly_path, xaml_file_project_path, animation_document)?
             };
+
             window = match control.cast::<Window>() {
                 Some(window) => window,
                 None => {
@@ -92,6 +101,10 @@ impl DesignWindowLoader {
                     window
                 }
             };
+            if animation_document.is_some() {
+                use ferroui_designer_animation::native::FrozenPreviewClock;
+                window.set_clock(Some(Rc::new(FrozenPreviewClock)));
+            }
 
             // `window.PlatformImpl is OffscreenTopLevelImplBase offscreenImpl`:
             // the window of the previewer, or another offscreen implementation.
@@ -120,7 +133,7 @@ impl DesignWindowLoader {
             }
         }
         window.show();
-        Ok(window)
+        Ok(LoadedDesign { window, root: control })
     }
 }
 
@@ -128,6 +141,7 @@ fn load_preview_control(
     xaml: &str,
     assembly_path: Option<&str>,
     xaml_file_project_path: Option<&str>,
+    animation_document: Option<&str>,
 ) -> Result<Ref<Control>, XamlLoadError> {
     let loader = FerroLocator::current().get_required_service::<dyn IRuntimeXamlLoader>();
     let mut base_uri = None;
@@ -161,7 +175,12 @@ fn load_preview_control(
     // assembly is not registered.
     configuration.use_compiled_bindings_by_default =
         local_asm.is_none_or(MarkupAssembly::compiles_bindings_by_default);
-    let loaded = loader.load(RuntimeXamlLoaderDocument::with_base_uri(base_uri, xaml), configuration)?;
+    let mut document = RuntimeXamlLoaderDocument::with_base_uri(base_uri, xaml);
+    if let Some(name) = animation_document {
+        document.document = Some(name.to_owned());
+        configuration.set_create_source_info(true);
+    }
+    let loaded = loader.load(document, configuration)?;
 
     Ok(Design::create_preview_with_control(&preview_target(&loaded))
         .expect("a preview is a control or a message that says why there is none"))

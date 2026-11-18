@@ -1,4 +1,5 @@
 use ferroui_base::{
+    animation::{animators::CornerRadiusAnimator, Animation, InterpolatingAnimator},
     ferro_class, ferro_class_info, ferro_impl_classes,
     input::InputElementImpl,
     instantiate,
@@ -6,7 +7,7 @@ use ferroui_base::{
     layout::LayoutableImpl,
     metadata::{from_markup_value, MarkupAssembly},
     platform::storage::file_io::StorageProviderHelpers,
-    FerroObjectImpl, Ref, StyledElementImpl, TypeInfo, VisualImpl,
+    CornerRadius, FerroObjectImpl, Ref, StyledElementImpl, TypeInfo, VisualImpl,
 };
 use ferroui_controls::{AppBuilder, Application, ControlImpl, TextBlock, TextBlockImpl, Window};
 use ferroui_designer_support::remote::RemoteDesignerEntryPoint;
@@ -68,10 +69,22 @@ fn register_fixtures() {
 
 fn register_markup() {
     FerroRuntimeXamlLoader::register();
+    Animation::register_custom_animator::<ReviewCorners>();
     ferroui_themes_winui::register_types();
     TypeInfo::register_namespaces(&[(module_path!(), "TodoWorkbench.Design")]);
     TypeInfo::register_all(&[PreviewBadge::TYPE]);
     MarkupAssembly::register(&ASSEMBLY);
+}
+
+#[derive(Default)]
+struct ReviewCorners;
+
+impl InterpolatingAnimator for ReviewCorners {
+    type Value = CornerRadius;
+
+    fn interpolate(&self, progress: f64, from: &CornerRadius, to: &CornerRadius) -> CornerRadius {
+        CornerRadiusAnimator::interpolate_core(progress * progress, from, to)
+    }
 }
 
 pub(crate) fn load_window(path: &Path) -> Result<Ref<Window>, Box<dyn std::error::Error>> {

@@ -26,6 +26,7 @@ mod assembly;
 mod bson_stream_transport;
 mod bson_tcp_transport;
 mod default_message_type_resolver;
+mod design_animation_messages;
 mod design_messages;
 mod error;
 mod event_stash;
@@ -71,6 +72,7 @@ pub mod input {
 
 /// `FerroUI.Remote.Protocol.Designer`.
 pub mod designer {
+    pub use crate::design_animation_messages::*;
     pub use crate::design_messages::*;
 }
 

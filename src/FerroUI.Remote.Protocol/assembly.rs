@@ -5,6 +5,7 @@
 //! A crate that declares message classes of its own has such a table and
 //! passes it to [`DefaultMessageTypeResolver::new`](crate::DefaultMessageTypeResolver::new).
 
+use crate::design_animation_messages::{DesignAnimationCatalogMessage, DesignAnimationRequestMessage, DesignAnimationResultMessage};
 use crate::design_messages::{DesignFrameMessage, DesignFrameReceivedMessage, StartDesignerSessionMessage, UpdateDesignMessage, UpdateDesignResultMessage, UpdateXamlMessage, UpdateXamlResultMessage};
 use crate::ferro_remote_message_guid_attribute::{FerroRemoteMessage, FerroRemoteMessageGuidAttribute};
 use crate::input_messages::{
@@ -64,6 +65,9 @@ pub static ASSEMBLY: Assembly = Assembly {
         ExportedType::of::<UpdateDesignResultMessage>(),
         ExportedType::of::<DesignFrameMessage>(),
         ExportedType::of::<DesignFrameReceivedMessage>(),
+        ExportedType::of::<DesignAnimationCatalogMessage>(),
+        ExportedType::of::<DesignAnimationRequestMessage>(),
+        ExportedType::of::<DesignAnimationResultMessage>(),
         // TransportMessages
         ExportedType::of::<HtmlTransportStartedMessage>(),
     ],
@@ -186,7 +190,7 @@ mod tests {
     #[test]
     fn every_upstream_message_class_is_in_the_table_with_its_identifier() {
         assert_eq!(UPSTREAM_MESSAGES.len(), 17);
-        assert_eq!(ASSEMBLY.exported_types.len(), UPSTREAM_MESSAGES.len() + 4);
+        assert_eq!(ASSEMBLY.exported_types.len(), UPSTREAM_MESSAGES.len() + 7);
         for (name, guid) in UPSTREAM_MESSAGES {
             let exported = ASSEMBLY
                 .exported_types

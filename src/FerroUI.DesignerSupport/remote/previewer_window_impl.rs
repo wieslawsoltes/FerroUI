@@ -109,6 +109,10 @@ impl PreviewerWindowImpl {
         self.base.set_render_scaling(value)
     }
 
+    pub(crate) fn request_frame(&self) -> i64 {
+        self.base.request_frame()
+    }
+
     #[allow(dead_code)]
     pub(crate) fn set_position(&self, value: PixelPoint) {
         self.position.set(value)

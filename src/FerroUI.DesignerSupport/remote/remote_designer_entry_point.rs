@@ -1,4 +1,5 @@
 use crate::design_window_loader::DesignWindowLoader;
+use crate::remote::hosted_animation;
 use crate::remote::file_watcher_transport::FileWatcherTransport;
 use crate::remote::html_transport::HtmlWebSocketTransport;
 use crate::remote::previewer_windowing_platform::PreviewerWindowingPlatform;
@@ -8,7 +9,7 @@ use ferroui_base::Ref;
 use ferroui_controls::{AppBuilder, Design, Window};
 use ferroui_markup_xaml::XamlLoadError;
 use ferroui_remote_protocol::designer::{
-    ExceptionDetails, StartDesignerSessionMessage, UpdateDesignMessage, UpdateDesignResultMessage, UpdateXamlMessage, UpdateXamlResultMessage,
+    DesignAnimationRequestMessage, ExceptionDetails, StartDesignerSessionMessage, UpdateDesignMessage, UpdateDesignResultMessage, UpdateXamlMessage, UpdateXamlResultMessage,
 };
 use ferroui_remote_protocol::viewport::{
     ClientRenderInfoMessage, ClientSupportedPixelFormatsMessage, ClientViewportAllocatedMessage,
@@ -315,6 +316,7 @@ impl RemoteDesignerEntryPoint {
             Ok(transport) => transport,
             Err(error) => die(Some(&error)),
         };
+        hosted_animation::configure(args.transport.as_ref(), args.method == methods::FERRO_REMOTE);
         Self::attach_transport(transport.clone());
         transport.on_exception(exception_handler(|_, e| {
             die(Some(&e.to_string()));
@@ -352,6 +354,14 @@ impl RemoteDesignerEntryPoint {
 
     /// The part of `OnTransportMessage` that runs on the UI thread.
     fn on_transport_message(arg: &Message) {
+        if let Some(request) = arg.downcast_ref::<DesignAnimationRequestMessage>() {
+            let transport = TRANSPORT.with(|slot| slot.borrow().clone());
+            if let Some(transport) = transport {
+                let window = CURRENT_WINDOW.with(|slot| slot.borrow().clone());
+                transport.send(Arc::new(hosted_animation::sample(request, window.as_deref())));
+            }
+            return;
+        }
         if arg.is::<ClientSupportedPixelFormatsMessage>() {
             SUPPORTED_PIXEL_FORMATS.with(|slot| *slot.borrow_mut() = Some(arg.clone()));
             Self::rebuild_pre_flight();
@@ -377,6 +387,7 @@ impl RemoteDesignerEntryPoint {
             };
             let revision = versioned.map(|update| update.revision);
             let pending = PreviewerWindowingPlatform::begin_update(revision);
+            let animations = versioned.and_then(hosted_animation::prepare);
             // `catch (Exception e)`: an error of the document, and whatever
             // else fails while the window is built and shown (a panic here).
             let loaded = catch_unwind(AssertUnwindSafe(|| {
@@ -386,10 +397,13 @@ impl RemoteDesignerEntryPoint {
                     xaml.xaml_file_project_path.as_deref(),
                     LAST_RENDER_SCALING.get(),
                     versioned.and_then(|update| update.fixture.as_deref()),
+                    animations.as_ref().map(|source| source.identity.as_str()),
                 )
             }));
             let result = match loaded {
-                Ok(Ok(window)) => {
+                Ok(Ok(design)) => {
+                    let catalog = hosted_animation::accept(revision, animations, &design);
+                    let window = design.window;
                     if let Some(previous) = current_window {
                         // Boundary (#567): closing the previous preview runs the closing and
                         // closed handlers of the previewed application; a panic of one must
@@ -400,6 +414,9 @@ impl RemoteDesignerEntryPoint {
                     let handle = window.platform_impl().and_then(|platform_impl| platform_impl.handle());
                     CURRENT_WINDOW.with(|slot| *slot.borrow_mut() = Some(window));
                     pending.accept();
+                    if let Some(catalog) = catalog {
+                        transport.send(Arc::new(catalog));
+                    }
                     UpdateXamlResultMessage {
                         handle: handle.map(|handle| handle.handle().to_string()),
                         ..UpdateXamlResultMessage::default()
@@ -450,6 +467,7 @@ impl RemoteDesignerEntryPoint {
         RENDER_INFO_MESSAGE.with(|slot| *slot.borrow_mut() = None);
         LAST_RENDER_SCALING.set(1.0);
         TRANSPORT.with(|slot| *slot.borrow_mut() = None);
+        hosted_animation::configure(None, false);
         CURRENT_WINDOW.with(|slot| *slot.borrow_mut() = None);
     }
 }

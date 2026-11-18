@@ -5,6 +5,7 @@ mod editor_mcp;
 mod edit_selection;
 mod edits;
 mod event_fields;
+mod hosted_animation;
 mod hosted_frame;
 mod hosted_relay;
 mod inspection;
@@ -117,15 +118,18 @@ fn respond(
             .ok_or_else(|| "Select a local workspace folder".to_owned())
             .and_then(|root| serialize(inventory::scan(std::path::Path::new(root)))),
         "hostedListen" => hosted_relay::Relay::listen(message["params"]["nonce"].as_str().unwrap_or("")).map(|relay| {
+            use ferroui_remote_protocol::designer::{DESIGN_ANIMATION_QUERY, DESIGN_ANIMATION_VERSION};
             let port = relay.port();
             *hosted = Some(relay);
-            json!({"port":port})
+            json!({"port":port,"animationQuery":format!("{DESIGN_ANIMATION_QUERY}={DESIGN_ANIMATION_VERSION}")})
         }),
         "hostedRender" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|design| serialize(hosted.as_mut().ok_or("Start an app-hosted session")?.render(design, projects))),
         "hostedFrame" => hosted.as_mut().ok_or_else(|| "Start an app-hosted session".into()).and_then(|relay| serialize(relay.frame())),
         "hostedInput" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|input| serialize(hosted.as_ref().ok_or("Start an app-hosted session")?.input(input))),
+        "hostedAnimate" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
+            .and_then(|command| serialize(hosted.as_mut().ok_or("Start an app-hosted session")?.animate(command))),
         "stagesSync" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|request| {
                 renderer.get_or_insert_with(Renderer::new);

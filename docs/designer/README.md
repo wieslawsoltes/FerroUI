@@ -447,6 +447,8 @@ Programs with native object payloads also use the accepted runtime Animation obj
 Source provenance identifies the matching style or resource program, and an explicit preview clock
 drives the framework's own shadow, gradient, effect, integer, transform-component and registered
 custom animators. This preserves native interpolation for values outside the portable model.
+Studio also uses the registered native animator when it can author a typed track for its property.
+App-hosted design uses the same clock and native animation layer in the Cargo target’s process.
 The additive `Animation::apply_for_preview` retains final fill and generated transforms at animation
 priority; disposal restores underlying values and live bindings. Application `apply` behavior stays
 unchanged. Failed setup unwinds its temporary subscriptions and values before reporting the error.
