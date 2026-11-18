@@ -205,7 +205,8 @@ mod tests {
         let raised = Rc::new(RefCell::new(Vec::new()));
         let _subscription = {
             let raised = raised.clone();
-            settings.color_values_changed(Rc::new(move |values: &PlatformColorValues| raised.borrow_mut().push(*values)))
+            settings
+                .color_values_changed(Rc::new(move |values: &PlatformColorValues| raised.borrow_mut().push(*values)))
         };
 
         let high = PlatformColorValues::new()

@@ -210,9 +210,8 @@ impl ThemeVariant {
     pub fn frame_theme_variant(variant: Option<&ThemeVariant>) -> Option<PlatformThemeVariant> {
         let variant = variant?;
         if Self::high_contrast_variant().as_ref() == Some(variant) {
-            if let Some(values) =
-                FerroLocator::current().get_service::<dyn IPlatformSettings>().map(|settings| settings.get_color_values())
-            {
+            let settings = FerroLocator::current().get_service::<dyn IPlatformSettings>();
+            if let Some(values) = settings.map(|settings| settings.get_color_values()) {
                 return Some(values.system_colors().map_or(values.theme_variant(), |colors| colors.theme_variant()));
             }
         }

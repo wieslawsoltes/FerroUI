@@ -1458,7 +1458,8 @@ impl TopLevel {
         let mut subscriptions = Vec::with_capacity(2);
         if let Some(platform_settings) = self.platform_settings() {
             let on_change = on_change.clone();
-            subscriptions.push(Subscription::new(platform_settings.color_values_changed(Rc::new(move |_| on_change()))));
+            let subscription = platform_settings.color_values_changed(Rc::new(move |_| on_change()));
+            subscriptions.push(Subscription::new(subscription));
         }
         subscriptions.push(Subscription::new(ThemeVariant::high_contrast_variant_changed(on_change)));
         *self.theme_settings_subscriptions.borrow_mut() = subscriptions;

@@ -75,7 +75,8 @@ fn system_colors_are_the_standard_ones_of_windows_outside_high_contrast() {
     }
     // Without an owner, the high contrast variant has the colours of "High Contrast Black".
     let high = WinUITheme::high_contrast();
-    assert_eq!(Some(Color::from_rgb(0x1A, 0xEB, 0xFF)), color_of(colors.try_get_resource(&key("SystemColorHighlightColor"), Some(&high))));
+    let highlight = colors.try_get_resource(&key("SystemColorHighlightColor"), Some(&high));
+    assert_eq!(Some(Color::from_rgb(0x1A, 0xEB, 0xFF)), color_of(highlight));
     // Nothing else.
     assert!(colors.try_get_resource(&key("SystemColorBackgroundColor"), None).is_none());
     assert!(colors.try_get_resource(&key("SystemAccentColor"), None).is_none());
@@ -124,7 +125,7 @@ fn the_theme_sets_its_high_contrast_variant_while_it_is_in_use() {
 }
 
 #[test]
-fn the_application_and_its_windows_follow_the_simulated_contrast_setting() {
+fn the_application_and_a_root_window_follow_the_simulated_contrast_setting() {
     let (_app, settings, _theme) = start_with_simulated_settings();
     let application = Application::current().expect("an application");
     let window = shown_window();
@@ -147,10 +148,13 @@ fn the_application_and_its_windows_follow_the_simulated_contrast_setting() {
     assert_eq!(Some(WinUITheme::high_contrast()), window.actual_theme_variant());
     assert_eq!(Some(Color::from_rgb(0x2D, 0x32, 0x36)), background_of(&window));
 
-    // High contrast off: the requested variant again.
+    // High contrast off: the requested variant of the application again. The window of the
+    // test application is a theme variant root of its own (it does not follow the application),
+    // so it takes the platform's variant, now dark.
     settings.set_color_values(PlatformColorValues::new().with_theme_variant(PlatformThemeVariant::Dark));
     assert_eq!(Some(ThemeVariant::light()), application.actual_theme_variant());
-    assert_eq!(Some(Color::parse("#F3F3F3").unwrap()), background_of(&window));
+    assert_eq!(Some(ThemeVariant::dark()), window.actual_theme_variant());
+    assert_eq!(Some(Color::parse("#202020").unwrap()), background_of(&window));
 }
 
 #[test]

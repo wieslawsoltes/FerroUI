@@ -567,7 +567,8 @@ fn high_contrast_values(variant: PlatformThemeVariant) -> PlatformColorValues {
         .with_contrast_preference(ferroui_base::platform::ColorContrastPreference::High)
 }
 
-fn start_with_simulated_settings() -> (UnitTestApplicationScope, Rc<DefaultPlatformSettings>, ferroui_base::Ref<Application>) {
+fn start_with_simulated_settings(
+) -> (UnitTestApplicationScope, Rc<DefaultPlatformSettings>, ferroui_base::Ref<Application>) {
     let settings = Rc::new(DefaultPlatformSettings::new());
     let scope = UnitTestApplication::start(TestServices::default().with_platform_settings(settings.clone()));
     let application = Application::current().expect("an application");
@@ -635,7 +636,8 @@ fn the_frame_of_the_high_contrast_variant_follows_the_system_colors() {
     settings.set_color_values(high_contrast_values(PlatformThemeVariant::Light));
     assert_eq!(ThemeVariant::frame_theme_variant(Some(&high_contrast)), Some(PlatformThemeVariant::Light));
     // With them: the brightness of the window colour ("High Contrast White" is light).
-    let white = high_contrast_values(PlatformThemeVariant::Dark).with_system_colors(Some(SystemColors::high_contrast_white()));
+    let white =
+        high_contrast_values(PlatformThemeVariant::Dark).with_system_colors(Some(SystemColors::high_contrast_white()));
     settings.set_color_values(white);
     assert_eq!(ThemeVariant::frame_theme_variant(Some(&high_contrast)), Some(PlatformThemeVariant::Light));
     let black = white.with_system_colors(Some(SystemColors::high_contrast_black()));

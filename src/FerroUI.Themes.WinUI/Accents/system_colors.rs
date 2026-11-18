@@ -118,7 +118,11 @@ impl SystemColors {
 
     /// Field initialisation; see [`ResourceProvider::construct`].
     pub fn construct() -> Self {
-        Self { base: ResourceProvider::construct(), high_contrast: Cell::new(None), color_values_changed: RefCell::new(None) }
+        Self {
+            base: ResourceProvider::construct(),
+            high_contrast: Cell::new(None),
+            color_values_changed: RefCell::new(None),
+        }
     }
 
     pub fn new() -> Ref<Self> {
@@ -189,7 +193,9 @@ impl SystemColors {
     /// the owner is the application, those of the visual when it is one.
     fn get_from_owner(owner: Option<&ResourceHostRef>) -> Option<Rc<dyn IPlatformSettings>> {
         match owner? {
-            ResourceHostRef::Element(element) => element.cast::<Visual>().and_then(|visual| visual.get_platform_settings()),
+            ResourceHostRef::Element(element) => {
+                element.cast::<Visual>().and_then(|visual| visual.get_platform_settings())
+            }
             other => {
                 // A host that is not an element: the application, if it is the current one.
                 let application = Application::current()?;
