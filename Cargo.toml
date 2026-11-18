@@ -104,6 +104,7 @@ members = [
     "src/FerroUI.Controls",
     "src/FerroUI.View",
     "src/FerroUI.View.Macros",
+    "src/FerroUI.View.Syntax",
     "src/FerroUI.Controls.ColorPicker",
     "src/FerroUI.Controls.Charts",
     "src/FerroUI.LiveCharts",
@@ -355,6 +356,7 @@ ferroui-reactiveui-controls = { version = "=0.5.1-preview.1", path = "src/FerroU
 ferroui-base = { version = "=0.5.1-preview.1", path = "src/FerroUI.Base" }
 ferroui-controls = { version = "=0.5.1-preview.1", path = "src/FerroUI.Controls" }
 ferroui-view = { version = "=0.5.1-preview.1", path = "src/FerroUI.View" }
+ferroui-view-syntax = { version = "=0.5.1-preview.1", path = "src/FerroUI.View.Syntax" }
 ferroui-view-macros = { version = "=0.5.1-preview.1", path = "src/FerroUI.View.Macros" }
 ferroui-controls-color-picker = { version = "=0.5.1-preview.1", path = "src/FerroUI.Controls.ColorPicker" }
 ferroui-controls-charts = { version = "=0.5.1-preview.1", path = "src/FerroUI.Controls.Charts" }

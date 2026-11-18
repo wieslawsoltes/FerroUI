@@ -3239,6 +3239,16 @@ dependencies = [
 name = "ferroui-view-macros"
 version = "0.5.1-preview.1"
 dependencies = [
+ "ferroui-view-syntax",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
+]
+
+[[package]]
+name = "ferroui-view-syntax"
+version = "0.5.1-preview.1"
+dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.119",
