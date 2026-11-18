@@ -55,9 +55,12 @@ def outputs(upstream):
                                "ms-appx:///Assets/Design/")):
             raise ValueError(f"Unexpected image URI: {uri}")
         registered = uri.removeprefix("ms-appx:///")
-        original = root / registered
-        if not original.is_file():
+        # A control image is the file of its own casing in the directory listing: a case-insensitive
+        # file system also opens the source's other casing, which is then a registered alias.
+        if registered.startswith("Assets/ControlImages/"):
             original = folded.get(registered.casefold())
+        else:
+            original = root / registered
         if original is None or not original.is_file():
             raise ValueError(f"Missing image: {uri}")
         relative = original.relative_to(root).as_posix()

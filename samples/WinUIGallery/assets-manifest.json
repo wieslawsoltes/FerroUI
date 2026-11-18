@@ -152,12 +152,13 @@
       ]
     },
     {
-      "source": "WinUIGallery/Assets/ControlImages/AnnotatedScrollbar.png",
-      "path": "samples/WinUIGallery/Assets/ControlImages/AnnotatedScrollbar.png",
+      "source": "WinUIGallery/Assets/ControlImages/AnnotatedScrollBar.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/AnnotatedScrollBar.png",
       "sha256": "729d6174120892fe93d59e518267e75009049a0d4dae0e144d02b88257062f2b",
       "size_bytes": 4540,
       "registered_paths": [
-        "Assets/ControlImages/AnnotatedScrollbar.png"
+        "Assets/ControlImages/AnnotatedScrollbar.png",
+        "Assets/ControlImages/AnnotatedScrollBar.png"
       ],
       "source_uris": [
         "ms-appx:///Assets/ControlImages/AnnotatedScrollbar.png"
@@ -344,12 +345,13 @@
       ]
     },
     {
-      "source": "WinUIGallery/Assets/ControlImages/CheckBox.png",
-      "path": "samples/WinUIGallery/Assets/ControlImages/CheckBox.png",
+      "source": "WinUIGallery/Assets/ControlImages/Checkbox.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/Checkbox.png",
       "sha256": "ed3669a4db8bf52cf4ac9a16b103feec88a43886b31ed436c8a6caf3a1fcd462",
       "size_bytes": 5919,
       "registered_paths": [
-        "Assets/ControlImages/CheckBox.png"
+        "Assets/ControlImages/CheckBox.png",
+        "Assets/ControlImages/Checkbox.png"
       ],
       "source_uris": [
         "ms-appx:///Assets/ControlImages/CheckBox.png"

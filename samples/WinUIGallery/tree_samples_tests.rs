@@ -3,7 +3,6 @@
 use crate::tree_samples::{explorer_item, explorer_item_templates, ExplorerItemType};
 use crate::{examples, tests::start};
 use ferroui_base::{BoxedValue, Ref};
-use ferroui_controls::templates::{IDataTemplate, ITemplateWithParam};
 use ferroui_controls::{
     Control, FontIcon, Image, ItemsControl, SelectionMode, StackPanel, TextBlock, TreeView, TreeViewItem,
 };

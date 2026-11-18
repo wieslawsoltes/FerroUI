@@ -25,7 +25,7 @@ use ferroui_base::utilities::DateTime;
 use ferroui_base::{ferro_markup_type, BoxedValue, Point, Ref, Vector, Visual};
 use ferroui_controls::automation::{AccessibilityView, AutomationProperties};
 use ferroui_controls::primitives::SelectingItemsControl;
-use ferroui_controls::templates::{FuncDataTemplate, ITemplateWithParam};
+use ferroui_controls::templates::FuncDataTemplate;
 use ferroui_controls::{
     Border, Button, ComboBox, Control, ItemsSource, ListBox, MenuFlyout, MenuItem, NumberBox, ScrollViewer,
     SelectionMode, TextBlock, TextBox,
