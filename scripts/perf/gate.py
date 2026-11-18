@@ -427,17 +427,33 @@ def parse_gate(output: str) -> list[tuple[Metric, float]]:
     return found
 
 
+# The instructions a `GATE {...}` line counts for a part of a start that is measured once, by the
+# time of that part: the build, the show (for a scene of the start without the taking of the
+# content, as its time is), the first frame, and their sum.
+START_INSTRUCTIONS = {
+    "build_ms": "build_instructions",
+    "show_ms": "show_instructions",
+    "first_frame_ms": "first_frame_instructions",
+    "startup_ms": "startup_instructions",
+}
+
+
 def parse_gate_instructions(output: str) -> dict[str, float]:
-    """The instructions of a frame of the `GATE {...}` lines that count them
-    (`instructions_per_frame`, those of every thread of the process), by the key of each time of a
-    frame of the record: the times of a scene are then judged as those of a benchmark that
-    counts are, and a time that changed with the same instructions says so."""
+    """The instructions of the `GATE {...}` lines that count them (those of every thread of the
+    process), by the key of the time they belong to: those of a frame (`instructions_per_frame`)
+    for each time of a frame of the record, and those of the parts of a start
+    (`START_INSTRUCTIONS`) for the time of each part. The times of a scene are then judged as
+    those of a benchmark that counts are, and a time that changed with the same instructions says
+    so."""
     counted = {}
     for line in output.splitlines():
         match = GATE_LINE.match(line.strip())
         if not match:
             continue
         record = json.loads(match.group(1))
+        for time, name in START_INSTRUCTIONS.items():
+            if time in record and name in record:
+                counted[f"{record['bench']} {time}"] = float(record[name])
         if "instructions_per_frame" not in record:
             continue
         instructions = float(record["instructions_per_frame"]) * presented_frames(record)
