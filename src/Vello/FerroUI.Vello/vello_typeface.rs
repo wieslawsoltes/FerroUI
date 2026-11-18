@@ -259,8 +259,9 @@ impl OutlinePen for PathPen {
 pub struct VelloTypeface {
     face: Arc<VelloFontFace>,
     /// The values of the axes of the font the typeface was asked for, which the shaper is given:
-    /// empty for the default instance.
-    variation_settings: FontVariationSettings,
+    /// empty for the default instance. Kept as plain values so that the typeface stays `Send`
+    /// and `Sync`.
+    variations: Box<[FontVariation]>,
     family_name: String,
     font_simulations: FontSimulations,
     weight: FontWeight,
@@ -321,21 +322,19 @@ impl VelloTypeface {
             .collect();
 
         let axes = font.axes();
-        let (normalized_coords, variation_settings) =
-            if settings.iter().any(|(tag, _)| axes.get_by_tag(*tag).is_some()) {
-                let variation_settings = FontVariationSettings::new(
-                    settings
-                        .iter()
-                        .filter(|(tag, value)| axes.get_by_tag(*tag).is_some() && !value.is_nan())
-                        .map(|(tag, value)| {
-                            FontVariation::new(OpenTypeTag::new(u32::from_be_bytes(tag.to_be_bytes())), *value as f64)
-                        }),
-                );
+        let (normalized_coords, variations) = if settings.iter().any(|(tag, _)| axes.get_by_tag(*tag).is_some()) {
+            let variations: Box<[FontVariation]> = settings
+                .iter()
+                .filter(|(tag, value)| axes.get_by_tag(*tag).is_some() && !value.is_nan())
+                .map(|(tag, value)| {
+                    FontVariation::new(OpenTypeTag::new(u32::from_be_bytes(tag.to_be_bytes())), *value as f64)
+                })
+                .collect();
 
-                (axes.location(settings.iter().copied()).coords().to_vec(), variation_settings)
-            } else {
-                (Vec::new(), FontVariationSettings::empty())
-            };
+            (axes.location(settings.iter().copied()).coords().to_vec(), variations)
+        } else {
+            (Vec::new(), Box::default())
+        };
 
         let os2 = font.os2().ok();
         let has_head_table = head.is_some();
@@ -395,7 +394,7 @@ impl VelloTypeface {
                 font_simulations,
                 glyph_bounds: Mutex::new(HashMap::new()),
             }),
-            variation_settings,
+            variations,
             family_name,
             font_simulations,
             weight,
@@ -472,7 +471,11 @@ impl IPlatformTypeface for VelloTypeface {
     }
 
     fn variation_settings(&self) -> FontVariationSettings {
-        self.variation_settings.clone()
+        if self.variations.is_empty() {
+            return FontVariationSettings::empty();
+        }
+
+        FontVariationSettings::new(self.variations.iter().copied())
     }
 
     fn try_get_stream(&self) -> Option<Box<dyn Read>> {
