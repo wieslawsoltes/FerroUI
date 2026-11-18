@@ -13,7 +13,9 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use ferroui_remote_protocol::designer::{
-    ExceptionDetails, StartDesignerSessionMessage, UpdateXamlMessage, UpdateXamlResultMessage,
+    DesignAnimationCatalogMessage, DesignAnimationProgram, DesignAnimationRequestMessage,
+    DesignAnimationResultMessage, DesignAnimationTarget, ExceptionDetails, StartDesignerSessionMessage,
+    UpdateXamlMessage, UpdateXamlResultMessage,
 };
 use ferroui_remote_protocol::input::{
     InputEventMessageBase, InputModifiers, Key, KeyEventMessage, MouseButton, PhysicalKey, PointerEventMessageBase,
@@ -153,6 +155,28 @@ fn entities() -> Vec<Message> {
         Arc::new(ferroui_remote_protocol::designer::UpdateDesignResultMessage { revision: 40, result: UpdateXamlResultMessage::default(), fixtures: Some(vec!["Content".into(), "Loading".into()]) }),
         Arc::new(ferroui_remote_protocol::designer::DesignFrameMessage { revision: 40, frame: FrameMessage { sequence_id: 8, data: Some(vec![0, 128, 0, 128]), ..Default::default() } }),
         Arc::new(ferroui_remote_protocol::designer::DesignFrameReceivedMessage { revision: 40, sequence_id: 8 }),
+        Arc::new(DesignAnimationCatalogMessage {
+            revision: 40,
+            programs: vec![DesignAnimationProgram {
+                id: 6,
+                name: "Round review card".into(),
+                selector: "Border#ReviewCard".into(),
+                duration: 2.0,
+                total_duration: Some(2.5),
+                default_targets: vec![12],
+                compatible_targets: vec![12, 14],
+                source_utf16: 71,
+                custom_animator: true,
+            }],
+            targets: vec![DesignAnimationTarget { id: 12, label: "ReviewCard".into(), type_name: "Border".into() }],
+        }),
+        Arc::new(DesignAnimationRequestMessage {
+            revision: 40, request: 31, program: Some(6), targets: Some(vec![12]), elapsed: 1.25, restart: true,
+        }),
+        Arc::new(DesignAnimationResultMessage {
+            revision: 40, request: 31, elapsed: 1.25, completed: true, after_sequence: 9,
+            error: Some("Portable BSON result".into()),
+        }),
     ]
 }
 
