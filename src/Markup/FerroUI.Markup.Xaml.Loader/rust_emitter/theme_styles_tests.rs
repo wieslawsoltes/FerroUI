@@ -88,12 +88,12 @@ fn a_factory_becomes_a_tree_of_its_members() {
     assert_eq!(theme.members[3], Member::Setter {
         property: format!("rt::property({TEMPLATED}::padding_property())"),
         form: Form::Plain,
-        value: Value::Constant("rt::ThemeValue::Thickness([8.0_f64, 5.0_f64, 8.0_f64, 6.0_f64])".to_string()),
+        value: Value::Constant(Constant::Thickness(["8.0_f64", "5.0_f64", "8.0_f64", "6.0_f64"].map(str::to_owned))),
     });
     assert_eq!(theme.members[4], Member::Setter {
         property: "rt::class_property(\"accent\")".to_string(),
         form: Form::Plain,
-        value: Value::Constant("rt::ThemeValue::Bool(false)".to_string()),
+        value: Value::Constant(Constant::Bool(false)),
     });
     assert_eq!(theme.members[5], Member::Setter {
         property: "rt::property(::ferroui_base::Visual::render_transform_property())".to_string(),
@@ -254,13 +254,13 @@ fn a_factory_with_a_member_the_table_cannot_hold_keeps_its_code() {
 
 #[test]
 fn constants_are_values_of_the_table() {
-    assert_eq!(constant_value("::core::option::Option::None").as_deref(), Some("rt::ThemeValue::Null"));
-    assert_eq!(constant_value("rt::to_object(1.5_f64)").as_deref(), Some("rt::ThemeValue::Double(1.5_f64)"));
-    assert_eq!(constant_value("rt::to_object(::core::primitive::f64::NAN)").as_deref(), Some("rt::ThemeValue::Double(::core::primitive::f64::NAN)"));
-    assert_eq!(constant_value("rt::to_object(-3_i32)").as_deref(), Some("rt::ThemeValue::Int(-3_i32)"));
-    assert_eq!(constant_value("rt::string_object(\"a, b\")").as_deref(), Some("rt::ThemeValue::Text(\"a, b\")"));
+    assert_eq!(constant_value("::core::option::Option::None").map(|c| c.native()).as_deref(), Some("rt::ThemeValue::Null"));
+    assert_eq!(constant_value("rt::to_object(1.5_f64)").map(|c| c.native()).as_deref(), Some("rt::ThemeValue::Double(1.5_f64)"));
+    assert_eq!(constant_value("rt::to_object(::core::primitive::f64::NAN)").map(|c| c.native()).as_deref(), Some("rt::ThemeValue::Double(::core::primitive::f64::NAN)"));
+    assert_eq!(constant_value("rt::to_object(-3_i32)").map(|c| c.native()).as_deref(), Some("rt::ThemeValue::Int(-3_i32)"));
+    assert_eq!(constant_value("rt::string_object(\"a, b\")").map(|c| c.native()).as_deref(), Some("rt::ThemeValue::Text(\"a, b\")"));
     assert_eq!(
-        constant_value(&format!("rt::to_object({CORNER_RADIUS}::__markup_new_3(4.0_f64, 4.0_f64, 0.0_f64, 0.0_f64))")).as_deref(),
+        constant_value(&format!("rt::to_object({CORNER_RADIUS}::__markup_new_3(4.0_f64, 4.0_f64, 0.0_f64, 0.0_f64))")).map(|c| c.native()).as_deref(),
         Some("rt::ThemeValue::CornerRadius([4.0_f64, 4.0_f64, 0.0_f64, 0.0_f64])")
     );
     assert_eq!(constant_value("rt::to_object(2_u32)"), None);
@@ -481,4 +481,61 @@ fn a_choice_that_is_not_only_a_template_binding_stays() {
     // Without the path of the class nothing is resolved.
     let lines = chosen_template_binding(2, 41);
     assert_eq!(with_resolved_template_bindings(true, || resolve_template_bindings(lines.clone(), None)), lines);
+}
+
+#[test]
+fn typed_theme_program_emits_local_imports_and_preserves_native_value_bodies() {
+    let theme = parse_theme(&button_factory(), THEME_RETURNED).expect("complete factory");
+    let mut pool = StylePool::new("build_button", "Button.xaml");
+    let call = control_theme_program(&mut pool, "build_button_deferred", &theme, &Default::default());
+    assert_eq!(call, "BUILD_BUTTON_DEFERRED_THEME.build(&context)");
+    let items = pool.items.join("\n");
+    assert!(items.contains("rt::TypedStyleProgram::new(b\"\\x01\\x01"));
+    assert!(items.contains("templates: &[build_controls_fluentcontrols_xaml_deferred_1]"));
+    assert!(items.contains("expressions: &[build_button_deferred_value_0]"));
+    assert!(items.contains("computed: &[build_button_deferred_value_1]"));
+    assert!(items.contains("as ::ferroui_base::StaticType>::TYPE"));
+    assert!(items.contains("as ::ferroui_base::ObjectType>::IDENTITY"));
+    assert!(items.contains(")), 22, 40)?;"));
+    assert!(!items.contains("rt::StyleMember::"));
+    assert!(!items.contains("rt::SelectorStep::"));
+    let mut no_imports = StylePool::new("empty", "Empty.xaml");
+    control_theme_program(&mut no_imports, "empty_deferred", &Theme { parent: false, members: vec![] }, &Default::default());
+    assert_eq!(no_imports.items.len(), 1);
+    assert!(no_imports.items[0].contains("rt::TypedStyleImports {\n    ..rt::TypedStyleImports::EMPTY"));
+}
+
+#[test]
+fn resolved_selectors_inline_in_control_themes_and_emit_only_live_programs() {
+    let mut pool = StylePool::new("build_x", "styles.xaml");
+    let inline = vec![Step::Nesting, Step::Template, Step::OfType(format!("<{PRESENTER} as ::ferroui_base::ObjectType>::IDENTITY"))];
+    let name = pool.resolve_selector(inline.clone());
+    let lines = body(&[
+        &format!("let control_theme_0 = {CONTROL_THEME}::new();"),
+        &format!("let style_0 = {STYLE}::new();"),
+        &format!("let selector_2 = {name}.build_selector()?;"),
+        &format!("{STYLE}::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_2.clone()));"),
+        &format!("{STYLE_BASE}::__markup_Add_1({}, rt::cast(style_0.clone(), 9, 6)?);", style_of("control_theme_0")),
+    ]);
+    let theme = pool.parse_resolved_theme(&lines, THEME_RETURNED).unwrap();
+    let Member::Style(style) = &theme.members[0] else { panic!("nested style") };
+    assert_eq!(style.selector, Some(inline));
+
+    let page = vec![Step::Or(vec![
+        vec![Step::Class("\"a\"".into())],
+        vec![Step::Is(format!("<{PRESENTER} as ::ferroui_base::ObjectType>::IDENTITY")), Step::Not(vec![Step::Class("\"b\"".into())])],
+    ])];
+    let live = pool.resolve_selector(page.clone());
+    assert_eq!(pool.resolve_selector(page), live);
+    let mut source = format!("    rt::ConstructionImport::Selector(&{live}),\n    {live}.build_selector()?;\n");
+    let image = super::super::BytecodeImage::packed();
+    pool.finish_selector_programs(&mut source, &image);
+    assert_eq!(source.matches(": rt::TypedSelectorProgram =").count(), 1);
+    assert!(!source.contains(&name));
+    assert!(source.contains("::ObjectType>::IDENTITY"));
+    assert!(!source.contains("::StaticType>::TYPE"));
+    use ferroui_markup::style_opcodes::{selector as s, VERSION};
+    assert_eq!(image.artifact("page.fxc").unwrap().0, [
+        VERSION, s::PUSH, s::CLASS, 0, s::PUSH, s::IS, 0, s::PUSH, s::CLASS, 1, s::NOT, s::OR, 2, s::END,
+    ]);
 }

@@ -58,6 +58,10 @@ pub(super) struct StylePool {
     properties: HashMap<String, String>,
     /// The static of each selector chain, by the text of its slice.
     selectors: HashMap<String, String>,
+    /// Standalone selector candidates from the resolved visitor. Whole-theme programs inline their
+    /// steps without retaining a second static or a second slice of the binary module image.
+    resolved_names: HashMap<std::rc::Rc<[Step]>, String>,
+    resolved_selectors: HashMap<String, std::rc::Rc<[Step]>>,
     /// The function of each value of a property selector, by its expression.
     selector_values: HashMap<String, String>,
     /// The number of tables of template bindings written.
@@ -73,9 +77,46 @@ impl StylePool {
             document_text: document_text.to_string(),
             properties: HashMap::new(),
             selectors: HashMap::new(),
+            resolved_names: HashMap::new(),
+            resolved_selectors: HashMap::new(),
             selector_values: HashMap::new(),
             binding_tables: 0,
             items: Vec::new(),
+        }
+    }
+
+    pub(super) fn resolve_selector(&mut self, steps: Vec<Step>) -> String {
+        if let Some(name) = self.resolved_names.get(steps.as_slice()) {
+            return name.clone();
+        }
+        let name = format!("{}_SELECTOR_PROGRAM_{}", self.prefix.to_uppercase(), self.resolved_names.len());
+        let steps: std::rc::Rc<[Step]> = steps.into();
+        self.resolved_names.insert(steps.clone(), name.clone());
+        self.resolved_selectors.insert(name.clone(), steps);
+        name
+    }
+
+    pub(super) fn parse_resolved_theme(&self, lines: &[String], returned: &str) -> Option<Theme> {
+        parse_theme_with_selectors(lines, returned, &self.resolved_selectors)
+    }
+
+    /// Emit only selector programs referenced by the surviving factories, including typed call
+    /// imports. The immutable steps came from XamlX. A folded whole theme already owns its bytes.
+    pub(super) fn finish_selector_programs(&mut self, source: &mut String, image: &super::BytecodeImage) {
+        if self.resolved_selectors.is_empty() {
+            return;
+        }
+        let start = self.items.len();
+        for line in source.lines().filter(|line| line.contains("_SELECTOR_PROGRAM_") && !line.trim_start().starts_with("//")) {
+            for name in identifiers(line) {
+                if let Some(steps) = self.resolved_selectors.remove(&name) {
+                    program::standalone_selector(self, &name, &steps, image);
+                }
+            }
+        }
+        for item in self.items.drain(start..) {
+            source.push('\n');
+            source.push_str(&item);
         }
     }
 
@@ -129,6 +170,7 @@ impl StylePool {
                     let alternatives: Vec<String> = alternatives.iter().map(|alternative| self.chain(alternative)).collect();
                     format!("rt::SelectorStep::Or {{ alternatives: &[{}] }}", alternatives.join(", "))
                 }
+                Step::CapturedEquals { .. } => unreachable!("lexical selector operands are only in standalone programs"),
                 Step::PropertyEquals { property, value } => {
                     let property = self.property(property);
                     let value = self.selector_value(value);
@@ -158,7 +200,7 @@ impl StylePool {
 // --- the parts of a statement ------------------------------------------------------------
 
 /// `text` without its string literals (each replaced by `""`).
-fn without_strings(text: &str) -> String {
+pub(super) fn without_strings(text: &str) -> String {
     let mut out = String::with_capacity(text.len());
     let mut in_string = false;
     let mut escaped = false;
@@ -223,7 +265,7 @@ fn is_static_type(text: &str) -> bool {
 
 /// The property definition at the start of `text`, as generated code names it
 /// (`rt::property(<accessor>())` or `rt::class_property("<class>")`), and the text after it.
-fn split_property(text: &str) -> Option<(&str, &str)> {
+pub(super) fn split_property(text: &str) -> Option<(&str, &str)> {
     if let Some(rest) = text.strip_prefix("rt::property(") {
         let end = rest.find("())")? + 2;
         let accessor = &rest[..end];
@@ -251,32 +293,67 @@ fn is_f64_literal(text: &str) -> bool {
         || text.strip_suffix("_f64").is_some_and(|number| number.parse::<f64>().is_ok())
 }
 
+pub(super) fn number_literal(literal: &str) -> f64 {
+    match literal {
+        "::core::primitive::f64::NAN" => f64::NAN,
+        "::core::primitive::f64::INFINITY" => f64::INFINITY,
+        "::core::primitive::f64::NEG_INFINITY" => f64::NEG_INFINITY,
+        _ => literal.trim_end_matches("_f64").parse().expect("a recognized f64 literal"),
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub(super) enum Constant {
+    Null,
+    Bool(bool),
+    Int(i32),
+    Double(String),
+    Text(String),
+    Thickness([String; 4]),
+    CornerRadius([String; 4]),
+}
+
+impl Constant {
+    fn native(&self) -> String {
+        match self {
+            Self::Null => "rt::ThemeValue::Null".to_owned(),
+            Self::Bool(b) => format!("rt::ThemeValue::Bool({b})"),
+            Self::Int(i) => format!("rt::ThemeValue::Int({i}_i32)"),
+            Self::Double(n) => format!("rt::ThemeValue::Double({n})"),
+            Self::Text(s) => format!("rt::ThemeValue::Text({s})"),
+            Self::Thickness(v) => format!("rt::ThemeValue::Thickness([{}])", v.join(", ")),
+            Self::CornerRadius(v) => format!("rt::ThemeValue::CornerRadius([{}])", v.join(", ")),
+        }
+    }
+}
+
 /// The text of `ThemeValue` of a constant the emitter writes as the value of `rt::add_setter`:
 /// null, a boolean, an `i32`, an `f64`, a text, a thickness or a corner radius of literals.
-fn constant_value(value: &str) -> Option<String> {
+fn constant_value(value: &str) -> Option<Constant> {
     if value == NONE {
-        return Some("rt::ThemeValue::Null".to_string());
+        return Some(Constant::Null);
     }
     if let Some(text) = value.strip_prefix("rt::string_object(").and_then(|rest| rest.strip_suffix(')')) {
-        return is_string_literal(text).then(|| format!("rt::ThemeValue::Text({text})"));
+        return is_string_literal(text).then(|| Constant::Text(text.to_owned()));
     }
     let inner = value.strip_prefix("rt::to_object(")?.strip_suffix(')')?;
     match inner {
-        "::core::clone::Clone::clone(&true)" => return Some("rt::ThemeValue::Bool(true)".to_string()),
-        "::core::clone::Clone::clone(&false)" => return Some("rt::ThemeValue::Bool(false)".to_string()),
+        "::core::clone::Clone::clone(&true)" => return Some(Constant::Bool(true)),
+        "::core::clone::Clone::clone(&false)" => return Some(Constant::Bool(false)),
         _ => {}
     }
     if is_f64_literal(inner) {
-        return Some(format!("rt::ThemeValue::Double({inner})"));
+        return Some(Constant::Double(inner.to_owned()));
     }
-    if inner.strip_suffix("_i32").is_some_and(|number| number.parse::<i32>().is_ok()) {
-        return Some(format!("rt::ThemeValue::Int({inner})"));
+    if let Some(n) = inner.strip_suffix("_i32").and_then(|n| n.parse().ok()) {
+        return Some(Constant::Int(n));
     }
-    for (path, variant) in [(THICKNESS, "Thickness"), (CORNER_RADIUS, "CornerRadius")] {
+    for (path, variant) in [(THICKNESS, Constant::Thickness as fn(_) -> _), (CORNER_RADIUS, Constant::CornerRadius)] {
         if let Some(arguments) = inner.strip_prefix(&format!("{path}::__markup_new_3(")).and_then(|rest| rest.strip_suffix(')')) {
             let arguments: Vec<&str> = arguments.split(", ").collect();
             if arguments.len() == 4 && arguments.iter().all(|argument| is_f64_literal(argument)) {
-                return Some(format!("rt::ThemeValue::{variant}([{}])", arguments.join(", ")));
+                let components: [&str; 4] = arguments.try_into().ok()?;
+                return Some(variant(components.map(str::to_owned)));
             }
         }
     }
@@ -286,7 +363,7 @@ fn constant_value(value: &str) -> Option<String> {
 // --- the tree of a factory ---------------------------------------------------------------
 
 /// A step of a selector chain, with its operands as generated code wrote them.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub(super) enum Step {
     Nesting,
     Class(String),
@@ -301,6 +378,8 @@ pub(super) enum Step {
     Not(Vec<Step>),
     Or(Vec<Vec<Step>>),
     PropertyEquals { property: String, value: String },
+    /// A fallible or scope-dependent property conversion supplied at this invocation.
+    CapturedEquals { property: String, slot: usize },
 }
 
 /// The key of `BasedOn`: a string literal or a type (`<X as StaticType>::TYPE`).
@@ -335,7 +414,7 @@ pub(super) enum Value {
     Static { key: String, position: (i32, i32) },
     Template(Template),
     /// The text of a constant `rt::ThemeValue`.
-    Constant(String),
+    Constant(Constant),
     /// An expression that needs no context and cannot fail.
     Expression(String),
     /// The statements of the value (indented for the body of a function) and the value.
@@ -378,6 +457,7 @@ struct Code<'s> {
 /// The parser of a factory body.
 struct Parser<'s> {
     code: Vec<Code<'s>>,
+    resolved: &'s HashMap<String, std::rc::Rc<[Step]>>,
     index: usize,
     /// The indentation of the top level of the body.
     top: usize,
@@ -618,6 +698,10 @@ impl<'s> Parser<'s> {
                 return chains.is_empty().then_some(chain);
             }
             let (local, call) = text.strip_prefix("let ")?.split_once(" = ")?;
+            if let Some(steps) = call.strip_suffix(".build_selector()?;").and_then(|name| self.resolved.get(name)) {
+                chains.push((local.to_owned(), steps.to_vec()));
+                continue;
+            }
             let (operation, arguments) = call.strip_prefix(&format!("{SELECTORS}::"))?.strip_suffix(");")?.split_once('(')?;
             if !is_identifier(local) {
                 return None;
@@ -759,7 +843,12 @@ fn template_value(statements: &[&str], value: &str) -> Option<Template> {
 
 /// The tree of the factory whose body the emitter wrote as `lines`, returning `returned`, if
 /// every statement of it is part of a member a table holds.
-pub(super) fn parse_theme(lines: &[String], returned: &str) -> Option<Theme> {
+#[cfg(test)]
+fn parse_theme(lines: &[String], returned: &str) -> Option<Theme> {
+    parse_theme_with_selectors(lines, returned, &HashMap::new())
+}
+
+fn parse_theme_with_selectors(lines: &[String], returned: &str, resolved: &HashMap<String, std::rc::Rc<[Step]>>) -> Option<Theme> {
     if returned != "rt::to_value(control_theme_0.clone())" {
         return None;
     }
@@ -775,7 +864,7 @@ pub(super) fn parse_theme(lines: &[String], returned: &str) -> Option<Theme> {
     }
     let top = first.indent;
     let locals = code.iter().filter_map(|code| declared_local(code.text)).map(|(name, _)| name).collect();
-    let mut parser = Parser { code, index: 1, top, locals };
+    let mut parser = Parser { code, index: 1, top, locals, resolved };
     let parent = parser.take_if("context.push_parent(rt::to_value(control_theme_0.clone()));");
     let mut members = Vec::new();
     let mut popped = false;
@@ -855,13 +944,22 @@ fn render_value(function: &str, values: &mut Vec<String>, value: &Value) -> Stri
                 template.content_type, template.build, template.parent
             )
         }
-        Value::Constant(constant) => constant.clone(),
+        Value::Constant(constant) => constant.native(),
+        Value::Expression(_) => format!("rt::ThemeValue::Expression({})", native_value(function, values, value)),
+        Value::Computed { .. } => format!("rt::ThemeValue::Computed({})", native_value(function, values, value)),
+        Value::Absent => "rt::ThemeValue::Absent".to_string(),
+    }
+}
+
+/// A local typed callback for a setter whose resolved value requires native code.
+fn native_value(function: &str, values: &mut Vec<String>, value: &Value) -> String {
+    match value {
         Value::Expression(expression) => {
             let name = format!("{function}_value_{}", values.len());
             values.push(format!(
                 "/// A setter value of the control theme built by `{function}` (#568).\nfn {name}() -> {MARKUP_VALUE} {{\n    {expression}\n}}\n"
             ));
-            format!("rt::ThemeValue::Expression({name})")
+            name
         }
         Value::Computed { statements, value, uses_context } => {
             let name = format!("{function}_value_{}", values.len());
@@ -878,11 +976,15 @@ fn render_value(function: &str, values: &mut Vec<String>, value: &Value) -> Stri
             }
             text.push_str(&format!("    ::core::result::Result::Ok({value})\n}}\n"));
             values.push(text);
-            format!("rt::ThemeValue::Computed({name})")
+            name
         }
-        Value::Absent => "rt::ThemeValue::Absent".to_string(),
+        _ => unreachable!("a native setter value"),
     }
 }
+
+#[path = "theme_style_program.rs"]
+mod program;
+pub(super) use program::control_theme_program;
 
 /// The factory `function` of the control theme `theme` as a table: the table and the value
 /// functions of the factory are added to the items of `pool`, and the result is the statement
@@ -919,8 +1021,18 @@ pub(super) struct TemplateBinding<'s> {
 /// The parts of `statement` if it is the fused statement of a template binding.
 pub(super) fn template_binding(statement: &str) -> Option<TemplateBinding<'_>> {
     let arguments = statement.strip_prefix("rt::bind_template_binding(")?.strip_suffix(")?;")?;
+    template_binding_parts(arguments, false)
+}
+
+pub(super) fn template_binding_from(statement: &str) -> Option<TemplateBinding<'_>> {
+    let arguments = statement.strip_prefix("rt::bind_template_binding_from(")?.strip_suffix(")?;")?;
+    template_binding_parts(arguments, true)
+}
+
+fn template_binding_parts(arguments: &str, source_first: bool) -> Option<TemplateBinding<'_>> {
     let parts: Vec<&str> = arguments.split(", ").collect();
-    let &[object, target, source, line, column] = parts.as_slice() else { return None };
+    let &[object, first, second, line, column] = parts.as_slice() else { return None };
+    let (target, source) = if source_first { (second, first) } else { (first, second) };
     let object = object.strip_suffix(&format!(".upcast_ref::<{FERRO_OBJECT}>()"))?;
     let source = source.strip_prefix("rt::property(")?.strip_suffix(')')?;
     let position = (line.parse().ok()?, column.parse().ok()?);

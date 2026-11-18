@@ -319,6 +319,166 @@ pub fn kept_units(theme: &ThemeUnitsModel, roots: &Roots, graph: &TypeGraph, ful
     indices
 }
 
+/// Why a unit of a theme is kept, and how much of it is used (#852).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct KeptUnit {
+    /// The canonical index of the unit.
+    pub index: u32,
+    /// The name of the unit (the path of its document).
+    pub name: String,
+    /// The first reason the closure found, with where the root came from.
+    pub reason: String,
+    /// Whether the reason is a conservative one: a token of a document or a name of the sources
+    /// that happens to spell a key or a type, rather than a construction, a reference of a kept
+    /// unit or a stated root.
+    pub conservative: bool,
+    /// The keys the unit defines.
+    pub keys: usize,
+    /// The keys the unit defines that are live: a root, or referenced by a kept unit.
+    pub live_keys: usize,
+}
+
+/// [`kept_units`], with the reason each unit is kept (#852): the same closure, which records the
+/// first reason it meets for a unit. `sources` are the roots by where they come from (`"documents"`,
+/// `"sources"`, `"dependencies"`, `"manifest"`, `"build script"`), whose union the closure is over;
+/// a source named `"documents"`, `"sources"` or `"dependencies"` is conservative (its keys are tokens
+/// and names that may spell a key), the others are stated. The result is in canonical order, the
+/// units of [`kept_units`] over the union of the sources.
+pub fn explain_kept_units(
+    theme: &ThemeUnitsModel,
+    sources: &[(&str, &Roots)],
+    graph: &TypeGraph,
+    full_themes: bool,
+) -> Vec<KeptUnit> {
+    let conservative_source = |label: &str| matches!(label, "documents" | "sources" | "dependencies");
+    let all = full_themes || sources.iter().any(|(_, roots)| roots.all);
+    let mut reasons: Vec<Option<(String, bool)>> = vec![None; theme.units.len()];
+    // What made each key and type live, first reason first.
+    let mut live_keys: BTreeMap<String, (String, bool)> = BTreeMap::new();
+    let mut live_types: BTreeMap<String, (String, bool)> = BTreeMap::new();
+    let mut pending: Vec<usize> = Vec::new();
+    let make_live = |live_types: &mut BTreeMap<String, (String, bool)>, type_: &str, why: &str, conservative: bool| {
+        for live in graph.live(type_) {
+            let reason = match live == type_ {
+                true => why.to_string(),
+                false => format!("{why}, which makes {live} live (base class or created)"),
+            };
+            live_types.entry(live).or_insert((reason, conservative));
+        }
+    };
+    for (label, roots) in sources {
+        for type_ in &roots.types {
+            let why = format!("the type {type_}, a root of the {label}");
+            make_live(&mut live_types, type_, &why, conservative_source(label));
+        }
+        for key in &roots.keys {
+            let why = format!("the key {key}, a root of the {label}");
+            live_keys.entry(key.clone()).or_insert((why, conservative_source(label)));
+        }
+        for name in &roots.names {
+            match theme.units.iter().position(|unit| unit.name == *name) {
+                Some(position) => {
+                    if reasons[position].is_none() {
+                        reasons[position] = Some((format!("named by the {label}"), false));
+                        pending.push(position);
+                    }
+                }
+                None => {
+                    let why = format!("the name {name}, a root of the {label}");
+                    live_keys.entry(name.clone()).or_insert((why.clone(), false));
+                    make_live(&mut live_types, name, &why, false);
+                }
+            }
+        }
+    }
+    if let Some(position) = theme.units.iter().position(|unit| unit.index == 0) {
+        if reasons[position].is_none() {
+            reasons[position] = Some(("the ambient unit, always kept".to_string(), false));
+            pending.push(position);
+        }
+    }
+    let mut kept = vec![false; theme.units.len()];
+    loop {
+        while let Some(position) = pending.pop() {
+            if std::mem::replace(&mut kept[position], true) {
+                continue;
+            }
+            let unit = &theme.units[position];
+            for key in &unit.references {
+                let why = format!("the key {key}, referenced by {}", unit.name);
+                live_keys.entry(key.clone()).or_insert((why, false));
+            }
+            for type_ in &unit.types {
+                make_live(&mut live_types, type_, &format!("the type {type_}, constructed by {}", unit.name), false);
+            }
+        }
+        for position in 0..theme.units.len() {
+            if kept[position] || reasons[position].is_some() {
+                continue;
+            }
+            let unit = &theme.units[position];
+            let by_type = || {
+                unit.type_keys.iter().find_map(|type_key| {
+                    let (why, conservative) = live_types.get(type_key)?;
+                    Some((format!("defines the theme of {type_key}: {why}"), *conservative))
+                })
+            };
+            let by_key = || {
+                unit.keys.iter().find_map(|key| {
+                    let (why, conservative) = live_keys.get(key)?;
+                    Some((format!("defines {key}: {why}"), *conservative))
+                })
+            };
+            let found = match all {
+                true => Some(("every unit is kept (theme-roots = \"all\" or full-themes)".to_string(), false)),
+                false => by_type().or_else(by_key),
+            };
+            if let Some(found) = found {
+                reasons[position] = Some(found);
+                pending.push(position);
+            }
+        }
+        if pending.is_empty() {
+            break;
+        }
+    }
+    let mut explained: Vec<KeptUnit> = theme
+        .units
+        .iter()
+        .zip(&kept)
+        .zip(reasons)
+        .filter(|((_, kept), _)| **kept)
+        .map(|((unit, _), reason)| {
+            let (reason, conservative) = reason.unwrap_or_default();
+            KeptUnit {
+                index: unit.index,
+                name: unit.name.clone(),
+                reason,
+                conservative,
+                keys: unit.keys.len(),
+                live_keys: unit.keys.iter().filter(|key| live_keys.contains_key(*key)).count(),
+            }
+        })
+        .collect();
+    explained.sort_by_key(|unit| unit.index);
+    explained
+}
+
+/// The text of `theme_parts_why.txt` for one theme (#852): a line per kept unit, with the share of
+/// its keys that are live and the reason it is kept, after a line with the totals.
+pub fn why_kept_listing(class: &str, units: &[KeptUnit], total: usize) -> String {
+    let keys: usize = units.iter().map(|unit| unit.keys).sum();
+    let live: usize = units.iter().map(|unit| unit.live_keys).sum();
+    let count = units.len();
+    let mut text = format!("{class}: {count} of {total} units; {live} of {keys} keys of the kept units are live\n");
+    for unit in units {
+        let kind = if unit.conservative { "conservative" } else { "exact" };
+        let (name, live, keys, reason) = (&unit.name, unit.live_keys, unit.keys, &unit.reason);
+        text.push_str(&format!("{name}\t{live} of {keys} keys live\t{kind}\t{reason}\n"));
+    }
+    text
+}
+
 /// The name of the static of the parts table of the class `class` (its full name) in
 /// `compiled_markup`: `THEME_PARTS_` and the name in upper case, with `_` for anything that is
 /// not a letter or a digit (`THEME_PARTS_FERROUI_THEMES_WINUI_WINUITHEME`). It is the established
@@ -442,6 +602,99 @@ fn last_segments(text: &str) -> String {
 pub fn unit_static_path(table_path: &str, index: u32) -> String {
     let module = table_path.rsplit_once("::").map_or("", |(module, _)| module);
     format!("{module}::THEME_UNIT_{index}")
+}
+
+/// The root files of the binaries of a package, relative to its directory, as Cargo finds them
+/// (#847): the `path` of every `[[bin]]` target (or, without one, `src/bin/<name>.rs`,
+/// `src/bin/<name>/main.rs` or `src/main.rs`), and, unless the package states `autobins = false`,
+/// `src/main.rs`, `src/bin/*.rs` and `src/bin/*/main.rs`. Each once, in that order; only the files
+/// that exist. Examples, tests and benchmarks are not production targets and are not read.
+pub fn binary_roots(manifest_dir: &std::path::Path, manifest: &str) -> Vec<std::path::PathBuf> {
+    let (autobins, binaries) = binary_targets(manifest);
+    let mut found: Vec<std::path::PathBuf> = Vec::new();
+    let mut push = |path: std::path::PathBuf| {
+        if path.is_file() && !found.contains(&path) {
+            found.push(path);
+        }
+    };
+    for (name, path) in binaries {
+        match path {
+            Some(path) => push(manifest_dir.join(path)),
+            None => {
+                let candidates: [String; 3] =
+                    [format!("src/bin/{name}.rs"), format!("src/bin/{name}/main.rs"), "src/main.rs".into()];
+                for candidate in candidates {
+                    if manifest_dir.join(&candidate).is_file() {
+                        push(manifest_dir.join(candidate));
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    if autobins {
+        push(manifest_dir.join("src/main.rs"));
+        let mut discovered: Vec<std::path::PathBuf> = std::fs::read_dir(manifest_dir.join("src/bin"))
+            .into_iter()
+            .flatten()
+            .filter_map(|entry| entry.ok().map(|entry| entry.path()))
+            .filter_map(|path| match path.is_dir() {
+                true => Some(path.join("main.rs")),
+                false => path.extension().is_some_and(|extension| extension == "rs").then_some(path),
+            })
+            .collect();
+        discovered.sort();
+        for path in discovered {
+            push(path);
+        }
+    }
+    found
+}
+
+/// What the manifest `text` states of the binaries of its package: whether Cargo discovers them
+/// (`autobins`, true unless `[package]` says `autobins = false`) and the `name` and `path` of each
+/// `[[bin]]` table, in order.
+fn binary_targets(text: &str) -> (bool, Vec<(String, Option<String>)>) {
+    #[derive(PartialEq)]
+    enum Section {
+        Package,
+        Bin,
+        Other,
+    }
+    let mut section = Section::Other;
+    let mut autobins = true;
+    let mut binaries: Vec<(String, Option<String>)> = Vec::new();
+    for line in text.lines() {
+        let line = without_comment(line).trim();
+        if line.starts_with('[') {
+            let header: String = line.chars().filter(|c| !c.is_whitespace()).collect();
+            section = match header.as_str() {
+                "[[bin]]" => {
+                    binaries.push((String::new(), None));
+                    Section::Bin
+                }
+                "[package]" => Section::Package,
+                _ => Section::Other,
+            };
+            continue;
+        }
+        let Some((key, value)) = line.split_once('=') else { continue };
+        let (key, value) = (key.trim(), value.trim());
+        match (&section, key) {
+            (Section::Package, "autobins") => autobins = value != "false",
+            (Section::Bin, "name" | "path") => {
+                let Some((value, _)) = string_value(value) else { continue };
+                if let Some(binary) = binaries.last_mut() {
+                    match key {
+                        "name" => binary.0 = value,
+                        _ => binary.1 = Some(value),
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+    (autobins, binaries)
 }
 
 /// A value of the manifest, of the forms the table of the opt-in has.

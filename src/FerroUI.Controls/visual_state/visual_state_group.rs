@@ -4,7 +4,7 @@
 //! `7e4b0c2096be402f51cc8f7d203ebf67cff183d0`; MIT, Copyright (c) Microsoft Corporation, see
 //! NOTICE.md).
 
-use super::{AppliedSetters, VisualState, VisualStateChangedEventArgs};
+use super::{AppliedSetters, Names, VisualState, VisualStateChangedEventArgs};
 use ferroui_base::collections::FerroList;
 use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::utilities::HandlerList;
@@ -146,6 +146,18 @@ impl VisualStateGroup {
             Some(state) => AppliedSetters::apply(state, template_root),
             None => AppliedSetters::default(),
         };
+        // The storyboard of the new state starts, then the one of the old state stops (WinUI's
+        // `VisualStateManagerActuator::ChangeVisualState`): a property both animate goes on
+        // from the value it has.
+        let old_storyboard = self.current_state().and_then(|old| old.storyboard());
+        let new_storyboard = state.and_then(|state| state.storyboard());
+        if let Some(storyboard) = &new_storyboard {
+            let names = template_root.map(Names::of);
+            storyboard.begin_with(names.as_ref());
+        }
+        if let Some(old) = old_storyboard.filter(|old| Some(old) != new_storyboard.as_ref()) {
+            old.stop();
+        }
         // The new values are applied before the old ones are removed, so that a property both
         // states set changes once, from the old value to the new one.
         let old = std::mem::replace(&mut *self.applied.borrow_mut(), applied);
@@ -157,7 +169,16 @@ impl VisualStateGroup {
     /// transitions).
     pub(crate) fn reapply_current_state(&self, template_root: Option<&Ref<crate::Control>>) {
         let state = self.current_state();
-        self.set_state(state.as_ref(), template_root);
+        let applied = match &state {
+            Some(state) => AppliedSetters::apply(state, template_root),
+            None => AppliedSetters::default(),
+        };
+        std::mem::replace(&mut *self.applied.borrow_mut(), applied).remove();
+        // The running storyboard of the state completes (WinUI's `GoToState` to the current
+        // state without transitions).
+        if let Some(storyboard) = state.and_then(|state| state.storyboard()) {
+            storyboard.skip_to_fill();
+        }
     }
 
     pub(crate) fn raise_current_state_changing(&self, args: &VisualStateChangedEventArgs) {
@@ -209,6 +230,9 @@ impl VisualStateGroup {
 
 impl Drop for VisualStateGroup {
     fn drop(&mut self) {
+        if let Some(storyboard) = self.current_state.get_mut().as_ref().and_then(|state| state.storyboard()) {
+            storyboard.stop();
+        }
         std::mem::take(self.applied.get_mut()).remove();
     }
 }

@@ -1,0 +1,23 @@
+Modules by literal path prefix Counter({'property_store': 2440760, 'styled_property': 1372376, 'direct_property': 615904})
+688852 1568 ferroui_base::data::core::value_type::nullable_operation
+539960 364 ferroui_base::property_store::effective_value::EffectiveValue::set_and_raise_core
+491116 509 ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::update_source
+437096 508 ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::write_source_value_to_target
+342304 508 ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::start
+275172 508 ferroui_base::data::core::typed_binding_expression::TypedClrPropertyInfo::set
+267260 197 ferroui_base::ferro_object::FerroObject::set_value
+259360 508 ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::dispose
+251404 353 ferroui_base::styled_property::StyledProperty::route_get_base_value
+251280 308 ferroui_base::property_store::value_store::ValueStore::set_value
+247676 508 ferroui_base::data::core::typed_binding_expression::TypedClrPropertyInfo::set_boxed
+243364 353 ferroui_base::property_store::value_store::ValueStore::create_effective_value
+235616 508 ferroui_base::data::core::typed_binding_expression::TypedClrPropertyInfo::try_get
+226236 452 ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::write_value_to_source
+220236 353 ferroui_base::styled_property::StyledProperty::route_set_value
+203948 508 ferroui_base::data::core::typed_binding_expression::TypedClrPropertyInfo::try_get_boxed
+198512 277 ferroui_base::ferro_property::FerroProperty::register_with_core
+193060 820 ferroui_base::data::core::value_type::ValueTypes::register_object::from_object
+188352 271 ferroui_base::data::core::typed_binding_expression::TypedClrPropertyInfo::value_from_untyped
+184672 231 ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::attach
+180944 353 ferroui_base::styled_property::StyledProperty::route_set_current_value
+175628 816 ferroui_base::data::core::value_type::ValueTypes::register_object::as_object

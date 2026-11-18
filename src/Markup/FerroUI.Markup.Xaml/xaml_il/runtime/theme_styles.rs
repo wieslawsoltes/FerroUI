@@ -95,35 +95,45 @@ pub enum SelectorStep {
 /// built, in order; `None` for an empty chain (generated code writes no empty chain).
 #[inline(never)]
 pub fn build_selector(steps: &[SelectorStep]) -> Option<Selector> {
-    let mut current: Option<Selector> = None;
-    for step in steps {
-        let next = match *step {
-            SelectorStep::Nesting => Selectors::nesting(current.take()),
-            SelectorStep::Class(name) => Selectors::class(current.take(), name),
-            SelectorStep::Name(name) => Selectors::name(current.take(), name),
-            SelectorStep::Template => Selectors::template(current.take()),
-            SelectorStep::Child => Selectors::child(current.take()),
-            SelectorStep::Descendant => Selectors::descendant(current.take()),
-            SelectorStep::OfType(identity) => Selectors::of_type_identity(current.take(), identity),
-            SelectorStep::Is(identity) => Selectors::is_type_identity(current.take(), identity),
-            SelectorStep::NthChild(step, offset) => Selectors::nth_child(current.take(), step, offset),
-            SelectorStep::NthLastChild(step, offset) => Selectors::nth_last_child(current.take(), step, offset),
-            SelectorStep::Not { argument } => {
-                let Some(argument) = build_selector(argument) else { continue };
-                Selectors::not(current.take(), argument)
-            }
-            SelectorStep::Or { alternatives } => {
-                Selectors::or(alternatives.iter().filter_map(|alternative| build_selector(alternative)).collect::<Vec<_>>())
-            }
-            SelectorStep::PropertyEquals { property, value } => {
-                let property = property();
-                Selectors::property_equals_untyped(current.take(), property, value())
-            }
-        };
-        current = Some(next);
-    }
-    current
+    steps.iter().fold(None, selector_step)
 }
+
+fn selector_step(current: Option<Selector>, step: &SelectorStep) -> Option<Selector> {
+    match *step {
+        SelectorStep::Not { argument } => match build_selector(argument) {
+            Some(argument) => Some(Selectors::not(current, argument)),
+            None => current,
+        },
+        SelectorStep::Or { alternatives } => Some(Selectors::or(alternatives.iter().filter_map(|steps| build_selector(steps)))),
+        _ => Some(selector_leaf(current, step)),
+    }
+}
+
+/// Both representations call the same leaf operations. A bytecode-only build handles compound
+/// selectors with its operand stack and has no dependency on the native slice interpreter.
+fn selector_leaf(current: Option<Selector>, step: &SelectorStep) -> Selector {
+    match *step {
+        SelectorStep::Nesting => Selectors::nesting(current),
+        SelectorStep::Class(name) => Selectors::class(current, name),
+        SelectorStep::Name(name) => Selectors::name(current, name),
+        SelectorStep::Template => Selectors::template(current),
+        SelectorStep::Child => Selectors::child(current),
+        SelectorStep::Descendant => Selectors::descendant(current),
+        SelectorStep::OfType(identity) => Selectors::of_type_identity(current, identity),
+        SelectorStep::Is(identity) => Selectors::is_type_identity(current, identity),
+        SelectorStep::NthChild(step, offset) => Selectors::nth_child(current, step, offset),
+        SelectorStep::NthLastChild(step, offset) => Selectors::nth_last_child(current, step, offset),
+        SelectorStep::PropertyEquals { property, value } => {
+            let property = property();
+            Selectors::property_equals_untyped(current, property, value())
+        }
+        SelectorStep::Not { .. } | SelectorStep::Or { .. } => unreachable!("compound selector has an operand chain"),
+    }
+}
+
+#[path = "theme_style_program.rs"]
+mod program;
+pub use program::{selector_operand, SelectorImports, SelectorProperty, TypedSelectorProgram, TypedStyleImports, TypedStyleProgram};
 
 // --- control themes -----------------------------------------------------------------------
 
