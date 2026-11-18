@@ -28,14 +28,12 @@ export class DesignerDependencies {
     stop(): void { this.duringRender = undefined; }
 }
 
-export function dirtyXamlSources(document: vscode.TextDocument, folder?: vscode.WorkspaceFolder): PreviewSourceBuffer[] {
-    const sourceFolder = folder?.uri.toString();
-    const localDirectory = path.dirname(document.uri.fsPath);
+export function dirtyXamlSources(documents: readonly vscode.Uri[], exclude?: vscode.TextDocument): PreviewSourceBuffer[] {
+    const scope = (uri: vscode.Uri) => vscode.workspace.getWorkspaceFolder(uri)?.uri.toString() ?? path.dirname(uri.fsPath);
+    const roots = new Set(documents.map(scope));
     let remaining = 8 * 1024 * 1024;
     return vscode.workspace.textDocuments.flatMap<PreviewSourceBuffer>(candidate => {
-        if (candidate === document || !candidate.isDirty || !xamlPath(candidate.uri)) return [];
-        const parent = vscode.workspace.getWorkspaceFolder(candidate.uri);
-        if (sourceFolder ? sourceFolder !== parent?.uri.toString() : localDirectory !== path.dirname(candidate.uri.fsPath)) return [];
+        if (candidate === exclude || !candidate.isDirty || !xamlPath(candidate.uri) || !roots.has(scope(candidate.uri))) return [];
         const input = { uri: candidate.uri.toString(), source: candidate.getText() };
         const length = Buffer.byteLength(JSON.stringify(input));
         // Preserve the unavailable identity when a draft exceeds the frame budget.

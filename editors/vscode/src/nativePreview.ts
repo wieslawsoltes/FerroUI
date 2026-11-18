@@ -7,7 +7,7 @@ import type { NativeProjectInventory } from './projectInventory';
 import type { Asset, CanvasInteraction, CanvasPresentation, DropHint, EditResult, Inspection, InspectionTarget, Operation, Placement, PreviewSourceBuffer, ResourceRow, Snapshot, Source, Viewport } from './protocol';
 import type { RsxLanguageDocument } from './rsxLanguageTypes';
 import type { HostedFrame, HostedInput, HostedSource } from './hostedProtocol';
-import type { NativeStageChange, PrototypeCommand, PrototypeHotspot, PrototypeScene, StageChecks, StageImage, StageManifest, StageModel, StagePick, StagePointer, StageStateOptions, StageTarget } from './stagesProtocol';
+import type { NativeStageChange, PrototypeCommand, PrototypeHotspot, PrototypeScene, StageChecks, StageDocument, StageImage, StageManifest, StageModel, StagePick, StagePointer, StageStateOptions, StageTarget } from './stagesProtocol';
 import { commandFor } from './tools';
 
 export class NativePreview implements vscode.Disposable {
@@ -18,7 +18,11 @@ export class NativePreview implements vscode.Disposable {
     private readonly projects = new WeakMap<BuiltProject, Promise<number>>();
     private nextProject = 0;
     assets: readonly Asset[] = [];
-    capabilities: { isolatedDesign?: boolean; appHostedDesign?: boolean; rsxLanguage?: boolean; stages?: boolean; prototypeEditing?: boolean; projectCatalog?: boolean; canvasInteraction?: boolean; canvasFocusOrder?: boolean; projectInventory?: boolean; tokenHandoff?: boolean } = {};
+    capabilities: {
+        isolatedDesign?: boolean; appHostedDesign?: boolean; rsxLanguage?: boolean;
+        stages?: boolean; prototypeEditing?: boolean; stageIncludes?: boolean; projectCatalog?: boolean;
+        canvasInteraction?: boolean; canvasFocusOrder?: boolean; projectInventory?: boolean; tokenHandoff?: boolean;
+    } = {};
 
     private constructor(command: string, channel: vscode.OutputChannel) {
         this.child = spawn(command, [], { windowsHide: true });
@@ -86,9 +90,11 @@ export class NativePreview implements vscode.Disposable {
     hostedFrame(): Promise<HostedFrame | null> { return this.send('hostedFrame'); }
     hostedInput(input: HostedInput): Promise<void> { return this.send('hostedInput', input); }
 
-    syncStages(source: Source, manifest?: StageManifest, additional: Source[] = []): Promise<StageModel> {
+    syncStages(source: StageDocument, manifest?: StageManifest, additional: StageDocument[] = [], localSources?: PreviewSourceBuffer[]): Promise<StageModel> {
         if (!this.capabilities.stages) throw new Error('Update the FerroUI preview helper to use Stages.');
-        return this.send('stagesSync', { source, manifest, additional });
+        const params = { source, manifest, additional };
+        const drafts = localSources?.length ? fitStageDrafts(params, localSources) : undefined;
+        return this.send('stagesSync', { ...params, localSources: drafts });
     }
 
     editStages(change: NativeStageChange): Promise<StageModel> {
@@ -175,4 +181,22 @@ export class NativePreview implements vscode.Disposable {
         this.connection.dispose();
         this.child.kill();
     }
+}
+
+function fitStageDrafts(params: object, drafts: PreviewSourceBuffer[]): PreviewSourceBuffer[] {
+    // The native JSON-RPC reader limits the entire message to 16 MiB. Reserve
+    // every draft identity so an omitted draft cannot fall back to its saved file.
+    const packed: PreviewSourceBuffer[] = drafts.map(({ uri }) => ({ uri, source: null }));
+    let available = 16 * 1024 * 1024 - Buffer.byteLength(JSON.stringify({
+        jsonrpc: '2.0', id: Number.MAX_SAFE_INTEGER, method: 'stagesSync', params: { ...params, localSources: packed },
+    }));
+    if (available < 0) throw new Error('The stage sources and include paths exceed the native request size.');
+    for (const [index, { source }] of drafts.entries()) {
+        if (source === null) continue;
+        const extra = Buffer.byteLength(JSON.stringify(source)) - 4;
+        if (extra > available) continue;
+        packed[index].source = source;
+        available -= extra;
+    }
+    return packed;
 }

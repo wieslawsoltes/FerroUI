@@ -4,6 +4,7 @@ use crate::renderer::Renderer;
 use crate::scenario::{existing_workspace_path, read_source, read_text};
 use crate::stages::{StageTarget, Stages, Sync};
 use crate::stages_prototype::{Command, Control, Scene};
+use crate::stages_sources::StageDocument;
 use ferroui_designer::{PreviewStageId, PreviewStageManifest};
 use ferroui_designer_tools::scenario::{ScenarioPrototype, ScenarioStep};
 use std::collections::BTreeMap;
@@ -186,9 +187,11 @@ fn resolve_sources(
     let source = documents
         .remove(&active_uri)
         .ok_or("The scenario's primary document was removed")?;
+    let scoped = |authored| StageDocument { authored, workspace_root: Some(workspace.to_path_buf()) };
     Ok(Sync {
-        source,
+        source: scoped(source),
         manifest: Some(manifest),
-        additional: documents.into_values().collect(),
+        additional: documents.into_values().map(scoped).collect(),
+        local_sources: Vec::new(),
     })
 }

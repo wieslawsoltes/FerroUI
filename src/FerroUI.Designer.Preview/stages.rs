@@ -1,23 +1,25 @@
 use crate::stages_prototype::Playback;
+use crate::stages_sources::{self, StageDocument, StageSource};
 use crate::{
     document::DesignDocument,
     projects::Projects,
-    protocol::{Image, Source},
+    protocol::Image,
 };
 use base64::{Engine, engine::general_purpose::STANDARD};
 use ferroui_base::{Point, Ref, threading::Dispatcher};
 use ferroui_controls::{Control, SizeToContent, Window, WindowDecorations};
 use ferroui_designer::{
-    PreviewEnvironment, PreviewFinding, PreviewHostOptions, PreviewPrototypeElementChoice,
-    PreviewPrototypeManifest, PreviewStageBoard, PreviewStageConfiguration, PreviewStageId,
-    PreviewStageInfo, PreviewStageManifest, PreviewStageMode, PreviewStageSource, PreviewStageStateOptions,
+    PreviewEnvironment, PreviewFinding, PreviewPrototypeElementChoice, PreviewPrototypeManifest,
+    PreviewStageBoard, PreviewStageConfiguration, PreviewStageId, PreviewStageInfo, PreviewStageManifest,
+    PreviewStageMode, PreviewStageStateOptions,
     PreviewStageStatus, PreviewTheme, capture_preview_stage_png,
 };
 use ferroui_designer_language::Range;
+use ferroui_designer_project::PreviewSourceBuffer;
 use ferroui_inspect::{Inspector, Permissions};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use std::{collections::BTreeMap, rc::Rc};
+use std::{collections::{BTreeMap, BTreeSet}, rc::Rc};
 
 #[derive(Default)]
 pub(crate) struct Stages {
@@ -28,32 +30,14 @@ pub(crate) struct Stages {
     pub(crate) playback: Playback,
 }
 
-struct StageSource {
-    authored: Source,
-    preview: PreviewStageSource,
-}
-
-impl StageSource {
-    fn parse(authored: Source, existing: Option<&Self>, projects: &Projects) -> Result<Self, String> {
-        let project = projects.source(&authored)?;
-        let preview = match existing.filter(|source| source.authored == authored) {
-            Some(source) => source.preview.clone(),
-            None => PreviewStageSource {
-                uri: authored.uri.clone(),
-                document: DesignDocument::parse(&authored, project)?.xaml,
-                pending: false,
-            },
-        };
-        Ok(Self { authored, preview })
-    }
-}
-
 #[derive(Deserialize)]
 pub(crate) struct Sync {
-    pub(crate) source: Source,
+    pub(crate) source: StageDocument,
     pub(crate) manifest: Option<PreviewStageManifest>,
     #[serde(default)]
-    pub(crate) additional: Vec<Source>,
+    pub(crate) additional: Vec<StageDocument>,
+    #[serde(default, rename = "localSources")]
+    pub(crate) local_sources: Vec<PreviewSourceBuffer>,
 }
 
 #[derive(Deserialize)]
@@ -66,13 +50,7 @@ pub(crate) struct Change {
 #[derive(Deserialize)]
 #[serde(tag = "action", rename_all = "camelCase")]
 enum Action {
-    Add {
-        name: String,
-        width: f64,
-        height: f64,
-        dark: bool,
-        source: Option<Source>,
-    },
+    Add(Addition),
     Remove {
         id: PreviewStageId,
     },
@@ -88,12 +66,24 @@ enum Action {
     },
 }
 
+#[derive(Deserialize)]
+struct Addition {
+    name: String,
+    width: f64,
+    height: f64,
+    dark: bool,
+    source: Option<StageDocument>,
+    #[serde(default, rename = "localSources")]
+    local_sources: Vec<PreviewSourceBuffer>,
+}
+
 #[derive(Serialize)]
 pub(crate) struct Model {
     epoch: u64,
     manifest: PreviewStageManifest,
     stages: Vec<PreviewStageInfo>,
     prototype: Option<crate::stages_prototype::Scene>,
+    dependencies: BTreeSet<String>,
 }
 
 #[derive(Deserialize)]
@@ -125,31 +115,23 @@ pub(crate) struct Pointer {
 
 impl Stages {
     pub(crate) fn sync(&mut self, request: Sync, projects: &Projects) -> Result<Model, String> {
-        let uri = request.source.uri.clone();
+        let uri = request.source.authored.uri.clone();
         if request.additional.len() >= ferroui_designer::MAX_PREVIEW_STAGES {
             return Err("Open at most 16 preview documents".into());
         }
         let mut sources = BTreeMap::new();
         for source in std::iter::once(request.source).chain(request.additional) {
-            let key = source.uri.clone();
+            let key = source.authored.uri.clone();
             if sources.contains_key(&key) {
                 return Err("Duplicate preview source URI".into());
             }
             sources.insert(
                 key.clone(),
-                StageSource::parse(source, self.sources.get(&key), projects)?,
+                StageSource::parse(source, self.sources.get(&key), projects, &request.local_sources)?,
             );
         }
         let epoch = self.board.epoch();
-        self.board.sync_sources(
-            &uri,
-            sources
-                .values()
-                .map(|source| source.preview.clone())
-                .collect(),
-            PreviewHostOptions::default(),
-            0,
-        )?;
+        stages_sources::sync_board(&mut self.board, &uri, sources.iter().map(|(uri, source)| (uri.as_str(), source)))?;
         if let Some(manifest) = request.manifest {
             self.board.restore_manifest(manifest)?;
         } else if self.active.is_none() {
@@ -184,13 +166,7 @@ impl Stages {
         self.active.as_ref().ok_or("Open a Stages board")?;
         let epoch = self.board.epoch();
         match request.action {
-            Action::Add {
-                name,
-                width,
-                height,
-                dark,
-                source,
-            } => self.add(name, width, height, dark, source, projects)?,
+            Action::Add(addition) => self.add(addition, projects)?,
             Action::Remove { id } => self.board.remove(id)?,
             Action::Update { id, configuration } => {
                 let previous = self.board.stage(id).ok_or("The stage was removed")?;
@@ -218,17 +194,14 @@ impl Stages {
 
     fn add(
         &mut self,
-        name: String,
-        width: f64,
-        height: f64,
-        dark: bool,
-        source: Option<Source>,
+        addition: Addition,
         projects: &Projects,
     ) -> Result<(), String> {
+        let Addition { name, width, height, dark, source, local_sources } = addition;
         let active = self.active.as_deref().ok_or("Open a Stages board")?;
         let uri = source
             .as_ref()
-            .map(|source| source.uri.as_str())
+            .map(|source| source.authored.uri.as_str())
             .unwrap_or(active);
         let configuration = PreviewStageConfiguration::new(
             name,
@@ -249,17 +222,15 @@ impl Stages {
             return Err("A preview board supports at most 16 stages".into());
         }
         if let Some(source) = source {
-            let uri = source.uri.clone();
-            let entry = StageSource::parse(source, self.sources.get(&uri), projects)?;
+            let uri = source.authored.uri.clone();
+            let entry = StageSource::parse(source, self.sources.get(&uri), projects, &local_sources)?;
             let documents = self
                 .sources
                 .iter()
                 .filter(|(key, _)| *key != &uri)
-                .map(|(_, entry)| entry.preview.clone())
-                .chain(std::iter::once(entry.preview.clone()))
-                .collect();
-            self.board
-                .sync_sources(active, documents, PreviewHostOptions::default(), 0)?;
+                .map(|(uri, entry)| (uri.as_str(), entry))
+                .chain(std::iter::once((uri.as_str(), &entry)));
+            stages_sources::sync_board(&mut self.board, active, documents)?;
             self.sources.insert(uri, entry);
         }
         self.board.add(configuration)?;
@@ -376,6 +347,7 @@ impl Stages {
             manifest: self.board.manifest(),
             stages,
             prototype: self.playback.scene(),
+            dependencies: stages_sources::watch_paths(&self.sources),
         }
     }
 }

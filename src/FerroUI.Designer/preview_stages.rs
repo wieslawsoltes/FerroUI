@@ -11,6 +11,7 @@ use ferroui_base::utilities::UriRef;
 use ferroui_base::{Point, Ref, Visual, WeakRef};
 use ferroui_controls::{Border, ContentControl, Control, ThemeVariantScope};
 use ferroui_designer_core::{Ast, Document, Node, NodeId};
+use ferroui_designer_project::LocalPreviewSources;
 use ferroui_inspect::{Inspector, TreeKind};
 use ferroui_markup_xaml::source_overlay::SourceSnapshot;
 use serde::{Deserialize, Serialize};
@@ -20,11 +21,14 @@ use std::rc::Rc;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
 
+#[path = "preview_stage_includes.rs"]
+mod includes;
 #[path = "preview_stage_layout.rs"]
 mod layout;
 #[path = "preview_stage_prototype_elements.rs"]
 mod prototype_elements;
 use layout::StageLayoutHost;
+use includes::{IncludeCatalog, IncludeCatalogs, IncludeSource};
 
 pub type PreviewStageId = u64;
 pub const MAX_PREVIEW_STAGES: usize = 16;
@@ -487,7 +491,7 @@ struct RenderedStage {
     configuration: PreviewStageConfiguration,
     options_epoch: u64,
     source_snapshot: SourceSnapshot,
-    source_catalog: Rc<BTreeMap<String, SourceStamp>>,
+    source_catalog: Rc<IncludeCatalog>,
 }
 
 impl Drop for RenderedStage {
@@ -507,7 +511,7 @@ struct Stage {
     status: PreviewStageStatus,
     rendered: Option<RenderedStage>,
     observed: Option<SourceStamp>,
-    observed_dependencies: BTreeMap<String, Option<SourceStamp>>,
+    observed_dependencies: BTreeMap<String, Option<IncludeSource>>,
 }
 
 #[derive(Clone)]
@@ -563,7 +567,7 @@ pub struct PreviewStageBoard {
     active: Option<PreviewStageId>,
     active_uri: String,
     sources: BTreeMap<String, PreviewStageSource>,
-    source_catalog: Rc<BTreeMap<String, SourceStamp>>,
+    includes: IncludeCatalogs,
     options: PreviewHostOptions,
     options_epoch: u64,
     epoch: u64,
@@ -583,7 +587,7 @@ impl PreviewStageBoard {
             active: None,
             active_uri: String::new(),
             sources: BTreeMap::new(),
-            source_catalog: Rc::new(BTreeMap::new()),
+            includes: IncludeCatalogs::default(),
             options: PreviewHostOptions::default(),
             options_epoch: 0,
             epoch: 1,
@@ -676,6 +680,19 @@ impl PreviewStageBoard {
         options: PreviewHostOptions,
         options_epoch: u64,
     ) -> Result<(), String> {
+        self.sync_sources_with_local_includes(active_uri, sources, options, options_epoch, &BTreeMap::new())
+    }
+
+    /// Synchronize authored buffers and the host's scoped literal includes for each view.
+    /// Native include requests determine which cards need a replacement frame.
+    pub fn sync_sources_with_local_includes(
+        &mut self,
+        active_uri: &str,
+        sources: Vec<PreviewStageSource>,
+        options: PreviewHostOptions,
+        options_epoch: u64,
+        local_includes: &BTreeMap<&str, &LocalPreviewSources>,
+    ) -> Result<(), String> {
         validate_uri(active_uri)?;
         let mut next = BTreeMap::new();
         for mut source in sources {
@@ -685,16 +702,7 @@ impl PreviewStageBoard {
                 return Err("Duplicate preview source URI".into());
             }
         }
-        let mut catalog = BTreeMap::new();
-        for source in next.values() {
-            let key = native_source_uri(&source.uri)?;
-            if catalog
-                .insert(key, SourceStamp::new(source, options_epoch))
-                .is_some()
-            {
-                return Err("Preview source URIs resolve to the same native document".into());
-            }
-        }
+        let includes = IncludeCatalogs::new(&next, local_includes, options_epoch)?;
         let active_changed = self.active_uri != active_uri;
         let sources_changed = self.sources.len() != next.len()
             || next.iter().any(|(uri, source)| {
@@ -711,7 +719,7 @@ impl PreviewStageBoard {
             });
         let options_changed = self.options_epoch != options_epoch;
         self.sources = next;
-        self.source_catalog = Rc::new(catalog);
+        self.includes = includes;
         self.options = options;
         self.options_epoch = options_epoch;
         self.active_uri = active_uri.into();
@@ -728,8 +736,8 @@ impl PreviewStageBoard {
                     (None, None) => !matches!(stage.status, PreviewStageStatus::MissingDocument),
                     _ => true,
                 };
-                (changed || observed_dependencies_changed(stage, &self.source_catalog))
-                    .then_some(stage.id)
+                let catalog = self.includes.for_document(&stage.configuration.source_uri);
+                (changed || observed_dependencies_changed(stage, catalog)).then_some(stage.id)
             })
             .collect::<Vec<_>>();
         for id in ids {
@@ -951,7 +959,7 @@ impl PreviewStageBoard {
         manifest.validate()?;
         let mut candidate = Self::new();
         candidate.sources = self.sources.clone();
-        candidate.source_catalog = self.source_catalog.clone();
+        candidate.includes = self.includes.clone();
         candidate.options = self.options.clone();
         candidate.options_epoch = self.options_epoch;
         candidate.active_uri = self.active_uri.clone();
@@ -1238,7 +1246,7 @@ impl PreviewStageBoard {
             && rendered.options_epoch == options_epoch
             && rendered.configuration.same_rendering(&stage.configuration)
             && rendered.configuration.same_layout(&stage.configuration)
-            && rendered_dependencies_current(rendered, &self.source_catalog)
+            && rendered_dependencies_current(rendered, self.includes.for_document(uri))
     }
 
     /// Read-only validation against all current host buffers, including native
@@ -1264,8 +1272,8 @@ impl PreviewStageBoard {
             }
         }
         rendered.source_snapshot.requested_uris().iter().all(|uri| {
-            match (rendered.source_catalog.get(uri), current.get(uri)) {
-                (Some(accepted), Some(current)) => accepted.matches_buffer(current),
+            match (rendered.source_catalog.get(uri), current.get(uri).copied()) {
+                (Some(accepted), current) => accepted.matches_open_buffer(current),
                 (None, None) => true,
                 _ => false,
             }
@@ -1305,7 +1313,7 @@ impl PreviewStageBoard {
                     &source.document.ast_snapshot(),
                     &rendered.document.ast_snapshot(),
                 )
-                && rendered_dependencies_current(rendered, &self.source_catalog)
+                && rendered_dependencies_current(rendered, self.includes.for_document(&stage.configuration.source_uri))
             {
                 rendered.preview.rebuild_map(&rendered.document);
             }
@@ -1439,7 +1447,7 @@ impl PreviewStageBoard {
             || rendered.options_epoch != self.options_epoch
             || !rendered.configuration.same_rendering(&stage.configuration)
             || !rendered.configuration.same_layout(&stage.configuration)
-            || !rendered_dependencies_current(rendered, &self.source_catalog)
+            || !rendered_dependencies_current(rendered, self.includes.for_document(&stage.configuration.source_uri))
         {
             return Err("The stage source or construction services changed".into());
         }
@@ -1449,6 +1457,7 @@ impl PreviewStageBoard {
     fn reload(&mut self, id: PreviewStageId, force: bool) -> Result<(), String> {
         let index = self.index(id)?;
         let config = self.stages[index].configuration.clone();
+        let catalog = self.includes.for_document(&config.source_uri).clone();
         let Some(source) = self.sources.get(&config.source_uri).cloned() else {
             self.stages[index].observed = None;
             self.stages[index].status = PreviewStageStatus::MissingDocument;
@@ -1459,7 +1468,7 @@ impl PreviewStageBoard {
         self.stages[index].observed = Some(SourceStamp::new(&source, self.options_epoch));
         let dependency_keys = observed_dependency_keys(&self.stages[index]);
         self.stages[index].observed_dependencies =
-            dependency_stamps(&dependency_keys, &self.source_catalog);
+            dependency_stamps(&dependency_keys, &catalog);
         if !source.document.is_valid() {
             self.stages[index].status = PreviewStageStatus::InvalidSource {
                 revision: source.document.revision(),
@@ -1500,7 +1509,7 @@ impl PreviewStageBoard {
                         &rendered.document.ast_snapshot(),
                         &source.document.ast_snapshot(),
                     )
-                    && rendered_dependencies_current(rendered, &self.source_catalog)
+                    && rendered_dependencies_current(rendered, &catalog)
                 {
                     rendered.document = source.document;
                     rendered.preview.status = PreviewStatus::Ready {
@@ -1515,15 +1524,15 @@ impl PreviewStageBoard {
                 }
             }
         }
-        let source_snapshot = self.new_source_snapshot();
-        let candidate = self.build_candidate(index, &source.document, &source_snapshot);
+        let source_snapshot = includes::snapshot(&catalog);
+        let candidate = self.build_candidate(index, &source.document, &source_snapshot, &catalog);
         let attempted = source_snapshot.requested_uris();
         let mut requested = attempted.clone();
         if candidate.is_err() {
             requested.extend(dependency_keys);
         }
         self.stages[index].observed_dependencies =
-            dependency_stamps(&requested, &self.source_catalog);
+            dependency_stamps(&requested, &catalog);
         match candidate {
             Ok(candidate) => {
                 let stage = &mut self.stages[index];
@@ -1555,8 +1564,7 @@ impl PreviewStageBoard {
                 Ok(())
             }
             Err(message) => {
-                self.stages[index].status = self
-                    .blocked_dependencies(&attempted, source.document.revision())
+                self.stages[index].status = blocked_dependencies(&catalog, &attempted, source.document.revision())
                     .map(|(status, _)| status)
                     .unwrap_or_else(|| PreviewStageStatus::Failed {
                         revision: Some(source.document.revision()),
@@ -1569,57 +1577,12 @@ impl PreviewStageBoard {
         }
     }
 
-    fn new_source_snapshot(&self) -> SourceSnapshot {
-        let mut sources = BTreeMap::new();
-        let mut unavailable = BTreeMap::new();
-        for (uri, source) in self.source_catalog.iter() {
-            if source.pending {
-                unavailable.insert(
-                    uri.clone(),
-                    format!("Apply the pending included source before refreshing: {uri}"),
-                );
-            } else if !source.valid {
-                unavailable.insert(
-                    uri.clone(),
-                    format!("Repair the included XAML before refreshing: {uri}"),
-                );
-            } else {
-                sources.insert(uri.clone(), source.source.clone());
-            }
-        }
-        SourceSnapshot::new(sources, unavailable)
-    }
-
-    fn blocked_dependencies(
-        &self,
-        dependencies: &BTreeSet<String>,
-        revision: u64,
-    ) -> Option<(PreviewStageStatus, String)> {
-        for uri in dependencies {
-            let Some(source) = self.source_catalog.get(uri) else {
-                continue;
-            };
-            if source.pending {
-                return Some((
-                    PreviewStageStatus::PendingSource { revision },
-                    format!("Apply the pending included source before refreshing: {uri}"),
-                ));
-            }
-            if !source.valid {
-                return Some((
-                    PreviewStageStatus::InvalidSource { revision },
-                    format!("Repair the included XAML before refreshing: {uri}"),
-                ));
-            }
-        }
-        None
-    }
-
     fn build_candidate(
         &self,
         index: usize,
         document: &Document,
         source_snapshot: &SourceSnapshot,
+        catalog: &Rc<IncludeCatalog>,
     ) -> Result<RenderedStage, String> {
         let stage = &self.stages[index];
         let config = &stage.configuration;
@@ -1711,8 +1674,7 @@ impl PreviewStageBoard {
                         &resolved_states,
                     )?)
                 };
-                if let Some((_, message)) = self
-                    .blocked_dependencies(&source_snapshot.requested_uris(), document.revision())
+                if let Some((_, message)) = blocked_dependencies(catalog, &source_snapshot.requested_uris(), document.revision())
                 {
                     return Err(message);
                 }
@@ -1726,7 +1688,7 @@ impl PreviewStageBoard {
                     configuration: config.clone(),
                     options_epoch: self.options_epoch,
                     source_snapshot: source_snapshot.clone(),
-                    source_catalog: self.source_catalog.clone(),
+                    source_catalog: catalog.clone(),
                 })
             })
         }))
@@ -1838,7 +1800,11 @@ fn native_source_uri(uri: &str) -> Result<String, String> {
         .map_err(|_| "Preview source URI must be absolute".into())
 }
 
-fn same_dependency(accepted: Option<&SourceStamp>, current: Option<&SourceStamp>) -> bool {
+fn blocked_dependencies(catalog: &IncludeCatalog, dependencies: &BTreeSet<String>, revision: u64) -> Option<(PreviewStageStatus, String)> {
+    dependencies.iter().find_map(|uri| catalog.get(uri)?.blocked(uri, revision))
+}
+
+fn same_dependency(accepted: Option<&IncludeSource>, current: Option<&IncludeSource>) -> bool {
     match (accepted, current) {
         (Some(accepted), Some(current)) => accepted.same_buffer(current),
         (None, None) => true,
@@ -1848,7 +1814,7 @@ fn same_dependency(accepted: Option<&SourceStamp>, current: Option<&SourceStamp>
 
 fn rendered_dependencies_current(
     rendered: &RenderedStage,
-    current: &BTreeMap<String, SourceStamp>,
+    current: &IncludeCatalog,
 ) -> bool {
     rendered
         .source_snapshot
@@ -1865,7 +1831,7 @@ fn observed_dependency_keys(stage: &Stage) -> BTreeSet<String> {
     keys
 }
 
-fn observed_dependencies_changed(stage: &Stage, current: &BTreeMap<String, SourceStamp>) -> bool {
+fn observed_dependencies_changed(stage: &Stage, current: &IncludeCatalog) -> bool {
     observed_dependency_keys(stage).iter().any(|uri| {
         // A deferred template can discover an include after the graph is accepted.
         // Compare it with the complete source view captured at construction, never
@@ -1886,8 +1852,8 @@ fn observed_dependencies_changed(stage: &Stage, current: &BTreeMap<String, Sourc
 
 fn dependency_stamps(
     dependencies: &BTreeSet<String>,
-    catalog: &BTreeMap<String, SourceStamp>,
-) -> BTreeMap<String, Option<SourceStamp>> {
+    catalog: &IncludeCatalog,
+) -> BTreeMap<String, Option<IncludeSource>> {
     dependencies
         .iter()
         .map(|uri| (uri.clone(), catalog.get(uri).cloned()))

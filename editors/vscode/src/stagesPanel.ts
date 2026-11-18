@@ -4,9 +4,10 @@ import { setTimeout as delay } from 'node:timers/promises';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { BuiltProjects } from './builtProjects';
+import { DesignerDependencies, dirtyXamlSources } from './designerDependencies';
 import { NativePreview } from './nativePreview';
-import { errorMessage, type Range } from './protocol';
-import type { FromStages, NativeStageChange, PrototypeCommand, StageChange, StageInfo, StageManifest, StageModel, StageTarget, StagesRequest, ToStages } from './stagesProtocol';
+import { errorMessage, type Range, type Source } from './protocol';
+import type { FromStages, NativeStageChange, PrototypeCommand, StageChange, StageDocument, StageInfo, StageManifest, StageModel, StageTarget, StagesRequest, ToStages } from './stagesProtocol';
 import { editPrototype } from './stagePrototypeEditor';
 import { chooseStageState } from './stageStatePicker';
 import { choose, editText } from './studioContext';
@@ -22,7 +23,10 @@ export class StagesPanel implements vscode.Disposable {
 
     constructor(private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel,
         private readonly projects: BuiltProjects) {
+        const xaml = vscode.workspace.createFileSystemWatcher('**/*.[xX][aA][mM][lL]');
+        const fileChanged = (uri: vscode.Uri) => this.views.forEach(session => session.fileChanged(uri));
         this.subscriptions = [
+            xaml, xaml.onDidChange(fileChanged), xaml.onDidCreate(fileChanged), xaml.onDidDelete(fileChanged),
             vscode.commands.registerCommand('ferroui.openStages', () => {
                 const editor = vscode.window.activeTextEditor;
                 if (!editor || !languageOf(editor.document)) {
@@ -73,6 +77,7 @@ export class StagesPanel implements vscode.Disposable {
 }
 
 class StageSession {
+    private readonly dependencies = new DesignerDependencies();
     private readonly subscriptions: vscode.Disposable[];
     private readonly cacheKey: string;
     private client?: Promise<NativePreview>;
@@ -100,11 +105,17 @@ class StageSession {
                 const language = languageOf(event.document);
                 if (!language || !event.contentChanges.length) return;
                 const uri = pathToFileURL(event.document.uri.fsPath).toString();
-                if (event.document === document || this.model?.manifest.stages.some(stage => stage.source_uri === uri)) this.schedule();
+                const dependency = this.dependencies.change(event.document.uri);
+                if (dependency || event.document === document || this.model?.manifest.stages.some(stage => stage.source_uri === uri)) this.schedule();
             }),
+            vscode.workspace.onDidCloseTextDocument(closed => { if (closed.isDirty) this.fileChanged(closed.uri); }),
         ];
         panel.webview.options = webviewOptions(context.extensionUri);
         panel.webview.html = stagesHtml(panel.webview, context.extensionUri);
+    }
+
+    fileChanged(uri: vscode.Uri): void {
+        if (this.dependencies.change(uri)) this.schedule();
     }
 
     async wait(signal: AbortSignal): Promise<StageModel> {
@@ -151,16 +162,19 @@ class StageSession {
         if (before.epoch !== change.epoch || this.busy) throw new Error('Read the current Stages board first.');
         const generation = this.generation;
         this.busy = true;
+        this.dependencies.start();
         try {
             const client = await this.getClient();
             const request = await this.nativeChange(change, client);
             signal.throwIfAborted();
             if (generation !== this.generation || this.disposed) throw new Error('The stage set changed. Repeat the change on its current board.');
             const model = await client.editStages(request);
+            if (this.dependencies.accept(model.dependencies ?? [])) this.schedule();
             if (generation !== this.generation && !this.manifest) this.manifest = model.manifest;
             await this.publish(model, client, generation);
             return model;
         } finally {
+            this.dependencies.stop();
             this.busy = false;
             if (generation !== this.generation) this.schedule();
         }
@@ -169,17 +183,16 @@ class StageSession {
     private async nativeChange(change: StageChange, client: NativePreview): Promise<NativeStageChange> {
         if (change.action !== 'add') return change;
         const { action, epoch, name, width, height, dark, sourcePath } = change;
-        let source;
-        if (sourcePath !== undefined) {
-            if (typeof sourcePath !== 'string') throw new Error('Choose a source file inside the workspace.');
-            const document = await vscode.workspace.openTextDocument(await resolveWorkspaceFile(sourcePath));
-            const language = languageOf(document);
-            if (!language) throw new Error('Choose a FerroUI XAML or Rust file.');
-            const caret = vscode.window.visibleTextEditors.find(editor => editor.document === document)?.selection.active
-                ?? new vscode.Position(0, 0);
-            source = await client.inProject(sourceOf(document, language, caret), this.projects.forDocument(document.uri));
-        }
-        return { action, epoch, name, width, height, dark, source };
+        if (sourcePath === undefined) return { action, epoch, name, width, height, dark };
+        if (typeof sourcePath !== 'string') throw new Error('Choose a source file inside the workspace.');
+        const document = await vscode.workspace.openTextDocument(await resolveWorkspaceFile(sourcePath));
+        const language = languageOf(document);
+        if (!language) throw new Error('Choose a FerroUI XAML or Rust file.');
+        const caret = vscode.window.visibleTextEditors.find(editor => editor.document === document)?.selection.active
+            ?? new vscode.Position(0, 0);
+        const source = await client.inProject(sourceOf(document, language, caret), this.projects.forDocument(document.uri));
+        const localSources = client.capabilities.stageIncludes ? dirtyXamlSources([document.uri]) : undefined;
+        return { action, epoch, name, width, height, dark, source: stageDocument(source, document.uri), localSources };
     }
 
     async controlPrototype(epoch: number, command: PrototypeCommand, signal: AbortSignal) {
@@ -206,17 +219,23 @@ class StageSession {
         const language = languageOf(this.document);
         if (!language) return;
         this.busy = true;
+        this.dependencies.start();
         try {
             const client = await this.getClient();
             const manifest = this.manifest;
-            const active = await client.inProject(sourceOf(this.document, language, this.document.validatePosition(this.caret)),
+            const source = await client.inProject(sourceOf(this.document, language, this.document.validatePosition(this.caret)),
                 this.projects.forDocument(this.document.uri));
+            const active = stageDocument(source, this.document.uri);
             const additional = await this.stageSources(manifest ?? this.model?.manifest, active.uri, client);
-            const model = await client.syncStages(active, manifest, additional);
+            const localSources = client.capabilities.stageIncludes
+                ? dirtyXamlSources([this.document.uri, ...additional.map(source => vscode.Uri.parse(source.uri, true))]) : undefined;
+            const model = await client.syncStages(active, manifest, additional, localSources);
+            if (this.dependencies.accept(model.dependencies ?? [])) this.schedule();
             if (manifest === this.manifest) this.manifest = undefined;
             await this.publish(model, client, generation);
         } catch (error) { this.report(error); }
         finally {
+            this.dependencies.stop();
             this.busy = false;
             if (generation !== this.generation) this.schedule();
         }
@@ -228,6 +247,7 @@ class StageSession {
         this.modelVersion = this.document.version;
         this.modelGeneration = generation;
         await this.context.workspaceState.update(this.cacheKey, model.manifest);
+        if (generation !== this.generation || this.model !== model || this.disposed) return;
         this.post({ type: 'model', uri: this.document.uri.toString(), model });
         for (const stage of model.stages) {
             if (generation !== this.generation || this.disposed) break;
@@ -240,7 +260,9 @@ class StageSession {
     private async image(client: NativePreview, stage: StageInfo): Promise<void> {
         const target = { id: stage.id, epoch: stage.epoch };
         const image = await client.stageImage(target);
-        if (this.model?.stages.some(entry => entry.id === stage.id && entry.epoch === stage.epoch)) this.post({ type: 'image', ...target, image });
+        if (this.modelGeneration === this.generation && this.model?.stages.some(entry => entry.id === stage.id && entry.epoch === stage.epoch)) {
+            this.post({ type: 'image', ...target, image });
+        }
     }
 
     private async receive(message: StagesRequest): Promise<void> {
@@ -330,7 +352,7 @@ class StageSession {
             const language = languageOf(document);
             if (!language) throw new Error('A stage source must be a FerroUI XAML or Rust file.');
             const source = { ...sourceOf(document, language, new vscode.Position(0, 0)), uri: path };
-            return client ? client.inProject(source, this.projects.forDocument(uri)) : source;
+            return stageDocument(client ? await client.inProject(source, this.projects.forDocument(uri)) : source, uri);
         }));
     }
 
@@ -421,6 +443,11 @@ class StageSession {
         void this.client?.then(client => client.dispose(), () => {});
         this.subscriptions.forEach(subscription => subscription.dispose());
     }
+}
+
+function stageDocument(source: Source, uri: vscode.Uri): StageDocument {
+    const folder = vscode.workspace.getWorkspaceFolder(uri);
+    return { ...source, workspaceRoot: folder?.uri.scheme === 'file' ? folder.uri.fsPath : undefined };
 }
 
 async function dimensions(width: number, height: number): Promise<{ width: number; height: number } | undefined> {

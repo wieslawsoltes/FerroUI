@@ -1,4 +1,4 @@
-import type { PreviewFinding, Range, Snapshot, Source } from './protocol';
+import type { PreviewFinding, PreviewSourceBuffer, Range, Snapshot, Source } from './protocol';
 
 export type StageImage = NonNullable<Snapshot['image']>;
 export interface StageConfiguration {
@@ -44,7 +44,7 @@ export interface PrototypeScene {
 }
 export type PrototypeCommand = { action: 'start'; flow: string } | { action: 'activate'; link: number }
     | { action: 'back' | 'closeOverlay' | 'restart' | 'stop' };
-export interface StageModel { epoch: number; manifest: StageManifest; stages: StageInfo[]; prototype: PrototypeScene | null }
+export interface StageModel { epoch: number; manifest: StageManifest; stages: StageInfo[]; prototype: PrototypeScene | null; dependencies?: string[] }
 export interface StageTarget { id: number; epoch: number }
 export interface StageChecks { uri: string; findings: (PreviewFinding & { range: Range | null })[] }
 export interface SourceAnchor { path: { namespace: string; type_name: string; name: string | null; key: string | null }[] }
@@ -58,7 +58,8 @@ type ExistingStageChange = (
     | { action: 'update'; id: number; configuration: StageConfiguration }
     | { action: 'setPrototype'; graph: PrototypeGraph }) & { epoch: number };
 export type StageChange = ExistingStageChange | (AddStage & { sourcePath?: string });
-export type NativeStageChange = ExistingStageChange | (AddStage & { source?: Source });
+export type StageDocument = Source & { workspaceRoot?: string };
+export type NativeStageChange = ExistingStageChange | (AddStage & { source?: StageDocument; localSources?: PreviewSourceBuffer[] });
 export type FromStages = { type: 'ready' | 'add' | 'saveManifest' | 'loadManifest' }
     | ({ type: 'pointer' } & StagePointer) | ({ type: 'checks' } & StageTarget)
     | { type: 'edit'; epoch: number; id: number; field: 'name' | 'environment' | 'mode' | 'layout' | 'pause' | 'refresh' | 'remove' | 'export' | 'designData' | 'state' };

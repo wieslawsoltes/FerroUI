@@ -452,7 +452,7 @@ export class DesignerPanel implements vscode.Disposable {
             const input = await client.inProject(source, project);
             const folder = vscode.workspace.getWorkspaceFolder(this.document.uri);
             const snapshot = await client.render(input, viewport, token, folder?.uri.scheme === 'file' ? folder.uri.fsPath : undefined,
-                dirtyXamlSources(this.document, folder));
+                dirtyXamlSources([this.document.uri], this.document));
             if (this.disposed || token !== this.generation || version !== this.document.version) return;
             if (this.dependencies.accept(snapshot.dependencies ?? [])) { this.schedule(0); return; }
             const anchor = snapshot.activeBlock?.start;
