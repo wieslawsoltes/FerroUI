@@ -23,6 +23,7 @@ pub(crate) struct PropertyField {
     editable: bool,
     can_reset: bool,
     can_bind: bool,
+    can_promote: bool,
     mixed: bool,
 }
 
@@ -40,6 +41,7 @@ impl PropertyField {
             editable: false,
             can_reset: false,
             can_bind: false,
+            can_promote: false,
             mixed: false,
         }
     }
@@ -54,6 +56,7 @@ pub(crate) fn intersect(properties: &mut Vec<PropertyField>, other: Vec<Property
         field.editable &= other.editable;
         field.can_reset = field.editable && (field.can_reset || other.can_reset);
         field.can_bind = false;
+        field.can_promote = false;
         field.range = None;
         if field.mixed {
             field.authored = None;
@@ -131,6 +134,9 @@ pub(crate) fn property_fields(
             }
             let literal = editable_attribute(design, node, &name);
             let editable = object.is_none() && expression.is_none() && (literal || addable);
+            let can_promote = design.rsx.is_none()
+                && literal
+                && ferroui_designer_tools::component_property_extractable(&design.xaml, node.id, &name);
             let runtime = effective.get(&name);
             let origin = if expression.is_some() {
                 Some("Rust expression".into())
@@ -161,6 +167,7 @@ pub(crate) fn property_fields(
                 editable,
                 can_reset: editable && literal,
                 can_bind,
+                can_promote,
                 mixed: false,
             })
         })

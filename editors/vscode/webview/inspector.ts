@@ -1,4 +1,4 @@
-import type { Bounds, NodeOperation, PropertiesState, PropertyField, Range } from '../src/protocol';
+import type { Bounds, NodeOperation, PropertiesState, PropertyAuthoring, PropertyField, Range } from '../src/protocol';
 import { create, element } from './dom';
 import { propertyEditor } from './propertyEditor';
 
@@ -22,7 +22,7 @@ export class Inspector {
         private readonly edit: (operation: NodeOperation) => void,
         private readonly openToolbox: () => void,
         private readonly reveal: (range: Range) => void,
-        private readonly binding: (property: string) => void,
+        private readonly author: (property: string, action: PropertyAuthoring) => void,
     ) {
         this.filter.addEventListener('input', () => this.applyFilter());
     }
@@ -139,7 +139,8 @@ export class Inspector {
             set: value => { if (node !== undefined) this.edit({ type: 'setProperty', node, name: field.name, value }); },
             reset: () => { if (node !== undefined) this.edit({ type: 'resetProperty', node, name: field.name }); },
             reveal: this.reveal,
-            binding: node !== undefined && field.canBind ? () => this.binding(field.name) : undefined,
+            binding: node !== undefined && field.canBind ? () => this.author(field.name, 'binding') : undefined,
+            promote: node !== undefined && field.canPromote ? () => this.author(field.name, 'promoteResource') : undefined,
         });
     }
 

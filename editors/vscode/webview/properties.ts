@@ -1,11 +1,11 @@
-import type { FromProperties, NodeOperation, NodeTarget, PropertiesState, Range, ToProperties } from '../src/protocol';
+import type { FromProperties, NodeOperation, NodeTarget, PropertiesState, PropertyAuthoring, Range, ToProperties } from '../src/protocol';
 import { element } from './dom';
 import { Inspector } from './inspector';
 
 declare function acquireVsCodeApi(): { postMessage(message: FromProperties): void };
 const vscode = acquireVsCodeApi();
 const message = element('view-message');
-const inspector = new Inspector(edit, () => vscode.postMessage({ type: 'toolbox' }), reveal, binding);
+const inspector = new Inspector(edit, () => vscode.postMessage({ type: 'toolbox' }), reveal, author);
 let state: PropertiesState = {};
 let error: string | undefined;
 let request = 0;
@@ -15,7 +15,7 @@ window.addEventListener('message', event => receive(event.data as ToProperties))
 vscode.postMessage({ type: 'ready' });
 
 function submit(message: Omit<Extract<FromProperties, { type: 'edit' }>, 'request' | 'target'>
-    | Omit<Extract<FromProperties, { type: 'binding' }>, 'request' | 'target'>): void {
+    | Omit<Extract<FromProperties, { type: 'author' }>, 'request' | 'target'>): void {
     const target = state.target;
     if (!target || pending) return;
     pending = { request: ++request, target };
@@ -28,8 +28,8 @@ function edit(operation: NodeOperation): void {
     if (operation.node === state.target?.node) submit({ type: 'edit', operation });
 }
 
-function binding(property: string): void {
-    submit({ type: 'binding', property });
+function author(property: string, action: PropertyAuthoring): void {
+    submit({ type: 'author', action, property });
 }
 
 function reveal(range: Range): void {

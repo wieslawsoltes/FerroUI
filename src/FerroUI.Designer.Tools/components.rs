@@ -10,7 +10,8 @@ mod authoring;
 #[path = "component_resource_refs.rs"]
 mod references;
 pub use authoring::{
-    plan_component_action, plan_component_action_in_context, plan_property_object,
+    component_property_extractable, component_property_resource_owners, plan_component_action,
+    plan_component_action_in_context, plan_property_object,
 };
 pub use references::{
     ComponentResourceContext, ComponentResourceResolution, component_resource_references,

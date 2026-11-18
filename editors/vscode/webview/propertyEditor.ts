@@ -6,6 +6,7 @@ interface Actions {
     reset(): void;
     reveal(range: Range): void;
     binding?: () => void;
+    promote?: () => void;
 }
 
 export function propertyEditor(property: PropertyField, actions: Actions): HTMLElement {
@@ -40,6 +41,9 @@ export function propertyEditor(property: PropertyField, actions: Actions): HTMLE
     }
     if (actions.binding) {
         value.append(actionButton('link', `Edit ${property.name} binding`, actions.binding));
+    }
+    if (actions.promote) {
+        value.append(actionButton('library', `Promote ${property.name} to resource`, actions.promote));
     }
     if (property.canReset) {
         value.append(actionButton('discard', `Reset ${property.name}`, actions.reset));

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import type { FrameTarget, FromProperties, NodeOperation, NodeTarget, PropertiesState, Range, ToProperties } from './protocol';
+import type { FrameTarget, FromProperties, NodeOperation, NodeTarget, PropertiesState, PropertyAuthoring, Range, ToProperties } from './protocol';
 import { errorMessage } from './protocol';
 import { propertiesHtml, webviewOptions } from './view';
 
@@ -17,7 +17,7 @@ export class PropertiesView implements vscode.WebviewViewProvider, vscode.Dispos
         private readonly edit: (target: NodeTarget, operation: NodeOperation) => Promise<void>,
         private readonly openToolbox: () => void,
         private readonly reveal: (frame: FrameTarget, range: Range) => Promise<void>,
-        private readonly binding: (target: NodeTarget, property: string) => Promise<void>,
+        private readonly author: (target: NodeTarget, property: string, action: PropertyAuthoring) => Promise<void>,
     ) {}
 
     get visible(): boolean { return this.view?.visible ?? false; }
@@ -50,10 +50,10 @@ export class PropertiesView implements vscode.WebviewViewProvider, vscode.Dispos
             this.openToolbox();
         } else if (message.type === 'reveal') {
             await this.reveal(message.frame, message.range);
-        } else if (message.type === 'edit' || message.type === 'binding') {
+        } else if (message.type === 'edit' || message.type === 'author') {
             let error: string | undefined;
             try {
-                if (message.type === 'binding') await this.binding(message.target, message.property);
+                if (message.type === 'author') await this.author(message.target, message.property, message.action);
                 else await this.edit(message.target, message.operation);
             } catch (failure) {
                 error = errorMessage(failure);

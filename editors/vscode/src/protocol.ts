@@ -55,6 +55,7 @@ export interface PropertyField {
     editable: boolean;
     canReset: boolean;
     canBind?: boolean;
+    canPromote?: boolean;
     mixed?: boolean;
 }
 export interface EventField {
@@ -141,10 +142,11 @@ export interface PropertiesState {
     fields?: PropertyField[];
     selectionCount?: number;
 }
+export type PropertyAuthoring = 'binding' | 'promoteResource';
 export type FromProperties = { type: 'ready' }
     | { type: 'toolbox' }
     | { type: 'reveal'; frame: FrameTarget; range: Range }
-    | { type: 'binding'; request: number; target: NodeTarget; property: string }
+    | { type: 'author'; action: PropertyAuthoring; request: number; target: NodeTarget; property: string }
     | { type: 'edit'; request: number; target: NodeTarget; operation: NodeOperation };
 export type ToProperties = { type: 'state'; state: PropertiesState }
     | { type: 'edit'; request: number; error?: string };
