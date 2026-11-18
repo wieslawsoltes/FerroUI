@@ -80,6 +80,16 @@ ferro_class!(Animatable: FerroObject);
 crate::ferro_class_info!(Animatable { new: Animatable::new });
 
 crate::ferro_overrides! { impl FerroObjectImpl for Animatable {
+    // The handler compares with the transitions collection, and follows every value while
+    // the object has transitions under way or waiting.
+    inherited_reactions: crate::InheritedReactions::to(|property| {
+        if property.has_change_handler(PropertyChangeHandler::Animatable) {
+            crate::InheritedReaction::Always
+        } else {
+            crate::InheritedReaction::While(Animatable::follows_changes)
+        }
+    });
+
     /// Starts transitions when the base value of a property with a
     /// transition changes, and tracks the transitions collection.
     ///
@@ -222,8 +232,19 @@ impl Animatable {
         self.transition_data.get_or_init(Box::default)
     }
 
+    /// Whether a change of any property of `object` may start a transition: what the change
+    /// handler asks before it looks for one.
+    fn follows_changes(object: &FerroObject) -> bool {
+        // SAFETY: the question of the class is only asked for its objects
+        // (`InheritedReaction::While`), which have an `Animatable` at offset zero.
+        let this = unsafe { crate::cast_this::<FerroObject, Animatable>(object) };
+        this.transitions_enabled.get() && this.has_transition_states()
+    }
+
     /// Whether the object has the states of its transitions, which it has from the first transitions
-    /// it was given while transitions were enabled.
+    /// it was given while transitions were enabled. Asked for every change of a styled property:
+    /// part of the change handler, not a call from it.
+    #[inline(always)]
     fn has_transition_states(&self) -> bool {
         self.transition_data().is_some_and(|data| data.transition_state.borrow().is_some())
     }

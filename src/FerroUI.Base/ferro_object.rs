@@ -52,6 +52,8 @@ static FERRO_OBJECT_IDENTITY: TypeIdentity = TypeIdentity::new("FerroObject");
 
 static FERRO_OBJECT_TYPE: TypeInfo = TypeInfo::new("FerroObject", None)
     .with_identity(&FERRO_OBJECT_IDENTITY)
+    // The handlers of the root class do nothing of their own with a change.
+    .with_change_handler_layer(crate::type_system::ChangeHandlerLayer::Absent)
     .with_module_path(module_path!())
     .with_class_init(<FerroObject as ObjectType>::register_class)
     .with_handles(|| [std::any::TypeId::of::<Ref<FerroObject>>(), std::any::TypeId::of::<Option<Ref<FerroObject>>>()])
@@ -112,6 +114,11 @@ pub trait FerroObjectImpl: ObjectType {
     /// table of the class is built from it.
     #[doc(hidden)]
     const __OVERRIDES: Option<&'static [&'static str]> = None;
+
+    /// What the change handlers of this implementation react to among inherited values, where
+    /// it states it. Set by [`ferro_overrides!`](crate::ferro_overrides), never by hand.
+    #[doc(hidden)]
+    const __INHERITED_REACTIONS: Option<crate::InheritedReactions> = None;
 
     /// Called once, right after the object has been allocated. This is where
     /// constructor logic that needs a reference to the object runs. Overrides
@@ -963,6 +970,15 @@ impl FerroObject {
     ) {
         let e = FerroPropertyChangedEventArgs::new(self, property, old_value, new_value, priority, is_effective_value);
         self.notify_property_changed(&e);
+    }
+
+    /// Whether a change of the inherited `property` that reaches this object from an ancestor
+    /// is heard here: by a listener of the object, by a handler of the property for its class
+    /// or by a change handler of its class. Where it is not, the change is not raised on the
+    /// object (FerroUI deviation, desktop-performance.md section 9.101).
+    #[inline]
+    pub(crate) fn hears_inherited(&self, property: &'static FerroProperty) -> bool {
+        property.changed().hears_inherited(self, property) || !self.property_changed.is_empty()
     }
 
     pub(crate) fn raise_inherited_property_changed(

@@ -148,6 +148,21 @@ crate::ferro_class_info!(StyledElement {
 });
 
 crate::ferro_overrides! { impl FerroObjectImpl for StyledElement {
+    // The handler leaves where the property is not one it named (`reacts_to`); the theme
+    // variant it only passes on to the listeners of the element.
+    inherited_reactions: crate::InheritedReactions::to(|property| {
+        if property == ThemeVariant::actual_theme_variant_property().as_property() {
+            crate::InheritedReaction::While(|object| {
+                // SAFETY: the question of the class is only asked for its objects
+                // (`InheritedReaction::While`), which have a `StyledElement` at offset zero.
+                let element = unsafe { crate::cast_this::<FerroObject, StyledElement>(object) };
+                !element.actual_theme_variant_changed.is_empty()
+            })
+        } else {
+            property.has_change_handler(PropertyChangeHandler::StyledElement).into()
+        }
+    });
+
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         if this.is_logical_root() {

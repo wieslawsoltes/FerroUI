@@ -130,8 +130,9 @@ pub use styled_property::{AttachedProperty, StyledProperty};
 pub use thickness::Thickness;
 pub use element_ref::ElementRef;
 pub use type_system::{
-    __forwards_to_parent, __parent_vtable_part, __register_class, __vtable_prefix, cast_this, instantiate, parent_vtable, ClassDefaults, DefaultConstructible, IntoRef,
-    Nullable, ObjectType, Ref, StaticType, Subclassable, TypeIdentity, TypeInfo, Upcast, WeakRef,
+    __change_handler_layer, __forwards_to_parent, __parent_vtable_part, __register_class, __vtable_prefix, cast_this, instantiate, parent_vtable, ClassDefaults, DefaultConstructible, IntoRef,
+    ChangeHandlerLayer, InheritedReaction, InheritedReactions, Nullable, ObjectType, Ref, StaticType, Subclassable, TypeIdentity, TypeInfo,
+    Upcast, WeakRef,
 };
 #[cfg(feature = "tagged-weak-references")]
 pub use type_system::WEAK_REFERENCE_TAG;
