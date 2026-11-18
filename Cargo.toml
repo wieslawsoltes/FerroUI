@@ -553,6 +553,12 @@ flate2 = { version = "1.1", default-features = false, features = ["rust_backend"
 des = { version = "0.9" }
 getrandom = { version = "0.4" }
 
+# Profiles do not reach an application of another workspace: cargo reads them from the root
+# manifest of the workspace it builds alone. An application in a repository of its own copies these
+# sections with scripts/apps/sync-workspace.py (docs/apps.md, section 2); any other application
+# copies them into its own root Cargo.toml (docs/binary-size.md, section 6), the per-package levels
+# of `dist` included.
+#
 # The default release build is the one that is built most often, so it is set up for build time:
 # thin LTO over the default sixteen code generation units, which generates code on all cores.
 # It aborts on panic, as `dist` does (#567, docs/binary-size.md, section 4.7): no framework path
