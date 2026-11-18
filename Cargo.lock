@@ -2382,7 +2382,9 @@ dependencies = [
  "ferroui-markup",
  "ferroui-markup-xaml",
  "ferroui-reload-protocol",
+ "quote",
  "roxmltree 0.20.0",
+ "syn 2.0.119",
  "url",
  "xamlx",
 ]

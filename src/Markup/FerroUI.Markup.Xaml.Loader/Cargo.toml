@@ -28,7 +28,7 @@ runtime = ["dep:ferroui-markup-xaml", "ferroui-markup-xaml/runtime-populate"]
 # documents and the emitter of Rust source, against the type system the host states. It links neither the
 # XAML runtime library nor the controls: `ferroui-build` compiles with it against the type models of the
 # crates (docs/porting/xaml.md, 9.5).
-compiler = ["dep:ferroui-build-scan"]
+compiler = ["dep:ferroui-build-scan", "dep:syn", "dep:quote"]
 # The run-time host of the emitter: the run-time type system as the type system of a transform, with what
 # it states for the emitter (`rust_emitter::runtime_types`). It needs the accessor table of registered
 # properties, which only this feature turns on in the base crate; applications that load markup at run time
@@ -57,7 +57,13 @@ ferroui-build-scan = { workspace = true, optional = true }
 # (`rust_emitter::theme_unit_graph`, #568). The XAML parser of `xamlx` already depends on it.
 roxmltree = { workspace = true }
 
+# Analyze the resolved Rust operand expressions only in the compiler host.
+syn = { version = "2", default-features = false, features = ["full", "parsing", "printing"], optional = true }
+quote = { version = "1", default-features = false, optional = true }
+
 [dev-dependencies]
+syn = { version = "2", default-features = false, features = ["full", "parsing", "printing"] }
+quote = { version = "1", default-features = false }
 # The unit tests of the emitter of Rust source run with the crate's own tests (`rust_emitter` is built
 # for them with the `runtime` feature), which needs the accessor table of the base crate.
 ferroui-base = { workspace = true, features = ["compiler-metadata"] }
