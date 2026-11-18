@@ -496,6 +496,10 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     // FerroUI.Controls.Primitives
     crate::primitives::TextSelectionHandle,
     crate::primitives::TextSelectionHandleCanvas,
+    // --- swipe (WinUI, docs/porting/winui-calculator-gaps.md, SW-1) ---
+    crate::swipe_control::SwipeControl,
+    crate::swipe_control::SwipeItems,
+    crate::swipe_control::SwipeItem,
     // --- visualstates (WinUI, docs/porting/winui-calculator-gaps.md) ---
     crate::visual_state::VisualStateManager,
     crate::visual_state::VisualStateGroup,

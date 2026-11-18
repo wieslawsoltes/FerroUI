@@ -493,6 +493,24 @@ model as WinUI's:
 - Template and resources from `SwipeControl.xaml` and `SwipeControl_themeresources.xaml`;
   `SwipeItemStyle` on `AppBarButton`. No peer (WinUI has none).
 
+**Status (SW-1, done).** `SwipeControl`, `SwipeItems`, `SwipeItem`, `SwipeItemInvokedEventArgs`,
+`SwipeMode`, `SwipeBehaviorOnInvoked` (and `ExecuteItemsHaveOneItem`, the error of
+`SwipeItems::try_add` and `try_set_mode` where WinUI throws) in `ferroui-controls`
+(`swipe_control/`). The interaction is WinUI's on the composition interactions: the tracker
+owner's `ValuesChanged` (the content of the side, the last control closed, the threshold),
+`InteractingStateEntered`, `InertiaStateEntered` (the flick to the other side, the blocked sides)
+and `IdleStateEntered` (execute items invoke their item; closed items are removed), the resting
+values of `ConfigurePositionInertiaRestingValues` and the swipe expression of the content's
+`Translation` as WinUI writes them, `Close` with `c_MinimumCloseVelocity`; the items are
+`CommandBarButton`s with `SwipeItemStyle`, coloured as WinUI's `UpdateColors`. Without a
+compositor (headless) `Close` closes at once. The WinUI theme has `Controls/SwipeControl.xaml`
+and the converted `Resources/SwipeControl_themeresources.xaml` (the waivers are removed); the
+catalog has a "SwipeControl" page in "Collections & Data". Left for later: the execute
+expression and the clip animation of the items (`SetupExecuteExpressionAnimation`,
+`SetupClipAnimation`), the dismissal on a tap outside, a key or a change of the top level
+(`AttachDismissingHandlers`), the `InputEater` that keeps taps from the content while open, a
+precision touchpad's pan. Tests: `swipe_control/swipe_control_tests.rs`.
+
 ## 7. Design: Pivot and high contrast
 
 ### 7.1 Pivot (decision D8: the full WinUI structure)

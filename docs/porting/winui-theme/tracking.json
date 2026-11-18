@@ -71984,8 +71984,8 @@
    "key": "DefaultSwipeControlStyle",
    "kind": "Style",
    "target_type": "SwipeControl",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -71994,8 +71994,8 @@
    "key": "{SwipeControl}",
    "kind": "Style",
    "target_type": "SwipeControl",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72004,8 +72004,8 @@
    "key": "SwipeItemStyle",
    "kind": "Style",
    "target_type": "AppBarButton",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72014,8 +72014,8 @@
    "key": "SwipeItemBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72024,8 +72024,8 @@
    "key": "SwipeItemBackgroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72034,8 +72034,8 @@
    "key": "SwipeItemForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72044,8 +72044,8 @@
    "key": "SwipeItemPostThresholdExecuteBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72054,8 +72054,8 @@
    "key": "SwipeItemPostThresholdExecuteForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72064,8 +72064,8 @@
    "key": "SwipeItemPreThresholdExecuteBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72074,8 +72074,8 @@
    "key": "SwipeItemPreThresholdExecuteForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72084,8 +72084,8 @@
    "key": "SwipeItemBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72094,8 +72094,8 @@
    "key": "SwipeItemBackgroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72104,8 +72104,8 @@
    "key": "SwipeItemForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72114,8 +72114,8 @@
    "key": "SwipeItemPostThresholdExecuteBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72124,8 +72124,8 @@
    "key": "SwipeItemPostThresholdExecuteForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72134,8 +72134,8 @@
    "key": "SwipeItemPreThresholdExecuteBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72144,8 +72144,8 @@
    "key": "SwipeItemPreThresholdExecuteForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72154,8 +72154,8 @@
    "key": "SwipeItemBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72164,8 +72164,8 @@
    "key": "SwipeItemBackgroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72174,8 +72174,8 @@
    "key": "SwipeItemForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72184,8 +72184,8 @@
    "key": "SwipeItemPostThresholdExecuteBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72194,8 +72194,8 @@
    "key": "SwipeItemPostThresholdExecuteForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72204,8 +72204,8 @@
    "key": "SwipeItemPreThresholdExecuteBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72214,8 +72214,8 @@
    "key": "SwipeItemPreThresholdExecuteForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -90130,6 +90130,7 @@
   "Controls/Slider.xaml",
   "Controls/SplitButton.xaml",
   "Controls/SplitView.xaml",
+  "Controls/SwipeControl.xaml",
   "Controls/SymbolIcon.xaml",
   "Controls/TabControl.xaml",
   "Controls/TabItem.xaml",
@@ -90216,6 +90217,7 @@
   "Resources/Slider_themeresources.xaml",
   "Resources/SplitButton_themeresources.xaml",
   "Resources/SplitView_themeresources.xaml",
+  "Resources/SwipeControl_themeresources.xaml",
   "Resources/SystemResources.xaml",
   "Resources/TabView_themeresources.xaml",
   "Resources/TableView_themeresources.xaml",
@@ -90776,6 +90778,18 @@
    "status": "ported",
    "deviations": 4,
    "date": "2026-10-24"
+  },
+  {
+   "document": "SwipeControl.xaml",
+   "themes": [
+    "{SwipeControl}",
+    "SwipeItemStyle"
+   ],
+   "batch": "B6",
+   "winui": "SwipeControl: {SwipeControl} (SwipeControl.xaml, DefaultSwipeControlStyle) and SwipeItemStyle (SwipeControl_themeresources.xaml). A WinUI control in ferroui-controls (docs/porting/winui-calculator-gaps.md, SW-1); the Fluent theme has no document for it.",
+   "status": "ported",
+   "deviations": 0,
+   "date": "not committed"
   },
   {
    "document": "NumericUpDown.xaml",
@@ -91465,20 +91479,6 @@
    "items": 2
   },
   {
-   "document": "controls/dev/SwipeControl/SwipeControl.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "SwipeControl: no FerroUI control.",
-   "items": 2
-  },
-  {
-   "document": "controls/dev/SwipeControl/SwipeControl_themeresources.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "SwipeControl: no FerroUI control.",
-   "items": 22
-  },
-  {
    "document": "controls/dev/AnnotatedScrollBar/AnnotatedScrollBar.xaml",
    "key": "*",
    "variant": null,
@@ -91867,6 +91867,10 @@
   "InfoBadge": {
    "ferroui": "InfoBadge",
    "batch": "B1"
+  },
+  "SwipeControl": {
+   "ferroui": "SwipeControl",
+   "batch": "B6"
   },
   "InfoBar": {
    "ferroui": "InfoBar",

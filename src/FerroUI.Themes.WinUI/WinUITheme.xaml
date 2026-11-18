@@ -70,6 +70,7 @@
         <MergeResourceInclude Source="/Resources/RefreshVisualizer_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/MenuBar_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/TreeView_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/SwipeControl_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/SplitButton_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/DropDownButton_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/RadioButtons_themeresources.xaml" />
