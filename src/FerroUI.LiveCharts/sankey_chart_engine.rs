@@ -11,7 +11,10 @@
 
 use crate::pie_chart_engine::{annular_sector_path, append_arc, rounded_annular_sector_path};
 use crate::scene::*;
-use crate::series::{Series, SeriesKind, DATA_LABELS_COLOR, DATA_LABELS_PADDING};
+use crate::label_lines::LabelLines;
+use crate::series::{
+    Series, SeriesKind, DATA_LABELS_COLOR, DATA_LABELS_MAX_WIDTH, DATA_LABELS_PADDING,
+};
 use crate::treemap_chart_engine::{
     fill_color, fill_style, stroke_style, text_size, tooltip_text, validate_series,
 };
@@ -144,6 +147,17 @@ impl SankeySeries {
 pub struct SankeyOptions {
     /// An explicit draw margin; `None` takes the whole control.
     pub draw_margin: Option<Rect>,
+}
+
+/// The properties of a Sankey series that [`SankeySeries`] does not carry, in the order of the
+/// series ([`SankeyChartEngine::measure_with_series_options`]). It is `non_exhaustive`: start
+/// from `SankeySeriesOptions::default()` and set the fields.
+#[derive(Clone, Debug, Default, PartialEq)]
+#[non_exhaustive]
+pub struct SankeySeriesOptions {
+    /// `DataLabelsMaxWidth`: the width a label breaks its text at, its padding included; `None`
+    /// is the source's [`DATA_LABELS_MAX_WIDTH`].
+    pub data_labels_max_width: Option<f64>,
 }
 
 /// A node rectangle of the vertical layout (`SankeyLayout.NodeBox`).
@@ -661,7 +675,19 @@ impl SankeyChartEngine {
         size: Size,
         series: &[SankeySeries],
         options: &SankeyOptions,
+        measure_text: impl FnMut(&str, f64) -> Size,
+    ) -> Result<Scene, ChartError> {
+        Self::measure_with_series_options(size, series, options, measure_text, &[])
+    }
+
+    /// [`Self::measure_with_labels`] with the options of the series, in their order; a series
+    /// without an entry takes the defaults.
+    pub fn measure_with_series_options(
+        size: Size,
+        series: &[SankeySeries],
+        options: &SankeyOptions,
         mut measure_text: impl FnMut(&str, f64) -> Size,
+        series_options: &[SankeySeriesOptions],
     ) -> Result<Scene, ChartError> {
         validate_size(size)?;
         let mut plot = match options.draw_margin {
@@ -707,6 +733,10 @@ impl SankeyChartEngine {
                 index: si,
                 series: s,
                 measure_text: &mut measure_text,
+                labels_max_width: series_options
+                    .get(si)
+                    .and_then(|o| o.data_labels_max_width)
+                    .unwrap_or(DATA_LABELS_MAX_WIDTH),
             };
             match s.layout {
                 SankeyLayoutKind::Vertical => context.vertical(plot)?,
@@ -730,6 +760,8 @@ struct Context<'a, F: FnMut(&str, f64) -> Size> {
     index: usize,
     series: &'a SankeySeries,
     measure_text: &'a mut F,
+    /// `DataLabelsMaxWidth`, the label padding included.
+    labels_max_width: f64,
 }
 
 impl<F: FnMut(&str, f64) -> Size> Context<'_, F> {
@@ -744,21 +776,24 @@ impl<F: FnMut(&str, f64) -> Size> Context<'_, F> {
         self.index as f64 + offset
     }
 
-    /// The text of a label and its size grown by the label padding.
-    fn label(&mut self, node: &SankeyNode) -> Option<(Size, Size)> {
+    /// The lines of a label, broken at `DataLabelsMaxWidth` less the label padding, and the size
+    /// of the label grown by the padding.
+    fn label(&mut self, node: &SankeyNode) -> Option<(LabelLines, Size)> {
         if !self.series.series.data_labels || node.name.is_empty() {
             return None;
         }
-        let text = text_size(
-            &mut *self.measure_text,
+        let mut measure = |text: &str, size: f64| text_size(&mut *self.measure_text, text, size);
+        let lines = LabelLines::wrap(
+            &mut measure,
             &node.name,
             self.series.series.data_labels_size,
+            self.labels_max_width - DATA_LABELS_PADDING.0 * 2.0,
         );
         let padded = Size::new(
-            text.width + DATA_LABELS_PADDING.0 * 2.0,
-            text.height + DATA_LABELS_PADDING.1 * 2.0,
+            lines.size.width + DATA_LABELS_PADDING.0 * 2.0,
+            lines.size.height + DATA_LABELS_PADDING.1 * 2.0,
         );
-        Some((text, padded))
+        Some((lines, padded))
     }
 
     fn push_label(
@@ -767,7 +802,7 @@ impl<F: FnMut(&str, f64) -> Size> Context<'_, F> {
         anchor: Point,
         rotation: f64,
         align: TextAnchor,
-        text: Size,
+        lines: LabelLines,
     ) {
         let s = self.series;
         // The label box is aligned at the anchor; its text sits inside the label padding.
@@ -777,21 +812,20 @@ impl<F: FnMut(&str, f64) -> Size> Context<'_, F> {
             TextAnchor::Center => 0.0,
         };
         let (sin, cos) = rotation.to_radians().sin_cos();
-        let dy = -text.height * 0.5;
+        let dy = -lines.size.height * 0.5;
         let origin = Point::new(anchor.x + dx * cos - dy * sin, anchor.y + dx * sin + dy * cos);
-        let primitive = Primitive::new(
-            Geometry::Text {
-                origin,
-                text: s.nodes[node].name.clone(),
-                size: s.series.data_labels_size,
-                rotation,
-                anchor: align,
-            },
-            PaintStyle::fill(s.series.data_labels_color.unwrap_or(DATA_LABELS_COLOR)),
-        )
-        .identified(self.id(node));
+        let style = PaintStyle::fill(s.series.data_labels_color.unwrap_or(DATA_LABELS_COLOR));
         let z = 1000.0 + self.z(0.3);
-        self.layers.push((z, primitive));
+        for primitive in lines.texts(
+            origin,
+            align,
+            rotation,
+            s.series.data_labels_size,
+            &style,
+            self.id(node),
+        ) {
+            self.layers.push((z, primitive));
+        }
     }
 
     /// The fill of a node: the node's colour over the series fill (`NodeColorMapper`).
@@ -1742,5 +1776,57 @@ mod tests {
         assert_eq!(normalize_sweep(350.0), -10.0);
         assert_eq!(normalize_sweep(-190.0), 170.0);
         assert_eq!(normalize_sweep(f64::NAN), 0.0);
+    }
+
+    /// `DataLabelsMaxWidth` (the `MaxWidth` of the label of a node): a name wider than the width
+    /// less the label padding (170 by default, as the source) breaks into lines of the label, one
+    /// line height apart from the left of their block, ending at the gap left of the source node;
+    /// a larger width keeps one line with its anchor.
+    #[test]
+    fn data_labels_break_at_their_max_width() {
+        let name = "Gross domestic product per capita";
+        let mut s = series(nodes(&[name, "B", "X"]), links(&[(1, 3, 5.0), (2, 3, 5.0)]));
+        s.series.data_labels = true;
+        let texts = |scene: &Scene| -> Vec<(Point, String, TextAnchor)> {
+            scene
+                .primitives
+                .iter()
+                .filter_map(|p| match (&p.geometry, p.id) {
+                    (
+                        Geometry::Text {
+                            origin,
+                            text,
+                            anchor,
+                            ..
+                        },
+                        Some(id),
+                    ) if id.point == 0 => Some((*origin, text.clone(), *anchor)),
+                    _ => None,
+                })
+                .collect()
+        };
+        let size = Size::new(600.0, 400.0);
+        let wrapped = texts(&measure(size, s.clone()));
+        assert_eq!(wrapped.len(), 2);
+        assert_eq!(wrapped[0].1, "Gross domestic ");
+        assert_eq!(wrapped[1].1, "product per capita");
+        assert!(wrapped
+            .iter()
+            .all(|(_, _, anchor)| *anchor == TextAnchor::Start));
+        assert!((wrapped[1].0.y - wrapped[0].0.y - 12.0 * 1.2).abs() < 1e-9);
+        assert_eq!(wrapped[0].0.x, wrapped[1].0.x);
+        let mut wide = SankeySeriesOptions::default();
+        wide.data_labels_max_width = Some(400.0);
+        let scene = SankeyChartEngine::measure_with_series_options(
+            size,
+            &[s],
+            &SankeyOptions::default(),
+            |text, size| Size::new(text.chars().count() as f64 * size * 0.6, size * 1.2),
+            &[wide],
+        )
+        .unwrap();
+        let one = texts(&scene);
+        assert_eq!(one.len(), 1);
+        assert_eq!((one[0].1.as_str(), one[0].2), (name, TextAnchor::End));
     }
 }
