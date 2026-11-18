@@ -16,6 +16,7 @@ path = "lib.rs"
 group = "tools"
 
 [dependencies]
+ferroui-reload-protocol.workspace = true
 serde_json = "1"
 ferroui-base = { workspace = true, features = ["full-themes", "hot-reload"] }
 ferroui-controls.workspace = true

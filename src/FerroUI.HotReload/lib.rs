@@ -9,6 +9,7 @@ mod handler_tests;
 mod template_state_tests;
 mod detached_context;
 mod deferred_context;
+mod editor;
 mod frame_timing;
 pub use frame_timing::record_frame_timing;
 mod input_pause;
@@ -44,6 +45,7 @@ pub use identity::KEY_NAMESPACE;
 mod watcher;
 mod x_bind;
 pub use content::ContentReloadTarget;
+pub use editor::notify_editor_on_open;
 pub use contract::DocumentContract;
 use ferroui_markup_xaml::source_overlay::{with_sources, Sources};
 pub use manifest::ReloadManifest;
@@ -102,6 +104,7 @@ pub trait ReloadTarget {
 /// Session ownership is intentionally `!Send`: callers must pump it on the UI thread.
 #[derive(Default)]
 pub struct HotReloadSession {
+    editor_files: BTreeMap<String, std::path::PathBuf>,
     watch_revision: Option<WatchRevision>,
     accepted: Rc<Sources>,
     published: Rc<std::cell::RefCell<Rc<Sources>>>,
@@ -330,7 +333,12 @@ impl HotReloadSession {
                 .is_some_and(|revision| !revision.is_current())
     }
     pub fn apply_pending(&mut self) -> Option<ReloadOutcome> {
-        self.apply_pending_with(|| Ok(()))
+        let sources = ferroui_reload_protocol::enabled().then(|| self.pending.clone());
+        let outcome = self.apply_pending_with(|| Ok(()))?;
+        if let Some(sources) = sources {
+            editor::report(&self.editor_files, &sources, &outcome);
+        }
+        Some(outcome)
     }
     /// Coordinate an external update with the markup transaction. The callback
     /// runs once, after every target commits but before accepted sources publish

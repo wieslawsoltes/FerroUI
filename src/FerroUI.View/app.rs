@@ -70,6 +70,10 @@ pub fn launch_themed(
             app.styles().add(theme());
             let window = mount_window(view);
             crate::hot::watch();
+            #[cfg(feature = "hot-reload")]
+            if ferroui_reload_protocol::enabled() {
+                window.opened(|| ferroui_reload_protocol::ready(ferroui_reload_protocol::Language::Rsx)).detach();
+            }
             #[cfg(debug_assertions)]
             crate::inspect::attach_inspector(&window);
             smoke_exit(&window);

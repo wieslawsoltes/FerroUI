@@ -2240,6 +2240,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
+ "ferroui-reload-protocol",
  "roxmltree 0.20.0",
  "serde_json",
  "url",
@@ -2942,6 +2943,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-reload-protocol"
+version = "0.5.1-preview.1"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "ferroui-remote-protocol"
 version = "0.5.1-preview.1"
 dependencies = [
@@ -3262,8 +3271,10 @@ dependencies = [
  "ferroui-markup-xaml-loader",
  "ferroui-reactiveui",
  "ferroui-reactiveui-controls",
+ "ferroui-reload-protocol",
  "ferroui-themes-fluent",
  "ferroui-view-macros",
+ "ferroui-view-syntax",
  "proc-macro2",
  "syn 2.0.119",
 ]

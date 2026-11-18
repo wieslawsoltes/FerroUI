@@ -137,34 +137,32 @@ impl HotLiteral for char {
 }
 
 #[cfg(feature = "hot-reload")]
+#[path = "hot_source.rs"]
+mod source;
+
+#[cfg(feature = "hot-reload")]
 mod reload {
     use super::Site;
+    use super::source::Source;
     use crate::diagnostics::{report, Diagnostic};
     use crate::reactive::{signal, Signal};
-    use proc_macro2::{Delimiter, TokenStream, TokenTree};
+    use ferroui_reload_protocol::{self as protocol, Language, Status};
     use std::cell::RefCell;
-    use std::collections::HashMap;
+    use std::collections::{HashMap, HashSet};
     use std::path::{Path, PathBuf};
     use std::time::SystemTime;
 
-    /// An `rsx!` of a file: where it starts, its literal tokens and the
-    /// shape of its other tokens.
-    #[derive(Clone, PartialEq, Debug)]
-    struct Invocation {
-        line: u32,
-        column: u32,
-        literals: Vec<String>,
-        shape: String,
-    }
+    type LiteralId = (u32, u32, u32);
 
     struct FileState {
         path: Option<PathBuf>,
         modified: Option<SystemTime>,
         /// The macros as the build saw them (the first read of the file).
-        built: Vec<Invocation>,
+        built: Option<Source>,
         /// The literals that differ from the build: (line, column, index) of
         /// the build to the text in the source now.
-        changed: HashMap<(u32, u32, u32), String>,
+        changed: HashMap<LiteralId, String>,
+        awaiting_reads: HashSet<LiteralId>,
     }
 
     ferroui_base::ferro_thread_local! {
@@ -190,7 +188,9 @@ mod reload {
         FILES.with(|files| {
             let mut files = files.borrow_mut();
             let state = files.entry(site.file).or_insert_with(|| register(site));
-            state.changed.get(&(site.line, site.column, index)).cloned()
+            let literal = (site.line, site.column, index);
+            state.awaiting_reads.remove(&literal);
+            state.changed.get(&literal).cloned()
         })
     }
 
@@ -199,12 +199,12 @@ mod reload {
         let (modified, built) = match &path {
             Some(path) => {
                 let modified = std::fs::metadata(path).and_then(|meta| meta.modified()).ok();
-                let built = std::fs::read_to_string(path).map(|text| scan(&text)).unwrap_or_default();
+                let built = std::fs::read_to_string(path).ok().and_then(|text| Source::parse(&text, protocol::enabled()).ok());
                 (modified, built)
             }
-            None => (None, Vec::new()),
+            None => (None, None),
         };
-        FileState { path, modified, built, changed: HashMap::new() }
+        FileState { path, modified, built, changed: HashMap::new(), awaiting_reads: HashSet::new() }
     }
 
     /// The file of `file!()`: relative to the root of the workspace, which
@@ -254,16 +254,31 @@ mod reload {
     }
 
     pub(super) fn apply(file: &str, source: &str) {
-        let now = scan(source);
-        let updated = FILES.with(|files| {
+        let managed = protocol::enabled();
+        let now = Source::parse(source, managed);
+        let result = FILES.with(|files| {
             let mut files = files.borrow_mut();
-            let Some(state) = files.iter_mut().find(|(name, _)| **name == file).map(|(_, state)| state) else {
-                return false;
+            let state = files.get_mut(file)?;
+            let built = state.built.as_ref()?;
+            let now = match now {
+                Ok(now) => now,
+                Err(error) => {
+                    if let Some(path) = &state.path {
+                        protocol::source(Language::Rsx, Status::Failed, path, source, Some(&error));
+                    }
+                    return None;
+                }
             };
+            if managed && built.signature != now.signature {
+                if let Some(path) = &state.path {
+                    protocol::source(Language::Rsx, Status::Rebuild, path, source, Some("Rust code or RSX structure changed"));
+                }
+                return None;
+            }
             let mut changed = HashMap::new();
-            let same_count = now.len() == state.built.len();
-            for (index, built) in state.built.iter().enumerate() {
-                match now.get(index) {
+            let same_count = now.rsx.len() == built.rsx.len();
+            for (index, built) in built.rsx.iter().enumerate() {
+                match now.rsx.get(index) {
                     Some(current) if same_count && current.shape == built.shape && current.literals.len() == built.literals.len() => {
                         for (number, (old, new)) in built.literals.iter().zip(&current.literals).enumerate() {
                             if old != new {
@@ -274,84 +289,29 @@ mod reload {
                     _ => report(Diagnostic::NeedsRebuild { file: file.to_string(), line: built.line }),
                 }
             }
-            if changed == state.changed {
-                return false;
+            let updated = changed != state.changed;
+            if updated {
+                if managed {
+                    state.awaiting_reads = changed.keys().chain(state.changed.keys()).copied()
+                        .filter(|key| changed.get(key) != state.changed.get(key)).collect();
+                }
+                report(Diagnostic::HotReloaded { file: file.to_string(), literals: changed.len() });
+                state.changed = changed;
             }
-            report(Diagnostic::HotReloaded { file: file.to_string(), literals: changed.len() });
-            state.changed = changed;
-            true
+            Some((updated, state.path.clone()))
         });
+        let Some((updated, path)) = result else { return; };
         if updated {
             version().update(|version| *version += 1);
         }
-    }
-
-    /// The `rsx!` invocations of a source file, in order, with nested ones.
-    fn scan(source: &str) -> Vec<Invocation> {
-        let Ok(tokens) = source.parse::<TokenStream>() else { return Vec::new() };
-        let mut found = Vec::new();
-        find(tokens, &mut found);
-        found
-    }
-
-    fn find(tokens: TokenStream, found: &mut Vec<Invocation>) {
-        let tokens: Vec<TokenTree> = tokens.into_iter().collect();
-        for (at, token) in tokens.iter().enumerate() {
-            if let TokenTree::Group(group) = token {
-                // `rsx ! { .. }`, perhaps with a path before `rsx`.
-                let is_rsx = at >= 2
-                    && matches!(&tokens[at - 1], TokenTree::Punct(p) if p.as_char() == '!')
-                    && matches!(&tokens[at - 2], TokenTree::Ident(ident) if ident == "rsx")
-                    && group.delimiter() != Delimiter::None;
-                if is_rsx {
-                    let start = path_start(&tokens, at - 2);
-                    let location = tokens[start].span().start();
-                    let mut literals = Vec::new();
-                    let mut shape = String::new();
-                    describe(group.stream(), &mut literals, &mut shape);
-                    found.push(Invocation { line: location.line as u32, column: location.column as u32 + 1, literals, shape });
-                }
-                find(group.stream(), found);
-            }
-        }
-    }
-
-    /// The first token of the path that ends with the token at `at`
-    /// (`ferroui_view::rsx`).
-    fn path_start(tokens: &[TokenTree], mut at: usize) -> usize {
-        while at >= 3
-            && matches!(&tokens[at - 1], TokenTree::Punct(p) if p.as_char() == ':')
-            && matches!(&tokens[at - 2], TokenTree::Punct(p) if p.as_char() == ':')
-            && matches!(&tokens[at - 3], TokenTree::Ident(_))
-        {
-            at -= 3;
-        }
-        at
-    }
-
-    fn describe(tokens: TokenStream, literals: &mut Vec<String>, shape: &mut String) {
-        for token in tokens {
-            match token {
-                TokenTree::Literal(literal) => {
-                    literals.push(literal.to_string());
-                    shape.push_str("$ ");
-                }
-                TokenTree::Group(group) => {
-                    let (open, close) = match group.delimiter() {
-                        Delimiter::Brace => ("{", "}"),
-                        Delimiter::Bracket => ("[", "]"),
-                        Delimiter::Parenthesis => ("(", ")"),
-                        Delimiter::None => ("", ""),
-                    };
-                    shape.push_str(open);
-                    describe(group.stream(), literals, shape);
-                    shape.push_str(close);
-                    shape.push(' ');
-                }
-                other => {
-                    shape.push_str(&other.to_string());
-                    shape.push(' ');
-                }
+        if managed {
+            if let Some(path) = path {
+                let visible = FILES.with(|files| files.borrow_mut().get_mut(file)
+                    .is_some_and(|state| std::mem::take(&mut state.awaiting_reads).is_empty()));
+                let (status, reason) = if visible { (Status::Applied, None) } else {
+                    (Status::Rebuild, Some("The changed RSX literals were not reread by a mounted reactive view"))
+                };
+                protocol::source(Language::Rsx, status, &path, source, reason);
             }
         }
     }
