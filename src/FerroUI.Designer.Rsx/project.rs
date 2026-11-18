@@ -1,7 +1,8 @@
 use crate::blocks::{blocks, contains_trivia};
 use crate::catalog::{self, Children};
 use crate::literal;
-use crate::tree::{replacement, Element, MAX_DEPTH};
+use crate::source_edits::RsxEvent;
+use crate::tree::{Element, MAX_DEPTH, replacement};
 use crate::xaml::XamlTree;
 use ferroui_designer_core::{Document, NodeKind, SourceSpan, TextPatch};
 use ferroui_view_syntax::{Attribute, Node};
@@ -15,7 +16,13 @@ pub struct RsxNode {
     pub span: SourceSpan,
     pub name: SourceSpan,
     pub properties: BTreeMap<String, SourceSpan>,
-    class: String,
+    pub expressions: BTreeMap<String, SourceSpan>,
+    pub events: BTreeMap<String, RsxEvent>,
+    pub(crate) fields: BTreeMap<String, SourceSpan>,
+    pub(crate) class: String,
+    pub(crate) open: usize,
+    pub(crate) close: usize,
+    pub(crate) complete_children: bool,
 }
 
 impl RsxNode {
@@ -23,11 +30,15 @@ impl RsxNode {
     pub fn supports_literal(&self, name: &str) -> bool {
         catalog::property(&self.class, name).is_some()
     }
+
+    pub fn editable_children(&self) -> bool {
+        self.complete_children && !self.expressions.contains_key("Content")
+    }
 }
 
 /// Static markup plus the source anchors needed to edit its original Rust block.
 pub struct RsxProjection<'a> {
-    source: &'a str,
+    pub(crate) source: &'a str,
     tree: Element,
     pub nodes: Vec<RsxNode>,
     pub blocks: Vec<SourceSpan>,
@@ -42,6 +53,11 @@ pub struct RsxProjection<'a> {
 impl RsxProjection<'_> {
     pub fn xaml(&self) -> String {
         self.tree.xaml()
+    }
+
+    pub fn matches_xaml(&self, source: &str) -> Result<bool, String> {
+        let document = Document::new(source).map_err(|error| error.to_string())?;
+        Ok(self.tree == XamlTree::parse(&document)?.tree)
     }
 
     /// Structural conversion can replace a complete tree with no interior comments.
@@ -179,19 +195,56 @@ impl State {
             span: SourceSpan::new(name.start, node.braces.close().byte_range().end),
             name: SourceSpan::new(name.start, name.end),
             properties: BTreeMap::new(),
+            expressions: BTreeMap::new(),
+            events: BTreeMap::new(),
+            fields: BTreeMap::new(),
             class: class.clone(),
+            open: node.braces.open().byte_range().end,
+            close: node.braces.close().byte_range().start,
+            complete_children: true,
         });
         let mut seen = BTreeSet::new();
         for attribute in &node.attributes {
-            let Attribute::Value {
-                owner, name, value, ..
-            } = attribute
-            else {
-                self.omit(format!("{class} builder call"));
-                continue;
+            let (owner, name, value) = match attribute {
+                Attribute::Value {
+                    owner, name, value, ..
+                } => (owner, name, value),
+                Attribute::Call { name, arguments } => {
+                    let setter = name.unraw().to_string();
+                    if setter.starts_with("on_") {
+                        let span = arguments
+                            .first()
+                            .map_or_else(|| name.span(), Spanned::span)
+                            .byte_range();
+                        self.nodes[index].events.insert(
+                            setter,
+                            RsxEvent {
+                                value: SourceSpan::new(span.start, span.end),
+                                field: None,
+                            },
+                        );
+                    }
+                    self.omit(format!("{class} builder call"));
+                    continue;
+                }
             };
             let setter = name.unraw().to_string();
             let owner = owner.as_ref().map(|owner| owner.unraw().to_string());
+            let value_span = value.span().byte_range();
+            let value_span = SourceSpan::new(value_span.start, value_span.end);
+            let field = SourceSpan::new(name.span().byte_range().start, value_span.end);
+            if owner.is_none() && setter.starts_with("on_") {
+                let field = (!self.nodes[index].events.contains_key(&setter)).then_some(field);
+                self.nodes[index].events.insert(
+                    setter.clone(),
+                    RsxEvent {
+                        value: value_span,
+                        field,
+                    },
+                );
+                self.omit(format!("{class}.{setter}"));
+                continue;
+            }
             let Some(key) = catalog::from_setter(&class, owner.as_deref(), &setter) else {
                 self.omit(format!("{class}.{setter}"));
                 continue;
@@ -199,18 +252,30 @@ impl State {
             if !seen.insert(key.clone()) {
                 result.properties.remove(&key);
                 self.nodes[index].properties.remove(&key);
+                self.nodes[index]
+                    .expressions
+                    .insert(key.clone(), value_span);
                 self.omit(format!("Repeated {class}.{key}"));
                 continue;
             }
             if let Some(text) =
                 catalog::property(&class, &key).and_then(|kind| kind.read_rust(value))
             {
-                let range = value.span().byte_range();
+                let start = match attribute {
+                    Attribute::Value {
+                        owner: Some(owner), ..
+                    } => owner.span().byte_range().start,
+                    _ => field.start,
+                };
                 self.nodes[index]
-                    .properties
-                    .insert(key.clone(), SourceSpan::new(range.start, range.end));
+                    .fields
+                    .insert(key.clone(), SourceSpan::new(start, field.end));
+                self.nodes[index].properties.insert(key.clone(), value_span);
                 result.properties.insert(key, text);
             } else {
+                self.nodes[index]
+                    .expressions
+                    .insert(key.clone(), value_span);
                 self.omit(format!("{class}.{key} expression"));
             }
         }
@@ -220,9 +285,9 @@ impl State {
         for child in &node.children {
             if let (Some(name), Node::Text(value, _)) = (text_property, child) {
                 let span = value.span().byte_range();
-                self.nodes[index]
-                    .properties
-                    .insert(name.into(), SourceSpan::new(span.start, span.end));
+                let span = SourceSpan::new(span.start, span.end);
+                self.nodes[index].fields.insert(name.into(), span);
+                self.nodes[index].properties.insert(name.into(), span);
                 result
                     .properties
                     .insert(name.into(), literal::text_value(&value.value()));
@@ -234,7 +299,10 @@ impl State {
                 {
                     result.children.push(self.element(child, depth + 1)?)
                 }
-                _ => self.omit(format!("{class} child")),
+                _ => {
+                    self.nodes[index].complete_children = false;
+                    self.omit(format!("{class} child"));
+                }
             }
         }
         Ok(result)
