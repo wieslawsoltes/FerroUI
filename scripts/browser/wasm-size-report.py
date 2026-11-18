@@ -18,8 +18,9 @@ Prints, as Markdown tables:
   smaller the gzip of the whole code section gets without the row (what removing the row saves in
   transfer; slow: one compression of the code section per row);
 - with --functions, the largest functions;
-- with --map, the constant data (the data section without the zero-filled .bss) by origin, from
-  the input segments the link map lists: the Rust crate of each object of the link (with LTO the
+- with --map, the code and the constant data (the data section without the zero-filled .bss) by
+  origin, from the functions and input segments the link map lists: the Rust crate of each object
+  of the link (the crate that instantiated a generic function) (with LTO the
   link has one object per crate and code generation unit, named after the crate), the archive of
   each C and C++ object, and the strings the linker merged. With --data, the largest pieces of
   data with the first symbol the map names in each (a constant without a symbol has the name of
@@ -172,11 +173,18 @@ def readable(names):
             for escape, character in LEGACY_ESCAPES:
                 name = name.replace(escape, character)
             result.append(("rust", name.replace("..", "::")))
+        elif DEMANGLED_RUST.search(name) and not name.endswith((")", ") const")) and not name.startswith("std::__"):
+            # A name the linker already demangled (the v0 scheme of recent toolchains: no hash,
+            # `::<T>` for generic arguments, `{closure#n}`), with the suffix of a duplicate cut off.
+            result.append(("rust", re.sub(r"_\d+$", "", name)))
         else:
             result.append(("c", name))
     return result
 
 
+# A path of Rust: a lower-case crate name and `::`, or a qualified path in angle brackets. C++ names
+# demangled by the linker end with their parameter list, which a Rust path has not.
+DEMANGLED_RUST = re.compile(r"^(<+[&*\[(]*(mut |dyn |const )?)?[a-z_][a-z0-9_]*::")
 SKIA = re.compile(r"^(\(anonymous namespace\)::)?(Sk|Gr|sk[a-z_]*::|SkSL|skgpu|skif|skcms|skia|sktext|skvx|portable|hsw|"
                   r"FT_|TT_|tt_|af_|cff_|cf2_|ps_|t1_|sfnt|ft_|FTC|Ins_|Direct_Move|Round_|Compute_|Project|Dual_Project|"
                   r"Read_CVT|Write_CVT|Move_CVT|SetSuperRound|Current_Ratio|Normalize|Get_Short|Init_Context|Free_Context)")
@@ -196,7 +204,7 @@ UNNAMED = re.compile(r"^function \d+$")
 # Archives of the link map, by the origin their functions are counted under.
 ARCHIVES = (("C++ Skia (with FreeType)", re.compile(r"libskia")),
             ("C++ HarfBuzz", re.compile(r"harfbuzz")),
-            ("C/C++ runtime (libc, libc++, Emscripten)", re.compile(r"/sysroot/|emscripten|lib(c|c\+\+|c\+\+abi|compiler_rt|"
+            ("C/C++ runtime (libc, libc++, Emscripten)", re.compile(r"/sysroot/|/emscripten/|lib(c|c\+\+|c\+\+abi|compiler_rt|"
                                                                     r"dlmalloc|emmalloc|GL|html5|stubs|sockets|noexit)[-.\w]*\.a")))
 
 
@@ -218,17 +226,19 @@ def link_map(path):
 
 
 MAP_LINE = re.compile(r"^\s*([0-9a-f]+|-)\s+([0-9a-f]+)\s+([0-9a-f]+) ( *)(\S.*?)\s*$")
-# The object of a Rust crate in an LTO link: <crate of the link>-<hash>.<crate>.<hash>-cgu.<n>.rcgu.o.
-RUST_OBJECT = re.compile(r"\.([A-Za-z_][A-Za-z0-9_]*)\.[0-9a-z]+-cgu\.\d+\.rcgu\.o$")
-# The object of a Rust crate without LTO: <crate>-<hash>.<crate>.<hash>-cgu.<n>.rcgu.o in an rlib.
-RUST_RLIB = re.compile(r"lib([A-Za-z_][A-Za-z0-9_]*)-[0-9a-f]+\.rlib\(")
+# The object of a Rust crate in a link with thin LTO, one per crate and code generation unit:
+# <crate of the link>.<crate>-<hash>.<crate>.<hash>-cgu.<n>.rcgu.o(.rcgu.o).
+RUST_OBJECT = re.compile(r"\.([A-Za-z_][A-Za-z0-9_]*)-[0-9a-f]{16}\.[A-Za-z_][A-Za-z0-9_]*\.[0-9a-z]+-cgu\.\d+\.rcgu\.o")
+# A member of an rlib: Rust code (`.rcgu.o`) or the C and C++ objects its build script bundled.
+RUST_RLIB = re.compile(r"lib([A-Za-z_][A-Za-z0-9_]*)-[0-9a-f]+\.rlib\(([^)]*)\)")
 
 
-def data_map(path):
-    """(size, input file, segment name, first symbol or None) of the input data segments of a link map,
-    without the zero-filled segments (.bss, .tbss), which are not in the file."""
-    chunks = []
-    in_data = False
+def map_chunks(path):
+    """The functions and the input data segments of a link map: two lists of
+    [size, input file, name, first symbol or None]. The data leaves out the zero-filled segments
+    (.bss, .tbss), which are not in the file."""
+    functions, chunks = [], []
+    section = None
     segment = None
     for line in open(path, encoding="utf-8", errors="replace"):
         match = MAP_LINE.match(line)
@@ -236,9 +246,13 @@ def data_map(path):
             continue
         address, _, size, indent, text = match.groups()
         if address == "-" and not indent:  # an output section
-            in_data = text == "DATA"
+            section = text
             continue
-        if not in_data:
+        if section == "CODE" and 0 < len(indent) < 16:
+            source, _, name = text.rpartition(":(")
+            functions.append([int(size, 16), source or "<internal>", name[:-1] if name.endswith(")") else name, None])
+            continue
+        if section != "DATA":
             continue
         if not indent:  # an output segment
             segment = text
@@ -250,19 +264,24 @@ def data_map(path):
             chunks.append([int(size, 16), source or "<internal>", name.rstrip(")"), None])
         elif chunks and chunks[-1][3] is None:  # the first symbol of the input segment
             chunks[-1][3] = text
-    return chunks
+    return functions, chunks
 
 
 def data_origin(source):
     """The origin of a piece of data by the input file of the link map."""
     if source in ("", "<internal>"):
         return "linker (merged strings, synthetic data)"
-    rust = RUST_OBJECT.search(source) or RUST_RLIB.search(source)
+    rust = RUST_OBJECT.search(source)
     if rust:
         return f"Rust {rust.group(1)}"
+    member = RUST_RLIB.search(source)
+    if member and member.group(2).endswith(".rcgu.o"):
+        return f"Rust {member.group(1)}"
     for label, pattern in ARCHIVES:
         if pattern.search(source):
             return label
+    if member:
+        return f"C/C++ of the crate {member.group(1)} (its build script)"
     return "C/C++ other: " + os.path.basename(re.sub(r"\(.*\)$", "", source))
 
 
@@ -285,10 +304,11 @@ def origin(kind, name):
     if "externref shim" in name or name.startswith(("__wbindgen", "__wbg_", "__externref")):
         return "wasm-bindgen glue"
     if kind == "rust":
-        if name.startswith("core::ptr::drop_in_place<"):
-            inner = re.match(r"[(&*\[]*(?:mut |const |dyn )?<?([A-Za-z_]\w*)", name[len("core::ptr::drop_in_place<"):])
-            return f"Rust drop glue of {inner.group(1) if inner else '?'} types"
-        crate = re.match(r"<?([A-Za-z_]\w*)", name)
+        for glue in ("core::ptr::drop_in_place<", "core::ptr::drop_in_place::<", "core::ptr::drop_glue::<"):
+            if name.startswith(glue):
+                inner = re.match(r"[(&*\[]*(?:mut |const |dyn )?<?([A-Za-z_]\w*)", name[len(glue):])
+                return f"Rust drop glue of {inner.group(1) if inner else '?'} types"
+        crate = re.match(r"<*[&*\[(]*(?:mut |const |dyn )?([A-Za-z_]\w*)", name)
         crate = crate.group(1) if crate else "?"
         if crate in GENERIC_PARAMETERS:  # <T as crate::Trait>::method
             trait = re.search(r" as ([A-Za-z_]\w*)::", name)
@@ -374,16 +394,21 @@ def main():
             print(f"| `{extension}` | {mb(size)} | {mb(packed[extension])} |")
 
     if "--map" in args:
-        chunks = data_map(args[args.index("--map") + 1])
-        by_origin = collections.defaultdict(list)
-        for chunk in chunks:
-            by_origin[data_origin(chunk[1])].append(chunk[0])
-        total_data = sum(chunk[0] for chunk in chunks)
-        print(f"\nConstant data in the link map: {mb(total_data)} MB in {len(chunks)} input segments "
-              "(sizes of the link, before wasm-opt).\n")
-        print("| Data by origin | Segments | MB | % of data |\n|---|---:|---:|---:|")
-        for label, sizes in sorted(by_origin.items(), key=lambda item: -sum(item[1]))[:top]:
-            print(f"| `{label}` | {len(sizes)} | {mb(sum(sizes))} | {100 * sum(sizes) / max(total_data, 1):.1f} |")
+        functions, chunks = map_chunks(args[args.index("--map") + 1])
+        code_by, data_by = collections.defaultdict(int), collections.defaultdict(int)
+        for size, source, _, _ in functions:
+            code_by[data_origin(source)] += size
+        for size, source, _, _ in chunks:
+            data_by[data_origin(source)] += size
+        total_code, total_data = sum(code_by.values()), sum(data_by.values())
+        print(f"\nThe link map (sizes of the link, before wasm-opt): {mb(total_code)} MB of code in "
+              f"{len(functions)} functions, {mb(total_data)} MB of constant data in {len(chunks)} input segments. "
+              "The code of a generic function is counted in the crate that instantiated it.\n")
+        print("| Code and data by origin | Code MB | Data MB | Both MB | % of both |\n|---|---:|---:|---:|---:|")
+        both = {label: code_by[label] + data_by[label] for label in set(code_by) | set(data_by)}
+        for label, size in sorted(both.items(), key=lambda item: -item[1])[:top]:
+            print(f"| `{label}` | {mb(code_by[label])} | {mb(data_by[label])} | {mb(size)} | "
+                  f"{100 * size / max(total_code + total_data, 1):.1f} |")
         if "--data" in args:
             count = int(args[args.index("--data") + 1])
             print("\n| Largest data | Origin | kB |\n|---|---|---:|")
