@@ -317,6 +317,17 @@ application trims takes the classes its paths name with it (#612, root D: hello 
 links NavigationView, RichEditBox, InfoBar, NavigationPage and DrawerPage). The theme tests check
 that no table naming classes is reachable from code outside the units.
 
+**How the build reads its inputs (#850).**
+- The includes that make up the group of a document are found by the XML parser of the compiler,
+  so entities are decoded and CDATA and comments are skipped. The build and the run-time loader use
+  the same rules.
+- The `[package.metadata.ferroui]` table is read as TOML, so dotted keys, inline tables and string
+  escapes all work.
+- A document consumed by a class (merged into it as well) is not embedded again by
+  `Build::embed_assets`.
+
+Details are in docs/porting/theme-trimming.md, section 15.
+
 **Turning trimming down or off:**
 - `theme-roots = "all"` keeps every unit, for comparison.
 - `theme-trimming = false` turns trimming off.
@@ -507,7 +518,8 @@ Documents loaded at run time bind the way the built application does (#604):
 | Resource and constant rows (step 1) | #568 | On `main` |
 | Units and the unit graph, all four checked-in themes (step 2) | #568 | On `main` |
 | Root tables, `with_parts`, debug diagnostic (step 3) | #568, #598 | On `main` |
-| `with_parts` only for a class that has it (the capability in its type model); one allocator for generated names | #849 | In review |
+| `with_parts` only for a class that has it (the capability in its type model); one allocator for generated names | #849 | On `main` |
+| Includes found by the XML parser; the manifest table read as TOML; consumed documents not embedded again | #850 | In review |
 | Roots from code: creates edges, source names and literals (step 4) | #568, #600 | On `main` |
 | Roots from the dependencies' documents; `full-themes` as the keep-all switch | #602 | On `main` |
 | Theme trimming on by default (`theme-trimming = false` to turn off) | #602 | On `main` |
