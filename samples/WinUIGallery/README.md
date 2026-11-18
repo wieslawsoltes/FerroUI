@@ -27,7 +27,7 @@ cargo run -p winui-gallery --features capture --bin winui-gallery-capture -- --p
 cargo run -p winui-gallery --features capture --bin winui-gallery-capture -- --all --dark --output-dir=captures/dark
 ```
 
-The tool loads the style documents of the application before the first page, so a document it cannot load ends it with an error and a non-zero exit, not a panic. The Linux job of CI renders the InkCanvas page with it.
+The tool loads the style documents of the application before the first page, so a document it cannot load ends it with an error and a non-zero exit, not a panic. The WinUI Gallery workflow (`.github/workflows/winui-gallery.yml`) renders the InkCanvas page with it on every pull request it runs for, and every page in its nightly rendering job.
 
 The capture host has only the fonts it embeds: glyphs of the symbol font (`SymbolThemeFontFamily`, Segoe Fluent Icons on Windows) show as missing glyphs where the system has no such font.
 
