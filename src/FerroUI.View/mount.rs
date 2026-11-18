@@ -510,7 +510,7 @@ impl Instance {
     /// effects and detaches its handlers.
     fn dispose(&self) {
         match self {
-            Instance::Control(control) => control.owner.dispose(),
+            Instance::Control(control) => control.dispose(),
             Instance::Dynamic(dynamic) => dynamic.owner.dispose(),
             Instance::Component(component) => component.owner.dispose(),
             Instance::Text(_) | Instance::Existing(..) => {}
@@ -580,9 +580,47 @@ pub(crate) struct ControlInstance {
     class: ElementClass,
     key: Option<Key>,
     control: Ref<Control>,
-    owner: Owner,
+    /// What owns what the element started when it was mounted: the effects of its reactive
+    /// values, its handlers, what its mount hooks registered, and the owners of what is below
+    /// it. An element that starts nothing (values, no handler, no hook) has none: what is below
+    /// it, and what a later patch starts for it, belongs to the nearest owner above, and is
+    /// taken out with the instance. Most elements of a tree are of this kind
+    /// (docs/porting/desktop-performance.md, section 9.100).
+    owner: Option<Owner>,
     slot: Rc<Slot>,
     state: RefCell<ControlState>,
+}
+
+impl ControlInstance {
+    /// Runs `f` with the owner of the instance as the current one; an instance without an
+    /// owner leaves the current one, the nearest above, as it is.
+    fn owned<R>(&self, f: impl FnOnce() -> R) -> R {
+        match self.owner {
+            Some(owner) => owner.with(f),
+            None => f(),
+        }
+    }
+
+    /// Takes the instance out: its owner is disposed, which stops its effects, detaches its
+    /// handlers and takes out what is below it. An instance without an owner takes out what
+    /// its values and handlers started and the instances below it one by one.
+    fn dispose(&self) {
+        match self.owner {
+            Some(owner) => owner.dispose(),
+            None => {
+                let state = self.state.borrow();
+                for prop in &state.props {
+                    stop_prop(prop);
+                }
+                if let Some(handlers) = state.handlers {
+                    handlers.dispose();
+                }
+                if let Some(children) = &state.children {
+                    children.dispose();
+                }
+            }
+        }
+    }
 }
 
 pub(crate) struct TextInstance {
@@ -746,8 +784,13 @@ pub(crate) fn mount_root(element: Element) -> Ref<Control> {
 }
 
 fn mount_control(element: ControlElement, host: &Rc<Host>) -> Rc<ControlInstance> {
-    let owner = Owner::new();
-    owner.with(|| {
+    // An owner for an element that starts something: a value that follows state or holds an
+    // element, a handler, a mount hook.
+    let starts = !element.handlers.is_empty()
+        || !element.on_mount.is_empty()
+        || element.props.iter().any(|entry| !matches!(entry.value, PropValue::Value(_)));
+    let owner = starts.then(Owner::new);
+    let mount = || {
         let control = (element.class.create)();
         // As the XAML loader does: the control is told that it is being
         // initialised while it gets its values and children, so that what it
@@ -790,9 +833,16 @@ fn mount_control(element: ControlElement, host: &Rc<Host>) -> Rc<ControlInstance
             slot,
             state: RefCell::new(ControlState { name: element.name, classes: element.classes, props, handlers, attached, children }),
         });
-        keep_alive(instance.clone());
+        // What holds the instances of a tree holds this one; an owner keeps its own as well.
+        if owner.is_some() {
+            keep_alive(instance.clone());
+        }
         instance
-    })
+    };
+    match owner {
+        Some(owner) => owner.with(mount),
+        None => mount(),
+    }
 }
 
 fn mount_prop(control: &Ref<Control>, property: &'static FerroProperty, value: PropValue) -> MountedProp {
@@ -1198,7 +1248,7 @@ fn patch_control(instance: &ControlInstance, element: ControlElement) {
     // Properties: the old values by property; what is equal stays.
     let mut old: Vec<Option<MountedProp>> = std::mem::take(&mut state.props).into_iter().map(Some).collect();
     let mut props = Vec::with_capacity(element.props.len());
-    instance.owner.with(|| {
+    instance.owned(|| {
         for entry in element.props {
             let previous = old.iter_mut().rev().find(|prop| prop.as_ref().is_some_and(|prop| std::ptr::eq(prop.property, entry.property)));
             let previous = previous.and_then(Option::take);
@@ -1243,7 +1293,7 @@ fn patch_control(instance: &ControlInstance, element: ControlElement) {
         }
     } else {
         let handlers = (!element.handlers.is_empty()).then(|| {
-            let handlers = instance.owner.with(Owner::new);
+            let handlers = instance.owned(Owner::new);
             handlers.with(|| {
                 for handler in &element.handlers {
                     (handler.attach)(control);
@@ -1260,7 +1310,7 @@ fn patch_control(instance: &ControlInstance, element: ControlElement) {
 
     // Children.
     let children = flatten(element.children);
-    instance.owner.with(|| match &mut state.children {
+    instance.owned(|| match &mut state.children {
         Some(mounted) => mounted.reconcile(children),
         None if children.is_empty() => {}
         None => state.children = Some(Children::mount(Host::of_control(control), children)),
