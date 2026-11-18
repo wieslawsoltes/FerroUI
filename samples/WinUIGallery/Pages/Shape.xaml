@@ -1,4 +1,88 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <StackPanel Orientation="Horizontal" Spacing="16"><Ellipse Width="100" Height="100" Fill="DodgerBlue"/><Rectangle Width="100" Height="100" Fill="Orange" RadiusX="12" RadiusY="12"/><Polygon Width="100" Height="100" Fill="SeaGreen" Points="0,100 50,0 100,100"/></StackPanel>
+<!-- Ported from the three pinned Shape examples of WinUI Gallery (14061eea); see ../NOTICE.md. The
+     page has no code-behind upstream: the shapes keep the source's TwoWay x:Bind of the sliders, and
+     the point labels its OneWay x:Bind of the switch (Visibility is IsVisible, IsOn is IsChecked, the
+     Header of the switch is its Content). FerroUI's Slider has no Header (composed) and no
+     StepFrequency or SnapsTo: the steps of 0.5 are TickFrequency with IsSnapToTickEnabled.
+     Canvas.ZIndex is the shared ZIndex. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="Example1" Spacing="8">
+    <TextBlock Text="Ellipse" FontSize="18" />
+    <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
+      <Ellipse x:Name="Ellipse1" HorizontalAlignment="Left" VerticalAlignment="Top"
+               Width="{x:Bind slider2.Value, Mode=TwoWay}"
+               Height="{x:Bind slider1.Value, Mode=TwoWay}"
+               Fill="SteelBlue" Stroke="Black"
+               StrokeThickness="{x:Bind slider3.Value, Mode=TwoWay}" />
+      <StackPanel Grid.Column="1" Width="220">
+        <TextBlock Text="Height" />
+        <Slider x:Name="slider1" AutomationProperties.Name="Height" Maximum="150" Minimum="100"
+                SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
+        <TextBlock Text="Width" />
+        <Slider x:Name="slider2" AutomationProperties.Name="Width" Maximum="150" Minimum="100"
+                SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
+        <TextBlock Text="Stroke Thickness" />
+        <Slider x:Name="slider3" AutomationProperties.Name="Stroke Thickness" Maximum="10" Minimum="2"
+                SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="Example2" Spacing="8">
+    <TextBlock Text="Rectangle" FontSize="18" />
+    <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
+      <Rectangle x:Name="Rectangle1" HorizontalAlignment="Left" VerticalAlignment="Top"
+                 Width="{x:Bind recSlider2.Value, Mode=TwoWay}"
+                 Height="{x:Bind recSlider1.Value, Mode=TwoWay}"
+                 Fill="SteelBlue"
+                 RadiusX="{x:Bind recSlider5.Value, Mode=TwoWay}"
+                 RadiusY="{x:Bind recSlider4.Value, Mode=TwoWay}"
+                 Stroke="Black"
+                 StrokeThickness="{x:Bind recSlider3.Value, Mode=TwoWay}" />
+      <StackPanel Grid.Column="1" Width="220">
+        <TextBlock Text="Height" />
+        <Slider x:Name="recSlider1" AutomationProperties.Name="Height" Maximum="150" Minimum="100"
+                SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
+        <TextBlock Text="Width" />
+        <Slider x:Name="recSlider2" AutomationProperties.Name="Width" Maximum="150" Minimum="100"
+                SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
+        <TextBlock Text="Stroke Thickness" />
+        <Slider x:Name="recSlider3" AutomationProperties.Name="Stroke Thickness" Maximum="10" Minimum="2"
+                SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
+        <TextBlock Text="Radius Y" />
+        <Slider x:Name="recSlider4" AutomationProperties.Name="Radius Y" Maximum="100" Minimum="0"
+                SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
+        <TextBlock Text="Radius X" />
+        <Slider x:Name="recSlider5" AutomationProperties.Name="Radius X" Maximum="100" Minimum="0"
+                SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="Example3" Spacing="8">
+    <TextBlock Text="Polygon" FontSize="18" />
+    <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
+      <Canvas Width="320" Height="200" HorizontalAlignment="Left">
+        <StackPanel>
+          <TextBlock Margin="0,0,0,15" Text="A polygon is a connected series of lines that form a closed shape." />
+          <Polygon x:Name="Polygon1" Fill="SteelBlue" Points="10,100 60,40 200,40 250,100" Stroke="Black"
+                   StrokeThickness="{x:Bind polySlider1.Value, Mode=TwoWay}" />
+        </StackPanel>
+        <TextBlock x:Name="PolyPoint1" Canvas.Left="0" Canvas.Top="150" ZIndex="1" Text="Point #1: (10,100)"
+                   IsVisible="{x:Bind ToggleSwitchPoly.IsChecked, Mode=OneWay}" />
+        <TextBlock Canvas.Left="50" Canvas.Top="40" ZIndex="1" Text="Point #2: (60,40)"
+                   IsVisible="{x:Bind ToggleSwitchPoly.IsChecked, Mode=OneWay}" />
+        <TextBlock Canvas.Left="200" Canvas.Top="40" ZIndex="1" Text="Point #3: (200,40)"
+                   IsVisible="{x:Bind ToggleSwitchPoly.IsChecked, Mode=OneWay}" />
+        <TextBlock Canvas.Left="240" Canvas.Top="150" ZIndex="1" Text="Point #4: (250,100)"
+                   IsVisible="{x:Bind ToggleSwitchPoly.IsChecked, Mode=OneWay}" />
+      </Canvas>
+      <StackPanel Grid.Column="1" Width="220">
+        <ToggleSwitch x:Name="ToggleSwitchPoly" Content="Show points" IsChecked="False" />
+        <TextBlock Text="Stroke Thickness" />
+        <Slider x:Name="polySlider1" AutomationProperties.Name="Stroke Thickness" Maximum="10" Minimum="2"
+                SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
 </StackPanel>

@@ -1,4 +1,122 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <Line StartPoint="0,0" EndPoint="240,80" Stroke="DodgerBlue" StrokeThickness="5"/><Polyline Points="0,80 60,0 120,60 180,10 240,80" Stroke="OrangeRed" StrokeThickness="4"/>
+<!-- Ported from the four pinned Line examples of WinUI Gallery (14061eea); see ../NOTICE.md. The
+     page has no code-behind upstream. WinUI's X1, Y1, X2 and Y2 are FerroUI's StartPoint and
+     EndPoint: shape_samples.rs sets them from the four point sliders, for the source's TwoWay x:Bind
+     of each coordinate; the other properties keep the source's x:Bind (Visibility is IsVisible, IsOn
+     is IsChecked, the Header of a switch is its Content). FerroUI's Slider has no Header (composed)
+     and no StepFrequency or SnapsTo: the steps of 0.5 are TickFrequency with IsSnapToTickEnabled.
+     Canvas.ZIndex is the shared ZIndex; the Rect of RectangleGeometry is written x,y,width,height. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="Example4" Spacing="8">
+    <TextBlock Text="Line" FontSize="18" />
+    <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
+      <Canvas Width="100" Height="200" HorizontalAlignment="Left">
+        <Line x:Name="Line1" Canvas.Top="50" Stroke="SteelBlue"
+              StrokeThickness="{x:Bind lineSlider5.Value, Mode=TwoWay}" />
+      </Canvas>
+      <StackPanel Grid.Column="1" Width="220">
+        <TextBlock Text="Start point X" />
+        <Slider x:Name="lineSlider1" AutomationProperties.Name="Start point X" Maximum="100" Minimum="0"
+                SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
+        <TextBlock Text="Start point Y" />
+        <Slider x:Name="lineSlider2" AutomationProperties.Name="Start point Y" Maximum="100" Minimum="0"
+                SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
+        <TextBlock Text="End point X" />
+        <Slider x:Name="lineSlider3" AutomationProperties.Name="End point X" Maximum="300" Minimum="200"
+                SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
+        <TextBlock Text="End point Y" />
+        <Slider x:Name="lineSlider4" AutomationProperties.Name="End point Y" Maximum="100" Minimum="0"
+                SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
+        <TextBlock Text="Stroke Thickness" />
+        <Slider x:Name="lineSlider5" AutomationProperties.Name="Stroke Thickness" Maximum="10" Minimum="5"
+                SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="Example5" Spacing="8">
+    <TextBlock Text="Polyline" FontSize="18" />
+    <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
+      <Canvas Width="320" Height="170" HorizontalAlignment="Left">
+        <StackPanel>
+          <TextBlock Margin="0,0,0,10" Text="Draws a series of connected straight lines." />
+          <Polyline x:Name="Polyline1" ZIndex="0" Points="10,100 60,40 200,40 250,100" Stroke="Black"
+                    StrokeThickness="{x:Bind polyLineSlider1.Value, Mode=TwoWay}" />
+        </StackPanel>
+        <TextBlock x:Name="PolylinePoint1" Canvas.Left="0" Canvas.Top="140" ZIndex="1" Text="Point #1: (10,100)"
+                   IsVisible="{x:Bind ToggleSwitch2.IsChecked, Mode=OneWay}" />
+        <TextBlock Canvas.Left="50" Canvas.Top="40" ZIndex="1" Text="Point #2: (60,40)"
+                   IsVisible="{x:Bind ToggleSwitch2.IsChecked, Mode=OneWay}" />
+        <TextBlock Canvas.Left="200" Canvas.Top="40" ZIndex="1" Text="Point #3: (200,40)"
+                   IsVisible="{x:Bind ToggleSwitch2.IsChecked, Mode=OneWay}" />
+        <TextBlock Canvas.Left="240" Canvas.Top="140" ZIndex="1" Text="Point #4: (250,100)"
+                   IsVisible="{x:Bind ToggleSwitch2.IsChecked, Mode=OneWay}" />
+      </Canvas>
+      <StackPanel Grid.Column="1" Width="220">
+        <ToggleSwitch x:Name="ToggleSwitch2" Content="Show points" IsChecked="False" />
+        <TextBlock Text="Stroke Thickness" />
+        <Slider x:Name="polyLineSlider1" AutomationProperties.Name="Stroke Thickness" Maximum="10" Minimum="2"
+                SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="Example6" Spacing="8">
+    <TextBlock Text="Path" FontSize="18" />
+    <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
+      <Canvas Width="320" Height="200" HorizontalAlignment="Left">
+        <StackPanel>
+          <TextBlock Text="Draws a series of connected lines and curves." />
+          <Path x:Name="Path1" Data="M 10,100 C 100,25 300,250 400,75 H 200" Stroke="DarkGoldenRod"
+                StrokeThickness="{x:Bind pathSlider1.Value, Mode=TwoWay}" />
+        </StackPanel>
+        <TextBlock x:Name="PathPoint1" Canvas.Left="0" Canvas.Top="130" ZIndex="1" Text="Point #1: (10,100)"
+                   IsVisible="{x:Bind ToggleSwitch.IsChecked, Mode=OneWay}" />
+        <TextBlock Canvas.Left="40" Canvas.Top="75" ZIndex="1" Text="Point #2: (100,25)"
+                   IsVisible="{x:Bind ToggleSwitch.IsChecked, Mode=OneWay}" />
+        <TextBlock Canvas.Left="280" Canvas.Top="175" ZIndex="1" Text="Point #3: (300,250)"
+                   IsVisible="{x:Bind ToggleSwitch.IsChecked, Mode=OneWay}" />
+        <TextBlock Canvas.Left="360" Canvas.Top="60" ZIndex="1" Text="Point #4: (400,75)"
+                   IsVisible="{x:Bind ToggleSwitch.IsChecked, Mode=OneWay}" />
+        <TextBlock Canvas.Left="170" Canvas.Top="60" ZIndex="1" Text="Point #5: (200,75)"
+                   IsVisible="{x:Bind ToggleSwitch.IsChecked, Mode=OneWay}" />
+      </Canvas>
+      <StackPanel Grid.Column="1" Width="220">
+        <ToggleSwitch x:Name="ToggleSwitch" Content="Show points" IsChecked="False" />
+        <TextBlock Text="Stroke Thickness" />
+        <Slider x:Name="pathSlider1" AutomationProperties.Name="Stroke Thickness" Maximum="10" Minimum="2"
+                SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="Example7" Spacing="8">
+    <TextBlock Text="GeometryGroup" FontSize="18" />
+    <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
+      <Canvas Width="100" Height="170" HorizontalAlignment="Left">
+        <StackPanel>
+          <TextBlock Margin="0,0,0,15" Text="Composite geometry objects can be created using a GeometryGroup." />
+          <Path x:Name="GeometryGroupPath" Fill="#CCCCFF" Stroke="Black" StrokeThickness="4">
+            <Path.Data>
+              <GeometryGroup FillRule="EvenOdd">
+                <LineGeometry StartPoint="10,10" EndPoint="50,30" />
+                <EllipseGeometry Center="40,70"
+                                 RadiusX="{x:Bind geogroupslider1.Value, Mode=TwoWay}"
+                                 RadiusY="{x:Bind geogroupslider2.Value, Mode=TwoWay}" />
+                <RectangleGeometry Rect="30,55,100,30" />
+              </GeometryGroup>
+            </Path.Data>
+          </Path>
+        </StackPanel>
+      </Canvas>
+      <StackPanel Grid.Column="1" Width="220">
+        <TextBlock Text="RadiusX" />
+        <Slider x:Name="geogroupslider1" AutomationProperties.Name="RadiusX" Maximum="40" Minimum="30"
+                SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
+        <TextBlock Text="RadiusY" />
+        <Slider x:Name="geogroupslider2" AutomationProperties.Name="RadiusY" Maximum="50" Minimum="30"
+                SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="0.5" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
 </StackPanel>

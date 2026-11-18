@@ -619,15 +619,27 @@
       "status": "partial",
       "implementation": [
         "samples/WinUIGallery/Pages/Geometry.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/shape_samples.rs",
+        "samples/WinUIGallery/assets.rs",
+        "samples/WinUIGallery/assets_data.rs",
+        "samples/WinUIGallery/assets-manifest.json"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "embedded_control_images_resolve_original_uri_paths_and_exact_bytes"
+        },
+        {
+          "path": "samples/WinUIGallery/shape_samples_tests.rs",
+          "name": "geometry_page_shows_the_theme_image_tips_and_copy_buttons"
         }
       ],
-      "notes": "Shared Path geometry renders a triangle and a cubic curve; the upstream geometry editor remains pending. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The source example with the code behind of GeometryPage.xaml.cs in Rust (shape_samples.rs): the header image of the page's theme (the source's Geometry.dark.png for the Default theme and Geometry.light.png for Light, its ThemeDictionaries), the three tip buttons of ShowGeometryButtonClick1 to 3, and CopyOverlayResourceToClipboardButton_Click and CopyControlResourceToClipboardButton_Click, which put the resource's name on the window's clipboard (the gallery's CopyButton is a Button with its glyph, its feedback a polite live region). The corner radius table keeps the source's rows; the radii are their values (8 and 4), CaptionTextBlockStyle is 12, the card styles are Borders with the card brushes and the selectable style names are SelectableTextBlocks (no IsTextSelectionEnabled on TextBlock). FerroUI has no TeachingTip: each tip is the Flyout of its button with the tip's title and subtitle, which the click opens and closes, so the page is partial. The glyphs need the platform's symbol font.",
       "examples": []
     },
     "Grid": {
@@ -778,18 +790,27 @@
       "examples": []
     },
     "Line": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/Line.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/shape_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
+        },
+        {
+          "path": "samples/WinUIGallery/shape_samples_tests.rs",
+          "name": "line_page_sliders_move_the_line_and_stroke_the_shapes"
         }
       ],
-      "notes": "Shared Line and Polyline use native geometry and stroke properties. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "All four source examples use native Line, Polyline, Path and a GeometryGroup of LineGeometry, EllipseGeometry and RectangleGeometry (FillRule EvenOdd), with the source's TwoWay x:Bind of the stroke thicknesses and of the ellipse's radii, and the OneWay x:Bind of the Show points switches to the point labels (Visibility is IsVisible, IsOn is IsChecked, the switch's Header its Content). The page has no code-behind upstream. WinUI's X1, Y1, X2 and Y2 are FerroUI's StartPoint and EndPoint: the four point sliders set them in Rust (shape_samples.rs) for the source's TwoWay x:Bind of each coordinate. FerroUI's Slider has no Header (composed) and no StepFrequency or SnapsTo: the steps of 0.5 are TickFrequency with IsSnapToTickEnabled. Canvas.ZIndex is the shared ZIndex; the Rect of RectangleGeometry is written x,y,width,height.",
       "examples": []
     },
     "ListView": {
@@ -1276,22 +1297,40 @@
       "examples": []
     },
     "ScrollViewer": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/ScrollViewer.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/scroll_samples.rs",
+        "samples/WinUIGallery/assets.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
+        },
+        {
+          "path": "samples/WinUIGallery/scroll_samples_tests.rs",
+          "name": "scroll_viewer_zoom_mode_option_enables_the_slider_and_binds_its_range"
+        },
+        {
+          "path": "samples/WinUIGallery/scroll_samples_tests.rs",
+          "name": "scroll_viewer_zoom_slider_and_zoom_factor_follow_each_other"
+        },
+        {
+          "path": "samples/WinUIGallery/scroll_samples_tests.rs",
+          "name": "scroll_viewer_scroll_modes_and_bar_visibilities_set_the_bars"
         }
       ],
-      "notes": "Native ScrollViewer hosts oversized content and scroll bars. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The source example uses native ScrollViewer with the source's cliff.jpg and the code behind of ScrollViewerPage.xaml.cs in Rust (scroll_samples.rs): the constructor's ZoomToFactor(4) (once the scroll viewer is first loaded, when it has its presenter), ZoomModeComboBox_SelectionChanged (the zoom mode, the slider enabled only with zooming, the factor 2 otherwise), ZoomSlider_ValueChanged (ChangeView), ScrollViewerControl_ViewChanged (the slider follows a change of ZoomFactor) and the four scroll mode and bar visibility handlers; the slider keeps the source's OneWay x:Bind of MinZoomFactor and MaxZoomFactor (its Header is composed). FerroUI's ScrollViewer has no HorizontalScrollMode or VerticalScrollMode: a Disabled scroll mode is the bar's Disabled visibility, which turns the scrolling of the axis off, and Enabled and Auto keep the visibility of the bar's box. IsVerticalScrollChainingEnabled is IsScrollChainingEnabled.",
       "examples": []
     },
     "Shape": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/Shape.xaml",
         "samples/WinUIGallery/examples.rs"
@@ -1300,9 +1339,17 @@
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
+        },
+        {
+          "path": "samples/WinUIGallery/shape_samples_tests.rs",
+          "name": "shape_page_sliders_size_and_stroke_the_ellipse_rectangle_and_polygon"
         }
       ],
-      "notes": "Shared Ellipse, Rectangle and Polygon render through the framework geometry backend. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "All three source examples use native Ellipse, Rectangle and Polygon with the source's TwoWay x:Bind of the sliders (sizes, radii and stroke thickness) and the OneWay x:Bind of the Show points switch to the point labels (Visibility is IsVisible, IsOn is IsChecked, the switch's Header its Content). The page has no code-behind upstream. FerroUI's Slider has no Header (composed) and no StepFrequency or SnapsTo: the steps of 0.5 are TickFrequency with IsSnapToTickEnabled. Canvas.ZIndex is the shared ZIndex.",
       "examples": []
     },
     "Slider": {
@@ -1369,18 +1416,35 @@
       "examples": []
     },
     "SplitView": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/SplitView.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/split_view_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "spacing_and_split_view_pages_follow_their_options"
+        },
+        {
+          "path": "samples/WinUIGallery/split_view_samples_tests.rs",
+          "name": "split_view_nav_links_write_the_page_of_the_clicked_link"
+        },
+        {
+          "path": "samples/WinUIGallery/split_view_samples_tests.rs",
+          "name": "split_view_options_set_the_pane_placement_mode_background_and_lengths"
         }
       ],
-      "notes": "Native SplitView binds IsPaneOpen to a ToggleButton with x:Bind, compiled by the x:Bind core. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The source example uses native SplitView with the code behind of SplitViewPage.xaml.cs in Rust (split_view_samples.rs): NavLinksList_ItemClick (the link's page in the content), PanePlacement_Toggled, togglePaneButton_CheckedChanged and SplitViewPage_Loaded with UpdateNavLinkItemLayout (the item template with the icon on the side of the pane), displayModeCombobox_SelectionChanged and paneBackgroundCombobox_SelectionChanged; the pane lengths keep the source's OneWay x:Bind of the sliders and IsPaneOpen its TwoWay x:Bind of the toggle button (the binding converts the nullable IsChecked, so no converter is needed). The NavLinks are a markup type for the {Binding} of the templates. FerroUI has no ListView: the links are a ListBox whose ItemClick is a tap on an item. The page's visual states are classes set by the handlers: Red, Blue and Green of the split view (the PaneBackground states) and RightIconLayout of the list. FerroUI's Slider has no Header (composed) and no StepFrequency or SnapsTo: the steps of 8 are TickFrequency with IsSnapToTickEnabled; the switch's IsOn is IsChecked and its Header its Content. As in the source, the split view keeps its markup DisplayMode until the box's selection changes. The symbol glyphs need the platform's symbol font.",
       "examples": []
     },
     "StackPanel": {

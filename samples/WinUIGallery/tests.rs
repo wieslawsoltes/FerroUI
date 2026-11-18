@@ -981,8 +981,8 @@ fn embedded_control_images_resolve_original_uri_paths_and_exact_bytes() {
     crate::assets::register();
     assert_eq!(
         crate::assets_data::ASSETS.len(),
-        135,
-        "108 control images, 25 sample media files and two explicit source-path case aliases"
+        137,
+        "108 control images, 25 sample media files, two design images and two explicit source-path case aliases"
     );
     for entry in CATALOG {
         let path = entry

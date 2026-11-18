@@ -38,7 +38,10 @@ pub mod navigation;
 mod navigation_view_samples;
 mod platform_samples;
 mod repeater_samples;
+mod scroll_samples;
+mod shape_samples;
 mod sizing_sample;
+mod split_view_samples;
 mod status_samples;
 mod text_input_samples;
 mod text_samples;
@@ -119,3 +122,12 @@ mod list_samples_tests;
 
 #[cfg(test)]
 mod tree_samples_tests;
+
+#[cfg(test)]
+mod split_view_samples_tests;
+
+#[cfg(test)]
+mod shape_samples_tests;
+
+#[cfg(test)]
+mod scroll_samples_tests;

@@ -19,10 +19,12 @@ SAMPLE_MEDIA = [
     "ninegrid.gif", "rainier.jpg", "sunset.jpg", "treetops.jpg", "valley.jpg",
     "Slices.png", "Slices2.png", "folder.png",
 ]
+# The theme images of the reviewed Geometry page (its HeaderImage of the Default and Light themes).
+DESIGN_MEDIA = ["Geometry.dark.png", "Geometry.light.png"]
 MEDIA_PAGES = [
     f"WinUIGallery/Samples/{page}/{page}Page{suffix}"
     for page in ["Image", "FlipView", "ConnectedAnimation", "Button", "AppBarButton",
-                 "AppBarToggleButton", "TreeView"]
+                 "AppBarToggleButton", "TreeView", "Geometry"]
     for suffix in [".xaml", ".xaml.cs"]
 ]
 
@@ -36,7 +38,8 @@ def outputs(upstream):
     metadata = json.loads((upstream / METADATA).read_text(encoding="utf-8-sig"))
     paths = sorted({item.get("ImagePath") or "ms-appx:///Assets/ControlImages/Placeholder.png"
                     for group in metadata["Groups"] for item in group["Items"]}
-                   | {"ms-appx:///Assets/SampleMedia/" + name for name in SAMPLE_MEDIA})
+                   | {"ms-appx:///Assets/SampleMedia/" + name for name in SAMPLE_MEDIA}
+                   | {"ms-appx:///Assets/Design/" + name for name in DESIGN_MEDIA})
     root = upstream / "WinUIGallery"
     candidates = list((root / "Assets/ControlImages").glob("*.png"))
     folded = {str(path.relative_to(root)).casefold(): path for path in candidates}
@@ -46,7 +49,8 @@ def outputs(upstream):
     registrations = []
     output = {}
     for uri in paths:
-        if not uri.startswith(("ms-appx:///Assets/ControlImages/", "ms-appx:///Assets/SampleMedia/")):
+        if not uri.startswith(("ms-appx:///Assets/ControlImages/", "ms-appx:///Assets/SampleMedia/",
+                               "ms-appx:///Assets/Design/")):
             raise ValueError(f"Unexpected image URI: {uri}")
         registered = uri.removeprefix("ms-appx:///")
         original = root / registered
