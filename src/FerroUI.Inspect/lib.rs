@@ -767,8 +767,19 @@ impl Inspector {
                 let root = Self::visual_object(&self.object(args)?)
                     .cast::<Visual>().ok_or("The selected object has no visual surface")?;
                 let point = Point::new(args["x"].as_f64().unwrap(), args["y"].as_f64().unwrap());
-                Ok(Value::Array(root.get_visuals_at(point).into_iter().take(32)
-                    .map(|visual| self.describe(&visual.upcast(), None)).collect()))
+                let mut seen = HashSet::new();
+                let mut hits = Vec::new();
+                let root_id = self.node_id(&root);
+                for hit in root.get_visuals_at(point) {
+                    let mut candidate = Some(hit);
+                    while let Some(visual) = candidate {
+                        let id = self.node_id(&visual);
+                        if id == root_id || hits.len() == 32 { break; }
+                        candidate = visual.visual_parent();
+                        if seen.insert(id) { hits.push(self.describe(&visual.upcast(), None)); }
+                    }
+                }
+                Ok(Value::Array(hits))
             }
             "get_source" => {
                 let object: BoxedValue = Rc::new(Self::visual_object(&self.object(args)?));
