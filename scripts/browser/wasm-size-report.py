@@ -2,7 +2,7 @@
 """What a WebAssembly module of a browser application is made of.
 
     python3 scripts/browser/wasm-size-report.py <module.wasm> [--assets <directory>...] [--top <n>]
-        [--map <link map>] [--functions <n>] [--marginal] [--profile <file>]
+        [--map <link map>] [--functions <n>] [--data <n>] [--marginal] [--profile <file>]
 
 Prints, as Markdown tables:
 
@@ -18,6 +18,13 @@ Prints, as Markdown tables:
   smaller the gzip of the whole code section gets without the row (what removing the row saves in
   transfer; slow: one compression of the code section per row);
 - with --functions, the largest functions;
+- with --map, the constant data (the data section without the zero-filled .bss) by origin, from
+  the input segments the link map lists: the Rust crate of each object of the link (with LTO the
+  link has one object per crate and code generation unit, named after the crate), the archive of
+  each C and C++ object, and the strings the linker merged. With --data, the largest pieces of
+  data with the first symbol the map names in each (a constant without a symbol has the name of
+  its segment). The sizes are those of the link, before wasm-opt, which may drop runs of zeros;
+  a gzip size per row cannot be given, since the map has no offsets into the optimised module;
 - with --profile, a profile of the module written by `wasm-split --instrument` (binaryen; see
   scripts/browser/first-frame.mjs --wasm-profile): how much of the code of each origin ran.
 
@@ -210,6 +217,55 @@ def link_map(path):
     return inputs
 
 
+MAP_LINE = re.compile(r"^\s*([0-9a-f]+|-)\s+([0-9a-f]+)\s+([0-9a-f]+) ( *)(\S.*?)\s*$")
+# The object of a Rust crate in an LTO link: <crate of the link>-<hash>.<crate>.<hash>-cgu.<n>.rcgu.o.
+RUST_OBJECT = re.compile(r"\.([A-Za-z_][A-Za-z0-9_]*)\.[0-9a-z]+-cgu\.\d+\.rcgu\.o$")
+# The object of a Rust crate without LTO: <crate>-<hash>.<crate>.<hash>-cgu.<n>.rcgu.o in an rlib.
+RUST_RLIB = re.compile(r"lib([A-Za-z_][A-Za-z0-9_]*)-[0-9a-f]+\.rlib\(")
+
+
+def data_map(path):
+    """(size, input file, segment name, first symbol or None) of the input data segments of a link map,
+    without the zero-filled segments (.bss, .tbss), which are not in the file."""
+    chunks = []
+    in_data = False
+    segment = None
+    for line in open(path, encoding="utf-8", errors="replace"):
+        match = MAP_LINE.match(line)
+        if not match:
+            continue
+        address, _, size, indent, text = match.groups()
+        if address == "-" and not indent:  # an output section
+            in_data = text == "DATA"
+            continue
+        if not in_data:
+            continue
+        if not indent:  # an output segment
+            segment = text
+            continue
+        if segment is None or segment.startswith((".bss", ".tbss")):
+            continue
+        if len(indent) < 16:  # an input segment, file:(name)
+            source, _, name = text.rpartition(":(")
+            chunks.append([int(size, 16), source or "<internal>", name.rstrip(")"), None])
+        elif chunks and chunks[-1][3] is None:  # the first symbol of the input segment
+            chunks[-1][3] = text
+    return chunks
+
+
+def data_origin(source):
+    """The origin of a piece of data by the input file of the link map."""
+    if source in ("", "<internal>"):
+        return "linker (merged strings, synthetic data)"
+    rust = RUST_OBJECT.search(source) or RUST_RLIB.search(source)
+    if rust:
+        return f"Rust {rust.group(1)}"
+    for label, pattern in ARCHIVES:
+        if pattern.search(source):
+            return label
+    return "C/C++ other: " + os.path.basename(re.sub(r"\(.*\)$", "", source))
+
+
 def archive_origin(name, raw_name, inputs):
     """The origin of a C or C++ function by the archive the link map names, or None."""
     source = inputs.get(raw_name) or inputs.get(re.sub(r"_\d+$", "", raw_name))
@@ -316,6 +372,25 @@ def main():
         print("\n| Embedded files | MB | MB gzip (file by file) |\n|---|---:|---:|")
         for extension, size in raw.most_common():
             print(f"| `{extension}` | {mb(size)} | {mb(packed[extension])} |")
+
+    if "--map" in args:
+        chunks = data_map(args[args.index("--map") + 1])
+        by_origin = collections.defaultdict(list)
+        for chunk in chunks:
+            by_origin[data_origin(chunk[1])].append(chunk[0])
+        total_data = sum(chunk[0] for chunk in chunks)
+        print(f"\nConstant data in the link map: {mb(total_data)} MB in {len(chunks)} input segments "
+              "(sizes of the link, before wasm-opt).\n")
+        print("| Data by origin | Segments | MB | % of data |\n|---|---:|---:|---:|")
+        for label, sizes in sorted(by_origin.items(), key=lambda item: -sum(item[1]))[:top]:
+            print(f"| `{label}` | {len(sizes)} | {mb(sum(sizes))} | {100 * sum(sizes) / max(total_data, 1):.1f} |")
+        if "--data" in args:
+            count = int(args[args.index("--data") + 1])
+            print("\n| Largest data | Origin | kB |\n|---|---|---:|")
+            for size, source, segment, symbol in sorted(chunks, key=lambda chunk: -chunk[0])[:count]:
+                name = symbol or segment
+                name = name if len(name) <= 140 else name[:137] + "..."
+                print(f"| `{name}` | {data_origin(source)} | {size / 1e3:.1f} |")
 
     names_section = next(((start, size) for _, name, start, size in found if name == "custom name"), None)
     if names_section is None or 10 not in by_id:

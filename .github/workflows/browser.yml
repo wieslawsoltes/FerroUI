@@ -29,7 +29,7 @@ on:
         # scripts/browser/wasm-size-report.py attributes it. Off by default: the second link adds
         # about the time of a rebuild of the catalog crate.
         #   gh workflow run browser.yml --ref <branch> -f size-report=true
-        description: Attribute the size of the ControlCatalog module (code by crate and by generic family, largest functions)
+        description: Attribute the size of the ControlCatalog module (code and data by crate, code by generic family, largest symbols)
         type: boolean
         default: false
 
@@ -151,7 +151,7 @@ jobs:
           # llvm-cxxfilt of the Emscripten SDK demangles the names.
           PATH="$EMSDK/upstream/bin:$PATH" python3 -I scripts/browser/wasm-size-report.py \
             "$out/control_catalog_browser.named.wasm" --map "$out/control_catalog_browser.map" \
-            --top 40 --functions 40 --marginal > "$out/report.md"
+            --top 40 --functions 40 --data 40 --marginal > "$out/report.md"
           cat "$out/report.md" >> "$GITHUB_STEP_SUMMARY"
       - name: Keep what the ControlCatalog module is made of
         if: inputs.size-report
