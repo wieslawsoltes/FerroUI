@@ -48,7 +48,9 @@ pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>) -> Result
                 Operation::SetProperty { value, .. } => Some(value.as_str()),
                 _ => None,
             };
-            if !editable_attribute(&design, target, name) && !(value.is_some() && can_add_property(&design, target, name)) {
+            let writable = editable_attribute(&design, target, name)
+                || value.is_some() && can_add_property(&design, target, name);
+            if !writable {
                 return Err(format!("{name} is unavailable in the property inspector"));
             }
             if let Some((i, _)) = design.rsx_node(*node) {

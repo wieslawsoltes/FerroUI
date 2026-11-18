@@ -176,7 +176,7 @@ fn merge_insertions(mut values: Vec<TextPatch>) -> Vec<TextPatch> {
     for patch in values {
         if let Some(previous) = merged
             .last_mut()
-            .filter(|item| item.span == patch.span && patch.span.len() == 0)
+            .filter(|item| item.span == patch.span && patch.span.is_empty())
         {
             previous.replacement.push_str(&patch.replacement);
         } else {
