@@ -3,6 +3,7 @@ import type { DesignerWorkbench } from './designerWorkbench';
 import type { HotReload } from './hotReload';
 import { revision } from './reloadProcess';
 import type { RuntimeClient } from './runtimeClient';
+import type { RuntimeTarget } from './runtimeConnections';
 import type { RuntimeNode, RuntimeProperty, RuntimeSource } from './runtimeProtocol';
 import { asRange } from './textDocument';
 import { isWorkspaceFile } from './workspacePaths';
@@ -27,33 +28,36 @@ export class RuntimeSourceEditor {
         const uri = vscode.Uri.parse(anchor.uri, true);
         if (!await isWorkspaceFile(uri)) return;
         const document = await vscode.workspace.openTextDocument(uri);
-        if (anchor.language === 'rust' && !this.matchesRust(document, anchor)) return;
+        if ((anchor.language === 'rust' || anchor.revision !== undefined) && !matchesRevision(document, anchor.revision)) return;
         const position = sourcePosition(document, anchor);
         return position && { anchor, document, position };
     }
 
-    describe(source: AuthoredSource) {
+    describe(source: AuthoredSource, target: RuntimeTarget) {
         const { anchor, document, position } = source;
         return { uri: document.uri.toString(), language: anchor.language ?? 'xaml', version: document.version,
-            position: { line: position.line, character: position.character }, canApply: this.canApply(source) };
+            position: { line: position.line, character: position.character }, canApply: this.canApply(source, target) };
     }
 
-    canApply({ anchor, document }: AuthoredSource): boolean {
+    canApply({ anchor, document }: AuthoredSource, target: RuntimeTarget): boolean {
         if (document.isDirty || document.isClosed) return false;
-        if (anchor.language === 'rust') return document.languageId === 'rust' && this.matchesRust(document, anchor);
-        return document.uri.fsPath.toLowerCase().endsWith('.xaml') && this.reload.containsXaml(document.uri.fsPath, document.getText());
+        if (anchor.language === 'rust') return document.languageId === 'rust' && matchesRevision(document, anchor.revision);
+        if (!document.uri.fsPath.toLowerCase().endsWith('.xaml')) return false;
+        const accepted = target === 'managed' ? this.reload.xamlRevision(document.uri.fsPath) : undefined;
+        if (anchor.revision === undefined) return matchesRevision(document, accepted);
+        return (!accepted || accepted === anchor.revision) && matchesRevision(document, anchor.revision);
     }
 
     async apply(client: RuntimeClient, node: RuntimeNode, name: string, value: string, signal: AbortSignal,
-        isCurrent: () => boolean, expectedVersion?: number): Promise<void> {
+        runtimeTarget: RuntimeTarget, isCurrent: () => boolean, expectedVersion?: number): Promise<void> {
         const source = await this.read(client, node.node_id, signal);
-        if (!source || !this.canApply(source) || (expectedVersion !== undefined && source.document.version !== expectedVersion)) {
+        if (!source || !this.canApply(source, runtimeTarget) || (expectedVersion !== undefined && source.document.version !== expectedVersion)) {
             throw new Error('Save the source and wait for the running app to accept that revision before applying a value.');
         }
         const { anchor, document, position } = source;
         const version = document.version;
         const guard = () => {
-            if (!isCurrent() || document.version !== version || !this.canApply(source)) {
+            if (!isCurrent() || document.version !== version || !this.canApply(source, runtimeTarget)) {
                 throw new Error('The runtime selection or its source revision changed. Choose the current control to retry.');
             }
         };
@@ -77,11 +81,11 @@ export class RuntimeSourceEditor {
         }
         await design.agentEdit(frame, { type: 'setProperty', node: target.id, name, value }, signal, guard);
     }
+}
 
-    private matchesRust(document: vscode.TextDocument, anchor: RuntimeSource): boolean {
-        return typeof anchor.revision === 'string' && /^[0-9a-f]{16}$/.test(anchor.revision)
-            && revision(Buffer.from(document.getText())) === anchor.revision;
-    }
+function matchesRevision(document: vscode.TextDocument, expected: string | undefined): boolean {
+    return typeof expected === 'string' && /^[0-9a-f]{16}$/.test(expected)
+        && revision(Buffer.from(document.getText())) === expected;
 }
 
 export function sourcePosition(document: vscode.TextDocument, source: Omit<RuntimeSource, 'uri'>): vscode.Position | undefined {

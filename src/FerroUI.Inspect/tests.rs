@@ -323,6 +323,9 @@ fn native_hits_and_compiler_locations_share_runtime_ids() {
         XamlSourceInfo::set_xaml_source_info(&boxed, Some(XamlSourceInfo::new(3, 5, Some("/source/View.xaml"))));
         assert_eq!(inspector.execute("get_source", &json!({"node_id":id})).unwrap(),
             json!({"uri":"file:///source/View.xaml","line":3,"column":5}));
+        XamlSourceInfo::set_xaml_source_info(&boxed, Some(XamlSourceInfo::new(4, 6, Some("/source/View.xaml")).with_source_revision(43)));
+        assert_eq!(inspector.execute("get_source", &json!({"node_id":id})).unwrap(),
+            json!({"uri":"file:///source/View.xaml","line":4,"column":6,"revision":"000000000000002b"}));
         let local = Point::new(button.bounds().width / 2.0, button.bounds().height / 2.0);
         let at = button.translate_point(local, &window.clone().upcast()).unwrap();
         let hits = inspector.execute("get_element_at", &json!({"node_id":root,"x":at.x,"y":at.y})).unwrap();

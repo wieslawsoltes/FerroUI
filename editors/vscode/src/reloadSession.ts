@@ -12,7 +12,14 @@ import type { RuntimeMcpEndpoint } from './runtimeMcp';
 const watchPattern = '**/{*.rs,*.xaml,Cargo.toml}';
 const reloadWindow = 1800;
 
-interface SourceChange { file: string; fingerprint: string; observed: number; language?: RuntimeEvent['language']; record: ReloadRecord }
+interface SourceChange {
+    file: string;
+    fingerprint: string;
+    xamlFingerprint?: string;
+    observed: number;
+    language?: RuntimeEvent['language'];
+    record: ReloadRecord;
+}
 
 export class ReloadSession implements vscode.Disposable {
     private readonly resources: vscode.Disposable[] = [];
@@ -49,8 +56,8 @@ export class ReloadSession implements vscode.Disposable {
 
     get pid(): number | undefined { return this.live?.pid; }
 
-    containsXaml(file: string, source: string): boolean {
-        return this.live !== undefined && this.acceptedXaml.get(fileKey(file)) === revision(Buffer.from(source));
+    xamlRevision(file: string): string | undefined {
+        return this.live ? this.acceptedXaml.get(fileKey(file)) : undefined;
     }
 
     build(): void {
@@ -69,8 +76,15 @@ export class ReloadSession implements vscode.Disposable {
         const marker = {};
         this.waitingReads.set(key, marker);
         let fingerprint: string;
+        let xamlFingerprint: string | undefined;
         try {
-            fingerprint = revision(await readFile(file));
+            const bytes = await readFile(file);
+            fingerprint = revision(bytes);
+            // The protocol acknowledges the file bytes. XAML source positions and the
+            // loaded VS Code document exclude the leading UTF-8 signature.
+            if (extension === '.xaml' && bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) {
+                xamlFingerprint = revision(bytes.subarray(3));
+            }
         } catch (error) {
             if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
                 this.output.appendLine(`Could not read ${path.basename(file)}. ${String(error)}`);
@@ -88,7 +102,7 @@ export class ReloadSession implements vscode.Disposable {
         if (previous) this.history.finish(previous.record, 'superseded', this.pid);
         const observed = Date.now();
         const record = this.history.observe(file, fingerprint, observed);
-        this.changes.set(key, { file, fingerprint, language, observed, record });
+        this.changes.set(key, { file, fingerprint, xamlFingerprint, language, observed, record });
         this.serial++;
         this.schedule(120);
     }
@@ -132,7 +146,7 @@ export class ReloadSession implements vscode.Disposable {
                         this.status(`${result.language.toUpperCase()} edit rejected`, true);
                     } else {
                         this.history.finish(change.record, 'applied', this.pid, result.message);
-                        if (result.language === 'xaml') this.acceptedXaml.set(key, change.fingerprint);
+                        if (result.language === 'xaml') this.acceptedXaml.set(key, change.xamlFingerprint ?? change.fingerprint);
                         applied = `${result.language.toUpperCase()} reloaded`;
                     }
                 }

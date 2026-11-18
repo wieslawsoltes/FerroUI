@@ -11,6 +11,7 @@ export class RuntimeConnections implements vscode.Disposable {
     private readonly subscriptions: vscode.Disposable[];
     private external?: RuntimeMcpEndpoint;
     private managedVersion = 0;
+    private attachedVersion = 0;
 
     constructor(private readonly reload: HotReload) {
         this.subscriptions = [
@@ -18,12 +19,16 @@ export class RuntimeConnections implements vscode.Disposable {
             vscode.commands.registerCommand('ferroui.mcp.attach', () => this.attach()),
             vscode.commands.registerCommand('ferroui.mcp.detach', () => {
                 this.external = undefined;
+                this.attachedVersion++;
                 this.changed.fire();
             }),
         ];
     }
 
     get managedRevision() { return this.managedVersion; }
+    revision(target: RuntimeTarget): number {
+        return target === 'managed' ? this.managedVersion : this.attachedVersion;
+    }
 
     get(target: RuntimeTarget): RuntimeMcpEndpoint | undefined {
         if (!vscode.workspace.isTrusted || !vscode.workspace.workspaceFolders?.length) return undefined;
@@ -38,6 +43,7 @@ export class RuntimeConnections implements vscode.Disposable {
             validateInput: value => /^[a-fA-F0-9]{64}$/.test(value) ? undefined : 'Enter the 64-character FerroUI bearer token.' });
         if (!token || !/^[a-fA-F0-9]{64}$/.test(token)) return;
         this.external = { url, token };
+        this.attachedVersion++;
         this.changed.fire();
     }
 

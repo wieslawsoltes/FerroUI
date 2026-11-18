@@ -207,9 +207,8 @@ export class RuntimePanel implements vscode.Disposable {
                 await client.call('set_property', { node_id, property: message.property, value: message.value });
                 await this.inspect(client, epoch, frame.token, node_id, 'properties');
             } else if (message.type === 'assignSource' && typeof message.property === 'string' && typeof message.value === 'string' && message.value.length <= 4096) {
-                if (this.target !== 'managed') throw new Error('Apply to Source requires a managed application.');
                 await this.authoredSource.apply(client, node, message.property, message.value, AbortSignal.timeout(15_000),
-                    () => epoch === this.epoch && this.frame?.token === frame.token);
+                    this.target, () => epoch === this.epoch && this.frame?.token === frame.token);
             }
             if (message.type !== 'select') this.schedule(0);
         } catch (error) {
@@ -227,7 +226,7 @@ export class RuntimePanel implements vscode.Disposable {
             default: return;
         }
         const source = await this.authoredSource.read(client, node);
-        const canApply = view === 'properties' && source && this.target === 'managed' && this.authoredSource.canApply(source);
+        const canApply = view === 'properties' && source && this.authoredSource.canApply(source, this.target);
         if (epoch === this.epoch && this.frame?.token === token) this.post({ type: 'inspection', token, node, view, data, canReveal: Boolean(source), canApply: Boolean(canApply) });
     }
 

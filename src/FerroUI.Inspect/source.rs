@@ -5,7 +5,11 @@ use serde_json::{json, Value};
 pub(super) fn location(object: &FerroObject) -> Option<Value> {
     let xaml = XamlSourceInfo::for_object(object).and_then(|info| {
         let uri = info.source_uri()?;
-        Some(json!({"uri":uri.as_str(),"line":info.line_number(),"column":info.line_position()}))
+        let mut source = json!({"uri":uri.as_str(),"line":info.line_number(),"column":info.line_position()});
+        if let Some(revision) = info.source_revision() {
+            source["revision"] = json!(format!("{revision:016x}"));
+        }
+        Some(source)
     });
     xaml.or_else(|| {
         let info = RsxSourceInfo::get(object)?;

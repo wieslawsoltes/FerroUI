@@ -347,11 +347,13 @@ impl FerroXamlIlRuntimeCompiler {
         let (mut parse_time, mut transform_time) = (std::time::Duration::ZERO, std::time::Duration::ZERO);
         for document in sources {
             let start = std::time::Instant::now();
-            let mut parsed: XamlDocument = compiler.parse(&document.xaml, document.override_type.clone())?;
+            let source = document.xaml.strip_prefix('\u{feff}').unwrap_or(&document.xaml);
+            let mut parsed: XamlDocument = compiler.parse(source, document.override_type.clone())?;
             parse_time += start.elapsed();
             parsed.document = Some(document.name.clone());
             let start = std::time::Instant::now();
-            compiler.transform(&mut parsed)?;
+            let file_path = document.base_uri.as_deref().and_then(source_file_path);
+            compiler.transform_source(&mut parsed, source, file_path)?;
             transform_time += start.elapsed();
 
             let root = parsed.root()?;
@@ -482,6 +484,22 @@ impl FerroXamlIlRuntimeCompiler {
     }
 }
 
+fn source_file_path(uri: &str) -> Option<String> {
+    #[cfg(any(unix, windows, target_os = "redox", target_os = "wasi", target_os = "hermit"))]
+    {
+        let uri = url::Url::parse(uri).ok()?;
+        if uri.scheme() != "file" {
+            return None;
+        }
+        uri.to_file_path().ok()?.into_os_string().into_string().ok()
+    }
+    #[cfg(not(any(unix, windows, target_os = "redox", target_os = "wasi", target_os = "hermit")))]
+    {
+        let _ = uri;
+        None
+    }
+}
+
 #[cfg(test)]
 mod cache_tests {
     use super::*;
@@ -489,6 +507,28 @@ mod cache_tests {
 
     fn group() -> Rc<TransformedGroup> {
         Rc::new(TransformedGroup { providers: Vec::new(), root_types: Vec::new() })
+    }
+
+    #[test]
+    #[cfg(any(unix, windows))]
+    fn runtime_source_info_keeps_the_document_path_and_revision() {
+        use ferroui_markup_xaml::diagnostics::XamlSourceInfo;
+
+        let file = std::env::temp_dir().join("Preview #1.xaml");
+        let uri = url::Url::from_file_path(file).unwrap();
+        let source = "<SolidColorBrush xmlns='https://github.com/ferroui'\r\n Color='Blue'/>";
+        let with_bom = format!("\u{feff}{source}");
+        let mut configuration = RuntimeXamlLoaderConfiguration::new();
+        configuration.set_create_source_info(true);
+        let object = FerroXamlIlRuntimeCompiler::load(
+            RuntimeXamlLoaderDocument::with_base_uri(Some(uri.clone()), &with_bom),
+            &configuration,
+        ).unwrap();
+        let info = XamlSourceInfo::get_xaml_source_info(&object).unwrap();
+        assert_eq!(info.source_uri(), Some(&uri));
+        assert_eq!(info.line_number(), 1);
+        assert_eq!(info.line_position(), 2);
+        assert_eq!(info.source_revision(), Some(ferroui_reload_protocol::fingerprint(source.as_bytes())));
     }
 
     #[test]

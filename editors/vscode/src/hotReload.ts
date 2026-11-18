@@ -55,7 +55,7 @@ export class HotReload implements vscode.Disposable {
     }
 
     recentOutput(lines: number) { return { ...this.state, output: this.log.tail(lines) }; }
-    containsXaml(file: string, source: string): boolean { return this.session?.containsXaml(file, source) ?? false; }
+    xamlRevision(file: string): string | undefined { return this.session?.xamlRevision(file); }
     async targets(selection: CargoSelection) {
         const targets = await discoverCargoTargets(selection);
         return { targets: targets.map(target => ({ ...describeCargoTarget(target), features: target.features })) };

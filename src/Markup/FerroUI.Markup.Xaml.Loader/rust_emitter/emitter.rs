@@ -1986,7 +1986,7 @@ impl<'a> Emitter<'a> {
         }
         if let Some(n) = node.cast::<XamlSourceInfoValueManipulation>() {
             // `XamlSourceInfo.SetXamlSourceInfo(target, new XamlSourceInfo(line, position, document))`.
-            let info = self.source_info(node, node.line(), node.position(), n.document.as_deref())?;
+            let info = self.source_info(node, node.line(), node.position(), n.document.as_deref(), n.source_revision)?;
             let setter = self.types.method(n.types.xaml_source_info_setter.as_ref())
                 .ok_or_else(|| unsupported(node, "SetXamlSourceInfo is not a method of the run-time type system"))?;
             let call = self.declared_call(node, &setter, &[Typed { expr: target.expr.clone(), kind: target.kind }, info])?;
@@ -1998,10 +1998,18 @@ impl<'a> Emitter<'a> {
 
     /// `new XamlSourceInfo(line, position, document)` (the source information of the
     /// node at `line`, `position` of the document named `document`).
-    fn source_info(&mut self, node: &Rc<dyn IXamlAstNode>, line: i32, position: i32, document: Option<&str>) -> EmitResult<Typed<'a>> {
+    fn source_info(&mut self, node: &Rc<dyn IXamlAstNode>, line: i32, position: i32, document: Option<&str>, revision: Option<u64>) -> EmitResult<Typed<'a>> {
         let types = self.configuration.try_get_ferro_types().map_err(|e| failed(node, e))?;
         let document = match document {
-            Some(document) => format!("::core::option::Option::Some(::std::string::String::from({}))", rust_string_literal(document)),
+            Some(document) => {
+                let path = rust_string_literal(document);
+                let path = if revision.is_some() && !std::path::Path::new(document).has_root() {
+                    format!("::core::concat!(::core::env!(\"CARGO_MANIFEST_DIR\"), \"/\", {path})")
+                } else {
+                    path
+                };
+                format!("::core::option::Option::Some(::std::string::String::from({path}))")
+            }
             None => "::core::option::Option::None".to_string(),
         };
         let arguments = [
@@ -2009,7 +2017,10 @@ impl<'a> Emitter<'a> {
             self.exact(Known::I32, format!("{position}_i32")),
             Typed { expr: document, kind: Kind::Exact { id: self.types.known(Known::OptionString), nullable: None } },
         ];
-        let info = self.constructor_call(node, &types.xaml_source_info_constructor, &arguments)?;
+        let mut info = self.constructor_call(node, &types.xaml_source_info_constructor, &arguments)?;
+        if let Some(revision) = revision {
+            info.expr = format!("{}.with_source_revision({revision}_u64)", info.expr);
+        }
         Ok(self.bind(&info, "source_info"))
     }
 
@@ -2929,7 +2940,7 @@ impl<'a> Emitter<'a> {
             value,
         ])?;
         self.line(format!("{call};"));
-        let info = self.source_info(node, setter.line, setter.position, setter.document.as_deref())?;
+        let info = self.source_info(node, setter.line, setter.position, setter.document.as_deref(), None)?;
         let dictionary_setter = self.types.method(setter.types.xaml_source_info_dictionary_setter.as_ref())
             .ok_or_else(|| unsupported(node, "SetXamlSourceInfo is not a method of the run-time type system"))?;
         let call = self.declared_call(node, &dictionary_setter, &[dictionary, key, info])?;

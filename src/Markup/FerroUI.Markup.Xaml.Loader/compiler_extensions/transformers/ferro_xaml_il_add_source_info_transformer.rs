@@ -1,6 +1,6 @@
 //! Port of `CompilerExtensions/Transformers/FerroXamlIlAddSourceInfoTransformer.cs`.
 
-use std::cell::Cell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 use xamlx::ast::{
@@ -23,6 +23,7 @@ use super::{FerroXamlIlWellKnownTypes, FerroXamlIlWellKnownTypesExtensions};
 #[derive(Default)]
 pub struct FerroXamlIlAddSourceInfoTransformer {
     create_source_info: Cell<bool>,
+    source_snapshot: RefCell<Option<(u64, Option<String>)>>,
 }
 
 impl FerroXamlIlAddSourceInfoTransformer {
@@ -38,6 +39,11 @@ impl FerroXamlIlAddSourceInfoTransformer {
 
     pub fn set_create_source_info(&self, value: bool) {
         self.create_source_info.set(value);
+    }
+
+    #[cfg(any(feature = "runtime", feature = "compiler"))]
+    pub(crate) fn set_source_snapshot(&self, snapshot: Option<(u64, Option<String>)>) {
+        self.source_snapshot.replace(snapshot);
     }
 }
 
@@ -68,13 +74,16 @@ impl IXamlAstTransformer for FerroXamlIlAddSourceInfoTransformer {
         }
 
         let ferro_types = context.try_get_ferro_types()?;
+        let snapshot = self.source_snapshot.borrow();
+        let document = snapshot.as_ref().and_then(|(_, path)| path.clone()).or_else(|| context.current_document());
         Ok(XamlValueWithManipulationNode::new(
             &*obj_node,
             obj_node.clone(),
-            Some(XamlSourceInfoValueManipulation::new(
+            Some(XamlSourceInfoValueManipulation::with_revision(
                 ferro_types,
                 &obj_node,
-                context.current_document(),
+                document,
+                snapshot.as_ref().map(|(revision, _)| *revision),
             )),
         ))
     }
@@ -98,6 +107,8 @@ pub struct XamlSourceInfoValueManipulation {
     base: XamlAstNode,
     pub types: Rc<FerroXamlIlWellKnownTypes>,
     pub document: Option<String>,
+    /// Fingerprint of the document text used by this transform.
+    pub source_revision: Option<u64>,
 }
 
 impl XamlSourceInfoValueManipulation {
@@ -106,10 +117,20 @@ impl XamlSourceInfoValueManipulation {
         obj_node: &Rc<XamlAstNewClrObjectNode>,
         document: Option<String>,
     ) -> Rc<Self> {
+        Self::with_revision(ferro_types, obj_node, document, None)
+    }
+
+    fn with_revision(
+        ferro_types: Rc<FerroXamlIlWellKnownTypes>,
+        obj_node: &Rc<XamlAstNewClrObjectNode>,
+        document: Option<String>,
+        source_revision: Option<u64>,
+    ) -> Rc<Self> {
         Rc::new(Self {
             base: XamlAstNode::new(&**obj_node),
             types: ferro_types,
             document,
+            source_revision,
         })
     }
 }

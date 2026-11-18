@@ -9,6 +9,7 @@ import type { ProjectFile, ProjectInventory } from './projectInventory';
 import type { ProjectScaffold } from './projectScaffold';
 import type { RuntimeSourceTools } from './runtimeSourceTools';
 import { renameRsxControl } from './rsxRename';
+import type { RuntimeTarget } from './runtimeConnections';
 import type { StagesPanel } from './stagesPanel';
 import type { PrototypeCommand, StageChange } from './stagesProtocol';
 import type { CanvasAction, CanvasInteraction, DesignerView, DragOrigin, DropTarget, OutlineMode, Placement } from './protocol';
@@ -22,6 +23,7 @@ interface Arguments extends CanvasAction, CargoSelection {
     expected_revision: number;
     expected_version: number;
     expected_generation: number;
+    runtime?: RuntimeTarget;
     path: string;
     line?: number;
     character?: number;
@@ -114,9 +116,9 @@ export class AgentTools {
         if (tool === 'ferroui_reload_output') return this.reload.recentOutput(args.lines ?? 60);
         if (tool === 'ferroui_reload_history') return { records: this.reload.history.recent(args.limit ?? 50) };
         if (tool === 'ferroui_reload_control') return this.reload.agentControl(args.action, args, signal, args.debug_configuration);
-        if (tool === 'ferroui_runtime_source') return this.runtimeSource.read(args.node!, signal);
+        if (tool === 'ferroui_runtime_source') return this.runtimeSource.read(args.node!, signal, args.runtime);
         if (tool === 'ferroui_runtime_apply_source') {
-            return this.runtimeSource.apply(args.node!, args.property, args.value!, args.expected_generation, args.expected_version, signal);
+            return this.runtimeSource.apply(args.node!, args.property, args.value!, args.expected_generation, args.expected_version, signal, args.runtime);
         }
         if (tool === 'ferroui_project_files') return this.project.list(args.folder, args.kind as ProjectFile['kind'] | undefined, args.offset ?? 0, args.limit ?? 100, signal);
         if (tool === 'ferroui_project_scaffold') return this.scaffolds.create(args.kind as 'view' | 'component', args.language!, args.path, args.folder, signal);

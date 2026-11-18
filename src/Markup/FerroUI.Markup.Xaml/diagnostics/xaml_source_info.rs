@@ -23,6 +23,7 @@ pub struct XamlSourceInfo {
     source_uri: Option<Url>,
     line_number: i32,
     line_position: i32,
+    source_revision: Option<u64>,
 }
 
 ferro_static_type!(XamlSourceInfo);
@@ -75,7 +76,23 @@ impl XamlSourceInfo {
     /// Initializes a new instance with the specified line, column, and file
     /// path.
     pub fn new(line: i32, column: i32, file_path: Option<&str>) -> Self {
-        Self { line_number: line, line_position: column, source_uri: file_path.and_then(file_uri) }
+        Self {
+            line_number: line,
+            line_position: column,
+            source_uri: file_path.and_then(file_uri),
+            source_revision: None,
+        }
+    }
+
+    /// Associate the location with the XAML text from which this object was built.
+    pub fn with_source_revision(mut self, revision: u64) -> Self {
+        self.source_revision = Some(revision);
+        self
+    }
+
+    /// The source text's development reload fingerprint, when emitted by the compiler.
+    pub fn source_revision(&self) -> Option<u64> {
+        self.source_revision
     }
 
     /// The full path of the source file containing the XAML element: the

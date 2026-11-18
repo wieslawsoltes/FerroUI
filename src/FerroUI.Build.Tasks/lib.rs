@@ -762,9 +762,9 @@ impl Build {
             // the type systems name it.
             (None, _) => self.crate_name.clone(),
         };
-        // Whether source information is on for the assembly, as the configuration of the
-        // run-time loader reads it from the metadata of the assembly.
-        let assembly_source_info = model.as_ref().is_some_and(|model| {
+        // Debug builds with a reload manifest identify compiled source for editor inspection.
+        // Assemblies may also opt in for other profiles through their markup metadata.
+        let assembly_source_info = hot_reload || model.as_ref().is_some_and(|model| {
             model.metadata.iter().find(|(key, _)| key == ferroui_build_scan::CREATE_SOURCE_INFO).is_some_and(|(_, value)| value.trim().eq_ignore_ascii_case("true"))
         });
 
@@ -955,7 +955,7 @@ impl Build {
                 #[cfg(feature = "runtime-host")]
                 None => {
                     let Some(assembly) = self.assembly else { break };
-                    runtime_host::generate_file(assembly, &root_uri, &borrowed, group.create_source_info, default_compile_bindings, &dependencies)
+                    runtime_host::generate_file(assembly, &root_uri, &borrowed, group.create_source_info.or(hot_reload.then_some(true)), default_compile_bindings, &dependencies)
                 }
                 // Reported before the groups: without the feature no group is compiled
                 // against the run-time type system.

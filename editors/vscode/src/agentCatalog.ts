@@ -108,10 +108,10 @@ export const agentCatalog = {
         { lines: integer(1, 250) }),
     ferroui_reload_history: tool('Read per-file managed hot reload receipts, outcomes, and time from save observation to acknowledgement.',
         { limit: integer(1, 200) }),
-    ferroui_runtime_source: tool('Resolve a managed runtime node to a workspace location. Returns the process generation and editor buffer version. Get node IDs from the managed app inspector.',
-        { node }, ['node']),
-    ferroui_runtime_apply_source: tool('Apply a managed runtime property as a literal through the workbench source editor. Use the node, generation and buffer version from ferroui_runtime_source. Saving the resulting buffer is a separate action.',
-        { node, property: text, value: { type: 'string', maxLength: 4096 }, expected_generation: integer(0), expected_version: integer(1) },
+    ferroui_runtime_source: tool('Resolve a node from the managed or attached runtime inspector to a workspace location. Returns the connection generation and editor buffer version.',
+        { node, runtime: { enum: ['managed', 'attached'] } }, ['node']),
+    ferroui_runtime_apply_source: tool('Apply a runtime property as a literal through the workbench source editor. Use the same runtime, node, generation and buffer version as ferroui_runtime_source. Saving the resulting buffer is a separate action.',
+        { node, runtime: { enum: ['managed', 'attached'] }, property: text, value: { type: 'string', maxLength: 4096 }, expected_generation: integer(0), expected_version: integer(1) },
         ['node', 'property', 'value', 'expected_generation', 'expected_version'], true),
 };
 
