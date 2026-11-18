@@ -7991,21 +7991,27 @@ section 9.99 for a family). A new value takes the place at the end of the eight 
 towards the front as it is used again, so values that come once pass through one place. Of the
 27 values of a tile of the benchmark, 19 take a box that is there.
 
+**Two lists.** `flatten` made a new list of the children of every element, to take fragments
+and lists apart, also where none was among them: a list that is flat already is the one given.
+The list of the values of an element grew from nothing to four to eight entries as its setters
+ran; it takes room for eight once.
+
 **Measured** (`declarative::ViewBenchmark`, the gate, two rounds for each step against the step
-before):
+before; the change of the instructions):
 
-| `declarative::ViewBenchmark` | Before | No owner | Change, instructions | Shared boxes | Change, instructions |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| `mount_wall_run_once` | 9.158 ms | 8.335 ms | -5.73 % | 8.305 ms | -4.23 % |
-| `mount_list_run_once` | 683.8 us | 604.1 us | -11.58 % | 607.4 us | +0.03 % |
-| `mount_list_rerender` | 682.8 us | 604.7 us | -11.50 % | 610.6 us | +0.17 % |
-| `run_parent_of_components[memoized by default]` | 236.8 us | 238.1 us | +0.86 % | 232.5 us | -3.67 % |
-| `mount_wall_controls` (the wall of controls) | 4.775 ms | 4.769 ms | +0.01 % | 4.777 ms | +0.00 % |
+| `declarative::ViewBenchmark` | No owner | Shared boxes | Two lists |
+| --- | ---: | ---: | ---: |
+| `mount_wall_run_once` | -5.73 % | -4.23 % | -4.28 % |
+| `mount_list_run_once` | -11.58 % | +0.03 % | -0.43 % |
+| `mount_list_rerender` | -11.50 % | +0.17 % | -0.40 % |
+| `run_parent_of_components[memoized by default]` | +0.86 % | -3.67 % | -5.55 % |
+| `run_unchanged` | -1.24 % | +0.15 % | -1.28 % |
+| `mount_wall_controls` (the wall of controls) | +0.01 % | +0.00 % | -0.01 % |
 
-The wall of elements takes 133.6 million instructions where it took 147.5 million (9.4 % fewer)
-and 8.3 ms where it took 9.2 ms; the wall of controls is at 86.7 million. Neither gate (25
-metrics each) has a line over its tolerance; the patches of a component that runs again are
-within 1.5 %.
+The wall of elements took 9.16 ms before the three steps and takes 7.25 ms. With the font
+family of section 9.99, which both walls make for every text, it takes 122.9 million
+instructions against 81.7 million for the wall of controls: one and a half times, where it was
+1.7 times. None of the three gates (25 metrics each) has a line over its tolerance.
 
 **Looked at and not changed** (section 8.4, rule 2). A dynamic list and a component that runs
 again keep their owners: they start an effect. The instance of a control, its slot and the
