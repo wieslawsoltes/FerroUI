@@ -186,6 +186,14 @@ impl BatchStreamData {
         self.objects.release_excess();
         self.structs.release_excess();
     }
+
+    /// Takes the emptied streams down to what a buffer keeps at rest, once the burst is over
+    /// (#836); tells whether they gave storage back.
+    pub(crate) fn release_at_rest(&mut self) -> bool {
+        use crate::utilities::ReleaseAtRest;
+        let objects = self.objects.release_at_rest();
+        self.structs.release_at_rest() | objects
+    }
 }
 
 /// A plain value that can be written to the value stream of a batch.

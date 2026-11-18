@@ -108,6 +108,17 @@ impl BatchQueue {
         }
     }
 
+    /// Takes the pooled streams down to what a buffer keeps at rest (#836): the streams of the
+    /// batch of the first frame of a large tree are pooled with the storage of that batch.
+    pub(crate) fn release_pool_at_rest(&self) -> bool {
+        let Ok(mut pool) = self.data_pool.try_lock() else { return false };
+        let mut released = false;
+        for data in pool.iter_mut() {
+            released |= data.release_at_rest();
+        }
+        released
+    }
+
     fn return_data(&self, mut data: BatchStreamData) {
         data.reset();
         let mut pool = self.data_pool.lock().unwrap();
@@ -1086,8 +1097,30 @@ impl ServerCompositor {
             }
         }
 
+        // No tick is pending: what the passes of a burst filled is released, and the allocator
+        // gives its free pages back (#836).
+        self.release_at_rest();
+
         // Otherwise there is no need to waste CPU cycles, tell the timer to pause
         false
+    }
+
+    /// The step of the render thread when no tick is pending (`utilities::resting`, #836): the
+    /// queues of the passes and the pooled streams are taken down to what a buffer keeps at rest,
+    /// and when one of them gave storage back the allocator is asked for its free pages.
+    fn release_at_rest(&self) {
+        use crate::utilities::ReleaseAtRest;
+        let mut released = false;
+        if let Ok(mut pass) = self.visual_own_properties_recompute_pass.try_borrow_mut() {
+            released |= pass.release_at_rest();
+        }
+        if let Ok(mut queue) = self.visual_readback_update_pass_queue.try_borrow_mut() {
+            released |= queue.release_at_rest();
+        }
+        released |= self.batches.release_pool_at_rest();
+        if released {
+            crate::utilities::release_free_pages();
+        }
     }
 }
 

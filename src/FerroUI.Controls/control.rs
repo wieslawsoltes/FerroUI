@@ -17,7 +17,7 @@ use ferroui_base::interactivity::{
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::styling::{ISetterValue, Setter};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
-use ferroui_base::utilities::ReleaseExcess;
+use ferroui_base::utilities::ReleaseAtRest;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, ferro_routed_event, instantiate, AnyValue, BoxedValue,
     FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, IntoRef, Nullable,
@@ -55,6 +55,8 @@ struct LoadedQueues {
     /// The queued controls, with their slot in `queue`.
     queued: HashMap<Ref<Control>, usize>,
     processing_queue: VecDeque<Ref<Control>>,
+    /// Whether the table is registered to be released once a burst is over (#836).
+    resting: bool,
 }
 
 impl LoadedQueues {
@@ -88,8 +90,21 @@ impl LoadedQueues {
     /// The queued controls in their order, the queue left empty.
     fn take(&mut self) -> Vec<Ref<Control>> {
         self.queued.clear();
-        // The first show of a large tree queues every control of it.
-        self.queued.release_excess();
+        // The first show of a large tree queues every control of it: the table is released once
+        // the burst is over (#836).
+        if !self.resting {
+            self.resting = true;
+            ferroui_base::utilities::register_resting_buffers(|| {
+                // The table of the thread lives as long as the thread.
+                let _ = LOADED.try_with(|loaded| {
+                    if let Ok(mut loaded) = loaded.try_borrow_mut() {
+                        loaded.queued.release_at_rest();
+                    }
+                });
+                true
+            });
+        }
+        self.queued.release_excess_later();
         std::mem::take(&mut self.queue).into_iter().flatten().collect()
     }
 }

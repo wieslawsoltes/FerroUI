@@ -12,7 +12,7 @@ use crate::rendering::{
     IHitTester, IPresentationSource, IRenderer, RendererDiagnostics, SceneInvalidatedEventArgs,
 };
 use crate::threading::DispatcherPriority;
-use crate::utilities::{HandlerList, ReleaseExcess};
+use crate::utilities::{HandlerList, ReleaseAtRest};
 use crate::visual::CompositionItemPlacements;
 use crate::{Matrix, Point, Rect, Ref, Size, Visual};
 use std::any::{Any, TypeId};
@@ -312,6 +312,16 @@ impl CompositingRenderer {
             renderers.retain(|_, r| r.strong_count() > 0);
             renderers.insert(key, Rc::downgrade(&renderer));
         });
+        // The list of the visuals that left with a large tree is released once the burst is over
+        // (#836).
+        let weak = Rc::downgrade(&renderer);
+        crate::utilities::register_resting_buffers(move || {
+            let Some(renderer) = weak.upgrade() else { return false };
+            if let Ok(mut departed) = renderer.departed.try_borrow_mut() {
+                departed.release_at_rest();
+            }
+            true
+        });
         renderer
     }
 
@@ -559,7 +569,7 @@ impl CompositingRenderer {
         // meanwhile.
         let mut list = self.departed.borrow_mut();
         if list.is_empty() {
-            departed.release_excess();
+            departed.release_excess_later();
             *list = departed;
         }
     }

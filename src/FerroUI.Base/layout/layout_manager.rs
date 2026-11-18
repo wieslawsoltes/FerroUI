@@ -55,7 +55,7 @@ pub struct LayoutManager {
 impl LayoutManager {
     /// Creates a layout manager for a layout root.
     pub fn new(owner: Weak<dyn ILayoutRoot>) -> Rc<Self> {
-        Rc::new_cyclic(|this| Self {
+        let manager = Rc::new_cyclic(|this| Self {
             this: this.clone(),
             owner,
             to_measure: RefCell::new(LayoutQueue::new(|v| !v.is_measure_valid())),
@@ -71,7 +71,20 @@ impl LayoutManager {
             total_pass_count: Cell::new(0),
             layout_updated: HandlerList::new(),
             layout_pass_timed: RefCell::new(None),
-        })
+        });
+        // The queues of a pass over a large tree are released once the burst is over (#836).
+        let weak = Rc::downgrade(&manager);
+        crate::utilities::register_resting_buffers(move || {
+            let Some(manager) = weak.upgrade() else { return false };
+            if let Ok(mut queue) = manager.to_measure.try_borrow_mut() {
+                queue.release_at_rest();
+            }
+            if let Ok(mut queue) = manager.to_arrange.try_borrow_mut() {
+                queue.release_at_rest();
+            }
+            true
+        });
+        manager
     }
 
     /// Whether a layout pass is currently executing.

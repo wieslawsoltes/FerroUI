@@ -1,6 +1,6 @@
 use crate::logging::{LogArea, LogEventLevel, Logger};
 use super::Layoutable;
-use crate::utilities::ReleaseExcess;
+use crate::utilities::ReleaseAtRest;
 use crate::Ref;
 use std::any::Any;
 use rustc_hash::FxHashMap;
@@ -76,8 +76,13 @@ impl<T: Clone + Eq + Hash> LoopQueueInfo<T> {
         self.index.clear();
         // A pass over a large tree (its first layout, or the layout that follows its removal)
         // has an entry for every element of it; no later pass comes near.
-        self.entries.release_excess();
-        self.index.release_excess();
+        self.entries.release_excess_later();
+        self.index.release_excess_later();
+    }
+
+    fn release_at_rest(&mut self) {
+        self.entries.release_at_rest();
+        self.index.release_at_rest();
     }
 }
 
@@ -164,8 +169,19 @@ impl<T: LayoutQueueItem> LayoutQueue<T> {
         self.not_finalized_buffer = not_finalized_buffer;
         if self.inner.is_empty() {
             // As the entries of the loop: the queue of a pass over a large tree.
-            self.inner.release_excess();
+            self.inner.release_excess_later();
         }
+    }
+
+    /// Gives back what the emptied queue keeps beyond what a buffer keeps at rest, once the
+    /// burst that filled it is over (`utilities::resting`, #836). A queue with items is left alone.
+    pub(crate) fn release_at_rest(&mut self) {
+        if !self.inner.is_empty() {
+            return;
+        }
+        self.inner.release_at_rest();
+        self.loop_queue_info.release_at_rest();
+        self.not_finalized_buffer.release_at_rest();
     }
 
     pub fn dispose(&mut self) {

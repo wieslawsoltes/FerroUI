@@ -11,7 +11,7 @@ use crate::reactive::{Disposable, IDisposable, Subscription};
 use crate::rendering::composition::server::IServerObject;
 use crate::rendering::{IRenderLoop, IRenderLoopTask};
 use crate::threading::{Dispatcher, DispatcherPriority};
-use crate::utilities::{HandlerList, ReleaseExcess};
+use crate::utilities::{HandlerList, ReleaseAtRest};
 use rustc_hash::FxHashSet;
 use crate::{FerroLocator, LocatorExtensions};
 use std::cell::{Cell, RefCell};
@@ -456,6 +456,20 @@ impl Compositor {
             compositors.retain(|_, c| c.strong_count() > 0);
             compositors.insert(key, Rc::downgrade(&compositor));
         });
+        // What the commit of the first frame of a large tree filled is released once the burst
+        // is over (#836): the queue of the objects to serialize, its set, the pooled streams.
+        let weak = Rc::downgrade(&compositor);
+        crate::utilities::register_resting_buffers(move || {
+            let Some(compositor) = weak.upgrade() else { return false };
+            if let Ok(mut queue) = compositor.object_serialization_queue.try_borrow_mut() {
+                queue.release_at_rest();
+            }
+            if let Ok(mut queued) = compositor.object_serialization_hash_set.try_borrow_mut() {
+                queued.release_at_rest();
+            }
+            let _ = compositor.batches.release_pool_at_rest();
+            true
+        });
         let dispatcher = compositor.dispatcher.clone();
         compositor.with_server(|server| {
             server.set_context_change_handler(Arc::new(move |state| {
@@ -768,10 +782,10 @@ impl Compositor {
                 // commit, up to what an emptied buffer keeps: the commit of
                 // the first frame of a large tree serializes every object of
                 // it.
-                self.object_serialization_queue.borrow_mut().release_excess();
+                self.object_serialization_queue.borrow_mut().release_excess_later();
                 let mut queued = self.object_serialization_hash_set.borrow_mut();
                 queued.clear();
-                queued.release_excess();
+                queued.release_excess_later();
             }
             drop(serialized);
 
