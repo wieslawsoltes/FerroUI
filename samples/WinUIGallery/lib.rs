@@ -18,6 +18,7 @@ pub mod catalog;
 mod catalog_data;
 pub mod contrast;
 mod control_samples;
+mod date_samples;
 pub mod examples;
 mod feedback_samples;
 mod frame_sample;
@@ -26,6 +27,7 @@ mod ink_samples;
 mod input_samples;
 mod layout_samples;
 mod materials_samples;
+mod menu_samples;
 mod media_samples;
 pub mod playback_samples;
 #[cfg(feature = "desktop")]
@@ -103,3 +105,9 @@ mod status_samples_tests;
 
 #[cfg(test)]
 mod command_samples_tests;
+
+#[cfg(test)]
+mod menu_samples_tests;
+
+#[cfg(test)]
+mod date_samples_tests;

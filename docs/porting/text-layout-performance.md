@@ -151,6 +151,15 @@ changes behavior upstream defines.
 4. **Cache fixes.** `SelectableTextBlock` passes no run cache (it shapes on every layout);
    `TextBlock` drops its shaped runs on a foreground or decoration change, which do not change
    shaping.
+
+   Done for the first: a `SelectableTextBlock` gives its layouts the run cache of the text block
+   (`TextBlock::text_run_cache`), which a change of the text, of the selection or of the brush of
+   the selection invalidates, as every property the shaping is made of does; a layout with the
+   foreground of a selection shapes without the cache, so no kept shaping holds those runs. Left:
+   the second. The shaped runs hold their run properties, and the drawing takes the foreground
+   and the decorations from there (also of the runs a font fallback made, which copy them), so
+   keeping the runs across a foreground or decoration change needs the kept runs given the new
+   properties, a change of the run cache of its own.
 5. **Stable glyph runs.** Lines cut at the same range of the same shaped run reuse their glyph
    runs, so the renderer's caches keyed by a run's identity keep hitting while the width moves.
 6. **A shared text service.** The prepared paragraphs and their caches (key: text, properties

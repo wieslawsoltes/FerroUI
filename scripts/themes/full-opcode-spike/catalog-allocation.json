@@ -1,0 +1,36 @@
+{
+  "bytes": 65876016,
+  "sha256": "701065a77efedc5a3ed13c479baae04472222bbc11eb4b6be718c40ea681d4c4",
+  "allocation": {
+    "Other instructions and code alignment": 11941160,
+    "Rust core, alloc and std": 3431708,
+    "Other FerroUI.Base instructions": 8624100,
+    "Core controls": 3934936,
+    "Other ControlCatalog instructions": 1543132,
+    "Generated XAML instructions": 7997836,
+    "XAML runtime library": 846064,
+    "FerroUI.Base property store and property types": 4429040,
+    "FerroUI.Base typed binding expressions": 4514656,
+    "Skia and HarfBuzz native archives": 4084560,
+    "Embedded assets matched to source files": 3799711,
+    "Other read-only constants": 3522159,
+    "Relocatable constant data": 5013344,
+    "Mach-O link and signing data": 1044528,
+    "Other sections, headers and padding": 1149082
+  },
+  "generated_instructions_by_crate": {
+    "control_catalog": 6090744,
+    "ferroui_controls_color_picker": 657900,
+    "ferroui_controls_inking": 144548,
+    "ferroui_controls_treedatagrid": 78168,
+    "ferroui_dialogs": 24284,
+    "ferroui_themes_winui": 789640,
+    "treedatagrid_demo": 212552
+  },
+  "generated_xaml_instructions_by_symbol": {
+    "directly named generated XAML": 7997836,
+    "other symbols naming a generated module": 358196,
+    "trait implementations for generated types": 1516
+  },
+  "construction_import_instructions_by_symbol": {}
+}

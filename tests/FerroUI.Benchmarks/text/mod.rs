@@ -7,6 +7,7 @@ pub mod codepoint_benchmark;
 pub mod glyph_bounds_benchmark;
 pub mod huge_text_layout;
 pub mod rich_text_editing;
+pub mod selectable_text_block_widths;
 pub mod shaped_buffer_ops;
 pub mod text_block_changing_text_benchmark;
 pub mod text_block_constraint_benchmark;
@@ -34,4 +35,5 @@ pub fn register(registry: &mut Registry) {
     text_pipeline_benchmark::register(registry);
     text_block_constraint_benchmark::register(registry);
     text_block_changing_text_benchmark::register(registry);
+    selectable_text_block_widths::register(registry);
 }
