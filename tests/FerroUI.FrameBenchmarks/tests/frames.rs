@@ -483,6 +483,17 @@ impl Gate {
         )));
     }
 
+    /// Runs the jobs of the UI thread and lets the render thread tick for `time`: what a scene
+    /// that asks for no frame still has to do (a content that was taken out) is done.
+    fn settle(&self, time: Duration) {
+        let start = Instant::now();
+        while start.elapsed() < time {
+            Dispatcher::ui_thread().run_jobs(None);
+            self.render_loop.wait_for_progress(Duration::from_millis(1));
+        }
+        self.render_loop.wait_for_tick_end();
+    }
+
     /// Runs the jobs of the UI thread until the screen's animation frames have advanced the frame
     /// index by `frames`, and returns what that took.
     fn run(&self, frames: i32) -> Run {
@@ -527,6 +538,10 @@ impl Drop for Gate {
         self.window.close();
     }
 }
+
+/// How long the two threads run after the content of a scene was taken out, before what it left
+/// is counted.
+const CLOSE_TIME: Duration = Duration::from_millis(500);
 
 /// The frames the warm-up of the process runs.
 const PROCESS_WARM_UP_FRAMES: i32 = 30;
@@ -669,6 +684,17 @@ fn measure_start(scene: &Scene) {
          ({startup_mb:.0} MB). Guards {}.",
         scene.guards
     );
+    // What the scene leaves when it goes (`FERROUI_GATE_CLOSE=1`, experiment #761): the content
+    // is taken out of the window, and the two threads run until nothing of it is left to do.
+    // What is still allocated then is what the queues and buffers of the framework keep of a
+    // burst; the sites of `FERROUI_HEAP_SITES=all` printed below are of those blocks.
+    let closed = std::env::var_os("FERROUI_GATE_CLOSE").map(|_| {
+        heap::sites("close", true);
+        gate.window.set_content(None);
+        gate.settle(CLOSE_TIME);
+        heap::sites("close", false);
+        (resident_megabytes(), heap::snapshot())
+    });
     if cfg!(feature = "counters") {
         let [before, built, content, shown] = gate.heap;
         println!("{bench} heap:");
@@ -676,6 +702,14 @@ fn measure_start(scene: &Scene) {
         println!("  the content: {}", content.since(&built).report());
         println!("  the show: {}", shown.since(&content).report());
         println!("  the first frame: {}", heap_first.since(&shown).report());
+        if let Some((memory_closed, heap_closed)) = closed {
+            println!("  the close: {}", heap_closed.since(&heap_first).report());
+            println!("  left of the scene after the close: {}", heap_closed.since(&before).report());
+            println!(
+                "  resident memory: {:.0} MB before the build, {memory_first:.0} MB at the first frame, {memory_closed:.0} MB after the close",
+                gate.memory[0]
+            );
+        }
         println!("{bench} sizes:\n{}", sizes_report());
         println!("{bench} counters:\n{}", counters.report());
         let mut census = Census::default();

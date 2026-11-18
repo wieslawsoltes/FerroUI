@@ -4,7 +4,8 @@
 //! the feature the allocator is the system's and every count is zero.
 //!
 //! The sizes say how much a phase left and not what it is. `FERROUI_HEAP_SITES=<phase>` (a phase
-//! of a start: `build`, `show`, `first`, or `all`) also keeps, for every block allocated in that
+//! of a start: `build`, `show`, `first`, `close` with `FERROUI_GATE_CLOSE=1`, or `all`, which is
+//! `build` to `first`) also keeps, for every block allocated in that
 //! phase, the frames of the call that allocated it, and the start prints the blocks that are
 //! still allocated at its end by those frames (`sites_report`). The frames are addresses of the
 //! program; `scripts/perf/heap-sites.py` gives them names and adds them up by function.
