@@ -602,25 +602,40 @@ fn attached_state_clock_samples_literal_and_resource_transitions_through_native_
 #[test]
 fn timeline_transition_seek_reconstructs_native_route_after_visiting_its_endpoint() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
-    let source = "<Canvas xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Name='Owner'><Canvas.Resources><x:Double x:Key='MutedOpacity'>0.25</x:Double></Canvas.Resources><Button Name='A' Opacity='1' Width='100' Height='40'/></Canvas>";
+    let source = "<Canvas xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Name='Owner'>
+        <Canvas.Resources>
+            <x:Double x:Key='NormalOpacity'>0.6</x:Double>
+            <x:Double x:Key='MutedOpacity'>0.25</x:Double>
+        </Canvas.Resources>
+        <Button Name='A' Opacity='1' Width='100' Height='40'/>
+    </Canvas>";
     let mut session = DesignerSession::new(source, ContentControl::new()).unwrap();
     let _window = attach_preview(&session);
     let owner = session.document().ast().root();
     let target = session.document().ast().find_name("A").unwrap();
     let mut group = state_group(owner);
+    group.states[0].setters[0].value = "{StaticResource NormalOpacity}".into();
     group.states[1].setters[0].value = "{StaticResource MutedOpacity}".into();
-    group.transitions.push(StateTransition {
-        from: None, to: "Muted".into(), duration: 0.8, easing: Easing::Linear,
-    });
+    group.transitions.extend([
+        StateTransition {
+            from: None, to: "Muted".into(), duration: 0.8, easing: Easing::Linear,
+        },
+        StateTransition {
+            from: None, to: "Normal".into(), duration: 0.8, easing: Easing::Linear,
+        },
+        StateTransition {
+            from: Some("Muted".into()), to: "Normal".into(), duration: 0.2, easing: Easing::Linear,
+        },
+    ]);
     session.upsert_state_group(group).unwrap();
     let authored = session.document().source().to_owned();
     let opacity = |session: &DesignerSession| session.preview.visual(target).unwrap().opacity();
     session.preview_state_transition(owner, "Interaction", Some("Normal"), "Muted", 0.2).unwrap();
-    assert!((opacity(&session) - 0.625).abs() < 1e-6, "Directional midpoint opacity was {}", opacity(&session));
+    assert!((opacity(&session) - 0.425).abs() < 1e-6, "Directional midpoint opacity was {}", opacity(&session));
     session.advance_state_preview(5.0).unwrap();
     assert!((opacity(&session) - 0.25).abs() < 1e-6, "Destination opacity was {}", opacity(&session));
     session.preview_state_transition(owner, "Interaction", Some("Normal"), "Muted", 0.1).unwrap();
-    assert!((opacity(&session) - 0.8125).abs() < 1e-6, "Backward seek opacity was {}", opacity(&session));
+    assert!((opacity(&session) - 0.5125).abs() < 1e-6, "Backward seek opacity was {}", opacity(&session));
     session.preview_state_transition(owner, "Interaction", None, "Muted", 0.4).unwrap();
     assert!((opacity(&session) - 0.625).abs() < 1e-6, "Default midpoint opacity was {}", opacity(&session));
     assert!(session.preview_state_transition(owner, "Interaction", Some("Normal"), "Muted", 0.8).is_err());

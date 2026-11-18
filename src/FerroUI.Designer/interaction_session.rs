@@ -99,7 +99,9 @@ impl DesignerSession {
             return Err("Attach the preview host to a rooted logical tree before sampling state transitions".into());
         }
         self.stop_animation_playback();
-        self.preview_state_at(owner, name, from, None)?;
+        // Resolve the exact starting endpoint without replaying any incoming route
+        // from the state that happened to be visible before this seek.
+        self.sample_state(owner, name, from, None, Some(None))?;
         let transition = TransitionPreview { owner, group: name.into(), to: to.into(), duration };
         if elapsed >= duration {
             return self.finish_state_transition(transition);

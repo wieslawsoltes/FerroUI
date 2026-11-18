@@ -5,7 +5,10 @@ import type { StateTransitionPosition } from '../src/stateTransitionProtocol';
 import type { McpFixture } from './mcp';
 
 const scene = `<Canvas xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="Owner">
-  <Canvas.Resources><x:Double x:Key="MutedOpacity">0.25</x:Double></Canvas.Resources>
+  <Canvas.Resources>
+    <x:Double x:Key="NormalOpacity">0.6</x:Double>
+    <x:Double x:Key="MutedOpacity">0.25</x:Double>
+  </Canvas.Resources>
   <Button Name="Status" Opacity="1" Content="Customer status"/>
 </Canvas>`;
 
@@ -19,11 +22,13 @@ export async function verifyStateTransition({ invoke, content }: McpFixture, ses
     let frame = await wait();
     const linear = { kind: 'Linear' };
     const model = { owner: frame.nodes[0].id, name: 'Status', states: [
-        { name: 'Normal', setters: [{ target: 'Status', property: 'Opacity', value: '1' }] },
+        { name: 'Normal', setters: [{ target: 'Status', property: 'Opacity', value: '{StaticResource NormalOpacity}' }] },
         { name: 'Muted', setters: [{ target: 'Status', property: 'Opacity', value: '{StaticResource MutedOpacity}' }] },
     ], transitions: [
         { from: 'Normal', to: 'Muted', duration: .4, easing: linear },
         { from: null, to: 'Muted', duration: .8, easing: linear },
+        { from: 'Muted', to: 'Normal', duration: .2, easing: linear },
+        { from: null, to: 'Normal', duration: .8, easing: linear },
     ] };
     content(await invoke('designer_studio_edit', { session, expected_revision: frame.revision, tool: 'designer_state',
         arguments: { action: 'upsert', model } }));
@@ -46,12 +51,12 @@ export async function verifyStateTransition({ invoke, content }: McpFixture, ses
     const opened = await control({ action: 'open', owner: frame.nodes[0].id, group: 'Status', from: 'Normal', to: 'Muted', time: .2 });
     assert.equal(opened.duration, .4);
     assert.equal(opened.revision, frame.revision);
-    assert.equal(await opacity(), .625);
+    assert.equal(await opacity(), .425);
     assert.ok((await request(retired, { action: 'seek', time: .1 })).isError);
     assert.equal((await control({ action: 'seek', time: .4 })).time, .4);
     assert.equal(await opacity(), .25);
     await control({ action: 'seek', time: .1 });
-    assert.equal(await opacity(), .8125);
+    assert.equal(await opacity(), .5125);
     content(await request(frame.revision, { action: 'stop' }));
     frame = await wait();
     assert.equal(await opacity(), 1);
