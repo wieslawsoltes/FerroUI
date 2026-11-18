@@ -18,7 +18,7 @@ export class CanvasDrag {
     constructor(private readonly artboard: Artboard, canDrag: () => boolean, private readonly send: (message: FromDesigner) => void) {
         const image = artboard.frame;
         this.source = new DragSource(image, event => {
-            const grab = artboard.point(event);
+            const grab = pointerPosition(artboard, event);
             const node = artboard.hit(grab);
             if (grab && node?.canMove && this.frame && canDrag()) {
                 return { frame: this.frame, origin: { type: 'node', node: node.id, grab } };
@@ -37,7 +37,7 @@ export class CanvasDrag {
                 this.clearHint();
                 return;
             }
-            const point = artboard.point(event);
+            const point = pointerPosition(artboard, event);
             if (!canDrag() || !this.frame || !point || !matchDrag(this.frame, this.gesture)) return;
             image.classList.add('placing');
             const key = `${Math.round(point.x)}:${Math.round(point.y)}`;
@@ -51,7 +51,7 @@ export class CanvasDrag {
         });
         image.addEventListener('pointerleave', () => this.clearHint());
         image.addEventListener('pointerup', event => {
-            const point = artboard.point(event);
+            const point = pointerPosition(artboard, event);
             if (event.button === 0 && canDrag() && point) finishDrop(this.frame, this.gesture, { type: 'canvas', ...point }, send);
             this.clearHint();
         });
@@ -98,4 +98,9 @@ export class CanvasDrag {
         this.artboard.frame.classList.remove('placing', 'invalid-placement');
         this.label.hidden = true;
     }
+}
+
+function pointerPosition(artboard: Artboard, event: PointerEvent) {
+    const point = artboard.point(event);
+    return point && { x: Math.round(point.x), y: Math.round(point.y) };
 }

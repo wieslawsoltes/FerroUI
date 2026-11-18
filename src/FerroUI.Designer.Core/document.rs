@@ -1,5 +1,6 @@
 mod changes;
 mod editing;
+mod insertion;
 
 use crate::{Ast, NodeId, SourceSpan};
 use changes::{diff, unchanged};

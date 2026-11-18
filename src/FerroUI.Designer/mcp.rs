@@ -709,6 +709,23 @@ mod tests {
     }
 
     #[test]
+    fn toolbox_and_placement_share_the_studio_transaction() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let (session, provider) = fixture();
+        let assets = provider.call("designer_toolbox", &json!({}), Permissions::default()).unwrap();
+        assert!(assets["assets"].as_array().unwrap().iter().any(|asset| asset["id"] == "Ellipse"));
+        let parent = session.borrow().document().ast().root();
+        let insert = json!({"expected_revision":0,"asset":"Ellipse","anchor":parent,"position":"inside"});
+        assert!(provider.call("designer_place", &insert, Permissions::default()).is_err());
+        let result = provider.call("designer_place", &insert, write()).unwrap();
+        assert_eq!(result["revision"], 1);
+        assert!(session.borrow().document().source().contains("<Ellipse"));
+        assert!(provider.call("designer_place", &insert, write()).is_err());
+        provider.call("designer_undo", &json!({"expected_revision":1}), write()).unwrap();
+        assert_eq!(session.borrow().document().source(), source());
+    }
+
+    #[test]
     fn automation_uses_revision_guards_atomic_edits_history_and_preview_retention() {
         let _app = UnitTestApplication::start(TestServices::styled_window());
         let (session, provider) = fixture();

@@ -132,7 +132,7 @@ fn apply_edit(old: Snapshot, edit: Edit, next_id: &mut NodeId) -> Result<Snapsho
                 return Ok(old);
             }
             validate_fragment(&old.ast, parent.id, &source)?;
-            insertion_patches(parent, &old.ast, &children, index, &source)?.0
+            insertion_patches(&old.source, parent, &old.ast, &children, index, &source)?.0
         }
         Edit::RemoveNode { node } => {
             if node == old.ast.root() {
@@ -212,7 +212,7 @@ fn apply_edit(old: Snapshot, edit: Edit, next_id: &mut NodeId) -> Result<Snapsho
                 node.opening_span.end - node.span.start - if node.self_closing { 2 } else { 1 };
             fragment.insert_str(declaration_offset, &declarations);
             let (mut patches, insert_offset, fragment_offset) =
-                insertion_patches(parent, &old.ast, &children, index, &fragment)?;
+                insertion_patches(&old.source, parent, &old.ast, &children, index, &fragment)?;
             patches.push(TextPatch {
                 span: node.span,
                 replacement: String::new(),
@@ -266,6 +266,7 @@ fn validate_fragment(ast: &Ast, parent: NodeId, fragment: &str) -> Result<(), De
 }
 
 fn insertion_patches(
+    source: &str,
     parent: &Node,
     ast: &Ast,
     children: &[NodeId],
@@ -280,26 +281,28 @@ fn insertion_patches(
     }
     if parent.self_closing {
         let start = parent.opening_span.end - 2;
+        let (replacement, fragment_offset) = super::insertion::expanded(source, ast, parent, fragment);
         Ok((
             vec![TextPatch {
                 span: SourceSpan::new(start, parent.opening_span.end),
-                replacement: format!(">{fragment}</{}>", parent.name),
+                replacement,
             }],
             start,
-            1,
+            fragment_offset,
         ))
     } else {
         let offset = children
             .get(index)
             .and_then(|id| ast.node(*id))
             .map_or_else(|| parent.closing_span.unwrap().start, |n| n.span.start);
+        let (replacement, fragment_offset) = super::insertion::inline_or_indented(source, ast, parent, children, index, offset, fragment);
         Ok((
             vec![TextPatch {
                 span: SourceSpan::new(offset, offset),
-                replacement: fragment.to_owned(),
+                replacement,
             }],
             offset,
-            0,
+            fragment_offset,
         ))
     }
 }
