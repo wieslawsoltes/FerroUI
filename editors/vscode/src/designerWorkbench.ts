@@ -11,6 +11,7 @@ import { OutlineView } from './outlineView';
 import { SelectionInspection } from './selectionInspection';
 import { PROPERTIES_VIEW, PropertiesView } from './propertiesView';
 import type { ProjectAssets } from './projectAssets';
+import { promptRsxControlName } from './rsxRename';
 import { chooseLayout } from './studioLayout';
 import { StudioView } from './studioView';
 import { errorMessage, type DesignerView, type DetailsView, type DragOrigin, type FrameTarget, type FromAssets, type FromDetails, type FromOutline, type FromToolbox, type Language, type NodeOperation, type NodeTarget, type OutlineMode, type ToolboxState, type ToToolbox, type Viewport } from './protocol';
@@ -86,6 +87,14 @@ export class DesignerWorkbench implements vscode.Disposable {
             vscode.commands.registerCommand('ferroui.showEvents', (session?: number) => this.showDock(EVENTS_VIEW, session)),
             vscode.commands.registerCommand('ferroui.showResources', (session?: number) => this.showDock(RESOURCES_VIEW, session)),
             vscode.commands.registerCommand('ferroui.showAssets', (session?: number) => this.showDock(ASSETS_VIEW, session)),
+            vscode.commands.registerCommand('ferroui.rsx.renameControl', async () => {
+                try {
+                    const editor = vscode.window.activeTextEditor;
+                    const panel = editor?.document.languageId === 'rust' ? await this.openDocument(editor.document.uri, editor.selection.active) : this.active;
+                    if (panel?.language !== 'rust') throw new Error('Select a named RSX control in a Rust designer.');
+                    await promptRsxControlName(panel);
+                } catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
+            }),
             vscode.commands.registerCommand('ferroui.studio.layout', async () => {
                 try {
                     if (!this.active) throw new Error('Open a FerroUI designer to arrange controls.');

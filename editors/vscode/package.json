@@ -156,6 +156,17 @@
         "category": "FerroUI"
       },
       {
+        "command": "ferroui.studio.findDefinition",
+        "title": "Find Definition in Designer",
+        "category": "FerroUI",
+        "icon": "$(search)"
+      },
+      {
+        "command": "ferroui.rsx.renameControl",
+        "title": "Rename RSX Control",
+        "category": "FerroUI"
+      },
+      {
         "command": "ferroui.studio.layout",
         "title": "Arrange Selection",
         "category": "FerroUI"

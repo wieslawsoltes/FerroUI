@@ -84,6 +84,8 @@ The [Todo Workbench sample](../../samples/TodoWorkbench/README.md) demonstrates 
 
 **Project** groups the open workspace folders into Cargo manifests, XAML and RSX views, assets, and saved stage sets. Expand a manifest to find its runnable binaries. **Find Project View** opens a design by name. **New View** and **New Component** create starter files in the selected workspace. Add the generated Rust file to your app’s module tree when you are ready to use it. MCP agents can browse the same index with `ferroui_project_files` and use `ferroui_project_scaffold` to create the same starter files.
 
+Use **Find Definition in Designer** to search the active design’s component, template, and resource definitions and preview one in its authored scope. **Rename RSX Control** uses a checked edit to rename an authored `name` literal in the selected invocation. The same rename is available to agents through `designer_rename_rsx_control`.
+
 **Diagnostics** shows the outcome and acknowledgement time of observed saves in a managed session. It also reads layout and scene counters from the native inspector, and opens authored source from binding errors that carry an available location. MCP exposes the same history through `ferroui_reload_history` and the runtime’s logs and counters through `get_logs` and `get_frame_stats`.
 
 ## Hot reload a running application

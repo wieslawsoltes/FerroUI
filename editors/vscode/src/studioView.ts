@@ -3,7 +3,7 @@ import type { DesignerPanel } from './designerPanel';
 import { errorMessage } from './protocol';
 import { StudioContext, type StudioItem } from './studioContext';
 import { behaviorItems } from './studioBehaviors';
-import { contentSections } from './studioContent';
+import { contentSections, findDefinition } from './studioContent';
 import { focusItems } from './studioFocus';
 import { layerItems } from './studioLayers';
 import { stateItems } from './studioStates';
@@ -24,6 +24,13 @@ export class StudioView implements vscode.TreeDataProvider<StudioItem>, vscode.D
         this.view = vscode.window.createTreeView(viewId, { treeDataProvider: this, showCollapseAll: true });
         this.subscriptions = [this.view, this.changed, this.view.onDidChangeVisibility(visible),
             vscode.commands.registerCommand('ferroui.showStudio', () => vscode.commands.executeCommand(`${viewId}.focus`)),
+            vscode.commands.registerCommand('ferroui.studio.findDefinition', async () => {
+                try {
+                    const context = this.context();
+                    if (!context) throw new Error('Open a FerroUI design before finding a definition.');
+                    await findDefinition(context);
+                } catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
+            }),
             vscode.commands.registerCommand(runId, async (item: StudioItem) => {
                 try { await item.run?.(); }
                 catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
@@ -57,10 +64,8 @@ export class StudioView implements vscode.TreeDataProvider<StudioItem>, vscode.D
             try { return await item.children?.() ?? []; }
             catch (error) { return [{ id: `${item.id}:error`, label: errorMessage(error), icon: 'warning' }]; }
         }
-        const panel = this.panel;
-        const token = panel?.currentToken;
-        if (!panel || token === undefined) return [];
-        const context = new StudioContext(panel, token, () => this.panel === panel);
+        const context = this.context();
+        if (!context) return [];
         return [
             ...contentSections(context),
             { id: 'layers', label: 'Layers', icon: 'layers', children: () => layerItems(context) },
@@ -69,6 +74,12 @@ export class StudioView implements vscode.TreeDataProvider<StudioItem>, vscode.D
             { id: 'states', label: 'States', icon: 'symbol-enum', children: () => stateItems(context) },
             { id: 'behaviors', label: 'Behaviors', icon: 'run', children: () => behaviorItems(context) },
         ];
+    }
+
+    private context(): StudioContext | undefined {
+        const panel = this.panel;
+        const token = panel?.currentToken;
+        if (panel && token !== undefined) return new StudioContext(panel, token, () => this.panel === panel);
     }
 
     dispose(): void { this.subscriptions.forEach(subscription => subscription.dispose()); }

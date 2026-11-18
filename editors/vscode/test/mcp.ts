@@ -162,6 +162,17 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         const frame = content<{ revision: number; blocks: { active: boolean }[] }>(await invoke('designer_wait', { session: rust.session }));
         assert.equal(frame.blocks.length, 2);
         const rustSource = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(vscode.workspace.workspaceFolders![0].uri, 'views.rs'));
+        const authoredRust = rustSource.getText();
+        const named = content<{ nodes: { name?: string; id: number }[] }>(await invoke('designer_outline', { session: rust.session }))
+            .nodes.find(node => node.name === 'saveButton');
+        assert.ok(named);
+        const rename = { session: rust.session, node: named.id, expected_revision: frame.revision, value: 'ZapiszŁódź' };
+        assert.ok((await invoke('designer_rename_rsx_control', { ...rename, value: 'Invalid Name' })).isError);
+        content(await invoke('designer_rename_rsx_control', rename));
+        assert.equal(rustSource.getText(), authoredRust.replace('name: "saveButton"', 'name: "ZapiszŁódź"'));
+        assert.ok((await invoke('designer_rename_rsx_control', rename)).isError);
+        content(await invoke('designer_history', { session: rust.session, expected_version: rustSource.version, action: 'undo' }));
+        assert.equal(rustSource.getText(), authoredRust);
         await verifyCanvasInteraction({ invoke, content }, rust.session, rustSource);
         const interactRevision = content<{ revision: number }>(await invoke('designer_wait', { session: rust.session })).revision;
         const selected = content<{ blocks: { active: boolean }[] }>(await invoke('designer_block', { session: rust.session,

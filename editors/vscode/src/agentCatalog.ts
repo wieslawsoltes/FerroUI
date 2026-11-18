@@ -33,6 +33,8 @@ export const agentCatalog = {
         { ...session, node }, ['session']),
     designer_assets: tool('Browse project image, font, media and markup files from the Assets view.',
         { ...session, offset: integer(0), limit: integer(1, 200) }, ['session']),
+    designer_rename_rsx_control: tool('Rename a mapped control name literal within the active RSX invocation. The source patch preserves surrounding Rust and refuses duplicate mapped names.',
+        { ...frame, node, value: { type: 'string', maxLength: 128 } }, ['session', 'expected_revision', 'node', 'value'], true),
     designer_preview_image: tool('Capture the current native artboard as PNG with viewport and source revision metadata.', session, ['session']),
     designer_wait: tool('Wait for the native preview of the current authored buffer. Return the revision, RSX invocation ranges, and rendering diagnostics.',
         session, ['session']),

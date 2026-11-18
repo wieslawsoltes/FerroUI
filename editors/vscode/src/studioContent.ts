@@ -29,6 +29,7 @@ async function library(context: StudioContext): Promise<StudioItem[]> {
         },
     }));
     const owner = context.node;
+    if (components.length) items.unshift(action('component:find', 'Find Definition…', () => findDefinition(context, components), 'search'));
     items.unshift(action('component:exit', 'Return to document preview', () => context.present('designer_definition', { action: 'exit' }), 'preview'));
     if (context.writable && owner !== undefined) items.unshift(action('component:create', 'Add resource…', async () => {
         const key = await editText('Resource key');
@@ -37,6 +38,15 @@ async function library(context: StudioContext): Promise<StudioItem[]> {
         if (source) await context.edit('designer_component', { action: 'create_resource', owner, key, source });
     }, 'add'));
     return items.length ? items : [{ id: 'component:empty', label: 'No definitions in this design' }];
+}
+
+export async function findDefinition(context: StudioContext, components?: Component[]): Promise<void> {
+    const available = components ?? (await context.read<{ components: Component[] }>('designer_components')).components;
+    if (!available.length) throw new Error('This design has no authored definitions.');
+    const selected = await choose('Find FerroUI Definition', available.map(component => ({
+        label: component.display_name, description: [component.kind, component.key].filter(Boolean).join(' · '), component,
+    })));
+    if (selected) await context.present('designer_definition', { action: 'enter', node: selected.component.node });
 }
 
 async function data(context: StudioContext): Promise<StudioItem[]> {

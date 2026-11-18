@@ -8,6 +8,7 @@ import type { HotReload } from './hotReload';
 import type { ProjectFile, ProjectInventory } from './projectInventory';
 import type { ProjectScaffold } from './projectScaffold';
 import type { RuntimeSourceTools } from './runtimeSourceTools';
+import { renameRsxControl } from './rsxRename';
 import type { StagesPanel } from './stagesPanel';
 import type { PrototypeCommand, StageChange } from './stagesProtocol';
 import type { CanvasAction, CanvasInteraction, DesignerView, DragOrigin, DropTarget, OutlineMode, Placement } from './protocol';
@@ -250,6 +251,9 @@ export class AgentTools {
                 break;
             case 'designer_apply':
                 await panel.agentEdit(args.expected_revision, { type: 'apply', label: args.label, edits: args.edits }, signal);
+                break;
+            case 'designer_rename_rsx_control':
+                await renameRsxControl(panel, args.expected_revision, args.node!, args.value!, signal);
                 break;
             case 'designer_apply_counterpart':
                 await panel.agentEdit(args.expected_revision, { type: 'applyCounterpart', source: args.source }, signal);
