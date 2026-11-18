@@ -5610,12 +5610,18 @@ mod tests {
     #[cfg(feature = "runtime")]
     #[test]
     fn relative_font_keeps_the_document_base_uri_in_the_setter_import() {
-        use crate::rust_emitter::{compile_documents_with, EmitterHost, TransformOptions, XamlBackend};
+        use crate::rust_emitter::{compile_documents_with, with_xaml_backend, EmitterHost, TransformOptions};
+        use crate::rust_emitter::XamlBackend;
         ferroui_markup_xaml::register_types();
         let host = EmitterHost::runtime(&[]).unwrap();
         let xaml = r#"<TextBlock xmlns="https://github.com/ferroui" FontFamily="/Assets/Fonts/font.ttf#Example" />"#;
-        let emit = |backend| compile_documents_with(&host, &[("Views/font.xaml", xaml)], Some("ferres://Example/"),
-            &TransformOptions { backend, ..Default::default() }).pop().unwrap().source.unwrap();
+        let emit = |backend| {
+            let options = TransformOptions::default();
+            with_xaml_backend(backend, &Default::default(), || {
+                compile_documents_with(&host, &[("Views/font.xaml", xaml)], Some("ferres://Example/"), &options)
+            })
+            .pop().unwrap().source.unwrap()
+        };
         assert!(emit(XamlBackend::Native).contains("FontFamily::__markup_new_1(context.base_uri()"));
         let typed = emit(XamlBackend::Bytecode);
         assert!(typed.contains("FontFamily::__markup_new_1(args.context()?.base_uri()"));
@@ -5625,12 +5631,18 @@ mod tests {
     #[cfg(feature = "runtime")]
     #[test]
     fn converted_image_uses_document_context_checked_cast_and_original_setter() {
-        use crate::rust_emitter::{compile_documents_with, EmitterHost, TransformOptions, XamlBackend};
+        use crate::rust_emitter::{compile_documents_with, with_xaml_backend, EmitterHost, TransformOptions};
+        use crate::rust_emitter::XamlBackend;
         ferroui_markup_xaml::register_types();
         let host = EmitterHost::runtime(&[]).unwrap();
         let source = r#"<Image xmlns="https://github.com/ferroui" Source="/Assets/example.png" />"#;
-        let emit = |backend| compile_documents_with(&host, &[("image.xaml", source)], Some("ferres://Example/"),
-            &TransformOptions { backend, ..Default::default() }).pop().unwrap().source.unwrap();
+        let emit = |backend| {
+            let options = TransformOptions::default();
+            with_xaml_backend(backend, &Default::default(), || {
+                compile_documents_with(&host, &[("image.xaml", source)], Some("ferres://Example/"), &options)
+            })
+            .pop().unwrap().source.unwrap()
+        };
         let native = emit(XamlBackend::Native);
         assert!(native.contains("rt::type_descriptor_context(&context)"));
         assert!(native.contains("rt::cast_checked("));
@@ -5644,15 +5656,21 @@ mod tests {
     #[cfg(feature = "runtime")]
     #[test]
     fn resource_capacity_retains_the_result_of_the_resolved_resource_access() {
-        use crate::rust_emitter::{compile_documents_with, EmitterHost, TransformOptions, XamlBackend};
+        use crate::rust_emitter::{compile_documents_with, with_xaml_backend, EmitterHost, TransformOptions};
+        use crate::rust_emitter::XamlBackend;
         ferroui_markup_xaml::register_types();
         let host = EmitterHost::runtime(&[]).unwrap();
         for (root, property) in [("ResourceDictionary", None), ("Border", Some("Border.Resources"))] {
             let entries = r#"<x:String x:Key="one">One</x:String><x:String x:Key="two">Two</x:String>"#;
             let entries = property.map_or_else(|| entries.to_owned(), |p| format!("<{p}>{entries}</{p}>"));
             let text = format!(r#"<{root} xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">{entries}</{root}>"#);
-            let emit = |backend| compile_documents_with(&host, &[("capacity.xaml", &text)], Some("ferres://Example/"),
-                &TransformOptions { backend, ..Default::default() }).pop().unwrap().source.unwrap();
+            let emit = |backend| {
+                let options = TransformOptions::default();
+                with_xaml_backend(backend, &Default::default(), || {
+                    compile_documents_with(&host, &[("capacity.xaml", &text)], Some("ferres://Example/"), &options)
+                })
+                .pop().unwrap().source.unwrap()
+            };
             let native = emit(XamlBackend::Native);
             assert!(native.contains("wrapping_add(2_i32)"));
             let compiled = emit(XamlBackend::Bytecode);
@@ -5673,16 +5691,19 @@ mod tests {
     #[cfg(feature = "runtime")]
     #[test]
     fn proven_default_template_binding_skips_only_its_nonnull_binding_choice() {
-        use crate::rust_emitter::{compile_documents_with, EmitterHost, TransformOptions, XamlBackend};
+        use crate::rust_emitter::{compile_documents_with, with_xaml_backend, EmitterHost, TransformOptions};
+        use crate::rust_emitter::XamlBackend;
         ferroui_markup_xaml::register_types();
         let host = EmitterHost::runtime(&[]).unwrap();
         let emit = |binding: &str, backend| {
             let text = format!(r#"<ControlTemplate xmlns="https://github.com/ferroui" TargetType="Button">
                 <ContentPresenter Content="{{TemplateBinding {binding}}}" />
             </ControlTemplate>"#);
-            let options = TransformOptions { backend, ..Default::default() };
-            compile_documents_with(&host, &[("template.xaml", &text)], Some("ferres://Example/"), &options)
-                .pop().unwrap().source.unwrap()
+            let options = TransformOptions::default();
+            with_xaml_backend(backend, &Default::default(), || {
+                compile_documents_with(&host, &[("template.xaml", &text)], Some("ferres://Example/"), &options)
+            })
+            .pop().unwrap().source.unwrap()
         };
         let native = emit("Content", XamlBackend::Native);
         assert!(native.contains("__markup_ProvideValue_0"));

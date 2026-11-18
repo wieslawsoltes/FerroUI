@@ -240,6 +240,7 @@ use ferroui_markup_xaml_loader::compiler_extensions::FerroXamlDiagnosticCodes;
 use ferroui_markup_xaml_loader::rust_emitter::{
     class_document_group, class_of_document, document_references, generate_class_file_with, generate_file_with, rust_string_literal, BytecodeImage, ClassGroup,
     CompiledMarkupTypeSystem, EmitterHost, ThemePartsTables, TransformOptions, XamlMetadata, CLASS_GROUP_NOT_TRANSFORMED, GROUP_NOT_TRANSFORMED,
+    with_xaml_backend,
 };
 use crate::theme_roots::{
     compile_bindings_from_manifest, explain_kept_units, kept_units, parts_constructor, parts_static_name,
@@ -952,11 +953,12 @@ impl Build {
                     use_compiled_bindings_by_default: default_compile_bindings,
                     diagnostic_handler: Some(diagnostics.handler()),
                     design_mode: false,
-                    backend: self.backend,
-                    bytecode_image: image.clone(),
                     theme_parts: theme_parts.clone(),
                 };
-                let compiled = class_group(&host, &**models, &root_uri, &borrowed, class_document, group.constructor, &module_path, &options);
+                let (constructor, module) = (group.constructor, &module_path);
+                let compiled = with_xaml_backend(self.backend, &image, || {
+                    class_group(&host, &**models, &root_uri, &borrowed, class_document, constructor, module, &options)
+                });
                 let reported_errors = diagnostics.report(&mut lines, &mut errors);
                 match compiled {
                     Ok(file) => {
@@ -1022,11 +1024,11 @@ impl Build {
                         use_compiled_bindings_by_default: default_compile_bindings,
                         diagnostic_handler: Some(diagnostics.handler()),
                         design_mode: false,
-                        backend: self.backend,
-                        bytecode_image: image.clone(),
                         theme_parts: theme_parts.clone(),
                     };
-                    generate_file_with(&host, &assembly_name, &root_uri, &borrowed, &options)
+                    with_xaml_backend(self.backend, &image, || {
+                        generate_file_with(&host, &assembly_name, &root_uri, &borrowed, &options)
+                    })
                 }
                 #[cfg(feature = "runtime-host")]
                 None => {
@@ -1303,10 +1305,11 @@ mod runtime_host {
         if let Some(create_source_info) = create_source_info {
             configuration.set_create_source_info(create_source_info);
         }
-        let mut options = super::TransformOptions::of(&configuration);
-        options.backend = backend;
-        options.bytecode_image = image.clone();
-        ferroui_markup_xaml_loader::rust_emitter::generate_file_with_runtime_types(assembly.name, root_uri, documents, &options, dependencies)
+        use ferroui_markup_xaml_loader::rust_emitter::{generate_file_with_runtime_types, with_xaml_backend};
+        let options = super::TransformOptions::of(&configuration);
+        with_xaml_backend(backend, image, || {
+            generate_file_with_runtime_types(assembly.name, root_uri, documents, &options, dependencies)
+        })
     }
 }
 

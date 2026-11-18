@@ -202,7 +202,7 @@ fn a_document_the_models_cannot_answer_for_is_refused() {
 
 #[test]
 fn page_setters_lower_the_resource_result_and_the_items_panel_template() {
-    use ferroui_markup_xaml_loader::rust_emitter::XamlBackend;
+    use ferroui_markup_xaml_loader::rust_emitter::{with_xaml_backend, XamlBackend};
     let system = ModelTypeSystem::new(scanned_models());
     let types = ModelEmitTypes::new(system.clone(), Vec::new());
     let host = EmitterHost { type_system: system.as_type_system(), types: &types, parsers: Vec::new() };
@@ -215,8 +215,13 @@ fn page_setters_lower_the_resource_result_and_the_items_panel_template() {
             </Setter.Value></Setter>
         </Style></TabControl.Styles>
     </TabControl>"#;
-    let emit = |backend| compile_documents_with(&host, &[("page.xaml", xaml)], Some("ferres://Tests/"),
-        &TransformOptions { backend, ..Default::default() }).pop().unwrap().source.unwrap();
+    let emit = |backend| {
+        let options = TransformOptions::default();
+        with_xaml_backend(backend, &Default::default(), || {
+            compile_documents_with(&host, &[("page.xaml", xaml)], Some("ferres://Tests/"), &options)
+        })
+        .pop().unwrap().source.unwrap()
+    };
     let native = emit(XamlBackend::Native);
     assert!(native.contains("rt::new_setter_with_parent("), "{native}");
     assert!(native.contains("rt::add_setter_value("), "{native}");

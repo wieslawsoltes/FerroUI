@@ -224,7 +224,7 @@ impl Emitter<'_> {
 
 #[cfg(all(test, feature = "runtime"))]
 mod tests {
-    use crate::rust_emitter::{compile_documents_with, EmitterHost, TransformOptions, XamlBackend};
+    use crate::rust_emitter::{compile_documents_with, with_xaml_backend, EmitterHost, TransformOptions, XamlBackend};
 
     #[test]
     fn fallible_equality_converters_stay_in_their_lexical_scope() {
@@ -233,11 +233,10 @@ mod tests {
         let source = r#"<Border xmlns="https://github.com/ferroui">
           <Border.Styles><Style Selector="Border[RenderTransform=none]" /></Border.Styles>
         </Border>"#;
-        let options = TransformOptions {
-            backend: XamlBackend::Bytecode,
-            ..Default::default()
-        };
-        let docs = compile_documents_with(&host, &[("transform.xaml", source)], Some("ferres://Example/"), &options);
+        let options = TransformOptions::default();
+        let docs = with_xaml_backend(XamlBackend::Bytecode, &Default::default(), || {
+            compile_documents_with(&host, &[("transform.xaml", source)], Some("ferres://Example/"), &options)
+        });
         let generated = docs.into_iter().next().unwrap().source.unwrap();
         assert!(generated.contains(".build_selector_with(1,"), "{generated}");
         assert!(generated.contains("::__markup_parse("));
@@ -256,16 +255,15 @@ mod tests {
         let template = r#"<ControlTemplate xmlns="https://github.com/ferroui" TargetType="Button">
           <Border><Border.Styles><Style Selector="Button[IsEnabled=True]"><Style Selector="^:pointerover" /></Style></Border.Styles></Border>
         </ControlTemplate>"#;
-        let options = TransformOptions {
-            backend: XamlBackend::Bytecode,
-            ..Default::default()
-        };
-        let docs = compile_documents_with(
-            &host,
-            &[("page.xaml", page), ("template.xaml", template)],
-            Some("ferres://Example/"),
-            &options,
-        );
+        let options = TransformOptions::default();
+        let docs = with_xaml_backend(XamlBackend::Bytecode, &Default::default(), || {
+            compile_documents_with(
+                &host,
+                &[("page.xaml", page), ("template.xaml", template)],
+                Some("ferres://Example/"),
+                &options,
+            )
+        });
         for doc in docs {
             let source = doc.source.expect("a resolved standalone selector");
             assert!(source.contains("rt::ConstructionImport::Selector(&"), "{}", doc.name);

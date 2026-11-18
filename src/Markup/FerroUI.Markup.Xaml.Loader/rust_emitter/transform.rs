@@ -74,6 +74,36 @@ impl XamlBackend {
     }
 }
 
+ferroui_base::ferro_thread_local! {
+    /// The representation the emitter writes on this thread and where its instruction streams
+    /// go: what [`with_xaml_backend`] selects, [`XamlBackend::Native`] outside it.
+    static BACKEND: RefCell<(XamlBackend, super::BytecodeImage)> = RefCell::new(Default::default());
+}
+
+/// Runs `compile` with the operations the XAML compiler resolves emitted as `backend`, their
+/// instruction streams packed into `image` ([`BytecodeImage::default`](super::BytecodeImage)
+/// writes them as byte literals of the generated source), and restores the previous selection
+/// afterwards. Outside it the emitter writes [`XamlBackend::Native`]. The selection is scoped
+/// rather than a field of [`TransformOptions`], whose public fields stay as they are within 0.5.
+pub fn with_xaml_backend<R>(backend: XamlBackend, image: &super::BytecodeImage, compile: impl FnOnce() -> R) -> R {
+    struct Restore(Option<(XamlBackend, super::BytecodeImage)>);
+    impl Drop for Restore {
+        fn drop(&mut self) {
+            if let Some(previous) = self.0.take() {
+                BACKEND.with(|selected| *selected.borrow_mut() = previous);
+            }
+        }
+    }
+    let previous = BACKEND.with(|selected| selected.replace((backend, image.clone())));
+    let _restore = Restore(Some(previous));
+    compile()
+}
+
+/// The representation [`with_xaml_backend`] selected on this thread, and its image.
+pub(super) fn selected_xaml_backend() -> (XamlBackend, super::BytecodeImage) {
+    BACKEND.with(|selected| selected.borrow().clone())
+}
+
 /// What a transform depends on beside the documents and the type system.
 #[derive(Clone, Default)]
 pub struct TransformOptions {
@@ -82,10 +112,6 @@ pub struct TransformOptions {
     pub local_assembly: Option<String>,
     /// Whether `{Binding}` is a compiled binding unless the document says otherwise.
     pub use_compiled_bindings_by_default: bool,
-    /// Emit compact programs for operations resolved by the XAML compiler.
-    pub backend: XamlBackend,
-    /// Destination of compiled instruction streams.
-    pub bytecode_image: super::BytecodeImage,
     pub design_mode: bool,
     /// Whether source information is attached to the objects the documents create.
     pub create_source_info: bool,
@@ -174,8 +200,6 @@ impl TransformOptions {
         Self {
             local_assembly: configuration.local_assembly.map(|assembly| assembly.name.to_string()),
             use_compiled_bindings_by_default: configuration.use_compiled_bindings_by_default,
-            backend: XamlBackend::Native,
-            bytecode_image: Default::default(),
             design_mode: configuration.design_mode,
             create_source_info: configuration.create_source_info(),
             diagnostic_handler,
