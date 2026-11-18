@@ -1,12 +1,8 @@
 **
-!dist/
 !dist/designer.js
 !dist/extension.js
-!media/
 !media/designer.css
-!syntaxes/
 !syntaxes/ferroui-xaml.tmLanguage.json
-!bin/
 !bin/ferroui-xaml-lsp
 !bin/ferroui-xaml-lsp.exe
 !bin/ferroui-designer-preview
