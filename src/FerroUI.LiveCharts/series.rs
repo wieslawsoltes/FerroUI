@@ -144,6 +144,30 @@ ferroui_base::ferro_markup_enum!(PolarLabelsPosition {
     Outer
 });
 
+/// Where the data label of a point of a Cartesian series goes (`DataLabelsPosition`), about the
+/// rectangle of its visual. `End` is the end of the value (above a value greater than the pivot on
+/// a vertical primary axis), `Start` its start. A heat series centres its labels by default.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+pub enum DataLabelsPosition {
+    #[default]
+    End,
+    Start,
+    Middle,
+    Top,
+    Bottom,
+    Left,
+    Right,
+}
+ferroui_base::ferro_markup_enum!(DataLabelsPosition {
+    End,
+    Start,
+    Middle,
+    Top,
+    Bottom,
+    Left,
+    Right
+});
+
 /// The outline of a box series in the source's light theme.
 pub const BOX_STROKE: Color = Color::from_rgb(30, 30, 30);
 

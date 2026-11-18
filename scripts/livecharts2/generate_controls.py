@@ -4,7 +4,7 @@
 From the LiveCharts2 port of #312 (docs/porting/livecharts2.md): the Cartesian and pie charts of L2,
 the polar chart of L4, the Sankey and treemap charts of L4b, the geographic map of L4c, and the
 OHLC series, error bars, date and time axes, heat series properties and angular gauge visuals of
-L5.
+L5, and the heat legend and the data label positions of the heat series (#624).
 
 The generated classes remain ordinary FerroUI classes visible to the XAML source
 scanner. This replaces the managed UI-property generator for this native host.
@@ -298,14 +298,16 @@ node_props = {
   ('min_value','MinValue','Option<f64>','None'),('max_value','MaxValue','Option<f64>','None')],
  # The ColorStops, PointPadding, MinValue and MaxValue of CoreHeatSeries (L5).
  'HeatSeries':[('color_stops','ColorStops','Option<Vec<f64>>','None'),('point_padding','PointPadding','Thickness','Thickness::uniform(4.0)'),
-  ('min_value','MinValue','Option<f64>','None'),('max_value','MaxValue','Option<f64>','None')],
+  ('min_value','MinValue','Option<f64>','None'),('max_value','MaxValue','Option<f64>','None'),
+  # Its DataLabelsPosition, Middle as the source's constructor sets it (#624).
+  ('data_labels_position','DataLabelsPosition','DataLabelsPosition','DataLabelsPosition::Middle')],
  # The tooltip label formatters of CorePolarLineSeries (code only), read by the chart (#624).
  'PolarLineSeries':[('angle_tool_tip_label_formatter','AngleToolTipLabelFormatter','Option<ChartPointFormatter>','None'),
   ('radius_tool_tip_label_formatter','RadiusToolTipLabelFormatter','Option<ChartPointFormatter>','None')]}
 classes = HEADER + '''use crate::{ChartSeries,HeatLands,SankeyLinks,SankeyNodes,TreemapNodes};
 use ferroui_base::{ferro_class,ferro_class_info,ferro_properties,instantiate,FerroObjectImpl,FerroObjectImplExt,FerroProperty,Ref,StyledProperty,Thickness};
 use ferroui_base::media::Color;
-use ferroui_livecharts::{ChartPointFormatter,SankeyLabelPosition,SankeyLayoutKind,SeriesKind};
+use ferroui_livecharts::{ChartPointFormatter,DataLabelsPosition,SankeyLabelPosition,SankeyLayoutKind,SeriesKind};
 '''
 for name,kind in families:
     owned=''.join(f'this.set_{prop}({typ}::new());' for prop,typ in node_collections.get(name,[]))
@@ -397,9 +399,12 @@ chart_props = [
  ('markers','Markers','GeoMarkers','GeoMarkers::new()'),
  # The visual elements of a pie chart: the ticks and needle of an angular gauge (L5).
  ('visual_elements','VisualElements','ChartVisualElements','ChartVisualElements::new()'),
+ # The legend of the chart (IChartView.Legend): None is the native legend of the series, a
+ # HeatLegend the gradient of SKHeatLegend (#624).
+ ('legend','Legend','Option<Ref<ChartLegend>>','None'),
 ]
-chart_properties=HEADER+'''use crate::{Chart,ChartKind,ChartSeriesCollection,ChartVisualElements,Axes,GeoMarkers,LegendPosition,MapInteractionMode,TooltipPosition,ZoomAndPanMode};
-use ferroui_base::{ferro_properties,FerroProperty,StyledProperty,Rect};
+chart_properties=HEADER+'''use crate::{Chart,ChartKind,ChartLegend,ChartSeriesCollection,ChartVisualElements,Axes,GeoMarkers,LegendPosition,MapInteractionMode,TooltipPosition,ZoomAndPanMode};
+use ferroui_base::{ferro_properties,FerroProperty,Ref,StyledProperty,Rect};
 use ferroui_base::media::Color;
 use ferroui_livecharts::{DrawnMap,FindingStrategy,MapProjection,Section};
 use std::rc::Rc;
@@ -498,8 +503,53 @@ impl {cls} {{
 '''
 visual_elements += properties('AngularTicksVisual',ticks_props) + properties('NeedleVisual',needle_props)
 
+# The legends of a chart (#624): ChartLegend is the base of the Legend of a chart (IChartLegend),
+# HeatLegend the gradient legend of SKHeatLegend with its BadgePadding, BadgeWidth and Formatter
+# (code only; None is Labelers.SixRepresentativeDigits).
+heat_legend_props = [
+ ('badge_padding','BadgePadding','Thickness','Thickness::uniform(10.0)'),('badge_width','BadgeWidth','Option<f64>','None'),
+ ('formatter','Formatter','Option<Labeler>','None')]
+legends = HEADER + IMPORTS + '''use ferroui_base::Thickness;
+use ferroui_livecharts::Labeler;
+
+/// The legend of a chart (`Legend`, the source's `IChartLegend`): the base of `HeatLegend`.
+#[repr(C)]
+pub struct ChartLegend { base: FerroObject }
+ferro_class!(ChartLegend: FerroObject);
+ferro_class_info!(ChartLegend { new: ChartLegend::new });
+impl FerroObjectImpl for ChartLegend {}
+impl ChartLegend {
+    pub fn construct() -> Self { Self { base: FerroObject::construct() } }
+    pub fn new() -> Ref<Self> { instantiate(Self::construct()) }
+    /// The engine legend of a heat legend, `None` for a legend of another kind.
+    pub fn heat_legend(this: &Ref<Self>) -> Option<ferroui_livecharts::HeatLegend> {
+        let heat = this.cast::<HeatLegend>()?;
+        let defaults = ferroui_livecharts::HeatLegend::default();
+        Some(ferroui_livecharts::HeatLegend {
+            badge_padding: heat.badge_padding(),
+            badge_width: heat.badge_width(),
+            formatter: heat.formatter().unwrap_or(defaults.formatter),
+            text_size: defaults.text_size,
+        })
+    }
+}
+
+/// The gradient heat legend (`SKHeatLegend`) of the first heat series of a Cartesian chart or of
+/// a map.
+#[repr(C)]
+pub struct HeatLegend { base: ChartLegend }
+ferro_class!(HeatLegend: ChartLegend);
+ferro_class_info!(HeatLegend { new: HeatLegend::new });
+impl FerroObjectImpl for HeatLegend {}
+impl HeatLegend {
+    pub fn construct() -> Self { Self { base: ChartLegend::construct() } }
+    pub fn new() -> Ref<Self> { instantiate(Self::construct()) }
+}
+''' + properties('HeatLegend',heat_legend_props)
+
 FILES={'chart_point.rs':point,'axis.rs':axis,'chart_series.rs':series,'series_classes.rs':classes,'collections.rs':collections,
-       'chart_properties.rs':chart_properties,'chart_classes.rs':chart_classes,'visual_elements.rs':visual_elements}
+       'chart_properties.rs':chart_properties,'chart_classes.rs':chart_classes,'visual_elements.rs':visual_elements,
+       'legends.rs':legends}
 def main():
     args=argparse.ArgumentParser();args.add_argument('--check',action='store_true')
     args.add_argument('--rustfmt',default='rustfmt',help='Rust formatter executable')

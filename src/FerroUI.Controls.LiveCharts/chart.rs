@@ -3,9 +3,9 @@
 use crate::renderer::NativeScene;
 use crate::scene_transition::SceneTransition;
 use crate::{
-    Axes, Axis, ChartKind, ChartSeries, ChartSeriesCollection, ChartVisualElement,
-    ChartVisualElements, GeoMarkers, HeatSeries, MapInteractionMode, PolarLineSeries,
-    TooltipPosition, ZoomAndPanMode,
+    Axes, Axis, ChartKind, ChartLegend, ChartSeries, ChartSeriesCollection, ChartVisualElement,
+    ChartVisualElements, GeoMarkers, HeatSeries, LegendPosition, MapInteractionMode,
+    PolarLineSeries, TooltipPosition, ZoomAndPanMode,
 };
 use ferroui_base::collections::FerroList;
 use ferroui_base::input::{
@@ -27,9 +27,9 @@ use ferroui_base::{
 use ferroui_controls::{Control, ControlImpl};
 use ferroui_livecharts::geo_map_chart_engine::shortest_rotation;
 use ferroui_livecharts::{
-    AxisScale, CartesianChartEngine, CartesianOptions, ChartError, DrawnMap, EasingFunctions,
+    AxisScale, CartesianChartEngine, CartesianOptions, CartesianSeriesOptions, ChartError, DrawnMap, EasingFunctions,
     FindingStrategy, GeoLand, GeoMapChartEngine, GeoMapMeasurement, GeoMapOptions,
-    GeographicBounds, HitRegion, MapViewport, Maps, PieChartEngine, PieOptions, PointId,
+    GeographicBounds, HeatLegendSource, HitRegion, MapViewport, Maps, PieChartEngine, PieOptions, PointId,
     PolarChartEngine, PolarOptions, PolarScale, PolarToolTipLabelFormatters, SankeyChartEngine,
     SankeyOptions, Scene, TreemapChartEngine, TreemapOptions, ZoomDirection,
 };
@@ -134,6 +134,7 @@ impl FerroObjectImpl for Chart {
             || property == Self::y_axes_property().as_property()
             || property == Self::markers_property().as_property()
             || property == Self::visual_elements_property().as_property()
+            || property == Self::legend_property().as_property()
         {
             this.rebind_sources();
         }
@@ -633,6 +634,15 @@ impl Chart {
                 }
             })));
         }
+        // The legend object (its padding, width and formatter).
+        if let Some(legend) = self.legend() {
+            let weak = self.to_ref().downgrade();
+            subscriptions.push(Subscription::new(legend.property_changed(move |_| {
+                if let Some(this) = weak.upgrade() {
+                    this.invalidate_chart();
+                }
+            })));
+        }
         *self.source_subscriptions.borrow_mut() = subscriptions;
     }
 
@@ -662,10 +672,55 @@ impl Chart {
             .iter()
             .map(|a| a.snapshot())
             .collect();
+        // The heat lands of a map, read once for the map and its heat legend.
+        let heat_lands = if self.chart_kind() == ChartKind::GeoMap {
+            Some(
+                models
+                    .iter()
+                    .zip(&series)
+                    .map(|(model, s)| crate::geo_models::heat_land_series(model, s.clone()))
+                    .collect::<Result<Vec<_>, _>>()?,
+            )
+        } else {
+            None
+        };
+        // A heat legend (`SKHeatLegend`) shows the first heat series of a Cartesian chart or of a
+        // map (`EnumerateHeatLegendSources`); a chart of another kind has none to show.
+        let heat_legend = self
+            .legend()
+            .and_then(|legend| ChartLegend::heat_legend(&legend))
+            .map(|legend| {
+                let source = match self.chart_kind() {
+                    ChartKind::Cartesian => HeatLegendSource::of_series(&series),
+                    ChartKind::GeoMap => heat_lands
+                        .as_deref()
+                        .and_then(HeatLegendSource::of_heat_lands),
+                    _ => None,
+                };
+                (legend, source)
+            });
+        let legend_room = heat_legend.as_ref().map(|(legend, source)| {
+            let vertical = matches!(
+                self.legend_position(),
+                LegendPosition::Left | LegendPosition::Right
+            );
+            let room = legend.measure(
+                source.as_ref(),
+                vertical,
+                Size::default(),
+                crate::decorations::text_size,
+            );
+            if vertical {
+                room.width
+            } else {
+                room.height
+            }
+        });
         let margin = self.draw_margin().or_else(|| {
             crate::decorations::draw_margin(
                 size,
                 self.legend_position(),
+                legend_room,
                 !self.title().is_empty(),
                 self.chart_kind(),
             )
@@ -685,7 +740,18 @@ impl Chart {
         let mut geo = None;
         let (mut scene, x_scales, y_scales) = match self.chart_kind() {
             ChartKind::Cartesian => {
-                let measured = CartesianChartEngine::measure_with_axes_and_labels(
+                // The data label positions of the heat series (`DataLabelsPosition`).
+                let series_options: Vec<_> = models
+                    .iter()
+                    .map(|model| {
+                        let mut options = CartesianSeriesOptions::default();
+                        options.data_labels_position = model
+                            .cast::<HeatSeries>()
+                            .map(|heat| heat.data_labels_position());
+                        options
+                    })
+                    .collect();
+                let measured = CartesianChartEngine::measure_with_series_options(
                     size,
                     &series,
                     &xs,
@@ -695,6 +761,7 @@ impl Chart {
                         sections: self.sections(),
                     },
                     crate::decorations::text_size,
+                    &series_options,
                 )?;
                 (measured.scene, measured.x_scales, measured.y_scales)
             }
@@ -811,11 +878,7 @@ impl Chart {
             // A map has no axes; its series are heat land series over the active map (the
             // bundled world map without one).
             ChartKind::GeoMap => {
-                let heat = models
-                    .iter()
-                    .zip(&series)
-                    .map(|(model, s)| crate::geo_models::heat_land_series(model, s.clone()))
-                    .collect::<Result<Vec<_>, _>>()?;
+                let heat = heat_lands.unwrap_or_default();
                 let markers: Vec<_> = self
                     .markers()
                     .to_vec()
@@ -842,6 +905,7 @@ impl Chart {
             self.title_size(),
             self.text_color(),
             self.legend_position(),
+            heat_legend.as_ref().map(|(legend, source)| (legend, source.as_ref())),
         );
         {
             for (series_index, model) in models.iter().enumerate() {

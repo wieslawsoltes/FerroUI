@@ -5,7 +5,9 @@ use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, FerroObjectImpl,
     FerroObjectImplExt, FerroProperty, Ref, StyledProperty, Thickness,
 };
-use ferroui_livecharts::{ChartPointFormatter, SankeyLabelPosition, SankeyLayoutKind, SeriesKind};
+use ferroui_livecharts::{
+    ChartPointFormatter, DataLabelsPosition, SankeyLabelPosition, SankeyLayoutKind, SeriesKind,
+};
 
 #[repr(C)]
 pub struct LineSeries {
@@ -1001,6 +1003,9 @@ ferro_properties! { impl HeatSeries {
     pub fn max_value_property() -> StyledProperty<Option<f64>> {
         FerroProperty::register::<HeatSeries, _>("MaxValue", None)
     }
+    pub fn data_labels_position_property() -> StyledProperty<DataLabelsPosition> {
+        FerroProperty::register::<HeatSeries, _>("DataLabelsPosition", DataLabelsPosition::Middle)
+    }
 } }
 impl HeatSeries {
     pub fn color_stops(&self) -> Option<Vec<f64>> {
@@ -1026,6 +1031,12 @@ impl HeatSeries {
     }
     pub fn set_max_value(&self, value: Option<f64>) {
         self.set_value(Self::max_value_property(), value);
+    }
+    pub fn data_labels_position(&self) -> DataLabelsPosition {
+        self.get_value(Self::data_labels_position_property())
+    }
+    pub fn set_data_labels_position(&self, value: DataLabelsPosition) {
+        self.set_value(Self::data_labels_position_property(), value);
     }
 }
 
