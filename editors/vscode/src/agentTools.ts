@@ -310,6 +310,7 @@ export class AgentTools {
             case 'designer_stage_hotspots': return this.stages.board(document.uri).hotspots(args.stage!, args.expected_epoch!, signal);
             case 'designer_stage_checks': return this.stages.board(document.uri).checks(args.stage!, args.expected_epoch!, signal);
             case 'designer_stage_states': return this.stages.board(document.uri).stateOptions(args.stage!, args.expected_epoch!, signal);
+            case 'designer_stage_fixtures': return this.stages.board(document.uri).fixtureOptions(args.stage!, args.expected_epoch!, signal);
             case 'designer_stage_change': return this.stages.board(document.uri).applyChange({ ...args.arguments, epoch: args.expected_epoch! } as StageChange, signal);
             case 'designer_stage_prototype': return this.stages.board(document.uri).controlPrototype(args.expected_epoch!, args.arguments as PrototypeCommand, signal);
         }

@@ -173,6 +173,12 @@
         "icon": "$(history)"
       },
       {
+        "command": "ferroui.showData",
+        "title": "Show Design Data",
+        "category": "FerroUI",
+        "icon": "$(database)"
+      },
+      {
         "command": "ferroui.studio.findDefinition",
         "title": "Find Definition in Designer",
         "category": "FerroUI",
@@ -550,6 +556,14 @@
           "name": "Timeline",
           "icon": "dist/icons/preview.svg",
           "contextualTitle": "FerroUI Timeline",
+          "visibility": "collapsed"
+        },
+        {
+          "type": "webview",
+          "id": "ferroui.data",
+          "name": "Data",
+          "icon": "dist/icons/preview.svg",
+          "contextualTitle": "FerroUI Design Data",
           "visibility": "collapsed"
         }
       ]

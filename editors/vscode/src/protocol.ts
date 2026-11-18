@@ -14,6 +14,7 @@ export interface Source {
 }
 export interface PreviewSourceBuffer { uri: string; source: string | null }
 export interface Viewport { width: number; height: number; dark: boolean }
+export interface DesignDataPresentation { enabled: boolean; fixture?: string }
 export const DEFAULT_VIEWPORT: Viewport = { width: 800, height: 520, dark: false };
 export const MIN_VIEWPORT_SIZE = 64;
 export const MAX_VIEWPORT_SIZE = 1536;
@@ -22,6 +23,7 @@ export interface DesignerViewState {
     uri: string;
     caret: Position;
     viewport: Viewport;
+    designData?: DesignDataPresentation;
 }
 export function isViewport(value: unknown): value is Viewport {
     if (!value || typeof value !== 'object') return false;
@@ -79,7 +81,7 @@ export interface ResourceRow {
     properties: string[];
 }
 export type DetailsView = 'events' | 'resources';
-export type DesignerView = 'canvas' | 'outline' | 'properties' | 'toolbox' | DetailsView | 'assets' | 'studio' | 'timeline';
+export type DesignerView = 'canvas' | 'outline' | 'properties' | 'toolbox' | DetailsView | 'assets' | 'studio' | 'timeline' | 'data';
 export interface DetailsState {
     frame?: FrameTarget;
     target?: NodeTarget;

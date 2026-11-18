@@ -111,6 +111,7 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
     <button type="button" id="menu-assets">Show Assets</button>
     <button type="button" id="menu-studio">Show Studio Tools</button>
     <button type="button" id="menu-timeline">Show Animation Timeline</button>
+    <button type="button" id="menu-data">Show Design Data</button>
     <button type="button" id="menu-focus-order" aria-pressed="false" disabled>Focus Order Overlay</button>
     <button type="button" class="compact-action" id="menu-refresh">Refresh preview</button>
 </div>`);
@@ -277,6 +278,27 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
         <div class="timeline-grid">
             <div id="timeline-ruler" class="timeline-ruler" aria-hidden="true"></div>
             <ol id="timeline-tracks" aria-label="Property tracks"></ol>
+        </div>
+    </section>
+</main>`);
+}
+
+export function designDataHtml(webview: vscode.Webview, root: vscode.Uri): string {
+    return page(webview, root, 'designData', 'FerroUI Design Data', `
+<main class="data-view" aria-label="Design data">
+    <p id="data-status" role="status">Reading design data…</p>
+    <p id="data-error" role="alert" hidden></p>
+    <section id="data-editor" class="data-editor" hidden>
+        <label for="data-preview">Preview data</label>
+        <select id="data-preview"></select>
+        <label for="data-source">Fixtures JSON</label>
+        <textarea id="data-source" spellcheck="false" autocapitalize="off" autocorrect="off"
+            aria-describedby="data-fixture-hint"></textarea>
+        <p id="data-fixture-hint">Bind to fields under data. Empty JSON text clears the fixtures.</p>
+        <div class="data-actions">
+            <button type="button" id="data-apply">Apply fixtures</button>
+            <button type="button" id="data-discard">Discard draft</button>
+            <button type="button" id="data-examples">Create example fixtures</button>
         </div>
     </section>
 </main>`);

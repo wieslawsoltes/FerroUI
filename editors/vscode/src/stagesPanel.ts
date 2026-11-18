@@ -145,6 +145,10 @@ class StageSession {
         return this.readStage({ id, epoch }, signal, (client, stage) => client.stageStateOptions(stage));
     }
 
+    fixtureOptions(id: number, epoch: number, signal: AbortSignal) {
+        return this.readStage({ id, epoch }, signal, (client, stage) => client.stageFixtureOptions(stage));
+    }
+
     private async readStage<T>(target: StageTarget, signal: AbortSignal, read: (client: NativePreview, target: StageTarget) => Promise<T>): Promise<T> {
         const model = await this.wait(signal);
         if (!model.stages.some(stage => stage.id === target.id && stage.epoch === target.epoch)) throw new Error('Read the current stage ID and epoch.');
@@ -399,7 +403,22 @@ class StageSession {
             }
             case 'mode': configuration.mode = configuration.mode === 'select' ? 'live' : 'select'; break;
             case 'pause': configuration.auto_update = !configuration.auto_update; break;
-            case 'designData': configuration.design_time_data = !configuration.design_time_data; break;
+            case 'designData': {
+                if (!client.capabilities.designFixtures) {
+                    configuration.design_time_data = !configuration.design_time_data;
+                    break;
+                }
+                const fixtures = await client.stageFixtureOptions({ id, epoch });
+                const choice = await choose('Stage design data', [
+                    { label: 'Application values', enabled: false, fixture: undefined },
+                    { label: 'View default', enabled: true, fixture: undefined },
+                    ...fixtures.map(fixture => ({ label: fixture, enabled: true, fixture })),
+                ]);
+                if (!choice) return;
+                configuration.design_time_data = choice.enabled;
+                if (choice.enabled) configuration.design_fixture = choice.fixture;
+                break;
+            }
             case 'state': {
                 const states = await chooseStageState(await client.stageStateOptions({ id, epoch }), configuration.states);
                 if (!states) return;

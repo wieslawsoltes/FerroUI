@@ -7,7 +7,7 @@ import { DEFAULT_VIEWPORT, errorMessage, isViewport, type Asset, type CanvasSnap
 import { applyTextEdits, asPosition, asRange, sourceOf } from './textDocument';
 import { designerHtml, webviewOptions } from './view';
 import type { EditResult, Inspection, InspectionTarget, Range, ResourceRow, RuntimeRow, RuntimeTreeMode } from './protocol';
-import type { CanvasAction, CanvasFocusOrder, CanvasInteraction, CanvasPresentation } from './protocol';
+import type { CanvasAction, CanvasFocusOrder, CanvasInteraction, CanvasPresentation, DesignDataPresentation } from './protocol';
 
 const mappedStudioEdits = new Set(['designer_selection_layout_edit', 'designer_property', 'designer_grid_track_edit']);
 
@@ -59,6 +59,7 @@ export class DesignerPanel implements vscode.Disposable {
         onClose: () => void,
         private readonly onDrag: (message: DragMessage | Extract<FromDesigner, { type: 'previewDrop' }>) => void,
         viewport = DEFAULT_VIEWPORT,
+        private designData?: DesignDataPresentation,
     ) {
         this.caret = caret;
         this.viewport = viewport;
@@ -326,7 +327,8 @@ export class DesignerPanel implements vscode.Disposable {
     }
 
     async studioPresent(token: number, name: string, args: object, selection: number[] | undefined, signal: AbortSignal): Promise<void> {
-        return this.present(token, signal, (client, next) => client.studioPresent(token, next, name, args, this.studioSelection(selection)), true);
+        return this.present(token, signal, (client, next) => client.studioPresent(token, next, name, args, this.studioSelection(selection)), true,
+            name === 'designer_design_data_edit' ? () => this.rememberDesignData(args) : undefined);
     }
 
     async interact(token: number, action: CanvasInteraction, signal: AbortSignal): Promise<void> {
@@ -335,7 +337,7 @@ export class DesignerPanel implements vscode.Disposable {
     }
 
     private async present(token: number, signal: AbortSignal,
-        update: (client: NativePreview, next: number) => Promise<CanvasPresentation>, syncSelection: boolean): Promise<void> {
+        update: (client: NativePreview, next: number) => Promise<CanvasPresentation>, syncSelection: boolean, accepted?: () => void): Promise<void> {
         const frame = this.frame;
         if (!frame || !this.canUse({ session: this.session, token })) throw new Error('Read the current designer revision before updating the preview.');
         this.editing = true;
@@ -362,6 +364,7 @@ export class DesignerPanel implements vscode.Disposable {
                 this.selection = presentation.selection;
                 this.selected = this.selection.at(-1);
             }
+            accepted?.();
             this.syncCanvas();
         } catch (error) {
             if (this.currentToken === token) this.schedule(0);
@@ -369,6 +372,15 @@ export class DesignerPanel implements vscode.Disposable {
         } finally {
             this.editing = false;
             this.changed.fire();
+        }
+    }
+
+    private rememberDesignData(args: object): void {
+        const { action, name, enabled } = args as Record<string, unknown>;
+        if (action === 'enabled' && typeof enabled === 'boolean') {
+            this.designData = { ...this.designData, enabled };
+        } else if (action === 'fixture') {
+            this.designData = { enabled: true, fixture: typeof name === 'string' ? name : undefined };
         }
     }
 
@@ -452,7 +464,7 @@ export class DesignerPanel implements vscode.Disposable {
             const input = await client.inProject(source, project);
             const folder = vscode.workspace.getWorkspaceFolder(this.document.uri);
             const snapshot = await client.render(input, viewport, token, folder?.uri.scheme === 'file' ? folder.uri.fsPath : undefined,
-                dirtyXamlSources([this.document.uri], this.document));
+                dirtyXamlSources([this.document.uri], this.document), this.designData);
             if (this.disposed || token !== this.generation || version !== this.document.version) return;
             if (this.dependencies.accept(snapshot.dependencies ?? [])) { this.schedule(0); return; }
             const anchor = snapshot.activeBlock?.start;
@@ -504,7 +516,7 @@ export class DesignerPanel implements vscode.Disposable {
         if (message.type === 'dock') {
             const commands = { outline: 'ferroui.showOutline', properties: 'ferroui.showProperties', toolbox: 'ferroui.showToolbox',
                 events: 'ferroui.showEvents', resources: 'ferroui.showResources', assets: 'ferroui.showAssets',
-                studio: 'ferroui.showStudio', timeline: 'ferroui.showTimeline' } as const;
+                studio: 'ferroui.showStudio', timeline: 'ferroui.showTimeline', data: 'ferroui.showData' } as const;
             await vscode.commands.executeCommand(commands[message.view], this.session);
             return;
         }
@@ -609,7 +621,7 @@ export class DesignerPanel implements vscode.Disposable {
         const caret = this.blockOffset !== undefined && block && !asRange(block).contains(this.caret)
             ? this.document.positionAt(this.blockOffset) : this.document.validatePosition(this.caret);
         this.post({ type: 'viewState', state: { version: 1, uri: this.document.uri.toString(),
-            caret: { line: caret.line, character: caret.character }, viewport: this.viewport } });
+            caret: { line: caret.line, character: caret.character }, viewport: this.viewport, designData: this.designData } });
     }
 
     private async getClient(): Promise<NativePreview> {

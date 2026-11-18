@@ -63,10 +63,11 @@ function update(stage: StageInfo): void {
     current.image.alt = `${stage.configuration.name} preview`;
     const description = stage.status.message ?? `${Math.round(stage.layout_size.width)} × ${Math.round(stage.layout_size.height)} · ${stage.status.state.replaceAll('_', ' ')}`;
     const states = stage.configuration.states.map(({ group, state }) => `${group} · ${state}`);
-    const detail = [description, ...states].join(' | ');
+    const fixture = stage.configuration.design_time_data ? stage.configuration.design_fixture : 'Application values';
+    const detail = [description, ...states, fixture].filter(Boolean).join(' | ');
     if (current.info.textContent !== detail) current.info.textContent = detail;
-    current.designData.textContent = stage.configuration.design_time_data ? 'Design data on' : 'Design data off';
-    current.designData.setAttribute('aria-pressed', String(stage.configuration.design_time_data));
+    current.designData.textContent = 'Design data…';
+    current.designData.title = fixture ?? 'View default';
     current.mode.textContent = stage.configuration.mode === 'select' ? 'Select' : 'Interact';
     current.pause.textContent = stage.configuration.auto_update ? 'Pause' : 'Resume';
     current.checks.disabled = stage.status.state !== 'ready';

@@ -2,6 +2,7 @@ import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { BuiltProjects } from './builtProjects';
 import { ASSETS_VIEW, AssetsView } from './assetsView';
+import { DATA_VIEW, DesignDataView } from './designDataView';
 import { DetailsViews, EVENTS_VIEW, RESOURCES_VIEW } from './detailsViews';
 import { DesignerPanel } from './designerPanel';
 import { DesignerDrag } from './designerDrag';
@@ -21,14 +22,14 @@ import { editBrush } from './studioBrush';
 import { StudioView } from './studioView';
 import type { TimelineControl } from './timelineProtocol';
 import { TIMELINE_VIEW, TimelineView } from './timelineView';
-import { errorMessage, type DesignerView, type DetailsView, type DragOrigin, type FrameTarget, type FromAssets, type FromDetails, type FromOutline, type FromToolbox, type Language, type NodeOperation, type NodeTarget, type OutlineMode, type ToolboxState, type ToToolbox, type Viewport } from './protocol';
+import { errorMessage, type DesignDataPresentation, type DesignerView, type DetailsView, type DragOrigin, type FrameTarget, type FromAssets, type FromDetails, type FromOutline, type FromToolbox, type Language, type NodeOperation, type NodeTarget, type OutlineMode, type ToolboxState, type ToToolbox, type Viewport } from './protocol';
 import { languageOf } from './textDocument';
 import { toolboxHtml, webviewOptions } from './view';
 
 const OUTLINE_VIEW = 'ferroui.outline';
 const TOOLBOX_VIEW = 'ferroui.toolbox';
 const docks = { outline: OUTLINE_VIEW, properties: PROPERTIES_VIEW, toolbox: TOOLBOX_VIEW,
-    assets: ASSETS_VIEW, events: EVENTS_VIEW, resources: RESOURCES_VIEW, studio: 'ferroui.studio', timeline: TIMELINE_VIEW } as const;
+    assets: ASSETS_VIEW, events: EVENTS_VIEW, resources: RESOURCES_VIEW, studio: 'ferroui.studio', timeline: TIMELINE_VIEW, data: DATA_VIEW } as const;
 
 export class DesignerWorkbench implements vscode.Disposable {
     private readonly panels = new Map<string, DesignerPanel>();
@@ -42,6 +43,7 @@ export class DesignerWorkbench implements vscode.Disposable {
     private readonly assets: AssetsView;
     private readonly studio: StudioView;
     private readonly timeline: TimelineView;
+    private readonly data: DesignDataView;
     private readonly drag = new DesignerDrag(update => {
         this.outline.post(update);
         this.toolbox.post(update);
@@ -80,6 +82,7 @@ export class DesignerWorkbench implements vscode.Disposable {
             });
         this.studio = new StudioView(changed);
         this.timeline = new TimelineView(context.extensionUri, changed);
+        this.data = new DesignDataView(context.extensionUri, changed);
         const snippets = vscode.workspace.createFileSystemWatcher('**/.ferroui/toolbox/*.xaml');
         const xaml = vscode.workspace.createFileSystemWatcher('**/*.[xX][aA][mM][lL]');
         const refreshResources = (uri: vscode.Uri) => {
@@ -105,6 +108,7 @@ export class DesignerWorkbench implements vscode.Disposable {
             vscode.window.registerWebviewViewProvider(RESOURCES_VIEW, this.details.resources),
             vscode.window.registerWebviewViewProvider(ASSETS_VIEW, this.assets.view),
             vscode.window.registerWebviewViewProvider(TIMELINE_VIEW, this.timeline.view),
+            vscode.window.registerWebviewViewProvider(DATA_VIEW, this.data.view),
             vscode.window.onDidChangeActiveTextEditor(() => this.followFocus()),
             vscode.window.tabGroups.onDidChangeTabGroups(() => this.followFocus()),
             vscode.window.tabGroups.onDidChangeTabs(() => this.followFocus()),
@@ -116,6 +120,7 @@ export class DesignerWorkbench implements vscode.Disposable {
             vscode.commands.registerCommand('ferroui.showResources', (session?: number) => this.showDock(RESOURCES_VIEW, session)),
             vscode.commands.registerCommand('ferroui.showAssets', (session?: number) => this.showDock(ASSETS_VIEW, session)),
             vscode.commands.registerCommand('ferroui.showTimeline', (session?: number) => this.showDock(TIMELINE_VIEW, session)),
+            vscode.commands.registerCommand('ferroui.showData', (session?: number) => this.showDock(DATA_VIEW, session)),
             vscode.commands.registerCommand('ferroui.rsx.renameControl', async () => {
                 try {
                     const editor = vscode.window.activeTextEditor;
@@ -179,7 +184,7 @@ export class DesignerWorkbench implements vscode.Disposable {
                 const document = await vscode.workspace.openTextDocument(saved.uri);
                 const language = languageOf(document);
                 if (language && !this.disposed && !this.panels.has(document.uri.toString())) {
-                    this.attach(panel, document, language, document.validatePosition(saved.caret), saved.viewport);
+                    this.attach(panel, document, language, document.validatePosition(saved.caret), saved.viewport, saved.designData);
                     this.followFocus();
                     return;
                 }
@@ -191,12 +196,12 @@ export class DesignerWorkbench implements vscode.Disposable {
     }
 
     private attach(panel: vscode.WebviewPanel, document: vscode.TextDocument, language: Language,
-        caret: vscode.Position, viewport?: Viewport): DesignerPanel {
+        caret: vscode.Position, viewport?: Viewport, designData?: DesignDataPresentation): DesignerPanel {
         const key = document.uri.toString();
         const designer: DesignerPanel = new DesignerPanel(this.context, this.output, this.projects, panel, document, ++this.nextSession, language,
             caret, () => { this.panels.delete(key); this.followFocus(); }, message => {
                 void this.drag.receive(designer, message).catch(error => designer.post({ type: 'edit', error: errorMessage(error) }));
-            }, viewport);
+            }, viewport, designData);
         designer.onDidChange(() => this.followFocus());
         this.panels.set(key, designer);
         return designer;
@@ -251,10 +256,12 @@ export class DesignerWorkbench implements vscode.Disposable {
     private updateDocks(): void {
         const panel = this.active;
         panel?.setInspected(this.outline.visible || this.properties.visible || this.toolbox.visible
-            || this.details.events.visible || this.details.resources.visible || this.assets.view.visible || this.studio.visible || this.timeline.view.visible);
+            || this.details.events.visible || this.details.resources.visible || this.assets.view.visible || this.studio.visible
+            || this.timeline.view.visible || this.data.view.visible);
         const file = panel ? vscode.workspace.asRelativePath(panel.document.uri, false) : '';
         this.studio.update(panel, file);
         this.timeline.update(panel, file);
+        this.data.update(panel, file);
         const token = panel?.currentToken;
         const node = panel?.selectedNode;
         const frame = panel && token !== undefined && !panel.status ? { session: panel.session, token } : undefined;
@@ -419,6 +426,7 @@ export class DesignerWorkbench implements vscode.Disposable {
         this.assets.dispose();
         this.studio.dispose();
         this.timeline.dispose();
+        this.data.dispose();
         const panels = [...this.panels.values()];
         this.panels.clear();
         this.active = undefined;

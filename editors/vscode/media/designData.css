@@ -1,0 +1,18 @@
+.data-view { display: grid; gap: 8px; padding: 10px; }
+.data-view p { margin: 0; }
+.data-editor { display: grid; gap: 8px; min-width: 0; }
+.data-editor textarea {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 180px;
+    padding: 8px;
+    resize: vertical;
+    border: 1px solid var(--vscode-input-border, transparent);
+    background: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+    font-family: var(--vscode-editor-font-family, monospace);
+    tab-size: 2;
+}
+.data-editor textarea:focus { outline: 1px solid var(--vscode-focusBorder); }
+.data-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+#data-error { color: var(--vscode-errorForeground); }

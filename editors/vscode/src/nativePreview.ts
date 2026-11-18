@@ -4,7 +4,7 @@ import type * as vscode from 'vscode';
 import type { BuiltProject } from './builtProjects';
 import type { TokenPlan, TokenRequest } from './designTokenProtocol';
 import type { NativeProjectInventory } from './projectInventory';
-import type { Asset, CanvasInteraction, CanvasPresentation, DropHint, EditResult, Inspection, InspectionTarget, Operation, Placement, PreviewSourceBuffer, ResourceRow, Snapshot, Source, Viewport } from './protocol';
+import type { Asset, CanvasInteraction, CanvasPresentation, DesignDataPresentation, DropHint, EditResult, Inspection, InspectionTarget, Operation, Placement, PreviewSourceBuffer, ResourceRow, Snapshot, Source, Viewport } from './protocol';
 import type { RsxLanguageDocument } from './rsxLanguageTypes';
 import type { HostedFrame, HostedInput, HostedSource } from './hostedProtocol';
 import type { NativeStageChange, PrototypeCommand, PrototypeHotspot, PrototypeScene, StageChecks, StageDocument, StageImage, StageManifest, StageModel, StagePick, StagePointer, StageStateOptions, StageTarget } from './stagesProtocol';
@@ -22,6 +22,7 @@ export class NativePreview implements vscode.Disposable {
         isolatedDesign?: boolean; appHostedDesign?: boolean; rsxLanguage?: boolean;
         stages?: boolean; prototypeEditing?: boolean; stageIncludes?: boolean; projectCatalog?: boolean;
         canvasInteraction?: boolean; canvasFocusOrder?: boolean; projectInventory?: boolean; tokenHandoff?: boolean;
+        designFixtures?: boolean;
     } = {};
 
     private constructor(command: string, channel: vscode.OutputChannel) {
@@ -106,6 +107,10 @@ export class NativePreview implements vscode.Disposable {
     stageImage(target: StageTarget): Promise<StageImage> { return this.send('stagesImage', target); }
     stageChecks(target: StageTarget): Promise<StageChecks> { return this.send('stagesChecks', target); }
     stageStateOptions(target: StageTarget): Promise<StageStateOptions[]> { return this.send('stagesStateOptions', target); }
+    stageFixtureOptions(target: StageTarget): Promise<string[]> {
+        if (!this.capabilities.designFixtures) throw new Error('Update the FerroUI preview helper to select named fixtures.');
+        return this.send('stagesFixtureOptions', target);
+    }
     stagePointer(input: StagePointer): Promise<StagePick> { return this.send('stagesPointer', input); }
     stagePrototypeElements(target: StageTarget): Promise<PrototypeHotspot[]> {
         if (!this.capabilities.prototypeEditing) throw new Error('Update the FerroUI preview helper to edit prototypes.');
@@ -115,8 +120,8 @@ export class NativePreview implements vscode.Disposable {
         return this.send('stagesPrototype', { epoch, ...command });
     }
 
-    render(source: Source, viewport: Viewport, frame = 0, workspaceRoot?: string, localSources?: PreviewSourceBuffer[]): Promise<Snapshot> {
-        return this.send('render', { ...source, ...viewport, frame, workspaceRoot, localSources });
+    render(source: Source, viewport: Viewport, frame = 0, workspaceRoot?: string, localSources?: PreviewSourceBuffer[], designData?: DesignDataPresentation): Promise<Snapshot> {
+        return this.send('render', { ...source, ...viewport, frame, workspaceRoot, localSources, designData });
     }
 
     placement(frame: number, placement: Placement): Promise<DropHint> {

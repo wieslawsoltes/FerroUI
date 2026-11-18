@@ -8,6 +8,7 @@ export interface StageConfiguration {
     environment: { width: number; height: number; theme: 'light' | 'dark' | 'inherit'; flow_direction: 'inherit' | 'left_to_right' | 'right_to_left' };
     layout: 'fixed' | 'size_that_fits' | 'fixed_width' | 'fixed_height';
     design_time_data: boolean;
+    design_fixture?: string;
     states: StageState[];
     pinned: boolean;
     auto_update: boolean;
