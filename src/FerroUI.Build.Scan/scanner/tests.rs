@@ -1609,7 +1609,8 @@ fn the_border_of_the_fixture_creates_its_brush() {
 
 /// The names and the string literals of the code (#568, step 4), when asked for: outside test
 /// code, comments and documentation, in the bodies of macros too; names that start with a
-/// lower-case letter are left out.
+/// lower-case letter are left out, except the functions and methods the code calls, which are
+/// names in the case of a type (`text_block()` is `TextBlock`).
 #[test]
 fn source_references_are_the_names_and_strings_of_the_code() {
     let scan = scan_crate(&ScanOptions::new("creates", creates_directory().join("lib.rs")).with_source_references(true));
@@ -1617,6 +1618,12 @@ fn source_references_are_the_names_and_strings_of_the_code() {
     for name in ["Plain", "Item", "Handle", "Spacer", "Unknown", "Thickness", "Control", "Separator", "Glyph"] {
         assert!(references.names.contains(name), "{name}: {:?}", references.names);
     }
+    // A function, a method and a function in the body of a macro; not the call of test code,
+    // nor a name the code does not call (`first`).
+    for name in ["ScrollViewer", "ToolTip", "TextBlock"] {
+        assert!(references.names.contains(name), "{name}: {:?}", references.names);
+    }
+    assert!(!references.names.contains("SplitView") && !references.names.contains("First"), "{:?}", references.names);
     assert!(!references.names.contains("describe") && !references.names.contains("ferroui_base"), "{:?}", references.names);
     for text in ["Item::new()", "TextFillColorPrimaryBrush", "{}"] {
         assert!(references.strings.contains(text), "{text}: {:?}", references.strings);

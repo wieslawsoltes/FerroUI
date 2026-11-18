@@ -1013,6 +1013,38 @@ Validated on macOS ARM64 (debug builds, a smoke run of each, and screenshots aga
   its tour selects all 127 pages with no diagnostic, and 12 of its 14 screenshots are identical to
   `"all"` (the home page differs in its animated banner, as between two runs of `main`).
 
+### 11.9 An application without markup
+
+An application whose interface is Rust code (the builders and `rsx!` of `ferroui-view`) has no
+document that constructs its theme: it constructed the theme in code with `WinUITheme::new()`,
+which is every unit, and linked every control of the theme. Two additions give it the trimming
+of 11.8:
+
+- **The calls of the sources are roots** (step 4). The scanner records, with the names that
+  start with an upper-case letter, the functions and methods the code calls, in the case of a
+  type (`SourceReferences::names`: `text_block()` gives `TextBlock`, `.tool_tip("..")` gives
+  `ToolTip`), in the bodies of macros too and outside test code. A builder is named after the
+  class it makes, so the rule of step 4 roots it unchanged: a name that is a type key of a unit
+  or a class of the type models. It is as conservative as the names are: a function of the
+  application named after a control keeps the unit of that control.
+- **`Build::theme(class)`** states a theme the code constructs. The build writes its table
+  (`compiled_markup::THEME_PARTS_<FULL NAME>`) from the roots of the sources, `theme-roots` and
+  `Build::theme_roots`, also for a crate without documents, and the code constructs the theme
+  with `with_parts` and the table. With `theme-trimming = false` the table has every unit. A
+  theme that no direct dependency has is an error of the build.
+
+The three declarative versions of hello world (`samples/HelloWorld.Builders`, `.Macros`,
+`.Hooks`) keep 16 of the 166 units of the WinUI theme, the list the XAML version keeps; the
+sizes are in docs/binary-size.md, section 4.24.
+
+The calls add no unit to the applications that were trimmed already: the kept units of
+HelloWorld (16 of 166), HelloWorld.ComponentHost (16), ReactiveDemo (47), BindingDemo (29 of 75),
+TreeDataGridDemo (30), Sandbox (5), RenderDemo (33) and TextTestApp (32) are the same lists with
+and without them.
+
+Tests: `source_references_are_the_names_and_strings_of_the_code` (the scanner),
+`a_theme_the_code_constructs_is_trimmed_by_what_the_sources_call` (`ferroui-build`).
+
 ## 12. Step 5 as implemented: ControlTheme tables
 
 The factory of a control theme runs once per theme dictionary, on the first lookup of its key, so
