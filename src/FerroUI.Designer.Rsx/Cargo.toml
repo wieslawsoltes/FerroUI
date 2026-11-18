@@ -1,0 +1,25 @@
+[package]
+name = "ferroui-designer-rsx"
+description = "Source-mapped RSX and XAML projections for the FerroUI designer"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-designer-core.workspace = true
+ferroui-designer-language.workspace = true
+ferroui-view-syntax.workspace = true
+proc-macro2 = { version = "1", features = ["span-locations"] }
+syn = { version = "2", features = ["full", "parsing"] }
+
+[package.metadata.release]
+group = "tools"

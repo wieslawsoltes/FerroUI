@@ -44,8 +44,10 @@ members = [
     "samples/PortableMedia.Browser",
     "src/FerroUI.Designer.Core",
     "src/FerroUI.Designer.Project",
+    "src/FerroUI.Designer.Preview",
     "src/FerroUI.Designer.Tools",
     "src/FerroUI.Designer.Language",
+    "src/FerroUI.Designer.Rsx",
     "src/FerroUI.Designer.Animation",
     "src/FerroUI.Designer.Collaboration",
     "src/FerroUI.Designer.Collaboration.Host",
@@ -329,6 +331,7 @@ ferroui-pretext-media = { version = "=0.5.1-preview.1", path = "src/Pretext/Ferr
 ferroui-designer-core = { version = "=0.5.1-preview.1", path = "src/FerroUI.Designer.Core" }
 ferroui-designer-project = { version = "=0.5.1-preview.1", path = "src/FerroUI.Designer.Project" }
 ferroui-designer-tools = { version = "=0.5.1-preview.1", path = "src/FerroUI.Designer.Tools" }
+ferroui-designer-rsx = { version = "=0.5.1-preview.1", path = "src/FerroUI.Designer.Rsx" }
 ferroui-designer-language = { version = "=0.5.1-preview.1", path = "src/FerroUI.Designer.Language" }
 ferroui-designer-animation = { version = "=0.5.1-preview.1", path = "src/FerroUI.Designer.Animation" }
 ferroui-designer-collaboration = { version = "=0.5.1-preview.1", path = "src/FerroUI.Designer.Collaboration" }

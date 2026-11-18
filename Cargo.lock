@@ -1950,6 +1950,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-designer-preview"
+version = "0.5.1-preview.1"
+dependencies = [
+ "base64",
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-designer",
+ "ferroui-designer-core",
+ "ferroui-designer-language",
+ "ferroui-designer-rsx",
+ "ferroui-designer-tools",
+ "ferroui-harfbuzz",
+ "ferroui-headless",
+ "ferroui-inspect",
+ "ferroui-mcp",
+ "ferroui-themes-winui",
+ "ferroui-vello",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "ferroui-designer-project"
 version = "0.5.1-preview.1"
 dependencies = [
@@ -1957,6 +1979,17 @@ dependencies = [
  "libc",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "ferroui-designer-rsx"
+version = "0.5.1-preview.1"
+dependencies = [
+ "ferroui-designer-core",
+ "ferroui-designer-language",
+ "ferroui-view-syntax",
+ "proc-macro2",
+ "syn 2.0.119",
 ]
 
 [[package]]

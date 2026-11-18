@@ -13,7 +13,7 @@ pub use references::{
     identifier as is_xaml_identifier, name_occurrences, rewrite_names, scope_of as name_scope,
     NameOccurrence,
 };
-pub use schema::{ExtensionInfo, PropertyInfo, Schema, TypeInfo};
+pub use schema::{ExtensionInfo, PropertyInfo, Schema, TypeInfo, FRAMEWORK_NAMESPACE};
 pub use service::*;
 use std::fmt;
 #[derive(Clone, Debug, PartialEq, Eq)]
