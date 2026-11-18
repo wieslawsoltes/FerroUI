@@ -97,7 +97,8 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     let design = DesignDocument::parse(&request.document, projects.source(&request.document)?)?;
     let query = request.query;
     if design.rsx.is_some()
-        && (!matches!(query.name.as_str(), "designer_selection_layout_edit" | "designer_property") || !design.editable_structure())
+        && (!matches!(query.name.as_str(), "designer_selection_layout_edit" | "designer_property" | "designer_grid_track_edit")
+            || !design.editable_structure())
     {
         return Err("This Studio operation requires XAML or a fully mapped RSX layout.".into());
     }
@@ -186,6 +187,7 @@ fn source_action(tool: &str, action: Option<&str>) -> bool {
         "designer_component"
         | "designer_property"
         | "designer_binding_edit"
+        | "designer_grid_track_edit"
         | "designer_set_event"
         | "designer_focus_edit"
         | "designer_selection_layout_edit"

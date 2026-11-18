@@ -7,6 +7,7 @@ import { verifyProjectMcp } from './projectMcp';
 import { verifyWorkspaceMcp } from './workspaceMcp';
 import { verifyTimelineMcp } from './studioTimelineMcp';
 import { verifyBindingMcp } from './studioBindingMcp';
+import { verifyGridMcp } from './studioGridMcp';
 
 interface ToolResponse {
     content: { type: string; text?: string; data?: string }[];
@@ -151,6 +152,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         assert.equal(document.getText(), original);
         await verifyTimelineMcp({ invoke, content }, session, document);
         await verifyBindingMcp({ invoke, content });
+        await verifyGridMcp({ invoke, content });
         const canvas = content<{ tab: string; scale: number; panTool: boolean }>(await invoke('designer_canvas', { session, tab: 'preview', scale: 2, pan_tool: true }));
         assert.deepEqual([canvas.tab, canvas.scale, canvas.panTool], ['preview', 2, true]);
         assert.equal(content<{ tab: string }>(await invoke('designer_canvas', { session, tab: 'counterpart', pan_tool: false })).tab, 'counterpart');

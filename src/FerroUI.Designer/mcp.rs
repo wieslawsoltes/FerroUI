@@ -20,6 +20,8 @@ mod automation_tests;
 mod components;
 #[path = "mcp_events.rs"]
 mod events;
+#[path = "mcp_grid.rs"]
+mod grid;
 #[cfg(test)]
 #[path = "mcp_components_tests.rs"]
 mod components_tests;
@@ -264,6 +266,7 @@ impl UiToolProvider for DesignerMcp {
         ];
         tools.extend(authoring::tools());
         tools.extend(binding::tools());
+        tools.extend(grid::tools());
         tools.extend(components::tools());
         tools.extend(events::tools());
         tools.extend(design_workflows::tools());
@@ -286,6 +289,7 @@ impl UiToolProvider for DesignerMcp {
             .ok_or("Unknown designer tool")?;
         if authoring::handles(name)
             || binding::handles(name)
+            || grid::handles(name)
             || components::handles(name)
             || events::handles(name)
             || workspace_tools::handles(name)
@@ -525,6 +529,9 @@ impl UiToolProvider for DesignerMcp {
         }
         if binding::handles(name) {
             return binding::call(&mut session, name, args);
+        }
+        if grid::handles(name) {
+            return grid::call(&mut session, name, args);
         }
         if components::handles(name) {
             return components::call(&mut session, name, args);

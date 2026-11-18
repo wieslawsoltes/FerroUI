@@ -5,6 +5,7 @@ import { StudioContext, type StudioItem } from './studioContext';
 import { behaviorItems } from './studioBehaviors';
 import { contentSections, findDefinition } from './studioContent';
 import { focusItems } from './studioFocus';
+import { chooseGridTrack, gridItems } from './studioGrid';
 import { layerItems } from './studioLayers';
 import { stateItems } from './studioStates';
 import { timelineItems } from './studioTimeline';
@@ -29,6 +30,13 @@ export class StudioView implements vscode.TreeDataProvider<StudioItem>, vscode.D
                     const context = this.context();
                     if (!context) throw new Error('Open a FerroUI design before finding a definition.');
                     await findDefinition(context);
+                } catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
+            }),
+            vscode.commands.registerCommand('ferroui.studio.gridTracks', async () => {
+                try {
+                    const context = this.context();
+                    if (!context) throw new Error('Open a FerroUI design before editing its Grid tracks.');
+                    await chooseGridTrack(context);
                 } catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
             }),
             vscode.commands.registerCommand(runId, async (item: StudioItem) => {
@@ -69,6 +77,7 @@ export class StudioView implements vscode.TreeDataProvider<StudioItem>, vscode.D
         return [
             ...contentSections(context),
             { id: 'layers', label: 'Layers', icon: 'layers', children: () => layerItems(context) },
+            { id: 'grid', label: 'Grid Tracks', icon: 'layout', children: () => gridItems(context) },
             { id: 'focus', label: 'Focus and Labels', icon: 'list-ordered', children: () => focusItems(context) },
             { id: 'timeline', label: 'Timeline', icon: 'history', children: () => timelineItems(context) },
             { id: 'states', label: 'States', icon: 'symbol-enum', children: () => stateItems(context) },

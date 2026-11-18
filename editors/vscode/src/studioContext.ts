@@ -28,7 +28,6 @@ export class StudioContext {
 
     async edit(name: string, arguments_: object): Promise<void> {
         this.ensure();
-        if (!this.writable) throw new Error('This Studio action is available in XAML.');
         await this.panel.studioEdit(this.token, name, arguments_, this.selection, AbortSignal.timeout(15_000));
     }
 

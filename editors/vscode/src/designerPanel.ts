@@ -8,6 +8,8 @@ import { designerHtml, webviewOptions } from './view';
 import type { EditResult, Inspection, InspectionTarget, Range, ResourceRow, RuntimeRow, RuntimeTreeMode } from './protocol';
 import type { CanvasAction, CanvasInteraction, CanvasPresentation } from './protocol';
 
+const mappedStudioEdits = new Set(['designer_selection_layout_edit', 'designer_property', 'designer_grid_track_edit']);
+
 interface Frame {
     token: number;
     version: number;
@@ -286,7 +288,7 @@ export class DesignerPanel implements vscode.Disposable {
     async studioTools() {
         const { tools, xamlEdits, presentations } = await (await this.getClient()).studioTools();
         return { tools, presentations: presentations ?? [], edits: this.language === 'xaml' ? xamlEdits : xamlEdits.filter(tool =>
-            ['designer_selection_layout_edit', 'designer_property'].includes((tool as { name: string }).name)) };
+            mappedStudioEdits.has((tool as { name: string }).name)) };
     }
 
     async studioQuery(name: string, args: object, selection: number[] | undefined, signal: AbortSignal): Promise<unknown> {
@@ -299,7 +301,7 @@ export class DesignerPanel implements vscode.Disposable {
     }
 
     async studioEdit(token: number, name: string, args: object, selection: number[] | undefined, signal: AbortSignal): Promise<void> {
-        if (this.language === 'rust' && !['designer_selection_layout_edit', 'designer_property'].includes(name)) {
+        if (this.language === 'rust' && !mappedStudioEdits.has(name)) {
             throw new Error('This Studio operation requires XAML or a mapped RSX layout operation.');
         }
         if (this.editing) throw new Error('A designer edit is already in progress.');

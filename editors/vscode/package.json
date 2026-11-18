@@ -172,6 +172,11 @@
         "category": "FerroUI"
       },
       {
+        "command": "ferroui.studio.gridTracks",
+        "title": "Edit Grid Tracks",
+        "category": "FerroUI"
+      },
+      {
         "command": "ferroui.revealDesignerSource",
         "title": "Reveal Selected Control in Source",
         "category": "FerroUI",
