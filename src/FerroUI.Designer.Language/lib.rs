@@ -1,6 +1,7 @@
 //! Schema-aware XAML text editing, navigation, refactoring and stdio LSP.
 mod binding;
 mod design_support;
+mod editing;
 mod formatting;
 mod line_index;
 pub mod lsp;
@@ -8,6 +9,7 @@ mod references;
 mod schema;
 mod service;
 pub use formatting::FormattingOptions;
+pub use editing::QuickFix;
 pub use line_index::{LineIndex, Position, Range, TextChange, TextEdit};
 pub use references::{
     identifier as is_xaml_identifier, name_occurrences, rewrite_names, scope_of as name_scope,

@@ -9,6 +9,7 @@ export class XamlServer implements vscode.Disposable {
     private client?: LanguageClient;
     private transition = Promise.resolve();
     private disposed = false;
+    private readonly watch = vscode.workspace.createFileSystemWatcher('**/*.xaml');
 
     constructor(private readonly context: vscode.ExtensionContext, private readonly channel: vscode.OutputChannel) {}
 
@@ -22,7 +23,7 @@ export class XamlServer implements vscode.Disposable {
                 command, transport: TransportKind.stdio,
             }, {
                 documentSelector: [{ language: xamlLanguage, scheme: 'file' }],
-                synchronize: { configurationSection: 'ferroui' },
+                synchronize: { configurationSection: 'ferroui', fileEvents: this.watch },
                 outputChannel: this.channel,
             });
             this.client = client;
@@ -46,6 +47,7 @@ export class XamlServer implements vscode.Disposable {
 
     dispose(): void {
         this.disposed = true;
+        this.watch.dispose();
         void this.transition.then(() => this.stop()).catch(error => this.channel.appendLine(errorMessage(error)));
     }
 }

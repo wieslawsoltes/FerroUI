@@ -216,6 +216,27 @@ impl LspServer {
                 let options: FormattingOptions = decode(&params["options"])?;
                 Ok(json!(self.service.format(uri(params)?, options)?))
             }
+            "textDocument/rangeFormatting" => Ok(json!(self.service.format_range(
+                uri(params)?, decode(&params["range"])?, decode(&params["options"])?,
+            )?)),
+            "textDocument/linkedEditingRange" => {
+                let (uri, offset) = self.position(params)?;
+                Ok(self.service.linked_tags(uri, offset)?.map_or(Value::Null, |ranges| {
+                    json!({"ranges": ranges, "wordPattern": "[^\\s<>/='\"]+"})
+                }))
+            }
+            "textDocument/codeAction" => {
+                if params["context"]["only"].as_array().is_some_and(|kinds| {
+                    !kinds.iter().any(|kind| kind.as_str() == Some("quickfix"))
+                }) {
+                    return Ok(json!([]));
+                }
+                let fixes = self.service.quick_fixes(uri(params)?, decode(&params["range"])?)?;
+                Ok(json!(fixes.into_iter().map(|fix| json!({
+                    "title": fix.title, "kind": "quickfix",
+                    "edit": self.workspace_edit(WorkspaceEdit { document_changes: vec![fix.edits] })
+                })).collect::<Vec<_>>()))
+            }
             "textDocument/documentSymbol" => Ok(json!(self.service.symbols(uri(params)?)?)),
             "textDocument/foldingRange" => Ok(json!(self.service.folding(uri(params)?)?)),
             "textDocument/semanticTokens/full" => {
@@ -276,6 +297,22 @@ impl LspServer {
                         let root = ferroui_designer_project::file_path(text(folder, "uri")?)?;
                         let solution = ferroui_designer_project::Solution::discover(root)?;
                         self.service.index_solution(&solution)?;
+                    }
+                }
+                Ok(Value::Null)
+            }
+            "workspace/didChangeWatchedFiles" => {
+                let changes = params["changes"].as_array()
+                    .ok_or_else(|| LanguageError("changes array required".into()))?;
+                let mut refreshed = false;
+                for change in changes {
+                    if change["uri"].as_str().is_some_and(|uri| uri.starts_with("file:")) {
+                        refreshed |= self.service.refresh_project_file(text(change, "uri")?)?;
+                    }
+                }
+                if refreshed {
+                    for uri in self.open_uris.values() {
+                        self.publish(uri, notifications)?;
                     }
                 }
                 Ok(Value::Null)
@@ -350,6 +387,8 @@ impl LspServer {
                 "completionProvider": { "triggerCharacters": ["<", " ", ":", ".", "{", "="] },
                 "hoverProvider": true, "definitionProvider": true, "referencesProvider": true,
                 "renameProvider": { "prepareProvider": true }, "documentFormattingProvider": true,
+                "documentRangeFormattingProvider": true, "linkedEditingRangeProvider": true,
+                "codeActionProvider": { "codeActionKinds": ["quickfix"] },
                 "documentSymbolProvider": true, "foldingRangeProvider": true, "workspaceSymbolProvider": true,
                 "signatureHelpProvider": { "triggerCharacters": ["{", ",", "="] },
                 "semanticTokensProvider": {

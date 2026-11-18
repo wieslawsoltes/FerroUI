@@ -20,7 +20,11 @@ impl Default for FormattingOptions {
         }
     }
 }
-pub(crate) fn format(document: &Document, options: FormattingOptions) -> Result<Vec<TextEdit>> {
+pub(crate) fn format(
+    document: &Document,
+    options: FormattingOptions,
+    selection: Option<SourceSpan>,
+) -> Result<Vec<TextEdit>> {
     require(document.is_valid(), "Repair invalid XML before formatting")?;
     require(
         (1..=16).contains(&options.tab_size),
@@ -87,7 +91,7 @@ pub(crate) fn format(document: &Document, options: FormattingOptions) -> Result<
         }
     }
     let root_end = document.ast().node(document.ast().root()).unwrap().span.end;
-    if source[root_end..].chars().all(char::is_whitespace) {
+    if selection.is_none() && source[root_end..].chars().all(char::is_whitespace) {
         let trailing = &source[root_end..];
         if options.insert_final_newline {
             patches.push((SourceSpan::new(root_end, source.len()), newline.into()));
@@ -98,6 +102,15 @@ pub(crate) fn format(document: &Document, options: FormattingOptions) -> Result<
     patches.sort_by_key(|(span, _)| (span.start, span.end));
     let edits = patches
         .into_iter()
+        .filter(|(span, _)| {
+            selection.is_none_or(|range| {
+                if span.is_empty() {
+                    range.start < span.start && span.end < range.end
+                } else {
+                    range.start <= span.start && span.end <= range.end
+                }
+            })
+        })
         .filter(|(span, text)| &source[span.range()] != text)
         .map(|(span, new_text)| {
             Ok(TextEdit {

@@ -196,6 +196,9 @@ impl LanguageService {
     pub fn schema_mut(&mut self) -> &mut Schema {
         &mut self.schema
     }
+    pub fn schema_for(&self, _uri: &str) -> &Schema {
+        &self.schema
+    }
     pub fn document(&self, uri: &str) -> Option<&Document> {
         self.state(uri).ok().map(|s| &s.document)
     }
@@ -352,6 +355,53 @@ impl LanguageService {
         }
         self.workspaces.insert(root, workspace);
         Ok(added)
+    }
+
+    /// Refresh one project snapshot without disturbing an editor's unsaved buffer.
+    pub fn refresh_project_file(&mut self, uri: &str) -> Result<bool> {
+        use ferroui_designer_project::{DocumentEntry, DocumentKind};
+
+        let uri = self.document_uri(uri)?.into_owned();
+        let path = ferroui_designer_project::file_path(&uri)?;
+        if !path.extension().is_some_and(|extension| extension.eq_ignore_ascii_case("xaml")) {
+            return Ok(false);
+        }
+        let contains = |project: &ferroui_designer_project::ProjectDescriptor| {
+            path.strip_prefix(&project.root).is_ok_and(|relative| {
+                !relative.iter().any(|part| matches!(part.to_str(),
+                    Some(".git" | "target" | "node_modules" | "bin" | "obj")))
+            })
+        };
+        if !self.workspaces.values().flat_map(|workspace| &workspace.solution.projects).any(contains) {
+            return Ok(false);
+        }
+
+        let opened = self.documents.get(&uri).is_some_and(|state| state.opened);
+        let present = path.is_file();
+        if !opened {
+            if present {
+                use std::io::Read;
+                const MAX: u64 = 16 * 1024 * 1024;
+                let mut source = String::new();
+                std::fs::File::open(&path).and_then(|file| file.take(MAX + 1).read_to_string(&mut source))
+                    .map_err(|error| LanguageError(error.to_string()))?;
+                require(source.len() as u64 <= MAX, "Indexed file exceeds 16 MiB")?;
+                self.open(&uri, source, -1)?;
+                self.documents.get_mut(&uri).expect("snapshot inserted").opened = false;
+            } else {
+                self.set_state(uri.clone(), None);
+            }
+        }
+        for project in self.workspaces.values_mut().flat_map(|workspace| &mut workspace.solution.projects) {
+            if !contains(project) {
+                continue;
+            }
+            project.documents.retain(|entry| entry.path != path);
+            if present {
+                project.documents.push(DocumentEntry { uri: uri.clone(), path: path.clone(), kind: DocumentKind::Xaml });
+            }
+        }
+        Ok(true)
     }
     /// Remove a workspace's disk snapshots while preserving open buffers and shared roots.
     pub fn remove_solution(&mut self, root: impl AsRef<std::path::Path>) -> usize {
@@ -1314,7 +1364,11 @@ impl LanguageService {
         Ok(())
     }
     pub fn format(&self, uri: &str, options: FormattingOptions) -> Result<Vec<TextEdit>> {
-        crate::formatting::format(&self.state(uri)?.document, options)
+        crate::formatting::format(&self.state(uri)?.document, options, None)
+    }
+    pub fn format_range(&self, uri: &str, range: Range, options: FormattingOptions) -> Result<Vec<TextEdit>> {
+        let state = self.state(uri)?;
+        crate::formatting::format(&state.document, options, Some(state.index.span(range)?))
     }
     pub fn symbols(&self, uri: &str) -> Result<Vec<DocumentSymbol>> {
         let state = self.state(uri)?;
