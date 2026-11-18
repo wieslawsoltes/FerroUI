@@ -1391,3 +1391,39 @@ function (`_deferred_<n>`, `_part_<n>`, `_unit_<n>`, `_untyped`).
 - `theme_roots_tests.rs`: the parts statics, the capability, and the producer check.
 - `tests/FerroUI.Markup.Xaml.UnitTests/emitter/build_diagnostics.rs`: the error and the
   disambiguation reported by a build.
+
+## 19. Why each unit is kept (#852, first step)
+
+Issue #852 asks whether a graph of entries could split the high-fanout dictionaries of a theme
+into clusters that link independently: `Resources/Generic.xaml` of WinUI has 330 keys, and
+`Accents/FluentControlResources.xaml` of Fluent 626 in one unit. Its rule is to count first, and to
+stop if the count does not carry the idea. This step provides the count and the reasons. It changes
+no kept unit.
+
+`$OUT_DIR/xaml/theme_parts_why.txt`, written next to `theme_parts.txt`, has a block for each theme
+the application trims:
+
+- **A line of totals:** the units kept, and of the keys the kept units define, how many are live.
+  A key is live when it is a root or a kept unit references it. A unit with few live keys is the
+  candidate for entry-level selection that the issue describes.
+- **A line for each kept unit:** its name, its live and total keys, whether its reason is
+  `conservative` or `exact`, and the first reason the closure found. A reason is one of these:
+  - the ambient unit;
+  - named by the manifest or the build script;
+  - the theme of a live type, with what made the type live (a root of the documents or the sources,
+    a type a kept unit constructs, or a base class or created class of another);
+  - a live key, with where it came from (a root, or the unit that references it).
+
+  A reason is conservative when its root is a token of a document, a name of the sources or a
+  reference of a dependency: something that may only spell the key or the type. Stated roots,
+  constructions and references of kept units are exact.
+
+`theme_roots::explain_kept_units` (new) runs the closure of `kept_units` and records the first reason
+it meets for each unit. Its units are those of `kept_units` over the union of its sources, and a test
+checks this. `theme_roots::why_kept_listing` (new) writes the block.
+
+Not done in this step:
+
+- the count for hello world and a larger sample, and the bytes behind the counts. The listing gives
+  the keys; the bytes need a link map of a build of a sample with the Skia backend.
+- clusters inside one dictionary. Whether to build them waits for that count.

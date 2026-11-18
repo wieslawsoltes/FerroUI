@@ -1,13 +1,32 @@
-<!-- Adapted from Samples/CheckBox and its page code behind; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <CheckBox x:Name="TwoState" Content="Two-state CheckBox"/>
-  <TextBlock x:Name="TwoStateOutput"/>
-  <CheckBox x:Name="ThreeState" Content="Three-state CheckBox" IsThreeState="True"/>
-  <TextBlock x:Name="ThreeStateOutput"/>
-  <StackPanel Spacing="8">
-    <CheckBox x:Name="OptionsAllCheckBox" Content="Select all" IsThreeState="True"/>
-    <CheckBox x:Name="Option1CheckBox" Content="Option 1" Margin="24,0,0,0"/>
-    <CheckBox x:Name="Option2CheckBox" Content="Option 2" Margin="24,0,0,0" IsChecked="True"/>
-    <CheckBox x:Name="Option3CheckBox" Content="Option 3" Margin="24,0,0,0"/>
+<!-- Ported from the three pinned CheckBox examples of WinUI Gallery (14061eea) and the handlers of
+     CheckBoxPage.xaml.cs (input_samples.rs); see ../NOTICE.md. The two- and three-state boxes are
+     named for the Rust handlers; the source's boxes have no name. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="CheckBoxExample1" Spacing="8">
+    <TextBlock Text="A 2-state CheckBox." FontSize="18" />
+    <StackPanel Orientation="Horizontal">
+      <CheckBox x:Name="TwoState" AutomationProperties.Name="Two-state" Content="Two-state CheckBox" />
+    </StackPanel>
+    <TextBlock x:Name="TwoStateOutput" AutomationProperties.AutomationId="Control1Output" />
+  </StackPanel>
+
+  <StackPanel x:Name="CheckBoxExample2" Spacing="8">
+    <TextBlock Text="A 3-state CheckBox." FontSize="18" />
+    <StackPanel Orientation="Horizontal">
+      <CheckBox x:Name="ThreeState" AutomationProperties.Name="Three-state" Content="Three-state CheckBox"
+                IsThreeState="True" />
+    </StackPanel>
+    <TextBlock x:Name="ThreeStateOutput" AutomationProperties.AutomationId="Control2Output" />
+  </StackPanel>
+
+  <StackPanel x:Name="CheckBoxExample3" Spacing="8">
+    <TextBlock Text="Using a 3-state CheckBox." FontSize="18" />
+    <StackPanel>
+      <CheckBox x:Name="OptionsAllCheckBox" Content="Select all" IsThreeState="True" />
+      <CheckBox x:Name="Option1CheckBox" Margin="24,0,0,0" Content="Option 1" />
+      <CheckBox x:Name="Option2CheckBox" Margin="24,0,0,0" Content="Option 2" IsChecked="True" />
+      <CheckBox x:Name="Option3CheckBox" Margin="24,0,0,0" Content="Option 3" />
+    </StackPanel>
   </StackPanel>
 </StackPanel>

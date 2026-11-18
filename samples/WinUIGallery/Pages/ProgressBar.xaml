@@ -1,4 +1,29 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <TextBlock Text="Indeterminate"/><ProgressBar Width="240" HorizontalAlignment="Left" IsIndeterminate="True"/><TextBlock Text="Determinate"/><ProgressBar Width="240" HorizontalAlignment="Left" Value="60"/>
+<!-- Ported from the two pinned ProgressBar examples of WinUI Gallery (14061eea) and the handler of
+     ProgressBarPage.xaml.cs (status_samples.rs); see ../NOTICE.md. FerroUI's ProgressBar has no
+     ShowPaused or ShowError, so the indeterminate bar has no Progress state options (Running,
+     Paused, Error): the source's x:Bind of IsChecked.Value has no target. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="ProgressBarExample1" Spacing="8">
+    <TextBlock Text="An indeterminate progress bar." FontSize="18" />
+    <ProgressBar x:Name="ProgressBar1" Width="130" Margin="10,10,0,0" HorizontalAlignment="Left"
+                 VerticalAlignment="Top" IsIndeterminate="True" />
+  </StackPanel>
+
+  <StackPanel x:Name="ProgressBarExample2" Spacing="8">
+    <TextBlock Text="A determinate progress bar." FontSize="18" />
+    <StackPanel x:Name="Control2" Orientation="Horizontal">
+      <ProgressBar x:Name="ProgressBar2" Width="130" VerticalAlignment="Center"
+                   AutomationProperties.Name="Determinate progress example" />
+      <TextBlock x:Name="Control2Output" Width="60" TextAlignment="Center" />
+      <TextBlock x:Name="ProgressLabel" Margin="0,0,10,0" VerticalAlignment="Center" Text="Progress" />
+      <NumberBox x:Name="ProgressValue"
+                 AutomationProperties.LabeledBy="{Binding ElementName=ProgressLabel}"
+                 AutomationProperties.Name="NumberBox controlling ProgressBar2 value"
+                 Maximum="100"
+                 Minimum="0"
+                 SpinButtonPlacementMode="Inline"
+                 Value="0" />
+    </StackPanel>
+  </StackPanel>
 </StackPanel>
