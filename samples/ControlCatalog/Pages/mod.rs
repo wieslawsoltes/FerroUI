@@ -55,6 +55,7 @@ mod ink_toolbar_page;
 mod icon_element_page;
 mod info_badge_page;
 mod info_bar_page;
+mod pivot_page;
 mod navigation_view_page;
 mod auto_suggest_box_page;
 mod rich_edit_box_page;
@@ -215,6 +216,7 @@ pub use ink_toolbar_page::InkToolbarPage;
 pub use icon_element_page::IconElementPage;
 pub use info_badge_page::InfoBadgePage;
 pub use info_bar_page::InfoBarPage;
+pub use pivot_page::PivotPage;
 pub use progress_ring_page::ProgressRingPage;
 pub use navigation_view_page::NavigationViewPage;
 pub use auto_suggest_box_page::AutoSuggestBoxPage;
@@ -326,6 +328,7 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     IconElementPage::TYPE,
     InfoBadgePage::TYPE,
     InfoBarPage::TYPE,
+    PivotPage::TYPE,
     ProgressRingPage::TYPE,
     NavigationViewPage::TYPE,
     AutoSuggestBoxPage::TYPE,
@@ -435,6 +438,7 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &IconElementPage::XAML_CLASS,
     &InfoBadgePage::XAML_CLASS,
     &InfoBarPage::XAML_CLASS,
+    &PivotPage::XAML_CLASS,
     &ProgressRingPage::XAML_CLASS,
     &NavigationViewPage::XAML_CLASS,
     &AutoSuggestBoxPage::XAML_CLASS,

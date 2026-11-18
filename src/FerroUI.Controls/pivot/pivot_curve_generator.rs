@@ -244,6 +244,7 @@ impl PivotCurveGenerator {
         self.current_header_panel_offset
     }
 
+    #[cfg(test)]
     pub(crate) fn current_section_offset(&self) -> f64 {
         self.current_offset
     }

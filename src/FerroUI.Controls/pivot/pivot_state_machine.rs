@@ -176,11 +176,13 @@ impl PivotStateMachine {
         self.static_viewport_offset
     }
 
+    #[cfg(test)]
     pub(crate) fn current_index(&self) -> i32 {
         self.current_index
     }
 
     /// Whether the machine waits for a measure pass to refresh its items (a reset of the items).
+    #[cfg(test)]
     pub(crate) fn is_pending_items_host_validation(&self) -> bool {
         self.pending_item_host_validation
     }

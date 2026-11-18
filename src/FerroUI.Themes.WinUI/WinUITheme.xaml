@@ -56,6 +56,7 @@
         <MergeResourceInclude Source="/Resources/DateTimePickerFlyout_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/FlipView_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/FlipViewItem_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/Pivot_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/ScrollBar_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/ScrollViewer_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/Slider_themeresources.xaml" />

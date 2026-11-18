@@ -1,0 +1,364 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/CommonStyles/Pivot_themeresources.xaml (DefaultPivotStyle with its NextTemplate,
+    PreviousTemplate and TitleContentControlStyle, DefaultPivotItemStyle,
+    DefaultPivotHeaderItemStyle and the implicit styles; the resources are
+    Resources/Pivot_themeresources.xaml) and PivotTitleContentControlStyle
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  The templates of WinUI's Pivot, PivotItem and PivotHeaderItem, which FerroUI ports as controls
+  (ferroui-controls, docs/porting/winui-calculator-gaps.md, PV-1 to PV-3); the Fluent theme has no
+  document for them. Translation notes (docs/porting/winui-theme.md, section 4):
+  - The parts keep their names: RootElement, TitleContentControl, ScrollViewer, Panel,
+    PivotLayoutElement, LeftHeaderPresenter, HeaderClipper, StaticHeader, Header, FocusFollower,
+    PreviousButton, NextButton, RightHeaderPresenter and PivotItemPresenter; the parts of the
+    header item are Grid, ContentPresenter and SelectedPipe.
+  - The transforms of the template (PivotLayoutElementTranslateTransform,
+    HeaderOffsetTranslateTransform, StaticHeaderTranslateTransform, HeaderTranslateTransform,
+    ItemsPresenterTranslateTransform, ItemsPresenterCompositeTransform) are not parts: the control
+    drives the composition Translation of the same elements (the layout element, the parent of the
+    header panels, the header panels, the items presenter) with expression and key frame
+    animations, on the compositor.
+  - The visual states are pseudo-classes, as in the other WinUI controls of the theme (decision
+    D2): NavigationButtonsVisibility is :previous-button-visible and :next-button-visible of the
+    pivot; HeaderStates (HeaderStatic) is set by the control on the header panels and shown as
+    :header-static; the Orientation states have the same padding (PivotPortraitThemePadding and
+    PivotLandscapeThemePadding are equal), so the title keeps the portrait margin. The selection
+    states of the header item are :selected, :pressed, :pointerover, :disabled and :locked
+    (UnselectedLocked); the VisualTransitions between Unselected and UnselectedLocked (0.33 s) are
+    the transitions of Opacity of the content presenter.
+  - The clip of HeaderClipper (HeaderClipperGeometry, the size of the clipper) is ClipToBounds.
+  - Visibility="Collapsed" is IsVisible="False"; CharacterSpacing (PivotHeaderItemCharacterSpacing)
+    and OpticalMarginAlignment are not FerroUI properties and are left out.
+  - The items of the pivot lie on each other in a Grid (WinUI's ItemsPanel).
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20" Width="420" Height="240">
+      <Pivot Title="EMAIL">
+        <PivotItem Header="All">
+          <TextBlock Text="All emails" />
+        </PivotItem>
+        <PivotItem Header="Unread">
+          <TextBlock Text="Unread emails" />
+        </PivotItem>
+        <PivotItem Header="Flagged">
+          <TextBlock Text="Flagged emails" />
+        </PivotItem>
+      </Pivot>
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTemplate x:Key="NextTemplate" TargetType="Button">
+    <Border x:Name="Root"
+            Background="{DynamicResource PivotNextButtonBackground}"
+            BorderThickness="{DynamicResource PivotNavButtonBorderThemeThickness}"
+            BorderBrush="{DynamicResource PivotNextButtonBorderBrush}">
+      <FontIcon x:Name="Arrow"
+                FontFamily="{DynamicResource SymbolThemeFontFamily}"
+                FontSize="12"
+                Foreground="{DynamicResource PivotNextButtonForeground}"
+                Glyph="&#xE76C;"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                MirroredWhenRightToLeft="True"
+                UseLayoutRounding="False" />
+    </Border>
+  </ControlTemplate>
+
+  <ControlTemplate x:Key="PreviousTemplate" TargetType="Button">
+    <Border x:Name="Root"
+            Background="{DynamicResource PivotPreviousButtonBackground}"
+            BorderThickness="{DynamicResource PivotNavButtonBorderThemeThickness}"
+            BorderBrush="{DynamicResource PivotPreviousButtonBorderBrush}">
+      <FontIcon x:Name="Arrow"
+                FontFamily="{DynamicResource SymbolThemeFontFamily}"
+                FontSize="12"
+                Foreground="{DynamicResource PivotPreviousButtonForeground}"
+                Glyph="&#xE76B;"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                MirroredWhenRightToLeft="True"
+                UseLayoutRounding="False" />
+    </Border>
+  </ControlTemplate>
+
+  <ControlTheme x:Key="TitleContentControlStyle" TargetType="ContentControl">
+    <Setter Property="FontFamily" Value="{DynamicResource PivotTitleFontFamily}" />
+    <Setter Property="FontWeight" Value="{DynamicResource PivotTitleThemeFontWeight}" />
+    <Setter Property="FontSize" Value="{DynamicResource PivotTitleFontSize}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <ContentPresenter Content="{TemplateBinding Content}"
+                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                          Margin="{TemplateBinding Padding}"
+                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <!-- WinUI's top-level PivotTitleContentControlStyle. Its font family, PhoneFontFamilyNormal, is not
+       a resource of the WinUI 3 theme (a reference WinUI leaves unresolved), so it is left out. -->
+  <ControlTheme x:Key="PivotTitleContentControlStyle" TargetType="ContentControl">
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="FontSize" Value="{DynamicResource TextStyleLargeFontSize}" />
+    <Setter Property="Margin" Value="{DynamicResource PivotPortraitThemePadding}" />
+  </ControlTheme>
+
+  <ControlTheme x:Key="DefaultPivotStyle" TargetType="Pivot">
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Background" Value="{DynamicResource PivotBackground}" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="ItemsPanel">
+      <ItemsPanelTemplate>
+        <Grid />
+      </ItemsPanelTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid x:Name="RootElement"
+              HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
+              VerticalAlignment="{TemplateBinding VerticalAlignment}"
+              Background="{TemplateBinding Background}"
+              RowDefinitions="Auto,*">
+          <ContentControl x:Name="TitleContentControl"
+                          IsTabStop="False"
+                          Margin="{StaticResource PivotPortraitThemePadding}"
+                          Theme="{StaticResource TitleContentControlStyle}"
+                          IsVisible="False"
+                          Content="{TemplateBinding Title}"
+                          ContentTemplate="{TemplateBinding TitleTemplate}" />
+          <Grid Grid.Row="1">
+            <ScrollViewer x:Name="ScrollViewer"
+                          Margin="{TemplateBinding Padding}"
+                          HorizontalSnapPointsType="MandatorySingle"
+                          HorizontalSnapPointsAlignment="Center"
+                          HorizontalScrollBarVisibility="Hidden"
+                          VerticalScrollBarVisibility="Disabled"
+                          VerticalSnapPointsType="None"
+                          VerticalContentAlignment="Stretch"
+                          ZoomMode="Disabled"
+                          Template="{StaticResource ScrollViewerScrollBarlessTemplate}"
+                          BringIntoViewOnFocusChange="False">
+              <PivotPanel x:Name="Panel" VerticalAlignment="Stretch">
+                <Grid x:Name="PivotLayoutElement" RowDefinitions="Auto,*" ColumnDefinitions="Auto,*,Auto">
+                  <ContentPresenter x:Name="LeftHeaderPresenter"
+                                    Content="{TemplateBinding LeftHeader}"
+                                    ContentTemplate="{TemplateBinding LeftHeaderTemplate}"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch" />
+                  <ContentControl x:Name="HeaderClipper"
+                                  Grid.Column="1"
+                                  Focusable="True"
+                                  ClipToBounds="True"
+                                  HorizontalContentAlignment="Stretch">
+                    <Grid Background="{DynamicResource PivotHeaderBackground}">
+                      <PivotHeaderPanel x:Name="StaticHeader" IsVisible="False" />
+                      <PivotHeaderPanel x:Name="Header" />
+                      <Rectangle x:Name="FocusFollower"
+                                 IsHitTestVisible="False"
+                                 Fill="Transparent"
+                                 HorizontalAlignment="Stretch"
+                                 VerticalAlignment="Stretch" />
+                    </Grid>
+                  </ContentControl>
+                  <Button x:Name="PreviousButton"
+                          Grid.Column="1"
+                          Template="{StaticResource PreviousTemplate}"
+                          Width="20"
+                          Height="36"
+                          Margin="{DynamicResource PivotNavButtonMargin}"
+                          IsTabStop="False"
+                          IsEnabled="False"
+                          HorizontalAlignment="Left"
+                          VerticalAlignment="Top"
+                          Opacity="0"
+                          Background="Transparent" />
+                  <Button x:Name="NextButton"
+                          Grid.Column="1"
+                          Template="{StaticResource NextTemplate}"
+                          Width="20"
+                          Height="36"
+                          Margin="{DynamicResource PivotNavButtonMargin}"
+                          IsTabStop="False"
+                          IsEnabled="False"
+                          HorizontalAlignment="Right"
+                          VerticalAlignment="Top"
+                          Opacity="0"
+                          Background="Transparent" />
+                  <ContentPresenter x:Name="RightHeaderPresenter"
+                                    Grid.Column="2"
+                                    Content="{TemplateBinding RightHeader}"
+                                    ContentTemplate="{TemplateBinding RightHeaderTemplate}"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch" />
+                  <ItemsPresenter x:Name="PivotItemPresenter"
+                                  Grid.Row="1"
+                                  Grid.ColumnSpan="3"
+                                  ItemsPanel="{TemplateBinding ItemsPanel}" />
+                </Grid>
+              </PivotPanel>
+            </ScrollViewer>
+          </Grid>
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- NavigationButtonsVisibility: NavigationButtonsVisible, PreviousButtonVisible,
+         NextButtonVisible. -->
+    <Style Selector="^:previous-button-visible /template/ Button#PreviousButton">
+      <Setter Property="Opacity" Value="1" />
+      <Setter Property="IsEnabled" Value="True" />
+    </Style>
+    <Style Selector="^:next-button-visible /template/ Button#NextButton">
+      <Setter Property="Opacity" Value="1" />
+      <Setter Property="IsEnabled" Value="True" />
+    </Style>
+    <!-- The CommonStates of NextTemplate and PreviousTemplate. -->
+    <Style Selector="^ /template/ Button#NextButton:pointerover /template/ Border#Root">
+      <Setter Property="Background" Value="{DynamicResource PivotNextButtonBackgroundPointerOver}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource PivotNextButtonBorderBrushPointerOver}" />
+    </Style>
+    <Style Selector="^ /template/ Button#NextButton:pointerover /template/ FontIcon#Arrow">
+      <Setter Property="Foreground" Value="{DynamicResource PivotNextButtonForegroundPointerOver}" />
+    </Style>
+    <Style Selector="^ /template/ Button#NextButton:pressed /template/ Border#Root">
+      <Setter Property="Background" Value="{DynamicResource PivotNextButtonBackgroundPressed}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource PivotNextButtonBorderBrushPressed}" />
+    </Style>
+    <Style Selector="^ /template/ Button#NextButton:pressed /template/ FontIcon#Arrow">
+      <Setter Property="Foreground" Value="{DynamicResource PivotNextButtonForegroundPressed}" />
+    </Style>
+    <Style Selector="^ /template/ Button#PreviousButton:pointerover /template/ Border#Root">
+      <Setter Property="Background" Value="{DynamicResource PivotPreviousButtonBackgroundPointerOver}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource PivotPreviousButtonBorderBrushPointerOver}" />
+    </Style>
+    <Style Selector="^ /template/ Button#PreviousButton:pointerover /template/ FontIcon#Arrow">
+      <Setter Property="Foreground" Value="{DynamicResource PivotPreviousButtonForegroundPointerOver}" />
+    </Style>
+    <Style Selector="^ /template/ Button#PreviousButton:pressed /template/ Border#Root">
+      <Setter Property="Background" Value="{DynamicResource PivotPreviousButtonBackgroundPressed}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource PivotPreviousButtonBorderBrushPressed}" />
+    </Style>
+    <Style Selector="^ /template/ Button#PreviousButton:pressed /template/ FontIcon#Arrow">
+      <Setter Property="Foreground" Value="{DynamicResource PivotPreviousButtonForegroundPressed}" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type Pivot}" TargetType="Pivot" BasedOn="{StaticResource DefaultPivotStyle}" />
+
+  <ControlTheme x:Key="DefaultPivotItemStyle" TargetType="PivotItem">
+    <Setter Property="Background" Value="{DynamicResource PivotItemBackground}" />
+    <Setter Property="Margin" Value="{DynamicResource PivotItemMargin}" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="VerticalContentAlignment" Value="Stretch" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid Background="{TemplateBinding Background}"
+              HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
+              VerticalAlignment="{TemplateBinding VerticalAlignment}">
+          <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Content="{TemplateBinding Content}"
+                            Margin="{TemplateBinding Padding}" />
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type PivotItem}" TargetType="PivotItem" BasedOn="{StaticResource DefaultPivotItemStyle}" />
+
+  <ControlTheme x:Key="DefaultPivotHeaderItemStyle" TargetType="PivotHeaderItem">
+    <Setter Property="FontSize" Value="{DynamicResource PivotHeaderItemFontSize}" />
+    <Setter Property="FontFamily" Value="{DynamicResource PivotHeaderItemFontFamily}" />
+    <Setter Property="FontWeight" Value="{DynamicResource PivotHeaderItemThemeFontWeight}" />
+    <Setter Property="Background" Value="{DynamicResource PivotHeaderItemBackgroundUnselected}" />
+    <Setter Property="Foreground" Value="{DynamicResource PivotHeaderItemForegroundUnselected}" />
+    <Setter Property="Padding" Value="{DynamicResource PivotHeaderItemMargin}" />
+    <Setter Property="Height" Value="48" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="CornerRadius" Value="{DynamicResource PivotHeaderItemSelectedPipeCornerRadius}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid x:Name="Grid" Background="{TemplateBinding Background}">
+          <ContentPresenter x:Name="ContentPresenter"
+                            Margin="{TemplateBinding Padding}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            FontSize="{TemplateBinding FontSize}"
+                            FontFamily="{TemplateBinding FontFamily}"
+                            FontWeight="{TemplateBinding FontWeight}"
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
+            <ContentPresenter.Transitions>
+              <Transitions>
+                <DoubleTransition Property="Opacity" Duration="0:0:0.33" />
+              </Transitions>
+            </ContentPresenter.Transitions>
+          </ContentPresenter>
+          <Rectangle x:Name="SelectedPipe"
+                     Fill="{DynamicResource PivotHeaderItemSelectedPipeFill}"
+                     Height="3"
+                     VerticalAlignment="Bottom"
+                     HorizontalAlignment="Stretch"
+                     Margin="0,0,0,2"
+                     RadiusX="{TemplateBinding CornerRadius, Converter={StaticResource TopLeftCornerRadiusDoubleValueConverter}}"
+                     RadiusY="{TemplateBinding CornerRadius, Converter={StaticResource BottomRightCornerRadiusDoubleValueConverter}}"
+                     IsVisible="False" />
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- SelectionStates. Unselected, UnselectedPointerOver, UnselectedPressed and Disabled
+         collapse the pipe (the default here); Selected and its pointer states show it. -->
+    <Style Selector="^:pointerover">
+      <Setter Property="Background" Value="{DynamicResource PivotHeaderItemBackgroundUnselectedPointerOver}" />
+      <Setter Property="Foreground" Value="{DynamicResource PivotHeaderItemForegroundUnselectedPointerOver}" />
+    </Style>
+    <Style Selector="^:pressed">
+      <Setter Property="Background" Value="{DynamicResource PivotHeaderItemBackgroundUnselectedPressed}" />
+      <Setter Property="Foreground" Value="{DynamicResource PivotHeaderItemForegroundUnselectedPressed}" />
+    </Style>
+    <Style Selector="^:selected">
+      <Setter Property="Background" Value="{DynamicResource PivotHeaderItemBackgroundSelected}" />
+      <Setter Property="Foreground" Value="{DynamicResource PivotHeaderItemForegroundSelected}" />
+      <Style Selector="^ /template/ Rectangle#SelectedPipe">
+        <Setter Property="IsVisible" Value="True" />
+      </Style>
+    </Style>
+    <Style Selector="^:selected:pointerover">
+      <Setter Property="Background" Value="{DynamicResource PivotHeaderItemBackgroundSelectedPointerOver}" />
+      <Setter Property="Foreground" Value="{DynamicResource PivotHeaderItemForegroundSelectedPointerOver}" />
+    </Style>
+    <Style Selector="^:selected:pressed">
+      <Setter Property="Background" Value="{DynamicResource PivotHeaderItemBackgroundSelectedPressed}" />
+      <Setter Property="Foreground" Value="{DynamicResource PivotHeaderItemForegroundSelectedPressed}" />
+    </Style>
+    <!-- UnselectedLocked: the content moves by PivotHeaderItemLockedTranslation (40, the same in
+         every theme dictionary; a transform takes no dynamic resource) and fades out. -->
+    <Style Selector="^:locked /template/ ContentPresenter#ContentPresenter">
+      <Setter Property="Opacity" Value="0" />
+      <Setter Property="RenderTransform">
+        <TranslateTransform X="40" />
+      </Setter>
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Background" Value="{DynamicResource PivotHeaderItemBackgroundDisabled}" />
+      <Setter Property="Foreground" Value="{DynamicResource PivotHeaderItemForegroundDisabled}" />
+      <Style Selector="^ /template/ Rectangle#SelectedPipe">
+        <Setter Property="IsVisible" Value="False" />
+      </Style>
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type PivotHeaderItem}" TargetType="PivotHeaderItem" BasedOn="{StaticResource DefaultPivotHeaderItemStyle}" />
+</ResourceDictionary>

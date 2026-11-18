@@ -591,6 +591,19 @@ the static content curve of WinUI (`PivotStaticContentCurve`) is the expression 
 the same line within the panel. Tests: `pivot/pivot_curve_generator.rs` (the curves and the
 expression) and the header tests of `pivot/pivot_tests.rs`.
 
+**Status (PV-3, done).** The WinUI theme has `Controls/Pivot.xaml` (hand-ported:
+`DefaultPivotStyle` with `NextTemplate`, `PreviousTemplate` and `TitleContentControlStyle`,
+`DefaultPivotItemStyle`, `DefaultPivotHeaderItemStyle`, `PivotTitleContentControlStyle` and the
+implicit themes) and the converted `Resources/Pivot_themeresources.xaml`; the two Pivot waivers
+are removed and G-23 no longer names Pivot. The states are pseudo-classes (decision D2):
+`:previous-button-visible` and `:next-button-visible` of the pivot for
+`NavigationButtonsVisibility`, `:selected`, `:pressed`, `:pointerover`, `:disabled` and `:locked`
+of the header item for `SelectionStates`; the header panels' visibility is set by the control
+(`HeaderStates`); the transforms of the template are composition animations of the control.
+`Pivot`, `PivotItem` and `PivotHeaderItem` join the WinUI-only list. The catalog has a "Pivot"
+page in "Navigation & Pages" (a pivot with a title, one whose headers wrap with slide-in groups,
+and one with `IsLocked` and `IsHeaderItemsCarouselEnabled` switches).
+
 ### 7.2 High contrast: the base library
 
 Additive members of `ferroui-base`:

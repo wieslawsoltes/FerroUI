@@ -118,6 +118,8 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/NavigationDemoPage.xaml", "NavigationPage", Icons::NAVIGATION, "Stack-based page navigation");
             // Not from upstream: NavigationView and Frame of WinUI (docs/porting/winui-controls.md).
             s.add("/Pages/NavigationViewPage.xaml", "NavigationView", Icons::MENU, "Left, top and compact panes with a Frame");
+            // Not from upstream: Pivot of WinUI (docs/porting/winui-calculator-gaps.md, PV-3).
+            s.add("/Pages/PivotPage.xaml", "Pivot", Icons::TAB, "Items under a row of headers you pan through");
             s.add("/Pages/SplitViewPage.xaml", "SplitView", Icons::SPLIT, "A collapsible pane beside content");
             s.add("/Pages/TabbedDemoPage.xaml", "TabbedPage", Icons::TAB, "Tab-based page navigation");
             s.add("/Pages/TabControlPage.xaml", "TabControl", Icons::TAB, "Switch between tabbed content views");
