@@ -2,6 +2,9 @@ import type { FrameTarget } from './protocol';
 
 export interface TimelineKeyframe { time: number; value_text: string; easing_text: string }
 export interface TimelineTrack { target: number; property: string; keyframes: TimelineKeyframe[] }
+export interface KeyframeLocation { target: number; property: string; time: number }
+export type KeyframeGroupEdit = { action: 'move_keyframes' | 'duplicate_keyframes'; offset: number }
+    | { action: 'remove_keyframes' };
 export interface AuthoredTimeline {
     duration: number;
     delay: number;
@@ -54,8 +57,9 @@ export type FromTimeline =
     | { type: 'control'; frame: FrameTarget; control: TimelineControl }
     | { type: 'programActions'; frame: FrameTarget; program: number | undefined }
     | { type: 'recordKeyframe'; frame: FrameTarget; program: number; time: number }
-    | ({ frame: FrameTarget; program: number; track: number; time: number }
-        & ({ type: 'keyframe' } | { type: 'moveKeyframe'; to: number }));
+    | { type: 'keyframeGroup'; frame: FrameTarget; program: number; keys: KeyframeLocation[]; edit?: KeyframeGroupEdit }
+    | { type: 'keyframe'; frame: FrameTarget; program: number; track: number; time: number };
 
 export type ToTimeline = { type: 'position'; position?: TimelinePosition; frame?: FrameTarget }
+    | { type: 'keyframesEdited'; keys?: KeyframeLocation[]; before: FrameTarget }
     | { type: 'error'; message: string };

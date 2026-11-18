@@ -1,27 +1,45 @@
 import type { FrameTarget } from '../src/protocol';
+import type { KeyframeLocation } from '../src/timelineProtocol';
 
-export function dragKeyframe(button: HTMLButtonElement, lane: HTMLElement, initial: number, duration: number,
-    frame: () => FrameTarget | undefined, commit: (time: number, frame: FrameTarget) => void): void {
+export interface RenderedKeyframe { key: KeyframeLocation; button: HTMLButtonElement }
+
+export function dragKeyframe(item: RenderedKeyframe, lane: HTMLElement, duration: number,
+    selected: () => readonly RenderedKeyframe[], frame: () => FrameTarget | undefined,
+    snapTime: (time: number) => number,
+    commit: (keys: KeyframeLocation[], offset: number, frame: FrameTarget) => void): void {
+    const { button, key: { time: initial } } = item;
     let swallowClick = false;
     button.addEventListener('pointerdown', event => {
         const target = frame();
         const width = lane.getBoundingClientRect().width;
         if (event.button !== 0 || !event.isPrimary || !target || width <= 0) return;
+        if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
         event.preventDefault();
         button.focus({ preventScroll: true });
         swallowClick = false;
+        const group = selected();
+        const limits = group.reduce(({ low, high }, { key }) => ({
+            low: Math.max(low, -key.time),
+            high: Math.min(high, duration - key.time),
+        }), { low: -initial, high: duration - initial });
         const { pointerId, clientX: start } = event;
         const listeners = new AbortController();
         const options = { capture: true, signal: listeners.signal };
         let moved = false;
-        const timeAt = (x: number) => {
+        const offsetAt = (x: number) => {
             const time = initial + (x - start) * duration / width;
-            return Math.min(duration, Math.max(0, Math.round(time * 1000) / 1000));
+            const offset = snapTime(time) - initial;
+            return Math.min(limits.high, Math.max(limits.low, offset));
+        };
+        const show = (offset: number, dragging: boolean) => {
+            for (const { button, key } of group) {
+                button.style.left = `${(key.time + offset) * 100 / duration}%`;
+                button.classList.toggle('timeline-key-dragging', dragging);
+            }
         };
         const finish = () => {
             listeners.abort();
-            button.classList.remove('timeline-key-dragging');
-            button.style.left = `${initial * 100 / duration}%`;
+            show(0, false);
             if (button.hasPointerCapture(pointerId)) button.releasePointerCapture(pointerId);
         };
         const cancel = () => { swallowClick = true; finish(); };
@@ -29,17 +47,16 @@ export function dragKeyframe(button: HTMLButtonElement, lane: HTMLElement, initi
             if (pointer.pointerId !== pointerId) return;
             moved ||= Math.abs(pointer.clientX - start) >= 4;
             if (!moved) return;
-            button.style.left = `${timeAt(pointer.clientX) * 100 / duration}%`;
-            button.classList.add('timeline-key-dragging');
+            show(offsetAt(pointer.clientX), true);
         }, options);
         document.addEventListener('pointerup', pointer => {
             if (pointer.pointerId !== pointerId) return;
             swallowClick = moved || Math.abs(pointer.clientX - start) >= 4;
-            const time = timeAt(pointer.clientX);
+            const offset = offsetAt(pointer.clientX);
             const current = frame();
             finish();
-            if (swallowClick && time !== initial && current?.session === target.session && current.token === target.token) {
-                commit(time, target);
+            if (swallowClick && offset !== 0 && current?.session === target.session && current.token === target.token) {
+                commit(group.map(({ key }) => key), offset, target);
             }
         }, options);
         button.addEventListener('lostpointercapture', cancel, options);

@@ -90,6 +90,39 @@ export async function verifyTimelineMcp(mcp: McpFixture, session: number, docume
     content(await keyframe({ time: 1.5, value: '0.25' }));
     frame = await wait();
     const timedSource = document.getText();
+    const keyframes = [1, 1.5].map(time => ({
+        target: frame.nodes.find(node => node.name === 'saveButton')!.id, property: 'Opacity', time,
+    }));
+    const editKeys = (action: string, offset?: number, keys = keyframes) => edit(frame.revision, { action, program, keyframes: keys, offset });
+    const keyTimes = async () => (await pulse()).timeline.tracks[0].keyframes.map(key => key.time);
+    content(await editKeys('move_keyframes', -.25));
+    frame = await wait();
+    assert.ok((await keyTimes()).includes(.75));
+    assert.ok((await keyTimes()).includes(1.25));
+    await undo();
+    assert.equal(document.getText(), timedSource);
+    frame = await wait();
+    const collision = await editKeys('duplicate_keyframes', .5);
+    assert.ok(collision.isError && collision.content[0]?.text?.includes('occupies a destination time'));
+    assert.equal(document.getText(), timedSource);
+    frame = await wait();
+    content(await editKeys('duplicate_keyframes', .125));
+    frame = await wait();
+    const duplicated = document.getText();
+    const copies = keyframes.map(key => ({ ...key, time: key.time + .125,
+        target: frame.nodes.find(node => node.name === 'saveButton')!.id }));
+    const copiedTimes = await keyTimes();
+    assert.ok(copies.every(key => copiedTimes.includes(key.time)));
+    content(await editKeys('remove_keyframes', undefined, copies));
+    await wait();
+    const remainingTimes = await keyTimes();
+    assert.ok(copies.every(key => !remainingTimes.includes(key.time)));
+    await undo();
+    assert.equal(document.getText(), duplicated);
+    await wait();
+    await undo();
+    assert.equal(document.getText(), timedSource);
+    frame = await wait();
     const present = async (action: string, options: object) => {
         content(await invoke('designer_studio_present', { session, expected_revision: frame.revision, tool: 'designer_program',
             arguments: { action, program, ...options } }));
@@ -135,5 +168,5 @@ export async function verifyTimelineMcp(mcp: McpFixture, session: number, docume
     assert.deepEqual((await pulse()).timeline.tracks, []);
     await undo();
     assert.equal(document.getText(), original);
-    console.log('VS Code MCP scrubbed, retimed and stopped a native timeline, sampled reverse playback, and undid the timing and recording edits');
+    console.log('VS Code MCP sampled reverse playback, restored the base on Stop, and verified timing, recording, and grouped keyframe transactions with undo');
 }

@@ -4,7 +4,8 @@ use super::{decode, node_id, number, state, text, Permissions};
 use crate::DesignerSession;
 use crate::animation_keyframe_authoring::KeyframeEdit;
 use ferroui_designer_animation::{
-    AnimationValue, BehaviorModel, Easing, Repeat, Timeline, TimelineTimingEdit, VisualStateGroup,
+    AnimationValue, BehaviorModel, Easing, KeyframeGroupEdit, KeyframeLocation, Repeat, Timeline,
+    TimelineTimingEdit, VisualStateGroup,
 };
 use ferroui_designer_tools::PropertyKind;
 use serde_json::{json, Value};
@@ -30,6 +31,15 @@ pub(super) fn tools() -> Vec<Value> {
         schema["minItems"] = json!(1);
         schema
     };
+    let keys = || {
+        let location = s::object(
+            json!({"target":s::id(),"property":s::string(),"time":s::time()}),
+            &["target", "property", "time"],
+        );
+        let mut schema = s::array(location, 100_000);
+        schema["minItems"] = json!(1);
+        schema
+    };
     vec![
         s::tool("designer_programs","Read animation programs, source keys, codec diagnostics and typed timelines. include_keyframe_text adds formatted XAML values and easing to the typed keys.",s::object(json!({"include_source":{"type":"boolean"},"include_keyframe_text":{"type":"boolean"}}), &[]),false),
         s::actions("designer_program","Author animation programs and keyframes, edit timing with proportional retiming, set selectors or preview targets, sample several programs together, or play all programs. IDs refer to the current document; every action checks expected_revision.",vec![
@@ -45,6 +55,9 @@ pub(super) fn tools() -> Vec<Value> {
             s::action("upsert_keyframe",json!({"program":s::id(),"target":s::id(),"property":s::string(),"previous":s::time(),"time":s::time(),"value":s::string(),"easing":s::string()}), &["program","target","property","time","value","easing"],true),
             s::action("record_keyframe",json!({"program":s::id(),"target":s::id(),"property":s::string(),"time":s::time()}), &["program","target","property","time"],true),
             s::action("remove_keyframe",json!({"program":s::id(),"target":s::id(),"property":s::string(),"time":s::time()}), &["program","target","property","time"],true),
+            s::action("move_keyframes",json!({"program":s::id(),"keyframes":keys(),"offset":s::number()}), &["program","keyframes","offset"],true),
+            s::action("duplicate_keyframes",json!({"program":s::id(),"keyframes":keys(),"offset":s::number()}), &["program","keyframes","offset"],true),
+            s::action("remove_keyframes",json!({"program":s::id(),"keyframes":keys()}), &["program","keyframes"],true),
             s::action("preview_targets",json!({"program":s::id(),"targets":s::nullable(s::array(s::id(),4096))}), &["program","targets"],true),
             s::action("preview",json!({"programs":ids(),"time":s::time()}), &["programs","time"],true),
             s::action("scrub",json!({"program":s::id(),"time":s::time()}), &["program","time"],true),
@@ -94,6 +107,7 @@ pub(super) fn call(
         }
         "designer_program" => {
             let mut created = None;
+            let mut keyframes = None;
             match text(args, "action")?.as_str() {
                 "create" => {
                     created = Some(session.create_animation_program(
@@ -164,6 +178,15 @@ pub(super) fn call(
                     node_id(args, "program")?, node_id(args, "target")?, &text(args, "property")?,
                     KeyframeEdit::Remove(number(args, "time")?),
                 )?,
+                action @ ("move_keyframes" | "duplicate_keyframes" | "remove_keyframes") => {
+                    let edit = match action {
+                        "move_keyframes" => KeyframeGroupEdit::Move(number(args, "offset")?),
+                        "duplicate_keyframes" => KeyframeGroupEdit::Duplicate(number(args, "offset")?),
+                        _ => KeyframeGroupEdit::Remove,
+                    };
+                    let keys: Vec<KeyframeLocation> = decode(args, "keyframes")?;
+                    keyframes = Some(session.edit_program_keyframes(node_id(args, "program")?, &keys, edit)?);
+                }
                 "preview_targets" => session.set_animation_program_preview_targets(
                     node_id(args, "program")?,
                     decode(args, "targets")?,
@@ -212,9 +235,11 @@ pub(super) fn call(
                 "play_all" => session.play_all_animation_programs(),
                 _ => return Err("Unknown animation program action".into()),
             }
-            return Ok(
-                json!({"document":state(session),"active":session.active_animation_program(),"created":created,"programs":session.animation_programs()}),
-            );
+            let mut result = json!({"document":state(session),"active":session.active_animation_program(),"created":created,"programs":session.animation_programs()});
+            if let Some(keys) = keyframes {
+                result["keyframes"] = json!(keys);
+            }
+            return Ok(result);
         }
         "designer_states" => {
             return Ok(

@@ -1,5 +1,5 @@
 import { action, choose, editText, editTime, type StudioContext, type StudioItem } from './studioContext';
-import type { TimelineKeyframe, TimelineProgram, TimelineTrack } from './timelineProtocol';
+import type { KeyframeGroupEdit, TimelineKeyframe, TimelineProgram, TimelineTrack } from './timelineProtocol';
 
 export type Program = TimelineProgram;
 type Timeline = NonNullable<TimelineProgram['timeline']>;
@@ -35,7 +35,7 @@ export function trackItems(context: StudioContext, program: Program, timeline: T
 
 export async function keyframeOptions(context: StudioContext, program: number, duration: number, track: TimelineTrack, frame: TimelineKeyframe,
     seek?: () => Promise<void>): Promise<void> {
-    const preview = seek ?? (() => context.present('designer_program', { action: 'preview', programs: [program], time: frame.time }));
+    const preview = seek ?? (() => context.present('designer_program', { action: 'scrub', program, time: frame.time }));
     if (!context.writable) return preview();
     const item = await choose(`${track.property} · ${frame.time}s`, [
         { label: 'Seek to keyframe', run: preview },
@@ -45,6 +45,19 @@ export async function keyframeOptions(context: StudioContext, program: number, d
         }) },
     ]);
     await item?.run();
+}
+
+export async function chooseKeyframeGroupEdit(count: number): Promise<KeyframeGroupEdit | undefined> {
+    const picked = await choose(count === 1 ? 'Selected keyframe' : `${count} selected keyframes`, [
+        { action: 'move_keyframes', label: '$(arrow-both) Move by offset…' },
+        { action: 'duplicate_keyframes', label: '$(copy) Duplicate at offset…' },
+        { action: 'remove_keyframes', label: '$(trash) Delete' },
+    ] as const);
+    if (!picked) return;
+    if (picked.action === 'remove_keyframes') return { action: picked.action };
+    const value = await editText('Offset in seconds. Use a negative value to move earlier.', '0.1', input =>
+        input.trim() && Number.isFinite(Number(input)) && Number(input) !== 0 ? undefined : 'Enter a nonzero number.');
+    if (value !== undefined) return { action: picked.action, offset: Number(value) };
 }
 
 async function authorKeyframe(context: StudioContext, program: number, duration: number, track: TimelineTrack,

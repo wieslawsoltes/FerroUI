@@ -1,7 +1,7 @@
 .timeline { padding: 7px 8px 10px; }
 #timeline-status { margin: 0 0 8px; color: var(--muted); overflow-wrap: anywhere; }
 .timeline-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
-#timeline-programs { flex: 1 1 82px; min-inline-size: 0; }
+#timeline-programs { flex: 1 1 120px; min-inline-size: 0; }
 #timeline-time, .timeline-ruler { color: var(--muted); font-variant-numeric: tabular-nums; }
 #timeline-time { padding-inline: 5px 1px; white-space: nowrap; }
 .timeline-grid {
@@ -105,5 +105,10 @@
     background: var(--vscode-button-background);
 }
 .timeline-key:hover::before, .timeline-key-dragging::before { background: var(--vscode-button-hoverBackground); }
+.timeline-key[aria-pressed="true"] {
+    background: var(--vscode-list-activeSelectionBackground);
+    color: var(--vscode-list-activeSelectionForeground);
+}
+.timeline-key[aria-pressed="true"]::before { border-color: currentColor; }
 .timeline-key-dragging { cursor: ew-resize; }
 @media (max-width: 220px) { .timeline-ruler span:nth-child(even) { display: none; } }

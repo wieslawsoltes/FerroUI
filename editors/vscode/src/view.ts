@@ -325,13 +325,21 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
         </div>
         <select id="timeline-programs" aria-label="Animation program"></select>
         <output id="timeline-time" for="timeline-seek" aria-live="off" hidden></output>
+        <select id="timeline-snap" aria-label="Keyframe snapping" title="Keyframe snapping" hidden>
+            <option value="0">Sec</option>
+            <option value="24">24 fps</option>
+            <option value="30">30 fps</option>
+            <option value="60">60 fps</option>
+        </select>
         ${tool('timeline-record', 'add', 'Add keyframe at playhead', 'hidden disabled')}
+        ${tool('timeline-key-actions', 'list-selection', 'Keyframe Selection Actions', 'hidden disabled')}
         ${tool('timeline-actions', 'ellipsis', 'More Animation Actions', 'disabled')}
     </div>
     <p id="timeline-native-source" class="dock-message" hidden>Open the authored animation through More Animation Actions.</p>
     <section id="timeline-program" aria-label="Selected animation" hidden>
         <div class="timeline-grid">
-            <input id="timeline-seek" type="range" min="0" value="0" step="any" aria-label="Animation playhead">
+            <input id="timeline-seek" type="range" min="0" value="0" step="any" aria-label="Animation playhead"
+                aria-keyshortcuts="[ ]" title="Use [ and ] to seek to the previous or next keyframe">
             <div id="timeline-ruler" class="timeline-ruler" aria-hidden="true"></div>
             <ol id="timeline-tracks" aria-label="Property tracks"></ol>
         </div>

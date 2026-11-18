@@ -3,6 +3,7 @@
 //! keyframes rather than baking transient preview values into document attributes.
 mod easing;
 mod interactions;
+mod keyframe_edits;
 mod programs;
 mod states;
 mod timeline;
@@ -11,6 +12,7 @@ mod xaml;
 
 pub use easing::Easing;
 pub use interactions::{BehaviorAction, BehaviorModel, BehaviorTrigger};
+pub use keyframe_edits::{KeyframeGroupEdit, KeyframeLocation};
 pub use programs::{
     fragment as animation_fragment, native_fragment, rekey_copied_programs, AnimationCodec,
     AnimationCodecRegistry, AnimationProgram, AnimationPrograms,

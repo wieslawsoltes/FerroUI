@@ -3,7 +3,7 @@ import type { DesignerPanel } from './designerPanel';
 import { DockView } from './dockView';
 import { errorMessage, type FrameTarget } from './protocol';
 import { choose, StudioContext } from './studioContext';
-import { keyframeOptions } from './studioKeyframes';
+import { chooseKeyframeGroupEdit, keyframeOptions } from './studioKeyframes';
 import { showAnimationActions } from './studioPrograms';
 import { TimelinePlayback } from './timelinePlayback';
 import type { FromTimeline, TimelineControl, TimelineProgram, TimelineState, ToTimeline } from './timelineProtocol';
@@ -124,16 +124,23 @@ export class TimelineView implements vscode.Disposable {
                     await this.recordKeyframe(context, program, timeline, message.time);
                     return;
                 }
+                if (message.type === 'keyframeGroup') {
+                    if (panel.language !== 'xaml' || !message.keys.length) throw new Error('Select authored XAML keyframes to edit.');
+                    const edit = message.edit ?? await chooseKeyframeGroupEdit(message.keys.length);
+                    if (!edit) {
+                        this.view.post({ type: 'keyframesEdited', before: message.frame });
+                        return;
+                    }
+                    await context.edit('designer_program', { ...edit, program: program.id, keyframes: message.keys });
+                    await panel.waitForSnapshot(AbortSignal.timeout(15_000));
+                    const keys = edit.action === 'remove_keyframes' ? [] : message.keys.map(key => ({ ...key, time: key.time + edit.offset }));
+                    this.view.post({ type: 'keyframesEdited', keys, before: message.frame });
+                    return;
+                }
                 const track = timeline.tracks[message.track];
                 const frame = track?.keyframes.find(entry => entry.time === message.time);
                 if (!track || !frame) throw new Error('Select a keyframe from the current timeline.');
-                if (message.type === 'moveKeyframe') {
-                    if (!Number.isFinite(message.to) || message.to < 0 || message.to > timeline.duration) {
-                        throw new Error('Choose a time within the animation duration.');
-                    }
-                    await context.edit('designer_program', { action: 'upsert_keyframe', program: program.id, target: track.target,
-                        property: track.property, previous: frame.time, time: message.to, value: frame.value_text, easing: frame.easing_text });
-                } else await keyframeOptions(context, program.id, timeline.duration, track, frame, async () => {
+                await keyframeOptions(context, program.id, timeline.duration, track, frame, async () => {
                     await this.control(panel, message.frame, { action: 'seek', program: program.id, time: frame.time },
                         AbortSignal.timeout(15_000));
                 });

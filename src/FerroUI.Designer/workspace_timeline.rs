@@ -4,15 +4,11 @@ use crate::timeline_lane::{EasingPreview, TimelineLane};
 use ferroui_base::media::{FontWeight, TextTrimming};
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::{ColumnDefinitions, ComboBox, PathIcon, ToolTip};
-use ferroui_designer_animation::{Keyframe, Timeline, Track};
+use ferroui_designer_animation::{
+    Keyframe, KeyframeGroupEdit as KeyframeEdit, KeyframeLocation as SelectedKey, Track,
+};
 
 const TRACK_HEADER: f64 = 240.0;
-#[derive(Clone, Debug, PartialEq)]
-pub(super) struct SelectedKey {
-    target: NodeId,
-    property: String,
-    time: f64,
-}
 #[derive(Default)]
 pub(super) struct TimelineUi {
     document: String,
@@ -799,100 +795,8 @@ impl DesignerWorkspace {
         let selected = ui.selection.clone();
         let primary = ui.selected.clone();
         drop(ui);
-        if selected.is_empty() {
-            return Err("Select one or more keyframes".into());
-        }
-        let id = session
-            .active_animation_program()
-            .ok_or("Choose an animation")?;
-        let mut timeline = session.timeline().clone();
-        let delta = match operation {
-            KeyframeEdit::Move(delta) | KeyframeEdit::Duplicate(delta) => {
-                if !delta.is_finite() {
-                    return Err("The keyframe offset must be finite".into());
-                }
-                Some(delta)
-            }
-            KeyframeEdit::Remove => None,
-        };
-        let mut groups =
-            std::collections::BTreeMap::<(NodeId, &str), std::collections::BTreeSet<u64>>::new();
-        for key in &selected {
-            groups
-                .entry((key.target, &key.property))
-                .or_default()
-                .insert(key.time.to_bits());
-        }
-        // Each affected track is rebuilt once. Removing selected sources before merging
-        // destinations permits overlapping shifts without quadratic Vec::remove/insert loops.
-        for ((target, property), times) in groups {
-            let duration = timeline.duration;
-            let track = timeline
-                .track_mut(target, property)
-                .ok_or("Animation track no longer exists")?;
-            let mut moving = track
-                .keyframes
-                .iter()
-                .filter(|key| times.contains(&key.time.to_bits()))
-                .cloned()
-                .collect::<Vec<_>>();
-            if moving.len() != times.len() {
-                return Err("A selected keyframe no longer exists".into());
-            }
-            if !matches!(operation, KeyframeEdit::Duplicate(_)) {
-                track
-                    .keyframes
-                    .retain(|key| !times.contains(&key.time.to_bits()));
-            }
-            if let Some(delta) = delta {
-                for key in &mut moving {
-                    key.time += delta;
-                    if !key.time.is_finite() || !(0.0..=duration).contains(&key.time) {
-                        return Err(
-                            "The selected keyframes would leave the animation duration".into()
-                        );
-                    }
-                    if key.time == 0.0 {
-                        key.time = 0.0;
-                    }
-                }
-                let stationary = std::mem::take(&mut track.keyframes);
-                let mut merged = Vec::with_capacity(stationary.len() + moving.len());
-                let mut left = stationary.into_iter().peekable();
-                let mut right = moving.into_iter().peekable();
-                while let (Some(existing), Some(incoming)) = (left.peek(), right.peek()) {
-                    if (existing.time - incoming.time).abs() <= 1e-9 {
-                        return Err(
-                            "A keyframe already occupies a destination time; no keys were changed"
-                                .into(),
-                        );
-                    }
-                    if existing.time < incoming.time {
-                        merged.push(left.next().expect("peeked key"));
-                    } else {
-                        merged.push(right.next().expect("peeked key"));
-                    }
-                }
-                merged.extend(left);
-                merged.extend(right);
-                track.keyframes = merged;
-            }
-        }
-        let mut changed = delta.map_or_else(Vec::new, |delta| {
-            selected
-                .iter()
-                .map(|key| SelectedKey {
-                    time: key.time + delta,
-                    ..key.clone()
-                })
-                .collect()
-        });
-        timeline.tracks.retain(|track| !track.keyframes.is_empty());
-        timeline.validate().map_err(|error| error.to_string())?;
-        session.update_animation_program(id, timeline)?;
-        for key in &mut changed {
-            reconcile_keyframe_time(session.timeline(), key);
-        }
+        let id = session.active_animation_program().ok_or("Choose an animation")?;
+        let changed = session.edit_program_keyframes(id, &selected, operation)?;
         drop(session);
         let mut ui = self.timeline_ui.borrow_mut();
         ui.selected = primary
@@ -1002,7 +906,7 @@ impl DesignerWorkspace {
     }
     fn remember_keyframe(&self, mut selected: SelectedKey) {
         let session = self.session.borrow();
-        reconcile_keyframe_time(session.timeline(), &mut selected);
+        selected.reconcile_time(session.timeline());
         let mut ui = self.timeline_ui.borrow_mut();
         if ui.document != session.document_uri() || ui.program != session.active_animation_program()
         {
@@ -1207,33 +1111,6 @@ impl DesignerWorkspace {
             .set_content(Some(Control::boxed(&row)));
     }
 }
-// Native KeyTime uses 100 ns ticks. Match accepted source times after every
-// authoring path so fractional frame times retain their selection and editor.
-fn reconcile_keyframe_time(timeline: &Timeline, key: &mut SelectedKey) {
-    if let Some(accepted) = timeline
-        .track(key.target, &key.property)
-        .and_then(|track| {
-            let index = track
-                .keyframes
-                .partition_point(|candidate| candidate.time < key.time);
-            [
-                index.checked_sub(1),
-                (index < track.keyframes.len()).then_some(index),
-            ]
-            .into_iter()
-            .flatten()
-            .map(|index| &track.keyframes[index])
-            .min_by(|left, right| {
-                (left.time - key.time)
-                    .abs()
-                    .total_cmp(&(right.time - key.time).abs())
-            })
-        })
-        .filter(|accepted| (accepted.time - key.time).abs() <= 0.0000001)
-    {
-        key.time = accepted.time;
-    }
-}
 fn nearest_key(track: &Track, time: f64) -> Option<SelectedKey> {
     track
         .keyframes
@@ -1341,13 +1218,6 @@ fn key_field(
     AutomationProperties::set_name(&input, Some(&format!("Keyframe {caption}")));
     panel.children().add(input.clone().upcast::<Control>());
     input
-}
-
-#[derive(Clone, Copy)]
-enum KeyframeEdit {
-    Move(f64),
-    Duplicate(f64),
-    Remove,
 }
 
 #[cfg(test)]

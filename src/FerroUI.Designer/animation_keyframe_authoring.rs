@@ -1,5 +1,5 @@
 use crate::DesignerSession;
-use ferroui_designer_animation::{AnimationValue, Easing};
+use ferroui_designer_animation::{AnimationValue, Easing, KeyframeGroupEdit, KeyframeLocation};
 use ferroui_designer_core::NodeId;
 
 pub(crate) enum KeyframeEdit<'a> {
@@ -13,6 +13,29 @@ pub(crate) enum KeyframeEdit<'a> {
 }
 
 impl DesignerSession {
+    pub(crate) fn edit_program_keyframes(
+        &mut self,
+        id: NodeId,
+        keys: &[KeyframeLocation],
+        edit: KeyframeGroupEdit,
+    ) -> Result<Vec<KeyframeLocation>, String> {
+        let program = self.animation_programs().iter().find(|program| program.id == id)
+            .ok_or("Unknown animation program")?;
+        let authored = program.timeline.as_ref().ok_or("The program has an opaque payload")?;
+        let (timeline, mut changed) = authored.with_keyframe_edit(keys, edit).map_err(|error| error.to_string())?;
+        if &timeline != authored {
+            self.update_animation_program(id, timeline)?;
+        }
+        if let Some(accepted) = self.animation_programs().iter().find(|program| program.id == id)
+            .and_then(|program| program.timeline.as_ref())
+        {
+            for key in &mut changed {
+                key.reconcile_time(accepted);
+            }
+        }
+        Ok(changed)
+    }
+
     pub(crate) fn edit_program_keyframe(
         &mut self,
         program: NodeId,
