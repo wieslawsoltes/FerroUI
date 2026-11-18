@@ -1,5 +1,7 @@
-//! Original CheckBoxPage and PasswordBoxPage handlers adapted to Rust.
-//! PasswordBox is still an explicit TextBox composition, as documented per page.
+//! The handlers of the pinned CheckBox and PasswordBox pages in Rust: those of
+//! `CheckBoxPage.xaml.cs`, and `PasswordBox_PasswordChanged` and `RevealModeCheckbox_Changed` of
+//! `PasswordBoxPage.xaml.cs`. FerroUI has no PasswordBox: the boxes are TextBoxes with a
+//! PasswordChar, as the page's notes record.
 
 use ferroui_base::{ObjectType, Ref};
 use ferroui_controls::primitives::ToggleButton;
@@ -23,7 +25,7 @@ fn wire_password(root: &Ref<Control>) {
     };
     let weak_password = password.downgrade();
     let weak_output = root
-        .get_control::<TextBlock>("PasswordValidation")
+        .get_control::<TextBlock>("Control1Output")
         .downgrade();
     password.property_changed(move |change| {
         if change.property() != TextBox::text_property().as_property() {

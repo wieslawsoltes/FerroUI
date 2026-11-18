@@ -299,11 +299,17 @@ use compiled_markup::THEME_PARTS_FERROUI_THEMES_WINUI_WINUITHEME as THEME_PARTS;
 launch_themed(|| WinUITheme::with_parts(None, THEME_PARTS).as_style(), view, |_| {});
 ```
 
+Since #847 the build reads every binary of the package as well as its library: the explicit
+`[[bin]]` targets and, unless `autobins = false`, the discovered ones (`src/main.rs`, `src/bin`).
+`$OUT_DIR/xaml/theme_roots.txt` says which target rooted which types and keys. A library whose code
+makes controls that no document names states them with `Build::theme_roots`, and the build exports
+them to the applications that depend on it. The documents of a class group that the class never
+includes root nothing.
+
 The roots are the ones of the list above without the documents: what the sources name and call
 (4), what the code of the live classes creates (5), and `theme-roots` (6). The build reads the
 sources from the root file of the crate (`src/lib.rs`, else `lib.rs`, else `src/main.rs`) and
-the modules it declares: an application with a library and a binary keeps its interface in the
-library, or names in `theme-roots` the controls only the binary makes. The table is named after
+the modules it declares, and from the root file of each binary of the package (#847). The table is named after
 the full name of the class of the theme, in upper case. With `theme-trimming = false` it holds
 every unit, so the code is the same either way. The three declarative versions of hello world
 (`samples/HelloWorld.Builders`, `.Macros`, `.Hooks`) are built this way, and keep the 16 units of

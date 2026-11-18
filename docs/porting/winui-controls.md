@@ -423,6 +423,46 @@ Phase G2 ports the WinUI controls the pending pages need, one control (or one sm
 | PagerControl | 3 of 3 | ported | `Pages/PagerControl.xaml` (no code-behind upstream) | `feedback_samples_tests.rs` |
 | PersonPicture | 1 of 1 | ported | `feedback_samples.rs` | `feedback_samples_tests.rs` |
 
+#### G4: the partial pages (#418)
+
+Phase G4 completes the pages that had native examples for a reviewed subset only: each catalog example of the source page gets its native adaptation with the handlers of the page's code behind in Rust and the source's x:Bind, as for G1. Where the source's x:Bind path is one the x:Bind core does not compile, the page records the binding it uses instead: `IsChecked.Value.Equals(x:False)` (there is no member `Value` on a nullable boolean) is the OneWay x:Bind of `IsChecked` with the `BoolConverters.Not` converter, and a cast to a number (`(x:Int32)Slider.Value`, a type test on the core) is the path without the cast, which the binding converts. A button that opens another page of the gallery, as the source's `App.MainWindow.Navigate`, is listed in `examples::GALLERY_LINKS` and wired by the gallery. A container FerroUI does not have is composed from one it has and recorded in the page's notes: GridView and VariableSizedWrapGrid of the SplitButton flyouts are a UniformGrid of buttons, as on the RichEditBox page. A `KeyboardAccelerator` is the `HotKey` of the button, the key gesture FerroUI's buttons invoke. WinUI's `CharacterSpacing`, in thousandths of an em, is FerroUI's `LetterSpacing` in pixels: the value times the font size over 1000 (200 at 24 is 4.8).
+
+| Page | Examples | State | Rust | Tests |
+|---|---:|---|---|---|
+| Button | 4 of 4 | ported | `button_samples.rs` | `tests.rs`, `button_samples_tests.rs` |
+| RepeatButton | 1 of 1 | ported | `button_samples.rs` | `button_samples_tests.rs` |
+| HyperlinkButton | 2 of 2 | ported | `gallery.rs` (`examples::GALLERY_LINKS`) | `button_samples_tests.rs` |
+| ToggleButton | 1 of 1 | ported | `button_samples.rs` | `button_samples_tests.rs` |
+| DropDownButton | 2 of 2 | ported | `Pages/DropDownButton.xaml` (no code-behind upstream) | `button_samples_tests.rs` |
+| SplitButton | 2 of 2 | ported | `button_samples.rs` | `button_samples_tests.rs` |
+| ToggleSplitButton | 1 partial: RichEditBox has no paragraph list type | partial | `button_samples.rs` | `button_samples_tests.rs` |
+| CheckBox | 3 of 3 | ported | `input_samples.rs` | `tests.rs` |
+| RadioButton | 2 of 2 | ported | `examples.rs` | `tests.rs` |
+| Slider | 2 ported, 2 partial: no StepFrequency, SnapsTo or Header | partial | `button_samples.rs` | `button_samples_tests.rs` |
+| ToggleSwitch | 2 of 2 | ported | `Pages/ToggleSwitch.xaml` (no code-behind upstream) | `button_samples_tests.rs` |
+| ComboBox | 2 ported, 1 partial: no TextSubmitted, no ContentDialog | partial | `button_samples.rs` | `button_samples_tests.rs` |
+| Border | 1 of 1 | ported | `layout_samples.rs` | `layout_samples_tests.rs` |
+| Canvas | 1 of 1 | ported | `layout_samples.rs` | `layout_samples_tests.rs` |
+| Grid | 1 of 1 | ported | `Pages/Grid.xaml` (no code-behind upstream) | `layout_samples_tests.rs` |
+| StackPanel | 1 of 1 | ported | `layout_samples.rs` | `layout_samples_tests.rs` |
+| RelativePanel | 1 of 1 | ported | `Pages/RelativePanel.xaml` (no code-behind upstream) | `layout_samples_tests.rs` |
+| TextBlock | 4 ported, 1 partial: no IsTextSelectionEnabled on TextBlock (a RichTextBlock) | partial | `Pages/TextBlock.xaml` (no code-behind upstream) | `text_input_samples_tests.rs` |
+| TextBox | 3 ported, 1 partial: no IsSpellCheckEnabled | partial | `Pages/TextBox.xaml` (no code-behind upstream) | `text_input_samples_tests.rs` |
+| PasswordBox | 3 partial: no PasswordBox (a TextBox with a PasswordChar) | partial | `input_samples.rs` | `tests.rs`, `text_input_samples_tests.rs` |
+| NumberBox | 3 of 3 | ported | `text_input_samples.rs` | `text_input_samples_tests.rs` |
+| ProgressBar | 1 ported, 1 partial: no ShowPaused or ShowError | partial | `status_samples.rs` | `status_samples_tests.rs` |
+| InfoBar | 3 of 3 | ported | `control_samples.rs` | `tests.rs`, `x_bind_tests.rs` |
+| Expander | 2 of 2 | ported | `status_samples.rs` | `status_samples_tests.rs` |
+| PipsPager | 2 partial: no FlipView (a Carousel), no VisibleOnPointerOver or WrapMode | partial | `status_samples.rs` | `status_samples_tests.rs` |
+| AppBarButton | 5 ported, 1 partial: no BitmapIcon (an Image) | partial | `command_samples.rs` | `command_samples_tests.rs` |
+| AppBarToggleButton | 3 ported, 1 partial: no BitmapIcon (an Image) | partial | `command_samples.rs` | `command_samples_tests.rs` |
+| AppBarSeparator | 1 of 1 | ported | `Pages/AppBarSeparator.xaml` (no code-behind upstream) | `command_samples_tests.rs` |
+| CommandBar | 1 of 1 | ported | `command_samples.rs` | `command_samples_tests.rs` |
+| Flyout | 1 of 1 | ported | `menu_samples.rs` | `menu_samples_tests.rs` |
+| MenuFlyout | 6 ported, 1 partial: no SplitMenuFlyoutItem | partial | `menu_samples.rs` | `menu_samples_tests.rs` |
+| MenuBar | 3 of 3 | ported | `menu_samples.rs` | `menu_samples_tests.rs` |
+| Popup | 1 of 1 | ported | `platform_samples.rs` | `menu_samples_tests.rs`, `x_bind_tests.rs` |
+
 ### 10.8 WinUI API and Gallery scanner (W10b)
 
 `scripts/winui-gallery/scan.py` (from #286) compares the public API of WinUI and the pages of WinUI Gallery with FerroUI's sources at the pins of `docs/porting/winui-gallery/data/sources.lock.json` (WinUI `7e4b0c2`, O13; Gallery `14061eea`). Its result is a report of candidates: 1,545 public WinUI types and 7,462 public members are scanned, a same-name Rust type or member in the mapped namespace is a *candidate*, and no candidate counts as behaviour, which the tests of the controls and of the sample establish. The pages have the states of `samples/WinUIGallery/port-status.json`.

@@ -8180,3 +8180,35 @@ wall of stack panels takes 18.9 % fewer instructions than before the change
 the same values in the same order. What is not called did nothing. An application class written
 as a plain `impl`, or one that overrides the change handlers without stating its reactions,
 hears every change, as do the objects below it.
+
+### 9.102 A property that follows a closure is set with the value of its type
+
+The second step of experiment #804, after section 9.94. Counted first in the gauntlet of the
+framework comparison at tier 16: about 900,000 runs of the effects of reactive properties in
+14 seconds, 31 % of them giving a value equal to the one the property had; by property `Text`
+45 % of the runs (31 % of them equal), `Points` 22 % (none equal), `Width` 17 % (5 % equal) and
+`Foreground` 17 % (99 % equal).
+
+The closure that the builders make for a reactive property knows the type of its value. Run by
+the effect of the property, it finds the control and the property on the thread and sets the
+property through the typed setter (`FerroObject::try_set_value_typed`), where every run put the
+value in a box and the untyped setter looked it up by type and took a copy of it out of the box
+(a text was cloned for every run). `PropValue` is unchanged: a closure written by hand is set
+untyped as before, and a closure run outside its effect returns its value boxed. An equal value
+is still computed and compared by the property store, which raises nothing; the copy before the
+comparison is gone.
+
+**Measured** (the gate, `declarative::`, two rounds, against the commit that adds the
+benchmarks; the change of the instructions):
+
+| `declarative::ViewBenchmark` | Instructions |
+| --- | ---: |
+| `shared_text_changed` (a thousand texts from one signal, each new) | -13.92 % |
+| `shared_text_equal` (each text equal to the one before) | -20.03 % |
+| `fine_grained_one_row_changed` | -11.71 % |
+| `shared_brush_equal` (a thousand foregrounds, each the same brush) | -2.47 % |
+| `shared_signal_changed` | -1.78 % |
+| The other lines of `declarative::` | within 0.3 % |
+
+The times of that run are not given: other builds ran on the machine. New:
+`FerroObject::try_set_value_typed`, `FerroProperty::as_direct`.
