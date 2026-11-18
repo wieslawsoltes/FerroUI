@@ -1034,3 +1034,34 @@ fn polar_and_pie_charts_find_by_both_dimensions_whatever_the_strategy() {
     cartesian.set_tooltip_finding_strategy(FindingStrategy::CompareOnlyX);
     assert_eq!(cartesian.find_points(below).len(), 1);
 }
+
+/// The tooltip text of a polar point (`GetPrimaryToolTipText`, `GetSecondaryToolTipText` of
+/// `CorePolarLineSeries`): the angle when its axis has labels, and the code-only
+/// `RadiusToolTipLabelFormatter` and `AngleToolTipLabelFormatter` of `PolarLineSeries`.
+#[test]
+fn polar_tooltip_text_takes_the_angle_labels_and_the_formatters_of_the_series() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let size = Size::new(600.0, 600.0);
+    let chart = PolarChart::new();
+    chart.set_animations_speed(0.0);
+    let series = PolarLineSeries::new();
+    series.set_name("Wind".into());
+    series.set_coordinates([Coordinate::new(1.0, 5.0)]);
+    chart.series().add(series.clone().upcast());
+    let label = |chart: &PolarChart| chart.scene(size).unwrap().hits[0].label.clone();
+    assert_eq!(label(&chart), "Wind: 5");
+    let angles = Axis::new();
+    angles.set_labels(vec!["N".into(), "E".into(), "S".into(), "W".into()]);
+    chart.x_axes().add(angles);
+    assert_eq!(label(&chart), "Wind: E: 5");
+    let revision = chart.revision();
+    series.set_radius_tool_tip_label_formatter(Some(ChartPointFormatter::new(|point| {
+        format!("{} km/h", point.primary_value)
+    })));
+    assert!(chart.revision() > revision);
+    assert_eq!(label(&chart), "Wind: E: 5 km/h");
+    series.set_angle_tool_tip_label_formatter(Some(ChartPointFormatter::new(|point| {
+        format!("{} degrees", point.secondary_value * 90.0)
+    })));
+    assert_eq!(label(&chart), "Wind: 90 degrees: 5 km/h");
+}
