@@ -444,6 +444,99 @@ pub fn unit_static_path(table_path: &str, index: u32) -> String {
     format!("{module}::THEME_UNIT_{index}")
 }
 
+/// The root files of the binaries of a package, relative to its directory, as Cargo finds them
+/// (#847): the `path` of every `[[bin]]` target (or, without one, `src/bin/<name>.rs`,
+/// `src/bin/<name>/main.rs` or `src/main.rs`), and, unless the package states `autobins = false`,
+/// `src/main.rs`, `src/bin/*.rs` and `src/bin/*/main.rs`. Each once, in that order; only the files
+/// that exist. Examples, tests and benchmarks are not production targets and are not read.
+pub fn binary_roots(manifest_dir: &std::path::Path, manifest: &str) -> Vec<std::path::PathBuf> {
+    let (autobins, binaries) = binary_targets(manifest);
+    let mut found: Vec<std::path::PathBuf> = Vec::new();
+    let mut push = |path: std::path::PathBuf| {
+        if path.is_file() && !found.contains(&path) {
+            found.push(path);
+        }
+    };
+    for (name, path) in binaries {
+        match path {
+            Some(path) => push(manifest_dir.join(path)),
+            None => {
+                let candidates: [String; 3] =
+                    [format!("src/bin/{name}.rs"), format!("src/bin/{name}/main.rs"), "src/main.rs".into()];
+                for candidate in candidates {
+                    if manifest_dir.join(&candidate).is_file() {
+                        push(manifest_dir.join(candidate));
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    if autobins {
+        push(manifest_dir.join("src/main.rs"));
+        let mut discovered: Vec<std::path::PathBuf> = std::fs::read_dir(manifest_dir.join("src/bin"))
+            .into_iter()
+            .flatten()
+            .filter_map(|entry| entry.ok().map(|entry| entry.path()))
+            .filter_map(|path| match path.is_dir() {
+                true => Some(path.join("main.rs")),
+                false => path.extension().is_some_and(|extension| extension == "rs").then_some(path),
+            })
+            .collect();
+        discovered.sort();
+        for path in discovered {
+            push(path);
+        }
+    }
+    found
+}
+
+/// What the manifest `text` states of the binaries of its package: whether Cargo discovers them
+/// (`autobins`, true unless `[package]` says `autobins = false`) and the `name` and `path` of each
+/// `[[bin]]` table, in order.
+fn binary_targets(text: &str) -> (bool, Vec<(String, Option<String>)>) {
+    #[derive(PartialEq)]
+    enum Section {
+        Package,
+        Bin,
+        Other,
+    }
+    let mut section = Section::Other;
+    let mut autobins = true;
+    let mut binaries: Vec<(String, Option<String>)> = Vec::new();
+    for line in text.lines() {
+        let line = without_comment(line).trim();
+        if line.starts_with('[') {
+            let header: String = line.chars().filter(|c| !c.is_whitespace()).collect();
+            section = match header.as_str() {
+                "[[bin]]" => {
+                    binaries.push((String::new(), None));
+                    Section::Bin
+                }
+                "[package]" => Section::Package,
+                _ => Section::Other,
+            };
+            continue;
+        }
+        let Some((key, value)) = line.split_once('=') else { continue };
+        let (key, value) = (key.trim(), value.trim());
+        match (&section, key) {
+            (Section::Package, "autobins") => autobins = value != "false",
+            (Section::Bin, "name" | "path") => {
+                let Some((value, _)) = string_value(value) else { continue };
+                if let Some(binary) = binaries.last_mut() {
+                    match key {
+                        "name" => binary.0 = value,
+                        _ => binary.1 = Some(value),
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+    (autobins, binaries)
+}
+
 /// A value of the manifest, of the forms the table of the opt-in has.
 #[derive(Clone, Debug, PartialEq, Eq)]
 enum TomlValue {

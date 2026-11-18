@@ -360,3 +360,32 @@ fn the_build_of_a_class_verifies_its_constructor_from_units() {
     assert_eq!(verify_parts_constructor(&model, &[], "Tests.Missing"), Ok(false));
     assert_eq!(last_segments("Option < Rc < dyn crate::IServiceProvider > >"), "Option<Rc<dynIServiceProvider>>");
 }
+
+/// Not from upstream (#847): the binaries of a package are read from its manifest and discovered as
+/// Cargo discovers them: explicit `[[bin]]` paths, a `[[bin]]` without a path by its name, and,
+/// unless `autobins = false`, `src/main.rs` and `src/bin`. Only files that exist count.
+#[test]
+fn the_binaries_of_a_package_are_its_production_targets() {
+    let root = std::env::temp_dir().join(format!("ferroui-binary-roots-{}", std::process::id()));
+    let files =
+        ["program.rs", "src/main.rs", "src/bin/tool.rs", "src/bin/other/main.rs", "src/bin/named.rs", "examples/a.rs"];
+    for file in files {
+        let path = root.join(file);
+        std::fs::create_dir_all(path.parent().expect("a directory")).expect("the directory");
+        std::fs::write(&path, "fn main() {}\n").expect("a file");
+    }
+    let manifest = "[package]\nname = \"app\"\nautobins = false # explicit only\n\n\
+                    [[bin]]\nname = \"app\"\npath = \"program.rs\"\n\n[[bin]]\nname = \"named\"\n\n\
+                    [[bin]]\nname = \"missing\"\npath = \"missing.rs\"\n\n[dependencies]\npath = \"x\"\n";
+    let relative = |paths: Vec<std::path::PathBuf>| -> Vec<String> {
+        let below = |path: &std::path::PathBuf| path.strip_prefix(&root).expect("below the root").display().to_string();
+        paths.iter().map(|path| below(path).replace('\\', "/")).collect()
+    };
+    assert_eq!(relative(binary_roots(&root, manifest)), ["program.rs", "src/bin/named.rs"]);
+    let discovered = "[package]\nname = \"app\"\n\n[[bin]]\nname = \"app\"\npath = \"program.rs\"\n";
+    assert_eq!(
+        relative(binary_roots(&root, discovered)),
+        ["program.rs", "src/main.rs", "src/bin/named.rs", "src/bin/other/main.rs", "src/bin/tool.rs"]
+    );
+    let _ = std::fs::remove_dir_all(&root);
+}
