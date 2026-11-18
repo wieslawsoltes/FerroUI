@@ -130,7 +130,7 @@ fn with_font<R>(typeface: &GlyphTypeface, f: impl FnOnce(&crate::hb::Font) -> R)
     let harf_buzz_typeface =
         text_shaper_typeface.as_any().downcast_ref::<HarfBuzzTypeface>().expect("the typeface of this shaper");
 
-    harf_buzz_typeface.with_font(|font| f(font))
+    harf_buzz_typeface.with_font(|font| f(&*font))
 }
 
 fn weight(value: f64) -> FontVariationSettings {
