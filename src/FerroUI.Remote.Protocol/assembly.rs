@@ -76,8 +76,7 @@ pub static ASSEMBLY: Assembly = Assembly {
     ],
 };
 
-// Tests of the port: the table stands for what reflection finds in the
-// original, so it is compared with the list of the upstream message classes.
+// Pin both the upstream wire contract and FerroUI's design messages.
 #[cfg(test)]
 mod tests {
     use std::collections::HashSet;
@@ -118,6 +117,17 @@ mod tests {
         ("UpdateXamlResultMessage", "B7A70093-0C5D-47FD-9261-22086D43A2E2"),
         ("StartDesignerSessionMessage", "854887CF-2694-4EB6-B499-7461B6FB96C7"),
         ("HtmlTransportStartedMessage", "53778004-78fa-4381-8ec3-176a6f2328b6"),
+    ];
+    const FERROUI_DESIGN_MESSAGES: &[(&str, &str)] = &[
+        ("UpdateDesignMessage", "58FA5FA8-5669-4C04-80FA-8F573BA45ACD"),
+        ("UpdateDesignResultMessage", "CB085DBB-7231-4C16-8797-D8D97BCF9341"),
+        ("DesignFrameMessage", "F7176EE5-1A68-4ECB-A986-8F461D21C13C"),
+        ("DesignFrameReceivedMessage", "1E9E50A0-F95D-48C0-AB8B-B2C800ACC09C"),
+        ("DesignAnimationCatalogMessage", "C094EFD2-D7FC-467D-AC22-8FA047C4B54B"),
+        ("DesignAnimationRequestMessage", "BCDB99F8-61E0-4E92-A837-F8D18045ABB1"),
+        ("DesignAnimationResultMessage", "2E7AC05A-D953-4211-BC9E-F400AEF993CF"),
+        ("DesignAnimationAuthoringRequest", "D7B9804A-61AD-4BEC-9067-F4901FE7C340"),
+        ("DesignAnimationAuthoringResult", "51B25CB4-4324-4890-B1C0-5B81766D5673"),
     ];
 
     fn modifiers() -> InputEventMessageBase {
@@ -191,10 +201,10 @@ mod tests {
     }
 
     #[test]
-    fn every_upstream_message_class_is_in_the_table_with_its_identifier() {
+    fn every_message_class_is_in_the_table_with_its_wire_identifier() {
         assert_eq!(UPSTREAM_MESSAGES.len(), 17);
-        assert_eq!(ASSEMBLY.exported_types.len(), UPSTREAM_MESSAGES.len() + 7);
-        for (name, guid) in UPSTREAM_MESSAGES {
+        assert_eq!(ASSEMBLY.exported_types.len(), UPSTREAM_MESSAGES.len() + FERROUI_DESIGN_MESSAGES.len());
+        for (name, guid) in UPSTREAM_MESSAGES.iter().chain(FERROUI_DESIGN_MESSAGES) {
             let exported = ASSEMBLY
                 .exported_types
                 .iter()
@@ -209,7 +219,7 @@ mod tests {
     #[test]
     fn the_resolver_maps_every_identifier_to_its_class_and_back() {
         let resolver = DefaultMessageTypeResolver::new(&[]);
-        for (name, guid) in UPSTREAM_MESSAGES {
+        for (name, guid) in UPSTREAM_MESSAGES.iter().chain(FERROUI_DESIGN_MESSAGES) {
             let guid = Uuid::parse_str(guid).unwrap();
             let class = resolver.get_by_guid(guid).unwrap();
             assert_eq!(class.name, *name);
