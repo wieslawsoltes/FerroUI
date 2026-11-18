@@ -3,10 +3,11 @@ import * as vscode from 'vscode';
 import { NativePreview } from '../src/nativePreview';
 import { applyTextEdits, sourceOf } from '../src/textDocument';
 import { verifyMcp } from './mcp';
-import { verifyWorkbenchFeatures } from './workbenchFeatures';
+import { verifyMultiSelection, verifyWorkbenchFeatures } from './workbenchFeatures';
 import { verifyCargoTarget } from './cargoTarget';
 import { verifyDrag } from './drag';
 import { verifyXamlRefactoring } from './xamlLanguage';
+import { verifyRuntimeClient } from './runtimeClient';
 import type { DesignerWorkbench } from '../src/designerWorkbench';
 
 const editorPosition = (line = 0, character = 0) => new vscode.Position(line, character);
@@ -17,6 +18,9 @@ export async function run(): Promise<void> {
     const extension = vscode.extensions.getExtension<{ designer: DesignerWorkbench }>('FerroUI.ferroui')!;
     assert.ok(extension, 'FerroUI extension is installed in the Extension Development Host');
     const { designer } = await extension.activate();
+    await verifyRuntimeClient();
+    await vscode.commands.executeCommand('ferroui.openLiveApp');
+    await until(() => vscode.window.tabGroups.all.some(group => group.tabs.some(tab => tab.label === 'FerroUI Live App')));
     const xaml = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(workspace, 'SettingsView.xaml'));
     assert.equal(xaml.languageId, 'ferroui-xaml');
     const editor = await vscode.window.showTextDocument(xaml);
@@ -98,6 +102,11 @@ export async function run(): Promise<void> {
         await vscode.commands.executeCommand('ferroui.openDesigner');
         await until(() => vscode.window.tabGroups.all.some(group => group.tabs.some(tab => tab.label === 'Design · views.rs')));
         const rustInput = sourceOf(rust, 'rust', editorPosition());
+        const rsxField = rust.positionAt(rust.getText().indexOf('padding: 36.0') + 3);
+        const rsxCompletion = await vscode.commands.executeCommand<vscode.CompletionList>('vscode.executeCompletionItemProvider', rust.uri, rsxField);
+        assert.ok(rsxCompletion?.items.some(item => item.label === 'padding' && item.detail?.includes('Border.Padding')));
+        const outsideRsx = await vscode.commands.executeCommand<vscode.CompletionList>('vscode.executeCompletionItemProvider', rust.uri, editorPosition());
+        assert.ok(!outsideRsx?.items.some(item => item.detail?.includes('Border.Padding')));
         const rustFrame = await preview.render(rustInput, viewport);
         assert.equal(rustFrame.blocks.length, 2);
         assert.ok(rustFrame.image, rustFrame.renderError ?? 'Expected a rendered RSX tree');
@@ -121,6 +130,7 @@ export async function run(): Promise<void> {
         assert.ok(partial.image && !partial.counterpart.editable);
         assert.ok(partial.notices.some(notice => notice.includes('omitted Rust items')));
         await verifyWorkbenchFeatures(preview, xamlInput.uri, rustInput.uri);
+        await verifyMultiSelection(preview, xamlInput.uri, rustInput.uri);
         const commands = await vscode.commands.getCommands(true);
         assert.ok(commands.includes('ferroui.outline.focus'), 'Outline is a contributed VS Code view');
         assert.ok(commands.includes('ferroui.properties.focus'), 'Properties is a separate contributed VS Code view');

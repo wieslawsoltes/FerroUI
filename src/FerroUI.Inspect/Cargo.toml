@@ -19,6 +19,7 @@ serde_json = "1"
 ferroui-base = { workspace = true, features = ["full-themes"] }
 ferroui-controls.workspace = true
 ferroui-markup.workspace = true
+ferroui-markup-xaml.workspace = true
 base64 = "0.22"
 
 [dev-dependencies]

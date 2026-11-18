@@ -20,7 +20,9 @@ export class CanvasDrag {
             const grab = pointerPosition(artboard, event);
             const node = artboard.hit(grab);
             if (grab && node?.canMove && this.frame && canDrag()) {
-                return { frame: this.frame, origin: { type: 'node', node: node.id, grab } };
+                const nodes = artboard.movableSelection(node.id);
+                return { frame: this.frame, origin: nodes.length > 1
+                    ? { type: 'nodes', nodes, anchor: node.id, grab } : { type: 'node', node: node.id, grab } };
             }
         }, send, gesture => this.setGesture(gesture));
         board.addEventListener('pointerdown', () => {

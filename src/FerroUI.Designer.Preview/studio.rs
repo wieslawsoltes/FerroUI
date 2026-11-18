@@ -6,7 +6,7 @@ use ferroui_designer::mcp::DesignerMcp;
 use ferroui_designer_core::{NodeId, TextPatch};
 use ferroui_mcp::{Permissions, UiToolProvider};
 use serde::Deserialize;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use std::collections::BTreeSet;
 
 #[derive(Deserialize)]
@@ -58,10 +58,12 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
 
 pub(crate) fn edit(renderer: &mut Renderer, request: Edit) -> Result<EditResult, String> {
     let design = DesignDocument::parse(&request.document)?;
-    if design.rsx.is_some() {
-        return Err("Studio authoring edits require XAML. Use the mapped designer tools or edit Rust source for RSX.".into());
-    }
     let query = request.query;
+    if design.rsx.is_some()
+        && (query.name != "designer_selection_layout_edit" || !design.editable_structure())
+    {
+        return Err("This Studio operation requires XAML or a fully mapped RSX layout.".into());
+    }
     let stage = renderer.stage(query.frame)?;
     if !source_action(&query.name, query.arguments["action"].as_str()) {
         return Err("Choose a source edit from the Studio authoring catalog".into());
@@ -73,7 +75,7 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit) -> Result<EditResult,
     {
         let session = stage.session.borrow();
         if session.document_uri() != request.document.uri
-            || session.document().source() != design.source
+            || session.document().source() != design.xaml.source()
         {
             return Err("The rendered design does not match the current source".into());
         }
@@ -99,8 +101,15 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit) -> Result<EditResult,
         },
     )?;
     let session = stage.session.borrow();
-    let patch = TextPatch::between(design.source, session.document().source());
-    editor_edits(&design, patch.into_iter().collect())
+    let source = session.document().source();
+    let patches = if let Some(projection) = &design.rsx {
+        projection.apply_xaml(source)?
+    } else {
+        TextPatch::between(design.source, source)
+            .into_iter()
+            .collect()
+    };
+    editor_edits(&design, patches)
 }
 
 fn select(stage: &Stage, selection: &[NodeId]) -> Result<(), String> {

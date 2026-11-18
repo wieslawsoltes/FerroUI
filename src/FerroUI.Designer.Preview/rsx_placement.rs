@@ -37,7 +37,12 @@ impl PlacementPolicy {
         document: &Document,
         edits: &[Edit],
     ) -> Result<(), String> {
-        if let DragOrigin::Node { node, .. } = origin {
+        let moving = match origin {
+            DragOrigin::Node { node, .. } => std::slice::from_ref(node),
+            DragOrigin::Nodes { nodes, .. } => nodes,
+            _ => &[],
+        };
+        for node in moving {
             let parent = document.ast().node(*node).and_then(|node| node.parent);
             if !parent.is_some_and(|parent| self.containers.contains(&parent)) {
                 return Err(
@@ -77,6 +82,9 @@ pub(crate) fn patches(
     planned: &[Edit],
 ) -> Result<Vec<TextPatch>, String> {
     let rsx = design.rsx.as_ref().ok_or("Open an RSX design")?;
+    if matches!(origin, DragOrigin::Nodes { .. }) {
+        return rsx.apply_xaml(draft.source());
+    }
     let (parent, before) = boundary(draft, id)?;
     let parent = design
         .rsx_node(parent)
@@ -142,6 +150,7 @@ pub(crate) fn patches(
         DragOrigin::Image { .. } => {
             return Err("Place a project image in XAML or use a Rust image expression".into());
         }
+        DragOrigin::Nodes { .. } => unreachable!("group placement handled above"),
     };
     let mut draft_source = design.source.to_owned();
     let mut ordered: Vec<_> = patches.iter().collect();

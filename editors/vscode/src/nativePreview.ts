@@ -2,6 +2,7 @@ import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { createMessageConnection, StreamMessageReader, StreamMessageWriter } from 'vscode-jsonrpc/node';
 import type * as vscode from 'vscode';
 import type { Asset, DropHint, EditResult, Inspection, InspectionTarget, Operation, Placement, ResourceRow, Snapshot, Source, Viewport } from './protocol';
+import type { RsxLanguageDocument } from './rsxLanguageTypes';
 import { commandFor } from './tools';
 
 export class NativePreview implements vscode.Disposable {
@@ -10,6 +11,7 @@ export class NativePreview implements vscode.Disposable {
     private stopped = false;
     private failure?: Error;
     assets: readonly Asset[] = [];
+    capabilities: { isolatedDesign?: boolean; rsxLanguage?: boolean } = {};
 
     private constructor(command: string, channel: vscode.OutputChannel) {
         this.child = spawn(command, [], { windowsHide: true });
@@ -29,9 +31,10 @@ export class NativePreview implements vscode.Disposable {
         const command = await commandFor('preview', context);
         const client = new NativePreview(command, channel);
         try {
-            const hello = await client.send<{ version: number; assets: Asset[] }>('initialize');
+            const hello = await client.send<{ version: number; assets: Asset[]; capabilities?: NativePreview['capabilities'] }>('initialize');
             if (hello.version !== 4) throw new Error(`Preview protocol ${hello.version} is incompatible with this extension.`);
             client.assets = hello.assets;
+            client.capabilities = hello.capabilities ?? {};
             return client;
         } catch (error) {
             client.dispose();
@@ -40,6 +43,10 @@ export class NativePreview implements vscode.Disposable {
     }
 
     get closed(): boolean { return this.stopped; }
+
+    rsxLanguage(source: string): Promise<RsxLanguageDocument | undefined> {
+        return this.capabilities.rsxLanguage ? this.send('rsxLanguage', { source }) : Promise.resolve(undefined);
+    }
 
     render(source: Source, viewport: Viewport, frame = 0): Promise<Snapshot> {
         return this.send('render', { ...source, ...viewport, frame });

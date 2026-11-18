@@ -28,6 +28,7 @@ let staged: SnapshotMessage | undefined;
 const canvasActions: Extract<ToDesigner, { type: 'canvasAction' }>[] = [];
 let snapshot: CanvasSnapshot | undefined;
 let selected: number | undefined;
+let selection: number[] = [];
 let runtime: RuntimeRow | undefined;
 let token = 0;
 let current = false;
@@ -126,12 +127,9 @@ function reveal(): void {
     if (artboard.isCurrent && !runtime && selected !== undefined) select(selected, true);
 }
 
-function select(id: number, openSource: boolean): void {
+function select(id: number, openSource: boolean, extend = false): void {
     if (!current || applying) return;
-    selected = id;
-    runtime = undefined;
-    updateSelection();
-    vscode.postMessage({ type: 'select', token, id, openSource });
+    vscode.postMessage({ type: 'select', token, id, openSource, extend });
 }
 
 function apply(source: string): void {
@@ -148,9 +146,10 @@ function updateSelection(): void {
     const enabled = current && !applying;
     if (artboard.isCurrent) {
         if (runtime) artboard.inspect(runtime.bounds);
-        else artboard.select(node);
+        else artboard.select(node, snapshot?.nodes.filter(item => item.id !== selected && selection.includes(item.id)));
         selectionLabel.hidden = !node?.bounds || Boolean(runtime);
-        if (node) selectedControl.textContent = node.name ? `${node.label} · ${node.name}` : node.label;
+        if (node) selectedControl.textContent = selection.length > 1 ? `${selection.length} controls selected`
+            : node.name ? `${node.label} · ${node.name}` : node.label;
     }
     selectionLabel.disabled = !enabled || !artboard.isCurrent;
     const bounds = runtime?.bounds ?? node?.bounds;
@@ -199,6 +198,7 @@ function presentSnapshot(message: SnapshotMessage, frame?: HTMLImageElement): vo
     snapshot = message.snapshot;
     token = message.frame.token;
     selected = message.selected;
+    selection = message.selection ?? [];
     runtime = message.runtime;
     current = true;
     if (frame) artboard.present(snapshot, message.viewport, frame);
@@ -239,9 +239,11 @@ function receive(message: ToDesigner): void {
         case 'selection':
             if (staged && message.token === staged.frame.token) {
                 staged.selected = message.selected;
+                staged.selection = message.selection;
                 staged.runtime = message.runtime;
             } else if (current && message.token === token) {
                 selected = message.selected;
+                selection = message.selection ?? [];
                 runtime = message.runtime;
             }
             break;

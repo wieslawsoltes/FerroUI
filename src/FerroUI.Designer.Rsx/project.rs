@@ -316,7 +316,7 @@ pub(crate) fn accepts_control(placement: Children, element: &Element) -> bool {
             && !element.properties.contains_key("Content"))
 }
 
-fn control(path: &syn::Path) -> Option<String> {
+pub(crate) fn control(path: &syn::Path) -> Option<String> {
     let class = path.segments.last()?.ident.unraw().to_string();
     let module: Vec<_> = path
         .segments

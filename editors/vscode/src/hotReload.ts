@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { describeCargoTarget, discoverCargoTargets, selectCargoTarget, type CargoSelection, type CargoTarget } from './cargoTarget';
 import { errorMessage } from './protocol';
 import { ReloadLog } from './reloadLog';
+import type { ProjectMetadata } from './reloadProcess';
 import { ReloadSession } from './reloadSession';
 import type { RuntimeMcpEndpoint } from './runtimeMcp';
 
@@ -12,6 +13,8 @@ export class HotReload implements vscode.Disposable {
     private readonly subscriptions: vscode.Disposable[];
     private readonly runtimeChanged = new vscode.EventEmitter<void>();
     readonly onDidChangeRuntime = this.runtimeChanged.event;
+    private readonly built = new vscode.EventEmitter<ProjectMetadata>();
+    readonly onDidBuild = this.built.event;
     runtimeMcp?: RuntimeMcpEndpoint;
     private session?: ReloadSession;
     private choosing = false;
@@ -26,6 +29,8 @@ export class HotReload implements vscode.Disposable {
             vscode.commands.registerCommand('ferroui.hotReload.rebuild', () => this.session ? this.session.build() : this.startInteractive()),
             vscode.commands.registerCommand('ferroui.hotReload.stop', () => this.stop()),
             vscode.commands.registerCommand('ferroui.hotReload.showOutput', () => this.output.show(true)),
+            vscode.commands.registerCommand('ferroui.hotReload.debug', () => this.attachDebugger()),
+            vscode.commands.registerCommand('ferroui.hotReload.processId', () => String(this.requirePid())),
         ];
     }
 
@@ -66,6 +71,31 @@ export class HotReload implements vscode.Disposable {
         }
     }
 
+    private requirePid(): number {
+        const pid = this.session?.pid;
+        if (!pid) throw new Error('Start a managed FerroUI application first.');
+        return pid;
+    }
+
+    private async attachDebugger(): Promise<void> {
+        try {
+            this.requirePid();
+            const folder = this.session!.target.folder;
+            const configurations = vscode.workspace.getConfiguration('launch', folder.uri)
+                .get<vscode.DebugConfiguration[]>('configurations', [])
+                .filter(configuration => configuration.request === 'attach'
+                    && JSON.stringify(configuration).includes('${command:ferroui.hotReload.processId}'));
+            if (!configurations.length) throw new Error('Add a Rust attach configuration with ${command:ferroui.hotReload.processId} as its process ID.');
+            const selected = configurations.length === 1 ? configurations[0] : (await vscode.window.showQuickPick(
+                configurations.map(configuration => ({ label: configuration.name, configuration })),
+                { placeHolder: 'Debug the managed FerroUI application' },
+            ))?.configuration;
+            if (selected) await vscode.debug.startDebugging(folder, selected);
+        } catch (error) {
+            void vscode.window.showErrorMessage(errorMessage(error));
+        }
+    }
+
     private async start(resolveTarget: () => Promise<CargoTarget | undefined>, signal?: AbortSignal): Promise<void> {
         if (this.choosing) throw new Error('A FerroUI Cargo target is already being selected.');
         const generation = ++this.generation;
@@ -86,7 +116,7 @@ export class HotReload implements vscode.Disposable {
                 if (endpoint?.url === this.runtimeMcp?.url && endpoint?.token === this.runtimeMcp?.token) return;
                 this.runtimeMcp = endpoint;
                 this.runtimeChanged.fire();
-            });
+            }, metadata => this.built.fire(metadata));
             this.message = 'Build queued';
             this.session.build();
         } finally {
@@ -108,5 +138,6 @@ export class HotReload implements vscode.Disposable {
         this.indicator.dispose();
         this.output.dispose();
         this.runtimeChanged.dispose();
+        this.built.dispose();
     }
 }

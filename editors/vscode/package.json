@@ -31,6 +31,7 @@
   "main": "./dist/extension.js",
   "activationEvents": [
     "onLanguage:ferroui-xaml",
+    "onLanguage:rust",
     "onWebviewPanel:ferroui.designer"
   ],
   "contributes": {
@@ -109,6 +110,11 @@
         "icon": "$(file-media)"
       },
       {
+        "command": "ferroui.studio.layout",
+        "title": "Arrange Selection",
+        "category": "FerroUI"
+      },
+      {
         "command": "ferroui.revealDesignerSource",
         "title": "Reveal Selected Control in Source",
         "category": "FerroUI",
@@ -133,6 +139,17 @@
       {
         "command": "ferroui.hotReload.showOutput",
         "title": "Show Hot Reload Output",
+        "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.openLiveApp",
+        "title": "Open Live App",
+        "category": "FerroUI",
+        "icon": "$(run)"
+      },
+      {
+        "command": "ferroui.hotReload.debug",
+        "title": "Attach Debugger to Managed App",
         "category": "FerroUI"
       },
       {
@@ -261,6 +278,16 @@
           "default": "",
           "scope": "machine",
           "description": "Absolute path to ferroui-designer-preview. Leave empty to use the bundled binary or PATH."
+        },
+        "ferroui.rsx.completion": {
+          "type": "boolean",
+          "default": true,
+          "description": "Offer FerroUI property names at mapped RSX fields alongside Rust completions."
+        },
+        "ferroui.rsx.inlayHints": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show FerroUI types at RSX fields whose values can be edited in the designer."
         },
         "ferroui.types": {
           "type": "array",

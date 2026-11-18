@@ -105,6 +105,7 @@ body {
     pointer-events: none;
 }
 .hover-outline { border-style: dashed; opacity: .62; }
+.additional-outline { border-style: dashed; }
 .drop-outline {
     min-inline-size: 2px;
     min-block-size: 2px;

@@ -19,9 +19,12 @@ export class DesignerDrag {
             const gesture = message.gesture;
             if (!gesture || !/^[a-f0-9-]{36}$/.test(gesture.id) || !panel.canUse(gesture.frame)) return;
             const origin = gesture.origin;
+            const movable = (id: number) => panel.nodes.some(node => node.id === id && node.canMove);
             if (!origin || !(origin.type === 'asset' ? panel.assets.some(asset => asset.id === origin.control)
                 : origin.type === 'image' ? panel.language === 'xaml' && this.ownsImage(origin)
-                    : origin.type === 'node' && panel.nodes.some(node => node.id === origin.node && node.canMove))) return;
+                    : origin.type === 'node' ? movable(origin.node) : origin.type === 'nodes'
+                        && Array.isArray(origin.nodes) && origin.nodes.length > 1 && origin.nodes.length <= 128
+                        && origin.nodes.includes(origin.anchor) && origin.nodes.every(movable))) return;
             clearTimeout(this.ending);
             clearTimeout(this.expiry);
             this.ending = undefined;

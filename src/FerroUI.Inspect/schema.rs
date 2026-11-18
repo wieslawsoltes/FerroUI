@@ -21,6 +21,8 @@ pub fn tools() -> Vec<Value> {
         false,
     );
     add("get_tree", "Snapshot a visual, logical or automation tree. Omit node_id for all windows. Depth defaults to 8; at most 10000 nodes.", json!({"node_id":id,"tree":{"enum":["visual","logical","automation"]},"depth":{"type":"integer","minimum":0,"maximum":64},"properties":strings}), &[], false);
+    add("get_element_at", "List native visual hits, front to back, at coordinates relative to the supplied window.", json!({"node_id":id,"x":{"type":"number"},"y":{"type":"number"}}), &["node_id", "x", "y"], false);
+    add("get_source", "Read compiler-provided source location for a live element. Returns null when the application has no source information for the element.", json!({"node_id":id}), &["node_id"], false);
     let search = json!({"node_id":id,"selector":string,"type":string,"name":string,"automation_id":string,"text":string,"limit":{"type":"integer","minimum":1,"maximum":10000}});
     add("find_elements", "Find elements by combined filters. Text is a substring; other fields are exact. Selectors use FerroUI syntax.", search.clone(), &[], false);
     add(

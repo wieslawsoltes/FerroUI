@@ -22,13 +22,14 @@ use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::styling::{ControlTheme, Selector, Style};
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{
-    BoxedValue, FerroObject, FerroProperty, FerroPropertyRegistry, PixelSize, Rect, Ref,
+    BoxedValue, FerroObject, FerroProperty, FerroPropertyRegistry, PixelSize, Point, Rect, Ref,
     StyledElement, Thickness, TypeInfo, Vector, Visual, WeakRef,
 };
 use ferroui_controls::automation::peers::{AutomationPeer, ControlAutomationPeer};
 use ferroui_controls::primitives::{AdornerLayer, TemplatedControl};
 use ferroui_controls::{Application, Border, Control, TopLevel};
 use ferroui_markup::markup::parsers::{SelectorGrammar, SelectorParser, SelectorSyntax};
+use ferroui_markup_xaml::diagnostics::XamlSourceInfo;
 pub use logs::{LogCapture, LogEntry, LogGuard};
 pub use schema::{tools, validate};
 use serde_json::{json, Value};
@@ -762,6 +763,20 @@ impl Inspector {
                 &Self::visual_object(&self.object(args)?),
                 args.get("properties"),
             )),
+            "get_element_at" => {
+                let root = Self::visual_object(&self.object(args)?)
+                    .cast::<Visual>().ok_or("The selected object has no visual surface")?;
+                let point = Point::new(args["x"].as_f64().unwrap(), args["y"].as_f64().unwrap());
+                Ok(Value::Array(root.get_visuals_at(point).into_iter().take(32)
+                    .map(|visual| self.describe(&visual.upcast(), None)).collect()))
+            }
+            "get_source" => {
+                let object: BoxedValue = Rc::new(Self::visual_object(&self.object(args)?));
+                Ok(XamlSourceInfo::get_xaml_source_info(&object).and_then(|info| {
+                    let uri = info.source_uri()?;
+                    Some(json!({"uri":uri.as_str(),"line":info.line_number(),"column":info.line_position()}))
+                }).unwrap_or(Value::Null))
+            }
             "set_property" => {
                 if !permissions.allow_property_writes {
                     return Err("Property writes are disabled".into());

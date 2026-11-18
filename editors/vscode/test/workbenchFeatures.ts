@@ -90,6 +90,33 @@ fn view() { rsx! {
     console.log('VS Code native hierarchy, grouped properties, resources, relative image drops and expression-preserving RSX placement passed');
 }
 
+export async function verifyMultiSelection(preview: NativePreview, xamlUri: string, rustUri: string): Promise<void> {
+    for (const design of [
+        { language: 'xaml', uri: xamlUri, caret, source: `<StackPanel xmlns="https://github.com/ferroui"><Button Name="First" Width="120"/><Button Name="Second" Width="72"/><Button Name="Third" Width="92"/></StackPanel>` },
+        { language: 'rust', uri: rustUri, caret, source: `fn view() { let _ = rsx! { StackPanel { Button { name: "First", width: 120.0 } Button { name: "Second", width: 72.0 } Button { name: "Third", width: 92.0 } } }; }\n// outside the invocation` },
+    ] as const) {
+        const frame = await preview.render(design, viewport, 25);
+        assert.ok(frame.image, frame.renderError ?? undefined);
+        const ids = ['First', 'Second', 'Third'].map(name => frame.nodes.find(node => node.name === name)!.id);
+        const placement = { origin: { type: 'nodes', nodes: ids.slice(0, 2), anchor: ids[0] },
+            target: { type: 'outline', node: ids[2], position: 'after' } } as const;
+        await preview.placement(25, placement);
+        const moved = await preview.edit(design, { type: 'place', frame: 25, placement });
+        const movedSource = apply(design.source, moved.edits);
+        assert.ok(movedSource.indexOf('Third') < movedSource.indexOf('First') && movedSource.indexOf('First') < movedSource.indexOf('Second'));
+        const layout = { operation: 'match_width' };
+        const plan = await preview.studioQuery(25, 'designer_selection_layout', layout, ids) as { model: string; edit_count: number };
+        assert.equal(plan.edit_count, 2);
+        const resized = await preview.studioEdit(design, 25, 'designer_selection_layout_edit', { ...layout, expected_model: plan.model }, ids);
+        assert.equal((apply(design.source, resized.edits).match(/120(?:\.0)?/g) ?? []).length, 3);
+        if (design.language === 'rust') {
+            assert.ok(movedSource.endsWith('// outside the invocation'));
+            assert.ok(apply(design.source, resized.edits).endsWith('// outside the invocation'));
+        }
+    }
+    console.log('VS Code native ordered multi-control placement and measured layout passed in XAML and RSX');
+}
+
 function apply(source: string, edits: TextEdit[]): string {
     const lines = source.split('\n');
     const offset = (line: number, character: number) =>

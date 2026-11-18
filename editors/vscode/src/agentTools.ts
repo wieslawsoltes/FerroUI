@@ -42,6 +42,7 @@ interface Arguments extends CanvasAction, CargoSelection {
     resource: number;
     dynamic?: boolean;
     anchor?: number;
+    moving_anchor?: number;
     position?: 'inside' | 'before' | 'after';
     x?: number;
     y?: number;
@@ -173,12 +174,16 @@ export class AgentTools {
             case 'designer_select': {
                 const frame = { session: panel.session, token: args.expected_revision };
                 if (!panel.canUse(frame)) throw new Error('Read the current outline before selecting.');
-                if ((args.node === undefined) === (args.inspector_id === undefined)) throw new Error('Choose one source or runtime object.');
+                if ([args.node, args.inspector_id, args.selection].filter(value => value !== undefined).length !== 1) {
+                    throw new Error('Choose a source node, an ordered source selection, or a runtime object.');
+                }
                 if (args.inspector_id !== undefined) {
                     const row = (await panel.runtimeTree(frame, 'combined')).find(row => row.inspector_id === args.inspector_id);
                     signal.throwIfAborted();
                     if (!row || !panel.canUse(frame)) throw new Error('Read the current runtime tree before selecting.');
                     await panel.selectRuntime(frame, row, args.reveal_source ?? false);
+                } else if (args.selection) {
+                    await panel.selectNodes(frame, args.selection);
                 } else {
                     if (!panel.nodes.some(node => node.id === args.node)) throw new Error('Read the current source outline before selecting.');
                     await panel.select({ ...frame, node: args.node! }, args.reveal_source);
@@ -246,10 +251,11 @@ export class AgentTools {
     }
 
     private async placement(panel: DesignerPanel, args: Arguments): Promise<Placement> {
-        if ([args.node, args.asset, args.project_asset].filter(value => value !== undefined).length !== 1) {
-            throw new Error('Specify one Toolbox control, project image, or source node.');
+        if ([args.node, args.asset, args.project_asset, args.selection].filter(value => value !== undefined).length !== 1) {
+            throw new Error('Specify a Toolbox control, project image, source node, or selection.');
         }
-        const origin: DragOrigin = args.node !== undefined ? { type: 'node', node: args.node }
+        const origin: DragOrigin = args.selection ? { type: 'nodes', nodes: args.selection, anchor: args.moving_anchor ?? args.selection[0] }
+            : args.node !== undefined ? { type: 'node', node: args.node }
             : args.project_asset !== undefined ? await this.workbench.projectImage(panel, args.project_asset)
                 : { type: 'asset', control: args.asset! };
         const hasOutline = args.anchor !== undefined && args.position !== undefined;
@@ -267,7 +273,7 @@ function describe(panel: DesignerPanel) {
     const blocks = snapshot?.blocks.map((range, index) => ({ index, range,
         active: range.start.line === active?.line && range.start.character === active.character })) ?? [];
     return { session: panel.session, uri: panel.document.uri.toString(), language: panel.language, version: panel.document.version,
-        revision: panel.currentToken ?? null, selected: panel.selectedNode?.id ?? null,
+        revision: panel.currentToken ?? null, selected: panel.selectedNode?.id ?? null, selection: panel.selectedIds,
         inspected: panel.runtimeSelection?.inspector_id ?? null, dirty: panel.document.isDirty,
         viewport: panel.dimensions, status: panel.status ?? snapshot?.renderError ?? 'Ready', notices: snapshot?.notices ?? [], blocks };
 }

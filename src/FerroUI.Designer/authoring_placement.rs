@@ -7,6 +7,7 @@ use ferroui_designer_tools::Rect;
 pub enum PlacementOrigin<'a> {
     Asset(&'a str),
     Node { node: NodeId, grab: Option<Point> },
+    Nodes { nodes: &'a [NodeId], anchor: NodeId, grab: Option<Point> },
 }
 
 pub enum PlacementTarget {
@@ -40,6 +41,10 @@ impl DesignerSession {
                     PlacementOrigin::Node { node: moving, .. } => (
                         self.plan_outline_move(moving, node, position)?,
                         "Move control",
+                    ),
+                    PlacementOrigin::Nodes { nodes, .. } => (
+                        self.plan_outline_move_many(nodes, node, position)?,
+                        "Move selected controls",
                     ),
                 };
                 Ok(PlacementPlan {
@@ -75,6 +80,15 @@ impl DesignerSession {
                         bounds: Some(landing),
                         description: "Move control".into(),
                     })
+                }
+                PlacementOrigin::Nodes { nodes, anchor, grab } => {
+                    if !nodes.contains(&anchor) { return Err("Start the drag on a selected control".into()); }
+                    let artboard = self.preview.host.clone().upcast();
+                    let bounds = self.preview.bounds(anchor, &artboard).ok_or("The dragged selection has no measured bounds")?;
+                    let grab = grab.unwrap_or_else(|| Point::new(bounds.x, bounds.y));
+                    let delta = Point::new(point.x - grab.x, point.y - grab.y);
+                    let preview = self.preview_layout_move(nodes, point, delta)?.ok_or("Drop the selection into a supported layout container")?;
+                    self.measured_placement(&preview)
                 }
             },
         }

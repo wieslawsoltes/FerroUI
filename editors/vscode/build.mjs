@@ -14,7 +14,7 @@ const [host] = await Promise.all([
     }),
     build({
         entryPoints: { designer: 'webview/main.ts', properties: 'webview/properties.ts', outline: 'webview/outline.ts',
-            toolbox: 'webview/toolbox.ts', details: 'webview/details.ts', assets: 'webview/assets.ts' },
+            toolbox: 'webview/toolbox.ts', details: 'webview/details.ts', assets: 'webview/assets.ts', runtime: 'webview/runtime.ts' },
         outdir: 'dist',
         bundle: true,
         platform: 'browser',

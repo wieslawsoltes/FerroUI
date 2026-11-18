@@ -7,22 +7,24 @@ export class Artboard {
     private readonly placeholder = element('placeholder');
     private frame = element<HTMLImageElement>('frame');
     private readonly selection = element('selection-box');
+    private readonly selectionGroup = element('selection-group');
     private readonly hover = element('hover-box');
     private readonly dropBox = element('drop-box');
     private snapshot?: CanvasSnapshot;
     private current = false;
     private selected?: number;
+    private selectedNodes: CanvasNode[] = [];
     private lastHovered?: number;
 
     constructor(
         private readonly viewport: CanvasViewport,
         canSelect: () => boolean,
-        select: (id: number, openSource: boolean) => void,
+        select: (id: number, openSource: boolean, extend: boolean) => void,
     ) {
         const hit = (event: MouseEvent) => this.current && canSelect() ? this.hit(this.point(event)) : undefined;
         const pick = (event: MouseEvent, openSource: boolean) => {
             const node = hit(event);
-            if (node) select(node.id, openSource);
+            if (node) select(node.id, openSource, !openSource && (event.ctrlKey || event.metaKey || event.shiftKey));
         };
         this.element.addEventListener('click', event => pick(event, false));
         this.element.addEventListener('dblclick', event => pick(event, true));
@@ -70,16 +72,30 @@ export class Artboard {
         this.clearHover();
     }
 
-    select(node: CanvasNode | undefined): void {
+    select(node: CanvasNode | undefined, additional: CanvasNode[] = []): void {
         if (node?.id !== this.selected) this.clearHover();
         this.selected = node?.id;
+        this.selectedNodes = node ? [...additional, node] : [];
         this.draw(this.selection, node?.bounds);
+        this.selectionGroup.replaceChildren(...additional.map(item => {
+            const box = document.createElement('div');
+            box.className = 'control-outline additional-outline';
+            this.draw(box, item.bounds);
+            return box;
+        }));
+    }
+
+    movableSelection(anchor: number): number[] {
+        return this.selectedNodes.some(node => node.id === anchor) && this.selectedNodes.every(node => node.canMove)
+            ? this.selectedNodes.map(node => node.id) : [];
     }
 
     inspect(bounds?: Bounds | null): void {
         this.selected = undefined;
+        this.selectedNodes = [];
         this.clearHover();
         this.draw(this.selection, bounds);
+        this.selectionGroup.replaceChildren();
     }
 
     get hasFrame(): boolean { return !this.element.hidden; }

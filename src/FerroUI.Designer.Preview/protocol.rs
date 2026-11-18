@@ -81,6 +81,7 @@ pub(crate) enum DragOrigin {
     Asset { control: String },
     Image { source: String },
     Node { node: u64, grab: Option<ferroui_designer_tools::Point> },
+    Nodes { nodes: Vec<u64>, anchor: u64, grab: Option<ferroui_designer_tools::Point> },
 }
 
 #[derive(Deserialize)]

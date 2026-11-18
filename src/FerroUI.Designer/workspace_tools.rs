@@ -1017,23 +1017,21 @@ fn artboard_bounds(session: &DesignerSession) -> Result<Vec<(NodeId, Rect)>, Str
         })
         .collect()
 }
-fn apply_deltas(
-    session: &mut DesignerSession,
-    deltas: BTreeMap<NodeId, Point>,
-    label: &str,
-) -> Result<(), String> {
-    let edits = plan_moves(session, deltas)?;
-    session.apply_visual(label, edits)
-}
-pub(crate) fn align(session: &mut DesignerSession, alignment: Alignment) -> Result<(), String> {
+pub(crate) fn plan_alignment(session: &DesignerSession, alignment: Alignment) -> Result<Vec<Edit>, String> {
     let deltas = ferroui_designer_tools::align(&artboard_bounds(session)?, alignment)
         .map_err(|e| e.to_string())?;
-    apply_deltas(session, deltas, "Align selection")
+    plan_moves(session, deltas)
 }
-pub(crate) fn distribute(session: &mut DesignerSession, axis: Axis) -> Result<(), String> {
+pub(crate) fn plan_distribution(session: &DesignerSession, axis: Axis) -> Result<Vec<Edit>, String> {
     let deltas = ferroui_designer_tools::distribute(&artboard_bounds(session)?, axis)
         .map_err(|e| e.to_string())?;
-    apply_deltas(session, deltas, "Distribute selection")
+    plan_moves(session, deltas)
+}
+pub(crate) fn align(session: &mut DesignerSession, alignment: Alignment) -> Result<(), String> {
+    session.apply_visual("Align selection", plan_alignment(session, alignment)?)
+}
+pub(crate) fn distribute(session: &mut DesignerSession, axis: Axis) -> Result<(), String> {
+    session.apply_visual("Distribute selection", plan_distribution(session, axis)?)
 }
 fn outermost(document: &Document, nodes: &[NodeId]) -> Vec<NodeId> {
     let selected = nodes.iter().copied().collect::<BTreeSet<_>>();

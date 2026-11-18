@@ -7,7 +7,7 @@ const frame = { ...session, expected_revision: integer(0) };
 const buffer = { ...session, expected_version: integer(1) };
 const workspacePath = { type: 'string', maxLength: 4096 };
 const cargoSelection = { folder: workspacePath, manifest_path: workspacePath, package: workspacePath, binary: workspacePath, label: workspacePath };
-const placement = { ...frame, asset: text, project_asset: text, node, anchor: node,
+const placement = { ...frame, asset: text, project_asset: text, node, selection: { type: 'array', items: node, minItems: 2, maxItems: 128 }, moving_anchor: node, anchor: node,
     position: choice('inside', 'before', 'after'), x: { type: 'number' }, y: { type: 'number' } };
 
 export const agentCatalog = {
@@ -38,11 +38,12 @@ export const agentCatalog = {
         { ...session, tab: choice('preview', 'counterpart'), zoom: choice('fit', 'fit_selection', 'actual'),
             scale: { type: 'number', minimum: 0.125, maximum: 8 }, pan_x: { type: 'number' }, pan_y: { type: 'number' }, pan_tool: truth },
         ['session'], true, false),
-    designer_select: tool('Select one source node or one runtime object in the canvas, Outline and Properties.',
-        { ...frame, node, inspector_id: node, reveal_source: truth }, ['session', 'expected_revision'], true, false),
+    designer_select: tool('Select one source node, ordered source nodes, or one runtime object in the canvas, Outline and Properties.',
+        { ...frame, node, selection: { type: 'array', items: node, maxItems: 128 }, inspector_id: node, reveal_source: truth },
+        ['session', 'expected_revision'], true, false),
     designer_placement_hint: tool('Validate a proposed drop and return its native landing bounds without editing the design.',
         placement, ['session', 'expected_revision']),
-    designer_place: tool('Insert a Toolbox control, place a project image in XAML, or move a control. Use an outline anchor and position or canvas coordinates.',
+    designer_place: tool('Insert a Toolbox control, place a project image in XAML, or move an authored control or selection. Use an outline anchor and position or canvas coordinates.',
         placement,
         ['session', 'expected_revision'], true),
     designer_remove: tool('Remove a mapped authored control, preserving the other Rust or XAML source.',

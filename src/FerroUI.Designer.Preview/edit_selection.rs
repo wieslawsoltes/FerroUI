@@ -11,6 +11,7 @@ pub(crate) fn dropped_node(
 ) -> Option<NodeId> {
     match origin {
         DragOrigin::Node { node, .. } => Some(*node),
+        DragOrigin::Nodes { anchor, .. } => Some(*anchor),
         DragOrigin::Asset { .. } | DragOrigin::Image { .. } => change.inserted.iter().copied().find(|id| {
             document.ast().node(*id).is_some_and(|node| {
                 node.kind == NodeKind::Element

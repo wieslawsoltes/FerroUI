@@ -50,6 +50,7 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
                 <img id="frame" alt="Rendered FerroUI view" draggable="false">
                 <div id="hover-box" class="control-outline hover-outline" hidden></div>
                 <div id="selection-box" class="control-outline" hidden></div>
+                <div id="selection-group" aria-hidden="true"></div>
                 <div id="drop-box" class="control-outline drop-outline" hidden></div>
             </div>
         </div>
@@ -109,6 +110,7 @@ export function outlineHtml(webview: vscode.Webview, root: vscode.Uri): string {
             <option value="visual">Visual</option><option value="logical">Logical</option>
         </select>
     </label>
+    <button type="button" id="outline-layout" disabled>Arrange selection…</button>
     <p class="dock-message" id="outline-message" role="status"></p>
     <ul id="outline-tree" role="tree" aria-label="Control hierarchy"></ul>
 </main>`);
@@ -183,6 +185,41 @@ export function assetsHtml(webview: vscode.Webview, root: vscode.Uri): string {
     </section>
     <ul id="project-asset-list" aria-label="Project files"></ul>
     <button id="assets-more" type="button" hidden>Show more files</button>
+</main>`);
+}
+
+export function runtimeHtml(webview: vscode.Webview, root: vscode.Uri): string {
+    return page(webview, root, 'runtime', 'FerroUI Live App', `
+<header class="runtime-toolbar" aria-label="Live App controls">
+    <select id="runtime-target" aria-label="Runtime connection"></select>
+    <select id="runtime-window" aria-label="Application window"></select>
+    <button id="runtime-start">Run with Hot Reload</button>
+    <button id="runtime-attach">Connect</button>
+    <button id="runtime-refresh" title="Reconnect and refresh">Refresh</button>
+</header>
+<p id="runtime-status" role="status">Connecting…</p>
+<p id="runtime-problem" role="alert" hidden></p>
+<main class="runtime-main" hidden>
+    <section class="runtime-stage" aria-label="Running application">
+        <div class="runtime-controls">
+            <button id="runtime-inspect" aria-pressed="true">Inspect</button>
+            <button id="runtime-interact" aria-pressed="false">Interact</button>
+        </div>
+        <div class="runtime-canvas"><img id="runtime-image" alt="Running FerroUI window" draggable="false"></div>
+        <form id="runtime-input" aria-label="Send input to the selected control" hidden>
+            <select id="runtime-input-kind" aria-label="Input kind"><option value="text">Text</option><option value="key">Key gesture</option></select>
+            <input id="runtime-input-value" aria-label="Text or key gesture" required maxlength="8192">
+            <button type="submit">Send</button>
+        </form>
+    </section>
+    <aside aria-label="Runtime inspection">
+        <label>Hierarchy <select id="runtime-hierarchy"><option value="visual">Visual</option><option value="logical">Logical</option><option value="automation">Accessibility</option></select></label>
+        <input id="runtime-filter" type="search" placeholder="Filter elements" aria-label="Filter elements">
+        <ul id="runtime-tree" aria-label="Application hierarchy"></ul>
+        <label>Inspect <select id="runtime-detail"><option value="properties">Properties</option><option value="styles">Styles</option><option value="resources">Resources</option><option value="diagnostics">Diagnostics</option></select></label>
+        <button id="runtime-reveal" hidden>Reveal Source</button>
+        <div id="runtime-details" aria-label="Runtime details"></div>
+    </aside>
 </main>`);
 }
 

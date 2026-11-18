@@ -11,6 +11,7 @@ const vscode = acquireVsCodeApi();
 const tree = element<HTMLUListElement>('outline-tree');
 const status = element('outline-message');
 const mode = element<HTMLSelectElement>('outline-mode');
+const layout = element<HTMLButtonElement>('outline-layout');
 let state: OutlineState = { nodes: [] };
 let rows = new Map<string, OutlineRow>();
 let children = new Map<string | null, OutlineRow[]>();
@@ -27,9 +28,13 @@ let error: string | undefined;
 const dragSource = new DragSource(tree, event => {
     const item = rowAt(event);
     if (item?.row.canMove && item.row.source !== undefined && state.frame && !(event.target as Element).closest('.twisty')) {
-        return { frame: state.frame, origin: { type: 'node', node: item.row.source } };
+        return { frame: state.frame, origin: originOf(item.row) };
     }
 }, vscode.postMessage, gesture => { drag = gesture; });
+
+layout.addEventListener('click', () => {
+    if (state.frame) vscode.postMessage({ type: 'layout', frame: state.frame });
+});
 
 tree.addEventListener('pointerdown', () => {
     if (drag) {
@@ -53,6 +58,7 @@ window.addEventListener('message', ({ data }: MessageEvent<ToOutline>) => {
         const picked = state.selected !== data.state.selected || state.session !== data.state.session;
         state = data.state;
         mode.value = state.mode ?? 'source';
+        layout.disabled = !state.frame || !state.selectedRows?.length;
         const next = JSON.stringify(state.nodes);
         if (next !== key) {
             key = next;
@@ -87,7 +93,7 @@ tree.addEventListener('click', event => {
         toggle(item.row.id);
         return;
     }
-    select(item.row.id);
+    select(item.row.id, false, event.ctrlKey || event.metaKey || event.shiftKey);
 });
 tree.addEventListener('dblclick', event => {
     const item = rowAt(event);
@@ -102,8 +108,12 @@ tree.addEventListener('keydown', event => {
         event.preventDefault();
         const above = event.key === 'ArrowUp';
         const siblings = (children.get(parent) ?? []).filter(row => row.canMove);
-        const sibling = siblings[siblings.findIndex(row => row.id === id) + (above ? -1 : 1)];
-        if (sibling?.source !== undefined) vscode.postMessage({ type: 'reorder', frame, node: source, anchor: sibling.source, position: above ? 'before' : 'after' });
+        const origin = originOf(item.row);
+        const moving = origin.type === 'nodes' ? origin.nodes : [source];
+        const index = siblings.findIndex(row => row.id === id);
+        const candidates = above ? siblings.slice(0, index).reverse() : siblings.slice(index + 1);
+        const sibling = candidates.find(row => row.source !== undefined && !moving.includes(row.source));
+        if (sibling?.source !== undefined) vscode.postMessage({ type: 'reorder', frame, origin, anchor: sibling.source, position: above ? 'before' : 'after' });
         return;
     }
     const visible = [...elements.keys()];
@@ -117,7 +127,7 @@ tree.addEventListener('keydown', event => {
         case 'ArrowLeft': if (children.has(id) && !collapsed.has(id)) toggle(id); else next = parent ?? undefined; break;
         case 'ArrowRight': if (collapsed.has(id)) toggle(id); else next = children.get(id)?.[0]?.id; break;
         case 'Enter': select(id, true); break;
-        case ' ': select(id); break;
+        case ' ': select(id, false, event.ctrlKey || event.metaKey || event.shiftKey); break;
         default: return;
     }
     event.preventDefault();
@@ -199,7 +209,7 @@ function syncRows(): void {
     for (const [id, element] of elements) {
         element.tabIndex = id === tabbable ? 0 : -1;
         element.toggleAttribute('data-movable', Boolean(state.frame && rows.get(id)?.canMove));
-        element.setAttribute('aria-selected', String(state.selected === id));
+        element.setAttribute('aria-selected', String(state.selectedRows?.includes(id) ?? state.selected === id));
     }
 }
 
@@ -216,10 +226,10 @@ function rowAt(event: Event) {
     return item && row ? { item, row } : undefined;
 }
 
-function select(id: string, openSource = false): void {
+function select(id: string, openSource = false, extend = false): void {
     if (!state.frame) return;
     error = undefined;
-    vscode.postMessage({ type: 'select', frame: state.frame, id, openSource });
+    vscode.postMessage({ type: 'select', frame: state.frame, id, openSource, extend });
 }
 
 function toggle(id: string): void {
@@ -235,15 +245,24 @@ function expandTo(node?: string): void {
     }
 }
 
+function originOf(row: OutlineRow): Extract<DragGesture['origin'], { type: 'node' | 'nodes' }> {
+    const selected = (state.selectedRows ?? []).map(id => rows.get(id));
+    if (selected.length > 1 && selected.includes(row) && selected.every(row => row?.canMove && row.source !== undefined)) {
+        return { type: 'nodes', nodes: selected.map(row => row!.source!), anchor: row.source! };
+    }
+    return { type: 'node', node: row.source! };
+}
+
 function dropTarget(event: PointerEvent) {
     if (!matchDrag(state.frame, drag)) return undefined;
     const found = rowAt(event);
     if (!found) return undefined;
     const { row, item } = found;
     if (row.source === undefined || state.mode !== 'source') return undefined;
-    if (drag.origin.type === 'node') {
+    if (drag.origin.type === 'node' || drag.origin.type === 'nodes') {
+        const moving = drag.origin.type === 'nodes' ? drag.origin.nodes : [drag.origin.node];
         for (let ancestor: OutlineRow | undefined = row; ancestor; ancestor = rows.get(ancestor.parent ?? '')) {
-            if (ancestor.source === drag.origin.node) return undefined;
+            if (ancestor.source !== undefined && moving.includes(ancestor.source)) return undefined;
         }
     }
     const rect = item.getBoundingClientRect();

@@ -34,6 +34,16 @@ impl Stage {
                 node: *node,
                 grab: grab.map(|point| Point::new(point.x, point.y)),
             },
+            DragOrigin::Nodes { nodes, anchor, grab } => {
+                let distinct: std::collections::BTreeSet<_> = nodes.iter().copied().collect();
+                if !(2..=128).contains(&nodes.len()) || distinct.len() != nodes.len() || !distinct.contains(anchor) {
+                    return Err("Drag two to 128 distinct controls from the current selection".into());
+                }
+                PlacementOrigin::Nodes {
+                    nodes, anchor: *anchor,
+                    grab: grab.map(|point| Point::new(point.x, point.y)),
+                }
+            }
         };
         let target = match placement.target {
             DropTarget::Outline { node, position } => {

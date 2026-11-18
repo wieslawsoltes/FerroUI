@@ -36,6 +36,7 @@ export class DesignerPanel implements vscode.Disposable {
     private problem?: string;
     private caret: vscode.Position;
     private selected?: number;
+    private selection: number[] = [];
     private runtime?: RuntimeRow;
     private blockOffset?: number;
     assets: readonly Asset[] = [];
@@ -100,6 +101,8 @@ export class DesignerPanel implements vscode.Disposable {
         return undefined;
     }
 
+    get selectedIds(): readonly number[] { return this.runtime ? [] : this.selection; }
+
     get nodes(): readonly Snapshot['nodes'][number][] { return this.frame?.snapshot.nodes ?? emptyNodes; }
     get selectedNode(): Snapshot['nodes'][number] | undefined { return this.runtime ? undefined : this.nodes.find(node => node.id === this.selected); }
     get runtimeSelection(): RuntimeRow | undefined { return this.runtime; }
@@ -117,10 +120,16 @@ export class DesignerPanel implements vscode.Disposable {
         if (inspected) void this.render();
     }
 
-    async select(target: NodeTarget, openSource = false): Promise<void> {
+    async select(target: NodeTarget, openSource = false, extend = false): Promise<void> {
         if (!this.canUse(target)) return;
         const node = this.nodes.find(node => node.id === target.node);
         if (!node) return;
+        if (extend) {
+            const existing = this.selectedIds.filter(id => id !== node.id);
+            const selection = this.selectedIds.includes(node.id) ? existing : [...existing, node.id].slice(-128);
+            this.setSelection(selection.at(-1), selection);
+            return;
+        }
         const range = asRange(node.nameRange);
         this.caret = range.start;
         this.setSelection(node.id);
@@ -255,7 +264,8 @@ export class DesignerPanel implements vscode.Disposable {
 
     async studioTools() {
         const { tools, xamlEdits } = await (await this.getClient()).studioTools();
-        return { tools, edits: this.language === 'xaml' ? xamlEdits : [] };
+        return { tools, edits: this.language === 'xaml' ? xamlEdits : xamlEdits.filter(tool =>
+            (tool as { name?: string }).name === 'designer_selection_layout_edit') };
     }
 
     async studioQuery(name: string, args: object, selection: number[] | undefined, signal: AbortSignal): Promise<unknown> {
@@ -268,7 +278,9 @@ export class DesignerPanel implements vscode.Disposable {
     }
 
     async studioEdit(token: number, name: string, args: object, selection: number[] | undefined, signal: AbortSignal): Promise<void> {
-        if (this.language !== 'xaml') throw new Error('Use the mapped designer tools or edit the authored Rust buffer for RSX.');
+        if (this.language === 'rust' && name !== 'designer_selection_layout_edit') {
+            throw new Error('This Studio operation requires XAML or a mapped RSX layout operation.');
+        }
         if (this.editing) throw new Error('A designer edit is already in progress.');
         const frame = this.frame;
         if (!frame || this.currentToken !== token) throw new Error('Read the current designer revision before editing.');
@@ -281,7 +293,7 @@ export class DesignerPanel implements vscode.Disposable {
     }
 
     private studioSelection(selection?: number[]): number[] {
-        return selection ?? (this.selected === undefined ? [] : [this.selected]);
+        return selection ?? [...this.selectedIds];
     }
 
     configure(viewport?: Viewport): void {
@@ -289,12 +301,20 @@ export class DesignerPanel implements vscode.Disposable {
         this.schedule(0);
     }
 
-    private setSelection(id: number | undefined): void {
-        if (id === this.selected && !this.runtime) return;
+    async selectNodes(target: FrameTarget, ids: number[]): Promise<void> {
+        if (!this.canUse(target) || ids.length > 128 || new Set(ids).size !== ids.length
+            || ids.some(id => !this.nodes.some(node => node.id === id))) throw new Error('Select distinct nodes from the current designer frame.');
+        this.setSelection(ids.at(-1), ids);
+    }
+
+    private setSelection(id: number | undefined, selection = id === undefined ? [] : [id]): void {
+        if (id === this.selected && !this.runtime && selection.length === this.selection.length
+            && selection.every((node, i) => this.selection[i] === node)) return;
         this.runtime = undefined;
         this.selected = id;
+        this.selection = selection;
         const token = this.currentToken;
-        if (token !== undefined) this.post({ type: 'selection', token, selected: id });
+        if (token !== undefined) this.post({ type: 'selection', token, selected: id, selection });
         this.rememberView();
         this.changed.fire();
     }
@@ -314,7 +334,10 @@ export class DesignerPanel implements vscode.Disposable {
                 return;
             }
         }
-        if (this.currentToken !== undefined) this.setSelection(selectionAt(frame.snapshot, caret) ?? this.selected);
+        if (this.currentToken !== undefined) {
+            const node = selectionAt(frame.snapshot, caret);
+            if (node !== undefined && (node !== this.selected || this.runtime)) this.setSelection(node);
+        }
     }
 
     private schedule(delay = 180): void {
@@ -350,7 +373,9 @@ export class DesignerPanel implements vscode.Disposable {
             const nodes = snapshot.nodes.map(({ id, label, name, bounds, canMove }) => ({ id, label, name, bounds, canMove }));
             this.frame = { token, version, viewport, source: input, snapshot, canvas: { ...snapshot, nodes } };
             this.runtime = undefined;
-            this.selected = selectionAt(snapshot, this.caret) ?? (sameView ? this.selected : undefined) ?? snapshot.nodes[0]?.id;
+            this.selected = (sameView ? this.selected : undefined) ?? selectionAt(snapshot, this.caret) ?? snapshot.nodes[0]?.id;
+            this.selection = sameView && this.selection.length ? this.selection.filter(id => snapshot.nodes.some(node => node.id === id))
+                : this.selected === undefined ? [] : [this.selected];
             if (anchor) this.blockOffset = this.document.offsetAt(asPosition(anchor));
             this.syncCanvas();
             this.changed.fire();
@@ -404,7 +429,7 @@ export class DesignerPanel implements vscode.Disposable {
         }
         try {
             if (message.type === 'select') {
-                await this.select({ session: this.session, token: message.token, node: message.id }, message.openSource);
+                await this.select({ session: this.session, token: message.token, node: message.id }, message.openSource, message.extend);
             } else if (message.type === 'block') {
                 await this.selectBlock({ session: this.session, token: message.token }, message.index);
             } else if (message.type === 'apply') {
@@ -462,7 +487,8 @@ export class DesignerPanel implements vscode.Disposable {
         if (frame && this.currentToken !== undefined) {
             const anchor = frame.snapshot.activeBlock?.start;
             const sourceKey = `${frame.version}:${anchor?.line ?? 0}:${anchor?.character ?? 0}`;
-            this.post({ type: 'snapshot', frame: { session: this.session, token: frame.token }, sourceKey, snapshot: frame.canvas, viewport: frame.viewport, selected: this.selected, runtime: this.runtime });
+            this.post({ type: 'snapshot', frame: { session: this.session, token: frame.token }, sourceKey, snapshot: frame.canvas, viewport: frame.viewport,
+                selected: this.selected, selection: this.selection, runtime: this.runtime });
         } else if (this.problem) {
             this.post({ type: 'error', message: this.problem });
         } else {

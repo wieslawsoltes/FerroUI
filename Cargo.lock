@@ -1990,6 +1990,7 @@ dependencies = [
  "ferroui-designer-language",
  "ferroui-view-syntax",
  "proc-macro2",
+ "serde",
  "syn 2.0.119",
 ]
 
@@ -2256,6 +2257,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-headless",
  "ferroui-markup",
+ "ferroui-markup-xaml",
  "ferroui-skia",
  "ferroui-themes-simple",
  "serde_json",

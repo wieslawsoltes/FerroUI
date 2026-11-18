@@ -412,7 +412,12 @@ impl DesignerSession {
         target: NodeId,
         position: OutlinePlacement,
     ) -> Result<Vec<Edit>, String> {
-        OutlineDrag::capture(self, [node])?.plan(self, target, position.into())
+        self.plan_outline_move_many(&[node], target, position)
+    }
+
+    /// A group uses the same normalized source order and content rules as Studio.
+    pub fn plan_outline_move_many(&self, nodes: &[NodeId], target: NodeId, position: OutlinePlacement) -> Result<Vec<Edit>, String> {
+        OutlineDrag::capture(self, nodes.iter().copied())?.plan(self, target, position.into())
     }
 
     /// Plan an asset insertion at an authored outline boundary without applying it.

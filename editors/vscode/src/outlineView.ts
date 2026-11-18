@@ -26,10 +26,10 @@ export class OutlineView extends DockView<OutlineState, FromOutline, ToOutline> 
         this.changed();
     }
 
-    async select(panel: DesignerPanel, frame: FrameTarget, id: string, openSource: boolean): Promise<void> {
+    async select(panel: DesignerPanel, frame: FrameTarget, id: string, openSource: boolean, extend = false): Promise<void> {
         const row = this.rows.find(row => row.id === id);
         if (row?.runtime) await panel.selectRuntime(frame, row.runtime, openSource);
-        else if (row?.source !== undefined) await panel.select({ ...frame, node: row.source }, openSource);
+        else if (row?.source !== undefined) await panel.select({ ...frame, node: row.source }, openSource, extend);
     }
 
     update(panel: DesignerPanel | undefined, frame: FrameTarget | undefined, file: string): void {
@@ -65,7 +65,8 @@ export class OutlineView extends DockView<OutlineState, FromOutline, ToOutline> 
         const row = runtime
             ? this.rows.find(row => row.runtime?.inspector_id === runtime.inspector_id)
             : this.rows.find(row => row.source !== undefined && row.source === selected);
-        this.show({ frame, session: panel?.session, mode, nodes: this.rows, selected: row?.id, message }, file);
+        const selectedRows = mode === 'source' ? panel?.selectedIds.map(sourceKey) : undefined;
+        this.show({ frame, session: panel?.session, mode, nodes: this.rows, selected: row?.id, selectedRows, message }, file);
     }
 }
 

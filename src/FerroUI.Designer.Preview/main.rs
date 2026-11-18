@@ -67,7 +67,12 @@ fn respond(
         return Ok(());
     }
     let result = match method {
-        "initialize" => Ok(json!({"version": protocol::PROTOCOL_VERSION, "assets": toolbox::catalog()})),
+        "initialize" => Ok(json!({"version": protocol::PROTOCOL_VERSION, "assets": toolbox::catalog(),
+            "capabilities": {"isolatedDesign":true,"rsxLanguage":true}})),
+        "rsxLanguage" => match message["params"]["source"].as_str() {
+            Some(source) if source.len() <= protocol::MAX_SOURCE_BYTES => serialize(Ok(ferroui_designer_rsx::analyze_rsx(source))),
+            _ => Err("RSX language source must be at most 1 MiB".into()),
+        },
         "render" => serde_json::from_value(message["params"].clone())
             .map_err(|e| e.to_string())
             .and_then(|input| {

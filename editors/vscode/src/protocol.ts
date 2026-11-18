@@ -166,6 +166,7 @@ export type ToAssets = DragUpdate | { type: 'state'; state: AssetsState }
     | { type: 'assetStatus'; message?: string; error?: boolean };
 export interface Point { x: number; y: number }
 export type DragOrigin = { type: 'asset'; control: string } | { type: 'node'; node: number; grab?: Point }
+    | { type: 'nodes'; nodes: number[]; anchor: number; grab?: Point }
     | { type: 'image'; source: string; asset?: string };
 export type OutlinePosition = 'before' | 'inside' | 'after';
 export type DropTarget = { type: 'canvas' } & Point | { type: 'outline'; node: number; position: OutlinePosition };
@@ -189,13 +190,15 @@ export interface OutlineState {
     mode?: OutlineMode;
     nodes: OutlineRow[];
     selected?: string;
+    selectedRows?: string[];
     message?: string;
 }
 export interface ToolboxState { frame?: FrameTarget; assets: Asset[]; canInsert: boolean; message?: string }
 export type FromOutline = { type: 'ready' } | DragMessage
     | { type: 'mode'; mode: OutlineMode }
-    | { type: 'select'; frame: FrameTarget; id: string; openSource: boolean }
-    | { type: 'reorder'; frame: FrameTarget; node: number; anchor: number; position: 'before' | 'after' };
+    | { type: 'layout'; frame: FrameTarget }
+    | { type: 'select'; frame: FrameTarget; id: string; openSource: boolean; extend?: boolean }
+    | { type: 'reorder'; frame: FrameTarget; origin: Extract<DragOrigin, { type: 'node' | 'nodes' }>; anchor: number; position: 'before' | 'after' };
 export type ToOutline = { type: 'state'; state: OutlineState } | DragUpdate | { type: 'edit'; error?: string };
 export type FromToolbox = { type: 'ready' } | DragMessage | { type: 'insert'; frame: FrameTarget; control: string };
 export type ToToolbox = DragUpdate | { type: 'state'; state: ToolboxState } | { type: 'edit'; error?: string };
@@ -225,16 +228,16 @@ export type FromDesigner = DragMessage
     | { type: 'viewport'; viewport: Viewport }
     | { type: 'canvasResult'; request: number; state?: CanvasState; error?: string }
     | { type: 'block'; token: number; index: number }
-    | { type: 'select'; token: number; id: number; openSource: boolean }
+    | { type: 'select'; token: number; id: number; openSource: boolean; extend?: boolean }
     | { type: 'apply'; token: number; source: string };
 
 export type ToDesigner = DragUpdate | PlacementResult
     | { type: 'viewState'; state: DesignerViewState }
     | { type: 'canvasAction'; request: number; action: CanvasAction }
     | { type: 'pending' }
-    | { type: 'snapshot'; frame: FrameTarget; sourceKey: string; snapshot: CanvasSnapshot; viewport: Viewport; selected: number | undefined; runtime?: RuntimeRow }
+    | { type: 'snapshot'; frame: FrameTarget; sourceKey: string; snapshot: CanvasSnapshot; viewport: Viewport; selected: number | undefined; selection?: number[]; runtime?: RuntimeRow }
     | { type: 'error'; message: string }
-    | { type: 'selection'; token: number; selected: number | undefined; runtime?: RuntimeRow }
+    | { type: 'selection'; token: number; selected: number | undefined; selection?: number[]; runtime?: RuntimeRow }
     | { type: 'edit'; error?: string };
 
 export function errorMessage(error: unknown): string {

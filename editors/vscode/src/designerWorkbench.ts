@@ -9,6 +9,7 @@ import { DockView } from './dockView';
 import { OutlineView } from './outlineView';
 import { SelectionInspection } from './selectionInspection';
 import { PROPERTIES_VIEW, PropertiesView } from './propertiesView';
+import { chooseLayout } from './studioLayout';
 import { errorMessage, type DesignerView, type DetailsView, type DragOrigin, type FrameTarget, type FromAssets, type FromDetails, type FromOutline, type FromToolbox, type Language, type NodeOperation, type NodeTarget, type OutlineMode, type ToolboxState, type ToToolbox, type Viewport } from './protocol';
 import { languageOf } from './textDocument';
 import { toolboxHtml, webviewOptions } from './view';
@@ -70,6 +71,14 @@ export class DesignerWorkbench implements vscode.Disposable {
             vscode.commands.registerCommand('ferroui.showEvents', (session?: number) => this.showDock(EVENTS_VIEW, session)),
             vscode.commands.registerCommand('ferroui.showResources', (session?: number) => this.showDock(RESOURCES_VIEW, session)),
             vscode.commands.registerCommand('ferroui.showAssets', (session?: number) => this.showDock(ASSETS_VIEW, session)),
+            vscode.commands.registerCommand('ferroui.studio.layout', async () => {
+                try {
+                    if (!this.active) throw new Error('Open a FerroUI designer to arrange controls.');
+                    await this.layout(this.active);
+                } catch (error) {
+                    void vscode.window.showErrorMessage(errorMessage(error));
+                }
+            }),
             vscode.commands.registerCommand('ferroui.revealDesignerSource', () => {
                 const panel = this.active;
                 const node = panel?.selectedNode;
@@ -226,9 +235,10 @@ export class DesignerWorkbench implements vscode.Disposable {
         try {
             switch (message.type) {
                 case 'mode': return this.outline.switch(message.mode, this.active);
-                case 'select': return await this.outline.select(this.panelFor(message.frame), message.frame, message.id, message.openSource);
+                case 'layout': return await this.layout(this.panelFor(message.frame));
+                case 'select': return await this.outline.select(this.panelFor(message.frame), message.frame, message.id, message.openSource, message.extend);
                 case 'reorder': return await this.panelFor(message.frame).place(message.frame, {
-                    origin: { type: 'node', node: message.node },
+                    origin: message.origin,
                     target: { type: 'outline', node: message.anchor, position: message.position },
                 });
                 case 'beginDrag': case 'endDrag': case 'drop':
@@ -238,6 +248,10 @@ export class DesignerWorkbench implements vscode.Disposable {
         } catch (error) {
             this.outline.post({ type: 'edit', error: errorMessage(error) });
         }
+    }
+
+    private layout(panel: DesignerPanel): Promise<void> {
+        return chooseLayout(panel, () => this.active === panel);
     }
 
     private async toolboxMessage(message: FromToolbox): Promise<void> {
