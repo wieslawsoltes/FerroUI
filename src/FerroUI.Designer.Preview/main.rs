@@ -8,6 +8,7 @@ mod event_fields;
 mod hosted_frame;
 mod hosted_relay;
 mod inspection;
+mod interaction;
 mod placement;
 mod projects;
 mod property_fields;
@@ -82,7 +83,7 @@ fn respond(
     }
     let result = match method {
         "initialize" => Ok(json!({"version": protocol::PROTOCOL_VERSION, "assets": toolbox::catalog(),
-            "capabilities": {"isolatedDesign":true,"appHostedDesign":true,"rsxLanguage":true,"stages":true,"prototypeEditing":true,"projectCatalog":true}})),
+            "capabilities": {"isolatedDesign":true,"appHostedDesign":true,"rsxLanguage":true,"stages":true,"prototypeEditing":true,"projectCatalog":true,"canvasInteraction":true}})),
         "configureProject" => serde_json::from_value(message["params"].clone())
             .map_err(|error| error.to_string()).and_then(|request| {
                 let retired = projects.register(request)?;
@@ -155,7 +156,9 @@ fn respond(
             }),
         "studioTools" => Ok(studio::catalog()),
         "studioPresent" => serde_json::from_value::<studio::Present>(message["params"].clone())
-            .map_err(|error| error.to_string()).and_then(|request| studio::present(renderer.as_mut().ok_or("Open a designer first")?, request)),
+            .map_err(|error| error.to_string()).and_then(|request| serialize(studio::present(renderer.as_mut().ok_or("Open a designer first")?, request))),
+        "canvasInput" => serde_json::from_value(message["params"].clone())
+            .map_err(|error| error.to_string()).and_then(|request| serialize(interaction::input(renderer.as_mut().ok_or("Open a designer first")?, request))),
         "studioQuery" => serde_json::from_value::<studio::Query>(message["params"].clone())
             .map_err(|e| e.to_string())
             .and_then(|query| {

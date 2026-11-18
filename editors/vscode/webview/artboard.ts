@@ -112,6 +112,12 @@ export class Artboard {
         return outside || (x >= 0 && y >= 0 && x < image.width && y < image.height) ? { x, y } : undefined;
     }
 
+    normalizedPoint(event: MouseEvent): Point | undefined {
+        const point = this.point(event);
+        const image = this.snapshot?.image;
+        if (point && image) return { x: point.x / image.width, y: point.y / image.height };
+    }
+
     hit(point?: Point): CanvasNode | undefined {
         if (!point) return undefined;
         return this.snapshot?.nodes.findLast(node => this.contains(node, point));

@@ -1,7 +1,7 @@
 use crate::document::DesignDocument;
 use crate::edits::editor_edits;
 use crate::protocol::{EditResult, Source};
-use crate::renderer::{Renderer, Stage};
+use crate::renderer::{Presentation, Renderer, Stage};
 use ferroui_designer::mcp::DesignerMcp;
 use ferroui_designer_core::{NodeId, TextPatch};
 use ferroui_mcp::{Permissions, UiToolProvider};
@@ -41,7 +41,7 @@ pub(crate) fn catalog() -> Value {
     json!({"tools":tools,"presentations":presentations,"xamlEdits":edits.into_iter().filter_map(|tool| action_definition(tool, source_action)).collect::<Vec<_>>()})
 }
 
-pub(crate) fn present(renderer: &mut Renderer, request: Present) -> Result<Value, String> {
+pub(crate) fn present(renderer: &mut Renderer, request: Present) -> Result<Presentation, String> {
     let query = request.query;
     if request.next_frame <= query.frame || !presentation_action(&query.name, query.arguments["action"].as_str()) {
         return Err("Choose a current Studio presentation action".into());
@@ -55,19 +55,7 @@ pub(crate) fn present(renderer: &mut Renderer, request: Present) -> Result<Value
     provider.validate(&query.name, &arguments)?;
     if let Some(selection) = &query.selection { select(stage, selection)?; }
     provider.call(&query.name, &arguments, Permissions { allow_property_writes: true, ..Default::default() })?;
-    let stage = renderer.stage.as_mut().expect("stage exists");
-    stage.token = request.next_frame;
-    let frame = {
-        let mut session = stage.session.borrow_mut();
-        let frame = crate::renderer::capture(&mut session)?;
-        let nodes = session.document().ast().elements().map(|node| json!({
-            "id":node.id,"bounds":frame.bounds.get(&node.id),
-            "canMove":session.can_move_outline_node(node.id),"canInsert":session.can_insert_outline_child(node.id),
-            "selectable":session.can_canvas_select(node.id),
-        })).collect::<Vec<_>>();
-        json!({"image":frame.image,"nodes":nodes,"notices":frame.notices,"selection":session.selection()})
-    };
-    Ok(frame)
+    renderer.present(request.next_frame)
 }
 
 fn presentation_action(tool: &str, action: Option<&str>) -> bool {

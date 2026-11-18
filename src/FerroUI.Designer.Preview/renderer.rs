@@ -12,6 +12,7 @@ use ferroui_harfbuzz::HarfBuzzApplicationExtensions;
 use ferroui_headless::{FerroHeadlessPlatformExtensions, FerroHeadlessPlatformOptions};
 use ferroui_inspect::TreeKind;
 use ferroui_vello::VelloApplicationExtensions;
+use serde::Serialize;
 use std::collections::BTreeMap;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -36,6 +37,24 @@ pub(crate) struct Frame {
     pub(crate) image: Image,
     pub(crate) bounds: BTreeMap<NodeId, Bounds>,
     pub(crate) notices: Vec<String>,
+}
+
+#[derive(Serialize)]
+pub(crate) struct Presentation {
+    image: Image,
+    nodes: Vec<PresentedNode>,
+    notices: Vec<String>,
+    selection: Vec<NodeId>,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct PresentedNode {
+    id: NodeId,
+    bounds: Option<Bounds>,
+    can_move: bool,
+    can_insert: bool,
+    selectable: bool,
 }
 
 impl Renderer {
@@ -96,6 +115,31 @@ impl Renderer {
             _window: window,
         });
         Ok(frame)
+    }
+
+    pub(crate) fn present(&mut self, next: u64) -> Result<Presentation, String> {
+        let stage = self.stage.as_mut().ok_or("Render the design first")?;
+        stage.token = next;
+        let mut session = stage.session.borrow_mut();
+        let frame = capture(&mut session)?;
+        let nodes = session
+            .document()
+            .ast()
+            .elements()
+            .map(|node| PresentedNode {
+                id: node.id,
+                bounds: frame.bounds.get(&node.id).copied(),
+                can_move: session.can_move_outline_node(node.id),
+                can_insert: session.can_insert_outline_child(node.id),
+                selectable: session.can_canvas_select(node.id),
+            })
+            .collect();
+        Ok(Presentation {
+            image: frame.image,
+            nodes,
+            notices: frame.notices,
+            selection: session.selection().to_vec(),
+        })
     }
 }
 

@@ -70,8 +70,8 @@ pub fn tools() -> Vec<Value> {
     );
     add(
         "scroll",
-        "Inject a wheel event at the node center. Deltas are wheel units. Requires allow_input.",
-        json!({"node_id":id,"delta_x":{"type":"number"},"delta_y":{"type":"number"}}),
+        "Inject a wheel event at the node center or local x/y. Deltas are wheel units. Requires allow_input.",
+        json!({"node_id":id,"x":{"type":"number"},"y":{"type":"number"},"delta_x":{"type":"number"},"delta_y":{"type":"number"}}),
         &["node_id", "delta_y"],
         true,
     );

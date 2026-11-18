@@ -6,6 +6,7 @@ import { CanvasInput } from './canvasInput';
 import { CanvasViewport } from './canvasViewport';
 import { Counterpart } from './counterpart';
 import { anchorPopover, element } from './dom';
+import { PreviewInteraction } from './previewInteraction';
 import { ViewportMenu } from './viewportMenu';
 
 declare function acquireVsCodeApi(): { postMessage(message: FromDesigner): void; setState(state: DesignerViewState): void };
@@ -45,10 +46,15 @@ const viewport = new CanvasViewport((fit, scale, hasImage) => {
     zoomOut.disabled = !hasImage || scale <= 0.125;
 });
 const input = new CanvasInput(viewport, reveal, stepSelection);
-const artboard = new Artboard(viewport, () => !input.panning, select);
-const drag = new CanvasDrag(artboard, () => current && !applying && !input.panning, vscode.postMessage);
+const artboard: Artboard = new Artboard(viewport, () => !input.panning && interaction.mode === 'select', select);
+const interaction = new PreviewInteraction(artboard, () => input.panning, action => {
+    if (!current || applying) return;
+    vscode.postMessage({ type: 'interaction', token, action });
+    pauseCanvas();
+}, updateSelection);
+const drag = new CanvasDrag(artboard, () => current && !applying && !input.panning && interaction.mode === 'select', vscode.postMessage);
 const resize = new ResizeHandles(artboard, gesture => {
-    if (current && !applying && !input.panning) vscode.postMessage({ type: 'resize', token, ...gesture });
+    if (current && !applying && !input.panning && interaction.mode === 'select') vscode.postMessage({ type: 'resize', token, ...gesture });
 });
 const size = new ViewportMenu(viewport => vscode.postMessage({ type: 'viewport', viewport }));
 const counterpart = new Counterpart(apply);
@@ -114,6 +120,10 @@ function controlCanvas(request: number, action: CanvasAction): void {
         vscode.postMessage({ type: 'canvasResult', request, error: 'Select a control with visible bounds first.' });
         return;
     }
+    if (action.mode && !interaction.setMode(action.mode)) {
+        vscode.postMessage({ type: 'canvasResult', request, error: 'Open an interactive native preview first.' });
+        return;
+    }
     if (geometry) {
         showDesign(true);
         if (zoom === 'fit') viewport.fit();
@@ -123,15 +133,18 @@ function controlCanvas(request: number, action: CanvasAction): void {
         if (pan_x !== undefined || pan_y !== undefined) viewport.panBy(pan_x ?? 0, pan_y ?? 0);
     }
     if (action.tab !== undefined) showDesign(action.tab === 'preview');
+    else if (action.mode === 'interact') showDesign(true);
     if (pan_tool !== undefined) input.setTool(pan_tool);
-    vscode.postMessage({ type: 'canvasResult', request, state: { tab, ...viewport.state, panTool: input.panTool } });
+    updateSelection();
+    vscode.postMessage({ type: 'canvasResult', request, state: { tab, mode: interaction.mode, ...viewport.state, panTool: input.panTool } });
 }
 
 function reveal(): void {
-    if (artboard.isCurrent && !runtime && selected !== undefined) select(selected, true);
+    if (interaction.mode === 'select' && artboard.isCurrent && !runtime && selected !== undefined) select(selected, true);
 }
 
 function stepSelection(direction: number): void {
+    if (interaction.mode !== 'select') return;
     const node = artboard.stepSelection(direction);
     if (node) select(node.id, false);
 }
@@ -153,11 +166,15 @@ function selectedNode() { return snapshot?.nodes.find(node => node.id === select
 function updateSelection(): void {
     const node = selectedNode();
     const enabled = current && !applying;
-    resize.update(enabled && !runtime && selection.length === 1 ? node : undefined);
+    const selecting = interaction.mode === 'select';
+    viewport.element.dataset.mode = interaction.mode;
+    interaction.setAvailable(enabled && artboard.isCurrent && Boolean(snapshot?.interactive));
+    resize.update(enabled && selecting && !runtime && selection.length === 1 ? node : undefined);
     if (artboard.isCurrent) {
-        if (runtime) artboard.inspect(runtime.bounds);
+        if (!selecting) artboard.select(undefined);
+        else if (runtime) artboard.inspect(runtime.bounds);
         else artboard.select(node, snapshot?.nodes.filter(item => item.id !== selected && selection.includes(item.id)));
-        selectionLabel.hidden = !node?.bounds || Boolean(runtime);
+        selectionLabel.hidden = !selecting || !node?.bounds || Boolean(runtime);
         if (node) selectedControl.textContent = selection.length > 1 ? `${selection.length} controls selected`
             : node.name ? `${node.label} · ${node.name}` : node.label;
     }

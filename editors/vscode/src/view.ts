@@ -20,6 +20,10 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
     </nav>
     <select id="blocks" aria-label="RSX invocation" hidden></select>
     <div id="canvas-tools" class="canvas-tools">
+        <div class="canvas-mode segments" role="group" aria-label="Canvas mode">
+            <button type="button" id="canvas-select" aria-pressed="true">Select</button>
+            <button type="button" id="canvas-interact" aria-pressed="false" disabled>Interact</button>
+        </div>
         <button id="viewport-button" class="metric" popovertarget="viewport-menu" aria-label="Preview size and theme" title="Preview size and theme">
             ${icon('layout')}<span id="dimensions"></span>${icon('chevron-down')}
         </button>
@@ -57,6 +61,13 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
     </div>
     <button id="selection-label" class="selection-label" title="Reveal selection in source" hidden>${icon('go-to-file')}<span id="selected-control" aria-live="polite"></span></button>
     <output id="drop-hint" class="drop-hint" aria-live="polite" hidden></output>
+    <form id="canvas-preview-input" aria-label="Send input to the focused preview control" hidden>
+        <select id="canvas-input-kind" aria-label="Input kind">
+            <option value="text">Text</option><option value="key">Key gesture</option>
+        </select>
+        <input id="canvas-input-value" aria-label="Preview text or key gesture" required maxlength="8192" placeholder="Click a control, then enter text">
+        <button type="submit" class="primary" id="canvas-send-input">Send</button>
+    </form>
 </main>
 <main id="counterpart" aria-label="${alternate} projection" hidden>
     <div class="counterpart-toolbar">

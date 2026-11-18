@@ -210,15 +210,22 @@ export type FromToolbox = { type: 'ready' } | DragMessage | { type: 'insert'; fr
 export type ToToolbox = DragUpdate | { type: 'state'; state: ToolboxState } | { type: 'edit'; error?: string };
 
 export type CanvasNode = Pick<OutlineNode, 'id' | 'label' | 'name' | 'bounds' | 'canMove'> & { selectable?: boolean };
-export interface StudioPresentation {
+export interface CanvasPresentation {
     image: NonNullable<Snapshot['image']>;
     nodes: Array<{ id: number; bounds: Bounds | null; canInsert: boolean; canMove: boolean; selectable: boolean }>;
     notices: string[];
     selection: number[];
 }
-export type CanvasSnapshot = Omit<Snapshot, 'nodes'> & { nodes: CanvasNode[] };
+export type CanvasSnapshot = Omit<Snapshot, 'nodes'> & { nodes: CanvasNode[]; interactive?: boolean };
+export type CanvasMode = 'select' | 'interact';
+export type CanvasInteraction =
+    | ({ kind: 'click' } & Point)
+    | ({ kind: 'scroll'; dx: number; dy: number } & Point)
+    | { kind: 'text'; text: string }
+    | { kind: 'key'; key: string };
 export interface CanvasAction {
     tab?: 'preview' | 'counterpart';
+    mode?: CanvasMode;
     zoom?: 'fit' | 'fit_selection' | 'actual';
     scale?: number;
     pan_x?: number;
@@ -227,6 +234,7 @@ export interface CanvasAction {
 }
 export interface CanvasState {
     tab: 'preview' | 'counterpart';
+    mode: CanvasMode;
     scale: number;
     fit: boolean;
     scrollX: number;
@@ -241,6 +249,7 @@ export type FromDesigner = DragMessage
     | { type: 'canvasResult'; request: number; state?: CanvasState; error?: string }
     | { type: 'block'; token: number; index: number }
     | { type: 'select'; token: number; id: number; openSource: boolean; extend?: boolean }
+    | { type: 'interaction'; token: number; action: CanvasInteraction }
     | ({ type: 'resize'; token: number } & ResizeGesture)
     | { type: 'apply'; token: number; source: string };
 

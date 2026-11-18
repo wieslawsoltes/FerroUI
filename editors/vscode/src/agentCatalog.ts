@@ -7,6 +7,8 @@ const frame = { ...session, expected_revision: integer(0) };
 const buffer = { ...session, expected_version: integer(1) };
 const workspacePath = { type: 'string', maxLength: 4096 };
 const cargoSelection = { folder: workspacePath, manifest_path: workspacePath, package: workspacePath, binary: workspacePath, label: workspacePath };
+const unit = { type: 'number', minimum: 0, maximum: 1 };
+const wheel = { type: 'number', minimum: -64, maximum: 64 };
 const placement = { ...frame, asset: text, project_asset: text, node, selection: { type: 'array', items: node, minItems: 2, maxItems: 128 }, moving_anchor: node, anchor: node,
     position: choice('inside', 'before', 'after'), x: { type: 'number' }, y: { type: 'number' } };
 
@@ -34,10 +36,15 @@ export const agentCatalog = {
     designer_view: tool('Show a designer view, refresh its preview, or set its logical width, height and appearance.',
         { ...session, view: choice('canvas', 'outline', 'properties', 'toolbox', 'events', 'resources', 'assets', 'studio'),
             outline_mode: choice('source', 'visual', 'logical', 'combined'), width: integer(64, 1536), height: integer(64, 1536), dark: truth, refresh: truth }, ['session'], true, false),
-    designer_canvas: tool('Control the canvas Preview or alternate-source tab, zoom, pan and pan tool. Returns the webview’s applied state.',
-        { ...session, tab: choice('preview', 'counterpart'), zoom: choice('fit', 'fit_selection', 'actual'),
+    designer_canvas: tool('Choose the canvas tab, Select or Interact mode, zoom and pan. Returns the applied workbench state.',
+        { ...session, tab: choice('preview', 'counterpart'), mode: choice('select', 'interact'), zoom: choice('fit', 'fit_selection', 'actual'),
             scale: { type: 'number', minimum: 0.125, maximum: 8 }, pan_x: { type: 'number' }, pan_y: { type: 'number' }, pan_tool: truth },
         ['session'], true, false),
+    designer_canvas_input: tool('Interact with the native design preview at the current revision. Click or scroll at normalized x and y. Send text or a key gesture to the focused preview control.',
+        { ...frame, input: { type: 'object', additionalProperties: false, required: ['kind'], properties: {
+            kind: choice('click', 'scroll', 'text', 'key'), x: unit, y: unit, dx: wheel, dy: wheel,
+            text: { type: 'string', maxLength: 8192 }, key: { type: 'string', maxLength: 64 },
+        } } }, ['session', 'expected_revision', 'input'], true, false),
     designer_select: tool('Select one source node, ordered source nodes, or one runtime object in the canvas, Outline and Properties.',
         { ...frame, node, selection: { type: 'array', items: node, maxItems: 128 }, inspector_id: node, reveal_source: truth },
         ['session', 'expected_revision'], true, false),

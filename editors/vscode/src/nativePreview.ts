@@ -2,7 +2,7 @@ import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { createMessageConnection, StreamMessageReader, StreamMessageWriter } from 'vscode-jsonrpc/node';
 import type * as vscode from 'vscode';
 import type { BuiltProject } from './builtProjects';
-import type { Asset, DropHint, EditResult, Inspection, InspectionTarget, Operation, Placement, ResourceRow, Snapshot, Source, StudioPresentation, Viewport } from './protocol';
+import type { Asset, CanvasInteraction, CanvasPresentation, DropHint, EditResult, Inspection, InspectionTarget, Operation, Placement, ResourceRow, Snapshot, Source, Viewport } from './protocol';
 import type { RsxLanguageDocument } from './rsxLanguageTypes';
 import type { HostedFrame, HostedInput, HostedSource } from './hostedProtocol';
 import type { NativeStageChange, PrototypeCommand, PrototypeHotspot, PrototypeScene, StageImage, StageManifest, StageModel, StagePick, StagePointer, StageTarget } from './stagesProtocol';
@@ -16,7 +16,7 @@ export class NativePreview implements vscode.Disposable {
     private readonly projects = new WeakMap<BuiltProject, Promise<number>>();
     private nextProject = 0;
     assets: readonly Asset[] = [];
-    capabilities: { isolatedDesign?: boolean; appHostedDesign?: boolean; rsxLanguage?: boolean; stages?: boolean; prototypeEditing?: boolean; projectCatalog?: boolean } = {};
+    capabilities: { isolatedDesign?: boolean; appHostedDesign?: boolean; rsxLanguage?: boolean; stages?: boolean; prototypeEditing?: boolean; projectCatalog?: boolean; canvasInteraction?: boolean } = {};
 
     private constructor(command: string, channel: vscode.OutputChannel) {
         this.child = spawn(command, [], { windowsHide: true });
@@ -121,8 +121,13 @@ export class NativePreview implements vscode.Disposable {
         return this.send('studioEdit', { ...source, frame, name, arguments: args, selection });
     }
 
-    studioPresent(frame: number, nextFrame: number, name: string, args: object, selection: number[]): Promise<StudioPresentation> {
+    studioPresent(frame: number, nextFrame: number, name: string, args: object, selection: number[]): Promise<CanvasPresentation> {
         return this.send('studioPresent', { frame, nextFrame, name, arguments: args, selection });
+    }
+
+    canvasInput(frame: number, nextFrame: number, action: CanvasInteraction): Promise<CanvasPresentation> {
+        if (!this.capabilities.canvasInteraction) throw new Error('The native preview helper does not support canvas input.');
+        return this.send('canvasInput', { frame, nextFrame, action });
     }
 
     edit(source: Source, operation: Operation): Promise<EditResult> {

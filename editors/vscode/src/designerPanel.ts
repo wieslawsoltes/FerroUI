@@ -6,7 +6,7 @@ import { DEFAULT_VIEWPORT, errorMessage, isViewport, type Asset, type CanvasSnap
 import { applyTextEdits, asPosition, asRange, sourceOf } from './textDocument';
 import { designerHtml, webviewOptions } from './view';
 import type { EditResult, Inspection, InspectionTarget, Range, ResourceRow, RuntimeRow, RuntimeTreeMode } from './protocol';
-import type { CanvasAction } from './protocol';
+import type { CanvasAction, CanvasInteraction, CanvasPresentation } from './protocol';
 
 interface Frame {
     token: number;
@@ -160,6 +160,10 @@ export class DesignerPanel implements vscode.Disposable {
         if (action.zoom && action.scale !== undefined) throw new Error('Choose a zoom preset or an explicit scale.');
         const geometry = action.zoom || action.scale !== undefined || action.pan_x !== undefined || action.pan_y !== undefined;
         if (geometry && !(await this.waitForSnapshot(signal)).image) throw new Error('Render an artboard before changing its zoom or pan.');
+        if (action.mode === 'interact') {
+            await this.waitForSnapshot(signal);
+            if (!this.frame?.canvas.interactive) throw new Error('Open an interactive native preview first.');
+        }
         if (!this.canvasReady) {
             const ready = AbortSignal.any([signal, AbortSignal.timeout(5000)]);
             await new Promise<void>((resolve, reject) => {
@@ -310,17 +314,27 @@ export class DesignerPanel implements vscode.Disposable {
     }
 
     async studioPresent(token: number, name: string, args: object, selection: number[] | undefined, signal: AbortSignal): Promise<void> {
+        return this.present(token, signal, (client, next) => client.studioPresent(token, next, name, args, this.studioSelection(selection)), true);
+    }
+
+    async interact(token: number, action: CanvasInteraction, signal: AbortSignal): Promise<void> {
+        if (!this.frame?.canvas.interactive) throw new Error('Open an interactive native preview first.');
+        return this.present(token, signal, (client, next) => client.canvasInput(token, next, action), false);
+    }
+
+    private async present(token: number, signal: AbortSignal,
+        update: (client: NativePreview, next: number) => Promise<CanvasPresentation>, syncSelection: boolean): Promise<void> {
         const frame = this.frame;
-        if (!frame || !this.canUse({ session: this.session, token })) throw new Error('Read the current designer revision before presenting a Studio view.');
+        if (!frame || !this.canUse({ session: this.session, token })) throw new Error('Read the current designer revision before updating the preview.');
         this.editing = true;
         this.changed.fire();
         this.post({ type: 'pending' });
         try {
             const client = await this.getClient();
             signal.throwIfAborted();
-            if (this.currentToken !== token) throw new Error('The source changed before the Studio action.');
+            if (this.currentToken !== token) throw new Error('The source changed before the preview action.');
             const next = token + 1;
-            const presentation = await client.studioPresent(token, next, name, args, this.studioSelection(selection));
+            const presentation = await update(client, next);
             if (this.currentToken !== token) return;
             const metrics = new Map(presentation.nodes.map(node => [node.id, node]));
             const nodes = frame.snapshot.nodes.map(node => {
@@ -329,11 +343,13 @@ export class DesignerPanel implements vscode.Disposable {
             });
             const snapshot = { ...frame.snapshot, nodes, image: presentation.image, notices: presentation.notices };
             const canvasNodes = nodes.map(({ id, label, name, bounds, canMove }) => ({ id, label, name, bounds, canMove, selectable: metrics.get(id)?.selectable }));
-            this.frame = { ...frame, token: next, snapshot, canvas: { ...snapshot, nodes: canvasNodes } };
+            this.frame = { ...frame, token: next, snapshot, canvas: { ...frame.canvas, ...snapshot, nodes: canvasNodes } };
             this.generation = next;
             this.runtime = undefined;
-            this.selection = presentation.selection;
-            this.selected = this.selection.at(-1);
+            if (syncSelection) {
+                this.selection = presentation.selection;
+                this.selected = this.selection.at(-1);
+            }
             this.syncCanvas();
         } catch (error) {
             if (this.currentToken === token) this.schedule(0);
@@ -426,7 +442,8 @@ export class DesignerPanel implements vscode.Disposable {
                 && previousAnchor?.character === anchor?.character;
             this.assets = [...client.assets, ...(snapshot.projectAssets ?? [])].filter(asset => this.language === 'xaml' || asset.rust);
             const nodes = snapshot.nodes.map(({ id, label, name, bounds, canMove }) => ({ id, label, name, bounds, canMove }));
-            this.frame = { token, version, viewport, source: input, snapshot, canvas: { ...snapshot, nodes } };
+            this.frame = { token, version, viewport, source: input, snapshot,
+                canvas: { ...snapshot, nodes, interactive: Boolean(client.capabilities.canvasInteraction && snapshot.image) } };
             this.runtime = undefined;
             this.selected = (sameView ? this.selected : undefined) ?? selectionAt(snapshot, this.caret) ?? snapshot.nodes[0]?.id;
             this.selection = sameView && this.selection.length ? this.selection.filter(id => snapshot.nodes.some(node => node.id === id))
@@ -491,6 +508,8 @@ export class DesignerPanel implements vscode.Disposable {
             } else if (message.type === 'resize' && !this.editing && this.selection.length === 1 && this.selected === message.node) {
                 const { node, handle, dx, dy } = message;
                 await this.edit(frame, { type: 'resize', frame: message.token, node, handle, dx, dy });
+            } else if (message.type === 'interaction') {
+                await this.interact(message.token, message.action, AbortSignal.timeout(15_000));
             } else if (message.type === 'apply') {
                 await this.edit(frame, { type: 'applyCounterpart', source: message.source });
                 this.post({ type: 'edit' });

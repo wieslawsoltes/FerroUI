@@ -7,7 +7,7 @@ import type { DesignerWorkbench } from './designerWorkbench';
 import type { HotReload } from './hotReload';
 import type { StagesPanel } from './stagesPanel';
 import type { PrototypeCommand, StageChange } from './stagesProtocol';
-import type { CanvasAction, DesignerView, DragOrigin, DropTarget, OutlineMode, Placement } from './protocol';
+import type { CanvasAction, CanvasInteraction, DesignerView, DragOrigin, DropTarget, OutlineMode, Placement } from './protocol';
 import { applyTextEdits } from './textDocument';
 import { isWorkspaceTool } from './workspaceCatalog';
 import { isWorkspaceFile, resolveWorkspaceFile } from './workspacePaths';
@@ -61,6 +61,7 @@ interface Arguments extends CanvasAction, CargoSelection {
     stage?: number;
     expected_epoch?: number;
     debug_configuration?: string;
+    input?: CanvasInteraction;
 }
 
 export class AgentTools {
@@ -180,6 +181,9 @@ export class AgentTools {
             case 'designer_canvas':
                 await this.workbench.revealDesign(panel, 'canvas');
                 return panel.controlCanvas(args, signal);
+            case 'designer_canvas_input':
+                await panel.interact(args.expected_revision, args.input!, signal);
+                return describe(panel);
             case 'designer_select': {
                 const frame = { session: panel.session, token: args.expected_revision };
                 if (!panel.canUse(frame)) throw new Error('Read the current outline before selecting.');

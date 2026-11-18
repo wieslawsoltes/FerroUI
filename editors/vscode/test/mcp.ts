@@ -2,6 +2,7 @@ import { strict as assert } from 'node:assert';
 import { spawn } from 'node:child_process';
 import { createInterface } from 'node:readline';
 import * as vscode from 'vscode';
+import { verifyCanvasInteraction, verifyCanvasScroll } from './canvasInteraction';
 import { verifyWorkspaceMcp } from './workspaceMcp';
 import { verifyTimelineMcp } from './studioTimelineMcp';
 
@@ -145,6 +146,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         const canvas = content<{ tab: string; scale: number; panTool: boolean }>(await invoke('designer_canvas', { session, tab: 'preview', scale: 2, pan_tool: true }));
         assert.deepEqual([canvas.tab, canvas.scale, canvas.panTool], ['preview', 2, true]);
         assert.equal(content<{ tab: string }>(await invoke('designer_canvas', { session, tab: 'counterpart', pan_tool: false })).tab, 'counterpart');
+        await verifyCanvasInteraction({ invoke, content }, session, document);
         const language = content<{ result: { items: { name: string; range: { start: { line: number } } }[] } }>(
             await invoke('ferroui_workspace_language', { path: 'SettingsView.xaml', action: 'symbols' }));
         const saveLine = document.positionAt(original.indexOf('x:Name="saveButton"')).line;
@@ -153,9 +155,13 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         const rust = content<{ session: number }>(await invoke('designer_open', { path: 'views.rs' }));
         const frame = content<{ revision: number; blocks: { active: boolean }[] }>(await invoke('designer_wait', { session: rust.session }));
         assert.equal(frame.blocks.length, 2);
+        const rustSource = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(vscode.workspace.workspaceFolders![0].uri, 'views.rs'));
+        await verifyCanvasInteraction({ invoke, content }, rust.session, rustSource);
+        const interactRevision = content<{ revision: number }>(await invoke('designer_wait', { session: rust.session })).revision;
         const selected = content<{ blocks: { active: boolean }[] }>(await invoke('designer_block', { session: rust.session,
-            expected_revision: frame.revision, index: 1 }));
+            expected_revision: interactRevision, index: 1 }));
         assert.deepEqual(selected.blocks.map(block => block.active), [false, true]);
+        await verifyCanvasScroll({ invoke, content });
         await verifyWorkspaceMcp({ invoke, content });
         console.log('VS Code MCP discovery, project Toolbox placement, shared Studio queries, PNG content, write permissions, stale revisions and editor undo passed');
     } finally {

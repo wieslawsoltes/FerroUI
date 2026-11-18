@@ -19,6 +19,7 @@ body {
 .segments button { padding-inline: 9px; color: var(--muted); }
 .segments button[aria-pressed=true] { color: var(--vscode-foreground); font-weight: 600; }
 .canvas-tools { gap: 5px; }
+.canvas-mode { margin-inline-end: 0; }
 .zoom-controls, .dock-tools { padding-inline-start: 5px; border-inline-start: 1px solid var(--line); }
 .tool {
     display: inline-grid;
@@ -62,6 +63,19 @@ body {
 
 #preview, #counterpart { flex: 1; min-block-size: 0; }
 #preview { position: relative; }
+#preview:has(#canvas-preview-input:not([hidden])) .canvas { inset-block-end: 38px; }
+#canvas-preview-input {
+    position: absolute;
+    inset: auto 0 0;
+    block-size: 38px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding-inline: 8px;
+    border-block-start: 1px solid var(--line);
+    background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
+}
+#canvas-input-value { flex: 1; min-inline-size: 0; }
 .canvas {
     position: absolute;
     inset: 0;
@@ -95,6 +109,7 @@ body {
 }
 .artboard[data-theme=dark] { background: #202020; }
 .artboard img { display: block; inline-size: 100%; block-size: 100%; cursor: crosshair; }
+.canvas[data-mode=interact]:not([data-pan=ready], [data-pan=dragging]) .artboard img { cursor: default; }
 .artboard.placing img { cursor: grabbing; }
 .artboard.invalid-placement img { cursor: no-drop !important; }
 .artboard.stale img { cursor: default; }
