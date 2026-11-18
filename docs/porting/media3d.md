@@ -842,6 +842,65 @@ drawn on its back, rasterized with one sample at the centre of each pixel. Every
 neighbours agree is hit when it is drawn and missed when it is not, and its colour names the
 model hit.
 
+### 3.17 Interactive 3D as built (D11, the model part)
+
+**Classes** (`src/FerroUI.Media3D/ui_element_3d.rs`): `UIElement3D` (a `Visual3D`, WPF's base of
+the 3D elements with input; `IsHitTestVisible`, `is_pointer_over`, `is_pointer_captured`,
+`capture_pointer`, `release_pointer_capture` and the pointer events), `ModelUIElement3D` (its
+`Model`, the content property of markup) and `ContainerUIElement3D` (its `Children`). Both draw as
+a `ModelVisual3D` with the same content: the snapshot compiler, `descendant_bounds` and the hit
+testing read what a visual shows through one function of `visual_3d.rs`, and the changes are of
+the structure (a model, a child) or of a record (a transform), as for a `ModelVisual3D`. The
+three classes are registered for markup (`<ContainerUIElement3D>`, `<ModelUIElement3D>` with its
+model as content, `IsHitTestVisible`).
+
+**Events.** `pointer_entered`, `pointer_exited`, `pointer_moved`, `pointer_pressed`,
+`pointer_released` and `pointer_capture_lost` take a handler `Fn(&Ref<UIElement3D>,
+&Pointer3DEventArgs)` and return a `Subscription`. `Pointer3DEventArgs` carries the source (the
+innermost element of the route), the `Viewport3D`, the pointer, the 2D event of the viewport (its
+point, buttons and modifiers), the position in the viewport's coordinates, the nearest hit under
+the pointer and the handled flag. WPF's 3D elements raise the routed mouse events of 2D; the 3D
+elements of the port are not `InputElement`s (a `Visual3D` is not a 2D visual), so their events
+are lists of handlers that the viewport raises in WPF's order (recorded in DEVIATIONS.md).
+
+**Routing** (`controls/viewport_3d_input.rs`). The 2D hit testing hits a `Viewport3D` only where
+one of its models is (its `custom_hit_test` is the 3D hit test), so the input system gives it the
+pointer there, as WPF's `Viewport3DVisual` is hit. For each 2D pointer event of the viewport (its
+`InputElementImpl` overrides): the nearest hit at the pointer's position (`IsHitTestVisible`
+false lets the pointer through an element and its descendants), the route of the hit (the
+`UIElement3D`s from the visual hit to the root of the scene, innermost first); the elements the
+pointer is over become that route (exited on the elements it left, innermost first, then entered
+on the new ones, outermost first, each on the element alone); a move, press or release is raised
+on the route, innermost first, until a handler handles it, and then the 2D event is handled too.
+A hit in a plain `ModelVisual3D` outside any element is in front of what is behind it and reaches
+no element. The pointer leaving the viewport leaves every element.
+
+**Capture.** `capture_pointer` takes the 2D capture of the pointer for the viewport (keeping an
+implicit capture of a press) and routes the pointer's events to the element and the elements
+that hold it, wherever the pointer is; the element is then the only one the pointer can be over,
+and only while the nearest hit is in it. Another element's capture takes it over (capture lost
+on the first); `release_pointer_capture` raises capture lost and releases the 2D capture; the
+end of the 2D capture of the viewport (the release of the button ends the implicit capture, as
+the input system does) ends the 3D capture with capture lost. An element captures through the
+viewport that last routed input to it; before any, `capture_pointer` returns false.
+
+**Not built: `Viewport2DVisual3D`.** Its rendering (a 2D visual as the material of a mesh) needs
+the materials from visuals of step D6, which is not done; its input (the texture coordinate of
+the hit mapped to a point of the hosted visual, and the input routed into it through a
+transformed hit-test path) is left with it. Keyboard focus of 3D elements is not part of this
+step either.
+
+**Tests** (`ui_element_3d_tests.rs`, in a window of the unit test application with the 2D
+pointer events raised on the viewport as the input system raises them, with the implicit capture
+of a press): the 2D hit test over models only; a press reaching the element under the pointer and
+bubbling to its container, with the hit and the position; a handled press stopping there and
+handling the 2D event; entered and exited following the pointer across two elements, the gap and
+the edge of the viewport; a capture keeping the events on the capturing element over the other
+one, ended by the release, released explicitly, and taken over by another element; a plain visual
+in front taking no input and hiding what is behind, an element that is not hit-test visible
+letting the pointer through; the elements' models drawn, their changes of the structure and the
+records; and the classes loaded from XAML (`xaml_tests.rs`).
+
 ## 4. Steps
 
 Each step is one pull request from main. Each updates the row "3D scenes (Viewport3D)" of
@@ -861,7 +920,7 @@ this page.
 | D8 | The GL executor (Skia Ganesh GL everywhere: ANGLE, EGL, Android GLES, CGL, WebGL2): GLSL ES 3.00 from naga at build time, framebuffer, depth renderbuffer and MSAA resolve, the reset of Skia's GL state after drawing, video through `SharedFrameTexture` ids on the same context. Tests: the comparison scenes under ANGLE on WARP (Windows CI), llvmpipe EGL (Linux CI), the Android emulator, a browser smoke run; browser and Android frame times | none new | high: Skia's GL state | planned |
 | D9 | Vello on Vulkan, DX12 and GLES, validated in the Windows and Linux virtual machines (one at a time); the Vulkan executor (SPIR-V) for Skia Vulkan with lavapipe in CI. The video gaps of those routes stay recorded gaps | none new | medium | planned |
 | D10 | Hit testing (section 3.16, `src/FerroUI.Media3D/hit_testing/`): the ray from the camera with the fitted planes of the snapshot, the hierarchy per mesh by `(id, version)`, Moller-Trumbore with weights and distance, WPF's front and back material rules, the transforms of the tree, `RayMeshGeometry3DHitTestResult` and its base types, `VisualTreeHelper::hit_test`, `hit_test_point` and `hit_test_ray` with the filter and result callbacks. Tests: hits on known triangles with weights and distance, the front and back material rules, nested transforms, the order of the hits, misses, degenerate triangles, the filters, the cameras, picks that match the rendered pixels of the CPU reference, a 100k-triangle mesh | additions (`VisualTreeHelper`, `RayHitTestParameters`, the result types and behaviours, `Viewport3DHitTestTarget`) | medium | in review |
-| D11 | Interactive 3D: `UIElement3D`, `ModelUIElement3D` and `ContainerUIElement3D` input events; `Viewport2DVisual3D` rendering (the D6 path) and input routing. Tests: pointer events reach a `Button` on a rotated `Viewport2DVisual3D` plane; capture and focus | additions | high: a transformed hit-test path in the input system | planned |
+| D11 | Interactive 3D (section 3.17): `UIElement3D`, `ModelUIElement3D` and `ContainerUIElement3D` with their pointer events (entered, exited, moved, pressed, released, capture lost) routed from a `Viewport3D` through the D10 hit test, pointer over and capture; the 2D hit test of `Viewport3D` over its models. Left for after D6: `Viewport2DVisual3D` rendering (the D6 path) and input routing (pointer events reaching a `Button` on a rotated `Viewport2DVisual3D` plane), and focus | additions (the three classes, `Pointer3DEventArgs`) | high: a transformed hit-test path in the input system (for `Viewport2DVisual3D`) | in review (the model part); `Viewport2DVisual3D` planned after D6 |
 | D12 | Catalog pages, one per control, in a "3D" section (a `Viewport3D` page with cameras, lights, materials, transforms and an animated `RotateTransform3D`; a `Viewport2DVisual3D` page) and a "video material" page in the Media section (docs/media/CONTROL-CATALOG.md); a `samples/Media3D` application with procedural meshes, run on device and simulator | none (samples) | low | planned |
 | D13 | Later: Vello hybrid-webgl 3D after route step 3; the ProGPU backend mapping (#369); browser WebGPU; Vello's perspective gap C7 through the 3D executor; an inventory of WinUI's `Microsoft.UI.Composition.Scenes` in winui-composition.md | to be stated | medium | planned |
 

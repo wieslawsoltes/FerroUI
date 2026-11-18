@@ -24,6 +24,10 @@
 //! are reported as [`RayMeshGeometry3DHitTestResult`]s sorted by their distance to the origin of
 //! the ray, until the result callback returns [`HitTestResultBehavior::Stop`].
 //!
+//! A `UIElement3D` whose `IsHitTestVisible` is false is not hit, nor are its descendants. The
+//! input of a `Viewport3D` (`controls/viewport_3d_input.rs`) routes the pointer through the
+//! nearest hit to the `UIElement3D`s above the visual hit.
+//!
 //! Hit testing runs on the CPU and the UI thread, as in WPF.
 
 mod bvh;
@@ -32,7 +36,8 @@ mod ray;
 pub(crate) use bvh::{hierarchies_built, MeshBvh};
 
 use crate::transform_3d::value_of;
-use crate::{GeometryModel3D, Matrix3D, MeshGeometry3D, Model3D, Model3DGroup, ModelVisual3D, Point3D, Vector3D};
+use crate::visual_3d::visual_parts;
+use crate::{GeometryModel3D, Matrix3D, MeshGeometry3D, Model3D, Model3DGroup, Point3D, UIElement3D, Vector3D};
 use crate::{Viewport3D, Viewport3DVisual, Visual3D};
 use ferroui_base::{Point, Ref};
 
@@ -288,17 +293,76 @@ fn hit_test_point_core(
     result: HitTestResultCallback<'_>,
     point: Point,
 ) {
+    if let Some(walk) = walk_viewport(viewport, filter, point, false) {
+        walk.report(result);
+    }
+}
+
+/// The walk of the ray through `point` over the scene of `viewport`; `None` when the point has
+/// no ray (no camera, outside the viewport).
+fn walk_viewport<'a>(
+    viewport: &Viewport3DVisual,
+    filter: Option<HitTestFilterCallback<'a>>,
+    point: Point,
+    routes: bool,
+) -> Option<Walk<'a>> {
     let snapshot = viewport.snapshot();
-    let Some(ray) = ray::viewport_ray(&snapshot, point) else {
-        return;
-    };
+    let ray = ray::viewport_ray(&snapshot, point)?;
     let mut walk = Walk::new(ray.origin, ray.direction, Some(ray.world_to_clip), filter);
+    walk.routes = routes;
     for child in viewport.children().iter() {
         if !walk.visit_visual(&child, &Matrix3D::IDENTITY, 0) {
             break;
         }
     }
-    walk.report(result);
+    Some(walk)
+}
+
+/// The nearest hit under `point` and the route of its input: the `UIElement3D`s from the visual
+/// hit up to the root of the scene, innermost first (empty when the visual hit is in none).
+pub(crate) fn hit_test_route(
+    viewport: &Viewport3DVisual,
+    point: Point,
+) -> Option<(RayMeshGeometry3DHitTestResult, Vec<Ref<UIElement3D>>)> {
+    let mut walk = walk_viewport(viewport, None, point, true)?;
+    let nearest = (0..walk.results.len())
+        .min_by(|a, b| walk.results[*a].distance_to_ray_origin.total_cmp(&walk.results[*b].distance_to_ray_origin))?;
+    let route = std::mem::take(&mut walk.result_routes[nearest]);
+    Some((walk.results.swap_remove(nearest), route))
+}
+
+/// The route of the input of `element` in the scene of `viewport`: the element and the
+/// `UIElement3D`s above it, innermost first; `None` when the scene does not hold it.
+pub(crate) fn route_of(viewport: &Viewport3DVisual, element: &UIElement3D) -> Option<Vec<Ref<UIElement3D>>> {
+    fn find(visual: &Ref<Visual3D>, element: &UIElement3D, path: &mut Vec<Ref<Visual3D>>, depth: usize) -> bool {
+        if depth > MAX_DEPTH {
+            return false;
+        }
+        path.push(visual.clone());
+        if std::ptr::addr_eq(&**visual as *const Visual3D, element as *const UIElement3D) {
+            return true;
+        }
+        let (_, children) = visual_parts(visual);
+        for child in children.iter().flat_map(|children| children.iter()) {
+            if find(&child, element, path, depth + 1) {
+                return true;
+            }
+        }
+        path.pop();
+        false
+    }
+    let mut path = Vec::new();
+    for child in viewport.children().iter() {
+        if find(&child, element, &mut path, 0) {
+            return Some(route_from_path(&path));
+        }
+    }
+    None
+}
+
+/// The `UIElement3D`s of a path from the root of a scene, innermost first.
+fn route_from_path(path: &[Ref<Visual3D>]) -> Vec<Ref<UIElement3D>> {
+    path.iter().rev().filter_map(|visual| visual.cast::<UIElement3D>()).collect()
 }
 
 /// The walk of a hit test over a tree of visuals and models, gathering the hits.
@@ -309,6 +373,12 @@ struct Walk<'a> {
     world_to_clip: Option<Matrix3D>,
     filter: Option<HitTestFilterCallback<'a>>,
     results: Vec<RayMeshGeometry3DHitTestResult>,
+    /// Whether the route of the input of each hit is kept (`result_routes`, by the index of the
+    /// result).
+    routes: bool,
+    result_routes: Vec<Vec<Ref<UIElement3D>>>,
+    /// The visuals from the root of the walk to the one being tested.
+    path: Vec<Ref<Visual3D>>,
 }
 
 impl<'a> Walk<'a> {
@@ -318,12 +388,26 @@ impl<'a> Walk<'a> {
         world_to_clip: Option<Matrix3D>,
         filter: Option<HitTestFilterCallback<'a>>,
     ) -> Self {
-        Self { origin, direction, world_to_clip, filter, results: Vec::new() }
+        Self {
+            origin,
+            direction,
+            world_to_clip,
+            filter,
+            results: Vec::new(),
+            routes: false,
+            result_routes: Vec::new(),
+            path: Vec::new(),
+        }
     }
 
     /// Tests a visual and its descendants; `false` when a filter stopped the test.
     fn visit_visual(&mut self, visual: &Ref<Visual3D>, parent: &Matrix3D, depth: usize) -> bool {
         if depth > MAX_DEPTH {
+            return true;
+        }
+        // An element that is not visible to hit testing hides its descendants too (WPF's
+        // `IsHitTestVisible`).
+        if visual.cast::<UIElement3D>().is_some_and(|element| !element.is_hit_test_visible()) {
             return true;
         }
         let behavior = match self.filter.as_mut() {
@@ -336,22 +420,24 @@ impl<'a> Walk<'a> {
             _ => {}
         }
         let world = value_of(visual.transform().as_ref()) * *parent;
-        let Some(model_visual) = visual.cast::<ModelVisual3D>() else {
-            return true;
-        };
+        let (content, children) = visual_parts(visual);
+        self.path.push(visual.clone());
+        let mut go_on = true;
         if behavior != HitTestFilterBehavior::ContinueSkipSelf {
-            if let Some(content) = model_visual.content() {
+            if let Some(content) = content {
                 self.visit_model(&content, &world, visual, depth + 1);
             }
         }
         if behavior != HitTestFilterBehavior::ContinueSkipChildren {
-            for child in model_visual.children().iter() {
+            for child in children.iter().flat_map(|children| children.iter()) {
                 if !self.visit_visual(&child, &world, depth + 1) {
-                    return false;
+                    go_on = false;
+                    break;
                 }
             }
         }
-        true
+        self.path.pop();
+        go_on
     }
 
     fn visit_model(&mut self, model: &Ref<Model3D>, parent: &Matrix3D, visual: &Ref<Visual3D>, depth: usize) {
@@ -394,7 +480,9 @@ impl<'a> Walk<'a> {
         let sides = if mirrored { (back, front) } else { (front, back) };
         let hierarchy = mesh.hit_test_hierarchy();
         let (origin, world_to_clip) = (self.origin, self.world_to_clip);
+        let (routes, path) = (self.routes, &self.path);
         let results = &mut self.results;
+        let result_routes = &mut self.result_routes;
         hierarchy.intersect(local_origin, local_direction, sides, &mut |hit| {
             let world_point = world.transform(hit.point);
             if let Some(world_to_clip) = world_to_clip.as_ref() {
@@ -416,6 +504,9 @@ impl<'a> Walk<'a> {
                 vertex_weights: hit.weights,
                 front_face: hit.front != mirrored,
             });
+            if routes {
+                result_routes.push(route_from_path(path));
+            }
         });
     }
 
