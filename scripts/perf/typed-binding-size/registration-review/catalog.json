@@ -1,0 +1,74 @@
+{
+  "image_bytes": 65876016,
+  "image_sha256": "701065a77efedc5a3ed13c479baae04472222bbc11eb4b6be718c40ea681d4c4",
+  "named_markup_type_headers": 1328,
+  "header_stride": 360,
+  "header_bytes": 478080,
+  "families": {
+    "properties": {
+      "unique_rows": 1703,
+      "row_bytes": 122616,
+      "unique_code_addresses": 2510,
+      "direct_text_bytes": 543256
+    },
+    "static_properties": {
+      "unique_rows": 331,
+      "row_bytes": 23832,
+      "unique_code_addresses": 328,
+      "direct_text_bytes": 5576
+    },
+    "methods": {
+      "unique_rows": 1138,
+      "row_bytes": 81936,
+      "unique_code_addresses": 1128,
+      "direct_text_bytes": 732732
+    },
+    "events": {
+      "unique_rows": 141,
+      "row_bytes": 5640,
+      "unique_code_addresses": 141,
+      "direct_text_bytes": 101976
+    },
+    "constructors": {
+      "unique_rows": 482,
+      "row_bytes": 19280,
+      "unique_code_addresses": 481,
+      "direct_text_bytes": 146304
+    },
+    "fields": {
+      "unique_rows": 168,
+      "row_bytes": 8064,
+      "unique_code_addresses": 161,
+      "direct_text_bytes": 20156
+    },
+    "enum_members": {
+      "unique_rows": 2324,
+      "row_bytes": 92960,
+      "unique_code_addresses": 0,
+      "direct_text_bytes": 0
+    }
+  },
+  "disjoint_headers_and_member_rows_bytes": 832408,
+  "direct_member_functions_after_deduplication": {
+    "unique_code_addresses": 4742,
+    "direct_text_bytes": 1547260
+  },
+  "void_instance_routed_event_methods": {
+    "parameter_types": [
+      "<ferroui_base::data::core::value_type::ValueType>::of::<core::option::Option<alloc::rc::Rc<dyn ferroui_base::ferro_property::AnyValue>>>",
+      "<ferroui_base::data::core::value_type::ValueType>::of::<alloc::rc::Rc<dyn ferroui_base::interactivity::routed_event_args::IRoutedEventArgs>>"
+    ],
+    "owner_count": 95,
+    "method_count": 348,
+    "unique_code_addresses": 345,
+    "direct_text_bytes": 227284
+  },
+  "all_Add_methods_including_overloads": {
+    "unique_code_addresses": 94,
+    "direct_text_bytes": 95060
+  },
+  "named_color_and_brush_static_getters": {
+    "unique_code_addresses": 278,
+    "direct_text_bytes": 4448
+  }
+}

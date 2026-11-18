@@ -406,6 +406,7 @@ fn a_table_lists_its_rows_in_order() {
             "rt::ValueRow { key: \"B\", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 3, position: 4 }".to_string(),
         ],
         slots: Vec::new(),
+        program: None,
     };
     assert_eq!(
         row_table("POPULATE_X_ROWS_0", "x.xaml", &run),
@@ -415,4 +416,37 @@ fn a_table_lists_its_rows_in_order() {
          rt::ValueRow { key: \"B\", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 3, position: 4 },\n\
          ];\n"
     );
+}
+
+#[test]
+fn typed_resource_runs_keep_units_local_and_encode_singleton_values_and_scopes() {
+    use super::super::theme_units::{begin_marker, END_MARKER};
+    let lines = body(&[
+        begin_marker(1).trim_start(),
+        &deferred_add("dictionary", "Alias", "build_alias", 6),
+        END_MARKER,
+        begin_marker(2).trim_start(),
+        &format!("{};", value_call("dictionary", "NegativeZero", "rt::to_object(-0.0_f64)", 3, 4)),
+        END_MARKER,
+    ]);
+    let scoped = DeferredRow {
+        kind: RowKind::ResourceAlias, operand: "\"Target\"".into(),
+        value_position: (7, 9), namespaces: Some("SCOPED".into()),
+    };
+    let statements = recorded(&lines, &[("build_alias", 0, scoped)]);
+    let mut next = 0;
+    let (body, tables) = row_runs_with_backend(lines, &statements, "DOC", || {
+        next += 1;
+        format!("BLOCK_{next}")
+    }, true);
+    assert_eq!(tables.len(), 2);
+    assert_eq!(tables[0].1.slots, [0]);
+    assert!(body.iter().any(|line| line.contains("BLOCK_1.add_resource_aliases(&dictionary, &context, &DOC)?;")));
+    assert!(body.iter().any(|line| line.contains("BLOCK_2.add_double_resources(&dictionary)?;")));
+    let alias = row_table("BLOCK_1", "test.xaml", &tables[0].1);
+    assert!(alias.contains(r#"b"\x01\x01\x01\x00\x0c\x10\x01\x02\x02\x01", &["Alias", "Target"], &[SCOPED]"#), "{alias}");
+    assert!(!alias.contains("NegativeZero"));
+    let number = row_table("BLOCK_2", "test.xaml", &tables[1].1);
+    assert!(number.contains(r#"b"\x01\x05\x01\x00\x06\x08\xff\x00\x00\x00\x00\x00\x00\x00\x80", &["NegativeZero"], &[]"#), "{number}");
+    assert!(!number.contains("SCOPED"));
 }
