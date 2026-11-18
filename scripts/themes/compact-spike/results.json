@@ -1,0 +1,141 @@
+{
+  "binary_bytes": {
+    "stock": {
+      "ferroui-resource-benchmarks": 18587216,
+      "hello-world": 16385408,
+      "control-catalog-desktop": 65876072
+    },
+    "fixed": {
+      "ferroui-resource-benchmarks": 18338496,
+      "hello-world": 16382448,
+      "control-catalog-desktop": 65627384
+    },
+    "packed": {
+      "ferroui-resource-benchmarks": 18305472,
+      "hello-world": 16365936,
+      "control-catalog-desktop": 65594360
+    },
+    "metadata": {
+      "hello-world": 16339360,
+      "control-catalog-desktop": 59481328
+    }
+  },
+  "medians": {
+    "stock": {
+      "theme_registration": 3578083,
+      "first_button_theme_and_template_lookup": 103375,
+      "first_button_template_build": 43625,
+      "repeated_button_template_build": 2621
+    },
+    "fixed": {
+      "theme_registration": 3627334,
+      "first_button_theme_and_template_lookup": 105750,
+      "first_button_template_build": 44542,
+      "repeated_button_template_build": 2697
+    },
+    "packed": {
+      "theme_registration": 3683791,
+      "first_button_theme_and_template_lookup": 105542,
+      "first_button_template_build": 43542,
+      "repeated_button_template_build": 2864
+    }
+  },
+  "fresh_processes_per_variant": 61,
+  "repeat_count": 128,
+  "binding_median_ns": {
+    "stock": {
+      "source_to_target_ns": 28,
+      "target_to_source_ns": 36
+    },
+    "metadata": {
+      "source_to_target_ns": 126,
+      "target_to_source_ns": 137
+    }
+  },
+  "commit": "933fd46325772fd1cdec81add9d4912dda2fe931",
+  "platform": "Apple silicon, macOS, cargo dist, single-architecture executable; decimal MB",
+  "toolchain": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+  "xaml_event_round_trip": {
+    "hello": {
+      "documents": 2,
+      "source_bytes": 602,
+      "encoded_bytes": 404,
+      "pool_and_header": 335,
+      "program_bytes": 58,
+      "directory_and_count": 11,
+      "symbols": 29
+    },
+    "winui": {
+      "documents": 175,
+      "source_bytes": 2132586,
+      "encoded_bytes": 488031,
+      "pool_and_header": 292606,
+      "program_bytes": 194373,
+      "directory_and_count": 1052,
+      "symbols": 8347
+    },
+    "catalog": {
+      "documents": 208,
+      "source_bytes": 1073759,
+      "encoded_bytes": 310838,
+      "pool_and_header": 185305,
+      "program_bytes": 124283,
+      "directory_and_count": 1250,
+      "symbols": 6594
+    }
+  },
+  "screenshot_pixel_differences": {
+    "stock": {
+      "01-buttons.png": 0,
+      "02-textblock.png": 0,
+      "03-listbox.png": 0,
+      "04-image.png": 0,
+      "05-calendar.png": 0,
+      "06-textbox.png": 0,
+      "07-dialogs.png": 0,
+      "08-treedatagrid.png": 0
+    },
+    "metadata": {
+      "01-buttons.png": 0,
+      "02-textblock.png": 0,
+      "03-listbox.png": 0,
+      "04-image.png": 0,
+      "05-calendar.png": 0,
+      "06-textbox.png": 0,
+      "07-dialogs.png": 0,
+      "08-treedatagrid.png": 0
+    },
+    "fixed": {
+      "01-buttons.png": 0,
+      "02-textblock.png": 0,
+      "03-listbox.png": 59370,
+      "04-image.png": 3336,
+      "05-calendar.png": 1516,
+      "06-textbox.png": 7103,
+      "07-dialogs.png": 0,
+      "08-treedatagrid.png": 0
+    },
+    "packed": {
+      "01-buttons.png": 1376,
+      "02-textblock.png": 0,
+      "03-listbox.png": 0,
+      "04-image.png": 0,
+      "05-calendar.png": 1516,
+      "06-textbox.png": 7103,
+      "07-dialogs.png": 0,
+      "08-treedatagrid.png": 0
+    }
+  },
+  "link_map_code_bytes": {
+    "catalog_generated_xaml_modules": 6090744,
+    "catalog_ButtonsPage_populate": 78408,
+    "catalog_WinUI_named_control_template_factories_and_children": 450500
+  },
+  "notes": [
+    "Style experiments modify WinUI generated tables in private build output. Each pool is local to a style or run. The 1,781 remaining specialized or uncommon style members use stock materializers.",
+    "Cold alias registration expands and retains up to 3,634 native rows (232,576 raw bytes at 64 bytes per row, additional allocator overhead).",
+    "The binding experiment disables optional metadata fast paths in a separate otherwise-stock build. The timing probe verifies both directions on one notifying i32 property and measures 50,000 changes per direction.",
+    "Theme timings are per fresh process. Repeated time includes creating and dropping a real WinUI Button template 128 times. Binding propagation and aliases in light, dark and high contrast are verified after timing.",
+    "The structural round trip includes all source .xaml files and preserves element/attribute/text events including whitespace. Markup extensions and literal values remain symbolic; this is a format-size experiment."
+  ]
+}
