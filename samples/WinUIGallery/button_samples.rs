@@ -1,20 +1,20 @@
-//! The code behind of the pinned Button, RepeatButton, ToggleButton, SplitButton and
-//! ToggleSplitButton pages in Rust: the handlers of `ButtonPage.xaml.cs`,
-//! `RepeatButtonPage.xaml.cs`, `ToggleButtonPage.xaml.cs`, `SplitButtonPage.xaml.cs` and
-//! `ToggleSplitButtonPage.xaml.cs`. The HyperlinkButton page's handler navigates the gallery
-//! (`examples::GALLERY_LINKS`). The controls own input, repetition, flyouts, editing and checked
-//! state; the sample owns only its output.
+//! The code behind of the pinned basic input pages in Rust: the handlers of `ButtonPage.xaml.cs`,
+//! `RepeatButtonPage.xaml.cs`, `ToggleButtonPage.xaml.cs`, `SplitButtonPage.xaml.cs`,
+//! `ToggleSplitButtonPage.xaml.cs`, `SliderPage.xaml.cs` and `ComboBoxPage.xaml.cs`. The
+//! HyperlinkButton page's handler navigates the gallery (`examples::GALLERY_LINKS`). The controls
+//! own input, repetition, flyouts, editing and checked state; the sample owns only its output.
 
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
+use ferroui_base::media::FontFamily;
 use ferroui_base::media::{Color, Colors, IBrush};
-use ferroui_base::Ref;
+use ferroui_base::{BoxedValue, Ref};
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::documents::CharacterFormat;
-use ferroui_controls::primitives::ToggleButton;
+use ferroui_controls::primitives::{SelectingItemsControl, ToggleButton};
 use ferroui_controls::shapes::Rectangle;
 use ferroui_controls::{
-    Border, Button, Control, Image, RepeatButton, RichEditBox, SplitButton, Symbol, SymbolIcon, TextBlock,
-    ToggleSplitButton,
+    Border, Button, ComboBox, Control, Image, NumberBox, RadioButtons, RepeatButton, RichEditBox,
+    Slider, SplitButton, Symbol, SymbolIcon, TextBlock, ToggleSplitButton,
 };
 use std::cell::Cell;
 use std::rc::Rc;
@@ -29,6 +29,8 @@ pub(crate) fn wire(page_id: &str, root: &Ref<Control>) {
         "ToggleButton" => wire_toggle_button(root),
         "SplitButton" => wire_split_button(root),
         "ToggleSplitButton" => wire_toggle_split_button(root),
+        "Slider" => wire_slider(root),
+        "ComboBox" => wire_combo_box(root),
         _ => {}
     }
 }
@@ -72,16 +74,19 @@ ferroui_base::ferro_thread_local! {
 /// `RepeatButton_Click` of `RepeatButtonPage.xaml.cs`. The output is a polite live region, which
 /// announces the changed text as the source's `LiveRegionChanged` event does.
 fn wire_repeat_button(root: &Ref<Control>) {
-    let output = root.get_control::<TextBlock>("RepeatButton1Output").downgrade();
-    root.get_control::<RepeatButton>("RepeatButton1").click(move |_, _| {
-        let clicks = REPEAT_CLICKS.with(|clicks| {
-            clicks.set(clicks.get().saturating_add(1));
-            clicks.get()
+    let output = root
+        .get_control::<TextBlock>("RepeatButton1Output")
+        .downgrade();
+    root.get_control::<RepeatButton>("RepeatButton1")
+        .click(move |_, _| {
+            let clicks = REPEAT_CLICKS.with(|clicks| {
+                clicks.set(clicks.get().saturating_add(1));
+                clicks.get()
+            });
+            if let Some(output) = output.upgrade() {
+                output.set_text(Some(&format!("Number of clicks: {clicks}")));
+            }
         });
-        if let Some(output) = output.upgrade() {
-            output.set_text(Some(&format!("Number of clicks: {clicks}")));
-        }
-    });
 }
 
 /// The constructor and `ToggleButton_Checked`/`ToggleButton_Unchecked` of
@@ -89,7 +94,11 @@ fn wire_repeat_button(root: &Ref<Control>) {
 fn wire_toggle_button(root: &Ref<Control>) {
     let toggle = root.get_control::<ToggleButton>("Toggle1");
     let output = root.get_control::<TextBlock>("Toggle1Output");
-    output.set_text(Some(if toggle.is_checked() == Some(true) { "On" } else { "Off" }));
+    output.set_text(Some(if toggle.is_checked() == Some(true) {
+        "On"
+    } else {
+        "Off"
+    }));
     let weak_toggle = toggle.downgrade();
     let weak_output = output.downgrade();
     toggle.is_checked_changed(move |_, _| {
@@ -115,14 +124,19 @@ fn brush_color(brush: &Rc<dyn IBrush>) -> Option<Color> {
 
 /// `Document.Selection.CharacterFormat.ForegroundColor = color`.
 fn set_selection_foreground(editor: &RichEditBox, color: Color) {
-    let _ = editor.text_document().selection().set_character_format(&CharacterFormat {
-        foreground: Some(Some(solid(color))),
-        ..CharacterFormat::default()
-    });
+    let _ = editor
+        .text_document()
+        .selection()
+        .set_character_format(&CharacterFormat {
+            foreground: Some(Some(solid(color))),
+            ..CharacterFormat::default()
+        });
 }
 
 /// The swatch buttons of the first flyout (the source's GridView items) and of the second.
-pub(crate) const SWATCHES: [&str; 8] = ["Red", "Orange", "Yellow", "Green", "Blue", "Indigo", "Violet", "Gray"];
+pub(crate) const SWATCHES: [&str; 8] = [
+    "Red", "Orange", "Yellow", "Green", "Blue", "Indigo", "Violet", "Gray",
+];
 
 /// The text the constructor of `SplitButtonPage.xaml.cs` writes into the editor.
 pub(crate) const SPLIT_BUTTON_TEXT: &str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, \
@@ -201,9 +215,11 @@ fn wire_split_button(root: &Ref<Control>) {
         let weak_split_button = split_button.downgrade();
         let color = current_color.clone();
         button.click(move |_, _| {
-            let (Some(button), Some(editor), Some(current)) =
-                (weak_button.upgrade(), weak_editor.upgrade(), weak_current.upgrade())
-            else {
+            let (Some(button), Some(editor), Some(current)) = (
+                weak_button.upgrade(),
+                weak_editor.upgrade(),
+                weak_current.upgrade(),
+            ) else {
                 return;
             };
             let Some(swatch) = button
@@ -231,11 +247,12 @@ fn wire_split_button(root: &Ref<Control>) {
     let reveal = root.get_control::<SplitButton>("myColorButtonReveal");
     for name in SWATCHES.iter().copied().chain(["Black"]) {
         let weak_reveal = reveal.downgrade();
-        root.get_control::<Button>(&format!("{name}RevealButton")).click(move |_, _| {
-            if let Some(reveal) = weak_reveal.upgrade() {
-                reveal.close_flyout();
-            }
-        });
+        root.get_control::<Button>(&format!("{name}RevealButton"))
+            .click(move |_, _| {
+                if let Some(reveal) = weak_reveal.upgrade() {
+                    reveal.close_flyout();
+                }
+            });
     }
 }
 
@@ -253,9 +270,11 @@ fn wire_toggle_split_button(root: &Ref<Control>) {
         let weak_symbol_icon = symbol_icon.downgrade();
         let weak_editor = editor.downgrade();
         root.get_control::<Button>(name).click(move |sender, _| {
-            let (Some(list_button), Some(symbol_icon), Some(editor)) =
-                (weak_list_button.upgrade(), weak_symbol_icon.upgrade(), weak_editor.upgrade())
-            else {
+            let (Some(list_button), Some(symbol_icon), Some(editor)) = (
+                weak_list_button.upgrade(),
+                weak_symbol_icon.upgrade(),
+                weak_editor.upgrade(),
+            ) else {
                 return;
             };
             let symbol = sender
@@ -281,4 +300,104 @@ fn wire_toggle_split_button(root: &Ref<Control>) {
             editor.focus();
         });
     }
+}
+
+/// `SnapsToRadioButtons_SelectionChanged` of `SliderPage.xaml.cs`, and the range example's value.
+/// SnapsTo Ticks is IsSnapToTickEnabled; FerroUI's Slider has no SnapsTo StepValues (integer
+/// steps), so StepValues is a slider that does not snap.
+fn wire_slider(root: &Ref<Control>) {
+    // The source's Value of the range example is 800, between the bound Minimum and Maximum.
+    // FerroUI's RangeBase coerces the Value of the markup against the default range while the
+    // document loads, before the x:Bind of the range runs, so the range of the options is set
+    // first here (the bindings set the same values) and then the source's value.
+    let slider = root.get_control::<Slider>("Slider2");
+    slider.set_maximum(root.get_control::<NumberBox>("MaximumValue").value());
+    slider.set_minimum(root.get_control::<NumberBox>("MinimumValue").value());
+    slider.set_range_value(800.0);
+
+    let snaps_to = root.get_control::<RadioButtons>("SnapsToRadioButtons");
+    let weak_snaps_to = snaps_to.downgrade();
+    let weak_slider = root.get_control::<Slider>("Slider3").downgrade();
+    snaps_to.property_changed(move |change| {
+        if change.property() != SelectingItemsControl::selected_item_property().as_property() {
+            return;
+        }
+        let (Some(snaps_to), Some(slider)) = (weak_snaps_to.upgrade(), weak_slider.upgrade())
+        else {
+            return;
+        };
+        let item = snaps_to.selected_item();
+        let step_values = item
+            .as_ref()
+            .and_then(|item| item.downcast_ref::<String>())
+            .map(String::as_str);
+        slider.set_is_snap_to_tick_enabled(step_values != Some("StepValues"));
+    });
+}
+
+/// The source's `FontSizes` of `ComboBoxPage.xaml.cs`.
+pub(crate) const FONT_SIZES: [f64; 14] = [
+    8.0, 9.0, 10.0, 11.0, 12.0, 14.0, 16.0, 18.0, 20.0, 24.0, 28.0, 36.0, 48.0, 72.0,
+];
+
+/// `ColorComboBox_SelectionChanged` and `Combo3_Loaded` of `ComboBoxPage.xaml.cs`, and the font of
+/// the second example's output (the source's x:Bind of `FontItem.Font` of the selected item).
+fn wire_combo_box(root: &Ref<Control>) {
+    let colors = root.get_control::<ComboBox>("Combo1");
+    let weak_colors = colors.downgrade();
+    let weak_output = root.get_control::<Rectangle>("Control1Output").downgrade();
+    colors.property_changed(move |change| {
+        if change.property() != SelectingItemsControl::selected_item_property().as_property() {
+            return;
+        }
+        let (Some(colors), Some(output)) = (weak_colors.upgrade(), weak_output.upgrade()) else {
+            return;
+        };
+        let item = colors.selected_item();
+        let color = match item
+            .as_ref()
+            .and_then(|item| item.downcast_ref::<String>())
+            .map(String::as_str)
+        {
+            Some("Yellow") => Colors::YELLOW,
+            Some("Green") => Colors::GREEN,
+            Some("Blue") => Colors::BLUE,
+            Some("Red") => Colors::RED,
+            _ => return,
+        };
+        output.set_fill(Some(solid(color)));
+    });
+
+    let fonts = root.get_control::<ComboBox>("Combo2");
+    let output = root.get_control::<TextBlock>("Control2Output");
+    let update_font = {
+        let fonts = fonts.downgrade();
+        let output = output.downgrade();
+        move || {
+            let (Some(fonts), Some(output)) = (fonts.upgrade(), output.upgrade()) else {
+                return;
+            };
+            if let Some(name) = fonts
+                .selected_item()
+                .as_ref()
+                .and_then(|item| item.downcast_ref::<String>())
+            {
+                output.set_font_family(FontFamily::new(name));
+            }
+        }
+    };
+    update_font();
+    fonts.property_changed(move |change| {
+        if change.property() == SelectingItemsControl::selected_item_property().as_property() {
+            update_font();
+        }
+    });
+
+    // `ItemsSource="{x:Bind FontSizes}"` and `Combo3_Loaded`: the third size is selected before the
+    // page's x:Bind of the output's font size reads it.
+    let sizes = root.get_control::<ComboBox>("Combo3");
+    for size in FONT_SIZES {
+        sizes.items().add(Some(Rc::new(size) as BoxedValue));
+    }
+    sizes.set_selected_index(2);
 }

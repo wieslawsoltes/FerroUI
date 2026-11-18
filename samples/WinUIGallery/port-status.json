@@ -537,7 +537,8 @@
       "status": "partial",
       "implementation": [
         "samples/WinUIGallery/Pages/ComboBox.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/button_samples.rs"
       ],
       "tests": [
         {
@@ -545,11 +546,15 @@
           "name": "all_reviewed_native_adaptations_load_real_controls"
         },
         {
-          "path": "samples/WinUIGallery/tests.rs",
-          "name": "slider_and_combobox_outputs_observe_shared_properties"
+          "path": "samples/WinUIGallery/button_samples_tests.rs",
+          "name": "combo_box_examples_color_font_and_size_their_outputs"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
         }
       ],
-      "notes": "Inline color choices and editable choices use native ComboBox; Header is composed explicitly. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "All three source examples use native ComboBox with ColorComboBox_SelectionChanged and Combo3_Loaded of ComboBoxPage.xaml.cs in Rust: the color rectangle, the font list (FontHelper.Fonts as their names, the output's font following the selection in Rust instead of the x:Bind of FontItem.Font through a cast), and the editable font sizes (the source's FontSizes) with the source's OneWay x:Bind of SelectedValue to the output's font size. Header is composed. Missing: FerroUI's ComboBox has no TextSubmitted event and there is no ContentDialog, so Combo3_TextSubmitted (accepting a typed size between 8 and 100, or reverting the text and showing the dialog) is not ported and the page stays partial.",
       "examples": []
     },
     "CommandBar": {
@@ -1256,7 +1261,7 @@
       "examples": []
     },
     "RadioButton": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/RadioButton.xaml",
         "samples/WinUIGallery/examples.rs"
@@ -1271,7 +1276,7 @@
           "name": "radio_groups_port_original_selection_and_color_handlers"
         }
       ],
-      "notes": "Both original groups use native RadioButtons with the existing native RadioButton, source labels and Rust selection/color handlers. Focus, layout and screen-reader parity still require host verification. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "Both source examples use native RadioButtons with the handlers of RadioButtonPage.xaml.cs in Rust: RadioButton_Checked writes the selected option, and BackgroundColor_SelectionChanged and BorderBrush_SelectionChanged color the border (Green, Yellow and White; DarkGreen, Gold and White). As in the source, the border keeps its markup colors until a selection changes, because the source's handlers run before ControlOutput exists. Rendering and screen-reader parity remain pending.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/RadioButton/RadioButtonGroup.txt",
@@ -1402,7 +1407,8 @@
       "status": "partial",
       "implementation": [
         "samples/WinUIGallery/Pages/Slider.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/button_samples.rs"
       ],
       "tests": [
         {
@@ -1410,11 +1416,15 @@
           "name": "all_reviewed_native_adaptations_load_real_controls"
         },
         {
-          "path": "samples/WinUIGallery/tests.rs",
-          "name": "slider_and_combobox_outputs_observe_shared_properties"
+          "path": "samples/WinUIGallery/button_samples_tests.rs",
+          "name": "slider_examples_keep_the_source_bindings_and_snapping"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
         }
       ],
-      "notes": "WinUI StepFrequency becomes TickFrequency with IsSnapToTickEnabled. The sample output observes Value. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "All four source examples use native Slider with the source's OneWay x:Bind of the outputs and of the range options (Minimum, Maximum, SmallChange and the step), and SnapsToRadioButtons_SelectionChanged in Rust; the source's Value.ToString() is the bound Value. Missing: FerroUI's Slider has no Header (composed), no StepFrequency (TickFrequency with IsSnapToTickEnabled instead) and no SnapsTo: Ticks is IsSnapToTickEnabled, and StepValues, the integer steps of the source, has no counterpart (the slider does not snap), so the page stays partial. FerroUI's RangeBase coerces the markup's Value against the default range before the x:Bind of the range runs; the code behind sets the range example's 800 after the range.",
       "examples": []
     },
     "Spacing": {
@@ -1610,7 +1620,7 @@
       "examples": []
     },
     "ToggleSwitch": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/ToggleSwitch.xaml",
         "samples/WinUIGallery/examples.rs"
@@ -1619,9 +1629,17 @@
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/button_samples_tests.rs",
+          "name": "toggle_switches_keep_the_source_header_content_and_progress_binding"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
         }
       ],
-      "notes": "IsOn maps to IsChecked on the existing ToggleSwitch; Header is composed with a label and an automation name, and states remain observable. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "Both source examples use native ToggleSwitch: the simple switch, and the switch with its header, OnContent and OffContent, checked at first, with the ProgressRing bound to it by the source's OneWay x:Bind. WinUI's IsOn is IsChecked and its Header is the Content of FerroUI's ToggleSwitch, which the WinUI theme presents as the header. The page has no code-behind upstream.",
       "examples": []
     },
     "ToolTip": {

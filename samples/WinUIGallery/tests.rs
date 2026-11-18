@@ -297,24 +297,6 @@ fn checkbox_select_all_keeps_source_aggregate_and_user_cycle_behavior() {
 }
 
 #[test]
-fn slider_and_combobox_outputs_observe_shared_properties() {
-    let _application = start();
-    let root = examples::create(examples::find("Slider").unwrap()).unwrap();
-    root.get_control::<Slider>("Primary").set_range_value(900.0);
-    assert_eq!(
-        root.get_control::<TextBlock>("Output").text().as_deref(),
-        Some("Value: 900")
-    );
-    let root = examples::create(examples::find("ComboBox").unwrap()).unwrap();
-    root.get_control::<ComboBox>("Primary")
-        .set_selected_index(2);
-    assert_eq!(
-        root.get_control::<TextBlock>("Output").text().as_deref(),
-        Some("Selected index: 2")
-    );
-}
-
-#[test]
 fn native_gallery_filters_navigates_and_retains_history() {
     let _application = start();
     let gallery = GalleryView::new().unwrap();
@@ -604,9 +586,22 @@ fn radio_groups_port_original_selection_and_color_handlers() {
     let background = root.get_control::<RadioButtons>("BackgroundRadioButtons");
     let border = root.get_control::<RadioButtons>("BorderRadioButtons");
     assert_eq!(background.max_columns(), 3);
+    let output = root.get_control::<Border>("ControlOutput");
+    // As in the source, the border keeps its markup colors until a selection changes (Green and
+    // Yellow are selected, the background is white).
+    assert_eq!((background.selected_index(), border.selected_index()), (0, 1));
+    assert_eq!(
+        output.background().unwrap().as_solid_color_brush().unwrap().color(),
+        Color::from_rgb(255, 255, 255)
+    );
+    background.set_selected_index(2);
+    border.set_selected_index(2);
+    assert_eq!(
+        output.border_brush().unwrap().as_solid_color_brush().unwrap().color(),
+        Color::from_rgb(255, 255, 255)
+    );
     background.set_selected_index(0);
     border.set_selected_index(0);
-    let output = root.get_control::<Border>("ControlOutput");
     assert_eq!(
         output
             .background()
