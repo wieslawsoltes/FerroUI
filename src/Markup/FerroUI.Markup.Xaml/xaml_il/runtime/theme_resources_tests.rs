@@ -568,13 +568,26 @@ fn packed_brushes_build_what_the_rows_build() {
         PackedRows { strings: "Literal", namespaces: &[], records: &[0, 7, (ACCENT & 0xFFFF) as u16, (ACCENT >> 16) as u16, 0, 2, 8] };
     static DYNAMIC: PackedRows = PackedRows { strings: "DynamicAccent", namespaces: &[], records: &[0, 7, 7, 6, 0, 1, 2, 1, 10] };
     static STATIC: PackedRows = PackedRows { strings: "StaticAccent", namespaces: &[], records: &[0, 6, 6, 6, 0, 1, 2, 1, 10] };
+    static SLICES: (&[LiteralBrushRow], &[DynamicBrushRow], &[StaticBrushRow]) = (
+        &[LiteralBrushRow { key: "Literal", color: ACCENT, namespaces: None, line: 2, position: 8 }],
+        &[DynamicBrushRow { key: "Dynamic", color_key: "Accent", namespaces: None, line: 1, position: 2, value_line: 1, value_position: 10 }],
+        &[StaticBrushRow { key: "Static", color_key: "Accent", namespaces: None, line: 1, position: 2, value_line: 1, value_position: 10 }],
+    );
     let (dictionary, context) = populated();
     add_packed_literal_brushes(&dictionary, &context, &DOCUMENT, &LITERAL).expect("the literal brush");
     add_packed_dynamic_brushes(&dictionary, &context, &DOCUMENT, &DYNAMIC).expect("the dynamic brush");
     add_packed_static_brushes(&dictionary, &context, &DOCUMENT, &STATIC).expect("the static brush");
+    let (sliced, sliced_context) = populated();
+    add_literal_brushes(&sliced, &sliced_context, &DOCUMENT, SLICES.0).expect("the literal brush");
+    add_dynamic_brushes(&sliced, &sliced_context, &DOCUMENT, SLICES.1).expect("the dynamic brush");
+    add_static_brushes(&sliced, &sliced_context, &DOCUMENT, SLICES.2).expect("the static brush");
+    // The packed rows build what the slices build (a dynamic brush of a dictionary outside a tree
+    // has no value of its resource yet).
     for key in ["Literal", "Dynamic", "Static"] {
-        assert_eq!(brush_color(&resource(&dictionary, key)), Color::from_uint32(ACCENT), "{key}");
+        assert_eq!(brush_color(&resource(&dictionary, key)), brush_color(&resource(&sliced, key)), "{key}");
     }
+    assert_eq!(brush_color(&resource(&dictionary, "Literal")), Color::from_uint32(ACCENT));
+    assert_eq!(brush_color(&resource(&dictionary, "Static")), Color::from_uint32(ACCENT));
 }
 
 #[test]
