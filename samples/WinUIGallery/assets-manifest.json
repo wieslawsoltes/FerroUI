@@ -69,6 +69,22 @@
     {
       "path": "WinUIGallery/Samples/Geometry/GeometryPage.xaml.cs",
       "sha256": "030a5c05e20674754b64088e6d42124e77f66c8e4d2801be13e7eef3efbe05e8"
+    },
+    {
+      "path": "WinUIGallery/Samples/Spacing/SpacingPage.xaml",
+      "sha256": "54e7197bfe87f794c3c1dd20a11d69d5673c887d96d71d37e929817cdd9a2696"
+    },
+    {
+      "path": "WinUIGallery/Samples/Spacing/SpacingPage.xaml.cs",
+      "sha256": "6859adaa5d9712f64938dbd95a129bb99bdcc77d81643dbe4ccb4d38687495ec"
+    },
+    {
+      "path": "WinUIGallery/Samples/IconElement/IconElementPage.xaml",
+      "sha256": "c6aa3edd6c75f016ca5a52479827e52d8a253c0152feb42d9830936783d8a58b"
+    },
+    {
+      "path": "WinUIGallery/Samples/IconElement/IconElementPage.xaml.cs",
+      "sha256": "797c34b2d109f3921ff29b4414beb1ab0aaca88516909e72858afd8f69fbe40a"
     }
   ],
   "assembly": "WinUIGallery",
@@ -1369,6 +1385,54 @@
       ],
       "source_uris": [
         "ms-appx:///Assets/ControlImages/WrapPanel.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/Design/Cards.dark.png",
+      "path": "samples/WinUIGallery/Assets/Design/Cards.dark.png",
+      "sha256": "acb4d2761297334ff2876440c3bf240a960c7a4fd91efc97ab804da461b43e63",
+      "size_bytes": 13580,
+      "registered_paths": [
+        "Assets/Design/Cards.dark.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/Design/Cards.dark.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/Design/Cards.light.png",
+      "path": "samples/WinUIGallery/Assets/Design/Cards.light.png",
+      "sha256": "c0471913eef2e019deeb14eec7b4b23e2aed9e851a85636026d10f1e65677545",
+      "size_bytes": 17660,
+      "registered_paths": [
+        "Assets/Design/Cards.light.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/Design/Cards.light.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/Design/Dialog.dark.png",
+      "path": "samples/WinUIGallery/Assets/Design/Dialog.dark.png",
+      "sha256": "db68563da1196bfe88f844c30e24f3a96ea6ccf9ced9080bee90630b1fcfc75f",
+      "size_bytes": 26084,
+      "registered_paths": [
+        "Assets/Design/Dialog.dark.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/Design/Dialog.dark.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/Design/Dialog.light.png",
+      "path": "samples/WinUIGallery/Assets/Design/Dialog.light.png",
+      "sha256": "00aac573496c01498b9493afeb2d303e20efc255715f4376569ea464996b926f",
+      "size_bytes": 25425,
+      "registered_paths": [
+        "Assets/Design/Dialog.light.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/Design/Dialog.light.png"
       ]
     },
     {
