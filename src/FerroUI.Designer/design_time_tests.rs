@@ -404,6 +404,27 @@ fn named_preview_fixtures_feed_scalars_records_and_items_through_one_source_edit
 }
 
 #[test]
+fn fixture_projection_keeps_bindings_below_a_separate_data_context() {
+    let source = format!(
+        "<StackPanel {NS} d:Fixtures='{{\"default\":\"Content\",\"fixtures\":[{{\"name\":\"Content\",\"data\":{{\"Title\":\"Ready\"}}}}]}}'><TextBlock Text='{{CompiledBinding Title}}'/><Border DataContext='Separate'><TextBlock Text='{{CompiledBinding Display}}'/></Border></StackPanel>"
+    );
+    let document = Document::new(&source).unwrap();
+    let preview = project(&document, &source, true, None).unwrap().unwrap();
+    assert!(
+        preview
+            .document
+            .source()
+            .contains("{ReflectionBinding Title}")
+    );
+    assert!(
+        preview
+            .document
+            .source()
+            .contains("{CompiledBinding Display}")
+    );
+}
+
+#[test]
 fn design_data_drafts_reject_source_selection_scope_and_permission_changes() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let mut session = DesignerSession::new(

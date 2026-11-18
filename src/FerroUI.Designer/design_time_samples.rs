@@ -127,6 +127,9 @@ pub(crate) fn request(
             .subtree(root)
             .filter(|element| element.is_element())
         {
+            if fixture.is_some() && !inherits_fixture(document, element, node) {
+                continue;
+            }
             for attribute in &element.attributes {
                 if attribute.namespace_uri.as_deref() == Some(crate::design_time::DESIGN_NAMESPACE)
                 {
@@ -209,6 +212,35 @@ pub(crate) fn request(
         fixture,
         binding_replacements,
     }
+}
+
+fn inherits_fixture(document: &Document, element: &Node, root: NodeId) -> bool {
+    let mut current = element;
+    while current.id != root {
+        let owns_context = current.attributes.iter().any(|attribute| {
+            let name = attribute.name.rsplit(':').next().unwrap_or("");
+            let namespace = attribute.namespace_uri.as_deref();
+            (name == "DataContext" || name == "Design.DataContext")
+                && (namespace.is_none()
+                    || namespace == current.namespace_uri.as_deref()
+                    || namespace == Some(crate::design_time::DESIGN_NAMESPACE))
+        }) || document.ast().element_children(current.id).into_iter().any(
+            |id| {
+                document
+                    .ast()
+                    .node(id)
+                    .is_some_and(|child| child.local_name().ends_with(".DataContext"))
+            },
+        );
+        if owns_context {
+            return false;
+        }
+        let Some(parent) = current.parent.and_then(|id| document.ast().node(id)) else {
+            return false;
+        };
+        current = parent;
+    }
+    true
 }
 
 fn simple_path(path: &str) -> bool {
