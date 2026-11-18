@@ -1173,6 +1173,18 @@ impl<T: ObjectType> Ref<T> {
         }
     }
 
+    /// Borrows the existing handle as class `U` if its runtime type derives from `U`.
+    #[inline]
+    pub fn cast_ref<U: ObjectType>(&self) -> Option<&Ref<U>> {
+        if self.is::<U>() {
+            // SAFETY: Ref is transparent over the same Rc for every marker type.
+            // The dynamic class check establishes the target invariant for this borrow.
+            Some(unsafe { &*(self as *const Ref<T> as *const Ref<U>) })
+        } else {
+            None
+        }
+    }
+
     /// Whether the object is of class `U` or a class derived from it.
     #[inline]
     pub fn is<U: ObjectType>(&self) -> bool {

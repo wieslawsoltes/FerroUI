@@ -234,12 +234,13 @@ use crate::model::{AssemblyModel, MarkupReferencesModel};
 use crate::model_set::ModelSet;
 use crate::scanner::{scan_crate, InherentFunction, Scan, ScanOptions, Severity, SourceReferences};
 use crate::type_system::{ModelEmitTypes, ModelTypeSystem};
-pub use ferroui_markup_xaml_loader::rust_emitter::ClassConstructor;
+pub use ferroui_markup_xaml_loader::rust_emitter::{ClassConstructor, XamlBackend};
 use crate::xaml_compiler_diagnostics_filter::XamlCompilerDiagnosticsFilter;
 use ferroui_markup_xaml_loader::compiler_extensions::FerroXamlDiagnosticCodes;
 use ferroui_markup_xaml_loader::rust_emitter::{
-    class_document_group, class_of_document, document_references, generate_class_file_with, generate_file_with, rust_string_literal, ClassGroup,
+    class_document_group, class_of_document, document_references, generate_class_file_with, generate_file_with, rust_string_literal, BytecodeImage, ClassGroup,
     CompiledMarkupTypeSystem, EmitterHost, ThemePartsTables, TransformOptions, XamlMetadata, CLASS_GROUP_NOT_TRANSFORMED, GROUP_NOT_TRANSFORMED,
+    with_xaml_backend,
 };
 use crate::theme_roots::{
     binary_roots, compile_bindings_from_manifest, explain_kept_units, kept_units, parts_constructor, parts_static_name,
@@ -354,6 +355,7 @@ pub use ferroui_build_scan::export::Outcome;
 
 /// The build of the markup of a crate; see the crate documentation.
 pub struct Build {
+    backend: XamlBackend,
     hot_reload: bool,
     manifest_dir: PathBuf,
     out_dir: PathBuf,
@@ -396,6 +398,13 @@ impl Build {
             &variable("CARGO_PKG_NAME").to_string_lossy(),
             ferroui_build_scan::export::dependencies_from_env(),
         )
+        .xaml_backend(match env::var("FERROUI_XAML_BACKEND") {
+            Ok(value) if value == "bytecode" => XamlBackend::Bytecode,
+            Ok(value) if value == "theme-bytecode" => XamlBackend::ThemeBytecode,
+            Ok(value) if value == "native" => XamlBackend::Native,
+            Err(env::VarError::NotPresent) => XamlBackend::Native,
+            _ => panic!("FERROUI_XAML_BACKEND must be native, theme-bytecode, or bytecode"),
+        })
         .full_themes(env::var_os(FULL_THEMES_VARIABLE).is_some())
     }
 
@@ -403,6 +412,7 @@ impl Build {
     /// with the `.xamlmeta` files of its direct dependencies.
     pub fn new(manifest_dir: PathBuf, out_dir: PathBuf, package_name: &str, dependencies: Vec<PathBuf>) -> Self {
         Self {
+            backend: XamlBackend::Native,
             hot_reload: false,
             manifest_dir,
             out_dir,
@@ -425,6 +435,18 @@ impl Build {
             theme_roots: Roots::default(),
             themes: Vec::new(),
         }
+    }
+
+    /// Selects typed bytecode for this package's compiled XAML. `from_env` reads
+    /// `FERROUI_XAML_BACKEND=bytecode` for a whole-build comparison.
+    pub fn typed_xaml_bytecode(self, enabled: bool) -> Self {
+        self.xaml_backend(if enabled { XamlBackend::Bytecode } else { XamlBackend::Native })
+    }
+
+    /// Selects the representation of this package's compiled markup.
+    pub fn xaml_backend(mut self, backend: XamlBackend) -> Self {
+        self.backend = backend;
+        self
     }
 
     /// Whether the base crate has `full-themes` in this build ([`FULL_THEMES_VARIABLE`], which
@@ -659,6 +681,10 @@ impl Build {
                     .to_string(),
             );
             return Outcome { lines, errors };
+        }
+
+        if !self.groups.is_empty() {
+            lines.push("cargo::rerun-if-env-changed=FERROUI_XAML_BACKEND".to_string());
         }
 
         // Whether the build writes the hot-reload manifest: requested and a target with debug
@@ -941,6 +967,7 @@ impl Build {
             }
             document_roots.extend(group_roots.clone());
             let path = xaml_directory.join(format!("{}.rs", group.module));
+            let image = if self.backend.uses_theme_programs() { BytecodeImage::packed() } else { BytecodeImage::default() };
             let module_path = format!("::{}::{}", self.crate_name, group.module);
 
             // The group of a class of the crate.
@@ -962,7 +989,10 @@ impl Build {
                     design_mode: false,
                     theme_parts: theme_parts.clone(),
                 };
-                let compiled = class_group(&host, &**models, &root_uri, &borrowed, class_document, group.constructor, &module_path, &options);
+                let (constructor, module) = (group.constructor, &module_path);
+                let compiled = with_xaml_backend(self.backend, &image, || {
+                    class_group(&host, &**models, &root_uri, &borrowed, class_document, constructor, module, &options)
+                });
                 let reported_errors = diagnostics.report(&mut lines, &mut errors);
                 match compiled {
                     Ok(file) => {
@@ -970,7 +1000,7 @@ impl Build {
                         for warning in &file.warnings {
                             diagnostics.warning(FerroXamlDiagnosticCodes::XAML_LOADER_UNREACHABLE, class_document, warning, &mut lines, &mut errors);
                         }
-                        write_if_changed(&path, &file.source, &mut errors);
+                        write_compiled_file(&path, &file.source, &image, &mut errors);
                         let class_metadata = file.metadata(&[]);
                         // Whether the class can be constructed from selected units of its markup
                         // (#849): only then are its documents rooted through its unit graph in the
@@ -1030,12 +1060,14 @@ impl Build {
                         design_mode: false,
                         theme_parts: theme_parts.clone(),
                     };
-                    generate_file_with(&host, &assembly_name, &root_uri, &borrowed, &options)
+                    with_xaml_backend(self.backend, &image, || {
+                        generate_file_with(&host, &assembly_name, &root_uri, &borrowed, &options)
+                    })
                 }
                 #[cfg(feature = "runtime-host")]
                 None => {
                     let Some(assembly) = self.assembly else { break };
-                    runtime_host::generate_file(assembly, &root_uri, &borrowed, group.create_source_info, default_compile_bindings, &dependencies)
+                    runtime_host::generate_file(assembly, &root_uri, &borrowed, group.create_source_info, default_compile_bindings, self.backend, &image, &dependencies)
                 }
                 // Reported before the groups: without the feature no group is compiled
                 // against the run-time type system.
@@ -1059,7 +1091,7 @@ impl Build {
                     false => errors.push(diagnostics::error(FerroXamlDiagnosticCodes::EMIT_ERROR, name, &reason)),
                 }
             }
-            write_if_changed(&path, &file.source, &mut errors);
+            write_compiled_file(&path, &file.source, &image, &mut errors);
             write_if_changed(&xaml_directory.join(format!("{}.map.json", group.module)), &file.position_map, &mut errors);
             if group.exported {
                 metadata.documents.extend(file.metadata(&self.crate_name, &module_path, &[]).documents);
@@ -1313,6 +1345,8 @@ mod runtime_host {
         documents: &[(&str, &str)],
         create_source_info: Option<bool>,
         default_compile_bindings: bool,
+        backend: super::XamlBackend,
+        image: &super::BytecodeImage,
         dependencies: &[XamlMetadata],
     ) -> GeneratedFile {
         let mut configuration = RuntimeXamlLoaderConfiguration::new();
@@ -1321,7 +1355,11 @@ mod runtime_host {
         if let Some(create_source_info) = create_source_info {
             configuration.set_create_source_info(create_source_info);
         }
-        ferroui_markup_xaml_loader::rust_emitter::generate_file(assembly.name, root_uri, documents, &configuration, dependencies)
+        use ferroui_markup_xaml_loader::rust_emitter::{generate_file_with_runtime_types, with_xaml_backend};
+        let options = super::TransformOptions::of(&configuration);
+        with_xaml_backend(backend, image, || {
+            generate_file_with_runtime_types(assembly.name, root_uri, documents, &options, dependencies)
+        })
     }
 }
 
@@ -1438,8 +1476,26 @@ fn collect(root: &Path, directory: &Path, found: &mut Vec<(String, PathBuf)>) ->
     Ok(())
 }
 
-/// Writes `text` to `path` unless the file holds it already, so that a build that
-/// changed nothing does not make the compiler run again.
+/// Writes the instruction image before the source that references it. A group can stop
+/// emitting programs when its documents or backend change.
+fn write_compiled_file(path: &Path, source: &str, image: &BytecodeImage, errors: &mut Vec<String>) {
+    let image_path = path.with_extension("fxc");
+    let file_name = image_path.file_name().and_then(|s| s.to_str()).expect("generated module name");
+    if let Some((bytes, declaration)) = image.artifact(file_name) {
+        if let Err(error) = ferroui_build_scan::export::write_bytes_if_changed(&image_path, &bytes) {
+            errors.push(error);
+            return;
+        }
+        write_if_changed(path, &format!("{source}{declaration}"), errors);
+    } else if let Err(error) = ferroui_build_scan::export::write_if_changed(path, source) {
+        errors.push(error);
+    } else if let Err(error) = fs::remove_file(&image_path) {
+        if error.kind() != std::io::ErrorKind::NotFound {
+            errors.push(format!("{}: {error}", image_path.display()));
+        }
+    }
+}
+
 fn write_if_changed(path: &Path, text: &str, errors: &mut Vec<String>) {
     if let Err(error) = ferroui_build_scan::export::write_if_changed(path, text) {
         errors.push(error);
@@ -1559,6 +1615,39 @@ fn crate_file(assembly_name: &str, modules: &[Module], loaders: &[String], asset
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[cfg(feature = "runtime-host")]
+    #[test]
+    fn selecting_a_backend_replaces_the_generated_module_and_its_instruction_image() {
+        static ASSEMBLY: MarkupAssembly = MarkupAssembly {
+            name: "BackendFixture", crate_name: "backend_fixture",
+            xmlns_definitions: &[], xmlns_prefixes: &[], metadata: &[],
+        };
+        let root = env::temp_dir().join(format!("ferroui-build-xaml-backends-{}", std::process::id()));
+        let out = root.join("out");
+        fs::create_dir_all(&root).unwrap();
+        fs::write(root.join("Cargo.toml"), "[package]\nname = 'backend-fixture'\nversion = '0.0.0'\n").unwrap();
+        let document = "<Border xmlns='https://github.com/ferroui' Width='73'><TextBlock Text='test'/></Border>";
+        let run = |backend| {
+            let group = XamlGroup::new("compiled_border").documents(&[("Border.xaml", document)]);
+            let result = Build::new(root.clone(), out.clone(), "backend-fixture", Vec::new())
+                .assembly(&ASSEMBLY).xaml_backend(backend).compile_group(group).execute();
+            assert!(result.errors.is_empty(), "{:?}", result.errors);
+            fs::read_to_string(out.join("xaml/compiled_border.rs")).unwrap()
+        };
+        let image = out.join("xaml/compiled_border.fxc");
+        let typed = run(XamlBackend::Bytecode);
+        assert!(typed.contains("include_bytes!(\"compiled_border.fxc\")") && typed.contains("rt::ConstructionProgram"));
+        let bytes = fs::read(&image).unwrap();
+        assert!(!bytes.is_empty());
+        for backend in [XamlBackend::ThemeBytecode, XamlBackend::Native] {
+            assert!(!run(backend).contains("rt::ConstructionProgram"));
+            assert!(!image.exists());
+        }
+        assert_eq!(run(XamlBackend::Bytecode), typed);
+        assert_eq!(fs::read(image).unwrap(), bytes);
+        fs::remove_dir_all(root).unwrap();
+    }
 
     /// Not from upstream: the file a crate includes names the generated files, chains the
     /// loader tables (the checked-in ones first, a group that is not exported not at all)
