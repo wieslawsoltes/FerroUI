@@ -469,11 +469,7 @@ impl TextBlockImpl for TextBlock {
 
         let max_size = this.get_max_size_from_constraint();
 
-        let text_run_cache = this.text_run_cache.get().unwrap_or_else(|| {
-            let text_run_cache = Rc::new(TextRunCache::new());
-            this.text_run_cache.set(Some(text_run_cache.clone()));
-            text_run_cache
-        });
+        let text_run_cache = this.text_run_cache();
 
         if !this.has_complex_content() {
             // A plain text: the layout the font manager keeps for this text with these
@@ -1332,6 +1328,17 @@ impl TextBlock {
         self.clear_text_internal.set(true);
         let _reset = Reset(&self.clear_text_internal);
         self.set_current_value(Self::text_property(), None);
+    }
+
+    /// The run cache of the layouts of the block, made with the first layout: the shaped runs of
+    /// its text are kept between layouts at other widths and dropped when what they were shaped
+    /// from changes (`invalidate_text_layout`).
+    pub(crate) fn text_run_cache(&self) -> Rc<TextRunCache> {
+        self.text_run_cache.get().unwrap_or_else(|| {
+            let text_run_cache = Rc::new(TextRunCache::new());
+            self.text_run_cache.set(Some(text_run_cache.clone()));
+            text_run_cache
+        })
     }
 
     /// The default run properties of the layouts: the ones kept since a property they are made of
