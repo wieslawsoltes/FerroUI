@@ -1198,4 +1198,32 @@ mod tests {
             Err("the document `Missing.xaml` of the class is not a document of the group".to_string())
         );
     }
+
+    /// Not from upstream (#850): the group of a class is found from its includes as the parser of
+    /// the documents reads them: a `Source` with an entity names the decoded file, a `>` in a key
+    /// does not hide an include, and an include written in CDATA is text.
+    #[test]
+    fn the_group_of_a_class_follows_its_includes_as_parsed() {
+        let namespaces = "xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'";
+        let theme = format!(
+            "<Styles {namespaces} x:Class='Fixture.Theme'>\
+             <Styles.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries>\
+             <MergeResourceInclude Source='/A&amp;B.xaml'/>\
+             <ResourceInclude x:Key='a>b' Source='/Keyed.xaml'/>\
+             </ResourceDictionary.MergedDictionaries>\
+             <x:String x:Key='Text'><![CDATA[<StyleInclude Source='/Text.xaml'/>]]></x:String>\
+             </ResourceDictionary></Styles.Resources></Styles>"
+        );
+        let dictionary = format!("<ResourceDictionary {namespaces}/>");
+        let styles = format!("<Styles {namespaces}/>");
+        let documents = [
+            ("Theme.xaml", theme.as_str()),
+            ("A&B.xaml", dictionary.as_str()),
+            ("Keyed.xaml", dictionary.as_str()),
+            ("Text.xaml", styles.as_str()),
+        ];
+        let group = class_document_group("ferres://Fixture/", &documents, "Theme.xaml").expect("the group");
+        let names: Vec<&str> = group.iter().map(|(name, _, _)| name.as_str()).collect();
+        assert_eq!(names, ["Theme.xaml", "A&B.xaml", "Keyed.xaml"]);
+    }
 }

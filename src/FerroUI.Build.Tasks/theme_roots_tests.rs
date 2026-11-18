@@ -360,3 +360,54 @@ fn the_build_of_a_class_verifies_its_constructor_from_units() {
     assert_eq!(verify_parts_constructor(&model, &[], "Tests.Missing"), Ok(false));
     assert_eq!(last_segments("Option < Rc < dyn crate::IServiceProvider > >"), "Option<Rc<dynIServiceProvider>>");
 }
+
+/// Not from upstream (#850): the table is read as TOML. Equivalent forms of
+/// `[package.metadata.ferroui]` give the same options: a table header, dotted keys under a parent
+/// table, an inline table, and dotted keys at the top level.
+#[test]
+fn equivalent_forms_of_the_manifest_table_give_the_same_options() {
+    let expected = ThemeTrimming { enabled: false, all: true, roots: Vec::new() };
+    let forms = [
+        "[package.metadata.ferroui]\ntheme-trimming = false\ntheme-roots = \"all\"\ncompile-bindings = false\n",
+        "[package.metadata]\nferroui.theme-trimming = false\nferroui.theme-roots = \"all\"\n\
+         ferroui.compile-bindings = false\n",
+        "[package]\nname = \"app\"\n\
+         metadata.ferroui = { theme-trimming = false, theme-roots = \"all\", compile-bindings = false }\n",
+        "package.metadata.ferroui.theme-trimming = false\npackage.metadata.ferroui.theme-roots = 'all'\n\
+         package.metadata.ferroui.compile-bindings = false\n",
+    ];
+    for form in forms {
+        assert_eq!(ThemeTrimming::from_manifest(form), Ok(expected.clone()), "{form}");
+        assert_eq!(compile_bindings_from_manifest(form), Ok(Some(false)), "{form}");
+    }
+}
+
+/// Not from upstream (#850): strings are TOML strings, with their escapes, and a bracket inside a
+/// string is text, also in an array that spans lines.
+#[test]
+fn the_strings_of_the_manifest_are_toml_strings() {
+    let manifest = "[package.metadata.ferroui]\ntheme-roots = [\n  \"Accent\\u0042uttonStyle\", # a comment\n\
+                    \"Accent[Brush\",\n  'C:\\path',\n]\n";
+    let trimming = ThemeTrimming::from_manifest(manifest).expect("the table");
+    assert_eq!(trimming.roots, strings(&["AccentButtonStyle", "Accent[Brush", "C:\\path"]));
+}
+
+/// Not from upstream (#850): a top-level table whose quoted name is `package.metadata.ferroui` is
+/// another table, and says nothing about the crate.
+#[test]
+fn a_quoted_table_name_is_one_key() {
+    let manifest = "[\"package.metadata.ferroui\"]\ntheme-trimming = false\ncompile-bindings = false\n";
+    assert_eq!(ThemeTrimming::from_manifest(manifest), Ok(ThemeTrimming::default()));
+    assert_eq!(compile_bindings_from_manifest(manifest), Ok(None));
+}
+
+/// Not from upstream (#850): a value of a wrong type is refused with the option it is for, and a
+/// manifest that is not TOML is refused.
+#[test]
+fn a_wrong_value_names_its_option() {
+    let roots = ThemeTrimming::from_manifest("[package.metadata.ferroui]\ntheme-roots = [\"A\", 1]\n");
+    assert_eq!(roots, Err("[package.metadata.ferroui] theme-roots must be \"all\" or an array of names".to_string()));
+    let other = ThemeTrimming::from_manifest("[package.metadata.ferroui]\ntheme-roots = \"some\"\n");
+    assert_eq!(other, Err("[package.metadata.ferroui] theme-roots must be \"all\" or an array of names".to_string()));
+    assert!(ThemeTrimming::from_manifest("[package\nname = 1").is_err());
+}

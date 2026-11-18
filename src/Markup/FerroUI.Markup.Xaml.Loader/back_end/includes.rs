@@ -74,4 +74,50 @@ mod tests {
             ["/Accents/Base.xaml", "Controls/Button.xaml", "ferres://Other/Styles.xaml", "/Local.xaml"]
         );
     }
+
+    /// Not from upstream (#850): a `Source` is the value of the attribute, with its entities
+    /// decoded, as the parser of the document reads it.
+    #[test]
+    fn an_entity_in_a_source_is_decoded() {
+        let xaml = "<Styles xmlns='https://github.com/ferroui'>\
+                    <StyleInclude Source='/A&amp;B.xaml'/><StyleInclude Source='/C&#x44;.xaml'/></Styles>";
+        assert_eq!(include_sources(xaml), ["/A&B.xaml", "/CD.xaml"]);
+    }
+
+    /// Not from upstream (#850): a `>` in the value of an attribute does not end the tag of an
+    /// include.
+    #[test]
+    fn a_greater_than_sign_in_an_attribute_does_not_end_the_tag() {
+        let xaml = "<ResourceDictionary xmlns='https://github.com/ferroui' \
+                    xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\
+                    <ResourceInclude x:Key='a>b' Source='/Keyed.xaml'/></ResourceDictionary>";
+        assert_eq!(include_sources(xaml), ["/Keyed.xaml"]);
+    }
+
+    /// Not from upstream (#850): what CDATA and comments hold is text, not an include.
+    #[test]
+    fn an_include_in_cdata_or_a_comment_is_not_an_include() {
+        let xaml = "<Styles xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\
+                    <Styles.Resources><x:String x:Key='Text'><![CDATA[<StyleInclude Source='/Text.xaml'/>]]></x:String>\
+                    </Styles.Resources><!-- <StyleInclude Source='/Comment.xaml'/> -->\
+                    <StyleInclude Source='/Real.xaml'/></Styles>";
+        assert_eq!(include_sources(xaml), ["/Real.xaml"]);
+    }
+
+    /// Not from upstream (#850): a document that is not well formed has no includes; it fails when
+    /// it is loaded, with the diagnostic of its parser.
+    #[test]
+    fn a_document_that_is_not_well_formed_has_no_includes() {
+        let xaml = "<Styles xmlns='https://github.com/ferroui'><StyleInclude Source='/A.xaml'/><Border></Styles>";
+        assert_eq!(include_sources(xaml), Vec::<String>::new());
+    }
+
+    /// Not from upstream (#850): a document type declaration is ignored, as the parser of the
+    /// document ignores it.
+    #[test]
+    fn a_document_type_declaration_is_ignored() {
+        let xaml = "<!DOCTYPE Styles>\
+                    <Styles xmlns='https://github.com/ferroui'><StyleInclude Source='/A.xaml'/></Styles>";
+        assert_eq!(include_sources(xaml), ["/A.xaml"]);
+    }
 }
