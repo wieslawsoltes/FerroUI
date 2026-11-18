@@ -2,29 +2,30 @@
      of TreeViewPage.xaml.cs (tree_samples.rs); see ../NOTICE.md. The trees get their items and
      templates from tree_samples.rs, as the source's constructor; the bound trees' items are
      expanded by the source's IsExpanded="True" of their templates, a style here. ThemeResource
-     becomes DynamicResource. FerroUI's TreeView has no drag and drop of its items (CanDragItems,
-     AllowDrop), so the first tree does not move items. -->
+     becomes DynamicResource and the bordered Grids are Borders (FerroUI's Grid has no border).
+     FerroUI's TreeView has no drag and drop of its items (CanDragItems, AllowDrop), so the first
+     tree does not move items. -->
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
   <StackPanel x:Name="TreeViewExample1" Spacing="8">
     <TextBlock Text="A simple TreeView with drag and drop support" FontSize="18" />
-    <Grid Height="280" BorderBrush="{DynamicResource TextControlBorderBrush}" BorderThickness="1">
+    <Border Height="280" BorderBrush="{DynamicResource TextControlBorderBrush}" BorderThickness="1">
       <TreeView x:Name="sampleTreeView" MinWidth="345" MaxHeight="400" Margin="0,12,0,0"
                 HorizontalAlignment="Center" VerticalAlignment="Top" />
-    </Grid>
+    </Border>
   </StackPanel>
 
   <StackPanel x:Name="TreeViewExample2" Spacing="8">
     <TextBlock Text="A TreeView with Multi-selection enabled" FontSize="18" />
-    <Grid Height="280" BorderBrush="{DynamicResource TextControlBorderBrush}" BorderThickness="1">
+    <Border Height="280" BorderBrush="{DynamicResource TextControlBorderBrush}" BorderThickness="1">
       <TreeView x:Name="sampleTreeView2" MinWidth="345" MaxHeight="400" Margin="0,12,0,0"
                 HorizontalAlignment="Center" VerticalAlignment="Top" />
-    </Grid>
+    </Border>
   </StackPanel>
 
   <StackPanel x:Name="TreeViewExample3" Spacing="8">
     <TextBlock Text="A TreeView with DataBinding Using ItemSource" FontSize="18" />
-    <Grid Height="200" BorderBrush="{DynamicResource TextControlBorderBrush}" BorderThickness="1">
+    <Border Height="200" BorderBrush="{DynamicResource TextControlBorderBrush}" BorderThickness="1">
       <TreeView x:Name="TreeView1" MinWidth="345" MaxHeight="400" Margin="0,12,0,0"
                 HorizontalAlignment="Center" VerticalAlignment="Top">
         <TreeView.Styles>
@@ -33,12 +34,12 @@
           </Style>
         </TreeView.Styles>
       </TreeView>
-    </Grid>
+    </Border>
   </StackPanel>
 
   <StackPanel x:Name="TreeViewExample4" Spacing="8">
     <TextBlock Text="A TreeView with ItemTemplateSelector" FontSize="18" />
-    <Grid Height="200" BorderBrush="{DynamicResource TextControlBorderBrush}" BorderThickness="1">
+    <Border Height="200" BorderBrush="{DynamicResource TextControlBorderBrush}" BorderThickness="1">
       <TreeView x:Name="FileTree" MinWidth="345" MaxHeight="400" Margin="0,12,0,0"
                 HorizontalAlignment="Center" VerticalAlignment="Top">
         <TreeView.Styles>
@@ -47,6 +48,6 @@
           </Style>
         </TreeView.Styles>
       </TreeView>
-    </Grid>
+    </Border>
   </StackPanel>
 </StackPanel>

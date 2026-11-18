@@ -295,18 +295,21 @@ fn list_view_context_menu_and_scrolling_act_on_the_realized_items() {
         .scroll()
         .and_then(|scroll| scroll.cast::<ScrollViewer>())
         .unwrap();
-    restore_viewer.set_offset(ferroui_base::Vector::new(0.0, 100.0));
+    restore.scroll_into_view(20);
     window.update_layout();
+    let saved = restore_viewer.offset().y;
+    assert!(saved > 0.0, "the list scrolled to its 21st item");
     assert!(!root.get_control::<Button>("RestorePositionButton").is_enabled());
     click(&root, "SavePositionButton");
     assert!(root.get_control::<Button>("RestorePositionButton").is_enabled());
-    restore_viewer.set_offset(ferroui_base::Vector::new(0.0, 0.0));
+    restore.scroll_into_view(0);
     window.update_layout();
+    assert!(restore_viewer.offset().y < saved);
     click(&root, "RestorePositionButton");
     window.update_layout();
     assert!(
-        (restore_viewer.offset().y - 100.0).abs() < 1.0,
-        "{}",
+        (restore_viewer.offset().y - saved).abs() < 1.0,
+        "restored {} for {saved}",
         restore_viewer.offset().y
     );
 }
