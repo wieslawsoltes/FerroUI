@@ -324,6 +324,15 @@ that no table naming classes is reachable from code outside the units.
   These are the run-time XAML loader, hot reload, the designer, DevTools, Inspect and
   Diagnostics. Looking types up by name (`type-tables`) does not keep every unit:
   `ferroui-view` and the behaviors only need the lookup, and their applications are trimmed.
+- The tables of types themselves keep every class of the framework they register, units or not.
+  Bounded reflection (#851, an experiment) builds with `--cfg ferroui_bounded_reflection` in
+  `RUSTFLAGS`: `type-tables` then registers no table of the framework and keeps no default
+  constructor, as without the feature, and the application registers what its dynamic use needs
+  one by one (`TypeInfo::register_all` for a type found by name, such as the owner of an
+  attached property a behavior names; `TypeInfo::register_constructor` for a class created by
+  reflection; `MarkupType::register_all`). The members a behavior finds by name on a value
+  (`find_markup_property`, `find_markup_methods`, `find_markup_event`) come from the markup
+  metadata of the value's own type and need no table.
 
 **When a unit is missing.** A debug build logs it once ("... was trimmed") with the control's
 name, the first time the control looks for its theme. Release builds do not check.
@@ -504,6 +513,7 @@ Documents loaded at run time bind the way the built application does (#604):
 | Part | Issue / PR | State |
 |---|---|---|
 | Tables of types trimmed by default | #566 | On `main` |
+| Bounded reflection: `type-tables` without the tables of the framework (`--cfg ferroui_bounded_reflection`, an experiment) | #851 | In review, to be measured |
 | Resource and constant rows (step 1) | #568 | On `main` |
 | Units and the unit graph, all four checked-in themes (step 2) | #568 | On `main` |
 | Root tables, `with_parts`, debug diagnostic (step 3) | #568, #598 | On `main` |
