@@ -1,6 +1,9 @@
 use crate::skia_sharp_extensions::slant_to_font_style;
 use ferroui_base::media::fonts::OpenTypeTag;
-use ferroui_base::media::{FontSimulations, FontStretch, FontStyle, FontWeight, IFontMemory, IPlatformTypeface};
+use ferroui_base::media::{
+    FontSimulations, FontStretch, FontStyle, FontVariation, FontVariationSettings, FontWeight, IFontMemory,
+    IPlatformTypeface,
+};
 use ferroui_base::utilities::ReadOnlyMemory;
 use skia_safe::{Font, Typeface};
 use std::any::Any;
@@ -88,6 +91,20 @@ impl IPlatformTypeface for SkiaTypeface {
 
     fn font_simulations(&self) -> FontSimulations {
         self.font_simulations
+    }
+
+    /// The position Skia reports for the typeface (`SkTypeface::getVariationDesignPosition`): a
+    /// system font of Core Text or DirectWrite at a weight is an instance of a variable font.
+    fn variation_settings(&self) -> FontVariationSettings {
+        match self.sk_typeface.variation_design_position() {
+            Some(coordinates) if !coordinates.is_empty() => FontVariationSettings::new(
+                coordinates
+                    .iter()
+                    .filter(|coordinate| !coordinate.value.is_nan())
+                    .map(|coordinate| FontVariation::new(OpenTypeTag::new(*coordinate.axis), coordinate.value as f64)),
+            ),
+            _ => FontVariationSettings::empty(),
+        }
     }
 
     fn try_get_stream(&self) -> Option<Box<dyn Read>> {

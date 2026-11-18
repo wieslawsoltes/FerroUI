@@ -1,5 +1,8 @@
 use ferroui_base::media::fonts::OpenTypeTag;
-use ferroui_base::media::{FontSimulations, FontStretch, FontStyle, FontWeight, IFontMemory, IPlatformTypeface};
+use ferroui_base::media::{
+    FontSimulations, FontStretch, FontStyle, FontVariation, FontVariationSettings, FontWeight, IFontMemory,
+    IPlatformTypeface,
+};
 use ferroui_base::utilities::ReadOnlyMemory;
 use kurbo::{Affine, BezPath, Diagonal2, Join, Shape};
 use peniko::{Blob, FontData};
@@ -255,6 +258,10 @@ impl OutlinePen for PathPen {
 /// tables this typeface serves, and the shaper reads the same tables.
 pub struct VelloTypeface {
     face: Arc<VelloFontFace>,
+    /// The values of the axes of the font the typeface was asked for, which the shaper is given:
+    /// empty for the default instance. Kept as plain values so that the typeface stays `Send`
+    /// and `Sync`.
+    variations: Box<[FontVariation]>,
     family_name: String,
     font_simulations: FontSimulations,
     weight: FontWeight,
@@ -315,10 +322,18 @@ impl VelloTypeface {
             .collect();
 
         let axes = font.axes();
-        let normalized_coords = if settings.iter().any(|(tag, _)| axes.get_by_tag(*tag).is_some()) {
-            axes.location(settings.iter().copied()).coords().to_vec()
+        let (normalized_coords, variations) = if settings.iter().any(|(tag, _)| axes.get_by_tag(*tag).is_some()) {
+            let variations: Box<[FontVariation]> = settings
+                .iter()
+                .filter(|(tag, value)| axes.get_by_tag(*tag).is_some() && !value.is_nan())
+                .map(|(tag, value)| {
+                    FontVariation::new(OpenTypeTag::new(u32::from_be_bytes(tag.to_be_bytes())), *value as f64)
+                })
+                .collect();
+
+            (axes.location(settings.iter().copied()).coords().to_vec(), variations)
         } else {
-            Vec::new()
+            (Vec::new(), Box::default())
         };
 
         let os2 = font.os2().ok();
@@ -379,6 +394,7 @@ impl VelloTypeface {
                 font_simulations,
                 glyph_bounds: Mutex::new(HashMap::new()),
             }),
+            variations,
             family_name,
             font_simulations,
             weight,
@@ -452,6 +468,14 @@ impl IPlatformTypeface for VelloTypeface {
 
     fn font_simulations(&self) -> FontSimulations {
         self.font_simulations
+    }
+
+    fn variation_settings(&self) -> FontVariationSettings {
+        if self.variations.is_empty() {
+            return FontVariationSettings::empty();
+        }
+
+        FontVariationSettings::new(self.variations.iter().copied())
     }
 
     fn try_get_stream(&self) -> Option<Box<dyn Read>> {
