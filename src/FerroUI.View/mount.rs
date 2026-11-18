@@ -27,7 +27,7 @@
 use crate::element::{AnyValueEq, ComponentElement, ControlElement, DynamicChildren, Element, ElementClass, Key, PropValue};
 use crate::reactive::{effect, on_cleanup, signal, untrack, Owner, Signal};
 use ferroui_base::data::BindingPriority;
-use ferroui_base::{BoxedValue, FerroProperty, Ref};
+use ferroui_base::{BoxedValue, FerroProperty, Ref, WeakRef};
 use ferroui_controls::presenters::ContentPresenter;
 use ferroui_controls::{ContentControl, Control, Decorator, ItemsControl, Panel, TextBlock};
 use std::any::{Any, TypeId};
@@ -884,23 +884,13 @@ fn start_prop(control: &Ref<Control>, property: &'static FerroProperty, value: &
         PropValue::Dynamic(compute) | PropValue::Follows { compute, .. } => {
             let compute = compute.clone();
             let weak = control.downgrade();
-            effect(move || {
-                let value = compute();
-                if let Some(control) = weak.upgrade() {
-                    untrack(|| set_untyped(&control, property, value));
-                }
-            });
+            effect(move || follow(&weak, property, &*compute));
         }
         PropValue::TwoWay { get, set, .. } => {
             let get = get.clone();
             let set = set.clone();
             let weak = control.downgrade();
-            effect(move || {
-                let value = get();
-                if let Some(control) = weak.upgrade() {
-                    untrack(|| set_untyped(&control, property, value));
-                }
-            });
+            effect(move || follow(&weak, property, &*get));
             let subscription = control.property_changed(move |e| {
                 if std::ptr::eq(e.property(), property) {
                     set(e.new_value());
@@ -914,6 +904,22 @@ fn start_prop(control: &Ref<Control>, property: &'static FerroProperty, value: &
         }
         PropValue::Value(_) | PropValue::Element(_) | PropValue::TypedElement { .. } => {
             unreachable!("handled by mount_prop")
+        }
+    }
+}
+
+/// A run of the effect of a property that follows a closure: the closure computes the value (and
+/// reads what the effect follows), and a closure of the builders sets the property with it,
+/// typed (`builder::compute_into`); the value of any other closure is set untyped.
+fn follow(control: &WeakRef<Control>, property: &'static FerroProperty, compute: &dyn Fn() -> BoxedValue) {
+    match control.upgrade() {
+        Some(control) => {
+            if let Some((control, value)) = crate::builder::compute_into(control, property, compute) {
+                untrack(|| set_untyped(&control, property, value));
+            }
+        }
+        None => {
+            compute();
         }
     }
 }

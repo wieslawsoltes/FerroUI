@@ -1,6 +1,7 @@
 use crate::generated::builders::*;
 use crate::reactive::{signal, Owner};
-use crate::{Element, GridDefinitions, IntoElement};
+use crate::element::{PropEntry, PropValue};
+use crate::{Element, GridDefinitions, IntoElement, IntoProp};
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::layout::HorizontalAlignment;
 use ferroui_base::media::Color;
@@ -160,6 +161,65 @@ fn a_property_follows_a_signal_and_a_closure() {
     assert_eq!(texts(), vec!["1", "Count: 1"]);
     count.set(7);
     assert_eq!(texts(), vec!["7", "Count: 7"]);
+    owner.dispose();
+}
+
+#[test]
+fn a_closure_sets_its_property_typed_and_a_value_equal_to_the_one_before_changes_nothing() {
+    let owner = Owner::new_root();
+    let (version, control) = owner.with(|| {
+        let version = signal(0_u32);
+        let text = move || {
+            let version = version.get();
+            if version < 2 { String::from("same") } else { format!("at {version}") }
+        };
+        let control = text_block().text(text).foreground(move || {
+            let _ = version.get();
+            Color::from_rgb(1, 2, 3)
+        });
+        (version, control.into_element().mount())
+    });
+    let block = control.cast::<TextBlock>().unwrap();
+    let changes = Rc::new(Cell::new(0));
+    let counted = changes.clone();
+    let subscription = block.property_changed(move |e| {
+        if matches!(e.property().name(), "Text" | "Foreground") {
+            counted.set(counted.get() + 1);
+        }
+    });
+    let address = || block.foreground().map(|brush| Rc::as_ptr(&brush) as *const ());
+    let foreground = address();
+    version.set(1);
+    assert_eq!((changes.get(), block.text().as_deref()), (0, Some("same")));
+    // The brush of the property is the one it had: the equal one was not taken.
+    assert_eq!(address(), foreground);
+    version.set(2);
+    assert_eq!((changes.get(), block.text().as_deref()), (1, Some("at 2")));
+    subscription.dispose();
+    owner.dispose();
+}
+
+#[test]
+fn a_closure_run_outside_its_effect_and_a_closure_made_elsewhere_give_their_values() {
+    // Outside the effect of a property the closure of the builders returns its value boxed.
+    let PropValue::Dynamic(compute) = IntoProp::<f64, _>::into_prop(|| 5.0) else { panic!("a closure") };
+    assert_eq!(compute().downcast_ref::<f64>(), Some(&5.0));
+    assert_eq!(compute().downcast_ref::<f64>(), Some(&5.0));
+
+    // A closure that is not of the builders is set through the untyped setter.
+    let owner = Owner::new_root();
+    let (count, control) = owner.with(|| {
+        let count = signal(1);
+        let mut element = text_block().build();
+        let Element::Control(control) = &mut element else { panic!("a control element") };
+        let compute: Rc<dyn Fn() -> BoxedValue> = Rc::new(move || Rc::new(Some(format!("made {}", count.get()))));
+        control.props.push(PropEntry { property: TextBlock::text_property().as_property(), value: PropValue::Dynamic(compute) });
+        (count, element.mount())
+    });
+    let block = control.cast::<TextBlock>().unwrap();
+    assert_eq!(block.text().as_deref(), Some("made 1"));
+    count.set(2);
+    assert_eq!(block.text().as_deref(), Some("made 2"));
     owner.dispose();
 }
 
