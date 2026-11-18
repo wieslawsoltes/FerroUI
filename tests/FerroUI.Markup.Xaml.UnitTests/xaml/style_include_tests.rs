@@ -355,3 +355,27 @@ fn style_include_from_code_behind_resolves_compiled() {
 
 // NOT PORTED (the Rust port lacks a type or member the test body needs):
 // - style_include_should_be_replaced_with_direct_call -> themes: `SimpleTheme` (the simple theme is not ported)
+
+/// Not from upstream (#850): a document that is not well formed fails to load with the diagnostic of
+/// the parser of the compiler, its position included, whether or not it has includes: the
+/// includes of a group are read with the same parser, and a document it refuses has none.
+#[test]
+fn a_document_that_is_not_well_formed_keeps_the_diagnostic_of_the_parser() {
+    let _app = unit_test_application(TestServices::styled_window().with_theme(|| styles_as_style(&Styles::new())));
+    let xaml = "<Styles xmlns='https://github.com/ferroui'>\n\
+                <StyleInclude Source='ferres://FerroUI.Markup.Xaml.UnitTests/Xaml/Style1.xaml'/>\n\
+                <Border></Styles>";
+    let error = match crate::support::loader::try_load(xaml) {
+        Ok(_) => panic!("a document that is not well formed loaded"),
+        Err(error) => error,
+    };
+    let parsed = xamlx::parsers::XDocumentXamlParser::parse(xaml, None).err().expect("the parser refuses the document");
+    let loaded = crate::support::loader::xaml_error(&error).unwrap_or_else(|| panic!("{}", describe(&error)));
+    assert!(loaded.is_xml_exception(), "{}", describe(&error));
+    assert_eq!(
+        (loaded.message(), loaded.line_number(), loaded.line_position()),
+        (parsed.message(), parsed.line_number(), parsed.line_position()),
+        "{}",
+        describe(&error)
+    );
+}
