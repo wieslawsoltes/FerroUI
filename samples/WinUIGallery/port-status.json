@@ -635,18 +635,23 @@
       "examples": []
     },
     "Flyout": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/Flyout.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/menu_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/menu_samples_tests.rs",
+          "name": "flyout_confirmation_hides_the_flyout"
         }
       ],
-      "notes": "Native Button.Flyout hosts the confirmation content; the action uses a Rust click handler. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The source example uses native Button.Flyout with DeleteConfirmation_Click of FlyoutPage.xaml.cs in Rust: the confirmation hides the flyout. The message's BaseTextBlockStyle is its semibold weight; the page's SharedFlyout resource is used by no example and is left out.",
       "examples": []
     },
     "Geometry": {
@@ -842,33 +847,47 @@
       "examples": []
     },
     "MenuBar": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/MenuBar.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/menu_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/menu_samples_tests.rs",
+          "name": "menu_bar_items_write_their_text_to_the_output_of_their_bar"
         }
       ],
-      "notes": "Native Menu with MenuItems represents WinUI MenuBar. Shortcuts remain shared key gestures. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "All three source examples use native Menu (WinUI's MenuBar; MenuBarItem.Title is the Header of a top MenuItem) with OnElementClicked of MenuBarPage.xaml.cs in Rust (the first letter of the item's name picks the output): the simple bar, the bar whose KeyboardAccelerators are HotKeys shown as InputGestures, and the bar with a submenu, separators and two radio groups (RadioMenuFlyoutItem is a MenuItem with the ToggleType Radio).",
       "examples": []
     },
     "MenuFlyout": {
       "status": "partial",
       "implementation": [
         "samples/WinUIGallery/Pages/MenuFlyout.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/menu_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/menu_samples_tests.rs",
+          "name": "menu_flyout_items_write_the_sort_option_and_the_clicked_item"
+        },
+        {
+          "path": "samples/WinUIGallery/menu_samples_tests.rs",
+          "name": "menu_flyout_items_keep_the_source_toggles_groups_and_accelerators"
         }
       ],
-      "notes": "Native MenuFlyout/MenuItem and separators preserve popup ownership and selection behavior. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "All seven source examples use native MenuFlyout with MenuFlyoutItem_Click and SplitMenuFlyoutItem_Click of MenuFlyoutPage.xaml.cs in Rust: the sort menu of a compact CommandBarButton (the Tag of the item), the check items and separator, the cascading menus, the icons (FontIcon and SymbolIcon), the KeyboardAccelerators as HotKeys shown as InputGestures with the source's fonts, and the radio groups. WinUI's MenuFlyoutItem is MenuItem (Text is Header); ToggleMenuFlyoutItem and RadioMenuFlyoutItem are MenuItems with the ToggleType CheckBox and Radio. FerroUI has no SplitMenuFlyoutItem: Save and Share are MenuItems with the source's items, whose primary parts cannot be clicked, so the page is partial. The glyphs need the platform's symbol font.",
       "examples": []
     },
     "NumberBox": {
@@ -1049,7 +1068,7 @@
       "examples": []
     },
     "Popup": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/Popup.xaml",
         "samples/WinUIGallery/examples.rs",
@@ -1061,29 +1080,16 @@
           "name": "all_reviewed_native_adaptations_load_real_controls"
         },
         {
-          "path": "samples/WinUIGallery/tests.rs",
-          "name": "popup_sample_opens_closes_and_observes_offset_options"
+          "path": "samples/WinUIGallery/menu_samples_tests.rs",
+          "name": "popup_buttons_open_and_close_and_disable_the_light_dismiss_option"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
         }
       ],
-      "notes": "The source open/close handlers and offset/light-dismiss options use the native Popup. Placement is explicitly relative to its button; WinUI absolute-placement, acrylic and screen-edge parity remain pending. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
-      "examples": [
-        {
-          "source": "WinUIGallery/Samples/Popup/PopupOffsetPositioning.txt",
-          "status": "partial",
-          "tests": [
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "all_reviewed_native_adaptations_load_real_controls"
-            },
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "popup_sample_opens_closes_and_observes_offset_options"
-            }
-          ],
-          "notes": "The source open/close handlers and offset/light-dismiss options use the native Popup. Placement is explicitly relative to its button; WinUI absolute-placement, acrylic and screen-edge parity remain pending. Mock host tests establish application behavior; real operating-system integration and upstream visual/accessibility acceptance remain pending.",
-          "source_sha256": "9508ff9307fb7228d41fd424b569f586e7b1765ed07b7dac72ae601c117fbb96"
-        }
-      ]
+      "notes": "The source example uses native Popup with ShowPopupOffsetClicked, ClosePopupClicked and PopupClosed of PopupPage.xaml.cs in Rust (the light-dismiss option is disabled while the popup is open). The offsets and IsLightDismissEnabled keep the source's OneWay x:Bind of the NumberBoxes and the ToggleSwitch (IsOn is IsChecked, the Header its Content). As WinUI's Popup without a placement target, the popup's top left corner is at its parent's, moved by the offsets (AnchorAndGravity, TopLeft, BottomRight).",
+      "examples": []
     },
     "ProgressBar": {
       "status": "partial",

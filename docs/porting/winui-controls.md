@@ -458,6 +458,10 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 | AppBarToggleButton | 3 ported, 1 partial: no BitmapIcon (an Image) | partial | `command_samples.rs` | `command_samples_tests.rs` |
 | AppBarSeparator | 1 of 1 | ported | `Pages/AppBarSeparator.xaml` (no code-behind upstream) | `command_samples_tests.rs` |
 | CommandBar | 1 of 1 | ported | `command_samples.rs` | `command_samples_tests.rs` |
+| Flyout | 1 of 1 | ported | `menu_samples.rs` | `menu_samples_tests.rs` |
+| MenuFlyout | 6 ported, 1 partial: no SplitMenuFlyoutItem | partial | `menu_samples.rs` | `menu_samples_tests.rs` |
+| MenuBar | 3 of 3 | ported | `menu_samples.rs` | `menu_samples_tests.rs` |
+| Popup | 1 of 1 | ported | `platform_samples.rs` | `menu_samples_tests.rs`, `x_bind_tests.rs` |
 
 ### 10.8 WinUI API and Gallery scanner (W10b)
 
