@@ -11,8 +11,9 @@ SOURCE_COMMIT = "14061eeac21c38ae99f302edf3d9136d4f652c4c"
 METADATA = "WinUIGallery/SampleSupport/Data/ControlInfoData.json"
 
 # Original media used by the reviewed Image, FlipView, ConnectedAnimation, Button,
-# AppBarButton, AppBarToggleButton and TreeView pages. Keep this list explicit: an embedded asset does not establish a port of
-# the source feature (for example animated GIF playback or SVG decoding).
+# AppBarButton, AppBarToggleButton and TreeView pages. Keep this list explicit: an embedded
+# asset does not establish a port of the source feature (for example animated GIF playback or
+# SVG decoding).
 SAMPLE_MEDIA = [
     *(f"LandscapeImage{number}.jpg" for number in range(1, 14)),
     "MirrorPCConsent.svg", "animated.gif", "cliff.jpg", "grapes.jpg",
@@ -25,6 +26,11 @@ MEDIA_PAGES = [
                  "AppBarToggleButton", "TreeView"]
     for suffix in [".xaml", ".xaml.cs"]
 ]
+
+
+def exact_file(path):
+    """Whether `path` names a file with exactly this case (macOS and Windows match any case)."""
+    return path.is_file() and path.name in {entry.name for entry in path.parent.iterdir()}
 
 
 def outputs(upstream):
@@ -49,12 +55,9 @@ def outputs(upstream):
         if not uri.startswith(("ms-appx:///Assets/ControlImages/", "ms-appx:///Assets/SampleMedia/")):
             raise ValueError(f"Unexpected image URI: {uri}")
         registered = uri.removeprefix("ms-appx:///")
-        # A control image is the file of its own casing in the directory listing: a case-insensitive
-        # file system also opens the source's other casing, which is then a registered alias.
-        if registered.startswith("Assets/ControlImages/"):
+        original = root / registered
+        if not exact_file(original):
             original = folded.get(registered.casefold())
-        else:
-            original = root / registered
         if original is None or not original.is_file():
             raise ValueError(f"Missing image: {uri}")
         relative = original.relative_to(root).as_posix()
