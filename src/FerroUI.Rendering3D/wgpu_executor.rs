@@ -818,8 +818,8 @@ impl Scene3DWgpuExecutor {
             let (uniforms, _) = DrawUniforms::of(model, layer, face);
             let mut brush = MaterialBrush::of(layer.brush.as_ref(), texture_bounds);
             let mut texture = None;
-            if let Some(source) = brush.texture() {
-                if self.brush_texture(device, queue, source, report) {
+            if let Some(source) = brush.texture().cloned() {
+                if self.brush_texture(device, queue, &source, report) {
                     texture = Some(source.key());
                 } else {
                     // Texels that cannot be read or uploaded: the layer is drawn with its colour.
@@ -881,7 +881,7 @@ impl Scene3DWgpuExecutor {
             return false;
         };
         let size = (texels.width, texels.height);
-        let replaced = match key {
+        let replaced_key = match key {
             BrushTextureKey::Image { identity, .. } => self
                 .textures
                 .iter()
@@ -890,10 +890,10 @@ impl Scene3DWgpuExecutor {
                         && texture.last_used != renders
                         && texture.size == size
                 })
-                .map(|(other, _)| *other)
-                .and_then(|other| self.textures.remove(&other)),
+                .map(|(other, _)| *other),
             _ => None,
         };
+        let replaced = replaced_key.and_then(|other| self.textures.remove(&other));
         let texture = match replaced {
             Some(texture) => BrushTexture { identity: source.identity(), last_used: renders, ..texture },
             None => {
