@@ -18,6 +18,14 @@ pub use registered::RsxCatalog;
 pub use source_edits::{RsxEvent, event_setter};
 pub use xaml::{apply_rsx, xaml_to_rsx};
 
+/// Count source-authored invocations without requiring registered control types.
+pub fn invocation_count(source: &str) -> usize {
+    if !source.contains("rsx") {
+        return 0;
+    }
+    blocks::blocks(source).map_or(0, |matches| matches.len())
+}
+
 #[cfg(test)]
 mod tests;
 #[cfg(test)]

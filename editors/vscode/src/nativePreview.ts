@@ -2,6 +2,7 @@ import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { createMessageConnection, StreamMessageReader, StreamMessageWriter } from 'vscode-jsonrpc/node';
 import type * as vscode from 'vscode';
 import type { BuiltProject } from './builtProjects';
+import type { NativeProjectInventory } from './projectInventory';
 import type { Asset, CanvasInteraction, CanvasPresentation, DropHint, EditResult, Inspection, InspectionTarget, Operation, Placement, ResourceRow, Snapshot, Source, Viewport } from './protocol';
 import type { RsxLanguageDocument } from './rsxLanguageTypes';
 import type { HostedFrame, HostedInput, HostedSource } from './hostedProtocol';
@@ -16,7 +17,7 @@ export class NativePreview implements vscode.Disposable {
     private readonly projects = new WeakMap<BuiltProject, Promise<number>>();
     private nextProject = 0;
     assets: readonly Asset[] = [];
-    capabilities: { isolatedDesign?: boolean; appHostedDesign?: boolean; rsxLanguage?: boolean; stages?: boolean; prototypeEditing?: boolean; projectCatalog?: boolean; canvasInteraction?: boolean } = {};
+    capabilities: { isolatedDesign?: boolean; appHostedDesign?: boolean; rsxLanguage?: boolean; stages?: boolean; prototypeEditing?: boolean; projectCatalog?: boolean; canvasInteraction?: boolean; projectInventory?: boolean } = {};
 
     private constructor(command: string, channel: vscode.OutputChannel) {
         this.child = spawn(command, [], { windowsHide: true });
@@ -63,6 +64,11 @@ export class NativePreview implements vscode.Disposable {
 
     rsxLanguage(source: Source): Promise<RsxLanguageDocument | undefined> {
         return this.capabilities.rsxLanguage ? this.send('rsxLanguage', source) : Promise.resolve(undefined);
+    }
+
+    projectInventory(workspaceRoot: string): Promise<NativeProjectInventory> {
+        if (!this.capabilities.projectInventory) throw new Error('Update the FerroUI preview helper to browse project files.');
+        return this.send('projectInventory', { workspaceRoot });
     }
 
     listenHosted(nonce: string): Promise<{ port: number }> {

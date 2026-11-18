@@ -80,6 +80,35 @@
         "category": "FerroUI"
       },
       {
+        "command": "ferroui.project.findView",
+        "title": "Find Project View",
+        "category": "FerroUI",
+        "icon": "$(search)"
+      },
+      {
+        "command": "ferroui.project.refresh",
+        "title": "Refresh Project",
+        "category": "FerroUI",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "ferroui.project.newView",
+        "title": "New View",
+        "category": "FerroUI",
+        "icon": "$(new-file)"
+      },
+      {
+        "command": "ferroui.project.newComponent",
+        "title": "New Component",
+        "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.project.runTarget",
+        "title": "Run with Hot Reload",
+        "category": "FerroUI",
+        "icon": "$(debug-start)"
+      },
+      {
         "command": "ferroui.showOutline",
         "title": "Show Outline",
         "category": "FerroUI",
@@ -200,6 +229,10 @@
         {
           "command": "ferroui.openDesigner",
           "when": "editorLangId == ferroui-xaml || editorLangId == rust"
+        },
+        {
+          "command": "ferroui.project.runTarget",
+          "when": "false"
         }
       ],
       "editor/title": [
@@ -220,6 +253,33 @@
           "command": "ferroui.revealDesignerSource",
           "when": "view == ferroui.outline",
           "group": "navigation"
+        },
+        {
+          "command": "ferroui.project.findView",
+          "when": "view == ferroui.project",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ferroui.project.newView",
+          "when": "view == ferroui.project && isWorkspaceTrusted",
+          "group": "navigation@2"
+        },
+        {
+          "command": "ferroui.project.refresh",
+          "when": "view == ferroui.project",
+          "group": "navigation@3"
+        },
+        {
+          "command": "ferroui.project.newComponent",
+          "when": "view == ferroui.project && isWorkspaceTrusted",
+          "group": "ferroui"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "ferroui.project.runTarget",
+          "when": "view == ferroui.project && viewItem == ferrouiProjectTarget && isWorkspaceTrusted",
+          "group": "inline"
         }
       ]
     },
@@ -366,6 +426,12 @@
     },
     "views": {
       "ferrouiWorkbench": [
+        {
+          "id": "ferroui.project",
+          "name": "Project",
+          "contextualTitle": "FerroUI Project",
+          "visibility": "collapsed"
+        },
         {
           "type": "webview",
           "id": "ferroui.toolbox",

@@ -6,7 +6,7 @@ mod toolbox;
 mod uri;
 mod workspace;
 
-pub use discovery::{CargoTarget, DocumentEntry, DocumentKind, ProjectDescriptor, Solution};
+pub use discovery::{CargoTarget, DocumentEntry, DocumentKind, ProjectDescriptor, Solution, workspace_documents};
 use std::fmt;
 pub use markup::{BuildMetadata, MarkupCatalog, MarkupControl};
 pub use tasks::{BuildTask, OutputStream, TaskHandle, TaskKind, TaskOutput, TaskStatus};

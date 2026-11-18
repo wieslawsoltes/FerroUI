@@ -10,6 +10,7 @@ import { DockView } from './dockView';
 import { OutlineView } from './outlineView';
 import { SelectionInspection } from './selectionInspection';
 import { PROPERTIES_VIEW, PropertiesView } from './propertiesView';
+import type { ProjectAssets } from './projectAssets';
 import { chooseLayout } from './studioLayout';
 import { StudioView } from './studioView';
 import { errorMessage, type DesignerView, type DetailsView, type DragOrigin, type FrameTarget, type FromAssets, type FromDetails, type FromOutline, type FromToolbox, type Language, type NodeOperation, type NodeTarget, type OutlineMode, type ToolboxState, type ToToolbox, type Viewport } from './protocol';
@@ -45,13 +46,13 @@ export class DesignerWorkbench implements vscode.Disposable {
     private active?: DesignerPanel;
 
     constructor(private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel,
-        private readonly projects: BuiltProjects) {
+        private readonly projects: BuiltProjects, assets: ProjectAssets) {
         const changed = () => this.updateDocks();
         this.inspection = new SelectionInspection(changed);
         this.outline = new OutlineView(context.extensionUri, changed, message => { void this.outlineMessage(message); });
         this.toolbox = new DockView(context.extensionUri, toolboxHtml, changed, message => { void this.toolboxMessage(message); });
         this.details = new DetailsViews(context.extensionUri, changed, (view, message) => { void this.detailsMessage(view, message); });
-        this.assets = new AssetsView(context.extensionUri, changed, message => { void this.assetsMessage(message); });
+        this.assets = new AssetsView(context.extensionUri, assets, changed, message => { void this.assetsMessage(message); });
         this.properties = new PropertiesView(context.extensionUri, changed, (target, operation) => this.edit(target, operation),
             () => { void this.showDock(TOOLBOX_VIEW); },
             async (frame, range) => { await this.active?.revealSource(frame, range); });

@@ -15,13 +15,13 @@ interface Query {
 
 export class AssetsView {
     readonly view: DockView<AssetsState, FromAssets, ToAssets>;
-    readonly library: ProjectAssets;
+    private readonly subscription: vscode.Disposable;
     private folder?: vscode.WorkspaceFolder;
     private cache?: Query;
 
-    constructor(root: vscode.Uri, private readonly changed: () => void, receive: (message: FromAssets) => void) {
+    constructor(root: vscode.Uri, readonly library: ProjectAssets, private readonly changed: () => void, receive: (message: FromAssets) => void) {
         this.view = new DockView(root, assetsHtml, changed, receive);
-        this.library = new ProjectAssets(() => { this.cache = undefined; changed(); });
+        this.subscription = library.onDidChange(() => { this.cache = undefined; changed(); });
     }
 
     update(panel?: DesignerPanel, frame?: FrameTarget, canInsert = false): void {
@@ -71,7 +71,7 @@ export class AssetsView {
     }
 
     dispose(): void {
-        this.library.dispose();
+        this.subscription.dispose();
         this.view.dispose();
     }
 }

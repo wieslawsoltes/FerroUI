@@ -15,6 +15,10 @@ const placement = { ...frame, asset: text, project_asset: text, node, selection:
 
 export const agentCatalog = {
     ...workspaceCatalog,
+    ferroui_project_files: tool('Browse indexed Cargo manifests, XAML, RSX invocations, assets and saved stage sets in the same project model used by the workbench.',
+        { folder: workspacePath, kind: choice('cargo', 'xaml', 'rsx', 'asset', 'stages'), offset: integer(0), limit: integer(1, 200) }),
+    ferroui_project_scaffold: tool('Create a FerroUI XAML or RSX view or reusable component as a new editor file. A Rust module can import the generated view after review.',
+        { kind: choice('view', 'component'), language: choice('xaml', 'rsx'), path: workspacePath, folder: workspacePath }, ['kind', 'language', 'path'], true, false),
     ferroui_designs: tool('List open FerroUI designer sessions and the active session in this VS Code window.'),
     designer_open: tool('Open a workspace XAML or Rust file and its design tab. For Rust, optionally specify a zero-based invocation position.',
         { path: workspacePath, folder: workspacePath, line: integer(0), character: integer(0) }, ['path'], true, false),

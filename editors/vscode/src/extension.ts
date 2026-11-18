@@ -5,7 +5,11 @@ import { DesignerWorkbench } from './designerWorkbench';
 import { HotReload } from './hotReload';
 import { HostedDesign } from './hostedDesign';
 import { FerroMcpProvider } from './mcpProvider';
+import { ProjectAssets } from './projectAssets';
+import { ProjectInventory } from './projectInventory';
+import { ProjectScaffold } from './projectScaffold';
 import { ProjectSchemaBuild } from './projectSchemaBuild';
+import { ProjectView } from './projectView';
 import type { ProjectMetadata } from './reloadProcess';
 import { RuntimeConnections } from './runtimeConnections';
 import { RuntimePanel } from './runtimePanel';
@@ -26,20 +30,25 @@ export function activate(context: vscode.ExtensionContext) {
     projects.metadata.forEach(metadata => server.updateProject(metadata));
     const schemaBuild = new ProjectSchemaBuild(languageOutput, publish);
     const rsx = new RsxLanguage(context, languageOutput, projects);
-    const designer = new DesignerWorkbench(context, previewOutput, projects);
+    const assets = new ProjectAssets();
+    const inventory = new ProjectInventory(context, previewOutput, assets);
+    const scaffolds = new ProjectScaffold();
+    const designer = new DesignerWorkbench(context, previewOutput, projects, assets);
     const hosted = new HostedDesign(context, previewOutput, publish);
     const stages = new StagesPanel(context, previewOutput, projects);
     const reload = new HotReload();
+    const projectView = new ProjectView(inventory, projects, reload);
     stopProcesses = async () => { await Promise.all([reload.stop(), hosted.dispose(), schemaBuild.dispose()]); };
     const runtimes = new RuntimeConnections(reload);
     const runtimeSource = new RuntimeSourceEditor(designer, reload);
     const liveApp = new RuntimePanel(context, runtimes, reload, runtimeSource);
-    const mcp = new FerroMcpProvider(context, new AgentTools(designer, reload, stages, new RuntimeSourceTools(runtimes, runtimeSource)), previewOutput, runtimes);
+    const runtimeTools = new RuntimeSourceTools(runtimes, runtimeSource);
+    const mcp = new FerroMcpProvider(context, new AgentTools(designer, reload, stages, runtimeTools, inventory, scaffolds), previewOutput, runtimes);
     const startForXaml = (document: vscode.TextDocument) => {
         if (document.languageId === xamlLanguage && document.uri.scheme === 'file') void server.start();
     };
     context.subscriptions.push(
-        projects, schemaBuild, server, rsx, designer, hosted, stages, liveApp, reload, runtimes, mcp, languageOutput, previewOutput,
+        projectView, projects, schemaBuild, inventory, scaffolds, assets, server, rsx, designer, hosted, stages, liveApp, reload, runtimes, mcp, languageOutput, previewOutput,
         reload.onDidBuild(publish),
         vscode.workspace.onDidOpenTextDocument(startForXaml),
         vscode.workspace.onDidChangeConfiguration(event => {

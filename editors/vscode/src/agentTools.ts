@@ -5,6 +5,8 @@ import type { CargoSelection } from './cargoTarget';
 import type { DesignerPanel } from './designerPanel';
 import type { DesignerWorkbench } from './designerWorkbench';
 import type { HotReload } from './hotReload';
+import type { ProjectFile, ProjectInventory } from './projectInventory';
+import type { ProjectScaffold } from './projectScaffold';
 import type { RuntimeSourceTools } from './runtimeSourceTools';
 import type { StagesPanel } from './stagesPanel';
 import type { PrototypeCommand, StageChange } from './stagesProtocol';
@@ -64,13 +66,15 @@ interface Arguments extends CanvasAction, CargoSelection {
     expected_epoch?: number;
     debug_configuration?: string;
     input?: CanvasInteraction;
+    kind?: string;
+    language?: 'xaml' | 'rsx';
 }
 
 export class AgentTools {
     private readonly workspace = new WorkspaceTools();
 
     constructor(private readonly workbench: DesignerWorkbench, private readonly reload: HotReload, private readonly stages: StagesPanel,
-        private readonly runtimeSource: RuntimeSourceTools) {}
+        private readonly runtimeSource: RuntimeSourceTools, private readonly project: ProjectInventory, private readonly scaffolds: ProjectScaffold) {}
 
     definitions() { return Object.entries(agentCatalog).map(([name, definition]) => ({ name, ...definition })); }
 
@@ -112,6 +116,8 @@ export class AgentTools {
         if (tool === 'ferroui_runtime_apply_source') {
             return this.runtimeSource.apply(args.node!, args.property, args.value!, args.expected_generation, args.expected_version, signal);
         }
+        if (tool === 'ferroui_project_files') return this.project.list(args.folder, args.kind as ProjectFile['kind'] | undefined, args.offset ?? 0, args.limit ?? 100, signal);
+        if (tool === 'ferroui_project_scaffold') return this.scaffolds.create(args.kind as 'view' | 'component', args.language!, args.path, args.folder, signal);
 
         const panel = this.workbench.designs().find(panel => panel.session === args.session);
         if (!panel || !await isWorkspaceFile(panel.document.uri)) throw new Error('Select an open design inside the current workspace.');

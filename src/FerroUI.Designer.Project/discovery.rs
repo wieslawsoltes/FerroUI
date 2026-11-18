@@ -38,6 +38,14 @@ pub struct Solution {
     pub root: PathBuf,
     pub projects: Vec<ProjectDescriptor>,
 }
+
+/// Discover files under an editor workspace without invoking Cargo.
+pub fn workspace_documents(root: &Path) -> Result<Vec<DocumentEntry>> {
+    let root = root.canonicalize()?;
+    require(root.is_dir(), "The workspace must be a directory")?;
+    scan(&root)
+}
+
 impl Solution {
     /// An explicit build can select a nested Cargo package inside the indexed root.
     /// Cargo workspace members can also have their own project roots.

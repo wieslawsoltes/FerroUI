@@ -29,9 +29,11 @@ interface IndexEntry {
 export class ProjectAssets implements vscode.Disposable {
     private readonly subscriptions: vscode.Disposable[];
     private readonly index = new Map<string, Promise<IndexEntry[]>>();
+    private readonly changed = new vscode.EventEmitter<void>();
+    readonly onDidChange = this.changed.event;
 
-    constructor(changed: () => void) {
-        const invalidate = () => { this.index.clear(); changed(); };
+    constructor() {
+        const invalidate = () => { this.index.clear(); this.changed.fire(); };
         const watcher = vscode.workspace.createFileSystemWatcher(pattern, false, true, false);
         this.subscriptions = [watcher, watcher.onDidCreate(invalidate), watcher.onDidDelete(invalidate),
             vscode.workspace.onDidChangeWorkspaceFolders(invalidate)];
@@ -107,7 +109,10 @@ export class ProjectAssets implements vscode.Disposable {
         return entries.filter((asset): asset is IndexEntry => asset !== undefined).sort((a, b) => a.path.localeCompare(b.path));
     }
 
-    dispose(): void { this.subscriptions.forEach(subscription => subscription.dispose()); }
+    dispose(): void {
+        this.subscriptions.forEach(subscription => subscription.dispose());
+        this.changed.dispose();
+    }
 }
 
 function relativeTo(document: vscode.Uri, file: vscode.Uri): string {

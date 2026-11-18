@@ -9,6 +9,7 @@ mod hosted_frame;
 mod hosted_relay;
 mod inspection;
 mod interaction;
+mod inventory;
 mod placement;
 mod projects;
 mod property_fields;
@@ -83,7 +84,7 @@ fn respond(
     }
     let result = match method {
         "initialize" => Ok(json!({"version": protocol::PROTOCOL_VERSION, "assets": toolbox::catalog(),
-            "capabilities": {"isolatedDesign":true,"appHostedDesign":true,"rsxLanguage":true,"stages":true,"prototypeEditing":true,"projectCatalog":true,"canvasInteraction":true}})),
+            "capabilities": {"isolatedDesign":true,"appHostedDesign":true,"rsxLanguage":true,"stages":true,"prototypeEditing":true,"projectCatalog":true,"canvasInteraction":true,"projectInventory":true}})),
         "configureProject" => serde_json::from_value(message["params"].clone())
             .map_err(|error| error.to_string()).and_then(|request| {
                 let retired = projects.register(request)?;
@@ -104,6 +105,9 @@ fn respond(
             }
             _ => Err("RSX language source must be at most 1 MiB".into()),
         },
+        "projectInventory" => message["params"]["workspaceRoot"].as_str()
+            .ok_or_else(|| "Select a local workspace folder".to_owned())
+            .and_then(|root| serialize(inventory::scan(std::path::Path::new(root)))),
         "hostedListen" => hosted_relay::Relay::listen(message["params"]["nonce"].as_str().unwrap_or("")).map(|relay| {
             let port = relay.port();
             *hosted = Some(relay);
