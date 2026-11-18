@@ -88,13 +88,13 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
     </div>
 </div>
 <div id="actions-menu" class="popover zoom-menu" popover>
-    <button type="button" id="menu-toolbox">Show Toolbox</button>
-    <button type="button" id="menu-outline">Show Outline</button>
-    <button type="button" id="menu-properties">Show Properties</button>
+    <button type="button" class="compact-action" id="menu-toolbox">Show Toolbox</button>
+    <button type="button" class="compact-action" id="menu-outline">Show Outline</button>
+    <button type="button" class="compact-action" id="menu-properties">Show Properties</button>
     <button type="button" id="menu-events">Show Events</button>
     <button type="button" id="menu-resources">Show Resources</button>
     <button type="button" id="menu-assets">Show Assets</button>
-    <button type="button" id="menu-refresh">Refresh preview</button>
+    <button type="button" class="compact-action" id="menu-refresh">Refresh preview</button>
 </div>`);
 }
 

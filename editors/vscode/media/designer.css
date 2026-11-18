@@ -37,7 +37,7 @@ body {
 }
 .metric .codicon-chevron-down { font-size: 12px; color: var(--muted); }
 #zoom-value { min-inline-size: 27px; }
-#actions-button { display: none; }
+.zoom-menu .compact-action { display: none; }
 #blocks { max-inline-size: 133px; color: var(--vscode-dropdown-foreground); background: var(--vscode-dropdown-background); }
 
 .status {
@@ -196,7 +196,7 @@ main:has(.drop-hint:not([hidden])) .selection-label { visibility: hidden; }
 }
 @media (max-width: 475px) {
     #outline-button, #properties-button, #toolbox-button, #refresh { display: none; }
-    #actions-button { display: inline-grid; }
+    .zoom-menu .compact-action { display: block; }
 }
 @media (max-width: 390px) {
     .stage { padding: 12px; }
