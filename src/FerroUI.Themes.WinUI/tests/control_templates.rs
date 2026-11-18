@@ -237,6 +237,8 @@ control_tests! {
     // B1: primitives and simple content
     data_validation_errors => "DataValidationErrors";
     grid_splitter => "GridSplitter";
+    grid_view => "GridView";
+    grid_view_item => "GridViewItem";
     group_box => "GroupBox";
     headered_content_control => "HeaderedContentControl";
     info_badge => "InfoBadge";

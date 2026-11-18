@@ -388,6 +388,8 @@ pub fn is_instance_of(object: &Ref<FerroObject>, handle_type: &str) -> bool {
 /// so that the list is kept current.
 pub const PENDING_CONTROLS: &[&str] = &[
     // The WinUI controls of #443 that the WinUI theme styles first.
+    "GridView",
+    "GridViewItem",
     "ListView",
     "ListViewItem",
 ];
