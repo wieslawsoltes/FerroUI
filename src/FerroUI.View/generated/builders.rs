@@ -2473,6 +2473,15 @@ pub trait AutoSuggestBoxProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::AutoSuggestBox>> AutoSuggestBoxProps for El<T> {}
 
+/// The properties and routed events of [`BackEase`](ferroui_controls::animation::BackEase).
+pub trait BackEaseProps: ElementBuilder {
+    /// Sets [`BackEase::amplitude_property`](ferroui_controls::animation::BackEase::amplitude_property).
+    fn amplitude<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::animation::BackEase>::amplitude_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::animation::BackEase>> BackEaseProps for El<T> {}
+
 /// The properties and routed events of [`BezierSegment`](ferroui_base::media::BezierSegment).
 pub trait BezierSegmentProps: ElementBuilder {
     /// Sets [`BezierSegment::point1_property`](ferroui_base::media::BezierSegment::point1_property).
@@ -2591,6 +2600,20 @@ pub trait BorderProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::Border>> BorderProps for El<T> {}
+
+/// The properties and routed events of [`BounceEase`](ferroui_controls::animation::BounceEase).
+pub trait BounceEaseProps: ElementBuilder {
+    /// Sets [`BounceEase::bounces_property`](ferroui_controls::animation::BounceEase::bounces_property).
+    fn bounces<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::animation::BounceEase>::bounces_property(), value)
+    }
+
+    /// Sets [`BounceEase::bounciness_property`](ferroui_controls::animation::BounceEase::bounciness_property).
+    fn bounciness<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::animation::BounceEase>::bounciness_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::animation::BounceEase>> BounceEaseProps for El<T> {}
 
 /// The properties and routed events of [`Brush`](ferroui_base::media::Brush).
 pub trait BrushProps: ElementBuilder {
@@ -2917,6 +2940,58 @@ pub trait CarouselPageProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::CarouselPage>> CarouselPageProps for El<T> {}
+
+/// The properties and routed events of [`ColorAnimation`](ferroui_controls::animation::ColorAnimation).
+pub trait ColorAnimationProps: ElementBuilder {
+    /// Sets [`ColorAnimation::from_property`](ferroui_controls::animation::ColorAnimation::from_property).
+    fn from<M>(self, value: impl IntoProp<Option<ferroui_base::media::Color>, M>) -> Self {
+        self.prop(<ferroui_controls::animation::ColorAnimation>::from_property(), value)
+    }
+
+    /// Sets [`ColorAnimation::to_property`](ferroui_controls::animation::ColorAnimation::to_property).
+    fn to<M>(self, value: impl IntoProp<Option<ferroui_base::media::Color>, M>) -> Self {
+        self.prop(<ferroui_controls::animation::ColorAnimation>::to_property(), value)
+    }
+
+    /// Sets [`ColorAnimation::by_property`](ferroui_controls::animation::ColorAnimation::by_property).
+    fn by<M>(self, value: impl IntoProp<Option<ferroui_base::media::Color>, M>) -> Self {
+        self.prop(<ferroui_controls::animation::ColorAnimation>::by_property(), value)
+    }
+
+    /// Sets [`ColorAnimation::easing_function_property`](ferroui_controls::animation::ColorAnimation::easing_function_property).
+    fn easing_function<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::animation::EasingFunctionBase>>, M>) -> Self {
+        self.prop(<ferroui_controls::animation::ColorAnimation>::easing_function_property(), value)
+    }
+
+    /// Sets [`ColorAnimation::enable_dependent_animation_property`](ferroui_controls::animation::ColorAnimation::enable_dependent_animation_property).
+    fn enable_dependent_animation<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::animation::ColorAnimation>::enable_dependent_animation_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::animation::ColorAnimation>> ColorAnimationProps for El<T> {}
+
+/// The properties and routed events of [`ColorAnimationUsingKeyFrames`](ferroui_controls::animation::ColorAnimationUsingKeyFrames).
+pub trait ColorAnimationUsingKeyFramesProps: ElementBuilder {
+    /// Sets [`ColorAnimationUsingKeyFrames::enable_dependent_animation_property`](ferroui_controls::animation::ColorAnimationUsingKeyFrames::enable_dependent_animation_property).
+    fn enable_dependent_animation<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::animation::ColorAnimationUsingKeyFrames>::enable_dependent_animation_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::animation::ColorAnimationUsingKeyFrames>> ColorAnimationUsingKeyFramesProps for El<T> {}
+
+/// The properties and routed events of [`ColorKeyFrame`](ferroui_controls::animation::ColorKeyFrame).
+pub trait ColorKeyFrameProps: ElementBuilder {
+    /// Sets [`ColorKeyFrame::key_time_property`](ferroui_controls::animation::ColorKeyFrame::key_time_property).
+    fn key_time<M>(self, value: impl IntoProp<ferroui_base::animation::SignedDuration, M>) -> Self {
+        self.prop(<ferroui_controls::animation::ColorKeyFrame>::key_time_property(), value)
+    }
+
+    /// Sets [`ColorKeyFrame::value_property`](ferroui_controls::animation::ColorKeyFrame::value_property).
+    fn value<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
+        self.prop(<ferroui_controls::animation::ColorKeyFrame>::value_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::animation::ColorKeyFrame>> ColorKeyFrameProps for El<T> {}
 
 /// The properties and routed events of [`ColumnDefinition`](ferroui_controls::ColumnDefinition).
 pub trait ColumnDefinitionProps: ElementBuilder {
@@ -3710,6 +3785,58 @@ pub trait DockPanelProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::DockPanel>> DockPanelProps for El<T> {}
 
+/// The properties and routed events of [`DoubleAnimation`](ferroui_controls::animation::DoubleAnimation).
+pub trait DoubleAnimationProps: ElementBuilder {
+    /// Sets [`DoubleAnimation::from_property`](ferroui_controls::animation::DoubleAnimation::from_property).
+    fn from<M>(self, value: impl IntoProp<Option<f64>, M>) -> Self {
+        self.prop(<ferroui_controls::animation::DoubleAnimation>::from_property(), value)
+    }
+
+    /// Sets [`DoubleAnimation::to_property`](ferroui_controls::animation::DoubleAnimation::to_property).
+    fn to<M>(self, value: impl IntoProp<Option<f64>, M>) -> Self {
+        self.prop(<ferroui_controls::animation::DoubleAnimation>::to_property(), value)
+    }
+
+    /// Sets [`DoubleAnimation::by_property`](ferroui_controls::animation::DoubleAnimation::by_property).
+    fn by<M>(self, value: impl IntoProp<Option<f64>, M>) -> Self {
+        self.prop(<ferroui_controls::animation::DoubleAnimation>::by_property(), value)
+    }
+
+    /// Sets [`DoubleAnimation::easing_function_property`](ferroui_controls::animation::DoubleAnimation::easing_function_property).
+    fn easing_function<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::animation::EasingFunctionBase>>, M>) -> Self {
+        self.prop(<ferroui_controls::animation::DoubleAnimation>::easing_function_property(), value)
+    }
+
+    /// Sets [`DoubleAnimation::enable_dependent_animation_property`](ferroui_controls::animation::DoubleAnimation::enable_dependent_animation_property).
+    fn enable_dependent_animation<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::animation::DoubleAnimation>::enable_dependent_animation_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::animation::DoubleAnimation>> DoubleAnimationProps for El<T> {}
+
+/// The properties and routed events of [`DoubleAnimationUsingKeyFrames`](ferroui_controls::animation::DoubleAnimationUsingKeyFrames).
+pub trait DoubleAnimationUsingKeyFramesProps: ElementBuilder {
+    /// Sets [`DoubleAnimationUsingKeyFrames::enable_dependent_animation_property`](ferroui_controls::animation::DoubleAnimationUsingKeyFrames::enable_dependent_animation_property).
+    fn enable_dependent_animation<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::animation::DoubleAnimationUsingKeyFrames>::enable_dependent_animation_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::animation::DoubleAnimationUsingKeyFrames>> DoubleAnimationUsingKeyFramesProps for El<T> {}
+
+/// The properties and routed events of [`DoubleKeyFrame`](ferroui_controls::animation::DoubleKeyFrame).
+pub trait DoubleKeyFrameProps: ElementBuilder {
+    /// Sets [`DoubleKeyFrame::key_time_property`](ferroui_controls::animation::DoubleKeyFrame::key_time_property).
+    fn key_time<M>(self, value: impl IntoProp<ferroui_base::animation::SignedDuration, M>) -> Self {
+        self.prop(<ferroui_controls::animation::DoubleKeyFrame>::key_time_property(), value)
+    }
+
+    /// Sets [`DoubleKeyFrame::value_property`](ferroui_controls::animation::DoubleKeyFrame::value_property).
+    fn value<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::animation::DoubleKeyFrame>::value_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::animation::DoubleKeyFrame>> DoubleKeyFrameProps for El<T> {}
+
 /// The properties and routed events of [`DrawerPage`](ferroui_controls::DrawerPage).
 pub trait DrawerPageProps: ElementBuilder {
     /// Sets [`DrawerPage::drawer_property`](ferroui_controls::DrawerPage::drawer_property).
@@ -3958,6 +4085,56 @@ pub trait DropShadowEffectBaseProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_base::media::DropShadowEffectBase>> DropShadowEffectBaseProps for El<T> {}
 
+/// The properties and routed events of [`EasingColorKeyFrame`](ferroui_controls::animation::EasingColorKeyFrame).
+pub trait EasingColorKeyFrameProps: ElementBuilder {
+    /// Sets [`EasingColorKeyFrame::easing_function_property`](ferroui_controls::animation::EasingColorKeyFrame::easing_function_property).
+    fn easing_function<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::animation::EasingFunctionBase>>, M>) -> Self {
+        self.prop(<ferroui_controls::animation::EasingColorKeyFrame>::easing_function_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::animation::EasingColorKeyFrame>> EasingColorKeyFrameProps for El<T> {}
+
+/// The properties and routed events of [`EasingDoubleKeyFrame`](ferroui_controls::animation::EasingDoubleKeyFrame).
+pub trait EasingDoubleKeyFrameProps: ElementBuilder {
+    /// Sets [`EasingDoubleKeyFrame::easing_function_property`](ferroui_controls::animation::EasingDoubleKeyFrame::easing_function_property).
+    fn easing_function<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::animation::EasingFunctionBase>>, M>) -> Self {
+        self.prop(<ferroui_controls::animation::EasingDoubleKeyFrame>::easing_function_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::animation::EasingDoubleKeyFrame>> EasingDoubleKeyFrameProps for El<T> {}
+
+/// The properties and routed events of [`EasingFunctionBase`](ferroui_controls::animation::EasingFunctionBase).
+pub trait EasingFunctionBaseProps: ElementBuilder {
+    /// Sets [`EasingFunctionBase::easing_mode_property`](ferroui_controls::animation::EasingFunctionBase::easing_mode_property).
+    fn easing_mode<M>(self, value: impl IntoProp<ferroui_controls::animation::EasingMode, M>) -> Self {
+        self.prop(<ferroui_controls::animation::EasingFunctionBase>::easing_mode_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::animation::EasingFunctionBase>> EasingFunctionBaseProps for El<T> {}
+
+/// The properties and routed events of [`EasingPointKeyFrame`](ferroui_controls::animation::EasingPointKeyFrame).
+pub trait EasingPointKeyFrameProps: ElementBuilder {
+    /// Sets [`EasingPointKeyFrame::easing_function_property`](ferroui_controls::animation::EasingPointKeyFrame::easing_function_property).
+    fn easing_function<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::animation::EasingFunctionBase>>, M>) -> Self {
+        self.prop(<ferroui_controls::animation::EasingPointKeyFrame>::easing_function_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::animation::EasingPointKeyFrame>> EasingPointKeyFrameProps for El<T> {}
+
+/// The properties and routed events of [`ElasticEase`](ferroui_controls::animation::ElasticEase).
+pub trait ElasticEaseProps: ElementBuilder {
+    /// Sets [`ElasticEase::oscillations_property`](ferroui_controls::animation::ElasticEase::oscillations_property).
+    fn oscillations<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::animation::ElasticEase>::oscillations_property(), value)
+    }
+
+    /// Sets [`ElasticEase::springiness_property`](ferroui_controls::animation::ElasticEase::springiness_property).
+    fn springiness<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::animation::ElasticEase>::springiness_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::animation::ElasticEase>> ElasticEaseProps for El<T> {}
+
 /// The properties and routed events of [`EllipseGeometry`](ferroui_base::media::EllipseGeometry).
 pub trait EllipseGeometryProps: ElementBuilder {
     /// Sets [`EllipseGeometry::rect_property`](ferroui_base::media::EllipseGeometry::rect_property).
@@ -4058,6 +4235,15 @@ pub trait ExperimentalAcrylicMaterialProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_base::media::ExperimentalAcrylicMaterial>> ExperimentalAcrylicMaterialProps for El<T> {}
+
+/// The properties and routed events of [`ExponentialEase`](ferroui_controls::animation::ExponentialEase).
+pub trait ExponentialEaseProps: ElementBuilder {
+    /// Sets [`ExponentialEase::exponent_property`](ferroui_controls::animation::ExponentialEase::exponent_property).
+    fn exponent<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::animation::ExponentialEase>::exponent_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::animation::ExponentialEase>> ExponentialEaseProps for El<T> {}
 
 /// The properties and routed events of [`FlexPanel`](ferroui_controls::FlexPanel).
 pub trait FlexPanelProps: ElementBuilder {
@@ -5947,6 +6133,20 @@ pub trait NumericUpDownProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::NumericUpDown>> NumericUpDownProps for El<T> {}
 
+/// The properties and routed events of [`ObjectKeyFrame`](ferroui_controls::animation::ObjectKeyFrame).
+pub trait ObjectKeyFrameProps: ElementBuilder {
+    /// Sets [`ObjectKeyFrame::key_time_property`](ferroui_controls::animation::ObjectKeyFrame::key_time_property).
+    fn key_time<M>(self, value: impl IntoProp<ferroui_base::animation::SignedDuration, M>) -> Self {
+        self.prop(<ferroui_controls::animation::ObjectKeyFrame>::key_time_property(), value)
+    }
+
+    /// Sets [`ObjectKeyFrame::value_property`](ferroui_controls::animation::ObjectKeyFrame::value_property).
+    fn value<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
+        self.prop(<ferroui_controls::animation::ObjectKeyFrame>::value_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::animation::ObjectKeyFrame>> ObjectKeyFrameProps for El<T> {}
+
 /// The properties and routed events of [`OverlayPopupHost`](ferroui_controls::primitives::OverlayPopupHost).
 pub trait OverlayPopupHostProps: ElementBuilder {
     /// Sets [`OverlayPopupHost::transform_property`](ferroui_controls::primitives::OverlayPopupHost::transform_property).
@@ -6386,6 +6586,58 @@ pub trait PipsPagerProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::PipsPager>> PipsPagerProps for El<T> {}
 
+/// The properties and routed events of [`PointAnimation`](ferroui_controls::animation::PointAnimation).
+pub trait PointAnimationProps: ElementBuilder {
+    /// Sets [`PointAnimation::from_property`](ferroui_controls::animation::PointAnimation::from_property).
+    fn from<M>(self, value: impl IntoProp<Option<ferroui_base::Point>, M>) -> Self {
+        self.prop(<ferroui_controls::animation::PointAnimation>::from_property(), value)
+    }
+
+    /// Sets [`PointAnimation::to_property`](ferroui_controls::animation::PointAnimation::to_property).
+    fn to<M>(self, value: impl IntoProp<Option<ferroui_base::Point>, M>) -> Self {
+        self.prop(<ferroui_controls::animation::PointAnimation>::to_property(), value)
+    }
+
+    /// Sets [`PointAnimation::by_property`](ferroui_controls::animation::PointAnimation::by_property).
+    fn by<M>(self, value: impl IntoProp<Option<ferroui_base::Point>, M>) -> Self {
+        self.prop(<ferroui_controls::animation::PointAnimation>::by_property(), value)
+    }
+
+    /// Sets [`PointAnimation::easing_function_property`](ferroui_controls::animation::PointAnimation::easing_function_property).
+    fn easing_function<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::animation::EasingFunctionBase>>, M>) -> Self {
+        self.prop(<ferroui_controls::animation::PointAnimation>::easing_function_property(), value)
+    }
+
+    /// Sets [`PointAnimation::enable_dependent_animation_property`](ferroui_controls::animation::PointAnimation::enable_dependent_animation_property).
+    fn enable_dependent_animation<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::animation::PointAnimation>::enable_dependent_animation_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::animation::PointAnimation>> PointAnimationProps for El<T> {}
+
+/// The properties and routed events of [`PointAnimationUsingKeyFrames`](ferroui_controls::animation::PointAnimationUsingKeyFrames).
+pub trait PointAnimationUsingKeyFramesProps: ElementBuilder {
+    /// Sets [`PointAnimationUsingKeyFrames::enable_dependent_animation_property`](ferroui_controls::animation::PointAnimationUsingKeyFrames::enable_dependent_animation_property).
+    fn enable_dependent_animation<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::animation::PointAnimationUsingKeyFrames>::enable_dependent_animation_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::animation::PointAnimationUsingKeyFrames>> PointAnimationUsingKeyFramesProps for El<T> {}
+
+/// The properties and routed events of [`PointKeyFrame`](ferroui_controls::animation::PointKeyFrame).
+pub trait PointKeyFrameProps: ElementBuilder {
+    /// Sets [`PointKeyFrame::key_time_property`](ferroui_controls::animation::PointKeyFrame::key_time_property).
+    fn key_time<M>(self, value: impl IntoProp<ferroui_base::animation::SignedDuration, M>) -> Self {
+        self.prop(<ferroui_controls::animation::PointKeyFrame>::key_time_property(), value)
+    }
+
+    /// Sets [`PointKeyFrame::value_property`](ferroui_controls::animation::PointKeyFrame::value_property).
+    fn value<M>(self, value: impl IntoProp<ferroui_base::Point, M>) -> Self {
+        self.prop(<ferroui_controls::animation::PointKeyFrame>::value_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::animation::PointKeyFrame>> PointKeyFrameProps for El<T> {}
+
 /// The properties and routed events of [`PolyBezierSegment`](ferroui_base::media::PolyBezierSegment).
 pub trait PolyBezierSegmentProps: ElementBuilder {
     /// Sets [`PolyBezierSegment::points_property`](ferroui_base::media::PolyBezierSegment::points_property).
@@ -6592,6 +6844,15 @@ pub trait PopupRootProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::primitives::PopupRoot>> PopupRootProps for El<T> {}
+
+/// The properties and routed events of [`PowerEase`](ferroui_controls::animation::PowerEase).
+pub trait PowerEaseProps: ElementBuilder {
+    /// Sets [`PowerEase::power_property`](ferroui_controls::animation::PowerEase::power_property).
+    fn power<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::animation::PowerEase>::power_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::animation::PowerEase>> PowerEaseProps for El<T> {}
 
 /// The properties and routed events of [`ProgressBar`](ferroui_controls::ProgressBar).
 pub trait ProgressBarProps: ElementBuilder {
@@ -8061,6 +8322,33 @@ pub trait SpinnerProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::Spinner>> SpinnerProps for El<T> {}
 
+/// The properties and routed events of [`SplineColorKeyFrame`](ferroui_controls::animation::SplineColorKeyFrame).
+pub trait SplineColorKeyFrameProps: ElementBuilder {
+    /// Sets [`SplineColorKeyFrame::key_spline_property`](ferroui_controls::animation::SplineColorKeyFrame::key_spline_property).
+    fn key_spline<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::animation::KeySpline>>, M>) -> Self {
+        self.prop(<ferroui_controls::animation::SplineColorKeyFrame>::key_spline_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::animation::SplineColorKeyFrame>> SplineColorKeyFrameProps for El<T> {}
+
+/// The properties and routed events of [`SplineDoubleKeyFrame`](ferroui_controls::animation::SplineDoubleKeyFrame).
+pub trait SplineDoubleKeyFrameProps: ElementBuilder {
+    /// Sets [`SplineDoubleKeyFrame::key_spline_property`](ferroui_controls::animation::SplineDoubleKeyFrame::key_spline_property).
+    fn key_spline<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::animation::KeySpline>>, M>) -> Self {
+        self.prop(<ferroui_controls::animation::SplineDoubleKeyFrame>::key_spline_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::animation::SplineDoubleKeyFrame>> SplineDoubleKeyFrameProps for El<T> {}
+
+/// The properties and routed events of [`SplinePointKeyFrame`](ferroui_controls::animation::SplinePointKeyFrame).
+pub trait SplinePointKeyFrameProps: ElementBuilder {
+    /// Sets [`SplinePointKeyFrame::key_spline_property`](ferroui_controls::animation::SplinePointKeyFrame::key_spline_property).
+    fn key_spline<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::animation::KeySpline>>, M>) -> Self {
+        self.prop(<ferroui_controls::animation::SplinePointKeyFrame>::key_spline_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::animation::SplinePointKeyFrame>> SplinePointKeyFrameProps for El<T> {}
+
 /// The properties and routed events of [`SplitButton`](ferroui_controls::SplitButton).
 pub trait SplitButtonProps: ElementBuilder {
     /// Sets [`SplitButton::command_property`](ferroui_controls::SplitButton::command_property).
@@ -8215,6 +8503,20 @@ pub trait StateTriggerProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::StateTrigger>> StateTriggerProps for El<T> {}
+
+/// The properties and routed events of [`Storyboard`](ferroui_controls::animation::Storyboard).
+pub trait StoryboardProps: ElementBuilder {
+    /// Sets [`Storyboard::target_name_property`](ferroui_controls::animation::Storyboard::target_name_property).
+    fn target_name<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::animation::Storyboard>::target_name_property(), value)
+    }
+
+    /// Sets [`Storyboard::target_property_property`](ferroui_controls::animation::Storyboard::target_property_property).
+    fn target_property<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::animation::Storyboard>::target_property_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::animation::Storyboard>> StoryboardProps for El<T> {}
 
 /// The properties and routed events of [`StyledElement`](ferroui_base::StyledElement).
 pub trait StyledElementProps: ElementBuilder {
@@ -9185,6 +9487,40 @@ pub trait TimePickerPresenterProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::TimePickerPresenter>> TimePickerPresenterProps for El<T> {}
+
+/// The properties and routed events of [`Timeline`](ferroui_controls::animation::Timeline).
+pub trait TimelineProps: ElementBuilder {
+    /// Sets [`Timeline::begin_time_property`](ferroui_controls::animation::Timeline::begin_time_property).
+    fn begin_time<M>(self, value: impl IntoProp<Option<ferroui_base::animation::SignedDuration>, M>) -> Self {
+        self.prop(<ferroui_controls::animation::Timeline>::begin_time_property(), value)
+    }
+
+    /// Sets [`Timeline::duration_property`](ferroui_controls::animation::Timeline::duration_property).
+    fn duration<M>(self, value: impl IntoProp<ferroui_base::animation::TimelineDuration, M>) -> Self {
+        self.prop(<ferroui_controls::animation::Timeline>::duration_property(), value)
+    }
+
+    /// Sets [`Timeline::auto_reverse_property`](ferroui_controls::animation::Timeline::auto_reverse_property).
+    fn auto_reverse<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::animation::Timeline>::auto_reverse_property(), value)
+    }
+
+    /// Sets [`Timeline::repeat_behavior_property`](ferroui_controls::animation::Timeline::repeat_behavior_property).
+    fn repeat_behavior<M>(self, value: impl IntoProp<ferroui_base::animation::RepeatBehavior, M>) -> Self {
+        self.prop(<ferroui_controls::animation::Timeline>::repeat_behavior_property(), value)
+    }
+
+    /// Sets [`Timeline::speed_ratio_property`](ferroui_controls::animation::Timeline::speed_ratio_property).
+    fn speed_ratio<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::animation::Timeline>::speed_ratio_property(), value)
+    }
+
+    /// Sets [`Timeline::fill_behavior_property`](ferroui_controls::animation::Timeline::fill_behavior_property).
+    fn fill_behavior<M>(self, value: impl IntoProp<ferroui_base::animation::FillBehavior, M>) -> Self {
+        self.prop(<ferroui_controls::animation::Timeline>::fill_behavior_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::animation::Timeline>> TimelineProps for El<T> {}
 
 /// The properties and routed events of [`TitleBar`](ferroui_controls::TitleBar).
 pub trait TitleBarProps: ElementBuilder {
@@ -10499,6 +10835,16 @@ pub trait AttachedProps: ElementBuilder {
     /// Sets the attached [`SelectingItemsControl::is_selected_property`](ferroui_controls::primitives::SelectingItemsControl::is_selected_property).
     fn selecting_items_control_is_selected<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::SelectingItemsControl>::is_selected_property(), value)
+    }
+
+    /// Sets the attached [`Storyboard::target_name_property`](ferroui_controls::animation::Storyboard::target_name_property).
+    fn storyboard_target_name<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::animation::Storyboard>::target_name_property(), value)
+    }
+
+    /// Sets the attached [`Storyboard::target_property_property`](ferroui_controls::animation::Storyboard::target_property_property).
+    fn storyboard_target_property<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::animation::Storyboard>::target_property_property(), value)
     }
 
     /// Sets the attached [`TabbedPage::is_tab_enabled_property`](ferroui_controls::TabbedPage::is_tab_enabled_property).

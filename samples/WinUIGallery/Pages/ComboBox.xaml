@@ -1,4 +1,51 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <TextBlock Text="Colors"/><ComboBox x:Name="Primary" Width="220" HorizontalAlignment="Left" PlaceholderText="Pick a color"><x:String>Blue</x:String><x:String>Green</x:String><x:String>Red</x:String><x:String>Yellow</x:String></ComboBox><TextBlock Text="Editable choice"/><ComboBox Width="220" HorizontalAlignment="Left" IsEditable="True"><x:String>12</x:String><x:String>16</x:String><x:String>24</x:String></ComboBox><TextBlock x:Name="Output" Text="Pick a color"/>
+<!-- Adapted from the three pinned ComboBox examples of WinUI Gallery (14061eea) and the handlers of
+     ComboBoxPage.xaml.cs (button_samples.rs); see ../NOTICE.md. FerroUI's ComboBox has no Header,
+     which is composed. The FontHelper.Fonts items are their names, and the output's font follows
+     the selected name (the source's x:Bind of FontItem.Font). The font sizes are the source's
+     FontSizes; Combo3_Loaded selects the third. FerroUI's ComboBox has no TextSubmitted event and
+     there is no ContentDialog, so Combo3_TextSubmitted (the check of a typed size and its dialog)
+     is not ported: the page is partial. OutputTextBlockStyle is its margin. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="ComboBoxExample1" Spacing="8">
+    <TextBlock Text="A ComboBox with items defined inline and its width set." FontSize="18" />
+    <StackPanel>
+      <TextBlock Margin="0,0,0,4" Text="Colors" />
+      <ComboBox x:Name="Combo1" Width="200" AutomationProperties.Name="Colors" PlaceholderText="Pick a color">
+        <x:String>Blue</x:String>
+        <x:String>Green</x:String>
+        <x:String>Red</x:String>
+        <x:String>Yellow</x:String>
+      </ComboBox>
+      <Rectangle x:Name="Control1Output" Width="100" Height="30" Margin="0,8,0,0" HorizontalAlignment="Left" />
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="ComboBoxExample2" Spacing="8">
+    <TextBlock Text="A ComboBox with its ItemsSource set." FontSize="18" />
+    <StackPanel>
+      <TextBlock Margin="0,0,0,4" Text="Font" />
+      <ComboBox x:Name="Combo2" MinWidth="200" AutomationProperties.Name="Font" SelectedIndex="2">
+        <x:String>Arial</x:String>
+        <x:String>Comic Sans MS</x:String>
+        <x:String>Courier New</x:String>
+        <x:String>Segoe UI</x:String>
+        <x:String>Times New Roman</x:String>
+      </ComboBox>
+      <TextBlock x:Name="Control2Output" Margin="8,8,0,0" Text="You can set the font used for this text." />
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="ComboBoxExample3" Spacing="8">
+    <TextBlock Text="An editable ComboBox." FontSize="18" />
+    <StackPanel>
+      <TextBlock Margin="0,0,0,4" Text="Font Size" />
+      <ComboBox x:Name="Combo3" Width="200" AutomationProperties.Name="Font Size" IsEditable="True" />
+      <TextBlock x:Name="Control3Output"
+                 Margin="8,8,0,0"
+                 FontFamily="Segoe UI"
+                 FontSize="{x:Bind Combo3.SelectedValue, Mode=OneWay}"
+                 Text="You can set the font size used for this text." />
+    </StackPanel>
+  </StackPanel>
 </StackPanel>
