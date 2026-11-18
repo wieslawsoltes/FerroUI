@@ -1,5 +1,7 @@
 use crate::controls::ResourceKey;
 use crate::platform::{IPlatformSettings, PlatformThemeVariant};
+use crate::reactive::{Disposable, IDisposable};
+use crate::utilities::HandlerList;
 use crate::{FerroLocator, LocatorExtensions, TypeInfo};
 use crate::{ferro_property, FerroObject, FerroProperty, StyledElement, StyledProperty, StyledPropertyOptions};
 use std::cell::RefCell;
@@ -30,6 +32,13 @@ crate::ferro_thread_local! {
     /// The classes, other than styled elements, whose objects are theme
     /// variant roots.
     static ROOT_TYPES: RefCell<Vec<&'static TypeInfo>> = const { RefCell::new(Vec::new()) };
+}
+
+crate::ferro_thread_local! {
+    /// The high contrast variant of the theme of the UI thread, if a theme set one.
+    static HIGH_CONTRAST_VARIANT: RefCell<Option<ThemeVariant>> = const { RefCell::new(None) };
+    /// The handlers of a change of the high contrast variant.
+    static HIGH_CONTRAST_VARIANT_CHANGED: Rc<HandlerList<dyn Fn()>> = Rc::new(HandlerList::new());
 }
 
 impl ThemeVariant {
@@ -106,10 +115,19 @@ impl ThemeVariant {
     /// Updates the actual theme variant of `target` from its requested
     /// theme variant: a requested variant other than the default becomes the
     /// actual one, otherwise the actual variant is inherited.
+    ///
+    /// A theme variant root (the application, a top level that does not follow the
+    /// application) resolves to the platform's variant when it requests the default one. While
+    /// the platform asks for high contrast and a theme has set a
+    /// [high contrast variant](Self::high_contrast_variant), a root that requests the default,
+    /// the light or the dark variant resolves to the high contrast variant instead, as WinUI
+    /// selects its `HighContrast` theme dictionary whatever `RequestedTheme` says.
     pub fn update_actual_theme_variant(target: &FerroObject) {
         let requested =
             target.get_value(Self::requested_theme_variant_property()).unwrap_or_else(ThemeVariant::default);
-        if requested != ThemeVariant::default() {
+        let high_contrast = Self::high_contrast_variant()
+            .filter(|_| requested.is_built_in() && Self::is_platform_high_contrast());
+        if requested != ThemeVariant::default() && high_contrast.is_none() {
             target.set_value(Self::actual_theme_variant_property(), Some(requested));
             return;
         }
@@ -117,10 +135,88 @@ impl ThemeVariant {
         let is_root = target.downcast_ref::<StyledElement>().is_some_and(|element| element.is_theme_variant_root())
             || ROOT_TYPES.with_borrow(|types| types.iter().any(|type_| type_.is_assignable_from(target.get_type())));
         if is_root {
+            if let Some(high_contrast) = high_contrast {
+                target.set_value(Self::actual_theme_variant_property(), Some(high_contrast));
+                return;
+            }
+        }
+        if requested != ThemeVariant::default() {
+            target.set_value(Self::actual_theme_variant_property(), Some(requested));
+        } else if is_root {
             target.set_value(Self::actual_theme_variant_property(), Some(Self::get_platform_theme_variant()));
         } else {
             target.clear_value(Self::actual_theme_variant_property());
         }
+    }
+
+    /// Whether this is one of the built in variants (default, light, dark).
+    fn is_built_in(&self) -> bool {
+        *self == ThemeVariant::default() || *self == ThemeVariant::light() || *self == ThemeVariant::dark()
+    }
+
+    /// The high contrast variant of the theme of the UI thread: the variant the theme variant
+    /// roots resolve to while the platform asks for high contrast; `None` (the default) when no
+    /// theme has one, and then the contrast setting of the platform selects nothing. The WinUI
+    /// theme sets its `HighContrast` variant while it is in use. A FerroUI addition (WinUI
+    /// selects its `HighContrast` theme dictionaries in the framework).
+    pub fn high_contrast_variant() -> Option<ThemeVariant> {
+        HIGH_CONTRAST_VARIANT.with_borrow(Clone::clone)
+    }
+
+    /// Sets the [high contrast variant](Self::high_contrast_variant) of the UI thread, or
+    /// removes it for `None`, and raises
+    /// [`high_contrast_variant_changed`](Self::high_contrast_variant_changed) when it changes,
+    /// so that the theme variant roots resolve again. A variant other than the built in ones
+    /// is expected: the light and the dark variant are not high contrast variants.
+    pub fn set_high_contrast_variant(variant: Option<ThemeVariant>) {
+        let changed = HIGH_CONTRAST_VARIANT.with_borrow_mut(|current| {
+            if *current == variant {
+                false
+            } else {
+                *current = variant;
+                true
+            }
+        });
+        if changed {
+            let handlers = HIGH_CONTRAST_VARIANT_CHANGED.with(Rc::clone);
+            for (_, handler) in handlers.snapshot().iter() {
+                handler();
+            }
+        }
+    }
+
+    /// Raised on the UI thread when the [high contrast variant](Self::high_contrast_variant)
+    /// changes. Disposing the returned handle unsubscribes.
+    pub fn high_contrast_variant_changed(handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
+        let handlers = HIGH_CONTRAST_VARIANT_CHANGED.with(Rc::clone);
+        let token = handlers.add(handler);
+        Disposable::create(move || {
+            handlers.remove(token);
+        })
+    }
+
+    /// Whether the platform settings ask for high contrast.
+    fn is_platform_high_contrast() -> bool {
+        FerroLocator::current()
+            .get_service::<dyn IPlatformSettings>()
+            .is_some_and(|settings| settings.get_color_values().is_high_contrast())
+    }
+
+    /// The platform theme variant a window frame shows for the actual theme variant `variant`:
+    /// [`to_platform_theme_variant`](Self::to_platform_theme_variant), except for the
+    /// [high contrast variant](Self::high_contrast_variant), whose frame follows the window
+    /// background of the system colours of the platform (light for "High Contrast White"), or
+    /// the platform's variant where it reports no system colours. A FerroUI addition.
+    pub fn frame_theme_variant(variant: Option<&ThemeVariant>) -> Option<PlatformThemeVariant> {
+        let variant = variant?;
+        if Self::high_contrast_variant().as_ref() == Some(variant) {
+            if let Some(values) =
+                FerroLocator::current().get_service::<dyn IPlatformSettings>().map(|settings| settings.get_color_values())
+            {
+                return Some(values.system_colors().map_or(values.theme_variant(), |colors| colors.theme_variant()));
+            }
+        }
+        Self::to_platform_theme_variant(Some(variant))
     }
 
     /// Declares that the objects of a class that is not a styled element

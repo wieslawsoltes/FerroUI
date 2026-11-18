@@ -1,9 +1,10 @@
-use super::{IPlatformSettings, PlatformColorValues, PlatformThemeVariant};
+use super::{IPlatformSettings, PlatformColorValues};
 use crate::input::platform::PlatformHotkeyConfiguration;
 use crate::input::PointerType;
 use crate::reactive::{Disposable, IDisposable};
 use crate::utilities::HandlerList;
 use crate::{FerroLocator, LocatorExtensions, Size};
+use std::cell::Cell;
 use std::rc::Rc;
 use std::time::Duration;
 
@@ -18,8 +19,14 @@ const TOUCH_DOUBLE_TAP_SIZE: f64 = 50.0;
 /// [`on_color_values_changed`](Self::on_color_values_changed),
 /// [`on_preferred_application_language_changed`](Self::on_preferred_application_language_changed) and
 /// [`on_accessibility_settings_changed`](Self::on_accessibility_settings_changed).
+///
+/// Its colour values are the defaults (light, no contrast preference) until
+/// [`set_color_values`](Self::set_color_values) simulates others: the platform-neutral setting
+/// of the headless platform and of tests (a simulated high contrast, a dark theme, system
+/// colours), raised to the subscribers as a platform raises its own.
 #[derive(Default)]
 pub struct DefaultPlatformSettings {
+    color_values: Cell<PlatformColorValues>,
     color_values_changed: Rc<HandlerList<dyn Fn(&PlatformColorValues)>>,
     preferred_application_language_changed: Rc<HandlerList<dyn Fn()>>,
     accessibility_settings_changed: Rc<HandlerList<dyn Fn()>>,
@@ -42,6 +49,20 @@ impl DefaultPlatformSettings {
         }
         for (_, handler) in self.color_values_changed.snapshot().iter() {
             handler(&color_values);
+        }
+    }
+
+    /// Simulates the colour values of the platform: [`get_color_values`](IPlatformSettings::get_color_values)
+    /// answers `values` from now on and, when they differ from the previous ones,
+    /// [`color_values_changed`](IPlatformSettings::color_values_changed) is raised with them.
+    ///
+    /// For the headless platform and tests (a simulated contrast setting, theme or system
+    /// colours); a backend that embeds these settings answers its own colour values and raises
+    /// its changes with [`on_color_values_changed`](Self::on_color_values_changed). A FerroUI
+    /// addition.
+    pub fn set_color_values(&self, values: PlatformColorValues) {
+        if self.color_values.replace(values) != values {
+            self.on_color_values_changed(values);
         }
     }
 
@@ -128,7 +149,7 @@ impl IPlatformSettings for DefaultPlatformSettings {
     }
 
     fn get_color_values(&self) -> PlatformColorValues {
-        PlatformColorValues::new().with_theme_variant(PlatformThemeVariant::Light)
+        self.color_values.get()
     }
 
     fn color_values_changed(&self, handler: Rc<dyn Fn(&PlatformColorValues)>) -> Rc<dyn IDisposable> {
@@ -166,6 +187,7 @@ impl IPlatformSettings for DefaultPlatformSettings {
 
 #[cfg(test)]
 mod tests {
+    use super::super::PlatformThemeVariant;
     use super::*;
     use std::cell::RefCell;
 
@@ -174,6 +196,31 @@ mod tests {
         let settings = DefaultPlatformSettings::new();
         assert_eq!(settings.get_color_values(), PlatformColorValues::new());
         assert_eq!(settings.get_color_values().theme_variant(), PlatformThemeVariant::Light);
+    }
+
+    #[test]
+    fn simulated_color_values_are_answered_and_raised_once_per_change() {
+        use super::super::{ColorContrastPreference, SystemColors};
+        let settings = DefaultPlatformSettings::new();
+        let raised = Rc::new(RefCell::new(Vec::new()));
+        let _subscription = {
+            let raised = raised.clone();
+            settings.color_values_changed(Rc::new(move |values: &PlatformColorValues| raised.borrow_mut().push(*values)))
+        };
+
+        let high = PlatformColorValues::new()
+            .with_theme_variant(PlatformThemeVariant::Dark)
+            .with_contrast_preference(ColorContrastPreference::High)
+            .with_system_colors(Some(SystemColors::high_contrast_black()));
+        settings.set_color_values(high);
+        assert_eq!(settings.get_color_values(), high);
+        // The same values again are no change.
+        settings.set_color_values(high);
+        assert_eq!(*raised.borrow(), [high]);
+
+        settings.set_color_values(PlatformColorValues::new());
+        assert_eq!(settings.get_color_values(), PlatformColorValues::new());
+        assert_eq!(raised.borrow().len(), 2);
     }
 
     #[test]

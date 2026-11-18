@@ -557,3 +557,93 @@ fn type_key_lookups_follow_changes_of_the_application_resources() {
     application.resources().remove(&key);
     assert!(application.try_get_resource(&key, None).is_none());
 }
+
+// System high contrast (#560, docs/porting/winui-calculator-gaps.md, section 7.2): not from
+// upstream, which has no high contrast variant.
+
+fn high_contrast_values(variant: PlatformThemeVariant) -> PlatformColorValues {
+    PlatformColorValues::new()
+        .with_theme_variant(variant)
+        .with_contrast_preference(ferroui_base::platform::ColorContrastPreference::High)
+}
+
+fn start_with_simulated_settings() -> (UnitTestApplicationScope, Rc<DefaultPlatformSettings>, ferroui_base::Ref<Application>) {
+    let settings = Rc::new(DefaultPlatformSettings::new());
+    let scope = UnitTestApplication::start(TestServices::default().with_platform_settings(settings.clone()));
+    let application = Application::current().expect("an application");
+    (scope, settings, application)
+}
+
+#[test]
+fn system_high_contrast_selects_nothing_without_a_high_contrast_variant() {
+    let (_app, settings, application) = start_with_simulated_settings();
+    ThemeVariant::set_high_contrast_variant(None);
+
+    settings.set_color_values(high_contrast_values(PlatformThemeVariant::Dark));
+    assert_eq!(application.actual_theme_variant(), Some(ThemeVariant::dark()));
+}
+
+#[test]
+fn system_high_contrast_selects_the_high_contrast_variant_of_the_theme_and_follows_it_live() {
+    let (_app, settings, application) = start_with_simulated_settings();
+    let high_contrast = ThemeVariant::new("TestHighContrast", Some(ThemeVariant::dark()));
+    ThemeVariant::set_high_contrast_variant(Some(high_contrast.clone()));
+    assert_eq!(application.actual_theme_variant(), Some(ThemeVariant::light()));
+
+    settings.set_color_values(high_contrast_values(PlatformThemeVariant::Light));
+    assert_eq!(application.actual_theme_variant(), Some(high_contrast.clone()));
+
+    // Decision D10: system high contrast overrides a requested light or dark variant, as WinUI.
+    application.set_requested_theme_variant(Some(ThemeVariant::dark()));
+    assert_eq!(application.actual_theme_variant(), Some(high_contrast.clone()));
+    // A variant of the application's own is kept.
+    let custom = ThemeVariant::new("Custom", None);
+    application.set_requested_theme_variant(Some(custom.clone()));
+    assert_eq!(application.actual_theme_variant(), Some(custom));
+    application.set_requested_theme_variant(Some(ThemeVariant::default()));
+    assert_eq!(application.actual_theme_variant(), Some(high_contrast.clone()));
+
+    // High contrast turned off: the platform's variant again.
+    settings.set_color_values(PlatformColorValues::new().with_theme_variant(PlatformThemeVariant::Dark));
+    assert_eq!(application.actual_theme_variant(), Some(ThemeVariant::dark()));
+
+    ThemeVariant::set_high_contrast_variant(None);
+}
+
+#[test]
+fn a_high_contrast_variant_set_while_high_contrast_is_on_applies_at_once() {
+    let (_app, settings, application) = start_with_simulated_settings();
+    settings.set_color_values(high_contrast_values(PlatformThemeVariant::Dark));
+    assert_eq!(application.actual_theme_variant(), Some(ThemeVariant::dark()));
+
+    let high_contrast = ThemeVariant::new("TestHighContrast", Some(ThemeVariant::dark()));
+    ThemeVariant::set_high_contrast_variant(Some(high_contrast.clone()));
+    assert_eq!(application.actual_theme_variant(), Some(high_contrast));
+
+    ThemeVariant::set_high_contrast_variant(None);
+    assert_eq!(application.actual_theme_variant(), Some(ThemeVariant::dark()));
+}
+
+#[test]
+fn the_frame_of_the_high_contrast_variant_follows_the_system_colors() {
+    use ferroui_base::platform::SystemColors;
+    let (_app, settings, _application) = start_with_simulated_settings();
+    let high_contrast = ThemeVariant::new("TestHighContrast", Some(ThemeVariant::dark()));
+    ThemeVariant::set_high_contrast_variant(Some(high_contrast.clone()));
+
+    // Without system colours: the platform's variant.
+    settings.set_color_values(high_contrast_values(PlatformThemeVariant::Light));
+    assert_eq!(ThemeVariant::frame_theme_variant(Some(&high_contrast)), Some(PlatformThemeVariant::Light));
+    // With them: the brightness of the window colour ("High Contrast White" is light).
+    let white = high_contrast_values(PlatformThemeVariant::Dark).with_system_colors(Some(SystemColors::high_contrast_white()));
+    settings.set_color_values(white);
+    assert_eq!(ThemeVariant::frame_theme_variant(Some(&high_contrast)), Some(PlatformThemeVariant::Light));
+    let black = white.with_system_colors(Some(SystemColors::high_contrast_black()));
+    settings.set_color_values(black);
+    assert_eq!(ThemeVariant::frame_theme_variant(Some(&high_contrast)), Some(PlatformThemeVariant::Dark));
+    // Other variants as before.
+    assert_eq!(ThemeVariant::frame_theme_variant(Some(&ThemeVariant::light())), Some(PlatformThemeVariant::Light));
+    assert_eq!(ThemeVariant::frame_theme_variant(None), None);
+
+    ThemeVariant::set_high_contrast_variant(None);
+}
