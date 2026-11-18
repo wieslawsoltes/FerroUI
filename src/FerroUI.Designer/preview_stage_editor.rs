@@ -15,7 +15,6 @@ use ferroui_controls::{
     Button, CheckBox, ColumnDefinitions, ComboBox, Control, Grid, RowDefinitions, ScrollViewer,
     StackPanel, TextBlock, TextBox,
 };
-use ferroui_designer_animation::VisualStateGroup;
 use ferroui_designer_tools::ComponentCatalog;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -507,49 +506,28 @@ impl PreviewStageEditor {
             );
             return;
         };
-        let target_node = self
+        let target = self
             .targets
             .borrow()
             .get(self.target.selected_index().max(0) as usize)
-            .and_then(|target| match target {
-                PreviewStageTarget::Document => None,
-                PreviewStageTarget::Definition { anchor, .. } => {
-                    anchor.resolve(&source.document).ok()
-                }
-            });
+            .cloned()
+            .unwrap_or_default();
         let mut rows = Vec::new();
-        for group in VisualStateGroup::read(&source.document) {
-            if target_node.is_some_and(|target| {
-                !source
-                    .document
-                    .ast()
-                    .subtree(target)
-                    .any(|node| node.id == group.owner)
-            }) {
-                continue;
-            }
-            let Ok(owner) = PreviewSourceAnchor::capture(&source.document, group.owner) else {
-                continue;
-            };
-            let owner_name = source
-                .document
-                .ast()
-                .node(group.owner)
-                .map(|node| node.xaml_name().unwrap_or(node.local_name()))
-                .unwrap_or("Control");
-            let control = picker("", &format!("{owner_name} · {} visual state", group.name));
+        for options in crate::preview_stage_state_options::options(&source.document, &target) {
+            let crate::PreviewStageStateOptions {
+                owner,
+                owner_name,
+                group,
+                states: mut values,
+            } = options;
+            let control = picker("", &format!("{owner_name} · {group} visual state"));
             item(&control, "Authored appearance");
-            let mut values = group
-                .states
-                .iter()
-                .map(|state| state.name.clone())
-                .collect::<Vec<_>>();
             for value in &values {
                 item(&control, value);
             }
             let selection = selected
                 .iter()
-                .find(|state| state.owner == owner && state.group == group.name);
+                .find(|state| state.owner == owner && state.group == group);
             let index = if let Some(selected) = selection {
                 if let Some(index) = values.iter().position(|value| value == &selected.state) {
                     index + 1
@@ -562,14 +540,10 @@ impl PreviewStageEditor {
                 0
             };
             control.set_selected_index(index as i32);
-            row(
-                &self.state_host,
-                &format!("{owner_name}\n{}", group.name),
-                &control,
-            );
+            row(&self.state_host, &format!("{owner_name}\n{group}"), &control);
             rows.push(StateChoice {
                 owner,
-                group: group.name,
+                group,
                 values,
                 picker: control,
             });

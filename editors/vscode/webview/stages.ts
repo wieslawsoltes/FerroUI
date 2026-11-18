@@ -6,7 +6,20 @@ const vscode = acquireVsCodeApi();
 const status = element('stages-status');
 const root = element('stage-cards');
 const controls = element('prototype-actions');
-const visible = new Map<number, { stage: StageInfo; card: HTMLElement; image: HTMLImageElement }>();
+type StageField = Extract<FromStages, { type: 'edit' }>['field'];
+interface StageCard {
+    stage: StageInfo;
+    card: HTMLElement;
+    title: HTMLElement;
+    info: HTMLElement;
+    image: HTMLImageElement;
+    displayedEpoch?: number;
+    designData: HTMLButtonElement;
+    mode: HTMLButtonElement;
+    pause: HTMLButtonElement;
+    checks: HTMLButtonElement;
+}
+const visible = new Map<number, StageCard>();
 let model: StageModel | undefined;
 let scene: PrototypeScene | null = null;
 
@@ -33,53 +46,78 @@ window.addEventListener('message', async ({ data }: MessageEvent<ToStages>) => {
         if (visible.get(data.id)?.stage.epoch === data.epoch) {
             current.image.src = image.src;
             current.image.hidden = false;
+            current.displayedEpoch = data.epoch;
         }
     }
 });
 
 function update(stage: StageInfo): void {
-    const previous = visible.get(stage.id);
-    const card = previous?.card ?? create('article');
+    let current = visible.get(stage.id);
+    if (!current) {
+        current = createStageCard(stage);
+        visible.set(stage.id, current);
+        root.append(current.card);
+    }
+    current.stage = stage;
+    current.title.textContent = stage.configuration.name;
+    current.image.alt = `${stage.configuration.name} preview`;
+    const description = stage.status.message ?? `${Math.round(stage.layout_size.width)} × ${Math.round(stage.layout_size.height)} · ${stage.status.state.replaceAll('_', ' ')}`;
+    const states = stage.configuration.states.map(({ group, state }) => `${group} · ${state}`);
+    const detail = [description, ...states].join(' | ');
+    if (current.info.textContent !== detail) current.info.textContent = detail;
+    current.designData.textContent = stage.configuration.design_time_data ? 'Design data on' : 'Design data off';
+    current.designData.setAttribute('aria-pressed', String(stage.configuration.design_time_data));
+    current.mode.textContent = stage.configuration.mode === 'select' ? 'Select' : 'Interact';
+    current.pause.textContent = stage.configuration.auto_update ? 'Pause' : 'Resume';
+    current.checks.disabled = stage.status.state !== 'ready';
+}
+
+function createStageCard(stage: StageInfo): StageCard {
+    const { id } = stage;
+    const card = create('article');
     card.className = 'stage-card';
-    const title = create('h2', stage.configuration.name);
+    const title = create('h2');
     const row = create('div');
     row.className = 'stage-actions';
-    const info = create('p', stage.status.message ?? `${Math.round(stage.layout_size.width)} × ${Math.round(stage.layout_size.height)} · ${stage.status.state.replaceAll('_', ' ')}`);
+    const info = create('p');
     info.setAttribute('role', 'status');
-    const control = (label: string, field: Extract<FromStages, { type: 'edit' }>['field']) => {
+    const control = (label: string, field: StageField) => {
         const button = create('button', label);
-        button.addEventListener('click', () => vscode.postMessage({ type: 'edit', id: stage.id, epoch: stage.epoch, field }));
+        button.addEventListener('click', () => vscode.postMessage({ type: 'edit', id, epoch: current.stage.epoch, field }));
         row.append(button);
+        return button;
     };
     control('Environment', 'environment');
     control('Sizing', 'layout');
-    control(stage.configuration.mode === 'select' ? 'Select' : 'Interact', 'mode');
-    control(stage.configuration.auto_update ? 'Pause' : 'Resume', 'pause');
+    const designData = control('', 'designData');
+    designData.title = 'Design-time overrides and sample data';
+    control('States…', 'state');
+    const mode = control('', 'mode');
+    const pause = control('', 'pause');
     control('Refresh', 'refresh');
     const checks = create('button', 'Checks');
-    checks.disabled = stage.status.state !== 'ready';
-    checks.addEventListener('click', () => vscode.postMessage({ type: 'checks', id: stage.id, epoch: stage.epoch }));
+    checks.addEventListener('click', () => vscode.postMessage({ type: 'checks', id, epoch: current.stage.epoch }));
     row.append(checks);
     control('Rename', 'name');
     control('Save PNG', 'export');
     control('Remove', 'remove');
-    const image = previous?.image ?? create('img');
-    image.alt = `${stage.configuration.name} preview`;
+    const image = create('img');
     image.draggable = false;
-    image.hidden = !image.hasAttribute('src');
+    image.hidden = true;
+    const current: StageCard = { stage, card, title, info, image, designData, mode, pause, checks };
     image.onclick = event => {
-        if (stage.status.state !== 'ready') return;
-        if (scene && scene.current !== stage.id) {
+        const { stage } = current;
+        if (stage.status.state !== 'ready' || current.displayedEpoch !== stage.epoch) return;
+        if (scene && scene.current !== id) {
             if (scene.overlays.at(-1)?.options.dismiss_on_outside) sendPrototype({ action: 'closeOverlay' });
             return;
         }
         const bounds = image.getBoundingClientRect();
-        vscode.postMessage({ type: 'pointer', id: stage.id, epoch: stage.epoch,
+        vscode.postMessage({ type: 'pointer', id, epoch: stage.epoch,
             x: (event.clientX - bounds.left) / bounds.width, y: (event.clientY - bounds.top) / bounds.height });
     };
-    card.replaceChildren(title, row, info, image);
-    if (!previous) root.append(card);
-    visible.set(stage.id, { stage, card, image });
+    card.append(title, row, info, image);
+    return current;
 }
 
 function sendPrototype(command: PrototypeCommand): void { vscode.postMessage({ type: 'prototype', command }); }

@@ -18,6 +18,7 @@ pub(super) fn handles(name: &str) -> bool {
             | "designer_preview_matrix"
             | "designer_preview_image"
             | "designer_preview_stage_checks"
+            | "designer_preview_stage_states"
     )
 }
 
@@ -182,6 +183,11 @@ pub(super) fn tools() -> Vec<Value> {
             "Read source-linked accessibility and clipping findings for a visible, current native stage. Use the model returned by designer_preview_stages.",
             s::object(json!({"stage":s::id(),"expected_model":bounded_string(16)}), &["stage","expected_model"]), false,
         ),
+        s::tool(
+            "designer_preview_stage_states",
+            "Read the authored state choices and owner anchors for one current stage. Update the stage's configuration to select states or change its design data flag.",
+            s::object(json!({"stage":s::id(),"expected_model":bounded_string(16)}), &["stage","expected_model"]), false,
+        ),
         edit,
     ]
 }
@@ -282,6 +288,10 @@ pub(super) fn call(
         let id = integer(args, "stage")?;
         let stage = workspace.preview_stage(id).ok_or("The preview stage was removed")?;
         return Ok(json!({"stage":id,"epoch":stage.epoch,"uri":stage.configuration.source_uri,"findings":workspace.preview_stage_checks(id)?}));
+    }
+    if name == "designer_preview_stage_states" {
+        let id = integer(args, "stage")?;
+        return Ok(json!({"stage":id,"groups":workspace.preview_stage_state_options(id)?}));
     }
     if name == "designer_preview_image" {
         let id = integer(args, "stage")?;

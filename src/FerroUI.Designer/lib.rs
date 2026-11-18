@@ -47,6 +47,7 @@ mod preview_stage_matrix_editor;
 #[cfg(test)]
 mod preview_stage_matrix_ui_tests;
 mod preview_stage_scenarios;
+mod preview_stage_state_options;
 mod preview_stage_editor;
 mod preview_stage_view;
 mod preview_source;
@@ -154,6 +155,7 @@ pub use property_transfer::{
 };
 pub use property_transfer_editor::PropertyTransferEditor;
 pub use preview_checks::PreviewFinding;
+pub use preview_stage_state_options::PreviewStageStateOptions;
 pub use resource_editor::{
     DefinitionCreationKind, DefinitionEditorCommand, DefinitionPreviewSettings,
     DefinitionPropertyField, DefinitionReference, ResourceDefinitionEditor,

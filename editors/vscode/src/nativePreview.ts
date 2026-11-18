@@ -6,7 +6,7 @@ import type { NativeProjectInventory } from './projectInventory';
 import type { Asset, CanvasInteraction, CanvasPresentation, DropHint, EditResult, Inspection, InspectionTarget, Operation, Placement, ResourceRow, Snapshot, Source, Viewport } from './protocol';
 import type { RsxLanguageDocument } from './rsxLanguageTypes';
 import type { HostedFrame, HostedInput, HostedSource } from './hostedProtocol';
-import type { NativeStageChange, PrototypeCommand, PrototypeHotspot, PrototypeScene, StageChecks, StageImage, StageManifest, StageModel, StagePick, StagePointer, StageTarget } from './stagesProtocol';
+import type { NativeStageChange, PrototypeCommand, PrototypeHotspot, PrototypeScene, StageChecks, StageImage, StageManifest, StageModel, StagePick, StagePointer, StageStateOptions, StageTarget } from './stagesProtocol';
 import { commandFor } from './tools';
 
 export class NativePreview implements vscode.Disposable {
@@ -93,6 +93,7 @@ export class NativePreview implements vscode.Disposable {
     }
     stageImage(target: StageTarget): Promise<StageImage> { return this.send('stagesImage', target); }
     stageChecks(target: StageTarget): Promise<StageChecks> { return this.send('stagesChecks', target); }
+    stageStateOptions(target: StageTarget): Promise<StageStateOptions[]> { return this.send('stagesStateOptions', target); }
     stagePointer(input: StagePointer): Promise<StagePick> { return this.send('stagesPointer', input); }
     stagePrototypeElements(target: StageTarget): Promise<PrototypeHotspot[]> {
         if (!this.capabilities.prototypeEditing) throw new Error('Update the FerroUI preview helper to edit prototypes.');

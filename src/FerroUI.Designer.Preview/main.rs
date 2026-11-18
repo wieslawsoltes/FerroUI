@@ -134,6 +134,8 @@ fn respond(
             .and_then(|request| serialize(stages.image(request))),
         "stagesChecks" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|request| serialize(stages.checks(request, projects))),
+        "stagesStateOptions" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
+            .and_then(|request| serialize(stages.state_options(request))),
         "stagesPointer" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|request| stages.pointer(request, projects)),
         "stagesPrototypeElements" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())

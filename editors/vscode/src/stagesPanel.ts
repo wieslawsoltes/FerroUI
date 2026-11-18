@@ -8,6 +8,7 @@ import { NativePreview } from './nativePreview';
 import { errorMessage, type Range } from './protocol';
 import type { FromStages, NativeStageChange, PrototypeCommand, StageChange, StageInfo, StageManifest, StageModel, StageTarget, StagesRequest, ToStages } from './stagesProtocol';
 import { editPrototype } from './stagePrototypeEditor';
+import { chooseStageState } from './stageStatePicker';
 import { choose, editText } from './studioContext';
 import { asRange, languageOf, sourceOf } from './textDocument';
 import { stagesHtml, webviewOptions } from './view';
@@ -127,6 +128,10 @@ class StageSession {
 
     checks(id: number, epoch: number, signal: AbortSignal) {
         return this.readStage({ id, epoch }, signal, (client, stage) => client.stageChecks(stage));
+    }
+
+    stateOptions(id: number, epoch: number, signal: AbortSignal) {
+        return this.readStage({ id, epoch }, signal, (client, stage) => client.stageStateOptions(stage));
     }
 
     private async readStage<T>(target: StageTarget, signal: AbortSignal, read: (client: NativePreview, target: StageTarget) => Promise<T>): Promise<T> {
@@ -372,6 +377,13 @@ class StageSession {
             }
             case 'mode': configuration.mode = configuration.mode === 'select' ? 'live' : 'select'; break;
             case 'pause': configuration.auto_update = !configuration.auto_update; break;
+            case 'designData': configuration.design_time_data = !configuration.design_time_data; break;
+            case 'state': {
+                const states = await chooseStageState(await client.stageStateOptions({ id, epoch }), configuration.states);
+                if (!states) return;
+                configuration.states = states;
+                break;
+            }
             case 'layout': {
                 const layout = await choose('Stage sizing', [
                     { label: 'Fixed width and height', value: 'fixed' }, { label: 'Fit content', value: 'size_that_fits' },

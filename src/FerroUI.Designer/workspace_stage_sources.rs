@@ -111,6 +111,20 @@ impl DesignerWorkspace {
         self.preview_stages.board.borrow().preview_checks(id)
     }
 
+    /// State groups available to an accepted source and stage configuration.
+    pub fn preview_stage_state_options(
+        &self,
+        id: PreviewStageId,
+    ) -> Result<Vec<crate::PreviewStageStateOptions>, String> {
+        let stage = self.preview_stage(id).ok_or("The preview stage was removed")?;
+        let source = self
+            .preview_stage_sources()
+            .into_iter()
+            .find(|source| source.uri == stage.configuration.source_uri)
+            .ok_or("Open the stage source before choosing its states")?;
+        crate::preview_stage_state_options::source_options(&source, &stage.configuration.target)
+    }
+
     /// Image capture may use a paused frame while its accepted source and all
     /// native include dependencies remain exact. This never enables selection/input.
     pub fn preview_stage_image_source_is_current(&self, id: PreviewStageId) -> bool {

@@ -10,7 +10,7 @@ use ferroui_controls::{Control, SizeToContent, Window, WindowDecorations};
 use ferroui_designer::{
     PreviewEnvironment, PreviewFinding, PreviewHostOptions, PreviewPrototypeElementChoice,
     PreviewPrototypeManifest, PreviewStageBoard, PreviewStageConfiguration, PreviewStageId,
-    PreviewStageInfo, PreviewStageManifest, PreviewStageMode, PreviewStageSource,
+    PreviewStageInfo, PreviewStageManifest, PreviewStageMode, PreviewStageSource, PreviewStageStateOptions,
     PreviewStageStatus, PreviewTheme, capture_preview_stage_png,
 };
 use ferroui_designer_language::Range;
@@ -296,6 +296,11 @@ impl Stages {
         Ok(StageChecks { uri, findings })
     }
 
+    pub(crate) fn state_options(&self, target: StageTarget) -> Result<Vec<PreviewStageStateOptions>, String> {
+        self.stage_info(&target)?;
+        self.board.state_options(target.id)
+    }
+
     pub(crate) fn pointer(&mut self, request: Pointer, projects: &Projects) -> Result<Value, String> {
         if !(0.0..=1.0).contains(&request.x) || !(0.0..=1.0).contains(&request.y) {
             return Err("Choose a point inside the stage".into());
@@ -338,13 +343,15 @@ impl Stages {
         Ok(json!({"range":range,"uri":source.uri}))
     }
 
-    pub(crate) fn mounted(&mut self, target: &StageTarget) -> Result<Ref<Control>, String> {
-        let info = self
-            .board
+    fn stage_info(&self, target: &StageTarget) -> Result<PreviewStageInfo, String> {
+        self.board
             .stage(target.id)
             .filter(|info| info.epoch == target.epoch)
-            .ok_or("The stage changed. Use its current image.")?;
-        if info.rendered_revision.is_none() {
+            .ok_or_else(|| "The stage changed. Use its current controls.".into())
+    }
+
+    pub(crate) fn mounted(&mut self, target: &StageTarget) -> Result<Ref<Control>, String> {
+        if self.stage_info(target)?.rendered_revision.is_none() {
             return Err("This stage has no accepted preview".into());
         }
         let control = self

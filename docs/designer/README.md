@@ -124,6 +124,8 @@ visual-state endpoints. Pinning keeps a stage visible across document tabs; Paus
 automatic source updates. **Focus** returns its context to the editing canvas. Stage settings
 remain separate from authored XAML and can be saved as a versioned set. See the
 [preview-stage guide](xcode-previews.md) for exact behavior and platform boundaries.
+Studio's `designer_preview_stage_states` MCP tool lists the scoped authored choices used
+by the stage editor and the VS Code **States…** action.
 The stage editor supports fitting either or both axes using native measurement. A resize
 grip applies fixed logical dimensions while preserving Live control state; card zoom
 changes only display scale. **Compare matrix** combines size, theme, direction, design-data

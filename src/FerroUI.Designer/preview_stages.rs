@@ -1045,6 +1045,19 @@ impl PreviewStageBoard {
         crate::preview_checks::check_preview(&rendered.document, &rendered.preview, &stage.control.clone().upcast())
     }
 
+    /// Read current authored state groups, including when a stage needs repair.
+    pub fn state_options(
+        &self,
+        id: PreviewStageId,
+    ) -> Result<Vec<crate::PreviewStageStateOptions>, String> {
+        let stage = &self.stages[self.index(id)?];
+        let source = self
+            .sources
+            .get(&stage.configuration.source_uri)
+            .ok_or("Open the stage source before choosing states")?;
+        crate::preview_stage_state_options::source_options(source, &stage.configuration.target)
+    }
+
     /// Resolve one authored hotspot against the exact accepted native graph. The
     /// returned axis-aligned rectangle uses stage logical coordinates and is clipped
     /// to the stage viewport and native ancestor clips. Call again immediately before

@@ -8,7 +8,7 @@ export interface StageConfiguration {
     environment: { width: number; height: number; theme: 'light' | 'dark' | 'inherit'; flow_direction: 'inherit' | 'left_to_right' | 'right_to_left' };
     layout: 'fixed' | 'size_that_fits' | 'fixed_width' | 'fixed_height';
     design_time_data: boolean;
-    states: unknown[];
+    states: StageState[];
     pinned: boolean;
     auto_update: boolean;
     mode: 'select' | 'live';
@@ -47,6 +47,9 @@ export type PrototypeCommand = { action: 'start'; flow: string } | { action: 'ac
 export interface StageModel { epoch: number; manifest: StageManifest; stages: StageInfo[]; prototype: PrototypeScene | null }
 export interface StageTarget { id: number; epoch: number }
 export interface StageChecks { uri: string; findings: (PreviewFinding & { range: Range | null })[] }
+export interface SourceAnchor { path: { namespace: string; type_name: string; name: string | null; key: string | null }[] }
+export interface StageState { owner: SourceAnchor; group: string; state: string }
+export interface StageStateOptions { owner: SourceAnchor; owner_name: string; group: string; states: string[] }
 export interface StagePointer extends StageTarget { x: number; y: number }
 export interface StagePick { range?: Range; uri?: string; interacted?: boolean; prototype?: PrototypeScene }
 interface AddStage { action: 'add'; name: string; width: number; height: number; dark: boolean; epoch: number }
@@ -58,7 +61,7 @@ export type StageChange = ExistingStageChange | (AddStage & { sourcePath?: strin
 export type NativeStageChange = ExistingStageChange | (AddStage & { source?: Source });
 export type FromStages = { type: 'ready' | 'add' | 'saveManifest' | 'loadManifest' }
     | ({ type: 'pointer' } & StagePointer) | ({ type: 'checks' } & StageTarget)
-    | { type: 'edit'; epoch: number; id: number; field: 'name' | 'environment' | 'mode' | 'layout' | 'pause' | 'refresh' | 'remove' | 'export' };
+    | { type: 'edit'; epoch: number; id: number; field: 'name' | 'environment' | 'mode' | 'layout' | 'pause' | 'refresh' | 'remove' | 'export' | 'designData' | 'state' };
 export type StagesRequest = FromStages | { type: 'prototype'; command?: PrototypeCommand } | { type: 'editPrototype' };
 export type ToStages = { type: 'model'; model: StageModel; uri: string }
     | ({ type: 'image'; image: StageImage } & StageTarget) | { type: 'status'; message: string }
