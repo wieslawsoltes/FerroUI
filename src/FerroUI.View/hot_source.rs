@@ -18,8 +18,13 @@ pub(super) struct Invocation {
 
 impl Source {
     pub(super) fn parse(text: &str, managed: bool) -> Result<Self, String> {
-        let tokens = text.parse::<TokenStream>().map_err(|error| error.to_string())?;
-        let mut source = Self { rsx: Vec::new(), signature: String::new() };
+        let tokens = text
+            .parse::<TokenStream>()
+            .map_err(|error| error.to_string())?;
+        let mut source = Self {
+            rsx: Vec::new(),
+            signature: String::new(),
+        };
         source.signature = source.describe_file(tokens, managed)?;
         Ok(source)
     }
@@ -29,7 +34,9 @@ impl Source {
         let mut signature = String::new();
         for (at, token) in tokens.iter().enumerate() {
             let TokenTree::Group(group) = token else {
-                if managed { describe_token(&mut signature, token); }
+                if managed {
+                    describe_token(&mut signature, token);
+                }
                 continue;
             };
             let (open, close) = delimiters(group.delimiter());
@@ -43,15 +50,30 @@ impl Source {
                 let mut shape = String::new();
                 let mut hot = BTreeSet::new();
                 if managed {
-                    let nodes = ferroui_view_syntax::parse(group.stream()).map_err(|error| error.to_string())?;
+                    let nodes = ferroui_view_syntax::parse(group.stream())
+                        .map_err(|error| error.to_string())?;
                     hot_indices(&nodes, &mut hot);
                 }
-                describe_invocation(group.stream(), &mut literals, &mut shape, managed.then_some(&hot));
-                if managed { let _ = write!(signature, "{open}{shape}{close}"); }
-                self.rsx.push(Invocation { line: location.line as u32, column: location.column as u32 + 1, literals, shape });
+                describe_invocation(
+                    group.stream(),
+                    &mut literals,
+                    &mut shape,
+                    managed.then_some(&hot),
+                );
+                if managed {
+                    let _ = write!(signature, "{open}{shape}{close}");
+                }
+                self.rsx.push(Invocation {
+                    line: location.line as u32,
+                    column: location.column as u32 + 1,
+                    literals,
+                    shape,
+                });
             }
             let contents = self.describe_file(group.stream(), managed)?;
-            if managed && !is_rsx { let _ = write!(signature, "{open}{contents}{close}"); }
+            if managed && !is_rsx {
+                let _ = write!(signature, "{open}{contents}{close}");
+            }
         }
         Ok(signature)
     }
@@ -60,16 +82,25 @@ impl Source {
 fn hot_indices(nodes: &[Node], hot: &mut BTreeSet<usize>) {
     for node in nodes {
         match node {
-            Node::Text(_, index) => { hot.insert(*index as usize); }
+            Node::Text(_, index) => {
+                hot.insert(*index as usize);
+            }
             Node::Element(element) => {
                 for attribute in &element.attributes {
-                    if let Attribute::Value { hot: Some(index), .. } = attribute { hot.insert(*index as usize); }
+                    if let Attribute::Value {
+                        hot: Some(index), ..
+                    } = attribute
+                    {
+                        hot.insert(*index as usize);
+                    }
                 }
                 hot_indices(&element.children, hot);
             }
             Node::If(_, then, otherwise, _) => {
                 hot_indices(then, hot);
-                if let Some(otherwise) = otherwise { hot_indices(otherwise, hot); }
+                if let Some(otherwise) = otherwise {
+                    hot_indices(otherwise, hot);
+                }
             }
             Node::For(_, _, body, _) => hot_indices(body, hot),
             Node::Expr(..) => (),
@@ -77,7 +108,12 @@ fn hot_indices(nodes: &[Node], hot: &mut BTreeSet<usize>) {
     }
 }
 
-fn describe_invocation(tokens: TokenStream, literals: &mut Vec<String>, shape: &mut String, hot: Option<&BTreeSet<usize>>) {
+fn describe_invocation(
+    tokens: TokenStream,
+    literals: &mut Vec<String>,
+    shape: &mut String,
+    hot: Option<&BTreeSet<usize>>,
+) {
     for token in tokens {
         match &token {
             TokenTree::Literal(literal) => {
@@ -115,7 +151,9 @@ fn literal_kind(text: &str) -> String {
 fn describe_token(out: &mut String, token: &TokenTree) {
     let text = token.to_string();
     let _ = write!(out, "{}:{text}", text.len());
-    if let TokenTree::Punct(punct) = token { let _ = write!(out, "{:?}", punct.spacing()); }
+    if let TokenTree::Punct(punct) = token {
+        let _ = write!(out, "{:?}", punct.spacing());
+    }
     out.push(' ');
 }
 
@@ -133,11 +171,15 @@ fn path_start(tokens: &[TokenTree], mut at: usize) -> usize {
         && matches!(&tokens[at - 1], TokenTree::Punct(p) if p.as_char() == ':')
         && matches!(&tokens[at - 2], TokenTree::Punct(p) if p.as_char() == ':')
         && matches!(&tokens[at - 3], TokenTree::Ident(_))
-    { at -= 3; }
+    {
+        at -= 3;
+    }
     if at >= 2
         && matches!(&tokens[at - 1], TokenTree::Punct(p) if p.as_char() == ':')
         && matches!(&tokens[at - 2], TokenTree::Punct(p) if p.as_char() == ':')
-    { return at - 2; }
+    {
+        return at - 2;
+    }
     at
 }
 
@@ -147,10 +189,19 @@ mod tests {
 
     #[test]
     fn distinguishes_hot_literals_from_compiled_expressions_and_structure() {
-        let base = r#"fn view() { rsx! { Button { width: 10.0, on_click: |_| count(1), "Saved" } }; }"#;
+        let base =
+            r#"fn view() { rsx! { Button { width: 10.0, on_click: |_| count(1), "Saved" } }; }"#;
         let signature = |text: &str| Source::parse(text, true).unwrap().signature;
-        assert_eq!(signature(base), signature(&base.replace("10.0", "20.0").replace("Saved", "Done")));
-        for (old, new) in [("count(1)", "count(2)"), ("Button", "TextBlock"), ("10.0", "10u32"), ("fn view", "fn other")] {
+        assert_eq!(
+            signature(base),
+            signature(&base.replace("10.0", "20.0").replace("Saved", "Done"))
+        );
+        for (old, new) in [
+            ("count(1)", "count(2)"),
+            ("Button", "TextBlock"),
+            ("10.0", "10u32"),
+            ("fn view", "fn other"),
+        ] {
             assert_ne!(signature(base), signature(&base.replace(old, new)));
         }
         assert!(Source::parse(&base.replace("width: 10.0", "width:"), true).is_err());

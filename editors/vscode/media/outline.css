@@ -21,7 +21,7 @@
     background: var(--vscode-list-activeSelectionBackground);
 }
 #outline-tree li:focus-visible { outline: 1px solid var(--focus); outline-offset: -1px; }
-#outline-tree li[draggable=true] { cursor: grab; }
+#outline-tree li[data-movable] { cursor: grab; }
 .outline-name { color: inherit; opacity: .72; overflow: hidden; text-overflow: ellipsis; }
 .twisty { inline-size: 14px; flex: 0 0 14px; }
 li[aria-expanded] .twisty { cursor: pointer; }

@@ -63,9 +63,9 @@ pub(crate) fn render(renderer: &mut Renderer, input: &Render) -> Result<Snapshot
                 bounds: bounds.get(&node.id).copied(),
                 properties,
                 addable_properties: addable_properties(&design, node),
-                can_insert: design.editable_structure() && renderer.stage.as_ref().is_some_and(|stage| stage.session.can_insert_outline_child(node.id)),
+                can_insert: design.editable_structure() && renderer.stage.as_ref().is_some_and(|stage| stage.session.borrow().can_insert_outline_child(node.id)),
                 can_remove: can_remove(&design, node),
-                can_move: design.editable_structure() && renderer.stage.as_ref().is_some_and(|stage| stage.session.can_move_outline_node(node.id)),
+                can_move: design.editable_structure() && renderer.stage.as_ref().is_some_and(|stage| stage.session.borrow().can_move_outline_node(node.id)),
             })
         })
         .collect::<Result<_, String>>()?;

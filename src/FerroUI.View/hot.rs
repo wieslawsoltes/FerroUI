@@ -65,6 +65,17 @@ pub fn watch() {
     reload::watch();
 }
 
+/// Report that a custom RSX application opened its main window. Call before
+/// showing the window and call [`watch`] on the same dispatcher. `launch`
+/// registers both automatically.
+pub fn notify_editor_on_open(window: &ferroui_base::Ref<ferroui_controls::Window>) {
+    #[cfg(feature = "hot-reload")]
+    if ferroui_reload_protocol::enabled() {
+        window.opened(|| ferroui_reload_protocol::ready(ferroui_reload_protocol::Language::Rsx)).detach();
+    }
+    let _ = window;
+}
+
 /// Checks the source files for changes now and applies them; what [`watch`]
 /// runs on its timer.
 pub fn poll() {

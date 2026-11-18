@@ -1,6 +1,6 @@
 import type { DragGesture, FromOutline, OutlinePosition, OutlineRow, OutlineState, ToOutline } from '../src/protocol';
 import { create, element } from './dom';
-import { allowDrop, finishDrop, matchDrag, startDrag } from './drag';
+import { DragSource, finishDrop, matchDrag } from './drag';
 
 declare function acquireVsCodeApi(): { postMessage(message: FromOutline): void };
 const vscode = acquireVsCodeApi();
@@ -14,16 +14,30 @@ const collapsed = new Set<number>();
 let key = '';
 let structureKey = '';
 let drag: DragGesture | undefined;
-let owned: DragGesture | undefined;
 let marker: HTMLLIElement | undefined;
 let expansion: ReturnType<typeof setTimeout> | undefined;
 let hoverScroll = 0;
 let error: string | undefined;
 
+const dragSource = new DragSource(tree, event => {
+    const item = rowAt(event);
+    if (item?.row.canMove && state.frame && !(event.target as Element).closest('.twisty')) {
+        return { frame: state.frame, origin: { type: 'node', node: item.row.id } };
+    }
+}, vscode.postMessage, gesture => { drag = gesture; });
+
+tree.addEventListener('pointerdown', () => {
+    if (drag) {
+        vscode.postMessage({ type: 'endDrag', id: drag.id });
+        drag = undefined;
+        clearMarker();
+    }
+}, true);
+
 window.addEventListener('message', ({ data }: MessageEvent<ToOutline>) => {
     if (data.type === 'drag') {
         drag = data.gesture;
-        if (!drag) clearMarker();
+        if (!drag) { dragSource.end(false); clearMarker(); }
         return;
     }
     if (data.type === 'state') {
@@ -103,21 +117,14 @@ tree.addEventListener('keydown', event => {
     if (next !== undefined) elements.get(next)?.focus();
 });
 
-tree.addEventListener('dragstart', event => {
-    const item = rowAt(event);
-    if (!item?.row.canMove || !state.frame) { event.preventDefault(); return; }
-    owned = startDrag(event, state.frame, { type: 'node', node: item.row.id }, vscode.postMessage, item.row.name ?? item.row.label);
-    drag = owned;
-});
-tree.addEventListener('dragend', () => {
-    if (owned) vscode.postMessage({ type: 'endDrag', id: owned.id });
-    drag = owned = undefined;
-    clearMarker();
-});
-tree.addEventListener('dragover', event => {
+tree.addEventListener('pointermove', event => {
+    if (!(event.buttons & 1)) {
+        if (drag) vscode.postMessage({ type: 'endDrag', id: drag.id });
+        clearMarker();
+        return;
+    }
     const target = dropTarget(event);
     if (!drag || !target) { clearMarker(); return; }
-    allowDrop(event, drag);
     if (marker !== target.item || marker.dataset.drop !== target.position) {
         clearMarker();
         marker = target.item;
@@ -130,12 +137,10 @@ tree.addEventListener('dragover', event => {
     const step = event.clientY < 28 ? -18 : event.clientY > innerHeight - 28 ? 18 : 0;
     if (step) hoverScroll = requestAnimationFrame(() => window.scrollBy(0, step));
 });
-tree.addEventListener('dragleave', event => {
-    if (!(event.relatedTarget instanceof Node) || !tree.contains(event.relatedTarget)) clearMarker();
-});
-tree.addEventListener('drop', event => {
+tree.addEventListener('pointerleave', clearMarker);
+tree.addEventListener('pointerup', event => {
     const target = dropTarget(event);
-    if (target) finishDrop(event, state.frame, drag, { type: 'outline', node: target.node, position: target.position }, vscode.postMessage);
+    if (target && event.button === 0) finishDrop(state.frame, drag, { type: 'outline', node: target.node, position: target.position }, vscode.postMessage);
     clearMarker();
 });
 vscode.postMessage({ type: 'ready' });
@@ -171,7 +176,7 @@ function syncRows(): void {
     const tabbable = state.selected !== undefined && elements.has(state.selected) ? state.selected : elements.keys().next().value;
     for (const [id, element] of elements) {
         element.tabIndex = id === tabbable ? 0 : -1;
-        element.draggable = Boolean(state.frame && rows.get(id)?.canMove);
+        element.toggleAttribute('data-movable', Boolean(state.frame && rows.get(id)?.canMove));
         element.setAttribute('aria-selected', String(state.selected === id));
     }
 }
@@ -208,8 +213,8 @@ function expandTo(node?: number): void {
     }
 }
 
-function dropTarget(event: DragEvent) {
-    if (!matchDrag(event, state.frame, drag)) return undefined;
+function dropTarget(event: PointerEvent) {
+    if (!matchDrag(state.frame, drag)) return undefined;
     const found = rowAt(event);
     if (!found) return undefined;
     const { row, item } = found;

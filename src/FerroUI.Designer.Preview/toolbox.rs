@@ -10,18 +10,26 @@ pub(crate) fn assets() -> &'static [DesignerAsset] {
 }
 
 pub(crate) fn find(id: &str) -> Result<&'static DesignerAsset, String> {
-    assets().iter().find(|asset| asset.id == id).ok_or_else(|| "Unknown toolbox control".into())
+    assets()
+        .iter()
+        .find(|asset| asset.id == id)
+        .ok_or_else(|| "Unknown toolbox control".into())
 }
 
 pub(crate) fn catalog() -> Vec<Asset> {
-    assets().iter().map(|asset| Asset {
-        id: asset.id.clone(),
-        title: asset.title.clone(),
-        category: asset.category.clone(),
-        description: asset.description.clone(),
-        icon: asset.icon.path().trim_start_matches("F1 ").to_owned(),
-        rust: Document::new(&asset.source).ok().is_some_and(|document| xaml_to_rsx(&document).is_ok()),
-    }).collect()
+    assets()
+        .iter()
+        .map(|asset| Asset {
+            id: asset.id.clone(),
+            title: asset.title.clone(),
+            category: asset.category.clone(),
+            description: asset.description.clone(),
+            icon: asset.icon.path().trim_start_matches("F1 ").to_owned(),
+            rust: Document::new(&asset.source)
+                .ok()
+                .is_some_and(|document| xaml_to_rsx(&document).is_ok()),
+        })
+        .collect()
 }
 
 #[cfg(test)]

@@ -52,6 +52,7 @@ impl RequestContext {
 /// A service whose state is safe to access from transport workers. No UI objects may be held.
 /// Tool definitions are immutable for the server lifetime. Mutating tools additionally require
 /// the server's existing write permission; identity/room ACLs remain the provider's responsibility.
+/// A result with `mimeType: "image/png"` and base64 `data` is delivered as an MCP image block.
 pub trait ServiceToolProvider: Send + Sync + 'static {
     fn tools(&self) -> Vec<Value>;
     fn validate(&self, name: &str, arguments: &Value) -> Result<(), String>;

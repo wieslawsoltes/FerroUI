@@ -1,11 +1,14 @@
 //! A private stdio renderer process. The extension owns the authored buffer and
 //! applies returned UTF-16 edits through the editor's undo/redo transaction.
 mod document;
+mod editor_mcp;
+mod edit_selection;
 mod edits;
 mod placement;
 mod protocol;
 mod renderer;
 mod snapshot;
+mod studio;
 mod toolbox;
 
 use ferroui_designer_language::lsp::{read_frame, write_frame};
@@ -16,7 +19,12 @@ use std::io::{self, Write};
 use std::process::ExitCode;
 
 fn main() -> ExitCode {
-    match serve() {
+    let result = match std::env::args().nth(1).as_deref() {
+        None => serve(),
+        Some("--mcp-editor") => editor_mcp::serve(),
+        Some(_) => Err(io::Error::new(io::ErrorKind::InvalidInput, "Unknown preview mode")),
+    };
+    match result {
         Ok(()) => ExitCode::SUCCESS,
         Err(error) => {
             eprintln!("FerroUI designer preview: {error}");
@@ -71,6 +79,13 @@ fn respond(
             .and_then(|input| {
                 let stage = renderer.as_ref().ok_or("Render the design before placing controls")?.stage(input.frame)?;
                 serialize(stage.plan(&input.placement).map(|(_, hint)| hint))
+            }),
+        "studioTools" => serialize(Ok(studio::catalog())),
+        "studioQuery" => serde_json::from_value::<studio::Query>(message["params"].clone())
+            .map_err(|e| e.to_string())
+            .and_then(|query| {
+                let stage = renderer.as_ref().ok_or("Open a designer first")?.stage(query.frame)?;
+                studio::query(stage, &query)
             }),
         _ => {
             return write_frame(

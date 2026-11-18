@@ -23,6 +23,7 @@
     min-inline-size: 0;
     padding-inline: 5px;
     cursor: grab;
+    user-select: none;
 }
 .asset svg { inline-size: 16px; block-size: 16px; flex: 0 0 auto; fill: currentColor; fill-rule: evenodd; }
 .asset span { overflow: hidden; text-overflow: ellipsis; }

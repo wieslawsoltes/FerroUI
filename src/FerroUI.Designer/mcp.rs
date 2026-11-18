@@ -34,6 +34,8 @@ mod schema;
 mod selection_workflows;
 #[path = "mcp_workspace.rs"]
 mod workspace_tools;
+#[path = "mcp_placement.rs"]
+mod placement;
 
 pub use ferroui_mcp::{
     Options, Permissions, Transport, UiServerHandle as ServerHandle, reserve_stdout,
@@ -46,6 +48,11 @@ pub struct DesignerMcp {
     workspace: Option<Weak<DesignerWorkspace>>,
 }
 impl DesignerMcp {
+    /// Tool definitions that only need a designer session, without a Studio shell.
+    pub fn session_tool_definitions() -> Vec<Value> {
+        Self { session: Weak::new(), workspace: None }.tools()
+    }
+
     pub fn new(session: &Rc<RefCell<DesignerSession>>) -> Self {
         Self {
             session: Rc::downgrade(session),
@@ -255,6 +262,7 @@ impl UiToolProvider for DesignerMcp {
         tools.extend(components::tools());
         tools.extend(design_workflows::tools());
         tools.extend(selection_workflows::tools());
+        tools.extend(placement::tools());
         if self.workspace.is_some() {
             tools.extend(workspace_tools::tools());
             tools.extend(preview_stages::tools());
@@ -276,6 +284,7 @@ impl UiToolProvider for DesignerMcp {
             || design_workflows::handles(name)
             || selection_workflows::handles(name)
             || preview_stages::handles(name)
+            || placement::handles(name)
             || prototype::handles(name)
         {
             return schema::validate(&definition["inputSchema"], args);
@@ -435,6 +444,11 @@ impl UiToolProvider for DesignerMcp {
             return Err("Designer authoring requires allow_property_writes".into());
         }
         let owner = self.session()?;
+        if placement::handles(name) {
+            let workspace = self.workspace.as_ref().and_then(Weak::upgrade);
+            let mut session = owner.try_borrow_mut().map_err(|_| "Designer is already processing a transaction")?;
+            return placement::call(&mut session, workspace.as_deref(), name, args);
+        }
         if preview_stages::handles(name) || prototype::handles(name) {
             let workspace = self
                 .workspace

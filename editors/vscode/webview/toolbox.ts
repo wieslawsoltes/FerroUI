@@ -1,6 +1,6 @@
-import type { Asset, DragGesture, FromToolbox, ToolboxState, ToToolbox } from '../src/protocol';
+import type { Asset, FromToolbox, ToolboxState, ToToolbox } from '../src/protocol';
 import { create, element } from './dom';
-import { startDrag } from './drag';
+import { DragSource } from './drag';
 
 declare function acquireVsCodeApi(): {
     postMessage(message: FromToolbox): void;
@@ -15,12 +15,20 @@ const status = element('toolbox-message');
 let state: ToolboxState = { assets: [], canInsert: false };
 let tiles = Boolean(vscode.getState()?.tiles);
 let listKey = '';
-let drag: DragGesture | undefined;
 let error: string | undefined;
+
+const dragSource = new DragSource(list, event => {
+    const control = (event.target as Element).closest<HTMLElement>('[data-asset]')?.dataset.asset;
+    if (control && state.frame) return { frame: state.frame, origin: { type: 'asset', control } };
+}, vscode.postMessage);
 
 mode.addEventListener('click', () => { tiles = !tiles; vscode.setState({ tiles }); render(); });
 search.addEventListener('input', render);
 window.addEventListener('message', ({ data }: MessageEvent<ToToolbox>) => {
+    if (data.type === 'drag') {
+        if (!data.gesture) dragSource.end(false);
+        return;
+    }
     if (data.type === 'state') {
         if (state.frame?.token !== data.state.frame?.token || state.frame?.session !== data.state.frame?.session) error = undefined;
         state = data.state;
@@ -66,7 +74,6 @@ function control(asset: Asset): HTMLButtonElement {
     button.className = 'asset';
     button.dataset.asset = asset.id;
     button.title = asset.description;
-    button.draggable = Boolean(state.frame);
     button.setAttribute('aria-disabled', String(!state.frame));
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('viewBox', '0 0 24 24');
@@ -84,14 +91,6 @@ function control(asset: Asset): HTMLButtonElement {
         }
         error = undefined;
         vscode.postMessage({ type: 'insert', frame: state.frame, control: asset.id });
-    });
-    button.addEventListener('dragstart', event => {
-        if (!state.frame) { event.preventDefault(); return; }
-        drag = startDrag(event, state.frame, { type: 'asset', control: asset.id }, vscode.postMessage, asset.title);
-    });
-    button.addEventListener('dragend', () => {
-        if (drag) vscode.postMessage({ type: 'endDrag', id: drag.id });
-        drag = undefined;
     });
     return button;
 }

@@ -1,38 +1,69 @@
 import type { DragGesture, DragMessage, DragOrigin, DropTarget, FrameTarget } from '../src/protocol';
 
-const mime = 'application/vnd.ferroui.designer-drag';
 type Send = (message: DragMessage) => void;
 
-export function startDrag(event: DragEvent, frame: FrameTarget, origin: DragOrigin, send: Send, label?: string): DragGesture | undefined {
-    const transfer = event.dataTransfer;
-    if (!transfer) return undefined;
-    const gesture = { id: crypto.randomUUID(), frame, origin };
-    transfer.setData(mime, gesture.id);
-    transfer.effectAllowed = origin.type === 'asset' ? 'copy' : 'move';
-    if (label) {
-        const ghost = document.createElement('span');
-        ghost.className = 'drag-label';
-        ghost.textContent = label;
-        document.body.append(ghost);
-        transfer.setDragImage(ghost, 12, 12);
-        setTimeout(() => ghost.remove(), 0);
+interface Press {
+    id: number;
+    x: number;
+    y: number;
+    frame: FrameTarget;
+    origin: DragOrigin;
+}
+
+/** Internal pointer gestures continue across the extension's views. VS Code's
+ * native workbench drag redirects HTML DragEvents to its editor-drop overlay. */
+export class DragSource {
+    private press?: Press;
+    private active?: DragGesture;
+    private suppressClick = false;
+
+    constructor(root: HTMLElement, candidate: (event: PointerEvent) => { frame: FrameTarget; origin: DragOrigin } | undefined,
+        private readonly send: Send, private readonly started: (gesture: DragGesture) => void = () => {}) {
+        root.addEventListener('pointerdown', event => {
+            this.suppressClick = false;
+            if (!event.isPrimary || event.button !== 0) return;
+            this.end();
+            const item = candidate(event);
+            if (item) this.press = { ...item, id: event.pointerId, x: event.clientX, y: event.clientY };
+        });
+        const move = (event: PointerEvent) => {
+            const press = this.press;
+            if (!press || event.pointerId !== press.id) return;
+            if (!(event.buttons & 1)) { this.end(); return; }
+            if (this.active || Math.hypot(event.clientX - press.x, event.clientY - press.y) < 5) return;
+            const gesture = { id: crypto.randomUUID(), frame: press.frame, origin: press.origin };
+            this.active = gesture;
+            this.suppressClick = true;
+            document.body.classList.add('drag-source');
+            this.send({ type: 'beginDrag', gesture });
+            this.started(gesture);
+        };
+        window.addEventListener('pointermove', move);
+        root.addEventListener('pointerleave', move);
+        window.addEventListener('pointerup', event => { if (event.isPrimary) this.end(); });
+        window.addEventListener('pointercancel', () => this.end());
+        window.addEventListener('keydown', event => { if (event.key === 'Escape') this.end(); });
+        root.addEventListener('click', event => {
+            if (this.suppressClick && event.detail) {
+                this.suppressClick = false;
+                event.preventDefault();
+                event.stopImmediatePropagation();
+            }
+        }, true);
     }
-    send({ type: 'beginDrag', gesture });
-    return gesture;
+
+    end(send = true): void {
+        if (this.active && send) this.send({ type: 'endDrag', id: this.active.id });
+        this.press = this.active = undefined;
+        document.body.classList.remove('drag-source');
+    }
 }
 
-export function matchDrag(event: DragEvent, frame: FrameTarget | undefined, gesture: DragGesture | undefined): gesture is DragGesture {
-    return Boolean(frame && gesture && frame.session === gesture.frame.session && frame.token === gesture.frame.token
-        && event.dataTransfer?.types.includes(mime));
+export function matchDrag(frame: FrameTarget | undefined, gesture: DragGesture | undefined): gesture is DragGesture {
+    return Boolean(frame && gesture && frame.session === gesture.frame.session && frame.token === gesture.frame.token);
 }
 
-export function allowDrop(event: DragEvent, gesture: DragGesture): void {
-    event.preventDefault();
-    if (event.dataTransfer) event.dataTransfer.dropEffect = gesture.origin.type === 'asset' ? 'copy' : 'move';
-}
-
-export function finishDrop(event: DragEvent, frame: FrameTarget | undefined, gesture: DragGesture | undefined, target: DropTarget, send: Send): void {
-    if (!frame || !matchDrag(event, frame, gesture) || event.dataTransfer?.getData(mime) !== gesture.id) return;
-    event.preventDefault();
+export function finishDrop(frame: FrameTarget | undefined, gesture: DragGesture | undefined, target: DropTarget, send: Send): void {
+    if (!frame || !matchDrag(frame, gesture)) return;
     send({ type: 'drop', id: gesture.id, frame, target });
 }

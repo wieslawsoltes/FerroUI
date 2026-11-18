@@ -151,6 +151,7 @@ pub use resource_editor::{
     ResourceDefinitionModel,
 };
 pub use runtime::{PreviewStatus, RuntimeNode};
+pub use authoring_placement::{PlacementOrigin, PlacementPlan, PlacementTarget};
 pub use selection_layout::{LayoutMatch, LayoutReset};
 pub use session::DesignerSession;
 pub use surface::{DesignGesture, DesignSurface};
@@ -174,6 +175,7 @@ mod tests;
 #[cfg(test)]
 mod workspace_authoring_tests;
 mod workspace_layout_helpers;
+mod authoring_placement;
 #[cfg(test)]
 mod workspace_shell_tests;
 #[cfg(test)]

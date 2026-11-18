@@ -1,6 +1,7 @@
 export interface Position { line: number; character: number }
 export interface Range { start: Position; end: Position }
 export interface TextEdit { range: Range; newText: string }
+export interface EditResult { edits: TextEdit[]; selection: Range | null }
 export type Language = 'xaml' | 'rust';
 
 export interface Source {
@@ -42,6 +43,7 @@ export type NodeOperation =
     | { type: 'setProperty'; node: number; name: string; value: string }
     | { type: 'removeNode'; node: number };
 export type Operation = NodeOperation | { type: 'applyCounterpart'; source: string }
+    | { type: 'apply'; label: string; edits: object[] }
     | { type: 'place'; frame: number; placement: Placement };
 
 // Node IDs and tokens are local to a designer session.
@@ -80,7 +82,7 @@ export type FromOutline = { type: 'ready' } | DragMessage
     | { type: 'reorder'; frame: FrameTarget; node: number; anchor: number; position: 'before' | 'after' };
 export type ToOutline = { type: 'state'; state: OutlineState } | DragUpdate | { type: 'edit'; error?: string };
 export type FromToolbox = { type: 'ready' } | DragMessage | { type: 'insert'; frame: FrameTarget; control: string };
-export type ToToolbox = { type: 'state'; state: ToolboxState } | { type: 'edit'; error?: string };
+export type ToToolbox = DragUpdate | { type: 'state'; state: ToolboxState } | { type: 'edit'; error?: string };
 
 export type CanvasNode = Pick<OutlineNode, 'id' | 'label' | 'name' | 'bounds' | 'canMove'>;
 export type CanvasSnapshot = Omit<Snapshot, 'nodes'> & { nodes: CanvasNode[] };

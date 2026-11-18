@@ -1,7 +1,7 @@
 import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { createMessageConnection, StreamMessageReader, StreamMessageWriter } from 'vscode-jsonrpc/node';
 import type * as vscode from 'vscode';
-import type { Asset, DropHint, Operation, Placement, Snapshot, Source, TextEdit, Viewport } from './protocol';
+import type { Asset, DropHint, EditResult, Operation, Placement, Snapshot, Source, Viewport } from './protocol';
 import { commandFor } from './tools';
 
 export class NativePreview implements vscode.Disposable {
@@ -49,7 +49,13 @@ export class NativePreview implements vscode.Disposable {
         return this.send('placement', { frame, placement });
     }
 
-    edit(source: Source, operation: Operation): Promise<TextEdit[]> {
+    studioTools(): Promise<object[]> { return this.send('studioTools'); }
+
+    studioQuery(frame: number, name: string, args: object, selected?: number): Promise<unknown> {
+        return this.send('studioQuery', { frame, name, arguments: args, selected });
+    }
+
+    edit(source: Source, operation: Operation): Promise<EditResult> {
         return this.send('edit', { ...source, operation });
     }
 

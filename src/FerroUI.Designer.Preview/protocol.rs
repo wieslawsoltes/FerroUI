@@ -51,6 +51,10 @@ pub(crate) enum Operation {
         frame: u64,
         placement: Placement,
     },
+    Apply {
+        label: String,
+        edits: Vec<ferroui_designer_core::Edit>,
+    },
     ApplyCounterpart {
         source: String,
     },
@@ -90,6 +94,12 @@ pub(crate) enum DropPosition { Inside, Before, After }
 pub(crate) struct DropHint {
     pub(crate) bounds: Option<ferroui_designer_tools::Rect>,
     pub(crate) description: String,
+}
+
+#[derive(Serialize)]
+pub(crate) struct EditResult {
+    pub(crate) edits: Vec<ferroui_designer_language::TextEdit>,
+    pub(crate) selection: Option<Range>,
 }
 
 #[derive(Serialize)]

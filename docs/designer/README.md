@@ -620,6 +620,7 @@ The additional tools are:
 | `designer_apply` / `designer_source` | Atomic structured edits or source editing with a required revision guard |
 | `designer_select` / `designer_undo` / `designer_redo` | Selection and shared authoring history |
 | `designer_tree` | Live visual/logical tree with runtime and source identities |
+| `designer_toolbox` / `designer_place` | List registered Toolbox assets and place or move controls through the same outline and native layout plans used by VS Code |
 | `designer_timeline` / `designer_animation` | Inspect, seek, play, record and edit keyframes |
 | `designer_collaboration_state` / `designer_collaboration` | Snapshots, version summaries, operations and explicit draft resolution |
 | `designer_presence` | Ephemeral peer selection/cursor updates |

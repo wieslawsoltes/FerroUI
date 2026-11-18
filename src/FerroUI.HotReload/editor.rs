@@ -12,7 +12,11 @@ pub fn notify_editor_on_open(window: &Ref<Window>) {
     }
 }
 
-pub(crate) fn report(files: &BTreeMap<String, PathBuf>, sources: &BTreeMap<String, String>, outcome: &ReloadOutcome) {
+pub(crate) fn report(
+    files: &BTreeMap<String, PathBuf>,
+    sources: &BTreeMap<String, String>,
+    outcome: &ReloadOutcome,
+) {
     let status = match outcome.status {
         ReloadStatus::Applied => Status::Applied,
         ReloadStatus::Failed => Status::Failed,
@@ -21,7 +25,13 @@ pub(crate) fn report(files: &BTreeMap<String, PathBuf>, sources: &BTreeMap<Strin
     };
     for uri in &outcome.documents {
         if let (Some(path), Some(text)) = (files.get(uri), sources.get(uri)) {
-            protocol::source(Language::Xaml, status, path, text, outcome.diagnostic.as_deref());
+            protocol::source(
+                Language::Xaml,
+                status,
+                path,
+                text,
+                outcome.diagnostic.as_deref(),
+            );
         }
     }
 }

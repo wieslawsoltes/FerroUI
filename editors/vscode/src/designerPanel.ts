@@ -28,6 +28,7 @@ export class DesignerPanel implements vscode.Disposable {
     private editing = false;
     private viewport = DEFAULT_VIEWPORT;
     private inspected = false;
+    private readers = 0;
     private problem?: string;
     private caret: vscode.Position;
     private selected?: number;
@@ -93,6 +94,7 @@ export class DesignerPanel implements vscode.Disposable {
 
     get nodes(): readonly Snapshot['nodes'][number][] { return this.frame?.snapshot.nodes ?? emptyNodes; }
     get selectedNode(): Snapshot['nodes'][number] | undefined { return this.nodes.find(node => node.id === this.selected); }
+    get dimensions(): Viewport { return this.viewport; }
     get status(): string | undefined {
         if (this.editing) return 'Applying edit…';
         if (this.currentToken === undefined) return this.problem ?? 'Updating preview…';
@@ -137,6 +139,50 @@ export class DesignerPanel implements vscode.Disposable {
         return (await this.getClient()).placement(target.token, placement);
     }
 
+    get snapshot(): Snapshot | undefined { return this.currentToken === undefined ? undefined : this.frame?.snapshot; }
+
+    async waitForSnapshot(signal: AbortSignal): Promise<Snapshot> {
+        signal.throwIfAborted();
+        if (this.snapshot) return this.snapshot;
+        if (this.problem || this.disposed) throw new Error(this.problem ?? 'The designer was closed.');
+        this.readers++;
+        try {
+            return await new Promise((resolve, reject) => {
+                const stop = () => finish(() => reject(signal.reason));
+                const finish = (done: () => void) => {
+                    changes.dispose();
+                    signal.removeEventListener('abort', stop);
+                    done();
+                };
+                const changes = this.onDidChange(() => {
+                    const snapshot = this.snapshot;
+                    if (snapshot) finish(() => resolve(snapshot));
+                    else if (this.problem || this.disposed) finish(() => reject(new Error(this.problem ?? 'The designer was closed.')));
+                });
+                signal.addEventListener('abort', stop, { once: true });
+                void this.render();
+            });
+        } finally { this.readers--; }
+    }
+
+    async agentEdit(token: number, operation: Operation, signal: AbortSignal): Promise<void> {
+        if (this.currentToken !== token || !this.frame) throw new Error('Read the current designer revision before editing.');
+        await this.edit(this.frame, operation, signal);
+    }
+
+    async studioTools(): Promise<object[]> { return (await this.getClient()).studioTools(); }
+
+    async studioQuery(name: string, args: object, signal: AbortSignal): Promise<unknown> {
+        await this.waitForSnapshot(signal);
+        signal.throwIfAborted();
+        return (await this.getClient()).studioQuery(this.currentToken!, name, args, this.selected);
+    }
+
+    configure(viewport?: Viewport): void {
+        if (viewport) this.viewport = viewport;
+        this.schedule(0);
+    }
+
     private setSelection(id: number | undefined): void {
         if (id === this.selected) return;
         this.selected = id;
@@ -174,7 +220,7 @@ export class DesignerPanel implements vscode.Disposable {
     }
 
     private async render(): Promise<void> {
-        if (this.disposed || !(this.inspected || this.panel.visible && this.ready) || !this.pending || this.rendering || this.timer) return;
+        if (this.disposed || !(this.inspected || this.readers || this.panel.visible && this.ready) || !this.pending || this.rendering || this.timer) return;
         this.rendering = true;
         this.pending = false;
         const token = this.generation;
@@ -264,14 +310,21 @@ export class DesignerPanel implements vscode.Disposable {
         }
     }
 
-    private async edit(frame: Frame, operation: Operation): Promise<void> {
+    private async edit(frame: Frame, operation: Operation, signal?: AbortSignal): Promise<void> {
+        signal?.throwIfAborted();
         if (this.editing) throw new Error('A designer edit is already in progress.');
         this.editing = true;
         this.changed.fire();
         try {
-            const edits = await (await this.getClient()).edit(frame.source, operation);
+            const { edits, selection } = await (await this.getClient()).edit(frame.source, operation);
+            signal?.throwIfAborted();
             if (this.currentToken !== frame.token) throw new Error('The preview changed. Use the current preview to retry.');
             await applyTextEdits(this.document, frame.version, edits);
+            if (selection && edits.length && this.document.version === frame.version + 1) {
+                const range = asRange(selection);
+                this.caret = range.start;
+                await this.reveal(range);
+            }
         } finally {
             this.editing = false;
             this.changed.fire();
@@ -331,6 +384,7 @@ export class DesignerPanel implements vscode.Disposable {
     dispose(): void {
         if (this.disposed) return;
         this.disposed = true;
+        this.changed.fire();
         clearTimeout(this.timer);
         this.stopClient();
         this.panel.dispose();

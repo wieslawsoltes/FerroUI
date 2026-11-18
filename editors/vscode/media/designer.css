@@ -90,6 +90,8 @@ body {
 .artboard[data-theme=dark] { background: #202020; }
 .artboard.stale { opacity: .65; }
 .artboard img { display: block; inline-size: 100%; block-size: 100%; cursor: crosshair; }
+.artboard img.placing { cursor: grabbing; }
+.artboard img.invalid-placement { cursor: no-drop !important; }
 .artboard.stale img { cursor: default; }
 .control-outline {
     position: absolute;

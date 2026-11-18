@@ -18,6 +18,7 @@ export class DesignerWorkbench implements vscode.Disposable {
     private readonly properties: PropertiesView;
     private readonly drag = new DesignerDrag(update => {
         this.outline.post(update);
+        this.toolbox.post(update);
         for (const panel of this.panels.values()) panel.post(update);
     });
     private readonly subscriptions: vscode.Disposable[];
@@ -54,31 +55,47 @@ export class DesignerWorkbench implements vscode.Disposable {
 
     private async open(uri?: vscode.Uri): Promise<void> {
         try {
-            const active = vscode.window.activeTextEditor;
-            const document = uri ? await vscode.workspace.openTextDocument(uri) : active?.document;
-            const language = document && languageOf(document);
-            if (!document || !language) throw new Error('Open a local FerroUI XAML or Rust file.');
-            const source = active?.document === document ? active : await vscode.window.showTextDocument(document);
-            const key = document.uri.toString();
-            const previous = this.panels.get(key);
-            if (previous) {
-                previous.show(source.selection.active);
-                this.setActive(previous);
-                return;
-            }
-            const panel = vscode.window.createWebviewPanel('ferroui.designer', `Design · ${path.basename(document.fileName)}`, {
-                viewColumn: vscode.ViewColumn.Beside, preserveFocus: true,
-            }, { ...webviewOptions(this.context.extensionUri), retainContextWhenHidden: true });
-            const designer: DesignerPanel = new DesignerPanel(this.context, this.output, panel, document, ++this.nextSession, language,
-                source.selection.active, () => { this.panels.delete(key); this.followFocus(); }, message => {
-                    void this.drag.receive(designer, message).catch(error => designer.post({ type: 'edit', error: errorMessage(error) }));
-                });
-            designer.onDidChange(() => this.followFocus());
-            this.panels.set(key, designer);
-            this.setActive(designer);
+            await this.openDocument(uri);
         } catch (error) {
             void vscode.window.showErrorMessage(errorMessage(error));
         }
+    }
+
+    async openDocument(uri?: vscode.Uri, caret?: vscode.Position): Promise<DesignerPanel> {
+        const active = vscode.window.activeTextEditor;
+        const document = uri ? await vscode.workspace.openTextDocument(uri) : active?.document;
+        const language = document && languageOf(document);
+        if (!document || !language) throw new Error('Open a local FerroUI XAML or Rust file.');
+        const source = active?.document === document ? active : await vscode.window.showTextDocument(document);
+        const position = caret ? document.validatePosition(caret) : source.selection.active;
+        const key = document.uri.toString();
+        const previous = this.panels.get(key);
+        if (previous) {
+            previous.show(position);
+            this.setActive(previous);
+            return previous;
+        }
+        const panel = vscode.window.createWebviewPanel('ferroui.designer', `Design · ${path.basename(document.fileName)}`, {
+            viewColumn: vscode.ViewColumn.Beside, preserveFocus: true,
+        }, { ...webviewOptions(this.context.extensionUri), retainContextWhenHidden: true });
+        const designer: DesignerPanel = new DesignerPanel(this.context, this.output, panel, document, ++this.nextSession, language,
+            position, () => { this.panels.delete(key); this.followFocus(); }, message => {
+                void this.drag.receive(designer, message).catch(error => designer.post({ type: 'edit', error: errorMessage(error) }));
+            });
+        designer.onDidChange(() => this.followFocus());
+        this.panels.set(key, designer);
+        this.setActive(designer);
+        return designer;
+    }
+
+    designs(): readonly DesignerPanel[] { return [...this.panels.values()]; }
+    get activeDesign(): DesignerPanel | undefined { return this.active; }
+
+    async revealDesign(panel: DesignerPanel, view: 'canvas' | 'outline' | 'properties' | 'toolbox'): Promise<void> {
+        if (view === 'canvas') {
+            panel.panel.reveal(undefined, false);
+            this.setActive(panel);
+        } else await this.showDock({ outline: OUTLINE_VIEW, properties: PROPERTIES_VIEW, toolbox: TOOLBOX_VIEW }[view], panel.session);
     }
 
     private followFocus(): void {

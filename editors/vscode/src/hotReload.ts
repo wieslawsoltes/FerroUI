@@ -10,6 +10,7 @@ export class HotReload implements vscode.Disposable {
     private session?: ReloadSession;
     private choosing = false;
     private generation = 0;
+    private message = 'Stopped';
 
     constructor() {
         this.indicator.name = 'FerroUI Hot Reload';
@@ -22,6 +23,18 @@ export class HotReload implements vscode.Disposable {
         ];
     }
 
+    get state() { return { target: this.session?.target.label ?? null, pid: this.session?.pid ?? null, status: this.message }; }
+
+    async agentControl(action: string): Promise<object> {
+        if (action === 'start') await this.start();
+        else if (action === 'stop') this.stop();
+        else if (action === 'rebuild') {
+            if (!this.session) throw new Error('Start a managed FerroUI application first.');
+            this.session.build();
+        }
+        return this.state;
+    }
+
     private async start(): Promise<void> {
         if (this.choosing) return;
         const generation = ++this.generation;
@@ -31,11 +44,13 @@ export class HotReload implements vscode.Disposable {
             if (!target || this.generation !== generation) return;
             this.session?.dispose();
             this.session = new ReloadSession(target, this.output, (message, problem) => {
+                this.message = message;
                 this.indicator.text = `$(flame) ${message}`;
                 this.indicator.tooltip = `${target.label} · ${message}\nShow FerroUI Hot Reload output`;
                 this.indicator.backgroundColor = problem ? new vscode.ThemeColor('statusBarItem.errorBackground') : undefined;
                 this.indicator.show();
             });
+            this.message = 'Build queued';
             this.session.build();
         } catch (error) {
             this.output.appendLine(errorMessage(error));
@@ -49,6 +64,7 @@ export class HotReload implements vscode.Disposable {
         this.generation++;
         this.session?.dispose();
         this.session = undefined;
+        this.message = 'Stopped';
         this.indicator.hide();
     }
 

@@ -6,6 +6,7 @@ export type DragRequest = DragMessage | Extract<FromDesigner, { type: 'previewDr
 export class DesignerDrag {
     private active?: DragGesture;
     private ending?: ReturnType<typeof setTimeout>;
+    private expiry?: ReturnType<typeof setTimeout>;
 
     constructor(private readonly publish: (update: DragUpdate) => void) {}
 
@@ -18,6 +19,7 @@ export class DesignerDrag {
                 : origin.type === 'node' && panel.nodes.some(node => node.id === origin.node && node.canMove))) return;
             this.clear();
             this.active = gesture;
+            this.expiry = setTimeout(() => this.clear(), 25_000);
             this.publish({ type: 'drag', gesture });
             return;
         }
@@ -48,6 +50,7 @@ export class DesignerDrag {
 
     clear(): void {
         clearTimeout(this.ending);
+        clearTimeout(this.expiry);
         if (!this.active) return;
         this.active = undefined;
         this.publish({ type: 'drag' });

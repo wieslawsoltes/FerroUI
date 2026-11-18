@@ -2,6 +2,7 @@ import { strict as assert } from 'node:assert';
 import * as vscode from 'vscode';
 import { NativePreview } from '../src/nativePreview';
 import { applyTextEdits, sourceOf } from '../src/textDocument';
+import { verifyMcp } from './mcp';
 
 const editorPosition = (line = 0, character = 0) => new vscode.Position(line, character);
 const viewport = { width: 640, height: 420, dark: false };
@@ -44,6 +45,7 @@ export async function run(): Promise<void> {
     await vscode.commands.executeCommand('undo');
     await until(() => vscode.languages.getDiagnostics(xaml.uri).length === 0);
     console.log('VS Code XAML language association, symbols, hover, completion and live diagnostics passed');
+    await verifyMcp(xaml);
 
     const channel = vscode.window.createOutputChannel('FerroUI test');
     const preview = await NativePreview.start(extension, channel);
@@ -56,7 +58,7 @@ export async function run(): Promise<void> {
         const button = frame.nodes.find(node => node.name === 'saveButton');
         assert.ok(button?.bounds?.width, 'Native button bounds map to the outlined source element');
         const version = xaml.version;
-        const edits = await preview.edit(xamlInput, { type: 'setProperty', node: button.id, name: 'Content', value: 'Ship it 🧪' });
+        const { edits } = await preview.edit(xamlInput, { type: 'setProperty', node: button.id, name: 'Content', value: 'Ship it 🧪' });
         await applyTextEdits(xaml, version, edits);
         assert.ok(xaml.getText().includes('Content="Ship it 🧪"'));
         assert.ok(xaml.isDirty, 'The designer edits the unsaved buffer');
@@ -68,14 +70,15 @@ export async function run(): Promise<void> {
         assert.ok(parent?.canInsert);
         const placement = { origin: { type: 'asset', control: 'TextBlock' }, target: { type: 'outline', node: parent.id, position: 'inside' } } as const;
         await assert.rejects(preview.placement(1, placement), /rendered layout changed/i);
-        const insertion = await preview.edit(xamlInput, { type: 'place', frame: 0, placement });
+        const { edits: insertion, selection } = await preview.edit(xamlInput, { type: 'place', frame: 0, placement });
         await applyTextEdits(xaml, xaml.version, insertion);
         assert.ok(xaml.getText().includes('Text="Text"'));
+        assert.ok(selection && xaml.lineAt(selection.start.line).text.includes('<TextBlock'));
         await vscode.commands.executeCommand('undo');
         await until(() => xaml.getText() === xamlInput.source);
         const draft = frame.counterpart.source?.replace('Save changes', 'Apply settings');
         assert.ok(frame.counterpart.editable && draft);
-        const rsxEdits = await preview.edit(xamlInput, { type: 'applyCounterpart', source: draft });
+        const { edits: rsxEdits } = await preview.edit(xamlInput, { type: 'applyCounterpart', source: draft });
         await applyTextEdits(xaml, xaml.version, rsxEdits);
         assert.ok(xaml.getText().includes(`x:Name="saveButton" Content="Apply settings"`));
 
@@ -90,18 +93,19 @@ export async function run(): Promise<void> {
         assert.ok(rustFrame.image, rustFrame.renderError ?? 'Expected a rendered RSX tree');
         assert.ok(rustFrame.counterpart.editable && rustFrame.counterpart.source);
         const xamlDraft = rustFrame.counterpart.source.replace('Workspace settings', 'Project settings');
-        const rustEdits = await preview.edit(rustInput, { type: 'applyCounterpart', source: xamlDraft });
+        const { edits: rustEdits } = await preview.edit(rustInput, { type: 'applyCounterpart', source: xamlDraft });
         await applyTextEdits(rust, rust.version, rustEdits);
         assert.equal(rust.getText(), rustInput.source.replace('Workspace settings', 'Project settings'));
         const rustPanel = rustFrame.nodes.find(node => node.label === 'StackPanel');
         assert.ok(rustPanel?.canInsert);
         const latestRust = sourceOf(rust, 'rust', editorPosition());
         await preview.render(latestRust, viewport, 2);
-        const rustInsert = await preview.edit(latestRust, { type: 'place', frame: 2, placement: {
+        const { edits: rustInsert, selection: insertedRust } = await preview.edit(latestRust, { type: 'place', frame: 2, placement: {
             origin: { type: 'asset', control: 'TextBlock' }, target: { type: 'outline', node: rustPanel.id, position: 'inside' },
         } });
         await applyTextEdits(rust, rust.version, rustInsert);
         assert.ok(rust.getText().includes('text: "Text"'));
+        assert.ok(insertedRust && rust.lineAt(insertedRust.start.line).text.includes('TextBlock'));
         assert.ok(rust.getText().endsWith(latestRust.source.slice(latestRust.source.indexOf('pub fn counter'))));
         const partial = await preview.render(sourceOf(rust, 'rust', rustEditor.document.positionAt(rust.getText().lastIndexOf('"Increment"'))), viewport);
         assert.ok(partial.image && !partial.counterpart.editable);

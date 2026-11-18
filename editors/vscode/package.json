@@ -11,7 +11,7 @@
     "directory": "editors/vscode"
   },
   "engines": {
-    "vscode": "^1.95.0"
+    "vscode": "^1.102.0"
   },
   "categories": [
     "Programming Languages",
@@ -33,6 +33,12 @@
     "onLanguage:ferroui-xaml"
   ],
   "contributes": {
+    "mcpServerDefinitionProviders": [
+      {
+        "id": "ferroui.mcp",
+        "label": "FerroUI"
+      }
+    ],
     "languages": [
       {
         "id": "ferroui-xaml",
@@ -109,6 +115,16 @@
         "command": "ferroui.hotReload.showOutput",
         "title": "Show Hot Reload Output",
         "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.mcp.attach",
+        "title": "Connect to Running MCP Server",
+        "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.mcp.detach",
+        "title": "Disconnect Running MCP Server",
+        "category": "FerroUI"
       }
     ],
     "menus": {
@@ -142,6 +158,34 @@
     "configuration": {
       "title": "FerroUI",
       "properties": {
+        "ferroui.mcp.enableDesigner": {
+          "type": "boolean",
+          "default": true,
+          "scope": "machine",
+          "description": "Offer the current VS Code designer workspace as a FerroUI MCP server."
+        },
+        "ferroui.mcp.allowWrites": {
+          "type": "boolean",
+          "default": false,
+          "scope": "machine",
+          "description": "Allow agents to edit editor buffers, control designer views, or run an application through the VS Code designer MCP server."
+        },
+        "ferroui.mcp.stdioServers": {
+          "type": "array",
+          "default": [],
+          "scope": "machine",
+          "description": "Existing FerroUI application or Designer Studio MCP servers started by VS Code.",
+          "items": {
+            "type": "object",
+            "required": ["label", "command"],
+            "additionalProperties": false,
+            "properties": {
+              "label": { "type": "string" },
+              "command": { "type": "string", "description": "Absolute path to the native FerroUI executable." },
+              "args": { "type": "array", "items": { "type": "string" }, "description": "Arguments such as --mcp-stdio and optional native permission flags." }
+            }
+          }
+        },
         "ferroui.hotReload.cargoPath": {
           "type": "string",
           "default": "",
@@ -157,12 +201,33 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
-              "label": { "type": "string" },
-              "manifestPath": { "type": "string", "description": "Path to Cargo.toml relative to the workspace folder." },
-              "package": { "type": "string" },
-              "binary": { "type": "string" },
-              "features": { "type": "array", "items": { "type": "string" }, "description": "Cargo features. The package's hot-reload feature is enabled by default when present." },
-              "args": { "type": "array", "items": { "type": "string" }, "description": "Arguments for the application." }
+              "label": {
+                "type": "string"
+              },
+              "manifestPath": {
+                "type": "string",
+                "description": "Path to Cargo.toml relative to the workspace folder."
+              },
+              "package": {
+                "type": "string"
+              },
+              "binary": {
+                "type": "string"
+              },
+              "features": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Cargo features. The package's hot-reload feature is enabled by default when present."
+              },
+              "args": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Arguments for the application."
+              }
             }
           }
         },
@@ -237,7 +302,7 @@
   },
   "devDependencies": {
     "@types/node": "22.19.17",
-    "@types/vscode": "1.95.0",
+    "@types/vscode": "1.102.0",
     "@vscode/codicons": "0.0.45",
     "@vscode/test-electron": "3.1.0",
     "@vscode/vsce": "4.1.1",

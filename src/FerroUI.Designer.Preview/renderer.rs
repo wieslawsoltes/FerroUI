@@ -12,6 +12,7 @@ use ferroui_headless::{FerroHeadlessPlatformExtensions, FerroHeadlessPlatformOpt
 use ferroui_inspect::TreeKind;
 use ferroui_vello::VelloApplicationExtensions;
 use std::collections::BTreeMap;
+use std::cell::RefCell;
 use std::rc::Rc;
 
 pub(crate) struct Renderer {
@@ -20,11 +21,10 @@ pub(crate) struct Renderer {
 }
 
 pub(crate) struct Stage {
-    pub(crate) session: DesignerSession,
+    pub(crate) session: Rc<RefCell<DesignerSession>>,
     pub(crate) token: u64,
     pub(crate) width: u32,
     pub(crate) height: u32,
-    pub(crate) bounds: BTreeMap<NodeId, Bounds>,
     _window: PreviewWindow,
 }
 
@@ -107,11 +107,10 @@ impl Renderer {
             .collect();
         let notices = session.preview_notices().to_vec();
         self.stage = Some(Stage {
-            session,
+            session: Rc::new(RefCell::new(session)),
             token: input.frame,
             width: input.width,
             height: input.height,
-            bounds: bounds.clone(),
             _window: window,
         });
         Ok(Frame {

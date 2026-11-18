@@ -1,5 +1,5 @@
 use crate::document::{schema, DesignDocument};
-use crate::protocol::{EditRequest, Operation, MAX_SOURCE_BYTES};
+use crate::protocol::{EditRequest, EditResult, Operation, MAX_SOURCE_BYTES};
 use crate::renderer::Renderer;
 use ferroui_designer_core::{Edit, Node, NodeId, NodeKind, TextPatch};
 use ferroui_designer_language::TextEdit;
@@ -27,9 +27,10 @@ const COMMON_PROPERTIES: &[&str] = &[
     "Canvas.Top",
 ];
 
-pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>) -> Result<Vec<TextEdit>, String> {
+pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>) -> Result<EditResult, String> {
     let design = DesignDocument::parse(&request.document)?;
     let mut candidate = design.xaml.snapshot_without_history();
+    let mut selected = None;
     let patches = match &request.operation {
         Operation::ApplyCounterpart { source } => {
             if source.len() > MAX_SOURCE_BYTES {
@@ -82,17 +83,38 @@ pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>) -> Result
                 return Err("Edit this RSX structure in Rust to preserve its expressions and comments".into());
             }
             let stage = renderer.ok_or("Render the design before placing controls")?.stage(*frame)?;
-            if stage.session.document().source() != design.xaml.source()
-                || stage.session.document_uri() != request.document.uri
+            let session = stage.session.borrow();
+            if session.document().source() != design.xaml.source()
+                || session.document_uri() != request.document.uri
             {
                 return Err("The source changed during the drag. Start again with the current preview.".into());
             }
+            drop(session);
             let (edits, hint) = stage.plan(placement)?;
             let change = candidate.apply(hint.description, edits).map_err(|error| error.to_string())?;
+            if !change.is_empty() {
+                selected = crate::edit_selection::dropped_node(&candidate, &change, &placement.origin);
+            }
+            translated_patches(&design, candidate.source(), change.patches)?
+        }
+        Operation::Apply { label, edits } => {
+            if !design.editable_structure() {
+                return Err("Author this Rust block directly to preserve its expressions and comments".into());
+            }
+            if edits.is_empty() || edits.len() > 4096 || label.len() > 256 {
+                return Err("Supply a label and between 1 and 4096 source edits".into());
+            }
+            if edits.iter().any(|edit| matches!(edit, Edit::ReplaceSource { .. } | Edit::Text { .. })) {
+                return Err("Use the versioned source buffer tool to write raw source".into());
+            }
+            let change = candidate.apply(label, edits.clone()).map_err(|error| error.to_string())?;
             translated_patches(&design, candidate.source(), change.patches)?
         }
     };
-    editor_edits(&design, patches)
+    let selection = selected.and_then(|node| crate::edit_selection::authored_range(&design, &candidate, &patches, node));
+    let mut result = editor_edits(&design, patches)?;
+    result.selection = selection;
+    Ok(result)
 }
 
 fn translated_patches(
@@ -109,7 +131,7 @@ fn translated_patches(
 fn editor_edits(
     design: &DesignDocument<'_>,
     patches: Vec<TextPatch>,
-) -> Result<Vec<TextEdit>, String> {
+) -> Result<EditResult, String> {
     let final_size = patches
         .iter()
         .fold(design.source.len() as i64, |size, patch| {
@@ -118,7 +140,7 @@ fn editor_edits(
     if final_size > MAX_SOURCE_BYTES as i64 {
         return Err("Designer source exceeds 1 MiB".into());
     }
-    patches
+    let edits = patches
         .into_iter()
         .filter(|patch| design.source.get(patch.span.range()) != Some(patch.replacement.as_str()))
         .map(|patch| {
@@ -127,7 +149,8 @@ fn editor_edits(
                 new_text: patch.replacement,
             })
         })
-        .collect()
+        .collect::<Result<_, String>>()?;
+    Ok(EditResult { edits, selection: None })
 }
 
 fn editable_node<'a>(design: &'a DesignDocument<'_>, id: NodeId) -> Result<&'a Node, String> {

@@ -34,6 +34,8 @@ export class ReloadSession implements vscode.Disposable {
             vscode.workspace.onDidSaveTextDocument(document => observe(document.uri)));
     }
 
+    get pid(): number | undefined { return this.live?.pid; }
+
     build(): void {
         this.rebuild = true;
         this.schedule(0);
@@ -206,7 +208,8 @@ async function awaitStartup(child: ReloadProcess, acknowledged: Promise<void>): 
     let timer: ReturnType<typeof setTimeout> | undefined;
     const exited = child.closed.then(code => { throw new Error(`Candidate exited before it opened a window (${code ?? 'terminated'}).`); });
     try {
-        await Promise.race([acknowledged, exited, new Promise<never>((_, reject) => {
+        const opened = acknowledged.then(() => new Promise<void>(resolve => setTimeout(resolve, 100)));
+        await Promise.race([opened, exited, new Promise<never>((_, reject) => {
             timer = setTimeout(() => reject(new Error('No FerroUI runtime acknowledgement. Enable hot reload in the selected Cargo binary.')), 15_000);
         })]);
     } finally {

@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
+import { AgentTools } from './agentTools';
 import { DesignerWorkbench } from './designerWorkbench';
 import { HotReload } from './hotReload';
+import { FerroMcpProvider } from './mcpProvider';
 import { xamlLanguage, XamlServer } from './xamlServer';
 
 export function activate(context: vscode.ExtensionContext): void {
@@ -8,11 +10,13 @@ export function activate(context: vscode.ExtensionContext): void {
     const previewOutput = vscode.window.createOutputChannel('FerroUI Designer');
     const server = new XamlServer(context, languageOutput);
     const designer = new DesignerWorkbench(context, previewOutput);
+    const reload = new HotReload();
+    const mcp = new FerroMcpProvider(context, new AgentTools(designer, reload), previewOutput);
     const startForXaml = (document: vscode.TextDocument) => {
         if (document.languageId === xamlLanguage && document.uri.scheme === 'file') void server.start();
     };
     context.subscriptions.push(
-        server, designer, new HotReload(), languageOutput, previewOutput,
+        server, designer, reload, mcp, languageOutput, previewOutput,
         vscode.workspace.onDidOpenTextDocument(startForXaml),
         vscode.workspace.onDidChangeConfiguration(event => {
             if ((event.affectsConfiguration('ferroui.languageServer.path') || event.affectsConfiguration('ferroui.types'))
@@ -20,5 +24,8 @@ export function activate(context: vscode.ExtensionContext): void {
         }),
         vscode.commands.registerCommand('ferroui.restartLanguageServer', () => server.start(true)),
     );
+    if (context.extensionMode === vscode.ExtensionMode.Test) {
+        context.subscriptions.push(vscode.commands.registerCommand('ferroui.test.mcpDefinitions', () => mcp.provideMcpServerDefinitions()));
+    }
     vscode.workspace.textDocuments.forEach(startForXaml);
 }
