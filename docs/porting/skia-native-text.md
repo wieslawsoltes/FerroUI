@@ -35,11 +35,17 @@ bindings build (Skia m153, skia-safe 0.153.3, `external/rust-skia-bindings`).
 
 - On Apple platforms Skia follows the system's font smoothing, so text has the native weight;
   `TextHintingMode::None` turns the smoothing off and gives lighter text.
-- FerroUI's HarfBuzz fonts set no point size, so the tracking table (`trak`) of
-  `.AppleSystemUIFont` (the macOS theme's font) is not applied: set `hb_font_set_ptem`.
-- No variation coordinates reach HarfBuzz, so variable fonts (SF, Segoe UI Variable) are shaped at
-  their default instance: pass them with `hb_font_set_variations`. How far the advances move is to
-  be measured against `CTRunGetAdvances`.
+- Done (issue #664): the shaper sets the point size of the HarfBuzz font (`hb_font_set_ptem`) to
+  the em size of each run, so the tracking table (`trak`) of `.AppleSystemUIFont` (the macOS
+  theme's font) is applied. The font of a typeface is shared by every size, so the size is set
+  before each shaping; HarfBuzz only stores it, and no cache of the font depends on it.
+- Done (issue #664): the variation coordinates of a typeface reach HarfBuzz, so a variable font
+  (SF, Segoe UI Variable) is shaped at the instance it is drawn at, not at its default instance.
+  `IPlatformTypeface::variation_settings` gives the position, empty by default; the Skia
+  typeface reports `SkTypeface::getVariationDesignPosition`, the Vello typeface the axis values it
+  was made with. They are set once, when the HarfBuzz font is made (`hb_font_set_variations`).
+- Still to do: measure how far the advances move against `CTRunGetAdvances` on macOS and against
+  DirectWrite on Windows.
 - Windows is tuned already (docs/porting/text-rendering.md). That document's section 2.3 should be
   checked: this Skia version's build appears to define `SK_GAMMA_APPLY_TO_A8` for every library
   source (`BUILD.gn`), FreeType included.
@@ -54,8 +60,8 @@ cached already: there is no saving a frame.
 ## 5. Recommendation
 
 1. Fonts, rasterization and fallback: no change.
-2. Shaping: HarfBuzz everywhere by default; in `ferroui-harfbuzz`, set the point size and pass the
-   variation coordinates.
+2. Shaping: HarfBuzz everywhere by default; `ferroui-harfbuzz` sets the point size and passes the
+   variation coordinates (done, issue #664).
 3. Opt-in native shapers only where they let a build drop HarfBuzz: on Apple, the native renderer's
    Core Text shaper factored out of `ferroui-quartz` (Skia's `SkTypeface_GetCTFontRef` gives the
    `CTFontRef` through a small shim; skia-safe does not bind it); on Windows, a DirectWrite shaper

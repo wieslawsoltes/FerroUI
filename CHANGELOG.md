@@ -44,6 +44,10 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 - **The workspace at 0.5.1-preview.1**: 0.5.0 is published, and `main` carries the previews of 0.5.1 (owner decision, 2026-11-14). Unlike the previews of a minor version, they keep the public API of 0.5: the API gate compares every pull request with `v0.5.0` (`scripts/api-gate/semver_checks.py`, docs/release.md, section 3.1), and a change that breaks it waits for 0.6.0.
 
+### Fixed
+
+- **The HarfBuzz shaper applies tracking and shapes variable fonts at their instance** (#664, `ferroui-harfbuzz`, [docs/porting/skia-native-text.md](docs/porting/skia-native-text.md), section 3): the HarfBuzz fonts had no point size, so the `trak` table of a font (that of `.AppleSystemUIFont`, the font of the macOS theme) was ignored, and no position in the variation space reached them, so a variable font (SF, Segoe UI Variable) was shaped at its default instance whatever instance was drawn. The point size of a run is now its em size, set before each shaping (HarfBuzz stores it: no allocation and no new font a call), and the position a typeface reports (`IPlatformTypeface::variation_settings`, new, empty by default; `getVariationDesignPosition` of the Skia typeface, the axis values of a Vello typeface) is set once when its HarfBuzz font is made. Advances change for such fonts only; a font without a `trak` table at its default instance shapes as before.
+
 ## [0.5.0] - 2026-11-14
 
 The fifth release. It adds, among the entries below:
