@@ -1,14 +1,14 @@
 //! Components that run again: the reconciler and the hooks.
 
 use crate::generated::builders::*;
-use crate::reactive::{batch, on_cleanup, signal, Owner};
+use crate::reactive::{batch, live_nodes, on_cleanup, signal, subscriber_count, Owner};
 use crate::{
     component, for_each, provide_context, rerender, rsx, use_context, use_effect, use_effect_with, use_hook, use_memo,
     use_signal, Element, IntoElement,
 };
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::{BoxedValue, Ref};
-use ferroui_controls::{Button, Control, ListBox, StackPanel, TextBlock};
+use ferroui_controls::{Border, Button, Control, ListBox, StackPanel, TextBlock};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -428,5 +428,64 @@ fn an_element_of_another_name_is_another_control() {
     assert_eq!(texts(&panel), vec!["Ready"]);
     named.set("Ready");
     assert!(second.ptr_eq(&children(&panel)[0]), "the same name keeps the control");
+    owner.dispose();
+}
+
+/// An element that starts nothing (values, no handler, no hook) has no owner of its own
+/// (docs/porting/desktop-performance.md, section 9.100): a tree of such elements makes no node of
+/// the runtime, and what is below one of them, and what a patch starts for it later, is taken out
+/// with it.
+#[test]
+fn an_element_that_starts_nothing_has_no_owner_and_takes_out_what_is_below_it() {
+    let owner = Owner::new_root();
+    let nodes = live_nodes();
+    let wall = owner.with(|| {
+        stack_panel()
+            .children((0..10).map(|i| border().width(8.0).child(text_block().text(format!("tile {i}")))).collect::<Vec<_>>())
+            .into_element()
+            .mount()
+    });
+    assert_eq!(children(&wall).len(), 10);
+    assert_eq!(live_nodes(), nodes, "twenty-one elements that start nothing make no node of the runtime");
+
+    let (shown, level, follows, panel) = owner.with(|| {
+        let (shown, level, follows) = (signal(vec![1, 2]), signal(1.0_f64), signal(false));
+        let panel = stack_panel()
+            .child(rerender(move || {
+                let follows = follows.get();
+                let rows = shown.get().into_iter().map(|id| {
+                    // A border that starts nothing over a text that follows `level`; once
+                    // `follows` is set, a patch makes the border follow it as well.
+                    let row = border().key(id).child(text_block().text("row").opacity(level));
+                    match follows {
+                        true => row.opacity(level).into(),
+                        false => row.into(),
+                    }
+                });
+                rows.collect::<Vec<Element>>()
+            }))
+            .into_element()
+            .mount();
+        (shown, level, follows, panel)
+    });
+    let opacities = |panel: &Ref<Control>| -> Vec<(f64, f64)> {
+        let rows = children(panel).into_iter();
+        let rows = rows.map(|row| {
+            let border = row.cast::<Border>().expect("a border");
+            let text = border.child().expect("its text");
+            (border.opacity(), text.opacity())
+        });
+        rows.collect()
+    };
+    assert_eq!((subscriber_count(&level), opacities(&panel)), (2, vec![(1.0, 1.0), (1.0, 1.0)]));
+    follows.set(true);
+    level.set(0.5);
+    assert_eq!((subscriber_count(&level), opacities(&panel)), (4, vec![(0.5, 0.5), (0.5, 0.5)]));
+
+    // A row that goes takes the effect of its text and the one the patch started for it.
+    shown.set(vec![2]);
+    assert_eq!((subscriber_count(&level), children(&panel).len()), (2, 1));
+    shown.set(Vec::new());
+    assert_eq!((subscriber_count(&level), children(&panel).len()), (0, 0));
     owner.dispose();
 }

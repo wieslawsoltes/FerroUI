@@ -7949,3 +7949,78 @@ without a block of their own, or are made once by the compiled markup.
 
 **Tests.** `font_family.rs`: `a_text_is_read_once_on_a_thread` (the instance, the base URI of
 a relative source, a family without a base URI), `the_families_a_thread_keeps_are_bounded`.
+
+### 9.100 What a static element costs on the declarative layer: no owner, shared boxes
+
+Experiment #811, parts (a) and (b). The wall of the declarative program of the framework
+comparison builds 293,480 elements before its first frame, and building them is about 40 % of
+its start (section 8.5). Two benchmarks now hold what the declarative layer adds to that
+(`declarative::ViewBenchmark`): a wall of a thousand tiles of five elements, with the
+properties an application writes for them (a size, a corner radius, a fill, a font, a font
+size, a weight, alignments, margins), made of controls directly and let go
+(`mount_wall_controls`), and the same wall as elements, mounted and taken out
+(`mount_wall_run_once`).
+
+**Counted.** The wall of elements took 147.5 million instructions and 9.2 ms where the wall of
+controls takes 86.7 million and 4.8 ms. Sampled, function by function against the wall of
+controls (self time for the thousand tiles): the allocator has 2.2 ms more (`free` 0.9, `malloc`
+0.85, the clearing of new blocks 0.2), the mounting itself about 1.0 ms (`mount_instance`, the
+collecting of the properties and children, `Runtime::create`, `Owner::with`). The setting of
+the properties, the adding of the children and the controls themselves cost what they cost the
+wall of controls. So what the layer adds is blocks: the description of an element (a box for
+every value, lists) and what it keeps mounted (an owner, an instance, its slot, its values).
+
+**An element that starts nothing has no owner.** Every mounted control had an owner in the
+reactive runtime: a node, a cleanup that kept the instance alive, an entry in what the owner
+above owns. An owner is for what an element starts: the effects of the values that follow
+state, the handlers, what its mount hooks registered. An element with values only, no handler
+and no mount hook starts nothing, and most elements of a tree are of this kind. It is mounted
+without an owner (`ControlInstance::owner` is an option): what is mounted below it belongs to
+the nearest owner above, as does what a patch starts for it later, and taking the instance out
+takes those out one by one (`ControlInstance::dispose`). Section 9.91 did this for the second
+owner an element had for its handlers; this is the first.
+
+**Elements that give a property the same plain value share its box.** A value an element gives
+a property is described as a box (`PropValue::Value`), which cannot change and is compared by
+its value. The boxes of the last eight values of a type are kept on the thread, and a value
+among them takes its box from there (`builder::boxed`). Only for plain values of up to 32
+bytes that own nothing: a number, an alignment, a weight, a margin, a corner radius. A value
+that owns something (a text, a brush, a font family) is as costly to compare as to box and is
+boxed as before; brushes and font families are shared one level below (the brush of a colour,
+section 9.99 for a family). A new value takes the place at the end of the eight and moves
+towards the front as it is used again, so values that come once pass through one place. Of the
+27 values of a tile of the benchmark, 19 take a box that is there.
+
+**Two lists.** `flatten` made a new list of the children of every element, to take fragments
+and lists apart, also where none was among them: a list that is flat already is the one given.
+The list of the values of an element grew from nothing to four to eight entries as its setters
+ran; it takes room for eight once.
+
+**Measured** (`declarative::ViewBenchmark`, the gate, two rounds for each step against the step
+before; the change of the instructions):
+
+| `declarative::ViewBenchmark` | No owner | Shared boxes | Two lists |
+| --- | ---: | ---: | ---: |
+| `mount_wall_run_once` | -5.73 % | -4.23 % | -4.28 % |
+| `mount_list_run_once` | -11.58 % | +0.03 % | -0.43 % |
+| `mount_list_rerender` | -11.50 % | +0.17 % | -0.40 % |
+| `run_parent_of_components[memoized by default]` | +0.86 % | -3.67 % | -5.55 % |
+| `run_unchanged` | -1.24 % | +0.15 % | -1.28 % |
+| `mount_wall_controls` (the wall of controls) | +0.01 % | +0.00 % | -0.01 % |
+
+The wall of elements took 9.16 ms before the three steps and takes 7.25 ms. With the font
+family of section 9.99, which both walls make for every text, it takes 122.9 million
+instructions against 81.7 million for the wall of controls: one and a half times, where it was
+1.7 times. None of the three gates (25 metrics each) has a line over its tolerance.
+
+**Looked at and not changed** (section 8.4, rule 2). A dynamic list and a component that runs
+again keep their owners: they start an effect. The instance of a control, its slot and the
+lists of what a parent mounted are two to six blocks an element more than a control needs; a
+description that is mounted once and never patched would not need to be kept at all, which is
+the part of (b) that is left, with the typed setter of #804.
+
+**Tests.** `rerender_tests.rs`:
+`an_element_that_starts_nothing_has_no_owner_and_takes_out_what_is_below_it` (twenty-one
+static elements make no node of the runtime; a row without an owner that goes takes the effect
+of the text below it and the one a patch started for it). `builder_tests.rs`:
+`elements_that_give_the_same_plain_value_share_its_box`.
