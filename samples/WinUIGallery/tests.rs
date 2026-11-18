@@ -515,27 +515,6 @@ fn page_transition_sample_uses_winui_frame_journal_and_source_page_types() {
 }
 
 #[test]
-fn command_bar_examples_keep_click_and_three_state_handlers() {
-    let _application = start();
-    for page in ["AppBarButton", "CommandBar"] {
-        let root = examples::create(examples::find(page).unwrap()).unwrap();
-        root.get_control::<Button>("Primary")
-            .raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
-        assert_eq!(
-            root.get_control::<TextBlock>("Output").text().as_deref(),
-            Some("Clicked 1 times")
-        );
-    }
-    let root = examples::create(examples::find("AppBarToggleButton").unwrap()).unwrap();
-    root.get_control::<ToggleButton>("Primary")
-        .set_is_checked(None);
-    assert_eq!(
-        root.get_control::<TextBlock>("Output").text().as_deref(),
-        Some("Indeterminate")
-    );
-}
-
-#[test]
 fn radio_groups_port_original_selection_and_color_handlers() {
     use ferroui_base::media::Color;
     use ferroui_controls::RadioButtons;
@@ -1040,8 +1019,8 @@ fn embedded_control_images_resolve_original_uri_paths_and_exact_bytes() {
     crate::assets::register();
     assert_eq!(
         crate::assets_data::ASSETS.len(),
-        133,
-        "108 control images, 23 sample media files and two explicit source-path case aliases"
+        134,
+        "108 control images, 24 sample media files and two explicit source-path case aliases"
     );
     for entry in CATALOG {
         let path = entry
@@ -1079,7 +1058,7 @@ fn embedded_sample_media_resolve_original_paths_and_exact_bytes() {
         .iter()
         .filter(|(path, _)| path.starts_with("Assets/SampleMedia/"))
         .collect();
-    assert_eq!(media.len(), 23);
+    assert_eq!(media.len(), 24);
     for (path, expected) in media {
         let uri = UriRef::from(UriRef::parse_absolute(&format!("ferres://WinUIGallery/{path}")).unwrap());
         let mut actual = Vec::new();

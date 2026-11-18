@@ -12,6 +12,7 @@ mod button_samples;
 mod cat_data;
 mod chart_samples;
 mod color_picker_samples;
+mod command_samples;
 mod connected_animation_samples;
 pub mod catalog;
 mod catalog_data;
@@ -99,3 +100,6 @@ mod text_input_samples_tests;
 
 #[cfg(test)]
 mod status_samples_tests;
+
+#[cfg(test)]
+mod command_samples_tests;

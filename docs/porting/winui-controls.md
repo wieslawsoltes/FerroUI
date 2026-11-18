@@ -425,7 +425,7 @@ Phase G2 ports the WinUI controls the pending pages need, one control (or one sm
 
 #### G4: the partial pages (#418)
 
-Phase G4 completes the pages that had native examples for a reviewed subset only: each catalog example of the source page gets its native adaptation with the handlers of the page's code behind in Rust and the source's x:Bind, as for G1. Where the source's x:Bind path is one the x:Bind core does not compile, the page records the binding it uses instead: `IsChecked.Value.Equals(x:False)` (there is no member `Value` on a nullable boolean) is the OneWay x:Bind of `IsChecked` with the `BoolConverters.Not` converter, and a cast to a number (`(x:Int32)Slider.Value`, a type test on the core) is the path without the cast, which the binding converts. A button that opens another page of the gallery, as the source's `App.MainWindow.Navigate`, is listed in `examples::GALLERY_LINKS` and wired by the gallery. A container FerroUI does not have is composed from one it has and recorded in the page's notes: GridView and VariableSizedWrapGrid of the SplitButton flyouts are a UniformGrid of buttons, as on the RichEditBox page. WinUI's `CharacterSpacing`, in thousandths of an em, is FerroUI's `LetterSpacing` in pixels: the value times the font size over 1000 (200 at 24 is 4.8).
+Phase G4 completes the pages that had native examples for a reviewed subset only: each catalog example of the source page gets its native adaptation with the handlers of the page's code behind in Rust and the source's x:Bind, as for G1. Where the source's x:Bind path is one the x:Bind core does not compile, the page records the binding it uses instead: `IsChecked.Value.Equals(x:False)` (there is no member `Value` on a nullable boolean) is the OneWay x:Bind of `IsChecked` with the `BoolConverters.Not` converter, and a cast to a number (`(x:Int32)Slider.Value`, a type test on the core) is the path without the cast, which the binding converts. A button that opens another page of the gallery, as the source's `App.MainWindow.Navigate`, is listed in `examples::GALLERY_LINKS` and wired by the gallery. A container FerroUI does not have is composed from one it has and recorded in the page's notes: GridView and VariableSizedWrapGrid of the SplitButton flyouts are a UniformGrid of buttons, as on the RichEditBox page. A `KeyboardAccelerator` is the `HotKey` of the button, the key gesture FerroUI's buttons invoke. WinUI's `CharacterSpacing`, in thousandths of an em, is FerroUI's `LetterSpacing` in pixels: the value times the font size over 1000 (200 at 24 is 4.8).
 
 | Page | Examples | State | Rust | Tests |
 |---|---:|---|---|---|
@@ -454,6 +454,10 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 | InfoBar | 3 of 3 | ported | `control_samples.rs` | `tests.rs`, `x_bind_tests.rs` |
 | Expander | 2 of 2 | ported | `status_samples.rs` | `status_samples_tests.rs` |
 | PipsPager | 2 partial: no FlipView (a Carousel), no VisibleOnPointerOver or WrapMode | partial | `status_samples.rs` | `status_samples_tests.rs` |
+| AppBarButton | 5 ported, 1 partial: no BitmapIcon (an Image) | partial | `command_samples.rs` | `command_samples_tests.rs` |
+| AppBarToggleButton | 3 ported, 1 partial: no BitmapIcon (an Image) | partial | `command_samples.rs` | `command_samples_tests.rs` |
+| AppBarSeparator | 1 of 1 | ported | `Pages/AppBarSeparator.xaml` (no code-behind upstream) | `command_samples_tests.rs` |
+| CommandBar | 1 of 1 | ported | `command_samples.rs` | `command_samples_tests.rs` |
 
 ### 10.8 WinUI API and Gallery scanner (W10b)
 

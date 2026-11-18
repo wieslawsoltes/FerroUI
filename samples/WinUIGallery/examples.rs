@@ -60,10 +60,10 @@ pub static ADAPTATIONS: &[PageAdaptation] = &[
     page!("Clipboard", "Text copy/paste, available formats and clear use the host clipboard service asynchronously. Bitmap/file operations, history/roaming, content-change notifications and original accessibility announcements remain pending."),
     page!("PullToRefresh", "The source RefreshContainer request/deferral behavior inserts NewControl on the UI dispatcher. ListView is explicitly adapted to ListBox; the custom visualizer and full gesture/animation parity remain pending."),
     page!("PageTransition", "The original alternating sample-page layouts use the native Frame/FramePage types, back/forward journals and Rust handlers. Navigation transition effects remain pending."),
-    page!("AppBarButton", "The path-icon sample uses the shared CommandBarButton with native click output. Other icon types, accelerators and flyout examples remain pending."),
-    page!("AppBarToggleButton", "The three-state path-icon sample uses CommandBarToggleButton; checked, unchecked and indeterminate state remain observable."),
-    page!("AppBarSeparator", "The source command groups use CommandBarSeparator; Symbol icons remain pending in this adaptation."),
-    page!("CommandBar", "The source primary/secondary commands use the shared CommandBar family, observable open state and an explicit HotKey adaptation. Dynamic symbol conversion and the full option set remain pending."),
+    page!("AppBarButton", "All six source examples use native CommandBarButton (WinUI's AppBarButton) with AppBarButton_Click of AppBarButtonPage.xaml.cs in Rust: the symbol, font and path icons (the source's Content of the path icon is the Icon, which the template presents), the KeyboardAccelerator Ctrl+S as the HotKey, and the flyout with its text box; the outputs are polite live regions for UIHelper.AnnounceActionForAccessibility. FerroUI has no BitmapIcon: the bitmap icon is an Image of the source's Slices2.png, not drawn in the foreground's single color, so the page is partial. The symbol glyphs need the platform's symbol font."),
+    page!("AppBarToggleButton", "All four source examples use native CommandBarToggleButton (WinUI's AppBarToggleButton) with AppBarButton_Click of AppBarToggleButtonPage.xaml.cs in Rust (IsChecked = True, False or empty for the third state, as C#'s bool?.ToString()): the symbol, font and three-state path icons (the source's Content of the path icon is the Icon). FerroUI has no BitmapIcon: the bitmap icon is an Image of the source's Slices2.png, not drawn in the foreground's single color, so the page is partial. The symbol glyph needs the platform's symbol font."),
+    page!(ported "AppBarSeparator", "The source example uses native CommandBarSeparator (WinUI's AppBarSeparator) between the source's CommandBarButtons with their symbol icons in a CommandBar, in a scroll viewer that scrolls horizontally without a bar and not vertically (the scroll modes are the bar visibilities Hidden and Disabled). The page has no code-behind upstream. The symbol glyphs need the platform's symbol font."),
+    page!(ported "CommandBar", "The source example uses native CommandBar with the code behind of CommandBarPage.xaml.cs in Rust: OnElementClicked (the clicked command's label), Open and Close (IsOpen with IsSticky), AddSecondaryCommands_Click (four buttons and a separator while Settings is alone) and RemoveSecondaryCommands, and the KeyboardAccelerators of the constructor and the markup as HotKeys (Ctrl+A, Ctrl+E, F4, Ctrl+I; Ctrl+N, Delete, Ctrl+Subtract, Ctrl+Add). The MultipleButtons property feeds the source viewer's substitutions only, and the gallery creates the page anew instead of OnNavigatingFrom. FerroUI's CommandBar has no closed display mode: its buttons keep their labels while it is closed. The symbol glyphs need the platform's symbol font."),
     page!("AccessibilityColorContrast", "The original luminance/contrast calculation and pass thresholds run in Rust. Opaque RGB text inputs replace the Gallery's custom inline color pickers; those picker controls remain pending."),
     page!("AutoSuggestBox", "Both examples use the native AutoSuggestBox: 97 source cat names, user-only token filtering, chosen-item output and control search/query with original title/subtitle and embedded bitmap details. Catalog titles are explicit item values; CurrentCulture matching and full input/accessibility parity remain pending."),
     page!(ported "NumberBox", "All three source examples use native NumberBox with the code behind of NumberBoxPage.xaml.cs in Rust: the expression box, the spin button box with SpinButtonPlacementGroup_SelectionChanged (Inline, Compact; as in the source the box keeps its markup placement until the selection changes), and SetNumberBoxNumberFormatter, a formatter of two fraction digits that rounds half up to 0.25 (DecimalFormatter with an IncrementNumberRounder). The formatter writes and reads the invariant decimal separator instead of the region's."),
@@ -177,6 +177,7 @@ pub fn create(sample: &PageAdaptation) -> Result<Ref<Control>, XamlLoadError> {
     crate::layout_samples::wire(sample.page_id, &root);
     crate::text_input_samples::wire(sample.page_id, &root);
     crate::status_samples::wire(sample.page_id, &root);
+    crate::command_samples::wire(sample.page_id, &root);
     wire(&root);
     initialize_x_bind(&root)?;
     Ok(root)
@@ -201,19 +202,7 @@ fn wire(root: &Ref<Control>) {
     let Some(output) = find_control::<TextBlock>(root, "Output") else {
         return;
     };
-    if let Some(primary) = find_control::<ToggleButton>(root, "Primary") {
-        let weak_output = output.downgrade();
-        let weak_primary = primary.downgrade();
-        primary.property_changed(move |_| {
-            if let (Some(primary), Some(output)) = (weak_primary.upgrade(), weak_output.upgrade()) {
-                output.set_text(Some(match primary.is_checked() {
-                    Some(true) => "Checked",
-                    Some(false) => "Unchecked",
-                    None => "Indeterminate",
-                }));
-            }
-        });
-    } else if let Some(primary) = find_control::<Button>(root, "Primary") {
+    if let Some(primary) = find_control::<Button>(root, "Primary") {
         let count = Rc::new(Cell::new(0u64));
         let weak_output = output.downgrade();
         primary.click(move |_, _| {
