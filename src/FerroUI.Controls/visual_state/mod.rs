@@ -14,7 +14,7 @@ mod visual_state_manager_tests;
 #[cfg(test)]
 mod state_trigger_tests;
 
-pub(crate) use applied_setters::AppliedSetters;
+pub(crate) use applied_setters::{AppliedSetters, Names};
 pub(crate) use state_trigger_base::TriggerRank;
 pub use state_trigger_base::{AdaptiveTrigger, StateTrigger, StateTriggerBase};
 pub use visual_state::VisualState;

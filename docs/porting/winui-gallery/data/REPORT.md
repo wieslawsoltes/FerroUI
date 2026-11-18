@@ -53,9 +53,9 @@ A verified enum does not verify its consuming controls, installed fonts, inherit
 
 | Page state | Count |
 |---|---:|
-| pending | 38 |
-| partial | 79 |
-| ported | 9 |
+| pending | 35 |
+| partial | 60 |
+| ported | 31 |
 | verified | 0 |
 
 Partial pages exercise reviewed native subsets; a ported page has a native adaptation, or a recorded reason why it cannot have one, for every catalog example (`samples/WinUIGallery/port-status.json`). Neither state claims rendering parity.
@@ -70,7 +70,7 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | AnimatedVisualPlayer | Media | pending | 1 |
 | AnnotatedScrollBar | Scrolling | pending | 1 |
 | AppBarButton | Menus & toolbars | partial | 6 |
-| AppBarSeparator | Menus & toolbars | partial | 1 |
+| AppBarSeparator | Menus & toolbars | ported | 1 |
 | AppBarToggleButton | Menus & toolbars | partial | 4 |
 | AppNotification | Shell | pending | 5 |
 | AppWindow | Windowing | pending | 7 |
@@ -78,20 +78,20 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | AutoSuggestBox | Text | partial | 2 |
 | BadgeNotificationManager | Shell | pending | 2 |
 | Binding | Fundamentals | partial | 7 |
-| Border | Layout | partial | 1 |
+| Border | Layout | ported | 1 |
 | BreadcrumbBar | Navigation | pending | 2 |
-| Button | Basic input | partial | 4 |
+| Button | Basic input | ported | 4 |
 | CalendarDatePicker | Date & time | partial | 1 |
 | CalendarView | Date & time | partial | 1 |
-| Canvas | Layout | partial | 1 |
-| CaptureElementPreview | Media | pending | 1 |
+| Canvas | Layout | ported | 1 |
+| CaptureElementPreview | Media | ported | 1 |
 | Chart | Media | partial | 7 |
-| CheckBox | Basic input | partial | 3 |
+| CheckBox | Basic input | ported | 3 |
 | Clipboard | System | partial | 6 |
 | Color | Design | partial | 0 |
 | ColorPicker | Basic input | partial | 1 |
 | ComboBox | Basic input | partial | 3 |
-| CommandBar | Menus & toolbars | partial | 1 |
+| CommandBar | Menus & toolbars | ported | 1 |
 | CommandBarFlyout | Menus & toolbars | pending | 1 |
 | CompactSizing | Styles | partial | 1 |
 | ConnectedAnimation | Motion | partial | 4 |
@@ -100,21 +100,21 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | CustomUserControls | Fundamentals | partial | 3 |
 | CustomXamlConditionals | Fundamentals | pending | 3 |
 | DatePicker | Date & time | partial | 2 |
-| DropDownButton | Basic input | partial | 2 |
+| DropDownButton | Basic input | ported | 2 |
 | EasingFunction | Motion | pending | 3 |
-| Expander | Layout | partial | 2 |
+| Expander | Layout | ported | 2 |
 | FlipView | Collections | partial | 2 |
 | Flyout | Dialogs & flyouts | partial | 1 |
 | Geometry | Design | partial | 1 |
-| Grid | Layout | partial | 1 |
+| Grid | Layout | ported | 1 |
 | GridView | Collections | pending | 3 |
-| HyperlinkButton | Basic input | partial | 2 |
+| HyperlinkButton | Basic input | ported | 2 |
 | IconElement | Styles | partial | 6 |
 | Iconography | Design | pending | 0 |
 | Image | Media | partial | 6 |
 | ImplicitTransition | Motion | pending | 6 |
 | InfoBadge | Status & info | partial | 4 |
-| InfoBar | Status & info | partial | 3 |
+| InfoBar | Status & info | ported | 3 |
 | InkCanvas | Media | ported | 3 |
 | ItemsRepeater | Collections | partial | 6 |
 | ItemsView | Collections | pending | 3 |
@@ -123,11 +123,11 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | Line | Styles | partial | 4 |
 | ListView | Collections | partial | 10 |
 | MapControl | Media | pending | 1 |
-| MediaPlayerElement | Media | pending | 2 |
+| MediaPlayerElement | Media | ported | 2 |
 | MenuBar | Menus & toolbars | partial | 3 |
 | MenuFlyout | Menus & toolbars | partial | 7 |
 | NavigationView | Navigation | partial | 8 |
-| NumberBox | Text | partial | 3 |
+| NumberBox | Text | ported | 3 |
 | PageTransition | Motion | partial | 1 |
 | PagerControl | Scrolling | ported | 3 |
 | ParallaxView | Motion | pending | 2 |
@@ -140,10 +140,10 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | ProgressRing | Status & info | partial | 2 |
 | PullToRefresh | Collections | partial | 2 |
 | RadialGradientBrush | Styles | partial | 1 |
-| RadioButton | Basic input | partial | 2 |
+| RadioButton | Basic input | ported | 2 |
 | RatingControl | Basic input | partial | 2 |
-| RelativePanel | Layout | partial | 1 |
-| RepeatButton | Basic input | partial | 1 |
+| RelativePanel | Layout | ported | 1 |
+| RepeatButton | Basic input | ported | 1 |
 | RichEditBox | Text | partial | 5 |
 | RichTextBlock | Text | ported | 4 |
 | ScratchPad | Fundamentals | partial | 0 |
@@ -153,11 +153,11 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | SemanticZoom | Scrolling | pending | 1 |
 | Shape | Styles | partial | 3 |
 | Slider | Basic input | partial | 4 |
-| Sound | Media | pending | 3 |
+| Sound | Media | ported | 3 |
 | Spacing | Design | partial | 0 |
-| SplitButton | Basic input | partial | 2 |
+| SplitButton | Basic input | ported | 2 |
 | SplitView | Layout | partial | 1 |
-| StackPanel | Layout | partial | 1 |
+| StackPanel | Layout | ported | 1 |
 | StandardUICommand | Menus & toolbars | pending | 1 |
 | StoragePickers | System | pending | 5 |
 | SwipeControl | Menus & toolbars | pending | 5 |
@@ -173,9 +173,9 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | ThemeTransition | Motion | pending | 5 |
 | TimePicker | Date & time | partial | 3 |
 | TitleBar | Windowing | ported | 3 |
-| ToggleButton | Basic input | partial | 1 |
+| ToggleButton | Basic input | ported | 1 |
 | ToggleSplitButton | Basic input | partial | 1 |
-| ToggleSwitch | Basic input | partial | 2 |
+| ToggleSwitch | Basic input | ported | 2 |
 | ToolTip | Status & info | partial | 3 |
 | TreeView | Collections | partial | 4 |
 | Typography | Design | partial | 1 |
