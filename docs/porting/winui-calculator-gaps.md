@@ -346,6 +346,15 @@ implementations, so they also fit FerroUI's transitions), `RepeatBehavior`, `Fil
   (`(Visual.RenderTransform).(ScaleTransform.ScaleX)`, resolved at start by walking the values).
   FerroUI has no `CompositeTransform`; the Calculator's six paths through it become
   `ScaleTransform` paths in its markup (an application adaptation, not a framework type).
+- **The timing model (first step of VSM-3).** The clock arithmetic of WinUI's `CTimeline` and
+  the key frame segment search of `CAnimation` are values and functions in `ferroui-base`
+  (`animation::TimelineTiming`, `TimelineDuration`, `RepeatBehavior`, `FillBehavior`,
+  `ClockState`, `from_to_by`, `key_frame_segment`, `KeyFrameEase`): the active period (begin
+  time, speed ratio, repeat count or duration, auto-reverse), the clock state with the 0.5 ms
+  tolerance of the expiration, the progress and the iteration, the fill at the end, the end
+  points of an animation from, to or by a value, and the segment and eased progress of the key
+  frames (discrete, linear, spline, easing). The storyboard classes of `ferroui-controls` read
+  them with the time of their clock.
 - **Not in scope:** theme animations (`PointerDownThemeAnimation` and the others, theme G-22),
   `Storyboard.TargetName` across namescopes, dependent animation throttling
   (`EnableDependentAnimation` is accepted and has no effect: FerroUI animates every property on the

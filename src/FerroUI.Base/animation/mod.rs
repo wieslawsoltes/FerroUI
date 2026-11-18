@@ -32,6 +32,8 @@ mod iteration_count;
 mod key_frame;
 mod key_frames;
 mod key_spline;
+/// The timing of WinUI's timelines (#443, VSM-3).
+mod timeline_timing;
 mod page_slide;
 mod page_transition_item;
 mod play_state;
@@ -78,6 +80,10 @@ pub use iteration_count::{IterationCount, IterationType};
 pub use key_frame::KeyFrame;
 pub use key_frames::KeyFrames;
 pub use key_spline::{KeySpline, KeySplineSolver};
+pub use timeline_timing::{
+    from_to_by, interpolate, key_frame_segment, ClockState, FillBehavior, KeyFrameEase, KeyFrameSegment, RepeatBehavior,
+    TimelineDuration, TimelineSample, TimelineTiming,
+};
 pub use page_slide::{PageSlide, SlideAxis};
 pub use page_transition_item::PageTransitionItem;
 pub use play_state::PlayState;
