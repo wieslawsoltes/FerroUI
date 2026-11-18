@@ -22,6 +22,16 @@ on:
   schedule:
     - cron: '17 3 * * *'
   workflow_dispatch:
+    inputs:
+      size-report:
+        # What the module of the ControlCatalog site is made of (#441): the catalog is linked a
+        # second time with the names of its functions and a link map, and
+        # scripts/browser/wasm-size-report.py attributes it. Off by default: the second link adds
+        # about the time of a rebuild of the catalog crate.
+        #   gh workflow run browser.yml --ref <branch> -f size-report=true
+        description: Attribute the size of the ControlCatalog module (code by crate and by generic family, largest functions)
+        type: boolean
+        default: false
 
 concurrency:
   group: browser-${{ github.ref }}
@@ -122,6 +132,35 @@ jobs:
             target/browser/control-catalog-browser
           if-no-files-found: error
           retention-days: 1
+      # By hand only (the input size-report). The published module has no name section; this links
+      # the same build of the catalog again, with the names of its functions (--profiling-funcs,
+      # which keeps them through wasm-bindgen and wasm-opt and changes no code) and the link map of
+      # wasm-ld, which names the object, and so the crate, of every function and every piece of
+      # constant data. Only the final crate is compiled again: its arguments differ, the
+      # dependencies are those of the build above. The site above is already assembled and tested.
+      - name: What the ControlCatalog module is made of (by hand, input size-report)
+        if: inputs.size-report
+        run: |
+          out=target/browser/size-report
+          mkdir -p "$out"
+          cargo rustc --locked --profile browser --target wasm32-unknown-emscripten \
+            -p control-catalog-browser --bin control-catalog-browser \
+            -- -C link-arg=--profiling-funcs "-Clink-arg=-Wl,--Map=$PWD/$out/control_catalog_browser.map"
+          cp target/wasm32-unknown-emscripten/browser/control_catalog_browser.wasm "$out/control_catalog_browser.named.wasm"
+          ls -l "$out"
+          # llvm-cxxfilt of the Emscripten SDK demangles the names.
+          PATH="$EMSDK/upstream/bin:$PATH" python3 -I scripts/browser/wasm-size-report.py \
+            "$out/control_catalog_browser.named.wasm" --map "$out/control_catalog_browser.map" \
+            --top 40 --functions 40 --marginal > "$out/report.md"
+          cat "$out/report.md" >> "$GITHUB_STEP_SUMMARY"
+      - name: Keep what the ControlCatalog module is made of
+        if: inputs.size-report
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: control-catalog-browser-size-report
+          path: target/browser/size-report
+          if-no-files-found: error
+          retention-days: 7
 
   # The build with threads (docs/porting/browser-render-worker.md, "B2.8"): the UI on the thread of
   # the page, the compositor and Skia on a render thread. A job of its own, beside the one above and
