@@ -5,10 +5,7 @@ use ferroui_base::media::immutable::ImmutableSolidColorBrush;
 use ferroui_base::media::Color;
 use ferroui_base::{ObjectType, Ref, Thickness};
 use ferroui_controls::primitives::ToggleButton;
-use ferroui_controls::{
-    Border, Button, ComboBox, Control, NumberBox, RadioButtons, Slider, SplitButton,
-    TextBlock, TextBox, ToggleSplitButton,
-};
+use ferroui_controls::{Border, Button, Control, RadioButtons, TextBlock, TextBox};
 use ferroui_markup_xaml::markup_extensions::XBindings;
 use ferroui_markup_xaml::XamlLoadError;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
@@ -58,21 +55,21 @@ pub static ADAPTATIONS: &[PageAdaptation] = &[
     page!("NavigationView", "All eight source compositions use native NavigationView, items, hierarchy, footer, settings and Frame navigation. Model templates and C# handlers are explicitly adapted to Rust. Top overflow, selectors, transition effects and platform visual/accessibility acceptance remain pending."),
     page!("ProgressRing", "Both source examples use the native ProgressRing, active state, background options and original NumberBox empty-value recovery. Native arc animation is an explicit adaptation; exact Lottie motion, custom animated sources and platform accessibility acceptance remain pending."),
     page!("RatingControl", "Both source examples use native RatingControl input, caption changes, clearing/read-only options and half-step placeholder binding. Programmatic updates retain the original caption; user ValueChanged selects Your rating. Exact source animation and host accessibility acceptance remain pending."),
-    page!("InfoBar", "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. The options keep the source TwoWay x:Bind, compiled by the x:Bind core; final layout, icons and live-region acceptance remain pending."),
+    page!(ported "InfoBar", "All three source examples use native InfoBar with the code behind of InfoBarPage.xaml.cs in Rust (control_samples.rs): SeverityComboBox_SelectionChanged (Informational, Success, Warning, Error), MessageComboBox_SelectionChanged (the short and the long message, long at load) and ActionButtonComboBox_SelectionChanged (none, the Action button, the Informational link to the Microsoft home page). The Is Open, Is Icon Visible and Is Closable options keep the source's TwoWay x:Bind, compiled by the x:Bind core. The ComboBoxes' Headers are composed; the DisplayMessage and DisplayButton values feed the source viewer's substitutions only."),
     page!("Popup", "The source open/close handlers and offset/light-dismiss options use the native Popup. Placement is explicitly relative to its button; WinUI absolute-placement, acrylic and screen-edge parity remain pending."),
     page!("Clipboard", "Text copy/paste, available formats and clear use the host clipboard service asynchronously. Bitmap/file operations, history/roaming, content-change notifications and original accessibility announcements remain pending."),
     page!("PullToRefresh", "The source RefreshContainer request/deferral behavior inserts NewControl on the UI dispatcher. ListView is explicitly adapted to ListBox; the custom visualizer and full gesture/animation parity remain pending."),
     page!("PageTransition", "The original alternating sample-page layouts use the native Frame/FramePage types, back/forward journals and Rust handlers. Navigation transition effects remain pending."),
-    page!("AppBarButton", "The path-icon sample uses the shared CommandBarButton with native click output. Other icon types, accelerators and flyout examples remain pending."),
-    page!("AppBarToggleButton", "The three-state path-icon sample uses CommandBarToggleButton; checked, unchecked and indeterminate state remain observable."),
-    page!("AppBarSeparator", "The source command groups use CommandBarSeparator; Symbol icons remain pending in this adaptation."),
-    page!("CommandBar", "The source primary/secondary commands use the shared CommandBar family, observable open state and an explicit HotKey adaptation. Dynamic symbol conversion and the full option set remain pending."),
+    page!("AppBarButton", "All six source examples use native CommandBarButton (WinUI's AppBarButton) with AppBarButton_Click of AppBarButtonPage.xaml.cs in Rust: the symbol, font and path icons (the source's Content of the path icon is the Icon, which the template presents), the KeyboardAccelerator Ctrl+S as the HotKey, and the flyout with its text box; the outputs are polite live regions for UIHelper.AnnounceActionForAccessibility. FerroUI has no BitmapIcon: the bitmap icon is an Image of the source's Slices2.png, not drawn in the foreground's single color, so the page is partial. The symbol glyphs need the platform's symbol font."),
+    page!("AppBarToggleButton", "All four source examples use native CommandBarToggleButton (WinUI's AppBarToggleButton) with AppBarButton_Click of AppBarToggleButtonPage.xaml.cs in Rust (IsChecked = True, False or empty for the third state, as C#'s bool?.ToString()): the symbol, font and three-state path icons (the source's Content of the path icon is the Icon). FerroUI has no BitmapIcon: the bitmap icon is an Image of the source's Slices2.png, not drawn in the foreground's single color, so the page is partial. The symbol glyph needs the platform's symbol font."),
+    page!(ported "AppBarSeparator", "The source example uses native CommandBarSeparator (WinUI's AppBarSeparator) between the source's CommandBarButtons with their symbol icons in a CommandBar, in a scroll viewer that scrolls horizontally without a bar and not vertically (the scroll modes are the bar visibilities Hidden and Disabled). The page has no code-behind upstream. The symbol glyphs need the platform's symbol font."),
+    page!(ported "CommandBar", "The source example uses native CommandBar with the code behind of CommandBarPage.xaml.cs in Rust: OnElementClicked (the clicked command's label), Open and Close (IsOpen with IsSticky), AddSecondaryCommands_Click (four buttons and a separator while Settings is alone) and RemoveSecondaryCommands, and the KeyboardAccelerators of the constructor and the markup as HotKeys (Ctrl+A, Ctrl+E, F4, Ctrl+I; Ctrl+N, Delete, Ctrl+Subtract, Ctrl+Add). The MultipleButtons property feeds the source viewer's substitutions only, and the gallery creates the page anew instead of OnNavigatingFrom. FerroUI's CommandBar has no closed display mode: its buttons keep their labels while it is closed. The symbol glyphs need the platform's symbol font."),
     page!("AccessibilityColorContrast", "The original luminance/contrast calculation and pass thresholds run in Rust. Opaque RGB text inputs replace the Gallery's custom inline color pickers; those picker controls remain pending."),
     page!("AutoSuggestBox", "Both examples use the native AutoSuggestBox: 97 source cat names, user-only token filtering, chosen-item output and control search/query with original title/subtitle and embedded bitmap details. Catalog titles are explicit item values; CurrentCulture matching and full input/accessibility parity remain pending."),
-    page!("NumberBox", "The native NumberBox preserves spin-button, NaN and expression behavior using the original snippets. Locale-specific upstream number formatting remains pending."),
+    page!(ported "NumberBox", "All three source examples use native NumberBox with the code behind of NumberBoxPage.xaml.cs in Rust: the expression box, the spin button box with SpinButtonPlacementGroup_SelectionChanged (Inline, Compact; as in the source the box keeps its markup placement until the selection changes), and SetNumberBoxNumberFormatter, a formatter of two fraction digits that rounds half up to 0.25 (DecimalFormatter with an IncrementNumberRounder). The formatter writes and reads the invariant decimal separator instead of the region's."),
     page!(ported "PersonPicture", "The source example uses native PersonPicture (WinUI's control in ferroui-controls) with its RadioButtons handler: the profile image, the display name Jane Doe and the initials SB. The profile image is the gallery's PersonPicture image instead of the remote image of the source."),
     page!(ported "PagerControl", "All three source examples use native PagerControl (WinUI's control in ferroui-controls): the basic pager, the number box and button panel display modes, and unbounded number box and button panel pagers. The page has no code-behind upstream."),
-    page!("PipsPager", "The existing PipsPager provides page counts, selection and previous/next controls; wrapping remains explicit."),
+    page!("PipsPager", "Both source examples use native PipsPager with the code behind of PipsPagerPage.xaml.cs in Rust: the pager of the source's eight Pictures, whose SelectedPageIndex keeps the source's TwoWay x:Bind of the gallery's SelectedIndex, and the pager whose TestPipsPager2_SelectedIndexChanged announces the page (a polite live region) with the orientation and button options. FerroUI has no FlipView: the gallery is a Carousel, as on the FlipView page (partial). FerroUI's PipsPager has IsPreviousButtonVisible and IsNextButtonVisible instead of PreviousButtonVisibility and NextButtonVisibility (no VisibleOnPointerOver) and no WrapMode, so those options are left out and the page is partial."),
     page!("TabView", "Native TabControl displays tab content; WinUI add/close/drag contracts remain pending."),
     page!("Pivot", "Native TabControl adapts the basic Pivot sample; Pivot-specific input and animation remain pending."),
     page!("RadialGradientBrush", "The shared RadialGradientBrush renders the source gradient with explicit relative radii."),
@@ -84,33 +81,33 @@ pub static ADAPTATIONS: &[PageAdaptation] = &[
     page!("Templates", "A shared ControlTemplate presents button content through TemplateBinding."),
     page!("CustomUserControls", "A native UserControl hosts the counter behavior; the original additional custom controls remain pending."),
     page!("AccessibilityScreenReader", "Native automation names and decorative accessibility views are assigned; screen-reader execution remains unverified."),
-    page!("Button", "Text, graphical content, disabled state and click output use native Button; custom styles remain tracked separately."),
-    page!("RepeatButton", "Native RepeatButton repeats the same Rust click handler; holding behavior belongs to FerroUI input."),
-    page!("ToggleButton", "Native ToggleButton checked state and output; the original handler is ported to Rust."),
-    page!("ToggleSwitch", "IsOn maps to IsChecked on the existing ToggleSwitch; Header is composed with a label and an automation name, and states remain observable."),
-    page!("CheckBox", "All three source compositions use native CheckBox with original two/three-state output and select-all synchronization. Keyboard, accessibility and exact rendering acceptance remain pending."),
-    page!("RadioButton", "Both original groups use native RadioButtons with the existing native RadioButton, source labels and Rust selection/color handlers. Focus, layout and screen-reader parity still require host verification."),
-    page!("TextBox", "Text, placeholder, read-only and multiline examples use existing TextBox properties; Header is composed explicitly."),
-    page!("PasswordBox", "The three source examples and original validation/reveal handlers use TextBox.PasswordChar and RevealPassword with composed Header. A distinct PasswordBox API and full input/accessibility parity remain pending."),
-    page!("TextBlock", "Text content, wrapping, typography and inline text use native TextBlock."),
-    page!("Slider", "WinUI StepFrequency becomes TickFrequency with IsSnapToTickEnabled. The sample output observes Value."),
-    page!("ProgressBar", "Both determinate and indeterminate ProgressBar modes use the shared control."),
-    page!("ComboBox", "Inline color choices and editable choices use native ComboBox; Header is composed explicitly."),
-    page!("Border", "The source Border/TextBlock composition uses the shared Border control."),
-    page!("Canvas", "Canvas coordinates use shared attached properties; ZIndex is the shared visual property."),
-    page!("Grid", "The source grid uses shared row/column definitions and spacing."),
-    page!("StackPanel", "Horizontal/vertical orientation and spacing use the shared StackPanel."),
-    page!("RelativePanel", "The source relative constraints use the shared RelativePanel and named controls."),
-    page!("Expander", "Header, content, expanded state and alignment use the shared Expander."),
+    page!(ported "Button", "All four source examples use native Button with Button_Click of ButtonPage.xaml.cs in Rust: the text button and its Disable option (the source's OneWay x:Bind of IsChecked, negated by BoolConverters.Not instead of IsChecked.Value.Equals(x:False)), the graphical button with the source's Slices.png, the WinUI theme's AccentButtonStyle and SubtleButtonStyle, and the wrapping layouts (WrapWholeWords is WrapWithOverflow)."),
+    page!(ported "RepeatButton", "The source example uses native RepeatButton with RepeatButton_Click of RepeatButtonPage.xaml.cs in Rust: the static click count and the polite live-region output. The Disable option is the source's OneWay x:Bind of IsChecked, negated by BoolConverters.Not instead of IsChecked.Value.Equals(x:False)."),
+    page!(ported "ToggleButton", "The source example uses native ToggleButton with the constructor and the Checked/Unchecked handlers of ToggleButtonPage.xaml.cs in Rust (On and Off, over IsCheckedChanged). The Disable option is the source's OneWay x:Bind of IsChecked, negated by BoolConverters.Not instead of IsChecked.Value.Equals(x:False)."),
+    page!(ported "ToggleSwitch", "Both source examples use native ToggleSwitch: the simple switch, and the switch with its header, OnContent and OffContent and the ProgressRing bound to it with the source's OneWay x:Bind. WinUI's IsOn is IsChecked and its Header is the Content of FerroUI's ToggleSwitch, which the WinUI theme presents as the header. The page has no code-behind upstream."),
+    page!(ported "CheckBox", "All three source examples use native CheckBox with the handlers of CheckBoxPage.xaml.cs in Rust: the two-state and three-state outputs, and Select all with SetCheckedState (the aggregate of the options at load and after each option) and the user cycle from checked to unchecked. The source's automation names and output automation ids are kept; rendering parity against Windows remains pending."),
+    page!(ported "RadioButton", "Both source examples use native RadioButtons with the handlers of RadioButtonPage.xaml.cs in Rust: RadioButton_Checked writes the selected option, and the Background and Border groups color the border (Green, Yellow, White; DarkGreen, Gold, White). As in the source, the border keeps its markup colors until a selection changes. Rendering and screen-reader parity remain pending."),
+    page!("TextBox", "All four source examples use native TextBox: the simple box, the box with its header (composed above the box, whose automation name it is) and placeholder, the read-only box with the source's font, foreground and character spacing (CharacterSpacing 200, thousandths of an em, is a LetterSpacing of 4.8 at 24), and the multi-line box with AcceptsReturn, wrapping and the green SelectionBrush (SelectionHighlightColor). The page has no code-behind upstream. FerroUI's TextBox has no IsSpellCheckEnabled, so the multi-line box does not check spelling and the page is partial."),
+    page!("PasswordBox", "All three source examples with PasswordBox_PasswordChanged and RevealModeCheckbox_Changed of PasswordBoxPage.xaml.cs in Rust (input_samples.rs): the validation of an empty or 'Password' value, the header (composed), placeholder and custom character, and the reveal check box. FerroUI has no PasswordBox: each box is a TextBox with a PasswordChar whose Text, text changes and RevealPassword stand for Password, PasswordChanged and PasswordRevealMode, so the page is partial."),
+    page!("TextBlock", "All five source examples: the simple text, the keyed style (a keyed ControlTheme set with Theme), the source's font, foreground, wrapping (WrapWholeWords is WrapWithOverflow) and character spacing (CharacterSpacing 200, thousandths of an em, is a LetterSpacing of 4.8 at 24), and the inline Run, LineBreak, Span, Bold, Italic and Underline. The page has no code-behind upstream. FerroUI's TextBlock has no IsTextSelectionEnabled or SelectionHighlightColor (SelectableTextBlock's selection cannot be switched off): the selectable text is a RichTextBlock, which has both, with the source's OneWay x:Bind of the switch, so the page is partial."),
+    page!("Slider", "All four source examples use native Slider with the source's OneWay x:Bind of the outputs and of the range options, and SnapsToRadioButtons_SelectionChanged in Rust. FerroUI's Slider has no Header (composed), no StepFrequency (TickFrequency with IsSnapToTickEnabled) and no SnapsTo: Ticks is IsSnapToTickEnabled, and StepValues, the integer steps of the source, has no counterpart (the slider does not snap), so the page is partial. The source's Value.ToString() is the bound Value."),
+    page!("ProgressBar", "Both source examples use native ProgressBar: the indeterminate bar, and the determinate bar set by the NumberBox with ProgressValue_ValueChanged of ProgressBarPage.xaml.cs in Rust (an empty box goes back to 0). FerroUI's ProgressBar has no ShowPaused or ShowError, so the indeterminate bar's Progress state options (Running, Paused, Error) and the source's x:Bind of IsChecked.Value are not ported and the page is partial."),
+    page!("ComboBox", "All three source examples use native ComboBox with ColorComboBox_SelectionChanged and Combo3_Loaded of ComboBoxPage.xaml.cs in Rust: the color rectangle, the font list (FontHelper.Fonts as names; the output's font follows the selection instead of the x:Bind of FontItem.Font), and the editable font sizes with the source's OneWay x:Bind of SelectedValue to the output's font size. Header is composed. FerroUI's ComboBox has no TextSubmitted event and there is no ContentDialog, so Combo3_TextSubmitted (the check of a typed size and its dialog) is not ported and the page is partial."),
+    page!(ported "Border", "The source example uses native Border with the handlers of BorderPage.xaml.cs in Rust: the thickness slider and the Background (Green, Yellow, Blue, White) and BorderBrush (DarkGreen, Gold, DarkBlue, White) options. FerroUI's Slider has no Header (composed) and no StepFrequency or SnapsTo: the steps of 1 are TickFrequency with IsSnapToTickEnabled. IsFocusEngagementEnabled is the gamepad focus engagement of Xbox, which FerroUI does not have."),
+    page!(ported "Canvas", "The source example uses native Canvas: the red rectangle keeps the source's OneWay x:Bind of Canvas.Left, Canvas.Top and the z-index to the sliders (the binding converts the value instead of the source's (x:Int32) cast, which the x:Bind core makes a type test), Canvas.ZIndex is the shared ZIndex, and UpdateZSliderAutomationName of CanvasPage.xaml.cs names the z-index slider in Rust. FerroUI's Slider has no Header (composed) and no StepFrequency or SnapsTo: the steps of 1 are TickFrequency with IsSnapToTickEnabled."),
+    page!(ported "Grid", "The source example uses native Grid with the source's OneWay x:Bind of ColumnSpacing, RowSpacing and the red rectangle's Grid.Column and Grid.Row to the sliders (the binding converts the value instead of the source's (x:Int32) cast, which the x:Bind core makes a type test). The page has no code-behind upstream. FerroUI's Slider has no Header (composed) and no StepFrequency or SnapsTo: the steps of 1 are TickFrequency with IsSnapToTickEnabled."),
+    page!(ported "StackPanel", "The source example uses native StackPanel with the source's OneWay x:Bind of Spacing to the slider and OrientationGroup_SelectionChanged of StackPanelPage.xaml.cs in Rust (the Tag of the checked option is the orientation). FerroUI's Slider has no Header (composed) and no StepFrequency or SnapsTo: the steps of 1 are TickFrequency with IsSnapToTickEnabled."),
+    page!(ported "RelativePanel", "The source example uses native RelativePanel with the source's relations: RightOf, AlignRightWithPanel, Below and AlignHorizontalCenterWith. The page has no code-behind upstream."),
+    page!(ported "Expander", "Both source examples use native Expander: the text header and content with ExpandDirectionComboBox_SelectionChanged of ExpanderPage.xaml.cs in Rust (Down from the top, Up from the bottom), and the centered header over left-aligned content (HorizontalContentAlignment Left, Padding 0). The ComboBox's Header is composed."),
     page!("Viewbox", "The Viewbox scales native vector content; the upstream bitmap asset is a separate pending sample."),
     page!("WrapPanel", "The source wrapping layout uses shared WrapPanel; ItemsStretch and Padding require explicit owner adaptation."),
     page!("ScrollViewer", "Native ScrollViewer hosts oversized content and scroll bars."),
     page!("Flyout", "Native Button.Flyout hosts the confirmation content; the action uses a Rust click handler."),
-    page!("DropDownButton", "MenuFlyout entries map to native MenuItem headers; flyout ownership remains native."),
-    page!("SplitButton", "Native SplitButton and Flyout keep separate primary and secondary actions."),
-    page!("ToggleSplitButton", "Native ToggleSplitButton owns its checked state and secondary flyout."),
+    page!(ported "DropDownButton", "Both source examples use native DropDownButton with a MenuFlyout placed BottomEdgeAlignedLeft: the text button and the icon button with the source's FontIcon glyphs on the button and the items. WinUI's MenuFlyoutItem is MenuItem (Text is Header). The page has no code-behind upstream. The glyphs need the symbol font of the platform (Segoe Fluent Icons on Windows)."),
+    page!(ported "SplitButton", "Both source examples use native SplitButton with the constructor and handlers of SplitButtonPage.xaml.cs in Rust: the primary part colors the RichEditBox text with its swatch, a flyout swatch colors the text and the primary part and closes the flyout, new text takes the current color (TextChanged), and the text button's swatches close its flyout. FerroUI has no GridView and no VariableSizedWrapGrid: both flyouts are a UniformGrid of three columns whose swatches are buttons, and GridView_ItemClick is their Click."),
+    page!("ToggleSplitButton", "The source example uses native ToggleSplitButton with BulletButton_Click of ToggleSplitButtonPage.xaml.cs in Rust: the clicked bullet button sets the symbol and the automation name, checks the button, closes the flyout and focuses the RichEditBox. FerroUI's RichEditBox has no paragraph list type (ParagraphFormat.ListType, MarkerType), so neither the bullet buttons nor MyListButton_IsCheckedChanged set the list of the text, and the page stays partial."),
     page!("ToolTip", "ToolTipService.ToolTip is explicitly mapped to the shared ToolTip.Tip attached property."),
-    page!("HyperlinkButton", "Native HyperlinkButton is used; external navigation remains explicit through NavigateUri."),
+    page!(ported "HyperlinkButton", "Both source examples use native HyperlinkButton: NavigateUri opens the Microsoft home page through the top level's launcher, with the Disable option as the source's OneWay x:Bind of IsChecked negated by BoolConverters.Not; GoToHyperlinkButton_Click navigates the gallery to the ToggleButton page, as the source's App.MainWindow.Navigate does."),
     page!("CalendarDatePicker", "Native CalendarDatePicker; header is composed and placeholder uses the shared property."),
     page!("CalendarView", "CalendarView is adapted to the shared Calendar; WinUI-specific day item customization is pending."),
     page!("DatePicker", "Native DatePicker composes a label for WinUI Header."),
@@ -138,6 +135,11 @@ pub static ADAPTATIONS: &[PageAdaptation] = &[
     page!(ported "InkCanvas", "All three source examples use the native InkCanvas, InkPresenter and InkToolbar with the handlers of InkCanvasPage.xaml.cs in Rust: input devices, ink colour, stroke width, inking enabled and clear; the toolbar's available tools, active tool in both directions, flyout placement and clear; save, clear and restore with the source's messages. Header is composed, TargetInkCanvas is set in Rust and the saved strokes are the bytes of InkStrokeContainer::save in memory. Routed window input and rendering acceptance remain pending."),
     page!("Chart", "The seven source examples map onto the native CartesianChart with the data and option handlers of ChartPage.xaml.cs in Rust: category labels, legend, bar orientation and category sort, grid lines and axis visibility, series visibility, dash style, thickness, markers and data labels, a day axis for the DateTimeAxis with its intervals and label formats, and the live series. LegendTitle, tick marks, axis brushes, marker shapes and per-point overrides are not available; rendering parity remains pending."),
 ];
+
+/// The buttons of the native examples that navigate the gallery, as the source's
+/// `App.MainWindow.Navigate(typeof(ItemPage), id)`: the page, the name of its button and the page
+/// the button opens. The gallery wires them when it shows the page (`gallery.rs`).
+pub static GALLERY_LINKS: &[(&str, &str, &str)] = &[("HyperlinkButton", "GoToToggleButton", "ToggleButton")];
 
 pub fn find(page_id: &str) -> Option<&'static PageAdaptation> {
     ADAPTATIONS.iter().find(|sample| sample.page_id == page_id)
@@ -171,6 +173,11 @@ pub fn create(sample: &PageAdaptation) -> Result<Ref<Control>, XamlLoadError> {
     crate::repeater_samples::wire(&root);
     crate::ink_samples::wire(&root);
     crate::chart_samples::wire(&root);
+    crate::button_samples::wire(sample.page_id, &root);
+    crate::layout_samples::wire(sample.page_id, &root);
+    crate::text_input_samples::wire(sample.page_id, &root);
+    crate::status_samples::wire(sample.page_id, &root);
+    crate::command_samples::wire(sample.page_id, &root);
     wire(&root);
     initialize_x_bind(&root)?;
     Ok(root)
@@ -195,81 +202,7 @@ fn wire(root: &Ref<Control>) {
     let Some(output) = find_control::<TextBlock>(root, "Output") else {
         return;
     };
-    if let Some(number) = find_control::<NumberBox>(root, "Number") {
-        let weak_output = output.downgrade();
-        let weak_number = number.downgrade();
-        number.value_changed(move |_| {
-            if let (Some(number), Some(output)) = (weak_number.upgrade(), weak_output.upgrade()) {
-                let value = if number.value().is_nan() {
-                    "empty".to_string()
-                } else {
-                    number.value().to_string()
-                };
-                output.set_text(Some(&format!("Value: {value}")));
-            }
-        }).detach();
-    } else if let Some(primary) = find_control::<ToggleSplitButton>(root, "Primary") {
-        let weak_output = output.downgrade();
-        let weak_primary = primary.downgrade();
-        primary.property_changed(move |_| {
-            if let (Some(primary), Some(output)) = (weak_primary.upgrade(), weak_output.upgrade()) {
-                output.set_text(Some(if primary.is_checked() {
-                    "Checked"
-                } else {
-                    "Unchecked"
-                }));
-            }
-        });
-    } else if let Some(primary) = find_control::<ToggleButton>(root, "Primary") {
-        let weak_output = output.downgrade();
-        let weak_primary = primary.downgrade();
-        primary.property_changed(move |_| {
-            if let (Some(primary), Some(output)) = (weak_primary.upgrade(), weak_output.upgrade()) {
-                output.set_text(Some(match primary.is_checked() {
-                    Some(true) => "Checked",
-                    Some(false) => "Unchecked",
-                    None => "Indeterminate",
-                }));
-            }
-        });
-    } else if let Some(primary) = find_control::<TextBox>(root, "Primary") {
-        let weak_output = output.downgrade();
-        let weak_primary = primary.downgrade();
-        primary.property_changed(move |_| {
-            if let (Some(primary), Some(output)) = (weak_primary.upgrade(), weak_output.upgrade()) {
-                let count = primary.text().unwrap_or_default().chars().count();
-                output.set_text(Some(&format!("{count} characters")));
-            }
-        });
-    } else if let Some(primary) = find_control::<Slider>(root, "Primary") {
-        let weak_output = output.downgrade();
-        let weak_primary = primary.downgrade();
-        primary.property_changed(move |_| {
-            if let (Some(primary), Some(output)) = (weak_primary.upgrade(), weak_output.upgrade()) {
-                output.set_text(Some(&format!("Value: {}", primary.value())));
-            }
-        });
-    } else if let Some(primary) = find_control::<ComboBox>(root, "Primary") {
-        let weak_output = output.downgrade();
-        let weak_primary = primary.downgrade();
-        primary.property_changed(move |_| {
-            if let (Some(primary), Some(output)) = (weak_primary.upgrade(), weak_output.upgrade()) {
-                output.set_text(Some(&format!(
-                    "Selected index: {}",
-                    primary.selected_index()
-                )));
-            }
-        });
-    } else if let Some(primary) = find_control::<SplitButton>(root, "Primary") {
-        let count = Rc::new(Cell::new(0u64));
-        let weak_output = output.downgrade();
-        primary.click(move |_, _| {
-            count.set(count.get().saturating_add(1));
-            if let Some(output) = weak_output.upgrade() {
-                output.set_text(Some(&format!("Clicked {} times", count.get())));
-            }
-        });
-    } else if let Some(primary) = find_control::<Button>(root, "Primary") {
+    if let Some(primary) = find_control::<Button>(root, "Primary") {
         let count = Rc::new(Cell::new(0u64));
         let weak_output = output.downgrade();
         primary.click(move |_, _| {

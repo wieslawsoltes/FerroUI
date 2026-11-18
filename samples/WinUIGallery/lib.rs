@@ -8,9 +8,11 @@
 
 mod assets;
 mod assets_data;
+mod button_samples;
 mod cat_data;
 mod chart_samples;
 mod color_picker_samples;
+mod command_samples;
 mod connected_animation_samples;
 pub mod catalog;
 mod catalog_data;
@@ -22,6 +24,7 @@ mod frame_sample;
 pub mod gallery;
 mod ink_samples;
 mod input_samples;
+mod layout_samples;
 mod materials_samples;
 mod media_samples;
 pub mod playback_samples;
@@ -33,6 +36,8 @@ mod navigation_view_samples;
 mod platform_samples;
 mod repeater_samples;
 mod sizing_sample;
+mod status_samples;
+mod text_input_samples;
 mod text_samples;
 mod window_samples;
 
@@ -83,3 +88,18 @@ mod chart_samples_tests;
 
 #[cfg(test)]
 mod x_bind_tests;
+
+#[cfg(test)]
+mod button_samples_tests;
+
+#[cfg(test)]
+mod layout_samples_tests;
+
+#[cfg(test)]
+mod text_input_samples_tests;
+
+#[cfg(test)]
+mod status_samples_tests;
+
+#[cfg(test)]
+mod command_samples_tests;

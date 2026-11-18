@@ -61,7 +61,9 @@
       "status": "partial",
       "implementation": [
         "samples/WinUIGallery/Pages/AppBarButton.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/command_samples.rs",
+        "samples/WinUIGallery/Assets/SampleMedia/Slices2.png"
       ],
       "tests": [
         {
@@ -69,32 +71,15 @@
           "name": "all_reviewed_native_adaptations_load_real_controls"
         },
         {
-          "path": "samples/WinUIGallery/tests.rs",
-          "name": "command_bar_examples_keep_click_and_three_state_handlers"
+          "path": "samples/WinUIGallery/command_samples_tests.rs",
+          "name": "app_bar_buttons_write_the_clicked_name_to_their_outputs"
         }
       ],
-      "notes": "The path-icon sample uses the shared CommandBarButton with native click output. Other icon types, accelerators and flyout examples remain pending. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
-      "examples": [
-        {
-          "source": "WinUIGallery/Samples/AppBarButton/AppbarbuttonPathIcon.txt",
-          "status": "partial",
-          "tests": [
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "all_reviewed_native_adaptations_load_real_controls"
-            },
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "command_bar_examples_keep_click_and_three_state_handlers"
-            }
-          ],
-          "notes": "The path-icon sample uses the shared CommandBarButton with native click output. Other icon types, accelerators and flyout examples remain pending. Original source substitutions remain in the catalog viewer; chosen native inputs and Rust handlers are explicit adaptations. Rendering/accessibility/platform acceptance is pending.",
-          "source_sha256": "f622185434ea6a824b7758a4cd457087be865146aaa6935c50df6ed4548a78b1"
-        }
-      ]
+      "notes": "All six source examples use native CommandBarButton (WinUI's AppBarButton) with AppBarButton_Click of AppBarButtonPage.xaml.cs in Rust: the symbol, font and path icons (the source's Content of the path icon is the Icon, which the template presents), the KeyboardAccelerator Ctrl+S as the HotKey, and the flyout with its text box; the outputs are polite live regions for UIHelper.AnnounceActionForAccessibility. FerroUI has no BitmapIcon: the bitmap icon is an Image of the source's Slices2.png, not drawn in the foreground's single color, so the page is partial. The symbol glyphs need the platform's symbol font.",
+      "examples": []
     },
     "AppBarSeparator": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/AppBarSeparator.xaml",
         "samples/WinUIGallery/examples.rs"
@@ -103,16 +88,22 @@
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/command_samples_tests.rs",
+          "name": "app_bar_separators_divide_the_primary_commands"
         }
       ],
-      "notes": "The source command groups use CommandBarSeparator; Symbol icons remain pending in this adaptation. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The source example uses native CommandBarSeparator (WinUI's AppBarSeparator) between the source's CommandBarButtons with their symbol icons in a CommandBar, in a scroll viewer that scrolls horizontally without a bar and not vertically (the scroll modes are the bar visibilities Hidden and Disabled). The page has no code-behind upstream. The symbol glyphs need the platform's symbol font.",
       "examples": []
     },
     "AppBarToggleButton": {
       "status": "partial",
       "implementation": [
         "samples/WinUIGallery/Pages/AppBarToggleButton.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/command_samples.rs",
+        "samples/WinUIGallery/Assets/SampleMedia/Slices2.png"
       ],
       "tests": [
         {
@@ -120,29 +111,12 @@
           "name": "all_reviewed_native_adaptations_load_real_controls"
         },
         {
-          "path": "samples/WinUIGallery/tests.rs",
-          "name": "command_bar_examples_keep_click_and_three_state_handlers"
+          "path": "samples/WinUIGallery/command_samples_tests.rs",
+          "name": "app_bar_toggle_buttons_state_is_checked_after_the_click"
         }
       ],
-      "notes": "The three-state path-icon sample uses CommandBarToggleButton; checked, unchecked and indeterminate state remain observable. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
-      "examples": [
-        {
-          "source": "WinUIGallery/Samples/AppBarToggleButton/ThreeStateAppbartogglebuttonPath.txt",
-          "status": "partial",
-          "tests": [
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "all_reviewed_native_adaptations_load_real_controls"
-            },
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "command_bar_examples_keep_click_and_three_state_handlers"
-            }
-          ],
-          "notes": "The three-state path-icon sample uses CommandBarToggleButton; checked, unchecked and indeterminate state remain observable. Original source substitutions remain in the catalog viewer; chosen native inputs and Rust handlers are explicit adaptations. Rendering/accessibility/platform acceptance is pending.",
-          "source_sha256": "d07e986796bdd5725f12fd4b234047ba72150d6ccfe0b39ef2fa2322be9b83bc"
-        }
-      ]
+      "notes": "All four source examples use native CommandBarToggleButton (WinUI's AppBarToggleButton) with AppBarButton_Click of AppBarToggleButtonPage.xaml.cs in Rust (IsChecked = True, False or empty for the third state, as C#'s bool?.ToString()): the symbol, font and three-state path icons (the source's Content of the path icon is the Icon). FerroUI has no BitmapIcon: the bitmap icon is an Image of the source's Slices2.png, not drawn in the foreground's single color, so the page is partial. The symbol glyph needs the platform's symbol font.",
+      "examples": []
     },
     "AutoSuggestBox": {
       "status": "partial",
@@ -253,25 +227,31 @@
       "examples": []
     },
     "Border": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/Border.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/layout_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/layout_samples_tests.rs",
+          "name": "border_options_set_the_thickness_background_and_border_brush"
         }
       ],
-      "notes": "The source Border/TextBlock composition uses the shared Border control. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The source example uses native Border with the handlers of BorderPage.xaml.cs in Rust: ThicknessSlider_ValueChanged sets the uniform thickness, BGRadioButton_Checked the background (Green, Yellow, Blue, White) and RadioButton_Checked the border brush (DarkGreen, Gold, DarkBlue, White). FerroUI's Slider has no Header (composed) and no StepFrequency or SnapsTo: the steps of 1 of the source are TickFrequency 1 with IsSnapToTickEnabled, the same values. The slider's IsFocusEngagementEnabled is the gamepad focus engagement of Xbox, which FerroUI does not have (not applicable).",
       "examples": []
     },
     "Button": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/Button.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/button_samples.rs"
       ],
       "tests": [
         {
@@ -285,9 +265,21 @@
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "dropping_native_example_releases_handler_targets"
+        },
+        {
+          "path": "samples/WinUIGallery/button_samples_tests.rs",
+          "name": "button_page_shows_the_graphical_content_and_the_wrapping_layouts"
+        },
+        {
+          "path": "samples/WinUIGallery/button_samples_tests.rs",
+          "name": "button_page_applies_the_built_in_styles_of_the_winui_theme"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
         }
       ],
-      "notes": "Text, graphical content, disabled state and click output use native Button; custom styles remain tracked separately. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "All four source examples use native Button with Button_Click of ButtonPage.xaml.cs in Rust: the text button with its output and the Disable option, the graphical button with the source's Slices.png, AccentButtonStyle and SubtleButtonStyle of the WinUI theme, and both wrapping layouts. The Disable option is the source's OneWay x:Bind of IsChecked, negated by the BoolConverters.Not converter, because the x:Bind core has no member Value on a nullable boolean for the source's IsChecked.Value.Equals(x:False). WinUI's WrapWholeWords is WrapWithOverflow. Rendering parity against Windows remains pending.",
       "examples": []
     },
     "CalendarDatePicker": {
@@ -321,22 +313,31 @@
       "examples": []
     },
     "Canvas": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/Canvas.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/layout_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/layout_samples_tests.rs",
+          "name": "canvas_options_move_the_red_rectangle_and_name_the_z_index_slider"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
         }
       ],
-      "notes": "Canvas coordinates use shared attached properties; ZIndex is the shared visual property. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The source example uses native Canvas: the red rectangle keeps the source's OneWay x:Bind of Canvas.Left, Canvas.Top and the z-index to the sliders, and the constructor and ZSlider_ValueChanged of CanvasPage.xaml.cs name the z-index slider in Rust (UpdateZSliderAutomationName). Canvas.ZIndex is the shared ZIndex. The binding converts the slider's value to the integer z-index instead of the source's (x:Int32) cast, which the x:Bind core makes a type test. FerroUI's Slider has no Header (composed) and no StepFrequency or SnapsTo: the steps of 1 of the source are TickFrequency 1 with IsSnapToTickEnabled, the same values.",
       "examples": []
     },
     "CheckBox": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/CheckBox.xaml",
         "samples/WinUIGallery/examples.rs",
@@ -356,7 +357,7 @@
           "name": "checkbox_select_all_keeps_source_aggregate_and_user_cycle_behavior"
         }
       ],
-      "notes": "All three source compositions use native CheckBox with original two/three-state output and select-all synchronization. Keyboard, accessibility and exact rendering acceptance remain pending. All examples remain partial pending complete input, platform, accessibility and rendering acceptance.",
+      "notes": "All three source examples use native CheckBox with the handlers of CheckBoxPage.xaml.cs in Rust: the two-state and three-state outputs, and Select all with SetCheckedState (the aggregate of the options when the page loads and after each option) and the user cycle from checked to unchecked through indeterminate. The source's automation names and output automation ids are kept; rendering parity against Windows remains pending.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/CheckBox/CheckBoxTwoState.txt",
@@ -524,7 +525,8 @@
       "status": "partial",
       "implementation": [
         "samples/WinUIGallery/Pages/ComboBox.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/button_samples.rs"
       ],
       "tests": [
         {
@@ -532,18 +534,23 @@
           "name": "all_reviewed_native_adaptations_load_real_controls"
         },
         {
-          "path": "samples/WinUIGallery/tests.rs",
-          "name": "slider_and_combobox_outputs_observe_shared_properties"
+          "path": "samples/WinUIGallery/button_samples_tests.rs",
+          "name": "combo_box_examples_color_font_and_size_their_outputs"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
         }
       ],
-      "notes": "Inline color choices and editable choices use native ComboBox; Header is composed explicitly. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "All three source examples use native ComboBox with ColorComboBox_SelectionChanged and Combo3_Loaded of ComboBoxPage.xaml.cs in Rust: the color rectangle, the font list (FontHelper.Fonts as their names, the output's font following the selection in Rust instead of the x:Bind of FontItem.Font through a cast), and the editable font sizes (the source's FontSizes) with the source's OneWay x:Bind of SelectedValue to the output's font size. Header is composed. Missing: FerroUI's ComboBox has no TextSubmitted event and there is no ContentDialog, so Combo3_TextSubmitted (accepting a typed size between 8 and 100, or reverting the text and showing the dialog) is not ported and the page stays partial.",
       "examples": []
     },
     "CommandBar": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/CommandBar.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/command_samples.rs"
       ],
       "tests": [
         {
@@ -551,29 +558,12 @@
           "name": "all_reviewed_native_adaptations_load_real_controls"
         },
         {
-          "path": "samples/WinUIGallery/tests.rs",
-          "name": "command_bar_examples_keep_click_and_three_state_handlers"
+          "path": "samples/WinUIGallery/command_samples_tests.rs",
+          "name": "command_bar_options_open_close_and_change_the_secondary_commands"
         }
       ],
-      "notes": "The source primary/secondary commands use the shared CommandBar family, observable open state and an explicit HotKey adaptation. Dynamic symbol conversion and the full option set remain pending. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
-      "examples": [
-        {
-          "source": "WinUIGallery/Samples/CommandBar/CommandBarLabelsSide.txt",
-          "status": "partial",
-          "tests": [
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "all_reviewed_native_adaptations_load_real_controls"
-            },
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "command_bar_examples_keep_click_and_three_state_handlers"
-            }
-          ],
-          "notes": "The source primary/secondary commands use the shared CommandBar family, observable open state and an explicit HotKey adaptation. Dynamic symbol conversion and the full option set remain pending. Original source substitutions remain in the catalog viewer; chosen native inputs and Rust handlers are explicit adaptations. Rendering/accessibility/platform acceptance is pending.",
-          "source_sha256": "538d33fdc980c18cdcf167e9722d42195f659fcab12565c27d340c80b69a1c44"
-        }
-      ]
+      "notes": "The source example uses native CommandBar with the code behind of CommandBarPage.xaml.cs in Rust: OnElementClicked (the clicked command's label), Open and Close (IsOpen with IsSticky), AddSecondaryCommands_Click (four buttons and a separator while Settings is alone) and RemoveSecondaryCommands, and the KeyboardAccelerators of the constructor and the markup as HotKeys (Ctrl+A, Ctrl+E, F4, Ctrl+I; Ctrl+N, Delete, Ctrl+Subtract, Ctrl+Add). The MultipleButtons property feeds the source viewer's substitutions only, and the gallery creates the page anew instead of OnNavigatingFrom. FerroUI's CommandBar has no closed display mode: its buttons keep their labels while it is closed. The symbol glyphs need the platform's symbol font.",
+      "examples": []
     },
     "CustomUserControls": {
       "status": "partial",
@@ -606,7 +596,7 @@
       "examples": []
     },
     "DropDownButton": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/DropDownButton.xaml",
         "samples/WinUIGallery/examples.rs"
@@ -615,24 +605,33 @@
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/button_samples_tests.rs",
+          "name": "drop_down_buttons_open_the_source_menus_with_their_icons"
         }
       ],
-      "notes": "MenuFlyout entries map to native MenuItem headers; flyout ownership remains native. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "Both source examples use native DropDownButton with a MenuFlyout placed BottomEdgeAlignedLeft: the text button and the icon button, with the source's FontIcon glyphs on the button and on the items. WinUI's MenuFlyoutItem is MenuItem (Text is Header). The page has no code-behind upstream. The glyphs need the symbol font of the platform (Segoe Fluent Icons on Windows).",
       "examples": []
     },
     "Expander": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/Expander.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/status_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/status_samples_tests.rs",
+          "name": "expand_direction_option_sets_the_direction_and_the_alignment"
         }
       ],
-      "notes": "Header, content, expanded state and alignment use the shared Expander. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "Both source examples use native Expander: the text header and content with ExpandDirectionComboBox_SelectionChanged of ExpanderPage.xaml.cs in Rust (Down from the top, Up from the bottom), and the centered header over left-aligned content (HorizontalContentAlignment Left, Padding 0). The ComboBox's Header is composed.",
       "examples": []
     },
     "Flyout": {
@@ -666,7 +665,7 @@
       "examples": []
     },
     "Grid": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/Grid.xaml",
         "samples/WinUIGallery/examples.rs"
@@ -675,24 +674,45 @@
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/layout_samples_tests.rs",
+          "name": "grid_options_bind_the_spacings_and_the_red_rectangle_cell"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
         }
       ],
-      "notes": "The source grid uses shared row/column definitions and spacing. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The source example uses native Grid with the source's OneWay x:Bind of ColumnSpacing, RowSpacing and the red rectangle's Grid.Column and Grid.Row to the sliders; the binding converts the values instead of the source's (x:Int32) casts, which the x:Bind core makes a type test. The page has no code-behind upstream. FerroUI's Slider has no Header (composed) and no StepFrequency or SnapsTo: the steps of 1 of the source are TickFrequency 1 with IsSnapToTickEnabled, the same values.",
       "examples": []
     },
     "HyperlinkButton": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/HyperlinkButton.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/gallery.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/button_samples_tests.rs",
+          "name": "hyperlink_button_navigates_to_its_uri_and_follows_the_disable_option"
+        },
+        {
+          "path": "samples/WinUIGallery/button_samples_tests.rs",
+          "name": "hyperlink_button_click_opens_the_toggle_button_page_of_the_gallery"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
         }
       ],
-      "notes": "Native HyperlinkButton is used; external navigation remains explicit through NavigateUri. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "Both source examples use native HyperlinkButton: NavigateUri opens the Microsoft home page through the launcher of the top level, with the Disable option as the source's OneWay x:Bind of IsChecked negated by the BoolConverters.Not converter instead of IsChecked.Value.Equals(x:False); GoToHyperlinkButton_Click navigates the gallery to the ToggleButton page, as App.MainWindow.Navigate does in the source (examples::GALLERY_LINKS, wired by the gallery).",
       "examples": []
     },
     "IconElement": {
@@ -764,7 +784,7 @@
       ]
     },
     "InfoBar": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/InfoBar.xaml",
         "samples/WinUIGallery/examples.rs",
@@ -778,59 +798,18 @@
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "infobar_examples_keep_source_severity_message_action_and_options"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "a_page_whose_bindings_stopped_reads_its_sources_again_when_it_is_shown"
         }
       ],
-      "notes": "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. The options keep the source TwoWay x:Bind, compiled by the x:Bind core; final layout, icons and live-region acceptance remain pending. This is bounded application behavior coverage, not complete source/API/render/accessibility acceptance.",
-      "examples": [
-        {
-          "source": "WinUIGallery/Samples/InfoBar/ClosableInfobarOptionsChange.txt",
-          "source_sha256": "8d728ad450ca0731c1335724d3ae52b1b282e689c01df518f3d5c7bf0e04926c",
-          "status": "partial",
-          "tests": [
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "all_reviewed_native_adaptations_load_real_controls"
-            },
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "infobar_examples_keep_source_severity_message_action_and_options"
-            }
-          ],
-          "notes": "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. The options keep the source TwoWay x:Bind, compiled by the x:Bind core; final layout, icons and live-region acceptance remain pending."
-        },
-        {
-          "source": "WinUIGallery/Samples/InfoBar/ClosableInfobarLongShort.txt",
-          "source_sha256": "a75efd92ea14304b69005e89cb538dd5da5e6100c05a5305e6ec051f5ed50221",
-          "status": "partial",
-          "tests": [
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "all_reviewed_native_adaptations_load_real_controls"
-            },
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "infobar_examples_keep_source_severity_message_action_and_options"
-            }
-          ],
-          "notes": "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. The options keep the source TwoWay x:Bind, compiled by the x:Bind core; final layout, icons and live-region acceptance remain pending."
-        },
-        {
-          "source": "WinUIGallery/Samples/InfoBar/ClosableInfobarOptionsDisplay.txt",
-          "source_sha256": "d1a0776f95de9546186eaffe15128996cdf1129bc3a5214d09415e760bae3ff1",
-          "status": "partial",
-          "tests": [
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "all_reviewed_native_adaptations_load_real_controls"
-            },
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "infobar_examples_keep_source_severity_message_action_and_options"
-            }
-          ],
-          "notes": "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. The options keep the source TwoWay x:Bind, compiled by the x:Bind core; final layout, icons and live-region acceptance remain pending."
-        }
-      ]
+      "notes": "All three source examples use native InfoBar with the code behind of InfoBarPage.xaml.cs in Rust (control_samples.rs): SeverityComboBox_SelectionChanged (Informational, Success, Warning, Error), MessageComboBox_SelectionChanged (the short and the long message, long at load) and ActionButtonComboBox_SelectionChanged (none, the Action button, the Informational link to the Microsoft home page). The Is Open, Is Icon Visible and Is Closable options keep the source's TwoWay x:Bind, compiled by the x:Bind core. The ComboBoxes' Headers are composed; the DisplayMessage and DisplayButton values feed the source viewer's substitutions only.",
+      "examples": []
     },
     "Line": {
       "status": "partial",
@@ -893,10 +872,11 @@
       "examples": []
     },
     "NumberBox": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/NumberBox.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/text_input_samples.rs"
       ],
       "tests": [
         {
@@ -904,45 +884,24 @@
           "name": "all_reviewed_native_adaptations_load_real_controls"
         },
         {
-          "path": "samples/WinUIGallery/tests.rs",
-          "name": "winui_numberbox_example_keeps_expression_nan_and_valuechanged_behavior"
-        }
-      ],
-      "notes": "The native NumberBox preserves spin-button, NaN and expression behavior using the original snippets. Locale-specific upstream number formatting remains pending. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
-      "examples": [
-        {
-          "source": "WinUIGallery/Samples/NumberBox/NumberboxSpinButton.txt",
-          "status": "partial",
-          "tests": [
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "all_reviewed_native_adaptations_load_real_controls"
-            },
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "winui_numberbox_example_keeps_expression_nan_and_valuechanged_behavior"
-            }
-          ],
-          "notes": "The native NumberBox preserves spin-button, NaN and expression behavior using the original snippets. Locale-specific upstream number formatting remains pending. Original source substitutions remain in the catalog viewer; chosen native inputs and Rust handlers are explicit adaptations. Rendering/accessibility/platform acceptance is pending.",
-          "source_sha256": "59699277ad9e163499f51c2cbbe822e76a458a7be9bed3b63a15d9121a94f236"
+          "path": "samples/WinUIGallery/text_input_samples_tests.rs",
+          "name": "number_box_expression_keeps_nan_and_evaluates"
         },
         {
-          "source": "WinUIGallery/Samples/NumberBox/NumberboxEvaluatesExpressions.txt",
-          "status": "partial",
-          "tests": [
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "all_reviewed_native_adaptations_load_real_controls"
-            },
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "winui_numberbox_example_keeps_expression_nan_and_valuechanged_behavior"
-            }
-          ],
-          "notes": "The native NumberBox preserves spin-button, NaN and expression behavior using the original snippets. Locale-specific upstream number formatting remains pending. Original source substitutions remain in the catalog viewer; chosen native inputs and Rust handlers are explicit adaptations. Rendering/accessibility/platform acceptance is pending.",
-          "source_sha256": "d5848adadd320cd197313234679a1920aa6def65c28c8a8c73c14d3d5d2896e1"
+          "path": "samples/WinUIGallery/text_input_samples_tests.rs",
+          "name": "spin_button_placement_group_places_the_spin_buttons"
+        },
+        {
+          "path": "samples/WinUIGallery/text_input_samples_tests.rs",
+          "name": "formatted_number_box_rounds_to_the_nearest_quarter"
+        },
+        {
+          "path": "samples/WinUIGallery/text_input_samples_tests.rs",
+          "name": "dollar_amount_formatter_rounds_half_up_and_reads_decimals"
         }
-      ]
+      ],
+      "notes": "All three source examples use native NumberBox with the code behind of NumberBoxPage.xaml.cs in Rust: the expression box, the spin button box with SpinButtonPlacementGroup_SelectionChanged (Inline, Compact; as in the source the box keeps its markup placement until the selection changes), and SetNumberBoxNumberFormatter, a formatter of two fraction digits that rounds half up to 0.25 (DecimalFormatter with an IncrementNumberRounder). The formatter writes and reads the invariant decimal separator instead of the region's.",
+      "examples": []
     },
     "PageTransition": {
       "status": "partial",
@@ -998,59 +957,14 @@
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "password_examples_keep_source_validation_and_reveal_behavior"
+        },
+        {
+          "path": "samples/WinUIGallery/text_input_samples_tests.rs",
+          "name": "password_box_examples_keep_the_source_characters"
         }
       ],
-      "notes": "The three source examples and original validation/reveal handlers use TextBox.PasswordChar and RevealPassword with composed Header. A distinct PasswordBox API and full input/accessibility parity remain pending. All examples remain partial pending complete input, platform, accessibility and rendering acceptance.",
-      "examples": [
-        {
-          "source": "WinUIGallery/Samples/PasswordBox/SimplePasswordbox.txt",
-          "source_sha256": "134ed71f6c67346d81b6b09a2207973f6a2028a4d970a93246b644696368788e",
-          "status": "partial",
-          "tests": [
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "all_reviewed_native_adaptations_load_real_controls"
-            },
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "password_examples_keep_source_validation_and_reveal_behavior"
-            }
-          ],
-          "notes": "The three source examples and original validation/reveal handlers use TextBox.PasswordChar and RevealPassword with composed Header. A distinct PasswordBox API and full input/accessibility parity remain pending. Original page code-behind supplies the corresponding Rust handlers; complete API/render/accessibility parity is not established."
-        },
-        {
-          "source": "WinUIGallery/Samples/PasswordBox/PasswordboxHeaderPlaceholderText.txt",
-          "source_sha256": "9702b97d4f7a7c469595c851894211da67897271815bc4388d89ea2563dbe1d8",
-          "status": "partial",
-          "tests": [
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "all_reviewed_native_adaptations_load_real_controls"
-            },
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "password_examples_keep_source_validation_and_reveal_behavior"
-            }
-          ],
-          "notes": "The three source examples and original validation/reveal handlers use TextBox.PasswordChar and RevealPassword with composed Header. A distinct PasswordBox API and full input/accessibility parity remain pending. Original page code-behind supplies the corresponding Rust handlers; complete API/render/accessibility parity is not established."
-        },
-        {
-          "source": "WinUIGallery/Samples/PasswordBox/PasswordboxRevealMode.txt",
-          "source_sha256": "3e852f716094e0f9210c3dc51b9f73dcbaadab89c12c83b5fb840b28b3283a50",
-          "status": "partial",
-          "tests": [
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "all_reviewed_native_adaptations_load_real_controls"
-            },
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "password_examples_keep_source_validation_and_reveal_behavior"
-            }
-          ],
-          "notes": "The three source examples and original validation/reveal handlers use TextBox.PasswordChar and RevealPassword with composed Header. A distinct PasswordBox API and full input/accessibility parity remain pending. Original page code-behind supplies the corresponding Rust handlers; complete API/render/accessibility parity is not established."
-        }
-      ]
+      "notes": "All three source examples with PasswordBox_PasswordChanged and RevealModeCheckbox_Changed of PasswordBoxPage.xaml.cs in Rust (input_samples.rs): the validation of an empty or 'Password' value, the header (composed), placeholder and custom character, and the reveal check box. FerroUI has no PasswordBox: each box is a TextBox with a PasswordChar whose Text, text changes and RevealPassword stand for Password, PasswordChanged and PasswordRevealMode, so the page is partial.",
+      "examples": []
     },
     "PagerControl": {
       "status": "ported",
@@ -1095,15 +1009,28 @@
       "status": "partial",
       "implementation": [
         "samples/WinUIGallery/Pages/PipsPager.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/status_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/status_samples_tests.rs",
+          "name": "flip_view_pager_follows_the_gallery_both_ways"
+        },
+        {
+          "path": "samples/WinUIGallery/status_samples_tests.rs",
+          "name": "options_pager_announces_the_page_and_follows_the_options"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
         }
       ],
-      "notes": "The existing PipsPager provides page counts, selection and previous/next controls; wrapping remains explicit. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "Both source examples use native PipsPager with the code behind of PipsPagerPage.xaml.cs in Rust: the pager of the source's eight Pictures, whose SelectedPageIndex keeps the source's TwoWay x:Bind of the gallery's SelectedIndex, and the pager whose TestPipsPager2_SelectedIndexChanged announces the page (a polite live region) with the orientation and button options. FerroUI has no FlipView: the gallery is a Carousel, as on the FlipView page (partial). FerroUI's PipsPager has IsPreviousButtonVisible and IsNextButtonVisible instead of PreviousButtonVisibility and NextButtonVisibility (no VisibleOnPointerOver) and no WrapMode, so those options are left out and the page is partial.",
       "examples": []
     },
     "Pivot": {
@@ -1162,15 +1089,20 @@
       "status": "partial",
       "implementation": [
         "samples/WinUIGallery/Pages/ProgressBar.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/status_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/status_samples_tests.rs",
+          "name": "progress_value_sets_the_determinate_bar_and_an_empty_box_goes_back_to_zero"
         }
       ],
-      "notes": "Both determinate and indeterminate ProgressBar modes use the shared control. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "Both source examples use native ProgressBar: the indeterminate bar, and the determinate bar set by the NumberBox with ProgressValue_ValueChanged of ProgressBarPage.xaml.cs in Rust (an empty box goes back to 0). FerroUI's ProgressBar has no ShowPaused or ShowError, so the indeterminate bar's Progress state options (Running, Paused, Error) and the source's x:Bind of IsChecked.Value are not ported and the page is partial.",
       "examples": []
     },
     "PullToRefresh": {
@@ -1226,7 +1158,7 @@
       "examples": []
     },
     "RadioButton": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/RadioButton.xaml",
         "samples/WinUIGallery/examples.rs"
@@ -1241,7 +1173,7 @@
           "name": "radio_groups_port_original_selection_and_color_handlers"
         }
       ],
-      "notes": "Both original groups use native RadioButtons with the existing native RadioButton, source labels and Rust selection/color handlers. Focus, layout and screen-reader parity still require host verification. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "Both source examples use native RadioButtons with the handlers of RadioButtonPage.xaml.cs in Rust: RadioButton_Checked writes the selected option, and BackgroundColor_SelectionChanged and BorderBrush_SelectionChanged color the border (Green, Yellow and White; DarkGreen, Gold and White). As in the source, the border keeps its markup colors until a selection changes, because the source's handlers run before ControlOutput exists. Rendering and screen-reader parity remain pending.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/RadioButton/RadioButtonGroup.txt",
@@ -1278,7 +1210,7 @@
       ]
     },
     "RelativePanel": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/RelativePanel.xaml",
         "samples/WinUIGallery/examples.rs"
@@ -1287,24 +1219,37 @@
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/layout_samples_tests.rs",
+          "name": "relative_panel_places_the_rectangles_by_their_relations"
         }
       ],
-      "notes": "The source relative constraints use the shared RelativePanel and named controls. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The source example uses native RelativePanel with the source's relations (RightOf, AlignRightWithPanel, Below, AlignHorizontalCenterWith) and margins. The page has no code-behind upstream.",
       "examples": []
     },
     "RepeatButton": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/RepeatButton.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/button_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/button_samples_tests.rs",
+          "name": "repeat_button_counts_every_click_and_follows_the_disable_option"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
         }
       ],
-      "notes": "Native RepeatButton repeats the same Rust click handler; holding behavior belongs to FerroUI input. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The source example uses native RepeatButton with RepeatButton_Click of RepeatButtonPage.xaml.cs in Rust: the static click count (kept when the page opens again) and the polite live-region output, whose text change is the announcement the source raises with LiveRegionChanged. The Disable option is the source's OneWay x:Bind of IsChecked, negated by the BoolConverters.Not converter instead of IsChecked.Value.Equals(x:False). The repetition while the button is held is the control's own (Delay and Interval); host input acceptance remains pending.",
       "examples": []
     },
     "ScratchPad": {
@@ -1363,7 +1308,8 @@
       "status": "partial",
       "implementation": [
         "samples/WinUIGallery/Pages/Slider.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/button_samples.rs"
       ],
       "tests": [
         {
@@ -1371,11 +1317,15 @@
           "name": "all_reviewed_native_adaptations_load_real_controls"
         },
         {
-          "path": "samples/WinUIGallery/tests.rs",
-          "name": "slider_and_combobox_outputs_observe_shared_properties"
+          "path": "samples/WinUIGallery/button_samples_tests.rs",
+          "name": "slider_examples_keep_the_source_bindings_and_snapping"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
         }
       ],
-      "notes": "WinUI StepFrequency becomes TickFrequency with IsSnapToTickEnabled. The sample output observes Value. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "All four source examples use native Slider with the source's OneWay x:Bind of the outputs and of the range options (Minimum, Maximum, SmallChange and the step), and SnapsToRadioButtons_SelectionChanged in Rust; the source's Value.ToString() is the bound Value. Missing: FerroUI's Slider has no Header (composed), no StepFrequency (TickFrequency with IsSnapToTickEnabled instead) and no SnapsTo: Ticks is IsSnapToTickEnabled, and StepValues, the integer steps of the source, has no counterpart (the slider does not snap), so the page stays partial. FerroUI's RangeBase coerces the markup's Value against the default range before the x:Bind of the range runs; the code behind sets the range example's 800 after the range.",
       "examples": []
     },
     "Spacing": {
@@ -1394,18 +1344,27 @@
       "examples": []
     },
     "SplitButton": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/SplitButton.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/button_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/button_samples_tests.rs",
+          "name": "split_button_colors_the_editor_text_with_its_swatches"
+        },
+        {
+          "path": "samples/WinUIGallery/button_samples_tests.rs",
+          "name": "split_button_swatches_close_their_flyouts"
         }
       ],
-      "notes": "Native SplitButton and Flyout keep separate primary and secondary actions. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "Both source examples use native SplitButton with the constructor and the handlers of SplitButtonPage.xaml.cs in Rust: the RichEditBox starts with the source's text in green, the primary part colors the selection with the swatch it shows (myColorButton_Click), a swatch of the flyout colors the selection and the primary part and closes the flyout (GridView_ItemClick), new text takes the current color (MyRichEditBox_TextChanged), and the text button's swatches close its flyout (RevealColorButton_Click). FerroUI has no GridView and no VariableSizedWrapGrid: both flyouts are a UniformGrid of three columns (MaximumRowsOrColumns) whose swatches are buttons, and GridView_ItemClick is their Click, so the GridView's item selection visuals are not shown. The source's delayed Flyout.Hide, a workaround of a GridView defect, closes at once.",
       "examples": []
     },
     "SplitView": {
@@ -1424,18 +1383,27 @@
       "examples": []
     },
     "StackPanel": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/StackPanel.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/layout_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/layout_samples_tests.rs",
+          "name": "stack_panel_options_set_the_orientation_and_the_spacing"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
         }
       ],
-      "notes": "Horizontal/vertical orientation and spacing use the shared StackPanel. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The source example uses native StackPanel with the source's OneWay x:Bind of Spacing to the slider and OrientationGroup_SelectionChanged of StackPanelPage.xaml.cs in Rust: the Tag of the checked option is the orientation. FerroUI's Slider has no Header (composed) and no StepFrequency or SnapsTo: the steps of 1 of the source are TickFrequency 1 with IsSnapToTickEnabled, the same values.",
       "examples": []
     },
     "TabView": {
@@ -1478,9 +1446,21 @@
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/text_input_samples_tests.rs",
+          "name": "text_block_examples_keep_the_source_style_properties_and_inlines"
+        },
+        {
+          "path": "samples/WinUIGallery/text_input_samples_tests.rs",
+          "name": "selectable_text_follows_the_selection_switch"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
         }
       ],
-      "notes": "Text content, wrapping, typography and inline text use native TextBlock. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "All five source examples: the simple text, the keyed style (a keyed ControlTheme set with Theme), the source's font, foreground, wrapping (WrapWholeWords is WrapWithOverflow) and character spacing (CharacterSpacing 200, thousandths of an em, is a LetterSpacing of 4.8 at 24), and the inline Run, LineBreak, Span, Bold, Italic and Underline. The page has no code-behind upstream. FerroUI's TextBlock has no IsTextSelectionEnabled or SelectionHighlightColor (SelectableTextBlock's selection cannot be switched off): the selectable text is a RichTextBlock, which has both, with the source's OneWay x:Bind of the switch, so the page is partial.",
       "examples": []
     },
     "TextBox": {
@@ -1495,11 +1475,11 @@
           "name": "all_reviewed_native_adaptations_load_real_controls"
         },
         {
-          "path": "samples/WinUIGallery/tests.rs",
-          "name": "textbox_counts_unicode_scalar_values"
+          "path": "samples/WinUIGallery/text_input_samples_tests.rs",
+          "name": "text_box_examples_keep_the_source_properties"
         }
       ],
-      "notes": "Text, placeholder, read-only and multiline examples use existing TextBox properties; Header is composed explicitly. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "All four source examples use native TextBox: the simple box, the box with its header (composed above the box, whose automation name it is) and placeholder, the read-only box with the source's font, foreground and character spacing (CharacterSpacing 200, thousandths of an em, is a LetterSpacing of 4.8 at 24), and the multi-line box with AcceptsReturn, wrapping and the green SelectionBrush (SelectionHighlightColor). The page has no code-behind upstream. FerroUI's TextBox has no IsSpellCheckEnabled, so the multi-line box does not check spelling and the page is partial.",
       "examples": []
     },
     "TimePicker": {
@@ -1518,37 +1498,51 @@
       "examples": []
     },
     "ToggleButton": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/ToggleButton.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/button_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/button_samples_tests.rs",
+          "name": "toggle_button_reports_on_and_off_and_follows_the_disable_option"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
         }
       ],
-      "notes": "Native ToggleButton checked state and output; the original handler is ported to Rust. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The source example uses native ToggleButton with the constructor and the Checked and Unchecked handlers of ToggleButtonPage.xaml.cs in Rust (On and Off, over IsCheckedChanged). The Disable option is the source's OneWay x:Bind of IsChecked, negated by the BoolConverters.Not converter instead of IsChecked.Value.Equals(x:False).",
       "examples": []
     },
     "ToggleSplitButton": {
       "status": "partial",
       "implementation": [
         "samples/WinUIGallery/Pages/ToggleSplitButton.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/button_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/button_samples_tests.rs",
+          "name": "toggle_split_button_bullets_set_the_symbol_the_name_and_the_checked_state"
         }
       ],
-      "notes": "Native ToggleSplitButton owns its checked state and secondary flyout. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The source example uses native ToggleSplitButton with BulletButton_Click of ToggleSplitButtonPage.xaml.cs in Rust: the clicked bullet button sets the symbol (List or Bullets) and the automation name (Bullets or Roman Numerals), checks the button, closes the flyout and focuses the RichEditBox. Missing: FerroUI's RichEditBox has no paragraph list type (ITextParagraphFormat.ListType, MarkerType), so neither BulletButton_Click nor MyListButton_IsCheckedChanged sets or removes the list of the text; the page stays partial until RichEditBox has it.",
       "examples": []
     },
     "ToggleSwitch": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/ToggleSwitch.xaml",
         "samples/WinUIGallery/examples.rs"
@@ -1557,9 +1551,17 @@
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/button_samples_tests.rs",
+          "name": "toggle_switches_keep_the_source_header_content_and_progress_binding"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
         }
       ],
-      "notes": "IsOn maps to IsChecked on the existing ToggleSwitch; Header is composed with a label and an automation name, and states remain observable. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "Both source examples use native ToggleSwitch: the simple switch, and the switch with its header, OnContent and OffContent, checked at first, with the ProgressRing bound to it by the source's OneWay x:Bind. WinUI's IsOn is IsChecked and its Header is the Content of FerroUI's ToggleSwitch, which the WinUI theme presents as the header. The page has no code-behind upstream.",
       "examples": []
     },
     "ToolTip": {
