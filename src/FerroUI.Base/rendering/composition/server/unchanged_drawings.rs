@@ -96,11 +96,45 @@ crate::ferro_thread_local! {
 
 /// The number of the frame being drawn, which a drawing notes when it changes; 0 when the
 /// count is off (and always in a build without `perf-counters`).
+#[cfg_attr(not(feature = "perf-counters"), allow(dead_code))]
 pub(crate) fn frame() -> u64 {
     if !perf_counters::ENABLED {
         return 0;
     }
     STATE.with(|state| state.borrow().as_ref().map_or(0, |state| state.counts.frame))
+}
+
+/// The frame of the last change of a drawing ([`frame`]). In a build without `perf-counters`
+/// it holds nothing: a drawing item and a draw list visual are not a word larger for a count
+/// that cannot run.
+#[derive(Default)]
+pub(crate) struct ChangedFrame {
+    #[cfg(feature = "perf-counters")]
+    frame: std::cell::Cell<u64>,
+}
+
+impl ChangedFrame {
+    /// A drawing that changes now.
+    pub(crate) fn now() -> Self {
+        let changed = Self::default();
+        changed.note();
+        changed
+    }
+
+    /// The drawing changed in the frame being drawn.
+    #[inline]
+    pub(crate) fn note(&self) {
+        #[cfg(feature = "perf-counters")]
+        self.frame.set(frame());
+    }
+
+    #[inline]
+    pub(crate) fn get(&self) -> u64 {
+        #[cfg(feature = "perf-counters")]
+        return self.frame.get();
+        #[cfg(not(feature = "perf-counters"))]
+        0
+    }
 }
 
 /// Replays a drawing with `replay`, counting it when the count is on: `changed` is the frame of
