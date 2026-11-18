@@ -80,7 +80,7 @@ fn respond(
     }
     let result = match method {
         "initialize" => Ok(json!({"version": protocol::PROTOCOL_VERSION, "assets": toolbox::catalog(),
-            "capabilities": {"isolatedDesign":true,"appHostedDesign":true,"rsxLanguage":true,"stages":true}})),
+            "capabilities": {"isolatedDesign":true,"appHostedDesign":true,"rsxLanguage":true,"stages":true,"prototypeEditing":true}})),
         "rsxLanguage" => match message["params"]["source"].as_str() {
             Some(source) if source.len() <= protocol::MAX_SOURCE_BYTES => serialize(Ok(ferroui_designer_rsx::analyze_rsx(source))),
             _ => Err("RSX language source must be at most 1 MiB".into()),
@@ -106,6 +106,8 @@ fn respond(
             .and_then(|request| serialize(stages.image(request))),
         "stagesPointer" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|request| stages.pointer(request)),
+        "stagesPrototypeElements" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
+            .and_then(|request| serialize(stages.prototype_elements(request))),
         "stagesPrototype" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|request| serialize(stages.playback.control(&stages.board, request))),
         "render" => serde_json::from_value(message["params"].clone())

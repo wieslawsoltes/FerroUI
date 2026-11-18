@@ -126,5 +126,6 @@ function showPrototype(next: PrototypeScene | null): void {
 element('stages-add').onclick = () => vscode.postMessage({ type: 'add' });
 element('stages-save').onclick = () => vscode.postMessage({ type: 'saveManifest' });
 element('stages-load').onclick = () => vscode.postMessage({ type: 'loadManifest' });
+element('stages-edit-prototype').onclick = () => vscode.postMessage({ type: 'editPrototype' });
 element('stages-prototype').onclick = () => vscode.postMessage({ type: 'prototype' });
 vscode.postMessage({ type: 'ready' });

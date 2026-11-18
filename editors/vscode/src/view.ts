@@ -239,7 +239,7 @@ export function stagesHtml(webview: vscode.Webview, root: vscode.Uri): string {
     return page(webview, root, 'stages', 'FerroUI Stages', `
 <header class="stage-toolbar">
     <button id="stages-add">Add Stage</button><button id="stages-save">Save Stage Set</button><button id="stages-load">Open Stage Set</button>
-    <button id="stages-prototype">Play Prototype</button>
+    <button id="stages-edit-prototype">Edit Prototype</button><button id="stages-prototype">Play Prototype</button>
 </header>
 <p id="stages-status" role="status">Rendering stages…</p>
 <div id="prototype-actions" class="stage-toolbar" aria-label="Prototype controls" hidden></div>

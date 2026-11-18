@@ -4,7 +4,7 @@ import type * as vscode from 'vscode';
 import type { Asset, DropHint, EditResult, Inspection, InspectionTarget, Operation, Placement, ResourceRow, Snapshot, Source, StudioPresentation, Viewport } from './protocol';
 import type { RsxLanguageDocument } from './rsxLanguageTypes';
 import type { HostedFrame, HostedInput, HostedSource } from './hostedProtocol';
-import type { PrototypeCommand, PrototypeScene, StageChange, StageImage, StageManifest, StageModel, StagePick, StagePointer, StageTarget } from './stagesProtocol';
+import type { NativeStageChange, PrototypeCommand, PrototypeHotspot, PrototypeScene, StageImage, StageManifest, StageModel, StagePick, StagePointer, StageTarget } from './stagesProtocol';
 import { commandFor } from './tools';
 
 export class NativePreview implements vscode.Disposable {
@@ -13,7 +13,7 @@ export class NativePreview implements vscode.Disposable {
     private stopped = false;
     private failure?: Error;
     assets: readonly Asset[] = [];
-    capabilities: { isolatedDesign?: boolean; appHostedDesign?: boolean; rsxLanguage?: boolean; stages?: boolean } = {};
+    capabilities: { isolatedDesign?: boolean; appHostedDesign?: boolean; rsxLanguage?: boolean; stages?: boolean; prototypeEditing?: boolean } = {};
 
     private constructor(command: string, channel: vscode.OutputChannel) {
         this.child = spawn(command, [], { windowsHide: true });
@@ -64,9 +64,18 @@ export class NativePreview implements vscode.Disposable {
         return this.send('stagesSync', { source, manifest, additional });
     }
 
-    editStages(change: StageChange): Promise<StageModel> { return this.send('stagesEdit', change); }
+    editStages(change: NativeStageChange): Promise<StageModel> {
+        if (!this.capabilities.prototypeEditing && (change.action === 'setPrototype' || (change.action === 'add' && change.source))) {
+            throw new Error('Update the FerroUI preview helper to edit prototypes and add other documents.');
+        }
+        return this.send('stagesEdit', change);
+    }
     stageImage(target: StageTarget): Promise<StageImage> { return this.send('stagesImage', target); }
     stagePointer(input: StagePointer): Promise<StagePick> { return this.send('stagesPointer', input); }
+    stagePrototypeElements(target: StageTarget): Promise<PrototypeHotspot[]> {
+        if (!this.capabilities.prototypeEditing) throw new Error('Update the FerroUI preview helper to edit prototypes.');
+        return this.send('stagesPrototypeElements', target);
+    }
     stagePrototype(epoch: number, command: PrototypeCommand): Promise<PrototypeScene | null> {
         return this.send('stagesPrototype', { epoch, ...command });
     }

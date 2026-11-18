@@ -4,12 +4,11 @@ use super::*;
 use crate::{
     PreviewPrototype, PreviewPrototypeElementChoice, PreviewPrototypeFlowEditor,
     PreviewPrototypeLinkEditor, PreviewPrototypeOverlay, PreviewPrototypePlayerView,
-    PreviewPrototypeSession, PreviewPrototypeView, PreviewPrototypeViewAction, PreviewSourceAnchor,
-    PreviewStageBoard, PreviewStageId,
+    PreviewPrototypeSession, PreviewPrototypeView, PreviewPrototypeViewAction, PreviewStageBoard,
+    PreviewStageId,
 };
 use ferroui_base::Rect;
 use ferroui_controls::Flyout;
-use ferroui_inspect::TreeKind;
 use serde::Serialize;
 use std::collections::BTreeMap;
 use std::hash::{Hash, Hasher};
@@ -167,56 +166,11 @@ impl DesignerWorkspace {
     /// Authored, unambiguous source choices from accepted native stage trees.
     /// The returned anchors contain no runtime inspector or session-local node IDs.
     pub fn preview_prototype_elements(&self) -> Vec<PreviewPrototypeElementChoice> {
-        let sources = self.preview_stage_sources();
-        let mut choices = Vec::new();
-        for stage in self.preview_stages() {
-            if !self.preview_stage_source_is_current(stage.id) {
-                continue;
-            }
-            let Some(source) = sources
-                .iter()
-                .find(|source| source.uri == stage.configuration.source_uri)
-            else {
-                continue;
-            };
-            let Ok(rows) = self.preview_stage_runtime_tree(stage.id, TreeKind::Visual) else {
-                continue;
-            };
-            let mut seen = BTreeSet::new();
-            for id in rows.into_iter().filter_map(|row| row.source_id) {
-                if !seen.insert(id) {
-                    continue;
-                }
-                let Some(node) = source.document.ast().node(id) else {
-                    continue;
-                };
-                let Ok(anchor) = PreviewSourceAnchor::capture(&source.document, id) else {
-                    continue;
-                };
-                let label = match node.xaml_name() {
-                    Some(name) => format!("{} · {name}", node.local_name()),
-                    None => format!(
-                        "{} · source line {}",
-                        node.local_name(),
-                        source.document.source()
-                            [..node.span.start.min(source.document.source().len())]
-                            .bytes()
-                            .filter(|byte| *byte == b'\n')
-                            .count()
-                            + 1
-                    ),
-                };
-                choices.push(PreviewPrototypeElementChoice {
-                    stage: stage.id,
-                    label,
-                    anchor,
-                });
-                if choices.len() >= 4096 {
-                    return choices;
-                }
-            }
-        }
-        choices
+        let board = self.preview_stages.board.borrow();
+        board.stages().into_iter()
+            .filter(|stage| self.preview_stage_source_is_current(stage.id))
+            .flat_map(|stage| board.prototype_elements(stage.id).unwrap_or_default())
+            .take(4096).collect()
     }
 
     pub fn set_preview_prototype_visible(self: &Rc<Self>, visible: bool) -> Result<(), String> {

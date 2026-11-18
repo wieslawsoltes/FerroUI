@@ -145,21 +145,33 @@ export async function verifyStudioPresentations(preview: NativePreview, uri: str
     assert.notEqual(restored.stages[0].id, target.id);
     assert.equal(restored.stages[0].configuration.auto_update, false);
     const second = { ...source, uri: source.uri.replace(/[^/]+$/, 'PrototypeSecond.xaml'), source: source.source.replace('One', 'Second screen') };
-    const manifest = { ...restored.manifest, version: 2, stages: restored.manifest.stages.map((stage, index) => ({
-        ...stage, auto_update: true, source_uri: index === 0 ? uri : second.uri,
-    })), prototype: {
+    const desktop = restored.stages[0];
+    const resumed = await preview.editStages({ action: 'update', id: desktop.id, epoch: restored.epoch,
+        configuration: { ...desktop.configuration, auto_update: true } });
+    const screens = await preview.editStages({ action: 'add', epoch: resumed.epoch, name: 'Second screen', width: 640, height: 420, dark: false, source: second });
+    assert.equal(screens.stages[2].configuration.source_uri, second.uri);
+    const hotspots = await preview.stagePrototypeElements(screens.stages[0]);
+    const trigger = hotspots.find(target => target.label === 'Button · A');
+    assert.ok(trigger);
+    const graph = {
         flows: [{ name: 'Settings flow', start: 0 }],
-        links: [{ name: 'Continue', source: 0, trigger: { path: [{ namespace: 'https://github.com/ferroui', type_name: 'StackPanel', name: null, key: null },
-            { namespace: 'https://github.com/ferroui', type_name: 'Button', name: 'A', key: null }] }, action: { kind: 'navigate', stage: 1 } }],
-    } };
-    const flow = await preview.syncStages(source, manifest, [second]);
+        links: [{ name: 'Continue', source: 0, trigger: trigger.anchor, action: { kind: 'navigate' as const, stage: 2 } }],
+    };
+    await assert.rejects(preview.editStages({ action: 'setPrototype', epoch: screens.epoch, graph: { ...graph, flows: [{ name: 'Invalid', start: 100 }] } }),
+        /stage index is outside/i);
+    const flow = await preview.editStages({ action: 'setPrototype', epoch: screens.epoch, graph });
+    assert.deepEqual(flow.manifest.prototype, graph);
     const start = await preview.stagePrototype(flow.epoch, { action: 'start', flow: 'Settings flow' });
     assert.equal(start?.screen, flow.stages[0].id);
-    await preview.stageImage(flow.stages[0]);
+    const unchanged = await preview.syncStages(source, undefined, [second]);
+    assert.equal(unchanged.epoch, flow.epoch, 'Syncing an unchanged buffer keeps the native stage and prototype running');
+    assert.equal(unchanged.prototype?.screen, start?.screen);
     const destination = await preview.stagePrototype(flow.epoch, { action: 'activate', link: 0 });
-    assert.equal(destination?.screen, flow.stages[1].id);
+    assert.equal(destination?.screen, flow.stages[2].id);
     assert.equal((await preview.stagePrototype(flow.epoch, { action: 'back' }))?.screen, flow.stages[0].id);
-    console.log('Studio layer presentations, frame retirement, native Stages images, pause and stage-set restore passed');
+    const reopened = await preview.syncStages(source, flow.manifest, [second]);
+    assert.deepEqual(reopened.manifest.prototype, graph);
+    console.log('Studio layers, retained stage images, pause and restore, and a source-anchored multi-document prototype passed');
 }
 
 function apply(source: string, edits: TextEdit[]): string {

@@ -7,8 +7,9 @@ use base64::{Engine, engine::general_purpose::STANDARD};
 use ferroui_base::{Point, Ref, threading::Dispatcher};
 use ferroui_controls::{Control, SizeToContent, Window, WindowDecorations};
 use ferroui_designer::{
-    PreviewEnvironment, PreviewHostOptions, PreviewStageBoard, PreviewStageConfiguration,
-    PreviewStageId, PreviewStageInfo, PreviewStageManifest, PreviewStageMode, PreviewStageSource,
+    PreviewEnvironment, PreviewHostOptions, PreviewPrototypeElementChoice,
+    PreviewPrototypeManifest, PreviewStageBoard, PreviewStageConfiguration, PreviewStageId,
+    PreviewStageInfo, PreviewStageManifest, PreviewStageMode, PreviewStageSource,
     PreviewStageStatus, PreviewTheme, capture_preview_stage_png,
 };
 use ferroui_designer_language::{LineIndex, Range};
@@ -21,9 +22,28 @@ use std::{collections::BTreeMap, rc::Rc};
 pub(crate) struct Stages {
     pub(crate) board: PreviewStageBoard,
     windows: BTreeMap<PreviewStageId, StageWindow>,
-    sources: BTreeMap<String, Source>,
+    sources: BTreeMap<String, StageSource>,
     active: Option<String>,
     pub(crate) playback: Playback,
+}
+
+struct StageSource {
+    authored: Source,
+    preview: PreviewStageSource,
+}
+
+impl StageSource {
+    fn parse(authored: Source, existing: Option<&Self>) -> Result<Self, String> {
+        let preview = match existing.filter(|source| source.authored == authored) {
+            Some(source) => source.preview.clone(),
+            None => PreviewStageSource {
+                uri: authored.uri.clone(),
+                document: DesignDocument::parse(&authored)?.xaml,
+                pending: false,
+            },
+        };
+        Ok(Self { authored, preview })
+    }
 }
 
 #[derive(Deserialize)]
@@ -49,6 +69,7 @@ enum Action {
         width: f64,
         height: f64,
         dark: bool,
+        source: Option<Source>,
     },
     Remove {
         id: PreviewStageId,
@@ -59,6 +80,9 @@ enum Action {
     },
     Refresh {
         id: PreviewStageId,
+    },
+    SetPrototype {
+        graph: PreviewPrototypeManifest,
     },
 }
 
@@ -91,22 +115,26 @@ impl Stages {
             return Err("Open at most 16 preview documents".into());
         }
         let mut sources = BTreeMap::new();
-        let mut documents = Vec::new();
         for source in std::iter::once(request.source).chain(request.additional) {
-            let parsed = DesignDocument::parse(&source)?;
-            documents.push(PreviewStageSource {
-                uri: source.uri.clone(),
-                document: parsed.xaml,
-                pending: false,
-            });
-            sources.insert(source.uri.clone(), source);
+            let key = source.uri.clone();
+            if sources.contains_key(&key) {
+                return Err("Duplicate preview source URI".into());
+            }
+            sources.insert(
+                key.clone(),
+                StageSource::parse(source, self.sources.get(&key))?,
+            );
         }
         let epoch = self.board.epoch();
-        self.board
-            .sync_sources(&uri, documents, PreviewHostOptions::default(), 0)?;
-        if epoch != self.board.epoch() {
-            self.playback.stop();
-        }
+        self.board.sync_sources(
+            &uri,
+            sources
+                .values()
+                .map(|source| source.preview.clone())
+                .collect(),
+            PreviewHostOptions::default(),
+            0,
+        )?;
         if let Some(manifest) = request.manifest {
             self.board.restore_manifest(manifest)?;
         } else if self.active.is_none() {
@@ -126,6 +154,9 @@ impl Stages {
                 },
             ))?;
         }
+        if epoch != self.board.epoch() {
+            self.playback.stop();
+        }
         self.active = Some(uri);
         self.sources = sources;
         Ok(self.model())
@@ -135,30 +166,16 @@ impl Stages {
         if request.epoch != self.board.epoch() {
             return Err("Read the current Stages board first".into());
         }
-        let uri = self.active.as_ref().ok_or("Open a Stages board")?;
-        self.playback.stop();
+        self.active.as_ref().ok_or("Open a Stages board")?;
+        let epoch = self.board.epoch();
         match request.action {
             Action::Add {
                 name,
                 width,
                 height,
                 dark,
-            } => {
-                self.board.add(PreviewStageConfiguration::new(
-                    name,
-                    uri,
-                    PreviewEnvironment {
-                        width,
-                        height,
-                        theme: if dark {
-                            PreviewTheme::Dark
-                        } else {
-                            PreviewTheme::Light
-                        },
-                        ..Default::default()
-                    },
-                ))?;
-            }
+                source,
+            } => self.add(name, width, height, dark, source)?,
             Action::Remove { id } => self.board.remove(id)?,
             Action::Update { id, configuration } => {
                 let previous = self.board.stage(id).ok_or("The stage was removed")?;
@@ -168,8 +185,77 @@ impl Stages {
                 self.board.update(id, configuration)?;
             }
             Action::Refresh { id } => self.board.refresh(id)?,
+            Action::SetPrototype { graph } => {
+                let ids = self
+                    .board
+                    .stages()
+                    .into_iter()
+                    .map(|stage| stage.id)
+                    .collect::<Vec<_>>();
+                self.board.set_prototype(graph.restore(&ids)?)?;
+            }
+        }
+        if epoch != self.board.epoch() {
+            self.playback.stop();
         }
         Ok(self.model())
+    }
+
+    fn add(
+        &mut self,
+        name: String,
+        width: f64,
+        height: f64,
+        dark: bool,
+        source: Option<Source>,
+    ) -> Result<(), String> {
+        let active = self.active.as_deref().ok_or("Open a Stages board")?;
+        let uri = source
+            .as_ref()
+            .map(|source| source.uri.as_str())
+            .unwrap_or(active);
+        let configuration = PreviewStageConfiguration::new(
+            name,
+            uri,
+            PreviewEnvironment {
+                width,
+                height,
+                theme: if dark {
+                    PreviewTheme::Dark
+                } else {
+                    PreviewTheme::Light
+                },
+                ..Default::default()
+            },
+        );
+        configuration.validate()?;
+        if self.board.stages().len() >= ferroui_designer::MAX_PREVIEW_STAGES {
+            return Err("A preview board supports at most 16 stages".into());
+        }
+        if let Some(source) = source {
+            let uri = source.uri.clone();
+            let entry = StageSource::parse(source, self.sources.get(&uri))?;
+            let documents = self
+                .sources
+                .iter()
+                .filter(|(key, _)| *key != &uri)
+                .map(|(_, entry)| entry.preview.clone())
+                .chain(std::iter::once(entry.preview.clone()))
+                .collect();
+            self.board
+                .sync_sources(active, documents, PreviewHostOptions::default(), 0)?;
+            self.sources.insert(uri, entry);
+        }
+        self.board.add(configuration)?;
+        Ok(())
+    }
+
+    pub(crate) fn prototype_elements(
+        &mut self,
+        target: StageTarget,
+    ) -> Result<Vec<PreviewPrototypeElementChoice>, String> {
+        self.mounted(&target)?;
+        self.board.prototype_elements(target.id)
     }
 
     pub(crate) fn image(&mut self, request: StageTarget) -> Result<Image, String> {
@@ -218,6 +304,7 @@ impl Stages {
             .sources
             .get(&selection.source_uri)
             .ok_or("Open the stage's source document first")?;
+        let source = &source.authored;
         let parsed = DesignDocument::parse(source)?;
         let range: Range = if let Some((_, node)) = parsed.rsx_node(selection.node) {
             parsed.range(node.name)?

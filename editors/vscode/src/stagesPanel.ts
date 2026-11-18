@@ -5,11 +5,12 @@ import * as path from 'node:path';
 import * as vscode from 'vscode';
 import { NativePreview } from './nativePreview';
 import { errorMessage } from './protocol';
-import type { FromStages, PrototypeCommand, StageChange, StageInfo, StageManifest, StageModel, StagesRequest, ToStages } from './stagesProtocol';
+import type { FromStages, NativeStageChange, PrototypeCommand, StageChange, StageInfo, StageManifest, StageModel, StagesRequest, ToStages } from './stagesProtocol';
+import { editPrototype } from './stagePrototypeEditor';
 import { choose, editText } from './studioContext';
 import { asRange, languageOf, sourceOf } from './textDocument';
 import { stagesHtml, webviewOptions } from './view';
-import { isWorkspaceFile } from './workspacePaths';
+import { isWorkspaceFile, resolveWorkspaceFile } from './workspacePaths';
 
 const stageView = 'ferroui.stages';
 
@@ -120,6 +121,15 @@ class StageSession {
         return image;
     }
 
+    async hotspots(id: number, epoch: number, signal: AbortSignal) {
+        const model = await this.wait(signal);
+        if (!model.stages.some(stage => stage.id === id && stage.epoch === epoch)) throw new Error('Read the current stage ID and epoch.');
+        const choices = await (await this.getClient()).stagePrototypeElements({ id, epoch });
+        signal.throwIfAborted();
+        if (this.model !== model || this.modelVersion !== this.document.version || this.timer) throw new Error('The stage changed during hotspot discovery.');
+        return choices;
+    }
+
     async applyChange(change: StageChange, signal: AbortSignal): Promise<StageModel> {
         const before = await this.wait(signal);
         if (before.epoch !== change.epoch || this.busy) throw new Error('Read the current Stages board first.');
@@ -127,14 +137,33 @@ class StageSession {
         this.busy = true;
         try {
             const client = await this.getClient();
+            const request = await this.nativeChange(change);
             signal.throwIfAborted();
-            const model = await client.editStages(change);
+            if (generation !== this.generation || this.disposed) throw new Error('The stage set changed. Repeat the change on its current board.');
+            const model = await client.editStages(request);
+            if (generation !== this.generation && !this.manifest) this.manifest = model.manifest;
             await this.publish(model, client, generation);
             return model;
         } finally {
             this.busy = false;
             if (generation !== this.generation) this.schedule();
         }
+    }
+
+    private async nativeChange(change: StageChange): Promise<NativeStageChange> {
+        if (change.action !== 'add') return change;
+        const { action, epoch, name, width, height, dark, sourcePath } = change;
+        let source;
+        if (sourcePath !== undefined) {
+            if (typeof sourcePath !== 'string') throw new Error('Choose a source file inside the workspace.');
+            const document = await vscode.workspace.openTextDocument(await resolveWorkspaceFile(sourcePath));
+            const language = languageOf(document);
+            if (!language) throw new Error('Choose a FerroUI XAML or Rust file.');
+            const caret = vscode.window.visibleTextEditors.find(editor => editor.document === document)?.selection.active
+                ?? new vscode.Position(0, 0);
+            source = sourceOf(document, language, caret);
+        }
+        return { action, epoch, name, width, height, dark, source };
     }
 
     async controlPrototype(epoch: number, command: PrototypeCommand, signal: AbortSignal) {
@@ -248,10 +277,16 @@ class StageSession {
                 return;
             }
             const change = message.type === 'add' ? await this.add(model) : message.type === 'edit'
-                ? await this.change(client, model, message) : undefined;
+                ? await this.change(client, model, message) : message.type === 'editPrototype'
+                    ? await this.editPrototype(model) : undefined;
             if (!change || generation !== this.generation || model !== this.model) return;
             await this.applyChange(change, AbortSignal.timeout(15_000));
         } catch (error) { this.report(error); }
+    }
+
+    private async editPrototype(model: StageModel): Promise<StageChange | undefined> {
+        const graph = await editPrototype(model, stage => this.hotspots(stage.id, stage.epoch, AbortSignal.timeout(15_000)));
+        if (graph) return { action: 'setPrototype', graph, epoch: model.epoch };
     }
 
     private async stageSources(manifest: StageManifest | undefined, active: string) {
@@ -269,16 +304,24 @@ class StageSession {
 
     private async chooseFlow(model: StageModel) {
         const flows = model.manifest.prototype?.flows ?? [];
-        if (!flows.length) throw new Error('Open a Studio stage set with a prototype flow.');
+        if (!flows.length) throw new Error('Add a flow with Edit Prototype first.');
         const flow = await choose('Prototype flow', flows.map(flow => ({ label: flow.name, description: model.stages[flow.start]?.configuration.name })));
         return flow ? { action: 'start' as const, flow: flow.label } : undefined;
     }
 
     private async add(model: StageModel): Promise<StageChange | undefined> {
+        const source = await choose('Stage source', [{ label: 'Current design', other: false }, { label: 'Another workspace file…', other: true }]);
+        if (!source) return;
+        let sourcePath: string | undefined;
+        if (source.other) {
+            const [uri] = await vscode.window.showOpenDialog({ canSelectMany: false, filters: { 'FerroUI source': ['xaml', 'rs'] } }) ?? [];
+            if (!uri) return;
+            sourcePath = uri.fsPath;
+        }
         const name = await editText('Stage name', 'Comparison');
         if (!name) return;
         const bounds = await dimensions(800, 520);
-        if (bounds) return { action: 'add', epoch: model.epoch, name, ...bounds, dark: false };
+        if (bounds) return { action: 'add', epoch: model.epoch, name, ...bounds, dark: false, sourcePath };
     }
 
     private async change(client: NativePreview, model: StageModel, message: Extract<FromStages, { type: 'edit' }>): Promise<StageChange | undefined> {

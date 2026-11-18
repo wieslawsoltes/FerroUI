@@ -1,4 +1,4 @@
-import type { Range, Snapshot } from './protocol';
+import type { Range, Snapshot, Source } from './protocol';
 
 export type StageImage = NonNullable<Snapshot['image']>;
 export interface StageConfiguration {
@@ -25,13 +25,21 @@ export interface StageManifest {
     version: number;
     stages: StageConfiguration[];
     active: number | null;
-    prototype?: { flows: Array<{ name: string; start: number }>; links: Array<{ name: string; source: number; trigger: unknown; action: { kind: string; stage?: number } }> };
+    prototype?: PrototypeGraph;
 }
+export type OverlayOptions = { placement: { kind: string; x?: number; y?: number }; dim_background: boolean; dismiss_on_outside: boolean };
+export type PrototypeAction = { kind: 'navigate'; stage: number } | { kind: 'back' | 'close_overlay' }
+    | { kind: 'open_overlay' | 'swap_overlay'; stage: number; options: OverlayOptions };
+export interface PrototypeGraph {
+    flows: Array<{ name: string; start: number }>;
+    links: Array<{ name: string; source: number; trigger: unknown; action: PrototypeAction }>;
+}
+export interface PrototypeHotspot { stage: number; label: string; anchor: unknown }
 export interface PrototypeScene {
     flow: string;
     screen: number;
     current: number;
-    overlays: Array<{ stage: number; options: { placement: { kind: string; x?: number; y?: number }; dim_background: boolean; dismiss_on_outside: boolean } }>;
+    overlays: Array<{ stage: number; options: OverlayOptions }>;
     can_go_back: boolean;
 }
 export type PrototypeCommand = { action: 'start'; flow: string } | { action: 'activate'; link: number }
@@ -40,13 +48,16 @@ export interface StageModel { epoch: number; manifest: StageManifest; stages: St
 export interface StageTarget { id: number; epoch: number }
 export interface StagePointer extends StageTarget { x: number; y: number }
 export interface StagePick { range?: Range; uri?: string; interacted?: boolean; prototype?: PrototypeScene }
-export type StageChange = (
-    | { action: 'add'; name: string; width: number; height: number; dark: boolean }
-    | { action: 'remove' | 'refresh'; id: number }
-    | { action: 'update'; id: number; configuration: StageConfiguration }) & { epoch: number };
+interface AddStage { action: 'add'; name: string; width: number; height: number; dark: boolean; epoch: number }
+type ExistingStageChange = (
+    { action: 'remove' | 'refresh'; id: number }
+    | { action: 'update'; id: number; configuration: StageConfiguration }
+    | { action: 'setPrototype'; graph: PrototypeGraph }) & { epoch: number };
+export type StageChange = ExistingStageChange | (AddStage & { sourcePath?: string });
+export type NativeStageChange = ExistingStageChange | (AddStage & { source?: Source });
 export type FromStages = { type: 'ready' | 'add' | 'saveManifest' | 'loadManifest' }
     | ({ type: 'pointer' } & StagePointer) | { type: 'edit'; epoch: number; id: number; field: 'name' | 'environment' | 'mode' | 'layout' | 'pause' | 'refresh' | 'remove' | 'export' };
-export type StagesRequest = FromStages | { type: 'prototype'; command?: PrototypeCommand };
+export type StagesRequest = FromStages | { type: 'prototype'; command?: PrototypeCommand } | { type: 'editPrototype' };
 export type ToStages = { type: 'model'; model: StageModel; uri: string }
     | ({ type: 'image'; image: StageImage } & StageTarget) | { type: 'status'; message: string }
     | { type: 'prototype'; scene: PrototypeScene | null };

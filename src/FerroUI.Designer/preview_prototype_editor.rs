@@ -22,7 +22,7 @@ use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 /// The workspace supplies only eligible authored elements from its accepted sources.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, serde::Serialize)]
 pub struct PreviewPrototypeElementChoice {
     pub stage: PreviewStageId,
     pub label: String,

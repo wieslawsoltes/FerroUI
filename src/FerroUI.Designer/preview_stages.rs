@@ -22,6 +22,8 @@ use std::sync::Arc;
 
 #[path = "preview_stage_layout.rs"]
 mod layout;
+#[path = "preview_stage_prototype_elements.rs"]
+mod prototype_elements;
 use layout::StageLayoutHost;
 
 pub type PreviewStageId = u64;
