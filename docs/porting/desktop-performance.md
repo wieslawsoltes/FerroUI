@@ -660,7 +660,11 @@ What it measures:
   `FERROUI_HEAP_SITES=build|show|first|all` beside the feature it keeps, for every block of that
   phase, the frames of the call that allocated it, and prints the blocks still allocated at the
   first frame by those frames; `python3 scripts/perf/heap-sites.py <output>` names them and adds
-  them up by the function that owns them. The gate runs every test of the frame benchmarks in
+  them up by the function that owns them. With `FERROUI_GATE_CLOSE=1` a start goes on after its
+  first frame: the content is taken out of the window, the two threads run for half a second,
+  and the heap and the resident memory that are left of the scene are printed
+  (`FERROUI_HEAP_SITES=close` keeps the sites of the blocks the close itself allocates and
+  keeps; section 9.98). The gate runs every test of the frame benchmarks in
   a process of its own: a start is the start of a process that
   has built nothing yet, and a scene leaves the heap and the caches of the process in a state
   that moves what is measured after it. The `text` scene builds in 3.65 ms in a process of the
@@ -7793,4 +7797,91 @@ nothing in these scenes, because nothing is after a change. The case of an equal
 not written: no frame has one. What would have one is an element replaced by another at its
 place among many siblings that share a holder (a tile of a wall given another control); a scene
 of that kind is the measurement to make first if it is taken up again.
+
+### 9.98 What a closed screen leaves: idle text layouts and the queues of its passes
+
+Experiment #761, part (b). Whether memory comes back after a burst was not measured: the
+starts (section 9.40) end at the first frame. A start can now go on (`FERROUI_GATE_CLOSE=1`,
+section 8.1): the content is taken out of the window, the two threads run for half a second,
+and the heap that is left of the scene is printed, with the allocation sites of what was
+allocated before and during the close and is still there.
+
+**Counted** on main. `startup/tiles` (58,696 tiles, 352,187 elements) has 1,600 MB allocated at
+its first frame; after the close 350.0 MB in 1.61 million blocks were left. `startup/controls`
+(1,600 templated controls) left 38.4 MB of 211 MB.
+
+| What kept it, `startup/tiles` after the close | MB |
+| --- | ---: |
+| Text layouts of the 59,696 text blocks, in the cache of the font manager, with their runs and glyphs | 198 |
+| The layout queues: the entries of a loop and the queue (`LayoutQueue`) | 65 |
+| Emptied buffers of the compositor, the renderer and the render thread, up to 4 MB each (section 9.40) | about 64 |
+| The frame buffers of the surface | 16 |
+| The queue of the loaded controls (a hash table kept at 6.5 MB) | 6 |
+
+**The text layouts.** The cache of plain text layouts (section 9.29) keeps the layouts
+something holds and, of the ones nothing holds, the 4,096 used last. It looked for idle
+layouts when layouts were added. A screen that is closed makes every layout of its texts idle
+and adds none, so they stayed until other text was laid out. A holder that lets a shared layout
+go says so already (`TextLayout::dispose`, which a text block calls when it leaves the tree
+and before it asks for another layout). The cache now counts, on the thread, how many of its
+layouts may be idle: a holder that lets one go adds one, a request that finds an idle layout
+takes one off, and a look sets the number that is. When 4,096 more than the cache keeps idle
+may be idle, and at least a quarter of the layouts kept more, the cache looks for idle layouts
+as an addition does. A look goes over every kept layout, so it costs each holder that left at
+most four layouts looked at. The idle layouts are then at most the 4,096 and as many more.
+
+The first version counted the holders that left and nothing else, and looked at every 4,096 of
+them. A text block lets its layout go between its measure and its arrangement and gets the same
+one back, so the show of the tiles looked through a cache of up to 59,696 held layouts ten
+times and found nothing: 31 ms of a show of 485 ms (sampled), which the gate refused
+(`startup/tiles show_ms` +10.3 %, and the shows of five frame scenes by 6 to 12 %). With the
+count of the layouts that may be idle the show looks for nothing: five starts of each side in
+turn gave a show of 485 to 518 ms for main and 489 to 515 ms for the change.
+
+**The queues.** `LayoutQueue` kept the entries of its largest loop (a list and a hash table of
+every element of a first layout, and again of the layout that follows a removal) and its
+queue; the renderer kept the list of the visuals that left the tree. They give back what is
+beyond what an emptied buffer keeps, as the other queues of a first frame do.
+
+**Measured.**
+
+| After the close | Main | This change |
+| --- | ---: | ---: |
+| `startup/tiles`: heap left of the scene | 350.0 MB in 1,612,591 blocks | 135.2 MB in 164,608 blocks |
+| `startup/controls`: heap left of the scene | 38.4 MB | 38.4 MB |
+
+The gate (counters, frames and the gauntlet; 130 metrics, two rounds) has no line of a show
+or a start over its tolerance: `startup/tiles` shows in 494 ms where main takes 505 ms and
+starts in 1,636 ms against 1,647 ms. Two lines of a run were over in time (`frames/cards` on
+the UI thread with the instructions of main, and the first frame of `startup/controls`);
+seven starts of each side in turn gave a first frame of 39.7 ms for main and 39.6 ms for the
+change.
+
+**Tried and left out: a smaller buffer kept.** With 1 MB kept for an emptied buffer instead of
+4 MB (and a hash table shrunk to what fits in it: a table shrunk to a number of items has up to
+sixteen sevenths of it in places, which is how the limit of 4 MB keeps tables of 6.5 MB) the
+tiles left 87.8 MB and the controls 33.5 MB. The gate refused it (130 metrics, two rounds,
+against the change above): eight lines over, all of them the show and the start of scenes with
+many elements (`startup/tiles` `show_ms` +12.2 % and `startup_ms` +7.0 %, `frames/reorder`
+`show_ms` +9.9 %, `frames/cards` `show_ms` +8.6 %, the starts of `grow` and `pile` +5 to 6 %),
+none a steady frame. A show runs several passes, and a buffer that is shrunk at the end of one
+is grown again by the next. The limit stays at 4 MB.
+
+**What is left, and what it would take.** About 95 MB of the 135 MB are emptied buffers at
+their limit, about 24 MB the idle layouts the cache keeps by design, 16 MB the frame buffers.
+The buffers could go lower without the cost above if they were released once, when the burst
+is over, and not at the end of each pass: one job at the idle priority of the dispatcher,
+posted when a buffer is emptied above its limit. Every buffer would have to be known to that
+job, which is a change of its own. Resident memory does not follow the heap: it was 1,898 MB at
+the first frame and 1,855 MB after the close with 1,465 MB freed, because the allocator keeps
+the pages it was given.
+
+**Looked at and not changed** (section 8.4, rule 2). The other holders of text layouts
+(`TextPresenter`) call `TextLayout::dispose` already. The reactive runtime of `ferroui-view`
+keeps its table of nodes at the size of the largest screen (216 bytes a node); its slots are
+used again, and giving them back needs the generations kept apart from the nodes.
+
+**Tests.** `text_layout_cache_tests.rs`:
+`the_layouts_of_holders_that_leave_are_let_go_without_an_addition` (12,288 held layouts whose
+holders dispose them: at most 8,192 are kept, all idle, the ones let go last).
 

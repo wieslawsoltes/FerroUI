@@ -706,7 +706,8 @@ fn measure_start(scene: &Scene) {
             println!("  the close: {}", heap_closed.since(&heap_first).report());
             println!("  left of the scene after the close: {}", heap_closed.since(&before).report());
             println!(
-                "  resident memory: {:.0} MB before the build, {memory_first:.0} MB at the first frame, {memory_closed:.0} MB after the close",
+                "  resident memory: {:.0} MB before the build, {memory_first:.0} MB at the first frame, \
+                 {memory_closed:.0} MB after the close",
                 gate.memory[0]
             );
         }

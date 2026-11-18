@@ -8,7 +8,9 @@ use crate::media::text_formatting::testing::{
     line_text, paragraph_properties, paragraph_properties_with, run_properties, SingleBufferTextSource,
     TextTestScope,
 };
-use crate::media::text_formatting::text_layout_cache::{IDLE_CAPACITY, IDLE_TEXT_CAPACITY, LEFT_INTERVAL, MAX_TEXT_LENGTH};
+use crate::media::text_formatting::text_layout_cache::{
+    IDLE_CAPACITY, IDLE_TEXT_CAPACITY, LEFT_INTERVAL, MAX_TEXT_LENGTH,
+};
 use crate::media::text_formatting::{
     GenericTextRunProperties, ITextSource, TextLayout, TextParagraphProperties, TextRunProperties,
 };
@@ -279,7 +281,8 @@ fn the_layouts_of_holders_that_leave_are_let_go_without_an_addition() {
 
     let properties = plain(12.0);
     let count = 3 * IDLE_CAPACITY;
-    let held: Vec<Rc<TextLayout>> = (0..count).map(|index| layout(&index.to_string(), &properties, f64::INFINITY)).collect();
+    let held: Vec<Rc<TextLayout>> =
+        (0..count).map(|index| layout(&index.to_string(), &properties, f64::INFINITY)).collect();
     assert_eq!((count, 0), (kept(), FontManager::current().text_layouts().idle_len()));
 
     // What a text block does with the layout it lets go.
