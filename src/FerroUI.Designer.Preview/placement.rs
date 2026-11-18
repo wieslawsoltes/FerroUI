@@ -17,7 +17,7 @@ impl Renderer {
 }
 
 impl Stage {
-    pub(crate) fn plan(&self, placement: &Placement) -> Result<(Vec<Edit>, DropHint), String> {
+    pub(crate) fn plan(&self, placement: &Placement, recording: bool) -> Result<(Vec<Edit>, DropHint), String> {
         let image;
         let origin = match &placement.origin {
             DragOrigin::Asset { control } => {
@@ -64,7 +64,17 @@ impl Stage {
             }
         };
         let session = self.session.borrow();
-        let plan = session.plan_placement(origin, target)?;
+        let as_layout_point = |point: Point| ferroui_designer_tools::Point::new(point.x, point.y);
+        let plan = match (recording, origin, target) {
+            (true, PlacementOrigin::Node { node, grab }, PlacementTarget::Canvas(point)) => {
+                session.plan_recorded_move(&[node], node, grab.map(as_layout_point), as_layout_point(point))?
+            }
+            (true, PlacementOrigin::Nodes { nodes, anchor, grab }, PlacementTarget::Canvas(point)) => {
+                session.plan_recorded_move(nodes, anchor, grab.map(as_layout_point), as_layout_point(point))?
+            }
+            (true, _, _) => return Err("Choose a canvas move to record".into()),
+            (false, origin, target) => session.plan_placement(origin, target)?,
+        };
         if let Some(policy) = &self.placement_policy {
             policy.validate(&placement.origin, session.document(), &plan.edits)?;
         }

@@ -24,6 +24,11 @@ pub enum Easing {
     Named(String),
 }
 impl Easing {
+    /// Samples the curve shown by animation editors at evenly spaced progress values.
+    pub fn preview_samples(&self) -> Result<Vec<f64>> {
+        (0..=32).map(|index| self.sample(f64::from(index) / 32.0)).collect()
+    }
+
     pub fn validate(&self) -> Result<()> {
         match self {
             Self::Linear => Ok(()),

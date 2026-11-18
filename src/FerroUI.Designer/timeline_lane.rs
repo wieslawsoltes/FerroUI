@@ -954,12 +954,7 @@ impl EasingPreview {
     /// `None` represents an invalid draft and clears the curve, without touching
     /// the document or silently displaying the previously accepted easing.
     pub fn set_easing(&self, easing: Option<Easing>) {
-        let sampled = easing.as_ref().and_then(|curve| {
-            (0..=32)
-                .map(|index| curve.sample(f64::from(index) / 32.0))
-                .collect::<Result<Vec<_>, _>>()
-                .ok()
-        });
+        let sampled = easing.as_ref().and_then(|curve| curve.preview_samples().ok());
         let valid = sampled.is_some();
         *self.samples.borrow_mut() = sampled.unwrap_or_default();
         let description = easing.as_ref().filter(|_| valid).map_or_else(

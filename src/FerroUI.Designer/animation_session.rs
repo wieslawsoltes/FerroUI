@@ -652,7 +652,12 @@ impl DesignerSession {
             ferroui_inspect::Inspector::property(&visual, property).map_err(|error| error.to_string())?;
         let value = ferroui_inspect::display_value(Some(&visual.get_value_untyped(info)));
         let value = self.animation_value_for_target(target, property, &value)?;
-        self.record_keyframe(target, property, value)
+        self.record_keyframe(target, property, value)?;
+        let mut key = ferroui_designer_animation::KeyframeLocation {
+            target: self.recording_target(target), property: property.into(), time,
+        };
+        key.reconcile_time(self.timeline());
+        self.seek(key.time)
     }
 
     pub fn move_keyframe(
@@ -715,7 +720,7 @@ impl DesignerSession {
         // key/value/curve changes instead of displaying the unanimated base until the next drag.
         self.seek(self.animation.player.time())
     }
-    fn program_edits(&self, id: NodeId, timeline: &Timeline) -> Result<Vec<Edit>, String> {
+    pub(crate) fn program_edits(&self, id: NodeId, timeline: &Timeline) -> Result<Vec<Edit>, String> {
         let program = self
             .animation
             .programs

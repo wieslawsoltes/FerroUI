@@ -16,6 +16,7 @@ pub(super) fn handles(name: &str) -> bool {
         name,
         "designer_programs"
             | "designer_program"
+            | "designer_keyframe_draft"
             | "designer_states"
             | "designer_state"
             | "designer_state_actions"
@@ -42,8 +43,13 @@ pub(super) fn tools() -> Vec<Value> {
         schema
     };
     let property_value = || json!({"anyOf":[s::string(),s::number(),{"type":"boolean"},s::animation_value()]});
+    let keyframe_draft = || json!({"program":s::id(),"target":s::id(),"property":s::string(),"previous":s::time(),
+        "time":s::time(),"value":s::string(),"easing":s::string()});
+    let draft_required = &["program","target","property","time","value","easing"];
     vec![
         s::tool("designer_programs","Read animation programs, source keys, codec diagnostics and typed timelines. include_keyframe_text adds formatted XAML values and easing to the typed keys.",s::object(json!({"include_source":{"type":"boolean"},"include_keyframe_text":{"type":"boolean"}}), &[]),false),
+        s::tool("designer_keyframe_draft", "Validate an animation keyframe's time, typed value and easing against the current program and source codec. Returns the sampled easing preview.",
+            s::object(keyframe_draft(), draft_required), false),
         s::actions("designer_program","Author animation programs and keyframes, edit timing with proportional retiming, set selectors or preview targets, sample several programs together, or play all programs. IDs refer to the current document; every action checks expected_revision.",vec![
             s::action("create",json!({"name":s::string(),"owner":s::id(),"selector":s::string(),"duration":s::time()}), &["name","owner","selector","duration"],true),
             s::action("select",json!({"program":s::id()}), &["program"],true),
@@ -54,7 +60,7 @@ pub(super) fn tools() -> Vec<Value> {
             s::action("source",json!({"program":s::id(),"source":s::string()}), &["program","source"],true),
             s::action("update",json!({"program":s::id(),"timeline":s::timeline()}), &["program","timeline"],true),
             s::action("update_timing",json!({"program":s::id(),"timing":s::timing_edit()}), &["program","timing"],true),
-            s::action("upsert_keyframe",json!({"program":s::id(),"target":s::id(),"property":s::string(),"previous":s::time(),"time":s::time(),"value":s::string(),"easing":s::string()}), &["program","target","property","time","value","easing"],true),
+            s::action("upsert_keyframe",keyframe_draft(),draft_required,true),
             s::action("record_keyframe",json!({"program":s::id(),"target":s::id(),"property":s::string(),"time":s::time()}), &["program","target","property","time"],true),
             s::action("remove_keyframe",json!({"program":s::id(),"target":s::id(),"property":s::string(),"time":s::time()}), &["program","target","property","time"],true),
             s::action("move_keyframes",json!({"program":s::id(),"keyframes":keys(),"offset":s::number()}), &["program","keyframes","offset"],true),
@@ -110,6 +116,9 @@ pub(super) fn call(
                 json!({"document":state(session),"active":session.active_animation_program(),"programs":programs}),
             );
         }
+        "designer_keyframe_draft" => return session.preview_program_keyframe(
+            node_id(args, "program")?, node_id(args, "target")?, &text(args, "property")?, keyframe_draft(args)?,
+        ),
         "designer_program" => {
             let mut created = None;
             let mut keyframes = None;
@@ -159,10 +168,7 @@ pub(super) fn call(
                 }
                 "upsert_keyframe" => session.edit_program_keyframe(
                     node_id(args, "program")?, node_id(args, "target")?, &text(args, "property")?,
-                    KeyframeEdit::Upsert {
-                        previous: args["previous"].as_f64(), time: number(args, "time")?,
-                        value: &text(args, "value")?, easing: &text(args, "easing")?,
-                    },
+                    keyframe_draft(args)?,
                 )?,
                 "record_keyframe" => {
                     let program = node_id(args, "program")?;
@@ -394,6 +400,7 @@ fn animation_programs(session: &DesignerSession, args: &Value) -> Result<Vec<Val
                 for (key, authored) in authored.keyframes.iter().enumerate() {
                     let model = &mut model["timeline"]["tracks"][track]["keyframes"][key];
                     model["value_text"] = json!(authored.value.to_xaml());
+                    model["value_kind"] = json!(authored.value.kind());
                     model["easing_text"] = json!(authored.easing.to_xaml());
                 }
             }
@@ -405,6 +412,15 @@ fn animation_programs(session: &DesignerSession, args: &Value) -> Result<Vec<Val
         }
         Ok(model)
     }).collect()
+}
+
+fn keyframe_draft(args: &Value) -> Result<KeyframeEdit<'_>, String> {
+    Ok(KeyframeEdit::Upsert {
+        previous: args["previous"].as_f64(),
+        time: number(args, "time")?,
+        value: args["value"].as_str().ok_or("Supply a typed keyframe value")?,
+        easing: args["easing"].as_str().ok_or("Supply a keyframe easing")?,
+    })
 }
 
 fn distinct(nodes: &[u64]) -> Result<(), String> {

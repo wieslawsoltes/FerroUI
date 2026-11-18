@@ -106,7 +106,7 @@ pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>, projects:
                 return Err("The source changed during the drag. Start again with the current preview.".into());
             }
             drop(session);
-            let (edits, hint) = stage.plan(placement)?;
+            let (edits, hint) = stage.plan(placement, false)?;
             let change = candidate.apply(hint.description, edits.clone()).map_err(|error| error.to_string())?;
             if !change.is_empty() {
                 selected = crate::edit_selection::dropped_node(&candidate, &change, &placement.origin);

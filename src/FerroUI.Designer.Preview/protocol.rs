@@ -91,6 +91,8 @@ pub(crate) enum Operation {
 pub(crate) struct PlacementRequest {
     pub(crate) frame: u64,
     pub(crate) placement: Placement,
+    #[serde(default)]
+    pub(crate) recording: bool,
 }
 
 #[derive(Deserialize)]

@@ -152,7 +152,8 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
             .into_iter()
             .collect()
     };
-    let recorded = query.name == "designer_record_property";
+    let recorded = matches!(query.name.as_str(), "designer_record_property" | "designer_record_geometry")
+        || query.name == "designer_program" && arguments["action"] == "record_keyframe";
     let retained_selection = if recorded {
         session.selection().iter().filter_map(|&node| crate::edit_selection::authored_range(
             &design, session.document(), &patches, node)).collect()
@@ -200,6 +201,7 @@ fn source_action(tool: &str, action: Option<&str>) -> bool {
         "designer_component"
         | "designer_property"
         | "designer_record_property"
+        | "designer_record_geometry"
         | "designer_binding_edit"
         | "designer_grid_track_edit"
         | "designer_set_event"

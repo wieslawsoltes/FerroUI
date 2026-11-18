@@ -1,7 +1,8 @@
 use crate::DesignerSession;
-use ferroui_designer_animation::{AnimationValue, Easing, KeyframeGroupEdit, KeyframeLocation};
+use ferroui_designer_animation::{AnimationValue, Easing, KeyframeGroupEdit, KeyframeLocation, Timeline};
 use ferroui_designer_core::NodeId;
 
+#[derive(Clone, Copy)]
 pub(crate) enum KeyframeEdit<'a> {
     Upsert {
         previous: Option<f64>,
@@ -43,12 +44,22 @@ impl DesignerSession {
         property: &str,
         edit: KeyframeEdit<'_>,
     ) -> Result<(), String> {
+        let timeline = self.plan_program_keyframe(program, target, property, edit)?;
+        self.update_animation_program(program, timeline)
+    }
+
+    fn plan_program_keyframe(
+        &self,
+        program: NodeId,
+        target: NodeId,
+        property: &str,
+        edit: KeyframeEdit<'_>,
+    ) -> Result<Timeline, String> {
         let program = self
             .animation_programs()
             .iter()
             .find(|candidate| candidate.id == program)
             .ok_or("Unknown animation program")?;
-        let id = program.id;
         let mut timeline = program
             .timeline
             .clone()
@@ -78,6 +89,9 @@ impl DesignerSession {
                         .map_err(|error| error.to_string())?,
                     None => self.animation_value_for_target(target, property, value)?,
                 };
+                if self.can_record_property(target, property) {
+                    self.preview.prepare_animation_value(target, property, &value)?;
+                }
                 let easing = Easing::parse(easing).map_err(|error| error.to_string())?;
                 if let Some(previous) = previous {
                     timeline
@@ -105,6 +119,23 @@ impl DesignerSession {
                 timeline.tracks.retain(|track| !track.keyframes.is_empty());
             }
         }
-        self.update_animation_program(id, timeline)
+        Ok(timeline)
+    }
+
+    #[cfg(feature = "mcp")]
+    pub(crate) fn preview_program_keyframe(
+        &self,
+        program: NodeId,
+        target: NodeId,
+        property: &str,
+        draft: KeyframeEdit<'_>,
+    ) -> Result<serde_json::Value, String> {
+        let KeyframeEdit::Upsert { time, .. } = draft else { return Err("Supply a keyframe draft".into()); };
+        let timeline = self.plan_program_keyframe(program, target, property, draft)?;
+        self.program_edits(program, &timeline)?;
+        let key = timeline.track(target, property).and_then(|track| track.keyframes.iter().find(|key| key.time == time))
+            .ok_or("The draft did not produce a keyframe")?;
+        let samples = key.easing.preview_samples().map_err(|error| error.to_string())?;
+        Ok(serde_json::json!({"valueKind": key.value.kind(), "samples": samples}))
     }
 }

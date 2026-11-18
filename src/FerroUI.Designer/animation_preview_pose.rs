@@ -116,45 +116,71 @@ impl DesignerSession {
         name: &str,
         value: &str,
     ) -> Result<(), String> {
-        if nodes.is_empty()
-            || value.starts_with('{')
-            || nodes
-                .iter()
-                .any(|&node| !self.can_record_property(node, name))
-        {
-            return Err("Record a literal on one or more animatable preview properties".into());
+        if nodes.is_empty() {
+            return Err("Select one or more animation targets".into());
         }
+        for &node in nodes {
+            self.validate_recorded_value(node, name, value)?;
+        }
+        self.record_at(
+            program,
+            time,
+            nodes.iter().map(|&node| (node, name)),
+            |session| session.set_property(nodes, name, value),
+        )
+    }
+
+    pub(crate) fn validate_recorded_value(
+        &self,
+        node: NodeId,
+        property: &str,
+        value: &str,
+    ) -> Result<(), String> {
+        if value.starts_with('{') || !self.can_record_property(node, property) {
+            return Err(format!(
+                "{property} requires a literal value on an animatable preview property"
+            ));
+        }
+        let animation_value = self.animation_value_for_target(node, property, value)?;
+        self.preview
+            .prepare_animation_value(node, property, &animation_value)?;
+        Ok(())
+    }
+
+    pub(crate) fn record_at<S: AsRef<str>>(
+        &mut self,
+        program: NodeId,
+        time: f64,
+        properties: impl IntoIterator<Item = (NodeId, S)>,
+        apply: impl FnOnce(&mut Self) -> Result<(), String>,
+    ) -> Result<(), String> {
         let active_program = self
             .animation_programs()
             .iter()
             .find(|entry| entry.id == program && entry.timeline.is_some())
             .ok_or("Choose an authored animation program with typed keyframes")?;
-        let records_on_active_program = nodes
-            .iter()
-            .any(|node| active_program.targets.contains(node));
-        for &node in nodes {
-            let animation_value = self.animation_value_for_target(node, name, value)?;
-            self.preview
-                .prepare_animation_value(node, name, &animation_value)?;
-        }
+        let sample = properties.into_iter().find_map(|(node, property)| {
+            active_program
+                .targets
+                .contains(&node)
+                .then(|| property.as_ref().to_owned())
+        });
         self.scrub_animation_program(program, time)?;
         let was_recording = self.recording();
         self.set_recording(true);
-        let result = self.set_property(nodes, name, value);
+        let result = apply(self);
         self.set_recording(was_recording);
         result?;
-        let active = self
-            .active_animation_program()
-            .filter(|_| records_on_active_program);
-        if let Some(target) = self
+        let active = self.active_animation_program();
+        let target = self
             .animation_programs()
             .iter()
             .find(|entry| Some(entry.id) == active)
-            .map(|entry| entry.primary_target())
-        {
+            .map(|entry| entry.primary_target());
+        if let (Some(target), Some(property)) = (target, sample) {
             let mut key = ferroui_designer_animation::KeyframeLocation {
                 target,
-                property: name.into(),
+                property,
                 time,
             };
             key.reconcile_time(self.timeline());

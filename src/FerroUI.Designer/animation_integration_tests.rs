@@ -54,6 +54,51 @@ fn state_group(owner: u64) -> VisualStateGroup {
 }
 
 #[test]
+fn timeline_canvas_gestures_share_recording_and_preserve_base_anchors() {
+    use crate::{DesignGesture, workspace_tools};
+    use ferroui_base::{Point, Rect};
+
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = source().replace(
+        "Height=\"40\" Opacity=\"1\"/>",
+        "Height=\"40\" Opacity=\"1\" Canvas.Left=\"24\" Canvas.Right=\"8\" Canvas.Bottom=\"30\"/>",
+    );
+    let mut session = DesignerSession::new(&source, ContentControl::new()).unwrap();
+    let window = attach_preview(&session);
+    let target = session.document().ast().find_name("A").unwrap();
+    let owner = session.document().ast().root();
+    let clip = session
+        .create_animation_program("Card", owner, "Button#A", 2.0)
+        .unwrap();
+    session.scrub_animation_program(clip, 0.999_318_2).unwrap();
+    session.set_recording(true);
+    let authored = session.document().source().to_owned();
+    let host = session.preview.host.clone().upcast();
+    let before = session.preview.bounds(target, &host).unwrap();
+    let after = Rect::new(before.x, before.y, before.width + 24.0, before.height + 16.0);
+    workspace_tools::commit(&mut session, DesignGesture::Resize { node: target, before, after }).unwrap();
+    assert!(session.timeline().track(target, "Width").is_some(), "{}", session.document().source());
+    window.update_layout();
+    assert_eq!(session.preview.bounds(target, &host), Some(after));
+    assert!(session.timeline().track(target, "Canvas.Left").is_none());
+    assert!(session.document().source().contains("Canvas.Left=\"24\" Canvas.Right=\"8\" Canvas.Bottom=\"30\""));
+    let sized = session.document().source().to_owned();
+    workspace_tools::commit(&mut session, DesignGesture::Move { nodes: vec![target], delta: Point::new(26.0, -12.0) }).unwrap();
+    window.update_layout();
+    assert_eq!(
+        session.preview.bounds(target, &host),
+        Some(Rect::new(after.x + 26.0, after.y - 12.0, after.width, after.height))
+    );
+    session.stop();
+    window.update_layout();
+    assert_eq!(session.preview.bounds(target, &host), Some(before));
+    session.undo().unwrap();
+    assert_eq!(session.document().source(), sized);
+    session.undo().unwrap();
+    assert_eq!(session.document().source(), authored);
+}
+
+#[test]
 fn timeline_pose_resolves_a_unique_program_in_a_rebuilt_preview() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let mut session = DesignerSession::new(source(), ContentControl::new()).unwrap();

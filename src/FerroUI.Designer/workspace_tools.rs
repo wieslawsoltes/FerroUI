@@ -55,6 +55,11 @@ impl DesignerSession {
         plan_moves(self, BTreeMap::from([(node, Point::new(delta.x, delta.y))]))
     }
 
+    pub(crate) fn plan_selection_translation(&self, nodes: &[NodeId], delta: Point) -> Result<Vec<Edit>, String> {
+        delta.validate().map_err(|error| error.to_string())?;
+        plan_moves(self, outermost(self.document(), nodes).into_iter().map(|node| (node, delta)).collect())
+    }
+
     /// Plans a panel-specific edit against the current, measured native preview.
     /// The returned edits share the same coordinate and expression rules as pointer tools.
     pub fn plan_layout_action(&self, action: LayoutAction) -> Result<Vec<Edit>, String> {
@@ -816,23 +821,26 @@ pub(crate) fn commit(session: &mut DesignerSession, gesture: DesignGesture) -> R
                 .into(),
         );
     }
+    let geometry_program = session.active_animation_program().filter(|_| {
+        session.recording()
+            && matches!(
+                &gesture,
+                DesignGesture::Move { .. }
+                    | DesignGesture::Resize { .. }
+                    | DesignGesture::ResizeLocal { .. }
+            )
+    });
     let mut edits = Vec::new();
     match gesture {
         DesignGesture::LayoutEdit { preview } => {
             return session.commit_layout_preview(&preview);
         }
         DesignGesture::Move { nodes, delta } => {
-            edits.extend(plan_moves(
-                session,
-                outermost(session.document(), &nodes)
-                    .into_iter()
-                    .map(|node| (node, Point::new(delta.x, delta.y)))
-                    .collect(),
-            )?);
+            edits.extend(session.plan_selection_translation(&nodes, Point::new(delta.x, delta.y))?);
         }
         DesignGesture::Resize { node, before, after } => {
             let (planned, transformed) = resize_edits(session, node, before, after)?;
-            if transformed {
+            if transformed && geometry_program.is_none() {
                 return session.apply_visual("Resize transformed selection", planned);
             }
             edits.extend(planned);
@@ -995,6 +1003,10 @@ pub(crate) fn commit(session: &mut DesignerSession, gesture: DesignGesture) -> R
         }
     }
     if !edits.is_empty() {
+        if let Some(program) = geometry_program {
+            let edits = session.animation_geometry_edits(edits)?;
+            return session.record_geometry(program, session.time(), "Record canvas geometry", edits);
+        }
         session.apply_visual("Manipulate selection", edits)?;
     }
     Ok(())

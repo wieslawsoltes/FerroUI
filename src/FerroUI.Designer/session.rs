@@ -973,6 +973,7 @@ impl DesignerSession {
                                 .ok()
                             })
                         })
+                        .or_else(|| self.measured_animation_baseline(*node, name))
                         .filter(|base| base.kind() == value.kind())
                         .unwrap_or_else(|| value.clone());
                     candidate
