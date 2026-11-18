@@ -27,9 +27,11 @@
 //! in paints with.
 
 mod frame_textures;
+mod layer_programs;
 
 pub use frame_textures::VelloWebGlTexture;
 use frame_textures::TexturePool;
+use layer_programs::LayerPrograms;
 
 use crate::drawing_context_impl::{CreateInfo, DrawingContextImpl};
 use crate::helpers::pixel_format_helper::scene_size;
@@ -89,6 +91,8 @@ struct WebGlState {
     render_count: u64,
     /// The textures scenes paint with that were written on the context.
     textures: TexturePool,
+    /// The programs of the layers with an effect, compiled when first needed.
+    programs: LayerPrograms,
 }
 
 /// The WebGL2 context of a canvas as the Vello backend draws with it: what
@@ -148,6 +152,7 @@ impl VelloWebGlGpu {
                 images: HashMap::new(),
                 render_count: 0,
                 textures: TexturePool::default(),
+                programs: LayerPrograms::default(),
             })),
         })))
     }
@@ -205,6 +210,7 @@ impl VelloWebGlGpu {
                 self.gl.delete_texture(Some(&image.texture));
             }
             state.textures.dispose(&self.gl);
+            state.programs.dispose(&self.gl);
         }
     }
 
@@ -313,6 +319,34 @@ impl VelloWebGlGpu {
         );
         gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, None);
         Ok(copied)
+    }
+
+    /// Whether a colour matrix layer can be drawn on the context: its program compiled (now, the
+    /// first time).
+    pub(crate) fn prepare_color_matrix(&self) -> bool {
+        match self.state.borrow_mut().as_mut() {
+            Some(state) => state.programs.prepare_color_matrix(&self.gl),
+            None => false,
+        }
+    }
+
+    /// The colour matrix pass on the context: `matrix` applied to the `area` (width, height) of
+    /// the content of a layer in `content` (as [`render_to_texture`](Self::render_to_texture)
+    /// left it), into a texture of the pool. `None` when the program is not there (it did not
+    /// compile: the layer is drawn on the processor).
+    pub(crate) fn color_matrix_texture(
+        &self,
+        content: &Rc<VelloWebGlTexture>,
+        area: (u32, u32),
+        matrix: &ferroui_base::media::ColorMatrix,
+        alpha_mode: ferroui_base::media::ColorMatrixAlphaMode,
+    ) -> Result<Option<Rc<VelloWebGlTexture>>, String> {
+        let mut state = self.state.borrow_mut();
+        let state = state.as_mut().ok_or("the renderer of the canvas has been released")?;
+        let (width, height) = frame_textures::pooled_size(area.0, area.1, self.max_texture_size);
+        let target = state.textures.acquire(&self.gl, width, height)?;
+        let drawn = state.programs.color_matrix_pass(&self.gl, content, &target, area, matrix, alpha_mode);
+        Ok(drawn.then_some(target))
     }
 
     /// Lets go of the textures of the pool that the frames no longer use, beyond a few of each
