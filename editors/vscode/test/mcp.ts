@@ -178,6 +178,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         content(await invoke('designer_rename_rsx_control', rename));
         assert.equal(rustSource.getText(), authoredRust.replace('name: "saveButton"', 'name: "ZapiszŁódź"'));
         assert.ok((await invoke('designer_rename_rsx_control', rename)).isError);
+        await vscode.commands.executeCommand('workbench.action.findInFiles');
         content(await invoke('designer_history', { session: rust.session, expected_version: rustSource.version, action: 'undo' }));
         assert.equal(rustSource.getText(), authoredRust);
         await verifyCanvasInteraction({ invoke, content }, rust.session, rustSource);

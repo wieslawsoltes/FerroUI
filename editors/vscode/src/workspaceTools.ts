@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { realpath } from 'node:fs/promises';
 import * as vscode from 'vscode';
+import { runEditorHistory } from './editorHistory';
 import type { Position, Range, TextEdit } from './protocol';
 import { asPosition, exactRange, wireRange } from './textDocument';
 import type { WorkspaceTool } from './workspaceCatalog';
@@ -121,11 +122,7 @@ export class WorkspaceTools {
         } else if (action === 'save') {
             if (!await document.save()) throw new Error('VS Code could not save the buffer.');
         } else if (action === 'undo' || action === 'redo') {
-            await vscode.window.showTextDocument(document);
-            signal.throwIfAborted();
-            requireRevision(document, request.expected_revision);
-            if (vscode.window.activeTextEditor?.document !== document) throw new Error('The authored editor lost focus.');
-            await vscode.commands.executeCommand(action);
+            await runEditorHistory(document, action, () => requireRevision(document, request.expected_revision), signal);
         } else if (action === 'format') {
             const config = vscode.workspace.getConfiguration('editor', document.uri);
             const options = { tabSize: config.get('tabSize', 4), insertSpaces: config.get('insertSpaces', true) };

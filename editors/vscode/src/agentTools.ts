@@ -4,6 +4,7 @@ import { validate } from './agentSchema';
 import type { CargoSelection } from './cargoTarget';
 import type { DesignerPanel } from './designerPanel';
 import type { DesignerWorkbench } from './designerWorkbench';
+import { runEditorHistory } from './editorHistory';
 import type { HotReload } from './hotReload';
 import type { ProjectFile, ProjectInventory } from './projectInventory';
 import type { ProjectScaffold } from './projectScaffold';
@@ -275,11 +276,8 @@ export class AgentTools {
             }
             case 'designer_history':
                 assertVersion(document, args.expected_version);
-                await vscode.window.showTextDocument(document, { preserveFocus: false });
-                signal.throwIfAborted();
-                assertVersion(document, args.expected_version);
-                if (vscode.window.activeTextEditor?.document !== document) throw new Error('The authored editor lost focus.');
-                await vscode.commands.executeCommand(args.action);
+                if (args.action !== 'undo' && args.action !== 'redo') throw new Error('Choose undo or redo.');
+                await runEditorHistory(document, args.action, () => assertVersion(document, args.expected_version), signal);
                 break;
             case 'designer_save':
                 assertVersion(document, args.expected_version);
