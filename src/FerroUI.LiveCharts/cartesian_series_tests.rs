@@ -814,6 +814,62 @@ fn source_heat_should_place_data_label() {
     });
 }
 
+// HeatSeries<TModel, VariableSVGPathGeometry> with GeometrySvg: each cell is the SVG path fitted
+// to the inset cell (`Svg.Draw`), here a square that covers it; path data the parser rejects is
+// an error.
+#[test]
+fn heat_cells_draw_the_svg_geometry_of_the_series() {
+    let mut series = Series::new(SeriesKind::Heat);
+    series.values = (0..4)
+        .map(|i| Coordinate::weighted((i % 2) as f64, (i / 2) as f64, i as f64))
+        .collect();
+    let measure = |svg: &str| {
+        let mut options = CartesianSeriesOptions::default();
+        options.geometry_svg = Some(svg.to_owned());
+        CartesianChartEngine::measure_with_series_options(
+            Size::new(400.0, 400.0),
+            std::slice::from_ref(&series),
+            &[Axis::default()],
+            &[Axis::default()],
+            &CartesianOptions::default(),
+            |text, size| Size::new(text.chars().count() as f64 * size * 0.6, size * 1.2),
+            &[options],
+        )
+    };
+    let scene = measure("M0,0 L10,0 L10,10 L0,10 Z").unwrap().scene;
+    let cells: Vec<_> = scene
+        .primitives
+        .iter()
+        .filter_map(|p| match (&p.geometry, p.id) {
+            (Geometry::Path(commands), Some(id)) if id.series == 0 => Some((id.point, commands)),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(cells.len(), 4);
+    for (point, commands) in cells {
+        let HitShape::Rectangle(cell) = scene.hits[point].shape else {
+            panic!("a heat cell hovers its whole cell")
+        };
+        let inset = Rect::new(
+            cell.x + 4.0,
+            cell.y + 4.0,
+            cell.width - 8.0,
+            cell.height - 8.0,
+        );
+        let PathCommand::MoveTo(first) = commands[0] else {
+            panic!("the path starts with a move")
+        };
+        assert_close(first.x, inset.x, "left of the cell");
+        assert_close(first.y, inset.y, "top of the cell");
+        let PathCommand::LineTo(corner) = commands[2] else {
+            panic!("the far corner")
+        };
+        assert_close(corner.x, inset.x + inset.width, "right of the cell");
+        assert_close(corner.y, inset.y + inset.height, "bottom of the cell");
+    }
+    assert!(measure("M0,0 X").is_err());
+}
+
 // OhlcSeriesAnimationTests.OhlcSeries_FirstDraw_BarsAppearWithOHLC: the source's three I-bars on
 // a 400 by 400 chart with a Y axis from 0 to 40 start their first draw with the high, the close
 // and the low at the open (every line of a bar at the pixel of its open) and end with the low

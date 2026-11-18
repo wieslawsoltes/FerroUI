@@ -16,6 +16,7 @@ mod chart_series;
 mod collections;
 mod decorations;
 mod enums;
+mod gauges;
 mod geo_models;
 mod identity;
 mod legends;
@@ -43,6 +44,7 @@ pub use ferroui_livecharts::{
     Maps, PolarLabelsPosition, PolarScale, RadialAlignment, SankeyLabelPosition, SankeyLayoutKind,
     SeriesKind, ZoomDirection,
 };
+pub use gauges::{GaugeGenerator, GaugeItem};
 pub use geo_models::{GeoMarker, HeatLand};
 pub use legends::{ChartLegend, HeatLegend};
 pub use node_models::{SankeyLink, SankeyNode, TreemapNode};

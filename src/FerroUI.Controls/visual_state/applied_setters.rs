@@ -15,9 +15,24 @@ use ferroui_base::styling::{Setter, SetterValue};
 use ferroui_base::{AnyValue, BoxedValue, FerroObject, FerroProperty, Ref};
 use std::rc::Rc;
 
+/// What a value is set on: the object and the property (compared by identity).
+pub(crate) type SetterKey = (usize, usize);
+
+pub(crate) fn key_of(object: &FerroObject, property: &'static FerroProperty) -> SetterKey {
+    (object as *const FerroObject as usize, property as *const FerroProperty as usize)
+}
+
+/// A setter of a visual state with its target resolved.
+pub(crate) struct ResolvedSetter {
+    pub(crate) object: Ref<FerroObject>,
+    pub(crate) property: &'static FerroProperty,
+    /// The value, when it is a plain value (not a binding or a template).
+    pub(crate) value: Option<BoxedValue>,
+}
+
 /// The values a visual state set, removed together.
 #[derive(Default)]
-pub(crate) struct AppliedSetters(Vec<Rc<dyn IDisposable>>);
+pub(crate) struct AppliedSetters(Vec<(SetterKey, Rc<dyn IDisposable>)>);
 
 impl AppliedSetters {
     /// Applies the setters of `state` that have a target and a property. A target named in markup
@@ -30,16 +45,51 @@ impl AppliedSetters {
             let Some(setter) = setter.as_any().and_then(|any| any.downcast_ref::<Setter>()) else {
                 continue;
             };
-            if let Some(handle) = apply_setter(setter, names.as_ref()) {
-                applied.push(handle);
+            if let Some(applied_setter) = apply_setter(setter, names.as_ref()) {
+                applied.push(applied_setter);
             }
         }
         Self(applied)
     }
 
+    /// The setters of `state` with their targets, without applying them.
+    pub(crate) fn resolve(
+        state: &Ref<VisualState>,
+        template_root: Option<&Ref<Control>>,
+    ) -> Vec<ResolvedSetter> {
+        let names = template_root.map(Names::of);
+        let mut resolved = Vec::new();
+        for setter in state.setters().snapshot().iter() {
+            let Some(setter) = setter.as_any().and_then(|any| any.downcast_ref::<Setter>()) else {
+                continue;
+            };
+            let (Some(target), Some(property)) = (setter_target(setter, names.as_ref()), setter.property()) else {
+                continue;
+            };
+            let value = match setter.value() {
+                Some(SetterValue::Value(value)) => Some(value),
+                _ => None,
+            };
+            resolved.push(ResolvedSetter { object: target, property, value });
+        }
+        resolved
+    }
+
+    /// Takes out the values set on one of `keys`.
+    pub(crate) fn take_matching(&mut self, keys: &[SetterKey]) -> AppliedSetters {
+        let (taken, kept) = std::mem::take(&mut self.0).into_iter().partition(|(key, _)| keys.contains(key));
+        self.0 = kept;
+        AppliedSetters(taken)
+    }
+
+    /// Adds the values of `other`, removed with these.
+    pub(crate) fn append(&mut self, other: AppliedSetters) {
+        self.0.extend(other.0);
+    }
+
     /// Removes the values, in the reverse order of their application.
     pub(crate) fn remove(self) {
-        for handle in self.0.into_iter().rev() {
+        for (_, handle) in self.0.into_iter().rev() {
             handle.dispose();
         }
     }
@@ -49,14 +99,14 @@ impl AppliedSetters {
 /// root and the elements under it) when the groups are on the root of a template, else the name
 /// scope of the document (the nearest of the element and its logical ancestors: the content of a
 /// document has no scope of its own, and its document root has the scope of the document).
-enum Names {
+pub(crate) enum Names {
     Template(Ref<Control>, Ref<crate::primitives::TemplatedControl>),
     Scope(NameScopeRef),
     None,
 }
 
 impl Names {
-    fn of(template_root: &Ref<Control>) -> Self {
+    pub(crate) fn of(template_root: &Ref<Control>) -> Self {
         // An element created by a template has the templated control as its templated parent.
         let templated =
             template_root.templated_parent().and_then(|parent| parent.cast::<crate::primitives::TemplatedControl>());
@@ -71,7 +121,7 @@ impl Names {
         }
     }
 
-    fn find(&self, name: &str) -> Option<Ref<FerroObject>> {
+    pub(crate) fn find(&self, name: &str) -> Option<Ref<FerroObject>> {
         match self {
             Names::Template(root, templated) => {
                 if root.name().as_deref() == Some(name) {
@@ -94,19 +144,30 @@ impl Names {
 /// A setter whose target is not set, is not found by its name or is gone, or that has no property,
 /// does nothing and logs a warning (WinUI fails the state change with an error; deviation,
 /// docs/porting/winui-controls.md, VisualStateManager).
-fn apply_setter(setter: &Setter, names: Option<&Names>) -> Option<Rc<dyn IDisposable>> {
+fn setter_target(setter: &Setter, names: Option<&Names>) -> Option<Ref<FerroObject>> {
     let path = setter.target()?;
     let name = path.target_name();
     let target = path.target().or_else(|| (!name.is_empty()).then(|| names?.find(&name)).flatten());
-    let Some(target) = target else {
-        if !name.is_empty() {
-            warn(&format!("Visual state: no element named '{name}' in the name scope of the setter."));
-        }
-        return None;
-    };
+    if target.is_none() && !name.is_empty() {
+        warn(&format!("Visual state: no element named '{name}' in the name scope of the setter."));
+    }
+    target
+}
+
+fn apply_setter(setter: &Setter, names: Option<&Names>) -> Option<(SetterKey, Rc<dyn IDisposable>)> {
+    let target = setter_target(setter, names)?;
     let property = setter.property()?;
+    let key = key_of(&target, property);
+    apply_value(setter, &target, property).map(|handle| (key, handle))
+}
+
+fn apply_value(
+    setter: &Setter,
+    target: &Ref<FerroObject>,
+    property: &'static FerroProperty,
+) -> Option<Rc<dyn IDisposable>> {
     match setter.value() {
-        Some(SetterValue::Value(value)) => set_value(&target, property, &value),
+        Some(SetterValue::Value(value)) => set_value(target, property, &value),
         Some(SetterValue::BindingBase(binding)) => {
             let expression = target.bind_binding_with_priority(property, &*binding, BindingPriority::Animation, None);
             Some(expression)
@@ -116,12 +177,12 @@ fn apply_setter(setter: &Setter, names: Option<&Names>) -> Option<Rc<dyn IDispos
         }
         Some(SetterValue::Template(template)) => {
             let value = template.build();
-            set_value(&target, property, &value)
+            set_value(target, property, &value)
         }
         // A setter without a value sets null where the property takes it.
         None => {
             let null = ValueTypes::null_value(ValueType::new(property.property_type(), property.property_type_name()))?;
-            set_value(&target, property, &null)
+            set_value(target, property, &null)
         }
     }
 }

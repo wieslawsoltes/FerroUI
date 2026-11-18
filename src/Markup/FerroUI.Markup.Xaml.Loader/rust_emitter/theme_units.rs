@@ -28,6 +28,9 @@ use xamlx::ast::IXamlAstNode;
 
 use crate::compiler_extensions::group_transformers::MergedEntryOrigins;
 
+#[path = "theme_run_program.rs"]
+mod bytecode;
+
 use super::{brace_balance, declared_local, identifiers};
 
 /// The start of the marker that opens an entry of a unit; the index of the unit follows. A
@@ -174,6 +177,13 @@ struct Run {
     lines: Vec<String>,
 }
 
+/// Only row tables actually emitted for this body can become schedule imports.
+pub(super) struct Schedule<'a> {
+    pub(super) image: &'a super::BytecodeImage,
+    pub(super) document: &'a str,
+    pub(super) rows: &'a HashMap<String, super::theme_rows::RowKind>,
+}
+
 /// `lines`, the complete body of the function `function_name` (of `document_text`), with each
 /// run of marked entries taken out into a function of its own (see the module documentation).
 /// `local_types` are the Rust types of the locals of the body the emitter states;
@@ -186,6 +196,7 @@ pub(super) fn extract_runs(
     local_types: &HashMap<String, String>,
     dictionary_type: &str,
     units: &UnitEmission,
+    bytecode: Option<Schedule<'_>>,
 ) -> (Vec<String>, Vec<String>) {
     if !lines.iter().any(|line| unit_marker(line).is_some()) {
         return (lines, Vec::new());
@@ -205,6 +216,7 @@ pub(super) fn extract_runs(
         function_name,
         document_text,
         dictionary_type,
+        bytecode,
         local_types,
         units,
         declared: ["context", "name_scope", "root", "service_provider"].iter().map(|name| name.to_string()).collect(),
@@ -258,6 +270,7 @@ struct Extractor<'e> {
     function_name: &'e str,
     document_text: &'e str,
     dictionary_type: &'e str,
+    bytecode: Option<Schedule<'e>>,
     local_types: &'e HashMap<String, String>,
     units: &'e UnitEmission,
     /// The locals declared in the body so far.
@@ -361,7 +374,8 @@ impl Extractor<'_> {
     fn flush(&mut self) {
         let Some(run) = self.run.take() else { return };
         let function = format!("{}_unit_{}", self.function_name, self.functions.len());
-        let uses_context = run
+        let schedule = self.bytecode.as_ref().and_then(|config| bytecode::compile(&run.lines, &run.dictionary, config));
+        let uses_context = schedule.is_some() || run
             .lines
             .iter()
             .map(|line| line.trim_start())
@@ -382,15 +396,19 @@ impl Extractor<'_> {
         ));
         text.push_str(&format!("    dictionary: &{},\n", self.dictionary_type));
         text.push_str(") -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {\n");
-        if uses_context {
-            text.push_str("    let context = ::core::clone::Clone::clone(context);\n");
+        if let Some(schedule) = schedule {
+            text.push_str(&schedule);
+        } else {
+            if uses_context {
+                text.push_str("    let context = ::core::clone::Clone::clone(context);\n");
+            }
+            text.push_str(&format!("    let {} = ::core::clone::Clone::clone(dictionary);\n", run.dictionary));
+            for line in &run.lines {
+                text.push_str(line);
+                text.push('\n');
+            }
+            text.push_str("    ::core::result::Result::Ok(())\n");
         }
-        text.push_str(&format!("    let {} = ::core::clone::Clone::clone(dictionary);\n", run.dictionary));
-        for line in &run.lines {
-            text.push_str(line);
-            text.push('\n');
-        }
-        text.push_str("    ::core::result::Result::Ok(())\n");
         text.push_str("}\n");
         self.functions.push(text);
         let index = self.units.push_run(run.unit, function);

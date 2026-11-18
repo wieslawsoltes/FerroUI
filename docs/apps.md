@@ -216,8 +216,34 @@ Inputs: `test`, `check`, `apt-packages` (extra Ubuntu packages), `script`, `brow
 `browser-features`, `browser-script`, `smoke` (default `true`), `smoke-ignore` (regular expressions,
 one per line, of smoke errors to leave out), `browser-tests`, `browser-tests-pull-request` (the
 lines for pull requests when they differ, for example fewer of the slow ones) and `browser-tests-setup`, `android` and
-`ios` (the arguments of the packaging scripts; empty: no package), `pages` (default `true`). The actions are pinned by commit, as
-in the workflows of this repository.
+`ios` (the arguments of the packaging scripts; empty: no package), `pages` (default `true`),
+`size-report` (default `false`: what the module of the site is made of, see below). The actions
+are pinned by commit, as in the workflows of this repository.
+
+What the WebAssembly module is made of: with `size-report: true` the browser job links the
+browser package a second time with the names of its functions and a link map, and
+`scripts/browser/wasm-size-report.py` writes the code by crate and by generic family (with what
+each row saves with gzip) and the largest functions into the summary of the run; the named module,
+the map and the report are the artifact `size-report`. The published site is the one built
+without names. An application turns it on for a run by hand with an input of its own:
+
+```yaml
+on:
+  workflow_dispatch:
+    inputs:
+      size-report:
+        type: boolean
+        default: false
+
+jobs:
+  app:
+    uses: wieslawsoltes/FerroUI/.github/workflows/app.yml@main
+    with:
+      browser-package: my-app-browser
+      size-report: ${{ inputs.size-report || false }}
+```
+
+and `gh workflow run ci.yml -f size-report=true`.
 
 GitHub Pages is enabled once, with GitHub Actions as its source:
 

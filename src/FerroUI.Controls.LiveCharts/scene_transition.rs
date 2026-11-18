@@ -159,6 +159,15 @@ impl SceneTransition {
         self
     }
 
+    /// The same transition, with its start, duration, easing and node motion, to another end
+    /// scene (a frame of the needles of a gauge while the scene moves).
+    pub(crate) fn retarget(&self, to: Rc<Scene>) -> Self {
+        let mut transition = Self::new(self.from.clone(), to, self.started_ms, self.duration_ms)
+            .with_easing(self.easing.clone());
+        transition.node_motion = self.node_motion;
+        transition
+    }
+
     /// The entrance and exit of the nodes, ribbons and tiles of a Sankey or treemap scene, as
     /// the source's `EnsureVisualForNode`, `EnsureVisualForLink`, `EnsureArcVisualForNode`,
     /// `EnsureChordVisualForLink` and `CollapseRemoved*`: a new rectangle grows from the zero
