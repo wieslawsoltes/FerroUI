@@ -17,6 +17,7 @@ import type { RuntimeTarget } from './runtimeConnections';
 import type { StagesPanel } from './stagesPanel';
 import type { PrototypeCommand, StageChange } from './stagesProtocol';
 import type { TimelineControl } from './timelineProtocol';
+import type { StateTransitionControl } from './stateTransitionProtocol';
 import type { CanvasAction, CanvasInteraction, DesignerView, DragOrigin, DropTarget, OutlineMode, Placement } from './protocol';
 import { applyTextEdits } from './textDocument';
 import { isWorkspaceTool } from './workspaceCatalog';
@@ -303,6 +304,10 @@ export class AgentTools {
                 await this.workbench.revealDesign(panel, 'timeline');
                 return this.workbench.controlTimeline(panel, { session: panel.session, token: args.expected_revision },
                     args.arguments as TimelineControl, signal);
+            case 'designer_transition_control':
+                await this.workbench.revealDesign(panel, 'timeline');
+                return await this.workbench.controlStateTransition(panel, { session: panel.session, token: args.expected_revision },
+                    args.arguments as StateTransitionControl, signal) ?? describe(panel);
             case 'designer_stages_open': {
                 const block = panel.snapshot?.activeBlock?.start;
                 return this.stages.open(document, block ? new vscode.Position(block.line, block.character) : new vscode.Position(0, 0)).wait(signal);

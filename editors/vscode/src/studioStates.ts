@@ -1,16 +1,19 @@
 import { action, choose, editText, editTime, type StudioContext, type StudioItem } from './studioContext';
+import type { StateTransitionRoute } from './stateTransitionProtocol';
 
 interface Setter { property: string; value: string; target: string }
 interface State { name: string; setters: Setter[] }
 interface Transition { from: string | null; to: string; duration: number; easing: unknown }
 interface StateGroup { owner: number; name: string; states: State[]; transitions: Transition[] }
 
-export async function stateItems(context: StudioContext): Promise<StudioItem[]> {
+type OpenTransition = (context: StudioContext, route: StateTransitionRoute) => Promise<void>;
+
+export async function stateItems(context: StudioContext, openTransition: OpenTransition): Promise<StudioItem[]> {
     const { groups } = await context.read<{ groups: StateGroup[] }>('designer_states');
     const update = (model: StateGroup) => context.edit('designer_state', { action: 'upsert', model });
     const rows: StudioItem[] = groups.map(group => ({
         id: groupId(group), label: group.name, description: `${group.states.length} states`,
-        children: async () => groupItems(context, group, update),
+        children: async () => groupItems(context, group, update, openTransition),
     }));
     rows.unshift(action('states:clear', 'Clear state preview', () => context.present('designer_state', { action: 'clear_preview' }), 'clear-all'));
     const owner = context.node;
@@ -26,7 +29,7 @@ export async function stateItems(context: StudioContext): Promise<StudioItem[]> 
 
 function groupId(group: StateGroup): string { return `states:${group.owner}:${group.name}`; }
 
-function groupItems(context: StudioContext, group: StateGroup, update: (group: StateGroup) => Promise<void>): StudioItem[] {
+function groupItems(context: StudioContext, group: StateGroup, update: (group: StateGroup) => Promise<void>, openTransition: OpenTransition): StudioItem[] {
     const id = groupId(group);
     const rows = group.states.map(state => action(`${id}:state:${state.name}`, state.name, async () => {
         const preview = () => context.present('designer_state', { action: 'preview', owner: group.owner, group: group.name, state: state.name });
@@ -40,6 +43,12 @@ function groupItems(context: StudioContext, group: StateGroup, update: (group: S
         ]);
         await selected?.run();
     }, 'symbol-enum-member'));
+    if (group.transitions.length && context.panel.supportsStateTransitionPreview) {
+        rows.unshift(action(`${id}:preview-transition`, 'Preview transition…', async () => {
+            const route = await chooseTransition(group);
+            if (route) await openTransition(context, route);
+        }, 'play'));
+    }
     if (!context.writable) return rows;
     rows.unshift(action(`${id}:add`, 'Add state…', async () => {
         const name = await editText('State name');
@@ -55,6 +64,21 @@ function groupItems(context: StudioContext, group: StateGroup, update: (group: S
         action: 'remove', owner: group.owner, group: group.name,
     }), 'trash'));
     return rows;
+}
+
+async function chooseTransition(group: StateGroup): Promise<StateTransitionRoute | undefined> {
+    const transition = await choose('Preview a state transition', group.transitions.map(transition => ({
+        label: `${transition.from ?? 'Any state'} → ${transition.to}`,
+        description: `${transition.duration} s`,
+        transition,
+    })));
+    if (!transition) return;
+    const { from, to } = transition.transition;
+    if (from !== null) return { owner: group.owner, group: group.name, from, to };
+    const directional = new Set(group.transitions.filter(transition => transition.to === to).map(transition => transition.from));
+    const initial = await choose('Choose the starting state', [{ label: 'Base values', name: null },
+        ...group.states.filter(state => state.name !== to && !directional.has(state.name)).map(state => ({ label: state.name, name: state.name }))]);
+    if (initial) return { owner: group.owner, group: group.name, from: initial.name, to };
 }
 
 async function authorSetter(state: State): Promise<Setter[] | undefined> {

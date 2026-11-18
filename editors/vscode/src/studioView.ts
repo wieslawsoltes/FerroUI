@@ -9,6 +9,7 @@ import { focusItems } from './studioFocus';
 import { chooseGridTrack, gridItems } from './studioGrid';
 import { layerItems } from './studioLayers';
 import { stateItems } from './studioStates';
+import type { StateTransitionRoute } from './stateTransitionProtocol';
 import { timelineItems } from './studioTimeline';
 
 const viewId = 'ferroui.studio';
@@ -22,7 +23,7 @@ export class StudioView implements vscode.TreeDataProvider<StudioItem>, vscode.D
     private key?: string;
     private panel?: DesignerPanel;
 
-    constructor(visible: () => void) {
+    constructor(visible: () => void, private readonly previewTransition: (context: StudioContext, route: StateTransitionRoute) => Promise<void>) {
         this.view = vscode.window.createTreeView(viewId, { treeDataProvider: this, showCollapseAll: true });
         this.subscriptions = [this.view, this.changed, this.view.onDidChangeVisibility(visible),
             vscode.commands.registerCommand('ferroui.showStudio', () => vscode.commands.executeCommand(`${viewId}.focus`)),
@@ -81,7 +82,7 @@ export class StudioView implements vscode.TreeDataProvider<StudioItem>, vscode.D
             { id: 'grid', label: 'Grid Tracks', icon: 'layout', children: () => gridItems(context) },
             { id: 'focus', label: 'Focus and Labels', icon: 'list-ordered', children: () => focusItems(context) },
             { id: 'timeline', label: 'Timeline', icon: 'history', children: () => timelineItems(context) },
-            { id: 'states', label: 'States', icon: 'symbol-enum', children: () => stateItems(context) },
+            { id: 'states', label: 'States', icon: 'symbol-enum', children: () => stateItems(context, this.previewTransition) },
             { id: 'behaviors', label: 'Behaviors', icon: 'run', children: () => behaviorItems(context) },
         ];
     }

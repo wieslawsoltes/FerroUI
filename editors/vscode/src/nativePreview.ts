@@ -4,7 +4,7 @@ import type * as vscode from 'vscode';
 import type { BuiltProject } from './builtProjects';
 import type { TokenPlan, TokenRequest } from './designTokenProtocol';
 import type { LayerViewInput } from './layerViews';
-import type { TimelinePreviewPose } from './timelineProtocol';
+import type { TimelinePreviewPose, TimelineTargetOverrides } from './timelineProtocol';
 import type { NativeProjectInventory } from './projectInventory';
 import type { Asset, CanvasInteraction, CanvasPresentation, DesignDataPresentation, DropHint, EditResult, Inspection, InspectionTarget, Operation, Placement, PreviewSourceBuffer, ResourceRow, Snapshot, Source, Viewport } from './protocol';
 import type { RsxLanguageDocument } from './rsxLanguageTypes';
@@ -20,6 +20,7 @@ interface RenderContext {
     designData?: DesignDataPresentation;
     layerView?: LayerViewInput;
     timelinePose?: TimelinePreviewPose;
+    timelineTargets?: TimelineTargetOverrides;
 }
 
 export class NativePreview implements vscode.Disposable {
@@ -35,7 +36,8 @@ export class NativePreview implements vscode.Disposable {
         stages?: boolean; prototypeEditing?: boolean; stageIncludes?: boolean; projectCatalog?: boolean;
         canvasInteraction?: boolean; canvasFocusOrder?: boolean; projectInventory?: boolean; tokenHandoff?: boolean;
         designFixtures?: boolean; timelineTransport?: boolean; timelineRecording?: boolean; timelineGeometryRecording?: boolean;
-        timelineKeyframeDrafts?: boolean;
+        timelineKeyframeDrafts?: boolean; timelineCombinedPlayback?: boolean; timelineProgramTargets?: boolean;
+        stateTransitionPreview?: boolean;
     } = {};
 
     private constructor(command: string, channel: vscode.OutputChannel) {
@@ -137,7 +139,10 @@ export class NativePreview implements vscode.Disposable {
     }
 
     render(source: Source, viewport: Viewport, frame = 0, context: RenderContext = {}): Promise<Snapshot> {
-        return this.send('render', { ...source, ...viewport, frame, ...context });
+        const { timelinePose, timelineTargets, ...presentation } = context;
+        return this.send('render', { ...source, ...viewport, frame, ...presentation,
+            timelinePose: timelinePose?.playback && !this.capabilities.timelineCombinedPlayback ? undefined : timelinePose,
+            timelineTargets: this.capabilities.timelineProgramTargets ? timelineTargets : undefined });
     }
 
     placement(frame: number, placement: Placement, recording = false): Promise<DropHint> {
@@ -167,6 +172,12 @@ export class NativePreview implements vscode.Disposable {
 
     studioPresent(frame: number, nextFrame: number, name: string, args: object, selection: number[]): Promise<CanvasPresentation> {
         const { action } = args as { action?: string };
+        if (name === 'designer_program' && action === 'play_all' && !this.capabilities.timelineCombinedPlayback) {
+            throw new Error('Update the FerroUI preview helper to play all animations.');
+        }
+        if (name === 'designer_state' && action === 'preview_transition' && !this.capabilities.stateTransitionPreview) {
+            throw new Error('Update the FerroUI preview helper to preview explicit state transitions.');
+        }
         if (name === 'designer_program' && action && timelineActions.has(action) && !this.capabilities.timelineTransport) {
             throw new Error('Update the FerroUI preview helper to use the Timeline playback controls.');
         }

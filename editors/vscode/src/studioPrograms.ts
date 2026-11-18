@@ -1,3 +1,4 @@
+import * as vscode from 'vscode';
 import { choose, editText, editTime, type StudioContext } from './studioContext';
 import { editAnimationTiming } from './studioAnimationTiming';
 import type { TimelineProgram } from './timelineProtocol';
@@ -17,6 +18,17 @@ export async function renameAnimationProgram(context: StudioContext, program: Ti
     if (name && name !== program.name) await context.edit('designer_program', { action: 'rename', program: program.id, name });
 }
 
+export async function chooseAnimationTargets(context: StudioContext, program: TimelineProgram): Promise<void> {
+    const controls = context.panel.nodes.filter(node => node.bounds && node.selectable !== false);
+    if (!controls.length) throw new Error('The current preview has no live source controls.');
+    const items = controls.map(node => ({ label: node.name || node.label, description: node.name ? node.label : undefined,
+        id: node.id, picked: program.targets.includes(node.id) }));
+    const targets = await vscode.window.showQuickPick(items, { title: `Preview targets · ${program.name}`, canPickMany: true,
+        matchOnDescription: true, placeHolder: 'Choose the controls that should play this animation' });
+    if (targets) await context.present('designer_program', { action: 'preview_targets', program: program.id,
+        targets: targets.length ? targets.map(target => target.id) : null });
+}
+
 export async function showAnimationActions(context: StudioContext, program: TimelineProgram | undefined): Promise<void> {
     const actions: { label: string; run: () => Promise<void> }[] = [];
     const nodes = context.panel.nodes;
@@ -30,12 +42,15 @@ export async function showAnimationActions(context: StudioContext, program: Time
         if (nodes.some(node => node.id === id)) {
             actions.push({ label: '$(go-to-file) Reveal animation in source', run: () => context.reveal(id) });
         }
+        actions.push({ label: '$(target) Choose preview targets…', run: () => chooseAnimationTargets(context, program) });
         if (targets.length) {
             actions.push({ label: '$(preview) Preview on selected controls', run: () =>
                 context.present('designer_program', { action: 'preview_targets', program: id, targets }) });
         }
-        actions.push({ label: '$(discard) Restore selector preview targets', run: () =>
-            context.present('designer_program', { action: 'preview_targets', program: id, targets: null }) });
+        if (program.preview?.explicit_targets || !program.preview) {
+            actions.push({ label: '$(discard) Clear preview target override', run: () =>
+                context.present('designer_program', { action: 'preview_targets', program: id, targets: null }) });
+        }
         if (context.writable) {
             const timeline = program.timeline;
             if (timeline) actions.push({ label: '$(watch) Timing and Playback…', run: () => editAnimationTiming(context, id, timeline) });

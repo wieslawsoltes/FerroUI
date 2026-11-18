@@ -322,10 +322,20 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
     return page(webview, root, 'timeline', 'FerroUI Timeline', `
 <main class="timeline" aria-label="Animation timeline">
     <p id="timeline-status" role="status" hidden></p>
+    <section id="timeline-transition" aria-label="State transition preview" hidden>
+        <div class="timeline-transition-toolbar">
+            ${tool('transition-close', 'arrow-left', 'Stop transition and return to animations')}
+            <strong id="transition-route"></strong>
+            ${tool('transition-play', 'play', 'Play state transition')}
+            <output id="transition-time" for="transition-seek" aria-live="off"></output>
+        </div>
+        <input id="transition-seek" type="range" min="0" value="0" step="any" aria-label="State transition playhead">
+    </section>
     <div id="timeline-toolbar" class="timeline-toolbar" aria-label="Animation controls" hidden>
         <div id="timeline-transport" class="tool-group" role="group" aria-label="Playback" hidden>
             ${tool('timeline-play', 'play', 'Play animation')}
             ${tool('timeline-stop', 'debug-stop', 'Stop animation')}
+            ${tool('timeline-play-all', 'run-all', 'Play all animations', 'aria-pressed="false"')}
         </div>
         <select id="timeline-programs" aria-label="Animation program"></select>
         <output id="timeline-time" for="timeline-seek" aria-live="off" hidden></output>
@@ -343,9 +353,14 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
             ${tool('timeline-fit', 'screen-normal', 'Fit timeline (0)')}
             ${tool('timeline-zoom-in', 'zoom-in', 'Zoom in on timeline (+)')}
         </div>
+        ${tool('timeline-preview-targets', 'target', 'Choose preview targets', 'hidden')}
+        ${tool('timeline-source', 'go-to-file', 'Reveal animation in source', 'hidden')}
         ${tool('timeline-actions', 'ellipsis', 'More Animation Actions', 'disabled')}
     </div>
-    <p id="timeline-native-source" class="dock-message" hidden>Open the authored animation through More Animation Actions.</p>
+    <section id="timeline-native-source" class="timeline-native-preview" hidden>
+        <p id="timeline-preview-note" class="dock-message"></p>
+        <input id="timeline-native-seek" type="range" min="0" max="1" value="0" step="any" aria-label="Native animation elapsed time" hidden>
+    </section>
     <section id="timeline-program" aria-label="Selected animation" hidden>
         <div id="timeline-grid" class="timeline-grid">
             <div class="timeline-axis">

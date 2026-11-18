@@ -1,10 +1,13 @@
 import type { FrameTarget } from '../src/protocol';
 import type { FromTimeline, KeyframeGroupEdit, KeyframeLocation, TimelineControl, TimelineProgram, TimelineState, ToTimeline } from '../src/timelineProtocol';
+import { canPreviewProgram, previewClock } from '../src/timelinePrograms';
 import { element, labelButton } from './dom';
 import { dragKeyframe, type RenderedKeyframe } from './timelineKeyDrag';
 import { TimelineKeyframeEditor } from './timelineKeyframeEditor';
 import { bindTimelineMarquee } from './timelineMarquee';
+import { TimelineNativePreview } from './timelineNativePreview';
 import { TimelineSelection } from './timelineSelection';
+import { TimelineStateTransition } from './timelineStateTransition';
 import { clamp } from './timelineViewport';
 import { TimelineViewportView } from './timelineViewportView';
 
@@ -19,12 +22,12 @@ const vscode = acquireVsCodeApi();
 const status = element('timeline-status');
 const toolbar = element('timeline-toolbar');
 const container = element('timeline-program');
-const nativeSource = element('timeline-native-source');
 const programs = element<HTMLSelectElement>('timeline-programs');
 const snap = element<HTMLSelectElement>('timeline-snap');
 const transport = element('timeline-transport');
 const play = element<HTMLButtonElement>('timeline-play');
 const stop = element<HTMLButtonElement>('timeline-stop');
+const playAll = element<HTMLButtonElement>('timeline-play-all');
 const recordMode = element<HTMLButtonElement>('timeline-record-mode');
 const record = element<HTMLButtonElement>('timeline-record');
 const actions = element<HTMLButtonElement>('timeline-actions');
@@ -39,6 +42,7 @@ let remembered = typeof saved === 'number' ? { id: saved } : saved;
 let frameRate = [24, 30, 60].find(rate => typeof saved === 'object' && rate === saved.frameRate) ?? 0;
 snap.value = String(frameRate);
 let program: number | undefined;
+let timedProgramSession: number | undefined;
 let queued: number | undefined;
 let submitted: number | undefined;
 let pending = false;
@@ -51,6 +55,8 @@ let owner: { session: number; program: ProgramIdentity } | undefined;
 let keyEdit: { before: FrameTarget; accepted?: KeyframeLocation[] } | undefined;
 
 const gestureFrame = () => pending || keyEdit ? undefined : model.frame;
+const nativePreview = new TimelineNativePreview(queueSeek, () => programAction('programTargets'), () => programAction('revealProgram'));
+const transition = new TimelineStateTransition((frame, control) => vscode.postMessage({ type: 'transitionControl', frame, control }));
 const keyframeEditor = new TimelineKeyframeEditor(request => vscode.postMessage(request),
     (frame, program, time) => send(frame, { action: 'seek', program, time }),
     ({ target, keyframe }, property) => { selection.replace([{ target, property, time: keyframe.time }]); showKeySelection(); },
@@ -67,6 +73,7 @@ programs.addEventListener('change', () => {
         send(model.frame, { action: 'record', program, enabled: false });
     }
     if (selected) remember(selected);
+    timedProgramSession = undefined;
     selection.replace([]);
     queued = undefined;
     showTracks();
@@ -78,12 +85,16 @@ snap.addEventListener('change', () => {
 play.addEventListener('click', () => {
     const selected = current();
     if (!model.frame || !selected) return;
-    const playing = model.position?.program === selected.id && model.position.playing;
-    send(model.frame, { action: playing ? 'pause' : 'play', program: selected.id });
+    const position = positionFor(selected);
+    send(model.frame, { action: position?.playing ? 'pause' : position?.all ? 'play_all' : 'play', program: position?.program ?? selected.id });
 });
 stop.addEventListener('click', () => {
     const selected = current();
-    if (model.frame && selected) send(model.frame, { action: 'stop', program: selected.id });
+    if (model.frame && selected) send(model.frame, { action: 'stop', program: positionFor(selected)?.program ?? selected.id });
+});
+playAll.addEventListener('click', () => {
+    const selected = current();
+    if (model.frame && selected) send(model.frame, { action: 'play_all', program: positionFor(selected)?.program ?? selected.id });
 });
 recordMode.addEventListener('click', () => {
     const selected = current();
@@ -98,12 +109,17 @@ actions.addEventListener('click', () => {
     if (model.frame && !pending && !keyEdit) vscode.postMessage({ type: 'programActions', frame: model.frame, program });
 });
 keyActions.addEventListener('click', () => editKeys(selection.keys, model.frame));
-slider.addEventListener('input', () => {
-    if (!model.frame || !current()?.timeline) return;
-    queued = slider.valueAsNumber;
+slider.addEventListener('input', () => queueSeek(slider.valueAsNumber));
+function queueSeek(seconds: number): void {
+    if (!model.frame || !canPreviewProgram(current())) return;
+    queued = seconds;
     showPosition();
     seek();
-});
+}
+function programAction(type: 'programTargets' | 'revealProgram'): void {
+    if (!model.frame || program === undefined || pending || keyEdit) return;
+    vscode.postMessage({ type, frame: model.frame, program });
+}
 container.addEventListener('keydown', event => {
     const frame = model.frame;
     if (!frame || program === undefined || pending || keyEdit || (event.key !== '[' && event.key !== ']')) return;
@@ -146,6 +162,7 @@ window.addEventListener('message', event => {
         queued = submitted = keyEdit = undefined;
         pending = false;
         showStatus(message.message);
+        transition.resetRequest();
         showPosition();
     }
 });
@@ -153,15 +170,31 @@ vscode.postMessage({ type: 'ready' });
 
 function current(): TimelineProgram | undefined { return model.programs.find(item => item.id === program); }
 
+function positionFor(selected: TimelineProgram | undefined) {
+    const position = model.position;
+    if (position?.all || position?.program === selected?.id) return position;
+}
+
 function showTracks(): void {
+    if (model.transition) {
+        toolbar.hidden = container.hidden = true;
+        keyframeEditor.close();
+        nativePreview.show(undefined, {}, 0, false, false);
+        transition.show(model.transition, model.frame);
+        return;
+    }
+    transition.show();
     const available = model.programs;
-    const selected = available.find(item => item.source_key && item.source_key === remembered?.key)
+    // A rebuilt source can assign different IDs to legacy programs. The native
+    // pose points to the resolved clip when the selected program was playing.
+    const remapped = model.frame && model.frame.session === timedProgramSession && model.position?.elapsed !== undefined
+        ? available.find(item => item.id === model.position?.program) : undefined;
+    const selected = remapped ?? available.find(item => item.source_key && item.source_key === remembered?.key)
         ?? available.find(item => matchesProgram(remembered, item)) ?? available[0];
     program = selected?.id;
     if (selected && model.frame) remember(selected);
     const timeline = selected?.timeline;
     toolbar.hidden = !model.frame && !selected;
-    nativeSource.hidden = !selected || Boolean(timeline);
     container.hidden = !timeline;
     const choices = JSON.stringify(available.map(({ id, name }) => [id, name]));
     if (lastPrograms !== choices) {
@@ -274,39 +307,61 @@ function remember(program: TimelineProgram): void {
 }
 
 function showPosition(): void {
+    if (model.transition) return;
     const selected = current();
+    if (model.frame && model.position && !model.position.busy) {
+        timedProgramSession = model.position.elapsed !== undefined && model.position.program === selected?.id ? model.frame.session : undefined;
+    }
     const timeline = selected?.timeline;
-    const position = model.position?.program === selected?.id ? model.position : undefined;
+    const clock = previewClock(selected);
+    const position = positionFor(selected);
     const playing = Boolean(position?.playing);
-    transport.hidden = time.hidden = !timeline;
+    const available = canPreviewProgram(selected);
+    const showTransport = Boolean(clock || position?.all);
+    transport.hidden = !showTransport && !model.canPlayAll;
+    play.hidden = stop.hidden = !showTransport;
+    time.hidden = !showTransport;
+    playAll.hidden = !model.canPlayAll;
+    playAll.disabled = !model.frame || pending || playing || Boolean(keyEdit);
+    playAll.setAttribute('aria-pressed', String(Boolean(position?.all)));
     snap.hidden = !timeline || !model.writable;
     snap.disabled = !model.frame || pending || playing || Boolean(keyEdit);
     record.hidden = !timeline || !model.writable;
     record.disabled = !model.frame || pending || playing || Boolean(keyEdit);
     recordMode.hidden = !timeline || !model.canRecord;
-    recordMode.disabled = !model.frame || pending || playing || Boolean(keyEdit);
+    recordMode.disabled = !model.frame || !available || pending || playing || Boolean(keyEdit);
     labelButton(recordMode, model.canRecordGeometry ? 'Record animation edits' : 'Record property changes');
     recordMode.setAttribute('aria-pressed', String(Boolean(model.recording)));
     actions.disabled = !model.frame || pending || playing || Boolean(keyEdit) || (!selected && !model.writable);
-    programs.disabled = pending || Boolean(keyEdit) || !model.frame || !selected;
+    programs.disabled = pending || playing || Boolean(keyEdit) || !model.frame || !selected;
     keyActions.disabled = !model.frame || pending || playing || Boolean(keyEdit);
-    if (!timeline) return;
-    const seconds = queued ?? submitted ?? position?.time ?? 0;
-    slider.value = String(seconds);
-    slider.setAttribute('aria-valuetext', `${number.format(seconds)} of ${number.format(timeline.duration)} seconds`);
-    viewport.position(seconds);
-    time.value = `${number.format(seconds)} / ${number.format(timeline.duration)} s`;
+    const seconds = queued ?? submitted ?? (position?.program === selected?.id ? position?.time : undefined) ?? 0;
+    nativePreview.show(selected, model.names, seconds, Boolean(model.frame && !playing && !keyEdit), pending);
+    if (timeline) {
+        slider.value = String(seconds);
+        slider.setAttribute('aria-valuetext', `${number.format(seconds)} of ${number.format(timeline.duration)} seconds`);
+        viewport.position(seconds);
+        time.value = `${number.format(seconds)} / ${number.format(timeline.duration)} s`;
+    }
+    if (clock?.native) {
+        time.value = clock.total_duration === null ? `${number.format(seconds)} s`
+            : `${number.format(Math.min(seconds, clock.total_duration))} / ${number.format(clock.total_duration)} s`;
+    }
     if (position?.elapsed !== undefined) {
-        const clock = timeline.total_duration === null ? `${number.format(position.elapsed)} s elapsed`
-            : `${number.format(position.elapsed)} / ${number.format(timeline.total_duration)} s elapsed`;
-        time.title = clock;
+        const displayClock = position.all || clock?.total_duration == null ? `${number.format(position.elapsed)} s elapsed`
+            : `${number.format(position.elapsed)} / ${number.format(clock.total_duration)} s elapsed`;
+        if (position.all) time.value = `${number.format(position.elapsed)} s`;
+        time.title = position.all ? `All animations · ${displayClock}` : displayClock;
+        time.setAttribute('aria-label', time.title);
     } else {
         time.removeAttribute('title');
+        time.removeAttribute('aria-label');
     }
-    labelButton(play, playing ? 'Pause animation' : 'Play animation', playing ? 'debug-pause' : 'play');
-    play.disabled = !model.frame || (!playing && (pending || Boolean(keyEdit) || timeline.duration <= 0));
+    const playLabel = position?.all ? (position.completed ? 'Play all animations' : 'Resume all animations') : 'Play animation';
+    labelButton(play, playing ? (position?.all ? 'Pause all animations' : 'Pause animation') : playLabel, playing ? 'debug-pause' : 'play');
+    play.disabled = !model.frame || !(available || position?.all) || (!playing && (pending || Boolean(keyEdit)));
     stop.disabled = !model.frame || !position || Boolean(keyEdit) || (!playing && pending);
-    slider.disabled = !model.frame || playing || Boolean(keyEdit) || timeline.duration <= 0;
+    slider.disabled = !model.frame || !timeline || !available || Boolean(clock?.native) || playing || Boolean(keyEdit);
     for (const { button } of renderedKeys) button.disabled = pending || Boolean(keyEdit) || !model.frame;
     keyframeEditor.follow(pending || playing || keyEdit ? undefined : model.frame, model.documentVersion, program);
 }

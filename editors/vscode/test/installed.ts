@@ -36,6 +36,9 @@ export async function run(): Promise<void> {
         assert.ok(native.capabilities.designFixtures, 'The installed preview recognizes named design fixtures');
         assert.ok(native.capabilities.timelineGeometryRecording, 'The installed preview supports canvas animation recording');
         assert.ok(native.capabilities.timelineKeyframeDrafts, 'The installed preview validates keyframe drafts and samples easing');
+        assert.ok(native.capabilities.timelineCombinedPlayback, 'The installed preview plays combined animation programs');
+        assert.ok(native.capabilities.timelineProgramTargets, 'The installed preview retains animation resource targets');
+        assert.ok(native.capabilities.stateTransitionPreview, 'The installed preview samples explicit state transitions');
         const source = sourceOf(document, 'xaml', new vscode.Position(0, 0));
         const snapshot = await native.render(source, { width: 800, height: 520, dark: false }, 1);
         assert.ok(snapshot.image?.png, snapshot.renderError ?? undefined);

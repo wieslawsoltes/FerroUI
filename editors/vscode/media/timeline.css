@@ -6,6 +6,22 @@ body { block-size: 100vh; }
 #timeline-programs { flex: 1 1 120px; min-inline-size: 0; }
 #timeline-time, .timeline-ruler { color: var(--muted); font-variant-numeric: tabular-nums; }
 #timeline-time { padding-inline: 5px 1px; white-space: nowrap; }
+.timeline-native-preview { margin-block-start: 5px; }
+#timeline-preview-note { margin: 3px 0; color: var(--muted); overflow-wrap: anywhere; }
+#timeline-native-seek { inline-size: 100%; margin: 0; accent-color: var(--focus); }
+.timeline-transition-toolbar { display: flex; gap: 4px; align-items: center; }
+#transition-route {
+    flex: 1;
+    min-inline-size: 0;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-height: 1.25;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+}
+#transition-time { color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+#transition-seek { inline-size: 100%; margin: 3px 0 0; accent-color: var(--focus); }
 #timeline-record-mode[aria-pressed="true"] {
     color: var(--vscode-debugIcon-breakpointForeground, var(--vscode-errorForeground));
     background: var(--vscode-toolbar-activeBackground, var(--vscode-toolbar-hoverBackground));

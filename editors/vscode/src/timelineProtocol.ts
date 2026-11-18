@@ -1,4 +1,5 @@
 import type { FrameTarget } from './protocol';
+import type { StateTransitionControl, StateTransitionPosition } from './stateTransitionProtocol';
 
 export interface TimelineKeyframe { time: number; value_text: string; easing_text: string; value_kind?: string }
 export interface TimelineTrack { target: number; property: string; keyframes: TimelineKeyframe[] }
@@ -27,13 +28,32 @@ export interface TimelineProgram {
     targets: number[];
     selector: string;
     timeline: AuthoredTimeline | null;
+    preview?: TimelineProgramPreview;
+    diagnostics?: string[];
 }
+
+export interface TimelineClock {
+    duration: number;
+    total_duration: number | null;
+    native?: boolean;
+}
+
+export interface TimelineProgramPreview extends TimelineClock {
+    native: boolean;
+    available: boolean;
+    explicit_targets: boolean;
+}
+
+/** Source anchors owned by the native preview engine. */
+export type TimelineTargetOverrides = readonly object[];
 
 export interface TimelinePosition {
     session: number;
     program: number;
     time: number;
     elapsed?: number;
+    all?: boolean;
+    completed?: boolean;
     playing: boolean;
     busy: boolean;
 }
@@ -43,6 +63,7 @@ export interface TimelinePreviewPose {
     time: number;
     sourceKey?: string;
     anchor?: object;
+    playback?: { elapsed: number; all: boolean; completed?: boolean };
 }
 
 export interface TimelineState {
@@ -54,14 +75,16 @@ export interface TimelineState {
     canRecord?: boolean;
     canRecordGeometry?: boolean;
     canEditKeyframes?: boolean;
+    canPlayAll?: boolean;
     recording?: boolean;
     position?: TimelinePosition;
+    transition?: StateTransitionPosition;
     message?: string;
 }
 
 export type TimelineTransportControl =
     | { action: 'seek'; program: number; time: number }
-    | { action: 'play'; program: number; time?: number }
+    | { action: 'play' | 'play_all'; program: number; time?: number }
     | { action: 'pause' | 'stop'; program: number };
 
 export type TimelineControl = TimelineTransportControl
@@ -70,7 +93,10 @@ export type TimelineControl = TimelineTransportControl
 export type FromTimeline =
     | { type: 'ready' }
     | { type: 'control'; frame: FrameTarget; control: TimelineControl }
+    | { type: 'transitionControl'; frame: FrameTarget; control: StateTransitionControl }
     | { type: 'programActions'; frame: FrameTarget; program: number | undefined }
+    | { type: 'programTargets'; frame: FrameTarget; program: number }
+    | { type: 'revealProgram'; frame: FrameTarget; program: number }
     | { type: 'recordKeyframe'; frame: FrameTarget; program: number; time: number; track?: number }
     | TimelineKeyframeRequest
     | { type: 'keyframeGroup'; frame: FrameTarget; program: number; keys: KeyframeLocation[]; edit?: KeyframeGroupEdit }

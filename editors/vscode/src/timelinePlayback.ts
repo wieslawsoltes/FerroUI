@@ -1,7 +1,7 @@
-import { setTimeout as delay } from 'node:timers/promises';
 import type { DesignerPanel } from './designerPanel';
+import { drivePreviewClock } from './previewClock';
 import type { FrameTarget } from './protocol';
-import type { AuthoredTimeline, TimelinePosition, TimelineTransportControl } from './timelineProtocol';
+import type { TimelineClock, TimelinePosition, TimelinePreviewPose, TimelineTransportControl } from './timelineProtocol';
 
 interface Playback {
     panel: DesignerPanel;
@@ -11,6 +11,11 @@ interface Playback {
     loop?: Promise<void>;
     running: boolean;
     interrupting: boolean;
+}
+
+export function positionFromPose(session: number, pose: TimelinePreviewPose): TimelinePosition {
+    return { session, program: pose.program, time: pose.time, playing: false, busy: false,
+        elapsed: pose.playback?.elapsed, all: pose.playback?.all, completed: pose.playback?.completed };
 }
 
 /** The extension measures elapsed time while Studio owns the clock and native values. */
@@ -24,13 +29,13 @@ export class TimelinePlayback {
 
     follow(panel?: DesignerPanel): void {
         const playback = this.playback;
-        if (!playback || (playback.panel === panel && panel.document.version === playback.revision)) return;
+        if (!playback || (playback.panel === panel && panel.document.version === playback.revision && panel.currentToken !== undefined)) return;
         playback.running = false;
         this.playback = undefined;
         this.update(undefined);
     }
 
-    async control(panel: DesignerPanel, frame: FrameTarget, control: TimelineTransportControl, timeline: AuthoredTimeline | undefined,
+    async control(panel: DesignerPanel, frame: FrameTarget, control: TimelineTransportControl, timeline: TimelineClock | undefined,
         signal: AbortSignal): Promise<TimelinePosition> {
         signal.throwIfAborted();
         const existing = this.playback;
@@ -49,8 +54,8 @@ export class TimelinePlayback {
         const idle = { session: panel.session, program: control.program, time: 0, playing: false, busy: false };
         const pose = panel.authoredTimelinePose;
         const previous = current?.token === frame.token ? current.position
-            : pose?.program === control.program ? { ...idle, time: pose.time } : undefined;
-        if (control.action === 'pause') return previous ?? idle;
+            : pose?.program === control.program ? positionFromPose(panel.session, pose) : undefined;
+        if (control.action === 'pause' && previous?.elapsed === undefined) return previous ?? idle;
         const playback: Playback = {
             panel, revision: panel.document.version, token: frame.token, position: previous ?? idle, running: false, interrupting: false,
         };
@@ -59,13 +64,23 @@ export class TimelinePlayback {
         try {
             if (control.action === 'stop') {
                 await this.render(playback, { action: 'stop_program' }, signal);
+            } else if (control.action === 'pause') {
+                await this.render(playback, { action: 'pause_program', program: control.program }, signal);
             } else if (control.action === 'seek' && timeline) {
-                if (!Number.isFinite(control.time) || control.time < 0 || control.time > timeline.duration) {
+                const limit = timeline.native ? timeline.total_duration : timeline.duration;
+                if (!Number.isFinite(control.time) || control.time < 0 || (limit !== null && control.time > limit)) {
                     throw new Error('Choose a time within the animation duration.');
                 }
                 await this.render(playback, { action: 'scrub', program: control.program, time: control.time }, signal);
             } else if (control.action === 'play' && timeline) {
-                await this.start(playback, control.time, previous, timeline, signal);
+                await this.start(playback, control.time, previous?.all ? undefined : previous, timeline, signal);
+            } else if (control.action === 'play_all') {
+                if (control.time !== undefined && (!Number.isFinite(control.time) || control.time < 0)) {
+                    throw new Error('Choose a nonnegative elapsed playback time.');
+                }
+                const time = control.time ?? (previous?.all && !previous.completed ? undefined : 0);
+                const position = await this.render(playback, { action: 'play_all', program: control.program, time }, signal);
+                this.beginClock(playback, position);
             } else {
                 throw new Error('Choose an authored animation program from the current document.');
             }
@@ -76,18 +91,23 @@ export class TimelinePlayback {
     }
 
     private async start(playback: Playback, time: number | undefined, previous: TimelinePosition | undefined,
-        timeline: AuthoredTimeline, signal: AbortSignal): Promise<void> {
+        timeline: TimelineClock, signal: AbortSignal): Promise<void> {
         const end = timeline.total_duration;
         if (time !== undefined && (!Number.isFinite(time) || time < 0 || (end !== null && time > end))) {
             throw new Error('Choose a time within the total playback duration.');
         }
-        const resume = previous?.elapsed !== undefined && (end === null || previous.elapsed < end);
+        const resume = previous?.elapsed !== undefined && !previous.completed && (end === null || previous.elapsed < end);
+        const limit = timeline.native ? end : timeline.duration;
         const fromPlayhead = previous?.elapsed === undefined && previous !== undefined && previous.time > 0
-            && previous.time < timeline.duration;
+            && (limit === null || previous.time < limit);
         const request = { action: 'play_program', program: playback.position.program };
         const position = await this.render(playback, time !== undefined
             ? { ...request, time: time === end ? 0 : time }
-            : resume ? request : { ...request, time: fromPlayhead ? previous.time : 0, from_playhead: fromPlayhead }, signal);
+            : resume ? request : { ...request, time: fromPlayhead ? previous.time : 0, from_playhead: fromPlayhead && !timeline.native }, signal);
+        this.beginClock(playback, position);
+    }
+
+    private beginClock(playback: Playback, position: TimelinePosition): void {
         if (position.playing) {
             playback.running = true;
             playback.loop = this.advance(playback);
@@ -95,18 +115,12 @@ export class TimelinePlayback {
     }
 
     private async advance(playback: Playback): Promise<void> {
-        let last = performance.now();
         try {
-            while (playback.running) {
-                await delay(16);
-                if (!playback.running) break;
-                const now = performance.now();
-                const seconds = (now - last) / 1000;
-                last = now;
+            await drivePreviewClock(() => playback.running, async seconds => {
                 const position = await this.render(playback,
                     { action: 'advance_program', program: playback.position.program, seconds }, AbortSignal.timeout(15_000));
-                if (!position.playing) break;
-            }
+                return position.playing;
+            });
         } catch (error) {
             if (this.playback === playback && playback.running) this.reportError(error);
         } finally {
@@ -145,8 +159,8 @@ export class TimelinePlayback {
         }
         if (!presentation?.timelinePosition) throw new Error('The native preview did not report a timeline position.');
         playback.token = token + 1;
-        const { elapsed, time, playing } = presentation.timelinePosition;
-        return this.commit(playback, { elapsed, time, playing: playing && !playback.interrupting });
+        const { elapsed, time, all, completed, playing } = presentation.timelinePosition;
+        return this.commit(playback, { elapsed, time, all, completed, playing: playing && !playback.interrupting });
     }
 
     private commit(playback: Playback, change: Partial<TimelinePosition>): TimelinePosition {

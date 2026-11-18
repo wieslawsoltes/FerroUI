@@ -17,6 +17,7 @@ import type { ProjectAssets } from './projectAssets';
 import { promptRsxControlName } from './rsxRename';
 import { editBinding } from './studioBinding';
 import { StudioContext } from './studioContext';
+import type { StateTransitionControl } from './stateTransitionProtocol';
 import { chooseLayout } from './studioLayout';
 import { promoteResource } from './studioResourcePromotion';
 import { editBrush } from './studioBrush';
@@ -83,8 +84,8 @@ export class DesignerWorkbench implements vscode.Disposable {
                 else if (action === 'promoteResource') await promoteResource(context, target.node, property);
                 else if (action === 'brush') await editBrush(context, target.node, property);
             });
-        this.studio = new StudioView(changed);
         this.timeline = new TimelineView(context.extensionUri, changed);
+        this.studio = new StudioView(changed, (context, route) => this.timeline.openTransition(context, route));
         this.data = new DesignDataView(context.extensionUri, changed);
         this.library = new LibraryView(changed);
         const snippets = vscode.workspace.createFileSystemWatcher('**/.ferroui/toolbox/*.xaml');
@@ -224,6 +225,10 @@ export class DesignerWorkbench implements vscode.Disposable {
 
     controlTimeline(panel: DesignerPanel, frame: FrameTarget, control: TimelineControl, signal: AbortSignal) {
         return this.timeline.control(panel, frame, control, signal);
+    }
+
+    controlStateTransition(panel: DesignerPanel, frame: FrameTarget, control: StateTransitionControl, signal: AbortSignal) {
+        return this.timeline.controlTransition(panel, frame, control, signal);
     }
 
     setOutlineMode(panel: DesignerPanel, mode: OutlineMode): void {

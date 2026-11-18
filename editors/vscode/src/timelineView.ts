@@ -1,12 +1,15 @@
-import type * as vscode from 'vscode';
+import * as vscode from 'vscode';
 import type { DesignerPanel } from './designerPanel';
 import { DockView } from './dockView';
 import { errorMessage, type FrameTarget } from './protocol';
+import type { StateTransitionControl, StateTransitionRoute } from './stateTransitionProtocol';
 import { choose, StudioContext } from './studioContext';
 import { chooseKeyframeGroupEdit, keyframeOptions } from './studioKeyframes';
-import { showAnimationActions } from './studioPrograms';
+import { chooseAnimationTargets, showAnimationActions } from './studioPrograms';
 import { authorTimelineKeyframe } from './timelineKeyframeAuthoring';
-import { TimelinePlayback } from './timelinePlayback';
+import { positionFromPose, TimelinePlayback } from './timelinePlayback';
+import { canPreviewProgram, previewClock } from './timelinePrograms';
+import { TimelineTransitions } from './timelineTransitions';
 import type { FromTimeline, KeyframeLocation, TimelineControl, TimelineProgram, TimelineState, ToTimeline } from './timelineProtocol';
 import { timelineHtml } from './view';
 
@@ -25,6 +28,7 @@ interface Catalog {
 export class TimelineView implements vscode.Disposable {
     readonly view: DockView<TimelineState, FromTimeline, ToTimeline>;
     private readonly playback: TimelinePlayback;
+    private readonly transitions: TimelineTransitions;
     private panel?: DesignerPanel;
     private file = '';
     private catalog?: Catalog;
@@ -36,6 +40,10 @@ export class TimelineView implements vscode.Disposable {
             this.view.post({ type: 'position', position, frame: this.frame() });
             if (!position?.busy) this.refresh();
         }, error => this.report(error));
+        this.transitions = new TimelineTransitions(() => {
+            this.shown = undefined;
+            this.refresh();
+        }, error => this.report(error));
     }
 
     update(panel: DesignerPanel | undefined, file: string): void {
@@ -44,6 +52,7 @@ export class TimelineView implements vscode.Disposable {
         this.file = file;
         if (panel?.snapshot?.image && !panel.authoredTimelinePose) panel.setAnimationRecording(false);
         this.playback.follow(panel);
+        this.transitions.follow(panel);
         this.refresh();
     }
 
@@ -52,16 +61,18 @@ export class TimelineView implements vscode.Disposable {
     }
 
     async control(panel: DesignerPanel, frame: FrameTarget, control: TimelineControl, signal: AbortSignal) {
+        if (this.transitions.position) throw new Error('Return to animations before controlling a program.');
         if ((control.action === 'pause' || control.action === 'stop')
             && this.playback.position?.session === panel.session && this.playback.position.program === control.program) {
             return this.playback.control(panel, frame, control, undefined, signal);
         }
         if (!panel.canUse(frame)) throw new Error('Read the current designer revision.');
         const program = (await this.programs(panel).pending).find(entry => entry.id === control.program);
-        if (!program?.timeline) throw new Error('Choose an authored animation program from the current document.');
+        if (!program) throw new Error('Choose an authored animation program from the current document.');
+        if (control.action === 'play_all' && !panel.supportsTimelineCombinedPlayback) throw new Error('Update the FerroUI preview helper to play all animations.');
         if (control.action === 'record') {
             if (typeof control.enabled !== 'boolean') throw new Error('Choose whether to record property edits.');
-            if (!panel.supportsTimelineRecording || this.panel !== panel) throw new Error('Use the current XAML designer to record property edits.');
+            if (!program.timeline || !panel.supportsTimelineRecording || this.panel !== panel) throw new Error('Use the current XAML designer to record property edits.');
             if (control.enabled) {
                 const time = control.time ?? (panel.authoredTimelinePose?.program === program.id ? panel.authoredTimelinePose.time : 0);
                 await this.playback.control(panel, frame, { action: 'seek', program: program.id, time }, program.timeline, signal);
@@ -76,12 +87,28 @@ export class TimelineView implements vscode.Disposable {
             return { session: panel.session, program: program.id, time: panel.authoredTimelinePose?.time ?? 0,
                 playing: false, busy: false, recording: panel.animationRecordingTime !== undefined };
         }
-        return this.playback.control(panel, frame, control, program.timeline, signal);
+        if ((control.action === 'play' || control.action === 'seek') && !canPreviewProgram(program)) {
+            throw new Error('Choose live targets for this animation preview.');
+        }
+        return this.playback.control(panel, frame, control, previewClock(program), signal);
+    }
+
+    async openTransition(context: StudioContext, route: StateTransitionRoute): Promise<void> {
+        context.ensure();
+        await this.controlTransition(context.panel, { session: context.panel.session, token: context.token },
+            { action: 'open', ...route }, AbortSignal.timeout(15_000));
+        await vscode.commands.executeCommand(`${TIMELINE_VIEW}.focus`);
+    }
+
+    controlTransition(panel: DesignerPanel, frame: FrameTarget, control: StateTransitionControl, signal: AbortSignal) {
+        if (this.panel !== panel || !panel.supportsStateTransitionPreview) throw new Error('Open a current designer with native transition preview.');
+        if (control.action === 'open' && panel.canUse(frame)) this.playback.follow();
+        return this.transitions.control(panel, frame, control, signal);
     }
 
     private programs(panel: DesignerPanel): Catalog {
         const block = panel.snapshot?.activeBlock?.start;
-        const key = `${panel.session}:${panel.document.version}:${block?.line ?? 0}:${block?.character ?? 0}`;
+        const key = `${panel.session}:${panel.document.version}:${block?.line ?? 0}:${block?.character ?? 0}:${panel.timelineCatalogEpoch}`;
         if (this.catalog?.key === key && (!this.catalog.error || this.catalog.token === panel.currentToken)) return this.catalog;
         const pending = panel.studioQuery('designer_programs', { include_source: false, include_keyframe_text: true },
             undefined, AbortSignal.timeout(15_000)).then(result => (result as { programs: TimelineProgram[] }).programs);
@@ -109,10 +136,14 @@ export class TimelineView implements vscode.Disposable {
         if (!this.view.visible) { this.shown = undefined; return; }
         const panel = this.panel;
         const frame = this.frame();
+        const transition = this.transitions.position;
+        if (transition && panel) {
+            this.view.show({ frame: frame && { session: panel.session, token: transition.revision }, documentVersion: panel.document.version,
+                transition, programs: [], names: {}, writable: false }, this.file);
+            return;
+        }
         const pose = panel?.snapshot?.timelinePose;
-        const position = this.playback.position ?? (panel && pose ? {
-            session: panel.session, program: pose.program, time: pose.time, playing: false, busy: false,
-        } : undefined);
+        const position = this.playback.position ?? (panel && pose ? positionFromPose(panel.session, pose) : undefined);
         if (position?.busy && frame?.session === position.session) return;
         const key = `${panel?.session}:${frame?.token}:${panel?.status ?? ''}`;
         if (key === this.shown) return;
@@ -126,6 +157,7 @@ export class TimelineView implements vscode.Disposable {
         this.view.show({ frame: catalog?.programs ? frame : undefined, documentVersion: panel?.document.version,
             programs, message, names, writable: panel?.language === 'xaml', position,
             canEditKeyframes: panel?.supportsTimelineKeyframeDrafts,
+            canPlayAll: Boolean(panel?.supportsTimelineCombinedPlayback && programs.some(canPreviewProgram)),
             canRecord: panel?.supportsTimelineRecording, canRecordGeometry: panel?.supportsTimelineGeometryRecording,
             recording: this.recordingTime(panel) !== undefined }, this.file);
     }
@@ -136,6 +168,8 @@ export class TimelineView implements vscode.Disposable {
         try {
             if (message.type === 'control') {
                 await this.control(panel, message.frame, message.control, AbortSignal.timeout(15_000));
+            } else if (message.type === 'transitionControl') {
+                await this.controlTransition(panel, message.frame, message.control, AbortSignal.timeout(15_000));
             } else {
                 const context = new StudioContext(panel, message.frame.token, () => this.panel === panel);
                 if (message.type === 'keyframeDraft') {
@@ -143,6 +177,12 @@ export class TimelineView implements vscode.Disposable {
                     return;
                 }
                 const program = (await this.programs(panel).pending).find(entry => entry.id === message.program);
+                if (message.type === 'programTargets' || message.type === 'revealProgram') {
+                    if (!program) throw new Error('Choose a current animation program.');
+                    if (message.type === 'programTargets') await chooseAnimationTargets(context, program);
+                    else await context.reveal(program.id);
+                    return;
+                }
                 if (message.type === 'programActions') {
                     if (message.program !== undefined && !program) throw new Error('Choose a current animation program.');
                     context.ensure();
@@ -213,6 +253,7 @@ export class TimelineView implements vscode.Disposable {
 
     dispose(): void {
         this.playback.follow();
+        this.transitions.follow();
         this.view.dispose();
     }
 }

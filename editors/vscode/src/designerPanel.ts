@@ -7,7 +7,7 @@ import { LayerViews } from './layerViews';
 import { NativePreview } from './nativePreview';
 import { DEFAULT_VIEWPORT, errorMessage, isViewport, type Asset, type CanvasSnapshot, type DragMessage, type DropHint, type FrameTarget, type FromDesigner, type Language, type NodeOperation, type NodeTarget, type Operation, type Placement, type Snapshot, type Source, type ToDesigner, type Viewport } from './protocol';
 import { applyTextEdits, asPosition, asRange, offsetAfterChanges, sourceOf } from './textDocument';
-import type { TimelinePreviewPose } from './timelineProtocol';
+import type { TimelinePreviewPose, TimelineTargetOverrides } from './timelineProtocol';
 import { designerHtml, webviewOptions } from './view';
 import type { EditResult, Inspection, InspectionTarget, Range, ResourceRow, RuntimeRow, RuntimeTreeMode } from './protocol';
 import type { CanvasAction, CanvasFocusOrder, CanvasInteraction, CanvasPresentation, DesignDataPresentation, DesignerViewState } from './protocol';
@@ -25,6 +25,8 @@ interface Frame {
     timelineRecording: boolean;
     timelineGeometryRecording: boolean;
     timelineKeyframeDrafts: boolean;
+    timelineCombinedPlayback: boolean;
+    stateTransitionPreview: boolean;
 }
 
 type PropertyEdit = Extract<NodeOperation, { type: 'setProperty' | 'resetProperty' }>;
@@ -48,6 +50,8 @@ export class DesignerPanel implements vscode.Disposable {
     private viewport: Viewport;
     private designData?: DesignDataPresentation;
     private timelinePose?: TimelinePreviewPose;
+    private timelineTargets?: TimelineTargetOverrides;
+    private animationCatalogEpoch = 0;
     private animationRecording = false;
     private retainedSelection?: { version: number; ranges: Range[] };
     private inspected = false;
@@ -143,10 +147,13 @@ export class DesignerPanel implements vscode.Disposable {
     get runtimeSelection(): RuntimeRow | undefined { return this.runtime; }
     get dimensions(): Viewport { return this.viewport; }
     get authoredTimelinePose(): TimelinePreviewPose | undefined { return this.timelinePose; }
+    get timelineCatalogEpoch(): number { return this.animationCatalogEpoch; }
     get supportsTimelineRecording(): boolean { return Boolean(this.language === 'xaml' && this.frame?.timelineRecording); }
     get supportsTimelineGeometryRecording(): boolean { return Boolean(this.supportsTimelineRecording && this.frame?.timelineGeometryRecording); }
     get supportsTimelineKeyframeDrafts(): boolean { return Boolean(this.language === 'xaml' && this.frame?.timelineKeyframeDrafts); }
-    get animationRecordingTime(): number | undefined { return this.animationRecording ? this.timelinePose?.time : undefined; }
+    get supportsTimelineCombinedPlayback(): boolean { return Boolean(this.frame?.timelineCombinedPlayback); }
+    get supportsStateTransitionPreview(): boolean { return Boolean(this.frame?.stateTransitionPreview); }
+    get animationRecordingTime(): number | undefined { return this.animationRecording && !this.timelinePose?.playback ? this.timelinePose?.time : undefined; }
     get isDisposed(): boolean { return this.disposed; }
     get canvasReady(): boolean { return !this.disposed && this.ready && this.panel.visible; }
     get status(): string | undefined {
@@ -393,7 +400,17 @@ export class DesignerPanel implements vscode.Disposable {
         return this.present(token, signal, (client, next) => client.studioPresent(token, next, name, args, this.studioSelection(selection)), true,
             presentation => {
                 if (name === 'designer_design_data_edit') this.rememberDesignData(args);
-                if (name === 'designer_program') this.timelinePose = presentation.timelinePosition?.pose ?? undefined;
+                if (name === 'designer_program') {
+                    this.timelinePose = presentation.timelinePosition?.pose ?? undefined;
+                    if (presentation.timelinePosition?.elapsed !== undefined || !this.timelinePose) this.setAnimationRecording(false);
+                }
+                if (name === 'designer_state' || name === 'designer_definition') {
+                    this.timelinePose = undefined;
+                    this.setAnimationRecording(false);
+                }
+                if (presentation.timelineTargets !== undefined) this.timelineTargets = presentation.timelineTargets;
+                if (presentation.timelineTargets !== undefined || name === 'designer_definition'
+                    || (name === 'designer_state' && (args as { action?: string }).action !== 'advance_preview')) this.animationCatalogEpoch++;
             });
     }
 
@@ -538,6 +555,7 @@ export class DesignerPanel implements vscode.Disposable {
                 workspaceRoot: folder?.uri.scheme === 'file' ? folder.uri.fsPath : undefined,
                 localSources: dirtyXamlSources([this.document.uri], this.document),
                 designData: this.designData, layerView: this.layers.input(caret), timelinePose: this.timelinePose,
+                timelineTargets: this.timelineTargets,
             });
             if (this.disposed || token !== this.generation || version !== this.document.version) return;
             if (this.dependencies.accept(snapshot.dependencies ?? [])) { this.schedule(0); return; }
@@ -551,6 +569,8 @@ export class DesignerPanel implements vscode.Disposable {
             this.frame = { token, version, viewport, source: input, snapshot, timelineRecording: Boolean(client.capabilities.timelineRecording),
                 timelineGeometryRecording: Boolean(client.capabilities.timelineGeometryRecording),
                 timelineKeyframeDrafts: Boolean(client.capabilities.timelineKeyframeDrafts),
+                timelineCombinedPlayback: Boolean(client.capabilities.timelineCombinedPlayback),
+                stateTransitionPreview: Boolean(client.capabilities.stateTransitionPreview),
                 canvas: { ...snapshot, nodes, interactive: Boolean(client.capabilities.canvasInteraction && snapshot.image),
                     focusOrderAvailable: Boolean(client.capabilities.canvasFocusOrder && snapshot.image) } };
             this.runtime = undefined;
@@ -661,7 +681,7 @@ export class DesignerPanel implements vscode.Disposable {
     }
 
     private recordingGeometryPose(): TimelinePreviewPose | undefined {
-        if (this.animationRecording && this.supportsTimelineGeometryRecording) return this.timelinePose;
+        if (this.animationRecordingTime !== undefined && this.supportsTimelineGeometryRecording) return this.timelinePose;
     }
 
     private async commitEdit(frame: Frame, plan: (client: NativePreview) => Promise<EditResult>, signal?: AbortSignal, validate?: () => void): Promise<void> {

@@ -1,5 +1,6 @@
 import type { LayerViewState, LayerViewsState } from './layerViews';
-import type { TimelinePreviewPose } from './timelineProtocol';
+import type { TimelinePreviewPose, TimelineTargetOverrides } from './timelineProtocol';
+import type { NativeTransitionPosition } from './stateTransitionProtocol';
 
 export interface Position { line: number; character: number }
 export interface Range { start: Position; end: Position }
@@ -239,7 +240,9 @@ export interface CanvasPresentation {
     notices: string[];
     selection: number[];
     layerView?: LayerViewState;
-    timelinePosition?: { time: number; elapsed?: number; playing: boolean; pose?: TimelinePreviewPose | null };
+    timelinePosition?: { time: number; elapsed?: number; all?: boolean; completed?: boolean; playing: boolean; pose?: TimelinePreviewPose | null };
+    timelineTargets?: TimelineTargetOverrides;
+    transitionPosition?: NativeTransitionPosition;
 }
 export type CanvasSnapshot = Omit<Snapshot, 'nodes'> & { nodes: CanvasNode[]; interactive?: boolean; focusOrderAvailable?: boolean };
 export interface CanvasFocusOrder {
