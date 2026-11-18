@@ -1,0 +1,24 @@
+[package]
+name = "todo-workbench"
+description = "A FerroUI RSX Todo app for the VS Code designer and application MCP server"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[[bin]]
+name = "todo-workbench"
+path = "main.rs"
+test = false
+
+[features]
+hot-reload = ["ferroui-view/hot-reload"]
+mcp = ["dep:ferroui-mcp"]
+
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-view = { workspace = true, features = ["desktop"] }
+ferroui-themes-winui = { workspace = true }
+ferroui-mcp = { workspace = true, optional = true }
+todo-mvc = { path = "../TodoMvc" }

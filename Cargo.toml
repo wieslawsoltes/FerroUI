@@ -228,6 +228,7 @@ members = [
     "samples/ViewInterop",
     "samples/ViewGallery",
     "samples/TodoMvc",
+    "samples/TodoWorkbench",
     "samples/CustomEffects",
     "samples/ReactiveDemoComponents",
     "samples/MiniMvvm",

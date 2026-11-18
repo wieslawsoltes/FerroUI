@@ -6834,6 +6834,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "todo-workbench"
+version = "0.5.1-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-mcp",
+ "ferroui-themes-winui",
+ "ferroui-view",
+ "todo-mvc",
+]
+
+[[package]]
 name = "tokio"
 version = "1.53.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"

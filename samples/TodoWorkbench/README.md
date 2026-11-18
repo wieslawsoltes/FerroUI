@@ -1,0 +1,41 @@
+# Todo Workbench
+
+A native Todo app using FerroUI Rust components and `rsx!`. It reuses the TodoMVC
+model and supports adding, checking, filtering, removing, and clearing tasks.
+
+```sh
+cargo run -p todo-workbench --features hot-reload,mcp -- --demo --mcp
+```
+
+`--demo` loads three sample tasks. `--mcp` starts the local runtime inspector when the
+`mcp` feature is enabled. Add `--mcp-input` to authorize native clicks and keyboard
+input from an MCP client.
+
+## Run it from VS Code
+
+Open the FerroUI checkout in VS Code. Use **FerroUI: Open Designer** on
+`samples/TodoWorkbench/view.rs` and select the first RSX invocation. Edit the
+heading text in Properties. The source and preview update together.
+
+To run this target through the extension, add a target like this to your VS Code
+settings and run **FerroUI: Run with Hot Reload**.
+
+```json
+{
+  "ferroui.hotReload.targets": [
+    {
+      "label": "Todo Workbench",
+      "package": "todo-workbench",
+      "binary": "todo-workbench",
+      "features": ["hot-reload", "mcp"],
+      "args": ["--demo", "--mcp", "--mcp-input"]
+    }
+  ]
+}
+```
+
+Give an agent access to **FerroUI Designer in VS Code** to edit the design and
+save source. With **FerroUI Managed Application**, the agent can use
+`find_elements` to locate `NewTask` and `AddTask`, then call `type_text` and
+`click`. Save a heading text edit to see the live title update alongside the
+tasks you already entered. [VS Code extension guide](../../editors/vscode/README.md)
