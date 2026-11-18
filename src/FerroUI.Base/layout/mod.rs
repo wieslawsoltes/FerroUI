@@ -39,6 +39,6 @@ mod layout_helper_tests;
 #[cfg(test)]
 mod hot_value_tests;
 #[cfg(test)]
-mod layout_manager_tests_bring_into_view;
+mod layout_manager_bring_into_view_tests;
 #[cfg(test)]
 mod layout_queue_tests;
