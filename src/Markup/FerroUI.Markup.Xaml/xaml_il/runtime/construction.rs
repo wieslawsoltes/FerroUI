@@ -938,7 +938,9 @@ mod tests {
     fn default_template_binding_choice_evaluates_source_first_and_stays_live() {
         use ferroui_base::metadata::{from_markup_value, MarkupValue};
         use ferroui_controls::{presenters::ContentPresenter, ContentControl};
-        thread_local! { static READS: std::cell::RefCell<Vec<&'static str>> = const { std::cell::RefCell::new(Vec::new()) }; }
+        ferroui_base::ferro_thread_local! {
+            static READS: std::cell::RefCell<Vec<&'static str>> = std::cell::RefCell::new(Vec::new());
+        }
         static BIND: ConstructionProgram = ConstructionProgram {
             code: &[op::TEMPLATE_BIND_FROM, 0, 0, 1, 14, 9],
             imports: &ConstructionImports {

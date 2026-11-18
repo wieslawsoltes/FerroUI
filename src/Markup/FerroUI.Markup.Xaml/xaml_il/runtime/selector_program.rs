@@ -337,7 +337,9 @@ mod lexical_tests {
 
     #[test]
     fn scoped_conversions_evaluate_in_order_and_preserve_the_first_error() {
-        thread_local! { static TRACE: std::cell::RefCell<Vec<&'static str>> = const { std::cell::RefCell::new(Vec::new()) }; }
+        ferroui_base::ferro_thread_local! {
+            static TRACE: std::cell::RefCell<Vec<&'static str>> = std::cell::RefCell::new(Vec::new());
+        }
         fn property() -> &'static FerroProperty {
             TRACE.with(|v| v.borrow_mut().push("property"));
             ferroui_base::input::InputElement::is_enabled_property()
