@@ -49,6 +49,10 @@ use crate::XamlLoadError;
 #[path = "compact_resource_rows.rs"]
 mod compact;
 
+#[path = "theme_resource_program.rs"]
+mod program;
+pub use program::TypedResourceProgram;
+
 /// A resource that is `{StaticResource target}` alone (a resource that names another one),
 /// added under `key`.
 ///

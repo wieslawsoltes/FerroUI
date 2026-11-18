@@ -271,10 +271,38 @@ impl VisualStateManager {
             }
             return true;
         }
-        let args = VisualStateChangedEventArgs::new(old_state, state.cloned(), Some(control.clone()));
+        let args = VisualStateChangedEventArgs::new(old_state.clone(), state.cloned(), Some(control.clone()));
         Self::raise_queued(group, args.clone(), true);
-        group.set_state(state, Some(template_root));
-        Self::raise_queued(group, args, false);
+        // With transitions (and system animations on), the transition of the change; one of
+        // zero length changes the state at once (WinUI's `IsZeroDuration`).
+        let transition = match state {
+            Some(state) if use_transitions && super::transitions::animations_enabled() => {
+                super::transitions::find_transition(&group.transitions(), old_state.as_ref(), state)
+                    .filter(|transition| !transition.is_zero_duration())
+            }
+            _ => None,
+        };
+        match (state, transition) {
+            (Some(state), Some(transition)) => {
+                // `CurrentStateChanged` when the transition completes; an interrupted transition
+                // raises none.
+                let weak = group.downgrade();
+                group.begin_transition(
+                    state,
+                    Some(template_root),
+                    &transition,
+                    Box::new(move || {
+                        if let Some(group) = weak.upgrade() {
+                            Self::raise_queued(&group, args, false);
+                        }
+                    }),
+                );
+            }
+            _ => {
+                group.set_state(state, Some(template_root));
+                Self::raise_queued(group, args, false);
+            }
+        }
         true
     }
 

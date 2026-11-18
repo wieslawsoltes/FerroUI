@@ -282,6 +282,43 @@ fn grid_definitions_and_attached_properties() {
 }
 
 #[test]
+fn definitions_of_the_same_count_and_kinds_take_their_sizes_in_place() {
+    use crate::{rerender, GridDefinitionsText};
+    use ferroui_controls::{ColumnDefinition, GridLength, GridUnitType};
+    let star = |value| GridLength::new(value, GridUnitType::Star);
+    let owner = Owner::new_root();
+    let (weight, pixels, control) = owner.with(|| {
+        let (weight, pixels) = (signal(1_u32), signal(false));
+        let control = rerender(move || {
+            let rows = if pixels.get() { "Auto,40" } else { "Auto,*" };
+            grid()
+                .row_definitions(rows)
+                .set(GridDefinitionsText::columns_property(), move || format!("{}*,Auto", weight.get()))
+        })
+        .into_element()
+        .mount();
+        (weight, pixels, control)
+    });
+    let grid = control.cast::<Grid>().unwrap();
+    let columns = grid.column_definitions();
+    let first: Ref<ColumnDefinition> = columns.snapshot()[0].clone();
+    assert_eq!(first.width(), star(1.0));
+
+    // The same count and kinds: the collection and its definitions stay and take the sizes.
+    weight.set(3);
+    assert!(grid.column_definitions() == columns);
+    assert!(grid.column_definitions().snapshot()[0].ptr_eq(&first));
+    assert_eq!(first.width(), star(3.0));
+
+    // Another kind: a new collection, as the setter of the grid gives it.
+    let rows = grid.row_definitions();
+    pixels.set(true);
+    assert!(grid.row_definitions() != rows);
+    assert_eq!(grid.row_definitions().snapshot()[1].height(), GridLength::new(40.0, GridUnitType::Pixel));
+    owner.dispose();
+}
+
+#[test]
 fn an_element_is_data_that_compares_by_value() {
     let a: Element = button().width(10.0).child("x").into_element();
     let b: Element = button().width(10.0).child("x").into_element();
