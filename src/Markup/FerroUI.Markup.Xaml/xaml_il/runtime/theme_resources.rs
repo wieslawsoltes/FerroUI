@@ -52,6 +52,10 @@ mod compact;
 mod packed;
 pub use packed::PackedRows;
 
+#[path = "theme_resource_program.rs"]
+mod program;
+pub use program::TypedResourceProgram;
+
 /// A resource that is `{StaticResource target}` alone (a resource that names another one),
 /// added under `key`.
 ///

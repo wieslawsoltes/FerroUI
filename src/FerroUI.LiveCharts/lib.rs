@@ -12,6 +12,7 @@ pub mod geo_map_chart_engine;
 pub mod heat_functions;
 pub mod heat_legend;
 pub mod kernel;
+mod label_lines;
 pub mod labelers;
 pub mod measure;
 pub mod motion;
@@ -22,6 +23,7 @@ pub mod sankey_chart_engine;
 pub mod scene;
 mod scene_transform;
 pub mod series;
+mod svg_path;
 pub mod treemap_chart_engine;
 pub mod visual_states;
 
@@ -39,8 +41,8 @@ pub use geo::{
     Maps,
 };
 pub use geo_map_chart_engine::{
-    GeoLand, GeoMapChartEngine, GeoMapMeasurement, GeoMapOptions, GeoMarker, GeoTooltipValue,
-    HeatLand, HeatLandSeries, MapViewport, ZoomDirection,
+    GeoLand, GeoMapChartEngine, GeoMapMeasurement, GeoMapOptions, GeoMarker, GeoTooltipFormatter,
+    GeoTooltipValue, HeatLand, HeatLandSeries, MapViewport, ZoomDirection,
 };
 pub use heat_functions::HeatFunctions;
 pub use heat_legend::{HeatLegend, HeatLegendSource};
@@ -55,14 +57,16 @@ pub use polar_chart_engine::{
 };
 pub use sankey_chart_engine::{
     SankeyChartEngine, SankeyLabelPosition, SankeyLayoutKind, SankeyLink, SankeyNode,
-    SankeyOptions, SankeySeries,
+    SankeyOptions, SankeySeries, SankeySeriesOptions,
 };
 pub use scene::{
     ChartError, FindingStrategy, Geometry, HitRegion, HitShape, LegendItem, PaintStyle,
     PathCommand, PointId, Primitive, Scene, TextAnchor,
 };
 pub use series::{DataLabelsPosition, PolarLabelsPosition, RadialAlignment, Series, SeriesKind};
-pub use treemap_chart_engine::{TreemapChartEngine, TreemapNode, TreemapOptions, TreemapSeries};
+pub use treemap_chart_engine::{
+    TreemapChartEngine, TreemapNode, TreemapOptions, TreemapSeries, TreemapSeriesOptions,
+};
 pub use visual_states::{
     DrawnPropertiesDictionary, DrawnPropertySetter, IStateBehavior, StateBehavior, StateOrigin,
     VisualStatesDictionary,

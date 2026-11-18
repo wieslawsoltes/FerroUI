@@ -4,7 +4,8 @@
 From the LiveCharts2 port of #312 (docs/porting/livecharts2.md): the Cartesian and pie charts of L2,
 the polar chart of L4, the Sankey and treemap charts of L4b, the geographic map of L4c, and the
 OHLC series, error bars, date and time axes, heat series properties and angular gauge visuals of
-L5, and the heat legend and the data label positions of the heat series (#624).
+L5, and the heat legend, the data label positions of the heat series, the tooltip formatter of the
+map and the DataLabelsMaxWidth of the Sankey and treemap series (#624).
 
 The generated classes remain ordinary FerroUI classes visible to the XAML source
 scanner. This replaces the managed UI-property generator for this native host.
@@ -287,20 +288,25 @@ node_collections = {'SankeySeries':[('nodes','SankeyNodes'),('links','SankeyLink
 node_content = {'SankeySeries':'Nodes','TreemapSeries':'Nodes','HeatLandSeries':'Lands'}
 family_overrides = {'HeatLandSeries':['heat_map'],'HeatSeries':['heat_map'],'OhlcSeries':['stroke_width']}
 node_props = {
+ # DataLabelsMaxWidth of the Sankey and treemap series, the source's 170 (#624).
  'SankeySeries':[('nodes','Nodes','SankeyNodes','SankeyNodes::new()'),('links','Links','SankeyLinks','SankeyLinks::new()'),
+  ('data_labels_max_width','DataLabelsMaxWidth','f64','170.0'),
   ('node_width','NodeWidth','f64','12.0'),('node_padding','NodePadding','f64','8.0'),
   ('node_corner_radius','NodeCornerRadius','f64','0.0'),('layout_iterations','LayoutIterations','u32','32'),
   ('node_label_position','NodeLabelPosition','SankeyLabelPosition','SankeyLabelPosition::Auto'),
   ('layout','Layout','SankeyLayoutKind','SankeyLayoutKind::Vertical'),
   ('arc_span_degrees','ArcSpanDegrees','f64','150.0'),('link_fill','LinkFill','Option<Color>','None')],
- 'TreemapSeries':[('nodes','Nodes','TreemapNodes','TreemapNodes::new()')],
+ 'TreemapSeries':[('nodes','Nodes','TreemapNodes','TreemapNodes::new()'),
+  ('data_labels_max_width','DataLabelsMaxWidth','f64','170.0')],
  'HeatLandSeries':[('lands','Lands','HeatLands','HeatLands::new()'),('color_stops','ColorStops','Option<Vec<f64>>','None'),
   ('min_value','MinValue','Option<f64>','None'),('max_value','MaxValue','Option<f64>','None')],
  # The ColorStops, PointPadding, MinValue and MaxValue of CoreHeatSeries (L5).
  'HeatSeries':[('color_stops','ColorStops','Option<Vec<f64>>','None'),('point_padding','PointPadding','Thickness','Thickness::uniform(4.0)'),
   ('min_value','MinValue','Option<f64>','None'),('max_value','MaxValue','Option<f64>','None'),
   # Its DataLabelsPosition, Middle as the source's constructor sets it (#624).
-  ('data_labels_position','DataLabelsPosition','DataLabelsPosition','DataLabelsPosition::Middle')],
+  ('data_labels_position','DataLabelsPosition','DataLabelsPosition','DataLabelsPosition::Middle'),
+  # Its GeometrySvg: the SVG path data drawn in every cell, None for rectangles (#624).
+  ('geometry_svg','GeometrySvg','Option<String>','None')],
  # The tooltip label formatters of CorePolarLineSeries (code only), read by the chart (#624).
  'PolarLineSeries':[('angle_tool_tip_label_formatter','AngleToolTipLabelFormatter','Option<ChartPointFormatter>','None'),
   ('radius_tool_tip_label_formatter','RadiusToolTipLabelFormatter','Option<ChartPointFormatter>','None')]}
@@ -402,11 +408,14 @@ chart_props = [
  # The legend of the chart (IChartView.Legend): None is the native legend of the series, a
  # HeatLegend the gradient of SKHeatLegend (#624).
  ('legend','Legend','Option<Ref<ChartLegend>>','None'),
+ # The TooltipFormatter of a map (IGeoMapView, code only): the line of each series value in the
+ # tooltip of a land (#624).
+ ('tooltip_formatter','TooltipFormatter','Option<GeoTooltipFormatter>','None'),
 ]
 chart_properties=HEADER+'''use crate::{Chart,ChartKind,ChartLegend,ChartSeriesCollection,ChartVisualElements,Axes,GeoMarkers,LegendPosition,MapInteractionMode,TooltipPosition,ZoomAndPanMode};
 use ferroui_base::{ferro_properties,FerroProperty,Ref,StyledProperty,Rect};
 use ferroui_base::media::Color;
-use ferroui_livecharts::{DrawnMap,FindingStrategy,MapProjection,Section};
+use ferroui_livecharts::{DrawnMap,FindingStrategy,GeoTooltipFormatter,MapProjection,Section};
 use std::rc::Rc;
 '''+properties('Chart',chart_props)
 

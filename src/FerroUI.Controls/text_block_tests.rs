@@ -1901,3 +1901,43 @@ fn a_text_block_that_is_resized_and_keeps_its_layout_is_not_drawn_again() {
     assert!(renderer.take(&block).0 >= 1);
 }
 
+
+/// Not in the reference tests: text blocks of the same typeface, size and foreground brush share
+/// their default run properties; another size, another brush (even of the same colour) or
+/// decorations make properties of their own (desktop-performance.md, the run properties of #811).
+#[test]
+fn text_blocks_of_the_same_font_and_brush_share_their_run_properties() {
+    let _scope = test_scope();
+    let same = |a: &Rc<dyn ferroui_base::media::text_formatting::TextRunProperties>,
+                b: &Rc<dyn ferroui_base::media::text_formatting::TextRunProperties>| Rc::ptr_eq(a, b);
+    let (first, second) = (text_block("first"), text_block("second"));
+    let brush = Brushes::red();
+    first.set_foreground(Some(brush.clone()));
+    second.set_foreground(Some(brush.clone()));
+    assert!(same(&first.default_run_properties(), &second.default_run_properties()));
+
+    let larger = text_block("larger");
+    larger.set_foreground(Some(brush.clone()));
+    larger.set_font_size(first.font_size() * 2.0);
+    assert!(!same(&first.default_run_properties(), &larger.default_run_properties()));
+
+    // An equal brush that is another object: the text of each block follows its own brush.
+    let other_brush = text_block("other brush");
+    let red = ferroui_base::media::immutable::ImmutableSolidColorBrush::new(ferroui_base::media::Colors::RED);
+    other_brush.set_foreground(Some(Rc::new(red)));
+    assert!(!same(&first.default_run_properties(), &other_brush.default_run_properties()));
+
+    let decorated = text_block("decorated");
+    decorated.set_foreground(Some(brush.clone()));
+    decorated.set_text_decorations(Some(TextDecorations::underline()));
+    let decorated_again = text_block("decorated again");
+    decorated_again.set_foreground(Some(brush));
+    decorated_again.set_text_decorations(Some(TextDecorations::underline()));
+    assert!(!same(&decorated.default_run_properties(), &decorated_again.default_run_properties()));
+
+    // A property they are made of changes: the block makes or finds others, the other keeps its own.
+    let before = second.default_run_properties();
+    second.set_font_size(first.font_size() * 2.0);
+    assert!(same(&second.default_run_properties(), &larger.default_run_properties()));
+    assert!(same(&first.default_run_properties(), &before));
+}

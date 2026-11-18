@@ -83,10 +83,16 @@ python3 FerroUI/scripts/apps/sync-workspace.py --check   # what CI runs
   of this repository (`FerroUI/samples/SampleSupport`, `SampleBuild`, `SampleTesting`) are path
   dependencies.
 - **Profiles.** `release` (thin LTO), `fast-release` (for running locally), `dist` (what is shipped
-  and measured) and `browser` (size-optimised, with the per-package optimisation levels of the
-  framework's hot crates; docs/porting/browser-platform.md, section 18). Cargo warns about a
-  per-package override whose package the application does not use (for example the Vello crates);
-  the warning is harmless.
+  and measured, with the theme crates at `opt-level = "z"`; docs/binary-size.md, section 4.14) and
+  `browser` (size-optimised, with the per-package optimisation levels of the framework's hot
+  crates; docs/porting/browser-platform.md, section 18), with `release-unwind` and `dist-unwind`.
+  Cargo reads profiles only from the root manifest of the workspace it builds, so these settings
+  reach the application through the block alone: without it a `dist` build of the application is
+  its own profile (or none), with every crate at the level it states and unwinding on panic.
+  Cargo warns about a per-package override whose package the application does not use (for
+  example the Vello crates); the warning is harmless. An application outside such a repository
+  (from crates.io or a git dependency) copies the sections by hand (docs/binary-size.md,
+  section 6).
 - **Lock file.** Start `Cargo.lock` from FerroUI's, so that the application resolves the same
   versions the framework is tested with, then let cargo prune and complete it:
 
@@ -210,8 +216,34 @@ Inputs: `test`, `check`, `apt-packages` (extra Ubuntu packages), `script`, `brow
 `browser-features`, `browser-script`, `smoke` (default `true`), `smoke-ignore` (regular expressions,
 one per line, of smoke errors to leave out), `browser-tests`, `browser-tests-pull-request` (the
 lines for pull requests when they differ, for example fewer of the slow ones) and `browser-tests-setup`, `android` and
-`ios` (the arguments of the packaging scripts; empty: no package), `pages` (default `true`). The actions are pinned by commit, as
-in the workflows of this repository.
+`ios` (the arguments of the packaging scripts; empty: no package), `pages` (default `true`),
+`size-report` (default `false`: what the module of the site is made of, see below). The actions
+are pinned by commit, as in the workflows of this repository.
+
+What the WebAssembly module is made of: with `size-report: true` the browser job links the
+browser package a second time with the names of its functions and a link map, and
+`scripts/browser/wasm-size-report.py` writes the code by crate and by generic family (with what
+each row saves with gzip) and the largest functions into the summary of the run; the named module,
+the map and the report are the artifact `size-report`. The published site is the one built
+without names. An application turns it on for a run by hand with an input of its own:
+
+```yaml
+on:
+  workflow_dispatch:
+    inputs:
+      size-report:
+        type: boolean
+        default: false
+
+jobs:
+  app:
+    uses: wieslawsoltes/FerroUI/.github/workflows/app.yml@main
+    with:
+      browser-package: my-app-browser
+      size-report: ${{ inputs.size-report || false }}
+```
+
+and `gh workflow run ci.yml -f size-report=true`.
 
 GitHub Pages is enabled once, with GitHub Actions as its source:
 

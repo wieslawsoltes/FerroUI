@@ -407,6 +407,7 @@ fn a_table_lists_its_rows_in_order() {
         ],
         slots: Vec::new(),
         packed: None,
+        program: None,
     };
     assert_eq!(
         row_table("POPULATE_X_ROWS_0", "x.xaml", &run),
@@ -480,6 +481,21 @@ fn a_run_of_a_deferred_shape_is_a_packed_table() {
     assert!(row_table("ROWS", "t.xaml", &tables[0].1).contains("static ROWS: &[rt::ResourceAliasRow] = &["));
 }
 
+/// #855: with the typed bytecode backend a run is its program, also with packed tables on: a run
+/// is encoded by one representation only, and packed tables are of the native backend.
+#[test]
+fn the_typed_backend_encodes_a_run_without_a_packed_table() {
+    let lines = packed_body(&[("AccentBrush", "build_t_deferred_0", 1), ("Accent", "build_t_deferred_1", 2)]);
+    let statements = recorded(&lines, &[("build_t_deferred_0", 0, alias("Accent")), ("build_t_deferred_1", 1, alias("SystemAccent"))]);
+    let (written, tables) = with_packed_theme_rows(true, || {
+        row_runs_with_backend(lines, &statements, "BUILD_T_DOCUMENT", || "BUILD_T_ROWS_0".to_string(), true)
+    });
+    let (name, run) = &tables[0];
+    assert!(run.packed.is_none() && run.program.is_some(), "{run:?}");
+    assert!(!written.iter().any(|line| line.contains("rt::add_packed_")), "{written:?}");
+    assert!(!row_table(name, "t.xaml", run).contains("rt::PackedRows"));
+}
+
 /// #855: the literal brush record splits its colour into halves; a key with escapes is
 /// unescaped into the pool and written back as a literal.
 #[test]
@@ -514,4 +530,37 @@ fn string_literals_are_read_back() {
     }
     assert_eq!(string_value("\"bad\\q\""), None);
     assert_eq!(string_value("not a literal"), None);
+}
+
+#[test]
+fn typed_resource_runs_keep_units_local_and_encode_singleton_values_and_scopes() {
+    use super::super::theme_units::{begin_marker, END_MARKER};
+    let lines = body(&[
+        begin_marker(1).trim_start(),
+        &deferred_add("dictionary", "Alias", "build_alias", 6),
+        END_MARKER,
+        begin_marker(2).trim_start(),
+        &format!("{};", value_call("dictionary", "NegativeZero", "rt::to_object(-0.0_f64)", 3, 4)),
+        END_MARKER,
+    ]);
+    let scoped = DeferredRow {
+        kind: RowKind::ResourceAlias, operand: "\"Target\"".into(),
+        value_position: (7, 9), namespaces: Some("SCOPED".into()),
+    };
+    let statements = recorded(&lines, &[("build_alias", 0, scoped)]);
+    let mut next = 0;
+    let (body, tables) = row_runs_with_backend(lines, &statements, "DOC", || {
+        next += 1;
+        format!("BLOCK_{next}")
+    }, true);
+    assert_eq!(tables.len(), 2);
+    assert_eq!(tables[0].1.slots, [0]);
+    assert!(body.iter().any(|line| line.contains("BLOCK_1.add_resource_aliases(&dictionary, &context, &DOC)?;")));
+    assert!(body.iter().any(|line| line.contains("BLOCK_2.add_double_resources(&dictionary)?;")));
+    let alias = row_table("BLOCK_1", "test.xaml", &tables[0].1);
+    assert!(alias.contains(r#"b"\x01\x01\x01\x00\x0c\x10\x01\x02\x02\x01", &["Alias", "Target"], &[SCOPED]"#), "{alias}");
+    assert!(!alias.contains("NegativeZero"));
+    let number = row_table("BLOCK_2", "test.xaml", &tables[1].1);
+    assert!(number.contains(r#"b"\x01\x05\x01\x00\x06\x08\xff\x00\x00\x00\x00\x00\x00\x00\x80", &["NegativeZero"], &[]"#), "{number}");
+    assert!(!number.contains("SCOPED"));
 }
