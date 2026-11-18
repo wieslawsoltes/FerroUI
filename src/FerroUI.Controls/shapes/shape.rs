@@ -73,7 +73,23 @@ impl ShapeImpl for Shape {
     }
 }
 
-impl FerroObjectImpl for Shape {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for Shape {
+    // The properties the handler below compares with: the stroke and the fill of a shape.
+    inherited_reactions: ferroui_base::InheritedReactions::to(|property| {
+        matches!(
+            property.name(),
+            "Stroke"
+                | "StrokeThickness"
+                | "StrokeDashArray"
+                | "StrokeDashOffset"
+                | "StrokeLineCap"
+                | "StrokeJoin"
+                | "StrokeMiterLimit"
+                | "Fill"
+        )
+        .into()
+    });
+
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -116,7 +132,7 @@ impl FerroObjectImpl for Shape {
             this.invalidate_visual();
         }
     }
-}
+} }
 
 impl VisualImpl for Shape {
     fn render(this: &Self, context: &mut DrawingContext) {

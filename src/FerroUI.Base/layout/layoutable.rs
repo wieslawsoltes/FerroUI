@@ -116,6 +116,11 @@ ferro_class! {
 crate::ferro_class_info!(Layoutable { new: Layoutable::new });
 
 crate::ferro_overrides! { impl FerroObjectImpl for Layoutable {
+    // The handler leaves where the property is not one it named (`reacts_to`).
+    inherited_reactions: crate::InheritedReactions::to(|property| {
+        property.has_change_handler(PropertyChangeHandler::Layoutable).into()
+    });
+
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -1049,12 +1054,13 @@ impl Layoutable {
     /// `invalidate_measure` is called on it.
     pub fn affects_measure<T: ObjectType + Upcast<Layoutable>>(properties: &[&'static FerroProperty]) {
         for property in properties {
-            property.changed().subscribe(|e| {
-                if let Some(sender) = e.sender().downcast_ref::<T>() {
+            property
+                .changed()
+                .add_class_handler::<T>(|sender, _| {
                     let layoutable: &Layoutable = sender.upcast();
                     layoutable.invalidate_measure();
-                }
-            }).detach();
+                })
+                .detach();
         }
     }
 
@@ -1063,12 +1069,13 @@ impl Layoutable {
     /// `invalidate_arrange` is called on it.
     pub fn affects_arrange<T: ObjectType + Upcast<Layoutable>>(properties: &[&'static FerroProperty]) {
         for property in properties {
-            property.changed().subscribe(|e| {
-                if let Some(sender) = e.sender().downcast_ref::<T>() {
+            property
+                .changed()
+                .add_class_handler::<T>(|sender, _| {
                     let layoutable: &Layoutable = sender.upcast();
                     layoutable.invalidate_arrange();
-                }
-            }).detach();
+                })
+                .detach();
         }
     }
 

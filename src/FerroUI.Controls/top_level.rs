@@ -417,7 +417,16 @@ impl TopLevel {
 
         Layoutable::affects_measure::<TopLevel>(&[Self::client_size_property().as_property()]);
 
-        Self::system_bar_color_property().changed().add_class_handler::<Control>(|view, e| {
+        // The colour concerns a top level and the control right below one: the handler does
+        // nothing for any other control, and says so.
+        let concerns = |object: &ferroui_base::FerroObject| {
+            // SAFETY: the condition of a class handler is only asked for objects of its class
+            // (`add_class_handler_where`), which have a `Control` at offset zero.
+            let view = unsafe { ferroui_base::cast_this::<ferroui_base::FerroObject, Control>(object) };
+            view.downcast_ref::<TopLevel>().is_some()
+                || view.parent().is_some_and(|parent| parent.downcast_ref::<TopLevel>().is_some())
+        };
+        Self::system_bar_color_property().changed().add_class_handler_where::<Control>(concerns, |view, e| {
             let (_, new_value) = e.get_old_and_new_value::<Option<Ref<SolidColorBrush>>>();
             if let Some(color_brush) = new_value {
                 if let Some(insets_manager) =

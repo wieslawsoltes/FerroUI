@@ -1206,3 +1206,46 @@ fn geo_map_heat_legend_right_reduces_the_draw_margin_width() {
     assert!(bar.x >= plot.x + plot.width);
     assert!(has_text(&scene, "1") && has_text(&scene, "9"));
 }
+
+/// `DataLabelsMaxWidth` of the Sankey and treemap series (the source's 170 by default) from
+/// markup: a treemap label that fits its tile of 120 only when broken at the width is drawn on
+/// two lines, and a width of 400 leaves it on one line, which the tile culls.
+#[test]
+fn sankey_and_treemap_data_labels_max_width_load_from_markup() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    register_types();
+    assert_eq!(SankeySeries::new().data_labels_max_width(), 170.0);
+    assert_eq!(TreemapSeries::new().data_labels_max_width(), 170.0);
+    let loaded = FerroRuntimeXamlLoader::parse(
+        r##"<lc:TreemapChart xmlns:lc="https://ferroui.dev/livecharts">
+          <lc:TreemapSeries Padding="0" DataLabels="True" DataLabelsMaxWidth="100">
+            <lc:TreemapSeries.Nodes>
+              <lc:TreemapNode Name="United States of America" Value="10" />
+            </lc:TreemapSeries.Nodes>
+          </lc:TreemapSeries>
+        </lc:TreemapChart>"##,
+        Some(&ASSEMBLY),
+    )
+    .unwrap_or_else(|error| panic!("{}; {:?}", error.message(), error.inner_exception()));
+    let chart = from_markup_value::<Ref<TreemapChart>>(&Some(loaded)).unwrap();
+    chart.set_animations_speed(0.0);
+    let series = chart.series().get(0).cast::<TreemapSeries>().unwrap();
+    assert_eq!(series.data_labels_max_width(), 100.0);
+    let size = Size::new(120.0, 300.0);
+    let texts = |chart: &TreemapChart| {
+        chart
+            .scene(size)
+            .unwrap()
+            .primitives
+            .iter()
+            .filter(|p| {
+                p.id.is_some() && matches!(p.geometry, ferroui_livecharts::Geometry::Text { .. })
+            })
+            .count()
+    };
+    assert!(texts(&chart) >= 2, "the label breaks into lines");
+    let revision = chart.revision();
+    series.set_data_labels_max_width(400.0);
+    assert!(chart.revision() > revision);
+    assert_eq!(texts(&chart), 0, "one line is wider than the tile");
+}

@@ -167,6 +167,11 @@ ferroui_base::ferro_class_info!(Control { new: Control::new });
 ferro_impl_classes!(Control: StyledElementImpl, LayoutableImpl, InteractiveImpl);
 
 ferroui_base::ferro_overrides! { impl FerroObjectImpl for Control {
+    // The handler leaves where the property is not one it named (`reacts_to`).
+    inherited_reactions: ferroui_base::InheritedReactions::to(|property| {
+        property.has_change_handler(PropertyChangeHandler::Control).into()
+    });
+
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
