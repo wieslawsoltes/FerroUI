@@ -1032,17 +1032,20 @@ pub fn with_resolved_template_bindings<R>(resolved: bool, emit: impl FnOnce() ->
 /// makes the calls of the first branch (the statement the emitter writes for a property with one
 /// setter, `fused_template_binding_bind`). `uses` counts the uses of each identifier in the body:
 /// the four locals must be named by these lines only. `template_binding` is the path of the class.
-fn resolved_template_binding(
-    lines: &[String],
+fn resolved_template_binding<'l>(
+    lines: &'l [String],
     uses: &HashMap<String, usize>,
     template_binding: &str,
 ) -> Option<String> {
     let [priority, create, provide, value, test, bind, otherwise, fallback, end] = lines else { return None };
     let indent = &priority[..priority.len() - priority.trim_start().len()];
-    let at = |line: &str, depth: usize| line.strip_prefix(indent).and_then(|line| {
+    // The statement of `line` at `depth` blocks below the indentation of the first line.
+    fn statement_at<'l>(line: &'l str, indent: &str, depth: usize) -> Option<&'l str> {
+        let line = line.strip_prefix(indent)?;
         let inner = "    ".repeat(depth);
         line.strip_prefix(inner.as_str()).filter(|line| !line.starts_with(' '))
-    });
+    }
+    let at = |line: &'l str, depth: usize| statement_at(line, indent, depth);
     let (priority, rest) = at(priority, 0)?.strip_prefix("let ")?.split_once(" = ")?;
     if !rest.ends_with("::BindingPriority::Template;") {
         return None;
