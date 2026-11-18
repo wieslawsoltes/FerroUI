@@ -23,7 +23,8 @@ export class Artboard {
     ) {
         const hit = (event: MouseEvent) => this.current && canSelect() ? this.hit(this.point(event)) : undefined;
         const pick = (event: MouseEvent, openSource: boolean) => {
-            const node = hit(event);
+            const node = event.altKey && !openSource && this.current && canSelect()
+                ? this.overlap(this.point(event)) : hit(event);
             if (node) select(node.id, openSource, !openSource && (event.ctrlKey || event.metaKey || event.shiftKey));
         };
         this.element.addEventListener('click', event => pick(event, false));
@@ -113,9 +114,33 @@ export class Artboard {
 
     hit(point?: Point): CanvasNode | undefined {
         if (!point) return undefined;
-        const { x, y } = point;
-        return this.snapshot?.nodes.findLast(({ bounds: b, selectable }) => selectable !== false && b && b.width > 0 && b.height > 0
-            && x >= b.x && y >= b.y && x < b.x + b.width && y < b.y + b.height);
+        return this.snapshot?.nodes.findLast(node => this.contains(node, point));
+    }
+
+    stepSelection(direction: number): CanvasNode | undefined {
+        if (!this.current) return undefined;
+        const available = this.snapshot?.nodes.filter(node => this.isSelectable(node)) ?? [];
+        if (!available.length) return undefined;
+        const index = available.findIndex(node => node.id === this.selected);
+        return available[index === -1 ? (direction > 0 ? 0 : available.length - 1)
+            : (index + direction + available.length) % available.length];
+    }
+
+    private overlap(point?: Point): CanvasNode | undefined {
+        if (!point) return undefined;
+        const hits = this.snapshot?.nodes.filter(node => this.contains(node, point)).reverse() ?? [];
+        const index = hits.findIndex(node => node.id === this.selected);
+        return hits[(index + 1) % hits.length];
+    }
+
+    private isSelectable(node: CanvasNode): node is CanvasNode & { bounds: Bounds } {
+        return node.selectable !== false && !!node.bounds && node.bounds.width > 0 && node.bounds.height > 0;
+    }
+
+    private contains(node: CanvasNode, { x, y }: Point): boolean {
+        if (!this.isSelectable(node)) return false;
+        const bounds = node.bounds;
+        return x >= bounds.x && y >= bounds.y && x < bounds.x + bounds.width && y < bounds.y + bounds.height;
     }
 
     showDrop(bounds?: Bounds | null): void {

@@ -27,6 +27,22 @@ pub struct DesignerAsset {
     pub icon: AssetIcon,
 }
 
+pub fn project_designer_assets(
+    workspace: &std::path::Path,
+    document: &std::path::Path,
+) -> Result<Vec<DesignerAsset>, String> {
+    ferroui_designer_project::toolbox_snippets(workspace, document)
+        .map_err(|error| error.to_string())
+        .map(|snippets| snippets.into_iter().map(|snippet| DesignerAsset {
+            id: format!("project-file:{}", snippet.title),
+            title: snippet.title,
+            category: "Project snippets".into(),
+            description: snippet.path.display().to_string(),
+            source: snippet.source,
+            icon: AssetIcon::Control,
+        }).collect())
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum AssetIcon {
     Control,
@@ -130,6 +146,7 @@ pub struct AssetToolbox {
     view_mode: Cell<AssetViewMode>,
     count: Ref<TextBlock>,
     catalog: RefCell<Vec<DesignerAsset>>,
+    project_catalog: RefCell<Vec<DesignerAsset>>,
     visible: RefCell<Vec<String>>,
     activate: RefCell<Option<Activate>>,
     begin_drag: RefCell<Option<BeginDrag>>,
@@ -216,6 +233,7 @@ impl AssetToolbox {
             view_mode: Cell::new(AssetViewMode::Grid),
             count,
             catalog: RefCell::new(Vec::new()),
+            project_catalog: RefCell::new(Vec::new()),
             visible: RefCell::new(Vec::new()),
             activate: RefCell::new(None),
             begin_drag: RefCell::new(None),
@@ -288,7 +306,15 @@ impl AssetToolbox {
         self.visible.borrow().clone()
     }
     pub fn assets(&self) -> Vec<DesignerAsset> {
-        self.catalog.borrow().clone()
+        self.catalog.borrow().iter().chain(self.project_catalog.borrow().iter()).cloned().collect()
+    }
+    pub(crate) fn replace_project_assets(self: &Rc<Self>, assets: Vec<DesignerAsset>) {
+        if *self.project_catalog.borrow() == assets {
+            return;
+        }
+        *self.project_catalog.borrow_mut() = assets;
+        self.rebuild_categories();
+        self.refresh_tiles();
     }
     pub fn on_activate(&self, callback: impl Fn(&DesignerAsset) + 'static) {
         *self.activate.borrow_mut() = Some(Rc::new(callback));
@@ -343,6 +369,7 @@ impl AssetToolbox {
             .catalog
             .borrow()
             .iter()
+            .chain(self.project_catalog.borrow().iter())
             .map(|asset| asset.category.clone())
             .collect::<BTreeSet<_>>()
             .into_iter()
@@ -376,6 +403,7 @@ impl AssetToolbox {
             .catalog
             .borrow()
             .iter()
+            .chain(self.project_catalog.borrow().iter())
             .filter(|asset| {
                 if category
                     .as_ref()

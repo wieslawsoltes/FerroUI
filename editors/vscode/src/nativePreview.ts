@@ -71,8 +71,8 @@ export class NativePreview implements vscode.Disposable {
         return this.send('stagesPrototype', { epoch, ...command });
     }
 
-    render(source: Source, viewport: Viewport, frame = 0): Promise<Snapshot> {
-        return this.send('render', { ...source, ...viewport, frame });
+    render(source: Source, viewport: Viewport, frame = 0, workspaceRoot?: string): Promise<Snapshot> {
+        return this.send('render', { ...source, ...viewport, frame, workspaceRoot });
     }
 
     placement(frame: number, placement: Placement): Promise<DropHint> {

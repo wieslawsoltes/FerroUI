@@ -43,7 +43,7 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
 <div class="designer-content">
 <div id="status" class="status" role="status" hidden></div>
 <main id="preview" aria-label="Design" aria-busy="true">
-    <div id="canvas" class="canvas" tabindex="0" role="region" aria-label="Preview canvas" aria-keyshortcuts="0 1 + - Space Enter">
+    <div id="canvas" class="canvas" tabindex="0" role="region" aria-label="Preview canvas" aria-keyshortcuts="0 1 + - Space Enter ArrowUp ArrowDown">
         <div id="stage" class="stage">
             <div id="placeholder" class="placeholder">${icon('preview')}<span id="empty-state">Rendering preview…</span></div>
             <div id="artboard" class="artboard" hidden>
@@ -55,7 +55,7 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
             </div>
         </div>
     </div>
-    <button id="selection-label" class="selection-label" title="Reveal selection in source" hidden>${icon('go-to-file')}<span id="selected-control"></span></button>
+    <button id="selection-label" class="selection-label" title="Reveal selection in source" hidden>${icon('go-to-file')}<span id="selected-control" aria-live="polite"></span></button>
     <output id="drop-hint" class="drop-hint" aria-live="polite" hidden></output>
 </main>
 <main id="counterpart" aria-label="${alternate} projection" hidden>
@@ -97,6 +97,7 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
     <button type="button" id="menu-events">Show Events</button>
     <button type="button" id="menu-resources">Show Resources</button>
     <button type="button" id="menu-assets">Show Assets</button>
+    <button type="button" id="menu-studio">Show Studio Tools</button>
     <button type="button" class="compact-action" id="menu-refresh">Refresh preview</button>
 </div>`);
 }

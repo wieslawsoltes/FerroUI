@@ -9,13 +9,13 @@ export class CanvasInput {
     private space = false;
     private drag?: Drag;
 
-    constructor(private readonly viewport: CanvasViewport, reveal: () => void) {
+    constructor(private readonly viewport: CanvasViewport, reveal: () => void, step: (direction: number) => void) {
         const canvas = viewport.element;
         const updateCursor = () => { canvas.dataset.pan = this.drag ? 'dragging' : this.panning ? 'ready' : ''; };
         const resetSpace = () => { this.space = false; updateCursor(); };
         this.pan.addEventListener('click', () => this.setTool(!this.tool));
         canvas.addEventListener('keydown', event => {
-            if (event.ctrlKey || event.metaKey || event.altKey) return;
+            if (event.target !== canvas || event.ctrlKey || event.metaKey || event.altKey) return;
             switch (event.key) {
                 case ' ': this.space = true; updateCursor(); break;
                 case '0': viewport.fit(); break;
@@ -23,6 +23,8 @@ export class CanvasInput {
                 case '+': case '=': viewport.step(1); break;
                 case '-': viewport.step(-1); break;
                 case 'Enter': reveal(); break;
+                case 'ArrowUp': step(-1); break;
+                case 'ArrowDown': step(1); break;
                 default: return;
             }
             event.preventDefault();

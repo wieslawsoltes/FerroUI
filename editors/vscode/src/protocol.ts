@@ -73,7 +73,7 @@ export interface ResourceRow {
     properties: string[];
 }
 export type DetailsView = 'events' | 'resources';
-export type DesignerView = 'canvas' | 'outline' | 'properties' | 'toolbox' | DetailsView | 'assets';
+export type DesignerView = 'canvas' | 'outline' | 'properties' | 'toolbox' | DetailsView | 'assets' | 'studio';
 export interface DetailsState {
     frame?: FrameTarget;
     target?: NodeTarget;
@@ -112,6 +112,7 @@ export interface Snapshot {
     image: { png: string; width: number; height: number } | null;
     renderError: string | null;
     notices: string[];
+    projectAssets?: Asset[];
 }
 export type NodeOperation =
     | { type: 'setProperty'; node: number; name: string; value: string }

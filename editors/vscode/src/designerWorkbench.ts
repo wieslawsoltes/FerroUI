@@ -18,7 +18,7 @@ import { toolboxHtml, webviewOptions } from './view';
 const OUTLINE_VIEW = 'ferroui.outline';
 const TOOLBOX_VIEW = 'ferroui.toolbox';
 const docks = { outline: OUTLINE_VIEW, properties: PROPERTIES_VIEW, toolbox: TOOLBOX_VIEW,
-    assets: ASSETS_VIEW, events: EVENTS_VIEW, resources: RESOURCES_VIEW } as const;
+    assets: ASSETS_VIEW, events: EVENTS_VIEW, resources: RESOURCES_VIEW, studio: 'ferroui.studio' } as const;
 
 export class DesignerWorkbench implements vscode.Disposable {
     private readonly panels = new Map<string, DesignerPanel>();
@@ -54,7 +54,16 @@ export class DesignerWorkbench implements vscode.Disposable {
             () => { void this.showDock(TOOLBOX_VIEW); },
             async (frame, range) => { await this.active?.revealSource(frame, range); });
         this.studio = new StudioView(changed);
+        const snippets = vscode.workspace.createFileSystemWatcher('**/.ferroui/toolbox/*.xaml');
+        const refreshToolbox = (uri: vscode.Uri) => {
+            const folder = vscode.workspace.getWorkspaceFolder(uri);
+            if (!folder) return;
+            for (const panel of this.panels.values()) {
+                if (vscode.workspace.getWorkspaceFolder(panel.document.uri)?.uri.toString() === folder.uri.toString()) panel.configure();
+            }
+        };
         this.subscriptions = [
+            snippets, snippets.onDidCreate(refreshToolbox), snippets.onDidChange(refreshToolbox), snippets.onDidDelete(refreshToolbox),
             vscode.window.registerWebviewPanelSerializer(DESIGNER_VIEW, {
                 deserializeWebviewPanel: (panel, state) => this.restore(panel, state),
             }),

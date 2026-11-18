@@ -28,6 +28,23 @@ impl Drop for Fixture {
         let _ = std::fs::remove_dir_all(&self.0);
     }
 }
+
+#[test]
+fn toolbox_snippets_overlay_the_active_package_and_ignore_invalid_fragments() {
+    let fixture = Fixture::new();
+    fixture.write(".ferroui/toolbox/Card.xaml", "<Button Content='Shared'/>");
+    fixture.write(".ferroui/toolbox/Invalid.xaml", "<Button");
+    fixture.write(".ferroui/toolbox/Sibling.xaml", "<TextBlock Text='Shared label'/>");
+    fixture.write("app/Cargo.toml", "[package]\nname = 'app'\nversion = '0.1.0'\n");
+    fixture.write("app/.ferroui/toolbox/Card.xaml", "<?xml version='1.0'?><Button Content='App'/>");
+    fixture.write("app/views/Page.xaml", "<Grid/>");
+    let files = toolbox_snippets(&fixture.0, &fixture.0.join("app/views/Page.xaml")).unwrap();
+    assert_eq!(files.len(), 2);
+    assert_eq!(files[0].title, "Card");
+    assert_eq!(files[0].path, PathBuf::from("app/.ferroui/toolbox/Card.xaml"));
+    assert_eq!(files[0].source, "<Button Content='App'/>");
+    assert_eq!(files[1].title, "Sibling");
+}
 #[test]
 fn paths_roundtrip_unicode_reserved_characters_and_relative_resources() {
     let fixture = Fixture::new();

@@ -1,12 +1,14 @@
 //! Project discovery, transactional document buffers and process tasks without a UI dependency.
 mod discovery;
 mod tasks;
+mod toolbox;
 mod uri;
 mod workspace;
 
 pub use discovery::{CargoTarget, DocumentEntry, DocumentKind, ProjectDescriptor, Solution};
 use std::fmt;
 pub use tasks::{BuildTask, OutputStream, TaskHandle, TaskKind, TaskOutput, TaskStatus};
+pub use toolbox::{ToolboxSnippet, toolbox_snippets};
 pub use uri::{canonical_file_uri, file_path, file_uri, resolve_uri};
 pub use workspace::{Buffer, BufferUpdate, ProjectWorkspace, SavePolicy};
 

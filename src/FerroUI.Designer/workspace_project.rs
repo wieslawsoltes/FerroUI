@@ -74,6 +74,7 @@ impl DesignerWorkspace {
             .map_err(|e| e.to_string())?;
         self.project.borrow_mut().workspace = Some(ProjectWorkspace::new(solution));
         self.project.borrow_mut().selected = 0;
+        self.refresh_project_toolbox();
         self.rebuild_project_tree();
         self.refresh_components();
         Ok(())
@@ -89,8 +90,27 @@ impl DesignerWorkspace {
         }
         state.selected = index;
         drop(state);
+        self.refresh_project_toolbox();
         self.refresh_run_targets();
         Ok(())
+    }
+    fn refresh_project_toolbox(&self) {
+        let Some(toolbox) = self.asset_toolbox() else { return };
+        let state = self.project.borrow();
+        let Some(workspace) = &state.workspace else { return };
+        let Some(project) = workspace.solution.projects.get(state.selected) else { return };
+        let document = if project.manifest_path.is_file() {
+            &project.manifest_path
+        } else {
+            &project.root
+        };
+        match crate::project_designer_assets(&workspace.solution.root, document) {
+            Ok(assets) => toolbox.replace_project_assets(assets),
+            Err(error) => {
+                toolbox.replace_project_assets(Vec::new());
+                self.status.set_text(Some(&error));
+            }
+        }
     }
     pub fn solution(&self) -> Option<Solution> {
         self.project
@@ -543,6 +563,7 @@ impl DesignerWorkspace {
                     self.source_tools.borrow_mut().service = language;
                     self.project.borrow_mut().workspace = Some(ProjectWorkspace::new(solution));
                     self.project.borrow_mut().selected = 0;
+                    self.refresh_project_toolbox();
                     self.rebuild_project_tree();
                     self.refresh_components();
                     self.status.set_text(Some("Solution loaded"));

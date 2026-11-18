@@ -51,7 +51,12 @@ export class RuntimePanel implements vscode.Disposable {
     }
 
     private reset(): void {
-        const endpoint = this.connections.get(this.target);
+        let endpoint = this.connections.get(this.target);
+        if (!endpoint) {
+            const alternate = this.target === 'managed' ? 'attached' : 'managed';
+            endpoint = this.connections.get(alternate);
+            if (endpoint) this.target = alternate;
+        }
         if (this.panel && endpoint && endpoint === this.client?.endpoint) return;
         this.invalidate();
         this.client?.dispose();
@@ -114,7 +119,6 @@ export class RuntimePanel implements vscode.Disposable {
         if (!message || typeof message !== 'object' || !vscode.workspace.isTrusted) return;
         if (message.type === 'ready') {
             this.ready = true;
-            if (!this.connections.get(this.target) && this.connections.get('attached')) this.target = 'attached';
             this.reset();
             return;
         }

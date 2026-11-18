@@ -9,17 +9,12 @@ pub(crate) fn assets() -> &'static [DesignerAsset] {
     ASSETS.get_or_init(default_designer_assets)
 }
 
-pub(crate) fn find(id: &str) -> Result<&'static DesignerAsset, String> {
-    assets()
-        .iter()
-        .find(|asset| asset.id == id)
-        .ok_or_else(|| "Unknown toolbox control".into())
+pub(crate) fn catalog() -> Vec<Asset> {
+    assets().iter().map(describe).collect()
 }
 
-pub(crate) fn catalog() -> Vec<Asset> {
-    assets()
-        .iter()
-        .map(|asset| Asset {
+pub(crate) fn describe(asset: &DesignerAsset) -> Asset {
+    Asset {
             id: asset.id.clone(),
             title: asset.title.clone(),
             category: asset.category.clone(),
@@ -28,8 +23,7 @@ pub(crate) fn catalog() -> Vec<Asset> {
             rust: Document::new(&asset.source)
                 .ok()
                 .is_some_and(|document| xaml_to_rsx(&document).is_ok()),
-        })
-        .collect()
+    }
 }
 
 #[cfg(test)]

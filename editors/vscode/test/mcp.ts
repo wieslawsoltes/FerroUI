@@ -77,6 +77,9 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         assert.ok(inspector.events.some(field => field.name === 'Click'));
         const assets = content<{ assets: { id: string }[] }>(await invoke('designer_assets', { session }));
         assert.ok(assets.assets.some(asset => asset.id === 'Assets/Preview Image.png'));
+        const toolbox = content<{ assets: { id: string; category: string }[] }>(await invoke('designer_toolbox', { session }));
+        const reviewAction = toolbox.assets.find(asset => asset.id === 'project-file:Review Action');
+        assert.equal(reviewAction?.category, 'Project snippets');
         const image = await invoke('designer_preview_image', { session });
         assert.equal(image.isError, false);
         assert.equal(Buffer.from(image.content.find(item => item.type === 'image')!.data!, 'base64').subarray(1, 4).toString(), 'PNG');
@@ -88,9 +91,27 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         assert.ok((await invoke('designer_studio_edit', designData)).isError);
         assert.ok((await invoke('ferroui_workspace_create', { path: 'Denied.rs', source: 'fn main() {}' })).isError);
         await config.update('allowWrites', true, vscode.ConfigurationTarget.Global);
+        const stages = content<{ epoch: number; stages: Array<{ id: number; epoch: number }> }>(await invoke('designer_stages_open', { session }));
+        assert.equal(stages.stages.length, 2);
+        const first = stages.stages[0];
+        const stageImage = await invoke('designer_stage_image', { session, stage: first.id, expected_epoch: first.epoch });
+        assert.equal(Buffer.from(stageImage.content.find(item => item.type === 'image')!.data!, 'base64').subarray(1, 4).toString(), 'PNG');
+        const changedStages = content<{ stages: unknown[] }>(await invoke('designer_stage_change', { session, expected_epoch: stages.epoch,
+            arguments: { action: 'add', name: 'Agent comparison', width: 420, height: 350, dark: true } }));
+        assert.equal(changedStages.stages.length, 3);
+        assert.ok((await invoke('designer_stage_change', { session, expected_epoch: stages.epoch, arguments: { action: 'remove', id: first.id } })).isError);
+        const board = vscode.window.tabGroups.all.flatMap(group => group.tabs).find(tab => tab.label === 'Stages · SettingsView.xaml');
+        if (board) await vscode.window.tabGroups.close(board);
         content(await invoke('designer_studio_edit', designData));
         assert.match(document.getText(), /d:Content="Studio sample"/);
         assert.ok((await invoke('designer_studio_edit', designData)).isError);
+        content(await invoke('designer_history', { session, expected_version: document.version, action: 'undo' }));
+        assert.equal(document.getText(), original);
+        const snippetFrame = content<{ revision: number }>(await invoke('designer_wait', { session }));
+        const snippet = { session, expected_revision: snippetFrame.revision, asset: reviewAction!.id, anchor: button.id, position: 'after' };
+        content(await invoke('designer_placement_hint', snippet));
+        content(await invoke('designer_place', snippet));
+        assert.match(document.getText(), /Content="Review selected item"/);
         content(await invoke('designer_history', { session, expected_version: document.version, action: 'undo' }));
         assert.equal(document.getText(), original);
         const layoutFrame = content<{ revision: number; nodes: { label: string; id: number }[] }>(
@@ -134,7 +155,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
             expected_revision: frame.revision, index: 1 }));
         assert.deepEqual(selected.blocks.map(block => block.active), [false, true]);
         await verifyWorkspaceMcp({ invoke, content });
-        console.log('VS Code MCP discovery, shared Studio queries, PNG content, write permissions, stale revisions and editor undo passed');
+        console.log('VS Code MCP discovery, project Toolbox placement, shared Studio queries, PNG content, write permissions, stale revisions and editor undo passed');
     } finally {
         await config.update('allowWrites', undefined, vscode.ConfigurationTarget.Global);
         lines.close();

@@ -21,7 +21,10 @@ impl Stage {
         let image;
         let origin = match &placement.origin {
             DragOrigin::Asset { control } => {
-                PlacementOrigin::Asset(&toolbox::find(control)?.source)
+                let asset = toolbox::assets().iter().chain(&self.project_assets)
+                    .find(|asset| asset.id == *control)
+                    .ok_or("Choose a control from the current Toolbox")?;
+                PlacementOrigin::Asset(&asset.source)
             }
             DragOrigin::Image { source } => {
                 if self.placement_policy.is_some() {

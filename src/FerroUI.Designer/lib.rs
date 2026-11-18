@@ -67,6 +67,7 @@ mod workspace;
 
 pub use asset_toolbox::{
     AssetIcon, AssetToolbox, AssetViewMode, DesignerAsset, default_designer_assets,
+    project_designer_assets,
 };
 pub use chrome::designer_chrome_style;
 pub use canvas_guides::{CanvasGuide, CanvasGuideAxis, CanvasGuideSettings};

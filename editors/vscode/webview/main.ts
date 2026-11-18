@@ -44,7 +44,7 @@ const viewport = new CanvasViewport((fit, scale, hasImage) => {
     zoomIn.disabled = !hasImage || scale >= 8;
     zoomOut.disabled = !hasImage || scale <= 0.125;
 });
-const input = new CanvasInput(viewport, reveal);
+const input = new CanvasInput(viewport, reveal, stepSelection);
 const artboard = new Artboard(viewport, () => !input.panning, select);
 const drag = new CanvasDrag(artboard, () => current && !applying && !input.panning, vscode.postMessage);
 const resize = new ResizeHandles(artboard, gesture => {
@@ -81,7 +81,7 @@ for (const [action, id, message] of actions) {
         vscode.postMessage(message);
     });
 }
-for (const view of ['events', 'resources', 'assets'] as const) {
+for (const view of ['events', 'resources', 'assets', 'studio'] as const) {
     element(`menu-${view}`).addEventListener('click', () => {
         actionsMenu.hidePopover();
         vscode.postMessage({ type: 'dock', view });
@@ -129,6 +129,11 @@ function controlCanvas(request: number, action: CanvasAction): void {
 
 function reveal(): void {
     if (artboard.isCurrent && !runtime && selected !== undefined) select(selected, true);
+}
+
+function stepSelection(direction: number): void {
+    const node = artboard.stepSelection(direction);
+    if (node) select(node.id, false);
 }
 
 function select(id: number, openSource: boolean, extend = false): void {
@@ -186,6 +191,13 @@ function flushCanvasActions(): void {
 }
 
 function stageSnapshot(message: SnapshotMessage): void {
+    if (current && token === message.frame.token && (!message.snapshot.image || artboard.isCurrent)) {
+        selected = message.selected;
+        selection = message.selection ?? [];
+        runtime = message.runtime;
+        updateSelection();
+        return;
+    }
     staged = message;
     pauseCanvas();
     preview.setAttribute('aria-busy', 'true');

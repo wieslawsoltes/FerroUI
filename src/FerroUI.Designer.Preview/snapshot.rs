@@ -33,8 +33,21 @@ pub(crate) fn render(renderer: &mut Renderer, input: &Render) -> Result<Snapshot
         }
         Err(error) => (None, Default::default(), Some(error)),
     };
+    let mut project_assets = Vec::new();
     if let Some(stage) = &mut renderer.stage {
         stage.placement_policy = crate::rsx_placement::PlacementPolicy::of(&design);
+        if let Some(root) = &input.workspace_root {
+            let result = ferroui_designer_project::file_path(&input.document.uri)
+                .map_err(|error| error.to_string())
+                .and_then(|file| ferroui_designer::project_designer_assets(root, &file));
+            match result {
+                Ok(assets) => {
+                    project_assets = assets.iter().map(crate::toolbox::describe).collect();
+                    stage.project_assets = assets;
+                }
+                Err(error) => notices.push(format!("Project Toolbox: {error}")),
+            }
+        }
     }
     let nodes = design
         .xaml
@@ -80,6 +93,7 @@ pub(crate) fn render(renderer: &mut Renderer, input: &Render) -> Result<Snapshot
         image,
         render_error,
         notices,
+        project_assets,
     })
 }
 

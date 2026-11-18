@@ -75,6 +75,11 @@
         "category": "FerroUI"
       },
       {
+        "command": "ferroui.buildProjectSchema",
+        "title": "Build Project XAML Schema",
+        "category": "FerroUI"
+      },
+      {
         "command": "ferroui.showOutline",
         "title": "Show Outline",
         "category": "FerroUI",

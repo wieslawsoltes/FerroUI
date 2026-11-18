@@ -5,6 +5,8 @@ import type { CargoSelection } from './cargoTarget';
 import type { DesignerPanel } from './designerPanel';
 import type { DesignerWorkbench } from './designerWorkbench';
 import type { HotReload } from './hotReload';
+import type { StagesPanel } from './stagesPanel';
+import type { PrototypeCommand, StageChange } from './stagesProtocol';
 import type { CanvasAction, DesignerView, DragOrigin, DropTarget, OutlineMode, Placement } from './protocol';
 import { applyTextEdits } from './textDocument';
 import { isWorkspaceTool } from './workspaceCatalog';
@@ -56,12 +58,14 @@ interface Arguments extends CanvasAction, CargoSelection {
     tool: string;
     arguments: object;
     selection?: number[];
+    stage?: number;
+    expected_epoch?: number;
 }
 
 export class AgentTools {
     private readonly workspace = new WorkspaceTools();
 
-    constructor(private readonly workbench: DesignerWorkbench, private readonly reload: HotReload) {}
+    constructor(private readonly workbench: DesignerWorkbench, private readonly reload: HotReload, private readonly stages: StagesPanel) {}
 
     definitions() { return Object.entries(agentCatalog).map(([name, definition]) => ({ name, ...definition })); }
 
@@ -133,9 +137,10 @@ export class AgentTools {
             case 'designer_inspect': {
                 await panel.waitForSnapshot(signal);
                 const frame = { session: panel.session, token: panel.currentToken! };
-                if (args.node !== undefined && args.inspector_id !== undefined) throw new Error('Choose one source or runtime object.');
-                const node = args.node ?? panel.selectedNode?.id;
-                const runtime = args.inspector_id ?? (args.node === undefined ? panel.runtimeSelection?.inspector_id : undefined);
+                if ([args.node, args.inspector_id, args.selection].filter(value => value !== undefined).length > 1) throw new Error('Choose source nodes or one runtime object.');
+                if (args.selection && args.selection.length !== 1) return panel.inspect(frame, { type: 'selection', nodes: args.selection });
+                const node = args.node ?? args.selection?.[0] ?? panel.selectedNode?.id;
+                const runtime = args.inspector_id ?? (args.node === undefined && !args.selection ? panel.runtimeSelection?.inspector_id : undefined);
                 if (runtime === undefined && node === undefined) throw new Error('Select a control or provide its node ID.');
                 const result = await panel.inspect(frame, runtime === undefined ? { type: 'source', node: node! } : { type: 'runtime', id: runtime });
                 return { revision: frame.token, ...result };
@@ -256,6 +261,17 @@ export class AgentTools {
             case 'designer_studio_present':
                 await panel.studioPresent(args.expected_revision, args.tool, args.arguments, args.selection, signal);
                 break;
+            case 'designer_stages_open': {
+                const block = panel.snapshot?.activeBlock?.start;
+                return this.stages.open(document, block ? new vscode.Position(block.line, block.character) : new vscode.Position(0, 0)).wait(signal);
+            }
+            case 'designer_stages': return this.stages.board(document.uri).wait(signal);
+            case 'designer_stage_image': {
+                const image = await this.stages.board(document.uri).capture(args.stage!, args.expected_epoch!, signal);
+                return { mimeType: 'image/png', data: image.png, width: image.width, height: image.height };
+            }
+            case 'designer_stage_change': return this.stages.board(document.uri).applyChange({ ...args.arguments, epoch: args.expected_epoch! } as StageChange, signal);
+            case 'designer_stage_prototype': return this.stages.board(document.uri).controlPrototype(args.expected_epoch!, args.arguments as PrototypeCommand, signal);
         }
         return describe(panel);
     }

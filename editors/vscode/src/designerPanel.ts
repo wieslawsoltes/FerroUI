@@ -405,13 +405,14 @@ export class DesignerPanel implements vscode.Disposable {
         const input = sourceOf(this.document, this.language, caret);
         try {
             const client = await this.getClient();
-            const snapshot = await client.render(input, viewport, token);
+            const folder = vscode.workspace.getWorkspaceFolder(this.document.uri);
+            const snapshot = await client.render(input, viewport, token, folder?.uri.scheme === 'file' ? folder.uri.fsPath : undefined);
             if (this.disposed || token !== this.generation || version !== this.document.version) return;
             const anchor = snapshot.activeBlock?.start;
             const previousAnchor = this.frame?.snapshot.activeBlock?.start;
             const sameView = this.frame?.version === version && previousAnchor?.line === anchor?.line
                 && previousAnchor?.character === anchor?.character;
-            this.assets = client.assets.filter(asset => this.language === 'xaml' || asset.rust);
+            this.assets = [...client.assets, ...(snapshot.projectAssets ?? [])].filter(asset => this.language === 'xaml' || asset.rust);
             const nodes = snapshot.nodes.map(({ id, label, name, bounds, canMove }) => ({ id, label, name, bounds, canMove }));
             this.frame = { token, version, viewport, source: input, snapshot, canvas: { ...snapshot, nodes } };
             this.runtime = undefined;
@@ -452,7 +453,8 @@ export class DesignerPanel implements vscode.Disposable {
         }
         if (message.type === 'dock') {
             const commands = { outline: 'ferroui.showOutline', properties: 'ferroui.showProperties', toolbox: 'ferroui.showToolbox',
-                events: 'ferroui.showEvents', resources: 'ferroui.showResources', assets: 'ferroui.showAssets' } as const;
+                events: 'ferroui.showEvents', resources: 'ferroui.showResources', assets: 'ferroui.showAssets',
+                studio: 'ferroui.showStudio' } as const;
             await vscode.commands.executeCommand(commands[message.view], this.session);
             return;
         }

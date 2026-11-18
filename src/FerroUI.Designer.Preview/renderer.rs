@@ -27,6 +27,7 @@ pub(crate) struct Stage {
     pub(crate) width: u32,
     pub(crate) height: u32,
     pub(crate) placement_policy: Option<PlacementPolicy>,
+    pub(crate) project_assets: Vec<ferroui_designer::DesignerAsset>,
     _window: PreviewWindow,
 }
 
@@ -89,6 +90,7 @@ impl Renderer {
             width: input.width,
             height: input.height,
             placement_policy: None,
+            project_assets: Vec::new(),
             _window: window,
         });
         Ok(frame)

@@ -1,10 +1,11 @@
 import { Buffer } from 'node:buffer';
 import { pathToFileURL } from 'node:url';
+import { setTimeout as delay } from 'node:timers/promises';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
 import { NativePreview } from './nativePreview';
 import { errorMessage } from './protocol';
-import type { FromStages, StageChange, StageInfo, StageManifest, StageModel, StagesRequest, ToStages } from './stagesProtocol';
+import type { FromStages, PrototypeCommand, StageChange, StageInfo, StageManifest, StageModel, StagesRequest, ToStages } from './stagesProtocol';
 import { choose, editText } from './studioContext';
 import { asRange, languageOf, sourceOf } from './textDocument';
 import { stagesHtml, webviewOptions } from './view';
@@ -14,7 +15,7 @@ const stageView = 'ferroui.stages';
 
 export class StagesPanel implements vscode.Disposable {
     private readonly subscriptions: vscode.Disposable[];
-    private readonly views = new Map<string, vscode.WebviewPanel>();
+    private readonly views = new Map<string, StageSession>();
 
     constructor(private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel) {
         this.subscriptions = [
@@ -24,13 +25,7 @@ export class StagesPanel implements vscode.Disposable {
                     void vscode.window.showErrorMessage('Open a FerroUI XAML or Rust file to compare stages.');
                     return;
                 }
-                const key = editor.document.uri.toString();
-                const previous = this.views.get(key);
-                if (previous) { previous.reveal(); return; }
-                const panel = vscode.window.createWebviewPanel(stageView, `Stages · ${path.basename(editor.document.fileName)}`,
-                    { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true },
-                    { ...webviewOptions(context.extensionUri), retainContextWhenHidden: true });
-                this.attach(panel, editor.document, editor.selection.active);
+                this.open(editor.document, editor.selection.active);
             }),
             vscode.window.registerWebviewPanelSerializer(stageView, { deserializeWebviewPanel: async (panel, state) => {
                 try {
@@ -44,16 +39,32 @@ export class StagesPanel implements vscode.Disposable {
         ];
     }
 
-    private attach(panel: vscode.WebviewPanel, document: vscode.TextDocument, caret: vscode.Position): void {
+    open(document: vscode.TextDocument, caret: vscode.Position): StageSession {
+        const previous = this.views.get(document.uri.toString());
+        if (previous) { previous.panel.reveal(); return previous; }
+        const panel = vscode.window.createWebviewPanel(stageView, `Stages · ${path.basename(document.fileName)}`,
+            { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true },
+            { ...webviewOptions(this.context.extensionUri), retainContextWhenHidden: true });
+        return this.attach(panel, document, caret);
+    }
+
+    board(uri: vscode.Uri): StageSession {
+        const board = this.views.get(uri.toString());
+        if (!board) throw new Error('Open Stages for this design first.');
+        return board;
+    }
+
+    private attach(panel: vscode.WebviewPanel, document: vscode.TextDocument, caret: vscode.Position): StageSession {
         const key = document.uri.toString();
-        this.views.set(key, panel);
+        const session = new StageSession(panel, document, caret, this.context, this.output);
+        this.views.set(key, session);
         panel.onDidDispose(() => this.views.delete(key));
-        new StageSession(panel, document, caret, this.context, this.output);
+        return session;
     }
 
     dispose(): void {
         this.subscriptions.forEach(subscription => subscription.dispose());
-        this.views.forEach(panel => panel.dispose());
+        this.views.forEach(session => session.panel.dispose());
     }
 }
 
@@ -70,7 +81,7 @@ class StageSession {
     private disposed = false;
     private manifest?: StageManifest;
 
-    constructor(private readonly panel: vscode.WebviewPanel, private readonly document: vscode.TextDocument,
+    constructor(readonly panel: vscode.WebviewPanel, private readonly document: vscode.TextDocument,
         private readonly caret: vscode.Position, private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel) {
         this.cacheKey = `ferroui.stages:${document.uri.toString()}`;
         this.manifest = context.workspaceState.get<StageManifest>(this.cacheKey);
@@ -87,6 +98,54 @@ class StageSession {
         ];
         panel.webview.options = webviewOptions(context.extensionUri);
         panel.webview.html = stagesHtml(panel.webview, context.extensionUri);
+    }
+
+    async wait(signal: AbortSignal): Promise<StageModel> {
+        const timeout = AbortSignal.any([signal, AbortSignal.timeout(15_000)]);
+        for (;;) {
+            timeout.throwIfAborted();
+            if (this.disposed) throw new Error('The Stages board was closed.');
+            if (!this.busy && !this.timer && this.model && this.modelVersion === this.document.version) return this.model;
+            if (!this.busy && !this.timer) await this.sync();
+            await delay(80, undefined, { signal: timeout });
+        }
+    }
+
+    async capture(id: number, epoch: number, signal: AbortSignal) {
+        const model = await this.wait(signal);
+        if (!model.stages.some(stage => stage.id === id && stage.epoch === epoch)) throw new Error('Read the current stage ID and epoch.');
+        const image = await (await this.getClient()).stageImage({ id, epoch });
+        signal.throwIfAborted();
+        if (this.model !== model || this.modelVersion !== this.document.version || this.timer) throw new Error('The stage changed during capture.');
+        return image;
+    }
+
+    async applyChange(change: StageChange, signal: AbortSignal): Promise<StageModel> {
+        const before = await this.wait(signal);
+        if (before.epoch !== change.epoch || this.busy) throw new Error('Read the current Stages board first.');
+        const generation = this.generation;
+        this.busy = true;
+        try {
+            const client = await this.getClient();
+            signal.throwIfAborted();
+            const model = await client.editStages(change);
+            await this.publish(model, client, generation);
+            return model;
+        } finally {
+            this.busy = false;
+            if (generation !== this.generation) this.schedule();
+        }
+    }
+
+    async controlPrototype(epoch: number, command: PrototypeCommand, signal: AbortSignal) {
+        const model = await this.wait(signal);
+        const generation = this.generation;
+        if (model.epoch !== epoch) throw new Error('Read the current stage set before controlling its flow.');
+        const scene = await (await this.getClient()).stagePrototype(epoch, command);
+        if (generation !== this.generation) throw new Error('The stage set changed during playback.');
+        model.prototype = scene;
+        this.post({ type: 'prototype', scene });
+        return scene;
     }
 
     private schedule(): void {
@@ -147,8 +206,7 @@ class StageSession {
             if (message.type === 'prototype') {
                 const command = message.command ?? await this.chooseFlow(model);
                 if (command && generation === this.generation) {
-                    const scene = await client.stagePrototype(model.epoch, command);
-                    if (generation === this.generation) this.post({ type: 'prototype', scene });
+                    await this.controlPrototype(model.epoch, command, AbortSignal.timeout(15_000));
                 }
                 return;
             }
@@ -156,7 +214,10 @@ class StageSession {
                 const version = this.document.version;
                 const result = await client.stagePointer(message);
                 if (generation !== this.generation || this.document.version !== version) return;
-                if (result.prototype) this.post({ type: 'prototype', scene: result.prototype });
+                if (result.prototype) {
+                    model.prototype = result.prototype;
+                    this.post({ type: 'prototype', scene: result.prototype });
+                }
                 if (result.range && result.uri) {
                     const uri = vscode.Uri.parse(result.uri, true);
                     if (uri.toString() !== this.document.uri.toString() && !await isWorkspaceFile(uri)) return;
@@ -189,7 +250,7 @@ class StageSession {
             const change = message.type === 'add' ? await this.add(model) : message.type === 'edit'
                 ? await this.change(client, model, message) : undefined;
             if (!change || generation !== this.generation || model !== this.model) return;
-            await this.publish(await client.editStages(change), client, generation);
+            await this.applyChange(change, AbortSignal.timeout(15_000));
         } catch (error) { this.report(error); }
     }
 
