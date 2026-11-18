@@ -1,5 +1,11 @@
 //! Roboto bundled under the SIL Open Font License. Source hashes are recorded in
 //! `scripts/material-theme/font-provenance.json`.
+//!
+//! The files are linked by [`register`]: through `register_types` with the feature
+//! `embedded-font-assets` (on by default), and always through
+//! [`MaterialAppBuilderExtension::with_material_fonts`], the explicit choice of the embedded
+//! family (#856). Without either, the theme's font family (`fonts:MaterialRoboto#Roboto, Roboto,
+//! $Default`) falls back to `Roboto` of the system, else the default font.
 use ferroui_base::media::fonts::EmbeddedFontCollection;
 use ferroui_base::platform::register_assets;
 use ferroui_base::utilities::UriRef;
