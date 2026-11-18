@@ -892,12 +892,14 @@ impl Inspector {
                     windows
                         .iter()
                         .map(|w| {
-                            let t = w.renderer_diagnostics().last_layout_pass_timing();
+                            let layout = w.layout_manager();
+                            let timing = layout.last_pass_timing();
                             let id = self.node_id(w);
                             let mut stats = self.frames[&id].snapshot();
                             stats["node_id"] = json!(id);
-                            stats["layout_pass_count"] = json!(t.pass_counter);
-                            stats["layout_ms"] = json!(t.elapsed.as_secs_f64() * 1000.0);
+                            stats["layout_pass_count"] = json!(layout.total_pass_count());
+                            stats["layout_timing_available"] = json!(timing.is_some());
+                            stats["layout_ms"] = json!(timing.map_or(0.0, |t| t.elapsed.as_secs_f64() * 1000.0));
                             stats
                         })
                         .collect(),

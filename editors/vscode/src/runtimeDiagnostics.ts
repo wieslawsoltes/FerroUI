@@ -14,6 +14,7 @@ export interface RuntimeLog {
 export interface RuntimeFrameStats {
     node_id: number;
     layout_ms: number;
+    layout_timing_available?: boolean;
     layout_pass_count: number;
     rendered_scene_updates: number;
     last_interval_ms?: number;

@@ -55,7 +55,8 @@ export async function verifyLiveApp(): Promise<void> {
         const updated = await client.call<string>('screenshot', { node_id: window.node_id });
         assert.notEqual(updated, png);
         const diagnostics = await readRuntimeDiagnostics(client);
-        assert.ok(diagnostics.frames.some(frame => frame.node_id === window.node_id && frame.layout_pass_count > 0));
+        const stats = diagnostics.frames.find(frame => frame.node_id === window.node_id);
+        assert.ok(stats && stats.layout_pass_count > 0 && stats.layout_timing_available, JSON.stringify(diagnostics.frames));
         assert.ok(Array.isArray(diagnostics.logs.entries));
         console.log('Live App found the authored RSX control, entered text, clicked a bound action and captured the updated native window');
     } finally {

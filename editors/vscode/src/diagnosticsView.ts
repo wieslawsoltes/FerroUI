@@ -64,7 +64,8 @@ export class DiagnosticsView implements vscode.TreeDataProvider<Item>, vscode.Di
         if (item.type === 'layout') {
             const { stats } = item;
             const row = new vscode.TreeItem(`Window ${stats.node_id}`);
-            row.description = `${stats.layout_ms.toFixed(2)} ms layout · ${stats.layout_pass_count} passes · ${stats.rendered_scene_updates} scene updates`;
+            const timing = stats.layout_timing_available ?? stats.layout_pass_count > 0;
+            row.description = `${timing ? `${stats.layout_ms.toFixed(2)} ms layout · ` : ''}${stats.layout_pass_count} passes · ${stats.rendered_scene_updates} scene updates`;
             row.iconPath = new vscode.ThemeIcon('graph');
             return row;
         }

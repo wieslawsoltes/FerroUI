@@ -48,6 +48,7 @@ pub struct LayoutManager {
     running: Cell<bool>,
     processing_bring_into_view_requests: Cell<bool>,
     total_pass_count: Cell<i32>,
+    last_pass_timing: Cell<Option<LayoutPassTiming>>,
     layout_updated: HandlerList<dyn Fn()>,
     layout_pass_timed: RefCell<Option<Rc<dyn Fn(LayoutPassTiming)>>>,
 }
@@ -69,6 +70,7 @@ impl LayoutManager {
             running: Cell::new(false),
             processing_bring_into_view_requests: Cell::new(false),
             total_pass_count: Cell::new(0),
+            last_pass_timing: Cell::new(None),
             layout_updated: HandlerList::new(),
             layout_pass_timed: RefCell::new(None),
         })
@@ -82,6 +84,11 @@ impl LayoutManager {
     /// The number of layout passes executed so far.
     pub fn total_pass_count(&self) -> i32 {
         self.total_pass_count.get()
+    }
+
+    /// The latest completed pass's timing, when timing was requested by a log or callback.
+    pub fn last_pass_timing(&self) -> Option<LayoutPassTiming> {
+        self.last_pass_timing.get().filter(|timing| timing.pass_counter == self.total_pass_count())
     }
 
     /// The callback that receives the timing of each layout pass (C#
@@ -488,9 +495,11 @@ impl ILayoutManager for LayoutManager {
             if capture_timing {
                 let elapsed =
                     Duration::from_millis(Self::get_timestamp().saturating_sub(starting_timestamp).max(0) as u64);
+                let timing = LayoutPassTiming::new(self.total_pass_count(), elapsed);
+                self.last_pass_timing.set(Some(timing));
                 let layout_pass_timed = self.layout_pass_timed.borrow().clone();
                 if let Some(layout_pass_timed) = layout_pass_timed {
-                    layout_pass_timed(LayoutPassTiming::new(self.total_pass_count.get(), elapsed));
+                    layout_pass_timed(timing);
                 }
 
                 if let Some(logger) = Logger::try_get(TIMING_LOG_LEVEL, LogArea::LAYOUT) {
