@@ -2,7 +2,7 @@
   "name": "ferroui",
   "displayName": "FerroUI Designer",
   "description": "FerroUI XAML and RSX design, native hot reload, and MCP tools for VS Code.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "publisher": "FerroUI",
   "license": "MIT",
   "repository": {
