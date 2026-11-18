@@ -1249,3 +1249,33 @@ fn sankey_and_treemap_data_labels_max_width_load_from_markup() {
     assert!(chart.revision() > revision);
     assert_eq!(texts(&chart), 0, "one line is wider than the tile");
 }
+
+/// `DataLabelsMaxWidth` of every series (170 by default, as the source): the data label of a box
+/// point ("Min ... Max ...") breaks into lines at a width of 60 and stays on one line at 1000.
+#[test]
+fn data_labels_of_every_series_break_at_their_max_width() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    assert_eq!(LineSeries::new().data_labels_max_width(), 170.0);
+    let chart = CartesianChart::new();
+    chart.set_animations_speed(0.0);
+    let series = BoxSeries::new();
+    series.set_coordinates([Coordinate::box_value(0.0, 10.0, 7.0, 3.0, 1.0, 5.0)]);
+    series.set_data_labels(true);
+    chart.series().add(series.clone().upcast());
+    let size = Size::new(600.0, 400.0);
+    let labels = |chart: &CartesianChart| {
+        chart
+            .scene(size)
+            .unwrap()
+            .primitives
+            .iter()
+            .filter(|p| {
+                p.id.is_some() && matches!(p.geometry, ferroui_livecharts::Geometry::Text { .. })
+            })
+            .count()
+    };
+    series.set_data_labels_max_width(1000.0);
+    assert_eq!(labels(&chart), 1);
+    series.set_data_labels_max_width(60.0);
+    assert!(labels(&chart) > 1, "the label breaks into lines");
+}

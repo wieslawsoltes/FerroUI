@@ -926,6 +926,27 @@ impl Chart {
                 (scene, Vec::new(), Vec::new())
             }
         };
+        // `DataLabelsMaxWidth` of the Cartesian, pie and polar series (the Sankey and treemap
+        // engines break their labels themselves): a label above a Cartesian point keeps its last
+        // line in place, the centred labels of the heat cells, slices and polar points their middle.
+        if matches!(
+            self.chart_kind(),
+            ChartKind::Cartesian | ChartKind::Pie | ChartKind::Polar
+        ) {
+            let widths: Vec<_> = models.iter().map(|m| m.data_labels_max_width()).collect();
+            let cartesian = self.chart_kind() == ChartKind::Cartesian;
+            ferroui_livecharts::label_lines::wrap_data_labels(
+                &mut scene,
+                &widths,
+                crate::decorations::text_size,
+                |id| {
+                    !cartesian
+                        || series
+                            .get(id.series)
+                            .is_some_and(|s| s.kind == ferroui_livecharts::SeriesKind::Heat)
+                },
+            );
+        }
         crate::decorations::decorate(
             &mut scene,
             &self.title(),

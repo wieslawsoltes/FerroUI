@@ -5,7 +5,7 @@ From the LiveCharts2 port of #312 (docs/porting/livecharts2.md): the Cartesian a
 the polar chart of L4, the Sankey and treemap charts of L4b, the geographic map of L4c, and the
 OHLC series, error bars, date and time axes, heat series properties and angular gauge visuals of
 L5, and the heat legend, the data label positions of the heat series, the tooltip formatter of the
-map and the DataLabelsMaxWidth of the Sankey and treemap series (#624).
+map and the DataLabelsMaxWidth of every series (#624).
 
 The generated classes remain ordinary FerroUI classes visible to the XAML source
 scanner. This replaces the managed UI-property generator for this native host.
@@ -173,6 +173,9 @@ series_props = [
  # The error bars (IErrorSeries) and the marker paints of a line series (L5).
  ('show_error','ShowError','bool','false'),('error_paint','ErrorPaint','Option<Color>','None'),
  ('geometry_fill','GeometryFill','Option<Color>','None'),('geometry_stroke','GeometryStroke','Option<Color>','None')]
+# The properties of every series that the engine reads beside the snapshot: DataLabelsMaxWidth,
+# the source's 170 (MaxTooltipsAndLegendsLabelsWidth), which breaks the data labels into lines (#624).
+series_extra_props = [('data_labels_max_width','DataLabelsMaxWidth','f64','170.0')]
 series = HEADER + IMPORTS + '''use crate::{ChartPoints, ChartPoint};
 use ferroui_base::{FerroObjectImplExt,FerroPropertyChangedEventArgs,Point};
 use ferroui_base::media::{Color,IBrush,PenLineCap,PenLineJoin};
@@ -268,7 +271,7 @@ impl Drop for ChartSeries { fn drop(&mut self) {
     drop(std::mem::take(self.point_listeners.get_mut()));
     for listener in self.brush_listeners.get_mut().drain(..){listener.dispose();}
 } }
-''' + properties('ChartSeries',series_props)
+''' + properties('ChartSeries',series_props + series_extra_props)
 
 families = [('LineSeries','Line'),('StepLineSeries','StepLine'),('AreaSeries','Area'),
 ('StackedAreaSeries','StackedArea'),('StackedStepAreaSeries','StackedStepArea'),
@@ -288,16 +291,13 @@ node_collections = {'SankeySeries':[('nodes','SankeyNodes'),('links','SankeyLink
 node_content = {'SankeySeries':'Nodes','TreemapSeries':'Nodes','HeatLandSeries':'Lands'}
 family_overrides = {'HeatLandSeries':['heat_map'],'HeatSeries':['heat_map'],'OhlcSeries':['stroke_width']}
 node_props = {
- # DataLabelsMaxWidth of the Sankey and treemap series, the source's 170 (#624).
  'SankeySeries':[('nodes','Nodes','SankeyNodes','SankeyNodes::new()'),('links','Links','SankeyLinks','SankeyLinks::new()'),
-  ('data_labels_max_width','DataLabelsMaxWidth','f64','170.0'),
   ('node_width','NodeWidth','f64','12.0'),('node_padding','NodePadding','f64','8.0'),
   ('node_corner_radius','NodeCornerRadius','f64','0.0'),('layout_iterations','LayoutIterations','u32','32'),
   ('node_label_position','NodeLabelPosition','SankeyLabelPosition','SankeyLabelPosition::Auto'),
   ('layout','Layout','SankeyLayoutKind','SankeyLayoutKind::Vertical'),
   ('arc_span_degrees','ArcSpanDegrees','f64','150.0'),('link_fill','LinkFill','Option<Color>','None')],
- 'TreemapSeries':[('nodes','Nodes','TreemapNodes','TreemapNodes::new()'),
-  ('data_labels_max_width','DataLabelsMaxWidth','f64','170.0')],
+ 'TreemapSeries':[('nodes','Nodes','TreemapNodes','TreemapNodes::new()')],
  'HeatLandSeries':[('lands','Lands','HeatLands','HeatLands::new()'),('color_stops','ColorStops','Option<Vec<f64>>','None'),
   ('min_value','MinValue','Option<f64>','None'),('max_value','MaxValue','Option<f64>','None')],
  # The ColorStops, PointPadding, MinValue and MaxValue of CoreHeatSeries (L5).

@@ -126,6 +126,10 @@ The `TooltipFormatter` of a map (`IGeoMapView`) is a code-only property of the c
 
 `mapping.json` records as ported `GeoMap_TooltipFormatter_IsAppliedToEachValue` and `LabelsMeasureTest.MaxWidth`, and `DrawingTextExtensions` partial (the shaping, right-to-left text and typeface fallback are the native text stack's): the report counts 212 ported and 111 partial test declarations.
 
+### #624: `DataLabelsMaxWidth` of every series
+
+`DataLabelsMaxWidth` is a property of every series (`ChartSeries`, 170 by default, the source's `Series.DataLabelsMaxWidth`), which the Sankey and treemap series had before. The Sankey and treemap engines break their labels as they measure them; for the Cartesian, pie and polar charts, `label_lines::wrap_data_labels` breaks each data label of a measured scene whose text is wider than the width of its series less the label padding into lines of `label_lines.rs`, one text of the scene each from the left of their block. These labels are placed by the size of one line, as the native engines measure them: a label above a Cartesian point keeps its last line where the one line was, and the centred labels of the heat cells, the slices and the polar points keep their middle. The labels of the axes and of the legends do not break. The native labels are numbers and the value lists of the range, financial and box points, so mostly the box labels break at the default.
+
 ## Remaining (#442)
 
 - Geographic map: a custom tooltip object (`IGeoMapTooltip`; no chart kind has one natively, `hover_changed` serves), visual elements other than circle markers at a coordinate, and the theme rules of the view.
