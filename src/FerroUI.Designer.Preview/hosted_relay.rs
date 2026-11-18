@@ -33,6 +33,8 @@ const WAIT_FOR_APP: Duration = Duration::from_secs(8);
 #[derive(Default)]
 struct Events {
     requested: Option<i64>,
+    fixture: Option<String>,
+    fixtures: Option<Vec<String>>,
     outcome: Option<Result<(), String>>,
     latest: Option<DesignFrameMessage>,
     disconnected: bool,
@@ -54,6 +56,7 @@ pub(crate) struct Design {
     document: Source,
     assembly: String,
     project_path: String,
+    fixture: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -79,6 +82,8 @@ pub(crate) struct Frame {
     revision: i64,
     sequence: i64,
     image: Image,
+    fixture: Option<String>,
+    fixtures: Option<Vec<String>>,
 }
 
 impl Relay {
@@ -154,7 +159,14 @@ impl Relay {
             let mut state = result.0.lock().unwrap();
             if let Some(outcome) = message.downcast_ref::<UpdateDesignResultMessage>() {
                 if state.requested == Some(outcome.revision) {
-                    state.outcome = Some(outcome.result.error.clone().map_or(Ok(()), Err));
+                    state.fixtures = outcome.fixtures.clone();
+                    state.outcome = Some(match &outcome.result.error {
+                        Some(error) => Err(error.clone()),
+                        None if state.fixture.as_ref().is_some_and(|name| {
+                            state.fixtures.as_ref().is_none_or(|available| !available.contains(name))
+                        }) => Err("The application does not expose that preview fixture".into()),
+                        None => Ok(()),
+                    });
                     result.1.notify_all();
                 }
             } else if let Some(frame) = message.downcast_ref::<DesignFrameMessage>() {
@@ -209,6 +221,9 @@ impl Relay {
 
     pub(crate) fn render(&mut self, design: Design, projects: &Projects) -> Result<Frame, String> {
         let revision = design.revision;
+        if let Some(name) = &design.fixture {
+            ferroui_designer_core::design_fixtures::validate_name(name)?;
+        }
         if revision < 1
             || !design.document.uri.starts_with("file:")
             || design.document.source.len() > MAX_SOURCE_BYTES
@@ -237,6 +252,7 @@ impl Relay {
             }
             *state = Events {
                 requested: Some(revision),
+                fixture: design.fixture.clone(),
                 ..Events::default()
             };
         }
@@ -247,7 +263,7 @@ impl Relay {
         };
         send(
             &connection,
-            Arc::new(UpdateDesignMessage { revision, source }),
+            Arc::new(UpdateDesignMessage { revision, source, fixture: design.fixture }),
         )?;
         let (state, _) = self
             .events
@@ -267,7 +283,7 @@ impl Relay {
     }
 
     pub(crate) fn frame(&mut self) -> Result<Option<Frame>, String> {
-        let frame = {
+        let (frame, fixture, fixtures) = {
             let mut state = self.events.0.lock().unwrap();
             if state.disconnected {
                 return Err("The app-hosted preview disconnected".into());
@@ -275,7 +291,7 @@ impl Relay {
             if !matches!(state.outcome, Some(Ok(()))) {
                 return Ok(None);
             }
-            state.latest.take()
+            (state.latest.take(), state.fixture.clone(), state.fixtures.clone())
         };
         let Some(DesignFrameMessage { revision, frame }) = frame else {
             return Ok(None);
@@ -291,6 +307,8 @@ impl Relay {
             revision,
             sequence,
             image,
+            fixture,
+            fixtures,
         }))
     }
 

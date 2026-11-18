@@ -58,9 +58,12 @@ Add `"app-preview"` to the target's features and open
 The application registers its own `PreviewBadge` control and markup assembly.
 Its build exports the control's XAML schema for completion and type checking.
 Edit the XAML, or click the preview's text box and use **Send Text**. The app's
-native binding updates the badge. [Preview entry point](app_preview.rs)
+native binding updates the badge. Choose **Loading** or **Ready** in Fixture to
+apply the registered data context. [Preview entry point](app_preview.rs)
 
 After a build, **Project controls** in the Toolbox includes `PreviewBadge`.
 Open the `rsx!` invocation in `app_preview.rs` to edit its mapped `text` literal
 or open the same Rust document in app-hosted design. Both use the control's
-native XAML registration.
+native XAML registration. The **Empty queue** and **One task** fixtures mount
+Rust views from the built binary. **Source preview** follows the current editor
+buffer. A Cargo build updates the Rust fixture factories.

@@ -7,6 +7,7 @@ import type { DesignerPanel } from './designerPanel';
 import type { DesignerWorkbench } from './designerWorkbench';
 import { runEditorHistory } from './editorHistory';
 import type { HotReload } from './hotReload';
+import type { HostedDesign } from './hostedDesign';
 import type { ProjectFile, ProjectInventory } from './projectInventory';
 import type { ProjectScaffold } from './projectScaffold';
 import type { RuntimeSourceTools } from './runtimeSourceTools';
@@ -76,6 +77,7 @@ interface Arguments extends CanvasAction, CargoSelection {
     input?: CanvasInteraction;
     kind?: string;
     language?: 'xaml' | 'rsx';
+    fixture?: string;
 }
 
 export class AgentTools {
@@ -83,7 +85,7 @@ export class AgentTools {
 
     constructor(private readonly workbench: DesignerWorkbench, private readonly reload: HotReload, private readonly stages: StagesPanel,
         private readonly runtimeSource: RuntimeSourceTools, private readonly project: ProjectInventory, private readonly scaffolds: ProjectScaffold,
-        private readonly scenarios: ScenarioRunner) {}
+        private readonly scenarios: ScenarioRunner, private readonly hosted: HostedDesign) {}
 
     definitions() { return Object.entries(agentCatalog).map(([name, definition]) => ({ name, ...definition })); }
 
@@ -139,6 +141,9 @@ export class AgentTools {
         signal.throwIfAborted();
         const document = panel.document;
         switch (tool) {
+            case 'designer_hosted_fixtures': return this.hosted.fixtures(document.uri);
+            case 'designer_hosted_fixture':
+                return this.hosted.chooseFixture(document.uri, args.expected_generation, args.expected_revision, args.fixture ?? null, signal);
             case 'designer_document': {
                 if (args.include_counterpart) {
                     await panel.waitForSnapshot(signal).catch(error => { if (signal.aborted) throw error; });

@@ -79,7 +79,9 @@ Export `MarkupAssembly` with `ferroui-build-scan` and add a metadata entry whose
 
 ## App-hosted design and Live App
 
-**Open App-Hosted Design** builds and starts the selected Cargo binary in design mode. The application registers its own XAML types, loader, assets, and theme using `RemoteDesignerEntryPoint::run_if_requested` from `ferroui-designer-support`. An authenticated loopback relay sends unsaved XAML or the supported static projection of the selected RSX invocation. Register design values with the application or in the view to provide sample data. Specify `ferroui.hostedPreview.assembly` when the registered markup assembly differs from the Cargo package name.
+**Open App-Hosted Design** builds and starts the selected Cargo binary in design mode. The application registers its own XAML types, loader, assets, and theme using `RemoteDesignerEntryPoint::run_if_requested` from `ferroui-designer-support`. An authenticated loopback relay sends unsaved XAML or the supported static projection of the selected RSX invocation. Specify `ferroui.hostedPreview.assembly` when the registered markup assembly differs from the Cargo package name.
+
+An application can call `register_preview_fixture` during preview setup. A **DataContext** fixture runs the current source with a typed application model. A **RustView** fixture mounts a fresh Rust control from the built binary. Choose **Source preview** to return to the current XAML or RSX buffer. The fixture selector is scoped to the previewed file. Agents can use `designer_hosted_fixtures` and `designer_hosted_fixture` to read choices and render them through the same session.
 
 The [Todo Workbench sample](../../samples/TodoWorkbench/README.md) demonstrates the preview entry point. Enable its `app-preview` Cargo feature in `ferroui.hotReload.targets` to use it with the hosted design command.
 

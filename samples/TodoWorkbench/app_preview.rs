@@ -10,10 +10,12 @@ use ferroui_base::{
 };
 use ferroui_controls::{AppBuilder, Application, ControlImpl, TextBlock, TextBlockImpl, Window};
 use ferroui_designer_support::remote::RemoteDesignerEntryPoint;
+use ferroui_designer_support::{PreviewFixture, register_preview_fixture};
 use ferroui_harfbuzz::HarfBuzzApplicationExtensions;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use ferroui_skia::SkiaApplicationExtensions;
 use std::{fs::File, path::Path};
+use std::rc::Rc;
 
 static ASSEMBLY: MarkupAssembly = MarkupAssembly {
     name: "todo-workbench",
@@ -33,12 +35,35 @@ pub(crate) fn start_if_requested() {
             .use_harfbuzz()
             .after_setup(|builder| {
                 register_markup();
+                register_fixtures();
                 if let Some(app) = builder.instance() {
                     app.styles()
                         .add(ferroui_themes_winui::WinUITheme::new().as_style());
                 }
             })
     });
+}
+
+fn register_fixtures() {
+    for (name, text) in [("Loading", "Loading tasks…"), ("Ready", "Ready to review")] {
+        register_preview_fixture("/HostedPreview.xaml", name, move || {
+            Ok(PreviewFixture::DataContext(Rc::new(text.to_owned())))
+        }).expect("valid Todo Workbench XAML fixture");
+    }
+    for (name, text) in [("Empty queue", "No tasks yet"), ("One task", "Review the project")] {
+        register_preview_fixture("/app_preview.rs", name, move || {
+            use ferroui_view::prelude::*;
+            Ok(PreviewFixture::RustView(rsx! {
+                StackPanel {
+                    width: 360.0,
+                    height: 180.0,
+                    spacing: 12.0,
+                    TextBlock { text: "Todo Workbench", font_size: 24.0 }
+                    TextBlock { text: text }
+                }
+            }.mount()))
+        }).expect("valid Todo Workbench RSX fixture");
+    }
 }
 
 fn register_markup() {

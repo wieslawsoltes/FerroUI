@@ -41,6 +41,10 @@ export const agentCatalog = {
     designer_rename_rsx_control: tool('Rename a mapped control name literal within the active RSX invocation. The source patch preserves surrounding Rust and refuses duplicate mapped names.',
         { ...frame, node, value: { type: 'string', maxLength: 128 } }, ['session', 'expected_revision', 'node', 'value'], true),
     designer_preview_image: tool('Capture the current native artboard as PNG with viewport and source revision metadata.', session, ['session']),
+    designer_hosted_fixtures: tool('Read registered fixture choices and current generation of the open application preview for this source.', session, ['session']),
+    designer_hosted_fixture: tool('Select a registered fixture in the application preview and wait for its accepted frame. Omit fixture to return to the current source.', {
+        ...frame, expected_generation: integer(1), fixture: { type: 'string', maxLength: 128 },
+    }, ['session', 'expected_generation', 'expected_revision'], true, false),
     designer_wait: tool('Wait for the native preview of the current authored buffer. Return the revision, RSX invocation ranges, and rendering diagnostics.',
         session, ['session']),
     designer_block: tool('Activate one of the indexed RSX invocations reported by designer_wait. Use the current preview revision.',

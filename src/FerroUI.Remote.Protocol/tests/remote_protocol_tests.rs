@@ -149,8 +149,8 @@ fn entities() -> Vec<Message> {
         }),
         Arc::new(StartDesignerSessionMessage { session_id: Some("a8098c1a-f86e-11da-bd1a-00112444be1e".to_string()) }),
         Arc::new(HtmlTransportStartedMessage { uri: Some("e902893a-9d22-3c7e-a7b8-d6e313b71d9f".to_string()) }),
-        Arc::new(ferroui_remote_protocol::designer::UpdateDesignMessage { revision: 40, source: UpdateXamlMessage { xaml: Some("<Border/>".into()), ..Default::default() } }),
-        Arc::new(ferroui_remote_protocol::designer::UpdateDesignResultMessage { revision: 40, result: UpdateXamlResultMessage::default() }),
+        Arc::new(ferroui_remote_protocol::designer::UpdateDesignMessage { revision: 40, fixture: Some("Loading".into()), source: UpdateXamlMessage { xaml: Some("<Border/>".into()), ..Default::default() } }),
+        Arc::new(ferroui_remote_protocol::designer::UpdateDesignResultMessage { revision: 40, result: UpdateXamlResultMessage::default(), fixtures: Some(vec!["Content".into(), "Loading".into()]) }),
         Arc::new(ferroui_remote_protocol::designer::DesignFrameMessage { revision: 40, frame: FrameMessage { sequence_id: 8, data: Some(vec![0, 128, 0, 128]), ..Default::default() } }),
         Arc::new(ferroui_remote_protocol::designer::DesignFrameReceivedMessage { revision: 40, sequence_id: 8 }),
     ]

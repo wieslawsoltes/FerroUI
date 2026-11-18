@@ -380,11 +380,12 @@ impl RemoteDesignerEntryPoint {
             // `catch (Exception e)`: an error of the document, and whatever
             // else fails while the window is built and shown (a panic here).
             let loaded = catch_unwind(AssertUnwindSafe(|| {
-                DesignWindowLoader::load_designer_window_with_scaling(
+                DesignWindowLoader::load_with_fixture(
                     xaml.xaml.as_deref().unwrap_or(""),
                     xaml.assembly_path.as_deref(),
                     xaml.xaml_file_project_path.as_deref(),
                     LAST_RENDER_SCALING.get(),
+                    versioned.and_then(|update| update.fixture.as_deref()),
                 )
             }));
             let result = match loaded {
@@ -430,7 +431,11 @@ impl RemoteDesignerEntryPoint {
                 }
             };
             let answer: Message = if let Some(revision) = revision {
-                Arc::new(UpdateDesignResultMessage { revision, result })
+                Arc::new(UpdateDesignResultMessage {
+                    revision,
+                    result,
+                    fixtures: crate::preview_fixtures::names(xaml.xaml_file_project_path.as_deref()),
+                })
             } else { Arc::new(result) };
             transport.send(answer);
         }

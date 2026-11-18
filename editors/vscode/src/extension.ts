@@ -51,7 +51,7 @@ export function activate(context: vscode.ExtensionContext) {
     const liveApp = new RuntimePanel(context, runtimes, reload, runtimeSource);
     const diagnostics = new DiagnosticsView(reload.history, runtimes, runtimeSource, designer);
     const runtimeTools = new RuntimeSourceTools(runtimes, runtimeSource);
-    const mcp = new FerroMcpProvider(context, new AgentTools(designer, reload, stages, runtimeTools, inventory, scaffolds, scenarios), previewOutput, runtimes);
+    const mcp = new FerroMcpProvider(context, new AgentTools(designer, reload, stages, runtimeTools, inventory, scaffolds, scenarios, hosted), previewOutput, runtimes);
     const startForXaml = (document: vscode.TextDocument) => {
         if (document.languageId === xamlLanguage && document.uri.scheme === 'file') void server.start();
     };

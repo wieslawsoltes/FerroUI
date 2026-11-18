@@ -2007,6 +2007,7 @@ version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
+ "ferroui-designer-core",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
  "ferroui-remote-protocol",

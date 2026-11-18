@@ -7,6 +7,10 @@ const canvas = element<HTMLImageElement>('hosted-image');
 const status = element('hosted-status');
 const input = element<HTMLFormElement>('hosted-input');
 const text = element<HTMLInputElement>('hosted-text');
+const fixtureLabel = element('hosted-fixture-label');
+const fixture = element<HTMLSelectElement>('hosted-fixture');
+let fixtureRevision = 0;
+let availableFixtures: string[] = [];
 let current: HostedFrame | undefined;
 let interactive = false;
 let request = 0;
@@ -16,6 +20,15 @@ window.addEventListener('message', async ({ data }: MessageEvent<ToHosted>) => {
         status.textContent = data.message;
         interactive = data.interactive;
         text.disabled = !interactive;
+        const { available, selected, revision, pending } = data.fixtures;
+        fixtureRevision = revision;
+        fixtureLabel.hidden = !available.length;
+        if (available.length !== availableFixtures.length || available.some((name, index) => name !== availableFixtures[index])) {
+            availableFixtures = available;
+            fixture.replaceChildren(new Option('Source preview', ''), ...available.map(name => new Option(name, name)));
+        }
+        fixture.value = selected ?? '';
+        fixture.disabled = pending;
         return;
     }
     const decoded = new Image();
@@ -54,4 +67,5 @@ input.onsubmit = event => {
     }
 };
 element('hosted-refresh').onclick = () => vscode.postMessage({ type: 'refresh' });
+fixture.onchange = () => vscode.postMessage({ type: 'fixture', revision: fixtureRevision, name: fixture.value || null });
 vscode.postMessage({ type: 'ready' });

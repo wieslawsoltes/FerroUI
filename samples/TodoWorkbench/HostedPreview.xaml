@@ -7,5 +7,6 @@
     <TextBlock Text="Write a label for the next task" FontSize="16" />
     <TextBox Name="LabelInput" Text="Review the project" />
     <app:PreviewBadge Text="{Binding #LabelInput.Text}" />
+    <TextBlock Text="{ReflectionBinding ., FallbackValue=Application data}" />
   </StackPanel>
 </Window>

@@ -1,9 +1,10 @@
 import { randomBytes } from 'node:crypto';
 import * as path from 'node:path';
+import { setTimeout as delay } from 'node:timers/promises';
 import * as vscode from 'vscode';
 import type { BuiltProject } from './builtProjects';
 import { type CargoTarget, selectCargoTarget } from './cargoTarget';
-import type { FromHosted, HostedFrame, ToHosted } from './hostedProtocol';
+import type { FromHosted, HostedFixtureCatalog, HostedFrame, ToHosted } from './hostedProtocol';
 import { NativePreview } from './nativePreview';
 import { errorMessage, type Language } from './protocol';
 import { buildCargo, launchArtifact, type ProjectMetadata, type ReloadProcess } from './reloadProcess';
@@ -15,6 +16,7 @@ export class HostedDesign implements vscode.Disposable {
     private readonly command: vscode.Disposable;
     private readonly sessions = new Map<string, HostedSession>();
     private readonly retiring = new Set<Promise<void>>();
+    private nextSession = 0;
     private stopped?: Promise<void>;
 
     constructor(context: vscode.ExtensionContext, output: vscode.OutputChannel, built: (metadata: ProjectMetadata) => void) {
@@ -37,7 +39,7 @@ export class HostedDesign implements vscode.Disposable {
                 const panel = vscode.window.createWebviewPanel('ferroui.hostedDesign', `App Preview · ${path.basename(document.fileName)}`,
                     { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true },
                     { ...webviewOptions(context.extensionUri), retainContextWhenHidden: true });
-                const session = new HostedSession(context, output, panel, editor, language, target, built, closing => {
+                const session = new HostedSession(context, output, panel, editor, language, target, ++this.nextSession, built, closing => {
                     this.sessions.delete(key);
                     this.retiring.add(closing);
                     void closing.then(() => this.retiring.delete(closing));
@@ -47,6 +49,25 @@ export class HostedDesign implements vscode.Disposable {
                 void vscode.window.showErrorMessage(errorMessage(error));
             }
         });
+    }
+
+    fixtures(uri: vscode.Uri): HostedFixtureCatalog {
+        return this.session(uri).fixtures();
+    }
+
+    async chooseFixture(uri: vscode.Uri, generation: number, revision: number, name: string | null, signal: AbortSignal): Promise<HostedFixtureCatalog> {
+        signal.throwIfAborted();
+        const session = this.session(uri);
+        if (session.generation !== generation) throw new Error('Read the current application preview generation.');
+        session.panel.reveal(session.panel.viewColumn, true);
+        const requested = session.selectFixture(revision, name);
+        return session.waitForFixture(requested, signal);
+    }
+
+    private session(uri: vscode.Uri): HostedSession {
+        const session = this.sessions.get(uri.toString());
+        if (!session) throw new Error('Open the application preview for the current design.');
+        return session;
     }
 
     dispose(): Promise<void> {
@@ -70,6 +91,8 @@ class HostedSession {
     private client?: NativePreview;
     private project?: BuiltProject;
     private frame?: HostedFrame;
+    private fixture: string | null = null;
+    private failed?: { revision: number; message: string };
     private timer?: ReturnType<typeof setTimeout>;
     private revision = 1;
     private requested = 0;
@@ -80,7 +103,7 @@ class HostedSession {
 
     constructor(private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel,
         readonly panel: vscode.WebviewPanel, private readonly editor: vscode.TextEditor, private readonly language: Language,
-        private readonly target: CargoTarget, built: (metadata: ProjectMetadata) => void, remove: (closing: Promise<void>) => void) {
+        private readonly target: CargoTarget, readonly generation: number, built: (metadata: ProjectMetadata) => void, remove: (closing: Promise<void>) => void) {
         this.subscriptions = [
             vscode.workspace.onDidChangeTextDocument(event => { if (event.document === editor.document) this.update(); }),
             vscode.window.onDidChangeTextEditorSelection(event => {
@@ -132,6 +155,7 @@ class HostedSession {
 
     private update(): void {
         ++this.revision;
+        this.failed = undefined;
         if (!this.application) return;
         this.report('Rendering the current source…');
         this.schedule(180);
@@ -157,16 +181,23 @@ class HostedSession {
             const assembly = vscode.workspace.getConfiguration('ferroui', document.uri)
                 .get<string>('hostedPreview.assembly') || this.target.packageName;
             const projectPath = '/' + path.relative(path.dirname(this.target.manifest), document.uri.fsPath).split(path.sep).map(encodeURIComponent).join('/');
-            const frame = update ? await client.renderHosted({ revision, assembly, projectPath,
-                document: await client.inProject(sourceOf(document, this.language, this.editor.selection.active), this.project),
-            }) : await client.hostedFrame();
+            let frame: HostedFrame | null;
+            if (update) {
+                const source = await client.inProject(sourceOf(document, this.language, this.editor.selection.active), this.project);
+                if (this.disposed || revision !== this.revision) return;
+                frame = await client.renderHosted({ revision, assembly, projectPath, document: source, fixture: this.fixture });
+            } else frame = await client.hostedFrame();
             if (!this.disposed && client === this.client && frame?.revision === this.revision) {
                 this.frame = frame;
                 this.post({ type: 'frame', frame });
-                this.report(`${this.target.label} · App-hosted design`, true);
+                this.report(`${this.target.label} · App-hosted design${frame.fixture ? ` · ${frame.fixture}` : ''}`, true);
             }
         } catch (error) {
-            if (client === this.client && revision === this.revision) this.report(errorMessage(error));
+            if (client === this.client && revision === this.revision) {
+                const message = errorMessage(error);
+                this.failed = { revision, message };
+                this.report(message);
+            }
         } finally {
             this.pending = false;
             this.schedule(this.requested === this.revision ? 160 : 0);
@@ -182,6 +213,11 @@ class HostedSession {
             return;
         }
         if (message.type === 'refresh') { this.update(); return; }
+        if (message.type === 'fixture') {
+            try { this.selectFixture(message.revision, message.name); }
+            catch (error) { this.report(errorMessage(error), this.frame?.revision === this.revision); }
+            return;
+        }
         if (!('revision' in message) || message.revision !== this.revision || message.sequence !== this.frame?.sequence) return;
         try { await this.client?.hostedInput(message); }
         catch (error) { this.report(errorMessage(error)); }
@@ -189,7 +225,35 @@ class HostedSession {
 
     private report(message: string, interactive = false): void {
         this.status = message;
-        this.post({ type: 'status', message, interactive });
+        this.post({ type: 'status', message, interactive, fixtures: this.fixtures() });
+    }
+
+    fixtures(): HostedFixtureCatalog {
+        return { generation: this.generation, revision: this.revision, available: this.frame?.fixtures ?? [],
+            selected: this.frame?.fixture ?? null, pending: this.failed?.revision !== this.revision && this.frame?.revision !== this.revision };
+    }
+
+    selectFixture(revision: number, name: string | null): number {
+        const catalog = this.fixtures();
+        if (revision !== catalog.revision || !this.client || !this.application || catalog.pending) {
+            throw new Error('Read the current application preview fixture choices.');
+        }
+        if (name !== null && !catalog.available.includes(name)) throw new Error('Choose a registered fixture for this source.');
+        if (this.frame?.revision === revision && name === catalog.selected) return revision;
+        this.fixture = name;
+        this.update();
+        return this.revision;
+    }
+
+    async waitForFixture(revision: number, signal: AbortSignal): Promise<HostedFixtureCatalog> {
+        const timeout = AbortSignal.any([signal, AbortSignal.timeout(15_000)]);
+        while (!this.disposed && this.client && this.revision === revision) {
+            timeout.throwIfAborted();
+            if (this.failed?.revision === revision) throw new Error(this.failed.message);
+            if (this.frame?.revision === revision) return this.fixtures();
+            await delay(60, undefined, { signal: timeout });
+        }
+        throw new Error('The application preview changed before the fixture was accepted.');
     }
 
     private post(message: ToHosted): void {

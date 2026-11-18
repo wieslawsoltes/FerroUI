@@ -35,8 +35,30 @@ export async function verifyHostedPreview(preview: NativePreview, uri: string): 
         assert.notEqual(third.image.png, first.image.png);
         await assert.rejects(preview.hostedInput({ type: 'click', x: .5, y: .5, revision: first.revision, sequence: first.sequence }), /frame changed/i);
         await preview.hostedInput({ type: 'click', x: .5, y: .5, revision: third.revision, sequence: third.sequence });
+        const bound = '<Window xmlns="https://github.com/ferroui" Width="380" Height="220"><TextBlock Text="{ReflectionBinding .}"/></Window>';
+        const hostedXaml = (revision: number, fixture?: string): HostedSource => ({
+            ...update(revision, bound), projectPath: '/HostedPreview.xaml', fixture,
+        });
+        const defaults = await preview.renderHosted(hostedXaml(4));
+        assert.deepEqual(defaults.fixtures, ['Loading', 'Ready']);
+        const loading = await preview.renderHosted(hostedXaml(5, 'Loading'));
+        const ready = await preview.renderHosted(hostedXaml(6, 'Ready'));
+        assert.equal(loading.fixture, 'Loading');
+        assert.notEqual(ready.image.png, loading.image.png);
+        await assert.rejects(preview.renderHosted(hostedXaml(7, 'Missing')), /unavailable/);
+        const hostedRsx = (revision: number, fixture?: string): HostedSource => ({
+            revision, projectPath: '/app_preview.rs', fixture, assembly: 'todo-workbench',
+            document: { uri: new URL('app_preview.rs', uri).toString(), language: 'rust', caret: { line: 0, character: 35 },
+                source: 'fn preview() { rsx! { TextBlock { text: "Unsaved Rust view" } } }' },
+        });
+        const rsx = await preview.renderHosted(hostedRsx(8));
+        assert.deepEqual(rsx.fixtures, ['Empty queue', 'One task']);
+        const one = await preview.renderHosted(hostedRsx(9, 'One task'));
+        assert.equal(one.fixture, 'One task');
+        assert.notEqual(one.image.png, rsx.image.png);
+        assert.notEqual((await preview.renderHosted(hostedRsx(10, 'Empty queue'))).image.png, one.image.png);
         assert.equal(child.exitCode, null);
-        console.log('App-hosted design rendered the custom Todo control and its live binding, recovered from an invalid edit, and fenced stale input');
+        console.log('App-hosted design rendered a custom control, native bindings and registered XAML/Rust fixtures, and fenced invalid updates and stale input');
     } catch (error) {
         throw new Error(`App-hosted preview failed. ${String(error)}\n${launchError?.message ?? log}`, { cause: error });
     } finally { child.kill(); }

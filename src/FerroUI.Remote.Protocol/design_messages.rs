@@ -7,19 +7,29 @@ use crate::viewport_messages::FrameMessage;
 pub struct UpdateDesignMessage {
     pub revision: i64,
     pub source: UpdateXamlMessage,
+    pub fixture: Option<String>,
 }
 
 ferro_remote_message_guid!(UpdateDesignMessage, "58FA5FA8-5669-4C04-80FA-8F573BA45ACD");
-bson_class!(UpdateDesignMessage as "UpdateDesignMessage" {"Revision" => revision: i64, "Source" => source: UpdateXamlMessage});
+bson_class!(UpdateDesignMessage as "UpdateDesignMessage" {
+    "Revision" => revision: i64,
+    "Source" => source: UpdateXamlMessage,
+    "Fixture" => fixture: Option<String>,
+});
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct UpdateDesignResultMessage {
     pub revision: i64,
     pub result: UpdateXamlResultMessage,
+    pub fixtures: Option<Vec<String>>,
 }
 
 ferro_remote_message_guid!(UpdateDesignResultMessage, "CB085DBB-7231-4C16-8797-D8D97BCF9341");
-bson_class!(UpdateDesignResultMessage as "UpdateDesignResultMessage" {"Revision" => revision: i64, "Result" => result: UpdateXamlResultMessage});
+bson_class!(UpdateDesignResultMessage as "UpdateDesignResultMessage" {
+    "Revision" => revision: i64,
+    "Result" => result: UpdateXamlResultMessage,
+    "Fixtures" => fixtures: Option<Vec<String>>,
+});
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct DesignFrameMessage {

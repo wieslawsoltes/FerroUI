@@ -31,7 +31,9 @@
 //! ```
 
 mod design_window_loader;
+mod preview_fixtures;
 
 pub mod remote;
 
 pub use design_window_loader::DesignWindowLoader;
+pub use preview_fixtures::{PreviewFixture, register_preview_fixture};

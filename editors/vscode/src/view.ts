@@ -243,7 +243,10 @@ export function runtimeHtml(webview: vscode.Webview, root: vscode.Uri): string {
 
 export function hostedHtml(webview: vscode.Webview, root: vscode.Uri): string {
     return page(webview, root, 'hosted', 'FerroUI App Preview', `
-<header class="runtime-header"><button id="hosted-refresh">Refresh Source</button></header>
+<header class="runtime-header">
+    <button id="hosted-refresh">Refresh Source</button>
+    <label id="hosted-fixture-label" hidden>Fixture <select id="hosted-fixture"></select></label>
+</header>
 <p id="hosted-status" role="status">Starting application preview…</p>
 <div class="runtime-canvas"><img id="hosted-image" alt="App-hosted FerroUI design" draggable="false" hidden></div>
 <form id="hosted-input" hidden>
