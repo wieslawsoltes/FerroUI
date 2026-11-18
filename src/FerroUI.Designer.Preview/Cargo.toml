@@ -20,6 +20,7 @@ base64 = "0.22"
 ferroui-base.workspace = true
 ferroui-controls.workspace = true
 ferroui-designer = { workspace = true, features = ["mcp"] }
+ferroui-designer-animation.workspace = true
 ferroui-designer-core.workspace = true
 ferroui-designer-language.workspace = true
 ferroui-designer-project.workspace = true

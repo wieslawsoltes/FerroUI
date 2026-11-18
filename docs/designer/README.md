@@ -467,6 +467,10 @@ decode an accepted XAML clip and round-trip its key values. The authored track c
 text value for a native property such as `BoxShadows`. Playback still resolves the property's
 actual native animator. [Todo Workbench shadow codec](../../samples/TodoWorkbench/app_preview/animation_codec.rs)
 
+App Preview uses the same authored program IDs and source paths as Studio when a valid source
+replaces its native tree. The relay resolves the selected clip and assigned controls, then samples
+the application at the retained elapsed time before it sends the replacement image to VS Code.
+
 ## Visual states, transitions and behaviors
 
 The **States** panel authors groups, named states, target setters, default/directional transitions,

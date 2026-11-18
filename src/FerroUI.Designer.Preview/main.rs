@@ -6,6 +6,7 @@ mod edit_selection;
 mod edits;
 mod event_fields;
 mod hosted_animation;
+mod hosted_animation_restore;
 mod hosted_frame;
 mod hosted_relay;
 mod inspection;
