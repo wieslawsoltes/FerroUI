@@ -14,6 +14,15 @@ export async function verifyCargoTarget(workspace: vscode.Uri): Promise<void> {
     };
     await write('Cargo.toml', '[package]\nname = "audit-app"\nversion = "0.1.0"\nedition = "2024"\n[features]\nhot-reload = []\n');
     await write('.cargo/config.toml', '[build]\ntarget-dir = "audit-output"\n');
+    const metadata = JSON.stringify({
+        format: 2, name: 'Audit Application', crate_name: 'audit_app',
+        types: [{ name: 'AuditCard', namespace: 'Audit.Controls', kind: 'class', rust_path: 'audit_app::AuditCard',
+            properties: [{ name: 'Caption', value_type: 'String', setter: {} }] }],
+    });
+    await write('build.rs', `fn main() {
+        let path = std::path::PathBuf::from(std::env::var_os("OUT_DIR").unwrap()).join("audit.xamlmeta");
+        std::fs::write(path, r#"${metadata}"#).unwrap();
+    }\n`);
     const source = await write('src/main.rs', 'fn main() {}\n');
     await vscode.window.showTextDocument(source);
     const target = await selectCargoTarget();
@@ -29,5 +38,24 @@ export async function verifyCargoTarget(workspace: vscode.Uri): Promise<void> {
     } finally {
         output.dispose();
     }
-    console.log('VS Code discovered and built the nested Cargo project using its Cargo configuration');
+    const markup = '<local:AuditCard xmlns:local="using:Audit.Controls" Caption="Review"/>';
+    const uri = await write('Card.xaml', markup);
+    const editor = await vscode.window.showTextDocument(uri, { viewColumn: vscode.ViewColumn.One });
+    const xaml = editor.document;
+    assert.equal(xaml.languageId, 'ferroui-xaml');
+    await vscode.commands.executeCommand('ferroui.buildProjectSchema');
+    const caption = xaml.positionAt(markup.indexOf('Caption') + 1);
+    let hovers: vscode.Hover[] | undefined;
+    for (const deadline = Date.now() + 10_000; Date.now() < deadline;) {
+        hovers = await vscode.commands.executeCommand<vscode.Hover[]>('vscode.executeHoverProvider', xaml.uri, caption);
+        if (hovers?.some(hover => hover.contents.some(content =>
+            (typeof content === 'string' ? content : content.value).includes('Caption: String')))) {
+            console.log('VS Code used the nested Cargo configuration and published its generated XAML schema');
+            return;
+        }
+        await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    const diagnostics = vscode.languages.getDiagnostics(xaml.uri).map(item => item.message);
+    assert.fail(`The built project schema did not provide the type of AuditCard.Caption in ${xaml.uri}. ` +
+        `Hovers: ${JSON.stringify(hovers)}. Diagnostics: ${diagnostics.join(', ')}`);
 }

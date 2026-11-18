@@ -44,6 +44,25 @@ fn exported(workspace: &DesignerWorkspace, uri: &str) -> Vec<DesignerDefinitionA
 }
 
 #[test]
+fn studio_toolbox_uses_project_snippets_and_retires_them_when_the_solution_changes() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let first = ProjectFiles::new();
+    let second = ProjectFiles::new();
+    let snippets = first.0.join(".ferroui/toolbox");
+    std::fs::create_dir_all(&snippets).unwrap();
+    std::fs::write(snippets.join("Review.xaml"), "<Button Content='Review'/>").unwrap();
+    let workspace = DesignerWorkspace::with_uri(MAIN, "memory://main.xaml".into()).unwrap();
+    workspace.set_solution(Solution::discover(&first.0).unwrap()).unwrap();
+    let toolbox = workspace.asset_toolbox().unwrap();
+    let catalog = toolbox.assets();
+    assert!(catalog.iter().any(|asset| asset.id == "project-file:Review"));
+    assert!(catalog.iter().any(|asset| asset.id == "Button"));
+    workspace.set_solution(Solution::discover(&second.0).unwrap()).unwrap();
+    assert!(!toolbox.assets().iter().any(|asset| asset.id == "project-file:Review"));
+    assert!(toolbox.assets().iter().any(|asset| asset.id == "Button"));
+}
+
+#[test]
 fn indexed_project_definitions_appear_without_reopening_files_or_rebuilding_unchanged_snapshots() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let files = ProjectFiles::new();

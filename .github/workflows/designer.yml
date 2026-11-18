@@ -13,6 +13,7 @@ on:
       - 'editors/vscode/**'
       - 'docs/designer/samples/**'
       - 'samples/DesignerStudio/**'
+      - 'samples/TodoWorkbench/**'
       - 'src/FerroUI.Mcp/**'
       - 'src/FerroUI.HotReload/**'
       - 'src/FerroUI.Inspect/**'
@@ -85,7 +86,9 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends libfontconfig1-dev libfreetype6-dev fonts-dejavu-core \
-            xvfb xauth libgtk-3-0t64 libnss3 libasound2t64
+            xvfb xauth libgtk-3-0t64 libnss3 libasound2t64 \
+            libx11-dev libx11-xcb-dev libxi-dev libxrandr-dev libxcursor-dev libxfixes-dev libxext-dev libxtst-dev libxkbcommon-dev \
+            libgl1-mesa-dev libegl1-mesa-dev
       - name: Studio, MCP tools and render-smoke suites
         env:
           FERROUI_DESIGNER_RENDER_OUTPUT: ${{ github.workspace }}/designer-render
@@ -107,13 +110,18 @@ jobs:
           node-version: '22'
           cache: npm
           cache-dependency-path: editors/vscode/package-lock.json
-      - name: Build the VS Code backend tools
-        run: cargo build --locked -p ferroui-designer-language -p ferroui-designer-preview
+      - name: Build the VS Code backend tools and native fixture
+        run: |
+          cargo build --locked -p ferroui-designer-language -p ferroui-designer-preview \
+            -p todo-workbench --features todo-workbench/app-preview,todo-workbench/hot-reload,todo-workbench/mcp
       - name: VS Code extension host smoke
         working-directory: editors/vscode
+        env:
+          FERROUI_TEST_HOSTED_APP: ${{ github.workspace }}/target/debug/todo-workbench
         run: |
           npm ci
           xvfb-run -a npm test
+          FERROUI_TEST_VSCODE_VERSION=1.102.0 xvfb-run -a node test/run.mjs
       - name: Render evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

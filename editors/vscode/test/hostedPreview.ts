@@ -18,20 +18,26 @@ export async function verifyHostedPreview(preview: NativePreview, uri: string): 
     child.on('error', error => { launchError = error; });
     const update = (revision: number, source: string): HostedSource => ({ revision, assembly: 'todo-workbench', projectPath: '/Test.xaml',
         document: { uri, source, language: 'xaml', caret: { line: 0, character: 0 } } });
-    const valid = (value: string) => `<Window xmlns="https://github.com/ferroui" Width="380" Height="220"><Button Content="${value}" Width="130"/></Window>`;
+    const valid = (value: string) =>
+        `<Window xmlns="https://github.com/ferroui" xmlns:app="using:TodoWorkbench.Design" Width="380" Height="220">
+          <StackPanel Margin="20">
+            <TextBlock Name="Message" IsVisible="False" Text="${value}"/>
+            <app:PreviewBadge Text="{Binding #Message.Text}"/>
+          </StackPanel>
+        </Window>`;
     try {
         const first = await preview.renderHosted(update(1, valid('First version')));
         assert.equal(first.revision, 1);
         assert.equal(Buffer.from(first.image.png, 'base64').subarray(1, 4).toString(), 'PNG');
-        await assert.rejects(preview.renderHosted(update(2, valid('Broken').replace('Button', 'NonexistentControl'))));
+        await assert.rejects(preview.renderHosted(update(2, valid('Broken').replace('PreviewBadge', 'NonexistentControl'))));
         const third = await preview.renderHosted(update(3, valid('Updated in the editor')));
         assert.equal(third.revision, 3);
         assert.notEqual(third.image.png, first.image.png);
         await assert.rejects(preview.hostedInput({ type: 'click', x: .5, y: .5, revision: first.revision, sequence: first.sequence }), /frame changed/i);
         await preview.hostedInput({ type: 'click', x: .5, y: .5, revision: third.revision, sequence: third.sequence });
         assert.equal(child.exitCode, null);
-        console.log('App-hosted design authenticated and rendered unsaved XAML, rejected an invalid update, and fenced stale input');
+        console.log('App-hosted design rendered the custom Todo control and its live binding, recovered from an invalid edit, and fenced stale input');
     } catch (error) {
-        throw new Error(`App-hosted preview failed. ${launchError?.message ?? log}`, { cause: error });
+        throw new Error(`App-hosted preview failed. ${String(error)}\n${launchError?.message ?? log}`, { cause: error });
     } finally { child.kill(); }
 }

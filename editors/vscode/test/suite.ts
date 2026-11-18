@@ -27,7 +27,7 @@ export async function run(): Promise<void> {
     if (live) await vscode.window.tabGroups.close(live);
     const xaml = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(workspace, 'SettingsView.xaml'));
     assert.equal(xaml.languageId, 'ferroui-xaml');
-    const editor = await vscode.window.showTextDocument(xaml);
+    await vscode.window.showTextDocument(xaml);
     await vscode.commands.executeCommand('ferroui.openDesigner');
     await until(() => vscode.window.tabGroups.all.some(group => group.tabs.some(tab => tab.label === 'Design · SettingsView.xaml')));
     assert.ok(vscode.window.visibleTextEditors.some(visible => visible.document === xaml));
@@ -67,6 +67,14 @@ export async function run(): Promise<void> {
     await verifyDrag(panel);
     await verifyMcp(xaml);
 
+    const undoXaml = async (expected: string) => {
+        await vscode.window.showTextDocument(xaml, { viewColumn: vscode.ViewColumn.One, preserveFocus: false });
+        await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
+        assert.equal(vscode.window.activeTextEditor?.document, xaml);
+        await vscode.commands.executeCommand('undo');
+        assert.equal(xaml.getText(), expected);
+    };
+
     const channel = vscode.window.createOutputChannel('FerroUI test');
     const preview = await NativePreview.start(extension, channel);
     try {
@@ -83,9 +91,7 @@ export async function run(): Promise<void> {
         assert.ok(xaml.getText().includes('Content="Ship it 🧪"'));
         assert.ok(xaml.isDirty, 'The designer edits the unsaved buffer');
         await assert.rejects(applyTextEdits(xaml, version, edits), /source changed/i);
-        await vscode.window.showTextDocument(xaml, editor.viewColumn);
-        await vscode.commands.executeCommand('undo');
-        await until(() => xaml.getText() === xamlInput.source);
+        await undoXaml(xamlInput.source);
         const parent = frame.nodes.find(node => node.label === 'StackPanel');
         assert.ok(parent?.canInsert);
         const placement = { origin: { type: 'asset', control: 'TextBlock' }, target: { type: 'outline', node: parent.id, position: 'inside' } } as const;
@@ -94,8 +100,7 @@ export async function run(): Promise<void> {
         await applyTextEdits(xaml, xaml.version, insertion);
         assert.ok(xaml.getText().includes('Text="Text"'));
         assert.ok(selection && xaml.lineAt(selection.start.line).text.includes('<TextBlock'));
-        await vscode.commands.executeCommand('undo');
-        await until(() => xaml.getText() === xamlInput.source);
+        await undoXaml(xamlInput.source);
         const draft = frame.counterpart.source?.replace('Save changes', 'Apply settings');
         assert.ok(frame.counterpart.editable && draft);
         const { edits: rsxEdits } = await preview.edit(xamlInput, { type: 'applyCounterpart', source: draft });

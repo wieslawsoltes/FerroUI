@@ -1,0 +1,11 @@
+<Window xmlns="https://github.com/ferroui"
+        xmlns:app="using:TodoWorkbench.Design"
+        Width="460"
+        Height="240"
+        Title="Todo Workbench preview">
+  <StackPanel Margin="24" Spacing="12">
+    <TextBlock Text="Write a label for the next task" FontSize="16" />
+    <TextBox Name="LabelInput" Text="Review the project" />
+    <app:PreviewBadge Text="{Binding #LabelInput.Text}" />
+  </StackPanel>
+</Window>

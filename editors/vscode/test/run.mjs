@@ -27,6 +27,7 @@ try {
         extensionDevelopmentPath: extension,
         extensionTestsPath: join(extension, 'dist/test.js'),
         vscodeExecutablePath: process.env.FERROUI_TEST_VSCODE,
+        version: process.env.FERROUI_TEST_VSCODE_VERSION,
         launchArgs: [workspace, '--user-data-dir', profile, '--extensions-dir', join(sandbox, 'extensions'),
             '--skip-welcome', '--skip-release-notes', '--disable-workspace-trust'],
     });
