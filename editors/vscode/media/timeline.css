@@ -188,27 +188,4 @@ body { block-size: 100vh; }
 }
 .timeline-key[aria-pressed="true"]::before { border-color: currentColor; }
 .timeline-key-dragging { cursor: ew-resize; }
-.timeline-keyframe-editor {
-    flex: none;
-    margin-block-start: 8px;
-    padding: 6px 8px 8px;
-    border: 1px solid var(--line);
-    border-radius: 5px;
-    background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
-}
-.timeline-keyframe-editor header, .keyframe-curve-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
-#keyframe-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-#keyframe-fields { min-inline-size: 0; border: 0; margin: 0; padding: 0; }
-.keyframe-fields { display: grid; grid-template-columns: minmax(54px, .75fr) minmax(0, 1.25fr); gap: 5px 6px; margin-block: 5px; }
-.keyframe-fields label { min-inline-size: 0; display: grid; gap: 3px; color: var(--muted); }
-.keyframe-fields input { inline-size: 100%; min-inline-size: 0; }
-.keyframe-easing { grid-column: 1 / -1; }
-#keyframe-curve {
-    min-inline-size: 0;
-    inline-size: min(100%, 180px);
-    block-size: 47px;
-    border: 1px solid var(--line);
-    border-radius: 3px;
-}
-#keyframe-feedback { color: var(--vscode-errorForeground); font-size: .93em; margin: 6px 0 0; overflow-wrap: anywhere; }
 @media (max-width: 220px) { .timeline-ruler span:nth-child(even) { display: none; } }

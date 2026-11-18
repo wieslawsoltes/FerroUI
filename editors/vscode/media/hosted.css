@@ -5,6 +5,7 @@ body { display: flex; flex-direction: column; block-size: 100vh; overflow: hidde
 #hosted-animation-program { flex: 1 1 100px; min-inline-size: 0; }
 .hosted-animation-toolbar { flex-wrap: wrap; }
 .hosted-animation-clock { display: flex; align-items: center; gap: 6px; padding: 2px 8px; }
+.timeline-keyframe-editor { margin-inline: 8px; max-block-size: 44vh; overflow: auto; }
 #hosted-animation-seek { flex: 1 1 auto; min-inline-size: 0; accent-color: var(--focus); }
 #hosted-animation-time { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
 #hosted-status { flex: none; margin-block: 5px; }

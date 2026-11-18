@@ -18,6 +18,7 @@ export async function run(): Promise<void> {
     await Promise.all([
         ...['ferroui-xaml-lsp', 'ferroui-designer-preview'].map(name => access(path.join(extension.extensionPath, 'bin', name + suffix))),
         ...['timeline.js', 'designData.js', 'hosted.js'].map(name => access(path.join(extension.extensionPath, 'dist', name))),
+        access(path.join(extension.extensionPath, 'media', 'keyframe-editor.css')),
     ]);
     const workspace = vscode.workspace.workspaceFolders![0];
     const document = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(workspace.uri, 'SettingsView.xaml'));
@@ -47,7 +48,9 @@ export async function run(): Promise<void> {
         const project = await native.projectInventory(workspace.uri.fsPath);
         assert.ok(project.files.some(file => file.kind === 'rsx' && file.path === 'views.rs'));
         const { animationQuery } = await native.listenHosted(randomBytes(32).toString('hex'));
-        assert.equal(animationQuery, 'ferroui-design-animation=1', 'The installed relay negotiates native application animations');
+        const capabilities = new URLSearchParams(animationQuery);
+        assert.equal(capabilities.get('ferroui-design-animation'), '1', 'The installed relay negotiates native application animations');
+        assert.equal(capabilities.get('ferroui-design-keyframes'), '1', 'The installed relay negotiates project codec authoring');
         console.log(`Installed FerroUI ${extension.packageJSON.version} passed on VS Code ${vscode.version} (${process.platform}-${process.arch}).`);
     } finally {
         native.dispose();

@@ -4,6 +4,7 @@ import { randomBytes } from 'node:crypto';
 import type { NativePreview } from '../src/nativePreview';
 import type { HostedSource } from '../src/hostedProtocol';
 import { verifyHostedAnimation } from './hostedAnimation';
+import { verifyHostedCodec } from './hostedCodec';
 
 export async function verifyHostedPreview(preview: NativePreview, uri: string): Promise<void> {
     const app = process.env.FERROUI_TEST_HOSTED_APP;
@@ -61,6 +62,7 @@ export async function verifyHostedPreview(preview: NativePreview, uri: string): 
         assert.notEqual(one.image.png, rsx.image.png);
         assert.notEqual((await preview.renderHosted(hostedRsx(10, 'Empty queue'))).image.png, one.image.png);
         await verifyHostedAnimation(preview, update);
+        await verifyHostedCodec(preview, update);
         assert.equal(child.exitCode, null);
         console.log('App-hosted design rendered a custom control, native bindings and registered XAML/Rust fixtures, and fenced invalid updates and stale input');
     } catch (error) {

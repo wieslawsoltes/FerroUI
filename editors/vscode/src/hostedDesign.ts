@@ -4,8 +4,9 @@ import { setTimeout as delay } from 'node:timers/promises';
 import * as vscode from 'vscode';
 import type { BuiltProject } from './builtProjects';
 import { type CargoSelection, type CargoTarget, discoverCargoTargets, selectCargoTarget } from './cargoTarget';
-import type { HostedAnimationControl, HostedAnimationFrame, HostedAnimationRequest } from './hostedAnimationProtocol';
+import type { HostedAnimationControl, HostedAnimationFrame, HostedAnimationRequest, HostedKeyframeDraft } from './hostedAnimationProtocol';
 import { HostedAnimations } from './hostedAnimations';
+import { applyHostedKeyframePatch, chooseHostedKeyframe } from './hostedKeyframes';
 import type { FromHosted, HostedAnimationSample, HostedFixtureCatalog, HostedFrame, ToHosted } from './hostedProtocol';
 import { NativePreview } from './nativePreview';
 import { errorMessage, type Language } from './protocol';
@@ -110,6 +111,13 @@ export class HostedDesign implements vscode.Disposable {
         return this.animations(uri);
     }
 
+    keyframe(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame, draft: HostedKeyframeDraft,
+        apply: boolean, signal: AbortSignal) {
+        const session = this.session(uri);
+        if (session.generation !== generation) throw new Error('Read the current application preview generation.');
+        return session.keyframe(frame, draft, apply, signal);
+    }
+
     async chooseFixture(uri: vscode.Uri, generation: number, revision: number, name: string | null, signal: AbortSignal): Promise<HostedFixtureCatalog> {
         signal.throwIfAborted();
         const session = this.session(uri);
@@ -153,6 +161,7 @@ class HostedSession {
     private revision = 1;
     private requested = 0;
     private pending = false;
+    private polling?: Promise<void>;
     private ready = false;
     private disposed = false;
     private status = 'Building the selected Cargo target…';
@@ -161,7 +170,8 @@ class HostedSession {
         readonly panel: vscode.WebviewPanel, private readonly editor: vscode.TextEditor, private readonly language: Language,
         private readonly target: CargoTarget, readonly generation: number, built: (metadata: ProjectMetadata) => void, remove: (closing: Promise<void>) => void) {
         this.animations = new HostedAnimations((request, signal) => this.sampleAnimation(request, signal),
-            state => this.post({ type: 'animations', state }), error => this.report(errorMessage(error), Boolean(this.currentFrame)));
+            state => this.post({ type: 'animations', state, version: this.editor.document.version }),
+            error => this.report(errorMessage(error), Boolean(this.currentFrame)));
         this.subscriptions = [
             vscode.workspace.onDidChangeTextDocument(event => { if (event.document === editor.document) this.update(); }),
             vscode.window.onDidChangeTextEditorSelection(event => {
@@ -226,7 +236,9 @@ class HostedSession {
     private schedule(delay: number): void {
         clearTimeout(this.timer);
         if (this.ready && this.panel.visible && this.client && this.application && !this.disposed) {
-            this.timer = setTimeout(() => { void this.tick(); }, delay);
+            this.timer = setTimeout(() => {
+                this.polling = this.tick().finally(() => { this.polling = undefined; });
+            }, delay);
         }
     }
 
@@ -278,6 +290,7 @@ class HostedSession {
     }
 
     private async sampleAnimation(request: HostedAnimationRequest, signal: AbortSignal): Promise<HostedAnimationSample> {
+        await this.polling;
         const client = this.client;
         signal.throwIfAborted();
         if (!client || this.pending || request.revision !== this.revision || request.sequence !== this.currentFrame?.sequence) {
@@ -324,16 +337,71 @@ class HostedSession {
         await this.animations.control(current, { action: 'targets', program: id, targets: choice.map(item => item.target) }, AbortSignal.timeout(15_000));
     }
 
+    async keyframe(frame: HostedAnimationFrame, draft: HostedKeyframeDraft, apply: boolean, signal: AbortSignal) {
+        await this.polling;
+        signal.throwIfAborted();
+        const program = this.animations.program(frame, draft.program);
+        if (this.language !== 'xaml' || !program.authoring) throw new Error('Choose an XAML animation with a registered project codec.');
+        const client = this.client;
+        if (!client || this.pending || this.animations.driving || this.currentFrame?.sequence !== frame.sequence) {
+            throw new Error('Wait for the current application preview frame.');
+        }
+        const document = this.editor.document;
+        const version = document.version;
+        clearTimeout(this.timer);
+        this.pending = true;
+        try {
+            const plan = await client.planHostedKeyframe(frame, draft);
+            signal.throwIfAborted();
+            if (client !== this.client || this.disposed || frame.revision !== this.revision || version !== document.version) {
+                throw new Error('The application preview source changed while planning the keyframe.');
+            }
+            if (apply && plan.patch) await applyHostedKeyframePatch(document, version, plan.patch);
+            return { ...plan, applied: apply && Boolean(plan.patch), version: document.version };
+        } finally {
+            this.pending = false;
+            this.schedule(this.requested === this.revision ? 160 : 0);
+        }
+    }
+
+    private async openKeyframe(frame: HostedAnimationFrame, id: number): Promise<void> {
+        const program = this.animations.program(frame, id);
+        const choice = await chooseHostedKeyframe(program);
+        if (!choice) return;
+        const current = this.animations.state.frame;
+        if (!current || current.revision !== frame.revision || this.revision !== current.revision) {
+            throw new Error('The application source changed while choosing a keyframe.');
+        }
+        const targetName = this.animations.state.targets.find(target => target.id === choice.target)?.label ?? program.name;
+        this.post({ type: 'openKeyframe', key: {
+            frame: current, version: this.editor.document.version, program: program.id, targetName,
+            target: choice.target, property: choice.label, duration: program.duration, keyframe: choice.keyframe,
+        } });
+    }
+
     private async receive(message: FromHosted): Promise<void> {
         if (message.type === 'ready') {
             this.ready = true;
             if (this.frame) this.post({ type: 'frame', frame: this.frame });
-            this.post({ type: 'animations', state: this.animations.state });
+            this.post({ type: 'animations', state: this.animations.state, version: this.editor.document.version });
             this.report(this.status, this.frame?.revision === this.revision && Boolean(this.client));
             this.schedule(0);
             return;
         }
         if (message.type === 'refresh') { this.update(); return; }
+        if (message.type === 'keyframeDraft') {
+            const reply = { type: 'keyframeReply' as const, frame: message.frame, request: message.request };
+            try {
+                const { valueKind, samples } = await this.keyframe(message.frame, message.draft, message.apply, AbortSignal.timeout(15_000));
+                this.post({ ...reply, preview: { valueKind, samples }, applied: message.apply });
+            } catch (error) { this.post({ ...reply, error: errorMessage(error) }); }
+            return;
+        }
+        if (message.type === 'chooseKeyframe') {
+            try { await this.openKeyframe(message.frame, message.program); }
+            catch (error) { this.report(errorMessage(error), Boolean(this.currentFrame)); }
+            return;
+        }
         if (message.type === 'animation' || message.type === 'animationTargets' || message.type === 'animationSource') {
             try {
                 if (message.type === 'animation') await this.animations.control(message.frame, message.control, AbortSignal.timeout(15_000));

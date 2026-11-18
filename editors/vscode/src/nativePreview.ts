@@ -8,7 +8,7 @@ import type { TimelinePreviewPose, TimelineTargetOverrides } from './timelinePro
 import type { NativeProjectInventory } from './projectInventory';
 import type { Asset, CanvasInteraction, CanvasPresentation, DesignDataPresentation, DropHint, EditResult, Inspection, InspectionTarget, Operation, Placement, PreviewSourceBuffer, ResourceRow, Snapshot, Source, Viewport } from './protocol';
 import type { RsxLanguageDocument } from './rsxLanguageTypes';
-import type { HostedAnimationRequest } from './hostedAnimationProtocol';
+import type { HostedAnimationFrame, HostedAnimationRequest, HostedKeyframeDraft, HostedKeyframePlan } from './hostedAnimationProtocol';
 import type { HostedAnimationSample, HostedFrame, HostedInput, HostedSource } from './hostedProtocol';
 import type { NativeStageChange, PrototypeCommand, PrototypeHotspot, PrototypeScene, StageChecks, StageDocument, StageImage, StageManifest, StageModel, StagePick, StagePointer, StageStateOptions, StageTarget } from './stagesProtocol';
 import { commandFor } from './tools';
@@ -111,6 +111,10 @@ export class NativePreview implements vscode.Disposable {
     hostedInput(input: HostedInput): Promise<void> { return this.send('hostedInput', input); }
     sampleHostedAnimation(request: HostedAnimationRequest): Promise<HostedAnimationSample> {
         return this.send('hostedAnimate', request, 12_000);
+    }
+
+    planHostedKeyframe(frame: HostedAnimationFrame, draft: HostedKeyframeDraft): Promise<HostedKeyframePlan> {
+        return this.send('hostedKeyframe', { ...frame, ...draft }, 12_000);
     }
 
     syncStages(source: StageDocument, manifest?: StageManifest, additional: StageDocument[] = [], localSources?: PreviewSourceBuffer[]): Promise<StageModel> {

@@ -78,10 +78,15 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         const { tools } = await request<{ tools: { name: string }[] }>('tools/list');
         assert.ok(tools.some(tool => tool.name === 'designer_place'));
         assert.ok(tools.some(tool => tool.name === 'ferroui_runtime_source'));
-        for (const name of ['open', 'animations', 'animation', 'image']) {
+        for (const name of ['open', 'animations', 'animation', 'image', 'keyframe_draft', 'keyframe']) {
             assert.ok(tools.some(tool => tool.name === `designer_hosted_${name}`));
         }
         assert.match((await invoke('designer_hosted_open', { session: 1 })).content[0]?.text ?? '', /allowWrites/);
+        const hostedKey = { session: 1, expected_generation: 1, expected_revision: 1, expected_sequence: 1,
+            arguments: { program: 1, target: 1, property: 'BoxShadow', previous: 2, time: 2, value: '8 14 24 2 #60244B90', easing: 'Linear' } };
+        assert.match((await invoke('designer_hosted_keyframe', hostedKey)).content[0]?.text ?? '', /allowWrites/);
+        const keyDraft = await invoke('designer_hosted_keyframe_draft', hostedKey);
+        assert.ok(keyDraft.isError && !keyDraft.content[0]?.text?.includes('allowWrites'));
         assert.deepEqual(content(await invoke('ferroui_reload_history', { limit: 1 })), { records: [] });
         const runtimeEdit = { node: 1, property: 'Text', value: 'Draft', expected_generation: 0, expected_version: 1 };
         assert.match((await invoke('ferroui_runtime_apply_source', runtimeEdit)).content[0]?.text ?? '', /allowWrites/);

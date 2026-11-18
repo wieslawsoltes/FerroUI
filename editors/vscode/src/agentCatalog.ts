@@ -10,6 +10,12 @@ const cargoSelection = { folder: workspacePath, manifest_path: workspacePath, pa
     label: workspacePath, features: { type: 'array', items: workspacePath, maxItems: 128 } };
 const unit = { type: 'number', minimum: 0, maximum: 1 };
 const wheel = { type: 'number', minimum: -64, maximum: 64 };
+const time = { type: 'number', minimum: 0 };
+const hostedKeyframe = { ...frame, expected_generation: integer(1), expected_sequence: integer(1),
+    arguments: { type: 'object', additionalProperties: false,
+        required: ['program', 'target', 'property', 'time', 'value', 'easing'],
+        properties: { program: node, target: node, property: text, previous: time, time, value: text, easing: text } } };
+const hostedKeyframeRequired = ['session', 'expected_generation', 'expected_revision', 'expected_sequence', 'arguments'];
 const placement = { ...frame, asset: text, project_asset: text, node, selection: { type: 'array', items: node, minItems: 2, maxItems: 128 }, moving_anchor: node, anchor: node,
     position: choice('inside', 'before', 'after'), x: { type: 'number' }, y: { type: 'number' } };
 
@@ -54,6 +60,10 @@ export const agentCatalog = {
             required: ['action'], properties: { action: choice('seek', 'play', 'pause', 'stop', 'targets', 'reveal'), program: node,
                 elapsed: { type: 'number', minimum: 0 }, targets: { type: 'array', items: node, maxItems: 2000 } } },
     }, ['session', 'expected_generation', 'expected_revision', 'expected_sequence', 'arguments'], true, false),
+    designer_hosted_keyframe_draft: tool('Validate a keyframe through the app preview’s registered project codec. Return easing samples and a checked XAML patch. Use the current app generation, revision, sequence, and authored track.',
+        hostedKeyframe, hostedKeyframeRequired),
+    designer_hosted_keyframe: tool('Apply a validated project codec keyframe as one undoable edit to the current XAML buffer. Omit previous to insert a key on the existing track.',
+        hostedKeyframe, hostedKeyframeRequired, true),
     designer_wait: tool('Wait for the native preview of the current authored buffer. Return the revision, RSX invocation ranges, and rendering diagnostics.',
         session, ['session']),
     designer_block: tool('Activate one of the indexed RSX invocations reported by designer_wait. Use the current preview revision.',

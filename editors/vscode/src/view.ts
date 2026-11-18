@@ -272,6 +272,7 @@ export function hostedHtml(webview: vscode.Webview, root: vscode.Uri): string {
         <div class="tool-group" role="group" aria-label="Animation actions">
             ${tool('hosted-animation-targets', 'target', 'Choose preview targets')}
             ${tool('hosted-animation-source', 'go-to-file', 'Reveal animation in source')}
+            ${tool('hosted-animation-keyframe', 'edit', 'Edit application keyframe', 'hidden')}
             <span class="toolbar-divider" aria-hidden="true"></span>
             ${tool('hosted-animation-play', 'play', 'Play application animation')}
             ${tool('hosted-animation-stop', 'debug-stop', 'Stop application animation')}
@@ -282,12 +283,13 @@ export function hostedHtml(webview: vscode.Webview, root: vscode.Uri): string {
         <output id="hosted-animation-time" for="hosted-animation-seek"></output>
     </div>
 </section>
+${keyframeEditorHtml(false)}
 <p id="hosted-status" class="dock-message" role="status">Starting application preview…</p>
 <main class="hosted-canvas preview-surface" aria-label="Application artboard"><img id="hosted-image" alt="App-hosted FerroUI design" draggable="false" hidden></main>
 <form id="hosted-input" class="toolbar" aria-label="Preview input" hidden>
     <input id="hosted-text" aria-label="Text for the focused preview control" required maxlength="8192">
     <button type="submit" class="tool" title="Send Text" aria-label="Send Text">${icon('send')}</button>
-</form>`);
+</form>`, ['keyframe-editor']);
 }
 
 export function stagesHtml(webview: vscode.Webview, root: vscode.Uri): string {
@@ -332,6 +334,32 @@ export function stagesHtml(webview: vscode.Webview, root: vscode.Uri): string {
     <hr>
     <button type="button" data-stage-action="remove" class="danger">${icon('trash')}Remove stage</button>
 </div>`);
+}
+
+function keyframeEditorHtml(seek = true): string {
+    return `<section id="timeline-keyframe-editor" class="timeline-keyframe-editor" aria-label="Keyframe editor" hidden>
+    <header>
+        <strong id="keyframe-name"></strong>
+        <div class="tool-group" role="group" aria-label="Selected keyframe">
+            ${tool('keyframe-seek', 'debug-step-over', 'Seek to selected keyframe', seek ? '' : 'hidden')}
+            ${tool('keyframe-close', 'close', 'Close keyframe editor')}
+        </div>
+    </header>
+    <form id="timeline-keyframe-form" novalidate>
+        <fieldset id="keyframe-fields" aria-label="Keyframe values">
+            <div class="keyframe-fields">
+                <label>Time (s) <input id="keyframe-time" type="number" min="0" step="any" required></label>
+                <label>Value <input id="keyframe-value" autocomplete="off" spellcheck="false" required></label>
+                <label class="keyframe-easing">Incoming easing <input id="keyframe-easing" autocomplete="off" spellcheck="false" required></label>
+            </div>
+            <div class="keyframe-curve-row">
+                <canvas id="keyframe-curve" width="180" height="58" role="img" aria-label="Incoming easing curve"></canvas>
+                <button id="keyframe-apply" class="tool primary" type="submit" aria-label="Apply keyframe" title="Apply keyframe" disabled>${icon('check')}</button>
+            </div>
+        </fieldset>
+        <p id="keyframe-feedback" role="status" hidden></p>
+    </form>
+</section>`;
 }
 
 export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string {
@@ -392,31 +420,9 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
                 <input id="timeline-pan" type="range" min="0" value="0" step="any" aria-label="Pan visible timeline">
             </div>
         </div>
-        <section id="timeline-keyframe-editor" class="timeline-keyframe-editor" aria-label="Keyframe editor" hidden>
-            <header>
-                <strong id="keyframe-name"></strong>
-                <div class="tool-group" role="group" aria-label="Selected keyframe">
-                    ${tool('keyframe-seek', 'debug-step-over', 'Seek to selected keyframe')}
-                    ${tool('keyframe-close', 'close', 'Close keyframe editor')}
-                </div>
-            </header>
-            <form id="timeline-keyframe-form" novalidate>
-                <fieldset id="keyframe-fields" aria-label="Keyframe values">
-                    <div class="keyframe-fields">
-                        <label>Time (s) <input id="keyframe-time" type="number" min="0" step="any" required></label>
-                        <label>Value <input id="keyframe-value" autocomplete="off" spellcheck="false" required></label>
-                        <label class="keyframe-easing">Incoming easing <input id="keyframe-easing" autocomplete="off" spellcheck="false" required></label>
-                    </div>
-                    <div class="keyframe-curve-row">
-                        <canvas id="keyframe-curve" width="180" height="58" role="img" aria-label="Incoming easing curve"></canvas>
-                        <button id="keyframe-apply" class="tool primary" type="submit" aria-label="Apply keyframe" title="Apply keyframe" disabled>${icon('check')}</button>
-                    </div>
-                </fieldset>
-                <p id="keyframe-feedback" role="status" hidden></p>
-            </form>
-        </section>
+        ${keyframeEditorHtml()}
     </section>
-</main>`);
+</main>`, ['keyframe-editor']);
 }
 
 export function designDataHtml(webview: vscode.Webview, root: vscode.Uri): string {
@@ -443,7 +449,7 @@ export function designDataHtml(webview: vscode.Webview, root: vscode.Uri): strin
 </main>`);
 }
 
-function page(webview: vscode.Webview, root: vscode.Uri, entry: string, title: string, body: string): string {
+function page(webview: vscode.Webview, root: vscode.Uri, entry: string, title: string, body: string, extraStyles: readonly string[] = []): string {
     const resource = (...parts: string[]) => webview.asWebviewUri(vscode.Uri.joinPath(root, ...parts));
     const nonce = randomBytes(16).toString('base64');
     return `<!doctype html>
@@ -454,6 +460,7 @@ function page(webview: vscode.Webview, root: vscode.Uri, entry: string, title: s
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; font-src ${webview.cspSource}; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
     <link rel="stylesheet" href="${resource('dist', 'icons', 'codicon.css')}">
     <link rel="stylesheet" href="${resource('media', 'workbench.css')}">
+    ${extraStyles.map(style => `<link rel="stylesheet" href="${resource('media', `${style}.css`)}">`).join('')}
     <link rel="stylesheet" href="${resource('media', `${entry}.css`)}">
     <title>${title}</title>
 </head>

@@ -8,7 +8,7 @@ import type { DesignerWorkbench } from './designerWorkbench';
 import { runEditorHistory } from './editorHistory';
 import type { HotReload } from './hotReload';
 import type { HostedDesign } from './hostedDesign';
-import type { HostedAnimationControl } from './hostedAnimationProtocol';
+import type { HostedAnimationControl, HostedKeyframeDraft } from './hostedAnimationProtocol';
 import type { ProjectFile, ProjectInventory } from './projectInventory';
 import type { ProjectScaffold } from './projectScaffold';
 import type { RuntimeSourceTools } from './runtimeSourceTools';
@@ -153,6 +153,10 @@ export class AgentTools {
             case 'designer_hosted_animation':
                 return this.hosted.animate(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },
                     args.arguments as HostedAnimationControl | { action: 'reveal'; program: number }, signal);
+            case 'designer_hosted_keyframe_draft':
+            case 'designer_hosted_keyframe':
+                return this.hosted.keyframe(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },
+                    args.arguments as HostedKeyframeDraft, tool === 'designer_hosted_keyframe', signal);
             case 'designer_document': {
                 if (args.include_counterpart) {
                     await panel.waitForSnapshot(signal).catch(error => { if (signal.aborted) throw error; });

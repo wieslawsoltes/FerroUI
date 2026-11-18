@@ -1,3 +1,5 @@
+import type { KeyframeDraft, KeyframeDraftPreview, TimelineKeyframe, TimelineTrack } from './timelineProtocol';
+
 export interface HostedAnimationProgram {
     id: number;
     name: string;
@@ -8,6 +10,7 @@ export interface HostedAnimationProgram {
     compatibleTargets: number[];
     sourceOffset: number;
     customAnimator: boolean;
+    authoring?: { codec: string; tracks: TimelineTrack[] } | null;
 }
 
 export interface HostedAnimationTarget {
@@ -52,4 +55,21 @@ export interface HostedAnimationState extends HostedAnimationCatalog {
     position?: HostedAnimationPosition;
     overrides: Record<number, number[]>;
     busy: boolean;
+}
+
+export type HostedKeyframeDraft = Omit<KeyframeDraft, 'previous'> & { previous?: number };
+
+export interface HostedKeyframePlan extends KeyframeDraftPreview {
+    patch: { start: number; end: number; expected: string; replacement: string } | null;
+}
+
+export interface HostedKeyframeSelection {
+    frame: HostedAnimationFrame;
+    version: number;
+    program: number;
+    target: number;
+    targetName: string;
+    property: string;
+    duration: number;
+    keyframe: TimelineKeyframe;
 }

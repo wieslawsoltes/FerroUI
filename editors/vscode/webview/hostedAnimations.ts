@@ -1,12 +1,14 @@
 import type { HostedAnimationControl, HostedAnimationFrame, HostedAnimationState } from '../src/hostedAnimationProtocol';
 import type { FromHosted } from '../src/hostedProtocol';
 import { element, labelButton } from './dom';
+import { HostedKeyframeEditor } from './hostedKeyframes';
 
 export class HostedAnimationView {
     private readonly section = element('hosted-animations');
     private readonly programs = element<HTMLSelectElement>('hosted-animation-program');
     private readonly targets = element<HTMLButtonElement>('hosted-animation-targets');
     private readonly source = element<HTMLButtonElement>('hosted-animation-source');
+    private readonly edit = element<HTMLButtonElement>('hosted-animation-keyframe');
     private readonly play = element<HTMLButtonElement>('hosted-animation-play');
     private readonly stop = element<HTMLButtonElement>('hosted-animation-stop');
     private readonly seek = element<HTMLInputElement>('hosted-animation-seek');
@@ -19,11 +21,19 @@ export class HostedAnimationView {
     private submitted?: number;
     private request = 0;
     private pending?: number;
+    private documentVersion = 0;
+    private restoreKeyframeFocus = false;
+    readonly keyframes: HostedKeyframeEditor;
 
     constructor(private readonly send: (message: FromHosted) => void) {
-        this.programs.onchange = () => { this.queued = undefined; this.paint(); };
+        this.keyframes = new HostedKeyframeEditor(send, () => {
+            this.restoreKeyframeFocus = true;
+            this.paint();
+        });
+        this.programs.onchange = () => { this.queued = undefined; this.keyframes.close(); this.paint(); };
         this.targets.onclick = () => this.choose('animationTargets');
         this.source.onclick = () => this.choose('animationSource');
+        this.edit.onclick = () => this.choose('chooseKeyframe');
         this.play.onclick = () => {
             if (this.state.position?.playing) this.control({ action: 'pause' }, true);
             else this.control({ action: 'play', program: Number(this.programs.value) });
@@ -43,13 +53,14 @@ export class HostedAnimationView {
         });
     }
 
-    update(state: HostedAnimationState): void {
+    update(state: HostedAnimationState, documentVersion: number): void {
         if (state.frame?.revision !== this.state.frame?.revision) {
             this.queued = this.submitted = this.pending = undefined;
         }
         const selected = state.position && state.position.program !== this.state.position?.program
             ? String(state.position.program) : this.programs.value;
         this.state = state;
+        this.documentVersion = documentVersion;
         const catalog = JSON.stringify(state.programs.map(({ id, name }) => [id, name]));
         if (catalog !== this.catalog) {
             this.catalog = catalog;
@@ -82,7 +93,7 @@ export class HostedAnimationView {
             && (interrupt || !this.state.busy) && this.pending === undefined);
     }
 
-    private choose(type: 'animationTargets' | 'animationSource'): void {
+    private choose(type: 'animationTargets' | 'animationSource' | 'chooseKeyframe'): void {
         if (this.canUse() && this.decoded) this.send({ type, frame: this.decoded, program: Number(this.programs.value) });
     }
 
@@ -115,6 +126,13 @@ export class HostedAnimationView {
         this.targets.disabled = !usable || !program?.compatibleTargets.length;
         labelButton(this.targets, selectedTargets?.length ? `Choose preview targets (${selectedTargets.length} selected)` : 'Choose preview targets');
         this.source.disabled = !usable;
+        this.edit.hidden = !program?.authoring;
+        this.edit.disabled = !usable;
+        if (this.restoreKeyframeFocus && usable) {
+            this.restoreKeyframeFocus = false;
+            if (document.activeElement === document.body) (this.edit.hidden ? this.programs : this.edit).focus();
+        }
+        this.keyframes.follow(usable ? this.state.frame : undefined, this.documentVersion, program?.id);
         this.play.disabled = playing ? !this.canUse(true) : !usable || !available;
         labelButton(this.play, playing ? 'Pause application animation' : current && !current.completed ? 'Resume application animation' : 'Play application animation',
             playing ? 'debug-pause' : 'play');

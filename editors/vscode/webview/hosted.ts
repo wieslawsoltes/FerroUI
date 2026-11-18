@@ -19,8 +19,10 @@ let interactive = false;
 let request = 0;
 
 window.addEventListener('message', async ({ data }: MessageEvent<ToHosted>) => {
-    if (data.type === 'animations') { animations.update(data.state); return; }
+    if (data.type === 'animations') { animations.update(data.state, data.version); return; }
     if (data.type === 'animationReply') { animations.reply(data.request); return; }
+    if (data.type === 'openKeyframe') { animations.keyframes.open(data.key); return; }
+    if (data.type === 'keyframeReply') { animations.keyframes.receive(data); return; }
     if (data.type === 'status') {
         if (status.textContent !== data.message) status.textContent = data.message;
         interactive = data.interactive;

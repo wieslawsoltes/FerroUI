@@ -32,8 +32,8 @@ export class TimelineKeyframeEditor {
     private request = 0;
 
     constructor(private readonly send: (request: TimelineKeyframeRequest) => void,
-        private readonly seek: (frame: FrameTarget, program: number, time: number) => void,
-        private readonly applied: (keyframe: AppliedKeyframe, property: string) => void,
+        private readonly seek: ((frame: FrameTarget, program: number, time: number) => void) | undefined,
+        private readonly applied: ((keyframe: AppliedKeyframe, property: string) => void) | undefined,
         private readonly restoreFocus: () => void) {
         this.fields.addEventListener('input', () => this.inspect());
         element('timeline-keyframe-form').addEventListener('submit', event => {
@@ -45,7 +45,7 @@ export class TimelineKeyframeEditor {
         });
         this.seekButton.onclick = () => {
             const key = this.selected;
-            if (key && this.frame) this.seek(this.frame, key.program, key.keyframe.time);
+            if (key && this.frame) this.seek?.(this.frame, key.program, key.keyframe.time);
         };
         element('keyframe-close').onclick = () => { this.close(); this.restoreFocus(); };
         this.section.addEventListener('keydown', event => {
@@ -99,7 +99,7 @@ export class TimelineKeyframeEditor {
             this.selected = { ...key, version, program, target, keyframe };
             this.frame = frame;
             this.fill(keyframe);
-            this.applied(response.applied, key.property);
+            this.applied?.(response.applied, key.property);
             this.inspect();
         } else if (response.applied === null) {
             this.close();
