@@ -310,7 +310,11 @@ jobs:
   windows:
     name: Build, test and smoke run (Windows platform backend)
     if: (github.event_name != 'push')
-    runs-on: windows-latest
+    # Not `windows-latest`: since the image `windows-2025-vs2026` of 2026-11-16 its MSVC
+    # standard library (14.52) refuses the libclang of the image ("STL1000: Unexpected compiler
+    # version, expected Clang 22 or newer"), and the build script of the ANGLE binding, which
+    # generates its bindings with libclang, fails. The image of Visual Studio 2022 builds it.
+    runs-on: windows-2022
     permissions:
       contents: read
       pull-requests: read
