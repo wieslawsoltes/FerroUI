@@ -17,6 +17,8 @@ export class ReloadSession implements vscode.Disposable {
     private readonly waitingReads = new Map<string, object>();
     private readonly results = new Map<string, RuntimeEvent>();
     private readonly languages = new Set<RuntimeEvent['language']>();
+    private readonly root: string;
+    private readonly targetDirectory: string;
     private live?: ReloadProcess;
     private compiler?: ReloadProcess;
     private candidate?: ReloadProcess;
@@ -28,6 +30,8 @@ export class ReloadSession implements vscode.Disposable {
 
     constructor(readonly target: CargoTarget, private readonly output: vscode.OutputChannel,
         private readonly status: (message: string, problem?: boolean) => void) {
+        this.root = fileKey(target.folder.uri.fsPath);
+        this.targetDirectory = fileKey(target.targetDirectory);
         const watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(target.folder, watchPattern));
         const observe = (uri: vscode.Uri) => { void this.observe(uri); };
         this.resources.push(watcher, watcher.onDidChange(observe), watcher.onDidCreate(observe), watcher.onDidDelete(observe),
@@ -42,13 +46,13 @@ export class ReloadSession implements vscode.Disposable {
     }
 
     private async observe(uri: vscode.Uri): Promise<void> {
-        const root = this.target.folder.uri.fsPath;
+        if (this.disposed || uri.scheme !== 'file') return;
         const file = uri.fsPath;
-        if (this.disposed || uri.scheme !== 'file' || !isInside(root, file) || isInside(this.target.targetDirectory, file)
-            || path.relative(root, file).split(path.sep).some(part => ['.git', '.vscode', 'target', 'node_modules'].includes(part))) return;
+        const key = fileKey(file);
+        if (!isInside(this.root, key) || isInside(this.targetDirectory, key)
+            || path.relative(this.root, key).split(path.sep).some(part => ['.git', '.vscode', 'target', 'node_modules'].includes(part))) return;
         const extension = path.extname(file).toLowerCase();
         if (extension !== '.rs' && extension !== '.xaml' && path.basename(file) !== 'Cargo.toml') return;
-        const key = fileKey(file);
         const marker = {};
         this.waitingReads.set(key, marker);
         let fingerprint: string;
@@ -77,8 +81,9 @@ export class ReloadSession implements vscode.Disposable {
             this.languages.add(event.language);
             return;
         }
-        if (!event.file || !path.isAbsolute(event.file) || !isInside(this.target.folder.uri.fsPath, event.file)) return;
+        if (!event.file || !path.isAbsolute(event.file)) return;
         const key = fileKey(event.file);
+        if (!isInside(this.root, key)) return;
         this.results.set(key, event);
         if (this.changes.has(key)) this.schedule(120);
     }
@@ -97,6 +102,7 @@ export class ReloadSession implements vscode.Disposable {
         for (const [key, change] of this.changes) {
             const result = this.results.get(key);
             if (result?.revision === change.fingerprint && result.language === change.language) {
+                this.results.delete(key);
                 this.output.appendLine(`${result.language.toUpperCase()} ${result.status} · ${vscode.workspace.asRelativePath(change.file)}${result.message ? ` · ${result.message}` : ''}`);
                 if (result.status === 'rebuild') this.rebuild = true;
                 else {

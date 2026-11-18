@@ -26,11 +26,17 @@ export function revision(bytes: Buffer): string {
 export class ReloadProcess {
     readonly closed: Promise<number | null>;
     private exited = false;
+    private stopping = false;
+    private escalation?: ReturnType<typeof setTimeout>;
 
     constructor(private readonly child: ChildProcess) {
         this.closed = new Promise((resolve, reject) => {
             child.once('error', reject);
-            child.once('close', code => { this.exited = true; resolve(code); });
+            child.once('close', code => {
+                this.exited = true;
+                clearTimeout(this.escalation);
+                resolve(code);
+            });
         });
     }
 
@@ -38,7 +44,8 @@ export class ReloadProcess {
 
     stop(): void {
         const pid = this.pid;
-        if (this.exited || !pid) return;
+        if (this.exited || this.stopping || !pid) return;
+        this.stopping = true;
         if (process.platform === 'win32') {
             const shutdown = spawn('taskkill.exe', ['/pid', String(pid), '/t', '/f'], { stdio: 'ignore', windowsHide: true });
             shutdown.on('error', () => this.child.kill());
@@ -46,8 +53,8 @@ export class ReloadProcess {
             return;
         }
         try { process.kill(-pid, 'SIGTERM'); } catch { return; }
-        const timer = setTimeout(() => { try { process.kill(-pid, 'SIGKILL'); } catch { /* process group exited */ } }, 1500);
-        timer.unref();
+        this.escalation = setTimeout(() => { try { process.kill(-pid, 'SIGKILL'); } catch { /* process group exited */ } }, 1500);
+        this.escalation.unref();
     }
 }
 
@@ -55,7 +62,7 @@ export function buildCargo(target: CargoTarget, output: OutputChannel): { proces
     const args = ['build', '--manifest-path', target.manifest, '--package', target.packageName,
         '--bin', target.binary, '--message-format=json-render-diagnostics'];
     if (target.features.length) args.push('--features', target.features.join(','));
-    const child = spawn(target.cargo, args, options(target));
+    const child = spawn(target.cargo, args, { ...options(target), cwd: target.cargoDirectory });
     const proc = new ReloadProcess(child);
     let artifact: string | undefined;
     lines(child.stdout, line => {
