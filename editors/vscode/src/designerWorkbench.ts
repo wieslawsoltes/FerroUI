@@ -17,6 +17,7 @@ import { editBinding } from './studioBinding';
 import { StudioContext } from './studioContext';
 import { chooseLayout } from './studioLayout';
 import { promoteResource } from './studioResourcePromotion';
+import { editBrush } from './studioBrush';
 import { StudioView } from './studioView';
 import { errorMessage, type DesignerView, type DetailsView, type DragOrigin, type FrameTarget, type FromAssets, type FromDetails, type FromOutline, type FromToolbox, type Language, type NodeOperation, type NodeTarget, type OutlineMode, type ToolboxState, type ToToolbox, type Viewport } from './protocol';
 import { languageOf } from './textDocument';
@@ -72,6 +73,7 @@ export class DesignerWorkbench implements vscode.Disposable {
                 const context = new StudioContext(panel, target.token, () => this.active === panel);
                 if (action === 'binding') await editBinding(context, target.node, property);
                 else if (action === 'promoteResource') await promoteResource(context, target.node, property);
+                else if (action === 'brush') await editBrush(context, target.node, property);
             });
         this.studio = new StudioView(changed);
         const snippets = vscode.workspace.createFileSystemWatcher('**/.ferroui/toolbox/*.xaml');

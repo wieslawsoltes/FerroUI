@@ -154,9 +154,10 @@ pub(super) fn object_attributes(name: &str) -> &'static [(&'static str, &'static
         "RadialGradientBrush" => &[
             ("Center", "RelativePoint"),
             ("GradientOrigin", "RelativePoint"),
-            ("RadiusX", "f64"),
-            ("RadiusY", "f64"),
+            ("RadiusX", "RelativeScalar"),
+            ("RadiusY", "RelativeScalar"),
             ("Opacity", "f64"),
+            ("SpreadMethod", "GradientSpreadMethod"),
         ],
         "ConicGradientBrush" => &[
             ("Center", "RelativePoint"),
@@ -194,7 +195,7 @@ pub(super) const OBJECT_PRESETS: &[(&str, &str)] = &[
     ),
     (
         "Radial gradient",
-        "<RadialGradientBrush Center=\"50%, 50%\" GradientOrigin=\"50%, 50%\" RadiusX=\"0.5\" RadiusY=\"0.5\"><GradientStop Color=\"White\" Offset=\"0\" /><GradientStop Color=\"#FF6C9EFF\" Offset=\"1\" /></RadialGradientBrush>",
+        "<RadialGradientBrush Center=\"50%, 50%\" GradientOrigin=\"50%, 50%\" RadiusX=\"50%\" RadiusY=\"50%\"><GradientStop Color=\"White\" Offset=\"0\" /><GradientStop Color=\"#FF6C9EFF\" Offset=\"1\" /></RadialGradientBrush>",
     ),
     (
         "Conic gradient",

@@ -18,6 +18,9 @@ mod binding_editor;
 mod metadata;
 #[path = "property_object_draft.rs"]
 mod object_draft;
+#[cfg(feature = "mcp")]
+#[path = "property_brush_draft.rs"]
+pub(crate) mod brush_draft;
 #[path = "property_typed_editors.rs"]
 mod typed;
 #[path = "property_value_workbench.rs"]

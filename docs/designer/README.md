@@ -636,6 +636,7 @@ The additional tools are:
 | `designer_states` / `designer_state` / `designer_state_actions` | State groups, setters, transitions and native actions |
 | `designer_behaviors` / `designer_behavior` | Behavior/trigger/action authoring and explicit native execution |
 | `designer_properties` / `designer_property` | Runtime-derived property schemas, typed values and transactional edits |
+| `designer_brush_draft` | Draft typed solid and gradient properties and stops. Apply the resulting source with `designer_component` and the current document revision. |
 | `designer_layers` / `designer_layer` | Local layer presentation, hierarchy navigation and exact control-type selection with scope/epoch guards |
 | `designer_selection_layout` / `designer_selection_layout_edit` | Inspect exact reset/size-match edits and apply the accepted plan in one transaction |
 | `designer_property_transfer` / `designer_property_transfer_edit` | Inspect authored appearance, compatible destination edits and skipped values, then apply the accepted transfer |

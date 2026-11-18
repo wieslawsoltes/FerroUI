@@ -7,6 +7,7 @@ interface Actions {
     reveal(range: Range): void;
     binding?: () => void;
     promote?: () => void;
+    brush?: () => void;
 }
 
 export function propertyEditor(property: PropertyField, actions: Actions): HTMLElement {
@@ -44,6 +45,9 @@ export function propertyEditor(property: PropertyField, actions: Actions): HTMLE
     }
     if (actions.promote) {
         value.append(actionButton('library', `Promote ${property.name} to resource`, actions.promote));
+    }
+    if (actions.brush) {
+        value.append(actionButton('symbol-color', `Edit ${property.name} brush`, actions.brush));
     }
     if (property.canReset) {
         value.append(actionButton('discard', `Reset ${property.name}`, actions.reset));

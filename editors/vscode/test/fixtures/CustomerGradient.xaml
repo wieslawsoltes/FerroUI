@@ -1,0 +1,14 @@
+<Border xmlns="https://github.com/ferroui" Name="CustomerCard" Width="420"
+        Padding="28" CornerRadius="14" HorizontalAlignment="Center" VerticalAlignment="Center">
+    <Border.Background>
+        <LinearGradientBrush StartPoint="0%, 0%" EndPoint="100%, 100%">
+            <!-- Keep the authored stops and their order. -->
+            <GradientStop Color="#1B2C47" Offset="0"/>
+            <GradientStop Color="#2D6A51" Offset="1"/>
+        </LinearGradientBrush>
+    </Border.Background>
+    <StackPanel Spacing="10">
+        <TextBlock Text="Customer overview" Foreground="White" FontSize="26"/>
+        <TextBlock Text="Northwind Studio · Account review" Foreground="#EDF9F4"/>
+    </StackPanel>
+</Border>

@@ -13,6 +13,8 @@ use std::rc::{Rc, Weak};
 mod authoring;
 #[path = "mcp_binding.rs"]
 mod binding;
+#[path = "mcp_brush.rs"]
+mod brush;
 #[cfg(test)]
 #[path = "mcp_automation_tests.rs"]
 mod automation_tests;
@@ -275,6 +277,7 @@ impl UiToolProvider for DesignerMcp {
         ];
         tools.extend(authoring::tools());
         tools.extend(binding::tools());
+        tools.push(brush::tool());
         tools.extend(grid::tools());
         tools.extend(components::tools());
         tools.extend(events::tools());
@@ -299,6 +302,7 @@ impl UiToolProvider for DesignerMcp {
             .ok_or("Unknown designer tool")?;
         if authoring::handles(name)
             || binding::handles(name)
+            || name == brush::NAME
             || grid::handles(name)
             || components::handles(name)
             || events::handles(name)
@@ -543,6 +547,9 @@ impl UiToolProvider for DesignerMcp {
         }
         if binding::handles(name) {
             return binding::call(&mut session, name, args);
+        }
+        if name == brush::NAME {
+            return brush::call(&session, args);
         }
         if grid::handles(name) {
             return grid::call(&mut session, name, args);

@@ -141,6 +141,7 @@ export class Inspector {
             reveal: this.reveal,
             binding: node !== undefined && field.canBind ? () => this.author(field.name, 'binding') : undefined,
             promote: node !== undefined && field.canPromote ? () => this.author(field.name, 'promoteResource') : undefined,
+            brush: node !== undefined && field.canEditBrush ? () => this.author(field.name, 'brush') : undefined,
         });
     }
 

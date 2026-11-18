@@ -58,6 +58,7 @@ export interface PropertyField {
     canReset: boolean;
     canBind?: boolean;
     canPromote?: boolean;
+    canEditBrush?: boolean;
     mixed?: boolean;
 }
 export interface EventField {
@@ -145,7 +146,7 @@ export interface PropertiesState {
     fields?: PropertyField[];
     selectionCount?: number;
 }
-export type PropertyAuthoring = 'binding' | 'promoteResource';
+export type PropertyAuthoring = 'binding' | 'promoteResource' | 'brush';
 export type FromProperties = { type: 'ready' }
     | { type: 'toolbox' }
     | { type: 'reveal'; frame: FrameTarget; range: Range }
