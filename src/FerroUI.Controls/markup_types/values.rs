@@ -127,6 +127,8 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <crate::media::FocusVisualKind as MarkupTyped>::MARKUP,
     // WinUI's ZoomMode of the scroll viewer (docs/porting/winui-composition.md, phase 7).
     <crate::ZoomMode as MarkupTyped>::MARKUP,
+    // WinUI's EasingMode of the storyboard easing functions (docs/porting/winui-calculator-gaps.md).
+    <crate::animation::EasingMode as MarkupTyped>::MARKUP,
 ];
 
 /// Registers what the untyped value conversions need of the types of this file that
@@ -152,6 +154,7 @@ pub(super) fn register_value_type_table() {
     ValueTypes::register_used::<Symbol>();
     ValueTypes::register_used::<InfoBarSeverity>();
     ValueTypes::register_used::<crate::ZoomMode>();
+    ValueTypes::register_used::<crate::animation::EasingMode>();
     ValueTypes::register_used::<InfoBarCloseReason>();
     ValueTypes::register_used::<NumberBoxSpinButtonPlacementMode>();
     ValueTypes::register_used::<NumberBoxValidationMode>();
@@ -204,6 +207,12 @@ impl ferroui_base::data::core::ValueTypeRegistration for Symbol {
 impl ferroui_base::data::core::ValueTypeRegistration for InfoBarSeverity {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<InfoBarSeverity>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::animation::EasingMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::animation::EasingMode>();
     }
 }
 

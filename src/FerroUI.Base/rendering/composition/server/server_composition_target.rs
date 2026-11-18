@@ -689,6 +689,7 @@ impl ServerCompositionTarget {
     /// prints what the render thread counted since the last report, a frame. The counters are
     /// those of this thread, so with several targets a report covers the frames of all of them.
     fn report_render_counters(&self) {
+        super::unchanged_drawings::frame_drawn();
         use crate::diagnostics::perf_counters::{self, PerfCounter};
         if !perf_counters::ENABLED || self.frame_times.borrow().is_none() {
             return;

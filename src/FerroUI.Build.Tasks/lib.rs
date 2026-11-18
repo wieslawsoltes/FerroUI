@@ -242,8 +242,9 @@ use ferroui_markup_xaml_loader::rust_emitter::{
     CompiledMarkupTypeSystem, EmitterHost, ThemePartsTables, TransformOptions, XamlMetadata, CLASS_GROUP_NOT_TRANSFORMED, GROUP_NOT_TRANSFORMED,
 };
 use crate::theme_roots::{
-    compile_bindings_from_manifest, kept_units, parts_constructor, parts_static_name, parts_static_names, source_roots,
-    unit_static_path, verify_parts_constructor, Roots, ThemeTrimming, TypeGraph,
+    binary_roots, compile_bindings_from_manifest, explain_kept_units, kept_units, parts_constructor, parts_static_name,
+    parts_static_names, source_roots, unit_static_path, verify_parts_constructor, why_kept_listing, Roots, ThemeTrimming,
+    TypeGraph,
 };
 
 /// The name of the module of the default group ([`Build::compile_xaml`]).
@@ -744,8 +745,10 @@ impl Build {
             None => Vec::new(),
         };
         let mut document_roots = Roots::default();
-        // The names and string literals of the sources of the crate (#568, step 4).
+        // The names and string literals of the sources of the crate (#568, step 4), and of each of
+        // its production targets with the root file of the target (#847).
         let mut source_references = SourceReferences::default();
+        let mut source_targets: Vec<(PathBuf, SourceReferences)> = Vec::new();
         // What the compiled documents name that no unit graph of a class constructed from selected
         // units roots: what the `.xamlmeta` states for the applications that depend on the crate
         // (#568, #849).
@@ -777,6 +780,25 @@ impl Build {
                     if theme_parts.is_some() {
                         base_models.push(scan.model.clone());
                         source_references = std::mem::take(&mut scan.references);
+                        let library = scan.files.first().map(|file| file.path.clone()).unwrap_or_default();
+                        source_targets.push((library, source_references.clone()));
+                        // The binaries of the package are production targets too (#847): what
+                        // their sources name roots the themes as what the library names does.
+                        let primary: Vec<PathBuf> = scan.files.iter().map(|file| file.path.clone()).collect();
+                        let manifest_text = fs::read_to_string(&manifest).unwrap_or_default();
+                        for root in binary_roots(&self.manifest_dir, &manifest_text) {
+                            if primary.contains(&root) {
+                                continue;
+                            }
+                            let options = ScanOptions::new(&self.crate_name, root.clone()).with_source_references(true);
+                            let binary = scan_crate(&options);
+                            for file in &binary.files {
+                                rerun(&mut lines, &file.path);
+                            }
+                            source_references.names.extend(binary.references.names.iter().cloned());
+                            source_references.strings.extend(binary.references.strings.iter().cloned());
+                            source_targets.push((root, binary.references));
+                        }
                     }
                     scanned_functions = std::mem::take(&mut scan.functions);
                     model = Some(scan.model);
@@ -904,8 +926,21 @@ impl Build {
             // What the documents name that roots the units of the themes (#568, step 3): the
             // roots of an application that trims, and what the `.xamlmeta` of a crate without
             // units states for the applications that depend on it.
+            // Of the group of a class, only the documents of its group (#847): the document of the
+            // class and the documents it includes. A document given to the group and never included
+            // is not compiled, and roots nothing.
+            let in_group: Option<Vec<(String, String)>> = group.class_document.as_ref().and_then(|class_document| {
+                let found = class_document_group(&root_uri, &borrowed, class_document).ok()?;
+                Some(found.into_iter().map(|(name, xaml, _)| (name, xaml)).collect())
+            });
             let mut group_roots = Roots::default();
-            for (_, xaml) in &documents {
+            for (name, xaml) in &documents {
+                // A document of the group by its path, or by its text where the path of its URI is
+                // spelled otherwise (escaped characters).
+                let member = |(known, text): &(String, String)| known == name.trim_start_matches('/') || text == xaml;
+                if in_group.as_ref().is_some_and(|group| !group.iter().any(member)) {
+                    continue;
+                }
                 if let Some(references) = document_references(xaml) {
                     group_roots.types.extend(references.types);
                     group_roots.keys.extend(references.keys);
@@ -1146,12 +1181,48 @@ impl Build {
                 roots.keys.extend(dependency.references.keys.iter().cloned());
             }
             let graph = TypeGraph::from_models(&base_models);
-            roots.extend(source_roots(&source_references, dependencies.iter().flat_map(|metadata| metadata.theme_units.iter()), &graph));
+            let themes = dependencies.iter().flat_map(|metadata| metadata.theme_units.iter());
+            let from_sources = source_roots(&source_references, themes, &graph);
+            roots.extend(from_sources.clone());
+            // Which target named each root of the sources (#847), for whoever traces a kept unit to
+            // the line that named it: the types and the keys of each production target.
+            let mut traced = String::new();
+            for (root, references) in &source_targets {
+                let themes = dependencies.iter().flat_map(|metadata| metadata.theme_units.iter());
+                let found = source_roots(references, themes, &graph);
+                let types: Vec<&str> = found.types.iter().map(String::as_str).collect();
+                let keys: Vec<&str> = found.keys.iter().map(String::as_str).collect();
+                let root = root.strip_prefix(&self.manifest_dir).unwrap_or(root);
+                traced.push_str(&format!("{}\ntypes: {}\nkeys: {}\n", root.display(), types.join(" "), keys.join(" ")));
+            }
+            write_if_changed(&xaml_directory.join("theme_roots.txt"), &traced, &mut errors);
+            // The same roots by where they come from, for the reasons of `theme_parts_why.txt`
+            // (#852).
+            let mut from_dependencies = Roots::default();
+            for dependency in &dependencies {
+                from_dependencies.types.extend(dependency.references.types.iter().cloned());
+                from_dependencies.keys.extend(dependency.references.keys.iter().cloned());
+            }
+            let from_manifest = Roots {
+                names: trimming.roots.iter().cloned().collect(),
+                all: trimming.all || !trimming.enabled,
+                ..Roots::default()
+            };
+            let sources: [(&str, &Roots); 5] = [
+                ("manifest", &from_manifest),
+                ("build script", &self.theme_roots),
+                ("documents", &document_roots),
+                ("sources", &from_sources),
+                ("dependencies", &from_dependencies),
+            ];
+            let mut why = String::new();
             for class in used {
                 let Some(units) = dependencies.iter().flat_map(|metadata| metadata.theme_units.iter()).find(|units| units.class == class) else {
                     continue;
                 };
                 let kept = kept_units(units, &roots, &graph, self.full_themes);
+                let explained = explain_kept_units(units, &sources, &graph, self.full_themes);
+                why.push_str(&why_kept_listing(&class, &explained, units.units.len()));
                 let name_of = |index: u32| units.units.iter().find(|unit| unit.index == index).map_or(String::new(), |unit| unit.name.clone());
                 parts_tables.push(PartsTable {
                     static_name: static_name_of(class.as_str()).unwrap_or_else(|| parts_static_name(&class)),
@@ -1169,6 +1240,7 @@ impl Build {
                 })
                 .collect();
             write_if_changed(&xaml_directory.join("theme_parts.txt"), &listing, &mut errors);
+            write_if_changed(&xaml_directory.join("theme_parts_why.txt"), &why, &mut errors);
         }
         // A crate whose compiled markup has units is built with the `cfg` of `full-themes` when
         // the base crate has it (#568, step 3).
@@ -1177,6 +1249,10 @@ impl Build {
         // every document but the ones of a class constructed from selected units, which are rooted
         // through its unit graph instead (#849: an ordinary class whose markup is partitioned into
         // units is constructed whole, so what its documents name is a root).
+        // What the build script states its code constructs (`Build::theme_roots`), for the
+        // applications that depend on a crate whose code makes controls (#847).
+        exported_roots.types.extend(self.theme_roots.names.iter().cloned());
+        exported_roots.keys.extend(self.theme_roots.names.iter().cloned());
         metadata.references = MarkupReferencesModel {
             types: exported_roots.types.iter().cloned().collect(),
             keys: exported_roots.keys.iter().cloned().collect(),
@@ -1789,6 +1865,73 @@ mod tests {
         // Without the theme among the direct dependencies, the application cannot name its units.
         let (module, listing) = build("transitive", vec![library_file.clone()]);
         assert!(listing.is_empty() && !module.contains("THEME_PARTS"), "{listing}\n{module}");
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    /// Not from upstream (#847): the binaries of a package root the themes as its library does,
+    /// the build says which target named each root, and the roots a build script states are
+    /// exported to the crates that depend on it.
+    #[test]
+    fn every_production_target_roots_the_themes() {
+        use ferroui_build_scan::xaml_metadata::{MarkupReferencesModel, ThemeUnitModel, ThemeUnitsModel};
+        let root = env::temp_dir().join(format!("ferroui-build-targets-{}", std::process::id()));
+        let crate_dir = root.join("app");
+        fs::create_dir_all(&crate_dir).expect("the directory of the crate");
+        let manifest = "[package]\nname = \"app\"\nautobins = false\n\n\
+                        [[bin]]\nname = \"app\"\npath = \"program.rs\"\n";
+        fs::write(crate_dir.join("Cargo.toml"), manifest).expect("a manifest");
+        let library = "//! The library names no control.\npub fn nothing() {}\n";
+        fs::write(crate_dir.join("lib.rs"), library).expect("the library");
+        let program = "fn main() {\n    let _ = ListBox::new();\n    let _ = \"CaptionStyle\";\n}\n";
+        fs::write(crate_dir.join("program.rs"), program).expect("the binary");
+        let unit = |index: u32, name: &str, keys: &[&str], type_keys: &[&str]| ThemeUnitModel {
+            name: name.to_string(),
+            index,
+            documents: vec![name.to_string()],
+            keys: keys.iter().map(|key| key.to_string()).collect(),
+            type_keys: type_keys.iter().map(|key| key.to_string()).collect(),
+            references: Vec::new(),
+            types: Vec::new(),
+        };
+        let theme = XamlMetadata {
+            name: "Theme".to_string(),
+            crate_name: "theme".to_string(),
+            documents: Vec::new(),
+            dependencies: Vec::new(),
+            theme_units: vec![ThemeUnitsModel {
+                class: "Tests.Theme".to_string(),
+                table_path: "::theme::compiled_xaml::THEME_UNITS".to_string(),
+                units: vec![
+                    unit(0, "ambient", &[], &[]),
+                    unit(1, "Controls/ListBox.xaml", &[], &["ListBox"]),
+                    unit(2, "Resources/Caption.xaml", &["CaptionStyle"], &[]),
+                    unit(3, "Controls/Unused.xaml", &[], &["Unused"]),
+                ],
+            }],
+            references: MarkupReferencesModel::default(),
+        };
+        let theme_file = root.join("theme.xamlmeta");
+        fs::write(&theme_file, theme.to_json()).expect("the .xamlmeta of the theme");
+        let out = root.join("out");
+        let outcome = Build::new(crate_dir.clone(), out.clone(), "app", vec![theme_file])
+            .type_system(TypeSystem::Model)
+            .theme("Theme")
+            .theme_roots(&["Popup"])
+            .execute();
+        assert_eq!(outcome.errors, Vec::<String>::new());
+        let listing = fs::read_to_string(out.join("xaml").join("theme_parts.txt")).expect("the kept units");
+        assert!(listing.starts_with("Tests.Theme: 3 of 4 units\n"), "{listing}");
+        assert!(listing.contains("Controls/ListBox.xaml") && listing.contains("Resources/Caption.xaml"), "{listing}");
+        assert!(!listing.contains("Controls/Unused.xaml"), "{listing}");
+        // The program is an input of the build, and the listing of the roots names it.
+        let program_input = format!("cargo::rerun-if-changed={}", crate_dir.join("program.rs").display());
+        assert!(outcome.lines.contains(&program_input), "{:?}", outcome.lines);
+        let traced = fs::read_to_string(out.join("xaml").join("theme_roots.txt")).expect("the listing of the roots");
+        assert!(traced.contains("program.rs\ntypes: ListBox\nkeys: CaptionStyle\n"), "{traced}");
+        // A root the build script states is exported with the references of the crate.
+        let text = fs::read_to_string(out.join("app.xamlmeta")).expect("the .xamlmeta");
+        let metadata = XamlMetadata::parse(&text).expect("metadata");
+        assert!(metadata.references.types.contains(&"Popup".to_string()), "{:?}", metadata.references);
         let _ = fs::remove_dir_all(&root);
     }
 

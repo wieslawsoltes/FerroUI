@@ -1392,9 +1392,102 @@ function (`_deferred_<n>`, `_part_<n>`, `_unit_<n>`, `_untyped`).
 - `tests/FerroUI.Markup.Xaml.UnitTests/emitter/build_diagnostics.rs`: the error and the
   disambiguation reported by a build.
 
-## 18. A library that constructs a theme (#846)
+## 17. Roots across targets, from dependencies, and only of the documents compiled (#847)
 
-### 18.1 The selection reaches the library
+The review found roots of theme trimming that were missed and roots that were over-collected.
+
+### 17.1 Every production target
+
+The build read the sources of a crate from one root file: `src/lib.rs`, else `lib.rs`, else
+`src/main.rs`. `ListBox::new()` in the binary of a package that also has a library therefore rooted
+nothing (#832 names the same limit for the samples).
+
+`theme_roots::binary_roots` (new) reads the binaries of the package as Cargo finds them:
+- the `path` of each `[[bin]]` table, or for a `[[bin]]` without a path, the file its name gives
+  (`src/bin/<name>.rs`, `src/bin/<name>/main.rs` or `src/main.rs`);
+- unless `[package]` states `autobins = false`, `src/main.rs`, `src/bin/*.rs` and
+  `src/bin/*/main.rs`.
+
+The build scans each binary for its names and string literals, as it scans the library, and adds
+them to the roots of the sources. Examples, tests and benchmarks are not production targets and are
+not read.
+
+`$OUT_DIR/xaml/theme_roots.txt` lists, for each target (by its root file), the types and keys its
+sources root. A kept unit can therefore be traced to the target that named it.
+
+The manifest is read by the small reader of section 10.1, extended to `[[bin]]` tables. It moves to
+the TOML reader of #850 when that is merged.
+
+### 17.2 What a dependency's code makes
+
+A dependency that is code only (`ListBox::new()` in a free function) exported nothing. The creates
+edges belong to classes of the model, and a free function has no owner. Exporting every name and
+literal of every dependency's code would root every control of `ferroui-view` (whose builders name
+each one) in every application that uses it, so this is not done automatically.
+
+Instead, a crate states what its code constructs with `Build::theme_roots(&[..])`. The build exports
+those names with the references of the crate's documents (`references.types` and `.keys` of its
+`.xamlmeta`), and every application that depends on the crate roots them.
+
+### 17.3 Only the documents a class compiles
+
+The build collected roots from every document given to a group, before it knew which documents
+belong to the class. A `NeverIncluded.xaml` with a `<ListBox />`, given to a class group but
+included by no document of it, is never compiled, yet it rooted 13 more units.
+
+For the group of a class, the roots now come from the documents of its group only: the document of
+the class and the documents it includes, directly or not (`class_document_group`). An ordinary
+group still roots every document it compiles.
+
+### 17.4 Tests
+
+- `theme_roots_tests.rs` (`the_binaries_of_a_package_are_its_production_targets`): explicit
+  binaries, a binary by its name, discovered binaries, `autobins = false`, and files that do not
+  exist.
+- `lib.rs` (`every_production_target_roots_the_themes`): a package whose binary names `ListBox` and a
+  key keeps their units while its library names neither. The binary is an input of the build,
+  `theme_roots.txt` names it with its types and keys, and a root the build script states is in the
+  exported references.
+
+## 19. Why each unit is kept (#852, first step)
+
+Issue #852 asks whether a graph of entries could split the high-fanout dictionaries of a theme
+into clusters that link independently: `Resources/Generic.xaml` of WinUI has 330 keys, and
+`Accents/FluentControlResources.xaml` of Fluent 626 in one unit. Its rule is to count first, and to
+stop if the count does not carry the idea. This step provides the count and the reasons. It changes
+no kept unit.
+
+`$OUT_DIR/xaml/theme_parts_why.txt`, written next to `theme_parts.txt`, has a block for each theme
+the application trims:
+
+- **A line of totals:** the units kept, and of the keys the kept units define, how many are live.
+  A key is live when it is a root or a kept unit references it. A unit with few live keys is the
+  candidate for entry-level selection that the issue describes.
+- **A line for each kept unit:** its name, its live and total keys, whether its reason is
+  `conservative` or `exact`, and the first reason the closure found. A reason is one of these:
+  - the ambient unit;
+  - named by the manifest or the build script;
+  - the theme of a live type, with what made the type live (a root of the documents or the sources,
+    a type a kept unit constructs, or a base class or created class of another);
+  - a live key, with where it came from (a root, or the unit that references it).
+
+  A reason is conservative when its root is a token of a document, a name of the sources or a
+  reference of a dependency: something that may only spell the key or the type. Stated roots,
+  constructions and references of kept units are exact.
+
+`theme_roots::explain_kept_units` (new) runs the closure of `kept_units` and records the first reason
+it meets for each unit. Its units are those of `kept_units` over the union of its sources, and a test
+checks this. `theme_roots::why_kept_listing` (new) writes the block.
+
+Not done in this step:
+
+- the count for hello world and a larger sample, and the bytes behind the counts. The listing gives
+  the keys; the bytes need a link map of a build of a sample with the Skia backend.
+- clusters inside one dictionary. Whether to build them waits for that count.
+
+## 20. A library that constructs a theme (#846)
+
+### 20.1 The selection reaches the library
 
 A library document with `<WinUITheme />` was compiled to
 `WinUITheme::with_parts(None, crate::compiled_markup::THEME_PARTS_..)`, with the units the library
@@ -1425,9 +1518,9 @@ Now:
 The rule "the wider table" assumes that the application's table holds the library's. That is the
 usual case, since the application's roots include what the library's documents name. A library
 whose code constructs controls that its documents do not name states them with `Build::theme_roots`,
-which #847 exports.
+which #847 exports (section 17).
 
-### 18.2 The selection as state of the thread (not done)
+### 20.2 The selection as state of the thread (not done)
 
 `set_active_theme_units` still writes a thread-local entry for each theme class, and the generated
 builds read it. A second construction of the same theme with other parts on the same thread, or a
@@ -1437,7 +1530,7 @@ changes the generated code of the theme builds. That is left for the work on the
 themes (#853 and the related issues). `register_theme_parts` still replaces an earlier
 registration; the generated `register()` now uses the wider registration instead.
 
-### 18.3 Tests
+### 20.3 Tests
 
 - `theme_units_tests.rs` (`the_wider_table_of_a_class_is_registered_and_applied`): registering in
   either order keeps the wider table, and a construction applies the wider table.

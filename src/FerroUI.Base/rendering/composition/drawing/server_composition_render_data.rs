@@ -71,6 +71,12 @@ impl ServerCompositionRenderData {
         rect.map(|r| LtrbRect { left: r.left.floor(), top: r.top.floor(), right: r.right.ceil(), bottom: r.bottom.ceil() })
     }
 
+    /// The bytes of the recorded operations: a measure of the commands of the drawing, for the
+    /// count of unchanged drawings (`unchanged_drawings`, #821).
+    pub(crate) fn recorded_bytes(&self) -> usize {
+        self.stream.borrow().as_ref().map_or(0, |stream| stream.opcodes().len())
+    }
+
     /// Replays the drawn content onto a platform drawing context.
     pub fn render(&self, context: &mut dyn IDrawingContextImpl) {
         if let Some(stream) = self.stream.borrow().as_ref() {

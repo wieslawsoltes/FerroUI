@@ -741,14 +741,15 @@ impl Chart {
         let mut geo = None;
         let (mut scene, x_scales, y_scales) = match self.chart_kind() {
             ChartKind::Cartesian => {
-                // The data label positions of the heat series (`DataLabelsPosition`).
+                // The data label positions and SVG geometries of the heat series.
                 let series_options: Vec<_> = models
                     .iter()
                     .map(|model| {
                         let mut options = CartesianSeriesOptions::default();
-                        options.data_labels_position = model
-                            .cast::<HeatSeries>()
-                            .map(|heat| heat.data_labels_position());
+                        if let Some(heat) = model.cast::<HeatSeries>() {
+                            options.data_labels_position = Some(heat.data_labels_position());
+                            options.geometry_svg = heat.geometry_svg();
+                        }
                         options
                     })
                     .collect();
@@ -966,6 +967,7 @@ impl Chart {
         }
         let scene = Rc::new(scene);
         let previous = self.measurement.borrow().as_ref().map(|m| m.scene.clone());
+        let previous = previous.or_else(|| self.heat_first_draw(&models, &scene));
         self.start_transition(previous, scene.clone());
         *self.measurement.borrow_mut() = Some(Measurement {
             revision,
@@ -1404,6 +1406,32 @@ impl Chart {
         ))
     }
 
+    /// The first draw of a Cartesian chart with heat series (`HeatSeriesAnimationTests`): the
+    /// cells start transparent in their colour (`EnsureVisualForPoint`) and take it as the scene
+    /// transition runs; everything else of the scene is in place from the start.
+    fn heat_first_draw(&self, models: &[Ref<ChartSeries>], scene: &Scene) -> Option<Rc<Scene>> {
+        if self.chart_kind() != ChartKind::Cartesian {
+            return None;
+        }
+        let heat: Vec<usize> = models
+            .iter()
+            .enumerate()
+            .filter(|(_, model)| model.kind() == ferroui_livecharts::SeriesKind::Heat)
+            .map(|(index, _)| index)
+            .collect();
+        if heat.is_empty() {
+            return None;
+        }
+        let mut seed = scene.clone();
+        for primitive in &mut seed.primitives {
+            let cell = primitive.id.is_some_and(|id| heat.contains(&id.series))
+                && !matches!(primitive.geometry, ferroui_livecharts::Geometry::Text { .. });
+            if let (true, Some(color)) = (cell, primitive.style.fill) {
+                primitive.style.fill = Some(Color::from_argb(0, color.r, color.g, color.b));
+            }
+        }
+        Some(Rc::new(seed))
+    }
     fn start_transition(&self, previous: Option<Rc<Scene>>, next: Rc<Scene>) {
         let duration = self.animations_speed();
         // The lands of a map take their colours at once (GeoMapAnimationTests): a map has no
@@ -1417,14 +1445,23 @@ impl Chart {
             return;
         }
         let now = Dispatcher::ui_thread().now() as f64;
+        // The nodes, ribbons and tiles of a Sankey or treemap chart enter and leave as the
+        // source's visuals do, also at the first draw (`SceneTransition::with_node_motion`).
+        let node_motion = matches!(self.chart_kind(), ChartKind::Sankey | ChartKind::Treemap);
         let from = self
             .transition
             .borrow()
             .as_ref()
             .map(|transition| Rc::new(transition.sample(now)))
-            .or(previous);
+            .or(previous)
+            .or_else(|| node_motion.then(|| Rc::new(Scene::new(next.size, next.plot_bounds))));
         if let Some(from) = from {
-            *self.transition.borrow_mut() = Some(SceneTransition::new(from, next, now, duration));
+            let transition = SceneTransition::new(from, next, now, duration);
+            *self.transition.borrow_mut() = Some(if node_motion {
+                transition.with_node_motion()
+            } else {
+                transition
+            });
             let timer = self.animation_timer.borrow().clone();
             if let Some(timer) = timer {
                 timer.start();
