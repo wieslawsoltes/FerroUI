@@ -288,6 +288,7 @@ export type FromDesigner = DragMessage
 
 export type ToDesigner = DragUpdate | PlacementResult
     | { type: 'viewState'; state: DesignerViewState }
+    | { type: 'recording'; time?: number }
     | { type: 'canvasAction'; request: number; action: CanvasAction }
     | { type: 'pending' }
     | { type: 'snapshot'; frame: FrameTarget; sourceKey: string; snapshot: CanvasSnapshot; viewport: Viewport; selected: number | undefined; selection?: number[]; runtime?: RuntimeRow }

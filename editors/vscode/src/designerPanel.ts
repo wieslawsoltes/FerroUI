@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { recordedGeometry, recordedMove } from './animationGeometry';
 import type { BuiltProject, BuiltProjects } from './builtProjects';
 import { CanvasRequests } from './canvasRequests';
 import { DesignerDependencies, dirtyXamlSources } from './designerDependencies';
@@ -22,6 +23,8 @@ interface Frame {
     snapshot: Snapshot;
     canvas: CanvasSnapshot;
     timelineRecording: boolean;
+    timelineGeometryRecording: boolean;
+    timelineKeyframeDrafts: boolean;
 }
 
 type PropertyEdit = Extract<NodeOperation, { type: 'setProperty' | 'resetProperty' }>;
@@ -45,6 +48,7 @@ export class DesignerPanel implements vscode.Disposable {
     private viewport: Viewport;
     private designData?: DesignDataPresentation;
     private timelinePose?: TimelinePreviewPose;
+    private animationRecording = false;
     private retainedSelection?: { version: number; ranges: Range[] };
     private inspected = false;
     private readers = 0;
@@ -140,6 +144,9 @@ export class DesignerPanel implements vscode.Disposable {
     get dimensions(): Viewport { return this.viewport; }
     get authoredTimelinePose(): TimelinePreviewPose | undefined { return this.timelinePose; }
     get supportsTimelineRecording(): boolean { return Boolean(this.language === 'xaml' && this.frame?.timelineRecording); }
+    get supportsTimelineGeometryRecording(): boolean { return Boolean(this.supportsTimelineRecording && this.frame?.timelineGeometryRecording); }
+    get supportsTimelineKeyframeDrafts(): boolean { return Boolean(this.language === 'xaml' && this.frame?.timelineKeyframeDrafts); }
+    get animationRecordingTime(): number | undefined { return this.animationRecording ? this.timelinePose?.time : undefined; }
     get isDisposed(): boolean { return this.disposed; }
     get canvasReady(): boolean { return !this.disposed && this.ready && this.panel.visible; }
     get status(): string | undefined {
@@ -152,6 +159,12 @@ export class DesignerPanel implements vscode.Disposable {
         if (inspected === this.inspected) return;
         this.inspected = inspected;
         if (inspected) void this.render();
+    }
+
+    setAnimationRecording(enabled: boolean): void {
+        if (this.animationRecording === enabled) return;
+        this.animationRecording = enabled;
+        this.showRecording();
     }
 
     async select(target: NodeTarget, openSource = false, extend = false): Promise<void> {
@@ -308,7 +321,10 @@ export class DesignerPanel implements vscode.Disposable {
 
     async previewPlacement(target: FrameTarget, placement: Placement): Promise<DropHint> {
         if (!this.canUse(target)) throw new Error('The design changed during the drag.');
-        return (await this.getClient()).placement(target.token, placement);
+        const recording = this.recordingGeometryPose() !== undefined && Boolean(recordedMove(placement));
+        const client = await this.getClient();
+        if (!this.canUse(target)) throw new Error('The design changed during the drag.');
+        return client.placement(target.token, placement, recording);
     }
 
     get snapshot(): Snapshot | undefined { return this.currentToken === undefined ? undefined : this.frame?.snapshot; }
@@ -533,6 +549,8 @@ export class DesignerPanel implements vscode.Disposable {
             const nodes = snapshot.nodes.map(({ id, label, name, bounds, canMove, selectable }) => ({ id, label, name, bounds, canMove, selectable }));
             if (snapshot.image) this.timelinePose = snapshot.timelinePose;
             this.frame = { token, version, viewport, source: input, snapshot, timelineRecording: Boolean(client.capabilities.timelineRecording),
+                timelineGeometryRecording: Boolean(client.capabilities.timelineGeometryRecording),
+                timelineKeyframeDrafts: Boolean(client.capabilities.timelineKeyframeDrafts),
                 canvas: { ...snapshot, nodes, interactive: Boolean(client.capabilities.canvasInteraction && snapshot.image),
                     focusOrderAvailable: Boolean(client.capabilities.canvasFocusOrder && snapshot.image) } };
             this.runtime = undefined;
@@ -631,7 +649,19 @@ export class DesignerPanel implements vscode.Disposable {
     }
 
     private async edit(frame: Frame, operation: Operation, signal?: AbortSignal, validate?: () => void): Promise<void> {
+        const pose = this.recordingGeometryPose();
+        const geometry = pose && recordedGeometry(operation);
+        if (pose && geometry) {
+            if (!('frame' in operation) || operation.frame !== frame.token) throw new Error('Read the current recording frame.');
+            const targets = geometry.action === 'move' ? geometry.nodes : [geometry.node];
+            return this.studioEdit(frame.token, 'designer_record_geometry', { ...geometry, program: pose.program, time: pose.time },
+                targets, signal ?? AbortSignal.timeout(15_000), validate);
+        }
         return this.commitEdit(frame, client => client.edit(frame.source, operation), signal, validate);
+    }
+
+    private recordingGeometryPose(): TimelinePreviewPose | undefined {
+        if (this.animationRecording && this.supportsTimelineGeometryRecording) return this.timelinePose;
     }
 
     private async commitEdit(frame: Frame, plan: (client: NativePreview) => Promise<EditResult>, signal?: AbortSignal, validate?: () => void): Promise<void> {
@@ -684,6 +714,7 @@ export class DesignerPanel implements vscode.Disposable {
 
     private syncCanvas(): void {
         this.rememberView();
+        this.showRecording();
         const frame = this.frame;
         if (frame && this.currentToken !== undefined) {
             const anchor = frame.snapshot.activeBlock?.start;
@@ -695,6 +726,10 @@ export class DesignerPanel implements vscode.Disposable {
         } else {
             this.post({ type: 'pending' });
         }
+    }
+
+    private showRecording(): void {
+        this.post({ type: 'recording', time: this.recordingGeometryPose()?.time });
     }
 
     private rememberView(): void {

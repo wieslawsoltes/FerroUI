@@ -8,6 +8,15 @@ body {
 .canvas-tools, .zoom-controls, .dock-tools { display: flex; align-items: center; gap: 2px; }
 .canvas-tools { gap: 5px; }
 .canvas-mode { margin-inline-end: 0; }
+.canvas-recording {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding-inline: 5px;
+    color: var(--vscode-debugIcon-breakpointForeground, var(--vscode-errorForeground));
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
 .zoom-controls, .dock-tools { padding-inline-start: 5px; border-inline-start: 1px solid var(--line); }
 #zoom-value { min-inline-size: 27px; }
 .zoom-menu .compact-action { display: none; }
@@ -111,7 +120,24 @@ body {
 .focus-overlay[inert] .focus-marker, .canvas:is([data-pan=ready], [data-pan=dragging]) .focus-marker { pointer-events: none; }
 .hover-outline { border-style: dashed; opacity: .62; }
 .additional-outline { border-style: dashed; }
-.resize-handle { position: absolute; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; padding: 0; pointer-events: auto; border: 1px solid var(--focus); background: var(--vscode-editor-background); }
+.resize-handle {
+    position: absolute;
+    inline-size: 13px;
+    block-size: 13px;
+    min-block-size: 0;
+    transform: translate(-50%, -50%);
+    padding: 0;
+    pointer-events: auto;
+    touch-action: none;
+}
+.resize-handle::before {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border: 1px solid var(--focus);
+    border-radius: 1px;
+    background: var(--vscode-editor-background);
+}
 .resize-0, .resize-1, .resize-2 { top: 0; }
 .resize-4, .resize-5, .resize-6 { top: 100%; }
 .resize-3, .resize-7 { top: 50%; }

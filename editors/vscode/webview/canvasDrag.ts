@@ -57,7 +57,10 @@ export class CanvasDrag {
         artboard.surface.addEventListener('pointerleave', () => this.clearHint());
         artboard.surface.addEventListener('pointerup', event => {
             const point = pointerPosition(artboard, event);
-            if (event.button === 0 && canDrag() && point) finishDrop(this.frame, this.gesture, { type: 'canvas', ...point }, send);
+            if (event.button === 0 && canDrag() && point) {
+                this.source.startIfMoved(event);
+                finishDrop(this.frame, this.gesture, { type: 'canvas', ...point }, send);
+            }
             this.clearHint();
         });
     }

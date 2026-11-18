@@ -1,4 +1,5 @@
 import type { KeyframeLocation, TimelineTrack } from '../src/timelineProtocol';
+import { acceptedKeyframe } from '../src/timelineKeyframes';
 
 export const keyframeId = (key: KeyframeLocation): string => JSON.stringify([key.target, key.property, key.time]);
 
@@ -47,24 +48,9 @@ export class TimelineSelection {
         for (const key of this.selected.values()) {
             const track = exact.get(JSON.stringify([key.target, key.property])) ?? unambiguous.get(key.property);
             if (!track) continue;
-            const time = acceptedTime(track, key.time);
-            if (time !== undefined) accepted.push({ target: track.target, property: track.property, time });
+            const match = acceptedKeyframe(track, key.time);
+            if (match) accepted.push({ target: track.target, property: track.property, time: match.time });
         }
         this.replace(accepted);
     }
-}
-
-function acceptedTime(track: TimelineTrack, wanted: number): number | undefined {
-    let low = 0;
-    let high = track.keyframes.length;
-    while (low < high) {
-        const middle = Math.floor((low + high) / 2);
-        if (track.keyframes[middle].time < wanted) low = middle + 1;
-        else high = middle;
-    }
-    const before = track.keyframes[low - 1]?.time;
-    const after = track.keyframes[low]?.time;
-    const nearest = before !== undefined && (after === undefined || wanted - before < after - wanted) ? before : after;
-    // Source round-trips through native XAML KeyTime at 100 ns precision.
-    if (nearest !== undefined && Math.abs(nearest - wanted) <= 0.0000001) return nearest;
 }

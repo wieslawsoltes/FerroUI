@@ -35,6 +35,7 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
             ${tool('zoom-in', 'add', 'Zoom in (+)')}
         </div>
         ${tool('pan', 'move', 'Pan canvas (Space and drag)', 'aria-pressed="false"')}
+        <output id="canvas-recording" class="canvas-recording" role="status" hidden>${icon('circle-filled')}<span></span></output>
     </div>
     <div class="dock-tools" role="group" aria-label="Workbench views">
         ${tool('toolbox-button', 'extensions', 'Show Toolbox')}
@@ -347,17 +348,42 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
     <p id="timeline-native-source" class="dock-message" hidden>Open the authored animation through More Animation Actions.</p>
     <section id="timeline-program" aria-label="Selected animation" hidden>
         <div id="timeline-grid" class="timeline-grid">
-            <div class="timeline-scrub">
-                <input id="timeline-seek" type="range" min="0" value="0" step="any" aria-label="Animation playhead"
-                    aria-keyshortcuts="[ ] + - 0 PageUp PageDown"
-                    title="[ and ] seek to nearby keyframes. + and − zoom. Page Up and Page Down pan.">
+            <div class="timeline-axis">
+                <div class="timeline-scrub">
+                    <input id="timeline-seek" type="range" min="0" value="0" step="any" aria-label="Animation playhead"
+                        aria-keyshortcuts="[ ] + - 0 PageUp PageDown"
+                        title="[ and ] seek to nearby keyframes. + and − zoom. Page Up and Page Down pan.">
+                </div>
+                <div id="timeline-ruler" class="timeline-ruler" aria-hidden="true"></div>
             </div>
-            <div id="timeline-ruler" class="timeline-ruler" aria-hidden="true"></div>
             <ol id="timeline-tracks" aria-label="Property tracks"></ol>
             <div id="timeline-pan-row" class="timeline-pan" hidden>
                 <input id="timeline-pan" type="range" min="0" value="0" step="any" aria-label="Pan visible timeline">
             </div>
         </div>
+        <section id="timeline-keyframe-editor" class="timeline-keyframe-editor" aria-label="Keyframe editor" hidden>
+            <header>
+                <strong id="keyframe-name"></strong>
+                <div class="tool-group" role="group" aria-label="Selected keyframe">
+                    ${tool('keyframe-seek', 'debug-step-over', 'Seek to selected keyframe')}
+                    ${tool('keyframe-close', 'close', 'Close keyframe editor')}
+                </div>
+            </header>
+            <form id="timeline-keyframe-form" novalidate>
+                <fieldset id="keyframe-fields" aria-label="Keyframe values">
+                    <div class="keyframe-fields">
+                        <label>Time (s) <input id="keyframe-time" type="number" min="0" step="any" required></label>
+                        <label>Value <input id="keyframe-value" autocomplete="off" spellcheck="false" required></label>
+                        <label class="keyframe-easing">Incoming easing <input id="keyframe-easing" autocomplete="off" spellcheck="false" required></label>
+                    </div>
+                    <div class="keyframe-curve-row">
+                        <canvas id="keyframe-curve" width="180" height="58" role="img" aria-label="Incoming easing curve"></canvas>
+                        <button id="keyframe-apply" class="tool primary" type="submit" aria-label="Apply keyframe" title="Apply keyframe" disabled>${icon('check')}</button>
+                    </div>
+                </fieldset>
+                <p id="keyframe-feedback" role="status" hidden></p>
+            </form>
+        </section>
     </section>
 </main>`);
 }

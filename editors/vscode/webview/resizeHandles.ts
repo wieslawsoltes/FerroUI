@@ -8,6 +8,7 @@ export class ResizeHandles {
     private readonly container = element('resize-handles');
     private node?: CanvasNode;
     private cancel?: () => void;
+    private suppressClick = false;
 
     constructor(private readonly artboard: Artboard, private readonly commit: (gesture: ResizeGesture) => void) {
         directions.forEach((direction, handle) => {
@@ -28,6 +29,12 @@ export class ResizeHandles {
             };
             this.container.append(button);
         });
+        artboard.element.addEventListener('pointerdown', () => { this.suppressClick = false; }, true);
+        artboard.element.addEventListener('click', event => {
+            if (!this.suppressClick || !event.detail) return;
+            this.suppressClick = false;
+            event.stopImmediatePropagation();
+        }, true);
     }
 
     update(node?: CanvasNode): void {
@@ -40,32 +47,48 @@ export class ResizeHandles {
     private pointer(button: HTMLButtonElement, handle: number, event: PointerEvent): void {
         const node = this.node;
         const before = node?.bounds;
-        if (!node || !before || event.button !== 0) return;
+        if (!node || !before || event.button !== 0 || !event.isPrimary) return;
         event.preventDefault();
         event.stopPropagation();
         this.cancel?.();
         const origin = this.artboard.point(event, true);
         if (!origin) return;
-        button.setPointerCapture(event.pointerId);
-        let delta = { dx: 0, dy: 0 };
+        const { pointerId } = event;
+        const listeners = new AbortController();
+        const options = { capture: true, signal: listeners.signal };
+        button.focus({ preventScroll: true });
+        const movement = (pointer: PointerEvent) => {
+            const position = this.artboard.point(pointer, true);
+            return position && { dx: Math.round(position.x - origin.x), dy: Math.round(position.y - origin.y) };
+        };
         const finish = () => {
             this.cancel = undefined;
-            button.onpointermove = button.onpointerup = button.onlostpointercapture = null;
-            if (button.hasPointerCapture(event.pointerId)) button.releasePointerCapture(event.pointerId);
+            listeners.abort();
+            if (button.hasPointerCapture(pointerId)) button.releasePointerCapture(pointerId);
             this.artboard.showDrop();
         };
         this.cancel = finish;
-        button.onpointermove = move => {
-            const position = this.artboard.point(move, true);
-            if (!position) return;
-            delta = { dx: Math.round(position.x - origin.x), dy: Math.round(position.y - origin.y) };
-            this.artboard.showDrop(rectangle(before, handle, delta.dx, delta.dy));
-        };
-        button.onpointerup = () => {
+        document.addEventListener('pointermove', move => {
+            if (move.pointerId !== pointerId || !(move.buttons & 1)) return;
+            const delta = movement(move);
+            if (delta) this.artboard.showDrop(rectangle(before, handle, delta.dx, delta.dy));
+        }, options);
+        document.addEventListener('pointerup', up => {
+            if (up.pointerId !== pointerId) return;
+            const delta = movement(up);
             finish();
-            if (delta.dx || delta.dy) this.commit({ node: node.id, handle, ...delta });
-        };
-        button.onlostpointercapture = finish;
+            if (delta && (delta.dx || delta.dy)) {
+                this.suppressClick = true;
+                this.commit({ node: node.id, handle, ...delta });
+            }
+        }, options);
+        document.addEventListener('pointercancel', cancel => { if (cancel.pointerId === pointerId) finish(); }, options);
+        button.addEventListener('lostpointercapture', finish, options);
+        window.addEventListener('blur', finish, options);
+        document.addEventListener('keydown', key => {
+            if (key.key === 'Escape') finish();
+        }, options);
+        button.setPointerCapture(pointerId);
     }
 }
 

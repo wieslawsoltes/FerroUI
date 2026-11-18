@@ -1,9 +1,12 @@
 import { strict as assert } from 'node:assert';
 import type * as vscode from 'vscode';
+import { acceptedKeyframe } from '../src/timelineKeyframes';
 import type { TimelinePosition, TimelineProgram } from '../src/timelineProtocol';
 import type { McpFixture } from './mcp';
 
 export async function verifyTimelineMcp(mcp: McpFixture, session: number, document: vscode.TextDocument): Promise<void> {
+    const closeKeys = [.5, .5000001].map(time => ({ time, value_text: '0.75', easing_text: 'LinearEasing' }));
+    assert.equal(acceptedKeyframe({ target: 1, property: 'Opacity', keyframes: closeKeys }, .500000072), closeKeys[1]);
     const { invoke, content } = mcp;
     const original = document.getText();
     const wait = async () => {
@@ -157,10 +160,26 @@ export async function verifyTimelineMcp(mcp: McpFixture, session: number, docume
     const duplicate = await keyframe();
     assert.ok(duplicate.isError && duplicate.content[0]?.text?.includes('occupies the destination time'));
     frame = await wait();
-    content(await keyframe({ previous: .5, time: .75, value: '0.25' }));
+    const draft = { program, target: frame.nodes.find(node => node.name === 'saveButton')!.id, property: 'Opacity',
+        previous: .5, time: .75, value: '0.25', easing: '0.42,1.8,0.58,1.4' };
+    const previewDraft = (arguments_: object) => invoke('designer_studio_query', { session, tool: 'designer_keyframe_draft', arguments: arguments_ });
+    const unchanged = document.version;
+    const graph = content<{ samples: number[]; valueKind: string }>(await previewDraft(draft));
+    assert.equal(graph.valueKind, 'Number');
+    assert.equal(graph.samples.length, 33);
+    assert.equal(graph.samples[0], 0);
+    assert.equal(graph.samples.at(-1), 1);
+    assert.ok(Math.max(...graph.samples) > 1.1);
+    assert.ok((await previewDraft({ ...draft, easing: '2,0,0.5,1' })).isError);
+    assert.ok((await previewDraft({ ...draft, time: 3 })).isError);
+    assert.ok((await previewDraft({ ...draft, value: 'blue' })).isError);
+    assert.equal(document.version, unchanged);
+    content(await keyframe(draft));
     await wait();
     await check(.75, '0.25');
+    assert.match((await pulse()).timeline.tracks[0].keyframes.find(key => key.time === .75)!.easing_text, /1\.8/);
     await undo();
+    assert.equal(document.getText(), beforeRecording);
     await wait();
     await check(.5, '0.75');
     await undo();
@@ -168,5 +187,5 @@ export async function verifyTimelineMcp(mcp: McpFixture, session: number, docume
     assert.deepEqual((await pulse()).timeline.tracks, []);
     await undo();
     assert.equal(document.getText(), original);
-    console.log('VS Code MCP sampled reverse playback, restored the base on Stop, and verified timing, recording, and grouped keyframe transactions with undo');
+    console.log('VS Code MCP validated and sampled an overshooting keyframe draft, verified one-step Undo, and exercised native playback and group edits');
 }

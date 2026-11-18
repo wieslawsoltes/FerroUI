@@ -2,8 +2,10 @@ import type { FrameTarget } from '../src/protocol';
 import type { FromTimeline, KeyframeGroupEdit, KeyframeLocation, TimelineControl, TimelineProgram, TimelineState, ToTimeline } from '../src/timelineProtocol';
 import { element, labelButton } from './dom';
 import { dragKeyframe, type RenderedKeyframe } from './timelineKeyDrag';
+import { TimelineKeyframeEditor } from './timelineKeyframeEditor';
 import { bindTimelineMarquee } from './timelineMarquee';
 import { TimelineSelection } from './timelineSelection';
+import { clamp } from './timelineViewport';
 import { TimelineViewportView } from './timelineViewportView';
 
 interface ProgramIdentity { id: number; key?: string }
@@ -49,6 +51,10 @@ let owner: { session: number; program: ProgramIdentity } | undefined;
 let keyEdit: { before: FrameTarget; accepted?: KeyframeLocation[] } | undefined;
 
 const gestureFrame = () => pending || keyEdit ? undefined : model.frame;
+const keyframeEditor = new TimelineKeyframeEditor(request => vscode.postMessage(request),
+    (frame, program, time) => send(frame, { action: 'seek', program, time }),
+    ({ target, keyframe }, property) => { selection.replace([{ target, property, time: keyframe.time }]); showKeySelection(); },
+    () => (renderedKeys.find(({ key, button }) => !button.hidden && selection.has(key))?.button ?? slider).focus({ preventScroll: true }));
 bindTimelineMarquee(viewport.grid, tracks, () => renderedKeys, gestureFrame, () => viewport.range, (keys, additive) => {
     selection.replace([...(additive ? selection.keys : []), ...keys.map(({ key }) => key)]);
     showKeySelection();
@@ -86,10 +92,7 @@ recordMode.addEventListener('click', () => {
     }
 });
 record.addEventListener('click', () => {
-    const selected = current();
-    if (model.frame && model.writable && selected?.timeline && !pending && !keyEdit) {
-        vscode.postMessage({ type: 'recordKeyframe', frame: model.frame, program: selected.id, time: slider.valueAsNumber });
-    }
+    recordAt(slider.valueAsNumber);
 });
 actions.addEventListener('click', () => {
     if (model.frame && !pending && !keyEdit) vscode.postMessage({ type: 'programActions', frame: model.frame, program });
@@ -137,6 +140,8 @@ window.addEventListener('message', event => {
         if (message.keys) keyEdit.accepted = message.keys;
         else keyEdit = undefined;
         showTracks();
+    } else if (message.type === 'keyframeDraftResult') {
+        keyframeEditor.receive(message);
     } else if (message.type === 'error') {
         queued = submitted = keyEdit = undefined;
         pending = false;
@@ -169,6 +174,7 @@ function showTracks(): void {
     programs.title = selected?.name ?? 'Animation program';
     if (!selected || !timeline) {
         viewport.follow(undefined, false);
+        keyframeEditor.close();
         showKeySelection();
         showPosition();
         return;
@@ -204,6 +210,15 @@ function showTracks(): void {
             name.title = target ? `${target} · ${track.property}` : track.property;
             const lane = document.createElement('div');
             lane.className = 'timeline-lane';
+            lane.addEventListener('dblclick', event => {
+                if (event.target !== lane) return;
+                const bounds = lane.getBoundingClientRect();
+                const { start, span, duration } = viewport.range;
+                if (!bounds.width || !span) return;
+                const raw = start + span * clamp((event.clientX - bounds.left) / bounds.width, 0, 1);
+                const time = clamp(Math.round(raw * (frameRate || 1000)) / (frameRate || 1000), 0, duration);
+                recordAt(time, index);
+            });
             for (const key of track.keyframes) {
                 const button = document.createElement('button');
                 button.type = 'button';
@@ -224,7 +239,10 @@ function showTracks(): void {
                     selection.pick(location, event.shiftKey ? renderedKeys.map(item => item.key) : [], event.shiftKey, additive);
                     showKeySelection();
                     if (event.shiftKey || additive) return;
-                    if (model.writable) vscode.postMessage({ type: 'keyframe', frame: model.frame, program: selected.id, track: index, time: key.time });
+                    if (model.writable && model.canEditKeyframes && model.documentVersion !== undefined) {
+                        keyframeEditor.open(model.frame, model.documentVersion, selected.id, track.target, track.property, key,
+                            target ?? track.property, timeline.duration, true);
+                    } else if (model.writable) vscode.postMessage({ type: 'keyframe', frame: model.frame, program: selected.id, track: index, time: key.time });
                     else send(model.frame, { action: 'seek', program: selected.id, time: key.time });
                 });
                 button.addEventListener('keydown', event => keyShortcuts(event, location, timeline.duration));
@@ -267,6 +285,7 @@ function showPosition(): void {
     record.disabled = !model.frame || pending || playing || Boolean(keyEdit);
     recordMode.hidden = !timeline || !model.canRecord;
     recordMode.disabled = !model.frame || pending || playing || Boolean(keyEdit);
+    labelButton(recordMode, model.canRecordGeometry ? 'Record animation edits' : 'Record property changes');
     recordMode.setAttribute('aria-pressed', String(Boolean(model.recording)));
     actions.disabled = !model.frame || pending || playing || Boolean(keyEdit) || (!selected && !model.writable);
     programs.disabled = pending || Boolean(keyEdit) || !model.frame || !selected;
@@ -289,6 +308,7 @@ function showPosition(): void {
     stop.disabled = !model.frame || !position || Boolean(keyEdit) || (!playing && pending);
     slider.disabled = !model.frame || playing || Boolean(keyEdit) || timeline.duration <= 0;
     for (const { button } of renderedKeys) button.disabled = pending || Boolean(keyEdit) || !model.frame;
+    keyframeEditor.follow(pending || playing || keyEdit ? undefined : model.frame, model.documentVersion, program);
 }
 
 function showKeySelection(): void {
@@ -299,7 +319,18 @@ function showKeySelection(): void {
 function editKeys(keys: KeyframeLocation[], frame?: FrameTarget, edit?: KeyframeGroupEdit): void {
     if (!frame || program === undefined || pending || keyEdit || !model.writable || !keys.length) return;
     keyEdit = { before: frame };
+    keyframeEditor.close();
     vscode.postMessage({ type: 'keyframeGroup', frame, program, keys, edit });
+    showPosition();
+}
+
+function recordAt(time: number, track?: number): void {
+    const frame = gestureFrame();
+    const selected = current();
+    if (!frame || !selected?.timeline || !model.writable) return;
+    keyframeEditor.close();
+    keyEdit = { before: frame };
+    vscode.postMessage({ type: 'recordKeyframe', frame, program: selected.id, time, track });
     showPosition();
 }
 

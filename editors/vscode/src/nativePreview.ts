@@ -34,7 +34,8 @@ export class NativePreview implements vscode.Disposable {
         isolatedDesign?: boolean; appHostedDesign?: boolean; rsxLanguage?: boolean;
         stages?: boolean; prototypeEditing?: boolean; stageIncludes?: boolean; projectCatalog?: boolean;
         canvasInteraction?: boolean; canvasFocusOrder?: boolean; projectInventory?: boolean; tokenHandoff?: boolean;
-        designFixtures?: boolean; timelineTransport?: boolean; timelineRecording?: boolean;
+        designFixtures?: boolean; timelineTransport?: boolean; timelineRecording?: boolean; timelineGeometryRecording?: boolean;
+        timelineKeyframeDrafts?: boolean;
     } = {};
 
     private constructor(command: string, channel: vscode.OutputChannel) {
@@ -139,8 +140,8 @@ export class NativePreview implements vscode.Disposable {
         return this.send('render', { ...source, ...viewport, frame, ...context });
     }
 
-    placement(frame: number, placement: Placement): Promise<DropHint> {
-        return this.send('placement', { frame, placement });
+    placement(frame: number, placement: Placement, recording = false): Promise<DropHint> {
+        return this.send('placement', { frame, placement, ...(recording && { recording }) });
     }
 
     inspect(source: Source, frame: number, target: InspectionTarget): Promise<Inspection> {

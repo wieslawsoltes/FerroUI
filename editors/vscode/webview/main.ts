@@ -26,6 +26,9 @@ const fitSelection = element<HTMLButtonElement>('fit-selection');
 const selectionLabel = element<HTMLButtonElement>('selection-label');
 const actionsMenu = element('actions-menu');
 const selectedControl = element('selected-control');
+const recording = element('canvas-recording');
+const recordingValue = recording.querySelector('span:last-child')!;
+const seconds = new Intl.NumberFormat(undefined, { maximumFractionDigits: 3 });
 type SnapshotMessage = Extract<ToDesigner, { type: 'snapshot' }>;
 let staged: SnapshotMessage | undefined;
 const canvasActions: Extract<ToDesigner, { type: 'canvasAction' }>[] = [];
@@ -36,6 +39,8 @@ let runtime: RuntimeRow | undefined;
 let token = 0;
 let current = false;
 let applying = false;
+let sourceKey: string | undefined;
+let editError: string | undefined;
 let tab: 'preview' | 'counterpart' = 'preview';
 
 const viewport = new CanvasViewport((fit, scale, hasImage) => {
@@ -60,6 +65,8 @@ const resize = new ResizeHandles(artboard, gesture => {
 const size = new ViewportMenu(viewport => vscode.postMessage({ type: 'viewport', viewport }));
 const counterpart = new Counterpart(apply);
 const focusOverlay = new FocusOverlay(token => vscode.postMessage({ type: 'focusOrder', token }), node => select(node, true));
+preview.addEventListener('pointerdown', clearEditError, true);
+preview.addEventListener('keydown', clearEditError, true);
 
 anchorPopover(zoomButton, zoomMenu);
 zoomOut.addEventListener('click', () => viewport.step(-1));
@@ -216,6 +223,17 @@ function showPreviewError(message: string): void {
     showStatus('error', `${message}${artboard.hasFrame ? ' Showing the previous frame.' : ''}`);
 }
 
+function showCurrentStatus(): void {
+    if (editError) showStatus('error', editError);
+    else if (snapshot) showStatus(snapshot.notices.length ? 'notice' : 'ready', snapshot.notices.join(' · '));
+}
+
+function clearEditError(): void {
+    if (!current || !editError) return;
+    editError = undefined;
+    showCurrentStatus();
+}
+
 function flushCanvasActions(): void {
     for (const { request, action } of canvasActions.splice(0)) controlCanvas(request, action);
 }
@@ -242,6 +260,8 @@ function stageSnapshot(message: SnapshotMessage): void {
 function presentSnapshot(message: SnapshotMessage, frame?: HTMLImageElement): void {
     if (staged !== message) return;
     staged = undefined;
+    if (sourceKey !== message.sourceKey) editError = undefined;
+    sourceKey = message.sourceKey;
     snapshot = message.snapshot;
     token = message.frame.token;
     selected = message.selected;
@@ -258,7 +278,7 @@ function presentSnapshot(message: SnapshotMessage, frame?: HTMLImageElement): vo
     blocks.selectedIndex = snapshot.blocks.findIndex(({ start }) => start.line === active?.line && start.character === active?.character);
     const error = snapshot.renderError ?? (snapshot.image && !frame ? 'The preview image could not be decoded.' : undefined);
     if (error) showPreviewError(error);
-    else showStatus(snapshot.notices.length ? 'notice' : 'ready', snapshot.notices.join(' · '));
+    else showCurrentStatus();
     preview.setAttribute('aria-busy', 'false');
     updateSelection();
     flushCanvasActions();
@@ -267,6 +287,19 @@ function presentSnapshot(message: SnapshotMessage, frame?: HTMLImageElement): vo
 function receive(message: ToDesigner): void {
     switch (message.type) {
         case 'viewState': vscode.setState(message.state); return;
+        case 'recording': {
+            recording.hidden = message.time === undefined;
+            if (message.time !== undefined) {
+                const time = `${seconds.format(message.time)} s`;
+                const label = `Recording animation at ${time}`;
+                if (recording.title !== label) {
+                    recording.title = label;
+                    recording.setAttribute('aria-label', label);
+                    recordingValue.textContent = time;
+                }
+            }
+            return;
+        }
         case 'canvasAction':
             if (staged && (canvasActions.length || changesGeometry(message.action))) canvasActions.push(message);
             else controlCanvas(message.request, message.action);
@@ -299,7 +332,8 @@ function receive(message: ToDesigner): void {
             }
             break;
         case 'edit':
-            if (message.error) showStatus('error', message.error);
+            editError = message.error;
+            if (editError) showStatus('error', editError);
             else if (applying) counterpart.accepted();
             applying = false;
             break;

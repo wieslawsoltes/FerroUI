@@ -1,6 +1,6 @@
 import type { FrameTarget } from './protocol';
 
-export interface TimelineKeyframe { time: number; value_text: string; easing_text: string }
+export interface TimelineKeyframe { time: number; value_text: string; easing_text: string; value_kind?: string }
 export interface TimelineTrack { target: number; property: string; keyframes: TimelineKeyframe[] }
 export interface KeyframeLocation { target: number; property: string; time: number }
 export type KeyframeGroupEdit = { action: 'move_keyframes' | 'duplicate_keyframes'; offset: number }
@@ -47,10 +47,13 @@ export interface TimelinePreviewPose {
 
 export interface TimelineState {
     frame?: FrameTarget;
+    documentVersion?: number;
     programs: TimelineProgram[];
     names: Record<number, string>;
     writable: boolean;
     canRecord?: boolean;
+    canRecordGeometry?: boolean;
+    canEditKeyframes?: boolean;
     recording?: boolean;
     position?: TimelinePosition;
     message?: string;
@@ -68,10 +71,49 @@ export type FromTimeline =
     | { type: 'ready' }
     | { type: 'control'; frame: FrameTarget; control: TimelineControl }
     | { type: 'programActions'; frame: FrameTarget; program: number | undefined }
-    | { type: 'recordKeyframe'; frame: FrameTarget; program: number; time: number }
+    | { type: 'recordKeyframe'; frame: FrameTarget; program: number; time: number; track?: number }
+    | TimelineKeyframeRequest
     | { type: 'keyframeGroup'; frame: FrameTarget; program: number; keys: KeyframeLocation[]; edit?: KeyframeGroupEdit }
     | { type: 'keyframe'; frame: FrameTarget; program: number; track: number; time: number };
 
 export type ToTimeline = { type: 'position'; position?: TimelinePosition; frame?: FrameTarget }
     | { type: 'keyframesEdited'; keys?: KeyframeLocation[]; before: FrameTarget }
+    | TimelineKeyframeResponse
     | { type: 'error'; message: string };
+
+export interface KeyframeDraft {
+    program: number;
+    target: number;
+    property: string;
+    previous: number;
+    time: number;
+    value: string;
+    easing: string;
+}
+
+export interface TimelineKeyframeRequest {
+    type: 'keyframeDraft';
+    frame: FrameTarget;
+    request: number;
+    draft: KeyframeDraft;
+    apply: boolean;
+}
+
+export interface KeyframeDraftPreview { samples: number[]; valueKind: string }
+
+export interface AppliedKeyframe {
+    frame: FrameTarget;
+    version: number;
+    program: number;
+    target: number;
+    keyframe: TimelineKeyframe;
+}
+
+export interface TimelineKeyframeResponse {
+    type: 'keyframeDraftResult';
+    frame: FrameTarget;
+    request: number;
+    preview?: KeyframeDraftPreview;
+    applied?: AppliedKeyframe | null;
+    error?: string;
+}

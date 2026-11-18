@@ -29,19 +29,14 @@ export class DragSource {
         const move = (event: PointerEvent) => {
             const press = this.press;
             if (!press || event.pointerId !== press.id) return;
-            if (!(event.buttons & 1)) { this.end(); return; }
-            if (this.active || Math.hypot(event.clientX - press.x, event.clientY - press.y) < 5) return;
-            const gesture = { id: crypto.randomUUID(), frame: press.frame, origin: press.origin };
-            this.active = gesture;
-            this.suppressClick = true;
-            document.body.classList.add('drag-source');
-            this.send({ type: 'beginDrag', gesture });
-            this.started(gesture);
+            if (!(event.buttons & 1)) { if (this.active) this.end(); return; }
+            this.startIfMoved(event);
         };
         window.addEventListener('pointermove', move);
         root.addEventListener('pointerleave', move);
         window.addEventListener('pointerup', event => { if (event.isPrimary) this.end(); });
         window.addEventListener('pointercancel', () => this.end());
+        window.addEventListener('blur', () => { if (!this.active) this.end(); });
         window.addEventListener('keydown', event => { if (event.key === 'Escape') this.end(); });
         root.addEventListener('click', event => {
             if (this.suppressClick && event.detail) {
@@ -50,6 +45,18 @@ export class DragSource {
                 event.stopImmediatePropagation();
             }
         }, true);
+    }
+
+    // An in-view drop can receive a final position before the next move sample.
+    startIfMoved(event: PointerEvent): void {
+        const press = this.press;
+        if (!press || event.pointerId !== press.id || this.active || Math.hypot(event.clientX - press.x, event.clientY - press.y) < 5) return;
+        const gesture = { id: crypto.randomUUID(), frame: press.frame, origin: press.origin };
+        this.active = gesture;
+        this.suppressClick = true;
+        document.body.classList.add('drag-source');
+        this.send({ type: 'beginDrag', gesture });
+        this.started(gesture);
     }
 
     end(send = true): void {
