@@ -256,6 +256,8 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     crate::pivot::Pivot,
     crate::pivot::PivotItem,
     crate::pivot::PivotPanel,
+    crate::pivot::PivotHeaderItem,
+    crate::pivot::PivotHeaderPanel,
     crate::title_bar::TitleBar,
     crate::items_control::ItemsControl,
     crate::label::Label,

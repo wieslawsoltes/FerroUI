@@ -1,5 +1,5 @@
-//! Tests of the pivot (#443, PV-1): the template parts, the panel, the selection through the
-//! state machine, the visible items, the item events, the keyboard and the lock.
+//! Tests of the pivot (#443, PV-1 and PV-2): the template parts, the panel, the selection through
+//! the state machine, the visible items, the item events, the keyboard, the lock and the headers.
 
 use super::pivot_common::PIVOT_PANEL_MULTIPLIER;
 use super::pivot_state_machine::PivotState;
@@ -8,8 +8,8 @@ use crate::automation::peers::{AutomationControlType, ControlAutomationPeer};
 use crate::presenters::{ItemsPresenter, ScrollContentPresenter};
 use crate::primitives::{ScrollBarVisibility, SnapPointsAlignment, SnapPointsType};
 use crate::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions, IControlTemplate};
-use crate::test_support::{boxed_str, test_scope, TestRoot};
-use crate::{Control, Grid, ItemsControl, Panel, ScrollViewer, SelectionMode};
+use crate::test_support::{boxed_str, string_of, test_scope, TestRoot};
+use crate::{ContentControl, Control, Grid, ItemsControl, Panel, ScrollViewer, SelectionMode, StackPanel};
 use ferroui_base::data::TemplateBinding;
 use ferroui_base::input::{InputElement, Key, KeyEventArgs, KeyModifiers};
 use ferroui_base::layout::Orientation;
@@ -37,8 +37,20 @@ fn pivot_template() -> Option<Rc<dyn IControlTemplate>> {
         presenter.set_name(Some("PivotItemPresenter".to_string()));
         let property = ItemsControl::items_panel_property().as_property();
         presenter.bind_binding(property, &TemplateBinding::new(property));
-        let layout_element = Grid::new();
+        // The headers (PV-2): the static and the dynamic panels in the header clipper.
+        let static_header = PivotHeaderPanel::new();
+        static_header.set_name(Some("StaticHeader".to_string()));
+        let header = PivotHeaderPanel::new();
+        header.set_name(Some("Header".to_string()));
+        let header_grid = Grid::new();
+        header_grid.children().add(static_header.register_in_name_scope(&**scope));
+        header_grid.children().add(header.register_in_name_scope(&**scope));
+        let header_clipper = ContentControl::new();
+        header_clipper.set_name(Some("HeaderClipper".to_string()));
+        header_clipper.set_content(Some(Control::boxed(header_grid)));
+        let layout_element = StackPanel::new();
         layout_element.set_name(Some("PivotLayoutElement".to_string()));
+        layout_element.children().add(header_clipper.register_in_name_scope(&**scope));
         layout_element.children().add(presenter.register_in_name_scope(&**scope));
         let panel = PivotPanel::new();
         panel.set_name(Some("Panel".to_string()));
@@ -57,13 +69,20 @@ fn pivot_template() -> Option<Rc<dyn IControlTemplate>> {
 
 /// A pivot of `count` items, laid out in a root.
 fn pivot(count: usize) -> (Ref<Pivot>, Ref<TestRoot>, Vec<Ref<PivotItem>>) {
+    let headers: Vec<String> = (0..count).map(|index| format!("Item {index}")).collect();
+    pivot_with_headers(&headers)
+}
+
+/// A pivot with an item per header, laid out in a root.
+fn pivot_with_headers(headers: &[String]) -> (Ref<Pivot>, Ref<TestRoot>, Vec<Ref<PivotItem>>) {
+    let count = headers.len();
     let pivot = Pivot::new();
     pivot.set_template(pivot_template());
     pivot.set_width(WIDTH);
     pivot.set_height(300.0);
     let items: Vec<Ref<PivotItem>> = (0..count)
         .map(|index| {
-            PivotItem::with_header(boxed_str(&format!("Item {index}")).unwrap(), boxed_str(&format!("Content {index}")))
+            PivotItem::with_header(boxed_str(&headers[index]).unwrap(), boxed_str(&format!("Content {index}")))
         })
         .collect();
     for item in &items {
@@ -178,10 +197,11 @@ fn control_page_down_and_control_tab_move_through_the_items() {
     assert!(press(Key::Tab, KeyModifiers::CONTROL | KeyModifiers::SHIFT));
     settle(&root);
     assert_eq!(pivot.selected_index(), 0);
-    // The carousel wraps.
+    // The headers fit, so they are static and do not wrap (WinUI's `ShouldWrap`).
+    assert!(pivot.uses_static_headers());
     assert!(press(Key::PageUp, KeyModifiers::CONTROL));
     settle(&root);
-    assert_eq!(pivot.selected_index(), 2);
+    assert_eq!(pivot.selected_index(), 0);
     assert!(!press(Key::PageDown, KeyModifiers::NONE));
 }
 
@@ -216,4 +236,107 @@ fn the_peers_are_a_tab_and_tab_items() {
     let item_peer = ControlAutomationPeer::create_peer_for_element(&items[1].clone().upcast());
     assert_eq!(item_peer.get_automation_control_type(), AutomationControlType::TabItem);
     assert_eq!(item_peer.get_name(), "Item 1");
+}
+
+fn headers(pivot: &Pivot) -> Vec<Ref<PivotHeaderItem>> {
+    pivot.header_items()
+}
+
+#[test]
+fn every_item_has_a_header_bound_to_its_header() {
+    let _scope = test_scope();
+    let (pivot, _root, items) = pivot(3);
+    let headers = headers(&pivot);
+    assert_eq!(headers.len(), 3);
+    assert_eq!(headers[1].content().as_ref().and_then(string_of).as_deref(), Some("Item 1"));
+    items[1].set_header(boxed_str("Renamed"));
+    assert_eq!(headers[1].content().as_ref().and_then(string_of).as_deref(), Some("Renamed"));
+    assert_eq!(headers[0].visual_state_name(), "Selected");
+    assert_eq!(headers[1].visual_state_name(), "Unselected");
+    assert!(headers[0].classes().contains(":selected"));
+}
+
+#[test]
+fn tapping_a_header_selects_its_item() {
+    let _scope = test_scope();
+    let (pivot, root, _items) = pivot(3);
+    let headers = headers(&pivot);
+    pivot.on_header_item_tapped(&headers[2]);
+    settle(&root);
+    assert_eq!(pivot.selected_index(), 2);
+    assert_eq!(headers[2].visual_state_name(), "Selected");
+    assert_eq!(headers[0].visual_state_name(), "Unselected");
+    // Locked, the taps are ignored and the other headers are hidden.
+    pivot.set_is_locked(true);
+    pivot.on_header_item_tapped(&headers[0]);
+    settle(&root);
+    assert_eq!(pivot.selected_index(), 2);
+    assert_eq!(headers[0].visual_state_name(), "UnselectedLocked");
+}
+
+#[test]
+fn the_dynamic_panel_starts_with_the_selected_header() {
+    let _scope = test_scope();
+    let long: Vec<String> =
+        (0..3).map(|index| format!("A header far too long to fit beside the others, number {index}")).collect();
+    let (pivot, root, _items) = pivot_with_headers(&long);
+    // The headers do not fit: they wrap (the dynamic panel).
+    assert!(!pivot.uses_static_headers());
+    assert!(pivot.should_wrap_for_tests());
+    pivot.set_selected_index(1);
+    settle(&root);
+    let headers = headers(&pivot);
+    // The selected header is arranged first, the one before it last.
+    assert!(headers[1].bounds().x < headers[2].bounds().x);
+    assert!(headers[2].bounds().x < headers[0].bounds().x);
+}
+
+#[test]
+fn without_the_carousel_the_headers_are_static_and_do_not_wrap() {
+    let _scope = test_scope();
+    let (pivot, root, _items) = pivot(3);
+    pivot.set_is_header_items_carousel_enabled(false);
+    settle(&root);
+    assert!(pivot.uses_static_headers());
+    assert!(pivot.classes().contains(":header-static"));
+    // Static headers do not wrap: from the first item there is no previous one.
+    assert!(!pivot.move_to_previous_item(pivot.should_wrap_for_tests()));
+    assert!(pivot.move_to_last_item());
+    settle(&root);
+    assert_eq!(pivot.selected_index(), 2);
+}
+
+#[test]
+fn the_header_template_reaches_the_headers() {
+    let _scope = test_scope();
+    let (pivot, _root, _items) = pivot(2);
+    let template: Rc<dyn crate::templates::IDataTemplate> = crate::templates::FuncDataTemplate::new(
+        |_: Option<&ferroui_base::BoxedValue>| true,
+        |_, _| Some(crate::TextBlock::new().upcast::<Control>()),
+        false,
+    );
+    pivot.set_header_template(Some(template));
+    assert!(headers(&pivot).iter().all(|header| header.content_template().is_some()));
+}
+
+#[test]
+fn the_header_keys_move_through_the_items() {
+    let _scope = test_scope();
+    let (pivot, root, _items) = pivot(3);
+    let press = |key: Key| {
+        let mut e = KeyEventArgs::new();
+        e.set_routed_event(Some(InputElement::key_down_event()));
+        e.key = key;
+        pivot.on_header_key_down_for_tests(&e);
+        e.handled()
+    };
+    assert!(press(Key::Right));
+    settle(&root);
+    assert_eq!(pivot.selected_index(), 1);
+    assert!(press(Key::End));
+    settle(&root);
+    assert_eq!(pivot.selected_index(), 2);
+    assert!(press(Key::Home));
+    settle(&root);
+    assert_eq!(pivot.selected_index(), 0);
 }

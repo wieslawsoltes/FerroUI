@@ -192,6 +192,9 @@ impl LayoutableImpl for PivotPanel {
     }
 
     fn arrange_override(this: &Self, final_size: Size) -> Size {
+        if let Some(pivot) = this.parent_pivot() {
+            pivot.invalidate_header_secondary_content_relationships();
+        }
         let width = this.available_width.get();
         let offset = this.section_offset.get();
         for child in this.children().snapshot().iter() {

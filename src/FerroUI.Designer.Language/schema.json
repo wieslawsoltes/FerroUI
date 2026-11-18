@@ -15794,6 +15794,30 @@
     ]
   },
   {
+    "name": "PivotHeaderItem",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::PivotHeaderItem",
+    "base": "ContentControl",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Primitives",
+      "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "PivotHeaderPanel",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::PivotHeaderPanel",
+    "base": "Canvas",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Primitives",
+      "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "PivotItem",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::PivotItem",

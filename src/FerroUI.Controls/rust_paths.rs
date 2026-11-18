@@ -100,6 +100,8 @@ ferroui_base::ferro_rust_paths! {
         crate::PipsPager,
         crate::PipsPagerTemplateSettings,
         crate::Pivot,
+        crate::PivotHeaderItem,
+        crate::PivotHeaderPanel,
         crate::PivotItem,
         crate::PivotPanel,
         crate::PlatformFeedback,

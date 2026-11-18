@@ -566,6 +566,31 @@ and fly-in complete on the next turn of the dispatcher without animating until P
 `pivot/pivot_state_machine_tests.rs` (the machine with recorded callbacks) and
 `pivot/pivot_tests.rs` (the control with WinUI's template parts).
 
+**Status (PV-2, done).** `PivotHeaderItem`, `PivotHeaderPanel` (Primitives), the header manager
+(`pivot_header_manager.rs`, WinUI's `PivotHeaderManager`: one header per item with its content
+bound to the item's `Header`, the header template, the states, the lock, the move between the
+dynamic and the static panel) and `PivotCurveGenerator` ported one to one
+(`pivot_curve_generator.rs`). The pivot chooses static headers as WinUI's `ShouldUseStaticHeaders`
+(no carousel, or headers that fit), shows the previous and next buttons while a mouse or a pen is
+over the headers (WinUI's `UpdateVisualStates`), moves with Left, Right, Home and End in the
+headers, and places the focus follower on the selected header. The header states are WinUI's
+names, given to the visual state manager and shown through the pseudo-classes `:selected`,
+`:pressed`, `:locked` of the header and `:header-static`, `:previous-button-visible`,
+`:next-button-visible` of the pivot (decision D2). Animations, all on the compositor: the
+parallax of the headers is the parametric curve of the generator as a piecewise linear
+expression of the scroll viewer's manipulation property set (WinUI's DManip parallax
+relationship), the fly-out and fly-in of `PivotAnimator` are key frame animations of the
+pivot's property set (`SectionOffset`, `ItemsOpacity`, `HeaderOffset`) that the expressions of
+the items and of the header offset element read, with WinUI's durations, distances and spline
+and a scoped batch for the completion the machine waits for (without animations of the platform
+they jump to their end), and the slide-in of `Pivot_SlideInEffect_Partial.cpp` animates the
+`Translation.X` of the elements with a `SlideInAnimationGroup`. Recorded deviations: the ghost
+header (WinUI's layout transition elements) is a redirect visual of the header before the
+selected one; the header positions are arranged, not written to `Canvas.Left` and `Canvas.Top`;
+the static content curve of WinUI (`PivotStaticContentCurve`) is the expression of PV-1, which is
+the same line within the panel. Tests: `pivot/pivot_curve_generator.rs` (the curves and the
+expression) and the header tests of `pivot/pivot_tests.rs`.
+
 ### 7.2 High contrast: the base library
 
 Additive members of `ferroui-base`:

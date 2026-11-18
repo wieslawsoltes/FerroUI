@@ -190,17 +190,4 @@ impl PivotItem {
             self.focus();
         }
     }
-
-    /// Whether `element` is in the content of the item (WinUI's `HasElement`).
-    pub(crate) fn has_element(&self, element: &Visual) -> bool {
-        let Some(child) = self.first_child() else { return false };
-        let mut current = Some(element.to_ref());
-        while let Some(visual) = current {
-            if std::ptr::eq(&*visual, &*child) {
-                return true;
-            }
-            current = visual.visual_parent();
-        }
-        false
-    }
 }

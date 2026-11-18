@@ -1128,6 +1128,32 @@ pub fn pivot() -> El<ferroui_controls::Pivot> {
     El::new()
 }
 
+pub use ferroui_controls::PivotHeaderItem;
+
+impl ViewClass for ferroui_controls::PivotHeaderItem {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::PivotHeaderItem>::new()
+    }
+}
+
+/// Starts an element of [`PivotHeaderItem`](ferroui_controls::PivotHeaderItem).
+pub fn pivot_header_item() -> El<ferroui_controls::PivotHeaderItem> {
+    El::new()
+}
+
+pub use ferroui_controls::PivotHeaderPanel;
+
+impl ViewClass for ferroui_controls::PivotHeaderPanel {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::PivotHeaderPanel>::new()
+    }
+}
+
+/// Starts an element of [`PivotHeaderPanel`](ferroui_controls::PivotHeaderPanel).
+pub fn pivot_header_panel() -> El<ferroui_controls::PivotHeaderPanel> {
+    El::new()
+}
+
 pub use ferroui_controls::PivotItem;
 
 impl ViewClass for ferroui_controls::PivotItem {

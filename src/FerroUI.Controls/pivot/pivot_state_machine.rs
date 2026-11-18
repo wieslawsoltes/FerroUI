@@ -176,10 +176,6 @@ impl PivotStateMachine {
         self.static_viewport_offset
     }
 
-    pub(crate) fn section_width(&self) -> f64 {
-        self.pivot_section_width
-    }
-
     pub(crate) fn current_index(&self) -> i32 {
         self.current_index
     }

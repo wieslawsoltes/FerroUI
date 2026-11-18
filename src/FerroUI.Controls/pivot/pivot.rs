@@ -2,12 +2,14 @@
 //! `dxaml/xcp/tools/XCPTypesAutoGen/Modules/Phone/Phone.cs` of microsoft-ui-xaml commit
 //! `7e4b0c2096be402f51cc8f7d203ebf67cff183d0`; MIT, Copyright (c) Microsoft Corporation, see
 //! NOTICE.md): the control, its selection, keyboard and lock handling and the callbacks of its
-//! state machine (docs/porting/winui-calculator-gaps.md, section 7.1, PV-1).
+//! state machine (docs/porting/winui-calculator-gaps.md, section 7.1, PV-1), the headers, the
+//! navigation buttons and the animations (`PivotAnimator`, `Pivot_SlideInEffect_Partial.cpp`, PV-2).
 
 use super::pivot_common::{positive_mod, PivotAnimationDirection, PIVOT_PANEL_MULTIPLIER};
+use super::pivot_header_manager::PivotHeaderManager;
 use super::pivot_panel::{ITEMS_PRESENTER_NAME, LAYOUT_ELEMENT_NAME};
 use super::pivot_state_machine::{PivotCollectionChange, PivotStateMachine, PivotStateMachineCallbacks};
-use super::{PivotItem, PivotItemEventArgs, PivotPanel};
+use super::{PivotHeaderItem, PivotHeaderPanel, PivotItem, PivotItemEventArgs, PivotPanel};
 use crate::generators::RecycleKey;
 use crate::hosting::ElementCompositionPreview;
 use crate::presenters::ItemsPresenter;
@@ -17,20 +19,24 @@ use crate::primitives::{
 };
 use crate::templates::{FuncTemplate, IDataTemplate, ITemplateOf};
 use crate::{
-    ContentControl, Control, ControlImpl, Grid, ItemsChangedEventArgs, ItemsControl, ItemsControlImpl,
-    ItemsControlImplExt, Panel, ScrollViewer, SelectionMode, TopLevel,
+    Button, ContentControl, Control, ControlImpl, Grid, ItemsChangedEventArgs, ItemsControl, ItemsControlImpl,
+    ItemsControlImplExt, Panel, ScrollViewer, SelectionMode, TopLevel, VisualStateManager,
 };
+use ferroui_base::animation::easings::IEasing;
 use ferroui_base::collections::NotifyCollectionChangedAction;
 use ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer;
 use ferroui_base::input::{
-    InputElement, InputElementImpl, InputElementImplExt, Key, KeyEventArgs, KeyModifiers, ScrollGestureEndedEventArgs,
-    ScrollGestureEventArgs,
+    InputElement, InputElementImpl, InputElementImplExt, Key, KeyEventArgs, KeyModifiers, PointerEventArgs,
+    PointerType, ScrollGestureEndedEventArgs, ScrollGestureEventArgs,
 };
 use ferroui_base::interactivity::{InteractiveImpl, RoutingStrategies};
 use ferroui_base::layout::{LayoutableImpl, LayoutableImplExt};
+use ferroui_base::numerics::Vector2;
 use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
+use ferroui_base::rendering::composition::animations::{CompositionEasingFunctionMode, ExponentialEasingFunction};
 use ferroui_base::rendering::composition::{
-    AsCompositionObject, CompositionPropertySet, CompositionVisual, ElementComposition, ICompositionObjectAnimations,
+    AsCompositionObject, CompositionBatchTypes, CompositionPropertySet, CompositionVisual, Compositor,
+    ElementComposition, ICompositionObjectAnimations,
 };
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::utilities::HandlerList;
@@ -41,6 +47,7 @@ use ferroui_base::{
 };
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+use std::time::Duration;
 
 /// Where the focus visual of the headers is drawn (WinUI's `PivotHeaderFocusVisualPlacement`).
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
@@ -88,6 +95,11 @@ struct Parts {
     header_clipper: Option<Ref<ContentControl>>,
     left_header_presenter: Option<Ref<Control>>,
     right_header_presenter: Option<Ref<Control>>,
+    header_panel: Option<Ref<PivotHeaderPanel>>,
+    static_header_panel: Option<Ref<PivotHeaderPanel>>,
+    previous_button: Option<Ref<Button>>,
+    next_button: Option<Ref<Button>>,
+    focus_follower: Option<Ref<Control>>,
 }
 
 /// The run-time state of the pivot (the members of WinUI's `Pivot` outside the machine).
@@ -104,6 +116,8 @@ struct Runtime {
     /// The section offset of the items (WinUI's `ItemsPresenterTranslateTransform.X`).
     section_offset: f64,
     viewport_enabled: bool,
+    using_static_headers: bool,
+    is_pointer_over_headers: bool,
 }
 
 impl Default for Runtime {
@@ -118,6 +132,8 @@ impl Default for Runtime {
             keyboard_focus_to_next_pivot_item_pending: false,
             section_offset: 0.0,
             viewport_enabled: true,
+            using_static_headers: false,
+            is_pointer_over_headers: false,
         }
     }
 }
@@ -128,6 +144,8 @@ struct Composition {
     properties: Rc<CompositionPropertySet>,
     layout_visual: Option<Rc<CompositionVisual>>,
     items_visual: Option<Rc<CompositionVisual>>,
+    /// The parent of the header panels (WinUI's `HeaderOffsetTranslateTransform`).
+    header_offset_visual: Option<Rc<CompositionVisual>>,
 }
 
 /// A control that shows one of its items at a time, under a row of headers that the user taps,
@@ -153,6 +171,9 @@ pub struct Pivot {
     parts: RefCell<Parts>,
     runtime: RefCell<Runtime>,
     composition: RefCell<Option<Composition>>,
+    headers: RefCell<PivotHeaderManager>,
+    /// The completion of the running fly animation.
+    fly_batch: RefCell<Option<Subscription>>,
     template_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
     animation_generation: Cell<u64>,
     pivot_item_loading: HandlerList<PivotItemHandler>,
@@ -173,6 +194,10 @@ ferroui_base::ferro_class_info!(Pivot {
             TemplatePart("PivotItemPresenter", type(Ref<ItemsPresenter>)),
             TemplatePart("TitleContentControl", type(Ref<ContentControl>)),
             TemplatePart("HeaderClipper", type(Ref<ContentControl>)),
+            TemplatePart("Header", type(Ref<PivotHeaderPanel>)),
+            TemplatePart("StaticHeader", type(Ref<PivotHeaderPanel>)),
+            TemplatePart("PreviousButton", type(Ref<Button>)),
+            TemplatePart("NextButton", type(Ref<Button>)),
         ],
     },
 });
@@ -280,11 +305,17 @@ impl FerroObjectImpl for Pivot {
             this.on_selected_index_changed(old, new);
         } else if property == Self::is_locked_property().as_property() {
             let locked = change.get_new_value::<bool>();
+            this.headers.borrow_mut().is_locked_changed_event(locked);
             this.with_machine(move |machine, cb| machine.is_locked_changed_event(cb, locked));
+            this.update_visual_states();
         } else if property == Self::title_property().as_property()
             || property == Self::title_template_property().as_property()
         {
             this.update_title_control_visibility();
+        } else if property == Self::header_template_property().as_property() {
+            this.headers.borrow().header_template_changed_event(this.header_template());
+        } else if property == Self::header_focus_visual_placement_property().as_property() {
+            this.update_header_manager_focus_state();
         } else if property == Self::is_header_items_carousel_enabled_property().as_property() {
             this.with_machine(|machine, cb| machine.is_header_items_carousel_enabled_changed_event(cb));
             if let Some(panel) = this.parts.borrow().panel.clone() {
@@ -305,6 +336,7 @@ impl VisualImpl for Pivot {
         // the next attach.
         this.complete_animations();
         *this.composition.borrow_mut() = None;
+        this.headers.borrow_mut().unloaded_event();
         Self::parent_on_detached_from_visual_tree(this, e);
     }
 }
@@ -331,6 +363,7 @@ impl LayoutableImpl for Pivot {
         let result = Self::parent_arrange_override(this, size);
         this.with_machine(move |machine, cb| machine.arrange_event(cb, size));
         this.ensure_composition();
+        this.update_header_state();
         result
     }
 }
@@ -358,6 +391,11 @@ impl TemplatedControlImpl for Pivot {
             parts.header_clipper = scope.find_as::<ContentControl>("HeaderClipper");
             parts.left_header_presenter = scope.find_as::<Control>("LeftHeaderPresenter");
             parts.right_header_presenter = scope.find_as::<Control>("RightHeaderPresenter");
+            parts.header_panel = scope.find_as::<PivotHeaderPanel>("Header");
+            parts.static_header_panel = scope.find_as::<PivotHeaderPanel>("StaticHeader");
+            parts.previous_button = scope.find_as::<Button>("PreviousButton");
+            parts.next_button = scope.find_as::<Button>("NextButton");
+            parts.focus_follower = scope.find_as::<Control>("FocusFollower");
         }
 
         if let Some(scroll_viewer) = this.parts.borrow().scroll_viewer.clone() {
@@ -379,10 +417,16 @@ impl TemplatedControlImpl for Pivot {
             panel.set_parent_pivot(Some(this));
         }
 
+        this.attach_header_handlers();
         this.validate_item_index();
         this.update_title_control_visibility();
         let valid = this.has_valid_template();
         this.with_machine(move |machine, cb| machine.apply_template_event(cb, valid));
+        let (header_panel, static_header_panel) = {
+            let parts = this.parts.borrow();
+            (parts.header_panel.clone(), parts.static_header_panel.clone())
+        };
+        this.headers.borrow_mut().apply_template_event(this, header_panel, static_header_panel);
         this.invalidate_measure();
     }
 }
@@ -507,9 +551,11 @@ impl ItemsControlImpl for Pivot {
                 PivotCollectionChange::ItemRemoved => (base_count - step - 1, index),
                 _ => (count, index),
             };
+            this.headers.borrow_mut().items_collection_changed_event(this, item_count, at, change);
             this.with_machine(move |machine, cb| machine.items_collection_changed_event(cb, item_count, at, change));
         }
         this.invalidate_arrange();
+        this.update_visual_states();
         if !this.is_header_items_carousel_enabled() {
             if let Some(panel) = this.parts.borrow().panel.clone() {
                 panel.invalidate_measure();
@@ -550,6 +596,8 @@ impl Pivot {
             parts: RefCell::new(Parts::default()),
             runtime: RefCell::new(Runtime::default()),
             composition: RefCell::new(None),
+            headers: RefCell::new(PivotHeaderManager::default()),
+            fly_batch: RefCell::new(None),
             template_subscriptions: RefCell::new(Vec::new()),
             animation_generation: Cell::new(0),
             pivot_item_loading: HandlerList::new(),
@@ -712,6 +760,28 @@ impl Pivot {
         self.parts.borrow().panel.clone()
     }
 
+    /// The headers, for the tests.
+    #[cfg(test)]
+    pub(crate) fn header_items(&self) -> Vec<Ref<PivotHeaderItem>> {
+        self.headers.borrow().header_items().to_vec()
+    }
+
+    /// Whether the static headers are in use, for the tests.
+    #[cfg(test)]
+    pub(crate) fn uses_static_headers(&self) -> bool {
+        self.runtime.borrow().using_static_headers
+    }
+
+    #[cfg(test)]
+    pub(crate) fn should_wrap_for_tests(&self) -> bool {
+        self.should_wrap()
+    }
+
+    #[cfg(test)]
+    pub(crate) fn on_header_key_down_for_tests(&self, e: &KeyEventArgs) {
+        self.on_header_key_down(e);
+    }
+
     /// The state of the machine, for the tests.
     #[cfg(test)]
     pub(crate) fn machine_state(&self) -> super::pivot_state_machine::PivotState {
@@ -723,6 +793,8 @@ impl Pivot {
     fn with_machine(&self, f: impl FnOnce(&mut PivotStateMachine, &dyn PivotStateMachineCallbacks) + 'static) {
         match self.machine.try_borrow_mut() {
             Ok(mut machine) => {
+                let (widths, _) = self.headers.borrow().header_widths();
+                machine.header_widths_changed_event(widths);
                 f(&mut machine, self);
                 drop(machine);
                 self.sync_layout_offset();
@@ -768,7 +840,7 @@ impl Pivot {
 
     /// WinUI's `ShouldWrap`: the headers wrap unless they are static (PV-2).
     fn should_wrap(&self) -> bool {
-        self.is_header_items_carousel_enabled()
+        !self.runtime.borrow().using_static_headers
     }
 
     /// WinUI's `ValidateItemIndex`: the selection is coerced into the items.
@@ -845,7 +917,15 @@ impl Pivot {
     }
 
     /// A header was tapped (WinUI's `OnHeaderItemTapped`).
-    pub(crate) fn on_header_item_tapped(&self, index: i32) {
+    pub(crate) fn on_header_item_tapped(&self, item: &Ref<PivotHeaderItem>) {
+        let index = self.headers.borrow().index_of(item);
+        if let Some(index) = index {
+            self.on_header_item_tapped_at(index as i32);
+        }
+    }
+
+    /// The header of `index` was tapped.
+    pub(crate) fn on_header_item_tapped_at(&self, index: i32) {
         if !self.is_locked() {
             self.with_machine(move |machine, cb| machine.selected_index_changed_event(cb, index, true, false));
         }
@@ -945,6 +1025,9 @@ impl Pivot {
                 };
                 container.set_translation(Vector3D::new(x_offset, 0.0, 0.0));
             }
+            if is_current && animation_hint != PivotAnimationDirection::Reset {
+                apply_slide_in_animation(&container, animation_hint);
+            }
         }
     }
 
@@ -992,11 +1075,21 @@ impl Pivot {
         };
         let layout_visual = ElementComposition::get_element_visual(&layout_element);
         let items_visual = ElementComposition::get_element_visual(&items_presenter);
+        let header_offset_visual = {
+            let parts = self.parts.borrow();
+            parts
+                .header_panel
+                .clone()
+                .or_else(|| parts.static_header_panel.clone())
+                .and_then(|panel| panel.visual_parent())
+                .and_then(|parent| ElementComposition::get_element_visual(&parent))
+        };
         let current = {
             let composition = self.composition.borrow();
             composition.as_ref().is_some_and(|composition| {
                 same_visual(&composition.layout_visual, &layout_visual)
                     && same_visual(&composition.items_visual, &items_visual)
+                    && same_visual(&composition.header_offset_visual, &header_offset_visual)
             })
         };
         if !current {
@@ -1009,6 +1102,8 @@ impl Pivot {
             let properties = CompositionPropertySet::new(&compositor);
             properties.insert_scalar("LayoutOffset", 0.0);
             properties.insert_scalar("SectionOffset", 0.0);
+            properties.insert_scalar("ItemsOpacity", 1.0);
+            properties.insert_scalar("HeaderOffset", 0.0);
             let scroller_reference: Rc<dyn AsCompositionObject> = scroller;
             let properties_reference: Rc<dyn AsCompositionObject> = properties.clone();
             if let Some(layout_visual) = &layout_visual {
@@ -1022,10 +1117,20 @@ impl Pivot {
                 let animation = compositor
                     .create_expression_animation_with("Vector3(pivot.SectionOffset + scroller.Translation.X, 0, 0)");
                 animation.set_reference_parameter("scroller", scroller_reference);
-                animation.set_reference_parameter("pivot", properties_reference);
+                animation.set_reference_parameter("pivot", properties_reference.clone());
                 items_visual.start_animation("Translation", &*animation);
+                // The fade of the fly animations (WinUI animates the opacity of the presenter).
+                let opacity = compositor.create_expression_animation_with("pivot.ItemsOpacity");
+                opacity.set_reference_parameter("pivot", properties_reference.clone());
+                items_visual.start_animation("Opacity", &*opacity);
             }
-            *self.composition.borrow_mut() = Some(Composition { properties, layout_visual, items_visual });
+            if let Some(header_offset_visual) = &header_offset_visual {
+                let animation = compositor.create_expression_animation_with("Vector3(pivot.HeaderOffset, 0, 0)");
+                animation.set_reference_parameter("pivot", properties_reference);
+                header_offset_visual.start_animation("Translation", &*animation);
+            }
+            *self.composition.borrow_mut() =
+                Some(Composition { properties, layout_visual, items_visual, header_offset_visual });
         }
         self.write_composition_offsets();
     }
@@ -1041,18 +1146,122 @@ impl Pivot {
     }
 
     /// Completes the running fly animations (WinUI's `PivotAnimator::Complete`).
+    /// Stops the fly animations (WinUI's `PivotAnimator::Stop`): the header offset and the opacity
+    /// of the items go back to their base values; a pending completion is dropped.
     fn complete_animations(&self) {
         self.animation_generation.set(self.animation_generation.get() + 1);
+        self.fly_batch.borrow_mut().take();
+        let composition = self.composition.borrow();
+        if let Some(composition) = composition.as_ref() {
+            for (name, value) in [("SectionOffset", None), ("ItemsOpacity", Some(1.0)), ("HeaderOffset", Some(0.0))] {
+                composition.properties.stop_animation(name);
+                if let Some(value) = value {
+                    composition.properties.insert_scalar(name, value);
+                }
+            }
+            composition.properties.insert_scalar("SectionOffset", self.runtime.borrow().section_offset as f32);
+        }
     }
 
-    /// The fly-out and fly-in of the items (WinUI's `PivotAnimator`): PV-1 completes them on the
-    /// next turn of the dispatcher without animating; PV-2 animates them on the compositor.
-    fn start_fly_animation(&self, final_section_offset: Option<f64>) {
-        let generation = self.animation_generation.get() + 1;
-        self.animation_generation.set(generation);
+    /// Whether the platform animates (WinUI's `UISettings.AnimationsEnabled`): without, the fly
+    /// animations jump to their end.
+    fn animations_enabled(&self) -> bool {
+        self.get_platform_settings().is_none_or(|settings| settings.animations_enabled())
+    }
+
+    fn fly_duration(&self, milliseconds: u64) -> Duration {
+        Duration::from_millis(if self.animations_enabled() { milliseconds } else { 1 })
+    }
+
+    /// WinUI's `PivotAnimator::AnimateOut`: the items move 7 pixels and fade out (83 and 67 ms,
+    /// linear); the headers start to shift by `header_offset` (850 ms, WinUI's spline), until the
+    /// fly-in stops them.
+    fn animate_out(&self, start: f64, header_offset: f64, to_left: bool) {
+        self.complete_animations();
+        let composition = self.composition.borrow();
+        let Some(composition) = composition.as_ref() else {
+            drop(composition);
+            self.complete_on_next_turn(None);
+            return;
+        };
+        let properties = composition.properties.clone();
+        let compositor = properties.compositor().clone();
+        if header_offset > 0.0 {
+            let animation = compositor.create_scalar_key_frame_animation();
+            animation.insert_key_frame(0.0, 0.0);
+            animation.insert_key_frame_with_easing(
+                1.0,
+                (if to_left { -header_offset } else { header_offset }) as f32,
+                fly_spline(&compositor),
+            );
+            animation.set_duration(self.fly_duration(FLY_OUT_TRANSLATION_MS + FLY_IN_TRANSLATION_MS));
+            properties.start_animation("HeaderOffset", &*animation);
+        }
+        let batch = compositor.create_scoped_batch(CompositionBatchTypes::ANIMATION);
+        let translation = compositor.create_scalar_key_frame_animation();
+        translation.insert_key_frame(0.0, start as f32);
+        let distance = if to_left { -FLY_OUT_TRANSLATION_DISTANCE } else { FLY_OUT_TRANSLATION_DISTANCE };
+        translation.insert_key_frame_with_easing(1.0, (start + distance) as f32, linear(&compositor));
+        translation.set_duration(self.fly_duration(FLY_OUT_TRANSLATION_MS));
+        properties.start_animation("SectionOffset", &*translation);
+        let opacity = compositor.create_scalar_key_frame_animation();
+        opacity.insert_key_frame(0.0, 1.0);
+        opacity.insert_key_frame_with_easing(1.0, 0.0, linear(&compositor));
+        opacity.set_duration(self.fly_duration(FLY_OUT_OPACITY_MS));
+        properties.start_animation("ItemsOpacity", &*opacity);
+        self.complete_with(&batch);
+        batch.end();
+    }
+
+    /// WinUI's `PivotAnimator::AnimateIn`: the items come from 20 pixels away and fade in (767 and
+    /// 333 ms, WinUI's spline).
+    fn animate_in(&self, to: f64, from_left: bool) {
+        self.complete_animations();
+        self.runtime.borrow_mut().section_offset = to;
+        let composition = self.composition.borrow();
+        let Some(composition) = composition.as_ref() else {
+            drop(composition);
+            self.complete_on_next_turn(Some(to));
+            return;
+        };
+        let properties = composition.properties.clone();
+        let compositor = properties.compositor().clone();
+        let batch = compositor.create_scoped_batch(CompositionBatchTypes::ANIMATION);
+        let translation = compositor.create_scalar_key_frame_animation();
+        let distance = if from_left { -FLY_IN_TRANSLATION_DISTANCE } else { FLY_IN_TRANSLATION_DISTANCE };
+        translation.insert_key_frame(0.0, (to + distance) as f32);
+        translation.insert_key_frame_with_easing(1.0, to as f32, fly_spline(&compositor));
+        translation.set_duration(self.fly_duration(FLY_IN_TRANSLATION_MS));
+        properties.start_animation("SectionOffset", &*translation);
+        let opacity = compositor.create_scalar_key_frame_animation();
+        opacity.insert_key_frame(0.0, 0.0);
+        opacity.insert_key_frame_with_easing(1.0, 1.0, fly_spline(&compositor));
+        opacity.set_duration(self.fly_duration(FLY_IN_OPACITY_MS));
+        properties.start_animation("ItemsOpacity", &*opacity);
+        self.complete_with(&batch);
+        batch.end();
+    }
+
+    /// The machine moves on when the animations of `batch` complete (WinUI's `OnCompleted`).
+    fn complete_with(&self, batch: &Rc<ferroui_base::rendering::composition::CompositionScopedBatch>) {
+        let generation = self.animation_generation.get();
+        let weak = self.to_ref().downgrade();
+        let subscription = batch.completed(move |_| {
+            if let Some(this) = weak.upgrade() {
+                if this.animation_generation.get() == generation {
+                    this.fly_batch.borrow_mut().take();
+                    this.with_machine(|machine, cb| machine.animation_complete_event(cb));
+                }
+            }
+        });
+        *self.fly_batch.borrow_mut() = Some(subscription);
+    }
+
+    /// Without a compositor the animations complete on the next turn of the dispatcher.
+    fn complete_on_next_turn(&self, final_section_offset: Option<f64>) {
+        let generation = self.animation_generation.get();
         if let Some(offset) = final_section_offset {
             self.runtime.borrow_mut().section_offset = offset;
-            self.write_composition_offsets();
         }
         let weak = self.to_ref().downgrade();
         Dispatcher::ui_thread().post_local(
@@ -1065,6 +1274,296 @@ impl Pivot {
             },
             DispatcherPriority::NORMAL,
         );
+    }
+
+    /// WinUI's `ShouldUseStaticHeaders`: static headers without the carousel, or while they fit.
+    fn should_use_static_headers(&self) -> bool {
+        let (header_panel, static_header_panel) = {
+            let parts = self.parts.borrow();
+            (parts.header_panel.clone(), parts.static_header_panel.clone())
+        };
+        let using_static = self.runtime.borrow().using_static_headers;
+        match (header_panel, static_header_panel) {
+            (Some(header_panel), Some(static_header_panel)) => {
+                !self.is_header_items_carousel_enabled()
+                    || (using_static && !static_header_panel.is_content_clipped())
+                    || (!using_static && !header_panel.is_content_clipped())
+            }
+            (Some(_), None) => false,
+            _ => true,
+        }
+    }
+
+    /// WinUI's `UpdateHeaderState`: the headers in use (dynamic or static), the state of the
+    /// template, the header manager and the machine.
+    fn update_header_state(&self) {
+        let previous = self.runtime.borrow().using_static_headers;
+        let using_static = self.should_use_static_headers();
+        self.runtime.borrow_mut().using_static_headers = using_static;
+        let (header_panel, static_header_panel, panel) = {
+            let parts = self.parts.borrow();
+            (parts.header_panel.clone(), parts.static_header_panel.clone(), parts.panel.clone())
+        };
+        if (using_static && static_header_panel.is_some()) || (!using_static && header_panel.is_some()) {
+            self.pseudo_classes().set(PC_HEADER_STATIC, using_static);
+            VisualStateManager::go_to_state(self, if using_static { "HeaderStatic" } else { "HeaderDynamic" }, true);
+            if let (Some(header_panel), Some(static_header_panel)) = (&header_panel, &static_header_panel) {
+                header_panel.set_is_visible(!using_static);
+                static_header_panel.set_is_visible(using_static);
+            }
+            self.headers.borrow_mut().header_state_changed_event(using_static);
+            self.with_machine(move |machine, cb| machine.header_state_changed_event(cb, using_static));
+            if previous != using_static {
+                if let Some(panel) = panel {
+                    panel.invalidate_measure();
+                }
+            }
+        }
+        self.update_visual_states();
+    }
+
+    /// WinUI's `UpdateVisualStates`: the previous and next buttons show while a mouse or a pen is
+    /// over the headers, and the pivot is not locked; with static headers only while they are
+    /// clipped and there is an item on that side.
+    fn update_visual_states(&self) {
+        let state = if self.runtime.borrow().is_pointer_over_headers && !self.is_locked() {
+            let (previous, next) = if self.runtime.borrow().using_static_headers {
+                let clipped =
+                    self.parts.borrow().static_header_panel.as_ref().is_some_and(|panel| panel.is_content_clipped());
+                let index = self.selected_index();
+                if clipped && self.item_count() > 1 && index >= 0 {
+                    (index > 0, index < self.item_count() - 1)
+                } else {
+                    (false, false)
+                }
+            } else {
+                (true, true)
+            };
+            match (previous, next) {
+                (true, true) => "NavigationButtonsVisible",
+                (true, false) => "PreviousButtonVisible",
+                (false, true) => "NextButtonVisible",
+                (false, false) => "NavigationButtonsHidden",
+            }
+        } else {
+            "NavigationButtonsHidden"
+        };
+        let pseudo_classes = self.pseudo_classes();
+        pseudo_classes
+            .set(PC_PREVIOUS_BUTTON_VISIBLE, matches!(state, "NavigationButtonsVisible" | "PreviousButtonVisible"));
+        pseudo_classes.set(PC_NEXT_BUTTON_VISIBLE, matches!(state, "NavigationButtonsVisible" | "NextButtonVisible"));
+        if !VisualStateManager::go_to_state(self, state, true)
+            && matches!(state, "PreviousButtonVisible" | "NextButtonVisible")
+        {
+            VisualStateManager::go_to_state(self, "NavigationButtonsVisible", true);
+        }
+    }
+
+    /// The handlers of the parts of the headers (WinUI's `OnApplyTemplate`): the previous and next
+    /// buttons, the pointer over the headers, the keys of the headers and their focus.
+    fn attach_header_handlers(&self) {
+        let (header_clipper, previous_button, next_button) = {
+            let parts = self.parts.borrow();
+            (parts.header_clipper.clone(), parts.previous_button.clone(), parts.next_button.clone())
+        };
+        let mut subscriptions: Vec<Rc<dyn IDisposable>> = Vec::new();
+        let hover_targets: Vec<Ref<InputElement>> = [
+            header_clipper.clone().map(|clipper| clipper.upcast()),
+            previous_button.clone().map(|button| button.upcast()),
+            next_button.clone().map(|button| button.upcast()),
+        ]
+        .into_iter()
+        .flatten()
+        .collect();
+        for target in hover_targets {
+            let weak = self.to_ref().downgrade();
+            subscriptions.push(
+                target
+                    .add_disposable_handler(InputElement::pointer_entered_event(), move |_, e: &PointerEventArgs| {
+                        if !matches!(e.pointer().type_(), PointerType::Mouse | PointerType::Pen) {
+                            return;
+                        }
+                        if let Some(pivot) = weak.upgrade() {
+                            pivot.runtime.borrow_mut().is_pointer_over_headers = true;
+                            pivot.update_visual_states();
+                        }
+                    })
+                    .detach(),
+            );
+            let weak = self.to_ref().downgrade();
+            subscriptions.push(
+                target
+                    .add_disposable_handler(InputElement::pointer_exited_event(), move |_, _: &PointerEventArgs| {
+                        if let Some(pivot) = weak.upgrade() {
+                            // WinUI's `OnPointerExitedHeader`: still over the headers when the
+                            // pointer moves to a navigation button.
+                            let over = {
+                                let parts = pivot.parts.borrow();
+                                [
+                                    parts.header_clipper.clone().map(|c| c.upcast::<InputElement>()),
+                                    parts.previous_button.clone().map(|b| b.upcast::<InputElement>()),
+                                    parts.next_button.clone().map(|b| b.upcast::<InputElement>()),
+                                ]
+                                .into_iter()
+                                .flatten()
+                                .any(|element| element.is_pointer_over())
+                            };
+                            pivot.runtime.borrow_mut().is_pointer_over_headers = over;
+                            pivot.update_visual_states();
+                        }
+                    })
+                    .detach(),
+            );
+        }
+        for (button, next) in [(previous_button, false), (next_button, true)] {
+            if let Some(button) = button {
+                let weak = self.to_ref().downgrade();
+                subscriptions.push(
+                    button
+                        .add_disposable_handler(Button::click_event(), move |_, _| {
+                            if let Some(pivot) = weak.upgrade() {
+                                let wrap = pivot.should_wrap();
+                                if next {
+                                    pivot.move_to_next_item(wrap);
+                                } else {
+                                    pivot.move_to_previous_item(wrap);
+                                }
+                            }
+                        })
+                        .detach(),
+                );
+            }
+        }
+        if let Some(header_clipper) = header_clipper {
+            let weak = self.to_ref().downgrade();
+            subscriptions.push(
+                header_clipper
+                    .add_disposable_handler(InputElement::key_down_event(), move |_, e: &KeyEventArgs| {
+                        if let Some(pivot) = weak.upgrade() {
+                            pivot.on_header_key_down(e);
+                        }
+                    })
+                    .detach(),
+            );
+            for event in [InputElement::got_focus_event(), InputElement::lost_focus_event()] {
+                let weak = self.to_ref().downgrade();
+                subscriptions.push(
+                    header_clipper
+                        .add_disposable_handler(event, move |_, _| {
+                            if let Some(pivot) = weak.upgrade() {
+                                pivot.update_header_manager_focus_state();
+                            }
+                        })
+                        .detach(),
+                );
+            }
+        }
+        self.template_subscriptions.borrow_mut().extend(subscriptions);
+    }
+
+    /// WinUI's `OnHeaderKeyDown`: Left and Right move through the items (wrapping with the
+    /// carousel), Home and End to the first and the last item; right to left mirrors the arrows.
+    fn on_header_key_down(&self, e: &KeyEventArgs) {
+        if e.handled() {
+            return;
+        }
+        let rtl = self.flow_direction() == ferroui_base::media::FlowDirection::RightToLeft;
+        let key = match e.key {
+            Key::Left if rtl => Key::Right,
+            Key::Right if rtl => Key::Left,
+            key => key,
+        };
+        let wrap = self.should_wrap();
+        let moved = match key {
+            Key::Left => self.move_to_previous_item(wrap),
+            Key::Right => self.move_to_next_item(wrap),
+            Key::Home => self.move_to_first_item(),
+            Key::End => self.move_to_last_item(),
+            _ => return,
+        };
+        e.set_handled(moved);
+    }
+
+    /// Moves to the first item (WinUI's `MoveToFirstItem`).
+    pub fn move_to_first_item(&self) -> bool {
+        if self.is_locked() || self.item_count() == 0 || self.selected_index() <= 0 {
+            return false;
+        }
+        self.move_to_item(0)
+    }
+
+    /// Moves to the last item (WinUI's `MoveToLastItem`).
+    pub fn move_to_last_item(&self) -> bool {
+        let count = self.item_count();
+        if self.is_locked() || count == 0 || self.selected_index() >= count - 1 {
+            return false;
+        }
+        self.move_to_item(count - 1)
+    }
+
+    /// WinUI's `InvalidateHeaderSecondaryContentRelationships`: the header panels are arranged
+    /// again, which applies their parallax.
+    pub(crate) fn invalidate_header_secondary_content_relationships(&self) {
+        let parts = self.parts.borrow();
+        for panel in [&parts.header_panel, &parts.static_header_panel].into_iter().flatten() {
+            panel.invalidate_arrange();
+        }
+    }
+
+    /// The header panel was arranged (WinUI's `HeaderPanelMeasureEvent`).
+    pub(crate) fn on_header_panel_measure(&self, viewport_size: f32) {
+        self.with_machine(move |machine, cb| machine.header_measure_event(cb, viewport_size));
+    }
+
+    /// The header panel placed its headers (WinUI's `HeaderPanelSetLteOffsetEvent`).
+    pub(crate) fn on_header_panel_ghost_offset(
+        &self,
+        panel: &PivotHeaderPanel,
+        ghost_offset: f64,
+        vertical_offset: f64,
+    ) {
+        if let Ok(mut headers) = self.headers.try_borrow_mut() {
+            headers.update_ghost(panel, ghost_offset, vertical_offset);
+        }
+    }
+
+    /// WinUI's `UpdateHeaderManagerFocusState`: the selected header shows the focus when the
+    /// headers have it and the placement is the selected header.
+    fn update_header_manager_focus_state(&self) {
+        let focused =
+            self.parts.borrow().header_clipper.as_ref().is_some_and(|clipper| clipper.is_keyboard_focus_within());
+        let show =
+            focused && self.header_focus_visual_placement() == PivotHeaderFocusVisualPlacement::SelectedItemHeader;
+        if let Ok(mut headers) = self.headers.try_borrow_mut() {
+            headers.focus_state_changed_event(show);
+        }
+        self.update_focus_follower_impl(self.selected_index());
+    }
+
+    /// WinUI's `UpdateFocusFollowerImpl`: with the focus on the selected header, the focus follower
+    /// of the template takes the place and the size of that header.
+    fn update_focus_follower_impl(&self, index: i32) {
+        if self.header_focus_visual_placement() != PivotHeaderFocusVisualPlacement::SelectedItemHeader {
+            return;
+        }
+        let (focus_follower, header_clipper) = {
+            let parts = self.parts.borrow();
+            (parts.focus_follower.clone(), parts.header_clipper.clone())
+        };
+        let (Some(focus_follower), Some(header_clipper)) = (focus_follower, header_clipper) else { return };
+        let header =
+            usize::try_from(index).ok().and_then(|index| self.headers.borrow().header_items().get(index).cloned());
+        let (position, size) = match &header {
+            Some(header) => {
+                let position = header.translate_point(ferroui_base::Point::new(0.0, 0.0), &header_clipper);
+                (position.unwrap_or_default(), header.bounds().size())
+            }
+            None => (ferroui_base::Point::default(), Size::default()),
+        };
+        focus_follower.set_width(size.width);
+        focus_follower.set_height(size.height);
+        focus_follower.set_horizontal_alignment(ferroui_base::layout::HorizontalAlignment::Left);
+        focus_follower.set_translation(Vector3D::new(position.x, 0.0, 0.0));
     }
 
     /// The scroll gesture recognizer of the scroll viewer.
@@ -1138,6 +1637,8 @@ impl PivotStateMachineCallbacks for Pivot {
         scroll_viewer.set_horizontal_snap_points_type(SnapPointsType::None);
         let moved = scroll_viewer.change_view_with(Some(offset), None, None, !animate);
         scroll_viewer.set_horizontal_snap_points_type(snap_points);
+        // WinUI's `SyncParallax`: the header panels apply their relationships again.
+        self.invalidate_header_secondary_content_relationships();
         moved
     }
 
@@ -1184,6 +1685,7 @@ impl PivotStateMachineCallbacks for Pivot {
                 }
             }
             self.update_visible_content(index, animation_hint);
+            self.headers.borrow_mut().set_selected_index(index, animation_hint);
             self.runtime.borrow_mut().previous_selected_index = -1;
         } else if let Some(container) =
             self.container_from_index(index).and_then(|container| container.cast::<PivotItem>())
@@ -1196,10 +1698,25 @@ impl PivotStateMachineCallbacks for Pivot {
         }
     }
 
-    fn set_parallax_relationship(&self, _section_offset: f64, _section_width: f64, _viewport_size: f32) {
-        // The relationships of the layout element and of the items are composition expressions
-        // set up after arrange; the parallax of the headers is PV-2.
+    /// WinUI's `SetParallaxRelationship`: the parallax of the headers in use, and the static
+    /// relationships of the layout element and of the items (composition expressions).
+    fn set_parallax_relationship(&self, section_offset: f64, section_width: f64, viewport_size: f32) {
         self.ensure_composition();
+        let scroll_viewer = self.parts.borrow().scroll_viewer.clone();
+        let Some(scroll_viewer) = scroll_viewer else { return };
+        let scroller = ElementCompositionPreview::get_scroll_viewer_manipulation_property_set(&scroll_viewer)
+            .map(|set| set as Rc<dyn AsCompositionObject>);
+        let is_dynamic = !self.runtime.borrow().using_static_headers;
+        let multiplier = self.pivot_panel_multiplier_impl();
+        self.headers.borrow_mut().apply_parallax(
+            &scroll_viewer,
+            scroller,
+            section_offset,
+            section_width,
+            is_dynamic,
+            viewport_size,
+            multiplier,
+        );
     }
 
     fn set_snapping_behavior(&self, mandatory_single: bool) {
@@ -1222,13 +1739,13 @@ impl PivotStateMachineCallbacks for Pivot {
     }
 
     /// WinUI's `StartFlyOutAnimation`.
-    fn start_fly_out_animation(&self, _from: f64, _header_offset: f64, _to_left: bool) {
-        self.start_fly_animation(None);
+    fn start_fly_out_animation(&self, from: f64, header_offset: f64, to_left: bool) {
+        self.animate_out(from, header_offset, to_left);
     }
 
     /// WinUI's `StartFlyInAnimation`: the items end at `to`.
-    fn start_fly_in_animation(&self, to: f64, _from_left: bool) {
-        self.start_fly_animation(Some(to));
+    fn start_fly_in_animation(&self, to: f64, from_left: bool) {
+        self.animate_in(to, from_left);
     }
 
     fn is_in_manipulation_animation(&self) -> bool {
@@ -1250,6 +1767,68 @@ impl PivotStateMachineCallbacks for Pivot {
     }
 
     fn update_focus_follower(&self) {
-        // The focus follower of the selected header is PV-2.
+        self.update_focus_follower_impl(self.selected_index());
+    }
+}
+
+/// The pseudo-classes of the header and navigation button states (WinUI's `HeaderStates` and
+/// `NavigationButtonsVisibility` groups).
+const PC_HEADER_STATIC: &str = ":header-static";
+const PC_PREVIOUS_BUTTON_VISIBLE: &str = ":previous-button-visible";
+const PC_NEXT_BUTTON_VISIBLE: &str = ":next-button-visible";
+
+/// WinUI's `PivotAnimator` constants.
+const FLY_OUT_TRANSLATION_MS: u64 = 83;
+const FLY_OUT_TRANSLATION_DISTANCE: f64 = 7.0;
+const FLY_OUT_OPACITY_MS: u64 = 67;
+const FLY_IN_TRANSLATION_MS: u64 = 767;
+const FLY_IN_TRANSLATION_DISTANCE: f64 = 20.0;
+const FLY_IN_OPACITY_MS: u64 = 333;
+
+/// WinUI's spline key frame of the pivot animations (control points 0.1,0.9 and 0.2,1.0).
+fn fly_spline(compositor: &Compositor) -> Rc<dyn IEasing> {
+    compositor.create_cubic_bezier_easing_function(Vector2::new(0.1, 0.9), Vector2::new(0.2, 1.0))
+}
+
+fn linear(compositor: &Compositor) -> Rc<dyn IEasing> {
+    compositor.create_linear_easing_function()
+}
+
+/// WinUI's `PivotSlideInManager::ApplySlideInAnimation` with its `PivotSlideInThemeAnimation`: the
+/// elements of `item` with a `SlideInAnimationGroup` slide in from 40 pixels times their group, on
+/// the side the pivot moves from, over 700 ms (linear to 28 % of the distance at half time, then an
+/// exponential ease in), on the compositor.
+fn apply_slide_in_animation(item: &PivotItem, direction: PivotAnimationDirection) {
+    const SLIDE_IN_GAP_BETWEEN_GROUPS: f64 = 40.0;
+    const DURATION_MS: u64 = 700;
+    const LINEAR_PORTION: f32 = 0.5;
+    const LINEAR_TO_EXP_VALUE_FACTOR: f64 = 0.283_350_521_296_607_65;
+    const EASE_EXPONENT: f32 = -2.302_585_1;
+    let side = if direction == PivotAnimationDirection::Left { -1.0 } else { 1.0 };
+    let mut stack: Vec<Ref<Visual>> = item.visual_children().snapshot().iter().cloned().collect();
+    while let Some(visual) = stack.pop() {
+        stack.extend(visual.visual_children().snapshot().iter().cloned());
+        let Some(control) = visual.cast::<Control>() else { continue };
+        let group = Pivot::get_slide_in_animation_group(&control);
+        if group == PivotSlideInAnimationGroup::Default {
+            continue;
+        }
+        let Some(composition_visual) = ElementComposition::get_element_visual(&control) else { continue };
+        let offset = SLIDE_IN_GAP_BETWEEN_GROUPS * group as i32 as f64 * side;
+        let compositor = composition_visual.compositor().clone();
+        let animation = compositor.create_scalar_key_frame_animation();
+        animation.insert_key_frame(0.0, offset as f32);
+        animation.insert_key_frame_with_easing(
+            LINEAR_PORTION,
+            (offset * LINEAR_TO_EXP_VALUE_FACTOR) as f32,
+            linear(&compositor),
+        );
+        animation.insert_key_frame_with_easing(
+            1.0,
+            0.0,
+            Rc::new(ExponentialEasingFunction::new(CompositionEasingFunctionMode::In, EASE_EXPONENT)),
+        );
+        animation.set_duration(Duration::from_millis(DURATION_MS));
+        composition_visual.start_animation("Translation.X", &*animation);
     }
 }

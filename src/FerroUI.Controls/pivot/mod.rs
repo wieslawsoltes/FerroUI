@@ -3,6 +3,10 @@
 
 mod pivot;
 mod pivot_common;
+mod pivot_curve_generator;
+mod pivot_header_item;
+mod pivot_header_manager;
+mod pivot_header_panel;
 mod pivot_item;
 mod pivot_panel;
 mod pivot_state_machine;
@@ -13,5 +17,7 @@ mod pivot_state_machine_tests;
 mod pivot_tests;
 
 pub use pivot::{Pivot, PivotHeaderFocusVisualPlacement, PivotSlideInAnimationGroup};
+pub use pivot_header_item::PivotHeaderItem;
+pub use pivot_header_panel::PivotHeaderPanel;
 pub use pivot_item::{PivotItem, PivotItemEventArgs};
 pub use pivot_panel::PivotPanel;
