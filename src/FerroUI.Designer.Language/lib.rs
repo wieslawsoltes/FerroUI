@@ -50,3 +50,5 @@ mod design_time_tests;
 mod tests;
 #[cfg(test)]
 mod theme_resource_tests;
+mod events;
+pub use events::{event_handler_name, event_object_span, plan_event_handler, routed_events};

@@ -16,6 +16,8 @@ mod authoring;
 mod automation_tests;
 #[path = "mcp_components.rs"]
 mod components;
+#[path = "mcp_events.rs"]
+mod events;
 #[cfg(test)]
 #[path = "mcp_components_tests.rs"]
 mod components_tests;
@@ -260,6 +262,7 @@ impl UiToolProvider for DesignerMcp {
         ];
         tools.extend(authoring::tools());
         tools.extend(components::tools());
+        tools.extend(events::tools());
         tools.extend(design_workflows::tools());
         tools.extend(selection_workflows::tools());
         tools.extend(placement::tools());
@@ -280,6 +283,7 @@ impl UiToolProvider for DesignerMcp {
             .ok_or("Unknown designer tool")?;
         if authoring::handles(name)
             || components::handles(name)
+            || events::handles(name)
             || workspace_tools::handles(name)
             || design_workflows::handles(name)
             || selection_workflows::handles(name)
@@ -517,6 +521,9 @@ impl UiToolProvider for DesignerMcp {
         }
         if components::handles(name) {
             return components::call(&mut session, name, args);
+        }
+        if events::handles(name) {
+            return events::call(&mut session, name, args);
         }
         if design_workflows::handles(name) {
             return design_workflows::call(&mut session, name, args);

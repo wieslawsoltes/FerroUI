@@ -290,7 +290,7 @@ impl Schema {
         self.property_in_context(owner, namespace, name, namespace)
     }
 
-    pub(crate) fn attribute_property(
+    pub fn attribute_property(
         &self,
         document: &ferroui_designer_core::Document,
         node: &ferroui_designer_core::Node,
