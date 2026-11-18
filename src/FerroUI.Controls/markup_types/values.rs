@@ -136,6 +136,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <crate::GroupHeaderPlacement as MarkupTyped>::MARKUP,
     <crate::ItemClickEventArgs as MarkupTyped>::MARKUP,
     <crate::ListViewItemTemplateSettings as MarkupTyped>::MARKUP,
+    <crate::GridViewItemTemplateSettings as MarkupTyped>::MARKUP,
 ];
 
 /// Registers what the untyped value conversions need of the types of this file that

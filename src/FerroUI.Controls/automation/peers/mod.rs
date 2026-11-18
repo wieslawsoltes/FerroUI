@@ -130,7 +130,7 @@ pub use label_automation_peer::LabelAutomationPeer;
 pub use list_box_automation_peer::ListBoxAutomationPeer;
 pub use list_item_automation_peer::ListItemAutomationPeer;
 pub use list_view_automation_peer::{
-    ListViewAutomationPeer, ListViewBaseAutomationPeer, ListViewBaseItemAutomationPeer, ListViewItemAutomationPeer,
+    GridViewAutomationPeer, GridViewItemAutomationPeer, ListViewAutomationPeer, ListViewBaseAutomationPeer, ListViewBaseItemAutomationPeer, ListViewItemAutomationPeer,
 };
 pub use menu_item_automation_peer::MenuItemAutomationPeer;
 pub use native_control_host_peer::NativeControlHostPeer;

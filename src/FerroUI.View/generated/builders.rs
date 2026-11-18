@@ -608,6 +608,32 @@ pub fn grid_splitter() -> El<ferroui_controls::GridSplitter> {
     El::new()
 }
 
+pub use ferroui_controls::GridView;
+
+impl ViewClass for ferroui_controls::GridView {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::GridView>::new()
+    }
+}
+
+/// Starts an element of [`GridView`](ferroui_controls::GridView).
+pub fn grid_view() -> El<ferroui_controls::GridView> {
+    El::new()
+}
+
+pub use ferroui_controls::GridViewItem;
+
+impl ViewClass for ferroui_controls::GridViewItem {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::GridViewItem>::new()
+    }
+}
+
+/// Starts an element of [`GridViewItem`](ferroui_controls::GridViewItem).
+pub fn grid_view_item() -> El<ferroui_controls::GridViewItem> {
+    El::new()
+}
+
 pub use ferroui_controls::GroupBox;
 
 impl ViewClass for ferroui_controls::GroupBox {
@@ -774,6 +800,19 @@ impl ViewClass for ferroui_controls::ItemsStackPanel {
 
 /// Starts an element of [`ItemsStackPanel`](ferroui_controls::ItemsStackPanel).
 pub fn items_stack_panel() -> El<ferroui_controls::ItemsStackPanel> {
+    El::new()
+}
+
+pub use ferroui_controls::ItemsWrapGrid;
+
+impl ViewClass for ferroui_controls::ItemsWrapGrid {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::ItemsWrapGrid>::new()
+    }
+}
+
+/// Starts an element of [`ItemsWrapGrid`](ferroui_controls::ItemsWrapGrid).
+pub fn items_wrap_grid() -> El<ferroui_controls::ItemsWrapGrid> {
     El::new()
 }
 
@@ -4878,6 +4917,15 @@ pub trait ItemsStackPanelProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::ItemsStackPanel>> ItemsStackPanelProps for El<T> {}
+
+/// The properties and routed events of [`ItemsWrapGrid`](ferroui_controls::ItemsWrapGrid).
+pub trait ItemsWrapGridProps: ElementBuilder {
+    /// Sets [`ItemsWrapGrid::maximum_rows_or_columns_property`](ferroui_controls::ItemsWrapGrid::maximum_rows_or_columns_property).
+    fn maximum_rows_or_columns<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::ItemsWrapGrid>::maximum_rows_or_columns_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::ItemsWrapGrid>> ItemsWrapGridProps for El<T> {}
 
 /// The properties and routed events of [`KeyBinding`](ferroui_base::input::KeyBinding).
 pub trait KeyBindingProps: ElementBuilder {

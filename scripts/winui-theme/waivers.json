@@ -48,18 +48,13 @@
     },
     {
       "document": "dxaml/xcp/dxaml/themes/generic.xaml",
-      "key": "re:\\{(Hub|HubSection|SemanticZoom|GridView|ListViewHeaderItem|GridViewHeaderItem|GroupItem|AppBar|AppBarElementContainer|ListPickerFlyoutPresenter|PickerFlyoutPresenter)\\}|GridViewItemExpanded|FlyoutPickerListViewItemContentPresenterStyle|FlyoutPickerTitleTextBlockStyle|ListPickerFlyoutPresenterContentTemplate|BaseRichTextBlockStyle|BodyRichTextBlockStyle|LanguageSwitcherMenuFlyoutItemStyle|LanguageSwitcherMenuFlyoutSettingsRowStyle",
-      "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu)."
+      "key": "re:\\{(Hub|HubSection|SemanticZoom|ListViewHeaderItem|GridViewHeaderItem|GroupItem|AppBar|AppBarElementContainer|ListPickerFlyoutPresenter|PickerFlyoutPresenter)\\}|GridViewItemExpanded|FlyoutPickerListViewItemContentPresenterStyle|FlyoutPickerTitleTextBlockStyle|ListPickerFlyoutPresenterContentTemplate|BaseRichTextBlockStyle|BodyRichTextBlockStyle|LanguageSwitcherMenuFlyoutItemStyle|LanguageSwitcherMenuFlyoutSettingsRowStyle",
+      "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu)."
     },
     {
       "document": "dxaml/xcp/dxaml/themes/generic.xaml",
-      "key": "re:(Hub|SemanticZoom|ListViewHeader|GridViewHeader|ListPickerFlyout|PickerFlyout|FlyoutPicker|RichTextBlock|LanguageSwitcher|IMECandidate|KeyTip|Phone|GridViewItem).*",
-      "reason": "Resources of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView and GridView headers, the picker flyouts, RichTextBlock, the input method candidate list, key tips, the phone resources of the platform theme, GridView items)."
-    },
-    {
-      "document": "controls/dev/CommonStyles/GridViewItem_themeresources.xaml",
-      "key": "*",
-      "reason": "GridViewItem: no FerroUI control (no GridView)."
+      "key": "re:(Hub|SemanticZoom|ListViewHeader|GridViewHeader|ListPickerFlyout|PickerFlyout|FlyoutPicker|RichTextBlock|LanguageSwitcher|IMECandidate|KeyTip|Phone).*",
+      "reason": "Resources of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView and GridView headers, the picker flyouts, RichTextBlock, the input method candidate list, key tips, the phone resources of the platform theme)."
     },
     {
       "document": "controls/dev/MapControl/MapControl.xaml",

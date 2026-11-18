@@ -211,6 +211,7 @@ const DECLARED_NEXT_TO_THE_TYPE: &[&str] = &[
     "GroupHeaderPlacement",
     "ItemClickEventArgs",
     "ListViewItemTemplateSettings",
+    "GridViewItemTemplateSettings",
     "InfoBarCloseReason",
     "InfoBarClosingEventArgs",
     "InfoBarClosedEventArgs",

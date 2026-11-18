@@ -170,3 +170,65 @@ impl ListViewItemAutomationPeer {
         instantiate(Self::construct(owner))
     }
 }
+
+/// The automation peer of a [`GridView`](crate::GridView) (WinUI's `GridViewAutomationPeer`): a
+/// List with the Selection pattern.
+#[repr(C)]
+pub struct GridViewAutomationPeer {
+    base: ListViewBaseAutomationPeer,
+}
+
+ferro_class!(GridViewAutomationPeer: ListViewBaseAutomationPeer);
+ferroui_base::ferro_class_info!(GridViewAutomationPeer {});
+
+impl FerroObjectImpl for GridViewAutomationPeer {}
+impl ControlAutomationPeerImpl for GridViewAutomationPeer {}
+impl ItemsControlAutomationPeerImpl for GridViewAutomationPeer {}
+impl SelectingItemsControlAutomationPeerImpl for GridViewAutomationPeer {}
+
+impl AutomationPeerImpl for GridViewAutomationPeer {
+    fn get_class_name_core(_this: &Self) -> String {
+        "GridView".to_owned()
+    }
+}
+
+impl GridViewAutomationPeer {
+    /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
+    pub fn construct(owner: &crate::GridView) -> Self {
+        Self { base: ListViewBaseAutomationPeer::construct(owner) }
+    }
+
+    pub fn new(owner: &crate::GridView) -> Ref<Self> {
+        instantiate(Self::construct(owner))
+    }
+}
+
+/// The automation peer of a [`GridViewItem`](crate::GridViewItem) (WinUI's
+/// `GridViewItemAutomationPeer`).
+#[repr(C)]
+pub struct GridViewItemAutomationPeer {
+    base: ListViewBaseItemAutomationPeer,
+}
+
+ferro_class!(GridViewItemAutomationPeer: ListViewBaseItemAutomationPeer);
+ferroui_base::ferro_class_info!(GridViewItemAutomationPeer {});
+
+impl FerroObjectImpl for GridViewItemAutomationPeer {}
+impl ControlAutomationPeerImpl for GridViewItemAutomationPeer {}
+
+impl AutomationPeerImpl for GridViewItemAutomationPeer {
+    fn get_class_name_core(_this: &Self) -> String {
+        "GridViewItem".to_owned()
+    }
+}
+
+impl GridViewItemAutomationPeer {
+    /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
+    pub fn construct(owner: &crate::GridViewItem) -> Self {
+        Self { base: ListViewBaseItemAutomationPeer::construct(owner) }
+    }
+
+    pub fn new(owner: &crate::GridViewItem) -> Ref<Self> {
+        instantiate(Self::construct(owner))
+    }
+}

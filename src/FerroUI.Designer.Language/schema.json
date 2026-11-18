@@ -7780,6 +7780,73 @@
     ]
   },
   {
+    "name": "GridView",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::GridView",
+    "base": "ListViewBase",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "GridViewAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "GridViewAutomationPeer",
+    "base": "ListViewBaseAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "GridViewItem",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::GridViewItem",
+    "base": "ListViewBaseItem",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "GridViewItemAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "GridViewItemAutomationPeer",
+    "base": "ListViewBaseItemAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "GridViewItemTemplateSettings",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::GridViewItemTemplateSettings",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "DragItemsCount": {
+        "name": "DragItemsCount",
+        "type_name": "i32",
+        "documentation": "GridViewItemTemplateSettings.DragItemsCount: i32",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Primitives",
+      "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "GroupBox",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::GroupBox",
@@ -10862,6 +10929,26 @@
           "True",
           "False"
         ],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ItemsWrapGrid",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::ItemsWrapGrid",
+    "base": "WrapPanel",
+    "constructible": true,
+    "properties": {
+      "MaximumRowsOrColumns": {
+        "name": "MaximumRowsOrColumns",
+        "type_name": "i32",
+        "documentation": "ItemsWrapGrid.MaximumRowsOrColumns: i32",
+        "values": [],
         "attached": false
       }
     },

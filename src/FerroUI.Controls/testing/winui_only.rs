@@ -7,7 +7,7 @@
 
 use crate::{
     AutoSuggestBox, FontIcon, Frame, InfoBadge, InfoBar, NavigationView, NavigationViewItem, NavigationViewItemHeader,
-    NavigationViewItemSeparator, ListView, ListViewItem, NumberBox, PagerControl, PersonPicture, ProgressRing, RadioButtons, RatingControl, RichEditBox, SymbolIcon,
+    NavigationViewItemSeparator, GridView, GridViewItem, ListView, ListViewItem, NumberBox, PagerControl, PersonPicture, ProgressRing, RadioButtons, RatingControl, RichEditBox, SymbolIcon,
     TitleBar,
 };
 use ferroui_base::TypeInfo;
@@ -34,6 +34,8 @@ pub const WINUI_ONLY_CONTROLS: &[(&TypeInfo, &str)] = &[
     (TitleBar::TYPE, "WinUI's TitleBar: its template is converted from WinUI's TitleBar.xaml into the WinUI theme and its derived themes"),
     (ListView::TYPE, "WinUI's ListView: its template is ported from the ListView style of WinUI's generic.xaml into the WinUI theme"),
     (ListViewItem::TYPE, "WinUI's ListViewItem: its implicit theme is DefaultListViewItemStyle of the WinUI theme"),
+    (GridView::TYPE, "WinUI's GridView: its template is ported from the GridView style of WinUI's generic.xaml into the WinUI theme"),
+    (GridViewItem::TYPE, "WinUI's GridViewItem: its template is ported from WinUI's GridViewItem_themeresources.xaml into the WinUI theme"),
 ];
 
 /// Whether only the WinUI theme and the themes derived from it style `control`.
