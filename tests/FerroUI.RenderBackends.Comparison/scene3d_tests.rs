@@ -1,5 +1,8 @@
 use crate::custom_effect_scenes::{reference_difference, render_at, Tolerance, MOVED_MEAN, SIDE};
-use crate::scene3d_scenes::{draw_plain, lit_cube_scene, orbiting_cube, scenes, unshifted_matrix_camera_scene, Scene3DCase};
+use crate::scene3d_scenes::{
+    draw_plain, lit_cube_scene, moving_brush_group, orbiting_cube, scenes, unshifted_matrix_camera_scene,
+    versioned_image_scene, Scene3DCase,
+};
 use crate::{compare, Backend, TOLERANCE};
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
 use ferroui_base::media::{BoxShadows, Color};
@@ -7,6 +10,7 @@ use ferroui_base::platform::IDrawingContextImpl;
 use ferroui_base::rendering::scene3d::Scene3DSnapshot;
 use ferroui_base::{PixelSize, Rect, RoundedRect};
 use ferroui_render3d::cpu::{render, scenes_rasterized};
+use ferroui_render3d::wgpu_executor::{texture_counters, Scene3DTextureCounters};
 use ferroui_render3d::CpuRenderOptions;
 use ferroui_vello::gpu::{scene3d_counters, VelloScene3DCounters};
 use ferroui_vello::VelloRenderingMode;
@@ -125,9 +129,6 @@ fn every_scene_3d_matches_its_cpu_reference_in_every_backend_and_mode() {
     for backend in backends() {
         for scale in [1, 2] {
             for case in scenes().into_iter().filter(|case| case.plain) {
-                if draws_on_device(&backend) && !case.device {
-                    continue;
-                }
                 let scene = (case.scene)();
                 let expected = reference(&scene, scale);
                 let actual = render_at(&backend, scale, &|context| (case.draw)(context, &scene)).rgba;
@@ -180,9 +181,6 @@ fn every_scene_3d_has_its_golden_properties_in_every_backend_and_mode() {
         for scale in [1, 2] {
             let side = (SIDE * scale) as usize;
             for case in scenes() {
-                if draws_on_device(&backend) && !case.device {
-                    continue;
-                }
                 let scene = (case.scene)();
                 let drawn = render_at(&backend, scale, &|context| (case.draw)(context, &scene));
                 for probe in (case.probes)(side) {
@@ -233,9 +231,6 @@ fn the_backends_draw_every_scene_3d_alike() {
         println!("|---|---|---|---|---|---|");
         for scale in [1, 2] {
             for case in scenes() {
-                if on_device && !case.device {
-                    continue;
-                }
                 let scene = (case.scene)();
                 let skia_drawn = render_at(&skia, scale, &|context| (case.draw)(context, &scene));
                 let vello_drawn = render_at(&vello, scale, &|context| (case.draw)(context, &scene));
@@ -409,11 +404,11 @@ fn a_static_viewport_issues_no_3d_pass() {
 
 /// Every scene drawn in the hybrid and the GPU mode at 96 and 192 DPI, twice: the first round
 /// makes the pipelines of the device (at most one per key: two blends, two sides, depth written or
-/// tested, one sample count, and the resolve), the second makes none, in the same mode or the
-/// other one, which draws on the same device.
+/// tested, one sample count, the four variants of the brush shader of step D6, and the resolve),
+/// the second makes none, in the same mode or the other one, which draws on the same device.
 #[test]
 fn pipelines_are_created_once_per_device() {
-    const KEYS: u64 = 2 * 2 * 2 + 1;
+    const KEYS: u64 = 2 * 2 * 2 * 4 + 1;
     let modes = device_modes();
     let Some(first_mode) = modes.first().copied() else { return };
     let draw_all = |mode: VelloRenderingMode| {
@@ -438,4 +433,101 @@ fn pipelines_are_created_once_per_device() {
     let again = since(before);
     assert_eq!(0, again.pipelines_created, "the device has its pipelines: {again:?}");
     assert!(again.scenes_drawn_on_gpu > 0, "{again:?}");
+}
+
+/// The texture uploads of the executors since `before`.
+fn uploads_since(before: Scene3DTextureCounters) -> u64 {
+    texture_counters().textures_uploaded - before.textures_uploaded
+}
+
+/// The frames of a viewport of brushes (a gradient on a specular layer, an image on an emissive
+/// one, step D6) whose camera moves, after the first two: each a 3D pass that writes the frame
+/// uniforms and nothing else (no texture uploaded or made, no mesh, pipeline or buffer).
+#[test]
+fn steady_frames_of_a_moving_camera_over_brushes_upload_no_texture() {
+    const FRAMES: u32 = 8;
+    let frame_bytes = std::mem::size_of::<ferroui_render3d::uniforms::FrameUniforms>() as u64;
+    for mode in device_modes() {
+        let backend = Backend::vello(mode);
+        for scale in [1, 2] {
+            for step in 0..2 {
+                let scene = moving_brush_group(step);
+                render_at(&backend, scale, &|context| draw_plain(context, &scene));
+            }
+            let before = scene3d_counters();
+            let textures = texture_counters();
+            for step in 2..2 + FRAMES {
+                let scene = moving_brush_group(step);
+                render_at(&backend, scale, &|context| draw_plain(context, &scene));
+            }
+            let steady = since(before);
+            let what = format!("{} at {scale}x: {steady:?}", backend.name);
+            assert_eq!(u64::from(FRAMES), steady.passes, "{what}: one 3D pass a frame");
+            assert_eq!(u64::from(FRAMES), steady.uniform_only_frames, "{what}: only uniforms");
+            assert_eq!(0, uploads_since(textures), "{what}: no texture uploaded");
+            assert_eq!(0, steady.textures_allocated, "{what}: no texture");
+            assert_eq!(0, steady.pipelines_created, "{what}: no pipeline");
+            assert_eq!(0, steady.buffers_created, "{what}: no buffer");
+            assert_eq!(u64::from(FRAMES) * frame_bytes, steady.uniform_bytes, "{what}: the frame uniforms alone");
+        }
+    }
+}
+
+/// A viewport of brushes whose scene does not change issues no 3D pass and uploads nothing after
+/// its first frame, while the 2D content beside it animates.
+#[test]
+fn a_static_viewport_of_brushes_issues_no_3d_pass_and_uploads_nothing() {
+    const FRAMES: u8 = 4;
+    for mode in device_modes() {
+        let backend = Backend::vello(mode);
+        let scene = moving_brush_group(0);
+        render_at(&backend, 1, &|context| draw_with_animated_2d(context, &scene, 0));
+        let before = scene3d_counters();
+        let textures = texture_counters();
+        for frame in 1..=FRAMES {
+            render_at(&backend, 1, &|context| draw_with_animated_2d(context, &scene, frame));
+        }
+        let steady = since(before);
+        let what = format!("{}: {steady:?}", backend.name);
+        assert_eq!(0, steady.passes, "{what}: no 3D pass");
+        assert_eq!(u64::from(FRAMES), steady.cached_output_frames, "{what}: the kept output each frame");
+        assert_eq!(0, uploads_since(textures), "{what}: no texture uploaded");
+    }
+}
+
+/// New pixels of the bitmap of an image brush (a new version, the snapshot unchanged): the kept
+/// output is not painted again; one 3D pass uploads the new pixels into the texture of the bitmap,
+/// with no texture, mesh, pipeline or buffer made, and draws them. In every backend and mode the
+/// new pixels are drawn.
+#[test]
+fn a_new_version_of_a_bitmap_uploads_only_its_texture() {
+    let red = [255, 0, 0, 255];
+    let blue = [0, 0, 255, 255];
+    for backend in backends() {
+        let (bitmap, scene) = versioned_image_scene(red);
+        let first = render_at(&backend, 1, &|context| draw_plain(context, &scene));
+        let centre = |pixels: &crate::Pixels| {
+            let index = (50 * pixels.width + 50) * 4;
+            [pixels.rgba[index], pixels.rgba[index + 1], pixels.rgba[index + 2], pixels.rgba[index + 3]]
+        };
+        assert_eq!(red, centre(&first), "{}", backend.name);
+        render_at(&backend, 1, &|context| draw_plain(context, &scene));
+
+        let before = scene3d_counters();
+        let textures = texture_counters();
+        bitmap.set_pixels(blue);
+        let changed = render_at(&backend, 1, &|context| draw_plain(context, &scene));
+        assert_eq!(blue, centre(&changed), "{} draws the new pixels", backend.name);
+        if draws_on_device(&backend) {
+            let after = since(before);
+            let what = format!("{}: {after:?}", backend.name);
+            assert_eq!(1, after.passes, "{what}: drawn again");
+            assert_eq!(0, after.cached_output_frames, "{what}: not the kept output");
+            assert_eq!(1, uploads_since(textures), "{what}: the new pixels uploaded");
+            assert_eq!(0, after.textures_allocated, "{what}: into the texture of the bitmap");
+            assert_eq!(0, after.mesh_uploads, "{what}: no mesh");
+            assert_eq!(0, after.pipelines_created, "{what}: no pipeline");
+            assert_eq!(0, after.buffers_created, "{what}: no buffer");
+        }
+    }
 }

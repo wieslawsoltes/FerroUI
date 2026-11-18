@@ -185,6 +185,11 @@ enum TextureOrigin {
 pub struct BrushTextureIdentity(Option<Weak<SharedBitmapImpl>>);
 
 impl BrushTextureIdentity {
+    /// The identity of a texture that names no bitmap (always alive).
+    pub(crate) fn none() -> BrushTextureIdentity {
+        BrushTextureIdentity(None)
+    }
+
     /// Whether the bitmap is alive (always for a gradient): a texture of a bitmap that is gone is
     /// dropped.
     pub fn is_alive(&self) -> bool {

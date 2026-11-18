@@ -15,11 +15,18 @@
 //! - **Meshes** are uploaded once per `(id, version)` as an interleaved vertex buffer and a `u32`
 //!   index buffer, kept while they are drawn; a new version of a mesh reuses the buffers of the
 //!   version it replaces when they are large enough.
+//! - **Brushes** (step D6, [`crate::brush`]): the variant of the brush shader of a draw is a bit of
+//!   its pipeline key (one fragment entry point each); the uniforms of its brush are written beside
+//!   its draw uniforms; the texture of a brush (a gradient's lookup texture, the pixels of an
+//!   image) is uploaded once per [`BrushTextureKey`] and device, a new version of a bitmap into the
+//!   texture of the version it replaces when it has the same size, and sampled through one
+//!   linear, clamped sampler ([`texture_counters`]).
 //! - **Uniforms.** A [`Scene3DViewport`] (one per kept output of the caller) holds the uniform
 //!   buffers of a viewport: the [`FrameUniforms`] in one, the [`DrawUniforms`] of its draws in
-//!   another at a stride of the device's `min_uniform_buffer_offset_alignment`, bound with dynamic
-//!   offsets. A render writes only the bytes that changed: a camera that moves writes the frame
-//!   uniforms alone.
+//!   another and the [`BrushUniforms`] of their brushes in a third, at a stride of the device's
+//!   `min_uniform_buffer_offset_alignment`, bound with dynamic offsets. A render writes only the
+//!   bytes that changed: a camera that moves writes the frame uniforms alone, a brush whose values
+//!   change the uniforms of its draws alone.
 //! - **Targets.** The multisampled colour, the depth (`Depth32Float`, the CPU reference's `f32`
 //!   depth) and the resolved colour of decision N are pooled by the size of the output texture
 //!   (the caller rounds it, as the textures of Vello's pool are) and the sample count; depth is
@@ -35,13 +42,18 @@
 //! the CPU reference; a pipeline that cannot be made with four samples is reported once, and the
 //! executor draws with one from then on.
 
-use crate::shader::{
-    write_mesh, FRAGMENT_ENTRY, RESOLVED_BINDING, RESOLVE_FRAGMENT_ENTRY, RESOLVE_VERTEX_ENTRY, SCENE3D_WGSL,
-    VERTEX_ATTRIBUTE_OFFSETS, VERTEX_ENTRY, VERTEX_STRIDE,
+use crate::brush::{
+    texture_coordinate_bounds, BrushShader, BrushTextureIdentity, BrushTextureKey, BrushTextureSource, BrushUniforms,
+    MaterialBrush,
 };
-use crate::uniforms::{BrushSampling, DrawUniforms, Face, FrameUniforms, LayerKind, Std140};
+use crate::shader::{
+    fragment_entry, samples_texture, write_mesh, BRUSH_BINDING, RESOLVED_BINDING, RESOLVE_FRAGMENT_ENTRY,
+    RESOLVE_VERTEX_ENTRY, SCENE3D_WGSL, VERTEX_ATTRIBUTE_OFFSETS, VERTEX_ENTRY, VERTEX_STRIDE,
+};
+use crate::uniforms::{DrawUniforms, Face, FrameUniforms, LayerKind, Std140};
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::rendering::scene3d::{MeshData, Scene3DMaterialLayer, Scene3DModel, Scene3DSnapshot};
+use ferroui_base::Rect;
 use std::cell::Cell;
 use std::collections::HashMap;
 use std::future::Future;
@@ -68,11 +80,13 @@ pub enum Scene3DBlend {
     Additive,
 }
 
-/// What a pipeline of a draw is made for: a `Copy` key, one pipeline per key and device.
+/// What a pipeline of a draw is made for: a `Copy` key, one pipeline per key, brush shader and
+/// device.
 ///
-/// The brush kind and the frame-sampling variant of section 3.5 join the key with the brushes of
-/// step D6 and the video materials of step D7; until then every layer is drawn with the colour
-/// of its uniforms, by the one vertex layout of [`crate::shader`].
+/// The executor keys its pipelines by this key and the variant of the brush shader of the draw
+/// ([`BrushShader`], step D6: the fragment entry point, and whether the pipeline layout has the
+/// group of the brush texture); the frame-sampling variant of section 3.5 joins them with the
+/// video materials of step D7. Every draw has the one vertex layout of [`crate::shader`].
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct Scene3DPipelineKey {
     /// The blend of the layer kind.
@@ -110,6 +124,33 @@ pub struct Scene3DGpuCounters {
     pub buffers_created: u64,
 }
 
+/// The key of a pipeline of a draw: [`Scene3DPipelineKey`] and the variant of its brush shader.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+struct DrawPipelineKey {
+    layer: Scene3DPipelineKey,
+    brush: BrushShader,
+}
+
+/// What the executors of this thread did with the textures of brushes since it started (step
+/// D6): what the tests of the uploads count.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[non_exhaustive]
+pub struct Scene3DTextureCounters {
+    /// Textures of brushes written: a new key (a gradient's stops, a bitmap's version).
+    pub textures_uploaded: u64,
+    /// The bytes of those texels.
+    pub texture_bytes: u64,
+    /// Textures of brushes that could not be uploaded (no readable pixels, larger than the device
+    /// takes): their layers are drawn with their colours and counted
+    /// ([`crate::layers_with_unsampled_brushes`]).
+    pub textures_refused: u64,
+}
+
+impl Scene3DTextureCounters {
+    const ZERO: Scene3DTextureCounters =
+        Scene3DTextureCounters { textures_uploaded: 0, texture_bytes: 0, textures_refused: 0 };
+}
+
 impl Scene3DGpuCounters {
     const ZERO: Scene3DGpuCounters = Scene3DGpuCounters {
         pipelines_created: 0,
@@ -126,6 +167,21 @@ impl Scene3DGpuCounters {
 ferroui_base::ferro_thread_local! {
     /// What the executors of this thread did.
     static COUNTERS: Cell<Scene3DGpuCounters> = const { Cell::new(Scene3DGpuCounters::ZERO) };
+    /// What they did with the textures of brushes.
+    static TEXTURE_COUNTERS: Cell<Scene3DTextureCounters> = const { Cell::new(Scene3DTextureCounters::ZERO) };
+}
+
+/// What the executors of this thread did with the textures of brushes since it started.
+pub fn texture_counters() -> Scene3DTextureCounters {
+    TEXTURE_COUNTERS.with(Cell::get)
+}
+
+fn count_textures(change: impl FnOnce(&mut Scene3DTextureCounters)) {
+    TEXTURE_COUNTERS.with(|counters| {
+        let mut value = counters.get();
+        change(&mut value);
+        counters.set(value);
+    });
 }
 
 /// What the executors of this thread did since it started.
@@ -204,6 +260,11 @@ struct DrawRecord {
     blend: Scene3DBlend,
     face: Face,
     depth_write: bool,
+    /// The variant of the brush shader.
+    brush: BrushShader,
+    /// The texture of the brush (`None` for a brush that samples none, or an image brush without
+    /// an image, which binds the empty texture).
+    texture: Option<BrushTextureKey>,
 }
 
 /// The uniform buffers of a viewport, with the bytes they hold, and the draws of its last render.
@@ -211,15 +272,20 @@ struct DrawRecord {
 #[derive(Default)]
 pub struct Scene3DViewport {
     frame_buffer: Option<(wgpu::Buffer, wgpu::BindGroup)>,
+    /// The draw uniforms, with the bind group of the draws (the draw and the brush uniforms).
     draw_buffer: Option<(wgpu::Buffer, wgpu::BindGroup)>,
-    /// The draws `draw_buffer` holds room for.
+    /// The brush uniforms of the draws (step D6), bound with `draw_buffer`.
+    brush_buffer: Option<wgpu::Buffer>,
+    /// The draws `draw_buffer` and `brush_buffer` hold room for.
     draw_capacity: usize,
     /// The bytes in the buffers, as last written.
     frame_bytes: Vec<u8>,
     draw_bytes: Vec<u8>,
+    brush_bytes: Vec<u8>,
     /// The bytes of the render being prepared.
     frame_scratch: Vec<u8>,
     draw_scratch: Vec<u8>,
+    brush_scratch: Vec<u8>,
     draws: Vec<DrawRecord>,
 }
 
@@ -245,6 +311,18 @@ struct MeshBuffers {
     /// `None` for a mesh without triangles.
     buffers: Option<MeshGpuBuffers>,
     index_count: u32,
+    /// The box of its texture coordinates, which relative brushes are mapped onto.
+    texture_bounds: Rect,
+    last_used: u64,
+}
+
+/// The texture of a brush on the device, with its bind group (the texture and the sampler).
+struct BrushTexture {
+    /// Keeps the address of a bitmap from naming another bitmap while the texture is kept.
+    identity: BrushTextureIdentity,
+    texture: wgpu::Texture,
+    size: (u32, u32),
+    group: wgpu::BindGroup,
     last_used: u64,
 }
 
@@ -265,16 +343,31 @@ pub struct Scene3DWgpuExecutor {
     module: wgpu::ShaderModule,
     frame_layout: wgpu::BindGroupLayout,
     draw_layout: wgpu::BindGroupLayout,
+    /// The texture of a brush and its sampler (group 2 of the textured pipelines).
+    texture_layout: wgpu::BindGroupLayout,
     resolve_layout: wgpu::BindGroupLayout,
     pipeline_layout: wgpu::PipelineLayout,
+    /// The layout of the pipelines whose brush samples a texture.
+    textured_pipeline_layout: wgpu::PipelineLayout,
     resolve_pipeline_layout: wgpu::PipelineLayout,
-    pipelines: HashMap<Scene3DPipelineKey, wgpu::RenderPipeline>,
+    /// The one sampler of the brush textures: linear, the edges clamped, no mipmaps.
+    sampler: wgpu::Sampler,
+    pipelines: HashMap<DrawPipelineKey, wgpu::RenderPipeline>,
     resolve_pipeline: Option<wgpu::RenderPipeline>,
     /// Whether 4x MSAA is drawn: the formats support it, and no pipeline failed with it.
     multisample: bool,
     /// The bytes between the draw uniforms of two draws.
     draw_stride: usize,
+    /// The bytes between the brush uniforms of two draws.
+    brush_stride: usize,
     meshes: HashMap<(u64, u64), MeshBuffers>,
+    /// The textures of brushes, by key.
+    textures: HashMap<BrushTextureKey, BrushTexture>,
+    /// The keys whose texels could not be read or uploaded, with the render that last asked:
+    /// not read again every frame.
+    refused_textures: HashMap<BrushTextureKey, u64>,
+    /// A transparent texture of one texel: what an image brush without an image samples.
+    empty_texture: Option<BrushTexture>,
     targets: Vec<Targets>,
     /// The renders so far: the clock of the pools.
     renders: u64,
@@ -307,6 +400,13 @@ const VERTEX_ATTRIBUTES: [wgpu::VertexAttribute; 3] = [
 pub fn draw_uniforms_stride(alignment: u32) -> usize {
     let alignment = (alignment as usize).max(1);
     std::mem::size_of::<DrawUniforms>().div_ceil(alignment) * alignment
+}
+
+/// The stride of the brush uniforms in a buffer bound with dynamic offsets on a device whose
+/// offsets are aligned to `alignment` bytes: the size of [`BrushUniforms`] rounded up to it.
+pub fn brush_uniforms_stride(alignment: u32) -> usize {
+    let alignment = (alignment as usize).max(1);
+    std::mem::size_of::<BrushUniforms>().div_ceil(alignment) * alignment
 }
 
 /// Whether `format` takes four samples and resolves them by the guarantees of WebGPU (what every
@@ -374,8 +474,8 @@ impl Scene3DWgpuExecutor {
             label,
             source: wgpu::ShaderSource::Wgsl(SCENE3D_WGSL.into()),
         });
-        let uniform_entry = |dynamic: bool, size: usize| wgpu::BindGroupLayoutEntry {
-            binding: 0,
+        let uniform_entry = |binding: u32, dynamic: bool, size: usize| wgpu::BindGroupLayoutEntry {
+            binding,
             visibility: wgpu::ShaderStages::VERTEX | wgpu::ShaderStages::FRAGMENT,
             ty: wgpu::BindingType::Buffer {
                 ty: wgpu::BufferBindingType::Uniform,
@@ -386,11 +486,35 @@ impl Scene3DWgpuExecutor {
         };
         let frame_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("FerroUI 3D scene frame"),
-            entries: &[uniform_entry(false, std::mem::size_of::<FrameUniforms>())],
+            entries: &[uniform_entry(0, false, std::mem::size_of::<FrameUniforms>())],
         });
         let draw_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("FerroUI 3D scene draw"),
-            entries: &[uniform_entry(true, std::mem::size_of::<DrawUniforms>())],
+            entries: &[
+                uniform_entry(0, true, std::mem::size_of::<DrawUniforms>()),
+                uniform_entry(BRUSH_BINDING, true, std::mem::size_of::<BrushUniforms>()),
+            ],
+        });
+        let texture_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            label: Some("FerroUI 3D scene brush texture"),
+            entries: &[
+                wgpu::BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Texture {
+                        sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                        view_dimension: wgpu::TextureViewDimension::D2,
+                        multisampled: false,
+                    },
+                    count: None,
+                },
+                wgpu::BindGroupLayoutEntry {
+                    binding: 1,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                    count: None,
+                },
+            ],
         });
         let resolve_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("FerroUI 3D scene resolve"),
@@ -410,6 +534,20 @@ impl Scene3DWgpuExecutor {
             bind_group_layouts: &[Some(&frame_layout), Some(&draw_layout)],
             immediate_size: 0,
         });
+        let textured_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+            label: Some("FerroUI 3D scene textured"),
+            bind_group_layouts: &[Some(&frame_layout), Some(&draw_layout), Some(&texture_layout)],
+            immediate_size: 0,
+        });
+        let sampler = device.create_sampler(&wgpu::SamplerDescriptor {
+            label: Some("FerroUI 3D scene brush"),
+            address_mode_u: wgpu::AddressMode::ClampToEdge,
+            address_mode_v: wgpu::AddressMode::ClampToEdge,
+            address_mode_w: wgpu::AddressMode::ClampToEdge,
+            mag_filter: wgpu::FilterMode::Linear,
+            min_filter: wgpu::FilterMode::Linear,
+            ..wgpu::SamplerDescriptor::default()
+        });
         let resolve_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("FerroUI 3D scene resolve"),
             bind_group_layouts: &[Some(&resolve_layout)],
@@ -425,14 +563,21 @@ impl Scene3DWgpuExecutor {
             module,
             frame_layout,
             draw_layout,
+            texture_layout,
             resolve_layout,
             pipeline_layout,
+            textured_pipeline_layout,
             resolve_pipeline_layout,
+            sampler,
             pipelines: HashMap::new(),
             resolve_pipeline: None,
             multisample,
             draw_stride: draw_uniforms_stride(device.limits().min_uniform_buffer_offset_alignment),
+            brush_stride: brush_uniforms_stride(device.limits().min_uniform_buffer_offset_alignment),
             meshes: HashMap::new(),
+            textures: HashMap::new(),
+            refused_textures: HashMap::new(),
+            empty_texture: None,
             targets: Vec::new(),
             renders: 0,
             vertex_scratch: Vec::new(),
@@ -454,6 +599,11 @@ impl Scene3DWgpuExecutor {
     /// The meshes on the device.
     pub fn mesh_count(&self) -> usize {
         self.meshes.len()
+    }
+
+    /// The textures of brushes on the device.
+    pub fn texture_count(&self) -> usize {
+        self.textures.len()
     }
 
     /// Draws `scene` into `target` with the uniform buffers of `viewport`, and submits it to
@@ -510,17 +660,18 @@ impl Scene3DWgpuExecutor {
         let frame = FrameUniforms::of(scene);
         viewport.draws.clear();
         viewport.draw_scratch.clear();
+        viewport.brush_scratch.clear();
         if frame.is_some() {
             for model in &scene.models {
                 if model.front.is_empty() && model.back.is_empty() {
                     continue;
                 }
-                let index_count = self.mesh(device, queue, &model.mesh, report);
+                let (index_count, texture_bounds) = self.mesh(device, queue, &model.mesh, report);
                 if index_count == 0 {
                     continue;
                 }
                 for (face, layers) in [(Face::Front, &model.front), (Face::Back, &model.back)] {
-                    self.add_draws(viewport, model, layers, face, index_count);
+                    self.add_draws(device, queue, viewport, model, layers, face, (index_count, texture_bounds), report);
                 }
             }
         }
@@ -530,15 +681,7 @@ impl Scene3DWgpuExecutor {
         // The pipelines, before anything is encoded: a failure leaves the target as it was.
         for index in 0..viewport.draws.len() {
             let draw = viewport.draws[index];
-            let key = Scene3DPipelineKey {
-                blend: draw.blend,
-                face: draw.face,
-                depth_write: draw.depth_write,
-                sample_count,
-                color_format: COLOR_FORMAT,
-                depth_format: DEPTH_FORMAT,
-            };
-            self.pipeline(device, key, report)?;
+            self.pipeline(device, draw_key(&draw, sample_count), report)?;
         }
         if additive {
             self.resolve_pipeline(device, report)?;
@@ -553,6 +696,8 @@ impl Scene3DWgpuExecutor {
         let renders = self.renders;
         self.meshes.retain(|_, mesh| renders - mesh.last_used < LIFETIME);
         self.targets.retain(|targets| renders - targets.last_used < LIFETIME);
+        self.textures.retain(|_, texture| texture.identity.is_alive() && renders - texture.last_used < LIFETIME);
+        self.refused_textures.retain(|_, last| renders - *last < LIFETIME);
         let index = self.targets(device, target.texture_size, sample_count, additive, report);
         let targets = &self.targets[index];
 
@@ -588,25 +733,34 @@ impl Scene3DWgpuExecutor {
                 pass.set_viewport(0.0, 0.0, width as f32, height as f32, 0.0, 1.0);
                 pass.set_scissor_rect(0, 0, width, height);
                 pass.set_bind_group(0, frame_group, &[]);
-                let mut current: Option<Scene3DPipelineKey> = None;
+                let mut current: Option<DrawPipelineKey> = None;
                 for (index, draw) in viewport.draws.iter().enumerate() {
-                    let key = Scene3DPipelineKey {
-                        blend: draw.blend,
-                        face: draw.face,
-                        depth_write: draw.depth_write,
-                        sample_count,
-                        color_format: COLOR_FORMAT,
-                        depth_format: DEPTH_FORMAT,
-                    };
+                    let key = draw_key(draw, sample_count);
                     let (Some(pipeline), Some(mesh)) = (self.pipelines.get(&key), self.meshes.get(&draw.mesh)) else {
                         continue;
                     };
                     let Some(buffers) = &mesh.buffers else { continue };
+                    let texture_group = if samples_texture(draw.brush) {
+                        let texture = match &draw.texture {
+                            Some(texture) => self.textures.get(texture),
+                            None => self.empty_texture.as_ref(),
+                        };
+                        match texture {
+                            Some(texture) => Some(&texture.group),
+                            None => continue,
+                        }
+                    } else {
+                        None
+                    };
                     if current != Some(key) {
                         pass.set_pipeline(pipeline);
                         current = Some(key);
                     }
-                    pass.set_bind_group(1, draw_group, &[(index * self.draw_stride) as u32]);
+                    let offsets = [(index * self.draw_stride) as u32, (index * self.brush_stride) as u32];
+                    pass.set_bind_group(1, draw_group, &offsets);
+                    if let Some(group) = texture_group {
+                        pass.set_bind_group(crate::shader::BRUSH_TEXTURE_GROUP, group, &[]);
+                    }
                     pass.set_vertex_buffer(0, buffers.vertices.slice(..buffers.vertex_bytes));
                     pass.set_index_buffer(
                         buffers.indices.slice(..u64::from(draw.index_count) * 4),
@@ -643,44 +797,179 @@ impl Scene3DWgpuExecutor {
         Ok(())
     }
 
-    /// The draws of the layers of one side of a model, in order, with their uniforms. The first
-    /// diffuse layer writes depth (the first layer when the side has no diffuse layer).
+    /// The draws of the layers of one side of a model, in order, with their uniforms and the
+    /// textures of their brushes (uploaded when their keys are new). The first diffuse layer
+    /// writes depth (the first layer when the side has no diffuse layer).
+    #[allow(clippy::too_many_arguments)]
     fn add_draws(
-        &self,
+        &mut self,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
         viewport: &mut Scene3DViewport,
         model: &Scene3DModel,
         layers: &[Scene3DMaterialLayer],
         face: Face,
-        index_count: u32,
+        (index_count, texture_bounds): (u32, Rect),
+        report: &mut Scene3DRenderReport,
     ) {
         let depth_layer =
             layers.iter().position(|layer| LayerKind::of(layer.kind) == LayerKind::Diffuse).unwrap_or(0);
         for (index, layer) in layers.iter().enumerate() {
-            let (uniforms, sampling) = DrawUniforms::of(model, layer, face);
-            if sampling == BrushSampling::Unsampled {
+            let (uniforms, _) = DrawUniforms::of(model, layer, face);
+            let mut brush = MaterialBrush::of(layer.brush.as_ref(), texture_bounds);
+            let mut texture = None;
+            if let Some(source) = brush.texture() {
+                if self.brush_texture(device, queue, source, report) {
+                    texture = Some(source.key());
+                } else {
+                    // Texels that cannot be read or uploaded: the layer is drawn with its colour.
+                    brush = brush.to_unsampled();
+                }
+            } else if brush.shader() == BrushShader::Image {
+                // An image brush without an image samples the empty texture (it paints nothing).
+                self.empty_texture(device, queue, report);
+            }
+            if brush.is_unsampled() {
                 crate::note_unsampled_brush();
             }
             let start = viewport.draw_scratch.len();
             uniforms.write_std140(&mut viewport.draw_scratch);
             viewport.draw_scratch.resize(start + self.draw_stride, 0);
+            let start = viewport.brush_scratch.len();
+            brush.uniforms().write_std140(&mut viewport.brush_scratch);
+            viewport.brush_scratch.resize(start + self.brush_stride, 0);
             viewport.draws.push(DrawRecord {
                 mesh: (model.mesh.id, model.mesh.version),
                 index_count,
                 blend: if uniforms.kind() == LayerKind::Diffuse { Scene3DBlend::SourceOver } else { Scene3DBlend::Additive },
                 face,
                 depth_write: index == depth_layer,
+                brush: brush.shader(),
+                texture,
             });
         }
     }
 
+    /// The texture of `source` on the device, uploaded when its key is new: into the texture of
+    /// an older version of the same bitmap that no draw of this render uses when it has the same
+    /// size, otherwise into a new one. `false` when its texels cannot be read or are larger than
+    /// the device takes (asked again only after [`LIFETIME`] renders).
+    fn brush_texture(
+        &mut self,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        source: &BrushTextureSource,
+        report: &mut Scene3DRenderReport,
+    ) -> bool {
+        let key = source.key();
+        let renders = self.renders;
+        if let Some(texture) = self.textures.get_mut(&key) {
+            texture.last_used = renders;
+            return true;
+        }
+        if let Some(last) = self.refused_textures.get_mut(&key) {
+            *last = renders;
+            return false;
+        }
+        let max_side = device.limits().max_texture_dimension_2d;
+        let texels = source.texels().filter(|texels| {
+            texels.width > 0 && texels.height > 0 && texels.width <= max_side && texels.height <= max_side
+        });
+        let Some(texels) = texels else {
+            self.refused_textures.insert(key, renders);
+            count_textures(|counters| counters.textures_refused += 1);
+            return false;
+        };
+        let size = (texels.width, texels.height);
+        let replaced = match key {
+            BrushTextureKey::Image { identity, .. } => self
+                .textures
+                .iter()
+                .find(|(other, texture)| {
+                    matches!(other, BrushTextureKey::Image { identity: other, .. } if *other == identity)
+                        && texture.last_used != renders
+                        && texture.size == size
+                })
+                .map(|(other, _)| *other)
+                .and_then(|other| self.textures.remove(&other)),
+            _ => None,
+        };
+        let texture = match replaced {
+            Some(texture) => BrushTexture { identity: source.identity(), last_used: renders, ..texture },
+            None => {
+                report.resources_created += 1;
+                count(|counters| counters.textures_created += 1);
+                self.create_brush_texture(device, source.identity(), size, "FerroUI 3D brush texture")
+            }
+        };
+        write_texels(queue, &texture.texture, size, &texels.rgba);
+        count_textures(|counters| {
+            counters.textures_uploaded += 1;
+            counters.texture_bytes += texels.rgba.len() as u64;
+        });
+        self.textures.insert(key, BrushTexture { last_used: renders, ..texture });
+        true
+    }
+
+    /// The transparent texture of one texel an image brush without an image samples, made on
+    /// first need.
+    fn empty_texture(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, report: &mut Scene3DRenderReport) {
+        if self.empty_texture.is_some() {
+            return;
+        }
+        let identity = BrushTextureIdentity::none();
+        let texture = self.create_brush_texture(device, identity, (1, 1), "FerroUI 3D empty brush");
+        write_texels(queue, &texture.texture, (1, 1), &[0; 4]);
+        report.resources_created += 1;
+        count(|counters| counters.textures_created += 1);
+        self.empty_texture = Some(texture);
+    }
+
+    /// A texture of brush texels of `size` with its bind group.
+    fn create_brush_texture(
+        &self,
+        device: &wgpu::Device,
+        identity: BrushTextureIdentity,
+        size: (u32, u32),
+        label: &str,
+    ) -> BrushTexture {
+        let texture = device.create_texture(&wgpu::TextureDescriptor {
+            label: Some(label),
+            size: wgpu::Extent3d { width: size.0, height: size.1, depth_or_array_layers: 1 },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: COLOR_FORMAT,
+            usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
+            view_formats: &[],
+        });
+        let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
+        let group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some(label),
+            layout: &self.texture_layout,
+            entries: &[
+                wgpu::BindGroupEntry { binding: 0, resource: wgpu::BindingResource::TextureView(&view) },
+                wgpu::BindGroupEntry { binding: 1, resource: wgpu::BindingResource::Sampler(&self.sampler) },
+            ],
+        });
+        BrushTexture { identity, texture, size, group, last_used: self.renders }
+    }
+
     /// The buffers of `mesh` on the device, uploaded when its `(id, version)` is new; returns
-    /// the number of its indices (0 for a mesh without triangles).
-    fn mesh(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, mesh: &MeshData, report: &mut Scene3DRenderReport) -> u32 {
+    /// the number of its indices (0 for a mesh without triangles) and the box of its texture
+    /// coordinates (computed once per version).
+    fn mesh(
+        &mut self,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        mesh: &MeshData,
+        report: &mut Scene3DRenderReport,
+    ) -> (u32, Rect) {
         let key = (mesh.id, mesh.version);
         let renders = self.renders;
         if let Some(buffers) = self.meshes.get_mut(&key) {
             buffers.last_used = renders;
-            return buffers.index_count;
+            return (buffers.index_count, buffers.texture_bounds);
         }
         // A new version replaces a version of the mesh that no draw of this render uses, and
         // reuses its buffers when they are large enough.
@@ -736,15 +1025,25 @@ impl Scene3DWgpuExecutor {
             });
             Some(buffers)
         };
-        self.meshes.insert(key, MeshBuffers { buffers, index_count, last_used: renders });
-        index_count
+        let texture_bounds = texture_coordinate_bounds(mesh);
+        self.meshes.insert(key, MeshBuffers { buffers, index_count, texture_bounds, last_used: renders });
+        (index_count, texture_bounds)
     }
 
     /// The pipeline of `key`, made on first demand.
-    fn pipeline(&mut self, device: &wgpu::Device, key: Scene3DPipelineKey, report: &mut Scene3DRenderReport) -> Result<(), Scene3DWgpuError> {
+    fn pipeline(
+        &mut self,
+        device: &wgpu::Device,
+        key: DrawPipelineKey,
+        report: &mut Scene3DRenderReport,
+    ) -> Result<(), Scene3DWgpuError> {
         if self.pipelines.contains_key(&key) {
             return Ok(());
         }
+        let layout = if samples_texture(key.brush) { &self.textured_pipeline_layout } else { &self.pipeline_layout };
+        let brush = key.brush;
+        let full_key = key;
+        let key = key.layer;
         let blend = match key.blend {
             Scene3DBlend::SourceOver => wgpu::BlendState::PREMULTIPLIED_ALPHA_BLENDING,
             Scene3DBlend::Additive => {
@@ -764,7 +1063,7 @@ impl Scene3DWgpuExecutor {
         let (pipeline, error) = scoped(device, || {
             device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
                 label: Some("FerroUI 3D scene"),
-                layout: Some(&self.pipeline_layout),
+                layout: Some(layout),
                 vertex: wgpu::VertexState {
                     module: &self.module,
                     entry_point: Some(VERTEX_ENTRY),
@@ -795,7 +1094,7 @@ impl Scene3DWgpuExecutor {
                 multisample: wgpu::MultisampleState { count: key.sample_count, ..wgpu::MultisampleState::default() },
                 fragment: Some(wgpu::FragmentState {
                     module: &self.module,
-                    entry_point: Some(FRAGMENT_ENTRY),
+                    entry_point: Some(fragment_entry(brush)),
                     targets: &[Some(wgpu::ColorTargetState {
                         format: key.color_format,
                         blend: Some(blend),
@@ -808,9 +1107,9 @@ impl Scene3DWgpuExecutor {
             })
         });
         if let Some(error) = error {
-            return Err(Scene3DWgpuError { reason: format!("the pipeline {key:?} cannot be made: {error}") });
+            return Err(Scene3DWgpuError { reason: format!("the pipeline {full_key:?} cannot be made: {error}") });
         }
-        self.pipelines.insert(key, pipeline);
+        self.pipelines.insert(full_key, pipeline);
         report.pipelines_created += 1;
         count(|counters| counters.pipelines_created += 1);
         Ok(())
@@ -899,52 +1198,61 @@ impl Scene3DWgpuExecutor {
         }
 
         let draws = viewport.draws.len().max(1);
-        if viewport.draw_buffer.is_none() || viewport.draw_capacity < draws {
+        if viewport.draw_buffer.is_none() || viewport.brush_buffer.is_none() || viewport.draw_capacity < draws {
             let capacity = draws.next_power_of_two();
-            let buffer = device.create_buffer(&wgpu::BufferDescriptor {
-                label: Some("FerroUI 3D scene draws"),
-                size: (capacity * self.draw_stride) as u64,
-                usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
-                mapped_at_creation: false,
-            });
+            let buffer = |stride: usize, label: &str| {
+                device.create_buffer(&wgpu::BufferDescriptor {
+                    label: Some(label),
+                    size: (capacity * stride) as u64,
+                    usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+                    mapped_at_creation: false,
+                })
+            };
+            let draw_buffer = buffer(self.draw_stride, "FerroUI 3D scene draws");
+            let brush_buffer = buffer(self.brush_stride, "FerroUI 3D scene brushes");
+            let binding = |binding: u32, buffer: &wgpu::Buffer, size: usize| wgpu::BindGroupEntry {
+                binding,
+                resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding {
+                    buffer,
+                    offset: 0,
+                    size: NonZeroU64::new(size as u64),
+                }),
+            };
             let group = device.create_bind_group(&wgpu::BindGroupDescriptor {
                 label: Some("FerroUI 3D scene draws"),
                 layout: &self.draw_layout,
-                entries: &[wgpu::BindGroupEntry {
-                    binding: 0,
-                    resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding {
-                        buffer: &buffer,
-                        offset: 0,
-                        size: NonZeroU64::new(std::mem::size_of::<DrawUniforms>() as u64),
-                    }),
-                }],
+                entries: &[
+                    binding(0, &draw_buffer, std::mem::size_of::<DrawUniforms>()),
+                    binding(BRUSH_BINDING, &brush_buffer, std::mem::size_of::<BrushUniforms>()),
+                ],
             });
-            viewport.draw_buffer = Some((buffer, group));
+            viewport.draw_buffer = Some((draw_buffer, group));
+            viewport.brush_buffer = Some(brush_buffer);
             viewport.draw_capacity = capacity;
             viewport.draw_bytes.clear();
-            report.resources_created += 1;
-            count(|counters| counters.buffers_created += 1);
+            viewport.brush_bytes.clear();
+            report.resources_created += 2;
+            count(|counters| counters.buffers_created += 2);
         }
-        // The range of the draws whose bytes changed (all of them in a new buffer).
-        let stride = self.draw_stride;
-        let new = &viewport.draw_scratch;
-        let old = &viewport.draw_bytes;
-        let changed = |index: usize| {
-            let range = index * stride..(index + 1) * stride;
-            old.get(range.clone()) != new.get(range)
-        };
-        let count_of_draws = new.len() / stride;
-        let first = (0..count_of_draws).find(|&index| changed(index));
-        if let Some(first) = first {
-            let last = (first..count_of_draws).rev().find(|&index| changed(index)).unwrap_or(first);
-            let range = first * stride..(last + 1) * stride;
-            if let Some((buffer, _)) = &viewport.draw_buffer {
-                queue.write_buffer(buffer, range.start as u64, &new[range.clone()]);
+        // The ranges of the draws whose bytes changed (all of them in a new buffer).
+        if let Some((buffer, _)) = &viewport.draw_buffer {
+            if let Some(written) =
+                write_changed(queue, buffer, &viewport.draw_bytes, &viewport.draw_scratch, self.draw_stride)
+            {
+                writes += 1;
+                bytes += written;
             }
-            writes += 1;
-            bytes += range.len() as u64;
+        }
+        if let Some(buffer) = &viewport.brush_buffer {
+            if let Some(written) =
+                write_changed(queue, buffer, &viewport.brush_bytes, &viewport.brush_scratch, self.brush_stride)
+            {
+                writes += 1;
+                bytes += written;
+            }
         }
         viewport.draw_bytes.clone_from(&viewport.draw_scratch);
+        viewport.brush_bytes.clone_from(&viewport.brush_scratch);
 
         report.uniform_bytes += bytes;
         count(|counters| {
@@ -1011,6 +1319,51 @@ impl Scene3DWgpuExecutor {
         self.targets[index].last_used = renders;
         index
     }
+}
+
+/// The pipeline key of a draw at `sample_count` samples.
+fn draw_key(draw: &DrawRecord, sample_count: u32) -> DrawPipelineKey {
+    DrawPipelineKey {
+        layer: Scene3DPipelineKey {
+            blend: draw.blend,
+            face: draw.face,
+            depth_write: draw.depth_write,
+            sample_count,
+            color_format: COLOR_FORMAT,
+            depth_format: DEPTH_FORMAT,
+        },
+        brush: draw.brush,
+    }
+}
+
+/// Writes to `buffer` the one range of the records of `stride` bytes of `new` from the first to
+/// the last that differ from `old`; returns the bytes written, `None` when nothing changed.
+fn write_changed(queue: &wgpu::Queue, buffer: &wgpu::Buffer, old: &[u8], new: &[u8], stride: usize) -> Option<u64> {
+    let changed = |index: usize| {
+        let range = index * stride..(index + 1) * stride;
+        old.get(range.clone()) != new.get(range)
+    };
+    let count_of_records = new.len() / stride.max(1);
+    let first = (0..count_of_records).find(|&index| changed(index))?;
+    let last = (first..count_of_records).rev().find(|&index| changed(index)).unwrap_or(first);
+    let range = first * stride..(last + 1) * stride;
+    queue.write_buffer(buffer, range.start as u64, &new[range.clone()]);
+    Some(range.len() as u64)
+}
+
+/// Writes the RGBA8 `rgba` (`size.0 * 4` bytes a row) into `texture`.
+fn write_texels(queue: &wgpu::Queue, texture: &wgpu::Texture, size: (u32, u32), rgba: &[u8]) {
+    queue.write_texture(
+        wgpu::TexelCopyTextureInfo {
+            texture,
+            mip_level: 0,
+            origin: wgpu::Origin3d::ZERO,
+            aspect: wgpu::TextureAspect::All,
+        },
+        rgba,
+        wgpu::TexelCopyBufferLayout { offset: 0, bytes_per_row: Some(4 * size.0), rows_per_image: Some(size.1) },
+        wgpu::Extent3d { width: size.0, height: size.1, depth_or_array_layers: 1 },
+    );
 }
 
 #[cfg(test)]

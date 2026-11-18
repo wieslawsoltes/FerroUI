@@ -705,8 +705,8 @@ device textures, the kept outputs, the painting) in `gpu/scene3d_passes.rs`.
   sample count, the colour and depth formats), made on first demand inside an error scope and kept
   in a `HashMap` of the executor, so at most eight per sample count and device, and one resolve
   pipeline; counted (`pipelines_created`). The shader module, the three bind group layouts and the
-  two pipeline layouts are made once with the executor. The brush kind and the frame-sampling
-  variant join the key with D6 and D7.
+  two pipeline layouts are made once with the executor. The brush shader joins the key with D6
+  (section 3.16), the frame-sampling variant with D7.
 - **Meshes** by `(id, version)`: an interleaved vertex buffer and an index buffer, uploaded with
   `Queue::write_buffer` when the pair is new; a new version of a mesh reuses the buffers of the
   version it replaces when they are large enough. Meshes and targets not drawn for 240 renders go.
@@ -821,6 +821,39 @@ address names one bitmap while the texels are kept. The output caches of the bac
 the identities and versions of the bitmaps of a scene (`brush::scene_texture_inputs`): new pixels
 of a bitmap change no generation of the snapshot.
 
+**The shader** (`scene3d.wgsl`) has the same functions (`brush_point`, `spread`, `gradient_t`,
+`inline_gradient`, `gradient_texture_coordinate`, `image_coordinate`, `unpremultiply`,
+`shade_color`) in the same order of operations, and one fragment entry point per variant of the
+brush shader: `fs_main` (solid colours, unchanged), `fs_gradient`, `fs_gradient_texture` and
+`fs_image`. Within the limits of section 3.4: the brush uniforms are a second uniform block of
+group 1 (`@binding(1)`, 256 bytes, at a dynamic offset of its own), the texture of a brush and one
+sampler are group 2, the inline stops a loop of at most 8, and textures are read with
+`textureSampleLevel` at level 0 (no derivatives, `textureLod` in GLSL ES 3.00). The tests of
+`shader.rs` validate the seven entry points, translate the new ones to GLSL ES 3.00 for WebGL2
+(three uniform blocks; one texture for the lookup and the image) and check the layout of
+`BrushUniforms` as naga lays it out.
+
+**The wgpu executor** (`wgpu_executor.rs`):
+
+- **Pipelines** are keyed by `Scene3DPipelineKey` and the `BrushShader` of the draw (the fragment
+  entry point, and the pipeline layout: with the group of the brush texture for
+  `GradientTexture` and `Image`), made on first demand and kept per device: at most 32 per sample
+  count, and the resolve.
+- **Uniforms.** The `BrushUniforms` of the draws are in a third buffer of the viewport, at the
+  stride of the device's offset alignment (256 bytes), bound with the draw uniforms in one bind
+  group with two dynamic offsets, and written like them only where they changed: a new stop colour
+  writes the 256 bytes of its draw.
+- **Textures** of brushes are uploaded once per `BrushTextureKey` and device (RGBA8, no mipmaps,
+  one linear sampler with the edges clamped), with the texels the CPU reference reads; a new version
+  of a bitmap is written into the texture of the version it replaces when it has the same size (no
+  texture made). A texture whose texels cannot be read, or that is larger than the device takes
+  (`max_texture_dimension_2d`), is refused, not asked again for 240 renders, and its layer drawn
+  with its colour and counted. Textures not drawn for 240 renders, and those of bitmaps that are
+  gone, go. `wgpu_executor::texture_counters()` counts the uploads, their bytes and the refusals.
+- **Vello** (`gpu/scene3d_passes.rs`) also keys a kept output on `brush::scene_texture_inputs`, so
+  new pixels of a bitmap draw the scene again (one 3D pass that uploads the new pixels alone), and
+  a render that uploaded a texture is not counted as uniform-only.
+
 **Tests.** `brush_tests.rs`: the layout of `BrushUniforms` and its WGSL declaration, relative and
 absolute linear gradients, the spread methods, radial gradients with a moved focus, sorted stops
 with straight colours, the lookup texture (its ends, within the rounding of its texels, one key per
@@ -834,7 +867,15 @@ and again for a new version. The comparison scenes (`scene3d_scenes.rs`): `linea
 mapping over half of the gradient), `image-brush-tiles` (`FlipX` tiles of half the box),
 `image-brush-viewbox` (the bottom half of the bitmap, `Uniform` into a box twice as high as wide)
 and `brush-material-group` (a grey diffuse layer, a specular layer with a gradient and an emissive
-layer with an image), with probes computed from the formulas in double precision.
+layer with an image), with probes computed from the formulas in double precision, held to the CPU
+reference in every backend and mode (the GPU modes within the interior levels of section 3.15).
+The steady state and compile once (`scene3d_tests.rs`):
+`steady_frames_of_a_moving_camera_over_brushes_upload_no_texture`,
+`a_static_viewport_of_brushes_issues_no_3d_pass_and_uploads_nothing`,
+`a_new_version_of_a_bitmap_uploads_only_its_texture` and `pipelines_are_created_once_per_device`
+with the four brush shaders; the unit tests of `wgpu_executor.rs`: the brush stride, a texture
+uploaded once per key and device and a new version into the same texture, a change of a brush
+writing only the uniforms of its draw.
 
 ## 4. Steps
 
@@ -850,7 +891,7 @@ this page.
 | D3 | The CPU reference rasterizer (`src/FerroUI.Rendering3D/cpu`) and 11 comparison scenes in `tests/FerroUI.RenderBackends.Comparison` (`scene3d_scenes.rs`, `scene3d_tests.rs`; 100 pixels, scales 1 and 2): a lit cube (ambient and directional), a point light with attenuation and range, a spot light cone, the orthographic camera, the matrix camera, front and back materials with culling, `MaterialGroup` with specular and emissive, transparent overlap in tree order, near and far clipping, `ClipToBounds` with opacity and a rotated viewport, the empty scene. Every backend draws the CPU reference from here, recorded as a gap | additions | medium | in review |
 | D4 | `scene3d.wgsl` and the wgpu executor (section 3.15): `ferroui-render3d`'s `shader` module and feature `wgpu` (the pipeline cache by a `Copy` key, the mesh cache by `(id, version)`, uniform buffers with dynamic offsets written only where they changed, the depth, MSAA and resolve pools, the fallback to one sample), and Vello's hybrid and GPU modes drawing on the device (`gpu/scene3d_passes.rs`: the outputs kept per device, painted as textures of the device, the CPU reference as the reported and counted last resort). Tests: `every_scene_3d_matches_its_cpu_reference_in_every_backend_and_mode` and `the_backends_draw_every_scene_3d_alike` with the GPU modes, `steady_frames_of_a_moving_camera_upload_only_uniforms_and_allocate_no_texture`, `a_static_viewport_issues_no_3d_pass`, `pipelines_are_created_once_per_device`, the naga validation and GLSL ES 3.00 of the shader; run by `vello.yml` on Metal (its paths now include `src/FerroUI.Rendering3D/`), Vulkan with D9 | additions (the module `wgpu_executor`, `ferroui_vello::gpu::scene3d_counters`) | high: the first GPU route; the uniform layout and alignment (dynamic offsets at the device's alignment) | in review |
 | D5 | Skia Graphite on Metal: the Metal executor (MSL from naga at build time) in or next to `ferroui-metal`, `ferroui-skia/gpu/scene3d.rs`, the output wrapped by `backend_textures::make_metal` and `wrap_texture`, ordered before `insert_recording`, the prewarm hook. Tests: `graphite_draws_every_scene_3d_as_its_cpu_reference` (`gpu/metal/tests.rs`), the steady state, compile once; iOS simulator and device measurements | none new | high: cross-API ordering on Apple | planned |
-| D6 | Materials from brushes (section 3.16): gradients (inline stops and the lookup texture), `ImageBrush` (the backend image caches), `VisualBrush` and `DrawingBrush` (offscreen renders, again only when dirty), WPF's texture-coordinate mapping, the specular and emissive passes. Tests: a comparison scene per brush, an image uploaded once per device, a visual brush rendered again only when its visual changes | additions (the module `brush`, `cpu::brush_textures_read`, `lighting::shade_color`) | medium | in review, in three parts: the description and the CPU reference (part 1); the shader and the wgpu executor (part 2); visual and drawing brushes (part 3) |
+| D6 | Materials from brushes (section 3.16): gradients (inline stops and the lookup texture), `ImageBrush` (the backend image caches), `VisualBrush` and `DrawingBrush` (offscreen renders, again only when dirty), WPF's texture-coordinate mapping, the specular and emissive passes. Tests: a comparison scene per brush, an image uploaded once per device, a visual brush rendered again only when its visual changes | additions (the module `brush`, `cpu::brush_textures_read`, `lighting::shade_color`) | medium | in review, in three parts: the description and the CPU reference (part 1); the shader and the wgpu executor (part 2: `brush_uniforms_stride`, `texture_counters`, `Scene3DTextureCounters`, `Scene3DWgpuExecutor::texture_count`, the entry points of `shader`); visual and drawing brushes (part 3) |
 | D7 | Video and shared-texture materials, Metal routes first: `ISharedGpuTexture` and `GpuTextureRef` in `src/FerroUI.Base/platform/`, the accessors of `LeasedGpuBitmap`, `VelloSharedFrameBitmap` and `SharedFrameTexture`, the import cache by `FrameIdentity` that `TexturePresenter` also uses, `VideoBrush` and the visual-brush fast path, `sample_frame()`. Tests: `a_video_material_samples_the_frame_without_a_copy` (`FrameTransferCounters`: `gpu_import` only on Graphite, one shared `gpu_conversion` on Vello), one import for a frame shown flat and on a cube, the lease released after GPU completion, no mesh or record upload for a new frame; a "video on a cube" scene in `samples/PortableMedia` | additions | high: lifetimes across 2D and 3D | planned |
 | D8 | The GL executor (Skia Ganesh GL everywhere: ANGLE, EGL, Android GLES, CGL, WebGL2): GLSL ES 3.00 from naga at build time, framebuffer, depth renderbuffer and MSAA resolve, the reset of Skia's GL state after drawing, video through `SharedFrameTexture` ids on the same context. Tests: the comparison scenes under ANGLE on WARP (Windows CI), llvmpipe EGL (Linux CI), the Android emulator, a browser smoke run; browser and Android frame times | none new | high: Skia's GL state | planned |
 | D9 | Vello on Vulkan, DX12 and GLES, validated in the Windows and Linux virtual machines (one at a time); the Vulkan executor (SPIR-V) for Skia Vulkan with lavapipe in CI. The video gaps of those routes stay recorded gaps | none new | medium | planned |

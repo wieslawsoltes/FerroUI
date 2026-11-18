@@ -57,10 +57,6 @@ pub struct Scene3DCase {
     /// the device and by the ordered grid of the reference, so the edge bounds of a GPU executor
     /// grow with it. The interior bound does not.
     pub layers: u32,
-    /// Whether the GPU executors of the device modes draw the scene as the CPU reference does:
-    /// not yet for the brushes of step D6, which the wgpu executor samples from its next part on
-    /// (until then they are drawn there with the layers' colours).
-    pub device: bool,
 }
 
 /// A pixel with the colour it has (premultiplied RGBA), within `levels`.
@@ -796,7 +792,6 @@ fn case(
         tolerance: Tolerance::Largest(2),
         bound: 0.05,
         layers: 1,
-        device: true,
     }
 }
 
@@ -821,7 +816,6 @@ pub fn scenes() -> Vec<Scene3DCase> {
             tolerance: Tolerance::Moves,
             bound: 3.0,
             layers: 1,
-            device: true,
         },
         case("empty", empty_scene, empty_probes),
         brush_case("linear-gradient", linear_gradient_scene, linear_gradient_probes),
@@ -1060,15 +1054,21 @@ fn gradient_lookup_probes(side: usize) -> Vec<Probe> {
     probes
 }
 
-/// A bitmap of 4 by 4 opaque pixels in quadrants of 2 by 2: red, green / blue, white.
+/// A bitmap of 4 by 4 opaque pixels in quadrants of 2 by 2: red, green / blue, white; the same
+/// bitmap for every snapshot (one texture on a device).
 fn quadrant_bitmap() -> Arc<SharedBitmapImpl> {
-    let mut pixels = Vec::new();
-    for y in 0..4 {
-        for x in 0..4 {
-            pixels.extend_from_slice(QUADRANT_COLORS[usize::from(y >= 2) * 2 + usize::from(x >= 2)].as_slice());
-        }
-    }
-    Arc::new(PixelBitmap { width: 4, height: 4, pixels })
+    static BITMAP: std::sync::OnceLock<Arc<SharedBitmapImpl>> = std::sync::OnceLock::new();
+    BITMAP
+        .get_or_init(|| {
+            let mut pixels = Vec::new();
+            for y in 0..4 {
+                for x in 0..4 {
+                    pixels.extend_from_slice(QUADRANT_COLORS[usize::from(y >= 2) * 2 + usize::from(x >= 2)].as_slice());
+                }
+            }
+            Arc::new(PixelBitmap::new(4, 4, pixels))
+        })
+        .clone()
 }
 
 /// The colours of the quadrants of [`quadrant_bitmap`]: top left, top right, bottom left, bottom
@@ -1142,9 +1142,10 @@ fn image_viewbox_probes(side: usize) -> Vec<Probe> {
     ]
 }
 
-/// A dim green bitmap of 2 by 2 pixels for the emissive layer.
+/// A dim green bitmap of 2 by 2 pixels for the emissive layer; the same for every snapshot.
 fn dim_green_bitmap() -> Arc<SharedBitmapImpl> {
-    Arc::new(PixelBitmap { width: 2, height: 2, pixels: [0, 64, 0, 255].repeat(4) })
+    static BITMAP: std::sync::OnceLock<Arc<SharedBitmapImpl>> = std::sync::OnceLock::new();
+    BITMAP.get_or_init(|| Arc::new(PixelBitmap::new(2, 2, [0, 64, 0, 255].repeat(4)))).clone()
 }
 
 fn brush_group_scene() -> Arc<Scene3DSnapshot> {
@@ -1188,7 +1189,84 @@ fn brush_group_probes(side: usize) -> Vec<Probe> {
 
 /// A step D6 scene: plain, held to the CPU reference.
 fn brush_case(name: &'static str, scene: fn() -> Arc<Scene3DSnapshot>, probes: fn(usize) -> Vec<Probe>) -> Scene3DCase {
-    Scene3DCase { device: false, ..case(name, scene, probes) }
+    case(name, scene, probes)
+}
+
+/// The scene of `brush-material-group` seen by its camera moved `step` hundredths along x: the
+/// snapshot of the `step`-th frame of one viewport whose camera moves (its camera generation is
+/// `1 + step`), with the same meshes, brushes and bitmaps at every step.
+pub fn moving_brush_group(step: u32) -> Arc<Scene3DSnapshot> {
+    let mut scene = (*brush_group_scene()).clone();
+    let offset = step as f32 * 0.01;
+    let mut camera = orthographic([offset, 0.0, 5.0], 2.0, 1.0, 10.0);
+    let (eye, target) = (Vector3::new(offset, 0.0, 5.0), Vector3::new(offset, 0.0, 0.0));
+    camera.view = Matrix4x4::create_look_at(eye, target, Vector3::new(0.0, 1.0, 0.0));
+    scene.camera = Some(camera);
+    scene.camera_generation = 1 + u64::from(step);
+    Arc::new(scene)
+}
+
+/// A square painted by an image brush of a bitmap of 2 by 2 pixels of `color` whose pixels the
+/// test changes ([`VersionedBitmap`]), with the snapshot that draws it.
+pub fn versioned_image_scene(color: [u8; 4]) -> (Arc<VersionedBitmap>, Arc<Scene3DSnapshot>) {
+    let bitmap = Arc::new(VersionedBitmap(PixelBitmap::new(2, 2, color.repeat(4))));
+    let shared: Arc<SharedBitmapImpl> = bitmap.clone();
+    let brush = ImmutableImageBrush::new(
+        Some(Rc::new(Bitmap::from_impl(shared))),
+        AlignmentX::Center,
+        AlignmentY::Center,
+        None,
+        1.0,
+        None,
+        RelativePoint::new(0.0, 0.0, RelativeUnit::Relative),
+        None,
+        Stretch::Fill,
+        TileMode::None,
+        None,
+    );
+    let layer = brush_layer(Scene3DMaterialKind::Diffuse, &brush, 0.0);
+    (bitmap, brush_square(26, [0.0, 0.0], [1.0, 1.0], vec![layer]))
+}
+
+/// A bitmap whose pixels are replaced (a new version) by [`VersionedBitmap::set_pixels`].
+pub struct VersionedBitmap(PixelBitmap);
+
+impl VersionedBitmap {
+    /// Replaces the pixels and bumps the version.
+    pub fn set_pixels(&self, color: [u8; 4]) {
+        let mut pixels = self.0.pixels.lock().expect("the pixels");
+        let count = pixels.len() / 4;
+        *pixels = color.repeat(count);
+        self.0.version.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+    }
+}
+
+impl IBitmapImpl for VersionedBitmap {
+    fn dpi(&self) -> Vector {
+        self.0.dpi()
+    }
+
+    fn pixel_size(&self) -> PixelSize {
+        self.0.pixel_size()
+    }
+
+    fn version(&self) -> i32 {
+        self.0.version()
+    }
+
+    fn save(&self, stream: &mut dyn std::io::Write, options: &BitmapEncoderOptions) -> std::io::Result<()> {
+        self.0.save(stream, options)
+    }
+
+    fn dispose(&self) {}
+
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+
+    fn as_readable_bitmap(&self) -> Option<&dyn IReadableBitmapImpl> {
+        Some(&self.0)
+    }
 }
 
 /// A bitmap of premultiplied RGBA pixels in memory at 96 DPI, read through its framebuffer: the
@@ -1196,7 +1274,15 @@ fn brush_case(name: &'static str, scene: fn() -> Arc<Scene3DSnapshot>, probes: f
 struct PixelBitmap {
     width: i32,
     height: i32,
-    pixels: Vec<u8>,
+    pixels: std::sync::Mutex<Vec<u8>>,
+    version: std::sync::atomic::AtomicI32,
+}
+
+impl PixelBitmap {
+    fn new(width: i32, height: i32, pixels: Vec<u8>) -> PixelBitmap {
+        let (pixels, version) = (std::sync::Mutex::new(pixels), std::sync::atomic::AtomicI32::new(0));
+        PixelBitmap { width, height, pixels, version }
+    }
 }
 
 impl IBitmapImpl for PixelBitmap {
@@ -1209,7 +1295,7 @@ impl IBitmapImpl for PixelBitmap {
     }
 
     fn version(&self) -> i32 {
-        0
+        self.version.load(std::sync::atomic::Ordering::SeqCst)
     }
 
     fn save(&self, _stream: &mut dyn std::io::Write, _options: &BitmapEncoderOptions) -> std::io::Result<()> {
@@ -1238,7 +1324,7 @@ impl IReadableBitmapImpl for PixelBitmap {
 
     fn lock(&self) -> Rc<dyn ILockedFramebuffer> {
         Rc::new(PixelFramebuffer {
-            data: RefCell::new(self.pixels.clone()),
+            data: RefCell::new(self.pixels.lock().expect("the pixels").clone()),
             size: PixelSize::new(self.width, self.height),
         })
     }
