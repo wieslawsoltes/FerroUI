@@ -42,6 +42,16 @@ impl Timeline {
     /// on the target. Materializing those endpoints would alter reverse initial-delay fill.
     /// XML is encoded once, preserving markup-extension text as an attribute value.
     pub fn to_xaml(&self, target: u64) -> Result<String> {
+        self.export_xaml(target, true)
+    }
+
+    /// Project the authored keys of another native source format without synthesizing
+    /// hold keys. FerroUI can still resolve implicit endpoints from the live control.
+    pub fn to_xaml_authored_keys(&self, target: u64) -> Result<String> {
+        self.export_xaml(target, false)
+    }
+
+    fn export_xaml(&self, target: u64, hold_without_base: bool) -> Result<String> {
         self.validate()?;
         require(
             native_ticks(self.duration)? > 0,
@@ -88,7 +98,7 @@ impl Timeline {
         for track in tracks {
             let first = &track.keyframes[0];
             let last = track.keyframes.last().expect("nonempty track");
-            if first.time > 0.0 && track.base_value.is_none() {
+            if hold_without_base && first.time > 0.0 && track.base_value.is_none() {
                 keys.push((
                     0.0,
                     &track.property,
@@ -108,7 +118,7 @@ impl Timeline {
                     key.easing.clone(),
                 ));
             }
-            if last.time < self.duration && track.base_value.is_none() {
+            if hold_without_base && last.time < self.duration && track.base_value.is_none() {
                 keys.push((
                     self.duration,
                     &track.property,
@@ -451,6 +461,11 @@ pub(crate) fn parse_time(source: &str) -> Result<f64> {
     native_ticks(result)?;
     Ok(result)
 }
+/// Return the key time after conversion to FerroUI's native TimeSpan.
+pub fn native_key_time(time: f64) -> Result<f64> {
+    Ok(native_ticks(time)? as f64 / 10_000_000.0)
+}
+
 pub(crate) fn native_ticks(time: f64) -> Result<u64> {
     let ticks = time * 10_000_000.0;
     require(

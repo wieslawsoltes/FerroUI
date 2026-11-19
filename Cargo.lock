@@ -1994,6 +1994,7 @@ dependencies = [
 name = "ferroui-designer-rsx"
 version = "0.5.1-preview.1"
 dependencies = [
+ "ferroui-designer-animation",
  "ferroui-designer-core",
  "ferroui-designer-language",
  "ferroui-designer-project",

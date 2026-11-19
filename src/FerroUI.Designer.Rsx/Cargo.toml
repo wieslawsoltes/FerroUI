@@ -15,6 +15,7 @@ categories.workspace = true
 path = "lib.rs"
 
 [dependencies]
+ferroui-designer-animation.workspace = true
 ferroui-designer-core.workspace = true
 ferroui-designer-language.workspace = true
 ferroui-designer-project.workspace = true

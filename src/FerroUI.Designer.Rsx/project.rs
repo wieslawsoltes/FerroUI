@@ -1,6 +1,8 @@
+use crate::animation::{AnimationStyle, projected_styles};
 use crate::blocks::{blocks, contains_trivia};
 use crate::catalog::Children;
 use crate::literal;
+use crate::markup::{RsxPreviewMarkup, serialize};
 use crate::registered::{Class, RsxCatalog};
 use crate::source_edits::RsxEvent;
 use crate::tree::{Element, MAX_DEPTH, replacement};
@@ -56,11 +58,20 @@ pub struct RsxProjection<'a> {
     pub omissions: Vec<String>,
     pub omitted_count: usize,
     inner_trivia: bool,
+    styles: BTreeMap<usize, Vec<AnimationStyle>>,
 }
 
 impl RsxProjection<'_> {
     pub fn xaml(&self) -> String {
-        self.tree.xaml()
+        self.preview_markup().source
+    }
+
+    pub fn preview_markup(&self) -> RsxPreviewMarkup<'_> {
+        serialize(&self.tree, &self.styles)
+    }
+
+    pub fn has_projected_animations(&self) -> bool {
+        !self.styles.is_empty()
     }
 
     pub fn matches_xaml(&self, source: &str) -> Result<bool, String> {
@@ -70,7 +81,7 @@ impl RsxProjection<'_> {
 
     /// Structural conversion can replace a complete tree with no interior comments.
     pub fn can_replace_structure(&self) -> bool {
-        self.omitted_count == 0 && !self.inner_trivia
+        self.omitted_count == 0 && !self.inner_trivia && !self.has_projected_animations()
     }
 
     pub fn set_property(&self, index: usize, name: &str, value: &str) -> Result<TextPatch, String> {
@@ -90,6 +101,9 @@ impl RsxProjection<'_> {
     /// Apply edited XAML to the selected RSX tree. Changes to existing values keep the
     /// original tokens outside those literals. Structural edits retain the rest of the file.
     pub fn apply_xaml(&self, draft: &str) -> Result<Vec<TextPatch>, String> {
+        if self.has_projected_animations() {
+            return Err("Edit mapped animation keys in Timeline and other Rust values in source or Properties".into());
+        }
         if self.omitted_count != 0 {
             return Err(
                 "Use the property inspector to edit literals in a partial RSX preview".into(),
@@ -154,6 +168,7 @@ impl RsxCatalog {
             omissions: state.omissions,
             omitted_count: state.omitted_count,
             inner_trivia,
+            styles: state.styles,
         })
     }
 }
@@ -174,6 +189,9 @@ pub(crate) fn parse_draft(source: &str, catalog: &RsxCatalog) -> Result<Element,
         return Err("Expected an rsx! expression".into());
     }
     let (tree, state) = parse_body(draft.mac.tokens, catalog)?;
+    if !state.styles.is_empty() {
+        return Err("Edit native animation declarations in their Rust source".into());
+    }
     if state.omitted_count != 0 {
         return Err(format!(
             "The RSX draft must be fully convertible: {}",
@@ -191,6 +209,7 @@ struct State {
     nodes: Vec<RsxNode>,
     omissions: Vec<String>,
     omitted_count: usize,
+    styles: BTreeMap<usize, Vec<AnimationStyle>>,
 }
 
 impl State {
@@ -261,6 +280,14 @@ impl State {
             let value_span = value.span().byte_range();
             let value_span = SourceSpan::new(value_span.start, value_span.end);
             let field = SourceSpan::new(name.span().byte_range().start, value_span.end);
+            if owner.is_none() && setter == "styles" && class.xaml_property(None, &setter).is_none() {
+                if let Some((styles, omitted)) = projected_styles(value) {
+                    self.styles.entry(index).or_default().extend(styles);
+                    if omitted == 0 { continue; }
+                }
+                self.omit(format!("{class}.styles expression"));
+                continue;
+            }
             if class.mapped_events() && owner.is_none() && setter.starts_with("on_") {
                 let field = (!self.nodes[index].events.contains_key(&setter)).then_some(field);
                 self.nodes[index].events.insert(

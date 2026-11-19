@@ -1,11 +1,13 @@
 //! Portable XAML/RSX translation for the visual designer. Parsed Rust is data,
 //! and the mapping is tied to the source snapshot used to construct it.
 
+mod animation;
 mod blocks;
 mod catalog;
 mod image_source;
 mod language;
 mod literal;
+mod markup;
 mod placement;
 mod project;
 mod registered;
@@ -13,7 +15,9 @@ mod source_edits;
 mod tree;
 mod xaml;
 
+pub use animation::RsxAnimation;
 pub use language::{RsxLanguageDocument, analyze_rsx};
+pub use markup::RsxPreviewMarkup;
 pub use project::{RsxNode, RsxProjection, project_rust};
 pub use registered::RsxCatalog;
 pub use source_edits::{RsxEvent, event_setter};
@@ -29,5 +33,7 @@ pub fn invocation_count(source: &str) -> usize {
 
 #[cfg(test)]
 mod tests;
+#[cfg(test)]
+mod animation_tests;
 #[cfg(test)]
 mod registered_tests;

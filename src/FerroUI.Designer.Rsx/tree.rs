@@ -1,6 +1,5 @@
 use crate::{literal::Literal, registered::Class};
 use ferroui_designer_core::{SourceSpan, TextPatch};
-use ferroui_designer_language::FRAMEWORK_NAMESPACE;
 use std::collections::BTreeMap;
 use std::fmt::Write;
 
@@ -24,36 +23,7 @@ impl Element {
     }
 
     pub(crate) fn xaml(&self) -> String {
-        let mut output = String::new();
-        self.write_xaml(&mut output, 0);
-        output
-    }
-
-    fn write_xaml(&self, output: &mut String, depth: usize) {
-        let pad = INDENT.repeat(depth);
-        let namespace = self.class.namespace();
-        let prefix = if namespace.is_some() { "ui:" } else { "" };
-        let name = self.class.name();
-        let _ = write!(output, "{pad}<{prefix}{name}");
-        if depth == 0 {
-            let _ = write!(output, " xmlns=\"{FRAMEWORK_NAMESPACE}\"");
-        }
-        if let Some(namespace) = namespace {
-            let _ = write!(output, " xmlns:ui=\"{}\"", escape_xml(namespace, Some('"')));
-        }
-        for (name, value) in &self.properties {
-            let _ = write!(output, " {name}=\"{}\"", escape_xml(value, Some('"')));
-        }
-        if self.children.is_empty() {
-            output.push_str(" />");
-            return;
-        }
-        output.push('>');
-        for child in &self.children {
-            output.push('\n');
-            child.write_xaml(output, depth + 1);
-        }
-        let _ = write!(output, "\n{pad}</{prefix}{name}>");
+        crate::markup::serialize(self, &BTreeMap::new()).source
     }
 
     pub(crate) fn rsx_body(&self) -> String {

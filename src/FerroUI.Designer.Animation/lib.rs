@@ -35,7 +35,7 @@ pub use timeline::{
     Sample, Timeline, TimelineTimingEdit, Track,
 };
 pub use value::{AnimationValue, RelativeUnit, ValueKind};
-pub use xaml::{AnimationImport, ImportOptions};
+pub use xaml::{AnimationImport, ImportOptions, native_key_time};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct AnimationError(pub String);
