@@ -617,3 +617,115 @@ docs/bindings-design.md, section 2.1.
 
 The tests are `src/FerroUI.CApi/tests/signals_tests.rs` and `test_signals` of
 `samples/CApi/abi_test.c`; the Osprey sample is `samples/CApi/osprey-bindings/temperature_signals`.
+
+## 15. Controls written in another language
+
+A control and its code-behind can be written in C, and through the generated bindings in any
+language (#974). The language registers a class on one of four bases, sets the callbacks of the
+members it overrides, and registers the properties of the class; the framework then creates,
+styles, lays out, renders and routes input to instances of the class as to any control.
+
+### 15.1 How it works without a cost for Rust applications
+
+Nothing outside `ferroui-capi` changed: the class model, the property system and the hot paths
+of layout, styling and rendering are untouched.
+
+- **One Rust class per base**, in this crate, written as any Rust control: `ForeignControl:
+  Control`, `ForeignPanel: Panel`, `ForeignDecorator: Decorator`, `ForeignContentControl:
+  ContentControl`. Their overrides (measure, arrange, render, property changed, attached,
+  detached, apply template, pointer and key) read the class of the instance and call its
+  callback, or call the base when the class has none.
+- **A registered class is a type of its own.** `ferro_class_register(name, length, base)` makes a
+  `TypeInfo` at run time with the public constructors of the type system (`TypeInfo::new`, the
+  Rust class of the base as its base, a constructor of a fixed pool of 64), registers it with the
+  tables of types and copies the virtual table of the Rust class of the base, changing only its
+  type slot. Each instance is attached to the copy, so `get_type()` answers the registered
+  class: styles select it by name, `ferro_type_id` and `ferro_create` find it, frames create it,
+  and `is::<Control>()` holds.
+- **The callbacks of a class** are a table of function pointers (`ferro_class_on_measure`, ...)
+  set once; each instance holds a pointer to its class and the language's data pointer, so a
+  virtual call reads two fields and calls one function: no lookup, no allocation, no boxed value.
+- **Registered properties** (`ferro_property_register`) are styled (or attached) properties of the
+  property system, owned by an internal class outside every hierarchy and registered on the
+  registered class, so they are found by name only there (and on its subclasses; `Owner.Name`
+  for attached ones). Setters and getters of the ABI, frames, signals, styles, bindings and
+  animations use them as built-in ones; the flags make a change invalidate the measure, the
+  arrange or the render, and the property-changed callback runs for the class's own properties
+  only.
+
+### 15.2 The calls
+
+| Call | What it does |
+| --- | --- |
+| `ferro_class_register(name, length, base)` | a class on `FERRO_BASE_CONTROL`, `_PANEL`, `_DECORATOR` or `_CONTENT_CONTROL`: its type ID |
+| `ferro_class_set_data(class_id, data)` | the data of the class, given to its create callback |
+| `ferro_class_on_create` | each new instance: the callback gives it its data with `ferro_object_set_data(object, data, release)` |
+| `ferro_class_on_measure`, `_on_arrange` | `(data, object, width_in, height_in, double *width, double *height)` |
+| `ferro_class_on_render` | `(data, object, context)`: draw with `ferro_draw_*` on `context` |
+| `ferro_class_on_property_changed` | `(data, object, property_id)` for the class's own properties |
+| `ferro_class_on_attached`, `_on_detached`, `_on_apply_template` | `(data, object, 0)` |
+| `ferro_class_on_pointer` | `(data, object, kind, x, y, modifiers)`, position relative to the instance; `1` handles it |
+| `ferro_class_on_key` | `(data, object, kind, key, modifiers)`; `1` handles it |
+| `ferro_property_register(owner, name, length, kind, default_number, default_text, flags)` | a property of a kind of signal (`FERRO_SIGNAL_I64`, `_F64`, `_BOOL`, `_TEXT`) with `FERRO_PROPERTY_AFFECTS_MEASURE`, `_ARRANGE`, `_RENDER`, `_INHERITS`, `_ATTACHED`: its property ID |
+| `ferro_object_data(object)` | the data of an instance |
+| `ferro_layout_measure`, `_arrange`, `_desired_width`, `_desired_height`, `_bounds_width`, `_bounds_height` | lay out children from the callbacks, read sizes |
+| `ferro_layout_result(width, height)` | the result of the running measure or arrange callback, for a language that cannot write a `double *` |
+| `ferro_panel_child_count`, `ferro_panel_child` | the children of a class on `FERRO_BASE_PANEL` |
+| `ferro_template_part(object, name, length)` | a named part of the applied template, from the apply-template callback on |
+| `ferro_draw_brush(argb)`, `ferro_draw_pen(argb, thickness)` | brush and pen IDs (the same colour is the same ID); make them once |
+| `ferro_draw_rect`, `_ellipse`, `_line`, `_path`, `_text` | draw (a rounded rectangle, an ellipse, a line, path markup, text in the default typeface) |
+| `ferro_draw_push_clip`, `_push_transform`, `_push_opacity`, `ferro_draw_pop` | state; what a callback leaves pushed is popped after it |
+
+### 15.3 The rules for a callback
+
+1. **A plain C function pointer and a data pointer per instance**: no closures and no thunks of
+   the library. The data pointer is the language's own object (a `GCHandle` in .NET, a global
+   reference in Java, `Unmanaged` in Swift, a `cgo.Handle` in Go), released by the function given
+   to `ferro_object_set_data` when the instance goes away.
+2. **Scalars only**: no structure passed or returned by value, no varargs; sizes come back through
+   `double *` (or `ferro_layout_result`).
+3. **Synchronous on the UI thread, and reentrant**: a callback may call the ABI again (measure and
+   arrange its children, read and write properties, draw). The library holds none of its own state
+   (no `UiCell` access) while it calls out.
+4. **Errors as statuses**: a callback returns `0` (or `1` for a handled event), a negative status on
+   a failure, which the library records (`ferro_last_error`) and answers with the base behaviour.
+   Nothing may unwind out of a callback; the library catches what fails inside its own calls.
+5. **What it costs**: an unimplemented member never calls the language; layout callbacks run only
+   for invalidated elements; render is retained, called when the element is invalidated, and the
+   GPU scene replays what it recorded.
+
+Drawing records into the same retained GPU scene as the built-in controls (the render of a
+foreign class runs through the recorder of the compositing renderer): there is no CPU drawing
+path. Handles are checked as everywhere, every call is UI-thread only, and an ID or a context
+that is not valid is a status.
+
+### 15.4 What it costs
+
+`cargo bench -p ferroui-capi --no-default-features --bench call_overhead`, the same Mac as section
+13, the median of five runs (load 9 to 19 while it ran):
+
+| Operation | The control in Rust | Through the ABI |
+| --- | ---: | ---: |
+| measure and arrange 1000 elements in a stack panel (each invalidated) | 60.2 us | 70.1 us |
+| render 1000 elements (a filled rounded rectangle each) into the recorder | 25.0 us | 38.9 us |
+| write a number property that affects the measure (`MinWidth` / a registered one) | 30.9 ns | 26.9 ns |
+| read it | 7.2 ns | 7.4 ns |
+
+A measure and an arrange through callbacks cost about 10 ns more per element than the same Rust
+overrides (two indirect calls, the remembered handle checked, the result out-parameters kept for
+`ferro_layout_result`); a render about 14 ns more (the context made reachable to the drawing calls
+and the brush looked up by ID). A registered property is a styled property like the built-in ones:
+it costs the same.
+
+### 15.5 What is not there yet
+
+- Text input (`on_text_input`), focus members, automation peers and custom hit testing are not
+  forwarded; the base runs them.
+- More bases (an items control, a templated control without a content) can follow the same pattern.
+- Classes are found by name in the tables of types; the XAML loader creates them by name once it
+  reads markup through the C ABI (step 7 of #636).
+- At most 64 registered classes per process (the pool of constructors).
+
+The tests are `src/FerroUI.CApi/tests/foreign_tests.rs` and `test_controls` of
+`samples/CApi/abi_test.c`; the samples are `samples/CApi/gauge.h` (with `gauge.c`, `make -C
+samples/CApi run-gauge`) and `samples/CApi/osprey-bindings/gauge_control`.

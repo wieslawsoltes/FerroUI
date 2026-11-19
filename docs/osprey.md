@@ -14,7 +14,7 @@ property and event, in two layers:
 
 Both share the namespace `ferroui`: the `extern fn` declarations, the ID constants, the
 enumerations as unions, the fingerprint check and the start of an application. This is the
-MVP of the Osprey bindings (#950): it works end to end and is extended later (section 8).
+MVP of the Osprey bindings (#950): it works end to end and is extended later (section 9).
 
 ## 1. The files and the selection of an application
 
@@ -141,7 +141,7 @@ fn main() = {
 - **Children.** `add(parent, child)` returns the parent: children of a panel, the content of a
   window or a button, the child of a border.
 - **Handles** are plain integers. The framework holds the tree; the bindings do not release
-  the handles they return (section 8).
+  the handles they return (section 9).
 
 ## 4. Layer 2: frames
 
@@ -317,7 +317,7 @@ without the desktop platform; the Rust columns from docs/c-abi.md, section 13):
   Osprey string). Memo elements save the writing of the 99 unchanged elements but not their
   building and not the walk of their attributes that finds the key and the version (48.3 us);
   they pay off for subtrees larger than one text block, and fully once Osprey can skip
-  building a subtree (section 8).
+  building a subtree (section 9).
 
 ## 7. Signals
 
@@ -346,7 +346,36 @@ memory, so a read and a write are one small call each: a read of a watched value
 against 11.9 ns for the getter of the control, 100 writes and one apply 3.91 us against 3.60 us
 for 100 setter calls (section 14.3 of docs/c-abi.md).
 
-## 8. Limits of the MVP
+## 8. Controls
+
+A control written in Osprey is a class registered with the library (docs/c-abi.md, section 15).
+`controlClass(name, base)` registers it (`baseControl()`, `basePanel()`, `baseDecorator()`,
+`baseContentControl()`), `numberProperty(classId, name, default, flags)` and `textProperty`
+register its properties (`affectsMeasure()`, `affectsArrange()`, `affectsRender()`), and the
+callbacks are named functions given to `ferro_class_on_measure`, `ferro_class_on_render`, ... at
+the call site, the rule of Osprey for callbacks. A callback receives a data pointer (unused: an
+Osprey control keeps its state in its registered properties), the handle of the instance and
+scalars, and returns a status; a measure or arrange callback gives its size with
+`layoutResult(width, height)`, and a render callback draws with the `ferro_draw_*` functions in
+the size `ferro_layout_bounds_width` and `_height` give.
+
+```osprey
+fn measure(data: Ptr, self: int, width: float, height: float, outWidth: Ptr, outHeight: Ptr) -> int32 =
+    layoutResult(smaller(width, 160.0), smaller(height, 16.0))
+
+fn registerGauge() -> Unit = {
+    let classId = controlClass("OspreyGauge", baseControl())
+    let level = numberProperty(classId, "Level", 0.5, affectsRender())
+    let _ = ferro_class_on_measure(classId: classId, callback: measure)
+    let _ = ferro_class_on_render(classId: classId, callback: render)
+    keepGauge(Gauge { gaugeClass: classId, gaugeLevel: level })
+}
+```
+
+`samples/CApi/osprey-bindings/gauge_control` is the whole control (measure, arrange, render and
+a pointer press that sets the level), the twin of the C control in `samples/CApi/gauge.h`.
+
+## 9. Limits of the MVP
 
 - **Handles are not released** by layer 1: a control removed from its parent lives while its
   handle does. Layer 2 releases what it removes.

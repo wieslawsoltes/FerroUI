@@ -149,12 +149,46 @@ The protocol, from any language:
 
 ## 6. Controls written in your language
 
-Writing new controls through the ABI (classes on `Control`, `Panel`, `Decorator` and
-`ContentControl`, registered properties, drawing in render, template parts) is #974, in
-progress. The rules above apply to it: one table of callbacks per class, a data pointer per
-instance, scalars only, synchronous callbacks that may call the ABI again, errors as results.
-Implement only the members you need: a member you do not implement runs the base class with no
-call into your language. This section will describe the calls when #974 lands.
+A control is a class registered with the library (docs/c-abi.md, section 15) on one of four
+bases: `FERRO_BASE_CONTROL` (draws and lays out itself), `FERRO_BASE_PANEL` (children),
+`FERRO_BASE_DECORATOR` (one child) and `FERRO_BASE_CONTENT_CONTROL` (a content and a template).
+
+1. **Register the class once**: `ferro_class_register("Gauge", -1, FERRO_BASE_CONTROL)` returns its
+   type ID, which `ferro_create`, frames and styles use as any class.
+2. **Set the callbacks of the members you override**, and only those: `ferro_class_on_create`,
+   `_on_measure`, `_on_arrange`, `_on_render`, `_on_property_changed`, `_on_attached`,
+   `_on_detached`, `_on_apply_template`, `_on_pointer`, `_on_key`. A member without a callback
+   runs the base class with no call into your language. Each callback is one exported function of
+   your binding (the mechanism of section 4) that receives the data pointer of the instance.
+3. **Give each instance its data**: the create callback calls `ferro_object_set_data(object,
+   data, release)`. In a garbage-collected runtime the data is a pinned handle to your object
+   (`GCHandle`, a global reference, `Unmanaged`, `cgo.Handle`, a kept `ffi.new_handle`), freed in
+   `release`, which the library calls when the instance goes away. A callback turns the pointer
+   back into your object and calls its method.
+4. **Register the properties of the class**: `ferro_property_register(class_id, "Level", -1,
+   FERRO_SIGNAL_F64, 0.5, NULL, FERRO_PROPERTY_AFFECTS_RENDER)` returns a property ID that the
+   setters and getters, frames, signals, styles, bindings and animations use. The flags make a
+   change measure, arrange or render the instance again; `FERRO_PROPERTY_ATTACHED` makes an
+   attached property (`Gauge.Level` on any control).
+5. **Measure and arrange with scalars**: the callback gets the available (final) size and writes
+   the desired (used) size through its two `double *` (or calls `ferro_layout_result` where your
+   language cannot write memory). Lay out children with `ferro_layout_measure`,
+   `ferro_layout_arrange` and `ferro_layout_desired_width`/`_height`; a panel's children are
+   `ferro_panel_child_count` and `ferro_panel_child`.
+6. **Draw in the render callback** with the context it receives: make brushes and pens once
+   (`ferro_draw_brush(0xFF2E7D32)`, `ferro_draw_pen`), then `ferro_draw_rect`, `_ellipse`,
+   `_line`, `_path` (path markup), `_text`, and `_push_clip`, `_push_transform`,
+   `_push_opacity` with `ferro_draw_pop`. The drawing is recorded into the retained GPU scene and
+   replayed until the instance is invalidated: render is not called every frame.
+7. **Find template parts** of a content control from the apply-template callback on:
+   `ferro_template_part(object, "PART_Track", -1)`.
+8. **Return statuses, never throw**: `0` (or `1` for a handled pointer or key event), a negative
+   status on a failure, which the library records and answers with the base behaviour.
+
+`samples/CApi/gauge.h` is a complete control in C (registration, data, measure, arrange,
+render, pointer) and `samples/CApi/osprey-bindings/gauge_control` the same control in Osprey,
+which keeps its state in its registered property instead of instance data. The cost of the calls
+against the same control in Rust is in docs/c-abi.md, section 15.4.
 
 ## 7. Checklist
 

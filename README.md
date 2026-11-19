@@ -509,7 +509,7 @@ FerroUI has ports of System.Reactive, DynamicData, Splat and ReactiveUI, one cra
 
 ### C and other languages
 
-The crate `ferroui-capi` is a C ABI for every language: integer handles, type, property and event IDs looked up once by name, scalar setters and getters, callbacks with an integer token or user data, and the UI thread rule, with a C header generated from its sources. The guide [docs/c-abi.md](docs/c-abi.md) has the rules and a hello world in C (`make -C samples/CApi run`); bindings for C++, Go, Dart, C# and other languages are built on it (#636).
+The crate `ferroui-capi` is a C ABI for every language: integer handles, type, property and event IDs looked up once by name, scalar setters and getters, callbacks with an integer token or user data, and the UI thread rule, with a C header generated from its sources. The guide [docs/c-abi.md](docs/c-abi.md) has the rules and a hello world in C (`make -C samples/CApi run`), and [docs/c-abi-languages.md](docs/c-abi-languages.md) how to use it from your language (the fastest path for each kind of work, callbacks, the signal table, controls written in your language); bindings for C++, Go, Dart, C# and other languages are built on it (#636).
 
 ### Developer tools
 
@@ -566,6 +566,7 @@ Using the framework:
 - [x:Bind](docs/porting/x-bind.md): compiled `{x:Bind}`, one core for FerroUI XAML and WinUI XAML in the run-time loader and the Rust emitter, its lifecycle, hot reload and the migration from `{Binding}` and the former WinUI adapter.
 - [Compiled XAML themes](docs/xaml-themes.md): how themes are compiled and trimmed, and the rules for writing or porting theme markup without reflection, extra size or start-up cost (compiled bindings, units, tables).
 - [The C ABI](docs/c-abi.md): `ferroui-capi` and its generated header, the rules of handles, IDs, values, errors, threads and callbacks, and a hello world in C.
+- [Using FerroUI from your language](docs/c-abi-languages.md): the fastest path for each kind of work, the FFI and the callbacks of each language, the signal table, and controls written in your language.
 - [MVVM on FerroUI](docs/mvvm.md): ReactiveUI, DynamicData and System.Reactive on FerroUI, with the samples ReactiveDemo and ReactiveUIExample.
 - [Developer tools](docs/porting/tracking/diagnostics/TRACKING.md): the developer tools attached with F12, member by member.
 - [Binary size](docs/binary-size.md): what an executable is made of, the `dist` profile to ship with, and the settings that make it smaller.
