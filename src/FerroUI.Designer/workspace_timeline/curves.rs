@@ -1,26 +1,40 @@
 use super::*;
+use ferroui_controls::{MenuFlyout, MenuItem, MenuItemToggleType};
 use ferroui_designer_animation::{AnimationValue, CurvePoint, KeyframeEdit};
 
 impl DesignerWorkspace {
     pub(in crate::workspace) fn connect_timeline_curves(self: &Rc<Self>) {
         let button = self.root.get_control::<Button>("TimelineCurves");
-        let weak = Rc::downgrade(self);
-        button.click(move |_, _| {
-            if let Some(this) = weak.upgrade() {
-                let enabled = !this.timeline_ui.borrow().curves;
-                this.set_timeline_curves(enabled);
-            }
-        });
+        let menu = MenuFlyout::new();
+        for (label, metric) in [
+            ("Keyframes", None),
+            ("Value curves", Some(CurveMetric::Value)),
+            ("Velocity curves", Some(CurveMetric::Velocity)),
+        ] {
+            let item = MenuItem::new();
+            item.set_header(Some(Rc::new(label.to_owned())));
+            item.set_toggle_type(MenuItemToggleType::Radio);
+            item.set_is_checked(metric.is_none());
+            let weak = Rc::downgrade(self);
+            item.click(move |_, _| {
+                if let Some(this) = weak.upgrade() {
+                    this.set_timeline_curves(metric);
+                }
+            });
+            menu.items().add(Some(Control::boxed(item)));
+        }
+        button.set_flyout(Some(menu.upcast()));
+        crate::chrome::apply_designer_menu_resources(&button, &self.root);
     }
 
-    fn set_timeline_curves(self: &Rc<Self>, enabled: bool) {
-        self.timeline_ui.borrow_mut().curves = enabled;
+    fn set_timeline_curves(self: &Rc<Self>, metric: Option<CurveMetric>) {
+        self.timeline_ui.borrow_mut().curves = metric;
         let button = self.root.get_control::<Button>("TimelineCurves");
-        button.classes().set("designer-motion", enabled);
-        let label = if enabled {
-            "Show keyframe lanes"
-        } else {
-            "Show value curves"
+        button.classes().set("designer-motion", metric.is_some());
+        let label = match metric {
+            None => "Animation graph · Keyframes",
+            Some(CurveMetric::Value) => "Animation graph · Value",
+            Some(CurveMetric::Velocity) => "Animation graph · Velocity",
         };
         AutomationProperties::set_name(&button, Some(label));
         ToolTip::set_tip(&button, Some(Rc::new(label.to_owned())));
@@ -30,7 +44,7 @@ impl DesignerWorkspace {
     pub(super) fn fit_timeline_selection(&self) {
         let range = {
             let ui = self.timeline_ui.borrow();
-            (ui.curves && ui.selection_explicit)
+            (ui.curves.is_some() && ui.selection_explicit)
                 .then(|| {
                     ui.selection
                         .iter()
@@ -56,6 +70,7 @@ impl DesignerWorkspace {
         lane: &TimelineLane,
         track: &Track,
         context: &TimelineContext,
+        metric: CurveMetric,
     ) -> bool {
         let Some(program) = context.program else {
             return false;
@@ -86,12 +101,14 @@ impl DesignerWorkspace {
         let context = context.clone();
         let property = track.property.clone();
         lane.configure_curve(
+            metric,
             keys,
             move |window| {
                 let workspace = query.upgrade().ok_or("The Timeline closed")?;
                 query_context.check(&workspace)?;
                 let session = workspace.session.borrow();
-                session.animation_curve(program, target, &query_property, window)
+                let points = session.animation_curve(program, target, &query_property, window)?;
+                metric.measure(points).map_err(|error| error.to_string())
             },
             move |from, time, value| {
                 if let Some(workspace) = owner.upgrade() {

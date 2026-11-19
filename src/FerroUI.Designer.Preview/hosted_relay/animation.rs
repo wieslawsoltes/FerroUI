@@ -219,6 +219,7 @@ impl Relay {
         if let Some(error) = result.error {
             return Err(error);
         }
-        Ok(result.points.into_iter().map(|point| CurvePoint { time: point.time, value: point.value }).collect())
+        let points = result.points.into_iter().map(|point| CurvePoint { time: point.time, value: point.value }).collect();
+        query.metric.measure(points).map_err(|error| error.to_string())
     }
 }

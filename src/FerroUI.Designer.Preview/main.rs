@@ -118,6 +118,7 @@ fn respond(
                 "rsxKeyframeStructure": true,
                 "rsxAnimationPrograms": true,
                 "timelineCurves": true,
+                "timelineCurveVelocity": true,
                 "timelineCombinedPlayback": true,
                 "timelineProgramTargets": true,
                 "stateTransitionPreview": true,

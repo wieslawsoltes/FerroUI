@@ -1,17 +1,29 @@
 use super::*;
-use ferroui_designer_animation::{CurvePoint, CurveWindow};
+use ferroui_designer_animation::{CurveMetric, CurvePoint, CurveWindow};
 
 pub(super) const HEIGHT: f64 = 88.0;
 const VALUE_INSET: f64 = 12.0;
+const KEY_ROW: f64 = 20.0;
 type Sample = Box<dyn Fn(CurveWindow) -> Result<Vec<CurvePoint>, String>>;
 type Edit = Rc<dyn Fn(f64, f64, f64)>;
 
 pub(super) struct Plot {
+    metric: CurveMetric,
     keys: Vec<CurvePoint>,
     samples: Vec<CurvePoint>,
     scale: Option<Scale>,
     sample: Sample,
     edit: Edit,
+}
+
+impl Plot {
+    fn height(&self, height: f64) -> f64 {
+        if self.metric == CurveMetric::Velocity {
+            height - KEY_ROW
+        } else {
+            height
+        }
+    }
 }
 
 #[derive(Clone, Copy)]
@@ -86,12 +98,18 @@ impl ValueDrag {
 impl TimelineLane {
     pub(crate) fn configure_curve(
         &self,
+        metric: CurveMetric,
         keys: Vec<CurvePoint>,
         sample: impl Fn(CurveWindow) -> Result<Vec<CurvePoint>, String> + 'static,
         edit: impl Fn(f64, f64, f64) + 'static,
     ) {
-        self.set_height(HEIGHT);
+        self.set_height(if metric == CurveMetric::Velocity {
+            HEIGHT + KEY_ROW
+        } else {
+            HEIGHT
+        });
         *self.curve.borrow_mut() = Some(Plot {
+            metric,
             keys,
             samples: Vec::new(),
             scale: None,
@@ -107,6 +125,7 @@ impl TimelineLane {
         let Some(plot) = curve.as_mut() else { return };
         let result = (plot.sample)(CurveWindow { start, end });
         let help = match &result {
+            Ok(_) if plot.metric == CurveMetric::Velocity => "Velocity in property units per authored second. Drag the bottom markers to retime keys. Edit incoming easing to shape the rate of change.".into(),
             Ok(_) => "Drag a key to edit time and value together. Select a key to edit its time, value, and easing in the inspector. Alt+Left or Right selects adjacent keys. Ctrl+wheel zooms and Shift+wheel pans.".into(),
             Err(error) => error.clone(),
         };
@@ -114,12 +133,19 @@ impl TimelineLane {
         plot.scale = Scale::from_values(
             plot.samples
                 .iter()
+                .map(|point| point.value)
                 .chain(
                     plot.keys
                         .iter()
-                        .filter(|key| (start..=end).contains(&key.time)),
+                        .filter(|key| {
+                            plot.metric == CurveMetric::Value && (start..=end).contains(&key.time)
+                        })
+                        .map(|key| key.value),
                 )
-                .map(|point| point.value),
+                .chain(
+                    (plot.metric == CurveMetric::Velocity && !plot.samples.is_empty())
+                        .then_some(0.0),
+                ),
         );
         ToolTip::set_tip(self, Some(Rc::new(help)));
         self.invalidate_visual();
@@ -146,6 +172,9 @@ impl TimelineLane {
     }
 
     pub(super) fn key_y(&self, time: f64) -> Option<f64> {
+        if self.curve.borrow().as_ref()?.metric == CurveMetric::Velocity {
+            return Some(self.bounds().height - KEY_ROW * 0.5);
+        }
         self.curve_y(self.curve_value(time)?)
     }
 
@@ -188,7 +217,9 @@ impl TimelineLane {
     pub(super) fn start_curve_drag(&self, time: f64) -> Option<ValueDrag> {
         let origin = self.curve_value(time)?;
         let curve = self.curve.borrow();
-        let plot = curve.as_ref().filter(|plot| !plot.samples.is_empty())?;
+        let plot = curve
+            .as_ref()
+            .filter(|plot| plot.metric == CurveMetric::Value && !plot.samples.is_empty())?;
         Some(ValueDrag {
             origin,
             current: origin,
@@ -211,7 +242,24 @@ impl TimelineLane {
         if let Some(scale) = plot.scale {
             let grid: Rc<dyn IPen> = Pen::from_uint32(0xff3b3d46, 1.0).into();
             let trace: Rc<dyn IPen> = Pen::from_uint32(0xff9bbaff, 1.5).into();
-            let height = plot_height(bounds.height);
+            let plot_bounds = plot.height(bounds.height);
+            let height = plot_height(plot_bounds);
+            let unit = if plot.metric == CurveMetric::Velocity {
+                " /s"
+            } else {
+                ""
+            };
+            if plot.metric == CurveMetric::Velocity
+                && scale.low < 0.0
+                && scale.low + scale.span > 0.0
+            {
+                let y = scale.y(0.0, plot_bounds);
+                context.draw_line(
+                    &grid,
+                    Point::new(INSET, y),
+                    Point::new(INSET + self.plot_width(), y),
+                );
+            }
             for (ratio, value) in [(0.0, scale.low + scale.span), (1.0, scale.low)] {
                 let y = VALUE_INSET + ratio * height;
                 context.draw_line(
@@ -219,7 +267,11 @@ impl TimelineLane {
                     Point::new(INSET, y),
                     Point::new(INSET + self.plot_width(), y),
                 );
-                let label = text(&format_value(value * scale.factor), 9.0, 0xffa9adba);
+                let label = text(
+                    &format!("{}{unit}", format_value(value * scale.factor)),
+                    9.0,
+                    0xffa9adba,
+                );
                 let label_y = if ratio == 0.0 { 0.0 } else { y + 1.0 };
                 context.draw_text(
                     &label,
@@ -228,7 +280,7 @@ impl TimelineLane {
             }
             for pair in plot.samples.windows(2) {
                 let position = |point: CurvePoint| {
-                    Point::new(self.x(point.time), scale.y(point.value, bounds.height))
+                    Point::new(self.x(point.time), scale.y(point.value, plot_bounds))
                 };
                 context.draw_line(&trace, position(pair[0]), position(pair[1]));
             }

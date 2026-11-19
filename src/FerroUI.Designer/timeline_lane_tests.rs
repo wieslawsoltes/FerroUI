@@ -116,6 +116,7 @@ fn value_curve_uses_the_ruler_and_commits_both_coordinates_on_release() {
     let commits = Rc::new(RefCell::new(Vec::new()));
     let observed = commits.clone();
     lane.configure_curve(
+        ferroui_designer_animation::CurveMetric::Value,
         vec![
             CurvePoint {
                 time: 0.0,
@@ -168,6 +169,37 @@ fn value_curve_uses_the_ruler_and_commits_both_coordinates_on_release() {
     key(&lane, Key::Escape, KeyModifiers::NONE);
     driver.release_at(destination);
     assert_eq!(commits.borrow().len(), 2);
+}
+
+#[test]
+fn velocity_curve_markers_retime_keys_without_editing_their_values() {
+    use ferroui_designer_animation::{CurveMetric, CurvePoint};
+
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let lane = TimelineLane::new();
+    lane.configure(2.0, vec![0.0, 1.0, 2.0]);
+    lane.configure_curve(
+        CurveMetric::Velocity,
+        vec![CurvePoint { time: 1.0, value: 40.0 }],
+        |window| Ok(vec![CurvePoint { time: window.start, value: 20.0 }]),
+        |_, _, _| panic!("Velocity must not write a derived value into the keyframe"),
+    );
+    let moved = Rc::new(Cell::new(None));
+    let observed = moved.clone();
+    lane.on_move(move |from, to| observed.set(Some((from, to))));
+    let driver = PointerDriver::new(lane.clone());
+    let origin = Point::new(lane.x(1.0), lane.key_y(1.0).unwrap());
+    assert_eq!(lane.key_at_position(origin), Some(1.0));
+    assert!(lane.key_at_position(Point::new(origin.x, origin.y - 16.0)).is_none());
+    driver.press_at(origin, 1, KeyModifiers::NONE);
+    driver.release_at(Point::new(origin.x, origin.y - 16.0));
+    assert_eq!(moved.get(), None);
+
+    let destination = Point::new(lane.x(1.5), origin.y - 16.0);
+    driver.press_at(origin, 1, KeyModifiers::NONE);
+    driver.move_to_point(destination);
+    driver.release_at(destination);
+    assert_eq!(moved.get(), Some((1.0, 1.5)));
 }
 
 #[test]

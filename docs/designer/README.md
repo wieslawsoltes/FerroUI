@@ -234,10 +234,13 @@ offsets, values and easing; collisions reject the
 entire edit. Choose seconds or 24/30/60 fps snapping. Double-click a lane to record, or use arrow
 keys to nudge selected keys. Escape and lost pointer capture cancel a drag without authoring it.
 Ctrl+wheel or +/- zooms the timeline; Shift+wheel or PageUp/PageDown pans the visible range.
-Use **Show value curves** to graph scalar properties on the same ruler and playhead. Each
-track scales to its visible values, including overshoot. Drag a key to edit time and value
-in one undo step. Select a key to edit its time, value and easing with the keyboard. The
-fit icon frames a selection in Curves mode.
+Choose **Value curves** from the **Animation graph** icon to graph scalar properties on the
+same ruler and playhead. Each track scales to its visible values, including overshoot. Drag a
+key to edit time and value in one undo step, or select it and edit in the inspector. Choose
+**Velocity curves** to graph signed property units per authored second. Drag a marker beneath
+the trace to retime its key. Change its incoming easing in the inspector to shape the velocity.
+The fit icon frames a selection in either display. `designer_animation_curve` accepts
+`metric: "velocity"` for the same native samples.
 The contextual editor validates time, value and easing together before one undoable transaction.
 The **Add a keyframe at the playhead** icon command records the selected track's live property
 value, with Opacity as the initial fallback for an object without a track. The **Animation name

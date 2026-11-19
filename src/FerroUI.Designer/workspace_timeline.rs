@@ -12,7 +12,7 @@ use ferroui_base::media::{FontWeight, TextTrimming};
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::{ColumnDefinitions, ComboBox, Flyout, PathIcon, ToolTip};
 use ferroui_designer_animation::{
-    keyframe_easing_presets, Keyframe, KeyframeGroupEdit as KeyframeEdit,
+    keyframe_easing_presets, CurveMetric, Keyframe, KeyframeGroupEdit as KeyframeEdit,
     KeyframeLocation as SelectedKey, Track,
 };
 
@@ -27,7 +27,7 @@ pub(super) struct TimelineUi {
     frame_rate: Option<u32>,
     snap_picker: Option<WeakRef<ComboBox>>,
     view: Option<(f64, f64)>,
-    curves: bool,
+    curves: Option<CurveMetric>,
     keyframe_paste: Option<Ref<Flyout>>,
 }
 #[derive(Clone)]
@@ -371,8 +371,8 @@ impl DesignerWorkspace {
                     .filter(|key| key.target == target && key.property == track.property)
                     .map(|key| key.time),
             );
-            let curve = curves && self.attach_timeline_curve(&lane, track, &context);
-            if curve {
+            let curve = curves.filter(|&metric| self.attach_timeline_curve(&lane, track, &context, metric));
+            if curve.is_some() {
                 title.set_height(lane.height());
             }
             plot.children().add(title.upcast::<Control>());
@@ -382,7 +382,11 @@ impl DesignerWorkspace {
                     "{} {} {}",
                     target_name,
                     track.property,
-                    if curve { "value curve" } else { "keyframes" }
+                    match curve {
+                        Some(CurveMetric::Value) => "value curve",
+                        Some(CurveMetric::Velocity) => "velocity curve",
+                        None => "keyframes",
+                    }
                 )),
             );
             let weak = Rc::downgrade(self);

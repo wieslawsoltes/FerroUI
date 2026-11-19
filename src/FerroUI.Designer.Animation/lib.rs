@@ -2,6 +2,7 @@
 //! Samples can be applied to a live preview without modifying authored XAML, and recording adds
 //! keyframes rather than baking transient preview values into document attributes.
 mod curve;
+mod curve_metric;
 mod easing;
 mod interactions;
 mod keyframe_draft;
@@ -20,6 +21,7 @@ mod xaml;
 pub mod native;
 
 pub use curve::{CurvePoint, CurveWindow};
+pub use curve_metric::CurveMetric;
 pub use easing::{keyframe_easing_presets, Easing, KeyframeEasingPreset};
 pub use interactions::{BehaviorAction, BehaviorModel, BehaviorTrigger};
 pub use keyframe_draft::{KeyframeDraftPreview, KeyframeEdit};
