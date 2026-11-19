@@ -4,6 +4,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 import * as vscode from 'vscode';
 import { DesignerDrag } from '../src/designerDrag';
 import type { DesignerPanel } from '../src/designerPanel';
+import { runEditorHistory } from '../src/editorHistory';
 import type { DragGesture, DragOrigin, DropTarget } from '../src/protocol';
 import { until } from './wait';
 
@@ -22,9 +23,7 @@ export async function verifyDrag(panel: DesignerPanel): Promise<void> {
     const drop = ({ id, frame }: DragGesture, target: DropTarget) =>
         drag.receive(panel, { type: 'drop', id, frame, target });
     const undo = async () => {
-        await vscode.window.showTextDocument(panel.document);
-        await vscode.commands.executeCommand('undo');
-        assert.equal(panel.document.getText(), original);
+        await undoDrop(panel.document, original);
         return panel.waitForSnapshot(AbortSignal.timeout(15_000));
     };
     try {
@@ -85,10 +84,14 @@ export async function verifyRsxImageDrag(panel: DesignerPanel): Promise<void> {
         await drag.receive(panel, { type: 'drop', id: gesture.id, frame, target: { type: 'outline', node: parent.id, position: 'inside' } });
         assert.match(panel.document.getText(), /include_bytes!\("Assets\/Preview Image\.png"\)/);
         assert.equal(active, undefined);
-        await vscode.window.showTextDocument(panel.document, { viewColumn: vscode.ViewColumn.One, preserveFocus: false });
-        await until(() => vscode.window.activeTextEditor?.document === panel.document);
-        await vscode.commands.executeCommand('undo');
-        assert.equal(panel.document.getText(), original);
+        await undoDrop(panel.document, original);
     } finally { drag.clear(); }
     console.log('VS Code accepted an authorized RSX raster drag and undid its embedded image insertion');
+}
+
+async function undoDrop(document: vscode.TextDocument, original: string): Promise<void> {
+    const version = document.version;
+    await runEditorHistory(document, 'undo', () => assert.equal(document.version, version), AbortSignal.timeout(5000));
+    await until(() => document.version !== version);
+    assert.equal(document.getText(), original);
 }
