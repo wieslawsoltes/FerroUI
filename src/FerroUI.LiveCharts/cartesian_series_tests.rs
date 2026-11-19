@@ -869,3 +869,65 @@ fn heat_cells_draw_the_svg_geometry_of_the_series() {
     }
     assert!(measure("M0,0 X").is_err());
 }
+
+// OhlcSeriesAnimationTests.OhlcSeries_FirstDraw_BarsAppearWithOHLC: the source's three I-bars on
+// a 400 by 400 chart with a Y axis from 0 to 40 start their first draw with the high, the close
+// and the low at the open (every line of a bar at the pixel of its open) and end with the low
+// below the high; the candles of a financial series start as a body of no height at the open.
+#[test]
+fn source_ohlc_first_draw_bars_grow_from_their_open() {
+    let bars = [
+        (35.0, 25.0, 20.0, 15.0),
+        (30.0, 22.0, 28.0, 18.0),
+        (32.0, 27.0, 24.0, 19.0),
+    ];
+    for kind in [SeriesKind::Ohlc, SeriesKind::Financial] {
+        let mut series = Series::new(kind);
+        series.values = bars
+            .iter()
+            .enumerate()
+            .map(|(i, &(h, o, c, l))| Coordinate::financial(i as f64, h, o, c, l))
+            .collect();
+        let measured = CartesianChartEngine::measure_with_axes(
+            Size::new(400.0, 400.0),
+            std::slice::from_ref(&series),
+            &[Axis::default()],
+            &[limits(0.0, 40.0)],
+            &CartesianOptions::default(),
+        )
+        .unwrap();
+        let seed = CartesianChartEngine::first_draw_seed(
+            &measured.scene,
+            std::slice::from_ref(&series),
+            &measured.y_scales,
+        );
+        let y = measured.y_scales[0];
+        for (target, start) in measured.scene.primitives.iter().zip(&seed.primitives) {
+            let Some(id) = target.id else {
+                assert_eq!(target, start, "the rest of the scene is in place");
+                continue;
+            };
+            let (h, o, _, l) = bars[id.point];
+            let open = y.to_pixels(o);
+            match (&target.geometry, &start.geometry) {
+                (Geometry::Line { start: a, end: b }, Geometry::Line { start: s, end: e }) => {
+                    assert_close(s.y, open, "a line starts at the open");
+                    assert_close(e.y, open, "a line starts at the open");
+                    assert_close(s.x, a.x, "in place");
+                    assert_close(e.x, b.x, "in place");
+                    if a.x == b.x {
+                        // The spine of the bar: the low below the high at the end.
+                        assert!(y.to_pixels(l) > y.to_pixels(h));
+                        assert!(a.y.max(b.y) > a.y.min(b.y));
+                    }
+                }
+                (Geometry::Rectangle { rect: r, .. }, Geometry::Rectangle { rect: s, .. }) => {
+                    assert_close(s.y, open, "the body starts at the open");
+                    assert_close(s.height, 0.0, "with no height");
+                    assert_close(s.x, r.x, "in place");
+                }
+                _ => {}
+            }
+        }
+    }
+}

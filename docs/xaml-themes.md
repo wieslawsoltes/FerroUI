@@ -502,6 +502,48 @@ Documents loaded at run time bind the way the built application does (#604):
 - A configuration made with `RuntimeXamlLoaderConfiguration::new()` keeps upstream's default
   (reflection bindings), for documents that belong to no application.
 
+### 5.1 Property lookups by name in compiled themes (#603)
+
+Two run-time helpers of compiled markup still find a declared (plain) property by its name:
+
+- `rt::clr_property_info`: the provide-value target of a nested markup extension, such as
+  `TemplateBinding.Converter` with a `{StaticResource}`, or `MultiBinding.Bindings` and `Converter`.
+- `rt::path_property`: a plain property in a compiled binding path, such as
+  `ProgressBar.TemplateSettings`, `CommandBar.VisiblePrimaryCommands` or the view models of the
+  managed file chooser.
+
+`python3 scripts/themes/by_name_lookups.py` counts the calls in the checked-in compiled themes;
+`--by-property` breaks them down by owner and property. On the branch of the change the counts were:
+
+| Theme | `rt::clr_property_info` | `rt::path_property` |
+|---|---:|---:|
+| WinUI | 70 | 59 |
+| Fluent | 65 | 53 |
+| Simple | 36 | 43 |
+| macOS | 67 | 43 |
+| All four | 238 | 198 |
+
+**Resolving the property at compile time.** The emitter can resolve the declared property at compile
+time wherever the type system knows the declaring type. It then writes
+`rt::declared_clr_property_info` and `rt::declared_path_property`, which take the position of the
+property in its declaration. At run time these helpers take the property at that position and do not
+search the declaration by name. If the declaration changed since the compilation and another
+property is at that position, they still find the property by name. Both forms give the same
+description, which is cached once per property and thread.
+
+**Off by default.** The option is off by default, because it changes the generated files. To turn it
+on:
+
+- in a build script, call `Build::compile_time_declared_properties(true)`;
+- in a host of the emitter, call `rust_emitter::set_compile_time_declared_properties(true)` around a
+  compilation.
+
+Turning it on for the themes means regenerating their checked-in `compiled_xaml.rs` (with the
+regeneration of each theme's `compiled_xaml_tests`) and the emitter corpus
+(`tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated.rs`). The typed accessors that would also
+drop the untyped accessors of the declaration are a further step (the next row of the table in
+section 9).
+
 ## 6. Porting a theme from upstream
 
 - Port each control document to its own document and merge it with `MergeResourceInclude`, as
@@ -561,6 +603,7 @@ Documents loaded at run time bind the way the built application does (#604):
 | Samples, sample apps and component samples on compiled bindings; no explicit `default_compile_bindings(true)`; hot reload and the previewer follow the application's setting | #604 | In review |
 | Templates on compiled bindings | FerroUI/templates#2 | Planned |
 | Relative-source paths of the themes resolved at compile time (no `ReflectionBinding.RelativeSource` targets) | #603 | In review |
+| `rt::clr_property_info` and `rt::path_property` counted (`scripts/themes/by_name_lookups.py`); declared properties resolved at compile time behind `Build::compile_time_declared_properties` (off by default) | #603 follow-up | In review |
 | `rt::clr_property_info` of plain properties (nested markup extension targets, plain path elements) resolved to typed accessors | #603 follow-up | Planned |
 | Path data converted at compile time instead of at load | #603 | In review |
 | `panic = "abort"` in `dist` | #595 | On `main` |

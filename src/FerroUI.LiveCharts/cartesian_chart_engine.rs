@@ -86,6 +86,44 @@ pub struct CartesianSeriesBounds {
 
 pub struct CartesianChartEngine;
 impl CartesianChartEngine {
+    /// The scene the first draw of a chart starts from, for the visuals the source seeds away
+    /// from their place: the bars of a financial or OHLC series collapsed at their open (the
+    /// `CoreFinancialSeries` visual starts with its high, close and low at the open and grows to
+    /// them, `OhlcSeriesAnimationTests`); everything else of `scene` is in place. `scene` is the
+    /// measured scene of `series` with the Y scales of its measurement.
+    pub fn first_draw_seed(scene: &Scene, series: &[Series], y_scales: &[AxisScale]) -> Scene {
+        let mut seed = scene.clone();
+        for primitive in &mut seed.primitives {
+            let Some(id) = primitive.id else {
+                continue;
+            };
+            let Some(s) = series.get(id.series) else {
+                continue;
+            };
+            if !matches!(s.kind, SeriesKind::Financial | SeriesKind::Ohlc) {
+                continue;
+            }
+            let (Some(c), Some(scale)) = (s.values.get(id.point), y_scales.get(s.y_axis)) else {
+                continue;
+            };
+            let open = scale.to_pixels(c.tertiary_value);
+            if !open.is_finite() {
+                continue;
+            }
+            match &mut primitive.geometry {
+                Geometry::Line { start, end } => {
+                    start.y = open;
+                    end.y = open;
+                }
+                Geometry::Rectangle { rect, .. } => {
+                    rect.y = open;
+                    rect.height = 0.0;
+                }
+                _ => {}
+            }
+        }
+        seed
+    }
     pub fn measure(
         size: Size,
         series: &[Series],
