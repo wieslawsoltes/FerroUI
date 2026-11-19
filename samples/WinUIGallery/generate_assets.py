@@ -20,12 +20,14 @@ SAMPLE_MEDIA = [
     "ninegrid.gif", "rainier.jpg", "sunset.jpg", "treetops.jpg", "valley.jpg",
     "Slices.png", "Slices2.png", "folder.png",
 ]
-# The theme images of the reviewed Geometry page (its HeaderImage of the Default and Light themes).
-DESIGN_MEDIA = ["Geometry.dark.png", "Geometry.light.png"]
+# The theme images of the reviewed Geometry and Spacing pages (their images of the Default and Light
+# themes).
+DESIGN_MEDIA = ["Geometry.dark.png", "Geometry.light.png", "Cards.dark.png", "Cards.light.png",
+                "Dialog.dark.png", "Dialog.light.png"]
 MEDIA_PAGES = [
     f"WinUIGallery/Samples/{page}/{page}Page{suffix}"
     for page in ["Image", "FlipView", "ConnectedAnimation", "Button", "AppBarButton",
-                 "AppBarToggleButton", "TreeView", "Geometry"]
+                 "AppBarToggleButton", "TreeView", "Geometry", "Spacing", "IconElement"]
     for suffix in [".xaml", ".xaml.cs"]
 ]
 

@@ -107,6 +107,30 @@ impl IPlatformTypeface for SkiaTypeface {
         }
     }
 
+    /// A clone of the Skia typeface at the position (`SkTypeface::makeClone` with a variation
+    /// design position): the axes of `settings` take their values, the others the values of this
+    /// typeface. The optical size of a text is chosen with it (#859).
+    fn with_variation_settings(&self, settings: &FontVariationSettings) -> Option<Rc<dyn IPlatformTypeface>> {
+        use skia_safe::font_arguments::variation_position::Coordinate;
+        use skia_safe::font_arguments::VariationPosition;
+        use skia_safe::{FontArguments, FourByteTag};
+
+        let mut coordinates: Vec<Coordinate> = self.sk_typeface.variation_design_position().unwrap_or_default();
+        for variation in settings.variations() {
+            let axis = FourByteTag::new(variation.tag.value());
+            let value = variation.value as f32;
+            match coordinates.iter_mut().find(|coordinate| coordinate.axis == axis) {
+                Some(coordinate) => coordinate.value = value,
+                None => coordinates.push(Coordinate { axis, value }),
+            }
+        }
+        let position = VariationPosition { coordinates: &coordinates };
+        let arguments = FontArguments::new().set_variation_design_position(position);
+        let typeface = self.sk_typeface.clone_with_arguments(&arguments)?;
+        let typeface: Rc<dyn IPlatformTypeface> = SkiaTypeface::new(typeface, self.font_simulations);
+        Some(typeface)
+    }
+
     fn try_get_stream(&self) -> Option<Box<dyn Read>> {
         let (bytes, _) = self.sk_typeface.to_font_bytes()?;
 

@@ -126,6 +126,10 @@ pub struct ModelMarkup {
     enum_i32_factory: Option<String>,
     /// The members of an enumeration: name, value and Rust variant.
     enum_members: Vec<(String, Option<i64>, Option<String>)>,
+    /// The names of the plain properties and of the static properties, in the order of the
+    /// declaration (#603).
+    properties: Vec<String>,
+    static_properties: Vec<String>,
     /// The questions the metadata could not answer, for the host.
     unanswered: Rc<RefCell<Vec<String>>>,
 }
@@ -133,6 +137,10 @@ pub struct ModelMarkup {
 impl EmitMarkup for ModelMarkup {
     fn full_name(&self) -> String {
         self.full_name.clone()
+    }
+    fn property_index(&self, name: &str, is_static: bool) -> Option<usize> {
+        let list = if is_static { &self.static_properties } else { &self.properties };
+        list.iter().position(|property| property == name)
     }
     fn rust_path(&self) -> Option<&str> {
         self.rust_path.as_deref()
@@ -732,6 +740,8 @@ impl ModelEmitTypes {
             is_flags: declared.is_flags,
             enum_i32_factory: declared.enum_i32_factory.clone(),
             enum_members: declared.enum_members.iter().map(|member| (member.name.clone(), member.value, member.rust_variant.clone())).collect(),
+            properties: declared.properties.iter().map(|property| property.name.clone()).collect(),
+            static_properties: declared.static_properties.iter().map(|property| property.name.clone()).collect(),
             unanswered: self.unanswered.clone(),
         });
         self.markups.insert(position, markup.clone());

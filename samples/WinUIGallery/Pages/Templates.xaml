@@ -1,4 +1,142 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <Button Content="A custom button template"><Button.Template><ControlTemplate><Border Background="#0078D4" Padding="18,10" CornerRadius="12"><ContentPresenter Content="{TemplateBinding Content}"/></Border></ControlTemplate></Button.Template></Button>
+<!-- Ported from the four pinned Templates examples of WinUI Gallery (14061eea) and the code behind of
+     TemplatesPage.xaml.cs (binding_samples.rs); see ../NOTICE.md. The TextBox's ControlTemplate keeps
+     the source's layout; FerroUI's TextBox has no Header, so the template's header is the box's Tag,
+     and its ContentElement is the PART_ScrollViewer with the PART_TextPresenter of FerroUI's TextBox
+     template. The Headers of the ComboBoxes are composed. FerroUI has no ListView or WrapGrid: the
+     list is a ListBox and WrapGrid is a WrapPanel; the page's two ItemsPanelTemplates are styles of
+     the list, which LayoutSelector_SelectionChanged switches with a class. ScrollView is a
+     ScrollViewer; ThemeResource becomes DynamicResource. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel.Styles>
+    <!-- WrapGridTemplate and StackPanelTemplate of the page's resources. -->
+    <Style Selector="ListBox#MyListView">
+      <Setter Property="ItemsPanel">
+        <ItemsPanelTemplate>
+          <WrapPanel Orientation="Horizontal" />
+        </ItemsPanelTemplate>
+      </Setter>
+    </Style>
+    <Style Selector="ListBox#MyListView.StackPanel">
+      <Setter Property="ItemsPanel">
+        <ItemsPanelTemplate>
+          <StackPanel Orientation="Vertical" />
+        </ItemsPanelTemplate>
+      </Setter>
+    </Style>
+  </StackPanel.Styles>
+  <StackPanel Margin="0,12,0,0" Spacing="12">
+    <RichTextBlock>
+      <Paragraph><Run FontWeight="SemiBold" Text="Placement of Templates" /></Paragraph>
+      <Paragraph><Run Text="Templates can be defined at the app, page, or control level, similar to styles and resources. The placement is determined by the intended scope and reuse of the template." /></Paragraph>
+    </RichTextBlock>
+    <RichTextBlock>
+      <Paragraph><Run Text="There are 3 types of templates:" /></Paragraph>
+      <Paragraph><Run Text="• ControlTemplate: customizes the structure of a control." /></Paragraph>
+      <Paragraph><Run Text="• DataTemplate: changes how individual items are displayed in a control like a ComboBox or ListView." /></Paragraph>
+      <Paragraph><Run Text="• ItemsPanelTemplate: defines how a collection of items is laid out." /></Paragraph>
+    </RichTextBlock>
+  </StackPanel>
+
+  <StackPanel x:Name="Example1" Spacing="8">
+    <TextBlock Text="Customize the look of a TextBox with a ControlTemplate" FontSize="18" />
+    <Grid>
+      <Grid.Resources>
+        <ControlTemplate x:Key="CustomTextBoxTemplate" TargetType="TextBox">
+          <StackPanel Spacing="8">
+            <TextBlock Text="{TemplateBinding Tag}" />
+            <Border MinWidth="200" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="2" CornerRadius="4">
+              <StackPanel Margin="4" Orientation="Horizontal" Spacing="4">
+                <SymbolIcon Symbol="Edit" />
+                <ScrollViewer Name="PART_ScrollViewer" Padding="{TemplateBinding Padding}"
+                              HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
+                              VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}">
+                  <TextPresenter Name="PART_TextPresenter"
+                                 CaretBrush="{TemplateBinding CaretBrush}"
+                                 CaretIndex="{TemplateBinding CaretIndex}"
+                                 SelectionBrush="{TemplateBinding SelectionBrush}"
+                                 SelectionEnd="{TemplateBinding SelectionEnd}"
+                                 SelectionStart="{TemplateBinding SelectionStart}"
+                                 Text="{TemplateBinding Text, Mode=TwoWay}"
+                                 TextAlignment="{TemplateBinding TextAlignment}"
+                                 TextWrapping="{TemplateBinding TextWrapping}" />
+                </ScrollViewer>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </ControlTemplate>
+      </Grid.Resources>
+      <TextBox x:Name="CustomTemplateTextBox" Padding="8" Tag="Enter text here"
+               BorderBrush="{DynamicResource AccentFillColorDefaultBrush}"
+               Template="{StaticResource CustomTextBoxTemplate}" AutomationProperties.Name="Enter text here" />
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="Example2" Spacing="8">
+    <TextBlock Text="Customize a ComboBox's ItemTemplate using a DataTemplate" FontSize="18" />
+    <Grid>
+      <Grid.Resources>
+        <DataTemplate x:Key="CustomComboBoxItemTemplate">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Ellipse Width="8" Height="8" Fill="{DynamicResource AccentFillColorDefaultBrush}" />
+            <TextBlock Text="{Binding}" />
+          </StackPanel>
+        </DataTemplate>
+      </Grid.Resources>
+      <StackPanel Spacing="4">
+        <TextBlock Text="Options" />
+        <ComboBox x:Name="TemplatedComboBox" ItemTemplate="{StaticResource CustomComboBoxItemTemplate}"
+                  SelectedIndex="0" AutomationProperties.Name="Options">
+          <x:String>Option 1</x:String>
+          <x:String>Option 2</x:String>
+          <x:String>Option 3</x:String>
+        </ComboBox>
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="Example3Code" Spacing="8">
+    <TextBlock Text="Create a DataTemplate in code (experimental)" FontSize="18" />
+    <TextBlock Text="Options" />
+    <ComboBox x:Name="CodeTemplateComboBox" SelectedIndex="0" AutomationProperties.Name="Options">
+      <x:String>Option 1</x:String>
+      <x:String>Option 2</x:String>
+      <x:String>Option 3</x:String>
+    </ComboBox>
+  </StackPanel>
+
+  <StackPanel x:Name="Example3" Spacing="8">
+    <TextBlock Text="Customize an ItemsControl with an ItemsPanelTemplate" FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+      <ScrollViewer>
+        <ListBox x:Name="MyListView" HorizontalAlignment="Stretch">
+          <ListBoxItem>Item 01</ListBoxItem>
+          <ListBoxItem>Item 02</ListBoxItem>
+          <ListBoxItem>Item 03</ListBoxItem>
+          <ListBoxItem>Item 04</ListBoxItem>
+          <ListBoxItem>Item 05</ListBoxItem>
+          <ListBoxItem>Item 06</ListBoxItem>
+          <ListBoxItem>Item 07</ListBoxItem>
+          <ListBoxItem>Item 08</ListBoxItem>
+          <ListBoxItem>Item 09</ListBoxItem>
+          <ListBoxItem>Item 10</ListBoxItem>
+          <ListBoxItem>Item 11</ListBoxItem>
+          <ListBoxItem>Item 12</ListBoxItem>
+          <ListBoxItem>Item 13</ListBoxItem>
+          <ListBoxItem>Item 14</ListBoxItem>
+          <ListBoxItem>Item 15</ListBoxItem>
+          <ListBoxItem>Item 16</ListBoxItem>
+          <ListBoxItem>Item 17</ListBoxItem>
+          <ListBoxItem>Item 18</ListBoxItem>
+          <ListBoxItem>Item 19</ListBoxItem>
+          <ListBoxItem>Item 20</ListBoxItem>
+        </ListBox>
+      </ScrollViewer>
+      <RadioButtons x:Name="LayoutSelector" Grid.Column="1" SelectedIndex="0">
+        <RadioButton Content="WrapGrid" Tag="WrapGrid" />
+        <RadioButton Content="StackPanel" Tag="StackPanel" />
+      </RadioButtons>
+    </Grid>
+  </StackPanel>
 </StackPanel>

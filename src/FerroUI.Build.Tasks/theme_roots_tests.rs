@@ -361,6 +361,76 @@ fn the_build_of_a_class_verifies_its_constructor_from_units() {
     assert_eq!(last_segments("Option < Rc < dyn crate::IServiceProvider > >"), "Option<Rc<dynIServiceProvider>>");
 }
 
+/// Not from upstream (#848): two types of one local name in two assemblies keep their own base
+/// classes and creates edges, whatever the order of the models; a root that names the local name
+/// is live with the edges of both.
+#[test]
+fn types_of_one_local_name_keep_their_own_edges() {
+    let model = |assembly: &str, namespace: &str, base: &str, created: &str| {
+        let mut model = AssemblyModel::new(assembly, &assembly.to_lowercase());
+        let crate_name = assembly.to_lowercase();
+        let mut twin = TypeModel::new("Twin", TypeKind::Class, RustType::resolved(&format!("::{crate_name}::Twin")), &crate_name);
+        twin.namespace = namespace.to_string();
+        twin.object_model = true;
+        twin.base = Some(RustType::resolved(&format!("::{crate_name}::{base}")));
+        twin.creates = vec![format!("{namespace}.{created}")];
+        let mut base_type = TypeModel::new(base, TypeKind::Class, RustType::resolved(&format!("::{crate_name}::{base}")), &crate_name);
+        base_type.namespace = namespace.to_string();
+        base_type.object_model = true;
+        model.types = vec![twin, base_type];
+        model
+    };
+    let left = model("Left", "Left", "LeftBase", "LeftPart");
+    let right = model("Right", "Right", "RightBase", "RightPart");
+    for graph in [TypeGraph::from_models([&left, &right]), TypeGraph::from_models([&right, &left])] {
+        assert_eq!(graph.live("Twin"), set(&["LeftBase", "LeftPart", "RightBase", "RightPart", "Twin"]));
+        assert_eq!(graph.live("LeftBase"), set(&["LeftBase"]));
+        assert!(graph.is_class("Twin") && graph.is_class("RightBase") && !graph.is_class("LeftPart"));
+    }
+}
+
+/// A theme of one unit besides the ambient one, for the tests of the closure across themes.
+fn small_theme(class: &str, units: Vec<ThemeUnitModel>) -> ThemeUnitsModel {
+    ThemeUnitsModel { class: class.to_string(), table_path: format!("::{}::THEME_UNITS", class.to_lowercase()), units }
+}
+
+/// Not from upstream (#848): themes used together are closed over together. A key that a kept unit
+/// of one theme references and only another theme defines keeps the unit that defines it, a type a
+/// kept unit of one theme constructs keeps the control theme another supplies, and references in a
+/// cycle between two themes end.
+#[test]
+fn themes_used_together_are_closed_over_together() {
+    let first = small_theme(
+        "Tests.First",
+        vec![
+            unit(0, "ambient", &[], &[], &[], &[]),
+            unit(1, "First/Button.xaml", &[], &["Button"], &["SecondBrush"], &["Popup"]),
+            unit(2, "First/Other.xaml", &["FirstBrush"], &[], &["SecondOther"], &[]),
+        ],
+    );
+    let second = small_theme(
+        "Tests.Second",
+        vec![
+            unit(0, "ambient", &[], &[], &[], &[]),
+            unit(1, "Second/Brushes.xaml", &["SecondBrush"], &[], &["FirstBrush"], &[]),
+            unit(2, "Second/Popup.xaml", &[], &["Popup"], &[], &[]),
+            unit(3, "Second/Unused.xaml", &["SecondOther"], &[], &[], &[]),
+        ],
+    );
+    let roots = Roots { types: set(&["Button"]), ..Roots::default() };
+    let graph = TypeGraph::default();
+    // Alone, each theme keeps what the roots name in it.
+    assert_eq!(kept_units(&first, &roots, &graph, false), [0, 1]);
+    assert_eq!(kept_units(&second, &roots, &graph, false), [0]);
+    // Together: the brush the button references and the popup it constructs, and, through the
+    // cycle `SecondBrush` -> `FirstBrush` -> `SecondOther`, the rest.
+    let kept = kept_units_across(&[&first, &second], &roots, &graph, false);
+    assert_eq!(kept, [vec![0, 1, 2], vec![0, 1, 2, 3]]);
+    // The order of the themes does not change what each keeps.
+    let reversed = kept_units_across(&[&second, &first], &roots, &graph, false);
+    assert_eq!(reversed, [vec![0, 1, 2, 3], vec![0, 1, 2]]);
+}
+
 /// Not from upstream (#847): the binaries of a package are read from its manifest and discovered as
 /// Cargo discovers them: explicit `[[bin]]` paths, a `[[bin]]` without a path by its name, and,
 /// unless `autobins = false`, `src/main.rs` and `src/bin`. Only files that exist count.
