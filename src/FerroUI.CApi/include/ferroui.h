@@ -2038,6 +2038,14 @@ int64_t ferro_type_of(FerroHandle object);
 // thread.
 int64_t ferro_api_fingerprint(void);
 
+// The fingerprint of the selection of classes and calls the library was built for
+// (`scripts/capi/app_library.py`, docs/c-abi.md, section 17): `0` for a library of every class
+// and call (the full and the by-use builds of the crate). A binding generated from the same
+// selection has the same value (`selectionFingerprint()` of the Osprey bindings,
+// `FERRO_APP_SELECTION_FINGERPRINT` of the C header the generator writes); a binding accepts a
+// library whose value is `0` or its own. Any thread.
+int64_t ferro_selection_fingerprint(void);
+
 // The type ID of the class named `name` (`Button`, or `FerroUI.Controls.Button` where two
 // namespaces have a class of the name): a positive ID, or [`FERRO_NOT_FOUND`]. `length` is the
 // length of the name in bytes; a negative length means a NUL-terminated name. Any thread.
