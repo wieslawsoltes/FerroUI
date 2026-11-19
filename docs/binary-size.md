@@ -457,8 +457,12 @@ without running destructors.
   the panic is caught, the frame is cleaned up and the panic is raised again on the dispatcher, the
   way the original rethrows an exception of a handler.
 - The development tools that isolate the code of the application they inspect (the Designer, the
-  previewer of `DesignerSupport`, hot reload, DevTools) need unwinding. They are built with `dev`,
-  `fast-release`, `release-unwind` or `dist-unwind`.
+  previewer of `DesignerSupport`, hot reload, DevTools) need unwinding for that. They are built
+  with `dev`, `fast-release`, `release-unwind` or `dist-unwind`. The errors of the edited
+  document no longer travel as panics there: a reload step, the previewer's load and show and
+  the Designer's stage layouts run in the error scope of the XAML runtime, and the animation
+  preview rejects a program with `Animation::try_apply_for_preview` (#567). The (E) sites left,
+  each with its reason, are listed in section 2 of the classification.
 
 `release` aborts on panic as well (owner decision of 2026-11-07, #567): it is what
 `cargo build --release` gives an application, and the unwind tables are as large there as in

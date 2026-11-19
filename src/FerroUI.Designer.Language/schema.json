@@ -8244,6 +8244,73 @@
     ]
   },
   {
+    "name": "GridView",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::GridView",
+    "base": "ListViewBase",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "GridViewAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "GridViewAutomationPeer",
+    "base": "ListViewBaseAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "GridViewItem",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::GridViewItem",
+    "base": "ListViewBaseItem",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "GridViewItemAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "GridViewItemAutomationPeer",
+    "base": "ListViewBaseItemAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "GridViewItemTemplateSettings",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::GridViewItemTemplateSettings",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "DragItemsCount": {
+        "name": "DragItemsCount",
+        "type_name": "i32",
+        "documentation": "GridViewItemTemplateSettings.DragItemsCount: i32",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Primitives",
+      "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "GroupBox",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::GroupBox",
@@ -10835,6 +10902,25 @@
     ]
   },
   {
+    "name": "ItemClickEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::ItemClickEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "ClickedItem": {
+        "name": "ClickedItem",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "ItemClickEventArgs.ClickedItem: Option<BoxedValue>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "ItemCollection",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::ItemCollection",
@@ -11257,6 +11343,77 @@
           "True",
           "False"
         ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ItemsStackPanel",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::ItemsStackPanel",
+    "base": "VirtualizingStackPanel",
+    "constructible": true,
+    "properties": {
+      "ItemsUpdatingScrollMode": {
+        "name": "ItemsUpdatingScrollMode",
+        "type_name": "ItemsUpdatingScrollMode",
+        "documentation": "ItemsStackPanel.ItemsUpdatingScrollMode: ItemsUpdatingScrollMode",
+        "values": [
+          "KeepItemsInView",
+          "KeepScrollOffset",
+          "KeepLastItemInView"
+        ],
+        "attached": false
+      },
+      "GroupPadding": {
+        "name": "GroupPadding",
+        "type_name": "Thickness",
+        "documentation": "ItemsStackPanel.GroupPadding: Thickness",
+        "values": [],
+        "attached": false
+      },
+      "GroupHeaderPlacement": {
+        "name": "GroupHeaderPlacement",
+        "type_name": "GroupHeaderPlacement",
+        "documentation": "ItemsStackPanel.GroupHeaderPlacement: GroupHeaderPlacement",
+        "values": [
+          "Top",
+          "Left"
+        ],
+        "attached": false
+      },
+      "AreStickyGroupHeadersEnabled": {
+        "name": "AreStickyGroupHeadersEnabled",
+        "type_name": "bool",
+        "documentation": "ItemsStackPanel.AreStickyGroupHeadersEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ItemsWrapGrid",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::ItemsWrapGrid",
+    "base": "WrapPanel",
+    "constructible": true,
+    "properties": {
+      "MaximumRowsOrColumns": {
+        "name": "MaximumRowsOrColumns",
+        "type_name": "i32",
+        "documentation": "ItemsWrapGrid.MaximumRowsOrColumns: i32",
+        "values": [],
+        "attached": false
       }
     },
     "namespace_aliases": [
@@ -12312,6 +12469,266 @@
     "namespace_aliases": [
       "using:FerroUI.Automation.Peers",
       "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ListView",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::ListView",
+    "base": "ListViewBase",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ListViewAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ListViewAutomationPeer",
+    "base": "ListViewBaseAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ListViewBase",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::ListViewBase",
+    "base": "SelectingItemsControl",
+    "constructible": false,
+    "properties": {
+      "ListViewSelectionMode": {
+        "name": "ListViewSelectionMode",
+        "type_name": "ListViewSelectionMode",
+        "documentation": "ListViewBase.ListViewSelectionMode: ListViewSelectionMode",
+        "values": [
+          "None",
+          "Single",
+          "Multiple",
+          "Extended"
+        ],
+        "attached": false
+      },
+      "IsItemClickEnabled": {
+        "name": "IsItemClickEnabled",
+        "type_name": "bool",
+        "documentation": "ListViewBase.IsItemClickEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "Header": {
+        "name": "Header",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "ListViewBase.Header: Option<BoxedValue>",
+        "values": [],
+        "attached": false
+      },
+      "HeaderTemplate": {
+        "name": "HeaderTemplate",
+        "type_name": "Option<Rc<dyn IDataTemplate>>",
+        "documentation": "ListViewBase.HeaderTemplate: Option<Rc<dyn IDataTemplate>>",
+        "values": [],
+        "attached": false
+      },
+      "Footer": {
+        "name": "Footer",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "ListViewBase.Footer: Option<BoxedValue>",
+        "values": [],
+        "attached": false
+      },
+      "FooterTemplate": {
+        "name": "FooterTemplate",
+        "type_name": "Option<Rc<dyn IDataTemplate>>",
+        "documentation": "ListViewBase.FooterTemplate: Option<Rc<dyn IDataTemplate>>",
+        "values": [],
+        "attached": false
+      },
+      "SingleSelectionFollowsFocus": {
+        "name": "SingleSelectionFollowsFocus",
+        "type_name": "bool",
+        "documentation": "ListViewBase.SingleSelectionFollowsFocus: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "IsMultiSelectCheckBoxEnabled": {
+        "name": "IsMultiSelectCheckBoxEnabled",
+        "type_name": "bool",
+        "documentation": "ListViewBase.IsMultiSelectCheckBoxEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "ShowsScrollingPlaceholders": {
+        "name": "ShowsScrollingPlaceholders",
+        "type_name": "bool",
+        "documentation": "ListViewBase.ShowsScrollingPlaceholders: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "IsSwipeEnabled": {
+        "name": "IsSwipeEnabled",
+        "type_name": "bool",
+        "documentation": "ListViewBase.IsSwipeEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "CanDragItems": {
+        "name": "CanDragItems",
+        "type_name": "bool",
+        "documentation": "ListViewBase.CanDragItems: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "CanReorderItems": {
+        "name": "CanReorderItems",
+        "type_name": "bool",
+        "documentation": "ListViewBase.CanReorderItems: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "ReorderMode": {
+        "name": "ReorderMode",
+        "type_name": "ListViewReorderMode",
+        "documentation": "ListViewBase.ReorderMode: ListViewReorderMode",
+        "values": [
+          "Disabled",
+          "Enabled"
+        ],
+        "attached": false
+      },
+      "IncrementalLoadingTrigger": {
+        "name": "IncrementalLoadingTrigger",
+        "type_name": "IncrementalLoadingTrigger",
+        "documentation": "ListViewBase.IncrementalLoadingTrigger: IncrementalLoadingTrigger",
+        "values": [
+          "None",
+          "Edge"
+        ],
+        "attached": false
+      },
+      "IncrementalLoadingThreshold": {
+        "name": "IncrementalLoadingThreshold",
+        "type_name": "f64",
+        "documentation": "ListViewBase.IncrementalLoadingThreshold: f64",
+        "values": [],
+        "attached": false
+      },
+      "DataFetchSize": {
+        "name": "DataFetchSize",
+        "type_name": "f64",
+        "documentation": "ListViewBase.DataFetchSize: f64",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ListViewBaseAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ListViewBaseAutomationPeer",
+    "base": "SelectingItemsControlAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ListViewBaseItem",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::ListViewBaseItem",
+    "base": "ListBoxItem",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Primitives",
+      "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ListViewBaseItemAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ListViewBaseItemAutomationPeer",
+    "base": "ListItemAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ListViewItem",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::ListViewItem",
+    "base": "ListViewBaseItem",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ListViewItemAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ListViewItemAutomationPeer",
+    "base": "ListViewBaseItemAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ListViewItemTemplateSettings",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::ListViewItemTemplateSettings",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "DragItemsCount": {
+        "name": "DragItemsCount",
+        "type_name": "i32",
+        "documentation": "ListViewItemTemplateSettings.DragItemsCount: i32",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Primitives",
+      "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
     ]
   },
   {

@@ -93,6 +93,7 @@
         <MergeResourceInclude Source="/Resources/PersonPicture_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/PagerControl_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/RichEditBox_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/GridViewItem_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/Pivot_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/SwipeControl_themeresources.xaml" />
 

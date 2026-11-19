@@ -46,6 +46,11 @@ extern "C" {
     #[wasm_bindgen(js_namespace = FerroDOM, js_name = getDarkMode)]
     pub fn get_dark_mode(global_this: &JsObject) -> Vec<i32>;
 
+    /// The CSS system colours of the page as ARGB while the browser forces colours, in the
+    /// order of `SystemColors` (#560); empty otherwise.
+    #[wasm_bindgen(js_namespace = FerroDOM, js_name = getSystemColors)]
+    pub fn get_system_colors(global_this: &JsObject) -> Vec<u32>;
+
     #[wasm_bindgen(js_namespace = FerroDOM, js_name = getAnimationsEnabled)]
     pub fn get_animations_enabled(global_this: &JsObject) -> bool;
 
