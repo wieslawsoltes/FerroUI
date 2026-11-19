@@ -1,5 +1,5 @@
 use crate::{bson_class, ferro_remote_message_guid};
-use crate::design_animation_authoring::DesignAnimationAuthoring;
+use crate::design_animation_authoring::{DesignAnimationAuthoring, DesignAnimationTrack};
 
 /// An IDE opts in with `?ferroui-design-animation=1` on the TCP preview URI.
 /// A host without this protocol still echoes its session and responds to ordinary design updates.
@@ -35,6 +35,7 @@ pub struct DesignAnimationProgram {
     pub source_utf16: i32,
     pub custom_animator: bool,
     pub authoring: Option<DesignAnimationAuthoring>,
+    pub curve_tracks: Option<Vec<DesignAnimationTrack>>,
 }
 
 bson_class!(DesignAnimationProgram as "DesignAnimationProgram" {
@@ -48,6 +49,7 @@ bson_class!(DesignAnimationProgram as "DesignAnimationProgram" {
     "SourceUtf16" => source_utf16: i32,
     "CustomAnimator" => custom_animator: bool,
     "Authoring" => authoring: Option<DesignAnimationAuthoring>,
+    "CurveTracks" => curve_tracks: Option<Vec<DesignAnimationTrack>>,
 });
 
 #[derive(Clone, Debug, Default, PartialEq)]

@@ -21,6 +21,8 @@ impl HostedKeyframes {
         document: Document,
         programs: Vec<AnimationProgram>,
         catalog: &mut [DesignAnimationProgram],
+        can_edit: bool,
+        curves: bool,
     ) -> Self {
         let candidates = programs
             .into_iter()
@@ -45,10 +47,20 @@ impl HostedKeyframes {
                 with_codecs(|codecs| {
                     codecs.decode(&mut program, &source, &ImportOptions::default())
                 });
-                authoring(&program)
+                tracks(&program)
             }));
-            if let Ok(Some(authoring)) = decoded {
-                entry.authoring = Some(authoring);
+            let Ok(Some(tracks)) = decoded else { continue };
+            if curves {
+                let tracks: Vec<_> = tracks.iter().filter(|track| {
+                    track.keys.first().is_some_and(|key| key.value_kind == "Number")
+                }).cloned().collect();
+                entry.curve_tracks = (!tracks.is_empty()).then_some(tracks);
+            }
+            if can_edit && (program.has_project_codec() || entry.curve_tracks.is_some()) {
+                entry.authoring = Some(DesignAnimationAuthoring {
+                    codec: program.codec.clone().unwrap_or_default(),
+                    tracks,
+                });
                 programs.insert(entry.id, program);
             }
         }
@@ -62,7 +74,7 @@ impl HostedKeyframes {
         let program = self
             .programs
             .get(&request.program)
-            .ok_or("Choose a project codec in the current application preview")?;
+            .ok_or("Choose an editable animation in the current application preview")?;
         let target =
             NodeId::try_from(request.target).map_err(|_| "Choose an authored animation track")?;
         let property = &request.property;
@@ -77,15 +89,13 @@ impl HostedKeyframes {
                 AnimationValue::parse(
                     text,
                     kind.ok_or_else(|| {
-                        AnimationError("Choose an existing track from the project codec".into())
+                        AnimationError("Choose an existing authored animation track".into())
                     })?,
                 )
             })
             .map_err(|error| error.to_string())?;
-        let authored =
-            animation_fragment(&self.document, program.id).map_err(|error| error.to_string())?;
         let (source, accepted) = with_codecs(|codecs| {
-            let source = codecs.encode(program, &authored, &draft)?;
+            let source = codecs.encode_for_document(&self.document, program, &draft)?;
             let mut accepted = program.clone();
             codecs.decode(&mut accepted, &source, &ImportOptions::default());
             Ok::<_, AnimationError>((source, accepted))
@@ -95,7 +105,7 @@ impl HostedKeyframes {
             .timeline
             .as_ref()
             .filter(|_| accepted.codec == program.codec)
-            .ok_or("The project codec could not read its encoded program")?;
+            .ok_or("The animation codec could not read its encoded program")?;
         let mut location = KeyframeLocation {
             target,
             property: property.clone(),
@@ -110,7 +120,7 @@ impl HostedKeyframes {
             .and_then(|track| track.keyframes.iter().find(|key| key.time == location.time));
         if !matches!((expected, round_trip), (Some(expected), Some(actual)) if expected.value == actual.value && expected.easing == actual.easing)
         {
-            return Err("The project codec did not preserve the draft value and easing".into());
+            return Err("The animation codec did not preserve the draft value and easing".into());
         }
         let preview = accepted_timeline
             .inspect_keyframe(target, property, location.time)
@@ -136,10 +146,7 @@ impl HostedKeyframes {
     }
 }
 
-fn authoring(program: &AnimationProgram) -> Option<DesignAnimationAuthoring> {
-    if !program.has_project_codec() {
-        return None;
-    }
+fn tracks(program: &AnimationProgram) -> Option<Vec<DesignAnimationTrack>> {
     let timeline = program.timeline.as_ref()?;
     timeline.validate().ok()?;
     let tracks = timeline
@@ -162,10 +169,7 @@ fn authoring(program: &AnimationProgram) -> Option<DesignAnimationAuthoring> {
             })
         })
         .collect::<Vec<_>>();
-    (!tracks.is_empty()).then(|| DesignAnimationAuthoring {
-        codec: program.codec.clone().unwrap_or_default(),
-        tracks,
-    })
+    (!tracks.is_empty()).then_some(tracks)
 }
 
 fn utf16_offset(source: &str, offset: usize) -> Result<i32, String> {

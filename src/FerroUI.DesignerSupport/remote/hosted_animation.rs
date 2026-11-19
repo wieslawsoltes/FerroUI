@@ -1,5 +1,10 @@
 //! Timeline commands run on the application UI thread, beside its registered animators.
 
+#[path = "hosted_animation_curve.rs"]
+mod curve;
+
+pub(super) use curve::curve;
+
 use crate::design_window_loader::LoadedDesign;
 use super::hosted_keyframes::HostedKeyframes;
 use crate::remote::previewer_windowing_platform::PreviewerWindowingPlatform;
@@ -16,7 +21,7 @@ use ferroui_remote_protocol::designer::{
     DesignAnimationAuthoringRequest, DesignAnimationAuthoringResult,
     DesignAnimationCatalogMessage, DesignAnimationProgram, DesignAnimationRequestMessage,
     DesignAnimationResultMessage, DesignAnimationTarget, UpdateDesignMessage,
-    DESIGN_ANIMATION_AUTHORING_QUERY, DESIGN_ANIMATION_QUERY, DESIGN_ANIMATION_VERSION,
+    DESIGN_ANIMATION_AUTHORING_QUERY, DESIGN_ANIMATION_CURVE_QUERY, DESIGN_ANIMATION_QUERY, DESIGN_ANIMATION_VERSION,
 };
 use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, BTreeSet};
@@ -25,6 +30,7 @@ use url::Url;
 ferroui_base::ferro_thread_local! {
     static ENABLED: Cell<bool> = const { Cell::new(false) };
     static AUTHORING: Cell<bool> = const { Cell::new(false) };
+    static CURVES: Cell<bool> = const { Cell::new(false) };
     static ACTIVE: RefCell<Option<HostedAnimations>> = const { RefCell::new(None) };
 }
 
@@ -36,6 +42,7 @@ pub(super) fn configure(transport: Option<&Url>, remote: bool) {
     let enabled = requested(DESIGN_ANIMATION_QUERY);
     ENABLED.set(enabled);
     AUTHORING.set(enabled && requested(DESIGN_ANIMATION_AUTHORING_QUERY));
+    CURVES.set(enabled && requested(DESIGN_ANIMATION_CURVE_QUERY));
     ACTIVE.with(|active| active.borrow_mut().take());
 }
 
@@ -122,13 +129,13 @@ pub(super) fn plan_keyframe(request: &DesignAnimationAuthoringRequest) -> Design
             let mut active = active.borrow_mut();
             let host = active.as_mut().ok_or("Open an app-hosted animation preview first")?;
             host.claim(request.revision, request.request)?;
-            host.keyframes.as_ref().ok_or("The application preview has no registered authoring codecs")?.plan(request)
+            host.keyframes.as_ref().ok_or("The application preview has no editable animation tracks")?.plan(request)
         })
     }));
     let error = match plan {
         Ok(Ok(plan)) => return plan,
         Ok(Err(error)) => error,
-        Err(_) => "The project animation codec could not plan this edit".into(),
+        Err(_) => "The animation codec could not plan this edit".into(),
     };
     DesignAnimationAuthoringResult {
         revision: request.revision, request: request.request, error: Some(error), ..Default::default()
@@ -197,10 +204,11 @@ impl HostedAnimations {
                 }
             })
             .collect();
-        let authoring = AUTHORING.get()
-            && crate::animation_codecs::with_codecs(ferroui_designer_animation::AnimationCodecRegistry::has_project_codecs);
-        let keyframes = authoring.then(|| {
-            HostedKeyframes::mount(source.document, source.programs, &mut catalog.programs)
+        let curves = CURVES.get();
+        let authoring = AUTHORING.get();
+        let project_codecs = crate::animation_codecs::with_codecs(ferroui_designer_animation::AnimationCodecRegistry::has_project_codecs);
+        let keyframes = (curves || (authoring && project_codecs)).then(|| {
+            HostedKeyframes::mount(source.document, source.programs, &mut catalog.programs, authoring, curves)
         });
         Self {
             revision,
@@ -305,6 +313,7 @@ fn catalog_entry(
         source_utf16: i32::try_from(utf16).ok()?,
         custom_animator: index.uses_custom_animators(program.id),
         authoring: None,
+        curve_tracks: None,
     })
 }
 

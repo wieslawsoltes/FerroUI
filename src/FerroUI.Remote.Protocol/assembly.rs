@@ -6,6 +6,7 @@
 //! passes it to [`DefaultMessageTypeResolver::new`](crate::DefaultMessageTypeResolver::new).
 
 use crate::design_animation_authoring::{DesignAnimationAuthoringRequest, DesignAnimationAuthoringResult};
+use crate::design_animation_curve::{DesignAnimationCurveRequest, DesignAnimationCurveResult};
 use crate::design_animation_messages::{DesignAnimationCatalogMessage, DesignAnimationRequestMessage, DesignAnimationResultMessage};
 use crate::design_messages::{DesignFrameMessage, DesignFrameReceivedMessage, StartDesignerSessionMessage, UpdateDesignMessage, UpdateDesignResultMessage, UpdateXamlMessage, UpdateXamlResultMessage};
 use crate::ferro_remote_message_guid_attribute::{FerroRemoteMessage, FerroRemoteMessageGuidAttribute};
@@ -71,6 +72,8 @@ pub static ASSEMBLY: Assembly = Assembly {
         ExportedType::of::<DesignAnimationResultMessage>(),
         ExportedType::of::<DesignAnimationAuthoringRequest>(),
         ExportedType::of::<DesignAnimationAuthoringResult>(),
+        ExportedType::of::<DesignAnimationCurveRequest>(),
+        ExportedType::of::<DesignAnimationCurveResult>(),
         // TransportMessages
         ExportedType::of::<HtmlTransportStartedMessage>(),
     ],
@@ -128,6 +131,8 @@ mod tests {
         ("DesignAnimationResultMessage", "2E7AC05A-D953-4211-BC9E-F400AEF993CF"),
         ("DesignAnimationAuthoringRequest", "D7B9804A-61AD-4BEC-9067-F4901FE7C340"),
         ("DesignAnimationAuthoringResult", "51B25CB4-4324-4890-B1C0-5B81766D5673"),
+        ("DesignAnimationCurveRequest", "29312A91-E412-4881-A469-1B0F1739BC77"),
+        ("DesignAnimationCurveResult", "2D4276FD-9106-4657-9EBA-530413ED4F11"),
     ];
 
     fn modifiers() -> InputEventMessageBase {

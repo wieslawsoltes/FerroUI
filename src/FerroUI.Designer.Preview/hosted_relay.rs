@@ -6,7 +6,7 @@ use crate::{
     protocol::{Image, Language, MAX_SOURCE_BYTES, Source},
 };
 use ferroui_remote_protocol::designer::{
-    DesignAnimationAuthoringResult, DesignAnimationCatalogMessage, DesignAnimationResultMessage,
+    DesignAnimationAuthoringResult, DesignAnimationCatalogMessage, DesignAnimationCurveResult, DesignAnimationResultMessage,
     DesignFrameMessage, DesignFrameReceivedMessage, StartDesignerSessionMessage,
     UpdateDesignMessage, UpdateDesignResultMessage, UpdateXamlMessage,
 };
@@ -49,7 +49,9 @@ struct Events {
     animation_request: Option<i64>,
     animation_result: Option<DesignAnimationResultMessage>,
     keyframe_result: Option<DesignAnimationAuthoringResult>,
+    curve_result: Option<DesignAnimationCurveResult>,
     authorable: BTreeSet<i64>,
+    curve_programs: BTreeSet<i64>,
     authored_xaml: bool,
     disconnected: bool,
 }
@@ -190,6 +192,8 @@ impl Relay {
                     } else {
                         catalog.programs.iter_mut().for_each(|program| program.authoring = None);
                     }
+                    state.curve_programs = catalog.programs.iter().filter(|program| program.curve_tracks.is_some())
+                        .map(|program| program.id).collect();
                     state.animation_catalog = Some(catalog);
                 }
             } else if let Some(outcome) = message.downcast_ref::<DesignAnimationResultMessage>() {
@@ -200,6 +204,11 @@ impl Relay {
             } else if let Some(outcome) = message.downcast_ref::<DesignAnimationAuthoringResult>() {
                 if state.requested == Some(outcome.revision) && state.animation_request == Some(outcome.request) {
                     state.keyframe_result = Some(outcome.clone());
+                    result.1.notify_all();
+                }
+            } else if let Some(outcome) = message.downcast_ref::<DesignAnimationCurveResult>() {
+                if state.requested == Some(outcome.revision) && state.animation_request == Some(outcome.request) {
+                    state.curve_result = Some(outcome.clone());
                     result.1.notify_all();
                 }
             } else if let Some(outcome) = message.downcast_ref::<UpdateDesignResultMessage>() {

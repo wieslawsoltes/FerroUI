@@ -14,6 +14,7 @@ use std::time::Duration;
 
 use ferroui_remote_protocol::designer::{
     DesignAnimationAuthoring, DesignAnimationAuthoringRequest, DesignAnimationAuthoringResult,
+    DesignAnimationCurvePoint, DesignAnimationCurveRequest, DesignAnimationCurveResult,
     DesignAnimationCatalogMessage, DesignAnimationKeyframe, DesignAnimationProgram, DesignAnimationRequestMessage,
     DesignAnimationResultMessage, DesignAnimationSourcePatch, DesignAnimationTarget, DesignAnimationTrack,
     ExceptionDetails, StartDesignerSessionMessage, UpdateXamlMessage, UpdateXamlResultMessage,
@@ -179,6 +180,10 @@ fn entities() -> Vec<Message> {
                         }],
                     }],
                 }),
+                curve_tracks: Some(vec![DesignAnimationTrack {
+                    target: 12, property: "Opacity".into(),
+                    keys: vec![DesignAnimationKeyframe { time: 1.0, value: "0.5".into(), value_kind: "Number".into(), easing: "Linear".into() }],
+                }]),
             }],
             targets: vec![DesignAnimationTarget { id: 12, label: "ReviewCard".into(), type_name: "Border".into() }],
         }),
@@ -197,6 +202,15 @@ fn entities() -> Vec<Message> {
             revision: 40, request: 32, samples: vec![0.0, 0.5, 1.0], value_kind: "CornerRadius".into(),
             patch: Some(DesignAnimationSourcePatch { start: 62, end: 64, expected: "16".into(), replacement: "18".into() }),
             error: Some("Portable draft result".into()),
+        }),
+        Arc::new(DesignAnimationCurveRequest {
+            revision: 40, request: 33, program: 6, target: 12, property: "Opacity".into(),
+            start: 0.2, end: 1.8,
+        }),
+        Arc::new(DesignAnimationCurveResult {
+            revision: 40, request: 33,
+            points: vec![DesignAnimationCurvePoint { time: 0.5, value: 0.7 }],
+            error: Some("Portable curve result".into()),
         }),
     ]
 }

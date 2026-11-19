@@ -145,10 +145,12 @@ fn respond(
             .ok_or_else(|| "Select a local workspace folder".to_owned())
             .and_then(|root| serialize(inventory::scan(std::path::Path::new(root)))),
         "hostedListen" => hosted_relay::Relay::listen(message["params"]["nonce"].as_str().unwrap_or("")).map(|relay| {
-            use ferroui_remote_protocol::designer::{DESIGN_ANIMATION_AUTHORING_QUERY, DESIGN_ANIMATION_QUERY, DESIGN_ANIMATION_VERSION};
+            use ferroui_remote_protocol::designer::{DESIGN_ANIMATION_AUTHORING_QUERY, DESIGN_ANIMATION_CURVE_QUERY, DESIGN_ANIMATION_QUERY, DESIGN_ANIMATION_VERSION};
             let port = relay.port();
             *hosted = Some(relay);
-            json!({"port":port,"animationQuery":format!("{DESIGN_ANIMATION_QUERY}={DESIGN_ANIMATION_VERSION}&{DESIGN_ANIMATION_AUTHORING_QUERY}={DESIGN_ANIMATION_VERSION}")})
+            let query = [DESIGN_ANIMATION_QUERY, DESIGN_ANIMATION_AUTHORING_QUERY, DESIGN_ANIMATION_CURVE_QUERY]
+                .map(|key| format!("{key}={DESIGN_ANIMATION_VERSION}")).join("&");
+            json!({"port": port, "animationQuery": query})
         }),
         "hostedRender" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|design| serialize(hosted.as_mut().ok_or("Start an app-hosted session")?.render(design, projects))),
@@ -159,6 +161,8 @@ fn respond(
             .and_then(|command| serialize(hosted.as_mut().ok_or("Start an app-hosted session")?.animate(command))),
         "hostedKeyframe" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|draft| hosted.as_mut().ok_or("Start an app-hosted session")?.plan_keyframe(draft)),
+        "hostedCurve" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
+            .and_then(|request| serialize(hosted.as_mut().ok_or("Start an app-hosted session")?.curve(request))),
         "stagesSync" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|request| {
                 renderer.get_or_insert_with(Renderer::new);

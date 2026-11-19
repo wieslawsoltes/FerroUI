@@ -1,7 +1,9 @@
 use super::{send, Connection, Relay, FRAME_TIMEOUT};
 use crate::{hosted_animation, hosted_animation_restore::Presentation};
+use ferroui_designer_animation::CurvePoint;
 use ferroui_remote_protocol::designer::{
-    DesignAnimationAuthoringRequest, DesignAnimationRequestMessage, DesignAnimationResultMessage,
+    DesignAnimationAuthoringRequest, DesignAnimationCurveRequest, DesignAnimationRequestMessage,
+    DesignAnimationResultMessage,
 };
 use std::sync::Arc;
 
@@ -141,7 +143,7 @@ impl Relay {
             let mut state = self.events.0.lock().unwrap();
             if !state.authorable.contains(&draft.program) {
                 return Err(
-                    "Choose an XAML program with a registered project animation codec".into(),
+                    "Choose an editable XAML animation in the application preview".into(),
                 );
             }
             state.animation_request = Some(request);
@@ -174,5 +176,40 @@ impl Relay {
             .take()
             .ok_or("The application did not return an animation edit plan")?;
         hosted_animation::keyframe(result)
+    }
+
+    pub(crate) fn curve(
+        &mut self,
+        query: hosted_animation::CurveRequest,
+    ) -> Result<Vec<CurvePoint>, String> {
+        let connection = self.animation_connection(query.revision, query.sequence)?;
+        let request = self.next_animation_request()?;
+        {
+            let mut state = self.events.0.lock().unwrap();
+            if !state.curve_programs.contains(&query.program) {
+                return Err("Choose a program with app-hosted scalar curves".into());
+            }
+            state.animation_request = Some(request);
+            state.curve_result = None;
+        }
+        send(&connection, Arc::new(DesignAnimationCurveRequest {
+            revision: query.revision,
+            request,
+            program: query.program,
+            target: query.target,
+            property: query.property,
+            start: query.window.start,
+            end: query.window.end,
+        }))?;
+        let (mut state, _) = self.events.1
+            .wait_timeout_while(self.events.0.lock().unwrap(), FRAME_TIMEOUT,
+                |state| !state.disconnected && state.curve_result.is_none())
+            .unwrap();
+        state.animation_request = None;
+        let result = state.curve_result.take().ok_or("The application did not return scalar samples")?;
+        if let Some(error) = result.error {
+            return Err(error);
+        }
+        Ok(result.points.into_iter().map(|point| CurvePoint { time: point.time, value: point.value }).collect())
     }
 }
