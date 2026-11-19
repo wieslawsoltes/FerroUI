@@ -50,6 +50,12 @@ export class TimelinePlayback {
             }
             return this.interrupt(current, control.action, signal);
         }
+        if (control.action === 'pause' && current?.position.completed && current.position.previewRange
+            && frame.session === panel.session && frame.token === current.token - 1
+            && panel.canUse({ session: panel.session, token: current.token })) {
+            // A one-shot range can reach Out while Pause is crossing the same clock's frame boundary.
+            return current.position;
+        }
         if (!panel.canUse(frame)) throw new Error('Read the current timeline first.');
         if (existing?.position.busy) throw new Error('Wait for the current timeline frame.');
         const idle = { session: panel.session, program: control.program, time: 0, playing: false, busy: false };

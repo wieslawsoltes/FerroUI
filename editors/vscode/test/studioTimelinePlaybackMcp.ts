@@ -98,15 +98,27 @@ export async function verifyTimelinePlayback({ invoke, content }: McpFixture, se
     const started = await control('play_range', { range }, false);
     assert.deepEqual(started.previewRange, range);
     assert.equal(started.time, range.start);
+    let outRevision: number | undefined;
     await until(async () => {
         frame = await wait();
         const node = frame.nodes.find(item => item.name === 'Lead')!.id;
         const result = await invoke('designer_inspect', { session, node });
         if (result.isError) return false;
-        const { properties } = content<{ properties: { name: string; effective: string }[] }>(result);
-        return Number(properties.find(property => property.name === 'Opacity')?.effective) === .375;
+        const { revision, properties } = content<{ revision: number; properties: { name: string; effective: string }[] }>(result);
+        if (Number(properties.find(property => property.name === 'Opacity')?.effective) !== .375) return false;
+        outRevision = revision;
+        return true;
     });
-    assert.equal((await control('pause')).time, range.end, 'One-shot playback stops at the authored Out pose');
+    assert.ok(outRevision);
+    const latePause = (revision: number) => invoke('designer_timeline_control', {
+        session, expected_revision: revision, arguments: { action: 'pause', program },
+    });
+    const completed = content<TimelinePosition>(await latePause(outRevision - 1));
+    assert.equal(completed.time, range.end, 'Pause at the final frame boundary retains the authored Out pose');
+    assert.equal(completed.playing, false);
+    assert.equal(completed.completed, true);
+    assert.equal((await latePause(outRevision - 2)).isError, true, 'Older presentation frames are rejected');
+    frame = await wait();
     const loop = await control('play_range', { range: { ...range, loop: true } }, false);
     assert.equal(loop.time, range.start, 'Play at Out restarts the preview from In');
     let pausedRange: TimelinePosition | undefined;
