@@ -305,6 +305,9 @@ control_tests! {
     toggle_switch => "ToggleSwitch";
     tree_view => "TreeView";
     tree_view_item => "TreeViewItem";
+    pivot => "Pivot";
+    pivot_header_item => "PivotHeaderItem";
+    pivot_item => "PivotItem";
 }
 
 /// The window itself is themed: its template is applied when it is shown
