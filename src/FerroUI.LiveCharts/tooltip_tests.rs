@@ -502,3 +502,239 @@ fn source_geo_tooltip_is_placed_about_the_centre_of_the_land() {
 }
 
 
+
+/// The header and value of the tooltip of the only point of a range series on a 200 by 200 chart
+/// (`GetSecondaryToolTipText`, `GetPrimaryToolTipText`).
+fn range_tool_tip_texts(
+    kind: SeriesKind,
+    values: &[Coordinate],
+    x: Axis,
+    y: Axis,
+    options: CartesianSeriesOptions,
+) -> Vec<(String, String)> {
+    let mut series = Series::new(kind);
+    series.values = values.to_vec();
+    let scene = CartesianChartEngine::measure_with_series_options(
+        Size::new(200.0, 200.0),
+        std::slice::from_ref(&series),
+        std::slice::from_ref(&x),
+        std::slice::from_ref(&y),
+        &CartesianOptions::default(),
+        |text, size| Size::new(text.chars().count() as f64 * size * 0.6, size * 1.2),
+        std::slice::from_ref(&options),
+    )
+    .unwrap()
+    .scene;
+    let mut hits: Vec<_> = scene.hits.iter().collect();
+    hits.sort_by_key(|hit| hit.id.point);
+    let texts: Vec<_> = hits
+        .iter()
+        .map(|hit| {
+            cartesian_chart_engine::tool_tip_texts(
+                &series,
+                &series.values[hit.id.point],
+                &x,
+                &y,
+                Some(&options),
+            )
+        })
+        .collect();
+    // The native tooltip writes the header and the value on one line.
+    for (hit, (header, value)) in hits.iter().zip(&texts) {
+        let line = [header.as_str(), value.as_str()]
+            .into_iter()
+            .filter(|part| !part.is_empty())
+            .collect::<Vec<_>>()
+            .join(": ");
+        assert_eq!(hit.label, line);
+    }
+    texts
+}
+
+fn dollars(min: f64, max: f64) -> Axis {
+    Axis {
+        labeler: Some(Labeler::new(|v| format!("${v}"))),
+        min_limit: Some(min),
+        max_limit: Some(max),
+        ..Axis::default()
+    }
+}
+
+fn days() -> (Axis, f64, f64) {
+    use ferroui_base::animation::SignedDuration;
+    use ferroui_base::utilities::{CultureInfo, DateTime};
+    let axis = Axis::date_time(SignedDuration::from_days(1.0), |date| {
+        date.try_to_string_format("MMM dd", &CultureInfo::invariant_culture())
+            .unwrap()
+    });
+    let start = DateTime::new(2026, 6, 1).ticks() as f64;
+    let end = DateTime::new(2026, 6, 5).ticks() as f64;
+    (axis, start, end)
+}
+
+// RangeBarTooltipTests.RangeColumn_DefaultTooltip_UsesValueAxisLabeler
+#[test]
+fn source_range_column_default_tooltip_uses_value_axis_labeler() {
+    let texts = range_tool_tip_texts(
+        SeriesKind::RangeColumn,
+        &[Coordinate::range(0.0, 30.0, 10.0)],
+        Axis::default(),
+        dollars(0.0, 50.0),
+        CartesianSeriesOptions::default(),
+    );
+    assert_eq!(texts[0].1, "$10 → $30");
+}
+
+// RangeBarTooltipTests.RangeColumn_DateTimeAxis_RendersDatesInTooltip
+#[test]
+fn source_range_column_date_time_axis_renders_dates_in_tooltip() {
+    let (y, start, end) = days();
+    let texts = range_tool_tip_texts(
+        SeriesKind::RangeColumn,
+        &[Coordinate::range(0.0, end, start)],
+        Axis::default(),
+        y,
+        CartesianSeriesOptions::default(),
+    );
+    assert_eq!(texts[0].1, "Jun 01 → Jun 05");
+}
+
+fn value_formatter(prefix: &'static str, middle: &'static str) -> CartesianSeriesOptions {
+    let mut options = CartesianSeriesOptions::default();
+    options.y_tool_tip_label_formatter = Some(ChartPointFormatter::new(move |c| {
+        format!("{prefix} {} {middle} {}", c.tertiary_value, c.primary_value)
+    }));
+    options
+}
+
+// RangeBarTooltipTests.RangeColumn_UserFormatter_TakesPrecedence
+#[test]
+fn source_range_column_user_formatter_takes_precedence() {
+    let texts = range_tool_tip_texts(
+        SeriesKind::RangeColumn,
+        &[Coordinate::range(0.0, 30.0, 10.0)],
+        Axis::default(),
+        dollars(0.0, 50.0),
+        value_formatter("from", "to"),
+    );
+    assert_eq!(texts[0].1, "from 10 to 30");
+}
+
+// RangeBarTooltipTests.RangeRow_DateTimeAxis_RendersDatesInTooltip: the value axis of a row
+// series is X.
+#[test]
+fn source_range_row_date_time_axis_renders_dates_in_tooltip() {
+    let (x, start, end) = days();
+    let texts = range_tool_tip_texts(
+        SeriesKind::RangeRow,
+        &[Coordinate::range(0.0, end, start)],
+        x,
+        Axis::default(),
+        CartesianSeriesOptions::default(),
+    );
+    assert_eq!(texts[0].1, "Jun 01 → Jun 05");
+}
+
+// RangeBarTooltipTests.RangeRow_UserFormatter_TakesPrecedence
+#[test]
+fn source_range_row_user_formatter_takes_precedence() {
+    let texts = range_tool_tip_texts(
+        SeriesKind::RangeRow,
+        &[Coordinate::range(0.0, 30.0, 10.0)],
+        dollars(0.0, 50.0),
+        Axis::default(),
+        value_formatter("between", "and"),
+    );
+    assert_eq!(texts[0].1, "between 10 and 30");
+}
+
+// RangeBarTooltipTests.RangeRow_HeaderUsesCategoryLabel_OrSuppressesWhenAbsent
+#[test]
+fn source_range_row_header_uses_category_label() {
+    let (x, start, _) = days();
+    let day = 864_000_000_000.0;
+    let texts = range_tool_tip_texts(
+        SeriesKind::RangeRow,
+        &[
+            Coordinate::range(0.0, start + 20.0 * day, start + 10.0 * day),
+            Coordinate::range(1.0, start + 25.0 * day, start + 15.0 * day),
+            Coordinate::range(2.0, start + 30.0 * day, start + 20.0 * day),
+        ],
+        x,
+        Axis {
+            labels: vec!["Design".into(), "Backend".into(), "Frontend".into()],
+            ..Axis::default()
+        },
+        CartesianSeriesOptions::default(),
+    );
+    let headers: Vec<_> = texts.iter().map(|(header, _)| header.as_str()).collect();
+    assert_eq!(headers, ["Design", "Backend", "Frontend"]);
+}
+
+// RangeBarTooltipTests.RangeRow_Header_SuppressedWhenYAxisHasNoLabels
+#[test]
+fn source_range_row_header_suppressed_when_y_axis_has_no_labels() {
+    let texts = range_tool_tip_texts(
+        SeriesKind::RangeRow,
+        &[Coordinate::range(0.0, 20.0, 10.0)],
+        Axis {
+            min_limit: Some(0.0),
+            max_limit: Some(30.0),
+            ..Axis::default()
+        },
+        Axis::default(),
+        CartesianSeriesOptions::default(),
+    );
+    assert_eq!(texts[0].0, "");
+}
+
+// RangeBarTooltipTests.RangeRow_Header_XFormatterStillOverrides
+#[test]
+fn source_range_row_header_x_formatter_still_overrides() {
+    let mut options = CartesianSeriesOptions::default();
+    options.x_tool_tip_label_formatter = Some(ChartPointFormatter::new(|_| "custom header".into()));
+    let texts = range_tool_tip_texts(
+        SeriesKind::RangeRow,
+        &[Coordinate::range(0.0, 20.0, 10.0)],
+        Axis {
+            min_limit: Some(0.0),
+            max_limit: Some(30.0),
+            ..Axis::default()
+        },
+        Axis {
+            labels: vec!["A".into()],
+            ..Axis::default()
+        },
+        options,
+    );
+    assert_eq!(texts[0].0, "custom header");
+}
+
+/// `GetSecondaryToolTipText` of `CartesianSeries`: the header of a column is the label of its
+/// category when the X axis has labels or a labeler of its own, else none; the name of the series
+/// starts the native line.
+#[test]
+fn cartesian_header_takes_the_category_labels_and_the_series_name_starts_the_line() {
+    let mut series = Series::from_values(SeriesKind::Column, [3.0, 5.0]);
+    series.name = "Sales".into();
+    let measure = |x: Axis| {
+        CartesianChartEngine::measure(
+            Size::new(300.0, 300.0),
+            std::slice::from_ref(&series),
+            &[x],
+            &[Axis::default()],
+            &CartesianOptions::default(),
+        )
+        .unwrap()
+    };
+    let mut labels: Vec<_> = measure(Axis::default()).hits.iter().map(|h| h.label.clone()).collect();
+    labels.sort();
+    assert_eq!(labels, ["Sales: 3", "Sales: 5"]);
+    let named = Axis {
+        labels: vec!["Jan".into(), "Feb".into()],
+        ..Axis::default()
+    };
+    let mut labels: Vec<_> = measure(named).hits.iter().map(|h| h.label.clone()).collect();
+    labels.sort();
+    assert_eq!(labels, ["Sales: Feb: 5", "Sales: Jan: 3"]);
+}

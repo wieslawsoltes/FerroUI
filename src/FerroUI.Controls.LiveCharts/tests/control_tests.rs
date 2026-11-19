@@ -1066,6 +1066,37 @@ fn polar_tooltip_text_takes_the_angle_labels_and_the_formatters_of_the_series() 
     assert_eq!(label(&chart), "Wind: 90 degrees: 5 km/h");
 }
 
+/// The tooltip text of a Cartesian point (`GetPrimaryToolTipText`, `GetSecondaryToolTipText` of
+/// `CartesianSeries`): the label of its category when the X axis has labels, and the code-only
+/// `XToolTipLabelFormatter` and `YToolTipLabelFormatter` of the series, which the chart observes.
+#[test]
+fn cartesian_tooltip_text_takes_the_category_labels_and_the_formatters_of_the_series() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let size = Size::new(600.0, 400.0);
+    let chart = CartesianChart::new();
+    chart.set_animations_speed(0.0);
+    let series = ColumnSeries::new();
+    series.set_name("Sales".into());
+    series.set_numeric_values([5.0]);
+    chart.series().add(series.clone().upcast());
+    let label = |chart: &CartesianChart| chart.scene(size).unwrap().hits[0].label.clone();
+    assert_eq!(label(&chart), "Sales: 5");
+    let months = Axis::new();
+    months.set_labels(vec!["Jan".into()]);
+    chart.x_axes().add(months);
+    assert_eq!(label(&chart), "Sales: Jan: 5");
+    let revision = chart.revision();
+    series.set_y_tool_tip_label_formatter(Some(ChartPointFormatter::new(|point| {
+        format!("{} units", point.primary_value)
+    })));
+    assert!(chart.revision() > revision);
+    assert_eq!(label(&chart), "Sales: Jan: 5 units");
+    series.set_x_tool_tip_label_formatter(Some(ChartPointFormatter::new(|point| {
+        format!("month {}", point.secondary_value + 1.0)
+    })));
+    assert_eq!(label(&chart), "Sales: month 1: 5 units");
+}
+
 /// The tooltip text of a node (`GetPrimaryToolTipText` of `CoreSankeySeries` and
 /// `CoreTreemapSeries`): `<label>: <value>`, and the code-only `ToolTipLabelFormatter` of
 /// `SankeySeries` and `TreemapSeries`, which the chart observes.

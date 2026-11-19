@@ -4,6 +4,7 @@
 use crate::axis::{format_number, Axis, AxisPosition, AxisScale, CARTESIAN_LABELS_PADDING};
 use crate::heat_functions::HeatFunctions;
 use crate::kernel::Coordinate;
+use crate::labelers::ChartPointFormatter;
 use crate::measure::{AxisOrientation, Bounds};
 use crate::scene::*;
 use crate::series::{DataLabelsPosition, Series, SeriesKind, DATA_LABELS_PADDING};
@@ -66,6 +67,12 @@ pub struct CartesianSeriesOptions {
     /// as the source's `VariableSVGPathGeometry`; `None` draws rectangles. Path data the parser
     /// rejects is an error, where the source throws.
     pub geometry_svg: Option<String>,
+    /// `YToolTipLabelFormatter`: the text of the value of a point in its tooltip; `None` is the
+    /// label of the value axis ([`tool_tip_texts`]).
+    pub y_tool_tip_label_formatter: Option<ChartPointFormatter>,
+    /// `XToolTipLabelFormatter`: the header of the tooltip of a point; `None` is the label of
+    /// the category axis when it has labels or a labeler of its own, else no header.
+    pub x_tool_tip_label_formatter: Option<ChartPointFormatter>,
 }
 
 /// Calculated axes can also drive crosshairs and zoom/pan without reinterpreting pixels.
@@ -603,6 +610,27 @@ impl CartesianChartEngine {
                     ));
                 }
             }
+        }
+        // The tooltip text of each point (`GetPrimaryToolTipText`, `GetSecondaryToolTipText`).
+        for hit in &mut scene.hits {
+            let Some(s) = series.get(hit.id.series) else {
+                continue;
+            };
+            let (Some(c), Some(x), Some(y)) = (
+                s.values.get(hit.id.point),
+                x_axes.get(s.x_axis),
+                y_axes.get(s.y_axis),
+            ) else {
+                continue;
+            };
+            let (header, value) = tool_tip_texts(s, c, x, y, series_options.get(hit.id.series));
+            // The native tooltip writes a point on one line: the name of the series, the header
+            // and the value, each left out when empty.
+            hit.label = [s.name.as_str(), header.as_str(), value.as_str()]
+                .into_iter()
+                .filter(|part| !part.is_empty())
+                .collect::<Vec<_>>()
+                .join(": ");
         }
         Ok(CartesianMeasurement {
             scene,
@@ -1203,6 +1231,67 @@ fn append_hit(
             }),
         );
     }
+}
+
+/// The header (`GetSecondaryToolTipText`) and the value (`GetPrimaryToolTipText`) of the tooltip
+/// of a point of a Cartesian series; an empty header is none (`IgnoreToolTipLabel`).
+///
+/// The value is the text of `YToolTipLabelFormatter`, else the label of the value axis (the Y
+/// axis, the X axis of a row series): `<low> → <high>` for a range series (`CoreRangeColumnSeries`,
+/// `CoreRangeRowSeries`, `CoreRangeLineSeries`), the open, high, low and close of a financial
+/// point and the five values of a box, each through the axis, and the weight of a heat cell. The
+/// header is the text of `XToolTipLabelFormatter`, else the label of the category axis when it has
+/// labels or a labeler of its own (`CartesianSeries`), the labels alone for a row series
+/// (`CoreRangeRowSeries`); without them there is no header (`IgnoreToolTipLabel`).
+///
+/// The source writes the value of every series through the Y axis and the header of a row series
+/// through the X axis, which labels the length of a bar by the categories; the native text takes
+/// the value axis of a row as its range rows do. A financial, box or heat point of the source
+/// shows its primary value alone; the native text keeps every value.
+pub fn tool_tip_texts(
+    s: &Series,
+    c: &Coordinate,
+    x: &Axis,
+    y: &Axis,
+    options: Option<&CartesianSeriesOptions>,
+) -> (String, String) {
+    let (category_axis, value_axis) = if s.kind.is_row() { (y, x) } else { (x, y) };
+    let value = |v: f64| value_axis.label(v);
+    let primary = match options.and_then(|o| o.y_tool_tip_label_formatter.as_ref()) {
+        Some(formatter) => formatter.format(c),
+        None => match s.kind {
+            SeriesKind::RangeColumn | SeriesKind::RangeRow | SeriesKind::RangeLine => {
+                format!("{} → {}", value(c.tertiary_value), value(c.primary_value))
+            }
+            SeriesKind::Financial | SeriesKind::Ohlc => format!(
+                "O {} H {} L {} C {}",
+                value(c.tertiary_value),
+                value(c.primary_value),
+                value(c.quinary_value),
+                value(c.quaternary_value)
+            ),
+            SeriesKind::Box => format!(
+                "Min {} Q1 {} Median {} Q3 {} Max {}",
+                value(c.quinary_value),
+                value(c.quaternary_value),
+                value(c.senary_value),
+                value(c.tertiary_value),
+                value(c.primary_value)
+            ),
+            SeriesKind::Heat => format_number(c.tertiary_value),
+            _ => value(c.primary_value),
+        },
+    };
+    let header = match options.and_then(|o| o.x_tool_tip_label_formatter.as_ref()) {
+        Some(formatter) => formatter.format(c),
+        None if !category_axis.labels.is_empty()
+            || (!s.kind.is_row() && category_axis.labeler.is_some()) =>
+        {
+            category_axis.label(c.secondary_value)
+        }
+        None => String::new(),
+    };
+    (header, primary)
 }
 
 pub(crate) fn line_path(points: &[Point], smoothness: f64, step: bool) -> Vec<PathCommand> {

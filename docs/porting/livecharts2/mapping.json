@@ -25,6 +25,17 @@
       ],
       "status": "partial"
     },
+    "src/LiveChartsCore/CartesianSeries.cs": {
+      "reason": "The tooltip texts of a point (cartesian_chart_engine::tool_tip_texts): the value is the YToolTipLabelFormatter of the series, else the label of the value axis (GetPrimaryToolTipText; the labels of the axis win over its labeler), and the header the XToolTipLabelFormatter, else the label of the category when the category axis has labels or a labeler of its own, else none (GetSecondaryToolTipText, IgnoreToolTipLabel). The two formatters are ChartPointFormatter properties of every series (code only), carried by CartesianSeriesOptions.",
+      "remaining": [
+        "The source writes the value of every series through the Y axis and the header of a row series through the X axis; the native text takes the value axis and the category labels of a row, as the range rows of the source. A financial, box or heat point shows all its values (the weight of a cell) where the source shows its primary value. ClippingMode and GetBounds are the engine's, not this class."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "status": "partial"
+    },
     "src/LiveChartsCore/CoreAxis.cs": {
       "reason": "Native axis snapshot preserves labels, named axes, limits, position, inversion, spacing, unit width, text styling and logarithmic scales; AxisScale handles extreme finite linear domains and inverse conversion.",
       "remaining": [
@@ -150,7 +161,7 @@
       "status": "partial"
     },
     "src/LiveChartsCore/CoreRangeColumnSeries.cs": {
-      "reason": "Vertical range bars include both endpoints in bounds, including reversed ranges, and show both values in tooltip labels.",
+      "reason": "Vertical range bars include both endpoints in bounds, including reversed ranges. The tooltip value is the YToolTipLabelFormatter of the series, else <low> → <high> through the labeler of the Y axis (GetPrimaryToolTipText).",
       "remaining": [
         "Source full-span tick padding and all range data-label formatting/placement options remain pending."
       ],
@@ -162,7 +173,7 @@
       "status": "partial"
     },
     "src/LiveChartsCore/CoreRangeLineSeries.cs": {
-      "reason": "Dual high/low paths form a filled band, both endpoint markers are rendered, exact hits target either marker and category hover covers the entire band.",
+      "reason": "Dual high/low paths form a filled band, both endpoint markers are rendered, exact hits target either marker and category hover covers the entire band. The tooltip value is the YToolTipLabelFormatter of the series, else <low> → <high> through the labeler of the Y axis (GetPrimaryToolTipText).",
       "remaining": [
         "Source full-span tick padding, complete data label layout, generic geometry and per-point lifecycle remain pending."
       ],
@@ -174,9 +185,9 @@
       "status": "partial"
     },
     "src/LiveChartsCore/CoreRangeRowSeries.cs": {
-      "reason": "Horizontal/Gantt range bars include both endpoints, preserve the axis swap and support numeric/date-sized categories.",
+      "reason": "Horizontal/Gantt range bars include both endpoints, preserve the axis swap and support numeric/date-sized categories. The tooltip value is the YToolTipLabelFormatter of the series, else <low> → <high> through the labeler of the X axis, and the header the XToolTipLabelFormatter, else the label of the category of the Y axis when it has labels (GetPrimaryToolTipText, GetSecondaryToolTipText).",
       "remaining": [
-        "Source automatic DateTime formatter integration and full-span tick padding remain pending."
+        "Source full-span tick padding remains pending."
       ],
       "rust": [
         "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
@@ -3402,6 +3413,70 @@
       "remaining": [],
       "rust": [
         "src/FerroUI.LiveCharts/polar_chart_engine.rs::tests::source_should_scale_properly"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/SeriesTests/RangeBarTooltipTests.cs::CoreTests.SeriesTests.RangeBarTooltipTests::void RangeColumn_DateTimeAxis_RendersDatesInTooltip()#L56": {
+      "reason": "A range column from June 1 to June 5, 2026 on a date Y axis of one day labelled MMM dd in the invariant culture: Jun 01 → Jun 05.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/tooltip_tests.rs::source_range_column_date_time_axis_renders_dates_in_tooltip"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/SeriesTests/RangeBarTooltipTests.cs::CoreTests.SeriesTests.RangeBarTooltipTests::void RangeColumn_DefaultTooltip_UsesValueAxisLabeler()#L33": {
+      "reason": "A range column of 10 to 30 on a Y axis labelled $v from 0 to 50: the value of its tooltip is $10 → $30, the low and the high through the labeler of the value axis.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/tooltip_tests.rs::source_range_column_default_tooltip_uses_value_axis_labeler"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/SeriesTests/RangeBarTooltipTests.cs::CoreTests.SeriesTests.RangeBarTooltipTests::void RangeColumn_UserFormatter_TakesPrecedence()#L81": {
+      "reason": "The YToolTipLabelFormatter of the series (CartesianSeriesOptions::y_tool_tip_label_formatter) wins over the labeler of the axis: from 10 to 30.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/tooltip_tests.rs::source_range_column_user_formatter_takes_precedence"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/SeriesTests/RangeBarTooltipTests.cs::CoreTests.SeriesTests.RangeBarTooltipTests::void RangeRow_DateTimeAxis_RendersDatesInTooltip()#L106": {
+      "reason": "The value axis of a range row is X: a date X axis writes Jun 01 → Jun 05.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/tooltip_tests.rs::source_range_row_date_time_axis_renders_dates_in_tooltip"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/SeriesTests/RangeBarTooltipTests.cs::CoreTests.SeriesTests.RangeBarTooltipTests::void RangeRow_HeaderUsesCategoryLabel_OrSuppressesWhenAbsent()#L163": {
+      "reason": "Three range rows on a date X axis with the Y labels Design, Backend and Frontend: the headers of their tooltips are the labels of their categories.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/tooltip_tests.rs::source_range_row_header_uses_category_label"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/SeriesTests/RangeBarTooltipTests.cs::CoreTests.SeriesTests.RangeBarTooltipTests::void RangeRow_Header_SuppressedWhenYAxisHasNoLabels()#L196": {
+      "reason": "A range row on a Y axis without labels has no header (IgnoreToolTipLabel is the empty header).",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/tooltip_tests.rs::source_range_row_header_suppressed_when_y_axis_has_no_labels"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/SeriesTests/RangeBarTooltipTests.cs::CoreTests.SeriesTests.RangeBarTooltipTests::void RangeRow_Header_XFormatterStillOverrides()#L218": {
+      "reason": "The XToolTipLabelFormatter of the series (CartesianSeriesOptions::x_tool_tip_label_formatter) gives the header over the labels: custom header.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/tooltip_tests.rs::source_range_row_header_x_formatter_still_overrides"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/SeriesTests/RangeBarTooltipTests.cs::CoreTests.SeriesTests.RangeBarTooltipTests::void RangeRow_UserFormatter_TakesPrecedence()#L134": {
+      "reason": "The YToolTipLabelFormatter of a row series gives the value of its tooltip: between 10 and 30.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/tooltip_tests.rs::source_range_row_user_formatter_takes_precedence"
       ],
       "status": "ported"
     },

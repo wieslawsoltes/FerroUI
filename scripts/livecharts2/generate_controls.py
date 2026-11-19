@@ -175,13 +175,17 @@ series_props = [
  ('geometry_fill','GeometryFill','Option<Color>','None'),('geometry_stroke','GeometryStroke','Option<Color>','None')]
 # The properties of every series that the engine reads beside the snapshot: DataLabelsMaxWidth,
 # the source's 170 (MaxTooltipsAndLegendsLabelsWidth), which breaks the data labels into lines (#624).
-series_extra_props = [('data_labels_max_width','DataLabelsMaxWidth','f64','170.0')]
+series_extra_props = [('data_labels_max_width','DataLabelsMaxWidth','f64','170.0'),
+ # The XToolTipLabelFormatter and YToolTipLabelFormatter of a Cartesian series (ICartesianSeries,
+ # code only): the header and the value of the tooltip of a point (#624).
+ ('x_tool_tip_label_formatter','XToolTipLabelFormatter','Option<ChartPointFormatter>','None'),
+ ('y_tool_tip_label_formatter','YToolTipLabelFormatter','Option<ChartPointFormatter>','None')]
 series = HEADER + IMPORTS + '''use crate::{ChartPoints, ChartPoint};
 use ferroui_base::{FerroObjectImplExt,FerroPropertyChangedEventArgs,Point};
 use ferroui_base::media::{Color,IBrush,PenLineCap,PenLineJoin};
 use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::HandlerList;
-use ferroui_livecharts::{Series as SeriesSnapshot, SeriesKind, BrushSpace,RadialAlignment,PolarLabelsPosition};
+use ferroui_livecharts::{Series as SeriesSnapshot, SeriesKind, BrushSpace,ChartPointFormatter,RadialAlignment,PolarLabelsPosition};
 use ferroui_livecharts::kernel::Coordinate;
 use std::{cell::RefCell, rc::Rc};
 

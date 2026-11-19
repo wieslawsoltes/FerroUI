@@ -787,6 +787,8 @@ impl Chart {
                     .iter()
                     .map(|model| {
                         let mut options = CartesianSeriesOptions::default();
+                        options.x_tool_tip_label_formatter = model.x_tool_tip_label_formatter();
+                        options.y_tool_tip_label_formatter = model.y_tool_tip_label_formatter();
                         if let Some(heat) = model.cast::<HeatSeries>() {
                             options.data_labels_position = Some(heat.data_labels_position());
                             options.geometry_svg = heat.geometry_svg();
