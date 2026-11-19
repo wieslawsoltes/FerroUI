@@ -119,7 +119,7 @@ pub use i_platform_handle::IPlatformHandle;
 pub use i_platform_settings::IPlatformSettings;
 pub use leased_platform_handle::LeasedPlatformHandle;
 pub use platform_color_values::{
-    AccentColorShades, ColorContrastPreference, PlatformColorValues, PlatformThemeVariant,
+    AccentColorShades, ColorContrastPreference, PlatformColorValues, PlatformThemeVariant, SystemColors,
 };
 pub use platform_handle::PlatformHandle;
 

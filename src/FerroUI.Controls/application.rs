@@ -71,6 +71,8 @@ pub struct Application {
     setup_completed: Cell<bool>,
     input_manager: RefCell<Option<Rc<InputManager>>>,
     name: RefCell<Option<String>>,
+    /// The subscription to the high contrast variant of the theme (#560).
+    high_contrast_variant_changed: RefCell<Option<Subscription>>,
 }
 
 ferro_class! {
@@ -231,6 +233,7 @@ impl Application {
             setup_completed: Cell::new(false),
             input_manager: RefCell::new(None),
             name: RefCell::new(None),
+            high_contrast_variant_changed: RefCell::new(None),
         }
     }
 
@@ -414,10 +417,12 @@ impl Application {
     }
 
     /// Establishes the actual theme variant of the application and keeps
-    /// it up to date with the color values of the platform settings.
+    /// it up to date with the color values of the platform settings (the theme
+    /// variant and the contrast preference of the system) and with the high
+    /// contrast variant of the theme ([`ThemeVariant::high_contrast_variant`]).
     ///
-    /// The subscription lasts as long as the platform settings do; it does
-    /// not keep the application alive.
+    /// The subscription to the platform settings lasts as long as they do;
+    /// neither subscription keeps the application alive.
     pub fn initialize_theme_variant(&self) {
         if let Some(platform_settings) = self.platform_settings() {
             let weak = self.to_ref().downgrade();
@@ -427,6 +432,13 @@ impl Application {
                 }
             }));
         }
+        let weak = self.to_ref().downgrade();
+        let subscription = ThemeVariant::high_contrast_variant_changed(Rc::new(move || {
+            if let Some(this) = weak.upgrade() {
+                this.update_actual_theme_variant();
+            }
+        }));
+        *self.high_contrast_variant_changed.borrow_mut() = Some(Subscription::new(subscription));
         self.update_actual_theme_variant();
     }
 

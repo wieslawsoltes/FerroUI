@@ -3,6 +3,7 @@ name = "portable-media-browser"
 version.workspace = true
 edition.workspace = true
 publish = false
+build = "build.rs"
 [[bin]]
 name = "portable-media-browser"
 path = "main.rs"
@@ -19,5 +20,10 @@ ferroui-media-video-browser = {workspace=true,features=["controls"]}
 ferroui-media-camera.workspace = true
 ferroui-media-camera-browser = {workspace=true,features=["controls"]}
 ferroui-themes-fluent.workspace = true
+# The runtime library of markup: the table of the units of the theme the build writes
+# (`build.rs`) names the type of a unit.
+ferroui-markup-xaml.workspace = true
 ferroui-fonts-inter.workspace = true
 wasm-bindgen.workspace = true
+[build-dependencies]
+ferroui-build.workspace = true

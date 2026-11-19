@@ -6,6 +6,7 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 publish = false
+build = "build.rs"
 
 # The scenario tests are a module of the library (`tests.rs`), not integration test targets.
 autotests = false
@@ -24,6 +25,12 @@ ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
 ferroui-view = { workspace = true, features = ["desktop"] }
 ferroui-themes-winui = { workspace = true }
+# The runtime library of markup: the table of the units of the theme the build writes
+# (`build.rs`) names the type of a unit.
+ferroui-markup-xaml = { workspace = true }
+
+[build-dependencies]
+ferroui-build = { workspace = true }
 
 [dev-dependencies]
 # The test application of the scenario tests (a dispatcher of the thread).

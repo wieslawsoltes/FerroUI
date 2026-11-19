@@ -146,6 +146,10 @@ The theme's gauge rules (`HasRuleForGaugeSeries` and `HasRuleForGaugeFillSeries`
 
 A needle turns to a new value over the animations speed of the chart in the cubic out easing of the transitions (the source animates the rotation of `NeedleGeometry`): the chart draws the needle at its value of the moment, frame by frame, so the needle goes the way its value does, the long way round a gauge of more than 180 degrees too. Its first value is drawn at once. A frame of the needles keeps a scene transition in progress on its clock, and a scene equal to the one before starts none. The scenarios of `snapshots.rs` still build their gauges by hand, as the generator does.
 
+### #624: `DataLabelsMaxWidth` of every series
+
+`DataLabelsMaxWidth` is a property of every series (`ChartSeries`, 170 by default, the source's `Series.DataLabelsMaxWidth`), which the Sankey and treemap series had before. The Sankey and treemap engines break their labels as they measure them; for the Cartesian, pie and polar charts, `label_lines::wrap_data_labels` breaks each data label of a measured scene whose text is wider than the width of its series less the label padding into lines of `label_lines.rs`, one text of the scene each from the left of their block. These labels are placed by the size of one line, as the native engines measure them: a label above a Cartesian point keeps its last line where the one line was, and the centred labels of the heat cells, the slices and the polar points keep their middle. The labels of the axes and of the legends do not break. The native labels are numbers and the value lists of the range, financial and box points, so mostly the box labels break at the default.
+
 ## Remaining (#442)
 
 - Geographic map: a custom tooltip object (`IGeoMapTooltip`; no chart kind has one natively, `hover_changed` serves), visual elements other than circle markers at a coordinate, and the theme rules of the view.
