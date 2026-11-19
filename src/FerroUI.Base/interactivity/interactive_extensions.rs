@@ -2,6 +2,7 @@
 
 use super::{IRoutedEventArgs, Interactive, RoutedEvent, RoutingStrategies};
 use crate::reactive::{Disposable, IObservable, Observable, Subscription};
+use crate::threading::CallbackResult;
 use crate::Ref;
 use std::rc::Rc;
 
@@ -9,11 +10,12 @@ impl Interactive {
     /// Adds a handler for a routed event (direct and bubble routes,
     /// unhandled events) and returns the guard of the handler: dropping it
     /// removes the handler; [`Subscription::detach`] keeps it for the life
-    /// of the object.
-    pub fn add_disposable_handler<TEventArgs: IRoutedEventArgs>(
+    /// of the object. The handler may return a `Result`, as with
+    /// [`add_handler`](Self::add_handler).
+    pub fn add_disposable_handler<TEventArgs: IRoutedEventArgs, R: CallbackResult>(
         &self,
         routed_event: &RoutedEvent<TEventArgs>,
-        handler: impl Fn(&Interactive, &TEventArgs) + 'static,
+        handler: impl Fn(&Interactive, &TEventArgs) -> R + 'static,
     ) -> Subscription {
         self.add_disposable_handler_with(routed_event, handler, Self::DEFAULT_ROUTES, false)
     }
@@ -21,10 +23,10 @@ impl Interactive {
     /// Adds a handler for a routed event and returns the guard of the
     /// handler: dropping it removes the handler; [`Subscription::detach`]
     /// keeps it for the life of the object.
-    pub fn add_disposable_handler_with<TEventArgs: IRoutedEventArgs>(
+    pub fn add_disposable_handler_with<TEventArgs: IRoutedEventArgs, R: CallbackResult>(
         &self,
         routed_event: &RoutedEvent<TEventArgs>,
-        handler: impl Fn(&Interactive, &TEventArgs) + 'static,
+        handler: impl Fn(&Interactive, &TEventArgs) -> R + 'static,
         routes: RoutingStrategies,
         handled_events_too: bool,
     ) -> Subscription {

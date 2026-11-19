@@ -89,7 +89,12 @@ fn create_tree(
         for visual in tree.get_self_and_visual_descendants() {
             let i = visual.cast::<Interactive>().unwrap();
             let handler = handler.clone();
-            i.add_handler_as::<RoutedEventArgs, _>(&ev, move |s, e| handler(s, e), handler_routes, handled_events_too);
+            i.add_handler_as::<RoutedEventArgs, _, _>(
+                &ev,
+                move |s, e| handler(s, e),
+                handler_routes,
+                handled_events_too,
+            );
         }
     }
 
@@ -397,7 +402,7 @@ fn removing_control_in_handler_should_not_stop_event() {
     let target = parent.get_visual_children()[0].cast::<Interactive>().unwrap();
 
     let removed_from = parent.target.clone();
-    target.add_handler_as::<RoutedEventArgs, _>(
+    target.add_handler_as::<RoutedEventArgs, _, _>(
         &ev,
         move |_, _| removed_from.set_children(Vec::new()),
         Interactive::DEFAULT_ROUTES,
@@ -489,7 +494,7 @@ fn untyped_handler_can_be_attached_to_event_with_derived_args() {
 
     {
         let base_called = base_called.clone();
-        target.add_handler_as::<RoutedEventArgs, _>(
+        target.add_handler_as::<RoutedEventArgs, _, _>(
             &ev,
             move |_, e: &RoutedEventArgs| base_called.set(e.routed_event().is_some()),
             Interactive::DEFAULT_ROUTES,
@@ -515,7 +520,7 @@ fn untyped_handler_can_be_attached_to_event_with_derived_args() {
 fn handler_with_unrelated_args_cannot_be_attached() {
     let ev = RoutedEvent::<TextInputEventArgs>::new("test", RoutingStrategies::BUBBLE, TestInteractive::TYPE);
     let target = TestInteractive::new("target");
-    target.add_handler_as::<KeyEventArgs, _>(&ev, |_, _| {}, Interactive::DEFAULT_ROUTES, false);
+    target.add_handler_as::<KeyEventArgs, _, _>(&ev, |_, _| {}, Interactive::DEFAULT_ROUTES, false);
 }
 
 #[test]
@@ -848,4 +853,39 @@ fn a_class_handler_is_reached_when_no_instance_handler_is_attached() {
 
     assert_eq!(*seen.borrow(), ["child", "parent"]);
     drop(parent);
+}
+
+#[test]
+fn an_error_a_handler_returns_reaches_the_dispatcher_and_the_route_goes_on() {
+    #[derive(Debug)]
+    struct HandlerFailed;
+    impl std::fmt::Display for HandlerFailed {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            f.write_str("the handler failed")
+        }
+    }
+    impl std::error::Error for HandlerFailed {}
+
+    let _scope = crate::threading::Dispatcher::unit_test_scope();
+    let dispatcher = crate::threading::Dispatcher::current_dispatcher();
+    let received = Rc::new(RefCell::new(Vec::new()));
+    let seen = received.clone();
+    let _handler = dispatcher.unhandled_exception(move |args| {
+        assert!(args.error().is_some_and(|error| error.is::<HandlerFailed>()));
+        seen.borrow_mut().push(args.exception_message().unwrap_or_default().to_owned());
+        args.set_handled(true);
+    });
+
+    let ev = RoutedEvent::<RoutedEventArgs>::new("test", RoutingStrategies::BUBBLE, TestInteractive::TYPE);
+    let child = TestInteractive::new("child");
+    let parent = TestInteractive::with_children("parent", vec![child.clone()]);
+    child.add_handler(&ev, |_, _| -> Result<(), HandlerFailed> { Err(HandlerFailed) });
+    let reached = Rc::new(Cell::new(false));
+    let parent_reached = reached.clone();
+    parent.add_handler(&ev, move |_, _| parent_reached.set(true));
+
+    child.raise_event(&RoutedEventArgs::with_event_and_source(&ev, &child));
+
+    assert_eq!(*received.borrow(), ["the handler failed"]);
+    assert!(reached.get(), "a handled error does not stop the route");
 }
