@@ -1419,10 +1419,13 @@ impl<'a> Emitter<'a> {
         // constructed so (#849); any other class is constructed with `new()`.
         let parts = self.configuration.get_extra::<super::transform::ThemePartsTables>().ok();
         match parts.as_ref().and_then(|parts| parts.table_of(&class.full_name()).map(str::to_string)) {
+            // The wider of the table the application registered and the table of this crate
+            // (#846): a library that constructs a theme gets the units its application needs.
             Some(table) => self.line(format!(
-                "let {local} = {}::{}(::core::option::Option::None, {table});",
+                "let {local} = {}::{}(::core::option::Option::None, rt::wider_theme_parts({}, {table}));",
                 absolute(path),
-                super::transform::PARTS_CONSTRUCTOR
+                super::transform::PARTS_CONSTRUCTOR,
+                rust_string_literal(&class.full_name())
             )),
             None => self.line(format!("let {local} = {}::new();", absolute(path))),
         }

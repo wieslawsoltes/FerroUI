@@ -28,3 +28,4 @@ pub use storyboard::{
     PointKeyFrame, PowerEase, QuadraticEase, QuarticEase, QuinticEase, SineEase, SplineColorKeyFrame,
     SplineDoubleKeyFrame, SplinePointKeyFrame, Storyboard, Timeline,
 };
+pub(crate) use storyboard::ResolvedAnimation;

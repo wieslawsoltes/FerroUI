@@ -283,7 +283,7 @@
       "examples": []
     },
     "CalendarDatePicker": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/CalendarDatePicker.xaml",
         "samples/WinUIGallery/examples.rs"
@@ -292,24 +292,33 @@
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/date_samples_tests.rs",
+          "name": "calendar_date_picker_has_the_source_placeholder"
         }
       ],
-      "notes": "Native CalendarDatePicker; header is composed and placeholder uses the shared property. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The source example uses native CalendarDatePicker with its header (composed above it, whose automation name it is) and the placeholder Pick a date. The page has no code-behind upstream.",
       "examples": []
     },
     "CalendarView": {
       "status": "partial",
       "implementation": [
         "samples/WinUIGallery/Pages/CalendarView.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/date_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/date_samples_tests.rs",
+          "name": "calendar_view_selection_mode_option_sets_the_calendar_mode"
         }
       ],
-      "notes": "CalendarView is adapted to the shared Calendar; WinUI-specific day item customization is pending. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The source example uses native Calendar (WinUI's CalendarView) with SelectionMode_SelectionChanged of CalendarViewPage.xaml.cs in Rust (None, Single as SingleDate, Multiple as MultipleRange). FerroUI's Calendar has no IsGroupLabelVisible, IsOutOfScopeEnabled or CalendarIdentifier (only the Gregorian calendar), and its names follow the current culture instead of a Language of the calendar, so those options and their x:Bind are left out and the page is partial.",
       "examples": []
     },
     "Canvas": {
@@ -581,18 +590,23 @@
       "examples": []
     },
     "DatePicker": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/DatePicker.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/date_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/date_samples_tests.rs",
+          "name": "date_picker_shows_two_months_from_now_within_five_years"
         }
       ],
-      "notes": "Native DatePicker composes a label for WinUI Header. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "Both source examples use native DatePicker: the picker with its header (composed above it), and the picker with the formatted day and hidden year with OnNavigatedTo of DatePickerPage.xaml.cs in Rust (the date two months from now, within the years from now to five years from now; WinUI's Date is the SelectedDate). FerroUI's DayFormat is a .NET date format: WinUI's {day.integer} ({dayofweek.abbreviated}) is d (ddd).",
       "examples": []
     },
     "DropDownButton": {
@@ -1489,18 +1503,23 @@
       "examples": []
     },
     "TimePicker": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/TimePicker.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/date_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/date_samples_tests.rs",
+          "name": "time_pickers_keep_the_increment_the_clocks_and_the_time_of_day"
         }
       ],
-      "notes": "Native TimePicker demonstrates 12/24-hour clocks and minute increments. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "All three source examples use native TimePicker: the picker with the clock of the current culture, the picker with its header (composed) and MinuteIncrement 15, and the 12-hour and 24-hour ClockIdentifiers. The page has no code-behind upstream; the x:Bind of the static path sys:DateTime.Now.TimeOfDay (a member of a .NET type, which the x:Bind core does not compile) is the time of day set once in Rust, as that OneTime binding.",
       "examples": []
     },
     "ToggleButton": {

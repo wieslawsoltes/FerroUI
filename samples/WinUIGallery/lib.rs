@@ -18,6 +18,7 @@ pub mod catalog;
 mod catalog_data;
 pub mod contrast;
 mod control_samples;
+mod date_samples;
 pub mod examples;
 mod feedback_samples;
 mod frame_sample;
@@ -107,3 +108,6 @@ mod command_samples_tests;
 
 #[cfg(test)]
 mod menu_samples_tests;
+
+#[cfg(test)]
+mod date_samples_tests;
