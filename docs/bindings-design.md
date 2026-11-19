@@ -98,6 +98,63 @@ part of it; section 7 says what is done and what is next.
    through the table costs about what a setter call costs; it batches, it can come from any
    thread, and it updates frames without describing them again.
 
+### 2.1 Which path to use
+
+The C ABI has three ways to reach the framework: frames, the signal table in shared memory and
+direct calls. They are not alternatives to choose between once. Each is the fastest for one kind
+of work, and a binding (and the code it generates) uses the fastest one for each kind. The rule
+is: **frames for structure, shared memory for values that change, direct calls for the rest.**
+The numbers behind it are in docs/c-abi.md, sections 13 and 14.
+
+| Work | Fastest path | For a language that cannot read or write memory |
+| --- | --- | --- |
+| Build a view, or change its structure (elements added, removed, moved, many attributes at once) | A frame written into the binding's own buffer, one `ferro_frame_commit_bytes` per update | The scalar writer (`ferro_frame_open`, `ferro_frame_str`, ...) and one `ferro_frame_commit` |
+| A subtree that did not change | A memo element and `ferro_frame_reuse`: the binding neither builds nor writes it | The same |
+| A value of a view that changes on its own (a counter, a progress value, a colour, a text) | A slot bound with a frame `bind` record (or `ferro_signal_bind`), written with a store and a dirty bit | `ferro_signal_set_*`, one small call |
+| Many values that change together | Stores and dirty bits for all of them, applied once (at the next commit, the end of the dispatch, or `ferro_signals_apply`) | `ferro_signal_set_*` for each, one apply |
+| A value computed on another thread | A store of a numeric slot from that thread (no `ferro_post` per value) | `ferro_signal_set_*` from that thread |
+| A value the user changes (the text of a text box, a slider, a selection, a check state) | A watched slot (`ferro_signal_watch`), read with a load; the version or the `changed` bit says whether it moved | `ferro_signal_get_*` and `ferro_signal_version` |
+| A text value | A text slot: read it (`ferro_signal_get_cstr`) only when its version moved | The same |
+| Events | `ferro_subscribe_dispatch` into the one dispatcher, or `ferro_subscribe` with one function and the token as the index of the binding's table | The same |
+| Setup: create objects, add children, show a window, subscribe | Direct calls | The same |
+| A single write that is not on a hot path, or a property frames do not model | A direct setter (one call is cheaper than a store and an apply) | The same |
+| A single read that is not repeated | A direct getter (`ferro_get_*_or`) | The same |
+
+Do not:
+
+- **Call per element when a frame can carry the work.** A view built or updated with one call
+  per element and property pays the call for each; a frame pays one call per update.
+- **Write a frame again to change one value.** Bind the value to a slot: one property write
+  instead of the description of the view (58 times less for 100 elements).
+- **Poll getters.** A value read every frame or in a loop is a watched slot read with a load
+  (a tenth to a twentieth of a getter call), and the version tells when to look at all.
+- **Expect a slot write to be a faster setter.** Use slots for what they are good at (bound
+  values, batches, writes from other threads, values both sides share); a one-off write is a
+  setter.
+- **Cache IDs or handles on the binding's side, or marshal objects.** IDs are constants of the
+  model, the UI-thread check is one comparison, and a wrapper is its handle.
+
+What the generated code does, in every backend:
+
+1. **The default API of a binding is frames, signals and the fluent object layer.** The direct
+   calls stay available in the module that mirrors the ABI (`abi.osp` for Osprey) for setup
+   and for what frames do not model, but an application written against the generated API
+   gets the fastest path without choosing it.
+2. **A view value that the program changes is a signal.** The view layer turns a value that
+   depends on program state into a bound slot, so a change updates the one property; it falls
+   back to writing the frame again only for structure.
+3. **A property the program reads back is watched.** The generated reader of a value the user
+   changes reads its slot, not the getter.
+4. **A backend maps the table when its language can.** A language with pointers or typed
+   memory views (C, C++, Rust, Zig, Swift, C# spans, Dart `asTypedList`, Java and Kotlin memory
+   segments, JavaScript typed arrays over the module's memory) reads and writes the arrays of
+   `FerroSignalTable` directly, with the orders of docs/c-abi.md, section 14.2. Only a language
+   without memory access (Osprey 0.29) uses the `ferro_signal_set_*` and `ferro_signal_get_*`
+   calls, and its backend switches to the mapped table when the language gains it.
+5. **Each backend's benchmark covers the three paths:** a setter and a getter, a slot store and
+   apply and a slot load, a bound value in a frame of 100 elements, and a frame commit (item 7
+   above), so a backend shows the same ordering as the C numbers, or the reason it does not.
+
 ## 3. Idiom
 
 1. **Names are words** in the model (`["font", "size"]`). A backend applies its casing:
@@ -190,8 +247,12 @@ subscribed to the dispatcher, and the cheaper calls; then signals shared through
 Next:
 
 - The library trimmed by the same manifest as the bindings (phase 2 of #636).
-- A buffer the library exposes for frames (`ferro_frame_buffer`) beside the commit of a
-  caller's buffer, for languages that would rather write into library memory.
+- The default paths of section 2.1 in the generated view layer of Osprey: values that depend
+  on program state bound to slots by the generator (today the application writes
+  `bound(attr, signal)` itself), and generated readers of user-changed values through watched
+  slots.
+- The mapped signal table (loads and stores, no call) in every backend whose language can
+  reach memory; Osprey keeps the calls until it can.
 - Object values in frames (an element as the value of a property, not only as a child), and
   typed event arguments (pointer and key events) as values of a frame event.
 - Typed handle wrappers per class where the language has value types (section 2.4).

@@ -603,5 +603,14 @@ other builds ran, load between 8 and 25, single numbers moved up to 30 % on the 
 - **Feeding `ferroui-view` signals from slots**: possible at the apply point, but it would make
   the C ABI depend on the declarative crate; bindings bind slots to properties directly.
 
+### 14.5 Which path to use
+
+Frames for structure, the signal table for values that change, direct calls for the rest: a
+view is built and restructured with frames, a value that changes after that is a bound slot
+written with a store, a value the user changes is a watched slot read with a load, and setters
+and getters serve setup, one-off writes and reads, and properties frames do not model. The
+table of cases, what not to do and what generated bindings do by default are in
+docs/bindings-design.md, section 2.1.
+
 The tests are `src/FerroUI.CApi/tests/signals_tests.rs` and `test_signals` of
 `samples/CApi/abi_test.c`; the Osprey sample is `samples/CApi/osprey-bindings/temperature_signals`.
