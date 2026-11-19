@@ -622,6 +622,17 @@
     "doc": "Creates the signal table of the process with room for `capacity` slots (rounded up to a multiple of 64), or returns the one that exists (whose capacity then stays). The arrays stay at their addresses until the process ends. `NULL` on a failure (a capacity that is not positive or above 2^24; off the UI thread). UI thread only."
    },
    {
+    "name": "ferro_signals_init",
+    "returns": "status",
+    "params": [
+     {
+      "name": "capacity",
+      "type": "i64"
+     }
+    ],
+    "doc": "[`ferro_signal_table`] for a language that cannot read memory (it calls `ferro_signal_set_*` and `ferro_signal_get_*`): creates the table, or keeps the one that exists, and returns a status. UI thread only."
+   },
+   {
     "name": "ferro_signal_new",
     "returns": "i64",
     "params": [

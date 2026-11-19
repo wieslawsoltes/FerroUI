@@ -3,13 +3,14 @@
 // --no-default-features --bench call_overhead): a property write and a read with layer 1, an
 // event dispatched to the one dispatcher, and frames of layer 2 (one text block whose text
 // changes; 100 text blocks of which one changes; the same 100 as memo elements; building the
-// view of the 100 alone). No window: the thread is made the UI thread with ferro_init. Each
+// view of the 100 alone; 100 setter calls against 100 signal writes and one apply; a read of a
+// watched signal). No window: the thread is made the UI thread with ferro_init. Each
 // case runs `iterations` times per sample; the median of 9 samples is printed in nanoseconds
 // per operation. The clock is the one of macOS.
 
 import ferroui::*
 import ferroviews::*
-import ferroobjects::{fontSize as setFontSize, getFontSize}
+import ferroobjects::{fontSize as setFontSize, getFontSize, onClick as subscribeClick}
 
 // Nanoseconds of the monotonic clock of macOS (CLOCK_UPTIME_RAW).
 extern fn clock_gettime_nsec_np(clock: int32) -> int
@@ -64,7 +65,18 @@ fn runCase(case: int, i: int, object: int, root: int) -> int = match case {
     3 => commitUnder(root, oneText(i))
     4 => commitUnder(root, manyTexts(i))
     5 => commitUnder(root, manyMemoTexts(i))
-    _ => manyTexts(i).elementType
+    6 => manyTexts(i).elementType
+    // 100 setter calls, and 100 signal writes with one apply (`root` is the first of 100 slots
+    // bound to the FontSize of `object`); a read of a watched signal (`root` is its slot).
+    7 => range(0, 100) |> fold(0, fn(acc: int, n: int) => acc + setFontSize(object, sizeOf(n + i)))
+    8 => {
+        let _ = range(0, 100) |> fold(0, fn(acc: int, n: int) => {
+            signalSetNumber(root + n, sizeOf(n + i))
+            acc
+        })
+        signalsApply()
+    }
+    _ => signalReadNumber(root) > 0.0 ? 0 : 1
 }
 
 // The nanoseconds of one operation over one sample.
@@ -102,15 +114,28 @@ fn main() = {
     let _ = ferro_frame_dispatcher(function: dispatch)
     let text = ferro_create(typeId: textBlockTypeId())
     let button = ferro_create(typeId: buttonTypeId())
-    let _ = ferro_subscribe(object: button, event: clickEventId(), function: dispatchEvent, token: 1)
+    let _ = subscribeClick(button, 1)
+    let trampolined = ferro_create(typeId: buttonTypeId())
+    let _ = ferro_subscribe(object: trampolined, event: clickEventId(), function: dispatchEvent, token: 1)
     let root = ferro_create(typeId: borderTypeId())
     print("benchmark: the median of 9 samples, nanoseconds per operation")
     print("write FontSize (layer 1 setter)           ${median(0, 100000, text, root)} ns")
     print("read FontSize (layer 1 getter)            ${median(1, 100000, text, root)} ns")
     print("raise Click to the one dispatcher         ${median(2, 100000, button, root)} ns")
+    print("raise Click through the trampoline        ${median(2, 100000, trampolined, root)} ns")
     print("frame: one text block, its text changes   ${median(3, 100000, text, root)} ns")
     print("frame: 100 text blocks, one changes       ${median(4, 1000, text, root)} ns")
     let _ = ferro_frame_clear(root: root)
     print("frame: 100 memo text blocks, one changes  ${median(5, 1000, text, root)} ns")
     print("the view of 100 text blocks alone         ${median(6, 1000, text, root)} ns")
+    let _ = signalsInit(256)
+    let first = signalNumber(12.0)
+    let _ = signalBind(text, fontSizePropertyId(), first)
+    let _ = range(1, 100) |> fold(0, fn(acc: int, n: int) => signalBind(text, fontSizePropertyId(), signalNumber(12.0)))
+    let _ = signalsApply()
+    print("100 setter calls (layer 1)                ${median(7, 1000, text, root)} ns")
+    print("100 signal writes and one apply           ${median(8, 1000, text, first)} ns")
+    let watched = signalNumber(0.0)
+    let _ = signalWatch(text, fontSizePropertyId(), watched)
+    print("read a watched signal (FontSize)          ${median(9, 100000, text, watched)} ns")
 }

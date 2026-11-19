@@ -400,6 +400,10 @@ extern fn ferro_event_ring_pop() -> int
 extern fn ferro_event_ring_sender() -> int
 // The argument of the record the last [`ferro_event_ring_pop`] of the thread took.
 extern fn ferro_event_ring_arg() -> int
+// [`ferro_signal_table`] for a language that cannot read memory (it calls `ferro_signal_set_*`
+// and `ferro_signal_get_*`): creates the table, or keeps the one that exists, and returns a
+// status. UI thread only.
+extern fn ferro_signals_init(capacity: int) -> int32
 // Takes a free slot of the kind `kind` (`FERRO_SIGNAL_I64` to `FERRO_SIGNAL_TEXT`), with the
 // value `0` (the empty text), and returns its index, or a negative status
 // ([`FERRO_INVALID_STATE`] when the table is full or not created). UI thread only.

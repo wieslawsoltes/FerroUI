@@ -1578,14 +1578,13 @@ impl Dispatching {
 impl Drop for Dispatching {
     #[inline]
     fn drop(&mut self) {
-        let (outermost, removed) = STATE
+        let removed = STATE
             .with(|state| {
                 state.dispatching -= 1;
-                let outermost = state.dispatching == 0;
-                if outermost && !state.removed.is_empty() {
-                    (true, std::mem::take(&mut state.removed))
+                if state.dispatching == 0 && !state.removed.is_empty() {
+                    std::mem::take(&mut state.removed)
                 } else {
-                    (outermost, Vec::new())
+                    Vec::new()
                 }
             })
             .unwrap_or_default();
@@ -1593,10 +1592,9 @@ impl Drop for Dispatching {
         for node in removed {
             free(node);
         }
-        // The end of a dispatch is a point where the signals the dispatcher wrote are applied.
-        if outermost {
-            crate::signals::apply_pending();
-        }
+        // The end of every dispatch (an inner one too: a dispatcher that drives events itself) is
+        // a point where the signals the dispatcher wrote are applied.
+        crate::signals::apply_pending();
     }
 }
 
