@@ -414,16 +414,9 @@ pub trait ElementBuilder: Sized {
     /// Gives a property a value (the indexer `control[Property] = value`
     /// upstream).
     fn prop<P: TypedProperty + ?Sized, M>(mut self, property: &'static P, value: impl IntoProp<P::Value, M>) -> Self {
-        let property = property.untyped();
-        let value = value.into_prop();
-        let props = &mut self.element_mut().props;
-        if props.capacity() == 0 {
-            // Room for the values an element usually has, taken once: a list that grows from
-            // nothing asks for room three times on the way to eight values.
-            props.reserve(PROPS_AT_FIRST);
-        }
-        props.retain(|entry| !std::ptr::eq(entry.property, property));
-        props.push(PropEntry { property, value });
+        // What depends on the types is the conversion of the value; the list of values is one
+        // function for every setter of every class (docs/binary-size.md, #954).
+        set_prop(self.element_mut(), property.untyped(), value.into_prop());
         self
     }
 
@@ -434,34 +427,90 @@ pub trait ElementBuilder: Sized {
         event: &'static RoutedEvent<A>,
         handler: impl Fn(&Interactive, &A) + 'static,
     ) -> Self {
-        type HandlerCell<A> = RefCell<Rc<dyn Fn(&Interactive, &A)>>;
-        fn swap<A: 'static>(old: &dyn Any, new: &dyn Any) {
-            if let (Some(old), Some(new)) = (old.downcast_ref::<HandlerCell<A>>(), new.downcast_ref::<HandlerCell<A>>()) {
-                let closure = new.borrow().clone();
-                *old.borrow_mut() = closure;
-            }
-        }
-        let cell: Rc<HandlerCell<A>> = Rc::new(RefCell::new(Rc::new(handler)));
-        let attached = cell.clone();
-        let attach: Attach = Rc::new(move |control: &Ref<Control>| {
-            // The trampoline calls the closure the cell holds now; it is
-            // detached with its owner.
-            let cell = attached.clone();
-            let token = control.add_handler(event, move |sender, e| {
-                let closure = cell.borrow().clone();
-                closure(sender, e)
-            });
-            let weak = control.downgrade();
-            crate::reactive::on_cleanup(move || {
-                if let Some(control) = weak.upgrade() {
-                    control.remove_handler(event, token);
-                }
-            });
-        });
-        let identity = event as *const RoutedEvent<A> as *const () as usize;
-        self.element_mut().handlers.push(Handler { identity, attach, cell, swap: swap::<A> });
+        // The closure is boxed here; the cell, the trampoline and what detaches it depend on the
+        // arguments alone, not on each closure of the application (#954).
+        let handler: Rc<dyn Fn(&Interactive, &A)> = Rc::new(handler);
+        self.element_mut().handlers.push(routed_handler(event, handler));
         self
     }
+}
+
+/// Puts `value` into the values of `element`, in the place of a value it gave `property` before
+/// ([`ElementBuilder::prop`]): one function for every property and every type of value.
+#[inline(never)]
+fn set_prop(element: &mut ControlElement, property: &'static FerroProperty, value: PropValue) {
+    let props = &mut element.props;
+    if props.capacity() == 0 {
+        // Room for the values an element usually has, taken once: a list that grows from
+        // nothing asks for room three times on the way to eight values.
+        props.reserve(PROPS_AT_FIRST);
+    }
+    props.retain(|entry| !std::ptr::eq(entry.property, property));
+    props.push(PropEntry { property, value });
+}
+
+/// The handler of the routed event `event` that calls `handler` ([`ElementBuilder::routed`]):
+/// one per type of arguments, whatever closures an application gives.
+#[inline(never)]
+fn routed_handler<A: IRoutedEventArgs + 'static>(
+    event: &'static RoutedEvent<A>,
+    handler: Rc<dyn Fn(&Interactive, &A)>,
+) -> Handler {
+    type HandlerCell<A> = RefCell<Rc<dyn Fn(&Interactive, &A)>>;
+    fn swap<A: 'static>(old: &dyn Any, new: &dyn Any) {
+        if let (Some(old), Some(new)) = (old.downcast_ref::<HandlerCell<A>>(), new.downcast_ref::<HandlerCell<A>>()) {
+            let closure = new.borrow().clone();
+            *old.borrow_mut() = closure;
+        }
+    }
+    let cell: Rc<HandlerCell<A>> = Rc::new(RefCell::new(handler));
+    let attached = cell.clone();
+    let attach: Attach = Rc::new(move |control: &Ref<Control>| {
+        // The trampoline calls the closure the cell holds now; it is
+        // detached with its owner.
+        let cell = attached.clone();
+        let token = control.add_handler(event, move |sender, e| {
+            let closure = cell.borrow().clone();
+            closure(sender, e)
+        });
+        let weak = control.downgrade();
+        crate::reactive::on_cleanup(move || {
+            if let Some(control) = weak.upgrade() {
+                control.remove_handler(event, token);
+            }
+        });
+    });
+    let identity = event as *const RoutedEvent<A> as *const () as usize;
+    Handler { identity, attach, cell, swap: swap::<A> }
+}
+
+/// The handler of a change of `property` on the control that calls `handler` with the new value
+/// ([`El::on_changed`]): one per type of value, whatever closures an application gives.
+#[inline(never)]
+fn changed_handler<V: 'static>(property: &'static FerroProperty, handler: Rc<dyn Fn(&V)>) -> Handler {
+    type ChangedCell<V> = RefCell<Rc<dyn Fn(&V)>>;
+    fn swap<V: 'static>(old: &dyn Any, new: &dyn Any) {
+        if let (Some(old), Some(new)) = (old.downcast_ref::<ChangedCell<V>>(), new.downcast_ref::<ChangedCell<V>>()) {
+            let closure = new.borrow().clone();
+            *old.borrow_mut() = closure;
+        }
+    }
+    let cell: Rc<ChangedCell<V>> = Rc::new(RefCell::new(handler));
+    let attached = cell.clone();
+    let attach: Attach = Rc::new(move |control: &Ref<Control>| {
+        let cell = attached.clone();
+        let subscription = control.property_changed(move |e| {
+            if std::ptr::eq(e.property(), property) {
+                if let Some(value) = e.new_value().downcast_ref::<V>() {
+                    let closure = cell.borrow().clone();
+                    closure(value);
+                }
+            }
+        });
+        crate::reactive::on_cleanup(move || subscription.dispose());
+    });
+    let identity = property as *const FerroProperty as usize;
+    Handler { identity, attach, cell, swap: swap::<V> }
 }
 
 impl<T> ElementBuilder for El<T> {
@@ -522,30 +571,8 @@ impl<T> El<T> {
     /// Calls `handler` with the new value whenever `property` changes on the
     /// control (the user typed, a slider moved, a binding set it).
     pub fn on_changed<P: TypedProperty + ?Sized>(mut self, property: &'static P, handler: impl Fn(&P::Value) + 'static) -> Self {
-        type ChangedCell<V> = RefCell<Rc<dyn Fn(&V)>>;
-        fn swap<V: 'static>(old: &dyn Any, new: &dyn Any) {
-            if let (Some(old), Some(new)) = (old.downcast_ref::<ChangedCell<V>>(), new.downcast_ref::<ChangedCell<V>>()) {
-                let closure = new.borrow().clone();
-                *old.borrow_mut() = closure;
-            }
-        }
-        let untyped = property.untyped();
-        let cell: Rc<ChangedCell<P::Value>> = Rc::new(RefCell::new(Rc::new(handler)));
-        let attached = cell.clone();
-        let attach: Attach = Rc::new(move |control: &Ref<Control>| {
-            let cell = attached.clone();
-            let subscription = control.property_changed(move |e| {
-                if std::ptr::eq(e.property(), untyped) {
-                    if let Some(value) = e.new_value().downcast_ref::<P::Value>() {
-                        let closure = cell.borrow().clone();
-                        closure(value);
-                    }
-                }
-            });
-            crate::reactive::on_cleanup(move || subscription.dispose());
-        });
-        let identity = untyped as *const FerroProperty as usize;
-        self.element.handlers.push(crate::element::Handler { identity, attach, cell, swap: swap::<P::Value> });
+        let handler: Rc<dyn Fn(&P::Value)> = Rc::new(handler);
+        self.element.handlers.push(changed_handler(property.untyped(), handler));
         self
     }
 
