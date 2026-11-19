@@ -602,6 +602,78 @@ fn fused_template_binding_bind(types: &dyn EmitTypes, lines: &[String], statemen
     })
 }
 
+/// The body of deferred content written as native code, with each value of
+/// `{StaticResource key}` for a registered property as one call of the shared helper of `rt`
+/// (#568): the three statements of the value (the extension created with the key,
+/// `rt::provide_value_invoked` with the property as the provide-value target property, the
+/// provided value held as a node value) are `rt::static_resource_value(&context, property, key,
+/// line, position)?`, which makes the same calls in the same order. The statement that assigns
+/// the value (the setter chosen at run time) stays. Runs after the shapes of the row tables and
+/// of the control themes were read, so that they read the statements as they were.
+fn shared_static_resource_values(types: &dyn EmitTypes, lines: Vec<String>) -> Vec<String> {
+    let Some(extension) = types.framework_path(FrameworkType::StaticResourceExtension) else { return lines };
+    let create = format!("{extension}::__markup_new_1(rt::string_object(");
+    if !lines.iter().any(|line| line.contains(&create)) {
+        return lines;
+    }
+    let mut uses: HashMap<String, usize> = HashMap::new();
+    for line in lines.iter().filter(|line| !line.trim_start().starts_with("//")) {
+        for name in identifiers(line) {
+            *uses.entry(name).or_default() += 1;
+        }
+    }
+    let mut body = Vec::with_capacity(lines.len());
+    let mut index = 0;
+    while index < lines.len() {
+        let window = lines.get(index..index + 3);
+        let fused = window.and_then(|window| fused_static_resource_value(&extension, window, &uses));
+        if let Some(fused) = fused {
+            body.push(fused);
+            index += 3;
+        } else {
+            body.push(lines[index].clone());
+            index += 1;
+        }
+    }
+    body
+}
+
+/// The call of `rt::static_resource_value` for `window` if it is the three statements of a
+/// `{StaticResource}` value for a registered property ([`shared_static_resource_values`]) whose
+/// extension and provided value no other statement names.
+fn fused_static_resource_value(extension: &str, window: &[String], uses: &HashMap<String, usize>) -> Option<String> {
+    let [create, provide, value] = window else { return None };
+    let indent = &create[..create.len() - create.trim_start().len()];
+    let (local, created) = create.strip_prefix(indent)?.strip_prefix("let ")?.split_once(" = ")?;
+    let key = created.strip_prefix(&format!("{extension}::__markup_new_1(rt::string_object("))?.strip_suffix("));")?;
+    let (provided, call) = provide.strip_prefix(indent)?.strip_prefix("let ")?.split_once(" = ")?;
+    let arguments = call.strip_prefix("rt::provide_value_invoked(&context, rt::property_value(")?;
+    let (property, rest) = arguments.split_once("), &")?;
+    let rest = rest.strip_prefix(&format!("{local}, {extension}::__markup_ProvideValue_0, "))?;
+    let (line, column) = rest.strip_suffix(")?;")?.split_once(", ")?;
+    let (held, converted) =
+        value.strip_prefix(indent)?.strip_prefix("let ")?.split_once(": ::ferroui_base::metadata::MarkupValue = ")?;
+    let plain_call = |text: &str| {
+        text.starts_with("::") && text.ends_with("()") && !text[..text.len() - 2].contains(['(', ')', ' '])
+    };
+    let named_once = |name: &str| uses.get(name) == Some(&2);
+    if converted != format!("rt::to_value({provided});")
+        || ![local, provided, held].into_iter().all(is_identifier)
+        || !is_string_literal(key)
+        || !plain_call(property)
+        || line.parse::<i32>().is_err()
+        || column.parse::<i32>().is_err()
+        || !named_once(local)
+        || !named_once(provided)
+    {
+        return None;
+    }
+    Some(format!(
+        "{indent}let {held}: ::ferroui_base::metadata::MarkupValue = \
+         rt::static_resource_value(&context, {property}, {key}, {line}, {column})?;"
+    ))
+}
+
 /// The Rust path of the markup extension of `{CompiledBinding}`, as the type systems of the
 /// emitter name it.
 const COMPILED_BINDING_EXTENSION: &str = "::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension";
@@ -3402,7 +3474,7 @@ impl<'a> Emitter<'a> {
                 }
                 let body_lines = match factory_metadata {
                     Some((types, calls)) => construction::lower(&body_lines, &types, &calls, &returned, &self.documents.bytecode_image),
-                    None => body_lines,
+                    None => shared_static_resource_values(self.types, body_lines),
                 };
                 for line in body_lines {
                     text.push_str(&line);
@@ -6025,9 +6097,10 @@ mod tests {
     }
 
     /// #568: the statements every styled element of a template repeats (the intermediate root,
-    /// the parent stack, the end of the initialisation, the name) and a `{CompiledBinding}` bound
-    /// to a property are calls of the shared helpers of `rt` in the native output; the
-    /// construction programs of the bytecode backend keep the statements they encode.
+    /// the parent stack, the end of the initialisation, the name), a `{CompiledBinding}` bound
+    /// to a property and the value of a `{StaticResource}` are calls of the shared helpers of
+    /// `rt` in the native output; the construction programs of the bytecode backend keep the
+    /// statements they encode.
     #[cfg(feature = "runtime")]
     #[test]
     fn styled_elements_of_a_template_share_their_repeated_statements() {
@@ -6040,7 +6113,7 @@ mod tests {
             <StackPanel x:Name="PART_Root">
                 <Border Width="{CompiledBinding $parent[Button].Width}" />
                 <TextBlock Name="PART_Text" Background="{DynamicResource ExampleBrush}" />
-                <TextBlock Text="plain" />
+                <TextBlock Text="plain" Foreground="{StaticResource ExampleBrush}" />
             </StackPanel>
         </ControlTemplate>"#;
         let emit = |backend| {
@@ -6062,6 +6135,8 @@ mod tests {
             "rt::pop_parent_end_init(&context, &stack_panel_0, ",
             "rt::end_init(&text_block_1, ",
             "rt::bind_compiled_binding(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ",
+            "rt::static_resource_value(&context, ",
+            "_property(), \"ExampleBrush\", ",
         ] {
             assert!(native.contains(shared), "{shared} in\n{native}");
         }
@@ -6075,6 +6150,7 @@ mod tests {
             "rt::register_name_value(",
             "StyledElement::name_property()",
             "CompiledBindingExtension::__markup_ProvideValue_0",
+            "StaticResourceExtension::__markup_new_1(",
         ] {
             assert!(!content.contains(inline), "{inline} in\n{content}");
         }
@@ -6086,6 +6162,7 @@ mod tests {
             "rt::pop_parent_end_init(",
             "rt::end_init(",
             "rt::bind_compiled_binding(",
+            "rt::static_resource_value(",
         ];
         for shared in helpers {
             assert!(!typed.contains(shared), "{shared} in\n{typed}");

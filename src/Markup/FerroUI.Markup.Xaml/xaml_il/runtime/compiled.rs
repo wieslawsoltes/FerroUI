@@ -547,6 +547,34 @@ pub fn static_resource_content(
     Ok(to_value(provided))
 }
 
+/// The value of `{StaticResource key}` for the registered property `property` (#568): what the
+/// statements of generated code do, which create the extension with the key
+/// (`StaticResourceExtension::__markup_new_1`), call `ProvideValue` with the property as the
+/// provide-value target property ([`provide_value_invoked`], a failure the error of an invoked
+/// member at `line`, `position`) and hold the provided value as the value of a node
+/// ([`to_value`]). The same calls, in the same order; the caller assigns the value with the
+/// setter it chooses.
+#[inline(never)]
+pub fn static_resource_value(
+    context: &Rc<XamlIlContext>,
+    property: &'static FerroProperty,
+    key: &str,
+    line: i32,
+    position: i32,
+) -> Result<MarkupValue, XamlLoadError> {
+    use crate::markup_extensions::StaticResourceExtension;
+    let extension = StaticResourceExtension::__markup_new_1(string_object(key));
+    let provided = provide_value_invoked(
+        context,
+        property_value(property),
+        &extension,
+        StaticResourceExtension::__markup_ProvideValue_0,
+        line,
+        position,
+    )?;
+    Ok(to_value(provided))
+}
+
 /// A deferred resource added to a resource dictionary under a text key: the deferred content
 /// of `build` ([`defer`]), then `ResourceDictionary.AddDeferred(key, content)`; a failure of
 /// either is the load error at `line`, `position`. The calls the statements of generated code
