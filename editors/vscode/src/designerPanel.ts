@@ -11,11 +11,12 @@ import { NativePreview } from './nativePreview';
 import { DEFAULT_VIEWPORT, errorMessage, isViewport, type Asset, type CanvasSnapshot, type DragMessage, type DropHint, type FrameTarget, type FromDesigner, type Language, type NodeOperation, type NodeTarget, type Operation, type Placement, type Snapshot, type Source, type ToDesigner, type Viewport } from './protocol';
 import { applyTextEdits, asPosition, asRange, offsetAfterChanges, sourceOf } from './textDocument';
 import type { TimelinePreviewPose, TimelineTargetOverrides } from './timelineProtocol';
+import type { SpacingCatalog, SpacingDraft, SpacingRequest, SpacingResponse } from './spacingProtocol';
 import { designerHtml, webviewOptions } from './view';
 import type { EditResult, Inspection, InspectionTarget, Range, ResourceRow, RuntimeRow, RuntimeTreeMode } from './protocol';
 import type { CanvasAction, CanvasFocusOrder, CanvasInteraction, CanvasPresentation, DesignDataPresentation, DesignerViewState, ResizeGesture } from './protocol';
 
-const mappedStudioEdits = new Set(['designer_selection_layout_edit', 'designer_property', 'designer_grid_track_edit']);
+const mappedStudioEdits = new Set(['designer_selection_layout_edit', 'designer_property', 'designer_grid_track_edit', 'designer_spacing_edit']);
 export type DesignerCanvasState = Pick<DesignerViewState, 'viewport' | 'designData' | 'layerViews' | 'guideViews'>;
 
 interface Frame {
@@ -247,6 +248,10 @@ export class DesignerPanel implements vscode.Disposable {
         if (action.focus_order === true) {
             await this.waitForSnapshot(signal);
             if (!this.frame?.canvas.focusOrderAvailable) throw new Error('Open a native preview with focus-order support.');
+        }
+        if (action.spacing_helpers === true) {
+            await this.waitForSnapshot(signal);
+            if (!this.frame?.canvas.spacingAvailable) throw new Error('Open a native preview with spacing helpers.');
         }
         if (action.mode === 'interact') {
             await this.waitForSnapshot(signal);
@@ -490,8 +495,53 @@ export class DesignerPanel implements vscode.Disposable {
         try {
             return await this.commitEdit(frame, client => client.studioEdit(frame.source, token, name, args, targets), signal, validate);
         } finally {
-            if (this.currentToken === token) this.schedule(0);
+            if (name !== 'designer_spacing_edit' && this.currentToken === token) this.schedule(0);
         }
+    }
+
+    private async spacing(message: SpacingRequest): Promise<Partial<SpacingResponse>> {
+        const { frame, selection, operation } = message;
+        if (!this.canUse(frame) || !this.frame?.canvas.spacingAvailable || !selection.length) {
+            throw new Error('Select authored controls in the current preview to measure spacing.');
+        }
+        const accepted = this.selection;
+        const validate = () => {
+            if (this.currentToken !== frame.token || this.runtime || this.selection !== accepted ||
+                accepted.length !== selection.length || accepted.some((id, index) => id !== selection[index])) {
+                throw new Error('The preview or selection changed. Use the current spacing handles.');
+            }
+        };
+        const client = await this.getClient();
+        validate();
+        if (operation.kind === 'measure') {
+            const catalog = await client.studioQuery(frame.token, 'designer_spacing_helpers', {}, accepted) as SpacingCatalog;
+            validate();
+            return { catalog };
+        }
+        const { model, handle } = operation;
+        let adjustment = operation.adjustment;
+        if (operation.kind !== 'commit') {
+            const draft = await client.studioQuery(frame.token, 'designer_spacing_draft', { model, handle, adjustment }, accepted) as SpacingDraft;
+            validate();
+            if (operation.kind === 'draft') return { draft };
+            const { label, ownerLabel, value, minimum, maximum } = draft.handle;
+            const input = await vscode.window.showInputBox({
+                title: `${label} · ${ownerLabel}`,
+                prompt: 'Enter a value in logical pixels',
+                value: String(value),
+                validateInput: entry => {
+                    const number = Number(entry);
+                    if (!entry.trim() || !Number.isFinite(number)) return 'Enter a finite number.';
+                    if (number < minimum) return `Enter a value of at least ${minimum}.`;
+                    if (maximum !== null && number > maximum) return `Enter a value of at most ${maximum}.`;
+                },
+            });
+            if (input === undefined) return {};
+            validate();
+            adjustment = { value: Number(input) };
+        }
+        await this.studioEdit(frame.token, 'designer_spacing_edit', { model, handle, adjustment }, accepted, AbortSignal.timeout(15_000), validate);
+        return {};
     }
 
     async studioPresent(token: number, name: string, args: object, selection: number[] | undefined, signal: AbortSignal): Promise<CanvasPresentation | undefined> {
@@ -681,7 +731,8 @@ export class DesignerPanel implements vscode.Disposable {
                 rsxStateAuthoring: Boolean(client.capabilities.rsxStateAuthoring),
                 rsxStateStructure: Boolean(client.capabilities.rsxStateStructure),
                 canvas: { ...snapshot, nodes, interactive: Boolean(client.capabilities.canvasInteraction && snapshot.image),
-                    focusOrderAvailable: Boolean(client.capabilities.canvasFocusOrder && snapshot.image) } };
+                    focusOrderAvailable: Boolean(client.capabilities.canvasFocusOrder && snapshot.image),
+                    spacingAvailable: Boolean(client.capabilities.spacingHelpers && snapshot.image) } };
             this.runtime = undefined;
             const retained = this.retainedSelection?.version === version && snapshot.image
                 ? this.retainedSelection.ranges.flatMap(range => {
@@ -724,6 +775,16 @@ export class DesignerPanel implements vscode.Disposable {
         }
         if (message.type === 'canvasResult') {
             this.canvasRequests.receive(message);
+            return;
+        }
+        if (message.type === 'spacing') {
+            const response: SpacingResponse = { type: 'spacingResult', request: message.request };
+            try {
+                Object.assign(response, await this.spacing(message));
+            } catch (error) {
+                response.error = errorMessage(error);
+            }
+            this.post(response);
             return;
         }
         if (message.type === 'guideEdit') {

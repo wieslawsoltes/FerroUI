@@ -209,7 +209,7 @@ function moved(event: PointerEvent, drag: Gesture): boolean {
 }
 
 function overCanvasControl(event: PointerEvent): boolean {
-    return event.target instanceof Element && Boolean(event.target.closest('.resize-handle, .focus-marker'));
+    return event.target instanceof Element && Boolean(event.target.closest('.resize-handle, .focus-marker, .spacing-grip'));
 }
 
 function position(event: PointerEvent, drag: Gesture): number {

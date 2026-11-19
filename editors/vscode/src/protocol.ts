@@ -1,5 +1,6 @@
 import type { LayerViewState, LayerViewsState } from './layerViews';
 import type { CanvasGuidesState, CanvasSnapInput, GuideEdit, SnapLine } from './canvasGuidesProtocol';
+import type { SpacingRequest, SpacingResponse } from './spacingProtocol';
 import type { GuideViewsState } from './guideViews';
 import type { KeyframeLocation, TimelinePreviewPose, TimelineTargetOverrides } from './timelineProtocol';
 import type { NativeTransitionPosition } from './stateTransitionProtocol';
@@ -252,7 +253,8 @@ export interface CanvasPresentation {
     timelineTargets?: TimelineTargetOverrides;
     transitionPosition?: NativeTransitionPosition;
 }
-export type CanvasSnapshot = Omit<Snapshot, 'nodes'> & { nodes: CanvasNode[]; interactive?: boolean; focusOrderAvailable?: boolean };
+export type CanvasSnapshot = Omit<Snapshot, 'nodes'> & { nodes: CanvasNode[]; interactive?: boolean;
+    focusOrderAvailable?: boolean; spacingAvailable?: boolean };
 export interface CanvasFocusOrder {
     badges: { node: number; group: number; rank: number; label: string; bounds: Bounds; groupEntry: boolean }[];
     links: [number, number][];
@@ -273,6 +275,7 @@ export interface CanvasAction {
     pan_y?: number;
     pan_tool?: boolean;
     focus_order?: boolean;
+    spacing_helpers?: boolean;
 }
 export interface CanvasState {
     tab: 'preview' | 'counterpart';
@@ -283,8 +286,9 @@ export interface CanvasState {
     scrollY: number;
     panTool: boolean;
     focusOrder: boolean;
+    spacingHelpers: boolean;
 }
-export type FromDesigner = DragMessage
+export type FromDesigner = DragMessage | SpacingRequest
     | { type: 'ready' | 'refresh' }
     | { type: 'dock'; view: Exclude<DesignerView, 'canvas'> }
     | { type: 'previewDrop'; id: string; frame: FrameTarget; target: DropTarget; sequence: number }
@@ -299,7 +303,7 @@ export type FromDesigner = DragMessage
     | ({ type: 'previewResize'; frame: FrameTarget; request: number } & ResizeGesture)
     | { type: 'apply'; token: number; source: string };
 
-export type ToDesigner = DragUpdate | PlacementResult
+export type ToDesigner = DragUpdate | PlacementResult | SpacingResponse
     | { type: 'viewState'; state: DesignerViewState }
     | { type: 'recording'; time?: number }
     | { type: 'canvasAction'; request: number; action: CanvasAction }

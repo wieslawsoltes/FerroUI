@@ -4,6 +4,7 @@ import { access, readFile } from 'node:fs/promises';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
 import { NativePreview } from '../src/nativePreview';
+import type { SpacingCatalog } from '../src/spacingProtocol';
 import { asRange, sourceOf } from '../src/textDocument';
 import type { CurvePoint, TimelineProgram } from '../src/timelineProtocol';
 import { isInside } from '../src/workspacePaths';
@@ -34,6 +35,7 @@ export async function run(): Promise<void> {
         access(path.join(extension.extensionPath, 'dist', 'icons', 'history.svg')),
         access(path.join(extension.extensionPath, 'media', 'keyframe-editor.css')),
         access(path.join(extension.extensionPath, 'media', 'timeline-clips.css')),
+        access(path.join(extension.extensionPath, 'media', 'canvas-spacing.css')),
     ]);
     const workspace = vscode.workspace.workspaceFolders![0];
     const document = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(workspace.uri, 'SettingsView.xaml'));
@@ -50,6 +52,7 @@ export async function run(): Promise<void> {
     const native = await NativePreview.start(extension, output);
     try {
         assert.ok(native.capabilities.canvasInteraction);
+        assert.ok(native.capabilities.spacingHelpers, 'The installed preview negotiates measured spacing');
         assert.ok(native.capabilities.designFixtures, 'The installed preview recognizes named design fixtures');
         assert.ok(native.capabilities.timelineGeometryRecording, 'The installed preview supports canvas animation recording');
         assert.ok(native.capabilities.timelineKeyframeDrafts, 'The installed preview validates keyframe drafts and samples easing');
@@ -71,6 +74,18 @@ export async function run(): Promise<void> {
         const snapshot = await native.render(source, { width: 800, height: 520, dark: false }, 1);
         assert.ok(snapshot.image?.png, snapshot.renderError ?? undefined);
         assert.equal(Buffer.from(snapshot.image.png, 'base64').subarray(1, 4).toString(), 'PNG');
+        const spacingSource = { ...source,
+            source: '<StackPanel xmlns="https://github.com/ferroui" Spacing="12"><TextBlock Text="First"/><TextBlock Text="Second"/></StackPanel>' };
+        const spacing = await native.render(spacingSource, { width: 640, height: 420, dark: false }, 18);
+        assert.ok(spacing.image, spacing.renderError ?? undefined);
+        const selection = [spacing.nodes.find(node => node.label === 'StackPanel')!.id];
+        const handles = await native.studioQuery(18, 'designer_spacing_helpers', {}, selection) as SpacingCatalog;
+        const gap = handles.handles.find(handle => handle.label === 'Spacing')!;
+        assert.equal(gap.value, 12);
+        const spacingEdit = await native.studioEdit(spacingSource, 18, 'designer_spacing_edit', {
+            model: handles.model, handle: gap.id, adjustment: { value: 18.5 },
+        }, selection);
+        assert.deepEqual(spacingEdit.edits.map(edit => edit.newText), ['18.5']);
         assert.ok(native.canvasGuides, 'The installed preview negotiates canvas guide support');
         const guide = await native.editCanvasGuides(native.canvasGuides.defaults, { action: 'add', axis: 'Vertical', position: -18.125 });
         assert.deepEqual(guide.settings.guides, [{ id: guide.selected, axis: 'Vertical', position: -18.125 }]);

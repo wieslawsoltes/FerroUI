@@ -37,6 +37,7 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
         ${tool('pan', 'move', 'Pan canvas (Space and drag)', 'aria-pressed="false"')}
         ${tool('guides-button', 'symbol-ruler', 'Canvas Guides', 'popovertarget="guides-menu" aria-haspopup="dialog" disabled')}
         ${tool('snapping-button', 'magnet', 'Snapping', 'popovertarget="snapping-menu" aria-haspopup="dialog" hidden disabled')}
+        ${tool('spacing-button', 'arrow-swap', 'Show Spacing Handles', 'aria-pressed="false" aria-controls="spacing-overlay" hidden disabled')}
         <output id="canvas-recording" class="canvas-recording" role="status" hidden>${icon('circle-filled')}<span></span></output>
     </div>
     <div class="dock-tools" role="group" aria-label="Workbench views">
@@ -62,6 +63,11 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
                 <div id="drop-box" class="control-outline drop-outline" hidden></div>
                 <div id="canvas-snap-lines" aria-hidden="true"></div>
                 <div id="focus-order" class="focus-overlay" role="group" aria-label="Native keyboard navigation" hidden></div>
+                <div id="spacing-overlay" class="spacing-overlay" role="group" aria-label="Measured spacing handles" hidden>
+                    <canvas id="spacing-bands" aria-hidden="true"></canvas>
+                    <div id="spacing-grips"></div>
+                    <span id="spacing-value" aria-hidden="true" hidden></span>
+                </div>
             </div>
         </div>
     </div>
@@ -173,7 +179,7 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
     <button type="button" id="menu-library">Show Library</button>
     <button type="button" id="menu-focus-order" aria-pressed="false" disabled>Focus Order Overlay</button>
     <button type="button" class="compact-action" id="menu-refresh">Refresh preview</button>
-</div>`, ['canvas-guides', 'canvas-snapping']);
+</div>`, ['canvas-guides', 'canvas-snapping', 'canvas-spacing']);
 }
 
 export function outlineHtml(webview: vscode.Webview, root: vscode.Uri): string {

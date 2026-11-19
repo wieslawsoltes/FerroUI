@@ -1,4 +1,4 @@
-import type { CanvasAction, CanvasSnapshot, DesignerViewState, FromDesigner, RuntimeRow, ToDesigner } from '../src/protocol';
+import type { CanvasAction, CanvasSnapshot, DesignerViewState, FrameTarget, FromDesigner, RuntimeRow, ToDesigner } from '../src/protocol';
 import { Artboard } from './artboard';
 import { CanvasDrag } from './canvasDrag';
 import { ResizeHandles } from './resizeHandles';
@@ -9,6 +9,7 @@ import { CanvasViewport } from './canvasViewport';
 import { Counterpart } from './counterpart';
 import { anchorPopover, element } from './dom';
 import { FocusOverlay } from './focusOverlay';
+import { SpacingOverlay } from './spacingOverlay';
 import { PreviewInteraction } from './previewInteraction';
 import { ViewportMenu } from './viewportMenu';
 
@@ -39,6 +40,7 @@ let selected: number | undefined;
 let selection: number[] = [];
 let runtime: RuntimeRow | undefined;
 let token = 0;
+let acceptedFrame: FrameTarget | undefined;
 let current = false;
 let applying = false;
 let sourceKey: string | undefined;
@@ -70,6 +72,10 @@ const resize = new ResizeHandles(artboard, gesture => {
 const size = new ViewportMenu(viewport => vscode.postMessage({ type: 'viewport', viewport }));
 const counterpart = new Counterpart(apply);
 const focusOverlay = new FocusOverlay(token => vscode.postMessage({ type: 'focusOrder', token }), node => select(node, true));
+const spacing = new SpacingOverlay(artboard, vscode.postMessage, error => {
+    editError = error;
+    showCurrentStatus();
+});
 preview.addEventListener('pointerdown', clearEditError, true);
 preview.addEventListener('keydown', clearEditError, true);
 
@@ -91,6 +97,10 @@ anchorPopover(element('actions-button'), actionsMenu);
 focusOverlay.toggle.addEventListener('click', () => {
     focusOverlay.setEnabled(!focusOverlay.enabled);
     actionsMenu.hidePopover();
+    updateSelection();
+});
+spacing.toggle.addEventListener('click', () => {
+    spacing.setEnabled(!spacing.enabled);
     updateSelection();
 });
 const actions = [
@@ -126,10 +136,11 @@ function showDesign(show: boolean): void {
     previewTab.setAttribute('aria-pressed', String(show));
     sourceTab.setAttribute('aria-pressed', String(!show));
     if (show) guides.schedule();
+    updateSelection();
 }
 
 function controlCanvas(request: number, action: CanvasAction): void {
-    const { zoom, scale, pan_x, pan_y, pan_tool, focus_order } = action;
+    const { zoom, scale, pan_x, pan_y, pan_tool, focus_order, spacing_helpers } = action;
     const geometry = changesGeometry(action);
     if (geometry && !artboard.isCurrent) {
         vscode.postMessage({ type: 'canvasResult', request, error: 'Render an artboard before changing its zoom or pan.' });
@@ -153,9 +164,10 @@ function controlCanvas(request: number, action: CanvasAction): void {
     else if (action.mode === 'interact') showDesign(true);
     if (pan_tool !== undefined) input.setTool(pan_tool);
     if (focus_order !== undefined) focusOverlay.setEnabled(focus_order);
+    if (spacing_helpers !== undefined) spacing.setEnabled(spacing_helpers);
     updateSelection();
     vscode.postMessage({ type: 'canvasResult', request, state: { tab, mode: interaction.mode, ...viewport.state, panTool: input.panTool,
-        focusOrder: focusOverlay.enabled } });
+        focusOrder: focusOverlay.enabled, spacingHelpers: spacing.enabled } });
 }
 
 function changesGeometry(action: CanvasAction): boolean {
@@ -194,9 +206,11 @@ function updateSelection(): void {
     guides.setAvailable(Boolean(enabled && image), selecting);
     focusOverlay.update(Boolean(snapshot?.focusOrderAvailable), selecting, enabled && image
         ? { token, width: image.width, height: image.height, nodes: snapshot!.nodes } : undefined);
+    spacing.update(Boolean(snapshot?.spacingAvailable), selecting && tab === 'preview', enabled && image && acceptedFrame && !runtime
+        ? { frame: acceptedFrame, width: image.width, height: image.height, selection } : undefined);
     viewport.element.dataset.mode = interaction.mode;
     interaction.setAvailable(enabled && artboard.isCurrent && Boolean(snapshot?.interactive));
-    resize.update(enabled && selecting && !runtime && selection.length === 1 ? node : undefined);
+    resize.update(enabled && selecting && !runtime && selection.length === 1 && !spacing.hasHandles ? node : undefined);
     if (artboard.isCurrent) {
         if (!selecting) artboard.select(undefined);
         else if (runtime) artboard.inspect(runtime.bounds);
@@ -275,6 +289,7 @@ function presentSnapshot(message: SnapshotMessage, bitmap?: ImageBitmap | null):
     sourceKey = message.sourceKey;
     snapshot = message.snapshot;
     token = message.frame.token;
+    acceptedFrame = message.frame;
     selected = message.selected;
     selection = message.selection ?? [];
     runtime = message.runtime;
@@ -337,6 +352,10 @@ function receive(message: ToDesigner): void {
             return;
         case 'guideResult': guides.result(message); return;
         case 'resizeHint': resizeHints.receive(message); return;
+        case 'spacingResult':
+            spacing.receive(message);
+            if (message.catalog) updateSelection();
+            return;
         case 'focusOrder':
             if (message.overlay) focusOverlay.show(message.token, message.overlay);
             else if (message.token === token && message.error) showStatus('notice', message.error);
