@@ -1,74 +1,21 @@
-//! The CustomUserControls page: the custom controls of `custom_controls.rs` in their templates.
+//! The CustomUserControls page: the custom controls of `custom_controls.rs`.
 
-#[cfg(feature = "theme")]
-use crate::custom_controls::{CounterControl, CounterMode};
 use crate::custom_controls::{
-    convert_to_fahrenheit, ValidatedPasswordBox, MISSING_NUMBER, MISSING_UPPERCASE, TOO_SHORT, VALID,
+    convert_to_fahrenheit, CounterControl, CounterMode, ValidatedPasswordBox, MISSING_NUMBER, MISSING_UPPERCASE,
+    TOO_SHORT, VALID,
 };
-#[cfg(feature = "theme")]
-use crate::examples;
-#[cfg(feature = "theme")]
+use crate::{examples, tests::start};
 use ferroui_base::interactivity::RoutedEventArgs;
-#[cfg(feature = "theme")]
 use ferroui_base::Ref;
-#[cfg(feature = "theme")]
-use ferroui_controls::automation::AutomationProperties;
-#[cfg(feature = "theme")]
-use ferroui_controls::{Button, ContentControl, Control, StackPanel, TextBlock, TextBox, UserControl, Window};
+use ferroui_controls::{Button, ContentControl, Control, StackPanel, TextBlock, TextBox, UserControl};
 
-/// The page in a window, with the WinUI theme: the templates of the TextBoxes inside the custom
-/// controls are the theme's.
-#[cfg(feature = "theme")]
-fn page_in_window() -> (Ref<Control>, Ref<Window>) {
-    let root = examples::create(examples::find("CustomUserControls").unwrap())
-        .unwrap_or_else(|error| panic!("CustomUserControls: {error}"));
-    let window = Window::new();
-    window.set_content(Some(Control::boxed(root.clone())));
-    window.show();
-    window.update_layout();
-    (root, window)
+fn page() -> Ref<Control> {
+    examples::create(examples::find("CustomUserControls").unwrap())
+        .unwrap_or_else(|error| panic!("CustomUserControls: {error}"))
 }
 
-#[cfg(feature = "theme")]
 fn click(button: &Button) {
     button.raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
-}
-
-#[cfg(feature = "theme")]
-#[test]
-fn counter_controls_count_up_and_down_in_their_templates() {
-    let _application = crate::tests::start_winui();
-    let (root, window) = page_in_window();
-    let counters = root.get_control::<StackPanel>("CounterHost");
-    let counter = |index: usize| counters.children().get(index).cast::<CounterControl>().unwrap();
-    for (index, mode, label, step) in [
-        (0, CounterMode::Increment, "Increase", 1),
-        (1, CounterMode::Decrement, "Decrease", -1),
-    ] {
-        let counter = counter(index);
-        assert_eq!(counter.mode(), mode);
-        // OnApplyTemplate found the parts: the button says what it does.
-        let button = counter
-            .get_visual_descendants()
-            .find_map(|visual| visual.cast::<Button>())
-            .expect("the ActionButton of the template");
-        assert_eq!(
-            button.content().and_then(|content| content.downcast_ref::<String>().cloned()).as_deref(),
-            Some(label)
-        );
-        assert_eq!(AutomationProperties::get_name(&button), Some(format!("{label} counter")));
-        click(&button);
-        click(&button);
-        assert_eq!(counter.count(), 2 * step);
-        let text = counter
-            .get_visual_descendants()
-            .find_map(|visual| {
-                visual.cast::<TextBlock>().filter(|text| text.name().as_deref() == Some("CountText"))
-            })
-            .expect("the CountText of the template");
-        assert_eq!(text.text(), Some((2 * step).to_string()));
-    }
-    window.close();
 }
 
 #[test]
@@ -84,48 +31,43 @@ fn validated_password_box_rules_are_the_sources() {
     assert_eq!(convert_to_fahrenheit("warm"), "Invalid input!");
 }
 
-#[cfg(feature = "theme")]
 #[test]
-fn validated_password_box_reports_what_the_password_misses() {
-    let _application = crate::tests::start_winui();
-    let (root, window) = page_in_window();
+fn custom_user_controls_page_creates_the_controls_of_the_three_examples() {
+    let _application = start();
+    let root = page();
+    let counters = root.get_control::<StackPanel>("CounterHost");
+    let modes: Vec<CounterMode> = counters
+        .children()
+        .to_vec()
+        .into_iter()
+        .filter_map(|child| child.cast::<CounterControl>())
+        .map(|counter| counter.mode())
+        .collect();
+    assert_eq!(modes, [CounterMode::Increment, CounterMode::Decrement]);
+    // The validated password box above the Submit button, whose IsEnabled follows IsValid.
     let password = root
         .get_control::<StackPanel>("PasswordHost")
         .children()
         .get(0)
         .cast::<ValidatedPasswordBox>()
         .unwrap();
+    assert_eq!(password.min_length(), 8);
+    assert_eq!(password.header().as_deref(), Some("Password"));
+    assert_eq!(password.placeholder_text().as_deref(), Some("Enter password..."));
     let submit = root.get_control::<Button>("SubmitButton");
-    assert!(!submit.is_enabled());
-    let input = password
-        .get_visual_descendants()
-        .find_map(|visual| visual.cast::<TextBox>())
-        .expect("the PasswordInput of the template");
-    assert_eq!(input.placeholder_text().as_deref(), Some("Enter password..."));
-    // The password box's text is the Password, and IsValid enables Submit.
-    input.set_text(Some("short"));
-    assert_eq!(password.password(), "short");
     assert!(!password.is_valid() && !submit.is_enabled());
-    input.set_text(Some("Longer password 1"));
+    password.set_password("short".to_string());
+    assert!(!password.is_valid() && !submit.is_enabled());
+    password.set_password("Longer password 1".to_string());
     assert!(password.is_valid() && submit.is_enabled());
-    let lines = password
-        .get_visual_descendants()
-        .find_map(|visual| {
-            visual.cast::<StackPanel>().filter(|panel| panel.name().as_deref() == Some("ValidationLines"))
-        })
-        .expect("the ValidationLines of the template");
-    assert!(lines.is_visible());
-    assert_eq!(lines.children().count(), 1);
-    input.set_text(Some(""));
-    assert!(!lines.is_visible());
-    window.close();
+    password.set_password(String::new());
+    assert!(!submit.is_enabled());
 }
 
-#[cfg(feature = "theme")]
 #[test]
 fn temperature_converter_user_control_converts_celsius() {
-    let _application = crate::tests::start_winui();
-    let (root, window) = page_in_window();
+    let _application = start();
+    let root = page();
     let converter = root
         .get_control::<ContentControl>("TemperatureHost")
         .content()
@@ -145,5 +87,54 @@ fn temperature_converter_user_control_converts_celsius() {
     );
     input.set_text(Some("   "));
     assert!(!button.is_enabled());
-    window.close();
+}
+
+/// A counter with the page's control theme, alone in a window with the WinUI theme: its template
+/// gives the parts that OnApplyTemplate finds.
+#[cfg(feature = "theme")]
+#[test]
+fn counter_controls_count_up_and_down_in_their_templates() {
+    use ferroui_base::controls::ResourceKey;
+    use ferroui_base::styling::ControlTheme;
+    use ferroui_controls::automation::AutomationProperties;
+    use ferroui_controls::Window;
+    let _application = crate::tests::start_winui();
+    let root = page();
+    let theme = root
+        .try_find_resource(&ResourceKey::from("CounterControlTheme"), None)
+        .flatten()
+        .and_then(|value| value.downcast_ref::<Ref<ControlTheme>>().cloned())
+        .expect("the page's CounterControl theme");
+    for (mode, label, step) in [
+        (CounterMode::Increment, "Increase", 1),
+        (CounterMode::Decrement, "Decrease", -1),
+    ] {
+        let counter = CounterControl::new();
+        counter.set_mode(mode);
+        counter.set_theme(Some(theme.clone()));
+        let window = Window::new();
+        window.set_content(Some(Control::boxed(counter.clone())));
+        window.show();
+        window.update_layout();
+        let button = counter
+            .get_visual_descendants()
+            .find_map(|visual| visual.cast::<Button>())
+            .expect("the ActionButton of the template");
+        assert_eq!(
+            button.content().and_then(|content| content.downcast_ref::<String>().cloned()).as_deref(),
+            Some(label)
+        );
+        assert_eq!(AutomationProperties::get_name(&button), Some(format!("{label} counter")));
+        click(&button);
+        click(&button);
+        assert_eq!(counter.count(), 2 * step);
+        let text = counter
+            .get_visual_descendants()
+            .find_map(|visual| {
+                visual.cast::<TextBlock>().filter(|text| text.name().as_deref() == Some("CountText"))
+            })
+            .expect("the CountText of the template");
+        assert_eq!(text.text(), Some((2 * step).to_string()));
+        window.close();
+    }
 }

@@ -568,15 +568,19 @@
         },
         {
           "path": "samples/WinUIGallery/custom_controls_tests.rs",
-          "name": "counter_controls_count_up_and_down_in_their_templates"
+          "name": "validated_password_box_rules_are_the_sources"
         },
         {
           "path": "samples/WinUIGallery/custom_controls_tests.rs",
-          "name": "validated_password_box_reports_what_the_password_misses"
+          "name": "custom_user_controls_page_creates_the_controls_of_the_three_examples"
         },
         {
           "path": "samples/WinUIGallery/custom_controls_tests.rs",
           "name": "temperature_converter_user_control_converts_celsius"
+        },
+        {
+          "path": "samples/WinUIGallery/custom_controls_tests.rs",
+          "name": "counter_controls_count_up_and_down_in_their_templates"
         }
       ],
       "notes": "All three source examples with the page's texts and the custom controls of the page in Rust (custom_controls.rs): CounterControl (Count and Mode styled properties, OnApplyTemplate with its ActionButton and CountText parts, UpdateUI and UpdateButtonText) in its two modes, ValidatedPasswordBox (Password, IsValid, MinLength, Header and PlaceholderText, OnApplyTemplate and UpdateValidationMessages with the colors of the theme) above the Submit button that its IsValid enables (the source's OneWay x:Bind), and the UserControl TemperatureConverterControl with HasText and Button_Click. The controls' default styles (DefaultStyleKey) are the page's control themes of CounterControl.xaml and ValidatedPasswordBox.xaml; a native page has no XAML namespace of its own types, so the sample creates the controls in their hosts. The validation lines are a panel of icon and text lines, the source's RichTextBlock of InlineUIContainers. FerroUI has no PasswordBox: the template's password box is a TextBox with a PasswordChar, so the page is partial.",
