@@ -137,6 +137,8 @@ pub(crate) struct EditResult {
     pub(crate) timeline_pose: Option<ferroui_designer::TimelinePreviewPose>,
     #[serde(rename = "timelineProgramKey", skip_serializing_if = "Option::is_none")]
     pub(crate) timeline_program_key: Option<String>,
+    #[serde(rename = "timelineKeys", skip_serializing_if = "Option::is_none")]
+    pub(crate) timeline_keys: Option<Vec<ferroui_designer_animation::KeyframeLocation>>,
     #[serde(rename = "retainedSelection", skip_serializing_if = "Vec::is_empty")]
     pub(crate) retained_selection: Vec<Range>,
 }

@@ -4,6 +4,7 @@ import { timelinePercent, visibleTime, type TimelineViewport } from './timelineV
 
 interface PropertyRow {
     element: HTMLLIElement;
+    index: number;
     searchLabel: string;
     times: number[];
 }
@@ -45,6 +46,7 @@ export class TimelineChannels {
             const channel = this.channel(target, name);
             channel.rows = group.map(({ track, index }) => ({
                 element: renderTrack(track, index, name),
+                index,
                 searchLabel: `${name} ${track.property}`.toLocaleLowerCase(),
                 times: track.keyframes.map(key => key.time),
             }));
@@ -57,6 +59,11 @@ export class TimelineChannels {
     isLocked(target: number): boolean { return this.locked.has(target); }
 
     get hasLocks(): boolean { return this.channels.some(({ target }) => this.isLocked(target)); }
+
+    editableTracks(): number[] {
+        return this.channels.flatMap(({ target, properties, rows }) => this.isLocked(target) || properties.hidden
+            ? [] : rows.filter(row => !row.element.hidden).map(row => row.index));
+    }
 
     showLocks(available: boolean, disabled: boolean): void {
         for (const { lock } of this.channels) {

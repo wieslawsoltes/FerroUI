@@ -2,11 +2,11 @@ import { strict as assert } from 'node:assert';
 import * as vscode from 'vscode';
 import type { OutlineNode } from '../src/protocol';
 import { asRange } from '../src/textDocument';
-import type { CurvePoint, TimelineProgram } from '../src/timelineProtocol';
+import type { CurvePoint, KeyframeLocation, TimelineProgram } from '../src/timelineProtocol';
 import type { McpFixture } from './mcp';
 import { until } from './wait';
 
-export async function verifyRsxAnimation({ invoke, content }: McpFixture): Promise<void> {
+export async function verifyRsxAnimation({ invoke, content }: McpFixture): Promise<unknown> {
     const path = 'animation_view.rs';
     const uri = vscode.Uri.joinPath(vscode.workspace.workspaceFolders![0].uri, path);
     const document = await vscode.workspace.openTextDocument(uri);
@@ -37,7 +37,7 @@ export async function verifyRsxAnimation({ invoke, content }: McpFixture): Promi
         await invoke('designer_studio_tools', { session }));
     assert.deepEqual(tools.edits.find(tool => tool.name === 'designer_program')?.inputSchema.properties.action?.enum,
         ['create', 'rename', 'duplicate', 'remove', 'upsert_keyframe', 'record_keyframe', 'remove_keyframe',
-            'move_keyframes', 'scale_keyframes', 'duplicate_keyframes', 'remove_keyframes']);
+            'move_keyframes', 'scale_keyframes', 'mirror_keyframes', 'paste_keyframes', 'duplicate_keyframes', 'remove_keyframes']);
 
     const draft = { program: program.id, target: program.timeline.tracks[0].target, property: 'Opacity',
         previous: .5, time: 1.4, value: '0.82', easing: '0.25,0.3,0.75,1.4' };
@@ -139,11 +139,36 @@ export async function verifyRsxAnimation({ invoke, content }: McpFixture): Promi
     await undo(duplicated);
     frame = await undo(original);
 
+    const clipboard = content<{ format: string }>(await query('designer_keyframe_clipboard', {
+        program: restored.id, keyframes: originals,
+    }));
+    assert.equal(clipboard.format, 'ferroui.keyframes.v1');
+    assert.equal(document.getText(), original);
+    const paste = { action: 'paste_keyframes', program: restored.id, paste: { clipboard,
+        destinations: [{ target: track.target, property: track.property }], time: .75, reverse: true } };
+    const pasted = content<{ keyframes: KeyframeLocation[] }>(await edit(frame.revision, paste));
+    assert.deepEqual(pasted.keyframes.map(key => key.time).sort((a, b) => a - b), [.75, 1.25]);
+    assert.match(document.getText(), /\.key_frame\(0\.375, \|key\| key\.set\(ferroui_base::Visual::opacity_property\(\), 0\.65\)\)/);
+    assert.ok((await edit(frame.revision, paste)).isError);
+    frame = await undo(original);
+    const mirrored = content<{ keyframes: KeyframeLocation[] }>(await edit(frame.revision, {
+        action: 'mirror_keyframes', program: restored.id, keyframes: originals, pivot: .5,
+    }));
+    assert.deepEqual(mirrored.keyframes.map(key => key.time), [1, .5]);
+    await outline();
+    const reflectedKeys = (await programs())[0].timeline!.tracks[0].keyframes;
+    assert.deepEqual(reflectedKeys.map(key => key.time), [.5, 1, 2]);
+    assert.equal(reflectedKeys[0].value_text, '0.65');
+    assert.match(document.getText(), /\/\* 🪴 hold \*\/ 0\.65f64/);
+    assert.ok(!document.getText().replace(/\r\n/g, '').includes('\n'));
+    frame = await undo(original);
+
     content(await invoke('designer_block', { session, expected_revision: frame.revision, index: 0 }));
     await outline();
     assert.deepEqual(await programs(), []);
     const fixtureTabs = vscode.window.tabGroups.all.flatMap(group => group.tabs).filter(tab =>
         tab.label === 'Design · animation_view.rs' || (tab.input instanceof vscode.TabInputText && tab.input.uri.toString() === uri.toString()));
     await vscode.window.tabGroups.close(fixtureTabs);
-    console.log('RSX animation validated native keyframes, added, retimed, duplicated, and removed mapped keys, rejected stale revisions, and restored CRLF and Unicode with Undo');
+    console.log('RSX animation validated native keyframes, including reverse paste and mirror, rejected stale revisions, and restored CRLF and Unicode with Undo');
+    return clipboard;
 }

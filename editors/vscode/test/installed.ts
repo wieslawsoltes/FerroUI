@@ -58,6 +58,7 @@ export async function run(): Promise<void> {
         assert.ok(native.capabilities.timelineCombinedPlayback, 'The installed preview plays combined animation programs');
         assert.ok(native.capabilities.timelineProgramTargets, 'The installed preview retains animation resource targets');
         assert.ok(native.capabilities.stateTransitionPreview, 'The installed preview samples explicit state transitions');
+        assert.ok(native.capabilities.timelineKeyframeTransfer, 'The installed preview transfers typed keyframes');
         assert.ok(native.capabilities.rsxStateAuthoring, 'The installed preview maps typed Rust state declarations');
         assert.ok(native.capabilities.rsxStateStructure, 'The installed preview authors Rust state groups');
         assert.ok(native.capabilities.hostedAnimationRestoration, 'The installed preview restores the accepted app-hosted timeline');
@@ -78,6 +79,9 @@ export async function run(): Promise<void> {
         assert.ok(programs[0]?.sourceRange && programs[0].timeline && programs[0].preview?.available);
         const [program] = programs;
         const track = program.timeline!.tracks[0];
+        const clipboard = await native.studioQuery(2, 'designer_keyframe_clipboard', { program: program.id,
+            keyframes: [{ target: track.target, property: track.property, time: .5 }] }) as { format: string };
+        assert.equal(clipboard.format, 'ferroui.keyframes.v1');
         const curve = await native.studioQuery(2, 'designer_animation_curve', { program: program.id,
             target: track.target, property: track.property, window: { start: 0, end: 2 } }) as { points: CurvePoint[] };
         assert.equal(curve.points.find(point => point.time === .5)?.value, .65);

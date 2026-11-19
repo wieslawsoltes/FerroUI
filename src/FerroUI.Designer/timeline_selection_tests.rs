@@ -1,8 +1,10 @@
 //! Native selection commands must preserve curve/value pairs and remain one source edit.
 use super::*;
+use ferroui_base::input::platform::IClipboard;
 use ferroui_base::input::KeyEventArgs;
-use ferroui_controls::testing::{TestServices, UnitTestApplication};
-use ferroui_designer_animation::AnimationValue;
+use ferroui_controls::Window;
+use ferroui_controls::testing::{MockWindowingPlatform, TestClipboardImpl, TestServices, UnitTestApplication};
+use ferroui_designer_animation::{AnimationValue, KeyframeClipboard};
 
 fn workspace() -> (Rc<DesignerWorkspace>, NodeId) {
     let workspace = DesignerWorkspace::new(
@@ -89,6 +91,43 @@ fn selected_lane(workspace: &DesignerWorkspace) -> Ref<TimelineLane> {
         .filter_map(WeakRef::upgrade)
         .find(|lane| !lane.is_ruler() && !lane.selected_keys().is_empty())
         .unwrap()
+}
+
+#[test]
+fn studio_lane_copies_typed_keys_and_reverse_pastes_with_one_undo() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let (workspace, target) = workspace();
+    let clipboard = TestClipboardImpl::new();
+    let window_impl = MockWindowingPlatform::create_window_mock();
+    window_impl.setup_feature::<dyn IClipboard>(clipboard.clipboard());
+    let window = Window::with_impl(window_impl);
+    window.set_content(Some(Control::boxed(&workspace.root)));
+    window.show();
+
+    workspace.select_keyframes(&[(target, "Opacity".into(), 1.0), (target, "Opacity".into(), 2.0)]).unwrap();
+    let original = workspace.session.borrow().authored_source().to_owned();
+    let revision = workspace.session.borrow().document().revision();
+    let lane = selected_lane(&workspace);
+    key(&lane, Key::C, KeyModifiers::META);
+    Dispatcher::ui_thread().run_jobs(None);
+    let copied = KeyframeClipboard::from_text(&clipboard.text().unwrap()).unwrap();
+    assert_eq!(copied.tracks[0].property, "Opacity");
+    assert_eq!(copied.tracks[0].keyframes.iter().map(|key| key.time).collect::<Vec<_>>(), [0.0, 1.0]);
+    assert_eq!(workspace.session.borrow().document().revision(), revision);
+
+    workspace.session.borrow_mut().seek(0.5).unwrap();
+    workspace.refresh(false);
+    key(&selected_lane(&workspace), Key::V, KeyModifiers::META | KeyModifiers::SHIFT);
+    Dispatcher::ui_thread().run_jobs(None);
+    let session = workspace.session.borrow();
+    let track = session.timeline().track(target, "Opacity").unwrap();
+    assert_eq!(track.keyframes[1].value, AnimationValue::Number(0.2));
+    assert_eq!(track.keyframes[3].value, AnimationValue::Number(0.1));
+    assert_eq!(session.document().revision(), revision + 1);
+    drop(session);
+    assert_eq!(workspace.selected_keyframes().len(), 2);
+    workspace.session.borrow_mut().undo().unwrap();
+    assert_eq!(workspace.session.borrow().authored_source(), original);
 }
 
 #[test]

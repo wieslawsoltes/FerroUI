@@ -4,9 +4,10 @@ import { DockView } from './dockView';
 import { errorMessage, type FrameTarget } from './protocol';
 import type { StateTransitionControl, StateTransitionRoute } from './stateTransitionProtocol';
 import { choose, StudioContext } from './studioContext';
-import { chooseKeyframeGroupEdit, keyframeOptions } from './studioKeyframes';
+import { chooseTimelineKeyAction, keyframeOptions } from './studioKeyframes';
 import { chooseAnimationIssue, chooseAnimationTargets, revealAnimationProgram, showAnimationActions } from './studioPrograms';
 import { authorTimelineKeyframe } from './timelineKeyframeAuthoring';
+import { copyTimelineKeys, prepareTimelinePaste, timelineEditTime } from './timelineKeyframeClipboard';
 import { TimelineMarkers } from './timelineMarkers';
 import { positionFromPose, TimelinePlayback } from './timelinePlayback';
 import { canPreviewProgram, canPreviewRange, previewClock } from './timelinePrograms';
@@ -187,6 +188,7 @@ export class TimelineView implements vscode.Disposable {
         this.view.show({ frame: catalog?.programs ? frame : undefined, documentVersion: panel?.document.version,
             programs, message, names, selectedTargets, markers, writable: panel?.language === 'xaml', position, sourceIssues: catalog?.sourceIssues,
             canEditKeyframes: panel?.supportsTimelineKeyframeDrafts,
+            canTransferKeys: panel?.supportsTimelineKeyframeTransfer,
             canAuthorRustKeys: panel?.supportsRustKeyframeStructure,
             canCreateRustProgram: Boolean(panel?.rustAnimationOwners.length),
             preferredProgram: panel?.authoredTimelineProgram,
@@ -267,29 +269,7 @@ export class TimelineView implements vscode.Disposable {
                     return;
                 }
                 if (message.type === 'keyframeGroup') {
-                    const rust = panel.language === 'rust';
-                    if (!message.keys.length || (rust && !program.sourceRange)) throw new Error('Select mapped keyframes to edit.');
-                    const pose = panel.authoredTimelinePose;
-                    const pivot = panel.supportsTimelineKeyframeScale && !program.preview?.native
-                        ? pose?.program === program.id ? pose.time : 0 : undefined;
-                    const structural = context.writable || panel.supportsRustKeyframeStructure;
-                    const edit = message.edit ?? await chooseKeyframeGroupEdit(message.keys.length, structural, pivot);
-                    if (!edit) {
-                        this.view.post({ type: 'keyframesEdited', before: message.frame });
-                        return;
-                    }
-                    if (!structural && edit.action !== 'move_keyframes' && edit.action !== 'scale_keyframes') {
-                        throw new Error('Update the FerroUI preview helper to add or remove mapped Rust keys.');
-                    }
-                    const version = panel.document.version;
-                    await context.edit('designer_program', { ...edit, program: program.id, keyframes: message.keys });
-                    if (panel.document.version === version) {
-                        this.view.post({ type: 'keyframesEdited', before: message.frame });
-                        return;
-                    }
-                    await panel.waitForSnapshot(AbortSignal.timeout(15_000));
-                    const keys = edit.action === 'remove_keyframes' ? [] : message.keys.map(key => ({ ...key,
-                        time: edit.action === 'scale_keyframes' ? edit.pivot + (key.time - edit.pivot) * edit.factor : key.time + edit.offset }));
+                    const keys = await this.editKeyframes(context, program, timeline, message);
                     this.view.post({ type: 'keyframesEdited', keys, before: message.frame });
                     return;
                 }
@@ -307,6 +287,48 @@ export class TimelineView implements vscode.Disposable {
             }
             this.report(error);
         }
+    }
+
+    private async editKeyframes(context: StudioContext, program: TimelineProgram, timeline: NonNullable<TimelineProgram['timeline']>,
+        { keys, edit: requested, destinations = [] }: Extract<FromTimeline, { type: 'keyframeGroup' }>): Promise<KeyframeLocation[] | undefined> {
+        const { panel } = context;
+        if (!context.writable && !program.sourceRange) throw new Error('Select a mapped Rust program to edit.');
+        const pose = panel.authoredTimelinePose;
+        const pivot = panel.supportsTimelineKeyframeScale && !program.preview?.native
+            ? pose?.program === program.id ? pose.time : 0 : undefined;
+        const structural = context.writable || panel.supportsRustKeyframeStructure;
+        const transfer = panel.supportsTimelineKeyframeTransfer;
+        const edit = requested ?? await chooseTimelineKeyAction(keys.length, structural, transfer, destinations.length > 0, pivot);
+        if (!edit) return;
+        if (edit.action !== 'paste_keyframes' && !keys.length) throw new Error('Select keyframes to edit.');
+        const isTransfer = edit.action === 'copy_keyframes' || edit.action === 'paste_keyframes' || edit.action === 'mirror_keyframes';
+        if (isTransfer && !transfer) throw new Error('Update the FerroUI preview helper to transfer keyframes.');
+        if (!structural && (edit.action === 'duplicate_keyframes' || edit.action === 'remove_keyframes')) {
+            throw new Error('Update the FerroUI preview helper to add or remove mapped Rust keys.');
+        }
+        if (edit.action === 'copy_keyframes') {
+            await copyTimelineKeys(context, program.id, keys);
+            return;
+        }
+
+        let parameters: object = edit;
+        if (edit.action === 'paste_keyframes') {
+            const paste = await prepareTimelinePaste(context, program, timeline, edit, destinations);
+            if (!paste) return;
+            parameters = { action: edit.action, paste };
+        } else if (edit.action === 'mirror_keyframes') {
+            const time = await timelineEditTime(context, program, timeline.duration, 'Mirror pivot');
+            if (time === undefined) return;
+            parameters = { action: edit.action, pivot: time };
+        }
+        const arguments_ = edit.action === 'paste_keyframes' ? parameters : { ...parameters, keyframes: keys };
+        const result = await context.editResult('designer_program', { ...arguments_, program: program.id });
+        if (!result.edits.length) return;
+        await panel.waitForSnapshot(AbortSignal.timeout(15_000));
+        if (result.timelineKeys) return result.timelineKeys;
+        if (edit.action === 'remove_keyframes') return [];
+        if (edit.action === 'scale_keyframes') return keys.map(key => ({ ...key, time: edit.pivot + (key.time - edit.pivot) * edit.factor }));
+        if ('offset' in edit) return keys.map(key => ({ ...key, time: key.time + edit.offset }));
     }
 
     private async recordKeyframe(context: StudioContext, program: TimelineProgram, timeline: NonNullable<TimelineProgram['timeline']>,

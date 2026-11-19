@@ -324,9 +324,10 @@ export class AgentTools {
                 break;
             case 'designer_studio_tools': return panel.studioTools();
             case 'designer_studio_query': return panel.studioQuery(args.tool, args.arguments, args.selection, signal);
-            case 'designer_studio_edit':
-                await panel.studioEdit(args.expected_revision, args.tool, args.arguments, args.selection, signal);
-                break;
+            case 'designer_studio_edit': {
+                const { timelineKeys } = await panel.studioEdit(args.expected_revision, args.tool, args.arguments, args.selection, signal);
+                return { ...describe(panel), ...(timelineKeys && { keyframes: timelineKeys }) };
+            }
             case 'designer_studio_present':
                 await panel.studioPresent(args.expected_revision, args.tool, args.arguments, args.selection, signal);
                 break;

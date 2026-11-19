@@ -191,7 +191,7 @@ pub(crate) fn editor_edits(
             })
         })
         .collect::<Result<_, String>>()?;
-    Ok(EditResult { edits, selection: None, timeline_pose: None, timeline_program_key: None, retained_selection: Vec::new() })
+    Ok(EditResult { edits, selection: None, timeline_pose: None, timeline_program_key: None, timeline_keys: None, retained_selection: Vec::new() })
 }
 
 fn editable_node<'a>(design: &'a DesignDocument<'_>, id: NodeId) -> Result<&'a Node, String> {

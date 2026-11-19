@@ -126,7 +126,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         assert.ok((await invoke('designer_studio_edit', designData)).isError);
         assert.ok((await invoke('ferroui_workspace_create', { path: 'Denied.rs', source: 'fn main() {}' })).isError);
         await config.update('allowWrites', true, vscode.ConfigurationTarget.Global);
-        await verifyRsxAnimation({ invoke, content });
+        const rsxKeyframeClipboard = await verifyRsxAnimation({ invoke, content });
         await verifyRsxPrograms({ invoke, content });
         await verifyRsxStates({ invoke, content });
         await vscode.window.showTextDocument(document, { preserveFocus: false });
@@ -181,7 +181,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         assert.match(document.getText(), /Click="OnSave"/);
         content(await invoke('designer_history', { session, expected_version: document.version, action: 'undo' }));
         assert.equal(document.getText(), original);
-        await verifyTimelineMcp({ invoke, content }, session, document);
+        await verifyTimelineMcp({ invoke, content }, session, document, rsxKeyframeClipboard);
         await verifyTimelineRecording({ invoke, content }, session, document);
         await verifyTimelineGeometry({ invoke, content }, session, document);
         await verifyTimelinePlayback({ invoke, content }, session, document);

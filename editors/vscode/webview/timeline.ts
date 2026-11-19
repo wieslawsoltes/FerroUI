@@ -1,5 +1,5 @@
 import type { FrameTarget } from '../src/protocol';
-import type { FromTimeline, KeyframeGroupEdit, KeyframeLocation, TimelineControl, TimelineProgram, TimelineState, ToTimeline } from '../src/timelineProtocol';
+import type { FromTimeline, KeyframeLocation, TimelineControl, TimelineKeyAction, TimelineProgram, TimelineState, ToTimeline } from '../src/timelineProtocol';
 import { canPreviewProgram, canPreviewRange, previewClock } from '../src/timelinePrograms';
 import { anchorPopover, element, labelButton } from './dom';
 import { TimelineChannels } from './timelineChannels';
@@ -161,6 +161,8 @@ sourceIssues.onclick = () => {
 };
 keyActions.addEventListener('click', () => editKeys(selection.keys, model.frame));
 slider.addEventListener('input', () => queueSeek(slider.valueAsNumber));
+const pasteControls: HTMLElement[] = [slider, keyActions];
+for (const control of pasteControls) control.addEventListener('keydown', event => { clipboardShortcut(event, selection.keys); });
 function queueSeek(seconds: number): void {
     if (!model.frame || keyframeEditor.applying || keyEdit || !canPreviewProgram(current())) return;
     queued = seconds;
@@ -363,7 +365,7 @@ function showTracks(): void {
                     if (model.writable) vscode.postMessage({ type: 'keyframe', frame, program: selected.id, track: index, time: key.time });
                     else send(frame, { action: 'seek', program: selected.id, time: key.time });
                 });
-                button.addEventListener('keydown', event => keyShortcuts(event, location, timeline.duration));
+                button.addEventListener('keydown', event => keyShortcuts(event, location, timeline.duration, index));
                 lane.append(button);
             }
             row.append(name, lane);
@@ -505,7 +507,8 @@ function showPosition(): void {
 }
 
 function showKeySelection(): void {
-    keyActions.hidden = !current()?.timeline || !canRetimeKeys() || selection.size === 0;
+    keyActions.hidden = !current()?.timeline || !canRetimeKeys()
+        || (!selection.size && !(model.canTransferKeys && channels.editableTracks().length));
     for (const { button, key } of renderedKeys) button.setAttribute('aria-pressed', String(selection.has(key)));
     showCurves();
 }
@@ -518,13 +521,18 @@ function canChangeKeyStructure(): boolean {
     return Boolean(model.writable || (model.canAuthorRustKeys && current()?.sourceRange));
 }
 
-function editKeys(keys: KeyframeLocation[], frame?: FrameTarget, edit?: KeyframeGroupEdit): void {
-    if (!frame || program === undefined || pending || keyEdit || !canRetimeKeys() || !keys.length
+function editKeys(keys: KeyframeLocation[], frame?: FrameTarget, edit?: TimelineKeyAction): void {
+    const destinations = model.canTransferKeys ? channels.editableTracks() : [];
+    const mayPaste = destinations.length > 0 && (!edit || edit.action === 'paste_keyframes');
+    const currentFrame = gestureFrame();
+    if (!frame || !currentFrame || frame.session !== currentFrame.session || frame.token !== currentFrame.token
+        || program === undefined || !canRetimeKeys() || (!keys.length && !mayPaste)
+        || (edit?.action === 'paste_keyframes' && !mayPaste)
         || (edit && ['duplicate_keyframes', 'remove_keyframes'].includes(edit.action) && !canChangeKeyStructure())
         || keys.some(key => channels.isLocked(key.target))) return;
     keyEdit = { before: frame };
     keyframeEditor.close();
-    vscode.postMessage({ type: 'keyframeGroup', frame, program, keys, edit });
+    vscode.postMessage({ type: 'keyframeGroup', frame, program, keys, edit, destinations });
     showPosition();
 }
 
@@ -543,11 +551,25 @@ function recordAt(time: number, track?: number): void {
     showPosition();
 }
 
-function keyShortcuts(event: KeyboardEvent, location: KeyframeLocation, duration: number): void {
+function clipboardShortcut(event: KeyboardEvent, keys: KeyframeLocation[], track?: number): boolean {
+    if (!model.canTransferKeys || !(event.metaKey || event.ctrlKey) || !gestureFrame() || !canRetimeKeys()) return false;
+    const command = event.key.toLowerCase();
+    if (command === 'c' && keys.length) editKeys(keys, model.frame, { action: 'copy_keyframes' });
+    else if (command === 'v' && channels.editableTracks().length) {
+        editKeys([], model.frame, { action: 'paste_keyframes', reverse: event.shiftKey, track });
+    } else return false;
+    event.preventDefault();
+    event.stopPropagation();
+    return true;
+}
+
+function keyShortcuts(event: KeyboardEvent, location: KeyframeLocation, duration: number, track: number): void {
     const found = model.frame;
     if (!found || pending || keyEdit || channels.isLocked(location.target)) return;
     const modifier = event.metaKey || event.ctrlKey;
     const command = event.key.toLowerCase();
+    const keys = selection.size ? selection.keys : [location];
+    if (clipboardShortcut(event, keys, track)) return;
     if (command === ' ' || command === 'escape' || (modifier && command === 'a')) {
         event.preventDefault();
         event.stopPropagation();
@@ -558,9 +580,8 @@ function keyShortcuts(event: KeyboardEvent, location: KeyframeLocation, duration
         return;
     }
     if (!canRetimeKeys()) return;
-    const keys = selection.size ? selection.keys : [location];
     const step = frameRate ? 1 / frameRate : Math.min(0.1, duration / 20);
-    let edit: KeyframeGroupEdit | undefined;
+    let edit: TimelineKeyAction | undefined;
     if (canChangeKeyStructure() && (command === 'delete' || command === 'backspace')) edit = { action: 'remove_keyframes' };
     else if (canChangeKeyStructure() && modifier && command === 'd') edit = { action: 'duplicate_keyframes', offset: step };
     else if (!modifier && (command === 'arrowleft' || command === 'arrowright')) {

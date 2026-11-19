@@ -1,4 +1,6 @@
 //! Compact object/property lanes and a single contextual keyframe inspector.
+#[path = "workspace_timeline/clipboard.rs"]
+mod clipboard;
 #[path = "workspace_timeline/curves.rs"]
 mod curves;
 
@@ -6,7 +8,7 @@ use super::*;
 use crate::timeline_lane::{EasingPreview, TimelineLane};
 use ferroui_base::media::{FontWeight, TextTrimming};
 use ferroui_controls::automation::AutomationProperties;
-use ferroui_controls::{ColumnDefinitions, ComboBox, PathIcon, ToolTip};
+use ferroui_controls::{ColumnDefinitions, ComboBox, Flyout, PathIcon, ToolTip};
 use ferroui_designer_animation::{
     keyframe_easing_presets, Keyframe, KeyframeGroupEdit as KeyframeEdit,
     KeyframeLocation as SelectedKey, Track,
@@ -24,6 +26,7 @@ pub(super) struct TimelineUi {
     snap_picker: Option<WeakRef<ComboBox>>,
     view: Option<(f64, f64)>,
     curves: bool,
+    keyframe_paste: Option<Ref<Flyout>>,
 }
 #[derive(Clone)]
 struct TimelineContext {
@@ -64,6 +67,7 @@ impl DesignerWorkspace {
             .and_then(|control| control.cast::<StackPanel>())
     }
     pub(super) fn rebuild_tracks(self: &Rc<Self>) {
+        self.close_timeline_paste();
         let focus_was_ruler = self
             .timeline_lanes
             .borrow()
@@ -253,6 +257,9 @@ impl DesignerWorkspace {
             }
         });
         header.children().add(snap.upcast::<Control>());
+        if context.program.is_some() && !tracks.is_empty() {
+            header.children().add(self.timeline_keyframe_menu(&context, !selection_keys.is_empty()).upcast::<Control>());
+        }
         ruler_row.children().add(header.upcast::<Control>());
         let ruler = TimelineLane::ruler();
         ruler.configure(
@@ -274,6 +281,7 @@ impl DesignerWorkspace {
             }
         });
         self.connect_timeline_zoom(&ruler);
+        self.connect_timeline_clipboard(&ruler, &context, None);
         self.timeline_lanes.borrow_mut().push(ruler.downgrade());
         Grid::set_column(&ruler, 1);
         ruler_row.children().add(ruler.clone().upcast::<Control>());
@@ -350,6 +358,7 @@ impl DesignerWorkspace {
             lane.set_playhead(playhead);
             lane.set_highlighted(is_selected);
             lane.set_frame_rate(frame_rate);
+            self.connect_timeline_clipboard(&lane, &context, Some(track));
             lane.set_selected_keys(
                 selection_keys
                     .iter()
@@ -828,17 +837,14 @@ impl DesignerWorkspace {
             .ok_or("Choose an animation")?;
         let changed = session.edit_program_keyframes(id, &selected, operation)?;
         drop(session);
-        let mut ui = self.timeline_ui.borrow_mut();
-        ui.selected = primary
-            .and_then(|key| {
-                selected
-                    .iter()
-                    .position(|original| *original == key)
-                    .and_then(|index| changed.get(index).cloned())
-            })
-            .or_else(|| changed.last().cloned());
-        ui.selection = changed;
+        let primary = primary.and_then(|key| selected.iter().position(|original| *original == key));
+        self.accept_timeline_key_batch(primary, changed);
         Ok(())
+    }
+    fn accept_timeline_key_batch(&self, primary: Option<usize>, changed: Vec<SelectedKey>) {
+        let mut ui = self.timeline_ui.borrow_mut();
+        ui.selected = primary.and_then(|index| changed.get(index)).or_else(|| changed.last()).cloned();
+        ui.selection = changed;
     }
     fn build_selection_inspector(self: &Rc<Self>, context: TimelineContext) {
         let count = self.timeline_ui.borrow().selection.len();

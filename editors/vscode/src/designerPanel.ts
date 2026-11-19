@@ -26,6 +26,7 @@ interface Frame {
     timelineGeometryRecording: boolean;
     timelineKeyframeDrafts: boolean;
     timelineKeyframeScale: boolean;
+    timelineKeyframeTransfer: boolean;
     rsxKeyframeStructure: boolean;
     rsxAnimationPrograms: boolean;
     timelineCurves: boolean;
@@ -164,6 +165,7 @@ export class DesignerPanel implements vscode.Disposable {
         return Boolean(this.frame?.timelineKeyframeDrafts && (this.language === 'xaml' || this.frame.snapshot.mappedRustAnimations));
     }
     get supportsTimelineKeyframeScale(): boolean { return Boolean(this.frame?.timelineKeyframeScale); }
+    get supportsTimelineKeyframeTransfer(): boolean { return Boolean(this.frame?.timelineKeyframeTransfer); }
     get supportsRustKeyframeStructure(): boolean {
         return Boolean(this.language === 'rust' && this.supportsTimelineKeyframeDrafts && this.frame?.rsxKeyframeStructure);
     }
@@ -311,9 +313,10 @@ export class DesignerPanel implements vscode.Disposable {
             target, operation, target.selection ?? [target.node], AbortSignal.timeout(15_000), checkSelection)) return;
         checkSelection();
         if (target.selection && target.selection.length > 1 && (operation.type === 'setProperty' || operation.type === 'resetProperty')) {
-            return this.studioEdit(target.token, 'designer_property', { action: operation.type === 'setProperty' ? 'set' : 'reset',
+            await this.studioEdit(target.token, 'designer_property', { action: operation.type === 'setProperty' ? 'set' : 'reset',
                 property: operation.name, nodes: target.selection, ...(operation.type === 'setProperty' ? { value: operation.value } : {}) },
             target.selection, AbortSignal.timeout(15_000));
+            return;
         }
         if (operation.type === 'applyResource' && operation.frame !== target.token) throw new Error('Read the current resource scope.');
         await this.edit(this.frame!, operation);
@@ -410,11 +413,12 @@ export class DesignerPanel implements vscode.Disposable {
     }
 
     async studioEdit(token: number, name: string, args: object, selection: number[] | undefined, signal: AbortSignal,
-        validate?: () => void): Promise<void> {
+        validate?: () => void): Promise<EditResult> {
         const { action, previous } = args as { action?: string; previous?: number | null };
         const rustKeyframe = name === 'designer_program' && this.supportsTimelineKeyframeDrafts
             && ((action === 'upsert_keyframe' && (previous != null || this.supportsRustKeyframeStructure))
                 || action === 'move_keyframes' || (action === 'scale_keyframes' && this.supportsTimelineKeyframeScale)
+                || (this.supportsTimelineKeyframeTransfer && (action === 'mirror_keyframes' || action === 'paste_keyframes'))
                 || (this.supportsRustKeyframeStructure && action !== undefined &&
                     ['record_keyframe', 'remove_keyframe', 'duplicate_keyframes', 'remove_keyframes'].includes(action)));
         const rustState = name === 'designer_state' && this.supportsRustStates
@@ -429,7 +433,7 @@ export class DesignerPanel implements vscode.Disposable {
         if (!frame || this.currentToken !== token) throw new Error('Read the current designer revision before editing.');
         const targets = this.studioSelection(selection);
         try {
-            await this.commitEdit(frame, client => client.studioEdit(frame.source, token, name, args, targets), signal, validate);
+            return await this.commitEdit(frame, client => client.studioEdit(frame.source, token, name, args, targets), signal, validate);
         } finally {
             if (this.currentToken === token) this.schedule(0);
         }
@@ -609,6 +613,7 @@ export class DesignerPanel implements vscode.Disposable {
                 timelineGeometryRecording: Boolean(client.capabilities.timelineGeometryRecording),
                 timelineKeyframeDrafts: Boolean(client.capabilities.timelineKeyframeDrafts),
                 timelineKeyframeScale: Boolean(client.capabilities.timelineKeyframeScale),
+                timelineKeyframeTransfer: Boolean(client.capabilities.timelineKeyframeTransfer),
                 rsxKeyframeStructure: Boolean(client.capabilities.rsxKeyframeStructure),
                 rsxAnimationPrograms: Boolean(client.capabilities.rsxAnimationPrograms),
                 timelineCurves: Boolean(client.capabilities.timelineCurves),
@@ -719,23 +724,25 @@ export class DesignerPanel implements vscode.Disposable {
         if (pose && geometry) {
             if (!('frame' in operation) || operation.frame !== frame.token) throw new Error('Read the current recording frame.');
             const targets = geometry.action === 'move' ? geometry.nodes : [geometry.node];
-            return this.studioEdit(frame.token, 'designer_record_geometry', { ...geometry, program: pose.program, time: pose.time },
+            await this.studioEdit(frame.token, 'designer_record_geometry', { ...geometry, program: pose.program, time: pose.time },
                 targets, signal ?? AbortSignal.timeout(15_000), validate);
+            return;
         }
-        return this.commitEdit(frame, client => client.edit(frame.source, operation), signal, validate);
+        await this.commitEdit(frame, client => client.edit(frame.source, operation), signal, validate);
     }
 
     private recordingGeometryPose(): TimelinePreviewPose | undefined {
         if (this.animationRecordingTime !== undefined && this.supportsTimelineGeometryRecording) return this.timelinePose;
     }
 
-    private async commitEdit(frame: Frame, plan: (client: NativePreview) => Promise<EditResult>, signal?: AbortSignal, validate?: () => void): Promise<void> {
+    private async commitEdit(frame: Frame, plan: (client: NativePreview) => Promise<EditResult>, signal?: AbortSignal, validate?: () => void): Promise<EditResult> {
         signal?.throwIfAborted();
         if (this.editing) throw new Error('A designer edit is already in progress.');
         this.editing = true;
         this.changed.fire();
         try {
-            const { edits, selection, timelinePose, timelineProgramKey, retainedSelection } = await plan(await this.getClient());
+            const result = await plan(await this.getClient());
+            const { edits, selection, timelinePose, timelineProgramKey, retainedSelection } = result;
             signal?.throwIfAborted();
             if (this.currentToken !== frame.token) throw new Error('The preview changed. Use the current preview to retry.');
             validate?.();
@@ -761,6 +768,7 @@ export class DesignerPanel implements vscode.Disposable {
                 this.caret = range.start;
                 await this.reveal(range);
             }
+            return result;
         } finally {
             this.editing = false;
             this.changed.fire();

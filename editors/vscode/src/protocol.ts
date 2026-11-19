@@ -1,5 +1,5 @@
 import type { LayerViewState, LayerViewsState } from './layerViews';
-import type { TimelinePreviewPose, TimelineTargetOverrides } from './timelineProtocol';
+import type { KeyframeLocation, TimelinePreviewPose, TimelineTargetOverrides } from './timelineProtocol';
 import type { NativeTransitionPosition } from './stateTransitionProtocol';
 
 export interface Position { line: number; character: number }
@@ -10,6 +10,7 @@ export interface EditResult {
     selection: Range | null;
     timelinePose?: TimelinePreviewPose;
     timelineProgramKey?: string;
+    timelineKeys?: KeyframeLocation[];
     retainedSelection?: Range[];
 }
 export interface PreviewFinding { node: number; control: string; name: string | null; code: string; message: string }

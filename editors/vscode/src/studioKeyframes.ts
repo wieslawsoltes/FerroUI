@@ -1,5 +1,5 @@
 import { action, choose, editText, editTime, type StudioContext, type StudioItem } from './studioContext';
-import type { KeyframeGroupEdit, TimelineKeyframe, TimelineProgram, TimelineTrack } from './timelineProtocol';
+import type { TimelineKeyAction, TimelineKeyframe, TimelineProgram, TimelineTrack } from './timelineProtocol';
 
 export type Program = TimelineProgram;
 type Timeline = NonNullable<TimelineProgram['timeline']>;
@@ -49,19 +49,26 @@ export async function keyframeOptions(context: StudioContext, program: number, d
     await item?.run();
 }
 
-export async function chooseKeyframeGroupEdit(count: number, structural: boolean, pivot?: number): Promise<KeyframeGroupEdit | undefined> {
+export async function chooseTimelineKeyAction(count: number, structural: boolean, transfer: boolean, canPaste: boolean,
+    pivot?: number): Promise<TimelineKeyAction | undefined> {
     const actions = [
-        { action: 'move_keyframes', label: '$(arrow-both) Move by offset…' },
-        { action: 'scale_keyframes', label: '$(arrow-swap) Scale from playhead…' },
-        { action: 'duplicate_keyframes', label: '$(copy) Duplicate at offset…' },
-        { action: 'remove_keyframes', label: '$(trash) Delete' },
+        { action: 'copy_keyframes', label: '$(copy) Copy Keyframes', available: transfer && count > 0 },
+        { action: 'paste_keyframes', label: '$(clippy) Paste at Playhead', reverse: false, available: transfer && canPaste },
+        { action: 'paste_keyframes', label: '$(arrow-swap) Paste Reversed at Playhead', reverse: true, available: transfer && canPaste },
+        { action: 'mirror_keyframes', label: '$(arrow-swap) Mirror About Playhead', available: transfer && count > 0 },
+        { action: 'move_keyframes', label: '$(arrow-both) Move by Offset…', available: count > 0 },
+        { action: 'scale_keyframes', label: '$(arrow-swap) Scale from Playhead…', available: count > 1 && pivot !== undefined },
+        { action: 'duplicate_keyframes', label: '$(copy) Duplicate at Offset…', available: count > 0 && structural },
+        { action: 'remove_keyframes', label: '$(trash) Delete', available: count > 0 && structural },
     ] as const;
-    const available = actions.filter(({ action }) => action === 'scale_keyframes' ? count > 1 && pivot !== undefined
-        : structural || action === 'move_keyframes');
+    const available = actions.filter(action => action.available);
     const picked = available.length === 1 ? available[0] :
-        await choose(count === 1 ? 'Selected keyframe' : `${count} selected keyframes`, available);
+        await choose(count ? `${count} selected keyframe${count === 1 ? '' : 's'}` : 'Keyframe Actions', available);
     if (!picked) return;
-    if (picked.action === 'remove_keyframes') return { action: picked.action };
+    if (picked.action === 'paste_keyframes') return { action: picked.action, reverse: picked.reverse };
+    if (picked.action === 'remove_keyframes' || picked.action === 'copy_keyframes' || picked.action === 'mirror_keyframes') {
+        return { action: picked.action };
+    }
     if (picked.action === 'scale_keyframes' && pivot !== undefined) {
         const factor = await editText(`Scale key times around ${Number(pivot.toFixed(6))} s. Use 0.5 to compress or 2 to stretch.`, '2', input =>
             Number.isFinite(Number(input)) && Number(input) > 0 && Number(input) !== 1 ? undefined : 'Enter a positive factor other than 1.');

@@ -1,9 +1,15 @@
 use super::AuthoredRsxFrame;
 use ferroui_designer::{DesignerSession, TimelinePreviewPose};
-use ferroui_designer_animation::{KeyframeEdit, KeyframeGroupEdit, KeyframeLocation};
+use ferroui_designer_animation::{KeyframeEdit, KeyframeGroupEdit, KeyframeLocation, KeyframePaste};
 use ferroui_designer_core::{NodeId, TextPatch};
 use ferroui_designer_rsx::RsxAnimation;
 use serde_json::Value;
+
+pub(crate) struct SourceEdit {
+    pub(crate) patches: Vec<TextPatch>,
+    pub(crate) pose: Option<TimelinePreviewPose>,
+    pub(crate) keys: Option<Vec<KeyframeLocation>>,
+}
 
 pub(crate) fn keyframe_edit(tool: &str, action: Option<&str>) -> bool {
     tool == "designer_program"
@@ -15,6 +21,8 @@ pub(crate) fn keyframe_edit(tool: &str, action: Option<&str>) -> bool {
                     | "remove_keyframe"
                     | "move_keyframes"
                     | "scale_keyframes"
+                    | "mirror_keyframes"
+                    | "paste_keyframes"
                     | "duplicate_keyframes"
                     | "remove_keyframes"
             )
@@ -37,10 +45,24 @@ impl AuthoredRsxFrame {
         &self,
         session: &DesignerSession,
         args: &Value,
-    ) -> Result<(Vec<TextPatch>, Option<TimelinePreviewPose>), String> {
+    ) -> Result<SourceEdit, String> {
         let program = node(args, "program")?;
         let clip = self.clip(program)?;
         let action = string(args, "action")?;
+        if matches!(action, "mirror_keyframes" | "paste_keyframes") {
+            let timeline = session.animation_programs().iter().find(|entry| entry.id == program)
+                .and_then(|entry| entry.timeline.as_ref()).ok_or("Choose a typed native timeline")?;
+            let (patches, keys) = if action == "mirror_keyframes" {
+                let keys = serde_json::from_value::<Vec<KeyframeLocation>>(args["keyframes"].clone())
+                    .map_err(|error| error.to_string())?;
+                clip.mirror_keyframes(&self.source, &self.catalog, timeline, &keys, number(args, "pivot")?)?
+            } else {
+                let paste = serde_json::from_value::<KeyframePaste>(args["paste"].clone())
+                    .map_err(|error| error.to_string())?;
+                clip.paste_keyframes(&self.source, &self.catalog, timeline, &paste)?
+            };
+            return Ok(SourceEdit { patches, pose: None, keys: Some(keys) });
+        }
         let group = match action {
             "move_keyframes" => Some(KeyframeGroupEdit::Move(number(args, "offset")?)),
             "scale_keyframes" => Some(KeyframeGroupEdit::Scale {
@@ -60,9 +82,9 @@ impl AuthoredRsxFrame {
                 .ok_or("Choose a typed native timeline")?;
             let keys: Vec<KeyframeLocation> = serde_json::from_value(args["keyframes"].clone())
                 .map_err(|error| error.to_string())?;
-            let (patches, _) =
+            let (patches, keys) =
                 clip.author_keyframes(&self.source, &self.catalog, timeline, &keys, edit)?;
-            return Ok((patches, None));
+            return Ok(SourceEdit { patches, pose: None, keys: Some(keys) });
         }
         let target = node(args, "target")?;
         let property = string(args, "property")?;
@@ -81,7 +103,7 @@ impl AuthoredRsxFrame {
         };
         session.plan_program_keyframe(program, target, property, edit)?;
         let patches = clip.author_keyframe(&self.source, &self.catalog, property, edit)?;
-        Ok((patches, pose))
+        Ok(SourceEdit { patches, pose, keys: None })
     }
 
     fn clip(&self, program: NodeId) -> Result<&RsxAnimation, String> {

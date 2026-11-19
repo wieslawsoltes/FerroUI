@@ -1,10 +1,10 @@
 import { strict as assert } from 'node:assert';
 import type * as vscode from 'vscode';
 import { acceptedKeyframe } from '../src/timelineKeyframes';
-import type { CurvePoint, TimelinePosition, TimelineProgram } from '../src/timelineProtocol';
+import type { CurvePoint, KeyframeLocation, TimelinePosition, TimelineProgram } from '../src/timelineProtocol';
 import type { McpFixture } from './mcp';
 
-export async function verifyTimelineMcp(mcp: McpFixture, session: number, document: vscode.TextDocument): Promise<void> {
+export async function verifyTimelineMcp(mcp: McpFixture, session: number, document: vscode.TextDocument, rsxClipboard: unknown): Promise<void> {
     const closeKeys = [.5, .5000001].map(time => ({ time, value_text: '0.75', easing_text: 'LinearEasing' }));
     assert.equal(acceptedKeyframe({ target: 1, property: 'Opacity', keyframes: closeKeys }, .500000072), closeKeys[1]);
     const { invoke, content } = mcp;
@@ -141,6 +141,27 @@ export async function verifyTimelineMcp(mcp: McpFixture, session: number, docume
     await undo();
     assert.equal(document.getText(), timedSource);
     frame = await wait();
+    const destination = { target: keyframes[0].target, property: 'Opacity' };
+    const paste = { action: 'paste_keyframes', program, paste: { clipboard: rsxClipboard, destinations: [destination], time: .125 } };
+    const pasted = content<{ keyframes: KeyframeLocation[] }>(await edit(frame.revision, paste));
+    assert.deepEqual(pasted.keyframes.map(key => key.time), [.125, .625]);
+    frame = await wait();
+    assert.deepEqual((await pulse()).timeline.tracks[0].keyframes.filter(key => [.125, .625].includes(key.time)).map(key => key.value_text), ['0.25', '0.65']);
+    await undo();
+    assert.equal(document.getText(), timedSource);
+    frame = await wait();
+    assert.ok((await edit(frame.revision, { ...paste, paste: { ...paste.paste, time: .5 } })).isError);
+    assert.equal(document.getText(), timedSource);
+    frame = await wait();
+    const reflected = content<{ keyframes: KeyframeLocation[] }>(await edit(frame.revision, {
+        action: 'mirror_keyframes', program, keyframes, pivot: .875,
+    }));
+    assert.deepEqual(reflected.keyframes.map(key => key.time), [.75, .25]);
+    frame = await wait();
+    assert.deepEqual(await keyTimes(), [0, .25, .75, 2]);
+    await undo();
+    assert.equal(document.getText(), timedSource);
+    frame = await wait();
     const present = async (action: string, options: object) => {
         content(await invoke('designer_studio_present', { session, expected_revision: frame.revision, tool: 'designer_program',
             arguments: { action, program, ...options } }));
@@ -202,5 +223,5 @@ export async function verifyTimelineMcp(mcp: McpFixture, session: number, docume
     assert.deepEqual((await pulse()).timeline.tracks, []);
     await undo();
     assert.equal(document.getText(), original);
-    console.log('VS Code MCP validated and sampled an overshooting keyframe draft, verified one-step Undo, and exercised native playback and group edits');
+    console.log('VS Code MCP validated keyframe drafts, RSX-to-XAML paste, mirror, collision rejection, one-step Undo, and native playback');
 }

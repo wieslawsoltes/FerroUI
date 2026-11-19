@@ -168,24 +168,25 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     }
     if rust_state || rust_keyframe || rust_program {
         let rsx = stage.authored_rsx.as_ref().ok_or("Render the current Rust view before editing motion")?;
-        let (patches, pose, program_key, retained_selection) = {
+        let (patches, pose, program_key, keys, retained_selection) = {
             let session = stage.session.borrow();
-            let (patches, pose, program_key) = if rust_state {
-                (rsx_animation::state_patches(&design, &arguments)?, None, None)
+            let (patches, pose, program_key, keys) = if rust_state {
+                (rsx_animation::state_patches(&design, &arguments)?, None, None, None)
             } else if rust_program {
                 let plan = stage.sources.run(|| rsx_animation::program_patches(&design, &arguments))?;
-                (plan.patches, None, plan.selected_key)
+                (plan.patches, None, plan.selected_key, None)
             } else {
-                let (patches, pose) = stage.sources.run(|| rsx.keyframe_patches(&session, &arguments))?;
-                (patches, pose, None)
+                let plan = stage.sources.run(|| rsx.keyframe_patches(&session, &arguments))?;
+                (plan.patches, plan.pose, None, plan.keys)
             };
             let ranges = crate::edit_selection::rsx_control_ranges(&design, &patches, session.selection())?;
-            (patches, pose, program_key, ranges)
+            (patches, pose, program_key, keys, ranges)
         };
         let mut result = editor_edits(&design, patches)?;
         if !result.edits.is_empty() {
             result.timeline_pose = pose;
             result.timeline_program_key = program_key;
+            result.timeline_keys = keys;
             result.retained_selection = retained_selection;
             renderer.stage.take();
         }
@@ -194,7 +195,7 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     // Retire the frame before touching the native session. VS Code owns the undo
     // transaction and renders a new frame from its buffer even on rejection.
     let stage = renderer.stage.take().expect("frame checked above");
-    stage.sources.run(|| provider.call(
+    let operation = stage.sources.run(|| provider.call(
         &query.name,
         &arguments,
         Permissions {
@@ -219,6 +220,12 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     } else { Vec::new() };
     let mut edit = editor_edits(&design, patches)?;
     if recorded { edit.timeline_pose = session.timeline_preview_pose(); }
+    if query.name == "designer_program" {
+        edit.timeline_keys = operation.get("keyframes")
+            .filter(|keys| !keys.is_null())
+            .map(|keys| serde_json::from_value(keys.clone()).map_err(|error| error.to_string()))
+            .transpose()?;
+    }
     edit.retained_selection = retained_selection;
     Ok(edit)
 }
@@ -249,7 +256,8 @@ fn source_action(tool: &str, action: Option<&str>) -> bool {
         "designer_program" => matches!(
             action,
             Some("create" | "rename" | "duplicate" | "remove" | "selector" | "source" | "update" | "update_timing" |
-                "upsert_keyframe" | "record_keyframe" | "remove_keyframe" | "move_keyframes" | "scale_keyframes" | "duplicate_keyframes" | "remove_keyframes")
+                "upsert_keyframe" | "record_keyframe" | "remove_keyframe" | "move_keyframes" | "scale_keyframes" |
+                "mirror_keyframes" | "paste_keyframes" | "duplicate_keyframes" | "remove_keyframes")
         ),
         "designer_state" => matches!(action, Some("upsert" | "remove")),
         "designer_behavior" => matches!(action, Some("upsert" | "remove" | "source")),

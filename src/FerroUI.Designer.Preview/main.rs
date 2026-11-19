@@ -114,6 +114,7 @@ fn respond(
                 "timelineGeometryRecording": true,
                 "timelineKeyframeDrafts": true,
                 "timelineKeyframeScale": true,
+                "timelineKeyframeTransfer": true,
                 "rsxKeyframeStructure": true,
                 "rsxAnimationPrograms": true,
                 "timelineCurves": true,

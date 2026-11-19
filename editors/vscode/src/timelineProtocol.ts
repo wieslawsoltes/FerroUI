@@ -8,6 +8,8 @@ export interface KeyframeLocation { target: number; property: string; time: numb
 export type KeyframeGroupEdit = { action: 'move_keyframes' | 'duplicate_keyframes'; offset: number }
     | { action: 'scale_keyframes'; pivot: number; factor: number }
     | { action: 'remove_keyframes' };
+export type TimelineKeyAction = KeyframeGroupEdit | { action: 'copy_keyframes' } | { action: 'mirror_keyframes' }
+    | { action: 'paste_keyframes'; reverse: boolean; track?: number };
 export interface AuthoredTimeline {
     duration: number;
     delay: number;
@@ -92,6 +94,7 @@ export interface TimelineState {
     canRecord?: boolean;
     canRecordGeometry?: boolean;
     canEditKeyframes?: boolean;
+    canTransferKeys?: boolean;
     canAuthorRustKeys?: boolean;
     canCreateRustProgram?: boolean;
     canShowCurves?: boolean;
@@ -124,7 +127,7 @@ export type FromTimeline =
     | { type: 'recordKeyframe'; frame: FrameTarget; program: number; time: number; track?: number; candidates?: number[] }
     | TimelineCurveRequest
     | TimelineKeyframeRequest
-    | { type: 'keyframeGroup'; frame: FrameTarget; program: number; keys: KeyframeLocation[]; edit?: KeyframeGroupEdit }
+    | { type: 'keyframeGroup'; frame: FrameTarget; program: number; keys: KeyframeLocation[]; edit?: TimelineKeyAction; destinations?: number[] }
     | { type: 'keyframe'; frame: FrameTarget; program: number; track: number; time: number };
 
 export type ToTimeline = { type: 'position'; position?: TimelinePosition; frame?: FrameTarget }

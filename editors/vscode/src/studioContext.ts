@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import type { DesignerPanel } from './designerPanel';
-import type { Range } from './protocol';
+import type { EditResult, Range } from './protocol';
 
 export class StudioContext {
     readonly selection: number[];
@@ -28,8 +28,12 @@ export class StudioContext {
     }
 
     async edit(name: string, arguments_: object): Promise<void> {
+        await this.editResult(name, arguments_);
+    }
+
+    editResult(name: string, arguments_: object): Promise<EditResult> {
         this.ensure();
-        await this.panel.studioEdit(this.token, name, arguments_, this.selection, AbortSignal.timeout(15_000));
+        return this.panel.studioEdit(this.token, name, arguments_, this.selection, AbortSignal.timeout(15_000), () => this.ensure());
     }
 
     async present(name: string, arguments_: object): Promise<void> {

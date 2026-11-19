@@ -440,6 +440,14 @@ selection inspector, and choose **Scale from playhead**. For example, `0.5` halv
 distance from the playhead. Studio preserves each key's value and easing and applies the change in
 one Undo step. For a shared Rust cue, include each setter on the cue in the selection.
 
+Use the **Keyframe Actions** icon beside the snap picker to copy, paste, and mirror a
+selection across tracks. **Paste at Playhead** maps the copied tracks to existing compatible
+properties and keeps their relative spacing. **Paste Reversed at Playhead** reverses the
+sequence. **Mirror About Playhead** reflects the selected keys in place. A successful paste
+or mirror is one source transaction. In a focused lane, use Ctrl+C or Command+C to copy
+and Ctrl+V or Command+V to paste. Hold Shift while pasting to reverse the keys. Studio
+and VS Code use the same typed clipboard and authoring tools. [Transfer keys between editors](vscode/motion.md#copy-paste-and-mirror-keyframes)
+
 Supported values include numbers, colors, points, vectors, sizes, rectangles, corner radii,
 relative points/scalars, thicknesses and discrete values. The portable
 engine implements linear-light color interpolation, cubic Bézier inversion, named FerroUI easing
@@ -547,7 +555,7 @@ example](../../samples/TodoWorkbench/app_preview/motion.rs).
 Select a key in Timeline to change its time, value, or incoming spline. Studio checks the
 native track and the helper patches the original Rust tokens in a single undoable edit.
 Click **Add keyframe at playhead** or double-click a property track to record its effective
-value. Use the selection actions to move, scale, duplicate, or delete mapped keys together.
+value. Use the keyframe actions to move, scale, duplicate, copy, paste, mirror, or delete mapped keys together.
 Duplicating keys preserves their values and easing, and deleting one setter in a shared cue
 leaves the other setters intact. In Studio, select the package in
 **Project**, enter its optional Cargo features, and run **Check** or **Build** to load the

@@ -421,7 +421,7 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
         <div class="tool-group timeline-tools" role="group" aria-label="Keyframe controls">
             ${tool('timeline-record-mode', 'circle-filled', 'Record property changes', 'aria-pressed="false" hidden disabled')}
             ${tool('timeline-record', 'add', 'Add keyframe at playhead', 'hidden disabled')}
-            ${tool('timeline-key-actions', 'list-selection', 'Keyframe Selection Actions', 'hidden disabled')}
+            ${tool('timeline-key-actions', 'list-selection', 'Keyframe Actions', 'hidden disabled')}
         </div>
         <div class="tool-group timeline-tools timeline-view-tools" role="group" aria-label="Timeline view">
             ${tool('timeline-curves', 'graph-line', 'Animation curves', 'aria-pressed="false" aria-controls="timeline-tracks" hidden')}
