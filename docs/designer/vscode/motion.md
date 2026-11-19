@@ -59,7 +59,13 @@ Select the target’s program and seek to the time you want. **Add keyframe at p
 
 Open [animation_view.rs](../../../editors/vscode/test/fixtures/animation_view.rs), then select the RSX invocation containing the inline style animation. Timeline can preview that animation and patch its supported literal key times, values, and incoming splines. The source action jumps to the authored declaration. Use the warning action to find computed clips in the original Rust. For custom property accessors, export the [animation getter metadata](../../../editors/vscode/README.md#map-an-application-control-to-rsx) from the owning Cargo package. Use [App Preview](runtime.md#render-with-your-app-in-app-preview) for its registered control and animator.
 
-In **Studio → States**, select a group and preview a route. In XAML, use the group’s authoring actions to create states, setters, and transitions. In Rust, edit mapped state literals and applicable route durations and easing. Preview directional and default routes with the transition transport. Close the preview to restore the base view. Structural Rust animation and state declarations are authored in Rust. [Typed Rust state examples](../README.md#rust-visual-states)
+1. Seek to a time and choose **Add keyframe at playhead**, or double-click an empty part of a property track. The isolated designer samples the track at that time and adds a Rust `.key_frame(...)`. An empty mapped clip starts with Opacity.
+2. Select one or more keys and open **Keyframe Selection Actions**. **Duplicate at offset…** copies their values and easing. **Delete** removes the selected setters. With a key focused, use Ctrl+D or Command+D to duplicate at the current snap interval, or press Delete or Backspace.
+3. When a cue has several setters, deleting one key preserves the other setters and their easing. Deleting the final key leaves the animation available for another key. One Undo restores the source for each edit.
+
+Agents can preview a draft with `designer_keyframe_draft`. Call `designer_program` through `designer_studio_edit` with the accepted revision. Use `upsert_keyframe` without `previous` to insert an explicit value, `record_keyframe` to sample the accepted preview, `remove_keyframe` for a single property and time, or `duplicate_keyframes` and `remove_keyframes` with the selected key locations.
+
+Author new Rust clip and state group declarations in the source editor. In **Studio → States**, select a group and preview a route. In XAML, use the group’s authoring actions to create states, setters, and transitions. In Rust, edit mapped state literals and applicable route durations and easing. Preview directional and default routes with the transition transport. Close the preview to restore the base view. [Typed Rust state examples](../README.md#rust-visual-states)
 
 ## Compare design data and environments
 

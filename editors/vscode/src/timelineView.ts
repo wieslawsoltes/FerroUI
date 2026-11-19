@@ -187,6 +187,7 @@ export class TimelineView implements vscode.Disposable {
         this.view.show({ frame: catalog?.programs ? frame : undefined, documentVersion: panel?.document.version,
             programs, message, names, selectedTargets, markers, writable: panel?.language === 'xaml', position, sourceIssues: catalog?.sourceIssues,
             canEditKeyframes: panel?.supportsTimelineKeyframeDrafts,
+            canAuthorRustKeys: panel?.supportsRustKeyframeStructure,
             canShowCurves: panel?.supportsTimelineCurves,
             curveCatalog: panel?.supportsTimelineCurves && catalog?.programs ? catalog.key : undefined,
             canPlayAll: Boolean(panel?.supportsTimelineCombinedPlayback && programs.some(canPreviewProgram)),
@@ -269,12 +270,15 @@ export class TimelineView implements vscode.Disposable {
                     const pose = panel.authoredTimelinePose;
                     const pivot = panel.supportsTimelineKeyframeScale && !program.preview?.native
                         ? pose?.program === program.id ? pose.time : 0 : undefined;
-                    const edit = message.edit ?? await chooseKeyframeGroupEdit(message.keys.length, rust, pivot);
+                    const structural = context.writable || panel.supportsRustKeyframeStructure;
+                    const edit = message.edit ?? await chooseKeyframeGroupEdit(message.keys.length, structural, pivot);
                     if (!edit) {
                         this.view.post({ type: 'keyframesEdited', before: message.frame });
                         return;
                     }
-                    if (rust && edit.action !== 'move_keyframes' && edit.action !== 'scale_keyframes') throw new Error('Add or remove Rust keys in source.');
+                    if (!structural && edit.action !== 'move_keyframes' && edit.action !== 'scale_keyframes') {
+                        throw new Error('Update the FerroUI preview helper to add or remove mapped Rust keys.');
+                    }
                     const version = panel.document.version;
                     await context.edit('designer_program', { ...edit, program: program.id, keyframes: message.keys });
                     if (panel.document.version === version) {
@@ -296,14 +300,18 @@ export class TimelineView implements vscode.Disposable {
                 });
             }
         } catch (error) {
-            if (message.type === 'keyframeGroup') this.view.post({ type: 'keyframesEdited', before: message.frame });
+            if (message.type === 'keyframeGroup' || message.type === 'recordKeyframe') {
+                this.view.post({ type: 'keyframesEdited', before: message.frame });
+            }
             this.report(error);
         }
     }
 
     private async recordKeyframe(context: StudioContext, program: TimelineProgram, timeline: NonNullable<TimelineProgram['timeline']>,
         time: number, index?: number, candidates?: number[]): Promise<KeyframeLocation | undefined> {
-        if (!context.writable) throw new Error('Recording into an authored program requires XAML.');
+        if (!(context.writable || (context.panel.supportsRustKeyframeStructure && program.sourceRange))) {
+            throw new Error('Choose an animation with source-backed keyframes.');
+        }
         if (!Number.isFinite(time) || time < 0 || time > timeline.duration) throw new Error('Choose a time within the animation duration.');
         const tracks = candidates === undefined ? timeline.tracks : candidates.map(candidate => timeline.tracks[candidate]).filter(Boolean);
         if (candidates && !tracks.length) throw new Error('Choose an unlocked animation track.');
@@ -319,9 +327,10 @@ export class TimelineView implements vscode.Disposable {
         }
         const target = track?.target ?? context.selection.find(node => program.targets.includes(node)) ?? program.targets[0] ?? program.owner;
         const property = track?.property ?? 'Opacity';
+        const version = context.panel.document.version;
         await context.edit('designer_program', { action: 'record_keyframe', program: program.id, target,
             property, time });
-        return { target, property, time };
+        if (context.panel.document.version !== version) return { target, property, time };
     }
 
     private report(error: unknown): void {

@@ -282,7 +282,8 @@ function showTracks(): void {
     }
     workArea.follow(canPreviewRange(selected) ? timeline.duration : 0, newProgram);
     const changedViewport = viewport.follow(timeline.duration, newProgram);
-    const content = JSON.stringify([model.frame?.session ?? owner?.session, selected, model.names, model.writable, model.canEditKeyframes]);
+    const content = JSON.stringify([model.frame?.session ?? owner?.session, selected, model.names,
+        model.writable, model.canEditKeyframes, model.canAuthorRustKeys]);
     if (lastContent !== content) {
         lastContent = content;
         const restoreFocus = renderedKeys.some(item => item.button === document.activeElement);
@@ -446,7 +447,7 @@ function showPosition(): void {
     playAll.setAttribute('aria-pressed', String(Boolean(position?.all)));
     snapField.hidden = !timeline || !(model.writable || canRetimeKeys());
     snap.disabled = !model.frame || pending || playing || editing;
-    record.hidden = !timeline || !model.writable;
+    record.hidden = !timeline || !canChangeKeyStructure();
     record.disabled = !model.frame || pending || playing || editing
         || Boolean(timeline?.tracks.length && timeline.tracks.every(track => channels.isLocked(track.target)));
     recordMode.hidden = !timeline || !model.canRecord;
@@ -504,9 +505,14 @@ function canRetimeKeys(): boolean {
     return Boolean(model.writable || (model.canEditKeyframes && current()?.sourceRange));
 }
 
+function canChangeKeyStructure(): boolean {
+    return Boolean(model.writable || (model.canAuthorRustKeys && current()?.sourceRange));
+}
+
 function editKeys(keys: KeyframeLocation[], frame?: FrameTarget, edit?: KeyframeGroupEdit): void {
     if (!frame || program === undefined || pending || keyEdit || !canRetimeKeys() || !keys.length
-        || (!model.writable && edit && edit.action !== 'move_keyframes') || keys.some(key => channels.isLocked(key.target))) return;
+        || (edit && ['duplicate_keyframes', 'remove_keyframes'].includes(edit.action) && !canChangeKeyStructure())
+        || keys.some(key => channels.isLocked(key.target))) return;
     keyEdit = { before: frame };
     keyframeEditor.close();
     vscode.postMessage({ type: 'keyframeGroup', frame, program, keys, edit });
@@ -516,7 +522,7 @@ function editKeys(keys: KeyframeLocation[], frame?: FrameTarget, edit?: Keyframe
 function recordAt(time: number, track?: number): void {
     const frame = gestureFrame();
     const selected = current();
-    if (!frame || !selected?.timeline || !model.writable) return;
+    if (!frame || !selected?.timeline || !canChangeKeyStructure()) return;
     const tracks = selected.timeline.tracks;
     if (track !== undefined && (!tracks[track] || channels.isLocked(tracks[track].target))) return;
     const candidates = track === undefined && channels.hasLocks
@@ -546,8 +552,8 @@ function keyShortcuts(event: KeyboardEvent, location: KeyframeLocation, duration
     const keys = selection.size ? selection.keys : [location];
     const step = frameRate ? 1 / frameRate : Math.min(0.1, duration / 20);
     let edit: KeyframeGroupEdit | undefined;
-    if (model.writable && (command === 'delete' || command === 'backspace')) edit = { action: 'remove_keyframes' };
-    else if (model.writable && modifier && command === 'd') edit = { action: 'duplicate_keyframes', offset: step };
+    if (canChangeKeyStructure() && (command === 'delete' || command === 'backspace')) edit = { action: 'remove_keyframes' };
+    else if (canChangeKeyStructure() && modifier && command === 'd') edit = { action: 'duplicate_keyframes', offset: step };
     else if (!modifier && (command === 'arrowleft' || command === 'arrowright')) {
         edit = { action: 'move_keyframes', offset: command === 'arrowleft' ? -step : step };
     }

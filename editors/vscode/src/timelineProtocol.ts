@@ -91,6 +91,7 @@ export interface TimelineState {
     canRecord?: boolean;
     canRecordGeometry?: boolean;
     canEditKeyframes?: boolean;
+    canAuthorRustKeys?: boolean;
     canShowCurves?: boolean;
     curveCatalog?: string;
     canPlayAll?: boolean;

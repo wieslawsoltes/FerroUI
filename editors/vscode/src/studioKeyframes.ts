@@ -12,8 +12,10 @@ export function trackItems(context: StudioContext, program: Program, timeline: T
         children: async () => {
             const frames = track.keyframes.map((frame, key) => action(`timeline:key:${program.id}:${index}:${key}`,
                 `${frame.time}s · ${frame.value_text}`, () => keyframeOptions(context, program.id, timeline.duration, track, frame), 'circle-outline'));
-            if (context.writable) frames.unshift(action(`timeline:${program.id}:track:${index}:add`, 'Add keyframe…',
-                () => authorKeyframe(context, program.id, timeline.duration, track), 'add'));
+            if (context.writable || (program.sourceRange && context.panel.supportsRustKeyframeStructure)) {
+                frames.unshift(action(`timeline:${program.id}:track:${index}:add`, 'Add keyframe…',
+                    () => authorKeyframe(context, program.id, timeline.duration, track), 'add'));
+            }
             return frames;
         },
     }));
@@ -36,7 +38,7 @@ export function trackItems(context: StudioContext, program: Program, timeline: T
 export async function keyframeOptions(context: StudioContext, program: number, duration: number, track: TimelineTrack, frame: TimelineKeyframe,
     seek?: () => Promise<void>): Promise<void> {
     const preview = seek ?? (() => context.present('designer_program', { action: 'scrub', program, time: frame.time }));
-    if (!context.writable) return preview();
+    if (!(context.writable || context.panel.supportsRustKeyframeStructure)) return preview();
     const item = await choose(`${track.property} · ${frame.time}s`, [
         { label: 'Seek to keyframe', run: preview },
         { label: 'Edit time, value and easing…', run: () => authorKeyframe(context, program, duration, track, frame) },
@@ -47,7 +49,7 @@ export async function keyframeOptions(context: StudioContext, program: number, d
     await item?.run();
 }
 
-export async function chooseKeyframeGroupEdit(count: number, rust: boolean, pivot?: number): Promise<KeyframeGroupEdit | undefined> {
+export async function chooseKeyframeGroupEdit(count: number, structural: boolean, pivot?: number): Promise<KeyframeGroupEdit | undefined> {
     const actions = [
         { action: 'move_keyframes', label: '$(arrow-both) Move by offset…' },
         { action: 'scale_keyframes', label: '$(arrow-swap) Scale from playhead…' },
@@ -55,7 +57,7 @@ export async function chooseKeyframeGroupEdit(count: number, rust: boolean, pivo
         { action: 'remove_keyframes', label: '$(trash) Delete' },
     ] as const;
     const available = actions.filter(({ action }) => action === 'scale_keyframes' ? count > 1 && pivot !== undefined
-        : !rust || action === 'move_keyframes');
+        : structural || action === 'move_keyframes');
     const picked = available.length === 1 ? available[0] :
         await choose(count === 1 ? 'Selected keyframe' : `${count} selected keyframes`, available);
     if (!picked) return;

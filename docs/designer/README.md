@@ -546,12 +546,15 @@ example](../../samples/TodoWorkbench/app_preview/motion.rs).
 
 Select a key in Timeline to change its time, value, or incoming spline. Studio checks the
 native track and the helper patches the original Rust tokens in a single undoable edit.
-Drag or nudge selected keys to move their cues together. In Studio, select the package in
+Click **Add keyframe at playhead** or double-click a property track to record its effective
+value. Use the selection actions to move, scale, duplicate, or delete mapped keys together.
+Duplicating keys preserves their values and easing, and deleting one setter in a shared cue
+leaves the other setters intact. In Studio, select the package in
 **Project**, enter its optional Cargo features, and run **Check** or **Build** to load the
 registry. For Todo Workbench, use the `app-preview` feature.
-Source reveal takes you to the animation declaration in the active invocation. Agents use
-`designer_keyframe_draft` and `designer_program` actions `upsert_keyframe` and `move_keyframes`
-with the current designer revision.
+Source reveal takes you to the animation declaration in the active invocation. Agents can
+validate `designer_keyframe_draft` or use the shared `designer_program` actions with the
+current designer revision. [Rust Timeline controls and MCP actions](vscode/motion.md#edit-mapped-rust-clips-and-state-routes)
 
 App Preview validates the same mapped Rust key against the application's loaded animation and
 codec. It sends a source-checked Rust patch to the editor and keeps the compatible elapsed

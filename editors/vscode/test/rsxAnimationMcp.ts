@@ -36,7 +36,7 @@ export async function verifyRsxAnimation({ invoke, content }: McpFixture): Promi
     const tools = content<{ edits: { name: string; inputSchema: { properties: { action?: { enum?: string[] } } } }[] }>(
         await invoke('designer_studio_tools', { session }));
     assert.deepEqual(tools.edits.find(tool => tool.name === 'designer_program')?.inputSchema.properties.action?.enum,
-        ['upsert_keyframe', 'move_keyframes', 'scale_keyframes']);
+        ['upsert_keyframe', 'record_keyframe', 'remove_keyframe', 'move_keyframes', 'scale_keyframes', 'duplicate_keyframes', 'remove_keyframes']);
 
     const draft = { program: program.id, target: program.timeline.tracks[0].target, property: 'Opacity',
         previous: .5, time: 1.4, value: '0.82', easing: '0.25,0.3,0.75,1.4' };
@@ -92,11 +92,57 @@ export async function verifyRsxAnimation({ invoke, content }: McpFixture): Promi
     content(await invoke('designer_history', { session, expected_version: document.version, action: 'undo' }));
     assert.equal(document.getText(), original);
     frame = await outline();
+    const undo = async (expected: string) => {
+        const version = document.version;
+        content(await invoke('designer_history', { session, expected_version: version, action: 'undo' }));
+        await until(() => document.version !== version);
+        assert.equal(document.getText(), expected);
+        return outline();
+    };
+    const value = { program: restored.id, target: track.target, property: track.property };
+    const insertion = { ...value, time: .75, value: '0.74', easing: 'LinearEasing' };
+    assert.equal(content<{ valueKind: string }>(await query('designer_keyframe_draft', insertion)).valueKind, 'Number');
+    content(await edit(frame.revision, insertion));
+    const withKey = document.getText();
+    const sourceLine = /\r\n[ \t]+\.key_frame\(0\.375, \|key\| key\.set\(ferroui_base::Visual::opacity_property\(\), 0\.74\)\)/;
+    assert.match(withKey, sourceLine);
+    assert.equal(withKey.replace(sourceLine, ''), original);
+    assert.ok((await edit(frame.revision, insertion)).isError);
+    frame = await outline();
+    const [withKeyProgram] = await programs();
+    content(await edit(frame.revision, { ...value, action: 'remove_keyframe', program: withKeyProgram.id,
+        target: withKeyProgram.timeline!.tracks[0].target, time: .75 }));
+    assert.equal(document.getText(), original);
+    await undo(withKey);
+    frame = await undo(original);
+
+    content(await edit(frame.revision, { ...value, action: 'record_keyframe', time: 1.25 }));
+    frame = await outline();
+    const recorded = (await programs())[0].timeline!.tracks[0].keyframes.find(key => key.time === 1.25);
+    assert.ok(recorded && Math.abs(Number(recorded.value_text) - .825) < 1e-10);
+    frame = await undo(original);
+
+    const originals = track.keyframes.slice(0, 2).map(key => ({ target: track.target, property: track.property, time: key.time }));
+    content(await edit(frame.revision, { action: 'duplicate_keyframes', program: restored.id, keyframes: originals, offset: .25 }));
+    frame = await outline();
+    const [copiedProgram] = await programs();
+    const copiedTrack = copiedProgram.timeline!.tracks[0];
+    const copies = copiedTrack.keyframes;
+    assert.deepEqual(copies.map(key => key.time), [0, .25, .5, .75, 2]);
+    assert.equal(copies[1].value_text, copies[0].value_text);
+    assert.equal(copies[3].easing_text, copies[2].easing_text);
+    const duplicated = document.getText();
+    content(await edit(frame.revision, { action: 'remove_keyframes', program: copiedProgram.id,
+        keyframes: originals.map(key => ({ ...key, target: copiedTrack.target, time: key.time + .25 })) }));
+    assert.equal(document.getText(), original);
+    await undo(duplicated);
+    frame = await undo(original);
+
     content(await invoke('designer_block', { session, expected_revision: frame.revision, index: 0 }));
     await outline();
     assert.deepEqual(await programs(), []);
     const fixtureTabs = vscode.window.tabGroups.all.flatMap(group => group.tabs).filter(tab =>
         tab.label === 'Design · animation_view.rs' || (tab.input instanceof vscode.TabInputText && tab.input.uri.toString() === uri.toString()));
     await vscode.window.tabGroups.close(fixtureTabs);
-    console.log('RSX animation validated native keyframes, moved and scaled a Rust selection, rejected a stale revision, and restored CRLF and Unicode with Undo');
+    console.log('RSX animation validated native keyframes, added, retimed, duplicated, and removed mapped keys, rejected stale revisions, and restored CRLF and Unicode with Undo');
 }

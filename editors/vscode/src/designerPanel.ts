@@ -26,6 +26,7 @@ interface Frame {
     timelineGeometryRecording: boolean;
     timelineKeyframeDrafts: boolean;
     timelineKeyframeScale: boolean;
+    rsxKeyframeStructure: boolean;
     timelineCurves: boolean;
     timelineCombinedPlayback: boolean;
     stateTransitionPreview: boolean;
@@ -157,6 +158,9 @@ export class DesignerPanel implements vscode.Disposable {
         return Boolean(this.frame?.timelineKeyframeDrafts && (this.language === 'xaml' || this.frame.snapshot.mappedRustAnimations));
     }
     get supportsTimelineKeyframeScale(): boolean { return Boolean(this.frame?.timelineKeyframeScale); }
+    get supportsRustKeyframeStructure(): boolean {
+        return Boolean(this.language === 'rust' && this.supportsTimelineKeyframeDrafts && this.frame?.rsxKeyframeStructure);
+    }
     get supportsTimelineCurves(): boolean { return Boolean(this.frame?.timelineCurves); }
     get supportsTimelineCombinedPlayback(): boolean { return Boolean(this.frame?.timelineCombinedPlayback); }
     get supportsStateTransitionPreview(): boolean { return Boolean(this.frame?.stateTransitionPreview); }
@@ -394,10 +398,12 @@ export class DesignerPanel implements vscode.Disposable {
 
     async studioEdit(token: number, name: string, args: object, selection: number[] | undefined, signal: AbortSignal,
         validate?: () => void): Promise<void> {
-        const action = (args as { action?: string }).action;
+        const { action, previous } = args as { action?: string; previous?: number | null };
         const rustKeyframe = name === 'designer_program' && this.supportsTimelineKeyframeDrafts
-            && (action === 'upsert_keyframe' || action === 'move_keyframes'
-                || (action === 'scale_keyframes' && this.supportsTimelineKeyframeScale));
+            && ((action === 'upsert_keyframe' && (previous != null || this.supportsRustKeyframeStructure))
+                || action === 'move_keyframes' || (action === 'scale_keyframes' && this.supportsTimelineKeyframeScale)
+                || (this.supportsRustKeyframeStructure && action !== undefined &&
+                    ['record_keyframe', 'remove_keyframe', 'duplicate_keyframes', 'remove_keyframes'].includes(action)));
         const rustState = name === 'designer_state' && action === 'upsert' && this.supportsRustStates;
         if (this.language === 'rust' && !rustKeyframe && !rustState && !mappedStudioEdits.has(name)) {
             throw new Error('This Studio operation requires mapped RSX source or XAML.');
@@ -587,6 +593,7 @@ export class DesignerPanel implements vscode.Disposable {
                 timelineGeometryRecording: Boolean(client.capabilities.timelineGeometryRecording),
                 timelineKeyframeDrafts: Boolean(client.capabilities.timelineKeyframeDrafts),
                 timelineKeyframeScale: Boolean(client.capabilities.timelineKeyframeScale),
+                rsxKeyframeStructure: Boolean(client.capabilities.rsxKeyframeStructure),
                 timelineCurves: Boolean(client.capabilities.timelineCurves),
                 timelineCombinedPlayback: Boolean(client.capabilities.timelineCombinedPlayback),
                 stateTransitionPreview: Boolean(client.capabilities.stateTransitionPreview),
