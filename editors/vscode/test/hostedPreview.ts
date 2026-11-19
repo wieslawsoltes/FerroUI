@@ -7,6 +7,7 @@ import { verifyHostedAnimation, verifyHostedScalarCurve } from './hostedAnimatio
 import { verifyHostedCodec } from './hostedCodec';
 import { verifyHostedContinuity } from './hostedContinuity';
 import { verifyHostedRustAnimation } from './hostedRustAnimation';
+import { verifyHostedStateRoutes } from './hostedStateRoutes';
 import { reviewStateSource } from './rsxStatesMcp';
 
 export async function verifyHostedPreview(preview: NativePreview, uri: string): Promise<void> {
@@ -80,6 +81,7 @@ export async function verifyHostedPreview(preview: NativePreview, uri: string): 
         assert.equal(review.fixture, 'Interactive review');
         assert.notEqual(review.image.png, one.image.png);
         assert.deepEqual(review.animations?.programs ?? [], []);
+        await verifyHostedStateRoutes(preview, reviewSource);
         assert.equal(child.exitCode, null);
         console.log('App-hosted design rendered a custom control, native bindings and registered XAML/Rust fixtures, and fenced invalid updates and stale input');
     } catch (error) {

@@ -595,6 +595,11 @@ in whole milliseconds, and the easing. Use the playhead in Studio or the Timelin
 transport in VS Code to sample a default or directional route. The reveal control
 opens the authored Rust declaration.
 
+App Preview in VS Code can sample eligible mapped routes on the selected Cargo
+binary’s native properties. Use its animation picker and edit icon to change
+duration and easing. The **Interactive review** Rust fixture also runs the
+compiled view’s button handlers on its application clock. [App Preview state routes](vscode/motion.md#scrub-a-rust-state-route-in-app-preview)
+
 Studio, VS Code, and MCP share the source planner for adding and removing inline
 groups, states, setters, and routes. Each action uses one Undo step. Comments,
 unchanged literals, and neighboring expressions retain their source. New sibling

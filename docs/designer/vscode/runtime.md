@@ -12,7 +12,9 @@ Use App Preview for a view mounted with your app’s registered controls and dat
 3. Choose **Source preview** to mount the current buffer. For app-supplied state, use a registered data context fixture or Rust view factory. DataContext fixtures render the current source against an app model. RustView fixtures mount an actual compiled Rust view, including dynamic children and handlers.
 4. Send native input to the frame. For supported animations, choose the clip and target in the toolbar, then play, pause, or enter a pose with the elapsed playhead. **Application animation curves** samples the app’s animator without moving its elapsed playhead. In a supported curve, drag a key or open **Edit application keyframe**. Apply a validated source-backed XAML or mapped Rust change in one Undo step.
 
-App Preview holds its accepted image through compilation and invalid edits. For a compatible replacement, the first frame can restore the paused pose, selected clip, and targets. A playing preview resumes its elapsed position when the replacement supports it. Test the hosted examples with [HostedPreview.xaml](../../../samples/TodoWorkbench/HostedPreview.xaml) and its app fixtures. [App preview integration and registered animator examples](../../../samples/TodoWorkbench/README.md)
+App Preview holds its accepted image through compilation and invalid edits. For a compatible replacement, the first frame can restore the paused pose, selected animation, and targets. A playing preview resumes its elapsed position when the replacement supports it. Test the hosted examples with [HostedPreview.xaml](../../../samples/TodoWorkbench/HostedPreview.xaml) and its app fixtures. [App preview integration and registered animator examples](../../../samples/TodoWorkbench/README.md)
+
+The App Preview transport also lists mapped Rust state routes. Choose one to scrub, play, and edit its timing with the app’s real control properties and animation registry. A compiled Rust fixture uses its ordinary application clock for input and state handlers. [App Preview state-route workflow](motion.md#scrub-a-rust-state-route-in-app-preview)
 
 ## Hot reload and debug the running application
 

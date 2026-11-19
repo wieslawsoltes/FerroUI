@@ -15,7 +15,10 @@ const hostedKeyframe = { ...frame, expected_generation: integer(1), expected_seq
     arguments: { type: 'object', additionalProperties: false,
         required: ['program', 'target', 'property', 'time', 'value', 'easing'],
         properties: { program: node, target: node, property: text, previous: time, time, value: text, easing: text } } };
-const hostedKeyframeRequired = ['session', 'expected_generation', 'expected_revision', 'expected_sequence', 'arguments'];
+const hostedFrameRequired = ['session', 'expected_generation', 'expected_revision', 'expected_sequence', 'arguments'];
+const hostedState = { ...frame, expected_generation: integer(1), expected_sequence: integer(1),
+    arguments: { type: 'object', additionalProperties: false, required: ['program', 'duration', 'easing'],
+        properties: { program: node, duration: time, easing: text } } };
 const placement = { ...frame, asset: text, project_asset: text, node, selection: { type: 'array', items: node, minItems: 2, maxItems: 128 }, moving_anchor: node, anchor: node,
     position: choice('inside', 'before', 'after'), x: { type: 'number' }, y: { type: 'number' } };
 
@@ -53,9 +56,9 @@ export const agentCatalog = {
     designer_hosted_fixture: tool('Select a registered fixture in the application preview and wait for its accepted frame. Omit fixture to return to the current source.', {
         ...frame, expected_generation: integer(1), fixture: { type: 'string', maxLength: 128 },
     }, ['session', 'expected_generation', 'expected_revision'], true, false),
-    designer_hosted_animations: tool('Read the application preview’s native clips, compatible controls, source issues, generation, frame and elapsed time.', session, ['session']),
+    designer_hosted_animations: tool('Read the application preview’s native clips and mapped Rust state routes, compatible controls, source issues, frame and elapsed time.', session, ['session']),
     designer_hosted_image: tool('Capture the current app-hosted preview frame as PNG with its revision and sequence.', session, ['session']),
-    designer_hosted_animation: tool('Control a native animation in the app-hosted preview. Use its current generation, revision and frame sequence.', {
+    designer_hosted_animation: tool('Control a native clip or Rust state route in the app-hosted preview. Use its current generation, revision and frame sequence.', {
         ...frame, expected_generation: integer(1), expected_sequence: integer(1), arguments: { type: 'object', additionalProperties: false,
             required: ['action'], properties: { action: choice('select', 'seek', 'play', 'pause', 'stop', 'targets', 'reveal', 'reveal_issue'), program: node,
                 index: integer(0), elapsed: { type: 'number', minimum: 0 }, targets: { type: 'array', items: node, maxItems: 2000 } } },
@@ -66,11 +69,15 @@ export const agentCatalog = {
             properties: { program: node, target: node, property: text, window: {
                 type: 'object', additionalProperties: false, required: ['start', 'end'], properties: { start: time, end: time },
             } },
-        } }, hostedKeyframeRequired),
+        } }, hostedFrameRequired),
     designer_hosted_keyframe_draft: tool('Validate an app-hosted keyframe and return easing samples and a checked XAML or mapped Rust source patch. Use the current app generation, revision, sequence, and authored track.',
-        hostedKeyframe, hostedKeyframeRequired),
+        hostedKeyframe, hostedFrameRequired),
     designer_hosted_keyframe: tool('Apply a validated animation keyframe as one undoable edit to the current source buffer. For XAML, omit previous to insert a key. For Rust, select an existing mapped key.',
-        hostedKeyframe, hostedKeyframeRequired, true),
+        hostedKeyframe, hostedFrameRequired, true),
+    designer_hosted_state_route_draft: tool('Validate a Rust state route duration in seconds and easing. Return checked source patches for the current application preview frame.',
+        hostedState, hostedFrameRequired),
+    designer_hosted_state_route: tool('Apply the mapped Rust state route duration in seconds and easing together as one undoable source edit.',
+        hostedState, hostedFrameRequired, true),
     designer_wait: tool('Wait for the native preview of the current authored buffer. Return the revision, RSX invocation ranges, and rendering diagnostics.',
         session, ['session']),
     designer_animation_issue: tool('Reveal an unsupported Rust clip from designer_programs. Supply the current designer revision and its zero-based sourceIssues index.',

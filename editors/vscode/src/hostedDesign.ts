@@ -4,15 +4,17 @@ import { setTimeout as delay } from 'node:timers/promises';
 import * as vscode from 'vscode';
 import type { BuiltProject } from './builtProjects';
 import { type CargoSelection, type CargoTarget, discoverCargoTargets, selectCargoTarget } from './cargoTarget';
-import type { HostedAnimationAction, HostedAnimationFrame, HostedAnimationRequest, HostedCurveQuery, HostedKeyframeDraft } from './hostedAnimationProtocol';
+import type { HostedAnimationAction, HostedAnimationFrame, HostedAnimationRequest, HostedCurveQuery, HostedKeyframeDraft, HostedStateDraft } from './hostedAnimationProtocol';
 import { HostedAnimations } from './hostedAnimations';
-import { applyHostedKeyframePatch, chooseHostedKeyframe } from './hostedKeyframes';
+import { chooseHostedKeyframe } from './hostedKeyframes';
 import type { FromHosted, HostedAnimationSample, HostedFixtureCatalog, HostedFrame, ToHosted } from './hostedProtocol';
+import { applyHostedSourcePatches } from './hostedSourceEdit';
+import { editHostedStateRoute } from './hostedStateRoutes';
 import { NativePreview } from './nativePreview';
 import { errorMessage, type Language } from './protocol';
 import { buildCargo, launchArtifact, type ProjectMetadata, type ReloadProcess } from './reloadProcess';
 import { chooseAnimationIssue } from './studioPrograms';
-import { languageOf, sourceOf } from './textDocument';
+import { asRange, languageOf, sourceOf } from './textDocument';
 import { hostedHtml, webviewOptions } from './view';
 import { isInside, isWorkspaceFile } from './workspacePaths';
 
@@ -121,6 +123,13 @@ export class HostedDesign implements vscode.Disposable {
         const session = this.session(uri);
         if (session.generation !== generation) throw new Error('Read the current application preview generation.');
         return session.keyframe(frame, draft, apply, signal);
+    }
+
+    stateRoute(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame, draft: HostedStateDraft,
+        apply: boolean, signal: AbortSignal) {
+        const session = this.session(uri);
+        if (session.generation !== generation) throw new Error('Read the current application preview generation.');
+        return session.stateRoute(frame, draft, apply, signal);
     }
 
     curve(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame, query: HostedCurveQuery, signal: AbortSignal) {
@@ -327,10 +336,11 @@ class HostedSession {
         if (program.sourceOffset == null) throw new Error('The application animation has no mapped declaration.');
         const document = this.editor.document;
         const position = document.positionAt(program.sourceOffset);
+        const range = program.stateRoute ? asRange(program.stateRoute.sourceRange) : new vscode.Range(position, position);
         const editor = await vscode.window.showTextDocument(document, { viewColumn: this.editor.viewColumn });
         if (frame.revision !== this.revision) throw new Error('The source changed before revealing the animation.');
-        editor.selection = new vscode.Selection(position, position);
-        editor.revealRange(new vscode.Range(position, position), vscode.TextEditorRevealType.InCenterIfOutsideViewport);
+        editor.selection = new vscode.Selection(range.start, range.end);
+        editor.revealRange(range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
     }
 
     async revealAnimationIssue(frame: HostedAnimationFrame, index?: number): Promise<void> {
@@ -383,12 +393,50 @@ class HostedSession {
             if (client !== this.client || this.disposed || frame.revision !== this.revision || version !== document.version) {
                 throw new Error('The application preview source changed while planning the keyframe.');
             }
-            if (apply && plan.patch) await applyHostedKeyframePatch(document, version, plan.patch);
+            if (apply && plan.patch) await applyHostedSourcePatches(document, version, [plan.patch]);
             return { ...plan, applied: apply && Boolean(plan.patch), version: document.version };
         } finally {
             this.pending = false;
             this.schedule(this.requested === this.revision ? 160 : 0);
         }
+    }
+
+    async stateRoute(frame: HostedAnimationFrame, draft: HostedStateDraft, apply: boolean, signal: AbortSignal) {
+        await this.polling;
+        signal.throwIfAborted();
+        if (!this.animations.program(frame, draft.program).stateRoute) {
+            throw new Error('Choose a mapped Rust state route in the current application preview.');
+        }
+        const client = this.client;
+        if (!client || this.pending || this.animations.driving || this.currentFrame?.sequence !== frame.sequence) {
+            throw new Error('Wait for the current application preview or pause playback.');
+        }
+        const document = this.editor.document;
+        const version = document.version;
+        clearTimeout(this.timer);
+        this.pending = true;
+        try {
+            const plan = await client.planHostedState(frame, draft);
+            signal.throwIfAborted();
+            if (client !== this.client || this.disposed || frame.revision !== this.revision || version !== document.version) {
+                throw new Error('The application preview source changed while planning the state route.');
+            }
+            if (apply) await applyHostedSourcePatches(document, version, plan.patches);
+            return { ...plan, applied: apply && plan.patches.length > 0, version: document.version };
+        } finally {
+            this.pending = false;
+            this.schedule(this.requested === this.revision ? 160 : 0);
+        }
+    }
+
+    private async promptStateRoute(frame: HostedAnimationFrame, id: number): Promise<void> {
+        const draft = await editHostedStateRoute(this.animations.program(frame, id));
+        if (!draft) return;
+        const current = this.animations.state.frame;
+        if (!current || current.revision !== frame.revision) {
+            throw new Error('The application source changed while editing the state route.');
+        }
+        await this.stateRoute(current, draft, true, AbortSignal.timeout(15_000));
     }
 
     async curve(frame: HostedAnimationFrame, query: HostedCurveQuery, signal: AbortSignal) {
@@ -460,6 +508,11 @@ class HostedSession {
         }
         if (message.type === 'chooseKeyframe') {
             try { await this.openKeyframe(message.frame, message.program); }
+            catch (error) { this.report(errorMessage(error), Boolean(this.currentFrame)); }
+            return;
+        }
+        if (message.type === 'editStateRoute') {
+            try { await this.promptStateRoute(message.frame, message.program); }
             catch (error) { this.report(errorMessage(error), Boolean(this.currentFrame)); }
             return;
         }

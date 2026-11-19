@@ -44,7 +44,7 @@ export class HostedAnimationView {
         this.issues.onclick = () => {
             if (this.canUse() && this.decoded) this.send({ type: 'animationIssues', frame: this.decoded });
         };
-        this.edit.onclick = () => this.choose('chooseKeyframe');
+        this.edit.onclick = () => this.choose(this.selectedProgram?.stateRoute ? 'editStateRoute' : 'chooseKeyframe');
         this.play.onclick = () => {
             if (this.state.position?.playing) this.control({ action: 'pause' }, true);
             else this.control({ action: 'play', program: Number(this.programs.value) });
@@ -71,10 +71,18 @@ export class HostedAnimationView {
         const selected = state.selection ?? state.position?.program;
         this.state = state;
         this.documentVersion = documentVersion;
-        const catalog = JSON.stringify(state.programs.map(({ id, name }) => [id, name]));
+        const catalog = JSON.stringify(state.programs.map(({ id, name, stateRoute }) => [id, name, Boolean(stateRoute)]));
         if (catalog !== this.catalog) {
             this.catalog = catalog;
-            this.programs.replaceChildren(...state.programs.map(({ name, id }) => new Option(name, String(id))));
+            const choices = [[false, 'Clips'], [true, 'State routes']] as const;
+            this.programs.replaceChildren(...choices.flatMap(([route, label]) => {
+                const options = state.programs.filter(program => Boolean(program.stateRoute) === route);
+                if (!options.length) return [];
+                const group = document.createElement('optgroup');
+                group.label = label;
+                group.append(...options.map(({ name, id }) => new Option(name, String(id))));
+                return [group];
+            }));
         }
         this.programs.value = String(state.programs.some(program => program.id === selected)
             ? selected : state.programs[0]?.id ?? '');
@@ -105,7 +113,11 @@ export class HostedAnimationView {
             && (interrupt || !this.state.busy) && this.pending === undefined);
     }
 
-    private choose(type: 'animationTargets' | 'animationSource' | 'chooseKeyframe'): void {
+    private get selectedProgram() {
+        return this.state.programs.find(program => program.id === Number(this.programs.value));
+    }
+
+    private choose(type: 'animationTargets' | 'animationSource' | 'chooseKeyframe' | 'editStateRoute'): void {
         if (this.canUse() && this.decoded) this.send({ type, frame: this.decoded, program: Number(this.programs.value) });
     }
 
@@ -125,7 +137,7 @@ export class HostedAnimationView {
     }
 
     private paint(): void {
-        const program = this.state.programs.find(program => program.id === Number(this.programs.value));
+        const program = this.selectedProgram;
         const position = this.state.position;
         const playing = Boolean(position?.playing);
         const current = position?.program === program?.id ? position : undefined;
@@ -135,14 +147,17 @@ export class HostedAnimationView {
         this.section.hidden = !program;
         this.programs.disabled = !usable;
         this.programs.title = program?.customAnimator ? `${program.name} · Registered animator` : program?.name ?? '';
-        this.targets.disabled = !usable || !program?.compatibleTargets.length;
+        this.targets.hidden = Boolean(program?.stateRoute);
+        this.targets.disabled = !usable || !program?.compatibleTargets.length || this.targets.hidden;
         labelButton(this.targets, selectedTargets?.length ? `Choose preview targets (${selectedTargets.length} selected)` : 'Choose preview targets');
         this.source.disabled = !usable || program?.sourceOffset == null;
         this.issues.hidden = !this.state.sourceIssues?.length;
         this.issues.disabled = !this.canUse();
-        labelButton(this.source, program?.sourceOffset == null ? 'Animation source is unavailable' : 'Reveal animation in source');
-        this.edit.hidden = !program?.authoring;
+        labelButton(this.source, program?.sourceOffset == null ? 'Animation source is unavailable'
+            : program.stateRoute ? 'Reveal Rust state route in source' : 'Reveal animation in source');
+        this.edit.hidden = !program?.authoring && !program?.stateRoute;
         this.edit.disabled = !usable;
+        labelButton(this.edit, program?.stateRoute ? 'Edit state route timing' : 'Edit application keyframe');
         this.keyframes.follow(usable ? this.state.frame : undefined, this.documentVersion, program?.id);
         this.curves.follow(program, this.state.targets.filter(target => selectedTargets?.includes(target.id)),
             this.state.frame, this.documentVersion, usable);

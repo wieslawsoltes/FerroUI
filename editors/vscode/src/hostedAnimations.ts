@@ -107,6 +107,7 @@ export class HostedAnimations {
             if (action.action === 'select') {
                 this.selection = program.id;
             } else if (action.action === 'targets') {
+                if (program.stateRoute) throw new Error('A state route uses its authored targets.');
                 const targets = action.targets ?? [];
                 if (new Set(targets).size !== targets.length || targets.some(id => !program.compatibleTargets.includes(id))) {
                     throw new Error('Choose distinct compatible preview controls.');
