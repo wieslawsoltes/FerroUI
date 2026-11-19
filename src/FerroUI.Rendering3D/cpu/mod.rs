@@ -198,8 +198,9 @@ struct KeptTexels {
 /// What renders the content of a visual or drawing brush of a material into premultiplied RGBA8
 /// texels of the given size in pixels, the bounds of the content ([`Scene3DBrushContent::rect`])
 /// stretched over them: the 2D renderer of the backend that draws the CPU reference (Skia raster,
-/// the CPU mode of Vello). `None` when it cannot.
-pub type ContentRenderer = Box<dyn FnMut(&Scene3DBrushContent, (u32, u32)) -> Option<BrushTexels>>;
+/// the CPU mode of Vello). `None` when it cannot. `Send` and `Sync`, as the rasterizer that holds
+/// it is.
+pub type ContentRenderer = Box<dyn FnMut(&Scene3DBrushContent, (u32, u32)) -> Option<BrushTexels> + Send + Sync>;
 
 /// The brush textures of a rasterizer, read once per key.
 #[derive(Default)]
@@ -209,7 +210,8 @@ struct TexelCache {
     /// The pixels per unit of the render: the resolution of the contents of visual and drawing
     /// brushes.
     scale: f64,
-    renderer: Option<ContentRenderer>,
+    /// Asserted unwind safe: a render that panicked leaves no texels of its key in the cache.
+    renderer: Option<std::panic::AssertUnwindSafe<ContentRenderer>>,
 }
 
 impl TexelCache {
@@ -236,7 +238,7 @@ impl TexelCache {
         }
         self.entries.retain(|entry| entry.key != key);
         let texels = match (source.content(), size) {
-            (Some(content), Some(size)) => self.renderer.as_mut().and_then(|render| render(content, size)),
+            (Some(content), Some(size)) => self.renderer.as_mut().and_then(|render| (render.0)(content, size)),
             _ => source.texels(),
         };
         let texels = texels.map(Arc::new);
@@ -289,7 +291,7 @@ impl CpuRasterizer {
     /// one, their layers are drawn with their colours and counted. The contents kept so far are
     /// rendered again.
     pub fn set_content_renderer(&mut self, renderer: Option<ContentRenderer>) {
-        self.textures.renderer = renderer;
+        self.textures.renderer = renderer.map(std::panic::AssertUnwindSafe);
         self.textures.entries.retain(|entry| !matches!(entry.key, BrushTextureKey::Content { .. }));
     }
 

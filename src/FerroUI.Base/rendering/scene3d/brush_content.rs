@@ -100,6 +100,11 @@ struct ContentValues {
 #[derive(Clone)]
 pub struct Scene3DBrushContent(Arc<ContentValues>);
 
+// The content is recorded once and never changed: a panic cannot leave it half written. So a
+// brush or a 3D scene that holds one stays unwind safe, as it was before scene brushes.
+impl std::panic::UnwindSafe for Scene3DBrushContent {}
+impl std::panic::RefUnwindSafe for Scene3DBrushContent {}
+
 impl Scene3DBrushContent {
     /// Records the current content of `brush` (a `VisualBrush`: the rendering of its visual; a
     /// `DrawingBrush`: its drawing) as the content `id` at `generation`. `None` when the brush

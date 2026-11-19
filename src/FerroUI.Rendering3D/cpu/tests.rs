@@ -349,8 +349,8 @@ fn the_content_of_a_drawing_brush_is_rendered_once_per_generation_and_sampled_as
     use ferroui_base::media::{Brushes, DrawingBrush, GeometryDrawing, IBrush, RectangleGeometry, SharedBrush, Stretch};
     use ferroui_base::rendering::scene3d::{Scene3DBrushContent, Scene3DMaterialKind, Scene3DMaterialLayer};
     use ferroui_base::rendering::testing::MockPlatformRenderInterface;
-    use std::cell::RefCell;
     use std::rc::Rc;
+    use std::sync::{Arc, Mutex};
     let (_scope, _) = MockPlatformRenderInterface::install();
     let drawing = GeometryDrawing::new();
     drawing.set_brush(Some(Brushes::red()));
@@ -375,11 +375,11 @@ fn the_content_of_a_drawing_brush_is_rendered_once_per_generation_and_sampled_as
 
     // The renderer stands for the 2D renderer of a backend: it paints the left half of the
     // content green and its right half blue, and records the sizes it was asked for.
-    let sizes = Rc::new(RefCell::new(Vec::new()));
+    let sizes = Arc::new(Mutex::new(Vec::new()));
     let asked = sizes.clone();
     let mut rasterizer = CpuRasterizer::new();
     rasterizer.set_content_renderer(Some(Box::new(move |content: &Scene3DBrushContent, (width, height)| {
-        asked.borrow_mut().push((content.generation(), width, height));
+        asked.lock().unwrap().push((content.generation(), width, height));
         let mut rgba = Vec::new();
         for _ in 0..height {
             for x in 0..width {
@@ -391,15 +391,15 @@ fn the_content_of_a_drawing_brush_is_rendered_once_per_generation_and_sampled_as
 
     let first = rasterizer.render(&scene(1), SIZE, 2.0, CpuRenderOptions::default());
     // The content of 20 by 10 units at 2 pixels a unit.
-    assert_eq!(vec![(1, 40, 20)], *sizes.borrow());
+    assert_eq!(vec![(1, 40, 20)], *sizes.lock().unwrap());
     assert_eq!([0, 255, 0, 255], first.pixel(20, 50));
     assert_eq!([0, 0, 255, 255], first.pixel(80, 50));
     // The same generation in a new snapshot: not rendered again.
     rasterizer.render(&scene(1), SIZE, 2.0, CpuRenderOptions::default());
-    assert_eq!(1, sizes.borrow().len());
+    assert_eq!(1, sizes.lock().unwrap().len());
     // A new generation is rendered again.
     rasterizer.render(&scene(2), SIZE, 2.0, CpuRenderOptions::default());
-    assert_eq!(vec![(1, 40, 20), (2, 40, 20)], *sizes.borrow());
+    assert_eq!(vec![(1, 40, 20), (2, 40, 20)], *sizes.lock().unwrap());
 
     // Without a renderer the layer is drawn with its colour, and counted.
     let before = crate::layers_with_unsampled_brushes();
