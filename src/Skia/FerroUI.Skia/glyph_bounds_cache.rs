@@ -126,17 +126,27 @@ impl GlyphBoundsCache {
         }
         let entry = &mut sizes[0];
 
-        let mut missing: Vec<usize> = Vec::new();
-        for (index, (glyph, bound)) in glyphs.iter().zip(bounds.iter_mut()).enumerate() {
+        let mut missing_count = 0;
+        for (glyph, bound) in glyphs.iter().zip(bounds.iter_mut()) {
             match entry.get(*glyph) {
                 Some(kept) => *bound = kept,
-                None => missing.push(index),
+                None => missing_count += 1,
             }
         }
-        if missing.is_empty() {
+        if missing_count == 0 {
+            return;
+        }
+        if missing_count == glyphs.len() {
+            // None kept (a new size, or new glyphs): Skia measures into the bounds themselves.
+            let bounds = &mut bounds[..glyphs.len()];
+            measure(glyphs, bounds);
+            for (glyph, bound) in glyphs.iter().zip(bounds.iter()) {
+                entry.set(*glyph, *bound);
+            }
             return;
         }
 
+        let missing: Vec<usize> = (0..glyphs.len()).filter(|index| entry.get(glyphs[*index]).is_none()).collect();
         let missing_glyphs: Vec<u16> = missing.iter().map(|index| glyphs[*index]).collect();
         let mut measured = vec![Rect::default(); missing.len()];
         measure(&missing_glyphs, &mut measured);
