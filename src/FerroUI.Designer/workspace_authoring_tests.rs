@@ -87,7 +87,7 @@ fn studio_rehearses_the_range_from_its_inline_timeline_editor() {
     let fields = editor.children().to_vec()[0].cast::<StackPanel>().unwrap();
     let fields = fields.children().to_vec();
     let field = |name| fields.iter()
-        .find(|control| AutomationProperties::get_name(*control).as_deref() == Some(name))
+        .find(|control| AutomationProperties::get_name(control).as_deref() == Some(name))
         .unwrap();
     assert_eq!(field("Limit playback to preview range").cast::<CheckBox>().unwrap().is_checked(), Some(true));
     field("In (s)").cast::<TextBox>().unwrap().set_text(Some("0.4"));
