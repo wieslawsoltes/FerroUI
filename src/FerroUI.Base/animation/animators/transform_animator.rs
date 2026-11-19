@@ -26,6 +26,12 @@ impl TransformAnimator {
     }
 }
 
+/// The rejection of a target of the transform animator that is not a `Visual`
+/// (`Animation::try_apply_for_preview` reports it, #567).
+pub(crate) fn not_a_visual_message(control: &Animatable) -> String {
+    format!("Unable to cast object of type '{}' to type 'Visual'.", control.get_type())
+}
+
 impl Animator for TransformAnimator {
     type Value = f64;
 
@@ -43,10 +49,7 @@ impl Animator for TransformAnimator {
         should_pause_on_invisible: bool,
     ) -> Option<Rc<dyn IDisposable>> {
         let Some(ctrl) = control.downcast_ref::<Visual>() else {
-            panic!(
-                "Unable to cast object of type '{}' to type 'Visual'.",
-                control.get_type()
-            );
+            panic!("{}", not_a_visual_message(control));
         };
 
         let Some(property) = this.base.property() else {
