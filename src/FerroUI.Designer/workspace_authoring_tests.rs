@@ -71,6 +71,39 @@ fn timeline_key(lane: &crate::TimelineLane, key: ferroui_base::input::Key) {
 }
 
 #[test]
+fn studio_rehearses_the_range_from_its_inline_timeline_editor() {
+    use ferroui_base::input::Key;
+    use ferroui_controls::{CheckBox, automation::AutomationProperties};
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = include_str!("../../docs/designer/samples/ClipSequence.xaml");
+    let workspace = DesignerWorkspace::new(source).unwrap();
+    let root = workspace.control();
+    click(&root.get_control::<Button>("TimelineClips"));
+    timeline_key(&timeline_ruler(&workspace), Key::End);
+    timeline_key(&timeline_ruler(&workspace), Key::O);
+    click(&root.get_control::<Button>("TimelineRange"));
+    let editor = keyframe_editor(&workspace);
+    assert_eq!(editor.name().as_deref(), Some("TimelineRangeEditor"));
+    let fields = editor.children().to_vec()[0].cast::<StackPanel>().unwrap();
+    let fields = fields.children().to_vec();
+    let field = |name| fields.iter()
+        .find(|control| AutomationProperties::get_name(*control).as_deref() == Some(name))
+        .unwrap();
+    assert_eq!(field("Limit playback to preview range").cast::<CheckBox>().unwrap().is_checked(), Some(true));
+    field("In (s)").cast::<TextBox>().unwrap().set_text(Some("0.4"));
+    field("Out (s)").cast::<TextBox>().unwrap().set_text(Some("1.45"));
+    field("Loop range").cast::<CheckBox>().unwrap().set_is_checked(Some(false));
+    click(&field("Apply range").cast::<Button>().unwrap());
+    click(&root.get_control::<Button>("Play"));
+    let session = workspace.session();
+    assert_eq!(session.borrow().time(), 0.4);
+    session.borrow_mut().advance(2.0).unwrap();
+    assert_eq!(session.borrow().time(), 1.45);
+    assert!(!session.borrow().is_playing());
+    assert_eq!(session.borrow().authored_source(), source);
+}
+
+#[test]
 fn clip_comparison_places_both_offsets_in_one_studio_transaction() {
     use ferroui_base::input::Key;
     let _app = UnitTestApplication::start(TestServices::styled_window());

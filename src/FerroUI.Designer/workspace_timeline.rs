@@ -7,6 +7,8 @@ mod clips;
 mod curves;
 #[path = "workspace_timeline/easing.rs"]
 mod easing;
+#[path = "workspace_timeline/range.rs"]
+mod range;
 
 use super::*;
 use crate::timeline_lane::{EasingPreview, TimelineLane};
@@ -37,6 +39,7 @@ pub(super) struct TimelineUi {
     clip_selection: Vec<NodeId>,
     clip_focus: Option<NodeId>,
     clip_duration: f64,
+    ranges: range::WorkAreas,
 }
 #[derive(Clone)]
 struct TimelineContext {
@@ -112,7 +115,7 @@ impl DesignerWorkspace {
         let session = self.session.borrow();
         let tracks = session.timeline().tracks.clone();
         let warnings = session.animation_warnings().to_vec();
-        let duration = session.timeline().duration;
+        let duration = session.timeline().duration.max(self.preview_range_for_view(&session).map_or(0.0, |range| range.end));
         let context = TimelineContext::new(&session);
         let playhead = session.time();
         let selection = session.selection().to_vec();
@@ -285,16 +288,18 @@ impl DesignerWorkspace {
         ruler.set_frame_rate(frame_rate);
         ruler.set_view(view.0, view.1);
         ruler.set_playhead(playhead);
+        ruler.set_preview_range(self.preview_range_for_view(&self.session.borrow()));
         let weak = Rc::downgrade(self);
         ruler.on_activate(move |time| {
             if let Some(this) = weak.upgrade() {
-                let result = this.session.borrow_mut().seek(time);
+                let result = this.seek_workspace_timeline(time);
                 this.refresh(false);
                 this.report(result);
             }
         });
         self.connect_timeline_zoom(&ruler);
         self.connect_timeline_clipboard(&ruler, &context, None);
+        self.connect_preview_range(&ruler, &context);
         self.timeline_lanes.borrow_mut().push(ruler.downgrade());
         Grid::set_column(&ruler, 1);
         ruler_row.children().add(ruler.clone().upcast::<Control>());

@@ -4,11 +4,12 @@ import type {
 } from './hostedAnimationProtocol';
 import type { HostedAnimationSample, HostedFrame } from './hostedProtocol';
 import { drivePreviewClock } from './previewClock';
+import { stepPreviewRange, validPreviewRange } from './timelinePreviewRange';
 
 const empty: HostedAnimationCatalog = { programs: [], targets: [] };
 
 type Bindings = Pick<HostedAnimationRequest, 'program' | 'targets' | 'clips'>;
-type PlaybackAction = Extract<HostedAnimationControl, { action: 'seek' | 'play' | 'scrub_all' | 'play_all' }>;
+type PlaybackAction = Extract<HostedAnimationControl, { action: 'seek' | 'play' | 'scrub_all' | 'play_all' | 'play_range' }>;
 
 interface Playback {
     revision: number;
@@ -30,11 +31,12 @@ export class HostedAnimations {
 
     constructor(private readonly render: (request: HostedAnimationRequest, signal: AbortSignal) => Promise<HostedAnimationSample>,
         private readonly present: (frame: HostedFrame) => void,
-        private readonly changed: (state: HostedAnimationState) => void, private readonly error: (error: unknown) => void) {}
+        private readonly changed: (state: HostedAnimationState) => void, private readonly error: (error: unknown) => void,
+        private readonly supportsRanges = () => true) {}
 
     get state(): HostedAnimationState {
         return { ...this.catalog, frame: this.frame, selection: this.selection, position: this.playback?.position,
-            overrides: this.overrides, busy: Boolean(this.pending) };
+            overrides: this.overrides, busy: Boolean(this.pending), canPreviewRanges: this.supportsRanges() };
     }
 
     get driving(): boolean { return Boolean(this.pending || this.playback?.position.playing); }
@@ -93,6 +95,9 @@ export class HostedAnimations {
 
     async control(frame: HostedAnimationFrame, action: HostedAnimationControl, signal: AbortSignal): Promise<HostedAnimationState> {
         signal.throwIfAborted();
+        if (action.action === 'play_range' && !this.supportsRanges()) {
+            throw new Error('Update the FerroUI preview helper to use preview ranges in App Preview.');
+        }
         const interrupt = action.action === 'pause' || action.action === 'stop';
         this.requireFrame(frame, interrupt);
         if (interrupt && this.playback?.loop && this.playback.position.playing) {
@@ -105,10 +110,11 @@ export class HostedAnimations {
         if (action.action === 'pause') return this.state;
         if (action.action === 'stop') {
             await this.sample(frame.revision, { elapsed: 0, restart: true }, signal, () => { this.playback = undefined; });
+        } else if (action.action === 'play_range') {
+            const programs = action.program === undefined ? this.playableClips() : [this.program(frame, action.program)];
+            await this.start(frame.revision, programs, action, signal);
         } else if (action.action === 'play_all' || action.action === 'scrub_all') {
-            const clips = this.catalog.programs.filter(program =>
-                program.clip && (this.overrides[program.id] ?? program.defaultTargets).length);
-            await this.start(frame.revision, clips, action, signal);
+            await this.start(frame.revision, this.playableClips(), action, signal);
         } else {
             const program = this.program(frame, action.program);
             if (action.action === 'select') {
@@ -140,27 +146,40 @@ export class HostedAnimations {
         return this.state;
     }
 
+    private playableClips(): HostedAnimationProgram[] {
+        return this.catalog.programs.filter(program =>
+            program.clip && (this.overrides[program.id] ?? program.defaultTargets).length);
+    }
+
     private async start(revision: number, programs: HostedAnimationProgram[], action: PlaybackAction, signal: AbortSignal): Promise<void> {
         const first = programs[0];
         if (!first || !(this.overrides[first.id] ?? first.defaultTargets).length) {
             throw new Error('Choose controls to preview this animation.');
         }
-        const clips = 'program' in action ? undefined : programs.map(program => program.id);
-        const playing = action.action === 'play' || action.action === 'play_all';
+        const clips = 'program' in action && action.program !== undefined ? undefined : programs.map(program => program.id);
+        const end = programs.reduce((end, program) => Math.max(end, program.totalDuration ?? Infinity), 0);
+        const range = action.action === 'play_range' ? action.range : undefined;
+        if (action.action === 'play_range' && !validPreviewRange(range, end)) {
+            throw new Error('Choose an In and Out time within the preview clock, with In before Out.');
+        }
+        const playing = action.action === 'play' || action.action === 'play_all' || range !== undefined;
         const previous = this.playback?.position;
         const sameClips = clips ? previous?.clips?.length === clips.length && clips.every((id, index) => id === previous.clips![index])
             : !previous?.clips;
-        const resume = playing && action.elapsed === undefined && previous?.program === first.id && sameClips && !previous.completed;
-        const elapsed = action.elapsed ?? (resume ? previous.elapsed : 0);
-        const end = programs.reduce((end, program) => Math.max(end, program.totalDuration ?? Infinity), 0);
-        if ((!playing && action.elapsed === undefined) || !Number.isFinite(elapsed) || elapsed < 0 || (!resume && elapsed > end)) {
+        const prior = previous?.program === first.id && sameClips ? previous : undefined;
+        const requested = 'elapsed' in action ? action.elapsed : undefined;
+        const resume = !range && playing && requested === undefined && prior !== undefined
+            && (prior.previewRange ? prior.elapsed < end : !prior.completed);
+        const elapsed = range ? (prior && prior.elapsed >= range.start && prior.elapsed < range.end ? prior.elapsed : range.start)
+            : requested ?? (resume ? prior.elapsed : 0);
+        if ((!playing && requested === undefined) || !Number.isFinite(elapsed) || elapsed < 0 || (!resume && elapsed > end)) {
             throw new Error('Choose a time within the animation duration.');
         }
-        const position = clips ? { program: first.id, clips } : { program: first.id };
+        const position = { program: first.id, ...(clips && { clips }), ...(range && { previewRange: range }) };
         await this.sample(revision, { ...this.bindings(position), elapsed, restart: !resume }, signal, point => {
             if (!clips) this.selection = first.id;
-            this.beginPlayback(revision, { ...position, elapsed: point.elapsed, completed: point.completed,
-                playing: playing && !point.completed });
+            const completed = range ? false : point.completed;
+            this.beginPlayback(revision, { ...position, elapsed: point.elapsed, completed, playing: playing && !completed });
         });
     }
 
@@ -177,12 +196,16 @@ export class HostedAnimations {
     private async run(playback: Playback): Promise<void> {
         try {
             await drivePreviewClock(() => playback.position.playing, async seconds => {
-                const point = await this.sample(playback.revision, { ...playback.bindings,
-                    elapsed: playback.position.elapsed + seconds, restart: false }, AbortSignal.timeout(15_000), point => {
-                    playback.position = { ...playback.position, elapsed: point.elapsed, completed: point.completed,
-                        playing: playback.position.playing && !point.completed };
+                const { previewRange: range, elapsed } = playback.position;
+                const next = range && stepPreviewRange(range, elapsed, seconds);
+                const wrap = Boolean(range?.loop && seconds >= range.end - elapsed);
+                await this.sample(playback.revision, { ...playback.bindings,
+                    elapsed: next?.time ?? elapsed + seconds, restart: wrap }, AbortSignal.timeout(15_000), point => {
+                    const completed = next?.completed ?? point.completed;
+                    playback.position = { ...playback.position, elapsed: point.elapsed, completed,
+                        playing: playback.position.playing && !completed };
                 });
-                return !point.completed;
+                return playback.position.playing;
             });
         } catch (error) {
             if (this.playback === playback && this.frame?.revision === playback.revision) this.error(error);
@@ -215,7 +238,10 @@ export class HostedAnimations {
     }
 
     private requireFrame(frame: HostedAnimationFrame, interrupt = false): void {
-        const previous = interrupt && this.playback?.position.playing && frame.sequence === this.previousSequence;
+        const position = this.playback?.position;
+        // A one-shot can reach Out while the preceding frame's Pause is in flight.
+        const previous = interrupt && (position?.playing || (position?.previewRange && position.completed))
+            && frame.sequence === this.previousSequence;
         if (frame.revision !== this.frame?.revision || (frame.sequence !== this.frame.sequence && !previous)) {
             throw new Error('Read the current app-hosted preview frame.');
         }

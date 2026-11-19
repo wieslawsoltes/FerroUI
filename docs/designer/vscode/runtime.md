@@ -16,6 +16,8 @@ For a supported geometry track, use the component picker beside its scale. The a
 
 Choose **Compare animation clips** to use a shared elapsed ruler for the app’s native clips. Place XAML or mapped Rust clips with a drag or the keyboard, then use **Play all clips** to check the native result. A compatible source update retains the combined pose. [Compare clips in App Preview](motion.md#compare-clips-in-app-preview)
 
+Use **Preview range** to loop an elapsed interval or hold the app’s exact Out pose for review. It works with one animation or the shared clip ruler. [Rehearse a range in App Preview](motion.md#rehearse-a-range-in-app-preview)
+
 App Preview holds its accepted image through compilation and invalid edits. For a compatible replacement, the first frame can restore the paused pose, selected animation, and targets. A playing preview resumes its elapsed position when the replacement supports it. Test the hosted examples with [HostedPreview.xaml](../../../samples/TodoWorkbench/HostedPreview.xaml) and its app fixtures. [App preview integration and registered animator examples](../../../samples/TodoWorkbench/README.md)
 
 The App Preview transport also lists mapped Rust state routes. Choose one to scrub, play, and edit its timing with the app’s real control properties and animation registry. A compiled Rust fixture uses its ordinary application clock for input and state handlers. [App Preview state-route workflow](motion.md#scrub-a-rust-state-route-in-app-preview)

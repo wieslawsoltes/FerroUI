@@ -224,6 +224,10 @@ impl DesignerWorkspace {
         self.root.get_control::<Button>("TimelineClips").click(move |_, _| {
             if let Some(this) = weak.upgrade() { this.toggle_clip_comparison(); }
         });
+        let weak = Rc::downgrade(self);
+        self.root.get_control::<Button>("TimelineRange").click(move |_, _| {
+            if let Some(this) = weak.upgrade() { this.report(this.show_preview_range()); }
+        });
     }
     fn authoring_command(self: &Rc<Self>, command: &str) -> Result<(), String> {
         let owner = self
@@ -352,6 +356,9 @@ impl DesignerWorkspace {
         }
         self.root.get_control::<Button>("TimelineCurves").set_is_visible(!clips);
         self.root.get_control::<Button>("PlayAll").set_is_visible(!clips);
+        self.root.get_control::<Button>("TimelineRange").set_is_visible(
+            session.preview_range_limit(session.active_animation_program(), clips).is_ok(),
+        );
 
         self.root.get_control::<TextBox>("AnimationSelector").set_is_read_only(rust);
         self.duration.set_is_read_only(rust || clips);

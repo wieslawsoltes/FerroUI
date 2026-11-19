@@ -3,7 +3,9 @@ import type { FromHosted, ToHosted } from '../src/hostedProtocol';
 import { element, labelButton } from './dom';
 import { HostedCurves } from './hostedCurves';
 import { HostedKeyframeEditor } from './hostedKeyframes';
-import { TimelineClips } from './timelineClips';
+import { clipRulerExtent, TimelineClips } from './timelineClips';
+import { fitTimeline } from './timelineViewport';
+import { TimelineWorkArea } from './timelineWorkArea';
 
 export class HostedAnimationView {
     private readonly section = element('hosted-animations');
@@ -27,6 +29,10 @@ export class HostedAnimationView {
     private documentVersion = 0;
     private readonly curves: HostedCurves;
     private readonly clips: TimelineClips<HostedAnimationFrame>;
+    private readonly workArea: TimelineWorkArea;
+    private readonly clipRange: TimelineWorkArea;
+    private rangeProgram?: string;
+    private rangeScope?: string;
     readonly keyframes: HostedKeyframeEditor;
 
     constructor(private readonly send: (message: FromHosted) => void, compare: boolean, rememberComparison: (enabled: boolean) => void) {
@@ -36,6 +42,10 @@ export class HostedAnimationView {
             button.focus({ preventScroll: true });
         });
         this.curves = new HostedCurves(send, this.keyframes);
+        this.workArea = new TimelineWorkArea('hosted', element('hosted-animation-clock'),
+            () => fitTimeline(Number(this.seek.max)), () => this.seek.valueAsNumber, () => this.paint());
+        this.clipRange = new TimelineWorkArea('clip', element('timeline-clips'),
+            () => this.clips.viewport, () => this.clips.elapsed, () => this.paint());
         this.clips = new TimelineClips<HostedAnimationFrame>(compare, {
             changed: () => {
                 this.queued = undefined;
@@ -44,8 +54,11 @@ export class HostedAnimationView {
                 this.paint();
             },
             seek: elapsed => this.queueSeek(elapsed),
-            transport: action => action === 'play_all'
-                ? this.control({ action }) : this.control({ action }, true),
+            transport: action => {
+                if (action !== 'play_all') this.control({ action }, true);
+                else if (this.clipRange.range) this.control({ action: 'play_range', range: this.clipRange.range });
+                else this.control({ action });
+            },
             place: (frame, programs, start, gap) => {
                 if (!this.canUse() || this.state.position?.playing) return;
                 this.queued = undefined;
@@ -56,6 +69,7 @@ export class HostedAnimationView {
                 rememberComparison(false);
                 this.control({ action: 'select', program });
             },
+            layout: () => this.clipRange.layout(),
         });
         this.programs.onchange = () => {
             this.queued = undefined;
@@ -70,6 +84,7 @@ export class HostedAnimationView {
         this.edit.onclick = () => this.choose(this.selectedProgram?.stateRoute ? 'editStateRoute' : 'chooseKeyframe');
         this.play.onclick = () => {
             if (this.state.position?.playing) this.control({ action: 'pause' }, true);
+            else if (this.workArea.range) this.control({ action: 'play_range', program: Number(this.programs.value), range: this.workArea.range });
             else this.control({ action: 'play', program: Number(this.programs.value) });
         };
         this.stop.onclick = () => this.control({ action: 'stop' }, true);
@@ -90,6 +105,9 @@ export class HostedAnimationView {
         }
         const selected = state.selection ?? state.position?.program;
         if (state.position?.clips && !this.state.position?.clips) this.clips.enabled = true;
+        if (state.position?.previewRange && state.position.playing && !this.state.position?.playing) {
+            this.clips.enabled = Boolean(state.position.clips);
+        }
         this.state = state;
         this.documentVersion = documentVersion;
         const catalog = JSON.stringify(state.programs.map(({ id, name, stateRoute }) => [id, name, Boolean(stateRoute)]));
@@ -180,13 +198,23 @@ export class HostedAnimationView {
         const available = Boolean(selectedTargets?.length);
         this.section.hidden = !program;
         const comparisonPosition = position && { ...position, all: Boolean(position.clips) };
+        const clipRows = this.state.programs.flatMap(program => program.clip ? [{
+            id: program.id, name: program.name, sourceKey: program.sourceKey, clip: program.clip, duration: program.duration, keys: true,
+        }] : []);
+        const playable = this.playableClips;
+        const groupEnd = playable.reduce((end, program) => Math.max(end, program.totalDuration ?? Infinity), 0);
+        const clipScope = this.state.clipScope;
+        const clipPosition = position?.clips ? position : undefined;
+        this.clipRange.follow(this.state.canPreviewRanges ? groupEnd : 0, this.rangeScope !== clipScope, clipRulerExtent(clipRows));
+        this.rangeScope = clipScope;
+        this.clipRange.adopt(clipPosition?.previewRange, clipPosition?.playing === true);
+        const clipElapsed = this.clips.enabled ? this.queued ?? this.submitted ?? clipPosition?.elapsed ?? 0 : 0;
         this.clips.follow({
-            frame: this.state.frame, scope: this.state.clipScope, position: comparisonPosition,
-            reference: this.playableClips[0]?.id,
-            programs: this.state.programs.flatMap(program => program.clip ? [{
-                id: program.id, name: program.name, sourceKey: program.sourceKey, clip: program.clip, duration: program.duration, keys: true,
-            }] : []),
-        }, !this.canUse(), false, this.clips.enabled ? this.queued ?? this.submitted ?? (position?.clips ? position.elapsed : 0) : 0);
+            frame: this.state.frame, scope: clipScope, position: comparisonPosition, programs: clipRows,
+            reference: playable[0]?.id, rangeEnabled: Boolean(this.clipRange.range),
+            rangeEnd: this.clipRange.range?.end,
+        }, !this.canUse(), false, clipElapsed);
+        this.clipRange.show(!usable, playing ? clipPosition?.previewRange : undefined);
         this.programs.disabled = !usable;
         this.programs.title = program?.customAnimator ? `${program.name} · Registered animator` : program?.name ?? '';
         this.targets.hidden = Boolean(program?.stateRoute);
@@ -205,13 +233,22 @@ export class HostedAnimationView {
         this.curves.follow(program, this.state.targets.filter(target => selectedTargets?.includes(target.id)),
             this.state.frame, this.documentVersion, keyframeUsable, Boolean(this.state.canShowVelocity));
         this.play.disabled = playing ? !this.canUse(true) : !usable || !available;
-        labelButton(this.play, playing ? 'Pause application animation' : current && !current.completed ? 'Resume application animation' : 'Play application animation',
-            playing ? 'debug-pause' : 'play');
         this.stop.disabled = !position || !this.canUse(true);
         // Keep the slider focused while the next sample is decoded. Retain only the latest seek.
         this.seek.disabled = !this.state.frame || !available || playing;
         const elapsed = this.queued ?? this.submitted ?? current?.elapsed ?? 0;
-        this.seek.max = String(program?.totalDuration ?? Math.max(program?.duration ?? 0, elapsed));
+        const horizon = Math.max(program?.duration ?? 0, program?.clip?.start ?? 0, elapsed);
+        const rangeProgram = program && (program.sourceKey ?? String(program.id));
+        this.workArea.follow(this.state.canPreviewRanges && available ? program?.totalDuration ?? Infinity : 0,
+            this.rangeProgram !== rangeProgram, horizon);
+        this.rangeProgram = rangeProgram;
+        this.workArea.adopt(current?.previewRange, current?.playing === true);
+        this.seek.max = String(program?.totalDuration ?? Math.max(horizon, this.workArea.range?.end ?? 0));
+        this.workArea.show(!usable, playing ? current?.previewRange : undefined);
+        const playLabel = this.workArea.range ? 'Play preview range'
+            : current && !current.completed ? 'Resume application animation' : 'Play application animation';
+        labelButton(this.play, playing ? current?.previewRange ? 'Pause preview range' : 'Pause application animation' : playLabel,
+            playing ? 'debug-pause' : 'play');
         this.seek.value = String(elapsed);
         this.seek.setAttribute('aria-valuetext', `${this.number.format(elapsed)} seconds elapsed`);
         const limit = program?.totalDuration;

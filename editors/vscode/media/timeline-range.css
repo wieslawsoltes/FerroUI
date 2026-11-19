@@ -1,11 +1,11 @@
-#timeline-range-options[data-limited] {
+[data-preview-range][data-limited] {
     background: var(--tool-active);
     color: var(--vscode-textLink-foreground, var(--focus));
 }
-#timeline-range-fields { min-inline-size: 0; border: 0; margin: 0; padding: 0; }
+.preview-range-fields { min-inline-size: 0; border: 0; margin: 0; padding: 0; }
 .timeline-range-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
 .timeline-range-fields label { display: grid; gap: 3px; color: var(--muted); }
-#timeline-range-feedback { margin: 0; white-space: normal; color: var(--vscode-errorForeground); }
+.preview-range-feedback { margin: 0; white-space: normal; color: var(--vscode-errorForeground); }
 .timeline-ruler-row { position: relative; }
 .timeline-range-track {
     position: absolute;
@@ -14,7 +14,7 @@
     block-size: 2px;
     pointer-events: none;
 }
-#timeline-range-band {
+.timeline-range-band {
     position: absolute;
     block-size: 100%;
     border-radius: 2px;

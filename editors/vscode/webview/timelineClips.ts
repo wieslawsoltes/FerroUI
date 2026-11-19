@@ -3,7 +3,7 @@ import type { ClipFrame } from './clipFrame';
 import { create, element, labelButton } from './dom';
 import { bindClipDrag } from './timelineClipDrag';
 import { TimelineClipPlacement } from './timelineClipPlacement';
-import { clamp, fitTimeline, minimumTimelineSpan, panTimeline, timelinePercent, visibleTime, zoomTimeline } from './timelineViewport';
+import { clamp, fitTimeline, minimumTimelineSpan, panTimeline, timelinePercent, visibleTime, zoomTimeline, type TimelineViewport } from './timelineViewport';
 
 export interface TimelineClipRow {
     id: number;
@@ -19,7 +19,9 @@ interface ClipState<Frame> {
     scope?: string;
     programs: readonly TimelineClipRow[];
     reference?: number;
-    position?: { program: number; playing: boolean; completed?: boolean; all?: boolean };
+    rangeEnd?: number;
+    rangeEnabled?: boolean;
+    position?: { program: number; playing: boolean; completed?: boolean; all?: boolean; previewRange?: object };
 }
 
 interface Row { key: string; program: TimelineClipRow; label: HTMLButtonElement; order: HTMLElement; bar: HTMLButtonElement }
@@ -30,9 +32,14 @@ interface ClipActions<Frame> {
     transport(action: 'play_all' | 'pause' | 'stop', program: number): void;
     place(frame: Frame, programs: number[], start: number | undefined, gap: number): void;
     keys(program: number): void;
+    layout?(): void;
 }
 
 const number = new Intl.NumberFormat(undefined, { maximumFractionDigits: 3 });
+
+export function clipRulerExtent(programs: readonly TimelineClipRow[]): number {
+    return programs.reduce((end, program) => Math.max(end, program.clip.end ?? program.clip.start + program.duration), 0.05);
+}
 
 export class TimelineClips<Frame extends ClipFrame> {
     private readonly toggle = element<HTMLButtonElement>('timeline-compare');
@@ -99,6 +106,8 @@ export class TimelineClips<Frame extends ClipFrame> {
     }
 
     get reference(): number | undefined { return this.state?.reference; }
+    get viewport(): TimelineViewport { return this.view; }
+    get elapsed(): number { return this.seconds; }
 
     private get frame(): Frame | undefined { return !this.locked && this.visible ? this.state?.frame : undefined; }
 
@@ -127,14 +136,18 @@ export class TimelineClips<Frame extends ClipFrame> {
         this.pane.hidden = this.tools.hidden = !this.visible;
         if (!this.visible) { this.placement.follow(undefined, []); return; }
         const signature = JSON.stringify([this.scope, clips]);
+        const duration = Math.max(clipRulerExtent(clips), state.rangeEnd ?? 0);
+        const extentChanged = this.view.duration !== duration;
+        if (extentChanged) this.view = fitTimeline(duration);
         if (signature !== this.signature) {
             this.signature = signature;
             this.renderRows(clips);
-        }
+        } else if (extentChanged) this.layout();
         const elapsed = state.position?.all ?? false;
         this.play.disabled = !state.frame || this.reference === undefined || (!playing && locked);
         this.stop.disabled = !state.frame || !state.position || (!playing && locked);
-        labelButton(this.play, playing ? 'Pause clips' : elapsed && !state.position?.completed ? 'Resume clips' : 'Play all clips',
+        const playLabel = state.rangeEnabled ? 'Play preview range' : elapsed && !state.position?.completed ? 'Resume clips' : 'Play all clips';
+        labelButton(this.play, playing ? state.position?.previewRange ? 'Pause preview range' : 'Pause clips' : playLabel,
             playing ? 'debug-pause' : 'run-all');
         this.seek.disabled = this.time.disabled = !state.frame || editing || playing || this.reference === undefined;
         this.showTime();
@@ -152,8 +165,6 @@ export class TimelineClips<Frame extends ClipFrame> {
             program.sourceKey && counts.get(program.sourceKey) === 1 ? program.sourceKey : String(program.id)));
         const visible = new Set(this.programRows.map(row => row.key));
         this.selection = this.selection.filter(key => visible.has(key));
-        const duration = programs.reduce((end, program) => Math.max(end, program.clip.end ?? (program.clip.start + program.duration)), 0.05);
-        if (this.view.duration !== duration) this.view = fitTimeline(duration);
         this.rows.replaceChildren(...this.programRows.map(row => row.label.parentElement!));
         this.layout();
         if (focused) {
@@ -239,6 +250,7 @@ export class TimelineClips<Frame extends ClipFrame> {
         }));
         for (const row of this.programRows) this.layoutBar(row, row.program.clip.start);
         this.showTime();
+        this.actions.layout?.();
     }
 
     private layoutBar(row: Row, start: number): void {

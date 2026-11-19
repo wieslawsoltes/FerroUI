@@ -13,7 +13,7 @@ import type { HostedAnimationSample, HostedFrame, HostedInput, HostedSource } fr
 import type { NativeStageChange, PrototypeCommand, PrototypeHotspot, PrototypeScene, StageChecks, StageDocument, StageImage, StageManifest, StageModel, StagePick, StagePointer, StageStateOptions, StageTarget } from './stagesProtocol';
 import { commandFor } from './tools';
 
-const timelineActions = new Set(['scrub', 'play_program', 'advance_program', 'pause_program', 'stop_program']);
+const timelineActions = new Set(['scrub', 'play_program', 'play_range', 'advance_program', 'pause_program', 'stop_program']);
 
 interface RenderContext {
     workspaceRoot?: string;
@@ -33,7 +33,7 @@ export class NativePreview implements vscode.Disposable {
     private nextProject = 0;
     assets: readonly Asset[] = [];
     capabilities: {
-        isolatedDesign?: boolean; appHostedDesign?: boolean; hostedAnimationRestoration?: boolean; rsxLanguage?: boolean;
+        isolatedDesign?: boolean; appHostedDesign?: boolean; hostedAnimationRestoration?: boolean; hostedPreviewRanges?: boolean; rsxLanguage?: boolean;
         stages?: boolean; prototypeEditing?: boolean; stageIncludes?: boolean; projectCatalog?: boolean;
         canvasInteraction?: boolean; canvasFocusOrder?: boolean; projectInventory?: boolean; tokenHandoff?: boolean;
         designFixtures?: boolean; timelineTransport?: boolean; timelineRecording?: boolean; timelineGeometryRecording?: boolean;

@@ -198,7 +198,8 @@ class HostedSession {
         private readonly target: CargoTarget, readonly generation: number, built: (metadata: ProjectMetadata) => void, remove: (closing: Promise<void>) => void) {
         this.animations = new HostedAnimations((request, signal) => this.sampleAnimation(request, signal), frame => this.accept(frame),
             state => this.showAnimations(state),
-            error => this.report(errorMessage(error), Boolean(this.currentFrame)));
+            error => this.report(errorMessage(error), Boolean(this.currentFrame)),
+            () => Boolean(this.client?.capabilities.hostedPreviewRanges));
         this.subscriptions = [
             vscode.workspace.onDidChangeTextDocument(event => { if (event.document === editor.document) this.update(); }),
             vscode.window.onDidChangeTextEditorSelection(event => {

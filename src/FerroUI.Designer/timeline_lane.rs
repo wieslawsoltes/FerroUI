@@ -66,6 +66,7 @@ pub struct TimelineLane {
     view_start: Cell<f64>,
     view_end: Cell<f64>,
     playhead: Cell<f64>,
+    preview_range: Cell<Option<ferroui_designer_animation::PreviewRange>>,
     ruler: Cell<bool>,
     highlighted: Cell<bool>,
     drag: RefCell<Option<Drag>>,
@@ -102,6 +103,7 @@ impl TimelineLane {
             view_start: Cell::new(0.0),
             view_end: Cell::new(1.0),
             playhead: Cell::new(0.0),
+            preview_range: Cell::new(None),
             ruler: Cell::new(false),
             highlighted: Cell::new(false),
             drag: RefCell::new(None),
@@ -194,6 +196,11 @@ impl TimelineLane {
             0.0
         };
         if self.playhead.replace(time) != time {
+            self.invalidate_visual();
+        }
+    }
+    pub(crate) fn set_preview_range(&self, range: Option<ferroui_designer_animation::PreviewRange>) {
+        if self.preview_range.replace(range) != range {
             self.invalidate_visual();
         }
     }
@@ -778,6 +785,16 @@ impl VisualImpl for TimelineLane {
             &BoxShadows::default(),
         );
         let clip = context.push_clip(bounds);
+        if let Some(range) = this.preview_range.get() {
+            let start = this.x(range.start.max(this.view_start.get()));
+            let end = this.x(range.end.min(this.view_end.get()));
+            if end > start {
+                let color = brush(0xff81b5fd);
+                context.draw_rectangle(Some(&color), None,
+                    Rect::new(start, (bounds.height - 3.0).max(0.0), end - start, 2.0),
+                    0.0, 0.0, &BoxShadows::default());
+            }
+        }
         let interval = tick_interval(this.span(), this.plot_width());
         let major = this.frame_rate.get().map_or(interval, |rate| {
             (interval * f64::from(rate)).ceil().max(1.0) / f64::from(rate)

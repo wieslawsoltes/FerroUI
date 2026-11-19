@@ -23,7 +23,9 @@ impl DesignerWorkspace {
         if ui.compare_clips {
             ui.clip_duration
         } else {
-            self.session.borrow().timeline().duration
+            drop(ui);
+            let session = self.session.borrow();
+            session.timeline().duration.max(self.preview_range_for_view(&session).map_or(0.0, |range| range.end))
         }
     }
 
@@ -62,7 +64,11 @@ impl DesignerWorkspace {
             }
             self.session.borrow_mut().scrub_animation_clips(None, time)
         } else {
-            self.session.borrow_mut().seek(time)
+            let mut session = self.session.borrow_mut();
+            if session.animation.preview_range.is_some() {
+                session.pause();
+            }
+            session.seek(time)
         }
     }
 
@@ -92,11 +98,12 @@ impl DesignerWorkspace {
         } else {
             0.0
         };
+        let range = self.preview_range_for_view(&session);
         drop(session);
         let duration = clips
             .iter()
             .map(|clip| clip.span.end.unwrap_or(clip.span.start + clip.length))
-            .fold(0.05, f64::max);
+            .fold(range.map_or(0.05, |range| range.end.max(0.05)), f64::max);
         let mut ui = self.timeline_ui.borrow_mut();
         if ui.clip_scope.as_ref() != Some(&scope) {
             ui.clip_scope = Some(scope);
@@ -119,8 +126,10 @@ impl DesignerWorkspace {
         ruler.configure(duration, vec![]);
         ruler.set_view(view.0, view.1);
         ruler.set_playhead(playhead);
+        ruler.set_preview_range(range);
         AutomationProperties::set_name(&ruler, Some("Shared animation clip ruler"));
         self.bind_clip_lane(&ruler, &context);
+        self.connect_preview_range(&ruler, &context);
         let header = StackPanel::new();
         header.set_orientation(Orientation::Horizontal);
         header.set_spacing(4.0);
@@ -255,7 +264,7 @@ fn clip_row(label: Ref<Control>, lane: &TimelineLane) -> Ref<Grid> {
     row
 }
 
-fn clip_tool(path: &str, title: &str) -> Ref<Button> {
+pub(super) fn clip_tool(path: &str, title: &str) -> Ref<Button> {
     let tool = button("");
     tool.set_content(Some(Control::boxed(crate::icons::vector_icon(path, 12.0))));
     tool.classes().add("icon");

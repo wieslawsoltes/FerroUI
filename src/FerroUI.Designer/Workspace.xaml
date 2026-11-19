@@ -392,6 +392,7 @@
         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center" VerticalAlignment="Center">
           <Button Name="Play" Classes="icon" ToolTip.Tip="Play or pause the active animation"><Grid><PathIcon Classes="designer-icon" Name="PlayIcon" Width="14" Height="14" Data="F1 M4,2 L17,10 4,18 Z" /><PathIcon Classes="designer-icon" Name="PauseIcon" Width="14" Height="14" IsVisible="False" Data="F1 M3,2 L7,2 7,18 3,18 Z M11,2 L15,2 15,18 11,18 Z" /></Grid></Button>
           <Button Name="Stop" Classes="icon" ToolTip.Tip="Stop playback and rewind"><PathIcon Classes="designer-icon" Width="12" Height="12" Data="F1 M2,2 L16,2 16,16 2,16 Z" /></Button>
+          <Button Name="TimelineRange" Classes="icon" AutomationProperties.Name="Preview range" ToolTip.Tip="Preview range" IsVisible="False"><PathIcon Classes="designer-icon" Width="14" Height="14" Data="F1 M2,2 H4 V12 H14 V2 H16 V14 H2 Z M6,8 H12 V10 H6 Z" /></Button>
           <Button Name="PlayAll" Classes="icon" ToolTip.Tip="Play all animation programs"><PathIcon Classes="designer-icon" Width="15" Height="15" Data="F1 M0,2 L10,9 0,16 Z M10,2 L20,9 10,16 Z" /></Button>
           <Border Width="1" Height="18" Background="{DynamicResource DesignerBorderBrush}" Margin="5,0" />
           <Button Name="Record" Classes="nav" ToolTip.Tip="Record property edits as keyframes">

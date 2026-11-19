@@ -618,6 +618,12 @@ impl DesignerWorkspace {
                 let mut session = self.session.borrow_mut();
                 if session.is_playing() {
                     session.pause();
+                } else if let Some(range) = self.preview_range_for_view(&session) {
+                    let result = session.start_preview_range(None, self.comparing_animation_clips(), range);
+                    drop(session);
+                    self.refresh(true);
+                    self.report(result);
+                    return;
                 } else if self.comparing_animation_clips() {
                     let restart = session.animation.playback_completed.then_some(0.0);
                     let result = session.start_combined_playback(None, restart);
@@ -682,6 +688,9 @@ impl DesignerWorkspace {
                 self.guard.set(false);
             }
         }
+        let range = self.preview_range_for_view(&session);
+        self.root.get_control::<Button>("TimelineRange").classes().set("active", range.is_some());
+        self.root.get_control::<Button>("TimelineRange").set_is_enabled(!session.is_playing());
         for lane in self
             .timeline_lanes
             .borrow()
@@ -689,6 +698,9 @@ impl DesignerWorkspace {
             .filter_map(WeakRef::upgrade)
         {
             lane.set_playhead(session.time());
+            if lane.is_ruler() {
+                lane.set_preview_range(range);
+            }
         }
         self.guard.set(true);
         let duration = self.timeline_view_duration();

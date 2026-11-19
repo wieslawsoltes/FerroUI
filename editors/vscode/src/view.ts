@@ -278,15 +278,21 @@ export function hostedHtml(webview: vscode.Webview, root: vscode.Uri): string {
                 ${tool('hosted-animation-keyframe', 'edit', 'Edit application keyframe', 'hidden')}
                 ${animationGraphMenu('hosted', 'Hide curves')}
                 <span class="toolbar-divider" aria-hidden="true"></span>
+                ${previewRangeButton('hosted')}
                 ${tool('hosted-animation-play', 'play', 'Play application animation')}
                 ${tool('hosted-animation-stop', 'debug-stop', 'Stop application animation')}
             </div>
         </div>
-        ${clipToolbarHtml('Open selected animation')}
+        ${clipToolbarHtml('Open selected animation', previewRangeButton('clip'))}
     </div>
-    ${clipBoardHtml()}
-    <div class="hosted-animation-clock hosted-single-animation">
-        <input id="hosted-animation-seek" type="range" min="0" step="0.001" aria-label="Application animation playhead">
+    ${clipBoardHtml(previewRangeBand('clip'))}
+    ${previewRangeHtml('hosted')}
+    ${previewRangeHtml('clip')}
+    <div id="hosted-animation-clock" class="hosted-animation-clock hosted-single-animation">
+        <div class="hosted-playhead">
+            <input id="hosted-animation-seek" type="range" min="0" step="0.001" aria-label="Application animation playhead" aria-keyshortcuts="I O">
+            ${previewRangeBand('hosted')}
+        </div>
         <output id="hosted-animation-time" for="hosted-animation-seek"></output>
     </div>
     <section id="hosted-curves" class="hosted-single-animation" aria-label="Authored animation curves" hidden>
@@ -310,7 +316,7 @@ ${keyframeEditorHtml(false)}
 <form id="hosted-input" class="toolbar" aria-label="Preview input" hidden>
     <input id="hosted-text" aria-label="Text for the focused preview control" required maxlength="8192">
     <button type="submit" class="tool" title="Send Text" aria-label="Send Text">${icon('send')}</button>
-</form>`, ['timeline-curve', 'keyframe-editor', 'timeline-clips']);
+</form>`, ['timeline-curve', 'keyframe-editor', 'timeline-clips', 'timeline-range']);
 }
 
 export function stagesHtml(webview: vscode.Webview, root: vscode.Uri): string {
@@ -431,7 +437,7 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
         </div>
         <div class="tool-group timeline-tools timeline-view-tools" role="group" aria-label="Timeline view">
             ${animationGraphMenu('timeline', 'Keyframes')}
-            ${tool('timeline-range-options', 'symbol-ruler', 'Preview range', 'popovertarget="timeline-preview-range" aria-controls="timeline-preview-range" aria-expanded="false" hidden')}
+            ${previewRangeButton('timeline')}
             ${tool('timeline-filter', 'filter', 'Filter tracks', 'popovertarget="timeline-track-filter" aria-controls="timeline-track-filter" aria-expanded="false" hidden')}
             ${tool('timeline-options', 'settings-gear', 'Timeline view options', 'popovertarget="timeline-view-options" aria-controls="timeline-view-options" aria-expanded="false" hidden')}
             ${tool('timeline-source-issues', 'warning', 'Open unsupported Rust animations in source', 'hidden')}
@@ -440,22 +446,12 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
         ${clipToolbarHtml()}
     </div>
     ${clipBoardHtml()}
-    <div id="timeline-preview-range" class="popover timeline-popover" popover role="group" aria-label="Preview range">
-        <label class="timeline-check"><input id="timeline-range-enabled" type="checkbox" autofocus> Limit playback to preview range</label>
-        <fieldset id="timeline-range-fields" aria-label="Preview range in seconds" hidden>
-            <div class="timeline-range-fields">
-                <label>In (s) <input id="timeline-range-in" type="number" min="0" step="any"></label>
-                <label>Out (s) <input id="timeline-range-out" type="number" min="0" step="any"></label>
-            </div>
-            <label class="timeline-check"><input id="timeline-range-loop" type="checkbox" checked> Loop range</label>
-        </fieldset>
-        <p id="timeline-range-feedback" role="status" hidden></p>
+    ${previewRangeHtml('timeline', `
         <form id="timeline-marker-form" aria-label="Preview markers">
             <input id="timeline-marker-name" type="text" aria-label="Marker name" placeholder="Marker name" maxlength="48" required>
             <button type="submit" id="timeline-marker-add" class="tool" aria-label="Add or update marker at playhead" title="Add or update marker at playhead">${icon('add')}</button>
         </form>
-        <ul id="timeline-marker-list" aria-label="Named markers" hidden></ul>
-    </div>
+        <ul id="timeline-marker-list" aria-label="Named markers" hidden></ul>`)}
     <div id="timeline-track-filter" class="popover timeline-popover" popover role="group" aria-label="Filter tracks">
         <input id="timeline-track-search" type="search" aria-label="Filter tracks by property or target" placeholder="Filter tracks" autofocus>
         <label class="timeline-check"><input id="timeline-selected-targets" type="checkbox"> Selected controls only</label>
@@ -498,7 +494,7 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
                             title="[ and ] jump to keys. , and . step frames. I and O set the preview range. + and − zoom.">
                     </div>
                     <div id="timeline-ruler" class="timeline-ruler" aria-hidden="true"></div>
-                    <div class="timeline-range-track" aria-hidden="true"><span id="timeline-range-band" hidden></span></div>
+                    ${previewRangeBand('timeline')}
                 </div>
                 <div id="timeline-marker-strip" role="group" aria-label="Markers on the ruler" hidden></div>
             </div>
@@ -517,11 +513,12 @@ function clipCompareButton(): string {
     return tool('timeline-compare', 'list-tree', 'Compare animation clips', 'aria-pressed="false" aria-controls="timeline-clips" hidden');
 }
 
-function clipToolbarHtml(openLabel = 'Open selected clip keyframes'): string {
+function clipToolbarHtml(openLabel = 'Open selected clip keyframes', range = ''): string {
     return `
 <div id="timeline-clip-tools" class="tool-group clip-tools" aria-label="Clip controls" role="group" hidden>
     ${tool('clip-play', 'run-all', 'Play all clips')}
     ${tool('clip-stop', 'debug-stop', 'Stop clips')}
+    ${range}
     <form id="clip-clock" class="clip-clock">
         <input id="clip-time" type="number" min="0" step="any" inputmode="decimal" aria-label="Elapsed playhead time in seconds">
         <span id="clip-duration"></span>
@@ -536,13 +533,14 @@ function clipToolbarHtml(openLabel = 'Open selected clip keyframes'): string {
 </div>`;
 }
 
-function clipBoardHtml(): string {
+function clipBoardHtml(rangeBand = ''): string {
     return `
 <section id="timeline-clips" class="clip-grid" aria-label="Animation clips on a shared ruler" hidden>
     <div class="clip-axis">
         <div class="clip-ruler" id="clip-ruler">
-            <input id="clip-seek" type="range" min="0" max="1" step="any" aria-label="Clip comparison playhead">
+            <input id="clip-seek" type="range" min="0" max="1" step="any" aria-label="Clip comparison playhead" ${rangeBand ? 'aria-keyshortcuts="I O"' : ''}>
             <div id="clip-marks" class="clip-marks" aria-hidden="true"></div>
+            ${rangeBand}
         </div>
     </div>
     <ol id="clip-rows" aria-label="Animation clips"></ol>
@@ -558,6 +556,31 @@ function clipBoardHtml(): string {
         <button id="clip-apply" class="tool" type="submit" aria-label="Apply clip placement" title="Apply clip placement">${icon('check')}</button>
     </form>
 </div>`;
+}
+
+function previewRangeButton(prefix: string): string {
+    return tool(`${prefix}-range-options`, 'symbol-ruler', 'Preview range',
+        `data-preview-range popovertarget="${prefix}-preview-range" aria-controls="${prefix}-preview-range" aria-expanded="false" hidden`);
+}
+
+function previewRangeHtml(prefix: string, extra = ''): string {
+    return `
+<div id="${prefix}-preview-range" class="popover timeline-popover preview-range-popover" popover role="group" aria-label="Preview range">
+    <label class="timeline-check"><input id="${prefix}-range-enabled" type="checkbox" autofocus> Limit playback to preview range</label>
+    <fieldset id="${prefix}-range-fields" class="preview-range-fields" aria-label="Preview range in seconds" hidden>
+        <div class="timeline-range-fields">
+            <label>In (s) <input id="${prefix}-range-in" type="number" min="0" step="any" inputmode="decimal"></label>
+            <label>Out (s) <input id="${prefix}-range-out" type="number" min="0" step="any" inputmode="decimal"></label>
+        </div>
+        <label class="timeline-check"><input id="${prefix}-range-loop" type="checkbox" checked> Loop range</label>
+    </fieldset>
+    <p id="${prefix}-range-feedback" class="preview-range-feedback" role="status" hidden></p>
+    ${extra}
+</div>`;
+}
+
+function previewRangeBand(prefix: string): string {
+    return `<div class="timeline-range-track" aria-hidden="true"><span id="${prefix}-range-band" class="timeline-range-band" hidden></span></div>`;
 }
 
 function timelineOption(id: string, glyph: string, label: string, attributes = ''): string {

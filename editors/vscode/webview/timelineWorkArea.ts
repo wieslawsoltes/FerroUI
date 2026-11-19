@@ -4,21 +4,31 @@ import { anchorPopover, element } from './dom';
 import { clamp, timelinePercent, type TimelineViewport } from './timelineViewport';
 
 export class TimelineWorkArea {
-    private readonly button = element<HTMLButtonElement>('timeline-range-options');
-    private readonly popup = element('timeline-preview-range');
-    private readonly enable = element<HTMLInputElement>('timeline-range-enabled');
-    private readonly fields = element<HTMLFieldSetElement>('timeline-range-fields');
-    private readonly start = element<HTMLInputElement>('timeline-range-in');
-    private readonly end = element<HTMLInputElement>('timeline-range-out');
-    private readonly repeat = element<HTMLInputElement>('timeline-range-loop');
-    private readonly band = element('timeline-range-band');
-    private readonly status = element('timeline-range-feedback');
+    private readonly button: HTMLButtonElement;
+    private readonly popup: HTMLElement;
+    private readonly enable: HTMLInputElement;
+    private readonly fields: HTMLFieldSetElement;
+    private readonly start: HTMLInputElement;
+    private readonly end: HTMLInputElement;
+    private readonly repeat: HTMLInputElement;
+    private readonly band: HTMLElement;
+    private readonly status: HTMLElement;
     private settings: TimelinePreviewRange = { start: 0, end: 0, loop: true };
     private playingRange?: TimelinePreviewRange;
+    private accepted?: TimelinePreviewRange;
     private duration = 0;
 
-    constructor(grid: HTMLElement, private readonly viewport: () => TimelineViewport, private readonly time: () => number,
+    constructor(prefix: string, grid: HTMLElement, private readonly viewport: () => TimelineViewport, private readonly time: () => number,
         private readonly changed: () => void) {
+        this.button = element(`${prefix}-range-options`);
+        this.popup = element(`${prefix}-preview-range`);
+        this.enable = element(`${prefix}-range-enabled`);
+        this.fields = element(`${prefix}-range-fields`);
+        this.start = element(`${prefix}-range-in`);
+        this.end = element(`${prefix}-range-out`);
+        this.repeat = element(`${prefix}-range-loop`);
+        this.band = element(`${prefix}-range-band`);
+        this.status = element(`${prefix}-range-feedback`);
         anchorPopover(this.button, this.popup);
         this.popup.addEventListener('toggle', event => {
             this.button.setAttribute('aria-expanded', String(event.newState === 'open'));
@@ -32,18 +42,38 @@ export class TimelineWorkArea {
         if (!this.button.hidden && this.enable.checked) return this.settings;
     }
 
-    follow(duration: number, reset: boolean): void {
+    follow(duration: number, reset: boolean, visibleEnd = duration): void {
         this.button.hidden = duration <= 0;
         if (this.button.hidden) { this.popup.hidePopover(); return; }
-        if (reset) {
+        const fitted = Math.min(duration, visibleEnd);
+        if (reset || this.duration === 0) {
             this.enable.checked = false;
-            this.settings = { start: 0, end: duration, loop: true };
+            this.accepted = undefined;
+            this.settings = { start: 0, end: fitted, loop: true };
+            this.popup.hidePopover();
         } else if (duration !== this.duration) {
-            const settings = { ...this.settings, end: this.settings.end === this.duration ? duration : Math.min(duration, this.settings.end) };
-            this.settings = validPreviewRange(settings, duration) ? settings : { start: 0, end: duration, loop: this.settings.loop };
+            const end = this.settings.end === this.duration ? fitted : Math.min(duration, this.settings.end);
+            const settings = { ...this.settings, end };
+            if (validPreviewRange(settings, duration)) this.settings = settings;
+            else {
+                this.enable.checked = false;
+                this.settings = { start: 0, end: fitted, loop: this.settings.loop };
+            }
         } else return;
         this.duration = duration;
-        this.start.max = this.end.max = String(duration);
+        this.start.max = this.end.max = Number.isFinite(duration) ? String(duration) : '';
+        this.fill();
+        this.report();
+    }
+
+    adopt(range: TimelinePreviewRange | undefined, playing: boolean): void {
+        const previous = this.accepted;
+        this.accepted = range;
+        if (!validPreviewRange(range, this.duration)
+            || (previous?.start === range.start && previous.end === range.end && previous.loop === range.loop
+                && (!playing || this.enable.checked))) return;
+        this.enable.checked = true;
+        this.settings = range;
         this.fill();
         this.report();
     }
@@ -75,7 +105,7 @@ export class TimelineWorkArea {
         const time = this.time();
         const { start, end, loop } = this.settings;
         const candidate = key === 'i'
-            ? { start: time, end: time < end ? end : this.duration, loop }
+            ? { start: time, end: time < end ? end : this.viewport().duration, loop }
             : { start: start < time ? start : 0, end: time, loop };
         if (!validPreviewRange(candidate, this.duration)) return;
         this.enable.checked = true;

@@ -74,7 +74,7 @@ const viewport = new TimelineViewportView(slider, () => visibleKeys, () => {
     markerView.layout();
     showCurves();
 });
-const workArea = new TimelineWorkArea(viewport.grid, () => viewport.range, () => slider.valueAsNumber, showPosition);
+const workArea = new TimelineWorkArea('timeline', viewport.grid, () => viewport.range, () => slider.valueAsNumber, showPosition);
 const markerView = new TimelineMarkerView(() => viewport.range, time => {
     viewport.reveal(time);
     queueSeek(time);

@@ -1,4 +1,4 @@
-import type { AnimationSourceIssue, KeyframeDraft, KeyframeDraftPreview, TimelineClipTiming, TimelineCurveRequest, TimelineKeyframe, TimelineTrack } from './timelineProtocol';
+import type { AnimationSourceIssue, KeyframeDraft, KeyframeDraftPreview, TimelineClipTiming, TimelineCurveRequest, TimelineKeyframe, TimelinePreviewRange, TimelineTrack } from './timelineProtocol';
 import type { Range } from './protocol';
 import type { StateTransitionRoute } from './stateTransitionProtocol';
 
@@ -56,6 +56,7 @@ export type HostedAnimationControl =
     | { action: 'play'; program: number; elapsed?: number }
     | { action: 'scrub_all'; elapsed: number }
     | { action: 'play_all'; elapsed?: number }
+    | { action: 'play_range'; program?: number; range: TimelinePreviewRange }
     | { action: 'pause' }
     | { action: 'stop' }
     | { action: 'targets'; program: number; targets?: number[] };
@@ -70,6 +71,7 @@ export interface HostedAnimationPosition {
     playing: boolean;
     completed: boolean;
     clips?: number[];
+    previewRange?: TimelinePreviewRange;
 }
 
 export interface HostedAnimationPresentation {
@@ -87,6 +89,7 @@ export interface HostedAnimationState extends HostedAnimationCatalog, HostedAnim
     frame?: HostedAnimationFrame;
     busy: boolean;
     canShowVelocity?: boolean;
+    canPreviewRanges?: boolean;
 }
 
 export type HostedKeyframeDraft = Omit<KeyframeDraft, 'previous'> & { previous?: number };

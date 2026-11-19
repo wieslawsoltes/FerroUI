@@ -108,6 +108,8 @@ When the application preview loads XAML or mapped RSX animations, its toolbar of
 
 **Compare animation clips** adds an elapsed ruler with the same drag and keyboard placement controls as Timeline. Play the clips together with the app’s native animator registry. Apply delays as one source edit, and use Undo to restore the previous arrangement. [Compare clips in App Preview](../../docs/designer/vscode/motion.md#compare-clips-in-app-preview)
 
+Use **Preview range** to rehearse an elapsed interval in one clip or the shared sequence. Loop it or hold the final pose at Out. Compatible source edits retain the range and playhead. [Rehearse a range in App Preview](../../docs/designer/vscode/motion.md#rehearse-a-range-in-app-preview)
+
 App Preview holds the last accepted frame while source changes are evaluated. When the clip and targets resolve in a replacement, its first frame includes the previous animation pose. Playback resumes from the retained elapsed time if it was running. A shorter clip bounds that time to its new duration. Clip selection and compatible target assignments follow the authored source, and agents can choose a clip through the `select` action in `designer_hosted_animation`.
 
 The animation picker groups mapped Rust transitions under **State routes**. Use the same playhead and transport, then choose **Edit state route timing** to update both duration and easing together. The source icon reveals the Rust declaration and one Undo restores the edited values. With a registered Rust fixture, stop the sampled route to inspect the app’s own state handlers. [Preview and edit a Rust state route](../../docs/designer/vscode/motion.md#scrub-a-rust-state-route-in-app-preview)

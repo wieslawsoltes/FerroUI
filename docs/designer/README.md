@@ -459,6 +459,24 @@ App Preview uses the same placement rules with the selected binary’s registere
 resolved timing. It samples the combined pose before displaying a compatible source replacement.
 [App Preview clip workflow](vscode/motion.md#compare-clips-in-app-preview)
 
+### Rehearse a preview range
+
+![Studio holds both clips at the 1.45-second Out pose with its range settings visible below the tracks](images/studio-preview-range.png)
+
+Choose **Preview range** beside Play and Stop to open the settings below the tracks. Enable
+**Limit playback to preview range**, enter **In (s)** and **Out (s)**, and choose **Apply range**.
+With the ruler focused, `I` and `O` set either
+boundary at the playhead. The ruler shows the selected interval and playback starts at In when the
+playhead is outside it. Enable **Loop range** to wrap back to In or clear it to hold the rendered
+pose at Out. Use Pause to inspect the current pose and Stop to restore the base artboard.
+
+Typed tracks use authored seconds in the keyframe view. Clip comparison and the fallback native
+clock for opaque programs use elapsed seconds. The work area is a Timeline view setting. It
+preserves authored timing, keys, and triggers. A compatible source edit retains the native pose
+and fits the work area to the replacement clock. In Studio MCP, use `designer_program` with
+`action: "play_range"` and a `range` containing `start`, `end`, and `loop`. Include `all: true` for
+the shared clip clock. [App Preview range workflow](vscode/motion.md#rehearse-a-range-in-app-preview)
+
 ### Edit tracks and keyframes
 
 Select a key and drag either handle in the incoming easing graph. The graph and **Curve**

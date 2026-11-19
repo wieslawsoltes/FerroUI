@@ -78,6 +78,19 @@ For VS Code MCP, call `designer_keyframe_clipboard` through `designer_studio_que
 
 The VS Code MCP tool `designer_timeline_control` accepts `action: "play_range"` with a program and a `range` containing `start`, `end`, and `loop`. Use `designer_timeline_markers` to read markers and `designer_timeline_marker_edit` to set or remove them. Use the current designer revision for each action.
 
+### Rehearse a range in App Preview
+
+![The shared App Preview ruler marks 0.35 to 1.3 seconds and the application holds its native pose at Out](../images/vscode-app-preview-range.png)
+
+1. Open [App Preview](runtime.md#render-with-your-app-in-app-preview), then choose an animation with a live target. Choose **Compare animation clips** to rehearse a group on its shared clock.
+2. Choose **Preview range** beside the playback controls and enable **Limit playback to preview range**. Enter **In (s)** and **Out (s)**, or focus the elapsed playhead and press `I` or `O` at the desired time. The ruler shades the interval.
+3. Choose **Play preview range**. Playback starts at the current time if it is inside the range. With **Loop range** enabled, it wraps from Out to In. Clear **Loop range** to hold the native frame at Out. Pause holds the accepted pose, and Stop removes the sampled pose.
+4. After a compatible source update, the first replacement frame retains the playhead and valid range. A shorter clock can move Out earlier. Choose a new interval if the clock ends before In. Clear **Limit playback to preview range** to play the full clip again.
+
+App Preview range times are elapsed seconds, including authored delay, speed, and repetitions. The range is a preview setting. It leaves animation timing and keys in source intact. Use an updated FerroUI preview helper to retain the range across an app-hosted frame replacement.
+
+Agents supply `action: "play_range"` and `range: { "start": 0.4, "end": 1.5, "loop": true }` to `designer_hosted_animation`. Include `program` for a single animation or omit it to rehearse all playable clips. Use the current app generation, revision, and sequence reported by `designer_hosted_animations`.
+
 ## Shape an incoming easing
 
 1. Select a source-backed key. **Incoming easing** shapes the segment that ends at the key. Choose a preset, type four cubic Bézier coordinates, or drag either control point on the curve.

@@ -11,6 +11,8 @@ const cargoSelection = { folder: workspacePath, manifest_path: workspacePath, pa
 const unit = { type: 'number', minimum: 0, maximum: 1 };
 const wheel = { type: 'number', minimum: -64, maximum: 64 };
 const time = { type: 'number', minimum: 0 };
+const previewRange = { type: 'object', additionalProperties: false, required: ['start', 'end', 'loop'],
+    properties: { start: time, end: time, loop: truth } };
 const hostedKeyframe = { ...frame, expected_generation: integer(1), expected_sequence: integer(1),
     arguments: { type: 'object', additionalProperties: false,
         required: ['program', 'target', 'property', 'time', 'value', 'easing'],
@@ -61,10 +63,10 @@ export const agentCatalog = {
     }, ['session', 'expected_generation', 'expected_revision'], true, false),
     designer_hosted_animations: tool('Read the application preview’s native clips and mapped Rust state routes, compatible controls, source issues, frame and elapsed time.', session, ['session']),
     designer_hosted_image: tool('Capture the current app-hosted preview frame as PNG with its revision and sequence.', session, ['session']),
-    designer_hosted_animation: tool('Control a native clip, a Rust state route, or all playable clips on a shared elapsed clock. Use the current app preview generation, revision and frame sequence.', {
+    designer_hosted_animation: tool('Control native clips or a Rust state route on the app’s elapsed clock. Play range takes start, end and loop. Omit program to rehearse all playable clips together. Use the current app generation, revision and frame sequence.', {
         ...frame, expected_generation: integer(1), expected_sequence: integer(1), arguments: { type: 'object', additionalProperties: false,
-            required: ['action'], properties: { action: choice('select', 'seek', 'play', 'scrub_all', 'play_all', 'pause', 'stop', 'targets', 'reveal', 'reveal_issue'), program: node,
-                index: integer(0), elapsed: { type: 'number', minimum: 0 }, targets: { type: 'array', items: node, maxItems: 2000 } } },
+            required: ['action'], properties: { action: choice('select', 'seek', 'play', 'play_range', 'scrub_all', 'play_all', 'pause', 'stop', 'targets', 'reveal', 'reveal_issue'), program: node,
+                index: integer(0), elapsed: time, range: previewRange, targets: { type: 'array', items: node, maxItems: 2000 } } },
     }, ['session', 'expected_generation', 'expected_revision', 'expected_sequence', 'arguments'], true, false),
     designer_hosted_curve: tool('Sample values or signed velocity from a running project’s animation track. Read the track’s curve_channels for its available components.',
         { ...frame, expected_generation: integer(1), expected_sequence: integer(1), arguments: {
@@ -143,7 +145,7 @@ export const agentCatalog = {
     designer_timeline_control: tool('Seek, scrub all clips, play, preview a range, pause, stop or arm Timeline recording. Seek uses authored time for typed tracks and elapsed time for native payloads. Scrub all uses elapsed seconds and leaves the combined frame paused. Play range takes authored start and end times and a loop flag. Play all uses program as the ruler reference. Record takes enabled and optional authored time.',
         { ...frame, arguments: { type: 'object', additionalProperties: false, required: ['action', 'program'],
             properties: { action: choice('seek', 'scrub_all', 'play', 'play_range', 'play_all', 'pause', 'stop', 'record'), program: node, enabled: truth, time,
-                range: { type: 'object', additionalProperties: false, required: ['start', 'end', 'loop'], properties: { start: time, end: time, loop: truth } } } } },
+                range: previewRange } } },
         ['session', 'expected_revision', 'arguments'], true, false),
     designer_timeline_markers: tool('List the named preview markers for a typed Timeline clip in the current VS Code designer revision.',
         { ...frame, program: node }, ['session', 'expected_revision', 'program']),

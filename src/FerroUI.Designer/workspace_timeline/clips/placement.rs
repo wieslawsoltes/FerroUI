@@ -37,7 +37,7 @@ impl DesignerWorkspace {
         } else {
             "Sequence selected clips"
         };
-        let apply = clip_tool("F1 M1 8L3 6L6 9L13 2L15 4L6 13Z", title);
+        let apply = clip_tool(crate::icons::CHECK, title);
         apply.set_name(Some("ApplyClipPlacement".into()));
         let weak = Rc::downgrade(self);
         let context = context.clone();
