@@ -387,11 +387,6 @@ pub fn is_instance_of(object: &Ref<FerroObject>, handle_type: &str) -> bool {
 /// does not fail on them; it fails when a control of the list has a theme,
 /// so that the list is kept current.
 pub const PENDING_CONTROLS: &[&str] = &[
-    // The WinUI controls of #443 that the WinUI theme styles first.
-    "GridView",
-    "GridViewItem",
-    "ListView",
-    "ListViewItem",
 ];
 
 /// Whether the control named `name` waits for a batch.
