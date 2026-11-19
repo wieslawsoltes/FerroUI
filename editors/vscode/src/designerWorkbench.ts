@@ -50,7 +50,7 @@ export class DesignerWorkbench implements vscode.Disposable {
     private readonly timeline: TimelineView;
     private readonly data: DesignDataView;
     private readonly library: LibraryView;
-    private readonly columns: ColumnsView;
+    readonly columns: ColumnsView;
     private readonly drag = new DesignerDrag(update => {
         this.outline.post(update);
         this.toolbox.post(update);

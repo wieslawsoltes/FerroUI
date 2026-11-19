@@ -13,7 +13,8 @@ interface ColumnRow {
     id: string;
     editor: ColumnEditor;
     column: AuthoredColumn;
-    index?: number;
+    index: number;
+    topLevel: boolean;
     field?: ColumnField;
 }
 
@@ -54,8 +55,12 @@ export class ColumnsView implements vscode.TreeDataProvider<ColumnRow>, vscode.T
             }),
             run('duplicate', ({ editor, column }) => editor.change({ action: 'duplicate', column: column.node })),
             run('remove', ({ editor, column }) => editor.change({ action: 'remove', column: column.node })),
-            run('earlier', row => this.move(row.editor, row.column.node, row.index === undefined ? undefined : row.index - 1)),
-            run('later', row => this.move(row.editor, row.column.node, row.index === undefined ? undefined : row.index + 1)),
+            run('earlier', async row => {
+                if (row.topLevel) await this.move(row.editor, row.column.node, row.index - 1);
+            }),
+            run('later', async row => {
+                if (row.topLevel) await this.move(row.editor, row.column.node, row.index + 1);
+            }),
         ];
     }
 
@@ -99,7 +104,7 @@ export class ColumnsView implements vscode.TreeDataProvider<ColumnRow>, vscode.T
     }
 
     getTreeItem(row: ColumnRow): vscode.TreeItem {
-        const { id, editor, column, field, index } = row;
+        const { id, editor, column, field, index, topLevel } = row;
         const writable = !editor.table.reason;
         const item = new vscode.TreeItem(field?.name ?? column.label, field
             ? vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Collapsed);
@@ -118,7 +123,7 @@ export class ColumnsView implements vscode.TreeDataProvider<ColumnRow>, vscode.T
             item.iconPath = new vscode.ThemeIcon(kind.icon);
             item.description = [column.kind !== 'table' && kind.label !== column.label ? kind.label : undefined,
                 column.fields.find(field => field.name === 'Width')?.value].filter(Boolean).join(' · ');
-            const reorderable = writable && index !== undefined;
+            const reorderable = writable && topLevel;
             item.contextValue = ['column', 'source', reorderable && 'remove', reorderable && column.canDuplicate && 'duplicate',
                 reorderable && index > 0 && 'earlier', reorderable && index < editor.table.columns.length - 1 && 'later'].filter(Boolean).join(' ');
         }
@@ -127,33 +132,36 @@ export class ColumnsView implements vscode.TreeDataProvider<ColumnRow>, vscode.T
 
     async getChildren(row?: ColumnRow): Promise<ColumnRow[]> {
         if (row) return row.field ? [] : [
-            ...rows(row.column.children, row.editor, row.id, false),
+            ...rows(row.column.children, row.editor, row.id, row.index),
             ...row.column.fields.filter(field => field.editable || field.range).map(field => ({
-                id: `${row.id}/field:${field.name}`, editor: row.editor, column: row.column, field,
+                ...row, id: `${row.id}/field:${field.name}`, topLevel: false, field,
             })),
         ];
         await this.pending;
-        return this.editor ? rows(this.editor.table.columns, this.editor, this.owner!, true) : [];
+        return this.editor ? rows(this.editor.table.columns, this.editor, this.owner!) : [];
     }
 
-    handleDrag(source: readonly ColumnRow[], transfer: vscode.DataTransfer): void {
+    handleDrag(source: readonly ColumnRow[], transfer: vscode.DataTransfer, token: vscode.CancellationToken): void {
         const [row] = source;
-        if (source.length === 1 && row.index !== undefined && row.editor === this.editor && !row.editor.table.reason) {
+        if (!token.isCancellationRequested && source.length === 1 && row.topLevel &&
+            row.editor === this.editor && !row.editor.table.reason) {
             const drag: ColumnDrag = { model: row.editor.table.model, column: row.column.node };
-            transfer.set(dragMime, new vscode.DataTransferItem(drag));
+            transfer.set(dragMime, new vscode.DataTransferItem(JSON.stringify(drag)));
         }
     }
 
     async handleDrop(target: ColumnRow | undefined, transfer: vscode.DataTransfer, token: vscode.CancellationToken): Promise<void> {
-        const drag = transfer.get(dragMime)?.value as ColumnDrag | undefined;
+        const item = transfer.get(dragMime);
         const editor = this.editor;
-        if (!drag || !editor || token.isCancellationRequested || drag.model !== editor.table.model || (target && target.editor !== editor)) return;
-        const index = target ? target.index : editor.table.columns.length - 1;
-        await this.run(() => this.move(editor, drag.column, index));
+        if (!item || !editor || editor.table.reason || token.isCancellationRequested || (target && target.editor !== editor)) return;
+        const column = await readDraggedColumn(item, editor.table.model);
+        if (column === undefined || token.isCancellationRequested || this.editor !== editor) return;
+        const index = target?.index ?? editor.table.columns.length - 1;
+        await this.run(() => this.move(editor, column, index));
     }
 
-    private async move(editor: ColumnEditor, column: number, index?: number): Promise<void> {
-        if (index === undefined || index < 0 || index >= editor.table.columns.length) return;
+    private async move(editor: ColumnEditor, column: number, index: number): Promise<void> {
+        if (index < 0 || index >= editor.table.columns.length) return;
         const before = editor.table.columns.findIndex(item => item.node === column);
         if (before !== -1 && before !== index) await editor.change({ action: 'move', column, index });
     }
@@ -166,13 +174,23 @@ export class ColumnsView implements vscode.TreeDataProvider<ColumnRow>, vscode.T
     dispose(): void { this.subscriptions.forEach(subscription => subscription.dispose()); }
 }
 
-function rows(columns: AuthoredColumn[], editor: ColumnEditor, parent: string, top: boolean): ColumnRow[] {
+async function readDraggedColumn(item: vscode.DataTransferItem, model: string): Promise<number | undefined> {
+    try {
+        const drag = JSON.parse(await item.asString()) as Partial<ColumnDrag> | null;
+        if (drag?.model === model && Number.isSafeInteger(drag.column)) return drag.column;
+    } catch {
+        // The workbench can deliver a transfer with no valid column payload.
+    }
+    return undefined;
+}
+
+function rows(columns: AuthoredColumn[], editor: ColumnEditor, parent: string, parentIndex?: number): ColumnRow[] {
     const counts = new Map<string, number>();
     return columns.map((column, index) => {
         const key = `${column.kind}:${column.label}`;
         const occurrence = counts.get(key) ?? 0;
         counts.set(key, occurrence + 1);
-        return { id: `${parent}/${key}:${occurrence}`, editor, column, index: top ? index : undefined };
+        return { id: `${parent}/${key}:${occurrence}`, editor, column, index: parentIndex ?? index, topLevel: parentIndex === undefined };
     });
 }
 

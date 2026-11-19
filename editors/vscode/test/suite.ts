@@ -7,6 +7,7 @@ import { verifyMcp } from './mcp';
 import { verifyMultiSelection, verifyStudioPresentations, verifyWorkbenchFeatures } from './workbenchFeatures';
 import { verifyCargoTarget } from './cargoTarget';
 import { verifyDrag, verifyRsxImageDrag } from './drag';
+import { verifyColumnsDrag } from './studioColumnsDrag';
 import { verifyXamlRefactoring } from './xamlLanguage';
 import { verifyRuntimeClient } from './runtimeClient';
 import { verifyHostedPreview } from './hostedPreview';
@@ -74,6 +75,7 @@ export async function run(): Promise<void> {
     const panel = designer.designs().find(panel => panel.document === xaml);
     assert.ok(panel);
     await verifyDrag(panel);
+    await verifyColumnsDrag(designer, workspace);
 
     const undoXaml = async (expected: string) => {
         const version = xaml.version;
