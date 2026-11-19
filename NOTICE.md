@@ -160,3 +160,9 @@ adaptations and validation are documented in `docs/porting/pretext.md`.
 `3694995fabbebc45a801a455880e3d31888367f1`, under Apache-2.0. The component retains
 its own LICENSE, NOTICE, THIRD-PARTY-NOTICES.md, FlorisBoard/Unicode attribution
 and resource licenses; the framework's MIT license does not replace them.
+
+## Osprey Native
+
+- Project: <https://github.com/Nimblesite/osprey> (release v0.29.0, commit `19ab5d4f231fcd20b016704606d9527645aa288f`)
+- License: MIT, Copyright (c) 2025-2026 NIMBLESITE PTY LTD, Australia.
+- Used for: the protocol of Osprey Native applications (envelope, node kinds, scene primitives, events, capabilities) and the design of its GPUI host, which `src/FerroUI.OspreyNative` (`ferroui-osprey-native`) implements from their specifications and sources; no Osprey source is copied. The crate's `NOTICE.md` holds the licence text, and `docs/osprey-native-host.md` records the host.

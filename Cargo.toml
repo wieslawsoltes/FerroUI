@@ -104,6 +104,8 @@ members = [
     "src/FerroUI.Controls",
     "src/FerroUI.View",
     "src/FerroUI.View.Macros",
+    # An Osprey Native host on FerroUI (docs/osprey-native-host.md).
+    "src/FerroUI.OspreyNative",
     "src/FerroUI.Controls.ColorPicker",
     "src/FerroUI.Controls.Charts",
     "src/FerroUI.LiveCharts",
