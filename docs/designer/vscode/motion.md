@@ -11,11 +11,21 @@ Open the source with **FerroUI: Open Designer** first. The animation and stage t
 2. Select an animation in the program picker. To create one in XAML, select an authored control and choose **New animation program** from **More Animation Actions**. The same menu manages program names, targets, timing, duplication, and removal. **Timing and Playback** includes delays, repeat, speed, direction, fill, and easing. Duration changes scale the authored key times.
 3. Click the time ruler or drag the playhead to preview a pose. Enter an exact time in the seconds field and press Enter. **Previous keyframe** and **Next keyframe** step between authored keys. Use **Play** or **Pause** for the selected program. Open the gear icon, **Timeline view options**, for **Play all animations**, zoom, and keyframe snapping. **Stop** restores the underlying values. A compatible source edit can retain the paused pose and elapsed time.
 4. Click a key or focus it and press Enter. The key editor opens beside the tracks on a wide Panel and below them in a narrow dock. Change the time or value and [edit the easing](#shape-an-incoming-easing). **Seek to selected keyframe** previews its exact pose.
-5. Open **Animation curves** to see interpolated scalar values, including overshoot. Drag a key horizontally to retime it or vertically to change its value. The curve and keyframe editor use the same checked source transaction. Use **Fit selected keyframes** to zoom into a group of keys in the curve editor.
+5. Open the **Animation graph** icon and choose **Value curves** to see interpolated scalar values, including overshoot. Drag a key horizontally to retime it or vertically to change its value. The curve and keyframe editor use the same checked source transaction. Use **Fit selected keyframes** to zoom into a group of keys in the graph.
 6. Toggle a target header to collapse its property tracks into a row of summary diamonds. On expanded tracks, round keys have incoming easing and diamonds mark linear keys. Open **Filter tracks** and type a property or target name, or turn on **Selected controls only** to follow the canvas and Outline selection. A filter expands matching groups while it is active. Clear the search and uncheck the selection filter to return to all tracks.
 7. Use the lock beside a target to protect its keys from Timeline edits. Locked keys still seek when you select them. Rectangle selection and Select All use displayed, unlocked property tracks. Unlock the tracks before arming **Record animation edits** for the canvas.
 
 Escape dismisses the filter popup when it has focus.
+
+### Read a velocity curve
+
+![The VS Code Timeline shows the Opacity velocity crossing zero before an eased key at 1.4 seconds](../images/vscode-velocity-curve.png)
+
+Choose **Velocity curves** from **Animation graph** to see how quickly each scalar track changes. The graph shows signed property units per authored second. Positive values are rising, negative values are falling, and zero marks a held value. The graph estimates the slope between adjacent samples from the native animator. An easing overshoot can briefly reverse the sign as the value approaches its key.
+
+The key markers stay under the velocity trace. Drag them horizontally to change their timing, or select a marker to change its authored value or incoming easing. The ruler, zoom, playhead, and selection work in both graph displays. Switch to **Keyframes** for the compact track lanes.
+
+VS Code and Designer Studio agents can pass `metric: "velocity"` to `designer_animation_curve`. Use `metric: "value"` or omit `metric` to return property values. The query uses the accepted program and target and leaves the authored source and playhead intact.
 
 ### Scale selected key times
 

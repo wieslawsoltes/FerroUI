@@ -4,7 +4,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 import * as vscode from 'vscode';
 import type { BuiltProject } from './builtProjects';
 import { type CargoSelection, type CargoTarget, discoverCargoTargets, selectCargoTarget } from './cargoTarget';
-import type { HostedAnimationAction, HostedAnimationFrame, HostedAnimationRequest, HostedCurveQuery, HostedKeyframeDraft, HostedStateDraft } from './hostedAnimationProtocol';
+import type { HostedAnimationAction, HostedAnimationFrame, HostedAnimationRequest, HostedAnimationState, HostedCurveQuery, HostedKeyframeDraft, HostedStateDraft } from './hostedAnimationProtocol';
 import { HostedAnimations } from './hostedAnimations';
 import { chooseHostedKeyframe } from './hostedKeyframes';
 import type { FromHosted, HostedAnimationSample, HostedFixtureCatalog, HostedFrame, ToHosted } from './hostedProtocol';
@@ -190,7 +190,7 @@ class HostedSession {
         readonly panel: vscode.WebviewPanel, private readonly editor: vscode.TextEditor, private readonly language: Language,
         private readonly target: CargoTarget, readonly generation: number, built: (metadata: ProjectMetadata) => void, remove: (closing: Promise<void>) => void) {
         this.animations = new HostedAnimations((request, signal) => this.sampleAnimation(request, signal), frame => this.accept(frame),
-            state => this.post({ type: 'animations', state, version: this.editor.document.version }),
+            state => this.showAnimations(state),
             error => this.report(errorMessage(error), Boolean(this.currentFrame)));
         this.subscriptions = [
             vscode.workspace.onDidChangeTextDocument(event => { if (event.document === editor.document) this.update(); }),
@@ -475,11 +475,16 @@ class HostedSession {
         } });
     }
 
+    private showAnimations(state: HostedAnimationState): void {
+        this.post({ type: 'animations', version: this.editor.document.version,
+            state: { ...state, canShowVelocity: Boolean(this.client?.capabilities.timelineCurveVelocity) } });
+    }
+
     private async receive(message: FromHosted): Promise<void> {
         if (message.type === 'ready') {
             this.ready = true;
             if (this.frame) this.post({ type: 'frame', frame: this.frame });
-            this.post({ type: 'animations', state: this.animations.state, version: this.editor.document.version });
+            this.showAnimations(this.animations.state);
             this.report(this.status, this.frame?.revision === this.revision && Boolean(this.client));
             this.schedule(0);
             return;

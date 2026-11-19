@@ -98,6 +98,7 @@ export interface TimelineState {
     canAuthorRustKeys?: boolean;
     canCreateRustProgram?: boolean;
     canShowCurves?: boolean;
+    canShowVelocity?: boolean;
     curveCatalog?: string;
     canPlayAll?: boolean;
     recording?: boolean;
@@ -174,6 +175,7 @@ export interface TimelineKeyframeResponse {
 }
 
 export interface CurvePoint { time: number; value: number }
+export type CurveMetric = 'value' | 'velocity';
 
 export interface TimelineCurveRequest {
     type: 'curve';
@@ -183,6 +185,7 @@ export interface TimelineCurveRequest {
     target: number;
     property: string;
     window: { start: number; end: number };
+    metric?: CurveMetric;
 }
 
 export interface TimelineCurveResponse {

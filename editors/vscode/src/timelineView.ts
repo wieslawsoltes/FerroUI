@@ -193,6 +193,7 @@ export class TimelineView implements vscode.Disposable {
             canCreateRustProgram: Boolean(panel?.rustAnimationOwners.length),
             preferredProgram: panel?.authoredTimelineProgram,
             canShowCurves: panel?.supportsTimelineCurves,
+            canShowVelocity: panel?.supportsTimelineCurveVelocity,
             curveCatalog: panel?.supportsTimelineCurves && catalog?.programs ? catalog.key : undefined,
             canPlayAll: Boolean(panel?.supportsTimelineCombinedPlayback && programs.some(canPreviewProgram)),
             canRecord: panel?.supportsTimelineRecording, canRecordGeometry: panel?.supportsTimelineGeometryRecording,
@@ -227,7 +228,7 @@ export class TimelineView implements vscode.Disposable {
                     return;
                 }
                 if (message.type === 'curve') {
-                    const { frame, request, program, target, property, window } = message;
+                    const { frame, request, program, target, property, window, metric } = message;
                     const reply = { type: 'curveResult', frame, request } as const;
                     const stale = () => this.panel !== panel || !panel.canUse(frame);
                     try {
@@ -235,8 +236,11 @@ export class TimelineView implements vscode.Disposable {
                             this.view.post({ ...reply, stale: true });
                             return;
                         }
+                        if (metric === 'velocity' && !panel.supportsTimelineCurveVelocity) {
+                            throw new Error('Update the FerroUI preview helper to sample velocity.');
+                        }
                         const { points } = await context.read<{ points: CurvePoint[] }>(
-                            'designer_animation_curve', { program, target, property, window });
+                            'designer_animation_curve', { program, target, property, window, ...(metric === 'velocity' && { metric }) });
                         this.view.post(stale() ? { ...reply, stale: true } : { ...reply, points });
                     } catch (error) {
                         this.view.post(stale() ? { ...reply, stale: true } : { ...reply, error: errorMessage(error) });

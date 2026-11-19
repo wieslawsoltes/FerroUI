@@ -274,7 +274,7 @@ export function hostedHtml(webview: vscode.Webview, root: vscode.Uri): string {
             ${tool('hosted-animation-targets', 'target', 'Choose preview targets')}
             ${tool('hosted-animation-source', 'go-to-file', 'Reveal animation in source')}
             ${tool('hosted-animation-keyframe', 'edit', 'Edit application keyframe', 'hidden')}
-            ${tool('hosted-animation-curves', 'graph-line', 'Application animation curves', 'aria-pressed="false" aria-controls="hosted-curves" hidden')}
+            ${animationGraphMenu('hosted', 'Hide curves')}
             <span class="toolbar-divider" aria-hidden="true"></span>
             ${tool('hosted-animation-play', 'play', 'Play application animation')}
             ${tool('hosted-animation-stop', 'debug-stop', 'Stop application animation')}
@@ -424,7 +424,7 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
             ${tool('timeline-key-actions', 'list-selection', 'Keyframe Actions', 'hidden disabled')}
         </div>
         <div class="tool-group timeline-tools timeline-view-tools" role="group" aria-label="Timeline view">
-            ${tool('timeline-curves', 'graph-line', 'Animation curves', 'aria-pressed="false" aria-controls="timeline-tracks" hidden')}
+            ${animationGraphMenu('timeline', 'Keyframes')}
             ${tool('timeline-range-options', 'symbol-ruler', 'Preview range', 'popovertarget="timeline-preview-range" aria-controls="timeline-preview-range" aria-expanded="false" hidden')}
             ${tool('timeline-filter', 'filter', 'Filter tracks', 'popovertarget="timeline-track-filter" aria-controls="timeline-track-filter" aria-expanded="false" hidden')}
             ${tool('timeline-options', 'settings-gear', 'Timeline view options', 'popovertarget="timeline-view-options" aria-controls="timeline-view-options" aria-expanded="false" hidden')}
@@ -564,4 +564,15 @@ function icon(name: string): string {
 
 function tool(id: string, glyph: string, label: string, attributes = ''): string {
     return `<button id="${id}" type="button" class="tool" aria-label="${label}" title="${label}" ${attributes}>${icon(glyph)}</button>`;
+}
+
+function animationGraphMenu(prefix: string, keysLabel: string): string {
+    const menu = `${prefix}-graph-modes`;
+    return `${tool(`${prefix}-animation-graph`, 'graph-line', 'Animation graph',
+        `popovertarget="${menu}" aria-controls="${menu}" aria-expanded="false" aria-pressed="false" hidden`)}
+        <div id="${menu}" class="popover command-menu animation-graph-modes" popover role="group" aria-label="Animation graph display">
+            <button type="button" value="keys" autofocus>${icon('check')}${keysLabel}</button>
+            <button type="button" value="value">${icon('check')}Value curves</button>
+            <button type="button" value="velocity" hidden>${icon('check')}Velocity curves</button>
+        </div>`;
 }

@@ -30,6 +30,7 @@ interface Frame {
     rsxKeyframeStructure: boolean;
     rsxAnimationPrograms: boolean;
     timelineCurves: boolean;
+    timelineCurveVelocity: boolean;
     timelineCombinedPlayback: boolean;
     stateTransitionPreview: boolean;
     rsxStateAuthoring: boolean;
@@ -176,6 +177,7 @@ export class DesignerPanel implements vscode.Disposable {
         return this.supportsRustAnimationPrograms ? this.frame?.snapshot.rustAnimationOwners ?? [] : [];
     }
     get supportsTimelineCurves(): boolean { return Boolean(this.frame?.timelineCurves); }
+    get supportsTimelineCurveVelocity(): boolean { return Boolean(this.frame?.timelineCurveVelocity); }
     get supportsTimelineCombinedPlayback(): boolean { return Boolean(this.frame?.timelineCombinedPlayback); }
     get supportsStateTransitionPreview(): boolean { return Boolean(this.frame?.stateTransitionPreview); }
     get supportsRustStates(): boolean { return Boolean(this.language === 'rust' && this.frame?.rsxStateAuthoring); }
@@ -617,6 +619,7 @@ export class DesignerPanel implements vscode.Disposable {
                 rsxKeyframeStructure: Boolean(client.capabilities.rsxKeyframeStructure),
                 rsxAnimationPrograms: Boolean(client.capabilities.rsxAnimationPrograms),
                 timelineCurves: Boolean(client.capabilities.timelineCurves),
+                timelineCurveVelocity: Boolean(client.capabilities.timelineCurveVelocity),
                 timelineCombinedPlayback: Boolean(client.capabilities.timelineCombinedPlayback),
                 stateTransitionPreview: Boolean(client.capabilities.stateTransitionPreview),
                 rsxStateAuthoring: Boolean(client.capabilities.rsxStateAuthoring),

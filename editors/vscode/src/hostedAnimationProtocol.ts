@@ -79,10 +79,11 @@ export interface HostedAnimationRestore {
 export interface HostedAnimationState extends HostedAnimationCatalog, HostedAnimationPresentation {
     frame?: HostedAnimationFrame;
     busy: boolean;
+    canShowVelocity?: boolean;
 }
 
 export type HostedKeyframeDraft = Omit<KeyframeDraft, 'previous'> & { previous?: number };
-export type HostedCurveQuery = Pick<TimelineCurveRequest, 'program' | 'target' | 'property' | 'window'>;
+export type HostedCurveQuery = Pick<TimelineCurveRequest, 'program' | 'target' | 'property' | 'window' | 'metric'>;
 export interface HostedStateDraft { program: number; duration: number; easing: string }
 export interface HostedSourcePatch { start: number; end: number; expected: string; replacement: string }
 export interface HostedStatePlan { patches: HostedSourcePatch[] }

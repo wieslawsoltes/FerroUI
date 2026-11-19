@@ -33,7 +33,8 @@ export function dragKeyframe(item: RenderedKeyframe, lane: HTMLElement, viewport
         const { width, height } = lane.getBoundingClientRect();
         if (event.button !== 0 || !event.isPrimary || !target || width <= 0 || height <= 0) return;
         if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
-        const graph = lane.hasAttribute('data-curve');
+        const display = lane.dataset.curve;
+        const graph = display === 'value';
         const scale = graph ? curve?.scale() : undefined;
         if (graph && !scale) return;
         const axis = viewport();
@@ -51,7 +52,7 @@ export function dragKeyframe(item: RenderedKeyframe, lane: HTMLElement, viewport
         const unchanged = () => {
             const current = frame();
             return viewport() === axis && current?.session === target.session && current.token === target.token
-                && lane.hasAttribute('data-curve') === graph && (!graph || curve?.scale() === scale);
+                && lane.dataset.curve === display && (!graph || curve?.scale() === scale);
         };
         const delta = (pointer: PointerEvent) => {
             const dx = pointer.clientX - startX;

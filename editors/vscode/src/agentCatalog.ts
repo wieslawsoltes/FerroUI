@@ -63,10 +63,10 @@ export const agentCatalog = {
             required: ['action'], properties: { action: choice('select', 'seek', 'play', 'pause', 'stop', 'targets', 'reveal', 'reveal_issue'), program: node,
                 index: integer(0), elapsed: { type: 'number', minimum: 0 }, targets: { type: 'array', items: node, maxItems: 2000 } } },
     }, ['session', 'expected_generation', 'expected_revision', 'expected_sequence', 'arguments'], true, false),
-    designer_hosted_curve: tool('Sample an authored scalar animation track with the running project’s preview animator. Supply the current app generation, frame, live target and authored time window.',
+    designer_hosted_curve: tool('Sample values or signed velocity from the running project’s scalar animation track. Supply the current app generation, frame, live target and authored time window.',
         { ...frame, expected_generation: integer(1), expected_sequence: integer(1), arguments: {
             type: 'object', additionalProperties: false, required: ['program', 'target', 'property', 'window'],
-            properties: { program: node, target: node, property: text, window: {
+            properties: { program: node, target: node, property: text, metric: choice('value', 'velocity'), window: {
                 type: 'object', additionalProperties: false, required: ['start', 'end'], properties: { start: time, end: time },
             } },
         } }, hostedFrameRequired),

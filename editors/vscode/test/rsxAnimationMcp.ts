@@ -58,6 +58,10 @@ export async function verifyRsxAnimation({ invoke, content }: McpFixture): Promi
     const samples = content<{ points: CurvePoint[] }>(await query('designer_animation_curve', curve)).points;
     assert.equal(samples.find(point => point.time === 1.4)?.value, .82);
     assert.ok(samples.some(point => point.time < 1.4 && point.value > .82));
+    const velocity = content<{ points: CurvePoint[] }>(await query('designer_animation_curve', { ...curve, metric: 'velocity' })).points;
+    assert.ok(velocity.some(point => point.time < 1.4 && point.value > 0));
+    assert.ok(velocity.some(point => point.time < 1.4 && point.value < 0), 'Velocity reverses as the incoming spline settles from overshoot');
+    assert.ok((await query('designer_animation_curve', { ...curve, metric: 'speed' })).isError);
     assert.ok((await query('designer_animation_curve', { ...curve, window: { start: 1, end: 3 } })).isError);
     content(await invoke('designer_timeline_control', { session, expected_revision: frame.revision,
         arguments: { action: 'seek', program: updated.id, time: 1.4 } }));

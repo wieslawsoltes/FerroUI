@@ -85,6 +85,10 @@ export async function run(): Promise<void> {
         const curve = await native.studioQuery(2, 'designer_animation_curve', { program: program.id,
             target: track.target, property: track.property, window: { start: 0, end: 2 } }) as { points: CurvePoint[] };
         assert.equal(curve.points.find(point => point.time === .5)?.value, .65);
+        assert.ok(native.capabilities.timelineCurveVelocity);
+        const velocity = await native.studioQuery(2, 'designer_animation_curve', { program: program.id,
+            target: track.target, property: track.property, metric: 'velocity', window: { start: 0, end: 2 } }) as { points: CurvePoint[] };
+        assert.ok(velocity.points.some(point => point.value > 0 && point.time < .5));
         const scaled = await native.studioEdit(animationSource, 2, 'designer_program', {
             action: 'scale_keyframes', program: program.id, pivot: 0, factor: .5,
             keyframes: track.keyframes.slice(1).map(({ time }) => ({ target: track.target, property: track.property, time })),

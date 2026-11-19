@@ -1,6 +1,7 @@
 import type { FrameTarget } from '../src/protocol';
 import type { FromTimeline, KeyframeLocation, TimelineControl, TimelineKeyAction, TimelineProgram, TimelineState, ToTimeline } from '../src/timelineProtocol';
 import { canPreviewProgram, canPreviewRange, previewClock } from '../src/timelinePrograms';
+import { AnimationGraphMenu, type AnimationGraphMode } from './animationGraphMenu';
 import { anchorPopover, element, labelButton } from './dom';
 import { TimelineChannels } from './timelineChannels';
 import { TimelineCurves } from './timelineCurves';
@@ -18,7 +19,7 @@ import { TimelineViewportView } from './timelineViewportView';
 import { TimelineWorkArea } from './timelineWorkArea';
 
 interface ProgramIdentity { id: number; key?: string }
-interface SavedTimeline extends ProgramIdentity { frameRate?: number; curves?: boolean }
+interface SavedTimeline extends ProgramIdentity { frameRate?: number; curves?: boolean; graph?: AnimationGraphMode }
 declare function acquireVsCodeApi(): {
     postMessage(message: FromTimeline): void;
     getState(): SavedTimeline | number | undefined;
@@ -42,7 +43,6 @@ const recordMode = element<HTMLButtonElement>('timeline-record-mode');
 const record = element<HTMLButtonElement>('timeline-record');
 const actions = element<HTMLButtonElement>('timeline-actions');
 const keyActions = element<HTMLButtonElement>('timeline-key-actions');
-const curveToggle = element<HTMLButtonElement>('timeline-curves');
 const fitKeys = element<HTMLButtonElement>('timeline-fit-keys');
 const slider = element<HTMLInputElement>('timeline-seek');
 const time = element<HTMLOutputElement>('timeline-time');
@@ -52,7 +52,8 @@ let model: TimelineState = { programs: [], names: {}, writable: false };
 const saved = vscode.getState();
 let remembered = typeof saved === 'number' ? { id: saved } : saved;
 let frameRate = [24, 30, 60].find(rate => typeof saved === 'object' && rate === saved.frameRate) ?? 0;
-let curveMode = typeof saved === 'object' && saved.curves === true;
+const graph = new AnimationGraphMenu('timeline', typeof saved === 'object'
+    ? saved.graph ?? (saved.curves ? 'value' : 'keys') : 'keys', () => { saveTimeline(); showCurves(); });
 snap.value = String(frameRate);
 let program: number | undefined;
 let timedProgramSession: number | undefined;
@@ -123,7 +124,6 @@ snap.addEventListener('change', () => {
     frameRate = Number(snap.value);
     saveTimeline();
 });
-curveToggle.onclick = () => { curveMode = !curveMode; saveTimeline(); showCurves(); };
 fitKeys.onclick = () => viewport.fitKeys(selection.keys.map(key => key.time));
 play.addEventListener('click', () => {
     const selected = current();
@@ -416,19 +416,19 @@ function remember(program: TimelineProgram): void {
 }
 
 function saveTimeline(): void {
-    if (remembered) vscode.setState({ ...remembered, frameRate, curves: curveMode });
+    if (remembered) vscode.setState({ ...remembered, frameRate, graph: graph.preference });
 }
 
 function showCurves(): void {
     const selected = current();
     const hasScalarTrack = selected?.timeline?.tracks.some(track => track.keyframes[0]?.value_kind === 'Number');
-    curveToggle.hidden = !model.canShowCurves || !hasScalarTrack || Boolean(model.transition);
-    const enabled = !curveToggle.hidden && curveMode;
-    curveToggle.setAttribute('aria-pressed', String(enabled));
-    fitKeys.hidden = !enabled || selection.size === 0;
+    const available = Boolean(model.canShowCurves && hasScalarTrack && !model.transition);
+    graph.show(available, Boolean(model.canShowVelocity));
+    const metric = available && graph.mode !== 'keys' ? graph.mode : undefined;
+    fitKeys.hidden = !metric || selection.size === 0;
     fitKeys.disabled = selection.size === 0;
     const frame = gestureFrame();
-    curves.follow(enabled, viewport.range, frame && model.curveCatalog && selected ?
+    curves.follow(metric, viewport.range, frame && model.curveCatalog && selected ?
         { frame, catalog: model.curveCatalog, program: selected.id } : undefined);
 }
 

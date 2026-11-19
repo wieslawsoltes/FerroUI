@@ -124,5 +124,6 @@ input[readonly], textarea[readonly] { color: var(--muted); }
 .command-menu { --popover-width: 195px; padding: 4px; }
 .command-menu button { display: flex; align-items: center; gap: 8px; inline-size: 100%; text-align: start; }
 .command-menu .codicon { color: var(--muted); }
+.animation-graph-modes button:not([aria-pressed=true]) .codicon { visibility: hidden; }
 .command-menu .danger, .command-menu .danger .codicon { color: var(--vscode-errorForeground); }
 .command-menu hr { border: 0; border-block-start: 1px solid var(--line); margin: 3px 2px; }

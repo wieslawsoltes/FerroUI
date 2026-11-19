@@ -62,3 +62,9 @@
     pointer-events: none;
 }
 [data-curve] .timeline-key-dragging { cursor: move; }
+[data-curve=velocity] .timeline-key-dragging { cursor: ew-resize; }
+[data-curve=velocity] .timeline-curve-plot { block-size: calc(100% - 20px); }
+[data-curve=velocity] .timeline-key { inset-block-start: calc(100% - 10px); }
+.timeline-curve-zero { display: none; stroke: var(--muted); stroke-width: 1px; }
+.timeline-curve-zero[data-visible] { display: initial; }
+.timeline-curve-scale[data-waiting] { visibility: hidden; }

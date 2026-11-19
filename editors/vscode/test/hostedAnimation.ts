@@ -76,6 +76,9 @@ export async function verifyHostedScalarCurve(preview: NativePreview, update: (r
     const trace = await preview.hostedCurve(frame, query);
     assert.deepEqual(trace.find(point => point.time === 1), { time: 1, value: 220 });
     assert.ok(trace.some(point => point.value > 220), 'Use the loaded easing and include values beyond the authored keys');
+    const velocity = await preview.hostedCurve(frame, { ...query, metric: 'velocity' });
+    assert.ok(velocity.some(point => point.time < 1 && point.value < 0), 'The native easing settles before the authored midpoint');
+    assert.ok(velocity.filter(point => point.time > 1).every(point => Math.abs(point.value + 40) < 1e-8));
     await assert.rejects(preview.hostedCurve({ ...frame, sequence: first.sequence }, query), /frame changed/i);
     await assert.rejects(preview.hostedCurve(frame, { ...query, window: { start: 1, end: 3 } }), /range/i);
     const draft = await preview.planHostedKeyframe(frame, { program: program.id, target: track.target, property: 'Width',

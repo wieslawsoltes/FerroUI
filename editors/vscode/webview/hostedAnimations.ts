@@ -160,7 +160,7 @@ export class HostedAnimationView {
         labelButton(this.edit, program?.stateRoute ? 'Edit state route timing' : 'Edit application keyframe');
         this.keyframes.follow(usable ? this.state.frame : undefined, this.documentVersion, program?.id);
         this.curves.follow(program, this.state.targets.filter(target => selectedTargets?.includes(target.id)),
-            this.state.frame, this.documentVersion, usable);
+            this.state.frame, this.documentVersion, usable, Boolean(this.state.canShowVelocity));
         this.play.disabled = playing ? !this.canUse(true) : !usable || !available;
         labelButton(this.play, playing ? 'Pause application animation' : current && !current.completed ? 'Resume application animation' : 'Play application animation',
             playing ? 'debug-pause' : 'play');
