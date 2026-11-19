@@ -146,8 +146,6 @@ pub(super) enum WebGlLayer {}
 /// The result of a layer drawn on the device: a texture of the pool.
 #[cfg(feature = "hybrid")]
 type LayerTexture = std::sync::Arc<crate::gpu::VelloDeviceTexture>;
-#[cfg(not(feature = "hybrid"))]
-type LayerTexture = std::convert::Infallible;
 
 /// An effect that is pushed.
 pub(super) struct EffectFrame {
