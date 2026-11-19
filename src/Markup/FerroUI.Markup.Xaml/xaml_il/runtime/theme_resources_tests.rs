@@ -59,20 +59,28 @@ fn compiled_dynamic_brush_keeps_its_resource_subscription_after_realization() {
     static ROWS: &[DynamicBrushRow] = &[
         DynamicBrushRow { key: "Brush", color_key: "Accent", namespaces: None, line: 1, position: 2, value_line: 1, value_position: 10 },
     ];
-    crate::register_types();
-    let host = Border::new();
-    let dictionary = host.resources();
-    dictionary.add("Accent", Some(Rc::new(Color::from_uint32(ACCENT))));
-    let context = populate_context(None, &DOCUMENT, to_value(host.clone()));
-    context.push_parent(to_value(host.clone()));
-    context.push_parent(to_value(dictionary.clone()));
-    add_dynamic_brushes(&dictionary, &context, &DOCUMENT, ROWS).unwrap();
-    let value = resource(&dictionary, "Brush");
-    assert_eq!(brush_color(&value), Color::from_uint32(ACCENT));
-    drop(context);
-    dictionary.set("Accent", Some(Rc::new(Color::from_uint32(0xFF00_0000))));
-    assert_eq!(brush_color(&value), Color::from_uint32(0xFF00_0000));
-    assert!(Rc::ptr_eq(&value, &resource(&dictionary, "Brush")));
+    static PROGRAM: TypedResourceProgram<DynamicBrushRow> =
+        TypedResourceProgram::new(&[1, 3, 1, 0, 2, 4, 0, 0, 16, 1], &["Brush", "Accent"], &[]);
+    for typed in [false, true] {
+        crate::register_types();
+        let host = Border::new();
+        let dictionary = host.resources();
+        dictionary.add("Accent", Some(Rc::new(Color::from_uint32(ACCENT))));
+        let context = populate_context(None, &DOCUMENT, to_value(host.clone()));
+        context.push_parent(to_value(host.clone()));
+        context.push_parent(to_value(dictionary.clone()));
+        if typed {
+            PROGRAM.add_dynamic_brushes(&dictionary, &context, &DOCUMENT).unwrap();
+        } else {
+            add_dynamic_brushes(&dictionary, &context, &DOCUMENT, ROWS).unwrap();
+        }
+        let value = resource(&dictionary, "Brush");
+        assert_eq!(brush_color(&value), Color::from_uint32(ACCENT));
+        drop(context);
+        dictionary.set("Accent", Some(Rc::new(Color::from_uint32(0xFF00_0000))));
+        assert_eq!(brush_color(&value), Color::from_uint32(0xFF00_0000));
+        assert!(Rc::ptr_eq(&value, &resource(&dictionary, "Brush")));
+    }
 }
 
 #[cfg(not(any(feature = "source-overlays", all(feature = "hot-reload", debug_assertions))))]
@@ -510,4 +518,154 @@ fn a_plain_value_added_twice_is_the_error_at_its_row() {
     assert!(at_position(&error, 3, 4), "{}", error.message());
     assert_eq!(resource(&dictionary, "Margin").downcast_ref::<Thickness>(), Some(&Thickness::new(1.0, 1.0, 1.0, 1.0)));
     assert!(dictionary.try_get_value(&ResourceKey::from("After")).is_none());
+}
+
+#[test]
+fn typed_resource_programs_build_all_resolved_shapes_and_preserve_deferred_identity() {
+    static ALIAS: TypedResourceProgram<ResourceAliasRow> =
+        TypedResourceProgram::new(&[1,1,1,0,12,16,1,2,2,1], &["Alias", "Accent"], &[SCOPED]);
+    static LITERAL: TypedResourceProgram<LiteralBrushRow> =
+        TypedResourceProgram::new(&[1,2,1,0,2,4,0,0x99,0x66,0x33,0xff], &["Literal"], &[]);
+    static DYNAMIC: TypedResourceProgram<DynamicBrushRow> =
+        TypedResourceProgram::new(&[1,3,1,0,2,4,0,0,0,1], &["Dynamic", "Accent"], &[]);
+    static STATIC_BRUSH: TypedResourceProgram<StaticBrushRow> =
+        TypedResourceProgram::new(&[1,4,1,0,2,4,0,0,0,1], &["Static", "Accent"], &[]);
+    static NUMBERS: TypedResourceProgram<ValueRow<f64>> =
+        TypedResourceProgram::new(&[1,5,2,0,6,8,255,0,0,0,0,0,0,0,128,1,1,5,56], &["NegativeZero","Width"], &[]);
+    static THICKNESS: TypedResourceProgram<ValueRow<[f64; 4]>> =
+        TypedResourceProgram::new(&[1,6,1,0,2,4,33,34,35,36], &["Padding"], &[]);
+    static RADIUS: TypedResourceProgram<ValueRow<[f64; 4]>> =
+        TypedResourceProgram::new(&[1,7,1,0,2,4,36,35,34,33], &["Radius"], &[]);
+    static COLOR: TypedResourceProgram<ValueRow<u32>> =
+        TypedResourceProgram::new(&[1,8,1,0,2,4,0x99,0x66,0x33,0xff], &["Color"], &[]);
+    static TEXT: TypedResourceProgram<ValueRow<&'static str>> =
+        TypedResourceProgram::new(&[1,9,1,0,2,4,1], &["String","é\0\n"], &[]);
+
+    let (dict, context) = populated();
+    ALIAS.add_resource_aliases(&dict, &context, &DOCUMENT).unwrap();
+    LITERAL.add_literal_brushes(&dict, &context, &DOCUMENT).unwrap();
+    DYNAMIC.add_dynamic_brushes(&dict, &context, &DOCUMENT).unwrap();
+    STATIC_BRUSH.add_static_brushes(&dict, &context, &DOCUMENT).unwrap();
+    NUMBERS.add_double_resources(&dict).unwrap();
+    THICKNESS.add_thickness_resources(&dict).unwrap();
+    RADIUS.add_corner_radius_resources(&dict).unwrap();
+    COLOR.add_color_resources(&dict).unwrap();
+    TEXT.add_string_resources(&dict).unwrap();
+    assert!(deferred(&dict, "Alias"));
+    assert_eq!(resource(&dict, "Alias").downcast_ref::<Color>(), Some(&Color::from_uint32(ACCENT)));
+    for key in ["Literal","Static","Dynamic"] {
+        assert!(deferred(&dict, key));
+        let brush = resource(&dict, key);
+        assert!(Rc::ptr_eq(&brush, &resource(&dict, key)));
+        if key != "Dynamic" { assert_eq!(brush_color(&brush), Color::from_uint32(ACCENT)); }
+    }
+    assert_eq!(resource(&dict, "NegativeZero").downcast_ref::<f64>().unwrap().to_bits(), (-0.0_f64).to_bits());
+    assert_eq!(resource(&dict, "Width").downcast_ref::<f64>(), Some(&24.0));
+    assert_eq!(resource(&dict, "Padding").downcast_ref::<Thickness>(), Some(&Thickness::new(1.0,2.0,3.0,4.0)));
+    assert_eq!(resource(&dict, "Radius").downcast_ref::<CornerRadius>(), Some(&CornerRadius::new(4.0,3.0,2.0,1.0)));
+    assert_eq!(resource(&dict, "Color").downcast_ref::<Color>(), Some(&Color::from_uint32(ACCENT)));
+    assert_eq!(resource(&dict, "String").downcast_ref::<String>().unwrap(), "é\0\n");
+}
+
+#[test]
+fn typed_resource_diagnostics_preserve_insertion_order_and_both_source_positions() {
+    static DUPLICATE: TypedResourceProgram<ValueRow<f64>> =
+        TypedResourceProgram::new(&[1,5,3,0,2,4,33,0,8,8,34,1,2,2,35], &["One","After"], &[]);
+    static MISSING: TypedResourceProgram<ResourceAliasRow> =
+        TypedResourceProgram::new(&[1,1,1,0,12,16,1,2,2,1], &["Alias", "Missing"], &[SCOPED]);
+    let (dict, context) = populated();
+    let error = DUPLICATE.add_double_resources(&dict).unwrap_err();
+    assert!(at_position(&error, 5, 6), "{error}");
+    assert_eq!(resource(&dict, "One").downcast_ref::<f64>(), Some(&1.0));
+    assert!(dict.try_get_value(&"After".into()).is_none());
+    MISSING.add_resource_aliases(&dict, &context, &DOCUMENT).unwrap();
+    assert!(deferred(&dict, "Alias"));
+    let failure = crate::xaml_error_scope::with_xaml_errors(|| { let _ = dict.try_get_value(&"Alias".into()); Ok(()) })
+        .expect_err("the missing alias reports its value position");
+    assert!(at_position(&failure, 7, 9), "{failure}");
+}
+
+#[test]
+fn invalid_resource_program_fails_before_dictionary_insertion() {
+    static BAD_INDEX: TypedResourceProgram<ValueRow<f64>> =
+        TypedResourceProgram::new(&[1,5,2,0,2,4,32,1,0,0,33], &["First"], &[]);
+    static TRUNCATED: TypedResourceProgram<ValueRow<f64>> =
+        TypedResourceProgram::new(&[1,5,1,0,0,0,255], &["First"], &[]);
+    static WRONG_KIND: TypedResourceProgram<ValueRow<f64>> =
+        TypedResourceProgram::new(&[1,9,1,0,0,0,0], &["First"], &[]);
+    let (dict, _) = populated();
+    for program in [&BAD_INDEX, &TRUNCATED, &WRONG_KIND] {
+        assert!(program.add_double_resources(&dict).unwrap_err().message().contains("Invalid compiled XAML resource program"));
+        assert!(dict.try_get_value(&"First".into()).is_none());
+    }
+}
+
+#[test]
+fn scheduled_units_capture_deferred_factories_and_apply_rows_in_declaration_order() {
+    use crate::xaml_il::runtime::compiled as rt;
+    use ferroui_markup::theme_run_opcodes as op;
+    static ROW: TypedResourceProgram<ValueRow<&str>> =
+        TypedResourceProgram::new(&[1, 9, 1, 0, 2, 4, 1], &["Later", "first value"], &[]);
+    fn build(provider: &Rc<dyn IServiceProvider>) -> Result<MarkupValue, XamlLoadError> {
+        rt::static_resource_content(provider, &DOCUMENT, "Later", 12, 8)
+    }
+    fn run(context: &Rc<XamlIlContext>, dict: &Ref<ResourceDictionary>) -> Result<(), XamlLoadError> {
+        rt::apply_theme_run(
+            &[op::VERSION, op::DEFER_TEXT, 0, 1, 2, 4, op::TEXT, 2],
+            &[rt::ThemeRunImport::Text("Lazy"), rt::ThemeRunImport::Factory(build), rt::ThemeRunImport::Rows(&ROW)],
+            &DOCUMENT, context, dict,
+        )
+    }
+    static UNIT: rt::ThemeUnit = rt::ThemeUnit { name: "Button", index: 1, runs: &[run] };
+    let (dict, context) = populated();
+    rt::apply_theme_unit(&[], 1, 0, &context, &dict).unwrap();
+    assert!(!dict.contains_key(&"Lazy".into()) && !dict.contains_key(&"Later".into()));
+    rt::apply_theme_unit(&[&UNIT], 1, 0, &context, &dict).unwrap();
+    assert!(deferred(&dict, "Lazy"));
+    assert_eq!(resource(&dict, "Lazy").downcast_ref::<String>().map(String::as_str), Some("first value"));
+    assert!(!deferred(&dict, "Lazy"));
+    let error = run(&context, &dict).unwrap_err();
+    assert!(at_position(&error, 1, 2), "{error}");
+}
+
+#[test]
+fn scheduled_type_key_duplicate_reports_its_insertion_position_and_stops_before_the_next_entry() {
+    use crate::xaml_il::runtime::compiled as rt;
+    use ferroui_base::StaticType;
+    use ferroui_markup::theme_run_opcodes as op;
+    let (dict, context) = populated();
+    let ty = <ResourceDictionary as StaticType>::TYPE;
+    static IMPORTS: &[rt::ThemeRunImport] = &[
+        rt::ThemeRunImport::Type(<ResourceDictionary as StaticType>::TYPE),
+        rt::ThemeRunImport::Factory(generated_literal_brush),
+        rt::ThemeRunImport::Text("After"),
+    ];
+    let error = rt::apply_theme_run(
+        &[op::VERSION, op::DEFER_TYPE, 0, 1, 2, 4, 6, 8,
+          op::DEFER_TYPE, 0, 1, 10, 12, 14, 16, op::BOOL, 2, 18, 20, 1],
+        IMPORTS, &DOCUMENT, &context, &dict,
+    ).unwrap_err();
+    assert!(at_position(&error, 7, 8), "{error}");
+    assert!(dict.contains_deferred_key(&ResourceKey::Type(ty)));
+    assert!(!dict.contains_key(&"After".into()));
+}
+
+#[test]
+fn malformed_schedule_operands_leave_the_current_entry_unapplied() {
+    use crate::xaml_il::runtime::compiled as rt;
+    use ferroui_base::StaticType;
+    use ferroui_markup::theme_run_opcodes as op;
+    static IMPORTS: &[rt::ThemeRunImport] = &[
+        rt::ThemeRunImport::Text("Value"),
+        rt::ThemeRunImport::Type(<ResourceDictionary as StaticType>::TYPE),
+        rt::ThemeRunImport::Factory(generated_literal_brush),
+    ];
+    let (dict, context) = populated();
+    for code in [&[][..], &[99], &[1, 255], &[1, op::TEXT, 0], &[1, op::DEFER_TEXT, 5],
+                 &[1, op::BOOL, 0, 0, 0, 2], &[1, op::DEFER_TYPE, 1, 2, 0, 0, 0],
+                 &[1, op::INT, 0, 0, 0, 128, 0]] {
+        let error = rt::apply_theme_run(code, IMPORTS, &DOCUMENT, &context, &dict).unwrap_err();
+        assert!(error.message().contains("Invalid compiled XAML dictionary run"), "{error}");
+        assert_eq!(dict.count(), 2);
+    }
 }
