@@ -84,3 +84,5 @@ picker. Scrub the live card's width and corner radius, or use the pencil to
 change the Rust route's duration and easing. Stop the playhead, then click
 **Queued**, **Ready**, and **Reset** to use the compiled fixture's state
 handlers. [App Preview state-route workflow](../../docs/designer/vscode/motion.md#scrub-a-rust-state-route-in-app-preview)
+
+Use **Visual state actions** in App Preview to author groups, states, setters, and transitions in XAML or mapped Rust. The sample registers the custom XAML interactions library so directional transitions load in both preview and `--xaml-live` mode. [Visual state authoring](../../docs/designer/vscode/motion.md#author-visual-states-in-app-preview)
