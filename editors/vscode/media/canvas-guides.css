@@ -63,7 +63,7 @@
 .canvas[data-guide-cursor="Vertical"][data-mode="select"]:not([data-pan="ready"], [data-pan="dragging"]) #frame { cursor: ew-resize; }
 
 #guides-button[data-active="true"] { color: var(--vscode-textLink-foreground, var(--focus)); }
-.guides-menu { inline-size: min(290px, calc(100vw - 16px)); padding: 9px; }
+.guides-menu { --popover-width: 290px; padding: 9px; }
 .guide-menu-heading, .guide-visibility, .guide-position-heading, .guide-menu-tools, .guide-menu-actions {
     display: flex;
     align-items: center;

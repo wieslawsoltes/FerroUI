@@ -95,7 +95,7 @@ export class CanvasGuides {
     private start(event: PointerEvent): void {
         const state = this.state;
         const view = this.projection();
-        if (!state || !view || !this.canDrag() || this.gesture || event.button !== 0 || !event.isPrimary) return;
+        if (!state || !view || !this.canDrag() || this.gesture || event.button !== 0 || !event.isPrimary || overCanvasControl(event)) return;
         const rail = rulerSize(state, view);
         const guide = guideAt(state, view, rail, event);
         const axis = guide?.axis ?? rulerAt(view, rail, event);
@@ -120,7 +120,7 @@ export class CanvasGuides {
             this.schedule();
         } else if (!gesture) {
             const rail = rulerSize(state, view);
-            const axis = guideAt(state, view, rail, event)?.axis ?? rulerAt(view, rail, event);
+            const axis = overCanvasControl(event) ? undefined : guideAt(state, view, rail, event)?.axis ?? rulerAt(view, rail, event);
             if (axis) this.viewport.element.dataset.guideCursor = axis;
             else delete this.viewport.element.dataset.guideCursor;
         }
@@ -192,6 +192,10 @@ export class CanvasGuides {
 
 function moved(event: PointerEvent, drag: Gesture): boolean {
     return Math.hypot(event.clientX - drag.x, event.clientY - drag.y) >= 3;
+}
+
+function overCanvasControl(event: PointerEvent): boolean {
+    return event.target instanceof Element && Boolean(event.target.closest('.resize-handle, .focus-marker'));
 }
 
 function position(event: PointerEvent, drag: Gesture): number {
