@@ -1,5 +1,5 @@
 use super::*;
-use ferroui_designer_animation::{CurveChannel, CurveMetric, CurvePoint, CurveWindow};
+use ferroui_designer_animation::{CurveChannel, CurveMetric, CurvePoint, CurveWindow, RelativeUnit};
 
 pub(super) const HEIGHT: f64 = 88.0;
 const VALUE_INSET: f64 = 12.0;
@@ -263,10 +263,13 @@ impl TimelineLane {
             let trace: Rc<dyn IPen> = Pen::from_uint32(color, 1.5).into();
             let plot_bounds = plot.height(bounds.height);
             let height = plot_height(plot_bounds);
-            let unit = if plot.metric == CurveMetric::Velocity {
-                " /s"
-            } else {
-                ""
+            let unit = match (plot.channel.relative_unit(), plot.metric) {
+                (Some(RelativeUnit::Relative), CurveMetric::Value) => "%",
+                (Some(RelativeUnit::Relative), CurveMetric::Velocity) => " pp/s",
+                (Some(RelativeUnit::Absolute), CurveMetric::Value) => " px",
+                (Some(RelativeUnit::Absolute), CurveMetric::Velocity) => " px/s",
+                (None, CurveMetric::Velocity) => " /s",
+                (None, CurveMetric::Value) => "",
             };
             if plot.metric == CurveMetric::Velocity
                 && scale.low < 0.0
@@ -297,11 +300,19 @@ impl TimelineLane {
                     Point::new((bounds.width - label.width() - 3.0).max(0.0), label_y),
                 );
             }
-            for pair in plot.samples.windows(2) {
-                let position = |point: CurvePoint| {
-                    Point::new(self.x(point.time), scale.y(point.value, plot_bounds))
-                };
+            let position = |point: CurvePoint| {
+                Point::new(self.x(point.time), scale.y(point.value, plot_bounds))
+            };
+            for pair in plot.samples.windows(2).filter(|pair| !pair[1].break_before) {
                 context.draw_line(&trace, position(pair[0]), position(pair[1]));
+            }
+            for (index, point) in plot.samples.iter().enumerate() {
+                if (index == 0 || point.break_before)
+                    && plot.samples.get(index + 1).is_none_or(|next| next.break_before)
+                {
+                    let at = position(*point);
+                    context.draw_line(&trace, Point::new(at.x - 1.0, at.y), Point::new(at.x + 1.0, at.y));
+                }
             }
         }
         if plot.samples.is_empty() {

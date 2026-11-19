@@ -1,5 +1,6 @@
 use crate::{
-    require, AnimationError, AnimationValue, CurvePoint, RelativeUnit, Result, Track, ValueKind,
+    require, AnimationError, AnimationValue, CurvePoint, FillMode, RelativeUnit, Result, Track,
+    ValueKind,
 };
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
@@ -66,23 +67,23 @@ impl CurveChannel {
         }
     }
 
-    pub fn for_track(track: &Track, duration: f64) -> Vec<Self> {
+    pub fn for_track(track: &Track, duration: f64, fill: FillMode) -> Vec<Self> {
         let Some(first) = track.keyframes.first() else {
             return Vec::new();
         };
         let mut channels = Self::for_kind(first.value.kind()).to_vec();
         if let Some(unit) = first.value.relative_unit() {
             // The live target may supply the units at an unauthored endpoint.
-            let has_implicit_endpoint = first.time > 0.0
-                || track
-                    .keyframes
-                    .last()
-                    .is_some_and(|last| last.time < duration);
+            let uses_base = (first.time > 0.0 && !matches!(fill, FillMode::Backward | FillMode::Both))
+                || (!matches!(fill, FillMode::Forward | FillMode::Both)
+                    && track.keyframes.last().is_some_and(|last| last.time < duration));
+            let base_may_use_other_unit = uses_base && track.base_value.as_ref()
+                .and_then(AnimationValue::relative_unit).is_none_or(|base_unit| base_unit != unit);
             let has_other_unit = track
                 .keyframes
                 .iter()
                 .any(|key| key.value.relative_unit() != Some(unit));
-            if has_implicit_endpoint || has_other_unit {
+            if base_may_use_other_unit || has_other_unit {
                 channels.sort_by_key(|channel| channel.relative_unit() != Some(unit));
             } else {
                 channels.retain(|channel| channel.relative_unit() == Some(unit));

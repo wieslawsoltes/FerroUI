@@ -84,10 +84,7 @@ impl DesignerWorkspace {
             .iter()
             .filter_map(|key| {
                 if let AnimationValue::Number(value) = key.value {
-                    Some(CurvePoint {
-                        time: key.time,
-                        value,
-                    })
+                    Some(CurvePoint::new(key.time, value))
                 } else {
                     None
                 }

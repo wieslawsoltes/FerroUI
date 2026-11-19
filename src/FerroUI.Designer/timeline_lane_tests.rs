@@ -119,22 +119,13 @@ fn value_curve_uses_the_ruler_and_commits_both_coordinates_on_release() {
         ferroui_designer_animation::CurveMetric::Value,
         ferroui_designer_animation::CurveChannel::Value,
         vec![
-            CurvePoint {
-                time: 0.0,
-                value: 20.0,
-            },
-            CurvePoint {
-                time: 0.753,
-                value: 40.0,
-            },
-            CurvePoint {
-                time: 2.0,
-                value: 0.0,
-            },
+            CurvePoint::new(0.0, 20.0),
+            CurvePoint::new(0.753, 40.0),
+            CurvePoint::new(2.0, 0.0),
         ],
         |window| {
             Ok([window.start, window.end]
-                .map(|time| CurvePoint { time, value: 20.0 })
+                .map(|time| CurvePoint::new(time, 20.0))
                 .to_vec())
         },
         move |from, to, value| observed.borrow_mut().push((from, to, value)),
@@ -182,8 +173,8 @@ fn velocity_curve_markers_retime_keys_without_editing_their_values() {
     lane.configure_curve(
         CurveMetric::Velocity,
         CurveChannel::Value,
-        vec![CurvePoint { time: 1.0, value: 40.0 }],
-        |window| Ok(vec![CurvePoint { time: window.start, value: 20.0 }]),
+        vec![CurvePoint::new(1.0, 40.0)],
+        |window| Ok(vec![CurvePoint::new(window.start, 20.0)]),
         |_, _, _| panic!("Velocity must not write a derived value into the keyframe"),
     );
     let moved = Rc::new(Cell::new(None));

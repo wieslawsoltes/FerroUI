@@ -56,7 +56,7 @@ pub(super) fn tools() -> Vec<Value> {
         s::tool("designer_select_rsx_view", "Select an RSX invocation by its authored UTF-8 starting offset.",
             s::object(json!({"start":s::revision(),"expected_revision":s::revision()}), &["start","expected_revision"]), true),
         s::tool("designer_programs","Read animation programs, source keys, codec diagnostics and typed timelines. include_keyframe_text adds formatted XAML values and easing to the typed keys.",s::object(json!({"include_source":{"type":"boolean"},"include_keyframe_text":{"type":"boolean"}}), &[]),false),
-        s::tool("designer_animation_curve", "Sample values or signed velocity of an authored track over the visible time range. Read curve_channels from designer_programs for available components. Color values are normalized from 0 to 1.",
+        s::tool("designer_animation_curve", "Sample values or signed velocity of an authored track. Read curve_channels from designer_programs. Percent channels use percentages and percentage points per second, and absolute channels use logical pixels. Color channels use normalized values. break_before marks a new segment after a unit change.",
             s::object(json!({"program":s::id(),"target":s::id(),"property":s::string(),
                 "metric":{"type":"string","enum":["value","velocity"]},
                 "channel":s::string(),
@@ -515,21 +515,19 @@ fn animation_programs(session: &DesignerSession, args: &Value) -> Result<Vec<Val
                     .range(span).map_err(|error| error.to_string())?);
             }
         }
-        for (track, authored) in program.timeline.iter().flat_map(|timeline| &timeline.tracks).enumerate() {
-            let track_model = &mut model["timeline"]["tracks"][track];
-            if let Some(first) = authored.keyframes.first() {
-                track_model["curve_channels"] = json!(CurveChannel::for_kind(first.value.kind()));
-            }
-            if args["include_keyframe_text"] == true {
-                for (key, authored) in authored.keyframes.iter().enumerate() {
-                    let model = &mut track_model["keyframes"][key];
-                    model["value_text"] = json!(authored.value.to_xaml());
-                    model["value_kind"] = json!(authored.value.kind());
-                    model["easing_text"] = json!(authored.easing.to_xaml());
+        if let Some(timeline) = &program.timeline {
+            for (track, authored) in timeline.tracks.iter().enumerate() {
+                let track_model = &mut model["timeline"]["tracks"][track];
+                track_model["curve_channels"] = json!(CurveChannel::for_track(authored, timeline.duration, timeline.fill));
+                if args["include_keyframe_text"] == true {
+                    for (key, authored) in authored.keyframes.iter().enumerate() {
+                        let model = &mut track_model["keyframes"][key];
+                        model["value_text"] = json!(authored.value.to_xaml());
+                        model["value_kind"] = json!(authored.value.kind());
+                        model["easing_text"] = json!(authored.easing.to_xaml());
+                    }
                 }
             }
-        }
-        if let Some(timeline) = &program.timeline {
             model["timeline"]["repeat_text"] = json!(timeline.repeat.to_string());
             model["timeline"]["easing_text"] = json!(timeline.easing.to_xaml());
             model["timeline"]["total_duration"] = json!(timeline.total_duration());

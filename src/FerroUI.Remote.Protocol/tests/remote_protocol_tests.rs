@@ -180,11 +180,13 @@ fn entities() -> Vec<Message> {
                             time: 1.25, value: "16".into(), easing: "Linear".into(),
                             value_kind: "CornerRadius".into(),
                         }],
+                        curve_channels: None,
                     }],
                 }),
                 curve_tracks: Some(vec![DesignAnimationTrack {
-                    target: 12, property: "Opacity".into(),
-                    keys: vec![DesignAnimationKeyframe { time: 1.0, value: "0.5".into(), value_kind: "Number".into(), easing: "Linear".into() }],
+                    target: 12, property: "RenderTransformOrigin".into(),
+                    keys: vec![DesignAnimationKeyframe { time: 1.0, value: "50%,20%".into(), value_kind: "RelativePoint".into(), easing: "Linear".into() }],
+                    curve_channels: Some(vec!["percent_x".into(), "percent_y".into()]),
                 }]),
                 clip: Some(DesignAnimationClip { delay: 0.5, speed_ratio: 1.0, editable: true }),
             }],
@@ -228,7 +230,8 @@ fn entities() -> Vec<Message> {
         }),
         Arc::new(DesignAnimationCurveResult {
             revision: 40, request: 33,
-            points: vec![DesignAnimationCurvePoint { time: 0.5, value: 0.7 }],
+            points: vec![DesignAnimationCurvePoint { time: 0.5, value: 0.7, break_before: None },
+                DesignAnimationCurvePoint { time: 1.5, value: 0.5, break_before: Some(true) }],
             error: Some("Portable curve result".into()),
         }),
     ]

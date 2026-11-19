@@ -62,6 +62,10 @@ impl HostedKeyframes {
                     .iter()
                     .filter(|track| {
                         track.keys.first().is_some_and(|key| {
+                            if track.curve_channels.is_some() {
+                                return curve_channels && matches!((key.value_kind.as_str(), options.property_kinds.get(&track.property)),
+                                    ("RelativePoint", Some(ValueKind::RelativePoint)) | ("RelativeScalar", Some(ValueKind::RelativeScalar)));
+                            }
                             if key.value_kind == "Color"
                                 && options.property_kinds.get(&track.property) != Some(&ValueKind::Color)
                             {
@@ -181,9 +185,14 @@ fn tracks(program: &AnimationProgram) -> Option<Vec<DesignAnimationTrack>> {
         .tracks
         .iter()
         .filter_map(|track| {
+            let channels = CurveChannel::for_track(track, timeline.duration, timeline.fill);
+            let curve_channels = channels.first().filter(|channel| channel.relative_unit().is_some())
+                .and_then(|_| serde_json::to_value(&channels).ok())
+                .and_then(|channels| serde_json::from_value(channels).ok());
             Some(DesignAnimationTrack {
                 target: i64::try_from(track.target).ok()?,
                 property: track.property.clone(),
+                curve_channels,
                 keys: track
                     .keyframes
                     .iter()

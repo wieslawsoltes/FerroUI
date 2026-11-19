@@ -2,7 +2,7 @@ use crate::{bson_class, ferro_remote_message_guid};
 
 /// Opt in to sampling the loaded app's scalar animation tracks.
 pub const DESIGN_ANIMATION_CURVE_QUERY: &str = "ferroui-design-curves";
-/// Ask the app to advertise geometry tracks alongside scalar tracks.
+/// Ask the app to advertise component and unit-specific tracks alongside scalar tracks.
 pub const DESIGN_ANIMATION_CURVE_CHANNELS_QUERY: &str = "ferroui-design-curve-channels";
 
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -55,9 +55,11 @@ bson_class!(DesignAnimationCurveResult as "DesignAnimationCurveResult" {
 pub struct DesignAnimationCurvePoint {
     pub time: f64,
     pub value: f64,
+    pub break_before: Option<bool>,
 }
 
 bson_class!(DesignAnimationCurvePoint as "DesignAnimationCurvePoint" {
     "Time" => time: f64,
     "Value" => value: f64,
+    "BreakBefore" => break_before: Option<bool>,
 });

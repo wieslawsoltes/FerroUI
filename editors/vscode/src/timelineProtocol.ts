@@ -188,10 +188,11 @@ export interface TimelineKeyframeResponse {
     error?: string;
 }
 
-export interface CurvePoint { time: number; value: number }
+export interface CurvePoint { time: number; value: number; break_before?: boolean }
 export type CurveMetric = 'value' | 'velocity';
 export type CurveChannel = 'value' | 'x' | 'y' | 'width' | 'height' | 'left' | 'top' | 'right' | 'bottom'
-    | 'top_left' | 'top_right' | 'bottom_left' | 'bottom_right' | 'red' | 'green' | 'blue' | 'alpha';
+    | 'top_left' | 'top_right' | 'bottom_left' | 'bottom_right' | 'red' | 'green' | 'blue' | 'alpha'
+    | 'percent_x' | 'percent_y' | 'absolute_x' | 'absolute_y' | 'percent' | 'absolute';
 
 export interface TimelineCurveRequest {
     type: 'curve';

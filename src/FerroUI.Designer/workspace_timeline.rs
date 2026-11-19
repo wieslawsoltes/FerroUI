@@ -117,7 +117,10 @@ impl DesignerWorkspace {
             return;
         }
         let session = self.session.borrow();
-        let tracks = session.timeline().tracks.clone();
+        let timeline = session.timeline();
+        let tracks = timeline.tracks.clone();
+        let authored_duration = timeline.duration;
+        let fill = timeline.fill;
         let warnings = session.animation_warnings().to_vec();
         let duration = session.timeline().duration.max(self.preview_range_for_view(&session).map_or(0.0, |range| range.end));
         let context = TimelineContext::new(&session);
@@ -393,13 +396,14 @@ impl DesignerWorkspace {
                     .filter(|key| key.target == target && key.property == track.property)
                     .map(|key| key.time),
             );
-            let curve = curves.and_then(|metric| self.timeline_curve_channel(track).map(|channel| (metric, channel)));
+            let choices = curves.map_or_else(Vec::new, |_| CurveChannel::for_track(track, authored_duration, fill));
+            let curve = curves.and_then(|metric| self.timeline_curve_channel(track, &choices).map(|channel| (metric, channel)));
             if let Some((metric, channel)) = curve {
                 self.attach_timeline_curve(&lane, track, &context, metric, channel);
                 title.set_height(lane.height());
             }
             plot.children().add(match curve {
-                Some((metric, channel)) if channel != CurveChannel::Value => self.timeline_curve_title(title, &lane, track, &context, metric, channel),
+                Some(active) if choices.len() > 1 => self.timeline_curve_title(title, &lane, track, &context, active, choices),
                 _ => title.upcast::<Control>(),
             });
             AutomationProperties::set_name(

@@ -20,12 +20,14 @@ pub struct DesignAnimationTrack {
     pub target: i64,
     pub property: String,
     pub keys: Vec<DesignAnimationKeyframe>,
+    pub curve_channels: Option<Vec<String>>,
 }
 
 bson_class!(DesignAnimationTrack as "DesignAnimationTrack" {
     "Target" => target: i64,
     "Property" => property: String,
     "Keys" => keys: Vec<DesignAnimationKeyframe>,
+    "CurveChannels" => curve_channels: Option<Vec<String>>,
 });
 
 #[derive(Clone, Debug, Default, PartialEq)]

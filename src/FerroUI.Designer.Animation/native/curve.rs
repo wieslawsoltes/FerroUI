@@ -81,3 +81,47 @@ pub(super) fn matches_property(property: &FerroProperty, name: &str) -> bool {
         !property.is_attached() && name == property.name()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::native::NativePlayback;
+    use crate::CurveMetric;
+    use ferroui_base::animation::{FillMode, KeyFrame, SignedDuration};
+    use ferroui_base::media::RadialGradientBrush;
+    use ferroui_base::styling::Setter;
+    use ferroui_base::{RelativeScalar, RelativeUnit};
+
+    #[test]
+    fn relative_scalar_curves_match_the_live_native_units_and_pose() {
+        let brush = RadialGradientBrush::new();
+        let animation = Animation::new();
+        animation.set_duration(SignedDuration::from_seconds(4.0));
+        animation.set_fill_mode(FillMode::Both);
+        for (time, value) in [(0.0, "10%"), (1.0, "70%"), (2.0, "24"), (3.0, "20%"), (4.0, "60%")] {
+            animation.children().add(KeyFrame::with_key_time(SignedDuration::from_seconds(time), [
+                Setter::new(RadialGradientBrush::radius_x_property(), RelativeScalar::parse(value).unwrap()) as _,
+            ]));
+        }
+        let window = CurveWindow { start: 0.0, end: 4.0 };
+        let percent = sample_curve_track(&animation, &brush, "RadiusX", CurveChannel::Percent, window).unwrap();
+        let pixels = sample_curve_track(&animation, &brush, "RadiusX", CurveChannel::Absolute, window).unwrap();
+        assert_eq!(brush.radius_x(), RelativeScalar::MIDDLE);
+        assert!(percent.iter().any(|point| point.time == 2.5 && point.break_before));
+        let velocity = CurveMetric::Velocity.measure(percent.clone()).unwrap();
+        assert!(velocity.iter().any(|point| point.time > 2.5 && point.break_before));
+        assert!(velocity.iter().all(|point| !(1.5..2.5).contains(&point.time)));
+        let mut playback = NativePlayback::default();
+        for (time, unit, points) in [(0.5, RelativeUnit::Relative, &percent), (1.5, RelativeUnit::Absolute, &pixels),
+            (2.5, RelativeUnit::Relative, &percent), (3.5, RelativeUnit::Relative, &percent)]
+        {
+            playback.seek(vec![(animation.clone(), brush.clone().upcast())], time).unwrap();
+            let actual = brush.radius_x();
+            let scale = if unit == RelativeUnit::Relative { 100.0 } else { 1.0 };
+            assert_eq!(actual.unit, unit);
+            assert_eq!(points.iter().find(|point| point.time == time).unwrap().value, actual.scalar * scale);
+        }
+        playback.stop();
+        assert_eq!(brush.radius_x(), RelativeScalar::MIDDLE);
+    }
+}

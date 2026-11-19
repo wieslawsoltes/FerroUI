@@ -13,6 +13,10 @@ interface CurveSnapshot {
 
 const axisNumber = new Intl.NumberFormat(undefined, { maximumSignificantDigits: 3, notation: 'compact' });
 const colorChannels = new Set<CurveChannel>(['red', 'green', 'blue', 'alpha']);
+const relativeLabels: Partial<Record<CurveChannel, string>> = {
+    percent_x: 'X (%)', percent_y: 'Y (%)', absolute_x: 'X (px)', absolute_y: 'Y (px)',
+    percent: 'Percent', absolute: 'Pixels',
+};
 
 export function curveChannels(track: TimelineTrack): readonly CurveChannel[] {
     return track.curve_channels ?? (track.keyframes[0]?.value_kind === 'Number' ? ['value'] : []);
@@ -21,7 +25,7 @@ export function curveChannels(track: TimelineTrack): readonly CurveChannel[] {
 /** Uses the Timeline's existing focusable key buttons as the curve's handles. */
 export class TimelineCurvePlot {
     private readonly svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    private readonly line = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+    private readonly line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     private readonly zeroLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
     private readonly scaleLabels = create('span');
     private readonly status = create('span');
@@ -43,6 +47,7 @@ export class TimelineCurvePlot {
         this.svg.setAttribute('viewBox', '0 0 100 100');
         this.svg.setAttribute('preserveAspectRatio', 'none');
         this.line.setAttribute('vector-effect', 'non-scaling-stroke');
+        this.line.setAttribute('stroke-linecap', 'round');
         this.zeroLine.setAttribute('x2', '100');
         this.zeroLine.setAttribute('vector-effect', 'non-scaling-stroke');
         this.zeroLine.classList.add('timeline-curve-zero');
@@ -61,15 +66,15 @@ export class TimelineCurvePlot {
             select.title = name;
             select.className = 'timeline-curve-channel';
             select.hidden = true;
-            select.append(...choices.map(channel => new Option(channel.length === 1 ? channel.toUpperCase()
-                : channel[0].toUpperCase() + channel.slice(1).replaceAll('_', ' '), channel)));
+            select.append(...choices.map(channel => new Option(relativeLabels[channel] ??
+                channel[0].toUpperCase() + channel.slice(1).replaceAll('_', ' '), channel)));
             if (preferred && choices.includes(preferred)) select.value = preferred;
             select.onchange = () => changed(this.channel);
             label.append(select);
         }
     }
 
-    get channel(): CurveChannel { return (this.channelPicker?.value as CurveChannel | undefined) ?? 'value'; }
+    get channel(): CurveChannel { return (this.channelPicker?.value as CurveChannel | undefined) ?? curveChannels(this.track)[0] ?? 'value'; }
     has(key: string): boolean { return this.accepted?.key === key; }
 
     receive(key: string, metric: CurveMetric, channel: CurveChannel, message: Pick<TimelineCurveResponse, 'points' | 'error' | 'stale'>): void {
@@ -111,13 +116,18 @@ export class TimelineCurvePlot {
         const scale = this.scale = new CurveScale(visible.length || keyValues.length ? visible : points ?? [],
             keyValues.length || visible.length ? keyValues : allValues.length ? allValues : [0]);
         const trace = [...(before ? [before] : []), ...visible, ...(after ? [after] : [])];
-        this.line.setAttribute('points', trace.map(({ time, value }) =>
-            `${timelinePercent(view, time).toFixed(3)},${scale.percent(value).toFixed(3)}`).join(' '));
+        this.line.setAttribute('d', trace.map((point, index) => {
+            const starts = index === 0 || point.break_before;
+            const ends = index === trace.length - 1 || trace[index + 1].break_before;
+            const position = `${timelinePercent(view, point.time).toFixed(3)},${scale.percent(point.value).toFixed(3)}`;
+            return `${starts ? 'M' : 'L'}${position}${starts && ends ? `L${position}` : ''}`;
+        }).join(' '));
         const [low, high] = scale.bounds;
         this.scaleLabels.toggleAttribute('data-waiting', !editsValues && !points?.length);
         this.ticks[0].textContent = axisNumber.format(low);
         this.ticks[1].textContent = axisNumber.format(high);
-        this.unit.textContent = isVelocity ? '/s' : '';
+        this.unit.textContent = channel.startsWith('percent') ? (isVelocity ? 'pp/s' : '%')
+            : channel.startsWith('absolute') ? (isVelocity ? 'px/s' : 'px') : isVelocity ? '/s' : '';
         this.zeroLine.toggleAttribute('data-visible', isVelocity && Boolean(points?.length) && low < 0 && high > 0);
         const baseline = scale.percent(0).toFixed(3);
         this.zeroLine.setAttribute('y1', baseline);

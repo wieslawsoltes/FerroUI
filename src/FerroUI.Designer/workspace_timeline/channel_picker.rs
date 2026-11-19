@@ -1,20 +1,12 @@
 use super::*;
 use ferroui_base::layout::VerticalAlignment;
 
-fn channels(track: &Track) -> &'static [CurveChannel] {
-    track
-        .keyframes
-        .first()
-        .map(|key| CurveChannel::for_kind(key.value.kind()))
-        .unwrap_or_default()
-}
-
 impl DesignerWorkspace {
     pub(in crate::workspace::timeline) fn timeline_curve_channel(
         &self,
         track: &Track,
+        choices: &[CurveChannel],
     ) -> Option<CurveChannel> {
-        let choices = channels(track);
         self.timeline_ui
             .borrow()
             .curve_channels
@@ -30,10 +22,9 @@ impl DesignerWorkspace {
         lane: &Ref<TimelineLane>,
         track: &Track,
         context: &TimelineContext,
-        metric: CurveMetric,
-        channel: CurveChannel,
+        (metric, channel): (CurveMetric, CurveChannel),
+        choices: Vec<CurveChannel>,
     ) -> Ref<Control> {
-        let choices = channels(track);
         let picker = ComboBox::new();
         picker.set_width(82.0);
         picker.set_font_size(10.0);
@@ -42,7 +33,7 @@ impl DesignerWorkspace {
         let label = format!("{} curve channel", track.property);
         AutomationProperties::set_name(&picker, Some(&label));
         ToolTip::set_tip(&picker, Some(Rc::new(label)));
-        for choice in choices {
+        for choice in &choices {
             picker.items().add(Some(Rc::new(choice.label().to_owned())));
         }
         if let Some(index) = choices.iter().position(|&choice| choice == channel) {

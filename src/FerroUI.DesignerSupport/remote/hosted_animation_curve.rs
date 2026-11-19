@@ -35,9 +35,14 @@ pub(in crate::remote) fn curve(
             if !program.curve_tracks.as_ref().is_some_and(|tracks| {
                 tracks
                     .iter()
-                    .any(|track| track.property == request.property && track.keys.first().is_some_and(|key| {
-                        CurveChannel::for_authored_kind(&key.value_kind).contains(&channel)
-                    }))
+                    .any(|track| {
+                        track.property == request.property && match &track.curve_channels {
+                            Some(names) => request.channel.as_ref().is_some_and(|name| names.contains(name)),
+                            None => track.keys.first().is_some_and(|key| {
+                                CurveChannel::for_authored_kind(&key.value_kind).contains(&channel)
+                            }),
+                        }
+                    })
             }) {
                 return Err("Choose an authored animation track and one of its curve channels".into());
             }
@@ -67,6 +72,7 @@ pub(in crate::remote) fn curve(
                 .map(|point| DesignAnimationCurvePoint {
                     time: point.time,
                     value: point.value,
+                    break_before: point.break_before.then_some(true),
                 })
                 .collect();
         }

@@ -76,7 +76,7 @@ mod tests {
 
     #[test]
     fn relative_curves_keep_units_and_velocity_segments_separate() {
-        use crate::{AnimationValue, CurveChannel, CurveMetric, RelativeUnit, ValueKind};
+        use crate::{AnimationValue, CurveChannel, CurveMetric, FillMode, RelativeUnit, ValueKind};
         let mut timeline = Timeline::new(4.0).unwrap();
         for (time, value) in [(0.0, "0%,10%"), (1.0, "100%,20%"), (2.0, "24,40"),
             (3.0, "25%,70%"), (4.0, "75%,90%")]
@@ -102,10 +102,11 @@ mod tests {
         let value = AnimationValue::RelativeScalar { scalar: 12.0, unit: RelativeUnit::Absolute };
         scalar.record(1, "Radius", 0.0, value.clone()).unwrap();
         let track = scalar.track(1, "Radius").unwrap();
-        assert_eq!(CurveChannel::for_track(track, 2.0), [CurveChannel::Absolute, CurveChannel::Percent]);
+        assert_eq!(CurveChannel::for_track(track, 2.0, FillMode::None), [CurveChannel::Absolute, CurveChannel::Percent]);
+        assert_eq!(CurveChannel::for_track(track, 2.0, FillMode::Forward), [CurveChannel::Absolute]);
         scalar.record(1, "Radius", 2.0, value).unwrap();
         let track = scalar.track(1, "Radius").unwrap();
-        assert_eq!(CurveChannel::for_track(track, 2.0), [CurveChannel::Absolute]);
+        assert_eq!(CurveChannel::for_track(track, 2.0, FillMode::None), [CurveChannel::Absolute]);
         assert!(scalar.compile().unwrap().curve(1, "Radius", CurveChannel::Absolute, CurveWindow { start: 0.0, end: 2.0 })
             .unwrap().iter().all(|p| p.value == 12.0));
     }

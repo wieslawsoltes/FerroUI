@@ -103,7 +103,7 @@ export const agentCatalog = {
             required: ['action'], properties: { action: choice('select', 'seek', 'play', 'play_range', 'scrub_all', 'play_all', 'pause', 'stop', 'targets', 'reveal', 'reveal_issue', 'marker'), program: node,
                 index: integer(0), elapsed: time, range: previewRange, marker: markerAction, targets: { type: 'array', items: node, maxItems: 2000 } } },
     }, ['session', 'expected_generation', 'expected_revision', 'expected_sequence', 'arguments'], true, false),
-    designer_hosted_curve: tool('Sample values or signed velocity from a running project’s animation track. Read curve_channels for available components. Color channels report normalized values from 0 to 1.',
+    designer_hosted_curve: tool('Sample values or signed velocity from a running project’s animation track. Read curve_channels for components and units. Percent channels use percentages and percentage points per second. Absolute channels use logical pixels. Color channels use normalized values. break_before marks a new segment after a unit change.',
         { ...frame, expected_generation: integer(1), expected_sequence: integer(1), arguments: {
             type: 'object', additionalProperties: false, required: ['program', 'target', 'property', 'window'],
             properties: { program: node, target: node, property: text, metric: choice('value', 'velocity'), channel: text, window: {
