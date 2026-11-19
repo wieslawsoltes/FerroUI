@@ -34,10 +34,10 @@ use super::theme_units::unit_marker;
 use super::{absolute, identifiers, is_identifier, is_string_literal, static_resource_alias};
 
 /// Whether the build and the reference tests of the themes write the runs of the deferred
-/// shapes as packed tables (#855, `rt::PackedRows`). Off: the generated files are what they were
-/// before the experiment, byte for byte. The experiment is turned on here, and the checked-in
-/// generated files of the themes are then regenerated.
-pub const DEFAULT_PACKED_THEME_ROWS: bool = false;
+/// shapes as packed tables (#855, `rt::PackedRows`). On by default: the measurement kept it (the
+/// stripped executables are smaller and start-up is not slower, docs/xaml-themes.md). Turning it
+/// off ([`with_packed_theme_rows`]) gives the slices of row structs of before.
+pub const DEFAULT_PACKED_THEME_ROWS: bool = true;
 
 ferroui_base::ferro_thread_local! {
     /// The choice [`with_packed_theme_rows`] made for the emission on this thread.

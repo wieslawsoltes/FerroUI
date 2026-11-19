@@ -277,10 +277,10 @@ fn runs_of_one_shape_and_one_dictionary_become_one_call_over_a_table() {
         ("build_t_deferred_2", 2, alias("Z")),
     ]);
     let mut count = 0;
-    let (written, tables) = row_runs(lines, &statements, "BUILD_T_DOCUMENT", || {
+    let (written, tables) = with_packed_theme_rows(false, || row_runs(lines, &statements, "BUILD_T_DOCUMENT", || {
         count += 1;
         format!("BUILD_T_ROWS_{}", count - 1)
-    });
+    }));
     assert_eq!(written, body(&[
         "// t.xaml(1,8) Content (resource)",
         "rt::add_resource_aliases(&resource_dictionary_1, &context, &BUILD_T_DOCUMENT, BUILD_T_ROWS_0)?;",
@@ -326,10 +326,10 @@ fn a_run_ends_at_another_dictionary_and_at_any_other_statement() {
     ]);
     let statements = recorded(&lines, &[]);
     let mut count = 0;
-    let (written, tables) = row_runs(lines, &statements, "D", || {
+    let (written, tables) = with_packed_theme_rows(false, || row_runs(lines, &statements, "D", || {
         count += 1;
         format!("ROWS_{count}")
-    });
+    }));
     assert_eq!(written, body(&[
         "rt::add_double_resources(&resource_dictionary_1, ROWS_1)?;",
         "rt::add_double_resources(&resource_dictionary_2, ROWS_2)?;",
@@ -365,10 +365,10 @@ fn a_run_ends_where_the_unit_of_the_theme_changes() {
     ]);
     let statements = recorded(&lines, &[]);
     let mut count = 0;
-    let (written, tables) = row_runs(lines, &statements, "D", || {
+    let (written, tables) = with_packed_theme_rows(false, || row_runs(lines, &statements, "D", || {
         count += 1;
         format!("ROWS_{count}")
-    });
+    }));
     assert_eq!(written, body(&[
         first,
         "rt::add_double_resources(&resource_dictionary_1, ROWS_1)?;",
@@ -391,7 +391,7 @@ fn a_colour_whose_local_is_named_elsewhere_stays_a_statement() {
         "use_colour(&value_1);",
     ]);
     let statements = recorded(&lines, &[]);
-    let (written, tables) = row_runs(lines.clone(), &statements, "D", || "ROWS".to_string());
+    let (written, tables) = with_packed_theme_rows(false, || row_runs(lines.clone(), &statements, "D", || "ROWS".to_string()));
     // The first colour is a run of one, the second keeps its local: nothing is written as rows.
     assert_eq!(written, lines);
     assert!(tables.is_empty());
@@ -419,13 +419,14 @@ fn a_table_lists_its_rows_in_order() {
     );
 }
 
-/// #855: packed tables are off by default; the emission of a closure can turn them on.
+/// #855: packed tables are on by default (kept by their measurement); the emission of a closure can
+/// turn them off.
 #[test]
-fn packed_tables_are_off_by_default() {
-    assert!(!DEFAULT_PACKED_THEME_ROWS);
-    assert!(!packed_theme_rows());
-    assert!(with_packed_theme_rows(true, packed_theme_rows));
-    assert!(!packed_theme_rows());
+fn packed_tables_are_on_by_default() {
+    assert!(DEFAULT_PACKED_THEME_ROWS);
+    assert!(packed_theme_rows());
+    assert!(!with_packed_theme_rows(false, packed_theme_rows));
+    assert!(packed_theme_rows());
 }
 
 /// The fused additions of the deferred rows `rows` (key, build, line, row), in a body.
@@ -473,10 +474,10 @@ fn a_run_of_a_deferred_shape_is_a_packed_table() {
         "/// The resource aliases of a run of `t.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).\n\
          static BUILD_T_ROWS_0: rt::PackedRows = rt::PackedRows {\n"
     ), "{table}");
-    // Without the experiment the run is the slice of rows it always was.
+    // Without packed tables the run is the slice of rows it always was.
     let lines = packed_body(&[("A", "build_t_deferred_0", 1)]);
     let statements = recorded(&lines, &[("build_t_deferred_0", 0, alias("X"))]);
-    let (_, tables) = row_runs(lines, &statements, "D", || "ROWS".to_string());
+    let (_, tables) = with_packed_theme_rows(false, || row_runs(lines, &statements, "D", || "ROWS".to_string()));
     assert!(tables[0].1.packed.is_none());
     assert!(row_table("ROWS", "t.xaml", &tables[0].1).contains("static ROWS: &[rt::ResourceAliasRow] = &["));
 }
