@@ -85,15 +85,15 @@ impl ProjectWorkspace {
         self.active = Some(uri);
         Ok(())
     }
+    /// Read an authorized project file without giving it a XAML document buffer.
+    pub fn read_source(&self, uri: &str) -> Result<String> {
+        read_source(&self.resolve_path(uri)?)
+    }
     pub fn open(&mut self, uri: &str) -> Result<&Buffer> {
         let path = self.resolve_path(uri)?;
         let uri = file_uri(&path)?;
         if !self.buffers.contains_key(&uri) {
-            require(
-                std::fs::metadata(&path)?.len() <= 16 * 1024 * 1024,
-                "Document exceeds 16 MiB",
-            )?;
-            let source = std::fs::read_to_string(&path)?;
+            let source = read_source(&path)?;
             self.buffers.insert(
                 uri.clone(),
                 Buffer {
@@ -493,6 +493,14 @@ impl ProjectWorkspace {
         Ok(())
     }
 }
+fn read_source(path: &Path) -> Result<String> {
+    require(
+        std::fs::metadata(path)?.len() <= 16 * 1024 * 1024,
+        "Document exceeds 16 MiB",
+    )?;
+    Ok(std::fs::read_to_string(path)?)
+}
+
 fn source_document(source: &str) -> Result<Document> {
     require(source.len() <= 16 * 1024 * 1024, "Document exceeds 16 MiB")?;
     let mut document = match Document::new(source) {

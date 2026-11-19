@@ -1,5 +1,7 @@
-use crate::animation::{AnimationStyle, RsxAnimation};
+use crate::animation::{AnimationStyle, RsxAnimation, RsxAnimationIssue};
 use crate::tree::{escape_xml, Element};
+use crate::RsxProjection;
+use ferroui_designer_core::SourceSpan;
 use ferroui_designer_language::FRAMEWORK_NAMESPACE;
 use std::collections::BTreeMap;
 use std::fmt::Write;
@@ -13,6 +15,44 @@ pub struct RsxPreviewMarkup<'a> {
     pub source: String,
     pub controls: Vec<usize>,
     pub animations: Vec<(usize, &'a RsxAnimation)>,
+}
+
+/// Source locations for an accepted projection. Keys are XML byte offsets
+/// so each native host can use its own reconciled document node IDs.
+pub struct RsxSourceMap {
+    pub invocation: SourceSpan,
+    pub blocks: Vec<SourceSpan>,
+    pub issues: Vec<RsxAnimationIssue>,
+    pub omitted_count: usize,
+    controls: Vec<(usize, SourceSpan)>,
+    animations: Vec<(usize, RsxAnimation)>,
+}
+
+impl RsxSourceMap {
+    pub fn control(&self, offset: usize) -> Option<(usize, SourceSpan)> {
+        let index = self.controls.binary_search_by_key(&offset, |(start, _)| *start).ok()?;
+        Some((index, self.controls[index].1))
+    }
+
+    pub fn animation(&self, offset: usize) -> Option<&RsxAnimation> {
+        let index = self.animations.binary_search_by_key(&offset, |(start, _)| *start).ok()?;
+        Some(&self.animations[index].1)
+    }
+}
+
+impl RsxProjection<'_> {
+    pub fn mapped_markup(&self) -> (String, RsxSourceMap) {
+        let markup = self.preview_markup();
+        let map = RsxSourceMap {
+            invocation: self.invocation,
+            blocks: self.blocks.clone(),
+            issues: self.animation_issues.clone(),
+            omitted_count: self.omitted_count,
+            controls: markup.controls.into_iter().zip(self.nodes.iter().map(|node| node.name)).collect(),
+            animations: markup.animations.into_iter().map(|(offset, clip)| (offset, clip.clone())).collect(),
+        };
+        (markup.source, map)
+    }
 }
 
 pub(crate) fn serialize<'a>(

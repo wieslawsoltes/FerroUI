@@ -1,6 +1,7 @@
 use crate::project_rust;
 use ferroui_designer_animation::{AnimationPrograms, ImportOptions, KeyframeEdit, Timeline};
 use ferroui_designer_core::Document;
+use ferroui_designer_core::TextPatch;
 
 const VIEW: &str = r#"fn different() { rsx! { TextBlock { text: "Separate 🪴" } } }
 
@@ -23,6 +24,28 @@ fn preview() {
     }
 }
 "#;
+
+#[test]
+fn retiming_shared_cues_requires_every_setter_and_changes_each_cue_once() {
+    let source = VIEW.replace(
+        "0.2))",
+        "0.2).set(ferroui_base::layout::Layoutable::width_property(), 120.0))",
+    );
+    let caret = source.rfind("rsx!").unwrap();
+    let projected = project_rust(&source, caret).unwrap();
+    let markup = projected.preview_markup();
+    let clip = markup.animations[0].1;
+    assert!(clip.patch_key_times([("Opacity", 0.0, 0.5)]).unwrap_err().contains("shares"));
+    let patches = clip.patch_key_times([
+        ("Opacity", 0.0, 0.5),
+        ("Width", 0.0, 0.5),
+        ("Opacity", 0.5, 1.0),
+    ]).unwrap();
+    assert_eq!(patches.len(), 2);
+    let updated = TextPatch::apply_all(&source, patches).unwrap();
+    assert_eq!(updated, source.replace(".key_frame(0.25,", ".key_frame(0.5,")
+        .replace(".key_frame(0.0,", ".key_frame(0.25,"));
+}
 
 #[test]
 fn styled_clip_has_rust_anchors_and_edits_only_its_authored_literals() {

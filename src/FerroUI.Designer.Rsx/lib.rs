@@ -17,7 +17,7 @@ mod xaml;
 
 pub use animation::{RsxAnimation, RsxAnimationIssue};
 pub use language::{RsxLanguageDocument, analyze_rsx};
-pub use markup::RsxPreviewMarkup;
+pub use markup::{RsxPreviewMarkup, RsxSourceMap};
 pub use project::{RsxNode, RsxProjection, project_rust};
 pub use registered::RsxCatalog;
 pub use source_edits::{RsxEvent, event_setter};

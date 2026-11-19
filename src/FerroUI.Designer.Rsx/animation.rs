@@ -1,6 +1,7 @@
 //! Original Rust source for a native animation projected from a known view builder.
 
 mod keyframe;
+mod retime;
 mod syntax;
 mod value;
 

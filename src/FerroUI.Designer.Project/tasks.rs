@@ -26,6 +26,12 @@ pub struct BuildTask {
 }
 impl BuildTask {
     pub fn cargo(project: &ProjectDescriptor, kind: TaskKind, release: bool) -> Result<Self> {
+        Self::cargo_with_features(project, kind, release, "")
+    }
+
+    pub fn cargo_with_features(
+        project: &ProjectDescriptor, kind: TaskKind, release: bool, features: &str,
+    ) -> Result<Self> {
         require(
             project.manifest_path.is_file(),
             "Project has no Cargo manifest",
@@ -81,6 +87,9 @@ impl BuildTask {
         }
         if release {
             args.push("--release".into());
+        }
+        if !features.trim().is_empty() {
+            args.push(format!("--features={}", features.trim()));
         }
         Ok(Self {
             program: "cargo".into(),
