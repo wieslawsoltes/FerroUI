@@ -21,6 +21,7 @@ pub mod catalog;
 mod catalog_data;
 pub mod contrast;
 mod control_samples;
+mod custom_controls;
 mod date_samples;
 pub mod examples;
 mod feedback_samples;
@@ -65,6 +66,9 @@ mod tests;
 
 #[cfg(test)]
 mod accessibility_samples_tests;
+
+#[cfg(test)]
+mod custom_controls_tests;
 
 #[cfg(test)]
 mod feedback_samples_tests;
