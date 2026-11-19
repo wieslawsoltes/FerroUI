@@ -4,7 +4,7 @@ import type { TimelineTrack } from '../src/timelineProtocol';
 import { create, element } from './dom';
 import { editorFrame, type HostedKeyframeEditor } from './hostedKeyframes';
 import { TimelineCurvePlot } from './timelineCurves';
-import { dragKeyframe } from './timelineKeyDrag';
+import { dragKeyframe, renderKeyframe } from './timelineKeyDrag';
 import { clamp, fitKeyTimes, fitTimeline, panTimeline, timelinePercent, visibleTime, zoomTimeline } from './timelineViewport';
 
 interface TrackChoice {
@@ -26,6 +26,7 @@ export class HostedCurves {
     private active = false;
     private program?: HostedAnimationProgram;
     private frame?: HostedAnimationFrame;
+    private revision?: number;
     private version = 0;
     private catalog = '';
     private choices: TrackChoice[] = [];
@@ -56,11 +57,14 @@ export class HostedCurves {
         }, { passive: false });
     }
 
-    follow(program: HostedAnimationProgram | undefined, targets: HostedAnimationTarget[], frame: HostedAnimationFrame | undefined, version: number) {
+    follow(program: HostedAnimationProgram | undefined, targets: HostedAnimationTarget[], frame: HostedAnimationFrame | undefined,
+        version: number, usable: boolean) {
         const sameProgram = program?.id === this.program?.id && program?.duration === this.program?.duration;
+        const sameRevision = frame?.revision === this.revision;
         const last = this.choices[this.select.selectedIndex];
         this.program = program;
-        this.frame = frame;
+        this.frame = usable ? frame : undefined;
+        this.revision = frame?.revision ?? this.revision;
         this.version = version;
         const catalog = JSON.stringify([program?.id, program?.duration, program?.curveTracks, program?.authoring?.codec, targets]);
         if (catalog !== this.catalog) {
@@ -69,7 +73,7 @@ export class HostedCurves {
             this.select.replaceChildren(...this.choices.map(choice => new Option(
                 targets.length === 1 ? choice.track.property : `${choice.track.property} · ${choice.target.label}`,
             )));
-            const selected = this.choices.findIndex(choice => choice.track.property === last?.track.property && choice.target.id === last?.target.id);
+            const selected = retainedCurveTrack(this.choices, last, sameRevision);
             this.select.selectedIndex = selected < 0 ? 0 : selected;
             if (!sameProgram) this.view = fitTimeline(program?.duration ?? 0);
             if (!sameProgram || selected < 0) this.selected = undefined;
@@ -113,11 +117,9 @@ export class HostedCurves {
             for (const key of track.keyframes) {
                 const value = Number(key.value_text);
                 if (!Number.isFinite(value)) continue;
-                const button = create('button', 'timeline-key');
-                button.type = 'button';
-                button.title = `${track.property}, ${this.number.format(key.time)} s · ${key.value_text}`;
-                button.setAttribute('aria-label', button.title);
-                const rendered = { button, key: { time: key.time, target: track.target, property: track.property } };
+                const location = { time: key.time, target: track.target, property: track.property };
+                const rendered = renderKeyframe(location, `${track.property}, ${this.number.format(key.time)} s · ${key.value_text}`);
+                const { button } = rendered;
                 const open = (found: HostedAnimationFrame): HostedKeyframeSelection => ({
                     frame: found, version: this.version, program: program.id, target: track.target,
                     targetName: choice.target.label, property: track.property, duration: program.duration, keyframe: key,
@@ -188,6 +190,20 @@ export class HostedCurves {
                 property: choice.track.property, window: { start: this.view.start, end: Math.min(this.view.duration, this.view.start + this.view.span) } } });
         }
     }
+}
+
+export function retainedCurveTrack(choices: readonly TrackChoice[], previous: TrackChoice | undefined, sameRevision: boolean): number {
+    if (!previous) return -1;
+    const matches = choices.filter(choice => choice.track.property === previous.track.property);
+    if (matches.length === 1) return choices.indexOf(matches[0]);
+    if (sameRevision) {
+        const exact = matches.find(choice => choice.target.id === previous.target.id);
+        if (exact) return choices.indexOf(exact);
+    }
+    // Rebuilding a document can renumber its source nodes. Restore the UI choice
+    // only when one current control has the former target's label and type.
+    const named = matches.filter(({ target }) => target.label === previous.target.label && target.typeName === previous.target.typeName);
+    return named.length === 1 ? choices.indexOf(named[0]) : -1;
 }
 
 function choicesFor(program: HostedAnimationProgram, targets: HostedAnimationTarget[]): TrackChoice[] {

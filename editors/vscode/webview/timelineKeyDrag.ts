@@ -1,9 +1,18 @@
 import type { FrameTarget } from '../src/protocol';
 import type { KeyframeLocation } from '../src/timelineProtocol';
+import { create, labelButton } from './dom';
 import type { CurveScale } from './timelineCurveScale';
 import { clamp, timelinePercent, type TimelineViewport } from './timelineViewport';
 
 export interface RenderedKeyframe { key: KeyframeLocation; button: HTMLButtonElement }
+
+export function renderKeyframe(key: KeyframeLocation, label: string): RenderedKeyframe {
+    const button = create('button');
+    button.type = 'button';
+    button.className = 'timeline-key';
+    labelButton(button, label);
+    return { key, button };
+}
 
 interface CurveDrag {
     value: number;

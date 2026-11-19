@@ -1,4 +1,5 @@
 import { strict as assert } from 'node:assert';
+import { retainedCurveTrack } from '../webview/hostedCurves';
 import { CurveScale } from '../webview/timelineCurveScale';
 import { fitKeyTimes, fitTimeline, minimumTimelineSpan, panTimeline, timelinePercent, visibleTime, zoomTimeline } from '../webview/timelineViewport';
 
@@ -27,5 +28,22 @@ export function verifyTimelineViewport(): void {
     assert.ok(Number.isFinite(new CurveScale([], [-1e300, 1e300]).percent(0)));
     const close = new CurveScale([], [1e12, 1e12 + 1]);
     assert.ok(close.fromOffset(1e12, -42) > 1e12 && close.fromOffset(1e12, -42) < 1e12 + 1);
+    verifyHostedCurveTrack();
     console.log('Timeline viewport kept the zoom pivot, aligned authored key positions, and clamped both pan edges');
+}
+
+function verifyHostedCurveTrack(): void {
+    const choice = (property: string, id: number, label: string) => ({ track: { property, target: id, keyframes: [] },
+        target: { id, label, typeName: 'Border' }, editable: true });
+    const previous = choice('Width', 8, 'Forecast');
+    const restored = choice('Width', 10, 'Forecast');
+    const renamed = choice('Width', 10, 'Estimate');
+    const opacity = choice('Opacity', 10, 'Forecast');
+    assert.equal(retainedCurveTrack([opacity, renamed], previous, false), 1, 'Retain the property when only one target is available');
+    assert.equal(retainedCurveTrack([choice('Width', 8, 'Other'), opacity, restored], previous, false), 2,
+        'Find the matching label after the native source IDs have changed');
+    assert.equal(retainedCurveTrack([restored, choice('Width', 8, 'Forecast')], previous, false), -1,
+        'A reused source ID cannot resolve two identical labels across revisions');
+    assert.equal(retainedCurveTrack([restored, previous], previous, true), 1, 'Preserve precise selection within an accepted revision');
+    assert.equal(retainedCurveTrack([opacity], previous, false), -1, 'Fall back when the authored track disappears');
 }

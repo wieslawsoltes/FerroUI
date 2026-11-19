@@ -3,7 +3,7 @@ import type { FromTimeline, KeyframeGroupEdit, KeyframeLocation, TimelineControl
 import { canPreviewProgram, previewClock } from '../src/timelinePrograms';
 import { element, labelButton } from './dom';
 import { TimelineCurves } from './timelineCurves';
-import { dragKeyframe, type RenderedKeyframe } from './timelineKeyDrag';
+import { dragKeyframe, renderKeyframe, type RenderedKeyframe } from './timelineKeyDrag';
 import { TimelineKeyframeEditor } from './timelineKeyframeEditor';
 import { bindTimelineMarquee } from './timelineMarquee';
 import { TimelineNativePreview } from './timelineNativePreview';
@@ -272,13 +272,9 @@ function showTracks(): void {
                 recordAt(time, index);
             });
             for (const key of track.keyframes) {
-                const button = document.createElement('button');
-                button.type = 'button';
-                button.className = 'timeline-key';
-                button.title = `${name.title}, ${number.format(key.time)}s · ${key.value_text} · ${key.easing_text}`;
-                button.setAttribute('aria-label', button.title);
                 const location = { target: track.target, property: track.property, time: key.time };
-                const rendered = { button, key: location };
+                const rendered = renderKeyframe(location, `${name.title}, ${number.format(key.time)}s · ${key.value_text} · ${key.easing_text}`);
+                const { button } = rendered;
                 renderedKeys.push(rendered);
                 const value = Number(key.value_text);
                 if (plot && Number.isFinite(value)) plot.keys.push({ rendered, value });
