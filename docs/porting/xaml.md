@@ -1139,6 +1139,13 @@ Statement sequences that recur at thousands of sites are calls of one helper of 
   shared in the function, the key, the position), as the runs of template bindings are
   (`rt::bind_template_bindings`). The rows are bound in order with the same function, the property
   read before each, and the first failure is the error. A dynamic resource alone keeps its call.
+- **The value of `{StaticResource key}` for a registered property** in the body of deferred
+  content written as native code (2026-11-19, #568): the extension created with the key,
+  `rt::provide_value_invoked` with `rt::property_value(property)` and the provided value held as
+  the value of a node are `let value = rt::static_resource_value(&context, property, key, line,
+  position)?;`; the assignment that follows (the setter chosen at run time,
+  `rt::assign_resource_value`) stays. The pass runs after the shapes of the row tables and of the
+  control themes were read, so they read the statements as they were.
 - **The description of `Setter.Value`** as the provide-value target property is `rt::setter_value_property()`. `rt::clr_property_info` keeps one description per declared property and thread, created on first use, as upstream keeps one per property in a static field of the generated helper type of the assembly (`XamlIlClrPropertyInfoEmitter`, `<Type>.<Name>!Field`). The interpreter creates one per evaluation; nothing compares descriptions by identity.
 - **The document of a context**: each document has `static <FUNCTION>_DOCUMENT: rt::DocumentInfo` with its base URI and its XML namespace table; `rt::populate_context` and `rt::deferred_context` take a reference to it.
 - **Split functions**: a build or populate function with more than 1,024 top-level statements is split into functions `<function>_part_<n>` of at most 256 statements each, called in place, with the locals of the function that a part uses passed to it as cloned handles, in the order the part first names them (the output does not depend on hashing; the drift tests compare it byte for byte). A part never declares a local a later statement uses; a statement that names a local whose Rust type the emitter does not state (the `let` of an object created with its default constructor, a `let` with a type, `context`, `name_scope`, `root`) stays in the function. The statements run in the same order with the same errors; a local of a part is dropped when the part returns instead of at the end of the function, which reference counting only observes as an earlier decrement of a handle that the object tree still holds (upstream has no deterministic destruction to compare with). Only the populate function of the Fluent theme is that large.
