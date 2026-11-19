@@ -215,7 +215,8 @@ def param_of(text):
     found = re.match(r"^(.*?)(\w+)$", text.strip())
     kind = found.group(1).strip()
     return {"name": found.group(2), "type": c_type(kind) if kind not in ("FerroEventFn", "FerroStartFn", "FerroPostFn",
-            "FerroEventDataFn", "FerroReleaseFn", "FerroPostDataFn") else "callback:" + kind}
+            "FerroEventDataFn", "FerroReleaseFn", "FerroPostDataFn", "FerroCreateFn", "FerroReleaseDataFn",
+            "FerroLayoutFn", "FerroRenderFn", "FerroNotifyFn", "FerroPointerFn", "FerroKeyFn") else "callback:" + kind}
 
 
 # ---- the frame layout ------------------------------------------------------------------------
@@ -303,6 +304,38 @@ SIGNAL_LAYOUT = {
         {"field": "kinds", "type": "u32[capacity]", "writer": "the library"},
     ],
     "apply": "ferro_signals_apply, the start of every frame commit and the end of every dispatch",
+}
+
+# Controls written in another language (docs/c-abi.md, section 15): what a backend needs to
+# present a class registered through the ABI the way its language writes a class.
+CONTROL_LAYOUT = {
+    "register": "ferro_class_register",
+    "bases": [
+        {"value": 1, "name": "Control"}, {"value": 2, "name": "Panel"},
+        {"value": 3, "name": "Decorator"}, {"value": 4, "name": "ContentControl"},
+    ],
+    "callbacks": [
+        {"setter": "ferro_class_on_create", "type": "FerroCreateFn", "member": "created"},
+        {"setter": "ferro_class_on_measure", "type": "FerroLayoutFn", "member": "measure_override"},
+        {"setter": "ferro_class_on_arrange", "type": "FerroLayoutFn", "member": "arrange_override"},
+        {"setter": "ferro_class_on_render", "type": "FerroRenderFn", "member": "render"},
+        {"setter": "ferro_class_on_property_changed", "type": "FerroNotifyFn", "member": "on_property_changed"},
+        {"setter": "ferro_class_on_attached", "type": "FerroNotifyFn", "member": "on_attached_to_visual_tree"},
+        {"setter": "ferro_class_on_detached", "type": "FerroNotifyFn", "member": "on_detached_from_visual_tree"},
+        {"setter": "ferro_class_on_apply_template", "type": "FerroNotifyFn", "member": "on_apply_template"},
+        {"setter": "ferro_class_on_pointer", "type": "FerroPointerFn", "member": "on_pointer_*"},
+        {"setter": "ferro_class_on_key", "type": "FerroKeyFn", "member": "on_key_*"},
+    ],
+    "property": {
+        "register": "ferro_property_register",
+        "kinds": "the kinds of signals: 1 i64, 2 f64, 3 bool, 5 text",
+        "flags": [
+            {"value": 1, "name": "affects_measure"}, {"value": 2, "name": "affects_arrange"},
+            {"value": 4, "name": "affects_render"}, {"value": 8, "name": "inherits"}, {"value": 16, "name": "attached"},
+        ],
+    },
+    "data": {"instance": "ferro_object_set_data", "class": "ferro_class_set_data"},
+    "status": "a callback returns 0 (or 1: handled) on success, a negative status on a failure",
 }
 
 
@@ -430,6 +463,7 @@ def build():
         "abi": {"functions": functions, "callbacks": callbacks, "statuses": statuses},
         "frame": FRAME_LAYOUT,
         "signals": SIGNAL_LAYOUT,
+        "controls": CONTROL_LAYOUT,
         "classes": out_classes,
         "properties": out_properties,
         "events": out_events,

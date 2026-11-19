@@ -1730,6 +1730,114 @@ extern fn ferro_unsubscribe(subscription: int) -> int32
 // interface from code. [`FERRO_NOT_SUPPORTED`] for an event whose arguments carry more than
 // the routing state (a pointer event). UI thread only.
 extern fn ferro_raise(object: int, event: int) -> int32
+// Gives the size of the measure or arrange callback that runs now (the innermost), for a
+// language that cannot write through the `double *` of the callback. UI thread only.
+extern fn ferro_layout_result(width: float, height: float) -> int32
+// Registers the class `name` (UTF-8, `length` bytes, negative for NUL-terminated) on the base
+// `base` (`FERRO_BASE_CONTROL`, `_PANEL`, `_DECORATOR`, `_CONTENT_CONTROL`) and returns its
+// type ID, or a negative status. The class is created by name
+// ([`ferro_create`](crate::ferro_create) with [`ferro_type_id`](crate::ferro_type_id)), in
+// frames and wherever a class is found by name; its virtual members call the callbacks set
+// with `ferro_class_on_*`, and fall through to the base where none is set. At most 64 classes
+// per process. UI thread only.
+extern fn ferro_class_register(name: string, length: int, base: int32) -> int
+// Sets the callback that gives each new instance of the class its data (`NULL` for none). UI
+// thread only.
+extern fn ferro_class_on_create(classId: int, callback: fn(Ptr, int) -> int32) -> int32
+// Sets the measure callback of the class (`NULL`: the base measures). UI thread only.
+extern fn ferro_class_on_measure(classId: int, callback: fn(Ptr, int, float, float, Ptr, Ptr) -> int32) -> int32
+// Sets the arrange callback of the class (`NULL`: the base arranges). UI thread only.
+extern fn ferro_class_on_arrange(classId: int, callback: fn(Ptr, int, float, float, Ptr, Ptr) -> int32) -> int32
+// Sets the render callback of the class (`NULL`: the base renders alone). The base renders
+// first (the background of a panel); the callback draws over it. UI thread only.
+extern fn ferro_class_on_render(classId: int, callback: fn(Ptr, int, int) -> int32) -> int32
+// Sets the callback called when a property the class registered changes, with its ID. UI
+// thread only.
+extern fn ferro_class_on_property_changed(classId: int, callback: fn(Ptr, int, int) -> int32) -> int32
+// Sets the callback called when an instance is attached to the visual tree. UI thread only.
+extern fn ferro_class_on_attached(classId: int, callback: fn(Ptr, int, int) -> int32) -> int32
+// Sets the callback called when an instance is detached from the visual tree. UI thread only.
+extern fn ferro_class_on_detached(classId: int, callback: fn(Ptr, int, int) -> int32) -> int32
+// Sets the callback called when the template of an instance is applied (a class on
+// `FERRO_BASE_CONTENT_CONTROL`); [`ferro_template_part`] finds its parts. UI thread only.
+extern fn ferro_class_on_apply_template(classId: int, callback: fn(Ptr, int, int) -> int32) -> int32
+// Sets the callback of pointer presses, releases and moves on an instance. UI thread only.
+extern fn ferro_class_on_pointer(classId: int, callback: fn(Ptr, int, int32, float, float, int) -> int32) -> int32
+// Sets the callback of key presses and releases on an instance. UI thread only.
+extern fn ferro_class_on_key(classId: int, callback: fn(Ptr, int, int32, int, int) -> int32) -> int32
+// Sets the data of the class, given to its create callback. UI thread only.
+extern fn ferro_class_set_data(classId: int, data: Ptr) -> int32
+// The data of an instance of a foreign class (`NULL` for none or on a failure, recorded). UI
+// thread only.
+extern fn ferro_object_data(object: int) -> Ptr
+// Registers a property of the foreign class `owner` (a type ID of [`ferro_class_register`])
+// and returns its property ID, or a negative status. `kind` is a kind of signal
+// (`FERRO_SIGNAL_I64`, `_F64`, `_BOOL`, `_TEXT`); the default is `default_number` (an integer
+// or a boolean as a number) or `default_text` (UTF-8, NUL-terminated, `NULL` for no text).
+// `flags` combine `FERRO_PROPERTY_AFFECTS_MEASURE`, `_ARRANGE`, `_RENDER`, `_INHERITS` and
+// `_ATTACHED` (an attached property, `Owner.Name`, that every control takes). The property is
+// a styled property as the ones of the framework: the setters and getters of the ABI, frames,
+// signals, styles, bindings and animations use it. UI thread only.
+extern fn ferro_property_register(owner: int, name: string, length: int, kind: int32, defaultNumber: float, defaultText: string, flags: int) -> int
+// Measures `object` (a child, from a measure callback) at the available size. UI thread only.
+extern fn ferro_layout_measure(object: int, width: float, height: float) -> int32
+// Arranges `object` (a child, from an arrange callback) in the rectangle. UI thread only.
+extern fn ferro_layout_arrange(object: int, x: float, y: float, width: float, height: float) -> int32
+// The desired width of `object` after its measure (`0` on a failure, recorded). UI thread
+// only.
+extern fn ferro_layout_desired_width(object: int) -> float
+// The desired height of `object` after its measure (`0` on a failure, recorded). UI thread
+// only.
+extern fn ferro_layout_desired_height(object: int) -> float
+// The width `object` was arranged at (its bounds; `0` on a failure, recorded): what a render
+// callback of a language without instance data draws in. UI thread only.
+extern fn ferro_layout_bounds_width(object: int) -> float
+// The height `object` was arranged at (its bounds; `0` on a failure, recorded). UI thread
+// only.
+extern fn ferro_layout_bounds_height(object: int) -> float
+// The number of children of a panel (`0` for another object, recorded). UI thread only.
+extern fn ferro_panel_child_count(object: int) -> int
+// The child `index` of a panel, with one reference counted (release it), or `0` (recorded). UI
+// thread only.
+extern fn ferro_panel_child(object: int, index: int) -> int
+// The part named `name` of the applied template of `object` (a foreign class on
+// `FERRO_BASE_CONTENT_CONTROL`), with one reference counted (release it), or `0` with
+// [`FERRO_NOT_FOUND`]. From the apply-template callback on. UI thread only.
+extern fn ferro_template_part(object: int, name: string, length: int) -> int
+// A solid brush of the colour `argb` (`0xAARRGGBB`) for the `ferro_draw_*` functions: its ID
+// (a positive number), the same for the same colour, or a negative status. Make the brushes of
+// a control once (at its creation) and draw with their IDs. UI thread only.
+extern fn ferro_draw_brush(argb: int) -> int
+// A solid pen of the colour `argb` and the thickness `thickness`: its ID, or a negative
+// status. UI thread only.
+extern fn ferro_draw_pen(argb: int, thickness: float) -> int
+// Fills (`brush`) and strokes (`pen`) a rectangle, its corners rounded by `radius_x` and
+// `radius_y`. UI thread only, in a render callback.
+extern fn ferro_draw_rect(context: int, x: float, y: float, width: float, height: float, radiusX: float, radiusY: float, brush: int, pen: int) -> int32
+// Fills and strokes the ellipse in the rectangle. UI thread only, in a render callback.
+extern fn ferro_draw_ellipse(context: int, x: float, y: float, width: float, height: float, brush: int, pen: int) -> int32
+// Strokes a line with the pen. UI thread only, in a render callback.
+extern fn ferro_draw_line(context: int, x1: float, y1: float, x2: float, y2: float, pen: int) -> int32
+// Fills and strokes the geometry of the path data `data` (the mini-language of markup: `M 0,0
+// L 10,10 Z`, UTF-8, `length` bytes, negative for NUL-terminated). UI thread only, in a render
+// callback.
+extern fn ferro_draw_path(context: int, data: string, length: int, brush: int, pen: int) -> int32
+// Draws `text` (UTF-8, `length` bytes, negative for NUL-terminated) with its top left at `x`,
+// `y`, in the default typeface at `size`, with the brush. UI thread only, in a render
+// callback.
+extern fn ferro_draw_text(context: int, text: string, length: int, x: float, y: float, size: float, brush: int) -> int32
+// Clips what is drawn next to the rectangle, until [`ferro_draw_pop`]. UI thread only, in a
+// render callback.
+extern fn ferro_draw_push_clip(context: int, x: float, y: float, width: float, height: float) -> int32
+// Transforms what is drawn next by the matrix (`m11 m12 m21 m22 dx dy`), until
+// [`ferro_draw_pop`]. UI thread only, in a render callback.
+extern fn ferro_draw_push_transform(context: int, m11: float, m12: float, m21: float, m22: float, dx: float, dy: float) -> int32
+// Draws what is drawn next with the opacity, until [`ferro_draw_pop`]. UI thread only, in a
+// render callback.
+extern fn ferro_draw_push_opacity(context: int, opacity: float) -> int32
+// Pops the clip, transform or opacity pushed last in the context. UI thread only, in a render
+// callback.
+extern fn ferro_draw_pop(context: int) -> int32
 // Starts a frame on the calling thread: empties the buffer of the scalar writer. Any thread
 // (the buffer is the calling thread's); commit it on the UI thread.
 extern fn ferro_frame_begin() -> int32
@@ -1969,7 +2077,7 @@ extern fn ferro_get_cstr_or(object: int, property: int, fallback: string) -> str
 extern fn osprey_ffi_null() -> Ptr
 
 // Not declared, because Osprey cannot pass what they take (a pointer to a result, a buffer,
-// UTF-16, bytes) or return (a string that can be NULL): ferro_subscribe_data, ferro_frame_str16, ferro_frame_commit_bytes, ferro_signal_table, ferro_post_data, ferro_get_f64, ferro_get_i64, ferro_get_bool, ferro_get_str, ferro_get_cstr, ferro_get_handle, ferro_set_str16.
+// UTF-16, bytes) or return (a string that can be NULL): ferro_subscribe_data, ferro_object_set_data, ferro_frame_str16, ferro_frame_commit_bytes, ferro_signal_table, ferro_post_data, ferro_get_f64, ferro_get_i64, ferro_get_bool, ferro_get_str, ferro_get_cstr, ferro_get_handle, ferro_set_str16.
 
 // ---- enumerations ----------------------------------------------------------------------------
 

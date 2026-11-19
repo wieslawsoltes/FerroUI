@@ -406,6 +406,13 @@ double ferro_layout_desired_width(FerroHandle object);
 // The desired height of `object` after its measure (`0` on a failure, recorded). UI thread only.
 double ferro_layout_desired_height(FerroHandle object);
 
+// The width `object` was arranged at (its bounds; `0` on a failure, recorded): what a render
+// callback of a language without instance data draws in. UI thread only.
+double ferro_layout_bounds_width(FerroHandle object);
+
+// The height `object` was arranged at (its bounds; `0` on a failure, recorded). UI thread only.
+double ferro_layout_bounds_height(FerroHandle object);
+
 // The number of children of a panel (`0` for another object, recorded). UI thread only.
 int64_t ferro_panel_child_count(FerroHandle object);
 

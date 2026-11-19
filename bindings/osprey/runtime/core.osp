@@ -187,3 +187,44 @@ fn signalWatch(object: int, property: int, signal: int) -> int = {
 
 // Applies the written signals now (outside a dispatch: a timer of the application).
 fn signalsApply() -> int = ferro_signals_apply()
+
+// ---- controls (docs/osprey.md, section 8) -------------------------------------------------------
+//
+// A control written in Osprey is a class registered with the library (docs/c-abi.md, section 15):
+// `controlClass(name, base)` returns its type ID, and the callbacks of the class are named
+// functions given to `ferro_class_on_measure`, `ferro_class_on_render`, ... at the call site (the
+// rule of Osprey for callbacks). A callback receives a data pointer Osprey does not use (the state
+// of an Osprey control is in its registered properties), the handle of the instance and scalars,
+// returns a status (0, 1 for a handled event, negative for a failure), and gives a layout result
+// with `layoutResult(width, height)`.
+
+fn baseControl() -> int = 1
+
+fn basePanel() -> int = 2
+
+fn baseDecorator() -> int = 3
+
+fn baseContentControl() -> int = 4
+
+fn affectsMeasure() -> int = 1
+
+fn affectsArrange() -> int = 2
+
+fn affectsRender() -> int = 4
+
+// Registers a control class on `base` (`baseControl()`, ...): its type ID, for `ferro_create`
+// and for frames.
+fn controlClass(name: string, base: int) -> int = ferro_class_register(name: name, length: -1, base: toInt32(base))
+
+// Registers a number property of a control class (`flags`: `affectsRender()`, ...): its ID.
+fn numberProperty(classId: int, name: string, defaultValue: float, flags: int) -> int =
+    ferro_property_register(owner: classId, name: name, length: -1, kind: toInt32(2), defaultNumber: defaultValue,
+        defaultText: "", flags: flags)
+
+// Registers a text property of a control class: its ID.
+fn textProperty(classId: int, name: string, defaultValue: string, flags: int) -> int =
+    ferro_property_register(owner: classId, name: name, length: -1, kind: toInt32(5), defaultNumber: 0.0,
+        defaultText: defaultValue, flags: flags)
+
+// The size a measure or arrange callback gives back.
+fn layoutResult(width: float, height: float) -> int32 = ferro_layout_result(width: width, height: height)

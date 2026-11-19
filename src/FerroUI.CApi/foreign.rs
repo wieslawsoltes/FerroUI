@@ -953,6 +953,25 @@ pub extern "C" fn ferro_layout_desired_height(object: FerroHandle) -> f64 {
     })
 }
 
+/// The width `object` was arranged at (its bounds; `0` on a failure, recorded): what a render
+/// callback of a language without instance data draws in. UI thread only.
+#[no_mangle]
+pub extern "C" fn ferro_layout_bounds_width(object: FerroHandle) -> f64 {
+    layoutable(object).map(|element| element.bounds().width).unwrap_or_else(|error| {
+        error.record();
+        0.0
+    })
+}
+
+/// The height `object` was arranged at (its bounds; `0` on a failure, recorded). UI thread only.
+#[no_mangle]
+pub extern "C" fn ferro_layout_bounds_height(object: FerroHandle) -> f64 {
+    layoutable(object).map(|element| element.bounds().height).unwrap_or_else(|error| {
+        error.record();
+        0.0
+    })
+}
+
 /// The number of children of a panel (`0` for another object, recorded). UI thread only.
 #[no_mangle]
 pub extern "C" fn ferro_panel_child_count(object: FerroHandle) -> i64 {

@@ -97,6 +97,8 @@ RESERVED = {
     "memo", "bound", "signalsInit", "signalText", "signalNumber", "signalInteger", "signalBool", "signalSetText",
     "signalSetNumber", "signalSetInteger", "signalSetBool", "signalReadText", "signalReadNumber", "signalReadInteger",
     "signalReadBool", "signalVersion", "signalBind", "signalWatch", "signalsApply",
+    "baseControl", "basePanel", "baseDecorator", "baseContentControl", "affectsMeasure", "affectsArrange",
+    "affectsRender", "controlClass", "numberProperty", "textProperty", "layoutResult",
 }
 
 # Osprey types of the C types of the model, for `extern fn` (#950: scalars, NUL-terminated
@@ -115,6 +117,16 @@ EXTERN_TYPES = {
     "callback:FerroEventFn": "fn(int, int, int) -> int",
     "callback:FerroStartFn": "fn(int) -> int",
     "callback:FerroPostFn": "fn(int) -> int",
+    # The callbacks of a control class (docs/c-abi.md, section 15): the data pointer of the
+    # instance (unused by Osprey, whose controls keep their state in registered properties), the
+    # handle, scalars, and the two `double *` of a layout result, which Osprey answers with
+    # `ferro_layout_result`.
+    "callback:FerroCreateFn": "fn(Ptr, int) -> int32",
+    "callback:FerroLayoutFn": "fn(Ptr, int, float, float, Ptr, Ptr) -> int32",
+    "callback:FerroRenderFn": "fn(Ptr, int, int) -> int32",
+    "callback:FerroNotifyFn": "fn(Ptr, int, int) -> int32",
+    "callback:FerroPointerFn": "fn(Ptr, int, int32, float, float, int) -> int32",
+    "callback:FerroKeyFn": "fn(Ptr, int, int32, int, int) -> int32",
 }
 
 # Functions whose `const char *` result can be NULL: Osprey strings cannot, so the binding

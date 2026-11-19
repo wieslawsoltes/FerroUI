@@ -1,6 +1,6 @@
 /* Tests of the C ABI of FerroUI, from C (docs/c-abi.md, section 9): status codes, the UI thread
  * rule, bad handles, ID lookups, string lengths, values, children, events, posted work, frames,
- * and signals shared through memory (section 14). No
+ * signals shared through memory (section 14) and a control written in C (section 15). No
  * window is opened: the thread is made the UI thread with ferro_init and driven with
  * ferro_run_jobs, so the tests run without a display and without the desktop platform.
  *
@@ -15,6 +15,7 @@
 #include <string.h>
 
 #include "ferroui.h"
+#include "gauge.h"
 
 static int failures;
 static int checks;
@@ -325,6 +326,44 @@ static void test_signals(void) {
     CHECK_STATUS(FERRO_OK, ferro_release(root));
 }
 
+/* A control written in C (gauge.h, docs/c-abi.md, section 15): created by its type ID and in a
+ * frame, measured and arranged through its callbacks, with its data and its registered property. */
+static void test_controls(void) {
+    CHECK(gauge_register() > 0);
+    CHECK(gauge_register() == gauge_class);
+    CHECK(ferro_type_id("Gauge", -1) == gauge_class);
+    FerroHandle gauge = ferro_create(gauge_class);
+    CHECK(gauge != 0);
+    CHECK(ferro_type_of(gauge) == gauge_class);
+    Gauge *data = ferro_object_data(gauge);
+    CHECK(data != NULL && data->track > 0 && data->fill > 0);
+    CHECK_STATUS(FERRO_OK, ferro_layout_measure(gauge, 1000, 1000));
+    CHECK(ferro_layout_desired_width(gauge) == 160 && ferro_layout_desired_height(gauge) == 16);
+    CHECK_STATUS(FERRO_OK, ferro_layout_measure(gauge, 100, 1000));
+    CHECK(ferro_layout_desired_width(gauge) == 100);
+    CHECK_STATUS(FERRO_OK, ferro_layout_arrange(gauge, 0, 0, 120, 16));
+    CHECK(data->width == 120 && data->height == 16);
+    CHECK(ferro_get_f64_or(gauge, gauge_level, -1) == 0.5);
+    CHECK_STATUS(FERRO_OK, ferro_set_f64(gauge, gauge_level, 0.75));
+    CHECK(ferro_get_f64_or(gauge, gauge_level, -1) == 0.75);
+    FerroHandle other = create("TextBlock");
+    CHECK_STATUS(FERRO_NOT_FOUND, ferro_set_f64(other, gauge_level, 0.5));
+    CHECK_STATUS(FERRO_OK, ferro_release(other));
+
+    FerroHandle root = create("Border");
+    CHECK_STATUS(FERRO_OK, ferro_frame_begin());
+    CHECK_STATUS(FERRO_OK, ferro_frame_open(gauge_class, 1));
+    CHECK_STATUS(FERRO_OK, ferro_frame_f64(gauge_level, 0.1));
+    CHECK_STATUS(FERRO_OK, ferro_frame_close());
+    CHECK_STATUS(FERRO_OK, ferro_frame_commit(root));
+    FerroHandle framed = ferro_frame_find(root, 1);
+    CHECK(ferro_type_of(framed) == gauge_class && ferro_get_f64_or(framed, gauge_level, -1) == 0.1);
+    CHECK_STATUS(FERRO_OK, ferro_release(framed));
+    CHECK_STATUS(FERRO_OK, ferro_frame_clear(root));
+    CHECK_STATUS(FERRO_OK, ferro_release(root));
+    CHECK_STATUS(FERRO_OK, ferro_release(gauge));
+}
+
 int main(void) {
     CHECK(ferro_abi_version() == FERRO_ABI_VERSION);
     CHECK(!ferro_is_ui_thread());
@@ -342,6 +381,7 @@ int main(void) {
     test_threads();
     test_frames();
     test_signals();
+    test_controls();
 
     if (failures != 0) {
         fprintf(stderr, "abi_test: %d of %d checks failed\n", failures, checks);

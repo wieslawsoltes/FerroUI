@@ -173,6 +173,690 @@
     "doc": "Raises the routed event `event` on `object` with plain event arguments, as the control does when it raises it (`Click` of a button, as a click does): for tests and for driving an interface from code. [`FERRO_NOT_SUPPORTED`] for an event whose arguments carry more than the routing state (a pointer event). UI thread only."
    },
    {
+    "name": "ferro_layout_result",
+    "returns": "status",
+    "params": [
+     {
+      "name": "width",
+      "type": "f64"
+     },
+     {
+      "name": "height",
+      "type": "f64"
+     }
+    ],
+    "doc": "Gives the size of the measure or arrange callback that runs now (the innermost), for a language that cannot write through the `double *` of the callback. UI thread only."
+   },
+   {
+    "name": "ferro_class_register",
+    "returns": "i64",
+    "params": [
+     {
+      "name": "name",
+      "type": "utf8"
+     },
+     {
+      "name": "length",
+      "type": "i64"
+     },
+     {
+      "name": "base",
+      "type": "i32"
+     }
+    ],
+    "doc": "Registers the class `name` (UTF-8, `length` bytes, negative for NUL-terminated) on the base `base` (`FERRO_BASE_CONTROL`, `_PANEL`, `_DECORATOR`, `_CONTENT_CONTROL`) and returns its type ID, or a negative status. The class is created by name ([`ferro_create`](crate::ferro_create) with [`ferro_type_id`](crate::ferro_type_id)), in frames and wherever a class is found by name; its virtual members call the callbacks set with `ferro_class_on_*`, and fall through to the base where none is set. At most 64 classes per process. UI thread only."
+   },
+   {
+    "name": "ferro_class_on_create",
+    "returns": "status",
+    "params": [
+     {
+      "name": "class_id",
+      "type": "i64"
+     },
+     {
+      "name": "callback",
+      "type": "callback:FerroCreateFn"
+     }
+    ],
+    "doc": "Sets the callback that gives each new instance of the class its data (`NULL` for none). UI thread only."
+   },
+   {
+    "name": "ferro_class_on_measure",
+    "returns": "status",
+    "params": [
+     {
+      "name": "class_id",
+      "type": "i64"
+     },
+     {
+      "name": "callback",
+      "type": "callback:FerroLayoutFn"
+     }
+    ],
+    "doc": "Sets the measure callback of the class (`NULL`: the base measures). UI thread only."
+   },
+   {
+    "name": "ferro_class_on_arrange",
+    "returns": "status",
+    "params": [
+     {
+      "name": "class_id",
+      "type": "i64"
+     },
+     {
+      "name": "callback",
+      "type": "callback:FerroLayoutFn"
+     }
+    ],
+    "doc": "Sets the arrange callback of the class (`NULL`: the base arranges). UI thread only."
+   },
+   {
+    "name": "ferro_class_on_render",
+    "returns": "status",
+    "params": [
+     {
+      "name": "class_id",
+      "type": "i64"
+     },
+     {
+      "name": "callback",
+      "type": "callback:FerroRenderFn"
+     }
+    ],
+    "doc": "Sets the render callback of the class (`NULL`: the base renders alone). The base renders first (the background of a panel); the callback draws over it. UI thread only."
+   },
+   {
+    "name": "ferro_class_on_property_changed",
+    "returns": "status",
+    "params": [
+     {
+      "name": "class_id",
+      "type": "i64"
+     },
+     {
+      "name": "callback",
+      "type": "callback:FerroNotifyFn"
+     }
+    ],
+    "doc": "Sets the callback called when a property the class registered changes, with its ID. UI thread only."
+   },
+   {
+    "name": "ferro_class_on_attached",
+    "returns": "status",
+    "params": [
+     {
+      "name": "class_id",
+      "type": "i64"
+     },
+     {
+      "name": "callback",
+      "type": "callback:FerroNotifyFn"
+     }
+    ],
+    "doc": "Sets the callback called when an instance is attached to the visual tree. UI thread only."
+   },
+   {
+    "name": "ferro_class_on_detached",
+    "returns": "status",
+    "params": [
+     {
+      "name": "class_id",
+      "type": "i64"
+     },
+     {
+      "name": "callback",
+      "type": "callback:FerroNotifyFn"
+     }
+    ],
+    "doc": "Sets the callback called when an instance is detached from the visual tree. UI thread only."
+   },
+   {
+    "name": "ferro_class_on_apply_template",
+    "returns": "status",
+    "params": [
+     {
+      "name": "class_id",
+      "type": "i64"
+     },
+     {
+      "name": "callback",
+      "type": "callback:FerroNotifyFn"
+     }
+    ],
+    "doc": "Sets the callback called when the template of an instance is applied (a class on `FERRO_BASE_CONTENT_CONTROL`); [`ferro_template_part`] finds its parts. UI thread only."
+   },
+   {
+    "name": "ferro_class_on_pointer",
+    "returns": "status",
+    "params": [
+     {
+      "name": "class_id",
+      "type": "i64"
+     },
+     {
+      "name": "callback",
+      "type": "callback:FerroPointerFn"
+     }
+    ],
+    "doc": "Sets the callback of pointer presses, releases and moves on an instance. UI thread only."
+   },
+   {
+    "name": "ferro_class_on_key",
+    "returns": "status",
+    "params": [
+     {
+      "name": "class_id",
+      "type": "i64"
+     },
+     {
+      "name": "callback",
+      "type": "callback:FerroKeyFn"
+     }
+    ],
+    "doc": "Sets the callback of key presses and releases on an instance. UI thread only."
+   },
+   {
+    "name": "ferro_class_set_data",
+    "returns": "status",
+    "params": [
+     {
+      "name": "class_id",
+      "type": "i64"
+     },
+     {
+      "name": "data",
+      "type": "pointer"
+     }
+    ],
+    "doc": "Sets the data of the class, given to its create callback. UI thread only."
+   },
+   {
+    "name": "ferro_object_set_data",
+    "returns": "status",
+    "params": [
+     {
+      "name": "object",
+      "type": "handle"
+     },
+     {
+      "name": "data",
+      "type": "pointer"
+     },
+     {
+      "name": "release",
+      "type": "callback:FerroReleaseDataFn"
+     }
+    ],
+    "doc": "Sets the data of an instance of a foreign class, passed to every callback of the instance, and the function that releases it when the instance goes away (`NULL` for none). UI thread only."
+   },
+   {
+    "name": "ferro_object_data",
+    "returns": "pointer",
+    "params": [
+     {
+      "name": "object",
+      "type": "handle"
+     }
+    ],
+    "doc": "The data of an instance of a foreign class (`NULL` for none or on a failure, recorded). UI thread only."
+   },
+   {
+    "name": "ferro_property_register",
+    "returns": "i64",
+    "params": [
+     {
+      "name": "owner",
+      "type": "i64"
+     },
+     {
+      "name": "name",
+      "type": "utf8"
+     },
+     {
+      "name": "length",
+      "type": "i64"
+     },
+     {
+      "name": "kind",
+      "type": "i32"
+     },
+     {
+      "name": "default_number",
+      "type": "f64"
+     },
+     {
+      "name": "default_text",
+      "type": "utf8"
+     },
+     {
+      "name": "flags",
+      "type": "i64"
+     }
+    ],
+    "doc": "Registers a property of the foreign class `owner` (a type ID of [`ferro_class_register`]) and returns its property ID, or a negative status. `kind` is a kind of signal (`FERRO_SIGNAL_I64`, `_F64`, `_BOOL`, `_TEXT`); the default is `default_number` (an integer or a boolean as a number) or `default_text` (UTF-8, NUL-terminated, `NULL` for no text). `flags` combine `FERRO_PROPERTY_AFFECTS_MEASURE`, `_ARRANGE`, `_RENDER`, `_INHERITS` and `_ATTACHED` (an attached property, `Owner.Name`, that every control takes). The property is a styled property as the ones of the framework: the setters and getters of the ABI, frames, signals, styles, bindings and animations use it. UI thread only."
+   },
+   {
+    "name": "ferro_layout_measure",
+    "returns": "status",
+    "params": [
+     {
+      "name": "object",
+      "type": "handle"
+     },
+     {
+      "name": "width",
+      "type": "f64"
+     },
+     {
+      "name": "height",
+      "type": "f64"
+     }
+    ],
+    "doc": "Measures `object` (a child, from a measure callback) at the available size. UI thread only."
+   },
+   {
+    "name": "ferro_layout_arrange",
+    "returns": "status",
+    "params": [
+     {
+      "name": "object",
+      "type": "handle"
+     },
+     {
+      "name": "x",
+      "type": "f64"
+     },
+     {
+      "name": "y",
+      "type": "f64"
+     },
+     {
+      "name": "width",
+      "type": "f64"
+     },
+     {
+      "name": "height",
+      "type": "f64"
+     }
+    ],
+    "doc": "Arranges `object` (a child, from an arrange callback) in the rectangle. UI thread only."
+   },
+   {
+    "name": "ferro_layout_desired_width",
+    "returns": "f64",
+    "params": [
+     {
+      "name": "object",
+      "type": "handle"
+     }
+    ],
+    "doc": "The desired width of `object` after its measure (`0` on a failure, recorded). UI thread only."
+   },
+   {
+    "name": "ferro_layout_desired_height",
+    "returns": "f64",
+    "params": [
+     {
+      "name": "object",
+      "type": "handle"
+     }
+    ],
+    "doc": "The desired height of `object` after its measure (`0` on a failure, recorded). UI thread only."
+   },
+   {
+    "name": "ferro_layout_bounds_width",
+    "returns": "f64",
+    "params": [
+     {
+      "name": "object",
+      "type": "handle"
+     }
+    ],
+    "doc": "The width `object` was arranged at (its bounds; `0` on a failure, recorded): what a render callback of a language without instance data draws in. UI thread only."
+   },
+   {
+    "name": "ferro_layout_bounds_height",
+    "returns": "f64",
+    "params": [
+     {
+      "name": "object",
+      "type": "handle"
+     }
+    ],
+    "doc": "The height `object` was arranged at (its bounds; `0` on a failure, recorded). UI thread only."
+   },
+   {
+    "name": "ferro_panel_child_count",
+    "returns": "i64",
+    "params": [
+     {
+      "name": "object",
+      "type": "handle"
+     }
+    ],
+    "doc": "The number of children of a panel (`0` for another object, recorded). UI thread only."
+   },
+   {
+    "name": "ferro_panel_child",
+    "returns": "handle",
+    "params": [
+     {
+      "name": "object",
+      "type": "handle"
+     },
+     {
+      "name": "index",
+      "type": "i64"
+     }
+    ],
+    "doc": "The child `index` of a panel, with one reference counted (release it), or `0` (recorded). UI thread only."
+   },
+   {
+    "name": "ferro_template_part",
+    "returns": "handle",
+    "params": [
+     {
+      "name": "object",
+      "type": "handle"
+     },
+     {
+      "name": "name",
+      "type": "utf8"
+     },
+     {
+      "name": "length",
+      "type": "i64"
+     }
+    ],
+    "doc": "The part named `name` of the applied template of `object` (a foreign class on `FERRO_BASE_CONTENT_CONTROL`), with one reference counted (release it), or `0` with [`FERRO_NOT_FOUND`]. From the apply-template callback on. UI thread only."
+   },
+   {
+    "name": "ferro_draw_brush",
+    "returns": "i64",
+    "params": [
+     {
+      "name": "argb",
+      "type": "i64"
+     }
+    ],
+    "doc": "A solid brush of the colour `argb` (`0xAARRGGBB`) for the `ferro_draw_*` functions: its ID (a positive number), the same for the same colour, or a negative status. Make the brushes of a control once (at its creation) and draw with their IDs. UI thread only."
+   },
+   {
+    "name": "ferro_draw_pen",
+    "returns": "i64",
+    "params": [
+     {
+      "name": "argb",
+      "type": "i64"
+     },
+     {
+      "name": "thickness",
+      "type": "f64"
+     }
+    ],
+    "doc": "A solid pen of the colour `argb` and the thickness `thickness`: its ID, or a negative status. UI thread only."
+   },
+   {
+    "name": "ferro_draw_rect",
+    "returns": "status",
+    "params": [
+     {
+      "name": "context",
+      "type": "i64"
+     },
+     {
+      "name": "x",
+      "type": "f64"
+     },
+     {
+      "name": "y",
+      "type": "f64"
+     },
+     {
+      "name": "width",
+      "type": "f64"
+     },
+     {
+      "name": "height",
+      "type": "f64"
+     },
+     {
+      "name": "radius_x",
+      "type": "f64"
+     },
+     {
+      "name": "radius_y",
+      "type": "f64"
+     },
+     {
+      "name": "brush",
+      "type": "i64"
+     },
+     {
+      "name": "pen",
+      "type": "i64"
+     }
+    ],
+    "doc": "Fills (`brush`) and strokes (`pen`) a rectangle, its corners rounded by `radius_x` and `radius_y`. UI thread only, in a render callback."
+   },
+   {
+    "name": "ferro_draw_ellipse",
+    "returns": "status",
+    "params": [
+     {
+      "name": "context",
+      "type": "i64"
+     },
+     {
+      "name": "x",
+      "type": "f64"
+     },
+     {
+      "name": "y",
+      "type": "f64"
+     },
+     {
+      "name": "width",
+      "type": "f64"
+     },
+     {
+      "name": "height",
+      "type": "f64"
+     },
+     {
+      "name": "brush",
+      "type": "i64"
+     },
+     {
+      "name": "pen",
+      "type": "i64"
+     }
+    ],
+    "doc": "Fills and strokes the ellipse in the rectangle. UI thread only, in a render callback."
+   },
+   {
+    "name": "ferro_draw_line",
+    "returns": "status",
+    "params": [
+     {
+      "name": "context",
+      "type": "i64"
+     },
+     {
+      "name": "x1",
+      "type": "f64"
+     },
+     {
+      "name": "y1",
+      "type": "f64"
+     },
+     {
+      "name": "x2",
+      "type": "f64"
+     },
+     {
+      "name": "y2",
+      "type": "f64"
+     },
+     {
+      "name": "pen",
+      "type": "i64"
+     }
+    ],
+    "doc": "Strokes a line with the pen. UI thread only, in a render callback."
+   },
+   {
+    "name": "ferro_draw_path",
+    "returns": "status",
+    "params": [
+     {
+      "name": "context",
+      "type": "i64"
+     },
+     {
+      "name": "data",
+      "type": "utf8"
+     },
+     {
+      "name": "length",
+      "type": "i64"
+     },
+     {
+      "name": "brush",
+      "type": "i64"
+     },
+     {
+      "name": "pen",
+      "type": "i64"
+     }
+    ],
+    "doc": "Fills and strokes the geometry of the path data `data` (the mini-language of markup: `M 0,0 L 10,10 Z`, UTF-8, `length` bytes, negative for NUL-terminated). UI thread only, in a render callback."
+   },
+   {
+    "name": "ferro_draw_text",
+    "returns": "status",
+    "params": [
+     {
+      "name": "context",
+      "type": "i64"
+     },
+     {
+      "name": "text",
+      "type": "utf8"
+     },
+     {
+      "name": "length",
+      "type": "i64"
+     },
+     {
+      "name": "x",
+      "type": "f64"
+     },
+     {
+      "name": "y",
+      "type": "f64"
+     },
+     {
+      "name": "size",
+      "type": "f64"
+     },
+     {
+      "name": "brush",
+      "type": "i64"
+     }
+    ],
+    "doc": "Draws `text` (UTF-8, `length` bytes, negative for NUL-terminated) with its top left at `x`, `y`, in the default typeface at `size`, with the brush. UI thread only, in a render callback."
+   },
+   {
+    "name": "ferro_draw_push_clip",
+    "returns": "status",
+    "params": [
+     {
+      "name": "context",
+      "type": "i64"
+     },
+     {
+      "name": "x",
+      "type": "f64"
+     },
+     {
+      "name": "y",
+      "type": "f64"
+     },
+     {
+      "name": "width",
+      "type": "f64"
+     },
+     {
+      "name": "height",
+      "type": "f64"
+     }
+    ],
+    "doc": "Clips what is drawn next to the rectangle, until [`ferro_draw_pop`]. UI thread only, in a render callback."
+   },
+   {
+    "name": "ferro_draw_push_transform",
+    "returns": "status",
+    "params": [
+     {
+      "name": "context",
+      "type": "i64"
+     },
+     {
+      "name": "m11",
+      "type": "f64"
+     },
+     {
+      "name": "m12",
+      "type": "f64"
+     },
+     {
+      "name": "m21",
+      "type": "f64"
+     },
+     {
+      "name": "m22",
+      "type": "f64"
+     },
+     {
+      "name": "dx",
+      "type": "f64"
+     },
+     {
+      "name": "dy",
+      "type": "f64"
+     }
+    ],
+    "doc": "Transforms what is drawn next by the matrix (`m11 m12 m21 m22 dx dy`), until [`ferro_draw_pop`]. UI thread only, in a render callback."
+   },
+   {
+    "name": "ferro_draw_push_opacity",
+    "returns": "status",
+    "params": [
+     {
+      "name": "context",
+      "type": "i64"
+     },
+     {
+      "name": "opacity",
+      "type": "f64"
+     }
+    ],
+    "doc": "Draws what is drawn next with the opacity, until [`ferro_draw_pop`]. UI thread only, in a render callback."
+   },
+   {
+    "name": "ferro_draw_pop",
+    "returns": "status",
+    "params": [
+     {
+      "name": "context",
+      "type": "i64"
+     }
+    ],
+    "doc": "Pops the clip, transform or opacity pushed last in the context. UI thread only, in a render callback."
+   },
+   {
     "name": "ferro_frame_begin",
     "returns": "status",
     "params": [],
@@ -1273,6 +1957,66 @@
     ],
     "doc": "Releases the user data of a subscription ([`ferro_subscribe_data`]) once the handler is removed: by [`ferro_unsubscribe`], or when the object goes away."
    },
+   "FerroCreateFn": {
+    "returns": "status",
+    "params": [
+     {
+      "name": "class_data",
+      "type": "pointer"
+     },
+     {
+      "name": "object",
+      "type": "handle"
+     }
+    ],
+    "doc": "Called once for every new instance of a class, with the data of the class ([`ferro_class_set_data`]) and the instance (borrowed for the call); the callback gives the instance its own data with [`ferro_object_set_data`]."
+   },
+   "FerroRenderFn": {
+    "returns": "status",
+    "params": [
+     {
+      "name": "data",
+      "type": "pointer"
+     },
+     {
+      "name": "object",
+      "type": "handle"
+     },
+     {
+      "name": "context",
+      "type": "i64"
+     }
+    ],
+    "doc": "Render: `context` names the drawing context of the call for the `ferro_draw_*` functions; it is valid until the callback returns."
+   },
+   "FerroNotifyFn": {
+    "returns": "status",
+    "params": [
+     {
+      "name": "data",
+      "type": "pointer"
+     },
+     {
+      "name": "object",
+      "type": "handle"
+     },
+     {
+      "name": "arg",
+      "type": "i64"
+     }
+    ],
+    "doc": "A notification with one integer: a property of the class changed (`arg` is its property ID), the instance was attached to or detached from the visual tree, its template was applied."
+   },
+   "FerroReleaseDataFn": {
+    "returns": "void",
+    "params": [
+     {
+      "name": "data",
+      "type": "pointer"
+     }
+    ],
+    "doc": "Called when an instance goes away, with its data, so that the language releases it."
+   },
    "FerroPostFn": {
     "returns": "i64",
     "params": [
@@ -1295,6 +2039,76 @@
    }
   },
   "statuses": [
+   {
+    "name": "FERRO_POINTER_PRESSED",
+    "value": 1,
+    "doc": "A pointer was pressed on the instance."
+   },
+   {
+    "name": "FERRO_POINTER_RELEASED",
+    "value": 2,
+    "doc": "A pointer was released on the instance."
+   },
+   {
+    "name": "FERRO_POINTER_MOVED",
+    "value": 3,
+    "doc": "A pointer moved over the instance."
+   },
+   {
+    "name": "FERRO_KEY_DOWN",
+    "value": 1,
+    "doc": "A key went down while the instance had the focus."
+   },
+   {
+    "name": "FERRO_KEY_UP",
+    "value": 2,
+    "doc": "A key went up while the instance had the focus."
+   },
+   {
+    "name": "FERRO_BASE_CONTROL",
+    "value": 1,
+    "doc": "The base of a class: `Control`."
+   },
+   {
+    "name": "FERRO_BASE_PANEL",
+    "value": 2,
+    "doc": "The base of a class: `Panel` (children)."
+   },
+   {
+    "name": "FERRO_BASE_DECORATOR",
+    "value": 3,
+    "doc": "The base of a class: `Decorator` (one child)."
+   },
+   {
+    "name": "FERRO_BASE_CONTENT_CONTROL",
+    "value": 4,
+    "doc": "The base of a class: `ContentControl` (a content and a template)."
+   },
+   {
+    "name": "FERRO_PROPERTY_AFFECTS_MEASURE",
+    "value": 1,
+    "doc": "A registered property makes the instance measure again when it changes."
+   },
+   {
+    "name": "FERRO_PROPERTY_AFFECTS_ARRANGE",
+    "value": 2,
+    "doc": "A registered property makes the instance arrange again when it changes."
+   },
+   {
+    "name": "FERRO_PROPERTY_AFFECTS_RENDER",
+    "value": 4,
+    "doc": "A registered property makes the instance render again when it changes."
+   },
+   {
+    "name": "FERRO_PROPERTY_INHERITS",
+    "value": 8,
+    "doc": "A registered property is inherited down the tree."
+   },
+   {
+    "name": "FERRO_PROPERTY_ATTACHED",
+    "value": 16,
+    "doc": "A registered property is attached: it can be set on any control (`Owner.Name`)."
+   },
    {
     "name": "FERRO_SIGNAL_FREE",
     "value": 0,
@@ -1703,6 +2517,110 @@
    }
   ],
   "apply": "ferro_signals_apply, the start of every frame commit and the end of every dispatch"
+ },
+ "controls": {
+  "register": "ferro_class_register",
+  "bases": [
+   {
+    "value": 1,
+    "name": "Control"
+   },
+   {
+    "value": 2,
+    "name": "Panel"
+   },
+   {
+    "value": 3,
+    "name": "Decorator"
+   },
+   {
+    "value": 4,
+    "name": "ContentControl"
+   }
+  ],
+  "callbacks": [
+   {
+    "setter": "ferro_class_on_create",
+    "type": "FerroCreateFn",
+    "member": "created"
+   },
+   {
+    "setter": "ferro_class_on_measure",
+    "type": "FerroLayoutFn",
+    "member": "measure_override"
+   },
+   {
+    "setter": "ferro_class_on_arrange",
+    "type": "FerroLayoutFn",
+    "member": "arrange_override"
+   },
+   {
+    "setter": "ferro_class_on_render",
+    "type": "FerroRenderFn",
+    "member": "render"
+   },
+   {
+    "setter": "ferro_class_on_property_changed",
+    "type": "FerroNotifyFn",
+    "member": "on_property_changed"
+   },
+   {
+    "setter": "ferro_class_on_attached",
+    "type": "FerroNotifyFn",
+    "member": "on_attached_to_visual_tree"
+   },
+   {
+    "setter": "ferro_class_on_detached",
+    "type": "FerroNotifyFn",
+    "member": "on_detached_from_visual_tree"
+   },
+   {
+    "setter": "ferro_class_on_apply_template",
+    "type": "FerroNotifyFn",
+    "member": "on_apply_template"
+   },
+   {
+    "setter": "ferro_class_on_pointer",
+    "type": "FerroPointerFn",
+    "member": "on_pointer_*"
+   },
+   {
+    "setter": "ferro_class_on_key",
+    "type": "FerroKeyFn",
+    "member": "on_key_*"
+   }
+  ],
+  "property": {
+   "register": "ferro_property_register",
+   "kinds": "the kinds of signals: 1 i64, 2 f64, 3 bool, 5 text",
+   "flags": [
+    {
+     "value": 1,
+     "name": "affects_measure"
+    },
+    {
+     "value": 2,
+     "name": "affects_arrange"
+    },
+    {
+     "value": 4,
+     "name": "affects_render"
+    },
+    {
+     "value": 8,
+     "name": "inherits"
+    },
+    {
+     "value": 16,
+     "name": "attached"
+    }
+   ]
+  },
+  "data": {
+   "instance": "ferro_object_set_data",
+   "class": "ferro_class_set_data"
+  },
+  "status": "a callback returns 0 (or 1: handled) on success, a negative status on a failure"
  },
  "classes": [
   {
