@@ -561,6 +561,24 @@ model as WinUI's:
 - Template and resources from `SwipeControl.xaml` and `SwipeControl_themeresources.xaml`;
   `SwipeItemStyle` on `AppBarButton`. No peer (WinUI has none).
 
+**Status (SW-1, done).** `SwipeControl`, `SwipeItems`, `SwipeItem`, `SwipeItemInvokedEventArgs`,
+`SwipeMode`, `SwipeBehaviorOnInvoked` (and `ExecuteItemsHaveOneItem`, the error of
+`SwipeItems::try_add` and `try_set_mode` where WinUI throws) in `ferroui-controls`
+(`swipe_control/`). The interaction is WinUI's on the composition interactions: the tracker
+owner's `ValuesChanged` (the content of the side, the last control closed, the threshold),
+`InteractingStateEntered`, `InertiaStateEntered` (the flick to the other side, the blocked sides)
+and `IdleStateEntered` (execute items invoke their item; closed items are removed), the resting
+values of `ConfigurePositionInertiaRestingValues` and the swipe expression of the content's
+`Translation` as WinUI writes them, `Close` with `c_MinimumCloseVelocity`; the items are
+`CommandBarButton`s with `SwipeItemStyle`, coloured as WinUI's `UpdateColors`. Without a
+compositor (headless) `Close` closes at once. The WinUI theme has `Controls/SwipeControl.xaml`
+and the converted `Resources/SwipeControl_themeresources.xaml` (the waivers are removed); the
+catalog has a "SwipeControl" page in "Collections & Data". Left for later: the execute
+expression and the clip animation of the items (`SetupExecuteExpressionAnimation`,
+`SetupClipAnimation`), the dismissal on a tap outside, a key or a change of the top level
+(`AttachDismissingHandlers`), the `InputEater` that keeps taps from the content while open, a
+precision touchpad's pan. Tests: `swipe_control/swipe_control_tests.rs`.
+
 ## 7. Design: Pivot and high contrast
 
 ### 7.1 Pivot (decision D8: the full WinUI structure)
@@ -711,7 +729,7 @@ Additive members of `ferroui-base`:
 | Platform | Contrast | System colours | Change | Validation |
 |---|---|---|---|---|
 | Windows (`src/Windows/FerroUI.Win32/win32_platform_settings.rs`) | `SPI_GETHIGHCONTRAST` with `HCF_HIGHCONTRASTON` (as WinUI), the `IAccessibilitySettings` reading kept as the fallback | `GetSysColor` of `COLOR_WINDOW`, `COLOR_WINDOWTEXT`, `COLOR_BTNFACE`, `COLOR_BTNTEXT`, `COLOR_HIGHLIGHT`, `COLOR_HIGHLIGHTTEXT`, `COLOR_HOTLIGHT`, `COLOR_GRAYTEXT`, while high contrast is on | `WM_SETTINGCHANGE` with `SPI_SETHIGHCONTRAST`, and `WM_SYSCOLORCHANGE` | Windows VM: the four contrast themes, switching while running |
-| macOS (`native/FerroUI.Native/src/OSX/PlatformSettings.mm`, `src/FerroUI.Native/frn.idl`, `native_platform_settings.rs`) | `NSWorkspace.accessibilityDisplayShouldIncreaseContrast` ("Increase contrast"), as well as the high contrast appearance names | the dynamic `NSColor`s under the effective appearance: `windowBackgroundColor`, `labelColor`, `controlColor`, `controlTextColor`, `selectedContentBackgroundColor`, `alternateSelectedControlTextColor`, `linkColor`, `disabledControlTextColor` (decision D11) | an observer of `NSWorkspaceAccessibilityDisplayOptionsDidChangeNotification` beside the appearance KVO | locally, with the owner switching the setting (an agent does not change system settings); the native interface gains two methods at the end of `IFrnPlatformSettings` |
+| macOS (`native/FerroUI.Native/src/OSX/PlatformSettings.mm`, `src/FerroUI.Native/frn.idl`, `native_platform_settings.rs`) | `NSWorkspace.accessibilityDisplayShouldIncreaseContrast` ("Increase contrast"), as well as the high contrast appearance names | the dynamic `NSColor`s under the effective appearance: `windowBackgroundColor`, `labelColor`, `controlColor`, `controlTextColor`, `selectedContentBackgroundColor`, `alternateSelectedControlTextColor`, `linkColor`, `disabledControlTextColor` (decision D11), while the preference is `High` | the observer of `NSWorkspaceAccessibilityDisplayOptionsDidChangeNotification` (already re-reading the colour values) beside the appearance KVO | locally, with the owner switching the setting (an agent does not change system settings). As built (HC-3): an optional interface `IFrnContrastSettings` found with `QueryInterface`, as `IFrnAccessibilitySettings` and `IFrnPowerSettings`, instead of methods at the end of `IFrnPlatformSettings`, so an older native library keeps working |
 | Linux (`src/FerroUI.FreeDesktop/dbus_platform_settings.rs`) | the portal key `contrast` of `org.freedesktop.appearance` (1 is high) | none (the portal has none): the fixed palettes of 7.3 | `SettingChanged` for `contrast` | the fake portal of the crate's tests; the Linux VM with GNOME's high contrast switch |
 | Browser, iOS, Android | already report the preference; the browser can read the system colours of `forced-colors` from CSS system colours (follow-up HC-5) | | already | |
 
@@ -743,7 +761,7 @@ to see. Efforts are working days of one agent, including review rounds.
 | PV-3 | The WinUI theme documents of Pivot, PivotItem and PivotHeaderItem; WinUI-only list; catalog page | PV-2 | D8 | yes: the header carousel and flick against WinUI, the Tab peers | 3 |
 | HC-1 | Base: `SystemColors`, the high contrast variant (7.2); WinUI theme: `UseSystemHighContrast`, `Accents/SystemColors` (7.3); headless tests with simulated platform settings; catalog shows the variant | | D9, D10 | no | done (#560); no catalog page |
 | HC-2 | Windows: `SPI_GETHIGHCONTRAST`, `GetSysColor`, the messages | HC-1; after #325 (it changes the same file) | | **yes** | 2 |
-| HC-3 | macOS: "Increase contrast", the `NSColor`s, the notification | HC-1; after #325 (same files) | D11 | no (macOS; the owner toggles the setting) | 2 |
+| HC-3 | macOS: "Increase contrast", the `NSColor`s, the notification | HC-1; after #325 (same files) | D11 | no (macOS; the owner toggles the setting) | done (#560); the owner validates it by toggling the setting |
 | HC-4 | Linux: the portal's `contrast` | HC-1 | | no (Linux VM to confirm with GNOME) | 1 |
 | Follow-ups | LV-3 drag and reorder; LV-4 ItemsView and ItemContainer on #269; deferred states (5.9); the theme migration pilot (5.11); HC-5 browser system colours; `ListViewItemPresenter` as an element (D6) | | | | |
 

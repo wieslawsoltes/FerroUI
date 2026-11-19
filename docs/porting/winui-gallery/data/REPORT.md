@@ -54,8 +54,8 @@ A verified enum does not verify its consuming controls, installed fonts, inherit
 | Page state | Count |
 |---|---:|
 | pending | 35 |
-| partial | 49 |
-| ported | 42 |
+| partial | 45 |
+| ported | 46 |
 | verified | 0 |
 
 Partial pages exercise reviewed native subsets; a ported page has a native adaptation, or a recorded reason why it cannot have one, for every catalog example (`samples/WinUIGallery/port-status.json`). Neither state claims rendering parity.
@@ -77,7 +77,7 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | AppWindowTitleBar | Windowing | pending | 3 |
 | AutoSuggestBox | Text | ported | 2 |
 | BadgeNotificationManager | Shell | pending | 2 |
-| Binding | Fundamentals | partial | 7 |
+| Binding | Fundamentals | ported | 7 |
 | Border | Layout | ported | 1 |
 | BreadcrumbBar | Navigation | pending | 2 |
 | Button | Basic input | ported | 4 |
@@ -139,7 +139,7 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | ProgressBar | Status & info | partial | 2 |
 | ProgressRing | Status & info | partial | 2 |
 | PullToRefresh | Collections | partial | 2 |
-| RadialGradientBrush | Styles | partial | 1 |
+| RadialGradientBrush | Styles | ported | 1 |
 | RadioButton | Basic input | ported | 2 |
 | RatingControl | Basic input | partial | 2 |
 | RelativePanel | Layout | ported | 1 |
@@ -154,7 +154,7 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | Shape | Styles | ported | 3 |
 | Slider | Basic input | partial | 4 |
 | Sound | Media | ported | 3 |
-| Spacing | Design | partial | 0 |
+| Spacing | Design | ported | 0 |
 | SplitButton | Basic input | ported | 2 |
 | SplitView | Layout | ported | 1 |
 | StackPanel | Layout | ported | 1 |
@@ -166,7 +166,7 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | TabView | Navigation | partial | 10 |
 | TableView | Collections | pending | 5 |
 | TeachingTip | Dialogs & flyouts | pending | 3 |
-| Templates | Fundamentals | partial | 4 |
+| Templates | Fundamentals | ported | 4 |
 | TextBlock | Text | partial | 5 |
 | TextBox | Text | partial | 4 |
 | ThemeShadow | Styles | ported | 1 |

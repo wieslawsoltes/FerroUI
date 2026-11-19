@@ -72,16 +72,6 @@
       "reason": "TwoPaneView: no FerroUI control."
     },
     {
-      "document": "controls/dev/SwipeControl/SwipeControl.xaml",
-      "key": "*",
-      "reason": "SwipeControl: no FerroUI control."
-    },
-    {
-      "document": "controls/dev/SwipeControl/SwipeControl_themeresources.xaml",
-      "key": "*",
-      "reason": "SwipeControl: no FerroUI control."
-    },
-    {
       "document": "controls/dev/AnnotatedScrollBar/AnnotatedScrollBar.xaml",
       "key": "*",
       "reason": "AnnotatedScrollBar: no FerroUI control."
