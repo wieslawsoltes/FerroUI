@@ -66,7 +66,7 @@ function groupItems(context: StudioContext, group: StateGroup, update: (group: S
             if (duration === undefined) return;
             const value = await editText('Transition easing', easingText(route.easing));
             if (value !== undefined) await update({ ...group, transitions: group.transitions.map(item =>
-                item === route ? { ...item, duration, easing: parseMappedEasing(value) } : item) });
+                item.from === route.from && item.to === route.to ? { ...item, duration, easing: parseMappedEasing(value) } : item) });
         }, 'settings-gear'));
         if (mapped.transitions.length) rows.push(action(`${id}:route-source`, 'Reveal transition source…', async () => {
             const route = await pickTransition(group);
@@ -117,7 +117,8 @@ async function editMappedSetter(state: State): Promise<Setter[] | undefined> {
     })));
     if (!selection) return;
     const value = await editText(selection.label, selection.setter.value);
-    if (value !== undefined) return state.setters.map(setter => setter === selection.setter ? { ...setter, value } : setter);
+    if (value !== undefined) return state.setters.map(setter =>
+        setter.target === selection.setter.target && setter.property === selection.setter.property ? { ...setter, value } : setter);
 }
 
 function easingText(easing: Easing): string {

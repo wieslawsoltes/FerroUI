@@ -76,18 +76,18 @@ export async function verifyRsxStates({ invoke, content }: McpFixture): Promise<
     await control({ action: 'stop' });
     assert.equal(await width(), 100);
     group.states[1].setters[0].value = '280';
-    group.transitions[1].duration = .825;
+    group.transitions[1].duration = .824;
     group.transitions[1].easing = { kind: 'Linear' };
     const edit = (expected_revision: number) => invoke('designer_studio_edit', { session,
         expected_revision, tool: 'designer_state', arguments: { action: 'upsert', model: group },
     });
     const retired = frame.revision;
     content(await edit(retired));
-    assert.equal(document.getText(), source.replace('260.0', '280.0').replace('640u64', '825u64')
+    assert.equal(document.getText(), source.replace('260.0', '280.0').replace('640u64', '824u64')
         .replace('CubicEaseIn', 'LinearEasing'));
     assert.ok((await edit(retired)).isError);
     frame = await outline();
-    assert.equal((await open('Idle', 'Ready', .4125)).duration, .825);
+    assert.equal((await open('Idle', 'Ready', .412)).duration, .824);
     assert.equal(await width(), 200);
     await control({ action: 'stop' });
     const version = document.version;
