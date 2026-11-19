@@ -397,6 +397,12 @@ name, the first time the control looks for its theme. Release builds do not chec
   rooted. If code must look a key up, write it as a string literal, or add it to `theme-roots`.
 - Define a geometry once as a keyed resource and refer to it, instead of repeating the same path
   data inline in several templates.
+- Colours the system reports (the accent, the system colours of high contrast) come from a
+  resource provider of the theme's Rust code (`Accents/SystemAccentColors`,
+  `Accents/SystemColors` of the WinUI theme), merged into the theme's dictionary, never from a
+  theme dictionary: theme dictionaries are searched before merged dictionaries, so a fixed value
+  there would hide the provider. Reference them with `{DynamicResource}`; the provider raises a
+  change only when its colours change.
 
 ### 4.3 Control themes
 
@@ -466,6 +472,10 @@ name, the first time the control looks for its theme. Release builds do not chec
   record the creates edge (4.4).
 - No `thread_local!` (use `ferro_thread_local!`), no panics for markup errors: return
   `XamlLoadError` (the move to `panic = "abort"` in `dist`).
+- A theme with a high contrast variant sets it with `ThemeVariant::set_high_contrast_variant`
+  while it is in use (the WinUI theme does so with `UseSystemHighContrast`); the theme variant
+  roots then resolve to it while the platform asks for high contrast. A theme without one sets
+  nothing, and the contrast setting selects nothing for it.
 
 ## 5. Compiled bindings in applications
 

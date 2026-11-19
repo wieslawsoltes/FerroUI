@@ -11,19 +11,21 @@ SOURCE_COMMIT = "14061eeac21c38ae99f302edf3d9136d4f652c4c"
 METADATA = "WinUIGallery/SampleSupport/Data/ControlInfoData.json"
 
 # Original media used by the reviewed Image, FlipView, ConnectedAnimation, Button,
-# AppBarButton and AppBarToggleButton pages. Keep this list explicit: an embedded asset
-# does not establish a port of the source feature (for example animated GIF playback or
+# AppBarButton, AppBarToggleButton and TreeView pages. Keep this list explicit: an embedded
+# asset does not establish a port of the source feature (for example animated GIF playback or
 # SVG decoding).
 SAMPLE_MEDIA = [
     *(f"LandscapeImage{number}.jpg" for number in range(1, 14)),
     "MirrorPCConsent.svg", "animated.gif", "cliff.jpg", "grapes.jpg",
     "ninegrid.gif", "rainier.jpg", "sunset.jpg", "treetops.jpg", "valley.jpg",
-    "Slices.png", "Slices2.png",
+    "Slices.png", "Slices2.png", "folder.png",
 ]
+# The theme images of the reviewed Geometry page (its HeaderImage of the Default and Light themes).
+DESIGN_MEDIA = ["Geometry.dark.png", "Geometry.light.png"]
 MEDIA_PAGES = [
     f"WinUIGallery/Samples/{page}/{page}Page{suffix}"
     for page in ["Image", "FlipView", "ConnectedAnimation", "Button", "AppBarButton",
-                 "AppBarToggleButton"]
+                 "AppBarToggleButton", "TreeView", "Geometry"]
     for suffix in [".xaml", ".xaml.cs"]
 ]
 
@@ -42,7 +44,8 @@ def outputs(upstream):
     metadata = json.loads((upstream / METADATA).read_text(encoding="utf-8-sig"))
     paths = sorted({item.get("ImagePath") or "ms-appx:///Assets/ControlImages/Placeholder.png"
                     for group in metadata["Groups"] for item in group["Items"]}
-                   | {"ms-appx:///Assets/SampleMedia/" + name for name in SAMPLE_MEDIA})
+                   | {"ms-appx:///Assets/SampleMedia/" + name for name in SAMPLE_MEDIA}
+                   | {"ms-appx:///Assets/Design/" + name for name in DESIGN_MEDIA})
     root = upstream / "WinUIGallery"
     candidates = list((root / "Assets/ControlImages").glob("*.png"))
     folded = {str(path.relative_to(root)).casefold(): path for path in candidates}
@@ -52,7 +55,8 @@ def outputs(upstream):
     registrations = []
     output = {}
     for uri in paths:
-        if not uri.startswith(("ms-appx:///Assets/ControlImages/", "ms-appx:///Assets/SampleMedia/")):
+        if not uri.startswith(("ms-appx:///Assets/ControlImages/", "ms-appx:///Assets/SampleMedia/",
+                               "ms-appx:///Assets/Design/")):
             raise ValueError(f"Unexpected image URI: {uri}")
         registered = uri.removeprefix("ms-appx:///")
         original = root / registered
