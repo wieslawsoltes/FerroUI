@@ -1124,15 +1124,19 @@ fn image_tiles_probes(side: usize) -> Vec<Probe> {
 
 fn image_viewbox_scene() -> Arc<Scene3DSnapshot> {
     // The viewbox is the bottom half of the bitmap (blue, white), stretched uniformly into the box
-    // of the texture coordinates, which is twice as high as wide: centred, with transparent bands
-    // above and below.
+    // of the texture coordinates, which is a little more than twice as high as wide: centred, with
+    // transparent bands above and below. Not exactly twice: the edges of the viewbox would then be
+    // at 37.5 % and 62.5 % of the image, the centres of two rows of pixels at 1x, where whether a
+    // pixel is inside the viewbox is decided by the rounding of the interpolated texture
+    // coordinates, which the rasterizer of a GPU and the CPU reference do not share.
     let source = RelativeRect::new(0.0, 0.5, 1.0, 0.5, RelativeUnit::Relative);
     let brush = image_brush(Stretch::Uniform, TileMode::None, RelativeRect::FILL, source);
-    brush_square(24, [0.0, 0.0], [1.0, 2.0], vec![brush_layer(Scene3DMaterialKind::Diffuse, &brush, 0.0)])
+    brush_square(24, [0.0, 0.0], [1.0, 2.1], vec![brush_layer(Scene3DMaterialKind::Diffuse, &brush, 0.0)])
 }
 
-/// The viewbox of 4 by 2 pixels placed uniformly in a box of 1 by 2: 1 by 0.5, from 0.75 to 1.25
-/// of the height of the texture coordinates, so from 37.5 % to 62.5 % of the image.
+/// The viewbox of 4 by 2 pixels placed uniformly in a box of 1 by 2.1: 1 by 0.5, from 0.8 to 1.3
+/// of the height of the texture coordinates, so from 38.1 % to 61.9 % of the image (no edge on
+/// the centre of a row of pixels at 1x or 2x).
 fn image_viewbox_probes(side: usize) -> Vec<Probe> {
     vec![
         Probe::at("above the viewbox: transparent", side, 0.5, 0.2, TRANSPARENT, 0),
