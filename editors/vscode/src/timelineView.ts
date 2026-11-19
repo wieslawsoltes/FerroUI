@@ -10,7 +10,7 @@ import { authorTimelineKeyframe } from './timelineKeyframeAuthoring';
 import { positionFromPose, TimelinePlayback } from './timelinePlayback';
 import { canPreviewProgram, previewClock } from './timelinePrograms';
 import { TimelineTransitions } from './timelineTransitions';
-import type { FromTimeline, KeyframeLocation, TimelineControl, TimelineProgram, TimelineState, ToTimeline } from './timelineProtocol';
+import type { CurvePoint, FromTimeline, KeyframeLocation, TimelineControl, TimelineProgram, TimelineState, ToTimeline } from './timelineProtocol';
 import { timelineHtml } from './view';
 
 export const TIMELINE_VIEW = 'ferroui.timeline';
@@ -157,6 +157,8 @@ export class TimelineView implements vscode.Disposable {
         this.view.show({ frame: catalog?.programs ? frame : undefined, documentVersion: panel?.document.version,
             programs, message, names, writable: panel?.language === 'xaml', position,
             canEditKeyframes: panel?.supportsTimelineKeyframeDrafts,
+            canShowCurves: panel?.supportsTimelineCurves,
+            curveCatalog: panel?.supportsTimelineCurves && catalog?.programs ? catalog.key : undefined,
             canPlayAll: Boolean(panel?.supportsTimelineCombinedPlayback && programs.some(canPreviewProgram)),
             canRecord: panel?.supportsTimelineRecording, canRecordGeometry: panel?.supportsTimelineGeometryRecording,
             recording: this.recordingTime(panel) !== undefined }, this.file);
@@ -174,6 +176,23 @@ export class TimelineView implements vscode.Disposable {
                 const context = new StudioContext(panel, message.frame.token, () => this.panel === panel);
                 if (message.type === 'keyframeDraft') {
                     this.view.post(await authorTimelineKeyframe(context, message, () => this.programs(panel).pending));
+                    return;
+                }
+                if (message.type === 'curve') {
+                    const { frame, request, program, target, property, window } = message;
+                    const reply = { type: 'curveResult', frame, request } as const;
+                    const stale = () => this.panel !== panel || !panel.canUse(frame);
+                    try {
+                        if (!panel.supportsTimelineCurves || stale()) {
+                            this.view.post({ ...reply, stale: true });
+                            return;
+                        }
+                        const { points } = await context.read<{ points: CurvePoint[] }>(
+                            'designer_animation_curve', { program, target, property, window });
+                        this.view.post(stale() ? { ...reply, stale: true } : { ...reply, points });
+                    } catch (error) {
+                        this.view.post(stale() ? { ...reply, stale: true } : { ...reply, error: errorMessage(error) });
+                    }
                     return;
                 }
                 const program = (await this.programs(panel).pending).find(entry => entry.id === message.program);

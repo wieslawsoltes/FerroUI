@@ -76,6 +76,8 @@ export interface TimelineState {
     canRecord?: boolean;
     canRecordGeometry?: boolean;
     canEditKeyframes?: boolean;
+    canShowCurves?: boolean;
+    curveCatalog?: string;
     canPlayAll?: boolean;
     recording?: boolean;
     position?: TimelinePosition;
@@ -99,6 +101,7 @@ export type FromTimeline =
     | { type: 'programTargets'; frame: FrameTarget; program: number }
     | { type: 'revealProgram'; frame: FrameTarget; program: number }
     | { type: 'recordKeyframe'; frame: FrameTarget; program: number; time: number; track?: number }
+    | TimelineCurveRequest
     | TimelineKeyframeRequest
     | { type: 'keyframeGroup'; frame: FrameTarget; program: number; keys: KeyframeLocation[]; edit?: KeyframeGroupEdit }
     | { type: 'keyframe'; frame: FrameTarget; program: number; track: number; time: number };
@@ -106,6 +109,7 @@ export type FromTimeline =
 export type ToTimeline = { type: 'position'; position?: TimelinePosition; frame?: FrameTarget }
     | { type: 'keyframesEdited'; keys?: KeyframeLocation[]; before: FrameTarget }
     | TimelineKeyframeResponse
+    | TimelineCurveResponse
     | { type: 'error'; message: string };
 
 export interface KeyframeDraft {
@@ -143,4 +147,25 @@ export interface TimelineKeyframeResponse {
     preview?: KeyframeDraftPreview;
     applied?: AppliedKeyframe | null;
     error?: string;
+}
+
+export interface CurvePoint { time: number; value: number }
+
+export interface TimelineCurveRequest {
+    type: 'curve';
+    frame: FrameTarget;
+    request: number;
+    program: number;
+    target: number;
+    property: string;
+    window: { start: number; end: number };
+}
+
+export interface TimelineCurveResponse {
+    type: 'curveResult';
+    frame: FrameTarget;
+    request: number;
+    points?: CurvePoint[];
+    error?: string;
+    stale?: boolean;
 }

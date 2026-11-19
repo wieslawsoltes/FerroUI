@@ -376,13 +376,16 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
         <input id="transition-seek" type="range" min="0" value="0" step="any" aria-label="State transition playhead">
     </section>
     <div id="timeline-toolbar" class="timeline-toolbar" aria-label="Animation controls" hidden>
-        <div id="timeline-transport" class="tool-group" role="group" aria-label="Playback" hidden>
-            ${tool('timeline-play', 'play', 'Play animation')}
-            ${tool('timeline-stop', 'debug-stop', 'Stop animation')}
-            ${tool('timeline-play-all', 'run-all', 'Play all animations', 'aria-pressed="false"')}
+        <div class="timeline-program-bar">
+            <div id="timeline-transport" class="tool-group" role="group" aria-label="Playback" hidden>
+                ${tool('timeline-play', 'play', 'Play animation')}
+                ${tool('timeline-stop', 'debug-stop', 'Stop animation')}
+                ${tool('timeline-play-all', 'run-all', 'Play all animations', 'aria-pressed="false"')}
+            </div>
+            <select id="timeline-programs" aria-label="Animation program"></select>
+            <output id="timeline-time" for="timeline-seek" aria-live="off" hidden></output>
+            ${tool('timeline-actions', 'ellipsis', 'More Animation Actions', 'disabled')}
         </div>
-        <select id="timeline-programs" aria-label="Animation program"></select>
-        <output id="timeline-time" for="timeline-seek" aria-live="off" hidden></output>
         <select id="timeline-snap" aria-label="Keyframe snapping" title="Keyframe snapping" hidden>
             <option value="0">Sec</option>
             <option value="24">24 fps</option>
@@ -392,6 +395,8 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
         ${tool('timeline-record-mode', 'circle-filled', 'Record property changes', 'aria-pressed="false" hidden disabled')}
         ${tool('timeline-record', 'add', 'Add keyframe at playhead', 'hidden disabled')}
         ${tool('timeline-key-actions', 'list-selection', 'Keyframe Selection Actions', 'hidden disabled')}
+        ${tool('timeline-curves', 'graph-line', 'Animation curves', 'aria-pressed="false" aria-controls="timeline-tracks" hidden')}
+        ${tool('timeline-fit-keys', 'selection', 'Fit selected keyframes', 'hidden disabled')}
         <div id="timeline-zoom" class="tool-group" role="group" aria-label="Timeline zoom" hidden>
             ${tool('timeline-zoom-out', 'zoom-out', 'Zoom out on timeline (−)')}
             ${tool('timeline-fit', 'screen-normal', 'Fit timeline (0)')}
@@ -399,7 +404,6 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
         </div>
         ${tool('timeline-preview-targets', 'target', 'Choose preview targets', 'hidden')}
         ${tool('timeline-source', 'go-to-file', 'Reveal animation in source', 'hidden')}
-        ${tool('timeline-actions', 'ellipsis', 'More Animation Actions', 'disabled')}
     </div>
     <section id="timeline-native-source" class="timeline-native-preview" hidden>
         <p id="timeline-preview-note" class="dock-message"></p>

@@ -1,6 +1,6 @@
 import { create, element } from './dom';
 import type { RenderedKeyframe } from './timelineKeyDrag';
-import { clamp, fitTimeline, minimumTimelineSpan, panTimeline, timelinePercent, visibleTime, zoomTimeline, type TimelineViewport } from './timelineViewport';
+import { clamp, fitKeyTimes, fitTimeline, minimumTimelineSpan, panTimeline, timelinePercent, visibleTime, zoomTimeline, type TimelineViewport } from './timelineViewport';
 
 export class TimelineViewportView {
     readonly grid = element('timeline-grid');
@@ -13,7 +13,8 @@ export class TimelineViewportView {
     private readonly panRow = element('timeline-pan-row');
     private viewport = fitTimeline(0);
 
-    constructor(private readonly slider: HTMLInputElement, private readonly keys: () => readonly RenderedKeyframe[]) {
+    constructor(private readonly slider: HTMLInputElement, private readonly keys: () => readonly RenderedKeyframe[],
+        private readonly afterLayout: () => void) {
         this.zoomIn.onclick = () => this.zoom(1.25);
         this.zoomOut.onclick = () => this.zoom(.8);
         this.fit.onclick = () => this.apply(fitTimeline(this.range.duration));
@@ -23,6 +24,8 @@ export class TimelineViewportView {
     }
 
     get range(): TimelineViewport { return this.viewport; }
+
+    fitKeys(times: readonly number[]): void { this.apply(fitKeyTimes(this.range.duration, times)); }
 
     follow(duration: number | undefined, reset: boolean): boolean {
         this.controls.hidden = duration === undefined;
@@ -63,6 +66,7 @@ export class TimelineViewportView {
             if (visible) button.style.left = `${clamp(timelinePercent(this.range, key.time), 0, 100)}%`;
         }
         this.position(this.slider.valueAsNumber);
+        this.afterLayout();
     }
 
     position(time: number): void {

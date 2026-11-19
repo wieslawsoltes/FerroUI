@@ -1,5 +1,6 @@
 import { strict as assert } from 'node:assert';
-import { fitTimeline, minimumTimelineSpan, panTimeline, timelinePercent, visibleTime, zoomTimeline } from '../webview/timelineViewport';
+import { CurveScale } from '../webview/timelineCurveScale';
+import { fitKeyTimes, fitTimeline, minimumTimelineSpan, panTimeline, timelinePercent, visibleTime, zoomTimeline } from '../webview/timelineViewport';
 
 export function verifyTimelineViewport(): void {
     const full = fitTimeline(8);
@@ -16,5 +17,15 @@ export function verifyTimelineViewport(): void {
     assert.equal(zoomTimeline(full, 500, 0).span, minimumTimelineSpan);
     assert.deepEqual(zoomTimeline(zoomed, .1, 4), full);
     assert.deepEqual(zoomTimeline(fitTimeline(0), 4, 0), fitTimeline(0));
+    const selection = fitKeyTimes(8, [6.5, 7]);
+    assert.ok(selection.span < 1 && visibleTime(selection, 6.5) && visibleTime(selection, 7));
+    assert.equal(fitKeyTimes(8, [0]).start, 0);
+    assert.equal(fitKeyTimes(8, [8]).start, 8 - fitKeyTimes(8, [8]).span);
+    const scale = new CurveScale([{ time: 1, value: .9 }], [0, .8]);
+    assert.ok(scale.percent(.9) < scale.percent(.8));
+    assert.ok(scale.fromOffset(.8, 25) < .8);
+    assert.ok(Number.isFinite(new CurveScale([], [-1e300, 1e300]).percent(0)));
+    const close = new CurveScale([], [1e12, 1e12 + 1]);
+    assert.ok(close.fromOffset(1e12, -42) > 1e12 && close.fromOffset(1e12, -42) < 1e12 + 1);
     console.log('Timeline viewport kept the zoom pivot, aligned authored key positions, and clamped both pan edges');
 }

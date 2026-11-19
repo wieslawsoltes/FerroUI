@@ -31,6 +31,8 @@ export class TimelineKeyframeEditor {
     private timer?: number;
     private request = 0;
 
+    get applying(): boolean { return Boolean(this.pending?.apply); }
+
     constructor(private readonly send: (request: TimelineKeyframeRequest) => void,
         private readonly seek: ((frame: FrameTarget, program: number, time: number) => void) | undefined,
         private readonly applied: ((keyframe: AppliedKeyframe, property: string) => void) | undefined,
@@ -123,6 +125,18 @@ export class TimelineKeyframeEditor {
         this.section.hidden = true;
     }
 
+    applyCurveDrag(frame: FrameTarget, time: number, value: number): void {
+        const key = this.selected;
+        if (!key || this.applying || frame.session !== this.frame?.session || frame.token !== this.frame.token) return;
+        this.clearRequest();
+        this.time.value = String(time);
+        this.value.value = String(value);
+        this.easing.value = key.keyframe.easing_text;
+        this.applyFocus = this.value;
+        this.submit(this.draft(key, time), frame, true);
+        this.enable();
+    }
+
     private fill(keyframe: TimelineKeyframe): void {
         this.time.value = String(keyframe.time);
         this.value.type = keyframe.value_kind === 'Number' ? 'number' : 'text';
@@ -143,9 +157,13 @@ export class TimelineKeyframeEditor {
             this.showError(`Enter a time from 0 to ${this.time.max} seconds.`);
             return;
         }
-        const draft = { program: key.program, target: key.target, property: key.property, previous: key.keyframe.time,
-            time, value: this.value.value, easing: this.easing.value };
+        const draft = this.draft(key, time);
         this.timer = window.setTimeout(() => this.submit(draft, frame, false), 140);
+    }
+
+    private draft(key: SelectedKeyframe, time: number): KeyframeDraft {
+        return { program: key.program, target: key.target, property: key.property, previous: key.keyframe.time,
+            time, value: this.value.value, easing: this.easing.value };
     }
 
     private submit(draft: KeyframeDraft, frame: FrameTarget, apply: boolean): void {

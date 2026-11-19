@@ -25,6 +25,7 @@ interface Frame {
     timelineRecording: boolean;
     timelineGeometryRecording: boolean;
     timelineKeyframeDrafts: boolean;
+    timelineCurves: boolean;
     timelineCombinedPlayback: boolean;
     stateTransitionPreview: boolean;
 }
@@ -153,6 +154,7 @@ export class DesignerPanel implements vscode.Disposable {
     get supportsTimelineKeyframeDrafts(): boolean {
         return Boolean(this.frame?.timelineKeyframeDrafts && (this.language === 'xaml' || this.frame.snapshot.mappedRustAnimations));
     }
+    get supportsTimelineCurves(): boolean { return Boolean(this.frame?.timelineCurves); }
     get supportsTimelineCombinedPlayback(): boolean { return Boolean(this.frame?.timelineCombinedPlayback); }
     get supportsStateTransitionPreview(): boolean { return Boolean(this.frame?.stateTransitionPreview); }
     get animationRecordingTime(): number | undefined { return this.animationRecording && !this.timelinePose?.playback ? this.timelinePose?.time : undefined; }
@@ -576,6 +578,7 @@ export class DesignerPanel implements vscode.Disposable {
             this.frame = { token, version, viewport, source: input, snapshot, timelineRecording: Boolean(client.capabilities.timelineRecording),
                 timelineGeometryRecording: Boolean(client.capabilities.timelineGeometryRecording),
                 timelineKeyframeDrafts: Boolean(client.capabilities.timelineKeyframeDrafts),
+                timelineCurves: Boolean(client.capabilities.timelineCurves),
                 timelineCombinedPlayback: Boolean(client.capabilities.timelineCombinedPlayback),
                 stateTransitionPreview: Boolean(client.capabilities.stateTransitionPreview),
                 canvas: { ...snapshot, nodes, interactive: Boolean(client.capabilities.canvasInteraction && snapshot.image),

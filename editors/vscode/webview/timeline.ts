@@ -2,6 +2,7 @@ import type { FrameTarget } from '../src/protocol';
 import type { FromTimeline, KeyframeGroupEdit, KeyframeLocation, TimelineControl, TimelineProgram, TimelineState, ToTimeline } from '../src/timelineProtocol';
 import { canPreviewProgram, previewClock } from '../src/timelinePrograms';
 import { element, labelButton } from './dom';
+import { TimelineCurves } from './timelineCurves';
 import { dragKeyframe, type RenderedKeyframe } from './timelineKeyDrag';
 import { TimelineKeyframeEditor } from './timelineKeyframeEditor';
 import { bindTimelineMarquee } from './timelineMarquee';
@@ -12,7 +13,7 @@ import { clamp } from './timelineViewport';
 import { TimelineViewportView } from './timelineViewportView';
 
 interface ProgramIdentity { id: number; key?: string }
-interface SavedTimeline extends ProgramIdentity { frameRate?: number }
+interface SavedTimeline extends ProgramIdentity { frameRate?: number; curves?: boolean }
 declare function acquireVsCodeApi(): {
     postMessage(message: FromTimeline): void;
     getState(): SavedTimeline | number | undefined;
@@ -32,6 +33,8 @@ const recordMode = element<HTMLButtonElement>('timeline-record-mode');
 const record = element<HTMLButtonElement>('timeline-record');
 const actions = element<HTMLButtonElement>('timeline-actions');
 const keyActions = element<HTMLButtonElement>('timeline-key-actions');
+const curveToggle = element<HTMLButtonElement>('timeline-curves');
+const fitKeys = element<HTMLButtonElement>('timeline-fit-keys');
 const slider = element<HTMLInputElement>('timeline-seek');
 const time = element<HTMLOutputElement>('timeline-time');
 const tracks = element<HTMLOListElement>('timeline-tracks');
@@ -40,6 +43,7 @@ let model: TimelineState = { programs: [], names: {}, writable: false };
 const saved = vscode.getState();
 let remembered = typeof saved === 'number' ? { id: saved } : saved;
 let frameRate = [24, 30, 60].find(rate => typeof saved === 'object' && rate === saved.frameRate) ?? 0;
+let curveMode = typeof saved === 'object' && saved.curves === true;
 snap.value = String(frameRate);
 let program: number | undefined;
 let timedProgramSession: number | undefined;
@@ -50,14 +54,18 @@ let lastContent = '';
 let lastPrograms = '';
 const selection = new TimelineSelection();
 let renderedKeys: RenderedKeyframe[] = [];
-const viewport = new TimelineViewportView(slider, () => renderedKeys);
+const viewport = new TimelineViewportView(slider, () => renderedKeys, showCurves);
+const curves = new TimelineCurves(viewport.grid, message => vscode.postMessage(message));
 let owner: { session: number; program: ProgramIdentity } | undefined;
 let keyEdit: { before: FrameTarget; accepted?: KeyframeLocation[] } | undefined;
 
-const gestureFrame = () => pending || keyEdit ? undefined : model.frame;
+const gestureFrame = () => pending || keyEdit || keyframeEditor.applying || positionFor(current())?.playing ? undefined : model.frame;
 const nativePreview = new TimelineNativePreview(queueSeek, () => programAction('programTargets'), () => programAction('revealProgram'));
 const transition = new TimelineStateTransition((frame, control) => vscode.postMessage({ type: 'transitionControl', frame, control }));
-const keyframeEditor = new TimelineKeyframeEditor(request => vscode.postMessage(request),
+const keyframeEditor = new TimelineKeyframeEditor(request => {
+    vscode.postMessage(request);
+    if (request.apply) showPosition();
+},
     (frame, program, time) => send(frame, { action: 'seek', program, time }),
     ({ target, keyframe }, property) => { selection.replace([{ target, property, time: keyframe.time }]); showKeySelection(); },
     () => (renderedKeys.find(({ key, button }) => !button.hidden && selection.has(key))?.button ?? slider).focus({ preventScroll: true }));
@@ -80,8 +88,10 @@ programs.addEventListener('change', () => {
 });
 snap.addEventListener('change', () => {
     frameRate = Number(snap.value);
-    if (remembered) vscode.setState({ ...remembered, frameRate });
+    saveTimeline();
 });
+curveToggle.onclick = () => { curveMode = !curveMode; saveTimeline(); showCurves(); };
+fitKeys.onclick = () => viewport.fitKeys(selection.keys.map(key => key.time));
 play.addEventListener('click', () => {
     const selected = current();
     if (!model.frame || !selected) return;
@@ -111,7 +121,7 @@ actions.addEventListener('click', () => {
 keyActions.addEventListener('click', () => editKeys(selection.keys, model.frame));
 slider.addEventListener('input', () => queueSeek(slider.valueAsNumber));
 function queueSeek(seconds: number): void {
-    if (!model.frame || !canPreviewProgram(current())) return;
+    if (!model.frame || keyframeEditor.applying || keyEdit || !canPreviewProgram(current())) return;
     queued = seconds;
     showPosition();
     seek();
@@ -121,8 +131,8 @@ function programAction(type: 'programTargets' | 'revealProgram'): void {
     vscode.postMessage({ type, frame: model.frame, program });
 }
 container.addEventListener('keydown', event => {
-    const frame = model.frame;
-    if (!frame || program === undefined || pending || keyEdit || (event.key !== '[' && event.key !== ']')) return;
+    const frame = gestureFrame();
+    if (!frame || program === undefined || (event.key !== '[' && event.key !== ']')) return;
     const previous = event.key === '[';
     const from = slider.valueAsNumber;
     let destination = previous ? -Infinity : Infinity;
@@ -158,6 +168,9 @@ window.addEventListener('message', event => {
         showTracks();
     } else if (message.type === 'keyframeDraftResult') {
         keyframeEditor.receive(message);
+        showPosition();
+    } else if (message.type === 'curveResult') {
+        curves.receive(message);
     } else if (message.type === 'error') {
         queued = submitted = keyEdit = undefined;
         pending = false;
@@ -181,6 +194,7 @@ function showTracks(): void {
         keyframeEditor.close();
         nativePreview.show(undefined, {}, 0, false, false);
         transition.show(model.transition, model.frame);
+        showCurves();
         return;
     }
     transition.show();
@@ -227,22 +241,27 @@ function showTracks(): void {
         selection.reconcile(timeline.tracks);
     }
     const changedViewport = viewport.follow(timeline.duration, newProgram);
-    const content = JSON.stringify([selected, model.names, model.writable]);
+    const content = JSON.stringify([model.frame?.session ?? owner?.session, selected, model.names, model.writable, model.canEditKeyframes]);
     if (lastContent !== content) {
         lastContent = content;
         const restoreFocus = renderedKeys.some(item => item.button === document.activeElement);
         renderedKeys = [];
+        curves.clear();
         slider.max = String(timeline.duration);
         tracks.replaceChildren(...timeline.tracks.map((track, index) => {
             const row = document.createElement('li');
             row.className = 'timeline-track';
             const name = document.createElement('span');
             name.className = 'timeline-track-name';
-            name.textContent = track.property;
+            const label = document.createElement('span');
+            label.className = 'timeline-track-label';
+            label.textContent = track.property;
+            name.append(label);
             const target = model.names[track.target];
             name.title = target ? `${target} · ${track.property}` : track.property;
             const lane = document.createElement('div');
             lane.className = 'timeline-lane';
+            const plot = track.keyframes[0]?.value_kind === 'Number' ? curves.add(lane, name, track) : undefined;
             lane.addEventListener('dblclick', event => {
                 if (event.target !== lane) return;
                 const bounds = lane.getBoundingClientRect();
@@ -261,22 +280,36 @@ function showTracks(): void {
                 const location = { target: track.target, property: track.property, time: key.time };
                 const rendered = { button, key: location };
                 renderedKeys.push(rendered);
-                if (model.writable && timeline.duration > 0) dragKeyframe(rendered, lane, () => viewport.range,
+                const value = Number(key.value_text);
+                if (plot && Number.isFinite(value)) plot.keys.push({ rendered, value });
+                const open = (frame: FrameTarget, focus: boolean) => {
+                    if (!model.canEditKeyframes || !(model.writable || selected.sourceRange) || model.documentVersion === undefined) return false;
+                    keyframeEditor.open(frame, model.documentVersion, selected.id, track.target, track.property, key,
+                        target ?? track.property, timeline.duration, focus);
+                    return true;
+                };
+                const editableCurve = plot && Number.isFinite(value) && model.canEditKeyframes && (model.writable || selected.sourceRange);
+                if ((model.writable || editableCurve) && timeline.duration > 0) dragKeyframe(rendered, lane, () => viewport.range,
                     () => selection.has(location) ? renderedKeys.filter(item => selection.has(item.key)) : [rendered],
                     gestureFrame,
                     time => Math.round(time * (frameRate || 1000)) / (frameRate || 1000),
-                    (keys, offset, frame) => editKeys(keys, frame, { action: 'move_keyframes', offset }));
+                    (keys, offset, frame) => editKeys(keys, frame, { action: 'move_keyframes', offset }),
+                    editableCurve ? { value, scale: () => curves.canEdit(plot) ? plot.scale : undefined, commit: (time, value, frame) => {
+                        if (!open(frame, false)) return;
+                        selection.replace([location]);
+                        showKeySelection();
+                        keyframeEditor.applyCurveDrag(frame, time, value);
+                    } } : undefined);
                 button.addEventListener('click', event => {
-                    if (!model.frame || pending || keyEdit) return;
+                    const frame = gestureFrame();
+                    if (!frame) return;
                     const additive = event.metaKey || event.ctrlKey;
                     selection.pick(location, event.shiftKey ? renderedKeys.map(item => item.key) : [], event.shiftKey, additive);
                     showKeySelection();
                     if (event.shiftKey || additive) return;
-                    if (model.canEditKeyframes && (model.writable || selected.sourceRange) && model.documentVersion !== undefined) {
-                        keyframeEditor.open(model.frame, model.documentVersion, selected.id, track.target, track.property, key,
-                            target ?? track.property, timeline.duration, true);
-                    } else if (model.writable) vscode.postMessage({ type: 'keyframe', frame: model.frame, program: selected.id, track: index, time: key.time });
-                    else send(model.frame, { action: 'seek', program: selected.id, time: key.time });
+                    if (open(frame, true)) return;
+                    if (model.writable) vscode.postMessage({ type: 'keyframe', frame, program: selected.id, track: index, time: key.time });
+                    else send(frame, { action: 'seek', program: selected.id, time: key.time });
                 });
                 button.addEventListener('keydown', event => keyShortcuts(event, location, timeline.duration));
                 lane.append(button);
@@ -303,7 +336,24 @@ function remember(program: TimelineProgram): void {
     const key = program.source_key ?? undefined;
     if (remembered?.id === program.id && remembered.key === key) return;
     remembered = { id: program.id, key };
-    vscode.setState({ ...remembered, frameRate });
+    saveTimeline();
+}
+
+function saveTimeline(): void {
+    if (remembered) vscode.setState({ ...remembered, frameRate, curves: curveMode });
+}
+
+function showCurves(): void {
+    const selected = current();
+    const hasScalarTrack = selected?.timeline?.tracks.some(track => track.keyframes[0]?.value_kind === 'Number');
+    curveToggle.hidden = !model.canShowCurves || !hasScalarTrack || Boolean(model.transition);
+    const enabled = !curveToggle.hidden && curveMode;
+    curveToggle.setAttribute('aria-pressed', String(enabled));
+    fitKeys.hidden = !enabled || selection.size === 0;
+    fitKeys.disabled = selection.size === 0;
+    const frame = gestureFrame();
+    curves.follow(enabled, viewport.range, frame && model.curveCatalog && selected ?
+        { frame, catalog: model.curveCatalog, program: selected.id } : undefined);
 }
 
 function showPosition(): void {
@@ -316,27 +366,28 @@ function showPosition(): void {
     const clock = previewClock(selected);
     const position = positionFor(selected);
     const playing = Boolean(position?.playing);
+    const editing = Boolean(keyEdit || keyframeEditor.applying);
     const available = canPreviewProgram(selected);
     const showTransport = Boolean(clock || position?.all);
     transport.hidden = !showTransport && !model.canPlayAll;
     play.hidden = stop.hidden = !showTransport;
     time.hidden = !showTransport;
     playAll.hidden = !model.canPlayAll;
-    playAll.disabled = !model.frame || pending || playing || Boolean(keyEdit);
+    playAll.disabled = !model.frame || pending || playing || editing;
     playAll.setAttribute('aria-pressed', String(Boolean(position?.all)));
     snap.hidden = !timeline || !model.writable;
-    snap.disabled = !model.frame || pending || playing || Boolean(keyEdit);
+    snap.disabled = !model.frame || pending || playing || editing;
     record.hidden = !timeline || !model.writable;
-    record.disabled = !model.frame || pending || playing || Boolean(keyEdit);
+    record.disabled = !model.frame || pending || playing || editing;
     recordMode.hidden = !timeline || !model.canRecord;
-    recordMode.disabled = !model.frame || !available || pending || playing || Boolean(keyEdit);
+    recordMode.disabled = !model.frame || !available || pending || playing || editing;
     labelButton(recordMode, model.canRecordGeometry ? 'Record animation edits' : 'Record property changes');
     recordMode.setAttribute('aria-pressed', String(Boolean(model.recording)));
-    actions.disabled = !model.frame || pending || playing || Boolean(keyEdit) || (!selected && !model.writable);
-    programs.disabled = pending || playing || Boolean(keyEdit) || !model.frame || !selected;
-    keyActions.disabled = !model.frame || pending || playing || Boolean(keyEdit);
+    actions.disabled = !model.frame || pending || playing || editing || (!selected && !model.writable);
+    programs.disabled = pending || playing || editing || !model.frame || !selected;
+    keyActions.disabled = !model.frame || pending || playing || editing;
     const seconds = queued ?? submitted ?? (position?.program === selected?.id ? position?.time : undefined) ?? 0;
-    nativePreview.show(selected, model.names, seconds, Boolean(model.frame && !playing && !keyEdit), pending);
+    nativePreview.show(selected, model.names, seconds, Boolean(model.frame && !playing && !editing), pending);
     if (timeline) {
         slider.value = String(seconds);
         slider.setAttribute('aria-valuetext', `${number.format(seconds)} of ${number.format(timeline.duration)} seconds`);
@@ -359,16 +410,18 @@ function showPosition(): void {
     }
     const playLabel = position?.all ? (position.completed ? 'Play all animations' : 'Resume all animations') : 'Play animation';
     labelButton(play, playing ? (position?.all ? 'Pause all animations' : 'Pause animation') : playLabel, playing ? 'debug-pause' : 'play');
-    play.disabled = !model.frame || !(available || position?.all) || (!playing && (pending || Boolean(keyEdit)));
-    stop.disabled = !model.frame || !position || Boolean(keyEdit) || (!playing && pending);
-    slider.disabled = !model.frame || !timeline || !available || Boolean(clock?.native) || playing || Boolean(keyEdit);
-    for (const { button } of renderedKeys) button.disabled = pending || Boolean(keyEdit) || !model.frame;
-    keyframeEditor.follow(pending || playing || keyEdit ? undefined : model.frame, model.documentVersion, program);
+    play.disabled = !model.frame || !(available || position?.all) || (!playing && (pending || editing));
+    stop.disabled = !model.frame || !position || editing || (!playing && pending);
+    slider.disabled = !model.frame || !timeline || !available || Boolean(clock?.native) || playing || editing;
+    for (const { button } of renderedKeys) button.disabled = pending || editing || !model.frame;
+    keyframeEditor.follow(pending || playing || editing ? undefined : model.frame, model.documentVersion, program);
+    showCurves();
 }
 
 function showKeySelection(): void {
     keyActions.hidden = !current()?.timeline || !model.writable || selection.size === 0;
     for (const { button, key } of renderedKeys) button.setAttribute('aria-pressed', String(selection.has(key)));
+    showCurves();
 }
 
 function editKeys(keys: KeyframeLocation[], frame?: FrameTarget, edit?: KeyframeGroupEdit): void {
@@ -419,7 +472,7 @@ function keyShortcuts(event: KeyboardEvent, location: KeyframeLocation, duration
 }
 
 function seek(): void {
-    if (!model.frame || program === undefined || pending || keyEdit || queued === undefined) return;
+    if (!model.frame || program === undefined || pending || keyEdit || keyframeEditor.applying || queued === undefined) return;
     const time = queued;
     queued = undefined;
     send(model.frame, { action: 'seek', program, time });

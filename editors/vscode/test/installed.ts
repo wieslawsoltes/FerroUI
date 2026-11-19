@@ -5,7 +5,7 @@ import * as path from 'node:path';
 import * as vscode from 'vscode';
 import { NativePreview } from '../src/nativePreview';
 import { sourceOf } from '../src/textDocument';
-import type { TimelineProgram } from '../src/timelineProtocol';
+import type { CurvePoint, TimelineProgram } from '../src/timelineProtocol';
 import { isInside } from '../src/workspacePaths';
 import { verifyHostedPreview } from './hostedPreview';
 import { until } from './wait';
@@ -40,6 +40,7 @@ export async function run(): Promise<void> {
         assert.ok(native.capabilities.designFixtures, 'The installed preview recognizes named design fixtures');
         assert.ok(native.capabilities.timelineGeometryRecording, 'The installed preview supports canvas animation recording');
         assert.ok(native.capabilities.timelineKeyframeDrafts, 'The installed preview validates keyframe drafts and samples easing');
+        assert.ok(native.capabilities.timelineCurves, 'The installed preview samples scalar animation curves');
         assert.ok(native.capabilities.timelineCombinedPlayback, 'The installed preview plays combined animation programs');
         assert.ok(native.capabilities.timelineProgramTargets, 'The installed preview retains animation resource targets');
         assert.ok(native.capabilities.stateTransitionPreview, 'The installed preview samples explicit state transitions');
@@ -58,6 +59,11 @@ export async function run(): Promise<void> {
         assert.ok(animated.mappedRustAnimations, 'The installed native preview maps an RSX animation declaration');
         const { programs } = await native.studioQuery(2, 'designer_programs', { include_source: false }) as { programs: TimelineProgram[] };
         assert.ok(programs[0]?.sourceRange && programs[0].timeline && programs[0].preview?.available);
+        const [program] = programs;
+        const track = program.timeline!.tracks[0];
+        const curve = await native.studioQuery(2, 'designer_animation_curve', { program: program.id,
+            target: track.target, property: track.property, window: { start: 0, end: 2 } }) as { points: CurvePoint[] };
+        assert.equal(curve.points.find(point => point.time === .5)?.value, .65);
         const { animationQuery } = await native.listenHosted(randomBytes(32).toString('hex'));
         const capabilities = new URLSearchParams(animationQuery);
         assert.equal(capabilities.get('ferroui-design-animation'), '1', 'The installed relay negotiates native application animations');

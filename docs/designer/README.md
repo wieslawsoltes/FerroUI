@@ -443,6 +443,12 @@ validation. Deterministic seek/scrub is independent of a wall clock. The live ru
 system remains authoritative about which property types and converters can actually receive an
 animation value.
 
+The `designer_animation_curve` query plots a scalar track over a range of authored seconds. Typed
+tracks use the same compiled target and underlying value as Studio’s scrubber. Registered scalar
+animators use the loaded native interpolation with temporary setter bindings. The query leaves the
+active playhead and target property unchanged. VS Code uses these samples in its Curves mode and
+applies key drags through the same checked transaction as the keyframe editor.
+
 Programs with native object payloads also use the accepted runtime Animation objects directly.
 Source provenance identifies the matching style or resource program, and an explicit preview clock
 drives the framework's own shadow, gradient, effect, integer, transform-component and registered

@@ -1,7 +1,7 @@
 import { strict as assert } from 'node:assert';
 import type * as vscode from 'vscode';
 import { acceptedKeyframe } from '../src/timelineKeyframes';
-import type { TimelinePosition, TimelineProgram } from '../src/timelineProtocol';
+import type { CurvePoint, TimelinePosition, TimelineProgram } from '../src/timelineProtocol';
 import type { McpFixture } from './mcp';
 
 export async function verifyTimelineMcp(mcp: McpFixture, session: number, document: vscode.TextDocument): Promise<void> {
@@ -68,6 +68,11 @@ export async function verifyTimelineMcp(mcp: McpFixture, session: number, docume
     frame = await wait();
     const target = frame.nodes.find(node => node.name === 'saveButton')!.id;
     const sampledOpacity = await opacity();
+    const { points } = content<{ points: CurvePoint[] }>(await invoke('designer_studio_query', { session, tool: 'designer_animation_curve',
+        arguments: { program, target, property: 'Opacity', window: { start: 0, end: 1 } } }));
+    assert.equal(points.find(point => point.time === recordTime)?.value, sampledOpacity);
+    assert.equal(await opacity(), sampledOpacity);
+    assert.equal(document.getText(), beforeRecording);
     content(await edit(frame.revision, { action: 'record_keyframe', program, target, property: 'Opacity', time: recordTime }));
     await wait();
     const recorded = (await pulse()).timeline.tracks[0].keyframes.find(key => key.time === recordTime);

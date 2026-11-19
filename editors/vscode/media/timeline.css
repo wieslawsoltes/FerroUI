@@ -2,8 +2,9 @@ body { block-size: 100vh; }
 .timeline { display: flex; flex-direction: column; block-size: 100%; padding: 7px 8px 10px; }
 #timeline-status { margin: 0 0 8px; color: var(--muted); overflow-wrap: anywhere; }
 .timeline-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.timeline-program-bar { display: flex; align-items: center; gap: 4px; flex: 1 0 100%; min-inline-size: 0; }
 #timeline-program { display: flex; flex-direction: column; min-block-size: 0; }
-#timeline-programs { flex: 1 1 120px; min-inline-size: 0; }
+#timeline-programs { flex: 1 1 90px; min-inline-size: 0; }
 #timeline-time, .timeline-ruler { color: var(--muted); font-variant-numeric: tabular-nums; }
 #timeline-time { padding-inline: 5px 1px; white-space: nowrap; }
 .timeline-native-preview { margin-block-start: 5px; }
@@ -188,4 +189,53 @@ body { block-size: 100vh; }
 }
 .timeline-key[aria-pressed="true"]::before { border-color: currentColor; }
 .timeline-key-dragging { cursor: ew-resize; }
-@media (max-width: 220px) { .timeline-ruler span:nth-child(even) { display: none; } }
+.timeline-track:has([data-curve]) .timeline-track-name {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    justify-content: center;
+    align-self: stretch;
+}
+.timeline-track-label { overflow: hidden; text-overflow: ellipsis; }
+.timeline-curve-scale, .timeline-curve-plot, .timeline-curve-status { display: none; }
+.timeline-lane[data-curve] {
+    block-size: 97px;
+    background: repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 25%),
+        repeating-linear-gradient(0deg, var(--line) 0 1px, transparent 1px 25%);
+}
+.timeline-track:has([data-curve]) .timeline-curve-scale {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 4px;
+    color: var(--muted);
+    font-size: .8em;
+    font-variant-numeric: tabular-nums;
+}
+.timeline-curve-scale span:nth-child(2)::before { content: '–'; margin-inline-end: 4px; }
+[data-curve] .timeline-curve-plot {
+    position: absolute;
+    display: block;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    overflow: hidden;
+    pointer-events: none;
+    fill: none;
+    stroke: var(--vscode-charts-blue, var(--focus));
+    stroke-width: 1.5px;
+    stroke-linejoin: round;
+}
+[data-curve] .timeline-curve-status:not(:empty) {
+    position: absolute;
+    display: block;
+    inset: 5px;
+    overflow: hidden;
+    color: var(--muted);
+    font-size: .85em;
+    pointer-events: none;
+}
+[data-curve] .timeline-key-dragging { cursor: move; }
+@media (max-width: 220px) {
+    .timeline-program-bar { flex-wrap: wrap; }
+    .timeline-ruler span:nth-child(even) { display: none; }
+}

@@ -2,8 +2,9 @@ import { strict as assert } from 'node:assert';
 import * as vscode from 'vscode';
 import type { OutlineNode } from '../src/protocol';
 import { asRange } from '../src/textDocument';
-import type { TimelineProgram } from '../src/timelineProtocol';
+import type { CurvePoint, TimelineProgram } from '../src/timelineProtocol';
 import type { McpFixture } from './mcp';
+import { until } from './wait';
 
 export async function verifyRsxAnimation({ invoke, content }: McpFixture): Promise<void> {
     const path = 'animation_view.rs';
@@ -50,6 +51,12 @@ export async function verifyRsxAnimation({ invoke, content }: McpFixture): Promi
     const key = updated.timeline?.tracks[0].keyframes[1];
     assert.equal(key?.time, 1.4);
     assert.equal(key?.value_text, '0.82');
+    const curve = { program: updated.id, target: updated.timeline!.tracks[0].target, property: 'Opacity',
+        window: { start: 0, end: 2 } };
+    const samples = content<{ points: CurvePoint[] }>(await query('designer_animation_curve', curve)).points;
+    assert.equal(samples.find(point => point.time === 1.4)?.value, .82);
+    assert.ok(samples.some(point => point.time < 1.4 && point.value > .82));
+    assert.ok((await query('designer_animation_curve', { ...curve, window: { start: 1, end: 3 } })).isError);
     content(await invoke('designer_timeline_control', { session, expected_revision: frame.revision,
         arguments: { action: 'seek', program: updated.id, time: 1.4 } }));
     frame = await outline();
@@ -58,6 +65,7 @@ export async function verifyRsxAnimation({ invoke, content }: McpFixture): Promi
     }));
     assert.equal(Number(inspection.properties.find(property => property.name === 'Opacity')?.effective), .82);
     content(await invoke('designer_history', { session, expected_version: document.version, action: 'undo' }));
+    await until(() => document.getText() === original);
     assert.equal(document.getText(), original);
     frame = await outline();
     content(await invoke('designer_block', { session, expected_revision: frame.revision, index: 0 }));
