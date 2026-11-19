@@ -39,6 +39,12 @@ export async function verifyHostedAnimation(preview: NativePreview, update: (rev
     assert.equal(halfway.elapsed, 1);
     assert.ok(halfway.frame.sequence > first.sequence);
     assert.notEqual(halfway.frame.image.png, first.image.png);
+    const corner = style.curveTracks?.find(track => track.property === 'CornerRadius');
+    assert.deepEqual(corner?.curve_channels, ['top_left', 'top_right', 'bottom_right', 'bottom_left']);
+    const query = { program: style.id, target: card.id, property: 'CornerRadius', window: { start: 0, end: 2 } };
+    const topLeft = await preview.hostedCurve(frame(halfway.frame), { ...query, channel: 'top_left' });
+    assert.equal(topLeft.find(point => point.time === 1)?.value, 8, 'Read the custom native radius animator from a property component');
+    await assert.rejects(preview.hostedCurve(frame(halfway.frame), { ...query, channel: 'height' }), /curve channel/i);
     await assert.rejects(sample(first, { program: style.id, elapsed: 0, restart: true }), /frame changed/i);
     const retired = frame(halfway.frame);
     const rewind = await sample(halfway.frame, { program: style.id, elapsed: .5, restart: true });

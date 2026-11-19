@@ -38,7 +38,7 @@ export class NativePreview implements vscode.Disposable {
         canvasInteraction?: boolean; canvasFocusOrder?: boolean; projectInventory?: boolean; tokenHandoff?: boolean;
         designFixtures?: boolean; timelineTransport?: boolean; timelineRecording?: boolean; timelineGeometryRecording?: boolean;
         timelineKeyframeDrafts?: boolean; timelineKeyframeScale?: boolean; timelineCurves?: boolean; timelineCurveVelocity?: boolean;
-        timelineCombinedPlayback?: boolean;
+        timelineCurveChannels?: boolean; timelineCombinedPlayback?: boolean;
         timelineKeyframeTransfer?: boolean;
         timelineProgramTargets?: boolean;
         stateTransitionPreview?: boolean;
@@ -127,11 +127,15 @@ export class NativePreview implements vscode.Disposable {
         return this.send('hostedState', { revision: frame.revision, sequence: frame.sequence, ...draft });
     }
     hostedCurve(frame: HostedAnimationFrame, query: HostedCurveQuery): Promise<CurvePoint[]> {
-        const { metric, ...track } = query;
+        const { metric, channel, ...track } = query;
         if (metric === 'velocity' && !this.capabilities.timelineCurveVelocity) {
             throw new Error('Update the FerroUI preview helper to sample velocity.');
         }
-        return this.send('hostedCurve', { ...frame, ...track, ...(metric === 'velocity' && { metric }) }, 12_000);
+        if (channel && channel !== 'value' && !this.capabilities.timelineCurveChannels) {
+            throw new Error('Update the FerroUI preview helper to sample a property component.');
+        }
+        return this.send('hostedCurve', { ...frame, ...track,
+            ...(metric === 'velocity' && { metric }), ...(channel && channel !== 'value' && { channel }) }, 12_000);
     }
 
     syncStages(source: StageDocument, manifest?: StageManifest, additional: StageDocument[] = [], localSources?: PreviewSourceBuffer[]): Promise<StageModel> {

@@ -143,7 +143,7 @@ export class TimelineKeyframeEditor {
         if (key && !this.applying && !visible({ target: key.target, property: key.property, time: key.keyframe.time })) this.close();
     }
 
-    applyCurveDrag(frame: FrameTarget, time: number, value: number): void {
+    applyCurveDrag(frame: FrameTarget, time: number, value: number | string): void {
         const key = this.selected;
         if (!key || this.applying || frame.session !== this.frame?.session || frame.token !== this.frame.token) return;
         this.clearRequest();

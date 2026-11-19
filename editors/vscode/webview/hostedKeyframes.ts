@@ -25,7 +25,7 @@ export class HostedKeyframeEditor {
             key.keyframe, key.targetName, key.duration, focus);
     }
 
-    drag(key: HostedKeyframeSelection, time: number, value: number) {
+    drag(key: HostedKeyframeSelection, time: number, value: number | string) {
         this.open(key, false);
         this.editor.applyCurveDrag(editorFrame(key.frame), time, value);
     }

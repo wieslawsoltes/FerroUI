@@ -1,6 +1,6 @@
 import type { HostedAnimationFrame, HostedAnimationProgram, HostedAnimationTarget, HostedKeyframeSelection } from '../src/hostedAnimationProtocol';
 import type { FromHosted, ToHosted } from '../src/hostedProtocol';
-import type { CurveMetric, TimelineTrack } from '../src/timelineProtocol';
+import type { CurveChannel, CurveMetric, TimelineTrack } from '../src/timelineProtocol';
 import { AnimationGraphMenu } from './animationGraphMenu';
 import { create, element } from './dom';
 import { editorFrame, type HostedKeyframeEditor } from './hostedKeyframes';
@@ -31,9 +31,10 @@ export class HostedCurves {
     private version = 0;
     private catalog = '';
     private choices: TrackChoice[] = [];
+    private readonly channels = new Map<string, CurveChannel>();
     private plot?: TimelineCurvePlot;
     private selected?: number;
-    private pending?: { request: number; key: string; metric: CurveMetric };
+    private pending?: { request: number; key: string; metric: CurveMetric; channel: CurveChannel };
     private request = 0;
 
     constructor(private readonly send: (message: FromHosted) => void, private readonly editor: HostedKeyframeEditor) {
@@ -85,10 +86,10 @@ export class HostedCurves {
 
     receive(reply: Extract<ToHosted, { type: 'curveReply' }>) {
         if (this.pending?.request !== reply.request) return;
-        const { key, metric } = this.pending;
+        const { key, metric, channel } = this.pending;
         this.pending = undefined;
         if (key === this.key() && this.frame?.sequence === reply.frame.sequence) {
-            this.plot?.receive(key, metric, reply);
+            this.plot?.receive(key, metric, channel, reply);
         }
         this.paint();
     }
@@ -111,11 +112,12 @@ export class HostedCurves {
         const choice = this.choices[this.select.selectedIndex];
         const program = this.program;
         const track = choice?.track;
-        const plot = this.plot = program && choice && track ? new TimelineCurvePlot(this.lane, this.label, track) : undefined;
+        const plot = this.plot = track ? new TimelineCurvePlot(this.lane, this.label, track,
+            this.channels.get(track.property), channel => { this.channels.set(track.property, channel); this.paint(); }) : undefined;
         if (plot && program && choice && track) {
             for (const key of track.keyframes) {
-                const value = Number(key.value_text);
-                if (!Number.isFinite(value)) continue;
+                const scalar = key.value_kind === 'Number' ? Number(key.value_text) : NaN;
+                const value = Number.isFinite(scalar) ? scalar : undefined;
                 const location = { time: key.time, target: track.target, property: track.property };
                 const rendered = renderKeyframe(location, `${track.property}, ${this.number.format(key.time)} s · ${key.value_text}`);
                 const { button } = rendered;
@@ -130,7 +132,7 @@ export class HostedCurves {
                         this.editor.open(open(this.frame));
                         this.paint();
                     };
-                    const commit = (time: number, value: number) => {
+                    const commit = (time: number, value: number | string) => {
                         if (!this.frame) return;
                         this.selected = key.time;
                         this.editor.drag(open(this.frame), time, value);
@@ -138,7 +140,7 @@ export class HostedCurves {
                     };
                     dragKeyframe(rendered, this.lane, () => this.view, () => [rendered],
                         () => this.frame && this.plot === plot && this.graph.mode !== 'keys' ? editorFrame(this.frame) : undefined,
-                        time => Math.round(time * 1000) / 1000, (_, offset) => commit(key.time + offset, value), {
+                        time => Math.round(time * 1000) / 1000, (_, offset) => commit(key.time + offset, key.value_text), value === undefined ? undefined : {
                             value, scale: () => plot.has(this.key() ?? '') ? plot.scale : undefined,
                             commit,
                         });
@@ -151,7 +153,8 @@ export class HostedCurves {
     }
 
     private key(): string | undefined {
-        if (this.frame && this.plot) return JSON.stringify([this.frame.revision, this.catalog, this.select.selectedIndex, this.graph.mode, this.view.start, this.view.span]);
+        if (this.frame && this.plot) return JSON.stringify([this.frame.revision, this.catalog, this.select.selectedIndex, this.graph.mode,
+            this.plot.channel, this.view.start, this.view.span]);
     }
 
     private paint() {
@@ -187,9 +190,10 @@ export class HostedCurves {
         const frame = this.frame;
         if (key && frame && this.program && !this.pending && !this.plot.has(key) && this.plot.failed?.key !== key) {
             const request = ++this.request;
-            this.pending = { request, key, metric };
+            const channel = this.plot.channel;
+            this.pending = { request, key, metric, channel };
             this.send({ type: 'curve', request, frame, query: { program: this.program.id, target: choice.target.id,
-                property: choice.track.property, metric,
+                property: choice.track.property, metric, channel,
                 window: { start: this.view.start, end: Math.min(this.view.duration, this.view.start + this.view.span) } } });
         }
     }

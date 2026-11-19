@@ -1,5 +1,5 @@
 import type { FrameTarget } from '../src/protocol';
-import type { CurveMetric, CurvePoint, TimelineCurveRequest, TimelineCurveResponse, TimelineTrack } from '../src/timelineProtocol';
+import type { CurveChannel, CurveMetric, CurvePoint, TimelineCurveRequest, TimelineCurveResponse, TimelineTrack } from '../src/timelineProtocol';
 import { create } from './dom';
 import { CurveScale } from './timelineCurveScale';
 import type { RenderedKeyframe } from './timelineKeyDrag';
@@ -13,6 +13,10 @@ interface CurveSnapshot {
 
 const axisNumber = new Intl.NumberFormat(undefined, { maximumSignificantDigits: 3, notation: 'compact' });
 
+export function curveChannels(track: TimelineTrack): readonly CurveChannel[] {
+    return track.curve_channels ?? (track.keyframes[0]?.value_kind === 'Number' ? ['value'] : []);
+}
+
 /** Uses the Timeline's existing focusable key buttons as the curve's handles. */
 export class TimelineCurvePlot {
     private readonly svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -22,15 +26,17 @@ export class TimelineCurvePlot {
     private readonly status = create('span');
     private readonly ticks = [create('span'), create('span')];
     private readonly unit = create('span');
-    readonly keys: { rendered: RenderedKeyframe; value: number }[] = [];
-    private accepted?: { key: string; metric: CurveMetric; points: CurvePoint[] };
-    private painted?: { metric?: CurveMetric; view: TimelineViewport; points?: CurvePoint[]; error?: string };
+    private readonly channelPicker?: HTMLSelectElement;
+    readonly keys: { rendered: RenderedKeyframe; value?: number }[] = [];
+    private accepted?: { key: string; metric: CurveMetric; channel: CurveChannel; points: CurvePoint[] };
+    private painted?: { metric?: CurveMetric; channel: CurveChannel; view: TimelineViewport; points?: CurvePoint[]; error?: string };
     scale?: CurveScale;
     pending?: { request: TimelineCurveRequest; key: string };
     failed?: { key: string; error: string };
     visible = false;
 
-    constructor(readonly lane: HTMLElement, label: HTMLElement, readonly track: TimelineTrack) {
+    constructor(readonly lane: HTMLElement, label: HTMLElement, readonly track: TimelineTrack,
+        preferred: CurveChannel | undefined, changed: (channel: CurveChannel) => void) {
         this.svg.classList.add('timeline-curve-plot');
         this.svg.setAttribute('aria-hidden', 'true');
         this.svg.setAttribute('viewBox', '0 0 100 100');
@@ -46,31 +52,49 @@ export class TimelineCurvePlot {
         this.status.className = 'timeline-curve-status';
         lane.prepend(this.svg, this.status);
         label.append(this.scaleLabels);
+        const choices = curveChannels(track);
+        if (choices.length > 1) {
+            const select = this.channelPicker = create('select');
+            const name = `${track.property} curve channel`;
+            select.setAttribute('aria-label', name);
+            select.title = name;
+            select.className = 'timeline-curve-channel';
+            select.hidden = true;
+            select.append(...choices.map(channel => new Option(channel.length === 1 ? channel.toUpperCase()
+                : channel[0].toUpperCase() + channel.slice(1).replaceAll('_', ' '), channel)));
+            if (preferred && choices.includes(preferred)) select.value = preferred;
+            select.onchange = () => changed(this.channel);
+            label.append(select);
+        }
     }
 
+    get channel(): CurveChannel { return (this.channelPicker?.value as CurveChannel | undefined) ?? 'value'; }
     has(key: string): boolean { return this.accepted?.key === key; }
 
-    receive(key: string, metric: CurveMetric, message: Pick<TimelineCurveResponse, 'points' | 'error' | 'stale'>): void {
+    receive(key: string, metric: CurveMetric, channel: CurveChannel, message: Pick<TimelineCurveResponse, 'points' | 'error' | 'stale'>): void {
         if (message.points?.length && message.points.every(point => Number.isFinite(point.time) && Number.isFinite(point.value))) {
-            this.accepted = { key, metric, points: message.points };
+            this.accepted = { key, metric, channel, points: message.points };
             this.failed = undefined;
         } else if (!message.stale) this.failed = { key, error: message.error ?? 'Curve samples are unavailable.' };
     }
 
     draw(metric: CurveMetric | undefined, view: TimelineViewport, key: string | undefined): void {
-        const points = this.accepted?.metric === metric ? this.accepted?.points : undefined;
+        const channel = this.channel;
+        const points = this.accepted?.metric === metric && this.accepted?.channel === channel ? this.accepted?.points : undefined;
         const error = this.failed?.key === key ? this.failed?.error : undefined;
-        if (this.painted && this.painted.metric === metric && this.painted.view === view
+        if (this.painted && this.painted.metric === metric && this.painted.channel === channel && this.painted.view === view
             && this.painted.points === points && this.painted.error === error) return;
-        this.painted = { metric, view, points, error };
+        this.painted = { metric, channel, view, points, error };
         this.status.textContent = metric ? error ?? '' : '';
+        if (this.channelPicker) this.channelPicker.hidden = !metric;
         if (!metric) {
             delete this.lane.dataset.curve;
             this.scale = undefined;
             for (const { rendered } of this.keys) rendered.button.style.top = '';
             return;
         }
-        this.lane.dataset.curve = metric;
+        const editsValues = channel === 'value' && metric === 'value';
+        this.lane.dataset.curve = metric === 'value' && !editsValues ? 'component' : metric;
         const visible = points?.filter(point => visibleTime(view, point.time)) ?? [];
         // Include neighbors so panning can move immediately while the current range samples arrive.
         const first = visible[0];
@@ -78,15 +102,16 @@ export class TimelineCurvePlot {
         const before = points?.findLast(point => point.time < (first?.time ?? view.start));
         const after = points?.find(point => point.time > (last?.time ?? view.start + view.span));
         const isVelocity = metric === 'velocity';
-        const keyValues = isVelocity ? [0] : this.keys.flatMap(({ rendered, value }) => visibleTime(view, rendered.key.time) ? [value] : []);
+        const keyValues = isVelocity ? [0] : this.keys.flatMap(({ rendered, value }) =>
+            value !== undefined && visibleTime(view, rendered.key.time) ? [value] : []);
+        const allValues = this.keys.flatMap(({ value }) => value === undefined ? [] : [value]);
         const scale = this.scale = new CurveScale(visible.length || keyValues.length ? visible : points ?? [],
-            keyValues.length || visible.length ? keyValues : this.keys.map(({ value }) => value));
+            keyValues.length || visible.length ? keyValues : allValues.length ? allValues : [0]);
         const trace = [...(before ? [before] : []), ...visible, ...(after ? [after] : [])];
         this.line.setAttribute('points', trace.map(({ time, value }) =>
             `${timelinePercent(view, time).toFixed(3)},${scale.percent(value).toFixed(3)}`).join(' '));
         const [low, high] = scale.bounds;
-        const waitingForVelocity = isVelocity && !points?.length;
-        this.scaleLabels.toggleAttribute('data-waiting', waitingForVelocity);
+        this.scaleLabels.toggleAttribute('data-waiting', !editsValues && !points?.length);
         this.ticks[0].textContent = axisNumber.format(low);
         this.ticks[1].textContent = axisNumber.format(high);
         this.unit.textContent = isVelocity ? '/s' : '';
@@ -94,13 +119,14 @@ export class TimelineCurvePlot {
         const baseline = scale.percent(0).toFixed(3);
         this.zeroLine.setAttribute('y1', baseline);
         this.zeroLine.setAttribute('y2', baseline);
-        for (const { rendered, value } of this.keys) rendered.button.style.top = isVelocity ? '' : `${scale.percent(value)}%`;
+        for (const { rendered, value } of this.keys) rendered.button.style.top = editsValues && value !== undefined ? `${scale.percent(value)}%` : '';
     }
 }
 
 /** Retain accepted traces across playback ticks and sample only on-screen tracks. */
 export class TimelineCurves {
     private readonly plots = new Map<Element, TimelineCurvePlot>();
+    private readonly channels = new Map<string, CurveChannel>();
     private frame?: CurveSnapshot;
     private range?: TimelineViewport;
     private metric?: CurveMetric;
@@ -119,7 +145,12 @@ export class TimelineCurves {
     }
 
     add(lane: HTMLElement, label: HTMLElement, track: TimelineTrack): TimelineCurvePlot {
-        const plot = new TimelineCurvePlot(lane, label, track);
+        const identity = `${track.target}:${track.property}`;
+        const plot = new TimelineCurvePlot(lane, label, track, this.channels.get(identity), channel => {
+            this.channels.set(identity, channel);
+            if (this.range) plot.draw(this.metric, this.range, this.key(plot));
+            this.schedule();
+        });
         this.plots.set(lane, plot);
         this.observer.observe(lane);
         return plot;
@@ -134,14 +165,13 @@ export class TimelineCurves {
         this.metric = metric;
         this.range = range;
         this.frame = frame;
-        const key = this.key();
-        for (const plot of this.plots.values()) plot.draw(metric, range, key);
+        for (const plot of this.plots.values()) plot.draw(metric, range, this.key(plot));
         this.schedule();
     }
 
     canEdit(plot: TimelineCurvePlot): boolean {
-        const key = this.key();
-        return this.metric === 'value' && key !== undefined && plot.has(key);
+        const key = this.key(plot);
+        return this.metric === 'value' && plot.channel === 'value' && key !== undefined && plot.has(key);
     }
 
     receive(message: TimelineCurveResponse): void {
@@ -151,17 +181,17 @@ export class TimelineCurves {
             || pending.request.frame.session !== message.frame.session) return;
         plot.pending = undefined;
         const current = this.frame?.frame;
-        if (current?.token === message.frame.token && current.session === message.frame.session && pending.key === this.key()) {
-            plot.receive(pending.key, pending.request.metric ?? 'value', message);
+        if (current?.token === message.frame.token && current.session === message.frame.session && pending.key === this.key(plot)) {
+            plot.receive(pending.key, pending.request.metric ?? 'value', pending.request.channel ?? 'value', message);
             if (this.range) plot.draw(this.metric, this.range, pending.key);
         }
         this.schedule();
     }
 
-    private key(): string | undefined {
+    private key(plot: TimelineCurvePlot): string | undefined {
         if (this.metric && this.frame && this.range?.span) {
             const { start, span } = this.range;
-            return JSON.stringify([this.frame.catalog, this.frame.program, this.metric, start, span]);
+            return JSON.stringify([this.frame.catalog, this.frame.program, this.metric, plot.channel, start, span]);
         }
     }
 
@@ -173,13 +203,13 @@ export class TimelineCurves {
     private sample(): void {
         const snapshot = this.frame;
         const range = this.range;
-        const key = this.key();
-        if (!snapshot || !range || !key) return;
+        if (!snapshot || !range) return;
         for (const plot of this.plots.values()) {
-            if (!plot.visible || plot.has(key) || plot.failed?.key === key || plot.pending?.key === key) continue;
+            const key = this.key(plot);
+            if (!key || !plot.visible || plot.has(key) || plot.failed?.key === key || plot.pending?.key === key) continue;
             const { target, property } = plot.track;
             const request: TimelineCurveRequest = { type: 'curve', request: ++this.request, frame: snapshot.frame,
-                program: snapshot.program, target, property, metric: this.metric,
+                program: snapshot.program, target, property, metric: this.metric, channel: plot.channel,
                 window: { start: range.start, end: Math.min(range.duration, range.start + range.span) } };
             plot.pending = { request, key };
             this.send(request);

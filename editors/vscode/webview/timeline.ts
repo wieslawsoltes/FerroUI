@@ -4,7 +4,7 @@ import { canPreviewProgram, canPreviewRange, previewClock } from '../src/timelin
 import { AnimationGraphMenu, type AnimationGraphMode } from './animationGraphMenu';
 import { anchorPopover, element, labelButton } from './dom';
 import { TimelineChannels } from './timelineChannels';
-import { TimelineCurves } from './timelineCurves';
+import { curveChannels, TimelineCurves } from './timelineCurves';
 import { dragKeyframe, renderKeyframe, type RenderedKeyframe } from './timelineKeyDrag';
 import { TimelineKeyframeEditor } from './timelineKeyframeEditor';
 import { bindTimelineMarquee } from './timelineMarquee';
@@ -313,7 +313,7 @@ function showTracks(): void {
             name.title = `${target} · ${track.property}`;
             const lane = document.createElement('div');
             lane.className = 'timeline-lane';
-            const plot = track.keyframes[0]?.value_kind === 'Number' ? curves.add(lane, name, track) : undefined;
+            const plot = curveChannels(track).length ? curves.add(lane, name, track) : undefined;
             lane.addEventListener('dblclick', event => {
                 if (event.target !== lane) return;
                 const bounds = lane.getBoundingClientRect();
@@ -330,8 +330,8 @@ function showTracks(): void {
                 const easing = key.easing_text.replace(/\s/g, '').toLowerCase();
                 button.toggleAttribute('data-eased', Boolean(easing && easing !== 'lineareasing' && easing !== '0,0,1,1'));
                 renderedKeys.push(rendered);
-                const value = Number(key.value_text);
-                if (plot && Number.isFinite(value)) plot.keys.push({ rendered, value });
+                const value = key.value_kind === 'Number' ? Number(key.value_text) : NaN;
+                if (plot) plot.keys.push({ rendered, value: Number.isFinite(value) ? value : undefined });
                 const open = (frame: FrameTarget, focus: boolean) => {
                     if (!model.canEditKeyframes || !(model.writable || selected.sourceRange) || model.documentVersion === undefined) return false;
                     keyframeEditor.open(frame, model.documentVersion, selected.id, track.target, track.property, key,
@@ -421,8 +421,8 @@ function saveTimeline(): void {
 
 function showCurves(): void {
     const selected = current();
-    const hasScalarTrack = selected?.timeline?.tracks.some(track => track.keyframes[0]?.value_kind === 'Number');
-    const available = Boolean(model.canShowCurves && hasScalarTrack && !model.transition);
+    const hasCurveTrack = selected?.timeline?.tracks.some(track => curveChannels(track).length);
+    const available = Boolean(model.canShowCurves && hasCurveTrack && !model.transition);
     graph.show(available, Boolean(model.canShowVelocity));
     const metric = available && graph.mode !== 'keys' ? graph.mode : undefined;
     fitKeys.hidden = !metric || selection.size === 0;

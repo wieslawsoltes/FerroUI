@@ -67,6 +67,9 @@ export async function verifyHostedRustAnimation(preview: NativePreview): Promise
         const paused = await preview.sampleHostedAnimation({ revision: first.revision, sequence: first.sequence,
             program: clip.id, elapsed: 1, restart: true });
         const frame = { revision: paused.frame.revision, sequence: paused.frame.sequence };
+        const radius = await preview.hostedCurve(frame, { program: clip.id, target: clip.defaultTargets[0],
+            property: track.property, channel: 'bottom_right', window: { start: 0, end: 2 } });
+        assert.equal(radius.find(point => point.time === 1)?.value, 8, 'Read the registered Rust corner channel without seeking');
         const draft = { program: clip.id, target: track.target, property: track.property, previous: 2, time: 1.6,
             value: '51.2,51.2,51.2,51.2', easing: track.keyframes[1].easing_text };
         await assert.rejects(preview.planHostedKeyframe(first, draft), /frame changed/i);

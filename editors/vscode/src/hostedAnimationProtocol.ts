@@ -83,7 +83,7 @@ export interface HostedAnimationState extends HostedAnimationCatalog, HostedAnim
 }
 
 export type HostedKeyframeDraft = Omit<KeyframeDraft, 'previous'> & { previous?: number };
-export type HostedCurveQuery = Pick<TimelineCurveRequest, 'program' | 'target' | 'property' | 'window' | 'metric'>;
+export type HostedCurveQuery = Pick<TimelineCurveRequest, 'program' | 'target' | 'property' | 'window' | 'metric' | 'channel'>;
 export interface HostedStateDraft { program: number; duration: number; easing: string }
 export interface HostedSourcePatch { start: number; end: number; expected: string; replacement: string }
 export interface HostedStatePlan { patches: HostedSourcePatch[] }

@@ -228,7 +228,7 @@ export class TimelineView implements vscode.Disposable {
                     return;
                 }
                 if (message.type === 'curve') {
-                    const { frame, request, program, target, property, window, metric } = message;
+                    const { frame, request, program, target, property, window, metric, channel } = message;
                     const reply = { type: 'curveResult', frame, request } as const;
                     const stale = () => this.panel !== panel || !panel.canUse(frame);
                     try {
@@ -240,7 +240,8 @@ export class TimelineView implements vscode.Disposable {
                             throw new Error('Update the FerroUI preview helper to sample velocity.');
                         }
                         const { points } = await context.read<{ points: CurvePoint[] }>(
-                            'designer_animation_curve', { program, target, property, window, ...(metric === 'velocity' && { metric }) });
+                            'designer_animation_curve', { program, target, property, window,
+                                ...(metric === 'velocity' && { metric }), ...(channel && channel !== 'value' && { channel }) });
                         this.view.post(stale() ? { ...reply, stale: true } : { ...reply, points });
                     } catch (error) {
                         this.view.post(stale() ? { ...reply, stale: true } : { ...reply, error: errorMessage(error) });

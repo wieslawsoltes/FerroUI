@@ -2,7 +2,7 @@ import type { FrameTarget, Range } from './protocol';
 import type { StateTransitionControl, StateTransitionPosition } from './stateTransitionProtocol';
 
 export interface TimelineKeyframe { time: number; value_text: string; easing_text: string; value_kind?: string }
-export interface TimelineTrack { target: number; property: string; keyframes: TimelineKeyframe[] }
+export interface TimelineTrack { target: number; property: string; keyframes: TimelineKeyframe[]; curve_channels?: CurveChannel[] }
 export interface AnimationSourceIssue { range: Range; reason: string }
 export interface KeyframeLocation { target: number; property: string; time: number }
 export type KeyframeGroupEdit = { action: 'move_keyframes' | 'duplicate_keyframes'; offset: number }
@@ -176,6 +176,8 @@ export interface TimelineKeyframeResponse {
 
 export interface CurvePoint { time: number; value: number }
 export type CurveMetric = 'value' | 'velocity';
+export type CurveChannel = 'value' | 'x' | 'y' | 'width' | 'height' | 'left' | 'top' | 'right' | 'bottom'
+    | 'top_left' | 'top_right' | 'bottom_left' | 'bottom_right';
 
 export interface TimelineCurveRequest {
     type: 'curve';
@@ -186,6 +188,7 @@ export interface TimelineCurveRequest {
     property: string;
     window: { start: number; end: number };
     metric?: CurveMetric;
+    channel?: CurveChannel;
 }
 
 export interface TimelineCurveResponse {

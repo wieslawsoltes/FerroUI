@@ -286,7 +286,7 @@ export function hostedHtml(webview: vscode.Webview, root: vscode.Uri): string {
     </div>
     <section id="hosted-curves" aria-label="Authored animation curves" hidden>
         <div class="toolbar hosted-curve-toolbar">
-            <select id="hosted-curve-track" aria-label="Scalar animation track"></select>
+            <select id="hosted-curve-track" aria-label="Animation track"></select>
             <span id="hosted-curve-scale" title="Visible value range"></span>
             <div class="tool-group" role="group" aria-label="Curve zoom">
                 ${tool('hosted-curve-fit-key', 'selection', 'Fit selected keyframe', 'disabled')}

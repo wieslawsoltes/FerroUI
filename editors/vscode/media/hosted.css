@@ -30,7 +30,7 @@ body { display: flex; flex-direction: column; block-size: 100vh; overflow: hidde
 }
 @media (max-width: 240px) {
     .hosted-curve-axis span:nth-child(even) { display: none; }
-    #hosted-curve-scale { display: none; }
+    #hosted-curve-scale[data-active] .timeline-curve-scale { display: none; }
 }
 #hosted-status { flex: none; margin-block: 5px; }
 .hosted-canvas {

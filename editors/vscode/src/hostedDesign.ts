@@ -443,9 +443,10 @@ class HostedSession {
         await this.polling;
         signal.throwIfAborted();
         const program = this.animations.program(frame, query.program);
-        if (!program.curveTracks?.some(track => track.property === query.property)
+        if (!program.curveTracks?.some(track => track.property === query.property
+            && (track.curve_channels ?? ['value']).includes(query.channel ?? 'value'))
             || !program.compatibleTargets.includes(query.target)) {
-            throw new Error('Choose a scalar track and a compatible live control.');
+            throw new Error('Choose a curve channel and a compatible live control.');
         }
         const client = this.client;
         if (!client || this.pending || this.animations.driving || this.currentFrame?.sequence !== frame.sequence) {
