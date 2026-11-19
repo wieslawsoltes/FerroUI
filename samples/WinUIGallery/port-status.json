@@ -8,6 +8,7 @@
       "implementation": [
         "samples/WinUIGallery/Pages/AccessibilityColorContrast.xaml",
         "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/accessibility_samples.rs",
         "samples/WinUIGallery/contrast.rs"
       ],
       "tests": [
@@ -21,10 +22,10 @@
         },
         {
           "path": "samples/WinUIGallery/tests.rs",
-          "name": "contrast_inputs_update_ratio_and_report_invalid_values"
+          "name": "contrast_pickers_update_the_ratio_the_checks_and_the_preview"
         }
       ],
-      "notes": "The original luminance/contrast calculation and pass thresholds run in Rust. Opaque RGB text inputs replace the Gallery's custom inline color pickers; those picker controls remain pending. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The catalog has no sample definition for the page; the page itself is ported with the code behind of AccessibilityColorContrastPage.xaml.cs and the gallery's InlineColorPicker in Rust (accessibility_samples.rs, the calculation in contrast.rs): the texts, the text and background pickers (Black and White), RecalculateContrastRatio with the source's rounding (21:1, 4.48:1) and SetCheckState of the three checks, and the preview's background, texts and shapes (the source's x:Bind of the pickers' ColorBrush). Each InlineColorPicker is its composition: the header, a SplitButton with the color preview whose flyout holds the color picker (Picker_ColorChanged, PickerFlyout_Opened), and the hex box (ColorHex_TextChanged, other text ignored). WinUI's inline ColorPicker is not a FerroUI control: the flyout's picker is a ColorView, as on the ColorPicker page, so the page is partial. ThemeResource is DynamicResource and GalleryTileGridStyle is a Border with the card brushes.",
       "examples": []
     },
     "AccessibilityKeyboard": {

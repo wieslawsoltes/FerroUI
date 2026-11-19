@@ -433,6 +433,7 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 
 | Page | Examples | State | Rust | Tests |
 |---|---:|---|---|---|
+| AccessibilityColorContrast | the page (no catalog example): partial, no WinUI ColorPicker (a ColorView) | partial | `accessibility_samples.rs`, `contrast.rs` | `tests.rs` |
 | AccessibilityKeyboard | 4 ported, 2 partial: no Key Tips (access keys are letters of the header), no accelerator tooltips | partial | `accessibility_samples.rs` | `accessibility_samples_tests.rs` |
 | AccessibilityScreenReader | 9 ported, 2 partial: no FullDescription (HelpText), no Custom landmark or LocalizedLandmarkType, no TextBox Header (LabeledBy) | partial | `accessibility_samples.rs` | `accessibility_samples_tests.rs` |
 | Clipboard | 4 ported, 2 partial: no clipboard history, roaming or ContentChanged | partial | `platform_samples.rs` | `tests.rs` |

@@ -5,7 +5,7 @@ use ferroui_base::media::immutable::ImmutableSolidColorBrush;
 use ferroui_base::media::Color;
 use ferroui_base::{ObjectType, Ref, Thickness};
 use ferroui_controls::primitives::ToggleButton;
-use ferroui_controls::{Border, Button, Control, RadioButtons, TextBlock, TextBox};
+use ferroui_controls::{Border, Button, Control, RadioButtons, TextBlock};
 use ferroui_markup_xaml::markup_extensions::XBindings;
 use ferroui_markup_xaml::XamlLoadError;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
@@ -64,7 +64,7 @@ pub static ADAPTATIONS: &[PageAdaptation] = &[
     page!("AppBarToggleButton", "All four source examples use native CommandBarToggleButton (WinUI's AppBarToggleButton) with AppBarButton_Click of AppBarToggleButtonPage.xaml.cs in Rust (IsChecked = True, False or empty for the third state, as C#'s bool?.ToString()): the symbol, font and three-state path icons (the source's Content of the path icon is the Icon). FerroUI has no BitmapIcon: the bitmap icon is an Image of the source's Slices2.png, not drawn in the foreground's single color, so the page is partial. The symbol glyph needs the platform's symbol font."),
     page!(ported "AppBarSeparator", "The source example uses native CommandBarSeparator (WinUI's AppBarSeparator) between the source's CommandBarButtons with their symbol icons in a CommandBar, in a scroll viewer that scrolls horizontally without a bar and not vertically (the scroll modes are the bar visibilities Hidden and Disabled). The page has no code-behind upstream. The symbol glyphs need the platform's symbol font."),
     page!(ported "CommandBar", "The source example uses native CommandBar with the code behind of CommandBarPage.xaml.cs in Rust: OnElementClicked (the clicked command's label), Open and Close (IsOpen with IsSticky), AddSecondaryCommands_Click (four buttons and a separator while Settings is alone) and RemoveSecondaryCommands, and the KeyboardAccelerators of the constructor and the markup as HotKeys (Ctrl+A, Ctrl+E, F4, Ctrl+I; Ctrl+N, Delete, Ctrl+Subtract, Ctrl+Add). The MultipleButtons property feeds the source viewer's substitutions only, and the gallery creates the page anew instead of OnNavigatingFrom. FerroUI's CommandBar has no closed display mode: its buttons keep their labels while it is closed. The symbol glyphs need the platform's symbol font."),
-    page!("AccessibilityColorContrast", "The original luminance/contrast calculation and pass thresholds run in Rust. Opaque RGB text inputs replace the Gallery's custom inline color pickers; those picker controls remain pending."),
+    page!("AccessibilityColorContrast", "The catalog has no sample definition for the page; the page itself is ported with the code behind of AccessibilityColorContrastPage.xaml.cs and the gallery's InlineColorPicker in Rust (accessibility_samples.rs, the calculation in contrast.rs): the texts, the text and background pickers (Black and White), RecalculateContrastRatio with the source's rounding (21:1, 4.48:1) and SetCheckState of the three checks, and the preview's background, texts and shapes (the source's x:Bind of the pickers' ColorBrush). Each InlineColorPicker is its composition: the header, a SplitButton with the color preview whose flyout holds the color picker (Picker_ColorChanged, PickerFlyout_Opened), and the hex box (ColorHex_TextChanged, other text ignored). WinUI's inline ColorPicker is not a FerroUI control: the flyout's picker is a ColorView, as on the ColorPicker page, so the page is partial. ThemeResource is DynamicResource and GalleryTileGridStyle is a Border with the card brushes."),
     page!(ported "AutoSuggestBox", "Both source examples use native AutoSuggestBox with the handlers of AutoSuggestBoxPage.xaml.cs in Rust (control_samples.rs): AutoSuggestBox_TextChanged filters the source's 97 cats by every word of the text a user types (No results found when none matches) and AutoSuggestBox_SuggestionChosen writes the chosen cat; Control2_TextChanged, Control2_SuggestionChosen and Control2_QuerySubmitted search the gallery's controls by every word of their title, prefix matches first, and show the chosen or the first control's image, title and subtitle. The suggestions are the controls' titles (the ToString of ControlInfoDataItem), mapped back to their catalog entries, and case is ignored by Unicode lowercase instead of CurrentCultureIgnoreCase. The search box's UpdateTextOnSelect is False: as in the source, only Control2_SuggestionChosen puts a control's title in the box, so a chosen No results found keeps the text. The output is the gallery's OutputTextBlockStyle, the title its BaseTextBlockStyle (semibold) and WrapWholeWords is WrapWithOverflow."),
     page!(ported "NumberBox", "All three source examples use native NumberBox with the code behind of NumberBoxPage.xaml.cs in Rust: the expression box, the spin button box with SpinButtonPlacementGroup_SelectionChanged (Inline, Compact; as in the source the box keeps its markup placement until the selection changes), and SetNumberBoxNumberFormatter, a formatter of two fraction digits that rounds half up to 0.25 (DecimalFormatter with an IncrementNumberRounder). The formatter writes and reads the invariant decimal separator instead of the region's."),
     page!(ported "PersonPicture", "The source example uses native PersonPicture (WinUI's control in ferroui-controls) with its RadioButtons handler: the profile image, the display name Jane Doe and the initials SB. The profile image is the gallery's PersonPicture image instead of the remote image of the source."),
@@ -211,7 +211,6 @@ fn initialize_x_bind(root: &Ref<Control>) -> Result<(), XamlLoadError> {
 }
 
 fn wire(root: &Ref<Control>) {
-    wire_contrast(root);
     wire_radio_groups(root);
     let Some(output) = find_control::<TextBlock>(root, "Output") else {
         return;
@@ -295,60 +294,6 @@ fn wire_radio_groups(root: &Ref<Control>) {
             }
         });
     }
-}
-
-fn wire_contrast(root: &Ref<Control>) {
-    let Some(text_color) = find_control::<TextBox>(root, "TextColor") else {
-        return;
-    };
-    let background_color = root.get_control::<TextBox>("BackgroundColor");
-    let weak_root = root.downgrade();
-    let update = Rc::new(move || {
-        let Some(root) = weak_root.upgrade() else {
-            return;
-        };
-        let first = crate::contrast::parse_rgb(
-            &root
-                .get_control::<TextBox>("TextColor")
-                .text()
-                .unwrap_or_default(),
-        );
-        let second = crate::contrast::parse_rgb(
-            &root
-                .get_control::<TextBox>("BackgroundColor")
-                .text()
-                .unwrap_or_default(),
-        );
-        let ratio = root.get_control::<TextBlock>("ContrastRatio");
-        let checks = root.get_control::<TextBlock>("ContrastChecks");
-        let (Some(first), Some(second)) = (first, second) else {
-            ratio.set_text(Some("Enter two six-digit RGB colors."));
-            checks.set_text(Some("Contrast is unavailable while an input is invalid."));
-            return;
-        };
-        let result = crate::contrast::ContrastResult::calculate(first, second);
-        ratio.set_text(Some(&format!("{:.2}:1", result.ratio)));
-        let state = |passed| if passed { "Pass" } else { "Fail" };
-        checks.set_text(Some(&format!(
-            "Regular text (4.5:1): {} · Large text (3:1): {} · Components (3:1): {}",
-            state(result.normal_text),
-            state(result.large_text),
-            state(result.components),
-        )));
-        root.get_control::<Border>("ContrastPreview")
-            .set_background(Some(Rc::new(ImmutableSolidColorBrush::new(second))));
-        root.get_control::<TextBlock>("ContrastText")
-            .set_foreground(Some(Rc::new(ImmutableSolidColorBrush::new(first))));
-    });
-    for input in [text_color, background_color] {
-        let update = update.clone();
-        input.property_changed(move |change| {
-            if change.property() == TextBox::text_property().as_property() {
-                update();
-            }
-        });
-    }
-    update();
 }
 
 fn find_control<T: ObjectType>(root: &Ref<Control>, name: &str) -> Option<Ref<T>> {

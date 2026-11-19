@@ -456,26 +456,44 @@ fn contrast_calculation_matches_original_endpoints_symmetry_and_thresholds() {
 }
 
 #[test]
-fn contrast_inputs_update_ratio_and_report_invalid_values() {
+fn contrast_pickers_update_the_ratio_the_checks_and_the_preview() {
+    use crate::accessibility_samples::{hex, picker_color, ratio_text};
+    use ferroui_base::media::{Color, Colors};
+    use ferroui_controls_color_picker::ColorView;
+    assert_eq!(ratio_text(21.0), "21:1");
+    assert_eq!(ratio_text(4.4776), "4.48:1");
+    assert_eq!(hex(Color::from_rgb(0x12, 0xab, 0x00)), "#12AB00");
     let _application = start();
     let root = examples::create(examples::find("AccessibilityColorContrast").unwrap()).unwrap();
-    let ratio = root.get_control::<TextBlock>("ContrastRatio");
-    assert_eq!(ratio.text().as_deref(), Some("21.00:1"));
-    let input = root.get_control::<TextBox>("TextColor");
+    let ratio = root.get_control::<TextBlock>("ContrastRatioPresenter");
+    // The text picker starts Black and the background picker White, as the source's.
+    assert_eq!(picker_color(&root, "Text"), Some(Colors::BLACK));
+    assert_eq!(picker_color(&root, "Background"), Some(Colors::WHITE));
+    assert_eq!(root.get_control::<TextBox>("TextColorHex").text().as_deref(), Some("#000000"));
+    assert_eq!(ratio.text().as_deref(), Some("21:1"));
+    // ColorHex_TextChanged: a hex color sets the picker, other text is ignored.
+    let input = root.get_control::<TextBox>("TextColorHex");
     input.set_text(Some("#777777"));
     assert_eq!(ratio.text().as_deref(), Some("4.48:1"));
-    assert!(root
-        .get_control::<TextBlock>("ContrastChecks")
-        .text()
-        .unwrap()
-        .starts_with("Regular text (4.5:1): Fail"));
-    input.set_text(Some("invalid"));
     assert_eq!(
-        ratio.text().as_deref(),
-        Some("Enter two six-digit RGB colors.")
+        root.get_control::<TextBlock>("NormalTextCheckResult").text().as_deref(),
+        Some("Fail")
     );
-    input.set_text(Some("#FFFFFF"));
-    assert_eq!(ratio.text().as_deref(), Some("1.00:1"));
+    assert_eq!(
+        root.get_control::<TextBlock>("LargeTextCheckResult").text().as_deref(),
+        Some("Pass")
+    );
+    input.set_text(Some("invalid"));
+    assert_eq!(ratio.text().as_deref(), Some("4.48:1"));
+    // Picker_ColorChanged: the picker's color writes the hex and the ratio.
+    root.get_control::<ColorView>("BackgroundColorView")
+        .set_color(Color::from_rgb(0x77, 0x77, 0x77));
+    assert_eq!(root.get_control::<TextBox>("BackgroundColorHex").text().as_deref(), Some("#777777"));
+    assert_eq!(ratio.text().as_deref(), Some("1:1"));
+    assert_eq!(
+        root.get_control::<TextBlock>("ComponentsCheckResult").text().as_deref(),
+        Some("Fail")
+    );
 }
 
 #[test]
@@ -617,13 +635,16 @@ fn dropping_native_example_releases_handler_targets() {
     assert!(output.upgrade().is_none());
 }
 
+/// With the WinUI theme: the page's ToggleSwitches and TextBox are laid out in the window, with
+/// the theme's templates.
+#[cfg(feature = "theme")]
 #[test]
 fn clipboard_sample_uses_host_service_for_text_images_files_formats_and_clear() {
     use crate::platform_samples::{COPIED_TEXT, RAINIER};
     use ferroui_base::input::platform::IClipboard;
     use ferroui_controls::testing::{MockWindowingPlatform, TestClipboardImpl};
     use ferroui_controls::{Control, Image, ToggleSwitch, Window};
-    let _application = start();
+    let _application = start_winui();
     let root = examples::create(examples::find("Clipboard").unwrap()).unwrap();
     let clipboard = TestClipboardImpl::new();
     let platform = MockWindowingPlatform::create_window_mock();
@@ -691,13 +712,14 @@ fn clipboard_sample_uses_host_service_for_text_images_files_formats_and_clear() 
     window.close();
 }
 
+#[cfg(feature = "theme")]
 #[test]
 fn clipboard_sample_reports_missing_service_and_platform_failure() {
     use crate::platform_samples::NO_CLIPBOARD;
     use ferroui_base::input::platform::{ClipboardErrorKind, IClipboard};
     use ferroui_controls::testing::{MockWindowingPlatform, TestClipboardImpl};
     use ferroui_controls::{Control, Window};
-    let _application = start();
+    let _application = start_winui();
     let root = examples::create(examples::find("Clipboard").unwrap()).unwrap();
     let copy = root.get_control::<Button>("CopyText");
     copy.raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
