@@ -119,7 +119,7 @@ pub(super) fn call(
     };
     let plan = session.plan_placement(origin, target)?;
     if name == "designer_placement_hint" {
-        return Ok(json!({"bounds":plan.bounds,"description":plan.description,"snapLines":adjustment.guides}));
+        return Ok(json!({"bounds":adjustment.bounds.or(plan.bounds),"description":plan.description,"snapLines":adjustment.guides}));
     }
     session.apply_visual(&plan.description, plan.edits)?;
     Ok(super::state(session))
@@ -136,7 +136,7 @@ fn resize(session: &mut DesignerSession, workspace: Option<&DesignerWorkspace>, 
     let dy = dy + adjustment.delta.y;
     let edits = session.plan_resize_handle(node, handle, dx, dy)?;
     if name == "designer_resize_hint" {
-        return Ok(json!({"node":node,"handle":handle,"dx":dx,"dy":dy,"snapLines":adjustment.guides}));
+        return Ok(json!({"node":node,"handle":handle,"dx":dx,"dy":dy,"bounds":adjustment.bounds,"snapLines":adjustment.guides}));
     }
     session.apply_visual("Resize control", edits)?;
     Ok(super::state(session))

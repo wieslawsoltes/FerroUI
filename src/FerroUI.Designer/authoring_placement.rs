@@ -111,7 +111,7 @@ impl DesignerSession {
                         return Err("Choose a Canvas that owns the full selection".into());
                     }
                     let edits = self.plan_selection_translation(nodes, ferroui_designer_tools::Point::new(delta.x, delta.y))?;
-                    let bounds = self.canvas_selection_bounds(nodes)?;
+                    let bounds = self.canvas_selection_bounds(nodes, false)?;
                     Ok(PlacementPlan { edits,
                         bounds: Some(Rect::new(bounds.x + delta.x, bounds.y + delta.y, bounds.width, bounds.height)),
                         description: "Move selected controls".into() })
@@ -120,13 +120,6 @@ impl DesignerSession {
         }
     }
 
-    pub(crate) fn canvas_selection_bounds(&self, nodes: &[NodeId]) -> Result<ferroui_base::Rect, String> {
-        let artboard = self.preview.host.clone().upcast();
-        let mut bounds = nodes.iter().map(|node| self.preview.bounds(*node, &artboard));
-        let first = bounds.next().flatten().ok_or("The selection has no measured bounds")?;
-        bounds.try_fold(first, |union, rect| rect.map(|rect| union.union(rect)))
-            .ok_or_else(|| "The selection has no measured bounds".into())
-    }
 
     fn measured_placement(&self, preview: &LayoutEditPreview) -> Result<PlacementPlan, String> {
         let edits = preview.source_edits(self)?;
