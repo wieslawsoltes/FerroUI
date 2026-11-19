@@ -146,8 +146,36 @@ export async function verifyTimelinePlayback({ invoke, content }: McpFixture, se
     assert.equal((await editMarker({ action: 'remove', name: 'Settled' })).isError, true, 'A retired frame cannot edit markers');
     assert.equal(await opacity('Lead'), .4);
     assert.equal(document.getText(), scene);
+
+    const clips = await programs();
+    assert.deepEqual(clips.map(clip => clip.clip), [{ start: 0, end: 6, editable: true }, { start: 0, end: 1, editable: true }]);
+    const place = (revision: number, ids: number[]) => invoke('designer_studio_edit', {
+        session, expected_revision: revision, tool: 'designer_program',
+        arguments: { action: 'place_clips', programs: ids, start: .25, gap: .5 },
+    });
+    assert.ok((await place(frame.revision, [clips[0].id, clips[0].id])).isError);
+    assert.equal(document.getText(), scene);
+    frame = await wait();
+    const retired = frame.revision;
+    content(await place(retired, clips.map(clip => clip.id)));
+    assert.equal(document.getText().replace(' Delay="0:0:0.2500000"', '').replace(' Delay="0:0:6.7500000"', ''), scene);
+    assert.ok((await place(retired, clips.map(clip => clip.id))).isError);
+    frame = await wait();
+    const placed = await programs();
+    assert.deepEqual(placed.map(clip => clip.clip), [{ start: .25, end: 6.25, editable: true }, { start: 6.75, end: 7.75, editable: true }]);
+    program = placed[0].id;
+    const elapsed = await control('scrub_all', { time: 1.25 });
+    assert.equal(elapsed.all, true);
+    assert.equal(elapsed.elapsed, 1.25);
+    assert.equal(elapsed.playing, false);
+    assert.equal(await opacity('Lead'), .5);
+    assert.equal(await opacity('Peer'), .9);
+    await control('scrub_all', { time: 7.25 });
+    assert.ok(Math.abs(await opacity('Peer') - .4) < 1e-9);
+    await undo();
+    assert.equal(document.getText(), scene, 'Undo reverses the whole sequence');
     await undo();
     assert.equal(document.getText(), original);
     await wait();
-    console.log('VS Code restored a paused alternating iteration, previewed a bounded authored range and navigated session markers');
+    console.log('VS Code restored a paused iteration, rehearsed a range, and authored and scrubbed a two-clip sequence with one Undo');
 }

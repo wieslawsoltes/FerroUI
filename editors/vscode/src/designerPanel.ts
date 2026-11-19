@@ -32,6 +32,7 @@ interface Frame {
     timelineCurves: boolean;
     timelineCurveVelocity: boolean;
     timelineCombinedPlayback: boolean;
+    timelineClipPlacement: boolean;
     stateTransitionPreview: boolean;
     rsxStateAuthoring: boolean;
     rsxStateStructure: boolean;
@@ -179,6 +180,7 @@ export class DesignerPanel implements vscode.Disposable {
     get supportsTimelineCurves(): boolean { return Boolean(this.frame?.timelineCurves); }
     get supportsTimelineCurveVelocity(): boolean { return Boolean(this.frame?.timelineCurveVelocity); }
     get supportsTimelineCombinedPlayback(): boolean { return Boolean(this.frame?.timelineCombinedPlayback); }
+    get supportsTimelineClipPlacement(): boolean { return Boolean(this.frame?.timelineClipPlacement); }
     get supportsStateTransitionPreview(): boolean { return Boolean(this.frame?.stateTransitionPreview); }
     get supportsRustStates(): boolean { return Boolean(this.language === 'rust' && this.frame?.rsxStateAuthoring); }
     get supportsRustStateStructure(): boolean { return this.supportsRustStates && Boolean(this.frame?.rsxStateStructure); }
@@ -400,7 +402,7 @@ export class DesignerPanel implements vscode.Disposable {
         const edits = this.language === 'xaml' ? xamlEdits : [
             ...xamlEdits.filter(tool => mappedStudioEdits.has((tool as { name: string }).name)),
             ...(rsxEdits ?? []).filter(tool => (tool as { name: string }).name === 'designer_state'
-                ? this.supportsRustStates : this.supportsTimelineKeyframeDrafts || this.supportsRustAnimationPrograms),
+                ? this.supportsRustStates : this.supportsTimelineKeyframeDrafts || this.supportsRustAnimationPrograms || this.supportsTimelineClipPlacement),
         ];
         return { tools, presentations: presentations ?? [], edits };
     }
@@ -427,7 +429,8 @@ export class DesignerPanel implements vscode.Disposable {
             && (action === 'upsert' || (this.supportsRustStateStructure && action === 'remove'));
         const rustProgram = name === 'designer_program' && this.supportsRustAnimationPrograms
             && action !== undefined && ['create', 'rename', 'duplicate', 'remove'].includes(action);
-        if (this.language === 'rust' && !rustKeyframe && !rustProgram && !rustState && !mappedStudioEdits.has(name)) {
+        const rustPlacement = name === 'designer_program' && action === 'place_clips' && this.supportsTimelineClipPlacement;
+        if (this.language === 'rust' && !rustKeyframe && !rustProgram && !rustState && !rustPlacement && !mappedStudioEdits.has(name)) {
             throw new Error('This Studio operation requires mapped RSX source or XAML.');
         }
         if (this.editing) throw new Error('A designer edit is already in progress.');
@@ -621,6 +624,7 @@ export class DesignerPanel implements vscode.Disposable {
                 timelineCurves: Boolean(client.capabilities.timelineCurves),
                 timelineCurveVelocity: Boolean(client.capabilities.timelineCurveVelocity),
                 timelineCombinedPlayback: Boolean(client.capabilities.timelineCombinedPlayback),
+                timelineClipPlacement: Boolean(client.capabilities.timelineClipPlacement),
                 stateTransitionPreview: Boolean(client.capabilities.stateTransitionPreview),
                 rsxStateAuthoring: Boolean(client.capabilities.rsxStateAuthoring),
                 rsxStateStructure: Boolean(client.capabilities.rsxStateStructure),

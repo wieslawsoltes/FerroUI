@@ -38,7 +38,7 @@ export class NativePreview implements vscode.Disposable {
         canvasInteraction?: boolean; canvasFocusOrder?: boolean; projectInventory?: boolean; tokenHandoff?: boolean;
         designFixtures?: boolean; timelineTransport?: boolean; timelineRecording?: boolean; timelineGeometryRecording?: boolean;
         timelineKeyframeDrafts?: boolean; timelineKeyframeScale?: boolean; timelineCurves?: boolean; timelineCurveVelocity?: boolean;
-        timelineCurveChannels?: boolean; timelineCombinedPlayback?: boolean;
+        timelineCurveChannels?: boolean; timelineCombinedPlayback?: boolean; timelineClipPlacement?: boolean;
         timelineKeyframeTransfer?: boolean;
         timelineProgramTargets?: boolean;
         stateTransitionPreview?: boolean;
@@ -196,6 +196,9 @@ export class NativePreview implements vscode.Disposable {
         if (name === 'designer_record_property' && !this.capabilities.timelineRecording) {
             throw new Error('Update the FerroUI preview helper to record property edits.');
         }
+        if (name === 'designer_program' && (args as { action?: string }).action === 'place_clips' && !this.capabilities.timelineClipPlacement) {
+            throw new Error('Update the FerroUI preview helper to place animation clips.');
+        }
         return this.send('studioEdit', { ...source, frame, name, arguments: args, selection });
     }
 
@@ -203,6 +206,9 @@ export class NativePreview implements vscode.Disposable {
         const { action } = args as { action?: string };
         if (name === 'designer_program' && action === 'play_all' && !this.capabilities.timelineCombinedPlayback) {
             throw new Error('Update the FerroUI preview helper to play all animations.');
+        }
+        if (name === 'designer_program' && action === 'scrub_all' && !this.capabilities.timelineClipPlacement) {
+            throw new Error('Update the FerroUI preview helper to scrub animation clips together.');
         }
         if (name === 'designer_state' && action === 'preview_transition' && !this.capabilities.stateTransitionPreview) {
             throw new Error('Update the FerroUI preview helper to preview explicit state transitions.');

@@ -33,6 +33,7 @@ export async function run(): Promise<void> {
         ...['timeline.js', 'designData.js', 'hosted.js'].map(name => access(path.join(extension.extensionPath, 'dist', name))),
         access(path.join(extension.extensionPath, 'dist', 'icons', 'history.svg')),
         access(path.join(extension.extensionPath, 'media', 'keyframe-editor.css')),
+        access(path.join(extension.extensionPath, 'media', 'timeline-clips.css')),
     ]);
     const workspace = vscode.workspace.workspaceFolders![0];
     const document = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(workspace.uri, 'SettingsView.xaml'));
@@ -56,6 +57,7 @@ export async function run(): Promise<void> {
         assert.ok(native.capabilities.timelineKeyframeScale, 'The installed preview scales authored key selections');
         assert.ok(native.capabilities.rsxAnimationPrograms, 'The installed preview authors whole Rust clips');
         assert.ok(native.capabilities.timelineCombinedPlayback, 'The installed preview plays combined animation programs');
+        assert.ok(native.capabilities.timelineClipPlacement, 'The installed preview arranges native animation clips');
         assert.ok(native.capabilities.timelineProgramTargets, 'The installed preview retains animation resource targets');
         assert.ok(native.capabilities.stateTransitionPreview, 'The installed preview samples explicit state transitions');
         assert.ok(native.capabilities.timelineKeyframeTransfer, 'The installed preview transfers typed keyframes');
@@ -135,6 +137,12 @@ export async function run(): Promise<void> {
         assert.equal(createdGroup.edits.length, 1);
         assert.match(createdGroup.edits[0].newText, /visual_states: \[/);
         assert.match(createdGroup.edits[0].newText, /::ferroui_view::visual_state_group\("Visibility"\)/);
+        const current = await native.render(animationSource, { width: 640, height: 420, dark: false }, 6);
+        assert.ok(current.image);
+        const placement = await native.studioEdit(animationSource, 6, 'designer_program', {
+            action: 'place_clips', programs: [program.id], start: .75,
+        }, []);
+        assert.deepEqual(placement.edits.map(edit => edit.newText), ['.delay(ferroui_view::ms(750))']);
         const { animationQuery } = await native.listenHosted(randomBytes(32).toString('hex'));
         const capabilities = new URLSearchParams(animationQuery);
         assert.equal(capabilities.get('ferroui-design-animation'), '1', 'The installed relay negotiates native application animations');

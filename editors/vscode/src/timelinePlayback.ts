@@ -73,6 +73,9 @@ export class TimelinePlayback {
                 await this.render(playback, { action: 'stop_program' }, signal);
             } else if (control.action === 'pause') {
                 await this.render(playback, { action: 'pause_program', program: control.program }, signal);
+            } else if (control.action === 'scrub_all') {
+                if (!Number.isFinite(control.time) || control.time < 0) throw new Error('Choose a nonnegative elapsed playback time.');
+                await this.render(playback, control, signal);
             } else if (control.action === 'seek' && timeline) {
                 const limit = timeline.native ? timeline.total_duration : timeline.duration;
                 if (!Number.isFinite(control.time) || control.time < 0 || (limit !== null && control.time > limit)) {

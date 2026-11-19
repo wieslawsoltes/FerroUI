@@ -131,6 +131,20 @@ For MCP, read `designer_states` through `designer_studio_query` to get the group
 
 Agents can read the route details in `designer_hosted_animations`. Use `designer_hosted_animation` for playback and reveal, `designer_hosted_state_route_draft` to review the source patches, or `designer_hosted_state_route` to apply them. Pass the current app generation, frame revision and sequence. Durations in the MCP tools are expressed in seconds.
 
+## Compare and sequence clips
+
+![The shared clip ruler shows two ordered reveals, the edited XAML delays, and the artboard at 1.5 seconds](../images/vscode-clip-sequence.png)
+
+1. Open [ClipSequence.xaml](../samples/ClipSequence.xaml) in the Designer and show the Timeline. Choose **Compare animation clips**. The bars share one elapsed-time ruler. Each starts after its native delay and spans its active playback, including finite repeats and delays between iterations. A dashed bar extends to the edge of the ruler for an infinite clip.
+2. Drag the playhead, click a bar to seek to its start, or enter an elapsed time and press Enter. Use **Play all clips**, **Pause clips**, and **Stop clips** to preview the artboard. Use the zoom icons or `+`, `−`, and `0` with a clip focused. Use the pan slider while zoomed in.
+3. Drag an editable clip bar to change only its start. To place it precisely with the keyboard, select its row and choose **Set selected clip start**. Enter seconds and apply the change.
+4. Select two or more clip names in the desired order. The numbers beside the names show that order. Choose **Sequence selected clips** and enter a **Start** and **Gap**. A zero gap places the clips end to end. A positive gap separates them. A negative gap overlaps them by that amount. An infinite clip can end a sequence. Apply the placements, then play or scrub across them.
+5. Select one clip and choose **Open selected clip keyframes**, or toggle **Return to animation keyframes** to return to the keyframe view. One Undo restores every delay from the last placement operation.
+
+Placement edits the native `Delay` attribute in XAML or the literal `.delay(ferroui_view::ms(...))` call in a mapped Rust builder. The clip keeps its authored keys, easing, fill, selector, and activation rules. The comparison clock starts clips with live preview targets together, then applies their offsets. In a running app, the selector or caller determines when each clock starts. Place clips that activate together to reproduce the shared timing in the app. Computed Rust clips and XAML delays defined by expressions remain source edits.
+
+Agents can read each clip's `start`, `end`, and `editable` fields in `designer_programs`. Use `designer_program` with `place_clips` and the ordered `programs` IDs, optional `start`, and optional `gap` through `designer_studio_edit`. Use `scrub_all` with elapsed `time` to sample the combined pose. Studio exposes both actions directly through `designer_program`. VS Code also offers `scrub_all` in `designer_timeline_control`.
+
 ## Compare design data and environments
 
 1. Open [PreviewStages.xaml](../samples/PreviewStages.xaml). Run **FerroUI: Show Design Data**. Add a named XAML fixture with typed JSON values, such as a string title and an array of items. Apply it once to store the design-only fixture in the view. Choose **Application values** to return to the regular bindings.

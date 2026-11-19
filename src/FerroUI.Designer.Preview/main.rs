@@ -122,6 +122,7 @@ fn respond(
                 "timelineCurveChannels": true,
                 "timelineCombinedPlayback": true,
                 "timelineProgramTargets": true,
+                "timelineClipPlacement": true,
                 "stateTransitionPreview": true,
                 "rsxStateAuthoring": true,
                 "rsxStateStructure": true,

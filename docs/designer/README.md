@@ -442,6 +442,21 @@ Selectors are matched by the native style system; per-target underlying values a
 are retained. Resource programs can be previewed against explicit targets. Graphical track lanes
 support scrubbing, keyframe selection and dragging, with explicit time, easing and removal controls.
 
+### Arrange clips on a shared ruler
+
+Open [ClipSequence.xaml](samples/ClipSequence.xaml) and choose **Compare animation clips** in the
+Timeline toolbar. The ruler and **Time** field seek the elapsed time shared by the visible clips.
+Use Play and Stop to rehearse the arrangement. Use the ruler controls to zoom and fit the clips.
+
+Drag a bar to move its start. For exact placement, select its name and enter **Start (s)** below
+the rows. Select names in sequence order to reveal **Gap / overlap (s)**. Apply zero for adjoining
+clips, a positive gap, or a negative overlap. One Undo restores the original delays together.
+The placement uses native XAML `Delay` or a mapped Rust `.delay(...)` and preserves the keyframes
+and existing triggers. Use the compare icon again to return to the selected program's keys.
+[VS Code workflow and MCP arguments](vscode/motion.md#compare-and-sequence-clips)
+
+### Edit tracks and keyframes
+
 Select a key and drag either handle in the incoming easing graph. The graph and **Curve**
 field show the draft together. Handle X is bounded from 0 to 1. Drag Y beyond the start or
 end value to add anticipation or overshoot. Escape cancels a drag. To edit with the

@@ -41,7 +41,8 @@ pub(crate) fn catalog() -> Value {
     let presentations = edits.iter().cloned().filter_map(|tool| action_definition(tool, presentation_action)).collect::<Vec<_>>();
     let rsx_edits = edits.iter().filter(|tool| matches!(tool["name"].as_str(), Some("designer_program" | "designer_state"))).cloned()
         .filter_map(|tool| action_definition(tool, |name, action| rsx_animation::program_edit(name, action)
-            || rsx_animation::keyframe_edit(name, action) || rsx_animation::state_edit(name, action)))
+            || rsx_animation::keyframe_edit(name, action) || rsx_animation::state_edit(name, action)
+            || rsx_animation::clip_placement_edit(name, action)))
         .collect::<Vec<_>>();
     json!({"tools":tools,"presentations":presentations,"rsxEdits":rsx_edits,
         "xamlEdits":edits.into_iter().filter_map(|tool| action_definition(tool, source_action)).collect::<Vec<_>>()})
@@ -78,7 +79,7 @@ fn presentation_action(tool: &str, action: Option<&str>) -> bool {
     match tool {
         "designer_program" => matches!(
             action,
-            Some("preview" | "preview_targets" | "scrub" | "play_program" | "advance_program" | "pause_program" | "stop_program" | "play_all")
+            Some("preview" | "preview_targets" | "scrub" | "scrub_all" | "play_program" | "advance_program" | "pause_program" | "stop_program" | "play_all")
         ),
         "designer_state" => matches!(action, Some("preview" | "preview_transition" | "advance_preview" | "clear_preview")),
         "designer_definition" => matches!(action, Some("enter" | "exit")),
@@ -125,13 +126,16 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
 pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::projects::Projects) -> Result<EditResult, String> {
     let design = DesignDocument::parse(&request.document, projects.source(&request.document)?)?;
     let query = request.query;
-    let rust_keyframe = design.rsx.is_some() && rsx_animation::keyframe_edit(&query.name, query.arguments["action"].as_str());
-    let rust_program = design.rsx.is_some() && rsx_animation::program_edit(&query.name, query.arguments["action"].as_str());
-    let rust_state = design.rsx.is_some() && rsx_animation::state_edit(&query.name, query.arguments["action"].as_str());
+    let action = query.arguments["action"].as_str();
+    let rust_keyframe = design.rsx.is_some() && rsx_animation::keyframe_edit(&query.name, action);
+    let rust_program = design.rsx.is_some() && rsx_animation::program_edit(&query.name, action);
+    let rust_state = design.rsx.is_some() && rsx_animation::state_edit(&query.name, action);
+    let rust_placement = design.rsx.is_some() && rsx_animation::clip_placement_edit(&query.name, action);
     if design.rsx.is_some()
         && !rust_keyframe
         && !rust_program
         && !rust_state
+        && !rust_placement
         && (!matches!(query.name.as_str(), "designer_selection_layout_edit" | "designer_property" | "designer_grid_track_edit")
             || !design.editable_structure())
     {
@@ -166,12 +170,14 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     if let Some(selection) = &query.selection {
         select(stage, selection)?;
     }
-    if rust_state || rust_keyframe || rust_program {
+    if rust_state || rust_keyframe || rust_program || rust_placement {
         let rsx = stage.authored_rsx.as_ref().ok_or("Render the current Rust view before editing motion")?;
         let (patches, pose, program_key, keys, retained_selection) = {
             let session = stage.session.borrow();
             let (patches, pose, program_key, keys) = if rust_state {
                 (rsx_animation::state_patches(&design, &arguments)?, None, None, None)
+            } else if rust_placement {
+                (rsx_animation::clip_placement_patches(&design, &session, &arguments)?, None, None, None)
             } else if rust_program {
                 let plan = stage.sources.run(|| rsx_animation::program_patches(&design, &arguments))?;
                 (plan.patches, None, plan.selected_key, None)
@@ -255,7 +261,7 @@ fn source_action(tool: &str, action: Option<&str>) -> bool {
     match tool {
         "designer_program" => matches!(
             action,
-            Some("create" | "rename" | "duplicate" | "remove" | "selector" | "source" | "update" | "update_timing" |
+            Some("create" | "rename" | "duplicate" | "remove" | "selector" | "source" | "update" | "update_timing" | "place_clips" |
                 "upsert_keyframe" | "record_keyframe" | "remove_keyframe" | "move_keyframes" | "scale_keyframes" |
                 "mirror_keyframes" | "paste_keyframes" | "duplicate_keyframes" | "remove_keyframes")
         ),

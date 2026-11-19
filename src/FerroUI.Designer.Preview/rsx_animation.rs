@@ -15,7 +15,7 @@ pub(crate) use hosted_states::HostedStateRoute;
 mod keyframes;
 pub(crate) use keyframes::keyframe_edit;
 mod programs;
-pub(crate) use programs::{program_edit, program_patches};
+pub(crate) use programs::{clip_placement_edit, clip_placement_patches, program_edit, program_patches};
 
 pub(crate) struct AuthoredRsxFrame {
     source: Box<str>,
@@ -66,6 +66,9 @@ impl AuthoredRsxFrame {
         if let Some(programs) = models["programs"].as_array_mut() {
             for program in programs {
                 let Some(clip) = program["id"].as_u64().and_then(|id| self.clips.get(&id)) else {
+                    if program["clip"].is_object() {
+                        program["clip"]["editable"] = json!(false);
+                    }
                     continue;
                 };
                 if let Ok(range) = index.range(clip.declaration) {

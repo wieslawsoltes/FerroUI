@@ -403,6 +403,7 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
         <input id="transition-seek" type="range" min="0" value="0" step="any" aria-label="State transition playhead">
     </section>
     <div id="timeline-toolbar" class="timeline-toolbar" role="group" aria-label="Animation controls" hidden>
+        ${tool('timeline-compare', 'list-tree', 'Compare animation clips', 'aria-pressed="false" aria-controls="timeline-clips" hidden')}
         <div class="timeline-program-bar">
             <select id="timeline-programs" aria-label="Animation program"></select>
             <div id="timeline-transport" class="tool-group" role="group" aria-label="Playback" hidden>
@@ -431,6 +432,41 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
             ${tool('timeline-source-issues', 'warning', 'Open unsupported Rust animations in source', 'hidden')}
             ${tool('timeline-actions', 'ellipsis', 'More Animation Actions', 'disabled')}
         </div>
+        <div id="timeline-clip-tools" class="tool-group clip-tools" aria-label="Clip controls" role="group" hidden>
+            ${tool('clip-play', 'run-all', 'Play all clips')}
+            ${tool('clip-stop', 'debug-stop', 'Stop clips')}
+            <form id="clip-clock" class="timeline-time-editor">
+                <input id="clip-time" type="number" min="0" step="any" inputmode="decimal" aria-label="Elapsed playhead time in seconds">
+                <span id="clip-duration"></span>
+            </form>
+            ${tool('clip-place', 'move', 'Place selected clips', 'popovertarget="clip-placement" aria-controls="clip-placement" aria-expanded="false" disabled')}
+            ${tool('clip-keys', 'go-to-file', 'Open selected clip keyframes', 'disabled')}
+            <div class="tool-group clip-zoom" role="group" aria-label="Clip timeline zoom">
+                ${tool('clip-zoom-out', 'zoom-out', 'Zoom out on clips (−)')}
+                ${tool('clip-fit', 'screen-normal', 'Fit clips (0)')}
+                ${tool('clip-zoom-in', 'zoom-in', 'Zoom in on clips (+)')}
+            </div>
+        </div>
+    </div>
+    <section id="timeline-clips" class="timeline-grid clip-grid" aria-label="Animation clips on a shared ruler" hidden>
+        <div class="timeline-axis clip-axis">
+            <div class="clip-ruler" id="clip-ruler">
+                <input id="clip-seek" type="range" min="0" max="1" step="any" aria-label="Clip comparison playhead">
+                <div id="clip-marks" class="clip-marks" aria-hidden="true"></div>
+            </div>
+        </div>
+        <ol id="clip-rows" aria-label="Animation clips"></ol>
+        <div id="clip-pan-row" class="timeline-pan" hidden>
+            <input id="clip-pan" type="range" min="0" step="any" aria-label="Pan clip timeline">
+        </div>
+    </section>
+    <div id="clip-placement" class="popover timeline-popover" popover>
+        <form id="clip-placement-form" aria-label="Place animation clips">
+            <label>Start (s) <input id="clip-start" type="number" min="0" step="any" inputmode="decimal" required autofocus></label>
+            <label id="clip-gap-field" hidden>Gap (s) <input id="clip-gap" type="number" step="any" inputmode="decimal" value="0" required
+                title="Use a negative gap for an overlap"></label>
+            <button id="clip-apply" class="tool" type="submit" aria-label="Apply clip placement" title="Apply clip placement">${icon('check')}</button>
+        </form>
     </div>
     <div id="timeline-preview-range" class="popover timeline-popover" popover role="group" aria-label="Preview range">
         <label class="timeline-check"><input id="timeline-range-enabled" type="checkbox" autofocus> Limit playback to preview range</label>
@@ -502,7 +538,7 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
         </div>
         ${keyframeEditorHtml()}
     </section>
-</main>`, ['timeline-curve', 'keyframe-editor', 'timeline-range']);
+</main>`, ['timeline-curve', 'keyframe-editor', 'timeline-range', 'timeline-clips']);
 }
 
 function timelineOption(id: string, glyph: string, label: string, attributes = ''): string {

@@ -61,6 +61,22 @@ export async function verifyRsxPrograms({ invoke, content }: McpFixture): Promis
     assert.equal(copy.name, 'Headline copy');
     assert.notEqual(copy.source_key, first.source_key);
     assert.equal(copy.timeline?.tracks[0].keyframes[0].value_text, '0.55');
+    const place = { action: 'place_clips', programs: [first.id, copy.id], start: .3, gap: -.1 };
+    const retired = frame.revision;
+    content(await edit(retired, place));
+    assert.ok((await edit(retired, place)).isError);
+    const placed = document.getText();
+    assert.match(placed, /\.delay\(ferroui_view::ms\(300\)\)/);
+    assert.match(placed, /\.delay\(ferroui_view::ms\(1050\)\)/);
+    assert.equal(placed.replace(/\.delay\(ferroui_view::ms\((?:300|1050)\)\)/g, ''), duplicated);
+    assert.ok(placed.endsWith(sibling));
+    frame = await accept();
+    assert.deepEqual((await catalog()).map(program => program.clip?.start), [.3, 1.05]);
+    const afterPlacement = document.version;
+    content(await invoke('designer_history', { session, expected_version: afterPlacement, action: 'undo' }));
+    await until(() => document.version !== afterPlacement);
+    assert.equal(document.getText(), duplicated);
+    frame = await accept();
     content(await edit(frame.revision, { action: 'remove', program: first.id }));
     const removed = document.getText();
     frame = await accept();
@@ -80,5 +96,5 @@ export async function verifyRsxPrograms({ invoke, content }: McpFixture): Promis
     const tabs = vscode.window.tabGroups.all.flatMap(group => group.tabs).filter(tab =>
         tab.label === 'Design · animation_view.rs' || (tab.input instanceof vscode.TabInputText && tab.input.uri.toString() === uri.toString()));
     await vscode.window.tabGroups.close(tabs);
-    console.log('VS Code created, renamed, duplicated, and removed source-backed Rust clips through MCP with one Undo per action');
+    console.log('VS Code created, sequenced, renamed, duplicated, and removed source-backed Rust clips with checked source and one Undo per action');
 }

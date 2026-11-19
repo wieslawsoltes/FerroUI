@@ -91,6 +91,7 @@ export class TimelineView implements vscode.Disposable {
         const program = (await this.programs(panel).pending).find(entry => entry.id === control.program);
         if (!program) throw new Error('Choose an authored animation program from the current document.');
         if (control.action === 'play_all' && !panel.supportsTimelineCombinedPlayback) throw new Error('Update the FerroUI preview helper to play all animations.');
+        if (control.action === 'scrub_all' && !panel.supportsTimelineClipPlacement) throw new Error('Update the FerroUI preview helper to scrub clips together.');
         if (control.action === 'record') {
             if (typeof control.enabled !== 'boolean') throw new Error('Choose whether to record property edits.');
             if (!program.timeline || !panel.supportsTimelineRecording || this.panel !== panel) throw new Error('Use the current XAML designer to record property edits.');
@@ -196,6 +197,8 @@ export class TimelineView implements vscode.Disposable {
             canShowVelocity: panel?.supportsTimelineCurveVelocity,
             curveCatalog: panel?.supportsTimelineCurves && catalog?.programs ? catalog.key : undefined,
             canPlayAll: Boolean(panel?.supportsTimelineCombinedPlayback && programs.some(canPreviewProgram)),
+            clipScope: panel?.supportsTimelineClipPlacement && catalog?.programs
+                ? `${panel.session}:${panel.snapshot?.activeBlock?.start.line ?? 0}:${panel.snapshot?.activeBlock?.start.character ?? 0}` : undefined,
             canRecord: panel?.supportsTimelineRecording, canRecordGeometry: panel?.supportsTimelineGeometryRecording,
             recording: this.recordingTime(panel) !== undefined }, this.file);
     }
@@ -212,6 +215,15 @@ export class TimelineView implements vscode.Disposable {
                 await this.previewMarkers(panel, message.frame, message.program, AbortSignal.timeout(15_000), message.edit);
             } else {
                 const context = new StudioContext(panel, message.frame.token, () => this.panel === panel);
+                if (message.type === 'clipPlacement') {
+                    try {
+                        await context.edit('designer_program', { action: 'place_clips', programs: message.programs, start: message.start, gap: message.gap });
+                        await panel.waitForSnapshot(AbortSignal.timeout(15_000));
+                    } finally {
+                        this.view.post({ type: 'clipsPlaced', before: message.frame });
+                    }
+                    return;
+                }
                 if (message.type === 'sourceIssues') {
                     const catalog = this.programs(panel);
                     await catalog.pending;

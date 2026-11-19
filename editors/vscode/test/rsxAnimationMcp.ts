@@ -36,7 +36,7 @@ export async function verifyRsxAnimation({ invoke, content }: McpFixture): Promi
     const tools = content<{ edits: { name: string; inputSchema: { properties: { action?: { enum?: string[] } } } }[] }>(
         await invoke('designer_studio_tools', { session }));
     assert.deepEqual(tools.edits.find(tool => tool.name === 'designer_program')?.inputSchema.properties.action?.enum,
-        ['create', 'rename', 'duplicate', 'remove', 'upsert_keyframe', 'record_keyframe', 'remove_keyframe',
+        ['create', 'rename', 'duplicate', 'remove', 'place_clips', 'upsert_keyframe', 'record_keyframe', 'remove_keyframe',
             'move_keyframes', 'scale_keyframes', 'mirror_keyframes', 'paste_keyframes', 'duplicate_keyframes', 'remove_keyframes']);
 
     const draft = { program: program.id, target: program.timeline.tracks[0].target, property: 'Opacity',

@@ -34,6 +34,7 @@ export interface TimelineProgram {
     selector: string;
     timeline: AuthoredTimeline | null;
     preview?: TimelineProgramPreview;
+    clip?: { start: number; end: number | null; editable: boolean };
     diagnostics?: string[];
 }
 
@@ -101,6 +102,7 @@ export interface TimelineState {
     canShowVelocity?: boolean;
     curveCatalog?: string;
     canPlayAll?: boolean;
+    clipScope?: string;
     recording?: boolean;
     position?: TimelinePosition;
     transition?: StateTransitionPosition;
@@ -108,7 +110,7 @@ export interface TimelineState {
 }
 
 export type TimelineTransportControl =
-    | { action: 'seek'; program: number; time: number }
+    | { action: 'seek' | 'scrub_all'; program: number; time: number }
     | { action: 'play_range'; program: number; range: TimelinePreviewRange }
     | { action: 'play' | 'play_all'; program: number; time?: number }
     | { action: 'pause' | 'stop'; program: number };
@@ -124,6 +126,7 @@ export type FromTimeline =
     | { type: 'programTargets'; frame: FrameTarget; program: number }
     | { type: 'revealProgram'; frame: FrameTarget; program: number }
     | { type: 'sourceIssues'; frame: FrameTarget }
+    | { type: 'clipPlacement'; frame: FrameTarget; programs: number[]; start?: number; gap?: number }
     | { type: 'markerEdit'; frame: FrameTarget; program: number; edit: TimelineMarkerEdit }
     | { type: 'recordKeyframe'; frame: FrameTarget; program: number; time: number; track?: number; candidates?: number[] }
     | TimelineCurveRequest
@@ -132,6 +135,7 @@ export type FromTimeline =
     | { type: 'keyframe'; frame: FrameTarget; program: number; track: number; time: number };
 
 export type ToTimeline = { type: 'position'; position?: TimelinePosition; frame?: FrameTarget }
+    | { type: 'clipsPlaced'; before: FrameTarget }
     | { type: 'keyframesEdited'; keys?: KeyframeLocation[]; before: FrameTarget }
     | TimelineKeyframeResponse
     | TimelineCurveResponse

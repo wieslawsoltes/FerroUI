@@ -1,5 +1,6 @@
 import type { FrameTarget } from '../src/protocol';
 import type { FromTimeline, KeyframeLocation, TimelineControl, TimelineKeyAction, TimelineProgram, TimelineState, ToTimeline } from '../src/timelineProtocol';
+import { TimelineClips } from './timelineClips';
 import { canPreviewProgram, canPreviewRange, previewClock } from '../src/timelinePrograms';
 import { AnimationGraphMenu, type AnimationGraphMode } from './animationGraphMenu';
 import { anchorPopover, element, labelButton } from './dom';
@@ -19,7 +20,7 @@ import { TimelineViewportView } from './timelineViewportView';
 import { TimelineWorkArea } from './timelineWorkArea';
 
 interface ProgramIdentity { id: number; key?: string }
-interface SavedTimeline extends ProgramIdentity { frameRate?: number; curves?: boolean; graph?: AnimationGraphMode }
+interface SavedTimeline extends ProgramIdentity { frameRate?: number; curves?: boolean; graph?: AnimationGraphMode; clips?: boolean }
 declare function acquireVsCodeApi(): {
     postMessage(message: FromTimeline): void;
     getState(): SavedTimeline | number | undefined;
@@ -90,6 +91,37 @@ const curves = new TimelineCurves(viewport.grid, message => vscode.postMessage(m
 let owner: { session: number; program: ProgramIdentity } | undefined;
 let keyEdit: { before: FrameTarget; accepted?: KeyframeLocation[] } | undefined;
 let appliedProgramEdit: string | undefined;
+let clipEdit: FrameTarget | undefined;
+const clips = new TimelineClips(Boolean(typeof saved === 'object' && saved.clips), {
+    changed: () => {
+        queued = undefined;
+        keyframeEditor.close();
+        closeViewOptions();
+        saveTimeline();
+        showTracks();
+    },
+    seek: seconds => {
+        if (clips.reference === undefined || !model.frame || clipEdit) return;
+        queued = seconds;
+        showPosition();
+        seek();
+    },
+    transport: (action, program) => {
+        if (model.frame) send(model.frame, { action, program });
+    },
+    place: (frame, programs, start, gap) => {
+        clipEdit = frame;
+        vscode.postMessage({ type: 'clipPlacement', frame, programs, start, gap });
+        showPosition();
+    },
+    keys: selected => {
+        timedProgramSession = undefined;
+        remember(selected);
+        saveTimeline();
+        showTracks();
+        programs.focus({ preventScroll: true });
+    },
+});
 
 const gestureFrame = () => pending || keyEdit || keyframeEditor.applying || positionFor(current())?.playing ? undefined : model.frame;
 const nativePreview = new TimelineNativePreview(queueSeek, () => programAction('programTargets'), () => programAction('revealProgram'));
@@ -184,6 +216,7 @@ window.addEventListener('message', event => {
     const message = event.data as ToTimeline | { type: 'state'; state: TimelineState };
     if (message.type === 'state') {
         if (model.frame?.session !== message.state.frame?.session) queued = submitted = undefined;
+        if (message.state.frame && clipEdit?.session !== message.state.frame.session) clipEdit = undefined;
         model = message.state;
         pending = Boolean(model.position?.busy);
         if (!pending) submitted = undefined;
@@ -197,6 +230,9 @@ window.addEventListener('message', event => {
         if (!pending) submitted = undefined;
         showPosition();
         seek();
+    } else if (message.type === 'clipsPlaced') {
+        if (clipEdit?.session === message.before.session && clipEdit.token === message.before.token) clipEdit = undefined;
+        showPosition();
     } else if (message.type === 'keyframesEdited') {
         if (keyEdit?.before.session !== message.before.session || keyEdit.before.token !== message.before.token) return;
         if (message.keys) keyEdit.accepted = message.keys;
@@ -209,6 +245,7 @@ window.addEventListener('message', event => {
         curves.receive(message);
     } else if (message.type === 'error') {
         queued = submitted = keyEdit = undefined;
+        clipEdit = undefined;
         pending = false;
         showStatus(message.message);
         transition.resetRequest();
@@ -227,6 +264,7 @@ function positionFor(selected: TimelineProgram | undefined) {
 function showTracks(): void {
     if (model.transition) {
         toolbar.hidden = container.hidden = true;
+        clips.follow(model, false, true, 0);
         closeViewOptions();
         trackFilter.follow(false, []);
         workArea.follow(0, false);
@@ -416,13 +454,13 @@ function remember(program: TimelineProgram): void {
 }
 
 function saveTimeline(): void {
-    if (remembered) vscode.setState({ ...remembered, frameRate, graph: graph.preference });
+    if (remembered) vscode.setState({ ...remembered, frameRate, graph: graph.preference, clips: clips.enabled });
 }
 
 function showCurves(): void {
     const selected = current();
     const hasCurveTrack = selected?.timeline?.tracks.some(track => curveChannels(track).length);
-    const available = Boolean(model.canShowCurves && hasCurveTrack && !model.transition);
+    const available = Boolean(model.canShowCurves && hasCurveTrack && !model.transition && !clips.visible);
     graph.show(available, Boolean(model.canShowVelocity));
     const metric = available && graph.mode !== 'keys' ? graph.mode : undefined;
     fitKeys.hidden = !metric || selection.size === 0;
@@ -443,6 +481,14 @@ function showPosition(): void {
     const position = positionFor(selected);
     const playing = Boolean(position?.playing);
     const editing = Boolean(keyEdit || keyframeEditor.applying);
+    const combined = model.position?.all ? model.position.elapsed : undefined;
+    clips.follow(model, pending, editing || Boolean(clipEdit), queued ?? submitted ?? combined ?? 0);
+    container.hidden = !timeline || clips.visible;
+    if (clips.visible) {
+        nativePreview.show(undefined, {}, 0, false, false);
+        showCurves();
+        return;
+    }
     channels.showLocks(canRetimeKeys(), !model.frame || pending || playing || editing || Boolean(model.recording));
     workArea.show(!model.frame || pending || playing || editing, playing ? position?.previewRange : undefined);
     markerView.show(selected && canPreviewRange(selected) ? model.markers?.[selected.id] ?? [] : [],
@@ -594,15 +640,16 @@ function keyShortcuts(event: KeyboardEvent, location: KeyframeLocation, duration
 }
 
 function seek(): void {
-    if (!model.frame || program === undefined || pending || keyEdit || keyframeEditor.applying || queued === undefined) return;
+    const reference = clips.visible ? clips.reference : program;
+    if (!model.frame || reference === undefined || pending || keyEdit || keyframeEditor.applying || clipEdit || queued === undefined) return;
     const time = queued;
     queued = undefined;
-    send(model.frame, { action: 'seek', program, time });
+    send(model.frame, { action: clips.visible ? 'scrub_all' : 'seek', program: reference, time });
 }
 
 function send(frame: FrameTarget, control: TimelineControl): void {
     pending = true;
-    if (control.action === 'seek') submitted = control.time;
+    if (control.action === 'seek' || control.action === 'scrub_all') submitted = control.time;
     vscode.postMessage({ type: 'control', frame, control });
     showPosition();
 }

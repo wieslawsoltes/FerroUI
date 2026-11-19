@@ -351,6 +351,7 @@ impl DesignerWorkspace {
             self.root.get_control::<Button>(name).set_is_visible(!rust);
         }
         self.root.get_control::<Button>("TimelineCurves").set_is_visible(!clips);
+        self.root.get_control::<Button>("PlayAll").set_is_visible(!clips);
 
         self.root.get_control::<TextBox>("AnimationSelector").set_is_read_only(rust);
         self.duration.set_is_read_only(rust || clips);
