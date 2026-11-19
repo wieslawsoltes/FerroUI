@@ -148,6 +148,12 @@ const char *ferro_last_error(void);
 // failed): the code of a function that returns a handle, which is `0` on a failure. Any thread.
 FerroStatus ferro_last_error_code(void);
 
+// Forgets the last failure of the calling thread: [`ferro_last_error_code`] is [`FERRO_OK`] and
+// [`ferro_last_error`] empty until the next failure. A binding whose language reports errors as
+// values (Osprey's `Result`) clears it before a call whose result does not tell a failure apart
+// (a getter with a fallback) and reads the code after it. Any thread.
+void ferro_clear_error(void);
+
 // Attaches `function` to the event `event` ([`ferro_event_id`](crate::ferro_event_id)) of
 // `object`: it is called with `token` on every raise of the event, on the UI thread (see
 // [`FerroEventFn`]). For a routed event the handler listens to the direct and the bubbling route
@@ -177,6 +183,93 @@ FerroStatus ferro_unsubscribe(int64_t subscription);
 // routing state (a pointer event). UI thread only.
 FerroStatus ferro_raise(FerroHandle object, int64_t event);
 
+// Starts a frame on the calling thread: empties the buffer of the scalar writer. Any thread (the
+// buffer is the calling thread's); commit it on the UI thread.
+FerroStatus ferro_frame_begin(void);
+
+// Opens an element of the class `type_id` ([`ferro_type_id`](crate::ferro_type_id)) in the frame
+// of the calling thread. `key` tells siblings apart across frames: `0` keeps the element by its
+// position among the siblings without a key. Any thread.
+FerroStatus ferro_frame_open(int64_t type_id, int64_t key);
+
+// Gives the element opened last a text key in place of its integer key. Any thread.
+FerroStatus ferro_frame_key_str(const char *text, int64_t length);
+
+// Closes the element opened last in the frame of the calling thread. Any thread.
+FerroStatus ferro_frame_close(void);
+
+// Sets `property` of the open element from text, as [`ferro_set_str`] does when the frame is
+// committed. Any thread.
+FerroStatus ferro_frame_str(int64_t property, const char *text, int64_t length);
+
+// Sets `property` of the open element from UTF-16 text (`units` code units), for a language
+// whose strings are UTF-16. Any thread.
+FerroStatus ferro_frame_str16(int64_t property, const uint16_t *text, int64_t units);
+
+// Sets `property` of the open element from a number, as [`ferro_set_f64`] does. Any thread.
+FerroStatus ferro_frame_f64(int64_t property, double value);
+
+// Sets `property` of the open element from an integer or the value of an enumeration member, as
+// [`ferro_set_i64`] does. Any thread.
+FerroStatus ferro_frame_i64(int64_t property, int64_t value);
+
+// Sets `property` of the open element from a boolean, as [`ferro_set_bool`] does. Any thread.
+FerroStatus ferro_frame_bool(int64_t property, bool value);
+
+// Binds the event `event` ([`ferro_event_id`](crate::ferro_event_id)) of the open element to the
+// message tag `tag`: when it fires, the dispatcher of the thread ([`ferro_frame_dispatcher`]) is
+// called with the tag, the sender, and the value of `value_property` (`0` for none), whose text
+// and number [`ferro_frame_event_text`] and [`ferro_frame_event_f64`] give. Any thread.
+FerroStatus ferro_frame_on(int64_t event, int64_t tag, int64_t value_property);
+
+// Commits the frame of the scalar writer of the calling thread under `root` (see
+// [`ferro_frame_commit_bytes`]) and empties the buffer. UI thread only.
+FerroStatus ferro_frame_commit(FerroHandle root);
+
+// Commits the frame of `length` bytes at `data` (records of the layout of the API model) under
+// `root`: the elements at the top of the frame become the children of `root` (the content of a
+// window, the children of a panel), and the frame before it under the same root is reconciled
+// into this one. With a `root` of `0` the elements at the top are windows: shown
+// ([`ferro_show`](crate::ferro_show)) when they come and closed when they go, which needs the
+// application to run ([`ferro_app_run`](crate::ferro_app_run)). The library keeps a reference to `root` until [`ferro_frame_clear`]. A failed
+// write does not stop the commit: the first failure is returned and recorded. UI thread only.
+FerroStatus ferro_frame_commit_bytes(FerroHandle root,
+                                     const uint8_t *data,
+                                     int64_t length);
+
+// Sets the dispatcher of the events bound in frames, one for the process: called on the UI thread
+// with the tag of the binding, the sender (borrowed for the call) and the value of its value
+// property as an integer (a number truncated, a boolean as `0` or `1`). A result other than `0`
+// marks a routed event as handled. `NULL` stops dispatching. Any thread: a language whose
+// callbacks must be named functions at the call site (Osprey) sets it before
+// [`ferro_app_run`](crate::ferro_app_run).
+FerroStatus ferro_frame_dispatcher(FerroEventFn function);
+
+// Calls the dispatcher of the thread ([`ferro_frame_dispatcher`]) with `tag`, `sender` and `arg`
+// as an event would, and returns its result: a binding starts its loop with it (the tag `0`
+// asks for the first frame) and a test drives a message without an event. The event text and
+// number are empty. [`FERRO_INVALID_STATE`] (as a negative result) without a dispatcher. UI
+// thread only.
+int64_t ferro_frame_dispatch(int64_t tag, FerroHandle sender, int64_t arg);
+
+// The text of the value property of the event being dispatched, NUL-terminated and owned by the
+// library until the next event; empty for a binding without a value property or outside a
+// dispatch. UI thread only.
+const char *ferro_frame_event_text(void);
+
+// The value property of the event being dispatched as a number (`0` when it is not one). UI
+// thread only.
+double ferro_frame_event_f64(void);
+
+// The handle of the element with the integer key `key` in the retained tree of `root`, with one
+// reference counted (release it), or `0` with [`FERRO_NOT_FOUND`]: for tests and for driving an
+// interface built from frames. UI thread only.
+FerroHandle ferro_frame_find(FerroHandle root, int64_t key);
+
+// Takes the elements of the frames of `root` out of it, frees them, and lets the reference to
+// `root` go. UI thread only.
+FerroStatus ferro_frame_clear(FerroHandle root);
+
 // Creates an object of the type `type_id` ([`ferro_type_id`](crate::ferro_type_id)) with its
 // default constructor and returns its handle, with one reference counted. `0` on a failure
 // ([`ferro_last_error_code`](crate::ferro_last_error_code): [`FERRO_NOT_FOUND`] for an unknown
@@ -196,6 +289,12 @@ FerroStatus ferro_release(FerroHandle object);
 // The type ID of the class of `object` (as [`ferro_type_id`](crate::ferro_type_id) gives it), or
 // a negative status. UI thread only.
 int64_t ferro_type_of(FerroHandle object);
+
+// The fingerprint of the stable IDs of this library: the one of the API model it was built with
+// (`bindings/model/ferroui-api.json`). A binding generated from the model compares it with its
+// own at start; a different value means its ID constants are not the IDs of this library. Any
+// thread.
+int64_t ferro_api_fingerprint(void);
 
 // The type ID of the class named `name` (`Button`, or `FerroUI.Controls.Button` where two
 // namespaces have a class of the name): a positive ID, or [`FERRO_NOT_FOUND`]. `length` is the
@@ -314,6 +413,34 @@ const char *ferro_get_cstr(FerroHandle object, int64_t property);
 // reference counted, which the caller releases ([`ferro_release`](crate::ferro_release)), or `0`
 // for null. UI thread only.
 FerroStatus ferro_get_handle(FerroHandle object, int64_t property, FerroHandle *result);
+
+// Reads a number from `property` of `object`, as [`ferro_get_f64`] does, and returns it; returns
+// `fallback` when the read fails (the failure is recorded: [`ferro_last_error`]). For a
+// language that cannot pass a pointer to a result. UI thread only.
+//
+// [`ferro_last_error`]: crate::ferro_last_error
+double ferro_get_f64_or(FerroHandle object, int64_t property, double fallback);
+
+// Reads an integer from `property` of `object`, as [`ferro_get_i64`] does, and returns it;
+// returns `fallback` when the read fails (the failure is recorded). UI thread only.
+int64_t ferro_get_i64_or(FerroHandle object, int64_t property, int64_t fallback);
+
+// Reads a boolean from `property` of `object`, as [`ferro_get_bool`] does, and returns it;
+// returns `fallback` when the read fails (the failure is recorded). UI thread only.
+bool ferro_get_bool_or(FerroHandle object, int64_t property, bool fallback);
+
+// Reads the text of `property` of `object` as [`ferro_get_cstr`] does, and returns `fallback`
+// (the caller's own string, returned as it is) in place of `NULL` when the read fails (the failure
+// is recorded): for a language whose strings cannot be `NULL`. UI thread only.
+const char *ferro_get_cstr_or(FerroHandle object, int64_t property, const char *fallback);
+
+// Writes UTF-16 text (`units` code units) to `property` of `object`, as [`ferro_set_str`] does
+// with UTF-8: for a language whose strings are UTF-16 (C#, Java, JavaScript), so that it passes
+// its string without converting it. UI thread only.
+FerroStatus ferro_set_str16(FerroHandle object,
+                            int64_t property,
+                            const uint16_t *text,
+                            int64_t units);
 
 #ifdef __cplusplus
 }  // extern "C"

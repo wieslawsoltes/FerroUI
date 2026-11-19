@@ -56,6 +56,11 @@ fn the_header_declares_every_export() {
         "ferro_post",
         "ferro_app_run",
         "ferro_show",
+        "ferro_api_fingerprint",
+        "ferro_frame_open",
+        "ferro_frame_commit",
+        "ferro_frame_commit_bytes",
+        "ferro_frame_dispatcher",
     ] {
         assert!(header.contains(&format!("{name}(")), "the header declares {name}");
     }

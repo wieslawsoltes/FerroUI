@@ -204,6 +204,66 @@ static void test_threads(void) {
     CHECK_STATUS(FERRO_OK, ferro_release(shared_handle));
 }
 
+static int64_t frame_tags;
+
+static int64_t on_frame_event(int64_t tag, FerroHandle sender, int64_t arg) {
+    (void)sender;
+    (void)arg;
+    frame_tags += tag;
+    return 0;
+}
+
+/* Frames: the scalar writer, a commit, a second commit that patches, the dispatcher of tags, and
+ * the same frame as bytes of the layout of the API model. */
+static void test_frames(void) {
+    FerroHandle root = create("StackPanel");
+    int64_t text = prop("Text");
+    int64_t block = ferro_type_id("TextBlock", -1);
+    int64_t click = ferro_event_id("Click", -1);
+    CHECK_STATUS(FERRO_OK, ferro_frame_dispatcher(on_frame_event));
+    for (int count = 0; count < 2; count++) {
+        char label[32];
+        snprintf(label, sizeof label, "Count %d", count);
+        CHECK_STATUS(FERRO_OK, ferro_frame_begin());
+        CHECK_STATUS(FERRO_OK, ferro_frame_open(block, 1));
+        CHECK_STATUS(FERRO_OK, ferro_frame_str(text, label, -1));
+        CHECK_STATUS(FERRO_OK, ferro_frame_close());
+        CHECK_STATUS(FERRO_OK, ferro_frame_open(ferro_type_id("Button", -1), 2));
+        CHECK_STATUS(FERRO_OK, ferro_frame_str(prop("Content"), "+", -1));
+        CHECK_STATUS(FERRO_OK, ferro_frame_on(click, 10 + count, 0));
+        CHECK_STATUS(FERRO_OK, ferro_frame_close());
+        CHECK_STATUS(FERRO_OK, ferro_frame_commit(root));
+    }
+    FerroHandle label = ferro_frame_find(root, 1);
+    CHECK(label != 0);
+    CHECK(strcmp(ferro_get_cstr(label, text), "Count 1") == 0);
+    FerroHandle button = ferro_frame_find(root, 2);
+    CHECK_STATUS(FERRO_OK, ferro_raise(button, click));
+    CHECK(frame_tags == 11);
+    CHECK(ferro_frame_dispatch(5, 0, 0) == 0);
+    CHECK(frame_tags == 16);
+    CHECK_STATUS(FERRO_OK, ferro_release(button));
+    CHECK_STATUS(FERRO_OK, ferro_release(label));
+
+    /* The same element as bytes: OPEN(type, key), TEXT(property, length, bytes), CLOSE. */
+    int64_t words[] = {
+        1 | (24ll << 32), block, 1,
+        3 | (32ll << 32), text, 5, 0,
+        2 | (8ll << 32),
+    };
+    memcpy(&words[6], "bytes\0\0\0", 8);
+    CHECK_STATUS(FERRO_OK, ferro_frame_commit_bytes(root, (const uint8_t *)words, sizeof words));
+    label = ferro_frame_find(root, 1);
+    CHECK(strcmp(ferro_get_cstr(label, text), "bytes") == 0);
+    CHECK(ferro_frame_find(root, 2) == 0);
+    CHECK_STATUS(FERRO_OK, ferro_release(label));
+    CHECK_STATUS(FERRO_INVALID_STATE, ferro_frame_commit_bytes(root, (const uint8_t *)words, 3 * 8));
+    CHECK_STATUS(FERRO_OK, ferro_frame_clear(root));
+    CHECK_STATUS(FERRO_OK, ferro_frame_dispatcher(NULL));
+    CHECK(ferro_api_fingerprint() != 0);
+    CHECK_STATUS(FERRO_OK, ferro_release(root));
+}
+
 int main(void) {
     CHECK(ferro_abi_version() == FERRO_ABI_VERSION);
     CHECK(!ferro_is_ui_thread());
@@ -219,6 +279,7 @@ int main(void) {
     test_values();
     test_tree_and_events();
     test_threads();
+    test_frames();
 
     if (failures != 0) {
         fprintf(stderr, "abi_test: %d of %d checks failed\n", failures, checks);

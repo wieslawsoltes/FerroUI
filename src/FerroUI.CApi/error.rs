@@ -108,3 +108,13 @@ pub extern "C" fn ferro_last_error() -> *const c_char {
 pub extern "C" fn ferro_last_error_code() -> FerroStatus {
     LAST_CODE.try_with(Cell::get).unwrap_or(FERRO_OK)
 }
+
+/// Forgets the last failure of the calling thread: [`ferro_last_error_code`] is [`FERRO_OK`] and
+/// [`ferro_last_error`] empty until the next failure. A binding whose language reports errors as
+/// values (Osprey's `Result`) clears it before a call whose result does not tell a failure apart
+/// (a getter with a fallback) and reads the code after it. Any thread.
+#[no_mangle]
+pub extern "C" fn ferro_clear_error() {
+    let _ = LAST_CODE.try_with(|last| last.set(FERRO_OK));
+    let _ = LAST_MESSAGE.try_with(|last| *last.borrow_mut() = CString::default());
+}
