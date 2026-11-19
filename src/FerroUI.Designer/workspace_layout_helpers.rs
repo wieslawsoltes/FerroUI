@@ -999,7 +999,7 @@ fn layout_target_where(
     visit(session, &root, &artboard, position, &excluded, moving, eligible)
 }
 
-fn insertion_target(session: &DesignerSession, position: Point) -> Result<(NodeId, Point), String> {
+pub(crate) fn insertion_target(session: &DesignerSession, position: Point) -> Result<(NodeId, Point), String> {
     if let Some(target) = layout_target_where(session, position, &[], &|id| {
         session.validate_content_insertion(id).is_ok()
     }) {

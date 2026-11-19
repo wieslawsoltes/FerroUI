@@ -348,6 +348,50 @@ fn canvas_guide_mcp_uses_the_native_scope_and_checked_editor() {
     assert_eq!(f.workspace.session().borrow().document().source(), SOURCE);
 }
 
+#[cfg(feature = "mcp")]
+#[test]
+fn canvas_guide_snapping_mcp_uses_native_move_and_resize_plans() {
+    use crate::mcp::DesignerMcp;
+    use ferroui_mcp::{Permissions, UiToolProvider};
+    use serde_json::json;
+
+    let _app = UnitTestApplication::start(services());
+    let f = Fixture::new();
+    let mcp = DesignerMcp::with_workspace(&f.workspace);
+    let read = Permissions { allow_property_writes: false, allow_input: false };
+    let write = Permissions { allow_property_writes: true, ..read };
+    let initial = mcp.call("designer_canvas_guides", &json!({}), read).unwrap();
+    let guide = mcp.call("designer_canvas_guides_edit", &json!({
+        "expected_revision":initial["revision"], "expected_epoch":initial["epoch"],
+        "edit":{"action":"apply","rulers":false,"guides":false,"lines":[
+            {"axis":"Vertical","position":150.25},{"axis":"Vertical","position":228.25},
+            {"axis":"Horizontal","position":103.5}
+        ]}
+    }), write).unwrap();
+    let settings = mcp.call("designer_canvas_guides_edit", &json!({
+        "expected_revision":guide["revision"], "expected_epoch":guide["epoch"],
+        "edit":{"action":"configure_snap","options":{"grid_visible":false,"grid_spacing":8,
+            "snap_to_grid":false,"snap_to_guides":true,"snap_to_objects":false,"snap_tolerance":6}}
+    }), write).unwrap();
+    let owner = f.workspace.session();
+    let target = owner.borrow().document().ast().find_name("Target").unwrap();
+    let resize = json!({"node":target,"handle":3,"dx":5.5,"dy":2.0,"expected_revision":settings["revision"],
+        "snap":{"epoch":settings["epoch"],"zoom":1}});
+    let resized = mcp.call("designer_resize_hint", &resize, read).unwrap();
+    assert_eq!(resized["dx"], 8.25);
+    assert_eq!(resized["dy"], 2.0);
+    assert_eq!(resized["snapLines"], json!([{"axis":"Horizontal","position":228.25}]));
+    let place = json!({"node":target,"x":147.0,"y":80.0,"expected_revision":settings["revision"],
+        "snap":{"epoch":settings["epoch"],"zoom":1}});
+    let hinted = mcp.call("designer_placement_hint", &place, read).unwrap();
+    assert_eq!(hinted["bounds"]["x"], 150.25);
+    assert_eq!(owner.borrow().document().source(), SOURCE);
+    mcp.call("designer_place", &place, write).unwrap();
+    assert_eq!(owner.borrow().document().ast().node(target).unwrap().attribute("Canvas.Left"), Some("150.25"));
+    owner.borrow_mut().undo().unwrap();
+    assert_eq!(owner.borrow().document().source(), SOURCE);
+}
+
 #[test]
 fn authored_control_move_snaps_to_hidden_manual_guide_in_screen_tolerance() {
     let _app = UnitTestApplication::start(services());

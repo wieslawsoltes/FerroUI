@@ -185,6 +185,8 @@ pub use resource_editor::{
 pub use runtime::{PreviewStatus, RuntimeNode};
 pub use runtime_outline::{RuntimeOutlineMode, RuntimeOutlineRow};
 pub use authoring_placement::{PlacementOrigin, PlacementPlan, PlacementTarget};
+mod canvas_snapping;
+pub use canvas_snapping::{CanvasSnapAdjustment, CanvasSnapQuery};
 pub use selection_layout::{LayoutMatch, LayoutReset};
 pub use session::DesignerSession;
 pub use surface::{DesignGesture, DesignSurface};

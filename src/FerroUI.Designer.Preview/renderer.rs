@@ -34,6 +34,7 @@ pub(crate) struct Stage {
     pub(crate) authored_rsx: Option<AuthoredRsxFrame>,
     pub(crate) project_assets: Vec<ferroui_designer::DesignerAsset>,
     pub(crate) sources: SourceSnapshot,
+    pub(crate) canvas_snap: RefCell<Option<crate::canvas_snap::PreparedSnap>>,
     _window: PreviewWindow,
 }
 
@@ -147,6 +148,7 @@ impl Renderer {
             authored_rsx: None,
             project_assets: Vec::new(),
             sources,
+            canvas_snap: RefCell::new(None),
             _window: window,
         });
         Ok(frame)

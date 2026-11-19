@@ -13,7 +13,7 @@ mod selection;
 pub mod token_handoff;
 
 pub use canvas_guide_edit::{CanvasGuideDraft, CanvasGuideEdit, CanvasGuideUpdate};
-pub use canvas_guides::{CANVAS_MIN_ZOOM, CANVAS_RULER, CanvasGuide, CanvasGuideAxis, CanvasGuideSettings, CanvasRuler, ruler_ticks};
+pub use canvas_guides::{CANVAS_MIN_ZOOM, CANVAS_RULER, CanvasGuide, CanvasGuideAxis, CanvasGuideSettings, CanvasRuler, CanvasSnapPreferences, ruler_ticks};
 pub use components::{
     ComponentAction, ComponentCatalog, ComponentEntry, ComponentKind, ComponentReference,
     ComponentResourceContext, ComponentResourceResolution, component_fragment,

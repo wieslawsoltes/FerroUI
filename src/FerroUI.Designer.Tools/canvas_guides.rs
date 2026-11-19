@@ -53,6 +53,32 @@ pub struct CanvasGuideSettings {
     pub guides: Vec<CanvasGuide>,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CanvasSnapPreferences {
+    pub grid_visible: bool,
+    pub snap_to_grid: bool,
+    pub snap_to_guides: bool,
+    pub snap_to_objects: bool,
+    pub grid_spacing: f64,
+    pub snap_tolerance: f64,
+}
+
+impl CanvasSnapPreferences {
+    pub fn enabled(self) -> bool {
+        self.snap_to_grid || self.snap_to_guides || self.snap_to_objects
+    }
+
+    pub(crate) fn apply(self, settings: &mut CanvasGuideSettings) {
+        settings.grid_visible = self.grid_visible;
+        settings.snap_to_grid = self.snap_to_grid;
+        settings.snap_to_guides = self.snap_to_guides;
+        settings.snap_to_objects = self.snap_to_objects;
+        settings.grid_spacing = self.grid_spacing;
+        settings.snap_tolerance = self.snap_tolerance;
+    }
+}
+
 impl Default for CanvasGuideSettings {
     fn default() -> Self {
         Self {
@@ -74,6 +100,17 @@ impl Default for CanvasGuideSettings {
 impl CanvasGuideSettings {
     pub const MAX_GUIDES: usize = 256;
     pub const MAX_POSITION: f64 = 1_000_000.0;
+
+    pub fn snapping(&self) -> CanvasSnapPreferences {
+        CanvasSnapPreferences {
+            grid_visible: self.grid_visible,
+            snap_to_grid: self.snap_to_grid,
+            snap_to_guides: self.snap_to_guides,
+            snap_to_objects: self.snap_to_objects,
+            grid_spacing: self.grid_spacing,
+            snap_tolerance: self.snap_tolerance,
+        }
+    }
 
     pub fn validate(&self) -> Result<(), String> {
         if self.guides.len() > Self::MAX_GUIDES {

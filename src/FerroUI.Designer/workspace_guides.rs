@@ -82,6 +82,11 @@ impl DesignerWorkspace {
         self.guides.settings.borrow().clone()
     }
 
+    #[cfg(feature = "mcp")]
+    pub(crate) fn canvas_guide_epoch(&self) -> u64 {
+        self.guides.epoch.get()
+    }
+
     /// Applies a complete local view atomically. It is available to viewers and never
     /// stages/applies source text, rebuilds the preview, or changes collaboration history.
     pub fn set_canvas_guides(&self, value: CanvasGuideSettings) -> Result<(), String> {

@@ -23,6 +23,21 @@ pub(super) fn tools() -> [Value; 2] {
         CanvasGuideSettings::MAX_GUIDES,
     );
     let boolean = json!({"type":"boolean"});
+    let snap_options = s::object(
+        json!({
+            "grid_visible":boolean,"snap_to_grid":boolean,"snap_to_guides":boolean,"snap_to_objects":boolean,
+            "grid_spacing":{"type":"number","minimum":0.1,"maximum":100000},
+            "snap_tolerance":{"type":"number","minimum":0,"maximum":32}
+        }),
+        &[
+            "grid_visible",
+            "snap_to_grid",
+            "snap_to_guides",
+            "snap_to_objects",
+            "grid_spacing",
+            "snap_tolerance",
+        ],
+    );
     let mut branches = Vec::new();
     for (action, fields, required) in [
         (
@@ -47,6 +62,11 @@ pub(super) fn tools() -> [Value; 2] {
         ),
         ("remove", json!({"id":s::id()}), vec!["id"]),
         ("clear", json!({}), vec![]),
+        (
+            "configure_snap",
+            json!({"options":snap_options}),
+            vec!["options"],
+        ),
         (
             "apply",
             json!({"rulers":boolean,"guides":boolean,"lines":lines}),

@@ -2,6 +2,7 @@
 //! applies returned UTF-16 edits through the editor's undo/redo transaction.
 mod document;
 mod canvas_guides;
+mod canvas_snap;
 mod editor_mcp;
 mod edit_selection;
 mod edits;
@@ -136,6 +137,11 @@ fn respond(
         })),
         "canvasGuideEdit" => serde_json::from_value::<canvas_guides::Request>(message["params"].clone())
             .map_err(|error| error.to_string()).and_then(|request| serialize(request.plan())),
+        "canvasSnap" => serde_json::from_value::<canvas_snap::Request>(message["params"].clone())
+            .map_err(|error| error.to_string()).and_then(|request| {
+                let stage = renderer.as_ref().ok_or("Render the design before snapping")?.stage(request.frame)?;
+                serialize(request.resolve(stage))
+            }),
         "designTokens" => serde_json::from_value::<ferroui_designer_tools::token_handoff::Request>(message["params"].clone())
             .map_err(|error| error.to_string()).and_then(|request| serialize(request.plan().map_err(|error| error.to_string()))),
         "configureProject" => serde_json::from_value(message["params"].clone())

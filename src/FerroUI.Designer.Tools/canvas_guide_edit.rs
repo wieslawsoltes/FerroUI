@@ -1,4 +1,4 @@
-use crate::{CanvasGuide, CanvasGuideAxis, CanvasGuideSettings};
+use crate::{CanvasGuide, CanvasGuideAxis, CanvasGuideSettings, CanvasSnapPreferences};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, Deserialize)]
@@ -32,6 +32,9 @@ pub enum CanvasGuideEdit {
         id: u64,
     },
     Clear,
+    ConfigureSnap {
+        options: CanvasSnapPreferences,
+    },
     Apply {
         rulers: bool,
         guides: bool,
@@ -86,6 +89,10 @@ impl CanvasGuideEdit {
             }
             Self::Clear => {
                 settings.guides.clear();
+                None
+            }
+            Self::ConfigureSnap { options } => {
+                options.apply(&mut settings);
                 None
             }
             Self::Apply {
