@@ -11,6 +11,7 @@ import { verifyHostedKeyframeGroups } from './hostedKeyframeGroups';
 import { verifyHostedContinuity } from './hostedContinuity';
 import { verifyHostedRustAnimation } from './hostedRustAnimation';
 import { verifyHostedStateRoutes } from './hostedStateRoutes';
+import { verifyHostedStateAuthoring } from './hostedStateAuthoring';
 import { reviewStateSource } from './rsxStatesMcp';
 
 export async function verifyHostedPreview(preview: NativePreview, uri: string): Promise<void> {
@@ -88,6 +89,7 @@ export async function verifyHostedPreview(preview: NativePreview, uri: string): 
         await verifyHostedClips(preview, update);
         await verifyHostedKeyframeGroups(preview, update);
         await verifyHostedClipAuthoring(preview, update);
+        await verifyHostedStateAuthoring(preview, update);
         assert.equal(child.exitCode, null);
         console.log('App-hosted design rendered a custom control, native bindings and registered XAML/Rust fixtures, and fenced invalid updates and stale input');
     } catch (error) {

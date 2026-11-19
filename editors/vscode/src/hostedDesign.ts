@@ -7,11 +7,13 @@ import { type CargoSelection, type CargoTarget, discoverCargoTargets, selectCarg
 import type { HostedAnimationAction, HostedAnimationFrame, HostedAnimationRequest, HostedAnimationState, HostedClipDraft, HostedClipEdit, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedSourcePlan, HostedStateDraft } from './hostedAnimationProtocol';
 import { HostedAnimations } from './hostedAnimations';
 import { chooseHostedClipEdit } from './hostedClipActions';
+import { chooseHostedStateAction } from './hostedStateActions';
 import { chooseHostedKeyframe } from './hostedKeyframes';
 import { prepareHostedKeyframeGroup } from './hostedKeyframeGroup';
 import type { FromHosted, HostedAnimationSample, HostedFixtureCatalog, HostedFrame, ToHosted } from './hostedProtocol';
 import { applyHostedSourcePatches } from './hostedSourceEdit';
 import { editHostedStateRoute } from './hostedStateRoutes';
+import type { StateGroupEdit } from './stateGroupProtocol';
 import { NativePreview } from './nativePreview';
 import { errorMessage, type Language } from './protocol';
 import { buildCargo, launchArtifact, type ProjectMetadata, type ReloadProcess } from './reloadProcess';
@@ -140,6 +142,13 @@ export class HostedDesign implements vscode.Disposable {
         const session = this.session(uri);
         if (session.generation !== generation) throw new Error('Read the current application preview generation.');
         return session.stateRoute(frame, draft, apply, signal);
+    }
+
+    stateGroup(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame, command: StateGroupEdit,
+        apply: boolean, signal: AbortSignal) {
+        const session = this.session(uri);
+        if (session.generation !== generation) throw new Error('Read the current application preview generation.');
+        return session.stateGroup(frame, command, apply, signal);
     }
 
     clipPlacement(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame, draft: HostedClipDraft,
@@ -365,8 +374,13 @@ class HostedSession {
         const document = this.editor.document;
         const position = document.positionAt(program.sourceOffset);
         const range = program.stateRoute ? asRange(program.stateRoute.sourceRange) : new vscode.Range(position, position);
-        const editor = await vscode.window.showTextDocument(document, { viewColumn: this.editor.viewColumn });
-        if (frame.revision !== this.revision) throw new Error('The source changed before revealing the animation.');
+        await this.revealSource(frame, range);
+    }
+
+    private async revealSource(frame: HostedAnimationFrame, range: vscode.Range): Promise<void> {
+        if (frame.revision !== this.revision) throw new Error('Read the current application preview frame.');
+        const editor = await vscode.window.showTextDocument(this.editor.document, { viewColumn: this.editor.viewColumn });
+        if (frame.revision !== this.revision) throw new Error('The source changed before revealing the declaration.');
         editor.selection = new vscode.Selection(range.start, range.end);
         editor.revealRange(range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
     }
@@ -431,11 +445,16 @@ class HostedSession {
 
     stateRoute(frame: HostedAnimationFrame, draft: HostedStateDraft, apply: boolean, signal: AbortSignal) {
         return this.editAnimationSource(frame, apply, signal, client => {
-            if (!this.animations.program(frame, draft.program).stateRoute) {
-                throw new Error('Choose a mapped Rust state route in the current application preview.');
+            const route = this.animations.program(frame, draft.program).stateRoute;
+            if (!route || route.endpoint) {
+                throw new Error('Choose an authored state transition in the current application preview.');
             }
             return client.planHostedState(frame, draft);
         });
+    }
+
+    stateGroup(frame: HostedAnimationFrame, command: StateGroupEdit, apply: boolean, signal: AbortSignal) {
+        return this.editAnimationSource(frame, apply, signal, client => client.planHostedStateGroup(frame, command));
     }
 
     clipPlacement(frame: HostedAnimationFrame, draft: HostedClipDraft, apply: boolean, signal: AbortSignal) {
@@ -485,13 +504,31 @@ class HostedSession {
     }
 
     private async promptStateRoute(frame: HostedAnimationFrame, id: number): Promise<void> {
-        const draft = await editHostedStateRoute(this.animations.program(frame, id));
+        const draft = await editHostedStateRoute(this.animations.program(frame, id), this.language === 'rust');
         if (!draft) return;
         const current = this.animations.state.frame;
         if (!current || current.revision !== frame.revision) {
             throw new Error('The application source changed while editing the state route.');
         }
         await this.stateRoute(current, draft, true, AbortSignal.timeout(15_000));
+    }
+
+    private async promptStateGroup(frame: HostedAnimationFrame, id?: number): Promise<void> {
+        const { stateAuthoring, programs } = this.animations.state;
+        if (!stateAuthoring) throw new Error('Use a current app with visual-state authoring support.');
+        if (frame.revision !== this.animations.state.frame?.revision) {
+            throw new Error('The application source changed. Open Visual state actions again.');
+        }
+        const action = await chooseHostedStateAction(stateAuthoring, programs, id);
+        if (!action) return;
+        const current = this.animations.state.frame;
+        if (!current || current.revision !== frame.revision || current.revision !== this.revision) {
+            throw new Error('The application source changed while choosing a visual state action.');
+        }
+        const signal = AbortSignal.timeout(15_000);
+        if (action.type === 'edit') await this.stateGroup(current, action.command, true, signal);
+        else if (action.type === 'preview') await this.animations.control(current, { action: 'seek', program: action.program.id, elapsed: 0 }, signal);
+        else await this.revealSource(current, asRange(action.range));
     }
 
     async curve(frame: HostedAnimationFrame, query: HostedCurveQuery, signal: AbortSignal) {
@@ -594,6 +631,12 @@ class HostedSession {
                 const command = await chooseHostedClipEdit(clipAuthoring, programs, message.program);
                 if (command) await this.clipEdit(message.frame, command, true, AbortSignal.timeout(15_000));
             } catch (error) { this.report(errorMessage(error), Boolean(this.currentFrame)); }
+            this.post({ type: 'animationReply', request: message.request });
+            return;
+        }
+        if (message.type === 'stateActions') {
+            try { await this.promptStateGroup(message.frame, message.program); }
+            catch (error) { this.report(errorMessage(error), Boolean(this.currentFrame)); }
             this.post({ type: 'animationReply', request: message.request });
             return;
         }

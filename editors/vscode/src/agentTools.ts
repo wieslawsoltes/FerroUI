@@ -9,6 +9,7 @@ import { runEditorHistory } from './editorHistory';
 import type { HotReload } from './hotReload';
 import type { HostedDesign } from './hostedDesign';
 import type { HostedAnimationAction, HostedClipDraft, HostedClipEdit, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedStateDraft } from './hostedAnimationProtocol';
+import type { StateGroupEdit } from './stateGroupProtocol';
 import type { ProjectFile, ProjectInventory } from './projectInventory';
 import type { ProjectScaffold } from './projectScaffold';
 import type { RuntimeSourceTools } from './runtimeSourceTools';
@@ -176,6 +177,10 @@ export class AgentTools {
             case 'designer_hosted_state_route':
                 return this.hosted.stateRoute(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },
                     args.arguments as HostedStateDraft, tool === 'designer_hosted_state_route', signal);
+            case 'designer_hosted_state_group_draft':
+            case 'designer_hosted_state_group':
+                return this.hosted.stateGroup(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },
+                    args.arguments as StateGroupEdit, tool === 'designer_hosted_state_group', signal);
             case 'designer_hosted_keyframe_group_draft':
             case 'designer_hosted_keyframe_group':
                 return this.hosted.keyframeGroup(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },

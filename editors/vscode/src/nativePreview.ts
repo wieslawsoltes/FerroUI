@@ -10,6 +10,7 @@ import type { Asset, CanvasInteraction, CanvasPresentation, DesignDataPresentati
 import type { RsxLanguageDocument } from './rsxLanguageTypes';
 import type { HostedAnimationFrame, HostedAnimationRequest, HostedClipDraft, HostedClipEdit, HostedClipPlan, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedKeyframeGroupPlan, HostedKeyframePlan, HostedSourcePatch, HostedSourcePlan, HostedStateDraft } from './hostedAnimationProtocol';
 import type { HostedAnimationSample, HostedFrame, HostedInput, HostedSource } from './hostedProtocol';
+import type { StateGroupEdit } from './stateGroupProtocol';
 import type { NativeStageChange, PrototypeCommand, PrototypeHotspot, PrototypeScene, StageChecks, StageDocument, StageImage, StageManifest, StageModel, StagePick, StagePointer, StageStateOptions, StageTarget } from './stagesProtocol';
 import { commandFor } from './tools';
 
@@ -33,7 +34,7 @@ export class NativePreview implements vscode.Disposable {
     private nextProject = 0;
     assets: readonly Asset[] = [];
     capabilities: {
-        isolatedDesign?: boolean; appHostedDesign?: boolean; hostedAnimationRestoration?: boolean; hostedPreviewRanges?: boolean; hostedClipAuthoring?: boolean; rsxLanguage?: boolean;
+        isolatedDesign?: boolean; appHostedDesign?: boolean; hostedAnimationRestoration?: boolean; hostedPreviewRanges?: boolean; hostedClipAuthoring?: boolean; hostedStateAuthoring?: boolean; rsxLanguage?: boolean;
         stages?: boolean; prototypeEditing?: boolean; stageIncludes?: boolean; projectCatalog?: boolean;
         canvasInteraction?: boolean; canvasFocusOrder?: boolean; projectInventory?: boolean; tokenHandoff?: boolean;
         designFixtures?: boolean; timelineTransport?: boolean; timelineRecording?: boolean; timelineGeometryRecording?: boolean;
@@ -130,6 +131,10 @@ export class NativePreview implements vscode.Disposable {
     }
     planHostedState(frame: HostedAnimationFrame, draft: HostedStateDraft): Promise<HostedSourcePlan> {
         return this.send('hostedState', { revision: frame.revision, sequence: frame.sequence, ...draft });
+    }
+    planHostedStateGroup(frame: HostedAnimationFrame, command: StateGroupEdit): Promise<HostedSourcePlan> {
+        if (!this.capabilities.hostedStateAuthoring) throw new Error('Update the FerroUI preview helper to edit visual states.');
+        return this.send('hostedStateGroup', { revision: frame.revision, sequence: frame.sequence, command });
     }
     planHostedClipPlacement(frame: HostedAnimationFrame, draft: HostedClipDraft): Promise<HostedSourcePlan> {
         return this.send('hostedClipPlacement', { ...frame, ...draft });

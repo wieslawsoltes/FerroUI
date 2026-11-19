@@ -1,4 +1,5 @@
 import type { HostedAnimationControl, HostedAnimationFrame, HostedAnimationState } from '../src/hostedAnimationProtocol';
+import type { HostedAnimationProgram } from '../src/hostedAnimationProtocol';
 import type { FromHosted, ToHosted } from '../src/hostedProtocol';
 import type { TimelineKeyframe, TimelineTrack } from '../src/timelineProtocol';
 import { element, labelButton } from './dom';
@@ -17,6 +18,7 @@ export class HostedAnimationView {
     private readonly source = element<HTMLButtonElement>('hosted-animation-source');
     private readonly issues = element<HTMLButtonElement>('hosted-animation-issues');
     private readonly clipActions = element<HTMLButtonElement>('hosted-clip-actions');
+    private readonly stateActions = element<HTMLButtonElement>('hosted-state-actions');
     private readonly edit = element<HTMLButtonElement>('hosted-animation-keyframe');
     private readonly play = element<HTMLButtonElement>('hosted-animation-play');
     private readonly stop = element<HTMLButtonElement>('hosted-animation-stop');
@@ -98,15 +100,12 @@ export class HostedAnimationView {
         this.issues.onclick = () => {
             if (this.canUse() && this.decoded) this.send({ type: 'animationIssues', frame: this.decoded });
         };
-        this.clipActions.onclick = () => {
-            if (!this.canUse() || !this.decoded || this.state.position?.playing) return;
-            const program = this.clips.visible ? undefined : this.selectedProgram?.id;
-            this.send({ type: 'clipActions', frame: this.decoded, request: this.pending = ++this.request, program });
-            this.paint();
-        };
+        this.clipActions.onclick = () => this.openActions('clipActions');
+        this.stateActions.onclick = () => this.openActions('stateActions');
         this.edit.onclick = () => this.choose(this.selectedProgram?.stateRoute ? 'editStateRoute' : 'chooseKeyframe');
         this.play.onclick = () => {
             if (this.state.position?.playing) this.control({ action: 'pause' }, true);
+            else if (this.selectedProgram?.stateRoute?.endpoint) this.control({ action: 'seek', program: Number(this.programs.value), elapsed: 0 });
             else if (this.workArea.range) this.control({ action: 'play_range', program: Number(this.programs.value), range: this.workArea.range });
             else this.control({ action: 'play', program: Number(this.programs.value) });
         };
@@ -134,12 +133,12 @@ export class HostedAnimationView {
         }
         this.state = state;
         this.documentVersion = documentVersion;
-        const catalog = JSON.stringify(state.programs.map(({ id, name, stateRoute }) => [id, name, Boolean(stateRoute)]));
+        const catalog = JSON.stringify(state.programs.map(program => [program.id, program.name, animationGroup(program)]));
         if (catalog !== this.catalog) {
             this.catalog = catalog;
-            const choices = [[false, 'Clips'], [true, 'State routes']] as const;
-            this.programs.replaceChildren(...choices.flatMap(([route, label]) => {
-                const options = state.programs.filter(program => Boolean(program.stateRoute) === route);
+            const choices = ['Clips', 'States', 'State routes'] as const;
+            this.programs.replaceChildren(...choices.flatMap(label => {
+                const options = state.programs.filter(program => animationGroup(program) === label);
                 if (!options.length) return [];
                 const group = document.createElement('optgroup');
                 group.label = label;
@@ -195,6 +194,13 @@ export class HostedAnimationView {
         if (this.canUse() && this.decoded) this.send({ type, frame: this.decoded, program: Number(this.programs.value) });
     }
 
+    private openActions(type: 'clipActions' | 'stateActions'): void {
+        if (!this.canUse() || !this.decoded || this.state.position?.playing) return;
+        const program = this.clips.visible ? undefined : this.selectedProgram?.id;
+        this.send({ type, frame: this.decoded, request: this.pending = ++this.request, program });
+        this.paint();
+    }
+
     private control(control: HostedAnimationControl, interrupt = false): void {
         const frame = interrupt ? this.state.frame : this.decoded;
         if (!frame || !this.canUse(interrupt)) return;
@@ -225,6 +231,7 @@ export class HostedAnimationView {
 
     private paint(): void {
         const program = this.selectedProgram;
+        const endpoint = Boolean(program?.stateRoute?.endpoint);
         const position = this.state.position;
         const playing = Boolean(position?.playing);
         const current = !position?.clips && position?.program === program?.id ? position : undefined;
@@ -264,9 +271,12 @@ export class HostedAnimationView {
         const authoring = this.state.clipAuthoring;
         this.clipActions.hidden = !authoring?.owners.length && !authoring?.programs.length;
         this.clipActions.disabled = !usable;
+        const states = this.state.stateAuthoring;
+        this.stateActions.hidden = !states?.owners.some(owner => owner.canCreate) && !states?.groups.length;
+        this.stateActions.disabled = !usable;
         labelButton(this.source, program?.sourceOffset == null ? 'Animation source is unavailable'
-            : program.stateRoute ? 'Reveal Rust state route in source' : 'Reveal animation in source');
-        this.edit.hidden = !program?.authoring && !program?.stateRoute;
+            : program.stateRoute ? 'Reveal visual state in source' : 'Reveal animation in source');
+        this.edit.hidden = endpoint || (!program?.authoring && !program?.stateRoute);
         this.edit.disabled = !usable;
         labelButton(this.edit, program?.stateRoute ? 'Edit state route timing' : 'Edit application keyframe');
         const keyframeUsable = usable && !this.clips.visible;
@@ -278,12 +288,13 @@ export class HostedAnimationView {
         this.play.disabled = playing ? !this.canUse(true) : !usable || !available;
         this.stop.disabled = !position || !this.canUse(true);
         // Keep the slider focused while the next sample is decoded. Retain only the latest seek.
-        this.seek.disabled = !this.state.frame || !available || playing;
+        this.seek.disabled = endpoint || !this.state.frame || !available || playing;
+        element('hosted-animation-clock').hidden = endpoint;
         const elapsed = this.queued ?? this.submitted ?? current?.elapsed ?? 0;
         const programMarkers = program ? this.state.markers?.programs[program.id] ?? [] : [];
         const horizon = Math.max(program?.duration ?? 0, program?.clip?.start ?? 0, elapsed, programMarkers.at(-1)?.time ?? 0);
         const rangeProgram = program && (program.sourceKey ?? String(program.id));
-        this.workArea.follow(this.state.canPreviewRanges && available ? program?.totalDuration ?? Infinity : 0,
+        this.workArea.follow(this.state.canPreviewRanges && available && !endpoint ? program?.totalDuration ?? Infinity : 0,
             this.rangeProgram !== rangeProgram, horizon);
         this.rangeProgram = rangeProgram;
         this.workArea.adopt(current?.previewRange, current?.playing === true);
@@ -291,8 +302,8 @@ export class HostedAnimationView {
         this.workArea.show(!usable, playing ? current?.previewRange : undefined);
         const playLabel = this.workArea.range ? 'Play preview range'
             : current && !current.completed ? 'Resume application animation' : 'Play application animation';
-        labelButton(this.play, playing ? current?.previewRange ? 'Pause preview range' : 'Pause application animation' : playLabel,
-            playing ? 'debug-pause' : 'play');
+        labelButton(this.play, endpoint ? 'Preview state' : playing ? current?.previewRange ? 'Pause preview range' : 'Pause application animation' : playLabel,
+            endpoint ? 'preview' : playing ? 'debug-pause' : 'play');
         this.seek.value = String(elapsed);
         this.programMarkers.show(programMarkers, !usable || !available, Boolean(this.state.markers));
         this.seek.setAttribute('aria-valuetext', `${this.number.format(elapsed)} seconds elapsed`);
@@ -300,4 +311,9 @@ export class HostedAnimationView {
         this.time.value = limit == null || elapsed > limit ? `${this.number.format(elapsed)} s elapsed`
             : `${this.number.format(elapsed)} / ${this.number.format(limit)} s`;
     }
+}
+
+function animationGroup(program: HostedAnimationProgram): 'Clips' | 'States' | 'State routes' {
+    if (program.stateRoute?.endpoint) return 'States';
+    return program.stateRoute ? 'State routes' : 'Clips';
 }

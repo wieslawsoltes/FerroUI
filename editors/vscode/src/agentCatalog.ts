@@ -38,6 +38,20 @@ const hostedKeyframeGroup = { ...frame, expected_generation: integer(1), expecte
 const hostedState = { ...frame, expected_generation: integer(1), expected_sequence: integer(1),
     arguments: { type: 'object', additionalProperties: false, required: ['program', 'duration', 'easing'],
         properties: { program: node, duration: time, easing: text } } };
+const stateSetter = { type: 'object', required: ['property', 'value', 'target'], additionalProperties: false,
+    properties: { property: text, value: text, target: text } };
+const stateModel = { type: 'object', required: ['owner', 'name', 'states', 'transitions'], additionalProperties: false,
+    properties: {
+        owner: node, name: text,
+        states: { type: 'array', maxItems: 1024, items: { type: 'object', required: ['name', 'setters'], additionalProperties: false,
+            properties: { name: text, setters: { type: 'array', maxItems: 4096, items: stateSetter } } } },
+        transitions: { type: 'array', maxItems: 4096, items: { type: 'object',
+            required: ['to', 'duration', 'easing'], additionalProperties: false,
+            properties: { from: {}, to: text, duration: time, easing: object } } },
+    } };
+const hostedStateGroup = { ...frame, expected_generation: integer(1), expected_sequence: integer(1),
+    arguments: { type: 'object', additionalProperties: false, required: ['action'],
+        properties: { action: choice('upsert', 'remove'), model: stateModel, owner: node, group: text } } };
 const hostedClips = { ...frame, expected_generation: integer(1), expected_sequence: integer(1),
     arguments: { type: 'object', additionalProperties: false, required: ['programs'],
         properties: { programs: { type: 'array', items: node, minItems: 1, maxItems: 4096 }, start: time, gap: { type: 'number' } } } };
@@ -104,10 +118,14 @@ export const agentCatalog = {
         hostedKeyframeGroup, hostedFrameRequired),
     designer_hosted_keyframe_group: tool('Apply a supported multi-key action as one undoable edit in the XAML or mapped Rust buffer. Use the current app generation, revision, sequence, and authored track IDs.',
         hostedKeyframeGroup, hostedFrameRequired, true),
-    designer_hosted_state_route_draft: tool('Validate a Rust state route duration in seconds and easing. Return checked source patches for the current application preview frame.',
+    designer_hosted_state_route_draft: tool('Validate an authored XAML or Rust transition duration in seconds and easing. Return checked source patches for the current application preview frame.',
         hostedState, hostedFrameRequired),
-    designer_hosted_state_route: tool('Apply the mapped Rust state route duration in seconds and easing together as one undoable source edit.',
+    designer_hosted_state_route: tool('Apply the authored transition duration in seconds and easing together as one undoable source edit.',
         hostedState, hostedFrameRequired, true),
+    designer_hosted_state_group_draft: tool('Plan a visual-state edit on the accepted application preview. Read stateAuthoring from designer_hosted_animations. Upsert takes a complete group model, including states, setters, and transitions. Remove takes owner and group.',
+        hostedStateGroup, hostedFrameRequired),
+    designer_hosted_state_group: tool('Apply a checked XAML or mapped Rust visual-state group edit as one Undo step. Supply the current app generation and accepted frame.',
+        hostedStateGroup, hostedFrameRequired, true),
     designer_hosted_clip_placement_draft: tool('Preview checked XAML or mapped Rust patches that arrange native clips in the supplied order. Start and signed gap use elapsed seconds. Omit start to keep the first clip’s delay.',
         hostedClips, hostedFrameRequired),
     designer_hosted_clip_placement: tool('Place or sequence native animation clips in the app-preview source buffer as one undoable edit. Use editable clip IDs from the current frame.',

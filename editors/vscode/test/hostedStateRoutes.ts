@@ -27,7 +27,7 @@ export async function verifyHostedStateRoutes(preview: NativePreview, review: Ho
     const seek = (frame: HostedFrame, program?: number, elapsed = 0, restart = true) =>
         preview.sampleHostedAnimation({ revision: frame.revision, sequence: frame.sequence, program, elapsed, restart });
     const initial = await update(152, source);
-    assert.equal(initial.animations?.programs.filter(program => Boolean(program.stateRoute)).length, 3);
+    assert.equal(initial.animations?.programs.filter(program => program.stateRoute && !program.stateRoute.endpoint).length, 3);
     const route = routeIn(initial);
     const clip = initial.animations?.programs.find(program => !program.stateRoute);
     assert.ok(clip);

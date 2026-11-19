@@ -1,14 +1,10 @@
 import { action, choose, editText, editTime, type StudioContext, type StudioItem } from './studioContext';
+import { addState, authorSetter, authorTransition, easingText, editMappedSetter, newStateGroup,
+    parseMappedEasing, pickSetter, pickTransition, removeState } from './stateAuthoringPrompts';
+import type { StateSetter as Setter, StateTransition as Transition, VisualStateGroup as StateGroup } from './stateGroupProtocol';
 import type { StateTransitionRoute } from './stateTransitionProtocol';
 import type { Range } from './protocol';
 
-interface Setter { property: string; value: string; target: string }
-interface State { name: string; setters: Setter[] }
-type Easing = { kind: 'Linear' } | { kind: 'Named'; value: string }
-    | { kind: 'CubicBezier'; value: { x1: number; y1: number; x2: number; y2: number } }
-    | { kind: 'Spring'; value: { mass: number; stiffness: number; damping: number; initial_velocity: number } };
-interface Transition { from: string | null; to: string; duration: number; easing: Easing }
-interface StateGroup { owner: number; name: string; states: State[]; transitions: Transition[] }
 interface StateSource { owner: number; group: string; range: Range; transitions: Array<Pick<Transition, 'from' | 'to'> & { range: Range }> }
 
 type OpenTransition = (context: StudioContext, route: StateTransitionRoute) => Promise<void>;
@@ -28,11 +24,8 @@ export async function stateItems(context: StudioContext, openTransition: OpenTra
     const creatable = owner !== undefined && (context.writable
         || (context.panel.supportsRustStateStructure && creatableOwners?.includes(owner)));
     if (creatable) rows.unshift(action('states:create', 'Add state group…', async () => {
-        const name = await editText('State group name');
-        if (!name) return;
-        if (groups.some(group => group.owner === owner && group.name === name)) throw new Error('This control already has a group with that name.');
-        const first = await editText('Initial state name', 'Normal');
-        if (first) await update({ owner, name, states: [{ name: first, setters: [] }], transitions: [] });
+        const model = await newStateGroup(owner, groups);
+        if (model) await update(model);
     }, 'add'));
     return rows;
 }
@@ -60,10 +53,7 @@ function groupItems(context: StudioContext, group: StateGroup, update: (group: S
             const selected = await pickSetter(state);
             if (selected) await updateSetters(state.setters.filter(setter => setter !== selected.setter));
         } });
-        if (writable) actions.push({ label: 'Remove state', run: () => update({
-            ...group, states: group.states.filter(item => item !== state),
-            transitions: group.transitions.filter(route => route.from !== state.name && route.to !== state.name),
-        }) });
+        if (writable) actions.push({ label: 'Remove state', run: () => update(removeState(group, state)) });
         const selected = await choose(state.name, actions);
         await selected?.run();
     }, 'symbol-enum-member'));
@@ -92,10 +82,8 @@ function groupItems(context: StudioContext, group: StateGroup, update: (group: S
     }
     if (!writable) return rows;
     rows.unshift(action(`${id}:add`, 'Add state…', async () => {
-        const name = await editText('State name');
-        if (!name) return;
-        if (group.states.some(state => state.name === name)) throw new Error('This group already has a state with that name.');
-        await update({ ...group, states: [...group.states, { name, setters: [] }] });
+        const model = await addState(group);
+        if (model) await update(model);
     }, 'add'));
     if (group.states.length) rows.push(action(`${id}:add-transition`, mapped ? 'Add transition…' : 'Add or edit transition…', async () => {
         const transitions = await authorTransition(group, Boolean(mapped));
@@ -120,82 +108,4 @@ async function chooseTransition(group: StateGroup): Promise<StateTransitionRoute
     const initial = await choose('Choose the starting state', [{ label: 'Base values', name: null },
         ...group.states.filter(state => state.name !== to && !directional.has(state.name)).map(state => ({ label: state.name, name: state.name }))]);
     if (initial) return { owner: group.owner, group: group.name, from: initial.name, to };
-}
-
-async function pickTransition(group: StateGroup): Promise<Transition | undefined> {
-    const choice = await choose('State transitions', group.transitions.map(transition => ({
-        label: `${transition.from ?? 'Any state'} → ${transition.to}`,
-        description: `${transition.duration} s`,
-        transition,
-    })));
-    return choice?.transition;
-}
-
-function pickSetter(state: State) {
-    return choose(state.name, state.setters.map(setter => ({
-        label: `${setter.target || 'Owner'}.${setter.property}`, description: setter.value, setter,
-    })));
-}
-
-async function editMappedSetter(state: State): Promise<Setter[] | undefined> {
-    const selection = await pickSetter(state);
-    if (!selection) return;
-    const value = await editText(selection.label, selection.setter.value);
-    if (value !== undefined) return state.setters.map(setter =>
-        setter.target === selection.setter.target && setter.property === selection.setter.property ? { ...setter, value } : setter);
-}
-
-function easingText(easing: Easing): string {
-    if (easing.kind === 'Named') return easing.value;
-    if (easing.kind === 'CubicBezier') {
-        const { x1, y1, x2, y2 } = easing.value;
-        return `${x1}, ${y1}, ${x2}, ${y2}`;
-    }
-    return 'LinearEasing';
-}
-
-function parseMappedEasing(text: string): Easing {
-    const name = text.trim();
-    if (!name || name === 'LinearEasing') return { kind: 'Linear' };
-    if (!name.includes(',')) return { kind: 'Named', value: name };
-    const fields = name.split(',').map(field => field.trim());
-    if (fields.length !== 4 || fields.some(field => !field || !Number.isFinite(Number(field)))) {
-        throw new Error('Enter a native easing name or four Bézier coordinates.');
-    }
-    const [x1, y1, x2, y2] = fields.map(Number);
-    return { kind: 'CubicBezier', value: { x1, y1, x2, y2 } };
-}
-
-async function authorSetter(state: State, rust: boolean): Promise<Setter[] | undefined> {
-    if (state.setters.length) {
-        const next = await choose('State setter', [
-            { label: 'Add a property…', edit: false },
-            { label: 'Edit an existing value…', edit: true },
-        ]);
-        if (!next) return;
-        if (next.edit) return editMappedSetter(state);
-    }
-    const property = await editText('Property name', rust ? 'Opacity' : undefined);
-    if (!property) return;
-    const target = await editText('Named target. Leave empty for the owner.', '');
-    if (target === undefined) return;
-    const existing = state.setters.find(setter => setter.property === property && setter.target === target);
-    const value = await editText('State value', existing?.value);
-    if (value !== undefined) return [...state.setters.filter(setter => setter !== existing), { property, value, target }];
-}
-
-async function authorTransition(group: StateGroup, rust: boolean): Promise<Transition[] | undefined> {
-    const names = group.states.map(state => ({ label: state.name, name: state.name }));
-    const from = await choose('Transition from', [{ label: 'Any state', name: null }, ...names]);
-    if (!from) return;
-    const to = await choose('Transition to', names.filter(state => state.name !== from.name));
-    if (!to) return;
-    const existing = group.transitions.find(transition => transition.from === from.name && transition.to === to.name);
-    const duration = await editTime('Transition duration in seconds', 600, existing?.duration ?? .2);
-    if (duration === undefined) return;
-    const initial = existing?.easing ?? { kind: 'Linear' } as const;
-    const response = rust ? await editText('Transition easing', easingText(initial)) : undefined;
-    if (rust && response === undefined) return;
-    const easing = response !== undefined ? parseMappedEasing(response) : initial;
-    return [...group.transitions.filter(transition => transition !== existing), { from: from.name, to: to.name, duration, easing }];
 }

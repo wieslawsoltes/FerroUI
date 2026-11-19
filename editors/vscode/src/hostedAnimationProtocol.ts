@@ -1,11 +1,13 @@
 import type { AnimationSourceIssue, KeyframeDraft, KeyframeDraftPreview, TimelineClipTiming, TimelineCurveRequest, TimelineKeyframe, TimelineMarker, TimelineMarkerAction, TimelinePreviewRange, TimelineTrack } from './timelineProtocol';
 import type { Range } from './protocol';
 import type { StateTransitionRoute } from './stateTransitionProtocol';
+import type { AuthoredStateGroup } from './stateGroupProtocol';
 import type { KeyframeGroupEdit, KeyframeLocation, KeyframePaste, TimelineKeyAction } from './timelineProtocol';
 
 export interface HostedStateRoute extends StateTransitionRoute {
     easing: string;
     sourceRange: Range;
+    endpoint?: boolean;
 }
 
 export interface HostedAnimationProgram {
@@ -38,6 +40,13 @@ export interface HostedClipAuthoring {
     programs: number[];
 }
 
+export interface HostedStateOwner extends HostedAnimationTarget { sourceLine: number; canCreate: boolean }
+export interface HostedStateAuthoring {
+    language: 'xaml' | 'rust';
+    owners: HostedStateOwner[];
+    groups: AuthoredStateGroup[];
+}
+
 export interface HostedAnimationCatalog {
     programs: HostedAnimationProgram[];
     targets: HostedAnimationTarget[];
@@ -46,6 +55,7 @@ export interface HostedAnimationCatalog {
     markerScope?: string;
     keyframeSelection?: boolean;
     clipAuthoring?: HostedClipAuthoring;
+    stateAuthoring?: HostedStateAuthoring;
 }
 
 export interface HostedAnimationFrame {
