@@ -1348,6 +1348,29 @@ pub fn name_element<T: PartialEq + Clone + 'static>(
     register_name_value(scope, name, Rc::new(element.clone()), line, position)
 }
 
+/// `{CompiledBinding path}` as the value of the registered property `property` of `target`:
+/// what the statements of generated code do, which create the extension with the path
+/// (`CompiledBindingExtension::__markup_new_1`), set the property as the provide-value target
+/// property of the context, call `ProvideValue` with the context as the service provider, clear
+/// the target property and pass the provided binding to the binding setter of the property
+/// ([`bind`]) at `line`, `position`. The same calls, in the same order.
+#[inline(never)]
+pub fn bind_compiled_binding(
+    context: &Rc<XamlIlContext>,
+    target: &Ref<FerroObject>,
+    property: &'static FerroProperty,
+    path: CompiledBindingPath,
+    line: i32,
+    position: i32,
+) -> Result<(), XamlLoadError> {
+    use crate::markup_extensions::CompiledBindingExtension;
+    let extension = CompiledBindingExtension::__markup_new_1(path);
+    context.set_target_property(property_value(property));
+    let provided = CompiledBindingExtension::__markup_ProvideValue_0(&extension, Some(service_provider(context)));
+    context.set_target_property(None);
+    bind(target, property, provided, line, position)
+}
+
 /// `element.Name = name`, the setter of the direct property of a styled element.
 #[inline(never)]
 fn set_element_name(element: &StyledElement, name: &str) {

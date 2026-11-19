@@ -602,6 +602,49 @@ fn fused_template_binding_bind(types: &dyn EmitTypes, lines: &[String], statemen
     })
 }
 
+/// The Rust path of the markup extension of `{CompiledBinding}`, as the type systems of the
+/// emitter name it.
+const COMPILED_BINDING_EXTENSION: &str = "::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension";
+
+/// The binding setter of a registered property whose value is `{CompiledBinding path}` with no
+/// other member of the extension set, as the shared helper of `rt` writes it: `lines` end with
+/// the statements of the value (the extension created with the path, the property set as the
+/// provide-value target property, `ProvideValue` with the context as the service provider, the
+/// target property cleared) and `statement` is the call of `rt::bind` with the provided binding.
+/// `rt::bind_compiled_binding(&context, target, property, path, line, position)` makes the same
+/// calls in the same order. `None` (the statements are kept) for any other shape.
+fn fused_compiled_binding_bind(lines: &[String], statement: &str) -> Option<String> {
+    let [.., create, target, provide, clear] = lines else { return None };
+    let (local, created) = create.strip_prefix("    let ")?.split_once(" = ")?;
+    let path = created.strip_prefix(&format!("{COMPILED_BINDING_EXTENSION}::__markup_new_1("))?.strip_suffix(");")?;
+    let property = target.strip_prefix("    context.set_target_property(rt::property_value(")?.strip_suffix("));")?;
+    let (provided, call) = provide.strip_prefix("    let ")?.split_once(" = ")?;
+    let provide_value = format!(
+        "{COMPILED_BINDING_EXTENSION}::__markup_ProvideValue_0(&{local}, \
+         ::core::option::Option::Some(rt::service_provider(&context)));"
+    );
+    if call != provide_value || clear != "    context.set_target_property(::core::option::Option::None);" {
+        return None;
+    }
+    let receiver = ".upcast_ref::<::ferroui_base::FerroObject>(), ";
+    let (object, rest) = statement.strip_prefix("rt::bind(")?.split_once(receiver)?;
+    let rest = rest.strip_prefix(&format!("{property}, {provided}, "))?;
+    let (line, column) = rest.strip_suffix(")?;")?.split_once(", ")?;
+    let plain_call = |text: &str| {
+        text.starts_with("::") && text.ends_with("()") && !text[..text.len() - 2].contains(['(', ')', ' '])
+    };
+    let path_local = path.strip_suffix(".clone()")?;
+    if !is_identifier(local) || !is_identifier(provided) || !is_identifier(object) || !is_identifier(path_local)
+        || !plain_call(property) || line.parse::<i32>().is_err() || column.parse::<i32>().is_err()
+    {
+        return None;
+    }
+    Some(format!(
+        "rt::bind_compiled_binding(&context, {object}.upcast_ref::<::ferroui_base::FerroObject>(), \
+         {property}, {path}, {line}, {column})?;"
+    ))
+}
+
 /// A deferred resource added to a resource dictionary under a text key, as the shared helper of
 /// `rt` writes it: `last` is the statement that created the deferred content `local`
 /// (`rt::defer`) and `call` the call of `ResourceDictionary.AddDeferred` with it, both at one
@@ -2358,7 +2401,14 @@ impl<'a> Emitter<'a> {
     fn setter_line(&mut self, statement: String) {
         let fused = fused_dynamic_resource_bind(self.types, &self.lines, &statement)
             .or_else(|| fused_template_binding_bind(self.types, &self.lines, &statement, false))
-            .map(|fused| (2, fused));
+            .map(|fused| (2, fused))
+            .or_else(|| {
+                // The construction programs encode the statements of the extension themselves.
+                (!self.documents.backend.uses_construction_programs())
+                    .then(|| fused_compiled_binding_bind(&self.lines, &statement))
+                    .flatten()
+                    .map(|fused| (4, fused))
+            });
         match fused {
             Some((replaced, fused)) => {
                 self.lines.truncate(self.lines.len() - replaced);
@@ -5970,5 +6020,71 @@ mod tests {
         );
         assert_eq!(brace_balance("if a { \"}\" "), 1);
         assert_eq!(declared_local("let value_0: ::x::T = f();"), Some(("value_0".to_string(), Some("::x::T".to_string()))));
+    }
+
+    /// #568: the statements every styled element of a template repeats (the intermediate root,
+    /// the parent stack, the end of the initialisation, the name) and a `{CompiledBinding}` bound
+    /// to a property are calls of the shared helpers of `rt` in the native output; the
+    /// construction programs of the bytecode backend keep the statements they encode.
+    #[cfg(feature = "runtime")]
+    #[test]
+    fn styled_elements_of_a_template_share_their_repeated_statements() {
+        use crate::rust_emitter::XamlBackend;
+        use crate::rust_emitter::{compile_documents_with, with_xaml_backend, EmitterHost, TransformOptions};
+        ferroui_markup_xaml::register_types();
+        let host = EmitterHost::runtime(&[]).unwrap();
+        let xaml = r#"<ControlTemplate xmlns="https://github.com/ferroui"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" TargetType="Button">
+            <StackPanel x:Name="PART_Root">
+                <Border Width="{CompiledBinding $parent[Button].Width}" />
+                <TextBlock Name="PART_Text" Background="{DynamicResource ExampleBrush}" />
+                <TextBlock Text="plain" />
+            </StackPanel>
+        </ControlTemplate>"#;
+        let emit = |backend| {
+            let options = TransformOptions::default();
+            with_xaml_backend(backend, &Default::default(), || {
+                compile_documents_with(&host, &[("template.xaml", xaml)], Some("ferres://Example/"), &options)
+            })
+            .pop()
+            .unwrap()
+            .source
+            .unwrap()
+        };
+        let native = emit(XamlBackend::Native);
+        for shared in [
+            "rt::set_intermediate_root(&context, &stack_panel_0);",
+            "rt::push_parent(&context, &stack_panel_0);",
+            "rt::name_element(name_scope.as_ref(), &stack_panel_0, &stack_panel_0, \"PART_Root\", ",
+            "rt::name_element(name_scope.as_ref(), &text_block_0, &text_block_0, \"PART_Text\", ",
+            "rt::pop_parent_end_init(&context, &stack_panel_0, ",
+            "rt::end_init(&text_block_1, ",
+            "rt::bind_compiled_binding(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ",
+        ] {
+            assert!(native.contains(shared), "{shared} in\n{native}");
+        }
+        for inline in [
+            "context.set_intermediate_root_object(",
+            "push_parent(rt::to_value(",
+            "context.pop_parent();",
+            "try_end_init()",
+            "rt::register_name_value(",
+            "StyledElement::name_property()",
+            "CompiledBindingExtension::__markup_ProvideValue_0",
+        ] {
+            assert!(!native.contains(inline), "{inline} in\n{native}");
+        }
+        let typed = emit(XamlBackend::Bytecode);
+        let helpers = [
+            "rt::set_intermediate_root(",
+            "rt::push_parent(",
+            "rt::name_element(",
+            "rt::pop_parent_end_init(",
+            "rt::end_init(",
+            "rt::bind_compiled_binding(",
+        ];
+        for shared in helpers {
+            assert!(!typed.contains(shared), "{shared} in\n{typed}");
+        }
     }
 }
