@@ -41,15 +41,13 @@ env:
 
 jobs:
   # The ABI without the desktop platform (no renderer): the Rust tests of the crate, the check that
-  # the header is the one of the sources, and the C tests of the ABI, on Linux and macOS.
+  # the header is the one of the sources, the C tests of the ABI and the benchmark, on Linux. The
+  # macOS job below runs the same tests against the library with the desktop platform, so that the
+  # workflow asks for one macOS runner.
   abi:
-    name: ABI tests (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
+    name: ABI tests (Linux)
+    runs-on: ubuntu-latest
     timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-15]
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
@@ -68,9 +66,10 @@ jobs:
         run: cargo bench --locked -p ferroui-capi --no-default-features --bench call_overhead
 
   # The C hello world on the desktop platform: the library with Skia, the sample compiled and
-  # linked against it, and a smoke run of three seconds (FERROUI_SMOKE_EXIT_MS).
+  # linked against it, and a smoke run of three seconds (FERROUI_SMOKE_EXIT_MS); on macOS also the
+  # Rust and C tests of the ABI.
   sample-macos:
-    name: C hello world (macOS)
+    name: ABI tests and C hello world (macOS)
     runs-on: macos-15
     timeout-minutes: 90
     steps:
@@ -83,8 +82,10 @@ jobs:
           cache-on-failure: true
       - name: Rust tests of the ABI with the desktop platform
         run: cargo test --locked -p ferroui-capi --lib
-      - name: Build the hello world
+      - name: Build the hello world and the C tests
         run: make -C samples/CApi all
+      - name: C tests of the ABI
+        run: make -C samples/CApi test
       - name: The hello world for three seconds
         env:
           FERROUI_SMOKE_EXIT_MS: 3000
