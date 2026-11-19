@@ -3617,3 +3617,27 @@ fn an_error_the_xaml_runtime_reports_in_a_reload_step_is_its_error_without_unwin
     assert_eq!(result, Err(ReloadError::RestartRequired("in an inner scope".into())));
     assert_eq!(xaml_error_scope::depth(), 0);
 }
+
+#[test]
+fn an_error_the_application_raises_on_the_dispatcher_in_a_reload_step_is_its_error_without_unwinding() {
+    let _scope = Dispatcher::unit_test_scope();
+    let went_on = Cell::new(false);
+    let result: Result<(), ReloadError> = catch_reload(|| {
+        // A handler or callback of the candidate that returns its error (#567).
+        Dispatcher::current_dispatcher().raise_unhandled_exception("the handler of the candidate failed");
+        went_on.set(true);
+        Ok(())
+    });
+    assert!(went_on.get());
+    assert_eq!(result, Err(ReloadError::Failed("the handler of the candidate failed".into())));
+
+    // A `ReloadError` raised outside every step goes to the dispatcher, without a panic.
+    let raised = Rc::new(RefCell::new(None::<ReloadError>));
+    let seen = raised.clone();
+    let _handler = Dispatcher::current_dispatcher().unhandled_exception(move |args| {
+        *seen.borrow_mut() = args.error().and_then(|error| error.downcast_ref::<ReloadError>()).cloned();
+        args.set_handled(true);
+    });
+    raise_reload_error(ReloadError::RestartRequired("outside".into()));
+    assert_eq!(raised.take(), Some(ReloadError::RestartRequired("outside".into())));
+}
