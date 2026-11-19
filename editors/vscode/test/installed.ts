@@ -59,6 +59,7 @@ export async function run(): Promise<void> {
         assert.ok(native.capabilities.timelineProgramTargets, 'The installed preview retains animation resource targets');
         assert.ok(native.capabilities.stateTransitionPreview, 'The installed preview samples explicit state transitions');
         assert.ok(native.capabilities.rsxStateAuthoring, 'The installed preview maps typed Rust state declarations');
+        assert.ok(native.capabilities.rsxStateStructure, 'The installed preview authors Rust state groups');
         assert.ok(native.capabilities.hostedAnimationRestoration, 'The installed preview restores the accepted app-hosted timeline');
         const source = sourceOf(document, 'xaml', new vscode.Position(0, 0));
         const snapshot = await native.render(source, { width: 800, height: 520, dark: false }, 1);
@@ -115,6 +116,17 @@ export async function run(): Promise<void> {
         assert.ok(newClip.image && newClip.mappedRustAnimations);
         const result = await native.studioQuery(5, 'designer_programs', { include_source: false }) as { programs: TimelineProgram[] };
         assert.deepEqual(result.programs.map(clip => [clip.name, clip.source_key]), [['Headline reveal', created.timelineProgramKey]]);
+        const { creatableOwners } = await native.studioQuery(5, 'designer_states', {}) as { creatableOwners: number[] };
+        const owner = creatableOwners[0];
+        assert.ok(owner);
+        const createdGroup = await native.studioEdit({ ...headline, source: draft }, 5, 'designer_state', {
+            action: 'upsert', model: { name: 'Visibility', owner, states: [
+                { name: 'Visible', setters: [{ target: '', property: 'Opacity', value: '1' }] },
+            ], transitions: [] },
+        }, []);
+        assert.equal(createdGroup.edits.length, 1);
+        assert.match(createdGroup.edits[0].newText, /visual_states: \[/);
+        assert.match(createdGroup.edits[0].newText, /::ferroui_view::visual_state_group\("Visibility"\)/);
         const { animationQuery } = await native.listenHosted(randomBytes(32).toString('hex'));
         const capabilities = new URLSearchParams(animationQuery);
         assert.equal(capabilities.get('ferroui-design-animation'), '1', 'The installed relay negotiates native application animations');

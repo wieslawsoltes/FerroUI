@@ -95,9 +95,41 @@ export async function verifyRsxStates({ invoke, content }: McpFixture): Promise<
     await until(() => document.version !== version);
     assert.equal(document.getText(), source);
     await outline();
+    const model = { owner: group.owner, name: 'Highlight', states: [
+        { name: 'Normal', setters: [] },
+        { name: 'Ready', setters: [{ target: 'Card', property: 'Width', value: '160' }] },
+    ], transitions: [{ from: 'Normal', to: 'Ready', duration: .23, easing: { kind: 'Linear' } }] };
+    const statesEdit = async (arguments_: object) => {
+        frame = await outline();
+        content(await invoke('designer_studio_edit', {
+            session, expected_revision: frame.revision, tool: 'designer_state', arguments: arguments_,
+        }));
+        frame = await outline();
+    };
+    await statesEdit({ action: 'upsert', model });
+    const authored = document.getText();
+    assert.match(authored, /::ferroui_view::visual_state_group\("Highlight"\)/);
+    assert.ok(authored.includes('.set_on("Card", ::ferroui_base::layout::Layoutable::width_property(), 160.0)'));
+    assert.equal(await width(), 100, 'The accepted base width remains visible before playing a new group');
+    const route = await control({ action: 'open', owner: model.owner, group: model.name, from: 'Normal', to: 'Ready', time: .115 });
+    assert.equal(route.duration, .23);
+    assert.equal(await width(), 130);
+    await control({ action: 'stop' });
+    model.states[1].setters = [];
+    model.transitions = [];
+    await statesEdit({ action: 'upsert', model });
+    assert.ok(!document.getText().includes('160.0'));
+    assert.ok(!document.getText().includes('ms(230)'));
+    await statesEdit({ action: 'remove', owner: model.owner, group: model.name });
+    assert.equal(document.getText(), source);
+    const beforeUndo = document.version;
+    content(await invoke('designer_history', { session, expected_version: beforeUndo, action: 'undo' }));
+    await until(() => document.version !== beforeUndo);
+    assert.match(document.getText(), /visual_state_group\("Highlight"\)/);
+    assert.ok(!document.getText().includes('ms(230)'));
     const tabs = vscode.window.tabGroups.all.flatMap(group => group.tabs).filter(tab =>
         tab.label === 'Design · review_states.rs' || (tab.input instanceof vscode.TabInputText && tab.input.uri.toString() === uri.toString()));
     await vscode.window.tabGroups.close(tabs);
     await vscode.workspace.fs.delete(uri, { useTrash: false });
-    console.log('VS Code and MCP sampled both mapped Rust directions and the default route, edited three literals, rejected a retired frame, and restored CRLF with one Undo');
+    console.log('VS Code and MCP sampled both mapped Rust directions and the default route, authored and removed state groups, setters and routes, rejected a retired frame, and preserved CRLF and undo');
 }

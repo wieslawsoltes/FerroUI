@@ -32,6 +32,7 @@ interface Frame {
     timelineCombinedPlayback: boolean;
     stateTransitionPreview: boolean;
     rsxStateAuthoring: boolean;
+    rsxStateStructure: boolean;
 }
 
 type PropertyEdit = Extract<NodeOperation, { type: 'setProperty' | 'resetProperty' }>;
@@ -176,6 +177,7 @@ export class DesignerPanel implements vscode.Disposable {
     get supportsTimelineCombinedPlayback(): boolean { return Boolean(this.frame?.timelineCombinedPlayback); }
     get supportsStateTransitionPreview(): boolean { return Boolean(this.frame?.stateTransitionPreview); }
     get supportsRustStates(): boolean { return Boolean(this.language === 'rust' && this.frame?.rsxStateAuthoring); }
+    get supportsRustStateStructure(): boolean { return this.supportsRustStates && Boolean(this.frame?.rsxStateStructure); }
     get animationRecordingTime(): number | undefined { return this.animationRecording && !this.timelinePose?.playback ? this.timelinePose?.time : undefined; }
     get isDisposed(): boolean { return this.disposed; }
     get canvasReady(): boolean { return !this.disposed && this.ready && this.panel.visible; }
@@ -415,7 +417,8 @@ export class DesignerPanel implements vscode.Disposable {
                 || action === 'move_keyframes' || (action === 'scale_keyframes' && this.supportsTimelineKeyframeScale)
                 || (this.supportsRustKeyframeStructure && action !== undefined &&
                     ['record_keyframe', 'remove_keyframe', 'duplicate_keyframes', 'remove_keyframes'].includes(action)));
-        const rustState = name === 'designer_state' && action === 'upsert' && this.supportsRustStates;
+        const rustState = name === 'designer_state' && this.supportsRustStates
+            && (action === 'upsert' || (this.supportsRustStateStructure && action === 'remove'));
         const rustProgram = name === 'designer_program' && this.supportsRustAnimationPrograms
             && action !== undefined && ['create', 'rename', 'duplicate', 'remove'].includes(action);
         if (this.language === 'rust' && !rustKeyframe && !rustProgram && !rustState && !mappedStudioEdits.has(name)) {
@@ -612,6 +615,7 @@ export class DesignerPanel implements vscode.Disposable {
                 timelineCombinedPlayback: Boolean(client.capabilities.timelineCombinedPlayback),
                 stateTransitionPreview: Boolean(client.capabilities.stateTransitionPreview),
                 rsxStateAuthoring: Boolean(client.capabilities.rsxStateAuthoring),
+                rsxStateStructure: Boolean(client.capabilities.rsxStateStructure),
                 canvas: { ...snapshot, nodes, interactive: Boolean(client.capabilities.canvasInteraction && snapshot.image),
                     focusOrderAvailable: Boolean(client.capabilities.canvasFocusOrder && snapshot.image) } };
             this.runtime = undefined;

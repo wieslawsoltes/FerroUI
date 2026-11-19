@@ -589,13 +589,19 @@ A `None` starting endpoint declares a default route. The compiled view calls
 `ferroui_view::set_visual_state` to enter a state or clear it. State properties use native or
 application-registered animators. Clearing the state restores the underlying values and bindings.
 
-Open **States** to preview endpoints, edit mapped typed values and route timing, or reveal
-the original Rust route. Use the playhead in Studio or the Timeline transport in VS Code
-to sample the generated native preview. Studio, VS Code and MCP apply checked edits to the
-original literals in one undo step. Constructors, comments, and neighboring expressions
-retain their original source. Add and remove declarations in Rust. Cargo-exported
+Select the owner and open **States** to add a group. Add states and property setters
+from the group controls. In the Transitions section, choose the endpoints, duration
+in whole milliseconds, and the easing. Use the playhead in Studio or the Timeline
+transport in VS Code to sample a default or directional route. The reveal control
+opens the authored Rust declaration.
+
+Studio, VS Code, and MCP share the source planner for adding and removing inline
+groups, states, setters, and routes. Each action uses one Undo step. Comments,
+unchanged literals, and neighboring expressions retain their source. New sibling
+groups require an inline array with identifiable group names. Cargo-exported
 property getters use the same registry as RSX keyframes. Todo Workbench registers
-the **Interactive review** fixture from `app_preview/review_states.rs`.
+the **Interactive review** fixture from `app_preview/review_states.rs` for runtime
+state preview. [VS Code motion guide](vscode/motion.md#edit-and-preview-visual-states)
 
 The **Behaviors** panel authors event/data triggers and property, command, method and class actions.
 Custom trigger/action objects retain their raw markup and can be edited in source. The designer

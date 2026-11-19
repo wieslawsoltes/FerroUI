@@ -14,7 +14,9 @@ interface StateSource { owner: number; group: string; range: Range; transitions:
 type OpenTransition = (context: StudioContext, route: StateTransitionRoute) => Promise<void>;
 
 export async function stateItems(context: StudioContext, openTransition: OpenTransition): Promise<StudioItem[]> {
-    const { groups, sources } = await context.read<{ groups: StateGroup[]; sources?: StateSource[] }>('designer_states');
+    const { groups, sources, creatableOwners } = await context.read<{
+        groups: StateGroup[]; sources?: StateSource[]; creatableOwners?: number[];
+    }>('designer_states');
     const update = (model: StateGroup) => context.edit('designer_state', { action: 'upsert', model });
     const rows: StudioItem[] = groups.map(group => ({
         id: groupId(group), label: group.name, description: `${group.states.length} states`,
@@ -23,7 +25,9 @@ export async function stateItems(context: StudioContext, openTransition: OpenTra
     }));
     rows.unshift(action('states:clear', 'Clear state preview', () => context.present('designer_state', { action: 'clear_preview' }), 'clear-all'));
     const owner = context.node;
-    if (context.writable && owner !== undefined) rows.unshift(action('states:create', 'Add state group…', async () => {
+    const creatable = owner !== undefined && (context.writable
+        || (context.panel.supportsRustStateStructure && creatableOwners?.includes(owner)));
+    if (creatable) rows.unshift(action('states:create', 'Add state group…', async () => {
         const name = await editText('State group name');
         if (!name) return;
         if (groups.some(group => group.owner === owner && group.name === name)) throw new Error('This control already has a group with that name.');
@@ -39,16 +43,28 @@ function groupItems(context: StudioContext, group: StateGroup, update: (group: S
     openTransition: OpenTransition, source?: StateSource): StudioItem[] {
     const id = groupId(group);
     const mapped = context.panel.supportsRustStates && source;
+    const writable = context.writable || (mapped && context.panel.supportsRustStateStructure);
     const rows = group.states.map(state => action(`${id}:state:${state.name}`, state.name, async () => {
         const preview = () => context.present('designer_state', { action: 'preview', owner: group.owner, group: group.name, state: state.name });
-        if (!context.writable && (!mapped || !state.setters.length)) return preview();
-        const selected = await choose(state.name, [
+        if (!writable && (!mapped || !state.setters.length)) return preview();
+        const updateSetters = (setters: Setter[]) => update({ ...group, states: group.states.map(item =>
+            item === state ? { ...item, setters } : item) });
+        const actions = [
             { label: 'Preview state', run: preview },
-            { label: mapped ? 'Edit a state value…' : 'Add or edit a state setter…', run: async () => {
-                const setters = await (mapped ? editMappedSetter(state) : authorSetter(state));
-                if (setters) await update({ ...group, states: group.states.map(item => item === state ? { ...item, setters } : item) });
+            { label: writable ? 'Add or edit a state setter…' : 'Edit a state value…', run: async () => {
+                const setters = await (writable ? authorSetter(state, Boolean(mapped)) : editMappedSetter(state));
+                if (setters) await updateSetters(setters);
             } },
-        ]);
+        ];
+        if (writable && state.setters.length) actions.push({ label: 'Remove setter…', run: async () => {
+            const selected = await pickSetter(state);
+            if (selected) await updateSetters(state.setters.filter(setter => setter !== selected.setter));
+        } });
+        if (writable) actions.push({ label: 'Remove state', run: () => update({
+            ...group, states: group.states.filter(item => item !== state),
+            transitions: group.transitions.filter(route => route.from !== state.name && route.to !== state.name),
+        }) });
+        const selected = await choose(state.name, actions);
         await selected?.run();
     }, 'symbol-enum-member'));
     if (group.transitions.length && context.panel.supportsStateTransitionPreview) {
@@ -74,17 +90,21 @@ function groupItems(context: StudioContext, group: StateGroup, update: (group: S
             if (range) await context.revealRange(range);
         }, 'go-to-file'));
     }
-    if (!context.writable) return rows;
+    if (!writable) return rows;
     rows.unshift(action(`${id}:add`, 'Add state…', async () => {
         const name = await editText('State name');
         if (!name) return;
         if (group.states.some(state => state.name === name)) throw new Error('This group already has a state with that name.');
         await update({ ...group, states: [...group.states, { name, setters: [] }] });
     }, 'add'));
-    if (group.states.length) rows.push(action(`${id}:transition`, 'Add or edit transition…', async () => {
-        const transitions = await authorTransition(group);
+    if (group.states.length) rows.push(action(`${id}:add-transition`, mapped ? 'Add transition…' : 'Add or edit transition…', async () => {
+        const transitions = await authorTransition(group, Boolean(mapped));
         if (transitions) await update({ ...group, transitions });
     }, 'arrow-swap'));
+    if (group.transitions.length) rows.push(action(`${id}:remove-transition`, 'Remove transition…', async () => {
+        const route = await pickTransition(group);
+        if (route) await update({ ...group, transitions: group.transitions.filter(item => item !== route) });
+    }, 'trash'));
     rows.push(action(`${id}:remove`, 'Remove state group', () => context.edit('designer_state', {
         action: 'remove', owner: group.owner, group: group.name,
     }), 'trash'));
@@ -111,10 +131,14 @@ async function pickTransition(group: StateGroup): Promise<Transition | undefined
     return choice?.transition;
 }
 
-async function editMappedSetter(state: State): Promise<Setter[] | undefined> {
-    const selection = await choose(state.name, state.setters.map(setter => ({
+function pickSetter(state: State) {
+    return choose(state.name, state.setters.map(setter => ({
         label: `${setter.target || 'Owner'}.${setter.property}`, description: setter.value, setter,
     })));
+}
+
+async function editMappedSetter(state: State): Promise<Setter[] | undefined> {
+    const selection = await pickSetter(state);
     if (!selection) return;
     const value = await editText(selection.label, selection.setter.value);
     if (value !== undefined) return state.setters.map(setter =>
@@ -142,8 +166,16 @@ function parseMappedEasing(text: string): Easing {
     return { kind: 'CubicBezier', value: { x1, y1, x2, y2 } };
 }
 
-async function authorSetter(state: State): Promise<Setter[] | undefined> {
-    const property = await editText('Property name');
+async function authorSetter(state: State, rust: boolean): Promise<Setter[] | undefined> {
+    if (state.setters.length) {
+        const next = await choose('State setter', [
+            { label: 'Add a property…', edit: false },
+            { label: 'Edit an existing value…', edit: true },
+        ]);
+        if (!next) return;
+        if (next.edit) return editMappedSetter(state);
+    }
+    const property = await editText('Property name', rust ? 'Opacity' : undefined);
     if (!property) return;
     const target = await editText('Named target. Leave empty for the owner.', '');
     if (target === undefined) return;
@@ -152,7 +184,7 @@ async function authorSetter(state: State): Promise<Setter[] | undefined> {
     if (value !== undefined) return [...state.setters.filter(setter => setter !== existing), { property, value, target }];
 }
 
-async function authorTransition(group: StateGroup): Promise<Transition[] | undefined> {
+async function authorTransition(group: StateGroup, rust: boolean): Promise<Transition[] | undefined> {
     const names = group.states.map(state => ({ label: state.name, name: state.name }));
     const from = await choose('Transition from', [{ label: 'Any state', name: null }, ...names]);
     if (!from) return;
@@ -161,6 +193,9 @@ async function authorTransition(group: StateGroup): Promise<Transition[] | undef
     const existing = group.transitions.find(transition => transition.from === from.name && transition.to === to.name);
     const duration = await editTime('Transition duration in seconds', 600, existing?.duration ?? .2);
     if (duration === undefined) return;
-    const easing = existing?.easing ?? { kind: 'Linear' };
+    const initial = existing?.easing ?? { kind: 'Linear' } as const;
+    const response = rust ? await editText('Transition easing', easingText(initial)) : undefined;
+    if (rust && response === undefined) return;
+    const easing = response !== undefined ? parseMappedEasing(response) : initial;
     return [...group.transitions.filter(transition => transition !== existing), { from: from.name, to: to.name, duration, easing }];
 }
