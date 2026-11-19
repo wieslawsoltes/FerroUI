@@ -910,7 +910,9 @@ emissive layers of a group painting with a gradient and an image, the texels rea
 and again for a new version. The comparison scenes (`scene3d_scenes.rs`): `linear-gradient`,
 `radial-gradient`, `gradient-lookup-absolute` (12 stops through the lookup texture, absolute
 mapping over half of the gradient), `image-brush-tiles` (`FlipX` tiles of half the box),
-`image-brush-viewbox` (the bottom half of the bitmap, `Uniform` into a box twice as high as wide)
+`image-brush-viewbox` (the bottom half of the bitmap, `Uniform` into a box of 1 by 2.1, so that no
+edge of the viewbox is on the centre of a row of pixels, where the GPU and the CPU reference round
+the interpolated texture coordinates apart)
 and `brush-material-group` (a grey diffuse layer, a specular layer with a gradient and an emissive
 layer with an image), with probes computed from the formulas in double precision, held to the CPU
 reference in every backend and mode (the GPU modes within the interior levels of section 3.15).
