@@ -30,6 +30,8 @@ pub struct Host {
     /// What the last render could not draw, shown in the diagnostics strip.
     rendered: RefCell<Vec<String>>,
     clock: RefCell<Option<ClockHandler>>,
+    /// Decoded scenes by region, revision and ordinal: a region that was not patched keeps its.
+    scenes: RefCell<std::collections::HashMap<(String, u64, u64), Rc<crate::scene::Scene>>>,
 }
 
 impl Host {
@@ -43,6 +45,7 @@ impl Host {
             patching: Cell::new(false),
             rendered: RefCell::new(Vec::new()),
             clock: RefCell::new(None),
+            scenes: RefCell::new(std::collections::HashMap::new()),
         })
     }
 
@@ -110,6 +113,23 @@ impl Host {
         self.patching.get()
     }
 
+    /// The decoded scene of a region's revision and ordinal, decoding it the first time.
+    pub(crate) fn scene(
+        &self,
+        region: &str,
+        revision: u64,
+        ordinal: u64,
+        decode: impl FnOnce() -> Result<crate::scene::Scene, String>,
+    ) -> Result<Rc<crate::scene::Scene>, String> {
+        let key = (region.to_owned(), revision, ordinal);
+        if let Some(scene) = self.scenes.borrow().get(&key) {
+            return Ok(scene.clone());
+        }
+        let scene = Rc::new(decode()?);
+        self.scenes.borrow_mut().insert(key, scene.clone());
+        Ok(scene)
+    }
+
     /// Records what a render could not draw.
     pub(crate) fn refuse(&self, message: String) {
         let mut rendered = self.rendered.borrow_mut();
@@ -128,6 +148,12 @@ impl Host {
                 let dark = host.dark.get();
                 host.rendered.borrow_mut().clear();
                 let session = host.session.borrow();
+                // Scenes of revisions that are gone are dropped.
+                host.scenes.borrow_mut().retain(|(region, revision, _), _| {
+                    session
+                        .region(region)
+                        .is_some_and(|current| current.revision == *revision)
+                });
                 let look = Look {
                     theme: session.theme().cloned(),
                     dark,

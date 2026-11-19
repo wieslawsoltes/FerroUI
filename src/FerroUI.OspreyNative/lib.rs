@@ -26,6 +26,7 @@ pub mod schema;
 pub mod session;
 pub mod smoke;
 pub mod store;
+pub mod surface;
 pub mod symbols;
 pub mod theme;
 pub mod view;

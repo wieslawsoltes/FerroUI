@@ -19,6 +19,7 @@ use serde_json::Value;
 
 use crate::host::Host;
 use crate::session::Session;
+use crate::surface::{SceneData, SceneLink, SceneSurface};
 use crate::theme::{self, Look};
 
 /// The node kinds this host draws, each with its mapping in `node` or `container`.
@@ -59,10 +60,11 @@ pub const DRAWN: &[&str] = &[
     "tabs",
     "rows",
     "editor",
+    "scene",
 ];
 
 /// The node kinds this host draws as a box that names them, until it maps them.
-pub const REFUSED: &[&str] = &["math", "image", "video", "board", "scene"];
+pub const REFUSED: &[&str] = &["math", "image", "video", "board"];
 
 /// What a render reads: the host, the session, the region being drawn and the look in force.
 pub struct Cx<'s> {
@@ -162,6 +164,7 @@ fn container(cx: &mut Cx, kind: &str, node: &Value) -> Element {
         "tabs" => tabs(cx, node),
         "rows" => rows(cx, node),
         "editor" => editor(cx, node),
+        "scene" => scene_node(cx, node),
         kind => refused(
             cx,
             format!("node kind {kind} is not drawn by this host yet"),
@@ -1292,6 +1295,47 @@ fn rich_text(cx: &mut Cx, node: &Value) -> Element {
         })
         .collect();
     wrap_panel().children(runs).into()
+}
+
+/// A scene: the `SceneSurface` control with the decoded scene (kept while its region's revision
+/// stays, so a region that was not patched is not decoded or drawn again) and the link its input
+/// goes through.
+fn scene_node(cx: &mut Cx, node: &Value) -> Element {
+    let Some(binding) = binding(cx, node, "event") else {
+        return refused(cx, "a scene has no event ordinal".to_owned());
+    };
+    let streamed = node
+        .get("streamSlot")
+        .and_then(Value::as_u64)
+        .and_then(|slot| cx.streams.get(slot as usize).cloned())
+        .unwrap_or_default();
+    let decoded = cx
+        .host
+        .scene(&binding.region, binding.revision, binding.ordinal, || {
+            crate::scene::decode(node, &streamed)
+        });
+    let scene = match decoded {
+        Ok(scene) => scene,
+        Err(problem) => return refused(cx, format!("a scene: {problem}")),
+    };
+    let host = cx.host.clone();
+    let link = SceneLink(Rc::new(move |value: Value| binding.send(&host, value)));
+    let sized = !scene.in_window_pixels();
+    let surface = El::<SceneSurface>::new()
+        .set(SceneSurface::scene_property(), SceneData(scene))
+        .set(SceneSurface::link_property(), link)
+        .clip_to_bounds(sized);
+    if sized {
+        surface
+            .horizontal_alignment(HorizontalAlignment::Left)
+            .vertical_alignment(VerticalAlignment::Top)
+            .into()
+    } else {
+        surface
+            .horizontal_alignment(HorizontalAlignment::Stretch)
+            .vertical_alignment(VerticalAlignment::Stretch)
+            .into()
+    }
 }
 
 /// A part this host cannot draw: a box that names it, and a diagnostic.
