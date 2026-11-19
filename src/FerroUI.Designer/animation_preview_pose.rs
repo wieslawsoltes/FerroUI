@@ -41,7 +41,11 @@ impl DesignerSession {
     }
 
     pub(crate) fn timeline_pose_at(&self, time: f64) -> Option<TimelinePreviewPose> {
-        let id = self.active_animation_program()?;
+        self.animation_program_pose(self.active_animation_program()?, time)
+    }
+
+    /// Capture a source anchor for a program's preview position across source edits.
+    pub fn animation_program_pose(&self, id: NodeId, time: f64) -> Option<TimelinePreviewPose> {
         let program = self
             .animation_programs()
             .iter()

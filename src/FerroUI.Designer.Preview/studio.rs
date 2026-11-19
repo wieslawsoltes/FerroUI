@@ -109,7 +109,7 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
         select(stage, selection)?;
     }
     if let Some(rsx) = stage.authored_rsx.as_ref().filter(|_| query.name == "designer_keyframe_draft") {
-        rsx.patches(&query.arguments)?;
+        rsx.validate_keyframe_draft(&query.arguments)?;
     }
     let mut result = provider.call(&query.name, &query.arguments, Permissions::default())?;
     if let Some(rsx) = stage.authored_rsx.as_ref().filter(|_| query.name == "designer_programs") {
@@ -173,20 +173,16 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     }
     if rust_keyframe {
         let rsx = stage.authored_rsx.as_ref().ok_or("Render the current Rust animation before editing")?;
-        let patches = if matches!(arguments["action"].as_str(), Some("move_keyframes" | "scale_keyframes")) {
-            rsx.retime_keys(&stage.session.borrow(), &arguments)?
-        } else {
-            let patches = rsx.patches(&arguments)?;
-            // Validate against the native timeline and send only the original Rust edits.
-            let mut draft = arguments;
-            let object = draft.as_object_mut().expect("validated action");
-            object.remove("action");
-            object.remove("expected_revision");
-            provider.call("designer_keyframe_draft", &draft, Permissions::default())?;
-            patches
+        let (patches, pose, retained_selection) = {
+            let session = stage.session.borrow();
+            let (patches, pose) = stage.sources.run(|| rsx.keyframe_patches(&session, &arguments))?;
+            let ranges = crate::edit_selection::rsx_control_ranges(&design, &patches, session.selection())?;
+            (patches, pose, ranges)
         };
-        let result = editor_edits(&design, patches)?;
+        let mut result = editor_edits(&design, patches)?;
         if !result.edits.is_empty() {
+            result.timeline_pose = pose;
+            result.retained_selection = retained_selection;
             renderer.stage.take();
         }
         return Ok(result);

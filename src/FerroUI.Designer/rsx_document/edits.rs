@@ -1,5 +1,5 @@
 use super::{RustDocument, invalid};
-use ferroui_designer_animation::KeyframeEdit;
+use ferroui_designer_animation::{KeyframeEdit, KeyframeGroupEdit, KeyframeLocation, Timeline};
 use ferroui_designer_core::{
     ChangeSet, DesignerError, Document, Edit, NodeId, SourceSpan, TextPatch,
 };
@@ -38,7 +38,19 @@ impl RustDocument {
         edit: KeyframeEdit<'_>,
     ) -> Result<Vec<TextPatch>, String> {
         self.animation(document, program)?
-            .patch_keyframe(property, edit)
+            .author_keyframe(&self.source, self.catalog(), property, edit)
+    }
+
+    pub(crate) fn keyframes(
+        &self,
+        document: &Document,
+        program: NodeId,
+        timeline: &Timeline,
+        keys: &[KeyframeLocation],
+        edit: KeyframeGroupEdit,
+    ) -> Result<(Vec<TextPatch>, Vec<KeyframeLocation>), String> {
+        self.animation(document, program)?
+            .author_keyframes(&self.source, self.catalog(), timeline, keys, edit)
     }
 
     pub(crate) fn plan_edit(

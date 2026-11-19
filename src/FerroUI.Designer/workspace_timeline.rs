@@ -95,7 +95,6 @@ impl DesignerWorkspace {
         let session = self.session.borrow();
         let tracks = session.timeline().tracks.clone();
         let warnings = session.animation_warnings().to_vec();
-        let rust = session.uses_rust_source();
         let duration = session.timeline().duration;
         let context = TimelineContext::new(&session);
         let playhead = session.time();
@@ -412,57 +411,51 @@ impl DesignerWorkspace {
                     this.report(result);
                 }
             });
-            if rust {
-                ToolTip::set_tip(&lane, Some(Rc::new(
-                    "Drag or nudge selected keyframes to move them. Use Ctrl+click or Shift+click to extend the selection.".to_owned(),
-                )));
-            } else {
-                let weak = Rc::downgrade(self);
-                let property = track.property.clone();
-                let remove_context = context.clone();
-                lane.on_remove_selection(move |times| {
-                    if let Some(this) = weak.upgrade() {
-                        let result = remove_context.check(&this).and_then(|_| {
-                            this.prepare_lane_batch(target, &property, &times);
-                            this.edit_selected_keys(KeyframeEdit::Remove)
+            let weak = Rc::downgrade(self);
+            let property = track.property.clone();
+            let remove_context = context.clone();
+            lane.on_remove_selection(move |times| {
+                if let Some(this) = weak.upgrade() {
+                    let result = remove_context.check(&this).and_then(|_| {
+                        this.prepare_lane_batch(target, &property, &times);
+                        this.edit_selected_keys(KeyframeEdit::Remove)
+                    });
+                    this.refresh(true);
+                    this.report(result);
+                }
+            });
+            let weak = Rc::downgrade(self);
+            let property = track.property.clone();
+            let duplicate_context = context.clone();
+            lane.on_duplicate_selection(move |times, delta| {
+                if let Some(this) = weak.upgrade() {
+                    let result = duplicate_context.check(&this).and_then(|_| {
+                        this.prepare_lane_batch(target, &property, &times);
+                        this.edit_selected_keys(KeyframeEdit::Duplicate(delta))
+                    });
+                    this.refresh(true);
+                    this.report(result);
+                }
+            });
+            let weak = Rc::downgrade(self);
+            let property = track.property.clone();
+            let insert_context = context.clone();
+            lane.on_insert(move |time| {
+                if let Some(this) = weak.upgrade() {
+                    let result = insert_context
+                        .check(&this)
+                        .and_then(|_| this.record_timeline_property(target, &property, time));
+                    if result.is_ok() {
+                        this.remember_keyframe(SelectedKey {
+                            target,
+                            property: property.clone(),
+                            time,
                         });
-                        this.refresh(true);
-                        this.report(result);
                     }
-                });
-                let weak = Rc::downgrade(self);
-                let property = track.property.clone();
-                let duplicate_context = context.clone();
-                lane.on_duplicate_selection(move |times, delta| {
-                    if let Some(this) = weak.upgrade() {
-                        let result = duplicate_context.check(&this).and_then(|_| {
-                            this.prepare_lane_batch(target, &property, &times);
-                            this.edit_selected_keys(KeyframeEdit::Duplicate(delta))
-                        });
-                        this.refresh(true);
-                        this.report(result);
-                    }
-                });
-                let weak = Rc::downgrade(self);
-                let property = track.property.clone();
-                let insert_context = context.clone();
-                lane.on_insert(move |time| {
-                    if let Some(this) = weak.upgrade() {
-                        let result = insert_context
-                            .check(&this)
-                            .and_then(|_| this.record_timeline_property(target, &property, time));
-                        if result.is_ok() {
-                            this.remember_keyframe(SelectedKey {
-                                target,
-                                property: property.clone(),
-                                time,
-                            });
-                        }
-                        this.refresh(true);
-                        this.report(result);
-                    }
-                });
-            }
+                    this.refresh(true);
+                    this.report(result);
+                }
+            });
             self.connect_timeline_zoom(&lane);
             self.timeline_lanes.borrow_mut().push(lane.downgrade());
             Grid::set_column(&lane, 1);
@@ -856,7 +849,6 @@ impl DesignerWorkspace {
         row.set_margin(Thickness::new(4.0, 6.0, 0.0, 6.0));
         row.children()
             .add(key_caption(&format!("{count} keyframes selected")).upcast::<Control>());
-        let rust = self.session.borrow().uses_rust_source();
         let offset = key_field(&row, "Offset", "KeyframeOffset", "0.1", 64.0);
         let factor = key_field(&row, "Factor", "KeyframeScaleFactor", "2", 56.0);
         for (name, label) in [
@@ -865,9 +857,6 @@ impl DesignerWorkspace {
             ("DuplicateKeyframes", "Duplicate"),
             ("RemoveKeyframes", "Delete"),
         ] {
-            if rust && matches!(name, "DuplicateKeyframes" | "RemoveKeyframes") {
-                continue;
-            }
             let control = button(label);
             control.classes().add("designer-timeline-tool");
             if name == "MoveKeyframes" {
@@ -1098,9 +1087,6 @@ impl DesignerWorkspace {
         self.root
             .get_control::<ContentControl>("TimelineInspectorHost")
             .set_content(Some(Control::boxed(&row)));
-        if self.session.borrow().uses_rust_source() {
-            return;
-        }
         let remove = button("Remove");
         remove.classes().add("nav");
         remove.classes().add("designer-timeline-tool");

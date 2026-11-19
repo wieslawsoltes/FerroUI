@@ -338,7 +338,7 @@ impl DesignerWorkspace {
         let session = self.session.borrow();
         let rust = session.uses_rust_source();
         for name in [
-            "NewAnimation", "DuplicateAnimation", "DeleteAnimation", "Record", "Keyframe",
+            "NewAnimation", "DuplicateAnimation", "DeleteAnimation", "Record",
             "CommitAnimation", "TimelineDetails", "BehaviorsMode",
         ] {
             self.root.get_control::<Button>(name).set_is_visible(!rust);
@@ -349,6 +349,10 @@ impl DesignerWorkspace {
         }
         self.duration.set_is_read_only(rust);
         let picker = self.root.get_control::<ComboBox>("AnimationPrograms");
+        let active = session.animation_programs().iter()
+            .find(|program| Some(program.id) == session.active_animation_program());
+        self.root.get_control::<Button>("Keyframe")
+            .set_is_visible(!rust || active.is_some_and(|program| program.timeline.is_some()));
         let previous = self.guard.replace(true);
         picker.set_placeholder_text(Some("No animation".into()));
         picker.items().clear();
@@ -372,11 +376,7 @@ impl DesignerWorkspace {
                 .map_or(-1, |index| index as i32),
         );
         picker.set_is_enabled(!ids.is_empty());
-        if let Some(program) = session
-            .animation_programs()
-            .iter()
-            .find(|program| Some(program.id) == session.active_animation_program())
-        {
+        if let Some(program) = active {
             ToolTip::set_tip(
                 &picker,
                 Some(Rc::new(format!(

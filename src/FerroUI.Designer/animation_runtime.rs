@@ -3,7 +3,7 @@ use crate::{runtime::RuntimePreview, PreviewStatus};
 use ferroui_base::animation::Animatable;
 use ferroui_base::StyledElement;
 use ferroui_designer_animation::native::{
-    animation_timing, sample_scalar_track, validate_animation_target, NativePlayback, NativeProgramIndex,
+    animation_timing, sample_keyframe_value, sample_scalar_track, validate_animation_target, NativePlayback, NativeProgramIndex,
     NativeSourceIndex,
 };
 use ferroui_designer_animation::{AnimationProgram, CurvePoint, CurveWindow, Timeline};
@@ -62,14 +62,33 @@ impl NativeAnimations {
         let animation = self.index.animation(program.id).ok_or("The native animation is unavailable")?;
         program.timeline.as_ref().and_then(|timeline| timeline.track(target, property))
             .ok_or("Choose an authored animation track")?;
-        let object = if program.targets.contains(&target) {
+        let object = self.track_target(program, preview, target)?;
+        sample_scalar_track(animation, &object, property, window)
+    }
+
+    pub(crate) fn sample_keyframe(
+        &self,
+        program: &AnimationProgram,
+        preview: &RuntimePreview,
+        target: NodeId,
+        property: &str,
+        time: f64,
+    ) -> Result<ferroui_base::BoxedValue, String> {
+        let animation = self.index.animation(program.id).ok_or("The native animation is unavailable")?;
+        let object = self.track_target(program, preview, target)?;
+        sample_keyframe_value(animation, &object, property, time)
+    }
+
+    fn track_target(
+        &self, program: &AnimationProgram, preview: &RuntimePreview, target: NodeId,
+    ) -> Result<ferroui_base::Ref<Animatable>, String> {
+        if program.targets.contains(&target) {
             preview.visual(target).and_then(|visual| visual.cast::<Animatable>())
         } else if self.uses_factory_target(program.id) && target == program.primary_target() {
             preview.root().map(|root| root.upcast::<Animatable>())
         } else {
             None
-        }.ok_or("Choose a live preview target for this curve")?;
-        sample_scalar_track(animation, &object, property, window)
+        }.ok_or_else(|| "Choose a live preview target for this track".into())
     }
 
     pub(crate) fn refresh(

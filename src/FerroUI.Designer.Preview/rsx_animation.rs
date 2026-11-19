@@ -1,22 +1,22 @@
 use crate::document::DesignDocument;
-use ferroui_designer_animation::{KeyframeEdit, KeyframeGroupEdit, KeyframeLocation, VisualStateGroup};
+use ferroui_designer_animation::{KeyframeEdit, VisualStateGroup};
 use ferroui_designer_core::{NodeId, SourceSpan, TextPatch};
 use ferroui_designer_language::LineIndex;
-use ferroui_designer_rsx::{RsxAnimation, RsxAnimationIssue, RsxStateGroup};
+use ferroui_designer_rsx::{RsxAnimation, RsxAnimationIssue, RsxCatalog, RsxStateGroup};
 use ferroui_remote_protocol::designer::{DesignAnimationProgram, DesignAnimationSourcePatch};
 use serde_json::{json, Value};
 use std::collections::BTreeMap;
+
+mod keyframes;
+pub(crate) use keyframes::keyframe_edit;
 
 pub(crate) struct AuthoredRsxFrame {
     source: Box<str>,
     invocation: SourceSpan,
     clips: BTreeMap<NodeId, RsxAnimation>,
+    catalog: RsxCatalog,
     states: BTreeMap<(NodeId, String), RsxStateGroup>,
     issues: Vec<RsxAnimationIssue>,
-}
-
-pub(crate) fn keyframe_edit(tool: &str, action: Option<&str>) -> bool {
-    tool == "designer_program" && matches!(action, Some("upsert_keyframe" | "move_keyframes" | "scale_keyframes"))
 }
 
 pub(crate) fn state_edit(tool: &str, action: Option<&str>) -> bool {
@@ -30,6 +30,7 @@ impl AuthoredRsxFrame {
             source: design.source.into(),
             invocation: rsx.invocation,
             clips: design.rsx_animations.clone(),
+            catalog: design.rsx_catalog().clone(),
             states: design.rsx_states.clone(),
             issues: rsx.animation_issues.clone(),
         })
@@ -100,49 +101,6 @@ impl AuthoredRsxFrame {
                 })
                 .collect(),
         );
-    }
-
-    pub(crate) fn patches(&self, args: &Value) -> Result<Vec<TextPatch>, String> {
-        let clip = self.clip(args)?;
-        clip.patch_keyframe(
-            args["property"]
-                .as_str()
-                .ok_or("Choose a mapped property")?,
-            KeyframeEdit::Upsert {
-                previous: args["previous"].as_f64(),
-                time: args["time"].as_f64().ok_or("Supply a keyframe time")?,
-                value: args["value"].as_str().ok_or("Supply a keyframe value")?,
-                easing: args["easing"].as_str().ok_or("Supply a keyframe easing")?,
-            },
-        )
-    }
-
-    pub(crate) fn retime_keys(
-        &self, session: &ferroui_designer::DesignerSession, args: &Value,
-    ) -> Result<Vec<TextPatch>, String> {
-        let clip = self.clip(args)?;
-        let program = session.animation_programs().iter()
-            .find(|program| Some(program.id) == args["program"].as_u64())
-            .and_then(|program| program.timeline.as_ref())
-            .ok_or("Choose a typed native timeline")?;
-        let keys: Vec<KeyframeLocation> = serde_json::from_value(args["keyframes"].clone())
-            .map_err(|error| error.to_string())?;
-        let edit = if args["action"] == "scale_keyframes" {
-            KeyframeGroupEdit::Scale {
-                pivot: args["pivot"].as_f64().ok_or("Supply a keyframe scale pivot")?,
-                factor: args["factor"].as_f64().ok_or("Supply a keyframe scale factor")?,
-            }
-        } else {
-            KeyframeGroupEdit::Move(args["offset"].as_f64().ok_or("Supply a keyframe offset")?)
-        };
-        let (_, moved) = program.with_keyframe_edit(&keys, edit)
-            .map_err(|error| error.to_string())?;
-        clip.patch_key_times(keys.iter().zip(moved).map(|(from, to)| (from.property.as_str(), from.time, to.time)))
-    }
-
-    fn clip(&self, args: &Value) -> Result<&RsxAnimation, String> {
-        args["program"].as_u64().and_then(|id| self.clips.get(&id))
-            .ok_or_else(|| "Choose an animation with a mapped Rust declaration".into())
     }
 
     pub(crate) fn map_hosted_program(&self, program: &mut DesignAnimationProgram) {

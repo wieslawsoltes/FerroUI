@@ -87,6 +87,7 @@ pub use asset_toolbox::{
 };
 pub use project_controls::registered_designer_assets;
 pub use chrome::designer_chrome_style;
+pub use animation_keyframe_authoring::SampledKeyframe;
 pub use animation_preview_pose::TimelinePreviewPose;
 pub use animation_program_preview::TimelineTargetOverrides;
 pub use canvas_guides::{CanvasGuide, CanvasGuideAxis, CanvasGuideSettings};

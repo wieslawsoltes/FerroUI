@@ -304,6 +304,33 @@ fn studio_rust_keyframe_editor_preserves_authored_history_and_the_native_preview
     #[cfg(feature = "mcp")]
     verify_rust_mcp(&workspace, program, target, &source, &edited, revision);
     session.borrow_mut().redo().unwrap();
+
+    workspace.refresh(true);
+    session.borrow_mut().select([target]);
+    workspace.select_keyframe(target, "CornerRadius", 1.6).unwrap();
+    session.borrow_mut().scrub_animation_program(program, 1.0).unwrap();
+    let add = root.get_control::<Button>("Keyframe");
+    assert!(add.is_visible());
+    click(&add);
+    let recorded = session.borrow().authored_source().to_owned();
+    let timeline = session.borrow().timeline().clone();
+    let track = timeline.track(target, "CornerRadius").unwrap();
+    assert_eq!(track.keyframes.len(), 3);
+    let key = track.keyframes.iter().find(|key| key.time == 1.0).unwrap();
+    assert_eq!(key.value.to_xaml(), "30,30,30,30");
+    assert!(recorded.contains(".key_frame(0.5, |key| key.set(crate::radius(), ::ferroui_base::CornerRadius::new"));
+    let selected = KeyframeLocation { target, property: "CornerRadius".into(), time: 1.0 };
+    session.borrow_mut().edit_program_keyframes(program, std::slice::from_ref(&selected),
+        KeyframeGroupEdit::Duplicate(0.25)).unwrap();
+    let duplicated = session.borrow().authored_source().to_owned();
+    let copied = KeyframeLocation { time: 1.25, ..selected };
+    session.borrow_mut().edit_program_keyframes(program, &[copied], KeyframeGroupEdit::Remove).unwrap();
+    assert_eq!(session.borrow().authored_source(), recorded);
+    for expected in [&duplicated, &recorded, &edited] {
+        session.borrow_mut().undo().unwrap();
+        assert_eq!(session.borrow().authored_source(), expected);
+    }
+
     let keys = [KeyframeLocation {
         target,
         property: "CornerRadius".into(),

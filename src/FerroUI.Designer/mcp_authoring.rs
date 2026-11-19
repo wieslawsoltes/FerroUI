@@ -204,18 +204,20 @@ pub(super) fn call(
                 )?,
                 "record_keyframe" => {
                     let program = node_id(args, "program")?;
-                    if session.active_animation_program() != Some(program) {
-                        session.select_animation_program(program)?;
-                    }
+                    let target = node_id(args, "target")?;
+                    let property = text(args, "property")?;
                     let time = number(args, "time")?;
-                    if !(0.0..=session.timeline().duration).contains(&time) {
-                        return Err("Choose a time within the animation duration".into());
+                    if session.uses_rust_source() {
+                        session.record_rust_keyframe(program, target, &property, time)?;
+                    } else {
+                        if session.active_animation_program() != Some(program) {
+                            session.select_animation_program(program)?;
+                        }
+                        if !(0.0..=session.timeline().duration).contains(&time) {
+                            return Err("Choose a time within the animation duration".into());
+                        }
+                        session.record_effective_keyframe(target, &property, time)?;
                     }
-                    session.record_effective_keyframe(
-                        node_id(args, "target")?,
-                        &text(args, "property")?,
-                        time,
-                    )?;
                 }
                 "remove_keyframe" => session.edit_program_keyframe(
                     node_id(args, "program")?, node_id(args, "target")?, &text(args, "property")?,

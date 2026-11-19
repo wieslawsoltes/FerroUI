@@ -729,6 +729,11 @@ impl DesignerSession {
         time: f64,
     ) -> Result<(), String> {
         self.editable_program()?;
+        if self.uses_rust_source() {
+            let program = self.active_animation_program().ok_or("Choose a mapped Rust animation")?;
+            let target = self.recording_target(target);
+            return self.record_rust_keyframe(program, target, property, time);
+        }
         self.seek(time)?;
         let visual = self
             .preview
@@ -744,6 +749,60 @@ impl DesignerSession {
         };
         key.reconcile_time(self.timeline());
         self.seek(key.time)
+    }
+
+    pub(crate) fn record_rust_keyframe(
+        &mut self, program: NodeId, target: NodeId, property: &str, time: f64,
+    ) -> Result<(), String> {
+        let sample = self.sample_keyframe(program, target, property, time)?;
+        let pose = self.animation_program_pose(program, sample.time());
+        self.edit_program_keyframe(program, target, property, sample.edit())?;
+        // The source transaction has been committed. A newly rebuilt preview can
+        // lose its target, so restoring the pose is independent of edit success.
+        if let Some(pose) = pose {
+            let _ = self.restore_timeline_preview_pose(&pose);
+        }
+        Ok(())
+    }
+
+    /// Sample an authored iteration without changing selection or the preview pose.
+    pub fn sample_keyframe(
+        &self, id: NodeId, target: NodeId, property: &str, time: f64,
+    ) -> Result<crate::SampledKeyframe, String> {
+        use ferroui_designer_animation::native_key_time;
+        if !matches!(self.preview_status(), crate::PreviewStatus::Ready { revision } if *revision == self.document().revision()) {
+            return Err("Open the current animation preview before adding a keyframe".into());
+        }
+        let program = self.animation_programs().iter().find(|program| program.id == id)
+            .ok_or("Unknown animation program")?;
+        let timeline = program.timeline.as_ref().ok_or("Choose a typed animation program")?;
+        if !(0.0..=timeline.duration).contains(&time) {
+            return Err("Choose a time within the animation duration".into());
+        }
+        let time = native_key_time(time).map_err(|error| error.to_string())?;
+        let track = timeline.track(target, property);
+        let key = track.and_then(|track| track.keyframes.iter().find(|key| key.time == time));
+        let value = if track.is_some() && self.requires_native_animation(program) {
+            let value = self.animation.native.sample_keyframe(program, &self.preview, target, property, time)?;
+            self.animation_value_for_target(target, property, &ferroui_inspect::display_value(Some(&value)))?
+        } else if track.is_some() {
+            self.animation.compiled_targets.get(&(id, target))
+                .ok_or("Choose a compiled animation target")?.scrub(time)
+                .map_err(|error| error.to_string())?.into_iter()
+                .find(|sample| sample.target == target && sample.property == property)
+                .ok_or("The animation did not produce a value for this property")?.value
+        } else {
+            let visual = self.preview.visual(target).ok_or("Choose a live preview target for this property")?;
+            let info = ferroui_inspect::Inspector::property(&visual, property).map_err(|error| error.to_string())?;
+            let value = ferroui_inspect::display_value(Some(&visual.get_value_untyped(info)));
+            self.animation_value_for_target(target, property, &value)?
+        };
+        Ok(crate::SampledKeyframe {
+            previous: key.map(|key| key.time),
+            time,
+            value: value.to_xaml(),
+            easing: key.map_or(Easing::Linear.to_xaml(), |key| key.easing.to_xaml()),
+        })
     }
 
     pub fn move_keyframe(
@@ -771,6 +830,12 @@ impl DesignerSession {
     ) -> Result<(), String> {
         self.editable_program()?;
         let target = self.recording_target(target);
+        if self.uses_rust_source() {
+            let program = self.active_animation_program().ok_or("Choose a mapped Rust animation")?;
+            return self.edit_program_keyframe(
+                program, target, property, ferroui_designer_animation::KeyframeEdit::Remove(time),
+            );
+        }
         let mut candidate = self.animation.timeline.clone();
         candidate
             .track_mut(target, property)
