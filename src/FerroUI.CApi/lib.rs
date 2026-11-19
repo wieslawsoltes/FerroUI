@@ -46,7 +46,7 @@ mod values;
 pub use app::{ferro_app_run, ferro_close, ferro_quit, ferro_show};
 pub use error::{ferro_last_error, ferro_last_error_code};
 pub use events::{ferro_raise, ferro_subscribe, ferro_subscribe_data, ferro_unsubscribe};
-pub use handles::{ferro_create, ferro_release, ferro_retain, ferro_type_of};
+pub use handles::{ferro_create, ferro_release, ferro_retain, ferro_type_of, handle_of, object_of};
 pub use ids::{ferro_event_id, ferro_property_id, ferro_type_id};
 pub use thread::{ferro_init, ferro_is_ui_thread, ferro_post, ferro_post_data, ferro_run_jobs};
 pub use tree::{ferro_add_child, ferro_remove_child};

@@ -45,3 +45,9 @@ ferroui-themes-fluent = { workspace = true, optional = true }
 # The C header is generated from the sources of this crate (`include/ferroui.h`); a unit test
 # compares it with what cbindgen writes now (`tests/header_tests.rs`).
 cbindgen = { version = "0.28", default-features = false }
+
+# The cost of a call through the ABI against the same operation in Rust (docs/c-abi.md, section 8).
+[[bench]]
+name = "call_overhead"
+path = "benches/call_overhead.rs"
+harness = false

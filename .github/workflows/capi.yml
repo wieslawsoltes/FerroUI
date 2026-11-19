@@ -62,6 +62,10 @@ jobs:
         run: cargo test --locked -p ferroui-capi --no-default-features --lib
       - name: C tests of the ABI
         run: make -C samples/CApi test CARGO_FLAGS=--no-default-features
+      # The cost of a call through the ABI against Rust (docs/c-abi.md, section 8): informative,
+      # a shared runner is not a quiet machine.
+      - name: Call overhead (informative)
+        run: cargo bench --locked -p ferroui-capi --no-default-features --bench call_overhead
 
   # The C hello world on the desktop platform: the library with Skia, the sample compiled and
   # linked against it, and a smoke run of three seconds (FERROUI_SMOKE_EXIT_MS).

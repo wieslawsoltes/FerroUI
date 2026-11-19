@@ -223,3 +223,17 @@ pub extern "C" fn ferro_type_of(object: FerroHandle) -> i64 {
             .ok_or_else(|| Error::new(FERRO_NOT_FOUND, "the type of the object has no ID"))
     })
 }
+
+/// The object of `handle`, for a Rust host of the ABI (a launcher that hosts another language,
+/// the benchmark of the crate): `None` for a handle that is not valid, or off the UI thread.
+pub fn object_of(handle: FerroHandle) -> Option<Ref<FerroObject>> {
+    thread::check().ok()?;
+    get(handle).ok()
+}
+
+/// The handle of `object` with one more reference counted, for a Rust host of the ABI: what
+/// [`ferro_create`] would have returned for it. `None` off the UI thread.
+pub fn handle_of(object: Ref<FerroObject>) -> Option<FerroHandle> {
+    thread::check().ok()?;
+    Some(insert(object))
+}
