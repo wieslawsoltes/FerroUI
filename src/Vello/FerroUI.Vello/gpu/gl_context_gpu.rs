@@ -135,6 +135,12 @@ impl IVelloGpu for VelloGlGpu {
         self.gl_context.clone()
     }
 
+    /// The fences of the frames the producers made with the context (their completions) and
+    /// the textures they retire: without this poll a frame of a producer never becomes ready.
+    fn poll_pending_platform_gpu_work(&self) -> bool {
+        self.gl_context.poll_pending_gpu_work()
+    }
+
     fn try_create_render_target(
         self: Rc<Self>,
         surfaces: &[Arc<dyn IPlatformRenderSurface>],
