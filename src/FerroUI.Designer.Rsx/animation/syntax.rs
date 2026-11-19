@@ -103,7 +103,7 @@ impl TargetType {
     }
 }
 
-fn chain(mut expr: &Expr) -> Option<(&ExprCall, Vec<&ExprMethodCall>)> {
+pub(crate) fn chain(mut expr: &Expr) -> Option<(&ExprCall, Vec<&ExprMethodCall>)> {
     let mut methods = Vec::new();
     while let Expr::MethodCall(method) = expr {
         if method.turbofish.is_some() {
@@ -119,7 +119,7 @@ fn chain(mut expr: &Expr) -> Option<(&ExprCall, Vec<&ExprMethodCall>)> {
     Some((factory, methods))
 }
 
-fn view_argument<'a>(call: &'a ExprCall, name: &str) -> Option<&'a Expr> {
+pub(crate) fn view_argument<'a>(call: &'a ExprCall, name: &str) -> Option<&'a Expr> {
     let path = path(call.func.as_ref())?;
     if call.args.len() != 1
         || path != format!("ferroui_view::{name}")
@@ -130,7 +130,7 @@ fn view_argument<'a>(call: &'a ExprCall, name: &str) -> Option<&'a Expr> {
     call.args.first()
 }
 
-fn argument<'a>(call: &'a ExprMethodCall, name: &str) -> Option<&'a Expr> {
+pub(crate) fn argument<'a>(call: &'a ExprMethodCall, name: &str) -> Option<&'a Expr> {
     (call.method == name && call.args.len() == 1).then(|| &call.args[0])
 }
 
@@ -144,7 +144,7 @@ fn fill_mode(expr: &Expr) -> Option<FillMode> {
     }
 }
 
-pub(super) fn path(expr: &Expr) -> Option<String> {
+pub(crate) fn path(expr: &Expr) -> Option<String> {
     let Expr::Path(ExprPath {
         qself: None, path, ..
     }) = expr
@@ -168,7 +168,7 @@ fn milliseconds(expr: &Expr) -> Option<f64> {
     Some(unsigned(view_argument(call, "ms")?)? as f64 / 1000.0)
 }
 
-fn unsigned(expr: &Expr) -> Option<u64> {
+pub(crate) fn unsigned(expr: &Expr) -> Option<u64> {
     let Expr::Lit(literal) = expr else {
         return None;
     };
@@ -230,7 +230,7 @@ pub(super) fn float(expr: &Expr) -> Option<FloatSource> {
     })
 }
 
-pub(super) fn span(tokens: &impl Spanned) -> SourceSpan {
+pub(crate) fn span(tokens: &impl Spanned) -> SourceSpan {
     let range = tokens.span().byte_range();
     SourceSpan::new(range.start, range.end)
 }

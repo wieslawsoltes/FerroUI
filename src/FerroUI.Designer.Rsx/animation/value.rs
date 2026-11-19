@@ -7,8 +7,8 @@ use syn::Expr;
 pub(crate) struct ValueShape(ValueKind);
 
 #[derive(Clone, Debug)]
-pub(super) struct ValueSource {
-    pub(super) value: AnimationValue,
+pub(crate) struct ValueSource {
+    pub(crate) value: AnimationValue,
     parts: Vec<FloatSource>,
 }
 
@@ -32,7 +32,7 @@ impl ValueShape {
         }))
     }
 
-    pub(super) fn read(self, expression: &Expr) -> Option<ValueSource> {
+    pub(crate) fn read(self, expression: &Expr) -> Option<ValueSource> {
         let kind = self.0;
         let parts = if kind == ValueKind::Number
             || matches!(kind, ValueKind::CornerRadius | ValueKind::Thickness)
@@ -84,7 +84,7 @@ impl ValueShape {
 }
 
 impl ValueSource {
-    pub(super) fn plan(&self, text: &str, patches: &mut Vec<TextPatch>) -> Result<(), String> {
+    pub(crate) fn plan(&self, text: &str, patches: &mut Vec<TextPatch>) -> Result<(), String> {
         let kind = self.value.kind();
         let value = AnimationValue::parse(text, kind).map_err(|error| error.to_string())?;
         let values = value

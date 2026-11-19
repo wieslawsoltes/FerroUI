@@ -118,7 +118,7 @@ pub(super) fn record(timeline: &mut Timeline, key: &KeySource) -> Option<()> {
     Some(())
 }
 
-fn property(expr: &Expr, catalog: &RsxCatalog) -> Option<Property> {
+pub(crate) fn property(expr: &Expr, catalog: &RsxCatalog) -> Option<Property> {
     let Expr::Call(call) = expr else { return None };
     if !call.args.is_empty() {
         return None;

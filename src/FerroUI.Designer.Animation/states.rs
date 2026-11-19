@@ -11,6 +11,7 @@ use ferroui_designer_core::{Document, Edit, NodeId, NodeKind};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 const GROUP_MARKER: &str = "ferroui-designer-state-group:";
+const PROJECTED_GROUP_MARKER: &str = "ferroui-designer-projected-state-group:";
 const STATE_MARKER: &str = "ferroui-designer-state:";
 const TRANSITION_MARKER: &str = "ferroui-designer-transition:";
 pub(crate) const STATE_PROGRAM_MARKER: &str = "ferroui-designer-state-program:";
@@ -227,12 +228,31 @@ impl VisualStateGroup {
     /// Native nested styles own their class scope. Literal state properties also use an
     /// animation layer so an authored local Width/Opacity does not mask the selected state.
     pub fn to_xaml(&self, owner_name: &str) -> Result<String> {
-        self.validate()?;
         require(!owner_name.is_empty(), "State styles require a named owner")?;
+        self.group_markup(GROUP_MARKER, &format!("#{owner_name}"), |target| format!("#{target}"))
+    }
+
+    /// Lower a source-mapped state group using the selectors resolved by its host.
+    pub fn to_xaml_for_selectors(
+        &self,
+        owner_selector: &str,
+        target_selector: impl Fn(&str) -> String,
+    ) -> Result<String> {
+        self.group_markup(PROJECTED_GROUP_MARKER, owner_selector, target_selector)
+    }
+
+    fn group_markup(
+        &self,
+        marker: &str,
+        owner_selector: &str,
+        target_selector: impl Fn(&str) -> String,
+    ) -> Result<String> {
+        self.validate()?;
+        require(!owner_selector.is_empty(), "State styles require an owner selector")?;
         let metadata = serde_json::to_string(self).map_err(core_error)?;
         let mut result = format!(
-            "<Style Selector=\"#{}\"><!--{GROUP_MARKER}{}-->",
-            escape(owner_name),
+            "<Style Selector=\"{}\"><!--{marker}{}-->",
+            escape(owner_selector),
             encode_text(&metadata)
         );
         for state in &self.states {
@@ -247,7 +267,7 @@ impl VisualStateGroup {
                         transition.easing.clone(),
                     )
                 });
-            result.push_str(&self.state_styles(state, None, duration, easing)?);
+            result.push_str(&self.state_styles(state, None, duration, easing, &target_selector)?);
         }
         for transition in self
             .transitions
@@ -264,6 +284,7 @@ impl VisualStateGroup {
                 transition.from.as_deref(),
                 transition.duration.max(0.000_000_1),
                 transition.easing.clone(),
+                &target_selector,
             )?);
         }
         for transition in self
@@ -283,6 +304,7 @@ impl VisualStateGroup {
         from: Option<&str>,
         duration: f64,
         easing: Easing,
+        target_selector: &impl Fn(&str) -> String,
     ) -> Result<String> {
         let mut targets = BTreeMap::<&str, Vec<&StateSetter>>::new();
         for setter in &state.setters {
@@ -299,7 +321,7 @@ impl VisualStateGroup {
                 if target.is_empty() {
                     String::new()
                 } else {
-                    format!(" #{target}")
+                    format!(" {}", target_selector(target))
                 }
             );
             let marker = if let Some(from) = from {
@@ -412,8 +434,13 @@ impl VisualStateGroup {
     pub fn read(document: &Document) -> Vec<Self> {
         group_nodes(document)
             .into_iter()
-            .filter_map(|(style, mut group)| {
+            .filter_map(|(style, mut group, projected)| {
                 document.ast().node(group.owner)?;
+                if projected {
+                    // The generated tracks may contain a minimum native tick for an
+                    // instantaneous state. The Rust declaration owns route timing.
+                    return Some(group);
+                }
                 // Native keyframes/setters are authoritative after direct source edits.
                 if let Some(style) = document.ast().node(style).map(|node| node.id) {
                     let mut seen_transitions = BTreeSet::new();
@@ -663,16 +690,21 @@ impl VisualStateGroup {
 fn group_node(document: &Document, owner: NodeId, name: &str) -> Option<NodeId> {
     group_nodes(document)
         .into_iter()
-        .find(|(_, group)| group.owner == owner && group.name == name)
-        .map(|(id, _)| id)
+        .find(|(_, group, projected)| !projected && group.owner == owner && group.name == name)
+        .map(|(id, _, _)| id)
 }
-fn group_nodes(document: &Document) -> Vec<(NodeId, VisualStateGroup)> {
+fn group_nodes(document: &Document) -> Vec<(NodeId, VisualStateGroup, bool)> {
     document
         .ast()
         .nodes()
         .filter(|node| node.kind == NodeKind::Comment)
         .filter_map(|node| {
-            let text = node.text.as_deref()?.trim().strip_prefix(GROUP_MARKER)?;
+            let marker = node.text.as_deref()?.trim();
+            let (text, projected) = if let Some(text) = marker.strip_prefix(GROUP_MARKER) {
+                (text, false)
+            } else {
+                (marker.strip_prefix(PROJECTED_GROUP_MARKER)?, true)
+            };
             let mut group: VisualStateGroup = serde_json::from_str(&decode_text(text)?).ok()?;
             let style = node.parent?;
             let mut current = Some(style);
@@ -684,7 +716,7 @@ fn group_nodes(document: &Document) -> Vec<(NodeId, VisualStateGroup)> {
                 }
                 current = parent.parent;
             }
-            Some((style, group))
+            Some((style, group, projected))
         })
         .collect()
 }

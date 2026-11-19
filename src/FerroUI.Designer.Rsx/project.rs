@@ -5,6 +5,7 @@ use crate::literal;
 use crate::markup::{RsxPreviewMarkup, serialize};
 use crate::registered::{Class, RsxCatalog};
 use crate::source_edits::RsxEvent;
+use crate::states::{self, ProjectedStates};
 use crate::tree::{Element, MAX_DEPTH, replacement};
 use crate::xaml::XamlTree;
 use ferroui_designer_core::{Document, NodeKind, SourceSpan, TextPatch};
@@ -60,6 +61,7 @@ pub struct RsxProjection<'a> {
     pub animation_issues: Vec<RsxAnimationIssue>,
     inner_trivia: bool,
     styles: BTreeMap<usize, Vec<AnimationStyle>>,
+    states: BTreeMap<usize, ProjectedStates>,
 }
 
 impl RsxProjection<'_> {
@@ -68,11 +70,15 @@ impl RsxProjection<'_> {
     }
 
     pub fn preview_markup(&self) -> RsxPreviewMarkup<'_> {
-        serialize(&self.tree, &self.styles)
+        serialize(&self.tree, &self.styles, &self.states)
     }
 
     pub fn has_projected_animations(&self) -> bool {
         !self.styles.is_empty()
+    }
+
+    pub fn has_projected_states(&self) -> bool {
+        !self.states.is_empty()
     }
 
     pub fn matches_xaml(&self, source: &str) -> Result<bool, String> {
@@ -82,7 +88,7 @@ impl RsxProjection<'_> {
 
     /// Structural conversion can replace a complete tree with no interior comments.
     pub fn can_replace_structure(&self) -> bool {
-        self.omitted_count == 0 && !self.inner_trivia && !self.has_projected_animations()
+        self.omitted_count == 0 && !self.inner_trivia && !self.has_projected_animations() && !self.has_projected_states()
     }
 
     pub fn set_property(&self, index: usize, name: &str, value: &str) -> Result<TextPatch, String> {
@@ -102,6 +108,9 @@ impl RsxProjection<'_> {
     /// Apply edited XAML to the selected RSX tree. Changes to existing values keep the
     /// original tokens outside those literals. Structural edits retain the rest of the file.
     pub fn apply_xaml(&self, draft: &str) -> Result<Vec<TextPatch>, String> {
+        if self.has_projected_states() {
+            return Err("Edit mapped Rust state declarations in States or in the source editor".into());
+        }
         if self.has_projected_animations() {
             return Err("Edit mapped animation keys in Timeline and other Rust values in source or Properties".into());
         }
@@ -171,6 +180,7 @@ impl RsxCatalog {
             animation_issues: state.animation_issues,
             inner_trivia,
             styles: state.styles,
+            states: state.states,
         })
     }
 }
@@ -191,8 +201,8 @@ pub(crate) fn parse_draft(source: &str, catalog: &RsxCatalog) -> Result<Element,
         return Err("Expected an rsx! expression".into());
     }
     let (tree, state) = parse_body(draft.mac.tokens, catalog)?;
-    if !state.styles.is_empty() {
-        return Err("Edit native animation declarations in their Rust source".into());
+    if !state.styles.is_empty() || !state.states.is_empty() {
+        return Err("Edit native animation and state declarations in their Rust source".into());
     }
     if state.omitted_count != 0 {
         return Err(format!(
@@ -212,6 +222,7 @@ struct State {
     omissions: Vec<String>,
     omitted_count: usize,
     styles: BTreeMap<usize, Vec<AnimationStyle>>,
+    states: BTreeMap<usize, ProjectedStates>,
     animation_issues: Vec<RsxAnimationIssue>,
 }
 
@@ -254,6 +265,7 @@ impl State {
             complete_children: true,
         });
         let mut seen = BTreeSet::new();
+        let mut state_fields = Vec::new();
         for attribute in &node.attributes {
             let (owner, name, value) = match attribute {
                 Attribute::Value {
@@ -280,6 +292,10 @@ impl State {
             };
             let setter = name.unraw().to_string();
             let owner = owner.as_ref().map(|owner| owner.unraw().to_string());
+            if owner.is_none() && setter == "visual_states" && class.xaml_property(None, &setter).is_none() {
+                state_fields.push(value.as_ref());
+                continue;
+            }
             let value_span = value.span().byte_range();
             let value_span = SourceSpan::new(value_span.start, value_span.end);
             let field = SourceSpan::new(name.span().byte_range().start, value_span.end);
@@ -366,6 +382,16 @@ impl State {
                     self.nodes[index].complete_children = false;
                     self.omit(format!("{class} child"));
                 }
+            }
+        }
+        if !state_fields.is_empty() {
+            let (groups, issues) = states::project(&state_fields, &result, index, catalog);
+            if let Some(groups) = groups {
+                self.states.insert(index, groups);
+            }
+            if !issues.is_empty() {
+                self.animation_issues.extend(issues);
+                self.omit(format!("{class}.visual_states expression"));
             }
         }
         Ok(result)
