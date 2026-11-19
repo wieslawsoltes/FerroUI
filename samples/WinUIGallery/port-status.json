@@ -1632,18 +1632,23 @@
       "examples": []
     },
     "ToolTip": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/ToolTip.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/status_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/status_samples_tests.rs",
+          "name": "tool_tip_examples_keep_the_source_tips_offset_and_placement"
         }
       ],
-      "notes": "ToolTipService.ToolTip is explicitly mapped to the shared ToolTip.Tip attached property. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "All three source examples use native ToolTip (the page has no code-behind upstream; status_samples.rs sets the source's cliff.jpg on the image): the button's simple ToolTip, the TextBlock's ToolTip with the source's VerticalOffset of -80, and the image's non-occluding ToolTip placed to its right. WinUI's ToolTipService.ToolTip is the attached ToolTip.Tip, and the ToolTip's own VerticalOffset and Placement are the attached ToolTip.VerticalOffset and ToolTip.Placement of the element. FerroUI's ToolTip has no PlacementRect: the source's rectangle (0,0,400,266) is the bounds of the 400 by 266 image, which is the target of the placement, so Right places the tip beside the image as the source does. AutomationProperties.FullDescription is HelpText, the description FerroUI's automation has.",
       "examples": []
     },
     "TreeView": {

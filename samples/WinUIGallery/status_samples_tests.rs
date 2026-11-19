@@ -109,3 +109,41 @@ fn options_pager_announces_the_page_and_follows_the_options() {
         .set_selected_index(0);
     assert!(pager.is_next_button_visible());
 }
+
+#[test]
+fn tool_tip_examples_keep_the_source_tips_offset_and_placement() {
+    use ferroui_base::metadata::from_markup_value;
+    use ferroui_controls::automation::AutomationProperties;
+    use ferroui_controls::{Button, Image, PlacementMode, ToolTip};
+    let _application = start();
+    let root = page("ToolTip");
+    fn tip_text(control: &Control) -> Option<String> {
+        ToolTip::get_tip(control).and_then(|value| value.downcast_ref::<String>().cloned())
+    }
+    // The simple ToolTip of the button.
+    let button = root.get_control::<Button>("SimpleToolTipButton");
+    assert_eq!(tip_text(&button).as_deref(), Some("Simple ToolTip"));
+    // The offset ToolTip of the text: the source's VerticalOffset of -80.
+    let text = root.get_control::<TextBlock>("OffsetToolTipText");
+    assert_eq!(tip_text(&text).as_deref(), Some("Offset information."));
+    assert_eq!(ToolTip::get_vertical_offset(&text), -80.0);
+    // The image's ToolTip is placed to the right of the 400 by 266 image, the source's
+    // PlacementRect, with the source's description.
+    let image = root.get_control::<Image>("textBoxToPlace");
+    assert!(image.source().is_some(), "the source's cliff.jpg");
+    assert_eq!((image.width(), image.height()), (400.0, 266.0));
+    assert_eq!(ToolTip::get_placement(&image), PlacementMode::Right);
+    let tool_tip = from_markup_value::<Ref<ToolTip>>(&ToolTip::get_tip(&image))
+        .expect("the ToolTip of the image");
+    assert_eq!(
+        tool_tip
+            .content()
+            .and_then(|value| value.downcast_ref::<String>().cloned())
+            .as_deref(),
+        Some("Non-occluding information.")
+    );
+    assert_eq!(
+        AutomationProperties::get_help_text(&tool_tip).as_deref(),
+        Some("Non-occluding tooltip")
+    );
+}
