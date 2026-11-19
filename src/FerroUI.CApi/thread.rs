@@ -137,12 +137,36 @@ fn busy() -> ! {
     panic!("the state of the UI thread was reached again inside an access of it")
 }
 
+ferroui_base::ferro_thread_local! {
+    /// Kept by the UI thread from [`init`] on: a thread token can be given to a new thread once
+    /// its thread ends, so the end of the UI thread poisons [`UI_TOKEN`] and no later thread
+    /// passes the check.
+    static UI_THREAD_END: UiThreadEnd = const { UiThreadEnd };
+}
+
+struct UiThreadEnd;
+
+impl Drop for UiThreadEnd {
+    fn drop(&mut self) {
+        // No thread has this token: the pointer of a thread is aligned, `GetCurrentThreadId` is a
+        // `u32`.
+        UI_TOKEN.store(usize::MAX, Ordering::Relaxed);
+    }
+}
+
+/// Remembers the calling thread as the UI thread, until it ends.
+fn remember_ui_thread() {
+    // The first access registers the drop at the end of the thread.
+    let _ = UI_THREAD_END.try_with(|_| ());
+    UI_TOKEN.store(thread_token(), Ordering::Relaxed);
+}
+
 /// Makes the calling thread the UI thread (see [`ferro_init`]).
 pub(crate) fn init() -> Result<()> {
     let current = std::thread::current().id();
     if let Some(ui) = UI_THREAD.get() {
         return if ui.id == current {
-            UI_TOKEN.store(thread_token(), Ordering::Relaxed);
+            remember_ui_thread();
             Ok(())
         } else {
             Err(Error::new(FERRO_WRONG_THREAD, "another thread is the UI thread"))
@@ -160,7 +184,7 @@ pub(crate) fn init() -> Result<()> {
         // dispatcher to one of the two, and the check above failed on the other.
         return Err(Error::new(FERRO_WRONG_THREAD, "another thread is the UI thread"));
     }
-    UI_TOKEN.store(thread_token(), Ordering::Relaxed);
+    remember_ui_thread();
     Ok(())
 }
 
