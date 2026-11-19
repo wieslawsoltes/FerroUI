@@ -231,11 +231,10 @@ FerroStatus ferro_frame_commit(FerroHandle root);
 // window, the children of a panel), and the frame before it under the same root is reconciled
 // into this one. With a `root` of `0` the elements at the top are windows: shown
 // ([`ferro_show`](crate::ferro_show)) when they come and closed when they go, which needs the
-// application to run ([`ferro_app_run`](crate::ferro_app_run)). The library keeps a reference to `root` until [`ferro_frame_clear`]. A failed
-// write does not stop the commit: the first failure is returned and recorded. UI thread only.
-FerroStatus ferro_frame_commit_bytes(FerroHandle root,
-                                     const uint8_t *data,
-                                     int64_t length);
+// application to run ([`ferro_app_run`](crate::ferro_app_run)). The library keeps a reference
+// to `root` until [`ferro_frame_clear`]. A failed write does not stop the commit: the first
+// failure is returned and recorded. UI thread only.
+FerroStatus ferro_frame_commit_bytes(FerroHandle root, const uint8_t *data, int64_t length);
 
 // Sets the dispatcher of the events bound in frames, one for the process: called on the UI thread
 // with the tag of the binding, the sender (borrowed for the call) and the value of its value
