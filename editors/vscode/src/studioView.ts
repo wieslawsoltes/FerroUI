@@ -51,12 +51,15 @@ export class StudioView implements vscode.TreeDataProvider<StudioItem>, vscode.D
     get visible(): boolean { return this.view.visible; }
 
     update(panel: DesignerPanel | undefined, description: string): void {
+        const previous = this.panel;
         this.panel = panel;
         this.view.description = description;
+        this.view.message = !panel ? 'Open a FerroUI designer.' : panel.currentToken === undefined ? (panel.status ?? 'Rendering the design…') : undefined;
+        // Keep open categories and actions visible while the next frame is pending.
+        if (panel && panel === previous && panel.currentToken === undefined) return;
         const key = panel ? `${panel.session}:${panel.currentToken}:${panel.selectedIds.join(',')}` : '';
         if (this.key === key) return;
         this.key = key;
-        this.view.message = !panel ? 'Open a FerroUI designer.' : panel.currentToken === undefined ? (panel.status ?? 'Rendering the design…') : undefined;
         this.changed.fire();
     }
 
