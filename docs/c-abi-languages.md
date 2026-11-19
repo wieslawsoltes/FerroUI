@@ -229,11 +229,43 @@ Link-time optimisation across the C program and the library (clang with `-flto=t
 the LLVM version of rustc) is docs/c-abi.md, section 13.4: it inlines the small functions of the
 ABI into the program; it is not needed for the size, which dead stripping gives.
 
-## 8. Checklist
+## 8. Shipping a library for your application
+
+A dynamic library of every class is 36.4 MB (macOS, release, stripped). Build one for your
+application from the manifest of its bindings (docs/c-abi.md, section 17):
+
+```sh
+python3 scripts/capi/app_library.py app/ferroui.json --out app/ferroui-library --build
+```
+
+It exports the calls and the class entries of the manifest only (19.8 MB for a window with a
+stack panel, a text block and a button), and `ferro_selection_fingerprint()` tells your bindings
+which manifest it was built for. Per language:
+
+| Language | Ship | Notes |
+| --- | --- | --- |
+| C, C++ | statically linked (section 7), or the library for the application beside the program | include `ferroui_app.h` of the generator: `ferro_app_check()` at start, `ferro_app_register_types()` before `ferro_app_run` |
+| Swift | the static library in an XCFramework (`xcodebuild -create-xcframework -library libferroui_capi.a -headers include`), linked with dead stripping | or the library for the application as a dynamic framework; the module map exposes `ferroui.h` |
+| Rust | the crates themselves | a Rust application links what it uses with no C ABI (docs/binary-size.md) |
+| Go | the static library with cgo (section 7) | one executable; `-ldflags='-s -w'` |
+| Zig | the static library (`exe.linkSystemLibrary`, or `addObjectFile` with the archive) | `-dead_strip` / `--gc-sections` as for C |
+| Python (`ctypes`, `cffi`) | the library for the application inside the wheel, beside the module | load it by path; check the fingerprint at import |
+| C# (P/Invoke, `LibraryImport`) | the library for the application in `runtimes/<rid>/native/` of the package | NativeAOT can link the static library instead (`<DirectPInvoke Include="ferroui_capi" />` and `<NativeLibrary Include="libferroui_capi.a" />`) |
+| Java (FFM), Kotlin/JVM | the library for the application in the JAR, extracted and loaded at start, or beside the launcher | `SymbolLookup.libraryLookup` by path |
+| Dart, Flutter (`dart:ffi`) | the library for the application in the native assets of the package (or the plugin) | one per platform and architecture |
+| JavaScript (Node, Bun, Deno FFI) | the library for the application in the platform package (`optionalDependencies` per platform) | |
+| Osprey | the library for the application beside the executable (`LIBRARY_PATH` when building) | the generated runtime checks the fingerprint in `checkApi()` |
+
+A library for one application serves the bindings of its manifest and nothing else: a binding of
+another manifest stops at start with both fingerprints. The full library (fingerprint `0`) serves
+every binding, for development.
+
+## 9. Checklist
 
 - Generated binding, or constant IDs looked up once.
 - Version and fingerprint checked at start.
 - The entries of the classes you use called before `ferro_app_run`.
+- A library built for your application from your manifest, or a static link with dead stripping.
 - Views as frames, memo elements for subtrees that rarely change.
 - Values that change bound to signal slots; values the user changes watched and read with
   loads.

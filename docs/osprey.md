@@ -40,6 +40,12 @@ starts with `ferro_init` calls it itself. A library built by use knows only the 
 registered this way and keeps only those when it is linked statically (docs/c-abi.md,
 section 16). The full bindings register nothing: the full library knows every class.
 
+A library built for the application from the same manifest (`scripts/capi/app_library.py`,
+docs/c-abi.md, section 17) exports only what the selection uses and returns the fingerprint of
+the selection; `checkApi()` compares it with `selectionFingerprint()` of `abi.osp` and accepts that
+library or the full one (which returns `0`). Build the application against it with
+`LIBRARY_PATH=<its directory>` and ship it beside the executable.
+
 | File | Namespace | What |
 | --- | --- | --- |
 | `<application>/ferroui/abi.osp` | `ferroui` | generated: the extern declarations, the ID constants (`buttonTypeId()`, `textPropertyId()`, `clickEventId()`), the fingerprint, the enumerations |
