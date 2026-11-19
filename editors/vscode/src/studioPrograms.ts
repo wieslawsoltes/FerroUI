@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
-import { choose, editText, editTime, type StudioContext } from './studioContext';
+import { choose, editText, type StudioContext } from './studioContext';
+import { newClipFields } from './animationPrompts';
 import { editAnimationTiming } from './studioAnimationTiming';
 import type { AnimationSourceIssue, TimelineProgram } from './timelineProtocol';
 
@@ -13,13 +14,9 @@ export async function createAnimationProgram(context: StudioContext, owner: numb
         owner = picked?.id;
     }
     if (owner === undefined) return;
-    const name = (await editText('Animation name'))?.trim();
-    if (!name) return;
     const node = context.panel.nodes.find(node => node.id === owner);
-    const selector = (await editText('FerroUI selector', node?.name ? `${node.label}#${node.name}` : node?.label))?.trim();
-    if (!selector) return;
-    const duration = await editTime('Duration in seconds', 600, 1);
-    if (duration !== undefined && duration > 0) await context.edit('designer_program', { action: 'create', owner, name, selector, duration });
+    const fields = await newClipFields(node?.name ? `${node.label}#${node.name}` : node?.label);
+    if (fields) await context.edit('designer_program', { action: 'create', owner, ...fields });
 }
 
 export async function renameAnimationProgram(context: StudioContext, program: TimelineProgram): Promise<void> {

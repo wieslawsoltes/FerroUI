@@ -65,6 +65,7 @@ export async function run(): Promise<void> {
         assert.ok(native.capabilities.rsxStateStructure, 'The installed preview authors Rust state groups');
         assert.ok(native.capabilities.hostedAnimationRestoration, 'The installed preview restores the accepted app-hosted timeline');
         assert.ok(native.capabilities.hostedPreviewRanges, 'The installed preview preserves an app-hosted work area');
+        assert.ok(native.capabilities.hostedClipAuthoring, 'The installed preview plans whole app-hosted clips');
         const source = sourceOf(document, 'xaml', new vscode.Position(0, 0));
         const snapshot = await native.render(source, { width: 800, height: 520, dark: false }, 1);
         assert.ok(snapshot.image?.png, snapshot.renderError ?? undefined);

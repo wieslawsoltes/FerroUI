@@ -10,6 +10,7 @@ import type { NativePreview } from '../src/nativePreview';
 import type { Source } from '../src/protocol';
 import type { AnimationSourceIssue, TimelineProgram } from '../src/timelineProtocol';
 import { applyClipDraft } from './hostedClips';
+import { verifyHostedRustClipAuthoring } from './hostedRustClipAuthoring';
 
 const getter = 'crate::app_preview::motion::review_corner_property';
 const style = `styles: [ferroui_view::style("Border#ReviewCard")
@@ -128,6 +129,7 @@ export async function verifyHostedRustAnimation(preview: NativePreview): Promise
             clips: [{ program: placedClip.id }], elapsed: 1.375, restart: true });
         assert.equal(shared.frame.image.png, before.image.png);
         console.log('App Preview validated a registered typed Rust key, preserved CRLF and comments, and restored paused and playing native poses');
+        await verifyHostedRustClipAuthoring(preview, source, source.replace(style.replaceAll('\n', '\r\n'), 'styles: styles_for(model),'), documentFor);
     } finally { await rm(sandbox, { recursive: true, force: true }); }
 }
 

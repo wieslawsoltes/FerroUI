@@ -4,8 +4,9 @@ import { setTimeout as delay } from 'node:timers/promises';
 import * as vscode from 'vscode';
 import type { BuiltProject } from './builtProjects';
 import { type CargoSelection, type CargoTarget, discoverCargoTargets, selectCargoTarget } from './cargoTarget';
-import type { HostedAnimationAction, HostedAnimationFrame, HostedAnimationRequest, HostedAnimationState, HostedClipDraft, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedSourcePlan, HostedStateDraft } from './hostedAnimationProtocol';
+import type { HostedAnimationAction, HostedAnimationFrame, HostedAnimationRequest, HostedAnimationState, HostedClipDraft, HostedClipEdit, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedSourcePlan, HostedStateDraft } from './hostedAnimationProtocol';
 import { HostedAnimations } from './hostedAnimations';
+import { chooseHostedClipEdit } from './hostedClipActions';
 import { chooseHostedKeyframe } from './hostedKeyframes';
 import { prepareHostedKeyframeGroup } from './hostedKeyframeGroup';
 import type { FromHosted, HostedAnimationSample, HostedFixtureCatalog, HostedFrame, ToHosted } from './hostedProtocol';
@@ -148,6 +149,13 @@ export class HostedDesign implements vscode.Disposable {
         return session.clipPlacement(frame, draft, apply, signal);
     }
 
+    clipEdit(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame, command: HostedClipEdit,
+        apply: boolean, signal: AbortSignal) {
+        const session = this.session(uri);
+        if (session.generation !== generation) throw new Error('Read the current application preview generation.');
+        return session.clipEdit(frame, command, apply, signal);
+    }
+
     curve(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame, query: HostedCurveQuery, signal: AbortSignal) {
         const session = this.session(uri);
         if (session.generation !== generation) throw new Error('Read the current application preview generation.');
@@ -192,6 +200,7 @@ class HostedSession {
     private project?: BuiltProject;
     private frame?: HostedFrame;
     private fixture: string | null = null;
+    private clipSelection?: { version: number; key: string };
     private failed?: { revision: number; message: string };
     private timer?: ReturnType<typeof setTimeout>;
     private revision = 1;
@@ -297,9 +306,11 @@ class HostedSession {
                 const source = await client.inProject(sourceOf(document, this.language, this.editor.selection.active), this.project);
                 if (this.disposed || revision !== this.revision) return;
                 frame = await client.renderHosted({ revision, assembly, projectPath, document: source, fixture: this.fixture,
-                    restoreAnimation: client.capabilities.hostedAnimationRestoration ? this.animations.restore : undefined });
+                    restoreAnimation: client.capabilities.hostedAnimationRestoration ? this.animations.restore : undefined,
+                    selectClipKey: this.clipSelection?.version === document.version ? this.clipSelection.key : undefined });
             } else frame = await client.hostedFrame();
             if (!this.disposed && client === this.client && frame?.revision === this.revision) {
+                if (update) this.clipSelection = undefined;
                 this.accept(frame);
             }
         } catch (error) {
@@ -429,6 +440,12 @@ class HostedSession {
 
     clipPlacement(frame: HostedAnimationFrame, draft: HostedClipDraft, apply: boolean, signal: AbortSignal) {
         return this.editAnimationSource(frame, apply, signal, client => client.planHostedClipPlacement(frame, draft));
+    }
+
+    async clipEdit(frame: HostedAnimationFrame, command: HostedClipEdit, apply: boolean, signal: AbortSignal) {
+        const result = await this.editAnimationSource(frame, apply, signal, client => client.planHostedClipEdit(frame, command));
+        if (result.applied && result.selectedKey) this.clipSelection = { version: result.version, key: result.selectedKey };
+        return result;
     }
 
     keyframeGroup(frame: HostedAnimationFrame, draft: HostedKeyframeGroupDraft, apply: boolean, signal: AbortSignal) {
@@ -567,6 +584,16 @@ class HostedSession {
         if (message.type === 'clipPlacement') {
             try { await this.clipPlacement(message.frame, message.draft, true, AbortSignal.timeout(15_000)); }
             catch (error) { this.report(errorMessage(error), Boolean(this.currentFrame)); }
+            this.post({ type: 'animationReply', request: message.request });
+            return;
+        }
+        if (message.type === 'clipActions') {
+            try {
+                const { clipAuthoring, programs } = this.animations.state;
+                if (!clipAuthoring) throw new Error('Use a current app with clip authoring support.');
+                const command = await chooseHostedClipEdit(clipAuthoring, programs, message.program);
+                if (command) await this.clipEdit(message.frame, command, true, AbortSignal.timeout(15_000));
+            } catch (error) { this.report(errorMessage(error), Boolean(this.currentFrame)); }
             this.post({ type: 'animationReply', request: message.request });
             return;
         }

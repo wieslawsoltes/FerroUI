@@ -82,7 +82,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         assert.ok(tools.some(tool => tool.name === 'designer_place'));
         assert.ok(tools.some(tool => tool.name === 'ferroui_runtime_source'));
         for (const name of ['open', 'animations', 'animation', 'image', 'curve', 'keyframe_draft', 'keyframe',
-            'keyframe_group_draft', 'keyframe_group', 'clip_placement_draft', 'clip_placement']) {
+            'keyframe_group_draft', 'keyframe_group', 'clip_placement_draft', 'clip_placement', 'clip_draft', 'clip_edit']) {
             assert.ok(tools.some(tool => tool.name === `designer_hosted_${name}`));
         }
         assert.match((await invoke('designer_hosted_open', { session: 1 })).content[0]?.text ?? '', /allowWrites/);
@@ -102,6 +102,10 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         assert.match((await invoke('designer_hosted_clip_placement', clipPlacement)).content[0]?.text ?? '', /allowWrites/);
         const clipDraft = await invoke('designer_hosted_clip_placement_draft', clipPlacement);
         assert.ok(clipDraft.isError && !clipDraft.content[0]?.text?.includes('allowWrites'));
+        const wholeClip = { ...hostedKey, arguments: { action: 'rename', program: 1, name: 'Draft clip' } };
+        assert.match((await invoke('designer_hosted_clip_edit', wholeClip)).content[0]?.text ?? '', /allowWrites/);
+        const clipEditDraft = await invoke('designer_hosted_clip_draft', wholeClip);
+        assert.ok(clipEditDraft.isError && !clipEditDraft.content[0]?.text?.includes('allowWrites'));
         assert.deepEqual(content(await invoke('ferroui_reload_history', { limit: 1 })), { records: [] });
         const runtimeEdit = { node: 1, property: 'Text', value: 'Draft', expected_generation: 0, expected_version: 1 };
         assert.match((await invoke('ferroui_runtime_apply_source', runtimeEdit)).content[0]?.text ?? '', /allowWrites/);

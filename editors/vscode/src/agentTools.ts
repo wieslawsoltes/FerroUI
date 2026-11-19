@@ -8,7 +8,7 @@ import type { DesignerWorkbench } from './designerWorkbench';
 import { runEditorHistory } from './editorHistory';
 import type { HotReload } from './hotReload';
 import type { HostedDesign } from './hostedDesign';
-import type { HostedAnimationAction, HostedClipDraft, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedStateDraft } from './hostedAnimationProtocol';
+import type { HostedAnimationAction, HostedClipDraft, HostedClipEdit, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedStateDraft } from './hostedAnimationProtocol';
 import type { ProjectFile, ProjectInventory } from './projectInventory';
 import type { ProjectScaffold } from './projectScaffold';
 import type { RuntimeSourceTools } from './runtimeSourceTools';
@@ -184,6 +184,10 @@ export class AgentTools {
             case 'designer_hosted_clip_placement':
                 return this.hosted.clipPlacement(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },
                     args.arguments as HostedClipDraft, tool === 'designer_hosted_clip_placement', signal);
+            case 'designer_hosted_clip_draft':
+            case 'designer_hosted_clip_edit':
+                return this.hosted.clipEdit(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },
+                    args.arguments as HostedClipEdit, tool === 'designer_hosted_clip_edit', signal);
             case 'designer_document': {
                 if (args.include_counterpart) {
                     await panel.waitForSnapshot(signal).catch(error => { if (signal.aborted) throw error; });

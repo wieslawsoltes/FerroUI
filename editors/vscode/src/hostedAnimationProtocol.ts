@@ -32,6 +32,12 @@ export interface HostedAnimationTarget {
     typeName: string;
 }
 
+export interface HostedClipOwner extends HostedAnimationTarget { selector: string }
+export interface HostedClipAuthoring {
+    owners: HostedClipOwner[];
+    programs: number[];
+}
+
 export interface HostedAnimationCatalog {
     programs: HostedAnimationProgram[];
     targets: HostedAnimationTarget[];
@@ -39,6 +45,7 @@ export interface HostedAnimationCatalog {
     clipScope?: string;
     markerScope?: string;
     keyframeSelection?: boolean;
+    clipAuthoring?: HostedClipAuthoring;
 }
 
 export interface HostedAnimationFrame {
@@ -102,6 +109,11 @@ export type HostedKeyframeDraft = Omit<KeyframeDraft, 'previous'> & { previous?:
 export type HostedCurveQuery = Pick<TimelineCurveRequest, 'program' | 'target' | 'property' | 'window' | 'metric' | 'channel'>;
 export interface HostedStateDraft { program: number; duration: number; easing: string }
 export interface HostedClipDraft { programs: number[]; start?: number; gap?: number }
+export type HostedClipEdit =
+    | { action: 'create'; owner: number; name: string; selector: string; duration: number }
+    | { action: 'rename' | 'duplicate'; program: number; name: string }
+    | { action: 'remove'; program: number };
+export interface HostedClipPlan extends HostedSourcePlan { selectedKey: string | null }
 export interface HostedSourcePatch { start: number; end: number; expected: string; replacement: string }
 export interface HostedSourcePlan { patches: HostedSourcePatch[] }
 

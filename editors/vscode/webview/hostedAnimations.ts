@@ -16,6 +16,7 @@ export class HostedAnimationView {
     private readonly targets = element<HTMLButtonElement>('hosted-animation-targets');
     private readonly source = element<HTMLButtonElement>('hosted-animation-source');
     private readonly issues = element<HTMLButtonElement>('hosted-animation-issues');
+    private readonly clipActions = element<HTMLButtonElement>('hosted-clip-actions');
     private readonly edit = element<HTMLButtonElement>('hosted-animation-keyframe');
     private readonly play = element<HTMLButtonElement>('hosted-animation-play');
     private readonly stop = element<HTMLButtonElement>('hosted-animation-stop');
@@ -96,6 +97,12 @@ export class HostedAnimationView {
         this.source.onclick = () => this.choose('animationSource');
         this.issues.onclick = () => {
             if (this.canUse() && this.decoded) this.send({ type: 'animationIssues', frame: this.decoded });
+        };
+        this.clipActions.onclick = () => {
+            if (!this.canUse() || !this.decoded || this.state.position?.playing) return;
+            const program = this.clips.visible ? undefined : this.selectedProgram?.id;
+            this.send({ type: 'clipActions', frame: this.decoded, request: this.pending = ++this.request, program });
+            this.paint();
         };
         this.edit.onclick = () => this.choose(this.selectedProgram?.stateRoute ? 'editStateRoute' : 'chooseKeyframe');
         this.play.onclick = () => {
@@ -254,6 +261,9 @@ export class HostedAnimationView {
         this.source.disabled = !usable || program?.sourceOffset == null;
         this.issues.hidden = !this.state.sourceIssues?.length;
         this.issues.disabled = !this.canUse();
+        const authoring = this.state.clipAuthoring;
+        this.clipActions.hidden = !authoring?.owners.length && !authoring?.programs.length;
+        this.clipActions.disabled = !usable;
         labelButton(this.source, program?.sourceOffset == null ? 'Animation source is unavailable'
             : program.stateRoute ? 'Reveal Rust state route in source' : 'Reveal animation in source');
         this.edit.hidden = !program?.authoring && !program?.stateRoute;

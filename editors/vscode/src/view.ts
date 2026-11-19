@@ -264,6 +264,7 @@ export function hostedHtml(webview: vscode.Webview, root: vscode.Uri): string {
     return page(webview, root, 'hosted', 'FerroUI App Preview', `
 <header class="toolbar hosted-toolbar" aria-label="Application preview controls">
     <label id="hosted-fixture-label" class="metric" hidden>${icon('database')}<select id="hosted-fixture" aria-label="Preview fixture"></select></label>
+    ${tool('hosted-clip-actions', 'ellipsis', 'Animation clip actions', 'hidden')}
     ${tool('hosted-refresh', 'refresh', 'Refresh Source')}
     ${tool('hosted-animation-issues', 'warning', 'Open unsupported Rust animations in source', 'hidden')}
 </header>

@@ -8,7 +8,7 @@ import type { CurvePoint, TimelinePreviewPose, TimelineTargetOverrides } from '.
 import type { NativeProjectInventory } from './projectInventory';
 import type { Asset, CanvasInteraction, CanvasPresentation, DesignDataPresentation, DropHint, EditResult, Inspection, InspectionTarget, Operation, Placement, PreviewSourceBuffer, ResourceRow, Snapshot, Source, Viewport } from './protocol';
 import type { RsxLanguageDocument } from './rsxLanguageTypes';
-import type { HostedAnimationFrame, HostedAnimationRequest, HostedClipDraft, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedKeyframeGroupPlan, HostedKeyframePlan, HostedSourcePatch, HostedSourcePlan, HostedStateDraft } from './hostedAnimationProtocol';
+import type { HostedAnimationFrame, HostedAnimationRequest, HostedClipDraft, HostedClipEdit, HostedClipPlan, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedKeyframeGroupPlan, HostedKeyframePlan, HostedSourcePatch, HostedSourcePlan, HostedStateDraft } from './hostedAnimationProtocol';
 import type { HostedAnimationSample, HostedFrame, HostedInput, HostedSource } from './hostedProtocol';
 import type { NativeStageChange, PrototypeCommand, PrototypeHotspot, PrototypeScene, StageChecks, StageDocument, StageImage, StageManifest, StageModel, StagePick, StagePointer, StageStateOptions, StageTarget } from './stagesProtocol';
 import { commandFor } from './tools';
@@ -33,7 +33,7 @@ export class NativePreview implements vscode.Disposable {
     private nextProject = 0;
     assets: readonly Asset[] = [];
     capabilities: {
-        isolatedDesign?: boolean; appHostedDesign?: boolean; hostedAnimationRestoration?: boolean; hostedPreviewRanges?: boolean; rsxLanguage?: boolean;
+        isolatedDesign?: boolean; appHostedDesign?: boolean; hostedAnimationRestoration?: boolean; hostedPreviewRanges?: boolean; hostedClipAuthoring?: boolean; rsxLanguage?: boolean;
         stages?: boolean; prototypeEditing?: boolean; stageIncludes?: boolean; projectCatalog?: boolean;
         canvasInteraction?: boolean; canvasFocusOrder?: boolean; projectInventory?: boolean; tokenHandoff?: boolean;
         designFixtures?: boolean; timelineTransport?: boolean; timelineRecording?: boolean; timelineGeometryRecording?: boolean;
@@ -133,6 +133,10 @@ export class NativePreview implements vscode.Disposable {
     }
     planHostedClipPlacement(frame: HostedAnimationFrame, draft: HostedClipDraft): Promise<HostedSourcePlan> {
         return this.send('hostedClipPlacement', { ...frame, ...draft });
+    }
+    planHostedClipEdit(frame: HostedAnimationFrame, command: HostedClipEdit): Promise<HostedClipPlan> {
+        if (!this.capabilities.hostedClipAuthoring) throw new Error('Update the FerroUI preview helper to edit native clips.');
+        return this.send('hostedClipEdit', { revision: frame.revision, sequence: frame.sequence, command });
     }
     hostedCurve(frame: HostedAnimationFrame, query: HostedCurveQuery): Promise<CurvePoint[]> {
         const { metric, channel, ...track } = query;

@@ -41,6 +41,10 @@ const hostedState = { ...frame, expected_generation: integer(1), expected_sequen
 const hostedClips = { ...frame, expected_generation: integer(1), expected_sequence: integer(1),
     arguments: { type: 'object', additionalProperties: false, required: ['programs'],
         properties: { programs: { type: 'array', items: node, minItems: 1, maxItems: 4096 }, start: time, gap: { type: 'number' } } } };
+const hostedClipEdit = { ...frame, expected_generation: integer(1), expected_sequence: integer(1),
+    arguments: { type: 'object', additionalProperties: false, required: ['action'],
+        properties: { action: choice('create', 'rename', 'duplicate', 'remove'), owner: node, program: node,
+            name: { type: 'string', maxLength: 512 }, selector: { type: 'string', maxLength: 4096 }, duration: time } } };
 const placement = { ...frame, asset: text, project_asset: text, node, selection: { type: 'array', items: node, minItems: 2, maxItems: 128 }, moving_anchor: node, anchor: node,
     position: choice('inside', 'before', 'after'), x: { type: 'number' }, y: { type: 'number' } };
 
@@ -108,6 +112,10 @@ export const agentCatalog = {
         hostedClips, hostedFrameRequired),
     designer_hosted_clip_placement: tool('Place or sequence native animation clips in the app-preview source buffer as one undoable edit. Use editable clip IDs from the current frame.',
         hostedClips, hostedFrameRequired, true),
+    designer_hosted_clip_draft: tool('Plan creation, rename, duplication, or removal of an app-hosted clip. Use clipAuthoring owners and programs from the accepted app preview. Create takes owner, name, selector, and duration in seconds. Rename and duplicate take program and name. Remove takes program.',
+        hostedClipEdit, hostedFrameRequired),
+    designer_hosted_clip_edit: tool('Apply a checked XAML or mapped Rust clip edit as one Undo step. Returns the selected source key for a created, renamed, or duplicated clip.',
+        hostedClipEdit, hostedFrameRequired, true),
     designer_wait: tool('Wait for the native preview of the current authored buffer. Return the revision, RSX invocation ranges, and rendering diagnostics.',
         session, ['session']),
     designer_animation_issue: tool('Reveal an unsupported Rust clip from designer_programs. Supply the current designer revision and its zero-based sourceIssues index.',
