@@ -477,6 +477,14 @@ and fits the work area to the replacement clock. In Studio MCP, use `designer_pr
 `action: "play_range"` and a `range` containing `start`, `end`, and `loop`. Include `all: true` for
 the shared clip clock. [App Preview range workflow](vscode/motion.md#rehearse-a-range-in-app-preview)
 
+### Bookmark poses in Designer Studio
+
+![Designer Studio shows two saved poses in a compact strip below the clip lanes](images/studio-preview-markers.png)
+
+Pause, seek to the pose, then choose **Preview range**. Enter a **Marker name** below the range settings and press Enter or choose **Add or update marker at playhead**. Click the amber mark on the ruler or the named row to return to the pose. Use the remove icon beside its time to delete it. Set the same name again to move the mark to the current playhead.
+
+The keyframe view and **Compare animation clips** keep their own marker lists. Typed keys use authored seconds, and the shared ruler uses elapsed seconds. Markers stay with their preview scope and are kept out of source and Undo history. In Studio MCP, read `designer_timeline_markers` with the current `expected_revision`. Use `designer_timeline_marker_edit` with `action`, `name`, and `time` for `set`. Use `name` for `seek` or `remove`. Supply `program` for a particular clip or `all: true` for the shared ruler. [VS Code and App Preview marker controls](vscode/motion.md#bookmark-preview-positions)
+
 ### Edit tracks and keyframes
 
 Select a key and drag either handle in the incoming easing graph. The graph and **Curve**

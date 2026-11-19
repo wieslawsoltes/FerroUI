@@ -74,9 +74,8 @@ For VS Code MCP, call `designer_keyframe_clipboard` through `designer_studio_que
 1. Choose a typed XAML or mapped Rust clip whose targets render in the designer. Open **Preview range** in the toolbar and enable **Limit playback to preview range**.
 2. Set **In** and **Out** in seconds, or seek to either point and press `I` or `O` with the ruler focused. A blue line marks the range on the ruler. Keep **Loop range** enabled for repeat playback or clear it to hold the Out pose after one pass.
 3. Use **Play preview range**, **Pause preview range**, and **Stop** in the transport. Play starts at the current playhead when it falls inside the range. Otherwise it starts at In. Playback disarms recording and samples the authored timeline. Clear **Limit playback to preview range** to use the clip's authored delay, repeat, and direction again.
-4. To bookmark a pose, seek to it, enter a name in **Preview range**, and choose **Add or update marker at playhead**. Click its marker on the ruler or its name in the popup to return to that time. Use **Remove marker** beside the name to delete it. Markers belong to the clip for the current designer session.
 
-The VS Code MCP tool `designer_timeline_control` accepts `action: "play_range"` with a program and a `range` containing `start`, `end`, and `loop`. Use `designer_timeline_markers` to read markers and `designer_timeline_marker_edit` to set or remove them. Use the current designer revision for each action.
+The VS Code MCP tool `designer_timeline_control` accepts `action: "play_range"` with a program and a `range` containing `start`, `end`, and `loop`. Use the current designer revision for each action.
 
 ### Rehearse a range in App Preview
 
@@ -90,6 +89,20 @@ The VS Code MCP tool `designer_timeline_control` accepts `action: "play_range"` 
 App Preview range times are elapsed seconds, including authored delay, speed, and repetitions. The range is a preview setting. It leaves animation timing and keys in source intact. Use an updated FerroUI preview helper to retain the range across an app-hosted frame replacement.
 
 Agents supply `action: "play_range"` and `range: { "start": 0.4, "end": 1.5, "loop": true }` to `designer_hosted_animation`. Include `program` for a single animation or omit it to rehearse all playable clips. Use the current app generation, revision, and sequence reported by `designer_hosted_animations`.
+
+## Bookmark preview positions
+
+![App Preview shows the Card rounds and Shadow settled markers with the app paused at 1.4 seconds](../images/vscode-app-preview-markers.png)
+
+1. Pause playback and move the playhead to the pose you want. Open **Preview range** in the keyframe view, in App Preview, or in Designer Studio. On the shared ruler in the VS Code Timeline, choose the **Preview markers** bookmark icon.
+2. Enter a name and choose **Add or update marker at playhead** or press Enter. Enter the same name at another position to move it.
+3. Choose a marker on the ruler or select its name in the marker list to return to the native pose. Use **Remove marker** beside the name to delete it.
+
+Typed clips in the VS Code Timeline use authored seconds. App Preview and the shared clip ruler use elapsed seconds, including the clip’s delay and playback speed. Each clock has its own markers. Markers are local to the preview session and leave the source and Undo history intact. When a clock becomes shorter, markers beyond its current end are hidden. App Preview and Studio retain marks when the authored clip identity and preview scope still match.
+
+In VS Code, read `designer_timeline_markers` and call `designer_timeline_marker_edit` with `action` set to `set`, `remove`, or `seek`. Pass `program` for a typed clip or `all: true` for the shared ruler. **Set** takes a `name` and `time` in seconds. **Remove** and **Seek** take a `name`. App Preview reports `markers.programs` and `markers.shared` from `designer_hosted_animations`. Send `action: "marker"` to `designer_hosted_animation` with the same name-based action inside `marker`. Pass `program` for one app animation or omit it for the shared ruler. Use the accepted revision, sequence, and app generation from the query. [Designer Studio marker controls](../README.md#bookmark-poses-in-designer-studio)
+
+[Markers on the docked VS Code Timeline](../images/vscode-timeline-markers.png)
 
 ## Shape an incoming easing
 
