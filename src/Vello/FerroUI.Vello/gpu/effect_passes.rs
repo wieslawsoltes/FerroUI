@@ -40,6 +40,9 @@
 #![cfg_attr(not(feature = "hybrid"), allow(dead_code))]
 
 use super::{VelloDeviceTexture, VelloTextureAlpha, VelloWgpuDevice};
+// The uniform blocks of the passes, written once for this route and the WebGL2 one.
+pub(crate) use crate::effect_uniforms::LightingOutput;
+use crate::effect_uniforms::{self as blocks, MAX_LIGHTS};
 use ferroui_base::logging::{LogEventLevel, Logger};
 use ferroui_base::media::effects::{
     EffectImage, EffectImageWeak, ImmutableCustomEffect, ShaderUniformType, ShaderUniformValue, MAX_SHADER_CHILDREN,
@@ -47,8 +50,6 @@ use ferroui_base::media::effects::{
 };
 use ferroui_base::media::{ColorMatrix, ColorMatrixAlphaMode, ConvolveMatrix};
 use ferroui_base::platform::{LightingParameters, PixelOperation};
-use ferroui_base::rendering::composition::effects::BlendEffectMode;
-use ferroui_base::rendering::composition::server::{LightSource, LIGHT_MAP_MAX_SCALE};
 use std::any::TypeId;
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
@@ -56,16 +57,8 @@ use std::mem::ManuallyDrop;
 use std::rc::Rc;
 use std::sync::{Arc, Weak};
 
-/// The most point and spot lights the pass evaluates.
-const MAX_LIGHTS: usize = LightingParameters::MAX_LIGHTS;
-
-const _: () = assert!(MAX_LIGHTS == 8, "the array of lights of the WGSL program has 8 elements");
-
-/// Floats of a light in the uniform block: 10 `vec4<f32>`.
-const LIGHT_FLOATS: usize = 40;
-/// Floats of the uniform block before the lights: 6 `vec4<f32>`.
-const HEAD_FLOATS: usize = 24;
-const UNIFORM_BYTES: u64 = ((HEAD_FLOATS + LIGHT_FLOATS * MAX_LIGHTS) * 4) as u64;
+/// The bytes of the uniform block of the lighting pass.
+const UNIFORM_BYTES: u64 = (blocks::LIGHTING_FLOATS * 4) as u64;
 
 /// The light math of the lighting passes: the uniforms, the vertex stage
 /// and `light_at`, followed by the fragment stage of a pass.
@@ -236,80 +229,6 @@ fn fs_main(@builtin(position) fragment: vec4<f32>) -> @location(0) vec4<f32> {
 }
 "#;
 
-/// What the lighting pass writes.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-#[allow(dead_code)]
-pub(crate) enum LightingOutput {
-    /// The light clamped to 0..1, opaque.
-    Light,
-    /// The light clamped to 0..`scale`, over it.
-    Factors { scale_bits: u32 },
-}
-
-/// The uniform block of the lighting pass.
-fn uniforms(lighting: &LightingParameters, output: LightingOutput, origin: (u32, u32), to_local: kurbo::Affine) -> Vec<f32> {
-    let mut floats = vec![0f32; HEAD_FLOATS + LIGHT_FLOATS * MAX_LIGHTS];
-    let constant = lighting.constant;
-    let material = lighting.material;
-    let (mode, scale) = match output {
-        LightingOutput::Light => (0.0, 1.0),
-        LightingOutput::Factors { scale_bits } => (1.0, f32::from_bits(scale_bits)),
-    };
-    let [a, b, c, d, e, f] = to_local.as_coeffs();
-    floats[0..4].copy_from_slice(&[constant.r as f32, constant.g as f32, constant.b as f32, 0.0]);
-    floats[4..8].copy_from_slice(&[material.ambient as f32, material.diffuse as f32, material.specular as f32, material.shine as f32]);
-    floats[8..12].copy_from_slice(&[mode, scale, lighting.lights.len().min(MAX_LIGHTS) as f32, 0.0]);
-    floats[12..16].copy_from_slice(&[origin.0 as f32, origin.1 as f32, 0.0, 0.0]);
-    // x' = a x + c y + e, y' = b x + d y + f
-    floats[16..20].copy_from_slice(&[a as f32, c as f32, e as f32, 0.0]);
-    floats[20..24].copy_from_slice(&[b as f32, d as f32, f as f32, 0.0]);
-    let max_cutoff = |value: f64| -> [f32; 2] {
-        if value.is_nan() || value >= f64::from(f32::MAX) {
-            [0.0, 0.0]
-        } else if value <= -f64::from(f32::MAX) {
-            [-f32::MAX, 1.0]
-        } else {
-            [value as f32, 1.0]
-        }
-    };
-    for (index, light) in lighting.lights.iter().take(MAX_LIGHTS).enumerate() {
-        let at = HEAD_FLOATS + index * LIGHT_FLOATS;
-        let slot = |field: usize| at + field * 4;
-        let m = light.to_light_space;
-        floats[slot(7)..slot(7) + 3].copy_from_slice(&[m.m11 as f32, m.m21 as f32, m.m31 as f32]);
-        floats[slot(8)..slot(8) + 3].copy_from_slice(&[m.m12 as f32, m.m22 as f32, m.m32 as f32]);
-        floats[slot(9)..slot(9) + 3].copy_from_slice(&[m.m13 as f32, m.m23 as f32, m.m33 as f32]);
-        let (attenuation, position) = match light.source {
-            LightSource::Point { color, position, attenuation } => {
-                floats[slot(0)] = 1.0;
-                floats[slot(1)..slot(1) + 3].copy_from_slice(&[color.r as f32, color.g as f32, color.b as f32]);
-                (attenuation, position)
-            }
-            LightSource::Spot { inner_color, outer_color, position, direction, inner_cone_angle, outer_cone_angle, attenuation } => {
-                let outer = outer_cone_angle.clamp(0.0, std::f64::consts::PI);
-                let inner = inner_cone_angle.clamp(0.0, outer);
-                floats[slot(0)..slot(0) + 3].copy_from_slice(&[2.0, inner.cos() as f32, outer.cos() as f32]);
-                floats[slot(1)..slot(1) + 3].copy_from_slice(&[inner_color.r as f32, inner_color.g as f32, inner_color.b as f32]);
-                floats[slot(2)..slot(2) + 3].copy_from_slice(&[outer_color.r as f32, outer_color.g as f32, outer_color.b as f32]);
-                floats[slot(4)..slot(4) + 3].copy_from_slice(&[direction.x as f32, direction.y as f32, direction.z as f32]);
-                (attenuation, position)
-            }
-            // The parameters list only point and spot lights.
-            LightSource::Ambient { .. } | LightSource::Distant { .. } => continue,
-        };
-        floats[slot(3)..slot(3) + 3].copy_from_slice(&[position.x as f32, position.y as f32, position.z as f32]);
-        let min_cutoff = attenuation.min_cutoff.clamp(-f64::from(f32::MAX), f64::from(f32::MAX));
-        floats[slot(5)..slot(5) + 4].copy_from_slice(&[
-            attenuation.constant as f32,
-            attenuation.linear as f32,
-            attenuation.quadratic as f32,
-            min_cutoff as f32,
-        ]);
-        floats[slot(6)..slot(6) + 2].copy_from_slice(&max_cutoff(attenuation.max_cutoff));
-    }
-    floats
-}
-
 /// The compiled lighting pipeline of a device.
 struct Pipeline {
     device: Weak<VelloWgpuDevice>,
@@ -421,7 +340,7 @@ pub(crate) fn lighting_texture(
     // by a fraction of a pixel covers one pixel more or less, and takes the
     // same texture (the scene paints the part the area covers).
     let (width, height) = (width.div_ceil(32) * 32, height.div_ceil(32) * 32);
-    let floats = uniforms(lighting, output, origin, to_local);
+    let floats = blocks::lighting(lighting, output, origin, to_local);
     let bytes: Vec<u8> = floats.iter().flat_map(|value| value.to_ne_bytes()).collect();
     with_pipeline(device, |pipeline| {
         POOL.with(|pool| {
@@ -860,11 +779,11 @@ impl LayerProgram {
     /// The floats of the uniform block.
     fn uniform_floats(self) -> usize {
         match self {
-            LayerProgram::ColorMatrix => 6 * 4,
-            LayerProgram::LightMultiply => HEAD_FLOATS + LIGHT_FLOATS * MAX_LIGHTS,
-            LayerProgram::PixelOperation => 6 * 4,
+            LayerProgram::ColorMatrix => blocks::COLOR_MATRIX_FLOATS,
+            LayerProgram::LightMultiply => blocks::LIGHTING_FLOATS,
+            LayerProgram::PixelOperation => blocks::PIXEL_OPERATION_FLOATS,
             LayerProgram::FrameConversion => 2 * 4,
-            LayerProgram::Convolution => 10 * 4,
+            LayerProgram::Convolution => blocks::CONVOLUTION_FLOATS,
         }
     }
 }
@@ -1145,12 +1064,7 @@ pub(crate) fn color_matrix_texture(
     matrix: &ColorMatrix,
     alpha_mode: ColorMatrixAlphaMode,
 ) -> Option<Arc<VelloDeviceTexture>> {
-    let mut floats = Vec::with_capacity(LayerProgram::ColorMatrix.uniform_floats());
-    for row in matrix.rows {
-        floats.extend_from_slice(&row);
-    }
-    let as_it_is = if alpha_mode == ColorMatrixAlphaMode::Straight { 1.0 } else { 0.0 };
-    floats.extend_from_slice(&[as_it_is, area.width as f32, area.height as f32, 0.0]);
+    let floats = blocks::color_matrix(matrix, alpha_mode, (area.width, area.height));
     run_layer_pass(device, LayerProgram::ColorMatrix, &floats, &[content])
 }
 
@@ -1164,13 +1078,7 @@ pub(crate) fn light_multiply_texture(
     lighting: &LightingParameters,
     to_local: kurbo::Affine,
 ) -> Option<Arc<VelloDeviceTexture>> {
-    if lighting.lights.len() > MAX_LIGHTS {
-        return None;
-    }
-    let scale = LIGHT_MAP_MAX_SCALE as f32;
-    let mut floats = uniforms(lighting, LightingOutput::Factors { scale_bits: scale.to_bits() }, (0, 0), to_local);
-    floats[14] = area.width as f32;
-    floats[15] = area.height as f32;
+    let floats = blocks::light_multiply(lighting, (area.width, area.height), to_local)?;
     run_layer_pass(device, LayerProgram::LightMultiply, &floats, &[content])
 }
 
@@ -1185,29 +1093,7 @@ pub(crate) fn pixel_operation_texture(
     operation: &PixelOperation,
     to_local: kurbo::Affine,
 ) -> Option<Arc<VelloDeviceTexture>> {
-    let (kind, mode, k, grid, cells) = match *operation {
-        PixelOperation::Blend { mode, noise_grid, noise_size } => {
-            if mode == BlendEffectMode::Dissolve && (noise_grid.width <= 0.0 || noise_grid.height <= 0.0) {
-                return None;
-            }
-            let grid = [noise_grid.x as f32, noise_grid.y as f32, noise_grid.width as f32, noise_grid.height as f32];
-            let cells = [noise_size.width.max(1) as f32, noise_size.height.max(1) as f32, 0.0, 0.0];
-            (0.0, mode as i32 as f32, [0.0; 4], grid, cells)
-        }
-        PixelOperation::Arithmetic { k } => (1.0, 0.0, k, [0.0; 4], [0.0; 4]),
-        PixelOperation::MaskInvert => (2.0, 0.0, [0.0; 4], [0.0; 4], [0.0; 4]),
-        #[allow(unreachable_patterns)]
-        _ => return None,
-    };
-    let [a, b, c, d, e, f] = to_local.as_coeffs();
-    let mut floats = Vec::with_capacity(LayerProgram::PixelOperation.uniform_floats());
-    floats.extend_from_slice(&[kind, mode, area.width as f32, area.height as f32]);
-    floats.extend_from_slice(&k);
-    floats.extend_from_slice(&grid);
-    floats.extend_from_slice(&cells);
-    // x' = a x + c y + e, y' = b x + d y + f
-    floats.extend_from_slice(&[a as f32, c as f32, e as f32, 0.0]);
-    floats.extend_from_slice(&[b as f32, d as f32, f as f32, 0.0]);
+    let floats = blocks::pixel_operation(operation, (area.width, area.height), to_local)?;
     run_layer_pass(device, LayerProgram::PixelOperation, &floats, &[destination, source])
 }
 
@@ -1218,18 +1104,7 @@ pub(crate) fn convolution_texture(
     area: LayerArea,
     convolution: &ConvolveMatrix,
 ) -> Option<Arc<VelloDeviceTexture>> {
-    let mut floats = vec![0.0f32; LayerProgram::Convolution.uniform_floats()];
-    for (slot, weight) in floats.iter_mut().zip(convolution.correlation_kernel()) {
-        *slot = weight;
-    }
-    let (target_x, target_y) = convolution.target();
-    let columns = convolution.kernel_width.clamp(1, ConvolveMatrix::MAX_SIDE);
-    let rows = convolution.kernel_height.clamp(1, ConvolveMatrix::MAX_SIDE);
-    floats[28..32].copy_from_slice(&[columns as f32, rows as f32, target_x as f32, target_y as f32]);
-    let keep_alpha = if convolution.preserve_alpha { 1.0 } else { 0.0 };
-    let repeat_edges = if convolution.clamp_edges { 1.0 } else { 0.0 };
-    floats[32..36].copy_from_slice(&[convolution.gain(), convolution.bias, keep_alpha, repeat_edges]);
-    floats[36..40].copy_from_slice(&[area.width as f32, area.height as f32, 0.0, 0.0]);
+    let floats = blocks::convolution(convolution, (area.width, area.height));
     run_layer_pass(device, LayerProgram::Convolution, &floats, &[content])
 }
 
