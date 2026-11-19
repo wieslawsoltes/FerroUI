@@ -24,7 +24,10 @@
 //! - the materials [`Material`], [`DiffuseMaterial`], [`SpecularMaterial`],
 //!   [`EmissiveMaterial`] and [`MaterialGroup`], painting with the brushes of FerroUI;
 //! - the visuals [`Visual3D`], [`ModelVisual3D`] and [`Viewport3DVisual`], and the control
-//!   [`Viewport3D`].
+//!   [`Viewport3D`];
+//! - the elements that take pointer input, [`UIElement3D`], [`ModelUIElement3D`] and
+//!   [`ContainerUIElement3D`], to which a `Viewport3D` routes its pointer events through the hit
+//!   testing.
 //!
 //! A `Viewport3DVisual` compiles its scene into an immutable [`Scene3DSnapshot`] (world
 //! matrices, shared meshes, material layers, lights in world space, the camera with its planes
@@ -60,6 +63,7 @@ mod scene_compiler;
 mod size_3d;
 mod text;
 mod transform_3d;
+mod ui_element_3d;
 mod vector_3d;
 mod viewport_3d_visual;
 mod visual_3d;
@@ -97,6 +101,7 @@ pub use transform_3d::{
     MatrixTransform3D, RotateTransform3D, ScaleTransform3D, Transform3D, Transform3DGroup, Transform3DImpl,
     Transform3DImplExt, Transform3DVTable, TranslateTransform3D,
 };
+pub use ui_element_3d::{ContainerUIElement3D, ModelUIElement3D, Pointer3DEventArgs, UIElement3D};
 pub use vector_3d::Vector3D;
 pub use viewport_3d_visual::Viewport3DVisual;
 pub use visual_3d::{ModelVisual3D, Visual3D};
@@ -110,6 +115,9 @@ pub use ferroui_base::rendering::scene3d::{
 
 #[cfg(test)]
 mod scene_tests;
+
+#[cfg(test)]
+mod ui_element_3d_tests;
 
 #[cfg(test)]
 mod xaml_tests;
