@@ -1,5 +1,5 @@
 use crate::{ProjectError, Result, require};
-use ferroui_build_scan::model::{AssemblyModel, TypeKind, TypeModel};
+use ferroui_build_scan::model::{AssemblyModel, RegisteredKind, TypeKind, TypeModel};
 use ferroui_build_scan::model_set::ModelSet;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
@@ -53,6 +53,13 @@ pub struct MarkupCatalog {
 pub struct MarkupControl<'a> {
     pub assembly: &'a AssemblyModel,
     pub class: &'a TypeModel,
+}
+
+/// A styled property resolved from a build-generated Rust accessor.
+pub struct MarkupAnimationProperty<'a> {
+    pub name: &'a str,
+    pub value_type: String,
+    pub owner: MarkupControl<'a>,
 }
 
 impl MarkupControl<'_> {
@@ -115,6 +122,26 @@ impl MarkupCatalog {
 
     pub fn models(&self) -> &ModelSet {
         &self.models
+    }
+
+    pub fn animation_property(&self, accessor: &str) -> Option<MarkupAnimationProperty<'_>> {
+        let (listed, property) = self.models.find_accessor(accessor)?;
+        if property.kind != RegisteredKind::Styled || property.read_only {
+            return None;
+        }
+        let path = property.owner.as_ref().unwrap_or(&listed.rust_path);
+        let (assembly, class) = self.models.find_rust_type(&path.text)?;
+        let name = self.models.name_of(property)?;
+        if !element_name(name) || !element_name(&class.name) || class.namespace.is_empty()
+            || !namespace_part(&class.namespace) || !namespace_part(&assembly.name)
+        {
+            return None;
+        }
+        Some(MarkupAnimationProperty {
+            name,
+            value_type: self.models.expanded(&property.value_type.text),
+            owner: MarkupControl { assembly, class },
+        })
     }
 
     pub fn controls(&self) -> impl Iterator<Item = MarkupControl<'_>> {

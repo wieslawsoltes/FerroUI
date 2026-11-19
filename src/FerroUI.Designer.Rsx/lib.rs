@@ -15,7 +15,7 @@ mod source_edits;
 mod tree;
 mod xaml;
 
-pub use animation::RsxAnimation;
+pub use animation::{RsxAnimation, RsxAnimationIssue};
 pub use language::{RsxLanguageDocument, analyze_rsx};
 pub use markup::RsxPreviewMarkup;
 pub use project::{RsxNode, RsxProjection, project_rust};

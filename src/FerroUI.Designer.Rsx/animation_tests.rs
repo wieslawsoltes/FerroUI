@@ -104,14 +104,14 @@ fn animated_source_keeps_dynamic_styles_in_rust_and_rejects_unmapped_keys() {
         previous: Some(0.3),
         time: 0.5,
         value: "0.72",
-        easing: "Linear",
+        easing: "LinearEasing",
     };
     assert!(animation.patch_keyframe("Opacity", not_authored).is_err());
     let collision = KeyframeEdit::Upsert {
         previous: Some(0.5),
         time: 1.999999999,
         value: "0.72",
-        easing: "Linear",
+        easing: "LinearEasing",
     };
     assert!(animation.patch_keyframe("Opacity", collision).is_err());
     let insert_spline = KeyframeEdit::Upsert {
@@ -124,4 +124,19 @@ fn animated_source_keeps_dynamic_styles_in_rust_and_rejects_unmapped_keys() {
     assert_eq!(patches.len(), 1);
     assert!(patches[0].span.is_empty());
     assert_eq!(patches[0].replacement, ".key_spline(0.2, 1.4, 0.8, 1.0)");
+}
+
+#[test]
+fn a_shared_rust_key_can_edit_one_value_and_keeps_its_common_cue_and_easing() {
+    let source = VIEW.replace("0.6f64)\n", "0.6f64)\n                            .set(ferroui_base::layout::Layoutable::width_property(), 64.0)\n");
+    let projection = project_rust(&source, source.find("ferroui_view::animation(").unwrap()).unwrap();
+    let markup = projection.preview_markup();
+    let clip = markup.animations[0].1;
+    let edit = |time, easing| KeyframeEdit::Upsert { previous: Some(0.5), time, value: "72", easing };
+    let changes = clip.patch_keyframe("Width", edit(0.5, "0.25,-0.5,0.6,1.2")).unwrap();
+    assert_eq!(changes.len(), 1);
+    assert_eq!(&source[changes[0].span.range()], "64.0");
+    assert_eq!(changes[0].replacement, "72.0");
+    assert!(clip.patch_keyframe("Width", edit(1.0, "0.25,-0.5,0.6,1.2")).is_err());
+    assert!(clip.patch_keyframe("Width", edit(0.5, "LinearEasing")).is_err());
 }

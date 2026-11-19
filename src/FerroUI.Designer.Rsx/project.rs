@@ -1,4 +1,4 @@
-use crate::animation::{AnimationStyle, projected_styles};
+use crate::animation::{AnimationStyle, RsxAnimationIssue, projected_styles};
 use crate::blocks::{blocks, contains_trivia};
 use crate::catalog::Children;
 use crate::literal;
@@ -57,6 +57,7 @@ pub struct RsxProjection<'a> {
     /// An incomplete projection can still edit its mapped literals in place.
     pub omissions: Vec<String>,
     pub omitted_count: usize,
+    pub animation_issues: Vec<RsxAnimationIssue>,
     inner_trivia: bool,
     styles: BTreeMap<usize, Vec<AnimationStyle>>,
 }
@@ -167,6 +168,7 @@ impl RsxCatalog {
             invocation: block.span,
             omissions: state.omissions,
             omitted_count: state.omitted_count,
+            animation_issues: state.animation_issues,
             inner_trivia,
             styles: state.styles,
         })
@@ -210,6 +212,7 @@ struct State {
     omissions: Vec<String>,
     omitted_count: usize,
     styles: BTreeMap<usize, Vec<AnimationStyle>>,
+    animation_issues: Vec<RsxAnimationIssue>,
 }
 
 impl State {
@@ -281,9 +284,12 @@ impl State {
             let value_span = SourceSpan::new(value_span.start, value_span.end);
             let field = SourceSpan::new(name.span().byte_range().start, value_span.end);
             if owner.is_none() && setter == "styles" && class.xaml_property(None, &setter).is_none() {
-                if let Some((styles, omitted)) = projected_styles(value) {
-                    self.styles.entry(index).or_default().extend(styles);
-                    if omitted == 0 { continue; }
+                if let Some(projected) = projected_styles(value, catalog) {
+                    self.animation_issues.extend(projected.unavailable);
+                    if !projected.styles.is_empty() {
+                        self.styles.entry(index).or_default().extend(projected.styles);
+                        if projected.omitted == 0 { continue; }
+                    }
                 }
                 self.omit(format!("{class}.styles expression"));
                 continue;

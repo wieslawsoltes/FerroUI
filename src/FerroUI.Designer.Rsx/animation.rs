@@ -1,19 +1,45 @@
 //! Original Rust source for a native animation projected from a known view builder.
 
 mod syntax;
+mod value;
 
-use ferroui_designer_animation::{
-    native_key_time, AnimationValue, Easing, KeyframeEdit, ValueKind,
-};
+use ferroui_designer_animation::{native_key_time, Easing, KeyframeEdit, ValueKind};
 use ferroui_designer_core::{SourceSpan, TextPatch};
 use syn::Expr;
+pub(crate) use value::ValueShape;
+use value::ValueSource;
 
 pub(crate) const TRACK_TARGET: u64 = 1;
+
+#[derive(Clone)]
+pub(crate) struct Property {
+    pub(crate) name: String,
+    pub(crate) shape: ValueShape,
+    pub(crate) owner: Option<TargetType>,
+}
+
+#[derive(Clone, PartialEq, Eq)]
+pub(crate) struct TargetType {
+    pub(crate) name: String,
+    pub(crate) namespace: Option<String>,
+}
 
 #[derive(Debug)]
 pub(crate) struct AnimationStyle {
     pub(crate) selector: String,
     pub(crate) clips: Vec<RsxAnimation>,
+}
+
+#[derive(Clone, Debug)]
+pub struct RsxAnimationIssue {
+    pub declaration: SourceSpan,
+    pub reason: &'static str,
+}
+
+pub(crate) struct ProjectedStyles {
+    pub(crate) styles: Vec<AnimationStyle>,
+    pub(crate) unavailable: Vec<RsxAnimationIssue>,
+    pub(crate) omitted: usize,
 }
 
 /// Source mapping for one clip. Its keys address only authored Rust literals.
@@ -27,11 +53,12 @@ pub struct RsxAnimation {
 
 #[derive(Clone, Debug)]
 struct KeySource {
-    property: &'static str,
+    property: String,
     time: f64,
     cue: FloatSource,
-    value: FloatSource,
+    value: ValueSource,
     spline: Option<[FloatSource; 4]>,
+    shared: bool,
     end: usize,
 }
 
@@ -68,6 +95,13 @@ impl FloatSource {
 }
 
 impl RsxAnimation {
+    /// Whether a native track can be edited back to this declaration.
+    pub fn maps_key(&self, property: &str, time: f64, kind: ValueKind) -> bool {
+        self.keys.iter().any(|key| {
+            key.property == property && key.time == time && key.value.value.kind() == kind
+        })
+    }
+
     /// Map a validated native keyframe edit back to its original Rust spelling.
     /// The host checks the accepted document and native keyframe plan first.
     pub fn patch_keyframe(
@@ -92,11 +126,6 @@ impl RsxAnimation {
         if !time.is_finite() || !(0.0..=self.duration).contains(&time) {
             return Err("Choose a key time within the animation duration".into());
         }
-        let AnimationValue::Number(value) =
-            AnimationValue::parse(value, ValueKind::Number).map_err(|error| error.to_string())?
-        else {
-            unreachable!("specified number kind")
-        };
         let easing = Easing::parse(easing).map_err(|error| error.to_string())?;
         let points = match easing {
             Easing::Linear => None,
@@ -104,6 +133,12 @@ impl RsxAnimation {
             _ => return Err("Choose linear or cubic Bézier easing for this Rust keyframe".into()),
         };
         let mapped_time = native_key_time(time).map_err(|error| error.to_string())?;
+        if key.shared
+            && (key.time != mapped_time
+                || points != key.spline.map(|spline| spline.map(|point| point.value)))
+        {
+            return Err("This Rust keyframe shares its cue and easing with other setters. Edit those fields in source.".into());
+        }
         if self.keys.iter().any(|other| {
             other.property == key.property && other.time != key.time && other.time == mapped_time
         }) {
@@ -113,7 +148,7 @@ impl RsxAnimation {
         if key.time != mapped_time {
             key.cue.plan(mapped_time / self.duration, &mut patches);
         }
-        key.value.plan(value, &mut patches);
+        key.value.plan(value, &mut patches)?;
         if let Some(existing) = key.spline {
             for (literal, point) in existing
                 .into_iter()
@@ -133,14 +168,29 @@ impl RsxAnimation {
 }
 
 /// Find the inline native style builders without resolving arbitrary Rust names.
-pub(crate) fn projected_styles(value: &Expr) -> Option<(Vec<AnimationStyle>, usize)> {
+pub(crate) fn projected_styles(
+    value: &Expr,
+    catalog: &crate::RsxCatalog,
+) -> Option<ProjectedStyles> {
     let Expr::Array(array) = value else {
         return None;
     };
-    let styles: Vec<_> = array.elems.iter().filter_map(syntax::style).collect();
-    if styles.is_empty() {
-        return None;
+    let mut result = ProjectedStyles {
+        styles: Vec::new(),
+        unavailable: Vec::new(),
+        omitted: 0,
+    };
+    for expr in &array.elems {
+        match syntax::style(expr, catalog) {
+            Some((style, mut issues)) => {
+                result.omitted += issues.len();
+                result.unavailable.append(&mut issues);
+                if !style.clips.is_empty() {
+                    result.styles.push(style);
+                }
+            }
+            None => result.omitted += 1,
+        }
     }
-    let omitted = array.elems.len() - styles.len();
-    Some((styles, omitted))
+    Some(result)
 }

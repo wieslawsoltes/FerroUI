@@ -9,6 +9,8 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::sync::{Arc, OnceLock};
 use syn::ext::IdentExt;
 
+#[path = "registered/animation.rs"]
+mod animation;
 #[path = "registered/control.rs"]
 mod control;
 pub(crate) use control::Class;
@@ -18,6 +20,7 @@ const KEY: &str = "FerroUI.Designer.Rsx.v1:";
 #[derive(Default)]
 pub struct RsxCatalog {
     registered: Vec<Arc<RegisteredClass>>,
+    animation_properties: BTreeMap<String, crate::animation::Property>,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -84,7 +87,12 @@ impl RsxCatalog {
             .into_values()
             .filter_map(|(class, ambiguous)| (!ambiguous).then_some(class))
             .collect();
-        Self { registered }
+        let animation_properties = animation::properties(catalog, package.as_deref());
+        Self { registered, animation_properties }
+    }
+
+    pub(crate) fn animation_property(&self, path: &str) -> Option<&crate::animation::Property> {
+        self.animation_properties.get(path)
     }
 
     pub(crate) fn rust(&self, path: &syn::Path) -> Option<Class> {
@@ -147,30 +155,7 @@ fn registered(
     package: Option<&str>,
     declaration: Declaration,
 ) -> Option<Arc<RegisteredClass>> {
-    let is_local = package == Some(&control.assembly.crate_name);
-    let path = syn::parse_str::<syn::Path>(&declaration.path).ok()?;
-    let parts = path
-        .segments
-        .iter()
-        .map(|segment| segment.ident.to_string())
-        .collect::<Vec<_>>();
-    let (owner, tail) = parts.split_first()?;
-    if tail.is_empty()
-        || path
-            .segments
-            .iter()
-            .any(|segment| !segment.arguments.is_empty())
-    {
-        return None;
-    }
-    let rust_path = if is_local && (owner == "crate" || owner == &control.assembly.crate_name) {
-        format!("crate::{}", tail.join("::"))
-    } else if owner == &control.assembly.crate_name {
-        format!("::{}", parts.join("::"))
-    } else {
-        return None;
-    };
-
+    let rust_path = assembly_path(&declaration.path, &control.assembly.crate_name, package)?;
     let namespace = control.namespace();
     let base = declaration
         .inherit
@@ -227,6 +212,23 @@ fn registered(
         base,
         properties,
     }))
+}
+
+fn assembly_path(source: &str, crate_name: &str, package: Option<&str>) -> Option<String> {
+    let path = syn::parse_str::<syn::Path>(source).ok()?;
+    if path.segments.len() < 2 || path.segments.iter().any(|segment| !segment.arguments.is_empty()) {
+        return None;
+    }
+    let mut parts = path.segments.iter().map(|segment| segment.ident.to_string());
+    let owner = parts.next()?;
+    let tail = parts.collect::<Vec<_>>().join("::");
+    if package == Some(crate_name) && (owner == "crate" || owner == crate_name) {
+        Some(format!("crate::{tail}"))
+    } else if owner == crate_name {
+        Some(format!("::{owner}::{tail}"))
+    } else {
+        None
+    }
 }
 
 fn inherited_control(catalog: &MarkupCatalog, control: &MarkupControl<'_>) -> Option<String> {

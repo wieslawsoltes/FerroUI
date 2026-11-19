@@ -19,11 +19,14 @@ impl Fixture {
                 "app",
                 json!({"format":2,"name":"Example","crate_name":"example",
                 "metadata":[["FerroUI.Designer.Rsx.v1:Example.Views.StatusCard",
-                    r#"{"path":"crate::views::ReviewCard","properties":{"Caption":"heading"}}"#]],
+                    r#"{"path":"crate::views::ReviewCard","properties":{"Caption":"heading"}}"#],
+                    ["FerroUI.Designer.RsxAnimation.v1:crate::motion::reading_radius", "crate::StatusCard::reading_radius_property"]],
                 "types":[{"name":"StatusCard","namespace":"Example.Views","kind":"class",
                     "rust_path":"::example::StatusCard","object_model":true,
                     "base":"::ferroui_controls::Control","default_constructor":{},
-                    "properties":[{"name":"Caption","value_type":"String","setter":{}}]}]}),
+                    "properties":[{"name":"Caption","value_type":"String","setter":{}}],
+                    "registered":[{"accessor":"reading_radius_property","name":"ReadingRadius","kind":"styled",
+                        "value_type":"::ferroui_base::corner_radius::CornerRadius","registration":"declared"}]}]}),
             ),
             (
                 "dependency",
@@ -54,6 +57,50 @@ impl Fixture {
         schema.register_project(&project);
         RsxCatalog::from_project(&project, &schema, Some("example"))
     }
+}
+
+#[test]
+fn registered_typed_keys_keep_comments_other_invocations_and_opaque_clips() {
+    use ferroui_designer_animation::{KeyframeEdit, ValueKind};
+
+    let source = r##"fn other() { rsx! { TextBlock { text: "🦀" } } }
+    fn view() {
+        let card = rsx! { StackPanel {
+            styles: [ferroui_view::style("#Review")
+                .animation(ferroui_view::animation(ferroui_view::ms(2000))
+                    .key_frame(0.0, |key| key.set(crate::motion::reading_radius(),
+                        ferroui_base::CornerRadius::uniform(0.0)))
+                    .key_frame(0.5, |key| key.set(crate::motion::reading_radius(),
+                        ferroui_base::CornerRadius::new(24.0, /* top-right */ 28.0, 20.0, 16.0)))
+                    .iterations(ferroui_base::animation::IterationCount::new(2)))
+                .animation(make_animation(model))],
+            crate::views::ReviewCard {}
+        }};
+    }"##.replace('\n', "\r\n");
+    let caret = source.find("let card").unwrap() + "let card = ".len();
+    let catalog = Fixture::catalog();
+    let projection = catalog.project(&source, caret).unwrap();
+    assert_eq!(projection.omitted_count, 1);
+    let markup = projection.preview_markup();
+    assert!(markup.source.contains("x:SetterTargetType=\"motion:StatusCard\""));
+    assert!(markup.source.contains("IterationCount=\"2\""));
+    assert!(markup.source.contains("Property=\"ReadingRadius\" Value=\"24,28,20,16\""));
+    let animation = markup.animations[0].1;
+    assert!(animation.maps_key("ReadingRadius", 1.0, ValueKind::CornerRadius));
+    let changes = animation.patch_keyframe("ReadingRadius", KeyframeEdit::Upsert {
+        previous: Some(1.0), time: 1.5, value: "24,30,20,18", easing: "LinearEasing",
+    }).unwrap();
+    let mut updated = source.clone();
+    for patch in changes.into_iter().rev() {
+        updated.replace_range(patch.span.range(), &patch.replacement);
+    }
+    assert_eq!(updated, source.replace("key_frame(0.5,", "key_frame(0.75,")
+        .replace("/* top-right */ 28.0, 20.0, 16.0", "/* top-right */ 30.0, 20.0, 18.0"));
+    assert!(catalog.project(&updated, caret).unwrap().xaml().contains("Value=\"24,30,20,18\""));
+    assert!(animation.patch_keyframe("ReadingRadius", KeyframeEdit::Upsert {
+        previous: Some(0.0), time: 0.0, value: "10,20,30,40", easing: "LinearEasing",
+    }).is_err());
+    assert!(RsxCatalog::built_in().project(&source, caret).unwrap().preview_markup().animations.is_empty());
 }
 
 impl Drop for Fixture {

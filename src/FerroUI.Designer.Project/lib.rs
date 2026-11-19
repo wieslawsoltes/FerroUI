@@ -9,7 +9,7 @@ mod workspace;
 
 pub use discovery::{CargoTarget, DocumentEntry, DocumentKind, ProjectDescriptor, Solution, workspace_documents};
 use std::fmt;
-pub use markup::{BuildMetadata, MarkupCatalog, MarkupControl};
+pub use markup::{BuildMetadata, MarkupAnimationProperty, MarkupCatalog, MarkupControl};
 pub use tasks::{BuildTask, OutputStream, TaskHandle, TaskKind, TaskOutput, TaskStatus};
 pub use toolbox::{ToolboxSnippet, toolbox_snippets};
 pub use uri::{canonical_file_uri, file_path, file_uri, relative_asset_path, relative_asset_uri, resolve_uri};

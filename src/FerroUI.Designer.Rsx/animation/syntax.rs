@@ -1,9 +1,16 @@
-use super::{AnimationStyle, FloatSource, KeySource, RsxAnimation, TRACK_TARGET};
-use ferroui_designer_animation::{native_key_time, AnimationValue, Easing, FillMode, Timeline};
+use super::{
+    AnimationStyle, FloatSource, KeySource, Property, RsxAnimation, RsxAnimationIssue, TargetType,
+    ValueShape, TRACK_TARGET,
+};
+use crate::{tree::escape_xml, RsxCatalog};
+use ferroui_designer_animation::{native_key_time, Easing, FillMode, Repeat, Timeline};
 use ferroui_designer_core::SourceSpan;
 use syn::{spanned::Spanned, Expr, ExprCall, ExprMethodCall, ExprPath, Lit, Pat, UnOp};
 
-pub(super) fn style(expr: &Expr) -> Option<AnimationStyle> {
+pub(super) fn style(
+    expr: &Expr,
+    catalog: &RsxCatalog,
+) -> Option<(AnimationStyle, Vec<RsxAnimationIssue>)> {
     let (factory, methods) = chain(expr)?;
     let Expr::Lit(selector) = view_argument(factory, "style")? else {
         return None;
@@ -21,55 +28,58 @@ pub(super) fn style(expr: &Expr) -> Option<AnimationStyle> {
     {
         return None;
     }
-    let clips: Vec<_> = methods
-        .into_iter()
-        .map(|call| clip(argument(call, "animation")?))
-        .collect::<Option<_>>()?;
-    (!clips.is_empty()).then_some(AnimationStyle { selector, clips })
+    let mut clips = Vec::new();
+    let mut omitted = Vec::new();
+    for call in methods {
+        let declaration = argument(call, "animation")?;
+        if let Some(clip) = clip(declaration, catalog) {
+            clips.push(clip);
+        } else {
+            omitted.push(RsxAnimationIssue {
+                declaration: span(declaration),
+                reason: "This clip contains a computed expression or a Rust builder form without a source mapping.",
+            });
+        }
+    }
+    (!clips.is_empty() || !omitted.is_empty())
+        .then_some((AnimationStyle { selector, clips }, omitted))
 }
 
-fn clip(expr: &Expr) -> Option<RsxAnimation> {
+fn clip(expr: &Expr, catalog: &RsxCatalog) -> Option<RsxAnimation> {
     let (factory, methods) = chain(expr)?;
     let duration = milliseconds(view_argument(factory, "animation")?)?;
     let mut timeline = Timeline::new(duration).ok()?;
     timeline.fill = FillMode::None;
     let mut keys = Vec::new();
+    let mut target_type = None;
     for method in methods {
         match method.method.to_string().as_str() {
             "key_frame" => {
-                let key = keyframe(method, duration)?;
-                if timeline
-                    .track(TRACK_TARGET, key.property)
-                    .is_some_and(|track| track.keyframes.iter().any(|prior| prior.time == key.time))
-                {
-                    return None;
+                for (key, owner) in keyframe(method, duration, catalog)? {
+                    if let Some(owner) = owner {
+                        if target_type.as_ref().is_some_and(|target| *target != owner) {
+                            return None;
+                        }
+                        target_type = Some(owner);
+                    }
+                    record(&mut timeline, &key)?;
+                    keys.push(key);
                 }
-                timeline
-                    .record(
-                        TRACK_TARGET,
-                        key.property,
-                        key.time,
-                        AnimationValue::Number(key.value.value),
-                    )
-                    .ok()?;
-                if let Some(points) = key.spline {
-                    let [x1, y1, x2, y2] = points.map(|point| point.value);
-                    timeline
-                        .track_mut(TRACK_TARGET, key.property)?
-                        .set_easing(key.time, Easing::CubicBezier { x1, y1, x2, y2 })
-                        .ok()?;
-                }
-                keys.push(key);
             }
             "fill_mode" => timeline.fill = fill_mode(argument(method, "fill_mode")?)?,
             "delay" => timeline.delay = milliseconds(argument(method, "delay")?)?,
+            "iterations" => timeline.repeat = repeat(argument(method, "iterations")?)?,
+            "easing" => timeline.easing = easing(argument(method, "easing")?)?,
             _ => return None,
         }
     }
     if keys.is_empty() {
         return None;
     }
-    let xaml = timeline.to_xaml_authored_keys(TRACK_TARGET).ok()?;
+    let mut xaml = timeline.to_xaml_authored_keys(TRACK_TARGET).ok()?;
+    if let Some(target) = target_type {
+        target.annotate(&mut xaml);
+    }
     Some(RsxAnimation {
         declaration: span(expr),
         xaml,
@@ -78,7 +88,51 @@ fn clip(expr: &Expr) -> Option<RsxAnimation> {
     })
 }
 
-fn keyframe(method: &ExprMethodCall, duration: f64) -> Option<KeySource> {
+fn record(timeline: &mut Timeline, key: &KeySource) -> Option<()> {
+    if timeline
+        .track(TRACK_TARGET, &key.property)
+        .is_some_and(|track| track.keyframes.iter().any(|prior| prior.time == key.time))
+    {
+        return None;
+    }
+    timeline
+        .record(
+            TRACK_TARGET,
+            &key.property,
+            key.time,
+            key.value.value.clone(),
+        )
+        .ok()?;
+    if let Some(points) = key.spline {
+        let [x1, y1, x2, y2] = points.map(|point| point.value);
+        timeline
+            .track_mut(TRACK_TARGET, &key.property)?
+            .set_easing(key.time, Easing::CubicBezier { x1, y1, x2, y2 })
+            .ok()?;
+    }
+    Some(())
+}
+
+impl TargetType {
+    fn annotate(&self, xaml: &mut String) {
+        let namespace = self.namespace.as_ref().map_or_else(String::new, |uri| {
+            format!(" xmlns:motion=\"{}\"", escape_xml(uri, Some('"')))
+        });
+        let prefix = if self.namespace.is_some() {
+            "motion:"
+        } else {
+            ""
+        };
+        xaml.insert_str("<Animation".len(), &format!(
+            " xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\"{namespace} x:SetterTargetType=\"{prefix}{}\"", self.name));
+    }
+}
+
+fn keyframe(
+    method: &ExprMethodCall,
+    duration: f64,
+    catalog: &RsxCatalog,
+) -> Option<Vec<(KeySource, Option<TargetType>)>> {
     if method.args.len() != 2 {
         return None;
     }
@@ -115,26 +169,47 @@ fn keyframe(method: &ExprMethodCall, duration: f64) -> Option<KeySource> {
     } else {
         (outer, None)
     };
-    let Expr::Path(receiver) = setter.receiver.as_ref() else {
-        return None;
-    };
-    if frame.subpat.is_some()
-        || frame.by_ref.is_some()
-        || !receiver.path.is_ident(&frame.ident)
-        || setter.method != "set"
-        || setter.turbofish.is_some()
-        || setter.args.len() != 2
-    {
+    if frame.subpat.is_some() || frame.by_ref.is_some() {
         return None;
     }
-    Some(KeySource {
-        property: property(&setter.args[0])?,
-        time: native_key_time(cue.value * duration).ok()?,
-        cue,
-        value: float(&setter.args[1])?,
-        spline,
-        end: span(closure.body.as_ref()).end,
-    })
+    let time = native_key_time(cue.value * duration).ok()?;
+    let end = span(closure.body.as_ref()).end;
+    let mut keys = Vec::new();
+    let mut current = setter;
+    loop {
+        if current.method != "set" || current.turbofish.is_some() || current.args.len() != 2 {
+            return None;
+        }
+        let property = property(&current.args[0], catalog)?;
+        let value = property.shape.read(&current.args[1])?;
+        keys.push((
+            KeySource {
+                property: property.name,
+                time,
+                cue,
+                value,
+                spline,
+                shared: false,
+                end,
+            },
+            property.owner,
+        ));
+        match current.receiver.as_ref() {
+            Expr::Path(receiver)
+                if receiver.qself.is_none() && receiver.path.is_ident(&frame.ident) =>
+            {
+                break
+            }
+            Expr::MethodCall(previous) => current = previous,
+            _ => return None,
+        }
+    }
+    let shared = keys.len() > 1;
+    for (key, _) in &mut keys {
+        key.shared = shared;
+    }
+    keys.reverse();
+    Some(keys)
 }
 
 fn chain(mut expr: &Expr) -> Option<(&ExprCall, Vec<&ExprMethodCall>)> {
@@ -178,24 +253,37 @@ fn fill_mode(expr: &Expr) -> Option<FillMode> {
     }
 }
 
-fn property(expr: &Expr) -> Option<&'static str> {
+fn property(expr: &Expr, catalog: &RsxCatalog) -> Option<Property> {
     let Expr::Call(call) = expr else { return None };
     if !call.args.is_empty() {
         return None;
     }
-    match path(&call.func)?.as_str() {
-        "ferroui_base::Visual::opacity_property" => Some("Opacity"),
-        "ferroui_base::layout::Layoutable::width_property" => Some("Width"),
-        "ferroui_base::layout::Layoutable::height_property" => Some("Height"),
-        "ferroui_base::layout::Layoutable::min_width_property" => Some("MinWidth"),
-        "ferroui_base::layout::Layoutable::min_height_property" => Some("MinHeight"),
-        "ferroui_base::layout::Layoutable::max_width_property" => Some("MaxWidth"),
-        "ferroui_base::layout::Layoutable::max_height_property" => Some("MaxHeight"),
-        _ => None,
-    }
+    let path = path(&call.func)?;
+    let (name, shape) = match path.as_str() {
+        "ferroui_base::Visual::opacity_property" => ("Opacity", ValueShape::NUMBER),
+        "ferroui_base::layout::Layoutable::width_property" => ("Width", ValueShape::NUMBER),
+        "ferroui_base::layout::Layoutable::height_property" => ("Height", ValueShape::NUMBER),
+        "ferroui_base::layout::Layoutable::min_width_property" => ("MinWidth", ValueShape::NUMBER),
+        "ferroui_base::layout::Layoutable::min_height_property" => {
+            ("MinHeight", ValueShape::NUMBER)
+        }
+        "ferroui_base::layout::Layoutable::max_width_property" => ("MaxWidth", ValueShape::NUMBER),
+        "ferroui_base::layout::Layoutable::max_height_property" => {
+            ("MaxHeight", ValueShape::NUMBER)
+        }
+        "ferroui_controls::Border::corner_radius_property" => {
+            ("CornerRadius", ValueShape::CORNER_RADIUS)
+        }
+        _ => return catalog.animation_property(&path).cloned(),
+    };
+    Some(Property {
+        name: name.into(),
+        shape,
+        owner: None,
+    })
 }
 
-fn path(expr: &Expr) -> Option<String> {
+pub(super) fn path(expr: &Expr) -> Option<String> {
     let Expr::Path(ExprPath {
         qself: None, path, ..
     }) = expr
@@ -216,17 +304,44 @@ fn path(expr: &Expr) -> Option<String> {
 
 fn milliseconds(expr: &Expr) -> Option<f64> {
     let Expr::Call(call) = expr else { return None };
-    let Expr::Lit(literal) = view_argument(call, "ms")? else {
+    Some(unsigned(view_argument(call, "ms")?)? as f64 / 1000.0)
+}
+
+fn unsigned(expr: &Expr) -> Option<u64> {
+    let Expr::Lit(literal) = expr else {
         return None;
     };
     let Lit::Int(literal) = &literal.lit else {
         return None;
     };
     matches!(literal.suffix(), "" | "u64").then_some(())?;
-    Some(literal.base10_parse::<u64>().ok()? as f64 / 1000.0)
+    literal.base10_parse().ok()
 }
 
-fn float(expr: &Expr) -> Option<FloatSource> {
+fn repeat(expr: &Expr) -> Option<Repeat> {
+    if path(expr).as_deref() == Some("ferroui_base::animation::IterationCount::INFINITE") {
+        return Some(Repeat::Infinite);
+    }
+    let Expr::Call(call) = expr else { return None };
+    if path(&call.func).as_deref() != Some("ferroui_base::animation::IterationCount::new")
+        || call.args.len() != 1
+    {
+        return None;
+    }
+    Some(Repeat::Count(unsigned(&call.args[0])?))
+}
+
+fn easing(expr: &Expr) -> Option<Easing> {
+    let Expr::Lit(literal) = expr else {
+        return None;
+    };
+    let Lit::Str(value) = &literal.lit else {
+        return None;
+    };
+    Easing::parse(&value.value()).ok()
+}
+
+pub(super) fn float(expr: &Expr) -> Option<FloatSource> {
     let (expr, minus) = match expr {
         Expr::Unary(unary) if matches!(unary.op, UnOp::Neg(_)) => {
             (unary.expr.as_ref(), Some(span(&unary.op)))
