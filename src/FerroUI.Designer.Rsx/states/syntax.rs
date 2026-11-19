@@ -20,7 +20,7 @@ pub(super) fn group(expr: &Expr, catalog: &crate::RsxCatalog) -> Option<RsxState
         },
         declaration: span(expr),
         routes: Vec::new(),
-        values: Default::default(),
+        values: Vec::new(),
     };
     for method in methods {
         if let Some(declaration) = argument(method, "state") {
@@ -30,19 +30,14 @@ pub(super) fn group(expr: &Expr, catalog: &crate::RsxCatalog) -> Option<RsxState
                 name,
                 setters: Vec::new(),
             };
+            let mut values = Vec::new();
             for setter in methods {
                 let (setter, value) = state_setter(setter, catalog)?;
-                group.values.insert(
-                    (
-                        state.name.clone(),
-                        setter.target.clone(),
-                        setter.property.clone(),
-                    ),
-                    value,
-                );
+                values.push(value);
                 state.setters.push(setter);
             }
             group.model.states.push(state);
+            group.values.push(values);
         } else {
             let (route, source) = transition(method)?;
             group.model.transitions.push(route);
@@ -57,6 +52,9 @@ fn state_setter(
     method: &ExprMethodCall,
     catalog: &crate::RsxCatalog,
 ) -> Option<(StateSetter, ValueSource)> {
+    if method.turbofish.is_some() {
+        return None;
+    }
     let args = method.args.iter().collect::<Vec<_>>();
     let (target, property, value) = match (method.method.to_string().as_str(), args.as_slice()) {
         ("set", [property, value]) => (String::new(), *property, *value),
@@ -76,7 +74,7 @@ fn state_setter(
 }
 
 fn transition(method: &ExprMethodCall) -> Option<(StateTransition, RouteSource)> {
-    if method.method != "transition" || method.args.len() != 4 {
+    if method.method != "transition" || method.turbofish.is_some() || method.args.len() != 4 {
         return None;
     }
     let from = match &method.args[0] {

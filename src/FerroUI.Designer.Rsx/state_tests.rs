@@ -71,3 +71,18 @@ fn visual_states_project_native_routes_and_retain_original_rust_sources() {
     edit.transitions.pop();
     assert!(map.patch_model(&edit).is_err());
 }
+
+#[test]
+fn an_instant_rust_route_retains_its_authored_duration() {
+    let source = r#"rsx! { Border {
+        visual_states: [ferroui_view::visual_state_group("Review")
+            .state(ferroui_view::visual_state("Ready").set(ferroui_base::Visual::opacity_property(), 0.5))
+            .transition(None, "Ready", ferroui_view::ms(0), "LinearEasing")]
+    } }"#;
+    let projection = project_rust(source, 0).unwrap();
+    let markup = projection.preview_markup();
+    let document = Document::new(markup.source).unwrap();
+    let [state] = VisualStateGroup::read(&document).try_into().unwrap();
+    assert_eq!(state.transitions[0].duration, 0.0);
+    assert!(markup.state_groups[0].1.patch_model(&state).unwrap().is_empty());
+}

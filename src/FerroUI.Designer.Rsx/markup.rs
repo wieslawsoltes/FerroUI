@@ -61,7 +61,7 @@ impl RsxSourceMap {
 
     pub fn state_group(&self, owner_offset: usize, name: &str) -> Option<&RsxStateGroup> {
         self.state_groups.iter().find_map(|(offset, source)| {
-            (*offset == owner_offset && source.model.name == name).then_some(source)
+            (*offset == owner_offset && source.name() == name).then_some(source)
         })
     }
 }

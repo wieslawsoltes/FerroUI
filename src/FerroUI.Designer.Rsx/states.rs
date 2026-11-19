@@ -9,7 +9,7 @@ use ferroui_designer_animation::{native_key_time, Easing, VisualStateGroup};
 use ferroui_designer_core::{NodeId, SourceSpan, TextPatch};
 use ferroui_designer_language::{LineIndex, Range};
 use serde::Serialize;
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeSet;
 use syn::Expr;
 
 pub(crate) struct ProjectedStates {
@@ -20,10 +20,10 @@ pub(crate) struct ProjectedStates {
 
 #[derive(Clone, Debug)]
 pub struct RsxStateGroup {
-    pub model: VisualStateGroup,
+    model: VisualStateGroup,
     pub declaration: SourceSpan,
     routes: Vec<RouteSource>,
-    values: BTreeMap<(String, String, String), ValueSource>,
+    values: Vec<Vec<ValueSource>>,
 }
 
 #[derive(Clone, Debug)]
@@ -50,6 +50,10 @@ struct RsxTransitionSource {
 }
 
 impl RsxStateGroup {
+    pub fn name(&self) -> &str {
+        &self.model.name
+    }
+
     pub fn source_ranges(&self, owner: NodeId, index: &LineIndex) -> Option<RsxStateSource> {
         Some(RsxStateSource {
             owner,
@@ -92,25 +96,20 @@ impl RsxStateGroup {
             return Err(shape_error());
         }
         let mut patches = Vec::new();
-        for state in &self.model.states {
+        for (state, sources) in self.model.states.iter().zip(&self.values) {
             let next = model
                 .states
                 .iter()
                 .find(|next| next.name == state.name && next.setters.len() == state.setters.len())
                 .ok_or_else(shape_error)?;
-            for setter in &state.setters {
+            for (setter, source) in state.setters.iter().zip(sources) {
                 let value = next
                     .setters
                     .iter()
                     .find(|item| item.target == setter.target && item.property == setter.property)
                     .ok_or_else(shape_error)?;
                 if value.value != setter.value {
-                    self.values[&(
-                        state.name.clone(),
-                        setter.target.clone(),
-                        setter.property.clone(),
-                    )]
-                        .plan(&value.value, &mut patches)?;
+                    source.plan(&value.value, &mut patches)?;
                 }
             }
         }
