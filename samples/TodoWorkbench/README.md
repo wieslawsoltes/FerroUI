@@ -77,3 +77,10 @@ or open the same Rust document in app-hosted design. Both use the control's
 native XAML registration. The **Empty queue** and **One task** fixtures mount
 Rust views from the built binary. **Source preview** follows the current editor
 buffer. A Cargo build updates the Rust fixture factories.
+
+Open [review_states.rs](app_preview/review_states.rs) in App Preview and choose
+**Interactive review**. Select **Review · Queued → Ready** in the animation
+picker. Scrub the live card's width and corner radius, or use the pencil to
+change the Rust route's duration and easing. Stop the playhead, then click
+**Queued**, **Ready**, and **Reset** to use the compiled fixture's state
+handlers. [App Preview state-route workflow](../../docs/designer/vscode/motion.md#scrub-a-rust-state-route-in-app-preview)
