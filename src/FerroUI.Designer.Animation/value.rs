@@ -106,6 +106,14 @@ impl AnimationValue {
             Self::Discrete(_) => ValueKind::Discrete,
         }
     }
+
+    pub(crate) fn relative_unit(&self) -> Option<RelativeUnit> {
+        match self {
+            Self::RelativePoint { unit, .. } | Self::RelativeScalar { unit, .. } => Some(*unit),
+            _ => None,
+        }
+    }
+
     pub fn validate(&self) -> Result<()> {
         if let Self::RelativePoint {
             x,

@@ -12,6 +12,15 @@ pub struct CurveWindow {
 pub struct CurvePoint {
     pub time: f64,
     pub value: f64,
+    /// The selected unit was inactive since the previous sample.
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    pub break_before: bool,
+}
+
+impl CurvePoint {
+    pub const fn new(time: f64, value: f64) -> Self {
+        Self { time, value, break_before: false }
+    }
 }
 
 impl CurveWindow {
@@ -64,6 +73,42 @@ fn subdivide(start: f64, end: f64, segments: usize, times: &mut Vec<f64>) {
 mod tests {
     use super::*;
     use crate::{AnimationValue::Number, Easing, Timeline};
+
+    #[test]
+    fn relative_curves_keep_units_and_velocity_segments_separate() {
+        use crate::{AnimationValue, CurveChannel, CurveMetric, RelativeUnit, ValueKind};
+        let mut timeline = Timeline::new(4.0).unwrap();
+        for (time, value) in [(0.0, "0%,10%"), (1.0, "100%,20%"), (2.0, "24,40"),
+            (3.0, "25%,70%"), (4.0, "75%,90%")]
+        {
+            timeline.record(1, "Origin", time, AnimationValue::parse(value, ValueKind::RelativePoint).unwrap()).unwrap();
+        }
+        let compiled = timeline.compile().unwrap();
+        let window = CurveWindow { start: 0.0, end: 4.0 };
+        let percent = compiled.curve(1, "Origin", CurveChannel::PercentX, window).unwrap();
+        assert!(percent.iter().all(|p| !(1.5..2.5).contains(&p.time)));
+        assert!(percent.contains(&CurvePoint::new(0.5, 50.0)));
+        assert!(percent.contains(&CurvePoint { break_before: true, ..CurvePoint::new(2.5, 25.0) }));
+        let absolute = compiled.curve(1, "Origin", CurveChannel::AbsoluteY, window).unwrap();
+        assert!(absolute.iter().all(|p| (1.5..2.5).contains(&p.time) && p.value == 40.0));
+        let velocity = CurveMetric::Velocity.measure(percent).unwrap();
+        assert!(velocity.iter().all(|p| !(1.5..2.5).contains(&p.time)));
+        let resumed = velocity.iter().find(|p| 2.5 < p.time).unwrap();
+        assert!(resumed.break_before);
+        assert!(velocity.iter().any(|p| p.time < 1.0 && (p.value - 100.0).abs() < 1e-7));
+        assert!(compiled.curve(1, "Origin", CurveChannel::AbsoluteX, CurveWindow { start: 0.0, end: 1.0 }).is_err());
+
+        let mut scalar = Timeline::new(2.0).unwrap();
+        let value = AnimationValue::RelativeScalar { scalar: 12.0, unit: RelativeUnit::Absolute };
+        scalar.record(1, "Radius", 0.0, value.clone()).unwrap();
+        let track = scalar.track(1, "Radius").unwrap();
+        assert_eq!(CurveChannel::for_track(track, 2.0), [CurveChannel::Absolute, CurveChannel::Percent]);
+        scalar.record(1, "Radius", 2.0, value).unwrap();
+        let track = scalar.track(1, "Radius").unwrap();
+        assert_eq!(CurveChannel::for_track(track, 2.0), [CurveChannel::Absolute]);
+        assert!(scalar.compile().unwrap().curve(1, "Radius", CurveChannel::Absolute, CurveWindow { start: 0.0, end: 2.0 })
+            .unwrap().iter().all(|p| p.value == 12.0));
+    }
 
     #[test]
     fn color_curves_project_the_interpolated_rgba_components() {
@@ -148,10 +193,7 @@ mod tests {
             .unwrap();
         assert_eq!(
             graph[0],
-            CurvePoint {
-                time: 0.0,
-                value: 0.1
-            }
+            CurvePoint::new(0.0, 0.1)
         );
         assert!(graph
             .iter()

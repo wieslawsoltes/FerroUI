@@ -1,5 +1,5 @@
 use super::curve_value;
-use crate::{CurveChannel, CurvePoint, CurveWindow};
+use crate::{AnimationError, CurveChannel, CurvePoint, CurveWindow};
 use ferroui_base::animation::{Animatable, Animation};
 use ferroui_base::{BoxedValue, FerroProperty};
 
@@ -30,17 +30,10 @@ pub fn sample_curve_track(
     let values = animation
         .sample_track_for_preview(target, property, &positions)
         .map_err(|error| error.to_string())?;
-    times
-        .into_iter()
-        .zip(values)
-        .map(|(time, value)| {
-            let value = curve_value::value(&value)
-                .and_then(|value| channel.project(&value))
-                .ok_or("The native animation does not produce a finite sample for the selected channel")?;
-            Ok(CurvePoint { time, value })
-        })
-        .collect::<Result<_, &str>>()
-        .map_err(str::to_owned)
+    channel.project_samples(times.into_iter().zip(values).map(|(time, value)| {
+        curve_value::value(&value).map(|value| (time, value))
+            .ok_or_else(|| AnimationError("The native animation does not produce a sample for the selected channel".into()))
+    })).map_err(|error| error.to_string())
 }
 
 /// Read one effective value from the same native animator used to draw the curve.

@@ -1,11 +1,22 @@
-use crate::AnimationValue;
+use crate::{AnimationValue, RelativeUnit};
 use ferroui_base::media::{Color, IBrush};
-use ferroui_base::{BoxedValue, CornerRadius, Point, Rect, Size, Thickness, Vector};
+use ferroui_base::{
+    BoxedValue, CornerRadius, Point, Rect, RelativePoint, RelativeScalar, Size, Thickness, Vector,
+};
 use std::rc::Rc;
 
 impl From<Color> for AnimationValue {
     fn from(color: Color) -> Self {
         Self::from_argb8([color.a, color.r, color.g, color.b])
+    }
+}
+
+impl From<ferroui_base::RelativeUnit> for RelativeUnit {
+    fn from(unit: ferroui_base::RelativeUnit) -> Self {
+        match unit {
+            ferroui_base::RelativeUnit::Absolute => Self::Absolute,
+            ferroui_base::RelativeUnit::Relative => Self::Relative,
+        }
     }
 }
 
@@ -27,6 +38,19 @@ pub(super) fn value(sample: &BoxedValue) -> Option<AnimationValue> {
     }
     if let Some(&Point { x, y }) = native.downcast_ref::<Point>() {
         return Some(AnimationValue::Point { x, y });
+    }
+    if let Some(&RelativePoint { point, unit }) = native.downcast_ref::<RelativePoint>() {
+        return Some(AnimationValue::RelativePoint {
+            x: point.x,
+            y: point.y,
+            unit: unit.into(),
+        });
+    }
+    if let Some(&RelativeScalar { scalar, unit }) = native.downcast_ref::<RelativeScalar>() {
+        return Some(AnimationValue::RelativeScalar {
+            scalar,
+            unit: unit.into(),
+        });
     }
     if let Some(&Vector { x, y }) = native.downcast_ref::<Vector>() {
         return Some(AnimationValue::Vector { x, y });

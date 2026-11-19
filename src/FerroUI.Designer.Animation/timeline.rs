@@ -627,16 +627,11 @@ impl CompiledTimeline {
             })
             .ok_or_else(|| AnimationError("Choose an active track and one of its curve channels".into()))?;
         let times = window.sample_times(self.0.duration, track.keyframes.iter().map(|key| key.time))?;
-        times.into_iter()
-            .map(|time| {
-                let Some(value) = track.sample_validated(time, self.0.duration, self.0.fill)?
-                    .and_then(|sample| channel.project(&sample))
-                else {
-                    return Err(AnimationError("The track has no finite sample for the selected channel".into()));
-                };
-                Ok(CurvePoint { time, value })
-            })
-            .collect()
+        channel.project_samples(times.into_iter().map(|time| {
+            let value = track.sample_validated(time, self.0.duration, self.0.fill)?
+                .ok_or_else(|| AnimationError("The track has no sample at the selected time".into()))?;
+            Ok((time, value))
+        }))
     }
     /// Display position in the authored iteration before global easing is applied.
     pub fn playback_position(&self, elapsed: f64) -> Result<f64> {
