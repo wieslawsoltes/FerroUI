@@ -1933,7 +1933,7 @@
       ]
     },
     "InfoBadge": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/InfoBadge.xaml",
         "samples/WinUIGallery/examples.rs",
@@ -1969,7 +1969,7 @@
           "name": "info_badge_navigation_modes_preserve_the_same_notification_and_selection"
         }
       ],
-      "notes": "All four original examples have native compositions: NavigationViewItem.InfoBadge retains Home/Account/Inbox, count 5, automation name, opacity and pane-mode handlers; severity ControlThemes retain source keys; the Refresh-button composition retains its glyph; NumberBox changes retain the integer-conversion guard. ToggleSwitch and page-property bindings are explicit existing-control/Rust adaptations. Style-to-Theme migration is audited; exact visuals, installed fonts, general XAML behavior and OS accessibility acceptance remain partial.",
+      "notes": "All four source examples use native InfoBadge with the handlers of InfoBadgePage.xaml.cs in Rust (feedback_samples.rs): the badge of the NavigationView's Inbox item (Value 5, its automation name) with ToggleInfoBadgeOpacity_Toggled and NavigationViewDisplayMode_SelectionChanged (LeftExpanded, LeftCompact and Top with the pane's state); the icon, value and dot styles with InfoBadgeStyleComboBox_SelectionChanged, which sets the Attention, Informational, Success or Critical control themes of the WinUI theme's InfoBadge dictionary (Style is Theme); the badge with its critical background and icon inside the refresh button; and the dynamic value with ValueNumberBox_ValueChanged and its integer guard. The page's InfoBadgeOpacity, an x:Bind of the page's own property, is the code behind in Rust (the source's Toggled at load sets it to 1); the options' Headers are composed, IsOn is IsChecked, SelectedValue is the index of the source's value, and SymbolThemeFontFamily is its value, Segoe Fluent Icons. The glyphs need the platform's symbol font.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/InfoBadge/InfobadgeEmbeddedNavigationview.txt",

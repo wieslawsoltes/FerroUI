@@ -487,6 +487,7 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 | XamlResources | 4 of 4 | ported | `binding_samples.rs` | `binding_samples_tests.rs` |
 | XamlStyles | 2 of 2 | ported | `Pages/XamlStyles.xaml` (no code-behind upstream) | `binding_samples_tests.rs` |
 | Pivot | 1 of 1 | ported | `Pages/Pivot.xaml` (no code-behind upstream) | `layout_samples_tests.rs` |
+| InfoBadge | 4 of 4 | ported | `feedback_samples.rs` | `feedback_samples_tests.rs` |
 | ProgressRing | 2 of 2 | ported | `feedback_samples.rs` | `feedback_samples_tests.rs`, `x_bind_tests.rs` |
 | RatingControl | 2 of 2 | ported | `feedback_samples.rs` | `feedback_samples_tests.rs`, `x_bind_tests.rs` |
 | ToolTip | 3 of 3 | ported | `status_samples.rs` (no code-behind upstream) | `status_samples_tests.rs` |
