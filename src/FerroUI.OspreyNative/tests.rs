@@ -208,7 +208,8 @@ fn a_malformed_scene_primitive_refuses_the_envelope() {
     let scene = |shapes: &str| {
         format!(
             r#"{{"version":1,"state":"","requests":[],"patches":[{{"key":"root","revision":1,"node":
-            {{"kind":"scene","width":10.0,"height":10.0,"zoom":1.0,"atlas":[],"shapes":{shapes},"streamed":0,"event":0}}}}]}}"#
+            {{"kind":"scene","width":10.0,"height":10.0,"zoom":1.0,"atlas":[],"shapes":{shapes},
+            "streamed":0,"event":0}}}}]}}"#
         )
     };
     assert!(protocol::parse(&scene("[[1,5.0,5.0,2.0,4278190335,0]]")).is_ok());
@@ -224,7 +225,8 @@ fn a_malformed_scene_primitive_refuses_the_envelope() {
 
 #[test]
 fn scene_primitives_decode_in_depth_order() {
-    let node = json!({"kind": "scene", "width": 100.0, "height": 50.0, "zoom": 1.0, "atlas": [], "streamed": 0, "event": 0,
+    let node = json!({"kind": "scene", "width": 100.0, "height": 50.0, "zoom": 1.0, "atlas": [],
+    "streamed": 0, "event": 0,
     "shapes": [
         [1, 5.0, 5.0, 2.0, 0xFF0000FFi64, 3],
         [0, 10.0, 10.0, 4.0, 2.0, 0.0, 0x00FF00FFi64, 1],
