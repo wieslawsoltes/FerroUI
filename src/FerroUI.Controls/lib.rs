@@ -320,6 +320,12 @@ mod info_badge_tests;
 mod info_bar_tests;
 #[cfg(test)]
 mod progress_ring_tests;
+// WinUI's Pivot (docs/porting/winui-calculator-gaps.md, section 7.1).
+mod pivot;
+pub use pivot::{
+    Pivot, PivotHeaderFocusVisualPlacement, PivotHeaderItem, PivotHeaderPanel, PivotItem, PivotItemEventArgs, PivotPanel,
+    PivotSlideInAnimationGroup,
+};
 // WinUI's title bar (docs/porting/winui-controls.md).
 mod title_bar;
 pub use title_bar::TitleBar;

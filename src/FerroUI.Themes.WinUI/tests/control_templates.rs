@@ -297,6 +297,9 @@ control_tests! {
     camera_capture_ui => "CameraCaptureUI";
     media_transport_controls => "MediaTransportControls";
     pager_control => "PagerControl";
+    pivot => "Pivot";
+    pivot_header_item => "PivotHeaderItem";
+    pivot_item => "PivotItem";
     pips_pager => "PipsPager";
     refresh_container => "RefreshContainer";
     refresh_visualizer => "RefreshVisualizer";

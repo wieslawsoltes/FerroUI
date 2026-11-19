@@ -84,6 +84,7 @@
         <ResourceDictionary><ResourceDictionary.MergedDictionaries><MergeResourceInclude Source="/Resources/PersonPicture_themeresources.xaml" /></ResourceDictionary.MergedDictionaries></ResourceDictionary>
         <ResourceDictionary><ResourceDictionary.MergedDictionaries><MergeResourceInclude Source="/Resources/PagerControl_themeresources.xaml" /></ResourceDictionary.MergedDictionaries></ResourceDictionary>
         <ResourceDictionary><ResourceDictionary.MergedDictionaries><MergeResourceInclude Source="/Resources/RichEditBox_themeresources.xaml" /></ResourceDictionary.MergedDictionaries></ResourceDictionary>
+        <ResourceDictionary><ResourceDictionary.MergedDictionaries><MergeResourceInclude Source="/Resources/Pivot_themeresources.xaml" /></ResourceDictionary.MergedDictionaries></ResourceDictionary>
         <ResourceDictionary><ResourceDictionary.MergedDictionaries><MergeResourceInclude Source="/Resources/SwipeControl_themeresources.xaml" /></ResourceDictionary.MergedDictionaries></ResourceDictionary>
         <MergeResourceInclude Source="/Resources/MaterialColors.xaml" />
         <MergeResourceInclude Source="/Resources/MaterialTypography.xaml" />
