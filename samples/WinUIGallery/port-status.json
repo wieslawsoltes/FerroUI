@@ -1760,18 +1760,23 @@
       "examples": []
     },
     "XamlResources": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/XamlResources.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/binding_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/binding_samples_tests.rs",
+          "name": "xaml_resources_resolve_at_each_level_and_follow_the_theme"
         }
       ],
-      "notes": "Static and dynamic resource examples use the shared resource dictionary; broader WinUI lookup rules remain tracked. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "All four source examples with the code behind of XamlResourcesPage.xaml.cs in Rust (binding_samples.rs), and the page's texts: the nested application-level (PrimaryColor), page-level (HighlightBrush, FontColor) and control-level (BackgroundColor, Description) resources; the same theme brushes read with StaticResource, once at load, and with ThemeResource, which follows the theme; the ThemeDictionaries of the third example (Default and Dark) with their brushes, text and image (the source's Light_Image.png and Dark_Image.png, added to the embedded assets and set for the example's theme and again when it changes); and the constructor's one-time lookup of AccentFillColorDefaultBrush and TextOnAccentFillColorPrimaryBrush in the application's resources beside SetThemeResourceBinding of the same keys, a resource observable of the element bound to Background and Foreground. ThemeResource is DynamicResource; the StackPanels and Grids with padding and corners are Borders (ControlCornerRadius is 4), a Color resource set as a Background is the Color of a SolidColorBrush, the headings' SubtitleHeadingTextBlockStyle is the theme's SubtitleTextBlockStyle with heading level 2, and the Color page link (Hyperlink_Click) is a HyperlinkButton that the gallery wires (examples::GALLERY_LINKS).",
       "examples": []
     },
     "XamlStyles": {

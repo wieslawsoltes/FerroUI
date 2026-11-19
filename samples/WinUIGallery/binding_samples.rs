@@ -10,17 +10,28 @@
 //! The code behind of the Templates page (`TemplatesPage.xaml.cs`) is here too: the data template
 //! the constructor creates in code, and `LayoutSelector_SelectionChanged`, whose two
 //! ItemsPanelTemplates are styles of the list that a class switches.
+//!
+//! The code behind of the XamlResources page (`XamlResourcesPage.xaml.cs`) is here too: the
+//! one-time lookup of two brushes of the application, their `SetThemeResourceBinding`, and the
+//! image of the page's theme dictionaries.
 
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::data::ReflectionBinding;
 use ferroui_base::layout::Orientation;
 use ferroui_base::metadata::{MarkupType, MarkupTyped};
+use ferroui_base::controls::{ResourceHostRef, ResourceKey};
+use ferroui_base::data::BindingPriority;
+use ferroui_base::media::{IBrush, IImage};
+use ferroui_base::metadata::from_markup_value;
+use ferroui_base::reactive::ObservableExt;
+use ferroui_base::styling::ThemeVariant;
 use ferroui_base::utilities::{CultureInfo, DateTime, DateTimeOffset};
 use ferroui_base::{ferro_markup_type, BoxedValue, Ref};
 use ferroui_controls::primitives::SelectingItemsControl;
 use ferroui_controls::templates::FuncDataTemplate;
 use ferroui_controls::{
-    ComboBox, Control, DatePicker, FontIcon, ItemsSource, ListBox, RadioButtons, StackPanel, TextBlock,
+    Application, Border, ComboBox, Control, DatePicker, FontIcon, Grid, Image, ItemsSource, ListBox, RadioButtons,
+    StackPanel, TextBlock,
 };
 use std::rc::Rc;
 
@@ -31,6 +42,7 @@ pub(crate) fn wire(page_id: &str, root: &Ref<Control>) {
             wire_binding(root);
         }
         "Templates" => wire_templates(root),
+        "XamlResources" => wire_xaml_resources(root),
         _ => {}
     }
 }
@@ -239,4 +251,80 @@ fn wire_templates(root: &Ref<Control>) {
             _ => {}
         }
     });
+}
+
+// --- XamlResources ------------------------------------------------------------------------------
+
+/// The two brushes of the fourth XamlResources example: the Background of each Border and the
+/// Foreground of its text.
+pub(crate) const ACCENT_BRUSHES: (&str, &str) =
+    ("AccentFillColorDefaultBrush", "TextOnAccentFillColorPrimaryBrush");
+
+/// The source's `ImageSource` of the third example's theme dictionaries: Light_Image.png in the
+/// Default (light) dictionary, Dark_Image.png in the Dark one.
+pub(crate) fn theme_image_uri(theme: Option<&ThemeVariant>) -> &'static str {
+    let dark = theme
+        .is_some_and(|theme| *theme == ThemeVariant::dark() || theme.inherit_variant() == Some(ThemeVariant::dark()));
+    if dark {
+        "ferres://WinUIGallery/Assets/SampleMedia/Dark_Image.png"
+    } else {
+        "ferres://WinUIGallery/Assets/SampleMedia/Light_Image.png"
+    }
+}
+
+fn brush(value: Option<BoxedValue>) -> Option<Rc<dyn IBrush>> {
+    from_markup_value::<Rc<dyn IBrush>>(&value)
+}
+
+fn update_theme_image(root: &Ref<Control>) {
+    let host = root.get_control::<Grid>("ThemeDictionaryHost");
+    let image = crate::assets::load_bitmap(theme_image_uri(host.actual_theme_variant().as_ref()))
+        .ok()
+        .map(|bitmap| Rc::new(bitmap) as Rc<dyn IImage>);
+    root.get_control::<Image>("ThemeImage").set_source(image);
+}
+
+/// The constructor of `XamlResourcesPage.xaml.cs`: the one-time lookup reads the two brushes of
+/// the application once (`Application.Current.Resources[key]`), and `SetThemeResourceBinding`
+/// binds the other Border's Background and its text's Foreground to the same resources, so they
+/// follow the theme (the code equivalent of `{ThemeResource}`, a resource observable of the
+/// element here). The ThemeDictionaries' image follows the theme of its example.
+fn wire_xaml_resources(root: &Ref<Control>) {
+    let (background, foreground) = ACCENT_BRUSHES;
+    if let Some(application) = Application::current() {
+        let theme = application.actual_theme_variant();
+        let lookup = |key: &str| {
+            brush(application.try_get_resource(&ResourceKey::from(key), theme.as_ref()).flatten())
+        };
+        root.get_control::<Border>("OneTimeLookupBorder")
+            .set_background(lookup(background));
+        root.get_control::<TextBlock>("OneTimeLookupText")
+            .set_foreground(lookup(foreground));
+    }
+    let border = root.get_control::<Border>("ThemeResourceBindingBorder");
+    border.bind(
+        Border::background_property(),
+        ResourceHostRef::from(&border)
+            .resource_observable(background, None)
+            .select(brush),
+        BindingPriority::LocalValue,
+    );
+    let text = root.get_control::<TextBlock>("ThemeResourceBindingText");
+    text.bind(
+        TextBlock::foreground_property(),
+        ResourceHostRef::from(&text)
+            .resource_observable(foreground, None)
+            .select(brush),
+        BindingPriority::LocalValue,
+    );
+
+    update_theme_image(root);
+    let host = root.get_control::<Grid>("ThemeDictionaryHost");
+    let weak_root = root.downgrade();
+    host.actual_theme_variant_changed(move || {
+        if let Some(root) = weak_root.upgrade() {
+            update_theme_image(&root);
+        }
+    })
+    .detach();
 }

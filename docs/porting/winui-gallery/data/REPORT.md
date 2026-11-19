@@ -54,8 +54,8 @@ A verified enum does not verify its consuming controls, installed fonts, inherit
 | Page state | Count |
 |---|---:|
 | pending | 35 |
-| partial | 42 |
-| ported | 49 |
+| partial | 41 |
+| ported | 50 |
 | verified | 0 |
 
 Partial pages exercise reviewed native subsets; a ported page has a native adaptation, or a recorded reason why it cannot have one, for every catalog example (`samples/WinUIGallery/port-status.json`). Neither state claims rendering parity.
@@ -185,7 +185,7 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | Windowing | Windowing | pending | 2 |
 | WrapPanel | Layout | partial | 2 |
 | XamlCompInterop | Motion | pending | 5 |
-| XamlResources | Fundamentals | partial | 4 |
+| XamlResources | Fundamentals | ported | 4 |
 | XamlStyles | Fundamentals | ported | 2 |
 | XamlUICommand | Menus & toolbars | pending | 1 |
 

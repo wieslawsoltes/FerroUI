@@ -93,6 +93,14 @@
     {
       "path": "WinUIGallery/Samples/Typography/TypographyPage.xaml.cs",
       "sha256": "7389d98ea7224a54cd5faca80a350afedab965b3f4680c41eedd3475e90fa3a6"
+    },
+    {
+      "path": "WinUIGallery/Samples/XamlResources/XamlResourcesPage.xaml",
+      "sha256": "0edfa6c8cf14448cc6a18c838633cf43fa6c9adc47af27fb300f2c4701a98962"
+    },
+    {
+      "path": "WinUIGallery/Samples/XamlResources/XamlResourcesPage.xaml.cs",
+      "sha256": "d62d272b4f97dc0c8fed72df0bb6800d928129333385acbbe5e5f04f634e6d9c"
     }
   ],
   "assembly": "WinUIGallery",
@@ -1494,6 +1502,18 @@
       ]
     },
     {
+      "source": "WinUIGallery/Assets/SampleMedia/Dark_Image.png",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/Dark_Image.png",
+      "sha256": "8b50c507a684b7a2fd43b20c20abb55a25bdad3e612b22229d2e6ca52cf266dc",
+      "size_bytes": 321331,
+      "registered_paths": [
+        "Assets/SampleMedia/Dark_Image.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/Dark_Image.png"
+      ]
+    },
+    {
       "source": "WinUIGallery/Assets/SampleMedia/LandscapeImage1.jpg",
       "path": "samples/WinUIGallery/Assets/SampleMedia/LandscapeImage1.jpg",
       "sha256": "e95f378499f06d2ec43b6633b8f81971961d15700f26566096d9b446863fc188",
@@ -1647,6 +1667,18 @@
       ],
       "source_uris": [
         "ms-appx:///Assets/SampleMedia/LandscapeImage9.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/Light_Image.png",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/Light_Image.png",
+      "sha256": "abfc91c2c9a44389d9ba40ffadcc2e3e231398672651f12667cf5fa7891b9414",
+      "size_bytes": 313819,
+      "registered_paths": [
+        "Assets/SampleMedia/Light_Image.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/Light_Image.png"
       ]
     },
     {

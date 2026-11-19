@@ -21,6 +21,9 @@ pub(crate) fn start() -> ferroui_controls::testing::UnitTestApplicationScope {
         "SystemFillColorSuccessBrush",
         "SystemFillColorCautionBrush",
         "SystemFillColorCriticalBrush",
+        // The StaticResources of the XamlResources page's second example.
+        "SolidBackgroundFillColorBaseBrush",
+        "TextFillColorPrimaryBrush",
     ] {
         application.resources().add(
             ferroui_base::controls::ResourceKey::from(name),
@@ -981,8 +984,8 @@ fn embedded_control_images_resolve_original_uri_paths_and_exact_bytes() {
     crate::assets::register();
     assert_eq!(
         crate::assets_data::ASSETS.len(),
-        143,
-        "108 control images, 25 sample media files, eight design images and two explicit source-path case aliases"
+        145,
+        "108 control images, 27 sample media files, eight design images and two explicit source-path case aliases"
     );
     for entry in CATALOG {
         let path = entry
@@ -1020,7 +1023,7 @@ fn embedded_sample_media_resolve_original_paths_and_exact_bytes() {
         .iter()
         .filter(|(path, _)| path.starts_with("Assets/SampleMedia/"))
         .collect();
-    assert_eq!(media.len(), 25);
+    assert_eq!(media.len(), 27);
     for (path, expected) in media {
         let uri = UriRef::from(UriRef::parse_absolute(&format!("ferres://WinUIGallery/{path}")).unwrap());
         let mut actual = Vec::new();

@@ -122,3 +122,77 @@ fn xaml_styles_apply_the_keyed_and_the_implicit_style() {
     );
     window.close();
 }
+
+#[test]
+fn xaml_resources_resolve_at_each_level_and_follow_the_theme() {
+    use crate::binding_samples::{theme_image_uri, ACCENT_BRUSHES};
+    use ferroui_base::controls::ResourceKey;
+    use ferroui_base::media::immutable::ImmutableSolidColorBrush;
+    use ferroui_base::media::{Color, IBrush};
+    use ferroui_base::styling::ThemeVariant;
+    use ferroui_controls::{Application, Border, Grid, Image, Window};
+    fn color(brush: Option<Rc<dyn IBrush>>) -> Option<Color> {
+        brush.and_then(|brush| brush.as_solid_color_brush().map(|brush| brush.color()))
+    }
+    let _application = start();
+    let root = page("XamlResources");
+    // The application-, page- and control-level resources of the first example.
+    assert_eq!(
+        color(root.get_control::<Border>("AppLevelPanel").background()),
+        Some(Color::from_rgb(0x00, 0x78, 0xd4))
+    );
+    assert_eq!(
+        color(root.get_control::<Border>("PageLevelPanel").background()),
+        Some(Color::from_rgb(0xa9, 0x4d, 0xc1))
+    );
+    assert_eq!(
+        color(root.get_control::<TextBlock>("PageLevelText").foreground()),
+        Some(Color::from_rgb(0xff, 0xff, 0xff))
+    );
+    assert_eq!(
+        color(root.get_control::<Border>("ControlLevelPanel").background()),
+        Some(Color::from_rgb(0xe2, 0x24, 0x1a))
+    );
+    assert_eq!(text(&root, "ControlLevelText").as_deref(), Some("Using control-level resources"));
+    // StaticResource and ThemeResource of the same theme brush.
+    assert!(root.get_control::<Grid>("StaticResourceGrid").background().is_some());
+    assert!(theme_image_uri(Some(&ThemeVariant::light())).ends_with("SampleMedia/Light_Image.png"));
+    assert!(theme_image_uri(Some(&ThemeVariant::dark())).ends_with("SampleMedia/Dark_Image.png"));
+    assert!(root.get_control::<Image>("ThemeImage").source().is_some());
+
+    // In a window: the ThemeDictionaries of the third example follow the requested theme, and
+    // SetThemeResourceBinding follows a change of the resource where the one-time lookup keeps
+    // the value it read.
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(root.clone())));
+    window.show();
+    window.update_layout();
+    let host = root.get_control::<Grid>("ThemeDictionaryHost");
+    host.set_value(ThemeVariant::requested_theme_variant_property(), Some(ThemeVariant::light()));
+    assert_eq!(text(&root, "ThemeStringText").as_deref(), Some("Light theme"));
+    assert_eq!(
+        color(root.get_control::<Border>("ThemeDictionaryPanel").background()),
+        Some(Color::from_rgb(0xee, 0xee, 0xee))
+    );
+    host.set_value(ThemeVariant::requested_theme_variant_property(), Some(ThemeVariant::dark()));
+    assert_eq!(text(&root, "ThemeStringText").as_deref(), Some("Dark theme"));
+    assert_eq!(
+        color(root.get_control::<Border>("ThemeDictionaryPanel").background()),
+        Some(Color::from_rgb(0x33, 0x33, 0x33))
+    );
+
+    let (background, _) = ACCENT_BRUSHES;
+    let one_time = root.get_control::<Border>("OneTimeLookupBorder");
+    let bound = root.get_control::<Border>("ThemeResourceBindingBorder");
+    let before = color(one_time.background());
+    assert!(before.is_some(), "the one-time lookup read the application's brush");
+    assert_eq!(color(bound.background()), before);
+    let green = Color::from_rgb(0, 128, 0);
+    Application::current().unwrap().resources().set(
+        ResourceKey::from(background),
+        Some(Rc::new(ImmutableSolidColorBrush::new(green)) as BoxedValue),
+    );
+    assert_eq!(color(bound.background()), Some(green), "the resource binding follows the resource");
+    assert_eq!(color(one_time.background()), before, "the one-time lookup keeps its value");
+    window.close();
+}
