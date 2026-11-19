@@ -3,11 +3,14 @@
 #   make -C samples/CApi run       # the hello world window (the library with the desktop platform)
 #   make -C samples/CApi run-gauge # a window with gauges, a control written in C (gauge.h)
 #   make -C samples/CApi test      # the C tests of the ABI (no window, no display)
-#   make -C samples/CApi bench CARGO_FLAGS="--release --no-default-features" PROFILE=release
+#   make -C samples/CApi bench CARGO_FLAGS="--release --no-default-features --features type-tables" PROFILE=release
 #                                  # the cost of the calls from C (call_overhead.c)
 #
-# The library is built with cargo first. CARGO_FLAGS go to that build: `--no-default-features`
-# builds the library without the desktop platform (no renderer), which is all the tests need.
+# The library is built with cargo first. CARGO_FLAGS go to that build: `--no-default-features
+# --features type-tables` builds the library without the desktop platform (no renderer) and with
+# the tables of types the tests and the benchmark look classes up in; `--no-default-features
+# --features desktop` builds it by use (docs/c-abi.md, section 16), for the samples, which
+# register their classes.
 # CC, CFLAGS, CARGO_TARGET_DIR and PROFILE (the cargo profile directory, `debug` by default) are
 # taken from the environment.
 

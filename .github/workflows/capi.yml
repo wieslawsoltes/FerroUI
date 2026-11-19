@@ -60,7 +60,7 @@ jobs:
       - name: Rust tests of the ABI and the header check
         run: cargo test --locked -p ferroui-capi --no-default-features --lib
       - name: C tests of the ABI
-        run: make -C samples/CApi test CARGO_FLAGS=--no-default-features
+        run: make -C samples/CApi test CARGO_FLAGS="--no-default-features --features type-tables"
       # The cost of a call through the ABI against Rust (docs/c-abi.md, section 8): informative,
       # a shared runner is not a quiet machine.
       - name: Call overhead (informative)

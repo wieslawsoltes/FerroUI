@@ -19,7 +19,10 @@ only the classes a program registers with their entries, and the units of the th
 
 ```sh
 cargo build -p ferroui-capi            # with the desktop platform (Skia, the Fluent theme)
-cargo build -p ferroui-capi --no-default-features   # without: no renderer, no ferro_app_run
+cargo build -p ferroui-capi --no-default-features --features type-tables
+                                       # without: no renderer, no ferro_app_run
+cargo build -p ferroui-capi --no-default-features --features desktop
+                                       # by use: no tables of types (section 16)
 ```
 
 The crate is built as a dynamic library (`libferroui_capi.dylib`, `.so`, `ferroui_capi.dll`),
