@@ -2675,6 +2675,7 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-controls",
  "ferroui-markup-xaml-loader",
+ "ferroui-render3d",
 ]
 
 [[package]]

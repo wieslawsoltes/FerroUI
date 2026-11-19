@@ -6,7 +6,7 @@
 
 use crate::change::{same, Link, ListLink, Notifier, Notifying, Scene3DChange};
 use crate::transform_3d::{transform_rect, value_of};
-use crate::{Model3D, Rect3D, Transform3D, Visual3DCollection};
+use crate::{ContainerUIElement3D, Model3D, ModelUIElement3D, Rect3D, Transform3D, Visual3DCollection};
 use ferroui_base::reactive::Subscription;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, FerroObject, FerroObjectImpl,
@@ -71,15 +71,28 @@ impl Visual3D {
     /// (its transform applied); WPF's `VisualTreeHelper.GetDescendantBounds` with the content.
     pub fn descendant_bounds(&self) -> Rect3D {
         let mut inner = Rect3D::EMPTY;
-        if let Some(model_visual) = self.to_ref().cast::<ModelVisual3D>() {
-            if let Some(content) = model_visual.content() {
-                inner.union(content.bounds());
-            }
-            for child in model_visual.children().iter() {
-                inner.union(child.descendant_bounds());
-            }
+        let (content, children) = visual_parts(&self.to_ref());
+        if let Some(content) = content {
+            inner.union(content.bounds());
+        }
+        for child in children.iter().flat_map(|children| children.iter()) {
+            inner.union(child.descendant_bounds());
         }
         transform_rect(inner, &value_of(self.transform().as_ref()))
+    }
+}
+
+/// What a visual shows: its model and its child visuals. Those of a `ModelVisual3D`, the `Model`
+/// of a `ModelUIElement3D`, the `Children` of a `ContainerUIElement3D`; nothing for another class.
+pub(crate) fn visual_parts(visual: &Ref<Visual3D>) -> (Option<Ref<Model3D>>, Option<Visual3DCollection>) {
+    if let Some(model_visual) = visual.cast::<ModelVisual3D>() {
+        (model_visual.content(), Some(model_visual.children()))
+    } else if let Some(element) = visual.cast::<ModelUIElement3D>() {
+        (element.model(), None)
+    } else if let Some(container) = visual.cast::<ContainerUIElement3D>() {
+        (None, Some(container.children()))
+    } else {
+        (None, None)
     }
 }
 
