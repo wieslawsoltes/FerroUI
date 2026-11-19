@@ -136,7 +136,7 @@ Run **Import Design Tokens** on a DTCG JSON file or **Export Design Tokens** on 
 
 ## Diagnose a design-time issue
 
-Open a XAML or RSX design and expand **Preview Checks** under **FerroUI → Diagnostics**. Select a finding to highlight the control in Design and reveal the control or its exact authored value in source. In **Stages**, use the check icon on a card to inspect that stage's current size, theme, and state.
+Open a XAML or RSX design and expand **Preview Checks** under **FerroUI → Diagnostics**. Hover a row for the full explanation. Select a finding to highlight the control in Design and reveal the control or its exact authored value in source. In **Stages**, use the check icon on a card to inspect that stage's current size, theme, and state.
 
 | Finding | What to look at |
 | --- | --- |
@@ -146,5 +146,11 @@ Open a XAML or RSX design and expand **Preview Checks** under **FerroUI → Diag
 | **Accessibility** | Check missing accessible names and text contrast on supported backgrounds. |
 
 Try [LayoutDiagnostics.xaml](../../../editors/vscode/test/fixtures/LayoutDiagnostics.xaml). The **OverhangingCard** extends 40 logical pixels past its Canvas. Change the Canvas width or the card position and watch the finding disappear. Open the **CapacityCard** finding for **Canvas.Right** to see the anchor that loses precedence. Checks use the accepted frame and leave the source buffer and undo history intact. [Preview Checks through MCP](reference.md#read-preview-checks-with-mcp)
+
+![Preview Checks selecting a card with 40 logical pixels of overflow beside its XAML source](../images/vscode-layout-overflow.jpg)
+
+![An ineffective Canvas.Right finding selecting the exact XAML attribute](../images/vscode-layout-ineffective-value.jpg)
+
+![Preview Checks selecting a mapped Rust anchor literal beside its native preview](../images/vscode-layout-rsx-checks.jpg)
 
 Use the Visual and Logical Outline to locate runtime-only elements. For a binding that depends on the application model or a custom loader, use a registered app fixture and inspect the running UI. [Test and inspect the app](runtime.md)

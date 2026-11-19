@@ -288,6 +288,8 @@ Agents read the catalog with `designer_hosted_animations`, then use `scrub_all` 
 3. Use **Select** to inspect a stage or **Interact** to operate its native controls. Pause a stage to hold its current image. Use **Checks** to review overflow, clipping, ineffective layout values, and accessibility in that stage. **More Actions** includes PNG export and stage settings. [Read Preview Checks](authoring.md#diagnose-a-design-time-issue)
 4. Save the stages as a `.ferrostages` file. Open it again in VS Code or Studio. Each stage retains its chosen view, environment, state, and design fixture. Source changes update affected stages after a valid render is ready. [Design-time data](../design-time-data.md) · [Preview environments](../xcode-previews.md)
 
+![The compact stage reports the edges clipped by its own viewport](../images/vscode-layout-stage-checks.jpg)
+
 ## Play a prototype
 
 Switch the Stages board to **Prototype**. Drag a stage title onto a destination or choose **Add interaction** to add a source-anchored trigger. Choose a native control, set the target stage or overlay, and use **Reveal trigger** to review the authored source. An overlay can set its placement, dimming, and dismissal. Use **Play Prototype** to follow the flow and test the native input. Save the stage set to reopen the same graph in Studio or run a [prototype scenario](runtime.md#run-a-native-ui-scenario). [Prototype authoring](../prototyping.md)
