@@ -1071,6 +1071,12 @@ impl<'a> Emitter<'a> {
         if let Some(n) = node.cast::<XamlDeferredContentInitializeIntermediateRootNode>() {
             // The root of the deferred content: created, then the intermediate root of the context.
             let value = self.value(&n.value().as_node())?;
+            if self.shares_element_statements(&value) {
+                // A styled element: one function for each class of element.
+                self.uses_context = true;
+                self.line(format!("rt::set_intermediate_root(&context, &{});", value.expr));
+                return Ok(value);
+            }
             let untyped = match value.kind {
                 Kind::Class(_) => format!("rt::to_value({}.clone())", value.expr),
                 Kind::Exact { .. } => format!("rt::to_value({})", value.expr),
@@ -2162,18 +2168,13 @@ impl<'a> Emitter<'a> {
             && self.parent_stack_nodes.contains(&node_address(node));
         if push_parent {
             self.uses_context = true;
-            let statement = format!("context.push_parent(rt::to_value({}.clone()))", target.expr);
-            if self.documents.backend.uses_construction_programs() && is_identifier(&target.expr) {
-                if let Some((ty, false)) = self.construction_type(target.kind) {
-                    self.record_resolved_call(&statement, construction::ResolvedCall {
-                        kind: construction::CallKind::ContextMember,
-                        inputs: vec![construction::CallInput::Register(target.expr.clone(), false)],
-                        import: format!("Call(|args| {{ let parent = args.value::<{ty}>()?.clone(); args.context()?.push_parent(rt::to_value(parent)); Ok(None) }})"),
-                        result: None, line: 0, column: 0,
-                    });
-                }
+            if supports_initialize && self.shares_element_statements(target) {
+                // A styled element: the clone, the box and the call are one function for each
+                // class of element.
+                self.line(format!("rt::push_parent(&context, &{});", target.expr));
+            } else {
+                self.push_parent_statement(target);
             }
-            self.line(format!("{statement};"));
         }
         self.manipulation(&init.manipulation().as_node(), target)?;
         if push_parent {
@@ -2185,6 +2186,34 @@ impl<'a> Emitter<'a> {
             self.line(format!("{};", invoked(format!("{}.try_end_init()", target.expr), true, node)));
         }
         Ok(())
+    }
+
+    /// Whether the statements of a styled element `target` that are the same at every element
+    /// (the parent stack, the intermediate root, the end of the initialisation, the name) are
+    /// written as calls of the shared helpers of `rt`: the target is a local, and the
+    /// operations are not encoded as construction programs, whose encoder reads the statements
+    /// they stand for.
+    fn shares_element_statements(&self, target: &Typed<'a>) -> bool {
+        is_identifier(&target.expr)
+            && !self.documents.backend.uses_construction_programs()
+            && matches!(target.kind, Kind::Class(class) if self.types.is_styled_element(class))
+    }
+
+    /// `context.push_parent(rt::to_value(target.clone()))`, with the resolved call of the
+    /// construction programs when they encode it.
+    fn push_parent_statement(&mut self, target: &Typed<'a>) {
+        let statement = format!("context.push_parent(rt::to_value({}.clone()))", target.expr);
+        if self.documents.backend.uses_construction_programs() && is_identifier(&target.expr) {
+            if let Some((ty, false)) = self.construction_type(target.kind) {
+                self.record_resolved_call(&statement, construction::ResolvedCall {
+                    kind: construction::CallKind::ContextMember,
+                    inputs: vec![construction::CallInput::Register(target.expr.clone(), false)],
+                    import: format!("Call(|args| {{ let parent = args.value::<{ty}>()?.clone(); args.context()?.push_parent(rt::to_value(parent)); Ok(None) }})"),
+                    result: None, line: 0, column: 0,
+                });
+            }
+        }
+        self.line(format!("{statement};"));
     }
 
     /// A property assignment, with the setter the interpreter's plan

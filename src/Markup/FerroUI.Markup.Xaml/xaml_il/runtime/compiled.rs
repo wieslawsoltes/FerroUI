@@ -1287,6 +1287,28 @@ pub fn populate_context(parent: Option<Rc<dyn IServiceProvider>>, document: &Doc
     context
 }
 
+// --- the parent stack of a styled element (#568) -------------------------------------------
+//
+// Generated code writes these for the objects of templates and documents that are styled
+// elements: the statements they stand for are the same at every element, so they are one
+// function for each class of element instead of a copy of the clone, the box and the call at
+// each element.
+
+/// `context.push_parent(rt::to_value(object.clone()))`: `object` on the parent stack of the
+/// context, as the value of the node ([`to_value`]).
+#[inline(never)]
+pub fn push_parent<T: PartialEq + Clone + 'static>(context: &Rc<XamlIlContext>, object: &T) {
+    context.push_parent(to_value(object.clone()));
+}
+
+/// `context.set_intermediate_root_object(rt::to_value(object.clone()))`: `object` as the
+/// intermediate root of the context (the root of deferred content), as the value of the node
+/// ([`to_value`]).
+#[inline(never)]
+pub fn set_intermediate_root<T: PartialEq + Clone + 'static>(context: &Rc<XamlIlContext>, object: &T) {
+    context.set_intermediate_root_object(to_value(object.clone()));
+}
+
 /// `context.FerroNameScope.Register(name, element)`: registers `element`
 /// under `name` in the name scope of the context. A missing scope, a
 /// completed scope and a duplicate name are load errors at the position of
