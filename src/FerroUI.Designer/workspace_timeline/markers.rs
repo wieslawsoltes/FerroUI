@@ -1,6 +1,7 @@
 use super::*;
 use ferroui_base::layout::VerticalAlignment;
 use ferroui_controls::ScrollViewer;
+use ferroui_controls::primitives::ScrollBarVisibility;
 use ferroui_designer_animation::{PreviewMarker, PreviewMarkerEdit};
 
 pub(super) struct MarkerEditor {
@@ -35,9 +36,12 @@ impl DesignerWorkspace {
         add.set_vertical_alignment(VerticalAlignment::Center);
         let rows = StackPanel::new();
         rows.set_name(Some("TimelineMarkerList".into()));
+        rows.set_orientation(Orientation::Horizontal);
+        rows.set_spacing(10.0);
         let list = ScrollViewer::new();
-        list.set_horizontal_alignment(HorizontalAlignment::Left);
-        list.set_max_height(100.0);
+        list.set_margin(Thickness::new(10.0, 0.0, 0.0, 0.0));
+        list.set_horizontal_scroll_bar_visibility(ScrollBarVisibility::Auto);
+        list.set_vertical_scroll_bar_visibility(ScrollBarVisibility::Disabled);
         list.set_content(Some(Control::boxed(&rows)));
         let weak = Rc::downgrade(self);
         let name = input.downgrade();
@@ -78,8 +82,14 @@ impl DesignerWorkspace {
         });
         form.children().add(input.clone().upcast::<Control>());
         form.children().add(add.clone().upcast::<Control>());
-        body.children().add(form.upcast::<Control>());
-        body.children().add(list.clone().upcast::<Control>());
+        let marker_bar = Grid::new();
+        marker_bar.set_column_definitions(
+            ColumnDefinitions::parse("Auto,*").expect("valid marker row columns"),
+        );
+        marker_bar.children().add(form.upcast::<Control>());
+        Grid::set_column(&list, 1);
+        marker_bar.children().add(list.clone().upcast::<Control>());
+        body.children().add(marker_bar.upcast::<Control>());
         self.timeline_ui.borrow_mut().marker_editor = Some(MarkerEditor {
             context,
             all,
@@ -196,6 +206,7 @@ impl MarkerEditor {
         row.set_spacing(4.0);
         let jump = button(&marker.name);
         jump.classes().add("designer-timeline-tool");
+        jump.set_max_width(200.0);
         jump.set_is_enabled(enabled);
         let title = format!("Seek to {} at {} seconds", marker.name, marker.time);
         AutomationProperties::set_name(&jump, Some(&title));

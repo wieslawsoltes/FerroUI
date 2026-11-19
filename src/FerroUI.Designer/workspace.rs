@@ -414,7 +414,7 @@ impl DesignerWorkspace {
                             }
                         });
                     this.report(result);
-                    this.refresh(true);
+                    this.refresh(is_duration);
                     event.set_handled(true);
                 }
             });
