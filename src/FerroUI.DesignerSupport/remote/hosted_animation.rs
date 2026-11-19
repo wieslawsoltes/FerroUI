@@ -24,8 +24,9 @@ use ferroui_remote_protocol::designer::{
     DesignAnimationAuthoringRequest, DesignAnimationAuthoringResult,
     DesignAnimationCatalogMessage, DesignAnimationProgram, DesignAnimationRequestMessage,
     DesignAnimationResultMessage, DesignAnimationTarget, UpdateDesignMessage,
-    DESIGN_ANIMATION_AUTHORING_QUERY, DESIGN_ANIMATION_CURVE_QUERY, DESIGN_ANIMATION_QUERY,
-    DESIGN_ANIMATION_VERSION, DESIGN_STATE_ROUTES_QUERY,
+    DESIGN_ANIMATION_AUTHORING_QUERY, DESIGN_ANIMATION_CURVE_CHANNELS_QUERY,
+    DESIGN_ANIMATION_CURVE_QUERY, DESIGN_ANIMATION_QUERY, DESIGN_ANIMATION_VERSION,
+    DESIGN_STATE_ROUTES_QUERY,
 };
 use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, BTreeSet};
@@ -35,6 +36,7 @@ ferroui_base::ferro_thread_local! {
     static ENABLED: Cell<bool> = const { Cell::new(false) };
     static AUTHORING: Cell<bool> = const { Cell::new(false) };
     static CURVES: Cell<bool> = const { Cell::new(false) };
+    static CURVE_CHANNELS: Cell<bool> = const { Cell::new(false) };
     static STATE_ROUTES: Cell<bool> = const { Cell::new(false) };
     static ACTIVE: RefCell<Option<HostedAnimations>> = const { RefCell::new(None) };
 }
@@ -48,6 +50,7 @@ pub(super) fn configure(transport: Option<&Url>, remote: bool) {
     ENABLED.set(enabled);
     AUTHORING.set(enabled && requested(DESIGN_ANIMATION_AUTHORING_QUERY));
     CURVES.set(enabled && requested(DESIGN_ANIMATION_CURVE_QUERY));
+    CURVE_CHANNELS.set(CURVES.get() && requested(DESIGN_ANIMATION_CURVE_CHANNELS_QUERY));
     STATE_ROUTES.set(enabled && requested(DESIGN_STATE_ROUTES_QUERY));
     ACTIVE.with(|active| active.borrow_mut().take());
 }
@@ -225,7 +228,15 @@ impl HostedAnimations {
         let curves = CURVES.get();
         let authoring = AUTHORING.get();
         let keyframes = (curves || authoring).then(|| {
-            HostedKeyframes::mount(source.document, source.programs, &index, &mut catalog.programs, authoring, curves)
+            HostedKeyframes::mount(
+                source.document,
+                source.programs,
+                &index,
+                &mut catalog.programs,
+                authoring,
+                curves,
+                CURVE_CHANNELS.get(),
+            )
         });
         Self {
             revision,

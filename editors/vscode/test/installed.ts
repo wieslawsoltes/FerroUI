@@ -139,6 +139,7 @@ export async function run(): Promise<void> {
         const capabilities = new URLSearchParams(animationQuery);
         assert.equal(capabilities.get('ferroui-design-animation'), '1', 'The installed relay negotiates native application animations');
         assert.equal(capabilities.get('ferroui-design-keyframes'), '1', 'The installed relay negotiates project codec authoring');
+        assert.equal(capabilities.get('ferroui-design-curve-channels'), '1', 'The installed relay opts in to geometry channels');
         await verifyHostedPreview(native, source.uri);
         console.log(`Installed FerroUI ${extension.packageJSON.version} passed on VS Code ${vscode.version} (${process.platform}-${process.arch}).`);
     } finally {

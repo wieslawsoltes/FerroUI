@@ -24,6 +24,7 @@ impl HostedKeyframes {
         catalog: &mut [DesignAnimationProgram],
         can_edit: bool,
         curves: bool,
+        curve_channels: bool,
     ) -> Self {
         let candidates = programs
             .into_iter()
@@ -54,9 +55,17 @@ impl HostedKeyframes {
             }));
             let Ok(Some(tracks)) = decoded else { continue };
             if curves {
-                let tracks: Vec<_> = tracks.iter().filter(|track| {
-                    track.keys.first().is_some_and(|key| !CurveChannel::for_authored_kind(&key.value_kind).is_empty())
-                }).cloned().collect();
+                let tracks: Vec<_> = tracks
+                    .iter()
+                    .filter(|track| {
+                        track.keys.first().is_some_and(|key| {
+                            key.value_kind == "Number"
+                                || (curve_channels
+                                    && !CurveChannel::for_authored_kind(&key.value_kind).is_empty())
+                        })
+                    })
+                    .cloned()
+                    .collect();
                 entry.curve_tracks = (!tracks.is_empty()).then_some(tracks);
             }
             let typed = program.timeline.as_ref().is_some_and(|timeline| timeline.tracks.iter().all(|track| {

@@ -2,6 +2,8 @@ use crate::{bson_class, ferro_remote_message_guid};
 
 /// Opt in to sampling the loaded app's scalar animation tracks.
 pub const DESIGN_ANIMATION_CURVE_QUERY: &str = "ferroui-design-curves";
+/// Ask the app to advertise geometry tracks alongside scalar tracks.
+pub const DESIGN_ANIMATION_CURVE_CHANNELS_QUERY: &str = "ferroui-design-curve-channels";
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct DesignAnimationCurveRequest {
