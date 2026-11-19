@@ -556,11 +556,16 @@ impl Dispatcher {
 
     /// Posts an action that will be invoked on the dispatcher thread.
     ///
-    /// Can be called from any thread. A panic raised by the action goes
-    /// through the unhandled-exception events of the dispatcher.
-    pub fn post(&self, action: impl FnOnce() + Send + 'static, priority: DispatcherPriority) {
+    /// Can be called from any thread. The action returns `()` or a `Result`
+    /// ([`CallbackResult`](super::CallbackResult)): its error, and a panic it
+    /// raises, go through the unhandled-exception events of the dispatcher.
+    pub fn post<R: super::CallbackResult>(
+        &self,
+        action: impl FnOnce() -> R + Send + 'static,
+        priority: DispatcherPriority,
+    ) {
         let callback: SendCallback = Box::new(move || {
-            action();
+            action().report();
             Box::new(()) as Box<dyn Any + Send>
         });
         let operation = OperationCore::new_send(&self.to_arc(), priority, true, callback);
@@ -568,12 +573,18 @@ impl Dispatcher {
     }
 
     /// Posts an action that is not `Send` to be invoked on the dispatcher
-    /// thread.
+    /// thread. As with [`post`](Self::post), the error the action returns goes
+    /// through the unhandled-exception events of the dispatcher.
     ///
     /// # Panics
     /// Panics when called from a thread other than the dispatcher thread.
-    pub fn post_local(&self, action: impl FnOnce() + 'static, priority: DispatcherPriority) {
-        let operation = OperationCore::new_local(&self.to_arc(), priority, true, box_local_callback(action));
+    pub fn post_local<R: super::CallbackResult>(
+        &self,
+        action: impl FnOnce() -> R + 'static,
+        priority: DispatcherPriority,
+    ) {
+        let operation =
+            OperationCore::new_local(&self.to_arc(), priority, true, box_local_callback(move || action().report()));
         self.invoke_async_impl(&operation, &CancellationToken::none());
     }
 

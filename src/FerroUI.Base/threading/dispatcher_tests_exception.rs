@@ -419,3 +419,77 @@ fn sync_context_exception_can_be_handled_with_post() {
     assert!(handled.get());
     assert!(executed.get());
 }
+
+/// The error of a job that fails without a panic (#567).
+#[derive(Debug, PartialEq)]
+struct JobFailed(&'static str);
+
+impl std::fmt::Display for JobFailed {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "job failed: {}", self.0)
+    }
+}
+
+impl std::error::Error for JobFailed {}
+
+#[test]
+fn an_error_a_posted_job_returns_reaches_the_unhandled_exception_events_without_a_panic() {
+    let t = DispatcherTests::new();
+    let filtered = Rc::new(Cell::new(None::<String>));
+    let received = Rc::new(Cell::new(None::<String>));
+    let seen = filtered.clone();
+    t.ui_thread.unhandled_exception_filter(move |args| seen.set(args.exception_message().map(str::to_owned)));
+    let seen = received.clone();
+    t.ui_thread.unhandled_exception(move |args| {
+        let error = args.error().and_then(|error| error.downcast_ref::<JobFailed>());
+        assert_eq!(error, Some(&JobFailed("post")));
+        seen.set(args.exception_message().map(str::to_owned));
+        args.set_handled(true);
+    });
+
+    t.ui_thread.post(|| -> Result<(), JobFailed> { Err(JobFailed("post")) }, DispatcherPriority::NORMAL);
+    t.ui_thread.post_local(|| -> Result<(), JobFailed> { Ok(()) }, DispatcherPriority::NORMAL);
+    // Nothing unwinds: the handler handled the error.
+    t.ui_thread.run_jobs_with_cancellation(None, &CancellationToken::none());
+
+    assert_eq!(filtered.take().as_deref(), Some("job failed: post"));
+    assert_eq!(received.take().as_deref(), Some("job failed: post"));
+}
+
+#[test]
+fn an_error_no_handler_handles_is_raised_as_its_payload_once() {
+    let t = DispatcherTests::new();
+    let calls = t.number_of_handler_on_unhandled_event_invoked.clone();
+    t.ui_thread.unhandled_exception(move |_| calls.set(calls.get() + 1));
+
+    let ui_thread = t.ui_thread.clone();
+    let result = catch_unwind(AssertUnwindSafe(|| {
+        ui_thread.post_local(|| -> Result<(), JobFailed> { Err(JobFailed("local")) }, DispatcherPriority::NORMAL);
+        ui_thread.run_jobs_with_cancellation(None, &CancellationToken::none());
+    }));
+
+    // Under unwinding the error leaves the dispatcher as the payload, without being
+    // filtered again on the way out; with `panic = "abort"` it ends the process.
+    let payload = result.expect_err("an unhandled error is fatal");
+    let error = payload.downcast_ref::<Box<dyn std::error::Error + Send + Sync>>().expect("the error is the payload");
+    assert_eq!(error.downcast_ref::<JobFailed>(), Some(&JobFailed("local")));
+    assert_eq!(t.number_of_handler_on_unhandled_event_invoked.get(), 1);
+}
+
+#[test]
+fn an_error_raised_off_the_dispatcher_thread_is_posted_to_it() {
+    let t = DispatcherTests::new();
+    let received = Rc::new(Cell::new(None::<String>));
+    let seen = received.clone();
+    t.ui_thread.unhandled_exception(move |args| {
+        seen.set(args.exception_message().map(str::to_owned));
+        args.set_handled(true);
+    });
+
+    let ui_thread = t.ui_thread.clone();
+    thread::spawn(move || ui_thread.raise_unhandled_exception("raised on a worker")).join().unwrap();
+    assert_eq!(received.take(), None);
+    t.ui_thread.run_jobs_with_cancellation(None, &CancellationToken::none());
+
+    assert_eq!(received.take().as_deref(), Some("raised on a worker"));
+}

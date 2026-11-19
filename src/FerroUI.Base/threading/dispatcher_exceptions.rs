@@ -1,3 +1,4 @@
+use std::error::Error;
 use std::rc::Rc;
 
 use super::dispatcher_operation::DispatcherException;
@@ -64,6 +65,43 @@ impl Dispatcher {
                 local.unhandled_exception_filter.remove(token);
             }
         })
+    }
+
+    /// Raises an error of application code that has no caller to return it to: a
+    /// callback the framework runs, such as an event handler, a posted job, a
+    /// layout or property changed callback, or the handler of a markup event.
+    ///
+    /// The error goes through [`unhandled_exception_filter`](Self::unhandled_exception_filter)
+    /// and [`unhandled_exception`](Self::unhandled_exception), as the panic of a posted
+    /// callback does, so a handler can mark it handled; the payload of the event is the
+    /// error, a `Box<dyn Error + Send + Sync>`
+    /// ([`DispatcherUnhandledExceptionEventArgs::error`]). This is where the callbacks
+    /// that return a [`CallbackResult`](super::CallbackResult) send their errors (#567).
+    ///
+    /// Called off the dispatcher thread, the error is posted to it.
+    ///
+    /// # Panics
+    /// An error no handler handles is fatal, as an unhandled exception is in the
+    /// reference: with `panic = "unwind"` the error is raised as the panic payload
+    /// (it unwinds to the top of the dispatcher loop without being filtered again);
+    /// with `panic = "abort"` the process ends with a panic that carries its message.
+    pub fn raise_unhandled_exception(&self, error: impl Into<Box<dyn Error + Send + Sync>>) {
+        self.raise_unhandled_error(error.into())
+    }
+
+    #[inline(never)]
+    fn raise_unhandled_error(&self, error: Box<dyn Error + Send + Sync>) {
+        if !self.check_access() {
+            let dispatcher = self.to_arc();
+            self.post(move || dispatcher.raise_unhandled_error(error), super::DispatcherPriority::SEND);
+            return;
+        }
+        let exception: DispatcherException = Box::new(error);
+        if self.try_catch_when(&exception) {
+            return;
+        }
+        self.forget_exception_if_outermost(&exception);
+        fail_unhandled(exception)
     }
 
     /// Exception filter returns true if exception should be caught.
@@ -157,5 +195,26 @@ impl Dispatcher {
                 local.seen_exceptions.borrow_mut().retain(|seen| *seen != key);
             }
         }
+    }
+}
+
+/// Ends an error that no handler of the dispatcher handled (#567).
+#[cold]
+fn fail_unhandled(exception: DispatcherException) -> ! {
+    let message = super::dispatcher_unhandled_exception_event_args::exception_text(&*exception)
+        .unwrap_or_else(|| "an error of application code".into());
+    #[cfg(panic = "unwind")]
+    {
+        // No panic ran the hook for an error value: say what ends the thread.
+        match crate::logging::Logger::try_get(crate::logging::LogEventLevel::Error, crate::logging::LogArea::CONTROL) {
+            Some(logger) => logger.log_with_values(None, "Unhandled exception: {Error}", &[&message]),
+            None => eprintln!("Unhandled exception: {message}"),
+        }
+        std::panic::resume_unwind(exception)
+    }
+    #[cfg(not(panic = "unwind"))]
+    {
+        drop(exception);
+        panic!("Unhandled exception: {message}")
     }
 }
