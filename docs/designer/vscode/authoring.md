@@ -33,6 +33,26 @@ Switch Outline to **Visual**, **Logical**, or **Combined** to inspect constructe
 
 Use the size button to change logical width, height, preset, or theme. With the canvas focused, press `0` to fit, `1` for actual size, `+` or `−` to zoom, and hold Space while dragging to pan. The zoom menu includes **Fit selection**. Use **Interact** and its input bar for clicks, scroll, text, and key gestures.
 
+## Measure and mark the canvas
+
+In the **Design** tab, open the ruler icon for **Canvas Guides**, enable **Rulers**, and choose **Apply**. You can also focus the preview canvas in **Select** mode and press Shift+R. The ruler reads logical pixels from the top-left of the rendered view as you zoom or pan.
+
+![XAML source beside horizontal and vertical rulers and guide lines](../images/vscode-canvas-rulers.jpg)
+
+| Action | Result |
+| --- | --- |
+| Drag down from the top ruler or right from the left ruler | Add a horizontal Y guide or a vertical X guide |
+| Drag a guide, or hold Alt (Option on macOS) as you start the drag | Move the guide, or drag a copy |
+| Drag a guide back to its ruler | Remove it |
+| Tab to a visible guide, then press an arrow key along its axis | Nudge it by 1 px. Hold Shift to nudge by 10 px. |
+| With a guide focused, press Delete or Backspace | Remove the focused guide |
+| Press Escape during a drag | Cancel the gesture |
+| With the canvas focused, press Shift+G | Show or hide the guide lines |
+
+For an exact position, open **Canvas Guides** again. Use the horizontal or vertical add icon, enter a position such as `73.5` or `-18.125`, and choose **Apply**. You can remove individual rows or clear the list in the same draft. **Cancel** discards the draft. If the accepted frame or guides change while the editor is open, reopen it to use the current values. [Exact position controls](../images/vscode-canvas-guide-positions.jpg)
+
+The designer tab retains a guide set for the document, each XAML definition opened from **Library**, and each Rust `rsx!` invocation. Reopening a definition or switching back to an invocation restores its guides. Guide positions stay in the designer tab’s view state. Source edits use the editor’s Undo history. [RSX canvas with guides](../images/vscode-rsx-canvas-guides.jpg) · [Studio guides](../canvas-guides.md)
+
 ## Edit values, actions, and resources
 
 | Tool | What to do |

@@ -71,6 +71,12 @@ export async function run(): Promise<void> {
         const snapshot = await native.render(source, { width: 800, height: 520, dark: false }, 1);
         assert.ok(snapshot.image?.png, snapshot.renderError ?? undefined);
         assert.equal(Buffer.from(snapshot.image.png, 'base64').subarray(1, 4).toString(), 'PNG');
+        assert.ok(native.canvasGuides, 'The installed preview negotiates canvas guide support');
+        const guide = await native.editCanvasGuides(native.canvasGuides.defaults, { action: 'add', axis: 'Vertical', position: -18.125 });
+        assert.deepEqual(guide.settings.guides, [{ id: guide.selected, axis: 'Vertical', position: -18.125 }]);
+        const copied = await native.editCanvasGuides(guide.settings, { action: 'duplicate', id: guide.selected!, position: 73.5 });
+        assert.deepEqual(copied.settings.guides.map(line => line.position), [-18.125, 73.5]);
+        assert.notEqual(copied.selected, guide.selected);
         const project = await native.projectInventory(workspace.uri.fsPath);
         assert.ok(project.files.some(file => file.kind === 'rsx' && file.path === 'views.rs'));
         const rust = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(workspace.uri, 'animation_view.rs'));

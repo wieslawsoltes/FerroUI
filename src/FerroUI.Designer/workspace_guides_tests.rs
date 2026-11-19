@@ -324,6 +324,30 @@ fn guides_survive_tabs_and_definition_roundtrips_but_not_new_documents_with_same
     assert!(!w.restore_canvas_guide_view(&stale));
 }
 
+#[cfg(feature = "mcp")]
+#[test]
+fn canvas_guide_mcp_uses_the_native_scope_and_checked_editor() {
+    use crate::mcp::DesignerMcp;
+    use ferroui_mcp::{Permissions, UiToolProvider};
+    use serde_json::json;
+
+    let _app = UnitTestApplication::start(services());
+    let f = Fixture::new();
+    let mcp = DesignerMcp::with_workspace(&f.workspace);
+    let read = Permissions { allow_property_writes: false, allow_input: false };
+    let write = Permissions { allow_property_writes: true, ..read };
+    let initial = mcp.call("designer_canvas_guides", &json!({}), read).unwrap();
+    let edit = json!({"expected_revision":initial["revision"],"expected_epoch":initial["epoch"],
+        "edit":{"action":"apply","rulers":true,"guides":true,"lines":[{"axis":"Horizontal","position":-12.25}]}});
+    assert!(mcp.call("designer_canvas_guides_edit", &edit, read).is_err());
+    let result = mcp.call("designer_canvas_guides_edit", &edit, write).unwrap();
+    assert_eq!(result["revision"], initial["revision"]);
+    assert_eq!(result["settings"]["guides"][0]["position"], -12.25);
+    assert_eq!(f.workspace.canvas_guides().guides[0].position, -12.25);
+    assert!(mcp.call("designer_canvas_guides_edit", &edit, write).is_err());
+    assert_eq!(f.workspace.session().borrow().document().source(), SOURCE);
+}
+
 #[test]
 fn authored_control_move_snaps_to_hidden_manual_guide_in_screen_tolerance() {
     let _app = UnitTestApplication::start(services());

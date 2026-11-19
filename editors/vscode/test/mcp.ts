@@ -3,6 +3,7 @@ import { spawn } from 'node:child_process';
 import { createInterface } from 'node:readline';
 import * as vscode from 'vscode';
 import { verifyCanvasInteraction, verifyCanvasScroll } from './canvasInteraction';
+import { verifyCanvasGuides } from './canvasGuidesMcp';
 import { verifyProjectMcp } from './projectMcp';
 import { verifyScenarioMcp } from './scenarioMcp';
 import { verifyWorkspaceMcp } from './workspaceMcp';
@@ -89,6 +90,8 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
             assert.ok(tools.some(tool => tool.name === `designer_hosted_${name}`));
         }
         assert.match((await invoke('designer_hosted_open', { session: 1 })).content[0]?.text ?? '', /allowWrites/);
+        const guideWrite = { session: 1, expected_revision: 0, expected_epoch: 0, edit: { action: 'clear' } };
+        assert.match((await invoke('designer_canvas_guides_edit', guideWrite)).content[0]?.text ?? '', /allowWrites/);
         const hostedKey = { session: 1, expected_generation: 1, expected_revision: 1, expected_sequence: 1,
             arguments: { program: 1, target: 1, property: 'BoxShadow', previous: 2, time: 2, value: '8 14 24 2 #60244B90', easing: 'Linear' } };
         assert.match((await invoke('designer_hosted_keyframe', hostedKey)).content[0]?.text ?? '', /allowWrites/);
@@ -217,6 +220,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         await verifyStateTransition({ invoke, content }, session, document);
         await verifyDesignData({ invoke, content }, session, document);
         await verifyLayerViews({ invoke, content }, session, document);
+        await verifyCanvasGuides({ invoke, content });
         await verifyBindingMcp({ invoke, content });
         await verifyGridMcp({ invoke, content });
         await verifyResourcePromotion({ invoke, content });
