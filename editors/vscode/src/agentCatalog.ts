@@ -57,7 +57,7 @@ export const agentCatalog = {
     designer_hosted_image: tool('Capture the current app-hosted preview frame as PNG with its revision and sequence.', session, ['session']),
     designer_hosted_animation: tool('Control a native animation in the app-hosted preview. Use its current generation, revision and frame sequence.', {
         ...frame, expected_generation: integer(1), expected_sequence: integer(1), arguments: { type: 'object', additionalProperties: false,
-            required: ['action'], properties: { action: choice('seek', 'play', 'pause', 'stop', 'targets', 'reveal'), program: node,
+            required: ['action'], properties: { action: choice('select', 'seek', 'play', 'pause', 'stop', 'targets', 'reveal'), program: node,
                 elapsed: { type: 'number', minimum: 0 }, targets: { type: 'array', items: node, maxItems: 2000 } } },
     }, ['session', 'expected_generation', 'expected_revision', 'expected_sequence', 'arguments'], true, false),
     designer_hosted_keyframe_draft: tool('Validate a keyframe through the app preview’s registered project codec. Return easing samples and a checked XAML patch. Use the current app generation, revision, sequence, and authored track.',

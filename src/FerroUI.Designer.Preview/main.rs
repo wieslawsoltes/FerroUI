@@ -91,8 +91,32 @@ fn respond(
         return Ok(());
     }
     let result = match method {
-        "initialize" => Ok(json!({"version": protocol::PROTOCOL_VERSION, "assets": toolbox::catalog(),
-            "capabilities": {"isolatedDesign":true,"appHostedDesign":true,"rsxLanguage":true,"stages":true,"prototypeEditing":true,"stageIncludes":true,"projectCatalog":true,"canvasInteraction":true,"canvasFocusOrder":true,"projectInventory":true,"tokenHandoff":true,"designFixtures":true,"timelineTransport":true,"timelineRecording":true,"timelineGeometryRecording":true,"timelineKeyframeDrafts":true,"timelineCombinedPlayback":true,"timelineProgramTargets":true,"stateTransitionPreview":true}})),
+        "initialize" => Ok(json!({
+            "version": protocol::PROTOCOL_VERSION,
+            "assets": toolbox::catalog(),
+            "capabilities": {
+                "isolatedDesign": true,
+                "appHostedDesign": true,
+                "hostedAnimationRestoration": true,
+                "rsxLanguage": true,
+                "stages": true,
+                "prototypeEditing": true,
+                "stageIncludes": true,
+                "projectCatalog": true,
+                "canvasInteraction": true,
+                "canvasFocusOrder": true,
+                "projectInventory": true,
+                "tokenHandoff": true,
+                "designFixtures": true,
+                "timelineTransport": true,
+                "timelineRecording": true,
+                "timelineGeometryRecording": true,
+                "timelineKeyframeDrafts": true,
+                "timelineCombinedPlayback": true,
+                "timelineProgramTargets": true,
+                "stateTransitionPreview": true,
+            },
+        })),
         "designTokens" => serde_json::from_value::<ferroui_designer_tools::token_handoff::Request>(message["params"].clone())
             .map_err(|error| error.to_string()).and_then(|request| serialize(request.plan().map_err(|error| error.to_string()))),
         "configureProject" => serde_json::from_value(message["params"].clone())

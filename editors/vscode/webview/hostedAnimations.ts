@@ -30,7 +30,11 @@ export class HostedAnimationView {
             const button = this.edit.disabled || this.edit.hidden ? element('hosted-refresh') : this.edit;
             button.focus({ preventScroll: true });
         });
-        this.programs.onchange = () => { this.queued = undefined; this.keyframes.close(); this.paint(); };
+        this.programs.onchange = () => {
+            this.queued = undefined;
+            this.keyframes.close();
+            this.control({ action: 'select', program: Number(this.programs.value) });
+        };
         this.targets.onclick = () => this.choose('animationTargets');
         this.source.onclick = () => this.choose('animationSource');
         this.edit.onclick = () => this.choose('chooseKeyframe');
@@ -57,8 +61,7 @@ export class HostedAnimationView {
         if (state.frame?.revision !== this.state.frame?.revision) {
             this.queued = this.submitted = this.pending = undefined;
         }
-        const selected = state.position && state.position.program !== this.state.position?.program
-            ? String(state.position.program) : this.programs.value;
+        const selected = state.selection ?? state.position?.program;
         this.state = state;
         this.documentVersion = documentVersion;
         const catalog = JSON.stringify(state.programs.map(({ id, name }) => [id, name]));
@@ -66,8 +69,8 @@ export class HostedAnimationView {
             this.catalog = catalog;
             this.programs.replaceChildren(...state.programs.map(({ name, id }) => new Option(name, String(id))));
         }
-        this.programs.value = state.programs.some(program => String(program.id) === selected)
-            ? selected : String(state.programs[0]?.id ?? '');
+        this.programs.value = String(state.programs.some(program => program.id === selected)
+            ? selected : state.programs[0]?.id ?? '');
         this.flush();
         this.paint();
     }

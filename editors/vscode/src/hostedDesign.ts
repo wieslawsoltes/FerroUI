@@ -169,7 +169,7 @@ class HostedSession {
     constructor(private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel,
         readonly panel: vscode.WebviewPanel, private readonly editor: vscode.TextEditor, private readonly language: Language,
         private readonly target: CargoTarget, readonly generation: number, built: (metadata: ProjectMetadata) => void, remove: (closing: Promise<void>) => void) {
-        this.animations = new HostedAnimations((request, signal) => this.sampleAnimation(request, signal),
+        this.animations = new HostedAnimations((request, signal) => this.sampleAnimation(request, signal), frame => this.accept(frame),
             state => this.post({ type: 'animations', state, version: this.editor.document.version }),
             error => this.report(errorMessage(error), Boolean(this.currentFrame)));
         this.subscriptions = [
@@ -227,7 +227,7 @@ class HostedSession {
     private update(): void {
         ++this.revision;
         this.failed = undefined;
-        this.animations.invalidate();
+        this.animations.beforeSourceUpdate();
         if (!this.application) return;
         this.report('Rendering the current source…');
         this.schedule(180);
@@ -259,7 +259,8 @@ class HostedSession {
             if (update) {
                 const source = await client.inProject(sourceOf(document, this.language, this.editor.selection.active), this.project);
                 if (this.disposed || revision !== this.revision) return;
-                frame = await client.renderHosted({ revision, assembly, projectPath, document: source, fixture: this.fixture });
+                frame = await client.renderHosted({ revision, assembly, projectPath, document: source, fixture: this.fixture,
+                    restoreAnimation: client.capabilities.hostedAnimationRestoration ? this.animations.restore : undefined });
             } else frame = await client.hostedFrame();
             if (!this.disposed && client === this.client && frame?.revision === this.revision) {
                 this.accept(frame);
@@ -303,7 +304,6 @@ class HostedSession {
             if (this.disposed || client !== this.client || sample.frame.revision !== this.revision) {
                 throw new Error('The application preview changed while sampling the animation.');
             }
-            this.accept(sample.frame);
             return sample;
         } finally {
             this.pending = false;

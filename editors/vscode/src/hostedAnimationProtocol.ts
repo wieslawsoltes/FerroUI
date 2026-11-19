@@ -37,6 +37,7 @@ export interface HostedAnimationRequest extends HostedAnimationFrame {
 }
 
 export type HostedAnimationControl =
+    | { action: 'select'; program: number }
     | { action: 'seek'; program: number; elapsed: number }
     | { action: 'play'; program: number; elapsed?: number }
     | { action: 'pause' }
@@ -50,10 +51,19 @@ export interface HostedAnimationPosition {
     completed: boolean;
 }
 
-export interface HostedAnimationState extends HostedAnimationCatalog {
-    frame?: HostedAnimationFrame;
+export interface HostedAnimationPresentation {
+    selection?: number;
     position?: HostedAnimationPosition;
     overrides: Record<number, number[]>;
+}
+
+export interface HostedAnimationRestore {
+    frame: HostedAnimationFrame;
+    presentation: HostedAnimationPresentation;
+}
+
+export interface HostedAnimationState extends HostedAnimationCatalog, HostedAnimationPresentation {
+    frame?: HostedAnimationFrame;
     busy: boolean;
 }
 

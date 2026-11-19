@@ -6,6 +6,7 @@ import * as vscode from 'vscode';
 import { NativePreview } from '../src/nativePreview';
 import { sourceOf } from '../src/textDocument';
 import { isInside } from '../src/workspacePaths';
+import { verifyHostedPreview } from './hostedPreview';
 import { until } from './wait';
 
 export async function run(): Promise<void> {
@@ -41,6 +42,7 @@ export async function run(): Promise<void> {
         assert.ok(native.capabilities.timelineCombinedPlayback, 'The installed preview plays combined animation programs');
         assert.ok(native.capabilities.timelineProgramTargets, 'The installed preview retains animation resource targets');
         assert.ok(native.capabilities.stateTransitionPreview, 'The installed preview samples explicit state transitions');
+        assert.ok(native.capabilities.hostedAnimationRestoration, 'The installed preview restores the accepted app-hosted timeline');
         const source = sourceOf(document, 'xaml', new vscode.Position(0, 0));
         const snapshot = await native.render(source, { width: 800, height: 520, dark: false }, 1);
         assert.ok(snapshot.image?.png, snapshot.renderError ?? undefined);
@@ -51,6 +53,7 @@ export async function run(): Promise<void> {
         const capabilities = new URLSearchParams(animationQuery);
         assert.equal(capabilities.get('ferroui-design-animation'), '1', 'The installed relay negotiates native application animations');
         assert.equal(capabilities.get('ferroui-design-keyframes'), '1', 'The installed relay negotiates project codec authoring');
+        await verifyHostedPreview(native, source.uri);
         console.log(`Installed FerroUI ${extension.packageJSON.version} passed on VS Code ${vscode.version} (${process.platform}-${process.arch}).`);
     } finally {
         native.dispose();

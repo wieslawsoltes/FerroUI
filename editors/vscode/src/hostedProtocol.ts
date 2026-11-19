@@ -1,5 +1,6 @@
 import type { Source } from './protocol';
-import type { HostedAnimationCatalog, HostedAnimationControl, HostedAnimationFrame, HostedAnimationState, HostedKeyframeDraft, HostedKeyframeSelection } from './hostedAnimationProtocol';
+import type { HostedAnimationCatalog, HostedAnimationControl, HostedAnimationFrame, HostedAnimationPresentation, HostedAnimationRestore,
+    HostedAnimationState, HostedKeyframeDraft, HostedKeyframeSelection } from './hostedAnimationProtocol';
 import type { KeyframeDraftPreview } from './timelineProtocol';
 
 export interface HostedSource {
@@ -8,6 +9,7 @@ export interface HostedSource {
     assembly: string;
     projectPath: string;
     fixture?: string | null;
+    restoreAnimation?: HostedAnimationRestore;
 }
 
 export interface HostedFrame {
@@ -17,6 +19,7 @@ export interface HostedFrame {
     fixture?: string | null;
     fixtures?: string[] | null;
     animations?: HostedAnimationCatalog;
+    animationPresentation?: HostedAnimationPresentation;
 }
 
 export interface HostedAnimationSample {

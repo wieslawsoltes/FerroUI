@@ -33,7 +33,7 @@ export class NativePreview implements vscode.Disposable {
     private nextProject = 0;
     assets: readonly Asset[] = [];
     capabilities: {
-        isolatedDesign?: boolean; appHostedDesign?: boolean; rsxLanguage?: boolean;
+        isolatedDesign?: boolean; appHostedDesign?: boolean; hostedAnimationRestoration?: boolean; rsxLanguage?: boolean;
         stages?: boolean; prototypeEditing?: boolean; stageIncludes?: boolean; projectCatalog?: boolean;
         canvasInteraction?: boolean; canvasFocusOrder?: boolean; projectInventory?: boolean; tokenHandoff?: boolean;
         designFixtures?: boolean; timelineTransport?: boolean; timelineRecording?: boolean; timelineGeometryRecording?: boolean;
