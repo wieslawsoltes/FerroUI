@@ -75,7 +75,7 @@ use std::ptr::NonNull;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 type Device = ProtocolObject<dyn MTLDevice>;
-type Queue = ProtocolObject<dyn MTLCommandQueue>;
+type CommandQueueObject = ProtocolObject<dyn MTLCommandQueue>;
 type CommandBuffer = ProtocolObject<dyn MTLCommandBuffer>;
 type Buffer = ProtocolObject<dyn MTLBuffer>;
 type Texture = ProtocolObject<dyn MTLTexture>;
@@ -389,7 +389,7 @@ fn report_single_sample(reason: &str) {
 /// textures and targets.
 pub struct Scene3DMetalExecutor {
     device: Retained<Device>,
-    queue: Retained<Queue>,
+    queue: Retained<CommandQueueObject>,
     library: Retained<ProtocolObject<dyn MTLLibrary>>,
     vertex_descriptor: Retained<MTLVertexDescriptor>,
     /// `Less` with depth written, and `LessEqual` without.
@@ -430,7 +430,7 @@ impl Scene3DMetalExecutor {
         // SAFETY: the caller hands out valid handles; `retain` takes a reference of its own.
         let device = unsafe { Retained::retain(device.cast::<Device>()) };
         // SAFETY: as above.
-        let queue = unsafe { Retained::retain(queue.cast::<Queue>()) };
+        let queue = unsafe { Retained::retain(queue.cast::<CommandQueueObject>()) };
         match (device, queue) {
             (Some(device), Some(queue)) => Self::with_device(device, queue),
             _ => Err(Scene3DMetalError::new("no Metal device or command queue")),
@@ -439,7 +439,7 @@ impl Scene3DMetalExecutor {
 
     fn with_device(
         device: Retained<Device>,
-        queue: Retained<Queue>,
+        queue: Retained<CommandQueueObject>,
     ) -> Result<Scene3DMetalExecutor, Scene3DMetalError> {
         objc2::rc::autoreleasepool(|_| {
             let options = MTLCompileOptions::new();
