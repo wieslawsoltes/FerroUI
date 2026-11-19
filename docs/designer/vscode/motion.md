@@ -84,6 +84,20 @@ Copy with Ctrl+C or Command+C and paste with Ctrl+V or Command+V. Hold Shift whe
 
 Read `keyframeSelection`, authored tracks, generation, revision, and sequence from `designer_hosted_animations`. Send the program and a `command` to `designer_hosted_keyframe_group_draft` for a checked patch or clipboard text. A key location uses `target`, `property`, and authored `time`. For paste, pass the parsed clipboard value with `destinations` in copied track order, authored `time`, and optional `reverse`. Apply a group through `designer_hosted_keyframe_group` with the same frame fields. The result reports the accepted key locations.
 
+### Manage clips in App Preview
+
+![The Animation clip actions picker shows New Animation Clip, Rename Clip, Duplicate Clip, and Remove Clip beside the running preview](../images/vscode-app-preview-clip-actions.jpg)
+
+1. Open **App Preview** with a current FerroUI app build. Pause playback and open **Animation clip actions** in its toolbar. [Open App Preview](runtime.md#render-with-your-app-in-app-preview)
+2. Choose **New Animation Clip**, then select a live style owner. Use the source line in the picker to distinguish controls with the same name. Give the clip a name, a FerroUI selector, and a duration in seconds. Use whole milliseconds for Rust. The new clip appears in the animation picker. Add its first keys from the source or the docked Timeline.
+3. Choose a clip in the animation picker and reopen **Animation clip actions**. Choose **Rename Clip**, **Duplicate Clip**, or **Remove Clip**. In the comparison view, select the clip to edit when prompted.
+
+A duplicate retains the clip’s timing and keys and receives its own source identity. Renaming a compatible clip retains its elapsed pose. Use Undo in the source editor to revert each operation. Rust clip actions apply to mapped inline styles in the active `rsx!` invocation. A computed style expression stays in Rust source.
+
+![The shared App Preview ruler shows the original and copied clip at 0.85 seconds each beside the same app artboard](../images/vscode-app-preview-copied-clips.jpg)
+
+For MCP, read `clipAuthoring.owners` and `clipAuthoring.programs` from `designer_hosted_animations`. Use the returned generation and frame with `designer_hosted_clip_draft` to plan the edit and `designer_hosted_clip_edit` to apply it. Send `action: "create"` with `owner`, `name`, `selector`, and `duration`. For `rename` and `duplicate`, send `program` and `name`. For `remove`, send `program`. The result includes the selected source key for a new, renamed, or duplicated clip.
+
 ## Rehearse a section
 
 1. Choose a typed XAML or mapped Rust clip whose targets render in the designer. Open **Preview range** in the toolbar and enable **Limit playback to preview range**.
