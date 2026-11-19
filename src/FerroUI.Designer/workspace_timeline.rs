@@ -3,6 +3,8 @@
 mod clipboard;
 #[path = "workspace_timeline/curves.rs"]
 mod curves;
+#[path = "workspace_timeline/easing.rs"]
+mod easing;
 
 use super::*;
 use crate::timeline_lane::{EasingPreview, TimelineLane};
@@ -80,16 +82,15 @@ impl DesignerWorkspace {
             .iter()
             .filter_map(WeakRef::upgrade)
             .any(|lane| lane.is_focused() && !lane.is_ruler());
-        let focused_field = self
+        let inspector_focus = self
             .timeline_inspector()
             .into_iter()
             .flat_map(|row| row.children().to_vec())
-            .filter_map(|control| control.cast::<TextBox>())
-            .find(|input| input.is_focused())
-            .and_then(|input| {
-                input
-                    .name()
-                    .map(|name| (name, input.selection_start(), input.selection_end()))
+            .find(|control| control.is_focused())
+            .and_then(|control| {
+                let name = control.name()?;
+                let selection = control.cast::<TextBox>().map(|input| (input.selection_start(), input.selection_end()));
+                Some((name, selection))
             });
         self.tracks.children().clear();
         self.root
@@ -490,17 +491,18 @@ impl DesignerWorkspace {
         if tracks.is_empty() {
             self.build_timeline_empty_state();
         }
-        if let Some((name, start, end)) = focused_field {
-            if let Some(input) = self
+        if let Some((name, selection)) = inspector_focus {
+            if let Some(control) = self
                 .timeline_inspector()
                 .into_iter()
                 .flat_map(|row| row.children().to_vec())
-                .filter_map(|control| control.cast::<TextBox>())
-                .find(|input| input.name().as_deref() == Some(name.as_str()))
+                .find(|control| control.name().as_deref() == Some(name.as_str()))
             {
-                input.focus();
-                input.set_selection_start(start);
-                input.set_selection_end(end);
+                control.focus();
+                if let (Some((start, end)), Some(input)) = (selection, control.cast::<TextBox>()) {
+                    input.set_selection_start(start);
+                    input.set_selection_end(end);
+                }
             }
         }
     }
@@ -981,60 +983,7 @@ impl DesignerWorkspace {
             .add(key_caption(&format!("{} keyframe", selected.property)).upcast::<Control>());
         let time = key_field(&row, "Time", "KeyframeTime", &key.time.to_string(), 65.0);
         let value = key_field(&row, "Value", "KeyframeValue", &key.value.to_xaml(), 104.0);
-        let curve = key_field(&row, "Curve", "KeyframeCurve", &key.easing.to_xaml(), 112.0);
-        let preview = EasingPreview::new();
-        preview.set_name(Some("KeyframeEasingPreview".into()));
-        preview.set_easing(Some(key.easing.clone()));
-        row.children().add(preview.clone().upcast::<Control>());
-        let weak_preview = preview.downgrade();
-        let weak_curve = curve.downgrade();
-        curve.text_changing(move |_, _| {
-            if let (Some(preview), Some(curve)) = (weak_preview.upgrade(), weak_curve.upgrade()) {
-                preview.set_easing(Easing::parse(&curve.text().unwrap_or_default()).ok());
-            }
-        });
-        let preset = ComboBox::new();
-        preset.set_name(Some("KeyframeEasingPreset".into()));
-        preset.set_width(108.0);
-        preset.classes().add("designer-field");
-        preset.set_min_height(26.0);
-        preset.set_font_size(11.0);
-        let presets = keyframe_easing_presets();
-        for option in presets {
-            preset.items().add(Some(Rc::new(option.label.to_owned())));
-        }
-        preset.items().add(Some(Rc::new("Custom".to_owned())));
-        let index = presets
-            .iter()
-            .position(|option| Easing::parse(option.value).ok().as_ref() == Some(&key.easing))
-            .unwrap_or(presets.len());
-        preset.set_selected_index(index as i32);
-        AutomationProperties::set_name(&preset, Some("Incoming keyframe easing preset"));
-        ToolTip::set_tip(
-            &preset,
-            Some(Rc::new(
-                "Choose an easing preset, then Apply keyframe. Custom curves accept x1,y1,x2,y2."
-                    .to_owned(),
-            )),
-        );
-        let weak_preset = preset.downgrade();
-        let weak_curve = curve.downgrade();
-        preset.selection_changed(move |_, _| {
-            if let (Some(preset), Some(curve)) = (weak_preset.upgrade(), weak_curve.upgrade()) {
-                if let Some(option) = presets.get(preset.selected_index().max(0) as usize) {
-                    curve.set_text(Some(option.value));
-                } else {
-                    curve.focus();
-                }
-            }
-        });
-        row.children().add(preset.upcast::<Control>());
-        ToolTip::set_tip(
-            &curve,
-            Some(Rc::new(
-                "LinearEasing or cubic Bézier x1,y1,x2,y2".to_owned(),
-            )),
-        );
+        let (curve, preview) = easing::easing_fields(&row, &key.easing, !self.session.borrow().is_read_only());
         let apply = button("Apply keyframe");
         apply.classes().add("designer-motion");
         apply.set_name(Some("ApplyKeyframe".into()));
@@ -1080,7 +1029,7 @@ impl DesignerWorkspace {
         });
         let click = commit.clone();
         apply.click(move |_, _| click());
-        for input in [&time, &value, &curve] {
+        for input in [time.upcast::<Control>(), value.upcast(), curve.upcast(), preview.upcast()] {
             let commit = commit.clone();
             input.add_handler(InputElement::key_down_event(), move |_, event| {
                 if event.key == Key::Enter {

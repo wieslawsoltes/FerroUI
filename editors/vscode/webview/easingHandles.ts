@@ -39,13 +39,14 @@ export class EasingHandles {
     private bind(handle: HTMLButtonElement, point: ControlPoint): void {
         handle.onpointerdown = event => this.drag(handle, point, event);
         handle.onkeydown = event => {
-            if (!this.points || this.cancelDrag || event.altKey || event.ctrlKey || event.metaKey) return;
+            if (!this.points || this.cancelDrag || event.altKey) return;
             const position = ['ArrowLeft', 'ArrowRight', 'ArrowDown', 'ArrowUp'].indexOf(event.key);
             if (position < 0) return;
             event.preventDefault();
             event.stopPropagation();
             const axis = position < 2 ? point : point + 1;
-            const step = (position % 2 ? 1 : -1) * (event.shiftKey ? .1 : .01);
+            const amount = event.ctrlKey || event.metaKey ? .001 : event.shiftKey ? .1 : .01;
+            const step = (position % 2 ? 1 : -1) * amount;
             const value = this.points[axis] + step;
             const next = coordinate(axis === point ? clamp(value, 0, 1) : value);
             if (next === this.points[axis]) return;

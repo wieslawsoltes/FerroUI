@@ -2,6 +2,8 @@
 //! and scrubbing remain aligned while zooming. A drag edits a ghost marker and
 //! commits once on release; capture loss or Escape leaves authored keys intact.
 mod curve;
+mod easing_preview;
+pub use easing_preview::EasingPreview;
 
 use ferroui_base::input::{
     IPointer, InputElement, InputElementImpl, InputElementImplExt, Key, KeyEventArgs, KeyModifiers,
@@ -21,7 +23,6 @@ use ferroui_base::{
 };
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::{Control, ControlImpl, ToolTip};
-use ferroui_designer_animation::Easing;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -972,104 +973,6 @@ impl VisualImpl for TimelineLane {
     }
 }
 
-/// A small native graph of the incoming keyframe easing. Hosts can embed it beside
-/// their own editor; sampling follows the animation engine, including overshoot.
-#[repr(C)]
-pub struct EasingPreview {
-    base: Control,
-    easing: RefCell<Option<Easing>>,
-    samples: RefCell<Vec<f64>>,
-}
-ferro_class!(EasingPreview:Control);
-ferro_class_info!(EasingPreview {
-    new: EasingPreview::new
-});
-ferro_impl_classes!(EasingPreview:FerroObjectImpl,StyledElementImpl,LayoutableImpl,InteractiveImpl,InputElementImpl,ControlImpl);
-impl EasingPreview {
-    pub fn new() -> Ref<Self> {
-        let this = instantiate(Self {
-            base: Control::construct(),
-            easing: RefCell::new(None),
-            samples: RefCell::new(Vec::new()),
-        });
-        this.set_width(48.0);
-        this.set_height(26.0);
-        this.set_easing(Some(Easing::Linear));
-        this
-    }
-    /// `None` represents an invalid draft and clears the curve, without touching
-    /// the document or silently displaying the previously accepted easing.
-    pub fn set_easing(&self, easing: Option<Easing>) {
-        let sampled = easing
-            .as_ref()
-            .and_then(|curve| curve.preview_samples().ok());
-        let valid = sampled.is_some();
-        *self.samples.borrow_mut() = sampled.unwrap_or_default();
-        let description = easing.as_ref().filter(|_| valid).map_or_else(
-            || "Invalid easing curve".to_owned(),
-            |curve| format!("Incoming easing: {}", curve.to_xaml()),
-        );
-        *self.easing.borrow_mut() = easing.filter(|_| valid);
-        AutomationProperties::set_name(self, Some(&description));
-        ToolTip::set_tip(self, Some(Rc::new(description)));
-        self.invalidate_visual();
-    }
-    pub fn easing(&self) -> Option<Easing> {
-        self.easing.borrow().clone()
-    }
-}
-impl VisualImpl for EasingPreview {
-    fn render(this: &Self, context: &mut DrawingContext) {
-        let bounds = Rect::from_size(this.bounds().size());
-        let fill = brush(0xff303138);
-        let border: Rc<dyn IPen> = Pen::from_uint32(0xff3b3d46, 1.0).into();
-        context.draw_rectangle(
-            Some(&fill),
-            Some(&border),
-            bounds.deflate(0.5),
-            4.0,
-            4.0,
-            &BoxShadows::default(),
-        );
-        let samples = this.samples.borrow();
-        let left = 5.0;
-        let top = 4.0;
-        let width = (bounds.width - 10.0).max(0.0);
-        let height = (bounds.height - 8.0).max(0.0);
-        if samples.is_empty() {
-            let invalid: Rc<dyn IPen> = Pen::from_uint32(0xffe89595, 1.0).into();
-            context.draw_line(
-                &invalid,
-                Point::new(left, top),
-                Point::new(left + width, top + height),
-            );
-            context.draw_line(
-                &invalid,
-                Point::new(left, top + height),
-                Point::new(left + width, top),
-            );
-            return;
-        }
-        let minimum = samples.iter().copied().fold(0.0, f64::min);
-        let maximum = samples.iter().copied().fold(1.0, f64::max);
-        let point = |index: usize, value: f64| {
-            Point::new(
-                left + width * index as f64 / (samples.len() - 1) as f64,
-                top + height * (1.0 - (value - minimum) / (maximum - minimum)),
-            )
-        };
-        let guide: Rc<dyn IPen> = Pen::from_uint32(0xff575465, 1.0).into();
-        context.draw_line(&guide, point(0, 0.0), point(samples.len() - 1, 1.0));
-        let curve: Rc<dyn IPen> = Pen::from_uint32(0xffb6a2f6, 1.5).into();
-        for index in 1..samples.len() {
-            context.draw_line(
-                &curve,
-                point(index - 1, samples[index - 1]),
-                point(index, samples[index]),
-            );
-        }
-    }
-}
 fn brush(color: u32) -> Rc<dyn IBrush> {
     SolidColorBrush::from_uint32(color).into()
 }

@@ -74,12 +74,12 @@ fn times(workspace: &DesignerWorkspace, target: NodeId, property: &str) -> Vec<f
         .collect()
 }
 
-fn key(lane: &TimelineLane, key: Key, modifiers: KeyModifiers) {
+fn key(control: &Control, key: Key, modifiers: KeyModifiers) {
     let mut event = KeyEventArgs::new();
     event.key = key;
     event.key_modifiers = modifiers;
     event.set_routed_event(Some(InputElement::key_down_event()));
-    lane.raise_event(&event);
+    control.raise_event(&event);
     assert!(event.handled());
 }
 
@@ -91,6 +91,54 @@ fn selected_lane(workspace: &DesignerWorkspace) -> Ref<TimelineLane> {
         .filter_map(WeakRef::upgrade)
         .find(|lane| !lane.is_ruler() && !lane.selected_keys().is_empty())
         .unwrap()
+}
+
+#[test]
+fn studio_easing_keyboard_edits_the_draft_before_one_source_commit() {
+    let mut services = TestServices::styled_window();
+    let focus = TestServices::real_focus();
+    services.keyboard_device = focus.keyboard_device;
+    services.keyboard_navigation = focus.keyboard_navigation;
+    services.input_manager = focus.input_manager;
+    let _app = UnitTestApplication::start(services);
+    let (workspace, target) = workspace();
+    let window = Window::new();
+    window.set_width(1280.0);
+    window.set_height(800.0);
+    window.set_content(Some(Control::boxed(&workspace.root)));
+    window.show();
+    workspace.set_timeline_visible(true);
+    workspace.select_keyframes(&[(target, "Opacity".into(), 1.0)]).unwrap();
+    window.update_layout();
+    Dispatcher::ui_thread().run_jobs(None);
+    let graph = || workspace.timeline_inspector().unwrap().children().to_vec().into_iter()
+        .find_map(|child| child.cast::<EasingPreview>()).unwrap();
+    let editor = graph();
+    assert!(editor.focus(), "Focusable {}, attached {}, visible {}, enabled {}",
+        editor.focusable(), editor.is_attached_to_visual_tree(), editor.is_effectively_visible(), editor.is_effectively_enabled());
+    let original = workspace.session.borrow().authored_source().to_owned();
+    let revision = workspace.session.borrow().document().revision();
+    key(&editor, Key::Up, KeyModifiers::SHIFT);
+    key(&editor, Key::Space, KeyModifiers::NONE);
+    key(&editor, Key::Down, KeyModifiers::META);
+    let easing = Easing::CubicBezier { x1: 0.1, y1: 0.3, x2: 0.8, y2: 0.899 };
+    assert_eq!(editor.easing(), Some(easing.clone()));
+    assert_eq!(workspace.session.borrow().authored_source(), original);
+    let combo = workspace.timeline_inspector().unwrap().children().to_vec().into_iter()
+        .find_map(|child| child.cast::<ComboBox>()).unwrap();
+    assert_eq!(combo.selected_index(), keyframe_easing_presets().len() as i32);
+    assert!(editor.is_focused());
+
+    key(&editor, Key::Enter, KeyModifiers::NONE);
+    let session = workspace.session.borrow();
+    assert_eq!(session.timeline().track(target, "Opacity").unwrap().keyframes[1].easing, easing);
+    assert_eq!(session.document().revision(), revision + 1);
+    drop(session);
+    window.update_layout();
+    Dispatcher::ui_thread().run_jobs(None);
+    assert!(graph().is_focused());
+    workspace.session.borrow_mut().undo().unwrap();
+    assert_eq!(workspace.session.borrow().authored_source(), original);
 }
 
 #[test]

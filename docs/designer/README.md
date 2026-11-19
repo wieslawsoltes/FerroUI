@@ -435,6 +435,14 @@ Selectors are matched by the native style system; per-target underlying values a
 are retained. Resource programs can be previewed against explicit targets. Graphical track lanes
 support scrubbing, keyframe selection and dragging, with explicit time, easing and removal controls.
 
+Select a key and drag either handle in the incoming easing graph. The graph and **Curve**
+field show the draft together. Handle X is bounded from 0 to 1. Drag Y beyond the start or
+end value to add anticipation or overshoot. Escape cancels a drag. To edit with the
+keyboard, focus the graph, press Space to switch handles, and use the arrow keys. Hold
+Shift for larger steps or Ctrl or Command for finer steps. Press Enter or choose
+**Apply keyframe** to write the checked XAML or mapped Rust edit in one Undo step.
+The graph stays focused when a keyboard apply rebuilds the Timeline.
+
 To change the spacing of selected keys, set the playhead to the pivot, enter a **Factor** in the
 selection inspector, and choose **Scale from playhead**. For example, `0.5` halves each key's
 distance from the playhead. Studio preserves each key's value and easing and applies the change in
