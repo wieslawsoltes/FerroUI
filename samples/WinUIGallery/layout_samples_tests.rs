@@ -144,3 +144,42 @@ fn relative_panel_places_the_rectangles_by_their_relations() {
     assert_eq!(position("Rectangle4"), (250.0, 58.0));
     window.close();
 }
+
+#[test]
+fn viewbox_options_size_and_stretch_the_viewbox() {
+    use ferroui_base::media::{Stretch, StretchDirection};
+    use ferroui_controls::{Image, RadioButtons, Viewbox};
+    let _application = start();
+    let root = page("Viewbox");
+    let viewbox = root.get_control::<Viewbox>("Control1");
+    assert!(
+        root.get_control::<Image>("ViewboxImage").source().is_some(),
+        "the source's Slices.png"
+    );
+    // The source's OneWay x:Bind of the size slider's Value to the Width and Height.
+    assert_eq!((viewbox.width(), viewbox.height()), (200.0, 200.0));
+    root.get_control::<Slider>("SizeSlider")
+        .set_range_value(120.0);
+    assert_eq!((viewbox.width(), viewbox.height()), (120.0, 120.0));
+    // Stretch_SelectionChanged: the Tag of the selected option is the Stretch.
+    assert_eq!(viewbox.stretch(), Stretch::Uniform);
+    let stretch = root.get_control::<RadioButtons>("StretchRadioButtons");
+    for (index, expected) in [
+        (0, Stretch::None),
+        (1, Stretch::Fill),
+        (3, Stretch::UniformToFill),
+        (2, Stretch::Uniform),
+    ] {
+        stretch.set_selected_index(index);
+        assert_eq!(viewbox.stretch(), expected);
+    }
+    // StretchDirection_SelectionChanged.
+    assert_eq!(viewbox.stretch_direction(), StretchDirection::Both);
+    let direction = root.get_control::<RadioButtons>("StretchDirectionRadioButtons");
+    direction.set_selected_index(0);
+    assert_eq!(viewbox.stretch_direction(), StretchDirection::UpOnly);
+    direction.set_selected_index(1);
+    assert_eq!(viewbox.stretch_direction(), StretchDirection::DownOnly);
+    direction.set_selected_index(2);
+    assert_eq!(viewbox.stretch_direction(), StretchDirection::Both);
+}

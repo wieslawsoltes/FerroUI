@@ -1706,18 +1706,27 @@
       "examples": []
     },
     "Viewbox": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/Viewbox.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/layout_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/layout_samples_tests.rs",
+          "name": "viewbox_options_size_and_stretch_the_viewbox"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
         }
       ],
-      "notes": "The Viewbox scales native vector content; the upstream bitmap asset is a separate pending sample. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The source example uses native Viewbox with Stretch_SelectionChanged and StretchDirection_SelectionChanged of ViewboxPage.xaml.cs in Rust (layout_samples.rs): the source's bordered content with its four rectangles, Slices.png and text, the Width and Height with the source's OneWay x:Bind of the size slider's Value, and the Stretch (None, Fill, Uniform, UniformToFill) and StretchDirection (UpOnly, DownOnly, Both) options, whose RadioButton Tags are parsed as the enums. The slider's Header is composed; the IsChecked option of each group is its SelectedIndex.",
       "examples": []
     },
     "WrapPanel": {

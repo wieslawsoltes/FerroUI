@@ -1,15 +1,17 @@
-//! The code behind of the pinned Border, Canvas and StackPanel pages in Rust: the handlers of
-//! `BorderPage.xaml.cs`, `CanvasPage.xaml.cs` and `StackPanelPage.xaml.cs`. The Grid and
-//! RelativePanel pages have no code-behind upstream; their options are x:Bind of the markup. The
-//! panels own layout; the sample owns only its options.
+//! The code behind of the pinned Border, Canvas, StackPanel and Viewbox pages in Rust: the handlers
+//! of `BorderPage.xaml.cs`, `CanvasPage.xaml.cs`, `StackPanelPage.xaml.cs` and
+//! `ViewboxPage.xaml.cs`. The Grid and RelativePanel pages have no code-behind upstream; their
+//! options are x:Bind of the markup. The panels own layout; the sample owns only its options.
 
 use ferroui_base::layout::Orientation;
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
-use ferroui_base::media::{Color, Colors, IBrush};
+use ferroui_base::media::{Color, Colors, IBrush, Stretch, StretchDirection};
 use ferroui_base::{Ref, Thickness};
 use ferroui_controls::automation::AutomationProperties;
-use ferroui_controls::primitives::{RangeBase, ToggleButton};
-use ferroui_controls::{Border, Control, RadioButton, Slider, StackPanel};
+use ferroui_controls::primitives::{RangeBase, SelectingItemsControl, ToggleButton};
+use ferroui_controls::{
+    Border, Control, Image, RadioButton, RadioButtons, Slider, StackPanel, Viewbox,
+};
 use std::rc::Rc;
 
 pub(crate) fn wire(page_id: &str, root: &Ref<Control>) {
@@ -17,6 +19,7 @@ pub(crate) fn wire(page_id: &str, root: &Ref<Control>) {
         "Border" => wire_border(root),
         "Canvas" => wire_canvas(root),
         "StackPanel" => wire_stack_panel(root),
+        "Viewbox" => wire_viewbox(root),
         _ => {}
     }
 }
@@ -141,4 +144,67 @@ fn wire_stack_panel(root: &Ref<Control>) {
             }
         });
     }
+}
+
+/// The source of the Viewbox page's image: `ms-appx:///Assets/SampleMedia/Slices.png`.
+const SLICES: &str = "ferres://WinUIGallery/Assets/SampleMedia/Slices.png";
+
+/// The Tag of the selected option of `group`, the source's `selectedItem.Tag`.
+fn selected_tag(group: &RadioButtons) -> Option<String> {
+    group
+        .selected_item()
+        .and_then(|item| Control::from_boxed(&item))
+        .and_then(|item| item.tag())
+        .and_then(|tag| tag.downcast_ref::<String>().cloned())
+}
+
+/// `Stretch_SelectionChanged` and `StretchDirection_SelectionChanged` of `ViewboxPage.xaml.cs`:
+/// the Tag of the selected option, parsed as the enum, sets the Viewbox's Stretch or
+/// StretchDirection (an unknown Tag changes nothing, as the source's `Enum.TryParse`). The image
+/// is the source's Slices.png.
+fn wire_viewbox(root: &Ref<Control>) {
+    if let Ok(bitmap) = crate::assets::load_bitmap(SLICES) {
+        root.get_control::<Image>("ViewboxImage")
+            .set_source(Some(Rc::new(bitmap)));
+    }
+    let viewbox = root.get_control::<Viewbox>("Control1");
+    let stretch = root.get_control::<RadioButtons>("StretchRadioButtons");
+    let weak_stretch = stretch.downgrade();
+    let weak_viewbox = viewbox.downgrade();
+    stretch.property_changed(move |change| {
+        if change.property() != SelectingItemsControl::selected_index_property().as_property() {
+            return;
+        }
+        let (Some(stretch), Some(viewbox)) = (weak_stretch.upgrade(), weak_viewbox.upgrade())
+        else {
+            return;
+        };
+        let value = match selected_tag(&stretch).as_deref() {
+            Some("None") => Stretch::None,
+            Some("Fill") => Stretch::Fill,
+            Some("Uniform") => Stretch::Uniform,
+            Some("UniformToFill") => Stretch::UniformToFill,
+            _ => return,
+        };
+        viewbox.set_stretch(value);
+    });
+    let direction = root.get_control::<RadioButtons>("StretchDirectionRadioButtons");
+    let weak_direction = direction.downgrade();
+    let weak_viewbox = viewbox.downgrade();
+    direction.property_changed(move |change| {
+        if change.property() != SelectingItemsControl::selected_index_property().as_property() {
+            return;
+        }
+        let (Some(direction), Some(viewbox)) = (weak_direction.upgrade(), weak_viewbox.upgrade())
+        else {
+            return;
+        };
+        let value = match selected_tag(&direction).as_deref() {
+            Some("UpOnly") => StretchDirection::UpOnly,
+            Some("DownOnly") => StretchDirection::DownOnly,
+            Some("Both") => StretchDirection::Both,
+            _ => return,
+        };
+        viewbox.set_stretch_direction(value);
+    });
 }
