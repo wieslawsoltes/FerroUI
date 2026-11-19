@@ -91,7 +91,8 @@ fn dispatchStart(token: int) -> int = {
 }
 
 // Runs the application whose dispatcher `registered` is the status of setting
-// (`ferro_frame_dispatcher(function: dispatch)`): checks the library, runs the main loop until
+// (`ferro_frame_dispatcher(function: dispatch)`): checks the library, registers the classes of the
+// selection (`registerTypes`, docs/c-abi.md, section 16), runs the main loop until
 // the last window closes, and returns the status of `ferro_app_run`.
 fn run(registered: int32) -> int = match checkApi() {
     Error { message } => {
@@ -103,7 +104,10 @@ fn run(registered: int32) -> int = match checkApi() {
             print("the dispatcher was not set: ${registered}")
             1
         }
-        true => toInt(ferro_app_run(options: osprey_ffi_null(), onStart: dispatchStart, token: 0))
+        true => {
+            let _ = registerTypes()
+            toInt(ferro_app_run(options: osprey_ffi_null(), onStart: dispatchStart, token: 0))
+        }
     }
 }
 

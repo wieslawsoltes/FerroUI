@@ -381,6 +381,7 @@ def generate_abi(model, names, selection):
         result = f" -> {returns}" if returns else ""
         lines += comment(function["doc"])
         lines.append(f"extern fn {function['name']}({', '.join(params)}){result}")
+    lines += generate_entries(model, selection)
     lines.append("// A null pointer, for the reserved options of ferro_app_run (from the runtime of Osprey).")
     lines.append("extern fn osprey_ffi_null() -> Ptr")
     lines.append("")
@@ -404,6 +405,30 @@ def generate_abi(model, names, selection):
         lines.append("}")
         lines.append("")
     return "\n".join(lines).rstrip() + "\n", len(skipped)
+
+
+def generate_entries(model, selection):
+    """The entries of the classes the selection names (docs/c-abi.md, section 16) and
+    `registerTypes()`, which calls them: a library built without the tables of types knows the
+    classes registered by their entries, and an application linked to it keeps those alone. The
+    full bindings register nothing: the full library knows every class by name."""
+    lines = ["// registerTypes() -> int: registers the classes of the selection, with the units of the theme they",
+             "// need, before the application starts (`run` calls it): what a library built for the",
+             "// selection (without the tables of types) knows. A class that failed fails where it is created."]
+    entries = [] if selection.full else [cls["entry"] for cls in model["classes"]
+                                         if cls.get("entry") and selection.cls(cls)]
+    for entry in entries:
+        lines.append(f"extern fn {entry}() -> int")
+    if not entries:
+        lines.append("fn registerTypes() = 0")
+    else:
+        lines.append("fn registerTypes() = {")
+        for index, entry in enumerate(entries):
+            lines.append(f"    let id{index} = {entry}()")
+        lines.append("    0")
+        lines.append("}")
+    lines.append("")
+    return lines
 
 
 # ---- objects.osp (layer 1) --------------------------------------------------------------------

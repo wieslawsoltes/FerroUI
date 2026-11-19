@@ -613,6 +613,21 @@ extern fn ferro_get_bool_or(object: int, property: int, fallback: int8) -> int8
 // (the caller's own string, returned as it is) in place of `NULL` when the read fails (the
 // failure is recorded): for a language whose strings cannot be `NULL`. UI thread only.
 extern fn ferro_get_cstr_or(object: int, property: int, fallback: string) -> string
+// registerTypes() -> int: registers the classes of the selection, with the units of the theme they
+// need, before the application starts (`run` calls it): what a library built for the
+// selection (without the tables of types) knows. A class that failed fails where it is created.
+extern fn ferro_type_button() -> int
+extern fn ferro_type_stack_panel() -> int
+extern fn ferro_type_text_block() -> int
+extern fn ferro_type_window() -> int
+fn registerTypes() = {
+    let id0 = ferro_type_button()
+    let id1 = ferro_type_stack_panel()
+    let id2 = ferro_type_text_block()
+    let id3 = ferro_type_window()
+    0
+}
+
 // A null pointer, for the reserved options of ferro_app_run (from the runtime of Osprey).
 extern fn osprey_ffi_null() -> Ptr
 
