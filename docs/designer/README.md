@@ -505,16 +505,47 @@ rsx! {
 ```
 
 The VS Code designer maps fully qualified FerroUI builders in the active `rsx!` invocation.
-It supports a literal selector and millisecond duration, an optional delay and fill mode,
-and a literal cue and scalar setter per key. Opacity and the `Layoutable` width, height,
-and min/max size properties are mapped. Keep computed values and other style expressions
-in Rust. The preview reports which expressions it omitted.
+It supports literal selectors, millisecond duration and delay, fill, iteration count, and
+named easing. Keyframes can use scalar values and supported native geometry constructors.
+When several setters share a Rust keyframe, the designer can edit each value. Edit their
+common cue and easing together in Rust. Use the warning icon in Timeline or App Preview
+to see an explanation for each unsupported clip and open its declaration.
+
+### Project animation accessors
+
+A `MarkupAssembly` can declare the correspondence between a fully qualified Rust getter
+in `KeyFrameBuilder::set` and a styled property from the build-generated XAML schema.
+Use the local `crate::` spelling or the dependency crate's qualified path. The getter
+must return the same registered property as the named accessor.
+
+```rust,ignore
+(
+    "FerroUI.Designer.RsxAnimation.v1:crate::app_preview::motion::review_corner_property",
+    "::ferroui_controls::Border::corner_radius_property",
+)
+```
+
+The mapper reads the registered value type from Cargo's `.xamlmeta` outputs. It handles
+`f64`, `CornerRadius`, `Thickness`, `Point`, `Vector`, `Size`, and `Rect` values when the
+authored arguments use supported literal forms, such as `CornerRadius::new` or `uniform`.
+An edit uses the existing constructor shape and patches its numeric arguments in place.
+Use a named selector such as `#ReviewCard` for a project-only control. Open App Preview
+to load the project's registered control and animator. See the [Todo Workbench motion
+example](../../samples/TodoWorkbench/app_preview/motion.rs).
 
 Select a key in Timeline to change its time, value, or incoming spline. Studio checks the
 native track and the helper patches the original Rust tokens in a single undoable edit.
 Source reveal takes you to the animation declaration in the active invocation. Agents use
 `designer_keyframe_draft` and the `designer_program` action `upsert_keyframe` with the current
 designer revision.
+
+App Preview validates the same mapped Rust key against the application's loaded animation and
+codec. It sends a source-checked Rust patch to the editor and keeps the compatible elapsed
+position when the edited invocation renders. An isolated preview uses the native animators
+registered in the designer process. For project-specific motion, use App Preview and its
+`designer_hosted_keyframe_draft` and `designer_hosted_keyframe` tools. Agents can read
+`sourceIssues` in the program catalog and navigate with `designer_animation_issue` or the
+app-hosted animation action `reveal_issue`.
 
 ## Visual states, transitions and behaviors
 

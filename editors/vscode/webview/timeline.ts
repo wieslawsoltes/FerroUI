@@ -22,6 +22,7 @@ declare function acquireVsCodeApi(): {
 const vscode = acquireVsCodeApi();
 const status = element('timeline-status');
 const toolbar = element('timeline-toolbar');
+const sourceIssues = element<HTMLButtonElement>('timeline-source-issues');
 const container = element('timeline-program');
 const programs = element<HTMLSelectElement>('timeline-programs');
 const snap = element<HTMLSelectElement>('timeline-snap');
@@ -118,6 +119,9 @@ record.addEventListener('click', () => {
 actions.addEventListener('click', () => {
     if (model.frame && !pending && !keyEdit) vscode.postMessage({ type: 'programActions', frame: model.frame, program });
 });
+sourceIssues.onclick = () => {
+    if (model.frame && !pending && !keyEdit) vscode.postMessage({ type: 'sourceIssues', frame: model.frame });
+};
 keyActions.addEventListener('click', () => editKeys(selection.keys, model.frame));
 slider.addEventListener('input', () => queueSeek(slider.valueAsNumber));
 function queueSeek(seconds: number): void {
@@ -209,6 +213,8 @@ function showTracks(): void {
     if (selected && model.frame) remember(selected);
     const timeline = selected?.timeline;
     toolbar.hidden = !model.frame && !selected;
+    sourceIssues.hidden = !model.sourceIssues?.length;
+    sourceIssues.disabled = !model.frame;
     container.hidden = !timeline;
     const choices = JSON.stringify(available.map(({ id, name }) => [id, name]));
     if (lastPrograms !== choices) {

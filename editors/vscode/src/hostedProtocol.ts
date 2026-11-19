@@ -42,6 +42,7 @@ export type HostedInput = { revision: number; sequence: number; x: number; y: nu
 export type FromHosted = HostedInput | { type: 'ready' | 'refresh' }
     | { type: 'animation'; request: number; frame: HostedAnimationFrame; control: HostedAnimationControl }
     | { type: 'animationTargets' | 'animationSource'; frame: HostedAnimationFrame; program: number }
+    | { type: 'animationIssues'; frame: HostedAnimationFrame }
     | { type: 'chooseKeyframe'; frame: HostedAnimationFrame; program: number }
     | { type: 'curve'; frame: HostedAnimationFrame; request: number; query: HostedCurveQuery }
     | { type: 'keyframeDraft'; frame: HostedAnimationFrame; request: number; draft: HostedKeyframeDraft; apply: boolean }

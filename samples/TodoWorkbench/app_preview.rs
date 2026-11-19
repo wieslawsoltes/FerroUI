@@ -19,16 +19,23 @@ use std::{fs::File, path::Path};
 use std::rc::Rc;
 
 mod animation_codec;
+mod motion;
 
 static ASSEMBLY: MarkupAssembly = MarkupAssembly {
     name: "todo-workbench",
     crate_name: "todo_workbench",
     xmlns_definitions: &[],
     xmlns_prefixes: &[],
-    metadata: &[(
-        "FerroUI.Designer.Rsx.v1:TodoWorkbench.Design.PreviewBadge",
-        r#"{"path":"crate::app_preview::PreviewBadge","inherit":true}"#,
-    )],
+    metadata: &[
+        (
+            "FerroUI.Designer.Rsx.v1:TodoWorkbench.Design.PreviewBadge",
+            r#"{"path":"crate::app_preview::PreviewBadge","inherit":true}"#,
+        ),
+        (
+            "FerroUI.Designer.RsxAnimation.v1:crate::app_preview::motion::review_corner_property",
+            "::ferroui_controls::Border::corner_radius_property",
+        ),
+    ],
 };
 
 pub(crate) fn start_if_requested() {
@@ -49,6 +56,9 @@ pub(crate) fn start_if_requested() {
 }
 
 fn register_fixtures() {
+    register_preview_fixture("/app_preview/motion.rs", "Compiled motion", || {
+        Ok(PreviewFixture::RustView(motion::view()))
+    }).expect("valid Todo Workbench motion fixture");
     for (name, text) in [("Loading", "Loading tasks…"), ("Ready", "Ready to review")] {
         register_preview_fixture("/HostedPreview.xaml", name, move || {
             Ok(PreviewFixture::DataContext(Rc::new(text.to_owned())))

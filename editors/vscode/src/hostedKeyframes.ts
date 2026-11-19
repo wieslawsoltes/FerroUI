@@ -4,7 +4,7 @@ import { applyTextEdits } from './textDocument';
 
 export async function chooseHostedKeyframe(program: HostedAnimationProgram) {
     const authoring = program.authoring;
-    if (!authoring) throw new Error('Choose an editable animation in the current XAML preview.');
+    if (!authoring) throw new Error('Choose an editable animation in the current application preview.');
     const seconds = new Intl.NumberFormat(undefined, { maximumFractionDigits: 7 });
     return vscode.window.showQuickPick(authoring.tracks.flatMap(track => track.keyframes.map(keyframe => ({
         label: track.property,

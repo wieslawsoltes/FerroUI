@@ -3,6 +3,7 @@ import type { StateTransitionControl, StateTransitionPosition } from './stateTra
 
 export interface TimelineKeyframe { time: number; value_text: string; easing_text: string; value_kind?: string }
 export interface TimelineTrack { target: number; property: string; keyframes: TimelineKeyframe[] }
+export interface AnimationSourceIssue { range: Range; reason: string }
 export interface KeyframeLocation { target: number; property: string; time: number }
 export type KeyframeGroupEdit = { action: 'move_keyframes' | 'duplicate_keyframes'; offset: number }
     | { action: 'remove_keyframes' };
@@ -71,6 +72,7 @@ export interface TimelineState {
     frame?: FrameTarget;
     documentVersion?: number;
     programs: TimelineProgram[];
+    sourceIssues?: AnimationSourceIssue[];
     names: Record<number, string>;
     writable: boolean;
     canRecord?: boolean;
@@ -100,6 +102,7 @@ export type FromTimeline =
     | { type: 'programActions'; frame: FrameTarget; program: number | undefined }
     | { type: 'programTargets'; frame: FrameTarget; program: number }
     | { type: 'revealProgram'; frame: FrameTarget; program: number }
+    | { type: 'sourceIssues'; frame: FrameTarget }
     | { type: 'recordKeyframe'; frame: FrameTarget; program: number; time: number; track?: number }
     | TimelineCurveRequest
     | TimelineKeyframeRequest

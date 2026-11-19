@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { choose, editText, editTime, type StudioContext } from './studioContext';
 import { editAnimationTiming } from './studioAnimationTiming';
-import type { TimelineProgram } from './timelineProtocol';
+import type { AnimationSourceIssue, TimelineProgram } from './timelineProtocol';
 
 export async function createAnimationProgram(context: StudioContext, owner: number): Promise<void> {
     const name = (await editText('Animation name'))?.trim();
@@ -33,6 +33,15 @@ export async function revealAnimationProgram(context: StudioContext, program: Ti
     if (!program.sourceRange) return context.reveal(program.id);
     context.ensure();
     await context.panel.revealSource({ session: context.panel.session, token: context.token }, program.sourceRange);
+}
+
+export async function chooseAnimationIssue(issues: readonly AnimationSourceIssue[] = []): Promise<AnimationSourceIssue | undefined> {
+    const choice = await vscode.window.showQuickPick(issues.map(issue => ({
+        label: `$(go-to-file) Line ${issue.range.start.line + 1}`,
+        description: issue.reason,
+        issue,
+    })), { title: 'Open Rust animation in source', matchOnDescription: true });
+    return choice?.issue;
 }
 
 export async function showAnimationActions(context: StudioContext, program: TimelineProgram | undefined): Promise<void> {

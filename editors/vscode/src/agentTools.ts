@@ -8,7 +8,7 @@ import type { DesignerWorkbench } from './designerWorkbench';
 import { runEditorHistory } from './editorHistory';
 import type { HotReload } from './hotReload';
 import type { HostedDesign } from './hostedDesign';
-import type { HostedAnimationControl, HostedCurveQuery, HostedKeyframeDraft } from './hostedAnimationProtocol';
+import type { HostedAnimationAction, HostedCurveQuery, HostedKeyframeDraft } from './hostedAnimationProtocol';
 import type { ProjectFile, ProjectInventory } from './projectInventory';
 import type { ProjectScaffold } from './projectScaffold';
 import type { RuntimeSourceTools } from './runtimeSourceTools';
@@ -17,7 +17,7 @@ import { renameRsxControl } from './rsxRename';
 import type { RuntimeTarget } from './runtimeConnections';
 import type { StagesPanel } from './stagesPanel';
 import type { PrototypeCommand, StageChange } from './stagesProtocol';
-import type { TimelineControl } from './timelineProtocol';
+import type { AnimationSourceIssue, TimelineControl } from './timelineProtocol';
 import type { StateTransitionControl } from './stateTransitionProtocol';
 import type { CanvasAction, CanvasInteraction, DesignerView, DragOrigin, DropTarget, OutlineMode, Placement } from './protocol';
 import { applyTextEdits } from './textDocument';
@@ -155,7 +155,17 @@ export class AgentTools {
             case 'designer_hosted_image': return this.hosted.image(document.uri);
             case 'designer_hosted_animation':
                 return this.hosted.animate(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },
-                    args.arguments as HostedAnimationControl | { action: 'reveal'; program: number }, signal);
+                    args.arguments as HostedAnimationAction, signal);
+            case 'designer_animation_issue': {
+                const frame = { session: panel.session, token: args.expected_revision };
+                if (!panel.canUse(frame)) throw new Error('Read the current designer revision.');
+                const catalog = await panel.studioQuery('designer_programs', { include_source: false }, undefined, signal) as { sourceIssues?: AnimationSourceIssue[] };
+                signal.throwIfAborted();
+                const issue = catalog.sourceIssues?.[args.index!];
+                if (!issue || !panel.canUse(frame)) throw new Error('Choose a source issue from the current designer revision.');
+                await panel.revealSource(frame, issue.range);
+                return issue;
+            }
             case 'designer_hosted_keyframe_draft':
             case 'designer_hosted_keyframe':
                 return this.hosted.keyframe(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },

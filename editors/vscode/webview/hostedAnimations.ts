@@ -9,6 +9,7 @@ export class HostedAnimationView {
     private readonly programs = element<HTMLSelectElement>('hosted-animation-program');
     private readonly targets = element<HTMLButtonElement>('hosted-animation-targets');
     private readonly source = element<HTMLButtonElement>('hosted-animation-source');
+    private readonly issues = element<HTMLButtonElement>('hosted-animation-issues');
     private readonly edit = element<HTMLButtonElement>('hosted-animation-keyframe');
     private readonly play = element<HTMLButtonElement>('hosted-animation-play');
     private readonly stop = element<HTMLButtonElement>('hosted-animation-stop');
@@ -40,6 +41,9 @@ export class HostedAnimationView {
         };
         this.targets.onclick = () => this.choose('animationTargets');
         this.source.onclick = () => this.choose('animationSource');
+        this.issues.onclick = () => {
+            if (this.canUse() && this.decoded) this.send({ type: 'animationIssues', frame: this.decoded });
+        };
         this.edit.onclick = () => this.choose('chooseKeyframe');
         this.play.onclick = () => {
             if (this.state.position?.playing) this.control({ action: 'pause' }, true);
@@ -133,7 +137,10 @@ export class HostedAnimationView {
         this.programs.title = program?.customAnimator ? `${program.name} · Registered animator` : program?.name ?? '';
         this.targets.disabled = !usable || !program?.compatibleTargets.length;
         labelButton(this.targets, selectedTargets?.length ? `Choose preview targets (${selectedTargets.length} selected)` : 'Choose preview targets');
-        this.source.disabled = !usable;
+        this.source.disabled = !usable || program?.sourceOffset == null;
+        this.issues.hidden = !this.state.sourceIssues?.length;
+        this.issues.disabled = !this.canUse();
+        labelButton(this.source, program?.sourceOffset == null ? 'Animation source is unavailable' : 'Reveal animation in source');
         this.edit.hidden = !program?.authoring;
         this.edit.disabled = !usable;
         this.keyframes.follow(usable ? this.state.frame : undefined, this.documentVersion, program?.id);

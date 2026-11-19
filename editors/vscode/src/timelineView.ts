@@ -5,12 +5,12 @@ import { errorMessage, type FrameTarget } from './protocol';
 import type { StateTransitionControl, StateTransitionRoute } from './stateTransitionProtocol';
 import { choose, StudioContext } from './studioContext';
 import { chooseKeyframeGroupEdit, keyframeOptions } from './studioKeyframes';
-import { chooseAnimationTargets, revealAnimationProgram, showAnimationActions } from './studioPrograms';
+import { chooseAnimationIssue, chooseAnimationTargets, revealAnimationProgram, showAnimationActions } from './studioPrograms';
 import { authorTimelineKeyframe } from './timelineKeyframeAuthoring';
 import { positionFromPose, TimelinePlayback } from './timelinePlayback';
 import { canPreviewProgram, previewClock } from './timelinePrograms';
 import { TimelineTransitions } from './timelineTransitions';
-import type { CurvePoint, FromTimeline, KeyframeLocation, TimelineControl, TimelineProgram, TimelineState, ToTimeline } from './timelineProtocol';
+import type { AnimationSourceIssue, CurvePoint, FromTimeline, KeyframeLocation, TimelineControl, TimelineProgram, TimelineState, ToTimeline } from './timelineProtocol';
 import { timelineHtml } from './view';
 
 export const TIMELINE_VIEW = 'ferroui.timeline';
@@ -21,6 +21,7 @@ interface Catalog {
     token: number | undefined;
     pending: Promise<TimelineProgram[]>;
     programs?: TimelineProgram[];
+    sourceIssues?: AnimationSourceIssue[];
     retained?: TimelineProgram[];
     error?: string;
 }
@@ -111,7 +112,11 @@ export class TimelineView implements vscode.Disposable {
         const key = `${panel.session}:${panel.document.version}:${block?.line ?? 0}:${block?.character ?? 0}:${panel.timelineCatalogEpoch}`;
         if (this.catalog?.key === key && (!this.catalog.error || this.catalog.token === panel.currentToken)) return this.catalog;
         const pending = panel.studioQuery('designer_programs', { include_source: false, include_keyframe_text: true },
-            undefined, AbortSignal.timeout(15_000)).then(result => (result as { programs: TimelineProgram[] }).programs);
+            undefined, AbortSignal.timeout(15_000)).then(result => {
+                const authored = result as { programs: TimelineProgram[]; sourceIssues?: AnimationSourceIssue[] };
+                catalog.sourceIssues = authored.sourceIssues;
+                return authored.programs;
+            });
         const previous = this.catalog?.session === panel.session ? this.catalog : undefined;
         const catalog: Catalog = this.catalog = { key, session: panel.session, token: panel.currentToken, pending,
             retained: previous?.programs ?? previous?.retained };
@@ -155,7 +160,7 @@ export class TimelineView implements vscode.Disposable {
             ?? (catalog?.programs ? undefined : 'Loading animation programs…');
         const names = Object.fromEntries((panel?.nodes ?? []).map(node => [node.id, node.name ?? node.label]));
         this.view.show({ frame: catalog?.programs ? frame : undefined, documentVersion: panel?.document.version,
-            programs, message, names, writable: panel?.language === 'xaml', position,
+            programs, message, names, writable: panel?.language === 'xaml', position, sourceIssues: catalog?.sourceIssues,
             canEditKeyframes: panel?.supportsTimelineKeyframeDrafts,
             canShowCurves: panel?.supportsTimelineCurves,
             curveCatalog: panel?.supportsTimelineCurves && catalog?.programs ? catalog.key : undefined,
@@ -174,6 +179,17 @@ export class TimelineView implements vscode.Disposable {
                 await this.controlTransition(panel, message.frame, message.control, AbortSignal.timeout(15_000));
             } else {
                 const context = new StudioContext(panel, message.frame.token, () => this.panel === panel);
+                if (message.type === 'sourceIssues') {
+                    const catalog = this.programs(panel);
+                    await catalog.pending;
+                    context.ensure();
+                    const issue = await chooseAnimationIssue(catalog.sourceIssues);
+                    if (issue) {
+                        context.ensure();
+                        await panel.revealSource(message.frame, issue.range);
+                    }
+                    return;
+                }
                 if (message.type === 'keyframeDraft') {
                     this.view.post(await authorTimelineKeyframe(context, message, () => this.programs(panel).pending));
                     return;

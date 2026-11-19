@@ -265,6 +265,7 @@ export function hostedHtml(webview: vscode.Webview, root: vscode.Uri): string {
 <header class="toolbar hosted-toolbar" aria-label="Application preview controls">
     <label id="hosted-fixture-label" class="metric" hidden>${icon('database')}<select id="hosted-fixture" aria-label="Preview fixture"></select></label>
     ${tool('hosted-refresh', 'refresh', 'Refresh Source')}
+    ${tool('hosted-animation-issues', 'warning', 'Open unsupported Rust animations in source', 'hidden')}
 </header>
 <section id="hosted-animations" aria-label="Application animations" hidden>
     <div class="toolbar hosted-animation-toolbar">
@@ -419,6 +420,7 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
         </div>
         ${tool('timeline-preview-targets', 'target', 'Choose preview targets', 'hidden')}
         ${tool('timeline-source', 'go-to-file', 'Reveal animation in source', 'hidden')}
+        ${tool('timeline-source-issues', 'warning', 'Open unsupported Rust animations in source', 'hidden')}
     </div>
     <section id="timeline-native-source" class="timeline-native-preview" hidden>
         <p id="timeline-preview-note" class="dock-message"></p>

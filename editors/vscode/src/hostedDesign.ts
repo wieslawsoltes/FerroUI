@@ -4,13 +4,14 @@ import { setTimeout as delay } from 'node:timers/promises';
 import * as vscode from 'vscode';
 import type { BuiltProject } from './builtProjects';
 import { type CargoSelection, type CargoTarget, discoverCargoTargets, selectCargoTarget } from './cargoTarget';
-import type { HostedAnimationControl, HostedAnimationFrame, HostedAnimationRequest, HostedCurveQuery, HostedKeyframeDraft } from './hostedAnimationProtocol';
+import type { HostedAnimationAction, HostedAnimationFrame, HostedAnimationRequest, HostedCurveQuery, HostedKeyframeDraft } from './hostedAnimationProtocol';
 import { HostedAnimations } from './hostedAnimations';
 import { applyHostedKeyframePatch, chooseHostedKeyframe } from './hostedKeyframes';
 import type { FromHosted, HostedAnimationSample, HostedFixtureCatalog, HostedFrame, ToHosted } from './hostedProtocol';
 import { NativePreview } from './nativePreview';
 import { errorMessage, type Language } from './protocol';
 import { buildCargo, launchArtifact, type ProjectMetadata, type ReloadProcess } from './reloadProcess';
+import { chooseAnimationIssue } from './studioPrograms';
 import { languageOf, sourceOf } from './textDocument';
 import { hostedHtml, webviewOptions } from './view';
 import { isInside, isWorkspaceFile } from './workspacePaths';
@@ -99,11 +100,15 @@ export class HostedDesign implements vscode.Disposable {
     }
 
     async animate(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame,
-        control: HostedAnimationControl | { action: 'reveal'; program: number }, signal: AbortSignal) {
+        control: HostedAnimationAction, signal: AbortSignal) {
         signal.throwIfAborted();
         const session = this.session(uri);
         if (session.generation !== generation) throw new Error('Read the current application preview generation.');
         if (control.action === 'reveal') await session.revealAnimation(frame, control.program);
+        else if (control.action === 'reveal_issue') {
+            if (!Number.isSafeInteger(control.index)) throw new Error('Choose a source issue by its index.');
+            await session.revealAnimationIssue(frame, control.index);
+        }
         else {
             session.panel.reveal(session.panel.viewColumn, true);
             await session.animations.control(frame, control, signal);
@@ -318,14 +323,30 @@ class HostedSession {
     }
 
     async revealAnimation(frame: HostedAnimationFrame, id: number): Promise<void> {
-        if (this.language !== 'xaml') throw new Error('The application animation has no mapped Rust declaration.');
         const program = this.animations.program(frame, id);
+        if (program.sourceOffset == null) throw new Error('The application animation has no mapped declaration.');
         const document = this.editor.document;
         const position = document.positionAt(program.sourceOffset);
         const editor = await vscode.window.showTextDocument(document, { viewColumn: this.editor.viewColumn });
         if (frame.revision !== this.revision) throw new Error('The source changed before revealing the animation.');
         editor.selection = new vscode.Selection(position, position);
         editor.revealRange(new vscode.Range(position, position), vscode.TextEditorRevealType.InCenterIfOutsideViewport);
+    }
+
+    async revealAnimationIssue(frame: HostedAnimationFrame, index?: number): Promise<void> {
+        if (this.currentFrame?.sequence !== frame.sequence || frame.revision !== this.revision) {
+            throw new Error('Read the current application preview frame.');
+        }
+        const issues = this.animations.state.sourceIssues;
+        const issue = index === undefined ? await chooseAnimationIssue(issues) : issues?.[index];
+        if (index !== undefined && !issue) throw new Error('Choose an unsupported animation from the current source.');
+        if (!issue) return;
+        const editor = await vscode.window.showTextDocument(this.editor.document, { viewColumn: this.editor.viewColumn });
+        if (frame.revision !== this.revision) throw new Error('The source changed before revealing the animation.');
+        const { start, end } = issue.range;
+        const range = new vscode.Range(start.line, start.character, end.line, end.character);
+        editor.selection = new vscode.Selection(range.start, range.end);
+        editor.revealRange(range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
     }
 
     private async chooseAnimationTargets(frame: HostedAnimationFrame, id: number): Promise<void> {
@@ -347,7 +368,7 @@ class HostedSession {
         await this.polling;
         signal.throwIfAborted();
         const program = this.animations.program(frame, draft.program);
-        if (this.language !== 'xaml' || !program.authoring) throw new Error('Choose an editable animation in the current XAML preview.');
+        if (!program.authoring) throw new Error('Choose an editable animation in the current application preview.');
         const client = this.client;
         if (!client || this.pending || this.animations.driving || this.currentFrame?.sequence !== frame.sequence) {
             throw new Error('Wait for the current application preview frame.');
@@ -416,6 +437,11 @@ class HostedSession {
             return;
         }
         if (message.type === 'refresh') { this.update(); return; }
+        if (message.type === 'animationIssues') {
+            try { await this.revealAnimationIssue(message.frame); }
+            catch (error) { this.report(errorMessage(error), Boolean(this.currentFrame)); }
+            return;
+        }
         if (message.type === 'curve') {
             const reply = { type: 'curveReply' as const, request: message.request, frame: message.frame };
             try {

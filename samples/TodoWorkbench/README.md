@@ -56,6 +56,10 @@ FERROUI_EDITOR_SOURCE=1 cargo run -p todo-workbench --features app-preview,mcp -
 Add `"app-preview"` to the target's features and open
 `samples/TodoWorkbench/HostedPreview.xaml`. Run **FerroUI: Open App-Hosted Design**.
 The application registers its own `PreviewBadge` control and markup assembly.
+Open [motion.rs](app_preview/motion.rs) with **Open App-Hosted Design** to preview and edit a
+project-registered `CornerRadius` clip. At one second, the two-second clip uses the app's
+quadratic animator to reach radius 8. Choose **Edit application keyframe** to retime a literal
+or change its four radii. VS Code applies one undoable edit to the Rust buffer.
 Its build exports the control's XAML schema for completion and type checking.
 Edit the XAML, or click the preview's text box and use **Send Text**. The app's
 native binding updates the badge. Choose **Loading** or **Ready** in Fixture to

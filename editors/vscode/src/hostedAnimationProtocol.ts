@@ -1,4 +1,4 @@
-import type { KeyframeDraft, KeyframeDraftPreview, TimelineCurveRequest, TimelineKeyframe, TimelineTrack } from './timelineProtocol';
+import type { AnimationSourceIssue, KeyframeDraft, KeyframeDraftPreview, TimelineCurveRequest, TimelineKeyframe, TimelineTrack } from './timelineProtocol';
 
 export interface HostedAnimationProgram {
     id: number;
@@ -8,7 +8,7 @@ export interface HostedAnimationProgram {
     totalDuration: number | null;
     defaultTargets: number[];
     compatibleTargets: number[];
-    sourceOffset: number;
+    sourceOffset: number | null;
     customAnimator: boolean;
     authoring?: { codec: string; tracks: TimelineTrack[] } | null;
     curveTracks?: TimelineTrack[] | null;
@@ -23,6 +23,7 @@ export interface HostedAnimationTarget {
 export interface HostedAnimationCatalog {
     programs: HostedAnimationProgram[];
     targets: HostedAnimationTarget[];
+    sourceIssues?: AnimationSourceIssue[];
 }
 
 export interface HostedAnimationFrame {
@@ -44,6 +45,10 @@ export type HostedAnimationControl =
     | { action: 'pause' }
     | { action: 'stop' }
     | { action: 'targets'; program: number; targets?: number[] };
+
+export type HostedAnimationAction = HostedAnimationControl
+    | { action: 'reveal'; program: number }
+    | { action: 'reveal_issue'; index: number };
 
 export interface HostedAnimationPosition {
     program: number;
