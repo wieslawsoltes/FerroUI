@@ -1,12 +1,21 @@
 //! The UI thread rule: UI objects belong to one thread, the one that called [`ferro_init`]. A call
 //! of a UI function from another thread returns [`FERRO_WRONG_THREAD`], and [`ferro_post`] runs
 //! work on the UI thread from any thread through its dispatcher.
+//!
+//! **The check costs one comparison.** The UI thread is remembered as a number that tells live
+//! threads apart and that the calling thread reads without a call where the platform allows
+//! ([`thread_token`]: the thread register on Apple arm64, `pthread_self` on other Unix systems,
+//! `GetCurrentThreadId` on Windows), so the check reads no thread-local variable (a call into the
+//! dynamic loader on macOS, a table lookup on Android). The state of the ABI that belongs to the
+//! UI thread (the handle table, the resolved IDs) lives in statics behind [`UiCell`], which checks
+//! the thread on every access: one comparison in place of a thread-local lookup and a borrow.
 
 use crate::error::{guard, status, Error, Result};
 use crate::{FerroPostDataFn, FerroPostFn, FerroStatus, FERRO_NOT_INITIALIZED, FERRO_NULL_POINTER, FERRO_WRONG_THREAD};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
-use std::cell::Cell;
+use std::cell::{Cell, UnsafeCell};
 use std::ffi::c_void;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, OnceLock};
 use std::thread::ThreadId;
 
@@ -18,32 +27,114 @@ struct UiThread {
 
 static UI_THREAD: OnceLock<UiThread> = OnceLock::new();
 
-ferroui_base::ferro_thread_local! {
-    /// Whether this thread is known to be the UI thread: the check of every UI call reads this
-    /// cell and nothing else once it is set.
-    static ON_UI_THREAD: Cell<bool> = const { Cell::new(false) };
+/// The [`thread_token`] of the UI thread, `0` before there is one.
+static UI_TOKEN: AtomicUsize = AtomicUsize::new(0);
+
+/// A number that tells the calling thread apart from every other live thread, never `0`.
+#[inline(always)]
+pub(crate) fn thread_token() -> usize {
+    #[cfg(all(target_arch = "aarch64", target_vendor = "apple"))]
+    {
+        // The base of the thread-specific data of the thread: one register read.
+        let token: usize;
+        // SAFETY: reads a register that user code may read; no memory, no flags.
+        unsafe { std::arch::asm!("mrs {}, tpidrro_el0", out(reg) token, options(nomem, nostack, preserves_flags)) };
+        token
+    }
+    #[cfg(all(unix, not(all(target_arch = "aarch64", target_vendor = "apple"))))]
+    {
+        extern "C" {
+            fn pthread_self() -> usize;
+        }
+        // SAFETY: `pthread_self` has no preconditions.
+        unsafe { pthread_self() }
+    }
+    #[cfg(windows)]
+    {
+        extern "system" {
+            fn GetCurrentThreadId() -> u32;
+        }
+        // SAFETY: `GetCurrentThreadId` has no preconditions.
+        unsafe { GetCurrentThreadId() as usize }
+    }
+    #[cfg(not(any(unix, windows)))]
+    {
+        // A target without threads of its own (WebAssembly without threads): one thread.
+        1
+    }
+}
+
+/// Whether the calling thread is the UI thread: one comparison.
+#[inline(always)]
+pub(crate) fn on_ui_thread() -> bool {
+    let token = UI_TOKEN.load(Ordering::Relaxed);
+    token != 0 && token == thread_token()
 }
 
 /// Fails unless the calling thread is the UI thread.
 #[inline]
 pub(crate) fn check() -> Result<()> {
-    if ON_UI_THREAD.get() {
+    if on_ui_thread() {
         Ok(())
     } else {
-        check_slow()
+        Err(check_slow())
     }
 }
 
 #[cold]
-fn check_slow() -> Result<()> {
+fn check_slow() -> Error {
     match UI_THREAD.get() {
-        None => Err(Error::new(FERRO_NOT_INITIALIZED, "no thread is the UI thread yet: call ferro_init or ferro_app_run")),
-        Some(ui) if ui.id == std::thread::current().id() => {
-            ON_UI_THREAD.set(true);
-            Ok(())
-        }
-        Some(_) => Err(Error::new(FERRO_WRONG_THREAD, "UI objects belong to the UI thread: post the work with ferro_post")),
+        None => Error::new(FERRO_NOT_INITIALIZED, "no thread is the UI thread yet: call ferro_init or ferro_app_run"),
+        Some(_) => Error::new(FERRO_WRONG_THREAD, "UI objects belong to the UI thread: post the work with ferro_post"),
     }
+}
+
+/// State of the UI thread in a static: every access checks that the calling thread is the UI
+/// thread (one comparison, [`on_ui_thread`]) and that no access of the cell is running (the
+/// closure of an access does not reach the same cell again), which is what makes the mutable
+/// reference it hands out unique.
+pub(crate) struct UiCell<T> {
+    value: UnsafeCell<T>,
+    busy: Cell<bool>,
+}
+
+// SAFETY: the value is reached only on the UI thread (`with` checks it), one access at a time.
+unsafe impl<T> Sync for UiCell<T> {}
+
+impl<T> UiCell<T> {
+    pub(crate) const fn new(value: T) -> Self {
+        UiCell { value: UnsafeCell::new(value), busy: Cell::new(false) }
+    }
+
+    /// Runs `access` with the value: an error off the UI thread. An access of the same cell
+    /// inside `access` panics, as a second borrow of a `RefCell` does.
+    #[inline]
+    pub(crate) fn with<R>(&self, access: impl FnOnce(&mut T) -> R) -> Result<R> {
+        if !on_ui_thread() {
+            return Err(check_slow());
+        }
+        // Only the UI thread reaches here, so `busy` is not shared between threads.
+        if self.busy.replace(true) {
+            busy();
+        }
+        struct Release<'a>(&'a Cell<bool>);
+        impl Drop for Release<'_> {
+            #[inline]
+            fn drop(&mut self) {
+                self.0.set(false);
+            }
+        }
+        let _release = Release(&self.busy);
+        // SAFETY: on the UI thread, and no other access is running (`busy`): the reference is
+        // the only one to the value until `access` returns.
+        Ok(access(unsafe { &mut *self.value.get() }))
+    }
+}
+
+#[cold]
+#[inline(never)]
+fn busy() -> ! {
+    panic!("the state of the UI thread was reached again inside an access of it")
 }
 
 /// Makes the calling thread the UI thread (see [`ferro_init`]).
@@ -51,7 +142,7 @@ pub(crate) fn init() -> Result<()> {
     let current = std::thread::current().id();
     if let Some(ui) = UI_THREAD.get() {
         return if ui.id == current {
-            ON_UI_THREAD.set(true);
+            UI_TOKEN.store(thread_token(), Ordering::Relaxed);
             Ok(())
         } else {
             Err(Error::new(FERRO_WRONG_THREAD, "another thread is the UI thread"))
@@ -67,9 +158,9 @@ pub(crate) fn init() -> Result<()> {
     if UI_THREAD.set(UiThread { id: current, dispatcher }).is_err() {
         // Another thread made itself the UI thread at the same moment: the framework gave the
         // dispatcher to one of the two, and the check above failed on the other.
-        return check_slow();
+        return Err(Error::new(FERRO_WRONG_THREAD, "another thread is the UI thread"));
     }
-    ON_UI_THREAD.set(true);
+    UI_TOKEN.store(thread_token(), Ordering::Relaxed);
     Ok(())
 }
 

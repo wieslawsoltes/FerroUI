@@ -79,7 +79,9 @@ impl Handler {
             self.sender.set(handle);
             return self.callback.call(handle, arg);
         }
-        let handle = handles::insert(sender.to_ref());
+        let Ok(handle) = handles::insert(sender.to_ref()) else {
+            return 0;
+        };
         let result = self.callback.call(handle, arg);
         let _ = handles::release(handle);
         result

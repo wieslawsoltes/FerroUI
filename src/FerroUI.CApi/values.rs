@@ -14,7 +14,6 @@ use crate::error::{status, Error, Result};
 use crate::handles;
 use crate::ids::{self, Property};
 use crate::strings;
-use crate::thread;
 use crate::{
     FerroHandle, FerroStatus, FERRO_BUFFER_TOO_SMALL, FERRO_INVALID_ARGUMENT, FERRO_INVALID_VALUE, FERRO_NULL_POINTER,
     FERRO_READ_ONLY, FERRO_TYPE_MISMATCH,
@@ -30,9 +29,9 @@ use std::ffi::c_char;
 use std::rc::Rc;
 
 /// The object of `object` and what `property` is on its class: the start of every value call.
+/// The handle table checks the thread.
 #[inline]
 fn target(object: FerroHandle, property: i64) -> Result<(Ref<FerroObject>, Property)> {
-    thread::check()?;
     let object = handles::get(object)?;
     let property = ids::property(object.get_type(), property)?;
     Ok((object, property))
@@ -535,7 +534,7 @@ pub unsafe extern "C" fn ferro_get_handle(object: FerroHandle, property: i64, re
             None => 0,
             Some(value) => {
                 let object = ValueTypes::as_object(&*value).ok_or_else(|| read_mismatch("an object"))?;
-                handles::insert(object)
+                handles::insert(object)?
             }
         };
         // SAFETY: checked for NULL; the caller passes a pointer to a `FerroHandle`.

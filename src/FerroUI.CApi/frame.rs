@@ -46,6 +46,7 @@
 //! properties and events by their IDs and writes them through the setters of the ABI.
 
 use crate::error::{guard, status, Error, Result};
+use crate::thread::UiCell;
 use crate::{
     ferro_add_child, ferro_clear, ferro_create, ferro_release, ferro_remove_child, ferro_retain, ferro_set_bool,
     ferro_set_f64, ferro_set_i64, ferro_set_str, ferro_subscribe_data, ferro_unsubscribe, handles, thread, values,
@@ -85,10 +86,25 @@ pub(crate) const OP_REUSE: u32 = 11;
 // ---- the writer -----------------------------------------------------------------------------
 
 ferroui_base::ferro_thread_local! {
-    /// The frame the scalar writer of this thread writes, as the 8-byte words of its records
-    /// (little-endian in memory on every host): a record is appended word by word, with no copy
-    /// of a variable length but its text.
+    /// The frame the scalar writer of a thread other than the UI thread writes, as the 8-byte
+    /// words of its records (little-endian in memory on every host): a record is appended word
+    /// by word, with no copy of a variable length but its text.
     static WRITER: RefCell<Vec<u64>> = const { RefCell::new(Vec::new()) };
+}
+
+/// The frame the scalar writer of the UI thread writes: a static, so that a record costs no
+/// thread-local lookup on the thread that commits frames.
+static UI_WRITER: UiCell<Vec<u64>> = UiCell::new(Vec::new());
+
+/// Runs `write` with the frame of the calling thread.
+#[inline]
+fn with_writer<R>(write: impl FnOnce(&mut Vec<u64>) -> R + Copy) -> R {
+    if thread::on_ui_thread() {
+        if let Ok(result) = UI_WRITER.with(write) {
+            return result;
+        }
+    }
+    WRITER.with_borrow_mut(write)
 }
 
 /// The bytes of the words of a frame.
@@ -122,7 +138,7 @@ pub(crate) fn write_record(buffer: &mut Vec<u8>, op: u32, words: &[i64], tail: &
 /// The bytes the scalar writer of the calling thread has written since the frame began.
 #[cfg(test)]
 pub(crate) fn writer_bytes() -> Vec<u8> {
-    WRITER.with_borrow(|words| word_bytes(words).to_vec())
+    with_writer(|words| word_bytes(words).to_vec())
 }
 
 /// Appends `tail` padded with zeros to whole words.
@@ -144,7 +160,7 @@ fn push_tail(buffer: &mut Vec<u64>, tail: &[u8]) {
 #[inline]
 fn write_words<const N: usize>(op: u32, words: [i64; N]) -> FerroStatus {
     guard(crate::FERRO_PANIC, || {
-        WRITER.with_borrow_mut(|buffer| {
+        with_writer(|buffer| {
             buffer.reserve(1 + N);
             buffer.push(header(op, 8 + 8 * N));
             for word in words {
@@ -163,7 +179,7 @@ fn write_tail<const N: usize>(op: u32, words: [i64; N], tail: &[u8]) -> FerroSta
     }
     guard(crate::FERRO_PANIC, || {
         let size = 8 + 8 * N + tail.len().div_ceil(8) * 8;
-        WRITER.with_borrow_mut(|buffer| {
+        with_writer(|buffer| {
             buffer.reserve(size / 8);
             buffer.push(header(op, size));
             for word in words {
@@ -196,7 +212,7 @@ unsafe fn text_bytes<'a>(text: *const c_char, length: i64) -> Result<&'a [u8]> {
 #[no_mangle]
 pub extern "C" fn ferro_frame_begin() -> FerroStatus {
     guard(crate::FERRO_PANIC, || {
-        WRITER.with_borrow_mut(Vec::clear);
+        with_writer(Vec::clear);
         FERRO_OK
     })
 }
@@ -307,14 +323,17 @@ pub extern "C" fn ferro_frame_reuse(root: FerroHandle, key: i64, version: i64, t
         if let Err(error) = thread::check() {
             return i64::from(error.record());
         }
-        let tags = RETAINED.with_borrow(|retained| {
-            retained
-                .iter()
-                .find(|(handle, _)| *handle == root)
-                .and_then(|(_, state)| state.memo.get(&key))
-                .filter(|stored| stored.version == version)
-                .map(|stored| stored.tags)
-        });
+        let tags = RETAINED
+            .with(|retained| {
+                retained
+                    .iter()
+                    .find(|(handle, _)| *handle == root)
+                    .and_then(|(_, state)| state.memo.get(&key))
+                    .filter(|stored| stored.version == version)
+                    .map(|stored| stored.tags)
+            })
+            .ok()
+            .flatten();
         match tags {
             Some(tags) => {
                 let status = write_words(OP_REUSE, [key, version, tag_base]);
@@ -335,15 +354,15 @@ pub extern "C" fn ferro_frame_reuse(root: FerroHandle, key: i64, version: i64, t
 pub extern "C" fn ferro_frame_commit(root: FerroHandle) -> FerroStatus {
     status(|| {
         thread::check()?;
-        let words = WRITER.with_borrow_mut(std::mem::take);
+        let words = UI_WRITER.with(std::mem::take)?;
         let result = commit(root, word_bytes(&words));
         // The buffer keeps its capacity for the next frame.
-        WRITER.with_borrow_mut(|buffer| {
+        UI_WRITER.with(|buffer| {
             if buffer.is_empty() {
                 *buffer = words;
                 buffer.clear();
             }
-        });
+        })?;
         result
     })
 }
@@ -437,6 +456,10 @@ fn header_at(bytes: &[u8], offset: usize) -> (u32, usize) {
 }
 
 impl Index {
+    const fn new() -> Self {
+        Index { entries: Vec::new(), scratch: Vec::new(), stack: Vec::new(), first: NONE, last: NONE }
+    }
+
     /// Indexes `bytes`, checking the layout of every record and the text of every key. The text of
     /// a value is checked when a commit writes it: an unchanged value is not looked at.
     fn build(&mut self, bytes: &[u8]) -> Result<()> {
@@ -980,31 +1003,39 @@ fn dispatcher() -> FerroEventFn {
     }
 }
 
-ferroui_base::ferro_thread_local! {
-    /// The retained trees, by root (few roots: a list).
-    static RETAINED: RefCell<Vec<(FerroHandle, RootState)>> = const { RefCell::new(Vec::new()) };
-    /// The index of the frame being committed, kept for the next commit.
-    static INDEX: RefCell<Index> = RefCell::new(Index::default());
+// The state of the frames belongs to the UI thread: statics behind `UiCell`, so that an event
+// and a commit reach it with one check of the thread and no thread-local lookup.
+
+/// The retained trees, by root (few roots: a list).
+static RETAINED: UiCell<Vec<(FerroHandle, RootState)>> = UiCell::new(Vec::new());
+/// The index of the frame being committed, kept for the next commit.
+static INDEX: UiCell<Index> = UiCell::new(Index::new());
+/// Commits and dispatches.
+static STATE: UiCell<State> = UiCell::new(State {
+    committing: false,
+    dispatching: 0,
+    removed: Vec::new(),
+    event_text: Vec::new(),
+    event_number: 0.0,
+});
+
+struct State {
     /// Whether a commit is writing values: events raised meanwhile are not dispatched.
-    static COMMITTING: Cell<bool> = const { Cell::new(false) };
+    committing: bool,
     /// How many dispatches run: nodes removed inside one are freed once the outermost returns.
-    static DISPATCHING: Cell<u32> = const { Cell::new(0) };
+    dispatching: u32,
     /// Nodes removed while a dispatch runs (their handler may be the one running).
-    static REMOVED: RefCell<Vec<Node>> = const { RefCell::new(Vec::new()) };
+    removed: Vec<Node>,
     /// The value of the event being dispatched (`ferro_frame_event_text`, `_f64`): the text with
     /// its NUL, in a buffer kept from one event to the next.
-    static EVENT_TEXT: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
-    static EVENT_NUMBER: Cell<f64> = const { Cell::new(0.0) };
+    event_text: Vec<u8>,
+    event_number: f64,
 }
 
-/// Sets the text of the event being dispatched, with no allocation once the buffer is large
-/// enough.
-fn set_event_text(text: &str) {
-    EVENT_TEXT.with_borrow_mut(|buffer| {
-        buffer.clear();
-        buffer.extend(text.bytes().filter(|byte| *byte != 0));
-        buffer.push(0);
-    });
+/// Whether a commit is writing values.
+#[inline]
+fn committing() -> bool {
+    STATE.with(|state| state.committing).unwrap_or(false)
 }
 
 /// Remembers the first failure of a commit; the others are recorded as they happen.
@@ -1023,9 +1054,15 @@ impl Failures {
 /// Resets the commit flag also when a commit panics.
 struct Committing(bool);
 
+impl Committing {
+    fn start() -> Self {
+        Committing(STATE.with(|state| std::mem::replace(&mut state.committing, true)).unwrap_or(false))
+    }
+}
+
 impl Drop for Committing {
     fn drop(&mut self) {
-        COMMITTING.set(self.0);
+        let _ = STATE.with(|state| state.committing = self.0);
     }
 }
 
@@ -1039,22 +1076,22 @@ struct Commit<'s> {
 }
 
 fn commit(root: FerroHandle, bytes: &[u8]) -> Result<()> {
-    if COMMITTING.get() {
+    if committing() {
         return Err(Error::new(FERRO_INVALID_STATE, "a frame is being committed: commit after it, not inside it"));
     }
     if root != 0 {
         handles::get(root)?;
     }
-    let mut index = INDEX.with_borrow_mut(std::mem::take);
+    let mut index = INDEX.with(std::mem::take)?;
     if let Err(error) = index.build(bytes) {
-        INDEX.with_borrow_mut(|kept| *kept = index);
+        INDEX.with(|kept| *kept = index)?;
         return Err(error);
     }
-    let _committing = Committing(COMMITTING.replace(true));
-    let state = RETAINED.with_borrow_mut(|retained| {
+    let _committing = Committing::start();
+    let state = RETAINED.with(|retained| {
         let position = retained.iter().position(|(handle, _)| *handle == root)?;
         Some(retained.swap_remove(position).1)
-    });
+    })?;
     let first = state.is_none();
     let mut state = state.unwrap_or_default();
     let mut commit = Commit { failures: Failures(None), memo: &mut state.memo, dropped: Vec::new() };
@@ -1070,8 +1107,8 @@ fn commit(root: FerroHandle, bytes: &[u8]) -> Result<()> {
         }
     }
     let failures = commit.failures.0.take();
-    RETAINED.with_borrow_mut(|retained| retained.push((root, state)));
-    INDEX.with_borrow_mut(|kept| *kept = index);
+    RETAINED.with(|retained| retained.push((root, state)))?;
+    INDEX.with(|kept| *kept = index)?;
     match failures {
         None => Ok(()),
         Some(error) => Err(error),
@@ -1458,9 +1495,18 @@ unsafe extern "C" fn release_target(user_data: *mut c_void) {
 struct Dispatching;
 
 impl Dispatching {
+    /// Starts a dispatch whose event has the value `text` and `number`.
     #[inline]
-    fn start() -> Self {
-        DISPATCHING.set(DISPATCHING.get() + 1);
+    fn start(text: &str, number: f64) -> Self {
+        let _ = STATE.with(|state| {
+            state.event_text.clear();
+            if !text.is_empty() {
+                state.event_text.extend(text.bytes().filter(|byte| *byte != 0));
+            }
+            state.event_text.push(0);
+            state.event_number = number;
+            state.dispatching += 1;
+        });
         Dispatching
     }
 }
@@ -1468,27 +1514,25 @@ impl Dispatching {
 impl Drop for Dispatching {
     #[inline]
     fn drop(&mut self) {
-        let depth = DISPATCHING.get() - 1;
-        DISPATCHING.set(depth);
-        if depth == 0 {
-            free_removed();
+        let removed = STATE
+            .with(|state| {
+                state.dispatching -= 1;
+                if state.dispatching == 0 && !state.removed.is_empty() {
+                    std::mem::take(&mut state.removed)
+                } else {
+                    Vec::new()
+                }
+            })
+            .unwrap_or_default();
+        // Freed with no access of the state running: freeing runs code of the framework.
+        for node in removed {
+            free(node);
         }
     }
 }
 
-/// Frees the nodes removed while dispatches ran.
-fn free_removed() {
-    if REMOVED.with_borrow(Vec::is_empty) {
-        return;
-    }
-    let removed = REMOVED.with_borrow_mut(std::mem::take);
-    for node in removed {
-        free(node);
-    }
-}
-
 unsafe extern "C" fn on_event(user_data: *mut c_void, sender: FerroHandle, _arg: i64) -> i64 {
-    if COMMITTING.get() {
+    if committing() {
         return 0;
     }
     let Some(dispatcher) = dispatcher() else {
@@ -1503,18 +1547,16 @@ unsafe extern "C" fn on_event(user_data: *mut c_void, sender: FerroHandle, _arg:
         }
         (target.tag.get(), target.value_property.get())
     };
+    let _dispatching;
     let mut arg = 0;
     if value_property != 0 {
         let text = values::peek_text(sender, value_property).unwrap_or_default();
         let number = values::peek_number(sender, value_property).unwrap_or(0.0);
-        set_event_text(&text);
-        EVENT_NUMBER.set(number);
+        _dispatching = Dispatching::start(&text, number);
         arg = number as i64;
     } else {
-        set_event_text("");
-        EVENT_NUMBER.set(0.0);
+        _dispatching = Dispatching::start("", 0.0);
     }
-    let _dispatching = Dispatching::start();
     // SAFETY: the dispatcher is a function of the documented signature.
     unsafe { dispatcher(tag, sender, arg) }
 }
@@ -1539,10 +1581,15 @@ fn retire(commit: &mut Commit<'_>, node: Node) {
 /// Takes a node out of service: its events unbound and its handles released, children first. A
 /// node removed while a dispatch runs waits for the dispatch to end.
 fn free(node: Node) {
-    if DISPATCHING.get() > 0 {
-        REMOVED.with_borrow_mut(|removed| removed.push(node));
+    let mut node = Some(node);
+    let _ = STATE.with(|state| {
+        if state.dispatching > 0 {
+            state.removed.extend(node.take());
+        }
+    });
+    let Some(node) = node else {
         return;
-    }
+    };
     for binding in node.bindings {
         let _ = ferro_unsubscribe(binding.subscription);
     }
@@ -1573,9 +1620,7 @@ pub(crate) fn dispatch_tag(tag: i64, sender: FerroHandle, arg: i64) -> i64 {
     let Some(dispatcher) = dispatcher() else {
         return 0;
     };
-    set_event_text("");
-    EVENT_NUMBER.set(0.0);
-    let _dispatching = Dispatching::start();
+    let _dispatching = Dispatching::start("", 0.0);
     // SAFETY: the dispatcher is a function of the documented signature.
     unsafe { dispatcher(tag, sender, arg) }
 }
@@ -1592,9 +1637,7 @@ pub extern "C" fn ferro_frame_dispatch(tag: i64, sender: FerroHandle, arg: i64) 
         let dispatcher = dispatcher().ok_or_else(|| {
             Error::new(FERRO_INVALID_STATE, "no dispatcher is set: call ferro_frame_dispatcher first")
         })?;
-        set_event_text("");
-        EVENT_NUMBER.set(0.0);
-        let _dispatching = Dispatching::start();
+        let _dispatching = Dispatching::start("", 0.0);
         // SAFETY: the dispatcher is a function of the documented signature.
         Ok(unsafe { dispatcher(tag, sender, arg) })
     })
@@ -1606,15 +1649,8 @@ pub extern "C" fn ferro_frame_dispatch(tag: i64, sender: FerroHandle, arg: i64) 
 #[no_mangle]
 pub extern "C" fn ferro_frame_event_text() -> *const c_char {
     static EMPTY: &[u8] = b"\0";
-    EVENT_TEXT
-        .try_with(|text| {
-            let text = text.borrow();
-            if text.is_empty() {
-                EMPTY.as_ptr()
-            } else {
-                text.as_ptr()
-            }
-        })
+    STATE
+        .with(|state| if state.event_text.is_empty() { EMPTY.as_ptr() } else { state.event_text.as_ptr() })
         .unwrap_or(EMPTY.as_ptr())
         .cast()
 }
@@ -1623,7 +1659,7 @@ pub extern "C" fn ferro_frame_event_text() -> *const c_char {
 /// thread only.
 #[no_mangle]
 pub extern "C" fn ferro_frame_event_f64() -> f64 {
-    EVENT_NUMBER.try_with(Cell::get).unwrap_or(0.0)
+    STATE.with(|state| state.event_number).unwrap_or(0.0)
 }
 
 /// The handle of the element with the integer key `key` in the retained tree of `root`, with one
@@ -1635,18 +1671,18 @@ pub extern "C" fn ferro_frame_find(root: FerroHandle, key: i64) -> FerroHandle {
         nodes.iter().find_map(|node| if &node.key == key { Some(node.handle) } else { find(&node.children, key) })
     }
     guard(0, || {
-        let found = thread::check().and_then(|()| {
-            RETAINED
-                .with_borrow(|retained| {
-                    retained
-                        .iter()
-                        .find(|(handle, _)| *handle == root)
-                        .and_then(|(_, state)| find(&state.nodes, &Key::Int(key)))
-                })
-                .ok_or_else(|| {
+        let found = RETAINED
+            .with(|retained| {
+                retained
+                    .iter()
+                    .find(|(handle, _)| *handle == root)
+                    .and_then(|(_, state)| find(&state.nodes, &Key::Int(key)))
+            })
+            .and_then(|found| {
+                found.ok_or_else(|| {
                     Error::new(FERRO_NOT_FOUND, format!("no element of the frames of the root has the key {key}"))
                 })
-        });
+            });
         match found {
             Ok(handle) if ferro_retain(handle) == FERRO_OK => handle,
             Ok(_) => 0,
@@ -1663,11 +1699,10 @@ pub extern "C" fn ferro_frame_find(root: FerroHandle, key: i64) -> FerroHandle {
 #[no_mangle]
 pub extern "C" fn ferro_frame_clear(root: FerroHandle) -> FerroStatus {
     status(|| {
-        thread::check()?;
-        let state = RETAINED.with_borrow_mut(|retained| {
+        let state = RETAINED.with(|retained| {
             let position = retained.iter().position(|(handle, _)| *handle == root)?;
             Some(retained.swap_remove(position).1)
-        });
+        })?;
         let Some(state) = state else {
             return Err(Error::new(FERRO_NOT_FOUND, "no frame was committed under the root"));
         };

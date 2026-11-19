@@ -21,11 +21,11 @@
 use crate::api_ids;
 use crate::error::{status_or_value, Error, Result};
 use crate::strings;
+use crate::thread::UiCell;
 use crate::{FERRO_INVALID_ARGUMENT, FERRO_NOT_FOUND};
 use ferroui_base::interactivity::{RoutedEvent, RoutedEventRegistry};
 use ferroui_base::metadata::{MarkupEvent, MarkupProperty};
 use ferroui_base::{FerroProperty, FerroPropertyRegistry, TypeInfo};
-use std::cell::RefCell;
 use std::collections::HashMap;
 use std::ffi::c_char;
 use std::sync::{LazyLock, Mutex, MutexGuard, PoisonError};
@@ -242,23 +242,19 @@ pub(crate) enum Event {
 /// What an ID was found to be on one class, `None` for nothing.
 type Resolutions<T> = Vec<Vec<(usize, Option<T>)>>;
 
-ferroui_base::ferro_thread_local! {
-    /// By property ID: what it is on each class it was used with.
-    static PROPERTIES: RefCell<Resolutions<Property>> = const { RefCell::new(Vec::new()) };
-    /// By event ID: what it is on each class it was used with.
-    static EVENTS: RefCell<Resolutions<Event>> = const { RefCell::new(Vec::new()) };
-}
+/// By property ID: what it is on each class it was used with (UI thread).
+static PROPERTIES: UiCell<Resolutions<Property>> = UiCell::new(Vec::new());
+/// By event ID: what it is on each class it was used with (UI thread).
+static EVENTS: UiCell<Resolutions<Event>> = UiCell::new(Vec::new());
 
 #[inline]
-fn cached<T: Copy>(cache: &RefCell<Resolutions<T>>, id: i64, key: usize) -> Option<Option<T>> {
-    let cache = cache.borrow();
+fn cached<T: Copy>(cache: &mut Resolutions<T>, id: i64, key: usize) -> Option<Option<T>> {
     let index = usize::try_from(id).ok()?.checked_sub(1)?;
     cache.get(index)?.iter().find(|(class, _)| *class == key).map(|(_, found)| *found)
 }
 
-fn remember<T: Copy>(cache: &RefCell<Resolutions<T>>, id: i64, key: usize, found: Option<T>) {
+fn remember<T: Copy>(cache: &mut Resolutions<T>, id: i64, key: usize, found: Option<T>) {
     if let Some(index) = usize::try_from(id).ok().and_then(|id| id.checked_sub(1)) {
-        let mut cache = cache.borrow_mut();
         if cache.len() <= index {
             cache.resize_with(index + 1, Vec::new);
         }
@@ -270,13 +266,13 @@ fn remember<T: Copy>(cache: &RefCell<Resolutions<T>>, id: i64, key: usize, found
 #[inline]
 pub(crate) fn property(type_: &'static TypeInfo, id: i64) -> Result<Property> {
     let key = type_ as *const TypeInfo as usize;
-    let found = match PROPERTIES.with(|cache| cached(cache, id, key)) {
+    let found = match PROPERTIES.with(|cache| cached(cache, id, key))? {
         Some(found) => found,
         None => {
             let name = property_name(id)?;
-            // Found with no borrow of the cache held: finding initialises the class.
+            // Found with no access of the cache running: finding initialises the class.
             let found = find_property(type_, name);
-            PROPERTIES.with(|cache| remember(cache, id, key, found));
+            PROPERTIES.with(|cache| remember(cache, id, key, found))?;
             found
         }
     };
@@ -318,12 +314,12 @@ fn find_property(type_: &'static TypeInfo, name: &str) -> Option<Property> {
 /// The event the ID `id` stands for on the class `type_`. UI thread.
 pub(crate) fn event(type_: &'static TypeInfo, id: i64) -> Result<Event> {
     let key = type_ as *const TypeInfo as usize;
-    let found = match EVENTS.with(|cache| cached(cache, id, key)) {
+    let found = match EVENTS.with(|cache| cached(cache, id, key))? {
         Some(found) => found,
         None => {
             let name = event_name(id)?;
             let found = find_event(type_, name);
-            EVENTS.with(|cache| remember(cache, id, key, found));
+            EVENTS.with(|cache| remember(cache, id, key, found))?;
             found
         }
     };
