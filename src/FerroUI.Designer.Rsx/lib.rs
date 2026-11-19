@@ -14,6 +14,7 @@ mod project;
 mod registered;
 mod source_array;
 mod source_edits;
+mod spacing_edits;
 mod states;
 mod tree;
 mod xaml;

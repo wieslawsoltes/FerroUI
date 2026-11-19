@@ -26,12 +26,14 @@ pub(crate) struct Renderer {
 
 pub(crate) struct Stage {
     pub(crate) session: Rc<RefCell<DesignerSession>>,
+    pub(crate) studio: ferroui_designer::mcp::DesignerMcp,
     pub(crate) token: u64,
     pub(crate) project: Option<u64>,
     pub(crate) width: u32,
     pub(crate) height: u32,
     pub(crate) placement_policy: Option<PlacementPolicy>,
     pub(crate) authored_rsx: Option<AuthoredRsxFrame>,
+    pub(crate) rsx_spacing: Option<crate::spacing::RsxOwners>,
     pub(crate) project_assets: Vec<ferroui_designer::DesignerAsset>,
     pub(crate) sources: SourceSnapshot,
     pub(crate) canvas_snap: RefCell<Option<crate::canvas_snap::PreparedSnap>>,
@@ -138,14 +140,17 @@ impl Renderer {
             Some(Err(error)) => frame.notices.push(format!("Animation preview: {error}")),
             None => {}
         }
+        let session = Rc::new(RefCell::new(session));
         self.stage = Some(Stage {
-            session: Rc::new(RefCell::new(session)),
+            studio: ferroui_designer::mcp::DesignerMcp::new(&session),
+            session,
             token: input.frame,
             project: input.document.project,
             width: input.width,
             height: input.height,
             placement_policy: None,
             authored_rsx: None,
+            rsx_spacing: None,
             project_assets: Vec::new(),
             sources,
             canvas_snap: RefCell::new(None),
@@ -157,6 +162,7 @@ impl Renderer {
     pub(crate) fn present(&mut self, next: u64, include_layers: bool) -> Result<Presentation, String> {
         let stage = self.stage.as_mut().ok_or("Render the design first")?;
         stage.token = next;
+        stage.studio.invalidate_spacing();
         let mut session = stage.session.borrow_mut();
         let frame = stage.sources.run(|| capture(&mut session))?;
         let nodes = session

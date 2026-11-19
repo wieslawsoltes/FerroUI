@@ -20,6 +20,7 @@ mod projects;
 mod property_fields;
 mod protocol;
 mod renderer;
+mod spacing;
 mod resources;
 mod rsx_animation;
 mod rsx_placement;
@@ -113,6 +114,7 @@ fn respond(
                 "projectCatalog": true,
                 "canvasInteraction": true,
                 "canvasFocusOrder": true,
+                "spacingHelpers": true,
                 "projectInventory": true,
                 "tokenHandoff": true,
                 "designFixtures": true,

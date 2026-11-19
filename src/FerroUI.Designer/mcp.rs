@@ -44,6 +44,8 @@ mod schema;
 mod timeline_markers;
 #[path = "mcp_selection_workflows.rs"]
 mod selection_workflows;
+#[path = "mcp_spacing.rs"]
+mod spacing;
 #[path = "mcp_workspace.rs"]
 mod workspace_tools;
 #[path = "mcp_placement.rs"]
@@ -52,23 +54,26 @@ mod placement;
 pub use ferroui_mcp::{
     Options, Permissions, Transport, UiServerHandle as ServerHandle, reserve_stdout,
 };
+pub use crate::workspace_spacing::SPACING_PROPERTIES;
 
 /// A server-local, UI-thread-owned designer tool provider. It does not keep a closed workspace
 /// alive. Read-only inspector tools remain available beside these document authoring tools.
 pub struct DesignerMcp {
     session: Weak<RefCell<DesignerSession>>,
     workspace: Option<Weak<DesignerWorkspace>>,
+    spacing: spacing::Cache,
 }
 impl DesignerMcp {
     /// Tool definitions that only need a designer session, without a Studio shell.
     pub fn session_tool_definitions() -> Vec<Value> {
-        Self { session: Weak::new(), workspace: None }.tools()
+        Self { session: Weak::new(), workspace: None, spacing: Default::default() }.tools()
     }
 
     pub fn new(session: &Rc<RefCell<DesignerSession>>) -> Self {
         Self {
             session: Rc::downgrade(session),
             workspace: None,
+            spacing: Default::default(),
         }
     }
     /// Bind project/editor tools without keeping the workspace or its session alive.
@@ -76,6 +81,7 @@ impl DesignerMcp {
         Self {
             session: Rc::downgrade(&workspace.session()),
             workspace: Some(Rc::downgrade(workspace)),
+            spacing: Default::default(),
         }
     }
     fn session(&self) -> Result<Rc<RefCell<DesignerSession>>, String> {
@@ -286,6 +292,7 @@ impl UiToolProvider for DesignerMcp {
         tools.extend(events::tools());
         tools.extend(design_workflows::tools());
         tools.extend(selection_workflows::tools());
+        tools.extend(spacing::tools());
         tools.extend(placement::tools());
         tools.push(design_tokens::tool());
         if self.workspace.is_some() {
@@ -313,6 +320,7 @@ impl UiToolProvider for DesignerMcp {
             || workspace_tools::handles(name)
             || design_workflows::handles(name)
             || selection_workflows::handles(name)
+            || spacing::handles(name)
             || preview_stages::handles(name)
             || placement::handles(name)
             || prototype::handles(name)
@@ -503,6 +511,7 @@ impl UiToolProvider for DesignerMcp {
             };
         }
         if selection_workflows::handles(name)
+            || spacing::handles(name)
             || (name == "designer_layer" && args["action"] == "select_matching_type")
         {
             if let Some(workspace) = &self.workspace {
@@ -572,6 +581,9 @@ impl UiToolProvider for DesignerMcp {
         }
         if selection_workflows::handles(name) {
             return selection_workflows::call(&mut session, name, args);
+        }
+        if spacing::handles(name) {
+            return self.spacing.call(&mut session, name, args);
         }
         match name {
             "designer_document" => {

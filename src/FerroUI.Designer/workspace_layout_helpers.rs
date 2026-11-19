@@ -495,6 +495,40 @@ impl DesignerSession {
         handle_index: usize,
         delta: Point,
     ) -> Result<LayoutEditPreview, String> {
+        self.preview_layout_handle_with(snapshot, handle_index, |handle, transform| {
+            let inverse = transform.inverse().map_err(|error| error.to_string())?;
+            let origin = inverse
+                .transform(LayoutPoint::new(0.0, 0.0))
+                .map_err(|error| error.to_string())?;
+            let end = inverse
+                .transform(point(delta)?)
+                .map_err(|error| error.to_string())?;
+            handle
+                .value_after_delta(LayoutPoint::new(end.x - origin.x, end.y - origin.y))
+                .map_err(|error| error.to_string())
+        })
+    }
+
+    pub(crate) fn preview_layout_handle_value(
+        &self,
+        snapshot: &LayoutHelperSnapshot,
+        handle_index: usize,
+        value: f64,
+    ) -> Result<LayoutEditPreview, String> {
+        self.preview_layout_handle_with(snapshot, handle_index, |handle, _| {
+            if !value.is_finite() || value < handle.minimum || handle.maximum.is_some_and(|max| value > max) {
+                return Err(format!("{} is outside the supported range", handle.label));
+            }
+            Ok(value)
+        })
+    }
+
+    fn preview_layout_handle_with(
+        &self,
+        snapshot: &LayoutHelperSnapshot,
+        handle_index: usize,
+        resolve: impl FnOnce(&ferroui_designer_tools::LayoutHandle, Affine) -> Result<f64, String>,
+    ) -> Result<LayoutEditPreview, String> {
         let guard = snapshot
             .guard
             .as_ref()
@@ -510,20 +544,12 @@ impl DesignerSession {
         }
         ensure_helper_layer_target(self, snapshot.scene.panel, &handle.action)?;
         let frame = snapshot.handle_frames.get(&handle.id);
-        let inverse = frame
-            .map_or(snapshot.to_artboard, |frame| frame.to_artboard)
-            .inverse()
-            .map_err(|error| error.to_string())?;
-        let origin = inverse
-            .transform(LayoutPoint::new(0.0, 0.0))
-            .map_err(|error| error.to_string())?;
-        let end = inverse
-            .transform(point(delta)?)
-            .map_err(|error| error.to_string())?;
-        let local = LayoutPoint::new(end.x - origin.x, end.y - origin.y);
-        let value = handle
-            .value_after_delta(local)
-            .map_err(|error| error.to_string())?;
+        let value = resolve(handle, frame.map_or(snapshot.to_artboard, |frame| frame.to_artboard))?;
+        let intent = PreviewIntent::Handle(handle.id.clone());
+        let label = format!("Adjust {}", handle.label);
+        if value == handle.value {
+            return Ok(accepted(self, snapshot.clone(), intent, Vec::new(), label));
+        }
         let mut helpers = snapshot.clone();
         let visual_handle = &mut helpers.scene.handles[handle_index];
         visual_handle.value = value;
@@ -549,7 +575,6 @@ impl DesignerSession {
                     text: format!("{}  {}", handle.label, compact(value)),
                 },
             });
-        let intent = PreviewIntent::Handle(handle.id.clone());
         let measured = measure(self, snapshot.scene.panel, None)?;
         let result = self
             .layout_tools()
@@ -571,7 +596,7 @@ impl DesignerSession {
             helpers,
             intent,
             edits,
-            format!("Adjust {}", handle.label),
+            label,
         ))
     }
 

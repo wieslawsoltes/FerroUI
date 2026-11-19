@@ -210,6 +210,8 @@ mod tests;
 #[cfg(test)]
 mod workspace_authoring_tests;
 mod workspace_layout_helpers;
+#[cfg(feature = "mcp")]
+mod workspace_spacing;
 mod authoring_placement;
 #[cfg(test)]
 mod workspace_shell_tests;

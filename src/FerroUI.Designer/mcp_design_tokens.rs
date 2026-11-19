@@ -33,7 +33,11 @@ mod tests {
 
     #[test]
     fn studio_serves_a_read_only_conversion_with_explicit_mapping() {
-        let provider = DesignerMcp { session: std::rc::Weak::new(), workspace: None };
+        let provider = DesignerMcp {
+            session: std::rc::Weak::new(),
+            workspace: None,
+            spacing: Default::default(),
+        };
         let args = json!({"direction":"import","source":r#"{"card":{"$type":"dimension","$value":{"value":16,"unit":"px"}}}"#,
             "options":{"mappings":{"card":{"key":"CardSize"}}}});
         let output = provider.call(NAME, &args, Permissions::default()).unwrap();

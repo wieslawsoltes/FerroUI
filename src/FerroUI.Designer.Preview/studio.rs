@@ -98,7 +98,6 @@ fn is_query(tool: &Value) -> bool {
 }
 
 pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
-    let provider = DesignerMcp::new(&stage.session);
     if !DesignerMcp::session_tool_definitions()
         .iter()
         .any(|definition| definition["name"] == query.name && is_query(definition))
@@ -113,7 +112,10 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
     if let Some(rsx) = stage.authored_rsx.as_ref().filter(|_| query.name == "designer_keyframe_draft") {
         rsx.validate_keyframe_draft(&query.arguments)?;
     }
-    let mut result = provider.call(&query.name, &query.arguments, Permissions::default())?;
+    let mut result = stage.sources.run(|| stage.studio.call(&query.name, &query.arguments, Permissions::default()))?;
+    if let Some(owners) = &stage.rsx_spacing {
+        owners.check_query(&query.name, &mut result)?;
+    }
     if let Some(rsx) = stage.authored_rsx.as_ref().filter(|_| query.name == "designer_programs") {
         rsx.annotate_programs(&mut result);
     }
@@ -131,11 +133,13 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     let rust_program = design.rsx.is_some() && rsx_animation::program_edit(&query.name, action);
     let rust_state = design.rsx.is_some() && rsx_animation::state_edit(&query.name, action);
     let rust_placement = design.rsx.is_some() && rsx_animation::clip_placement_edit(&query.name, action);
+    let spacing = query.name == "designer_spacing_edit";
     if design.rsx.is_some()
         && !rust_keyframe
         && !rust_program
         && !rust_state
         && !rust_placement
+        && !spacing
         && (!matches!(query.name.as_str(), "designer_selection_layout_edit" | "designer_property" | "designer_grid_track_edit")
             || !design.editable_structure())
     {
@@ -165,10 +169,12 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
             json!(session.document().revision()),
         );
     }
-    let provider = DesignerMcp::new(&stage.session);
-    provider.validate(&query.name, &arguments)?;
+    stage.studio.validate(&query.name, &arguments)?;
     if let Some(selection) = &query.selection {
         select(stage, selection)?;
+    }
+    if spacing {
+        return crate::spacing::source_edit(stage, &design, &arguments);
     }
     if rust_state || rust_keyframe || rust_program || rust_placement {
         let rsx = stage.authored_rsx.as_ref().ok_or("Render the current Rust view before editing motion")?;
@@ -201,7 +207,7 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     // Retire the frame before touching the native session. VS Code owns the undo
     // transaction and renders a new frame from its buffer even on rejection.
     let stage = renderer.stage.take().expect("frame checked above");
-    let operation = stage.sources.run(|| provider.call(
+    let operation = stage.sources.run(|| stage.studio.call(
         &query.name,
         &arguments,
         Permissions {
@@ -277,6 +283,7 @@ fn source_action(tool: &str, action: Option<&str>) -> bool {
         | "designer_record_geometry"
         | "designer_binding_edit"
         | "designer_grid_track_edit"
+        | "designer_spacing_edit"
         | "designer_set_event"
         | "designer_focus_edit"
         | "designer_selection_layout_edit"

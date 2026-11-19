@@ -99,6 +99,54 @@ fn selecting_a_leaf_button_exposes_parent_flow_and_margin_helpers() {
     assert!(!fixture.session.can_undo());
 }
 
+#[cfg(feature = "mcp")]
+#[test]
+fn measured_spacing_catalog_edits_one_side_and_rejects_retired_selection() {
+    use crate::workspace_spacing::{Adjustment, SpacingModel};
+
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let mut fixture = Fixture::new(SOURCE);
+    let empty = fixture.id("Empty");
+    let flow = fixture.id("Flow");
+    let first = fixture.id("First");
+    fixture.session.select([empty]);
+    let model = SpacingModel::capture(&fixture.session, 1);
+    let catalog = model.catalog(&fixture.session);
+    let handles = catalog["handles"].as_array().unwrap();
+    let padding = handles.iter().find(|handle| handle["label"] == "Padding left").unwrap();
+    let margin = handles.iter().find(|handle| handle["label"] == "Margin right").unwrap();
+    assert_eq!(padding["owner"], empty);
+    assert_eq!(margin["owner"], empty);
+    assert_eq!(padding["value"], 12.0);
+    let padding_id = padding["id"].as_str().unwrap();
+    let unchanged = model.plan(&fixture.session, padding_id, Adjustment::Value { value: 12.0 }).unwrap().1;
+    assert!(unchanged.source_edits(&fixture.session).unwrap().is_empty());
+    assert!(model.plan(&fixture.session, padding_id, Adjustment::Value { value: -1.0 }).is_err());
+    let (_, preview) = model.plan(&fixture.session, padding_id, Adjustment::Value { value: 19.125 }).unwrap();
+    assert_eq!(fixture.session.document().source(), SOURCE);
+    fixture.session.commit_layout_preview(&preview).unwrap();
+    assert_eq!(fixture.session.document().ast().node(empty).unwrap().attribute("Padding"), Some("19.125,12,12,12"));
+    assert_eq!(fixture.session.document().revision(), 1);
+    fixture.session.undo().unwrap();
+    assert_eq!(fixture.session.document().source(), SOURCE);
+    assert!(!model.is_current(&fixture.session));
+
+    fixture.refresh();
+    fixture.session.select([first]);
+    let model = SpacingModel::capture(&fixture.session, 2);
+    let catalog = model.catalog(&fixture.session);
+    let handles = catalog["handles"].as_array().unwrap();
+    let gap = handles.iter().find(|handle| handle["property"] == "Spacing").unwrap();
+    assert_eq!(gap["owner"], flow);
+    assert_eq!(gap["value"], 0.0);
+    let gap_id = gap["id"].as_str().unwrap();
+    assert!(model.is_current(&fixture.session));
+    fixture.session.select([empty]);
+    fixture.session.select([first]);
+    assert!(model.plan(&fixture.session, gap_id, Adjustment::Value { value: 7.5 }).is_err());
+    assert_eq!(fixture.session.document().source(), SOURCE);
+}
+
 #[test]
 fn zero_gap_flow_edges_reorder_existing_nodes_with_one_undo() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
