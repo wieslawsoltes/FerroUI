@@ -521,18 +521,27 @@ fn page_transition_sample_uses_winui_frame_journal_and_source_page_types() {
         frame.current_source_page_type(),
         Some(FirstSamplePage::PAGE_TYPE)
     );
-    assert!(frame.can_go_forward());
-    root.get_control::<Button>("NavigationForward")
+    // BackwardButton1_Click does nothing without a back stack.
+    root.get_control::<Button>("NavigationBack")
         .raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
     assert_eq!(
         frame.current_source_page_type(),
-        Some(SecondSamplePage::PAGE_TYPE)
+        Some(FirstSamplePage::PAGE_TYPE)
     );
     assert!(root
         .get_control::<TextBlock>("NavigationStatus")
         .text()
         .unwrap()
-        .starts_with("Second page · Forward"));
+        .starts_with("First page · Back"));
+    // TransitionRadioButton_Checked keeps the mode's NavigationTransitionInfo.
+    let modes = root.get_control::<ferroui_controls::RadioButtons>("TransitionModes");
+    let value = root.get_control::<TextBlock>("TransitionValue");
+    modes.set_selected_index(2);
+    assert_eq!(value.text().as_deref(), Some(", new DrillInNavigationTransitionInfo()"));
+    modes.set_selected_index(4);
+    assert!(value.text().unwrap().contains("SlideNavigationTransitionEffect.FromRight"));
+    modes.set_selected_index(0);
+    assert_eq!(value.text().as_deref(), Some(""));
 }
 
 #[test]
