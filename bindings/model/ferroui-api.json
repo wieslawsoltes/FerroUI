@@ -1247,6 +1247,12 @@
     "doc": "The fingerprint of the stable IDs of this library: the one of the API model it was built with (`bindings/model/ferroui-api.json`). A binding generated from the model compares it with its own at start; a different value means its ID constants are not the IDs of this library. Any thread."
    },
    {
+    "name": "ferro_selection_fingerprint",
+    "returns": "i64",
+    "params": [],
+    "doc": "The fingerprint of the selection of classes and calls the library was built for (`scripts/capi/app_library.py`, docs/c-abi.md, section 17): `0` for a library of every class and call (the full and the by-use builds of the crate). A binding generated from the same selection has the same value (`selectionFingerprint()` of the Osprey bindings, `FERRO_APP_SELECTION_FINGERPRINT` of the C header the generator writes); a binding accepts a library whose value is `0` or its own. Any thread."
+   },
+   {
     "name": "ferro_type_id",
     "returns": "i64",
     "params": [
