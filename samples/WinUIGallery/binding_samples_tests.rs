@@ -85,3 +85,40 @@ fn templates_page_code_template_and_items_panels_follow_the_source() {
     assert!(!list.classes().contains("StackPanel"));
     let _ = root.get_control::<TextBox>("CustomTemplateTextBox");
 }
+
+#[test]
+fn xaml_styles_apply_the_keyed_and_the_implicit_style() {
+    use ferroui_base::media::FontWeight;
+    use ferroui_controls::{Button, Window};
+    let _application = start();
+    let root = page("XamlStyles");
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(root.clone())));
+    window.show();
+    window.update_layout();
+    // The keyed style: the buttons of the class take its MinWidth; the default button does not,
+    // and the third button's own Background is its local value.
+    assert_ne!(root.get_control::<Button>("DefaultStyleButton").min_width(), 200.0);
+    assert_eq!(root.get_control::<Button>("CustomStyleButton").min_width(), 200.0);
+    let overridden = root.get_control::<Button>("OverriddenStyleButton");
+    assert_eq!(overridden.min_width(), 200.0);
+    assert!(overridden.classes().contains("CustomButtonStyle"));
+    // The implicit style of the panel's TextBlocks.
+    for name in ["ImplicitText1", "ImplicitText2"] {
+        let text = root.get_control::<TextBlock>(name);
+        assert_eq!(text.font_size(), 16.0, "{name}");
+        assert_eq!(text.font_weight(), FontWeight::Bold, "{name}");
+        assert_eq!(text.font_family().name(), "Consolas", "{name}");
+    }
+    // The page's own text is outside the implicit style's panel.
+    assert_ne!(
+        root.get_control::<StackPanel>("Example2")
+            .children()
+            .get(0)
+            .cast::<TextBlock>()
+            .unwrap()
+            .font_size(),
+        16.0
+    );
+    window.close();
+}

@@ -1775,7 +1775,7 @@
       "examples": []
     },
     "XamlStyles": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/XamlStyles.xaml",
         "samples/WinUIGallery/examples.rs"
@@ -1784,9 +1784,13 @@
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/binding_samples_tests.rs",
+          "name": "xaml_styles_apply_the_keyed_and_the_implicit_style"
         }
       ],
-      "notes": "The explicit WinUI style example is adapted to an opt-in ControlTheme; implicit WinUI style semantics are not changed globally. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "Both source examples (the page has no code-behind upstream), with the page's introduction: the keyed CustomButtonStyle based on the default button style (ButtonRevealStyle) with the accent acrylic Background and a MinWidth of 200, applied to two of the three buttons, the last with its own critical Background over the style's, and the implicit style of the TextBlocks (16, Consolas, Bold) applied to every TextBlock of its panel. FerroUI's styles are selectors: the keyed style is the style of the class CustomButtonStyle, which a button applies with Classes (it keeps the button's theme, as BasedOn the default style, and a local value still wins), and the implicit style is the style of the selector TextBlock in the panel's Styles. ThemeResource is DynamicResource.",
       "examples": []
     },
     "ProgressRing": {
