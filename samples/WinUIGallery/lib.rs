@@ -8,6 +8,8 @@
 
 mod assets;
 mod assets_data;
+mod binding_samples;
+mod brush_samples;
 mod button_samples;
 mod cat_data;
 mod chart_samples;
@@ -131,3 +133,9 @@ mod shape_samples_tests;
 
 #[cfg(test)]
 mod scroll_samples_tests;
+
+#[cfg(test)]
+mod brush_samples_tests;
+
+#[cfg(test)]
+mod binding_samples_tests;

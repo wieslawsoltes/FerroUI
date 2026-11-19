@@ -2,6 +2,7 @@
 //! and the windowing platform contracts.
 
 pub mod animation;
+mod swipe_control;
 pub mod application_lifetimes;
 pub mod automation;
 pub mod chrome;
@@ -161,6 +162,10 @@ pub use i_clickable_control::{as_clickable_control, register_clickable_control};
 pub use i_command_source::{as_command_source, register_command_source};
 pub use button_spinner::{ButtonSpinner, ButtonSpinnerImpl, ButtonSpinnerImplExt, ButtonSpinnerVTable, Location};
 pub use check_box::CheckBox;
+pub use swipe_control::{
+    ExecuteItemsHaveOneItem, SwipeBehaviorOnInvoked, SwipeControl, SwipeItem, SwipeItemInvokedEventArgs, SwipeItems,
+    SwipeMode,
+};
 pub use drop_down_button::DropDownButton;
 pub use hyperlink_button::HyperlinkButton;
 pub use split_button::{

@@ -1,9 +1,71 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <StackPanel Orientation="Horizontal" Spacing="16">
-    <Button Name="AcceptButton"><StackPanel><SymbolIcon x:Name="AcceptIcon" Symbol="Accept"/><TextBlock Text="Accept"/></StackPanel></Button>
-    <Button Name="ExampleButton1"><FontIcon x:Name="FontGlyph" FontFamily="Segoe MDL2 Assets" Glyph="&#xE790;"/></Button>
-    <Button Name="Example1Button"><PathIcon Data="F1 M 16,12 20,2L 20,16 1,16" HorizontalAlignment="Center"/></Button>
+<!-- Ported from the six pinned IconElement examples of WinUI Gallery (14061eea) and the code behind
+     of IconElementPage.xaml.cs (brush_samples.rs); see ../NOTICE.md. FerroUI has no BitmapIcon or
+     ImageIcon: the bitmap icon is an Image of the source's Slices.png with, for ShowAsMonochrome, a
+     rectangle of the foreground brush masked by the bitmap over it; the PNG image icon is an Image.
+     FerroUI decodes no SVG and the remote SVG of the source is not loaded: that button says so.
+     BodyTextBlockStyle is the default text. The glyphs need the source's icon fonts. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="Example1" Spacing="8">
+    <TextBlock Text="A BitmapIcon with a multicolor bitmap image" FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+      <StackPanel>
+        <TextBlock Margin="0,0,0,12" TextWrapping="Wrap"
+                   Text="The ShowAsMonochrome property (true by default) will result in a solid block of the foreground color if the property is set to true and the icon is more than one color. This behavior can be ignored by setting the ShowAsMonochrome property to false." />
+        <Grid x:Name="SlicesIcon" Width="50" HorizontalAlignment="Left">
+          <Image x:Name="SlicesImage" Stretch="Uniform" />
+          <Rectangle x:Name="SlicesMonochrome" IsVisible="False"
+                     Fill="{DynamicResource TextFillColorPrimaryBrush}" />
+        </Grid>
+      </StackPanel>
+      <CheckBox x:Name="MonochromeButton" Grid.Column="1" Content="Monochrome" />
+    </Grid>
   </StackPanel>
-  <TextBlock Text="The font examples retain the source font family and glyphs. Their appearance depends on the requested icon font being installed." TextWrapping="Wrap"/>
+
+  <StackPanel x:Name="Example2" Spacing="8">
+    <TextBlock Text="A FontIcon using a glyph from a specific font family in a button" FontSize="18" />
+    <TextBlock Margin="0,0,0,12" TextWrapping="Wrap"
+               Text="Use FontIcon as the icon for a control if you want to specify a Glyph value from a FontFamily. Windows 10 uses the Segoe MDL2 Assets FontFamily and that is what this example is showing." />
+    <Button x:Name="ExampleButton1" AutomationProperties.Name="ExampleButton1">
+      <FontIcon x:Name="FontGlyph" FontFamily="Segoe MDL2 Assets" Glyph="&#xE790;" />
+    </Button>
+  </StackPanel>
+
+  <StackPanel x:Name="Example3" Spacing="8">
+    <TextBlock Text="A ImageIcon using a bitmap image in a button" FontSize="18" />
+    <TextBlock Margin="0,0,0,12" TextWrapping="Wrap"
+               Text="To use an ImageIcon as the icon for a control, you can set image that has a file format supported by the Image class. The two examples here show a PNG and SVG image as the icon." />
+    <Button x:Name="ImageExample1" Width="100" AutomationProperties.Name="ImageExample1">
+      <Image x:Name="ImageExample1Icon" Stretch="Uniform" />
+    </Button>
+  </StackPanel>
+
+  <StackPanel x:Name="Example4" Spacing="8">
+    <TextBlock Text="A ImageIcon using a SVG image in a button" FontSize="18" />
+    <Button x:Name="ImageExample2" AutomationProperties.Name="ImageExample2">
+      <TextBlock x:Name="SvgUnavailable" TextWrapping="Wrap"
+                 Text="SVG images are not decoded: the remote libre-camera-panorama.svg is not shown." />
+    </Button>
+  </StackPanel>
+
+  <StackPanel x:Name="Example5" Spacing="8">
+    <TextBlock Text="A PathIcon in a button" FontSize="18" />
+    <TextBlock Margin="0,0,0,12" TextWrapping="Wrap"
+               Text="To use a PathIcon as the icon for a control, you specify the path data of the image you are trying to display. The path data draws a series of connected lines and curves." />
+    <Button x:Name="Example1Button" AutomationProperties.Name="Example1Button">
+      <PathIcon x:Name="PathGlyph" HorizontalAlignment="Center" Data="F1 M 16,12 20,2L 20,16 1,16" />
+    </Button>
+  </StackPanel>
+
+  <StackPanel x:Name="Example6" Spacing="8">
+    <TextBlock Text="A SymbolIcon in a button" FontSize="18" />
+    <TextBlock Margin="0,0,0,12" TextWrapping="Wrap"
+               Text="To use a SymbolIcon as the icon for a control, you specify the enum value for the glyph you would like to display. SymbolIcon's enum is based off of icons from the Segoe MDL2 font used by Windows 10." />
+    <Button x:Name="AcceptButton" AutomationProperties.Name="AcceptButton">
+      <StackPanel>
+        <SymbolIcon x:Name="AcceptIcon" Symbol="Accept" />
+        <TextBlock Text="Accept" />
+      </StackPanel>
+    </Button>
+  </StackPanel>
 </StackPanel>

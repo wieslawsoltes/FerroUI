@@ -73,6 +73,12 @@ pub struct GlyphTypeface {
     /// could not be parsed (capability unknown). Parsing copies the layout
     /// tables, so it is deferred until a complex script is actually queried.
     shaping_script_tags: OnceCell<(HashSet<OpenTypeTag>, bool)>,
+
+    /// The range of the optical size axis (`opsz`) of a variable font, read once
+    /// (`glyph_typeface_optical_size.rs`).
+    pub(crate) optical_size_axis: OnceCell<Option<(f64, f64)>>,
+    /// The instances of the typeface at the optical sizes of texts, by optical size.
+    pub(crate) optical_sizes: RefCell<Vec<(i32, Rc<GlyphTypeface>)>>,
 }
 
 impl GlyphTypeface {
@@ -267,6 +273,8 @@ impl GlyphTypeface {
             supported_unicode_range: OnceCell::new(),
             ascii_coverage: OnceCell::new(),
             shaping_script_tags: OnceCell::new(),
+            optical_size_axis: OnceCell::new(),
+            optical_sizes: RefCell::new(Vec::new()),
         }))
     }
 
