@@ -11,8 +11,13 @@ const cargoSelection = { folder: workspacePath, manifest_path: workspacePath, pa
 const unit = { type: 'number', minimum: 0, maximum: 1 };
 const guidePosition = { type: 'number', minimum: -1_000_000, maximum: 1_000_000 };
 const guideAxis = choice('Horizontal', 'Vertical');
+const snapProperties = { grid_visible: truth, snap_to_grid: truth, snap_to_guides: truth, snap_to_objects: truth,
+    grid_spacing: { type: 'number', minimum: .1, maximum: 100_000 }, snap_tolerance: { type: 'number', minimum: 0, maximum: 32 } };
+const snap = { type: 'object', additionalProperties: false, required: ['epoch', 'zoom'],
+    properties: { epoch: integer(0), zoom: { type: 'number', minimum: .01, maximum: 8 }, bypass: truth } };
 const guideEdit = { type: 'object', additionalProperties: false, required: ['action'], properties: {
-    action: choice('visibility', 'add', 'move', 'duplicate', 'remove', 'clear', 'apply'), rulers: truth, guides: truth,
+    action: choice('visibility', 'add', 'move', 'duplicate', 'remove', 'clear', 'apply', 'configure_snap'), rulers: truth, guides: truth,
+    options: { type: 'object', additionalProperties: false, properties: snapProperties, required: Object.keys(snapProperties) },
     id: node, axis: guideAxis, position: guidePosition,
     lines: { type: 'array', maxItems: 256, items: { type: 'object', additionalProperties: false, required: ['axis', 'position'],
         properties: { id: node, axis: guideAxis, position: guidePosition } } },
@@ -68,7 +73,10 @@ const hostedClipEdit = { ...frame, expected_generation: integer(1), expected_seq
         properties: { action: choice('create', 'rename', 'duplicate', 'remove'), owner: node, program: node,
             name: { type: 'string', maxLength: 512 }, selector: { type: 'string', maxLength: 4096 }, duration: time } } };
 const placement = { ...frame, asset: text, project_asset: text, node, selection: { type: 'array', items: node, minItems: 2, maxItems: 128 }, moving_anchor: node, anchor: node,
-    position: choice('inside', 'before', 'after'), x: { type: 'number' }, y: { type: 'number' } };
+    position: choice('inside', 'before', 'after'), x: { type: 'number' }, y: { type: 'number' }, snap };
+const resize = { ...frame, node, handle: integer(0, 7), dx: { type: 'number', minimum: -6144, maximum: 6144 },
+    dy: { type: 'number', minimum: -6144, maximum: 6144 }, snap };
+const resizeRequired = ['session', 'expected_revision', 'node', 'handle', 'dx', 'dy'];
 
 export const agentCatalog = {
     ...workspaceCatalog,
@@ -156,7 +164,7 @@ export const agentCatalog = {
             scale: { type: 'number', minimum: 0.125, maximum: 8 }, pan_x: { type: 'number' }, pan_y: { type: 'number' }, pan_tool: truth, focus_order: truth },
         ['session'], true, false),
     designer_canvas_guides: tool('Read the active canvas scope, ruler visibility, and guides in logical coordinates.', session, ['session']),
-    designer_canvas_guides_edit: tool('Change local canvas guides or visibility. Use the reported revision and epoch. Apply edits a complete set atomically.',
+    designer_canvas_guides_edit: tool('Change local guides, visibility, or snapping. Use the reported revision and epoch. Apply edits a complete guide set. Configure_snap sets the grid, guide and object options together.',
         { ...frame, expected_epoch: integer(0), edit: guideEdit }, ['session', 'expected_revision', 'expected_epoch', 'edit'], true, false),
     designer_canvas_input: tool('Interact with the native design preview at the current revision. Click or scroll at normalized x and y. Send text or a key gesture to the focused preview control.',
         { ...frame, input: { type: 'object', additionalProperties: false, required: ['kind'], properties: {
@@ -166,14 +174,14 @@ export const agentCatalog = {
     designer_select: tool('Select one source node, ordered source nodes, or one runtime object in the canvas, Outline and Properties.',
         { ...frame, node, selection: { type: 'array', items: node, maxItems: 128 }, inspector_id: node, reveal_source: truth },
         ['session', 'expected_revision'], true, false),
-    designer_placement_hint: tool('Validate a proposed drop and return its native landing bounds without editing the design.',
+    designer_placement_hint: tool('Validate a proposed drop and return its native landing bounds. Pass snap with the current guide epoch and zoom for a snapped Canvas placement.',
         placement, ['session', 'expected_revision']),
     designer_place: tool('Insert a Toolbox control, place a project image, or move authored controls. With Timeline recording armed, a supported canvas move writes geometry keyframes. Use an outline anchor and position or canvas coordinates.',
         placement,
         ['session', 'expected_revision'], true),
-    designer_resize: tool('Resize one authored control with a native layout plan. With Timeline recording armed, a supported resize writes geometry keyframes. Handles zero through seven run clockwise from top left. dx and dy are artboard units.',
-        { ...frame, node, handle: integer(0, 7), dx: { type: 'number', minimum: -6144, maximum: 6144 }, dy: { type: 'number', minimum: -6144, maximum: 6144 } },
-        ['session', 'expected_revision', 'node', 'handle', 'dx', 'dy'], true),
+    designer_resize_hint: tool('Preview the effective resize displacement and snap lines using the current canvas guide epoch and zoom.', resize, resizeRequired),
+    designer_resize: tool('Resize an authored control with the same snap context as designer_resize_hint. With Timeline recording armed, a supported resize writes geometry keyframes. Handles zero through seven run clockwise from top left. dx and dy are artboard units.',
+        resize, resizeRequired, true),
     designer_remove: tool('Remove a mapped authored control, preserving the other Rust or XAML source.',
         { ...frame, node }, ['session', 'expected_revision', 'node'], true),
     designer_edit_property: tool('Set or reset a property as in the Properties view. When XAML Timeline recording is armed, a supported literal value becomes a keyframe and preserves the base value.',

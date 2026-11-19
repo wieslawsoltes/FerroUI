@@ -2,6 +2,7 @@ import type { CanvasAction, CanvasSnapshot, DesignerViewState, FromDesigner, Run
 import { Artboard } from './artboard';
 import { CanvasDrag } from './canvasDrag';
 import { ResizeHandles } from './resizeHandles';
+import { ResizeSnapHints } from './resizeSnapHints';
 import { CanvasInput } from './canvasInput';
 import { CanvasGuides } from './canvasGuides';
 import { CanvasViewport } from './canvasViewport';
@@ -59,11 +60,13 @@ const interaction = new PreviewInteraction(artboard, () => input.panning, action
     vscode.postMessage({ type: 'interaction', token, action });
     pauseCanvas();
 }, updateSelection);
-const drag = new CanvasDrag(artboard, () => current && !applying && !input.panning && interaction.mode === 'select', vscode.postMessage);
+const guides = new CanvasGuides(viewport, artboard, () => input.panning, vscode.postMessage, error => showStatus('error', error));
+const captureSnap = () => guides.snapCapture;
+const drag = new CanvasDrag(artboard, () => current && !applying && !input.panning && interaction.mode === 'select', vscode.postMessage, captureSnap);
+const resizeHints = new ResizeSnapHints(vscode.postMessage);
 const resize = new ResizeHandles(artboard, gesture => {
     if (current && !applying && !input.panning && interaction.mode === 'select') vscode.postMessage({ type: 'resize', token, ...gesture });
-});
-const guides = new CanvasGuides(viewport, () => input.panning, vscode.postMessage, error => showStatus('error', error));
+}, captureSnap, resizeHints);
 const size = new ViewportMenu(viewport => vscode.postMessage({ type: 'viewport', viewport }));
 const counterpart = new Counterpart(apply);
 const focusOverlay = new FocusOverlay(token => vscode.postMessage({ type: 'focusOrder', token }), node => select(node, true));
@@ -333,6 +336,7 @@ function receive(message: ToDesigner): void {
             else if (current && artboard.isCurrent && message.state.frame.token === token) guides.present(message.state);
             return;
         case 'guideResult': guides.result(message); return;
+        case 'resizeHint': resizeHints.receive(message); return;
         case 'focusOrder':
             if (message.overlay) focusOverlay.show(message.token, message.overlay);
             else if (message.token === token && message.error) showStatus('notice', message.error);

@@ -4,6 +4,7 @@ import type { BuiltProject, BuiltProjects } from './builtProjects';
 import type { GuideCatalog, GuideEdit } from './canvasGuidesProtocol';
 import { CanvasRequests } from './canvasRequests';
 import { DesignerDependencies, dirtyXamlSources } from './designerDependencies';
+import { DesignerSnapping, snappedPlacement, snappedResize } from './designerSnapping';
 import { GuideViews, type GuideAnchor } from './guideViews';
 import { LayerViews } from './layerViews';
 import { NativePreview } from './nativePreview';
@@ -12,7 +13,7 @@ import { applyTextEdits, asPosition, asRange, offsetAfterChanges, sourceOf } fro
 import type { TimelinePreviewPose, TimelineTargetOverrides } from './timelineProtocol';
 import { designerHtml, webviewOptions } from './view';
 import type { EditResult, Inspection, InspectionTarget, Range, ResourceRow, RuntimeRow, RuntimeTreeMode } from './protocol';
-import type { CanvasAction, CanvasFocusOrder, CanvasInteraction, CanvasPresentation, DesignDataPresentation, DesignerViewState } from './protocol';
+import type { CanvasAction, CanvasFocusOrder, CanvasInteraction, CanvasPresentation, DesignDataPresentation, DesignerViewState, ResizeGesture } from './protocol';
 
 const mappedStudioEdits = new Set(['designer_selection_layout_edit', 'designer_property', 'designer_grid_track_edit']);
 export type DesignerCanvasState = Pick<DesignerViewState, 'viewport' | 'designData' | 'layerViews' | 'guideViews'>;
@@ -49,6 +50,7 @@ export class DesignerPanel implements vscode.Disposable {
     private readonly dependencies = new DesignerDependencies();
     private readonly layers: LayerViews;
     private readonly guides: GuideViews;
+    private readonly snapping = new DesignerSnapping(() => this.canvasGuides, frame => this.canUse(frame), () => this.getClient());
     private readonly subscriptions: vscode.Disposable[] = [];
     private readonly changed = new vscode.EventEmitter<void>();
     readonly onDidChange = this.changed.event;
@@ -374,6 +376,7 @@ export class DesignerPanel implements vscode.Disposable {
             return state;
         };
         const state = checked();
+        if (edit.action === 'configure_snap' && !state.snapping) throw new Error('Update the FerroUI preview helper to configure snapping.');
         const anchor = this.frame!.guideAnchor!;
         const client = await this.getClient();
         signal?.throwIfAborted();
@@ -381,7 +384,7 @@ export class DesignerPanel implements vscode.Disposable {
         const update = await client.editCanvasGuides(state.settings, edit);
         signal?.throwIfAborted();
         checked();
-        this.guides.remember(anchor, update.settings);
+        this.guides.remember(anchor, update.settings, state.snapping === true);
         const accepted = this.canvasGuides!;
         this.rememberView();
         this.post({ type: 'guides', state: accepted });
@@ -396,9 +399,21 @@ export class DesignerPanel implements vscode.Disposable {
     async previewPlacement(target: FrameTarget, placement: Placement): Promise<DropHint> {
         if (!this.canUse(target)) throw new Error('The design changed during the drag.');
         const recording = this.recordingGeometryPose() !== undefined && Boolean(recordedMove(placement));
+        const snap = placement.target.type === 'canvas' ? placement.target.snap : undefined;
+        const adjustment = snap ? await this.snapping.resolve(target, snap, { type: 'place', placement, recording }) : undefined;
         const client = await this.getClient();
         if (!this.canUse(target)) throw new Error('The design changed during the drag.');
-        return client.placement(target.token, placement, recording);
+        if (snap) this.snapping.validate(target, snap);
+        const hint = await client.placement(target.token, adjustment ? snappedPlacement(placement, adjustment.delta) : placement, recording);
+        if (snap) this.snapping.validate(target, snap);
+        return { ...hint, bounds: adjustment?.bounds ?? hint.bounds, snapLines: adjustment?.guides };
+    }
+
+    async previewResize(target: FrameTarget, gesture: ResizeGesture) {
+        if (!this.canUse(target)) throw new Error('The design changed during the resize.');
+        const { node, handle, dx, dy, snap } = gesture;
+        const adjustment = snap && await this.snapping.resolve(target, snap, { type: 'resize', node, handle, dx, dy });
+        return { ...snappedResize(gesture, adjustment?.delta ?? { x: 0, y: 0 }), bounds: adjustment?.bounds, snapLines: adjustment?.guides ?? [] };
     }
 
     get snapshot(): Snapshot | undefined { return this.currentToken === undefined ? undefined : this.frame?.snapshot; }
@@ -720,6 +735,13 @@ export class DesignerPanel implements vscode.Disposable {
             }
             return;
         }
+        if (message.type === 'previewResize') {
+            let preview: Awaited<ReturnType<DesignerPanel['previewResize']>> | undefined;
+            try { preview = await this.previewResize(message.frame, message); }
+            catch { /* An outdated preview hint can retire independently of the gesture. */ }
+            this.post({ type: 'resizeHint', request: message.request, preview });
+            return;
+        }
         if (message.type === 'refresh') {
             this.schedule(0);
             return;
@@ -756,8 +778,8 @@ export class DesignerPanel implements vscode.Disposable {
             } else if (message.type === 'block') {
                 await this.selectBlock({ session: this.session, token: message.token }, message.index);
             } else if (message.type === 'resize' && !this.editing && this.selection.length === 1 && this.selected === message.node) {
-                const { node, handle, dx, dy } = message;
-                await this.edit(frame, { type: 'resize', frame: message.token, node, handle, dx, dy });
+                const { node, handle, dx, dy, snap } = message;
+                await this.edit(frame, { type: 'resize', frame: message.token, node, handle, dx, dy, snap });
             } else if (message.type === 'interaction') {
                 await this.interact(message.token, message.action, AbortSignal.timeout(15_000));
             } else if (message.type === 'apply') {
@@ -773,6 +795,22 @@ export class DesignerPanel implements vscode.Disposable {
 
     private async edit(frame: Frame, operation: Operation, signal?: AbortSignal, validate?: () => void): Promise<void> {
         const pose = this.recordingGeometryPose();
+        const target = { session: this.session, token: frame.token };
+        if (operation.type === 'place' && operation.placement.target.type === 'canvas' && operation.placement.target.snap) {
+            const { placement } = operation;
+            const snap = operation.placement.target.snap;
+            const adjustment = await this.snapping.resolve(target, snap,
+                { type: 'place', placement, recording: Boolean(pose && recordedMove(placement)) });
+            this.snapping.validate(target, snap);
+            operation = { ...operation, placement: snappedPlacement(placement, adjustment.delta) };
+            if (pose !== this.recordingGeometryPose()) throw new Error('Animation recording changed during the drag.');
+        } else if (operation.type === 'resize' && operation.snap) {
+            const preview = await this.previewResize(target, operation);
+            this.snapping.validate(target, operation.snap);
+            const { node, handle, dx, dy } = preview;
+            operation = { ...operation, node, handle, dx, dy, snap: undefined };
+            if (pose !== this.recordingGeometryPose()) throw new Error('Animation recording changed during the resize.');
+        }
         const geometry = pose && recordedGeometry(operation);
         if (pose && geometry) {
             if (!('frame' in operation) || operation.frame !== frame.token) throw new Error('Read the current recording frame.');

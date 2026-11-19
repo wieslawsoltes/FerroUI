@@ -1,6 +1,8 @@
 import type { Bounds, CanvasNode, CanvasSnapshot, Point, Viewport } from '../src/protocol';
+import type { SnapLine } from '../src/canvasGuidesProtocol';
 import { CanvasViewport } from './canvasViewport';
 import { element } from './dom';
+import { SnapFeedback } from './snapFeedback';
 
 export class Artboard {
     readonly element = element('artboard');
@@ -12,6 +14,7 @@ export class Artboard {
     private readonly selectionGroup = element('selection-group');
     private readonly hover = element('hover-box');
     private readonly dropBox = element('drop-box');
+    private readonly snapping = new SnapFeedback();
     private snapshot?: CanvasSnapshot;
     private current = false;
     private selected?: number;
@@ -154,8 +157,14 @@ export class Artboard {
         return x >= bounds.x && y >= bounds.y && x < bounds.x + bounds.width && y < bounds.y + bounds.height;
     }
 
-    showDrop(bounds?: Bounds | null): void {
+    showDrop(bounds?: Bounds | null, lines: readonly SnapLine[] = []): void {
         this.draw(this.dropBox, bounds, true);
+        const image = this.snapshot?.image;
+        this.snapping.showLines(this.current && image ? lines : [], image?.width ?? 1, image?.height ?? 1);
+    }
+
+    showGrid(spacing?: number): void {
+        this.snapping.showGrid(spacing);
     }
 
     private draw(element: HTMLElement, bounds: Bounds | null | undefined, allowLine = false): void {

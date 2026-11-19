@@ -1,12 +1,12 @@
 import { createHash } from 'node:crypto';
 import type * as vscode from 'vscode';
-import type { CanvasGuidesState, GuideCatalog, GuidePreferences } from './canvasGuidesProtocol';
+import type { CanvasGuidesState, GuideCatalog, GuidePreferences, GuideSettings, SnapPreferences } from './canvasGuidesProtocol';
 import type { FrameTarget, Position } from './protocol';
 import { asPosition, offsetAfterChanges } from './textDocument';
 
 export type GuideAnchor = { kind: 'document' } | { kind: 'rsx' | 'definition'; start: Position };
 interface GuideViewKey { kind: GuideAnchor['kind']; offset: number }
-interface GuideView extends GuideViewKey { preferences: GuidePreferences }
+interface GuideView extends GuideViewKey { preferences: GuidePreferences; snapping?: SnapPreferences }
 export interface GuideViewsState { stamp?: string; views: GuideView[] }
 const maxViews = 24;
 
@@ -39,13 +39,15 @@ export class GuideViews {
         const key = this.key(anchor);
         const view = this.views.find(candidate => sameView(candidate, key));
         const { defaults, ...limits } = catalog;
-        return { frame, scope: anchor.kind, epoch: this.epoch, settings: { ...defaults, ...view?.preferences }, ...limits };
+        return { frame, scope: anchor.kind, epoch: this.epoch,
+            settings: { ...defaults, ...view?.preferences, ...(catalog.snapping ? view?.snapping : undefined) }, ...limits };
     }
 
-    remember(anchor: GuideAnchor, preferences: GuidePreferences): void {
+    remember(anchor: GuideAnchor, preferences: GuideSettings, supportsSnapping: boolean): void {
         const key = this.key(anchor);
         const { rulers_visible, guides_visible, guides } = preferences;
-        this.views = [{ ...key, preferences: { rulers_visible, guides_visible, guides } },
+        const snapping = supportsSnapping ? snapPreferences(preferences) : this.views.find(view => sameView(view, key))?.snapping;
+        this.views = [{ ...key, preferences: { rulers_visible, guides_visible, guides }, snapping },
             ...this.views.filter(view => !sameView(view, key))].slice(0, maxViews);
         this.epoch++;
     }
@@ -69,7 +71,8 @@ export class GuideViews {
         this.views = saved.views.filter(view => view && validPreferences(view.preferences, catalog)
             && (view.kind === 'document' && view.offset === -1 || sameSource
                 && (view.kind === 'rsx' || view.kind === 'definition')
-                && Number.isSafeInteger(view.offset) && view.offset >= 0 && view.offset < length));
+                && Number.isSafeInteger(view.offset) && view.offset >= 0 && view.offset < length))
+            .map(view => ({ ...view, snapping: validSnapPreferences(view.snapping) ? snapPreferences(view.snapping) : undefined }));
     }
 
     private sourceStamp(): string {
@@ -81,6 +84,18 @@ export class GuideViews {
 }
 
 function sameView(a: GuideViewKey, b: GuideViewKey): boolean { return a.kind === b.kind && a.offset === b.offset; }
+
+function snapPreferences({ grid_visible, grid_spacing, snap_tolerance, snap_to_grid, snap_to_guides, snap_to_objects }: SnapPreferences): SnapPreferences {
+    return { grid_visible, grid_spacing, snap_tolerance, snap_to_grid, snap_to_guides, snap_to_objects };
+}
+
+function validSnapPreferences(value: unknown): value is SnapPreferences {
+    if (!value || typeof value !== 'object') return false;
+    const { grid_visible, grid_spacing, snap_tolerance, snap_to_grid, snap_to_guides, snap_to_objects } = value as SnapPreferences;
+    return [grid_visible, snap_to_grid, snap_to_guides, snap_to_objects].every(flag => typeof flag === 'boolean')
+        && Number.isFinite(grid_spacing) && grid_spacing >= 0.1 && grid_spacing <= 100_000
+        && Number.isFinite(snap_tolerance) && snap_tolerance >= 0 && snap_tolerance <= 32;
+}
 
 function validPreferences(value: unknown, catalog: GuideCatalog): value is GuidePreferences {
     if (!value || typeof value !== 'object') return false;

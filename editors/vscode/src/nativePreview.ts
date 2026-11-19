@@ -2,7 +2,7 @@ import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { createMessageConnection, StreamMessageReader, StreamMessageWriter } from 'vscode-jsonrpc/node';
 import type * as vscode from 'vscode';
 import type { BuiltProject } from './builtProjects';
-import type { GuideCatalog, GuideEdit, GuideSettings, GuideUpdate } from './canvasGuidesProtocol';
+import type { CanvasSnapAdjustment, CanvasSnapGesture, GuideCatalog, GuideEdit, GuideSettings, GuideUpdate } from './canvasGuidesProtocol';
 import type { TokenPlan, TokenRequest } from './designTokenProtocol';
 import type { LayerViewInput } from './layerViews';
 import type { CurvePoint, TimelinePreviewPose, TimelineTargetOverrides } from './timelineProtocol';
@@ -86,6 +86,11 @@ export class NativePreview implements vscode.Disposable {
     editCanvasGuides(settings: GuideSettings, edit: GuideEdit): Promise<GuideUpdate> {
         if (!this.canvasGuides) throw new Error('Update the FerroUI preview helper to edit canvas guides.');
         return this.send('canvasGuideEdit', { settings, edit });
+    }
+
+    canvasSnap(frame: number, settings: GuideSettings, zoom: number, gesture: CanvasSnapGesture): Promise<CanvasSnapAdjustment> {
+        if (!this.canvasGuides?.snapping) throw new Error('Update the FerroUI preview helper to use canvas snapping.');
+        return this.send('canvasSnap', { frame, settings, zoom, gesture });
     }
 
     async inProject(source: Source, project?: BuiltProject): Promise<Source> {

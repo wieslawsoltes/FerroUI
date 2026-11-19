@@ -1,10 +1,13 @@
-import type { CanvasGuidesState, Guide, GuideAxis, GuideEdit } from '../src/canvasGuidesProtocol';
+import { snapEnabled, type CanvasGuidesState, type Guide, type GuideAxis, type GuideEdit } from '../src/canvasGuidesProtocol';
 import type { FromDesigner, ToDesigner } from '../src/protocol';
 import { element } from './dom';
 import { sameProjection, type GuideProjection } from './canvasRulers';
 import { GuideEditor } from './guideEditor';
 import { guideAt, GuideOverlay, rulerAt, rulerSize } from './guideOverlay';
 import type { CanvasViewport } from './canvasViewport';
+import type { Artboard } from './artboard';
+import type { SnapCapture } from './snapFeedback';
+import { SnappingEditor } from './snappingEditor';
 
 interface Gesture {
     pointer: number; axis: GuideAxis; guide?: Guide; duplicate: boolean;
@@ -15,8 +18,8 @@ interface Gesture {
 /** Keeps pointer capture and viewport projection local. Only the completed gesture reaches the host. */
 export class CanvasGuides {
     private readonly editor = new GuideEditor((state, edit) => this.send(state, edit));
+    private readonly snapping = new SnappingEditor((state, edit) => this.send(state, edit));
     private readonly overlay = new GuideOverlay();
-    private readonly artboard = element('artboard');
     private state?: CanvasGuidesState;
     private enabled = false;
     private selecting = false;
@@ -25,7 +28,7 @@ export class CanvasGuides {
     private sequence = 0;
     private focus?: number;
 
-    constructor(private readonly viewport: CanvasViewport, private readonly panning: () => boolean,
+    constructor(private readonly viewport: CanvasViewport, private readonly artboard: Artboard, private readonly panning: () => boolean,
         private readonly post: (message: FromDesigner) => void, private readonly report: (message: string) => void) {
         const canvas = viewport.element;
         canvas.addEventListener('pointerdown', event => this.start(event), { capture: true });
@@ -40,7 +43,7 @@ export class CanvasGuides {
         window.addEventListener('resize', () => this.schedule());
         const resize = new ResizeObserver(() => this.schedule());
         resize.observe(canvas);
-        resize.observe(this.artboard);
+        resize.observe(this.artboard.element);
         new MutationObserver(() => this.schedule()).observe(document.body, { attributes: true, attributeFilter: ['style', 'class'] });
     }
 
@@ -49,6 +52,7 @@ export class CanvasGuides {
             || this.state?.epoch !== state?.epoch) this.cancel();
         this.state = state;
         this.editor.update(this.enabled ? state : undefined);
+        this.snapping.update(state, this.enabled);
         this.schedule();
     }
 
@@ -58,14 +62,22 @@ export class CanvasGuides {
         this.selecting = selecting;
         if (!this.canDrag()) this.cancel();
         this.editor.update(enabled ? this.state : undefined);
+        this.snapping.update(this.state, enabled);
         this.schedule();
     }
 
     result(message: Extract<ToDesigner, { type: 'guideResult' }>): void {
-        if (this.editor.result(message.request, message.error) || message.request !== this.sequence) return;
+        if (this.editor.result(message.request, message.error) || this.snapping.result(message.request, message.error)
+            || message.request !== this.sequence) return;
         if (message.frame.token !== this.state?.frame.token || message.frame.session !== this.state.frame.session) return;
         if (message.error) this.report(message.error);
         else if (message.selected != null && this.canDrag()) { this.focus = message.selected; this.schedule(); }
+    }
+
+    get snapCapture(): SnapCapture | undefined {
+        const state = this.state;
+        if (this.enabled && state?.snapping) return { frame: state.frame, epoch: state.epoch,
+            zoom: Math.max(.01, this.viewport.state.scale), active: snapEnabled(state.settings) };
     }
 
     schedule(): void {
@@ -76,6 +88,8 @@ export class CanvasGuides {
             if (this.gesture && (!view || !sameProjection(view, this.gesture.view))) this.cancel();
             const ghost = this.gesture?.point !== undefined ? { axis: this.gesture.axis, position: this.gesture.point } : undefined;
             this.overlay.draw(this.state, view, this.enabled && this.selecting, ghost);
+            const snap = this.state?.snapping && this.state.settings;
+            this.artboard.showGrid(view && snap && snap.grid_visible ? snap.grid_spacing * view.scale : undefined);
             if (this.focus !== undefined) { this.overlay.focus(this.focus); this.focus = undefined; }
         });
     }
@@ -84,9 +98,9 @@ export class CanvasGuides {
         const canvas = this.viewport.element;
         const width = canvas.clientWidth;
         const height = canvas.clientHeight;
-        if (this.artboard.hidden || !width || !height) return;
+        if (this.artboard.element.hidden || !width || !height) return;
         const { left, top } = canvas.getBoundingClientRect();
-        const artboard = this.artboard.getBoundingClientRect();
+        const artboard = this.artboard.element.getBoundingClientRect();
         return { left, top, width, height, x: artboard.left - left, y: artboard.top - top, scale: this.viewport.state.scale };
     }
 

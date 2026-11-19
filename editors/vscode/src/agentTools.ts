@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { agentCatalog, type AgentTool } from './agentCatalog';
 import { validate } from './agentSchema';
-import type { GuideEdit } from './canvasGuidesProtocol';
+import type { CanvasSnapInput, GuideEdit } from './canvasGuidesProtocol';
 import type { CargoSelection } from './cargoTarget';
 import type { TokenRequest } from './designTokenProtocol';
 import type { DesignerPanel } from './designerPanel';
@@ -73,6 +73,7 @@ interface Arguments extends CanvasAction, CargoSelection {
     label: string;
     edits: object[];
     edit?: GuideEdit;
+    snap?: CanvasSnapInput;
     source: string;
     action: string;
     tool: string;
@@ -309,9 +310,12 @@ export class AgentTools {
             case 'designer_remove':
                 await panel.agentEdit(args.expected_revision, { type: 'removeNode', node: args.node! }, signal);
                 break;
+            case 'designer_resize_hint':
+                return panel.previewResize({ session: panel.session, token: args.expected_revision },
+                    { node: args.node!, handle: args.handle!, dx: args.dx!, dy: args.dy!, snap: args.snap });
             case 'designer_resize':
                 await panel.agentEdit(args.expected_revision, { type: 'resize', frame: args.expected_revision,
-                    node: args.node!, handle: args.handle!, dx: args.dx!, dy: args.dy! }, signal);
+                    node: args.node!, handle: args.handle!, dx: args.dx!, dy: args.dy!, snap: args.snap }, signal);
                 break;
             case 'designer_edit_property':
                 if (args.action === 'set' && args.value === undefined) throw new Error('Supply the property value.');
@@ -404,8 +408,9 @@ export class AgentTools {
         const hasOutline = args.anchor !== undefined && args.position !== undefined;
         const hasPoint = args.x !== undefined && args.y !== undefined;
         if (hasOutline === hasPoint) throw new Error('Specify one outline anchor and position or one canvas point.');
+        if (hasOutline && args.snap) throw new Error('Snapping applies to a canvas placement.');
         const target: DropTarget = hasOutline ? { type: 'outline', node: args.anchor!, position: args.position! }
-            : { type: 'canvas', x: args.x!, y: args.y! };
+            : { type: 'canvas', x: args.x!, y: args.y!, snap: args.snap };
         return { origin, target };
     }
 }

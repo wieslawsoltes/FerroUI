@@ -1,5 +1,5 @@
 import type { LayerViewState, LayerViewsState } from './layerViews';
-import type { CanvasGuidesState, GuideEdit } from './canvasGuidesProtocol';
+import type { CanvasGuidesState, CanvasSnapInput, GuideEdit, SnapLine } from './canvasGuidesProtocol';
 import type { GuideViewsState } from './guideViews';
 import type { KeyframeLocation, TimelinePreviewPose, TimelineTargetOverrides } from './timelineProtocol';
 import type { NativeTransitionPosition } from './stateTransitionProtocol';
@@ -153,7 +153,7 @@ export type Operation = NodeOperation | { type: 'applyCounterpart'; source: stri
     | { type: 'apply'; label: string; edits: object[] }
     | { type: 'place'; frame: number; placement: Placement }
     | ({ type: 'resize'; frame: number } & ResizeGesture);
-export interface ResizeGesture { node: number; handle: number; dx: number; dy: number }
+export interface ResizeGesture { node: number; handle: number; dx: number; dy: number; snap?: CanvasSnapInput }
 
 // Node IDs and tokens are local to a designer session.
 export interface FrameTarget { session: number; token: number }
@@ -206,9 +206,9 @@ export type DragOrigin = { type: 'asset'; control: string } | { type: 'node'; no
     | { type: 'nodes'; nodes: number[]; anchor: number; grab?: Point }
     | { type: 'image'; source: string; asset?: string };
 export type OutlinePosition = 'before' | 'inside' | 'after';
-export type DropTarget = { type: 'canvas' } & Point | { type: 'outline'; node: number; position: OutlinePosition };
+export type DropTarget = { type: 'canvas'; snap?: CanvasSnapInput } & Point | { type: 'outline'; node: number; position: OutlinePosition };
 export interface Placement { origin: DragOrigin; target: DropTarget }
-export interface DropHint { bounds: Bounds | null; description: string }
+export interface DropHint { bounds: Bounds | null; description: string; snapLines?: SnapLine[] }
 export interface DragGesture { id: string; frame: FrameTarget; origin: DragOrigin }
 export type DragMessage = { type: 'beginDrag'; gesture: DragGesture } | { type: 'endDrag'; id: string }
     | { type: 'drop'; id: string; frame: FrameTarget; target: DropTarget };
@@ -296,6 +296,7 @@ export type FromDesigner = DragMessage
     | { type: 'select'; token: number; id: number; openSource: boolean; extend?: boolean }
     | { type: 'interaction'; token: number; action: CanvasInteraction }
     | ({ type: 'resize'; token: number } & ResizeGesture)
+    | ({ type: 'previewResize'; frame: FrameTarget; request: number } & ResizeGesture)
     | { type: 'apply'; token: number; source: string };
 
 export type ToDesigner = DragUpdate | PlacementResult
@@ -306,6 +307,7 @@ export type ToDesigner = DragUpdate | PlacementResult
     | { type: 'snapshot'; frame: FrameTarget; sourceKey: string; snapshot: CanvasSnapshot; viewport: Viewport; selected: number | undefined; selection?: number[]; runtime?: RuntimeRow; guides?: CanvasGuidesState }
     | { type: 'guides'; state: CanvasGuidesState }
     | { type: 'guideResult'; frame: FrameTarget; request: number; selected?: number | null; error?: string }
+    | { type: 'resizeHint'; request: number; preview?: ResizeGesture & { bounds?: Bounds; snapLines: SnapLine[] } }
     | { type: 'error'; message: string }
     | { type: 'selection'; token: number; selected: number | undefined; selection?: number[]; runtime?: RuntimeRow }
     | { type: 'focusOrder'; token: number; overlay?: CanvasFocusOrder; error?: string }

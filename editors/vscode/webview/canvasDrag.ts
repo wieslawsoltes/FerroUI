@@ -2,6 +2,7 @@ import type { DragGesture, DropTarget, FrameTarget, FromDesigner, PlacementResul
 import { Artboard } from './artboard';
 import { element } from './dom';
 import { DragSource, finishDrop, matchDrag } from './drag';
+import { sameSnap, snapInput, type SnapCapture } from './snapFeedback';
 
 export class CanvasDrag {
     private readonly label = element('drop-hint');
@@ -13,8 +14,10 @@ export class CanvasDrag {
     private requested?: string;
     private inFlight?: number;
     private timer?: ReturnType<typeof setTimeout>;
+    private snapBasis?: SnapCapture;
 
-    constructor(private readonly artboard: Artboard, canDrag: () => boolean, private readonly send: (message: FromDesigner) => void) {
+    constructor(private readonly artboard: Artboard, canDrag: () => boolean, private readonly send: (message: FromDesigner) => void,
+        private readonly captureSnap: () => SnapCapture | undefined) {
         const board = artboard.element;
         this.source = new DragSource(board, event => {
             const grab = pointerPosition(artboard, event);
@@ -40,6 +43,7 @@ export class CanvasDrag {
             }
             const point = pointerPosition(artboard, event);
             if (!canDrag() || !this.frame || !matchDrag(this.frame, this.gesture)) return;
+            if (!this.validateSnap()) return;
             if (!point) {
                 this.clearHint();
                 this.feedback('Move onto the artboard to drop', 'outside');
@@ -47,10 +51,11 @@ export class CanvasDrag {
             }
             board.classList.add('placing');
             if (this.label.hidden || this.label.dataset.state === 'outside') this.feedback('Finding drop target…', 'pending');
-            const key = `${Math.round(point.x)}:${Math.round(point.y)}`;
+            const key = `${Math.round(point.x)}:${Math.round(point.y)}:${event.altKey}`;
             if (key !== this.requested) {
                 this.requested = key;
-                this.queued = { id: this.gesture.id, frame: this.frame, target: { type: 'canvas', ...point }, sequence: ++this.sequence };
+                const snap = snapInput(this.snapBasis, event.altKey);
+                this.queued = { id: this.gesture.id, frame: this.frame, target: { type: 'canvas', ...point, snap }, sequence: ++this.sequence };
                 this.timer ??= setTimeout(() => this.flush(), 55);
             }
         });
@@ -59,7 +64,7 @@ export class CanvasDrag {
             const point = pointerPosition(artboard, event);
             if (event.button === 0 && canDrag() && point) {
                 this.source.startIfMoved(event);
-                finishDrop(this.frame, this.gesture, { type: 'canvas', ...point }, send);
+                if (this.validateSnap()) finishDrop(this.frame, this.gesture, { type: 'canvas', ...point, snap: snapInput(this.snapBasis, event.altKey) }, send);
             }
             this.clearHint();
         });
@@ -72,20 +77,31 @@ export class CanvasDrag {
     }
 
     setGesture(gesture?: DragGesture): void {
-        if (this.gesture?.id !== gesture?.id) this.clearHint();
+        if (this.gesture?.id !== gesture?.id) {
+            this.clearHint();
+            this.snapBasis = gesture ? this.captureSnap() : undefined;
+        }
         this.gesture = gesture;
         if (!gesture) this.source.end(false);
     }
 
     show(result: PlacementResult): void {
         if (result.id !== this.gesture?.id || result.sequence !== this.inFlight) return;
+        if (!this.validateSnap()) return;
         this.inFlight = undefined;
         if (this.queued) this.timer ??= setTimeout(() => this.flush(), 55);
         if (result.sequence !== this.sequence) return;
         const state = result.error ? 'error' : 'valid';
         this.feedback(result.error ?? result.hint?.description ?? '', state);
         this.artboard.element.classList.toggle('invalid-placement', state === 'error');
-        this.artboard.showDrop(result.hint?.bounds);
+        this.artboard.showDrop(result.hint?.bounds, result.hint?.snapLines);
+    }
+
+    private validateSnap(): boolean {
+        if (!this.gesture || sameSnap(this.snapBasis, this.captureSnap())) return true;
+        this.send({ type: 'endDrag', id: this.gesture.id });
+        this.setGesture(undefined);
+        return false;
     }
 
     private flush(): void {

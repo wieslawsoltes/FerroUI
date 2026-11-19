@@ -36,6 +36,7 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
         </div>
         ${tool('pan', 'move', 'Pan canvas (Space and drag)', 'aria-pressed="false"')}
         ${tool('guides-button', 'symbol-ruler', 'Canvas Guides', 'popovertarget="guides-menu" aria-haspopup="dialog" disabled')}
+        ${tool('snapping-button', 'magnet', 'Snapping', 'popovertarget="snapping-menu" aria-haspopup="dialog" hidden disabled')}
         <output id="canvas-recording" class="canvas-recording" role="status" hidden>${icon('circle-filled')}<span></span></output>
     </div>
     <div class="dock-tools" role="group" aria-label="Workbench views">
@@ -54,10 +55,12 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
             <div id="placeholder" class="placeholder">${icon('preview')}<span id="empty-state">Rendering preview…</span></div>
             <div id="artboard" class="artboard" hidden>
                 <canvas id="frame" role="img" aria-label="Rendered FerroUI view"></canvas>
+                <div id="canvas-grid" aria-hidden="true" hidden></div>
                 <div id="hover-box" class="control-outline hover-outline" hidden></div>
                 <div id="selection-box" class="control-outline" hidden><div id="resize-handles" role="group" aria-label="Resize handles" hidden></div></div>
                 <div id="selection-group" aria-hidden="true"></div>
                 <div id="drop-box" class="control-outline drop-outline" hidden></div>
+                <div id="canvas-snap-lines" aria-hidden="true"></div>
                 <div id="focus-order" class="focus-overlay" role="group" aria-label="Native keyboard navigation" hidden></div>
             </div>
         </div>
@@ -137,6 +140,26 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
         </div>
     </form>
 </div>
+<div id="snapping-menu" class="popover snap-menu" popover role="dialog" aria-labelledby="snapping-title">
+    <form id="snapping-form">
+        <strong id="snapping-title">Snapping</strong>
+        <div class="snap-targets" role="group" aria-label="Snap to">
+            <label><input id="snap-to-grid" type="checkbox" autofocus> Grid</label>
+            <label><input id="snap-to-guides" type="checkbox"> Guides</label>
+            <label><input id="snap-to-objects" type="checkbox"> Objects</label>
+        </div>
+        <label class="snap-grid-visibility"><input id="show-snap-grid" type="checkbox"> Show grid</label>
+        <div class="snap-fields">
+            <label>Spacing (px)<input id="snap-grid-spacing" type="number" min="0.1" max="100000" step="any" required></label>
+            <label>Tolerance (screen px)<input id="snap-tolerance" type="number" min="0" max="32" step="any" required></label>
+        </div>
+        <p id="snapping-error" role="status" hidden></p>
+        <div class="guide-menu-actions">
+            <button type="button" id="snapping-cancel" class="secondary">Cancel</button>
+            <button type="submit" id="snapping-apply" class="primary">Apply</button>
+        </div>
+    </form>
+</div>
 <div id="actions-menu" class="popover zoom-menu" popover>
     <button type="button" class="compact-action" id="menu-toolbox">Show Toolbox</button>
     <button type="button" class="compact-action" id="menu-outline">Show Outline</button>
@@ -150,7 +173,7 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
     <button type="button" id="menu-library">Show Library</button>
     <button type="button" id="menu-focus-order" aria-pressed="false" disabled>Focus Order Overlay</button>
     <button type="button" class="compact-action" id="menu-refresh">Refresh preview</button>
-</div>`, ['canvas-guides']);
+</div>`, ['canvas-guides', 'canvas-snapping']);
 }
 
 export function outlineHtml(webview: vscode.Webview, root: vscode.Uri): string {
