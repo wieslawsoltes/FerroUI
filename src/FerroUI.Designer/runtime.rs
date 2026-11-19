@@ -47,6 +47,7 @@ pub(crate) struct RuntimePreview {
     pub host: Ref<ContentControl>,
     uri: String,
     options: crate::preview_host::PreviewHostOptions,
+    fixture: Option<String>,
     options_epoch: u64,
     isolated: bool,
     native_window: Option<Ref<ferroui_controls::Window>>,
@@ -65,18 +66,30 @@ pub(crate) struct RuntimePreview {
 }
 
 impl RuntimePreview {
+    #[cfg(test)]
     pub fn new_with_options(
         host: Ref<ContentControl>,
         uri: String,
         document: &Document,
         options: crate::preview_host::PreviewHostOptions,
     ) -> Result<Self, String> {
-        Self::construct(host, uri, document, options, None, false)
+        Self::new_with_fixture(host, uri, document, options, None)
+    }
+
+    pub(crate) fn new_with_fixture(
+        host: Ref<ContentControl>,
+        uri: String,
+        document: &Document,
+        options: crate::preview_host::PreviewHostOptions,
+        fixture: Option<String>,
+    ) -> Result<Self, String> {
+        Self::construct(host, uri, document, options, fixture, None, false)
     }
 
     /// Independent secondary previews never publish a competing source overlay for
     /// the authored URI. They load a complete native candidate with the original
     /// resource base URI and registered factory request, in both debug and release.
+    #[cfg(test)]
     pub(crate) fn new_isolated(
         host: Ref<ContentControl>,
         uri: String,
@@ -84,7 +97,14 @@ impl RuntimePreview {
         options: crate::preview_host::PreviewHostOptions,
         scope: Option<crate::DefinitionScope>,
     ) -> Result<Self, String> {
-        Self::construct(host, uri, document, options, scope, true)
+        Self::new_isolated_with_fixture(host, uri, document, options, None, scope)
+    }
+
+    pub(crate) fn new_isolated_with_fixture(
+        host: Ref<ContentControl>, uri: String, document: &Document,
+        options: crate::preview_host::PreviewHostOptions, fixture: Option<String>, scope: Option<crate::DefinitionScope>,
+    ) -> Result<Self, String> {
+        Self::construct(host, uri, document, options, fixture, scope, true)
     }
 
     fn construct(
@@ -92,6 +112,7 @@ impl RuntimePreview {
         uri: String,
         document: &Document,
         mut options: crate::preview_host::PreviewHostOptions,
+        fixture: Option<String>,
         scope: Option<crate::DefinitionScope>,
         isolated: bool,
     ) -> Result<Self, String> {
@@ -121,6 +142,7 @@ impl RuntimePreview {
                 &host,
                 &uri,
                 options.clone(),
+                fixture.clone(),
                 use_factory.clone(),
             )?);
             let registered: Rc<dyn ferroui_hot_reload::ReloadTarget> = target.clone();
@@ -135,6 +157,7 @@ impl RuntimePreview {
             host,
             uri,
             options,
+            fixture,
             options_epoch: NEXT_PREVIEW_OPTIONS.fetch_add(1, Ordering::Relaxed),
             isolated,
             native_window: None,
@@ -159,7 +182,16 @@ impl RuntimePreview {
     /// A failed factory leaves the accepted graph and previous factory configuration intact.
     pub(crate) fn configure(
         &mut self,
+        options: crate::preview_host::PreviewHostOptions,
+        document: &Document,
+    ) -> Result<(), String> {
+        self.configure_with_fixture(options, self.fixture.clone(), document)
+    }
+
+    fn configure_with_fixture(
+        &mut self,
         mut options: crate::preview_host::PreviewHostOptions,
+        fixture: Option<String>,
         document: &Document,
     ) -> Result<(), String> {
         for register in &options.register_types {
@@ -171,13 +203,15 @@ impl RuntimePreview {
         let previous_target = self.reload_driver.as_ref().map(|driver| {
             driver
                 .target
-                .replace_configuration(&self.host, options.clone())
+                .replace_configuration(&self.host, options.clone(), fixture.clone())
         });
         let previous = std::mem::replace(&mut self.options, options);
+        let previous_fixture = std::mem::replace(&mut self.fixture, fixture);
         self.reload_document(document, true);
         if let PreviewStatus::Failed { message, .. } = &self.status {
             let error = message.clone();
             self.options = previous;
+            self.fixture = previous_fixture;
             #[cfg(debug_assertions)]
             if let (Some(driver), Some(previous_target)) = (&self.reload_driver, previous_target) {
                 driver.target.restore_configuration(previous_target);
@@ -213,7 +247,7 @@ impl RuntimePreview {
             self.reload_document(document, true);
         } else {
             let mut preview =
-                Self::new_with_options(self.host.clone(), uri, document, self.options.clone())?;
+                Self::new_with_fixture(self.host.clone(), uri, document, self.options.clone(), self.fixture.clone())?;
             preview.options_epoch = self.options_epoch;
             *self = preview;
         }
@@ -229,7 +263,7 @@ impl RuntimePreview {
     }
 
     pub(crate) fn design_fixture(&self) -> Option<&str> {
-        self.options.design_fixture.as_deref()
+        self.fixture.as_deref()
     }
 
     pub(crate) fn configure_design_data(
@@ -238,7 +272,7 @@ impl RuntimePreview {
         fixture: Option<String>,
         document: &Document,
     ) -> Result<(), String> {
-        if enabled == self.options.design_time_data && fixture == self.options.design_fixture {
+        if enabled == self.options.design_time_data && fixture == self.fixture {
             return Ok(());
         }
         let status = self.status.clone();
@@ -246,8 +280,7 @@ impl RuntimePreview {
         let options_epoch = self.options_epoch;
         let mut options = self.options.clone();
         options.design_time_data = enabled;
-        options.design_fixture = fixture;
-        if let Err(error) = self.configure(options, document) {
+        if let Err(error) = self.configure_with_fixture(options, fixture, document) {
             self.status = status;
             self.notices = notices;
             return Err(error);
@@ -493,7 +526,7 @@ impl RuntimePreview {
         if !allow_root_factories {
             options.root_factories.clear();
         }
-        let candidate = options.control(source, &self.uri)?;
+        let candidate = options.control(source, &self.uri, self.design_fixture())?;
         if self.isolated
             && (candidate.parent().is_some()
                 || candidate.visual_parent().is_some()
@@ -537,7 +570,7 @@ impl RuntimePreview {
             design
                 .as_ref()
                 .map_or(projection.source.as_str(), |design| design.document.valid_source()),
-            &self.uri,
+            &self.uri, self.design_fixture(),
         )?;
         if let Some(design) = design {
             let mut state = crate::design_time_samples::SampleState::default();
@@ -564,14 +597,14 @@ impl RuntimePreview {
             self.options.design_time_data,
             self.design_fixture(),
         )?;
-        let loaded = self.options.load(&source, &self.uri)?;
+        let loaded = self.options.load(&source, &self.uri, self.design_fixture())?;
         let sample_root = Ref::<Control>::from_xaml_object(&loaded);
         let window =
             if let Some(window) = Ref::<ferroui_controls::Window>::from_xaml_object(&loaded) {
                 window
             } else {
                 let control = Ref::<Control>::from_xaml_object(&loaded)
-                    .or_else(|| self.options.control(&source, &self.uri).ok())
+                    .or_else(|| self.options.control(&source, &self.uri, self.design_fixture()).ok())
                     .ok_or("The native preview requires a control or a configured resource view")?;
                 let window = ferroui_controls::Window::new();
                 window.set_content(Some(Control::boxed(control)));

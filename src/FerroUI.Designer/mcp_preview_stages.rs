@@ -2,7 +2,7 @@
 use super::schema as s;
 use super::{decode, integer, text, Permissions};
 use crate::{
-    DesignerWorkspace, PreviewEnvironment, PreviewStageConfiguration, PreviewStageManifest,
+    DesignerWorkspace, PreviewEnvironment, PreviewStageSpec, PreviewStageSet,
     PreviewStageMode,
 };
 use base64::Engine;
@@ -205,7 +205,11 @@ fn report(workspace: &DesignerWorkspace, args: &Value) -> Result<Value, String> 
         .into_iter()
         .map(|stage| {
             let current = workspace.preview_stage_source_is_current(stage.id);
+            let id = stage.id;
             let mut value = json!(stage);
+            if let Some(spec) = workspace.preview_stage_spec(id) {
+                value["configuration"] = json!(spec);
+            }
             value["current_source"] = json!(current);
             value["current_image_source"] =
                 json!(workspace.preview_stage_image_source_is_current(stage.id));
@@ -213,7 +217,7 @@ fn report(workspace: &DesignerWorkspace, args: &Value) -> Result<Value, String> 
         })
         .collect::<Vec<_>>();
     let mut value = json!({"model":workspace.preview_stage_model(),"epoch":workspace.preview_stage_epoch(),
-        "visible":workspace.preview_stages_visible(),"stages":stages,"manifest":workspace.preview_stage_manifest(),
+        "visible":workspace.preview_stages_visible(),"stages":stages,"manifest":workspace.preview_stage_set(),
         "active_source_uri":workspace.session().borrow().document_uri()});
     if let Some(stage) = args["stage"].as_u64() {
         let kind = if args["tree"] == "logical" {
@@ -241,20 +245,20 @@ fn needs_input(workspace: &DesignerWorkspace, action: &str, args: &Value) -> Res
         return Ok(true);
     }
     if let Some(value) = args.get("configuration") {
-        let config: PreviewStageConfiguration =
+        let config: PreviewStageSpec =
             serde_json::from_value(value.clone()).map_err(|error| error.to_string())?;
         config.validate()?;
-        if config.mode == PreviewStageMode::Live {
+        if config.configuration.mode == PreviewStageMode::Live {
             return Ok(true);
         }
     }
     if action == "restore" {
-        let manifest: PreviewStageManifest = decode(args, "manifest")?;
+        let manifest: PreviewStageSet = decode(args, "manifest")?;
         manifest.validate()?;
         if manifest
             .stages
             .iter()
-            .any(|config| config.mode == PreviewStageMode::Live)
+            .any(|config| config.configuration.mode == PreviewStageMode::Live)
         {
             return Ok(true);
         }
@@ -331,10 +335,10 @@ pub(super) fn call(
     match action.as_str() {
         "add" => {
             result["created_stage"] =
-                json!(workspace.add_preview_stage(decode(args, "configuration")?)?)
+                json!(workspace.add_preview_stage_spec(decode(args, "configuration")?)?)
         }
         "update" => workspace
-            .update_preview_stage(integer(args, "stage")?, decode(args, "configuration")?)?,
+            .update_preview_stage_spec(integer(args, "stage")?, decode(args, "configuration")?)?,
         "duplicate" => {
             result["created_stage"] =
                 json!(workspace.duplicate_preview_stage(integer(args, "stage")?)?)
@@ -358,7 +362,7 @@ pub(super) fn call(
             integer(args, "inspector_id")?,
         )?,
         "show" => workspace.set_preview_stages_visible(args["visible"].as_bool().unwrap())?,
-        "restore" => workspace.restore_preview_stage_manifest(decode(args, "manifest")?)?,
+        "restore" => workspace.restore_preview_stage_set(decode(args, "manifest")?)?,
         "compare" => {
             let variants = args["variants"]
                 .as_array()

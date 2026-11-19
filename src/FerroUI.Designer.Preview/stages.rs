@@ -10,7 +10,7 @@ use ferroui_base::{Point, Ref, threading::Dispatcher};
 use ferroui_controls::{Control, SizeToContent, Window, WindowDecorations};
 use ferroui_designer::{
     PreviewEnvironment, PreviewFinding, PreviewPrototypeElementChoice, PreviewPrototypeManifest,
-    PreviewStageBoard, PreviewStageConfiguration, PreviewStageId, PreviewStageInfo, PreviewStageManifest,
+    PreviewStageBoard, PreviewStageConfiguration, PreviewStageId, PreviewStageDetails, PreviewStageInfo, PreviewStageSet, PreviewStageSpec,
     PreviewStageMode, PreviewStageStateOptions,
     PreviewStageStatus, PreviewTheme, capture_preview_stage_png,
 };
@@ -33,7 +33,7 @@ pub(crate) struct Stages {
 #[derive(Deserialize)]
 pub(crate) struct Sync {
     pub(crate) source: StageDocument,
-    pub(crate) manifest: Option<PreviewStageManifest>,
+    pub(crate) manifest: Option<PreviewStageSet>,
     #[serde(default)]
     pub(crate) additional: Vec<StageDocument>,
     #[serde(default, rename = "localSources")]
@@ -56,7 +56,7 @@ enum Action {
     },
     Update {
         id: PreviewStageId,
-        configuration: PreviewStageConfiguration,
+        configuration: PreviewStageSpec,
     },
     Refresh {
         id: PreviewStageId,
@@ -80,8 +80,8 @@ struct Addition {
 #[derive(Serialize)]
 pub(crate) struct Model {
     epoch: u64,
-    manifest: PreviewStageManifest,
-    stages: Vec<PreviewStageInfo>,
+    manifest: PreviewStageSet,
+    stages: Vec<PreviewStageDetails>,
     prototype: Option<crate::stages_prototype::Scene>,
     dependencies: BTreeSet<String>,
 }
@@ -141,7 +141,7 @@ impl Stages {
         let epoch = self.board.epoch();
         stages_sources::sync_board(&mut self.board, &uri, sources.iter().map(|(uri, source)| (uri.as_str(), source)))?;
         if let Some(manifest) = request.manifest {
-            self.board.restore_manifest(manifest)?;
+            self.board.restore_stage_set(manifest)?;
         } else if self.active.is_none() {
             self.board.add(PreviewStageConfiguration::new(
                 "Desktop",
@@ -178,10 +178,10 @@ impl Stages {
             Action::Remove { id } => self.board.remove(id)?,
             Action::Update { id, configuration } => {
                 let previous = self.board.stage(id).ok_or("The stage was removed")?;
-                if configuration.source_uri != previous.configuration.source_uri {
+                if configuration.configuration.source_uri != previous.configuration.source_uri {
                     return Err("The stage source changed. Reopen its document in Stages.".into());
                 }
-                self.board.update(id, configuration)?;
+                self.board.update_spec(id, configuration)?;
             }
             Action::Refresh { id } => self.board.refresh(id)?,
             Action::SetPrototype { graph } => {
@@ -361,12 +361,12 @@ impl Stages {
     }
 
     pub(crate) fn model(&mut self) -> Model {
-        let stages = self.board.stages();
+        let stages = self.board.stage_details();
         self.windows
             .retain(|id, _| stages.iter().any(|stage| stage.id == *id));
         Model {
             epoch: self.board.epoch(),
-            manifest: self.board.manifest(),
+            manifest: self.board.stage_set(),
             stages,
             prototype: self.playback.scene(),
             dependencies: stages_sources::watch_paths(&self.sources),

@@ -657,7 +657,7 @@ fn preview_factories_observe_scoped_design_mode_and_restore_on_failure() {
         }),
     );
     options
-        .load(source, "ferres://Preview/DesignMode.xaml")
+        .load(source, "ferres://Preview/DesignMode.xaml", None)
         .unwrap();
     assert!(!Design::is_design_mode());
     options.register_root(
@@ -669,7 +669,7 @@ fn preview_factories_observe_scoped_design_mode_and_restore_on_failure() {
     );
     assert!(
         options
-            .load(source, "ferres://Preview/DesignMode.xaml")
+            .load(source, "ferres://Preview/DesignMode.xaml", None)
             .is_err()
     );
     assert!(!Design::is_design_mode());
@@ -683,7 +683,7 @@ fn preview_factories_observe_scoped_design_mode_and_restore_on_failure() {
         }),
     );
     options
-        .load(source, "ferres://Preview/DesignMode.xaml")
+        .load(source, "ferres://Preview/DesignMode.xaml", None)
         .unwrap();
     assert!(Design::is_design_mode());
     Design::set_is_design_mode(false);

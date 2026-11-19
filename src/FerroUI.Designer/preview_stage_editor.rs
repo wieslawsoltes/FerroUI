@@ -2,7 +2,7 @@
 //! detached configuration; the host validates the accepted board/source epoch on Apply.
 use crate::{
     DefinitionPreviewOptions, PREVIEW_SIZE_PRESETS, PreviewEnvironment, PreviewFlowDirection,
-    PreviewSourceAnchor, PreviewStageConfiguration, PreviewStageLayout, PreviewStageMode,
+    PreviewSourceAnchor, PreviewStageConfiguration, PreviewStageLayout, PreviewStageMode, PreviewStageSpec,
     PreviewStageSource, PreviewStageState, PreviewStageTarget, PreviewTheme,
 };
 use ferroui_base::input::{InputElement, Key};
@@ -19,7 +19,7 @@ use ferroui_designer_tools::ComponentCatalog;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
-type Apply = Rc<dyn Fn(PreviewStageConfiguration) -> Result<(), String>>;
+type Apply = Rc<dyn Fn(PreviewStageSpec) -> Result<(), String>>;
 
 struct StateChoice {
     owner: PreviewSourceAnchor,
@@ -70,6 +70,11 @@ pub struct PreviewStageEditor {
 
 impl PreviewStageEditor {
     pub fn new(initial: PreviewStageConfiguration, sources: Vec<PreviewStageSource>) -> Rc<Self> {
+        Self::with_spec(initial.into(), sources)
+    }
+
+    pub fn with_spec(initial: PreviewStageSpec, sources: Vec<PreviewStageSource>) -> Rc<Self> {
+        let PreviewStageSpec { configuration: initial, design_fixture: initial_fixture } = initial;
         let root = Grid::new();
         root.set_name(Some("PreviewStageEditor".into()));
         root.classes().add("designer-chrome");
@@ -327,7 +332,7 @@ impl PreviewStageEditor {
         });
         editor.rebuild_targets(Some(&initial.target));
         editor.rebuild_states(&initial.states);
-        editor.rebuild_fixtures(initial.design_fixture.as_deref());
+        editor.rebuild_fixtures(initial_fixture.as_deref());
         editor.refresh_layout_captions();
         editor.guard.set(false);
         let weak = Rc::downgrade(&editor);
@@ -605,6 +610,10 @@ impl PreviewStageEditor {
     }
 
     pub fn value(&self) -> Result<PreviewStageConfiguration, String> {
+        Ok(self.spec()?.configuration)
+    }
+
+    pub fn spec(&self) -> Result<PreviewStageSpec, String> {
         let source_uri = self
             .source_uris
             .get(
@@ -663,7 +672,7 @@ impl PreviewStageEditor {
                 });
             }
         }
-        let value = PreviewStageConfiguration {
+        let configuration = PreviewStageConfiguration {
             name: self.name.text().unwrap_or_default().trim().to_owned(),
             source_uri,
             target,
@@ -689,10 +698,6 @@ impl PreviewStageEditor {
                 },
             },
             design_time_data: self.design_data.is_checked() == Some(true),
-            design_fixture: usize::try_from(self.design_fixture.selected_index())
-                .ok()
-                .and_then(|index| index.checked_sub(1))
-                .and_then(|index| self.fixtures.borrow().get(index).cloned()),
             states,
             pinned: self.pinned.is_checked() == Some(true),
             auto_update: self.auto_update.is_checked() == Some(true),
@@ -702,6 +707,13 @@ impl PreviewStageEditor {
                 PreviewStageMode::Select
             },
         };
+        let value = PreviewStageSpec {
+            configuration,
+            design_fixture: usize::try_from(self.design_fixture.selected_index())
+                .ok()
+                .and_then(|index| index.checked_sub(1))
+                .and_then(|index| self.fixtures.borrow().get(index).cloned()),
+        };
         value.validate()?;
         Ok(value)
     }
@@ -710,6 +722,10 @@ impl PreviewStageEditor {
         &self,
         callback: impl Fn(PreviewStageConfiguration) -> Result<(), String> + 'static,
     ) {
+        self.on_apply_spec(move |spec| callback(spec.configuration));
+    }
+
+    pub fn on_apply_spec(&self, callback: impl Fn(PreviewStageSpec) -> Result<(), String> + 'static) {
         *self.apply.borrow_mut() = Some(Rc::new(callback));
     }
     pub fn on_close(&self, callback: impl Fn() + 'static) {
@@ -719,7 +735,7 @@ impl PreviewStageEditor {
         if self.retired.get() {
             return Err("This stage editor is closed; reopen it to edit the stage".into());
         }
-        let result = self.value().and_then(|value| {
+        let result = self.spec().and_then(|value| {
             self.apply
                 .borrow()
                 .clone()

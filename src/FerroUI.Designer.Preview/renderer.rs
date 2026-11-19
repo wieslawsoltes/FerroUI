@@ -104,13 +104,12 @@ impl Renderer {
         host.set_vertical_content_alignment(VerticalAlignment::Stretch);
         let mut options = PreviewHostOptions::default();
         if let Some(data) = &input.design_data {
-            if let Some(name) = &data.fixture {
-                ferroui_designer_core::design_fixtures::validate_name(name)?;
-            }
             options.design_time_data = data.enabled;
-            options.design_fixture = data.fixture.clone();
         }
-        let mut session = DesignerSession::with_preview_options(source, host.clone(), input.document.uri.clone(), options)?;
+        let fixture = input.design_data.as_ref().and_then(|data| data.fixture.clone());
+        let mut session = DesignerSession::with_preview_fixture(
+            source, host.clone(), input.document.uri.clone(), options, fixture,
+        )?;
         match session.preview_status() {
             PreviewStatus::Ready { .. } => (),
             PreviewStatus::InvalidSource { .. } => {

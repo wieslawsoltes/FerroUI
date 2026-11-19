@@ -1,3 +1,4 @@
+use crate::PreviewStageConfiguration;
 use super::*;
 use crate::mcp::DesignerMcp;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};

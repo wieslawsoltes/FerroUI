@@ -57,21 +57,22 @@ impl DesignerWorkspace {
                 enabled: session.design_time_enabled(),
                 writable: !session.is_read_only(),
                 sample_count,
-                fixtures: DesignFixtureEditorModel {
-                    root: session.document().ast().root(),
-                    source: session.document().ast().node(session.document().ast().root())
-                        .and_then(|node| node.attributes.iter().find(|attribute| is_fixtures(attribute)))
-                        .map(|attribute| attribute.value.clone()),
-                    selected: session.design_fixture().map(str::to_owned),
-                },
+            };
+            let fixtures = DesignFixtureEditorModel {
+                root: session.document().ast().root(),
+                source: session.document().ast().node(session.document().ast().root())
+                    .and_then(|node| node.attributes.iter().find(|attribute| is_fixtures(attribute)))
+                    .map(|attribute| attribute.value.clone()),
+                selected: session.design_fixture().map(str::to_owned),
             };
             let snapshot = DesignTimeSnapshot::capture(&session);
             drop(session);
             let weak = Rc::downgrade(&workspace);
             let accept_flyout = flyout.downgrade();
             let cancel_flyout = flyout.downgrade();
-            let editor = DesignTimeEditor::new(
+            let editor = DesignTimeEditor::with_fixtures(
                 model,
+                fixtures,
                 move |enabled, fixture, edits| {
                     let workspace = weak.upgrade().ok_or("The designer was closed.")?;
                     if workspace.pending_source.get() {

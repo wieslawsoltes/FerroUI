@@ -1,4 +1,5 @@
 //! Real TopLevel storage-provider calls, with controllable picker/read completion.
+use crate::PreviewStageManifest;
 use super::*;
 use crate::{PreviewEnvironment, PreviewStageConfiguration, PreviewStageId, PreviewStageStatus};
 use ferroui_base::input::LocalBoxFuture;

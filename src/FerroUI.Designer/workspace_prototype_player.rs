@@ -113,12 +113,13 @@ impl DesignerWorkspace {
             for link in graph.links.iter().filter(|link| link.source == info.id) {
                 link.trigger.resolve(&source.document)?;
             }
-            let mut configuration = info.configuration.clone();
+            let mut spec = self.preview_stage_spec(info.id).ok_or("A prototype stage was removed")?;
+            let configuration = &mut spec.configuration;
             configuration.mode = PreviewStageMode::Live;
             configuration.auto_update = true;
             configuration.pinned = true;
             originals.push(info.id);
-            configurations.push(configuration);
+            configurations.push(spec);
         }
         let (options, options_epoch) = self.preview_stage_host_options();
         let mut board = PreviewStageBoard::new();
@@ -128,7 +129,7 @@ impl DesignerWorkspace {
             options,
             options_epoch,
         )?;
-        let ids = board.add_configurations(configurations)?;
+        let ids = board.add_specs(configurations)?;
         let mapping = originals.into_iter().zip(ids).collect::<BTreeMap<_, _>>();
 
         if source_model != self.preview_stage_model() {

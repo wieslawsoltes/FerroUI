@@ -5,7 +5,7 @@ use crate::scenario::{existing_workspace_path, read_source, read_text};
 use crate::stages::{StageTarget, Stages, Sync};
 use crate::stages_prototype::{Command, Control, Scene};
 use crate::stages_sources::StageDocument;
-use ferroui_designer::{PreviewStageId, PreviewStageManifest};
+use ferroui_designer::{PreviewStageId, PreviewStageSet};
 use ferroui_designer_tools::scenario::{ScenarioPrototype, ScenarioStep};
 use std::collections::BTreeMap;
 use std::path::Path;
@@ -25,7 +25,7 @@ impl PrototypeRun {
     ) -> Result<Self, String> {
         let path = existing_workspace_path(base.join(&spec.stage_set), workspace)?;
         let text = read_text(&path)?;
-        let manifest = PreviewStageManifest::from_json(text.trim_start_matches('\u{feff}'))?;
+        let manifest = PreviewStageSet::from_json_with_fixtures(text.trim_start_matches('\u{feff}'))?;
         let input = resolve_sources(source, manifest, spec, base, workspace)?;
         let platform = Renderer::new();
         let mut stages = Stages::default();
@@ -141,7 +141,7 @@ impl PrototypeRun {
 
 fn resolve_sources(
     active: Source,
-    mut manifest: PreviewStageManifest,
+    mut manifest: PreviewStageSet,
     spec: &ScenarioPrototype,
     base: &Path,
     workspace: &Path,
@@ -150,7 +150,8 @@ fn resolve_sources(
     let mut documents = BTreeMap::from([(active_uri.clone(), active)]);
     let mut remapped = BTreeMap::<String, String>::new();
     let mut carets = BTreeMap::new();
-    for stage in &mut manifest.stages {
+    for stage_spec in &mut manifest.stages {
+        let stage = &mut stage_spec.configuration;
         if let Some(uri) = remapped.get(&stage.source_uri) {
             stage.source_uri.clone_from(uri);
             continue;

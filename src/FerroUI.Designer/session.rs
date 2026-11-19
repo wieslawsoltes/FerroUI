@@ -62,19 +62,33 @@ impl DesignerSession {
         uri: String,
         options: crate::PreviewHostOptions,
     ) -> Result<Self, String> {
-        Self::with_source(source.into(), preview_host, uri, options, false)
+        Self::with_preview_fixture(source, preview_host, uri, options, None)
+    }
+
+    /// Open a design preview and select a named design-time fixture for this session.
+    pub fn with_preview_fixture(
+        source: impl Into<String>,
+        preview_host: Ref<ContentControl>,
+        uri: String,
+        options: crate::PreviewHostOptions,
+        fixture: Option<String>,
+    ) -> Result<Self, String> {
+        if let Some(name) = &fixture {
+            ferroui_designer_core::design_fixtures::validate_name(name)?;
+        }
+        Self::with_source(source.into(), preview_host, uri, options, fixture, false)
     }
 
     /// Open authored Rust and render the first supported RSX invocation.
     pub fn with_rust_source(
         source: impl Into<String>, preview_host: Ref<ContentControl>, uri: String,
     ) -> Result<Self, String> {
-        Self::with_source(source.into(), preview_host, uri, Default::default(), true)
+        Self::with_source(source.into(), preview_host, uri, Default::default(), None, true)
     }
 
     fn with_source(
         source: String, preview_host: Ref<ContentControl>, uri: String,
-        options: crate::PreviewHostOptions, rust_source: bool,
+        options: crate::PreviewHostOptions, fixture: Option<String>, rust_source: bool,
     ) -> Result<Self, String> {
         let (document, rust, invalid_source) = if rust_source {
             let (document, rust) = RustDocument::open(source, None).map_err(|error| error.to_string())?;
@@ -93,7 +107,7 @@ impl DesignerSession {
         ferroui_xaml_interactivity::register_types();
         ferroui_xaml_interactions::register_types();
         ferroui_xaml_interactions_custom::register_types();
-        let preview = RuntimePreview::new_with_options(preview_host, uri, &document, options)?;
+        let preview = RuntimePreview::new_with_fixture(preview_host, uri, &document, options, fixture)?;
         let mut result = Self {
             document,
             rust,

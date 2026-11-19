@@ -60,6 +60,7 @@ mod preview_stage_state_options;
 mod preview_stage_editor;
 mod preview_stage_view;
 mod preview_source;
+mod preview_source_anchor;
 #[cfg(feature = "mcp")]
 mod property_binding_session;
 mod property_color_editor;
@@ -143,10 +144,10 @@ pub use preview_prototype_player::{
     PreviewPrototypePlayerView,
 };
 pub use preview_prototype_view::{PreviewPrototypeView, PreviewPrototypeViewAction};
-pub use ferroui_designer_core::{SourceAnchor as PreviewSourceAnchor, SourceSegment as PreviewSourceSegment};
+pub use preview_source_anchor::{PreviewSourceAnchor, PreviewSourceSegment};
 pub use preview_stages::{
     MAX_PREVIEW_STAGES, PreviewStageBoard,
-    PreviewStageConfiguration, PreviewStageId, PreviewStageInfo, PreviewStageManifest,
+    PreviewStageConfiguration, PreviewStageDetails, PreviewStageId, PreviewStageInfo, PreviewStageManifest, PreviewStageSet, PreviewStageSpec,
     PreviewStageLayout, PreviewStageSize, PreviewStageMode, PreviewStageSelection, PreviewStageSelectionToken, PreviewStageSnapshot,
     PreviewStageSource, PreviewStageState, PreviewStageStatus, PreviewStageTarget,
 };

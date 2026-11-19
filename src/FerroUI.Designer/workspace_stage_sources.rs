@@ -173,6 +173,7 @@ impl DesignerWorkspace {
     pub(super) fn focus_preview_stage_configuration(
         self: &Rc<Self>,
         configuration: &PreviewStageConfiguration,
+        fixture: Option<String>,
     ) -> Result<(), String> {
         if self.pending_source.get() {
             return Err("Apply or repair the pending XAML before focusing a preview stage".into());
@@ -224,7 +225,7 @@ impl DesignerWorkspace {
             definition,
             environment: configuration.environment,
             design_time_data: configuration.design_time_data,
-            fixture: configuration.design_fixture.clone(),
+            fixture,
             states,
             interactive: configuration.mode == PreviewStageMode::Live,
             selection: Vec::new(),
@@ -263,7 +264,8 @@ impl DesignerWorkspace {
         {
             return Err("The source changed after this preview was accepted; refresh the stage and select again".into());
         }
-        self.focus_preview_stage_configuration(&selection.configuration)?;
+        let fixture = self.preview_stage_spec(selection.stage).and_then(|spec| spec.design_fixture);
+        self.focus_preview_stage_configuration(&selection.configuration, fixture)?;
         {
             let mut session = self.session.borrow_mut();
             if !selection.matches_source(session.document_uri(), session.document())

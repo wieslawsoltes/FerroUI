@@ -334,8 +334,9 @@ The public components can be embedded independently:
 - `PreviewStageView` renders cards and emits explicit actions. It receives stage controls
   from its host and does not own document or runtime state.
 - `PreviewStageEditor` edits a detached configuration and validates it on Apply.
-- `PreviewStageManifest` validates and serializes a versioned stage set, including its
-  prototype graph. Overlay actions use version 3, Navigate/Back-only graphs use version 2,
+- `PreviewStageSet` validates and serializes a versioned stage set with its prototype
+  graph and per-card design fixtures. `PreviewStageManifest` provides the original
+  configuration API. Overlay actions use version 3, Navigate/Back-only graphs use version 2,
   and an empty graph uses version 1. All three versions load; older versions reject
   overlay actions. JSON parsing rejects unknown fields, invalid dimensions or overlay
   coordinates, malformed source paths, invalid graph references and manifests larger
@@ -351,8 +352,11 @@ The public components can be embedded independently:
 `set_preview_stage_paused`, `refresh_preview_stage`, `refresh_all_preview_stages`,
 `compare_preview_stage`, `compare_preview_stage_matrix`, `set_active_preview_stage` and
 `set_preview_stages_visible`.
-`preview_stage_manifest` and `restore_preview_stage_manifest` provide persistence without
-requiring the native file picker.
+Use `preview_stage_set` and `restore_preview_stage_set` to include each card’s
+fixture choice when saving without a native file picker. Use
+`PreviewStageSet::from_json_with_fixtures` to load both earlier and current stage
+sets. `preview_stage_manifest` and `restore_preview_stage_manifest` remain
+available for callers using the original configuration API.
 `plan_preview_stage_matrix` returns the exact configurations and validates the available
 capacity without constructing controls; `compare_preview_stage_matrix` adds the validated
 set through the same board as the native editor.
