@@ -2,6 +2,8 @@
 
 #[path = "hosted_animation_curve.rs"]
 mod curve;
+#[path = "hosted_animation_playback.rs"]
+mod playback;
 #[path = "hosted_state_routes.rs"]
 mod state_routes;
 
@@ -18,13 +20,15 @@ use ferroui_designer_animation::native::{
     animation_timing, validate_animation_target, NativePlayback, NativeProgramIndex,
     NativeSourceIndex,
 };
-use ferroui_designer_animation::{AnimationProgram, AnimationPrograms, ProjectedStateGroup};
+use ferroui_designer_animation::{
+    AnimationProgram, AnimationPrograms, ProjectedStateGroup, native_key_time, xaml_clip_delay,
+};
 use ferroui_designer_core::{Document, NodeId};
 use ferroui_remote_protocol::designer::{
     DesignAnimationAuthoringRequest, DesignAnimationAuthoringResult,
-    DesignAnimationCatalogMessage, DesignAnimationProgram, DesignAnimationRequestMessage,
+    DesignAnimationCatalogMessage, DesignAnimationClip, DesignAnimationProgram, DesignAnimationRequestMessage,
     DesignAnimationResultMessage, DesignAnimationTarget, UpdateDesignMessage,
-    DESIGN_ANIMATION_AUTHORING_QUERY, DESIGN_ANIMATION_CURVE_CHANNELS_QUERY,
+    DESIGN_ANIMATION_AUTHORING_QUERY, DESIGN_ANIMATION_CLIPS_QUERY, DESIGN_ANIMATION_CURVE_CHANNELS_QUERY,
     DESIGN_ANIMATION_CURVE_QUERY, DESIGN_ANIMATION_QUERY, DESIGN_ANIMATION_VERSION,
     DESIGN_STATE_ROUTES_QUERY,
 };
@@ -37,6 +41,7 @@ ferroui_base::ferro_thread_local! {
     static AUTHORING: Cell<bool> = const { Cell::new(false) };
     static CURVES: Cell<bool> = const { Cell::new(false) };
     static CURVE_CHANNELS: Cell<bool> = const { Cell::new(false) };
+    static CLIPS: Cell<bool> = const { Cell::new(false) };
     static STATE_ROUTES: Cell<bool> = const { Cell::new(false) };
     static ACTIVE: RefCell<Option<HostedAnimations>> = const { RefCell::new(None) };
 }
@@ -51,6 +56,7 @@ pub(super) fn configure(transport: Option<&Url>, remote: bool) {
     AUTHORING.set(enabled && requested(DESIGN_ANIMATION_AUTHORING_QUERY));
     CURVES.set(enabled && requested(DESIGN_ANIMATION_CURVE_QUERY));
     CURVE_CHANNELS.set(CURVES.get() && requested(DESIGN_ANIMATION_CURVE_CHANNELS_QUERY));
+    CLIPS.set(enabled && requested(DESIGN_ANIMATION_CLIPS_QUERY));
     STATE_ROUTES.set(enabled && requested(DESIGN_STATE_ROUTES_QUERY));
     ACTIVE.with(|active| active.borrow_mut().take());
 }
@@ -166,7 +172,7 @@ struct HostedAnimations {
     index: NativeProgramIndex,
     programs: BTreeMap<i64, DesignAnimationProgram>,
     targets: BTreeMap<i64, Ref<StyledElement>>,
-    current: Option<(i64, Vec<i64>)>,
+    current: Vec<(i64, Vec<i64>)>,
     playback: NativePlayback,
     keyframes: Option<HostedKeyframes>,
     state_routes: HostedStateRoutes,
@@ -244,7 +250,7 @@ impl HostedAnimations {
             index,
             programs: catalog.programs.iter().map(|p| (p.id, p.clone())).collect(),
             targets,
-            current: None,
+            current: Vec::new(),
             playback: NativePlayback::default(),
             keyframes,
             state_routes,
@@ -257,71 +263,6 @@ impl HostedAnimations {
         }
         self.last_request = request;
         Ok(())
-    }
-
-    fn sample(&mut self, command: &DesignAnimationRequestMessage) -> Result<(bool, f64), String> {
-        self.claim(command.revision, command.request)?;
-        let Some(id) = command.program else {
-            self.current = None;
-            self.playback.stop();
-            return Ok((false, 0.0));
-        };
-        let entry = self
-            .programs
-            .get(&id)
-            .ok_or("Choose a current native animation program")?;
-        let targets = command
-            .targets
-            .clone()
-            .unwrap_or_else(|| entry.default_targets.clone());
-        let clip = (id, targets);
-        if let Some(route) = self.state_routes.get(id) {
-            if clip.1 != entry.default_targets {
-                return Err("A state route uses its authored targets".into());
-            }
-            if command.elapsed < 0.0 || !command.elapsed.is_finite()
-                || (command.restart && command.elapsed > entry.duration)
-            {
-                return Err("Choose a time within the state route duration".into());
-            }
-            let elapsed = command.elapsed.min(entry.duration);
-            let complete = if !command.restart && self.current.as_ref() == Some(&clip) && self.playback.is_active() {
-                self.playback.advance_to(elapsed)?
-            } else {
-                self.playback.seek(route.bindings(), elapsed)?
-            };
-            self.current = Some(clip);
-            return Ok((complete || elapsed == entry.duration, elapsed));
-        }
-        if !command.restart && self.current.as_ref() == Some(&clip) && self.playback.is_active() {
-            return Ok((self.playback.advance_to(command.elapsed)?, command.elapsed));
-        }
-        if command.elapsed > entry.total_duration.unwrap_or(f64::INFINITY) {
-            return Err("Choose a time within the animation's elapsed duration".into());
-        }
-        if clip.1.is_empty() || clip.1.len() != clip.1.iter().collect::<BTreeSet<_>>().len() {
-            return Err("Choose distinct live preview targets for the animation".into());
-        }
-        let animation = self
-            .index
-            .animation(id as NodeId)
-            .ok_or("The native animation was retired")?;
-        let bindings = clip
-            .1
-            .iter()
-            .map(|target| {
-                let target = self
-                    .targets
-                    .get(target)
-                    .and_then(|target| target.cast::<Animatable>())
-                    .ok_or("Choose current application preview targets")?;
-                validate_animation_target(animation, &target, "the preview target")?;
-                Ok::<_, String>((animation.clone(), target))
-            })
-            .collect::<Result<Vec<_>, _>>()?;
-        let complete = self.playback.seek(bindings, command.elapsed)?;
-        self.current = Some(clip);
-        Ok((complete, command.elapsed))
     }
 }
 
@@ -361,6 +302,13 @@ fn catalog_entry(
         custom_animator: index.uses_custom_animators(program.id),
         authoring: None,
         curve_tracks: None,
+        clip: CLIPS.get().then(|| DesignAnimationClip {
+            delay: timing.delay,
+            speed_ratio: timing.speed_ratio,
+            editable: AUTHORING.get() && xaml_clip_delay(document, program.id)
+                .and_then(|delay| native_key_time(delay).ok())
+                .is_some_and(|delay| Some(delay) == native_key_time(timing.delay).ok()),
+        }),
     })
 }
 

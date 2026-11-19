@@ -1,7 +1,9 @@
 use crate::hosted_relay::Frame;
-use ferroui_designer_animation::{CurveChannel, CurveMetric, CurveWindow};
+use ferroui_designer_animation::{ClipClock, CurveChannel, CurveMetric, CurveWindow};
+use ferroui_designer_core::TextPatch;
 use ferroui_remote_protocol::designer::{
-    DesignAnimationAuthoringResult, DesignAnimationCatalogMessage, DesignAnimationSourcePatch, DesignAnimationTrack,
+    DesignAnimationAuthoringResult, DesignAnimationCatalogMessage, DesignAnimationClipBinding,
+    DesignAnimationSourcePatch, DesignAnimationTrack,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
@@ -14,6 +16,31 @@ pub(crate) struct Command {
     pub(crate) targets: Option<Vec<i64>>,
     pub(crate) elapsed: f64,
     pub(crate) restart: bool,
+    pub(crate) clips: Option<Vec<ClipBinding>>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct ClipBinding {
+    program: i64,
+    targets: Option<Vec<i64>>,
+}
+
+impl From<ClipBinding> for DesignAnimationClipBinding {
+    fn from(binding: ClipBinding) -> Self {
+        Self { program: binding.program, targets: binding.targets }
+    }
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct ClipDraft {
+    pub(crate) revision: i64,
+    pub(crate) sequence: i64,
+    pub(crate) programs: Vec<i64>,
+    pub(crate) start: Option<f64>,
+    #[serde(default)]
+    pub(crate) gap: f64,
 }
 
 #[derive(Serialize)]
@@ -87,11 +114,22 @@ pub(crate) fn source_patch(patch: DesignAnimationSourcePatch) -> Value {
     json!({ "start": patch.start, "end": patch.end, "expected": patch.expected, "replacement": patch.replacement })
 }
 
+pub(crate) fn checked_source_patch(before: &str, after: &str) -> Result<Option<DesignAnimationSourcePatch>, String> {
+    TextPatch::between(before, after)
+        .map(|patch| DesignAnimationSourcePatch::from_utf8(before, patch.span.range(), patch.replacement))
+        .transpose()
+}
+
 pub(crate) fn catalog(catalog: DesignAnimationCatalogMessage) -> Value {
     let programs = catalog
         .programs
         .into_iter()
         .map(|program| {
+            let clip = program.clip.map(|clip| {
+                let clock = ClipClock { delay: clip.delay, speed_ratio: clip.speed_ratio, end: program.total_duration };
+                let span = clock.span();
+                json!({ "start": span.start, "end": span.end, "editable": clip.editable })
+            });
             json!({
                 "id": program.id,
                 "name": program.name,
@@ -102,6 +140,7 @@ pub(crate) fn catalog(catalog: DesignAnimationCatalogMessage) -> Value {
                 "compatibleTargets": program.compatible_targets,
                 "sourceOffset": (program.source_utf16 >= 0).then_some(program.source_utf16),
                 "customAnimator": program.custom_animator,
+                "clip": clip,
                 "curveTracks": program.curve_tracks.map(tracks),
                 "authoring": program.authoring.map(|authoring| json!({
                     "codec": authoring.codec,

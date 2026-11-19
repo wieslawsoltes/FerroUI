@@ -116,6 +116,9 @@ impl AuthoredRsxFrame {
         let clip = u64::try_from(program.id)
             .ok()
             .and_then(|id| self.clips.get(&id));
+        if let Some(timing) = &mut program.clip {
+            timing.editable &= clip.is_some();
+        }
         program.source_utf16 = clip
             .and_then(|clip| {
                 i32::try_from(self.source[..clip.declaration.start].encode_utf16().count()).ok()
@@ -154,14 +157,6 @@ impl AuthoredRsxFrame {
             },
         )?;
         let edited = TextPatch::apply_all(&self.source, patches).map_err(|error| error.to_string())?;
-        TextPatch::between(&self.source, &edited)
-            .map(|patch| {
-                DesignAnimationSourcePatch::from_utf8(
-                    &self.source,
-                    patch.span.range(),
-                    patch.replacement,
-                )
-            })
-            .transpose()
+        crate::hosted_animation::checked_source_patch(&self.source, &edited)
     }
 }

@@ -1,6 +1,6 @@
 //! Arrange clips on their shared elapsed clock while leaving iteration keys untouched.
 use crate::xaml::{native_namespace, native_ticks, parse_time, time_string};
-use crate::{require, AnimationError, Result, Timeline};
+use crate::{AnimationError, Result, Timeline, require};
 use ferroui_designer_core::{Document, Edit, NodeId};
 use serde::Serialize;
 
@@ -10,26 +10,71 @@ pub struct ClipSpan {
     pub end: Option<f64>,
 }
 
+/// Resolved timing for a native clip, including clips loaded in another process.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct ClipClock {
+    pub delay: f64,
+    pub speed_ratio: f64,
+    pub end: Option<f64>,
+}
+
+impl ClipClock {
+    pub fn span(self) -> ClipSpan {
+        ClipSpan {
+            start: self.delay / self.speed_ratio,
+            end: self.end,
+        }
+    }
+}
+
+impl From<&Timeline> for ClipClock {
+    fn from(timeline: &Timeline) -> Self {
+        Self {
+            delay: timeline.delay,
+            speed_ratio: timeline.speed_ratio,
+            end: timeline.total_duration(),
+        }
+    }
+}
+
 impl Timeline {
     /// Elapsed clock positions, including speed, initial delay and finite repeats.
     pub fn clip_span(&self) -> ClipSpan {
-        ClipSpan {
-            start: self.delay / self.speed_ratio,
-            end: self.total_duration(),
-        }
+        ClipClock::from(self).span()
     }
 }
 
 /// Plan ordered offsets in the animation's authored time units. With no explicit start,
 /// retain the first clip's delay. A positive gap separates clips and a negative gap overlaps them.
 pub fn clip_delays(clips: &[&Timeline], start: Option<f64>, gap: f64) -> Result<Vec<f64>> {
+    let clocks = clips
+        .iter()
+        .map(|&clip| {
+            clip.validate()?;
+            Ok(ClipClock::from(clip))
+        })
+        .collect::<Result<Vec<_>>>()?;
+    clip_clock_delays(&clocks, start, gap)
+}
+
+/// Plan delays using resolved timing, without requiring the animation's tracks.
+pub fn clip_clock_delays(clips: &[ClipClock], start: Option<f64>, gap: f64) -> Result<Vec<f64>> {
     require(!clips.is_empty(), "Choose at least one clip")?;
     require(gap.is_finite(), "Clip spacing must be finite")?;
     let mut next = start;
     let mut delays = Vec::with_capacity(clips.len());
     for (index, &clip) in clips.iter().enumerate() {
-        clip.validate()?;
-        let span = clip.clip_span();
+        require(
+            clip.speed_ratio.is_finite() && clip.speed_ratio > 0.0,
+            "Clip speed must be positive and finite",
+        )?;
+        native_ticks(clip.delay)?;
+        let span = clip.span();
+        native_ticks(span.start)?;
+        if let Some(end) = span.end {
+            native_ticks(end)?;
+            require(end >= span.start, "Clip end must follow its start")?;
+        }
         let delay = match next {
             None => clip.delay,
             Some(time) => {

@@ -1,8 +1,23 @@
+use super::AuthoredRsxFrame;
 use crate::document::DesignDocument;
 use ferroui_designer::{validate_rsx_animation_selector, DesignerSession};
 use ferroui_designer_core::{NodeId, TextPatch};
 use ferroui_designer_rsx::{RsxAnimationEdit, RsxAnimationPlan};
+use ferroui_remote_protocol::designer::DesignAnimationSourcePatch;
 use serde_json::Value;
+
+impl AuthoredRsxFrame {
+    pub(crate) fn hosted_clip_patch(&self, placements: &[(NodeId, f64)]) -> Result<Option<DesignAnimationSourcePatch>, String> {
+        let placements = placements.iter().map(|&(id, delay)| {
+            let clip = self.clips.get(&id).ok_or("Choose a clip from the active Rust invocation")?;
+            Ok((clip.declaration, delay))
+        }).collect::<Result<Vec<_>, String>>()?;
+        let projection = self.catalog.project(&self.source, self.invocation.start)?;
+        let patches = projection.place_animation_clips(&placements)?;
+        let edited = TextPatch::apply_all(&self.source, patches).map_err(|error| error.to_string())?;
+        crate::hosted_animation::checked_source_patch(&self.source, &edited)
+    }
+}
 
 pub(crate) fn program_edit(tool: &str, action: Option<&str>) -> bool {
     tool == "designer_program"

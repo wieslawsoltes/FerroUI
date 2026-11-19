@@ -365,6 +365,9 @@ impl Relay {
             authored.annotate_issues(catalog);
             authored.annotate_hosted_routes(catalog);
         }
+        if let (Some(source), Some(catalog)) = (&source, &mut frame.animations) {
+            source.annotate_clips(catalog);
+        }
         self.animation_sources.deliver(source, revision, frame.sequence);
         self.authored_rsx = authored_rsx;
         frame.animation_presentation = presentation;

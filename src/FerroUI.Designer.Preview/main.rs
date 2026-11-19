@@ -155,7 +155,7 @@ fn respond(
             .and_then(|root| serialize(inventory::scan(std::path::Path::new(root)))),
         "hostedListen" => hosted_relay::Relay::listen(message["params"]["nonce"].as_str().unwrap_or("")).map(|relay| {
             use ferroui_remote_protocol::designer::{
-                DESIGN_ANIMATION_AUTHORING_QUERY, DESIGN_ANIMATION_CURVE_CHANNELS_QUERY,
+                DESIGN_ANIMATION_AUTHORING_QUERY, DESIGN_ANIMATION_CLIPS_QUERY, DESIGN_ANIMATION_CURVE_CHANNELS_QUERY,
                 DESIGN_ANIMATION_CURVE_QUERY, DESIGN_ANIMATION_QUERY, DESIGN_ANIMATION_VERSION,
                 DESIGN_STATE_ROUTES_QUERY,
             };
@@ -164,6 +164,7 @@ fn respond(
             let query = [
                 DESIGN_ANIMATION_QUERY,
                 DESIGN_ANIMATION_AUTHORING_QUERY,
+                DESIGN_ANIMATION_CLIPS_QUERY,
                 DESIGN_ANIMATION_CURVE_QUERY,
                 DESIGN_ANIMATION_CURVE_CHANNELS_QUERY,
                 DESIGN_STATE_ROUTES_QUERY,
@@ -183,6 +184,8 @@ fn respond(
             .and_then(|draft| hosted.as_mut().ok_or("Start an app-hosted session")?.plan_keyframe(draft)),
         "hostedState" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|draft| hosted.as_ref().ok_or("Start an app-hosted session")?.plan_state(draft)),
+        "hostedClipPlacement" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
+            .and_then(|draft| hosted.as_ref().ok_or("Start an app-hosted session")?.plan_clip_placement(draft)),
         "hostedCurve" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|request| serialize(hosted.as_mut().ok_or("Start an app-hosted session")?.curve(request))),
         "stagesSync" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())

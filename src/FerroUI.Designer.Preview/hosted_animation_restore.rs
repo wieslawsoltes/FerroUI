@@ -1,9 +1,12 @@
 use crate::rsx_animation::HostedStateRoute;
-use ferroui_designer_animation::{AnimationProgram, AnimationProgramLocator, AnimationPrograms};
+use ferroui_designer_animation::{AnimationProgram, AnimationProgramLocator, AnimationPrograms, ClipClock};
 use ferroui_designer_core::{Document, NodeId, SourceAnchor};
 use ferroui_remote_protocol::designer::DesignAnimationCatalogMessage;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
+
+#[path = "hosted_clip_placement.rs"]
+mod clip_placement;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -27,12 +30,14 @@ pub(crate) struct Presentation {
     pub(crate) position: Option<Position>,
 }
 
-#[derive(Clone, Copy, Deserialize, Serialize)]
+#[derive(Deserialize, Serialize)]
 pub(crate) struct Position {
     pub(crate) program: i64,
     pub(crate) elapsed: f64,
     pub(crate) playing: bool,
     pub(crate) completed: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) clips: Option<Vec<i64>>,
 }
 
 #[derive(PartialEq, Eq)]
@@ -47,6 +52,8 @@ pub(crate) struct SourceScope {
 
 struct Clip {
     duration: Option<f64>,
+    clock: Option<ClipClock>,
+    editable: bool,
     default_targets: Vec<i64>,
     compatible_targets: BTreeSet<i64>,
 }
@@ -79,6 +86,12 @@ impl SourceMap {
                     program.id,
                     Clip {
                         duration: program.total_duration,
+                        clock: program.clip.as_ref().map(|clip| ClipClock {
+                            delay: clip.delay,
+                            speed_ratio: clip.speed_ratio,
+                            end: program.total_duration,
+                        }),
+                        editable: program.clip.as_ref().is_some_and(|clip| clip.editable),
                         default_targets: program.default_targets.clone(),
                         compatible_targets: program.compatible_targets.iter().copied().collect(),
                     },
@@ -181,24 +194,44 @@ impl SourceMap {
                 (!targets.is_empty()).then_some((mapped, targets))
             })
             .collect::<BTreeMap<_, _>>();
-        let position = prior.position.and_then(|position| {
-            let program = remap(position.program)?;
-            let clip = replacement.clips.get(&program)?;
-            let available = if prior.overrides.contains_key(&position.program) {
-                overrides.contains_key(&program)
-            } else {
-                !clip.default_targets.is_empty()
-            };
-            if !available || !position.elapsed.is_finite() || position.elapsed < 0.0 {
+        let position = prior.position.as_ref().and_then(|position| {
+            if !position.elapsed.is_finite() || position.elapsed < 0.0 {
                 return None;
             }
-            let elapsed = clip
-                .duration
-                .map_or(position.elapsed, |limit| position.elapsed.min(limit));
+            let available = |id| {
+                let mapped = remap(id)?;
+                let clip = replacement.clips.get(&mapped)?;
+                let available = if prior.overrides.contains_key(&id) {
+                    overrides.contains_key(&mapped)
+                } else {
+                    !clip.default_targets.is_empty()
+                };
+                available.then_some(mapped)
+            };
+            let program = available(position.program)?;
+            let (clips, duration) = if let Some(clips) = &position.clips {
+                let clips = clips.iter().map(|&id| {
+                    self.clips.get(&id)?.clock?;
+                    let mapped = available(id)?;
+                    replacement.clips.get(&mapped)?.clock?;
+                    Some(mapped)
+                }).collect::<Option<Vec<_>>>()?;
+                if !clips.contains(&program) || clips.iter().collect::<BTreeSet<_>>().len() != clips.len() {
+                    return None;
+                }
+                let duration = clips.iter().try_fold(0.0_f64, |end, id| {
+                    replacement.clips[id].duration.map(|duration| end.max(duration))
+                });
+                (Some(clips), duration)
+            } else {
+                (None, replacement.clips.get(&program)?.duration)
+            };
             Some(Position {
                 program,
-                elapsed,
-                ..position
+                clips,
+                elapsed: duration.map_or(position.elapsed, |limit| position.elapsed.min(limit)),
+                playing: position.playing,
+                completed: position.completed,
             })
         });
         Presentation {
@@ -219,6 +252,10 @@ pub(crate) struct SourceMaps {
 }
 
 impl SourceMaps {
+    pub(crate) fn supports_shared_playback(&self) -> bool {
+        self.current.as_ref().is_some_and(|map| map.clips.values().any(|clip| clip.clock.is_some()))
+    }
+
     pub(crate) fn retain(&mut self, request: Option<&Restore>) {
         if request.is_some_and(|request| {
             self.current

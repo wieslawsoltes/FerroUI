@@ -16,6 +16,7 @@ use ferroui_remote_protocol::designer::{
     DesignAnimationAuthoring, DesignAnimationAuthoringRequest, DesignAnimationAuthoringResult,
     DesignAnimationCurvePoint, DesignAnimationCurveRequest, DesignAnimationCurveResult,
     DesignAnimationCatalogMessage, DesignAnimationKeyframe, DesignAnimationProgram, DesignAnimationRequestMessage,
+    DesignAnimationClip, DesignAnimationClipBinding,
     DesignAnimationResultMessage, DesignAnimationSourcePatch, DesignAnimationTarget, DesignAnimationTrack,
     ExceptionDetails, StartDesignerSessionMessage, UpdateXamlMessage, UpdateXamlResultMessage,
 };
@@ -184,11 +185,16 @@ fn entities() -> Vec<Message> {
                     target: 12, property: "Opacity".into(),
                     keys: vec![DesignAnimationKeyframe { time: 1.0, value: "0.5".into(), value_kind: "Number".into(), easing: "Linear".into() }],
                 }]),
+                clip: Some(DesignAnimationClip { delay: 0.5, speed_ratio: 1.0, editable: true }),
             }],
             targets: vec![DesignAnimationTarget { id: 12, label: "ReviewCard".into(), type_name: "Border".into() }],
         }),
         Arc::new(DesignAnimationRequestMessage {
-            revision: 40, request: 31, program: Some(6), targets: Some(vec![12]), elapsed: 1.25, restart: true,
+            revision: 40, request: 31, program: None, targets: None, elapsed: 1.25, restart: true,
+            clips: Some(vec![
+                DesignAnimationClipBinding { program: 6, targets: Some(vec![12]) },
+                DesignAnimationClipBinding { program: 7, targets: None },
+            ]),
         }),
         Arc::new(DesignAnimationResultMessage {
             revision: 40, request: 31, elapsed: 1.25, completed: true, after_sequence: 9,

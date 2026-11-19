@@ -2,7 +2,7 @@ use super::{send, Connection, Relay, FRAME_TIMEOUT};
 use crate::{hosted_animation, hosted_animation_restore::Presentation};
 use ferroui_designer_animation::{CurveChannel, CurvePoint};
 use ferroui_remote_protocol::designer::{
-    DesignAnimationAuthoringRequest, DesignAnimationCurveRequest, DesignAnimationRequestMessage,
+    DesignAnimationAuthoringRequest, DesignAnimationClipBinding, DesignAnimationCurveRequest, DesignAnimationRequestMessage,
     DesignAnimationResultMessage,
 };
 use std::sync::Arc;
@@ -19,12 +19,17 @@ impl Relay {
         };
         // The base frame stays in the relay. Only the sample from the
         // rebuilt artboard is delivered to the editor.
+        let clips = position.clips.as_ref().map(|clips| clips.iter().map(|&program| {
+            DesignAnimationClipBinding { program, targets: presentation.overrides.get(&program).cloned() }
+        }).collect());
+        let program = clips.is_none().then_some(position.program);
         let outcome = self.request_animation(
             connection,
             DesignAnimationRequestMessage {
                 revision,
-                program: Some(position.program),
-                targets: presentation.overrides.get(&position.program).cloned(),
+                program,
+                targets: program.and_then(|id| presentation.overrides.get(&id).cloned()),
+                clips,
                 elapsed: position.elapsed,
                 restart: true,
                 ..Default::default()
@@ -68,12 +73,16 @@ impl Relay {
         command: hosted_animation::Command,
     ) -> Result<hosted_animation::Sample, String> {
         let connection = self.animation_connection(command.revision, command.sequence)?;
+        if command.clips.is_some() && !self.animation_sources.supports_shared_playback() {
+            return Err("The application preview does not expose shared clip playback".into());
+        }
         let result = self.request_animation(
             &connection,
             DesignAnimationRequestMessage {
                 revision: command.revision,
                 program: command.program,
                 targets: command.targets,
+                clips: command.clips.map(|clips| clips.into_iter().map(Into::into).collect()),
                 elapsed: command.elapsed,
                 restart: command.restart,
                 ..Default::default()
@@ -185,6 +194,11 @@ impl Relay {
     pub(crate) fn plan_state(&self, draft: hosted_animation::StateDraft) -> Result<serde_json::Value, String> {
         self.animation_connection(draft.revision, draft.sequence)?;
         self.authored_rsx.as_ref().ok_or("Open the current Rust view")?.plan_hosted_state(&draft)
+    }
+
+    pub(crate) fn plan_clip_placement(&self, draft: hosted_animation::ClipDraft) -> Result<serde_json::Value, String> {
+        self.animation_connection(draft.revision, draft.sequence)?;
+        self.animation_sources.plan_clip_placement(&draft, self.authored_rsx.as_ref())
     }
 
     pub(crate) fn curve(

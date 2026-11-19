@@ -7,6 +7,8 @@ pub const DESIGN_ANIMATION_QUERY: &str = "ferroui-design-animation";
 pub const DESIGN_ANIMATION_VERSION: &str = "1";
 /// Include projected Rust state routes in the native preview animation catalog.
 pub const DESIGN_STATE_ROUTES_QUERY: &str = "ferroui-design-state-routes";
+/// Include elapsed clip timing and accept combined native playback requests.
+pub const DESIGN_ANIMATION_CLIPS_QUERY: &str = "ferroui-design-clips";
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct DesignAnimationCatalogMessage {
@@ -38,6 +40,7 @@ pub struct DesignAnimationProgram {
     pub custom_animator: bool,
     pub authoring: Option<DesignAnimationAuthoring>,
     pub curve_tracks: Option<Vec<DesignAnimationTrack>>,
+    pub clip: Option<DesignAnimationClip>,
 }
 
 bson_class!(DesignAnimationProgram as "DesignAnimationProgram" {
@@ -52,6 +55,31 @@ bson_class!(DesignAnimationProgram as "DesignAnimationProgram" {
     "CustomAnimator" => custom_animator: bool,
     "Authoring" => authoring: Option<DesignAnimationAuthoring>,
     "CurveTracks" => curve_tracks: Option<Vec<DesignAnimationTrack>>,
+    "Clip" => clip: Option<DesignAnimationClip>,
+});
+
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct DesignAnimationClip {
+    pub delay: f64,
+    pub speed_ratio: f64,
+    pub editable: bool,
+}
+
+bson_class!(DesignAnimationClip as "DesignAnimationClip" {
+    "Delay" => delay: f64,
+    "SpeedRatio" => speed_ratio: f64,
+    "Editable" => editable: bool,
+});
+
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct DesignAnimationClipBinding {
+    pub program: i64,
+    pub targets: Option<Vec<i64>>,
+}
+
+bson_class!(DesignAnimationClipBinding as "DesignAnimationClipBinding" {
+    "Program" => program: i64,
+    "Targets" => targets: Option<Vec<i64>>,
 });
 
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -68,7 +96,8 @@ bson_class!(DesignAnimationTarget as "DesignAnimationTarget" {
 });
 
 /// Apply an elapsed sample using either the authored selector or explicit live targets.
-/// A request without a program disposes the animation layer. An explicit seek restarts its clock.
+/// Either a program or a set of clips identifies the pose. Omitting both disposes the
+/// animation layer. An explicit seek restarts the shared clock.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct DesignAnimationRequestMessage {
     pub revision: i64,
@@ -77,6 +106,7 @@ pub struct DesignAnimationRequestMessage {
     pub targets: Option<Vec<i64>>,
     pub elapsed: f64,
     pub restart: bool,
+    pub clips: Option<Vec<DesignAnimationClipBinding>>,
 }
 
 ferro_remote_message_guid!(
@@ -90,6 +120,7 @@ bson_class!(DesignAnimationRequestMessage as "DesignAnimationRequestMessage" {
     "Targets" => targets: Option<Vec<i64>>,
     "Elapsed" => elapsed: f64,
     "Restart" => restart: bool,
+    "Clips" => clips: Option<Vec<DesignAnimationClipBinding>>,
 });
 
 /// On success, only a rendered frame newer than `after_sequence` can satisfy the request.

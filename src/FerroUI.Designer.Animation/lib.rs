@@ -22,7 +22,7 @@ mod xaml;
 #[cfg(feature = "native-preview")]
 pub mod native;
 
-pub use clip_timing::{clip_delays, xaml_clip_delay, xaml_clip_delay_edit, ClipSpan};
+pub use clip_timing::{ClipClock, ClipSpan, clip_clock_delays, clip_delays, xaml_clip_delay, xaml_clip_delay_edit};
 pub use curve::{CurvePoint, CurveWindow};
 pub use curve_channel::CurveChannel;
 pub use curve_metric::CurveMetric;
