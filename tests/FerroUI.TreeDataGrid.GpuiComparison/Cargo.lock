@@ -1524,7 +1524,9 @@ dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
  "ferroui-markup",
+ "quote",
  "roxmltree 0.20.0",
+ "syn 2.0.119",
  "url",
  "xamlx",
 ]

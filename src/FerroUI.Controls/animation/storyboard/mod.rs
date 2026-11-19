@@ -26,4 +26,5 @@ pub use key_frames::{
     SplinePointKeyFrame,
 };
 pub use storyboard::Storyboard;
+pub(crate) use storyboard::ResolvedAnimation;
 pub use timeline::Timeline;

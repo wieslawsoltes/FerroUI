@@ -1011,9 +1011,15 @@ Validated on macOS ARM64 (debug builds, a smoke run of each, and screenshots aga
   PlatformSanityChecks, ViewInterop, HelloWorld, the hot reload demo (which keeps every unit:
   `full-themes`), FerroDockReactiveUISample, SingleProjectSandbox, ChartsDemo and LiveChartsDemo
   (which has no smoke exit; its window was captured and closed): no diagnostic, no panic;
-- the ControlCatalog (desktop): it links `ferroui-diagnostics`, so it keeps every unit by design;
-  its tour selects all 127 pages with no diagnostic, and 12 of its 14 screenshots are identical to
+- the desktop ControlCatalog at the time linked `ferroui-diagnostics` and kept every unit.
+  Its tour selected all 127 pages with no diagnostic, and 12 of its 14 screenshots were identical to
   `"all"` (the home page differs in its animated banner, as between two runs of `main`).
+
+The desktop ControlCatalog links `ferroui-diagnostics` (the F12 inspector) only with its
+feature `diagnostics`, so its default build trims the WinUI theme. On native targets it keeps
+`ManagedFileChooser` as a theme root (`Build::theme_roots`), because the Dialogs page opens it
+through the managed storage provider; its template also supplies the overwrite prompt and
+references the ContentDialog resources.
 
 ### 11.9 An application without markup
 
@@ -1484,3 +1490,57 @@ Not done in this step:
 - the count for hello world and a larger sample, and the bytes behind the counts. The listing gives
   the keys; the bytes need a link map of a build of a sample with the Skia backend.
 - clusters inside one dictionary. Whether to build them waits for that count.
+
+## 20. A library that constructs a theme (#846)
+
+### 20.1 The selection reaches the library
+
+A library document with `<WinUITheme />` was compiled to
+`WinUITheme::with_parts(None, crate::compiled_markup::THEME_PARTS_..)`, with the units the library
+needs. An application that uses the library and adds `<ListBox />` computed no table for the theme,
+because the emitter records a theme as used only in the crate that writes the construction. The
+theme the library constructed then had no `Controls/ListBox.xaml`.
+
+Now:
+
+- **The construction takes the wider table.** The construction is written as
+  `with_parts(None, rt::wider_theme_parts("<class>", crate::compiled_markup::THEME_PARTS_..))`.
+  `rt::wider_theme_parts` (new) returns the parts registered for the class when they have more
+  units than the table of the crate that writes the construction, and that table otherwise.
+- **Registration keeps the wider table.** The generated `register()` of a crate registers its
+  tables with `rt::register_wider_theme_parts` (new), which keeps the wider table whichever crate
+  registers first.
+- **The application computes the table.** For each theme that the compiled documents of a direct
+  dependency name (the `references.types` of its `.xamlmeta` hold the class name), the build of the
+  application writes and registers a table. The table is computed from all the roots of the
+  application, whether or not the application's own documents construct the theme. This needs no
+  new field in the metadata: the references of the library's documents are the record of what
+  they construct.
+- **Limits.** The table is written only when the theme's crate is a direct dependency too, since
+  the table names its unit statics. A library used alone, or in an application that does not depend
+  on the theme crate, keeps its own table. A crate without markup writes the file of its tables when
+  it has one, and `register()` must run for it to take effect.
+
+The rule "the wider table" assumes that the application's table holds the library's. That is the
+usual case, since the application's roots include what the library's documents name. A library
+whose code constructs controls that its documents do not name states them with `Build::theme_roots`,
+which #847 exports (section 17).
+
+### 20.2 The selection as state of the thread (not done)
+
+`set_active_theme_units` still writes a thread-local entry for each theme class, and the generated
+builds read it. A second construction of the same theme with other parts on the same thread, or a
+deferred producer that runs later, can read the selection of another instance. Carrying the
+selection in the creation context of the document, captured by its nested and deferred factories,
+changes the generated code of the theme builds. That is left for the work on the output of the
+themes (#853 and the related issues). `register_theme_parts` still replaces an earlier
+registration; the generated `register()` now uses the wider registration instead.
+
+### 20.3 Tests
+
+- `theme_units_tests.rs` (`the_wider_table_of_a_class_is_registered_and_applied`): registering in
+  either order keeps the wider table, and a construction applies the wider table.
+- `lib.rs` (`a_theme_a_library_constructs_gets_the_table_of_the_application`):
+  - an application that never names the theme, whose control is named in its sources, gets the
+    theme's table with that control's unit, registered with the wider registration;
+  - without the theme crate among its direct dependencies, it gets no table.

@@ -121,3 +121,19 @@ fn only_trimmed_type_keys_are_reported() {
     assert!(!report_trimmed_theme("Tests", &ResourceKey::from("ResourceDictionary"), trimmed));
     assert!(!report_trimmed_theme("Tests", &ResourceKey::Type(<ResourceDictionary as StaticType>::TYPE), &[]));
 }
+
+/// Not from upstream (#846): the wider table registered for a class stays, whichever crate
+/// registers first, and a compiled construction applies the registered table when it is wider
+/// than the table of its own crate.
+#[test]
+fn the_wider_table_of_a_class_is_registered_and_applied() {
+    static ONLY_AMBIENT: &[&ThemeUnit] = &[&AMBIENT];
+    let class = "Tests.WiderTheme";
+    assert!(std::ptr::eq(wider_theme_parts(class, ONLY_AMBIENT), ONLY_AMBIENT), "nothing registered: its own table");
+    register_wider_theme_parts(class, UNITS);
+    register_wider_theme_parts(class, ONLY_AMBIENT);
+    assert_eq!(registered_theme_parts(class).map(<[&ThemeUnit]>::len), Some(2), "the narrower table does not replace");
+    assert!(std::ptr::eq(wider_theme_parts(class, ONLY_AMBIENT), UNITS));
+    // A construction whose own table is as wide keeps it.
+    assert!(std::ptr::eq(wider_theme_parts(class, UNITS), UNITS));
+}
