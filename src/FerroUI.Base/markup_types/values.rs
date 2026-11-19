@@ -3,11 +3,11 @@
 //! their static values, as the managed original declares them.
 
 use crate::animation::easings::Easing;
-use crate::animation::{Cue, IterationCount, IterationType, SignedDuration};
+use crate::animation::{Cue, FillBehavior, IterationCount, IterationType, RepeatBehavior, SignedDuration, TimelineDuration};
 use crate::data::core::ValueTypes;
 use crate::data::CultureInfoIetfLanguageTagConverter;
 use crate::utilities::{CultureInfo, DateTime, DateTimeKind, DateTimeOffset, DayOfWeek, Decimal, NumberStyles};
-use crate::ferro_markup_type;
+use crate::{ferro_markup_enum, ferro_markup_type};
 use crate::input::{Cursor, Key, KeyGesture, KeyModifiers, StandardCursorType};
 use crate::media::{
     BoxShadow, BoxShadows, Color, FontFamily, FontFeature, FontFeatureCollection, FontWeight, HslColor, HsvColor,
@@ -505,6 +505,25 @@ ferro_markup_type!(struct IterationCount {
     ],
 });
 
+// The timing of WinUI's timelines (#443, VSM-3): `Duration`, `RepeatBehavior` and
+// `FillBehavior` of the storyboards of `ferroui-controls`.
+
+ferro_markup_type!(struct TimelineDuration {
+    namespace: "FerroUI.Animation",
+    handles: [TimelineDuration],
+    parse: TimelineDuration::parse,
+    constructors: [() => TimelineDuration::default],
+});
+
+ferro_markup_type!(struct RepeatBehavior {
+    namespace: "FerroUI.Animation",
+    handles: [RepeatBehavior],
+    parse: RepeatBehavior::parse,
+    constructors: [() => RepeatBehavior::default],
+});
+
+ferro_markup_enum!(FillBehavior { HoldEnd, Stop }, { namespace: "FerroUI.Animation" });
+
 // FerroUI.Animation.Easings
 
 ferro_markup_type!(class Easing {
@@ -659,6 +678,9 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <Cursor as MarkupTyped>::MARKUP,
     <Cue as MarkupTyped>::MARKUP,
     <IterationCount as MarkupTyped>::MARKUP,
+    <TimelineDuration as MarkupTyped>::MARKUP,
+    <RepeatBehavior as MarkupTyped>::MARKUP,
+    <FillBehavior as MarkupTyped>::MARKUP,
     <Easing as MarkupTyped>::MARKUP,
     <ThemeVariant as MarkupTyped>::MARKUP,
     <SignedDuration as MarkupTyped>::MARKUP,
@@ -719,6 +741,9 @@ pub(super) fn register_value_type_table() {
     ValueTypes::register_used::<BoxShadows>();
     ValueTypes::register_used::<Cue>();
     ValueTypes::register_used::<IterationCount>();
+    ValueTypes::register_used::<TimelineDuration>();
+    ValueTypes::register_used::<RepeatBehavior>();
+    ValueTypes::register_used::<FillBehavior>();
     ValueTypes::register_used::<SignedDuration>();
     ValueTypes::register_used::<Uri>();
     ValueTypes::register_used::<Cursor>();
@@ -1013,3 +1038,20 @@ impl crate::data::core::ValueTypeRegistration for CultureInfo {
     }
 }
 
+impl crate::data::core::ValueTypeRegistration for TimelineDuration {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<TimelineDuration>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for RepeatBehavior {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<RepeatBehavior>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FillBehavior {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FillBehavior>();
+    }
+}

@@ -299,6 +299,23 @@ base value), leaving out what the transition's own storyboard animates. As in Wi
 independent animations (opacity, render transform and translation values) get the full duration;
 the others get zero.
 
+**Status (VSM-4, done).** `VisualTransition` (`From`, `To`, `GeneratedDuration`,
+`GeneratedEasingFunction`, `Storyboard`) and `VisualStateGroup.Transitions` in
+`ferroui-controls` (`visual_state/visual_transition.rs`, `transitions.rs`). `GoToState` with
+transitions and system animations on (`IPlatformSettings::animations_enabled`) picks the
+transition by the score above; one of zero length (WinUI's `IsZeroDuration`) changes the state at
+once. Otherwise the group is in the new state at once, the transition's storyboard and the
+generated storyboard run (`Changing` is raised at the start), the values of the old state that
+the new one does not set are removed (the generated storyboard animates them back), and the
+setters and the storyboard of the new state apply when both storyboards have completed, which
+raises `CurrentStateChanged`. Another `GoToState` interrupts it (no `Changed` for it); `GoToState`
+to the state it goes to without transitions completes it. The generated storyboard follows
+`DynamicTransitionStoryboardGenerator`: to-values of the new state's animations (`From`, else
+`To`; the first key frame) and setters (doubles, colours, points), back-animations of the old
+state's, leaving out what the transition's storyboard animates; the opacity and the values of
+transforms take the full duration, eased, the rest jumps. Tests:
+`visual_state/transition_tests.rs`.
+
 ### 5.7 State triggers
 
 - When the groups are attached to a visual tree, after the template is applied, when the
@@ -346,6 +363,37 @@ implementations, so they also fit FerroUI's transitions), `RepeatBehavior`, `Fil
   (`(Visual.RenderTransform).(ScaleTransform.ScaleX)`, resolved at start by walking the values).
   FerroUI has no `CompositeTransform`; the Calculator's six paths through it become
   `ScaleTransform` paths in its markup (an application adaptation, not a framework type).
+- **The timing model (first step of VSM-3).** The clock arithmetic of WinUI's `CTimeline` and
+  the key frame segment search of `CAnimation` are values and functions in `ferroui-base`
+  (`animation::TimelineTiming`, `TimelineDuration`, `RepeatBehavior`, `FillBehavior`,
+  `ClockState`, `from_to_by`, `key_frame_segment`, `KeyFrameEase`): the active period (begin
+  time, speed ratio, repeat count or duration, auto-reverse), the clock state with the 0.5 ms
+  tolerance of the expiration, the progress and the iteration, the fill at the end, the end
+  points of an animation from, to or by a value, and the segment and eased progress of the key
+  frames (discrete, linear, spline, easing). The storyboard classes of `ferroui-controls` read
+  them with the time of their clock.
+- **The storyboard classes (second step of VSM-3, done).** `ferroui_controls::animation` (markup
+  namespace `FerroUI.Controls`, as the other WinUI additions of the crate: the framework XML
+  namespace maps the `FerroUI.Animation` namespace to the types of `ferroui-base` only) has
+  `Timeline`, `Storyboard` (children, the attached `TargetName` and `TargetProperty`,
+  `SetTarget`, `Begin`, `Stop`, `Pause`, `Resume`, `Seek`, `SeekAlignedToLastTick`,
+  `SkipToFill`, `GetCurrentState`, `GetCurrentTime`, `Completed`), `DoubleAnimation`,
+  `ColorAnimation`, `PointAnimation`, the `Double`, `Color` and `Point` key frame animations
+  with their `Discrete`, `Linear`, `Spline` and `Easing` key frames,
+  `ObjectAnimationUsingKeyFrames` with `DiscreteObjectKeyFrame`, `EasingFunctionBase` with
+  `EasingMode` and the eleven easing functions (`to_easing` hands one to the transitions of the
+  framework), and `VisualState.Storyboard` (the content property of a state: it begins when the
+  state is entered and stops when it is left; `GoToState` to the current state without
+  transitions skips it to its fill). The markup types `Duration`, `RepeatBehavior` and
+  `FillBehavior` of `ferroui-base` parse as WinUI writes them (`Automatic`, `Forever`,
+  `0:0:0.25`; `2x`). Deviations: a storyboard applies the values of its start at once when it
+  begins and of the time it seeks to at once (WinUI on the next tick); `TargetName` is looked up
+  in the elements of the template or the name scope of the document of the element given to
+  `Storyboard::set_target_scope` (the visual states set it), not in the name scope the
+  storyboard was loaded in; key frame values written as text are converted to the type of the
+  property when the animation begins (the compiler does not type them yet); colours interpolate
+  channel by channel in sRGB, as WinUI does. Tests: `ferroui-controls`,
+  `animation/storyboard/storyboard_tests.rs`.
 - **Not in scope:** theme animations (`PointerDownThemeAnimation` and the others, theme G-22),
   `Storyboard.TargetName` across namescopes, dependent animation throttling
   (`EnableDependentAnimation` is accepted and has no effect: FerroUI animates every property on the
@@ -396,6 +444,26 @@ the control's state (its pseudo-classes and properties) into `GoToState` calls. 
 installs a control's mapper when it applies a template whose root has groups (and only then), and
 re-runs it on the control's pseudo-class changes (`Classes::add_listener`) with transitions. A
 control without groups in its template is untouched; a mapper never changes pseudo-classes.
+
+**Status (VSM-5, done).** `visual_state/state_mappers.rs` of `ferroui-controls` has the mappers
+of `Button` (and `RepeatButton`), `ToggleButton`, `CheckBox`, `RadioButton`, `ListBoxItem` and
+`TextBox`, ports of WinUI's `ChangeVisualState` (`Button_Partial.cpp`, `ToggleButton_Partial.cpp`,
+`CheckBox_Partial.cpp`, `RadioButton_Partial.cpp`, `ListBoxItem_Partial.cpp`) and of the text
+box's `UpdateVisualState` (`TextBoxBase.cpp`, `TextBox.cpp`): `CommonStates` from `:disabled`,
+`:pressed` and `:pointerover`; the check states (`Checked`, `CheckedPointerOver`,
+`IndeterminatePressed`, ...; the combined states of the check box, else its older common and
+check states); the selection states of the list item (`SelectedUnfocused` while the selector
+around it does not have the keyboard focus: FerroUI's counterpart of `IsSelectionActive` is
+`:focus-within`); the focus states (`Focused` for keyboard focus, `:focus-visible`,
+`PointerFocused` for other focus); the text box's `Focused` state and its `ButtonStates`. A
+mapper is installed by `TemplatedControl::apply_template` only when the root of the new template
+has visual state groups; it sets the states without transitions then and with transitions when
+the classes of the control or the properties the states read (`IsChecked`, `IsSelected`, `Text`,
+`IsReadOnly`, ...) change. Controls of other families do nothing more than a type test. The
+catalog's "Visual States" page shows a button template written with visual states, a storyboard
+and a transition. Tests: `visual_state/state_mapper_tests.rs`. Left for later: the mappers of the
+other upstream-ported controls (`ComboBox`, `ComboBoxItem`, `ToggleSwitch`, `Slider`, ...), and the
+theme migration pilot of 5.11.
 
 ### 5.11 Can WinUI templates keep their visual state markup, and should the WinUI theme migrate?
 

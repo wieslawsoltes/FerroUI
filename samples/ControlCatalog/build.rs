@@ -221,6 +221,10 @@ fn compile_documents(out_dir: &Path, documents: &[(String, String)], catalog_app
     let mut build = Build::from_env()
         .type_system(TypeSystem::Model)
         .input("build/compiled_documents.rs");
+    // On native targets the Dialogs page can open this control through ManagedStorageProvider.
+    if env::var("CARGO_CFG_TARGET_ARCH").as_deref() != Ok("wasm32") {
+        build = build.theme_roots(&["ManagedFileChooser"]);
+    }
     for (name, text) in &compiled {
         // A document that includes another one of the sample is given every document, of
         // which the compiler takes the ones it includes.
