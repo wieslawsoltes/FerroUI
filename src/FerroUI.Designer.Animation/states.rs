@@ -10,6 +10,10 @@ use crate::{
 use ferroui_designer_core::{Document, Edit, NodeId, NodeKind};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
+
+#[path = "states/projected_routes.rs"]
+mod projected_routes;
+pub use projected_routes::{ProjectedStateGroup, ProjectedStateRoute};
 const GROUP_MARKER: &str = "ferroui-designer-state-group:";
 const PROJECTED_GROUP_MARKER: &str = "ferroui-designer-projected-state-group:";
 const STATE_MARKER: &str = "ferroui-designer-state:";

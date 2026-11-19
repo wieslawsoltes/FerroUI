@@ -278,8 +278,8 @@ fn xaml_annotation(attribute: &ferroui_designer_core::Attribute) -> bool {
 
 pub struct AnimationPrograms;
 impl AnimationPrograms {
-    /// App-hosted clips are individually seekable. Generated Rust state routes
-    /// use the live application clock through their state handlers.
+    /// App-hosted ordinary clips. Generated Rust states are exposed as whole
+    /// routes so a seek updates every target of the same transition.
     pub fn scan_hosted(document: &Document) -> Vec<AnimationProgram> {
         Self::scan(document)
             .into_iter()

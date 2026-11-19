@@ -31,6 +31,7 @@ pub struct DesignWindowLoader;
 pub(crate) struct LoadedDesign {
     pub(crate) window: Ref<Window>,
     pub(crate) root: Ref<Control>,
+    pub(crate) rust_fixture: bool,
 }
 
 impl DesignWindowLoader {
@@ -63,7 +64,7 @@ impl DesignWindowLoader {
         xaml_file_project_path: Option<&str>,
         render_scaling: f64,
     ) -> Result<Ref<Window>, XamlLoadError> {
-        Self::load_with_fixture(xaml, assembly_path, xaml_file_project_path, render_scaling, None, None)
+        Self::load_with_fixture(xaml, assembly_path, xaml_file_project_path, render_scaling, None, None, false)
             .map(|loaded| loaded.window)
     }
 
@@ -74,13 +75,16 @@ impl DesignWindowLoader {
         render_scaling: f64,
         fixture: Option<&str>,
         animation_document: Option<&str>,
+        freeze_animation_clock: bool,
     ) -> Result<LoadedDesign, XamlLoadError> {
         let window: Ref<Window>;
         let control: Ref<Control>;
+        let rust_fixture;
         {
             let _designer_mode = DesignerMode(PlatformManager::designer_mode());
             let fixture = fixture.map(|name| preview_fixtures::create(xaml_file_project_path, name))
                 .transpose().map_err(XamlLoadError::with_message)?;
+            rust_fixture = matches!(fixture, Some(PreviewFixture::RustView(_)));
 
             control = if let Some(PreviewFixture::RustView(control)) = &fixture {
                 if control.parent().is_some() || control.visual_parent().is_some()
@@ -93,17 +97,18 @@ impl DesignWindowLoader {
                 load_preview_control(xaml, assembly_path, xaml_file_project_path, animation_document)?
             };
 
-            window = match control.cast::<Window>() {
-                Some(window) => window,
-                None => {
-                    let window = Window::new();
-                    window.set_content(Some(Control::boxed(control.clone())));
-                    window
-                }
+            let (preview, wrap_content) = match control.cast::<Window>() {
+                Some(window) => (window, false),
+                None => (Window::new(), true),
             };
-            if animation_document.is_some() {
+            window = preview;
+            if freeze_animation_clock && !rust_fixture {
                 use ferroui_designer_animation::native::FrozenPreviewClock;
                 window.set_clock(Some(Rc::new(FrozenPreviewClock)));
+            }
+            if wrap_content {
+                // Styles can start their animation subscriptions when content is attached.
+                window.set_content(Some(Control::boxed(control.clone())));
             }
 
             // `window.PlatformImpl is OffscreenTopLevelImplBase offscreenImpl`:
@@ -133,7 +138,7 @@ impl DesignWindowLoader {
             }
         }
         window.show();
-        Ok(LoadedDesign { window, root: control })
+        Ok(LoadedDesign { window, root: control, rust_fixture })
     }
 }
 

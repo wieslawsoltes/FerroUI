@@ -410,6 +410,7 @@ impl RemoteDesignerEntryPoint {
                     LAST_RENDER_SCALING.get(),
                     versioned.and_then(|update| update.fixture.as_deref()),
                     animations.as_ref().map(|source| source.identity.as_str()),
+                    animations.as_ref().is_some_and(hosted_animation::AnimationSource::freeze_clock),
                 )
             }));
             let result = match loaded {

@@ -5,6 +5,8 @@ use crate::design_animation_authoring::{DesignAnimationAuthoring, DesignAnimatio
 /// A host without this protocol still echoes its session and responds to ordinary design updates.
 pub const DESIGN_ANIMATION_QUERY: &str = "ferroui-design-animation";
 pub const DESIGN_ANIMATION_VERSION: &str = "1";
+/// Include projected Rust state routes in the native preview animation catalog.
+pub const DESIGN_STATE_ROUTES_QUERY: &str = "ferroui-design-state-routes";
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct DesignAnimationCatalogMessage {

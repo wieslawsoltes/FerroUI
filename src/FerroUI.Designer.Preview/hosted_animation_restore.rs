@@ -1,3 +1,4 @@
+use crate::rsx_animation::HostedStateRoute;
 use ferroui_designer_animation::{AnimationProgram, AnimationProgramLocator, AnimationPrograms};
 use ferroui_designer_core::{Document, NodeId, SourceAnchor};
 use ferroui_remote_protocol::designer::DesignAnimationCatalogMessage;
@@ -39,6 +40,7 @@ pub(crate) struct SourceScope {
     pub(crate) uri: String,
     pub(crate) assembly: String,
     pub(crate) project_path: String,
+    pub(crate) fixture: Option<String>,
     // Edits to literals can change the length of this invocation during reload.
     pub(crate) invocation: Option<usize>,
 }
@@ -55,6 +57,7 @@ pub(crate) struct SourceMap {
     scope: SourceScope,
     document: Document,
     programs: Vec<AnimationProgram>,
+    state_routes: BTreeMap<i64, HostedStateRoute>,
     clips: BTreeMap<i64, Clip>,
 }
 
@@ -63,6 +66,7 @@ impl SourceMap {
         document: Document,
         scope: SourceScope,
         catalog: &DesignAnimationCatalogMessage,
+        state_routes: BTreeMap<i64, HostedStateRoute>,
     ) -> Option<Self> {
         if catalog.programs.is_empty() {
             return None;
@@ -88,6 +92,7 @@ impl SourceMap {
             scope,
             document,
             programs,
+            state_routes,
             clips,
         })
     }
@@ -99,6 +104,9 @@ impl SourceMap {
     fn remap_program(&self, replacement: &Self, id: i64) -> Option<i64> {
         let old_id = NodeId::try_from(id).ok()?;
         self.clips.get(&id)?;
+        if let Some(route) = self.state_routes.get(&id) {
+            return self.remap_route(replacement, id, route);
+        }
         let program = self.programs.iter().find(|program| program.id == old_id)?;
         let anchor = AnimationProgramLocator::capture(&self.document, program);
         let key = program.source_key.as_deref();
@@ -118,6 +126,21 @@ impl SourceMap {
         )?;
         let id = i64::try_from(resolved.id).ok()?;
         replacement.clips.contains_key(&id).then_some(id)
+    }
+
+    fn remap_route(&self, replacement: &Self, id: i64, route: &HostedStateRoute) -> Option<i64> {
+        let owner = SourceAnchor::capture(&self.document, route.owner).ok()?
+            .resolve(&replacement.document).ok()?;
+        let mut matches = replacement.state_routes.iter().filter(|(_, candidate)| {
+            candidate.owner == owner && candidate.group == route.group
+                && candidate.from == route.from && candidate.to == route.to
+        });
+        let (&mapped, _) = matches.next().filter(|_| matches.next().is_none())?;
+        let old = self.clips.get(&id)?;
+        let new = replacement.clips.get(&mapped)?;
+        let targets = self.remap_targets(replacement, old, new, &old.default_targets);
+        (targets.len() == old.default_targets.len() && targets.len() == new.default_targets.len())
+            .then_some(mapped)
     }
 
     fn remap_targets(

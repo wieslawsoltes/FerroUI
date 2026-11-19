@@ -2,11 +2,14 @@
 
 #[path = "hosted_animation_curve.rs"]
 mod curve;
+#[path = "hosted_state_routes.rs"]
+mod state_routes;
 
 pub(super) use curve::curve;
 
 use crate::design_window_loader::LoadedDesign;
 use super::hosted_keyframes::HostedKeyframes;
+use state_routes::HostedStateRoutes;
 use crate::remote::previewer_windowing_platform::PreviewerWindowingPlatform;
 use ferroui_base::animation::Animatable;
 use ferroui_base::{Ref, StyledElement, Visual};
@@ -15,13 +18,14 @@ use ferroui_designer_animation::native::{
     animation_timing, validate_animation_target, NativePlayback, NativeProgramIndex,
     NativeSourceIndex,
 };
-use ferroui_designer_animation::{AnimationProgram, AnimationPrograms};
+use ferroui_designer_animation::{AnimationProgram, AnimationPrograms, ProjectedStateGroup};
 use ferroui_designer_core::{Document, NodeId};
 use ferroui_remote_protocol::designer::{
     DesignAnimationAuthoringRequest, DesignAnimationAuthoringResult,
     DesignAnimationCatalogMessage, DesignAnimationProgram, DesignAnimationRequestMessage,
     DesignAnimationResultMessage, DesignAnimationTarget, UpdateDesignMessage,
-    DESIGN_ANIMATION_AUTHORING_QUERY, DESIGN_ANIMATION_CURVE_QUERY, DESIGN_ANIMATION_QUERY, DESIGN_ANIMATION_VERSION,
+    DESIGN_ANIMATION_AUTHORING_QUERY, DESIGN_ANIMATION_CURVE_QUERY, DESIGN_ANIMATION_QUERY,
+    DESIGN_ANIMATION_VERSION, DESIGN_STATE_ROUTES_QUERY,
 };
 use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, BTreeSet};
@@ -31,6 +35,7 @@ ferroui_base::ferro_thread_local! {
     static ENABLED: Cell<bool> = const { Cell::new(false) };
     static AUTHORING: Cell<bool> = const { Cell::new(false) };
     static CURVES: Cell<bool> = const { Cell::new(false) };
+    static STATE_ROUTES: Cell<bool> = const { Cell::new(false) };
     static ACTIVE: RefCell<Option<HostedAnimations>> = const { RefCell::new(None) };
 }
 
@@ -43,6 +48,7 @@ pub(super) fn configure(transport: Option<&Url>, remote: bool) {
     ENABLED.set(enabled);
     AUTHORING.set(enabled && requested(DESIGN_ANIMATION_AUTHORING_QUERY));
     CURVES.set(enabled && requested(DESIGN_ANIMATION_CURVE_QUERY));
+    STATE_ROUTES.set(enabled && requested(DESIGN_STATE_ROUTES_QUERY));
     ACTIVE.with(|active| active.borrow_mut().take());
 }
 
@@ -50,6 +56,13 @@ pub(super) struct AnimationSource {
     pub(super) identity: String,
     document: Document,
     programs: Vec<AnimationProgram>,
+    states: Vec<ProjectedStateGroup>,
+}
+
+impl AnimationSource {
+    pub(super) fn freeze_clock(&self) -> bool {
+        !self.programs.is_empty()
+    }
 }
 
 pub(super) fn prepare(update: &UpdateDesignMessage) -> Option<AnimationSource> {
@@ -58,10 +71,12 @@ pub(super) fn prepare(update: &UpdateDesignMessage) -> Option<AnimationSource> {
     }
     let document = Document::new(update.source.xaml.as_deref()?).ok()?;
     let programs = AnimationPrograms::scan_hosted(&document);
-    (!programs.is_empty()).then(|| AnimationSource {
+    let states = STATE_ROUTES.get().then(|| ProjectedStateGroup::scan(&document)).unwrap_or_default();
+    (!programs.is_empty() || !states.is_empty()).then(|| AnimationSource {
         identity: format!("ferroui-design/{}", update.revision),
         document,
         programs,
+        states,
     })
 }
 
@@ -97,7 +112,7 @@ pub(super) fn sample(
         let window = window.ok_or("Open an app-hosted animation preview first")?;
         let platform = PreviewerWindowingPlatform::last_window()
             .ok_or("The application preview window retired")?;
-        let completed = ACTIVE.with(|active| {
+        let (completed, elapsed) = ACTIVE.with(|active| {
             active
                 .borrow_mut()
                 .as_mut()
@@ -106,12 +121,12 @@ pub(super) fn sample(
         })?;
         window.update_layout();
         window.invalidate_visual();
-        Ok::<_, String>((completed, platform.request_frame()))
+        Ok::<_, String>((completed, elapsed, platform.request_frame()))
     }));
     match sample {
-        Ok(Ok((completed, sequence))) => {
+        Ok(Ok((completed, elapsed, sequence))) => {
             answer.completed = completed;
-            answer.elapsed = request.program.map_or(0.0, |_| request.elapsed);
+            answer.elapsed = elapsed;
             answer.after_sequence = sequence;
         }
         Ok(Err(error)) => answer.error = Some(error),
@@ -151,6 +166,7 @@ struct HostedAnimations {
     current: Option<(i64, Vec<i64>)>,
     playback: NativePlayback,
     keyframes: Option<HostedKeyframes>,
+    state_routes: HostedStateRoutes,
 }
 
 impl HostedAnimations {
@@ -176,7 +192,7 @@ impl HostedAnimations {
                     .or_insert_with(|| Some(control.clone()));
             }
         }
-        let targets = candidates
+        let mut targets = candidates
             .into_iter()
             .filter_map(|(id, control)| Some((id, control?)))
             .collect::<BTreeMap<_, _>>();
@@ -193,6 +209,8 @@ impl HostedAnimations {
                 catalog.programs.push(entry);
             }
         }
+        let state_routes =
+            HostedStateRoutes::mount(&source.document, source.states, design, &mut targets, catalog);
         catalog.targets = targets
             .iter()
             .map(|(&id, control)| {
@@ -218,6 +236,7 @@ impl HostedAnimations {
             current: None,
             playback: NativePlayback::default(),
             keyframes,
+            state_routes,
         }
     }
 
@@ -229,12 +248,12 @@ impl HostedAnimations {
         Ok(())
     }
 
-    fn sample(&mut self, command: &DesignAnimationRequestMessage) -> Result<bool, String> {
+    fn sample(&mut self, command: &DesignAnimationRequestMessage) -> Result<(bool, f64), String> {
         self.claim(command.revision, command.request)?;
         let Some(id) = command.program else {
             self.current = None;
             self.playback.stop();
-            return Ok(false);
+            return Ok((false, 0.0));
         };
         let entry = self
             .programs
@@ -245,8 +264,26 @@ impl HostedAnimations {
             .clone()
             .unwrap_or_else(|| entry.default_targets.clone());
         let clip = (id, targets);
+        if let Some(route) = self.state_routes.get(id) {
+            if clip.1 != entry.default_targets {
+                return Err("A state route uses its authored targets".into());
+            }
+            if command.elapsed < 0.0 || !command.elapsed.is_finite()
+                || (command.restart && command.elapsed > entry.duration)
+            {
+                return Err("Choose a time within the state route duration".into());
+            }
+            let elapsed = command.elapsed.min(entry.duration);
+            let complete = if !command.restart && self.current.as_ref() == Some(&clip) && self.playback.is_active() {
+                self.playback.advance_to(elapsed)?
+            } else {
+                self.playback.seek(route.bindings(), elapsed)?
+            };
+            self.current = Some(clip);
+            return Ok((complete || elapsed == entry.duration, elapsed));
+        }
         if !command.restart && self.current.as_ref() == Some(&clip) && self.playback.is_active() {
-            return self.playback.advance_to(command.elapsed);
+            return Ok((self.playback.advance_to(command.elapsed)?, command.elapsed));
         }
         if command.elapsed > entry.total_duration.unwrap_or(f64::INFINITY) {
             return Err("Choose a time within the animation's elapsed duration".into());
@@ -273,7 +310,7 @@ impl HostedAnimations {
             .collect::<Result<Vec<_>, _>>()?;
         let complete = self.playback.seek(bindings, command.elapsed)?;
         self.current = Some(clip);
-        Ok(complete)
+        Ok((complete, command.elapsed))
     }
 }
 

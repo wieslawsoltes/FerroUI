@@ -9,6 +9,8 @@ use std::collections::BTreeMap;
 
 mod states;
 pub(crate) use states::{state_edit, state_patches};
+mod hosted_states;
+pub(crate) use hosted_states::HostedStateRoute;
 
 mod keyframes;
 pub(crate) use keyframes::keyframe_edit;
@@ -23,6 +25,8 @@ pub(crate) struct AuthoredRsxFrame {
     states: BTreeMap<(NodeId, String), RsxStateGroup>,
     state_owners: Vec<NodeId>,
     issues: Vec<RsxAnimationIssue>,
+    pub(crate) hosted_routes: BTreeMap<i64, HostedStateRoute>,
+    hosted_groups: BTreeMap<(NodeId, String), ferroui_designer_animation::VisualStateGroup>,
 }
 
 impl AuthoredRsxFrame {
@@ -39,6 +43,8 @@ impl AuthoredRsxFrame {
                 rsx.can_create_state_group(owner).then_some(node.id)
             }).collect(),
             issues: rsx.animation_issues.clone(),
+            hosted_routes: BTreeMap::new(),
+            hosted_groups: BTreeMap::new(),
         })
     }
 

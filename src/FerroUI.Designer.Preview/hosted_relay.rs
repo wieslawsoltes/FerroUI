@@ -309,6 +309,7 @@ impl Relay {
             uri: design.document.uri.clone(),
             assembly: design.assembly.clone(),
             project_path: design.project_path.clone(),
+            fixture: design.fixture.clone(),
             invocation: document.rsx.as_ref().map(|projection| projection.invocation.start),
         };
         let connection = self.connection()?;
@@ -339,15 +340,16 @@ impl Relay {
         if !matches!(state.outcome, Some(Ok(()))) || state.latest.is_none() {
             return Err("The application did not render this source revision".into());
         }
-        let authored_rsx = AuthoredRsxFrame::capture(&document);
+        let mut authored_rsx = AuthoredRsxFrame::capture(&document);
         if let Some(catalog) = &mut state.animation_catalog {
-            if let Some(projected) = &authored_rsx {
-                for program in &mut catalog.programs { projected.map_hosted_program(program); }
+            if let Some(projected) = &mut authored_rsx {
+                projected.bind_hosted_routes(&document.xaml, catalog);
             }
             state.authorable = catalog.programs.iter().filter(|program| program.authoring.is_some())
                 .map(|program| program.id).collect();
         }
-        let source = state.animation_catalog.as_ref().and_then(|catalog| SourceMap::new(document.xaml, scope, catalog));
+        let routes = authored_rsx.as_ref().map(|authored| authored.hosted_routes.clone()).unwrap_or_default();
+        let source = state.animation_catalog.as_ref().and_then(|catalog| SourceMap::new(document.xaml, scope, catalog, routes));
         drop(state);
         let mut presentation = self.animation_sources.restore(design.restore_animation.as_ref(), source.as_ref());
         if let Some(presentation) = &mut presentation {
@@ -361,6 +363,7 @@ impl Relay {
         let mut frame = self.frame()?.ok_or("The application did not render this source revision")?;
         if let (Some(authored), Some(catalog)) = (&authored_rsx, &mut frame.animations) {
             authored.annotate_issues(catalog);
+            authored.annotate_hosted_routes(catalog);
         }
         self.animation_sources.deliver(source, revision, frame.sequence);
         self.authored_rsx = authored_rsx;

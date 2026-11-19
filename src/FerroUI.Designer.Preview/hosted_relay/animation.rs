@@ -182,6 +182,11 @@ impl Relay {
         hosted_animation::keyframe(result)
     }
 
+    pub(crate) fn plan_state(&self, draft: hosted_animation::StateDraft) -> Result<serde_json::Value, String> {
+        self.animation_connection(draft.revision, draft.sequence)?;
+        self.authored_rsx.as_ref().ok_or("Open the current Rust view")?.plan_hosted_state(&draft)
+    }
+
     pub(crate) fn curve(
         &mut self,
         query: hosted_animation::CurveRequest,

@@ -30,8 +30,8 @@ pub use programs::{
     NativeAnimationCodec,
 };
 pub use states::{
-    resolve_state_target, rewrite_design_metadata, state_value, StateSetter, StateTransition,
-    VisualState, VisualStateGroup,
+    resolve_state_target, rewrite_design_metadata, state_value, ProjectedStateGroup,
+    ProjectedStateRoute, StateSetter, StateTransition, VisualState, VisualStateGroup,
 };
 pub use timeline::{
     CompiledTimeline, FillMode, Keyframe, PlaybackBehavior, PlaybackDirection, Player, Repeat,

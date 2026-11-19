@@ -1,7 +1,7 @@
 use crate::hosted_relay::Frame;
 use ferroui_designer_animation::CurveWindow;
 use ferroui_remote_protocol::designer::{
-    DesignAnimationAuthoringResult, DesignAnimationCatalogMessage, DesignAnimationTrack,
+    DesignAnimationAuthoringResult, DesignAnimationCatalogMessage, DesignAnimationSourcePatch, DesignAnimationTrack,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
@@ -38,6 +38,16 @@ pub(crate) struct KeyframeDraft {
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
+pub(crate) struct StateDraft {
+    pub(crate) revision: i64,
+    pub(crate) sequence: i64,
+    pub(crate) program: i64,
+    pub(crate) duration: f64,
+    pub(crate) easing: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 pub(crate) struct CurveRequest {
     pub(crate) revision: i64,
     pub(crate) sequence: i64,
@@ -64,10 +74,12 @@ pub(crate) fn keyframe(result: DesignAnimationAuthoringResult) -> Result<Value, 
     Ok(json!({
         "samples": result.samples,
         "valueKind": result.value_kind,
-        "patch": result.patch.map(|patch| json!({
-            "start": patch.start, "end": patch.end, "expected": patch.expected, "replacement": patch.replacement,
-        })),
+        "patch": result.patch.map(source_patch),
     }))
+}
+
+pub(crate) fn source_patch(patch: DesignAnimationSourcePatch) -> Value {
+    json!({ "start": patch.start, "end": patch.end, "expected": patch.expected, "replacement": patch.replacement })
 }
 
 pub(crate) fn catalog(catalog: DesignAnimationCatalogMessage) -> Value {
