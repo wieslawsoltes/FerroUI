@@ -16,7 +16,7 @@
 //! recently, and its pages are used again.
 
 use skia_safe::Rect;
-use std::cell::RefCell;
+use std::sync::Mutex;
 
 /// The glyphs of a page.
 const PAGE: usize = 256;
@@ -107,23 +107,32 @@ const REMEMBERED: usize = SIZES;
 const ADMIT_AFTER: u32 = 16;
 
 /// The glyph bounds of a typeface by size (see the module).
+///
+/// The state is under one lock, taken once a glyph run, so that the typeface that holds the cache
+/// stays `Sync` and unwind safe as its public type is; runs are made on one thread, so the lock is
+/// never contended.
 #[derive(Default)]
 pub(crate) struct GlyphBoundsCache {
-    /// The sizes, the one used last first.
-    sizes: RefCell<Vec<Size>>,
-    /// The sizes missed lately while all sizes were kept (`REMEMBERED`): their bits and the lookup
-    /// of their first miss; a size of 0 is free (the bits of the size 0.0, which no glyph run has).
-    remembered: RefCell<[(u32, u32); REMEMBERED]>,
-    /// The lookups made, wrapping (the clock of `remembered`).
-    lookups: std::cell::Cell<u32>,
+    state: Mutex<State>,
 }
 
-impl GlyphBoundsCache {
+#[derive(Default)]
+struct State {
+    /// The sizes, the one used last first.
+    sizes: Vec<Size>,
+    /// The sizes missed lately while all sizes were kept (`REMEMBERED`): their bits and the lookup
+    /// of their first miss; a size of 0 is free (the bits of the size 0.0, which no glyph run has).
+    remembered: [(u32, u32); REMEMBERED],
+    /// The lookups made, wrapping (the clock of `remembered`).
+    lookups: u32,
+}
+
+impl State {
     /// Whether `size` was first missed at least [`ADMIT_AFTER`] lookups ago while all sizes were
     /// kept (it is forgotten then, as it takes a place); a size missed for the first time is
     /// remembered, in the place of the one remembered longest.
-    fn admits(&self, size: u32, now: u32) -> bool {
-        let mut remembered = self.remembered.borrow_mut();
+    fn admits(&mut self, size: u32, now: u32) -> bool {
+        let remembered = &mut self.remembered;
         if let Some(position) = remembered.iter().position(|(bits, _)| *bits == size) {
             if now.wrapping_sub(remembered[position].1) < ADMIT_AFTER {
                 return false;
@@ -135,7 +144,9 @@ impl GlyphBoundsCache {
         remembered[0] = (size, now);
         false
     }
+}
 
+impl GlyphBoundsCache {
     /// Writes the bounds of `glyphs` at `size` into `bounds`: the kept ones, and for the others
     /// what `measure` writes for them (it is called once, with the glyphs that are not kept and a
     /// buffer of their length, and only when there are such glyphs).
@@ -144,26 +155,28 @@ impl GlyphBoundsCache {
     /// Panics when `bounds` is shorter than `glyphs`.
     pub(crate) fn get(&self, size: f32, glyphs: &[u16], bounds: &mut [Rect], measure: impl FnOnce(&[u16], &mut [Rect])) {
         assert!(bounds.len() >= glyphs.len(), "a bound for every glyph");
-        let now = self.lookups.get().wrapping_add(1);
-        self.lookups.set(now);
-        let mut sizes = self.sizes.borrow_mut();
+        let mut state = self.state.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+        let state = &mut *state;
+        state.lookups = state.lookups.wrapping_add(1);
+        let now = state.lookups;
         let size = size.to_bits();
-        match sizes.iter().position(|entry| entry.size == size) {
+        let found = state.sizes.iter().position(|entry| entry.size == size);
+        match found {
             Some(0) => {}
-            Some(position) => sizes[..=position].rotate_right(1),
-            None if sizes.len() < SIZES => sizes.insert(0, Size { size, pages: Vec::new(), kept: 0 }),
-            None if !self.admits(size, now) => {
+            Some(position) => state.sizes[..=position].rotate_right(1),
+            None if state.sizes.len() < SIZES => state.sizes.insert(0, Size { size, pages: Vec::new(), kept: 0 }),
+            None if !state.admits(size, now) => {
                 // Not kept (yet): measured.
                 measure(glyphs, &mut bounds[..glyphs.len()]);
                 return;
             }
             None => {
-                let mut least = sizes.pop().expect("the cache keeps sizes");
+                let mut least = state.sizes.pop().expect("the cache keeps sizes");
                 least.reuse(size);
-                sizes.insert(0, least);
+                state.sizes.insert(0, least);
             }
         }
-        let entry = &mut sizes[0];
+        let entry = &mut state.sizes[0];
 
         let mut missing_count = 0;
         for (glyph, bound) in glyphs.iter().zip(bounds.iter_mut()) {
@@ -210,6 +223,14 @@ mod tests {
                 *bound = Rect::new(0.0, -(*glyph as f32), 1.0, 0.0);
             }
         }
+    }
+
+    /// The typeface that holds the cache keeps the auto traits of its public type (0.5.x API).
+    #[test]
+    fn the_cache_and_the_typeface_keep_their_auto_traits() {
+        fn traits<T: Send + Sync + std::panic::UnwindSafe + std::panic::RefUnwindSafe>() {}
+        traits::<GlyphBoundsCache>();
+        traits::<crate::SkiaTypeface>();
     }
 
     #[test]
