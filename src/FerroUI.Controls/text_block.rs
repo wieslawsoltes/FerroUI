@@ -469,11 +469,7 @@ impl TextBlockImpl for TextBlock {
 
         let max_size = this.get_max_size_from_constraint();
 
-        let text_run_cache = this.text_run_cache.get().unwrap_or_else(|| {
-            let text_run_cache = Rc::new(TextRunCache::new());
-            this.text_run_cache.set(Some(text_run_cache.clone()));
-            text_run_cache
-        });
+        let text_run_cache = this.text_run_cache();
 
         if !this.has_complex_content() {
             // A plain text: the layout the font manager keeps for this text with these
@@ -510,6 +506,78 @@ impl TextBlockImpl for TextBlock {
             Some(text_run_cache),
         ))
     }
+}
+
+/// The default run properties of text blocks that are kept to be shared, by the last use.
+const SHARED_RUN_PROPERTIES: usize = 8;
+
+ferroui_base::ferro_thread_local! {
+    /// The default run properties made last that hold nothing but values: a typeface, a size and
+    /// a foreground brush.
+    static RUN_PROPERTIES: RefCell<Vec<Rc<dyn TextRunProperties>>> = const { RefCell::new(Vec::new()) };
+}
+
+/// The default run properties of a text block: the ones another text block made for the same
+/// typeface, size and foreground brush, where there are such, else new ones.
+///
+/// The text blocks of a screen give their texts a few fonts, sizes and brushes, and each made
+/// an object of its own for them (docs/porting/desktop-performance.md, the run properties of
+/// #811). The properties are immutable, so equal ones can be one object, which also finds its
+/// glyph typeface once. Only properties that hold values are shared: a foreground is the same
+/// brush (a brush can change, and the text of each block follows its own), and properties with
+/// decorations or font features (collections) are made for their block alone. The last
+/// [`SHARED_RUN_PROPERTIES`] are kept on the thread; a new one takes the place at the end.
+fn shared_run_properties(
+    typeface: Typeface,
+    font_size: f64,
+    text_decorations: Option<TextDecorationCollection>,
+    foreground: Option<Rc<dyn IBrush>>,
+    font_features: Option<FontFeatureCollection>,
+) -> Rc<dyn TextRunProperties> {
+    let shareable = text_decorations.is_none() && font_features.is_none();
+    let same_brush = |kept: Option<&Rc<dyn IBrush>>| match (kept, foreground.as_ref()) {
+        (None, None) => true,
+        (Some(kept), Some(brush)) => Rc::ptr_eq(kept, brush),
+        _ => false,
+    };
+    if shareable {
+        let found = RUN_PROPERTIES.try_with(|kept| {
+            let mut kept = kept.borrow_mut();
+            let index = kept.iter().position(|properties| {
+                properties.font_rendering_em_size() == font_size
+                    && same_brush(properties.foreground_brush())
+                    && *properties.typeface() == typeface
+            })?;
+            // Towards the front, so that the properties in use stay.
+            if index > 0 {
+                kept.swap(index, index - 1);
+            }
+            Some(kept[index.saturating_sub(1)].clone())
+        });
+        if let Ok(Some(found)) = found {
+            return found;
+        }
+    }
+    let properties: Rc<dyn TextRunProperties> = Rc::new(GenericTextRunProperties::with_all(
+        typeface,
+        font_size,
+        text_decorations,
+        foreground,
+        None,
+        Default::default(),
+        None,
+        font_features,
+    ));
+    if shareable {
+        let _ = RUN_PROPERTIES.try_with(|kept| {
+            let mut kept = kept.borrow_mut();
+            if kept.len() == SHARED_RUN_PROPERTIES {
+                kept.pop();
+            }
+            kept.push(properties.clone());
+        });
+    }
+    properties
 }
 
 /// The handle through which the inlines of a text block reach it.
@@ -1262,6 +1330,17 @@ impl TextBlock {
         self.set_current_value(Self::text_property(), None);
     }
 
+    /// The run cache of the layouts of the block, made with the first layout: the shaped runs of
+    /// its text are kept between layouts at other widths and dropped when what they were shaped
+    /// from changes (`invalidate_text_layout`).
+    pub(crate) fn text_run_cache(&self) -> Rc<TextRunCache> {
+        self.text_run_cache.get().unwrap_or_else(|| {
+            let text_run_cache = Rc::new(TextRunCache::new());
+            self.text_run_cache.set(Some(text_run_cache.clone()));
+            text_run_cache
+        })
+    }
+
     /// The default run properties of the layouts: the ones kept since a property they are made of
     /// last changed, else new ones.
     pub(crate) fn default_run_properties(&self) -> Rc<dyn TextRunProperties> {
@@ -1270,16 +1349,13 @@ impl TextBlock {
         }
         let typeface =
             Typeface::with_style(self.font_family(), self.font_style(), self.font_weight(), self.font_stretch());
-        let properties: Rc<dyn TextRunProperties> = Rc::new(GenericTextRunProperties::with_all(
+        let properties = shared_run_properties(
             typeface,
             self.font_size(),
             self.text_decorations(),
             self.foreground(),
-            None,
-            Default::default(),
-            None,
             Typography::effective_font_features(self),
-        ));
+        );
         self.run_properties.set(Some(properties.clone()));
         properties
     }

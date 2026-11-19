@@ -131,6 +131,8 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <crate::SwipeMode as MarkupTyped>::MARKUP,
     <crate::SwipeBehaviorOnInvoked as MarkupTyped>::MARKUP,
     <crate::SwipeItemInvokedEventArgs as MarkupTyped>::MARKUP,
+    // WinUI's EasingMode of the storyboard easing functions (docs/porting/winui-calculator-gaps.md).
+    <crate::animation::EasingMode as MarkupTyped>::MARKUP,
 ];
 
 /// Registers what the untyped value conversions need of the types of this file that
@@ -158,6 +160,7 @@ pub(super) fn register_value_type_table() {
     ValueTypes::register_used::<crate::ZoomMode>();
     ValueTypes::register_used::<crate::SwipeMode>();
     ValueTypes::register_used::<crate::SwipeBehaviorOnInvoked>();
+    ValueTypes::register_used::<crate::animation::EasingMode>();
     ValueTypes::register_used::<InfoBarCloseReason>();
     ValueTypes::register_used::<NumberBoxSpinButtonPlacementMode>();
     ValueTypes::register_used::<NumberBoxValidationMode>();
@@ -222,6 +225,12 @@ impl ferroui_base::data::core::ValueTypeRegistration for crate::SwipeMode {
 impl ferroui_base::data::core::ValueTypeRegistration for crate::SwipeBehaviorOnInvoked {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<crate::SwipeBehaviorOnInvoked>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::animation::EasingMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::animation::EasingMode>();
     }
 }
 

@@ -1,8 +1,8 @@
 //! `{x:Bind}` in the gallery on the compiled x:Bind core (#525, step X7, docs/porting/x-bind.md).
 //!
 //! The native pages whose source binds with x:Bind keep it (`Binding`, `Button`, `Canvas`,
-//! `ComboBox`, `Grid`, `HyperlinkButton`, `InfoBar`, `PipsPager`, `Popup`, `ProgressRing`,
-//! `RatingControl`, `RepeatButton`, `RichTextBlock`, `Slider`, `Spacing`, `SplitView`,
+//! `ComboBox`, `Grid`, `HyperlinkButton`, `InfoBar`, `Line`, `PipsPager`, `Popup`, `ProgressRing`,
+//! `RatingControl`, `RepeatButton`, `RichTextBlock`, `ScrollViewer`, `Shape`, `Slider`, `Spacing`, `SplitView`,
 //! `StackPanel`, `TextBlock`, `TitleBar`, `ToggleButton`, `ToggleSwitch` and the window of
 //! `TitleBarWindow.xaml`): the run-time loader compiles the paths of the named elements,
 //! `examples::create` initializes the bindings once the page is wired, and the attach of a page
@@ -26,12 +26,15 @@ const X_BIND_PAGES: &[&str] = &[
     "Grid",
     "HyperlinkButton",
     "InfoBar",
+    "Line",
     "PipsPager",
     "Popup",
     "ProgressRing",
     "RatingControl",
     "RepeatButton",
     "RichTextBlock",
+    "ScrollViewer",
+    "Shape",
     "Slider",
     "Spacing",
     "SplitView",
@@ -99,11 +102,11 @@ fn spacing_and_split_view_pages_follow_their_options() {
     assert_eq!(row.spacing(), 20.0);
 
     let root = page("SplitView");
-    let split = child::<SplitView>(&root, 1);
+    let split = root.get_control::<SplitView>("splitView");
     assert!(split.is_pane_open());
-    root.get_control::<ToggleButton>("OpenPane").set_is_checked(Some(false));
+    root.get_control::<ToggleButton>("togglePaneButton").set_is_checked(Some(false));
     assert!(!split.is_pane_open());
-    root.get_control::<ToggleButton>("OpenPane").set_is_checked(Some(true));
+    root.get_control::<ToggleButton>("togglePaneButton").set_is_checked(Some(true));
     assert!(split.is_pane_open());
 }
 

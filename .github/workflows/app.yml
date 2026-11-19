@@ -106,6 +106,18 @@ on:
         description: Deploy the browser site to GitHub Pages from runs of main (not from pull requests).
         type: boolean
         default: true
+      size-report:
+        description: >
+          What the WebAssembly module of the browser site is made of: the browser package is linked
+          a second time with the names of its functions and the link map of wasm-ld, and
+          FerroUI/scripts/browser/wasm-size-report.py attributes it (code by crate and by generic
+          family, with what each row saves with gzip, the largest functions) into the summary of the
+          run; the named module, the map and the report are the artifact `size-report`. The
+          published site is unchanged. Off by default: the second link takes about as long as a
+          rebuild of the package. A workflow of the application passes it on, for example from an
+          input of its own `workflow_dispatch`.
+        type: boolean
+        default: false
 
 env:
   CARGO_TERM_COLOR: always
@@ -275,6 +287,36 @@ jobs:
           retention-days: 7
       - name: Sizes of the module
         run: node FerroUI/scripts/browser/module-sizes.mjs "${{ steps.site.outputs.dir }}" | tee -a "$GITHUB_STEP_SUMMARY"
+      # The same build linked again: only the browser package is compiled again (its arguments
+      # differ), with --profiling-funcs, which keeps the names through wasm-bindgen and wasm-opt and
+      # changes no code. The configuration of the browser target is found as build-browser.sh finds it.
+      - name: What the module is made of (input size-report)
+        if: inputs.size-report
+        env:
+          PACKAGE: ${{ inputs.browser-package }}
+          FEATURES: ${{ inputs.browser-features }}
+        run: |
+          out="$GITHUB_WORKSPACE/target/size-report"
+          mkdir -p "$out"
+          config=()
+          grep -qsF "FerroUI/.cargo/config.toml" .cargo/config.toml || config=(--config FerroUI/.cargo/config.toml)
+          name="${PACKAGE//-/_}"
+          cargo rustc --locked --profile browser --target wasm32-unknown-emscripten "${config[@]}" \
+            -p "$PACKAGE" --bin "$PACKAGE" ${FEATURES:+--features "$FEATURES"} \
+            -- -C link-arg=--profiling-funcs "-Clink-arg=-Wl,--Map=$out/$name.map"
+          cp "${CARGO_TARGET_DIR:-target}/wasm32-unknown-emscripten/browser/$name.wasm" "$out/$name.named.wasm"
+          # llvm-cxxfilt of the Emscripten SDK demangles the names.
+          PATH="$EMSDK/upstream/bin:$PATH" python3 -I FerroUI/scripts/browser/wasm-size-report.py \
+            "$out/$name.named.wasm" --map "$out/$name.map" --top 40 --functions 40 --data 40 --marginal > "$out/report.md"
+          cat "$out/report.md" >> "$GITHUB_STEP_SUMMARY"
+      - name: Keep what the module is made of
+        if: inputs.size-report
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: size-report
+          path: target/size-report
+          if-no-files-found: error
+          retention-days: 7
       - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
         with:
           path: ${{ steps.site.outputs.dir }}

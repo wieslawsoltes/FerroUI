@@ -200,6 +200,7 @@ fn template_parts_name_classes() {
 /// controls (docs/porting/winui-controls.md).
 const DECLARED_NEXT_TO_THE_TYPE: &[&str] = &[
     "TextLayoutRoundingPlacement",
+    "EasingMode",
     "Symbol",
     "InfoBarSeverity",
     "ZoomMode",

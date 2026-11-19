@@ -884,7 +884,7 @@ pub mod visual_state;
 pub use visual_state::{
     AdaptiveTrigger, StateTrigger, StateTriggerBase, VisualState, VisualStateChangedEventArgs, VisualStateGroup,
     VisualStateGroupCollection, VisualStateManager, VisualStateManagerImpl, VisualStateManagerImplExt,
-    VisualStateManagerVTable,
+    VisualStateManagerVTable, VisualTransition,
 };
 #[cfg(test)]
 mod table_view_column_header_tests;
