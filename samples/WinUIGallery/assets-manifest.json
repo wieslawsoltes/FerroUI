@@ -85,6 +85,14 @@
     {
       "path": "WinUIGallery/Samples/IconElement/IconElementPage.xaml.cs",
       "sha256": "797c34b2d109f3921ff29b4414beb1ab0aaca88516909e72858afd8f69fbe40a"
+    },
+    {
+      "path": "WinUIGallery/Samples/Typography/TypographyPage.xaml",
+      "sha256": "aadabb3354b9aa7068f6a0f6b40981421a7bac56a65f582de2f8f4846d070d2a"
+    },
+    {
+      "path": "WinUIGallery/Samples/Typography/TypographyPage.xaml.cs",
+      "sha256": "7389d98ea7224a54cd5faca80a350afedab965b3f4680c41eedd3475e90fa3a6"
     }
   ],
   "assembly": "WinUIGallery",
@@ -1459,6 +1467,30 @@
       ],
       "source_uris": [
         "ms-appx:///Assets/Design/Geometry.light.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/Design/Typography.dark.png",
+      "path": "samples/WinUIGallery/Assets/Design/Typography.dark.png",
+      "sha256": "7dab99d54bc452d0e44f88c98ec2eb7f554b536c5ec37d067c31f9d8ccf73d75",
+      "size_bytes": 176609,
+      "registered_paths": [
+        "Assets/Design/Typography.dark.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/Design/Typography.dark.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/Design/Typography.light.png",
+      "path": "samples/WinUIGallery/Assets/Design/Typography.light.png",
+      "sha256": "b564653a67b2cd781c474a00903896418b82f8dcbb5956c8b44df0300eb40fe2",
+      "size_bytes": 125473,
+      "registered_paths": [
+        "Assets/Design/Typography.light.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/Design/Typography.light.png"
       ]
     },
     {

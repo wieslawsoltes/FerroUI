@@ -1,7 +1,7 @@
-//! The RadialGradientBrush, IconElement and Spacing pages: the source's examples with their code
-//! behind (`brush_samples.rs`).
+//! The RadialGradientBrush, IconElement, Spacing and Typography pages: the source's examples with
+//! their code behind (`brush_samples.rs`).
 
-use crate::brush_samples::{design_image_uri, is_monochrome, radial_brush};
+use crate::brush_samples::{design_image_uri, is_monochrome, radial_brush, TYPE_RAMP};
 use crate::{examples, tests::start};
 use ferroui_base::media::GradientSpreadMethod;
 use ferroui_base::styling::ThemeVariant;
@@ -84,4 +84,72 @@ fn spacing_page_shows_the_spacing_table_and_the_theme_images() {
     );
     let _ = root.get_control::<Image>("CardsImage");
     let _ = root.get_control::<Image>("DialogImage");
+}
+
+#[test]
+fn typography_page_shows_the_type_ramp_the_theme_image_and_the_tips() {
+    use ferroui_base::interactivity::RoutedEventArgs;
+    use ferroui_controls::{Button, Flyout, SelectableTextBlock};
+    let _application = start();
+    let root = page("Typography");
+    assert!(design_image_uri("Typography", Some(&ThemeVariant::light())).ends_with("Typography.light.png"));
+    assert!(design_image_uri("Typography", None).ends_with("Typography.dark.png"));
+    assert!(root.get_control::<Image>("HeaderImage").source().is_some());
+    // The five tips of ShowTypographyButtonClick1 to 5, the Flyouts of their buttons.
+    for (index, title) in ["Caption", "Body", "Body Strong", "Title", "Display"].into_iter().enumerate() {
+        let button = format!("ShowTypographyButton{}", index + 1);
+        let flyout = root
+            .get_control::<Button>(&button)
+            .flyout()
+            .and_then(|flyout| flyout.cast::<Flyout>())
+            .unwrap_or_else(|| panic!("{button} has the tip"));
+        let content = flyout.content().expect("the tip's content");
+        let text = Control::from_boxed(&content)
+            .and_then(|control| control.cast::<TextBlock>())
+            .expect("the tip's title");
+        assert_eq!(text.text().as_deref(), Some(title));
+    }
+    // The nine rows of the type ramp: the example and its resource name.
+    for (example, resource, _, _) in TYPE_RAMP {
+        assert_eq!(
+            root.get_control::<TextBlock>(&format!("{resource}Example")).text().as_deref(),
+            Some(example)
+        );
+        let names = root
+            .get_logical_descendants()
+            .filter_map(|control| control.cast::<SelectableTextBlock>())
+            .filter(|name| name.text().as_deref() == Some(resource))
+            .count();
+        assert_eq!(names, 1, "{resource}");
+    }
+    // Outside a window there is no clipboard: the copy button says so.
+    root.get_control::<Button>("CopyBodyTextBlockStyle")
+        .raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
+    assert_eq!(
+        root.get_control::<TextBlock>("CopyOutput").text().as_deref(),
+        Some("This window has no clipboard service.")
+    );
+}
+
+#[cfg(feature = "theme")]
+#[test]
+fn typography_examples_take_the_text_styles_of_the_winui_theme() {
+    use ferroui_controls::Window;
+    let _application = crate::tests::start_winui();
+    let root = page("Typography");
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(root.clone())));
+    window.show();
+    window.update_layout();
+    // Each example's style is the ControlTheme of its resource name, found as a dynamic resource
+    // once the page is in the window: the sizes of the type ramp.
+    for ((_, resource, size, _), expected) in TYPE_RAMP
+        .into_iter()
+        .zip([12.0, 14.0, 14.0, 18.0, 18.0, 20.0, 28.0, 40.0, 68.0])
+    {
+        let example = root.get_control::<TextBlock>(&format!("{resource}Example"));
+        assert!(example.theme().is_some(), "{resource}");
+        assert_eq!(example.font_size(), expected, "{resource} is {size}");
+    }
+    window.close();
 }

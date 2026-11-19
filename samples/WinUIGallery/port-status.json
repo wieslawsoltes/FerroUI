@@ -1694,15 +1694,25 @@
       "status": "partial",
       "implementation": [
         "samples/WinUIGallery/Pages/Typography.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/brush_samples.rs",
+        "samples/WinUIGallery/shape_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/brush_samples_tests.rs",
+          "name": "typography_page_shows_the_type_ramp_the_theme_image_and_the_tips"
+        },
+        {
+          "path": "samples/WinUIGallery/brush_samples_tests.rs",
+          "name": "typography_examples_take_the_text_styles_of_the_winui_theme"
         }
       ],
-      "notes": "The WinUI type ramp is expressed with shared TextBlock font sizes and weights. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The source example with the code behind of TypographyPage.xaml.cs and the gallery's TypographyControl in Rust (brush_samples.rs): the introduction with its hyperlink, the header image of the page's theme (the source's Typography.dark.png for the Default theme and Typography.light.png for Light, its ThemeDictionaries), the five tip buttons of ShowTypographyButtonClick1 to 5, and the nine rows of the type ramp: the example in the WinUI theme's text style of its resource name (CaptionTextBlockStyle to DisplayTextBlockStyle, ControlThemes found as dynamic resources), the variable font, the size and line height, and the resource name with CopyToClipboardButton_Click, which puts the name on the window's clipboard (the gallery's CopyButton is a Button with its glyph, its feedback a polite live region). The rows' Grids with padding and corners are Borders, ThemeResource is DynamicResource and the resource names are SelectableTextBlocks (no IsTextSelectionEnabled on TextBlock). FerroUI has no TeachingTip: each tip is the Flyout of its button with the tip's title, which the click opens and closes, so the page is partial. The glyphs need the platform's symbol font.",
       "examples": []
     },
     "Viewbox": {
