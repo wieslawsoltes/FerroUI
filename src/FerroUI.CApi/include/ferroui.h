@@ -162,6 +162,14 @@ void ferro_clear_error(void);
 // only.
 int64_t ferro_subscribe(FerroHandle object, int64_t event, FerroEventFn function, int64_t token);
 
+// [`ferro_subscribe`] to the one dispatcher of the thread
+// ([`ferro_frame_dispatcher`](crate::ferro_frame_dispatcher)): every raise of the event calls it
+// with `tag`, the sender and the argument, as an event bound in a frame does (the event text
+// and number are empty). For a binding with one dispatcher, which then needs no trampoline of
+// its own between the library and its dispatcher: one indirect call per event. Returns a
+// positive subscription ID for [`ferro_unsubscribe`], or a negative status. UI thread only.
+int64_t ferro_subscribe_dispatch(FerroHandle object, int64_t event, int64_t tag);
+
 // [`ferro_subscribe`] with a `void *` in place of the token: `function` is called with
 // `user_data`, and `release` (which may be `NULL`) is called with it once the handler is gone,
 // removed by [`ferro_unsubscribe`] or dropped with its object. If the subscription fails,

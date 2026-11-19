@@ -54,6 +54,7 @@ use crate::{
 use std::cell::{Cell, RefCell};
 use std::collections::{HashMap, VecDeque};
 use std::ffi::{c_char, c_void};
+use std::hash::{BuildHasherDefault, Hasher};
 use std::rc::Rc;
 use std::sync::atomic::{AtomicPtr, Ordering};
 
@@ -84,12 +85,27 @@ pub(crate) const OP_REUSE: u32 = 11;
 // ---- the writer -----------------------------------------------------------------------------
 
 ferroui_base::ferro_thread_local! {
-    /// The frame the scalar writer of this thread writes.
-    static WRITER: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
+    /// The frame the scalar writer of this thread writes, as the 8-byte words of its records
+    /// (little-endian in memory on every host): a record is appended word by word, with no copy
+    /// of a variable length but its text.
+    static WRITER: RefCell<Vec<u64>> = const { RefCell::new(Vec::new()) };
+}
+
+/// The bytes of the words of a frame.
+fn word_bytes(words: &[u64]) -> &[u8] {
+    // SAFETY: the memory of `words` is `8 * words.len()` initialised bytes, and bytes have no
+    // alignment.
+    unsafe { std::slice::from_raw_parts(words.as_ptr().cast::<u8>(), words.len() * 8) }
+}
+
+/// The first word of a record: the operation and the size in bytes.
+#[inline]
+fn header(op: u32, size: usize) -> u64 {
+    (u64::from(op) | ((size as u64) << 32)).to_le()
 }
 
 /// Appends a record: the header, the words, then `tail` padded with zeros to 8 bytes.
-#[inline]
+#[cfg(test)]
 pub(crate) fn write_record(buffer: &mut Vec<u8>, op: u32, words: &[i64], tail: &[u8]) {
     let padding = tail.len().wrapping_neg() & 7;
     let size = 8 + 8 * words.len() + tail.len() + padding;
@@ -103,37 +119,76 @@ pub(crate) fn write_record(buffer: &mut Vec<u8>, op: u32, words: &[i64], tail: &
     buffer.extend_from_slice(&[0; 8][..padding]);
 }
 
-/// A record of `N` words and no tail, written as one block.
+/// The bytes the scalar writer of the calling thread has written since the frame began.
+#[cfg(test)]
+pub(crate) fn writer_bytes() -> Vec<u8> {
+    WRITER.with_borrow(|words| word_bytes(words).to_vec())
+}
+
+/// Appends `tail` padded with zeros to whole words.
+#[inline]
+fn push_tail(buffer: &mut Vec<u64>, tail: &[u8]) {
+    let words = tail.len().div_ceil(8);
+    buffer.reserve(words);
+    let length = buffer.len();
+    // SAFETY: `words` words are reserved after the length; the tail and its zeros fill them all.
+    unsafe {
+        let end = buffer.as_mut_ptr().add(length).cast::<u8>();
+        std::ptr::copy_nonoverlapping(tail.as_ptr(), end, tail.len());
+        std::ptr::write_bytes(end.add(tail.len()), 0, words * 8 - tail.len());
+        buffer.set_len(length + words);
+    }
+}
+
+/// A record of `N` words and no tail.
 #[inline]
 fn write_words<const N: usize>(op: u32, words: [i64; N]) -> FerroStatus {
     guard(crate::FERRO_PANIC, || {
         WRITER.with_borrow_mut(|buffer| {
-            let size = 8 + 8 * N;
-            buffer.reserve(size);
-            buffer.extend_from_slice(&op.to_le_bytes());
-            buffer.extend_from_slice(&(size as u32).to_le_bytes());
+            buffer.reserve(1 + N);
+            buffer.push(header(op, 8 + 8 * N));
             for word in words {
-                buffer.extend_from_slice(&word.to_le_bytes());
+                buffer.push((word as u64).to_le());
             }
         });
         FERRO_OK
     })
 }
 
-fn write(op: u32, words: &[i64], tail: &[u8]) -> FerroStatus {
+/// A record of `N` words and a tail padded to 8 bytes.
+#[inline]
+fn write_tail<const N: usize>(op: u32, words: [i64; N], tail: &[u8]) -> FerroStatus {
     if tail.len() > u32::MAX as usize / 2 {
         return Error::new(FERRO_INVALID_ARGUMENT, "the text is too long for a record").record();
     }
     guard(crate::FERRO_PANIC, || {
-        WRITER.with_borrow_mut(|buffer| write_record(buffer, op, words, tail));
+        let size = 8 + 8 * N + tail.len().div_ceil(8) * 8;
+        WRITER.with_borrow_mut(|buffer| {
+            buffer.reserve(size / 8);
+            buffer.push(header(op, size));
+            for word in words {
+                buffer.push((word as u64).to_le());
+            }
+            push_tail(buffer, tail);
+        });
         FERRO_OK
     })
 }
 
-/// The bytes of a string argument; a negative length means NUL-terminated.
+/// The bytes of a string argument; a negative length means NUL-terminated. Not checked for
+/// UTF-8 here: a commit checks the text of a value it writes (an unchanged value was checked when
+/// it was written), and the key of every element.
 unsafe fn text_bytes<'a>(text: *const c_char, length: i64) -> Result<&'a [u8]> {
-    // SAFETY: forwarded from the caller of the exported function.
-    unsafe { crate::strings::borrowed(text, length) }.map(str::as_bytes)
+    if text.is_null() {
+        return if length == 0 { Ok(&[]) } else { Err(Error::new(crate::FERRO_NULL_POINTER, "the string is NULL")) };
+    }
+    if length < 0 {
+        // SAFETY: the caller passes a NUL-terminated string for a negative length.
+        return Ok(unsafe { std::ffi::CStr::from_ptr(text) }.to_bytes());
+    }
+    let length = usize::try_from(length).map_err(|_| Error::new(FERRO_INVALID_ARGUMENT, "the string is too long"))?;
+    // SAFETY: the caller passes `length` readable bytes.
+    Ok(unsafe { std::slice::from_raw_parts(text.cast::<u8>(), length) })
 }
 
 /// Starts a frame on the calling thread: empties the buffer of the scalar writer. Any thread (the
@@ -159,7 +214,7 @@ pub extern "C" fn ferro_frame_open(type_id: i64, key: i64) -> FerroStatus {
 pub unsafe extern "C" fn ferro_frame_key_str(text: *const c_char, length: i64) -> FerroStatus {
     // SAFETY: the caller passes a string as `ferro_set_str` documents.
     match unsafe { text_bytes(text, length) } {
-        Ok(bytes) => write(OP_KEY_TEXT, &[bytes.len() as i64], bytes),
+        Ok(bytes) => write_tail(OP_KEY_TEXT, [bytes.len() as i64], bytes),
         Err(error) => error.record(),
     }
 }
@@ -176,7 +231,7 @@ pub extern "C" fn ferro_frame_close() -> FerroStatus {
 pub unsafe extern "C" fn ferro_frame_str(property: i64, text: *const c_char, length: i64) -> FerroStatus {
     // SAFETY: the caller passes a string as `ferro_set_str` documents.
     match unsafe { text_bytes(text, length) } {
-        Ok(bytes) => write(OP_TEXT, &[property, bytes.len() as i64], bytes),
+        Ok(bytes) => write_tail(OP_TEXT, [property, bytes.len() as i64], bytes),
         Err(error) => error.record(),
     }
 }
@@ -196,7 +251,7 @@ pub unsafe extern "C" fn ferro_frame_str16(property: i64, text: *const u16, unit
         unsafe { std::slice::from_raw_parts(text, units) }
     };
     let bytes: Vec<u8> = slice.iter().flat_map(|unit| unit.to_le_bytes()).collect();
-    write(OP_TEXT16, &[property, units as i64], &bytes)
+    write_tail(OP_TEXT16, [property, units as i64], &bytes)
 }
 
 /// Sets `property` of the open element from a number, as [`ferro_set_f64`] does. Any thread.
@@ -280,13 +335,12 @@ pub extern "C" fn ferro_frame_reuse(root: FerroHandle, key: i64, version: i64, t
 pub extern "C" fn ferro_frame_commit(root: FerroHandle) -> FerroStatus {
     status(|| {
         thread::check()?;
-        let bytes = WRITER.with_borrow_mut(std::mem::take);
-        // The writer checked the text of every record it wrote.
-        let result = commit(root, &bytes, true);
+        let words = WRITER.with_borrow_mut(std::mem::take);
+        let result = commit(root, word_bytes(&words));
         // The buffer keeps its capacity for the next frame.
         WRITER.with_borrow_mut(|buffer| {
             if buffer.is_empty() {
-                *buffer = bytes;
+                *buffer = words;
                 buffer.clear();
             }
         });
@@ -316,7 +370,7 @@ pub unsafe extern "C" fn ferro_frame_commit_bytes(root: FerroHandle, data: *cons
             // SAFETY: the caller passes `length` readable bytes.
             unsafe { std::slice::from_raw_parts(data, length) }
         };
-        commit(root, bytes, false)
+        commit(root, bytes)
     })
 }
 
@@ -383,9 +437,9 @@ fn header_at(bytes: &[u8], offset: usize) -> (u32, usize) {
 }
 
 impl Index {
-    /// Indexes `bytes`, checking the layout of every record (and the text of every text record
-    /// unless `trusted`: the scalar writer checked it when it wrote it).
-    fn build(&mut self, bytes: &[u8], trusted: bool) -> Result<()> {
+    /// Indexes `bytes`, checking the layout of every record and the text of every key. The text of
+    /// a value is checked when a commit writes it: an unchanged value is not looked at.
+    fn build(&mut self, bytes: &[u8]) -> Result<()> {
         self.entries.clear();
         self.scratch.clear();
         self.stack.clear();
@@ -452,7 +506,7 @@ impl Index {
                     need(1)?;
                     let open = self.open(offset)?;
                     let key = tail(1, word_at(bytes, body))?;
-                    if !trusted && std::str::from_utf8(key).is_err() {
+                    if std::str::from_utf8(key).is_err() {
                         return Err(Error::new(crate::FERRO_INVALID_UTF8, "a key of the frame is not UTF-8"));
                     }
                     self.entries[open as usize].key = KeyRef::Text((body + 8) as u32, key.len() as u32);
@@ -466,18 +520,8 @@ impl Index {
                     need(2)?;
                     let open = self.open(offset)?;
                     let count = word_at(bytes, body + 8);
-                    if op == OP_TEXT {
-                        let text = tail(2, count)?;
-                        if !trusted && std::str::from_utf8(text).is_err() {
-                            return Err(Error::new(crate::FERRO_INVALID_UTF8, "a text of the frame is not UTF-8"));
-                        }
-                    } else {
-                        let length = count.checked_mul(2).ok_or_else(|| malformed("a length too large", offset))?;
-                        let units = tail(2, length)?.chunks_exact(2).map(|pair| u16::from_le_bytes([pair[0], pair[1]]));
-                        if char::decode_utf16(units).any(|unit| unit.is_err()) {
-                            return Err(Error::new(crate::FERRO_INVALID_UTF8, "a text of the frame is not UTF-16"));
-                        }
-                    }
+                    let length = if op == OP_TEXT { Some(count) } else { count.checked_mul(2) };
+                    tail(2, length.ok_or_else(|| malformed("a length too large", offset))?)?;
                     self.attribute(bytes, open, offset, size);
                 }
                 OP_NUMBER | OP_INTEGER | OP_BOOL => {
@@ -640,12 +684,15 @@ enum ValueRef<'a> {
 }
 
 impl ValueRef<'_> {
+    /// The text of a text value: `None` for another value, and for text that is not UTF-8
+    /// (UTF-16 for `Text16`).
     fn text(&self) -> Option<std::borrow::Cow<'_, str>> {
         match self {
-            ValueRef::Text(bytes) => Some(String::from_utf8_lossy(bytes)),
+            ValueRef::Text(bytes) => std::str::from_utf8(bytes).ok().map(std::borrow::Cow::Borrowed),
             ValueRef::Text16(bytes) => {
-                let units = bytes.chunks_exact(2).map(|pair| u16::from_le_bytes([pair[0], pair[1]]));
-                Some(char::decode_utf16(units).map(|unit| unit.unwrap_or('\u{FFFD}')).collect::<String>().into())
+                let units: Vec<u16> =
+                    bytes.chunks_exact(2).map(|pair| u16::from_le_bytes([pair[0], pair[1]])).collect();
+                String::from_utf16(&units).ok().map(std::borrow::Cow::Owned)
             }
             _ => None,
         }
@@ -653,7 +700,9 @@ impl ValueRef<'_> {
 
     fn owned(&self) -> Value {
         match self {
-            ValueRef::Text(_) | ValueRef::Text16(_) => Value::Text(self.text().unwrap_or_default().into_owned()),
+            ValueRef::Text(_) | ValueRef::Text16(_) => {
+                Value::Text(self.text().map(std::borrow::Cow::into_owned).unwrap_or_default())
+            }
             ValueRef::Number(bits) => Value::Number(*bits),
             ValueRef::Integer(value) => Value::Integer(*value),
             ValueRef::Bool(value) => Value::Bool(*value),
@@ -802,7 +851,7 @@ pub(crate) fn decode(bytes: &[u8]) -> Result<Vec<Element>> {
         Element { type_id: entry.type_id, key: frame.owned_key(entry), props, events, children }
     }
     let mut index = Index::default();
-    index.build(bytes, false)?;
+    index.build(bytes)?;
     let frame = Frame { bytes, index: &index };
     Ok(siblings(&frame, index.first).map(|top| element(&frame, top)).collect())
 }
@@ -879,15 +928,38 @@ struct Stored {
     /// The number of tags the subtree uses from its tag base.
     tags: i64,
     bytes: Vec<u8>,
-    /// The commit that last kept or wrote the element.
-    used: u64,
+    /// The number of elements of the retained tree that are memo elements of this key.
+    nodes: u32,
+}
+
+/// The memo elements of a root by key: integer keys the application chose, hashed with one
+/// multiplication (the default hasher costs more than the rest of a reuse).
+type MemoMap = HashMap<i64, Stored, BuildHasherDefault<KeyHasher>>;
+
+#[derive(Default)]
+struct KeyHasher(u64);
+
+impl Hasher for KeyHasher {
+    fn finish(&self) -> u64 {
+        self.0
+    }
+
+    fn write(&mut self, bytes: &[u8]) {
+        for byte in bytes {
+            self.0 = (self.0 ^ u64::from(*byte)).wrapping_mul(0x0100_0000_01b3);
+        }
+    }
+
+    fn write_i64(&mut self, value: i64) {
+        self.0 = (value as u64).wrapping_mul(0x9E37_79B9_7F4A_7C15).rotate_left(26);
+    }
 }
 
 /// The retained tree of a root and the memo elements in it.
 #[derive(Default)]
 struct RootState {
     nodes: Vec<Node>,
-    memo: HashMap<i64, Stored>,
+    memo: MemoMap,
 }
 
 /// The dispatcher of the events bound in frames: one per process, set from any thread (before
@@ -913,8 +985,6 @@ ferroui_base::ferro_thread_local! {
     static RETAINED: RefCell<Vec<(FerroHandle, RootState)>> = const { RefCell::new(Vec::new()) };
     /// The index of the frame being committed, kept for the next commit.
     static INDEX: RefCell<Index> = RefCell::new(Index::default());
-    /// The number of the last commit.
-    static COMMITS: Cell<u64> = const { Cell::new(0) };
     /// Whether a commit is writing values: events raised meanwhile are not dispatched.
     static COMMITTING: Cell<bool> = const { Cell::new(false) };
     /// How many dispatches run: nodes removed inside one are freed once the outermost returns.
@@ -962,15 +1032,13 @@ impl Drop for Committing {
 /// The state of one commit.
 struct Commit<'s> {
     failures: Failures,
-    memo: &'s mut HashMap<i64, Stored>,
-    /// The number of this commit.
-    number: u64,
+    memo: &'s mut MemoMap,
     /// The keys of the memo elements taken out by this commit: their bytes are dropped at its
-    /// end unless the commit kept or wrote an element of the key elsewhere.
+    /// end when no element of the retained tree has the key then.
     dropped: Vec<i64>,
 }
 
-fn commit(root: FerroHandle, bytes: &[u8], trusted: bool) -> Result<()> {
+fn commit(root: FerroHandle, bytes: &[u8]) -> Result<()> {
     if COMMITTING.get() {
         return Err(Error::new(FERRO_INVALID_STATE, "a frame is being committed: commit after it, not inside it"));
     }
@@ -978,7 +1046,7 @@ fn commit(root: FerroHandle, bytes: &[u8], trusted: bool) -> Result<()> {
         handles::get(root)?;
     }
     let mut index = INDEX.with_borrow_mut(std::mem::take);
-    if let Err(error) = index.build(bytes, trusted) {
+    if let Err(error) = index.build(bytes) {
         INDEX.with_borrow_mut(|kept| *kept = index);
         return Err(error);
     }
@@ -989,9 +1057,7 @@ fn commit(root: FerroHandle, bytes: &[u8], trusted: bool) -> Result<()> {
     });
     let first = state.is_none();
     let mut state = state.unwrap_or_default();
-    let number = COMMITS.get() + 1;
-    COMMITS.set(number);
-    let mut commit = Commit { failures: Failures(None), memo: &mut state.memo, number, dropped: Vec::new() };
+    let mut commit = Commit { failures: Failures(None), memo: &mut state.memo, dropped: Vec::new() };
     if first && root != 0 {
         // The handle of the root stays valid for the next commits.
         commit.failures.check(ferro_retain(root));
@@ -999,7 +1065,7 @@ fn commit(root: FerroHandle, bytes: &[u8], trusted: bool) -> Result<()> {
     let frame = Frame { bytes, index: &index };
     reconcile_children(&mut commit, root, &mut state.nodes, &frame, index.first);
     for key in std::mem::take(&mut commit.dropped) {
-        if commit.memo.get(&key).is_some_and(|stored| stored.used != number) {
+        if commit.memo.get(&key).is_some_and(|stored| stored.nodes == 0) {
             commit.memo.remove(&key);
         }
     }
@@ -1033,6 +1099,9 @@ fn reconcile_children(
     frame: &Frame<'_>,
     first: u32,
 ) {
+    if first == NONE && old.is_empty() {
+        return;
+    }
     // The same keys and classes in the same order: matched by position, in place.
     let mut count = 0;
     let mut same = true;
@@ -1124,35 +1193,49 @@ fn reconcile(commit: &mut Commit<'_>, node: &mut Node, frame: &Frame<'_>, index:
             if tag_base != kept_base {
                 move_node_tags(node, tag_base - kept_base);
             }
-            if let Key::Int(key) = node.key {
-                if let Some(stored) = commit.memo.get_mut(&key) {
-                    stored.used = commit.number;
-                }
-            }
             return;
         }
     }
     update(commit, node, frame.attrs(entry));
     reconcile_children(commit, node.handle, &mut node.children, frame, entry.first_child);
+    let counted = node.memo.is_some();
+    if counted && entry.memo.is_none() {
+        if let Key::Int(key) = node.key {
+            uncount(commit, key);
+        }
+    }
     node.memo = entry.memo;
-    store(commit, node, frame, entry);
+    store(commit, node, frame, entry, counted);
 }
 
-/// Keeps the bytes of a memo element with an integer key written in full.
-fn store(commit: &mut Commit<'_>, node: &Node, frame: &Frame<'_>, entry: &Entry) {
+/// Keeps the bytes of a memo element with an integer key written in full, and counts the node
+/// under its key unless it is `counted` already.
+#[inline]
+fn store(commit: &mut Commit<'_>, node: &Node, frame: &Frame<'_>, entry: &Entry, counted: bool) {
     let (Some((version, tag_base)), Key::Int(key)) = (entry.memo, &node.key) else {
         return;
     };
     let bytes = frame.subtree(entry);
     let tags = tags_of(commit, bytes, tag_base);
     let stored =
-        commit.memo.entry(*key).or_insert_with(|| Stored { version, tag_base, tags, bytes: Vec::new(), used: 0 });
+        commit.memo.entry(*key).or_insert_with(|| Stored { version, tag_base, tags, bytes: Vec::new(), nodes: 0 });
     stored.version = version;
     stored.tag_base = tag_base;
     stored.tags = tags;
     stored.bytes.clear();
     stored.bytes.extend_from_slice(bytes);
-    stored.used = commit.number;
+    if !counted {
+        stored.nodes += 1;
+    }
+}
+
+/// One node fewer under the memo key `key`; its bytes are dropped at the end of the commit when
+/// no node has the key then (a reuse later in the same commit may still need them).
+fn uncount(commit: &mut Commit<'_>, key: i64) {
+    if let Some(stored) = commit.memo.get_mut(&key) {
+        stored.nodes = stored.nodes.saturating_sub(1);
+        commit.dropped.push(key);
+    }
 }
 
 /// The number of tags the subtree `bytes` uses from `tag_base`: up to its largest tag, the
@@ -1204,11 +1287,8 @@ fn replay(commit: &mut Commit<'_>, candidate: Option<Node>, entry: &Entry, remov
     let (KeyRef::Int(key), Some((version, tag_base))) = (entry.key, entry.memo) else {
         return candidate;
     };
-    let number = commit.number;
-    let kept = commit.memo.get_mut(&key).filter(|stored| stored.version == version).map(|stored| {
-        stored.used = number;
-        (stored.bytes.clone(), stored.tag_base)
-    });
+    let kept = commit.memo.get(&key).filter(|stored| stored.version == version);
+    let kept = kept.map(|stored| (stored.bytes.clone(), stored.tag_base));
     let Some((mut bytes, kept_base)) = kept else {
         let error =
             Error::new(FERRO_INVALID_STATE, format!("no memo element of the key {key} has the version {version}"));
@@ -1220,7 +1300,7 @@ fn replay(commit: &mut Commit<'_>, candidate: Option<Node>, entry: &Entry, remov
         move_tags(&mut bytes, tag_base - kept_base);
     }
     let mut index = Index::default();
-    if let Err(error) = index.build(&bytes, true) {
+    if let Err(error) = index.build(&bytes) {
         commit.failures.check(error.record());
         return candidate;
     }
@@ -1244,7 +1324,10 @@ fn replay(commit: &mut Commit<'_>, candidate: Option<Node>, entry: &Entry, remov
 fn write_value(handle: FerroHandle, property: i64, value: ValueRef<'_>) -> FerroStatus {
     match value {
         ValueRef::Text(_) | ValueRef::Text16(_) => {
-            let text = value.text().unwrap_or_default();
+            let Some(text) = value.text() else {
+                let unit = if matches!(value, ValueRef::Text(_)) { "UTF-8" } else { "UTF-16" };
+                return Error::new(crate::FERRO_INVALID_UTF8, format!("a text of the frame is not {unit}")).record();
+            };
             // What the object shows already is not written again (the text typed into a box).
             if values::shows_text(handle, property, &text) {
                 return FERRO_OK;
@@ -1294,7 +1377,7 @@ fn create(commit: &mut Commit<'_>, frame: &Frame<'_>, index: u32) -> Option<Node
         children,
         memo: entry.memo,
     };
-    store(commit, &node, frame, entry);
+    store(commit, &node, frame, entry, false);
     Some(node)
 }
 
@@ -1439,16 +1522,16 @@ unsafe extern "C" fn on_event(user_data: *mut c_void, sender: FerroHandle, _arg:
 /// Takes a node removed by a commit out of service: the bytes of the memo elements in it are
 /// dropped at the end of the commit, unless the commit kept their keys elsewhere.
 fn retire(commit: &mut Commit<'_>, node: Node) {
-    fn memo_keys(node: &Node, keys: &mut Vec<i64>) {
+    fn uncount_all(commit: &mut Commit<'_>, node: &Node) {
         if let (Some(_), Key::Int(key)) = (node.memo, &node.key) {
-            keys.push(*key);
+            uncount(commit, *key);
         }
         for child in &node.children {
-            memo_keys(child, keys);
+            uncount_all(commit, child);
         }
     }
     if !commit.memo.is_empty() {
-        memo_keys(&node, &mut commit.dropped);
+        uncount_all(commit, &node);
     }
     free(node);
 }
@@ -1480,6 +1563,21 @@ pub extern "C" fn ferro_frame_dispatcher(function: FerroEventFn) -> FerroStatus 
     let pointer = function.map_or(std::ptr::null_mut(), |function| function as *mut c_void);
     DISPATCHER.store(pointer, Ordering::Release);
     FERRO_OK
+}
+
+/// Calls the dispatcher for an event subscribed with
+/// [`ferro_subscribe_dispatch`](crate::ferro_subscribe_dispatch), on the UI thread: `0` without a
+/// dispatcher.
+#[inline]
+pub(crate) fn dispatch_tag(tag: i64, sender: FerroHandle, arg: i64) -> i64 {
+    let Some(dispatcher) = dispatcher() else {
+        return 0;
+    };
+    set_event_text("");
+    EVENT_NUMBER.set(0.0);
+    let _dispatching = Dispatching::start();
+    // SAFETY: the dispatcher is a function of the documented signature.
+    unsafe { dispatcher(tag, sender, arg) }
 }
 
 /// Calls the dispatcher of the thread ([`ferro_frame_dispatcher`]) with `tag`, `sender` and `arg`

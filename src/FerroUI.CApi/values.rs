@@ -26,7 +26,7 @@ use ferroui_base::{BoxedValue, FerroObject, FerroProperty, PropertyValue, Ref};
 use ferroui_controls::Control;
 use std::any::TypeId;
 use std::cell::RefCell;
-use std::ffi::{c_char, CString};
+use std::ffi::c_char;
 use std::rc::Rc;
 
 /// The object of `object` and what `property` is on its class: the start of every value call.
@@ -469,8 +469,30 @@ pub unsafe extern "C" fn ferro_get_str(
 }
 
 ferroui_base::ferro_thread_local! {
-    /// The text the last `ferro_get_cstr` of the thread returned.
-    static LAST_TEXT: RefCell<CString> = RefCell::new(CString::default());
+    /// The text the last `ferro_get_cstr` of the thread returned, with its NUL, in a buffer kept
+    /// from one call to the next.
+    static LAST_TEXT: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
+}
+
+/// Appends the text of `property` of `object` (see [`text_of`]) to `out`: a text property is
+/// read in place, with no copy of its text but this one.
+fn append_text(object: &Ref<FerroObject>, property: Property, out: &mut Vec<u8>) -> Result<()> {
+    if let Property::Registered(registered) = property {
+        if registered.property_type() == TypeId::of::<Option<String>>() {
+            if let Some(styled) = registered.as_styled::<Option<String>>() {
+                object.with_value(styled, |text| out.extend_from_slice(text.as_deref().unwrap_or_default().as_bytes()));
+                return Ok(());
+            }
+        }
+        if registered.property_type() == TypeId::of::<String>() {
+            if let Some(styled) = registered.as_styled::<String>() {
+                object.with_value(styled, |text| out.extend_from_slice(text.as_bytes()));
+                return Ok(());
+            }
+        }
+    }
+    out.extend_from_slice(text_of(object, property)?.as_bytes());
+    Ok(())
 }
 
 /// Reads the text of `property` of `object` (see [`ferro_set_str`]) and returns it as a
@@ -483,12 +505,15 @@ pub extern "C" fn ferro_get_cstr(object: FerroHandle, property: i64) -> *const c
     let mut pointer = std::ptr::null();
     let code = status(|| {
         let (object, property) = target(object, property)?;
-        let text = CString::new(text_of(&object, property)?)
-            .map_err(|_| Error::new(FERRO_INVALID_VALUE, "the text has a NUL inside"))?;
         pointer = LAST_TEXT.with_borrow_mut(|last| {
-            *last = text;
-            last.as_ptr()
-        });
+            last.clear();
+            append_text(&object, property, last)?;
+            if last.contains(&0) {
+                return Err(Error::new(FERRO_INVALID_VALUE, "the text has a NUL inside"));
+            }
+            last.push(0);
+            Ok(last.as_ptr().cast::<c_char>())
+        })?;
         Ok(())
     });
     if code == crate::FERRO_OK {

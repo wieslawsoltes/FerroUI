@@ -2,7 +2,9 @@
 //! dispatcher of message tags, and the stable IDs of the API model.
 
 use super::support::*;
-use crate::frame::{decode, write_record, Key, Value, OP_CLOSE, OP_NUMBER, OP_ON, OP_OPEN, OP_TEXT};
+use crate::frame::{
+    decode, write_record, writer_bytes, Key, Value, OP_CLOSE, OP_KEY_TEXT, OP_MEMO, OP_NUMBER, OP_ON, OP_OPEN, OP_TEXT,
+};
 use crate::*;
 use std::sync::Mutex;
 
@@ -67,6 +69,27 @@ fn records_have_the_layout_of_the_model() {
     assert_eq!((element.type_id, &element.key), (3, &Key::Int(9)));
     assert_eq!(element.props, vec![(5, Value::Text("abc".into())), (6, Value::Number(2.5f64.to_bits()))]);
     assert_eq!(element.events, vec![(4, 11, 5)]);
+}
+
+#[test]
+fn the_writer_writes_the_records_of_the_layout() {
+    let mut bytes = Vec::new();
+    write_record(&mut bytes, OP_OPEN, &[3, 9], &[]);
+    write_record(&mut bytes, OP_MEMO, &[12, 4], &[]);
+    write_record(&mut bytes, OP_TEXT, &[5, 9], b"the label");
+    write_record(&mut bytes, OP_NUMBER, &[6, 2.5f64.to_bits() as i64], &[]);
+    write_record(&mut bytes, OP_ON, &[4, 11, 5], &[]);
+    write_record(&mut bytes, OP_CLOSE, &[], &[]);
+    assert_eq!(ferro_frame_begin(), FERRO_OK);
+    assert_eq!(ferro_frame_open(3, 9), FERRO_OK);
+    assert_eq!(ferro_frame_memo(12, 4), FERRO_OK);
+    // SAFETY: a NUL-terminated literal.
+    assert_eq!(unsafe { ferro_frame_str(5, c"the label".as_ptr(), -1) }, FERRO_OK);
+    assert_eq!(ferro_frame_f64(6, 2.5), FERRO_OK);
+    assert_eq!(ferro_frame_on(4, 11, 5), FERRO_OK);
+    assert_eq!(ferro_frame_close(), FERRO_OK);
+    assert_eq!(writer_bytes(), bytes);
+    assert_eq!(ferro_frame_begin(), FERRO_OK);
 }
 
 #[test]
@@ -492,5 +515,54 @@ fn a_reused_element_can_move_to_another_parent() {
         assert_eq!(ferro_remove_child(second, child), FERRO_OK, "{}", last_error());
         assert_eq!(ferro_frame_clear(root), FERRO_OK);
         assert_eq!(ferro_release(root), FERRO_OK);
+    });
+}
+
+#[test]
+fn a_text_that_is_not_utf8_fails_its_write_and_a_key_the_frame() {
+    ui(|| {
+        let root = create("Border");
+        let mut bytes = Vec::new();
+        write_record(&mut bytes, OP_OPEN, &[type_id("StackPanel"), 0], &[]);
+        write_record(&mut bytes, OP_OPEN, &[type_id("TextBlock"), 1], &[]);
+        write_record(&mut bytes, OP_TEXT, &[property_id("Text"), 2], &[0xff, 0xfe]);
+        write_record(&mut bytes, OP_CLOSE, &[], &[]);
+        write_record(&mut bytes, OP_OPEN, &[type_id("TextBlock"), 2], &[]);
+        write_record(&mut bytes, OP_TEXT, &[property_id("Text"), 2], b"ok");
+        write_record(&mut bytes, OP_CLOSE, &[], &[]);
+        write_record(&mut bytes, OP_CLOSE, &[], &[]);
+        // SAFETY: the pointer and the length of a vector.
+        let committed = unsafe { ferro_frame_commit_bytes(root, bytes.as_ptr(), bytes.len() as i64) };
+        assert_eq!(committed, FERRO_INVALID_UTF8);
+        assert_eq!(get_str(find(root, 2), "Text").as_deref(), Ok("ok"), "the rest of the frame is committed");
+        let mut keyed = Vec::new();
+        write_record(&mut keyed, OP_OPEN, &[type_id("TextBlock"), 0], &[]);
+        write_record(&mut keyed, OP_KEY_TEXT, &[1], &[0xff]);
+        write_record(&mut keyed, OP_CLOSE, &[], &[]);
+        // SAFETY: the pointer and the length of a vector.
+        let committed = unsafe { ferro_frame_commit_bytes(root, keyed.as_ptr(), keyed.len() as i64) };
+        assert_eq!(committed, FERRO_INVALID_UTF8);
+        assert_eq!(find(root, 2), find(root, 2), "a refused frame changes nothing");
+        assert_ne!(find(root, 2), 0);
+        assert_eq!(ferro_frame_clear(root), FERRO_OK);
+        assert_eq!(ferro_release(root), FERRO_OK);
+    });
+}
+
+#[test]
+fn an_event_subscribed_to_the_dispatcher_calls_it_with_its_tag() {
+    ui(|| {
+        assert_eq!(ferro_frame_dispatcher(Some(dispatcher)), FERRO_OK);
+        dispatched();
+        let button = create("Button");
+        let subscription = ferro_subscribe_dispatch(button, event_id("Click"), 42);
+        assert!(subscription > 0, "{}", last_error());
+        assert_eq!(ferro_raise(button, event_id("Click")), FERRO_OK);
+        assert_eq!(dispatched(), vec![(42, button, 0, String::new())]);
+        assert_eq!(ferro_unsubscribe(subscription), FERRO_OK);
+        assert_eq!(ferro_raise(button, event_id("Click")), FERRO_OK);
+        assert_eq!(dispatched(), vec![]);
+        assert_eq!(ferro_release(button), FERRO_OK);
+        assert_eq!(ferro_frame_dispatcher(None), FERRO_OK);
     });
 }
