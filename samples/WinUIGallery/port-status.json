@@ -159,18 +159,35 @@
       "examples": []
     },
     "Binding": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/Binding.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/binding_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "binding_page_x_bind_mirrors_the_text_boxes_and_converts_the_input"
+        },
+        {
+          "path": "samples/WinUIGallery/binding_samples_tests.rs",
+          "name": "binding_page_code_behind_sets_the_greeting_the_date_and_the_view_model"
+        },
+        {
+          "path": "samples/WinUIGallery/binding_samples_tests.rs",
+          "name": "binding_page_list_shows_the_items_and_the_detail_of_the_selection"
         }
       ],
-      "notes": "The element bindings are the source OneWay x:Bind, compiled by the x:Bind core. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "All seven source examples with the code behind of BindingPage.xaml.cs in Rust (binding_samples.rs): the OneWay and TwoWay x:Bind between the text boxes (UpdateSourceTrigger PropertyChanged), the x:Bind of a text box's text through a converter (emptyStringToVisibilityConverter is StringConverters.IsNotNullOrEmpty, Visibility is IsVisible), and the detail panel's DataContext x:Bind of the list's SelectedItem, all compiled by the x:Bind core. A native page has no x:Class, so the x:Bind of the page's own members is its code behind in Rust: GreetingMessage is set once (OneTime), FormatDate(DatePickerControl.SelectedDate) follows the picker, and ExampleViewModel is the page's DataContext, read with {Binding} over the markup types ExampleViewModel and ListDetailItem (whose values do not change, so they raise no property changes; TargetNullValue as the source's, whose NullString is empty, not null). FerroUI has no ListView: the list is a ListBox. The Headers are composed and AppBarSeparator is CommandBarSeparator.",
       "examples": []
     },
     "Border": {
@@ -1462,18 +1479,23 @@
       "examples": []
     },
     "Templates": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/Templates.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/binding_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/binding_samples_tests.rs",
+          "name": "templates_page_code_template_and_items_panels_follow_the_source"
         }
       ],
-      "notes": "A shared ControlTemplate presents button content through TemplateBinding. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "All four source examples with the code behind of TemplatesPage.xaml.cs in Rust (binding_samples.rs): the TextBox's ControlTemplate with the source's header, bordered box and Edit symbol (FerroUI's TextBox has no Header, so the template's header is the box's Tag, and the source's ContentElement is the PART_ScrollViewer with the PART_TextPresenter of FerroUI's TextBox template), the ComboBox's ItemTemplate DataTemplate, the constructor's DataTemplate created in code (FuncDataTemplate: the E734 glyph and the item's text by a Binding), and LayoutSelector_SelectionChanged between the page's two ItemsPanelTemplates (styles of the list that a class switches). FerroUI has no ListView or WrapGrid: the list is a ListBox and WrapGrid a WrapPanel. The Headers of the ComboBoxes are composed; ScrollView is a ScrollViewer. The glyphs need the platform's symbol font.",
       "examples": []
     },
     "TextBlock": {

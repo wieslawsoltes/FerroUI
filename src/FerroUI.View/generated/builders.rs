@@ -1531,6 +1531,19 @@ pub fn stack_panel() -> El<ferroui_controls::StackPanel> {
     El::new()
 }
 
+pub use ferroui_controls::SwipeControl;
+
+impl ViewClass for ferroui_controls::SwipeControl {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::SwipeControl>::new()
+    }
+}
+
+/// Starts an element of [`SwipeControl`](ferroui_controls::SwipeControl).
+pub fn swipe_control() -> El<ferroui_controls::SwipeControl> {
+    El::new()
+}
+
 pub use ferroui_controls::SymbolIcon;
 
 impl ViewClass for ferroui_controls::SymbolIcon {
@@ -8347,6 +8360,30 @@ pub trait StyledElementProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_base::StyledElement>> StyledElementProps for El<T> {}
 
+/// The properties and routed events of [`SwipeControl`](ferroui_controls::SwipeControl).
+pub trait SwipeControlProps: ElementBuilder {
+    /// Sets [`SwipeControl::left_items_property`](ferroui_controls::SwipeControl::left_items_property).
+    fn left_items<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::SwipeItems>>, M>) -> Self {
+        self.prop(<ferroui_controls::SwipeControl>::left_items_property(), value)
+    }
+
+    /// Sets [`SwipeControl::right_items_property`](ferroui_controls::SwipeControl::right_items_property).
+    fn right_items<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::SwipeItems>>, M>) -> Self {
+        self.prop(<ferroui_controls::SwipeControl>::right_items_property(), value)
+    }
+
+    /// Sets [`SwipeControl::top_items_property`](ferroui_controls::SwipeControl::top_items_property).
+    fn top_items<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::SwipeItems>>, M>) -> Self {
+        self.prop(<ferroui_controls::SwipeControl>::top_items_property(), value)
+    }
+
+    /// Sets [`SwipeControl::bottom_items_property`](ferroui_controls::SwipeControl::bottom_items_property).
+    fn bottom_items<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::SwipeItems>>, M>) -> Self {
+        self.prop(<ferroui_controls::SwipeControl>::bottom_items_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::SwipeControl>> SwipeControlProps for El<T> {}
+
 /// The properties and routed events of [`SwipeGestureRecognizer`](ferroui_base::input::gesture_recognizers::SwipeGestureRecognizer).
 pub trait SwipeGestureRecognizerProps: ElementBuilder {
     /// Sets [`SwipeGestureRecognizer::can_horizontally_swipe_property`](ferroui_base::input::gesture_recognizers::SwipeGestureRecognizer::can_horizontally_swipe_property).
@@ -8375,6 +8412,54 @@ pub trait SwipeGestureRecognizerProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_base::input::gesture_recognizers::SwipeGestureRecognizer>> SwipeGestureRecognizerProps for El<T> {}
+
+/// The properties and routed events of [`SwipeItem`](ferroui_controls::SwipeItem).
+pub trait SwipeItemProps: ElementBuilder {
+    /// Sets [`SwipeItem::text_property`](ferroui_controls::SwipeItem::text_property).
+    fn text<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::SwipeItem>::text_property(), value)
+    }
+
+    /// Sets [`SwipeItem::icon_source_property`](ferroui_controls::SwipeItem::icon_source_property).
+    fn icon_source<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::IconSource>>, M>) -> Self {
+        self.prop(<ferroui_controls::SwipeItem>::icon_source_property(), value)
+    }
+
+    /// Sets [`SwipeItem::background_property`](ferroui_controls::SwipeItem::background_property).
+    fn background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
+        self.prop(<ferroui_controls::SwipeItem>::background_property(), value)
+    }
+
+    /// Sets [`SwipeItem::foreground_property`](ferroui_controls::SwipeItem::foreground_property).
+    fn foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
+        self.prop(<ferroui_controls::SwipeItem>::foreground_property(), value)
+    }
+
+    /// Sets [`SwipeItem::command_property`](ferroui_controls::SwipeItem::command_property).
+    fn command<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::input::ICommand>>, M>) -> Self {
+        self.prop(<ferroui_controls::SwipeItem>::command_property(), value)
+    }
+
+    /// Sets [`SwipeItem::command_parameter_property`](ferroui_controls::SwipeItem::command_parameter_property).
+    fn command_parameter<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
+        self.prop(<ferroui_controls::SwipeItem>::command_parameter_property(), value)
+    }
+
+    /// Sets [`SwipeItem::behavior_on_invoked_property`](ferroui_controls::SwipeItem::behavior_on_invoked_property).
+    fn behavior_on_invoked<M>(self, value: impl IntoProp<ferroui_controls::SwipeBehaviorOnInvoked, M>) -> Self {
+        self.prop(<ferroui_controls::SwipeItem>::behavior_on_invoked_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::SwipeItem>> SwipeItemProps for El<T> {}
+
+/// The properties and routed events of [`SwipeItems`](ferroui_controls::SwipeItems).
+pub trait SwipeItemsProps: ElementBuilder {
+    /// Sets [`SwipeItems::mode_property`](ferroui_controls::SwipeItems::mode_property).
+    fn mode<M>(self, value: impl IntoProp<ferroui_controls::SwipeMode, M>) -> Self {
+        self.prop(<ferroui_controls::SwipeItems>::mode_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::SwipeItems>> SwipeItemsProps for El<T> {}
 
 /// The properties and routed events of [`SymbolIcon`](ferroui_controls::SymbolIcon).
 pub trait SymbolIconProps: ElementBuilder {

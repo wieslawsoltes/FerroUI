@@ -478,6 +478,28 @@ impl IPlatformTypeface for VelloTypeface {
         FontVariationSettings::new(self.variations.iter().copied())
     }
 
+    /// The typeface of the same font data at the position: the axes of `settings` take their
+    /// values, the others the values this typeface was made with. The optical size of a text is
+    /// chosen with it (#859).
+    fn with_variation_settings(&self, settings: &FontVariationSettings) -> Option<Rc<dyn IPlatformTypeface>> {
+        let mut values: Vec<(String, f32)> = self
+            .variations
+            .iter()
+            .filter(|variation| settings.try_get_value(variation.tag).is_none())
+            .chain(settings.variations())
+            .filter_map(|variation| {
+                let tag = String::from_utf8(variation.tag.value().to_be_bytes().to_vec()).ok()?;
+                Some((tag, variation.value as f32))
+            })
+            .collect();
+        values.sort_by(|a, b| a.0.cmp(&b.0));
+        let values: Vec<(&str, f32)> = values.iter().map(|(tag, value)| (tag.as_str(), *value)).collect();
+        let data = &self.face.data;
+        let typeface: Rc<dyn IPlatformTypeface> =
+            VelloTypeface::new(data.data.clone(), data.index, self.font_simulations, &values)?;
+        Some(typeface)
+    }
+
     fn try_get_stream(&self) -> Option<Box<dyn Read>> {
         let bytes = self.face.data.data.data();
 
