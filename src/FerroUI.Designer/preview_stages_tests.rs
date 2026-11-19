@@ -1813,3 +1813,18 @@ fn an_error_of_the_xaml_runtime_in_a_stage_layout_is_its_error_without_unwinding
     assert_eq!(with_runtime_errors("construction", || Ok(3)), Ok(3));
     assert!(!xaml_error_scope::has_error());
 }
+
+#[test]
+fn an_error_the_previewed_code_raises_on_the_dispatcher_fails_the_stage_without_unwinding() {
+    let _scope = ferroui_base::threading::Dispatcher::unit_test_scope();
+    let went_on = Cell::new(false);
+    let result: Result<(), String> = with_runtime_errors("layout", || {
+        // A layout callback of the application that returns its error (#567).
+        ferroui_base::threading::Dispatcher::current_dispatcher()
+            .raise_unhandled_exception("the measure of the control failed");
+        went_on.set(true);
+        Ok(())
+    });
+    assert!(went_on.get());
+    assert_eq!(result, Err("Native preview layout failed: the measure of the control failed".into()));
+}
