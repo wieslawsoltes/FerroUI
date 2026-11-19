@@ -506,10 +506,21 @@ impl TypeInfo {
             T::new_instance().upcast::<FerroObject>()
         }
         let type_ = T::TYPE;
-        if type_.stored_constructor().is_none() {
-            write_registry().constructors.entry(type_ as *const TypeInfo as usize).or_insert(construct::<T>);
-        }
+        Self::register_constructor_of(type_, construct::<T>);
         type_
+    }
+
+    /// Makes `constructor` the default constructor of `type_`, as
+    /// [`register_constructor`](Self::register_constructor) does for a class it
+    /// names statically: for a type made at run time (a class another language
+    /// registers through the C ABI), whose constructor is a function of its
+    /// own. Without the tables of types the type carries no constructor, so
+    /// this is what [`create_instance`](Self::create_instance) finds. A type
+    /// that carries one (with the tables), or one registered before, keeps it.
+    pub fn register_constructor_of(type_: &'static TypeInfo, constructor: fn() -> Ref<FerroObject>) {
+        if type_.stored_constructor().is_none() {
+            write_registry().constructors.entry(type_ as *const TypeInfo as usize).or_insert(constructor);
+        }
     }
 
     /// The default constructor the type carries: the declared one with the
