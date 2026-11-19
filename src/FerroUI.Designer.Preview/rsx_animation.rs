@@ -34,6 +34,8 @@ pub(crate) struct AuthoredRsxFrame {
 }
 
 impl AuthoredRsxFrame {
+    pub(crate) fn source(&self) -> &str { &self.source }
+
     pub(crate) fn projection(&self) -> Result<ferroui_designer_rsx::RsxProjection<'_>, String> {
         self.catalog.project(&self.source, self.invocation.start)
     }

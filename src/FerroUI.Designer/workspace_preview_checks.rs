@@ -62,6 +62,7 @@ impl DesignerWorkspace {
                     let workspace = weak.clone();
                     let close = weak_flyout.clone();
                     let node = finding.node;
+                    let source = finding.source;
                     item.click(move |_, _| {
                         let Some(workspace) = workspace.upgrade() else {
                             return;
@@ -82,8 +83,12 @@ impl DesignerWorkspace {
                         if workspace.view_mode() == WorkspaceViewMode::Design {
                             workspace.set_view_mode(WorkspaceViewMode::Split);
                         }
-                        workspace.reveal_source(node);
                         workspace.refresh(true);
+                        if let Some(span) = source {
+                            workspace.select_source_span(span);
+                        } else {
+                            workspace.reveal_source(node);
+                        }
                     });
                     body.children().add(item.upcast::<Control>());
                 }

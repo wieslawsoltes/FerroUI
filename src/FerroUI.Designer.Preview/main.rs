@@ -16,6 +16,7 @@ mod inspection;
 mod interaction;
 mod inventory;
 mod placement;
+mod preview_checks;
 mod projects;
 mod property_fields;
 mod protocol;

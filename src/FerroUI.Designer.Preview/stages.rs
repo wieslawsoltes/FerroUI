@@ -9,7 +9,7 @@ use base64::{Engine, engine::general_purpose::STANDARD};
 use ferroui_base::{Point, Ref, threading::Dispatcher};
 use ferroui_controls::{Control, SizeToContent, Window, WindowDecorations};
 use ferroui_designer::{
-    PreviewEnvironment, PreviewFinding, PreviewPrototypeElementChoice, PreviewPrototypeManifest,
+    PreviewEnvironment, PreviewPrototypeElementChoice, PreviewPrototypeManifest,
     PreviewStageBoard, PreviewStageConfiguration, PreviewStageId, PreviewStageDetails, PreviewStageInfo, PreviewStageSet, PreviewStageSpec,
     PreviewStageMode, PreviewStageStateOptions,
     PreviewStageStatus, PreviewTheme, capture_preview_stage_png,
@@ -95,14 +95,7 @@ pub(crate) struct StageTarget {
 #[derive(Serialize)]
 pub(crate) struct StageChecks {
     uri: String,
-    findings: Vec<StageFinding>,
-}
-
-#[derive(Serialize)]
-struct StageFinding {
-    #[serde(flatten)]
-    finding: PreviewFinding,
-    range: Option<Range>,
+    findings: Vec<crate::preview_checks::SourceFinding>,
 }
 
 #[derive(Serialize)]
@@ -278,9 +271,9 @@ impl Stages {
         let uri = stage.configuration.source_uri;
         let source = &self.sources.get(&uri).ok_or("Open the stage's source document first")?.authored;
         let document = DesignDocument::parse(source, projects.source(source)?)?;
-        let findings = self.board.preview_checks(target.id)?.into_iter().map(|finding| StageFinding {
-            range: document.node_name_range(finding.node).ok(), finding,
-        }).collect();
+        let findings = self.board.preview_checks(target.id)?;
+        let map = document.rsx.as_ref().filter(|_| !findings.is_empty()).map(|rsx| rsx.mapped_markup().1);
+        let findings = crate::preview_checks::source_findings(findings, &document.xaml, document.source, map.as_ref());
         Ok(StageChecks { uri, findings })
     }
 

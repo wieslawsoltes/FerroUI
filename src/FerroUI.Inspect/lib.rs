@@ -7,6 +7,8 @@
 //! are left to protocols, such as CDP's document node).
 mod frames;
 mod input;
+mod layout_overflow;
+mod layout_values;
 mod logs;
 mod schema;
 mod source;
@@ -32,9 +34,11 @@ use ferroui_controls::automation::peers::{AutomationPeer, ControlAutomationPeer}
 use ferroui_controls::primitives::{AdornerLayer, TemplatedControl};
 use ferroui_controls::{Application, Border, Control, TopLevel};
 use ferroui_markup::markup::parsers::{SelectorGrammar, SelectorParser, SelectorSyntax};
+pub use layout_overflow::MeasuredOverflow;
+pub use layout_values::{LayoutValueFinding, check_layout_values};
 pub use logs::{LogCapture, LogEntry, LogGuard};
 pub use schema::{tools, validate};
-pub use visual_checks::{VisualFinding, check_visual};
+pub use visual_checks::{VisualChecks, VisualFinding, check_visual, check_visual_with_layout};
 use serde_json::{json, Value};
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};

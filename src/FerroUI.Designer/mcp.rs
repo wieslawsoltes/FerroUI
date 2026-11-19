@@ -244,7 +244,7 @@ impl UiToolProvider for DesignerMcp {
             ),
             definition(
                 "designer_preview_checks",
-                "Check the current native preview for missing accessible names, rectangular clipping and low contrast on supported solid text backgrounds. Findings link to authored nodes.",
+                "Check the current native preview for measured overflow, rectangular clipping, ineffective authored layout values, accessible names, and supported text contrast. Findings link to source. Overflow distances are logical pixels.",
                 json!({}),
                 &[],
                 false,

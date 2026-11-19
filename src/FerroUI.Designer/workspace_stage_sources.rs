@@ -112,7 +112,24 @@ impl DesignerWorkspace {
         if !self.preview_stage_source_is_current(id) {
             return Err("Refresh this stage before checking its preview".into());
         }
-        self.preview_stages.board.borrow().preview_checks(id)
+        let stage = self.preview_stage(id).ok_or("The preview stage was removed")?;
+        let uri = stage.configuration.source_uri;
+        let mut findings = self.preview_stages.board.borrow().preview_checks(id)?;
+        let session = self.session.borrow();
+        if session.document_uri() == uri {
+            if let Some(map) = session.rust_map() {
+                for finding in &mut findings {
+                    finding.map_rsx_source(session.document(), map);
+                }
+            }
+        } else if let Some(tab) = self.project.borrow().tabs.values().find(|tab| tab.preview_uri == uri) {
+            if let Some(map) = tab.rust.as_ref().and_then(|rust| rust.map()) {
+                for finding in &mut findings {
+                    finding.map_rsx_source(&tab.document, map);
+                }
+            }
+        }
+        Ok(findings)
     }
 
     /// State groups available to an accepted source and stage configuration.

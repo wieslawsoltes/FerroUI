@@ -1,6 +1,6 @@
 //! Namespace-aware source authoring shared by placement and layout helper transactions.
 use crate::{Result, ToolError, error, require};
-use ferroui_designer_core::{Attribute, Document, Edit, Node, NodeId, NodeKind};
+use ferroui_designer_core::{Attribute, Document, Edit, Node, NodeId, NodeKind, SourceSpan};
 use std::collections::BTreeSet;
 
 pub(crate) fn framework_namespace(namespace: Option<&str>) -> bool {
@@ -42,6 +42,46 @@ pub(crate) fn layout_attribute<'a>(
         format!("{name} is declared more than once through namespace aliases"),
     )?;
     Ok(first)
+}
+
+/// Locate an authored native layout value, including namespace-qualified attached properties.
+pub fn authored_layout_property_span(
+    document: &Document,
+    element: &Node,
+    name: &str,
+) -> Option<SourceSpan> {
+    if let Some(attribute) = layout_attribute(document, element, name).ok()? {
+        return Some(attribute.span);
+    }
+    if name.contains('.') {
+        return element
+            .children
+            .iter()
+            .filter_map(|&id| document.ast().node(id))
+            .find(|node| {
+                node.kind == NodeKind::PropertyElement
+                    && node.local_name() == name
+                    && framework_namespace(node.namespace_uri.as_deref())
+            })
+            .map(|node| node.span);
+    }
+    if element.attributes.iter().any(|attribute| {
+        attribute
+            .name
+            .rsplit_once('.')
+            .is_some_and(|(_, member)| member == name)
+    }) {
+        if let Some(attribute) =
+            crate::component_property_attribute(document, element.id, name).ok()?
+        {
+            return Some(attribute.span);
+        }
+    }
+    let id = crate::component_property_elements(document, element.id, name)
+        .ok()?
+        .into_iter()
+        .next()?;
+    document.ast().node(id).map(|node| node.span)
 }
 pub(crate) fn ensure_layout_literal(document: &Document, node: &Node, name: &str) -> Result<()> {
     if let Some(attribute) = layout_attribute(document, node, name)? {

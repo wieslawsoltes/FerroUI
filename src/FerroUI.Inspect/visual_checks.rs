@@ -1,8 +1,7 @@
-use crate::Inspector;
-use ferroui_base::{Rect, Ref, Visual};
+use crate::{Inspector, MeasuredOverflow, layout_overflow};
+use ferroui_base::{Ref, Visual};
+use ferroui_controls::TextBlock;
 use ferroui_controls::automation::peers::AutomationControlType;
-use ferroui_controls::presenters::ScrollContentPresenter;
-use ferroui_controls::{ScrollViewer, TextBlock};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum VisualFinding {
@@ -33,21 +32,42 @@ impl VisualFinding {
 
 /// Inspect a visible control in the coordinates of a laid-out native artboard.
 pub fn check_visual(visual: &Ref<Visual>, viewport: &Ref<Visual>) -> Vec<VisualFinding> {
-    if !visual.is_effectively_visible() || visual.bounds().is_empty() {
+    let Some(VisualChecks {
+        mut accessibility,
+        overflow,
+    }) = check_visual_with_layout(visual, viewport)
+    else {
         return Vec::new();
+    };
+    if let Some(overflow) = overflow.filter(|issue| issue.clipped) {
+        accessibility.push(VisualFinding::ClippedLayout(overflow.boundary));
+    }
+    accessibility
+}
+
+/// Accessibility and measured layout findings from the same visible visual path.
+pub struct VisualChecks {
+    pub accessibility: Vec<VisualFinding>,
+    pub overflow: Option<MeasuredOverflow>,
+}
+
+pub fn check_visual_with_layout(
+    visual: &Ref<Visual>,
+    viewport: &Ref<Visual>,
+) -> Option<VisualChecks> {
+    if !visual.is_effectively_visible() || visual.bounds().is_empty() {
+        return None;
     }
     let mut ancestry = vec![visual.clone()];
     while ancestry.last() != Some(viewport) {
-        let Some(parent) = ancestry.last().and_then(|entry| entry.visual_parent()) else {
-            return Vec::new();
-        };
+        let parent = ancestry.last()?.visual_parent()?;
         ancestry.push(parent);
     }
     if ancestry
         .iter()
         .any(|entry| entry.is_render_suppressed() || entry.opacity() <= 0.0)
     {
-        return Vec::new();
+        return None;
     }
 
     let mut findings = Vec::new();
@@ -63,18 +83,15 @@ pub fn check_visual(visual: &Ref<Visual>, viewport: &Ref<Visual>) -> Vec<VisualF
             ));
         }
     }
-    let text = visual.cast::<TextBlock>();
-    if (interactive || text.is_some()) && visual != viewport {
-        if let Some(clip) = clipping_ancestor(visual, &ancestry) {
-            findings.push(VisualFinding::ClippedLayout(clip));
-        }
-    }
-    if let Some(text) = text {
+    if let Some(text) = visual.cast::<TextBlock>() {
         if let Some(finding) = crate::text_contrast::check(&text, &ancestry) {
             findings.push(finding);
         }
     }
-    findings
+    Some(VisualChecks {
+        accessibility: findings,
+        overflow: layout_overflow::measure(&ancestry),
+    })
 }
 
 fn needs_name(role: AutomationControlType) -> bool {
@@ -94,32 +111,4 @@ fn needs_name(role: AutomationControlType) -> bool {
             | SplitButton
             | TabItem
     )
-}
-
-fn clipping_ancestor(visual: &Ref<Visual>, ancestry: &[Ref<Visual>]) -> Option<String> {
-    // Scrolling exposes clipped content. A shaped clip or transform needs a scene check.
-    if ancestry.iter().any(|entry| {
-        entry.clip().is_some()
-            || entry.render_transform().is_some()
-            || entry.cast::<ScrollContentPresenter>().is_some()
-            || entry.cast::<ScrollViewer>().is_some()
-    }) {
-        return None;
-    }
-    let viewport = ancestry.last()?;
-    for ancestor in ancestry.iter().skip(1) {
-        if ancestor != viewport && !ancestor.clip_to_bounds() {
-            continue;
-        }
-        let arranged = Inspector::box_model(visual, ancestor).ok()?.border;
-        let clip = Rect::from_size(ancestor.bounds().size());
-        if !clip.is_empty() && !clip.inflate(1.0).contains_rect(arranged) {
-            return Some(if ancestor == viewport {
-                "the preview viewport".into()
-            } else {
-                format!("the {} clip", ancestor.get_type().name())
-            });
-        }
-    }
-    None
 }

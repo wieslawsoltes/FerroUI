@@ -903,7 +903,8 @@ impl PreviewStageBoard {
     pub fn preview_checks(&self, id: PreviewStageId) -> Result<Vec<crate::PreviewFinding>, String> {
         let stage = &self.stages[self.index(id)?];
         let rendered = self.current(stage)?;
-        crate::preview_checks::check_preview(&rendered.document, &rendered.preview, &stage.control.clone().upcast())
+        let viewport = rendered.preview.host.clone().upcast();
+        crate::preview_checks::check_preview(&rendered.document, &rendered.preview, &viewport)
     }
 
     /// Read current authored state groups, including when a stage needs repair.

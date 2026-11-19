@@ -109,6 +109,9 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
     if let Some(selection) = &query.selection {
         select(stage, selection)?;
     }
+    if query.name == "designer_preview_checks" {
+        return crate::preview_checks::query(stage, &query.arguments);
+    }
     if query.name == "designer_wrap_selection" {
         let rsx = stage.authored_rsx.as_ref().map(crate::rsx_animation::AuthoredRsxFrame::projection).transpose()?;
         return stage.sources.run(|| stage.studio.wrap_query(&query.arguments, rsx));

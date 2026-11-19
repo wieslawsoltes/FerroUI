@@ -182,7 +182,7 @@ pub(super) fn tools() -> Vec<Value> {
         ),
         s::tool(
             "designer_preview_stage_checks",
-            "Read source-linked accessibility and clipping findings for a visible, current native stage. Use the model returned by designer_preview_stages.",
+            "Read source-linked layout overflow, ineffective values and accessibility findings from a visible, current native stage. Use the model returned by designer_preview_stages.",
             s::object(json!({"stage":s::id(),"expected_model":bounded_string(16)}), &["stage","expected_model"]), false,
         ),
         s::tool(

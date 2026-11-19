@@ -176,7 +176,7 @@ pub use property_transfer::{
     PropertyPastePreview, PropertyTransferIssue,
 };
 pub use property_transfer_editor::PropertyTransferEditor;
-pub use preview_checks::PreviewFinding;
+pub use preview_checks::{PreviewFinding, PreviewOverflow};
 pub use preview_stage_state_options::PreviewStageStateOptions;
 pub use resource_editor::{
     DefinitionCreationKind, DefinitionEditorCommand, DefinitionPreviewSettings,
