@@ -23,6 +23,22 @@ fn main() {
     // Given by the application with `RUSTFLAGS="--cfg ferro_skia_apple_ganesh"`: the manifest then
     // builds Skia with Ganesh on OpenGL and on Metal for Apple targets instead of Graphite.
     println!("cargo:rustc-check-cfg=cfg(ferro_skia_apple_ganesh)");
+    // The patched skia-bindings of the FerroUI repository says that the Skia it built carries the
+    // Graphite Metal ownership fix (#622; `graphite_metal_ownership.rs`). Cargo gives the value to
+    // the direct dependents of the binding, which this crate is on Apple targets with Graphite.
+    println!("cargo:rustc-check-cfg=cfg(ferro_skia_graphite_ownership_fixed)");
+    if env::var("DEP_SKIA_GRAPHITE_METAL_OWNERSHIP").as_deref() == Ok("fixed") {
+        println!("cargo:rustc-cfg=ferro_skia_graphite_ownership_fixed");
+    } else if env::var("CARGO_CFG_TARGET_VENDOR").as_deref() == Ok("apple")
+        && env::var("CARGO_CFG_FERRO_SKIA_APPLE_GANESH").is_err()
+    {
+        // Shown for a build of a path dependency; cargo keeps the warnings of the build scripts
+        // of registry crates to itself, so the platform also logs it at run time.
+        println!(
+            "cargo:warning=skia-bindings without the FerroUI Graphite Metal ownership fix: Metal \
+             pipelines leak (docs/apps.md, \"The Graphite Metal ownership fix\")"
+        );
+    }
 
     // Keep in step with the target tables of the manifest.
     if env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("emscripten") {

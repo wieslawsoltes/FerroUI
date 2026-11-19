@@ -137,6 +137,7 @@ impl GraphiteGrContext {
     /// Wraps a Graphite context, creating its recorder. Returns `None` when
     /// the recorder cannot be created.
     pub fn new(mut context: graphite::Context) -> Option<Self> {
+        crate::graphite_metal_ownership::report_once();
         let recorder = context.make_recorder(None)?;
         Some(Self {
             state: RefCell::new(Some(GraphiteState {
