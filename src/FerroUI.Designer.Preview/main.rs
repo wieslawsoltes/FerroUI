@@ -117,6 +117,7 @@ fn respond(
                 "canvasFocusOrder": true,
                 "spacingHelpers": true,
                 "selectionWrapping": true,
+                "columnAuthoring": true,
                 "projectInventory": true,
                 "tokenHandoff": true,
                 "designFixtures": true,

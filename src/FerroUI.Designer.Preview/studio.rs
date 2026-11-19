@@ -112,6 +112,9 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
     if query.name == "designer_preview_checks" {
         return crate::preview_checks::query(stage, &query.arguments);
     }
+    if query.name == "designer_columns" && stage.authored_rsx.is_some() {
+        return Ok(json!({"table":null,"reason":"Edit Rust-owned column collections in the authored Rust source."}));
+    }
     if query.name == "designer_wrap_selection" {
         let rsx = stage.authored_rsx.as_ref().map(crate::rsx_animation::AuthoredRsxFrame::projection).transpose()?;
         return stage.sources.run(|| stage.studio.wrap_query(&query.arguments, rsx));
@@ -300,6 +303,7 @@ fn source_action(tool: &str, action: Option<&str>) -> bool {
         | "designer_record_geometry"
         | "designer_binding_edit"
         | "designer_grid_track_edit"
+        | "designer_columns_edit"
         | "designer_spacing_edit"
         | "designer_wrap_selection_edit"
         | "designer_set_event"

@@ -1,0 +1,84 @@
+use super::*;
+use ferroui_base::interactivity::RoutedEventArgs;
+use ferroui_controls::testing::{TestServices, UnitTestApplication};
+use ferroui_controls::{TableView, Window};
+use ferroui_markup_xaml::FromXamlObject;
+
+const SOURCE: &str = include_str!("../../editors/vscode/test/fixtures/ColumnsWorkbench.xaml");
+
+#[test]
+fn studio_column_controls_reorder_the_native_table_and_reject_a_retired_click() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let workspace = DesignerWorkspace::new(SOURCE).unwrap();
+    let window = Window::new();
+    window.set_width(1240.0);
+    window.set_height(840.0);
+    window.set_content(Some(Control::boxed(workspace.control())));
+    window.show();
+    window.update_layout();
+    let session = workspace.session();
+    let table = session
+        .borrow()
+        .document()
+        .ast()
+        .find_name("Portfolio")
+        .unwrap();
+    let status = session
+        .borrow()
+        .document()
+        .ast()
+        .find_name("Status")
+        .unwrap();
+    session.borrow_mut().select([table]);
+    workspace.refresh(true);
+    let anchor = workspace.control().get_control::<Button>("EditColumns");
+    assert!(anchor.is_visible());
+    let flyout = anchor
+        .flyout()
+        .and_then(|flyout| flyout.cast::<Flyout>())
+        .unwrap();
+    flyout.show_at(&anchor);
+    let body =
+        Ref::<Control>::from_xaml_object(&flyout.content().expect("column editor has opened"))
+            .unwrap();
+    let move_later = body
+        .get_logical_descendants()
+        .find(|control| {
+            AutomationProperties::get_name(control).as_deref() == Some("Move column later")
+        })
+        .and_then(|control| control.cast::<Button>())
+        .expect("Move column later button");
+    assert!(move_later.is_enabled());
+    let click = RoutedEventArgs::with_event(Button::click_event());
+    move_later.raise_event(&click);
+    let first_header = || {
+        let view = session
+            .borrow()
+            .preview
+            .visual(table)
+            .unwrap()
+            .cast::<TableView>()
+            .unwrap();
+        view.columns()
+            .get(0)
+            .header()
+            .unwrap()
+            .downcast_ref::<String>()
+            .unwrap()
+            .clone()
+    };
+    assert_eq!(first_header(), "Owner");
+    let reordered = session.borrow().authored_source().to_owned();
+    let revision = session.borrow().document().revision();
+    move_later.raise_event(&RoutedEventArgs::with_event(Button::click_event()));
+    assert_eq!(session.borrow().document().revision(), revision);
+    assert_eq!(session.borrow().authored_source(), reordered);
+    session.borrow_mut().undo().unwrap();
+    assert_eq!(session.borrow().authored_source(), SOURCE);
+    assert_eq!(first_header(), "Account");
+    let grid = session.borrow().authored_columns(status).unwrap().unwrap();
+    assert_eq!(grid.reason, None);
+    assert_eq!(grid.columns.len(), 3);
+    flyout.hide();
+    window.close();
+}

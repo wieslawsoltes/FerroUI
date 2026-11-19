@@ -183,6 +183,7 @@ impl DesignerWorkspace {
         this.connect_property_transfer_commands();
         this.connect_focus_order_commands();
         this.connect_preview_checks();
+        this.connect_columns();
         this.connect_design_time_commands();
         this.refresh(true);
         Ok(this)
@@ -777,6 +778,7 @@ impl DesignerWorkspace {
         self.refresh_selection_tools();
         self.refresh_selection_layout();
         self.refresh_property_transfer_commands();
+        self.refresh_columns_command();
         self.refresh_file_title();
         if changed || generation_changed {
             self.rebuild_outline();
@@ -936,6 +938,8 @@ mod rust_source;
 mod focus_order;
 #[path = "workspace_preview_checks.rs"]
 mod preview_checks;
+#[path = "workspace_columns.rs"]
+mod columns;
 #[path = "inspector_drag.rs"]
 mod inspector_drag;
 #[path = "inspector_controls.rs"]

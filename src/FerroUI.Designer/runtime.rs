@@ -118,6 +118,7 @@ impl RuntimePreview {
     ) -> Result<Self, String> {
         FerroRuntimeXamlLoader::register();
         ferroui_markup_xaml::register_types();
+        ferroui_controls_treedatagrid::register_types();
         for register in &options.register_types {
             register();
         }

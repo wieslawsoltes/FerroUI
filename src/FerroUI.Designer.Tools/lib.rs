@@ -7,6 +7,7 @@ mod grid_tracks;
 pub mod scenario;
 mod layout;
 mod layout_attributes;
+mod table_columns;
 mod layout_helpers;
 mod layout_wrap;
 mod properties;
@@ -38,6 +39,7 @@ pub use layout::{
     LayoutContext, LayoutRegistry, RelativeRelation, ResolvedLayout,
 };
 pub use layout_attributes::{authored_layout_property_span, plan_layout_attributes};
+pub use table_columns::{AuthoredColumn, ColumnChange, ColumnChoice, ColumnField, ColumnFieldKind, ColumnKind, TableColumns, TableKind, nearest_table, plan_column_change, table_columns};
 pub use layout_wrap::{SelectionWrap, WrapKind, plan_selection_wrap};
 pub use layout_helpers::{
     LayoutGuide, LayoutGuideGeometry, LayoutGuideRole, LayoutHandle, LayoutHandleAction,

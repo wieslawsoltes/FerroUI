@@ -44,6 +44,7 @@ mod interaction_session;
 mod layer_state;
 mod layout_helper_renderer;
 mod preview_checks;
+mod column_authoring;
 mod preview_environment;
 mod preview_host;
 mod preview_prototype;

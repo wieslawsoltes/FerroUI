@@ -13,6 +13,7 @@ use ferroui_harfbuzz::HarfBuzzApplicationExtensions;
 use ferroui_headless::{FerroHeadlessPlatformExtensions, FerroHeadlessPlatformOptions};
 use ferroui_inspect::TreeKind;
 use ferroui_markup_xaml::source_overlay::SourceSnapshot;
+use ferroui_markup_xaml::styling::StyleInclude;
 use ferroui_vello::VelloApplicationExtensions;
 use serde::Serialize;
 use std::collections::BTreeMap;
@@ -86,9 +87,17 @@ impl Renderer {
             .use_harfbuzz()
             .setup_without_starting();
         let app = builder.instance().expect("headless app setup");
+        ferroui_controls_treedatagrid::register_types();
         ferroui_themes_winui::register_types();
         app.styles()
             .add(ferroui_themes_winui::WinUITheme::new().as_style());
+        let table_styles = StyleInclude::new(None);
+        table_styles.set_source(Some(
+            "ferres://FerroUI.Controls.TreeDataGrid/Themes/Generic.xaml"
+                .parse()
+                .expect("built-in TreeDataGrid style URI"),
+        ));
+        app.styles().add(table_styles.as_style());
         Self { app, stage: None }
     }
 

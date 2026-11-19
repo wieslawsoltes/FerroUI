@@ -1992,6 +1992,7 @@ dependencies = [
  "base64",
  "ferroui-base",
  "ferroui-controls",
+ "ferroui-controls-treedatagrid",
  "ferroui-designer",
  "ferroui-designer-animation",
  "ferroui-designer-core",
