@@ -71,6 +71,28 @@ Drag a Toolbox entry or an authored control onto a **Canvas**, or drag an active
 
 **Tolerance** is in screen pixels. Increase it to catch more nearby targets, or reduce it for precise placement. Changing zoom preserves the same screen distance. Edits use logical positions and the preview follows the app’s layout rounding. Arrow keys on resize handles use their existing exact steps. The tab retains snapping settings with the current guide set. Moving, inserting, or resizing a control commits one authored edit, including when the Timeline records a supported geometry gesture. [Layout sample](../samples/SelectionWorkflows.xaml)
 
+## Adjust spacing on the canvas
+
+In **Design**, switch to **Select** and choose **Show Spacing Handles** from the arrow-swap icon in the toolbar. Select a layout container or a child. The overlay marks gaps and margins in blue and padding in purple. Each handle identifies its property, owner, and current value. Values use logical pixels at every zoom.
+
+![Measured gap, padding, and margin handles on a selected card with XAML and Outline beside the canvas](../images/vscode-spacing-handles.jpg)
+
+| Select | Handles |
+| --- | --- |
+| StackPanel or ReversibleStackPanel | Spacing between items |
+| WrapPanel or FlexPanel | Item and line gaps for the measured arrangement |
+| Grid or UniformGrid | Measured row and column gaps |
+| A supported container or control, such as a Border | Individual padding sides |
+| One child or siblings with the same layout parent | Individual margin sides for the selected children and the parent’s available gap controls |
+
+Drag a handle along its cursor direction. The draft label shows the proposed value. Release to commit one source edit or press Escape to cancel. To use the keyboard, tab to a handle and use the arrow keys to decrease or increase by 1. Hold Shift for steps of 10 or Ctrl (Command also works on macOS) for steps of 0.1. Press Enter or double-click a handle to enter an exact value.
+
+![Exact spacing entry in logical pixels while the selected layout remains visible](../images/vscode-spacing-exact-value.jpg)
+
+The edit preserves the other sides of the inset and participates in VS Code Undo and Redo. Gaps and padding start at zero. Margins accept negative values. A disabled handle describes the protected binding, expression, layer, or source form. In a mapped RSX view, a supported scalar or four-sided tuple can be adjusted even when a sibling is dynamic. The overlay follows the accepted selection and frame. Turn it off to show the standard resize handles again, or switch to **Interact** to use the view.
+
+Try the StackPanel, Grid, and Border in [LayoutHelpers.xaml](../samples/LayoutHelpers.xaml). [Pointer edit](../images/vscode-spacing-drag.jpg) · [Mapped Rust padding](../images/vscode-rsx-spacing-handles.jpg) · [Studio gestures](../layout-helpers.md#native-input-and-transaction-flow) · [MCP workflow](reference.md#adjust-measured-spacing-with-mcp)
+
 ## Edit values, actions, and resources
 
 | Tool | What to do |
