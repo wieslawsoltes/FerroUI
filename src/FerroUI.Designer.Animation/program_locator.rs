@@ -16,6 +16,19 @@ pub struct AnimationProgramLocator {
 }
 
 impl AnimationProgramLocator {
+    /// A session-local key for a uniquely authored clip. Ambiguous programs should
+    /// use a current-frame identity for view settings.
+    pub fn preview_key(
+        document: &Document,
+        programs: &[AnimationProgram],
+        program: &AnimationProgram,
+    ) -> Option<String> {
+        let key = program.source_key.as_deref();
+        let anchor = key.is_none().then(|| Self::capture(document, program)).flatten();
+        let resolved = Self::resolve(document, programs, key, anchor.as_ref())?;
+        (resolved.id == program.id).then(|| serde_json::json!([key, anchor]).to_string())
+    }
+
     pub fn capture(document: &Document, program: &AnimationProgram) -> Option<Self> {
         let source = SourceAnchor::capture(document, program.id).ok();
         let owner = SourceAnchor::capture(document, program.owner).ok();

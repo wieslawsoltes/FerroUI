@@ -11,6 +11,7 @@ mod keyframe_draft;
 mod keyframe_edits;
 mod keyframe_clipboard;
 mod keyframe_mirror;
+mod preview_markers;
 mod preview_range;
 mod program_edit;
 mod program_locator;
@@ -35,6 +36,7 @@ pub use keyframe_clipboard::{CopiedKeyframeTrack, KeyframeClipboard, KeyframeDes
 pub use preview_range::PreviewRange;
 pub use program_edit::compose_animation_edit;
 pub use program_locator::AnimationProgramLocator;
+pub use preview_markers::{PreviewMarker, PreviewMarkerEdit, PreviewMarkers};
 pub use programs::{
     fragment as animation_fragment, native_fragment, rekey_copied_programs, AnimationCodec,
     AnimationCodecRegistry, AnimationProgram, AnimationProgramIdentity, AnimationPrograms,
