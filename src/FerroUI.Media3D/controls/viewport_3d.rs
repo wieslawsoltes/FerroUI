@@ -1,8 +1,13 @@
 //! WPF's `Viewport3D` (`System.Windows.Controls.Viewport3D`): the control that shows a 3D
 //! scene in the 2D layout.
 
-use crate::{Camera, Scene3DChange, Viewport3DVisual, Visual3DCollection};
-use ferroui_base::input::InputElementImpl;
+use super::viewport_3d_input::Viewport3DInput;
+use crate::ui_element_3d::PointerEvent3D;
+use crate::{Camera, Scene3DChange, UIElement3D, Viewport3DVisual, Visual3DCollection, VisualTreeHelper};
+use ferroui_base::input::{
+    IPointer, InputElementImpl, InputElementImplExt, PointerCaptureLostEventArgs, PointerEventArgs,
+    PointerPressedEventArgs, PointerReleasedEventArgs,
+};
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::DrawingContext;
@@ -11,10 +16,11 @@ use ferroui_base::rendering::scene3d::Scene3DSnapshot;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, FerroObjectImpl,
     FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Rect, Ref, Size, StyledElementImpl,
-    StyledProperty, Visual, VisualImpl,
+    Point, StyledProperty, Visual, VisualImpl,
 };
 use ferroui_controls::{Control, ControlImpl};
 use std::cell::RefCell;
+use std::rc::Rc;
 use std::sync::Arc;
 
 /// WPF's `Viewport3D`: the scene of its `Camera` and `Children` (the visuals of a
@@ -24,11 +30,16 @@ use std::sync::Arc;
 /// (`ClipToBounds` is true, as in WPF), and composes like any element under its transform,
 /// clip, opacity and effects: it records one `DrawScene3D` operation with the snapshot of its
 /// scene. Its desired size is zero unless a size is set, as WPF's.
+///
+/// The 2D hit testing hits it only where one of its models is (its custom hit test is the 3D hit
+/// test of [`VisualTreeHelper::hit_test`]), and it routes the pointer events it receives to the
+/// [`UIElement3D`]s of its scene (see the documentation of `UIElement3D`).
 #[repr(C)]
 pub struct Viewport3D {
     base: Control,
     visual: Ref<Viewport3DVisual>,
     visual_subscription: RefCell<Option<Subscription>>,
+    input: Viewport3DInput,
 }
 
 ferro_class!(Viewport3D: Control);
@@ -42,7 +53,7 @@ ferro_class_info!(Viewport3D {
         ],
     },
 });
-ferro_impl_classes!(Viewport3D: StyledElementImpl, InteractiveImpl, InputElementImpl, ControlImpl);
+ferro_impl_classes!(Viewport3D: StyledElementImpl, InteractiveImpl, ControlImpl);
 
 impl FerroObjectImpl for Viewport3D {
     fn constructed(this: &Self) {
@@ -78,6 +89,43 @@ impl VisualImpl for Viewport3D {
         let scene = this.visual.snapshot();
         context.draw_scene_3d(&scene, Rect::from_size(size));
     }
+
+    /// Hit where a model of the scene is under the point, as WPF's `Viewport3DVisual`.
+    fn custom_hit_test(this: &Self, point: Point) -> Option<bool> {
+        Some(VisualTreeHelper::hit_test(this, point).is_some())
+    }
+}
+
+impl InputElementImpl for Viewport3D {
+    fn on_pointer_entered(this: &Self, e: &PointerEventArgs) {
+        Self::parent_on_pointer_entered(this, e);
+        this.input.route(this, e, None);
+    }
+
+    fn on_pointer_exited(this: &Self, e: &PointerEventArgs) {
+        Self::parent_on_pointer_exited(this, e);
+        this.input.exited(this, e);
+    }
+
+    fn on_pointer_moved(this: &Self, e: &PointerEventArgs) {
+        Self::parent_on_pointer_moved(this, e);
+        this.input.route(this, e, Some(PointerEvent3D::Moved));
+    }
+
+    fn on_pointer_pressed(this: &Self, e: &PointerPressedEventArgs) {
+        Self::parent_on_pointer_pressed(this, e);
+        this.input.route(this, e, Some(PointerEvent3D::Pressed));
+    }
+
+    fn on_pointer_released(this: &Self, e: &PointerReleasedEventArgs) {
+        Self::parent_on_pointer_released(this, e);
+        this.input.route(this, e, Some(PointerEvent3D::Released));
+    }
+
+    fn on_pointer_capture_lost(this: &Self, e: &PointerCaptureLostEventArgs) {
+        Self::parent_on_pointer_capture_lost(this, e);
+        this.input.capture_lost(this, e.pointer());
+    }
 }
 
 ferro_properties! { impl Viewport3D {
@@ -93,7 +141,12 @@ impl Viewport3D {
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
     pub fn construct() -> Self {
-        Self { base: Control::construct(), visual: Viewport3DVisual::new(), visual_subscription: RefCell::new(None) }
+        Self {
+            base: Control::construct(),
+            visual: Viewport3DVisual::new(),
+            visual_subscription: RefCell::new(None),
+            input: Viewport3DInput::default(),
+        }
     }
 
     /// An empty viewport without a camera.
@@ -129,5 +182,18 @@ impl Viewport3D {
     /// Calls `handler` on every change of the scene, until the returned guard is dropped.
     pub fn scene_changed(&self, handler: impl Fn(Scene3DChange) + 'static) -> Subscription {
         self.visual.changed(handler)
+    }
+
+    /// The element of the scene that captures a pointer through this viewport.
+    pub(crate) fn captured_element_3d(&self) -> Option<Ref<UIElement3D>> {
+        self.input.captured_element()
+    }
+
+    pub(crate) fn capture_3d(&self, element: &Ref<UIElement3D>, pointer: &Rc<dyn IPointer>) -> bool {
+        self.input.capture(self, element, pointer)
+    }
+
+    pub(crate) fn release_capture_3d(&self, element: &Ref<UIElement3D>, pointer: &Rc<dyn IPointer>) {
+        self.input.release(self, element, pointer)
     }
 }
