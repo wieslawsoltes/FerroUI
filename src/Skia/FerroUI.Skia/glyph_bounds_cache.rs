@@ -97,31 +97,42 @@ impl Size {
 }
 
 /// The sizes missed while every size was kept, that are remembered: a size takes the place of
-/// another only when it is missed again while remembered, so text whose size keeps changing (an
-/// animated size) is measured by Skia as before instead of replacing the kept sizes every run.
+/// another only when it is missed again while remembered, at least [`ADMIT_AFTER`] lookups after it
+/// was first missed. Text whose size keeps changing (an animated size: a new size for each layout,
+/// new glyphs in each run) is then measured by Skia as before, instead of replacing the kept sizes
+/// and storing bounds nothing reads again; a size that stays is kept from its next layout on.
 const REMEMBERED: usize = SIZES;
+
+/// The lookups between the first miss of a size and the miss that keeps it.
+const ADMIT_AFTER: u32 = 16;
 
 /// The glyph bounds of a typeface by size (see the module).
 #[derive(Default)]
 pub(crate) struct GlyphBoundsCache {
     /// The sizes, the one used last first.
     sizes: RefCell<Vec<Size>>,
-    /// The sizes missed lately while all sizes were kept (`REMEMBERED`), by their bits; 0 is free
-    /// (the bits of the size 0.0, which no glyph run has).
-    remembered: RefCell<[u32; REMEMBERED]>,
+    /// The sizes missed lately while all sizes were kept (`REMEMBERED`): their bits and the lookup
+    /// of their first miss; a size of 0 is free (the bits of the size 0.0, which no glyph run has).
+    remembered: RefCell<[(u32, u32); REMEMBERED]>,
+    /// The lookups made, wrapping (the clock of `remembered`).
+    lookups: std::cell::Cell<u32>,
 }
 
 impl GlyphBoundsCache {
-    /// Whether `size` was missed lately while all sizes were kept (it is forgotten then, as it
-    /// takes a place); otherwise it is remembered, in the place of the one remembered longest.
-    fn remembered_again(&self, size: u32) -> bool {
+    /// Whether `size` was first missed at least [`ADMIT_AFTER`] lookups ago while all sizes were
+    /// kept (it is forgotten then, as it takes a place); a size missed for the first time is
+    /// remembered, in the place of the one remembered longest.
+    fn admits(&self, size: u32, now: u32) -> bool {
         let mut remembered = self.remembered.borrow_mut();
-        if let Some(position) = remembered.iter().position(|bits| *bits == size) {
-            remembered[position] = 0;
+        if let Some(position) = remembered.iter().position(|(bits, _)| *bits == size) {
+            if now.wrapping_sub(remembered[position].1) < ADMIT_AFTER {
+                return false;
+            }
+            remembered[position] = (0, 0);
             return true;
         }
         remembered.rotate_right(1);
-        remembered[0] = size;
+        remembered[0] = (size, now);
         false
     }
 
@@ -133,14 +144,16 @@ impl GlyphBoundsCache {
     /// Panics when `bounds` is shorter than `glyphs`.
     pub(crate) fn get(&self, size: f32, glyphs: &[u16], bounds: &mut [Rect], measure: impl FnOnce(&[u16], &mut [Rect])) {
         assert!(bounds.len() >= glyphs.len(), "a bound for every glyph");
+        let now = self.lookups.get().wrapping_add(1);
+        self.lookups.set(now);
         let mut sizes = self.sizes.borrow_mut();
         let size = size.to_bits();
         match sizes.iter().position(|entry| entry.size == size) {
             Some(0) => {}
             Some(position) => sizes[..=position].rotate_right(1),
             None if sizes.len() < SIZES => sizes.insert(0, Size { size, pages: Vec::new(), kept: 0 }),
-            None if !self.remembered_again(size) => {
-                // Missed for the first time lately: measured, not kept.
+            None if !self.admits(size, now) => {
+                // Not kept (yet): measured.
                 measure(glyphs, &mut bounds[..glyphs.len()]);
                 return;
             }
@@ -185,7 +198,7 @@ impl GlyphBoundsCache {
 
 #[cfg(test)]
 mod tests {
-    use super::{GlyphBoundsCache, PAGE, PAGES_PER_SIZE, SIZES};
+    use super::{GlyphBoundsCache, ADMIT_AFTER, PAGE, PAGES_PER_SIZE, SIZES};
     use skia_safe::Rect;
     use std::cell::Cell;
 
@@ -229,12 +242,17 @@ mod tests {
         }
         // The first size is used again, so the second (11) is the least recently used one.
         cache.get(10.0, &[1], &mut bound, |_, _| panic!("kept"));
-        // A new size missed once is measured and not kept; missed again, it takes a place.
+        // A new size missed once is measured and not kept; missed again right away, still not
+        // kept (a size of one layout); missed again later, it takes a place.
         cache.get(99.0, &[2], &mut bound, measured(&asked));
         assert_eq!(bound[0], Rect::new(0.0, -2.0, 1.0, 0.0));
+        cache.get(99.0, &[2], &mut bound, measured(&asked));
+        for _ in 0..ADMIT_AFTER {
+            cache.get(10.0, &[1], &mut bound, |_, _| panic!("kept"));
+        }
         let before = asked.get();
         cache.get(99.0, &[2], &mut bound, measured(&asked));
-        assert_eq!(asked.get(), before + 1, "the second miss measures and keeps");
+        assert_eq!(asked.get(), before + 1, "the later miss measures and keeps");
         cache.get(99.0, &[2], &mut bound, |_, _| panic!("kept now"));
         cache.get(10.0, &[1], &mut bound, |_, _| panic!("still kept"));
         // 11 gave way: measured again.
