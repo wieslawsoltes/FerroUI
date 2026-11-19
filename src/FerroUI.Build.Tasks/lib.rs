@@ -1019,7 +1019,7 @@ impl Build {
                 });
                 let reported_errors = diagnostics.report(&mut lines, &mut errors);
                 match compiled {
-                    Ok(file) => {
+                    Ok((file, consumed)) => {
                         // Upstream's `XamlLoaderUnreachable`, a warning the filter decides on.
                         for warning in &file.warnings {
                             diagnostics.warning(FerroXamlDiagnosticCodes::XAML_LOADER_UNREACHABLE, class_document, warning, &mut lines, &mut errors);
@@ -1044,7 +1044,10 @@ impl Build {
                             exported_roots.extend(group_roots);
                         }
                         if group.exported {
-                            compiled_documents.extend(class_metadata.documents.iter().filter_map(|document| document_path(&document.uri)));
+                            // Every document the compiler consumed for the class, the ones merged
+                            // into it included, is left out of the raw assets (#850): its content
+                            // is in the compiled markup.
+                            compiled_documents.extend(consumed);
                             metadata.documents.extend(class_metadata.documents);
                             // The unit graph of the theme of the class (#568), for the builds of
                             // the applications that construct it.
@@ -1491,8 +1494,11 @@ fn class_group(
     constructor: Option<ClassConstructor>,
     module_path: &str,
     options: &TransformOptions,
-) -> Result<ferroui_markup_xaml_loader::rust_emitter::ClassFile, ClassGroupError> {
+) -> Result<(ferroui_markup_xaml_loader::rust_emitter::ClassFile, Vec<String>), ClassGroupError> {
     let group = class_document_group(root_uri, documents, class_document).map_err(ClassGroupError::Transform)?;
+    // The documents the compiler consumed for the class (#850): the document of the class and every
+    // document it includes, merged ones too, by their rooted paths.
+    let consumed: Vec<String> = group.iter().filter_map(|(_, _, uri)| uri.as_deref().and_then(document_path)).collect();
     let class_name = class_of_document(&group[0].1)
         .map_err(ClassGroupError::Transform)?
         .ok_or_else(|| ClassGroupError::Transform("the document names no class (`x:Class`)".to_string()))?;
@@ -1501,12 +1507,12 @@ fn class_group(
             "the type models have no type `{class_name}`, which the document names with `x:Class`: the class is not declared in the sources of the crate, or its declaration is not read"
         ))
     })?;
-    generate_class_file_with(host, &ClassGroup { class, documents: &group, constructor, module_path }, options).map_err(|reasons| {
-        match reasons.strip_prefix(CLASS_GROUP_NOT_TRANSFORMED) {
+    generate_class_file_with(host, &ClassGroup { class, documents: &group, constructor, module_path }, options)
+        .map(|file| (file, consumed))
+        .map_err(|reasons| match reasons.strip_prefix(CLASS_GROUP_NOT_TRANSFORMED) {
             Some(_) => ClassGroupError::Transform(reasons),
             None => ClassGroupError::Emit(reasons),
-        }
-    })
+        })
 }
 
 /// Why the file of a class is not generated.

@@ -78,6 +78,21 @@ class CompareTests(unittest.TestCase):
         self.assertFalse(compare.summarize(records)["units_deterministic_per_revision"])
 
 
+    def test_a_new_dependency_of_the_build_crate_is_a_build_only_unit(self):
+        # #850: `ferroui-build` reads the manifest with `toml`, a dependency only build scripts link.
+        toml = {"package": "registry+https://example.invalid/index#toml@1.1.6", "name": "toml", "kind": ["lib"],
+                "features": [], "profile": {"opt_level": "0"}}
+        runtime = {"package": "registry+https://example.invalid/index#other@1.0.0", "name": "other", "kind": ["lib"],
+                   "features": [], "profile": {"opt_level": "0"}}
+        units = UNITS + [toml, runtime]
+        additions = compare.build_only_additions(UNITS, units, {"toml"})
+        self.assertEqual([compare.unit_key(item) for item in additions], [compare.unit_key(toml)])
+        # Another added unit stays a change of the graph.
+        self.assertEqual(compare.without_units(units, additions), UNITS + [runtime])
+        # A unit the reference builds too is never left out.
+        self.assertEqual(compare.build_only_additions(units, units, {"toml"}), [])
+        self.assertEqual(compare.package_name(toml), "toml")
+
 class ScannerTests(unittest.TestCase):
     def test_changed_files(self):
         self.assertEqual(scanner.changed_files({"a": "1", "b": "2"}, {"a": "1", "b": "3", "c": "4"}), ["b", "c"])

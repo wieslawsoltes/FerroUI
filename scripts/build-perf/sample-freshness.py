@@ -25,8 +25,9 @@ import sys
 import tempfile
 import time
 
-from compare import (changed_features, changed_outputs, changed_unit_set, common_units,
-                     generated_outputs, identity, normalized, units, without_features)
+from compare import (BUILD_ONLY_ROOT, build_only_additions, build_only_packages, changed_features,
+                     changed_outputs, changed_unit_set, common_units, generated_outputs, identity,
+                     normalized, unit_key, units, without_features, without_units)
 
 
 FIXTURE_PACKAGE = "sample-freshness-fixture"
@@ -166,6 +167,7 @@ def make_fixture(directory: Path, source: Path, env: dict) -> None:
 def fixture_checks(sources: dict[str, Path], temporary: Path, output: Path, env: dict,
                    jobs: int | None, report: dict, save, accept_output_changes: bool = False) -> None:
     reference_outputs: dict[str, dict] = {}
+    build_only = build_only_packages(sources["candidate"])
     for label, source in sources.items():
         directory = temporary / f"fixture-{label}"
         make_fixture(directory, source, env)
@@ -230,6 +232,13 @@ def fixture_checks(sources: dict[str, Path], temporary: Path, output: Path, env:
                 raise RuntimeError(f"candidate fixture {phase}: unchanged build was unnecessarily rebuilt")
             equivalence = {"generated": record["generated"], "runtime": record["consumer_stdout"],
                            "units": graph}
+            if label == "candidate" and phase in reference_outputs:
+                # Repeat checks above use the full workload. Exclude only the build-only
+                # additions when comparing the two revisions.
+                additions = build_only_additions(reference_outputs[phase]["units"], graph, build_only)
+                if additions:
+                    report.setdefault("fixture_build_only_units", {})[phase] = sorted(unit_key(u) for u in additions)
+                    equivalence["units"] = without_units(graph, additions)
             if label == "baseline":
                 reference_outputs[phase] = equivalence
             elif equivalence != reference_outputs[phase]:
@@ -239,13 +248,13 @@ def fixture_checks(sources: dict[str, Path], temporary: Path, output: Path, env:
                 # The same documented acknowledgement applies to SampleBuild's dependencies.
                 # Each revision repeats its own graph and generated files and every phase checks
                 # the consumer output above.
-                unit_changes = compare_sample_graph(reference["units"], graph, accept_changes=True)
+                unit_changes = compare_sample_graph(reference["units"], equivalence["units"], accept_changes=True)
                 if any(unit_changes.values()):
                     report["fixture_unit_changes"] = unit_changes
                 output_changes = changed_outputs(reference["generated"], equivalence["generated"])
                 if output_changes:
                     report.setdefault("fixture_output_changes", {})[phase] = output_changes
-                feature_changes = changed_features(reference["units"], graph)
+                feature_changes = changed_features(reference["units"], equivalence["units"])
                 if feature_changes:
                     report.setdefault("fixture_feature_changes", {})[phase] = feature_changes
             previous_generated = record["generated"]
@@ -327,6 +336,7 @@ def main() -> int:
                 # Each revision repeats its own first graph and generated output. Acknowledged
                 # dependency changes may change the workload while shared units keep their profiles.
                 references = {}
+                build_only = build_only_packages(sources["candidate"])
                 for label, source in sources.items():
                     target = temporary / f"target-{label}"
                     record = build(source, source, target, output / "graph", label, "populate", package,
@@ -335,9 +345,17 @@ def main() -> int:
                     report["population"].append(record)
                     save()
                     baseline_reference = references["baseline"]
-                    report["graph_unit_changes"] = compare_sample_graph(baseline_reference[0], references[label][0],
+                    # Compare runtime and shared build units. Keep the full workload in
+                    # references so repeats still verify every unit.
+                    compared = references[label][0]
+                    if label == "candidate":
+                        additions = build_only_additions(baseline_reference[0], compared, build_only)
+                        if additions:
+                            report["graph_build_only_units"] = sorted(unit_key(unit) for unit in additions)
+                            compared = without_units(compared, additions)
+                    report["graph_unit_changes"] = compare_sample_graph(baseline_reference[0], compared,
                                                                        args.accept_output_changes)
-                    report["graph_feature_changes"] = changed_features(baseline_reference[0], references[label][0])
+                    report["graph_feature_changes"] = changed_features(baseline_reference[0], compared)
                     if references[label][1] != baseline_reference[1]:
                         if not args.accept_output_changes:
                             raise RuntimeError("Baseline/candidate generated sample files differ")
@@ -415,6 +433,12 @@ def main() -> int:
                      + "".join(f"- {workload}: {action} `{unit}`\n"
                                for workload, changes in (("Sample", unit_changes), ("Fixture", fixture_units))
                                for action, units in changes.items() for unit in units[:50]))
+        build_only_units = report.get("graph_build_only_units", [])
+        if build_only_units:
+            text += (f"\n### Build-only units of `{BUILD_ONLY_ROOT}`\n\n"
+                     f"The candidate also builds {len(build_only_units)} units of dependencies of `{BUILD_ONLY_ROOT}`, "
+                     "which run in build scripts only; they are left out of the comparison:\n\n"
+                     + "".join(f"- `{name}`\n" for name in build_only_units[:50]))
         if args.minimum_speedup:
             text += (f"\nRequested unchanged-build threshold: **{args.minimum_speedup:.2f}×**; "
                      f"passed: **{report['summary']['requested_speedup_gate_passed']}**.\n")

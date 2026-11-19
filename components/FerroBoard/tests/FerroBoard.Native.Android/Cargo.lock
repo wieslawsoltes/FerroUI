@@ -305,6 +305,7 @@ dependencies = [
  "ferroui-markup-xaml-loader",
  "roxmltree",
  "serde_json",
+ "toml",
  "xamlx",
 ]
 
