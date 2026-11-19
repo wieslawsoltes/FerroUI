@@ -87,6 +87,17 @@ part of it; section 7 says what is done and what is next.
    (docs/c-abi.md, section 13), so a binding gains nothing by caching handles or IDs on its
    side.
 
+11. **Signals in shared memory** (docs/c-abi.md, section 14). A binding whose language can
+   read and write memory maps the signal table (`ferro_signal_table`): it writes a bound value
+   with a store and a dirty bit, reads a watched value with a load, and reads the versions or
+   the changed bits to know what changed, with no call. A binding that cannot (Osprey) calls
+   `ferro_signal_set_*` and `ferro_signal_get_*`, one small call each. Reads of values the user
+   changes (the text of a text box, the value of a slider, a selection) go through watched
+   slots; values of a view that change on their own go through `bind` records of frames, so
+   one change is one property write and not a frame. A signal is not a faster setter: a write
+   through the table costs about what a setter call costs; it batches, it can come from any
+   thread, and it updates frames without describing them again.
+
 ## 3. Idiom
 
 1. **Names are words** in the model (`["font", "size"]`). A backend applies its casing:
@@ -124,6 +135,7 @@ retained tree of a root. The layout (also `frame` in the model):
   property, 0 or 1. `on` (7): event, tag, value property. `text16` (8): property, code units,
   UTF-16 padded to 8. `key_text` (9): a text key for the open element. `memo` (10): version,
   tag base of the open element. `reuse` (11): key, version, tag base, in place of an element.
+  `bind` (12): property, signal slot: the property follows the slot with no new frame.
 
 The commit: an element keeps its object while its class and its key stay (without a key, its
 position among the siblings without one); a value is written when it changed since the last
@@ -172,7 +184,8 @@ points, getters with a fallback, both layers of Osprey for every class, selectio
 manifest (each sample builds in one to two seconds), five samples and a benchmark. Then the
 performance work of docs/c-abi.md, section 13: frames proportional to what changed, memo
 elements and reuse records (the `memo(version)` attribute of Osprey), plain getters, events
-subscribed to the dispatcher, and the cheaper calls.
+subscribed to the dispatcher, and the cheaper calls; then signals shared through memory
+(section 14 of docs/c-abi.md), with `signal*` helpers and `bound(attr, signal)` in Osprey.
 
 Next:
 

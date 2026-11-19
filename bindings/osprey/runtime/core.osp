@@ -107,7 +107,7 @@ fn run(registered: int32) -> int = match checkApi() {
     }
 }
 
-// ---- signals (docs/osprey.md, section 8) ------------------------------------------------------
+// ---- signals (docs/osprey.md, section 7) ------------------------------------------------------
 //
 // A signal is a slot of the signal table of the library (docs/c-abi.md, section 14), named by
 // its index like a handle. A property bound to a signal (`signalBind`, or `bound(attr, signal)`

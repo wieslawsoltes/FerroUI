@@ -1,5 +1,5 @@
 // 7GUIs task 2, Temperature Converter, with layer 1 of the generated Osprey bindings of FerroUI
-// and signals (docs/osprey.md, section 8). Each text box is bound to a text signal and watched
+// and signals (docs/osprey.md, section 7). Each text box is bound to a text signal and watched
 // into it: the library writes what the user types into the signal, and writes what the program
 // writes into the signal into the box at the end of the dispatch. The program reads the typed
 // text from the signal, with no call to the box, and converts it into the other signal. A box
