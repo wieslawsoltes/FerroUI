@@ -261,13 +261,14 @@ body { block-size: 100vh; }
     #timeline-program .timeline-keyframe-editor { min-inline-size: 0; overflow: auto; }
 }
 @media (max-width: 779px) {
-    #timeline-program:has(> .timeline-keyframe-editor:not([hidden])) .timeline-grid { flex-grow: 0; }
+    #timeline-program:has(> .timeline-keyframe-editor:not([hidden])) .timeline-grid { flex: 0 1 auto; }
 }
 @media (max-width: 480px) {
     .timeline-program-bar { flex: 1 0 100%; }
+    .timeline-program-bar .tool { inline-size: 22px; }
     #timeline-programs { flex: 1 1 90px; }
     #timeline-time-input { inline-size: 5.5ch; }
-    .timeline-grid { --track-label-width: clamp(94px, 36%, 144px); }
+    .timeline-grid { --track-label-width: clamp(108px, 37%, 144px); }
     .timeline-tools:not(.timeline-view-tools) { padding-inline-start: 0; border: 0; }
 }
 @media (max-width: 270px) {
