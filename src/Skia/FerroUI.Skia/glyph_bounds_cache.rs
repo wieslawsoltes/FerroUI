@@ -96,14 +96,35 @@ impl Size {
     }
 }
 
+/// The sizes missed while every size was kept, that are remembered: a size takes the place of
+/// another only when it is missed again while remembered, so text whose size keeps changing (an
+/// animated size) is measured by Skia as before instead of replacing the kept sizes every run.
+const REMEMBERED: usize = SIZES;
+
 /// The glyph bounds of a typeface by size (see the module).
 #[derive(Default)]
 pub(crate) struct GlyphBoundsCache {
     /// The sizes, the one used last first.
     sizes: RefCell<Vec<Size>>,
+    /// The sizes missed lately while all sizes were kept (`REMEMBERED`), by their bits; 0 is free
+    /// (the bits of the size 0.0, which no glyph run has).
+    remembered: RefCell<[u32; REMEMBERED]>,
 }
 
 impl GlyphBoundsCache {
+    /// Whether `size` was missed lately while all sizes were kept (it is forgotten then, as it
+    /// takes a place); otherwise it is remembered, in the place of the one remembered longest.
+    fn remembered_again(&self, size: u32) -> bool {
+        let mut remembered = self.remembered.borrow_mut();
+        if let Some(position) = remembered.iter().position(|bits| *bits == size) {
+            remembered[position] = 0;
+            return true;
+        }
+        remembered.rotate_right(1);
+        remembered[0] = size;
+        false
+    }
+
     /// Writes the bounds of `glyphs` at `size` into `bounds`: the kept ones, and for the others
     /// what `measure` writes for them (it is called once, with the glyphs that are not kept and a
     /// buffer of their length, and only when there are such glyphs).
@@ -118,6 +139,11 @@ impl GlyphBoundsCache {
             Some(0) => {}
             Some(position) => sizes[..=position].rotate_right(1),
             None if sizes.len() < SIZES => sizes.insert(0, Size { size, pages: Vec::new(), kept: 0 }),
+            None if !self.remembered_again(size) => {
+                // Missed for the first time lately: measured, not kept.
+                measure(glyphs, &mut bounds[..glyphs.len()]);
+                return;
+            }
             None => {
                 let mut least = sizes.pop().expect("the cache keeps sizes");
                 least.reuse(size);
@@ -194,24 +220,50 @@ mod tests {
     }
 
     #[test]
-    fn the_least_recently_used_size_gives_way_and_the_bounds_stay_right() {
+    fn a_new_size_takes_the_place_of_the_least_recently_used_one_when_missed_again() {
         let cache = GlyphBoundsCache::default();
         let asked = Cell::new(0);
         let mut bound = [Rect::default(); 1];
         for size in 0..SIZES {
             cache.get(10.0 + size as f32, &[1], &mut bound, measured(&asked));
         }
-        // The first size is used again, so the second is the least recently used one.
+        // The first size is used again, so the second (11) is the least recently used one.
         cache.get(10.0, &[1], &mut bound, |_, _| panic!("kept"));
+        // A new size missed once is measured and not kept; missed again, it takes a place.
         cache.get(99.0, &[2], &mut bound, measured(&asked));
         assert_eq!(bound[0], Rect::new(0.0, -2.0, 1.0, 0.0));
-        cache.get(10.0, &[1], &mut bound, |_, _| panic!("still kept"));
         let before = asked.get();
+        cache.get(99.0, &[2], &mut bound, measured(&asked));
+        assert_eq!(asked.get(), before + 1, "the second miss measures and keeps");
+        cache.get(99.0, &[2], &mut bound, |_, _| panic!("kept now"));
+        cache.get(10.0, &[1], &mut bound, |_, _| panic!("still kept"));
+        // 11 gave way: measured again.
         cache.get(11.0, &[1], &mut bound, measured(&asked));
-        assert_eq!(asked.get(), before + 1, "the size that gave way is measured again");
-        // A reused size forgets what the size before it kept.
+        assert_eq!(asked.get(), before + 2);
+        // The reused size forgets what the size before it kept.
         cache.get(99.0, &[1], &mut bound, measured(&asked));
         assert_eq!(bound[0], Rect::new(0.0, -1.0, 1.0, 0.0));
+    }
+
+    #[test]
+    fn sizes_that_keep_changing_do_not_replace_the_kept_ones() {
+        let cache = GlyphBoundsCache::default();
+        let asked = Cell::new(0);
+        let mut bound = [Rect::default(); 1];
+        for size in 0..SIZES {
+            cache.get(10.0 + size as f32, &[1], &mut bound, measured(&asked));
+        }
+        // Forty other sizes in turn, twice: each is measured every time and none is kept.
+        for _ in 0..2 {
+            for size in 0..40 {
+                cache.get(50.0 + size as f32, &[3], &mut bound, measured(&asked));
+                assert_eq!(bound[0], Rect::new(0.0, -3.0, 1.0, 0.0));
+            }
+        }
+        assert_eq!(asked.get(), SIZES + 80);
+        for size in 0..SIZES {
+            cache.get(10.0 + size as f32, &[1], &mut bound, |_, _| panic!("the kept sizes stay"));
+        }
     }
 
     #[test]
