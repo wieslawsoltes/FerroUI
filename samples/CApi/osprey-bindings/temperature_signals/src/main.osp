@@ -1,0 +1,142 @@
+// 7GUIs task 2, Temperature Converter, with layer 1 of the generated Osprey bindings of FerroUI
+// and signals (docs/osprey.md, section 8). Each text box is bound to a text signal and watched
+// into it: the library writes what the user types into the signal, and writes what the program
+// writes into the signal into the box at the end of the dispatch. The program reads the typed
+// text from the signal, with no call to the box, and converts it into the other signal. A box
+// the program wrote raises TextChanged too: its text is then what the program wrote last, and
+// nothing is converted back, so the boxes do not echo.
+//
+// With FERROUI_SAMPLE_SCRIPT=1 the program types into the boxes itself and prints the state.
+
+import ferroui::*
+import ferroobjects::*
+
+fn celsiusTag() -> int = 1
+
+fn fahrenheitTag() -> int = 2
+
+type Ui = { celsiusBox: int, fahrenheitBox: int, celsius: int, fahrenheit: int, wroteCelsius: string, wroteFahrenheit: string }
+
+effect State { ui: fn(Ui) -> Unit }
+
+mut ui = Ui { celsiusBox: 0, fahrenheitBox: 0, celsius: 0, fahrenheit: 0, wroteCelsius: "", wroteFahrenheit: "" }
+
+fn setUi(value: Ui) -> Unit = {
+    handle State { ui v => { ui = v } }
+    perform State.ui(value)
+}
+
+// A number as the boxes show it: rounded to a whole number, without a fraction.
+fn shown(value: float) -> string = {
+    let text = toString(round(value))
+    match endsWith(text, ".0") {
+        true => match substring(text, 0, length(text) - 2) {
+            Success { value } => value
+            Error { message } => text
+        }
+        false => text
+    }
+}
+
+// A text box bound to `signal` and watched into it.
+fn signalBox(signal: int, tag: int) -> int =
+    textBox() |> width(80.0) |> signalBind(textPropertyId(), signal) |> signalWatch(textPropertyId(), signal)
+        |> onTextChanged(tag)
+
+fn build() -> int = {
+    let _ = signalsInit(64)
+    let celsius = signalText("")
+    let fahrenheit = signalText("")
+    let celsiusBox = signalBox(celsius, celsiusTag())
+    let fahrenheitBox = signalBox(fahrenheit, fahrenheitTag())
+    let panel = stackPanel() |> orientation(OrientationHorizontal) |> verticalAlignment(VerticalAlignmentTop)
+        |> spacing(8.0) |> margin("16") |> add(celsiusBox) |> add(textBlock() |> text("Celsius ="))
+        |> add(fahrenheitBox) |> add(textBlock() |> text("Fahrenheit"))
+    let _ = window() |> title("TempConv") |> width(420.0) |> height(110.0) |> add(panel) |> showWindow
+    setUi(Ui { celsiusBox: celsiusBox, fahrenheitBox: fahrenheitBox, celsius: celsius, fahrenheit: fahrenheit,
+               wroteCelsius: "", wroteFahrenheit: "" })
+    report("build", failure())
+    match envSet("FERROUI_SAMPLE_SCRIPT") {
+        true => script()
+        false => nothing()
+    }
+    0
+}
+
+fn celsiusChanged() -> int = {
+    let typed = signalReadText(ui.celsius)
+    match typed == ui.wroteCelsius {
+        true => 0
+        false => match parseFloat(typed) {
+            Success { value } => {
+                let converted = shown(value * 9.0 / 5.0 + 32.0)
+                setUi(Ui { celsiusBox: ui.celsiusBox, fahrenheitBox: ui.fahrenheitBox, celsius: ui.celsius,
+                           fahrenheit: ui.fahrenheit, wroteCelsius: ui.wroteCelsius, wroteFahrenheit: converted })
+                signalSetText(ui.fahrenheit, converted)
+                0
+            }
+            Error { message } => 0
+        }
+    }
+}
+
+fn fahrenheitChanged() -> int = {
+    let typed = signalReadText(ui.fahrenheit)
+    match typed == ui.wroteFahrenheit {
+        true => 0
+        false => match parseFloat(typed) {
+            Success { value } => {
+                let converted = shown((value - 32.0) * 5.0 / 9.0)
+                setUi(Ui { celsiusBox: ui.celsiusBox, fahrenheitBox: ui.fahrenheitBox, celsius: ui.celsius,
+                           fahrenheit: ui.fahrenheit, wroteCelsius: converted, wroteFahrenheit: ui.wroteFahrenheit })
+                signalSetText(ui.celsius, converted)
+                0
+            }
+            Error { message } => 0
+        }
+    }
+}
+
+// Types `text` into `box` as the user does: its TextChanged runs at once (`ferro_run_jobs`).
+fn typeInto(box: int, text: string) -> Unit = {
+    let _ = ferro_set_str(object: box, property: textPropertyId(), text: text, length: -1)
+    let _ = ferro_run_jobs()
+}
+
+fn expect(what: string, box: int, signal: int, wanted: string) -> Unit = {
+    let shownText = getText(box)
+    let read = signalReadText(signal)
+    let ok = shownText == wanted && read == wanted
+    print("script: ${what}: '${shownText}' (signal '${read}'): ${ok ? "ok" : "FAILED"}")
+}
+
+// The scenario of the Rust tests (samples/SevenGuis/Model/scenarios.rs).
+fn script() -> Unit = {
+    typeInto(ui.celsiusBox, "100")
+    expect("Celsius 100 gives Fahrenheit", ui.fahrenheitBox, ui.fahrenheit, "212")
+    typeInto(ui.fahrenheitBox, "5")
+    expect("Fahrenheit 5 gives Celsius", ui.celsiusBox, ui.celsius, "-15")
+    typeInto(ui.celsiusBox, "abc")
+    expect("text that is no number converts nothing, Fahrenheit", ui.fahrenheitBox, ui.fahrenheit, "5")
+    typeInto(ui.celsiusBox, "1.5")
+    expect("the box the user typed into keeps its text, Celsius", ui.celsiusBox, ui.celsius, "1.5")
+    expect("Celsius 1.5 gives Fahrenheit", ui.fahrenheitBox, ui.fahrenheit, "35")
+}
+
+fn dispatch(tag: int, sender: int, arg: int) -> int = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    match tag {
+        0 => build()
+        1 => celsiusChanged()
+        _ => fahrenheitChanged()
+    }
+}
+
+fn main() = {
+    let rc = run(ferro_frame_dispatcher(function: dispatch))
+    print("the application returned ${rc}")
+}

@@ -120,6 +120,25 @@
     "doc": "[`ferro_subscribe`] to the one dispatcher of the thread ([`ferro_frame_dispatcher`](crate::ferro_frame_dispatcher)): every raise of the event calls it with `tag`, the sender and the argument, as an event bound in a frame does (the event text and number are empty). For a binding with one dispatcher, which then needs no trampoline of its own between the library and its dispatcher: one indirect call per event. Returns a positive subscription ID for [`ferro_unsubscribe`], or a negative status. UI thread only."
    },
    {
+    "name": "ferro_subscribe_ring",
+    "returns": "i64",
+    "params": [
+     {
+      "name": "object",
+      "type": "handle"
+     },
+     {
+      "name": "event",
+      "type": "i64"
+     },
+     {
+      "name": "tag",
+      "type": "i64"
+     }
+    ],
+    "doc": "[`ferro_subscribe`] to the event ring ([`ferro_event_ring`](crate::ferro_event_ring)): every raise of the event appends a record with `tag` (not negative), the sender and the argument, which the language drains when it wants, with no callback per event. Returns a positive subscription ID for [`ferro_unsubscribe`], or a negative status ([`FERRO_INVALID_STATE`](crate::FERRO_INVALID_STATE) before the ring exists). UI thread only."
+   },
+   {
     "name": "ferro_subscribe_data",
     "returns": "i64",
     "params": [
@@ -315,6 +334,21 @@
      }
     ],
     "doc": "Binds the event `event` ([`ferro_event_id`](crate::ferro_event_id)) of the open element to the message tag `tag`: when it fires, the dispatcher of the thread ([`ferro_frame_dispatcher`]) is called with the tag, the sender, and the value of `value_property` (`0` for none), whose text and number [`ferro_frame_event_text`] and [`ferro_frame_event_f64`] give. Any thread."
+   },
+   {
+    "name": "ferro_frame_bind",
+    "returns": "status",
+    "params": [
+     {
+      "name": "property",
+      "type": "i64"
+     },
+     {
+      "name": "slot",
+      "type": "i64"
+     }
+    ],
+    "doc": "Binds `property` of the open element to the signal slot `slot` (docs/c-abi.md, section 14): the commit binds it ([`ferro_signal_bind`](crate::ferro_signal_bind)) and keeps the binding while the frames keep the record, so a write of the slot updates the property with no new frame. Any thread."
    },
    {
     "name": "ferro_frame_memo",
@@ -546,6 +580,268 @@
      }
     ],
     "doc": "The event ID of the name `name` (`Click`): a routed event of the class of the object or of a base class, or an event its metadata declares; `Button.Click` is the routed event a class owns, for a handler on an ancestor of the objects that raise it. As for [`ferro_property_id`], the ID is the name, checked when it is first used with a class. Any thread."
+   },
+   {
+    "name": "ferro_event_ring",
+    "returns": "const FerroEventRing*",
+    "params": [
+     {
+      "name": "capacity",
+      "type": "i64"
+     }
+    ],
+    "doc": "Creates the event ring of the process with room for `capacity` records (rounded up to a power of two, at most 2^20), or returns the one that exists. `NULL` on a failure. UI thread only."
+   },
+   {
+    "name": "ferro_event_ring_pop",
+    "returns": "i64",
+    "params": [],
+    "doc": "Takes the next record of the ring, for a language that cannot read memory: returns its tag (and keeps its sender and argument for [`ferro_event_ring_sender`] and [`ferro_event_ring_arg`]), or [`FERRO_NOT_FOUND`] when the ring is empty (nothing recorded). The thread that drains the ring."
+   },
+   {
+    "name": "ferro_event_ring_sender",
+    "returns": "handle",
+    "params": [],
+    "doc": "The sender of the record the last [`ferro_event_ring_pop`] of the thread took."
+   },
+   {
+    "name": "ferro_event_ring_arg",
+    "returns": "i64",
+    "params": [],
+    "doc": "The argument of the record the last [`ferro_event_ring_pop`] of the thread took."
+   },
+   {
+    "name": "ferro_signal_table",
+    "returns": "const FerroSignalTable*",
+    "params": [
+     {
+      "name": "capacity",
+      "type": "i64"
+     }
+    ],
+    "doc": "Creates the signal table of the process with room for `capacity` slots (rounded up to a multiple of 64), or returns the one that exists (whose capacity then stays). The arrays stay at their addresses until the process ends. `NULL` on a failure (a capacity that is not positive or above 2^24; off the UI thread). UI thread only."
+   },
+   {
+    "name": "ferro_signal_new",
+    "returns": "i64",
+    "params": [
+     {
+      "name": "kind",
+      "type": "i32"
+     }
+    ],
+    "doc": "Takes a free slot of the kind `kind` (`FERRO_SIGNAL_I64` to `FERRO_SIGNAL_TEXT`), with the value `0` (the empty text), and returns its index, or a negative status ([`FERRO_INVALID_STATE`] when the table is full or not created). UI thread only."
+   },
+   {
+    "name": "ferro_signal_free",
+    "returns": "status",
+    "params": [
+     {
+      "name": "slot",
+      "type": "i64"
+     }
+    ],
+    "doc": "Frees the slot `slot`: its bindings are removed and its kind is `FERRO_SIGNAL_FREE` until [`ferro_signal_new`] takes it again. UI thread only."
+   },
+   {
+    "name": "ferro_signal_set_i64",
+    "returns": "status",
+    "params": [
+     {
+      "name": "slot",
+      "type": "i64"
+     },
+     {
+      "name": "value",
+      "type": "i64"
+     }
+    ],
+    "doc": "Writes an integer into the slot and marks it dirty (the store and the bit of section 14, for a language that cannot write memory). Any thread."
+   },
+   {
+    "name": "ferro_signal_set_f64",
+    "returns": "status",
+    "params": [
+     {
+      "name": "slot",
+      "type": "i64"
+     },
+     {
+      "name": "value",
+      "type": "f64"
+     }
+    ],
+    "doc": "Writes a number into the slot and marks it dirty. Any thread."
+   },
+   {
+    "name": "ferro_signal_set_bool",
+    "returns": "status",
+    "params": [
+     {
+      "name": "slot",
+      "type": "i64"
+     },
+     {
+      "name": "value",
+      "type": "bool"
+     }
+    ],
+    "doc": "Writes a boolean into the slot and marks it dirty. Any thread."
+   },
+   {
+    "name": "ferro_signal_set_handle",
+    "returns": "status",
+    "params": [
+     {
+      "name": "slot",
+      "type": "i64"
+     },
+     {
+      "name": "value",
+      "type": "handle"
+     }
+    ],
+    "doc": "Writes a handle (`0` for null) into the slot and marks it dirty. Any thread."
+   },
+   {
+    "name": "ferro_signal_set_str",
+    "returns": "status",
+    "params": [
+     {
+      "name": "slot",
+      "type": "i64"
+     },
+     {
+      "name": "text",
+      "type": "utf8"
+     },
+     {
+      "name": "length",
+      "type": "i64"
+     }
+    ],
+    "doc": "Writes UTF-8 text (`length` bytes, negative for NUL-terminated) into a text slot and marks it dirty; the slot value becomes the length. UI thread only."
+   },
+   {
+    "name": "ferro_signal_get_i64",
+    "returns": "i64",
+    "params": [
+     {
+      "name": "slot",
+      "type": "i64"
+     }
+    ],
+    "doc": "The integer of the slot (the load of section 14, for a language that cannot read memory); `0` when the slot is not an integer slot (recorded). Any thread."
+   },
+   {
+    "name": "ferro_signal_get_f64",
+    "returns": "f64",
+    "params": [
+     {
+      "name": "slot",
+      "type": "i64"
+     }
+    ],
+    "doc": "The number of the slot; `0` when the slot is not a number slot (recorded). Any thread."
+   },
+   {
+    "name": "ferro_signal_get_bool",
+    "returns": "bool",
+    "params": [
+     {
+      "name": "slot",
+      "type": "i64"
+     }
+    ],
+    "doc": "The boolean of the slot; `false` when the slot is not a boolean slot (recorded). Any thread."
+   },
+   {
+    "name": "ferro_signal_version",
+    "returns": "i64",
+    "params": [
+     {
+      "name": "slot",
+      "type": "i64"
+     }
+    ],
+    "doc": "The version of the slot (raised every time its value changes); `-1` for a slot that is not in the table (recorded). Any thread."
+   },
+   {
+    "name": "ferro_signal_get_cstr",
+    "returns": "utf8",
+    "params": [
+     {
+      "name": "slot",
+      "type": "i64"
+     }
+    ],
+    "doc": "The text of a text slot as NUL-terminated UTF-8 owned by the library until the next call on the thread; the empty text when the slot is not a text slot (recorded), never `NULL`. A language reads it when the version of the slot changed. UI thread only."
+   },
+   {
+    "name": "ferro_signal_bind",
+    "returns": "i64",
+    "params": [
+     {
+      "name": "slot",
+      "type": "i64"
+     },
+     {
+      "name": "object",
+      "type": "handle"
+     },
+     {
+      "name": "property",
+      "type": "i64"
+     }
+    ],
+    "doc": "Binds `property` of `object` to the slot: the property takes the value of the slot now and every time an apply finds the slot dirty, with no frame and no call of the language. Returns a positive binding ID for [`ferro_signal_unbind`], or a negative status. UI thread only."
+   },
+   {
+    "name": "ferro_signal_watch",
+    "returns": "i64",
+    "params": [
+     {
+      "name": "slot",
+      "type": "i64"
+     },
+     {
+      "name": "object",
+      "type": "handle"
+     },
+     {
+      "name": "property",
+      "type": "i64"
+     }
+    ],
+    "doc": "Watches `property` of `object` into the slot: the library writes the value of the property into the slot now and every time it changes (the value, then the version, then the changed bit), so the language reads it with a load and no call. A text property goes into a text slot (read with [`ferro_signal_get_cstr`] when the version changed). Returns a positive binding ID for [`ferro_signal_unbind`], or a negative status. UI thread only."
+   },
+   {
+    "name": "ferro_signal_unbind",
+    "returns": "status",
+    "params": [
+     {
+      "name": "binding",
+      "type": "i64"
+     }
+    ],
+    "doc": "Removes a binding of [`ferro_signal_bind`] or [`ferro_signal_watch`]. UI thread only."
+   },
+   {
+    "name": "ferro_signals_apply",
+    "returns": "i64",
+    "params": [],
+    "doc": "Applies the dirty slots: for each slot whose dirty bit is set, its version is raised and its value written to every property bound to it. Returns the number of slots applied, or a negative status (the first failed write; the others are still made). The library applies by itself at the start of every frame commit and at the end of every dispatch; a language calls this after writing slots outside them (a timer of its own). UI thread only."
+   },
+   {
+    "name": "ferro_signal_take_changed",
+    "returns": "bool",
+    "params": [
+     {
+      "name": "slot",
+      "type": "i64"
+     }
+    ],
+    "doc": "Clears `changed` bits of the slot for a language that cannot write memory, and returns whether it was set. Any thread."
    },
    {
     "name": "ferro_init",
@@ -1037,6 +1333,46 @@
   },
   "statuses": [
    {
+    "name": "FERRO_EVENT_RING_LAYOUT",
+    "value": 1,
+    "doc": "The version of the layout of [`FerroEventRing`]."
+   },
+   {
+    "name": "FERRO_SIGNAL_FREE",
+    "value": 0,
+    "doc": "A free slot."
+   },
+   {
+    "name": "FERRO_SIGNAL_I64",
+    "value": 1,
+    "doc": "A slot of an `int64_t` (an enumeration as its value)."
+   },
+   {
+    "name": "FERRO_SIGNAL_F64",
+    "value": 2,
+    "doc": "A slot of a `double`, stored as its bits."
+   },
+   {
+    "name": "FERRO_SIGNAL_BOOL",
+    "value": 3,
+    "doc": "A slot of a boolean, stored as `0` or `1`."
+   },
+   {
+    "name": "FERRO_SIGNAL_HANDLE",
+    "value": 4,
+    "doc": "A slot of a handle (`0` for null)."
+   },
+   {
+    "name": "FERRO_SIGNAL_TEXT",
+    "value": 5,
+    "doc": "A slot of a text: the text is in the library, the slot value is its length in bytes."
+   },
+   {
+    "name": "FERRO_SIGNAL_LAYOUT",
+    "value": 1,
+    "doc": "The version of the layout of [`FerroSignalTable`]."
+   },
+   {
     "name": "FERRO_OK",
     "value": 0,
     "doc": "The call succeeded."
@@ -1325,8 +1661,125 @@
      }
     ],
     "doc": "Stands for the memo element with the integer key `key` and the version `version` of the last frame under the root, with its tags moved to start at `tag_base`, in place of an element. `ferro_frame_reuse` writes it when the root has that element."
+   },
+   {
+    "op": 12,
+    "name": "bind",
+    "writer": "ferro_frame_bind",
+    "fields": [
+     {
+      "field": "property",
+      "type": "i64"
+     },
+     {
+      "field": "slot",
+      "type": "i64"
+     }
+    ],
+    "doc": "Binds a property of the open element to a slot of the signal table: a write of the slot updates the property at the next apply, with no new frame."
    }
   ]
+ },
+ "signals": {
+  "table": "ferro_signal_table",
+  "layout_version": 1,
+  "kinds": [
+   {
+    "value": 1,
+    "name": "i64"
+   },
+   {
+    "value": 2,
+    "name": "f64",
+    "doc": "the bits of the number"
+   },
+   {
+    "value": 3,
+    "name": "bool",
+    "doc": "0 or 1"
+   },
+   {
+    "value": 4,
+    "name": "handle"
+   },
+   {
+    "value": 5,
+    "name": "text",
+    "doc": "the text is in the library; the value is its length in bytes"
+   }
+  ],
+  "fields": [
+   {
+    "field": "layout",
+    "type": "u32"
+   },
+   {
+    "field": "capacity",
+    "type": "u32",
+    "doc": "a multiple of 64"
+   },
+   {
+    "field": "values",
+    "type": "u64[capacity]",
+    "writer": "the language (bound slots), the library (watched)"
+   },
+   {
+    "field": "versions",
+    "type": "u64[capacity]",
+    "writer": "the library"
+   },
+   {
+    "field": "dirty",
+    "type": "u64[capacity / 64]",
+    "writer": "the language, an atomic OR with release order"
+   },
+   {
+    "field": "changed",
+    "type": "u64[capacity / 64]",
+    "writer": "the library sets, the language clears"
+   },
+   {
+    "field": "kinds",
+    "type": "u32[capacity]",
+    "writer": "the library"
+   }
+  ],
+  "apply": "ferro_signals_apply, the start of every frame commit and the end of every dispatch",
+  "event_ring": {
+   "function": "ferro_event_ring",
+   "subscribe": "ferro_subscribe_ring",
+   "fields": [
+    {
+     "field": "layout",
+     "type": "u32"
+    },
+    {
+     "field": "capacity",
+     "type": "u32",
+     "doc": "a power of two"
+    },
+    {
+     "field": "head",
+     "type": "u64*",
+     "writer": "the library, release order"
+    },
+    {
+     "field": "tail",
+     "type": "u64*",
+     "writer": "the language, release order"
+    },
+    {
+     "field": "dropped",
+     "type": "u64*",
+     "writer": "the library"
+    },
+    {
+     "field": "records",
+     "type": "i64[capacity * 4]",
+     "doc": "tag, sender, argument, number"
+    }
+   ]
+  }
  },
  "classes": [
   {

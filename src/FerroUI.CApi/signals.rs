@@ -31,13 +31,14 @@
 
 use crate::error::{guard, status, status_or_value, Error, Result};
 use crate::handles;
+use crate::ids::Property;
 use crate::thread::{self, UiCell};
 use crate::values;
 use crate::{
-    ferro_get_bool_or, ferro_get_f64_or, ferro_get_i64_or, ferro_release, ferro_retain, ferro_set_bool, ferro_set_f64,
-    ferro_set_handle, ferro_set_i64, ferro_set_str, FerroHandle, FerroStatus, FERRO_INVALID_ARGUMENT,
-    FERRO_INVALID_STATE, FERRO_NOT_FOUND, FERRO_TYPE_MISMATCH,
+    ferro_get_bool_or, ferro_get_f64_or, ferro_get_i64_or, ferro_release, ferro_retain, ferro_set_handle, FerroHandle,
+    FerroStatus, FERRO_INVALID_ARGUMENT, FERRO_INVALID_STATE, FERRO_NOT_FOUND, FERRO_TYPE_MISMATCH,
 };
+use ferroui_base::{FerroObject, Ref};
 use std::ffi::c_char;
 use std::sync::atomic::{AtomicU32, AtomicU64, Ordering};
 use std::sync::OnceLock;
@@ -109,6 +110,10 @@ fn shared() -> Result<&'static Shared> {
 struct Binding {
     id: i64,
     handle: FerroHandle,
+    /// The object of the handle and the property, resolved when the binding is made: an apply
+    /// writes with no lookup of the handle or the ID.
+    object: Ref<FerroObject>,
+    resolved: Property,
     property: i64,
     /// The token of the property-changed handler of a watch, `None` for a bind.
     watch: Option<u64>,
@@ -127,12 +132,20 @@ struct State {
     next_id: i64,
     /// The slot of each binding.
     bindings: Vec<(i64, u32)>,
-    /// Whether an apply runs: what it writes is not watched back into the slot it came from.
-    applying: Option<u32>,
+    /// The number of slots the running apply found dirty.
+    applied: i64,
+    /// The writes of an apply, kept from one apply to the next.
+    targets: Vec<Target>,
 }
 
-static STATE: UiCell<State> =
-    UiCell::new(State { slots: Vec::new(), free: Vec::new(), next_id: 0, bindings: Vec::new(), applying: None });
+static STATE: UiCell<State> = UiCell::new(State {
+    slots: Vec::new(),
+    free: Vec::new(),
+    next_id: 0,
+    bindings: Vec::new(),
+    applied: 0,
+    targets: Vec::new(),
+});
 
 /// Creates the signal table of the process with room for `capacity` slots (rounded up to a
 /// multiple of 64), or returns the one that exists (whose capacity then stays). The arrays stay
@@ -176,6 +189,18 @@ pub extern "C" fn ferro_signal_table(capacity: i64) -> *const FerroSignalTable {
             std::ptr::null()
         })
     })
+}
+
+/// [`ferro_signal_table`] for a language that cannot read memory (it calls
+/// `ferro_signal_set_*` and `ferro_signal_get_*`): creates the table, or keeps the one that
+/// exists, and returns a status. UI thread only.
+#[no_mangle]
+pub extern "C" fn ferro_signals_init(capacity: i64) -> FerroStatus {
+    if ferro_signal_table(capacity).is_null() {
+        crate::ferro_last_error_code()
+    } else {
+        crate::FERRO_OK
+    }
 }
 
 /// The slot `slot` of the table, checked.
@@ -375,14 +400,26 @@ pub extern "C" fn ferro_signal_get_cstr(slot: i64) -> *const c_char {
 }
 
 /// Writes the value of slot `index` (of kind `kind`) to `property` of `handle`.
-fn write(handle: FerroHandle, property: i64, kind: u32, word: u64, text: &str) -> FerroStatus {
+fn write_to(
+    object: &Ref<FerroObject>,
+    property: Property,
+    (handle, id): (FerroHandle, i64),
+    kind: u32,
+    word: u64,
+    text: &str,
+) -> Result<()> {
     match kind as i32 {
-        FERRO_SIGNAL_I64 => ferro_set_i64(handle, property, word as i64),
-        FERRO_SIGNAL_F64 => ferro_set_f64(handle, property, f64::from_bits(word)),
-        FERRO_SIGNAL_BOOL => ferro_set_bool(handle, property, word != 0),
-        FERRO_SIGNAL_HANDLE => ferro_set_handle(handle, property, word),
-        // SAFETY: a pointer and the length of a Rust string.
-        _ => unsafe { ferro_set_str(handle, property, text.as_ptr().cast(), text.len() as i64) },
+        FERRO_SIGNAL_I64 => values::set_i64_to(object, property, word as i64),
+        FERRO_SIGNAL_F64 => values::set_f64_to(object, property, f64::from_bits(word)),
+        FERRO_SIGNAL_BOOL => values::set_bool_to(object, property, word != 0),
+        FERRO_SIGNAL_TEXT => values::set_text_to(object, property, text),
+        _ => {
+            // A handle: the object of the value is looked up and checked as the setter does.
+            match ferro_set_handle(handle, id, word) {
+                code if code < 0 => Err(Error::new(code, crate::error::last_message())),
+                _ => Ok(()),
+            }
+        }
     }
 }
 
@@ -414,15 +451,16 @@ pub(crate) fn bind(slot: i64, object: FerroHandle, property: i64, watch: bool) -
     let target = handles::get(object)?;
     // The property must exist on the class (an error now, not at the first apply); a watched one
     // must notify its changes (a registered property).
-    let registered = match crate::ids::property(target.get_type(), property)? {
-        crate::ids::Property::Registered(registered) => Some(registered),
-        crate::ids::Property::Plain(plain) if watch => {
+    let resolved = crate::ids::property(target.get_type(), property)?;
+    let registered = match resolved {
+        Property::Registered(registered) => Some(registered),
+        Property::Plain(plain) if watch => {
             return Err(Error::new(
                 FERRO_TYPE_MISMATCH,
                 format!("the property {} does not notify its changes: it cannot be watched", plain.name),
             ))
         }
-        crate::ids::Property::Plain(_) => None,
+        Property::Plain(_) => None,
     };
     let id = STATE.with(|state| {
         state.next_id += 1;
@@ -442,7 +480,7 @@ pub(crate) fn bind(slot: i64, object: FerroHandle, property: i64, watch: bool) -
         })));
         watched_changed(index, object, property);
     }
-    let binding = Binding { id, handle: object, property, watch: token };
+    let binding = Binding { id, handle: object, object: target.clone(), resolved, property, watch: token };
     let text = STATE.with(|state| {
         let slot = &mut state.slots[index];
         if watch {
@@ -454,10 +492,11 @@ pub(crate) fn bind(slot: i64, object: FerroHandle, property: i64, watch: bool) -
         }
     })?;
     if let Some(text) = text {
-        let code = write(object, property, kind, shared.values[index].load(Ordering::Acquire), &text);
-        if code < 0 {
+        if let Err(error) =
+            write_to(&target, resolved, (object, property), kind, shared.values[index].load(Ordering::Acquire), &text)
+        {
             let _ = unbind(id);
-            return Err(Error::new(code, "the value of the slot cannot be given to the property"));
+            return Err(error);
         }
     }
     Ok(id)
@@ -470,7 +509,7 @@ fn watched_changed(index: usize, object: FerroHandle, property: i64) {
         return;
     };
     let kind = shared.kinds[index].load(Ordering::Relaxed) as i32;
-    if STATE.with(|state| state.applying == Some(index as u32)).unwrap_or(false) {
+    if APPLYING.load(Ordering::Relaxed) == index as u32 {
         return;
     }
     let word = match kind {
@@ -538,45 +577,77 @@ pub(crate) fn apply() -> Result<i64> {
         return Ok(0);
     };
     thread::check()?;
-    let mut applied = 0;
-    let mut failure = None;
-    for (word_index, word) in shared.dirty.iter().enumerate() {
-        if word.load(Ordering::Relaxed) == 0 {
-            continue;
-        }
-        let mut bits = word.swap(0, Ordering::Acquire);
-        while bits != 0 {
-            let index = word_index * 64 + bits.trailing_zeros() as usize;
-            bits &= bits - 1;
-            let kind = shared.kinds[index].load(Ordering::Relaxed);
-            if kind == 0 {
+    // One access of the state for the whole apply: the targets of every dirty slot are copied
+    // into a buffer kept from one apply to the next, then written with no access of the state
+    // running (a write runs handlers: a watch of another slot).
+    let mut targets = STATE.with(|state| {
+        let mut targets = std::mem::take(&mut state.targets);
+        for (word_index, word) in shared.dirty.iter().enumerate() {
+            if word.load(Ordering::Relaxed) == 0 {
                 continue;
             }
-            applied += 1;
-            shared.versions[index].fetch_add(1, Ordering::Release);
-            let value = shared.values[index].load(Ordering::Relaxed);
-            // The targets, taken with no access of the state running: a write runs handlers.
-            let (targets, text) = STATE.with(|state| {
-                state.applying = Some(index as u32);
+            let mut bits = word.swap(0, Ordering::Acquire);
+            while bits != 0 {
+                let index = word_index * 64 + bits.trailing_zeros() as usize;
+                bits &= bits - 1;
+                let kind = shared.kinds[index].load(Ordering::Relaxed);
+                if kind == 0 {
+                    continue;
+                }
+                // Only the library writes versions, on the UI thread: a load and a store.
+                let version = shared.versions[index].load(Ordering::Relaxed);
+                shared.versions[index].store(version.wrapping_add(1), Ordering::Release);
+                let word = shared.values[index].load(Ordering::Relaxed);
                 let slot = &state.slots[index];
-                let targets: Vec<(FerroHandle, i64)> =
-                    slot.binds.iter().map(|binding| (binding.handle, binding.property)).collect();
-                let text = if kind as i32 == FERRO_SIGNAL_TEXT { slot.text.clone() } else { String::new() };
-                (targets, text)
-            })?;
-            for (handle, property) in targets {
-                let code = write(handle, property, kind, value, &text);
-                if code < 0 && failure.is_none() {
-                    failure = Some(code);
+                state.applied += 1;
+                for binding in &slot.binds {
+                    let text = if kind as i32 == FERRO_SIGNAL_TEXT { Some(slot.text.clone()) } else { None };
+                    targets.push(Target {
+                        index: index as u32,
+                        object: binding.object.clone(),
+                        property: binding.resolved,
+                        ids: (binding.handle, binding.property),
+                        kind,
+                        word,
+                        text,
+                    });
                 }
             }
-            STATE.with(|state| state.applying = None)?;
+        }
+        targets
+    })?;
+    let mut failure = None;
+    for target in targets.drain(..) {
+        APPLYING.store(target.index, Ordering::Relaxed);
+        let text = target.text.as_deref().unwrap_or_default();
+        if let Err(error) = write_to(&target.object, target.property, target.ids, target.kind, target.word, text) {
+            failure.get_or_insert(error.record());
         }
     }
+    APPLYING.store(u32::MAX, Ordering::Relaxed);
+    let applied = STATE.with(|state| {
+        state.targets = targets;
+        std::mem::take(&mut state.applied)
+    })?;
     match failure {
         Some(code) => Err(Error::new(code, crate::error::last_message())),
         None => Ok(applied),
     }
+}
+
+/// The slot an apply is writing now (`u32::MAX` for none): what it writes is not watched back into
+/// it. UI thread only (an atomic so that it needs no access of the state).
+static APPLYING: AtomicU32 = AtomicU32::new(u32::MAX);
+
+/// A write of an apply.
+struct Target {
+    index: u32,
+    object: Ref<FerroObject>,
+    property: Property,
+    ids: (FerroHandle, i64),
+    kind: u32,
+    word: u64,
+    text: Option<String>,
 }
 
 /// Applies the dirty slots: for each slot whose dirty bit is set, its version is raised and its

@@ -94,6 +94,9 @@ RESERVED = {
     "messageAt", "checkApi", "element", "attrs", "envSet", "getenv", "readResult", "report", "showWindow",
     "apiFingerprint", "abiVersion", "keyOf", "writeAttr", "writeAttrs", "writeElement", "writeChildren",
     "eventText", "seekAttrs", "seekElement", "seekChildren", "findKey", "dispatchEvent", "dispatchStart", "textAt", "typeAt",
+    "memo", "bound", "signalsInit", "signalText", "signalNumber", "signalInteger", "signalBool", "signalSetText",
+    "signalSetNumber", "signalSetInteger", "signalSetBool", "signalReadText", "signalReadNumber", "signalReadInteger",
+    "signalReadBool", "signalVersion", "signalBind", "signalWatch", "signalsApply",
 }
 
 # Osprey types of the C types of the model, for `extern fn` (#950: scalars, NUL-terminated

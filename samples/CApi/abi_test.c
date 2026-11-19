@@ -1,5 +1,6 @@
 /* Tests of the C ABI of FerroUI, from C (docs/c-abi.md, section 9): status codes, the UI thread
- * rule, bad handles, ID lookups, string lengths, values, children, events and posted work. No
+ * rule, bad handles, ID lookups, string lengths, values, children, events, posted work, frames,
+ * and signals and the event ring shared through memory (section 14). No
  * window is opened: the thread is made the UI thread with ferro_init and driven with
  * ferro_run_jobs, so the tests run without a display and without the desktop platform.
  *
@@ -8,6 +9,7 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include <pthread.h>
+#include <stdatomic.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -264,6 +266,82 @@ static void test_frames(void) {
     CHECK_STATUS(FERRO_OK, ferro_release(root));
 }
 
+/* Signals shared through memory (docs/c-abi.md, section 14): a store and its dirty bit, applied to
+ * a bound property; a watched property read with a load; a bind record of a frame; the ring. */
+static void test_signals(void) {
+    const FerroSignalTable *table = ferro_signal_table(128);
+    CHECK(table != NULL && table->layout == FERRO_SIGNAL_LAYOUT && table->capacity % 64 == 0);
+    _Atomic uint64_t *values = (_Atomic uint64_t *)table->values;
+    _Atomic uint64_t *dirty = (_Atomic uint64_t *)table->dirty;
+    _Atomic uint64_t *changed = (_Atomic uint64_t *)table->changed;
+    FerroHandle block = create("TextBlock");
+    int64_t size = ferro_signal_new(FERRO_SIGNAL_F64);
+    CHECK(size >= 0);
+    CHECK_STATUS(FERRO_OK, ferro_signal_set_f64(size, 14.0));
+    CHECK(ferro_signal_bind(size, block, prop("FontSize")) > 0);
+    CHECK(ferro_get_f64_or(block, prop("FontSize"), 0) == 14.0);
+    /* The store of a language that writes memory: the value, then the bit with release order. */
+    double next = 22.0;
+    uint64_t bits;
+    memcpy(&bits, &next, sizeof bits);
+    atomic_store_explicit(&values[size], bits, memory_order_relaxed);
+    atomic_fetch_or_explicit(&dirty[size / 64], 1ull << (size % 64), memory_order_release);
+    CHECK(ferro_signals_apply() >= 1);
+    CHECK(ferro_get_f64_or(block, prop("FontSize"), 0) == 22.0);
+    CHECK_STATUS(FERRO_INVALID_ARGUMENT, ferro_signal_set_f64(1 << 30, 1.0));
+    CHECK_STATUS(FERRO_TYPE_MISMATCH, ferro_signal_set_i64(size, 1));
+
+    /* A watched text: typed into the box, read from the slot. */
+    FerroHandle box = create("TextBox");
+    int64_t typed = ferro_signal_new(FERRO_SIGNAL_TEXT);
+    CHECK(ferro_signal_watch(typed, box, prop("Text")) > 0);
+    int64_t version = ferro_signal_version(typed);
+    CHECK_STATUS(FERRO_OK, ferro_set_str(box, prop("Text"), "typed", -1));
+    CHECK(ferro_signal_version(typed) == version + 1);
+    CHECK(atomic_load_explicit(&values[typed], memory_order_acquire) == 5);
+    CHECK((atomic_load_explicit(&changed[typed / 64], memory_order_acquire) >> (typed % 64)) & 1);
+    CHECK(strcmp(ferro_signal_get_cstr(typed), "typed") == 0);
+
+    /* A bind record: the property follows the slot with no new frame. */
+    FerroHandle root = create("Border");
+    CHECK_STATUS(FERRO_OK, ferro_frame_begin());
+    CHECK_STATUS(FERRO_OK, ferro_frame_open(ferro_type_id("TextBlock", -1), 1));
+    CHECK_STATUS(FERRO_OK, ferro_frame_bind(prop("FontSize"), size));
+    CHECK_STATUS(FERRO_OK, ferro_frame_close());
+    CHECK_STATUS(FERRO_OK, ferro_frame_commit(root));
+    FerroHandle framed = ferro_frame_find(root, 1);
+    CHECK(ferro_get_f64_or(framed, prop("FontSize"), 0) == 22.0);
+    CHECK_STATUS(FERRO_OK, ferro_signal_set_f64(size, 30.0));
+    CHECK(ferro_signals_apply() == 1);
+    CHECK(ferro_get_f64_or(framed, prop("FontSize"), 0) == 30.0);
+    CHECK(ferro_get_f64_or(block, prop("FontSize"), 0) == 30.0);
+    CHECK_STATUS(FERRO_OK, ferro_release(framed));
+    CHECK_STATUS(FERRO_OK, ferro_frame_clear(root));
+
+    /* The event ring: a click is a record, drained with loads and a store of the tail. */
+    const FerroEventRing *ring = ferro_event_ring(16);
+    CHECK(ring != NULL && ring->capacity == 16);
+    FerroHandle button = create("Button");
+    int64_t click = ferro_event_id("Click", -1);
+    CHECK(ferro_subscribe_ring(button, click, 3) > 0);
+    _Atomic uint64_t *head = (_Atomic uint64_t *)ring->head;
+    _Atomic uint64_t *tail = (_Atomic uint64_t *)ring->tail;
+    uint64_t start = atomic_load_explicit(head, memory_order_acquire);
+    CHECK_STATUS(FERRO_OK, ferro_raise(button, click));
+    CHECK(atomic_load_explicit(head, memory_order_acquire) == start + 1);
+    const int64_t *record = &ring->records[(start % ring->capacity) * 4];
+    CHECK(record[0] == 3 && (FerroHandle)record[1] == button);
+    atomic_store_explicit(tail, start + 1, memory_order_release);
+    CHECK(ferro_event_ring_pop() == FERRO_NOT_FOUND);
+
+    CHECK_STATUS(FERRO_OK, ferro_signal_free(typed));
+    CHECK_STATUS(FERRO_OK, ferro_signal_free(size));
+    CHECK_STATUS(FERRO_OK, ferro_release(button));
+    CHECK_STATUS(FERRO_OK, ferro_release(box));
+    CHECK_STATUS(FERRO_OK, ferro_release(block));
+    CHECK_STATUS(FERRO_OK, ferro_release(root));
+}
+
 int main(void) {
     CHECK(ferro_abi_version() == FERRO_ABI_VERSION);
     CHECK(!ferro_is_ui_thread());
@@ -280,6 +358,7 @@ int main(void) {
     test_tree_and_events();
     test_threads();
     test_frames();
+    test_signals();
 
     if (failures != 0) {
         fprintf(stderr, "abi_test: %d of %d checks failed\n", failures, checks);

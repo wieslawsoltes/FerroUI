@@ -439,6 +439,11 @@ int64_t ferro_event_ring_arg(void);
 // positive or above 2^24; off the UI thread). UI thread only.
 const FerroSignalTable *ferro_signal_table(int64_t capacity);
 
+// [`ferro_signal_table`] for a language that cannot read memory (it calls
+// `ferro_signal_set_*` and `ferro_signal_get_*`): creates the table, or keeps the one that
+// exists, and returns a status. UI thread only.
+FerroStatus ferro_signals_init(int64_t capacity);
+
 // Takes a free slot of the kind `kind` (`FERRO_SIGNAL_I64` to `FERRO_SIGNAL_TEXT`), with the
 // value `0` (the empty text), and returns its index, or a negative status
 // ([`FERRO_INVALID_STATE`] when the table is full or not created). UI thread only.

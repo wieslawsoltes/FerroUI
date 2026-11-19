@@ -1,0 +1,10 @@
+# The temperature converter with layer 1 of the generated Osprey bindings and signals shared
+# through memory (docs/osprey.md, section 8).
+[project]
+name = "temperature_signals"
+source_roots = ["src", "ferroui", "../../../../bindings/osprey/runtime"]
+default_namespace = "app"
+entry = "src/main.osp"
+
+[modules]
+allow_wildcard_imports = true
