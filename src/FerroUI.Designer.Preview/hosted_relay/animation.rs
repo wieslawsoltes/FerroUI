@@ -230,7 +230,7 @@ impl Relay {
         {
             let mut state = self.events.0.lock().unwrap();
             if !state.curve_programs.contains(&query.program) {
-                return Err("Choose a program with app-hosted scalar curves".into());
+                return Err("Choose a program with app-hosted animation curves".into());
             }
             state.animation_request = Some(request);
             state.curve_result = None;
@@ -250,7 +250,7 @@ impl Relay {
                 |state| !state.disconnected && state.curve_result.is_none())
             .unwrap();
         state.animation_request = None;
-        let result = state.curve_result.take().ok_or("The application did not return scalar samples")?;
+        let result = state.curve_result.take().ok_or("The application did not return curve samples")?;
         if let Some(error) = result.error {
             return Err(error);
         }

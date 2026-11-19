@@ -12,6 +12,7 @@ interface CurveSnapshot {
 }
 
 const axisNumber = new Intl.NumberFormat(undefined, { maximumSignificantDigits: 3, notation: 'compact' });
+const colorChannels = new Set<CurveChannel>(['red', 'green', 'blue', 'alpha']);
 
 export function curveChannels(track: TimelineTrack): readonly CurveChannel[] {
     return track.curve_channels ?? (track.keyframes[0]?.value_kind === 'Number' ? ['value'] : []);
@@ -95,6 +96,7 @@ export class TimelineCurvePlot {
         }
         const editsValues = channel === 'value' && metric === 'value';
         this.lane.dataset.curve = metric === 'value' && !editsValues ? 'component' : metric;
+        this.line.dataset.channel = channel;
         const visible = points?.filter(point => visibleTime(view, point.time)) ?? [];
         // Include neighbors so panning can move immediately while the current range samples arrive.
         const first = visible[0];
@@ -102,8 +104,9 @@ export class TimelineCurvePlot {
         const before = points?.findLast(point => point.time < (first?.time ?? view.start));
         const after = points?.find(point => point.time > (last?.time ?? view.start + view.span));
         const isVelocity = metric === 'velocity';
-        const keyValues = isVelocity ? [0] : this.keys.flatMap(({ rendered, value }) =>
-            value !== undefined && visibleTime(view, rendered.key.time) ? [value] : []);
+        const keyValues = isVelocity ? [0] : colorChannels.has(channel) ? [0, 1]
+            : this.keys.flatMap(({ rendered, value }) =>
+                value !== undefined && visibleTime(view, rendered.key.time) ? [value] : []);
         const allValues = this.keys.flatMap(({ value }) => value === undefined ? [] : [value]);
         const scale = this.scale = new CurveScale(visible.length || keyValues.length ? visible : points ?? [],
             keyValues.length || visible.length ? keyValues : allValues.length ? allValues : [0]);

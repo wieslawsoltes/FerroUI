@@ -7,6 +7,7 @@ import { verifyHostedAnimation, verifyHostedScalarCurve } from './hostedAnimatio
 import { verifyHostedCodec } from './hostedCodec';
 import { verifyHostedClips } from './hostedClips';
 import { verifyHostedClipAuthoring } from './hostedClipAuthoring';
+import { verifyHostedColorCurves } from './hostedColorCurves';
 import { verifyHostedKeyframeGroups } from './hostedKeyframeGroups';
 import { verifyHostedContinuity } from './hostedContinuity';
 import { verifyHostedRustAnimation } from './hostedRustAnimation';
@@ -90,6 +91,7 @@ export async function verifyHostedPreview(preview: NativePreview, uri: string): 
         await verifyHostedKeyframeGroups(preview, update);
         await verifyHostedClipAuthoring(preview, update);
         await verifyHostedStateAuthoring(preview, update);
+        await verifyHostedColorCurves(preview, update);
         assert.equal(child.exitCode, null);
         console.log('App-hosted design rendered a custom control, native bindings and registered XAML/Rust fixtures, and fenced invalid updates and stale input');
     } catch (error) {

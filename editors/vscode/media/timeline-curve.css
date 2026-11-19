@@ -52,6 +52,9 @@
     stroke-width: 1.5px;
     stroke-linejoin: round;
 }
+.timeline-curve-plot [data-channel=red] { stroke: var(--vscode-charts-red, var(--focus)); }
+.timeline-curve-plot [data-channel=green] { stroke: var(--vscode-charts-green, var(--focus)); }
+.timeline-curve-plot [data-channel=alpha] { stroke: var(--vscode-charts-foreground, var(--vscode-editor-foreground)); }
 [data-curve] .timeline-curve-status:not(:empty) {
     position: absolute;
     display: block;

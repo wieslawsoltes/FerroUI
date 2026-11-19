@@ -140,6 +140,7 @@ impl TimelineLane {
             Err(error) => error.clone(),
         };
         plot.samples = result.unwrap_or_default();
+        let color_value = plot.metric == CurveMetric::Value && plot.channel.is_color() && !plot.samples.is_empty();
         plot.scale = Scale::from_values(
             plot.samples
                 .iter()
@@ -153,7 +154,8 @@ impl TimelineLane {
                 .chain(
                     (plot.metric == CurveMetric::Velocity && !plot.samples.is_empty())
                         .then_some(0.0),
-                ),
+                )
+                .chain(color_value.then_some([0.0, 1.0]).into_iter().flatten()),
         );
         ToolTip::set_tip(self, Some(Rc::new(help)));
         self.invalidate_visual();
@@ -252,7 +254,13 @@ impl TimelineLane {
         };
         if let Some(scale) = plot.scale {
             let grid: Rc<dyn IPen> = Pen::from_uint32(0xff3b3d46, 1.0).into();
-            let trace: Rc<dyn IPen> = Pen::from_uint32(0xff9bbaff, 1.5).into();
+            let color = match plot.channel {
+                CurveChannel::Red => 0xffff958f,
+                CurveChannel::Green => 0xffa3d891,
+                CurveChannel::Alpha => 0xffc9cce0,
+                _ => 0xff9bbaff,
+            };
+            let trace: Rc<dyn IPen> = Pen::from_uint32(color, 1.5).into();
             let plot_bounds = plot.height(bounds.height);
             let height = plot_height(plot_bounds);
             let unit = if plot.metric == CurveMetric::Velocity {

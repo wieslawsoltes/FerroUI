@@ -7,6 +7,7 @@ import { verifyProjectMcp } from './projectMcp';
 import { verifyScenarioMcp } from './scenarioMcp';
 import { verifyWorkspaceMcp } from './workspaceMcp';
 import { verifyTimelineMcp } from './studioTimelineMcp';
+import { verifyTimelineColorMcp } from './studioTimelineColorMcp';
 import { verifyTimelineRecording } from './studioTimelineRecordingMcp';
 import { verifyTimelineGeometry } from './studioTimelineGeometryMcp';
 import { verifyTimelinePlayback } from './studioTimelinePlaybackMcp';
@@ -206,6 +207,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         content(await invoke('designer_history', { session, expected_version: document.version, action: 'undo' }));
         assert.equal(document.getText(), original);
         await verifyTimelineMcp({ invoke, content }, session, document, rsxKeyframeClipboard);
+        await verifyTimelineColorMcp({ invoke, content }, session, document);
         await verifyTimelineRecording({ invoke, content }, session, document);
         await verifyTimelineGeometry({ invoke, content }, session, document);
         await verifyTimelinePlayback({ invoke, content }, session, document);

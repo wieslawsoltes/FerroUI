@@ -191,7 +191,7 @@ export interface TimelineKeyframeResponse {
 export interface CurvePoint { time: number; value: number }
 export type CurveMetric = 'value' | 'velocity';
 export type CurveChannel = 'value' | 'x' | 'y' | 'width' | 'height' | 'left' | 'top' | 'right' | 'bottom'
-    | 'top_left' | 'top_right' | 'bottom_left' | 'bottom_right';
+    | 'top_left' | 'top_right' | 'bottom_left' | 'bottom_right' | 'red' | 'green' | 'blue' | 'alpha';
 
 export interface TimelineCurveRequest {
     type: 'curve';
