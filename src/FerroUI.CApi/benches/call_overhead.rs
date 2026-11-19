@@ -28,17 +28,34 @@
 //! renderer: the thread is the UI thread through `ferro_init`. Each case alternates between two
 //! values (a write of the value a property already has is skipped by the property system), runs
 //! `ITERATIONS` times per sample, and the median of `SAMPLES` samples is printed in nanoseconds
-//! per operation, with the difference of the ABI case to the Rust case.
+//! per operation, with the difference of the ABI case to the Rust case. For the lines of
+//! controls the Rust column is the control written in Rust (or the built-in property).
+//!
+//! - controls written through the ABI (section 15): a measure and arrange pass over 1000 elements
+//!   of a class registered at run time whose callbacks are C functions, against the same control
+//!   written in Rust; a render of 1000 of them into the recorder of the retained scene, against
+//!   the Rust control; a write and a read of a registered property against a built-in one of the
+//!   same kind (`MinWidth`: a number that affects the measure).
 //!
 //! `CALL_OVERHEAD_FILTER=<text>` runs only the cases whose name contains the text, and
 //! `CALL_OVERHEAD_SCALE=<n>` multiplies the operations per sample (a long run of one case for a
 //! profiler).
 
-use ferroui_base::interactivity::RoutedEventArgs;
+use ferroui_base::input::InputElementImpl;
+use ferroui_base::interactivity::{InteractiveImpl, RoutedEventArgs};
+use ferroui_base::layout::{Layoutable, LayoutableImpl};
+use ferroui_base::media::immutable::ImmutableSolidColorBrush;
+use ferroui_base::media::{DrawingContext, IBrush};
+use ferroui_base::rendering::composition::drawing::RenderDataDrawingContext;
+use ferroui_base::{
+    ferro_class, ferro_impl_classes, ferro_overrides, instantiate, FerroObjectImpl, Rect, Ref, Size, StyledElementImpl,
+    Visual, VisualImpl,
+};
+use ferroui_controls::{Control, ControlImpl, StackPanel};
 use ferroui_capi::*;
 use ferroui_controls::{Button, TextBlock};
 use std::cell::Cell;
-use std::ffi::{c_char, CStr};
+use std::ffi::{c_char, c_void, CStr};
 use std::hint::black_box;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -502,5 +519,159 @@ fn main() {
         report("signal: a frame of 100, one bound value changes", frames, bound);
         assert_eq!(ferro_frame_clear(root), FERRO_OK);
         assert_eq!(ferro_signal_free(slot), FERRO_OK);
+    }
+
+    controls();
+}
+
+/// A control written in Rust: what the class registered through the ABI does, for comparison.
+#[repr(C)]
+struct Swatch {
+    base: Control,
+}
+
+ferro_class!(Swatch: Control);
+ferro_impl_classes!(Swatch: FerroObjectImpl, StyledElementImpl, InteractiveImpl, InputElementImpl, ControlImpl);
+
+ferroui_base::ferro_thread_local! {
+    static SWATCH_BRUSH: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF33_6699));
+}
+
+ferro_overrides! { impl LayoutableImpl for Swatch {
+    fn measure_override(_this: &Self, _available_size: Size) -> Size {
+        Size::new(40.0, 20.0)
+    }
+
+    fn arrange_override(_this: &Self, final_size: Size) -> Size {
+        final_size
+    }
+} }
+
+ferro_overrides! { impl VisualImpl for Swatch {
+    fn render(_this: &Self, context: &mut DrawingContext) {
+        SWATCH_BRUSH.with(|brush| context.fill_rectangle(brush, Rect::new(0.0, 0.0, 40.0, 20.0), 2.0));
+    }
+} }
+
+unsafe extern "C" fn swatch_measure(_: *mut c_void, _: FerroHandle, _: f64, _: f64, width: *mut f64, height: *mut f64) -> FerroStatus {
+    // SAFETY: the out-parameters of the call.
+    unsafe {
+        *width = 40.0;
+        *height = 20.0;
+    }
+    0
+}
+
+unsafe extern "C" fn swatch_arrange(_: *mut c_void, _: FerroHandle, w: f64, h: f64, width: *mut f64, height: *mut f64) -> FerroStatus {
+    // SAFETY: the out-parameters of the call.
+    unsafe {
+        *width = w;
+        *height = h;
+    }
+    0
+}
+
+static SWATCH_BRUSH_ID: AtomicU64 = AtomicU64::new(0);
+
+unsafe extern "C" fn swatch_render(_: *mut c_void, _: FerroHandle, context: i64) -> FerroStatus {
+    let brush = SWATCH_BRUSH_ID.load(Ordering::Relaxed) as i64;
+    ferro_draw_rect(context, 0.0, 0.0, 40.0, 20.0, 2.0, 2.0, brush, 0)
+}
+
+/// Controls written through the ABI against the same control in Rust.
+fn controls() {
+    let class = {
+        let name = "BenchSwatch";
+        // SAFETY: a pointer and the length of a Rust string.
+        let class = unsafe { ferro_class_register(name.as_ptr().cast(), name.len() as i64, FERRO_BASE_CONTROL) };
+        assert!(class > 0);
+        assert_eq!(ferro_class_on_measure(class, Some(swatch_measure)), FERRO_OK);
+        assert_eq!(ferro_class_on_arrange(class, Some(swatch_arrange)), FERRO_OK);
+        assert_eq!(ferro_class_on_render(class, Some(swatch_render)), FERRO_OK);
+        SWATCH_BRUSH_ID.store(ferro_draw_brush(0xFF33_6699) as u64, Ordering::Relaxed);
+        class
+    };
+    let count = 1000;
+    let rust_panel = StackPanel::new();
+    let rust_children: Vec<Ref<Swatch>> = (0..count).map(|_| instantiate(Swatch { base: Control::construct() })).collect();
+    for child in &rust_children {
+        rust_panel.children().add(child);
+    }
+    let foreign_panel = StackPanel::new();
+    let handles: Vec<FerroHandle> = (0..count).map(|_| ferro_create(class)).collect();
+    let foreign_children: Vec<Ref<Control>> =
+        handles.iter().map(|&handle| object_of(handle).and_then(|o| o.cast::<Control>()).expect("a control")).collect();
+    for child in &foreign_children {
+        foreign_panel.children().add(child);
+    }
+    let pass = |panel: &StackPanel, children: &mut dyn Iterator<Item = &Layoutable>| {
+        for child in children {
+            child.invalidate_measure();
+        }
+        panel.invalidate_measure();
+        panel.measure(Size::new(400.0, f64::INFINITY));
+        panel.arrange(Rect::new(0.0, 0.0, 400.0, panel.desired_size().height));
+    };
+    if selected("controls: measure and arrange") {
+        let rust = measure_n(ITERATIONS / count as u32, |_| {
+            pass(&rust_panel, &mut rust_children.iter().map(|c| -> &Layoutable { c }));
+        });
+        let abi = measure_n(ITERATIONS / count as u32, |_| {
+            pass(&foreign_panel, &mut foreign_children.iter().map(|c| -> &Layoutable { c }));
+        });
+        report("controls: measure and arrange 1000", rust, abi);
+    }
+    if selected("controls: render") {
+        let mut recorder = RenderDataDrawingContext::new(None);
+        let mut render = |children: &mut dyn Iterator<Item = &Visual>| {
+            {
+                let mut context = DrawingContext::new(&mut recorder);
+                for child in children {
+                    child.render(&mut context);
+                }
+            }
+            recorder.reset();
+        };
+        let rust = measure_n(ITERATIONS / count as u32, |_| render(&mut rust_children.iter().map(|c| -> &Visual { c })));
+        let abi = measure_n(ITERATIONS / count as u32, |_| render(&mut foreign_children.iter().map(|c| -> &Visual { c })));
+        report("controls: render 1000", rust, abi);
+    }
+    if selected("controls: registered property") {
+        let name = "Level";
+        // SAFETY: a pointer and the length of a Rust string, no default text.
+        let level = unsafe {
+            ferro_property_register(
+                class,
+                name.as_ptr().cast(),
+                name.len() as i64,
+                FERRO_SIGNAL_F64,
+                1.0,
+                std::ptr::null(),
+                FERRO_PROPERTY_AFFECTS_MEASURE,
+            )
+        };
+        // A built-in property of the same kind: a number that affects the measure.
+        let font_size = id(ferro_property_id, c"MinWidth");
+        assert!(level > 0);
+        let builtin = ferro_create(class);
+        let size = |i: u32| if i & 1 == 0 { 12.0 } else { 13.0 };
+        let write_builtin = measure(|i| {
+            ferro_set_f64(builtin, font_size, size(i));
+        });
+        let write_registered = measure(|i| {
+            ferro_set_f64(builtin, level, size(i));
+        });
+        report("controls: write a registered property", write_builtin, write_registered);
+        let read_builtin = measure(|_| {
+            black_box(ferro_get_f64_or(builtin, font_size, 0.0));
+        });
+        let read_registered = measure(|_| {
+            black_box(ferro_get_f64_or(builtin, level, 0.0));
+        });
+        report("controls: read a registered property", read_builtin, read_registered);
+        assert_eq!(ferro_release(builtin), FERRO_OK);
+    }
+    for handle in handles {
+        assert_eq!(ferro_release(handle), FERRO_OK);
     }
 }
