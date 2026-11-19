@@ -20,13 +20,16 @@ impl Fixture {
                 json!({"format":2,"name":"Example","crate_name":"example",
                 "metadata":[["FerroUI.Designer.Rsx.v1:Example.Views.StatusCard",
                     r#"{"path":"crate::views::ReviewCard","properties":{"Caption":"heading"}}"#],
-                    ["FerroUI.Designer.RsxAnimation.v1:crate::motion::reading_radius", "crate::StatusCard::reading_radius_property"]],
+                    ["FerroUI.Designer.RsxAnimation.v1:crate::motion::reading_radius", "crate::StatusCard::reading_radius_property"],
+                    ["FerroUI.Designer.RsxAnimation.v1:crate::StatusCard::relative_radius_property", "crate::StatusCard::relative_radius_property"]],
                 "types":[{"name":"StatusCard","namespace":"Example.Views","kind":"class",
                     "rust_path":"::example::StatusCard","object_model":true,
                     "base":"::ferroui_controls::Control","default_constructor":{},
                     "properties":[{"name":"Caption","value_type":"String","setter":{}}],
                     "registered":[{"accessor":"reading_radius_property","name":"ReadingRadius","kind":"styled",
-                        "value_type":"::ferroui_base::corner_radius::CornerRadius","registration":"declared"}]}]}),
+                        "value_type":"::ferroui_base::corner_radius::CornerRadius","registration":"declared"},
+                        {"accessor":"relative_radius_property","name":"RelativeRadius","kind":"styled",
+                        "value_type":"::ferroui_base::RelativeScalar","registration":"declared"}]}]}),
             ),
             (
                 "dependency",
@@ -115,6 +118,36 @@ fn registered_typed_keys_keep_comments_other_invocations_and_opaque_clips() {
     let markup = inserted.preview_markup();
     assert!(markup.animations[0].1.maps_key("ReadingRadius", 1.5, ValueKind::CornerRadius));
     assert_eq!(inserted.omitted_count, 1);
+}
+
+#[test]
+fn registered_relative_scalar_keys_support_unit_edits_and_typed_insertion() {
+    use ferroui_designer_animation::{KeyframeEdit, ValueKind};
+    use ferroui_designer_core::TextPatch;
+
+    let source = r##"fn view() { rsx! { StackPanel {
+        styles: [ferroui_view::style("#Review").animation(ferroui_view::animation(ferroui_view::ms(2000))
+            .key_frame(0.0, |key| key.set(crate::StatusCard::relative_radius_property(),
+                ferroui_base::RelativeScalar::new(/* radius 🧭 */ 0.25f64, ferroui_base::RelativeUnit::Relative))))],
+        crate::views::ReviewCard { name: "Review" }
+    }}}"##.replace('\n', "\r\n");
+    let caret = source.find("rsx!").unwrap();
+    let catalog = Fixture::catalog();
+    let projection = catalog.project(&source, caret).unwrap();
+    let markup = projection.preview_markup();
+    assert!(markup.source.contains("Property=\"RelativeRadius\" Value=\"25%\""));
+    let clip = markup.animations[0].1;
+    let edited = TextPatch::apply_all(&source, clip.patch_keyframe("RelativeRadius", KeyframeEdit::Upsert {
+        previous: Some(0.0), time: 0.0, value: "12.5", easing: "LinearEasing",
+    }).unwrap()).unwrap();
+    assert_eq!(edited, source.replace("0.25f64, ferroui_base::RelativeUnit::Relative", "12.5f64, ferroui_base::RelativeUnit::Absolute"));
+    let inserted = clip.author_keyframe(&source, &catalog, "RelativeRadius", KeyframeEdit::Upsert {
+        previous: None, time: 1.0, value: "60%", easing: "LinearEasing",
+    }).unwrap();
+    assert!(inserted[0].replacement.contains("::ferroui_base::RelativeScalar::new(0.6, ::ferroui_base::RelativeUnit::Relative)"));
+    let inserted = TextPatch::apply_all(&source, inserted).unwrap();
+    let projection = catalog.project(&inserted, caret).unwrap();
+    assert!(projection.preview_markup().animations[0].1.maps_key("RelativeRadius", 1.0, ValueKind::RelativeScalar));
 }
 
 impl Drop for Fixture {

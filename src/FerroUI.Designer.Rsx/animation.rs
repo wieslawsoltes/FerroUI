@@ -3,6 +3,7 @@
 mod color;
 mod keyframe;
 pub(crate) mod program_comment;
+mod relative;
 mod retime;
 mod structural;
 pub(crate) mod syntax;

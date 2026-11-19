@@ -48,6 +48,28 @@ fn rgb_key_can_add_alpha_and_keep_its_comments_and_byte_suffix() {
 }
 
 #[test]
+fn relative_point_keys_preserve_the_constructor_when_editing_units() {
+    let constructor = "ferroui_base::RelativePoint::from_point(ferroui_base::Point::new(/* origin 🧭 */ 0.6f64, 0.25), ::ferroui_base::RelativeUnit::Relative)";
+    let source = VIEW.replace("ferroui_base::Visual::opacity_property()", "ferroui_base::Visual::render_transform_origin_property()")
+        .replace("0.2))", "ferroui_base::RelativePoint::new(0.2, 0.25, ferroui_base::RelativeUnit::Relative)))")
+        .replace("0.6f64", constructor)
+        .replace("1.0))", "ferroui_base::RelativePoint::new(1.0, 0.5, ferroui_base::RelativeUnit::Relative)))")
+        .replace('\n', "\r\n");
+    let caret = source.rfind("rsx!").unwrap();
+    let projection = project_rust(&source, caret).unwrap();
+    let markup = projection.preview_markup();
+    assert!(markup.source.contains("Property=\"RenderTransformOrigin\" Value=\"60%,25%\""));
+    let clip = markup.animations[0].1;
+    let edit = |value| KeyframeEdit::Upsert { previous: Some(0.5), time: 0.5, value, easing: "0.25,-0.5,0.6,1.2" };
+    assert!(clip.patch_keyframe("RenderTransformOrigin", edit("18%,24")).is_err());
+    let patches = clip.patch_keyframe("RenderTransformOrigin", edit("18,24")).unwrap();
+    let expected = constructor.replace("0.6f64, 0.25", "18.0f64, 24.0").replace("::RelativeUnit::Relative", "::RelativeUnit::Absolute");
+    let edited = TextPatch::apply_all(&source, patches).unwrap();
+    assert_eq!(edited, source.replace(constructor, &expected));
+    assert!(project_rust(&edited, caret).unwrap().xaml().contains("Value=\"18,24\""));
+}
+
+#[test]
 fn retiming_shared_cues_requires_every_setter_and_changes_each_cue_once() {
     let source = VIEW.replace(
         "0.2))",

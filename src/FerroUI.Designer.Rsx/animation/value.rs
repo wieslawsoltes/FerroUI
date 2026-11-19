@@ -1,4 +1,5 @@
 use super::color::ColorSource;
+use super::relative::RelativeSource;
 use super::{syntax, FloatSource};
 use ferroui_designer_animation::{AnimationValue, ValueKind};
 use ferroui_designer_core::TextPatch;
@@ -20,11 +21,13 @@ pub(crate) struct ValueSource {
 enum ValueSyntax {
     Numbers(Vec<FloatSource>),
     Color(ColorSource),
+    Relative(RelativeSource),
 }
 
 impl ValueShape {
     pub(crate) const NUMBER: Self = Self::typed(ValueKind::Number);
     pub(crate) const CORNER_RADIUS: Self = Self::typed(ValueKind::CornerRadius);
+    pub(crate) const RELATIVE_POINT: Self = Self::typed(ValueKind::RelativePoint);
     pub(super) const SOLID_BRUSH: Self = Self {
         kind: ValueKind::Color,
         brush: true,
@@ -51,6 +54,8 @@ impl ValueShape {
             "Vector" | "vector::Vector" => ValueKind::Vector,
             "Size" | "size::Size" => ValueKind::Size,
             "Rect" | "rect::Rect" => ValueKind::Rect,
+            "RelativePoint" | "relative_point::RelativePoint" => ValueKind::RelativePoint,
+            "RelativeScalar" | "relative_scalar::RelativeScalar" => ValueKind::RelativeScalar,
             _ => return None,
         }))
     }
@@ -63,6 +68,10 @@ impl ValueShape {
                 value,
                 source: ValueSyntax::Color(source),
             });
+        }
+        if matches!(kind, ValueKind::RelativePoint | ValueKind::RelativeScalar) {
+            let (value, source) = RelativeSource::read(expression, kind)?;
+            return Some(ValueSource { value, source: ValueSyntax::Relative(source) });
         }
         let parts = if kind == ValueKind::Number
             || matches!(kind, ValueKind::CornerRadius | ValueKind::Thickness)
@@ -119,6 +128,7 @@ impl ValueSource {
         let value = AnimationValue::parse(text, kind).map_err(|error| error.to_string())?;
         let parts = match &self.source {
             ValueSyntax::Color(source) => return source.plan(&self.value, &value, patches),
+            ValueSyntax::Relative(source) => return source.plan(&value, patches),
             ValueSyntax::Numbers(parts) => parts,
         };
         let values = numeric_parts(&value)?;
@@ -150,6 +160,9 @@ pub(crate) fn rust_literal(value: &AnimationValue) -> Result<String, String> {
         return Ok(format!(
             "::ferroui_base::media::Color::from_argb({a}, {r}, {g}, {b})"
         ));
+    }
+    if let Some(relative) = super::relative::literal(value) {
+        return Ok(relative);
     }
     let name = match value.kind() {
         ValueKind::CornerRadius => "CornerRadius",
