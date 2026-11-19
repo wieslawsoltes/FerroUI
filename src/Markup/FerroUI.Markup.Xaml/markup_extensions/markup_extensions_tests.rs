@@ -165,7 +165,7 @@ fn static_resource_is_found_through_chained_providers() {
     let outer = TestServiceProvider::new().with_parents(vec![boxed(dictionary(&[("k", boxed(1i32))]))]);
     let sp = TestServiceProvider::new().with_parents(vec![boxed(Border::new())]).with_outer_parents(outer).sp();
     let extension = StaticResourceExtension::with_resource_key(Some(boxed("k".to_string())));
-    assert_eq!(extension.try_provide_value(&sp).unwrap().unwrap().unwrap().downcast_ref::<i32>(), Some(&1));
+    assert_eq!(extension.provide_value(&sp).unwrap().unwrap().downcast_ref::<i32>(), Some(&1));
 }
 
 #[test]
@@ -179,11 +179,11 @@ fn static_resource_requires_a_key() {
 fn static_resource_that_is_not_found_is_an_error() {
     let sp = TestServiceProvider::new().with_parents(vec![boxed(dictionary(&[]))]).sp();
     let extension = StaticResourceExtension::with_resource_key(Some(boxed("missing".to_string())));
-    assert_eq!(extension.try_provide_value(&sp).unwrap().unwrap_err().message(), "Static resource 'missing' not found.");
+    assert_eq!(extension.provide_value(&sp).unwrap_err().message(), "Static resource 'missing' not found.");
 
     // Also without a parent stack.
     let sp = TestServiceProvider::new().sp();
-    assert!(extension.try_provide_value(&sp).unwrap().is_err());
+    assert!(extension.provide_value(&sp).is_err());
 }
 
 #[test]
@@ -193,7 +193,7 @@ fn static_resource_keyed_by_type() {
     let sp = TestServiceProvider::new().with_parents(vec![boxed(resources)]).sp();
 
     let extension = StaticResourceExtension::with_resource_key(Some(boxed(<Button as StaticType>::TYPE)));
-    assert_eq!(text(&extension.try_provide_value(&sp).unwrap().unwrap()), "button theme");
+    assert_eq!(text(&extension.provide_value(&sp).unwrap()), "button theme");
 }
 
 #[test]
@@ -206,7 +206,7 @@ fn static_resource_converts_a_color_for_a_brush_property() {
         .with_target(Some(boxed(border)), Some(boxed(property)))
         .sp();
     let extension = StaticResourceExtension::with_resource_key(Some(boxed("accent".to_string())));
-    assert_eq!(brush_color(&extension.try_provide_value(&sp).unwrap().unwrap()), Colors::RED);
+    assert_eq!(brush_color(&extension.provide_value(&sp).unwrap()), Colors::RED);
 
     // For a property of another type the color stays a color.
     let tag: &'static FerroProperty = Control::tag_property();
@@ -214,7 +214,7 @@ fn static_resource_converts_a_color_for_a_brush_property() {
         .with_parents(vec![boxed(resources.clone())])
         .with_target(Some(boxed(Border::new())), Some(boxed(tag)))
         .sp();
-    assert!(extension.try_provide_value(&sp).unwrap().unwrap().unwrap().is::<ferroui_base::media::Color>());
+    assert!(extension.provide_value(&sp).unwrap().unwrap().is::<ferroui_base::media::Color>());
 
 }
 
@@ -246,7 +246,7 @@ fn static_resource_that_is_not_found_yet_is_applied_when_the_control_is_initiali
     let sp = TestServiceProvider::new().with_parents(vec![]).with_target(Some(boxed(border.clone())), Some(boxed(property))).sp();
 
     let extension = StaticResourceExtension::with_resource_key(Some(boxed("late".to_string())));
-    let provided = extension.try_provide_value(&sp).unwrap().unwrap();
+    let provided = extension.provide_value(&sp).unwrap();
     assert!(is_unset(&provided));
 
     border.resources().add("late", Some(boxed("found".to_string())));
@@ -284,7 +284,7 @@ fn static_resource_metadata_constructs_and_provides() {
 fn dynamic_resource_provides_itself_as_the_binding() {
     let extension = DynamicResourceExtension::with_resource_key(Some(boxed("k".to_string())));
     let sp = TestServiceProvider::new().sp();
-    let provided = extension.try_provide_value(&sp).unwrap();
+    let provided = extension.provide_value(&sp);
     assert!(Rc::ptr_eq(&provided, &extension));
     assert_eq!(text(&extension.resource_key()), "k");
 }
@@ -297,7 +297,7 @@ fn dynamic_resource_follows_the_resources_of_its_target() {
     let sp = TestServiceProvider::new().with_target(Some(boxed(border.clone())), Some(boxed(property))).sp();
 
     let extension = DynamicResourceExtension::with_resource_key(Some(boxed("brush".to_string())));
-    let binding = extension.try_provide_value(&sp).unwrap();
+    let binding = extension.provide_value(&sp);
     let expression = border.bind_binding(property, &*binding);
 
     // A color resource becomes a brush for a brush property.
@@ -325,7 +325,7 @@ fn dynamic_resource_in_a_control_template_binds_with_template_priority() {
         .sp();
 
     let extension = DynamicResourceExtension::with_resource_key(Some(boxed("tag".to_string())));
-    let binding = extension.try_provide_value(&sp).unwrap();
+    let binding = extension.provide_value(&sp);
     let expression = border.bind_binding(property, &*binding);
     assert_eq!(expression.priority(), BindingPriority::Template);
     assert_eq!(text(&border.tag()), "from resource");
@@ -348,7 +348,7 @@ fn dynamic_resource_on_a_non_element_target_is_anchored_to_the_nearest_element()
         .with_target(Some(boxed(brush.clone())), Some(boxed(property)))
         .sp();
     let extension = DynamicResourceExtension::with_resource_key(Some(boxed("accent".to_string())));
-    let binding = extension.try_provide_value(&sp).unwrap();
+    let binding = extension.provide_value(&sp);
 
     let expression = brush.bind_binding(property, &*binding);
     assert_eq!(brush.color(), Colors::RED);
@@ -365,7 +365,7 @@ fn dynamic_resource_without_a_host_publishes_nothing() {
     let property: &'static FerroProperty = SolidColorBrush::color_property();
     let sp = TestServiceProvider::new().with_target(Some(boxed(brush.clone())), Some(boxed(property))).sp();
     let extension = DynamicResourceExtension::with_resource_key(Some(boxed("accent".to_string())));
-    let binding = extension.try_provide_value(&sp).unwrap();
+    let binding = extension.provide_value(&sp);
     let _expression = brush.bind_binding(property, &*binding);
     assert_eq!(brush.color(), default);
 }
@@ -672,7 +672,7 @@ fn reflection_binding_extension_provides_a_binding_with_its_context() {
     extension.set_mode(BindingMode::OneWayToSource);
     extension.set_delay(10);
 
-    let binding = extension.try_provide_value(&sp).unwrap();
+    let binding = extension.provide_value(&sp);
     assert!(!Rc::ptr_eq(&binding, extension.base()));
     assert_eq!(binding.path(), "Foo.Bar");
     assert_eq!(binding.element_name().as_deref(), Some("source"));
@@ -989,7 +989,7 @@ fn static_resource_takes_the_target_type_from_the_property_of_a_setter() {
     setter.set_property(Some(property));
     let sp = TestServiceProvider::new().with_parents(vec![boxed(resources)]).with_target(Some(boxed(setter)), None).sp();
     let extension = StaticResourceExtension::with_resource_key(Some(boxed("accent".to_string())));
-    assert_eq!(brush_color(&extension.try_provide_value(&sp).unwrap().unwrap()), Colors::RED);
+    assert_eq!(brush_color(&extension.provide_value(&sp).unwrap()), Colors::RED);
 }
 
 #[test]
@@ -1125,7 +1125,7 @@ fn a_static_resource_that_is_not_found_is_delayed_for_a_control_property_and_an_
         let border = Border::new();
         border.begin_init();
         let sp = TestServiceProvider::new().with_parents(parents).with_target(Some(boxed(border.clone())), Some(property)).sp();
-        assert!(is_unset(&extension.try_provide_value(&sp).unwrap().unwrap()), "{case}");
+        assert!(is_unset(&extension.provide_value(&sp).unwrap()), "{case}");
         // The delayed lookup finds the resource when the control is initialised.
         border.resources().add("Missing", Some(boxed("late".to_string())));
         border.end_init();
@@ -1140,15 +1140,15 @@ fn a_static_resource_that_is_not_found_is_delayed_for_a_control_property_and_an_
         .with_parents(vec![boxed(dictionary(&[]))])
         .with_target(Some(boxed(brush)), Some(boxed(color)))
         .sp();
-    assert_eq!(extension.try_provide_value(&sp).unwrap().unwrap_err().message(), not_found);
+    assert_eq!(extension.provide_value(&sp).unwrap_err().message(), not_found);
     let sp = TestServiceProvider::new().with_target(Some(boxed(Setter::empty())), Some(boxed(description))).sp();
-    assert_eq!(extension.try_provide_value(&sp).unwrap().unwrap_err().message(), not_found);
+    assert_eq!(extension.provide_value(&sp).unwrap_err().message(), not_found);
 
     // A control without a target property, and no provide-value target at all: an error.
     let sp = TestServiceProvider::new().with_target(Some(boxed(Border::new())), None).sp();
-    assert_eq!(extension.try_provide_value(&sp).unwrap().unwrap_err().message(), not_found);
+    assert_eq!(extension.provide_value(&sp).unwrap_err().message(), not_found);
     let sp = TestServiceProvider::new().with_parents(vec![boxed(Border::new())]).sp();
-    assert_eq!(extension.try_provide_value(&sp).unwrap().unwrap_err().message(), not_found);
+    assert_eq!(extension.provide_value(&sp).unwrap_err().message(), not_found);
 }
 
 #[test]

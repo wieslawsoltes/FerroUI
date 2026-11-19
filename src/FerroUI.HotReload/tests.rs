@@ -3572,9 +3572,11 @@ fn an_error_raised_in_a_reload_step_is_its_error_without_unwinding() {
     assert_eq!(catch_reload(|| Err::<(), _>(own.clone())), Err(own));
     assert_eq!(catch_reload(|| Ok(2)), Ok(2));
 
+    // Outside a step the error goes to the dispatcher (#567); unhandled, it unwinds with its
+    // message.
     let outside = std::panic::catch_unwind(|| raise_reload_error(ReloadError::Failed("outside".into())));
     let payload = outside.expect_err("raised outside a step");
-    assert_eq!(payload.downcast_ref::<ReloadError>(), Some(&ReloadError::Failed("outside".into())));
+    assert_eq!(payload.downcast_ref::<String>().map(String::as_str), Some("The reload failed: outside"));
 }
 
 /// Not from upstream (#567): an error the XAML runtime reports in a step of a reload (a deferred
