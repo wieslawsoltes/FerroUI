@@ -6,11 +6,18 @@ impl DesignerWorkspace {
         panel: &StackPanel,
         group: Rc<VisualStateGroup>,
         accepted: AcceptedSource,
+        writable: bool,
     ) {
-        if group.transitions.is_empty() {
+        if group.states.is_empty() {
             return;
         }
         section(panel, "Transitions");
+        if group.transitions.is_empty() {
+            if writable {
+                self.rust_route_creator(&toolbar(panel), group, &accepted);
+            }
+            return;
+        }
         let labels = group
             .transitions
             .iter()
@@ -89,29 +96,51 @@ impl DesignerWorkspace {
                 }
             },
         );
-        icon_action(
-            &tools,
-            "Apply transition settings",
-            APPLY,
-            self,
-            accepted.clone(),
-            {
-                let (group, picker) = (group.clone(), picker.clone());
+        if writable {
+            self.rust_route_creator(&tools, group.clone(), &accepted);
+            let (group, picker) = (group.clone(), picker.clone());
+            icon_action(
+                &tools,
+                "Remove transition",
+                REMOVE,
+                self,
+                accepted.clone(),
                 move |this| {
                     let mut model = (*group).clone();
-                    let route = model
-                        .transitions
-                        .get_mut(picker.selected_index() as usize)
-                        .ok_or_else(index)?;
-                    route.duration = text(&duration)
-                        .parse()
-                        .map_err(|_| "Enter the duration in seconds")?;
-                    route.easing =
-                        Easing::parse(&text(&ease)).map_err(|error| error.to_string())?;
+                    let index = picker.selected_index() as usize;
+                    if index >= model.transitions.len() {
+                        return Err("Choose a Rust state route".into());
+                    }
+                    model.transitions.remove(index);
                     this.session.borrow_mut().upsert_state_group(model)
-                }
-            },
-        );
+                },
+            );
+        }
+        if writable {
+            icon_action(
+                &tools,
+                "Apply transition settings",
+                APPLY,
+                self,
+                accepted.clone(),
+                {
+                    let (group, picker) = (group.clone(), picker.clone());
+                    move |this| {
+                        let mut model = (*group).clone();
+                        let route = model
+                            .transitions
+                            .get_mut(picker.selected_index() as usize)
+                            .ok_or_else(index)?;
+                        route.duration = text(&duration)
+                            .parse()
+                            .map_err(|_| "Enter the duration in seconds")?;
+                        route.easing =
+                            Easing::parse(&text(&ease)).map_err(|error| error.to_string())?;
+                        this.session.borrow_mut().upsert_state_group(model)
+                    }
+                },
+            );
+        }
         icon_action(
             &tools,
             "Reveal Rust transition source",

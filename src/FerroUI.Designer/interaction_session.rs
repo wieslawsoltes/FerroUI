@@ -41,15 +41,7 @@ impl DesignerSession {
     }
     pub fn upsert_state_group(&mut self, group: VisualStateGroup) -> Result<(), String> {
         if self.uses_rust_source() {
-            let patches = self.rust_state_group(group.owner, &group.name)
-                .ok_or("Choose an existing mapped Rust state group")?
-                .patch_model(&group)?;
-            let change = self.commit_rust_patches("Edit Rust visual state group", patches)
-                .map_err(|error| error.to_string())?;
-            if !change.is_empty() {
-                self.changed(true);
-            }
-            return Ok(());
+            return self.edit_rust_state_group(group.owner, &group.name, Some(&group));
         }
         let edits = group
             .plan(&self.document)
@@ -60,7 +52,7 @@ impl DesignerSession {
     }
     pub fn remove_state_group(&mut self, owner: NodeId, name: &str) -> Result<(), String> {
         if self.uses_rust_source() {
-            return Err("Remove the Rust state group in the source editor".into());
+            return self.edit_rust_state_group(owner, name, None);
         }
         let edits = VisualStateGroup::remove(&self.document, owner, name)
             .map_err(|error| error.to_string())?;
@@ -68,6 +60,28 @@ impl DesignerSession {
             .map_err(|error| error.to_string())?;
         Ok(())
     }
+    pub(crate) fn can_create_rust_state_group(&self, owner: NodeId) -> bool {
+        self.can_manipulate()
+            && self.document.ast().node(owner).zip(self.rust_map())
+                .is_some_and(|(node, map)| map.can_create_state_group(node.span.start))
+    }
+
+    fn edit_rust_state_group(
+        &mut self, owner: NodeId, name: &str, model: Option<&VisualStateGroup>,
+    ) -> Result<(), String> {
+        if !self.can_manipulate() {
+            return Err("Open a current, editable Rust view".into());
+        }
+        let rust = self.rust.as_ref().ok_or("Open the current Rust view")?;
+        let patches = rust.edit_state_group(&self.document, owner, name, model)?;
+        if !patches.is_empty() {
+            let label = if model.is_some() { "Edit Rust visual state group" } else { "Remove Rust visual state group" };
+            self.commit_rust_patches(label, patches).map_err(|error| error.to_string())?;
+            self.changed(true);
+        }
+        Ok(())
+    }
+
     pub fn preview_state(
         &mut self,
         owner: NodeId,
@@ -193,6 +207,7 @@ impl DesignerSession {
         {
             return Err("Attach the preview host to a Window or rooted logical tree before sampling native state transitions, bindings or resources".into());
         }
+        let projected = group.is_projected(&self.document);
         let key = (owner, name.to_owned());
         let from = source_state.unwrap_or_else(|| {
             group.states.iter().find(|state| owner_visual.classes().contains(&group.class_name(&state.name)))
@@ -268,7 +283,7 @@ impl DesignerSession {
         if let Some(state) = selected {
             let class = group.class_name(&state.name);
             let route = transition.and_then(|transition| transition.from.as_deref());
-            if let Some(from) = route.filter(|_| source_state.is_some()) {
+            if let Some(from) = route.filter(|_| source_state.is_some() && !projected) {
                 // During an explicit seek, start the selected route last. Existing
                 // XAML can match the default style along with the directional style.
                 classes.add(&class);

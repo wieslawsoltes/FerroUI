@@ -212,6 +212,30 @@ fn studio_rust_states_edit_and_seek_the_original_source() {
     session.borrow_mut().undo().unwrap();
     assert_eq!(session.borrow().authored_source(), source);
     assert!(!session.borrow().can_undo());
+    let mut highlights = ferroui_designer_animation::VisualStateGroup {
+        name: "Highlight".into(), owner,
+        states: vec![ferroui_designer_animation::VisualState { name: "Focused".into(), setters: vec![
+            ferroui_designer_animation::StateSetter { target: "Card".into(), property: "Width".into(), value: "160".into() },
+        ] }],
+        transitions: vec![],
+    };
+    assert!(session.borrow().can_create_rust_state_group(owner));
+    session.borrow_mut().upsert_state_group(highlights.clone()).unwrap();
+    let added = session.borrow().authored_source().to_owned();
+    assert!(added.contains(r#"::ferroui_view::visual_state_group("Highlight")"#));
+    session.borrow_mut().preview_state(owner, "Highlight", Some("Focused")).unwrap();
+    assert!((width() - 160.0).abs() < 0.000_01);
+    highlights.states[0].setters.clear();
+    session.borrow_mut().upsert_state_group(highlights).unwrap();
+    assert!(!session.borrow().authored_source().contains("160.0"));
+    session.borrow_mut().undo().unwrap();
+    assert_eq!(session.borrow().authored_source(), added);
+    session.borrow_mut().remove_state_group(owner, "Highlight").unwrap();
+    assert_eq!(session.borrow().authored_source(), source);
+    session.borrow_mut().undo().unwrap();
+    assert_eq!(session.borrow().authored_source(), added);
+    session.borrow_mut().undo().unwrap();
+    assert_eq!(session.borrow().authored_source(), source);
     assert!(!session.borrow_mut().update_source(source.replace("width: 100.0", "width: [")).valid);
     assert!(session.borrow_mut().upsert_state_group(group).is_err());
     window.close();

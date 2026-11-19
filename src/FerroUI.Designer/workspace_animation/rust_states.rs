@@ -1,11 +1,16 @@
 #[path = "rust_states/routes.rs"]
 mod routes;
+#[path = "rust_states/structure.rs"]
+mod structure;
 
 use super::*;
 use ferroui_designer_core::Ast;
 use std::sync::Arc;
 
 const REVEAL: &str = "F1 M5,3 L0,8 5,13 6,12 2,8 6,4 Z M11,3 L16,8 11,13 10,12 14,8 10,4 Z";
+const ADD: &str = "F1 M7,2 L9,2 9,7 14,7 14,9 9,9 9,14 7,14 7,9 2,9 2,7 7,7 Z";
+const REMOVE: &str =
+    "F1 M6,1 L10,1 10,3 14,3 14,5 13,5 12,15 4,15 3,5 2,5 2,3 6,3 Z M5,5 L6,13 10,13 11,5 Z";
 const APPLY: &str = "F1 M2,8 L4,6 7,9 13,3 15,5 7,13 Z";
 const SEEK: &str = "F1 M3,2 L12,8 3,14 Z M13,2 L15,2 15,14 13,14 Z";
 const CLEAR: &str =
@@ -15,6 +20,7 @@ const CLEAR: &str =
 struct AcceptedSource {
     document: String,
     revision: u64,
+    selection: Vec<NodeId>,
     syntax: Arc<Ast>,
 }
 
@@ -23,6 +29,7 @@ impl AcceptedSource {
         Self {
             document: session.document_uri().to_owned(),
             revision: session.document().revision(),
+            selection: session.selection().to_vec(),
             syntax: session.document().ast_snapshot(),
         }
     }
@@ -33,9 +40,10 @@ impl AcceptedSource {
             || !session.authored_is_valid()
             || session.document_uri() != self.document
             || session.document().revision() != self.revision
+            || session.selection() != self.selection
             || !std::ptr::eq(session.document().ast(), self.syntax.as_ref())
         {
-            return Err("The Rust source changed. Reopen its state editor.".into());
+            return Err("The Rust source or selection changed. Reopen its state editor.".into());
         }
         Ok(())
     }
@@ -50,15 +58,28 @@ impl DesignerWorkspace {
             .filter(|group| group.owner == owner)
             .collect::<Vec<_>>();
         let accepted = AcceptedSource::new(&session);
+        let creatable = session.can_create_rust_state_group(owner);
+        let writable = session.can_manipulate();
         drop(session);
         let active_name = self.authoring.borrow().group.clone();
+        if creatable {
+            let tools = toolbar(panel);
+            self.rust_group_creator(&tools, owner, &accepted);
+        }
         let Some(group) = groups
             .iter()
             .find(|group| group.name == active_name)
             .or_else(|| groups.first())
             .cloned()
         else {
-            description(panel, "Select the owner of a mapped Rust state group.");
+            description(
+                panel,
+                if creatable {
+                    "Add a state group to the selected control."
+                } else {
+                    "Select a control with a mapped inline Rust state group."
+                },
+            );
             return;
         };
         if groups.len() > 1 {
@@ -94,8 +115,19 @@ impl DesignerWorkspace {
                 Ok(())
             },
         );
-        self.build_rust_state_values(panel, &group, &accepted);
-        self.build_rust_state_routes(panel, group, accepted);
+        if writable {
+            let name = group.name.clone();
+            icon_action(
+                &group_tools,
+                "Remove Rust state group",
+                REMOVE,
+                self,
+                accepted.clone(),
+                move |this| this.session.borrow_mut().remove_state_group(owner, &name),
+            );
+        }
+        self.build_rust_state_values(panel, &group, &accepted, writable);
+        self.build_rust_state_routes(panel, group, accepted, writable);
     }
 
     fn build_rust_state_values(
@@ -103,8 +135,12 @@ impl DesignerWorkspace {
         panel: &StackPanel,
         group: &Rc<VisualStateGroup>,
         accepted: &AcceptedSource,
+        writable: bool,
     ) {
         section(panel, "States");
+        if writable {
+            self.rust_state_creator(&toolbar(panel), group.clone(), accepted);
+        }
         for state in &group.states {
             let name = state.name.clone();
             let group = group.clone();
@@ -118,13 +154,17 @@ impl DesignerWorkspace {
             });
         }
         let current = self.authoring.borrow().state.clone();
-        let Some(index) = group.states.iter().position(|state| state.name == current) else {
-            return;
-        };
-        let state = &group.states[index];
-        if state.setters.is_empty() {
+        if !writable || group.states.is_empty() {
             return;
         }
+        let index = group
+            .states
+            .iter()
+            .position(|state| state.name == current)
+            .unwrap_or(0);
+        let state = &group.states[index];
+        section(panel, &state.name);
+        self.rust_state_tools(&toolbar(panel), group.clone(), index, accepted);
         let inputs = state
             .setters
             .iter()
@@ -137,6 +177,9 @@ impl DesignerWorkspace {
                 field(panel, &name, &setter.value)
             })
             .collect::<Vec<_>>();
+        if inputs.is_empty() {
+            return;
+        }
         let group = group.clone();
         icon_action(
             &toolbar(panel),
@@ -199,15 +242,7 @@ fn icon_action(
     accepted: AcceptedSource,
     run: impl Fn(&Rc<DesignerWorkspace>) -> Result<(), String> + 'static,
 ) {
-    let button = Button::new();
-    button.classes().add("icon");
-    button.set_width(27.0);
-    button.set_height(26.0);
-    AutomationProperties::set_name(&button, Some(title));
-    ToolTip::set_tip(&button, Some(Rc::new(title.to_owned())));
-    let icon = crate::icons::vector_icon(path, 14.0);
-    icon.classes().add("designer-icon");
-    button.set_content(Some(Control::boxed(&icon)));
+    let button = icon_button(title, path);
     let weak = Rc::downgrade(workspace);
     button.click(move |_, event| {
         if let Some(this) = weak.upgrade() {
@@ -220,4 +255,17 @@ fn icon_action(
         }
     });
     row.children().add(button.upcast::<Control>());
+}
+
+fn icon_button(title: &str, path: &str) -> Ref<Button> {
+    let button = Button::new();
+    button.classes().add("icon");
+    button.set_width(27.0);
+    button.set_height(26.0);
+    AutomationProperties::set_name(&button, Some(title));
+    ToolTip::set_tip(&button, Some(Rc::new(title.to_owned())));
+    let icon = crate::icons::vector_icon(path, 14.0);
+    icon.classes().add("designer-icon");
+    button.set_content(Some(Control::boxed(&icon)));
+    button
 }

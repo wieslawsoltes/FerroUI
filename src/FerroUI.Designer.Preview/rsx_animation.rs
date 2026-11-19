@@ -1,11 +1,14 @@
 use crate::document::DesignDocument;
-use ferroui_designer_animation::{KeyframeEdit, VisualStateGroup};
+use ferroui_designer_animation::KeyframeEdit;
 use ferroui_designer_core::{NodeId, SourceSpan, TextPatch};
 use ferroui_designer_language::LineIndex;
 use ferroui_designer_rsx::{RsxAnimation, RsxAnimationIssue, RsxCatalog, RsxStateGroup};
 use ferroui_remote_protocol::designer::{DesignAnimationProgram, DesignAnimationSourcePatch};
 use serde_json::{json, Value};
 use std::collections::BTreeMap;
+
+mod states;
+pub(crate) use states::{state_edit, state_patches};
 
 mod keyframes;
 pub(crate) use keyframes::keyframe_edit;
@@ -18,11 +21,8 @@ pub(crate) struct AuthoredRsxFrame {
     clips: BTreeMap<NodeId, RsxAnimation>,
     catalog: RsxCatalog,
     states: BTreeMap<(NodeId, String), RsxStateGroup>,
+    state_owners: Vec<NodeId>,
     issues: Vec<RsxAnimationIssue>,
-}
-
-pub(crate) fn state_edit(tool: &str, action: Option<&str>) -> bool {
-    tool == "designer_state" && action == Some("upsert")
 }
 
 impl AuthoredRsxFrame {
@@ -34,6 +34,10 @@ impl AuthoredRsxFrame {
             clips: design.rsx_animations.clone(),
             catalog: design.rsx_catalog().clone(),
             states: design.rsx_states.clone(),
+            state_owners: design.xaml.ast().nodes_in_source_order().filter_map(|node| {
+                let (owner, _) = design.rsx_node(node.id)?;
+                rsx.can_create_state_group(owner).then_some(node.id)
+            }).collect(),
             issues: rsx.animation_issues.clone(),
         })
     }
@@ -68,6 +72,8 @@ impl AuthoredRsxFrame {
 
     pub(crate) fn annotate_states(&self, models: &mut Value, owner: Option<NodeId>) {
         let index = LineIndex::new(&self.source);
+        models["creatableOwners"] = json!(self.state_owners.iter()
+            .filter(|id| owner.is_none_or(|owner| owner == **id)).collect::<Vec<_>>());
         models["sources"] = json!(self.states.iter().filter_map(|((id, _), group)| {
             if owner.is_some_and(|owner| owner != *id) { return None; }
             group.source_ranges(*id, &index)
@@ -79,14 +85,6 @@ impl AuthoredRsxFrame {
         let to = args["to"].as_str()?;
         let span = group.transition_span(args["from"].as_str(), to).or_else(|| group.transition_span(None, to))?;
         LineIndex::new(&self.source).range(span).ok()
-    }
-
-    pub(crate) fn state_patches(&self, args: &Value) -> Result<Vec<TextPatch>, String> {
-        let model: VisualStateGroup = serde_json::from_value(args["model"].clone())
-            .map_err(|error| error.to_string())?;
-        self.states.get(&(model.owner, model.name.clone()))
-            .ok_or("Choose an existing mapped Rust state group")?
-            .patch_model(&model)
     }
 
     pub(crate) fn annotate_issues(&self, catalog: &mut Value) {

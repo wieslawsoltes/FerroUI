@@ -1,5 +1,5 @@
 use super::{RustDocument, invalid};
-use ferroui_designer_animation::{KeyframeEdit, KeyframeGroupEdit, KeyframeLocation, Timeline};
+use ferroui_designer_animation::{KeyframeEdit, KeyframeGroupEdit, KeyframeLocation, Timeline, VisualStateGroup};
 use ferroui_designer_core::{
     ChangeSet, DesignerError, Document, Edit, NodeId, SourceSpan, TextPatch,
 };
@@ -70,6 +70,19 @@ impl RustDocument {
         let map = self.map().ok_or("Open the current Rust view")?;
         self.catalog().project(&self.source, map.invocation.start)?
             .edit_animation(declaration, edit)
+    }
+
+    pub(crate) fn edit_state_group(
+        &self, document: &Document, owner: NodeId, name: &str, model: Option<&VisualStateGroup>,
+    ) -> Result<Vec<TextPatch>, String> {
+        let node = document.ast().node(owner).ok_or("Choose an authored Rust control")?;
+        let map = self.map().ok_or("Open the current Rust view")?;
+        let (ordinal, _) = map.control(node.span.start).ok_or("Choose a mapped Rust control")?;
+        let projection = self.catalog().project(&self.source, map.invocation.start)?;
+        match model {
+            Some(model) => projection.upsert_state_group(ordinal, model),
+            None => projection.remove_state_group(ordinal, name),
+        }
     }
 
     pub(crate) fn plan_edit(

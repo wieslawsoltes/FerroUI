@@ -88,7 +88,7 @@ pub(super) fn tools() -> Vec<Value> {
             s::action("play_all",json!({"program":s::id(),"time":s::time()}), &[],true),
         ],true),
         s::tool("designer_states","Read source-backed visual-state groups, setters and directional transitions, optionally for one owner.",s::object(json!({"owner":s::id()}), &[]),false),
-        s::actions("designer_state","Author a validated XAML state group or edit mapped Rust values and route timing in an existing group. Preview, advance and clear use the native state clock. XAML setters accept native text including bindings and resources.",vec![
+        s::actions("designer_state","Author a validated XAML or inline Rust state group, including its states, setters and routes. Preview, advance and clear use the native state clock. XAML setters accept native text including bindings and resources.",vec![
             s::action("upsert",json!({"model":s::state_group()}), &["model"],true),
             s::action("remove",json!({"owner":s::id(),"group":s::string()}), &["owner","group"],true),
             s::action("preview",json!({"owner":s::id(),"group":s::string(),"state":s::nullable(s::string()),"time":s::time()}), &["owner","group","state"],true),
@@ -296,6 +296,10 @@ pub(super) fn call(
                     session.rust_state_group(group.owner, &group.name)?.source_ranges(group.owner, &index)
                 }).collect::<Vec<_>>();
                 result["sources"] = json!(sources);
+                result["creatableOwners"] = json!(session.document().ast().nodes_in_source_order()
+                    .map(|node| node.id)
+                    .filter(|id| owner.is_none_or(|owner| owner == *id) && session.can_create_rust_state_group(*id))
+                    .collect::<Vec<_>>());
             }
             return Ok(result);
         }

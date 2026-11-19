@@ -166,19 +166,13 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     if let Some(selection) = &query.selection {
         select(stage, selection)?;
     }
-    if rust_state {
-        let rsx = stage.authored_rsx.as_ref().ok_or("Render the current Rust state group before editing")?;
-        let result = editor_edits(&design, rsx.state_patches(&arguments)?)?;
-        if !result.edits.is_empty() {
-            renderer.stage.take();
-        }
-        return Ok(result);
-    }
-    if rust_keyframe || rust_program {
-        let rsx = stage.authored_rsx.as_ref().ok_or("Render the current Rust animation before editing")?;
+    if rust_state || rust_keyframe || rust_program {
+        let rsx = stage.authored_rsx.as_ref().ok_or("Render the current Rust view before editing motion")?;
         let (patches, pose, program_key, retained_selection) = {
             let session = stage.session.borrow();
-            let (patches, pose, program_key) = if rust_program {
+            let (patches, pose, program_key) = if rust_state {
+                (rsx_animation::state_patches(&design, &arguments)?, None, None)
+            } else if rust_program {
                 let plan = stage.sources.run(|| rsx_animation::program_patches(&design, &arguments))?;
                 (plan.patches, None, plan.selected_key)
             } else {
