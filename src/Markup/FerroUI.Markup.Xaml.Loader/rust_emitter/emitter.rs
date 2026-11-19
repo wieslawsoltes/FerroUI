@@ -6114,6 +6114,7 @@ mod tests {
                 <Border Width="{CompiledBinding $parent[Button].Width}" />
                 <TextBlock Name="PART_Text" Background="{DynamicResource ExampleBrush}" />
                 <TextBlock Text="plain" Foreground="{StaticResource ExampleBrush}" />
+                <Border />
             </StackPanel>
         </ControlTemplate>"#;
         let emit = |backend| {
@@ -6133,7 +6134,7 @@ mod tests {
             "rt::name_element(name_scope.as_ref(), &stack_panel_0, &stack_panel_0, \"PART_Root\", ",
             "rt::name_element(name_scope.as_ref(), &text_block_0, &text_block_0, \"PART_Text\", ",
             "rt::pop_parent_end_init(&context, &stack_panel_0, ",
-            "rt::end_init(&text_block_1, ",
+            "rt::end_init(&border_1, ",
             "rt::bind_compiled_binding(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ",
             "rt::static_resource_value(&context, ",
             "_property(), \"ExampleBrush\", ",
