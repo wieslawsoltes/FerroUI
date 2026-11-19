@@ -598,6 +598,24 @@ model as WinUI's:
 - Template and resources from `SwipeControl.xaml` and `SwipeControl_themeresources.xaml`;
   `SwipeItemStyle` on `AppBarButton`. No peer (WinUI has none).
 
+**Status (SW-1, done).** `SwipeControl`, `SwipeItems`, `SwipeItem`, `SwipeItemInvokedEventArgs`,
+`SwipeMode`, `SwipeBehaviorOnInvoked` (and `ExecuteItemsHaveOneItem`, the error of
+`SwipeItems::try_add` and `try_set_mode` where WinUI throws) in `ferroui-controls`
+(`swipe_control/`). The interaction is WinUI's on the composition interactions: the tracker
+owner's `ValuesChanged` (the content of the side, the last control closed, the threshold),
+`InteractingStateEntered`, `InertiaStateEntered` (the flick to the other side, the blocked sides)
+and `IdleStateEntered` (execute items invoke their item; closed items are removed), the resting
+values of `ConfigurePositionInertiaRestingValues` and the swipe expression of the content's
+`Translation` as WinUI writes them, `Close` with `c_MinimumCloseVelocity`; the items are
+`CommandBarButton`s with `SwipeItemStyle`, coloured as WinUI's `UpdateColors`. Without a
+compositor (headless) `Close` closes at once. The WinUI theme has `Controls/SwipeControl.xaml`
+and the converted `Resources/SwipeControl_themeresources.xaml` (the waivers are removed); the
+catalog has a "SwipeControl" page in "Collections & Data". Left for later: the execute
+expression and the clip animation of the items (`SetupExecuteExpressionAnimation`,
+`SetupClipAnimation`), the dismissal on a tap outside, a key or a change of the top level
+(`AttachDismissingHandlers`), the `InputEater` that keeps taps from the content while open, a
+precision touchpad's pan. Tests: `swipe_control/swipe_control_tests.rs`.
+
 ## 7. Design: Pivot and high contrast
 
 ### 7.1 Pivot (decision D8: the full WinUI structure)
@@ -643,6 +661,72 @@ The owner chose the structure of WinUI over a `Carousel` base. `Pivot` derives f
 The size is about 12.5k lines of WinUI. PV-1 is therefore split into three pull requests (section
 8).
 
+**Status (PV-1, done).** `Pivot`, `PivotItem`, `PivotItemEventArgs`, `PivotPanel`,
+`PivotHeaderFocusVisualPlacement`, `PivotSlideInAnimationGroup` and the peers
+`PivotAutomationPeer` (Tab, Selection) and `PivotItemAutomationPeer` (TabItem, SelectionItem) in
+`ferroui-controls` (`pivot/`, `automation/peers/pivot_automation_peer.rs`). The state machine
+(`pivot_state_machine.rs`) is WinUI's `PivotStateMachine` ported one to one, with its callbacks
+as a trait the pivot implements; it is driven as in WinUI: measure, arrange, the selection, the
+lock, the items, the carousel. Where WinUI listens to DManip (`ViewChanging`, `ViewChanged`,
+`DirectManipulationStarted/Completed`), the port takes the scroll gestures of the scroll viewer:
+the offset changes while a gesture runs are non-inertial view changes, the end of the gesture
+(after the scroll presenter snapped to a section) is the inertial view change at the final offset
+followed by the final view; programmatic offsets are the machine's own and are not reported back.
+`SetViewportEnabled` turns the scroll gesture recognizer of the scroll viewer on and off (WinUI
+switches the scroll mode). `PivotPanel` is WinUI's: one section per measure width, a thousand
+sections while the headers wrap, a regular snap point per section. Recorded deviations: WinUI
+arranges the `PivotLayoutElement` at the start of the panel and keeps it in the viewport with a
+secondary content relationship of the scroll viewer, and moves the items with the inverse
+relationship and `ItemsPresenterTranslateTransform`; the port arranges the layout element at the
+section the viewport rests on and drives both with expression animations of the composition
+`Translation` that read the scroll viewer's manipulation property set and a property set of the
+pivot (`LayoutOffset`, `SectionOffset`), so the pan runs on the compositor and layout and hit
+testing are where the content rests. The neighbours of the selected item get their
+`Translation` of one section while a pan runs, as in WinUI. `SelectionChanged` is the base's (the
+base keeps the item and the index together). The data item peer (`PivotItemDataAutomationPeer`)
+and the Scroll and ScrollItem patterns are left out: FerroUI has no data item peers. The fly-out
+and fly-in complete on the next turn of the dispatcher without animating until PV-2. Tests:
+`pivot/pivot_state_machine_tests.rs` (the machine with recorded callbacks) and
+`pivot/pivot_tests.rs` (the control with WinUI's template parts).
+
+**Status (PV-2, done).** `PivotHeaderItem`, `PivotHeaderPanel` (Primitives), the header manager
+(`pivot_header_manager.rs`, WinUI's `PivotHeaderManager`: one header per item with its content
+bound to the item's `Header`, the header template, the states, the lock, the move between the
+dynamic and the static panel) and `PivotCurveGenerator` ported one to one
+(`pivot_curve_generator.rs`). The pivot chooses static headers as WinUI's `ShouldUseStaticHeaders`
+(no carousel, or headers that fit), shows the previous and next buttons while a mouse or a pen is
+over the headers (WinUI's `UpdateVisualStates`), moves with Left, Right, Home and End in the
+headers, and places the focus follower on the selected header. The header states are WinUI's
+names, given to the visual state manager and shown through the pseudo-classes `:selected`,
+`:pressed`, `:locked` of the header and `:header-static`, `:previous-button-visible`,
+`:next-button-visible` of the pivot (decision D2). Animations, all on the compositor: the
+parallax of the headers is the parametric curve of the generator as a piecewise linear
+expression of the scroll viewer's manipulation property set (WinUI's DManip parallax
+relationship), the fly-out and fly-in of `PivotAnimator` are key frame animations of the
+pivot's property set (`SectionOffset`, `ItemsOpacity`, `HeaderOffset`) that the expressions of
+the items and of the header offset element read, with WinUI's durations, distances and spline
+and a scoped batch for the completion the machine waits for (without animations of the platform
+they jump to their end), and the slide-in of `Pivot_SlideInEffect_Partial.cpp` animates the
+`Translation.X` of the elements with a `SlideInAnimationGroup`. Recorded deviations: the ghost
+header (WinUI's layout transition elements) is a redirect visual of the header before the
+selected one; the header positions are arranged, not written to `Canvas.Left` and `Canvas.Top`;
+the static content curve of WinUI (`PivotStaticContentCurve`) is the expression of PV-1, which is
+the same line within the panel. Tests: `pivot/pivot_curve_generator.rs` (the curves and the
+expression) and the header tests of `pivot/pivot_tests.rs`.
+
+**Status (PV-3, done).** The WinUI theme has `Controls/Pivot.xaml` (hand-ported:
+`DefaultPivotStyle` with `NextTemplate`, `PreviousTemplate` and `TitleContentControlStyle`,
+`DefaultPivotItemStyle`, `DefaultPivotHeaderItemStyle`, `PivotTitleContentControlStyle` and the
+implicit themes) and the converted `Resources/Pivot_themeresources.xaml`; the two Pivot waivers
+are removed and G-23 no longer names Pivot. The states are pseudo-classes (decision D2):
+`:previous-button-visible` and `:next-button-visible` of the pivot for
+`NavigationButtonsVisibility`, `:selected`, `:pressed`, `:pointerover`, `:disabled` and `:locked`
+of the header item for `SelectionStates`; the header panels' visibility is set by the control
+(`HeaderStates`); the transforms of the template are composition animations of the control.
+`Pivot`, `PivotItem` and `PivotHeaderItem` join the WinUI-only list. The catalog has a "Pivot"
+page in "Navigation & Pages" (a pivot with a title, one whose headers wrap with slide-in groups,
+and one with `IsLocked` and `IsHeaderItemsCarouselEnabled` switches).
+
 ### 7.2 High contrast: the base library
 
 Additive members of `ferroui-base`:
@@ -682,7 +766,7 @@ Additive members of `ferroui-base`:
 | Platform | Contrast | System colours | Change | Validation |
 |---|---|---|---|---|
 | Windows (`src/Windows/FerroUI.Win32/win32_platform_settings.rs`) | `SPI_GETHIGHCONTRAST` with `HCF_HIGHCONTRASTON` (as WinUI), the `IAccessibilitySettings` reading kept as the fallback | `GetSysColor` of `COLOR_WINDOW`, `COLOR_WINDOWTEXT`, `COLOR_BTNFACE`, `COLOR_BTNTEXT`, `COLOR_HIGHLIGHT`, `COLOR_HIGHLIGHTTEXT`, `COLOR_HOTLIGHT`, `COLOR_GRAYTEXT`, while high contrast is on | `WM_SETTINGCHANGE` with `SPI_SETHIGHCONTRAST`, and `WM_SYSCOLORCHANGE` | Windows VM: the four contrast themes, switching while running |
-| macOS (`native/FerroUI.Native/src/OSX/PlatformSettings.mm`, `src/FerroUI.Native/frn.idl`, `native_platform_settings.rs`) | `NSWorkspace.accessibilityDisplayShouldIncreaseContrast` ("Increase contrast"), as well as the high contrast appearance names | the dynamic `NSColor`s under the effective appearance: `windowBackgroundColor`, `labelColor`, `controlColor`, `controlTextColor`, `selectedContentBackgroundColor`, `alternateSelectedControlTextColor`, `linkColor`, `disabledControlTextColor` (decision D11) | an observer of `NSWorkspaceAccessibilityDisplayOptionsDidChangeNotification` beside the appearance KVO | locally, with the owner switching the setting (an agent does not change system settings); the native interface gains two methods at the end of `IFrnPlatformSettings` |
+| macOS (`native/FerroUI.Native/src/OSX/PlatformSettings.mm`, `src/FerroUI.Native/frn.idl`, `native_platform_settings.rs`) | `NSWorkspace.accessibilityDisplayShouldIncreaseContrast` ("Increase contrast"), as well as the high contrast appearance names | the dynamic `NSColor`s under the effective appearance: `windowBackgroundColor`, `labelColor`, `controlColor`, `controlTextColor`, `selectedContentBackgroundColor`, `alternateSelectedControlTextColor`, `linkColor`, `disabledControlTextColor` (decision D11), while the preference is `High` | the observer of `NSWorkspaceAccessibilityDisplayOptionsDidChangeNotification` (already re-reading the colour values) beside the appearance KVO | locally, with the owner switching the setting (an agent does not change system settings). As built (HC-3): an optional interface `IFrnContrastSettings` found with `QueryInterface`, as `IFrnAccessibilitySettings` and `IFrnPowerSettings`, instead of methods at the end of `IFrnPlatformSettings`, so an older native library keeps working |
 | Linux (`src/FerroUI.FreeDesktop/dbus_platform_settings.rs`) | the portal key `contrast` of `org.freedesktop.appearance` (1 is high) | none (the portal has none): the fixed palettes of 7.3 | `SettingChanged` for `contrast` | the fake portal of the crate's tests; the Linux VM with GNOME's high contrast switch |
 | Browser, iOS, Android | already report the preference; the browser can read the system colours of `forced-colors` from CSS system colours (follow-up HC-5) | | already | |
 
@@ -713,8 +797,8 @@ to see. Efforts are working days of one agent, including review rounds.
 | PV-2 | The headers: `PivotHeaderManager`, `PivotHeaderPanel`, `PivotHeaderItem`, static headers, the parallax, the previous and next buttons, the fly-in, fly-out and slide-in animations | PV-1 | D8 | | 5 |
 | PV-3 | The WinUI theme documents of Pivot, PivotItem and PivotHeaderItem; WinUI-only list; catalog page | PV-2 | D8 | yes: the header carousel and flick against WinUI, the Tab peers | 3 |
 | HC-1 | Base: `SystemColors`, the high contrast variant (7.2); WinUI theme: `UseSystemHighContrast`, `Accents/SystemColors` (7.3); headless tests with simulated platform settings; catalog shows the variant | | D9, D10 | no | done (#560); no catalog page |
-| HC-2 | Windows: `SPI_GETHIGHCONTRAST`, `GetSysColor`, the messages | HC-1; after #325 (it changes the same file) | | **yes** | 2 |
-| HC-3 | macOS: "Increase contrast", the `NSColor`s, the notification | HC-1; after #325 (same files) | D11 | no (macOS; the owner toggles the setting) | 2 |
+| HC-2 | Windows: `SPI_GETHIGHCONTRAST`, `GetSysColor`, the messages | HC-1; after #325 (it changes the same file) | | **yes** | done (#560); to validate in the Windows VM |
+| HC-3 | macOS: "Increase contrast", the `NSColor`s, the notification | HC-1; after #325 (same files) | D11 | no (macOS; the owner toggles the setting) | done (#560); the owner validates it by toggling the setting |
 | HC-4 | Linux: the portal's `contrast` | HC-1 | | no (Linux VM to confirm with GNOME) | 1 |
 | Follow-ups | LV-3 drag and reorder; LV-4 ItemsView and ItemContainer on #269; deferred states (5.9); the theme migration pilot (5.11); HC-5 browser system colours; `ListViewItemPresenter` as an element (D6) | | | | |
 

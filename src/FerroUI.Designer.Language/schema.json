@@ -16641,6 +16641,222 @@
     ]
   },
   {
+    "name": "Pivot",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::Pivot",
+    "base": "SelectingItemsControl",
+    "constructible": true,
+    "properties": {
+      "Title": {
+        "name": "Title",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "Pivot.Title: Option<BoxedValue>",
+        "values": [],
+        "attached": false
+      },
+      "TitleTemplate": {
+        "name": "TitleTemplate",
+        "type_name": "Option<Rc<dyn IDataTemplate>>",
+        "documentation": "Pivot.TitleTemplate: Option<Rc<dyn IDataTemplate>>",
+        "values": [],
+        "attached": false
+      },
+      "LeftHeader": {
+        "name": "LeftHeader",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "Pivot.LeftHeader: Option<BoxedValue>",
+        "values": [],
+        "attached": false
+      },
+      "LeftHeaderTemplate": {
+        "name": "LeftHeaderTemplate",
+        "type_name": "Option<Rc<dyn IDataTemplate>>",
+        "documentation": "Pivot.LeftHeaderTemplate: Option<Rc<dyn IDataTemplate>>",
+        "values": [],
+        "attached": false
+      },
+      "RightHeader": {
+        "name": "RightHeader",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "Pivot.RightHeader: Option<BoxedValue>",
+        "values": [],
+        "attached": false
+      },
+      "RightHeaderTemplate": {
+        "name": "RightHeaderTemplate",
+        "type_name": "Option<Rc<dyn IDataTemplate>>",
+        "documentation": "Pivot.RightHeaderTemplate: Option<Rc<dyn IDataTemplate>>",
+        "values": [],
+        "attached": false
+      },
+      "HeaderTemplate": {
+        "name": "HeaderTemplate",
+        "type_name": "Option<Rc<dyn IDataTemplate>>",
+        "documentation": "Pivot.HeaderTemplate: Option<Rc<dyn IDataTemplate>>",
+        "values": [],
+        "attached": false
+      },
+      "IsLocked": {
+        "name": "IsLocked",
+        "type_name": "bool",
+        "documentation": "Pivot.IsLocked: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "IsHeaderItemsCarouselEnabled": {
+        "name": "IsHeaderItemsCarouselEnabled",
+        "type_name": "bool",
+        "documentation": "Pivot.IsHeaderItemsCarouselEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "HeaderFocusVisualPlacement": {
+        "name": "HeaderFocusVisualPlacement",
+        "type_name": "PivotHeaderFocusVisualPlacement",
+        "documentation": "Pivot.HeaderFocusVisualPlacement: PivotHeaderFocusVisualPlacement",
+        "values": [
+          "ItemHeaders",
+          "SelectedItemHeader"
+        ],
+        "attached": false
+      },
+      "SlideInAnimationGroup": {
+        "name": "SlideInAnimationGroup",
+        "type_name": "PivotSlideInAnimationGroup",
+        "documentation": "Pivot.SlideInAnimationGroup: PivotSlideInAnimationGroup",
+        "values": [
+          "Default",
+          "GroupOne",
+          "GroupTwo",
+          "GroupThree"
+        ],
+        "attached": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "PivotAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "PivotAutomationPeer",
+    "base": "SelectingItemsControlAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "PivotHeaderItem",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::PivotHeaderItem",
+    "base": "ContentControl",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Primitives",
+      "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "PivotHeaderPanel",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::PivotHeaderPanel",
+    "base": "Canvas",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Primitives",
+      "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "PivotItem",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::PivotItem",
+    "base": "ContentControl",
+    "constructible": true,
+    "properties": {
+      "Header": {
+        "name": "Header",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "PivotItem.Header: Option<BoxedValue>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "PivotItemAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "PivotItemAutomationPeer",
+    "base": "ContentControlAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "PivotItemEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::PivotItemEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Item": {
+        "name": "Item",
+        "type_name": "Ref<PivotItem>",
+        "documentation": "PivotItemEventArgs.Item: Ref<PivotItem>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "PivotPanel",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::PivotPanel",
+    "base": "Panel",
+    "constructible": true,
+    "properties": {
+      "HorizontalSnapPointsChanged": {
+        "name": "HorizontalSnapPointsChanged",
+        "type_name": "RoutedEventArgs",
+        "documentation": "PivotPanel.HorizontalSnapPointsChanged routed event",
+        "event": true
+      },
+      "VerticalSnapPointsChanged": {
+        "name": "VerticalSnapPointsChanged",
+        "type_name": "RoutedEventArgs",
+        "documentation": "PivotPanel.VerticalSnapPointsChanged routed event",
+        "event": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Primitives",
+      "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "PlatformFeedback",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::PlatformFeedback",
@@ -22927,6 +23143,47 @@
     ]
   },
   {
+    "name": "SwipeControl",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::SwipeControl",
+    "base": "ContentControl",
+    "constructible": true,
+    "properties": {
+      "LeftItems": {
+        "name": "LeftItems",
+        "type_name": "Option<Ref<SwipeItems>>",
+        "documentation": "SwipeControl.LeftItems: Option<Ref<SwipeItems>>",
+        "values": [],
+        "attached": false
+      },
+      "RightItems": {
+        "name": "RightItems",
+        "type_name": "Option<Ref<SwipeItems>>",
+        "documentation": "SwipeControl.RightItems: Option<Ref<SwipeItems>>",
+        "values": [],
+        "attached": false
+      },
+      "TopItems": {
+        "name": "TopItems",
+        "type_name": "Option<Ref<SwipeItems>>",
+        "documentation": "SwipeControl.TopItems: Option<Ref<SwipeItems>>",
+        "values": [],
+        "attached": false
+      },
+      "BottomItems": {
+        "name": "BottomItems",
+        "type_name": "Option<Ref<SwipeItems>>",
+        "documentation": "SwipeControl.BottomItems: Option<Ref<SwipeItems>>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "SwipeGestureEndedEventArgs",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::input::SwipeGestureEndedEventArgs",
@@ -23051,6 +23308,120 @@
     "namespace_aliases": [
       "using:FerroUI.Input.GestureRecognizers",
       "clr-namespace:FerroUI.Input.GestureRecognizers;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "SwipeItem",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::SwipeItem",
+    "base": "FerroObject",
+    "constructible": true,
+    "properties": {
+      "Text": {
+        "name": "Text",
+        "type_name": "String",
+        "documentation": "SwipeItem.Text: String",
+        "values": [],
+        "attached": false
+      },
+      "IconSource": {
+        "name": "IconSource",
+        "type_name": "Option<Ref<IconSource>>",
+        "documentation": "SwipeItem.IconSource: Option<Ref<IconSource>>",
+        "values": [],
+        "attached": false
+      },
+      "Background": {
+        "name": "Background",
+        "type_name": "Option<Rc<dyn IBrush>>",
+        "documentation": "SwipeItem.Background: Option<Rc<dyn IBrush>>",
+        "values": [],
+        "attached": false
+      },
+      "Foreground": {
+        "name": "Foreground",
+        "type_name": "Option<Rc<dyn IBrush>>",
+        "documentation": "SwipeItem.Foreground: Option<Rc<dyn IBrush>>",
+        "values": [],
+        "attached": false
+      },
+      "Command": {
+        "name": "Command",
+        "type_name": "Option<Rc<dyn ICommand>>",
+        "documentation": "SwipeItem.Command: Option<Rc<dyn ICommand>>",
+        "values": [],
+        "attached": false
+      },
+      "CommandParameter": {
+        "name": "CommandParameter",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "SwipeItem.CommandParameter: Option<BoxedValue>",
+        "values": [],
+        "attached": false
+      },
+      "BehaviorOnInvoked": {
+        "name": "BehaviorOnInvoked",
+        "type_name": "SwipeBehaviorOnInvoked",
+        "documentation": "SwipeItem.BehaviorOnInvoked: SwipeBehaviorOnInvoked",
+        "values": [
+          "Auto",
+          "Close",
+          "RemainOpen"
+        ],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "SwipeItemInvokedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::SwipeItemInvokedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "SwipeControl": {
+        "name": "SwipeControl",
+        "type_name": "Ref<SwipeControl>",
+        "documentation": "SwipeItemInvokedEventArgs.SwipeControl: Ref<SwipeControl>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "SwipeItems",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::SwipeItems",
+    "base": "FerroObject",
+    "constructible": true,
+    "properties": {
+      "Mode": {
+        "name": "Mode",
+        "type_name": "SwipeMode",
+        "documentation": "SwipeItems.Mode: SwipeMode",
+        "values": [
+          "Reveal",
+          "Execute"
+        ],
+        "attached": false
+      },
+      "Items": {
+        "name": "Items",
+        "type_name": "FerroList<Ref<SwipeItem>>",
+        "documentation": "SwipeItems.Items: FerroList<Ref<SwipeItem>>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {

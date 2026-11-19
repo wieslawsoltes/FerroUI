@@ -283,3 +283,28 @@ fn an_application_document_names_its_types_and_keys() {
     assert!(!references.keys.contains("Ignored"), "{:?}", references.keys);
     assert_eq!(document_references("<!DOCTYPE Window [<!-- x -->]><Window />"), None);
 }
+
+/// Not from upstream (#848): the argument of a resource extension is a reference of its unit also
+/// when no document of the group defines the key (another theme, or the application, provides
+/// it); a token that spells no key of the group is not.
+#[test]
+fn a_resource_extension_references_a_key_of_another_theme() {
+    let documents = vec![
+        document(
+            "Theme.xaml",
+            format!(
+                r#"<Styles {NAMESPACES} x:Class="Tests.Theme"><Styles.Resources><ResourceDictionary>
+                <ResourceDictionary.MergedDictionaries><MergeResourceInclude Source="/Brushes.xaml" /></ResourceDictionary.MergedDictionaries>
+                </ResourceDictionary></Styles.Resources></Styles>"#
+            ),
+        ),
+        document(
+            "Brushes.xaml",
+            dictionary(r#"<SolidColorBrush x:Key="LocalBrush" Color="{DynamicResource ElsewhereColor}" Opacity="Elsewhere" />"#),
+        ),
+    ];
+    let plan = plan(&documents, &[uri("Brushes.xaml")]).expect("units");
+    let brushes = unit(&plan, "Brushes.xaml");
+    assert_eq!(brushes.keys, strings(&["LocalBrush"]));
+    assert_eq!(brushes.references, strings(&["ElsewhereColor"]));
+}

@@ -309,6 +309,10 @@ control_tests! {
     list_view_item => "ListViewItem";
     grid_view => "GridView";
     grid_view_item => "GridViewItem";
+    pivot => "Pivot";
+    pivot_header_item => "PivotHeaderItem";
+    pivot_item => "PivotItem";
+    swipe_control => "SwipeControl";
 }
 
 /// The window itself is themed: its template is applied when it is shown
