@@ -64,6 +64,7 @@ units of the build's own output.
 | Control themes | One static table per theme, interpreted by `rt::build_control_theme`; selector chains are static slices, shared when identical | Once per theme, on first use of the control type |
 | Control templates | Native code; what every element repeats (the parent stack, the end of the initialisation, the name, a `{CompiledBinding}` bound to a property) is a call of a shared helper of `rt` (`docs/porting/xaml.md`, 9.3.7) | Every time a control applies its template |
 | Template bindings in a template | Runs of (target, source) pairs, applied by `rt::bind_template_bindings` | With the template |
+| Dynamic resources in a template | Runs on one object of (property, key) pairs, bound by `rt::bind_dynamic_resources`; one alone is a call of `rt::bind_dynamic_resource` | With the template |
 | Units | `THEME_UNIT_<n>` statics and the table `THEME_UNITS` | See section 3 |
 
 A control theme whose content the table cannot express keeps native code for that theme only.
