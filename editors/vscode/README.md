@@ -68,7 +68,7 @@ npm ci
 npm run package:platform -- ../../target/dist-unwind
 ```
 
-After building the extension, run `npm run test:vsix -- <package.vsix>` to install the package and smoke-test the minimum supported and current stable releases of VS Code. The Visual designer workflow provides a manual installed-package matrix for macOS, Linux, and Windows.
+The packaged README links to the user guides and examples at the source checkout’s Git revision. After building the extension, run `npm run test:vsix -- <package.vsix>` to install the package and smoke-test the minimum supported and current stable releases of VS Code. The Visual designer workflow provides a manual installed-package matrix for macOS, Linux, and Windows.
 
 ## Preview and round-trip coverage
 

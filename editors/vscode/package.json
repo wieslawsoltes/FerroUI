@@ -601,7 +601,7 @@
     "test": "npm run check && npm run build && node test/run.mjs",
     "test:vsix": "node test/installed.mjs",
     "vscode:prepublish": "npm run build",
-    "package": "vsce package --no-dependencies",
+    "package": "node package-vsix.mjs",
     "package:platform": "node package-platform.mjs"
   },
   "dependencies": {

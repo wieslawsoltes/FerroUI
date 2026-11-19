@@ -1,6 +1,6 @@
 import { strict as assert } from 'node:assert';
 import { randomBytes } from 'node:crypto';
-import { access } from 'node:fs/promises';
+import { access, readFile } from 'node:fs/promises';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
 import { NativePreview } from '../src/nativePreview';
@@ -19,6 +19,12 @@ export async function run(): Promise<void> {
     assert.ok(viewsContainers.panel.some(({ id }: { id: string }) => id === 'ferrouiTimeline'));
     assert.ok(views.ferrouiTimeline.some(({ id }: { id: string }) => id === 'ferroui.timeline'));
     assert.ok(!views.ferrouiWorkbench.some(({ id }: { id: string }) => id === 'ferroui.timeline'));
+    const readme = await readFile(path.join(extension.extensionPath, 'readme.md'), 'utf8');
+    const userGuide = readme.match(/\[VS Code user guides\]\(([^)]+)\)/)?.[1];
+    assert.ok(userGuide, 'The installed README links to the user guides');
+    const guideUrl = new URL(userGuide);
+    assert.equal(guideUrl.origin, 'https://github.com');
+    assert.match(guideUrl.pathname, /^\/wieslawsoltes\/FerroUI\/blob\/[^/]+\/docs\/designer\/vscode\/README\.md$/);
     const suffix = process.platform === 'win32' ? '.exe' : '';
     assert.equal(vscode.workspace.getConfiguration('ferroui.languageServer').get('path'), '');
     assert.equal(vscode.workspace.getConfiguration('ferroui.preview').get('path'), '');

@@ -1,6 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import { chmod, copyFile, mkdir, mkdtemp, rename, rm, stat } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const [directory, output] = process.argv.slice(2);
 const { platform, arch } = process;
@@ -25,9 +26,9 @@ try {
 } finally {
     await rm(staging, { recursive: true, force: true });
 }
-const packager = resolve('node_modules/@vscode/vsce/vsce');
-const args = [packager, 'package', '--no-dependencies', '--target', `${platform}-${arch}`];
-if (output) args.push('--out', output);
+const packager = fileURLToPath(new URL('package-vsix.mjs', import.meta.url));
+const args = [packager, '--target', `${platform}-${arch}`];
+if (output) args.push('--out', resolve(output));
 const result = spawnSync(process.execPath, args, { stdio: 'inherit' });
 if (result.error) throw result.error;
 process.exitCode = result.status ?? 1;
