@@ -200,11 +200,10 @@ pub(crate) fn run<A: Animator>(
         should_pause_on_invisible,
         visual_target,
     );
-    if animation.is_preview() {
-        // Value-store frames subscribe lazily, and stop a hidden binding. Preview clocks
-        // must keep advancing even below another program, so retain one eager producer
-        // and replay its latest value when this original property frame becomes visible.
-        let values = Rc::new(PreviewValue {
+    if animation.keeps_fill_at_animation_priority() {
+        // Value-store frames stop hidden bindings. Keep the scoped animation clock running
+        // and replay its latest value when the binding becomes visible again.
+        let values = Rc::new(ScopedAnimationValue {
             value: RefCell::new(None),
             subject: LightweightSubject::new(),
             complete: Cell::new(false),
@@ -219,13 +218,13 @@ pub(crate) fn run<A: Animator>(
     }
 }
 
-struct PreviewValue<T> {
+struct ScopedAnimationValue<T> {
     value: RefCell<Option<T>>,
     subject: LightweightSubject<T>,
     complete: Cell<bool>,
     error: RefCell<Option<ObservableError>>,
 }
-impl<T: Clone + 'static> IObservable<T> for PreviewValue<T> {
+impl<T: Clone + 'static> IObservable<T> for ScopedAnimationValue<T> {
     fn subscribe(&self, observer: Rc<dyn IObserver<T>>) -> Rc<dyn IDisposable> {
         if self.complete.get() {
             let error = self.error.borrow().clone();
@@ -244,7 +243,7 @@ impl<T: Clone + 'static> IObservable<T> for PreviewValue<T> {
         subscription
     }
 }
-impl<T: Clone> IObserver<T> for PreviewValue<T> {
+impl<T: Clone> IObserver<T> for ScopedAnimationValue<T> {
     fn on_next(&self, value: T) {
         if !self.complete.get() {
             self.value.replace(Some(value.clone()));

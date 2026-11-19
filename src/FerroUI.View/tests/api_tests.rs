@@ -7,13 +7,16 @@ use crate::{
     animation, ms, rerender, style, transition, transitions, use_resource, use_theme_variant, IntoElement, StyleBuilder,
 };
 use ferroui_base::layout::ILayoutManager;
+use ferroui_base::animation::{IClock, PlayState, SignedDuration};
 use ferroui_base::media::text_formatting::testing::TextTestScope;
 use ferroui_base::platform::IPlatformRenderInterface;
+use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
 use ferroui_base::styling::ThemeVariant;
 use ferroui_base::{BoxedValue, FerroLocator, LocatorExtensions, Ref, Visual};
 use ferroui_controls::primitives::Popup;
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
 use ferroui_controls::{Button, Control, TextBlock, Window};
+use std::cell::Cell;
 use std::rc::Rc;
 
 struct App {
@@ -67,6 +70,100 @@ fn styles_of_an_element_apply_to_the_controls_below_it() {
     assert_eq!(find("a").font_size(), 30.0);
     assert_eq!(find("b").font_size(), 40.0, "a nested style applies with its parent's selector");
     assert_ne!(find("c").font_size(), 30.0);
+    window.close();
+    owner.dispose();
+}
+
+#[derive(Default)]
+struct ViewClock {
+    subject: LightweightSubject<SignedDuration>,
+    paused: Cell<bool>,
+}
+
+impl IObservable<SignedDuration> for ViewClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
+        self.subject.subscribe(observer)
+    }
+}
+
+impl IClock for ViewClock {
+    fn play_state(&self) -> PlayState {
+        if self.paused.get() { PlayState::Pause } else { PlayState::Run }
+    }
+    fn set_play_state(&self, value: PlayState) {
+        self.paused.set(value != PlayState::Run);
+    }
+}
+
+#[test]
+fn rsx_visual_states_apply_native_directional_motion_and_restore_the_base_value() {
+    use crate::{set_visual_state, visual_state, visual_state_group};
+    use ferroui_base::layout::Layoutable;
+    use ferroui_controls::{Border, StackPanel};
+    let _app = app();
+    let owner = Owner::new_root();
+    let panel = owner.with(|| crate::rsx! {
+        StackPanel {
+            visual_states: [visual_state_group("Review")
+                .state(visual_state("Idle").set_on("Card", Layoutable::width_property(), 120.0))
+                .state(visual_state("Ready").set_on("Card", Layoutable::width_property(), 260.0)
+                    .set(Visual::opacity_property(), 0.5))
+                .transition(None, "Ready", ms(350), "LinearEasing")
+                .transition(Some("Idle"), "Ready", ms(640), "CubicEaseIn")
+                .transition(Some("Ready"), "Idle", ms(370), "LinearEasing")],
+            Border { name: "Card", width: 100.0, height: 40.0 }
+        }
+    }.mount());
+    let clock = Rc::new(ViewClock::default());
+    panel.set_clock(Some(clock.clone()));
+    let window = window_with(&panel);
+    let card = panel.get_visual_descendants().find_map(|child| child.cast::<Border>()).unwrap();
+    let pulse = |seconds| clock.subject.on_next(SignedDuration::from_seconds(seconds));
+    assert_eq!(card.width(), 100.0);
+    assert!(set_visual_state(&panel, "Review", Some("Ready"), true));
+    pulse(0.0);
+    pulse(0.175);
+    assert!((card.width() - 180.0).abs() < 0.001, "default width was {}", card.width());
+    assert!((panel.opacity() - 0.75).abs() < 0.001);
+    pulse(0.35);
+    assert_eq!(card.width(), 260.0);
+    assert!(set_visual_state(&panel, "Review", Some("Idle"), true));
+    pulse(1.0);
+    pulse(1.185);
+    assert!((card.width() - 190.0).abs() < 0.001, "reverse width was {}", card.width());
+    pulse(1.37);
+    assert_eq!(card.width(), 120.0);
+    assert!(set_visual_state(&panel, "Review", Some("Ready"), true));
+    pulse(2.0);
+    pulse(2.32);
+    assert!((card.width() - 137.5).abs() < 0.001, "forward width was {}", card.width());
+    assert!(!set_visual_state(&panel, "Review", Some("Unknown"), true));
+    assert!(set_visual_state(&panel, "Review", None, false));
+    window.layout_manager().execute_layout_pass();
+    pulse(2.321);
+    assert_eq!(card.width(), 100.0);
+    assert!(set_visual_state(&panel, "Review", Some("Ready"), false));
+    pulse(3.0);
+    pulse(3.001);
+    assert_eq!(card.width(), 260.0);
+    assert!(set_visual_state(&panel, "Review", None, false));
+    assert_eq!(card.width(), 100.0);
+
+    let widths = Rc::new(LightweightSubject::<f64>::new());
+    let property = Layoutable::width_property();
+    let binding = card.bind(property, widths.clone(), ferroui_base::data::BindingPriority::LocalValue);
+    widths.on_next(115.0);
+    assert!(set_visual_state(&panel, "Review", Some("Ready"), true));
+    pulse(4.0);
+    pulse(4.35);
+    assert_eq!(card.width(), 260.0);
+    widths.on_next(135.0);
+    assert_eq!(card.width(), 260.0);
+    assert!(set_visual_state(&panel, "Review", None, false));
+    assert_eq!(card.width(), 135.0);
+    widths.on_next(145.0);
+    assert_eq!(card.width(), 145.0);
+    binding.dispose();
     window.close();
     owner.dispose();
 }

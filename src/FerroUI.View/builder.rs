@@ -594,6 +594,14 @@ impl<T> El<T> {
         self
     }
 
+    /// Installs locally scoped visual state groups when this control is mounted.
+    pub fn visual_states(mut self, groups: impl IntoIterator<Item = crate::ViewStateGroup>) -> Self {
+        let groups: Vec<_> = groups.into_iter().collect();
+        crate::visual_states::validate(&groups);
+        self.element.on_mount.push(Rc::new(move |control| crate::visual_states::install(control, &groups)));
+        self
+    }
+
     /// Keeps the control in `node_ref` once it is made.
     pub fn node_ref(self, node_ref: crate::NodeRef<T>) -> Self
     where

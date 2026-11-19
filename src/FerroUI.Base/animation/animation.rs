@@ -43,6 +43,7 @@ pub struct Animation {
     playback_direction: Cell<PlaybackDirection>,
     playback_behavior: Cell<PlaybackBehavior>,
     fill_mode: Cell<FillMode>,
+    fill_at_animation_priority: Cell<bool>,
     easing: RefCell<Easing>,
     delay: Cell<SignedDuration>,
     delay_between_iterations: Cell<SignedDuration>,
@@ -162,6 +163,7 @@ impl Animation {
             playback_direction: Cell::new(PlaybackDirection::Normal),
             playback_behavior: Cell::new(PlaybackBehavior::Auto),
             fill_mode: Cell::new(FillMode::None),
+            fill_at_animation_priority: Cell::new(false),
             easing: RefCell::new(Easing::default()),
             delay: Cell::new(SignedDuration::ZERO),
             delay_between_iterations: Cell::new(SignedDuration::ZERO),
@@ -173,6 +175,16 @@ impl Animation {
 
     pub fn new() -> Ref<Self> {
         instantiate(Self::construct())
+    }
+
+    /// Retain forward fill at animation priority. Cancelling playback or removing
+    /// the animation's style restores the underlying value and its binding.
+    pub fn set_fill_at_animation_priority(&self, retain: bool) {
+        self.fill_at_animation_priority.set(retain);
+    }
+
+    pub(crate) fn keeps_fill_at_animation_priority(&self) -> bool {
+        self.fill_at_animation_priority.get() || self.is_preview()
     }
 
     /// The easing function to be used for this animation.

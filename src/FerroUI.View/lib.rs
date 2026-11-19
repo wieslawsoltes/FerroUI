@@ -65,6 +65,7 @@ pub mod router;
 mod rust_paths;
 mod style;
 mod template;
+mod visual_states;
 pub mod xaml;
 
 #[cfg(feature = "desktop")]
@@ -104,6 +105,7 @@ pub use animation::{
     Transitionable,
 };
 pub use style::{parse_selector, style, style_of, StyleBuilder};
+pub use visual_states::{set_visual_state, visual_state, visual_state_group, ViewState, ViewStateGroup};
 pub use inspect::{inspector, mounted_trees, InstanceKind, InstanceNode, MountedTree, PropertyInfo};
 #[cfg(feature = "desktop")]
 pub use inspect::{attach_inspector, open_inspector};
@@ -128,6 +130,7 @@ pub use ferroui_view_macros::{component, rsx};
 /// Everything an application written with the builders or the macro uses.
 pub mod prelude {
     pub use crate::generated::builders::*;
+    pub use crate::{set_visual_state, visual_state, visual_state_group, ViewState, ViewStateGroup};
     #[cfg(feature = "color-picker")]
     pub use crate::generated::color_picker::*;
     #[cfg(feature = "dialogs")]

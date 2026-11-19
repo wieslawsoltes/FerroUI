@@ -137,6 +137,11 @@ impl Animation {
     pub(crate) fn get_animator_type(property: &'static FerroProperty) -> Option<(TypeId, AnimatorFactory)> {
         registered_animator(property).map(|entry| (entry.type_, entry.factory))
     }
+
+    /// Whether a styled property has a native or application-registered animator.
+    pub fn can_animate_property(property: &'static FerroProperty) -> bool {
+        !property.is_direct() && registered_animator(property).is_some()
+    }
 }
 
 fn registered_animator(property: &'static FerroProperty) -> Option<Registration> {

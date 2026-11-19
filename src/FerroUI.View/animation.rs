@@ -105,8 +105,11 @@ pub struct KeyFrameBuilder {
 impl KeyFrameBuilder {
     /// Sets `property` to `value` at the cue of the frame.
     pub fn set<P: TypedProperty + ?Sized>(self, property: &'static P, value: impl IntoValue<P::Value>) -> Self {
-        let value: BoxedValue = Rc::new(value.into_value());
-        let setter: Rc<dyn ferroui_base::animation::IAnimationSetter> = Setter::new_untyped(property.untyped(), value);
+        self.set_boxed(property.untyped(), Rc::new(value.into_value()))
+    }
+
+    pub(crate) fn set_boxed(self, property: &'static FerroProperty, value: BoxedValue) -> Self {
+        let setter: Rc<dyn ferroui_base::animation::IAnimationSetter> = Setter::new_untyped(property, value);
         self.frame.setters().add(setter);
         self
     }
@@ -150,6 +153,11 @@ impl AnimationBuilder {
     /// Whether the values of its ends are kept before and after it runs.
     pub fn fill_mode(self, fill_mode: FillMode) -> Self {
         self.animation.set_fill_mode(fill_mode);
+        self
+    }
+
+    pub(crate) fn fill_at_animation_priority(self) -> Self {
+        self.animation.set_fill_at_animation_priority(true);
         self
     }
 
