@@ -3,6 +3,7 @@ use crate::blocks::{blocks, contains_trivia};
 use crate::catalog::Children;
 use crate::literal;
 use crate::markup::{RsxPreviewMarkup, serialize};
+use crate::programs::StyleSlot;
 use crate::registered::{Class, RsxCatalog};
 use crate::source_edits::RsxEvent;
 use crate::states::{self, ProjectedStates};
@@ -27,6 +28,7 @@ pub struct RsxNode {
     pub(crate) open: usize,
     pub(crate) close: usize,
     pub(crate) complete_children: bool,
+    pub(crate) style_slot: StyleSlot,
 }
 
 impl RsxNode {
@@ -50,7 +52,7 @@ impl RsxNode {
 pub struct RsxProjection<'a> {
     pub(crate) source: &'a str,
     pub(crate) catalog: &'a RsxCatalog,
-    tree: Element,
+    pub(crate) tree: Element,
     pub nodes: Vec<RsxNode>,
     pub blocks: Vec<SourceSpan>,
     /// The selected invocation, including its name and delimiters.
@@ -60,7 +62,7 @@ pub struct RsxProjection<'a> {
     pub omitted_count: usize,
     pub animation_issues: Vec<RsxAnimationIssue>,
     inner_trivia: bool,
-    styles: BTreeMap<usize, Vec<AnimationStyle>>,
+    pub(crate) styles: BTreeMap<usize, Vec<AnimationStyle>>,
     states: BTreeMap<usize, ProjectedStates>,
 }
 
@@ -166,7 +168,7 @@ impl RsxCatalog {
             .or_else(|| blocks.first())
             .ok_or("Open a Rust file containing a ferroui_view::rsx! invocation")?;
         let stream = block.group.stream();
-        let (tree, state) = parse_body(stream.clone(), self)?;
+        let (tree, state) = parse_body(source, stream.clone(), self)?;
         let inner_trivia = contains_trivia(source, stream, state.nodes[0].span);
         Ok(RsxProjection {
             source,
@@ -200,7 +202,7 @@ pub(crate) fn parse_draft(source: &str, catalog: &RsxCatalog) -> Result<Element,
     {
         return Err("Expected an rsx! expression".into());
     }
-    let (tree, state) = parse_body(draft.mac.tokens, catalog)?;
+    let (tree, state) = parse_body(source, draft.mac.tokens, catalog)?;
     if !state.styles.is_empty() || !state.states.is_empty() {
         return Err("Edit native animation and state declarations in their Rust source".into());
     }
@@ -236,6 +238,7 @@ impl State {
 
     fn element(
         &mut self,
+        source: &str,
         node: &Node,
         depth: usize,
         catalog: &RsxCatalog,
@@ -263,6 +266,11 @@ impl State {
             open: node.braces.open().byte_range().end,
             close: node.braces.close().byte_range().start,
             complete_children: true,
+            style_slot: if class.xaml_property(None, "styles").is_none() {
+                StyleSlot::Missing
+            } else {
+                StyleSlot::Unavailable
+            },
         });
         let mut seen = BTreeSet::new();
         let mut state_fields = Vec::new();
@@ -273,6 +281,9 @@ impl State {
                 } => (owner, name, value),
                 Attribute::Call { name, arguments } => {
                     let setter = name.unraw().to_string();
+                    if setter == "styles" {
+                        self.nodes[index].style_slot = StyleSlot::Unavailable;
+                    }
                     if setter.starts_with("on_") {
                         let span = arguments
                             .first()
@@ -300,12 +311,18 @@ impl State {
             let value_span = SourceSpan::new(value_span.start, value_span.end);
             let field = SourceSpan::new(name.span().byte_range().start, value_span.end);
             if owner.is_none() && setter == "styles" && class.xaml_property(None, &setter).is_none() {
-                if let Some(projected) = projected_styles(value, catalog) {
+                let slot = &mut self.nodes[index].style_slot;
+                *slot = if matches!(slot, StyleSlot::Missing) {
+                    StyleSlot::from_expression(value)
+                } else {
+                    StyleSlot::Unavailable
+                };
+                if let Some(projected) = projected_styles(source, value, catalog) {
                     self.animation_issues.extend(projected.unavailable);
                     if !projected.styles.is_empty() {
                         self.styles.entry(index).or_default().extend(projected.styles);
-                        if projected.omitted == 0 { continue; }
                     }
+                    if projected.omitted == 0 { continue; }
                 }
                 self.omit(format!("{class}.styles expression"));
                 continue;
@@ -376,7 +393,7 @@ impl State {
                 {
                     result
                         .children
-                        .push(self.element(child, depth + 1, catalog)?)
+                        .push(self.element(source, child, depth + 1, catalog)?)
                 }
                 _ => {
                     self.nodes[index].complete_children = false;
@@ -405,12 +422,12 @@ pub(crate) fn accepts_control(placement: Children, element: &Element) -> bool {
             && !element.properties.contains_key("Content"))
 }
 
-fn parse_body(tokens: TokenStream, catalog: &RsxCatalog) -> Result<(Element, State), String> {
+fn parse_body(source: &str, tokens: TokenStream, catalog: &RsxCatalog) -> Result<(Element, State), String> {
     let nodes = ferroui_view_syntax::parse(tokens).map_err(|e| format!("Invalid RSX: {e}"))?;
     let [root] = nodes.as_slice() else {
         return Err("RSX preview needs one root control; wrap fragments in a panel".into());
     };
     let mut state = State::default();
-    let tree = state.element(root, 0, catalog)?;
+    let tree = state.element(source, root, 0, catalog)?;
     Ok((tree, state))
 }

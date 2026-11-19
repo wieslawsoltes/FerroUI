@@ -9,6 +9,7 @@ mod language;
 mod literal;
 mod markup;
 mod placement;
+mod programs;
 mod project;
 mod registered;
 mod source_edits;
@@ -19,6 +20,7 @@ mod xaml;
 pub use animation::{RsxAnimation, RsxAnimationIssue};
 pub use language::{RsxLanguageDocument, analyze_rsx};
 pub use markup::{RsxPreviewMarkup, RsxSourceMap};
+pub use programs::{RsxAnimationEdit, RsxAnimationPlan};
 pub use project::{RsxNode, RsxProjection, project_rust};
 pub use registered::RsxCatalog;
 pub use source_edits::{RsxEvent, event_setter};
@@ -37,6 +39,8 @@ pub fn invocation_count(source: &str) -> usize {
 mod tests;
 #[cfg(test)]
 mod animation_tests;
+#[cfg(test)]
+mod program_tests;
 #[cfg(test)]
 mod registered_tests;
 

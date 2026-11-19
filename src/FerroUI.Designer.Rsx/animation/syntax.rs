@@ -1,4 +1,5 @@
 use super::keyframe::{keyframe, record, MappedKey};
+use super::program_comment::AnimationAttachment;
 use super::{
     AnimationStyle, FloatSource, RsxAnimation, RsxAnimationIssue, TargetType, TRACK_TARGET,
 };
@@ -8,7 +9,9 @@ use ferroui_designer_core::SourceSpan;
 use syn::{spanned::Spanned, Expr, ExprCall, ExprMethodCall, ExprPath, Lit, UnOp};
 
 pub(super) fn style(
+    source: &str,
     expr: &Expr,
+    comma: Option<SourceSpan>,
     catalog: &RsxCatalog,
 ) -> Option<(AnimationStyle, Vec<RsxAnimationIssue>)> {
     let (factory, methods) = chain(expr)?;
@@ -19,20 +22,20 @@ pub(super) fn style(
         return None;
     };
     let selector = selector.value();
-    if selector.trim().is_empty()
-        || selector.starts_with('{')
-        || selector.chars().any(|c| {
-            c.is_control() && !matches!(c, '\t' | '\n' | '\r')
-                || matches!(c, '\u{FFFE}' | '\u{FFFF}')
-        })
-    {
+    if !valid_selector(&selector) {
         return None;
     }
+    let lone_style = (methods.len() == 1).then(|| (span(expr), comma));
     let mut clips = Vec::new();
     let mut omitted = Vec::new();
     for call in methods {
         let declaration = argument(call, "animation")?;
-        if let Some(clip) = clip(declaration, catalog) {
+        if let Some(mut clip) = clip(declaration, catalog) {
+            let attachment = AnimationAttachment::read(source, call, span(declaration), lone_style);
+            if let Some(identity) = attachment.identity() {
+                identity.annotate_xaml(&mut clip.xaml);
+            }
+            clip.attachment = Some(attachment);
             clips.push(clip);
         } else {
             omitted.push(RsxAnimationIssue {
@@ -41,8 +44,16 @@ pub(super) fn style(
             });
         }
     }
-    (!clips.is_empty() || !omitted.is_empty())
-        .then_some((AnimationStyle { selector, clips }, omitted))
+    Some((AnimationStyle { selector, clips }, omitted))
+}
+
+pub(crate) fn valid_selector(selector: &str) -> bool {
+    !(selector.trim().is_empty()
+        || selector.starts_with('{')
+        || selector.chars().any(|c| {
+            c.is_control() && !matches!(c, '\t' | '\n' | '\r')
+                || matches!(c, '\u{FFFE}' | '\u{FFFF}')
+        }))
 }
 
 pub(super) fn clip(expr: &Expr, catalog: &RsxCatalog) -> Option<RsxAnimation> {
@@ -86,6 +97,7 @@ pub(super) fn clip(expr: &Expr, catalog: &RsxCatalog) -> Option<RsxAnimation> {
         first_method,
         target_type,
         keys,
+        attachment: None,
     })
 }
 

@@ -35,6 +35,7 @@ struct ControlSource {
     offset: usize,
     name: SourceSpan,
     properties: BTreeMap<String, SourceSpan>,
+    can_create_animation: bool,
 }
 
 impl RsxSourceMap {
@@ -49,6 +50,10 @@ impl RsxSourceMap {
     pub fn property(&self, offset: usize, name: &str) -> Option<SourceSpan> {
         let (index, _) = self.control(offset)?;
         self.controls[index].properties.get(name).copied()
+    }
+
+    pub fn can_create_animation(&self, offset: usize) -> bool {
+        self.control(offset).is_some_and(|(index, _)| self.controls[index].can_create_animation)
     }
 
     pub fn animation(&self, offset: usize) -> Option<&RsxAnimation> {
@@ -78,9 +83,11 @@ impl RsxProjection<'_> {
                 .controls
                 .into_iter()
                 .zip(&self.nodes)
-                .map(|(offset, node)| ControlSource {
+                .enumerate()
+                .map(|(index, (offset, node))| ControlSource {
                     offset,
                     name: node.name,
+                    can_create_animation: self.can_create_animation(index),
                     properties: node
                         .properties
                         .iter()

@@ -1,6 +1,7 @@
 //! Original Rust source for a native animation projected from a known view builder.
 
 mod keyframe;
+pub(crate) mod program_comment;
 mod retime;
 mod structural;
 pub(crate) mod syntax;
@@ -55,6 +56,7 @@ pub struct RsxAnimation {
     first_method: Option<usize>,
     target_type: Option<TargetType>,
     keys: Vec<KeySource>,
+    pub(crate) attachment: Option<program_comment::AnimationAttachment>,
 }
 
 #[derive(Clone, Debug)]
@@ -187,6 +189,7 @@ impl RsxAnimation {
 
 /// Find the inline native style builders without resolving arbitrary Rust names.
 pub(crate) fn projected_styles(
+    source: &str,
     value: &Expr,
     catalog: &crate::RsxCatalog,
 ) -> Option<ProjectedStyles> {
@@ -198,8 +201,9 @@ pub(crate) fn projected_styles(
         unavailable: Vec::new(),
         omitted: 0,
     };
-    for expr in &array.elems {
-        match syntax::style(expr, catalog) {
+    for pair in array.elems.pairs() {
+        let comma = pair.punct().map(|punct| syntax::span(*punct));
+        match syntax::style(source, pair.value(), comma, catalog) {
             Some((style, mut issues)) => {
                 result.omitted += issues.len();
                 result.unavailable.append(&mut issues);

@@ -1,6 +1,6 @@
 //! Checked method-chain edits for one authored RSX animation.
 use super::{KeySource, RsxAnimation, keyframe::BUILTINS, syntax, value::rust_literal};
-use crate::{RsxCatalog, blocks::keep_comments};
+use crate::{RsxCatalog, blocks::keep_comments, source_edits::line_prefix};
 use ferroui_designer_animation::{
     AnimationValue, Easing, KeyframeEdit, KeyframeGroupEdit, KeyframeLocation, Timeline,
     native_key_time,
@@ -260,21 +260,4 @@ impl RsxAnimation {
         syntax::clip(&expression, catalog)
             .ok_or_else(|| "The edited Rust animation has no source mapping".into())
     }
-}
-
-fn line_prefix(source: &str, dot: Option<usize>) -> &str {
-    let Some(before) = dot.and_then(|dot| source.get(..dot)) else {
-        return "";
-    };
-    let Some(newline) = before.rfind('\n') else {
-        return "";
-    };
-    if !before[newline + 1..]
-        .chars()
-        .all(|character| matches!(character, ' ' | '\t'))
-    {
-        return "";
-    }
-    let start = newline - usize::from(newline > 0 && before.as_bytes()[newline - 1] == b'\r');
-    &before[start..]
 }

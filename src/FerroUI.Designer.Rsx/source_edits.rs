@@ -86,7 +86,7 @@ impl RsxProjection<'_> {
     }
 }
 
-fn insert_field(source: &str, offset: usize, field: &str) -> TextPatch {
+pub(crate) fn insert_field(source: &str, offset: usize, field: &str) -> TextPatch {
     let following = &source[offset..];
     let rest = following.trim_start_matches([' ', '\t']);
     let replacement = if rest.starts_with(['\n', '\r']) {
@@ -134,4 +134,19 @@ pub(crate) fn remove_field(source: &str, span: SourceSpan) -> TextPatch {
 pub(crate) fn line_indent(source: &str, offset: usize) -> &str {
     let line = source[..offset].rsplit('\n').next().unwrap_or("");
     &line[..line.len() - line.trim_start_matches([' ', '\t']).len()]
+}
+
+/// Whitespace from the preceding line ending to a token on its own line.
+pub(crate) fn line_prefix(source: &str, offset: Option<usize>) -> &str {
+    let Some(before) = offset.and_then(|offset| source.get(..offset)) else {
+        return "";
+    };
+    let Some(newline) = before.rfind('\n') else {
+        return "";
+    };
+    if !before[newline + 1..].chars().all(|character| matches!(character, ' ' | '\t')) {
+        return "";
+    }
+    let start = newline - usize::from(newline > 0 && before.as_bytes()[newline - 1] == b'\r');
+    &before[start..]
 }

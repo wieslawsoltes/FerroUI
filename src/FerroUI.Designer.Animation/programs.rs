@@ -12,6 +12,36 @@ pub const NATIVE_XMLNS: &str = "https://github.com/ferroui";
 const NAME_MARKER: &str = "ferroui-designer-program:";
 const ID_MARKER: &str = "ferroui-designer-program-id:";
 
+/// Source identity shared by named animations in the designer's source codecs.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct AnimationProgramIdentity {
+    name: String,
+    key: uuid::Uuid,
+}
+
+impl AnimationProgramIdentity {
+    pub fn new(name: &str, key: Option<&str>) -> Result<Self> {
+        validate_name(name)?;
+        let key = match key {
+            Some(key) => uuid::Uuid::parse_str(key)
+                .map_err(|_| AnimationError("Invalid animation program identity".into()))?,
+            None => uuid::Uuid::new_v4(),
+        };
+        Ok(Self { name: name.into(), key })
+    }
+
+    pub fn name(&self) -> &str { &self.name }
+
+    pub fn key(&self) -> String { self.key.to_string() }
+
+    /// Attach the existing XAML designer annotations to a projected animation.
+    pub fn annotate_xaml(&self, xaml: &mut String) {
+        if let Some(offset) = xaml.find('>') {
+            xaml.insert_str(offset + 1, &format!("<!--{ID_MARKER}{}-->{}", self.key, name_marker(&self.name)));
+        }
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AnimationProgram {
     pub id: NodeId,

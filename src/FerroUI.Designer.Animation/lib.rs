@@ -26,7 +26,8 @@ pub use program_edit::compose_animation_edit;
 pub use program_locator::AnimationProgramLocator;
 pub use programs::{
     fragment as animation_fragment, native_fragment, rekey_copied_programs, AnimationCodec,
-    AnimationCodecRegistry, AnimationProgram, AnimationPrograms, NativeAnimationCodec,
+    AnimationCodecRegistry, AnimationProgram, AnimationProgramIdentity, AnimationPrograms,
+    NativeAnimationCodec,
 };
 pub use states::{
     resolve_state_target, rewrite_design_metadata, state_value, StateSetter, StateTransition,
