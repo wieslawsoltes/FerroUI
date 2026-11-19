@@ -80,6 +80,7 @@ pub(crate) struct Design {
     project_path: String,
     fixture: Option<String>,
     restore_animation: Option<Restore>,
+    select_clip_key: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -358,9 +359,16 @@ impl Relay {
                 .map(|program| program.id).collect();
         }
         let routes = authored_rsx.as_ref().map(|authored| authored.hosted_routes.clone()).unwrap_or_default();
-        let source = state.animation_catalog.as_ref().and_then(|catalog| SourceMap::new(document.xaml, scope, catalog, routes));
+        let source = state.animation_catalog.as_ref().and_then(|catalog| {
+            let mut source = SourceMap::new(document.xaml, scope, catalog, routes)?;
+            source.capture_clip_authoring(catalog, authored_rsx.as_ref());
+            Some(source)
+        });
         drop(state);
         let mut presentation = self.animation_sources.restore(design.restore_animation.as_ref(), source.as_ref());
+        if let Some(id) = design.select_clip_key.as_deref().and_then(|key| source.as_ref()?.clip_with_source_key(key)) {
+            presentation.get_or_insert_with(Presentation::default).selection = Some(id);
+        }
         if let Some(presentation) = &mut presentation {
             if let Err(error) = self.restore_animation(&connection, revision, presentation) {
                 // Later polling must not promote the candidate's unposed frame
@@ -377,6 +385,7 @@ impl Relay {
         if let (Some(source), Some(catalog)) = (&source, &mut frame.animations) {
             source.annotate_clips(catalog);
             source.annotate_marker_scopes(catalog);
+            source.annotate_clip_authoring(catalog);
         }
         self.animation_sources.deliver(source, revision, frame.sequence);
         self.authored_rsx = authored_rsx;

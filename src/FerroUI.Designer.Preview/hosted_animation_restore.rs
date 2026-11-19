@@ -7,6 +7,8 @@ use std::collections::{BTreeMap, BTreeSet};
 
 #[path = "hosted_clip_placement.rs"]
 mod clip_placement;
+#[path = "hosted_clip_authoring.rs"]
+mod clip_authoring;
 #[path = "hosted_marker_scopes.rs"]
 mod marker_scopes;
 
@@ -70,6 +72,7 @@ pub(crate) struct SourceMap {
     programs: Vec<AnimationProgram>,
     state_routes: BTreeMap<i64, HostedStateRoute>,
     clips: BTreeMap<i64, Clip>,
+    clip_authoring: Option<clip_authoring::ClipAuthoring>,
 }
 
 impl SourceMap {
@@ -79,7 +82,7 @@ impl SourceMap {
         catalog: &DesignAnimationCatalogMessage,
         state_routes: BTreeMap<i64, HostedStateRoute>,
     ) -> Option<Self> {
-        if catalog.programs.is_empty() {
+        if catalog.programs.is_empty() && catalog.clip_authoring != Some(true) {
             return None;
         }
         let clips = catalog
@@ -111,6 +114,7 @@ impl SourceMap {
             programs,
             state_routes,
             clips,
+            clip_authoring: None,
         })
     }
 
@@ -125,6 +129,14 @@ impl SourceMap {
             return self.remap_route(replacement, id, route);
         }
         let program = self.programs.iter().find(|program| program.id == old_id)?;
+        if let Some(renamed) = replacement.programs.iter().find(|candidate| {
+            candidate.span.start == program.span.start && AnimationPrograms::is_annotation_only_rename(
+                &self.document, program, &replacement.document, candidate,
+            )
+        }) {
+            let id = i64::try_from(renamed.id).ok()?;
+            return replacement.clips.contains_key(&id).then_some(id);
+        }
         let anchor = AnimationProgramLocator::capture(&self.document, program);
         let key = program.source_key.as_deref();
         // A rebuild can remove one of two indistinguishable clips. Resolve against

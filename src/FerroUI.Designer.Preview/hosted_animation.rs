@@ -1,5 +1,5 @@
 use crate::hosted_relay::Frame;
-use ferroui_designer_animation::{ClipClock, CurveChannel, CurveMetric, CurveWindow, KeyframeSelection};
+use ferroui_designer_animation::{AnimationClipEdit, ClipClock, CurveChannel, CurveMetric, CurveWindow, KeyframeSelection};
 use ferroui_designer_core::TextPatch;
 use ferroui_remote_protocol::designer::{
     DesignAnimationAuthoringResult, DesignAnimationCatalogMessage, DesignAnimationClipBinding,
@@ -41,6 +41,14 @@ pub(crate) struct ClipDraft {
     pub(crate) start: Option<f64>,
     #[serde(default)]
     pub(crate) gap: f64,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct ClipEditDraft {
+    pub(crate) revision: i64,
+    pub(crate) sequence: i64,
+    pub(crate) command: AnimationClipEdit,
 }
 
 #[derive(Serialize)]

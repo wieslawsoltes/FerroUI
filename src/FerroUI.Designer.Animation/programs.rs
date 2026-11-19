@@ -2,6 +2,8 @@
 //! syntax ID; display names are ordinary XML comments, so generated markup needs no designer
 //! runtime types and unknown payloads remain fully editable.
 mod authoring;
+mod clip_edit;
+pub use clip_edit::{AnimationClipEdit, AnimationClipPlan};
 
 use crate::{require, AnimationError, AnimationImport, ImportOptions, Result, Timeline};
 use ferroui_designer_core::{Document, Edit, NodeId, NodeKind, SourceSpan};

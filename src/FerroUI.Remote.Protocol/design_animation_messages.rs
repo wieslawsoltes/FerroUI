@@ -9,6 +9,8 @@ pub const DESIGN_ANIMATION_VERSION: &str = "1";
 pub const DESIGN_STATE_ROUTES_QUERY: &str = "ferroui-design-state-routes";
 /// Include elapsed clip timing and accept combined native playback requests.
 pub const DESIGN_ANIMATION_CLIPS_QUERY: &str = "ferroui-design-clips";
+/// Include live style owners even when an accepted design contains no clips.
+pub const DESIGN_CLIP_AUTHORING_QUERY: &str = "ferroui-design-clip-authoring";
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct DesignAnimationCatalogMessage {
@@ -16,6 +18,7 @@ pub struct DesignAnimationCatalogMessage {
     pub programs: Vec<DesignAnimationProgram>,
     pub targets: Vec<DesignAnimationTarget>,
     pub keyframe_selection: Option<bool>,
+    pub clip_authoring: Option<bool>,
 }
 
 ferro_remote_message_guid!(
@@ -27,6 +30,7 @@ bson_class!(DesignAnimationCatalogMessage as "DesignAnimationCatalogMessage" {
     "Programs" => programs: Vec<DesignAnimationProgram>,
     "Targets" => targets: Vec<DesignAnimationTarget>,
     "KeyframeSelection" => keyframe_selection: Option<bool>,
+    "ClipAuthoring" => clip_authoring: Option<bool>,
 });
 
 #[derive(Clone, Debug, Default, PartialEq)]

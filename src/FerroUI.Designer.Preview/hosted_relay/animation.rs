@@ -206,6 +206,11 @@ impl Relay {
         self.animation_sources.plan_clip_placement(&draft, self.authored_rsx.as_ref())
     }
 
+    pub(crate) fn plan_clip_edit(&self, draft: hosted_animation::ClipEditDraft) -> Result<serde_json::Value, String> {
+        self.animation_connection(draft.revision, draft.sequence)?;
+        self.animation_sources.plan_clip_edit(&draft, self.authored_rsx.as_ref())
+    }
+
     pub(crate) fn curve(
         &mut self,
         query: hosted_animation::CurveRequest,

@@ -1,12 +1,51 @@
 use super::AuthoredRsxFrame;
 use crate::document::DesignDocument;
 use ferroui_designer::{validate_rsx_animation_selector, DesignerSession};
+use ferroui_designer_animation::{AnimationClipEdit, AnimationClipPlan};
 use ferroui_designer_core::{NodeId, TextPatch};
 use ferroui_designer_rsx::{RsxAnimationEdit, RsxAnimationPlan};
 use ferroui_remote_protocol::designer::DesignAnimationSourcePatch;
 use serde_json::Value;
 
 impl AuthoredRsxFrame {
+    pub(crate) fn hosted_clip_owner(&self, owner: NodeId) -> bool {
+        self.clip_owners.contains_key(&owner)
+    }
+
+    pub(crate) fn hosted_editable_clip(&self, program: NodeId) -> bool {
+        self.clips.get(&program).is_some_and(|clip| clip.can_edit_program())
+    }
+
+    pub(crate) fn plan_hosted_clip_edit(
+        &self, command: &AnimationClipEdit,
+    ) -> Result<AnimationClipPlan, String> {
+        let projection = self.catalog.project(&self.source, self.invocation.start)?;
+        let plan = match command {
+            AnimationClipEdit::Create { owner, name, selector, duration } => {
+                let index = *self.clip_owners.get(owner).ok_or("Choose a Rust control with editable inline styles")?;
+                projection.create_animation(index, name, selector, *duration)
+            }
+            AnimationClipEdit::Rename { program, name } =>
+                projection.edit_animation(self.hosted_declaration(*program)?, RsxAnimationEdit::Rename(name)),
+            AnimationClipEdit::Duplicate { program, name } =>
+                projection.edit_animation(self.hosted_declaration(*program)?, RsxAnimationEdit::Duplicate(name)),
+            AnimationClipEdit::Remove { program } =>
+                projection.edit_animation(self.hosted_declaration(*program)?, RsxAnimationEdit::Remove),
+        }?;
+        let edited = TextPatch::apply_all(&self.source, plan.patches).map_err(|error| error.to_string())?;
+        Ok(AnimationClipPlan {
+            patches: TextPatch::between(&self.source, &edited).into_iter().collect(),
+            selected_key: plan.selected_key,
+        })
+    }
+
+    pub(crate) fn source_text(&self) -> &str { &self.source }
+
+    fn hosted_declaration(&self, program: NodeId) -> Result<ferroui_designer_core::SourceSpan, String> {
+        self.clips.get(&program).filter(|clip| clip.can_edit_program()).map(|clip| clip.declaration)
+            .ok_or_else(|| "Choose a clip on an inline Rust style".into())
+    }
+
     pub(crate) fn hosted_clip_patch(&self, placements: &[(NodeId, f64)]) -> Result<Option<DesignAnimationSourcePatch>, String> {
         let placements = placements.iter().map(|&(id, delay)| {
             let clip = self.clips.get(&id).ok_or("Choose a clip from the active Rust invocation")?;

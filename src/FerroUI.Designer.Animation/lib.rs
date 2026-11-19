@@ -40,6 +40,7 @@ pub use program_edit::compose_animation_edit;
 pub use program_locator::AnimationProgramLocator;
 pub use preview_markers::{PreviewMarker, PreviewMarkerEdit, PreviewMarkers};
 pub use programs::{
+    AnimationClipEdit, AnimationClipPlan,
     fragment as animation_fragment, native_fragment, rekey_copied_programs, AnimationCodec,
     AnimationCodecRegistry, AnimationProgram, AnimationProgramIdentity, AnimationPrograms,
     NativeAnimationCodec,

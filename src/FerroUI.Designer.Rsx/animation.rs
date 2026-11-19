@@ -124,6 +124,11 @@ impl FloatSource {
 }
 
 impl RsxAnimation {
+    /// The whole clip is an inline style attachment with checked source edits.
+    pub fn can_edit_program(&self) -> bool {
+        self.attachment.is_some()
+    }
+
     pub(crate) fn delay_patch(&self, delay: f64) -> Result<Option<TextPatch>, String> {
         let millis = (native_key_time(delay).map_err(|error| error.to_string())? * 1000.0).round();
         if millis / 1000.0 != delay {

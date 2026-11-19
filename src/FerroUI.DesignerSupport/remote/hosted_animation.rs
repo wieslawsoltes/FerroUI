@@ -31,7 +31,7 @@ use ferroui_remote_protocol::designer::{
     DesignKeyframeSelectionRequest, DesignKeyframeSelectionResult, DESIGN_KEYFRAME_SELECTION_QUERY,
     DESIGN_ANIMATION_AUTHORING_QUERY, DESIGN_ANIMATION_CLIPS_QUERY, DESIGN_ANIMATION_CURVE_CHANNELS_QUERY,
     DESIGN_ANIMATION_CURVE_QUERY, DESIGN_ANIMATION_QUERY, DESIGN_ANIMATION_VERSION,
-    DESIGN_STATE_ROUTES_QUERY,
+    DESIGN_CLIP_AUTHORING_QUERY, DESIGN_STATE_ROUTES_QUERY,
 };
 use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, BTreeSet};
@@ -44,6 +44,7 @@ ferroui_base::ferro_thread_local! {
     static CURVES: Cell<bool> = const { Cell::new(false) };
     static CURVE_CHANNELS: Cell<bool> = const { Cell::new(false) };
     static CLIPS: Cell<bool> = const { Cell::new(false) };
+    static CLIP_AUTHORING: Cell<bool> = const { Cell::new(false) };
     static STATE_ROUTES: Cell<bool> = const { Cell::new(false) };
     static ACTIVE: RefCell<Option<HostedAnimations>> = const { RefCell::new(None) };
 }
@@ -60,6 +61,7 @@ pub(super) fn configure(transport: Option<&Url>, remote: bool) {
     CURVES.set(enabled && requested(DESIGN_ANIMATION_CURVE_QUERY));
     CURVE_CHANNELS.set(CURVES.get() && requested(DESIGN_ANIMATION_CURVE_CHANNELS_QUERY));
     CLIPS.set(enabled && requested(DESIGN_ANIMATION_CLIPS_QUERY));
+    CLIP_AUTHORING.set(AUTHORING.get() && requested(DESIGN_CLIP_AUTHORING_QUERY));
     STATE_ROUTES.set(enabled && requested(DESIGN_STATE_ROUTES_QUERY));
     ACTIVE.with(|active| active.borrow_mut().take());
 }
@@ -84,7 +86,7 @@ pub(super) fn prepare(update: &UpdateDesignMessage) -> Option<AnimationSource> {
     let document = Document::new(update.source.xaml.as_deref()?).ok()?;
     let programs = AnimationPrograms::scan_hosted(&document);
     let states = STATE_ROUTES.get().then(|| ProjectedStateGroup::scan(&document)).unwrap_or_default();
-    (!programs.is_empty() || !states.is_empty()).then(|| AnimationSource {
+    (!programs.is_empty() || !states.is_empty() || CLIP_AUTHORING.get()).then(|| AnimationSource {
         identity: format!("ferroui-design/{}", update.revision),
         document,
         programs,
@@ -103,6 +105,7 @@ pub(super) fn accept(
     let mut catalog = DesignAnimationCatalogMessage {
         revision,
         keyframe_selection: KEYFRAME_SELECTION.get().then_some(true),
+        clip_authoring: CLIP_AUTHORING.get().then_some(true),
         ..Default::default()
     };
     if let Some(source) = source {
