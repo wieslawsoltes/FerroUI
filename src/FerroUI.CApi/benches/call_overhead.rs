@@ -18,7 +18,11 @@
 //!   same text (what the reconcile costs); and the two halves of the 100-element frame: writing
 //!   it with the scalar writer, and committing the same bytes from a buffer of the caller;
 //! - memo frames: 100 and 1000 text blocks as memo elements, of which the frame reuses all but
-//!   the one that changes (`ferro_frame_reuse`).
+//!   the one that changes (`ferro_frame_reuse`);
+//! - signals shared through memory (section 14): a store and an apply against the setter call
+//!   (the Rust column of these lines is the ABI call they replace), 100 stores and one apply
+//!   against 100 setter calls, a load of a watched value against a getter, and events into the
+//!   event ring, drained, against a callback per event.
 //!
 //! `cargo bench -p ferroui-capi --no-default-features --bench call_overhead`. No window and no
 //! renderer: the thread is the UI thread through `ferro_init`. Each case alternates between two
@@ -370,4 +374,110 @@ fn main() {
         }
     }
     assert!(DISPATCHED.load(Ordering::Relaxed) > 0 || !selected("frame dispatcher"));
+
+    // Signals shared through memory (section 14): a store and its dirty bit, applied, against the
+    // setter call it replaces; 100 of them with one apply against 100 setter calls; a load of a
+    // watched value against a getter call; events into the ring against a callback.
+    let table = ferro_signal_table(1024);
+    assert!(!table.is_null());
+    // SAFETY: the table lives for the process.
+    let table = unsafe { &*table };
+    // SAFETY: the arrays of the table are atomics of the library with `capacity` slots (`values`)
+    // and `capacity / 64` words (`dirty`).
+    let values = unsafe { std::slice::from_raw_parts(table.values as *const AtomicU64, table.capacity as usize) };
+    let dirty = unsafe { std::slice::from_raw_parts(table.dirty as *const AtomicU64, table.capacity as usize / 64) };
+    let store = |slot: i64, value: f64| {
+        let index = slot as usize;
+        values[index].store(value.to_bits(), Ordering::Relaxed);
+        dirty[index / 64].fetch_or(1 << (index % 64), Ordering::Release);
+    };
+    let size = |i: u32| if i & 1 == 0 { 12.0 } else { 13.0 };
+    if selected("signal: a store") {
+        let slot = ferro_signal_new(FERRO_SIGNAL_F64);
+        assert_eq!(ferro_signal_set_f64(slot, 12.0), FERRO_OK);
+        assert!(ferro_signal_bind(slot, handle, font_size) > 0);
+        let setter = measure(|i| {
+            ferro_set_f64(handle, font_size, size(i));
+        });
+        let signal = measure(|i| {
+            store(slot, size(i));
+            ferro_signals_apply();
+        });
+        report("signal: a store and an apply (FontSize)", setter, signal);
+        let call = measure(|i| {
+            ferro_signal_set_f64(slot, size(i));
+            ferro_signals_apply();
+        });
+        report("signal: ferro_signal_set_f64 and an apply", setter, call);
+        assert_eq!(ferro_signal_free(slot), FERRO_OK);
+    }
+    if selected("signal: 100") {
+        let blocks: Vec<FerroHandle> = (0..100).map(|_| ferro_create(text_type)).collect();
+        let slots: Vec<i64> = blocks
+            .iter()
+            .map(|&block| {
+                let slot = ferro_signal_new(FERRO_SIGNAL_F64);
+                assert_eq!(ferro_signal_set_f64(slot, 12.0), FERRO_OK);
+                assert!(ferro_signal_bind(slot, block, font_size) > 0);
+                slot
+            })
+            .collect();
+        ferro_signals_apply();
+        let setters = measure_n(ITERATIONS / 100, |i| {
+            for &block in &blocks {
+                ferro_set_f64(block, font_size, size(i));
+            }
+        });
+        let signals = measure_n(ITERATIONS / 100, |i| {
+            for &slot in &slots {
+                store(slot, size(i));
+            }
+            ferro_signals_apply();
+        });
+        report("signal: 100 stores and one apply", setters, signals);
+        for slot in slots {
+            assert_eq!(ferro_signal_free(slot), FERRO_OK);
+        }
+        for block in blocks {
+            assert_eq!(ferro_release(block), FERRO_OK);
+        }
+    }
+    if selected("signal: a load") {
+        let slot = ferro_signal_new(FERRO_SIGNAL_F64);
+        assert!(ferro_signal_watch(slot, handle, font_size) > 0);
+        let getter = measure(|_| {
+            black_box(ferro_get_f64_or(black_box(handle), font_size, -1.0));
+        });
+        let signal = measure(|_| {
+            black_box(f64::from_bits(values[black_box(slot) as usize].load(Ordering::Acquire)));
+        });
+        report("signal: a load of a watched value (FontSize)", getter, signal);
+        let call = measure(|_| {
+            black_box(ferro_signal_get_f64(black_box(slot)));
+        });
+        report("signal: ferro_signal_get_f64", getter, call);
+        assert_eq!(ferro_signal_free(slot), FERRO_OK);
+    }
+    if selected("event ring") {
+        let ring = ferro_event_ring(1024);
+        assert!(!ring.is_null());
+        // SAFETY: the ring lives for the process.
+        let ring = unsafe { &*ring };
+        // SAFETY: the counters of the ring are atomics of the library.
+        let (head, tail) = unsafe { (&*(ring.head as *const AtomicU64), &*(ring.tail as *const AtomicU64)) };
+        let ringed_handle = ferro_create(button_type);
+        let ringed = object_of(ringed_handle).and_then(|object| object.cast::<Button>()).expect("a button");
+        assert!(ferro_subscribe_ring(ringed_handle, click, 1) > 0);
+        let mut taken = 0u64;
+        let callback = measure(|_| abi_button.raise_event(&RoutedEventArgs::with_event(Button::click_event())));
+        let into_ring = measure(|_| {
+            ringed.raise_event(&RoutedEventArgs::with_event(Button::click_event()));
+            // Drained as a language drains it: the records up to the head, then the tail.
+            let end = head.load(Ordering::Acquire);
+            taken += end - tail.load(Ordering::Relaxed);
+            tail.store(end, Ordering::Release);
+        });
+        report("event ring: a raise of Click and its drain", callback, into_ring);
+        assert!(taken > 0);
+    }
 }
