@@ -445,6 +445,26 @@ installs a control's mapper when it applies a template whose root has groups (an
 re-runs it on the control's pseudo-class changes (`Classes::add_listener`) with transitions. A
 control without groups in its template is untouched; a mapper never changes pseudo-classes.
 
+**Status (VSM-5, done).** `visual_state/state_mappers.rs` of `ferroui-controls` has the mappers
+of `Button` (and `RepeatButton`), `ToggleButton`, `CheckBox`, `RadioButton`, `ListBoxItem` and
+`TextBox`, ports of WinUI's `ChangeVisualState` (`Button_Partial.cpp`, `ToggleButton_Partial.cpp`,
+`CheckBox_Partial.cpp`, `RadioButton_Partial.cpp`, `ListBoxItem_Partial.cpp`) and of the text
+box's `UpdateVisualState` (`TextBoxBase.cpp`, `TextBox.cpp`): `CommonStates` from `:disabled`,
+`:pressed` and `:pointerover`; the check states (`Checked`, `CheckedPointerOver`,
+`IndeterminatePressed`, ...; the combined states of the check box, else its older common and
+check states); the selection states of the list item (`SelectedUnfocused` while the selector
+around it does not have the keyboard focus: FerroUI's counterpart of `IsSelectionActive` is
+`:focus-within`); the focus states (`Focused` for keyboard focus, `:focus-visible`,
+`PointerFocused` for other focus); the text box's `Focused` state and its `ButtonStates`. A
+mapper is installed by `TemplatedControl::apply_template` only when the root of the new template
+has visual state groups; it sets the states without transitions then and with transitions when
+the classes of the control or the properties the states read (`IsChecked`, `IsSelected`, `Text`,
+`IsReadOnly`, ...) change. Controls of other families do nothing more than a type test. The
+catalog's "Visual States" page shows a button template written with visual states, a storyboard
+and a transition. Tests: `visual_state/state_mapper_tests.rs`. Left for later: the mappers of the
+other upstream-ported controls (`ComboBox`, `ComboBoxItem`, `ToggleSwitch`, `Slider`, ...), and the
+theme migration pilot of 5.11.
+
 ### 5.11 Can WinUI templates keep their visual state markup, and should the WinUI theme migrate?
 
 **They can**, once VSM-1 to VSM-4 (section 8) and, for upstream-ported controls, the bridge are
