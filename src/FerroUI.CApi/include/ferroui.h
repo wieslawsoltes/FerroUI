@@ -14,6 +14,48 @@
 // version; a change that breaks a binding raises it.
 #define FERRO_ABI_VERSION 1
 
+// A pointer was pressed on the instance.
+#define FERRO_POINTER_PRESSED 1
+
+// A pointer was released on the instance.
+#define FERRO_POINTER_RELEASED 2
+
+// A pointer moved over the instance.
+#define FERRO_POINTER_MOVED 3
+
+// A key went down while the instance had the focus.
+#define FERRO_KEY_DOWN 1
+
+// A key went up while the instance had the focus.
+#define FERRO_KEY_UP 2
+
+// The base of a class: `Control`.
+#define FERRO_BASE_CONTROL 1
+
+// The base of a class: `Panel` (children).
+#define FERRO_BASE_PANEL 2
+
+// The base of a class: `Decorator` (one child).
+#define FERRO_BASE_DECORATOR 3
+
+// The base of a class: `ContentControl` (a content and a template).
+#define FERRO_BASE_CONTENT_CONTROL 4
+
+// A registered property makes the instance measure again when it changes.
+#define FERRO_PROPERTY_AFFECTS_MEASURE 1
+
+// A registered property makes the instance arrange again when it changes.
+#define FERRO_PROPERTY_AFFECTS_ARRANGE 2
+
+// A registered property makes the instance render again when it changes.
+#define FERRO_PROPERTY_AFFECTS_RENDER 4
+
+// A registered property is inherited down the tree.
+#define FERRO_PROPERTY_INHERITS 8
+
+// A registered property is attached: it can be set on any control (`Owner.Name`).
+#define FERRO_PROPERTY_ATTACHED 16
+
 // A free slot.
 #define FERRO_SIGNAL_FREE 0
 
@@ -59,6 +101,48 @@ typedef int64_t (*FerroEventDataFn)(void *user_data, FerroHandle sender, int64_t
 // Releases the user data of a subscription ([`ferro_subscribe_data`]) once the handler is
 // removed: by [`ferro_unsubscribe`], or when the object goes away.
 typedef void (*FerroReleaseFn)(void *user_data);
+
+// Called once for every new instance of a class, with the data of the class
+// ([`ferro_class_set_data`]) and the instance (borrowed for the call); the callback gives the
+// instance its own data with [`ferro_object_set_data`].
+typedef FerroStatus (*FerroCreateFn)(void *class_data, FerroHandle object);
+
+// Measure and arrange: the available (final) width and height in, the desired (used) size out
+// through `*width` and `*height` (or [`ferro_layout_result`]).
+typedef FerroStatus (*FerroLayoutFn)(void *data,
+                                     FerroHandle object,
+                                     double width_in,
+                                     double height_in,
+                                     double *width,
+                                     double *height);
+
+// Render: `context` names the drawing context of the call for the `ferro_draw_*` functions; it
+// is valid until the callback returns.
+typedef FerroStatus (*FerroRenderFn)(void *data, FerroHandle object, int64_t context);
+
+// A notification with one integer: a property of the class changed (`arg` is its property ID),
+// the instance was attached to or detached from the visual tree, its template was applied.
+typedef FerroStatus (*FerroNotifyFn)(void *data, FerroHandle object, int64_t arg);
+
+// A pointer event: `kind` (`FERRO_POINTER_PRESSED`, `_RELEASED`, `_MOVED`), the position relative
+// to the instance and the key modifiers. A status of `1` marks the event as handled.
+typedef FerroStatus (*FerroPointerFn)(void *data,
+                                      FerroHandle object,
+                                      int32_t kind,
+                                      double x,
+                                      double y,
+                                      int64_t modifiers);
+
+// A key event: `kind` (`FERRO_KEY_DOWN`, `FERRO_KEY_UP`), the key (the value of the `Key`
+// enumeration of the model) and the key modifiers. A status of `1` marks it as handled.
+typedef FerroStatus (*FerroKeyFn)(void *data,
+                                  FerroHandle object,
+                                  int32_t kind,
+                                  int64_t key,
+                                  int64_t modifiers);
+
+// Called when an instance goes away, with its data, so that the language releases it.
+typedef void (*FerroReleaseDataFn)(void *data);
 
 // The signal table of the process (docs/c-abi.md, section 14): arrays the library allocates
 // once, which stay at their addresses until the process ends. `capacity` is a multiple of 64;
@@ -232,6 +316,186 @@ FerroStatus ferro_unsubscribe(int64_t subscription);
 // interface from code. [`FERRO_NOT_SUPPORTED`] for an event whose arguments carry more than the
 // routing state (a pointer event). UI thread only.
 FerroStatus ferro_raise(FerroHandle object, int64_t event);
+
+// Gives the size of the measure or arrange callback that runs now (the innermost), for a
+// language that cannot write through the `double *` of the callback. UI thread only.
+FerroStatus ferro_layout_result(double width, double height);
+
+// Registers the class `name` (UTF-8, `length` bytes, negative for NUL-terminated) on the base
+// `base` (`FERRO_BASE_CONTROL`, `_PANEL`, `_DECORATOR`, `_CONTENT_CONTROL`) and returns its type
+// ID, or a negative status. The class is created by name ([`ferro_create`](crate::ferro_create)
+// with [`ferro_type_id`](crate::ferro_type_id)), in frames and wherever a class is found by name;
+// its virtual members call the callbacks set with `ferro_class_on_*`, and fall through to the
+// base where none is set. At most 64 classes per process. UI thread only.
+int64_t ferro_class_register(const char *name, int64_t length, int32_t base);
+
+// Sets the callback that gives each new instance of the class its data (`NULL` for none).
+// UI thread only.
+FerroStatus ferro_class_on_create(int64_t class_id, FerroCreateFn callback);
+
+// Sets the measure callback of the class (`NULL`: the base measures). UI thread only.
+FerroStatus ferro_class_on_measure(int64_t class_id, FerroLayoutFn callback);
+
+// Sets the arrange callback of the class (`NULL`: the base arranges). UI thread only.
+FerroStatus ferro_class_on_arrange(int64_t class_id, FerroLayoutFn callback);
+
+// Sets the render callback of the class (`NULL`: the base renders alone). The base renders
+// first (the background of a panel); the callback draws over it. UI thread only.
+FerroStatus ferro_class_on_render(int64_t class_id, FerroRenderFn callback);
+
+// Sets the callback called when a property the class registered changes, with its ID. UI
+// thread only.
+FerroStatus ferro_class_on_property_changed(int64_t class_id, FerroNotifyFn callback);
+
+// Sets the callback called when an instance is attached to the visual tree. UI thread only.
+FerroStatus ferro_class_on_attached(int64_t class_id, FerroNotifyFn callback);
+
+// Sets the callback called when an instance is detached from the visual tree. UI thread only.
+FerroStatus ferro_class_on_detached(int64_t class_id, FerroNotifyFn callback);
+
+// Sets the callback called when the template of an instance is applied (a class on
+// `FERRO_BASE_CONTENT_CONTROL`); [`ferro_template_part`] finds its parts. UI thread only.
+FerroStatus ferro_class_on_apply_template(int64_t class_id, FerroNotifyFn callback);
+
+// Sets the callback of pointer presses, releases and moves on an instance. UI thread only.
+FerroStatus ferro_class_on_pointer(int64_t class_id, FerroPointerFn callback);
+
+// Sets the callback of key presses and releases on an instance. UI thread only.
+FerroStatus ferro_class_on_key(int64_t class_id, FerroKeyFn callback);
+
+// Sets the data of the class, given to its create callback. UI thread only.
+FerroStatus ferro_class_set_data(int64_t class_id, void *data);
+
+// Sets the data of an instance of a foreign class, passed to every callback of the instance, and
+// the function that releases it when the instance goes away (`NULL` for none). UI thread only.
+FerroStatus ferro_object_set_data(FerroHandle object, void *data, FerroReleaseDataFn release);
+
+// The data of an instance of a foreign class (`NULL` for none or on a failure, recorded). UI
+// thread only.
+void *ferro_object_data(FerroHandle object);
+
+// Registers a property of the foreign class `owner` (a type ID of [`ferro_class_register`]) and
+// returns its property ID, or a negative status. `kind` is a kind of signal (`FERRO_SIGNAL_I64`,
+// `_F64`, `_BOOL`, `_TEXT`); the default is `default_number` (an integer or a boolean as a
+// number) or `default_text` (UTF-8, NUL-terminated, `NULL` for no text). `flags` combine
+// `FERRO_PROPERTY_AFFECTS_MEASURE`, `_ARRANGE`, `_RENDER`, `_INHERITS` and `_ATTACHED` (an
+// attached property, `Owner.Name`, that every control takes). The property is a styled property
+// as the ones of the framework: the setters and getters of the ABI, frames, signals, styles,
+// bindings and animations use it. UI thread only.
+int64_t ferro_property_register(int64_t owner,
+                                const char *name,
+                                int64_t length,
+                                int32_t kind,
+                                double default_number,
+                                const char *default_text,
+                                int64_t flags);
+
+// Measures `object` (a child, from a measure callback) at the available size. UI thread only.
+FerroStatus ferro_layout_measure(FerroHandle object, double width, double height);
+
+// Arranges `object` (a child, from an arrange callback) in the rectangle. UI thread only.
+FerroStatus ferro_layout_arrange(FerroHandle object,
+                                 double x,
+                                 double y,
+                                 double width,
+                                 double height);
+
+// The desired width of `object` after its measure (`0` on a failure, recorded). UI thread only.
+double ferro_layout_desired_width(FerroHandle object);
+
+// The desired height of `object` after its measure (`0` on a failure, recorded). UI thread only.
+double ferro_layout_desired_height(FerroHandle object);
+
+// The number of children of a panel (`0` for another object, recorded). UI thread only.
+int64_t ferro_panel_child_count(FerroHandle object);
+
+// The child `index` of a panel, with one reference counted (release it), or `0` (recorded). UI
+// thread only.
+FerroHandle ferro_panel_child(FerroHandle object, int64_t index);
+
+// The part named `name` of the applied template of `object` (a foreign class on
+// `FERRO_BASE_CONTENT_CONTROL`), with one reference counted (release it), or `0` with
+// [`FERRO_NOT_FOUND`]. From the apply-template callback on. UI thread only.
+FerroHandle ferro_template_part(FerroHandle object, const char *name, int64_t length);
+
+// A solid brush of the colour `argb` (`0xAARRGGBB`) for the `ferro_draw_*` functions: its ID (a
+// positive number), the same for the same colour, or a negative status. Make the brushes of a
+// control once (at its creation) and draw with their IDs. UI thread only.
+int64_t ferro_draw_brush(int64_t argb);
+
+// A solid pen of the colour `argb` and the thickness `thickness`: its ID, or a negative status.
+// UI thread only.
+int64_t ferro_draw_pen(int64_t argb, double thickness);
+
+// Fills (`brush`) and strokes (`pen`) a rectangle, its corners rounded by `radius_x` and
+// `radius_y`. UI thread only, in a render callback.
+FerroStatus ferro_draw_rect(int64_t context,
+                            double x,
+                            double y,
+                            double width,
+                            double height,
+                            double radius_x,
+                            double radius_y,
+                            int64_t brush,
+                            int64_t pen);
+
+// Fills and strokes the ellipse in the rectangle. UI thread only, in a render callback.
+FerroStatus ferro_draw_ellipse(int64_t context,
+                               double x,
+                               double y,
+                               double width,
+                               double height,
+                               int64_t brush,
+                               int64_t pen);
+
+// Strokes a line with the pen. UI thread only, in a render callback.
+FerroStatus ferro_draw_line(int64_t context,
+                            double x1,
+                            double y1,
+                            double x2,
+                            double y2,
+                            int64_t pen);
+
+// Fills and strokes the geometry of the path data `data` (the mini-language of markup: `M 0,0 L
+// 10,10 Z`, UTF-8, `length` bytes, negative for NUL-terminated). UI thread only, in a render
+// callback.
+FerroStatus ferro_draw_path(int64_t context,
+                            const char *data,
+                            int64_t length,
+                            int64_t brush,
+                            int64_t pen);
+
+// Draws `text` (UTF-8, `length` bytes, negative for NUL-terminated) with its top left at `x`,
+// `y`, in the default typeface at `size`, with the brush. UI thread only, in a render callback.
+FerroStatus ferro_draw_text(int64_t context,
+                            const char *text,
+                            int64_t length,
+                            double x,
+                            double y,
+                            double size,
+                            int64_t brush);
+
+// Clips what is drawn next to the rectangle, until [`ferro_draw_pop`]. UI thread only, in a
+// render callback.
+FerroStatus ferro_draw_push_clip(int64_t context, double x, double y, double width, double height);
+
+// Transforms what is drawn next by the matrix (`m11 m12 m21 m22 dx dy`), until
+// [`ferro_draw_pop`]. UI thread only, in a render callback.
+FerroStatus ferro_draw_push_transform(int64_t context,
+                                      double m11,
+                                      double m12,
+                                      double m21,
+                                      double m22,
+                                      double dx,
+                                      double dy);
+
+// Draws what is drawn next with the opacity, until [`ferro_draw_pop`]. UI thread only, in a
+// render callback.
+FerroStatus ferro_draw_push_opacity(int64_t context, double opacity);
+
+// Pops the clip, transform or opacity pushed last in the context. UI thread only, in a render
+// callback.
+FerroStatus ferro_draw_pop(int64_t context);
 
 // Starts a frame on the calling thread: empties the buffer of the scalar writer. Any thread (the
 // buffer is the calling thread's); commit it on the UI thread.

@@ -42,6 +42,7 @@ mod app;
 mod api_ids;
 mod error;
 mod events;
+mod foreign;
 mod frame;
 mod handles;
 mod ids;
@@ -56,6 +57,7 @@ pub use error::{ferro_clear_error, ferro_last_error, ferro_last_error_code};
 pub use events::{
     ferro_raise, ferro_subscribe, ferro_subscribe_data, ferro_subscribe_dispatch, ferro_unsubscribe,
 };
+pub use foreign::*;
 pub use frame::{
     ferro_frame_begin, ferro_frame_bind, ferro_frame_bool, ferro_frame_clear, ferro_frame_close, ferro_frame_commit,
     ferro_frame_commit_bytes, ferro_frame_dispatch, ferro_frame_dispatcher, ferro_frame_event_f64,
