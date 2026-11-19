@@ -3576,3 +3576,44 @@ fn an_error_raised_in_a_reload_step_is_its_error_without_unwinding() {
     let payload = outside.expect_err("raised outside a step");
     assert_eq!(payload.downcast_ref::<ReloadError>(), Some(&ReloadError::Failed("outside".into())));
 }
+
+/// Not from upstream (#567): an error the XAML runtime reports in a step of a reload (a deferred
+/// resource, include or template of the candidate that fails) is the error of the step, with the
+/// message its throw panicked with, without unwinding. A reload error raised before it wins; one
+/// raised after it is left out, as when the throw ended the step; an error scope opened inside
+/// the step keeps its own error.
+#[test]
+fn an_error_the_xaml_runtime_reports_in_a_reload_step_is_its_error_without_unwinding() {
+    use ferroui_markup_xaml::{xaml_error_scope, XamlLoadError};
+    let report = |message: &str| xaml_error_scope::report(XamlLoadError::with_message(message)).unwrap();
+
+    let went_on = Cell::new(false);
+    let result: Result<u32, ReloadError> = catch_reload(|| {
+        report("Unable to resolve the resource");
+        report("A later consequence");
+        raise_reload_error(ReloadError::RestartRequired("after".into()));
+        went_on.set(true);
+        Err(ReloadError::Failed("own".into()))
+    });
+    assert!(went_on.get());
+    assert_eq!(result, Err(ReloadError::Failed("Unable to resolve the resource".into())));
+
+    let result: Result<(), ReloadError> = catch_reload(|| {
+        raise_reload_error(ReloadError::RestartRequired("before".into()));
+        report("Unable to resolve the resource");
+        Ok(())
+    });
+    assert_eq!(result, Err(ReloadError::RestartRequired("before".into())));
+
+    let result: Result<(), ReloadError> = catch_reload(|| {
+        let inner: Result<(), XamlLoadError> = xaml_error_scope::with_xaml_errors(|| {
+            report("inner");
+            raise_reload_error(ReloadError::RestartRequired("in an inner scope".into()));
+            Ok(())
+        });
+        assert_eq!(inner.unwrap_err().message(), "inner");
+        Ok(())
+    });
+    assert_eq!(result, Err(ReloadError::RestartRequired("in an inner scope".into())));
+    assert_eq!(xaml_error_scope::depth(), 0);
+}

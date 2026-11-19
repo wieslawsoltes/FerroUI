@@ -41,6 +41,7 @@
         <MergeResourceInclude Source="/Resources/ListBox_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/ToggleSwitch_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/CommandBar_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/GridViewItem_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/ListViewItem_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/TextBlock_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/TextBlock_themeresources_v2.5.xaml" />

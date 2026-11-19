@@ -219,6 +219,8 @@ control_tests! {
     hyperlink_button => "HyperlinkButton";
     list_box => "ListBox";
     list_box_item => "ListBoxItem";
+    list_view => "ListView";
+    list_view_item => "ListViewItem";
     menu => "Menu";
     menu_flyout_presenter => "MenuFlyoutPresenter";
     menu_item => "MenuItem";
@@ -235,6 +237,8 @@ control_tests! {
     // B1: primitives and simple content
     data_validation_errors => "DataValidationErrors";
     grid_splitter => "GridSplitter";
+    grid_view => "GridView";
+    grid_view_item => "GridViewItem";
     group_box => "GroupBox";
     headered_content_control => "HeaderedContentControl";
     info_badge => "InfoBadge";
