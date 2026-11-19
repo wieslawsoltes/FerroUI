@@ -8,6 +8,7 @@ Standard library only; it reads the sources and the generated files of the repos
 writes nothing.
 """
 
+import glob
 import importlib.util
 import json
 import os
@@ -112,29 +113,101 @@ class OspreyTests(unittest.TestCase):
 
     def test_setters_chain_and_call_constants(self):
         objects = self.text["objects.osp"]
-        self.assertRegex(objects, r"fn fontSize\(object: int, value: float\) -> int = \{\n"
+        self.assertRegex(objects, r"// fontSize\(object: int, value: float\) -> int: sets FontSize")
+        self.assertRegex(objects, r"fn fontSize\(object, value\) = \{\n"
                                   r"    let _ = ferro_set_f64\(object: object, property: \d+, value: value\)\n    object\n\}")
-        self.assertIn("fn button() -> int = ferro_create(typeId: ", objects)
+        self.assertIn("fn button() = ferro_create(typeId: ", objects)
         self.assertNotIn("ferro_property_id", objects, "no name is looked up at run time")
-        self.assertRegex(objects, r"fn onClick\(object: int, tag: int\) -> int")
+        self.assertRegex(objects, r"fn onClick\(object, tag\) = ")
+
+    def test_generated_functions_carry_no_redundant_annotations(self):
+        # The lint of Osprey on redundant annotations is slow on a large file (docs/osprey.md,
+        # section 5): generated functions name their types in the comment only.
+        for name, text in self.files:
+            for line in text.split("\n"):
+                if line.startswith("fn "):
+                    self.assertNotRegex(line.split("=")[0], r":|->", f"{name}: {line}")
 
     def test_views_have_elements_attributes_and_messages(self):
         views = self.text["views.osp"]
-        self.assertRegex(views, r"fn stackPanel<M>\(attrs: List<Attr<M>>, children: List<Element<M>>\) -> Element<M>")
-        self.assertRegex(views, r"fn textBlock<M>\(attrs: List<Attr<M>>\) -> Element<M>")
-        self.assertRegex(views, r"fn onClick<M>\(message: M\) -> Attr<M> = AttrOn")
-        self.assertRegex(views, r"fn onTextChanged<M>\(message: M\) -> Attr<M> = AttrOnValue")
+        self.assertRegex(views, r"// stackPanel\(attrs: List<Attr<M>>, children: List<Element<M>>\) -> Element<M>")
+        self.assertIn("fn stackPanel(attrs, children) = Element {", views)
+        self.assertIn("fn textBlock(attrs) = Element {", views)
+        self.assertRegex(views, r"fn onClick\(message\) = AttrOn ")
+        self.assertRegex(views, r"fn onTextChanged\(message\) = AttrOnValue ")
 
     def test_enums_are_unions_named_apart(self):
         abi = self.text["abi.osp"]
         self.assertIn("type Orientation = OrientationHorizontal | OrientationVertical", abi)
-        self.assertIn(f"fn apiFingerprint() -> int = {OSPREY_MODEL()['fingerprint']}", abi)
+        self.assertIn(f"fn apiFingerprint() = {OSPREY_MODEL()['fingerprint']}", abi)
 
     def test_the_generated_files_are_up_to_date(self):
-        for name, text in self.files:
-            path = os.path.join(OSPREY.OUT, name)
-            with open(path, encoding="utf-8") as f:
-                self.assertEqual(f.read(), text, f"{name} is stale: python3 scripts/generate_osprey_bindings.py")
+        model, names = OSPREY.load_model()
+        for directory, manifest_path in OSPREY.targets():
+            manifest = None
+            if manifest_path:
+                with open(manifest_path, encoding="utf-8") as f:
+                    manifest = json.load(f)
+            files, _ = OSPREY.outputs(manifest, model, names)
+            for name, text in files:
+                path = os.path.join(directory, name)
+                with open(path, encoding="utf-8") as f:
+                    self.assertEqual(f.read(), text, f"{path} is stale: python3 scripts/generate_osprey_bindings.py")
+
+
+class SelectionTests(unittest.TestCase):
+    """The bindings of an application are its selection: small, so that it builds in seconds."""
+
+    # A selection of a sample stays below this many bytes of generated Osprey; the full bindings
+    # are about 1.1 MB. Raise it only with a reason (docs/osprey.md, section 5).
+    LIMIT = 200_000
+
+    @classmethod
+    def setUpClass(cls):
+        cls.model, cls.names = OSPREY.load_model()
+
+    def selection(self, classes, layers=("objects", "views")):
+        files, _ = OSPREY.outputs({"classes": classes, "layers": list(layers)}, self.model, self.names)
+        return dict(files)
+
+    def test_a_selection_has_its_classes_their_bases_and_nothing_else(self):
+        files = self.selection(["Button"], ["objects"])
+        self.assertEqual(sorted(files), ["abi.osp", "objects.osp"])
+        objects = files["objects.osp"]
+        self.assertIn("fn button() = ", objects)
+        self.assertNotIn("fn stackPanel() = ", objects)
+        # Content of ContentControl and Width of Layoutable, bases of Button.
+        self.assertIn("fn content(object, value) = ", objects)
+        self.assertIn("fn width(object, value) = ", objects)
+        self.assertNotIn("fn spacing(object, value) = ", objects)
+        self.assertIn("type ClickMode = ", files["abi.osp"])
+        self.assertNotIn("type Orientation = ", files["abi.osp"])
+
+    def test_names_are_the_names_of_the_full_bindings(self):
+        full = dict(OSPREY.outputs(None, self.model, self.names)[0])
+        selected = self.selection(["Window", "StackPanel", "TextBox", "Button"])
+        for name in ("objects.osp", "views.osp"):
+            full_functions = set(re.findall(r"^fn (\w+)", full[name], re.M))
+            for function in re.findall(r"^fn (\w+)", selected[name], re.M):
+                self.assertIn(function, full_functions, f"{name}: {function}")
+
+    def test_unknown_classes_and_layers_are_errors(self):
+        with self.assertRaises(SystemExit):
+            self.selection(["NoSuchControl"])
+        with self.assertRaises(SystemExit):
+            self.selection(["Button"], ["widgets"])
+
+    def test_every_sample_has_a_small_selection(self):
+        paths = glob.glob(OSPREY.SAMPLE_MANIFESTS)
+        self.assertGreaterEqual(len(paths), 6)
+        for path in paths:
+            directory = os.path.join(os.path.dirname(path), "ferroui")
+            size = sum(os.path.getsize(os.path.join(directory, name)) for name in os.listdir(directory))
+            self.assertLess(size, self.LIMIT, f"{directory}: {size} bytes of generated Osprey")
+            with open(os.path.join(os.path.dirname(path), "osprey.toml"), encoding="utf-8") as f:
+                roots = f.read()
+            self.assertIn('"ferroui"', roots, f"{path}: the project builds its selection")
+            self.assertNotIn("bindings/osprey/full", roots, f"{path}: not the full bindings")
 
 
 def OSPREY_MODEL():

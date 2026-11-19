@@ -59,6 +59,13 @@ part of it; section 7 says what is done and what is next.
    no function of the binding in between; a language with closures uses `ferro_subscribe`
    with one function and the token as the index of its table. Nothing is allocated per
    event (the event text of a frame event lives in a buffer the library keeps).
+6. **Selection trims both sides.** A manifest of what an application uses (`ferroui.json`:
+   classes, whose bases come with them, and layers) selects the part of the model a backend
+   generates; the Osprey backend does this for every sample. Trimming the exports and tables of
+   the library with the same manifest is phase 2 of #636.
+7. **A benchmark per backend.** Each backend ships the same operations as the Rust benchmark
+   of the ABI (`src/FerroUI.CApi/benches/call_overhead.rs`): a property write, a read, an
+   event dispatch, frame commits. Section 6 of docs/osprey.md has the numbers of Osprey.
 8. **Frames cost what changed.** A commit compares the attribute bytes of every element with
    the ones the retained tree keeps from the last frame and matches siblings by position
    while their keys stay, so an unchanged element costs one short comparison
@@ -79,12 +86,6 @@ part of it; section 7 says what is done and what is next.
    (handles, resolved IDs, frames) is in statics checked with one comparison of the thread
    (docs/c-abi.md, section 13), so a binding gains nothing by caching handles or IDs on its
    side.
-6. **Selection trims both sides.** A manifest of what an application uses (classes,
-   properties, events) selects the part of the model a backend generates and the exports and
-   tables of the library (phase 2 of #636). The model already has what the manifest names.
-7. **A benchmark per backend.** Each backend ships the same operations as the Rust benchmark
-   of the ABI (`src/FerroUI.CApi/benches/call_overhead.rs`): a property write, a read, an
-   event dispatch, frame commits. Section 6 of docs/osprey.md has the numbers of Osprey.
 
 ## 3. Idiom
 
@@ -167,14 +168,15 @@ documentation from the model.
 
 Done in the Osprey MVP: the model and its tests, stable IDs compiled into the library and the
 fingerprint, the frame layout with the scalar writer and the buffer commit, UTF-16 entry
-points, getters with a fallback, both layers of Osprey for every class, five samples and a
-benchmark. Then the performance work of docs/c-abi.md, section 13: frames proportional to
-what changed, memo elements and reuse records (the `memo(version)` attribute of Osprey),
-plain getters, events subscribed to the dispatcher, and the cheaper calls.
+points, getters with a fallback, both layers of Osprey for every class, selections from a
+manifest (each sample builds in one to two seconds), five samples and a benchmark. Then the
+performance work of docs/c-abi.md, section 13: frames proportional to what changed, memo
+elements and reuse records (the `memo(version)` attribute of Osprey), plain getters, events
+subscribed to the dispatcher, and the cheaper calls.
 
 Next:
 
-- The selection manifest (phase 2 of #636) for the bindings and the library together.
+- The library trimmed by the same manifest as the bindings (phase 2 of #636).
 - A buffer the library exposes for frames (`ferro_frame_buffer`) beside the commit of a
   caller's buffer, for languages that would rather write into library memory.
 - Object values in frames (an element as the value of a property, not only as a child), and
