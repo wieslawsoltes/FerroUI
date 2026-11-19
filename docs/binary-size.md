@@ -488,6 +488,34 @@ workspace settings that `scripts/apps/sync-workspace.py` writes carry `panic = "
 panic hook (`std::panic::set_hook`), which runs before the abort, as the Android and browser
 platforms do for their crash reports.
 
+What is left of the unwind sections after `panic = "abort"` (0.26 MB of hello world's `dist`
+build above) was checked against `-C force-unwind-tables=no` (#567, 2026-11-19), and the flag
+is left out:
+
+- rustc already leaves the `uwtable` attribute off every function of the workspace with
+  `panic = "abort"`, unless the target sets `default-uwtable` or `requires-uwtable`
+  (`rustc --print target-spec-json`). Without either: `aarch64-apple-darwin`,
+  `x86_64-apple-darwin`, `x86_64-unknown-linux-gnu`, `aarch64-unknown-linux-gnu`. The flag gives
+  these targets nothing they do not have already.
+- On macOS the code generator still writes the call frame information of every function. The
+  linker builds `__unwind_info` from it, and the system unwinder and the crash reporter read it.
+  A test program built for `aarch64-apple-darwin` with `panic = "abort"` had the same number of
+  `.cfi_startproc` in its assembly, the same section sizes (`__unwind_info` 4,992 bytes,
+  `__eh_frame` 27,044 bytes) and the same file size, with and without the flag.
+- `x86_64-pc-windows-msvc` and `aarch64-pc-windows-msvc` require unwind tables
+  (`requires-uwtable`): the `.pdata` and `.xdata` records are what structured exception handling
+  and every stack walk on Windows use. rustc refuses `-C force-unwind-tables=no` there.
+- `aarch64-linux-android` sets `default-uwtable`: there the flag would remove the tables of the
+  workspace's code. The platform's crash dumps (`debuggerd`) use them to unwind, so they stay.
+- The unwind records that remain come from the precompiled standard library, which is built
+  with unwinding, and from the C and C++ libraries (Skia, HarfBuzz). Only `-Zbuild-std` (nightly)
+  rebuilds the standard library without them, and FerroUI builds on stable. The C++ libraries
+  are compiled by their own build scripts.
+- A profile cannot set rustflags on stable (`profile-rustflags` is unstable).
+  `[target.<triple>] rustflags` in `.cargo/config.toml` reach every profile, the tests and the
+  build scripts too, and an application in a workspace of its own does not read the
+  framework's configuration.
+
 ### 4.8 Class tables are constants (#569)
 
 A class's table of virtual members was built at run time by `Subclassable::build_vtable`, a
