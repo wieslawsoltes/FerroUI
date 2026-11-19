@@ -184,6 +184,8 @@ For MCP, read `designer_states` through `designer_studio_query` to get the group
 3. Choose **Add or Edit Transition**. Set the starting state, destination, duration in seconds, and easing. Choose **Any state** for a default transition. Use a whole number of milliseconds for Rust, such as `0.64` seconds. Remove transitions, setters, individual states, or the whole group from the same actions. Removing a state also removes its routes.
 4. Choose **Preview State** in an authored state’s actions or choose it under **States** in the animation picker and use **Preview state**. Choose **Preview Transition** or open a route under **State routes** to scrub its elapsed playhead. **Stop** clears the sampled pose.
 
+![The Review group actions over an XAML source buffer and the app’s Ready pose](../images/vscode-app-preview-xaml-state-actions.jpg)
+
 App Preview uses the app’s registered animators for literal state poses and transitions. XAML authoring writes native style classes, setters, and animations. Mapped Rust authoring edits inline `visual_states` in the active invocation. Use Undo in the source editor to revert each operation. When the active transition or state still resolves after an edit, the first accepted frame restores its preview position.
 
 To author directional XAML transitions, include `ferroui-xaml-interactions-custom` in the application and call `ferroui_xaml_interactions_custom::register_types()` before loading XAML in App Preview and in the running app. Studio uses the same `ConditionalAction` class for directional routes. [Todo Workbench registration](../../../samples/TodoWorkbench/app_preview.rs)
@@ -196,6 +198,8 @@ For MCP, read `stateAuthoring.owners` and `stateAuthoring.groups` from `designer
 2. Drag the playhead or focus it and use the arrow keys. Use **Play**, **Pause**, or **Stop** to drive the route. Stop removes the sampled layer and returns to the app’s own values.
 3. Pause playback and use **Edit state route timing** to change the duration in whole milliseconds and the easing. The change to the Rust buffer uses one Undo step. **Reveal visual state in source** selects the declaration. A compatible replacement keeps its elapsed pose through the edit.
 4. In Todo Workbench, choose the **Interactive review** Rust fixture to test its compiled button handlers. Stop designer playback before trying **Queued**, **Ready**, and **Reset**. The fixture’s runtime uses the logic compiled into the selected binary. The playhead samples eligible route values from the current Rust buffer. Rebuild the binary to exercise edited logic through its handlers. [App Preview setup](runtime.md#render-with-your-app-in-app-preview)
+
+![The Queued to Ready route remains at 0.32 seconds after its Rust duration changes to 760 milliseconds](../images/vscode-app-preview-rust-state-route.jpg)
 
 Agents can read the route details in `designer_hosted_animations`. Use `designer_hosted_animation` for playback and reveal, `designer_hosted_state_route_draft` to review the source patches, or `designer_hosted_state_route` to apply them. Pass the current app generation, frame revision and sequence. Durations in the MCP tools are expressed in seconds.
 
