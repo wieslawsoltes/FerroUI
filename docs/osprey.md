@@ -95,11 +95,15 @@ fn main() = {
 - **One dispatcher.** Osprey passes a callback to C only as a named function at the call
   site, so an application has one, `dispatch(tag, sender, arg)`, and gives it to the library
   in `main`. `run` checks the library and runs the main loop; the tag 0 is the start. Every
-  event helper (`onClick(object, tag)`) subscribes the one trampoline of the bindings
-  (`dispatchEvent`) with the tag.
+  event helper (`onClick(object, tag)`) subscribes the dispatcher itself with the tag
+  (`ferro_subscribe_dispatch`): no trampoline of the bindings runs between the library and
+  `dispatch`.
 - **Errors as values.** A setter records a failure in the library instead of returning a
   status; `failure()` returns `Error` with the message of the last one and clears it, so a
-  chain is checked once. A getter returns `Result<T, string>`.
+  chain is checked once. A getter returns the plain value (`getFontSize(text)` is a
+  `float`), the fallback of its kind (`0`, `0.0`, `false`, `""`) when the read fails, and the
+  failure is reported by the next `failure()` like that of a setter: no `Result` is allocated
+  per read.
 - **Children.** `add(parent, child)` returns the parent: children of a panel, the content of a
   window or a button, the child of a border.
 - **Handles** are plain integers. The framework holds the tree; the bindings do not release
@@ -175,6 +179,12 @@ fn main() = {
 - **Keys** keep an element's control across frames (`key(n)`); without one an element is
   matched by its position. What the user typed is not written back, and what a commit writes
   does not come back as a message, so two text boxes that follow each other do not echo.
+- **Memo elements.** `memo(version)` on an element with a key says that its subtree is what
+  `version` says (a revision of the data it shows): while the key and the version stay, the
+  writer asks the library (`ferro_frame_reuse`) and writes one reuse record in place of the
+  subtree, and the library does not look into it. Give a new version whenever anything in
+  the subtree changes (`textBlock([key(n + 1), memo(item.revision), text(item.label)])`).
+  The view is still built, but not written: what a frame costs is what changed.
 
 ## 5. Building and running the samples
 
@@ -212,11 +222,13 @@ script: Fahrenheit 5 gives Celsius: '-15': ok
 
 `samples/CApi/osprey-bindings/benchmark` runs the operations of the Rust benchmark of the ABI
 (`cargo bench -p ferroui-capi --no-default-features --bench call_overhead`) from Osprey: a
-property write and a read with layer 1, an event raised to the one dispatcher, and two frames
-of layer 2 (one text block whose text changes; 100 text blocks of which one changes, built by
-Osprey every time). It uses the clock of macOS. First run (2026-11-19, one Apple silicon Mac,
-the median of 9 samples; Osprey with `--memory=arc` against the library in the `release`
-profile, the Rust benchmark in the `bench` profile):
+property write and a read with layer 1, an event raised to the one dispatcher, and three
+frames of layer 2 (one text block whose text changes; 100 text blocks of which one changes,
+built by Osprey every time; the same 100 as memo elements). It uses the clock of macOS.
+
+The first run (2026-11-19, one Apple silicon Mac, the median of 9 samples; Osprey with
+`--memory=arc` against the library in the `release` profile, the Rust benchmark in the
+`bench` profile), before the work of docs/c-abi.md, section 13:
 
 | Operation | Osprey | Rust through the ABI | Rust |
 | --- | ---: | ---: | ---: |
@@ -226,15 +238,22 @@ profile, the Rust benchmark in the `bench` profile):
 | frame: one text block, its text changes | 1.45 us | 0.61 us | 89.0 ns |
 | frame: 100 text blocks, one changes | 94.4 us | 27.7 us | 89.0 ns |
 
-The Rust column of the frames is the one `set_text` a frame comes down to. A setter of layer
-1 costs what the call of the ABI costs. A getter makes three calls (it clears the error of
-the thread, reads with a fallback and reads the code again) to tell a failure from a value.
-A raise to the dispatcher adds the trampoline of the bindings and `ferro_frame_dispatch` to a
-C handler. A frame costs the writer calls, the decode and the reconcile: an unchanged element
-is compared, not written, so the 100 elements cost about 0.28 us each in the library (the
-decode of each text and the keyed match) and about as much again in Osprey (building the
-list and the strings of the view every time). Those are the first things to make cheaper
-(section 7).
+After it, the library side (Rust through the ABI, the same machine, docs/c-abi.md, section
+13): a read 7.3 ns, the frame dispatcher 5.0 ns (27.0 ns before), a frame of one text block
+204 ns, a frame of 100 text blocks of which one changes 3.18 us, the same as memo elements
+1.81 us. What changed for Osprey besides the library:
+
+- A getter is one call and returns the value (no `ferro_clear_error`, no second call for the
+  code, no `Result` allocated per read): what was 52.7 ns is now the read of the ABI plus the
+  call from Osprey.
+- An event helper subscribes the dispatcher itself (`ferro_subscribe_dispatch`): the
+  trampoline `dispatchEvent` and the call of `ferro_frame_dispatch` are gone from every event.
+- A memo element (`memo(version)`) is written as one reuse record while its version stays, so
+  a frame of 100 memo text blocks of which one changes writes one element in full.
+
+The Osprey column after the work is not measured yet: the Osprey compiler does not finish
+the bindings generated from the model after the merge of main into #968 (a hello world took
+over 180 s where it took 10 to 16 s), which #968 fixes; the table is measured again then.
 
 ## 7. Limits of the MVP
 
@@ -250,9 +269,10 @@ list and the strings of the view every time). Those are the first things to make
   import what one layer needs by name (`import ferroobjects::{fontSize as setFontSize}`).
 - **Every class is generated.** A selection manifest that trims the bindings and the library
   together is phase 2.
-- **Frame cost**: the reconcile decodes every text of a frame into a string and matches keys
-  in a hash map; comparing the bytes with the retained value first, and a cheaper match of
-  elements in order, are the next steps.
+- **Memo elements are built.** A memo element is skipped by the writer and the library, but
+  the view builds it: Osprey 0.29 cannot call a function held in a value whose effects it
+  does not track, so a lazy element (a function that builds the subtree only when the version
+  changed) is left for a later version of the compiler.
 - **CI** checks that the generated files are up to date and runs the Rust and C tests of the
   frame layer; the Osprey samples are built and run locally (the Osprey compiler is not
   installed on the runners yet).
