@@ -25,6 +25,14 @@ macOS source builds require Xcode command-line tools, Python and Ninja. Upstream
 `SKIA_LIBRARY_SEARCH_PATH` deliberately imports a caller-managed archive; that
 archive must include the same fix before claiming this profile's acceptance.
 
+When it applies the fix, the build script also passes `graphite_metal_ownership=fixed` to the
+crates that depend on the binding (`links = "skia"`): `ferroui-skia` reads it as
+`DEP_SKIA_GRAPHITE_METAL_OWNERSHIP`, warns at build time and logs at run time when it is missing,
+and answers `ferroui_skia::graphite_metal_ownership_fixed()` with it (#622). An application built
+from the published crates takes the fix with a `[patch.crates-io]` of its own (`docs/apps.md`,
+"The Graphite Metal ownership fix"). Builds for iOS take the published archive and do not get
+the fix.
+
 The local crate is excluded from the FerroUI workspace and marked non-publishable.
 Before publishing independently consumed FerroUI crates, move this fix into an
 upstream/published Skia dependency or distribute a reviewed patched dependency.

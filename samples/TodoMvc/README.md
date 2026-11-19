@@ -5,6 +5,11 @@ components that run again, with their state in hooks, and the router of single-w
 applications. It is a sample of phase 6 of the API (`docs/declarative-ui.md`, section 14) and runs
 in the WinUI 3 theme.
 
+The theme is constructed from the units the sample uses: the build script names the theme
+(`build.rs`, `ferroui_build::Build::theme`), the build finds the controls the sources make, and
+`shots.rs` constructs the theme with the table it wrote
+([docs/xaml-themes.md](../../docs/xaml-themes.md), section 3, "An application without markup").
+
 ## What it shows
 
 - **A model without user interface** (`model.rs`). A todo, the list of todos with its operations

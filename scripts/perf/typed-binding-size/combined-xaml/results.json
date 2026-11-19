@@ -1,0 +1,705 @@
+{
+  "base_revision": "933fd46325772fd1cdec81add9d4912dda2fe931",
+  "platform": "macOS arm64",
+  "source_snapshot": "9ae0b2690da57f2005ec800a29ad5c0df9cf398bec00b1c265e63acdd525ae48",
+  "typed_binding_source_sha256": "0023f15bb26c5abf9cc5c41a2f2438abe96551e0bf60114776e3ad6c9fa01d16",
+  "generated_census_note": "The frozen census counts public populate methods, including the one WinUI populate_with_parts wrapper. The 223 methods correspond to 222 class documents.",
+  "profile": "dist",
+  "executable": "control-catalog-desktop",
+  "arms": {
+    "frozen-native": {
+      "bytes": 65859488,
+      "sha256": "bd77dbc65e3b3c51b30b29a06d522a13c71211316c13372e5517b662b2fb8098",
+      "allocation": {
+        "Other instructions and code alignment": 11941340,
+        "Rust core, alloc and std": 3431948,
+        "Other FerroUI.Base instructions": 8624224,
+        "Core controls": 3934948,
+        "Other ControlCatalog instructions": 1543188,
+        "Generated XAML instructions": 7997808,
+        "XAML runtime library": 845992,
+        "FerroUI.Base property store and property types": 4428980,
+        "FerroUI.Base typed binding expressions": 4514652,
+        "Skia and HarfBuzz native archives": 4084560,
+        "Embedded assets matched to source files": 3799711,
+        "Other read-only constants": 3522159,
+        "Relocatable constant data": 5013344,
+        "Mach-O link and signing data": 1044384,
+        "Other sections, headers and padding": 1132250
+      },
+      "generated_instructions_by_crate": {
+        "control_catalog": 6089388,
+        "ferroui_controls_color_picker": 658732,
+        "ferroui_controls_inking": 140812,
+        "ferroui_controls_treedatagrid": 82380,
+        "ferroui_dialogs": 24284,
+        "ferroui_themes_winui": 789640,
+        "treedatagrid_demo": 212572
+      },
+      "link_map_sha256": "e41a1279a01c0460dda56f021bcee993e77db4edc23583ff36f4aeacab0ed69e",
+      "generated": {
+        "Catalog": {
+          "depfile": "control_catalog-393510980e2f6c67.d",
+          "generated_sources": 207,
+          "sha256_over_filename_hash_table": "7f2175136a70f365b48ecae19d2883a1c782cef102a2ca54c2e6f74015d710e5",
+          "text_occurrences": {
+            "ObjectDocumentProgram": 0,
+            "ObjectProgram": 0,
+            "TemplateBinding": 440,
+            "ValueProgram": 0,
+            "StyleProgram": 0
+          }
+        },
+        "WinUI": {
+          "depfile": "ferroui_themes_winui-67dfb13902fe0825.d",
+          "generated_sources": 2,
+          "sha256_over_filename_hash_table": "2eac6469f34d03888cb1019f08350fe738a4b2dcf2a32afec17d50d58e5afd04",
+          "text_occurrences": {
+            "ObjectDocumentProgram": 0,
+            "ObjectProgram": 0,
+            "TemplateBinding": 2324,
+            "ValueProgram": 0,
+            "StyleProgram": 0
+          }
+        },
+        "application_image": {
+          "packages": {
+            "control-catalog": {
+              "class_document_methods": 203,
+              "whole_class_document_programs": 0,
+              "generated_modules": 207
+            },
+            "ferroui-controls-color-picker": {
+              "class_document_methods": 0,
+              "whole_class_document_programs": 0,
+              "generated_modules": 2
+            },
+            "ferroui-controls-inking": {
+              "class_document_methods": 0,
+              "whole_class_document_programs": 0,
+              "generated_modules": 2
+            },
+            "ferroui-controls-treedatagrid": {
+              "class_document_methods": 0,
+              "whole_class_document_programs": 0,
+              "generated_modules": 2
+            },
+            "ferroui-diagnostics": {
+              "class_document_methods": 7,
+              "whole_class_document_programs": 0,
+              "generated_modules": 13
+            },
+            "ferroui-dialogs": {
+              "class_document_methods": 1,
+              "whole_class_document_programs": 0,
+              "generated_modules": 2
+            },
+            "ferroui-themes-winui": {
+              "class_document_methods": 2,
+              "whole_class_document_programs": 0,
+              "generated_modules": 2
+            },
+            "treedatagrid-demo": {
+              "class_document_methods": 10,
+              "whole_class_document_programs": 0,
+              "generated_modules": 11
+            }
+          },
+          "total": {
+            "class_document_methods": 223,
+            "generated_modules": 241
+          }
+        }
+      }
+    },
+    "frozen-native-binding": {
+      "bytes": 63839040,
+      "sha256": "13ca93117e66b974fe2d30b79834dc11d111385ed9af4b05ecbfa24b195b286f",
+      "allocation": {
+        "Other instructions and code alignment": 11843052,
+        "Rust core, alloc and std": 3335104,
+        "Other FerroUI.Base instructions": 8599160,
+        "Core controls": 3934904,
+        "Other ControlCatalog instructions": 1543248,
+        "Generated XAML instructions": 7997908,
+        "XAML runtime library": 856080,
+        "FerroUI.Base property store and property types": 4425968,
+        "FerroUI.Base typed binding expressions": 2684264,
+        "Skia and HarfBuzz native archives": 4084560,
+        "Embedded assets matched to source files": 3799711,
+        "Other read-only constants": 3522159,
+        "Relocatable constant data": 5069248,
+        "Mach-O link and signing data": 1022784,
+        "Other sections, headers and padding": 1120890
+      },
+      "generated_instructions_by_crate": {
+        "control_catalog": 6089424,
+        "ferroui_controls_color_picker": 658732,
+        "ferroui_controls_inking": 140812,
+        "ferroui_controls_treedatagrid": 82380,
+        "ferroui_dialogs": 24284,
+        "ferroui_themes_winui": 789648,
+        "treedatagrid_demo": 212628
+      },
+      "link_map_sha256": "c7f1f1f9ea1402c44f0b01850972f5e920d388738241acdde5c6a6ddcceb4bf0",
+      "generated": {
+        "Catalog": {
+          "depfile": "control_catalog-393510980e2f6c67.d",
+          "generated_sources": 207,
+          "sha256_over_filename_hash_table": "7f2175136a70f365b48ecae19d2883a1c782cef102a2ca54c2e6f74015d710e5",
+          "text_occurrences": {
+            "ObjectDocumentProgram": 0,
+            "ObjectProgram": 0,
+            "TemplateBinding": 440,
+            "ValueProgram": 0,
+            "StyleProgram": 0
+          }
+        },
+        "WinUI": {
+          "depfile": "ferroui_themes_winui-67dfb13902fe0825.d",
+          "generated_sources": 2,
+          "sha256_over_filename_hash_table": "2eac6469f34d03888cb1019f08350fe738a4b2dcf2a32afec17d50d58e5afd04",
+          "text_occurrences": {
+            "ObjectDocumentProgram": 0,
+            "ObjectProgram": 0,
+            "TemplateBinding": 2324,
+            "ValueProgram": 0,
+            "StyleProgram": 0
+          }
+        },
+        "application_image": {
+          "packages": {
+            "control-catalog": {
+              "class_document_methods": 203,
+              "whole_class_document_programs": 0,
+              "generated_modules": 207
+            },
+            "ferroui-controls-color-picker": {
+              "class_document_methods": 0,
+              "whole_class_document_programs": 0,
+              "generated_modules": 2
+            },
+            "ferroui-controls-inking": {
+              "class_document_methods": 0,
+              "whole_class_document_programs": 0,
+              "generated_modules": 2
+            },
+            "ferroui-controls-treedatagrid": {
+              "class_document_methods": 0,
+              "whole_class_document_programs": 0,
+              "generated_modules": 2
+            },
+            "ferroui-diagnostics": {
+              "class_document_methods": 7,
+              "whole_class_document_programs": 0,
+              "generated_modules": 13
+            },
+            "ferroui-dialogs": {
+              "class_document_methods": 1,
+              "whole_class_document_programs": 0,
+              "generated_modules": 2
+            },
+            "ferroui-themes-winui": {
+              "class_document_methods": 2,
+              "whole_class_document_programs": 0,
+              "generated_modules": 2
+            },
+            "treedatagrid-demo": {
+              "class_document_methods": 10,
+              "whole_class_document_programs": 0,
+              "generated_modules": 11
+            }
+          },
+          "total": {
+            "class_document_methods": 223,
+            "generated_modules": 241
+          }
+        }
+      }
+    },
+    "typed": {
+      "bytes": 61562624,
+      "sha256": "c5f70115f8f9020ec878ef6e35e8c7269cbbef69322dd1a4e4f1e8272e16532d",
+      "allocation": {
+        "Other instructions and code alignment": 12323544,
+        "Rust core, alloc and std": 3443916,
+        "Other FerroUI.Base instructions": 8539776,
+        "Core controls": 3847904,
+        "Other ControlCatalog instructions": 2941276,
+        "FerroUI.Base property store and property types": 4427156,
+        "FerroUI.Base typed binding expressions": 4515728,
+        "XAML runtime library": 859556,
+        "Generated XAML instructions": 1478528,
+        "Skia and HarfBuzz native archives": 4084560,
+        "Embedded assets matched to source files": 3799711,
+        "Other read-only constants": 4017295,
+        "Relocatable constant data": 5017056,
+        "Mach-O link and signing data": 974592,
+        "Other sections, headers and padding": 1292026
+      },
+      "generated_instructions_by_crate": {
+        "control_catalog": 689388,
+        "ferroui_controls_color_picker": 293516,
+        "ferroui_controls_inking": 39112,
+        "ferroui_controls_treedatagrid": 41164,
+        "ferroui_dialogs": 2692,
+        "ferroui_markup": 592,
+        "ferroui_themes_winui": 356920,
+        "treedatagrid_demo": 55144
+      },
+      "link_map_sha256": "17fd5f6334fb756264e3df92e729519a41f840966241f5b7c813050ea55229e1",
+      "generated": {
+        "Catalog": {
+          "depfile": "control_catalog-393510980e2f6c67.d",
+          "generated_sources": 207,
+          "sha256_over_filename_hash_table": "6212fa09a5a0b6af6aad4c8fb37ff6e41ff5cb5aa59cde12c2f1317b2044adeb",
+          "text_occurrences": {
+            "ObjectDocumentProgram": 46,
+            "ObjectProgram": 0,
+            "TemplateBinding": 78,
+            "ValueProgram": 0,
+            "StyleProgram": 108
+          }
+        },
+        "WinUI": {
+          "depfile": "ferroui_themes_winui-67dfb13902fe0825.d",
+          "generated_sources": 2,
+          "sha256_over_filename_hash_table": "01d5b6234eb5c2f40403f531f6253e698224d156ff6d64f24df46101f1fa4964",
+          "text_occurrences": {
+            "ObjectDocumentProgram": 0,
+            "ObjectProgram": 0,
+            "TemplateBinding": 441,
+            "ValueProgram": 0,
+            "StyleProgram": 554
+          }
+        },
+        "application_image": {
+          "packages": {
+            "control-catalog": {
+              "class_document_methods": 203,
+              "whole_class_document_programs": 23,
+              "modules_with_image": 206,
+              "generated_image_bytes": 284089,
+              "BindingPathProgram_references": 493,
+              "BindingPathProgram_referenced_bytes": 1503,
+              "ConstructionProgram_references": 1186,
+              "ConstructionProgram_referenced_bytes": 269784,
+              "TypedResourceProgram_references": 57,
+              "TypedResourceProgram_referenced_bytes": 3076,
+              "TypedSelectorProgram_references": 118,
+              "TypedSelectorProgram_referenced_bytes": 936,
+              "TypedStyleProgram_references": 54,
+              "TypedStyleProgram_referenced_bytes": 7714,
+              "TypedSetterChoice_references": 60,
+              "TypedSetterChoice_referenced_bytes": 322,
+              "source_referenced_unique_bytes": 281328,
+              "unreferenced_generated_bytes": 2761,
+              "generated_modules": 207
+            },
+            "ferroui-controls-color-picker": {
+              "class_document_methods": 0,
+              "whole_class_document_programs": 0,
+              "modules_with_image": 1,
+              "generated_image_bytes": 24426,
+              "ConstructionProgram_references": 1070,
+              "ConstructionProgram_referenced_bytes": 54112,
+              "TypedSetterChoice_references": 16,
+              "TypedSetterChoice_referenced_bytes": 64,
+              "TypedStyleProgram_references": 40,
+              "TypedStyleProgram_referenced_bytes": 4042,
+              "BindingPathProgram_references": 216,
+              "BindingPathProgram_referenced_bytes": 920,
+              "TypedSelectorProgram_references": 4,
+              "TypedSelectorProgram_referenced_bytes": 24,
+              "TypedResourceProgram_references": 22,
+              "TypedResourceProgram_referenced_bytes": 346,
+              "source_referenced_unique_bytes": 24372,
+              "unreferenced_generated_bytes": 54,
+              "generated_modules": 2
+            },
+            "ferroui-controls-inking": {
+              "class_document_methods": 0,
+              "whole_class_document_programs": 0,
+              "modules_with_image": 1,
+              "generated_image_bytes": 9916,
+              "ConstructionProgram_references": 106,
+              "ConstructionProgram_referenced_bytes": 10691,
+              "TypedResourceProgram_references": 68,
+              "TypedResourceProgram_referenced_bytes": 4103,
+              "TypedStyleProgram_references": 38,
+              "TypedStyleProgram_referenced_bytes": 2462,
+              "BindingPathProgram_references": 28,
+              "BindingPathProgram_referenced_bytes": 140,
+              "TypedSelectorProgram_references": 18,
+              "TypedSelectorProgram_referenced_bytes": 186,
+              "source_referenced_unique_bytes": 9577,
+              "unreferenced_generated_bytes": 339,
+              "generated_modules": 2
+            },
+            "ferroui-controls-treedatagrid": {
+              "class_document_methods": 0,
+              "whole_class_document_programs": 0,
+              "modules_with_image": 1,
+              "generated_image_bytes": 2858,
+              "ConstructionProgram_references": 55,
+              "ConstructionProgram_referenced_bytes": 2146,
+              "TypedResourceProgram_references": 10,
+              "TypedResourceProgram_referenced_bytes": 188,
+              "TypedStyleProgram_references": 8,
+              "TypedStyleProgram_referenced_bytes": 414,
+              "BindingPathProgram_references": 1,
+              "BindingPathProgram_referenced_bytes": 4,
+              "TypedSelectorProgram_references": 2,
+              "TypedSelectorProgram_referenced_bytes": 10,
+              "source_referenced_unique_bytes": 2700,
+              "unreferenced_generated_bytes": 158,
+              "generated_modules": 2
+            },
+            "ferroui-diagnostics": {
+              "class_document_methods": 7,
+              "whole_class_document_programs": 0,
+              "modules_with_image": 12,
+              "generated_image_bytes": 24545,
+              "ConstructionProgram_references": 317,
+              "ConstructionProgram_referenced_bytes": 23169,
+              "source_referenced_unique_bytes": 24545,
+              "unreferenced_generated_bytes": 0,
+              "TypedSelectorProgram_references": 152,
+              "TypedSelectorProgram_referenced_bytes": 1372,
+              "TypedResourceProgram_references": 8,
+              "TypedResourceProgram_referenced_bytes": 644,
+              "BindingPathProgram_references": 167,
+              "BindingPathProgram_referenced_bytes": 451,
+              "TypedSetterChoice_references": 23,
+              "TypedSetterChoice_referenced_bytes": 92,
+              "generated_modules": 13
+            },
+            "ferroui-dialogs": {
+              "class_document_methods": 1,
+              "whole_class_document_programs": 0,
+              "modules_with_image": 1,
+              "generated_image_bytes": 760,
+              "BindingPathProgram_references": 2,
+              "BindingPathProgram_referenced_bytes": 4,
+              "ConstructionProgram_references": 7,
+              "ConstructionProgram_referenced_bytes": 781,
+              "source_referenced_unique_bytes": 760,
+              "unreferenced_generated_bytes": 0,
+              "generated_modules": 2
+            },
+            "ferroui-themes-winui": {
+              "class_document_methods": 2,
+              "whole_class_document_programs": 0,
+              "modules_with_image": 1,
+              "generated_image_bytes": 191711,
+              "ConstructionProgram_references": 1179,
+              "ConstructionProgram_referenced_bytes": 89810,
+              "TypedResourceProgram_references": 897,
+              "TypedResourceProgram_referenced_bytes": 53315,
+              "TypedStyleProgram_references": 277,
+              "TypedStyleProgram_referenced_bytes": 36956,
+              "BindingPathProgram_references": 194,
+              "BindingPathProgram_referenced_bytes": 799,
+              "TypedSetterChoice_references": 31,
+              "TypedSetterChoice_referenced_bytes": 124,
+              "TypedSelectorProgram_references": 34,
+              "TypedSelectorProgram_referenced_bytes": 270,
+              "source_referenced_unique_bytes": 176164,
+              "unreferenced_generated_bytes": 15547,
+              "generated_modules": 2
+            },
+            "treedatagrid-demo": {
+              "class_document_methods": 10,
+              "whole_class_document_programs": 1,
+              "modules_with_image": 10,
+              "generated_image_bytes": 7331,
+              "BindingPathProgram_references": 72,
+              "BindingPathProgram_referenced_bytes": 148,
+              "ConstructionProgram_references": 106,
+              "ConstructionProgram_referenced_bytes": 7294,
+              "TypedSetterChoice_references": 12,
+              "TypedSetterChoice_referenced_bytes": 48,
+              "TypedSelectorProgram_references": 7,
+              "TypedSelectorProgram_referenced_bytes": 70,
+              "source_referenced_unique_bytes": 7331,
+              "unreferenced_generated_bytes": 0,
+              "generated_modules": 11
+            }
+          },
+          "total": {
+            "class_document_methods": 223,
+            "whole_class_document_programs": 24,
+            "modules_with_image": 233,
+            "generated_image_bytes": 545636,
+            "BindingPathProgram_references": 1173,
+            "BindingPathProgram_referenced_bytes": 3969,
+            "ConstructionProgram_references": 4026,
+            "ConstructionProgram_referenced_bytes": 457787,
+            "TypedResourceProgram_references": 1062,
+            "TypedResourceProgram_referenced_bytes": 61672,
+            "TypedSelectorProgram_references": 335,
+            "TypedSelectorProgram_referenced_bytes": 2868,
+            "TypedStyleProgram_references": 417,
+            "TypedStyleProgram_referenced_bytes": 51588,
+            "TypedSetterChoice_references": 142,
+            "TypedSetterChoice_referenced_bytes": 650,
+            "source_referenced_unique_bytes": 526777,
+            "unreferenced_generated_bytes": 18859,
+            "generated_modules": 241
+          }
+        }
+      }
+    },
+    "combined": {
+      "bytes": 59542176,
+      "sha256": "07f0b596ea048441fb07af8ee283f8a42e559e8bdd9bb13bd555cdd4effa803e",
+      "allocation": {
+        "Other instructions and code alignment": 12224324,
+        "Rust core, alloc and std": 3346484,
+        "Other FerroUI.Base instructions": 8514580,
+        "Core controls": 3847844,
+        "Other ControlCatalog instructions": 2941348,
+        "FerroUI.Base property store and property types": 4424204,
+        "FerroUI.Base typed binding expressions": 2686720,
+        "XAML runtime library": 869660,
+        "Generated XAML instructions": 1478508,
+        "Skia and HarfBuzz native archives": 4084560,
+        "Embedded assets matched to source files": 3799711,
+        "Other read-only constants": 4017295,
+        "Relocatable constant data": 5072960,
+        "Mach-O link and signing data": 952992,
+        "Other sections, headers and padding": 1280986
+      },
+      "generated_instructions_by_crate": {
+        "control_catalog": 689388,
+        "ferroui_controls_color_picker": 293516,
+        "ferroui_controls_inking": 39112,
+        "ferroui_controls_treedatagrid": 41164,
+        "ferroui_dialogs": 2692,
+        "ferroui_markup": 592,
+        "ferroui_themes_winui": 356900,
+        "treedatagrid_demo": 55144
+      },
+      "link_map_sha256": "e67481df75a30ef4c61ad345bb74cb383da59645d13a1112c7a9651fb49dfb41",
+      "generated": {
+        "Catalog": {
+          "depfile": "control_catalog-393510980e2f6c67.d",
+          "generated_sources": 207,
+          "sha256_over_filename_hash_table": "6212fa09a5a0b6af6aad4c8fb37ff6e41ff5cb5aa59cde12c2f1317b2044adeb",
+          "text_occurrences": {
+            "ObjectDocumentProgram": 46,
+            "ObjectProgram": 0,
+            "TemplateBinding": 78,
+            "ValueProgram": 0,
+            "StyleProgram": 108
+          }
+        },
+        "WinUI": {
+          "depfile": "ferroui_themes_winui-67dfb13902fe0825.d",
+          "generated_sources": 2,
+          "sha256_over_filename_hash_table": "01d5b6234eb5c2f40403f531f6253e698224d156ff6d64f24df46101f1fa4964",
+          "text_occurrences": {
+            "ObjectDocumentProgram": 0,
+            "ObjectProgram": 0,
+            "TemplateBinding": 441,
+            "ValueProgram": 0,
+            "StyleProgram": 554
+          }
+        },
+        "application_image": {
+          "packages": {
+            "control-catalog": {
+              "class_document_methods": 203,
+              "whole_class_document_programs": 23,
+              "modules_with_image": 206,
+              "generated_image_bytes": 284089,
+              "BindingPathProgram_references": 493,
+              "BindingPathProgram_referenced_bytes": 1503,
+              "ConstructionProgram_references": 1186,
+              "ConstructionProgram_referenced_bytes": 269784,
+              "TypedResourceProgram_references": 57,
+              "TypedResourceProgram_referenced_bytes": 3076,
+              "TypedSelectorProgram_references": 118,
+              "TypedSelectorProgram_referenced_bytes": 936,
+              "TypedStyleProgram_references": 54,
+              "TypedStyleProgram_referenced_bytes": 7714,
+              "TypedSetterChoice_references": 60,
+              "TypedSetterChoice_referenced_bytes": 322,
+              "source_referenced_unique_bytes": 281328,
+              "unreferenced_generated_bytes": 2761,
+              "generated_modules": 207
+            },
+            "ferroui-controls-color-picker": {
+              "class_document_methods": 0,
+              "whole_class_document_programs": 0,
+              "modules_with_image": 1,
+              "generated_image_bytes": 24426,
+              "ConstructionProgram_references": 1070,
+              "ConstructionProgram_referenced_bytes": 54112,
+              "TypedSetterChoice_references": 16,
+              "TypedSetterChoice_referenced_bytes": 64,
+              "TypedStyleProgram_references": 40,
+              "TypedStyleProgram_referenced_bytes": 4042,
+              "BindingPathProgram_references": 216,
+              "BindingPathProgram_referenced_bytes": 920,
+              "TypedSelectorProgram_references": 4,
+              "TypedSelectorProgram_referenced_bytes": 24,
+              "TypedResourceProgram_references": 22,
+              "TypedResourceProgram_referenced_bytes": 346,
+              "source_referenced_unique_bytes": 24372,
+              "unreferenced_generated_bytes": 54,
+              "generated_modules": 2
+            },
+            "ferroui-controls-inking": {
+              "class_document_methods": 0,
+              "whole_class_document_programs": 0,
+              "modules_with_image": 1,
+              "generated_image_bytes": 9916,
+              "ConstructionProgram_references": 106,
+              "ConstructionProgram_referenced_bytes": 10691,
+              "TypedResourceProgram_references": 68,
+              "TypedResourceProgram_referenced_bytes": 4103,
+              "TypedStyleProgram_references": 38,
+              "TypedStyleProgram_referenced_bytes": 2462,
+              "BindingPathProgram_references": 28,
+              "BindingPathProgram_referenced_bytes": 140,
+              "TypedSelectorProgram_references": 18,
+              "TypedSelectorProgram_referenced_bytes": 186,
+              "source_referenced_unique_bytes": 9577,
+              "unreferenced_generated_bytes": 339,
+              "generated_modules": 2
+            },
+            "ferroui-controls-treedatagrid": {
+              "class_document_methods": 0,
+              "whole_class_document_programs": 0,
+              "modules_with_image": 1,
+              "generated_image_bytes": 2858,
+              "ConstructionProgram_references": 55,
+              "ConstructionProgram_referenced_bytes": 2146,
+              "TypedResourceProgram_references": 10,
+              "TypedResourceProgram_referenced_bytes": 188,
+              "TypedStyleProgram_references": 8,
+              "TypedStyleProgram_referenced_bytes": 414,
+              "BindingPathProgram_references": 1,
+              "BindingPathProgram_referenced_bytes": 4,
+              "TypedSelectorProgram_references": 2,
+              "TypedSelectorProgram_referenced_bytes": 10,
+              "source_referenced_unique_bytes": 2700,
+              "unreferenced_generated_bytes": 158,
+              "generated_modules": 2
+            },
+            "ferroui-diagnostics": {
+              "class_document_methods": 7,
+              "whole_class_document_programs": 0,
+              "modules_with_image": 12,
+              "generated_image_bytes": 24545,
+              "ConstructionProgram_references": 317,
+              "ConstructionProgram_referenced_bytes": 23169,
+              "source_referenced_unique_bytes": 24545,
+              "unreferenced_generated_bytes": 0,
+              "TypedSelectorProgram_references": 152,
+              "TypedSelectorProgram_referenced_bytes": 1372,
+              "TypedResourceProgram_references": 8,
+              "TypedResourceProgram_referenced_bytes": 644,
+              "BindingPathProgram_references": 167,
+              "BindingPathProgram_referenced_bytes": 451,
+              "TypedSetterChoice_references": 23,
+              "TypedSetterChoice_referenced_bytes": 92,
+              "generated_modules": 13
+            },
+            "ferroui-dialogs": {
+              "class_document_methods": 1,
+              "whole_class_document_programs": 0,
+              "modules_with_image": 1,
+              "generated_image_bytes": 760,
+              "BindingPathProgram_references": 2,
+              "BindingPathProgram_referenced_bytes": 4,
+              "ConstructionProgram_references": 7,
+              "ConstructionProgram_referenced_bytes": 781,
+              "source_referenced_unique_bytes": 760,
+              "unreferenced_generated_bytes": 0,
+              "generated_modules": 2
+            },
+            "ferroui-themes-winui": {
+              "class_document_methods": 2,
+              "whole_class_document_programs": 0,
+              "modules_with_image": 1,
+              "generated_image_bytes": 191711,
+              "ConstructionProgram_references": 1179,
+              "ConstructionProgram_referenced_bytes": 89810,
+              "TypedResourceProgram_references": 897,
+              "TypedResourceProgram_referenced_bytes": 53315,
+              "TypedStyleProgram_references": 277,
+              "TypedStyleProgram_referenced_bytes": 36956,
+              "BindingPathProgram_references": 194,
+              "BindingPathProgram_referenced_bytes": 799,
+              "TypedSetterChoice_references": 31,
+              "TypedSetterChoice_referenced_bytes": 124,
+              "TypedSelectorProgram_references": 34,
+              "TypedSelectorProgram_referenced_bytes": 270,
+              "source_referenced_unique_bytes": 176164,
+              "unreferenced_generated_bytes": 15547,
+              "generated_modules": 2
+            },
+            "treedatagrid-demo": {
+              "class_document_methods": 10,
+              "whole_class_document_programs": 1,
+              "modules_with_image": 10,
+              "generated_image_bytes": 7331,
+              "BindingPathProgram_references": 72,
+              "BindingPathProgram_referenced_bytes": 148,
+              "ConstructionProgram_references": 106,
+              "ConstructionProgram_referenced_bytes": 7294,
+              "TypedSetterChoice_references": 12,
+              "TypedSetterChoice_referenced_bytes": 48,
+              "TypedSelectorProgram_references": 7,
+              "TypedSelectorProgram_referenced_bytes": 70,
+              "source_referenced_unique_bytes": 7331,
+              "unreferenced_generated_bytes": 0,
+              "generated_modules": 11
+            }
+          },
+          "total": {
+            "class_document_methods": 223,
+            "whole_class_document_programs": 24,
+            "modules_with_image": 233,
+            "generated_image_bytes": 545636,
+            "BindingPathProgram_references": 1173,
+            "BindingPathProgram_referenced_bytes": 3969,
+            "ConstructionProgram_references": 4026,
+            "ConstructionProgram_referenced_bytes": 457787,
+            "TypedResourceProgram_references": 1062,
+            "TypedResourceProgram_referenced_bytes": 61672,
+            "TypedSelectorProgram_references": 335,
+            "TypedSelectorProgram_referenced_bytes": 2868,
+            "TypedStyleProgram_references": 417,
+            "TypedStyleProgram_referenced_bytes": 51588,
+            "TypedSetterChoice_references": 142,
+            "TypedSetterChoice_referenced_bytes": 650,
+            "source_referenced_unique_bytes": 526777,
+            "unreferenced_generated_bytes": 18859,
+            "generated_modules": 241
+          }
+        }
+      }
+    }
+  },
+  "savings": {
+    "both_bytes": 6317312,
+    "native_binding_bytes": 2020448,
+    "bytecode_binding_bytes": 2020448,
+    "stock_binding_xaml_bytes": 4296864,
+    "shared_binding_xaml_bytes": 4296864,
+    "extra_saving_beyond_standalone_effects": 0
+  },
+  "earlier_native_binaries_without_xaml_snapshot": {
+    "frozen-native": {
+      "bytes": 65859504,
+      "sha256": "39ce6790364280963d391e7607ff76e6d1b645714fccc6d67e91217e06e1b44a"
+    },
+    "frozen-native-binding": {
+      "bytes": 63839040,
+      "sha256": "6c94cb229537e047c69cc94f88aee57a97c8be47393c8943cd07d3d54081d5d3"
+    }
+  }
+}

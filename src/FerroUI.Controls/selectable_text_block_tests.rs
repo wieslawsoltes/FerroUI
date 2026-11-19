@@ -1006,3 +1006,33 @@ fn hit_testing_follows_the_text_with_the_layout_rounding_above() {
     assert!((offset - 0.6).abs() < 1e-9, "{offset}");
     assert_eq!(0, above);
 }
+
+/// Not in the reference tests: a selectable text block keeps the shaped runs of its text between
+/// layouts at other widths, as a text block does, and shapes again once its selection changes
+/// (step 4 of docs/porting/text-layout-performance.md).
+#[test]
+fn a_selectable_text_block_shapes_its_text_once_for_layouts_at_other_widths() {
+    use ferroui_base::diagnostics::perf_counters::{self, PerfCounter};
+    use ferroui_base::media::TextWrapping;
+    let _scope = test_scope();
+    let block = SelectableTextBlock::new();
+    block.set_text(Some("a text of several words that wraps"));
+    block.set_text_wrapping(TextWrapping::Wrap);
+    block.measure(Size::new(500.0, 100.0));
+    assert_eq!(block.text_layout().text_lines().len(), 1);
+
+    let before = perf_counters::snapshot();
+    block.measure(Size::new(60.0, 100.0));
+    let shaped = perf_counters::snapshot().since(&before).get(PerfCounter::TextRunsShaped);
+    assert!(block.text_layout().text_lines().len() > 1, "the narrower layout wraps");
+    if perf_counters::ENABLED {
+        assert_eq!(shaped, 0, "the runs of the first layout are kept");
+    }
+
+    // A selection with its brush: the layout is made again, its text drawn in two colours.
+    block.set_selection_foreground_brush(Some(ferroui_base::media::Brushes::red()));
+    block.set_selection_start(2);
+    block.set_selection_end(6);
+    block.measure(Size::new(80.0, 100.0));
+    assert!(block.text_layout().text_lines().len() > 1);
+}

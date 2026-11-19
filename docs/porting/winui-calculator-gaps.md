@@ -299,6 +299,23 @@ base value), leaving out what the transition's own storyboard animates. As in Wi
 independent animations (opacity, render transform and translation values) get the full duration;
 the others get zero.
 
+**Status (VSM-4, done).** `VisualTransition` (`From`, `To`, `GeneratedDuration`,
+`GeneratedEasingFunction`, `Storyboard`) and `VisualStateGroup.Transitions` in
+`ferroui-controls` (`visual_state/visual_transition.rs`, `transitions.rs`). `GoToState` with
+transitions and system animations on (`IPlatformSettings::animations_enabled`) picks the
+transition by the score above; one of zero length (WinUI's `IsZeroDuration`) changes the state at
+once. Otherwise the group is in the new state at once, the transition's storyboard and the
+generated storyboard run (`Changing` is raised at the start), the values of the old state that
+the new one does not set are removed (the generated storyboard animates them back), and the
+setters and the storyboard of the new state apply when both storyboards have completed, which
+raises `CurrentStateChanged`. Another `GoToState` interrupts it (no `Changed` for it); `GoToState`
+to the state it goes to without transitions completes it. The generated storyboard follows
+`DynamicTransitionStoryboardGenerator`: to-values of the new state's animations (`From`, else
+`To`; the first key frame) and setters (doubles, colours, points), back-animations of the old
+state's, leaving out what the transition's storyboard animates; the opacity and the values of
+transforms take the full duration, eased, the rest jumps. Tests:
+`visual_state/transition_tests.rs`.
+
 ### 5.7 State triggers
 
 - When the groups are attached to a visual tree, after the template is applied, when the
@@ -427,6 +444,26 @@ the control's state (its pseudo-classes and properties) into `GoToState` calls. 
 installs a control's mapper when it applies a template whose root has groups (and only then), and
 re-runs it on the control's pseudo-class changes (`Classes::add_listener`) with transitions. A
 control without groups in its template is untouched; a mapper never changes pseudo-classes.
+
+**Status (VSM-5, done).** `visual_state/state_mappers.rs` of `ferroui-controls` has the mappers
+of `Button` (and `RepeatButton`), `ToggleButton`, `CheckBox`, `RadioButton`, `ListBoxItem` and
+`TextBox`, ports of WinUI's `ChangeVisualState` (`Button_Partial.cpp`, `ToggleButton_Partial.cpp`,
+`CheckBox_Partial.cpp`, `RadioButton_Partial.cpp`, `ListBoxItem_Partial.cpp`) and of the text
+box's `UpdateVisualState` (`TextBoxBase.cpp`, `TextBox.cpp`): `CommonStates` from `:disabled`,
+`:pressed` and `:pointerover`; the check states (`Checked`, `CheckedPointerOver`,
+`IndeterminatePressed`, ...; the combined states of the check box, else its older common and
+check states); the selection states of the list item (`SelectedUnfocused` while the selector
+around it does not have the keyboard focus: FerroUI's counterpart of `IsSelectionActive` is
+`:focus-within`); the focus states (`Focused` for keyboard focus, `:focus-visible`,
+`PointerFocused` for other focus); the text box's `Focused` state and its `ButtonStates`. A
+mapper is installed by `TemplatedControl::apply_template` only when the root of the new template
+has visual state groups; it sets the states without transitions then and with transitions when
+the classes of the control or the properties the states read (`IsChecked`, `IsSelected`, `Text`,
+`IsReadOnly`, ...) change. Controls of other families do nothing more than a type test. The
+catalog's "Visual States" page shows a button template written with visual states, a storyboard
+and a transition. Tests: `visual_state/state_mapper_tests.rs`. Left for later: the mappers of the
+other upstream-ported controls (`ComboBox`, `ComboBoxItem`, `ToggleSwitch`, `Slider`, ...), and the
+theme migration pilot of 5.11.
 
 ### 5.11 Can WinUI templates keep their visual state markup, and should the WinUI theme migrate?
 

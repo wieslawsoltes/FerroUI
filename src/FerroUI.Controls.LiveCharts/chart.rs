@@ -111,6 +111,39 @@ pub struct Chart {
     map_timer: RefCell<Option<Rc<DispatcherTimer>>>,
     /// Set while a rotation writes the centre, which otherwise ends the rotation.
     rotating: Cell<bool>,
+    /// The needles of an angular gauge in motion, by their order among the visual elements.
+    needles: RefCell<Vec<NeedleMotion>>,
+    needle_timer: RefCell<Option<Rc<DispatcherTimer>>>,
+    /// Set by a frame of the needles, whose scene only moves a needle.
+    needle_frame: Cell<bool>,
+}
+
+/// The motion of a needle (`BaseNeedleVisual` animates the rotation of its geometry): from the
+/// value it was drawn at to its value over the animations speed of the chart, in the cubic out
+/// easing of the scene transitions.
+#[derive(Clone, Copy, Debug)]
+struct NeedleMotion {
+    from: f64,
+    to: f64,
+    started_ms: f64,
+    duration_ms: f64,
+}
+impl NeedleMotion {
+    fn at(&self, now_ms: f64) -> f64 {
+        let elapsed = now_ms - self.started_ms;
+        if self.duration_ms.is_nan()
+            || self.duration_ms <= 0.0
+            || !elapsed.is_finite()
+            || elapsed >= self.duration_ms
+        {
+            return self.to;
+        }
+        let progress = EasingFunctions::cubic_out((elapsed / self.duration_ms).clamp(0.0, 1.0));
+        self.from + (self.to - self.from) * progress
+    }
+    fn is_moving(&self, now_ms: f64) -> bool {
+        self.duration_ms > 0.0 && now_ms - self.started_ms < self.duration_ms
+    }
 }
 
 ferro_class!(Chart:Control);
@@ -266,6 +299,7 @@ impl VisualImpl for Chart {
     fn on_detached_from_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         this.attached.set(false);
         this.stop_animation();
+        this.stop_needle_timer();
         this.stop_map_animations();
         this.map_click.set(None);
         this.cancel_pointer_gesture();
@@ -487,6 +521,9 @@ impl Chart {
             map_animation: RefCell::new(Vec::new()),
             map_timer: RefCell::new(None),
             rotating: Cell::new(false),
+            needles: RefCell::new(Vec::new()),
+            needle_timer: RefCell::new(None),
+            needle_frame: Cell::new(false),
         }
     }
     pub fn new() -> Ref<Self> {
@@ -741,14 +778,15 @@ impl Chart {
         let mut geo = None;
         let (mut scene, x_scales, y_scales) = match self.chart_kind() {
             ChartKind::Cartesian => {
-                // The data label positions of the heat series (`DataLabelsPosition`).
+                // The data label positions and SVG geometries of the heat series.
                 let series_options: Vec<_> = models
                     .iter()
                     .map(|model| {
                         let mut options = CartesianSeriesOptions::default();
-                        options.data_labels_position = model
-                            .cast::<HeatSeries>()
-                            .map(|heat| heat.data_labels_position());
+                        if let Some(heat) = model.cast::<HeatSeries>() {
+                            options.data_labels_position = Some(heat.data_labels_position());
+                            options.geometry_svg = heat.geometry_svg();
+                        }
                         options
                     })
                     .collect();
@@ -777,12 +815,7 @@ impl Chart {
                         min_value: self.min_value(),
                         max_value: self.max_value(),
                         clockwise: self.clockwise(),
-                        visual_elements: self
-                            .visual_elements()
-                            .to_vec()
-                            .iter()
-                            .filter_map(ChartVisualElement::snapshot)
-                            .collect(),
+                        visual_elements: self.pie_visuals(),
                     },
                     crate::decorations::text_size,
                 )?,
@@ -926,6 +959,27 @@ impl Chart {
                 (scene, Vec::new(), Vec::new())
             }
         };
+        // `DataLabelsMaxWidth` of the Cartesian, pie and polar series (the Sankey and treemap
+        // engines break their labels themselves): a label above a Cartesian point keeps its last
+        // line in place, the centred labels of the heat cells, slices and polar points their middle.
+        if matches!(
+            self.chart_kind(),
+            ChartKind::Cartesian | ChartKind::Pie | ChartKind::Polar
+        ) {
+            let widths: Vec<_> = models.iter().map(|m| m.data_labels_max_width()).collect();
+            let cartesian = self.chart_kind() == ChartKind::Cartesian;
+            ferroui_livecharts::label_lines::wrap_data_labels(
+                &mut scene,
+                &widths,
+                crate::decorations::text_size,
+                |id| {
+                    !cartesian
+                        || series
+                            .get(id.series)
+                            .is_some_and(|s| s.kind == ferroui_livecharts::SeriesKind::Heat)
+                },
+            );
+        }
         crate::decorations::decorate(
             &mut scene,
             &self.title(),
@@ -966,7 +1020,19 @@ impl Chart {
         }
         let scene = Rc::new(scene);
         let previous = self.measurement.borrow().as_ref().map(|m| m.scene.clone());
-        self.start_transition(previous, scene.clone());
+        // A frame of the needles only moves them: a transition in progress keeps its clock and
+        // takes the new scene as its end. A scene equal to the one before has nothing to move.
+        if self.needle_frame.take() {
+            let mut transition = self.transition.borrow_mut();
+            if let Some(current) = transition.as_mut() {
+                *current = current.retarget(scene.clone());
+            }
+        } else {
+            let previous = previous.or_else(|| self.heat_first_draw(&models, &scene));
+            if previous.as_deref() != Some(&*scene) {
+                self.start_transition(previous, scene.clone());
+            }
+        }
         *self.measurement.borrow_mut() = Some(Measurement {
             revision,
             scene: scene.clone(),
@@ -1404,6 +1470,106 @@ impl Chart {
         ))
     }
 
+    /// The visual elements of a pie chart, each needle at the value it is drawn at now: a needle
+    /// whose value changed turns to it over the animations speed of the chart (its first value is
+    /// drawn at once).
+    fn pie_visuals(&self) -> Vec<ferroui_livecharts::PieVisual> {
+        let now = Dispatcher::ui_thread().now() as f64;
+        let duration = self.animations_speed();
+        let animate = self.attached.get() && duration.is_finite() && duration > 0.0;
+        let mut visuals: Vec<_> = self
+            .visual_elements()
+            .to_vec()
+            .iter()
+            .filter_map(ChartVisualElement::snapshot)
+            .collect();
+        let mut needles = self.needles.borrow_mut();
+        let mut index = 0;
+        let mut moving = false;
+        for visual in &mut visuals {
+            let ferroui_livecharts::PieVisual::Needle(needle) = visual else {
+                continue;
+            };
+            let target = needle.value;
+            if index == needles.len() {
+                needles.push(NeedleMotion {
+                    from: target,
+                    to: target,
+                    started_ms: now,
+                    duration_ms: 0.0,
+                });
+            } else if needles[index].to != target {
+                let from = needles[index].at(now);
+                needles[index] = NeedleMotion {
+                    from,
+                    to: target,
+                    started_ms: now,
+                    duration_ms: if animate { duration } else { 0.0 },
+                };
+            }
+            needle.value = needles[index].at(now);
+            moving |= needles[index].is_moving(now);
+            index += 1;
+        }
+        needles.truncate(index);
+        drop(needles);
+        if moving {
+            self.start_needle_timer();
+        } else {
+            self.stop_needle_timer();
+        }
+        visuals
+    }
+    fn start_needle_timer(&self) {
+        if self.needle_timer.borrow().is_some() {
+            return;
+        }
+        let weak = self.to_ref().downgrade();
+        let timer = DispatcherTimer::with_callback(
+            Duration::from_millis(16),
+            DispatcherPriority::RENDER,
+            move |_| {
+                if let Some(this) = weak.upgrade() {
+                    this.needle_frame.set(true);
+                    this.invalidate_chart();
+                }
+            },
+        );
+        timer.start();
+        *self.needle_timer.borrow_mut() = Some(timer);
+    }
+    fn stop_needle_timer(&self) {
+        let timer = self.needle_timer.borrow_mut().take();
+        if let Some(timer) = timer {
+            timer.stop();
+        }
+    }
+    /// The first draw of a Cartesian chart with heat series (`HeatSeriesAnimationTests`): the
+    /// cells start transparent in their colour (`EnsureVisualForPoint`) and take it as the scene
+    /// transition runs; everything else of the scene is in place from the start.
+    fn heat_first_draw(&self, models: &[Ref<ChartSeries>], scene: &Scene) -> Option<Rc<Scene>> {
+        if self.chart_kind() != ChartKind::Cartesian {
+            return None;
+        }
+        let heat: Vec<usize> = models
+            .iter()
+            .enumerate()
+            .filter(|(_, model)| model.kind() == ferroui_livecharts::SeriesKind::Heat)
+            .map(|(index, _)| index)
+            .collect();
+        if heat.is_empty() {
+            return None;
+        }
+        let mut seed = scene.clone();
+        for primitive in &mut seed.primitives {
+            let cell = primitive.id.is_some_and(|id| heat.contains(&id.series))
+                && !matches!(primitive.geometry, ferroui_livecharts::Geometry::Text { .. });
+            if let (true, Some(color)) = (cell, primitive.style.fill) {
+                primitive.style.fill = Some(Color::from_argb(0, color.r, color.g, color.b));
+            }
+        }
+        Some(Rc::new(seed))
+    }
     fn start_transition(&self, previous: Option<Rc<Scene>>, next: Rc<Scene>) {
         let duration = self.animations_speed();
         // The lands of a map take their colours at once (GeoMapAnimationTests): a map has no
@@ -1747,6 +1913,9 @@ impl Drop for Chart {
         if let Some(timer) = self.map_timer.get_mut().take() {
             timer.stop();
         }
+        if let Some(timer) = self.needle_timer.get_mut().take() {
+            timer.stop();
+        }
     }
 }
 
@@ -1761,7 +1930,40 @@ fn series_snapshot(model: &Ref<ChartSeries>) -> ferroui_livecharts::Series {
         series.min_value = heat.min_value();
         series.max_value = heat.max_value();
     }
+    if series.is_gauge {
+        apply_gauge_rules(model, &mut series);
+    }
     series
+}
+
+/// The gauge rules of the source's default (light) theme (`HasRuleForGaugeSeries`,
+/// `HasRuleForGaugeFillSeries` of `ThemesExtensions`): a property of a gauge series that the
+/// series does not set takes the value of the rule, as a theme rule gives way to the properties
+/// a series sets. A gauge has no stroke, centred data labels in (70, 70, 70) and a corner radius
+/// of 8, in the palette colour of the series; its fill series is (30, 30, 30) at alpha 10.
+fn apply_gauge_rules(model: &Ref<ChartSeries>, series: &mut ferroui_livecharts::Series) {
+    let unset = |property: &ferroui_base::FerroProperty| !model.is_set(property);
+    if series.is_fill_series {
+        if unset(ChartSeries::fill_property().as_property()) {
+            series.fill = Some(Color::from_argb(10, 30, 30, 30));
+        }
+        return;
+    }
+    if unset(ChartSeries::stroke_property().as_property()) {
+        series.stroke = None;
+    }
+    if unset(ChartSeries::data_labels_property().as_property()) {
+        series.data_labels = true;
+    }
+    if unset(ChartSeries::polar_labels_position_property().as_property()) {
+        series.polar_labels_position = ferroui_livecharts::PolarLabelsPosition::ChartCenter;
+    }
+    if unset(ChartSeries::data_labels_color_property().as_property()) {
+        series.data_labels_color = Some(Color::from_rgb(70, 70, 70));
+    }
+    if unset(ChartSeries::corner_radius_property().as_property()) {
+        series.corner_radius = 8.0;
+    }
 }
 
 fn observe_list<T: Clone + 'static>(

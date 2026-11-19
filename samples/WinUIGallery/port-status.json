@@ -119,7 +119,7 @@
       "examples": []
     },
     "AutoSuggestBox": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/AutoSuggestBox.xaml",
         "samples/WinUIGallery/examples.rs",
@@ -155,61 +155,8 @@
           "name": "embedded_control_images_resolve_original_uri_paths_and_exact_bytes"
         }
       ],
-      "notes": "Both examples use the native AutoSuggestBox: 97 source cat names, user-only token filtering, chosen-item output and control search/query with original title/subtitle and embedded bitmap details. Catalog titles are explicit item values; CurrentCulture matching and full input/accessibility parity remain pending. Original images retain exact bytes and paths with explicit Windows case aliases; see assets-manifest.json. All acceptance statuses remain partial.",
-      "examples": [
-        {
-          "source": "WinUIGallery/Samples/AutoSuggestBox/BasicAutosuggestBox.txt",
-          "source_sha256": "bf6373ec33a0eb9efb7bc5ae4f88e76b923b4473fc13e4b4827cad0c1ed91343",
-          "status": "partial",
-          "tests": [
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "all_reviewed_native_adaptations_load_real_controls"
-            },
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "autosuggest_filter_preserves_all_source_names_and_word_matching"
-            },
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "autosuggest_example_filters_only_user_changes_and_reports_selected_cat"
-            }
-          ],
-          "notes": "The basic source sample uses the native AutoSuggestBox, all 97 source cat names, UserInput-only split-word filtering and SuggestionChosen output. The control-search/bitmap-detail example and host input/accessibility acceptance remain pending."
-        },
-        {
-          "source": "WinUIGallery/Samples/AutoSuggestBox/AutosuggestboxProvidesSearchboxExperience.txt",
-          "source_sha256": "1b29fd85e90f1d51bbcc88cc2f055a3c0caf3613f754d20e715b9bf31d56d32f",
-          "status": "partial",
-          "tests": [
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "all_reviewed_native_adaptations_load_real_controls"
-            },
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "autosuggest_filter_preserves_all_source_names_and_word_matching"
-            },
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "autosuggest_example_filters_only_user_changes_and_reports_selected_cat"
-            },
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "control_search_preserves_title_tokens_prefix_priority_and_unique_metadata"
-            },
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "control_search_uses_chosen_suggestion_before_free_query_and_preserves_no_result"
-            },
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "embedded_control_images_resolve_original_uri_paths_and_exact_bytes"
-            }
-          ],
-          "notes": "Both examples use the native AutoSuggestBox: 97 source cat names, user-only token filtering, chosen-item output and control search/query with original title/subtitle and embedded bitmap details. Catalog titles are explicit item values; CurrentCulture matching and full input/accessibility parity remain pending. The catalog metadata provides original title/subtitle/image paths. Images decode through the native platform renderer; mock-only tests assert URI/byte provenance, not pixels."
-        }
-      ]
+      "notes": "Both source examples use native AutoSuggestBox with the handlers of AutoSuggestBoxPage.xaml.cs in Rust (control_samples.rs): AutoSuggestBox_TextChanged filters the source's 97 cats by every word of the text a user types (No results found when none matches) and AutoSuggestBox_SuggestionChosen writes the chosen cat; Control2_TextChanged, Control2_SuggestionChosen and Control2_QuerySubmitted search the gallery's controls by every word of their title, prefix matches first, and show the chosen or the first control's image, title and subtitle. The suggestions are the controls' titles (the ToString of ControlInfoDataItem), mapped back to their catalog entries, and case is ignored by Unicode lowercase instead of CurrentCultureIgnoreCase. The search box's UpdateTextOnSelect is False: as in the source, only Control2_SuggestionChosen puts a control's title in the box, so a chosen No results found keeps the text. The output is the gallery's OutputTextBlockStyle, the title its BaseTextBlockStyle (semibold) and WrapWholeWords is WrapWithOverflow.",
+      "examples": []
     },
     "Binding": {
       "status": "partial",
@@ -283,7 +230,7 @@
       "examples": []
     },
     "CalendarDatePicker": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/CalendarDatePicker.xaml",
         "samples/WinUIGallery/examples.rs"
@@ -292,24 +239,33 @@
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/date_samples_tests.rs",
+          "name": "calendar_date_picker_has_the_source_placeholder"
         }
       ],
-      "notes": "Native CalendarDatePicker; header is composed and placeholder uses the shared property. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The source example uses native CalendarDatePicker with its header (composed above it, whose automation name it is) and the placeholder Pick a date. The page has no code-behind upstream.",
       "examples": []
     },
     "CalendarView": {
       "status": "partial",
       "implementation": [
         "samples/WinUIGallery/Pages/CalendarView.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/date_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/date_samples_tests.rs",
+          "name": "calendar_view_selection_mode_option_sets_the_calendar_mode"
         }
       ],
-      "notes": "CalendarView is adapted to the shared Calendar; WinUI-specific day item customization is pending. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The source example uses native Calendar (WinUI's CalendarView) with SelectionMode_SelectionChanged of CalendarViewPage.xaml.cs in Rust (None, Single as SingleDate, Multiple as MultipleRange). FerroUI's Calendar has no IsGroupLabelVisible, IsOutOfScopeEnabled or CalendarIdentifier (only the Gregorian calendar), and its names follow the current culture instead of a Language of the calendar, so those options and their x:Bind are left out and the page is partial.",
       "examples": []
     },
     "Canvas": {
@@ -581,18 +537,23 @@
       "examples": []
     },
     "DatePicker": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/DatePicker.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/date_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/date_samples_tests.rs",
+          "name": "date_picker_shows_two_months_from_now_within_five_years"
         }
       ],
-      "notes": "Native DatePicker composes a label for WinUI Header. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "Both source examples use native DatePicker: the picker with its header (composed above it), and the picker with the formatted day and hidden year with OnNavigatedTo of DatePickerPage.xaml.cs in Rust (the date two months from now, within the years from now to five years from now; WinUI's Date is the SelectedDate). FerroUI's DayFormat is a .NET date format: WinUI's {day.integer} ({dayofweek.abbreviated}) is d (ddd).",
       "examples": []
     },
     "DropDownButton": {
@@ -635,33 +596,50 @@
       "examples": []
     },
     "Flyout": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/Flyout.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/menu_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/menu_samples_tests.rs",
+          "name": "flyout_confirmation_hides_the_flyout"
         }
       ],
-      "notes": "Native Button.Flyout hosts the confirmation content; the action uses a Rust click handler. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The source example uses native Button.Flyout with DeleteConfirmation_Click of FlyoutPage.xaml.cs in Rust: the confirmation hides the flyout. The message's BaseTextBlockStyle is its semibold weight; the page's SharedFlyout resource is used by no example and is left out.",
       "examples": []
     },
     "Geometry": {
       "status": "partial",
       "implementation": [
         "samples/WinUIGallery/Pages/Geometry.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/shape_samples.rs",
+        "samples/WinUIGallery/assets.rs",
+        "samples/WinUIGallery/assets_data.rs",
+        "samples/WinUIGallery/assets-manifest.json"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "embedded_control_images_resolve_original_uri_paths_and_exact_bytes"
+        },
+        {
+          "path": "samples/WinUIGallery/shape_samples_tests.rs",
+          "name": "geometry_page_shows_the_theme_image_tips_and_copy_buttons"
         }
       ],
-      "notes": "Shared Path geometry renders a triangle and a cubic curve; the upstream geometry editor remains pending. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The source example with the code behind of GeometryPage.xaml.cs in Rust (shape_samples.rs): the header image of the page's theme (the source's Geometry.dark.png for the Default theme and Geometry.light.png for Light, its ThemeDictionaries), the three tip buttons of ShowGeometryButtonClick1 to 3, and CopyOverlayResourceToClipboardButton_Click and CopyControlResourceToClipboardButton_Click, which put the resource's name on the window's clipboard (the gallery's CopyButton is a Button with its glyph, its feedback a polite live region). The corner radius table keeps the source's rows; the radii are their values (8 and 4), CaptionTextBlockStyle is 12, the card styles are Borders with the card brushes and the selectable style names are SelectableTextBlocks (no IsTextSelectionEnabled on TextBlock). FerroUI has no TeachingTip: each tip is the Flyout of its button with the tip's title and subtitle, which the click opens and closes, so the page is partial. The glyphs need the platform's symbol font.",
       "examples": []
     },
     "Grid": {
@@ -812,63 +790,120 @@
       "examples": []
     },
     "Line": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/Line.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/shape_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
+        },
+        {
+          "path": "samples/WinUIGallery/shape_samples_tests.rs",
+          "name": "line_page_sliders_move_the_line_and_stroke_the_shapes"
         }
       ],
-      "notes": "Shared Line and Polyline use native geometry and stroke properties. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "All four source examples use native Line, Polyline, Path and a GeometryGroup of LineGeometry, EllipseGeometry and RectangleGeometry (FillRule EvenOdd), with the source's TwoWay x:Bind of the stroke thicknesses and of the ellipse's radii, and the OneWay x:Bind of the Show points switches to the point labels (Visibility is IsVisible, IsOn is IsChecked, the switch's Header its Content). The page has no code-behind upstream. WinUI's X1, Y1, X2 and Y2 are FerroUI's StartPoint and EndPoint: the four point sliders set them in Rust (shape_samples.rs) for the source's TwoWay x:Bind of each coordinate. FerroUI's Slider has no Header (composed) and no StepFrequency or SnapsTo: the steps of 0.5 are TickFrequency with IsSnapToTickEnabled. Canvas.ZIndex is the shared ZIndex; the Rect of RectangleGeometry is written x,y,width,height.",
       "examples": []
     },
     "ListView": {
       "status": "partial",
       "implementation": [
         "samples/WinUIGallery/Pages/ListView.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/list_samples.rs",
+        "samples/WinUIGallery/assets.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/list_samples_tests.rs",
+          "name": "list_view_lists_get_the_contacts_and_items_of_on_navigated_to"
+        },
+        {
+          "path": "samples/WinUIGallery/list_samples_tests.rs",
+          "name": "list_view_selection_mode_option_sets_the_mode_of_the_list"
+        },
+        {
+          "path": "samples/WinUIGallery/list_samples_tests.rs",
+          "name": "list_view_drop_moves_contacts_between_and_within_the_lists"
+        },
+        {
+          "path": "samples/WinUIGallery/list_samples_tests.rs",
+          "name": "list_view_grouped_list_shows_each_header_before_its_contacts"
+        },
+        {
+          "path": "samples/WinUIGallery/list_samples_tests.rs",
+          "name": "list_view_filters_remove_and_add_back_contacts_and_announce_the_count"
+        },
+        {
+          "path": "samples/WinUIGallery/list_samples_tests.rs",
+          "name": "list_view_messages_are_sent_and_received_with_their_alignment"
+        },
+        {
+          "path": "samples/WinUIGallery/list_samples_tests.rs",
+          "name": "list_view_context_menu_delete_removes_the_contact"
+        },
+        {
+          "path": "samples/WinUIGallery/list_samples_tests.rs",
+          "name": "list_view_context_menu_and_scrolling_act_on_the_realized_items"
         }
       ],
-      "notes": "ListView is explicitly adapted to ListBox for selection; WinUI container/event parity remains pending. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "All ten source examples use native ListBox (FerroUI has no ListView) with the code behind of ListViewPage.xaml.cs in Rust (list_samples.rs): the basic list, which takes the focus when it is loaded; SelectionModeComboBox_SelectionChanged (Single; Multiple as Multiple with Toggle; Extended as Multiple; None as items that are not selected, hit or focused, a class of the page, because FerroUI's SelectionMode has no None); ListView_Drop between and within the two lists with the source's insertion index, the contacts in an in-process data format, and a drag that starts when the pointer pressed on an item moves (DragItemsStarting); the grouped contacts after their group headers in one list, the headers not selectable; OnFilterChanged with Remove_NonMatching, AddBack_Contacts and the count in a polite live region (UIHelper.AnnounceActionForAccessibility); the inverted list with AddItemToEnd and MessageReceived, which keeps its last item in view; the images of CustomDataObject; ContactDeleteMenuItem_Click of the items' context menu; the scroll position of ListViewPersistenceHelper (the key of the first visible item and the offset in it), saved and restored; and ScrollIntoView with the Default and Leading alignments. The contacts of Contacts.txt are a table, x:Bind in the templates is {Binding} over markup types and WinUI's StackPanel with a background, padding and corners is a Border. FerroUI has no grouping (CollectionViewSource, GroupStyle) and no sticky group headers (the Sticky Headers switch changes nothing), no IsTextTrimmed on TextBlock (TextBlock_IsTextTrimmedChanged does not set the description's tooltip), no ItemsUpdatingScrollMode and no check boxes of the Multiple mode, so the page is partial.",
       "examples": []
     },
     "MenuBar": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/MenuBar.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/menu_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/menu_samples_tests.rs",
+          "name": "menu_bar_items_write_their_text_to_the_output_of_their_bar"
         }
       ],
-      "notes": "Native Menu with MenuItems represents WinUI MenuBar. Shortcuts remain shared key gestures. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "All three source examples use native Menu (WinUI's MenuBar; MenuBarItem.Title is the Header of a top MenuItem) with OnElementClicked of MenuBarPage.xaml.cs in Rust (the first letter of the item's name picks the output): the simple bar, the bar whose KeyboardAccelerators are HotKeys shown as InputGestures, and the bar with a submenu, separators and two radio groups (RadioMenuFlyoutItem is a MenuItem with the ToggleType Radio).",
       "examples": []
     },
     "MenuFlyout": {
       "status": "partial",
       "implementation": [
         "samples/WinUIGallery/Pages/MenuFlyout.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/menu_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/menu_samples_tests.rs",
+          "name": "menu_flyout_items_write_the_sort_option_and_the_clicked_item"
+        },
+        {
+          "path": "samples/WinUIGallery/menu_samples_tests.rs",
+          "name": "menu_flyout_items_keep_the_source_toggles_groups_and_accelerators"
         }
       ],
-      "notes": "Native MenuFlyout/MenuItem and separators preserve popup ownership and selection behavior. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "All seven source examples use native MenuFlyout with MenuFlyoutItem_Click and SplitMenuFlyoutItem_Click of MenuFlyoutPage.xaml.cs in Rust: the sort menu of a compact CommandBarButton (the Tag of the item), the check items and separator, the cascading menus, the icons (FontIcon and SymbolIcon), the KeyboardAccelerators as HotKeys shown as InputGestures with the source's fonts, and the radio groups. WinUI's MenuFlyoutItem is MenuItem (Text is Header); ToggleMenuFlyoutItem and RadioMenuFlyoutItem are MenuItems with the ToggleType CheckBox and Radio. FerroUI has no SplitMenuFlyoutItem: Save and Share are MenuItems with the source's items, whose primary parts cannot be clicked, so the page is partial. The glyphs need the platform's symbol font.",
       "examples": []
     },
     "NumberBox": {
@@ -1049,7 +1084,7 @@
       "examples": []
     },
     "Popup": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/Popup.xaml",
         "samples/WinUIGallery/examples.rs",
@@ -1061,29 +1096,16 @@
           "name": "all_reviewed_native_adaptations_load_real_controls"
         },
         {
-          "path": "samples/WinUIGallery/tests.rs",
-          "name": "popup_sample_opens_closes_and_observes_offset_options"
+          "path": "samples/WinUIGallery/menu_samples_tests.rs",
+          "name": "popup_buttons_open_and_close_and_disable_the_light_dismiss_option"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
         }
       ],
-      "notes": "The source open/close handlers and offset/light-dismiss options use the native Popup. Placement is explicitly relative to its button; WinUI absolute-placement, acrylic and screen-edge parity remain pending. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
-      "examples": [
-        {
-          "source": "WinUIGallery/Samples/Popup/PopupOffsetPositioning.txt",
-          "status": "partial",
-          "tests": [
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "all_reviewed_native_adaptations_load_real_controls"
-            },
-            {
-              "path": "samples/WinUIGallery/tests.rs",
-              "name": "popup_sample_opens_closes_and_observes_offset_options"
-            }
-          ],
-          "notes": "The source open/close handlers and offset/light-dismiss options use the native Popup. Placement is explicitly relative to its button; WinUI absolute-placement, acrylic and screen-edge parity remain pending. Mock host tests establish application behavior; real operating-system integration and upstream visual/accessibility acceptance remain pending.",
-          "source_sha256": "9508ff9307fb7228d41fd424b569f586e7b1765ed07b7dac72ae601c117fbb96"
-        }
-      ]
+      "notes": "The source example uses native Popup with ShowPopupOffsetClicked, ClosePopupClicked and PopupClosed of PopupPage.xaml.cs in Rust (the light-dismiss option is disabled while the popup is open). The offsets and IsLightDismissEnabled keep the source's OneWay x:Bind of the NumberBoxes and the ToggleSwitch (IsOn is IsChecked, the Header its Content). As WinUI's Popup without a placement target, the popup's top left corner is at its parent's, moved by the offsets (AnchorAndGravity, TopLeft, BottomRight).",
+      "examples": []
     },
     "ProgressBar": {
       "status": "partial",
@@ -1275,22 +1297,40 @@
       "examples": []
     },
     "ScrollViewer": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/ScrollViewer.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/scroll_samples.rs",
+        "samples/WinUIGallery/assets.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
+        },
+        {
+          "path": "samples/WinUIGallery/scroll_samples_tests.rs",
+          "name": "scroll_viewer_zoom_mode_option_enables_the_slider_and_binds_its_range"
+        },
+        {
+          "path": "samples/WinUIGallery/scroll_samples_tests.rs",
+          "name": "scroll_viewer_zoom_slider_and_zoom_factor_follow_each_other"
+        },
+        {
+          "path": "samples/WinUIGallery/scroll_samples_tests.rs",
+          "name": "scroll_viewer_scroll_modes_and_bar_visibilities_set_the_bars"
         }
       ],
-      "notes": "Native ScrollViewer hosts oversized content and scroll bars. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The source example uses native ScrollViewer with the source's cliff.jpg and the code behind of ScrollViewerPage.xaml.cs in Rust (scroll_samples.rs): the constructor's ZoomToFactor(4) (once the scroll viewer is first loaded, when it has its presenter), ZoomModeComboBox_SelectionChanged (the zoom mode, the slider enabled only with zooming, the factor 2 otherwise), ZoomSlider_ValueChanged (ChangeView), ScrollViewerControl_ViewChanged (the slider follows a change of ZoomFactor) and the four scroll mode and bar visibility handlers; the slider keeps the source's OneWay x:Bind of MinZoomFactor and MaxZoomFactor (its Header is composed). FerroUI's ScrollViewer has no HorizontalScrollMode or VerticalScrollMode: a Disabled scroll mode is the bar's Disabled visibility, which turns the scrolling of the axis off, and Enabled and Auto keep the visibility of the bar's box. IsVerticalScrollChainingEnabled is IsScrollChainingEnabled.",
       "examples": []
     },
     "Shape": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/Shape.xaml",
         "samples/WinUIGallery/examples.rs"
@@ -1299,9 +1339,17 @@
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
+        },
+        {
+          "path": "samples/WinUIGallery/shape_samples_tests.rs",
+          "name": "shape_page_sliders_size_and_stroke_the_ellipse_rectangle_and_polygon"
         }
       ],
-      "notes": "Shared Ellipse, Rectangle and Polygon render through the framework geometry backend. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "All three source examples use native Ellipse, Rectangle and Polygon with the source's TwoWay x:Bind of the sliders (sizes, radii and stroke thickness) and the OneWay x:Bind of the Show points switch to the point labels (Visibility is IsVisible, IsOn is IsChecked, the switch's Header its Content). The page has no code-behind upstream. FerroUI's Slider has no Header (composed) and no StepFrequency or SnapsTo: the steps of 0.5 are TickFrequency with IsSnapToTickEnabled. Canvas.ZIndex is the shared ZIndex.",
       "examples": []
     },
     "Slider": {
@@ -1368,18 +1416,35 @@
       "examples": []
     },
     "SplitView": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/SplitView.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/split_view_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "spacing_and_split_view_pages_follow_their_options"
+        },
+        {
+          "path": "samples/WinUIGallery/split_view_samples_tests.rs",
+          "name": "split_view_nav_links_write_the_page_of_the_clicked_link"
+        },
+        {
+          "path": "samples/WinUIGallery/split_view_samples_tests.rs",
+          "name": "split_view_options_set_the_pane_placement_mode_background_and_lengths"
         }
       ],
-      "notes": "Native SplitView binds IsPaneOpen to a ToggleButton with x:Bind, compiled by the x:Bind core. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The source example uses native SplitView with the code behind of SplitViewPage.xaml.cs in Rust (split_view_samples.rs): NavLinksList_ItemClick (the link's page in the content), PanePlacement_Toggled, togglePaneButton_CheckedChanged and SplitViewPage_Loaded with UpdateNavLinkItemLayout (the item template with the icon on the side of the pane), displayModeCombobox_SelectionChanged and paneBackgroundCombobox_SelectionChanged; the pane lengths keep the source's OneWay x:Bind of the sliders and IsPaneOpen its TwoWay x:Bind of the toggle button (the binding converts the nullable IsChecked, so no converter is needed). The NavLinks are a markup type for the {Binding} of the templates. FerroUI has no ListView: the links are a ListBox whose ItemClick is a tap on an item. The page's visual states are classes set by the handlers: Red, Blue and Green of the split view (the PaneBackground states) and RightIconLayout of the list. FerroUI's Slider has no Header (composed) and no StepFrequency or SnapsTo: the steps of 8 are TickFrequency with IsSnapToTickEnabled; the switch's IsOn is IsChecked and its Header its Content. As in the source, the split view keeps its markup DisplayMode until the box's selection changes. The symbol glyphs need the platform's symbol font.",
       "examples": []
     },
     "StackPanel": {
@@ -1483,18 +1548,23 @@
       "examples": []
     },
     "TimePicker": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/TimePicker.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/date_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/date_samples_tests.rs",
+          "name": "time_pickers_keep_the_increment_the_clocks_and_the_time_of_day"
         }
       ],
-      "notes": "Native TimePicker demonstrates 12/24-hour clocks and minute increments. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "All three source examples use native TimePicker: the picker with the clock of the current culture, the picker with its header (composed) and MinuteIncrement 15, and the 12-hour and 24-hour ClockIdentifiers. The page has no code-behind upstream; the x:Bind of the static path sys:DateTime.Now.TimeOfDay (a member of a .NET type, which the x:Bind core does not compile) is the time of day set once in Rust, as that OneTime binding.",
       "examples": []
     },
     "ToggleButton": {
@@ -1583,15 +1653,39 @@
       "status": "partial",
       "implementation": [
         "samples/WinUIGallery/Pages/TreeView.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/tree_samples.rs",
+        "samples/WinUIGallery/assets.rs",
+        "samples/WinUIGallery/assets_data.rs",
+        "samples/WinUIGallery/assets-manifest.json"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/tree_samples_tests.rs",
+          "name": "tree_view_sample_trees_have_the_nodes_of_initialize_sample_tree_view"
+        },
+        {
+          "path": "samples/WinUIGallery/tree_samples_tests.rs",
+          "name": "tree_view_multi_selection_tree_selects_several_items"
+        },
+        {
+          "path": "samples/WinUIGallery/tree_samples_tests.rs",
+          "name": "tree_view_bound_tree_shows_the_names_and_children_of_get_data"
+        },
+        {
+          "path": "samples/WinUIGallery/tree_samples_tests.rs",
+          "name": "tree_view_template_selector_picks_the_folder_and_the_file_template"
+        },
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "embedded_sample_media_resolve_original_paths_and_exact_bytes"
         }
       ],
-      "notes": "Native TreeViewItem hierarchy demonstrates expansion and selection; WinUI TreeViewNode parity is pending. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "All four source examples use native TreeView with the code behind of TreeViewPage.xaml.cs in Rust (tree_samples.rs): the nodes of InitializeSampleTreeView as TreeViewItems with their content as the header (FerroUI has no TreeViewNode), the multi-selection tree (Multiple with Toggle: a click toggles an item, without check boxes), the tree bound to GetData with the names and children of its ExplorerItems, and ExplorerItemTemplateSelector as the folder and file data templates of the tree, with the source's folder.png and the E8A5 glyph. The source's item templates are TreeViewItems with the x:Bind of Children: here hierarchical data templates (FuncTreeDataTemplate) whose children are the item's Children, and the templates' IsExpanded is a style of the tree. FerroUI's TreeView has no drag and drop of its items (CanDragItems, AllowDrop), so the first tree does not move items and the page is partial. The glyph needs the platform's symbol font.",
       "examples": []
     },
     "Typography": {
