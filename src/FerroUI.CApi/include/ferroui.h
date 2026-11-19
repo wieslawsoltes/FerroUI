@@ -110,7 +110,7 @@ extern "C" {
 int32_t ferro_abi_version(void);
 
 // Shows the window `window` ([`ferro_create`](crate::ferro_create) of the type `Window`). While
-// it is open the platform holds it, and the main loop of [`ferro_app_run`] runs until the last
+// it is open the library holds it (its handle can be released), and the main loop of [`ferro_app_run`] runs until the last
 // window shown this way closes. [`FERRO_INVALID_STATE`] before `ferro_app_run` has started.
 // UI thread only.
 FerroStatus ferro_show(FerroHandle window);
