@@ -66,12 +66,13 @@ export function action(id: string, label: string, run: () => Promise<void>, icon
     return { id, label, run, icon };
 }
 
-export function editText(prompt: string, value?: string, validateInput?: (input: string) => string | undefined): Thenable<string | undefined> {
-    return vscode.window.showInputBox({ title: 'FerroUI Studio', prompt, value, validateInput, ignoreFocusOut: true });
+export function editText(prompt: string, value?: string, validateInput?: (input: string) => string | undefined,
+    title = 'FerroUI Studio'): Thenable<string | undefined> {
+    return vscode.window.showInputBox({ title, prompt, value, validateInput, ignoreFocusOut: true });
 }
 
-export async function editTime(prompt: string, maximum: number, initial: number): Promise<number | undefined> {
-    const value = await editText(`${prompt} (0–${maximum})`, String(initial));
+export async function editTime(prompt: string, maximum: number, initial: number, title?: string): Promise<number | undefined> {
+    const value = await editText(`${prompt} (0–${maximum})`, String(initial), undefined, title);
     if (value === undefined) return;
     const time = value.trim() ? Number(value) : Number.NaN;
     if (!Number.isFinite(time) || time < 0 || time > maximum) throw new Error(`Enter a time from 0 to ${maximum} seconds.`);

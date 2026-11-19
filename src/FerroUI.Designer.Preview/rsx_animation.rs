@@ -24,7 +24,7 @@ pub(crate) struct AuthoredRsxFrame {
     catalog: RsxCatalog,
     states: BTreeMap<(NodeId, String), RsxStateGroup>,
     state_owners: Vec<NodeId>,
-    clip_owners: BTreeMap<NodeId, usize>,
+    clip_owners: BTreeMap<NodeId, (usize, u32)>,
     issues: Vec<RsxAnimationIssue>,
     pub(crate) hosted_routes: BTreeMap<i64, HostedStateRoute>,
     hosted_groups: BTreeMap<(NodeId, String), ferroui_designer_animation::VisualStateGroup>,
@@ -40,8 +40,9 @@ impl AuthoredRsxFrame {
             catalog: design.rsx_catalog().clone(),
             states: design.rsx_states.clone(),
             clip_owners: design.xaml.ast().nodes_in_source_order().filter_map(|node| {
-                let (index, _) = design.rsx_node(node.id)?;
-                rsx.can_create_animation(index).then_some((node.id, index))
+                let (index, authored) = design.rsx_node(node.id)?;
+                let line = design.index.position(authored.name.start).ok()?.line + 1;
+                rsx.can_create_animation(index).then_some((node.id, (index, line)))
             }).collect(),
             state_owners: design.xaml.ast().nodes_in_source_order().filter_map(|node| {
                 let (owner, _) = design.rsx_node(node.id)?;

@@ -5,6 +5,7 @@ use crate::rsx_animation::AuthoredRsxFrame;
 use ferroui_designer::validate_rsx_animation_selector;
 use ferroui_designer_animation::{AnimationClipEdit, AnimationPrograms};
 use ferroui_designer_core::NodeId;
+use ferroui_designer_language::LineIndex;
 use ferroui_remote_protocol::designer::{
     DesignAnimationCatalogMessage, DesignAnimationSourcePatch,
 };
@@ -24,6 +25,7 @@ struct ClipOwner {
     label: String,
     type_name: String,
     selector: String,
+    source_line: u32,
 }
 
 impl SourceMap {
@@ -35,15 +37,17 @@ impl SourceMap {
         if catalog.clip_authoring != Some(true) {
             return;
         }
+        let index = LineIndex::new(self.document.source());
         let owners = catalog
             .targets
             .iter()
             .filter_map(|target| {
                 let id = NodeId::try_from(target.id).ok()?;
-                if rust.is_some_and(|rust| !rust.hosted_clip_owner(id)) {
-                    return None;
-                }
                 let node = self.document.ast().node(id)?;
+                let source_line = match rust {
+                    Some(rust) => rust.hosted_clip_owner_line(id)?,
+                    None => index.position(node.name_span.start).ok()?.line + 1,
+                };
                 let local_type = node.local_name();
                 let selector = node.xaml_name().map_or_else(
                     || local_type.to_owned(),
@@ -54,6 +58,7 @@ impl SourceMap {
                     selector,
                     label: target.label.clone(),
                     type_name: target.type_name.clone(),
+                    source_line,
                 })
             })
             .collect();

@@ -32,7 +32,7 @@ export interface HostedAnimationTarget {
     typeName: string;
 }
 
-export interface HostedClipOwner extends HostedAnimationTarget { selector: string }
+export interface HostedClipOwner extends HostedAnimationTarget { selector: string; sourceLine: number }
 export interface HostedClipAuthoring {
     owners: HostedClipOwner[];
     programs: number[];

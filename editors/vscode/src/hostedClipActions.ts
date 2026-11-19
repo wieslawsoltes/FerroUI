@@ -2,6 +2,8 @@ import { newClipFields } from './animationPrompts';
 import type { HostedAnimationProgram, HostedClipAuthoring, HostedClipEdit } from './hostedAnimationProtocol';
 import { choose, editText } from './studioContext';
 
+const title = 'FerroUI App Preview';
+
 export async function chooseHostedClipEdit(
     authoring: HostedClipAuthoring, programs: readonly HostedAnimationProgram[], preferred?: number,
 ): Promise<HostedClipEdit | undefined> {
@@ -17,10 +19,12 @@ export async function chooseHostedClipEdit(
     if (!picked) return;
     if (picked.action === 'create') {
         const owner = await choose('Choose a live style owner', authoring.owners.map(owner => ({
-            label: owner.label, description: owner.typeName, detail: owner.selector, owner,
+            label: owner.label,
+            description: owner.label === owner.selector ? `Line ${owner.sourceLine}` : `${owner.selector} · Line ${owner.sourceLine}`,
+            owner,
         })));
         if (!owner) return;
-        const fields = await newClipFields(owner.owner.selector);
+        const fields = await newClipFields(owner.owner.selector, title);
         if (fields) return { action: 'create', owner: owner.owner.id, ...fields };
         return;
     }
@@ -31,6 +35,6 @@ export async function chooseHostedClipEdit(
     if (picked.action === 'remove') return { action: picked.action, program: clip.id };
     const copy = picked.action === 'duplicate';
     const name = (await editText(copy ? 'Name for the copied animation' : 'Animation name',
-        copy ? `${clip.name} Copy` : clip.name))?.trim();
+        copy ? `${clip.name} Copy` : clip.name, undefined, title))?.trim();
     if (name && (copy || name !== clip.name)) return { action: picked.action, program: clip.id, name };
 }

@@ -15,6 +15,7 @@ export async function verifyHostedRustClipAuthoring(preview: NativePreview, sour
     const frame = await render(48, source);
     const owner = frame.animations?.clipAuthoring?.owners.find(item => item.typeName === 'StackPanel');
     assert.ok(owner);
+    assert.equal(owner.sourceLine, source.split('\r\n').findIndex(line => line.includes('StackPanel { width')) + 1);
     assert.equal(frame.animations?.clipAuthoring?.programs.length, 1, 'Only the mapped Rust clip can be edited');
     const create: HostedClipEdit = { action: 'create', owner: owner.id, name: 'Rust entrance', selector: 'Border#ReviewCard', duration: .85 };
     await assert.rejects(preview.planHostedClipEdit(frame, { ...create, duration: .8501 }), /whole milliseconds/i);

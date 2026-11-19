@@ -8,8 +8,8 @@ use ferroui_remote_protocol::designer::DesignAnimationSourcePatch;
 use serde_json::Value;
 
 impl AuthoredRsxFrame {
-    pub(crate) fn hosted_clip_owner(&self, owner: NodeId) -> bool {
-        self.clip_owners.contains_key(&owner)
+    pub(crate) fn hosted_clip_owner_line(&self, owner: NodeId) -> Option<u32> {
+        self.clip_owners.get(&owner).map(|&(_, line)| line)
     }
 
     pub(crate) fn hosted_editable_clip(&self, program: NodeId) -> bool {
@@ -22,7 +22,7 @@ impl AuthoredRsxFrame {
         let projection = self.catalog.project(&self.source, self.invocation.start)?;
         let plan = match command {
             AnimationClipEdit::Create { owner, name, selector, duration } => {
-                let index = *self.clip_owners.get(owner).ok_or("Choose a Rust control with editable inline styles")?;
+                let &(index, _) = self.clip_owners.get(owner).ok_or("Choose a Rust control with editable inline styles")?;
                 projection.create_animation(index, name, selector, *duration)
             }
             AnimationClipEdit::Rename { program, name } =>

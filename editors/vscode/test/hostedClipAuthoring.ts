@@ -13,6 +13,7 @@ export async function verifyHostedClipAuthoring(preview: NativePreview, update: 
     assert.ok(owner, 'Expose live owners even when there are no animations');
     assert.deepEqual(empty.animations?.programs, []);
     assert.equal(owner.selector, 'Border#ReviewCard');
+    assert.equal(owner.sourceLine, plain.split('\r\n').findIndex(line => line.includes('<Border Name="ReviewCard"')) + 1);
     await assert.rejects(plan(empty, { action: 'create', owner: 9999, name: 'Retired', selector: owner.selector, duration: 1 }), /style owner/i);
     await assert.rejects(plan(empty, { action: 'create', owner: owner.id, name: 'Invalid', selector: 'Border[', duration: 1 }), /selector|closing|expected/i);
     const draft = await plan(empty, { action: 'create', owner: owner.id, name: 'Enter review', selector: owner.selector, duration: .85 });
