@@ -402,6 +402,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
  "ferroui-markup",
+ "ferroui-reload-protocol",
  "quote",
  "roxmltree",
  "syn 2.0.119",
@@ -499,6 +500,10 @@ dependencies = [
  "paste",
  "uuid",
 ]
+
+[[package]]
+name = "ferroui-reload-protocol"
+version = "0.5.1-preview.1"
 
 [[package]]
 name = "ferroui-remote-protocol"
