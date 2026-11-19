@@ -1,0 +1,115 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Header="3D Interaction"
+             x:Class="ControlCatalog.Pages.Interaction3DPage">
+  <!-- Not from upstream: the interactive 3D elements of FerroUI's 3D API (ferroui-media3d,
+       docs/porting/media3d.md, sections 3.16 and 3.17). Three cubes, each a ModelUIElement3D in one
+       ContainerUIElement3D, share one mesh. The code-behind (`interaction_3d_page.rs`) colours a cube
+       while the pointer is over it, selects the cube a press is on, counts the presses that bubble to
+       the container, and reports the nearest model under the pointer with VisualTreeHelper. -->
+  <ContentPage.Resources>
+    <!-- Four positions a face, so that each face has its own normal. -->
+    <MeshGeometry3D x:Key="CubeMesh"
+                    Positions="-1,-1,1 1,-1,1 1,1,1 -1,1,1  1,-1,-1 -1,-1,-1 -1,1,-1 1,1,-1  1,-1,1 1,-1,-1 1,1,-1 1,1,1  -1,-1,-1 -1,-1,1 -1,1,1 -1,1,-1  -1,1,1 1,1,1 1,1,-1 -1,1,-1  -1,-1,-1 1,-1,-1 1,-1,1 -1,-1,1"
+                    TriangleIndices="0 1 2 0 2 3  4 5 6 4 6 7  8 9 10 8 10 11  12 13 14 12 14 15  16 17 18 16 18 19  20 21 22 20 22 23"/>
+  </ContentPage.Resources>
+  <StackPanel Orientation="Vertical" Spacing="4">
+    <TextBlock Margin="2" Classes="h2" TextWrapping="Wrap">The models of a Viewport3D take pointer input as UIElement3D elements: move the pointer over a cube to light it up, press it to select it.</TextBlock>
+
+    <WrapPanel Margin="2,12,2,2" Orientation="Horizontal">
+      <Border Margin="0,0,16,16" Background="#FF1E2330" CornerRadius="6" ClipToBounds="True">
+        <Viewport3D x:Name="Viewport" Width="560" Height="320"
+                    PointerMoved="ViewportPointerMoved" PointerExited="ViewportPointerExited">
+          <Viewport3D.Camera>
+            <PerspectiveCamera Position="0,2,10" LookDirection="0,-0.2,-1" UpDirection="0,1,0" FieldOfView="45"/>
+          </Viewport3D.Camera>
+          <ModelVisual3D>
+            <ModelVisual3D.Content>
+              <Model3DGroup>
+                <AmbientLight Color="#FF505050"/>
+                <DirectionalLight Color="White" Direction="-0.4,-1,-0.7"/>
+              </Model3DGroup>
+            </ModelVisual3D.Content>
+          </ModelVisual3D>
+          <ContainerUIElement3D>
+            <ModelUIElement3D>
+              <GeometryModel3D Geometry="{StaticResource CubeMesh}">
+                <GeometryModel3D.Material>
+                  <DiffuseMaterial Brush="#FFE74856"/>
+                </GeometryModel3D.Material>
+                <GeometryModel3D.Transform>
+                  <Transform3DGroup>
+                    <RotateTransform3D>
+                      <RotateTransform3D.Rotation>
+                        <AxisAngleRotation3D Axis="0,1,0" Angle="35"/>
+                      </RotateTransform3D.Rotation>
+                    </RotateTransform3D>
+                    <RotateTransform3D>
+                      <RotateTransform3D.Rotation>
+                        <AxisAngleRotation3D Axis="1,0,0" Angle="15"/>
+                      </RotateTransform3D.Rotation>
+                    </RotateTransform3D>
+                    <TranslateTransform3D OffsetX="-2.8"/>
+                  </Transform3DGroup>
+                </GeometryModel3D.Transform>
+              </GeometryModel3D>
+            </ModelUIElement3D>
+            <ModelUIElement3D>
+              <GeometryModel3D Geometry="{StaticResource CubeMesh}">
+                <GeometryModel3D.Material>
+                  <DiffuseMaterial Brush="#FF16C60C"/>
+                </GeometryModel3D.Material>
+                <GeometryModel3D.Transform>
+                  <Transform3DGroup>
+                    <RotateTransform3D>
+                      <RotateTransform3D.Rotation>
+                        <AxisAngleRotation3D Axis="0,1,0" Angle="35"/>
+                      </RotateTransform3D.Rotation>
+                    </RotateTransform3D>
+                    <RotateTransform3D>
+                      <RotateTransform3D.Rotation>
+                        <AxisAngleRotation3D Axis="1,0,0" Angle="15"/>
+                      </RotateTransform3D.Rotation>
+                    </RotateTransform3D>
+                  </Transform3DGroup>
+                </GeometryModel3D.Transform>
+              </GeometryModel3D>
+            </ModelUIElement3D>
+            <ModelUIElement3D>
+              <GeometryModel3D Geometry="{StaticResource CubeMesh}">
+                <GeometryModel3D.Material>
+                  <DiffuseMaterial Brush="#FF0078D4"/>
+                </GeometryModel3D.Material>
+                <GeometryModel3D.Transform>
+                  <Transform3DGroup>
+                    <RotateTransform3D>
+                      <RotateTransform3D.Rotation>
+                        <AxisAngleRotation3D Axis="0,1,0" Angle="35"/>
+                      </RotateTransform3D.Rotation>
+                    </RotateTransform3D>
+                    <RotateTransform3D>
+                      <RotateTransform3D.Rotation>
+                        <AxisAngleRotation3D Axis="1,0,0" Angle="15"/>
+                      </RotateTransform3D.Rotation>
+                    </RotateTransform3D>
+                    <TranslateTransform3D OffsetX="2.8"/>
+                  </Transform3DGroup>
+                </GeometryModel3D.Transform>
+              </GeometryModel3D>
+            </ModelUIElement3D>
+          </ContainerUIElement3D>
+        </Viewport3D>
+      </Border>
+
+      <StackPanel Width="280" Spacing="6">
+        <TextBlock FontSize="14" FontWeight="Bold">Pointer events of the elements</TextBlock>
+        <TextBlock x:Name="OverText" TextWrapping="Wrap">Over: nothing</TextBlock>
+        <TextBlock x:Name="SelectedText" TextWrapping="Wrap">Selected: nothing</TextBlock>
+        <TextBlock x:Name="PressText" TextWrapping="Wrap">Presses that reached the container: 0</TextBlock>
+
+        <TextBlock Margin="0,12,0,0" FontSize="14" FontWeight="Bold">VisualTreeHelper hit test</TextBlock>
+        <TextBlock x:Name="HitText" TextWrapping="Wrap">Nothing under the pointer</TextBlock>
+      </StackPanel>
+    </WrapPanel>
+  </StackPanel>
+</ContentPage>

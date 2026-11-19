@@ -42,7 +42,7 @@ pub use flex_item_view_model::FlexItemViewModel;
 pub use flex_view_model::FlexViewModel;
 pub use list_box_page_view_model::{ItemModel, ListBoxPageViewModel};
 pub use main_window_view_model::MainWindowViewModel;
-pub use main_window_view_model_page_list::UnavailablePage;
+pub use main_window_view_model_page_list::{UnavailablePage, HIDDEN};
 pub use menu_item_view_model::MenuItemViewModel;
 pub use menu_page_view_model::MenuPageViewModel;
 pub use notification_view_model::NotificationViewModel;

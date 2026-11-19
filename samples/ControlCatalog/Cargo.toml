@@ -101,7 +101,12 @@ ferroui-markup-xaml = { workspace = true }
 # compiled by its build, and the crate does not link the loader.
 ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"], optional = true }
 # The OpenGL pages: the OpenGL control and the entry points the scene of the pages draws with.
+# The pages are hidden from the side bar for now (`ViewModels/main_window_view_model_page_list.rs`).
 ferroui-opengl = { workspace = true }
+# The 3D API: `Viewport3D` and the scene classes of the pages of the section "3D". The hosts
+# turn on the 3D rendering of their backends (feature `media3d` of `ferroui-skia` and
+# `ferroui-vello`); without it a scene draws nothing.
+ferroui-media3d = { workspace = true }
 # The themes of the original, only with the feature `classic-themes`.
 ferroui-themes-simple = { workspace = true, optional = true }
 ferroui-themes-fluent = { workspace = true, optional = true }
@@ -132,12 +137,13 @@ ferroui-themes-fluent = { workspace = true }
 ferroui-controls = { workspace = true, features = ["testing"] }
 # The render interface, font manager and text shaper of the tests: the pages decode bitmaps and
 # lay out text, which the mock services of the framework tests do not.
-ferroui-skia = { workspace = true }
+# With the 3D scenes of the pages of the section "3D" (`media3d`).
+ferroui-skia = { workspace = true, features = ["media3d"] }
 ferroui-harfbuzz = { workspace = true }
 # The Vello render backend, for the frame benchmarks: they are run once a backend and rendering mode
 # (`FERROUI_TEST_RENDERER`, tests/support.rs), on a raster framebuffer or on a Metal surface that is
 # not on screen (`FERROUI_BENCH_SURFACE`, tests/frame_benchmark.rs).
-ferroui-vello = { workspace = true, features = ["hybrid", "gpu"] }
+ferroui-vello = { workspace = true, features = ["hybrid", "gpu", "media3d"] }
 # The styles of the colour picker as assets too: `App.xaml` loaded with the run-time loader includes
 # them, and the loader leaves such an include to run time only for a document the asset loader has.
 ferroui-controls-color-picker = { workspace = true, features = ["document-assets"] }

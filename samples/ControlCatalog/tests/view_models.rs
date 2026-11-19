@@ -80,7 +80,7 @@ fn the_view_model_lists_every_upstream_page_as_available_or_unavailable() {
     let _app = start_catalog_application();
     let view_model = MainWindowViewModel::new();
 
-    assert_eq!(13, view_model.home_sections().len());
+    assert_eq!(14, view_model.home_sections().len());
     let available: usize = view_model.home_sections().iter().map(|s| s.items().map_or(0, |items| items.len())).sum();
     // The upstream list has 74 entries. The native catalog also offers these
     // pages, each exactly once and available through its page factory.
@@ -89,6 +89,7 @@ fn the_view_model_lists_every_upstream_page_as_available_or_unavailable() {
         // The first page of the section "Composition" is the upstream page "Composition".
         .chain(COMPOSITION_PAGES.into_iter().skip(1))
         .chain(CUSTOM_EFFECTS_PAGES)
+        .chain(PAGES_3D)
         .collect::<Vec<_>>();
     assert_eq!(74 + additional_pages.len(), available + view_model.unavailable_pages().len());
     for header in additional_pages {
@@ -177,6 +178,58 @@ fn the_custom_effects_section_has_a_page_per_family() {
     assert_eq!(CUSTOM_EFFECTS_PAGES.to_vec(), families);
     let all: Vec<String> = sections.iter().flat_map(|section| section.items().unwrap().to_vec()).map(|page| page.header()).collect();
     assert!(!all.iter().any(|page| page == "Custom effects"), "Custom effects is a section, no longer a page");
+}
+
+/// The pages of the section "3D" (not from upstream): the pages of the 3D API of the framework, in
+/// the order of the page list.
+const PAGES_3D: [&str; 3] = ["Viewport3D", "3D Interaction", "3D Transforms and animation"];
+
+/// The section "3D" follows "Custom effects" and has the pages of the 3D API.
+#[test]
+fn the_3d_section_follows_the_custom_effects() {
+    let _app = start_catalog_application();
+    let view_model = MainWindowViewModel::new();
+    let sections = view_model.home_sections();
+    let titles: Vec<String> = sections.iter().map(|section| section.title()).collect();
+    let effects = titles.iter().position(|title| title == "Custom effects").expect("the section Custom effects");
+    assert_eq!(Some("3D"), titles.get(effects + 1).map(String::as_str), "{titles:?}");
+    let headers: Vec<String> =
+        sections[effects + 1].items().map(|items| items.iter().map(|page| page.header()).collect()).unwrap_or_default();
+    assert_eq!(PAGES_3D.to_vec(), headers);
+}
+
+/// The OpenGL pages are hidden from the side bar for now, not removed: they are in no section, each
+/// is recorded as left out with the reason of a hidden page (the lease page with what it waits for,
+/// as before), and their classes are still those of their documents.
+#[test]
+fn the_open_gl_pages_are_hidden_from_the_side_bar() {
+    let _app = start_catalog_application();
+    let view_model = MainWindowViewModel::new();
+    let all: Vec<String> = view_model
+        .home_sections()
+        .iter()
+        .flat_map(|section| section.items().unwrap().to_vec())
+        .map(|page| page.header())
+        .collect();
+    for (header, document) in [
+        ("OpenGL", "/Pages/OpenGlPage.xaml"),
+        ("OpenGL Lease", "/Pages/OpenGl/OpenGlLeasePage.xaml"),
+        ("OpenGL Interop", "/Pages/OpenGl/OpenGlInteropPage.xaml"),
+    ] {
+        assert!(!all.iter().any(|page| page == header), "{header} is not in the side bar");
+        let page = view_model
+            .unavailable_pages()
+            .iter()
+            .find(|page| page.document == document)
+            .unwrap_or_else(|| panic!("{document} is recorded as left out"));
+        assert_eq!(page.header, header);
+        assert_eq!(page.section, "Media & Graphics");
+        assert!(crate::markup::XamlClass::find(document).is_some(), "{document} keeps its class");
+        match crate::excluded(document) {
+            Some(excluded) => assert_eq!(page.reason, excluded.reason),
+            None => assert_eq!(page.reason, crate::view_models::HIDDEN),
+        }
+    }
 }
 
 #[test]
