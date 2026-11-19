@@ -124,10 +124,14 @@ fn transitions_and_animations_are_built_for_the_animation_system() {
 
     let built = animation(ms(600))
         .key_frame(0.0, |frame| frame.set(Visual::opacity_property(), 0.0))
-        .key_frame(1.0, |frame| frame.set(Visual::opacity_property(), 1.0))
+        .key_frame(1.0, |frame| frame.set(Visual::opacity_property(), 1.0).key_spline(0.25, 0.0, 0.75, 1.0))
         .build();
     assert_eq!(built.children().count(), 2);
     assert_eq!(built.duration(), ferroui_base::animation::SignedDuration::from(ms(600)));
+    let animated_style = style("Border").animation(animation(ms(600))
+        .key_frame(0.0, |frame| frame.set(Visual::opacity_property(), 0.0)))
+        .build();
+    assert_eq!(animated_style.animations().count(), 1);
     owner.dispose();
 }
 

@@ -8,7 +8,7 @@ use crate::hooks::use_effect_with;
 use crate::reactive::on_cleanup;
 use ferroui_base::animation::{
     Animatable, Animation, BoolTransition, BrushTransition, ColorTransition, CornerRadiusTransition, Cue,
-    DoubleTransition, FillMode, FloatTransition, ITransition, IntegerTransition, IterationCount, KeyFrame,
+    DoubleTransition, FillMode, FloatTransition, ITransition, IntegerTransition, IterationCount, KeyFrame, KeySpline,
     PointTransition, SizeTransition, ThicknessTransition, SignedDuration, Transitions, VectorTransition,
 };
 use ferroui_base::animation::easings::Easing;
@@ -108,6 +108,12 @@ impl KeyFrameBuilder {
         let value: BoxedValue = Rc::new(value.into_value());
         let setter: Rc<dyn ferroui_base::animation::IAnimationSetter> = Setter::new_untyped(property.untyped(), value);
         self.frame.setters().add(setter);
+        self
+    }
+
+    /// Sets the cubic Bézier easing of the segment arriving at this key.
+    pub fn key_spline(self, x1: f64, y1: f64, x2: f64, y2: f64) -> Self {
+        self.frame.set_key_spline(Some(KeySpline::with_points(x1, y1, x2, y2)));
         self
     }
 }
