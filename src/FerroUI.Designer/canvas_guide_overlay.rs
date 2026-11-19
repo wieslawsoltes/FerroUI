@@ -13,10 +13,11 @@ use ferroui_base::{
     ferro_class_info, ferro_impl_classes, instantiate,
 };
 use ferroui_controls::{Control, ControlImpl};
+use ferroui_designer_tools::{CANVAS_RULER, ruler_ticks};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
-pub(crate) const RULER_SIZE: f64 = 24.0;
+pub(crate) const RULER_SIZE: f64 = CANVAS_RULER.thickness;
 
 #[repr(C)]
 pub(crate) struct CanvasGuideOverlay {
@@ -231,7 +232,7 @@ impl VisualImpl for CanvasGuideOverlay {
                 } else {
                     (offset.x, bounds.width)
                 };
-                for (pixel, value, major) in crate::canvas_guides::ruler_ticks(offset, zoom, length)
+                for (pixel, value, major) in ruler_ticks(offset, zoom, length)
                 {
                     if pixel < RULER_SIZE {
                         continue;

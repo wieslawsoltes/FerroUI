@@ -1,5 +1,6 @@
-//! Portable editor tools that produce source transactions. A host supplies measured geometry;
-//! layout, property and selection commands never mutate preview objects directly.
+//! Portable editor tools. Hosts supply measured geometry and apply checked source or view plans.
+mod canvas_guides;
+mod canvas_guide_edit;
 mod components;
 mod geometry;
 mod grid_tracks;
@@ -11,6 +12,8 @@ mod properties;
 mod selection;
 pub mod token_handoff;
 
+pub use canvas_guide_edit::{CanvasGuideDraft, CanvasGuideEdit, CanvasGuideUpdate};
+pub use canvas_guides::{CANVAS_MIN_ZOOM, CANVAS_RULER, CanvasGuide, CanvasGuideAxis, CanvasGuideSettings, CanvasRuler, ruler_ticks};
 pub use components::{
     ComponentAction, ComponentCatalog, ComponentEntry, ComponentKind, ComponentReference,
     ComponentResourceContext, ComponentResourceResolution, component_fragment,

@@ -1,6 +1,7 @@
 //! A private stdio renderer process. The extension owns the authored buffer and
 //! applies returned UTF-16 edits through the editor's undo/redo transaction.
 mod document;
+mod canvas_guides;
 mod editor_mcp;
 mod edit_selection;
 mod edits;
@@ -96,6 +97,7 @@ fn respond(
         "initialize" => Ok(json!({
             "version": protocol::PROTOCOL_VERSION,
             "assets": toolbox::catalog(),
+            "canvasGuides": canvas_guides::catalog(),
             "capabilities": {
                 "isolatedDesign": true,
                 "appHostedDesign": true,
@@ -132,6 +134,8 @@ fn respond(
                 "rsxStateStructure": true,
             },
         })),
+        "canvasGuideEdit" => serde_json::from_value::<canvas_guides::Request>(message["params"].clone())
+            .map_err(|error| error.to_string()).and_then(|request| serialize(request.plan())),
         "designTokens" => serde_json::from_value::<ferroui_designer_tools::token_handoff::Request>(message["params"].clone())
             .map_err(|error| error.to_string()).and_then(|request| serialize(request.plan().map_err(|error| error.to_string()))),
         "configureProject" => serde_json::from_value(message["params"].clone())

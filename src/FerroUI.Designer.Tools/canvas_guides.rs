@@ -3,6 +3,27 @@
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 
+pub const CANVAS_MIN_ZOOM: f64 = 0.01;
+
+/// Shared ruler cadence. Hosts project these steps in their own screen coordinates.
+#[derive(Clone, Copy, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CanvasRuler {
+    pub thickness: f64,
+    pub major_pixels: f64,
+    pub factors: [f64; 4],
+    pub subdivisions: u32,
+    pub max_ticks: usize,
+}
+
+pub const CANVAS_RULER: CanvasRuler = CanvasRuler {
+    thickness: 24.0,
+    major_pixels: 80.0,
+    factors: [1.0, 2.0, 5.0, 10.0],
+    subdivisions: 5,
+    max_ticks: 1024,
+};
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum CanvasGuideAxis {
     Horizontal,
@@ -108,10 +129,10 @@ impl CanvasGuideSettings {
         Ok(id)
     }
 
-    pub(crate) fn snap_settings(&self, zoom: f64) -> ferroui_designer_tools::SnapSettings {
-        let mut settings = ferroui_designer_tools::SnapSettings {
+    pub fn snap_settings(&self, zoom: f64) -> crate::SnapSettings {
+        let mut settings = crate::SnapSettings {
             grid: self.snap_to_grid.then_some(self.grid_spacing),
-            tolerance: self.snap_tolerance / zoom.max(crate::CanvasViewport::MIN_ZOOM),
+            tolerance: self.snap_tolerance / zoom.max(CANVAS_MIN_ZOOM),
             guides_x: Vec::new(),
             guides_y: Vec::new(),
         };
@@ -128,7 +149,7 @@ impl CanvasGuideSettings {
 }
 
 /// At most one screen's worth of ticks, even at extreme camera offsets and scales.
-pub(crate) fn ruler_ticks(offset: f64, zoom: f64, length: f64) -> Vec<(f64, f64, bool)> {
+pub fn ruler_ticks(offset: f64, zoom: f64, length: f64) -> Vec<(f64, f64, bool)> {
     if !offset.is_finite()
         || !zoom.is_finite()
         || zoom <= 0.0
@@ -137,22 +158,23 @@ pub(crate) fn ruler_ticks(offset: f64, zoom: f64, length: f64) -> Vec<(f64, f64,
     {
         return Vec::new();
     }
-    let raw = 80.0 / zoom;
+    let ruler = CANVAS_RULER;
+    let raw = ruler.major_pixels / zoom;
     let power = 10.0f64.powf(raw.log10().floor());
     let normalized = raw / power;
     let major = power
-        * if normalized <= 1.0 {
-            1.0
-        } else if normalized <= 2.0 {
-            2.0
-        } else if normalized <= 5.0 {
-            5.0
-        } else {
-            10.0
-        };
-    let minor = major / 5.0;
+        * ruler
+            .factors
+            .into_iter()
+            .find(|factor| normalized <= *factor)
+            .unwrap_or(10.0);
+    let subdivisions = f64::from(ruler.subdivisions);
+    let minor = major / subdivisions;
     let first = ((-offset / zoom) / minor).ceil();
-    let count = (length / (minor * zoom)).ceil().clamp(0.0, 1024.0) as usize + 1;
+    let count = (length / (minor * zoom))
+        .ceil()
+        .clamp(0.0, ruler.max_ticks as f64) as usize
+        + 1;
     (0..count)
         .filter_map(|index| {
             let tick = first + index as f64;
@@ -161,7 +183,7 @@ pub(crate) fn ruler_ticks(offset: f64, zoom: f64, length: f64) -> Vec<(f64, f64,
             (pixel >= 0.0 && pixel <= length && value.is_finite()).then_some((
                 pixel,
                 value,
-                (tick / 5.0 - (tick / 5.0).round()).abs() < 0.00001,
+                (tick / subdivisions - (tick / subdivisions).round()).abs() < 0.00001,
             ))
         })
         .collect()

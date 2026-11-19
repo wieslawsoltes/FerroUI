@@ -10,6 +10,7 @@ use ferroui_base::interactivity::RoutingStrategies;
 use ferroui_base::{Point, Size};
 use ferroui_controls::Flyout;
 use ferroui_designer_core::Ast;
+use ferroui_designer_tools::CanvasGuideEdit;
 use std::collections::BTreeMap;
 use std::sync::Arc;
 
@@ -97,34 +98,21 @@ impl DesignerWorkspace {
     }
 
     pub fn add_canvas_guide(&self, axis: CanvasGuideAxis, position: f64) -> Result<u64, String> {
-        let mut value = self.canvas_guides();
-        let id = value.add(axis, position)?;
-        self.set_canvas_guides(value)?;
+        let update = CanvasGuideEdit::Add { axis, position }.plan(&self.canvas_guides())?;
+        let id = update.selected.expect("A checked addition returns the added guide");
+        self.set_canvas_guides(update.settings)?;
         self.select_canvas_guide(Some(id));
         Ok(id)
     }
 
     pub fn move_canvas_guide(&self, id: u64, position: f64) -> Result<(), String> {
-        CanvasGuideSettings::validate_position(position)?;
-        let mut value = self.canvas_guides();
-        value
-            .guides
-            .iter_mut()
-            .find(|guide| guide.id == id)
-            .ok_or("Unknown canvas guide")?
-            .position = position;
-        self.set_canvas_guides(value)
+        let update = CanvasGuideEdit::Move { id, position }.plan(&self.canvas_guides())?;
+        self.set_canvas_guides(update.settings)
     }
 
     pub fn remove_canvas_guide(&self, id: u64) -> Result<(), String> {
-        let mut value = self.canvas_guides();
-        let index = value
-            .guides
-            .iter()
-            .position(|guide| guide.id == id)
-            .ok_or("Unknown canvas guide")?;
-        value.guides.remove(index);
-        self.set_canvas_guides(value)
+        let update = CanvasGuideEdit::Remove { id }.plan(&self.canvas_guides())?;
+        self.set_canvas_guides(update.settings)
     }
 
     pub fn selected_canvas_guide(&self) -> Option<u64> {
