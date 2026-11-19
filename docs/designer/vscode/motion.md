@@ -40,6 +40,8 @@ For a native animation resource, choose **Choose preview targets** in **Timeline
 
 ### Copy, paste, and mirror keyframes
 
+![The VS Code Keyframe Actions picker above four selected keys on the Opacity and Width tracks](../images/vscode-keyframe-actions.jpg)
+
 1. Select keys on one or more tracks. Open the **Keyframe Actions** icon and choose **Copy Keyframes**.
 2. Open the destination animation in VS Code or Designer Studio. Show and unlock its destination tracks, then seek to the paste time. Add a property track first if its property is missing.
 3. Choose **Paste at Playhead**. Assign each copied track to an existing destination of the same value type. For discrete values, choose the same property. The first pasted key lands at the playhead and the remaining keys keep their relative timing across tracks.

@@ -443,6 +443,8 @@ Shift for larger steps or Ctrl or Command for finer steps. Press Enter or choose
 **Apply keyframe** to write the checked XAML or mapped Rust edit in one Undo step.
 The graph stays focused when a keyboard apply rebuilds the Timeline.
 
+![Designer Studio shows both incoming Bézier handles beneath the selected Width keyframe](images/designer-easing-handles.png)
+
 To change the spacing of selected keys, set the playhead to the pivot, enter a **Factor** in the
 selection inspector, and choose **Scale from playhead**. For example, `0.5` halves each key's
 distance from the playhead. Studio preserves each key's value and easing and applies the change in
