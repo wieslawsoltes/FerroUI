@@ -1,0 +1,103 @@
+// Hello, World! in Osprey through the C ABI of FerroUI (ferroui-capi): a window with a text and a
+// button whose click handler, a named Osprey function, changes the button's text, as the C
+// hello world (samples/CApi/hello_world.c) does. Handles and IDs are plain integers, strings are
+// NUL-terminated (a length of -1), and the callbacks are named top-level functions with an
+// integer token, which is all the FFI of Osprey can pass (#950).
+//
+// With FERROUI_SAMPLE_SCRIPT=1 the program clicks the button itself (ferro_raise of Click) and
+// prints what the button shows.
+//
+// @link: ferroui_capi
+// @linkdir: target/release
+
+extern fn ferro_abi_version() -> int32
+extern fn ferro_app_run(options: Ptr, onStart: fn(int) -> int, token: int) -> int32
+extern fn ferro_type_id(name: string, length: int) -> int
+extern fn ferro_property_id(name: string, length: int) -> int
+extern fn ferro_event_id(name: string, length: int) -> int
+extern fn ferro_create(typeId: int) -> int
+extern fn ferro_set_str(object: int, property: int, text: string, length: int) -> int32
+extern fn ferro_set_f64(object: int, property: int, value: float) -> int32
+extern fn ferro_set_bool(object: int, property: int, value: int8) -> int32
+extern fn ferro_get_cstr(object: int, property: int) -> string
+extern fn ferro_add_child(parent: int, child: int) -> int32
+extern fn ferro_show(window: int) -> int32
+extern fn ferro_subscribe(object: int, event: int, function: fn(int, int, int) -> int, token: int) -> int
+extern fn ferro_raise(object: int, event: int) -> int32
+extern fn ferro_last_error() -> string
+extern fn osprey_ffi_null() -> Ptr
+// The address of the value of an environment variable, kept as an integer: 0 when it is not set.
+extern fn getenv(name: string) -> int
+
+// ---- helpers over the ABI --------------------------------------------------------------------
+
+// The value of an arm that does nothing.
+fn nothing() -> Unit = {
+    let _ = 0
+}
+
+fn prop(name: string) -> int = ferro_property_id(name: name, length: 0 - 1)
+
+fn make(name: string) -> int = ferro_create(typeId: ferro_type_id(name: name, length: 0 - 1))
+
+fn check(what: string, status: int32) -> Unit =
+    if status == toInt32(0) { nothing() } else { print("${what}: ${status} ${ferro_last_error()}") }
+
+fn setText(object: int, name: string, text: string) -> Unit =
+    check(what: name, status: ferro_set_str(object: object, property: prop(name: name), text: text, length: 0 - 1))
+
+fn setNumber(object: int, name: string, value: float) -> Unit =
+    check(what: name, status: ferro_set_f64(object: object, property: prop(name: name), value: value))
+
+fn setFlag(object: int, name: string, value: bool) -> Unit =
+    check(what: name, status: ferro_set_bool(object: object, property: prop(name: name), value: value ? toInt8(1) : toInt8(0)))
+
+// The text of a property, copied: the library owns the string it returns until its next call.
+fn getText(object: int, name: string) -> string = ferro_get_cstr(object: object, property: prop(name: name)) + ""
+
+fn add(parent: int, child: int) -> Unit = check(what: "add child", status: ferro_add_child(parent: parent, child: child))
+
+// ---- the program -----------------------------------------------------------------------------
+
+// The handler of Click: the token is the one given to ferro_subscribe, the sender is the button.
+fn onClick(token: int, sender: int, arg: int) -> int = {
+    setText(object: sender, name: "Content", text: "Clicked from Osprey")
+    print("Osprey click handler: token ${token}, sender ${sender}")
+    0
+}
+
+fn onStart(token: int) -> int = {
+    let window = make(name: "Window")
+    setText(object: window, name: "Title", text: "Hello from Osprey")
+    setNumber(object: window, name: "Width", value: 400.0)
+    setNumber(object: window, name: "Height", value: 240.0)
+    let panel = make(name: "StackPanel")
+    setNumber(object: panel, name: "Spacing", value: 12.0)
+    setText(object: panel, name: "Margin", text: "16")
+    let text = make(name: "TextBlock")
+    setText(object: text, name: "Text", text: "Hello, World!")
+    let button = make(name: "Button")
+    setText(object: button, name: "Content", text: "Click me")
+    let click = ferro_event_id(name: "Click", length: 0 - 1)
+    let subscription = ferro_subscribe(object: button, event: click, function: onClick, token: 7)
+    add(parent: panel, child: text)
+    add(parent: panel, child: button)
+    add(parent: window, child: panel)
+    check(what: "show", status: ferro_show(window: window))
+    print("window ${window}, button ${button}, subscription ${subscription}")
+    if getenv(name: "FERROUI_SAMPLE_SCRIPT") != 0 { script(button: button, click: click) } else { nothing() }
+    0
+}
+
+// Clicks the button as a click does and prints what it shows.
+fn script(button: int, click: int) -> Unit = {
+    check(what: "raise", status: ferro_raise(object: button, event: click))
+    let shown = getText(object: button, name: "Content")
+    print("script: the button shows '${shown}': ${shown == "Clicked from Osprey" ? "ok" : "FAILED"}")
+}
+
+fn main() = {
+    print("ABI version ${ferro_abi_version()}")
+    let rc = ferro_app_run(options: osprey_ffi_null(), onStart: onStart, token: 0)
+    print("ferro_app_run returned ${rc}")
+}
