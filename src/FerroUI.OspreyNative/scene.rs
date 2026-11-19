@@ -481,7 +481,7 @@ fn step(value: &Value) -> Result<Step, String> {
         5 => {
             let closed = read.flag()?;
             let rest = items.len() - read.at;
-            if rest % 2 != 0 {
+            if !rest.is_multiple_of(2) {
                 return Err("a polygon has an odd number of coordinates".into());
             }
             let corners = (0..rest / 2)

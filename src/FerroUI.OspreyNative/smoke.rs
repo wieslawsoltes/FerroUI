@@ -160,7 +160,7 @@ fn check(session: &Session, requests: &[String], expect: &Value) -> Result<(), S
         }
     }
     for key in names("patched") {
-        if !session.last_patched().iter().any(|patched| *patched == key) {
+        if !session.last_patched().contains(&key) {
             return Err(format!(
                 "region {key} was not patched; patches were {:?}",
                 session.last_patched()
