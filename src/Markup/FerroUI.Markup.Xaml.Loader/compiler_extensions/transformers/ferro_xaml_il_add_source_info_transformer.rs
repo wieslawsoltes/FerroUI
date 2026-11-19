@@ -108,7 +108,7 @@ pub struct XamlSourceInfoValueManipulation {
     pub types: Rc<FerroXamlIlWellKnownTypes>,
     pub document: Option<String>,
     /// Fingerprint of the document text used by this transform.
-    pub source_revision: Option<u64>,
+    source_revision: Option<u64>,
 }
 
 impl XamlSourceInfoValueManipulation {
@@ -118,6 +118,10 @@ impl XamlSourceInfoValueManipulation {
         document: Option<String>,
     ) -> Rc<Self> {
         Self::with_revision(ferro_types, obj_node, document, None)
+    }
+
+    pub(crate) fn source_revision(&self) -> Option<u64> {
+        self.source_revision
     }
 
     fn with_revision(

@@ -465,7 +465,7 @@ fn source_info(node: &Rc<XamlSourceInfoValueManipulation>, context: &mut EvalCon
         context,
         &**node,
     )?;
-    let info = if let Some((revision, info)) = node.source_revision.zip(info.as_ref()) {
+    let info = if let Some((revision, info)) = node.source_revision().zip(info.as_ref()) {
         use ferroui_markup_xaml::diagnostics::XamlSourceInfo;
         let info = info.downcast_ref::<XamlSourceInfo>()
             .ok_or_else(|| runtime_error("InvalidCastException", "Expected XAML source information", &**node))?;

@@ -2069,7 +2069,7 @@ impl<'a> Emitter<'a> {
         }
         if let Some(n) = node.cast::<XamlSourceInfoValueManipulation>() {
             // `XamlSourceInfo.SetXamlSourceInfo(target, new XamlSourceInfo(line, position, document))`.
-            let info = self.source_info(node, node.line(), node.position(), n.document.as_deref(), n.source_revision)?;
+            let info = self.source_info(node, node.line(), node.position(), n.document.as_deref(), n.source_revision())?;
             let setter = self.types.method(n.types.xaml_source_info_setter.as_ref())
                 .ok_or_else(|| unsupported(node, "SetXamlSourceInfo is not a method of the run-time type system"))?;
             let call = self.declared_call(node, &setter, &[Typed { expr: target.expr.clone(), kind: target.kind }, info])?;
