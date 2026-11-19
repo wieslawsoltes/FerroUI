@@ -21,7 +21,7 @@ use ferroui_designer_animation::native::{
     NativeSourceIndex,
 };
 use ferroui_designer_animation::{
-    AnimationProgram, AnimationPrograms, ProjectedStateGroup, native_key_time, xaml_clip_delay,
+    AnimationProgram, AnimationPrograms, StatePreviewGroup, native_key_time, xaml_clip_delay,
 };
 use ferroui_designer_core::{Document, NodeId};
 use ferroui_remote_protocol::designer::{
@@ -31,7 +31,7 @@ use ferroui_remote_protocol::designer::{
     DesignKeyframeSelectionRequest, DesignKeyframeSelectionResult, DESIGN_KEYFRAME_SELECTION_QUERY,
     DESIGN_ANIMATION_AUTHORING_QUERY, DESIGN_ANIMATION_CLIPS_QUERY, DESIGN_ANIMATION_CURVE_CHANNELS_QUERY,
     DESIGN_ANIMATION_CURVE_QUERY, DESIGN_ANIMATION_QUERY, DESIGN_ANIMATION_VERSION,
-    DESIGN_CLIP_AUTHORING_QUERY, DESIGN_STATE_ROUTES_QUERY,
+    DESIGN_CLIP_AUTHORING_QUERY, DESIGN_STATE_AUTHORING_QUERY, DESIGN_STATE_ROUTES_QUERY,
 };
 use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, BTreeSet};
@@ -46,6 +46,7 @@ ferroui_base::ferro_thread_local! {
     static CLIPS: Cell<bool> = const { Cell::new(false) };
     static CLIP_AUTHORING: Cell<bool> = const { Cell::new(false) };
     static STATE_ROUTES: Cell<bool> = const { Cell::new(false) };
+    static STATE_AUTHORING: Cell<bool> = const { Cell::new(false) };
     static ACTIVE: RefCell<Option<HostedAnimations>> = const { RefCell::new(None) };
 }
 
@@ -63,6 +64,7 @@ pub(super) fn configure(transport: Option<&Url>, remote: bool) {
     CLIPS.set(enabled && requested(DESIGN_ANIMATION_CLIPS_QUERY));
     CLIP_AUTHORING.set(AUTHORING.get() && requested(DESIGN_CLIP_AUTHORING_QUERY));
     STATE_ROUTES.set(enabled && requested(DESIGN_STATE_ROUTES_QUERY));
+    STATE_AUTHORING.set(STATE_ROUTES.get() && AUTHORING.get() && requested(DESIGN_STATE_AUTHORING_QUERY));
     ACTIVE.with(|active| active.borrow_mut().take());
 }
 
@@ -70,7 +72,7 @@ pub(super) struct AnimationSource {
     pub(super) identity: String,
     document: Document,
     programs: Vec<AnimationProgram>,
-    states: Vec<ProjectedStateGroup>,
+    states: Vec<StatePreviewGroup>,
 }
 
 impl AnimationSource {
@@ -84,9 +86,13 @@ pub(super) fn prepare(update: &UpdateDesignMessage) -> Option<AnimationSource> {
         return None;
     }
     let document = Document::new(update.source.xaml.as_deref()?).ok()?;
-    let programs = AnimationPrograms::scan_hosted(&document);
-    let states = STATE_ROUTES.get().then(|| ProjectedStateGroup::scan(&document)).unwrap_or_default();
-    (!programs.is_empty() || !states.is_empty() || CLIP_AUTHORING.get()).then(|| AnimationSource {
+    let full_states = STATE_AUTHORING.get();
+    let mut programs = AnimationPrograms::scan_hosted(&document);
+    if full_states {
+        programs.retain(|program| !AnimationPrograms::is_state_managed(&document, program.id));
+    }
+    let states = STATE_ROUTES.get().then(|| StatePreviewGroup::scan(&document, full_states)).unwrap_or_default();
+    (!programs.is_empty() || !states.is_empty() || CLIP_AUTHORING.get() || full_states).then(|| AnimationSource {
         identity: format!("ferroui-design/{}", update.revision),
         document,
         programs,
@@ -106,6 +112,7 @@ pub(super) fn accept(
         revision,
         keyframe_selection: KEYFRAME_SELECTION.get().then_some(true),
         clip_authoring: CLIP_AUTHORING.get().then_some(true),
+        state_authoring: STATE_AUTHORING.get().then_some(true),
         ..Default::default()
     };
     if let Some(source) = source {

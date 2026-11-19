@@ -68,7 +68,7 @@ impl SourceMap {
             .map(|program| program.id)
             .filter(|&id| {
                 i64::try_from(id).is_ok_and(|id| {
-                    self.clips.contains_key(&id) && !self.state_routes.contains_key(&id)
+                    self.clips.contains_key(&id) && !self.states.routes.contains_key(&id)
                 }) && rust.is_none_or(|rust| rust.hosted_editable_clip(id))
             })
             .collect();

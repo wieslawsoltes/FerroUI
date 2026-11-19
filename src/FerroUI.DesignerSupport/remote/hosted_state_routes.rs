@@ -1,6 +1,6 @@
 use crate::design_window_loader::LoadedDesign;
 use ferroui_base::{Ref, StyledElement};
-use ferroui_designer_animation::ProjectedStateGroup;
+use ferroui_designer_animation::StatePreviewGroup;
 use ferroui_designer_animation::native::NativeStateRoute;
 use ferroui_designer_core::{Document, NodeId};
 use ferroui_remote_protocol::designer::{DesignAnimationCatalogMessage, DesignAnimationProgram};
@@ -12,7 +12,7 @@ pub(super) struct HostedStateRoutes(BTreeMap<i64, NativeStateRoute>);
 impl HostedStateRoutes {
     pub(super) fn mount(
         document: &Document,
-        groups: Vec<ProjectedStateGroup>,
+        groups: Vec<StatePreviewGroup>,
         design: &LoadedDesign,
         targets: &mut BTreeMap<i64, Ref<StyledElement>>,
         catalog: &mut DesignAnimationCatalogMessage,
@@ -24,8 +24,13 @@ impl HostedStateRoutes {
         for group in groups {
             let owner = group.model.owner;
             if let Some(root) = &fixture {
-                if fixture_control(document, owner, root).is_none() {
+                let Some(control) = fixture_control(document, owner, root) else {
                     continue;
+                };
+                if catalog.state_authoring == Some(true) {
+                    if let Ok(id) = i64::try_from(owner) {
+                        targets.insert(id, control);
+                    }
                 }
             }
             for route in group.routes {
@@ -54,9 +59,14 @@ impl HostedStateRoutes {
                 targets.extend(matched);
                 let transition = &route.transition;
                 let from = transition.from.as_deref().unwrap_or("Base");
+                let name = if route.endpoint {
+                    format!("{} · {}", group.model.name, transition.to)
+                } else {
+                    format!("{} · {from} → {}", group.model.name, transition.to)
+                };
                 catalog.programs.push(DesignAnimationProgram {
                     id,
-                    name: format!("{} · {from} → {}", group.model.name, transition.to),
+                    name,
                     selector: String::new(),
                     duration: transition.duration,
                     total_duration: Some(transition.duration),

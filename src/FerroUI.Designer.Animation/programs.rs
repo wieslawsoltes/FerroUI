@@ -307,6 +307,11 @@ impl AnimationPrograms {
             .collect()
     }
 
+    /// XAML programs whose source and playback are owned by a visual state group.
+    pub fn is_state_managed(document: &Document, id: NodeId) -> bool {
+        crate::states::state_program_role(document, id).is_some()
+    }
+
     /// Enumerate every Animation, including resource, nested-style and custom payload programs.
     /// Hosts resolve selectors against their live tree and then invoke the codec registry.
     pub fn scan(document: &Document) -> Vec<AnimationProgram> {

@@ -191,6 +191,7 @@ fn entities() -> Vec<Message> {
             targets: vec![DesignAnimationTarget { id: 12, label: "ReviewCard".into(), type_name: "Border".into() }],
             keyframe_selection: Some(true),
             clip_authoring: Some(true),
+            state_authoring: Some(true),
         }),
         Arc::new(DesignAnimationRequestMessage {
             revision: 40, request: 31, program: None, targets: None, elapsed: 1.25, restart: true,

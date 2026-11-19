@@ -14,6 +14,7 @@ use std::collections::{BTreeMap, BTreeSet};
 #[path = "states/projected_routes.rs"]
 mod projected_routes;
 pub use projected_routes::{ProjectedStateGroup, ProjectedStateRoute};
+pub use projected_routes::{StatePreviewGroup, StatePreviewRoute};
 const GROUP_MARKER: &str = "ferroui-designer-state-group:";
 const PROJECTED_GROUP_MARKER: &str = "ferroui-designer-projected-state-group:";
 const STATE_MARKER: &str = "ferroui-designer-state:";
@@ -61,6 +62,22 @@ pub struct VisualStateGroup {
     pub states: Vec<VisualState>,
     pub transitions: Vec<StateTransition>,
 }
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(tag = "action", rename_all = "snake_case", deny_unknown_fields)]
+pub enum StateGroupEdit {
+    Upsert { model: VisualStateGroup },
+    Remove { owner: NodeId, group: String },
+}
+
+impl StateGroupEdit {
+    pub fn identity(&self) -> (NodeId, &str) {
+        match self {
+            Self::Upsert { model } => (model.owner, &model.name),
+            Self::Remove { owner, group } => (*owner, group),
+        }
+    }
+}
+
 impl VisualStateGroup {
     /// Directional transitions take precedence over the same destination's default.
     pub fn transition(&self, from: Option<&str>, to: &str) -> Option<&StateTransition> {
@@ -477,6 +494,10 @@ impl VisualStateGroup {
     }
 
     pub fn read(document: &Document) -> Vec<Self> {
+        Self::read_group_styles(document).into_iter().map(|(_, group, _)| group).collect()
+    }
+
+    fn read_group_styles(document: &Document) -> Vec<(NodeId, Self, bool)> {
         group_nodes(document)
             .into_iter()
             .filter_map(|(style, mut group, projected)| {
@@ -484,7 +505,7 @@ impl VisualStateGroup {
                 if projected {
                     // The generated tracks may contain a minimum native tick for an
                     // instantaneous state. The Rust declaration owns route timing.
-                    return Some(group);
+                    return Some((style, group, projected));
                 }
                 // Native keyframes/setters are authoritative after direct source edits.
                 if let Some(style) = document.ast().node(style).map(|node| node.id) {
@@ -581,7 +602,7 @@ impl VisualStateGroup {
                             }));
                     }
                 }
-                Some(group)
+                Some((style, group, projected))
             })
             .collect()
     }

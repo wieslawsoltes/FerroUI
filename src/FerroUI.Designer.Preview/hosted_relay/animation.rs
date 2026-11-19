@@ -198,7 +198,12 @@ impl Relay {
 
     pub(crate) fn plan_state(&self, draft: hosted_animation::StateDraft) -> Result<serde_json::Value, String> {
         self.animation_connection(draft.revision, draft.sequence)?;
-        self.authored_rsx.as_ref().ok_or("Open the current Rust view")?.plan_hosted_state(&draft)
+        self.animation_sources.plan_state_route(&draft, self.authored_rsx.as_ref())
+    }
+
+    pub(crate) fn plan_state_group(&self, draft: hosted_animation::StateGroupDraft) -> Result<serde_json::Value, String> {
+        self.animation_connection(draft.revision, draft.sequence)?;
+        self.animation_sources.plan_state_group(&draft, self.authored_rsx.as_ref())
     }
 
     pub(crate) fn plan_clip_placement(&self, draft: hosted_animation::ClipDraft) -> Result<serde_json::Value, String> {

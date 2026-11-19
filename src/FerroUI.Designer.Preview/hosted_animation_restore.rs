@@ -1,4 +1,4 @@
-use crate::rsx_animation::HostedStateRoute;
+use crate::hosted_states::{HostedStateRoute, HostedStates};
 use ferroui_designer_animation::{AnimationProgram, AnimationProgramLocator, AnimationPrograms, ClipClock, PreviewRange};
 use ferroui_designer_core::{Document, NodeId, SourceAnchor};
 use ferroui_remote_protocol::designer::DesignAnimationCatalogMessage;
@@ -11,6 +11,8 @@ mod clip_placement;
 mod clip_authoring;
 #[path = "hosted_marker_scopes.rs"]
 mod marker_scopes;
+#[path = "hosted_state_edit.rs"]
+mod state_edit;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -70,7 +72,7 @@ pub(crate) struct SourceMap {
     scope: SourceScope,
     document: Document,
     programs: Vec<AnimationProgram>,
-    state_routes: BTreeMap<i64, HostedStateRoute>,
+    pub(crate) states: HostedStates,
     clips: BTreeMap<i64, Clip>,
     clip_authoring: Option<clip_authoring::ClipAuthoring>,
 }
@@ -80,9 +82,9 @@ impl SourceMap {
         document: Document,
         scope: SourceScope,
         catalog: &DesignAnimationCatalogMessage,
-        state_routes: BTreeMap<i64, HostedStateRoute>,
+        states: HostedStates,
     ) -> Option<Self> {
-        if catalog.programs.is_empty() && catalog.clip_authoring != Some(true) {
+        if catalog.programs.is_empty() && catalog.clip_authoring != Some(true) && catalog.state_authoring != Some(true) {
             return None;
         }
         let clips = catalog
@@ -112,7 +114,7 @@ impl SourceMap {
             scope,
             document,
             programs,
-            state_routes,
+            states,
             clips,
             clip_authoring: None,
         })
@@ -125,7 +127,7 @@ impl SourceMap {
     fn remap_program(&self, replacement: &Self, id: i64) -> Option<i64> {
         let old_id = NodeId::try_from(id).ok()?;
         self.clips.get(&id)?;
-        if let Some(route) = self.state_routes.get(&id) {
+        if let Some(route) = self.states.routes.get(&id) {
             return self.remap_route(replacement, id, route);
         }
         let program = self.programs.iter().find(|program| program.id == old_id)?;
@@ -160,9 +162,9 @@ impl SourceMap {
     fn remap_route(&self, replacement: &Self, id: i64, route: &HostedStateRoute) -> Option<i64> {
         let owner = SourceAnchor::capture(&self.document, route.owner).ok()?
             .resolve(&replacement.document).ok()?;
-        let mut matches = replacement.state_routes.iter().filter(|(_, candidate)| {
+        let mut matches = replacement.states.routes.iter().filter(|(_, candidate)| {
             candidate.owner == owner && candidate.group == route.group
-                && candidate.from == route.from && candidate.to == route.to
+                && candidate.from == route.from && candidate.to == route.to && candidate.endpoint == route.endpoint
         });
         let (&mapped, _) = matches.next().filter(|_| matches.next().is_none())?;
         let old = self.clips.get(&id)?;

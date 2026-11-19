@@ -6978,6 +6978,7 @@ dependencies = [
  "ferroui-skia",
  "ferroui-themes-winui",
  "ferroui-view",
+ "ferroui-xaml-interactions-custom",
  "todo-mvc",
 ]
 

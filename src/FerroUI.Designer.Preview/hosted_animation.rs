@@ -1,5 +1,5 @@
 use crate::hosted_relay::Frame;
-use ferroui_designer_animation::{AnimationClipEdit, ClipClock, CurveChannel, CurveMetric, CurveWindow, KeyframeSelection};
+use ferroui_designer_animation::{AnimationClipEdit, ClipClock, CurveChannel, CurveMetric, CurveWindow, KeyframeSelection, StateGroupEdit};
 use ferroui_designer_core::TextPatch;
 use ferroui_remote_protocol::designer::{
     DesignAnimationAuthoringResult, DesignAnimationCatalogMessage, DesignAnimationClipBinding,
@@ -88,6 +88,14 @@ pub(crate) struct StateDraft {
     pub(crate) program: i64,
     pub(crate) duration: f64,
     pub(crate) easing: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct StateGroupDraft {
+    pub(crate) revision: i64,
+    pub(crate) sequence: i64,
+    pub(crate) command: StateGroupEdit,
 }
 
 #[derive(Deserialize)]

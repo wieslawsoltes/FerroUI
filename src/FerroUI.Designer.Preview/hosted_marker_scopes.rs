@@ -22,11 +22,12 @@ impl SourceMap {
             let Some(id) = item["id"].as_i64() else {
                 continue;
             };
-            let identity = if let Some(route) = self.state_routes.get(&id) {
+            let identity = if let Some(route) = self.states.routes.get(&id) {
                 SourceAnchor::capture(&self.document, route.owner)
                     .ok()
                     .map(|owner| {
-                        json!(["route", owner, route.group, route.from, route.to]).to_string()
+                        let scope = if route.endpoint { "state" } else { "route" };
+                        json!([scope, owner, route.group, route.from, route.to]).to_string()
                     })
             } else {
                 self.programs

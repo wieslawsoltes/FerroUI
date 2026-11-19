@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 pub(crate) const PROTOCOL_VERSION: u32 = 4;
 pub(crate) const MAX_SOURCE_BYTES: usize = 1024 * 1024;
 
-#[derive(Clone, Copy, PartialEq, Eq, Deserialize)]
+#[derive(Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub(crate) enum Language {
     Xaml,

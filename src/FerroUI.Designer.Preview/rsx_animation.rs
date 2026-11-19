@@ -10,12 +10,17 @@ use std::collections::BTreeMap;
 mod states;
 pub(crate) use states::{state_edit, state_patches};
 mod hosted_states;
-pub(crate) use hosted_states::HostedStateRoute;
 
 mod keyframes;
 pub(crate) use keyframes::keyframe_edit;
 mod programs;
 pub(crate) use programs::{clip_placement_edit, clip_placement_patches, program_edit, program_patches};
+
+struct StateOwnerMapping {
+    ordinal: usize,
+    line: u32,
+    can_create: bool,
+}
 
 pub(crate) struct AuthoredRsxFrame {
     source: Box<str>,
@@ -23,11 +28,9 @@ pub(crate) struct AuthoredRsxFrame {
     clips: BTreeMap<NodeId, RsxAnimation>,
     catalog: RsxCatalog,
     states: BTreeMap<(NodeId, String), RsxStateGroup>,
-    state_owners: Vec<NodeId>,
+    state_owners: BTreeMap<NodeId, StateOwnerMapping>,
     clip_owners: BTreeMap<NodeId, (usize, u32)>,
     issues: Vec<RsxAnimationIssue>,
-    pub(crate) hosted_routes: BTreeMap<i64, HostedStateRoute>,
-    hosted_groups: BTreeMap<(NodeId, String), ferroui_designer_animation::VisualStateGroup>,
 }
 
 impl AuthoredRsxFrame {
@@ -45,12 +48,11 @@ impl AuthoredRsxFrame {
                 rsx.can_create_animation(index).then_some((node.id, (index, line)))
             }).collect(),
             state_owners: design.xaml.ast().nodes_in_source_order().filter_map(|node| {
-                let (owner, _) = design.rsx_node(node.id)?;
-                rsx.can_create_state_group(owner).then_some(node.id)
+                let (ordinal, authored) = design.rsx_node(node.id)?;
+                let line = design.index.position(authored.name.start).ok()?.line + 1;
+                Some((node.id, StateOwnerMapping { ordinal, line, can_create: rsx.can_create_state_group(ordinal) }))
             }).collect(),
             issues: rsx.animation_issues.clone(),
-            hosted_routes: BTreeMap::new(),
-            hosted_groups: BTreeMap::new(),
         })
     }
 
@@ -88,7 +90,8 @@ impl AuthoredRsxFrame {
     pub(crate) fn annotate_states(&self, models: &mut Value, owner: Option<NodeId>) {
         let index = LineIndex::new(&self.source);
         models["creatableOwners"] = json!(self.state_owners.iter()
-            .filter(|id| owner.is_none_or(|owner| owner == **id)).collect::<Vec<_>>());
+            .filter(|(id, source)| source.can_create && owner.is_none_or(|owner| owner == **id))
+            .map(|(id, _)| id).collect::<Vec<_>>());
         models["sources"] = json!(self.states.iter().filter_map(|((id, _), group)| {
             if owner.is_some_and(|owner| owner != *id) { return None; }
             group.source_ranges(*id, &index)

@@ -86,6 +86,7 @@ fn register_fixtures() {
 
 fn register_markup() {
     FerroRuntimeXamlLoader::register();
+    ferroui_xaml_interactions_custom::register_types();
     Animation::register_custom_animator::<ReviewCorners>();
     ferroui_themes_winui::register_types();
     TypeInfo::register_namespaces(&[(module_path!(), "TodoWorkbench.Design")]);

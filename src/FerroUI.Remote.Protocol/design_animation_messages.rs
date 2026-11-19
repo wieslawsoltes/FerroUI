@@ -11,6 +11,8 @@ pub const DESIGN_STATE_ROUTES_QUERY: &str = "ferroui-design-state-routes";
 pub const DESIGN_ANIMATION_CLIPS_QUERY: &str = "ferroui-design-clips";
 /// Include live style owners even when an accepted design contains no clips.
 pub const DESIGN_CLIP_AUTHORING_QUERY: &str = "ferroui-design-clip-authoring";
+/// Expose XAML state routes, instantaneous state poses, and live state owners.
+pub const DESIGN_STATE_AUTHORING_QUERY: &str = "ferroui-design-state-authoring";
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct DesignAnimationCatalogMessage {
@@ -19,6 +21,7 @@ pub struct DesignAnimationCatalogMessage {
     pub targets: Vec<DesignAnimationTarget>,
     pub keyframe_selection: Option<bool>,
     pub clip_authoring: Option<bool>,
+    pub state_authoring: Option<bool>,
 }
 
 ferro_remote_message_guid!(
@@ -31,6 +34,7 @@ bson_class!(DesignAnimationCatalogMessage as "DesignAnimationCatalogMessage" {
     "Targets" => targets: Vec<DesignAnimationTarget>,
     "KeyframeSelection" => keyframe_selection: Option<bool>,
     "ClipAuthoring" => clip_authoring: Option<bool>,
+    "StateAuthoring" => state_authoring: Option<bool>,
 });
 
 #[derive(Clone, Debug, Default, PartialEq)]

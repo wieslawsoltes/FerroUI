@@ -2,6 +2,7 @@ use crate::{
     hosted_animation,
     hosted_animation_restore::{Presentation, Restore, SourceMap, SourceMaps, SourceScope},
     hosted_frame,
+    hosted_states::HostedStates,
     projects::Projects,
     protocol::{Image, MAX_SOURCE_BYTES, Source},
     rsx_animation::AuthoredRsxFrame,
@@ -350,17 +351,16 @@ impl Relay {
         if !matches!(state.outcome, Some(Ok(()))) || state.latest.is_none() {
             return Err("The application did not render this source revision".into());
         }
-        let mut authored_rsx = AuthoredRsxFrame::capture(&document);
-        if let Some(catalog) = &mut state.animation_catalog {
-            if let Some(projected) = &mut authored_rsx {
-                projected.bind_hosted_routes(&document.xaml, catalog);
-            }
+        let authored_rsx = AuthoredRsxFrame::capture(&document);
+        let states = state.animation_catalog.as_mut().map(|catalog| {
+            HostedStates::capture(&document.xaml, catalog, authored_rsx.as_ref())
+        });
+        if let Some(catalog) = &state.animation_catalog {
             state.authorable = catalog.programs.iter().filter(|program| program.authoring.is_some())
                 .map(|program| program.id).collect();
         }
-        let routes = authored_rsx.as_ref().map(|authored| authored.hosted_routes.clone()).unwrap_or_default();
         let source = state.animation_catalog.as_ref().and_then(|catalog| {
-            let mut source = SourceMap::new(document.xaml, scope, catalog, routes)?;
+            let mut source = SourceMap::new(document.xaml, scope, catalog, states?)?;
             source.capture_clip_authoring(catalog, authored_rsx.as_ref());
             Some(source)
         });
@@ -380,12 +380,12 @@ impl Relay {
         let mut frame = self.frame()?.ok_or("The application did not render this source revision")?;
         if let (Some(authored), Some(catalog)) = (&authored_rsx, &mut frame.animations) {
             authored.annotate_issues(catalog);
-            authored.annotate_hosted_routes(catalog);
         }
         if let (Some(source), Some(catalog)) = (&source, &mut frame.animations) {
             source.annotate_clips(catalog);
             source.annotate_marker_scopes(catalog);
             source.annotate_clip_authoring(catalog);
+            source.states.annotate(catalog);
         }
         self.animation_sources.deliver(source, revision, frame.sequence);
         self.authored_rsx = authored_rsx;
