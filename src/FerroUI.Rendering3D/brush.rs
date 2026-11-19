@@ -12,9 +12,13 @@
 //! - **Image brushes** sample the pixels of their bitmap ([`BrushShader::Image`]), uploaded once per
 //!   `(identity, version)` of the bitmap ([`BrushTextureKey::Image`]), with the tile, stretch,
 //!   alignment, viewbox (`SourceRect`) and viewport (`DestinationRect`) of the brush.
-//! - Any other brush (a conic gradient, an image whose pixels cannot be read, a visual or drawing
-//!   brush without a shared form) is drawn with the layer's `Color` and counted
-//!   ([`crate::layers_with_unsampled_brushes`]).
+//! - **Visual and drawing brushes** are their recorded content
+//!   ([`Scene3DBrushContent`]), rendered offscreen by the backend's 2D renderer into a texture
+//!   sampled as an image ([`BrushShader::Image`]), again only for a new generation of the content
+//!   ([`BrushTextureKey::Content`]); a renderer without a 2D renderer for it draws the layer
+//!   with its `Color`.
+//! - Any other brush (a conic gradient, an image whose pixels cannot be read) is drawn with the
+//!   layer's `Color` and counted ([`crate::layers_with_unsampled_brushes`]).
 //!
 //! **The mapping** of a mesh to a brush is WPF's: the texture coordinate of a point is a point of
 //! the brush's 2D space, and the bounding box of the mesh's texture coordinates is the box a
@@ -39,7 +43,7 @@ use ferroui_base::media::{
     GradientSpreadMethod, IBrush, IGradientBrush, ITileBrush, MediaExtensions, SharedBrush, StretchDirection, TileMode,
 };
 use ferroui_base::platform::{AlphaFormat, PixelFormat, SharedBitmapImpl};
-use ferroui_base::rendering::scene3d::{MeshData, Scene3DSnapshot};
+use ferroui_base::rendering::scene3d::{MeshData, Scene3DBrushContent, Scene3DSnapshot};
 use ferroui_base::rendering::utilities::TileBrushCalculator;
 use ferroui_base::{Matrix, Rect, Size};
 use std::collections::hash_map::DefaultHasher;
@@ -53,6 +57,10 @@ pub const MAX_INLINE_STOPS: usize = 8;
 /// The texels of the lookup texture of a gradient: the colour at `t = i / (width - 1)` in texel
 /// `i`, sampled with linear filtering.
 pub const GRADIENT_TEXTURE_WIDTH: u32 = 256;
+
+/// The largest side of the offscreen render of the content of a visual or drawing brush, in
+/// pixels: a larger content is rendered at a lower resolution.
+pub const MAX_CONTENT_SIDE: u32 = 4096;
 
 /// The kind of a brush in [`BrushUniforms::metadata`] (its `x`; 0 for a solid colour).
 mod kind {
@@ -163,6 +171,14 @@ pub enum BrushTextureKey {
         /// [`IBitmapImpl::version`](ferroui_base::platform::IBitmapImpl::version).
         version: i32,
     },
+    /// The offscreen render of the content of a visual or drawing brush: its identity and
+    /// generation ([`Scene3DBrushContent::id`], [`Scene3DBrushContent::generation`]).
+    Content {
+        /// The identity of the content.
+        id: u64,
+        /// Its generation.
+        generation: u64,
+    },
 }
 
 /// Where the texels of a brush come from, read only when its texture is not on the device yet.
@@ -176,6 +192,7 @@ pub struct BrushTextureSource {
 enum TextureOrigin {
     Gradient(Arc<[(f32, [f32; 4])]>),
     Image(Arc<SharedBitmapImpl>),
+    Content(Scene3DBrushContent),
 }
 
 /// A handle that keeps the address of a bitmap from being reused while a texture made of it is
@@ -212,19 +229,40 @@ impl BrushTextureSource {
     /// What keeps the key unique while a texture of it is kept.
     pub fn identity(&self) -> BrushTextureIdentity {
         match &self.origin {
-            TextureOrigin::Gradient(_) => BrushTextureIdentity::none(),
+            TextureOrigin::Gradient(_) | TextureOrigin::Content(_) => BrushTextureIdentity::none(),
             TextureOrigin::Image(bitmap) => BrushTextureIdentity(Some(Arc::downgrade(bitmap))),
         }
     }
 
     /// The texels: the lookup texture of a gradient (straight colours), or the pixels of a bitmap
     /// (premultiplied). `None` for a bitmap whose pixels cannot be read (no CPU pixels, or a
-    /// format other than 8-bit RGBA or BGRA).
+    /// format other than 8-bit RGBA or BGRA), and for the content of a visual or drawing brush,
+    /// which a 2D renderer renders ([`content`](Self::content)).
     pub fn texels(&self) -> Option<BrushTexels> {
         match &self.origin {
             TextureOrigin::Gradient(stops) => Some(gradient_texels(stops)),
             TextureOrigin::Image(bitmap) => bitmap_texels(&**bitmap),
+            TextureOrigin::Content(_) => None,
         }
+    }
+
+    /// The content of a visual or drawing brush this texture is the offscreen render of.
+    pub fn content(&self) -> Option<&Scene3DBrushContent> {
+        match &self.origin {
+            TextureOrigin::Content(content) => Some(content),
+            _ => None,
+        }
+    }
+
+    /// The size in pixels of the offscreen render of the content of a visual or drawing brush at
+    /// `scale` pixels per unit of the content (the scale of the render of the viewport): its
+    /// bounds at that resolution, each side from 1 to [`MAX_CONTENT_SIDE`]. `None` for another
+    /// texture.
+    pub fn content_pixel_size(&self, scale: f64) -> Option<(u32, u32)> {
+        let rect = self.content()?.rect();
+        let scale = if scale.is_finite() && scale > 0.0 { scale } else { 1.0 };
+        let side = |length: f64| (length * scale - 1e-6).ceil().clamp(1.0, f64::from(MAX_CONTENT_SIDE)) as u32;
+        Some((side(rect.width), side(rect.height)))
     }
 }
 
@@ -308,6 +346,20 @@ impl MaterialBrush {
         let (to_brush_x, to_brush_y) = inverse_brush_rows(brush, texture_bounds);
         uniforms.to_brush_x = to_brush_x;
         uniforms.to_brush_y = to_brush_y;
+
+        if let (Some(content), Some(tile)) = (brush.scene_content(), brush.as_tile_brush()) {
+            // A visual or drawing brush: its content rendered offscreen over its bounds, sampled
+            // as an image of the size of those bounds.
+            let rect = content.rect();
+            if rect.width <= 0.0 || rect.height <= 0.0 {
+                uniforms.metadata = [kind::IMAGE, 0.0, 0.0, 1.0];
+                return MaterialBrush { shader: BrushShader::Image, uniforms, texture: None, unsampled: false };
+            }
+            image_uniforms(&mut uniforms, tile, rect.size(), texture_bounds);
+            let key = BrushTextureKey::Content { id: content.id(), generation: content.generation() };
+            let texture = BrushTextureSource { key, origin: TextureOrigin::Content(content.clone()) };
+            return MaterialBrush { shader: BrushShader::Image, uniforms, texture: Some(texture), unsampled: false };
+        }
 
         if let Some(gradient) = brush.as_gradient_brush() {
             let gradient_kind = if let Some(linear) = brush.as_linear_gradient_brush() {
@@ -431,13 +483,19 @@ pub fn texture_coordinate_bounds(mesh: &MeshData) -> Rect {
 }
 
 /// A key of the textures of the image brushes of `scene` (the identities and versions of their
-/// bitmaps, in order): an output kept for a snapshot is drawn again only while it is the same,
-/// since new pixels of a bitmap change no generation of the snapshot. 0 without image brushes.
+/// bitmaps, in order) and of its visual and drawing brushes (the identities and generations of
+/// their contents): an output kept for a snapshot is drawn again only while it is the same, since
+/// new pixels of a bitmap change no generation of the snapshot. 0 without such brushes.
 pub fn scene_texture_inputs(scene: &Scene3DSnapshot) -> u64 {
     let mut hasher: Option<DefaultHasher> = None;
     for model in &scene.models {
         for layer in model.front.iter().chain(&model.back) {
             let Some(brush) = &layer.brush else { continue };
+            if let Some(content) = brush.scene_content() {
+                let hasher = hasher.get_or_insert_with(DefaultHasher::new);
+                (content.id(), content.generation()).hash(hasher);
+                continue;
+            }
             let Some(image) = brush.as_image_brush() else { continue };
             let Some(bitmap) = image.source().and_then(|source| source.get_bitmap()) else { continue };
             let hasher = hasher.get_or_insert_with(DefaultHasher::new);

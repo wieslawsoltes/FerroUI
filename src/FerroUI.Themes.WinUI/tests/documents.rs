@@ -203,6 +203,7 @@ document_tests! {
     resources_rich_edit_box_themeresources => "/Resources/RichEditBox_themeresources.xaml";
     resources_list_box_themeresources => "/Resources/ListBox_themeresources.xaml";
     resources_list_view_item_themeresources => "/Resources/ListViewItem_themeresources.xaml";
+    resources_media_transport_controls_themeresources => "/Resources/MediaTransportControls_themeresources.xaml";
     resources_menu_bar_themeresources => "/Resources/MenuBar_themeresources.xaml";
     resources_menu_flyout_themeresources => "/Resources/MenuFlyout_themeresources.xaml";
     resources_navigation_back_button_themeresources => "/Resources/NavigationBackButton_themeresources.xaml";
