@@ -94,6 +94,12 @@ pub trait Animator: Sized + 'static {
         new_value: &Self::Value,
     ) -> Self::Value;
 
+    /// Resolve a specialized animator for the prepared keyframes. Animators
+    /// that dispatch by their key values use the same delegate for playback and sampling.
+    fn specialized_animator(&self) -> Option<Rc<dyn IAnimator>> {
+        None
+    }
+
     fn neutral_value(&self, control: &Animatable) -> Self::Value {
         let property = self.base().styled_property::<Self::Value>();
         control.get_base_value(property).unwrap_or_else(|| control.get_value(property))
@@ -429,6 +435,9 @@ impl<A: Animator> IAnimator for A {
             || (!property.is_attached() && !property.owner_type().is_assignable_from(control.get_type()))
         {
             return None;
+        }
+        if let Some(animator) = self.specialized_animator() {
+            return animator.sample_for_preview(control, positions);
         }
         let base = self.neutral_value(control);
         Some(positions.iter().map(|&position| {
