@@ -53,16 +53,12 @@ pub const COMPILE_BINDINGS_KEY: &str = "compile-bindings";
 /// `[package.metadata.ferroui]` (`compile-bindings = true` or `false`, #603); `None` when it says
 /// nothing. An error names the key when its value is not a boolean.
 pub fn compile_bindings_from_manifest(text: &str) -> Result<Option<bool>, String> {
-    let mut compile_bindings = None;
-    for (key, value) in manifest_table(text, MANIFEST_TABLE)? {
-        if key == COMPILE_BINDINGS_KEY {
-            match value {
-                TomlValue::Bool(value) => compile_bindings = Some(value),
-                _ => return Err(format!("[{MANIFEST_TABLE}] {COMPILE_BINDINGS_KEY} must be true or false")),
-            }
-        }
+    let manifest = parse_manifest(text)?;
+    match ferroui_table(&manifest)?.and_then(|table| table.get(COMPILE_BINDINGS_KEY)) {
+        None => Ok(None),
+        Some(toml::Value::Boolean(value)) => Ok(Some(*value)),
+        Some(_) => Err(format!("[{MANIFEST_TABLE}] {COMPILE_BINDINGS_KEY} must be true or false")),
     }
-    Ok(compile_bindings)
 }
 
 /// What the manifest of an application states about the trimming of its themes.
@@ -90,19 +86,23 @@ impl ThemeTrimming {
     /// the forms above.
     pub fn from_manifest(text: &str) -> Result<Self, String> {
         let mut trimming = ThemeTrimming::default();
-        for (key, value) in manifest_table(text, MANIFEST_TABLE)? {
-            match key.as_str() {
-                TRIMMING_KEY => match value {
-                    TomlValue::Bool(enabled) => trimming.enabled = enabled,
-                    _ => return Err(format!("[{MANIFEST_TABLE}] {TRIMMING_KEY} must be true or false")),
-                },
-                ROOTS_KEY => match value {
-                    TomlValue::String(text) if text == "all" => trimming.all = true,
-                    TomlValue::Array(names) => trimming.roots.extend(names),
-                    _ => return Err(format!("[{MANIFEST_TABLE}] {ROOTS_KEY} must be \"all\" or an array of names")),
-                },
-                _ => {}
+        let manifest = parse_manifest(text)?;
+        let Some(table) = ferroui_table(&manifest)? else { return Ok(trimming) };
+        match table.get(TRIMMING_KEY) {
+            None => {}
+            Some(toml::Value::Boolean(enabled)) => trimming.enabled = *enabled,
+            Some(_) => return Err(format!("[{MANIFEST_TABLE}] {TRIMMING_KEY} must be true or false")),
+        }
+        let roots_error = || format!("[{MANIFEST_TABLE}] {ROOTS_KEY} must be \"all\" or an array of names");
+        match table.get(ROOTS_KEY) {
+            None => {}
+            Some(toml::Value::String(text)) if text == "all" => trimming.all = true,
+            Some(toml::Value::Array(names)) => {
+                for name in names {
+                    trimming.roots.push(name.as_str().ok_or_else(roots_error)?.to_string());
+                }
             }
+            Some(_) => return Err(roots_error()),
         }
         Ok(trimming)
     }
@@ -710,6 +710,13 @@ pub fn unit_static_path(table_path: &str, index: u32) -> String {
     format!("{module}::THEME_UNIT_{index}")
 }
 
+/// The manifest `text` as TOML (#850): the `toml` crate, a dependency of this build crate only, so
+/// the parser runs in build scripts and is linked into no application. A manifest Cargo read is
+/// valid TOML; anything else is an error of the build.
+fn parse_manifest(text: &str) -> Result<toml::Table, String> {
+    text.parse::<toml::Table>().map_err(|error| format!("the manifest is not TOML: {}", error.message()))
+}
+
 /// The root files of the binaries of a package, relative to its directory, as Cargo finds them
 /// (#847): the `path` of every `[[bin]]` target (or, without one, `src/bin/<name>.rs`,
 /// `src/bin/<name>/main.rs` or `src/main.rs`), and, unless the package states `autobins = false`,
@@ -759,179 +766,36 @@ pub fn binary_roots(manifest_dir: &std::path::Path, manifest: &str) -> Vec<std::
 
 /// What the manifest `text` states of the binaries of its package: whether Cargo discovers them
 /// (`autobins`, true unless `[package]` says `autobins = false`) and the `name` and `path` of each
-/// `[[bin]]` table, in order.
+/// `[[bin]]` table, in order. The manifest is read as TOML ([`parse_manifest`]); a manifest that is
+/// not states nothing.
 fn binary_targets(text: &str) -> (bool, Vec<(String, Option<String>)>) {
-    #[derive(PartialEq)]
-    enum Section {
-        Package,
-        Bin,
-        Other,
-    }
-    let mut section = Section::Other;
-    let mut autobins = true;
-    let mut binaries: Vec<(String, Option<String>)> = Vec::new();
-    for line in text.lines() {
-        let line = without_comment(line).trim();
-        if line.starts_with('[') {
-            let header: String = line.chars().filter(|c| !c.is_whitespace()).collect();
-            section = match header.as_str() {
-                "[[bin]]" => {
-                    binaries.push((String::new(), None));
-                    Section::Bin
-                }
-                "[package]" => Section::Package,
-                _ => Section::Other,
-            };
-            continue;
-        }
-        let Some((key, value)) = line.split_once('=') else { continue };
-        let (key, value) = (key.trim(), value.trim());
-        match (&section, key) {
-            (Section::Package, "autobins") => autobins = value != "false",
-            (Section::Bin, "name" | "path") => {
-                let Some((value, _)) = string_value(value) else { continue };
-                if let Some(binary) = binaries.last_mut() {
-                    match key {
-                        "name" => binary.0 = value,
-                        _ => binary.1 = Some(value),
-                    }
-                }
-            }
-            _ => {}
-        }
-    }
-    (autobins, binaries)
+    let Ok(table) = parse_manifest(text) else { return (true, Vec::new()) };
+    let autobins = table.get("package").and_then(|package| package.get("autobins")).and_then(toml::Value::as_bool);
+    let binaries = table.get("bin").and_then(toml::Value::as_array).map_or_else(Vec::new, |binaries| {
+        binaries
+            .iter()
+            .map(|binary| {
+                let text = |key: &str| binary.get(key).and_then(toml::Value::as_str).map(str::to_string);
+                (text("name").unwrap_or_default(), text("path"))
+            })
+            .collect()
+    });
+    (autobins.unwrap_or(true), binaries)
 }
 
-/// A value of the manifest, of the forms the table of the opt-in has.
-#[derive(Clone, Debug, PartialEq, Eq)]
-enum TomlValue {
-    Bool(bool),
-    String(String),
-    Array(Vec<String>),
-    /// Any other value: a number, a date, an inline table, an array of other values.
-    Other,
-}
-
-/// The text of `line` before a comment (`#` outside a string).
-fn without_comment(line: &str) -> &str {
-    let mut in_string: Option<char> = None;
-    let mut escaped = false;
-    for (index, c) in line.char_indices() {
-        match in_string {
-            Some(quote) => {
-                if escaped {
-                    escaped = false;
-                } else if c == '\\' && quote == '"' {
-                    escaped = true;
-                } else if c == quote {
-                    in_string = None;
-                }
-            }
-            None if c == '"' || c == '\'' => in_string = Some(c),
-            None if c == '#' => return &line[..index],
-            None => {}
+/// The table `package.metadata.ferroui` of the manifest, in whatever form the manifest writes it (a
+/// header, dotted keys, an inline table); `None` when it has none. A value of that path that is
+/// not a table is an error that names it.
+fn ferroui_table(manifest: &toml::Table) -> Result<Option<&toml::Table>, String> {
+    let mut table = manifest;
+    for key in MANIFEST_TABLE.split('.') {
+        match table.get(key) {
+            None => return Ok(None),
+            Some(toml::Value::Table(inner)) => table = inner,
+            Some(_) => return Err(format!("`{MANIFEST_TABLE}` of the manifest must be a table")),
         }
     }
-    line
-}
-
-/// The strings of `text` (`"a"` or `'a'`), in order; `None` when `text` has anything else than
-/// strings, commas and white space between `[` and `]`.
-fn string_items(text: &str) -> Option<Vec<String>> {
-    let inner = text.trim().strip_prefix('[')?.strip_suffix(']')?;
-    let mut items = Vec::new();
-    let mut rest = inner.trim_start();
-    while !rest.is_empty() {
-        let (item, after) = string_value(rest)?;
-        items.push(item);
-        rest = after.trim_start();
-        match rest.strip_prefix(',') {
-            Some(after) => rest = after.trim_start(),
-            None if rest.is_empty() => {}
-            None => return None,
-        }
-    }
-    Some(items)
-}
-
-/// The string at the start of `text` and what follows it.
-fn string_value(text: &str) -> Option<(String, &str)> {
-    let quote = text.chars().next().filter(|c| *c == '"' || *c == '\'')?;
-    let mut value = String::new();
-    let mut escaped = false;
-    for (index, c) in text.char_indices().skip(1) {
-        if escaped {
-            value.push(match c {
-                'n' => '\n',
-                't' => '\t',
-                other => other,
-            });
-            escaped = false;
-        } else if c == '\\' && quote == '"' {
-            escaped = true;
-        } else if c == quote {
-            return Some((value, &text[index + c.len_utf8()..]));
-        } else {
-            value.push(c);
-        }
-    }
-    None
-}
-
-fn parse_value(text: &str) -> TomlValue {
-    let text = text.trim();
-    match text {
-        "true" => return TomlValue::Bool(true),
-        "false" => return TomlValue::Bool(false),
-        _ => {}
-    }
-    if text.starts_with('[') {
-        return string_items(text).map_or(TomlValue::Other, TomlValue::Array);
-    }
-    match string_value(text) {
-        Some((value, rest)) if rest.trim().is_empty() => TomlValue::String(value),
-        _ => TomlValue::Other,
-    }
-}
-
-/// The keys and values of the table `[name]` of the manifest `text`, in order. Only what the
-/// opt-in needs is read: `key = value` lines, an array may span lines. The names of the headers
-/// are compared without white space and quotes.
-fn manifest_table(text: &str, name: &str) -> Result<Vec<(String, TomlValue)>, String> {
-    let normalised = |header: &str| header.chars().filter(|c| !c.is_whitespace() && *c != '"' && *c != '\'').collect::<String>();
-    let mut entries = Vec::new();
-    let mut inside = false;
-    let mut lines = text.lines();
-    while let Some(line) = lines.next() {
-        let line = without_comment(line).trim();
-        if line.is_empty() {
-            continue;
-        }
-        if line.starts_with('[') {
-            let header = line.trim_start_matches('[').trim_end_matches(']');
-            inside = !line.starts_with("[[") && normalised(header) == name;
-            continue;
-        }
-        if !inside {
-            continue;
-        }
-        let Some((key, value)) = line.split_once('=') else { continue };
-        let key = normalised(key);
-        let mut value = value.trim().to_string();
-        // An array that continues on the next lines.
-        if value.starts_with('[') {
-            while value.matches('[').count() > value.matches(']').count() {
-                let Some(next) = lines.next() else {
-                    return Err(format!("[{name}] {key}: the array is not closed"));
-                };
-                value.push(' ');
-                value.push_str(without_comment(next).trim());
-            }
-        }
-        entries.push((key, parse_value(&value)));
-    }
-    Ok(entries)
+    Ok(Some(table))
 }
 
 #[cfg(test)]
