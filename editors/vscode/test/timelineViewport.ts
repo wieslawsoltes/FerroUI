@@ -1,7 +1,7 @@
 import { strict as assert } from 'node:assert';
 import { retainedCurveTrack } from '../webview/hostedCurves';
 import { CurveScale } from '../webview/timelineCurveScale';
-import { fitKeyTimes, fitTimeline, minimumTimelineSpan, panTimeline, timelinePercent, visibleTime, zoomTimeline } from '../webview/timelineViewport';
+import { fitKeyTimes, fitTimeline, minimumTimelineSpan, panTimeline, stepTimelineFrame, timelinePercent, visibleTime, zoomTimeline } from '../webview/timelineViewport';
 
 export function verifyTimelineViewport(): void {
     const full = fitTimeline(8);
@@ -22,6 +22,11 @@ export function verifyTimelineViewport(): void {
     assert.ok(selection.span < 1 && visibleTime(selection, 6.5) && visibleTime(selection, 7));
     assert.equal(fitKeyTimes(8, [0]).start, 0);
     assert.equal(fitKeyTimes(8, [8]).start, 8 - fitKeyTimes(8, [8]).span);
+    assert.equal(stepTimelineFrame(7 / 30, 1, 30, 2), 8 / 30);
+    assert.equal(stepTimelineFrame(.21, -1, 30, 2), 6 / 30);
+    assert.equal(stepTimelineFrame(.21, 1, 30, 2), 7 / 30);
+    assert.equal(stepTimelineFrame(.21, 10, 24, .24), .24);
+    assert.equal(stepTimelineFrame(.01, -10, 24, 2), 0);
     const scale = new CurveScale([{ time: 1, value: .9 }], [0, .8]);
     assert.ok(scale.percent(.9) < scale.percent(.8));
     assert.ok(scale.fromOffset(.8, 25) < .8);

@@ -18,7 +18,7 @@ mod xaml;
 pub mod native;
 
 pub use curve::{CurvePoint, CurveWindow};
-pub use easing::Easing;
+pub use easing::{keyframe_easing_presets, Easing, KeyframeEasingPreset};
 pub use interactions::{BehaviorAction, BehaviorModel, BehaviorTrigger};
 pub use keyframe_draft::{KeyframeDraftPreview, KeyframeEdit};
 pub use keyframe_edits::{KeyframeGroupEdit, KeyframeLocation};

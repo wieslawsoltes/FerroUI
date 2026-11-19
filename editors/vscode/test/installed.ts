@@ -15,12 +15,17 @@ export async function run(): Promise<void> {
     const extension = vscode.extensions.getExtension('FerroUI.ferroui');
     assert.ok(extension);
     assert.ok(isInside(process.env.FERROUI_TEST_INSTALLED_ROOT!, extension.extensionPath));
+    const { views, viewsContainers } = extension.packageJSON.contributes;
+    assert.ok(viewsContainers.panel.some(({ id }: { id: string }) => id === 'ferrouiTimeline'));
+    assert.ok(views.ferrouiTimeline.some(({ id }: { id: string }) => id === 'ferroui.timeline'));
+    assert.ok(!views.ferrouiWorkbench.some(({ id }: { id: string }) => id === 'ferroui.timeline'));
     const suffix = process.platform === 'win32' ? '.exe' : '';
     assert.equal(vscode.workspace.getConfiguration('ferroui.languageServer').get('path'), '');
     assert.equal(vscode.workspace.getConfiguration('ferroui.preview').get('path'), '');
     await Promise.all([
         ...['ferroui-xaml-lsp', 'ferroui-designer-preview'].map(name => access(path.join(extension.extensionPath, 'bin', name + suffix))),
         ...['timeline.js', 'designData.js', 'hosted.js'].map(name => access(path.join(extension.extensionPath, 'dist', name))),
+        access(path.join(extension.extensionPath, 'dist', 'icons', 'history.svg')),
         access(path.join(extension.extensionPath, 'media', 'keyframe-editor.css')),
     ]);
     const workspace = vscode.workspace.workspaceFolders![0];

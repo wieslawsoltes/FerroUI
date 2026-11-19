@@ -493,6 +493,13 @@
           "title": "FerroUI",
           "icon": "dist/icons/preview.svg"
         }
+      ],
+      "panel": [
+        {
+          "id": "ferrouiTimeline",
+          "title": "FerroUI Timeline",
+          "icon": "dist/icons/history.svg"
+        }
       ]
     },
     "views": {
@@ -563,14 +570,6 @@
         },
         {
           "type": "webview",
-          "id": "ferroui.timeline",
-          "name": "Timeline",
-          "icon": "dist/icons/preview.svg",
-          "contextualTitle": "FerroUI Timeline",
-          "visibility": "collapsed"
-        },
-        {
-          "type": "webview",
           "id": "ferroui.data",
           "name": "Data",
           "icon": "dist/icons/preview.svg",
@@ -583,6 +582,15 @@
           "icon": "dist/icons/library.svg",
           "contextualTitle": "FerroUI Component Library",
           "visibility": "collapsed"
+        }
+      ],
+      "ferrouiTimeline": [
+        {
+          "type": "webview",
+          "id": "ferroui.timeline",
+          "name": "Timeline",
+          "icon": "dist/icons/history.svg",
+          "contextualTitle": "FerroUI Timeline"
         }
       ]
     }

@@ -1,11 +1,28 @@
 body { block-size: 100vh; }
-.timeline { display: flex; flex-direction: column; block-size: 100%; padding: 7px 8px 10px; }
+.timeline { display: flex; flex-direction: column; block-size: 100%; padding: 4px 8px 7px; }
 #timeline-status { margin: 0 0 8px; color: var(--muted); overflow-wrap: anywhere; }
-.timeline-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
-.timeline-program-bar { display: flex; align-items: center; gap: 4px; flex: 1 0 100%; min-inline-size: 0; }
-#timeline-program { display: flex; flex-direction: column; min-block-size: 0; }
-#timeline-programs { flex: 1 1 90px; min-inline-size: 0; }
-#timeline-time, .timeline-ruler { color: var(--muted); font-variant-numeric: tabular-nums; }
+.timeline-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; flex: none; }
+.timeline-toolbar .tool { inline-size: 24px; block-size: 24px; min-block-size: 24px; }
+.timeline-program-bar { display: flex; align-items: center; gap: 4px; min-inline-size: 0; }
+#timeline-programs { inline-size: clamp(90px, 20vw, 184px); min-inline-size: 0; }
+.timeline-tools { flex-wrap: wrap; max-inline-size: 100%; }
+.timeline-tools:not(:has(> :not([hidden]))) { display: none; }
+#timeline-track-search { inline-size: 148px; }
+#timeline-filter[aria-expanded="true"] { background: var(--tool-active); }
+#timeline-filter-status { position: absolute; inset-block-start: 34px; inset-inline: 8px; color: var(--muted); }
+#timeline-program {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 6px;
+    min-block-size: 0;
+    margin-block-start: 5px;
+}
+#timeline-program .timeline-keyframe-editor { margin-block-start: 0; }
+#timeline-time, .timeline-time-editor, .timeline-ruler { color: var(--muted); font-variant-numeric: tabular-nums; }
+.timeline-time-editor { display: flex; align-items: center; gap: 3px; white-space: nowrap; }
+#timeline-time-input { inline-size: 7ch; text-align: end; }
+#timeline-time-input::-webkit-inner-spin-button { appearance: none; margin: 0; }
 #timeline-time { padding-inline: 5px 1px; white-space: nowrap; }
 .timeline-native-preview { margin-block-start: 5px; }
 #timeline-preview-note { margin: 3px 0; color: var(--muted); overflow-wrap: anywhere; }
@@ -29,29 +46,33 @@ body { block-size: 100vh; }
 }
 .timeline-grid {
     position: relative;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
     overflow: auto;
-    min-block-size: 75px;
+    min-block-size: 112px;
+    scroll-padding-block: 32px 22px;
     --track-label-width: clamp(46px, 28%, 160px);
     --lane-gap: 7px;
     --lane-inset: 11px;
     --ruler-start: calc(var(--track-label-width) + var(--lane-gap) + var(--lane-inset));
-    margin-block-start: 8px;
     border: 1px solid var(--line);
     border-radius: 5px;
     background: var(--vscode-editor-background);
 }
 .timeline-axis, .timeline-pan {
+    flex: none;
     position: sticky;
-    background: var(--vscode-editor-background);
+    background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
     z-index: 3;
 }
-.timeline-axis { inset-block-start: 0; }
+.timeline-axis { inset-block-start: 0; border-block-end: 1px solid var(--line); }
 #timeline-seek {
     appearance: none;
     display: block;
     direction: ltr;
     inline-size: calc(100% - var(--ruler-start) - var(--lane-inset) + 10px);
-    min-block-size: 21px;
+    min-block-size: 31px;
     margin: 0;
     margin-inline-start: calc(var(--ruler-start) - 5px);
     padding: 0;
@@ -59,17 +80,15 @@ body { block-size: 100vh; }
     background: transparent;
 }
 #timeline-seek::-webkit-slider-runnable-track {
-    block-size: 2px;
-    border-radius: 2px;
-    background: var(--vscode-editorWidget-border, var(--line));
+    block-size: 10px;
 }
 #timeline-seek::-webkit-slider-thumb {
     appearance: none;
     inline-size: 10px;
     block-size: 10px;
-    margin-block-start: -4px;
     border: 1px solid var(--vscode-button-foreground);
-    border-radius: 50%;
+    border-radius: 2px;
+    transform: translateY(8px);
     background: var(--vscode-button-background);
 }
 #timeline-seek:disabled::-webkit-slider-thumb {
@@ -78,7 +97,7 @@ body { block-size: 100vh; }
 .timeline-scrub {
     overflow: clip;
     margin-inline: calc(var(--ruler-start) - 5px) calc(var(--lane-inset) - 5px);
-    padding-block: 2px;
+    background: linear-gradient(var(--line), var(--line)) center calc(100% - 7px) / calc(100% - 10px) 1px no-repeat;
 }
 .timeline-scrub #timeline-seek {
     inline-size: calc((100% - 10px) * var(--timeline-scale, 1) + 10px);
@@ -112,45 +131,66 @@ body { block-size: 100vh; }
     background: var(--vscode-descriptionForeground, var(--muted));
 }
 .timeline-ruler {
-    position: relative;
-    min-block-size: 19px;
-    margin-inline: var(--ruler-start) var(--lane-inset);
+    position: absolute;
+    inset-block-start: 2px;
+    inset-inline: var(--ruler-start) var(--lane-inset);
     font-size: .86em;
+    pointer-events: none;
 }
 .timeline-ruler span { position: absolute; transform: translateX(-50%); }
-#timeline-tracks { list-style: none; padding: 0; margin: 0; }
+#timeline-tracks {
+    position: relative;
+    flex: 1 0 auto;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+#timeline-tracks::before, #timeline-tracks::after {
+    position: absolute;
+    content: '';
+    inset-block: 0;
+    inset-inline: var(--ruler-start) var(--lane-inset);
+    pointer-events: none;
+}
+#timeline-tracks::before {
+    background: repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 25%);
+    border-inline-end: 1px solid var(--line);
+}
+#timeline-tracks::after {
+    /* Include the width of the stroke so 100% aligns with the last ruler tick. */
+    inset-inline-end: calc(var(--lane-inset) - 1px);
+    background: linear-gradient(var(--focus), var(--focus)) var(--timeline-position, 0%) 0 / 1px 100% no-repeat;
+}
+.timeline-grid[data-playhead-outside] #timeline-tracks::after { display: none; }
 .timeline-track {
+    position: relative;
     display: grid;
     grid-template-columns: var(--track-label-width) minmax(0, 1fr);
     align-items: center;
     gap: var(--lane-gap);
-    border-block-start: 1px solid var(--line);
+    border-block-end: 1px solid var(--line);
 }
 .timeline-track-name {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
     min-inline-size: 0;
-    padding-inline-start: 6px;
+    padding-inline-start: 8px;
+}
+.timeline-track-label, .timeline-track-target {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
 }
+.timeline-track-target { color: var(--muted); font-size: .83em; }
+.timeline-track:has([data-curve]) .timeline-track-name { flex-direction: column; gap: 2px; }
 .timeline-lane {
     position: relative;
-    block-size: 29px;
+    block-size: 26px;
     margin-inline: var(--lane-inset);
-    background: linear-gradient(var(--line), var(--line)) center / 100% 1px no-repeat,
-        repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 25%);
-    border-inline-end: 1px solid var(--line);
+    background: linear-gradient(var(--line), var(--line)) center / 100% 1px no-repeat;
     user-select: none;
 }
-.timeline-lane::after {
-    position: absolute;
-    content: '';
-    left: var(--timeline-position, 0%);
-    inset-block: 0;
-    border-left: 1px solid var(--focus);
-    pointer-events: none;
-}
-.timeline-grid[data-playhead-outside] .timeline-lane::after { display: none; }
 .timeline-marquee {
     position: absolute;
     z-index: 2;
@@ -159,20 +199,29 @@ body { block-size: 100vh; }
     background: color-mix(in srgb, var(--focus) 20%, transparent);
     pointer-events: none;
 }
-.timeline-track:has([data-curve]) .timeline-track-name {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    justify-content: center;
-    align-self: stretch;
-}
-.timeline-track-label { overflow: hidden; text-overflow: ellipsis; }
 .timeline-lane[data-curve] {
-    block-size: 97px;
-    background: repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 25%),
-        repeating-linear-gradient(0deg, var(--line) 0 1px, transparent 1px 25%);
+    block-size: 78px;
+    background: repeating-linear-gradient(0deg, var(--line) 0 1px, transparent 1px 25%);
+}
+@media (min-width: 780px) {
+    #timeline-program {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: minmax(112px, 1fr);
+    }
+    #timeline-program:has(> .timeline-keyframe-editor:not([hidden])) {
+        grid-template-columns: minmax(0, 1fr) clamp(224px, 26%, 304px);
+    }
+    #timeline-program .timeline-keyframe-editor { min-inline-size: 0; overflow: auto; }
+}
+@media (max-width: 630px) {
+    .timeline-program-bar { flex: 1 0 100%; }
+    #timeline-programs { flex: 1 1 90px; }
+    .timeline-tools { padding-inline-start: 0; border: 0; }
+}
+@media (max-width: 330px) {
+    .timeline-program-bar { flex-wrap: wrap; }
 }
 @media (max-width: 220px) {
-    .timeline-program-bar { flex-wrap: wrap; }
     .timeline-ruler span:nth-child(even) { display: none; }
 }

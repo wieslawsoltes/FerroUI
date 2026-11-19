@@ -27,6 +27,10 @@ export class TimelineViewportView {
 
     fitKeys(times: readonly number[]): void { this.apply(fitKeyTimes(this.range.duration, times)); }
 
+    reveal(time: number): void {
+        if (!visibleTime(this.range, time)) this.apply(panTimeline(this.range, time - this.range.span / 2));
+    }
+
     follow(duration: number | undefined, reset: boolean): boolean {
         this.controls.hidden = duration === undefined;
         if (duration === undefined || (!reset && this.range.duration === duration)) return false;

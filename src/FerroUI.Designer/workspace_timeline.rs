@@ -8,7 +8,8 @@ use ferroui_base::media::{FontWeight, TextTrimming};
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::{ColumnDefinitions, ComboBox, PathIcon, ToolTip};
 use ferroui_designer_animation::{
-    Keyframe, KeyframeGroupEdit as KeyframeEdit, KeyframeLocation as SelectedKey, Track,
+    keyframe_easing_presets, Keyframe, KeyframeGroupEdit as KeyframeEdit,
+    KeyframeLocation as SelectedKey, Track,
 };
 
 const TRACK_HEADER: f64 = 240.0;
@@ -996,22 +997,15 @@ impl DesignerWorkspace {
         preset.classes().add("designer-field");
         preset.set_min_height(26.0);
         preset.set_font_size(11.0);
-        let presets = [
-            ("Linear", "LinearEasing"),
-            ("Ease in", "0.42,0,1,1"),
-            ("Ease out", "0,0,0.58,1"),
-            ("Ease in-out", "0.42,0,0.58,1"),
-            ("Smooth", "0.25,0.1,0.25,1"),
-            ("Back", "0.34,1.56,0.64,1"),
-            ("Custom", ""),
-        ];
-        for (label, _) in presets {
-            preset.items().add(Some(Rc::new(label.to_owned())));
+        let presets = keyframe_easing_presets();
+        for option in presets {
+            preset.items().add(Some(Rc::new(option.label.to_owned())));
         }
+        preset.items().add(Some(Rc::new("Custom".to_owned())));
         let index = presets
             .iter()
-            .position(|(_, value)| Easing::parse(value).ok().as_ref() == Some(&key.easing))
-            .unwrap_or(presets.len() - 1);
+            .position(|option| Easing::parse(option.value).ok().as_ref() == Some(&key.easing))
+            .unwrap_or(presets.len());
         preset.set_selected_index(index as i32);
         AutomationProperties::set_name(&preset, Some("Incoming keyframe easing preset"));
         ToolTip::set_tip(
@@ -1025,12 +1019,10 @@ impl DesignerWorkspace {
         let weak_curve = curve.downgrade();
         preset.selection_changed(move |_, _| {
             if let (Some(preset), Some(curve)) = (weak_preset.upgrade(), weak_curve.upgrade()) {
-                if let Some((_, value)) = presets.get(preset.selected_index().max(0) as usize) {
-                    if !value.is_empty() {
-                        curve.set_text(Some(value));
-                    } else {
-                        curve.focus();
-                    }
+                if let Some(option) = presets.get(preset.selected_index().max(0) as usize) {
+                    curve.set_text(Some(option.value));
+                } else {
+                    curve.focus();
                 }
             }
         });

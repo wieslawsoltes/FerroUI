@@ -366,7 +366,13 @@ function keyframeEditorHtml(seek = true): string {
             <div class="keyframe-fields">
                 <label>Time (s) <input id="keyframe-time" type="number" min="0" step="any" required></label>
                 <label>Value <input id="keyframe-value" autocomplete="off" spellcheck="false" required></label>
-                <label class="keyframe-easing">Incoming easing <input id="keyframe-easing" autocomplete="off" spellcheck="false" required></label>
+                <div class="keyframe-easing">
+                    <label for="keyframe-easing">Incoming easing</label>
+                    <div class="keyframe-easing-controls">
+                        <input id="keyframe-easing" autocomplete="off" spellcheck="false" required>
+                        <select id="keyframe-easing-preset" aria-label="Incoming easing preset" title="Incoming easing preset"></select>
+                    </div>
+                </div>
             </div>
             <div class="keyframe-curve-row">
                 <canvas id="keyframe-curve" width="180" height="58" role="img" aria-label="Incoming easing curve"></canvas>
@@ -392,36 +398,51 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
         </div>
         <input id="transition-seek" type="range" min="0" value="0" step="any" aria-label="State transition playhead">
     </section>
-    <div id="timeline-toolbar" class="timeline-toolbar" aria-label="Animation controls" hidden>
+    <div id="timeline-toolbar" class="timeline-toolbar" role="group" aria-label="Animation controls" hidden>
         <div class="timeline-program-bar">
             <div id="timeline-transport" class="tool-group" role="group" aria-label="Playback" hidden>
+                ${tool('timeline-previous-key', 'chevron-left', 'Previous keyframe ([)', 'hidden')}
                 ${tool('timeline-play', 'play', 'Play animation')}
                 ${tool('timeline-stop', 'debug-stop', 'Stop animation')}
                 ${tool('timeline-play-all', 'run-all', 'Play all animations', 'aria-pressed="false"')}
+                ${tool('timeline-next-key', 'chevron-right', 'Next keyframe (])', 'hidden')}
             </div>
             <select id="timeline-programs" aria-label="Animation program"></select>
+            <form id="timeline-time-editor" class="timeline-time-editor" novalidate hidden>
+                <input id="timeline-time-input" type="number" min="0" step="any" inputmode="decimal"
+                    aria-label="Playhead time in seconds" title="Enter a playhead time in seconds, then press Enter">
+                <span id="timeline-duration"></span>
+            </form>
             <output id="timeline-time" for="timeline-seek" aria-live="off" hidden></output>
             ${tool('timeline-actions', 'ellipsis', 'More Animation Actions', 'disabled')}
         </div>
-        <select id="timeline-snap" aria-label="Keyframe snapping" title="Keyframe snapping" hidden>
-            <option value="0">Sec</option>
-            <option value="24">24 fps</option>
-            <option value="30">30 fps</option>
-            <option value="60">60 fps</option>
-        </select>
-        ${tool('timeline-record-mode', 'circle-filled', 'Record property changes', 'aria-pressed="false" hidden disabled')}
-        ${tool('timeline-record', 'add', 'Add keyframe at playhead', 'hidden disabled')}
-        ${tool('timeline-key-actions', 'list-selection', 'Keyframe Selection Actions', 'hidden disabled')}
-        ${tool('timeline-curves', 'graph-line', 'Animation curves', 'aria-pressed="false" aria-controls="timeline-tracks" hidden')}
-        ${tool('timeline-fit-keys', 'selection', 'Fit selected keyframes', 'hidden disabled')}
-        <div id="timeline-zoom" class="tool-group" role="group" aria-label="Timeline zoom" hidden>
-            ${tool('timeline-zoom-out', 'zoom-out', 'Zoom out on timeline (−)')}
-            ${tool('timeline-fit', 'screen-normal', 'Fit timeline (0)')}
-            ${tool('timeline-zoom-in', 'zoom-in', 'Zoom in on timeline (+)')}
+        <div class="tool-group toolbar-divider timeline-tools" role="group" aria-label="Keyframe controls">
+            <select id="timeline-snap" aria-label="Keyframe snapping" title="Keyframe snapping" hidden>
+                <option value="0">Sec</option>
+                <option value="24">24 fps</option>
+                <option value="30">30 fps</option>
+                <option value="60">60 fps</option>
+            </select>
+            ${tool('timeline-record-mode', 'circle-filled', 'Record property changes', 'aria-pressed="false" hidden disabled')}
+            ${tool('timeline-record', 'add', 'Add keyframe at playhead', 'hidden disabled')}
+            ${tool('timeline-key-actions', 'list-selection', 'Keyframe Selection Actions', 'hidden disabled')}
         </div>
-        ${tool('timeline-preview-targets', 'target', 'Choose preview targets', 'hidden')}
-        ${tool('timeline-source', 'go-to-file', 'Reveal animation in source', 'hidden')}
-        ${tool('timeline-source-issues', 'warning', 'Open unsupported Rust animations in source', 'hidden')}
+        <div class="tool-group toolbar-divider timeline-tools" role="group" aria-label="Track view controls">
+            ${tool('timeline-curves', 'graph-line', 'Animation curves', 'aria-pressed="false" aria-controls="timeline-tracks" hidden')}
+            ${tool('timeline-fit-keys', 'selection', 'Fit selected keyframes', 'hidden disabled')}
+            <div id="timeline-zoom" class="tool-group" role="group" aria-label="Timeline zoom" hidden>
+                ${tool('timeline-zoom-out', 'zoom-out', 'Zoom out on timeline (−)')}
+                ${tool('timeline-fit', 'screen-normal', 'Fit timeline (0)')}
+                ${tool('timeline-zoom-in', 'zoom-in', 'Zoom in on timeline (+)')}
+            </div>
+            ${tool('timeline-filter', 'filter', 'Filter tracks', 'aria-expanded="false" aria-controls="timeline-track-search" hidden')}
+            <input id="timeline-track-search" type="search" aria-label="Filter tracks by property or target" placeholder="Filter tracks" hidden>
+        </div>
+        <div class="tool-group toolbar-divider timeline-tools" role="group" aria-label="Animation preview and source">
+            ${tool('timeline-preview-targets', 'target', 'Choose preview targets', 'hidden')}
+            ${tool('timeline-source', 'go-to-file', 'Reveal animation in source', 'hidden')}
+            ${tool('timeline-source-issues', 'warning', 'Open unsupported Rust animations in source', 'hidden')}
+        </div>
     </div>
     <section id="timeline-native-source" class="timeline-native-preview" hidden>
         <p id="timeline-preview-note" class="dock-message"></p>
@@ -432,12 +453,13 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
             <div class="timeline-axis">
                 <div class="timeline-scrub">
                     <input id="timeline-seek" type="range" min="0" value="0" step="any" aria-label="Animation playhead"
-                        aria-keyshortcuts="[ ] + - 0 PageUp PageDown"
-                        title="[ and ] seek to nearby keyframes. + and − zoom. Page Up and Page Down pan.">
+                        aria-keyshortcuts="[ ] , . Home End + - 0 PageUp PageDown"
+                        title="[ and ] jump to keys. , and . step frames. Home and End jump to the bounds. + and − zoom.">
                 </div>
                 <div id="timeline-ruler" class="timeline-ruler" aria-hidden="true"></div>
             </div>
             <ol id="timeline-tracks" aria-label="Property tracks"></ol>
+            <p id="timeline-filter-status" role="status" hidden>No matching tracks.</p>
             <div id="timeline-pan-row" class="timeline-pan" hidden>
                 <input id="timeline-pan" type="range" min="0" value="0" step="any" aria-label="Pan visible timeline">
             </div>

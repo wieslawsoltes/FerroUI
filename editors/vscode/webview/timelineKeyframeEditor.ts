@@ -1,5 +1,6 @@
 import type { FrameTarget } from '../src/protocol';
 import type { AppliedKeyframe, KeyframeDraft, TimelineKeyframe, TimelineKeyframeRequest, TimelineKeyframeResponse } from '../src/timelineProtocol';
+import easingPresets from '../../../src/FerroUI.Designer.Animation/keyframe-easing-presets.json';
 import { element } from './dom';
 import { drawEasingCurve } from './easingCurve';
 
@@ -19,6 +20,7 @@ export class TimelineKeyframeEditor {
     private readonly time = element<HTMLInputElement>('keyframe-time');
     private readonly value = element<HTMLInputElement>('keyframe-value');
     private readonly easing = element<HTMLInputElement>('keyframe-easing');
+    private readonly preset = element<HTMLSelectElement>('keyframe-easing-preset');
     private readonly curve = element<HTMLCanvasElement>('keyframe-curve');
     private readonly apply = element<HTMLButtonElement>('keyframe-apply');
     private readonly seekButton = element<HTMLButtonElement>('keyframe-seek');
@@ -37,6 +39,12 @@ export class TimelineKeyframeEditor {
         private readonly seek: ((frame: FrameTarget, program: number, time: number) => void) | undefined,
         private readonly applied: ((keyframe: AppliedKeyframe, property: string) => void) | undefined,
         private readonly restoreFocus: () => void) {
+        this.preset.replaceChildren(...easingPresets.map(({ label, value }) => new Option(label, value)), new Option('Custom', ''));
+        this.preset.addEventListener('input', () => {
+            if (this.preset.value) this.easing.value = this.preset.value;
+            else this.easing.focus();
+        });
+        this.easing.addEventListener('input', () => this.syncPreset());
         this.fields.addEventListener('input', () => this.inspect());
         element('timeline-keyframe-form').addEventListener('submit', event => {
             event.preventDefault();
@@ -132,6 +140,7 @@ export class TimelineKeyframeEditor {
         this.time.value = String(time);
         this.value.value = String(value);
         this.easing.value = key.keyframe.easing_text;
+        this.syncPreset();
         this.applyFocus = this.value;
         this.submit(this.draft(key, time), frame, true);
         this.enable();
@@ -143,6 +152,12 @@ export class TimelineKeyframeEditor {
         this.value.step = 'any';
         this.value.value = keyframe.value_text;
         this.easing.value = keyframe.easing_text;
+        this.syncPreset();
+    }
+
+    private syncPreset(): void {
+        const value = this.easing.value.trim().replace(/\s*,\s*/g, ',') || 'LinearEasing';
+        this.preset.value = easingPresets.some(preset => preset.value === value) ? value : '';
     }
 
     private inspect(): void {

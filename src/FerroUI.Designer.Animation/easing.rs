@@ -1,5 +1,21 @@
 use crate::{require, AnimationError, Result};
 use serde::{Deserialize, Serialize};
+use std::sync::OnceLock;
+
+#[derive(Deserialize)]
+pub struct KeyframeEasingPreset {
+    pub label: &'static str,
+    pub value: &'static str,
+}
+
+/// Presets shared by the Studio and VS Code keyframe editors.
+pub fn keyframe_easing_presets() -> &'static [KeyframeEasingPreset] {
+    static PRESETS: OnceLock<Vec<KeyframeEasingPreset>> = OnceLock::new();
+    PRESETS.get_or_init(|| {
+        serde_json::from_str(include_str!("keyframe-easing-presets.json"))
+            .expect("keyframe easing presets are bundled with the animation crate")
+    })
+}
 
 /// Cubic Bezier easings invert the X polynomial; evaluating Y at progress directly is incorrect.
 /// Named curves are FerroUI's animation-wide easing names. Per-keyframe easing must be Linear or

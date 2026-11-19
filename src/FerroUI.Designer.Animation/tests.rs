@@ -1,4 +1,16 @@
 use super::*;
+
+#[test]
+fn keyframe_presets_use_native_incoming_easing() {
+    let presets = keyframe_easing_presets();
+    assert!(!presets.is_empty());
+    for preset in presets {
+        let easing = Easing::parse(preset.value).unwrap();
+        assert!(matches!(easing, Easing::Linear | Easing::CubicBezier { .. }));
+        assert!(easing.preview_samples().unwrap().iter().all(|v| v.is_finite()));
+    }
+}
+
 fn numeric() -> Timeline {
     let mut timeline = Timeline::new(2.0).unwrap();
     timeline

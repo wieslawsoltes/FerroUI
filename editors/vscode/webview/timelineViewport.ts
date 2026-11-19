@@ -44,6 +44,13 @@ export function visibleTime(view: TimelineViewport, time: number): boolean {
     return percent >= -1e-8 && percent <= 100 + 1e-8;
 }
 
+export function stepTimelineFrame(time: number, frames: number, rate: number, duration: number): number {
+    const frame = time * rate;
+    const exact = Math.abs(frame - Math.round(frame)) < 1e-8 ? Math.round(frame) : frame;
+    const origin = frames < 0 ? Math.ceil(exact) : Math.floor(exact);
+    return clamp((origin + frames) / rate, 0, duration);
+}
+
 export function clamp(value: number, minimum: number, maximum: number): number {
     return Math.min(maximum, Math.max(minimum, value));
 }
