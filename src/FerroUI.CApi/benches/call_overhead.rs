@@ -21,8 +21,8 @@
 //!   the one that changes (`ferro_frame_reuse`);
 //! - signals shared through memory (section 14): a store and an apply against the setter call
 //!   (the Rust column of these lines is the ABI call they replace), 100 stores and one apply
-//!   against 100 setter calls, a load of a watched value against a getter, and events into the
-//!   event ring, drained, against a callback per event.
+//!   against 100 setter calls, a load of a watched value against a getter, and a value bound in
+//!   a frame of 100 elements changed by a store and an apply against the frame written again.
 //!
 //! `cargo bench -p ferroui-capi --no-default-features --bench call_overhead`. No window and no
 //! renderer: the thread is the UI thread through `ferro_init`. Each case alternates between two
@@ -377,7 +377,7 @@ fn main() {
 
     // Signals shared through memory (section 14): a store and its dirty bit, applied, against the
     // setter call it replaces; 100 of them with one apply against 100 setter calls; a load of a
-    // watched value against a getter call; events into the ring against a callback.
+    // watched value against a getter call.
     let table = ferro_signal_table(1024);
     assert!(!table.is_null());
     // SAFETY: the table lives for the process.
@@ -458,26 +458,49 @@ fn main() {
         report("signal: ferro_signal_get_f64", getter, call);
         assert_eq!(ferro_signal_free(slot), FERRO_OK);
     }
-    if selected("event ring") {
-        let ring = ferro_event_ring(1024);
-        assert!(!ring.is_null());
-        // SAFETY: the ring lives for the process.
-        let ring = unsafe { &*ring };
-        // SAFETY: the counters of the ring are atomics of the library.
-        let (head, tail) = unsafe { (&*(ring.head as *const AtomicU64), &*(ring.tail as *const AtomicU64)) };
-        let ringed_handle = ferro_create(button_type);
-        let ringed = object_of(ringed_handle).and_then(|object| object.cast::<Button>()).expect("a button");
-        assert!(ferro_subscribe_ring(ringed_handle, click, 1) > 0);
-        let mut taken = 0u64;
-        let callback = measure(|_| abi_button.raise_event(&RoutedEventArgs::with_event(Button::click_event())));
-        let into_ring = measure(|_| {
-            ringed.raise_event(&RoutedEventArgs::with_event(Button::click_event()));
-            // Drained as a language drains it: the records up to the head, then the tail.
-            let end = head.load(Ordering::Acquire);
-            taken += end - tail.load(Ordering::Relaxed);
-            tail.store(end, Ordering::Release);
+    if selected("signal: a frame") {
+        // A frame of 100 text blocks whose first one has its FontSize bound to a slot: a change of
+        // that one value is a store and an apply, against the frame described again.
+        let labels: Vec<String> = (0..100).map(|n| format!("Item {n}")).collect();
+        let slot = ferro_signal_new(FERRO_SIGNAL_F64);
+        assert_eq!(ferro_signal_set_f64(slot, 12.0), FERRO_OK);
+        ferro_frame_begin();
+        ferro_frame_open(panel_type, 0);
+        for (n, label) in labels.iter().enumerate() {
+            ferro_frame_open(text_type, n as i64 + 1);
+            // SAFETY: a pointer and the length of a Rust string.
+            unsafe { ferro_frame_str(text, label.as_ptr().cast(), label.len() as i64) };
+            if n == 0 {
+                ferro_frame_bind(font_size, slot);
+            }
+            ferro_frame_close();
+        }
+        ferro_frame_close();
+        assert_eq!(ferro_frame_commit(root), FERRO_OK);
+        let frames = measure_n(ITERATIONS / 100, |i| {
+            write_texts(text_type, panel_type, text, &labels, &texts, i, true);
+            ferro_frame_commit(root);
         });
-        report("event ring: a raise of Click and its drain", callback, into_ring);
-        assert!(taken > 0);
+        assert_eq!(ferro_frame_clear(root), FERRO_OK);
+        ferro_frame_begin();
+        ferro_frame_open(panel_type, 0);
+        for (n, label) in labels.iter().enumerate() {
+            ferro_frame_open(text_type, n as i64 + 1);
+            // SAFETY: a pointer and the length of a Rust string.
+            unsafe { ferro_frame_str(text, label.as_ptr().cast(), label.len() as i64) };
+            if n == 0 {
+                ferro_frame_bind(font_size, slot);
+            }
+            ferro_frame_close();
+        }
+        ferro_frame_close();
+        assert_eq!(ferro_frame_commit(root), FERRO_OK);
+        let bound = measure(|i| {
+            store(slot, size(i));
+            ferro_signals_apply();
+        });
+        report("signal: a frame of 100, one bound value changes", frames, bound);
+        assert_eq!(ferro_frame_clear(root), FERRO_OK);
+        assert_eq!(ferro_signal_free(slot), FERRO_OK);
     }
 }
