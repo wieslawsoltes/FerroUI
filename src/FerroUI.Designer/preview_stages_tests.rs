@@ -810,7 +810,7 @@ fn deferred_include_discovery_uses_the_graphs_accepted_source_stamps_and_snapsho
             });
             let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(
                 builder, &provider,
-            );
+            ).unwrap();
             let template = DataTemplate::new();
             template.set_content(Some(content));
             template

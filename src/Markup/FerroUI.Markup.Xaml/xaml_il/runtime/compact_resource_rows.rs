@@ -57,10 +57,10 @@ mod indexed {
             let context = self.contexts.borrow()[index].as_ref().expect("an indexed row has a compact capture").clone();
             match context.try_build(provider, |provider| self.rows[index].build(provider, self.document)) {
                 Ok(value) => Ok(value),
-                Err(error) => match crate::xaml_error_scope::report(error) {
-                    Ok(()) => Err(DeferredContentFailed),
-                    Err(error) => crate::xaml_error_scope::throw(error),
-                },
+                Err(error) => {
+                    crate::xaml_error_scope::report_or_raise(error);
+                    Err(DeferredContentFailed)
+                }
             }
         }
 
