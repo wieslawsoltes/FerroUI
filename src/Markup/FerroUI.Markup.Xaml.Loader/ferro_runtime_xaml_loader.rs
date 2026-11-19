@@ -95,7 +95,9 @@ impl FerroRuntimeXamlLoader {
         document: RuntimeXamlLoaderDocument,
         configuration: Option<RuntimeXamlLoaderConfiguration>,
     ) -> Result<BoxedValue, XamlLoadError> {
-        ferroui_markup_xaml::xaml_error_scope::with_xaml_errors(|| Self::load_document_in_scope(document, configuration))
+        ferroui_markup_xaml::xaml_error_scope::with_xaml_errors(|| {
+            Self::load_document_in_scope(document, configuration)
+        })
     }
 
     fn load_document_in_scope(
@@ -145,7 +147,8 @@ impl FerroRuntimeXamlLoader {
         configuration: Option<RuntimeXamlLoaderConfiguration>,
     ) -> Result<Vec<Option<BoxedValue>>, XamlLoadError> {
         ferroui_markup_xaml::xaml_error_scope::with_xaml_errors(|| {
-            FerroXamlIlRuntimeCompiler::load_group(documents, &configuration.unwrap_or_default()).map_err(load_exception)
+            FerroXamlIlRuntimeCompiler::load_group(documents, &configuration.unwrap_or_default())
+                .map_err(load_exception)
         })
     }
 
