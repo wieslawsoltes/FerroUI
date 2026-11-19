@@ -16,7 +16,17 @@ export interface EditResult {
     timelineKeys?: KeyframeLocation[];
     retainedSelection?: Range[];
 }
-export interface PreviewFinding { node: number; control: string; name: string | null; code: string; message: string }
+export interface PreviewFinding {
+    node: number;
+    control: string;
+    name: string | null;
+    code: string;
+    message: string;
+    summary?: string;
+    property?: string;
+    range?: Range | null;
+    overflow?: { boundary: string; left: number; top: number; right: number; bottom: number };
+}
 export type Language = 'xaml' | 'rust';
 
 export interface Source {

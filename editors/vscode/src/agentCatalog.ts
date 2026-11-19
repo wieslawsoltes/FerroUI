@@ -229,7 +229,7 @@ export const agentCatalog = {
         { ...session, stage: node, expected_epoch: integer(0) }, ['session', 'stage', 'expected_epoch']),
     designer_stage_hotspots: tool('List source-anchored prototype hotspot choices from a ready stage. Pass its current ID and epoch.',
         { ...session, stage: node, expected_epoch: integer(0) }, ['session', 'stage', 'expected_epoch']),
-    designer_stage_checks: tool('Read source-linked accessibility and clipping findings from the current native stage.',
+    designer_stage_checks: tool('Read source-linked layout overflow, ineffective values and accessibility findings from the current native stage.',
         { ...session, stage: node, expected_epoch: integer(0) }, ['session', 'stage', 'expected_epoch']),
     designer_stage_states: tool('Read authored state groups and owner anchors for the current stage configuration. Use designer_stage_change to apply choices or toggle design data.',
         { ...session, stage: node, expected_epoch: integer(0) }, ['session', 'stage', 'expected_epoch']),

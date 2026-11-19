@@ -72,10 +72,12 @@ export class DiagnosticsView implements vscode.TreeDataProvider<Item>, vscode.Di
         }
         if (item.type === 'preview') {
             const { finding } = item;
-            const row = new vscode.TreeItem(finding.message);
-            row.id = `preview:${item.panel.session}:${finding.node}:${finding.code}`;
-            row.description = finding.name ? `${finding.control} · ${finding.name}` : finding.control;
-            row.iconPath = new vscode.ThemeIcon('warning');
+            const row = new vscode.TreeItem(finding.summary ?? finding.message);
+            row.id = `preview:${item.panel.session}:${finding.node}:${finding.code}:${finding.property ?? ''}`;
+            row.description = finding.name ?? finding.control;
+            row.tooltip = `${row.description}\n${finding.message}`;
+            row.accessibilityInformation = { label: `${row.description}. ${finding.message}` };
+            row.iconPath = new vscode.ThemeIcon(finding.code === 'ineffectiveLayoutValue' ? 'info' : 'warning');
             row.command = { command: 'ferroui.diagnostics.openSource', title: 'Reveal Source', arguments: [item] };
             return row;
         }
@@ -109,7 +111,11 @@ export class DiagnosticsView implements vscode.TreeDataProvider<Item>, vscode.Di
         if (item?.type === 'preview') {
             const { panel, token } = item;
             const node = panel.nodes.find(node => node.id === item.finding.node);
-            if (node && this.designer.activeDesign === panel) await panel.revealSource({ session: panel.session, token }, node.nameRange);
+            if (node && this.designer.activeDesign === panel) {
+                const frame = { session: panel.session, token };
+                await panel.select({ ...frame, node: node.id });
+                await panel.revealSource(frame, item.finding.range ?? node.nameRange);
+            }
         } else if (item?.type === 'reload') {
             const uri = vscode.Uri.file(item.record.file);
             if (await isWorkspaceFile(uri)) await vscode.commands.executeCommand('vscode.open', uri);

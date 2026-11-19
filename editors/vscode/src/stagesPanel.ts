@@ -314,7 +314,10 @@ class StageSession {
                 const { uri, findings } = await this.checks(message.id, message.epoch, AbortSignal.timeout(15_000));
                 if (!findings.length) { void vscode.window.showInformationMessage('No findings in this stage.'); return; }
                 const issue = await choose('Stage Preview Checks', findings.map(finding => ({
-                    label: finding.message, description: finding.name ?? finding.control, range: finding.range,
+                    label: `$(${finding.code === 'ineffectiveLayoutValue' ? 'info' : 'warning'}) ${finding.summary ?? finding.message}`,
+                    description: finding.name ?? finding.control,
+                    detail: finding.summary ? finding.message : undefined,
+                    range: finding.range,
                 })));
                 if (issue?.range) await this.revealStageSource(uri, issue.range, generation);
                 return;

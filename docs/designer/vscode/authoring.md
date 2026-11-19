@@ -136,4 +136,15 @@ Run **Import Design Tokens** on a DTCG JSON file or **Export Design Tokens** on 
 
 ## Diagnose a design-time issue
 
-Use **Preview Checks** in the designer actions menu to find measured rectangular clipping, missing accessible names, and supported text contrast issues. Open a result to reveal its authored source. Use the Visual and Logical Outline to locate runtime-only elements. For a binding that depends on the application model or a custom loader, use a registered app fixture and inspect the running UI. [Test and inspect the app](runtime.md)
+Open a XAML or RSX design and expand **Preview Checks** under **FerroUI → Diagnostics**. Select a finding to highlight the control in Design and reveal the control or its exact authored value in source. In **Stages**, use the check icon on a card to inspect that stage's current size, theme, and state.
+
+| Finding | What to look at |
+| --- | --- |
+| **Overflow** | A control extends beyond its layout slot or parent bounds. The report gives the boundary and distance on each affected edge in logical pixels. |
+| **Clipping** | The preview viewport or a rectangular clip cuts through a control. Scrollable axes are evaluated with the scroller in mind. |
+| **Ineffective layout value** | Read which constraint or parent controls the result. Examples include competing Canvas anchors, out-of-range Grid tracks or spans, a filled DockPanel child, and Width or Height constrained by a size limit. |
+| **Accessibility** | Check missing accessible names and text contrast on supported backgrounds. |
+
+Try [LayoutDiagnostics.xaml](../../../editors/vscode/test/fixtures/LayoutDiagnostics.xaml). The **OverhangingCard** extends 40 logical pixels past its Canvas. Change the Canvas width or the card position and watch the finding disappear. Open the **CapacityCard** finding for **Canvas.Right** to see the anchor that loses precedence. Checks use the accepted frame and leave the source buffer and undo history intact. [Preview Checks through MCP](reference.md#read-preview-checks-with-mcp)
+
+Use the Visual and Logical Outline to locate runtime-only elements. For a binding that depends on the application model or a custom loader, use a registered app fixture and inspect the running UI. [Test and inspect the app](runtime.md)

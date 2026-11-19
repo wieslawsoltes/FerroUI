@@ -46,7 +46,7 @@ Managed debug builds record compiled RSX locations. Set `FERROUI_EDITOR_SOURCE=1
 
 ## Read diagnostics and save history
 
-Open **FerroUI → Diagnostics** to inspect the managed save outcome, acknowledgement time, binding errors, and native layout and scene counters. Open a binding result with a recorded source location to inspect its original declaration. **Show Hot Reload Output** includes build and process messages. Use **Preview Checks** in a design or stage for native accessible name, measured clipping, and supported contrast checks against the accepted preview.
+Open **FerroUI → Diagnostics** to inspect the managed save outcome, acknowledgement time, binding errors, and native layout and scene counters. Open a binding result with a recorded source location to inspect its original declaration. **Show Hot Reload Output** includes build and process messages. Use **Preview Checks** in a design or stage for measured overflow, clipping, ineffective layout values, and accessibility in the accepted preview. [Read Preview Checks](authoring.md#diagnose-a-design-time-issue)
 
 ## Run a native UI scenario
 
