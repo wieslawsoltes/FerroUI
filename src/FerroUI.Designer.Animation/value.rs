@@ -77,6 +77,20 @@ pub enum AnimationValue {
     Discrete(String),
 }
 impl AnimationValue {
+    pub fn from_argb8([a, r, g, b]: [u8; 4]) -> Self {
+        Self::Color {
+            a: f64::from(a) / 255.0,
+            r: f64::from(r) / 255.0,
+            g: f64::from(g) / 255.0,
+            b: f64::from(b) / 255.0,
+        }
+    }
+
+    pub fn argb8(&self) -> Option<[u8; 4]> {
+        let Self::Color { a, r, g, b } = *self else { return None };
+        Some([a, r, g, b].map(channel))
+    }
+
     pub fn kind(&self) -> ValueKind {
         match self {
             Self::Number(_) => ValueKind::Number,
@@ -405,12 +419,7 @@ impl AnimationValue {
                 };
                 let bits = u32::from_str_radix(&expanded, 16)
                     .map_err(|_| AnimationError("Invalid hexadecimal color".into()))?;
-                Self::Color {
-                    a: ((bits >> 24) & 255) as f64 / 255.0,
-                    r: ((bits >> 16) & 255) as f64 / 255.0,
-                    g: ((bits >> 8) & 255) as f64 / 255.0,
-                    b: (bits & 255) as f64 / 255.0,
-                }
+                Self::from_argb8(bits.to_be_bytes())
             }
             ValueKind::Point => {
                 let v = values()?;

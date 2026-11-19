@@ -62,6 +62,11 @@ impl HostedKeyframes {
                     .iter()
                     .filter(|track| {
                         track.keys.first().is_some_and(|key| {
+                            if key.value_kind == "Color"
+                                && options.property_kinds.get(&track.property) != Some(&ValueKind::Color)
+                            {
+                                return false;
+                            }
                             key.value_kind == "Number"
                                 || (curve_channels
                                     && !CurveChannel::for_authored_kind(&key.value_kind).is_empty())

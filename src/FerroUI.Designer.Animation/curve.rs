@@ -66,6 +66,26 @@ mod tests {
     use crate::{AnimationValue::Number, Easing, Timeline};
 
     #[test]
+    fn color_curves_project_the_interpolated_rgba_components() {
+        use crate::{AnimationValue, CurveChannel, ValueKind};
+        let mut timeline = Timeline::new(2.0).unwrap();
+        for (time, argb) in [(0.0, [255, 0, 0, 0]), (2.0, [128, 255, 128, 64])] {
+            timeline.record(12, "Background", time, AnimationValue::from_argb8(argb)).unwrap();
+        }
+        let compiled = timeline.compile().unwrap();
+        let window = CurveWindow { start: 0.0, end: 2.0 };
+        let channels = [CurveChannel::Red, CurveChannel::Green, CurveChannel::Blue, CurveChannel::Alpha];
+        assert_eq!(CurveChannel::for_authored_kind("Color"), channels);
+        assert_eq!(CurveChannel::for_kind(ValueKind::Color), channels);
+        let midpoint = channels.map(|channel| {
+            let points = compiled.curve(12, "Background", channel, window).unwrap();
+            points.iter().find(|point| point.time == 1.0).unwrap().value
+        });
+        assert_eq!(midpoint.map(|sample| (sample * 255.0).round_ties_even() as u8), [188, 92, 44, 192]);
+        assert!(compiled.scalar_curve(12, "Background", window).is_err());
+    }
+
+    #[test]
     fn geometry_components_follow_the_authored_value_order() {
         use crate::{AnimationValue::CornerRadius, CurveChannel, ValueKind};
         let mut timeline = Timeline::new(2.0).unwrap();

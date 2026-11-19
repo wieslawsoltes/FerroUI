@@ -1202,7 +1202,7 @@ impl DesignerSession {
         if let Some(kind) = self.animation_kind_for_target(target, property) {
             if kind == ValueKind::Color {
                 if let Some(color) = ferroui_base::media::Color::try_parse(value) {
-                    return Ok(color_value(color));
+                    return Ok(color.into());
                 }
             }
             return AnimationValue::parse(value, kind).map_err(|error| error.to_string());
@@ -1399,21 +1399,13 @@ pub(crate) fn animation_value(property: &str, value: &str) -> Result<AnimationVa
             | "SelectionBrush"
     ) {
         if let Some(color) = ferroui_base::media::Color::try_parse(value) {
-            return Ok(color_value(color));
+            return Ok(color.into());
         }
     }
 
     ferroui_designer_animation::state_value(property, value).map_err(|error| error.to_string())
 }
 
-fn color_value(color: ferroui_base::media::Color) -> AnimationValue {
-    AnimationValue::Color {
-        a: color.a as f64 / 255.0,
-        r: color.r as f64 / 255.0,
-        g: color.g as f64 / 255.0,
-        b: color.b as f64 / 255.0,
-    }
-}
 
 fn subtree_nodes(document: &Document, root: NodeId) -> Vec<NodeId> {
     let mut pending = vec![root];

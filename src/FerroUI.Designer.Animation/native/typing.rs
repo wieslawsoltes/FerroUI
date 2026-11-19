@@ -1,14 +1,15 @@
 use super::curve::matches_property;
 use crate::{AnimationProgram, ImportOptions, ValueKind};
 use ferroui_base::animation::Animation;
-use ferroui_base::media::Color;
+use ferroui_base::media::{Color, IBrush};
 use ferroui_base::{
     CornerRadius, FerroProperty, Point, Rect, RelativePoint, RelativeScalar, Size, Thickness,
     Vector,
 };
 use ferroui_designer_core::Document;
 use std::any::TypeId;
-use std::collections::BTreeSet;
+use std::collections::BTreeMap;
+use std::rc::Rc;
 
 /// Resolve authored setter names against the app's loaded animation, where the
 /// property's registered Rust type is authoritative for portable key values.
@@ -30,26 +31,56 @@ pub fn native_keyframe_options(
                 .collect::<Vec<_>>()
         })
         .collect::<Vec<_>>();
-    let setters = document
+    let mut setters = BTreeMap::<_, Vec<_>>::new();
+    for setter in document
         .ast()
         .subtree(program.id)
         .filter(|node| node.local_name() == "Setter")
-        .filter_map(|node| node.attribute("Property"))
-        .collect::<BTreeSet<_>>();
+    {
+        if let Some(name) = setter.attribute("Property") {
+            setters
+                .entry(name)
+                .or_default()
+                .push(setter.attribute("Value"));
+        }
+    }
     let mut options = ImportOptions::default();
-    for name in setters {
+    for (name, values) in setters {
         let mut matches = properties
             .iter()
             .copied()
             .filter(|property| matches_property(property, name));
-        if let Some(property) = matches
+        let Some(property) = matches
             .next()
             .filter(|first| matches.all(|other| std::ptr::eq(*first, other)))
+        else {
+            continue;
+        };
+        let mut kind = value_kind(property);
+        if kind == Some(ValueKind::Color)
+            || property.property_type() == TypeId::of::<Option<Rc<dyn IBrush>>>()
         {
-            if let Some(kind) = value_kind(property) {
-                options.property_kinds.insert(name.into(), kind);
-                continue;
+            // A brush's registered type can also hold gradients and other payloads.
+            // Only a complete track of static solid colors has RGBA components.
+            let colors = values
+                .into_iter()
+                .map(|text| {
+                    let text = text?;
+                    let text = text.strip_prefix("{}").unwrap_or(text);
+                    Some((text, Color::try_parse(text)?))
+                })
+                .collect::<Option<Vec<_>>>();
+            if let Some(colors) = colors {
+                kind = Some(ValueKind::Color);
+                options.literal_values.extend(
+                    colors
+                        .into_iter()
+                        .map(|(text, color)| ((name.to_owned(), text.to_owned()), color.into())),
+                );
             }
+        }
+        if let Some(kind) = kind {
+            options.property_kinds.insert(name.into(), kind);
         }
     }
     options

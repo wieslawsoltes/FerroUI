@@ -20,6 +20,10 @@ pub enum CurveChannel {
     TopRight,
     BottomRight,
     BottomLeft,
+    Red,
+    Green,
+    Blue,
+    Alpha,
 }
 
 impl FromStr for CurveChannel {
@@ -42,6 +46,7 @@ impl CurveChannel {
         use CurveChannel::*;
         match kind {
             ValueKind::Number => &[Value],
+            ValueKind::Color => &[Red, Green, Blue, Alpha],
             ValueKind::Point | ValueKind::Vector => &[X, Y],
             ValueKind::Size => &[Width, Height],
             ValueKind::Rect => &[X, Y, Width, Height],
@@ -66,13 +71,25 @@ impl CurveChannel {
             Self::TopRight => "Top right",
             Self::BottomRight => "Bottom right",
             Self::BottomLeft => "Bottom left",
+            Self::Red => "Red",
+            Self::Green => "Green",
+            Self::Blue => "Blue",
+            Self::Alpha => "Alpha",
         }
+    }
+
+    pub fn is_color(self) -> bool {
+        matches!(self, Self::Red | Self::Green | Self::Blue | Self::Alpha)
     }
 
     pub(crate) fn project(self, value: &AnimationValue) -> Option<f64> {
         use AnimationValue as V;
         let sample = match (self, value) {
             (Self::Value, V::Number(n)) => *n,
+            (Self::Red, V::Color { r, .. }) => *r,
+            (Self::Green, V::Color { g, .. }) => *g,
+            (Self::Blue, V::Color { b, .. }) => *b,
+            (Self::Alpha, V::Color { a, .. }) => *a,
             (Self::X, V::Point { x, .. } | V::Vector { x, .. } | V::Rect { x, .. }) => *x,
             (Self::Y, V::Point { y, .. } | V::Vector { y, .. } | V::Rect { y, .. }) => *y,
             (Self::Width, V::Size { width, .. } | V::Rect { width, .. }) => *width,

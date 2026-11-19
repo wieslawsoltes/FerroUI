@@ -496,7 +496,18 @@ fn native_named_brush_colors_are_interpolated_as_colors_and_preview_stays_source
         session.timeline().tracks[0].keyframes[0].value,
         AnimationValue::Color { .. }
     ));
+    let program = &session.animation_programs()[0];
+    let target = session.document().ast().find_name("A").unwrap();
+    let window = ferroui_designer_animation::CurveWindow { start: 0.0, end: 2.0 };
+    let curve = session.animation_curve_channel(program.id, target, "Background", ferroui_designer_animation::CurveChannel::Red, window).unwrap();
+    assert_eq!((curve[0].value, curve.last().unwrap().value), (1.0, 0.0));
+    let red = curve.iter().find(|point| point.time == 1.0).unwrap().value;
     session.seek(1.0).unwrap();
+    let button = session.preview.visual(target).unwrap().cast::<ferroui_controls::Button>().unwrap();
+    let brush = button.background().unwrap();
+    let color = brush.as_solid_color_brush().unwrap().color();
+    assert_eq!(color.r, (red * 255.0).round_ties_even() as u8);
+    assert_eq!((color.r, color.b), (188, 188));
     assert_eq!(session.document().source(), source);
 }
 

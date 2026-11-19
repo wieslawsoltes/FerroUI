@@ -1,29 +1,50 @@
+use super::color::ColorSource;
 use super::{syntax, FloatSource};
 use ferroui_designer_animation::{AnimationValue, ValueKind};
 use ferroui_designer_core::TextPatch;
 use syn::Expr;
 
 #[derive(Clone, Copy)]
-pub(crate) struct ValueShape(ValueKind);
+pub(crate) struct ValueShape {
+    kind: ValueKind,
+    brush: bool,
+}
 
 #[derive(Clone, Debug)]
 pub(crate) struct ValueSource {
     pub(crate) value: AnimationValue,
-    parts: Vec<FloatSource>,
+    source: ValueSyntax,
+}
+
+#[derive(Clone, Debug)]
+enum ValueSyntax {
+    Numbers(Vec<FloatSource>),
+    Color(ColorSource),
 }
 
 impl ValueShape {
-    pub(crate) const NUMBER: Self = Self(ValueKind::Number);
-    pub(crate) const CORNER_RADIUS: Self = Self(ValueKind::CornerRadius);
+    pub(crate) const NUMBER: Self = Self::typed(ValueKind::Number);
+    pub(crate) const CORNER_RADIUS: Self = Self::typed(ValueKind::CornerRadius);
+    pub(super) const SOLID_BRUSH: Self = Self {
+        kind: ValueKind::Color,
+        brush: true,
+    };
 
-    pub(crate) fn kind(self) -> ValueKind { self.0 }
+    const fn typed(kind: ValueKind) -> Self {
+        Self { kind, brush: false }
+    }
+
+    pub(crate) fn kind(self) -> ValueKind {
+        self.kind
+    }
 
     pub(crate) fn from_type(path: &str) -> Option<Self> {
         if path == "f64" {
             return Some(Self::NUMBER);
         }
         let name = path.strip_prefix("::ferroui_base::")?;
-        Some(Self(match name {
+        Some(Self::typed(match name {
+            "media::Color" | "media::color::Color" => ValueKind::Color,
             "CornerRadius" | "corner_radius::CornerRadius" => ValueKind::CornerRadius,
             "Thickness" | "thickness::Thickness" => ValueKind::Thickness,
             "Point" | "point::Point" => ValueKind::Point,
@@ -35,7 +56,14 @@ impl ValueShape {
     }
 
     pub(crate) fn read(self, expression: &Expr) -> Option<ValueSource> {
-        let kind = self.0;
+        let kind = self.kind;
+        if kind == ValueKind::Color {
+            let (value, source) = ColorSource::read(expression, self.brush)?;
+            return Some(ValueSource {
+                value,
+                source: ValueSyntax::Color(source),
+            });
+        }
         let parts = if kind == ValueKind::Number
             || matches!(kind, ValueKind::CornerRadius | ValueKind::Thickness)
                 && !matches!(expression, Expr::Call(_))
@@ -49,7 +77,7 @@ impl ValueShape {
             let (owner, method) = path.rsplit_once("::")?;
             let (crate_name, type_name) = owner.split_once("::")?;
             if crate_name != "ferroui_base"
-                || Self::from_type(&format!("::{owner}"))?.0 != kind
+                || Self::from_type(&format!("::{owner}"))?.kind != kind
                 || type_name.contains("::")
             {
                 return None;
@@ -80,7 +108,7 @@ impl ValueShape {
             .join(",");
         Some(ValueSource {
             value: AnimationValue::parse(&text, kind).ok()?,
-            parts,
+            source: ValueSyntax::Numbers(parts),
         })
     }
 }
@@ -89,8 +117,12 @@ impl ValueSource {
     pub(crate) fn plan(&self, text: &str, patches: &mut Vec<TextPatch>) -> Result<(), String> {
         let kind = self.value.kind();
         let value = AnimationValue::parse(text, kind).map_err(|error| error.to_string())?;
+        let parts = match &self.source {
+            ValueSyntax::Color(source) => return source.plan(&self.value, &value, patches),
+            ValueSyntax::Numbers(parts) => parts,
+        };
         let values = numeric_parts(&value)?;
-        let components = match (self.parts.len(), values.as_slice()) {
+        let components = match (parts.len(), values.as_slice()) {
             (1, [a, b, c, d]) if a == b && a == c && a == d => vec![*a],
             (2, [a, b, c, d]) if kind == ValueKind::CornerRadius && a == b && c == d => {
                 vec![*a, *c]
@@ -100,10 +132,10 @@ impl ValueSource {
                 return Err(
                     "Enter values that fit the Rust constructor, or change its shape in source"
                         .into(),
-                )
+                );
             }
         };
-        for (part, value) in self.parts.iter().zip(components) {
+        for (part, value) in parts.iter().zip(components) {
             part.plan(value, patches);
         }
         Ok(())
@@ -114,6 +146,11 @@ pub(crate) fn rust_literal(value: &AnimationValue) -> Result<String, String> {
     if let AnimationValue::Number(number) = value {
         return Ok(format!("{number:?}"));
     }
+    if let Some([a, r, g, b]) = value.argb8() {
+        return Ok(format!(
+            "::ferroui_base::media::Color::from_argb({a}, {r}, {g}, {b})"
+        ));
+    }
     let name = match value.kind() {
         ValueKind::CornerRadius => "CornerRadius",
         ValueKind::Thickness => "Thickness",
@@ -123,11 +160,19 @@ pub(crate) fn rust_literal(value: &AnimationValue) -> Result<String, String> {
         ValueKind::Rect => "Rect",
         _ => return Err("The key value has no typed Rust builder representation".into()),
     };
-    let args = numeric_parts(value)?.iter().map(|part| format!("{part:?}")).collect::<Vec<_>>().join(", ");
+    let args = numeric_parts(value)?
+        .iter()
+        .map(|part| format!("{part:?}"))
+        .collect::<Vec<_>>()
+        .join(", ");
     Ok(format!("::ferroui_base::{name}::new({args})"))
 }
 
 fn numeric_parts(value: &AnimationValue) -> Result<Vec<f64>, String> {
-    value.to_xaml().split(',').map(str::parse::<f64>).collect::<Result<_, _>>()
+    value
+        .to_xaml()
+        .split(',')
+        .map(str::parse::<f64>)
+        .collect::<Result<_, _>>()
         .map_err(|_| "The key value has no numeric Rust representation".into())
 }
