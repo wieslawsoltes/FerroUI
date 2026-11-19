@@ -108,6 +108,8 @@ members = [
     "src/FerroUI.View",
     "src/FerroUI.View.Macros",
     "src/FerroUI.View.Syntax",
+    # The universal C ABI (#636, docs/c-abi.md).
+    "src/FerroUI.CApi",
     "src/FerroUI.Controls.ColorPicker",
     "src/FerroUI.Controls.Charts",
     "src/FerroUI.LiveCharts",

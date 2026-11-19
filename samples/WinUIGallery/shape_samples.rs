@@ -80,8 +80,14 @@ fn wire_geometry(root: &Ref<Control>) {
         }
     })
     .detach();
-    // The copy buttons put the resource's name on the clipboard of the window, and announce it.
-    for (name, text) in COPIED_RESOURCES {
+    wire_copy_buttons(root, &COPIED_RESOURCES);
+}
+
+/// The gallery's copy buttons of a design page (`CopyButton`): each named button puts its text on
+/// the clipboard of the window and announces it in the page's `CopyOutput`, a polite live region
+/// (the button's `UIHelper.AnnounceActionForAccessibility`).
+pub(crate) fn wire_copy_buttons(root: &Ref<Control>, buttons: &[(&str, &'static str)]) {
+    for &(name, text) in buttons {
         let weak_root = root.downgrade();
         root.get_control::<Button>(name).click(move |_, _| {
             let Some(root) = weak_root.upgrade() else {
