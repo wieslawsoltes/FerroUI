@@ -4,9 +4,10 @@ import { setTimeout as delay } from 'node:timers/promises';
 import * as vscode from 'vscode';
 import type { BuiltProject } from './builtProjects';
 import { type CargoSelection, type CargoTarget, discoverCargoTargets, selectCargoTarget } from './cargoTarget';
-import type { HostedAnimationAction, HostedAnimationFrame, HostedAnimationRequest, HostedAnimationState, HostedClipDraft, HostedCurveQuery, HostedKeyframeDraft, HostedSourcePlan, HostedStateDraft } from './hostedAnimationProtocol';
+import type { HostedAnimationAction, HostedAnimationFrame, HostedAnimationRequest, HostedAnimationState, HostedClipDraft, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedSourcePlan, HostedStateDraft } from './hostedAnimationProtocol';
 import { HostedAnimations } from './hostedAnimations';
 import { chooseHostedKeyframe } from './hostedKeyframes';
+import { prepareHostedKeyframeGroup } from './hostedKeyframeGroup';
 import type { FromHosted, HostedAnimationSample, HostedFixtureCatalog, HostedFrame, ToHosted } from './hostedProtocol';
 import { applyHostedSourcePatches } from './hostedSourceEdit';
 import { editHostedStateRoute } from './hostedStateRoutes';
@@ -15,6 +16,7 @@ import { errorMessage, type Language } from './protocol';
 import { buildCargo, launchArtifact, type ProjectMetadata, type ReloadProcess } from './reloadProcess';
 import { chooseAnimationIssue } from './studioPrograms';
 import { asRange, languageOf, sourceOf } from './textDocument';
+import { writeTimelineClipboard } from './timelineKeyframeClipboard';
 import { hostedHtml, webviewOptions } from './view';
 import { isInside, isWorkspaceFile } from './workspacePaths';
 
@@ -123,6 +125,13 @@ export class HostedDesign implements vscode.Disposable {
         const session = this.session(uri);
         if (session.generation !== generation) throw new Error('Read the current application preview generation.');
         return session.keyframe(frame, draft, apply, signal);
+    }
+
+    keyframeGroup(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame, draft: HostedKeyframeGroupDraft,
+        apply: boolean, signal: AbortSignal) {
+        const session = this.session(uri);
+        if (session.generation !== generation) throw new Error('Read the current application preview generation.');
+        return session.keyframeGroup(frame, draft, apply, signal);
     }
 
     stateRoute(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame, draft: HostedStateDraft,
@@ -422,8 +431,17 @@ class HostedSession {
         return this.editAnimationSource(frame, apply, signal, client => client.planHostedClipPlacement(frame, draft));
     }
 
-    private async editAnimationSource(frame: HostedAnimationFrame, apply: boolean, signal: AbortSignal,
-        planEdit: (client: NativePreview) => Promise<HostedSourcePlan>) {
+    keyframeGroup(frame: HostedAnimationFrame, draft: HostedKeyframeGroupDraft, apply: boolean, signal: AbortSignal) {
+        return this.editAnimationSource(frame, apply, signal, client => {
+            if (!this.animations.state.keyframeSelection || !this.animations.program(frame, draft.program).authoring) {
+                throw new Error('Choose an editable animation in an app with keyframe selection support.');
+            }
+            return client.planHostedKeyframeGroup(frame, draft);
+        });
+    }
+
+    private async editAnimationSource<T extends HostedSourcePlan>(frame: HostedAnimationFrame, apply: boolean, signal: AbortSignal,
+        planEdit: (client: NativePreview) => Promise<T>) {
         await this.polling;
         signal.throwIfAborted();
         const client = this.client;
@@ -532,6 +550,10 @@ class HostedSession {
             } catch (error) { this.post({ ...reply, error: errorMessage(error) }); }
             return;
         }
+        if (message.type === 'keyframeGroup') {
+            await this.receiveKeyframeGroup(message);
+            return;
+        }
         if (message.type === 'chooseKeyframe') {
             try { await this.openKeyframe(message.frame, message.program); }
             catch (error) { this.report(errorMessage(error), Boolean(this.currentFrame)); }
@@ -565,6 +587,28 @@ class HostedSession {
         if (!('revision' in message) || message.revision !== this.revision || message.sequence !== this.frame?.sequence) return;
         try { await this.client?.hostedInput(message); }
         catch (error) { this.report(errorMessage(error)); }
+    }
+
+    private async receiveKeyframeGroup(message: Extract<FromHosted, { type: 'keyframeGroup' }>): Promise<void> {
+        const { action, frame, request } = message;
+        const reply = { type: 'keyframeGroupReply' as const, frame, request };
+        const ensure = () => {
+            const current = this.currentFrame;
+            if (!current || current.revision !== frame.revision || current.sequence !== frame.sequence || this.animations.driving) {
+                throw new Error('The application preview changed while choosing a keyframe action.');
+            }
+        };
+        try {
+            ensure();
+            const program = this.animations.program(frame, action.program);
+            const command = await prepareHostedKeyframeGroup(action, program, this.animations.state.targets, ensure);
+            if (!command) { this.post(reply); return; }
+            const plan = await this.keyframeGroup(frame, { program: program.id, command }, true, AbortSignal.timeout(15_000));
+            if (plan.clipboard) await writeTimelineClipboard(plan.clipboard, action.keys.length);
+            this.post(plan.applied ? { ...reply, keys: plan.keys ?? [], version: plan.version } : reply);
+        } catch (error) {
+            this.post({ ...reply, error: errorMessage(error) });
+        }
     }
 
     private report(message: string, interactive = false): void {

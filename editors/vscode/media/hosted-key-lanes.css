@@ -1,0 +1,65 @@
+.hosted-key-lanes-toolbar { justify-content: flex-end; padding-block: 1px; }
+.hosted-key-lanes-toolbar > label { margin-inline-end: auto; }
+#hosted-key-time { inline-size: 66px; font-variant-numeric: tabular-nums; }
+#hosted-key-selection { font-variant-numeric: tabular-nums; color: var(--muted); }
+.hosted-key-grid {
+    --hosted-key-label: clamp(80px, 23%, 150px);
+    --hosted-key-pivot: 0%;
+    position: relative;
+    margin: 2px 8px 4px;
+    max-block-size: clamp(78px, 26vh, 190px);
+    overflow: auto;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--vscode-editor-background);
+}
+.hosted-key-row {
+    display: grid;
+    grid-template-columns: var(--hosted-key-label) minmax(0, 1fr);
+    padding: 0 12px 0 6px;
+    gap: 10px;
+    align-items: center;
+    min-block-size: 25px;
+    border-block-end: 1px solid var(--line);
+}
+.hosted-key-row.timeline-axis { position: sticky; inset-block-start: 0; z-index: 3; background: var(--vscode-editor-background); }
+.hosted-key-ruler, .hosted-key-row > .timeline-lane {
+    position: relative;
+    block-size: 24px;
+    background: repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 25%);
+    cursor: crosshair;
+    touch-action: none;
+}
+.hosted-key-ruler::after, .hosted-key-row > .timeline-lane::after {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    left: var(--hosted-key-pivot);
+    inline-size: 1px;
+    background: var(--vscode-charts-blue, var(--focus));
+    pointer-events: none;
+}
+.hosted-key-ruler span {
+    position: absolute;
+    inset-block-start: 3px;
+    transform: translateX(-50%);
+    color: var(--muted);
+    font-size: .8em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    pointer-events: none;
+}
+.hosted-key-ruler span:first-child { transform: translateX(2px); }
+.hosted-key-ruler span:last-child { transform: translateX(-100%); }
+.hosted-key-row > .timeline-lane > button { cursor: ew-resize; }
+#hosted-key-tracks { margin: 0; padding: 0; list-style: none; }
+#hosted-key-tracks .hosted-key-row:last-child { border-block-end: 0; }
+.hosted-key-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hosted-key-grid .timeline-marquee {
+    position: absolute;
+    z-index: 2;
+    box-sizing: border-box;
+    border: 1px solid var(--focus);
+    background: color-mix(in srgb, var(--focus) 20%, transparent);
+    pointer-events: none;
+}

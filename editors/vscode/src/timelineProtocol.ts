@@ -5,6 +5,12 @@ export interface TimelineKeyframe { time: number; value_text: string; easing_tex
 export interface TimelineTrack { target: number; property: string; keyframes: TimelineKeyframe[]; curve_channels?: CurveChannel[] }
 export interface AnimationSourceIssue { range: Range; reason: string }
 export interface KeyframeLocation { target: number; property: string; time: number }
+export type KeyframeDestination = Pick<KeyframeLocation, 'target' | 'property'>;
+export interface KeyframeClipboard {
+    format: 'ferroui.keyframes.v1';
+    tracks: { property: string; keyframes: { time: number; value: { kind: string; value: unknown }; easing: unknown }[] }[];
+}
+export interface KeyframePaste { clipboard: KeyframeClipboard; destinations: KeyframeDestination[]; time: number; reverse: boolean }
 export type KeyframeGroupEdit = { action: 'move_keyframes' | 'duplicate_keyframes'; offset: number }
     | { action: 'scale_keyframes'; pivot: number; factor: number }
     | { action: 'remove_keyframes' };

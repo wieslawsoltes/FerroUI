@@ -20,6 +20,21 @@ const hostedKeyframe = { ...frame, expected_generation: integer(1), expected_seq
         required: ['program', 'target', 'property', 'time', 'value', 'easing'],
         properties: { program: node, target: node, property: text, previous: time, time, value: text, easing: text } } };
 const hostedFrameRequired = ['session', 'expected_generation', 'expected_revision', 'expected_sequence', 'arguments'];
+const keyframeTrack = { target: node, property: { type: 'string', maxLength: 512 } };
+const hostedKeyframeGroup = { ...frame, expected_generation: integer(1), expected_sequence: integer(1),
+    arguments: { type: 'object', additionalProperties: false, required: ['program', 'command'],
+        properties: { program: node, command: { type: 'object', additionalProperties: false, required: ['action'], properties: {
+            action: choice('copy_keyframes', 'move_keyframes', 'duplicate_keyframes', 'scale_keyframes', 'remove_keyframes', 'mirror_keyframes', 'paste_keyframes'),
+            keyframes: { type: 'array', maxItems: 4096, items: { type: 'object', additionalProperties: false,
+                required: ['target', 'property', 'time'], properties: { ...keyframeTrack, time } } },
+            offset: { type: 'number' }, pivot: time, factor: { type: 'number', minimum: 0 },
+            paste: { type: 'object', additionalProperties: false, required: ['clipboard', 'destinations', 'time'], properties: {
+                clipboard: object, time, reverse: truth,
+                destinations: { type: 'array', maxItems: 4096, items: { type: 'object', additionalProperties: false,
+                    required: ['target', 'property'], properties: keyframeTrack } },
+            } },
+        } } } },
+};
 const hostedState = { ...frame, expected_generation: integer(1), expected_sequence: integer(1),
     arguments: { type: 'object', additionalProperties: false, required: ['program', 'duration', 'easing'],
         properties: { program: node, duration: time, easing: text } } };
@@ -81,6 +96,10 @@ export const agentCatalog = {
         hostedKeyframe, hostedFrameRequired),
     designer_hosted_keyframe: tool('Apply a validated animation keyframe as one undoable edit to the current source buffer. For XAML, omit previous to insert a key. For Rust, select an existing mapped key.',
         hostedKeyframe, hostedFrameRequired, true),
+    designer_hosted_keyframe_group_draft: tool('Plan a grouped keyframe edit using authored seconds and the current app frame. Copy returns portable clipboard JSON text. For paste, pass the parsed clipboard and one destination per copied track, in clipboard order.',
+        hostedKeyframeGroup, hostedFrameRequired),
+    designer_hosted_keyframe_group: tool('Apply a supported multi-key action as one undoable edit in the XAML or mapped Rust buffer. Use the current app generation, revision, sequence, and authored track IDs.',
+        hostedKeyframeGroup, hostedFrameRequired, true),
     designer_hosted_state_route_draft: tool('Validate a Rust state route duration in seconds and easing. Return checked source patches for the current application preview frame.',
         hostedState, hostedFrameRequired),
     designer_hosted_state_route: tool('Apply the mapped Rust state route duration in seconds and easing together as one undoable source edit.',

@@ -29,6 +29,7 @@ window.addEventListener('message', async ({ data }: MessageEvent<ToHosted>) => {
     if (data.type === 'curveReply') { animations.curve(data); return; }
     if (data.type === 'openKeyframe') { animations.keyframes.open(data.key); return; }
     if (data.type === 'keyframeReply') { animations.keyframes.receive(data); return; }
+    if (data.type === 'keyframeGroupReply') { animations.keyLanes.receive(data); return; }
     if (data.type === 'status') {
         if (status.textContent !== data.message) status.textContent = data.message;
         interactive = data.interactive;

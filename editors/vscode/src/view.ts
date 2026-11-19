@@ -276,6 +276,8 @@ export function hostedHtml(webview: vscode.Webview, root: vscode.Uri): string {
                 ${tool('hosted-animation-targets', 'target', 'Choose preview targets')}
                 ${tool('hosted-animation-source', 'go-to-file', 'Reveal animation in source')}
                 ${tool('hosted-animation-keyframe', 'edit', 'Edit application keyframe', 'hidden')}
+                ${tool('hosted-key-lanes-toggle', 'list-selection', 'Keyframe lanes',
+                    'aria-pressed="false" aria-controls="hosted-key-lanes" aria-expanded="false" hidden')}
                 ${animationGraphMenu('hosted', 'Hide curves')}
                 <span class="toolbar-divider" aria-hidden="true"></span>
                 ${previewRangeButton('hosted')}
@@ -298,6 +300,22 @@ export function hostedHtml(webview: vscode.Webview, root: vscode.Uri): string {
         </div>
         <output id="hosted-animation-time" for="hosted-animation-seek"></output>
     </div>
+    <section id="hosted-key-lanes" class="hosted-single-animation" aria-label="App Preview keyframe lanes" hidden>
+        <div class="toolbar hosted-key-lanes-toolbar">
+            <label class="metric" for="hosted-key-time">Authored time
+                <input type="number" min="0" step="any" id="hosted-key-time" value="0" aria-label="Authored time in seconds"> s
+            </label>
+            <output id="hosted-key-selection" aria-live="polite"></output>
+            ${tool('hosted-key-actions', 'ellipsis', 'Keyframe actions')}
+        </div>
+        <div class="hosted-key-grid" id="hosted-key-grid">
+            <div class="timeline-axis hosted-key-row">
+                <span></span><div id="hosted-key-axis" class="hosted-key-ruler" aria-hidden="true"></div>
+            </div>
+            <ol id="hosted-key-tracks" aria-label="Authored tracks"></ol>
+        </div>
+        <p id="hosted-key-error" class="dock-message" role="status" hidden></p>
+    </section>
     <section id="hosted-curves" class="hosted-single-animation" aria-label="Authored animation curves" hidden>
         <div class="toolbar hosted-curve-toolbar">
             <select id="hosted-curve-track" aria-label="Animation track"></select>
@@ -319,7 +337,7 @@ ${keyframeEditorHtml(false)}
 <form id="hosted-input" class="toolbar" aria-label="Preview input" hidden>
     <input id="hosted-text" aria-label="Text for the focused preview control" required maxlength="8192">
     <button type="submit" class="tool" title="Send Text" aria-label="Send Text">${icon('send')}</button>
-</form>`, ['timeline-curve', 'keyframe-editor', 'timeline-clips', 'timeline-range']);
+</form>`, ['timeline-curve', 'keyframe-editor', 'timeline-clips', 'timeline-range', 'hosted-key-lanes']);
 }
 
 export function stagesHtml(webview: vscode.Webview, root: vscode.Uri): string {

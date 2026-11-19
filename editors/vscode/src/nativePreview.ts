@@ -8,7 +8,7 @@ import type { CurvePoint, TimelinePreviewPose, TimelineTargetOverrides } from '.
 import type { NativeProjectInventory } from './projectInventory';
 import type { Asset, CanvasInteraction, CanvasPresentation, DesignDataPresentation, DropHint, EditResult, Inspection, InspectionTarget, Operation, Placement, PreviewSourceBuffer, ResourceRow, Snapshot, Source, Viewport } from './protocol';
 import type { RsxLanguageDocument } from './rsxLanguageTypes';
-import type { HostedAnimationFrame, HostedAnimationRequest, HostedClipDraft, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframePlan, HostedSourcePlan, HostedStateDraft } from './hostedAnimationProtocol';
+import type { HostedAnimationFrame, HostedAnimationRequest, HostedClipDraft, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedKeyframeGroupPlan, HostedKeyframePlan, HostedSourcePatch, HostedSourcePlan, HostedStateDraft } from './hostedAnimationProtocol';
 import type { HostedAnimationSample, HostedFrame, HostedInput, HostedSource } from './hostedProtocol';
 import type { NativeStageChange, PrototypeCommand, PrototypeHotspot, PrototypeScene, StageChecks, StageDocument, StageImage, StageManifest, StageModel, StagePick, StagePointer, StageStateOptions, StageTarget } from './stagesProtocol';
 import { commandFor } from './tools';
@@ -122,6 +122,11 @@ export class NativePreview implements vscode.Disposable {
 
     planHostedKeyframe(frame: HostedAnimationFrame, draft: HostedKeyframeDraft): Promise<HostedKeyframePlan> {
         return this.send('hostedKeyframe', { ...frame, ...draft }, 12_000);
+    }
+    async planHostedKeyframeGroup(frame: HostedAnimationFrame, draft: HostedKeyframeGroupDraft): Promise<HostedKeyframeGroupPlan> {
+        const { patch, ...plan } = await this.send<Omit<HostedKeyframeGroupPlan, 'patches'> & { patch: HostedSourcePatch | null }>(
+            'hostedKeyframeSelection', { revision: frame.revision, sequence: frame.sequence, ...draft }, 12_000);
+        return { ...plan, patches: patch ? [patch] : [] };
     }
     planHostedState(frame: HostedAnimationFrame, draft: HostedStateDraft): Promise<HostedSourcePlan> {
         return this.send('hostedState', { revision: frame.revision, sequence: frame.sequence, ...draft });

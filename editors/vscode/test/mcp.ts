@@ -81,7 +81,8 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         const { tools } = await request<{ tools: { name: string }[] }>('tools/list');
         assert.ok(tools.some(tool => tool.name === 'designer_place'));
         assert.ok(tools.some(tool => tool.name === 'ferroui_runtime_source'));
-        for (const name of ['open', 'animations', 'animation', 'image', 'curve', 'keyframe_draft', 'keyframe', 'clip_placement_draft', 'clip_placement']) {
+        for (const name of ['open', 'animations', 'animation', 'image', 'curve', 'keyframe_draft', 'keyframe',
+            'keyframe_group_draft', 'keyframe_group', 'clip_placement_draft', 'clip_placement']) {
             assert.ok(tools.some(tool => tool.name === `designer_hosted_${name}`));
         }
         assert.match((await invoke('designer_hosted_open', { session: 1 })).content[0]?.text ?? '', /allowWrites/);
@@ -90,6 +91,12 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         assert.match((await invoke('designer_hosted_keyframe', hostedKey)).content[0]?.text ?? '', /allowWrites/);
         const keyDraft = await invoke('designer_hosted_keyframe_draft', hostedKey);
         assert.ok(keyDraft.isError && !keyDraft.content[0]?.text?.includes('allowWrites'));
+        const group = { ...hostedKey, arguments: { program: 1, command: {
+            action: 'move_keyframes', keyframes: [{ target: 1, property: 'Opacity', time: .5 }], offset: .1,
+        } } };
+        assert.match((await invoke('designer_hosted_keyframe_group', group)).content[0]?.text ?? '', /allowWrites/);
+        const groupDraft = await invoke('designer_hosted_keyframe_group_draft', group);
+        assert.ok(groupDraft.isError && !groupDraft.content[0]?.text?.includes('allowWrites'));
         const clipPlacement = { session: 1, expected_generation: 1, expected_revision: 1, expected_sequence: 1,
             arguments: { programs: [1, 2], start: .25, gap: -.125 } };
         assert.match((await invoke('designer_hosted_clip_placement', clipPlacement)).content[0]?.text ?? '', /allowWrites/);

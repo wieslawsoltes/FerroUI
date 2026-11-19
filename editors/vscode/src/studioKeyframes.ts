@@ -50,14 +50,14 @@ export async function keyframeOptions(context: StudioContext, program: number, d
 }
 
 export async function chooseTimelineKeyAction(count: number, structural: boolean, transfer: boolean, canPaste: boolean,
-    pivot?: number): Promise<TimelineKeyAction | undefined> {
+    pivot?: number, timeLabel = 'Playhead'): Promise<TimelineKeyAction | undefined> {
     const actions = [
         { action: 'copy_keyframes', label: '$(copy) Copy Keyframes', available: transfer && count > 0 },
-        { action: 'paste_keyframes', label: '$(clippy) Paste at Playhead', reverse: false, available: transfer && canPaste },
-        { action: 'paste_keyframes', label: '$(arrow-swap) Paste Reversed at Playhead', reverse: true, available: transfer && canPaste },
-        { action: 'mirror_keyframes', label: '$(arrow-swap) Mirror About Playhead', available: transfer && count > 0 },
+        { action: 'paste_keyframes', label: `$(clippy) Paste at ${timeLabel}`, reverse: false, available: transfer && canPaste },
+        { action: 'paste_keyframes', label: `$(arrow-swap) Paste Reversed at ${timeLabel}`, reverse: true, available: transfer && canPaste },
+        { action: 'mirror_keyframes', label: `$(arrow-swap) Mirror About ${timeLabel}`, available: transfer && count > 0 },
         { action: 'move_keyframes', label: '$(arrow-both) Move by Offset…', available: count > 0 },
-        { action: 'scale_keyframes', label: '$(arrow-swap) Scale from Playhead…', available: count > 1 && pivot !== undefined },
+        { action: 'scale_keyframes', label: `$(arrow-swap) Scale from ${timeLabel}…`, available: count > 1 && pivot !== undefined },
         { action: 'duplicate_keyframes', label: '$(copy) Duplicate at Offset…', available: count > 0 && structural },
         { action: 'remove_keyframes', label: '$(trash) Delete', available: count > 0 && structural },
     ] as const;

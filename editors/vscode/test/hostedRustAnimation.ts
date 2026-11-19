@@ -68,6 +68,16 @@ export async function verifyHostedRustAnimation(preview: NativePreview): Promise
         const paused = await preview.sampleHostedAnimation({ revision: first.revision, sequence: first.sequence,
             program: clip.id, elapsed: 1, restart: true });
         const frame = { revision: paused.frame.revision, sequence: paused.frame.sequence };
+        const keyframes = track.keyframes.map(key => ({ property: track.property, target: track.target, time: key.time }));
+        const copied = await preview.planHostedKeyframeGroup(frame, {
+            program: clip.id, command: { action: 'copy_keyframes', keyframes },
+        });
+        assert.match(copied.clipboard ?? '', /"kind":"CornerRadius"/);
+        const scaled = await preview.planHostedKeyframeGroup(frame, {
+            program: clip.id, command: { action: 'scale_keyframes', keyframes, pivot: 0, factor: .75 },
+        });
+        assert.deepEqual(scaled.keys?.map(key => key.time), [0, 1.5]);
+        assert.equal(applyClipDraft(source, scaled.patches), source.replace('.key_frame(1.0,', '.key_frame(0.75,'));
         const radius = await preview.hostedCurve(frame, { program: clip.id, target: clip.defaultTargets[0],
             property: track.property, channel: 'bottom_right', window: { start: 0, end: 2 } });
         assert.equal(radius.find(point => point.time === 1)?.value, 8, 'Read the registered Rust corner channel without seeking');

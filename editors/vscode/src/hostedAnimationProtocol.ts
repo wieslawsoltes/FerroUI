@@ -1,6 +1,7 @@
 import type { AnimationSourceIssue, KeyframeDraft, KeyframeDraftPreview, TimelineClipTiming, TimelineCurveRequest, TimelineKeyframe, TimelineMarker, TimelineMarkerAction, TimelinePreviewRange, TimelineTrack } from './timelineProtocol';
 import type { Range } from './protocol';
 import type { StateTransitionRoute } from './stateTransitionProtocol';
+import type { KeyframeGroupEdit, KeyframeLocation, KeyframePaste, TimelineKeyAction } from './timelineProtocol';
 
 export interface HostedStateRoute extends StateTransitionRoute {
     easing: string;
@@ -37,6 +38,7 @@ export interface HostedAnimationCatalog {
     sourceIssues?: AnimationSourceIssue[];
     clipScope?: string;
     markerScope?: string;
+    keyframeSelection?: boolean;
 }
 
 export interface HostedAnimationFrame {
@@ -102,6 +104,21 @@ export interface HostedStateDraft { program: number; duration: number; easing: s
 export interface HostedClipDraft { programs: number[]; start?: number; gap?: number }
 export interface HostedSourcePatch { start: number; end: number; expected: string; replacement: string }
 export interface HostedSourcePlan { patches: HostedSourcePatch[] }
+
+export type HostedKeyframeCommand = ({ keyframes: KeyframeLocation[] } & (KeyframeGroupEdit
+    | { action: 'copy_keyframes' } | { action: 'mirror_keyframes'; pivot: number }))
+    | { action: 'paste_keyframes'; paste: KeyframePaste };
+export interface HostedKeyframeGroupDraft { program: number; command: HostedKeyframeCommand }
+export interface HostedKeyframeGroupPlan extends HostedSourcePlan {
+    keys: KeyframeLocation[] | null;
+    clipboard: string | null;
+}
+export interface HostedKeyframeGroupAction {
+    program: number;
+    keys: KeyframeLocation[];
+    pivot: number;
+    edit?: TimelineKeyAction;
+}
 
 export interface HostedKeyframePlan extends KeyframeDraftPreview {
     patch: HostedSourcePatch | null;

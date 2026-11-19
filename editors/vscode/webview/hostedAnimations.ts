@@ -1,8 +1,10 @@
 import type { HostedAnimationControl, HostedAnimationFrame, HostedAnimationState } from '../src/hostedAnimationProtocol';
 import type { FromHosted, ToHosted } from '../src/hostedProtocol';
+import type { TimelineKeyframe, TimelineTrack } from '../src/timelineProtocol';
 import { element, labelButton } from './dom';
 import { HostedCurves } from './hostedCurves';
 import { HostedKeyframeEditor } from './hostedKeyframes';
+import { HostedKeyLanes } from './hostedKeyLanes';
 import { clipRulerExtent, TimelineClips } from './timelineClips';
 import { TimelineMarkerView } from './timelineMarkerView';
 import { fitTimeline } from './timelineViewport';
@@ -29,6 +31,7 @@ export class HostedAnimationView {
     private pending?: number;
     private documentVersion = 0;
     private readonly curves: HostedCurves;
+    readonly keyLanes: HostedKeyLanes;
     private readonly clips: TimelineClips<HostedAnimationFrame>;
     private readonly workArea: TimelineWorkArea;
     private readonly clipRange: TimelineWorkArea;
@@ -45,6 +48,8 @@ export class HostedAnimationView {
             button.focus({ preventScroll: true });
         });
         this.curves = new HostedCurves(send, this.keyframes);
+        this.keyLanes = new HostedKeyLanes(send, () => { this.flush(); this.paint(); },
+            (track, key) => this.openLaneKey(track, key));
         this.workArea = new TimelineWorkArea('hosted', element('hosted-animation-clock'),
             () => fitTimeline(Number(this.seek.max)), () => this.seek.valueAsNumber, () => this.paint());
         this.clipRange = new TimelineWorkArea('clip', element('timeline-clips'),
@@ -102,6 +107,7 @@ export class HostedAnimationView {
         this.seek.oninput = () => this.queueSeek(this.seek.valueAsNumber);
         this.section.addEventListener('keydown', event => {
             if (event.key === 'Escape' && this.state.position && this.canUse(true)
+                && !(event.target instanceof HTMLElement && event.target.closest('#hosted-key-lanes'))
                 && !this.section.querySelector(':popover-open, .clip-bar[data-dragging]')) {
                 event.preventDefault();
                 event.stopPropagation();
@@ -160,7 +166,18 @@ export class HostedAnimationView {
         const decoded = this.decoded;
         return Boolean(frame && decoded && frame.revision === decoded.revision
             && (frame.sequence === decoded.sequence || (interrupt && this.state.position?.playing))
-            && (interrupt || !this.state.busy) && this.pending === undefined);
+            && (interrupt || !this.state.busy) && this.pending === undefined && !this.keyLanes.editing);
+    }
+
+    private openLaneKey(track: TimelineTrack, keyframe: TimelineKeyframe): void {
+        const program = this.selectedProgram;
+        const frame = this.state.frame;
+        if (!program || !frame || !this.canUse()) return;
+        this.keyframes.open({
+            frame, version: this.documentVersion, program: program.id, duration: program.duration,
+            target: track.target, property: track.property, keyframe,
+            targetName: this.state.targets.find(target => target.id === track.target)?.label ?? `Target ${track.target}`,
+        });
     }
 
     private get selectedProgram() {
@@ -244,6 +261,8 @@ export class HostedAnimationView {
         labelButton(this.edit, program?.stateRoute ? 'Edit state route timing' : 'Edit application keyframe');
         const keyframeUsable = usable && !this.clips.visible;
         this.keyframes.follow(keyframeUsable ? this.state.frame : undefined, this.documentVersion, program?.id);
+        this.keyLanes.follow(program, this.state.targets, this.state.markerScope,
+            keyframeUsable ? this.state.frame : undefined, Boolean(this.state.keyframeSelection) && !this.clips.visible, this.documentVersion);
         this.curves.follow(program, this.state.targets.filter(target => selectedTargets?.includes(target.id)),
             this.state.frame, this.documentVersion, keyframeUsable, Boolean(this.state.canShowVelocity));
         this.play.disabled = playing ? !this.canUse(true) : !usable || !available;
