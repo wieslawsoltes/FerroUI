@@ -151,6 +151,78 @@ fn animation_preview_failed_setup_removes_created_transform() {
     assert!(!target.is_animating(Visual::render_transform_property()));
 }
 
+/// Not from upstream (#567): `try_apply_for_preview` returns the programs the framework rejects
+/// as `Err`, with the message `apply_for_preview` panics with, and applies nothing for them.
+#[test]
+fn animation_preview_rejections_are_errors_with_the_message_of_the_panic() {
+    let rotate = || {
+        let animation = Animation::new();
+        animation.set_duration(seconds(1.0));
+        animation.children().add(KeyFrame::with_key_time(
+            seconds(1.0),
+            [Setter::new(crate::media::RotateTransform::angle_property(), 90.0) as _],
+        ));
+        animation
+    };
+    let negative_speed = rotate();
+    negative_speed.set_speed_ratio(-1.0);
+    let negative_delay = create_opacity_animation(
+        SetterValue::Value(Rc::new(1.0_f64)),
+        SetterValue::Value(Rc::new(0.0_f64)),
+    );
+    negative_delay.set_delay(seconds(-1.0));
+    let no_property = Animation::new();
+    no_property.set_duration(seconds(1.0));
+    no_property.children().add(KeyFrame::with_key_time(seconds(1.0), [Setter::empty() as _]));
+
+    let border = |css: bool| {
+        let target = Border::new();
+        if css {
+            let operations = crate::media::transformation::TransformOperations::parse("rotate(10deg)").unwrap();
+            target.set_render_transform(Some(operations as Rc<dyn crate::media::ITransform>));
+        }
+        target.upcast::<Animatable>()
+    };
+    let cases: [(&Ref<Animation>, Ref<Animatable>, &str); 5] = [
+        (&negative_speed, border(false), "SpeedRatio value cannot be negative."),
+        (&negative_delay, border(false), "Delay value cannot be negative."),
+        (&no_property, border(false), "No Setter property assigned."),
+        (&rotate(), border(true), "CSS TransformOperations"),
+        (&rotate(), crate::media::RotateTransform::new().upcast::<Animatable>(), "to type 'Visual'"),
+    ];
+    for (animation, target, expected) in cases {
+        let transform = target.downcast_ref::<Visual>().and_then(Visual::render_transform);
+        let error = animation
+            .try_apply_for_preview(&target, Some(TestClock::new().as_clock()), None)
+            .err()
+            .expect("the program is rejected");
+        assert!(error.0.contains(expected), "{error}");
+        let render_transform = target.downcast_ref::<Visual>().and_then(Visual::render_transform);
+        assert_eq!(transform.is_some(), render_transform.is_some(), "{expected}: nothing is applied");
+        let panic = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            animation.apply_for_preview(&target, Some(TestClock::new().as_clock()), None)
+        }))
+        .err()
+        .expect("apply_for_preview panics");
+        let message =
+            panic.downcast_ref::<String>().cloned().or_else(|| panic.downcast_ref::<&str>().map(|text| text.to_string()));
+        assert_eq!(Some(error.0), message);
+    }
+
+    let animation = create_opacity_animation(
+        SetterValue::Value(Rc::new(1.0_f64)),
+        SetterValue::Value(Rc::new(0.0_f64)),
+    );
+    let target = Border::new();
+    let clock = TestClock::new();
+    let preview = animation.try_apply_for_preview(&target, Some(clock.as_clock()), None).unwrap();
+    clock.step(SignedDuration::ZERO);
+    clock.step(seconds(1.0));
+    assert_eq!(target.opacity(), 0.0);
+    preview.dispose();
+    assert_eq!(target.opacity(), 1.0);
+}
+
 #[test]
 fn animation_preview_completed_fill_keeps_original_program_precedence() {
     let first = create_opacity_animation(
