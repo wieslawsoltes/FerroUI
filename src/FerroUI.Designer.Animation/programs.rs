@@ -1,6 +1,8 @@
 //! Source-backed independent animation programs. Identity is the document's stable Animation
 //! syntax ID; display names are ordinary XML comments, so generated markup needs no designer
 //! runtime types and unknown payloads remain fully editable.
+mod authoring;
+
 use crate::{require, AnimationError, AnimationImport, ImportOptions, Result, Timeline};
 use ferroui_designer_core::{Document, Edit, NodeId, NodeKind, SourceSpan};
 use serde::{Deserialize, Serialize};

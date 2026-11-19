@@ -11,6 +11,7 @@ use ferroui_controls::PathIcon;
 pub(crate) const MORE: &str = "F1 M2 7A1 1 0 1 1 2 9A1 1 0 1 1 2 7Z M8 7A1 1 0 1 1 8 9A1 1 0 1 1 8 7Z M14 7A1 1 0 1 1 14 9A1 1 0 1 1 14 7Z";
 pub(crate) const ADD: &str = "F1 M7 1H9V7H15V9H9V15H7V9H1V7H7Z";
 pub(crate) const REMOVE: &str = "F1 M1 7H15V9H1Z";
+pub(crate) const FIT: &str = "F1 M1 1H6V2.5H2.5V6H1Z M10 1H15V6H13.5V2.5H10Z M1 10H2.5V13.5H6V15H1Z M13.5 10H15V15H10V13.5H13.5Z";
 pub(crate) const CLOSE: &str =
     "F1 M3 1.6L8 6.6L13 1.6L14.4 3L9.4 8L14.4 13L13 14.4L8 9.4L3 14.4L1.6 13L6.6 8L1.6 3Z";
 pub(crate) const MOVE_UP: &str = "F1 M8 1L15 8L13.6 9.4L9 4.8V15H7V4.8L2.4 9.4L1 8Z";

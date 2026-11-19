@@ -286,6 +286,7 @@ impl DesignerWorkspace {
         self.connect_project();
         self.connect_source_tools();
         self.connect_authoring();
+        self.connect_timeline_curves();
         self.connect_sharing();
         for (name, action) in [
             ("Undo", Action::Undo),

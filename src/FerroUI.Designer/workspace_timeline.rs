@@ -1,4 +1,7 @@
 //! Compact object/property lanes and a single contextual keyframe inspector.
+#[path = "workspace_timeline/curves.rs"]
+mod curves;
+
 use super::*;
 use crate::timeline_lane::{EasingPreview, TimelineLane};
 use ferroui_base::media::{FontWeight, TextTrimming};
@@ -19,6 +22,7 @@ pub(super) struct TimelineUi {
     frame_rate: Option<u32>,
     snap_picker: Option<WeakRef<ComboBox>>,
     view: Option<(f64, f64)>,
+    curves: bool,
 }
 #[derive(Clone)]
 struct TimelineContext {
@@ -141,6 +145,7 @@ impl DesignerWorkspace {
         }
         let selection_keys = ui.selection.clone();
         let frame_rate = ui.frame_rate;
+        let curves = ui.curves;
         ui.view = ui
             .view
             .filter(|(start, end)| *start >= 0.0 && *end > *start && *end <= duration);
@@ -164,15 +169,17 @@ impl DesignerWorkspace {
         caption.set_vertical_alignment(ferroui_base::layout::VerticalAlignment::Center);
         caption.set_margin(Thickness::new(4.0, 0.0, 4.0, 0.0));
         header.children().add(caption.upcast::<Control>());
-        for (label, path, help, factor) in [
-            ("", Some(crate::icons::REMOVE), "Zoom out timeline", 0.8),
-            ("", Some(crate::icons::ADD), "Zoom in timeline", 1.25),
-            ("Fit", None, "Fit complete animation", 0.0),
+        for (path, help, factor) in [
+            (crate::icons::REMOVE, "Zoom out timeline", 0.8),
+            (crate::icons::ADD, "Zoom in timeline", 1.25),
+            (
+                crate::icons::FIT,
+                "Fit selected keys or complete animation",
+                0.0,
+            ),
         ] {
-            let control = button(label);
-            if let Some(path) = path {
-                control.set_content(Some(Control::boxed(crate::icons::vector_icon(path, 12.0))));
-            }
+            let control = button("");
+            control.set_content(Some(Control::boxed(crate::icons::vector_icon(path, 12.0))));
             control.classes().add("designer-timeline-tool");
             control.classes().add("nav");
             control.set_padding(Thickness::symmetric(5.0, 2.0));
@@ -184,7 +191,7 @@ impl DesignerWorkspace {
             control.click(move |_, _| {
                 if let Some(this) = weak.upgrade() {
                     if factor == 0.0 {
-                        this.set_timeline_view(None);
+                        this.fit_timeline_selection();
                     } else {
                         let pivot = this.session.borrow().time();
                         this.zoom_timeline(factor, pivot);
@@ -333,7 +340,6 @@ impl DesignerWorkspace {
                     this.activate_timeline_key(target, &property, time);
                 }
             });
-            plot.children().add(title.upcast::<Control>());
             let lane = TimelineLane::new();
             lane.configure(
                 duration,
@@ -354,9 +360,19 @@ impl DesignerWorkspace {
                     .filter(|key| key.target == target && key.property == track.property)
                     .map(|key| key.time),
             );
+            let curve = curves && self.attach_timeline_curve(&lane, track, &context);
+            if curve {
+                title.set_height(lane.height());
+            }
+            plot.children().add(title.upcast::<Control>());
             AutomationProperties::set_name(
                 &lane,
-                Some(&format!("{} {} keyframes", target_name, track.property)),
+                Some(&format!(
+                    "{} {} {}",
+                    target_name,
+                    track.property,
+                    if curve { "value curve" } else { "keyframes" }
+                )),
             );
             let weak = Rc::downgrade(self);
             let property = track.property.clone();
@@ -795,7 +811,9 @@ impl DesignerWorkspace {
         let selected = ui.selection.clone();
         let primary = ui.selected.clone();
         drop(ui);
-        let id = session.active_animation_program().ok_or("Choose an animation")?;
+        let id = session
+            .active_animation_program()
+            .ok_or("Choose an animation")?;
         let changed = session.edit_program_keyframes(id, &selected, operation)?;
         drop(session);
         let mut ui = self.timeline_ui.borrow_mut();
@@ -1014,9 +1032,7 @@ impl DesignerWorkspace {
         apply.set_padding(Thickness::symmetric(8.0, 3.0));
         let weak = Rc::downgrade(self);
         let selected = selected.clone();
-        let property = selected.property.clone();
-        let target = selected.target;
-        let old_time = selected.time;
+        let editing = selected.clone();
         let weak_time = time.downgrade();
         let weak_value = value.downgrade();
         let weak_curve = curve.downgrade();
@@ -1029,34 +1045,19 @@ impl DesignerWorkspace {
                 weak_curve.upgrade(),
             ) {
                 let result = (|| {
-                    commit_context.check(&this)?;
                     let time: f64 = time
                         .text()
                         .unwrap_or_default()
                         .parse()
                         .map_err(|_| "Invalid keyframe time")?;
-                    let mut session = this.session.borrow_mut();
-                    let id = session
-                        .active_animation_program()
-                        .ok_or("Choose an animation")?;
-                    session.edit_program_keyframe(
-                        id,
-                        target,
-                        &property,
-                        ferroui_designer_animation::KeyframeEdit::Upsert {
-                            previous: Some(old_time),
-                            time,
-                            value: &value.text().unwrap_or_default(),
-                            easing: &curve.text().unwrap_or_default(),
-                        },
-                    )?;
-                    drop(session);
-                    this.remember_keyframe(SelectedKey {
-                        target,
-                        property: property.clone(),
+                    this.apply_timeline_keyframe(
+                        &commit_context,
+                        &editing,
                         time,
-                    });
-                    Ok(())
+                        &value.text().unwrap_or_default(),
+                        &curve.text().unwrap_or_default(),
+                    )
+                    .map(|_| ())
                 })();
                 // Keep invalid input available for correction. Accepted changes
                 // rebuild the editor from the single committed source transaction.

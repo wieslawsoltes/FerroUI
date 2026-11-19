@@ -3,7 +3,7 @@ use crate::{runtime::RuntimePreview, PreviewStatus};
 use ferroui_base::animation::Animatable;
 use ferroui_base::StyledElement;
 use ferroui_designer_animation::native::{
-    animation_timing, validate_animation_target, NativePlayback, NativeProgramIndex,
+    animation_timing, sample_scalar_track, validate_animation_target, NativePlayback, NativeProgramIndex,
     NativeSourceIndex,
 };
 use ferroui_designer_animation::{AnimationProgram, CurvePoint, CurveWindow, Timeline};
@@ -56,7 +56,7 @@ impl NativeAnimations {
         window: CurveWindow,
     ) -> Result<Vec<CurvePoint>, String> {
         let animation = self.index.animation(program.id).ok_or("The native animation is unavailable")?;
-        let track = program.timeline.as_ref().and_then(|timeline| timeline.track(target, property))
+        program.timeline.as_ref().and_then(|timeline| timeline.track(target, property))
             .ok_or("Choose an authored animation track")?;
         let object = if program.targets.contains(&target) {
             preview.visual(target).and_then(|visual| visual.cast::<Animatable>())
@@ -65,20 +65,7 @@ impl NativeAnimations {
         } else {
             None
         }.ok_or("Choose a live preview target for this curve")?;
-        let registered = ferroui_inspect::Inspector::property(&object, property)
-            .map_err(|error| error.to_string())?;
-        let duration = animation.duration().total_seconds();
-        let times = window.sample_times(duration, track.keyframes.iter().map(|key| key.time))
-            .map_err(|error| error.to_string())?;
-        let positions = times.iter().map(|time| time / duration).collect::<Vec<_>>();
-        let values = animation.sample_track_for_preview(&object, registered, &positions)
-            .map_err(|error| error.to_string())?;
-        times.into_iter().zip(values).map(|(time, value)| {
-            let value = value.as_ref().downcast_ref::<f64>().copied()
-                .or_else(|| value.as_ref().downcast_ref::<f32>().map(|value| f64::from(*value)))
-                .filter(|value| value.is_finite()).ok_or("The native animation does not produce a finite scalar")?;
-            Ok(CurvePoint { time, value })
-        }).collect::<Result<_, &str>>().map_err(str::to_owned)
+        sample_scalar_track(animation, &object, property, window)
     }
 
     pub(crate) fn refresh(

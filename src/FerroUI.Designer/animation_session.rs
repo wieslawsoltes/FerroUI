@@ -673,6 +673,9 @@ impl DesignerSession {
         property: &str,
         window: ferroui_designer_animation::CurveWindow,
     ) -> Result<Vec<ferroui_designer_animation::CurvePoint>, String> {
+        if !matches!(self.preview_status(), crate::PreviewStatus::Ready { revision } if *revision == self.document().revision()) {
+            return Err("Open the current animation preview to sample its tracks".into());
+        }
         let program = self.animation.programs.iter().find(|program| program.id == id)
             .ok_or("Unknown animation program")?;
         if self.requires_native_animation(program) {
@@ -813,93 +816,11 @@ impl DesignerSession {
             .iter()
             .find(|program| program.id == id)
             .ok_or("Unknown animation program")?;
-        let original = ferroui_designer_animation::animation_fragment(&self.document, id)
-            .map_err(|error| error.to_string())?;
         let generated = self
             .animation
             .codecs
-            .encode(program, &original, timeline)
+            .encode_for_document(&self.document, program, timeline)
             .map_err(|error| error.to_string())?;
-        let generated =
-            if program.codec.as_deref() == Some("ferroui.native") && !timeline.tracks.is_empty() {
-                let mut generated_document =
-                    Document::new(generated).map_err(|error| error.to_string())?;
-                let root = generated_document.ast().root();
-                let existing = generated_document
-                    .ast()
-                    .node(root)
-                    .expect("root")
-                    .attributes
-                    .iter()
-                    .any(|attribute| {
-                        attribute.namespace_uri.as_deref()
-                            == Some("http://schemas.microsoft.com/winfx/2006/xaml")
-                            && attribute.name.rsplit(':').next() == Some("SetterTargetType")
-                    });
-                if !existing {
-                    let target = self
-                        .document
-                        .ast()
-                        .node(program.primary_target())
-                        .ok_or("Animation target source disappeared")?;
-                    let mut namespaces = generated_document.ast().namespaces(root);
-                    let prefix = namespaces
-                        .iter()
-                        .find(|(prefix, uri)| {
-                            !prefix.is_empty()
-                                && uri.as_str() == "http://schemas.microsoft.com/winfx/2006/xaml"
-                        })
-                        .map(|(prefix, _)| prefix.clone())
-                        .unwrap_or_else(|| {
-                            let mut prefix = "x".to_owned();
-                            while namespaces.contains_key(&prefix) {
-                                prefix.push('_');
-                            }
-                            prefix
-                        });
-                    namespaces.insert(
-                        prefix.clone(),
-                        "http://schemas.microsoft.com/winfx/2006/xaml".into(),
-                    );
-                    let mut edits = vec![Edit::SetAttribute {
-                        node: root,
-                        name: format!("xmlns:{prefix}"),
-                        value: "http://schemas.microsoft.com/winfx/2006/xaml".into(),
-                    }];
-                    let (target_prefix, target_local) = target
-                        .name
-                        .split_once(':')
-                        .unwrap_or(("", target.name.as_str()));
-                    let mut target_type = target.name.clone();
-                    if let Some(namespace) =
-                        self.document.ast().namespaces(target.id).get(target_prefix)
-                    {
-                        if namespaces.get(target_prefix) != Some(namespace) {
-                            let mut alias = "designertarget".to_owned();
-                            while namespaces.contains_key(&alias) {
-                                alias.push('_');
-                            }
-                            edits.push(Edit::SetAttribute {
-                                node: root,
-                                name: format!("xmlns:{alias}"),
-                                value: namespace.clone(),
-                            });
-                            target_type = format!("{alias}:{target_local}");
-                        }
-                    }
-                    edits.push(Edit::SetAttribute {
-                        node: root,
-                        name: format!("{prefix}:SetterTargetType"),
-                        value: target_type,
-                    });
-                    generated_document
-                        .apply("Retain animation setter target type", edits)
-                        .map_err(|error| error.to_string())?;
-                }
-                generated_document.source().to_owned()
-            } else {
-                generated
-            };
         ferroui_designer_animation::compose_animation_edit(&self.document, id, &generated)
             .map_err(|error| error.to_string())
     }
