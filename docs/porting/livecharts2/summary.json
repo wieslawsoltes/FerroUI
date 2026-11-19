@@ -8,9 +8,9 @@
   "source_members": 4859,
   "source_status": {
     "native-replacement": 65,
-    "partial": 46,
+    "partial": 44,
     "pending": 537,
-    "ported": 50
+    "ported": 52
   },
   "member_status": {
     "native-replacement": 19,

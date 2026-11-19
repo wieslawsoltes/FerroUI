@@ -47,7 +47,10 @@ pub use geo_map_chart_engine::{
 pub use heat_functions::HeatFunctions;
 pub use heat_legend::{HeatLegend, HeatLegendSource};
 pub use kernel::{Coordinate, Error, StackedValue, Stacker};
-pub use labelers::{as_date, as_time_span, ChartPointFormatter, Labeler, Labelers};
+pub use labelers::{
+    as_date, as_time_span, ChartPointFormatter, Labeler, Labelers, NodeTooltipFormatter,
+    NodeTooltipPoint,
+};
 pub use motion::{Animatable, Animation, MotionProperty, Repeat};
 pub use paint::BrushSpace;
 pub use pie_chart_engine::{AngularTicks, Needle, PieChartEngine, PieOptions, PieVisual};

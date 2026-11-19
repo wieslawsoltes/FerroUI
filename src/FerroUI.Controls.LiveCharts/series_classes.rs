@@ -6,7 +6,8 @@ use ferroui_base::{
     FerroObjectImplExt, FerroProperty, Ref, StyledProperty, Thickness,
 };
 use ferroui_livecharts::{
-    ChartPointFormatter, DataLabelsPosition, SankeyLabelPosition, SankeyLayoutKind, SeriesKind,
+    ChartPointFormatter, DataLabelsPosition, NodeTooltipFormatter, SankeyLabelPosition,
+    SankeyLayoutKind, SeriesKind,
 };
 
 #[repr(C)]
@@ -871,6 +872,9 @@ ferro_properties! { impl SankeySeries {
     pub fn link_fill_property() -> StyledProperty<Option<Color>> {
         FerroProperty::register::<SankeySeries, _>("LinkFill", None)
     }
+    pub fn tool_tip_label_formatter_property() -> StyledProperty<Option<NodeTooltipFormatter>> {
+        FerroProperty::register::<SankeySeries, _>("ToolTipLabelFormatter", None)
+    }
 } }
 impl SankeySeries {
     pub fn nodes(&self) -> SankeyNodes {
@@ -933,11 +937,20 @@ impl SankeySeries {
     pub fn set_link_fill(&self, value: Option<Color>) {
         self.set_value(Self::link_fill_property(), value);
     }
+    pub fn tool_tip_label_formatter(&self) -> Option<NodeTooltipFormatter> {
+        self.get_value(Self::tool_tip_label_formatter_property())
+    }
+    pub fn set_tool_tip_label_formatter(&self, value: Option<NodeTooltipFormatter>) {
+        self.set_value(Self::tool_tip_label_formatter_property(), value);
+    }
 }
 
 ferro_properties! { impl TreemapSeries {
     pub fn nodes_property() -> StyledProperty<TreemapNodes> {
         FerroProperty::register::<TreemapSeries, _>("Nodes", TreemapNodes::new())
+    }
+    pub fn tool_tip_label_formatter_property() -> StyledProperty<Option<NodeTooltipFormatter>> {
+        FerroProperty::register::<TreemapSeries, _>("ToolTipLabelFormatter", None)
     }
 } }
 impl TreemapSeries {
@@ -946,6 +959,12 @@ impl TreemapSeries {
     }
     pub fn set_nodes(&self, value: TreemapNodes) {
         self.set_value(Self::nodes_property(), value);
+    }
+    pub fn tool_tip_label_formatter(&self) -> Option<NodeTooltipFormatter> {
+        self.get_value(Self::tool_tip_label_formatter_property())
+    }
+    pub fn set_tool_tip_label_formatter(&self, value: Option<NodeTooltipFormatter>) {
+        self.set_value(Self::tool_tip_label_formatter_property(), value);
     }
 }
 

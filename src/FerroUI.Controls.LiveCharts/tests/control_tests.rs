@@ -1066,6 +1066,51 @@ fn polar_tooltip_text_takes_the_angle_labels_and_the_formatters_of_the_series() 
     assert_eq!(label(&chart), "Wind: 90 degrees: 5 km/h");
 }
 
+/// The tooltip text of a node (`GetPrimaryToolTipText` of `CoreSankeySeries` and
+/// `CoreTreemapSeries`): `<label>: <value>`, and the code-only `ToolTipLabelFormatter` of
+/// `SankeySeries` and `TreemapSeries`, which the chart observes.
+#[test]
+fn node_tooltip_text_takes_the_tool_tip_label_formatter_of_the_series() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let size = Size::new(600.0, 600.0);
+    let labels = |chart: &Chart| {
+        let mut labels: Vec<_> = chart
+            .scene(size)
+            .unwrap()
+            .hits
+            .iter()
+            .map(|h| h.label.clone())
+            .collect();
+        labels.sort();
+        labels
+    };
+    let formatter = NodeTooltipFormatter::new(|point| {
+        format!("{} ({}) {}", point.label, point.index, point.value)
+    });
+    let sankey = SankeyChart::new();
+    sankey.set_animations_speed(0.0);
+    let (series, _) = sankey_fixture();
+    sankey.series().add(series.clone().upcast());
+    assert_eq!(labels(&sankey), ["A: 6", "B: 6", "X: 4", "Y: 8"]);
+    let revision = sankey.revision();
+    series.set_tool_tip_label_formatter(Some(formatter.clone()));
+    assert!(sankey.revision() > revision);
+    assert_eq!(labels(&sankey), ["A (0) 6", "B (1) 6", "X (2) 4", "Y (3) 8"]);
+    let treemap = TreemapChart::new();
+    treemap.set_animations_speed(0.0);
+    let series = TreemapSeries::new();
+    series.set_nodes(TreemapNodes::from_items([
+        TreemapNode::with_value(3.0, "Lisbon"),
+        TreemapNode::with_value(2.0, "Porto"),
+    ]));
+    treemap.series().add(series.clone().upcast());
+    assert_eq!(labels(&treemap), ["Lisbon: 3", "Porto: 2"]);
+    let revision = treemap.revision();
+    series.set_tool_tip_label_formatter(Some(formatter));
+    assert!(treemap.revision() > revision);
+    assert_eq!(labels(&treemap), ["Lisbon (0) 3", "Porto (1) 2"]);
+}
+
 /// The gradient bar of a `HeatLegend` (`Legend` of a chart, the source's `SKHeatLegend`).
 fn heat_legend_bar(scene: &ferroui_livecharts::Scene) -> ferroui_base::Rect {
     scene

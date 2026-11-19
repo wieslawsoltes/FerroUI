@@ -296,8 +296,12 @@ node_props = {
   ('node_corner_radius','NodeCornerRadius','f64','0.0'),('layout_iterations','LayoutIterations','u32','32'),
   ('node_label_position','NodeLabelPosition','SankeyLabelPosition','SankeyLabelPosition::Auto'),
   ('layout','Layout','SankeyLayoutKind','SankeyLayoutKind::Vertical'),
-  ('arc_span_degrees','ArcSpanDegrees','f64','150.0'),('link_fill','LinkFill','Option<Color>','None')],
- 'TreemapSeries':[('nodes','Nodes','TreemapNodes','TreemapNodes::new()')],
+  ('arc_span_degrees','ArcSpanDegrees','f64','150.0'),('link_fill','LinkFill','Option<Color>','None'),
+  # The tooltip label formatter of CoreSankeySeries (code only), read by the chart (#624).
+  ('tool_tip_label_formatter','ToolTipLabelFormatter','Option<NodeTooltipFormatter>','None')],
+ 'TreemapSeries':[('nodes','Nodes','TreemapNodes','TreemapNodes::new()'),
+  # The tooltip label formatter of CoreTreemapSeries (code only), read by the chart (#624).
+  ('tool_tip_label_formatter','ToolTipLabelFormatter','Option<NodeTooltipFormatter>','None')],
  'HeatLandSeries':[('lands','Lands','HeatLands','HeatLands::new()'),('color_stops','ColorStops','Option<Vec<f64>>','None'),
   ('min_value','MinValue','Option<f64>','None'),('max_value','MaxValue','Option<f64>','None')],
  # The ColorStops, PointPadding, MinValue and MaxValue of CoreHeatSeries (L5).
@@ -313,7 +317,7 @@ node_props = {
 classes = HEADER + '''use crate::{ChartSeries,HeatLands,SankeyLinks,SankeyNodes,TreemapNodes};
 use ferroui_base::{ferro_class,ferro_class_info,ferro_properties,instantiate,FerroObjectImpl,FerroObjectImplExt,FerroProperty,Ref,StyledProperty,Thickness};
 use ferroui_base::media::Color;
-use ferroui_livecharts::{ChartPointFormatter,DataLabelsPosition,SankeyLabelPosition,SankeyLayoutKind,SeriesKind};
+use ferroui_livecharts::{ChartPointFormatter,DataLabelsPosition,NodeTooltipFormatter,SankeyLabelPosition,SankeyLayoutKind,SeriesKind};
 '''
 for name,kind in families:
     owned=''.join(f'this.set_{prop}({typ}::new());' for prop,typ in node_collections.get(name,[]))

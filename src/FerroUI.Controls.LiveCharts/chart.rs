@@ -882,9 +882,11 @@ impl Chart {
                     .iter()
                     .map(|model| {
                         let mut options = SankeySeriesOptions::default();
-                        options.data_labels_max_width = model
-                            .cast::<crate::SankeySeries>()
-                            .map(|s| s.data_labels_max_width());
+                        let sankey = model.cast::<crate::SankeySeries>();
+                        options.data_labels_max_width =
+                            sankey.as_ref().map(|s| s.data_labels_max_width());
+                        options.tool_tip_label_formatter =
+                            sankey.and_then(|s| s.tool_tip_label_formatter());
                         options
                     })
                     .collect();
@@ -912,9 +914,11 @@ impl Chart {
                     .iter()
                     .map(|model| {
                         let mut options = TreemapSeriesOptions::default();
-                        options.data_labels_max_width = model
-                            .cast::<crate::TreemapSeries>()
-                            .map(|s| s.data_labels_max_width());
+                        let treemap = model.cast::<crate::TreemapSeries>();
+                        options.data_labels_max_width =
+                            treemap.as_ref().map(|s| s.data_labels_max_width());
+                        options.tool_tip_label_formatter =
+                            treemap.and_then(|s| s.tool_tip_label_formatter());
                         options
                     })
                     .collect();
