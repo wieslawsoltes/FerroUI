@@ -29203,6 +29203,12 @@
         "documentation": "VisualStateGroup.States: FerroList<Ref<VisualState>>",
         "values": []
       },
+      "Transitions": {
+        "name": "Transitions",
+        "type_name": "FerroList<Ref<VisualTransition>>",
+        "documentation": "VisualStateGroup.Transitions: FerroList<Ref<VisualTransition>>",
+        "values": []
+      },
       "CurrentState": {
         "name": "CurrentState",
         "type_name": "Option<Ref<VisualState>>",
@@ -29235,6 +29241,49 @@
         "documentation": "VisualStateManager.CustomVisualStateManager: Option<Ref<VisualStateManager>>",
         "values": [],
         "attached": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "VisualTransition",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::VisualTransition",
+    "base": "FerroObject",
+    "constructible": true,
+    "properties": {
+      "From": {
+        "name": "From",
+        "type_name": "String",
+        "documentation": "VisualTransition.From: String",
+        "values": []
+      },
+      "To": {
+        "name": "To",
+        "type_name": "String",
+        "documentation": "VisualTransition.To: String",
+        "values": []
+      },
+      "GeneratedDuration": {
+        "name": "GeneratedDuration",
+        "type_name": "SignedDuration",
+        "documentation": "VisualTransition.GeneratedDuration: SignedDuration",
+        "values": []
+      },
+      "GeneratedEasingFunction": {
+        "name": "GeneratedEasingFunction",
+        "type_name": "Option<Ref<EasingFunctionBase>>",
+        "documentation": "VisualTransition.GeneratedEasingFunction: Option<Ref<EasingFunctionBase>>",
+        "values": []
+      },
+      "Storyboard": {
+        "name": "Storyboard",
+        "type_name": "Option<Ref<Storyboard>>",
+        "documentation": "VisualTransition.Storyboard: Option<Ref<Storyboard>>",
+        "values": []
       }
     },
     "namespace_aliases": [

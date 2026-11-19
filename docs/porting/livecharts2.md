@@ -53,7 +53,7 @@ Reviewing the native renders beside the upstream references of the 55 scenarios 
 
 One difference is the upstream's: for an empty series (`LineSeriesTests.VectorOperationsClear`) the reference image draws the X axis from 10 to 0, because the source's `Scaler` passes the sentinel bounds of the series to `AxisLimit.ValidateLimits` in swapped order. The native axis keeps the default range from 0 to 10 in the order of the axis; the disposition of the scenario says so.
 
-Still different from the source theme (named in the disposition of every scenario): the gauge rules (no stroke, centred data labels, corner radius 8, the translucent fill series; the gauge scenarios set them), the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides.
+Still different from the source theme (named in the disposition of every scenario): the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides.
 
 ### L4: the polar chart
 
@@ -132,11 +132,28 @@ The other chart kinds animate through the native scene transition: a primitive o
 
 The mappers of custom models (`LabelMapper`, `NodeColorMapper` and `LinkColorMapper` of the Sankey series, `ValueMapper`, `ChildrenMapper` and `LabelMapper` of the treemap series) map once, as `set_mapped_values` maps the points of a Cartesian series: `SankeySeries::set_mapped_nodes` makes a node for each model with its name and colour and returns them, `SankeySeries::set_mapped_links` makes the links between them by index with their weights and colours, and `TreemapSeries::set_mapped_nodes` makes the tree of the models with their weights and names. The tooltip formatters of these series are not ported.
 
+### #624: the SVG cells and the colour animation of the heat series
+
+`GeometrySvg` of a heat series (a property of the generated `HeatSeries`, markup and code; the source's `HeatSeries<TModel, VariableSVGPathGeometry>`) draws its SVG path data in every cell. `svg_path.rs` reads the data with the path markup parser of FerroUI, as `SKPath.ParseSvgPathData`, into the path commands of the scene (quadratic curves and elliptical arcs become cubic curves, an arc by the endpoint parametrization of SVG in curves of at most a quarter turn), and fits it to the inset cell as `Svg.Draw` without `FitToSize`: centred, scaled by the width and height of the cell over the larger side of the tight bounds of the path. Path data the parser rejects is an error, where the source throws. The path reaches the engine in `CartesianSeriesOptions::geometry_svg`. The cells are paths of the native renderer, on the GPU path of every backend.
+
+The colour of a heat cell animates as the source's: at the first draw a cell starts transparent in its colour (`EnsureVisualForPoint`) and takes it over the animation, its rectangle in place (`HeatSeriesAnimationTests`); on a change of the data a cell moves to its new colour with the scene transition, which interpolates the fills, and a cell that enters or leaves fades (the alpha of `SoftDeleteOrDisposePoint`). The chart starts the first-draw transition of a Cartesian chart with heat series from its scene with the cells transparent; nothing else of the scene moves. `mapping.json` records `HeatSeries_FirstDraw_CellColorsInterpolateAcrossGradient` as ported (without the frame baseline of the source, whose easing differs) and `Svg` and `VariableSVGPathGeometry` partial.
+
+### #624: `GaugeGenerator`, the theme's gauge rules and the needle animation
+
+`gauges.rs` of `ferroui-controls-livecharts` ports `GaugeGenerator`, `GaugeItem` and `BaseGaugeItem`: `GaugeGenerator::build_solid_gauge` makes a gauge series for each item with its value at the place of the item among empty values (a ring each) and `build_angular_gauge_sections` one of a single value relative to the minimum, without a hover push-out or data labels (`PieChartExtensions.AsSeries` with `GaugeOptions`); both add the fill series, a zero for each item, styled by the background items (`GaugeItem::BACKGROUND`), and run the builder of each item after the series is set up.
+
+The theme's gauge rules (`HasRuleForGaugeSeries` and `HasRuleForGaugeFillSeries` of the default theme) apply to every gauge series, built by the generator or by hand: what a gauge series does not set takes the rule (no stroke, data labels at the chart centre in (70, 70, 70), a corner radius of 8, the palette colour; a fill series of (30, 30, 30) at alpha 10), as a theme rule gives way to what a series sets.
+
+A needle turns to a new value over the animations speed of the chart in the cubic out easing of the transitions (the source animates the rotation of `NeedleGeometry`): the chart draws the needle at its value of the moment, frame by frame, so the needle goes the way its value does, the long way round a gauge of more than 180 degrees too. Its first value is drawn at once. A frame of the needles keeps a scene transition in progress on its clock, and a scene equal to the one before starts none. The scenarios of `snapshots.rs` still build their gauges by hand, as the generator does.
+
+### #624: `DataLabelsMaxWidth` of every series
+
+`DataLabelsMaxWidth` is a property of every series (`ChartSeries`, 170 by default, the source's `Series.DataLabelsMaxWidth`), which the Sankey and treemap series had before. The Sankey and treemap engines break their labels as they measure them; for the Cartesian, pie and polar charts, `label_lines::wrap_data_labels` breaks each data label of a measured scene whose text is wider than the width of its series less the label padding into lines of `label_lines.rs`, one text of the scene each from the left of their block. These labels are placed by the size of one line, as the native engines measure them: a label above a Cartesian point keeps its last line where the one line was, and the centred labels of the heat cells, the slices and the polar points keep their middle. The labels of the axes and of the legends do not break. The native labels are numbers and the value lists of the range, financial and box points, so mostly the box labels break at the default.
+
 ## Remaining (#442)
 
 - Geographic map: a custom tooltip object (`IGeoMapTooltip`; no chart kind has one natively, `hover_changed` serves), visual elements other than circle markers at a coordinate, and the theme rules of the view.
 - Sankey and treemap: the tooltip formatters of the series (the tooltip is the node name and value).
 - Polar: the placement of the tooltip of the source (the suggested locations of the hover areas, `GetTooltipLocation` and the layout of the default tooltip), which every chart kind shares; the polar chart shows the native tooltip, finds and labels its points as the source (#624). The source draws no axis names and has no polar sub-separators.
-- Heat series: SVG cell geometries and the colour animation of the cells; the heat legend has no label wrapping, background or animation (#624).
-- Angular gauge: `GaugeGenerator` and the theme's gauge rules (the scenarios set them), and the animation of the needle.
+- Heat series: the heat legend has no label wrapping, background or animation (#624); the SVG geometries of the other series.
 - Tooltips and animations of the OHLC, error and heat series, which wait for the tooltip and animation suites.

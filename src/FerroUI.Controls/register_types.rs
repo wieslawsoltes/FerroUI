@@ -506,6 +506,7 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     crate::visual_state::VisualStateManager,
     crate::visual_state::VisualStateGroup,
     crate::visual_state::VisualState,
+    crate::visual_state::VisualTransition,
     crate::visual_state::StateTriggerBase,
     crate::visual_state::StateTrigger,
     crate::visual_state::AdaptiveTrigger,

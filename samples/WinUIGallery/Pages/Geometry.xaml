@@ -1,4 +1,151 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <StackPanel Orientation="Horizontal" Spacing="24"><Path Width="120" Height="120" Stretch="Uniform" Fill="DodgerBlue" Data="M 50,0 L 100,100 0,100 Z"/><Path Width="120" Height="120" Stretch="Uniform" Stroke="OrangeRed" StrokeThickness="3" Data="M 0,50 C 0,0 100,0 100,50 S 0,100 0,50"/></StackPanel>
+<!-- Ported from the pinned Geometry example of WinUI Gallery (14061eea) and the code behind of
+     GeometryPage.xaml.cs (shape_samples.rs); see ../NOTICE.md. The header image is the source's
+     Geometry.dark.png or Geometry.light.png of the page's theme, set by shape_samples.rs (the
+     ThemeDictionaries of HeaderImage). FerroUI has no TeachingTip: each tip is the Flyout of its
+     button, with the tip's title and subtitle, which the button's click opens and closes as
+     ShowGeometryButtonClick toggles IsOpen. The gallery's CopyButton is a Button with its glyph;
+     the copied text is announced in a polite live region for its feedback; ThemeResource becomes
+     DynamicResource, the corner radii are their values (OverlayCornerRadius 8,
+     ControlCornerRadius 4), CaptionTextBlockStyle is 12, and the cards of DesignRowCardStyle and
+     DesignRowLightCardStyle are Borders with the card brushes. HorizontalScrollMode is the bar's
+     visibility. FerroUI's TextBlock has no IsTextSelectionEnabled: the style names are
+     SelectableTextBlocks. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <StackPanel.Styles>
+    <Style Selector="Border.DesignRowCard">
+      <Setter Property="Padding" Value="0,12" />
+      <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
+      <Setter Property="BorderThickness" Value="0,1,0,0" />
+    </Style>
+    <Style Selector="Border.DesignRowLightCard">
+      <Setter Property="Padding" Value="0,12" />
+      <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorSecondaryBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
+      <Setter Property="BorderThickness" Value="0,1,0,0" />
+    </Style>
+  </StackPanel.Styles>
+  <RichTextBlock TextWrapping="Wrap">
+    <Paragraph><Run Text="Geometry describes the shape, size and position of UI elements on screen. These fundamental design elements help experiences feel coherent across the entire design system. WinUI uses three levels of rounding depending on what UI component is being rounded and how that component is arranged relative to neighboring elements." /><Run Text=" You can reference built-in corner radii styles using: " /><Run FontStyle="Italic" Text="CornerRadius=&quot;{StaticResource ControlCornerRadius}&quot;" /><Run Text="." /></Paragraph>
+  </RichTextBlock>
+
+  <StackPanel x:Name="Example1" Spacing="8">
+    <TextBlock Text="Geometry" FontSize="18" />
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Hidden">
+      <Canvas Width="505" Height="271" HorizontalAlignment="Left">
+        <Image x:Name="HeaderImage" Height="271" ZIndex="0" />
+        <Button x:Name="ShowGeometryButton1" Canvas.Left="16" Canvas.Top="16" Padding="4" ZIndex="1"
+                AutomationProperties.Name="Show Geometry" ToolTip.Tip="8px">
+          <FontIcon FontSize="16" Glyph="&#xE946;" />
+          <Button.Flyout>
+            <Flyout>
+              <StackPanel>
+                <TextBlock FontWeight="SemiBold" Text="8px" />
+                <TextBlock Text="OverlayCornerRadius" />
+              </StackPanel>
+            </Flyout>
+          </Button.Flyout>
+        </Button>
+        <Button x:Name="ShowGeometryButton2" Canvas.Left="16" Canvas.Top="148" Padding="4" ZIndex="1"
+                AutomationProperties.Name="Show Geometry" ToolTip.Tip="Body">
+          <FontIcon FontSize="16" Glyph="&#xE946;" />
+          <Button.Flyout>
+            <Flyout>
+              <TextBlock FontWeight="SemiBold" Text="0px" />
+            </Flyout>
+          </Button.Flyout>
+        </Button>
+        <Button x:Name="ShowGeometryButton3" Canvas.Left="240" Canvas.Top="168" Padding="4" ZIndex="1"
+                AutomationProperties.Name="Show geometry" ToolTip.Tip="4px">
+          <FontIcon FontSize="16" Glyph="&#xE946;" />
+          <Button.Flyout>
+            <Flyout>
+              <StackPanel>
+                <TextBlock FontWeight="SemiBold" Text="4px" />
+                <TextBlock Text="ControlCornerRadius" />
+              </StackPanel>
+            </Flyout>
+          </Button.Flyout>
+        </Button>
+      </Canvas>
+    </ScrollViewer>
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Hidden">
+      <StackPanel>
+        <Grid Margin="0,48,0,24" HorizontalAlignment="Stretch" ColumnDefinitions="148,*,112">
+          <TextBlock Margin="16,0,0,0" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                     Text="Corner radius" />
+          <TextBlock Grid.Column="1" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                     Text="Usage" />
+          <TextBlock Grid.Column="2" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                     Text="Style" />
+        </Grid>
+        <Border Classes="DesignRowLightCard">
+          <Grid HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="148" />
+              <ColumnDefinition Width="*" MaxWidth="400" />
+              <ColumnDefinition Width="160" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal" Spacing="12">
+              <Border x:Name="OverlayCornerSample" Width="20" Height="20" Margin="16,0,0,0" CornerRadius="8"
+                      Background="{DynamicResource AccentFillColorDefaultBrush}" />
+              <TextBlock VerticalAlignment="Center" Text="8px" />
+            </StackPanel>
+            <TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="12" TextWrapping="Wrap"
+                       Text="Top-level containers such as app windows, flyouts, cards and dialogs." />
+            <SelectableTextBlock Grid.Column="2" VerticalAlignment="Center" FontFamily="Consolas" FontSize="12"
+                                 Text="OverlayCornerRadius" />
+            <Button x:Name="CopyOverlayResourceToClipboardButton" Grid.Column="3" Margin="4,2,8,0"
+                    ToolTip.Tip="Copy to clipboard" AutomationProperties.Name="Copy to clipboard">
+              <FontIcon FontSize="14" Glyph="&#xE8C8;" />
+            </Button>
+          </Grid>
+        </Border>
+        <Border Classes="DesignRowCard">
+          <Grid HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="148" />
+              <ColumnDefinition Width="*" MaxWidth="400" />
+              <ColumnDefinition Width="160" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal" Spacing="12">
+              <Border x:Name="ControlCornerSample" Width="20" Height="20" Margin="16,0,0,0" CornerRadius="4"
+                      Background="{DynamicResource AccentFillColorDefaultBrush}" />
+              <TextBlock VerticalAlignment="Center" Text="4px" />
+            </StackPanel>
+            <TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="12" TextWrapping="Wrap"
+                       Text="In-page elements such as controls and list backplates." />
+            <SelectableTextBlock Grid.Column="2" VerticalAlignment="Center" FontFamily="Consolas" FontSize="12"
+                                 Text="ControlCornerRadius" />
+            <Button x:Name="CopyControlResourceToClipboardButton" Grid.Column="3" Margin="4,2,8,0"
+                    ToolTip.Tip="Copy to clipboard" AutomationProperties.Name="Copy to clipboard">
+              <FontIcon FontSize="14" Glyph="&#xE8C8;" />
+            </Button>
+          </Grid>
+        </Border>
+        <Border Classes="DesignRowLightCard">
+          <Grid HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="148" />
+              <ColumnDefinition Width="*" MaxWidth="400" />
+              <ColumnDefinition Width="160" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal" Spacing="12">
+              <Border Width="20" Height="20" Margin="16,0,0,0"
+                      Background="{DynamicResource AccentFillColorDefaultBrush}" />
+              <TextBlock VerticalAlignment="Center" Text="0px" />
+            </StackPanel>
+            <TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="12" TextWrapping="Wrap"
+                       Text="Straight edges that intersect with other straight edges." />
+            <TextBlock Grid.Column="2" VerticalAlignment="Center" FontFamily="Consolas" FontSize="12" Text="N/a" />
+          </Grid>
+        </Border>
+        <TextBlock x:Name="CopyOutput" Margin="16,8,0,0" FontSize="12" AutomationProperties.LiveSetting="Polite" />
+      </StackPanel>
+    </ScrollViewer>
+  </StackPanel>
 </StackPanel>
