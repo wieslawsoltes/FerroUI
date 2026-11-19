@@ -14,7 +14,7 @@ use xamlx::type_system::IXamlType;
 
 use super::{
     FerroXamlIlDataContextTypeMetadataNode, FerroXamlIlTargetTypeMetadataNode,
-    FerroXamlIlWellKnownTypesExtensions, XamlBindingsTransformException,
+    FerroTransformErrors, FerroXamlIlWellKnownTypesExtensions,
 };
 use crate::compiler_extensions::XamlIlBindingPathHelper;
 
@@ -244,7 +244,7 @@ impl IXamlAstTransformer for FerroXamlIlBindingPathTransformer {
                 .into_iter()
                 .find_map(|n| n.cast::<FerroXamlIlDataContextTypeMetadataNode>());
             match parent_data_context_node {
-                None => Err(XamlBindingsTransformException::new(
+                None => Err(XamlError::bindings_transform(
                     "Cannot parse a compiled binding without an explicit x:DataType directive to give a starting data type for bindings.",
                     &*binding,
                     None,
