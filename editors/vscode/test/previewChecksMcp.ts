@@ -94,7 +94,7 @@ async function verifyLayoutChecks({ invoke, content }: McpFixture): Promise<void
     ].join('\r\n');
     const uri = vscode.Uri.joinPath(vscode.workspace.workspaceFolders![0].uri, 'LayoutReview.rs');
     await vscode.workspace.fs.writeFile(uri, Buffer.from(rust));
-    const mapped = await open('LayoutReview.rs', 1);
+    const mapped = await open('LayoutReview.rs', 2);
     const mappedFindings = await mapped.read();
     assert.equal(text(mapped.document, mappedFindings.find(finding => finding.property === 'Canvas.Right')), '14.0');
     assert.equal(mappedFindings.find(finding => finding.code === 'layoutOverflow' && finding.name === 'Queue')?.overflow?.right, 22);
