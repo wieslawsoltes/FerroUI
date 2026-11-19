@@ -1,6 +1,7 @@
 //! Renderer-independent animation authoring. Times are seconds; colors are unpremultiplied sRGB.
 //! Samples can be applied to a live preview without modifying authored XAML, and recording adds
 //! keyframes rather than baking transient preview values into document attributes.
+mod clip_timing;
 mod curve;
 mod curve_channel;
 mod curve_metric;
@@ -21,6 +22,7 @@ mod xaml;
 #[cfg(feature = "native-preview")]
 pub mod native;
 
+pub use clip_timing::{clip_delays, xaml_clip_delay, xaml_clip_delay_edit, ClipSpan};
 pub use curve::{CurvePoint, CurveWindow};
 pub use curve_channel::CurveChannel;
 pub use curve_metric::CurveMetric;

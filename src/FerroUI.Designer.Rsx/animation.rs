@@ -54,9 +54,17 @@ pub struct RsxAnimation {
     duration: f64,
     factory_end: usize,
     first_method: Option<usize>,
+    delay: Option<DelaySource>,
     target_type: Option<TargetType>,
     keys: Vec<KeySource>,
     pub(crate) attachment: Option<program_comment::AnimationAttachment>,
+}
+
+#[derive(Clone, Debug)]
+struct DelaySource {
+    millis: u64,
+    literal: SourceSpan,
+    explicit_type: bool,
 }
 
 #[derive(Clone, Debug)]
@@ -116,6 +124,27 @@ impl FloatSource {
 }
 
 impl RsxAnimation {
+    pub(crate) fn delay_patch(&self, delay: f64) -> Result<Option<TextPatch>, String> {
+        let millis = (native_key_time(delay).map_err(|error| error.to_string())? * 1000.0).round();
+        if millis / 1000.0 != delay {
+            return Err("Use a clip delay in whole milliseconds for Rust animations".into());
+        }
+        if self.delay.as_ref().map_or(0, |delay| delay.millis) == millis as u64 {
+            return Ok(None);
+        }
+        let patch = match &self.delay {
+            Some(delay) => TextPatch {
+                span: delay.literal,
+                replacement: format!("{millis:.0}{}", if delay.explicit_type { "u64" } else { "" }),
+            },
+            None => TextPatch {
+                span: SourceSpan::new(self.factory_end, self.factory_end),
+                replacement: format!(".delay(ferroui_view::ms({millis:.0}))"),
+            },
+        };
+        Ok(Some(patch))
+    }
+
     /// Whether a native track can be edited back to this declaration.
     pub fn maps_key(&self, property: &str, time: f64, kind: ValueKind) -> bool {
         self.keys.iter().any(|key| {

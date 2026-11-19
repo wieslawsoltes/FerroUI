@@ -1,12 +1,12 @@
 use super::keyframe::{keyframe, record, MappedKey};
 use super::program_comment::AnimationAttachment;
 use super::{
-    AnimationStyle, FloatSource, RsxAnimation, RsxAnimationIssue, TargetType, TRACK_TARGET,
+    AnimationStyle, DelaySource, FloatSource, RsxAnimation, RsxAnimationIssue, TargetType, TRACK_TARGET,
 };
 use crate::{tree::escape_xml, RsxCatalog};
 use ferroui_designer_animation::{Easing, FillMode, Repeat, Timeline};
 use ferroui_designer_core::SourceSpan;
-use syn::{spanned::Spanned, Expr, ExprCall, ExprMethodCall, ExprPath, Lit, UnOp};
+use syn::{spanned::Spanned, Expr, ExprCall, ExprMethodCall, ExprPath, Lit, LitInt, UnOp};
 
 pub(super) fn style(
     source: &str,
@@ -63,6 +63,7 @@ pub(super) fn clip(expr: &Expr, catalog: &RsxCatalog) -> Option<RsxAnimation> {
     timeline.fill = FillMode::None;
     let mut keys = Vec::new();
     let mut target_type = None;
+    let mut delay = None;
     let first_method = methods.first().map(|method| span(&method.dot_token).start);
     for method in methods {
         match method.method.to_string().as_str() {
@@ -79,7 +80,12 @@ pub(super) fn clip(expr: &Expr, catalog: &RsxCatalog) -> Option<RsxAnimation> {
                 }
             }
             "fill_mode" => timeline.fill = fill_mode(argument(method, "fill_mode")?)?,
-            "delay" => timeline.delay = milliseconds(argument(method, "delay")?)?,
+            "delay" => {
+                let literal = milliseconds_literal(argument(method, "delay")?)?;
+                let millis = literal.base10_parse().ok()?;
+                timeline.delay = millis as f64 / 1000.0;
+                delay = Some(DelaySource { millis, literal: span(literal), explicit_type: literal.suffix() == "u64" });
+            }
             "iterations" => timeline.repeat = repeat(argument(method, "iterations")?)?,
             "easing" => timeline.easing = easing(argument(method, "easing")?)?,
             _ => return None,
@@ -95,6 +101,7 @@ pub(super) fn clip(expr: &Expr, catalog: &RsxCatalog) -> Option<RsxAnimation> {
         duration,
         factory_end: span(factory).end,
         first_method,
+        delay,
         target_type,
         keys,
         attachment: None,
@@ -177,19 +184,26 @@ pub(crate) fn path(expr: &Expr) -> Option<String> {
 }
 
 fn milliseconds(expr: &Expr) -> Option<f64> {
+    Some(milliseconds_literal(expr)?.base10_parse::<u64>().ok()? as f64 / 1000.0)
+}
+
+fn milliseconds_literal(expr: &Expr) -> Option<&LitInt> {
     let Expr::Call(call) = expr else { return None };
-    Some(unsigned(view_argument(call, "ms")?)? as f64 / 1000.0)
+    unsigned_literal(view_argument(call, "ms")?)
 }
 
 pub(crate) fn unsigned(expr: &Expr) -> Option<u64> {
+    unsigned_literal(expr)?.base10_parse().ok()
+}
+
+fn unsigned_literal(expr: &Expr) -> Option<&LitInt> {
     let Expr::Lit(literal) = expr else {
         return None;
     };
     let Lit::Int(literal) = &literal.lit else {
         return None;
     };
-    matches!(literal.suffix(), "" | "u64").then_some(())?;
-    literal.base10_parse().ok()
+    matches!(literal.suffix(), "" | "u64").then_some(literal)
 }
 
 fn repeat(expr: &Expr) -> Option<Repeat> {

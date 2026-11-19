@@ -8,6 +8,7 @@ use crate::blocks::keep_comments;
 use crate::source_edits::line_prefix;
 use ferroui_designer_animation::{AnimationProgramIdentity, Timeline};
 use ferroui_designer_core::{SourceSpan, TextPatch};
+use std::collections::BTreeMap;
 
 pub enum RsxAnimationEdit<'a> {
     Rename(&'a str),
@@ -22,6 +23,18 @@ pub struct RsxAnimationPlan {
 }
 
 impl RsxProjection<'_> {
+    /// Change literal runtime offsets in one checked transaction over the active invocation.
+    pub fn place_animation_clips(&self, placements: &[(SourceSpan, f64)]) -> Result<Vec<TextPatch>, String> {
+        let clips = self.clips().map(|clip| (clip.declaration.start, clip)).collect::<BTreeMap<_, _>>();
+        let mut patches = Vec::new();
+        for &(span, delay) in placements {
+            let clip = clips.get(&span.start).filter(|clip| clip.declaration == span)
+                .ok_or("Choose an animation declared inline on a mapped Rust style")?;
+            patches.extend(clip.delay_patch(delay)?);
+        }
+        self.check_animation_plan(patches, None, 0).map(|plan| plan.patches)
+    }
+
     pub fn can_create_animation(&self, owner: usize) -> bool {
         self.nodes
             .get(owner)

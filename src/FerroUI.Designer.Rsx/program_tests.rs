@@ -8,6 +8,34 @@ fn clips(source: &str) -> Vec<AnimationProgram> {
 }
 
 #[test]
+fn places_two_clips_without_changing_comments_typed_literals_or_opaque_siblings() {
+    let source = r##"fn other() { rsx! { Border { name: "Other 🌿" } } }
+fn view() { rsx! { Border {
+    name: "Card",
+    styles: [ferroui_view::style("#Card")
+        .animation(ferroui_view::animation(ferroui_view::ms(750)).delay(ferroui_view::ms(/* 🌿 */ 250u64)))
+        .animation(ferroui_view::animation(ferroui_view::ms(1000)))
+        .animation(compute_motion())],
+} } }
+"##.replace('\n', "\r\n");
+    let caret = source.rfind("rsx!").unwrap();
+    let map = project_rust(&source, caret).unwrap();
+    let preview = map.preview_markup();
+    let first = preview.animations[0].1.declaration;
+    let second = preview.animations[1].1.declaration;
+    let patches = map.place_animation_clips(&[(first, 0.5), (second, 1.4)]).unwrap();
+    assert_eq!(patches.len(), 2);
+    let expected = source.replace("250u64", "500u64")
+        .replace("ms(1000)))", "ms(1000)).delay(ferroui_view::ms(1400)))");
+    let edited = TextPatch::apply_all(&source, patches).unwrap();
+    assert_eq!(edited, expected);
+    let programs = clips(&edited);
+    assert!(programs[0].source.contains("Delay=\"0:0:0.5000000\""));
+    assert!(programs[1].source.contains("Delay=\"0:0:1.4000000\""));
+    assert!(map.place_animation_clips(&[(first, 0.0001)]).is_err());
+}
+
+#[test]
 fn creates_a_named_clip_after_an_opaque_style_without_replacing_the_view() {
     let source = r#"fn other() { rsx! { TextBlock { text: "Other 🌱" } } }
 fn dashboard() {
