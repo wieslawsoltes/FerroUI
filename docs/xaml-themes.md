@@ -346,6 +346,11 @@ documents of a direct dependency construct, so its controls keep their templates
 constructs the theme. The theme crate must be a direct dependency of the application; otherwise the
 library keeps its own table. See docs/porting/theme-trimming.md, section 20.
 
+**Themes used together, and types of one name (#848).** An application that uses several themes
+closes over all of them together: a key one theme references and another defines, or a type one
+constructs and another styles, keeps the providing unit. Types of one local name in two assemblies
+keep their own base classes and creates edges. See docs/porting/theme-trimming.md, section 21.
+
 **Turning trimming down or off:**
 - `theme-roots = "all"` keeps every unit, for comparison.
 - `theme-trimming = false` turns trimming off.
