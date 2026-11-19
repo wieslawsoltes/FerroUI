@@ -371,7 +371,7 @@ def decide(files, event, workspace, complete=True):
     compiled = {job: workspace.compiled(TARGETS[job]) for job in TARGETS}
     for path in files:
         if matches(path, FULL):
-            return run_all(f"{path} is built with by every job")
+            return run_all(f"{path} is used by every job")
         packages = workspace.readers(path, tests=False)
         owner = workspace.owner(path)
         if owner is not None:
@@ -413,7 +413,7 @@ def load_workspace(metadata_file, root):
     workspace = Workspace(metadata)
     tracked = subprocess.run(
         ["git", "ls-files", "--", "*.rs", "*.toml", "*.json", "*.mjs", "*.js", "*.ts"],
-        cwd=workspace.root, capture_output=True, text=True).stdout.split()
+        cwd=workspace.root, capture_output=True, text=True).stdout.splitlines()
     workspace.scan_references(tracked)
     return workspace
 

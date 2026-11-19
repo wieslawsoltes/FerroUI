@@ -98,7 +98,7 @@ jobs:
         run: |
           gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/files" \
             -q '.[] | .filename, (.previous_filename // empty)' > "$RUNNER_TEMP/files.txt"
-          if [ "$CHANGED" -ge 3000 ]; then echo "incomplete=--incomplete" >> "$GITHUB_OUTPUT"; fi
+          if [ "${CHANGED:-0}" -ge 3000 ]; then echo "incomplete=--incomplete" >> "$GITHUB_OUTPUT"; fi
           wc -l < "$RUNNER_TEMP/files.txt"
       - name: The jobs this run needs
         id: areas
