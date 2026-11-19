@@ -115,10 +115,15 @@ impl IVelloGpu for VelloGlGpu {
         &self.device
     }
 
-    /// The external objects feature of the GPU when the context shares the frames of its
-    /// producers.
+    /// The context of OpenGL the device is made over, as the Skia backend on the context hands it
+    /// out (the producers of the platform draw their frames with it: `NativeGlFrameProducer`
+    /// asks the render interface for it), and the external objects feature of the GPU when the
+    /// context shares the frames of its producers.
     fn try_get_feature(&self, feature_type: std::any::TypeId) -> Option<Rc<dyn std::any::Any>> {
         use ferroui_base::platform::IExternalObjectsRenderInterfaceContextFeature;
+        if feature_type == std::any::TypeId::of::<dyn IGlContext>() {
+            return Some(Rc::new(self.gl_context.clone()));
+        }
         if feature_type == std::any::TypeId::of::<dyn IExternalObjectsRenderInterfaceContextFeature>() {
             let feature: Rc<dyn IExternalObjectsRenderInterfaceContextFeature> = self.external_objects.clone()?;
             return Some(Rc::new(feature));
