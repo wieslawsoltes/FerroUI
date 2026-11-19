@@ -688,8 +688,9 @@ theme-roots = ["CalendarView", "AccentButtonStyle", "Controls/Popup.xaml"]
 # theme-roots = "all"
 ```
 
-`ferroui-build` reads the table from `Cargo.toml` in the crate directory with a small reader of
-these three forms (`theme_roots::ThemeTrimming::from_manifest`). A value in any other form fails the
+`ferroui-build` reads the table from `Cargo.toml` in the crate directory
+(`theme_roots::ThemeTrimming::from_manifest`). Since #850 it reads the manifest as TOML (section
+15.2): a header, dotted keys and an inline table are all the same table. A value in any other form fails the
 build and names the key. A build script can add roots with `Build::theme_roots(&[..])`; step 4
 adds the roots it reads from sources beside them, through `Roots::extend` (section 11.2). The
 roots are:
@@ -1421,8 +1422,8 @@ not read.
 `$OUT_DIR/xaml/theme_roots.txt` lists, for each target (by its root file), the types and keys its
 sources root. A kept unit can therefore be traced to the target that named it.
 
-The manifest is read by the small reader of section 10.1, extended to `[[bin]]` tables. It moves to
-the TOML reader of #850 when that is merged.
+The manifest is read as TOML (section 22.2): `[package] autobins` and the `name` and `path` of each
+`[[bin]]` table.
 
 ### 17.2 What a dependency's code makes
 
@@ -1614,3 +1615,91 @@ checked-in `compiled_xaml.xamlmeta` of a theme whose documents name such a key h
   - the existing graph tests, unchanged.
 - `theme_unit_graph_tests.rs`: an extension key that no document of the group defines is a
   reference of its unit.
+
+## 22. Build inputs read as what they are (#850)
+
+The review that found the problems of section 14 found three places where the build read an input
+as text. Each one has a test that failed on main.
+
+### 22.1 Includes
+
+The group of a document is the document and the documents it includes, directly or not. Both the
+build (`rust_emitter::class_document_group`) and the run-time loader collect it with
+`back_end::include_sources`. That function used to scan the raw text of the document, so:
+
+- `Source="/A&amp;B.xaml"` was collected with its entity, and `A&B.xaml` was left out of the group;
+- `x:Key="a>b"` ended the tag early, and the include behind it was not found;
+- an include written as text inside CDATA was added to the group.
+
+`include_sources` now reads the document with `roxmltree`, over the text the parser of the compiler
+reads. `XDocumentXamlParser::xml_text` (new in `xamlx`) gives that text: the document type
+declaration is blanked out, as `parse` does. The rules are these:
+
+- an include is an element whose local name is `MergeResourceInclude`, `ResourceInclude` or
+  `StyleInclude`, with any prefix, as before;
+- its source is the value of its `Source` attribute that has no namespace, with entities decoded;
+- text, CDATA and comments are not elements.
+
+A document that is not well formed has no includes. It fails when it is compiled or loaded, with
+the diagnostic of the parser, the same diagnostic it gets without includes. No new dependency is
+needed: the parser of `xamlx` already uses `roxmltree`.
+
+### 22.2 The manifest
+
+`[package.metadata.ferroui]` (`theme-trimming`, `theme-roots` and `compile-bindings`) was read by a
+parser of its own lines, which had four faults:
+
+- dotted keys under `[package.metadata]` were ignored;
+- `"Accent\u0042uttonStyle"` lost its escape;
+- `["Accent[Brush"]` was reported as an array that is not closed;
+- a top-level table whose quoted name is `"package.metadata.ferroui"` was taken for the nested
+  table.
+
+`ferroui-build` now parses the manifest with the `toml` crate (1.1.6). That version was already in
+the lock file of the workspace, as a build dependency of `skia-bindings`. `ferroui-build` is a
+build dependency of every crate that uses it, so the parser runs only in build scripts and is linked
+into no application.
+
+The options are read from the table at the path `package.metadata.ferroui`, whatever form the
+manifest writes it in: a header, dotted keys, an inline table, or dotted keys at the top level. A
+value of the wrong type is refused, and the error names the option. A manifest that is not TOML is
+an error of the build; Cargo has already parsed the manifest, so this does not happen in practice.
+The binaries of a package (section 17.1) are read from the same parsed manifest.
+
+The `toml` dependency is kept by a decision of the owner: it is build-only (about 3 s more of a
+cold build, no cost in a binary or at run time).
+
+### 22.3 Assets
+
+`Build::embed_assets` embeds the files of its directories as raw bytes, except the documents the
+compiler consumed. For a class group, that list held only the documents the compiler emitted one by
+one. A dictionary merged into the class has no build function of its own: it is compiled into a
+unit of the class. Such a dictionary under an embedded directory was therefore embedded again. A
+class group now leaves out every document of its group: the document of the class and every
+document it includes, merged documents included.
+
+Every other file is embedded as before, including a document of an embedded directory that no group
+consumed. The theme crates do not use `embed_assets` for their documents; they have filters of their
+own. Their assets, their `.xamlmeta` and the checked-in generated files are unchanged. There is no
+explicit option yet to ship the original text of a consumed document (see the issue).
+
+### 22.4 Tests
+
+- `back_end/includes.rs`:
+  - an entity in a source;
+  - a `>` in an attribute;
+  - an include in CDATA or in a comment;
+  - a document that is not well formed;
+  - a document type declaration.
+- `rust_emitter/compiled.rs` (`the_group_of_a_class_follows_its_includes_as_parsed`): the group of a
+  class with these cases.
+- `tests/FerroUI.Markup.Xaml.UnitTests/xaml/style_include_tests.rs`: a document that is not well
+  formed, with an include, fails to load with the diagnostic of the parser, position included.
+- `theme_roots_tests.rs`:
+  - equivalent forms of the table give the same options;
+  - escapes, and a bracket inside a string;
+  - a quoted top-level table name is a different table;
+  - a value of the wrong type names its option.
+- `tests/GeneratedRustFixture/Library`: `Dictionaries/Part.xaml` is merged into `App.xaml` and its
+  directory is embedded. Neither its path nor the canary comment of the file is in `ASSETS`, while
+  `Dictionaries/Loose.xaml`, which no document consumes, is.

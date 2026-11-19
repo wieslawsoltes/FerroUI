@@ -33984,8 +33984,8 @@
    "key": "DefaultMediaTransportControlsStyle",
    "kind": "Style",
    "target_type": "MediaTransportControls",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34004,8 +34004,8 @@
    "key": "MediaTransportControlsAppBarButtonHeight",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34014,8 +34014,8 @@
    "key": "MediaTransportControlsAppBarButtonWidth",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34024,8 +34024,8 @@
    "key": "MediaTransportControlsBorderBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34034,8 +34034,8 @@
    "key": "MediaTransportControlsBorderThickness",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34044,8 +34044,8 @@
    "key": "MediaTransportControlsFillMediaText",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34054,8 +34054,8 @@
    "key": "MediaTransportControlsFillTimeElapsedText",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34064,8 +34064,8 @@
    "key": "MediaTransportControlsFlyoutBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34074,8 +34074,8 @@
    "key": "MediaTransportControlsMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34084,8 +34084,8 @@
    "key": "MediaTransportControlsMaxWidth",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34094,8 +34094,8 @@
    "key": "MediaTransportControlsMinWidth",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34104,8 +34104,8 @@
    "key": "MediaTransportControlsPanelBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34114,8 +34114,8 @@
    "key": "MediaTransportControlsProgressSliderCompactMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34124,8 +34124,8 @@
    "key": "MediaTransportControlsProgressSliderMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34134,8 +34134,8 @@
    "key": "MediaTransportControlsSliderHeight",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34144,8 +34144,8 @@
    "key": "MediaTransportControlsSliderWidth",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34154,8 +34154,8 @@
    "key": "MediaTransportControlsThumbBorderBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34165,7 +34165,7 @@
    "kind": "Thickness",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "reason": "The title safe bounds of a television (the Xbox layout of MediaTransportControls): the port has no television layout. The other resources of the document are ported (Resources/MediaTransportControls_themeresources.xaml) and its style is ported by hand (Controls/MediaTransportControls.xaml).",
    "batch": null
   },
   {
@@ -34174,8 +34174,8 @@
    "key": "MediaTransportControlsAppBarButtonHeight",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34184,8 +34184,8 @@
    "key": "MediaTransportControlsAppBarButtonWidth",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34194,8 +34194,8 @@
    "key": "MediaTransportControlsBorderBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34204,8 +34204,8 @@
    "key": "MediaTransportControlsBorderThickness",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34214,8 +34214,8 @@
    "key": "MediaTransportControlsFillMediaText",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34224,8 +34224,8 @@
    "key": "MediaTransportControlsFillTimeElapsedText",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34234,8 +34234,8 @@
    "key": "MediaTransportControlsFlyoutBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34244,8 +34244,8 @@
    "key": "MediaTransportControlsMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34254,8 +34254,8 @@
    "key": "MediaTransportControlsMaxWidth",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34264,8 +34264,8 @@
    "key": "MediaTransportControlsMinWidth",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34274,8 +34274,8 @@
    "key": "MediaTransportControlsPanelBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34284,8 +34284,8 @@
    "key": "MediaTransportControlsProgressSliderCompactMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34294,8 +34294,8 @@
    "key": "MediaTransportControlsProgressSliderMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34304,8 +34304,8 @@
    "key": "MediaTransportControlsSliderHeight",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34314,8 +34314,8 @@
    "key": "MediaTransportControlsSliderWidth",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34324,8 +34324,8 @@
    "key": "MediaTransportControlsThumbBorderBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34335,7 +34335,7 @@
    "kind": "Thickness",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "reason": "The title safe bounds of a television (the Xbox layout of MediaTransportControls): the port has no television layout. The other resources of the document are ported (Resources/MediaTransportControls_themeresources.xaml) and its style is ported by hand (Controls/MediaTransportControls.xaml).",
    "batch": null
   },
   {
@@ -34344,8 +34344,8 @@
    "key": "MediaTransportControlsAppBarButtonHeight",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34354,8 +34354,8 @@
    "key": "MediaTransportControlsAppBarButtonWidth",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34364,8 +34364,8 @@
    "key": "MediaTransportControlsBorderBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34374,8 +34374,8 @@
    "key": "MediaTransportControlsBorderThickness",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34384,8 +34384,8 @@
    "key": "MediaTransportControlsFillMediaText",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34394,8 +34394,8 @@
    "key": "MediaTransportControlsFillTimeElapsedText",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34404,8 +34404,8 @@
    "key": "MediaTransportControlsFlyoutBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34414,8 +34414,8 @@
    "key": "MediaTransportControlsMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34424,8 +34424,8 @@
    "key": "MediaTransportControlsMaxWidth",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34434,8 +34434,8 @@
    "key": "MediaTransportControlsMinWidth",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34444,8 +34444,8 @@
    "key": "MediaTransportControlsPanelBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34454,8 +34454,8 @@
    "key": "MediaTransportControlsProgressSliderCompactMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34464,8 +34464,8 @@
    "key": "MediaTransportControlsProgressSliderMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34474,8 +34474,8 @@
    "key": "MediaTransportControlsSliderHeight",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34484,8 +34484,8 @@
    "key": "MediaTransportControlsSliderWidth",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34494,8 +34494,8 @@
    "key": "MediaTransportControlsThumbBorderBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -34505,7 +34505,7 @@
    "kind": "Thickness",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
+   "reason": "The title safe bounds of a television (the Xbox layout of MediaTransportControls): the port has no television layout. The other resources of the document are ported (Resources/MediaTransportControls_themeresources.xaml) and its style is ported by hand (Controls/MediaTransportControls.xaml).",
    "batch": null
   },
   {
@@ -90193,6 +90193,7 @@
   "Resources/InfoBar_themeresources.xaml",
   "Resources/ListBox_themeresources.xaml",
   "Resources/ListViewItem_themeresources.xaml",
+  "Resources/MediaTransportControls_themeresources.xaml",
   "Resources/MenuBar_themeresources.xaml",
   "Resources/MenuFlyout_themeresources.xaml",
   "Resources/NavigationBackButton_themeresources.xaml",
@@ -90924,10 +90925,10 @@
     "{MediaTransportControls}"
    ],
    "batch": "B6",
-   "winui": "MediaTransportControls: {MediaTransportControls} (MediaTransportControls_themeresources.xaml), with standard Button and Slider controls and a menu for additional provider-supported playback actions. A WinUI control in ferroui-media-video-controls (docs/media/ISSUE-561.md); the Fluent theme has no document for it.",
+   "winui": "MediaTransportControls: {MediaTransportControls}, DefaultMediaTransportControlsStyle, the template styles AppBarButtonStyle, AppBarToggleButtonStyle and FlyoutStyle (MediaTransportControls_themeresources.xaml): the parts, states and values of the source, the commands in three groups of AppBarButtons in place of the CommandBar. A WinUI control in ferroui-media-video-controls (docs/media/ISSUE-561.md); the Fluent theme has no document for it.",
    "status": "ported",
    "deviations": 1,
-   "date": "2026-11-11"
+   "date": "2026-11-18"
   },
   {
    "document": "CameraCaptureUI.xaml",
@@ -91431,10 +91432,10 @@
   },
   {
    "document": "controls/dev/CommonStyles/MediaTransportControls_themeresources.xaml",
-   "key": "*",
+   "key": "MediaTransportControlsTitleSafeBounds",
    "variant": null,
-   "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported.",
-   "items": 52
+   "reason": "The title safe bounds of a television (the Xbox layout of MediaTransportControls): the port has no television layout. The other resources of the document are ported (Resources/MediaTransportControls_themeresources.xaml) and its style is ported by hand (Controls/MediaTransportControls.xaml).",
+   "items": 3
   },
   {
    "document": "dxaml/xcp/dxaml/themes/generic.xaml",
@@ -91942,7 +91943,7 @@
   "MediaTransportControls": {
    "ferroui": "MediaTransportControls",
    "batch": "B6",
-   "note": "WinUI's MediaTransportControls in ferroui-media-video-controls, with a reduced template"
+   "note": "WinUI's MediaTransportControls in ferroui-media-video-controls"
   },
   "MenuBarItem": {
    "ferroui": "MenuItem",

@@ -22,7 +22,9 @@
 //!    plane), cleared to 1: the first diffuse layer of a material writes it with the test
 //!    `Less`; the other layers test `LessEqual` and do not write it.
 //! 7. **Fragment stage** per sample: the attributes interpolated perspective-correctly, the
-//!    lighting and colour of the layer ([`crate::lighting::shade`]).
+//!    brush of the layer sampled at the texture coordinate ([`crate::brush::sample_brush`]: a
+//!    gradient, an image) and the lighting and colour of the layer
+//!    ([`crate::lighting::shade_color`]).
 //! 8. **Blend.** A diffuse layer premultiplied source-over, a specular or emissive layer added
 //!    (`One, One`), each channel clamped to 0..1 as an RGBA8 target stores it.
 //! 9. **Resolve.** 4x supersampling on an ordered grid (samples at a quarter and three quarters
@@ -32,17 +34,24 @@
 //!
 //! The output is premultiplied RGBA8, top row first, transparent where nothing was drawn.
 //! Nothing is allocated per pixel or per triangle: the buffers of a [`CpuRasterizer`] are kept
-//! from one render to the next.
+//! from one render to the next, and so are the texels of the brushes (a gradient's lookup, the
+//! pixels of a bitmap), read once per [`BrushTextureKey`] ([`brush_textures_read`]).
 
 mod clip;
 
-use crate::lighting::shade;
-use crate::uniforms::{transform_point, BrushSampling, DrawUniforms, Face, FrameUniforms, LayerKind};
+use crate::brush::{
+    sample_brush, texture_coordinate_bounds, BrushShader, BrushTextureIdentity, BrushTextureKey, BrushTextureSource,
+    BrushTexels, BrushUniforms, MaterialBrush,
+};
+use crate::lighting::shade_color;
+use crate::uniforms::{transform_point, DrawUniforms, Face, FrameUniforms, LayerKind};
 use clip::{clip_triangle, ClipVertex, Clipped, ATTRIBUTES};
+use ferroui_base::media::IBrush;
 use ferroui_base::rendering::scene3d::{Scene3DMaterialLayer, Scene3DSnapshot};
-use ferroui_base::PixelSize;
+use ferroui_base::{PixelSize, Rect};
 use std::cell::Cell;
 use std::ops::Range;
+use std::sync::Arc;
 
 /// The largest side of an image the rasterizer makes, in pixels: larger sizes are clamped (the
 /// image is then drawn scaled up), which keeps the fixed-point coordinates in range.
@@ -58,9 +67,20 @@ const SUBPIXEL_ONE: i64 = 1 << SUBPIXEL_BITS;
 /// Half a sample in fixed point: the centre of a sample.
 const SUBPIXEL_HALF: i64 = SUBPIXEL_ONE / 2;
 
+/// The renders a brush texture is kept for without being drawn.
+const TEXTURE_LIFETIME: u64 = 240;
+
 ferroui_base::ferro_thread_local! {
     /// The scenes rasterized on this thread.
     static RASTERIZED: Cell<u64> = const { Cell::new(0) };
+    /// The brush textures read on this thread.
+    static TEXTURES_READ: Cell<u64> = const { Cell::new(0) };
+}
+
+/// How many brush textures the CPU reference read on this thread (a gradient's lookup texture
+/// made, the pixels of a bitmap read): once per [`BrushTextureKey`] while a rasterizer keeps it.
+pub fn brush_textures_read() -> u64 {
+    TEXTURES_READ.with(Cell::get)
 }
 
 /// How many scenes the CPU reference rasterized on this thread (each call of
@@ -157,6 +177,52 @@ struct Pass {
     writes_depth: bool,
     /// Whether the draw is added (`One, One`) rather than blended source-over.
     additive: bool,
+    /// How the brush of the layer is sampled.
+    shader: BrushShader,
+    /// The uniforms of the brush.
+    brush: BrushUniforms,
+    /// The texels of the brush's texture, when it has one.
+    texels: Option<Arc<BrushTexels>>,
+}
+
+/// The texels of a brush texture kept by a rasterizer.
+struct KeptTexels {
+    key: BrushTextureKey,
+    identity: BrushTextureIdentity,
+    /// `None` when they could not be read: the layer is then drawn with its `Color`.
+    texels: Option<Arc<BrushTexels>>,
+    last_used: u64,
+}
+
+/// The brush textures of a rasterizer, read once per key.
+#[derive(Default)]
+struct TexelCache {
+    entries: Vec<KeptTexels>,
+    clock: u64,
+}
+
+impl TexelCache {
+    /// A new render: what was not drawn for a while, and the textures of bitmaps that are gone,
+    /// go.
+    fn begin(&mut self) {
+        self.clock += 1;
+        let clock = self.clock;
+        self.entries.retain(|entry| entry.identity.is_alive() && clock - entry.last_used < TEXTURE_LIFETIME);
+    }
+
+    /// The texels of `source`, read on first demand.
+    fn get(&mut self, source: &BrushTextureSource) -> Option<Arc<BrushTexels>> {
+        let key = source.key();
+        if let Some(entry) = self.entries.iter_mut().find(|entry| entry.key == key) {
+            entry.last_used = self.clock;
+            return entry.texels.clone();
+        }
+        let texels = source.texels().map(Arc::new);
+        TEXTURES_READ.with(|count| count.set(count.get() + 1));
+        let identity = source.identity();
+        self.entries.push(KeptTexels { key, identity, texels: texels.clone(), last_used: self.clock });
+        texels
+    }
 }
 
 /// The CPU reference rasterizer, with the buffers it keeps from one render to the next.
@@ -170,6 +236,7 @@ pub struct CpuRasterizer {
     tile_triangles: Vec<u32>,
     color: Vec<[f32; 4]>,
     depth: Vec<f32>,
+    textures: TexelCache,
 }
 
 /// The geometry of a target: its pixels, its samples and its tiles.
@@ -198,9 +265,10 @@ impl CpuRasterizer {
 
     /// Renders `scene` into an image of `size` pixels (each side clamped to 0..[`MAX_SIDE`]).
     /// The projection of the camera covers the whole image. `scale` is the number of pixels per
-    /// unit of the viewport; the rasterizer itself depends only on the size (the brushes of
-    /// step D6 use the scale for the resolution of what they draw), and the output cache keys on
-    /// it. A scene without a camera, or a size without pixels, gives a transparent image.
+    /// unit of the viewport; the rasterizer itself depends only on the size (the offscreen
+    /// renders of visual and drawing brushes take the scale for their resolution), and the
+    /// output cache keys on it. A scene without a camera, or a size without pixels, gives a
+    /// transparent image.
     pub fn render(
         &mut self,
         scene: &Scene3DSnapshot,
@@ -227,6 +295,7 @@ impl CpuRasterizer {
             tiles_x: width.div_ceil(TILE),
             tiles_y: height.div_ceil(TILE),
         };
+        self.textures.begin();
         self.prepare(scene, &frame, &target);
         self.bin(&target);
         self.draw_tiles(&frame, &target, &mut image.rgba);
@@ -287,8 +356,14 @@ impl CpuRasterizer {
             if triangles.is_empty() {
                 continue;
             }
+            // The box of the texture coordinates a relative brush is mapped onto, once per model.
+            let sampled = model.front.iter().chain(&model.back).any(|layer| {
+                layer.brush.as_ref().is_none_or(|brush| brush.as_solid_color_brush().is_none())
+            });
+            let texture_bounds = if sampled { texture_coordinate_bounds(mesh) } else { Rect::default() };
             for (face, layers) in [(Face::Front, &model.front), (Face::Back, &model.back)] {
-                add_passes(&mut self.passes, model, layers, face, triangles.clone());
+                let textures = &mut self.textures;
+                add_passes(&mut self.passes, textures, model, layers, face, triangles.clone(), texture_bounds);
             }
         }
     }
@@ -379,18 +454,26 @@ impl CpuRasterizer {
 /// depth (the first layer when the material has no diffuse layer); the others test against it.
 fn add_passes(
     passes: &mut Vec<Pass>,
+    textures: &mut TexelCache,
     model: &ferroui_base::rendering::scene3d::Scene3DModel,
     layers: &[Scene3DMaterialLayer],
     face: Face,
     triangles: Range<usize>,
+    texture_bounds: Rect,
 ) {
     let depth_layer = layers
         .iter()
         .position(|layer| LayerKind::of(layer.kind) == LayerKind::Diffuse)
         .unwrap_or(0);
     for (index, layer) in layers.iter().enumerate() {
-        let (draw, sampling) = DrawUniforms::of(model, layer, face);
-        if sampling == BrushSampling::Unsampled {
+        let (draw, _) = DrawUniforms::of(model, layer, face);
+        let mut brush = MaterialBrush::of(layer.brush.as_ref(), texture_bounds);
+        let texels = brush.texture().and_then(|source| textures.get(source));
+        if brush.texture().is_some() && texels.is_none() {
+            // Texels that cannot be read: the layer is drawn with its colour.
+            brush = brush.to_unsampled();
+        }
+        if brush.is_unsampled() {
             crate::note_unsampled_brush();
         }
         passes.push(Pass {
@@ -399,6 +482,9 @@ fn add_passes(
             draw,
             writes_depth: index == depth_layer,
             additive: draw.kind() != LayerKind::Diffuse,
+            shader: brush.shader(),
+            brush: *brush.uniforms(),
+            texels,
         });
     }
 }
@@ -535,7 +621,15 @@ fn rasterize(
                     let attributes = interpolate(triangle, weights);
                     let normal = [attributes[3], attributes[4], attributes[5]];
                     let world = [attributes[0], attributes[1], attributes[2]];
-                    let source = shade(frame, &pass.draw, normal, world);
+                    let mut layer_color = pass.draw.color;
+                    if pass.shader != BrushShader::Solid {
+                        let uv = [attributes[6], attributes[7]];
+                        let sample = sample_brush(pass.shader, &pass.brush, pass.texels.as_deref(), uv);
+                        for (channel, factor) in layer_color.iter_mut().zip(sample) {
+                            *channel *= factor;
+                        }
+                    }
+                    let source = shade_color(frame, &pass.draw, layer_color, normal, world);
                     blend(dst, source, pass.additive);
                     if pass.writes_depth {
                         *z_dst = z;

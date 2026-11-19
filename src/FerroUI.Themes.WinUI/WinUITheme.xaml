@@ -48,6 +48,7 @@
         <MergeResourceInclude Source="/Resources/Button_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/ToggleButton_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/CornerRadius_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/MediaTransportControls_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/RepeatButton_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/CalendarDatePicker_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/CalendarView_themeresources.xaml" />

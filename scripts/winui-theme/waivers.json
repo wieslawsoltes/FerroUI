@@ -28,8 +28,8 @@
     },
     {
       "document": "controls/dev/CommonStyles/MediaTransportControls_themeresources.xaml",
-      "key": "*",
-      "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported."
+      "key": "MediaTransportControlsTitleSafeBounds",
+      "reason": "The title safe bounds of a television (the Xbox layout of MediaTransportControls): the port has no television layout. The other resources of the document are ported (Resources/MediaTransportControls_themeresources.xaml) and its style is ported by hand (Controls/MediaTransportControls.xaml)."
     },
     {
       "document": "dxaml/xcp/dxaml/themes/generic.xaml",

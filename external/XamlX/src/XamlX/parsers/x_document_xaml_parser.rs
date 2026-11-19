@@ -843,7 +843,31 @@ fn get_declared_whitespace_mode(entered: &EnteredElement<'_, '_>) -> XmlSpace {
     }
 }
 
+/// `s` with the document type declaration in `range` blanked out, all offsets and line breaks
+/// kept.
+fn blank_document_type(s: &str, range: std::ops::Range<usize>) -> String {
+    let mut text = String::with_capacity(s.len());
+    text.push_str(&s[..range.start]);
+    text.extend(s[range.clone()].bytes().map(|b| if b == b'\n' || b == b'\r' { b as char } else { ' ' }));
+    text.push_str(&s[range.end..]);
+    text
+}
+
 impl XDocumentXamlParser {
+    /// The text the XML parser of [`parse`](Self::parse) reads for the markup `s`: `s` with its
+    /// document type declaration blanked out (it is ignored, as upstream's `DtdProcessing.Ignore`
+    /// ignores it), or `s` itself. The error of a document whose elements are nested too deeply,
+    /// as [`parse`](Self::parse) reports it. Not from upstream: what a reader of the elements of a
+    /// document (the includes a group is collected from) parses, so that it reads the document
+    /// with the rules of the parser.
+    pub fn xml_text(s: &str) -> XamlResult<std::borrow::Cow<'_, str>> {
+        let lines = LineIndex::new(s);
+        Ok(match prescan(s, &lines)? {
+            Some(range) => std::borrow::Cow::Owned(blank_document_type(s, range)),
+            None => std::borrow::Cow::Borrowed(s),
+        })
+    }
+
     pub fn parse(
         s: &str,
         compatibility_mappings: Option<&HashMap<String, String>>,
@@ -852,19 +876,7 @@ impl XDocumentXamlParser {
 
         // The document type declaration is ignored: it is blanked out (keeping all offsets and
         // line breaks intact) before the XML parser sees the text.
-        let without_doctype: Option<String> = prescan(s, &lines)?.map(|range| {
-            let mut text = String::with_capacity(s.len());
-            text.push_str(&s[..range.start]);
-            text.extend(s[range.clone()].bytes().map(|b| {
-                if b == b'\n' || b == b'\r' {
-                    b as char
-                } else {
-                    ' '
-                }
-            }));
-            text.push_str(&s[range.end..]);
-            text
-        });
+        let without_doctype: Option<String> = prescan(s, &lines)?.map(|range| blank_document_type(s, range));
         let xml_text = without_doctype.as_deref().unwrap_or(s);
 
         let xml = roxmltree::Document::parse(xml_text).map_err(|e| {
