@@ -16,7 +16,9 @@
 //!   root, against `set_text` of the text block; frames of 100 and of 1000 text blocks of which
 //!   one changes and of 100 of which none changes, against the one `set_text` that changes the
 //!   same text (what the reconcile costs); and the two halves of the 100-element frame: writing
-//!   it with the scalar writer, and committing the same bytes from a buffer of the caller.
+//!   it with the scalar writer, and committing the same bytes from a buffer of the caller;
+//! - memo frames: 100 and 1000 text blocks as memo elements, of which the frame reuses all but
+//!   the one that changes (`ferro_frame_reuse`).
 //!
 //! `cargo bench -p ferroui-capi --no-default-features --bench call_overhead`. No window and no
 //! renderer: the thread is the UI thread through `ferro_init`. Each case alternates between two
@@ -333,6 +335,37 @@ fn main() {
                 debug_assert_eq!(code, FERRO_OK);
             });
             report("frame: 100 text blocks, commit of bytes", rust_one(), bytes);
+            assert_eq!(ferro_frame_clear(root), FERRO_OK);
+        }
+    }
+
+    // Memo elements: every text block is a memo element whose version is its text; the frame
+    // reuses the ones the last frame has (`ferro_frame_reuse`) and writes the one that changes.
+    for count in [100usize, 1000] {
+        let labels: Vec<String> = (0..count).map(|n| format!("Item {n}")).collect();
+        let name = format!("frame: {count} memo text blocks, one changes");
+        if selected(&name) {
+            let memo = measure_n(ITERATIONS / count as u32, |i| {
+                ferro_frame_begin();
+                ferro_frame_open(panel_type, 0);
+                for (n, label) in labels.iter().enumerate() {
+                    let key = n as i64 + 1;
+                    let version = if n == 0 { i64::from(i & 1) + 1 } else { 1 };
+                    if ferro_frame_reuse(root, key, version, 0) >= 0 {
+                        continue;
+                    }
+                    ferro_frame_open(text_type, key);
+                    ferro_frame_memo(version, 0);
+                    let value = if n == 0 { texts[(i & 1) as usize] } else { label.as_str() };
+                    // SAFETY: a pointer and the length of a Rust string.
+                    unsafe { ferro_frame_str(text, value.as_ptr().cast(), value.len() as i64) };
+                    ferro_frame_close();
+                }
+                ferro_frame_close();
+                let code = ferro_frame_commit(root);
+                debug_assert_eq!(code, FERRO_OK);
+            });
+            report(&name, rust_one(), memo);
             assert_eq!(ferro_frame_clear(root), FERRO_OK);
         }
     }
