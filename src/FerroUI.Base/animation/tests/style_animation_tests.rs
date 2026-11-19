@@ -754,3 +754,59 @@ fn animations_with_activator_trigger_should_be_activated_and_deactivated() {
     border.classes().add("foo");
     assert!(border.background() == Some(blue()));
 }
+
+/// An animator of `bool` values, given explicitly for a property of another type.
+struct BoolValuesAnimator;
+
+impl crate::animation::InterpolatingAnimator for BoolValuesAnimator {
+    type Value = bool;
+
+    fn interpolate(&self, progress: f64, old_value: &bool, new_value: &bool) -> bool {
+        if progress < 0.5 { *old_value } else { *new_value }
+    }
+}
+
+#[test]
+fn an_animator_that_rejects_its_property_is_an_error_of_apply_without_a_panic() {
+    let program = || {
+        let animator: Rc<dyn crate::animation::ICustomAnimator> = Rc::new(BoolValuesAnimator);
+        let setter: Rc<dyn crate::animation::IAnimationSetter> =
+            Setter::new(crate::layout::Layoutable::width_property(), 20.0);
+        Animation::set_animator(&setter, animator);
+        let animation = Animation::new();
+        animation.set_duration(seconds(1.0));
+        animation.children().add(KeyFrame::with_key_time(seconds(1.0), [setter as _]));
+        animation
+    };
+    let expected = "Unable to animate property";
+
+    // The preview of the Designer and `try_apply` return the error of the animator.
+    let animation = program();
+    let target = Border::new();
+    let error = animation
+        .try_apply_for_preview(&target, Some(TestClock::new().as_clock()), None)
+        .err()
+        .expect("the animator rejects the property");
+    assert!(error.0.contains(expected), "{error}");
+    let error = animation
+        .try_apply(&target, Some(TestClock::new().as_clock()), Observable::single_value(true), None, true)
+        .err()
+        .expect("the animator rejects the property");
+    assert!(error.0.contains(expected), "{error}");
+
+    // `apply` raises it on the dispatcher and applies nothing.
+    let _scope = crate::threading::Dispatcher::unit_test_scope();
+    let raised = Rc::new(RefCell::new(None::<String>));
+    let seen = raised.clone();
+    let _handler = crate::threading::Dispatcher::current_dispatcher().unhandled_exception(move |args| {
+        *seen.borrow_mut() = args.exception_message().map(str::to_owned);
+        args.set_handled(true);
+    });
+    let clock = TestClock::new();
+    let applied = animation.apply(&target, Some(clock.as_clock()), Observable::single_value(true), None, true);
+    clock.step(SignedDuration::ZERO);
+    clock.step(seconds(1.0));
+    assert!(raised.take().is_some_and(|message| message.contains(expected)));
+    assert!(target.width().is_nan(), "nothing is applied");
+    applied.dispose();
+}
