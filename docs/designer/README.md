@@ -565,6 +565,24 @@ Directional routes use the framework's existing ConditionalAction implementation
 In VS Code, the States action opens a route in the Timeline. The `designer_state` tool can
 sample the same explicit route at a requested time through `preview_transition`.
 
+### Rust visual states
+
+Declare typed state groups inline with `visual_states: [ferroui_view::visual_state_group("Review")…]`.
+Use `visual_state("Queued").set(property, value)` on the group owner or
+`set_on("Card", property, value)` on its named control. Routes use
+`transition(Some("Queued"), "Ready", ferroui_view::ms(640), "CubicEaseIn")`.
+A `None` starting endpoint declares a default route. The compiled view calls
+`ferroui_view::set_visual_state` to enter a state or clear it. State properties use native or
+application-registered animators. Clearing the state restores the underlying values and bindings.
+
+Open **States** to preview endpoints, edit mapped typed values and route timing, or reveal
+the original Rust route. Use the playhead in Studio or the Timeline transport in VS Code
+to sample the generated native preview. Studio, VS Code and MCP apply checked edits to the
+original literals in one undo step. Constructors, comments, and neighboring expressions
+retain their original source. Add and remove declarations in Rust. Cargo-exported
+property getters use the same registry as RSX keyframes. Todo Workbench registers
+the **Interactive review** fixture from `app_preview/review_states.rs`.
+
 The **Behaviors** panel authors event/data triggers and property, command, method and class actions.
 Custom trigger/action objects retain their raw markup and can be edited in source. The designer
 registers the existing Interactivity, Interactions and Interactions.Custom types. Preview executes

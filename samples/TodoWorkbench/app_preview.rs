@@ -20,6 +20,7 @@ use std::rc::Rc;
 
 mod animation_codec;
 mod motion;
+mod review_states;
 
 static ASSEMBLY: MarkupAssembly = MarkupAssembly {
     name: "todo-workbench",
@@ -59,6 +60,9 @@ fn register_fixtures() {
     register_preview_fixture("/app_preview/motion.rs", "Compiled motion", || {
         Ok(PreviewFixture::RustView(motion::view()))
     }).expect("valid Todo Workbench motion fixture");
+    register_preview_fixture("/app_preview/review_states.rs", "Interactive review", || {
+        Ok(PreviewFixture::RustView(review_states::view()))
+    }).expect("valid Todo Workbench state fixture");
     for (name, text) in [("Loading", "Loading tasks…"), ("Ready", "Ready to review")] {
         register_preview_fixture("/HostedPreview.xaml", name, move || {
             Ok(PreviewFixture::DataContext(Rc::new(text.to_owned())))
