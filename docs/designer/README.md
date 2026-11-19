@@ -245,6 +245,12 @@ The fit icon frames a selection in either display. `designer_animation_curve` ac
 Use the picker beside a supported geometry track to see one coordinate, dimension, side, or
 corner. Drag beneath the trace to retime its key or use the inspector to edit the complete
 geometry value. The MCP program catalog lists the same `curve_channels` for a track.
+Relative points and scalars show separate percentage and logical pixel curves. The trace
+leaves a gap while the other unit is active. Velocity uses percentage points or logical
+pixels per authored second. [Inspect a curve that changes units](vscode/motion.md#inspect-a-curve-that-changes-units)
+
+![Studio shows the Y velocity in percentage points per second and the gap around the pixel pose](images/studio-relative-curves.jpg)
+
 For a color or solid brush track, the picker offers red, green, blue, and alpha. The value
 graph keeps a 0–1 scale. The key inspector edits the full hex color in one Undo step.
 [Inspect a color animation](vscode/motion.md#inspect-a-color-animation)

@@ -35,6 +35,29 @@ In **Value curves** or **Velocity curves**, choose a component beside a supporte
 
 Drag a marker beneath the graph to move its key in time. Select the marker and edit **Value** to change the complete geometry value in one source edit. Agents can read the track’s `curve_channels` from `designer_programs` and pass a channel such as `"top_left"` to `designer_animation_curve`.
 
+### Inspect a curve that changes units
+
+1. Open an animation of `RenderTransformOrigin` or another `RelativePoint` property. For a `RelativeScalar` property, the same workflow uses one value instead of X and Y.
+2. In **Animation graph**, choose **Value curves**. Use the channel picker to switch between **X (%)**, **Y (%)**, **X (px)**, and **Y (px)** when the track uses both units. A relative scalar offers **Percent** and **Pixels**. The trace has a gap wherever the other unit is active. Scrub across a change to see the native preview switch at the eased midpoint.
+3. Choose **Velocity curves** to see percentage points per authored second (`pp/s`) or logical pixels per authored second (`px/s`). Drag a bottom marker to retime the key. Open its editor to change the complete value, for example from `25%,60%` to `24,40`. Enter either two percentages or two absolute coordinates for a relative point. Apply the edit and use one Undo to restore it.
+
+![The VS Code Timeline plots a percentage X curve with a gap at the pixel key](../images/vscode-timeline-relative-curves.jpg)
+
+In App Preview, keep the playhead inside the pixel interval to inspect the changed native pose. The first edit to a source-authored XAML clip can write the animation block in the designer's canonical format. The playhead stays in place, and one Undo restores the original clip text.
+
+![App Preview shows the pixel channel and the rotated boarding pass after a key edit](../images/vscode-app-preview-relative-curves.jpg)
+
+Mapped Rust keys accept fully qualified `RelativePoint::new`, `RelativePoint::from_point` with a literal `Point::new`, and `RelativeScalar::new` on registered properties. Key edits keep constructor comments and numeric suffixes. This Rust key uses 25% of the width and 60% of the height.
+
+```rust
+.key_frame(0.5, |key| key.set(
+    ferroui_base::Visual::render_transform_origin_property(),
+    ferroui_base::RelativePoint::new(0.25, 0.60, ferroui_base::RelativeUnit::Relative),
+))
+```
+
+Agents can use `percent_x`, `percent_y`, `absolute_x`, or `absolute_y` for a point and `percent` or `absolute` for a scalar. Query the channels listed by `designer_programs` or `designer_hosted_animations`, then pass the chosen name to `designer_animation_curve` or `designer_hosted_curve`. A percentage sample such as `25` represents 25%. A point with `break_before: true` starts a new segment after an interval in the other unit.
+
 ### Inspect a color animation
 
 1. Open a clip with literal colors on a `Color` property or a solid brush property such as `Border.Background`. In Timeline, choose **Animation graph** and then **Value curves**. In App Preview, also choose the track and a compatible live target.

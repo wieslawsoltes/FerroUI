@@ -161,6 +161,12 @@ units; unlike-unit transitions switch at 50%, matching the native animators. The
 uses the live property's type metadata when selecting a value codec. Nonfinite components are
 rejected before preview or source changes.
 
+The curve channels for relative values keep percentages and logical pixels separate. Percent
+channels return percentages, and their velocity returns percentage points per authored second.
+Native sampling retains the registered animator's unit at each time. Each `CurvePoint` with
+`break_before` starts a new run after the other unit was active. Velocity uses only adjacent
+samples within a run. An implicit endpoint can use the live target's underlying units.
+
 `CurveChannel` projects color values into red, green, blue, and alpha on a normalized
 0–1 scale. The native sampler reads the registered animator's `Color` or solid brush
 result, including its byte precision. Velocity uses these same samples. The key plan
