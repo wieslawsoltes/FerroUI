@@ -9,9 +9,9 @@ import { until } from './wait';
 export async function verifyRsxAnimation({ invoke, content }: McpFixture): Promise<void> {
     const path = 'animation_view.rs';
     const uri = vscode.Uri.joinPath(vscode.workspace.workspaceFolders![0].uri, path);
-    const original = new TextDecoder().decode(await vscode.workspace.fs.readFile(uri)).replace(/\r?\n/g, '\r\n');
-    await vscode.workspace.fs.writeFile(uri, Buffer.from(original));
     const document = await vscode.workspace.openTextDocument(uri);
+    assert.equal(document.eol, vscode.EndOfLine.CRLF);
+    const original = document.getText();
     const { session } = content<{ session: number }>(await invoke('designer_open', { path }));
     const outline = async () => {
         content(await invoke('designer_wait', { session }));
@@ -64,12 +64,17 @@ export async function verifyRsxAnimation({ invoke, content }: McpFixture): Promi
         session, node: frame.nodes.find(node => node.name === 'Forecast')!.id,
     }));
     assert.equal(Number(inspection.properties.find(property => property.name === 'Opacity')?.effective), .82);
-    content(await invoke('designer_history', { session, expected_version: document.version, action: 'undo' }));
-    await until(() => document.getText() === original);
+    const editVersion = document.version;
+    content(await invoke('designer_history', { session, expected_version: editVersion, action: 'undo' }));
+    await until(() => document.version !== editVersion).catch(() => assert.fail(
+        `Undo left the Rust buffer at version ${editVersion}. Focused window: ${vscode.window.state.focused}. Active editor: ${vscode.window.activeTextEditor?.document.fileName}.`));
     assert.equal(document.getText(), original);
     frame = await outline();
     content(await invoke('designer_block', { session, expected_revision: frame.revision, index: 0 }));
     await outline();
     assert.deepEqual(await programs(), []);
+    const fixtureTabs = vscode.window.tabGroups.all.flatMap(group => group.tabs).filter(tab =>
+        tab.label === 'Design · animation_view.rs' || (tab.input instanceof vscode.TabInputText && tab.input.uri.toString() === uri.toString()));
+    await vscode.window.tabGroups.close(fixtureTabs);
     console.log('RSX animation used native playback and keyframe validation, preserved CRLF and Unicode, rejected a stale edit, and restored exact Rust with Undo');
 }

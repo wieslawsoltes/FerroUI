@@ -108,7 +108,16 @@ export async function run(): Promise<void> {
         assert.ok(xaml.getText().includes('Text="Text"'));
         assert.ok(selection && xaml.lineAt(selection.start.line).text.includes('<TextBlock'));
         await undoXaml(xamlInput.source);
+
+        const rust = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(workspace, 'views.rs'));
+        assert.equal(rust.languageId, 'rust');
+        await vscode.commands.executeCommand('ferroui.openDesigner', rust.uri);
+        const rsxDesigner = designer.designs().find(panel => panel.document === rust);
+        assert.ok(rsxDesigner);
+        await verifyRsxImageDrag(rsxDesigner);
+
         // The MCP audit opens other editors and views. Complete the source-only undo checks first.
+        await vscode.commands.executeCommand('ferroui.openDesigner', xaml.uri);
         await verifyMcp(xaml);
         const draft = frame.counterpart.source?.replace('Save changes', 'Apply settings');
         assert.ok(frame.counterpart.editable && draft);
@@ -116,14 +125,6 @@ export async function run(): Promise<void> {
         await applyTextEdits(xaml, xaml.version, rsxEdits);
         assert.ok(xaml.getText().includes(`x:Name="saveButton" Content="Apply settings"`));
 
-        const rust = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(workspace, 'views.rs'));
-        const rustEditor = await vscode.window.showTextDocument(rust, vscode.ViewColumn.One);
-        assert.equal(rust.languageId, 'rust');
-        await vscode.commands.executeCommand('ferroui.openDesigner');
-        await until(() => vscode.window.tabGroups.all.some(group => group.tabs.some(tab => tab.label === 'Design · views.rs')));
-        const rsxDesigner = designer.designs().find(panel => panel.document === rust);
-        assert.ok(rsxDesigner);
-        await verifyRsxImageDrag(rsxDesigner);
         const rustInput = sourceOf(rust, 'rust', editorPosition());
         const rsxField = rust.positionAt(rust.getText().indexOf('padding: 36.0') + 3);
         const rsxCompletion = await vscode.commands.executeCommand<vscode.CompletionList>('vscode.executeCompletionItemProvider', rust.uri, rsxField);
@@ -149,7 +150,7 @@ export async function run(): Promise<void> {
         assert.ok(rust.getText().includes('text: "Text"'));
         assert.ok(insertedRust && rust.lineAt(insertedRust.start.line).text.includes('TextBlock'));
         assert.ok(rust.getText().endsWith(latestRust.source.slice(latestRust.source.indexOf('pub fn counter'))));
-        const partial = await preview.render(sourceOf(rust, 'rust', rustEditor.document.positionAt(rust.getText().lastIndexOf('"Increment"'))), viewport);
+        const partial = await preview.render(sourceOf(rust, 'rust', rust.positionAt(rust.getText().lastIndexOf('"Increment"'))), viewport);
         assert.ok(partial.image && !partial.counterpart.editable);
         assert.ok(partial.notices.some(notice => notice.includes('omitted Rust items')));
         await verifyWorkbenchFeatures(preview, xamlInput.uri, rustInput.uri);

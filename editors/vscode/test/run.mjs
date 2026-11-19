@@ -1,5 +1,5 @@
 import { runTests } from '@vscode/test-electron';
-import { cp, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,6 +12,9 @@ const bin = resolve(process.env.FERROUI_TEST_BIN_DIR ?? join(extension, '../../t
 const executable = name => join(bin, name + (process.platform === 'win32' ? '.exe' : ''));
 try {
     await cp(join(extension, 'test/fixtures'), workspace, { recursive: true });
+    const animation = join(workspace, 'animation_view.rs');
+    // Seed the CRLF fixture before VS Code watches or loads its text model.
+    await writeFile(animation, (await readFile(animation, 'utf8')).replace(/\r?\n/g, '\r\n'));
     await mkdir(join(workspace, 'Assets'));
     await writeFile(join(workspace, 'Assets', 'Preview Image.png'), Buffer.from(
         'iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAE0lEQVR4nGNMjb3OAANMcBZeDgBQdAGhOsFZtwAAAABJRU5ErkJggg==', 'base64'));

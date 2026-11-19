@@ -1,7 +1,7 @@
 import { strict as assert } from 'node:assert';
 import { randomUUID } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
-import * as vscode from 'vscode';
+import type * as vscode from 'vscode';
 import { DesignerDrag } from '../src/designerDrag';
 import type { DesignerPanel } from '../src/designerPanel';
 import { runEditorHistory } from '../src/editorHistory';
@@ -84,8 +84,6 @@ export async function verifyRsxImageDrag(panel: DesignerPanel): Promise<void> {
         await drag.receive(panel, { type: 'drop', id: gesture.id, frame, target: { type: 'outline', node: parent.id, position: 'inside' } });
         assert.match(panel.document.getText(), /include_bytes!\("Assets\/Preview Image\.png"\)/);
         assert.equal(active, undefined);
-        await vscode.window.showTextDocument(panel.document, { viewColumn: vscode.ViewColumn.One, preserveFocus: false });
-        await until(() => vscode.window.activeTextEditor?.document === panel.document);
         await undoDrop(panel.document, original);
     } finally { drag.clear(); }
     console.log('VS Code accepted an authorized RSX raster drag and undid its embedded image insertion');

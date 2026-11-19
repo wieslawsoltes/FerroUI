@@ -124,6 +124,9 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         assert.ok((await invoke('designer_studio_edit', designData)).isError);
         assert.ok((await invoke('ferroui_workspace_create', { path: 'Denied.rs', source: 'fn main() {}' })).isError);
         await config.update('allowWrites', true, vscode.ConfigurationTarget.Global);
+        await verifyRsxAnimation({ invoke, content });
+        await vscode.window.showTextDocument(document, { preserveFocus: false });
+        designData.expected_revision = content<{ revision: number }>(await invoke('designer_wait', { session })).revision;
         assert.match((await invoke('ferroui_runtime_apply_source', runtimeEdit)).content[0]?.text ?? '', /managed FerroUI application/);
         const stages = content<{ epoch: number; stages: Array<{ id: number; epoch: number }> }>(await invoke('designer_stages_open', { session }));
         assert.equal(stages.stages.length, 2);
@@ -224,7 +227,6 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         await verifyWorkspaceMcp({ invoke, content });
         await verifyProjectMcp({ invoke, content });
         await verifyScenarioMcp({ invoke, content });
-        await verifyRsxAnimation({ invoke, content });
         console.log('VS Code MCP discovery, project Toolbox placement, shared Studio queries, PNG content, write permissions, stale revisions and editor undo passed');
     } finally {
         await config.update('allowWrites', undefined, vscode.ConfigurationTarget.Global);
