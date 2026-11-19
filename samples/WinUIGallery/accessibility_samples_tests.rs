@@ -71,3 +71,86 @@ fn accessibility_keyboard_arrow_keys_accelerators_and_access_keys_keep_the_sourc
     assert_eq!(keys.len(), 12);
     assert!(keys.iter().all(Option::is_some));
 }
+
+#[test]
+fn accessibility_screen_reader_examples_keep_the_source_automation_properties() {
+    use crate::accessibility_samples::SCREEN_READER_IMAGES;
+    use ferroui_controls::automation::peers::AutomationLandmarkType;
+    use ferroui_controls::automation::AccessibilityView;
+    use ferroui_controls::{Border, CheckBox, Image, ListBox, TextBlock, TextBox};
+    let _application = start();
+    let root = page("AccessibilityScreenReader");
+    // The names set manually: the list, the image and the groups.
+    assert_eq!(
+        AutomationProperties::get_name(&root.get_control::<ListBox>("ContactsList")).as_deref(),
+        Some("Contacts")
+    );
+    assert_eq!(
+        AutomationProperties::get_name(&root.get_control::<Image>("GrapesImage")).as_deref(),
+        Some("Grapes")
+    );
+    for (name, expected) in [
+        ("AlbumBrowser", "Album browser"),
+        ("MyAlbums", "My albums"),
+        ("SharedWithMe", "Shared with me"),
+    ] {
+        assert_eq!(AutomationProperties::get_name(&root.get_control::<StackPanel>(name)).as_deref(), Some(expected));
+    }
+    // LabeledBy: the box and the list are labeled by their TextBlocks, which are in the Raw view.
+    for (labeled, label) in [
+        ("SearchPhotosBox", "InputLabel"),
+        ("NameBox", "NameHeader"),
+        ("EmailBox", "EmailHeader"),
+    ] {
+        let by = AutomationProperties::get_labeled_by(&root.get_control::<TextBox>(labeled));
+        assert_eq!(by.and_then(|by| by.name()).as_deref(), Some(label), "{labeled}");
+        assert_eq!(
+            AutomationProperties::get_accessibility_view(&root.get_control::<TextBlock>(label)),
+            AccessibilityView::Raw
+        );
+    }
+    let students = AutomationProperties::get_labeled_by(&root.get_control::<ListBox>("StudentsList"));
+    assert_eq!(students.and_then(|by| by.name()).as_deref(), Some("StudentsLabel"));
+    // The description of the check box is the text of its description; the help text of the
+    // button.
+    assert_eq!(
+        AutomationProperties::get_help_text(&root.get_control::<CheckBox>("ClearCacheCheckBox")).as_deref(),
+        Some("Deletes all cached items when closing the browser. This includes cookies, images, and browsing history.")
+    );
+    assert_eq!(
+        AutomationProperties::get_help_text(&root.get_control::<Button>("CancelSubscriptionsButton")).as_deref(),
+        Some("Launch the cancellation wizard")
+    );
+    // PositionInSet and SizeOfSet of the three buttons.
+    for (index, name) in ["ViewButton", "RenameButton", "DeleteButton"].into_iter().enumerate() {
+        let button = root.get_control::<Button>(name);
+        assert_eq!(AutomationProperties::get_position_in_set(&button), index as i32 + 1);
+        assert_eq!(AutomationProperties::get_size_of_set(&button), 3);
+    }
+    // The decorative image is in the Raw view; the images are the source's where they decode.
+    assert_eq!(
+        AutomationProperties::get_accessibility_view(&root.get_control::<Image>("TreetopsImage")),
+        AccessibilityView::Raw
+    );
+    for (name, uri) in SCREEN_READER_IMAGES {
+        let decoded = crate::assets::load_bitmap(uri).is_ok();
+        assert_eq!(root.get_control::<Image>(name).source().is_some(), decoded, "{name}");
+    }
+    // The landmarks, and the headings of the headings example.
+    for (name, landmark) in [
+        ("NavigationLandmark", AutomationLandmarkType::Navigation),
+        ("MainLandmark", AutomationLandmarkType::Main),
+        ("ViewersLandmark", AutomationLandmarkType::Region),
+    ] {
+        assert_eq!(AutomationProperties::get_landmark_type(&root.get_control::<Border>(name)), Some(landmark));
+    }
+    let levels: Vec<i32> = root
+        .get_control::<StackPanel>("HeadingsPanel")
+        .children()
+        .to_vec()
+        .into_iter()
+        .map(|child| AutomationProperties::get_heading_level(&child))
+        .filter(|level| *level > 0)
+        .collect();
+    assert_eq!(levels, [1, 2, 2, 3, 3, 2]);
+}

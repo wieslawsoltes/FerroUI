@@ -55,15 +55,20 @@
       "status": "partial",
       "implementation": [
         "samples/WinUIGallery/Pages/AccessibilityScreenReader.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/accessibility_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/accessibility_samples_tests.rs",
+          "name": "accessibility_screen_reader_examples_keep_the_source_automation_properties"
         }
       ],
-      "notes": "Native automation names and decorative accessibility views are assigned; screen-reader execution remains unverified. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "All eleven source examples with the page's texts (the page has no code-behind upstream; accessibility_samples.rs sets the source's grapes.jpg and treetops.jpg): the name from a button's content, the names from the text boxes' headers and placeholders, the named list and image, LabeledBy, the description and help text, PositionInSet and SizeOfSet of the three buttons beside the list labeled by its text, the decorative image in the Raw view, the navigation, search and main landmarks, the headings of levels 1 to 3, and the groups named for their context. The headings are the theme's text styles with their heading levels; WinUI's ListView is FerroUI's ListBox, StackPanels with padding, background and corners are Borders, and the x:Bind of an element (LabeledBy) is a Binding of the element by name. FerroUI's TextBox has no Header: each header is a TextBlock above its box that labels it (LabeledBy, in the Raw view). FerroUI's automation has no FullDescription (the visible description is the check box's HelpText) and no Custom landmark with a LocalizedLandmarkType (the Current viewers sidebar is a named Region): the page is partial. Screen-reader output itself is not verified by the tests.",
       "examples": []
     },
     "AppBarButton": {
