@@ -88,6 +88,7 @@ const navigation = new TimelineNavigation(viewport.grid, slider, () => frameRate
 const curves = new TimelineCurves(viewport.grid, message => vscode.postMessage(message));
 let owner: { session: number; program: ProgramIdentity } | undefined;
 let keyEdit: { before: FrameTarget; accepted?: KeyframeLocation[] } | undefined;
+let appliedProgramEdit: string | undefined;
 
 const gestureFrame = () => pending || keyEdit || keyframeEditor.applying || positionFor(current())?.playing ? undefined : model.frame;
 const nativePreview = new TimelineNativePreview(queueSeek, () => programAction('programTargets'), () => programAction('revealProgram'));
@@ -239,7 +240,15 @@ function showTracks(): void {
     // pose points to the resolved clip when the selected program was playing.
     const remapped = model.frame && model.frame.session === timedProgramSession && model.position?.elapsed !== undefined
         ? available.find(item => item.id === model.position?.program) : undefined;
-    const selected = remapped ?? available.find(item => item.source_key && item.source_key === remembered?.key)
+    const programEdit = model.frame && model.preferredProgram
+        ? `${model.frame.session}:${model.documentVersion}:${model.preferredProgram}` : undefined;
+    const preferred = programEdit && programEdit !== appliedProgramEdit
+        ? available.find(item => item.source_key === model.preferredProgram) : undefined;
+    if (preferred) {
+        appliedProgramEdit = programEdit;
+        timedProgramSession = undefined;
+    }
+    const selected = preferred ?? remapped ?? available.find(item => item.source_key && item.source_key === remembered?.key)
         ?? available.find(item => matchesProgram(remembered, item)) ?? available[0];
     program = selected?.id;
     if (selected && model.frame) remember(selected);
@@ -455,7 +464,7 @@ function showPosition(): void {
     labelButton(recordMode, channels.hasLocks && !model.recording ? 'Unlock tracks to record animation edits'
         : model.canRecordGeometry ? 'Record animation edits' : 'Record property changes');
     recordMode.setAttribute('aria-pressed', String(Boolean(model.recording)));
-    actions.disabled = !model.frame || pending || playing || editing || (!selected && !model.writable);
+    actions.disabled = !model.frame || pending || playing || editing || (!selected && !model.writable && !model.canCreateRustProgram);
     options.hidden = !selected;
     if (options.hidden) closeViewOptions();
     programs.disabled = pending || playing || editing || !model.frame || !selected;

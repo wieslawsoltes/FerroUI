@@ -4,7 +4,7 @@ import { access, readFile } from 'node:fs/promises';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
 import { NativePreview } from '../src/nativePreview';
-import { sourceOf } from '../src/textDocument';
+import { asRange, sourceOf } from '../src/textDocument';
 import type { CurvePoint, TimelineProgram } from '../src/timelineProtocol';
 import { isInside } from '../src/workspacePaths';
 import { verifyHostedPreview } from './hostedPreview';
@@ -54,6 +54,7 @@ export async function run(): Promise<void> {
         assert.ok(native.capabilities.timelineKeyframeDrafts, 'The installed preview validates keyframe drafts and samples easing');
         assert.ok(native.capabilities.timelineCurves, 'The installed preview samples scalar animation curves');
         assert.ok(native.capabilities.timelineKeyframeScale, 'The installed preview scales authored key selections');
+        assert.ok(native.capabilities.rsxAnimationPrograms, 'The installed preview authors whole Rust clips');
         assert.ok(native.capabilities.timelineCombinedPlayback, 'The installed preview plays combined animation programs');
         assert.ok(native.capabilities.timelineProgramTargets, 'The installed preview retains animation resource targets');
         assert.ok(native.capabilities.stateTransitionPreview, 'The installed preview samples explicit state transitions');
@@ -98,6 +99,22 @@ export async function run(): Promise<void> {
         forward.duration = .8;
         const planned = await native.studioEdit(stateSource, 3, 'designer_state', { action: 'upsert', model: group }, []);
         assert.deepEqual(planned.edits.map(edit => edit.newText), ['800u64']);
+        const headline = sourceOf(rust, 'rust', new vscode.Position(0, 0));
+        const empty = await native.render(headline, { width: 640, height: 420, dark: false }, 4);
+        assert.ok(empty.image && !empty.mappedRustAnimations && empty.rustAnimationOwners?.length);
+        const created = await native.studioEdit(headline, 4, 'designer_program', {
+            action: 'create', owner: empty.rustAnimationOwners[0], name: 'Headline reveal',
+            selector: 'TextBlock', duration: .85,
+        }, []);
+        assert.ok(created.timelineProgramKey);
+        assert.equal(created.edits.length, 1);
+        const [insertion] = created.edits;
+        const range = asRange(insertion.range);
+        const draft = headline.source.slice(0, rust.offsetAt(range.start)) + insertion.newText + headline.source.slice(rust.offsetAt(range.end));
+        const newClip = await native.render({ ...headline, source: draft }, { width: 640, height: 420, dark: false }, 5);
+        assert.ok(newClip.image && newClip.mappedRustAnimations);
+        const result = await native.studioQuery(5, 'designer_programs', { include_source: false }) as { programs: TimelineProgram[] };
+        assert.deepEqual(result.programs.map(clip => [clip.name, clip.source_key]), [['Headline reveal', created.timelineProgramKey]]);
         const { animationQuery } = await native.listenHosted(randomBytes(32).toString('hex'));
         const capabilities = new URLSearchParams(animationQuery);
         assert.equal(capabilities.get('ferroui-design-animation'), '1', 'The installed relay negotiates native application animations');

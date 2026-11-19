@@ -82,6 +82,7 @@ export interface TimelinePreviewPose {
 export interface TimelineState {
     frame?: FrameTarget;
     documentVersion?: number;
+    preferredProgram?: string;
     programs: TimelineProgram[];
     sourceIssues?: AnimationSourceIssue[];
     names: Record<number, string>;
@@ -92,6 +93,7 @@ export interface TimelineState {
     canRecordGeometry?: boolean;
     canEditKeyframes?: boolean;
     canAuthorRustKeys?: boolean;
+    canCreateRustProgram?: boolean;
     canShowCurves?: boolean;
     curveCatalog?: string;
     canPlayAll?: boolean;

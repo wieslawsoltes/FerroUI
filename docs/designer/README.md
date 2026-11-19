@@ -556,6 +556,12 @@ Source reveal takes you to the animation declaration in the active invocation. A
 validate `designer_keyframe_draft` or use the shared `designer_program` actions with the
 current designer revision. [Rust Timeline controls and MCP actions](vscode/motion.md#edit-mapped-rust-clips-and-state-routes)
 
+Use **New animation program** in Studio’s Timeline toolbar to add an inline style animation to
+the selected Rust control. **Animation name and target** opens the name field. Rename, copy,
+and delete clips with the existing Timeline controls. A source comment preserves the name and
+identity, and a copy receives its own identity. The selector and timing are available in the Rust
+source. Studio MCP uses the same `designer_program` actions and source history.
+
 App Preview validates the same mapped Rust key against the application's loaded animation and
 codec. It sends a source-checked Rust patch to the editor and keeps the compatible elapsed
 position when the edited invocation renders. An isolated preview uses the native animators

@@ -9,6 +9,7 @@ export interface EditResult {
     edits: TextEdit[];
     selection: Range | null;
     timelinePose?: TimelinePreviewPose;
+    timelineProgramKey?: string;
     retainedSelection?: Range[];
 }
 export interface PreviewFinding { node: number; control: string; name: string | null; code: string; message: string }
@@ -135,6 +136,7 @@ export interface Snapshot {
     dependencies?: string[];
     projectAssets?: Asset[];
     mappedRustAnimations?: boolean;
+    rustAnimationOwners?: number[];
     timelinePose?: TimelinePreviewPose;
 }
 export type NodeOperation =

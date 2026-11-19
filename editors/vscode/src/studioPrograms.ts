@@ -3,7 +3,16 @@ import { choose, editText, editTime, type StudioContext } from './studioContext'
 import { editAnimationTiming } from './studioAnimationTiming';
 import type { AnimationSourceIssue, TimelineProgram } from './timelineProtocol';
 
-export async function createAnimationProgram(context: StudioContext, owner: number): Promise<void> {
+export async function createAnimationProgram(context: StudioContext, owner: number | undefined): Promise<void> {
+    if (!context.writable && (owner === undefined || !context.panel.rustAnimationOwners.includes(owner))) {
+        const eligible = context.panel.nodes.filter(node => context.panel.rustAnimationOwners.includes(node.id));
+        if (!eligible.length) throw new Error('Choose a mapped Rust control with inline styles.');
+        const picked = await choose('Choose the control that owns the style', eligible.map(node => ({
+            label: node.name ?? node.label, description: node.name ? node.label : undefined, id: node.id,
+        })));
+        owner = picked?.id;
+    }
+    if (owner === undefined) return;
     const name = (await editText('Animation name'))?.trim();
     if (!name) return;
     const node = context.panel.nodes.find(node => node.id === owner);
@@ -49,7 +58,7 @@ export async function showAnimationActions(context: StudioContext, program: Time
     const nodes = context.panel.nodes;
     const targets = context.selection.filter(id => nodes.some(node => node.id === id && node.bounds));
     const owner = targets.at(-1) ?? nodes[0]?.id;
-    if (context.writable && owner !== undefined) {
+    if ((context.writable && owner !== undefined) || context.panel.rustAnimationOwners.length) {
         actions.push({ label: '$(add) New animation program…', run: () => createAnimationProgram(context, owner) });
     }
     if (program) {
@@ -66,9 +75,11 @@ export async function showAnimationActions(context: StudioContext, program: Time
             actions.push({ label: '$(discard) Clear preview target override', run: () =>
                 context.present('designer_program', { action: 'preview_targets', program: id, targets: null }) });
         }
-        if (context.writable) {
+        if (context.writable || (program.sourceRange && context.panel.supportsRustAnimationPrograms)) {
             const timeline = program.timeline;
-            if (timeline) actions.push({ label: '$(watch) Timing and Playback…', run: () => editAnimationTiming(context, id, timeline) });
+            if (context.writable && timeline) {
+                actions.push({ label: '$(watch) Timing and Playback…', run: () => editAnimationTiming(context, id, timeline) });
+            }
             actions.push(
                 { label: '$(edit) Rename animation…', run: () => renameAnimationProgram(context, program) },
                 { label: '$(copy) Duplicate animation…', run: async () => {
@@ -76,7 +87,7 @@ export async function showAnimationActions(context: StudioContext, program: Time
                     if (name) await context.edit('designer_program', { action: 'duplicate', program: id, name });
                 } },
             );
-            if (program.style != null) actions.push({ label: '$(target) Edit authored selector…', run: async () => {
+            if (context.writable && program.style != null) actions.push({ label: '$(target) Edit authored selector…', run: async () => {
                 const selector = (await editText('FerroUI selector', program.selector))?.trim();
                 if (selector && selector !== program.selector) {
                     await context.edit('designer_program', { action: 'selector', program: id, selector });

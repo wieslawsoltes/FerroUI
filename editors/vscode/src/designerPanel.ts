@@ -27,6 +27,7 @@ interface Frame {
     timelineKeyframeDrafts: boolean;
     timelineKeyframeScale: boolean;
     rsxKeyframeStructure: boolean;
+    rsxAnimationPrograms: boolean;
     timelineCurves: boolean;
     timelineCombinedPlayback: boolean;
     stateTransitionPreview: boolean;
@@ -58,6 +59,7 @@ export class DesignerPanel implements vscode.Disposable {
     private animationCatalogEpoch = 0;
     private animationRecording = false;
     private retainedSelection?: { version: number; ranges: Range[] };
+    private timelineProgramSelection?: { version: number; key: string };
     private inspected = false;
     private readers = 0;
     private problem?: string;
@@ -151,6 +153,9 @@ export class DesignerPanel implements vscode.Disposable {
     get runtimeSelection(): RuntimeRow | undefined { return this.runtime; }
     get dimensions(): Viewport { return this.viewport; }
     get authoredTimelinePose(): TimelinePreviewPose | undefined { return this.timelinePose; }
+    get authoredTimelineProgram(): string | undefined {
+        if (this.timelineProgramSelection?.version === this.document.version) return this.timelineProgramSelection.key;
+    }
     get timelineCatalogEpoch(): number { return this.animationCatalogEpoch; }
     get supportsTimelineRecording(): boolean { return Boolean(this.language === 'xaml' && this.frame?.timelineRecording); }
     get supportsTimelineGeometryRecording(): boolean { return Boolean(this.supportsTimelineRecording && this.frame?.timelineGeometryRecording); }
@@ -160,6 +165,12 @@ export class DesignerPanel implements vscode.Disposable {
     get supportsTimelineKeyframeScale(): boolean { return Boolean(this.frame?.timelineKeyframeScale); }
     get supportsRustKeyframeStructure(): boolean {
         return Boolean(this.language === 'rust' && this.supportsTimelineKeyframeDrafts && this.frame?.rsxKeyframeStructure);
+    }
+    get supportsRustAnimationPrograms(): boolean {
+        return Boolean(this.language === 'rust' && this.frame?.rsxAnimationPrograms && this.frame.snapshot.image);
+    }
+    get rustAnimationOwners(): readonly number[] {
+        return this.supportsRustAnimationPrograms ? this.frame?.snapshot.rustAnimationOwners ?? [] : [];
     }
     get supportsTimelineCurves(): boolean { return Boolean(this.frame?.timelineCurves); }
     get supportsTimelineCombinedPlayback(): boolean { return Boolean(this.frame?.timelineCombinedPlayback); }
@@ -382,7 +393,7 @@ export class DesignerPanel implements vscode.Disposable {
         const edits = this.language === 'xaml' ? xamlEdits : [
             ...xamlEdits.filter(tool => mappedStudioEdits.has((tool as { name: string }).name)),
             ...(rsxEdits ?? []).filter(tool => (tool as { name: string }).name === 'designer_state'
-                ? this.supportsRustStates : this.supportsTimelineKeyframeDrafts),
+                ? this.supportsRustStates : this.supportsTimelineKeyframeDrafts || this.supportsRustAnimationPrograms),
         ];
         return { tools, presentations: presentations ?? [], edits };
     }
@@ -405,7 +416,9 @@ export class DesignerPanel implements vscode.Disposable {
                 || (this.supportsRustKeyframeStructure && action !== undefined &&
                     ['record_keyframe', 'remove_keyframe', 'duplicate_keyframes', 'remove_keyframes'].includes(action)));
         const rustState = name === 'designer_state' && action === 'upsert' && this.supportsRustStates;
-        if (this.language === 'rust' && !rustKeyframe && !rustState && !mappedStudioEdits.has(name)) {
+        const rustProgram = name === 'designer_program' && this.supportsRustAnimationPrograms
+            && action !== undefined && ['create', 'rename', 'duplicate', 'remove'].includes(action);
+        if (this.language === 'rust' && !rustKeyframe && !rustProgram && !rustState && !mappedStudioEdits.has(name)) {
             throw new Error('This Studio operation requires mapped RSX source or XAML.');
         }
         if (this.editing) throw new Error('A designer edit is already in progress.');
@@ -594,6 +607,7 @@ export class DesignerPanel implements vscode.Disposable {
                 timelineKeyframeDrafts: Boolean(client.capabilities.timelineKeyframeDrafts),
                 timelineKeyframeScale: Boolean(client.capabilities.timelineKeyframeScale),
                 rsxKeyframeStructure: Boolean(client.capabilities.rsxKeyframeStructure),
+                rsxAnimationPrograms: Boolean(client.capabilities.rsxAnimationPrograms),
                 timelineCurves: Boolean(client.capabilities.timelineCurves),
                 timelineCombinedPlayback: Boolean(client.capabilities.timelineCombinedPlayback),
                 stateTransitionPreview: Boolean(client.capabilities.stateTransitionPreview),
@@ -717,12 +731,16 @@ export class DesignerPanel implements vscode.Disposable {
         this.editing = true;
         this.changed.fire();
         try {
-            const { edits, selection, timelinePose, retainedSelection } = await plan(await this.getClient());
+            const { edits, selection, timelinePose, timelineProgramKey, retainedSelection } = await plan(await this.getClient());
             signal?.throwIfAborted();
             if (this.currentToken !== frame.token) throw new Error('The preview changed. Use the current preview to retry.');
             validate?.();
             const previous = this.timelinePose;
+            const previousProgram = this.timelineProgramSelection;
             if (timelinePose) this.timelinePose = timelinePose;
+            if (timelineProgramKey && edits.length) {
+                this.timelineProgramSelection = { version: frame.version + 1, key: timelineProgramKey };
+            }
             if (retainedSelection?.length && edits.length) {
                 this.retainedSelection = { version: frame.version + 1, ranges: retainedSelection };
             }
@@ -730,6 +748,7 @@ export class DesignerPanel implements vscode.Disposable {
                 await applyTextEdits(this.document, frame.version, edits);
             } catch (error) {
                 if (this.timelinePose === timelinePose) this.timelinePose = previous;
+                this.timelineProgramSelection = previousProgram;
                 this.retainedSelection = undefined;
                 throw error;
             }

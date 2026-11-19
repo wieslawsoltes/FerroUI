@@ -23,6 +23,7 @@ import { verifyBrushMcp } from './studioBrushMcp';
 import { verifyFocusOverlay } from './studioFocusMcp';
 import { verifyResourcePromotion } from './studioResourceMcp';
 import { verifyRsxAnimation } from './rsxAnimationMcp';
+import { verifyRsxPrograms } from './rsxProgramsMcp';
 import { verifyRsxStates } from './rsxStatesMcp';
 
 interface ToolResponse {
@@ -126,6 +127,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         assert.ok((await invoke('ferroui_workspace_create', { path: 'Denied.rs', source: 'fn main() {}' })).isError);
         await config.update('allowWrites', true, vscode.ConfigurationTarget.Global);
         await verifyRsxAnimation({ invoke, content });
+        await verifyRsxPrograms({ invoke, content });
         await verifyRsxStates({ invoke, content });
         await vscode.window.showTextDocument(document, { preserveFocus: false });
         designData.expected_revision = content<{ revision: number }>(await invoke('designer_wait', { session })).revision;

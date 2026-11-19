@@ -65,7 +65,19 @@ Open [animation_view.rs](../../../editors/vscode/test/fixtures/animation_view.rs
 
 Agents can preview a draft with `designer_keyframe_draft`. Call `designer_program` through `designer_studio_edit` with the accepted revision. Use `upsert_keyframe` without `previous` to insert an explicit value, `record_keyframe` to sample the accepted preview, `remove_keyframe` for a single property and time, or `duplicate_keyframes` and `remove_keyframes` with the selected key locations.
 
-Author new Rust clip and state group declarations in the source editor. In **Studio → States**, select a group and preview a route. In XAML, use the group’s authoring actions to create states, setters, and transitions. In Rust, edit mapped state literals and applicable route durations and easing. Preview directional and default routes with the transition transport. Close the preview to restore the base view. [Typed Rust state examples](../README.md#rust-visual-states)
+### Create and manage Rust clips
+
+1. Select the control that should own the style. In **More Animation Actions**, choose **New animation program…**. Choose an eligible owner if prompted.
+2. Enter a name, FerroUI selector, and duration in seconds with millisecond precision. The new animation appears in the active invocation’s inline `styles` and opens in Timeline. Use **Add keyframe at playhead** to start its first track.
+3. Choose **Rename animation…**, **Duplicate animation…**, or **Remove animation** from the same menu. Renaming keeps the clip’s source identity. Duplicating copies its literal values, timing, and easing with a new identity. Each operation is one Undo step.
+
+The designer stores the name and identity in a Rust comment beside the builder. It can append a clip alongside computed entries in a literal styles array. For a computed styles field, choose an enclosing control with inline styles to hold the new rule, or author the builder in Rust.
+
+Agents use `designer_program` through `designer_studio_edit` with `create`, `rename`, `duplicate`, and `remove`. For creation, supply the current owner ID, name, selector, and duration. Read `designer_programs` after a source edit for the new clip and target IDs.
+
+### Preview Rust state routes
+
+Author new Rust state groups in the source editor. In **Studio → States**, select a group and preview a route. In XAML, use the group’s authoring actions to create states, setters, and transitions. In Rust, edit mapped state literals and applicable route durations and easing. Preview directional and default routes with the transition transport. Close the preview to restore the base view. [Typed Rust state examples](../README.md#rust-visual-states)
 
 ## Compare design data and environments
 
