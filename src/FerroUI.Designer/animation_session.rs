@@ -4,7 +4,7 @@ use ferroui_base::styling::Style;
 use ferroui_base::{StyledElement, TypeInfo};
 use ferroui_designer_animation::{
     AnimationCodec, AnimationCodecRegistry, AnimationProgram, AnimationPrograms, AnimationValue,
-    CompiledTimeline, CurveChannel, CurvePoint, CurveWindow, Easing, ImportOptions, Player, Sample, Timeline, TimelineTimingEdit, ValueKind,
+    CompiledTimeline, CurveChannel, CurvePoint, CurveWindow, Easing, ImportOptions, Player, PreviewRange, Sample, Timeline, TimelineTimingEdit, ValueKind,
 };
 use ferroui_designer_core::{Document, Edit, NodeId};
 use ferroui_markup::markup::parsers::SelectorParser;
@@ -23,6 +23,7 @@ pub(crate) struct AnimationSession {
     pub(crate) play_all: bool,
     pub(crate) elapsed_clock: bool,
     pub(crate) playback_completed: bool,
+    pub(crate) preview_range: Option<PreviewRange>,
     pub(crate) pending_playback: Option<crate::TimelinePreviewPose>,
     compiled_programs: BTreeMap<NodeId, CompiledTimeline>,
     compiled_targets: BTreeMap<(NodeId, NodeId), CompiledTimeline>,
@@ -38,6 +39,7 @@ impl AnimationSession {
         self.play_all = false;
         self.elapsed_clock = false;
         self.playback_completed = false;
+        self.preview_range = None;
         self.pending_playback = None;
         self.target_elapsed.clear();
     }
@@ -57,6 +59,7 @@ impl AnimationSession {
             play_all: false,
             elapsed_clock: false,
             playback_completed: false,
+            preview_range: None,
             pending_playback: None,
             compiled_programs: BTreeMap::new(),
             compiled_targets: BTreeMap::new(),
@@ -113,6 +116,7 @@ impl DesignerSession {
         self.animation.play_all = false;
         self.animation.elapsed_clock = false;
         self.animation.playback_completed = false;
+        self.animation.preview_range = None;
         self.preview.clear_animation();
         self.generation += 1;
         Ok(())
@@ -239,6 +243,7 @@ impl DesignerSession {
         self.animation.player.stop();
         self.animation.play_all = false;
         self.animation.elapsed_clock = false;
+        self.animation.preview_range = None;
         self.animation.pending_playback = None;
         self.generation += 1;
         Ok(())
@@ -340,6 +345,7 @@ impl DesignerSession {
             self.animation.target_elapsed.clear();
             self.animation.elapsed_clock = false;
             self.animation.playback_completed = false;
+            self.animation.preview_range = None;
             self.animation.play_all = false;
             self.generation += 1;
             return Ok(());
@@ -355,12 +361,14 @@ impl DesignerSession {
         self.animation.target_elapsed.clear();
         self.animation.elapsed_clock = false;
         self.animation.playback_completed = false;
+        self.animation.preview_range = None;
         self.animation.play_all = false;
         self.generation += 1;
         Ok(())
     }
     pub fn play(&mut self) {
         self.animation.play_all = false;
+        self.animation.preview_range = None;
         self.animation.player.play();
         self.generation += 1;
     }
@@ -398,6 +406,7 @@ impl DesignerSession {
     }
     pub fn play_all_animation_programs(&mut self) {
         self.animation.play_all = true;
+        self.animation.preview_range = None;
         self.animation.player.play();
         self.generation += 1;
     }
@@ -419,6 +428,7 @@ impl DesignerSession {
     pub fn set_interactive(&mut self, value: bool) {
         self.animation.player.pause();
         self.animation.native.stop();
+        self.animation.preview_range = None;
         self.preview.set_interactive(value);
         self.generation += 1;
     }
@@ -437,6 +447,7 @@ impl DesignerSession {
         self.animation.target_elapsed.clear();
         self.animation.elapsed_clock = false;
         self.animation.playback_completed = false;
+        self.animation.preview_range = None;
         self.animation.play_all = false;
         self.animation.pending_playback = None;
         self.preview.clear_animation();
@@ -508,6 +519,9 @@ impl DesignerSession {
         }
         if !seconds.is_finite() || seconds < 0.0 {
             return Err("Playback delta must be finite and nonnegative".into());
+        }
+        if let Some(range) = self.animation.preview_range {
+            return self.advance_preview_range(range, seconds);
         }
         let native_programs = self
             .animation

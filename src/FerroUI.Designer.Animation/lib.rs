@@ -11,6 +11,7 @@ mod keyframe_draft;
 mod keyframe_edits;
 mod keyframe_clipboard;
 mod keyframe_mirror;
+mod preview_range;
 mod program_edit;
 mod program_locator;
 mod programs;
@@ -31,6 +32,7 @@ pub use interactions::{BehaviorAction, BehaviorModel, BehaviorTrigger};
 pub use keyframe_draft::{KeyframeDraftPreview, KeyframeEdit};
 pub use keyframe_edits::{KeyframeGroupEdit, KeyframeLocation};
 pub use keyframe_clipboard::{CopiedKeyframeTrack, KeyframeClipboard, KeyframeDestination, KeyframePaste};
+pub use preview_range::PreviewRange;
 pub use program_edit::compose_animation_edit;
 pub use program_locator::AnimationProgramLocator;
 pub use programs::{

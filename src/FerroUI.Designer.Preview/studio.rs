@@ -79,7 +79,7 @@ fn presentation_action(tool: &str, action: Option<&str>) -> bool {
     match tool {
         "designer_program" => matches!(
             action,
-            Some("preview" | "preview_targets" | "scrub" | "scrub_all" | "play_program" | "advance_program" | "pause_program" | "stop_program" | "play_all")
+            Some("preview" | "preview_targets" | "scrub" | "scrub_all" | "play_program" | "play_range" | "advance_program" | "pause_program" | "stop_program" | "play_all")
         ),
         "designer_state" => matches!(action, Some("preview" | "preview_transition" | "advance_preview" | "clear_preview")),
         "designer_definition" => matches!(action, Some("enter" | "exit")),

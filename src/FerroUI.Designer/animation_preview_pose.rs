@@ -1,5 +1,6 @@
 use crate::DesignerSession;
 use crate::animation_playback_pose::PlaybackPose;
+use crate::animation_preview_range::PreviewRangePose;
 use ferroui_designer_animation::{AnimationProgram, AnimationProgramLocator as ProgramLocator};
 use ferroui_designer_core::NodeId;
 use serde::{Deserialize, Serialize};
@@ -17,6 +18,8 @@ pub struct TimelinePreviewPose {
     anchor: Option<ProgramLocator>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub(crate) playback: Option<PlaybackPose>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(crate) preview_range: Option<PreviewRangePose>,
 }
 
 impl DesignerSession {
@@ -57,6 +60,7 @@ impl DesignerSession {
             source_key: program.source_key.clone(),
             anchor,
             playback: None,
+            preview_range: None,
         })
     }
 
@@ -67,6 +71,14 @@ impl DesignerSession {
         pose: &TimelinePreviewPose,
     ) -> Result<Option<TimelinePreviewPose>, String> {
         let program = self.resolve_preview_program(pose.source_key.as_deref(), pose.anchor.as_ref());
+        if let Some(range) = pose.preview_range {
+            let program = program.map(|program| program.id)
+                .or_else(|| range.all.then_some(self.active_animation_program()).flatten());
+            return match program {
+                Some(program) => self.restore_preview_range(program, pose, range),
+                None => Ok(None),
+            };
+        }
         if let Some(playback) = &pose.playback {
             // Play All belongs to the current document even when its reference clip is removed.
             let program = program.map(|program| program.id)
@@ -92,7 +104,7 @@ impl DesignerSession {
             && self.seeks_animation_elapsed(program))
     }
 
-    fn preview_seek_limit(&self, program: &AnimationProgram) -> Result<Option<f64>, String> {
+    pub(crate) fn preview_seek_limit(&self, program: &AnimationProgram) -> Result<Option<f64>, String> {
         if self.seeks_animation_elapsed(program) {
             return self.animation.native.timing(program.id).map(|clock| clock.total_duration())
                 .ok_or_else(|| "The authored animation is unavailable in the current native preview".into());

@@ -99,6 +99,7 @@ fn respond(
                 "isolatedDesign": true,
                 "appHostedDesign": true,
                 "hostedAnimationRestoration": true,
+                "hostedPreviewRanges": true,
                 "rsxLanguage": true,
                 "stages": true,
                 "prototypeEditing": true,

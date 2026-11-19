@@ -2,6 +2,7 @@ use crate::animation_integration_tests::attach_preview;
 use crate::{DesignerSession, TimelinePreviewPose};
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
 use ferroui_controls::{Border, ContentControl};
+use ferroui_designer_animation::PreviewRange;
 
 const SOURCE: &str = r#"<Canvas xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <Canvas.Styles>
@@ -21,6 +22,43 @@ const SOURCE: &str = r#"<Canvas xmlns="https://github.com/ferroui" xmlns:x="http
 fn opacity(session: &DesignerSession, name: &str) -> f64 {
     let target = session.document().ast().find_name(name).unwrap();
     session.preview.visual(target).unwrap().opacity()
+}
+
+#[test]
+fn preview_range_uses_authored_and_shared_clocks_and_restores_the_pose() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let mut session = DesignerSession::new(SOURCE, ContentControl::new()).unwrap();
+    let _window = attach_preview(&session);
+    let program = session.active_animation_program().unwrap();
+    let range = PreviewRange { start: 0.5, end: 1.5, looping: true };
+    session.start_preview_range(Some(program), false, range).unwrap();
+    assert_eq!(session.time(), 0.5);
+    assert_eq!(opacity(&session, "Lead"), 0.25);
+    session.advance(1.25).unwrap();
+    assert_eq!(session.time(), 0.75);
+    assert_eq!(opacity(&session, "Lead"), 0.375);
+    let pose = session.timeline_playback_pose().unwrap();
+    let revised = SOURCE.replace("0:0:2", "0:0:1").replace("Content=\"Old\"", "Content=\"New\"");
+    let mut replacement = DesignerSession::new(&revised, ContentControl::new()).unwrap();
+    let _replacement_window = attach_preview(&replacement);
+    let restored = replacement.restore_timeline_preview_pose(&pose).unwrap().unwrap();
+    assert_eq!(restored.preview_range.unwrap().range.end, 1.0);
+    assert_eq!(restored.time, 0.75);
+    assert_eq!(opacity(&replacement, "Lead"), 0.75);
+    assert!(replacement.is_playing());
+    replacement.advance(0.375).unwrap();
+    assert_eq!(replacement.time(), 0.625);
+
+    session.pause();
+    session.start_preview_range(None, true, PreviewRange { start: 1.0, end: 2.5, looping: false }).unwrap();
+    session.advance(3.0).unwrap();
+    assert_eq!(session.time(), 2.5);
+    assert!(!session.is_playing());
+    assert!(session.animation.playback_completed);
+    assert_eq!(opacity(&session, "Lead"), 0.75);
+    session.stop();
+    assert!(session.animation.preview_range.is_none());
+    assert_eq!(session.authored_source(), SOURCE);
 }
 
 #[test]

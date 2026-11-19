@@ -1,6 +1,7 @@
 //! Capture and restore the native clocks that produced an accepted preview frame.
 use ferroui_designer_animation::AnimationProgramLocator as ProgramLocator;
 use crate::{DesignerSession, PreviewSourceAnchor, PreviewStatus, TimelinePreviewPose};
+use crate::animation_preview_range::PreviewRangePose;
 use ferroui_designer_core::NodeId;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
@@ -35,6 +36,15 @@ struct TargetClock {
 
 impl DesignerSession {
     pub(crate) fn timeline_playback_pose(&self) -> Option<TimelinePreviewPose> {
+        if let Some(range) = self.animation.preview_range {
+            let mut pose = self.timeline_preview_pose()?;
+            pose.preview_range = Some(PreviewRangePose {
+                range,
+                all: self.animation.play_all,
+                playing: self.is_playing(),
+            });
+            return Some(pose);
+        }
         if !self.animation.elapsed_clock {
             return None;
         }
@@ -147,6 +157,7 @@ impl DesignerSession {
         };
         self.animation.elapsed_clock = false;
         self.animation.play_all = false;
+        self.animation.preview_range = None;
         self.animation.player.stop();
         if let Err(error) = self.restore_timeline_preview_pose(&pose) {
             self.preview.clear_animation();

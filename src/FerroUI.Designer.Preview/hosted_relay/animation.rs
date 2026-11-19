@@ -36,8 +36,10 @@ impl Relay {
             },
         )?;
         position.elapsed = outcome.elapsed;
-        position.completed = outcome.completed;
-        position.playing &= !outcome.completed;
+        if position.preview_range.is_none() {
+            position.completed = outcome.completed;
+            position.playing &= !outcome.completed;
+        }
         Ok(())
     }
 

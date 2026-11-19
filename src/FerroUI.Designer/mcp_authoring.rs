@@ -91,6 +91,8 @@ pub(super) fn tools() -> Vec<Value> {
             s::action("scrub",json!({"program":s::id(),"time":s::time()}), &["program","time"],true),
             s::action("scrub_all",json!({"program":s::id(),"time":s::time()}), &["time"],true),
             s::action("play_program",json!({"program":s::id(),"time":s::time(),"from_playhead":{"type":"boolean"}}), &["program"],true),
+            s::action("play_range", json!({"program":s::id(),"all":{"type":"boolean"},"range":
+                s::object(json!({"start":s::time(),"end":s::time(),"loop":{"type":"boolean"}}), &["start","end","loop"])}), &["range"],true),
             s::action("advance_program",json!({"program":s::id(),"seconds":s::time()}), &["program","seconds"],true),
             s::action("pause_program",json!({"program":s::id()}), &["program"],true),
             s::action("stop_program",json!({}), &[],true),
@@ -293,6 +295,10 @@ pub(super) fn call(
                     )?;
                     return Ok(playback_position(session));
                 }
+                "play_range" => {
+                    session.start_preview_range(args["program"].as_u64(), args["all"] == true, decode(args, "range")?)?;
+                    return Ok(playback_position(session));
+                }
                 action @ ("advance_program" | "pause_program") => {
                     if session.active_animation_program() != Some(node_id(args, "program")?) {
                         return Err("Play this animation program before advancing or pausing it".into());
@@ -484,7 +490,7 @@ fn playback_position(session: &DesignerSession) -> Value {
     let pose = session.timeline_playback_pose();
     let time = pose.as_ref().map_or(elapsed, |pose| pose.time);
     json!({"timelinePosition":{"time":time,"elapsed":elapsed,"playing":session.is_playing(),"all":session.animation.play_all,
-        "completed":session.animation.playback_completed,"pose":pose}})
+        "completed":session.animation.playback_completed,"previewRange":session.animation.preview_range,"pose":pose}})
 }
 fn state_transition_position(session: &DesignerSession) -> Value {
     let mut result = json!({"document":state(session)});

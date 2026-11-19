@@ -1,5 +1,5 @@
 use crate::rsx_animation::HostedStateRoute;
-use ferroui_designer_animation::{AnimationProgram, AnimationProgramLocator, AnimationPrograms, ClipClock};
+use ferroui_designer_animation::{AnimationProgram, AnimationProgramLocator, AnimationPrograms, ClipClock, PreviewRange};
 use ferroui_designer_core::{Document, NodeId, SourceAnchor};
 use ferroui_remote_protocol::designer::DesignAnimationCatalogMessage;
 use serde::{Deserialize, Serialize};
@@ -38,6 +38,8 @@ pub(crate) struct Position {
     pub(crate) completed: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) clips: Option<Vec<i64>>,
+    #[serde(rename = "previewRange", skip_serializing_if = "Option::is_none")]
+    pub(crate) preview_range: Option<PreviewRange>,
 }
 
 #[derive(PartialEq, Eq)]
@@ -226,13 +228,26 @@ impl SourceMap {
             } else {
                 (None, replacement.clips.get(&program)?.duration)
             };
-            Some(Position {
+            let mut restored = Position {
                 program,
                 clips,
                 elapsed: duration.map_or(position.elapsed, |limit| position.elapsed.min(limit)),
                 playing: position.playing,
                 completed: position.completed,
-            })
+                preview_range: position.preview_range.and_then(|range| range.fit(duration)),
+            };
+            if let Some(range) = restored.preview_range {
+                restored.elapsed = if range.looping && restored.playing {
+                    range.start_at(restored.elapsed)
+                } else {
+                    restored.elapsed.clamp(range.start, range.end)
+                };
+                restored.completed = !range.looping && restored.elapsed >= range.end;
+                restored.playing &= !restored.completed;
+            } else if position.preview_range.is_some() {
+                restored.playing = false;
+            }
+            Some(restored)
         });
         Presentation {
             selection: prior.selection.and_then(remap),
