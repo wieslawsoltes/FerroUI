@@ -91,7 +91,7 @@ impl FerroXamlDiagnosticCodes {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::compiler_extensions::transformers::XamlPropertyPathException;
+    use crate::compiler_extensions::transformers::FerroTransformErrors;
     use xamlx::ast::XamlLineInfo;
 
     fn code(e: &XamlError) -> String {
@@ -125,7 +125,7 @@ mod tests {
         assert_eq!(code(&XamlError::parse_exception("x", Some(&li))), "FRN1000");
         assert_eq!(code(&XamlError::invalid_operation("x")), "FRN9999");
         assert_eq!(code(&XamlError::xml_exception("x", 1, 1)), "FRN9999");
-        assert_eq!(code(&XamlPropertyPathException::new("x", &li, None)), "FRN2202");
+        assert_eq!(code(&XamlError::property_path("x", &li, None)), "FRN2202");
         for (name, expected) in [
             ("XamlDataContextException", "FRN2101"),
             ("XamlBindingsTransformException", "FRN2100"),
