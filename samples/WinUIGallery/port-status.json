@@ -1044,7 +1044,7 @@
       "examples": []
     },
     "Pivot": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/Pivot.xaml",
         "samples/WinUIGallery/examples.rs"
@@ -1053,9 +1053,13 @@
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/layout_samples_tests.rs",
+          "name": "pivot_page_shows_the_source_title_and_items"
         }
       ],
-      "notes": "Native TabControl adapts the basic Pivot sample; Pivot-specific input and animation remain pending. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The source example uses the native Pivot (its template in the WinUI theme) with the source's title EMAIL, MinHeight 400 and the four PivotItems All, Unread, Flagged and Urgent with their texts. The page has no code-behind upstream.",
       "examples": []
     },
     "Popup": {

@@ -218,3 +218,24 @@ fn wrap_panel_options_set_the_orientation_spacing_and_padding() {
     assert_eq!(second.children().count(), 6);
     assert_eq!(second.item_spacing(), 8.0);
 }
+
+#[test]
+fn pivot_page_shows_the_source_title_and_items() {
+    use ferroui_controls::{Pivot, PivotItem};
+    let _application = start();
+    let root = page("Pivot");
+    let pivot = root.get_control::<Pivot>("EmailPivot");
+    assert_eq!(
+        pivot.title().and_then(|title| title.downcast_ref::<String>().cloned()).as_deref(),
+        Some("EMAIL")
+    );
+    assert_eq!(pivot.min_height(), 400.0);
+    let headers: Vec<String> = (0..pivot.items().count())
+        .filter_map(|index| pivot.items().get_at(index))
+        .filter_map(|item| Control::from_boxed(&item).and_then(|item| item.cast::<PivotItem>()))
+        .filter_map(|item| item.header().and_then(|header| header.downcast_ref::<String>().cloned()))
+        .collect();
+    assert_eq!(headers, ["All", "Unread", "Flagged", "Urgent"]);
+    pivot.set_selected_index(2);
+    assert_eq!(pivot.selected_index(), 2);
+}
