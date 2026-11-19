@@ -7,7 +7,7 @@ use crate::reactive::{
     CompositeDisposable, Disposable, IDisposable, IObservable, IObserver, LightweightSubject,
     ObservableError,
 };
-use crate::{AnyValue, FerroProperty, PropertyValue, Ref, StyledProperty, Visual};
+use crate::{AnyValue, BoxedValue, FerroProperty, PropertyValue, Ref, StyledProperty, Visual};
 use std::any::TypeId;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -93,6 +93,11 @@ pub trait Animator: Sized + 'static {
         old_value: &Self::Value,
         new_value: &Self::Value,
     ) -> Self::Value;
+
+    fn neutral_value(&self, control: &Animatable) -> Self::Value {
+        let property = self.base().styled_property::<Self::Value>();
+        control.get_base_value(property).unwrap_or_else(|| control.get_value(property))
+    }
 
     /// Reads a key frame value; `None` when it is not a value this animator
     /// can animate, in which case the neutral value is used in its place.
@@ -417,6 +422,19 @@ impl<A: Animator> IAnimator for A {
 
     fn animator_type(&self) -> TypeId {
         TypeId::of::<A>()
+    }
+
+    fn sample_for_preview(&self, control: &Animatable, positions: &[f64]) -> Option<Vec<BoxedValue>> {
+        let property = self.property()?;
+        if property.as_styled::<A::Value>().is_none()
+            || (!property.is_attached() && !property.owner_type().is_assignable_from(control.get_type()))
+        {
+            return None;
+        }
+        let base = self.neutral_value(control);
+        Some(positions.iter().map(|&position| {
+            Rc::new(interpolation_handler(self, position, &base)) as BoxedValue
+        }).collect())
     }
 
     fn apply(

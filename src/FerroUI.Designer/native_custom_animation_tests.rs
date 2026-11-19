@@ -5,9 +5,53 @@ use ferroui_base::CornerRadius;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
 use ferroui_controls::{Border, ContentControl};
 use ferroui_designer_animation::{
-    AnimationCodec, AnimationError, AnimationImport, AnimationValue, ImportOptions, KeyframeEdit,
+    AnimationCodec, AnimationError, AnimationImport, AnimationValue, CurveWindow, ImportOptions, KeyframeEdit,
     NativeAnimationCodec, Timeline, ValueKind,
 };
+
+#[derive(Default)]
+struct ReviewOpacity;
+
+impl InterpolatingAnimator for ReviewOpacity {
+    type Value = f64;
+
+    fn interpolate(&self, progress: f64, from: &f64, to: &f64) -> f64 {
+        from + (to - from) * progress * progress
+    }
+}
+
+#[test]
+fn registered_scalar_curve_matches_native_pose_without_changing_it() {
+    std::thread::spawn(|| {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        Animation::register_custom_animator::<ReviewOpacity>();
+        let source = r#"<Canvas xmlns="https://github.com/ferroui">
+            <Canvas.Styles><Style Selector="Border#Review"><Style.Animations>
+                <Animation Duration="0:0:2" FillMode="Both">
+                    <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.2"/></KeyFrame>
+                    <KeyFrame Cue="100%"><Setter Property="Opacity" Value="1"/></KeyFrame>
+                </Animation>
+            </Style.Animations></Style></Canvas.Styles>
+            <Border Name="Review" Width="160" Height="90" Opacity="0.8"/>
+        </Canvas>"#;
+        let mut studio = DesignerSession::new(source, ContentControl::new()).unwrap();
+        let _window = attach_preview(&studio);
+        let program = &studio.animation_programs()[0];
+        assert!(studio.requires_native_animation(program));
+        let (id, target) = (program.id, program.primary_target());
+        let visual = studio.preview.visual(target).unwrap();
+        studio.scrub_animation_program(id, 0.5).unwrap();
+        let opacity = visual.opacity();
+        let curve = studio.animation_curve(id, target, "Opacity", CurveWindow { start: 0.0, end: 2.0 }).unwrap();
+        let midpoint = curve.iter().find(|sample| sample.time == 1.0).unwrap().value;
+        assert!((midpoint - 0.4).abs() < 1e-12);
+        assert_eq!(studio.time(), 0.5);
+        assert_eq!(visual.opacity(), opacity);
+        assert_eq!(studio.document().source(), source);
+        studio.scrub_animation_program(id, 1.0).unwrap();
+        assert_eq!(visual.opacity(), midpoint);
+    }).join().unwrap();
+}
 
 #[derive(Default)]
 struct ReviewCorners;

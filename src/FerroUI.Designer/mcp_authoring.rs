@@ -17,6 +17,7 @@ pub(super) fn handles(name: &str) -> bool {
         "designer_programs"
             | "designer_program"
             | "designer_keyframe_draft"
+            | "designer_animation_curve"
             | "designer_states"
             | "designer_state"
             | "designer_state_actions"
@@ -48,6 +49,10 @@ pub(super) fn tools() -> Vec<Value> {
     let draft_required = &["program","target","property","time","value","easing"];
     vec![
         s::tool("designer_programs","Read animation programs, source keys, codec diagnostics and typed timelines. include_keyframe_text adds formatted XAML values and easing to the typed keys.",s::object(json!({"include_source":{"type":"boolean"},"include_keyframe_text":{"type":"boolean"}}), &[]),false),
+        s::tool("designer_animation_curve", "Sample an authored scalar track over a visible time range in seconds using the current artboard and its native animation evaluator.",
+            s::object(json!({"program":s::id(),"target":s::id(),"property":s::string(),
+                "window":s::object(json!({"start":s::time(),"end":s::time()}), &["start","end"])}),
+                &["program","target","property","window"]), false),
         s::tool("designer_keyframe_draft", "Validate an animation keyframe's time, typed value and easing against the current program and source codec. Returns the sampled easing preview.",
             s::object(keyframe_draft(), draft_required), false),
         s::actions("designer_program","Author animation programs and keyframes, edit timing with proportional retiming, set selectors or preview targets, sample several programs together, or play all programs. IDs refer to the current document; every action checks expected_revision.",vec![
@@ -120,6 +125,11 @@ pub(super) fn call(
         "designer_keyframe_draft" => return session.preview_program_keyframe(
             node_id(args, "program")?, node_id(args, "target")?, &text(args, "property")?, keyframe_draft(args)?,
         ),
+        "designer_animation_curve" => {
+            let points = session.animation_curve(node_id(args, "program")?, node_id(args, "target")?,
+                &text(args, "property")?, decode(args, "window")?)?;
+            return Ok(json!({"document":state(session), "points":points}));
+        }
         "designer_program" => {
             let mut created = None;
             let mut keyframes = None;

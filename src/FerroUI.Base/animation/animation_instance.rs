@@ -634,16 +634,10 @@ impl<A: Animator> AnimationInstance<A> {
     }
 
     fn update_neutral_value(&self) {
-        let property = self.animator.base().styled_property::<A::Value>();
         let Some(control) = self.target_control.upgrade() else {
             return;
         };
-
-        let value = match control.get_base_value(property) {
-            Some(base_value) => base_value,
-            None => control.get_value(property),
-        };
-        *self.neutral_value.borrow_mut() = value;
+        *self.neutral_value.borrow_mut() = self.animator.neutral_value(&control);
     }
 }
 
