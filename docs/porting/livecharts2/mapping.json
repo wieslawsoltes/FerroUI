@@ -1360,13 +1360,14 @@
       "status": "partial"
     },
     "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/VariableSVGPathGeometry.cs": {
-      "reason": "The SVGPath of the cells of a heat series (its GeometrySvg) is read by the path markup parser of FerroUI into path commands of the scene (quadratic curves and elliptical arcs as cubic curves), as SKPath.ParseSvgPathData; the cells are paths of the native renderer.",
+      "reason": "The SVGPath of the cells of a heat series (its GeometrySvg) is read by the path markup parser of FerroUI into path commands of the scene (quadratic curves and elliptical arcs as cubic curves), as SKPath.ParseSvgPathData; the cells are paths of the native renderer; the GeometrySvg of the line, stacked area, scatter and bar series replaces each marker and each bar with the path fitted to its visual (draw_svg_geometries of the Cartesian engine; GeometrySvg of the generated LineSeries, AreaSeries, StackedAreaSeries, ScatterSeries and the column, row, stacked and range bar series).",
       "remaining": [
-        "The SVG geometries of the other series (bars, line markers, boxes, polar markers)."
+        "The polar line markers, and the miniatures of the box and pie series in the legend and tooltip of the source (the native legend and tooltip have no miniatures)."
       ],
       "rust": [
         "src/FerroUI.LiveCharts/svg_path.rs",
-        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs::draw_heat"
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs::draw_heat",
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs"
       ],
       "status": "partial"
     },

@@ -1068,6 +1068,146 @@ impl HeatSeries {
     }
 }
 
+ferro_properties! { impl LineSeries {
+    pub fn geometry_svg_property() -> StyledProperty<Option<String>> {
+        FerroProperty::register::<LineSeries, _>("GeometrySvg", None)
+    }
+} }
+impl LineSeries {
+    pub fn geometry_svg(&self) -> Option<String> {
+        self.get_value(Self::geometry_svg_property())
+    }
+    pub fn set_geometry_svg(&self, value: Option<String>) {
+        self.set_value(Self::geometry_svg_property(), value);
+    }
+}
+
+ferro_properties! { impl AreaSeries {
+    pub fn geometry_svg_property() -> StyledProperty<Option<String>> {
+        FerroProperty::register::<AreaSeries, _>("GeometrySvg", None)
+    }
+} }
+impl AreaSeries {
+    pub fn geometry_svg(&self) -> Option<String> {
+        self.get_value(Self::geometry_svg_property())
+    }
+    pub fn set_geometry_svg(&self, value: Option<String>) {
+        self.set_value(Self::geometry_svg_property(), value);
+    }
+}
+
+ferro_properties! { impl StackedAreaSeries {
+    pub fn geometry_svg_property() -> StyledProperty<Option<String>> {
+        FerroProperty::register::<StackedAreaSeries, _>("GeometrySvg", None)
+    }
+} }
+impl StackedAreaSeries {
+    pub fn geometry_svg(&self) -> Option<String> {
+        self.get_value(Self::geometry_svg_property())
+    }
+    pub fn set_geometry_svg(&self, value: Option<String>) {
+        self.set_value(Self::geometry_svg_property(), value);
+    }
+}
+
+ferro_properties! { impl ScatterSeries {
+    pub fn geometry_svg_property() -> StyledProperty<Option<String>> {
+        FerroProperty::register::<ScatterSeries, _>("GeometrySvg", None)
+    }
+} }
+impl ScatterSeries {
+    pub fn geometry_svg(&self) -> Option<String> {
+        self.get_value(Self::geometry_svg_property())
+    }
+    pub fn set_geometry_svg(&self, value: Option<String>) {
+        self.set_value(Self::geometry_svg_property(), value);
+    }
+}
+
+ferro_properties! { impl ColumnSeries {
+    pub fn geometry_svg_property() -> StyledProperty<Option<String>> {
+        FerroProperty::register::<ColumnSeries, _>("GeometrySvg", None)
+    }
+} }
+impl ColumnSeries {
+    pub fn geometry_svg(&self) -> Option<String> {
+        self.get_value(Self::geometry_svg_property())
+    }
+    pub fn set_geometry_svg(&self, value: Option<String>) {
+        self.set_value(Self::geometry_svg_property(), value);
+    }
+}
+
+ferro_properties! { impl RowSeries {
+    pub fn geometry_svg_property() -> StyledProperty<Option<String>> {
+        FerroProperty::register::<RowSeries, _>("GeometrySvg", None)
+    }
+} }
+impl RowSeries {
+    pub fn geometry_svg(&self) -> Option<String> {
+        self.get_value(Self::geometry_svg_property())
+    }
+    pub fn set_geometry_svg(&self, value: Option<String>) {
+        self.set_value(Self::geometry_svg_property(), value);
+    }
+}
+
+ferro_properties! { impl StackedColumnSeries {
+    pub fn geometry_svg_property() -> StyledProperty<Option<String>> {
+        FerroProperty::register::<StackedColumnSeries, _>("GeometrySvg", None)
+    }
+} }
+impl StackedColumnSeries {
+    pub fn geometry_svg(&self) -> Option<String> {
+        self.get_value(Self::geometry_svg_property())
+    }
+    pub fn set_geometry_svg(&self, value: Option<String>) {
+        self.set_value(Self::geometry_svg_property(), value);
+    }
+}
+
+ferro_properties! { impl StackedRowSeries {
+    pub fn geometry_svg_property() -> StyledProperty<Option<String>> {
+        FerroProperty::register::<StackedRowSeries, _>("GeometrySvg", None)
+    }
+} }
+impl StackedRowSeries {
+    pub fn geometry_svg(&self) -> Option<String> {
+        self.get_value(Self::geometry_svg_property())
+    }
+    pub fn set_geometry_svg(&self, value: Option<String>) {
+        self.set_value(Self::geometry_svg_property(), value);
+    }
+}
+
+ferro_properties! { impl RangeColumnSeries {
+    pub fn geometry_svg_property() -> StyledProperty<Option<String>> {
+        FerroProperty::register::<RangeColumnSeries, _>("GeometrySvg", None)
+    }
+} }
+impl RangeColumnSeries {
+    pub fn geometry_svg(&self) -> Option<String> {
+        self.get_value(Self::geometry_svg_property())
+    }
+    pub fn set_geometry_svg(&self, value: Option<String>) {
+        self.set_value(Self::geometry_svg_property(), value);
+    }
+}
+
+ferro_properties! { impl RangeRowSeries {
+    pub fn geometry_svg_property() -> StyledProperty<Option<String>> {
+        FerroProperty::register::<RangeRowSeries, _>("GeometrySvg", None)
+    }
+} }
+impl RangeRowSeries {
+    pub fn geometry_svg(&self) -> Option<String> {
+        self.get_value(Self::geometry_svg_property())
+    }
+    pub fn set_geometry_svg(&self, value: Option<String>) {
+        self.set_value(Self::geometry_svg_property(), value);
+    }
+}
+
 ferro_properties! { impl PolarLineSeries {
     pub fn angle_tool_tip_label_formatter_property() -> StyledProperty<Option<ChartPointFormatter>> {
         FerroProperty::register::<PolarLineSeries, _>("AngleToolTipLabelFormatter", None)

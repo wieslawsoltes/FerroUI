@@ -63,9 +63,10 @@ pub struct CartesianSeriesOptions {
     /// `DataLabelsPosition` of the series; `None` is the default of the family (`Middle` for a
     /// heat series, the only family that places its labels by it).
     pub data_labels_position: Option<DataLabelsPosition>,
-    /// `GeometrySvg`: the SVG path data drawn in each cell of a heat series, fitted to the cell
-    /// as the source's `VariableSVGPathGeometry`; `None` draws rectangles. Path data the parser
-    /// rejects is an error, where the source throws.
+    /// `GeometrySvg`: the SVG path data drawn in each cell of a heat series, each marker of a line
+    /// or stacked area series, each scatter point and each bar, fitted to the visual as the source's
+    /// `VariableSVGPathGeometry`; `None` draws the native geometry. Path data the parser rejects
+    /// is an error, where the source throws.
     pub geometry_svg: Option<String>,
     /// `YToolTipLabelFormatter`: the text of the value of a point in its tooltip; `None` is the
     /// label of the value axis ([`tool_tip_texts`]).
@@ -611,6 +612,7 @@ impl CartesianChartEngine {
                 }
             }
         }
+        draw_svg_geometries(&mut scene, series, series_options)?;
         // The tooltip text of each point (`GetPrimaryToolTipText`, `GetSecondaryToolTipText`).
         for hit in &mut scene.hits {
             let Some(s) = series.get(hit.id.series) else {
@@ -1231,6 +1233,55 @@ fn append_hit(
             }),
         );
     }
+}
+
+/// `GeometrySvg` of the line, area, scatter and bar series (the source's series of
+/// `VariableSVGPathGeometry`): the path data is read once and drawn in place of the marker of
+/// each point of a line or stacked area series and each scatter point, and of each bar (a rounded bar
+/// loses its corners, as the source's path replaces the geometry), fitted to the visual as
+/// `Svg.Draw`. A heat series draws its own cells (`draw_heat`); the other families have no SVG
+/// geometry in the source. Path data the parser rejects is an error.
+fn draw_svg_geometries(
+    scene: &mut Scene,
+    series: &[Series],
+    series_options: &[CartesianSeriesOptions],
+) -> Result<(), ChartError> {
+    for (si, s) in series.iter().enumerate().filter(|(_, s)| s.visible) {
+        // `CoreLineSeries` (and the stacked areas over it), `CoreScatterSeries` and `BarSeries`.
+        let markers = matches!(
+            s.kind,
+            SeriesKind::Line | SeriesKind::Area | SeriesKind::StackedArea | SeriesKind::Scatter
+        );
+        let bars = matches!(
+            s.kind,
+            SeriesKind::Column
+                | SeriesKind::Row
+                | SeriesKind::StackedColumn
+                | SeriesKind::StackedRow
+                | SeriesKind::RangeColumn
+                | SeriesKind::RangeRow
+        );
+        if !markers && !bars {
+            continue;
+        }
+        let Some(data) = series_options.get(si).and_then(|o| o.geometry_svg.as_deref()) else {
+            continue;
+        };
+        let commands = crate::svg_path::parse(data)?;
+        let bounds = crate::svg_path::bounds(&commands);
+        for primitive in &mut scene.primitives {
+            if primitive.id.map(|id| id.series) != Some(si) {
+                continue;
+            }
+            let rect = match primitive.geometry {
+                Geometry::Ellipse(rect) if markers => rect,
+                Geometry::Rectangle { rect, .. } if !markers => rect,
+                _ => continue,
+            };
+            primitive.geometry = Geometry::Path(crate::svg_path::fit(&commands, bounds, rect));
+        }
+    }
+    Ok(())
 }
 
 /// The header (`GetSecondaryToolTipText`) and the value (`GetPrimaryToolTipText`) of the tooltip

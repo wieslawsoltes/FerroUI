@@ -1097,6 +1097,49 @@ fn cartesian_tooltip_text_takes_the_category_labels_and_the_formatters_of_the_se
     assert_eq!(label(&chart), "Sales: month 1: 5 units");
 }
 
+/// `GeometrySvg` of the scatter and column series from markup: each point is drawn as the path,
+/// which the chart observes.
+#[test]
+fn scatter_and_column_series_draw_their_geometry_svg_from_markup() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    register_types();
+    let loaded = FerroRuntimeXamlLoader::parse(
+        r##"<lc:CartesianChart xmlns:lc="https://ferroui.dev/livecharts">
+          <lc:ScatterSeries GeometrySvg="M0,0 L10,0 L5,10 Z">
+            <lc:ChartPoint X="0" Y="1" />
+            <lc:ChartPoint X="1" Y="2" />
+          </lc:ScatterSeries>
+          <lc:ColumnSeries>
+            <lc:ChartPoint X="0" Y="3" />
+          </lc:ColumnSeries>
+        </lc:CartesianChart>"##,
+        Some(&ASSEMBLY),
+    )
+    .unwrap_or_else(|error| panic!("{}; {:?}", error.message(), error.inner_exception()));
+    let chart = from_markup_value::<Ref<CartesianChart>>(&Some(loaded)).unwrap();
+    chart.set_animations_speed(0.0);
+    let size = Size::new(400.0, 400.0);
+    let paths = |chart: &CartesianChart, series: usize| {
+        chart
+            .scene(size)
+            .unwrap()
+            .primitives
+            .iter()
+            .filter(|p| {
+                p.id.is_some_and(|id| id.series == series)
+                    && matches!(p.geometry, ferroui_livecharts::Geometry::Path(_))
+            })
+            .count()
+    };
+    assert_eq!(paths(&chart, 0), 2);
+    assert_eq!(paths(&chart, 1), 0);
+    let column = chart.series().get(1).cast::<ColumnSeries>().unwrap();
+    let revision = chart.revision();
+    column.set_geometry_svg(Some("M0,0 L10,0 L10,10 Z".into()));
+    assert!(chart.revision() > revision);
+    assert_eq!(paths(&chart, 1), 1);
+}
+
 /// The tooltip text of a node (`GetPrimaryToolTipText` of `CoreSankeySeries` and
 /// `CoreTreemapSeries`): `<label>: <value>`, and the code-only `ToolTipLabelFormatter` of
 /// `SankeySeries` and `TreemapSeries`, which the chart observes.

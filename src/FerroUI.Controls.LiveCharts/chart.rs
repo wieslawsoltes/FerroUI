@@ -40,6 +40,31 @@ use std::{
     time::Duration,
 };
 
+/// The `GeometrySvg` of a line, stacked area, scatter or bar series (`VariableSVGPathGeometry`).
+fn series_geometry_svg(model: &Ref<ChartSeries>) -> Option<String> {
+    use crate::series_classes::*;
+    macro_rules! svg {
+        ($($class:ty),*) => {
+            $(if let Some(series) = model.cast::<$class>() {
+                return series.geometry_svg();
+            })*
+        };
+    }
+    svg!(
+        LineSeries,
+        AreaSeries,
+        StackedAreaSeries,
+        ScatterSeries,
+        ColumnSeries,
+        RowSeries,
+        StackedColumnSeries,
+        StackedRowSeries,
+        RangeColumnSeries,
+        RangeRowSeries
+    );
+    None
+}
+
 /// Immutable event data. Handlers may change collections or remove the chart.
 #[derive(Clone, Debug, PartialEq)]
 pub struct ChartPointerEventArgs {
@@ -792,6 +817,8 @@ impl Chart {
                         if let Some(heat) = model.cast::<HeatSeries>() {
                             options.data_labels_position = Some(heat.data_labels_position());
                             options.geometry_svg = heat.geometry_svg();
+                        } else {
+                            options.geometry_svg = series_geometry_svg(model);
                         }
                         options
                     })

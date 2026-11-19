@@ -315,6 +315,11 @@ node_props = {
   ('data_labels_position','DataLabelsPosition','DataLabelsPosition','DataLabelsPosition::Middle'),
   # Its GeometrySvg: the SVG path data drawn in every cell, None for rectangles (#624).
   ('geometry_svg','GeometrySvg','Option<String>','None')],
+ # The GeometrySvg of the line, stacked area, scatter and bar series: the SVG path data drawn in
+ # place of each marker or bar (VariableSVGPathGeometry), None for the native geometry (#624).
+ **{name:[('geometry_svg','GeometrySvg','Option<String>','None')] for name in
+    ['LineSeries','AreaSeries','StackedAreaSeries','ScatterSeries','ColumnSeries','RowSeries',
+     'StackedColumnSeries','StackedRowSeries','RangeColumnSeries','RangeRowSeries']},
  # The tooltip label formatters of CorePolarLineSeries (code only), read by the chart (#624).
  'PolarLineSeries':[('angle_tool_tip_label_formatter','AngleToolTipLabelFormatter','Option<ChartPointFormatter>','None'),
   ('radius_tool_tip_label_formatter','RadiusToolTipLabelFormatter','Option<ChartPointFormatter>','None')]}
