@@ -1078,13 +1078,14 @@ fn draw(
                     _ => Err(Error::new(FERRO_INVALID_ARGUMENT, format!("{id} is not a brush or a pen"))),
                 }
             };
-            let brush = pick(brush, drawing.brushes.len())?.map(|index| drawing.brushes[index].1.clone());
-            let pen = pick(pen, drawing.pens.len())?.map(|index| drawing.pens[index].2.clone());
-            let (pointer, pushed) = drawing.contexts.last_mut().expect("a context runs");
+            let Drawing { contexts, brushes, pens } = drawing;
+            let brush = pick(brush, brushes.len())?.map(|index| &brushes[index].1);
+            let pen = pick(pen, pens.len())?.map(|index| &pens[index].2);
+            let (pointer, pushed) = contexts.last_mut().expect("a context runs");
             // SAFETY: the context of the running render callback: it lives until the callback
             // returns, when it is taken off this list.
             let target = unsafe { &mut **pointer };
-            draw(target, brush.as_ref(), pen.as_ref(), pushed);
+            draw(target, brush, pen, pushed);
             Ok(())
         })?
     })

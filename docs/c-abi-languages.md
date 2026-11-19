@@ -126,7 +126,7 @@ process ends (docs/c-abi.md, section 14.2). Map it once and read and write it di
 | C, C++, Zig, Rust | the pointers of `FerroSignalTable`; C11 `<stdatomic.h>`, `std::atomic_ref`, Rust atomics |
 | C# | `Span<long>` over the pointer, `Volatile.Read`/`Volatile.Write` and `Interlocked.Or` |
 | Java, Kotlin | `MemorySegment.reinterpret(capacity * 8)` and a `VarHandle` with `getAcquire`/`setRelease`/`getAndBitwiseOrRelease` |
-| Swift | `UnsafeMutablePointer<UInt64>` with the `Synchronization` module's atomics |
+| Swift | `UnsafeMutablePointer<UInt64>` with `UnsafeAtomic` of the swift-atomics package |
 | Dart | `Pointer<Uint64>.asTypedList(capacity)`; write from the UI isolate only |
 | Go | `unsafe.Slice` and `sync/atomic` |
 | Python | the `ferro_signal_set_*` and `ferro_signal_get_*` calls (no atomics on raw memory) |

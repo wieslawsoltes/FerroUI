@@ -6,6 +6,9 @@ design that the model and the ABI follow so that each language can get the faste
 most idiomatic binding its FFI allows. The first backend, Osprey (docs/osprey.md), implements
 part of it; section 7 says what is done and what is next.
 
+The guide for the users of the ABI and of the bindings, per language, is
+docs/c-abi-languages.md.
+
 ## 1. Two stages
 
 - **One model** (`bindings/model/ferroui-api.json`), built from the metadata of the framework

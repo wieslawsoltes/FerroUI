@@ -7,6 +7,9 @@ against, the way Skia, SQLite and wgpu-native are consumed. This document descri
 of #636, with the changes #950 proposed for languages that have neither pointers nor
 closures in their FFI (Osprey, WebAssembly hosts, Dart, Go, Python).
 
+For application and binding authors, docs/c-abi-languages.md is the guide: how to call the ABI
+from each language and which path is the fastest for each kind of work.
+
 Phase 1 is the "full" build of #636: the tables of types are on, so any registered type,
 property and routed event can be found by name, and there is no markup. Selecting what an
 application uses, and trimming the library to it, is phase 2 (section 11).
