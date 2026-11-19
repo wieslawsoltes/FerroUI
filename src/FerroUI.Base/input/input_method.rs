@@ -48,7 +48,7 @@ impl InputMethod {
         element: &Interactive,
         handler: impl Fn(&Interactive, &RoutedEventArgs) + 'static,
     ) -> RoutedEventHandlerToken {
-        element.add_handler_as::<RoutedEventArgs, _, _>(
+        element.add_handler_as::<RoutedEventArgs, _>(
             Self::text_input_method_client_requery_requested_event(),
             handler,
             RoutingStrategies::DIRECT | RoutingStrategies::BUBBLE,

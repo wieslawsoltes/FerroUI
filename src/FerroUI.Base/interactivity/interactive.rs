@@ -1,6 +1,5 @@
 use super::{EventRoute, IRoutedEventArgs, RouteHandler, RoutedEvent, RoutingStrategies};
 use crate::metadata::MarkupDelegate;
-use crate::threading::CallbackResult;
 use crate::BoxedValue;
 use crate::layout::{Layoutable, LayoutableImpl};
 use crate::{
@@ -88,16 +87,11 @@ impl Interactive {
     /// Adds a handler for a routed event, listening to the direct and
     /// bubble routes of unhandled events.
     ///
-    /// The handler returns `()` or a `Result`
-    /// ([`CallbackResult`](crate::threading::CallbackResult)): an error goes to
-    /// [`Dispatcher::raise_unhandled_exception`](crate::threading::Dispatcher::raise_unhandled_exception)
-    /// and, when a handler of the dispatcher handles it, the route goes on (#567).
-    ///
     /// Returns a token for [`remove_handler`](Self::remove_handler).
-    pub fn add_handler<TEventArgs: IRoutedEventArgs, R: CallbackResult>(
+    pub fn add_handler<TEventArgs: IRoutedEventArgs>(
         &self,
         routed_event: &RoutedEvent<TEventArgs>,
-        handler: impl Fn(&Interactive, &TEventArgs) -> R + 'static,
+        handler: impl Fn(&Interactive, &TEventArgs) + 'static,
     ) -> RoutedEventHandlerToken {
         self.add_handler_with(routed_event, handler, Self::DEFAULT_ROUTES, false)
     }
@@ -108,16 +102,56 @@ impl Interactive {
     /// `handled_events_too` whether the handler is also invoked for events
     /// that are already handled. The handler receives the element it is
     /// attached to and the event args.
-    pub fn add_handler_with<TEventArgs: IRoutedEventArgs, R: CallbackResult>(
+    pub fn add_handler_with<TEventArgs: IRoutedEventArgs>(
         &self,
         routed_event: &RoutedEvent<TEventArgs>,
-        handler: impl Fn(&Interactive, &TEventArgs) -> R + 'static,
+        handler: impl Fn(&Interactive, &TEventArgs) + 'static,
         routes: RoutingStrategies,
         handled_events_too: bool,
     ) -> RoutedEventHandlerToken {
         // The event's args type is `TEventArgs` by construction, so the
         // conversion below cannot fail for args accepted by `raise_event`.
-        self.add_handler_as::<TEventArgs, TEventArgs, R>(routed_event, handler, routes, handled_events_too)
+        self.add_handler_as::<TEventArgs, TEventArgs>(routed_event, handler, routes, handled_events_too)
+    }
+
+    /// Adds a handler that may fail, listening to the direct and bubble routes
+    /// of unhandled events: its error goes to
+    /// [`Dispatcher::raise_unhandled_exception`](crate::threading::Dispatcher::raise_unhandled_exception)
+    /// and, when a handler of the dispatcher handles it, the route goes on
+    /// (#567). A handler fails by returning its error, not by panicking.
+    ///
+    /// Returns a token for [`remove_handler`](Self::remove_handler).
+    pub fn add_fallible_handler<TEventArgs, E>(
+        &self,
+        routed_event: &RoutedEvent<TEventArgs>,
+        handler: impl Fn(&Interactive, &TEventArgs) -> Result<(), E> + 'static,
+    ) -> RoutedEventHandlerToken
+    where
+        TEventArgs: IRoutedEventArgs,
+        E: Into<Box<dyn std::error::Error + Send + Sync>>,
+    {
+        self.add_fallible_handler_with(routed_event, handler, Self::DEFAULT_ROUTES, false)
+    }
+
+    /// [`add_fallible_handler`](Self::add_fallible_handler) with the routes and
+    /// whether handled events are seen, as [`add_handler_with`](Self::add_handler_with).
+    pub fn add_fallible_handler_with<TEventArgs, E>(
+        &self,
+        routed_event: &RoutedEvent<TEventArgs>,
+        handler: impl Fn(&Interactive, &TEventArgs) -> Result<(), E> + 'static,
+        routes: RoutingStrategies,
+        handled_events_too: bool,
+    ) -> RoutedEventHandlerToken
+    where
+        TEventArgs: IRoutedEventArgs,
+        E: Into<Box<dyn std::error::Error + Send + Sync>>,
+    {
+        let handler = move |sender: &Interactive, args: &TEventArgs| {
+            if let Err(error) = handler(sender, args) {
+                crate::threading::Dispatcher::current_dispatcher().raise_unhandled_exception(error);
+            }
+        };
+        self.add_handler_with(routed_event, handler, routes, handled_events_too)
     }
 
     /// Adds a handler written against args type `THandlerArgs` to any
@@ -129,10 +163,10 @@ impl Interactive {
     /// [`RoutedEvent`].
     ///
     /// Panics if the event's args type does not derive from `THandlerArgs`.
-    pub fn add_handler_as<THandlerArgs: IRoutedEventArgs, TEventArgs: ?Sized, R: CallbackResult>(
+    pub fn add_handler_as<THandlerArgs: IRoutedEventArgs, TEventArgs: ?Sized>(
         &self,
         routed_event: &RoutedEvent<TEventArgs>,
-        handler: impl Fn(&Interactive, &THandlerArgs) -> R + 'static,
+        handler: impl Fn(&Interactive, &THandlerArgs) + 'static,
         routes: RoutingStrategies,
         handled_events_too: bool,
     ) -> RoutedEventHandlerToken {
@@ -146,7 +180,7 @@ impl Interactive {
 
         let adapter: RouteHandler = Rc::new(move |sender: &Interactive, args: &dyn IRoutedEventArgs| {
             match args.downcast_ref::<THandlerArgs>() {
-                Some(typed_args) => handler(sender, typed_args).report(),
+                Some(typed_args) => handler(sender, typed_args),
                 None => panic!(
                     "Event args of the wrong type were raised: expected {}.",
                     std::any::type_name::<THandlerArgs>()

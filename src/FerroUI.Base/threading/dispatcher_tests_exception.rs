@@ -447,8 +447,8 @@ fn an_error_a_posted_job_returns_reaches_the_unhandled_exception_events_without_
         args.set_handled(true);
     });
 
-    t.ui_thread.post(|| -> Result<(), JobFailed> { Err(JobFailed("post")) }, DispatcherPriority::NORMAL);
-    t.ui_thread.post_local(|| -> Result<(), JobFailed> { Ok(()) }, DispatcherPriority::NORMAL);
+    t.ui_thread.post_fallible(|| Err(JobFailed("post")), DispatcherPriority::NORMAL);
+    t.ui_thread.post_local_fallible(|| Ok::<(), JobFailed>(()), DispatcherPriority::NORMAL);
     // Nothing unwinds: the handler handled the error.
     t.ui_thread.run_jobs_with_cancellation(None, &CancellationToken::none());
 
@@ -464,7 +464,7 @@ fn an_error_no_handler_handles_unwinds_with_its_message_once() {
 
     let ui_thread = t.ui_thread.clone();
     let result = catch_unwind(AssertUnwindSafe(|| {
-        ui_thread.post_local(|| -> Result<(), JobFailed> { Err(JobFailed("local")) }, DispatcherPriority::NORMAL);
+        ui_thread.post_local_fallible(|| Err(JobFailed("local")), DispatcherPriority::NORMAL);
         ui_thread.run_jobs_with_cancellation(None, &CancellationToken::none());
     }));
 

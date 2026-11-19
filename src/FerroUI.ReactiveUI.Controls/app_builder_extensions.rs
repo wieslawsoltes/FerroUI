@@ -145,6 +145,6 @@ impl ReactiveUIBuilderFerroExtensions for ReactiveUIBuilder {
 pub(crate) fn dispatcher_exception_handler() -> Rc<dyn IObserver<ObservableError>> {
     Observer::create(|error: ObservableError| {
         let unhandled = UnhandledError::of_broken_pipeline(&*error);
-        Dispatcher::ui_thread().post(move || Err::<(), _>(unhandled), DispatcherPriority::SEND);
+        Dispatcher::ui_thread().post_fallible(move || Err(unhandled), DispatcherPriority::SEND);
     })
 }

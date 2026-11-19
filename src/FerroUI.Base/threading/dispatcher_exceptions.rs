@@ -76,8 +76,9 @@ impl Dispatcher {
     /// and [`unhandled_exception`](Self::unhandled_exception), as the panic of a posted
     /// callback does, so a handler can mark it handled; the payload of the event is the
     /// error, a `Box<dyn Error + Send + Sync>`
-    /// ([`DispatcherUnhandledExceptionEventArgs::error`]). This is where the callbacks
-    /// that return a [`CallbackResult`](super::CallbackResult) send their errors (#567).
+    /// ([`DispatcherUnhandledExceptionEventArgs::error`]). This is where the fallible
+    /// callbacks ([`post_fallible`](Self::post_fallible),
+    /// `Interactive::add_fallible_handler`) send their errors (#567).
     ///
     /// Called off the dispatcher thread, the error is posted to it.
     ///
@@ -94,9 +95,8 @@ impl Dispatcher {
     /// Runs `work` and returns the message of the first exception of application code
     /// that reaches the unhandled-exception events of this dispatcher while it runs and
     /// that no other handler handles: an error raised with
-    /// [`raise_unhandled_exception`](Self::raise_unhandled_exception) (by a
-    /// [`CallbackResult`](super::CallbackResult) callback, a markup delegate, an
-    /// animation an animator rejects) or, in a build that unwinds, the panic of a job.
+    /// [`raise_unhandled_exception`](Self::raise_unhandled_exception) (by a fallible
+    /// callback, a markup delegate, an animation an animator rejects) or, in a build that unwinds, the panic of a job.
     /// The exception is marked handled.
     ///
     /// This is how a development tool (the Designer, the previewer, hot reload) fails a
