@@ -69,6 +69,21 @@ For a Timeline using a native elapsed clock, enter an authored time in seconds w
 
 For VS Code MCP, call `designer_keyframe_clipboard` through `designer_studio_query` with the program ID and selected `keyframes`. Each location contains `target`, `property`, and `time`. Pass the returned clipboard to the `designer_program` action `paste_keyframes` through `designer_studio_edit`. The `paste` argument contains `clipboard`, `destinations` in copied track order, the authored `time`, and optional `reverse`. Each destination contains `target` and `property`. Use `mirror_keyframes` with the selected `keyframes` and authored `pivot`. Use the destination frame’s current revision for the edit. The edit returns the accepted key locations as `keyframes`. Designer Studio exposes the same tool and actions directly.
 
+### Edit several keys in App Preview
+
+![VS Code shows two retimed keys selected on the CornerRadius and Opacity tracks beside the XAML source and the paused app](../images/vscode-app-preview-keyframe-lanes.jpg)
+
+1. Open [App Preview](runtime.md#render-with-your-app-in-app-preview) with a current FerroUI app build. Choose a clip with typed XAML or mapped Rust tracks, pause playback, and open **Keyframe lanes** from the clip toolbar.
+2. Click a key to select it. Hold Shift to select a range across tracks, or hold Ctrl or Command to toggle individual keys. Drag a rectangle from empty lane space to select several keys. Press Space to toggle a focused key and Ctrl+A or Command+A to select all.
+3. Drag a selected key to move the group while preserving its relative spacing. With a key focused, use Left or Right to nudge, Ctrl+D or Command+D to duplicate, or Delete to remove. Double-click a key or press Enter to open its time, value, and easing editor.
+4. Click the ruler or enter **Authored time** in seconds. Open **Keyframe actions** to move or duplicate by an exact offset, scale or mirror about that time, or paste there. The elapsed playhead above the lanes continues to describe the app’s preview pose.
+
+Copy with Ctrl+C or Command+C and paste with Ctrl+V or Command+V. Hold Shift when pasting to reverse the sequence. Choose a compatible destination for each copied track. The VS Code Timeline, App Preview, and Designer Studio use the same clipboard format. Mapped Rust keys follow their source declarations, so a retime of a cue shared by several setters needs the full cue selection. The planner checks destination times and leaves the current source intact if any key collides. A successful group edit updates the buffer in one Undo step and retains the app’s compatible preview pose through the edit and Undo.
+
+![The Keyframe actions picker offers group transfer, mirror, move, scale, duplicate, and delete](../images/vscode-app-preview-keyframe-actions.jpg)
+
+Read `keyframeSelection`, authored tracks, generation, revision, and sequence from `designer_hosted_animations`. Send the program and a `command` to `designer_hosted_keyframe_group_draft` for a checked patch or clipboard text. A key location uses `target`, `property`, and authored `time`. For paste, pass the parsed clipboard value with `destinations` in copied track order, authored `time`, and optional `reverse`. Apply a group through `designer_hosted_keyframe_group` with the same frame fields. The result reports the accepted key locations.
+
 ## Rehearse a section
 
 1. Choose a typed XAML or mapped Rust clip whose targets render in the designer. Open **Preview range** in the toolbar and enable **Limit playback to preview range**.
