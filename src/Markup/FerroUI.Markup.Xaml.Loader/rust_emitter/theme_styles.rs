@@ -1121,6 +1121,116 @@ pub(super) fn template_binding_runs(pool: &mut StylePool, lines: Vec<String>) ->
     body
 }
 
+// --- dynamic resources --------------------------------------------------------------------
+
+/// The parts of `rt::bind_dynamic_resource(&context, <object>.upcast_ref::<FerroObject>(),
+/// <property>, <key>, <line>, <position>)?;`, the statement the emitter fuses a
+/// `{DynamicResource key}` bound to a registered property into.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(super) struct DynamicResource<'s> {
+    pub(super) object: &'s str,
+    pub(super) property: &'s str,
+    pub(super) key: &'s str,
+    pub(super) position: (i32, i32),
+}
+
+/// The parts of `statement` if it is the fused statement of a dynamic resource.
+pub(super) fn dynamic_resource(statement: &str) -> Option<DynamicResource<'_>> {
+    let arguments = statement.strip_prefix("rt::bind_dynamic_resource(&context, ")?.strip_suffix(")?;")?;
+    let (object, rest) = arguments.split_once(&format!(".upcast_ref::<{FERRO_OBJECT}>(), "))?;
+    let (property, rest) = rest.split_once(", ")?;
+    let (key, rest) = split_string_literal(rest)?;
+    let (line, column) = rest.strip_prefix(", ")?.split_once(", ")?;
+    let position = (line.parse().ok()?, column.parse().ok()?);
+    (is_identifier(object) && is_plain_call(property)).then_some(DynamicResource { object, property, key, position })
+}
+
+/// A dynamic resource found in a body: the index of its first line (its position markers) and
+/// of the statement.
+struct FoundResource<'s> {
+    start: usize,
+    statement: usize,
+    indent: usize,
+    resource: DynamicResource<'s>,
+}
+
+/// Ends the run `run`: a run as long as [`MIN_BINDING_RUN`] becomes the position markers of its
+/// first statement and one call of `rt::bind_dynamic_resources` over a new table (added to
+/// `pool`); a shorter run is written as it was.
+fn flush_resources(pool: &mut StylePool, run: &mut Vec<FoundResource<'_>>, lines: &[String], body: &mut Vec<String>) {
+    let Some(first) = run.first() else { return };
+    if run.len() < MIN_BINDING_RUN {
+        for found in run.iter() {
+            body.extend(lines[found.start..=found.statement].iter().cloned());
+        }
+        run.clear();
+        return;
+    }
+    let name = format!("{}_RESOURCES_{}", pool.prefix.to_uppercase(), pool.binding_tables);
+    pool.binding_tables += 1;
+    let mut table = format!(
+        "/// The dynamic resources of a run of `{}`, bound in order by `rt::bind_dynamic_resources` (#568).\n\
+         static {name}: &[rt::DynamicResourceRow] = &[\n",
+        pool.document_text
+    );
+    for found in run.iter() {
+        let DynamicResource { property, key, position: (line, column), .. } = &found.resource;
+        let property = pool.property(&format!("rt::property({property})"));
+        table.push_str(&format!(
+            "    rt::DynamicResourceRow {{ property: {property}, key: {key}, line: {line}, position: {column} }},\n"
+        ));
+    }
+    table.push_str("];\n");
+    pool.items.push(table);
+    body.extend(lines[first.start..first.statement].iter().cloned());
+    body.push(format!(
+        "{}rt::bind_dynamic_resources(&context, {}.upcast_ref::<{FERRO_OBJECT}>(), {name})?;",
+        " ".repeat(first.indent),
+        first.resource.object
+    ));
+    run.clear();
+}
+
+/// `lines`, a body the emitter wrote, with each run of consecutive dynamic resources bound on
+/// one object (position markers between them allowed) written as one call over a table, as the
+/// runs of template bindings are ([`template_binding_runs`]).
+pub(super) fn dynamic_resource_runs(pool: &mut StylePool, lines: Vec<String>) -> Vec<String> {
+    if !lines.iter().any(|line| line.trim_start().starts_with("rt::bind_dynamic_resource(")) {
+        return lines;
+    }
+    let mut body = Vec::with_capacity(lines.len());
+    let mut run: Vec<FoundResource<'_>> = Vec::new();
+    let mut index = 0;
+    while index < lines.len() {
+        let start = index;
+        while index < lines.len() && lines[index].trim_start().starts_with("//") {
+            index += 1;
+        }
+        if index == lines.len() {
+            flush_resources(pool, &mut run, &lines, &mut body);
+            body.extend(lines[start..].iter().cloned());
+            break;
+        }
+        let line = &lines[index];
+        let indent = line.len() - line.trim_start().len();
+        let Some(resource) = dynamic_resource(line.trim_start()) else {
+            flush_resources(pool, &mut run, &lines, &mut body);
+            body.extend(lines[start..=index].iter().cloned());
+            index += 1;
+            continue;
+        };
+        let continues =
+            run.first().is_some_and(|first| first.resource.object == resource.object && first.indent == indent);
+        if !continues {
+            flush_resources(pool, &mut run, &lines, &mut body);
+        }
+        run.push(FoundResource { start, statement: index, indent, resource });
+        index += 1;
+    }
+    flush_resources(pool, &mut run, &lines, &mut body);
+    body
+}
+
 // --- the setter of a resource value -------------------------------------------------------
 
 /// The text of `rt::ValueHandle` of a type check generated code writes (`rt::markup_handle(..)`,

@@ -463,6 +463,33 @@ pub fn bind_dynamic_resource(
     }
 }
 
+/// `{DynamicResource key}` as the value of the registered property `property` of an object, at
+/// `line`, `position` ([`bind_dynamic_resource`]): a row of a run that
+/// [`bind_dynamic_resources`] binds.
+#[derive(Clone, Copy)]
+pub struct DynamicResourceRow {
+    pub property: PropertyFn,
+    pub key: &'static str,
+    pub line: i32,
+    pub position: i32,
+}
+
+/// Binds the dynamic resources `rows` on `target`, in order ([`bind_dynamic_resource`] of each,
+/// its property read before it is bound); the first failure is the error. A run of
+/// `{DynamicResource}` values on one object, which generated code wrote as one call of
+/// [`bind_dynamic_resource`] each.
+#[inline(never)]
+pub fn bind_dynamic_resources(
+    context: &Rc<XamlIlContext>,
+    target: &Ref<FerroObject>,
+    rows: &[DynamicResourceRow],
+) -> Result<(), XamlLoadError> {
+    for row in rows {
+        bind_dynamic_resource(context, target, (row.property)(), row.key, row.line, row.position)?;
+    }
+    Ok(())
+}
+
 /// `{TemplateBinding source}` as the value of the registered property `property` of `target`
 /// (in a control template): what the statements of generated code do, which create the binding
 /// for the property `source` of the templated parent (`TemplateBinding::__markup_new_1`), call

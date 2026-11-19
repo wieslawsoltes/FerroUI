@@ -320,6 +320,76 @@ fn a_template_binding_is_parsed() {
     assert_eq!(template_binding("rt::bind_template_binding(border_0, x, y, 1, 2)?;"), None);
 }
 
+// --- dynamic resources --------------------------------------------------------------------
+
+const BORDER: &str = "::ferroui_controls::Border";
+
+fn resource(object: &str, property: &str, key: &str, line: i32) -> String {
+    format!(
+        "    rt::bind_dynamic_resource(&context, {object}.upcast_ref::<::ferroui_base::FerroObject>(), \
+         {BORDER}::{property}(), {key}, {line}, 17)?;"
+    )
+}
+
+#[test]
+fn a_run_of_dynamic_resources_on_one_object_becomes_a_table() {
+    let lines = vec![
+        "    // Controls/X.xaml(48,17) BorderBrush".to_string(),
+        resource("border_0", "border_brush_property", "\"FocusBrush\"", 48),
+        "    // Controls/X.xaml(49,17) CornerRadius".to_string(),
+        resource("border_0", "corner_radius_property", "\"Radius, \\\"quoted\\\"\"", 49),
+        resource("border_1", "border_brush_property", "\"OtherBrush\"", 50),
+        "    border_1.begin_init();".to_string(),
+        resource("border_1", "corner_radius_property", "\"Radius\"", 52),
+    ];
+    let mut pool = StylePool::new("build_x", "x.xaml");
+    let body = dynamic_resource_runs(&mut pool, lines.clone());
+    assert_eq!(body, vec![
+        "    // Controls/X.xaml(48,17) BorderBrush".to_string(),
+        "    rt::bind_dynamic_resources(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), \
+         BUILD_X_RESOURCES_0)?;"
+            .to_string(),
+        lines[4].clone(),
+        lines[5].clone(),
+        lines[6].clone(),
+    ]);
+    let items = pool.items.join("\n");
+    assert!(items.contains(
+        "static BUILD_X_RESOURCES_0: &[rt::DynamicResourceRow] = &[\n    \
+         rt::DynamicResourceRow { property: build_x_property_0, key: \"FocusBrush\", line: 48, position: 17 },\n    \
+         rt::DynamicResourceRow { property: build_x_property_1, key: \"Radius, \\\"quoted\\\"\", line: 49, \
+         position: 17 },\n];\n"
+    ));
+    assert!(items.contains(&format!(
+        "fn build_x_property_0() -> &'static ::ferroui_base::FerroProperty {{\n    \
+         rt::property({BORDER}::border_brush_property())\n}}\n"
+    )));
+    assert_eq!(items.matches("rt::DynamicResourceRow {").count(), 2);
+    // A body without a run is written as it was.
+    let single = vec![resource("border_0", "border_brush_property", "\"FocusBrush\"", 4)];
+    assert_eq!(dynamic_resource_runs(&mut pool, single.clone()), single);
+}
+
+#[test]
+fn a_dynamic_resource_is_parsed() {
+    let statement = resource("border_0", "border_brush_property", "\"A, B\"", 4);
+    assert_eq!(dynamic_resource(statement.trim_start()), Some(DynamicResource {
+        object: "border_0",
+        property: "::ferroui_controls::Border::border_brush_property()",
+        key: "\"A, B\"",
+        position: (4, 17),
+    }));
+    assert_eq!(dynamic_resource("rt::bind_dynamic_resource(&context, border_0, x, \"k\", 1, 2)?;"), None);
+    assert_eq!(
+        dynamic_resource(
+            "rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), \
+             ::a::B::c_property(), key, 1, 2)?;"
+        ),
+        None,
+        "a key that is not a literal"
+    );
+}
+
 // --- the setter of a resource value -------------------------------------------------------
 
 const UNSET: &str = "rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)";

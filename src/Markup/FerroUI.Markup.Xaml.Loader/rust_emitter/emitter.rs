@@ -3335,7 +3335,9 @@ impl<'a> Emitter<'a> {
         let body_lines = if self.documents.backend.uses_construction_programs() {
             body_lines
         } else {
-            theme_styles::template_binding_runs(&mut self.theme_styles, body_lines)
+            let body_lines = theme_styles::template_binding_runs(&mut self.theme_styles, body_lines);
+            // And runs of dynamic resources on one object (#568).
+            theme_styles::dynamic_resource_runs(&mut self.theme_styles, body_lines)
         };
 
         let document = self.document_name.replace('`', "'").replace(['\r', '\n'], " ");
