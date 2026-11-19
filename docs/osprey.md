@@ -34,8 +34,8 @@ python3 scripts/generate_api_model.py
 python3 scripts/generate_osprey_bindings.py
 ```
 
-CI fails when they are stale. The generated files are large (about 1 MB of Osprey for all 493
-classes, 1026 properties and 96 events of FerroUI.Base and FerroUI.Controls); a program links
+CI fails when they are stale. The generated files are large (about 1 MB of Osprey for all 507
+classes, 1042 properties and 96 events of FerroUI.Base and FerroUI.Controls); a program links
 only what it calls (the layer 1 hello world is a 98 KB executable on macOS), but the compiler
 reads all of it: a sample builds in about 10 to 16 seconds. A selection of what an
 application uses is phase 2 (#636).
