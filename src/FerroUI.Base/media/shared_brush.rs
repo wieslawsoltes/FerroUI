@@ -125,7 +125,7 @@ impl SharedBrush {
 
     /// The shared form of a scene brush (a `VisualBrush` or a `DrawingBrush`) of a 3D material:
     /// the tile settings, opacity and transforms of `brush` over its recorded `content`, which the
-    /// 3D renderers render offscreen (`docs/porting/media3d.md`, section 3.16). The 2D backends do
+    /// 3D renderers render offscreen (`docs/porting/media3d.md`, section 3.18). The 2D backends do
     /// not draw this form (their scene brushes are composition resources). `None` when `brush` is
     /// not a tile brush.
     pub fn from_scene_content(brush: &dyn IBrush, content: Scene3DBrushContent) -> Option<SharedBrush> {

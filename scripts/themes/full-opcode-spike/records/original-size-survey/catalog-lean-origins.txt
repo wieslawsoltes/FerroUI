@@ -1,0 +1,21 @@
+Mach-O __text 48260920 symbol bytes accounted 48137400
+Largest origins (bytes, Rust names by leading crate in demangled symbol, native by archive)
+ferroui_base 15801304
+control_catalog 7656844
+other 4655212
+ferroui_controls 3831564
+libskia_bindings 3477680
+core 2284516
+ferroui_treedatagrid_core 1171296
+ferroui_markup_xaml 813044
+ferroui_themes_winui 772968
+ferroui_controls_color_picker 728616
+alloc 671912
+libharfbuzz_sys 606880
+ferroboard_controls 598540
+ferroui_controls_treedatagrid 584332
+ferroboard_core 452692
+treedatagrid_demo 400688
+ferroui_controls_inking 356752
+std 298036
+Three property modules by leading path {'property_store': 2379020, 'direct_property': 599120, 'styled_property': 1333828} total 4311968

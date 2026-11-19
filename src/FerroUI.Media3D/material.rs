@@ -7,7 +7,7 @@
 //! the model is drawn with.
 //!
 //! A `VisualBrush` or a `DrawingBrush` is recorded into a [`Scene3DBrushContent`] (step D6 of
-//! `docs/porting/media3d.md`, section 3.16) when a snapshot is made and its content is dirty: a
+//! `docs/porting/media3d.md`, section 3.18) when a snapshot is made and its content is dirty: a
 //! change of the brush (its properties) or of what it draws (the drawing of a `DrawingBrush`)
 //! marks it dirty and is a change of a record; every other snapshot takes the kept recording,
 //! with the same identity and generation, so that the renderers keep the texture they rendered of

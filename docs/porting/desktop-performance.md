@@ -8180,3 +8180,60 @@ wall of stack panels takes 18.9 % fewer instructions than before the change
 the same values in the same order. What is not called did nothing. An application class written
 as a plain `impl`, or one that overrides the change handlers without stating its reactions,
 hears every change, as do the objects below it.
+
+### 9.102 A property that follows a closure is set with the value of its type
+
+The second step of experiment #804, after section 9.94. Counted first in the gauntlet of the
+framework comparison at tier 16: about 900,000 runs of the effects of reactive properties in
+14 seconds, 31 % of them giving a value equal to the one the property had; by property `Text`
+45 % of the runs (31 % of them equal), `Points` 22 % (none equal), `Width` 17 % (5 % equal) and
+`Foreground` 17 % (99 % equal).
+
+The closure that the builders make for a reactive property knows the type of its value. Run by
+the effect of the property, it finds the control and the property on the thread and sets the
+property through the typed setter (`FerroObject::try_set_value_typed`), where every run put the
+value in a box and the untyped setter looked it up by type and took a copy of it out of the box
+(a text was cloned for every run). `PropValue` is unchanged: a closure written by hand is set
+untyped as before, and a closure run outside its effect returns its value boxed. An equal value
+is still computed and compared by the property store, which raises nothing; the copy before the
+comparison is gone.
+
+**Measured** (the gate, `declarative::`, two rounds, against the commit that adds the
+benchmarks; the change of the instructions):
+
+| `declarative::ViewBenchmark` | Instructions |
+| --- | ---: |
+| `shared_text_changed` (a thousand texts from one signal, each new) | -13.92 % |
+| `shared_text_equal` (each text equal to the one before) | -20.03 % |
+| `fine_grained_one_row_changed` | -11.71 % |
+| `shared_brush_equal` (a thousand foregrounds, each the same brush) | -2.47 % |
+| `shared_signal_changed` | -1.78 % |
+| The other lines of `declarative::` | within 0.3 % |
+
+The times of that run are not given: other builds ran on the machine. New:
+`FerroObject::try_set_value_typed`, `FerroProperty::as_direct`.
+
+### 9.103 Three measured steps of 0.5.1: grid text in place, run-once descriptions, selectable text runs
+
+Each was gated against its own benchmark commit or its base on main (`scripts/perf/gate.py`, two
+rounds; the change of the instructions; the times of those runs are not given, other builds ran on
+the machine).
+
+- **Grid definitions given as text take new sizes in place** (#803 part (b)). The rows and columns
+  a declarative element gives a grid as text are values of the grid (`GridDefinitionsText`): a new
+  text with the same count and kinds of definitions writes the sizes into the definitions the grid
+  has, where an effect gave the grid new definitions. `declarative::ViewBenchmark`: a thousand bars
+  that follow one signal take 7.50 million instructions as text (`grid_definitions_followed`)
+  against 14.28 million with new definitions (`grid_definitions_replaced`), -47.5 %; the other
+  lines of the class within 0.7 %. `Grid::set_column_definitions` is unchanged: a program that
+  calls it in an effect of its own (as the declarative program of the framework comparison does)
+  replaces the definitions as before.
+- **An element that no reconciler reaches again keeps no description of its values** (#811, the
+  rest of part (b) and part (c)). Text blocks with the same typeface, size and foreground share
+  their default run properties. No line of the gate is worse; `trees::Text.create_and_measure`
+  -5.56 %, `change_and_lay_out` -1.83 %. What the descriptions kept is memory, which this gate does
+  not count; it is to be counted with the heap of the wall.
+- **A selectable text block keeps the shaped runs of its text between layouts** (#649, the first
+  fix of step 4): `text::SelectableTextBlockWidths.measure_at_the_other_width` -72.4 %; the rest of
+  `text::` and `trees::Text` within its tolerance (the largest rise +1.5 %).
+

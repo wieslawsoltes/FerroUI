@@ -1,5 +1,5 @@
 //! The content of a visual or drawing brush of a 3D material (#608, step D6 of
-//! `docs/porting/media3d.md`, section 3.16): what the render thread renders offscreen into the
+//! `docs/porting/media3d.md`, section 3.18): what the render thread renders offscreen into the
 //! texture the material samples.
 //!
 //! A `VisualBrush` or a `DrawingBrush` belongs to the UI thread, and so does what it records (a

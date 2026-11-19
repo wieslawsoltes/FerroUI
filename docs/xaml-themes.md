@@ -215,6 +215,20 @@ use, and nothing that is remembered is dropped for it.
 The deviation from upstream, which matches every child style against every element, is recorded
 in [docs/porting/desktop-performance.md](porting/desktop-performance.md), section 9.26.
 
+### 2.5 Typed construction programs (opt-in)
+
+`Build::xaml_backend` (or `FERROUI_XAML_BACKEND` read by `Build::from_env`) selects how the
+operations the compiler resolved are emitted. `native`, the default, is the generated code of
+section 2.1. `theme-bytecode` encodes resource runs and recognised control styles as instruction
+streams; `bytecode` also encodes construction, resolved calls, staged setters, the extracted
+theme unit runs and compiled binding paths of pages and templates. The streams are constant
+arrays of the generated Rust (a Cargo build packs a module's streams in `OUT_DIR` and embeds them
+with `include_bytes!`); the typed imports they call are what the linker reaches, so units and
+trimming (section 3) are unchanged, and a shape the encoder does not recognise stays native. The
+checked-in references of section 2 are native output: with another backend their comparison
+tests fail by design. Design, coverage and measurements:
+[docs/porting/typed-xaml.md](porting/typed-xaml.md).
+
 ## 3. Units and theme trimming
 
 **Units.** The documents a theme merges (`MergeResourceInclude`) are each a unit, such as
@@ -247,7 +261,9 @@ needs. The build computes the table from the roots:
 6. the names in `[package.metadata.ferroui] theme-roots = [..]`.
 
 From the roots, the closure follows the unit graph. The kept units are listed in
-`$OUT_DIR/xaml/theme_parts.txt`.
+`$OUT_DIR/xaml/theme_parts.txt`. `$OUT_DIR/xaml/theme_parts_why.txt` (#852) explains each one: its
+first reason, whether that reason is conservative or exact, and how many of its keys are live.
+See docs/porting/theme-trimming.md, section 19.
 
 **Which classes are constructed from units (#849).** Partitioning a class into units and
 constructing it from some of them are two separate things. Any class whose document merges
@@ -297,11 +313,17 @@ use compiled_markup::THEME_PARTS_FERROUI_THEMES_WINUI_WINUITHEME as THEME_PARTS;
 launch_themed(|| WinUITheme::with_parts(None, THEME_PARTS).as_style(), view, |_| {});
 ```
 
+Since #847 the build reads every binary of the package as well as its library: the explicit
+`[[bin]]` targets and, unless `autobins = false`, the discovered ones (`src/main.rs`, `src/bin`).
+`$OUT_DIR/xaml/theme_roots.txt` says which target rooted which types and keys. A library whose code
+makes controls that no document names states them with `Build::theme_roots`, and the build exports
+them to the applications that depend on it. The documents of a class group that the class never
+includes root nothing.
+
 The roots are the ones of the list above without the documents: what the sources name and call
 (4), what the code of the live classes creates (5), and `theme-roots` (6). The build reads the
 sources from the root file of the crate (`src/lib.rs`, else `lib.rs`, else `src/main.rs`) and
-the modules it declares: an application with a library and a binary keeps its interface in the
-library, or names in `theme-roots` the controls only the binary makes. The table is named after
+the modules it declares, and from the root file of each binary of the package (#847). The table is named after
 the full name of the class of the theme, in upper case. With `theme-trimming = false` it holds
 every unit, so the code is the same either way. The three declarative versions of hello world
 (`samples/HelloWorld.Builders`, `.Macros`, `.Hooks`) are built this way, and keep the 16 units of
@@ -316,6 +338,13 @@ entries push around their code and give to their templates and deferred resource
 application trims takes the classes its paths name with it (#612, root D: hello world no longer
 links NavigationView, RichEditBox, InfoBar, NavigationPage and DrawerPage). The theme tests check
 that no table naming classes is reachable from code outside the units.
+
+**A library that constructs a theme (#846).** A library document with `<WinUITheme />` constructs
+the theme with the wider of its own table and the table the application registers
+(`rt::wider_theme_parts`). The application writes and registers a table for every theme the
+documents of a direct dependency construct, so its controls keep their templates whichever crate
+constructs the theme. The theme crate must be a direct dependency of the application; otherwise the
+library keeps its own table. See docs/porting/theme-trimming.md, section 20.
 
 **Turning trimming down or off:**
 - `theme-roots = "all"` keeps every unit, for comparison.
@@ -368,6 +397,12 @@ name, the first time the control looks for its theme. Release builds do not chec
   rooted. If code must look a key up, write it as a string literal, or add it to `theme-roots`.
 - Define a geometry once as a keyed resource and refer to it, instead of repeating the same path
   data inline in several templates.
+- Colours the system reports (the accent, the system colours of high contrast) come from a
+  resource provider of the theme's Rust code (`Accents/SystemAccentColors`,
+  `Accents/SystemColors` of the WinUI theme), merged into the theme's dictionary, never from a
+  theme dictionary: theme dictionaries are searched before merged dictionaries, so a fixed value
+  there would hide the provider. Reference them with `{DynamicResource}`; the provider raises a
+  change only when its colours change.
 
 ### 4.3 Control themes
 
@@ -437,6 +472,10 @@ name, the first time the control looks for its theme. Release builds do not chec
   record the creates edge (4.4).
 - No `thread_local!` (use `ferro_thread_local!`), no panics for markup errors: return
   `XamlLoadError` (the move to `panic = "abort"` in `dist`).
+- A theme with a high contrast variant sets it with `ThemeVariant::set_high_contrast_variant`
+  while it is in use (the WinUI theme does so with `UseSystemHighContrast`); the theme variant
+  roots then resolve to it while the platform asks for high contrast. A theme without one sets
+  nothing, and the contrast setting selects nothing for it.
 
 ## 5. Compiled bindings in applications
 

@@ -1,7 +1,83 @@
-<!-- Adapted from AppbarbuttonPathIcon.txt in the pinned Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <CommandBarButton x:Name="Primary" Label="PathIcon" HorizontalAlignment="Left">
-    <CommandBarButton.Icon><PathIcon Data="F1 M 20,20L 24,10L 24,24L 5,24"/></CommandBarButton.Icon>
-  </CommandBarButton>
-  <TextBlock x:Name="Output" Text="Clicked 0 times"/>
+<!-- Ported from the six pinned AppBarButton examples of WinUI Gallery (14061eea) and
+     AppBarButton_Click of AppBarButtonPage.xaml.cs (command_samples.rs); see ../NOTICE.md.
+     WinUI's AppBarButton is FerroUI's CommandBarButton. Icon="Like" is a SymbolIcon; the source's
+     AppBarButton.Content of the path icon is the Icon (the template presents the Icon). FerroUI
+     has no BitmapIcon: the bitmap icon is an Image of the source's Slices2.png, set by the code
+     behind, which is not drawn in the foreground's single color as a BitmapIcon is. The
+     KeyboardAccelerator Ctrl+S is the HotKey. The outputs are polite live regions, for the
+     source's UIHelper.AnnounceActionForAccessibility. The glyphs of the symbol icons need the
+     symbol font of the platform (Segoe Fluent Icons on Windows). -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="AppBarButtonExample1" Spacing="8">
+    <TextBlock Text="An AppBarButton with a symbol icon." FontSize="18" />
+    <StackPanel Orientation="Horizontal">
+      <CommandBarButton x:Name="Button1" Label="SymbolIcon">
+        <CommandBarButton.Icon><SymbolIcon Symbol="Like" /></CommandBarButton.Icon>
+      </CommandBarButton>
+      <TextBlock x:Name="Control1Output" Margin="8,0,0,0" VerticalAlignment="Center"
+                 AutomationProperties.LiveSetting="Polite" />
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="AppBarButtonExample2" Spacing="8">
+    <TextBlock Text="An AppBarButton with a bitmap icon." FontSize="18" />
+    <StackPanel Orientation="Horizontal">
+      <CommandBarButton x:Name="Button2" Label="BitmapIcon">
+        <CommandBarButton.Icon><Image x:Name="Button2Icon" /></CommandBarButton.Icon>
+      </CommandBarButton>
+      <TextBlock x:Name="Control2Output" Margin="8,0,0,0" VerticalAlignment="Center"
+                 AutomationProperties.LiveSetting="Polite" />
+    </StackPanel>
+    <TextBlock x:Name="Button2IconError" IsVisible="False" TextWrapping="Wrap" />
+  </StackPanel>
+
+  <StackPanel x:Name="AppBarButtonExample3" Spacing="8">
+    <TextBlock Text="An AppBarButton with a font icon." FontSize="18" />
+    <StackPanel Orientation="Horizontal">
+      <CommandBarButton x:Name="Button3" Label="FontIcon">
+        <CommandBarButton.Icon><FontIcon FontFamily="Candara" Glyph="&#x03A3;" /></CommandBarButton.Icon>
+      </CommandBarButton>
+      <TextBlock x:Name="Control3Output" Margin="8,0,0,0" VerticalAlignment="Center"
+                 AutomationProperties.LiveSetting="Polite" />
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="AppBarButtonExample4" Spacing="8">
+    <TextBlock Text="An AppBarButton with a path icon." FontSize="18" />
+    <StackPanel Orientation="Horizontal">
+      <CommandBarButton x:Name="Button4" Label="PathIcon">
+        <CommandBarButton.Icon>
+          <Viewbox Stretch="Uniform"><PathIcon Data="F1 M 20,20L 24,10L 24,24L 5,24" /></Viewbox>
+        </CommandBarButton.Icon>
+      </CommandBarButton>
+      <TextBlock x:Name="Control4Output" Margin="8,0,0,0" VerticalAlignment="Center"
+                 AutomationProperties.LiveSetting="Polite" />
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="AppBarButtonExample5" Spacing="8">
+    <TextBlock Text="An AppBarButton with a KeyboardAccelerator" FontSize="18" />
+    <StackPanel Orientation="Horizontal">
+      <CommandBarButton x:Name="Button5" Label="Save" HotKey="Ctrl+S">
+        <CommandBarButton.Icon><SymbolIcon Symbol="Save" /></CommandBarButton.Icon>
+      </CommandBarButton>
+      <TextBlock x:Name="Control5Output" Margin="8,0,0,0" VerticalAlignment="Center"
+                 AutomationProperties.LiveSetting="Polite" />
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="AppBarButtonExample6" Spacing="8">
+    <TextBlock Text="An AppBarButton that opens a Flyout containing an input control." FontSize="18" />
+    <StackPanel Orientation="Horizontal">
+      <CommandBarButton x:Name="EditButton" AllowFocusOnInteraction="True" Label="Edit">
+        <CommandBarButton.Icon><SymbolIcon Symbol="Edit" /></CommandBarButton.Icon>
+        <CommandBarButton.Flyout>
+          <Flyout>
+            <TextBox x:Name="FlyoutTextBox" MinWidth="240" PlaceholderText="Input text here" />
+          </Flyout>
+        </CommandBarButton.Flyout>
+      </CommandBarButton>
+    </StackPanel>
+  </StackPanel>
 </StackPanel>

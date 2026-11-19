@@ -407,3 +407,16 @@ fn the_content_of_a_drawing_brush_is_rendered_once_per_generation_and_sampled_as
     assert_eq!([255, 255, 255, 255], plain.pixel(50, 50));
     assert!(crate::layers_with_unsampled_brushes() > before);
 }
+
+/// The rasterizer, the output cache and the shared brushes of the materials keep the auto traits
+/// of the published release (`Send`, `Sync`, unwind safe) with the textures of brushes (the API
+/// gate checks them against the release; this test fails to compile first).
+#[test]
+fn the_rasterizer_the_output_cache_and_the_brushes_keep_their_auto_traits() {
+    use std::panic::{RefUnwindSafe, UnwindSafe};
+    fn auto_traits<T: Send + Sync + UnwindSafe + RefUnwindSafe>() {}
+    auto_traits::<CpuRasterizer>();
+    auto_traits::<crate::output_cache::Scene3DOutputCache<u8>>();
+    auto_traits::<ferroui_base::media::SharedBrush>();
+    auto_traits::<Scene3DSnapshot>();
+}

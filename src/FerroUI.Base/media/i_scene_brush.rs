@@ -14,7 +14,7 @@ pub trait ISceneBrush: ITileBrush {
 
     /// Calls `handler` when what the brush draws changes without a change of a property of the
     /// brush itself: the drawing of a `DrawingBrush` invalidated (a change of a 3D material's
-    /// content, `docs/porting/media3d.md`, section 3.16), until the returned subscription is
+    /// content, `docs/porting/media3d.md`, section 3.18), until the returned subscription is
     /// dropped or disposed. `None` when the brush raises no such change (by default, and for a
     /// `VisualBrush`, whose visual is followed by the 2D compositor).
     fn subscribe_content_changed(&self, handler: Rc<dyn Fn()>) -> Option<Subscription> {

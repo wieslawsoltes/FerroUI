@@ -5,9 +5,10 @@
 
 use crate::material::WHITE;
 use crate::transform_3d::{transform_rect, value_of};
+use crate::visual_3d::visual_parts;
 use crate::{
     AmbientLight, Camera, DiffuseMaterial, DirectionalLight, EmissiveMaterial, GeometryModel3D, Light, Material,
-    MaterialGroup, Matrix3D, MeshGeometry3D, Model3D, Model3DGroup, ModelVisual3D, PerspectiveCamera, Point3D,
+    MaterialGroup, Matrix3D, MeshGeometry3D, Model3D, Model3DGroup, PerspectiveCamera, Point3D,
     PointLight, ProjectionCamera, Rect3D, SpecularMaterial, SpotLight, Vector3D, Visual3D, Visual3DCollection,
 };
 use ferroui_base::numerics::{Matrix4x4, Vector3};
@@ -68,11 +69,11 @@ impl Compiler {
             return;
         }
         let world = value_of(visual.transform().as_ref()) * *parent;
-        let Some(model_visual) = visual.cast::<ModelVisual3D>() else { return };
-        if let Some(content) = model_visual.content() {
+        let (content, children) = visual_parts(visual);
+        if let Some(content) = content {
             self.visit_model(&content, &world, visual, depth + 1);
         }
-        for child in model_visual.children().iter() {
+        for child in children.iter().flat_map(|children| children.iter()) {
             self.visit_visual(&child, &world, depth + 1);
         }
     }
