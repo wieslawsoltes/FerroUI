@@ -8,6 +8,9 @@ use ferroui_controls::{
 };
 use ferroui_designer_animation::{AnimationValue, BehaviorAction, BehaviorTrigger, Easing};
 
+#[path = "workspace_rsx_tests.rs"]
+mod rsx_tests;
+
 fn click(button: &Button) {
     button.raise_event(&RoutedEventArgs::with_event(Button::click_event()));
 }

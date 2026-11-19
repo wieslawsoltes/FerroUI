@@ -1,5 +1,6 @@
 //! Native solution explorer, retained document tabs and supervised build processes.
 use super::*;
+use crate::rsx_document::RustDocument;
 use ferroui_controls::{Border, ComboBox};
 use ferroui_designer_core::Document;
 use ferroui_designer_project::{
@@ -25,11 +26,27 @@ pub(super) struct Tab {
     /// Preserve the host's loader base URI beside the canonical file-tab key.
     pub(super) preview_uri: String,
     pub(super) document: Document,
+    pub(super) rust: Option<RustDocument>,
     pub(super) saved: String,
     pub(super) file: Option<Rc<dyn ferroui_base::platform::storage::IStorageFile>>,
     pub(super) layers: Option<crate::LayerViewSnapshot>,
     pub(super) viewport: Option<super::navigation::RetainedCanvasViewport>,
     pub(super) guides: Option<crate::CanvasGuideViewSnapshot>,
+}
+
+impl Tab {
+    pub(super) fn source(&self) -> &str {
+        self.rust.as_ref().map_or_else(|| self.document.source(), RustDocument::source)
+    }
+
+    pub(super) fn mark_saved(&mut self, source: String) {
+        self.saved = source.clone();
+        if let Some(rust) = self.rust.as_mut() {
+            rust.mark_saved(source);
+        } else {
+            self.document.mark_saved_snapshot(source);
+        }
+    }
 }
 #[derive(Default)]
 pub(super) struct ProjectUi {
@@ -83,6 +100,7 @@ impl DesignerWorkspace {
             project.markup = Default::default();
         }
         self.refresh_project_toolbox();
+        self.refresh_rust_catalog();
         self.rebuild_project_tree();
         self.refresh_components();
         Ok(())
@@ -123,6 +141,20 @@ impl DesignerWorkspace {
             }
         }
     }
+    pub(super) fn rust_catalog(&self, uri: &str) -> Option<std::sync::Arc<ferroui_designer_rsx::RsxCatalog>> {
+        self.project.borrow().markup.rust(uri)
+    }
+
+    pub(super) fn refresh_rust_catalog(self: &Rc<Self>) {
+        let catalog = {
+            let session = self.session.borrow();
+            if !session.uses_rust_source() { return }
+            self.rust_catalog(session.document_uri())
+        };
+        let result = self.session.borrow_mut().set_rust_catalog(catalog);
+        self.refresh(false);
+        self.report(result);
+    }
     pub fn solution(&self) -> Option<Solution> {
         self.project
             .borrow()
@@ -151,7 +183,7 @@ impl DesignerWorkspace {
         let uri = document_identity(session.document_uri())
             .unwrap_or_else(|_| session.document_uri().to_owned());
         let mut state = self.project.borrow_mut();
-        if let Some(workspace) = state.workspace.as_mut() {
+        if let Some(workspace) = state.workspace.as_mut().filter(|_| !session.uses_rust_source()) {
             if let Some(buffer) = workspace.buffer(&uri) {
                 let version = buffer.version();
                 let _ = workspace.store_document(&uri, version, session.document().clone());
@@ -162,6 +194,7 @@ impl DesignerWorkspace {
             Tab {
                 preview_uri: session.document_uri().into(),
                 document: session.document().clone(),
+                rust: session.rust.clone(),
                 saved: self.saved_source.borrow().clone(),
                 file: self.file.borrow().clone(),
                 layers: Some(session.layer_view_snapshot()),
@@ -180,18 +213,26 @@ impl DesignerWorkspace {
             self.apply_source();
         }
         self.capture_tab();
-        let (document, saved, file, layers, viewport, guides, preview_uri) = {
+        let mut tab = {
             let mut state = self.project.borrow_mut();
             if !state.tabs.contains_key(uri) {
                 let workspace = state
-                    .workspace
-                    .as_mut()
+                    .workspace.as_ref()
                     .ok_or("Open a solution before navigating to another document")?;
-                let buffer = workspace.open(uri).map_err(|e| e.to_string())?;
+                let (document, rust, saved) = if RustDocument::for_uri(uri) {
+                    let source = workspace.read_source(uri).map_err(|error| error.to_string())?;
+                    let (document, rust) = RustDocument::open(source.clone(), state.markup.rust(uri))
+                        .map_err(|error| error.to_string())?;
+                    (document, Some(rust), source)
+                } else {
+                    let buffer = state.workspace.as_mut().unwrap().open(uri).map_err(|error| error.to_string())?;
+                    (buffer.document().clone(), None, buffer.saved_source().unwrap_or("").into())
+                };
                 let tab = Tab {
                     preview_uri: uri.into(),
-                    document: buffer.document().clone(),
-                    saved: buffer.saved_source().unwrap_or("").into(),
+                    document,
+                    rust,
+                    saved,
                     file: None,
                     layers: None,
                     viewport: None,
@@ -199,23 +240,17 @@ impl DesignerWorkspace {
                 };
                 state.tabs.insert(uri.into(), tab);
             }
-            let tab = &state.tabs[uri];
-            (
-                tab.document.clone(),
-                tab.saved.clone(),
-                tab.file.clone(),
-                tab.layers.clone(),
-                tab.viewport,
-                tab.guides.clone(),
-                tab.preview_uri.clone(),
-            )
+            state.tabs[uri].clone()
         };
+        if let Some(rust) = tab.rust.as_mut() {
+            rust.set_catalog(&mut tab.document, self.rust_catalog(uri)).map_err(|error| error.to_string())?;
+        }
         #[cfg(feature = "collaboration-client")]
         self.disconnect_sharing();
         self.session
             .borrow_mut()
-            .restore_document(document, preview_uri)?;
-        if let Some(snapshot) = layers {
+            .restore_authored_document(tab.document, tab.rust, tab.preview_uri)?;
+        if let Some(snapshot) = tab.layers {
             self.session.borrow_mut().restore_layer_view(&snapshot);
         }
         if let Some(workspace) = self.project.borrow_mut().workspace.as_mut() {
@@ -223,13 +258,13 @@ impl DesignerWorkspace {
                 workspace.activate(uri).map_err(|e| e.to_string())?;
             }
         }
-        *self.saved_source.borrow_mut() = saved;
-        *self.file.borrow_mut() = file;
+        *self.saved_source.borrow_mut() = tab.saved;
+        *self.file.borrow_mut() = tab.file;
         self.pending_source.set(false);
         self.runtime_selection.set(None);
         self.refresh(true);
-        self.restore_canvas_viewport(viewport);
-        if let Some(snapshot) = guides {
+        self.restore_canvas_viewport(tab.viewport);
+        if let Some(snapshot) = tab.guides {
             self.restore_tab_canvas_guide_view(&snapshot);
         }
         self.rebuild_document_tabs();
@@ -246,7 +281,7 @@ impl DesignerWorkspace {
         let next = {
             let state = self.project.borrow();
             let tab = state.tabs.get(uri).ok_or("Document is not open")?;
-            if !discard && tab.document.source() != tab.saved {
+            if !discard && tab.source() != tab.saved {
                 return Err(
                     "The tab has unsaved changes; save it or explicitly discard before closing"
                         .into(),
@@ -282,7 +317,7 @@ impl DesignerWorkspace {
             .borrow()
             .tabs
             .iter()
-            .find(|(uri, tab)| **uri != active && tab.document.source() != tab.saved)
+            .find(|(uri, tab)| **uri != active && tab.source() != tab.saved)
             .map(|(uri, _)| uri.clone())
     }
     pub fn save_all_documents(self: &Rc<Self>) -> Result<(), String> {
@@ -295,7 +330,7 @@ impl DesignerWorkspace {
         // Check every destination before writing the first file.
         let mut files = Vec::new();
         for (uri, tab) in &state.tabs {
-            if tab.document.source() == tab.saved {
+            if tab.source() == tab.saved {
                 continue;
             }
             let path = ferroui_designer_project::file_path(uri)
@@ -307,7 +342,7 @@ impl DesignerWorkspace {
         }
         for (uri, path) in files {
             let tab = state.tabs.get(&uri).unwrap();
-            let source = tab.document.source().to_owned();
+            let source = tab.source().to_owned();
             super::files::write_local(&path, Some(&tab.saved), &source)
                 .map_err(|e| e.to_string())?;
             if let Some(workspace) = state.workspace.as_mut() {
@@ -319,8 +354,7 @@ impl DesignerWorkspace {
                 }
             }
             let tab = state.tabs.get_mut(&uri).unwrap();
-            tab.saved = tab.document.source().into();
-            tab.document.mark_saved();
+            tab.mark_saved(source);
             if uri == active {
                 *self.saved_source.borrow_mut() = tab.saved.clone();
                 self.session.borrow_mut().mark_saved();
@@ -341,6 +375,9 @@ impl DesignerWorkspace {
         let previous_uri = previous_uri.as_str();
         let uri = document_identity(uri)?;
         let uri = uri.as_str();
+        if RustDocument::for_uri(uri) {
+            return Ok(());
+        }
         let active_uri = document_identity(self.session.borrow().document_uri())?;
         let document = if active_uri == uri {
             self.session.borrow().document().clone()
@@ -389,6 +426,12 @@ impl DesignerWorkspace {
         kind: TaskKind,
         release: bool,
     ) -> Result<(), String> {
+        self.start_project_task_with_features(kind, release, "")
+    }
+
+    pub fn start_project_task_with_features(
+        self: &Rc<Self>, kind: TaskKind, release: bool, features: &str,
+    ) -> Result<(), String> {
         let mut state = self.project.borrow_mut();
         if state
             .task
@@ -402,7 +445,8 @@ impl DesignerWorkspace {
             .as_ref()
             .and_then(|w| w.solution.projects.get(state.selected))
             .ok_or("Select a project in the solution tree")?;
-        let task = BuildTask::cargo(project, kind, release).map_err(|e| e.to_string())?;
+        let task = BuildTask::cargo_with_features(project, kind, release, features)
+            .map_err(|e| e.to_string())?;
         drop(state);
         self.save_all_documents()?;
         self.root
@@ -471,15 +515,17 @@ impl DesignerWorkspace {
                                 .unwrap_or_default(),
                         ),
                         "SaveAll" => this.save_all_documents(),
-                        "CheckProject" => this.start_project_task(TaskKind::Check, false),
-                        "BuildProject" => this.start_project_task(TaskKind::Build, false),
-                        "RunProject" => {
-                            let target = this
-                                .root
-                                .get_control::<ComboBox>("RunTarget")
-                                .selected_item()
-                                .and_then(|v| v.downcast_ref::<String>().cloned());
-                            this.start_project_task(TaskKind::Run { target }, false)
+                        "CheckProject" | "BuildProject" | "RunProject" => {
+                            let kind = match name {
+                                "CheckProject" => TaskKind::Check,
+                                "BuildProject" => TaskKind::Build,
+                                _ => TaskKind::Run {
+                                    target: this.root.get_control::<ComboBox>("RunTarget").selected_item()
+                                        .and_then(|value| value.downcast_ref::<String>().cloned()),
+                                },
+                            };
+                            let features = this.root.get_control::<TextBox>("ProjectFeatures").text().unwrap_or_default();
+                            this.start_project_task_with_features(kind, false, &features)
                         }
                         "CancelBuild" => this.cancel_project_task(),
                         "NativePreview" => this.open_preview(),
@@ -576,6 +622,7 @@ impl DesignerWorkspace {
                     self.project.borrow_mut().selected = 0;
                     self.project.borrow_mut().markup = Default::default();
                     self.refresh_project_toolbox();
+                    self.refresh_rust_catalog();
                     self.rebuild_project_tree();
                     self.refresh_components();
                     self.status.set_text(Some("Solution loaded"));
@@ -615,7 +662,10 @@ impl DesignerWorkspace {
         }).map(|metadata| state.markup.load(metadata));
         let refreshed = state.markup.poll();
         drop(state);
-        if refreshed.iter().any(Result::is_ok) { self.refresh_project_toolbox(); }
+        if refreshed.iter().any(Result::is_ok) {
+            self.refresh_project_toolbox();
+            self.refresh_rust_catalog();
+        }
         for result in refreshed.into_iter().chain(added) {
             if let Err(error) = result { self.status.set_text(Some(&error)); }
         }
@@ -718,7 +768,7 @@ impl DesignerWorkspace {
             .borrow()
             .tabs
             .iter()
-            .map(|(uri, tab)| (uri.clone(), tab.document.source() != tab.saved))
+            .map(|(uri, tab)| (uri.clone(), tab.source() != tab.saved))
             .collect::<Vec<_>>();
         let tabs = self.root.get_control::<StackPanel>("DocumentTabs");
         tabs.children().clear();

@@ -120,6 +120,7 @@
             <TextBlock Text="Project" Classes="designer-section-title" />
             <TextBox Name="ProjectPath" PlaceholderText="Folder or Cargo.toml path" ToolTip.Tip="Enter a path and choose Check to load the solution" />
             <ComboBox Name="RunTarget" PlaceholderText="Choose a binary target" HorizontalAlignment="Stretch" />
+            <TextBox Name="ProjectFeatures" PlaceholderText="Cargo features" AutomationProperties.Name="Cargo features for the next task" ToolTip.Tip="Optional features for Cargo Check, Build, and Run" />
           </StackPanel>
           <WrapPanel Grid.Row="1" Margin="0,8,0,10">
             <Button Name="CheckProject" Content="Check" Margin="0,0,4,4" />
@@ -274,6 +275,7 @@
         <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
           <StackPanel Orientation="Horizontal" Spacing="3" Margin="8,5">
             <TextBlock Name="SourcePosition" Text="XAML" Classes="designer-section-title" VerticalAlignment="Center" Margin="2,0,8,0" />
+            <ComboBox Name="RustInvocations" IsVisible="False" MinWidth="132" AutomationProperties.Name="RSX view" ToolTip.Tip="Choose an RSX invocation in the current Rust file" />
             <Button Name="CompleteSource" Classes="nav" Content="Complete" />
             <Button Name="SourceDefinition" Classes="nav" Content="Definition" />
             <Button Name="SourceReferences" Classes="nav" Content="References" />
@@ -281,7 +283,7 @@
             <Button Name="FormatSource" Classes="nav" Content="Format" />
             <TextBox Name="RenameSymbol" Width="100" PlaceholderText="New name" />
             <Button Name="RenameSource" Classes="nav" Content="Rename" />
-            <Button Name="ApplySource" Content="Apply" ToolTip.Tip="Apply the current XAML buffer" />
+            <Button Name="ApplySource" Content="Apply" ToolTip.Tip="Apply the current source buffer" />
           </StackPanel>
         </ScrollViewer>
         <TextBox Name="Source" Grid.Row="1" AcceptsReturn="True" AcceptsTab="True" FontFamily="monospace" FontSize="12" TextWrapping="NoWrap" Padding="16,12" Background="{DynamicResource DesignerCanvasBrush}" Foreground="#FFDFE8EE" BorderThickness="0" />
@@ -405,7 +407,8 @@
           <TextBlock Text="s" Classes="designer-muted" VerticalAlignment="Center" Margin="0,0,4,0" />
           <Button Name="TimelineCurves" Classes="icon" AutomationProperties.Name="Show value curves" ToolTip.Tip="Show value curves"><PathIcon Classes="designer-icon" Width="14" Height="14" Data="F1 M1,1 H2.5 V13.5 H15 V15 H1 Z M4,10 C7,10 6.5,4.5 10,4.5 H14 V6 H10 C7.5,6 8,11.5 4,11.5 Z" /></Button>
           <Button Name="TimelineDetails" Classes="icon" ToolTip.Tip="Animation name and target"><PathIcon Classes="designer-icon" Width="14" Height="14" Data="F1 M2,3 L18,3 18,5 2,5 Z M2,9 L13,9 13,11 2,11 Z M2,15 L10,15 10,17 2,17 Z M14,12 L16,14 12,18 10,18 10,16 Z" /></Button>
-          <Button Name="AnimationSource" Classes="icon" ToolTip.Tip="Reveal the animation XAML"><PathIcon Classes="designer-icon" Width="15" Height="13" Data="F1 M6,1 L0,7 6,13 7,12 2,7 7,2 Z M14,1 L13,2 18,7 13,12 14,13 20,7 Z M11,0 L8,14 10,14 13,0 Z" /></Button>
+          <Button Name="AnimationSourceIssues" IsVisible="False" Classes="icon" AutomationProperties.Name="Animation source issues" ToolTip.Tip="Reveal expressions that need to be edited in Rust"><PathIcon Classes="designer-icon" Width="15" Height="15" Data="F1 M8,1 L16,15 H0 Z M8,4 L2.8,13.5 H13.2 Z M7.25,7 H8.75 V10.5 H7.25 Z M7.25,11.5 H8.75 V13 H7.25 Z" /></Button>
+          <Button Name="AnimationSource" Classes="icon" AutomationProperties.Name="Reveal animation source" ToolTip.Tip="Reveal the authored animation"><PathIcon Classes="designer-icon" Width="15" Height="13" Data="F1 M6,1 L0,7 6,13 7,12 2,7 7,2 Z M14,1 L13,2 18,7 13,12 14,13 20,7 Z M11,0 L8,14 10,14 13,0 Z" /></Button>
           <Button Name="AnimationSettings" Classes="icon" ToolTip.Tip="Animation timing, repeat and direction"><PathIcon Classes="designer-icon" Width="15" Height="15" Data="F1 M0,4 L20,4 20,6 0,6 Z M0,14 L20,14 20,16 0,16 Z M4,1 L8,1 8,9 4,9 Z M12,11 L16,11 16,19 12,19 Z" /></Button>
         </StackPanel>
       </Grid>

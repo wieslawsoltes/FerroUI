@@ -1875,6 +1875,7 @@ dependencies = [
  "ferroui-designer-core",
  "ferroui-designer-language",
  "ferroui-designer-project",
+ "ferroui-designer-rsx",
  "ferroui-designer-tools",
  "ferroui-harfbuzz",
  "ferroui-hot-reload",

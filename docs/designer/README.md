@@ -1,6 +1,6 @@
 # FerroUI Designer Studio
 
-Designer Studio is a native FerroUI XAML authoring workspace and a set of reusable Rust engines.
+Designer Studio is a native authoring workspace for FerroUI XAML and mapped Rust `rsx!` views.
 
 The [VS Code extension](../../editors/vscode/README.md) embeds its native preview and source
 editing tools beside FerroUI XAML and Rust `rsx!` files. See the [workbench design review](vscode-workbench.md)
@@ -63,6 +63,7 @@ cargo run -p designer-studio -- --file docs/designer/samples/SelectionWorkflows.
 cargo run -p designer-studio -- --file docs/designer/samples/PreviewStages.xaml
 cargo run -p designer-studio -- --file docs/designer/samples/PrototypeFlow.xaml
 cargo run -p designer-studio -- --file docs/designer/samples/PrototypeOverlays.xaml
+cargo run -p designer-studio -- --file samples/TodoWorkbench/app_preview/motion.rs --project samples/TodoWorkbench/Cargo.toml
 cargo run -p designer-studio -- --project /absolute/path/to/solution
 ```
 
@@ -504,12 +505,17 @@ rsx! {
 }
 ```
 
-The VS Code designer maps fully qualified FerroUI builders in the active `rsx!` invocation.
-It supports literal selectors, millisecond duration and delay, fill, iteration count, and
+Studio and the VS Code designer map fully qualified FerroUI builders in the active `rsx!` invocation.
+They support literal selectors, millisecond duration and delay, fill, iteration count, and
 named easing. Keyframes can use scalar values and supported native geometry constructors.
-When several setters share a Rust keyframe, the designer can edit each value. Edit their
-common cue and easing together in Rust. Use the warning icon in Timeline or App Preview
+When several setters share a Rust keyframe, the designer can edit each value. Select all the
+setters on that cue to move them together. Edit a shared easing in Rust. Use the warning icon in Timeline or App Preview
 to see an explanation for each unsupported clip and open its declaration.
+
+Open a `.rs` file in Studio and use the **RSX view** picker in the source pane to switch
+invocations. The canvas renders the selected projection. The editor, Save, and Undo operate
+on the original Rust file. A draft with incomplete tokens keeps the last accepted artboard
+visible. Mapped properties and supported static layout edits use the same checked patches.
 
 ### Project animation accessors
 
@@ -535,9 +541,12 @@ example](../../samples/TodoWorkbench/app_preview/motion.rs).
 
 Select a key in Timeline to change its time, value, or incoming spline. Studio checks the
 native track and the helper patches the original Rust tokens in a single undoable edit.
+Drag or nudge selected keys to move their cues together. In Studio, select the package in
+**Project**, enter its optional Cargo features, and run **Check** or **Build** to load the
+registry. For Todo Workbench, use the `app-preview` feature.
 Source reveal takes you to the animation declaration in the active invocation. Agents use
-`designer_keyframe_draft` and the `designer_program` action `upsert_keyframe` with the current
-designer revision.
+`designer_keyframe_draft` and `designer_program` actions `upsert_keyframe` and `move_keyframes`
+with the current designer revision.
 
 App Preview validates the same mapped Rust key against the application's loaded animation and
 codec. It sends a source-checked Rust patch to the editor and keeps the compatible elapsed
@@ -725,6 +734,8 @@ The additional tools are:
 | `designer_collaboration_state` / `designer_collaboration` | Snapshots, version summaries, operations and explicit draft resolution |
 | `designer_presence` | Ephemeral peer selection/cursor updates |
 | `designer_programs` / `designer_program` | Independent program inspection, create/edit/targets/timing/source and playback |
+| `designer_rsx_views` / `designer_select_rsx_view` | List and switch Studio's authored Rust invocations |
+| `designer_reveal_rsx_animation_issue` | Reveal an expression from the selected Rust Timeline's source issues |
 | `designer_states` / `designer_state` / `designer_state_actions` | State groups, setters, transitions and native actions |
 | `designer_behaviors` / `designer_behavior` | Behavior/trigger/action authoring and explicit native execution |
 | `designer_properties` / `designer_property` | Runtime-derived property schemas, typed values and transactional edits |

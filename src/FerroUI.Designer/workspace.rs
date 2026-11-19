@@ -108,6 +108,9 @@ impl DesignerWorkspace {
         root.styles().add(crate::designer_chrome_style()?);
         let preview = root.get_control::<ContentControl>("Preview");
         let session = Rc::new(RefCell::new(match uri {
+            Some(uri) if crate::rsx_document::RustDocument::for_uri(&uri) => {
+                DesignerSession::with_rust_source(source, preview, uri)?
+            }
             Some(uri) => DesignerSession::with_uri(source, preview, uri)?,
             None => DesignerSession::new(source, preview)?,
         }));
@@ -116,7 +119,7 @@ impl DesignerWorkspace {
         surface.attach(&session);
         artboard.children().add(surface.clone().upcast::<Control>());
         let now = Dispatcher::ui_thread().now();
-        let saved_source = session.borrow().document().source().to_owned();
+        let saved_source = session.borrow().authored_source().to_owned();
         let this = Rc::new(Self {
             source: root.get_control("Source"),
             inspectors: inspectors::InspectorControls::new(&root),
@@ -285,6 +288,7 @@ impl DesignerWorkspace {
         self.connect_file_commands();
         self.connect_project();
         self.connect_source_tools();
+        self.connect_rust_source();
         self.connect_authoring();
         self.connect_timeline_curves();
         self.connect_sharing();
@@ -664,7 +668,7 @@ impl DesignerWorkspace {
         }
         self.source.set_is_read_only(session.is_read_only());
         if changed && !self.pending_source.get() {
-            let text = session.document().source();
+            let text = session.authored_source();
             if self.source.text().as_deref() != Some(text) {
                 self.guard.set(true);
                 self.source.set_text(Some(text));
@@ -722,16 +726,16 @@ impl DesignerWorkspace {
                 session.timeline().tracks.len()
             ),
             PreviewStatus::InvalidSource { .. } => session
-                .document()
-                .diagnostics()
+                .authored_diagnostics()
                 .first()
                 .map(|diagnostic| {
                     format!(
-                        "XAML {}:{}  {}  ·  preview retains last accepted document",
+                        "{} {}:{}  {}  ·  preview retains last accepted document",
+                        if session.uses_rust_source() { "Rust" } else { "XAML" },
                         diagnostic.line, diagnostic.column, diagnostic.message
                     )
                 })
-                .unwrap_or_else(|| "Invalid XAML".into()),
+                .unwrap_or_else(|| "Invalid source".into()),
             PreviewStatus::Failed { message, .. } => format!("Preview: {message}"),
         };
         let status = if session.preview_notices().is_empty() {
@@ -819,13 +823,10 @@ impl DesignerWorkspace {
 
     fn reveal_source(&self, id: NodeId) {
         let session = self.session.borrow();
-        if !session.document().diagnostics().is_empty() {
-            return;
-        }
-        if let Some(node) = session.document().ast().node(id) {
-            let source = session.document().source();
-            let begin = source[..node.span.start].encode_utf16().count() as i32;
-            let end = source[..node.span.end].encode_utf16().count() as i32;
+        if let Some(span) = session.authored_span(id) {
+            let source = session.authored_source();
+            let begin = source_tools::utf16_from_byte(source, span.start);
+            let end = source_tools::utf16_from_byte(source, span.end);
             self.source.set_selection_start(begin);
             self.source.set_selection_end(end);
         }
@@ -908,6 +909,8 @@ pub use components::DesignerDefinitionAsset;
 mod design_time;
 #[path = "workspace_files.rs"]
 mod files;
+#[path = "workspace_rsx.rs"]
+mod rust_source;
 #[path = "workspace_focus_order.rs"]
 mod focus_order;
 #[path = "workspace_preview_checks.rs"]

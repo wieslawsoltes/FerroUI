@@ -19,6 +19,10 @@ pub(crate) struct NativeAnimations {
 }
 
 impl NativeAnimations {
+    pub(crate) fn has_pose(&self) -> bool {
+        !self.active.is_empty()
+    }
+
     pub(crate) fn stop(&mut self) {
         self.playback.stop();
         self.active.clear();

@@ -16,6 +16,7 @@ pub(super) fn handles(name: &str) -> bool {
             | "designer_project_task"
             | "designer_language"
             | "designer_language_apply"
+            | "designer_reveal_rsx_animation_issue"
     )
 }
 pub(super) fn tools() -> Vec<Value> {
@@ -61,7 +62,7 @@ pub(super) fn tools() -> Vec<Value> {
     let plans = ["check", "build", "run"]
         .into_iter()
         .map(|kind| {
-            let mut fields = json!({"project":s::revision(),"release":{"type":"boolean"}});
+            let mut fields = json!({"project":s::revision(),"release":{"type":"boolean"},"features":s::string()});
             if kind == "run" {
                 fields["target"] = s::nullable(s::string());
             }
@@ -71,7 +72,7 @@ pub(super) fn tools() -> Vec<Value> {
     let mut tasks: Vec<_> = ["check", "build", "run"]
         .into_iter()
         .map(|kind| {
-            let mut fields = json!({"release":{"type":"boolean"}});
+            let mut fields = json!({"release":{"type":"boolean"},"features":s::string()});
             if kind == "run" {
                 fields["target"] = s::nullable(s::string());
             }
@@ -80,6 +81,8 @@ pub(super) fn tools() -> Vec<Value> {
         .collect();
     tasks.push(s::action("cancel", json!({}), &[], true));
     vec![
+        s::tool("designer_reveal_rsx_animation_issue", "Reveal a computed or unsupported clip expression from the current Rust Timeline sourceIssues list.",
+            s::object(json!({"index":s::revision(),"expected_revision":s::revision()}), &["index","expected_revision"]), false),
         s::tool("designer_project","Read the discovered solution, selected project, open document URIs, discovery status and current build task. include_output returns the bounded captured compiler output.",s::object(json!({"include_output":{"type":"boolean"}}),&[]),false),
         s::actions("designer_project_edit","Open a solution asynchronously, select a project, activate/close an editor document, or save all authored buffers. Poll designer_project for discovery completion. close requires an explicit discard choice; saves preserve external-change checks.",vec![
             s::action("open_solution",json!({"path":s::string()}),&["path"],true),
@@ -100,6 +103,10 @@ pub(super) fn call(
     args: &Value,
 ) -> Result<Value, String> {
     match name {
+        "designer_reveal_rsx_animation_issue" => {
+            workspace.reveal_rust_animation_issue(integer(args, "expected_revision")?, index(args, "index")?)?;
+            Ok(state(&workspace.session().borrow()))
+        }
         "designer_project" => project(workspace, args["include_output"] == true),
         "designer_project_edit" => {
             match text(args, "action")?.as_str() {
@@ -130,7 +137,8 @@ pub(super) fn call(
                 .projects
                 .get(index)
                 .ok_or("Unknown project index")?;
-            let task = BuildTask::cargo(project, task_kind(args)?, args["release"] == true)
+            let task = BuildTask::cargo_with_features(project, task_kind(args)?, args["release"] == true,
+                args["features"].as_str().unwrap_or_default())
                 .map_err(|error| error.to_string())?;
             Ok(json!({"task":task,"project":index}))
         }
@@ -138,7 +146,8 @@ pub(super) fn call(
             if args["action"] == "cancel" {
                 workspace.cancel_project_task()?;
             } else {
-                workspace.start_project_task(task_kind(args)?, args["release"] == true)?;
+                workspace.start_project_task_with_features(task_kind(args)?, args["release"] == true,
+                    args["features"].as_str().unwrap_or_default())?;
             }
             project(workspace, true)
         }

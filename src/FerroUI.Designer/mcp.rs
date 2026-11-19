@@ -166,7 +166,7 @@ fn state(session: &DesignerSession) -> Value {
             json!({"state":"failed","revision":revision,"message":message})
         }
     };
-    json!({"revision":session.document().revision(),"valid":session.document().is_valid(),"dirty":session.document().is_dirty(),"selection":session.selection(),"can_undo":session.can_undo(),"can_redo":session.can_redo(),"preview":preview,"diagnostics":session.document().diagnostics(),"collaboration_error":session.collaboration_error()})
+    json!({"revision":session.document().revision(),"valid":session.authored_is_valid(),"dirty":session.authored_is_dirty(),"language":if session.uses_rust_source() { "rust" } else { "xaml" },"selection":session.selection(),"can_undo":session.can_undo(),"can_redo":session.can_redo(),"preview":preview,"diagnostics":session.authored_diagnostics(),"collaboration_error":session.collaboration_error()})
 }
 
 impl UiToolProvider for DesignerMcp {
@@ -570,7 +570,7 @@ impl UiToolProvider for DesignerMcp {
             "designer_document" => {
                 let mut result = state(&session);
                 if args["include_source"] != false {
-                    result["source"] = json!(session.document().source());
+                    result["source"] = json!(session.authored_source());
                 }
                 Ok(result)
             }
@@ -594,9 +594,14 @@ impl UiToolProvider for DesignerMcp {
                         break;
                     }
                 }
-                Ok(
-                    json!({"revision":session.document().revision(),"authored_valid":session.document().is_valid(),"nodes":nodes,"truncated":truncated}),
-                )
+                let mut result = json!({"revision":session.document().revision(),"authored_valid":session.authored_is_valid(),"nodes":nodes,"truncated":truncated});
+                if session.uses_rust_source() {
+                    result["coordinateSpace"] = json!("projectedXaml");
+                    result["authoredSpans"] = json!(nodes.iter().filter_map(|node| {
+                        Some((node.id, session.authored_span(node.id)?))
+                    }).collect::<std::collections::BTreeMap<_, _>>());
+                }
+                Ok(result)
             }
             "designer_apply" => {
                 let change = session

@@ -1,22 +1,41 @@
 use crate::{DesignerAsset, registered_designer_assets};
-use ferroui_designer_project::BuildMetadata;
+use ferroui_designer_language::Schema;
+use ferroui_designer_project::{BuildMetadata, file_path};
+use ferroui_designer_rsx::RsxCatalog;
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 use std::sync::mpsc::{self, Receiver, TryRecvError};
 
-type CatalogResult = Result<Vec<DesignerAsset>, String>;
+struct Package {
+    assets: Vec<DesignerAsset>,
+    rust: Arc<RsxCatalog>,
+}
 
 /// Each accepted build replaces the selected package's controls. Older jobs
 /// cannot publish after a newer build of the same package begins loading.
 #[derive(Default)]
 pub(super) struct ProjectMarkup {
-    accepted: BTreeMap<PathBuf, Vec<DesignerAsset>>,
-    loading: BTreeMap<PathBuf, Receiver<CatalogResult>>,
+    accepted: BTreeMap<PathBuf, Package>,
+    loading: BTreeMap<PathBuf, Receiver<Result<Package, String>>>,
 }
 
 impl ProjectMarkup {
     pub(super) fn assets(&self, root: &Path) -> &[DesignerAsset] {
-        self.accepted.get(root).map_or(&[], Vec::as_slice)
+        self.accepted
+            .get(root)
+            .map_or(&[], |package| package.assets.as_slice())
+    }
+
+    pub(super) fn rust(&self, uri: &str) -> Option<Arc<RsxCatalog>> {
+        let path = file_path(uri).ok()?;
+        // The closest Cargo package owns the file, even when only an outer
+        // package has been built in this solution.
+        let root = path
+            .ancestors()
+            .skip(1)
+            .find(|root| root.join("Cargo.toml").is_file())?;
+        self.accepted.get(root).map(|package| package.rust.clone())
     }
 
     pub(super) fn load(&mut self, metadata: BuildMetadata) -> Result<(), String> {
@@ -25,7 +44,15 @@ impl ProjectMarkup {
         std::thread::spawn(move || {
             let result = metadata
                 .catalog()
-                .map(|catalog| registered_designer_assets(&catalog, metadata.package.as_deref()))
+                .map(|catalog| {
+                    let mut schema = Schema::ferroui();
+                    schema.register_project(&catalog);
+                    let package = metadata.package.as_deref();
+                    Package {
+                        assets: registered_designer_assets(&catalog, package),
+                        rust: Arc::new(RsxCatalog::from_project(&catalog, &schema, package)),
+                    }
+                })
                 .map_err(|error| error.to_string());
             let _ = sender.send(result);
         });
@@ -37,8 +64,8 @@ impl ProjectMarkup {
         let mut results = Vec::new();
         self.loading
             .retain(|root, receiver| match receiver.try_recv() {
-                Ok(Ok(assets)) => {
-                    self.accepted.insert(root.clone(), assets);
+                Ok(Ok(package)) => {
+                    self.accepted.insert(root.clone(), package);
                     results.push(Ok(()));
                     false
                 }

@@ -24,7 +24,18 @@ impl DesignerSession {
             .with_keyframe_edit(keys, edit)
             .map_err(|error| error.to_string())?;
         if &timeline != authored {
-            self.update_animation_program(id, timeline)?;
+            if let Some(rust) = &self.rust {
+                if !matches!(edit, KeyframeGroupEdit::Move(_)) {
+                    return Err("Add or remove Rust keyframes in source".into());
+                }
+                let patches = rust.animation(&self.document, id)?.patch_key_times(
+                    keys.iter().zip(&changed).map(|(from, to)| (from.property.as_str(), from.time, to.time))
+                )?;
+                self.commit_rust_patches("Move Rust keyframes", patches).map_err(|error| error.to_string())?;
+                self.changed(true);
+            } else {
+                self.update_animation_program(id, timeline)?;
+            }
         }
         if let Some(accepted) = self
             .animation_programs()
@@ -46,6 +57,16 @@ impl DesignerSession {
         property: &str,
         edit: KeyframeEdit<'_>,
     ) -> Result<(), String> {
+        if let Some(rust) = &self.rust {
+            let patches = rust.keyframe(&self.document, program, property, edit)?;
+            self.plan_program_keyframe(program, target, property, edit)?;
+            let change = self.commit_rust_patches("Edit Rust keyframe", patches)
+                .map_err(|error| error.to_string())?;
+            if !change.is_empty() {
+                self.changed(true);
+            }
+            return Ok(());
+        }
         let timeline = self.plan_program_keyframe(program, target, property, edit)?;
         self.update_animation_program(program, timeline)
     }
@@ -92,7 +113,16 @@ impl DesignerSession {
             return Err("Supply a keyframe draft".into());
         };
         let timeline = self.plan_program_keyframe(program, target, property, draft)?;
-        self.program_edits(program, &timeline)?;
+        if let Some(rust) = &self.rust {
+            if !matches!(self.preview_status(), crate::PreviewStatus::Ready { revision }
+                if *revision == self.document.revision())
+            {
+                return Err("Wait for the current RSX preview".into());
+            }
+            rust.keyframe(&self.document, program, property, draft)?;
+        } else {
+            self.program_edits(program, &timeline)?;
+        }
         serde_json::to_value(
             timeline
                 .inspect_keyframe(target, property, time)

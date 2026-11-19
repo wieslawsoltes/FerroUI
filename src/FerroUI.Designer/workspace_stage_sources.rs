@@ -36,13 +36,13 @@ impl DesignerWorkspace {
             .map(|(_, tab)| PreviewStageSource {
                 uri: tab.preview_uri.clone(),
                 document: tab.document.snapshot_without_history(),
-                pending: false,
+                pending: tab.rust.as_ref().is_some_and(|rust| !rust.diagnostics().is_empty()),
             })
             .collect::<Vec<_>>();
         sources.push(PreviewStageSource {
             uri: uri.into(),
             document: session.document().snapshot_without_history(),
-            pending: self.pending_source.get(),
+            pending: self.pending_source.get() || (session.uses_rust_source() && !session.authored_is_valid()),
         });
         sources
     }

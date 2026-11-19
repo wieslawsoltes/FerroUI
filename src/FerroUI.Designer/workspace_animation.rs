@@ -302,10 +302,9 @@ impl DesignerWorkspace {
                 .borrow_mut()
                 .set_animation_program_selector(active.ok_or("Choose an animation")?, &selector),
             "AnimationSource" => {
-                if self.view_mode() == crate::WorkspaceViewMode::Design {
-                    self.set_view_mode(crate::WorkspaceViewMode::Split);
-                }
-                self.reveal_source(active.ok_or("Choose an animation")?);
+                let span = self.session.borrow().authored_span(active.ok_or("Choose an animation")?)
+                    .ok_or("The current clip has no authored source range")?;
+                self.select_source_span(span);
                 Ok(())
             }
             "PlayAll" => {
@@ -333,6 +332,17 @@ impl DesignerWorkspace {
     }
     pub(super) fn refresh_animation_programs(&self) {
         let session = self.session.borrow();
+        let rust = session.uses_rust_source();
+        for name in [
+            "NewAnimation", "DuplicateAnimation", "DeleteAnimation", "Record", "Keyframe",
+            "CommitAnimation", "TimelineDetails", "StatesMode", "BehaviorsMode",
+        ] {
+            self.root.get_control::<Button>(name).set_is_visible(!rust);
+        }
+        if rust {
+            self.root.get_control::<ferroui_controls::Border>("AnimationDetails").set_is_visible(false);
+        }
+        self.duration.set_is_read_only(rust);
         let picker = self.root.get_control::<ComboBox>("AnimationPrograms");
         let previous = self.guard.replace(true);
         picker.set_placeholder_text(Some("No animation".into()));
@@ -384,7 +394,9 @@ impl DesignerWorkspace {
             ToolTip::set_tip(
                 &picker,
                 Some(Rc::new(
-                    "Create an animation or add a keyframe to the selected object".to_owned(),
+                    if rust { "No mapped animation in this RSX invocation" } else {
+                        "Create an animation or add a keyframe to the selected object"
+                    }.to_owned(),
                 )),
             );
         }
@@ -395,7 +407,12 @@ impl DesignerWorkspace {
         let panel = self.root.get_control::<StackPanel>("AuthoringPanel");
         panel.children().clear();
         panel.set_spacing(8.0);
-        let mode = self.authoring.borrow().mode;
+        let mut authoring = self.authoring.borrow_mut();
+        if self.session.borrow().uses_rust_source() && matches!(authoring.mode, 1 | 2) {
+            authoring.mode = 0;
+        }
+        let mode = authoring.mode;
+        drop(authoring);
         self.root
             .get_control::<Grid>("InspectorDesignPane")
             .set_is_visible(mode == 0);
@@ -438,6 +455,10 @@ impl DesignerWorkspace {
         let Some(id) = self.session.borrow().active_animation_program() else {
             return;
         };
+        if self.session.borrow().uses_rust_source() {
+            self.build_animation_preview_targets(panel, id);
+            return;
+        }
         let timeline = self.session.borrow().timeline().clone();
         section(panel, "Timing");
         description(
@@ -520,23 +541,7 @@ impl DesignerWorkspace {
             };
             this.session.borrow_mut().edit_animation_timing(id, changes)
         });
-        section(panel, "Preview targets");
-        action(panel, "Preview on current selection", self, move |this| {
-            let targets = this.session.borrow().selection().to_vec();
-            this.session
-                .borrow_mut()
-                .set_animation_program_preview_targets(id, Some(targets))
-        });
-        action(
-            panel,
-            "Restore selector preview targets",
-            self,
-            move |this| {
-                this.session
-                    .borrow_mut()
-                    .set_animation_program_preview_targets(id, None)
-            },
-        );
+        self.build_animation_preview_targets(panel, id);
         let source = self
             .session
             .borrow()
@@ -552,6 +557,17 @@ impl DesignerWorkspace {
             this.session
                 .borrow_mut()
                 .set_animation_program_source(id, &text(&editor))
+        });
+    }
+
+    fn build_animation_preview_targets(self: &Rc<Self>, panel: &StackPanel, id: NodeId) {
+        section(panel, "Preview targets");
+        action(panel, "Preview on current selection", self, move |this| {
+            let targets = this.session.borrow().selection().to_vec();
+            this.session.borrow_mut().set_animation_program_preview_targets(id, Some(targets))
+        });
+        action(panel, "Restore selector preview targets", self, move |this| {
+            this.session.borrow_mut().set_animation_program_preview_targets(id, None)
         });
     }
     fn build_state_panel(self: &Rc<Self>, panel: &StackPanel, owner: NodeId) {

@@ -10,6 +10,8 @@ use std::collections::BTreeMap;
 pub(crate) struct PlaybackPose {
     pub(crate) elapsed: f64,
     pub(crate) all: bool,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    playing: bool,
     #[serde(default)]
     pub(crate) completed: bool,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -74,6 +76,7 @@ impl DesignerSession {
         pose.playback = Some(PlaybackPose {
             elapsed,
             all,
+            playing: self.uses_rust_source() && self.is_playing(),
             completed: self.animation.playback_completed,
             clocks,
         });
@@ -119,14 +122,19 @@ impl DesignerSession {
             .map_err(|error| error.to_string())?;
         self.animation.player.play();
         let result = self.advance(0.0);
-        self.animation.player.pause();
+        if !pose.playing {
+            self.animation.player.pause();
+        }
         result?;
         Ok(self.timeline_playback_pose())
     }
 
     pub(crate) fn remember_playback_for_reload(&mut self) {
         if self.animation.pending_playback.is_none() {
-            self.animation.pending_playback = self.timeline_playback_pose();
+            self.animation.pending_playback = self.timeline_playback_pose().or_else(|| {
+                (self.uses_rust_source() && (self.preview.has_animation_layer() || self.animation.native.has_pose()))
+                    .then(|| self.timeline_preview_pose()).flatten()
+            });
         }
     }
 

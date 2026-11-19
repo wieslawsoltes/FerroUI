@@ -495,6 +495,12 @@ impl DesignerWorkspace {
         }
     }
     fn build_timeline_empty_state(self: &Rc<Self>) {
+        if self.session.borrow().uses_rust_source() {
+            let label = key_caption("No mapped keyframes in this RSX invocation");
+            label.set_margin(Thickness::new(8.0, 12.0, 8.0, 8.0));
+            self.tracks.children().add(label.upcast::<Control>());
+            return;
+        }
         let row = Grid::new();
         row.set_column_definitions(ColumnDefinitions::parse("48,*,Auto").unwrap());
         row.set_margin(Thickness::new(14.0, 18.0, 18.0, 14.0));
@@ -837,12 +843,16 @@ impl DesignerWorkspace {
         row.set_margin(Thickness::new(4.0, 6.0, 0.0, 6.0));
         row.children()
             .add(key_caption(&format!("{count} keyframes selected")).upcast::<Control>());
+        let rust = self.session.borrow().uses_rust_source();
         let offset = key_field(&row, "Offset", "KeyframeOffset", "0.1", 64.0);
         for (name, label) in [
             ("MoveKeyframes", "Move"),
             ("DuplicateKeyframes", "Duplicate"),
             ("RemoveKeyframes", "Delete"),
         ] {
+            if rust && name != "MoveKeyframes" {
+                continue;
+            }
             let control = button(label);
             control.classes().add("designer-timeline-tool");
             if name == "MoveKeyframes" {
@@ -1079,6 +1089,12 @@ impl DesignerWorkspace {
             });
         }
         row.children().add(apply.upcast::<Control>());
+        self.root
+            .get_control::<ContentControl>("TimelineInspectorHost")
+            .set_content(Some(Control::boxed(&row)));
+        if self.session.borrow().uses_rust_source() {
+            return;
+        }
         let remove = button("Remove");
         remove.classes().add("nav");
         remove.classes().add("designer-timeline-tool");
@@ -1107,9 +1123,6 @@ impl DesignerWorkspace {
             }
         });
         row.children().add(remove.upcast::<Control>());
-        self.root
-            .get_control::<ContentControl>("TimelineInspectorHost")
-            .set_content(Some(Control::boxed(&row)));
     }
 }
 fn nearest_key(track: &Track, time: f64) -> Option<SelectedKey> {

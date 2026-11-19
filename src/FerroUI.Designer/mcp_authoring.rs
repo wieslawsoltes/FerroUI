@@ -15,6 +15,8 @@ pub(super) fn handles(name: &str) -> bool {
     matches!(
         name,
         "designer_programs"
+            | "designer_rsx_views"
+            | "designer_select_rsx_view"
             | "designer_program"
             | "designer_keyframe_draft"
             | "designer_animation_curve"
@@ -48,6 +50,10 @@ pub(super) fn tools() -> Vec<Value> {
         "time":s::time(),"value":s::string(),"easing":s::string()});
     let draft_required = &["program","target","property","time","value","easing"];
     vec![
+        s::tool("designer_rsx_views", "List the Rust file's rsx! invocations and the active source range.",
+            s::object(json!({}), &[]), false),
+        s::tool("designer_select_rsx_view", "Select an RSX invocation by its authored UTF-8 starting offset.",
+            s::object(json!({"start":s::revision(),"expected_revision":s::revision()}), &["start","expected_revision"]), true),
         s::tool("designer_programs","Read animation programs, source keys, codec diagnostics and typed timelines. include_keyframe_text adds formatted XAML values and easing to the typed keys.",s::object(json!({"include_source":{"type":"boolean"},"include_keyframe_text":{"type":"boolean"}}), &[]),false),
         s::tool("designer_animation_curve", "Sample an authored scalar track over a visible time range in seconds using the current artboard and its native animation evaluator.",
             s::object(json!({"program":s::id(),"target":s::id(),"property":s::string(),
@@ -118,9 +124,23 @@ pub(super) fn call(
     match name {
         "designer_programs" => {
             let programs = animation_programs(session, args)?;
-            return Ok(
-                json!({"document":state(session),"active":session.active_animation_program(),"programs":programs}),
-            );
+            let mut result = json!({"document":state(session),"active":session.active_animation_program(),"programs":programs});
+            if let Some(map) = session.rust_map() {
+                let index = ferroui_designer_language::LineIndex::new(session.authored_source());
+                result["sourceIssues"] = json!(map.issues.iter().filter_map(|issue| {
+                    let range = index.range(issue.declaration).ok()?;
+                    Some(json!({"range":range, "reason":issue.reason}))
+                }).collect::<Vec<_>>());
+            }
+            return Ok(result);
+        }
+        "designer_rsx_views" | "designer_select_rsx_view" => {
+            if name == "designer_select_rsx_view" {
+                session.select_rust_invocation(usize::try_from(super::integer(args, "start")?)
+                    .map_err(|_| "RSX source offset is out of range")?)?;
+            }
+            let map = session.rust_map().ok_or("Open a Rust file with a valid RSX invocation")?;
+            return Ok(json!({"document":state(session),"active":map.invocation,"invocations":map.blocks}));
         }
         "designer_keyframe_draft" => return session.preview_program_keyframe(
             node_id(args, "program")?, node_id(args, "target")?, &text(args, "property")?, keyframe_draft(args)?,
@@ -425,6 +445,16 @@ fn animation_programs(session: &DesignerSession, args: &Value) -> Result<Vec<Val
         let mut model = serde_json::to_value(program).map_err(|error| error.to_string())?;
         if args["include_source"] == false {
             model.as_object_mut().expect("program is an object").remove("source");
+        }
+        if session.uses_rust_source() {
+            if let Some(span) = session.authored_span(program.id) {
+                let source = session.authored_source();
+                if args["include_source"] != false {
+                    model["source"] = json!(&source[span.range()]);
+                }
+                model["sourceRange"] = json!(ferroui_designer_language::LineIndex::new(source)
+                    .range(span).map_err(|error| error.to_string())?);
+            }
         }
         if args["include_keyframe_text"] == true {
             for (track, authored) in program.timeline.iter().flat_map(|timeline| &timeline.tracks).enumerate() {

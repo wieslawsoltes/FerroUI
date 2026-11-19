@@ -105,6 +105,9 @@ impl DesignerWorkspace {
             });
     }
     pub(super) fn refresh_source_tools(self: &Rc<Self>) {
+        if self.refresh_rust_source_tools() {
+            return;
+        }
         let (uri, source, revision) = {
             let session = self.session.borrow();
             (
@@ -183,6 +186,9 @@ impl DesignerWorkspace {
     }
     fn source_command(self: &Rc<Self>, command: &str) -> Result<(), String> {
         self.refresh_source_tools();
+        if self.session.borrow().uses_rust_source() {
+            return Err("Use rust-analyzer for Rust language commands".into());
+        }
         let (uri, source, revision) = {
             let session = self.session.borrow();
             (
@@ -342,6 +348,9 @@ impl DesignerWorkspace {
         let mut documents = BTreeSet::new();
         for change in &mut changes {
             change.uri = super::project::document_identity(&change.uri)?;
+            if crate::rsx_document::RustDocument::for_uri(&change.uri) {
+                return Err("XAML workspace refactoring cannot target a Rust file".into());
+            }
             if !documents.insert(change.uri.clone()) {
                 return Err("A workspace edit contains duplicate document identities".into());
             }
@@ -365,6 +374,7 @@ impl DesignerWorkspace {
             super::project::Tab {
                 preview_uri: self.session.borrow().document_uri().into(),
                 document: active_document,
+                rust: self.session.borrow().rust.clone(),
                 saved: self.saved_source.borrow().clone(),
                 file: self.file.borrow().clone(),
                 layers: Some(self.session.borrow().layer_view_snapshot()),
@@ -387,6 +397,7 @@ impl DesignerWorkspace {
                 let tab = super::project::Tab {
                     preview_uri: change.uri.clone(),
                     document: buffer.document().clone(),
+                    rust: None,
                     saved: buffer.saved_source().unwrap_or("").into(),
                     file: None,
                     layers: None,

@@ -938,6 +938,10 @@ impl RuntimePreview {
     pub fn clear_animation(&mut self) {
         self.animation_values.clear();
     }
+
+    pub(crate) fn has_animation_layer(&self) -> bool {
+        !self.animation_values.is_empty()
+    }
 }
 
 impl Drop for RuntimePreview {

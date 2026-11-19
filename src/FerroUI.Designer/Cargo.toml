@@ -27,6 +27,7 @@ render-smoke = ["dep:ferroui-vello", "dep:ferroui-harfbuzz", "dep:ferroui-themes
 [dependencies]
 base64 = { version = "0.22", optional = true }
 ferroui-designer-project.workspace = true
+ferroui-designer-rsx.workspace = true
 ferroui-designer-language.workspace = true
 ferroui-designer-collaboration-host = { workspace = true, features = ["server"] }
 ferroui-xaml-interactivity.workspace = true

@@ -88,7 +88,7 @@ impl DesignerSession {
         self.animation.recording
     }
     pub fn set_recording(&mut self, value: bool) {
-        self.animation.recording = value && !self.is_read_only();
+        self.animation.recording = value && !self.is_read_only() && !self.uses_rust_source();
         self.generation += 1;
     }
     pub fn register_animation_codec(&mut self, codec: Box<dyn AnimationCodec>) {
@@ -810,6 +810,9 @@ impl DesignerSession {
         Ok(())
     }
     pub(crate) fn program_edits(&self, id: NodeId, timeline: &Timeline) -> Result<Vec<Edit>, String> {
+        if self.uses_rust_source() {
+            return Err("Edit the Rust program in source or choose mapped keyframes in Timeline".into());
+        }
         let program = self
             .animation
             .programs
@@ -831,6 +834,9 @@ impl DesignerSession {
         ordinary: Vec<Edit>,
     ) -> Result<(), String> {
         self.ensure_writable().map_err(|error| error.to_string())?;
+        if self.uses_rust_source() {
+            return Err("Edit the Rust program in source or choose mapped keyframes in Timeline".into());
+        }
         self.editable_program()?;
         candidate.validate().map_err(|error| error.to_string())?;
         let active = self.animation.active;
