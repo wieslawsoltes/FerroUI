@@ -1216,10 +1216,11 @@
       "status": "ported"
     },
     "src/LiveChartsCore/VisualElements/BaseNeedleVisual.cs": {
-      "reason": "The needle of the source: 45% of the smaller side of the draw margin long, turned about the centre by the truncated initial rotation and the angle of its value in the range, offset by Translate, in the theme's Width of 20 and (30, 30, 30) fill, drawn over the ticks and under the data labels.",
+      "reason": "The needle of the source: 45% of the smaller side of the draw margin long, turned about the centre by the truncated initial rotation and the angle of its value in the range, offset by Translate, in the theme's Width of 20 and (30, 30, 30) fill, drawn over the ticks and under the data labels; a needle whose value changes turns to it over the animations speed of the chart (the source animates the rotation of its geometry), the long way when the range asks for it.",
       "remaining": [],
       "rust": [
-        "src/FerroUI.LiveCharts/pie_chart_engine.rs::draw_needle"
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs::draw_needle",
+        "src/FerroUI.Controls.LiveCharts/chart.rs"
       ],
       "status": "ported"
     },
@@ -1338,6 +1339,38 @@
         "src/FerroUI.LiveCharts/cartesian_chart_engine.rs::draw_heat"
       ],
       "status": "partial"
+    },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/Extensions/BaseGaugeItem.cs": {
+      "reason": "GaugeItem carries BaseGaugeItem: the value, the builder, GaugeItem::BACKGROUND (double.MaxValue) and is_fill_series_builder.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/gauges.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/Extensions/GaugeGenerator.cs": {
+      "reason": "GaugeGenerator::build_solid_gauge and build_angular_gauge_sections: a gauge series for each item (a ring of its value among empty values, or one value relative to the minimum without a hover push-out or data labels), the fill series of a zero for each item styled by the background items, added when no item styles it.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/gauges.rs"
+      ],
+      "status": "ported"
+    },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/Extensions/GaugeItem.cs": {
+      "reason": "GaugeItem: the value and the builder of an item, which runs after the generator has set the series up.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/gauges.rs"
+      ],
+      "status": "ported"
+    },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/Extensions/GaugeOptions.cs": {
+      "reason": "The solid and angular builds of GaugeGenerator are its two functions; the options are not a public type.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/gauges.rs"
+      ],
+      "status": "native-replacement"
     },
     "src/skiasharp/LiveChartsCore.SkiaSharp/HeatLandSeries.cs": {
       "reason": "The native HeatLandSeries, a generated ChartSeries of the kind HeatLand with its lands and the default heat map of the source constructors.",
@@ -3481,7 +3514,7 @@
     "tests/SnapshotTests/AngularGaugeTests.cs::SnapshotTests.AngularGaugeTests::void AngularGauge()#L50": {
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
-        "GaugeGenerator.BuildAngularGaugeSections has no native counterpart; the scenario builds its sections and background series, with the theme's gauge rule.",
+        "The scenario builds its sections by hand, as GaugeGenerator::build_angular_gauge_sections does.",
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
         "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
@@ -3494,7 +3527,7 @@
     "tests/SnapshotTests/AngularGaugeTests.cs::SnapshotTests.AngularGaugeTests::void AngularGaugeAtMinValue()#L60": {
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
-        "GaugeGenerator.BuildAngularGaugeSections has no native counterpart; the scenario builds its sections and background series, with the theme's gauge rule.",
+        "The scenario builds its sections by hand, as GaugeGenerator::build_angular_gauge_sections does.",
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
         "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],

@@ -9,6 +9,7 @@ mod visual_state_changed_event_args;
 mod visual_state_group;
 mod visual_state_manager;
 mod transitions;
+pub(crate) mod state_mappers;
 mod visual_transition;
 
 #[cfg(test)]
@@ -17,6 +18,8 @@ mod visual_state_manager_tests;
 mod state_trigger_tests;
 #[cfg(test)]
 mod transition_tests;
+#[cfg(test)]
+mod state_mapper_tests;
 
 pub(crate) use applied_setters::{AppliedSetters, Names};
 pub(crate) use state_trigger_base::TriggerRank;
