@@ -1,4 +1,4 @@
-use crate::{ChartKind, ChartPointerEventArgs, LegendPosition, TooltipPosition};
+use crate::{ChartKind, ChartPointerEventArgs, LegendPosition};
 use ferroui_base::media::{Color, FlowDirection, FormattedText, Typeface};
 use ferroui_base::utilities::Locale;
 use ferroui_base::{Point, Rect, Size};
@@ -191,14 +191,10 @@ pub(crate) fn decorate(
     }
 }
 
-pub(crate) fn tooltip_scene(
-    size: Size,
-    args: &ChartPointerEventArgs,
-    placement: TooltipPosition,
-    color: Color,
-) -> Scene {
-    let mut scene = Scene::new(size, Rect::from_size(size));
-    // A label of several lines (the land and its series values of a map) takes a line each.
+/// The lines of the tooltip of the found points and its size in a control of `size`: a line for
+/// each point (a label of several lines, the land and its series values of a map, takes a line
+/// each), 12 px text padded by 12 and 8.
+pub(crate) fn tooltip_layout(size: Size, args: &ChartPointerEventArgs) -> (Vec<String>, Size) {
     let lines: Vec<_> = args
         .points
         .iter()
@@ -217,25 +213,19 @@ pub(crate) fn tooltip_scene(
         + 24.0)
         .min(size.width.max(0.0));
     let height = (lines.len() as f64 * 20.0 + 16.0).min(size.height.max(0.0));
-    let p = args.position;
-    let (x, y) = match placement {
-        TooltipPosition::Bottom => (p.x - width / 2.0, p.y + 14.0),
-        TooltipPosition::Left => (p.x - width - 14.0, p.y - height / 2.0),
-        TooltipPosition::Right => (p.x + 14.0, p.y - height / 2.0),
-        TooltipPosition::Center => (p.x - width / 2.0, p.y - height / 2.0),
-        _ => (
-            p.x - width / 2.0,
-            if p.y - height - 14.0 >= 0.0 {
-                p.y - height - 14.0
-            } else {
-                p.y + 14.0
-            },
-        ),
-    };
-    let origin = Point::new(
-        x.clamp(0.0, (size.width - width).max(0.0)),
-        y.clamp(0.0, (size.height - height).max(0.0)),
-    );
+    (lines, Size::new(width, height))
+}
+
+/// The tooltip of `lines` of `tooltip` size with its top left corner at `origin`.
+pub(crate) fn tooltip_scene(
+    size: Size,
+    lines: &[String],
+    tooltip: Size,
+    origin: Point,
+    color: Color,
+) -> Scene {
+    let mut scene = Scene::new(size, Rect::from_size(size));
+    let (width, height) = (tooltip.width, tooltip.height);
     let rect = Rect::new(origin.x, origin.y, width, height);
     scene.primitives.push(Primitive::new(
         Geometry::Rectangle { rect, radius: 6.0 },

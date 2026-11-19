@@ -9,8 +9,8 @@
   "source_status": {
     "native-replacement": 65,
     "partial": 44,
-    "pending": 537,
-    "ported": 52
+    "pending": 535,
+    "ported": 54
   },
   "member_status": {
     "native-replacement": 19,
@@ -21,8 +21,8 @@
   "test_declarations": 1066,
   "test_status": {
     "partial": 112,
-    "pending": 741,
-    "ported": 213
+    "pending": 730,
+    "ported": 224
   },
   "test_declarations_by_suite": {
     "ConsoleTests": 33,

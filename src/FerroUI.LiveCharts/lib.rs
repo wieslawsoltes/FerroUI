@@ -24,6 +24,7 @@ pub mod scene;
 mod scene_transform;
 pub mod series;
 mod svg_path;
+pub mod tooltips;
 pub mod treemap_chart_engine;
 pub mod visual_states;
 
@@ -67,6 +68,9 @@ pub use scene::{
     PathCommand, PointId, Primitive, Scene, TextAnchor,
 };
 pub use series::{DataLabelsPosition, PolarLabelsPosition, RadialAlignment, Series, SeriesKind};
+pub use tooltips::{
+    geo_tooltip_location, tooltip_location, PopUpPlacement, TooltipHoverArea, TooltipLocation,
+};
 pub use treemap_chart_engine::{
     TreemapChartEngine, TreemapNode, TreemapOptions, TreemapSeries, TreemapSeriesOptions,
 };
@@ -83,3 +87,5 @@ mod cartesian_series_tests;
 mod upstream_regression_tests;
 #[cfg(test)]
 mod pie_series_tests;
+#[cfg(test)]
+mod tooltip_tests;

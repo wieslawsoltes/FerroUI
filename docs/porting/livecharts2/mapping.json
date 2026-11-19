@@ -768,12 +768,13 @@
       "status": "ported"
     },
     "src/LiveChartsCore/Kernel/Drawing/AnnularSectorHoverArea.cs": {
-      "reason": "Annular containment respects the inner hole, radius, sweep sign, wraparound and full-circle spans.",
+      "reason": "Annular containment respects the inner hole, radius, sweep sign, wraparound and full-circle spans. TooltipHoverArea::AnnularSector (TooltipHoverArea::of_region of an arc node) suggests the middle of the outer edge, never below the pivot (SuggestTooltipPlacement).",
       "remaining": [
-        "Source tooltip-placement aggregation and full hover-class API remain pending."
+        "The hover area is the native hit shape; the class API of the source is not ported."
       ],
       "rust": [
-        "src/FerroUI.LiveCharts/scene.rs::HitShape::AnnularSector"
+        "src/FerroUI.LiveCharts/scene.rs::HitShape::AnnularSector",
+        "src/FerroUI.LiveCharts/tooltips.rs"
       ],
       "status": "partial"
     },
@@ -794,22 +795,24 @@
       "status": "ported"
     },
     "src/LiveChartsCore/Kernel/Drawing/RectangleHoverArea.cs": {
-      "reason": "Normalized hover bounds distinguish painted geometry from category discovery; all closest strategies choose within each series, and zero-area plots reject interactions. A pointer on an edge is outside and every side is at least 1 px long (IsPointerOver), for every strategy.",
+      "reason": "Normalized hover bounds distinguish painted geometry from category discovery; all closest strategies choose within each series, and zero-area plots reject interactions. A pointer on an edge is outside and every side is at least 1 px long (IsPointerOver), for every strategy. TooltipHoverArea::Rectangle suggests the placement of the tooltip (SuggestTooltipPlacement with its SuggestedTooltipLocation and LessThanPivot, the edges compared with the suggested points as the source); CartesianChartEngine::tooltip_hover_area sets the suggested point of each series as its CenterXToolTip, StartYToolTip and the others, and TooltipHoverArea::centered that of the polar, Sankey and treemap areas.",
       "remaining": [
-        "All source SuggestedTooltipLocation/placement aggregation methods are not modeled one-to-one."
+        "The suggested point is derived from the hit region of a point when the tooltip is placed, not kept on the area; the ExactMatch strategy keeps the category area of a bar or box, where the source takes the drawn geometry."
       ],
       "rust": [
-        "src/FerroUI.LiveCharts/scene.rs::HitShape"
+        "src/FerroUI.LiveCharts/scene.rs::HitShape",
+        "src/FerroUI.LiveCharts/tooltips.rs"
       ],
       "status": "partial"
     },
     "src/LiveChartsCore/Kernel/Drawing/SemicircleHoverArea.cs": {
-      "reason": "Annular containment respects the inner hole, radius, sweep sign, wraparound and full-circle spans.",
+      "reason": "Annular containment respects the inner hole, radius, sweep sign, wraparound and full-circle spans. TooltipHoverArea::Semicircle (PieChartEngine::tooltip_hover_area) suggests the outer end of the slice at 95 % of its radius, the furthest slice winning (SuggestTooltipPlacement).",
       "remaining": [
-        "Source tooltip-placement aggregation and full hover-class API remain pending."
+        "The hover area is the native hit shape; the class API of the source is not ported."
       ],
       "rust": [
-        "src/FerroUI.LiveCharts/scene.rs::HitShape::AnnularSector"
+        "src/FerroUI.LiveCharts/scene.rs::HitShape::AnnularSector",
+        "src/FerroUI.LiveCharts/tooltips.rs"
       ],
       "status": "partial"
     },
@@ -822,12 +825,13 @@
       "status": "ported"
     },
     "src/LiveChartsCore/Kernel/Extensions.cs": {
-      "reason": "Cartesian and polar tick calculation is ported with rotated-label, density, unit-width and minimum-separator logic. Degenerate input gets a finite fallback and loop iterations are bounded.",
+      "reason": "Cartesian and polar tick calculation is ported with rotated-label, density, unit-width and minimum-separator logic. Degenerate input gets a finite fallback and loop iterations are bounded. GetTooltipLocation is tooltips::tooltip_location: the Cartesian placement over the TooltipPlacementContext of the found hover areas (the chart's TooltipPosition, Auto above the highest point or below when all are under their pivot, turned Right or Left at the edges and below or above at the top or bottom), the pie placement above the outer end of the furthest slice or below it, and the clamp to the control.",
       "remaining": [
         "Other source extension methods are not mapped by this contribution."
       ],
       "rust": [
-        "src/FerroUI.LiveCharts/measure/axis_tick.rs"
+        "src/FerroUI.LiveCharts/measure/axis_tick.rs",
+        "src/FerroUI.LiveCharts/tooltips.rs"
       ],
       "status": "partial"
     },
@@ -909,6 +913,14 @@
         "src/FerroUI.LiveCharts/kernel/stacker.rs::Stacker"
       ],
       "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Kernel/TooltipPlacementContext.cs": {
+      "reason": "The context of the placement (the extremes of the suggested points, the auto placement, whether all points are below their pivot, the pie anchor and its radius) is the private TooltipPlacementContext of tooltips.rs.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/tooltips.rs"
+      ],
+      "status": "ported"
     },
     "src/LiveChartsCore/Labelers.cs": {
       "reason": "SixRepresentativeDigits (Log10_6, up to seven decimals, millions and millionths), FormatCurrency (quadrillions to millions, digit groups and two decimals), Currency with the symbol of the current culture and BuildNamedLabeler (an index out of range an empty label), with the label function of an axis (Labeler). The native default label of an axis stays the native number format; SetDefaultLabeler has no counterpart.",
@@ -998,6 +1010,14 @@
         "src/FerroUI.LiveCharts/measure/polar_scaler.rs"
       ],
       "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Measure/PopUpPlacement.cs": {
+      "reason": "PopUpPlacement (Top, Bottom, Left, Right) is the side of TooltipLocation that tooltip_location and geo_tooltip_location return (AutoToolTipsInfo.ToolTipPlacement).",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/tooltips.rs"
+      ],
+      "status": "ported"
     },
     "src/LiveChartsCore/Measure/RadialAlignment.cs": {
       "reason": "All source enum alternatives are explicit Rust variants and registered FerroUI markup values.",
@@ -1409,13 +1429,14 @@
       "status": "native-replacement"
     },
     "src/skiasharp/LiveChartsCore.SkiaSharp/SKCharts/SKDefaultGeoTooltip.cs": {
-      "reason": "The text of the tooltip: the name of the land in title case, then a line for each series value, {name}: {value:N2} or the text of the TooltipFormatter of the map; placed above the anchor of the land, below it when there is no room.",
+      "reason": "The text of the tooltip: the name of the land in title case, then a line for each series value, {name}: {value:N2} or the text of the TooltipFormatter of the map; placed as Show places it (tooltips::geo_tooltip_location): centred above the centre of the land, below it with TooltipPosition.Bottom, Auto turned below at the top of the control and above at its bottom, kept inside the control horizontally and at the bottom.",
       "remaining": [
         "The pop-up geometry with its wedge, its drop shadow and its animation, the tooltip paints and text size of the view."
       ],
       "rust": [
         "src/FerroUI.LiveCharts/geo_map_chart_engine.rs",
-        "src/FerroUI.Controls.LiveCharts/decorations.rs"
+        "src/FerroUI.Controls.LiveCharts/decorations.rs",
+        "src/FerroUI.LiveCharts/tooltips.rs"
       ],
       "status": "partial"
     },
@@ -3125,6 +3146,22 @@
       ],
       "status": "ported"
     },
+    "tests/CoreTests/OtherTests/SKChartingVisualsTests.cs::CoreTests.OtherTests.SKChartingVisualsTests::void SKDefaultGeoTooltip_BottomPlacementIsExercisedByFixedTooltipPosition()#L106": {
+      "reason": "TooltipPosition.Bottom places the tooltip of a land below its centre (Bottom); Auto turns a tooltip that leaves the top of the control below the centre, and the bottom edge keeps it inside.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/tooltip_tests.rs::source_geo_tooltip_is_placed_about_the_centre_of_the_land"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/OtherTests/SKChartingVisualsTests.cs::CoreTests.OtherTests.SKChartingVisualsTests::void SKDefaultGeoTooltip_ShowThenHideRunsTheFullLifecycle()#L74": {
+      "reason": "The tooltip of a land at the centre of a 400 by 400 map is centred above the centre of the land (geo_tooltip_location, the placement of Show); the native tooltip has no show and hide lifecycle of its own.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/tooltip_tests.rs::source_geo_tooltip_is_placed_about_the_centre_of_the_land"
+      ],
+      "status": "ported"
+    },
     "tests/CoreTests/OtherTests/SKChartingVisualsTests.cs::CoreTests.OtherTests.SKChartingVisualsTests::void SKHeatLegend_HorizontalPositionExercisesBottomBranch()#L48": {
       "reason": "The legend at the bottom with a BadgeWidth of 25: a bar 25 high under the plot; the horizontal layout is tested in the engine.",
       "remaining": [],
@@ -3167,6 +3204,14 @@
       ],
       "status": "ported"
     },
+    "tests/CoreTests/SeriesTests/BoxSeriesTests.cs::CoreTests.SeriesTests.BoxSeriesTest::void ShouldPlaceToolTips()#L87": {
+      "reason": "The source boxes, with the assertions of the financial series (ConfigureHoverAnchor).",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/tooltip_tests.rs::source_box_should_place_tool_tips"
+      ],
+      "status": "ported"
+    },
     "tests/CoreTests/SeriesTests/BoxSeriesTests.cs::CoreTests.SeriesTests.BoxSeriesTest::void ShouldScale()#L19": {
       "reason": "The series, values, chart size and axis limits of the source test, with its assertions on the measured visuals read from the retained scene by point identity.",
       "remaining": [],
@@ -3183,11 +3228,27 @@
       ],
       "status": "ported"
     },
+    "tests/CoreTests/SeriesTests/ColumnSeriesTest.cs::CoreTests.SeriesTests.ColumnSeriesTest::void ShouldPlaceToolTips()#L82": {
+      "reason": "The source series, a 300 by 300 chart with hidden axes and the pointer at the middle column: the tooltip above, below, at the left, at the right and on the top of the column for each TooltipPosition, above with Auto (Top), and below the end of a negative column (Bottom). The value axis takes the bounds of the source's bars, which do not reach their pivot (the native bounds of a bar include its base); the tooltip is 80 by 40.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/tooltip_tests.rs::source_column_should_place_tool_tips"
+      ],
+      "status": "ported"
+    },
     "tests/CoreTests/SeriesTests/ColumnSeriesTest.cs::CoreTests.SeriesTests.ColumnSeriesTest::void ShouldScale()#L18": {
       "reason": "The series, values, chart size and axis limits of the source test, with its assertions on the measured visuals read from the retained scene by point identity.",
       "remaining": [],
       "rust": [
         "src/FerroUI.LiveCharts/cartesian_series_tests.rs::source_column_should_scale"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/SeriesTests/FinancialSeriesTest.cs::CoreTests.SeriesTests.FinancialSeriesTest::void ShouldPlaceToolTips()#L110": {
+      "reason": "The source candles from their high to their low: the six positions about the area of the middle candle (half a category from its anchor), Auto below the top of the highest category (Bottom), and the ends turned Left and Right at half a category; the tooltip of four lines is 80 by 100.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/tooltip_tests.rs::source_financial_should_place_tool_tips"
       ],
       "status": "ported"
     },
@@ -3231,6 +3292,14 @@
       ],
       "status": "ported"
     },
+    "tests/CoreTests/SeriesTests/HeatSeriesTest.cs::CoreTests.SeriesTests.HeatSeriesTest::void ShouldPlaceToolTips()#L107": {
+      "reason": "The source heat map of 25 cells: the six positions about the centre cell, Auto below the centre of a top cell (Bottom), and the corner cells turned Left and Right with the source's coordinates.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/tooltip_tests.rs::source_heat_should_place_tool_tips"
+      ],
+      "status": "ported"
+    },
     "tests/CoreTests/SeriesTests/HeatSeriesTest.cs::CoreTests.SeriesTests.HeatSeriesTest::void ShouldScale()#L20": {
       "reason": "The source values, heat map and 1000 by 1000 chart: every cell has the size of the unit cell and the colour of its weight, read from the retained scene by point identity.",
       "remaining": [],
@@ -3267,6 +3336,14 @@
       ],
       "status": "ported"
     },
+    "tests/CoreTests/SeriesTests/LineSeriesTest.cs::CoreTests.SeriesTests.LineSeriesTest::void ShouldPlaceToolTips()#L87": {
+      "reason": "The source series of no geometry size: the six positions about the middle point, Auto above it (Top) or below it under the pivot (Bottom), and at the ends of the line the tooltip turned to the Left or Right to stay inside the control.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/tooltip_tests.rs::source_line_should_place_tool_tips"
+      ],
+      "status": "ported"
+    },
     "tests/CoreTests/SeriesTests/LineSeriesTest.cs::CoreTests.SeriesTests.LineSeriesTest::void ShouldScale()#L19": {
       "reason": "Pinned source fixture values and numerical assertions are adapted to owned Rust scenes; native rendering resources are asserted through scene geometry.",
       "remaining": [
@@ -3296,11 +3373,27 @@
       ],
       "status": "ported"
     },
+    "tests/CoreTests/SeriesTests/PieSeriesTest.cs::CoreTests.SeriesTests.PieSeriesTest::void ShouldPlaceToolTips()#L73": {
+      "reason": "Four slices of one: the tooltip of the slice under the pointer goes out from the centre into the quadrant of the pointer (the outer end of the slice, SemicircleHoverArea).",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/tooltip_tests.rs::source_pie_should_place_tool_tips"
+      ],
+      "status": "ported"
+    },
     "tests/CoreTests/SeriesTests/PieSeriesTest.cs::CoreTests.SeriesTests.PieSeriesTest::void ShouldScale()#L19": {
       "reason": "Pinned source fixture values and numerical assertions are adapted to owned Rust scenes; native rendering resources are asserted through scene geometry.",
       "remaining": [],
       "rust": [
         "src/FerroUI.LiveCharts/pie_chart_engine.rs::tests::source_should_scale_preserves_slice_angles_center_and_hover_reservation"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/SeriesTests/PolarLineSeriesTest.cs::CoreTests.SeriesTests.PolarLineSeriesTest::void ShouldPlaceToolTipsCorrectly()#L68": {
+      "reason": "The source series with the radius axis from 1 to 5: the point of the lowest radius is at the centre, and the tooltip is above, below, at the left, at the right and on it for the five positions.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/tooltip_tests.rs::source_polar_line_should_place_tool_tips"
       ],
       "status": "ported"
     },
@@ -3341,6 +3434,14 @@
       "remaining": [],
       "rust": [
         "src/FerroUI.LiveCharts/upstream_regression_tests.rs::range_row_series_auto_bounds_include_lowest_low_endpoint"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/SeriesTests/ScatterSeriesTest.cs::CoreTests.SeriesTests.ScatterSeriesTest::void ShouldPlaceToolTips()#L102": {
+      "reason": "The source series with its 24 px geometry: the six positions about the middle point, Auto below a point whose tooltip does not fit above it (Bottom), and the corners turned Left and Right; the tooltip of four lines is 80 by 100.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/tooltip_tests.rs::source_scatter_should_place_tool_tips"
       ],
       "status": "ported"
     },
@@ -3469,6 +3570,14 @@
       "remaining": [],
       "rust": [
         "src/FerroUI.LiveCharts/cartesian_series_tests.rs::source_stacked_row_should_scale_properly"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/SeriesTests/StepLineSeriesTest.cs::CoreTests.SeriesTests.StepLineSeriesTest::void ShouldPlaceToolTipsCorrectly()#L83": {
+      "reason": "The step line fixture of the source, with the assertions of the line series.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/tooltip_tests.rs::source_step_line_should_place_tool_tips"
       ],
       "status": "ported"
     },
