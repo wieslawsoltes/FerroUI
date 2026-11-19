@@ -53,6 +53,24 @@ For an exact position, open **Canvas Guides** again. Use the horizontal or verti
 
 The designer tab retains a guide set for the document, each XAML definition opened from **Library**, and each Rust `rsx!` invocation. Reopening a definition or switching back to an invocation restores its guides. Guide positions stay in the designer tab’s view state. Source edits use the editor’s Undo history. [RSX canvas with guides](../images/vscode-rsx-canvas-guides.jpg) · [Studio guides](../canvas-guides.md)
 
+## Snap controls to guides, the grid, or other controls
+
+Open the magnet icon for **Snapping** in the **Design** toolbar. Choose one or more targets, then choose **Apply**.
+
+![Snapping settings in a narrow editor split with a visible logical grid](../images/vscode-canvas-snap-settings.jpg)
+
+| Target | What snaps |
+| --- | --- |
+| Grid | The leading corner of a drop or move, and the active resize edges. **Spacing** sets the grid in logical pixels. **Show grid** controls the display independently. |
+| Guides | The edge or center of a moved control or selection aligns to a guide. Hidden guides remain active when this target is enabled. |
+| Objects | Edges and centers align to other measured controls in the current design scope. The moving selection and its descendants are excluded from the targets. |
+
+Drag a Toolbox entry or an authored control onto a **Canvas**, or drag an active resize handle. Dashed lines indicate the native snap positions. Move a multi-selection to align its combined bounds. Side handles snap along their resize axis. Grid cells and flow layouts use their existing placement rules. Hold Alt (Option on macOS) during a gesture to use its precise unsnapped position.
+
+![XAML source and preview after moving the Exploration card and snapping the Prototype card’s right edge](../images/vscode-canvas-snapped-layout.jpg)
+
+**Tolerance** is in screen pixels. Increase it to catch more nearby targets, or reduce it for precise placement. Changing zoom preserves the same screen distance. Edits use logical positions and the preview follows the app’s layout rounding. Arrow keys on resize handles use their existing exact steps. The tab retains snapping settings with the current guide set. Moving, inserting, or resizing a control commits one authored edit, including when the Timeline records a supported geometry gesture. [Layout sample](../samples/SelectionWorkflows.xaml)
+
 ## Edit values, actions, and resources
 
 | Tool | What to do |

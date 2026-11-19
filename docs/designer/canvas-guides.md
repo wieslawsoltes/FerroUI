@@ -98,6 +98,13 @@ in VS Code. Use `add` with a `Horizontal` or `Vertical` axis and a logical pixel
 or `apply` with the full set of visibility flags and positions. The edit needs MCP write
 permission and applies to the active view scope. [VS Code MCP reference](vscode/reference.md#drive-an-editor-workflow)
 
+For snapping, use `configure_snap` with an `options` object containing the three target
+flags, `grid_visible`, `grid_spacing`, and `snap_tolerance`. In either editor an optional
+`snap` argument activates the current settings for `designer_placement_hint`,
+`designer_place`, `designer_resize_hint`, or `designer_resize`. Pass the current guide
+`epoch`, the numeric `zoom` factor, and optional `bypass`. Both preview and commit use the
+same logical coordinates. [VS Code snapping controls](vscode/authoring.md#snap-controls-to-guides-the-grid-or-other-controls)
+
 ## Reference decisions
 
 [Figma's rulers and guides](https://help.figma.com/hc/en-us/articles/360040449713-Add-guides-to-the-canvas-or-frames)

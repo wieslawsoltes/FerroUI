@@ -77,6 +77,18 @@ export async function run(): Promise<void> {
         const copied = await native.editCanvasGuides(guide.settings, { action: 'duplicate', id: guide.selected!, position: 73.5 });
         assert.deepEqual(copied.settings.guides.map(line => line.position), [-18.125, 73.5]);
         assert.notEqual(copied.selected, guide.selected);
+        assert.ok(native.canvasGuides.snapping);
+        const { settings: snapped } = await native.editCanvasGuides(copied.settings, { action: 'configure_snap', options: {
+            grid_visible: false, grid_spacing: 16, snap_to_grid: false, snap_to_guides: true, snap_to_objects: false, snap_tolerance: 6,
+        } });
+        const canvas = await native.render({ ...source, source: '<Canvas xmlns="https://github.com/ferroui" Background="White"/>' },
+            { width: 800, height: 520, dark: false }, 17);
+        assert.ok(canvas.image, canvas.renderError ?? undefined);
+        const button = native.assets.find(asset => asset.title === 'Button')!;
+        const adjustment = await native.canvasSnap(17, snapped, 1, { type: 'place', recording: false, placement: {
+            origin: { type: 'asset', control: button.id }, target: { type: 'canvas', x: 70, y: 100 },
+        } });
+        assert.deepEqual(adjustment, { delta: { x: 3.5, y: 0 }, guides: [{ axis: 'Horizontal', position: 73.5 }] });
         const project = await native.projectInventory(workspace.uri.fsPath);
         assert.ok(project.files.some(file => file.kind === 'rsx' && file.path === 'views.rs'));
         const rust = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(workspace.uri, 'animation_view.rs'));
