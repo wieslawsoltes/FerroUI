@@ -1293,9 +1293,11 @@ what it is with `panic = "abort"`: a bug that ends the process after the panic h
   `panic = "unwind"` it is logged and unwinds with its message as the payload, marked as seen
   by the operations it unwinds through (no second filtering); under `panic = "abort"` the
   process ends with a panic with the message.
-- **`CallbackResult`** (`()` or `Result<(), E>`) is what a callback returns: `Dispatcher::post`,
-  `post_local`, `Interactive::add_handler`, `add_handler_with`, `add_handler_as` and the
-  disposable forms accept both, so a closure that returned `()` still compiles.
+- **Fallible callbacks**: `Dispatcher::post_fallible`, `post_local_fallible`,
+  `Interactive::add_fallible_handler` and `add_fallible_handler_with` take a callback that
+  returns `Result<(), E>` and give its error to `raise_unhandled_exception`. The infallible
+  methods keep their signatures: a generic result type there would make every closure that only
+  panics depend on the never type fallback, which the compiler rejects.
 - **`Dispatcher::capture_unhandled_exceptions(work) -> Result<T, String>`** runs `work` and
   returns the message of the first exception that reaches the events while it runs and that no
   other handler handles (marked handled); only the innermost capture of a thread records. This
@@ -1310,8 +1312,8 @@ what it is with `panic = "abort"`: a bug that ends the process after the panic h
 
 | Flow | Before | After | Test |
 |---|---|---|---|
-| posted jobs (`Dispatcher::post`, `post_local`) | a job could only panic | a job returns `Result`; the error reaches the events | `an_error_a_posted_job_returns_reaches_the_unhandled_exception_events_without_a_panic`, `an_error_no_handler_handles_unwinds_with_its_message_once`, `an_error_raised_off_the_dispatcher_thread_is_posted_to_it` |
-| routed event handlers (`add_handler` and its forms) | a handler could only panic, which stopped the route | the error reaches the events; handled, the route goes on | `an_error_a_handler_returns_reaches_the_dispatcher_and_the_route_goes_on` |
+| posted jobs (`Dispatcher::post_fallible`, `post_local_fallible`) | a job could only panic | a job returns `Result`; the error reaches the events | `an_error_a_posted_job_returns_reaches_the_unhandled_exception_events_without_a_panic`, `an_error_no_handler_handles_unwinds_with_its_message_once`, `an_error_raised_off_the_dispatcher_thread_is_posted_to_it` |
+| routed event handlers (`add_fallible_handler`, `add_fallible_handler_with`) | a handler could only panic, which stopped the route | the error reaches the events; handled, the route goes on | `an_error_a_fallible_handler_returns_reaches_the_dispatcher_and_the_route_goes_on` |
 | markup event handlers and method bindings (`MarkupDelegate::invoke`) | the failure of a `try fn` handler was discarded | it reaches the events | `delegates_of_declared_methods_know_their_method_and_target` |
 | animators (`IAnimator::apply`, `Animator::apply`) | the type of the property (`AnimatorBase::styled_property`), the target of `TransformAnimator` and the timing were panics when the animation ran | `apply` returns `Result<Option<..>, AnimationError>` and checks first (`try_styled_property`, `validate_timing`); `Animation::try_apply` (new) removes the steps applied and returns the error; `Animation::apply` raises it on the dispatcher; `try_apply_for_preview` returns it | `an_animator_that_rejects_its_property_is_an_error_of_apply_without_a_panic` |
 | the members of the XAML runtime outside a load (deferred resources, includes, templates built on first use) | a panic with the message (`throw_or` outside a scope) | the error reaches the events (`xaml_error_scope::report_or_raise`, new); the member goes on with its fallback | `a_failing_builder_outside_a_load_raises_its_error_on_the_dispatcher`, `without_a_scope_a_failing_member_raises_its_error_on_the_dispatcher` |
@@ -1336,9 +1338,7 @@ one that fails raises its error the same way.
 ### 11.3 Breaking changes
 
 `IAnimator::apply` and `Animator::apply` return `Result`; `deferred_transformation_factory_v1`
-to `_v3` return `Result`; the panicking members of 11.2 are removed; `add_handler_as` has a
-third type parameter (an explicit `add_handler_as::<Args, _>` becomes `::<Args, _, _>`); a
-failing markup delegate and a failing member of the XAML runtime outside a load are errors on
+to `_v3` return `Result`; the panicking members of 11.2 are removed; a failing markup delegate and a failing member of the XAML runtime outside a load are errors on
 the dispatcher, fatal unless a handler handles them.
 
 ### 11.4 What still catches a panic, and why
