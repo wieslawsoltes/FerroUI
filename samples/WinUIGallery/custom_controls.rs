@@ -1,6 +1,7 @@
 //! The custom controls of the pinned CustomUserControls page in Rust: `CounterControl.cs` and
-//! `ValidatedPasswordBox.cs`, templated controls whose default styles are the control themes of
-//! the page (`CounterControl.xaml` and `ValidatedPasswordBox.xaml`), and the UserControl
+//! `ValidatedPasswordBox.cs`, templated controls whose default styles are the page's control
+//! theme of `CounterControl.xaml` and the Rust template of `ValidatedPasswordBox.xaml`, and the
+//! UserControl
 //! `TemperatureConverterControl` with the code behind of `TemperatureConverterControl.xaml.cs`.
 //!
 //! WinUI's `DefaultStyleKey` is the control theme the page gives the control (a native page has
@@ -20,7 +21,8 @@ use ferroui_base::{
     FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, StyledElementImpl,
     StyledProperty, VisualImpl,
 };
-use ferroui_controls::automation::AutomationProperties;
+use ferroui_controls::automation::{AutomationLiveSetting, AutomationProperties};
+use ferroui_controls::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions, IControlTemplate};
 use ferroui_controls::primitives::{
     TemplateAppliedEventArgs, TemplatedControl, TemplatedControlImpl, TemplatedControlImplExt,
 };
@@ -156,6 +158,30 @@ pub(crate) const VALID: (&str, &str) = ("\u{E930}", "Password is valid");
 pub(crate) const MISSING_UPPERCASE: (&str, &str) = ("\u{EA39}", "Missing uppercase");
 pub(crate) const MISSING_NUMBER: (&str, &str) = ("\u{EA39}", "Missing number");
 pub(crate) const TOO_SHORT: (&str, &str) = ("\u{EA39}", "Too short!");
+
+/// The default style of `ValidatedPasswordBox.xaml`: the header, the password box and the
+/// validation lines of the template, built in Rust. A TextBox inside a ControlTemplate of
+/// run-time loaded markup does not get its own template part `PART_TextPresenter` when it is
+/// laid out (a defect recorded in the page's notes), so this template is not markup of the page.
+pub(crate) fn validated_password_box_template() -> Rc<FuncControlTemplate> {
+    FuncControlTemplate::new(|_, scope| {
+        let root = StackPanel::new();
+        root.set_spacing(4.0);
+        let header = TextBlock::new();
+        header.set_name(Some("HeaderText".to_string()));
+        root.children().add(header.register_in_name_scope(&**scope));
+        let input = TextBox::new();
+        input.set_name(Some("PasswordInput".to_string()));
+        input.set_password_char('\u{25CF}');
+        root.children().add(input.register_in_name_scope(&**scope));
+        let lines = StackPanel::new();
+        lines.set_name(Some("ValidationLines".to_string()));
+        lines.set_is_visible(false);
+        AutomationProperties::set_live_setting(&lines, AutomationLiveSetting::Polite);
+        root.children().add(lines.register_in_name_scope(&**scope));
+        root.upcast()
+    })
+}
 
 /// `ValidatedPasswordBox`: a password box whose validation lines say what the password misses,
 /// its template parts `PasswordInput`, `HeaderText` (WinUI's PasswordBox Header) and
@@ -442,7 +468,8 @@ pub(crate) fn wire(page_id: &str, root: &Ref<Control>) -> Result<(), XamlLoadErr
     password.set_horizontal_alignment(ferroui_base::layout::HorizontalAlignment::Left);
     password.set_header(Some("Password".to_string()));
     password.set_placeholder_text(Some("Enter password...".to_string()));
-    password.set_theme(theme("ValidatedPasswordBoxTheme"));
+    password.set_is_tab_stop(false);
+    password.set_template(Some(validated_password_box_template() as Rc<dyn IControlTemplate>));
     host.children().insert(0, &password);
     let weak_password = password.downgrade();
     let weak_submit = root.get_control::<Button>("SubmitButton").downgrade();

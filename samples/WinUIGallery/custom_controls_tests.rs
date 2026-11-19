@@ -139,24 +139,19 @@ fn counter_controls_count_up_and_down_in_their_templates() {
     }
 }
 
-/// The validated password box alone in a window with the WinUI theme: the TextBox of its
+/// The validated password box alone in a window with the WinUI theme: the TextBox of its Rust
 /// template gets the theme's template and the validation lines follow the password.
 #[cfg(feature = "theme")]
 #[test]
 fn validated_password_box_lays_out_its_template_in_a_window() {
-    use ferroui_base::controls::ResourceKey;
-    use ferroui_base::styling::ControlTheme;
     use ferroui_controls::Window;
     let _application = crate::tests::start_winui();
-    let root = page();
-    let theme = root
-        .try_find_resource(&ResourceKey::from("ValidatedPasswordBoxTheme"), None)
-        .flatten()
-        .and_then(|value| value.downcast_ref::<Ref<ControlTheme>>().cloned())
-        .expect("the page's ValidatedPasswordBox theme");
     let password = ValidatedPasswordBox::new();
     password.set_header(Some("Password".to_string()));
-    password.set_theme(Some(theme));
+    password.set_template(Some(
+        crate::custom_controls::validated_password_box_template()
+            as std::rc::Rc<dyn ferroui_controls::templates::IControlTemplate>,
+    ));
     let window = Window::new();
     window.set_content(Some(Control::boxed(password.clone())));
     window.show();
