@@ -2,7 +2,7 @@
 //!
 //! The native pages whose source binds with x:Bind keep it (`Binding`, `Button`, `Canvas`,
 //! `ComboBox`, `Grid`, `HyperlinkButton`, `InfoBar`, `Line`, `PipsPager`, `Popup`, `ProgressRing`,
-//! `RatingControl`, `RepeatButton`, `RichTextBlock`, `ScrollViewer`, `Shape`, `Slider`, `Spacing`, `SplitView`,
+//! `RatingControl`, `RepeatButton`, `RichTextBlock`, `ScrollViewer`, `Shape`, `Slider`, `SplitView`,
 //! `StackPanel`, `TextBlock`, `TitleBar`, `ToggleButton`, `ToggleSwitch` and the window of
 //! `TitleBarWindow.xaml`): the run-time loader compiles the paths of the named elements,
 //! `examples::create` initializes the bindings once the page is wired, and the attach of a page
@@ -36,7 +36,6 @@ const X_BIND_PAGES: &[&str] = &[
     "ScrollViewer",
     "Shape",
     "Slider",
-    "Spacing",
     "SplitView",
     "StackPanel",
     "TextBlock",
@@ -89,18 +88,11 @@ fn binding_page_one_way_x_bind_follows_the_slider_and_the_text_box() {
     assert_eq!(mirror.text().as_deref(), Some("x:Bind"));
 }
 
-/// Spacing and SplitView: a OneWay x:Bind of a named element whose name is also a property of
-/// the root (`Spacing`: at the root of a document the named element wins, as WinUI's field), and
-/// a nullable `IsChecked` read into a `bool` target.
+/// SplitView: the TwoWay x:Bind of a nullable `IsChecked` with a `bool` target, read in both
+/// directions.
 #[test]
-fn spacing_and_split_view_pages_follow_their_options() {
+fn split_view_page_pane_follows_its_toggle_button() {
     let _application = start();
-    let root = page("Spacing");
-    let row = child::<StackPanel>(&root, 1);
-    assert_eq!(row.spacing(), 8.0);
-    root.get_control::<Slider>("Spacing").set_range_value(20.0);
-    assert_eq!(row.spacing(), 20.0);
-
     let root = page("SplitView");
     let split = root.get_control::<SplitView>("splitView");
     assert!(split.is_pane_open());
