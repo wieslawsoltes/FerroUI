@@ -1,4 +1,5 @@
 //! Narrow, ownership-checked camera FFI. No pixel mapping or preview copy API.
+use ferroui_media::frames::FrameRotation;
 use ferroui_media_apple::PixelBuffer;
 use ferroui_media_camera::{CameraError, CameraErrorKind, CameraPermission, CameraSelection};
 use std::{
@@ -24,7 +25,11 @@ extern "C" {
     fn ferroui_portable_camera_release(p: *mut c_void);
     fn ferroui_portable_camera_status(p: *mut c_void, error: *mut c_char, capacity: usize) -> i32;
     fn ferroui_portable_camera_settings(p: *mut c_void) -> *mut c_char;
-    fn ferroui_portable_camera_frame(p: *mut c_void, timestamp: *mut f64) -> *mut c_void;
+    fn ferroui_portable_camera_frame(
+        p: *mut c_void,
+        timestamp: *mut f64,
+        rotation: *mut i32,
+    ) -> *mut c_void;
     fn ferroui_portable_camera_photo(p: *mut c_void) -> *mut c_void;
     fn ferroui_portable_photo_state(p: *mut c_void, info: *mut PhotoInfo) -> i32;
     fn ferroui_portable_photo_copy(p: *mut c_void, bytes: *mut u8, capacity: usize) -> i32;
@@ -125,15 +130,23 @@ impl Camera {
     pub fn settings(&self) -> Result<serde_json::Value, CameraError> {
         unsafe { json(ferroui_portable_camera_settings(self.handle.as_ptr())) }
     }
-    pub fn frame(&self) -> Option<(PixelBuffer, f64)> {
+    pub fn frame(&self) -> Option<(PixelBuffer, f64, FrameRotation)> {
         let mut timestamp = 0.;
-        unsafe {
+        let mut rotation = 0;
+        let buffer = unsafe {
             PixelBuffer::from_owned(ferroui_portable_camera_frame(
                 self.handle.as_ptr(),
                 &mut timestamp,
+                &mut rotation,
             ))
-        }
-        .map(|buffer| (buffer, timestamp))
+        }?;
+        let rotation = match rotation {
+            90 => FrameRotation::Clockwise90,
+            180 => FrameRotation::Clockwise180,
+            270 => FrameRotation::Clockwise270,
+            _ => FrameRotation::None,
+        };
+        Some((buffer, timestamp, rotation))
     }
     pub fn photo(&self) -> Result<Photo, CameraError> {
         let handle = NonNull::new(unsafe { ferroui_portable_camera_photo(self.handle.as_ptr()) })
@@ -226,6 +239,7 @@ mod tests {
         fn ferroui_camera_lifetime_fixture() -> *mut c_void;
         fn ferroui_camera_lifetime_result() -> i32;
         fn ferroui_camera_frame_duration_contract() -> i32;
+        fn ferroui_camera_preview_rotation_contract() -> i32;
         fn ferroui_camera_recording_contract() -> i32;
     }
     #[test]
@@ -235,6 +249,10 @@ mod tests {
     #[test]
     fn native_frame_duration_keeps_exact_supported_boundaries() {
         assert_eq!(unsafe { ferroui_camera_frame_duration_contract() }, 1);
+    }
+    #[test]
+    fn native_preview_rotation_accounts_for_pixels_the_connection_has_already_rotated() {
+        assert_eq!(unsafe { ferroui_camera_preview_rotation_contract() }, 1);
     }
     #[test]
     fn native_stop_releases_the_retaining_delegate_and_session_off_ui() {
