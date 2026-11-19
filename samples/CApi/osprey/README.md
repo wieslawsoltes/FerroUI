@@ -33,8 +33,9 @@ workspace:
 cargo build --release -p ferroui-capi
 ```
 
-Compile a sample from the root of the repository: the directive `// @linkdir: target/release` of
-each file is read relative to the current directory, not to the file.
+Compile a sample from the root of the repository: the directives `// @linkdir: target/release`
+and `// @linkdir: target/debug` of each file are read relative to the current directory, not to
+the file.
 
 ```sh
 mkdir -p target/osprey
@@ -49,9 +50,11 @@ DYLD_LIBRARY_PATH=target/release target/osprey/counter
 FERROUI_SAMPLE_SCRIPT=1 FERROUI_SMOKE_EXIT_MS=3000 DYLD_LIBRARY_PATH=target/release target/osprey/counter
 ```
 
-`FERROUI_SMOKE_EXIT_MS=<n>` closes the windows after `n` milliseconds, as for every sample. The
-samples run on macOS; Linux needs only the other variable of the loader. Continuous integration
-does not build them yet: they are run locally against a build of the library.
+`FERROUI_SMOKE_EXIT_MS=<n>` closes the windows after `n` milliseconds, as for every sample. A
+debug build of the library (`target/debug`, the second `@linkdir`) works as well. The workflow
+`capi.yml` downloads the pinned Osprey release (checked against its SHA-256) on macOS, compiles
+every sample against the debug library of the job and runs its scenario; on Linux they need
+only the other variable of the loader and the Linux release of the compiler.
 
 ## How the programs are written
 

@@ -8,6 +8,7 @@
 //
 // @link: ferroui_capi
 // @linkdir: target/release
+// @linkdir: target/debug
 
 extern fn ferro_abi_version() -> int32
 extern fn ferro_app_run(options: Ptr, onStart: fn(int) -> int, token: int) -> int32
