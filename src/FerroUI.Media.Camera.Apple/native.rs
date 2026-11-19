@@ -72,6 +72,16 @@ pub fn permission() -> CameraPermission {
         _ => CameraPermission::NotDetermined,
     }
 }
+/// The clockwise quarter turns the native side reports for a frame. Any other value
+/// shows the frame as delivered.
+fn frame_rotation(degrees: i32) -> FrameRotation {
+    match degrees {
+        90 => FrameRotation::Clockwise90,
+        180 => FrameRotation::Clockwise180,
+        270 => FrameRotation::Clockwise270,
+        _ => FrameRotation::None,
+    }
+}
 pub struct Camera {
     handle: NonNull<c_void>,
     _thread: PhantomData<Rc<()>>,
@@ -140,13 +150,7 @@ impl Camera {
                 &mut rotation,
             ))
         }?;
-        let rotation = match rotation {
-            90 => FrameRotation::Clockwise90,
-            180 => FrameRotation::Clockwise180,
-            270 => FrameRotation::Clockwise270,
-            _ => FrameRotation::None,
-        };
-        Some((buffer, timestamp, rotation))
+        Some((buffer, timestamp, frame_rotation(rotation)))
     }
     pub fn photo(&self) -> Result<Photo, CameraError> {
         let handle = NonNull::new(unsafe { ferroui_portable_camera_photo(self.handle.as_ptr()) })
@@ -228,6 +232,21 @@ impl Drop for Photo {
     fn drop(&mut self) {
         unsafe {
             ferroui_portable_photo_release(self.handle.as_ptr());
+        }
+    }
+}
+
+#[cfg(test)]
+mod rotation_tests {
+    use super::*;
+    #[test]
+    fn native_quarter_turns_map_to_frame_rotations_and_other_values_show_the_frame_as_delivered() {
+        assert_eq!(frame_rotation(0), FrameRotation::None);
+        assert_eq!(frame_rotation(90), FrameRotation::Clockwise90);
+        assert_eq!(frame_rotation(180), FrameRotation::Clockwise180);
+        assert_eq!(frame_rotation(270), FrameRotation::Clockwise270);
+        for other in [-90, 45, 360, i32::MIN, i32::MAX] {
+            assert_eq!(frame_rotation(other), FrameRotation::None);
         }
     }
 }
