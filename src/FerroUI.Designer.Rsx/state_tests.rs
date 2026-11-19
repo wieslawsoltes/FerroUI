@@ -28,6 +28,7 @@ fn visual_states_project_native_routes_and_retain_original_rust_sources() {
     assert_eq!(projection.animation_issues.len(), 1);
     let (xaml, map) = projection.mapped_markup();
     assert_eq!(xaml, project_rust(&source, offset).unwrap().xaml());
+    assert!(!xaml.contains("ConditionalAction"));
     let document = Document::new(xaml).unwrap();
     assert!(!AnimationPrograms::scan(&document).is_empty());
     assert!(AnimationPrograms::scan_hosted(&document).is_empty());

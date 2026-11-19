@@ -309,7 +309,9 @@ impl VisualStateGroup {
         for transition in self
             .transitions
             .iter()
-            .filter(|transition| transition.from.is_some())
+            // Authored XAML behaviors can read the route condition. Rust projections
+            // apply the selected classes directly and can render in apps without interactivity.
+            .filter(|transition| !projected && transition.from.is_some())
         {
             let from = transition.from.as_deref().expect("directional edge");
             result.push_str(&format!("<Style Selector=\"^.{} ConditionalAction.{}\"><!--{TRANSITION_MARKER}route--><Setter Property=\"Condition\" Value=\"True\"/></Style>",self.class_name(from),self.route_class(from,&transition.to)));

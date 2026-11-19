@@ -69,11 +69,14 @@ export async function verifyHostedPreview(preview: NativePreview, uri: string): 
         await verifyHostedContinuity(preview, update);
         await verifyHostedScalarCurve(preview, update);
         await verifyHostedRustAnimation(preview);
-        const review = await preview.renderHosted({
-            ...hostedRsx(150, 'Interactive review'), projectPath: '/app_preview/review_states.rs',
+        const reviewSource: HostedSource = {
+            ...hostedRsx(150), projectPath: '/app_preview/review_states.rs',
             document: { uri: new URL('review_states.rs', uri).toString(), language: 'rust',
                 source: reviewStateSource, caret: { line: 3, character: 2 } },
-        });
+        };
+        const projection = await preview.renderHosted(reviewSource);
+        assert.ok(projection.fixtures?.includes('Interactive review'));
+        const review = await preview.renderHosted({ ...reviewSource, revision: 151, fixture: 'Interactive review' });
         assert.equal(review.fixture, 'Interactive review');
         assert.notEqual(review.image.png, one.image.png);
         assert.deepEqual(review.animations?.programs ?? [], []);
