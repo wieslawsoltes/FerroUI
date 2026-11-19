@@ -10,7 +10,13 @@ on:
     # run replaced the results of the real run of the same commit (a failure looked like a skip). A
     # pull request of a stack that is retargeted to main gets a new run from scripts/stack/stack.py,
     # which brings the branch up to date with its new base (docs/stacked-pull-requests.md).
-    paths-ignore: ['docs/**', '**/*.md']
+    # The documentation alone runs nothing, except the data under docs/ that tests read.
+    paths:
+      - '**'
+      - '!docs/**'
+      - '!**/*.md'
+      - 'docs/porting/data/**'
+      - 'docs/designer/samples/**'
   workflow_dispatch:
     inputs:
       # A calibration run of the text rendering in the comparison of the WinUI theme gallery
@@ -52,13 +58,63 @@ env:
   CARGO_INCREMENTAL: 0
   RUST_BACKTRACE: 1
 
-# The checks of every pull request: the conventions and the packages, the Linux tests of the
-# workspace, the native macOS platform, the Windows backend, X11 and the browser catalog. The jobs
-# of one platform or backend alone are workflows of their own that a pull request starts only when it changes that area, so a
-# pull request shows no skipped check for them: vello.yml, browser.yml, ios.yml, android.yml,
+# The checks of a pull request: the conventions and the packages on every pull request, and of the
+# Linux tests of the workspace, the API gate, the native macOS platform, the Windows backend, X11
+# and the browser catalog those that build a file the pull request changes. The job `changes`
+# decides (scripts/ci/changed_areas.py, docs/ci.md: the packages each job builds, for its target,
+# against the files of the pull request); a change of this workflow, the root manifest, the lock
+# file or the cargo configuration runs them all, and so do a push to main, the nightly run and a
+# run started by hand. `CI result` sums them up in one check that a skipped job does not fail.
+# The jobs of one platform or backend alone are workflows of their own that a pull request
+# starts only when it changes that area: vello.yml, browser.yml, ios.yml, android.yml,
 # wayland.yml, linuxfb.yml; the informative jobs are in nightly.yml. All of them also run every
 # night on main and by hand (gh workflow run <file> --ref <branch>).
 jobs:
+  changes:
+    name: Changed areas
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      api-gate: ${{ steps.areas.outputs.api-gate }}
+      linux: ${{ steps.areas.outputs.linux }}
+      macos: ${{ steps.areas.outputs.macos }}
+      windows: ${{ steps.areas.outputs.windows }}
+      browser: ${{ steps.areas.outputs.browser }}
+      x11: ${{ steps.areas.outputs.x11 }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      # The files of the pull request, with the old names of renamed ones. The API lists at most
+      # 3000 files: a larger pull request runs every job.
+      - name: Changed files
+        id: files
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          CHANGED: ${{ github.event.pull_request.changed_files }}
+        run: |
+          gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/files" \
+            -q '.[] | .filename, (.previous_filename // empty)' > "$RUNNER_TEMP/files.txt"
+          if [ "${CHANGED:-0}" -ge 3000 ]; then echo "incomplete=--incomplete" >> "$GITHUB_OUTPUT"; fi
+          wc -l < "$RUNNER_TEMP/files.txt"
+      - name: The jobs this run needs
+        id: areas
+        env:
+          EVENT: ${{ github.event_name }}
+          INCOMPLETE: ${{ steps.files.outputs.incomplete }}
+        run: |
+          touch "$RUNNER_TEMP/files.txt"
+          # shellcheck disable=SC2086
+          if ! python3 scripts/ci/changed_areas.py --event "$EVENT" --files "$RUNNER_TEMP/files.txt" $INCOMPLETE \
+              --output "$RUNNER_TEMP/areas.txt" --summary "$GITHUB_STEP_SUMMARY"; then
+            echo "::warning::the changed areas could not be worked out: every job runs"
+            printf '%s=true\n' api-gate linux macos windows browser x11 > "$RUNNER_TEMP/areas.txt"
+          fi
+          cat "$RUNNER_TEMP/areas.txt" >> "$GITHUB_OUTPUT"
+
   conventions:
     name: Source conventions and packages
     timeout-minutes: 20
@@ -103,6 +159,9 @@ jobs:
       # The scoped names of the generator (two public types of one crate with the same name).
       - name: Tests of the view builder generator
         run: python3 scripts/test_generate_view_builders.py
+      # Which jobs of this workflow a pull request runs (docs/ci.md).
+      - name: Tests of the selection of the jobs
+        run: python3 -m unittest discover -s scripts/ci -p 'test_*.py'
       # The WinUI source paths keep their Windows spelling on Linux (InkToolbar and InkToolBar).
       - name: Tests of the WinUI theme scripts
         run: python3 -m unittest discover -s scripts/winui-theme -p 'test_*.py'
@@ -148,7 +207,8 @@ jobs:
   # macOS. Like the macOS job, it does not run for a push to main.
   api-gate:
     name: API gate (cargo-semver-checks)
-    if: (github.event_name != 'push')
+    needs: changes
+    if: github.event_name != 'push' && needs.changes.outputs.api-gate == 'true'
     runs-on: macos-15
     timeout-minutes: 45
     env:
@@ -220,6 +280,8 @@ jobs:
   # macOS job.
   linux:
     name: Build and test (Linux, the workspace)
+    needs: changes
+    if: needs.changes.outputs.linux == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
@@ -276,7 +338,8 @@ jobs:
   # the nightly run and in a run started by hand. It does not run for a push to main.
   macos:
     name: Build and test (macOS, the native platform)
-    if: (github.event_name != 'push')
+    needs: changes
+    if: github.event_name != 'push' && needs.changes.outputs.macos == 'true'
     runs-on: macos-15
     timeout-minutes: 180
     env:
@@ -318,7 +381,8 @@ jobs:
   #   binaries are published stays informative: it gates them.
   windows:
     name: Build, test and smoke run (Windows platform backend)
-    if: (github.event_name != 'push')
+    needs: changes
+    if: github.event_name != 'push' && needs.changes.outputs.windows == 'true'
     runs-on: windows-latest
     permissions:
       contents: read
@@ -758,6 +822,8 @@ jobs:
 
   browser:
     name: Check (browser, wasm32-unknown-emscripten)
+    needs: changes
+    if: needs.changes.outputs.browser == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 150
     # The catalog site of a check is built with the `browser` profile without its link-time
@@ -819,6 +885,8 @@ jobs:
   # (xrandr --setmonitor). No compositing manager: that is not covered here.
   x11:
     name: Build and test (Linux, X11 under Xvfb)
+    needs: changes
+    if: needs.changes.outputs.x11 == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
@@ -1092,3 +1160,26 @@ jobs:
             xrandr --setmonitor FERRO-B 640/169x1024/271+640+0 none
             xrandr --listmonitors
             timeout 300 target/debug/examples/x11_window --smoke --expect-screens=2 --skip=clipboard'
+
+  # One check for the whole workflow: it fails when a job failed or was cancelled, and passes when
+  # the jobs a pull request does not need were skipped. A branch protection rule can require it
+  # alone, whatever the pull request changes.
+  result:
+    name: CI result
+    if: ${{ !cancelled() }}
+    needs: [changes, conventions, api-gate, linux, macos, windows, browser, x11]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: The results of the jobs
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          python3 - <<'PY'
+          import json, os, sys
+          results = {job: value["result"] for job, value in json.loads(os.environ["RESULTS"]).items()}
+          for job, result in results.items():
+              print(f"{job}: {result}")
+          if results["changes"] != "success" or any(r in ("failure", "cancelled") for r in results.values()):
+              sys.exit(1)
+          PY
