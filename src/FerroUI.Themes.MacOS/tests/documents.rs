@@ -244,6 +244,7 @@ document_tests! {
     resources_person_picture_themeresources => "/Resources/PersonPicture_themeresources.xaml";
     resources_pager_control_themeresources => "/Resources/PagerControl_themeresources.xaml";
     resources_rich_edit_box_themeresources => "/Resources/RichEditBox_themeresources.xaml";
+    resources_grid_view_item_themeresources => "/Resources/GridViewItem_themeresources.xaml";
     strings_invariant_resources => "/Strings/InvariantResources.xaml";
     macos_theme => "/MacOSTheme.xaml";
     // B2: buttons, ranges and expanders
@@ -274,6 +275,7 @@ document_tests! {
     controls_navigation_view => "/Controls/NavigationView.xaml";
     controls_title_bar => "/Controls/TitleBar.xaml";
     controls_list_view => "/Controls/ListView.xaml";
+    controls_grid_view => "/Controls/GridView.xaml";
 }
 
 #[test]

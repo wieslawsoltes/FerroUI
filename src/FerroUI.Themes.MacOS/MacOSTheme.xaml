@@ -93,6 +93,7 @@
         <MergeResourceInclude Source="/Resources/PersonPicture_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/PagerControl_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/RichEditBox_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/GridViewItem_themeresources.xaml" />
 
         <!-- The labels of the commands of the context flyout of the text controls (not part of the
              WinUI theme: WinUI takes them from the resources of the framework). -->

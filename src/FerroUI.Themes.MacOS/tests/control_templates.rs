@@ -307,6 +307,8 @@ control_tests! {
     tree_view_item => "TreeViewItem";
     list_view => "ListView";
     list_view_item => "ListViewItem";
+    grid_view => "GridView";
+    grid_view_item => "GridViewItem";
 }
 
 /// The window itself is themed: its template is applied when it is shown
