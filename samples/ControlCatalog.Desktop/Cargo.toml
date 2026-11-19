@@ -29,8 +29,7 @@ ferroui-desktop = { path = "../../src/FerroUI.Desktop", default-features = false
 # `--vnc`: the catalog on the headless platform, seen and driven through a VNC viewer.
 ferroui-headless-vnc = { path = "../../src/Headless/FerroUI.Headless.Vnc", default-features = false }
 control-catalog = { path = "../ControlCatalog" }
-# DevTools on F12 in debug builds.
-ferroui-diagnostics = { workspace = true }
+ferroui-diagnostics = { workspace = true, optional = true }
 ferroui-vello = { workspace = true, optional = true, features = ["hybrid", "gpu"] }
 
 # The options of a smoke run on Windows (`FERROUI_SMOKE_RENDERING`).
@@ -82,6 +81,8 @@ classic-themes = ["control-catalog/classic-themes"]
 macos-theme = ["control-catalog/macos-theme"]
 material-theme = ["control-catalog/material-theme"]
 hot-reload = ["control-catalog/hot-reload"]
+# In-process F12 inspector for development and diagnostics smoke runs.
+diagnostics = ["dep:ferroui-diagnostics"]
 mcp = ["dep:ferroui-mcp", "dep:ferroui-headless"]
 # Explicit opt-in to the local CDP endpoint; FERROUI_CDP_PORT starts it.
 cdp = ["dep:ferroui-devtools"]

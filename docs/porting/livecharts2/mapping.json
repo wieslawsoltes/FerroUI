@@ -86,15 +86,16 @@
       "status": "partial"
     },
     "src/LiveChartsCore/CoreHeatSeries.cs": {
-      "reason": "Heat cells span the smallest step of the data on each axis (issue 1511), inset by PointPadding (4 by default), coloured by HeatFunctions between the weight bounds (MinValue and MaxValue, else the extremes) at the ColorStops of the heat map (the source's two blues by default); the hover area is the whole cell and the data label of the primary value (the default formatter) is placed about the inset cell by DataLabelsPosition (Middle by default, GetLabelPosition), its size the text grown by DataLabelsPadding; WeightBounds is Series::weight_bounds, which the heat legend reads.",
+      "reason": "Heat cells span the smallest step of the data on each axis (issue 1511), inset by PointPadding (4 by default), coloured by HeatFunctions between the weight bounds (MinValue and MaxValue, else the extremes) at the ColorStops of the heat map (the source's two blues by default); the hover area is the whole cell and the data label of the primary value (the default formatter) is placed about the inset cell by DataLabelsPosition (Middle by default, GetLabelPosition), its size the text grown by DataLabelsPadding; WeightBounds is Series::weight_bounds, which the heat legend reads; a GeometrySvg draws its path in every cell, fitted as Svg.Draw; the colour of a cell comes in from transparent at the first draw (EnsureVisualForPoint) and moves to its new colour with the scene transition, which also fades a cell in and out (SoftDeleteOrDisposePoint).",
       "remaining": [
-        "The tooltip label of the source, SVG cell geometries and the per-cell colour animation remain pending."
+        "The tooltip label of the source."
       ],
       "rust": [
         "src/FerroUI.LiveCharts/cartesian_chart_engine.rs::draw_heat",
         "src/FerroUI.LiveCharts/series.rs",
         "src/FerroUI.Controls.LiveCharts/series_classes.rs",
-        "src/FerroUI.Controls.LiveCharts/chart.rs"
+        "src/FerroUI.Controls.LiveCharts/chart.rs",
+        "src/FerroUI.LiveCharts/svg_path.rs"
       ],
       "status": "partial"
     },
@@ -197,15 +198,15 @@
       "status": "partial"
     },
     "src/LiveChartsCore/CoreSankeySeries.cs": {
-      "reason": "Vertical and bipartite arc measurement: node rectangles and arc sectors with the corner radius, ribbons and chords under the nodes, the ribbon paint (link colour, then the source node colour at half alpha, then LinkFill, then the theme's LinkFill at alpha 90; a null LinkFill takes the node fill), Auto, Outside and Inside labels with the room they reserve and the radial label margin, and rectangle and annular sector hover areas with the default tooltip text; labels break into lines at DataLabelsMaxWidth (170) less the label padding, which the room of the labels counts.",
+      "reason": "Vertical and bipartite arc measurement: node rectangles and arc sectors with the corner radius, ribbons and chords under the nodes, the ribbon paint (link colour, then the source node colour at half alpha, then LinkFill, then the theme's LinkFill at alpha 90; a null LinkFill takes the node fill), Auto, Outside and Inside labels with the room they reserve and the radial label margin, and rectangle and annular sector hover areas with the default tooltip text; labels break into lines at DataLabelsMaxWidth (170) less the label padding, which the room of the labels counts; nodes, ribbons, arcs and chords enter and leave as the source visuals (a node grows from the zero size at its centre and collapses to it, a ribbon opens from the middle of its source and narrows to the middles of its ends, an arc opens from its middle angle and closes on its start angle, a chord grows from and collapses into the centre), labels fade (SceneTransition::with_node_motion, also at the first draw); LabelMapper, NodeColorMapper and LinkColorMapper of custom models are SankeySeries::set_mapped_nodes and set_mapped_links.",
       "remaining": [
-        "The per-node, per-ribbon and per-label visual lifecycle of the source (entrance at zero size, exit collapse) is replaced by the native scene transition.",
-        "LabelMapper, NodeColorMapper, LinkColorMapper and ToolTipLabelFormatter delegates are replaced by the node names and the colours of nodes and links."
+        "The ToolTipLabelFormatter of the series: the tooltip text is the node name and value."
       ],
       "rust": [
         "src/FerroUI.LiveCharts/sankey_chart_engine.rs",
         "src/FerroUI.Controls.LiveCharts/series_classes.rs",
-        "src/FerroUI.Controls.LiveCharts/node_models.rs"
+        "src/FerroUI.Controls.LiveCharts/node_models.rs",
+        "src/FerroUI.Controls.LiveCharts/scene_transition.rs"
       ],
       "status": "partial"
     },
@@ -258,15 +259,15 @@
       "status": "partial"
     },
     "src/LiveChartsCore/CoreTreemapSeries.cs": {
-      "reason": "The weight roll-up (a nonzero explicit value, else the sum of the children), the padding inset of every level, tiles in the order of the source, hover areas and centred data labels culled when they do not fit on the leaves only, and the leaf that becomes internal losing both; labels break into lines at DataLabelsMaxWidth (170) less the label padding and are culled by the size of their lines.",
+      "reason": "The weight roll-up (a nonzero explicit value, else the sum of the children), the padding inset of every level, tiles in the order of the source, hover areas and centred data labels culled when they do not fit on the leaves only, and the leaf that becomes internal losing both; labels break into lines at DataLabelsMaxWidth (170) less the label padding and are culled by the size of their lines; a tile grows from the zero size at its centre and a removed one collapses to it, labels fade (SceneTransition::with_node_motion, also at the first draw); ValueMapper, ChildrenMapper and LabelMapper of custom models are TreemapSeries::set_mapped_nodes.",
       "remaining": [
-        "ValueMapper, ChildrenMapper, LabelMapper and the tooltip formatter of a custom model are not ported: the native TreemapNode is the model.",
-        "The per-tile visual lifecycle of the source is replaced by the native scene transition."
+        "The tooltip formatter of the series: the tooltip text is the node name and value."
       ],
       "rust": [
         "src/FerroUI.LiveCharts/treemap_chart_engine.rs",
         "src/FerroUI.Controls.LiveCharts/series_classes.rs",
-        "src/FerroUI.Controls.LiveCharts/node_models.rs"
+        "src/FerroUI.Controls.LiveCharts/node_models.rs",
+        "src/FerroUI.Controls.LiveCharts/scene_transition.rs"
       ],
       "status": "partial"
     },
@@ -1215,10 +1216,11 @@
       "status": "ported"
     },
     "src/LiveChartsCore/VisualElements/BaseNeedleVisual.cs": {
-      "reason": "The needle of the source: 45% of the smaller side of the draw margin long, turned about the centre by the truncated initial rotation and the angle of its value in the range, offset by Translate, in the theme's Width of 20 and (30, 30, 30) fill, drawn over the ticks and under the data labels.",
+      "reason": "The needle of the source: 45% of the smaller side of the draw margin long, turned about the centre by the truncated initial rotation and the angle of its value in the range, offset by Translate, in the theme's Width of 20 and (30, 30, 30) fill, drawn over the ticks and under the data labels; a needle whose value changes turns to it over the animations speed of the chart (the source animates the rotation of its geometry), the long way when the range asks for it.",
       "remaining": [],
       "rust": [
-        "src/FerroUI.LiveCharts/pie_chart_engine.rs::draw_needle"
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs::draw_needle",
+        "src/FerroUI.Controls.LiveCharts/chart.rs"
       ],
       "status": "ported"
     },
@@ -1233,9 +1235,9 @@
       "status": "ported"
     },
     "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/DrawingTextExtensions.cs": {
-      "reason": "label_lines.rs ports Tokenize and BlobArray.Measure for the data labels of the Sankey and treemap series: words end after a white space, a line feed is a word, a carriage return is dropped, a word that passes the largest width starts a line (a first word wider than it leaves an empty line, as the source); lines start at the left of their block (LinesAlignment.Start). Each line is a text of the scene.",
+      "reason": "label_lines.rs ports Tokenize and BlobArray.Measure for the data labels of every series (label_lines::wrap_data_labels for the Cartesian, pie and polar scenes): words end after a white space, a line feed is a word, a carriage return is dropped, a word that passes the largest width starts a line (a first word wider than it leaves an empty line, as the source); lines start at the left of their block (LinesAlignment.Start). Each line is a text of the scene.",
       "remaining": [
-        "Shaping, right-to-left text, the typeface fallback and the drawing of the glyphs are the native text stack; the labels of the other series and of the axes do not break."
+        "Shaping, right-to-left text, the typeface fallback and the drawing of the glyphs are the native text stack; the labels of the axes and of the legends do not break; a Cartesian, pie or polar label is placed by the size of one line before it breaks (above its point it keeps its last line in place, centred it keeps its middle)."
       ],
       "rust": [
         "src/FerroUI.LiveCharts/label_lines.rs"
@@ -1314,6 +1316,59 @@
       "remaining": [],
       "rust": [
         "src/FerroUI.LiveCharts/sankey_chart_engine.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/Svg.cs": {
+      "reason": "svg_path::fit draws a path in a rectangle as Draw without FitToSize: centred and scaled by the width and height over the larger side of the tight bounds of the path (curves sampled along their length).",
+      "remaining": [
+        "FitToSize, and the stroke width that the source adds to the bounds (the heat cells are filled)."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/svg_path.rs"
+      ],
+      "status": "partial"
+    },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/VariableSVGPathGeometry.cs": {
+      "reason": "The SVGPath of the cells of a heat series (its GeometrySvg) is read by the path markup parser of FerroUI into path commands of the scene (quadratic curves and elliptical arcs as cubic curves), as SKPath.ParseSvgPathData; the cells are paths of the native renderer.",
+      "remaining": [
+        "The SVG geometries of the other series (bars, line markers, boxes, polar markers)."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/svg_path.rs",
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs::draw_heat"
+      ],
+      "status": "partial"
+    },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/Extensions/BaseGaugeItem.cs": {
+      "reason": "GaugeItem carries BaseGaugeItem: the value, the builder, GaugeItem::BACKGROUND (double.MaxValue) and is_fill_series_builder.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/gauges.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/Extensions/GaugeGenerator.cs": {
+      "reason": "GaugeGenerator::build_solid_gauge and build_angular_gauge_sections: a gauge series for each item (a ring of its value among empty values, or one value relative to the minimum without a hover push-out or data labels), the fill series of a zero for each item styled by the background items, added when no item styles it.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/gauges.rs"
+      ],
+      "status": "ported"
+    },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/Extensions/GaugeItem.cs": {
+      "reason": "GaugeItem: the value and the builder of an item, which runs after the generator has set the series up.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/gauges.rs"
+      ],
+      "status": "ported"
+    },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/Extensions/GaugeOptions.cs": {
+      "reason": "The solid and angular builds of GaugeGenerator are its two functions; the options are not a public type.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/gauges.rs"
       ],
       "status": "native-replacement"
     },
@@ -3161,6 +3216,14 @@
       ],
       "status": "ported"
     },
+    "tests/CoreTests/SeriesTests/HeatSeriesAnimationTests.cs::CoreTests.SeriesTests.HeatSeriesAnimationTests::void HeatSeries_FirstDraw_CellColorsInterpolateAcrossGradient()#L45": {
+      "reason": "The four cells of the source with axes from -0.5 to 1.5 and an animation of 1000 ms: at the first draw the cells keep their rectangles while their colours come in from transparent (EnsureVisualForPoint), and the lowest and highest weights end at distinct colours. The frame-by-frame JSON baseline of the source is not compared; the native transition eases with its own curve.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/chart_input_tests.rs::heat_cells_take_their_colours_at_the_first_draw"
+      ],
+      "status": "ported"
+    },
     "tests/CoreTests/SeriesTests/HeatSeriesTest.cs::CoreTests.SeriesTests.HeatSeriesTest::void ShouldPlaceDataLabel()#L260": {
       "reason": "The source cells, the 500 by 500 chart with a draw margin of 100 and the hidden axes: no labels without data labels, then the centre of the label of every cell about its inset visual for Middle (the default), Top, Bottom, Left and Right, with the label size of the text grown by DataLabelsPadding; End and Start by the pivot as well.",
       "remaining": [],
@@ -3451,7 +3514,7 @@
     "tests/SnapshotTests/AngularGaugeTests.cs::SnapshotTests.AngularGaugeTests::void AngularGauge()#L50": {
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
-        "GaugeGenerator.BuildAngularGaugeSections has no native counterpart; the scenario builds its sections and background series, with the theme's gauge rule.",
+        "The scenario builds its sections by hand, as GaugeGenerator::build_angular_gauge_sections does.",
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
         "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
@@ -3464,7 +3527,7 @@
     "tests/SnapshotTests/AngularGaugeTests.cs::SnapshotTests.AngularGaugeTests::void AngularGaugeAtMinValue()#L60": {
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
-        "GaugeGenerator.BuildAngularGaugeSections has no native counterpart; the scenario builds its sections and background series, with the theme's gauge rule.",
+        "The scenario builds its sections by hand, as GaugeGenerator::build_angular_gauge_sections does.",
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
         "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],

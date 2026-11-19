@@ -1,6 +1,8 @@
 //! Tests of `FerroXamlIlSetterTransformer` and `FerroXamlIlSetterTargetTypeMetadataTransformer`.
 //! The XAML shapes come from the upstream `SetterTests` and `StyleTests`.
 
+use crate::compiler_extensions::transformers::{FerroTransformErrorKind, FerroTransformErrors};
+use xamlx::exceptions::XamlError;
 use std::rc::Rc;
 
 use xamlx::ast::{
@@ -320,12 +322,12 @@ fn setter_target_type_directive_creates_a_style_scope() {
 #[test]
 fn style_exception_is_a_tagged_transform_exception() {
     let line = xamlx::ast::XamlLineInfo::new(2, 3);
-    let e = XamlStyleTransformException::new("bad", &line, None);
-    assert!(XamlStyleTransformException::is(&e));
-    assert!(!XamlSelectorsTransformException::is(&e));
+    let e = XamlError::style_transform("bad", &line, None);
+    assert_eq!(e.transform_kind(), Some(FerroTransformErrorKind::Style));
+    assert_ne!(e.transform_kind(), Some(FerroTransformErrorKind::Selectors));
     assert_eq!(e.type_name(), "XamlStyleTransformException");
-    let e = XamlSelectorsTransformException::new("bad", &line, Some(e));
-    assert!(XamlSelectorsTransformException::is(&e));
+    let e = XamlError::selectors_transform("bad", &line, Some(e));
+    assert_eq!(e.transform_kind(), Some(FerroTransformErrorKind::Selectors));
     assert_eq!(e.message(), "bad Line 2, position 3.");
     assert!(e.inner_exception().is_some());
 }

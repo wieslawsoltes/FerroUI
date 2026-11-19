@@ -28,4 +28,15 @@ fn main() {
             path.display()
         );
     }
+    // The units of the WinUI theme the desktop application needs (docs/xaml-themes.md, section 3):
+    // the build reads the sources of the crate (`main.rs` and its modules), finds the controls they
+    // make, and writes the table `desktop.rs` constructs the theme with.
+    let target_os = std::env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
+    if matches!(target_os.as_str(), "macos" | "windows" | "linux") {
+        ferroui_build::Build::from_env()
+            .type_system(ferroui_build::TypeSystem::Model)
+            .source_root("main.rs")
+            .theme("WinUITheme")
+            .run();
+    }
 }
