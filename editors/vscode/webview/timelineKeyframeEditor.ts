@@ -1,8 +1,8 @@
 import type { FrameTarget } from '../src/protocol';
-import type { AppliedKeyframe, KeyframeDraft, TimelineKeyframe, TimelineKeyframeRequest, TimelineKeyframeResponse } from '../src/timelineProtocol';
+import type { AppliedKeyframe, KeyframeDraft, KeyframeLocation, TimelineKeyframe, TimelineKeyframeRequest, TimelineKeyframeResponse } from '../src/timelineProtocol';
 import easingPresets from '../../../src/FerroUI.Designer.Animation/keyframe-easing-presets.json';
 import { element } from './dom';
-import { drawEasingCurve } from './easingCurve';
+import { EasingHandles } from './easingHandles';
 
 interface SelectedKeyframe {
     version: number;
@@ -21,7 +21,11 @@ export class TimelineKeyframeEditor {
     private readonly value = element<HTMLInputElement>('keyframe-value');
     private readonly easing = element<HTMLInputElement>('keyframe-easing');
     private readonly preset = element<HTMLSelectElement>('keyframe-easing-preset');
-    private readonly curve = element<HTMLCanvasElement>('keyframe-curve');
+    private readonly curve = new EasingHandles(easing => {
+        this.easing.value = easing;
+        this.syncPreset();
+        this.inspect();
+    });
     private readonly apply = element<HTMLButtonElement>('keyframe-apply');
     private readonly seekButton = element<HTMLButtonElement>('keyframe-seek');
     private readonly feedback = element('keyframe-feedback');
@@ -116,7 +120,7 @@ export class TimelineKeyframeEditor {
             this.restoreFocus();
         } else {
             this.showError(response.error);
-            drawEasingCurve(this.curve, response.preview?.samples);
+            this.curve.show(request.draft.easing, response.preview?.samples);
             this.validated = response.preview ? request.draft : undefined;
             this.enable();
         }
@@ -127,10 +131,16 @@ export class TimelineKeyframeEditor {
     }
 
     close(): void {
+        this.curve.cancel();
         this.clearRequest();
         this.applyFocus = undefined;
         this.selected = this.frame = undefined;
         this.section.hidden = true;
+    }
+
+    keepVisible(visible: (key: KeyframeLocation) => boolean): void {
+        const key = this.selected;
+        if (key && !this.applying && !visible({ target: key.target, property: key.property, time: key.keyframe.time })) this.close();
     }
 
     applyCurveDrag(frame: FrameTarget, time: number, value: number): void {
@@ -164,7 +174,7 @@ export class TimelineKeyframeEditor {
         this.clearRequest();
         const { selected: key, frame } = this;
         const time = this.time.valueAsNumber;
-        drawEasingCurve(this.curve);
+        this.curve.show(this.easing.value);
         this.showError(undefined);
         this.enable();
         if (!key || !frame) return;
@@ -199,6 +209,7 @@ export class TimelineKeyframeEditor {
     private enable(): void {
         const disabled = !this.frame || Boolean(this.pending?.apply);
         this.fields.disabled = this.seekButton.disabled = disabled;
+        if (disabled) this.curve.cancel();
         const original = this.selected?.keyframe;
         const edit = this.validated;
         this.apply.disabled = disabled || !edit || !original || (edit.time === original.time && edit.value === original.value_text

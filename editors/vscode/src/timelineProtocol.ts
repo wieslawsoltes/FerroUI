@@ -74,6 +74,7 @@ export interface TimelineState {
     programs: TimelineProgram[];
     sourceIssues?: AnimationSourceIssue[];
     names: Record<number, string>;
+    selectedTargets?: readonly number[];
     writable: boolean;
     canRecord?: boolean;
     canRecordGeometry?: boolean;

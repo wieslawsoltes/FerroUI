@@ -1,25 +1,54 @@
 .timeline-keyframe-editor {
     flex: none;
     margin-block-start: 8px;
-    padding: 6px 8px 8px;
+    padding: 4px 6px 6px;
     border: 1px solid var(--line);
     border-radius: 5px;
     background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
 }
 .timeline-keyframe-editor header, .keyframe-curve-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.timeline-keyframe-editor .tool { inline-size: 24px; block-size: 24px; min-block-size: 24px; }
 #keyframe-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #keyframe-fields { min-inline-size: 0; border: 0; margin: 0; padding: 0; }
-.keyframe-fields { display: grid; grid-template-columns: minmax(54px, .75fr) minmax(0, 1.25fr); gap: 5px 6px; margin-block: 5px; }
-.keyframe-fields label { min-inline-size: 0; display: grid; gap: 3px; color: var(--muted); }
+.keyframe-fields { display: grid; grid-template-columns: minmax(54px, .75fr) minmax(0, 1.25fr); gap: 3px 6px; margin-block: 3px 5px; }
+.keyframe-fields label { min-inline-size: 0; display: grid; gap: 2px; color: var(--muted); }
+.keyframe-fields :is(input, select) { min-block-size: 23px; padding-block: 1px; }
 .keyframe-fields input { inline-size: 100%; min-inline-size: 0; }
-.keyframe-easing { display: grid; gap: 3px; grid-column: 1 / -1; }
+.keyframe-easing { display: grid; gap: 2px; grid-column: 1 / -1; }
 .keyframe-easing-controls { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px; }
 .keyframe-easing-controls select { max-inline-size: 108px; }
-#keyframe-curve {
+.keyframe-easing-graph {
+    position: relative;
+    flex: 1 1 auto;
     min-inline-size: 0;
-    inline-size: min(100%, 180px);
-    block-size: 47px;
+    max-inline-size: 290px;
+    block-size: 56px;
     border: 1px solid var(--line);
     border-radius: 3px;
+    background: var(--vscode-editor-background);
 }
+#keyframe-curve { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; }
+.keyframe-handle {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    inline-size: 16px;
+    block-size: 16px;
+    min-block-size: 0;
+    padding: 0;
+    transform: translate(-50%, -50%);
+    cursor: grab;
+    touch-action: none;
+}
+.keyframe-handle::before {
+    content: '';
+    inline-size: 6px;
+    block-size: 6px;
+    border: 1px solid var(--vscode-charts-blue, var(--focus));
+    border-radius: 50%;
+    background: var(--vscode-editor-background);
+}
+.keyframe-handle:hover::before, .keyframe-handle:focus-visible::before { background: var(--vscode-charts-blue, var(--focus)); }
+.keyframe-handle:active { cursor: grabbing; z-index: 1; }
+#keyframe-apply { align-self: end; }
 #keyframe-feedback { color: var(--vscode-errorForeground); font-size: .93em; margin: 6px 0 0; overflow-wrap: anywhere; }

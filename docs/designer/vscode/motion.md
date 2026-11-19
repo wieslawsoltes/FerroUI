@@ -9,10 +9,10 @@ Open the source with **FerroUI: Open Designer** first. The animation and stage t
 
 1. Open [DesignWorkflows.xaml](../samples/DesignWorkflows.xaml) or an XAML file with an authored animation. Choose **FerroUI: Show Animation Timeline**. In the default VS Code layout, the **FerroUI Timeline** tab opens below the source and design. Drag the Panel divider or use **Maximize Panel** for more space. If you previously moved the view, open its title context menu and choose **Reset Location**.
 2. Select an animation in the program picker. To create one in XAML, select an authored control and choose **New animation program** from **More Animation Actions**. The same menu manages program names, targets, timing, duplication, and removal. **Timing and Playback** includes delays, repeat, speed, direction, fill, and easing. Duration changes scale the authored key times.
-3. Click the time ruler or drag the playhead to preview a pose. Enter an exact time in the seconds field and press Enter. **Previous keyframe** and **Next keyframe** step between authored keys. Use **Play**, **Pause**, or **Play All Animations** to preview the native clock. **Stop** restores the underlying values. A compatible source edit can retain the paused pose and elapsed time.
-4. Click a key or focus it and press Enter. The key editor opens beside the tracks on a wide Panel and below them in a narrow dock. Change the time or value, choose an incoming easing preset such as **Ease out**, or enter custom cubic Bézier coordinates. The graph previews the staged easing. Choose **Apply keyframe** to commit the validated draft. **Seek to selected keyframe** previews its exact pose.
+3. Click the time ruler or drag the playhead to preview a pose. Enter an exact time in the seconds field and press Enter. **Previous keyframe** and **Next keyframe** step between authored keys. Use **Play** or **Pause** for the selected program. Open the gear icon, **Timeline view options**, for **Play all animations**, zoom, and keyframe snapping. **Stop** restores the underlying values. A compatible source edit can retain the paused pose and elapsed time.
+4. Click a key or focus it and press Enter. The key editor opens beside the tracks on a wide Panel and below them in a narrow dock. Change the time or value and [edit the easing](#shape-an-incoming-easing). **Seek to selected keyframe** previews its exact pose.
 5. Open **Animation curves** to see interpolated scalar values, including overshoot. Drag a key horizontally to retime it or vertically to change its value. The curve and keyframe editor use the same checked source transaction. Use **Fit selected keyframes** to zoom into a group of keys in the curve editor.
-6. Open **Filter tracks** and type a property or target name to narrow the track list. Key navigation, rectangle selection, and Select All use the matching tracks. Press Escape in the search field to clear it and return to the filter button. Filtering is local to the Timeline.
+6. Toggle a target header to collapse its property tracks into a row of summary diamonds. Open **Filter tracks** and type a property or target name, or turn on **Selected controls only** to follow the canvas and Outline selection. A filter expands matching groups while it is active. Key navigation, rectangle selection, and Select All use the displayed property tracks. Escape dismisses the popup when it has focus. Clear the search and uncheck the selection filter to return to all tracks.
 
 | With the Timeline ruler or a key focused | Action |
 | --- | --- |
@@ -22,9 +22,15 @@ Open the source with **FerroUI: Open Designer** first. The animation and stage t
 | `+`, `−`, `0` | Zoom in, zoom out, or fit the full duration. Ctrl or Command with the wheel zooms at the pointer. |
 | Page Up and Page Down | Pan the zoomed ruler. You can also use the pan slider or scroll horizontally. |
 | Shift, Ctrl, or Command with a key click | Select a range or toggle individual keys. Space toggles a focused key. Drag from empty track space to select keys in a rectangle. |
-| Left and Right with a key focused | Nudge selected keys. The 24, 30, and 60 fps options set the edit grid. Use **Keyframe Selection Actions** for supported move, duplicate, and delete actions. |
+| Left and Right with a key focused | Nudge selected keys. Set the edit grid to 24, 30, or 60 fps from **Timeline view options**. Use **Keyframe Selection Actions** for supported move, duplicate, and delete actions. |
 
-For a native animation resource, choose **Preview Targets** to mount it on one or more controls. Use its elapsed playhead for payloads whose keys are edited in XAML. [Designer Studio animation authoring](../README.md#animation-authoring)
+For a native animation resource, choose **Choose preview targets** in **Timeline view options** to mount it on one or more controls. Use its elapsed playhead for payloads whose keys are edited in XAML. [Designer Studio animation authoring](../README.md#animation-authoring)
+
+## Shape an incoming easing
+
+1. Select a source-backed key. **Incoming easing** shapes the segment that ends at the key. Choose a preset, type four cubic Bézier coordinates, or drag either control point on the curve.
+2. Drag horizontally to adjust progress between 0 and 1. Drag vertically above or below that interval to shape overshoot. With a control point focused, use the arrow keys for 0.01 steps or hold Shift for 0.1 steps. Escape during a drag restores the starting curve.
+3. Choose **Apply keyframe** to commit the time, value, and easing in one source edit. Use Undo to restore the original key. The same editor appears for supported keys in [App Preview](runtime.md#render-with-your-app-in-app-preview).
 
 ## Record a property or geometry change in XAML
 

@@ -150,7 +150,8 @@ export class TimelineView implements vscode.Disposable {
         const pose = panel?.snapshot?.timelinePose;
         const position = this.playback.position ?? (panel && pose ? positionFromPose(panel.session, pose) : undefined);
         if (position?.busy && frame?.session === position.session) return;
-        const key = `${panel?.session}:${frame?.token}:${panel?.status ?? ''}`;
+        const selectedTargets = panel?.selectedIds;
+        const key = `${panel?.session}:${frame?.token}:${panel?.status ?? ''}:${selectedTargets?.join(',') ?? ''}`;
         if (key === this.shown) return;
         this.shown = key;
         const catalog = panel && frame && !panel.status ? this.programs(panel) : undefined;
@@ -160,7 +161,7 @@ export class TimelineView implements vscode.Disposable {
             ?? (catalog?.programs ? undefined : 'Loading animation programs…');
         const names = Object.fromEntries((panel?.nodes ?? []).map(node => [node.id, node.name ?? node.label]));
         this.view.show({ frame: catalog?.programs ? frame : undefined, documentVersion: panel?.document.version,
-            programs, message, names, writable: panel?.language === 'xaml', position, sourceIssues: catalog?.sourceIssues,
+            programs, message, names, selectedTargets, writable: panel?.language === 'xaml', position, sourceIssues: catalog?.sourceIssues,
             canEditKeyframes: panel?.supportsTimelineKeyframeDrafts,
             canShowCurves: panel?.supportsTimelineCurves,
             curveCatalog: panel?.supportsTimelineCurves && catalog?.programs ? catalog.key : undefined,
