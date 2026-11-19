@@ -83,9 +83,10 @@ impl Dispatcher {
     ///
     /// # Panics
     /// An error no handler handles is fatal, as an unhandled exception is in the
-    /// reference: with `panic = "unwind"` the error is raised as the panic payload
-    /// (it unwinds to the top of the dispatcher loop without being filtered again);
-    /// with `panic = "abort"` the process ends with a panic that carries its message.
+    /// reference: with `panic = "unwind"` its message is logged and unwinds as the
+    /// payload (a `String`, as of a panic with it), to the top of the dispatcher
+    /// loop without being filtered again; with `panic = "abort"` the process ends
+    /// with a panic that carries the message.
     pub fn raise_unhandled_exception(&self, error: impl Into<Box<dyn Error + Send + Sync>>) {
         self.raise_unhandled_error(error.into())
     }
@@ -151,7 +152,7 @@ impl Dispatcher {
             return;
         }
         self.forget_exception_if_outermost(&exception);
-        fail_unhandled(exception)
+        fail_unhandled(self, exception)
     }
 
     /// Exception filter returns true if exception should be caught.
@@ -250,9 +251,10 @@ impl Dispatcher {
 
 /// Ends an error that no handler of the dispatcher handled (#567).
 #[cold]
-fn fail_unhandled(exception: DispatcherException) -> ! {
+fn fail_unhandled(dispatcher: &Dispatcher, exception: DispatcherException) -> ! {
     let message = super::dispatcher_unhandled_exception_event_args::exception_text(&*exception)
         .unwrap_or_else(|| "an error of application code".into());
+    drop(exception);
     #[cfg(panic = "unwind")]
     {
         // No panic ran the hook for an error value: say what ends the thread.
@@ -260,11 +262,19 @@ fn fail_unhandled(exception: DispatcherException) -> ! {
             Some(logger) => logger.log_with_values(None, "Unhandled exception: {Error}", &[&message]),
             None => eprintln!("Unhandled exception: {message}"),
         }
-        std::panic::resume_unwind(exception)
+        // The payload is the message, as the payload of a panic with it is; the operations of
+        // the dispatcher it unwinds through have seen it already.
+        let payload: DispatcherException = Box::new(message);
+        if let Some(local) = dispatcher.try_local() {
+            if local.executing_depth.get() > 0 {
+                local.seen_exceptions.borrow_mut().push(exception_key(&payload));
+            }
+        }
+        std::panic::resume_unwind(payload)
     }
     #[cfg(not(panic = "unwind"))]
     {
-        drop(exception);
+        let _ = dispatcher;
         panic!("Unhandled exception: {message}")
     }
 }

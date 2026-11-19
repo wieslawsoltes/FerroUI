@@ -457,7 +457,7 @@ fn an_error_a_posted_job_returns_reaches_the_unhandled_exception_events_without_
 }
 
 #[test]
-fn an_error_no_handler_handles_is_raised_as_its_payload_once() {
+fn an_error_no_handler_handles_unwinds_with_its_message_once() {
     let t = DispatcherTests::new();
     let calls = t.number_of_handler_on_unhandled_event_invoked.clone();
     t.ui_thread.unhandled_exception(move |_| calls.set(calls.get() + 1));
@@ -468,11 +468,10 @@ fn an_error_no_handler_handles_is_raised_as_its_payload_once() {
         ui_thread.run_jobs_with_cancellation(None, &CancellationToken::none());
     }));
 
-    // Under unwinding the error leaves the dispatcher as the payload, without being
-    // filtered again on the way out; with `panic = "abort"` it ends the process.
+    // Under unwinding the message of the error leaves the dispatcher as the payload, without
+    // being filtered again on the way out; with `panic = "abort"` it ends the process.
     let payload = result.expect_err("an unhandled error is fatal");
-    let error = payload.downcast_ref::<Box<dyn std::error::Error + Send + Sync>>().expect("the error is the payload");
-    assert_eq!(error.downcast_ref::<JobFailed>(), Some(&JobFailed("local")));
+    assert_eq!(message_of(&*payload), Some("job failed: local"));
     assert_eq!(t.number_of_handler_on_unhandled_event_invoked.get(), 1);
 }
 
