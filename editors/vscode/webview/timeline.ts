@@ -1,12 +1,13 @@
 import type { FrameTarget } from '../src/protocol';
 import type { FromTimeline, KeyframeGroupEdit, KeyframeLocation, TimelineControl, TimelineProgram, TimelineState, ToTimeline } from '../src/timelineProtocol';
-import { canPreviewProgram, previewClock } from '../src/timelinePrograms';
+import { canPreviewProgram, canPreviewRange, previewClock } from '../src/timelinePrograms';
 import { anchorPopover, element, labelButton } from './dom';
 import { TimelineChannels } from './timelineChannels';
 import { TimelineCurves } from './timelineCurves';
 import { dragKeyframe, renderKeyframe, type RenderedKeyframe } from './timelineKeyDrag';
 import { TimelineKeyframeEditor } from './timelineKeyframeEditor';
 import { bindTimelineMarquee } from './timelineMarquee';
+import { TimelineMarkerView } from './timelineMarkerView';
 import { TimelineNativePreview } from './timelineNativePreview';
 import { TimelineNavigation } from './timelineNavigation';
 import { keyframeId, TimelineSelection } from './timelineSelection';
@@ -14,6 +15,7 @@ import { TimelineStateTransition } from './timelineStateTransition';
 import { TimelineTrackFilter } from './timelineTrackFilter';
 import { clamp } from './timelineViewport';
 import { TimelineViewportView } from './timelineViewportView';
+import { TimelineWorkArea } from './timelineWorkArea';
 
 interface ProgramIdentity { id: number; key?: string }
 interface SavedTimeline extends ProgramIdentity { frameRate?: number; curves?: boolean }
@@ -62,10 +64,21 @@ let lastPrograms = '';
 const selection = new TimelineSelection();
 let renderedKeys: RenderedKeyframe[] = [];
 let visibleKeys: RenderedKeyframe[] = [];
+let editableKeys: RenderedKeyframe[] = [];
 const channels = new TimelineChannels(updateTrackVisibility);
 const viewport = new TimelineViewportView(slider, () => visibleKeys, () => {
     channels.layout(viewport.range);
+    workArea.layout();
+    markerView.layout();
     showCurves();
+});
+const workArea = new TimelineWorkArea(viewport.grid, () => viewport.range, () => slider.valueAsNumber, showPosition);
+const markerView = new TimelineMarkerView(() => viewport.range, time => {
+    viewport.reveal(time);
+    queueSeek(time);
+}, edit => {
+    const frame = gestureFrame();
+    if (frame && program !== undefined) vscode.postMessage({ type: 'markerEdit', frame, program, edit });
 });
 const trackFilter = new TimelineTrackFilter(updateTrackVisibility);
 const navigation = new TimelineNavigation(viewport.grid, slider, () => frameRate, time => {
@@ -86,7 +99,7 @@ const keyframeEditor = new TimelineKeyframeEditor(request => {
     (frame, program, time) => send(frame, { action: 'seek', program, time }),
     ({ target, keyframe }, property) => { selection.replace([{ target, property, time: keyframe.time }]); showKeySelection(); },
     () => (visibleKeys.find(({ key, button }) => !button.hidden && selection.has(key))?.button ?? slider).focus({ preventScroll: true }));
-bindTimelineMarquee(viewport.grid, tracks, () => visibleKeys, gestureFrame, () => viewport.range, (keys, additive) => {
+bindTimelineMarquee(viewport.grid, tracks, () => editableKeys, gestureFrame, () => viewport.range, (keys, additive) => {
     selection.replace([...(additive ? selection.keys : []), ...keys.map(({ key }) => key)]);
     showKeySelection();
     (keys.at(-1)?.button ?? slider).focus({ preventScroll: true });
@@ -115,7 +128,10 @@ play.addEventListener('click', () => {
     const selected = current();
     if (!model.frame || !selected) return;
     const position = positionFor(selected);
-    send(model.frame, { action: position?.playing ? 'pause' : position?.all ? 'play_all' : 'play', program: position?.program ?? selected.id });
+    const range = workArea.range;
+    if (position?.playing) send(model.frame, { action: 'pause', program: position.program });
+    else if (range) send(model.frame, { action: 'play_range', program: selected.id, range });
+    else send(model.frame, { action: position?.all ? 'play_all' : 'play', program: position?.program ?? selected.id });
 });
 stop.addEventListener('click', () => {
     const selected = current();
@@ -210,6 +226,7 @@ function showTracks(): void {
         toolbar.hidden = container.hidden = true;
         closeViewOptions();
         trackFilter.follow(false, []);
+        workArea.follow(0, false);
         keyframeEditor.close();
         nativePreview.show(undefined, {}, 0, false, false);
         transition.show(model.transition, model.frame);
@@ -243,6 +260,7 @@ function showTracks(): void {
     programs.title = selected?.name ?? 'Animation program';
     if (!selected || !timeline) {
         viewport.follow(undefined, false);
+        workArea.follow(0, false);
         keyframeEditor.close();
         showKeySelection();
         showPosition();
@@ -262,6 +280,7 @@ function showTracks(): void {
         owner = { session: frame.session, program: { id: selected.id, key: selected.source_key ?? undefined } };
         selection.reconcile(timeline.tracks);
     }
+    workArea.follow(canPreviewRange(selected) ? timeline.duration : 0, newProgram);
     const changedViewport = viewport.follow(timeline.duration, newProgram);
     const content = JSON.stringify([model.frame?.session ?? owner?.session, selected, model.names, model.writable, model.canEditKeyframes]);
     if (lastContent !== content) {
@@ -296,6 +315,8 @@ function showTracks(): void {
                 const location = { target: track.target, property: track.property, time: key.time };
                 const rendered = renderKeyframe(location, `${name.title}, ${number.format(key.time)}s · ${key.value_text} · ${key.easing_text}`);
                 const { button } = rendered;
+                const easing = key.easing_text.replace(/\s/g, '').toLowerCase();
+                button.toggleAttribute('data-eased', Boolean(easing && easing !== 'lineareasing' && easing !== '0,0,1,1'));
                 renderedKeys.push(rendered);
                 const value = Number(key.value_text);
                 if (plot && Number.isFinite(value)) plot.keys.push({ rendered, value });
@@ -307,8 +328,8 @@ function showTracks(): void {
                 };
                 const editableCurve = plot && Number.isFinite(value) && model.canEditKeyframes && (model.writable || selected.sourceRange);
                 if (canRetimeKeys() && timeline.duration > 0) dragKeyframe(rendered, lane, () => viewport.range,
-                    () => selection.has(location) ? renderedKeys.filter(item => selection.has(item.key)) : [rendered],
-                    gestureFrame,
+                    () => selection.has(location) ? editableKeys.filter(item => selection.has(item.key)) : [rendered],
+                    () => channels.isLocked(track.target) ? undefined : gestureFrame(),
                     time => Math.round(time * (frameRate || 1000)) / (frameRate || 1000),
                     (keys, offset, frame) => editKeys(keys, frame, { action: 'move_keyframes', offset }),
                     editableCurve ? { value, scale: () => curves.canEdit(plot) ? plot.scale : undefined, commit: (time, value, frame) => {
@@ -320,8 +341,12 @@ function showTracks(): void {
                 button.addEventListener('click', event => {
                     const frame = gestureFrame();
                     if (!frame) return;
+                    if (channels.isLocked(track.target)) {
+                        if (canPreviewProgram(selected)) send(frame, { action: 'seek', program: selected.id, time: key.time });
+                        return;
+                    }
                     const additive = event.metaKey || event.ctrlKey;
-                    selection.pick(location, event.shiftKey ? visibleKeys.map(item => item.key) : [], event.shiftKey, additive);
+                    selection.pick(location, event.shiftKey ? editableKeys.map(item => item.key) : [], event.shiftKey, additive);
                     showKeySelection();
                     if (event.shiftKey || additive) return;
                     if (open(frame, true)) return;
@@ -354,11 +379,12 @@ function updateTrackVisibility(): void {
 function layoutTracks(newProgram: boolean): void {
     channels.filter(trackFilter.active, (target, label) => trackFilter.matches(target, label));
     visibleKeys = renderedKeys.filter(({ button }) => !button.parentElement?.closest('[hidden]'));
-    if (visibleKeys.length !== renderedKeys.length) {
-        const visible = new Set(visibleKeys.map(({ key }) => keyframeId(key)));
-        keyframeEditor.keepVisible(key => visible.has(keyframeId(key)));
+    editableKeys = visibleKeys.filter(({ key }) => !channels.isLocked(key.target));
+    if (editableKeys.length !== renderedKeys.length) {
+        const editable = new Set(editableKeys.map(({ key }) => keyframeId(key)));
+        keyframeEditor.keepVisible(key => editable.has(keyframeId(key)));
         const selected = selection.keys;
-        const retained = selected.filter(key => visible.has(keyframeId(key)));
+        const retained = selected.filter(key => editable.has(keyframeId(key)));
         if (retained.length !== selected.length) selection.replace(retained);
     }
     navigation.setKeys(visibleKeys.map(({ key }) => key.time), newProgram);
@@ -405,6 +431,10 @@ function showPosition(): void {
     const position = positionFor(selected);
     const playing = Boolean(position?.playing);
     const editing = Boolean(keyEdit || keyframeEditor.applying);
+    channels.showLocks(canRetimeKeys(), !model.frame || pending || playing || editing || Boolean(model.recording));
+    workArea.show(!model.frame || pending || playing || editing, playing ? position?.previewRange : undefined);
+    markerView.show(selected && canPreviewRange(selected) ? model.markers?.[selected.id] ?? [] : [],
+        !model.frame || pending || playing || editing);
     const available = canPreviewProgram(selected);
     const showTransport = Boolean(clock || position?.all);
     transport.hidden = !showTransport;
@@ -417,10 +447,12 @@ function showPosition(): void {
     snapField.hidden = !timeline || !(model.writable || canRetimeKeys());
     snap.disabled = !model.frame || pending || playing || editing;
     record.hidden = !timeline || !model.writable;
-    record.disabled = !model.frame || pending || playing || editing;
+    record.disabled = !model.frame || pending || playing || editing
+        || Boolean(timeline?.tracks.length && timeline.tracks.every(track => channels.isLocked(track.target)));
     recordMode.hidden = !timeline || !model.canRecord;
-    recordMode.disabled = !model.frame || !available || pending || playing || editing;
-    labelButton(recordMode, model.canRecordGeometry ? 'Record animation edits' : 'Record property changes');
+    recordMode.disabled = !model.frame || !available || pending || playing || editing || (channels.hasLocks && !model.recording);
+    labelButton(recordMode, channels.hasLocks && !model.recording ? 'Unlock tracks to record animation edits'
+        : model.canRecordGeometry ? 'Record animation edits' : 'Record property changes');
     recordMode.setAttribute('aria-pressed', String(Boolean(model.recording)));
     actions.disabled = !model.frame || pending || playing || editing || (!selected && !model.writable);
     options.hidden = !selected;
@@ -449,8 +481,10 @@ function showPosition(): void {
         time.removeAttribute('title');
         time.removeAttribute('aria-label');
     }
-    const playLabel = position?.all ? (position.completed ? 'Play all animations' : 'Resume all animations') : 'Play animation';
-    labelButton(play, playing ? (position?.all ? 'Pause all animations' : 'Pause animation') : playLabel, playing ? 'debug-pause' : 'play');
+    const playLabel = workArea.range ? 'Play preview range' : position?.all
+        ? (position.completed ? 'Play all animations' : 'Resume all animations') : 'Play animation';
+    const pauseLabel = position?.previewRange ? 'Pause preview range' : position?.all ? 'Pause all animations' : 'Pause animation';
+    labelButton(play, playing ? pauseLabel : playLabel, playing ? 'debug-pause' : 'play');
     play.disabled = !model.frame || !(available || position?.all) || (!playing && (pending || editing));
     stop.disabled = !model.frame || !position || editing || (!playing && pending);
     slider.disabled = !model.frame || !timeline || !available || Boolean(clock?.native) || playing || editing;
@@ -472,7 +506,7 @@ function canRetimeKeys(): boolean {
 
 function editKeys(keys: KeyframeLocation[], frame?: FrameTarget, edit?: KeyframeGroupEdit): void {
     if (!frame || program === undefined || pending || keyEdit || !canRetimeKeys() || !keys.length
-        || (!model.writable && edit && edit.action !== 'move_keyframes')) return;
+        || (!model.writable && edit && edit.action !== 'move_keyframes') || keys.some(key => channels.isLocked(key.target))) return;
     keyEdit = { before: frame };
     keyframeEditor.close();
     vscode.postMessage({ type: 'keyframeGroup', frame, program, keys, edit });
@@ -483,23 +517,28 @@ function recordAt(time: number, track?: number): void {
     const frame = gestureFrame();
     const selected = current();
     if (!frame || !selected?.timeline || !model.writable) return;
+    const tracks = selected.timeline.tracks;
+    if (track !== undefined && (!tracks[track] || channels.isLocked(tracks[track].target))) return;
+    const candidates = track === undefined && channels.hasLocks
+        ? tracks.flatMap((item, index) => channels.isLocked(item.target) ? [] : [index]) : undefined;
+    if (candidates && !candidates.length) return;
     keyframeEditor.close();
     keyEdit = { before: frame };
-    vscode.postMessage({ type: 'recordKeyframe', frame, program: selected.id, time, track });
+    vscode.postMessage({ type: 'recordKeyframe', frame, program: selected.id, time, track, candidates });
     showPosition();
 }
 
 function keyShortcuts(event: KeyboardEvent, location: KeyframeLocation, duration: number): void {
     const found = model.frame;
-    if (!found || pending || keyEdit) return;
+    if (!found || pending || keyEdit || channels.isLocked(location.target)) return;
     const modifier = event.metaKey || event.ctrlKey;
     const command = event.key.toLowerCase();
     if (command === ' ' || command === 'escape' || (modifier && command === 'a')) {
         event.preventDefault();
         event.stopPropagation();
         if (command === 'escape') selection.replace([]);
-        else if (command === 'a') selection.replace(visibleKeys.map(item => item.key));
-        else selection.pick(location, visibleKeys.map(item => item.key), event.shiftKey, true);
+        else if (command === 'a') selection.replace(editableKeys.map(item => item.key));
+        else selection.pick(location, editableKeys.map(item => item.key), event.shiftKey, true);
         showKeySelection();
         return;
     }

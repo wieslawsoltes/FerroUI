@@ -1,6 +1,8 @@
 import { strict as assert } from 'node:assert';
 import { retainedCurveTrack } from '../webview/hostedCurves';
 import { CurveScale } from '../webview/timelineCurveScale';
+import { cubicEasing, easingPlot } from '../webview/easingCurve';
+import { stepPreviewRange, validPreviewRange } from '../src/timelinePreviewRange';
 import { fitKeyTimes, fitTimeline, minimumTimelineSpan, panTimeline, stepTimelineFrame, timelinePercent, visibleTime, zoomTimeline } from '../webview/timelineViewport';
 
 export function verifyTimelineViewport(): void {
@@ -33,6 +35,18 @@ export function verifyTimelineViewport(): void {
     assert.ok(Number.isFinite(new CurveScale([], [-1e300, 1e300]).percent(0)));
     const close = new CurveScale([], [1e12, 1e12 + 1]);
     assert.ok(close.fromOffset(1e12, -42) > 1e12 && close.fromOffset(1e12, -42) < 1e12 + 1);
+    const points = cubicEasing('0.25,-0.2,0.75,1.6');
+    assert.deepEqual(points, [.25, -.2, .75, 1.6]);
+    assert.equal(cubicEasing('0.25,0.25,1.1,1'), undefined);
+    assert.equal(cubicEasing('0,,1,1'), undefined);
+    const plot = easingPlot(points, []);
+    assert.ok(Math.abs(plot.value(plot.y(1.6)) - 1.6) < 1e-12);
+    assert.ok(Math.abs(plot.value(plot.y(-.2)) + .2) < 1e-12);
+    const range = { start: .25, end: .75, loop: true };
+    assert.equal(validPreviewRange(range, 1), true);
+    assert.equal(validPreviewRange({ ...range, end: .25 }, 1), false);
+    assert.deepEqual(stepPreviewRange(range, .625, 1.25), { time: .375, completed: false });
+    assert.deepEqual(stepPreviewRange({ ...range, loop: false }, .625, 1.25), { time: .75, completed: true });
     verifyHostedCurveTrack();
     console.log('Timeline viewport kept the zoom pivot, aligned authored key positions, and clamped both pan edges');
 }

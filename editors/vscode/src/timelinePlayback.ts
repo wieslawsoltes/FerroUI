@@ -1,6 +1,7 @@
 import type { DesignerPanel } from './designerPanel';
 import { drivePreviewClock } from './previewClock';
 import type { FrameTarget } from './protocol';
+import { stepPreviewRange, validPreviewRange } from './timelinePreviewRange';
 import type { TimelineClock, TimelinePosition, TimelinePreviewPose, TimelineTransportControl } from './timelineProtocol';
 
 interface Playback {
@@ -74,6 +75,15 @@ export class TimelinePlayback {
                 await this.render(playback, { action: 'scrub', program: control.program, time: control.time }, signal);
             } else if (control.action === 'play' && timeline) {
                 await this.start(playback, control.time, previous?.all ? undefined : previous, timeline, signal);
+            } else if (control.action === 'play_range' && timeline && !timeline.native) {
+                if (!validPreviewRange(control.range, timeline.duration)) throw new Error('Choose an In and Out time within the animation, with In before Out.');
+                const range = control.range;
+                const prior = previous?.all ? range.start : previous?.time ?? range.start;
+                const time = prior >= range.start && prior < range.end ? prior : range.start;
+                panel.setAnimationRecording(false);
+                const position = await this.render(playback, { action: 'scrub', program: control.program, time }, signal,
+                    { previewRange: range, playing: true, completed: false });
+                this.beginClock(playback, position);
             } else if (control.action === 'play_all') {
                 if (control.time !== undefined && (!Number.isFinite(control.time) || control.time < 0)) {
                     throw new Error('Choose a nonnegative elapsed playback time.');
@@ -117,8 +127,15 @@ export class TimelinePlayback {
     private async advance(playback: Playback): Promise<void> {
         try {
             await drivePreviewClock(() => playback.running, async seconds => {
+                const { previewRange: range, program, time } = playback.position;
+                if (range) {
+                    const next = stepPreviewRange(range, time, seconds);
+                    const position = await this.render(playback, { action: 'scrub', program, time: next.time }, AbortSignal.timeout(15_000),
+                        { previewRange: range, playing: !next.completed, completed: next.completed });
+                    return position.playing;
+                }
                 const position = await this.render(playback,
-                    { action: 'advance_program', program: playback.position.program, seconds }, AbortSignal.timeout(15_000));
+                    { action: 'advance_program', program, seconds }, AbortSignal.timeout(15_000));
                 return position.playing;
             });
         } catch (error) {
@@ -138,9 +155,11 @@ export class TimelinePlayback {
         try {
             await playback.loop;
             signal.throwIfAborted();
-            await this.render(playback, action === 'pause'
-                ? { action: 'pause_program', program: playback.position.program }
-                : { action: 'stop_program' }, signal);
+            if (action === 'stop' || !playback.position.previewRange) {
+                await this.render(playback, action === 'pause'
+                    ? { action: 'pause_program', program: playback.position.program }
+                    : { action: 'stop_program' }, signal);
+            }
         } finally {
             playback.interrupting = false;
             this.commit(playback, { busy: false });
@@ -148,7 +167,8 @@ export class TimelinePlayback {
         return playback.position;
     }
 
-    private async render(playback: Playback, request: object, signal: AbortSignal): Promise<TimelinePosition> {
+    private async render(playback: Playback, request: object, signal: AbortSignal,
+        range?: Pick<TimelinePosition, 'previewRange' | 'completed' | 'playing'>): Promise<TimelinePosition> {
         const { panel, token, revision } = playback;
         if (this.playback !== playback || panel.document.version !== revision || panel.currentToken !== token) {
             throw new Error('The design changed during animation playback.');
@@ -160,7 +180,8 @@ export class TimelinePlayback {
         if (!presentation?.timelinePosition) throw new Error('The native preview did not report a timeline position.');
         playback.token = token + 1;
         const { elapsed, time, all, completed, playing } = presentation.timelinePosition;
-        return this.commit(playback, { elapsed, time, all, completed, playing: playing && !playback.interrupting });
+        return this.commit(playback, { elapsed, time, all, completed, previewRange: undefined,
+            ...range, playing: (range?.playing ?? playing) && !playback.interrupting });
     }
 
     private commit(playback: Playback, change: Partial<TimelinePosition>): TimelinePosition {

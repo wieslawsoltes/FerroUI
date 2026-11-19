@@ -17,7 +17,7 @@ import { renameRsxControl } from './rsxRename';
 import type { RuntimeTarget } from './runtimeConnections';
 import type { StagesPanel } from './stagesPanel';
 import type { PrototypeCommand, StageChange } from './stagesProtocol';
-import type { AnimationSourceIssue, TimelineControl } from './timelineProtocol';
+import type { AnimationSourceIssue, TimelineControl, TimelineMarkerEdit } from './timelineProtocol';
 import type { StateTransitionControl } from './stateTransitionProtocol';
 import type { CanvasAction, CanvasInteraction, DesignerView, DragOrigin, DropTarget, OutlineMode, Placement } from './protocol';
 import { applyTextEdits } from './textDocument';
@@ -73,6 +73,7 @@ interface Arguments extends CanvasAction, CargoSelection {
     action: string;
     tool: string;
     arguments: object;
+    program: number;
     selection?: number[];
     stage?: number;
     expected_epoch?: number;
@@ -329,6 +330,10 @@ export class AgentTools {
                 await this.workbench.revealDesign(panel, 'timeline');
                 return this.workbench.controlTimeline(panel, { session: panel.session, token: args.expected_revision },
                     args.arguments as TimelineControl, signal);
+            case 'designer_timeline_markers':
+            case 'designer_timeline_marker_edit':
+                return this.workbench.timelineMarkers(panel, { session: panel.session, token: args.expected_revision }, args.program,
+                    signal, tool === 'designer_timeline_marker_edit' ? args.arguments as TimelineMarkerEdit : undefined);
             case 'designer_transition_control':
                 await this.workbench.revealDesign(panel, 'timeline');
                 return await this.workbench.controlStateTransition(panel, { session: panel.session, token: args.expected_revision },

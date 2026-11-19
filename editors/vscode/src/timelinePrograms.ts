@@ -7,3 +7,7 @@ export function previewClock(program?: TimelineProgram): TimelineClock | undefin
 export function canPreviewProgram(program?: TimelineProgram): boolean {
     return program?.preview?.available ?? Boolean(program?.timeline);
 }
+
+export function canPreviewRange(program?: TimelineProgram): boolean {
+    return Boolean(program?.timeline && program.timeline.duration > 0 && !program.preview?.native && canPreviewProgram(program));
+}

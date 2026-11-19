@@ -425,11 +425,28 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
         </div>
         <div class="tool-group timeline-tools timeline-view-tools" role="group" aria-label="Timeline view">
             ${tool('timeline-curves', 'graph-line', 'Animation curves', 'aria-pressed="false" aria-controls="timeline-tracks" hidden')}
+            ${tool('timeline-range-options', 'symbol-ruler', 'Preview range', 'popovertarget="timeline-preview-range" aria-controls="timeline-preview-range" aria-expanded="false" hidden')}
             ${tool('timeline-filter', 'filter', 'Filter tracks', 'popovertarget="timeline-track-filter" aria-controls="timeline-track-filter" aria-expanded="false" hidden')}
             ${tool('timeline-options', 'settings-gear', 'Timeline view options', 'popovertarget="timeline-view-options" aria-controls="timeline-view-options" aria-expanded="false" hidden')}
             ${tool('timeline-source-issues', 'warning', 'Open unsupported Rust animations in source', 'hidden')}
             ${tool('timeline-actions', 'ellipsis', 'More Animation Actions', 'disabled')}
         </div>
+    </div>
+    <div id="timeline-preview-range" class="popover timeline-popover" popover role="group" aria-label="Preview range">
+        <label class="timeline-check"><input id="timeline-range-enabled" type="checkbox" autofocus> Limit playback to preview range</label>
+        <fieldset id="timeline-range-fields" aria-label="Preview range in seconds" hidden>
+            <div class="timeline-range-fields">
+                <label>In (s) <input id="timeline-range-in" type="number" min="0" step="any"></label>
+                <label>Out (s) <input id="timeline-range-out" type="number" min="0" step="any"></label>
+            </div>
+            <label class="timeline-check"><input id="timeline-range-loop" type="checkbox" checked> Loop range</label>
+        </fieldset>
+        <p id="timeline-range-feedback" role="status" hidden></p>
+        <form id="timeline-marker-form" aria-label="Preview markers">
+            <input id="timeline-marker-name" type="text" aria-label="Marker name" placeholder="Marker name" maxlength="48" required>
+            <button type="submit" id="timeline-marker-add" class="tool" aria-label="Add or update marker at playhead" title="Add or update marker at playhead">${icon('add')}</button>
+        </form>
+        <ul id="timeline-marker-list" aria-label="Named markers" hidden></ul>
     </div>
     <div id="timeline-track-filter" class="popover timeline-popover" popover role="group" aria-label="Filter tracks">
         <input id="timeline-track-search" type="search" aria-label="Filter tracks by property or target" placeholder="Filter tracks" autofocus>
@@ -466,12 +483,16 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
     <section id="timeline-program" aria-label="Selected animation" hidden>
         <div id="timeline-grid" class="timeline-grid">
             <div class="timeline-axis">
-                <div class="timeline-scrub">
-                    <input id="timeline-seek" type="range" min="0" value="0" step="any" aria-label="Animation playhead"
-                        aria-keyshortcuts="[ ] , . Home End + - 0 PageUp PageDown"
-                        title="[ and ] jump to keys. , and . step frames. Home and End jump to the bounds. + and − zoom.">
+                <div class="timeline-ruler-row">
+                    <div class="timeline-scrub">
+                        <input id="timeline-seek" type="range" min="0" value="0" step="any" aria-label="Animation playhead"
+                            aria-keyshortcuts="[ ] , . Home End + - 0 PageUp PageDown I O"
+                            title="[ and ] jump to keys. , and . step frames. I and O set the preview range. + and − zoom.">
+                    </div>
+                    <div id="timeline-ruler" class="timeline-ruler" aria-hidden="true"></div>
+                    <div class="timeline-range-track" aria-hidden="true"><span id="timeline-range-band" hidden></span></div>
                 </div>
-                <div id="timeline-ruler" class="timeline-ruler" aria-hidden="true"></div>
+                <div id="timeline-marker-strip" role="group" aria-label="Markers on the ruler" hidden></div>
             </div>
             <ol id="timeline-tracks" aria-label="Animation targets and properties"></ol>
             <p id="timeline-filter-status" role="status" hidden>No matching tracks.</p>
@@ -481,7 +502,7 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
         </div>
         ${keyframeEditorHtml()}
     </section>
-</main>`, ['timeline-curve', 'keyframe-editor']);
+</main>`, ['timeline-curve', 'keyframe-editor', 'timeline-range']);
 }
 
 function timelineOption(id: string, glyph: string, label: string, attributes = ''): string {

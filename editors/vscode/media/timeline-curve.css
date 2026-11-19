@@ -22,6 +22,7 @@
     background: var(--vscode-button-background);
 }
 .timeline-key:hover::before, .timeline-key-dragging::before { background: var(--vscode-button-hoverBackground); }
+.timeline-key[data-eased]::before { border-radius: 50%; }
 .timeline-key[aria-pressed="true"] {
     background: var(--vscode-list-activeSelectionBackground);
     color: var(--vscode-list-activeSelectionForeground);

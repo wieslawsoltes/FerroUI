@@ -56,9 +56,19 @@ export interface TimelinePosition {
     elapsed?: number;
     all?: boolean;
     completed?: boolean;
+    previewRange?: TimelinePreviewRange;
     playing: boolean;
     busy: boolean;
 }
+
+export interface TimelinePreviewRange {
+    start: number;
+    end: number;
+    loop: boolean;
+}
+
+export interface TimelineMarker { name: string; time: number }
+export type TimelineMarkerEdit = { action: 'set'; name: string; time: number } | { action: 'remove'; name: string };
 
 export interface TimelinePreviewPose {
     program: number;
@@ -75,6 +85,7 @@ export interface TimelineState {
     sourceIssues?: AnimationSourceIssue[];
     names: Record<number, string>;
     selectedTargets?: readonly number[];
+    markers?: Record<number, TimelineMarker[]>;
     writable: boolean;
     canRecord?: boolean;
     canRecordGeometry?: boolean;
@@ -90,6 +101,7 @@ export interface TimelineState {
 
 export type TimelineTransportControl =
     | { action: 'seek'; program: number; time: number }
+    | { action: 'play_range'; program: number; range: TimelinePreviewRange }
     | { action: 'play' | 'play_all'; program: number; time?: number }
     | { action: 'pause' | 'stop'; program: number };
 
@@ -104,7 +116,8 @@ export type FromTimeline =
     | { type: 'programTargets'; frame: FrameTarget; program: number }
     | { type: 'revealProgram'; frame: FrameTarget; program: number }
     | { type: 'sourceIssues'; frame: FrameTarget }
-    | { type: 'recordKeyframe'; frame: FrameTarget; program: number; time: number; track?: number }
+    | { type: 'markerEdit'; frame: FrameTarget; program: number; edit: TimelineMarkerEdit }
+    | { type: 'recordKeyframe'; frame: FrameTarget; program: number; time: number; track?: number; candidates?: number[] }
     | TimelineCurveRequest
     | TimelineKeyframeRequest
     | { type: 'keyframeGroup'; frame: FrameTarget; program: number; keys: KeyframeLocation[]; edit?: KeyframeGroupEdit }

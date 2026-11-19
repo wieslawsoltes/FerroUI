@@ -1,8 +1,9 @@
 import { strict as assert } from 'node:assert';
 import type * as vscode from 'vscode';
 import type { OutlineNode } from '../src/protocol';
-import type { TimelinePosition, TimelineProgram } from '../src/timelineProtocol';
+import type { TimelineMarker, TimelinePosition, TimelineProgram } from '../src/timelineProtocol';
 import type { McpFixture } from './mcp';
+import { until } from './wait';
 
 const scene = `<Canvas xmlns="https://github.com/ferroui">
   <Canvas.Styles>
@@ -42,11 +43,11 @@ export async function verifyTimelinePlayback({ invoke, content }: McpFixture, se
             arguments: { action, program, ...fields } }));
         frame = await wait();
     };
-    const control = async (action: string) => {
+    const control = async (action: string, fields: object = {}, refresh = true) => {
         const position = content<TimelinePosition>(await invoke('designer_timeline_control', {
-            session, expected_revision: frame.revision, arguments: { action, program },
+            session, expected_revision: frame.revision, arguments: { action, program, ...fields },
         }));
-        frame = await wait();
+        if (refresh) frame = await wait();
         return position;
     };
     const opacity = async (name: string) => {
@@ -89,9 +90,52 @@ export async function verifyTimelinePlayback({ invoke, content }: McpFixture, se
     assert.equal(all.elapsed, 3);
     await control('stop');
     assert.equal(await opacity('Peer'), .9);
+
+    const range = { start: .25, end: .75, loop: false };
+    const invalid = await invoke('designer_timeline_control', { session, expected_revision: frame.revision,
+        arguments: { action: 'play_range', program, range: { ...range, start: 1 } } });
+    assert.equal(invalid.isError, true, 'In must precede Out');
+    const started = await control('play_range', { range }, false);
+    assert.deepEqual(started.previewRange, range);
+    assert.equal(started.time, range.start);
+    await until(async () => {
+        frame = await wait();
+        const node = frame.nodes.find(item => item.name === 'Lead')!.id;
+        const result = await invoke('designer_inspect', { session, node });
+        if (result.isError) return false;
+        const { properties } = content<{ properties: { name: string; effective: string }[] }>(result);
+        return Number(properties.find(property => property.name === 'Opacity')?.effective) === .375;
+    });
+    assert.equal((await control('pause')).time, range.end, 'One-shot playback stops at the authored Out pose');
+    const loop = await control('play_range', { range: { ...range, loop: true } }, false);
+    assert.equal(loop.time, range.start, 'Play at Out restarts the preview from In');
+    let pausedRange: TimelinePosition | undefined;
+    await until(async () => {
+        frame = await wait();
+        const result = await invoke('designer_timeline_control', { session, expected_revision: frame.revision, arguments: { action: 'pause', program } });
+        if (result.isError) return false;
+        pausedRange = content<TimelinePosition>(result);
+        return true;
+    });
+    assert.ok(pausedRange && !pausedRange.playing && pausedRange.time >= range.start && pausedRange.time <= range.end);
+    frame = await wait();
+    await control('stop');
+    const markerFrame = { session, expected_revision: frame.revision, program };
+    const markers = async () => content<{ markers: TimelineMarker[] }>(await invoke('designer_timeline_markers', markerFrame)).markers;
+    const editMarker = async (arguments_: object) => invoke('designer_timeline_marker_edit', { ...markerFrame, arguments: arguments_ });
+    assert.equal((await editMarker({ action: 'set', name: 'Settled', time: 3 })).isError, true);
+    content(await editMarker({ action: 'set', name: 'Settled', time: .75 }));
+    content(await editMarker({ action: 'set', name: 'In', time: .25 }));
+    content(await editMarker({ action: 'set', name: 'Settled', time: .8 }));
+    assert.deepEqual(await markers(), [{ name: 'In', time: .25 }, { name: 'Settled', time: .8 }]);
+    content(await editMarker({ action: 'remove', name: 'In' }));
+    assert.deepEqual(await markers(), [{ name: 'Settled', time: .8 }]);
+    await control('seek', { time: .8 });
+    assert.equal((await editMarker({ action: 'remove', name: 'Settled' })).isError, true, 'A retired frame cannot edit markers');
+    assert.equal(await opacity('Lead'), .4);
     assert.equal(document.getText(), scene);
     await undo();
     assert.equal(document.getText(), original);
     await wait();
-    console.log('VS Code restored the paused alternating iteration across a source edit and played both clips on the native clock');
+    console.log('VS Code restored a paused alternating iteration, previewed a bounded authored range and navigated session markers');
 }
