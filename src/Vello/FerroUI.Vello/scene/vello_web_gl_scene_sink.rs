@@ -303,6 +303,8 @@ impl IVelloSceneSink for VelloWebGlSceneSink {
         texture: &Rc<VelloWebGlTexture>,
         size: (u32, u32),
         texture_transform: Affine,
+        alpha: f32,
+        blend_mode: BlendMode,
     ) {
         let (path, path_transform) = prepare(path, transform);
         let limit = u32::from(u16::MAX);
@@ -321,7 +323,7 @@ impl IVelloSceneSink for VelloWebGlSceneSink {
                 x_extend: peniko::Extend::Pad,
                 y_extend: peniko::Extend::Pad,
                 quality: peniko::ImageQuality::Low,
-                alpha: 1.0,
+                alpha,
             },
         });
         // As `fill` places a paint: by the transform of the path times the one of the paint.
@@ -333,10 +335,25 @@ impl IVelloSceneSink for VelloWebGlSceneSink {
         self.set_anti_alias(false);
         self.scene.set_fill_rule(Fill::NonZero);
         self.scene.set_blend_mode(BlendMode::default());
-        self.scene.set_transform(path_transform);
-        self.scene.set_paint(paint_type);
-        self.scene.set_paint_transform(relative_paint_transform);
-        self.scene.fill_path(&path);
+        if blend_mode.is_destructive() {
+            // As `fill` composes a destructive mode: a layer clipped to the shape that holds the
+            // paint everywhere.
+            self.scene.set_transform(path_transform);
+            self.scene.push_layer(Some(&path), Some(blend_mode), None, None, None);
+            let target = self.target_path();
+            self.scene.set_transform(Affine::IDENTITY);
+            self.scene.set_paint(paint_type);
+            self.scene.set_paint_transform(transform * texture_transform);
+            self.scene.fill_path(&target);
+            self.scene.pop_layer();
+        } else {
+            self.scene.set_transform(path_transform);
+            self.scene.set_paint(paint_type);
+            self.scene.set_paint_transform(relative_paint_transform);
+            self.scene.set_blend_mode(blend_mode);
+            self.scene.fill_path(&path);
+            self.scene.set_blend_mode(BlendMode::default());
+        }
         if !self.textures.iter().any(|held| Rc::ptr_eq(held, texture)) {
             self.textures.push(texture.clone());
         }
