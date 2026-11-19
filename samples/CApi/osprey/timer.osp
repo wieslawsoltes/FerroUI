@@ -1,0 +1,236 @@
+// 7GUIs task 4, Timer, in Osprey through the C ABI of FerroUI (ferroui-capi): a gauge of the
+// elapsed time, its value in seconds, a slider of the duration, and a button that starts the
+// elapsed time again. The time runs up to the duration and follows the slider: a longer duration
+// lets it run on. The same task as samples/SevenGuis/Builders/Timer. The clock is a timer of the
+// UI thread (ferro_timer_start), whose function gets the microseconds since its previous tick; the
+// duration is read back from the slider (ferro_get_f64_or).
+//
+// With FERROUI_SAMPLE_SCRIPT=1 the program runs the steps of the scenario of the Rust tests, then
+// lets the timer run for a second and prints what the controls show.
+//
+// @link: ferroui_capi
+// @linkdir: target/release
+
+extern fn ferro_abi_version() -> int32
+extern fn ferro_app_run(options: Ptr, onStart: fn(int) -> int, token: int) -> int32
+extern fn ferro_type_id(name: string, length: int) -> int
+extern fn ferro_property_id(name: string, length: int) -> int
+extern fn ferro_event_id(name: string, length: int) -> int
+extern fn ferro_create(typeId: int) -> int
+extern fn ferro_set_str(object: int, property: int, text: string, length: int) -> int32
+extern fn ferro_set_f64(object: int, property: int, value: float) -> int32
+extern fn ferro_set_bool(object: int, property: int, value: int8) -> int32
+extern fn ferro_get_cstr(object: int, property: int) -> string
+extern fn ferro_get_f64_or(object: int, property: int, fallback: float) -> float
+extern fn ferro_timer_start(interval: int, function: fn(int, int) -> int, token: int) -> int
+extern fn ferro_timer_stop(timer: int) -> int32
+extern fn ferro_get_i64_or(object: int, property: int, fallback: int) -> int
+extern fn ferro_get_bool_or(object: int, property: int, fallback: int8) -> int8
+extern fn ferro_set_i64(object: int, property: int, value: int) -> int32
+extern fn ferro_clear(object: int, property: int) -> int32
+extern fn ferro_add_child(parent: int, child: int) -> int32
+extern fn ferro_show(window: int) -> int32
+extern fn ferro_subscribe(object: int, event: int, function: fn(int, int, int) -> int, token: int) -> int
+extern fn ferro_raise(object: int, event: int) -> int32
+extern fn ferro_last_error() -> string
+extern fn osprey_ffi_null() -> Ptr
+// The address of the value of an environment variable, kept as an integer: 0 when it is not set.
+extern fn getenv(name: string) -> int
+
+// ---- helpers over the ABI --------------------------------------------------------------------
+
+// The value of an arm that does nothing.
+fn nothing() -> Unit = {
+    let _ = 0
+}
+
+fn prop(name: string) -> int = ferro_property_id(name: name, length: 0 - 1)
+
+fn make(name: string) -> int = ferro_create(typeId: ferro_type_id(name: name, length: 0 - 1))
+
+fn check(what: string, status: int32) -> Unit =
+    if status == toInt32(0) { nothing() } else { print("${what}: ${status} ${ferro_last_error()}") }
+
+fn setText(object: int, name: string, text: string) -> Unit =
+    check(what: name, status: ferro_set_str(object: object, property: prop(name: name), text: text, length: 0 - 1))
+
+fn setNumber(object: int, name: string, value: float) -> Unit =
+    check(what: name, status: ferro_set_f64(object: object, property: prop(name: name), value: value))
+
+fn setFlag(object: int, name: string, value: bool) -> Unit =
+    check(what: name, status: ferro_set_bool(object: object, property: prop(name: name), value: value ? toInt8(1) : toInt8(0)))
+
+// The text of a property, copied: the library owns the string it returns until its next call.
+fn getText(object: int, name: string) -> string = ferro_get_cstr(object: object, property: prop(name: name)) + ""
+
+fn getNumber(object: int, name: string, fallback: float) -> float =
+    ferro_get_f64_or(object: object, property: prop(name: name), fallback: fallback)
+
+fn getInt(object: int, name: string, fallback: int) -> int =
+    ferro_get_i64_or(object: object, property: prop(name: name), fallback: fallback)
+
+fn getFlag(object: int, name: string) -> bool =
+    ferro_get_bool_or(object: object, property: prop(name: name), fallback: toInt8(0)) == toInt8(1)
+
+fn setInt(object: int, name: string, value: int) -> Unit =
+    check(what: name, status: ferro_set_i64(object: object, property: prop(name: name), value: value))
+
+fn clear(object: int, name: string) -> Unit = check(what: name, status: ferro_clear(object: object, property: prop(name: name)))
+
+fn add(parent: int, child: int) -> Unit = check(what: "add child", status: ferro_add_child(parent: parent, child: child))
+
+// ---- state -----------------------------------------------------------------------------------
+
+type Ui = { gauge: int, seconds: int, duration: int, reset: int, timer: int }
+
+effect State { elapsed: fn(float) -> Unit  ui: fn(Ui) -> Unit }
+
+mut elapsed = 0.0
+mut ui = Ui { gauge: 0, seconds: 0, duration: 0, reset: 0, timer: 0 }
+
+fn setElapsed(value: float) -> Unit = {
+    handle State { elapsed v => { elapsed = v } }
+    perform State.elapsed(value)
+}
+
+fn setUi(value: Ui) -> Unit = {
+    handle State { ui v => { ui = v } }
+    perform State.ui(value)
+}
+
+// ---- the task --------------------------------------------------------------------------------
+
+fn duration() -> float = getNumber(object: ui.duration, name: "Value", fallback: 15.0)
+
+fn minimum(a: float, b: float) -> float = a < b ? a : b
+
+// Tenths of a second, halves away from zero: "7.5 s".
+fn formatSeconds(seconds: float) -> string = match floatToInt(floor(seconds * 10.0 + 0.5)) {
+    Success { value } => "${intDiv(value, 10)}.${value % 10} s"
+    Error { message } => "?"
+}
+
+fn show() -> Unit = {
+    let limit = duration()
+    setNumber(object: ui.gauge, name: "Value", value: limit > 0.0 ? minimum(a: floatDiv(elapsed, limit), b: 1.0) : 1.0)
+    setText(object: ui.seconds, name: "Text", text: formatSeconds(seconds: elapsed))
+}
+
+// A tick of the clock: the time since the previous one, in microseconds, is added up to the
+// duration.
+fn onTick(token: int, microseconds: int) -> int = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    let limit = duration()
+    if elapsed < limit { setElapsed(value: minimum(a: elapsed + toFloat(microseconds) / 1000000.0, b: limit)) } else { nothing() }
+    show()
+    0
+}
+
+fn onDurationChanged(token: int, sender: int, arg: int) -> int = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    show()
+    0
+}
+
+fn onReset(token: int, sender: int, arg: int) -> int = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    setElapsed(value: 0.0)
+    show()
+    0
+}
+
+fn label(text: string) -> int = {
+    let block = make(name: "TextBlock")
+    setText(object: block, name: "Text", text: text)
+    block
+}
+
+fn onStart(token: int) -> int = {
+    let window = make(name: "Window")
+    setText(object: window, name: "Title", text: "Timer")
+    setNumber(object: window, name: "Width", value: 360.0)
+    setNumber(object: window, name: "Height", value: 300.0)
+    let panel = make(name: "StackPanel")
+    setNumber(object: panel, name: "Spacing", value: 8.0)
+    setText(object: panel, name: "Margin", text: "16")
+    setNumber(object: panel, name: "Width", value: 300.0)
+    let gauge = make(name: "ProgressBar")
+    setText(object: gauge, name: "Name", text: "Gauge")
+    setNumber(object: gauge, name: "Minimum", value: 0.0)
+    setNumber(object: gauge, name: "Maximum", value: 1.0)
+    let seconds = label(text: "0.0 s")
+    setText(object: seconds, name: "Name", text: "Seconds")
+    let slider = make(name: "Slider")
+    setText(object: slider, name: "Name", text: "Duration")
+    setNumber(object: slider, name: "Minimum", value: 0.0)
+    setNumber(object: slider, name: "Maximum", value: 30.0)
+    setNumber(object: slider, name: "Value", value: 15.0)
+    let reset = make(name: "Button")
+    setText(object: reset, name: "Name", text: "Reset")
+    setText(object: reset, name: "Content", text: "Reset")
+    add(parent: panel, child: label(text: "Elapsed time:"))
+    add(parent: panel, child: gauge)
+    add(parent: panel, child: seconds)
+    add(parent: panel, child: label(text: "Duration:"))
+    add(parent: panel, child: slider)
+    add(parent: panel, child: reset)
+    add(parent: window, child: panel)
+    let _v = ferro_subscribe(object: slider, event: ferro_event_id(name: "ValueChanged", length: 0 - 1), function: onDurationChanged, token: 0)
+    let _r = ferro_subscribe(object: reset, event: ferro_event_id(name: "Click", length: 0 - 1), function: onReset, token: 0)
+    let timer = ferro_timer_start(interval: 50, function: onTick, token: 0)
+    if timer < 0 { print("ferro_timer_start: ${timer} ${ferro_last_error()}") } else { nothing() }
+    setUi(value: Ui { gauge: gauge, seconds: seconds, duration: slider, reset: reset, timer: timer })
+    let _s = onDurationChanged(token: 0, sender: 0, arg: 0)
+    check(what: "show", status: ferro_show(window: window))
+    if getenv(name: "FERROUI_SAMPLE_SCRIPT") != 0 { script() } else { nothing() }
+    0
+}
+
+// ---- the scenario of the Rust tests (samples/SevenGuis/Model/scenarios.rs) ---------------------
+
+fn expect(what: string, ok: bool) -> Unit = print("script: ${what}: ${ok ? "ok" : "FAILED"}")
+
+fn gaugeIs(value: float) -> bool = abs(getNumber(object: ui.gauge, name: "Value", fallback: 0.0 - 1.0) - value) < 0.000001
+
+fn script() -> Unit = {
+    // The scenario drives the view without the clock.
+    check(what: "stop", status: ferro_timer_stop(timer: ui.timer))
+    setElapsed(value: 7.5)
+    show()
+    expect(what: "the gauge is 0.5", ok: gaugeIs(value: 0.5))
+    expect(what: "Seconds shows 7.5 s", ok: getText(object: ui.seconds, name: "Text") == "7.5 s")
+    setNumber(object: ui.duration, name: "Value", value: 30.0)
+    expect(what: "a duration of 30 s makes the gauge 0.25", ok: gaugeIs(value: 0.25))
+    check(what: "raise", status: ferro_raise(object: ui.reset, event: ferro_event_id(name: "Click", length: 0 - 1)))
+    expect(what: "Reset: Seconds shows 0.0 s", ok: getText(object: ui.seconds, name: "Text") == "0.0 s")
+    // Then the clock runs again, and a timer that ticks once looks after a second.
+    let timer = ferro_timer_start(interval: 50, function: onTick, token: 0)
+    setUi(value: ui { timer: timer })
+    let _later = ferro_timer_start(interval: 1000, function: afterASecond, token: 0)
+}
+
+fn afterASecond(token: int, microseconds: int) -> int = {
+    let shown = getText(object: ui.seconds, name: "Text")
+    let running = shown == "0.8 s" || shown == "0.9 s" || shown == "1.0 s" || shown == "1.1 s" || shown == "1.2 s"
+    expect(what: "after a second Seconds shows '${shown}'", ok: running)
+    // Not again.
+    1
+}
+
+fn main() = {
+    print("ABI version ${ferro_abi_version()}")
+    let rc = ferro_app_run(options: osprey_ffi_null(), onStart: onStart, token: 0)
+    print("ferro_app_run returned ${rc}")
+}
