@@ -1526,6 +1526,15 @@
           "type_keys": ["TitleBar"],
           "references": ["CaptionTextBlockStyle", "DefaultTitleBarControlStyle", "TitleBarBackButtonStyle", "TitleBarCompactContentMargin", "TitleBarCompactHeight", "TitleBarContentHorizontalAlignment", "TitleBarContentVerticalAlignment", "TitleBarDeactivatedForegroundBrush", "TitleBarDeactivatedOpacity", "TitleBarExpandedHeight", "TitleBarForegroundBrush", "TitleBarHeaderNegativeInsetPaddingWidth", "TitleBarIconMargin", "TitleBarIconMaxHeight", "TitleBarIconMaxWidth", "TitleBarLeftHeaderHorizontalAlignment", "TitleBarLeftHeaderPaddingWidth", "TitleBarLeftHeaderVerticalAlignment", "TitleBarLeftPaddingWidth", "TitleBarMinDragRegionWidth", "TitleBarPaneToggleButtonStyle", "TitleBarRightHeaderHorizontalAlignment", "TitleBarRightHeaderVerticalAlignment", "TitleBarRightPaddingWidth", "TitleBarSubtitleDeactivatedForegroundBrush", "TitleBarSubtitleForegroundBrush", "TitleBarSubtitleMargin", "TitleBarSubtitleMinWidth", "TitleBarTitleMargin", "TitleBarTitleMinWidth"],
           "types": ["Border", "Button", "ColumnDefinition", "ContentPresenter", "ControlTemplate", "ControlTheme", "Grid", "ResourceDictionary", "Setter", "Style", "TextBlock", "TitleBar", "Viewbox"]
+        },
+        {
+          "name": "Controls/ListView.xaml",
+          "index": 166,
+          "documents": ["Controls/ListView.xaml"],
+          "keys": ["DefaultListViewStyle"],
+          "type_keys": ["ListView", "ListViewItem"],
+          "references": ["DefaultListViewItemStyle", "DefaultListViewStyle"],
+          "types": ["Border", "ContentPresenter", "ControlTemplate", "ControlTheme", "ItemsPanelTemplate", "ItemsPresenter", "ItemsStackPanel", "ListView", "ListViewItem", "ResourceDictionary", "ScrollViewer", "Setter", "StackPanel"]
         }
       ]
     }

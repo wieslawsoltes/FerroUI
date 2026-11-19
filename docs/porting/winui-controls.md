@@ -96,8 +96,8 @@ A separate namespace for the controls (`ferroui_controls::winui`, `FerroUI.Contr
 | `NavigationViewItemSeparator` | WinUI's NavigationViewItemSeparator: its template is converted from WinUI's NavigationView.xaml into the WinUI theme and its derived themes | W8 |
 | `RichEditBox` | WinUI's RichEditBox: its template is ported from WinUI's RichEditBox_themeresources.xaml into the WinUI theme (docs/porting/winui-rich-text.md, decision D4) | R8 of #243 |
 | `TitleBar` | WinUI's TitleBar: its template is converted from WinUI's TitleBar.xaml into the WinUI theme and its derived themes | W8c |
-| `ListView` | WinUI's ListView: its template is ported from the ListView style of WinUI's generic.xaml into the WinUI theme | LV-1 (#443) |
-| `ListViewItem` | WinUI's ListViewItem: its implicit theme is DefaultListViewItemStyle of the WinUI theme | LV-1 (#443) |
+| `ListView` | WinUI's ListView: its template is ported from the ListView style of WinUI's generic.xaml into the WinUI theme and its derived themes | LV-1 (#443) |
+| `ListViewItem` | WinUI's ListViewItem: its implicit theme is DefaultListViewItemStyle of the WinUI theme and its derived themes | LV-1 (#443) |
 <!-- winui-only:end -->
 - The tables of `winui-theme.md` that say "no FerroUI control" for these controls (NavigationView and its items, RadioButtons, RatingControl; DRP-1, DRP-2, DRP-11, DRP-13, NVP-1 and G-23 of the theme's DEVIATIONS) are updated in the pull request that lands each control; W5 updated them for InfoBar, InfoBadge and ProgressRing, W6 for RadioButtons and RatingControl, W8 for NavigationView and its items.
 
