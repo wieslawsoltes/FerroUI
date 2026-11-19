@@ -2357,10 +2357,11 @@ impl<'a> Emitter<'a> {
     /// `fused_template_binding_bind`), which replaces the two statements of the value too.
     fn setter_line(&mut self, statement: String) {
         let fused = fused_dynamic_resource_bind(self.types, &self.lines, &statement)
-            .or_else(|| fused_template_binding_bind(self.types, &self.lines, &statement, false));
+            .or_else(|| fused_template_binding_bind(self.types, &self.lines, &statement, false))
+            .map(|fused| (2, fused));
         match fused {
-            Some(fused) => {
-                self.lines.truncate(self.lines.len() - 2);
+            Some((replaced, fused)) => {
+                self.lines.truncate(self.lines.len() - replaced);
                 self.line(fused);
             }
             None => self.line(statement),
@@ -4927,9 +4928,27 @@ impl<'a> Emitter<'a> {
             .ok_or_else(|| unsupported(node, "a name that is not text"))?
             .text();
         self.uses_name_scope = true;
+        let literal = rust_string_literal(&name);
+        // The name of a styled element, set just before (`Name`, or `x:Name` that sets it): the
+        // two statements are one call of the shared helper, which sets it and registers it.
+        let set_name = format!(
+            "    {}.set_direct_value(::ferroui_base::StyledElement::name_property(), \
+             ::core::option::Option::Some(::std::string::String::from({literal})));",
+            target.expr
+        );
+        if self.shares_element_statements(target) && self.lines.last() == Some(&set_name) {
+            self.lines.pop();
+            self.line(format!(
+                "rt::name_element(name_scope.as_ref(), &{0}, &{0}, {literal}, {1}, {2})?;",
+                target.expr,
+                node.line(),
+                node.position()
+            ));
+            return Ok(());
+        }
         self.line(format!(
             "rt::register_name_value(name_scope.as_ref(), {}, ::std::rc::Rc::new(::core::clone::Clone::clone(&{})), {}, {})?;",
-            rust_string_literal(&name),
+            literal,
             target.expr,
             node.line(),
             node.position()

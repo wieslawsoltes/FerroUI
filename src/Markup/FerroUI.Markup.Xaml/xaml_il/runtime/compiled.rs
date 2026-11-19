@@ -1330,6 +1330,30 @@ pub fn pop_parent_end_init(
     invoked(element.try_end_init(), line, position)
 }
 
+/// The name of a styled element (`x:Name` or `Name`): `name` set as its `Name`, then `element`
+/// registered under it in the name scope of the context ([`register_name_value`] of
+/// `Rc::new(element.clone())`, the value in the handle the statements boxed), as the two
+/// statements of generated code did. One function for each class of element; `styled` is the
+/// element as a styled element.
+#[inline(never)]
+pub fn name_element<T: PartialEq + Clone + 'static>(
+    scope: Option<&Rc<dyn INameScope>>,
+    element: &T,
+    styled: &StyledElement,
+    name: &str,
+    line: i32,
+    position: i32,
+) -> Result<(), XamlLoadError> {
+    set_element_name(styled, name);
+    register_name_value(scope, name, Rc::new(element.clone()), line, position)
+}
+
+/// `element.Name = name`, the setter of the direct property of a styled element.
+#[inline(never)]
+fn set_element_name(element: &StyledElement, name: &str) {
+    element.set_direct_value(StyledElement::name_property(), Some(String::from(name)));
+}
+
 /// `context.FerroNameScope.Register(name, element)`: registers `element`
 /// under `name` in the name scope of the context. A missing scope, a
 /// completed scope and a duplicate name are load errors at the position of
