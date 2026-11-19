@@ -245,6 +245,12 @@ The fit icon frames a selection in either display. `designer_animation_curve` ac
 Use the picker beside a supported geometry track to see one coordinate, dimension, side, or
 corner. Drag beneath the trace to retime its key or use the inspector to edit the complete
 geometry value. The MCP program catalog lists the same `curve_channels` for a track.
+For a color or solid brush track, the picker offers red, green, blue, and alpha. The value
+graph keeps a 0–1 scale. The key inspector edits the full hex color in one Undo step.
+[Inspect a color animation](vscode/motion.md#inspect-a-color-animation)
+
+![Studio shows the green curve for a Background track and the native pose at 1.15 seconds](images/studio-color-curves.jpg)
+
 The contextual editor validates time, value and easing together before one undoable transaction.
 The **Add a keyframe at the playhead** icon command records the selected track's live property
 value, with Opacity as the initial fallback for an object without a track. The **Animation name

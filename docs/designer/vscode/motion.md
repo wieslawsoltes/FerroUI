@@ -35,6 +35,34 @@ In **Value curves** or **Velocity curves**, choose a component beside a supporte
 
 Drag a marker beneath the graph to move its key in time. Select the marker and edit **Value** to change the complete geometry value in one source edit. Agents can read the track’s `curve_channels` from `designer_programs` and pass a channel such as `"top_left"` to `designer_animation_curve`.
 
+### Inspect a color animation
+
+1. Open a clip with literal colors on a `Color` property or a solid brush property such as `Border.Background`. In Timeline, choose **Animation graph** and then **Value curves**. In App Preview, also choose the track and a compatible live target.
+2. Use the picker beside the track to select **Red**, **Green**, **Blue**, or **Alpha**. The value scale stays at 0–1 as you switch channels. **Velocity curves** shows the signed change in the selected channel per authored second. Drag the playhead to compare the sampled color with the artboard.
+3. Select a key marker to edit its full hex color, time, and easing. Use `#AARRGGBB` for a color with alpha. Applying the key uses one source Undo step.
+
+![The VS Code Timeline shows the red channel of a XAML Background animation with its artboard at 1.15 seconds](../images/vscode-timeline-color-curves.jpg)
+
+For a mapped Rust brush key, use a hex string or a qualified `ferroui_base::media::Color` constructor. Registered `Color` properties use the typed constructors. For example, this animation changes a solid background from opaque black to half-transparent orange.
+
+```rust
+ferroui_view::animation(ferroui_view::ms(2000))
+    .key_frame(0.0, |key| key.set(
+        ferroui_controls::Border::background_property(),
+        "#000000",
+    ))
+    .key_frame(1.0, |key| key.set(
+        ferroui_controls::Border::background_property(),
+        ferroui_base::media::Color::from_argb(128, 255, 128, 64),
+    ))
+```
+
+Keep keyframe closures as a single builder expression, as in `|key| key.set(...)`. A checked edit keeps comments and numeric suffixes around constructor arguments. Adding alpha to a `Color::from_rgb` key changes that call to `Color::from_argb` in the same edit.
+
+Agents can request `"red"`, `"green"`, `"blue"`, or `"alpha"` from `designer_animation_curve` and `designer_hosted_curve` after reading the track’s `curve_channels`. Samples use normalized sRGB components and the color’s own alpha. App Preview reads the app’s native color, including its byte precision.
+
+![App Preview shows the blue velocity of a mapped Rust brush animation and the live application at the retained playhead](../images/vscode-app-preview-color-curves.jpg)
+
 ### Scale selected key times
 
 Select at least two keys, then seek to the time that should stay fixed. Open **Keyframe Actions**, choose **Scale from Playhead**, and enter a factor. Use `0.5` to halve the spacing from the playhead or `2` to double it. The edit preserves key values and easing. If a destination would collide or leave the clip, adjust the selection, playhead, or factor and try again.

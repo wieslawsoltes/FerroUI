@@ -161,6 +161,11 @@ units; unlike-unit transitions switch at 50%, matching the native animators. The
 uses the live property's type metadata when selecting a value codec. Nonfinite components are
 rejected before preview or source changes.
 
+`CurveChannel` projects color values into red, green, blue, and alpha on a normalized
+0–1 scale. The native sampler reads the registered animator's `Color` or solid brush
+result, including its byte precision. Velocity uses these same samples. The key plan
+retains the complete typed color.
+
 Global easing accepts native named curves, the default `SplineEasing`, spline property elements
 and parameterized `SpringEasing`. The editor syntax `Spring(mass,stiffness,damping,velocity)`
 exports an actual `Animation.Easing` / `SpringEasing` object. Spring interpolation matches the
